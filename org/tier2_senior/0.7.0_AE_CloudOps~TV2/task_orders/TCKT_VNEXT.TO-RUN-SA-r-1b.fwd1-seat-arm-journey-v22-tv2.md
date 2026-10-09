@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TV2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -96,6 +96,31 @@
     that DIFFERS from the own-firm answer, OR code that reads the selector for an off-list target.** A selector-ignoring route
     whose firm comes only from the token is not a STOP. Then hops (a)-(g), cleanup, and the 0-data-refresh-calls proof.
   </amendment>
+
+  <completion date="2026-10-09" by="0.7.0_AE_CloudOps~TV2">
+    COMPLETE under AMENDMENT 4, which directs the flip after the run. FOUR attempts were made; runs 1-3 are kept in the
+    trace because each measured something the next relied on. AC1 PASSED before every attempt (`READ27 27/27` rc 0 at
+    16:18Z, 16:48Z, 17:08Z, 17:19Z), re-run each time because hosts moved twice during the order.
+
+    CENSUS, under AMENDMENT 4's criterion: 82 of 91 live `/api/scoped` routes armed (9 on `opal-data-refresh-api`
+    skipped per AMENDMENT 2), live denominator 119 against the source census's 117 with the 2 live-only scoped GETs
+    named. ZERO off-list admits; ZERO leaks on limb 1 and ZERO on limb 2 with ZERO UNKNOWN. AMENDMENT 1's CREATE arms
+    reached the firm clamp: own 201, both off-list 400 with the body NAMING the firm.
+
+    HOPS, run 4: every hop (a)-(g) answered with its artifact recorded, and a direct `ConsistentRead` of `opal-tickets`
+    independently corroborates the shape -- the upload door's `upload_id`/`input_id` on the attachment, the filer as
+    claimer and assignee, `report_ref` recorded 17:31:59.179Z, `answers.firm 49financial`, status completed.
+
+    WHAT IS NOT CLAIMED. Hop (e) is UNVERIFIED and the fault is this seat's instrument: it polled `state` and read
+    `UNAVAILABLE`, which is absent from the contract's progress enum, so it never observed `stage`. The request's real
+    stage is then UNVERIFIABLE-BY-INSTRUMENT here (`kms:Decrypt` denied on `irpt-requests`; the bounds forbid an IAM
+    change). A `report_ref` is a reference, not a report. AC2 is CVO judgment at L9 and is NOT self-graded.
+
+    Rows filed: `TCKT_VNEXT-D2-S18` (the irpt-status 500 regression, since repaired by the Branch B rollback) and
+    `TCKT_VNEXT-D2-S20` (the pair's "remove the row" rollback WIDENS the token rather than narrowing it; only `exp`
+    bounds it). Ledgers: run 1 CLOSED, a RETROSPECTIVE entry for run 2 (this seat's NEVER-2 lapse, labelled as such),
+    and runs 3+4 CLOSED on an entry opened BEFORE the run. Records @66bfdf5c2e. Step 7 report: msg to `2.0.0_SA_COO~V2`.
+  </completion>
 
   <steps>
     0. Open the NEVER-2 ledger entry: the row write, the token, the run, and the cleanup legs.
