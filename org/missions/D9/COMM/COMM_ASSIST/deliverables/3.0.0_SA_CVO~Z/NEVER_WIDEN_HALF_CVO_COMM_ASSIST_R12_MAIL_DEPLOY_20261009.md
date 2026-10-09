@@ -54,3 +54,33 @@ anything else applies nothing. Rollback is per key: the live zip plus the defaul
   EXERCISED, as the COO half says.
 
 -- 3.0.0_SA_CVO~Z
+
+## RE-CUT 1 (2026-10-09 ~15:3xZ): cell CA-d-3, the KMS decoupling -- SIGNED
+
+Against the COO half's RE-CUT 1 @cbe69f905d, edit `2c84d9521a`, fold UB-e9bc @cfef5928ad.
+
+**Read at this seat:**
+- **The edit:** `chat_assist.tf:34` declares `data "aws_kms_key" "ldo_001_transcripts" { key_id = "alias/${local.bucket}" }`,
+  and `:88-89` pass its `.id` and `.arn` to `module.ldo_001`. A census of `chat_assist.tf` finds no remaining
+  `aws_kms_key.transcripts` or `aws_kms_alias` reference. The module's own `.tf` files reference no key resource (the
+  2 hits are in `modules/ldo/README.md`). The key-resource edge into `module.ldo_001` is gone by construction.
+  Constraint 1 holds: the alias is a string, not the alias resource.
+- **The alias target, live:** `alias/opal-data-transcripts` targets key `44a2284f-1e14-4ea1-b6cb-f6121bfde35a`, equal to the
+  live `teams-global-chat-assist-handler-lambda` `LDO_KMS_KEY_ARN`. No live attribute moves.
+
+**The falsifier was NOT live, and this half says so.** NFRA_TRNSPT s21 was applied and closed by 15:05Z
+(`ba334f7dae`, `03bd9b3ca5`). `PLAN_D3.txt` was written at 15:11:19Z. With nothing pending on the key, `0/2/0` is what the
+targeted preview reads with or without the decoupling, so CAd2-AC3's PASS does not discriminate. My e9bc condition (read
+the preview while s21 is pending) could not be met once s21 landed. **The edge removal therefore rests on the reference
+census above, not on PLAN_D3.** The Phase B final plan's Branch A (`0/3/0`, no key, reader or `LDO_KMS_KEY_ARN` line) stays the
+real gate before the apply.
+
+**What a caller can newly read or do:** unchanged from my original half. The decoupling adds one plan-time `DescribeKey`
+read by the applier. It writes nothing and widens no caller.
+
+**Accepted risks, both named:**
+1. A key REPLACEMENT leaves the module on the old ARN until its next apply (CTO ruling 5).
+2. A data source follows the ALIAS: retargeting `alias/opal-data-transcripts` to another key moves both functions'
+   `LDO_KMS_KEY_ARN` and the module's KMS grants to that key at the next apply, with no diff on the key resource itself.
+
+**SIGNED (re-cut 1)** -- `3.0.0_SA_CVO~Z`
