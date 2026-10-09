@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-79",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3c01cf1110"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "3c01cf1110",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-79.orion-gross-silver.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~57",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~57/ORION_GROSS_SILVER.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~57/orion_gross_silver.py",
+      "kind": "script",
+      "commit_or_etag": "09d56d19ec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one read-only Generate call to Orion's query API (token read from its S3 secret into memory, never printed or written) and one S3 put of a parquet and a manifest under the opal_naming.address() output; py_compile rc 0, ruff --target-version py39 All checks passed.",
+      "artifact_covered_by": [
+        "DB38-2-AC1",
+        "DB38-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~57/orion_gross_fee_pull.py",
+      "kind": "script",
+      "commit_or_etag": "09d56d19ec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 37's pull script copied unedited; imported by orion_gross_silver.py for its token, header, request-body and poll functions.",
+      "artifact_covered_by": [
+        "DB38-2-AC1",
+        "DB38-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~57/ORION_GROSS_SILVER.json",
+      "kind": "config_data",
+      "commit_or_etag": "09d56d19ec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the landing record: address (builder output), as_of 2026-10-08, rows 3129 read back from the landed parquet, objects 2 read by listing, columns; no account id in it.",
+      "artifact_covered_by": [
+        "DB38-2-AC1",
+        "DB38-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-assets/orion/4698/silver/account_performance_gross/snapshot_date=2026-10-08/",
+      "kind": "s3_object",
+      "commit_or_etag": "data.parquet 41091 bytes, manifest.json 852 bytes (listed after the write)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "list_objects_v2 under the builder's address prefix after the put: 2 objects; the parquet read back 3129 rows.",
+      "artifact_covered_by": [
+        "DB38-2-AC1",
+        "DB38-2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB38-2-AC1",
+      "criterion_verbatim": "DB38-2-AC1 -- Orion's gross TWR landed under a silver address with its as-of, rows and object count read by listing. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r38/p38_round38.py\" . DB38-2-AC1",
+      "output_evidence": "OK: 3129 rows in 2 object(s) at s3://opal-data-assets/orion/4698/silver/account_performance_gross/snapshot_date=2026-10-08, as_of 2026-10-08\nDB38-2-AC1 PASS",
+      "denominator": "3129 rows (3129 distinct accounts; 1236 with a null twr_gross_value, 1893 with a figure) read back from the landed parquet; 2 objects by listing (data.parquet, manifest.json); fee method 'Gross of Fees' on 3129 of 3129 rows.",
+      "status": "PASS",
+      "expect": "DB38-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB38-2-AC2",
+      "criterion_verbatim": "DB38-2-AC2 -- the address is lib/opal_naming address() output, printed. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r38/p38_round38.py\" . DB38-2-AC2",
+      "output_evidence": "OK: address is builder output: opal_naming.address('orion', '4698', 'silver', 'account_performance_gross', 'snapshot_date=2026-10-08')\nDB38-2-AC2 PASS",
+      "denominator": "1 of 1 addresses (the record's address equals the builder call's printed output; the two object addresses are the same call with object=).",
+      "status": "PASS",
+      "expect": "DB38-2-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads ORION_GROSS_SILVER.json only; no run state",
+      "observed": "printed the same last lines on a second read",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "In a scratch root, the record's builder_call.output changed to 's3://x' (the real record untouched).",
+      "expected": "DB38-2-AC2 FAIL naming the mismatch",
+      "observed": "FAIL: builder_call {... 'output': 's3://x'} does not print the address 's3://opal-data-assets/orion/4698/silver/account_performance_gross/snapshot_date=2026-10-08'\nDB38-2-AC2 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the tie-out re-read from the landed figure",
+      "reason": "Cell DB-b-80; this cell lands the input only."
+    },
+    {
+      "item": "any other S3 write, Black Diamond or Bloomberg call, deploy, bun or download; any write call to Orion; any edit under data/, infra/ or portal/",
+      "reason": "Bounds of the order; none made. The Orion call was one Generate POST that runs a saved report; the token was read for the call only, never printed, written or committed. The pulled CSV (with account names) is in .scratch and not committed."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W57-S1",
+    "IRPT_DASHBD-W57-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile orion_gross_silver.py orion_gross_fee_pull.py",
+      "result": "rc 0"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 orion_gross_silver.py orion_gross_fee_pull.py",
+      "result": "All checks passed"
+    }
+  ]
+}

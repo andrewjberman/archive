@@ -1,0 +1,91 @@
+diff --git a/infra/aws/lambda/investor-reporting/_authz/served.py b/infra/aws/lambda/investor-reporting/_authz/served.py
+index c451d81eab..2c6bcbdd28 100644
+--- a/infra/aws/lambda/investor-reporting/_authz/served.py
++++ b/infra/aws/lambda/investor-reporting/_authz/served.py
+@@ -1135,9 +1135,10 @@ class Entry(object):
+         """IB-pr-387: the PROFILE row's `allowedFirmIds` narrowing for an INTERNAL caller, found by the verified identity
+         exactly as `_service_allowed_firms` finds a service row (never a header, never a token claim).
+ 
+-        Returns None = UNCHANGED (no row, no attribute, an empty list, or the unrestricted spelling 'ALL' on its own);
+-        a non-empty list of firm ids = the selectable firms. A non-list value, or ANY error reading the row,
+-        RAISES, and the caller turns that into FIRM_BINDING (fail closed; CTO rule msg 2367). An 'ALL' member of a non-empty list never admits: it is not a firm id."""
++        Returns None = UNCHANGED (no row, no attribute, or an empty list); a non-empty list of firm ids = the selectable
++        firms. A non-list value, or ANY error reading the row, RAISES, and the caller turns that into FIRM_BINDING (fail
++        closed; CTO rule msg 2367). 'ALL' NEVER admits an internal caller (CTO msg 2569): the string 'ALL', or a list
++        holding an 'ALL' member, RAISES too -- it is not a firm id and it is not an unrestricted spelling here."""
+         if self.load_service_profile is not None:
+             row = self.load_service_profile(email.strip().lower())
+         else:
+@@ -1147,16 +1148,18 @@ class Entry(object):
+         if row is None or "allowedFirmIds" not in row:
+             return None
+         value = row["allowedFirmIds"]
+-        if value is None or value == "ALL":
++        if value is None:
+             return None
+         if not isinstance(value, (list, tuple, set, frozenset)):
+-            raise ValueError("allowedFirmIds is not a list")
++            raise ValueError("allowedFirmIds is not a list")      # includes the bare string 'ALL'
+         if any(not isinstance(i, str) for i in value):
+             raise ValueError("allowedFirmIds carries a non-string member")
+         items = [i.strip() for i in value if i.strip()]
+         if not items:
+             return None
+-        return [i for i in items if i != "ALL"] or [""]
++        if "ALL" in items:
++            raise ValueError("allowedFirmIds holds ALL")
++        return items
+ 
+     def handle(self, event, context=None):
+         headers = event_headers(event)
+diff --git a/infra/aws/lambda/investor-reporting/_authz/tests/test_allowed_firm_ids.py b/infra/aws/lambda/investor-reporting/_authz/tests/test_allowed_firm_ids.py
+index 6cd2a785e4..ffd07dbb90 100644
+--- a/infra/aws/lambda/investor-reporting/_authz/tests/test_allowed_firm_ids.py
++++ b/infra/aws/lambda/investor-reporting/_authz/tests/test_allowed_firm_ids.py
+@@ -72,7 +72,7 @@ def test_allowed_firm_ids_unlisted_firm_refused():
+ 
+ def test_allowed_firm_ids_no_row_or_empty_list_unchanged():
+     for row in (None, {}, {"userType": "user"}, {"allowedFirmIds": []}, {"allowedFirmIds": ["", "  "]},
+-                {"allowedFirmIds": None}, {"allowedFirmIds": "ALL"}):
++                {"allowedFirmIds": None}):
+         assert _run(row, selected="inflection") == (False, True), row
+ 
+ 
+@@ -86,11 +86,17 @@ def test_allowed_firm_ids_non_string_member_refused():
+     assert _run({"allowedFirmIds": ["cottonwood", 7]}, selected="cottonwood") == (True, False)
+ 
+ 
+-def test_allowed_firm_ids_all_never_admits_with_a_non_empty_list():
+-    assert _run({"allowedFirmIds": ["ALL", "cottonwood"]}, selected="inflection") == (True, False)
+-    assert _run({"allowedFirmIds": ["ALL", "cottonwood"]}, selected="cottonwood") == (False, True)
+-    assert _run({"allowedFirmIds": ["ALL"]}, selected="inflection") == (True, False)
+-    assert _run({"allowedFirmIds": ["ALL"]}, selected="cottonwood") == (True, False)
++def test_allowed_firm_ids_all_string_alone_is_refused():
++    # CTO msg 2569 (on CVO msg 2565, row D2-W198-S2): the bare string "ALL" never admits an internal caller.
++    for selected in ("inflection", "cottonwood", "49financial"):
++        assert _run({"allowedFirmIds": "ALL"}, selected=selected) == (True, False), selected
++
++
++def test_allowed_firm_ids_all_in_a_list_is_refused():
++    # A list holding an "ALL" member is refused at the narrowing step, whatever else it lists.
++    for row in ({"allowedFirmIds": ["ALL"]}, {"allowedFirmIds": ["ALL", "cottonwood"]}, {"allowedFirmIds": ["cottonwood", "ALL"]}):
++        for selected in ("inflection", "cottonwood"):
++            assert _run(row, selected=selected) == (True, False), (row, selected)
+ 
+ 
+ def test_allowed_firm_ids_lookup_error_fails_closed():
+diff --git a/infra/aws/lambda/investor-reporting/_authz/tests/test_served_on_behalf_create.py b/infra/aws/lambda/investor-reporting/_authz/tests/test_served_on_behalf_create.py
+index 9e299d6037..2fdce84460 100644
+--- a/infra/aws/lambda/investor-reporting/_authz/tests/test_served_on_behalf_create.py
++++ b/infra/aws/lambda/investor-reporting/_authz/tests/test_served_on_behalf_create.py
+@@ -196,8 +196,8 @@ def test_served_refuses_unlisted_firm():
+ 
+ def test_served_refuses_all():
+     world = listed_world(allowed="ALL")
+-    # 'ALL' alone is not narrowed (row W198-S2): still a refusal, by uploads.py's own rule.
+-    refused(world.post(), world, "INVALID_INPUT")
++    # CTO msg 2569 (row W198-S2): 'ALL' never admits an internal caller; it is refused at the narrowing step.
++    refused(world.post(), world, "FIRM_BINDING")
+ 
+ 
+ def test_served_refuses_non_internal():
