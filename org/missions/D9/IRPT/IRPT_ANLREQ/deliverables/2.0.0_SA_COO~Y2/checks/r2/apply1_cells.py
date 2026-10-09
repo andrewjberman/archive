@@ -20,6 +20,9 @@ FN = "irpt-status"
 BUILT = "VC/r14kaXm6FqaZOOFm3fT+8qngsyGI5Yr7U+DgYx64="  # AMENDMENT 4: pair REVISION 4 at 287b105600 (rev 3 t6OJTCcm, rev 2 BjUZjt2o)
 ROLLBACK = "t6OJTCcmOnWGVl8iglcvfGoYb3PbPJqJYqsSgJBpGdI="  # AMENDMENT 4: revision 3 is the rollback of revision 4
 ROUTE = "GET /api/scoped/investor-reporting/analysis/requests/{requestId}/original"
+# AMENDMENT 5: reads 3 and 4 come from the laptop's re-run on the fresh request (dell2 cannot decrypt irpt-requests); read 5 is
+# graded on release 4's ticket-bound run (decomposition R2 AMENDMENT 3, row IRPT_ANLREQ-D2-S15) and stays not-PASS until then.
+LAPTOP = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release1/Y1_laptop_reads_3a_4_5_rerun_result.json"
 READS = [str(i) for i in range(0, 8)]  # AMENDMENT 2: 6 = REQ-5e4149d2 served (no RetentionRefused), 7 = per-member diff exactly reporting_policies.json
 
 
@@ -65,7 +68,14 @@ def main():
     if not f.is_file():
         fail("no %s" % F)
     d = json.loads(f.read_text(encoding="utf-8"))
-    reads = d.get("reads") or {}
+    reads = dict(d.get("reads") or {})
+    lp = root / LAPTOP
+    if lp.is_file():
+        lr = json.loads(lp.read_text(encoding="utf-8")).get("reads") or {}
+        reads["3"] = "PASS" if lr.get("3a") is True else "FAIL"
+        reads["4"] = "PASS" if lr.get("4_record") is True and lr.get("4_route") is True else "FAIL"
+        if lr.get("5") is not True:
+            reads["5"] = "DEFERRED-RELEASE4"
     all_pass = all(reads.get(r) == "PASS" for r in READS)
 
     if cid == "APPLY1-AC1":
@@ -98,6 +108,10 @@ def main():
         if all_pass:
             if d.get("rolled_back") is not False or live != BUILT or n != 1:
                 fail("branch A incoherent")
+        elif not any(reads.get(r) == "FAIL" for r in READS):
+            # AMENDMENT 5: branch B fires only on a read that FAILED; a deferred read keeps the release live
+            if d.get("rolled_back") is not False or live != BUILT or n != 1:
+                fail("open reads, but the live state is not the built release")
         elif d.get("rolled_back") is not True or live != ROLLBACK or n != 1:
             # AMENDMENT 2: revision 3 rolls back to revision 2, whose route stays (exactly ONE)
             fail("branch B incoherent")
