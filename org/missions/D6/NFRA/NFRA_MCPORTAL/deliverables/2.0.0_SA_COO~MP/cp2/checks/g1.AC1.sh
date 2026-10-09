@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# MP-g-1 AC1 (FWD-16 ACCEPT, C14, A16; decomposition CP2.3-G): tests/test_admin_fabric_gitstate.py passes with 0 failed and
+# MP-s-1 AC1 (FWD-16 ACCEPT, C14, A16; decomposition CP2.3-G): tests/test_admin_fabric_gitstate.py passes with 0 failed and
 # each named test PASSES:
 #   test_gitstate_state_rule                    four planted boxes read committed-not-pushed / pushed-not-on-trunk / on trunk / not recorded
 #   test_gitstate_absent_box_reads_not_recorded NoSuchKey latest.json -> status and state 'not recorded', fields null
