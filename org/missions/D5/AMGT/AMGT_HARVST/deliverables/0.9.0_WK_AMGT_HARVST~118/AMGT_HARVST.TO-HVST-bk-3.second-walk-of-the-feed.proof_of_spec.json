@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "to_id": "AMGT_HARVST.TO-HVST-bk-3.second-walk-of-the-feed",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bk-3.second-walk-of-the-feed.md",
+    "group": "OTHER",
+    "vintage_commit": "01c0e024ae"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "01c0e024ae",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bk-3.second-walk-of-the-feed.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~118",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~118, branch wk-AMGT_HARVST-118-r66, TREE-OK. Called real read_feed x12 (S3 GET only) on part 20261008T225527Z; WALK OK; row AMGT_HARVST-Z-W118-S1 filed. Order file not edited.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~118/bk3_feed_walk.py",
+      "kind": "script",
+      "commit_or_etag": "dfb350812d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only; calls scoped_amgt.read_feed x12",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~118/bk3_feed_walk.out",
+      "kind": "script",
+      "commit_or_etag": "dfb350812d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "WALK OK",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~118/BK3_FEED_WALK.md",
+      "kind": "script",
+      "commit_or_etag": "dfb350812d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "per security header, newest 15, left and new items, no verdict",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~118/BK3_FEED_WALK.json",
+      "kind": "script",
+      "commit_or_etag": "dfb350812d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "same, machine form",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~118/bk3_feed_walk.out expects last line WALK OK",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~118/bk3_feed_walk.out",
+      "expect": "WALK OK",
+      "output_evidence": "rc 0. SERVED PART READ: ...part-20261008T225527Z.parquet, rows 52282 | THE REPORTED ITEM: \"Bond Traders Bet on Fed Delivering 25 BP Rate Increase\" on BP_US_Equity not in the feed | WALK OK",
+      "denominator": "12 of 12 securities read; part read differs from first walk's part",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "judgment criterion (no invocation)",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~118/BK3_FEED_WALK.md",
+      "output_evidence": "BK3_FEED_WALK.md and .json carry per security the header, newest 15 items, items that left and items new; no verdict by worker",
+      "denominator": "12 securities",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the CVO at L9 is the oracle"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any put, delete, gold or silver build, vendor call, or product file change",
+      "reason": "Order: read-only walk."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W118-S1: BJ1_FEED_WALK.json has no article_key and only 15 items per security, so the all-items comparison is partial for BP and META"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "committed 8d8c19f44d"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "single run",
+      "observed": "not re-run",
+      "status": "N/A-WITH-REASON",
+      "reason": "read-only walk of a write-once snapshot; no build to compare"
+    },
+    "mutant": {
+      "description": "The order names no mutant; the walk is a read, not a rule under test.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  }
+}

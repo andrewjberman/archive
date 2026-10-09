@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -15,6 +15,11 @@
 <decomp_context>The apply leg of AMENDMENT 21 (merged @83326afe6f): the CTO's three follow-ups on step F (msg 107457).</decomp_context>
 </decomp_ref>
 
+  <closure>
+    COMPLETE (issuer, ~00:3xZ). APPLIED 2026-10-09T00:29:00Z, exactly 0/2/0, re-plan 0, ledger closed (@ec2671005). Issuer live
+    read: ssm:PutParameter on /mdpf/custody_source explicitDeny and ssm:GetParameter on it allowed, for dell1 and dell2.
+  </closure>
+
   <objective>
     Apply STEP G on the Dell identity root: one secret ARN (a public key) joins the platform-secrets read; one Deny refuses writes to the
     bd-to-schwab cutover parameter. `0 to add, 2 to change, 0 to destroy`.
@@ -23,8 +28,8 @@
   <context>
     Root `infra/aws/terraform/nfra-ctlpln-identity/`, trunk containing merge 83326afe6f. Measured by the issuer ~00:0xZ (read-only):
     `Plan: 0 to add, 2 to change, 0 to destroy.` Halves: COO
-    `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_G_STEP_F_FOLLOWUPS_20261008.md`; CTO named
-    in the GO. Set TF_PLUGIN_CACHE_DIR to the shared cache (MSTR msg 107482). YOU READ NO SECRET VALUE.
+    `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_G_STEP_F_FOLLOWUPS_20261008.md`; CTO
+    `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_STEP_G_AND_PARTNER_ROSTER_20261009.md` section 1 (@21a5ceab0f, SIGNED). Set TF_PLUGIN_CACHE_DIR to the shared cache (MSTR msg 107482). YOU READ NO SECRET VALUE.
   </context>
 
   <the_act>

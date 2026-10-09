@@ -5,11 +5,18 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NONE (Andrew-direct fast build, no project registration: 4.0.0_SA_CRO leads, ~16:5xZ)</project_code>
   </metadata>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
+
+  <closure>
+    COMPLETE (issuer, ~00:5xZ). First retry stopped by the naming gate (nothing landed); CTO ruled (a), fix @6611a1507b; activated
+    2026-10-08T20:56:53Z (worker family only; six families held on their digest). First publish PROVEN (4.0.0_SA_CRO msg 107541):
+    vintage 2026-10-09T00:49:09Z. Issuer live read via comp-kuzu: VINTAGE 2026-10-09 00:49:09 UTC; FabricNode BOX 4, SEAT 361,
+    SURFACE 504, COMMIT 3922, PROJECT 28; CloudNode count 29,586 (estate unchanged).
+  </closure>
 
   <objective>
     Land the fabric overlay in the served graph: commit the patch, build and push the projection image, and move ONLY the

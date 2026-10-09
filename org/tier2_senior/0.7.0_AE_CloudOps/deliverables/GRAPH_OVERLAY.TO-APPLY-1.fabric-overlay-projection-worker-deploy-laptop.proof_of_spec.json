@@ -20,6 +20,16 @@
       "artifact_covered_by": [
         "AC1"
       ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/overlay_20261008/first-publish-readback.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "VINTAGE: 2026-10-09T00:49:09.369447+00:00;manifestdc305b5abee7;BOX4 SEAT361 SURFACE504 COMMIT3922 PROJECT28;fabric_node_count4819 fabric_edge_count16864;estate node_count29586 edge_count63213;sixother families retain17ccc9b01855 and saved revisions",
+      "artifact_covered_by": [
+        "AC1"
+      ]
     }
   ],
   "acceptance": [
@@ -29,15 +39,14 @@
       "method": "live_read",
       "invocation": "comp-kuzu \"MATCH (n:FabricNode) RETURN n.node_type, count(*)\"",
       "expect": "VINTAGE:",
-      "output_evidence": "NOT RUN pending next publish: worker7 applied2026-10-08T20:56:53Z; served pointer remains2026-10-08T12:54:23.609381+00:00",
-      "denominator": "one served publish required, zero after activation because activation did not occur",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "Next real branch marker publishes under worker7; nightly derive starts2026-10-09T02:00Z unless incremental marker earlier."
+      "output_evidence": "VINTAGE: 2026-10-09T00:49:09.369447+00:00;manifestdc305b5abee7;BOX4 SEAT361 SURFACE504 COMMIT3922 PROJECT28;fabric_node_count4819 fabric_edge_count16864;estate node_count29586 edge_count63213;sixother families retain17ccc9b01855 and saved revisions",
+      "denominator": "one postdeploy served publish;5types sum4819;7family pins and7consumerbindings checked",
+      "status": "PASS"
     }
   ],
   "controls": {
     "image_build": {
-      "description": "New ECR immutable digest built, not yet activated",
+      "description": "New immutable worker image built and activated",
       "expected_landed": "sha256:d3037f32c0143855a283f5e997fa83d8f09fc23755608c190896ab0adfd3f3b1",
       "expected_not_landed": "sha256:17ccc9b01855138e2abd0c36938c62a21ffd0730bf7886b9758a5317b4d24d04",
       "observed": "sha256:d3037f32c0143855a283f5e997fa83d8f09fc23755608c190896ab0adfd3f3b1",
@@ -49,6 +58,13 @@
       "expected_not_landed": "17ccc9b01855",
       "observed": "d3037f32c014; worker7 Pipe7",
       "status": "PASS"
+    },
+    "first_publish": {
+      "description": "Served graph has positive fabric count after worker7 activation",
+      "expected_landed": "4819 fabric nodes",
+      "expected_not_landed": "no fabric count",
+      "observed": "4819 fabric nodes",
+      "status": "PASS"
     }
   },
   "never_widen_pair": {
@@ -56,16 +72,11 @@
     "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_FABRIC_OVERLAY_SERVED_GRAPH_20261008.md@1d61e96831"
   },
   "risk_class": "WORLD",
-  "rollback": "No activation landed; all families/Pipe/pointer unchanged. On later authorized deployment, worker GLOBGRPH_FABRIC_OVERLAY=0 or saved digest/pointer restores prior behavior.",
-  "scope": "Worker7 applied, six other families unchanged; first served publish pending",
-  "declared_exclusions": [
-    {
-      "item": "First served publish proof",
-      "reason": "No postactivation marker/vintage yet; next scheduled derive2026-10-09T02:00Z, >one hour away. Event-driven incremental marker may precede it."
-    }
-  ],
+  "rollback": "Under issuer rollback authority set worker GLOBGRPH_FABRIC_OVERLAY=0, or restore saved worker digest17ccc9b01855138e2abd0c36938c62a21ffd0730bf7886b9758a5317b4d24d04, or restore saved current-before.json pointer bytes; never delete a vintage.",
+  "scope": "Worker7 active;postactivation firstpublish independently verified;other6families unchanged",
+  "declared_exclusions": [],
   "surprises": [],
-  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/codex_overlay_stopped.md",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/overlay_20261008/FIRST_PUBLISH_REPORT.md",
   "compiler_tools": [
     {
       "tool": "comp-schedule",
@@ -76,7 +87,12 @@
       "tool": "comp-trigger",
       "invocation": "comp-trigger globgrph --days 2",
       "result": "152 rules34schedules scanned;5matches; derive nightly02:00Z; excludes S3 notifications"
+    },
+    {
+      "tool": "comp-kuzu",
+      "invocation": "comp-kuzu \"MATCH (n:FabricNode) RETURN n.node_type, count(*)\"",
+      "result": "VINTAGE: 2026-10-09T00:49:09.369447+00:00;manifestdc305b5abee7;BOX4 SEAT361 SURFACE504 COMMIT3922 PROJECT28;fabric_node_count4819 fabric_edge_count16864;estate node_count29586 edge_count63213;sixother families retain17ccc9b01855 and saved revisions"
     }
   ],
-  "status": "ACTIVATED-AWAITING-PUBLISH"
+  "status": "DEPLOYED-VERIFIED"
 }
