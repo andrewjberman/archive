@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-y-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-y-2.override-bound-to-message.md",
+    "group": "OTHER",
+    "vintage_commit": "46f6d8a447"
+  },
+  "assignee": "0.9.0_WK_LGIC_BLANKFIX~1",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round10.md",
+    "vintage_commit": "46f6d8a447",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-y-2.override-bound-to-message.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/safe-commit.sh",
+      "kind": "script",
+      "commit_or_etag": "c5a940cc7f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo script; no deploy is made; the switch file org/mcp/naming-place.enforce is untouched",
+      "artifact_covered_by": [
+        "BY2-AC1",
+        "BY2-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/naming-gate.py",
+      "kind": "script",
+      "commit_or_etag": "c5a940cc7f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo script; no deploy is made",
+      "artifact_covered_by": [
+        "BY2-AC1",
+        "BY2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_override_bound.py",
+      "kind": "test",
+      "commit_or_etag": "c5a940cc7f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo script; runs in temporary git repositories and leaves nothing in the repository (arm B14)",
+      "artifact_covered_by": [
+        "BY2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_audit_in_commit.py",
+      "kind": "test",
+      "commit_or_etag": "c5a940cc7f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo script; arms C2, C9, C10 adjusted for the binding and named in its docstring",
+      "artifact_covered_by": [
+        "BY2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BY2-AC1",
+      "criterion_verbatim": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_override_bound.py expect: OVERRIDE-BOUND ok=True",
+      "method": "command",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_override_bound.py",
+      "expect": "OVERRIDE-BOUND ok=True",
+      "output_evidence": "OVERRIDE-BOUND ok=True arms=14 held=14 (rc 0, 9 s, under timeout 120)",
+      "denominator": "14 of 14 arms held: B1 a real override (-F) lands and the row msg_sha256 = sha256 of the message bytes; B2 the -m form (two -m texts joined by a blank line) lands with that hash; B3 a FORGED row (fresh, right id and name, the hash of another message) -> rc=1 IGNORED 'bound to a different message' (negative arm); B4 the same row with only the hash corrected -> rc=0 OVERRIDDEN (control); B5 right hash, message without the line -> rc=1; B6 right hash, empty reason -> rc=1; B7 right hash of M, M plus one byte handed -> rc=1; B8 empty msg_sha256 -> rc=1; B9 no message handed -> rc=1; B10 hand-set variable, no row -> rc=1; B11 the real row's id set by hand on a later commit with another message -> refused, nothing lands, no new row; B12 a row dated 2020-01-01 with the right hash -> rc=0 (window retired); B13 the temporary message file is removed (a mutant that keeps it fails this arm: 3 files left, held=13); B14 the repository's switch file and audit file bytes are unchanged",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BY2-AC2",
+      "criterion_verbatim": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_audit_in_commit.py expect: AUDIT-IN-COMMIT ok=True",
+      "method": "command",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_audit_in_commit.py",
+      "expect": "AUDIT-IN-COMMIT ok=True",
+      "output_evidence": "AUDIT-IN-COMMIT ok=True arms=11 held=11 (rc 0, 12 s, under timeout 120)",
+      "denominator": "11 of 11 arms held (C1 the landed commit's --stat lists the audit file and the .tf; C2 now expects msg_sha256 = sha256 of the message file; C3 OVERRIDDEN with the row's id; C4 disk = committed blob; C5 no line -> refused, file = seed; C6 older-limb refusal leaves no row; C7, C8 no refusal -> file untouched; C9, C10 the gate directly, handed the message: row on disk only -> IGNORED, staged -> OVERRIDDEN; C11 the repository unchanged). Arms adjusted for the binding: C2, C9, C10, named in the docstring",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BY2-AC3",
+      "criterion_verbatim": "3.0.0_SA_CVO reads BF-y-1's and BF-y-2's arms against row D1-W2-S2 and the forge hazard: is an override now visible fabric-wide in git and impossible to admit with a row written for another commit?",
+      "method": "manual_read_with_citation",
+      "invocation": "read the artifacts: org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_audit_in_commit.py (BF-y-1: the row travels in the commit it permits; C1 C4 C5 C6) and org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_override_bound.py (BF-y-2: B3 forged row refused, B4 control, B7 one byte, B11 replay of a real row's id, B12 window retired); .tools/naming-gate.py override_valid and message_binding; .tools/safe-commit.sh override block; org/missions/D14/LGIC/LGIC_BLANKFIX/surprise-channel/investigations/INVESTIGATION_v1.md rows LGIC_BLANKFIX-D1-W1-S3, -S4, -S5",
+      "output_evidence": "artifact paths recorded, no verdict: OVERRIDE-BOUND ok=True arms=14 held=14; AUDIT-IN-COMMIT ok=True arms=11 held=11; open limit stated in the .tools/naming-gate.py docstring and row LGIC_BLANKFIX-D1-W1-S5 (a seat that can stage a row and hash its own message can still forge one)",
+      "denominator": "N/A -- judgment criterion, graded by 3.0.0_SA_CVO at L9; the worker records paths and output only",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: the oracle is 3.0.0_SA_CVO at L9 (BY2-AC3); no instrument grades whether the override is fabric-wide visible and unforgeable by a row written for another commit"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the rm of the temporary message file (NP_MSGFILE) in .tools/safe-commit.sh replaced by `true` (a temporary edit to the worktree copy, restored byte-for-byte afterwards), then exercise_override_bound.py run",
+      "expected": "arm B13 fails",
+      "observed": "ARM B13 ... got: new files left=3 | FAIL; OVERRIDE-BOUND ok=False arms=14 held=13",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "run again at the commit",
+      "observed": "exercise_override_bound.py 14 of 14, exercise_audit_in_commit.py 11 of 11, exercise_override.py 12 of 12, exercise_switch_on.py 11 of 11 at c5a940cc7f; each row's id and time differ per run, the verdicts do not",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a run of the whole .tools/safe-commit.sh (hooks, commit-gate, lane gates) in the temporary repository",
+      "reason": "as in BF-y-1: the exercises cut the real naming stage, which holds the override reader and the audit writer, and land with the same git commit --only call; row LGIC_BLANKFIX-D1-W1-S3 records what no hook graded. The commit c5a940cc7f itself went through the full safe-commit.sh."
+    },
+    {
+      "item": "the hash of the message as git stores it after its own cleanup",
+      "reason": "the binding is to the text as passed to safe-commit.sh; row LGIC_BLANKFIX-D1-W1-S5."
+    }
+  ],
+  "surprises": [
+    "LGIC_BLANKFIX-D1-W1-S5"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/LGIC_BLANKFIX.TO-BF-y-2.override-bound-to-message.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_override.py",
+      "result": "OVERRIDE-ARMS ok=True arms=12 held=12"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~2/exercise_switch_on.py",
+      "result": "SWITCH-ON ok=True arms=11 held=11"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/naming-gate.py --self-test",
+      "result": "NAMING-GATE-SELF-TEST: PASS (20 of 20 arms ok, 0 FAIL; 9 override arms)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/naming-apply-gate.py --self-test",
+      "result": "NAMING-APPLY-GATE-SELF-TEST: PASS"
+    },
+    {
+      "tool": "bash",
+      "invocation": "bash -n .tools/safe-commit.sh; bash -n .tools/safe-apply.sh",
+      "result": "rc 0 both"
+    }
+  ]
+}

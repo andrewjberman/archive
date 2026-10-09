@@ -5,7 +5,12 @@
 AC1 (the stored source): the LATEST silver `filing_source` row for ASML_NA_Equity (vendor sec, read through
     lib.research.harvest.store.silver_latest, read only) carries a business section cut from its own heading:
     S1 its excerpt `item_keys` holds "business"; S2 its excerpt `items` holds "Item 4.B. Business Overview";
-    S3 the excerpt text, within 400 characters after that label, reads "business overview" (the heading itself).
+    S3 the excerpt text carries the heading "Item 4.B. Business Overview" in any case and spacing, and the 400 characters
+       after it are body prose: no other "Item <n>" heading inside them (a contents entry is followed by the next item).
+       Round 83 (row AMGT_RESAPP-D1-W324-S2): the round-81 S3 searched the label case-sensitively and then looked for the
+       heading again AFTER itself, so a correct ASML cut ("ITEM 4.B. BUSINESS OVERVIEW") could never pass.
+  python r81_store.py --self-test   runs S3 on planted texts: a true heading (YES), a contents-entry mis-cut (NO),
+       no heading (NO). Exit 0 only when all three read as planted.
 AC2 (what is served): GET /security/ASML_NA_Equity/thesis (--where deployed: the live function, read only):
     T1 200; T2 the share-capital refusal sentence ("shares or describes its share capital") appears 0 times;
     T3 at least one served `location` starts with an Item 4.B / Business overview item.
@@ -24,6 +29,20 @@ FN = "opal-amgt-scoped-api"
 PREFIX = "/api/scoped/amgt"
 REFUSAL = "shares or describes its share capital"
 LABEL = "Item 4.B. Business Overview"
+HEADING_RE = re.compile(r"item\s+4\s*\.?\s*b\s*\.?\s*business\s+overview", re.I)
+NEXT_ITEM_RE = re.compile(r"\bitem\s+\d+\s*\.?\s*[a-z]?\s*\.", re.I)
+
+
+def s3_heading(text):
+    """(ok, why): the business heading is in the text and opens body prose, not a contents line."""
+    m = HEADING_RE.search(text or "")
+    if not m:
+        return False, "no Item 4.B Business Overview heading in the excerpt text"
+    after = text[m.end():m.end() + 400]
+    nxt = NEXT_ITEM_RE.search(after)
+    if nxt:
+        return False, "heading at %d is followed within 400 chars by %r (a contents entry)" % (m.start(), nxt.group(0))
+    return True, "heading at %d (%r) opens %d chars of prose" % (m.start(), m.group(0), len(after))
 
 
 def say(ok, label):
@@ -47,11 +66,24 @@ def ac1():
         obj.get("accession"), obj.get("parser_version"), row.get("fetched_at"), ex.get("items")))
     s1 = say("business" in (ex.get("item_keys") or []), "S1 excerpt item_keys holds business")
     s2 = say(LABEL in (ex.get("items") or []), "S2 excerpt items holds %r" % LABEL)
-    text = ex.get("text") or ""
-    i = text.find(LABEL)
-    window = text[i + len(LABEL):i + len(LABEL) + 400].lower() if i >= 0 else ""
-    s3 = say("business overview" in window, "S3 the business section opens on its own heading")
+    ok, why = s3_heading(ex.get("text") or "")
+    s3 = say(ok, "S3 the business section opens on its own heading: %s" % why)
     return s1 and s2 and s3
+
+
+def self_test():
+    prose = " ASML is a supplier to the semiconductor industry. " * 12
+    planted = [
+        ("true heading, upper case", "ITEM 4.B. BUSINESS OVERVIEW" + prose, True),
+        ("contents-entry mis-cut", "Item 4.B. Business Overview 23 Item 4.C. Organizational Structure 41" + prose, False),
+        ("no heading", "About us" + prose, False),
+    ]
+    good = 0
+    for name, text, want in planted:
+        ok, why = s3_heading(text)
+        good += say(ok == want, "planted %s reads %s (want %s): %s" % (name, ok, want, why))
+    print("R81 STORE S3 SELF-TEST: %s %d of %d" % ("YES" if good == len(planted) else "NO", good, len(planted)))
+    return good == len(planted)
 
 
 def walk(node, out):
@@ -93,12 +125,17 @@ def ac2(where):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--crit", required=True, choices=["AC1", "AC2"])
+    ap.add_argument("--crit", choices=["AC1", "AC2"])
+    ap.add_argument("--self-test", action="store_true")
     ap.add_argument("--where", choices=("deployed", "local"), default="deployed")
     a = ap.parse_args()
     root = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
     if root and root not in sys.path:
         sys.path.insert(0, root)
+    if a.self_test:
+        return 0 if self_test() else 1
+    if not a.crit:
+        ap.error("--crit is required unless --self-test")
     ok = ac1() if a.crit == "AC1" else ac2(a.where)
     print("R81 STORE %s SERVED: %s" % (a.crit, "YES" if ok else "NO"))
     return 0 if ok else 1
