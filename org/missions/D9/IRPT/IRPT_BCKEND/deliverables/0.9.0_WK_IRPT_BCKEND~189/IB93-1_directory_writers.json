@@ -1,0 +1,43 @@
+{
+ "to_id": "IRPT_BCKEND.TO-IB-pr-381",
+ "measured_on": "2026-10-09T01:3xZ from dell2 (AWS reads only; the repo at branch wk-IRPT_BCKEND-189, base 2c1f4f425d)",
+ "objects": [
+  "investor-reporting/directory/<as_of>/directory.json",
+  "investor-reporting/directory/latest.json",
+  "in opal-data-bd (49financial), opal-data-inf (inflection), opal-data-cot (cottonwood)"
+ ],
+ "writer_count": 1,
+ "writers": [
+  {
+   "name": "directory_runner.land (data/assets/scripts/gold/investor_reporting/directory_runner.py, run on the mdpf-daily-runner host i-02448edb624a7a7cf under role mdpf-daily-runner-ec2-role)",
+   "kind": "CODE_PATH: the one gold runner; its land() puts the dated directory.json and then latest.json (two put_object calls, ~line 872 at base), --upload only",
+   "evidence": "CODE: a recursive search of the repo's code (infra/, data/, .tools/, lib/) for any put of these two keys finds only land(); every other file naming the keys is a reader (directory handler, holdings handler and snapshot, ops status, _authz loaders, reporting-publish, advisor_client_list) -- 0 other writers. IAM, read live: the only role carrying s3:PutObject on investor-reporting/directory/* in the three firm buckets is mdpf-daily-runner-ec2-role (inline policy mdpf-runner-scoped, Sid IrptDirectoryFirmDestWrite, PutObject+GetObject on the three buckets). LIVE OBJECT VERSIONS: every version of latest.json and of the dated directory.json in the three buckets (33 versions: 49financial 12, inflection 10, cottonwood 11; 0 delete markers) lands 0-300 s after exactly one SSM command on that host whose comment is 'irpt directory refresh <firm> <date>' (33 of 33 matched, no unmatched write). Example, inflection 2026-10-08: SSM command requested 13:40:43Z, latest.json and 2026-10-08/directory.json LastModified 13:40:52Z."
+  }
+ ],
+ "triggers_of_the_one_writer_not_writers": [
+  {
+   "name": "irpt-directory-refresh Lambda (function irpt-directory-refresh, role irpt-directory-refresh-role)",
+   "role_in_chain": "sends the SSM command that runs the writer, then reads the landed artifact and writes only _refresh/<date>/manifest.json",
+   "evidence": "live inline policy irpt-directory-refresh-policy: s3:PutObject only on <bucket>/investor-reporting/directory/_refresh/*, s3:GetObject on directory/*, ssm:SendCommand to the one runner instance; it holds no PutObject on directory.json or latest.json and cannot overwrite them."
+  },
+  {
+   "name": "EventBridge Scheduler irpt-directory-refresh (cron 30 9 MON-FRI America/New_York) and irpt-directory-refresh-retry-daily (cron 40 9 MON-FRI)",
+   "role_in_chain": "fire the Lambda; the 09:40 fire is the one whose build has landed on 2026-10-06, 10-07 and 10-08 (host Online by then)",
+   "evidence": "infra/aws/terraform/investor-reporting/directory/schedule.tf :389 and :423; SSM commands of 2026-10-06/07/08 requested 09:40:36-09:40:44 ET."
+  },
+  {
+   "name": "driven invocations of the same Lambda with an event business_date",
+   "role_in_chain": "the same dispatch code path run by an operator; 20 of the 32 'irpt directory refresh' commands since 2026-09-01 fall off both schedule times (2026-09-12 and 09-18), all earlier than 2026-09-25",
+   "evidence": "SSM command comments all carry the Lambda's own 'irpt directory refresh <firm> <date>' text (refresh.py dispatch)."
+  }
+ ],
+ "non_writers_checked": [
+  "irpt-directory-search / holdings / ops status / reporting-publish / _authz loaders / advisor_client_list: read latest.json and directory.json only",
+  "holdings publication (holdings/publication.py) and irpt-holdings-snapshot schedule: write the holdings publication prefixes, not investor-reporting/directory/",
+  "irpt-directory-keepwarm-5min (3 targets): invokes irpt-directory-search with a warm marker; reads nothing",
+  "the QA prefix investor-reporting/qa/directory/ is a different key and is not served"
+ ],
+ "capability_not_exercised": "Any principal holding s3:PutObject on investor-reporting/directory/* could write the keys by hand; that capability was not enumerated beyond the runner host role. No such write exists in the version history: 33 of 33 versions are accounted for by a runner SSM command.",
+ "served_inflection_1008_explained": "There is no second writer. The served inflection directory reads as_of 2026-10-08 because the runner landed it, and the refresh's REFRESH_FAILED is a verdict written beside the artifact, never a gate on it. SSM command cf33dc53 (requested 2026-10-08T13:40:43Z, from the 09:40 ET fire) ran directory_runner.py --firms inflection --upload on the host; it built 2026-10-08, put 2026-10-08/directory.json and latest.json at 13:40:52Z (294 entries). The refresh Lambda cannot roll that back (no PutObject on those keys) and does not try: it reads the landed artifact on a LATER fire, compares it to the previous accounted-completion build, finds 1 client missing (the vendor-merged household), and writes REFRESH_FAILED under _refresh/ -- for the 2026-10-08 build that manifest was written by the driven refresh at 23:32:41Z, and the scheduled 13:30 and 13:40 fires of 10-08 had written the same verdict for the 10-07 build. The same happened on 10-06 and 10-07. The runner has landed a build on every 09:40 fire since 2026-10-06 regardless of the last verdict, which is why the served directory advanced while every verdict was REFRESH_FAILED, and why the entry the verdict protects is already absent from the served directory at inflection (since 10-06) and at cottonwood (since 10-07).",
+ "consequence_for_the_rule": "The runner is the only place the rule can act on the served bytes, and the served directory at both firms has ALREADY lost the entry, so the previous SERVED directory no longer holds it; see row IRPT_BCKEND-D2-W189-S1."
+}
