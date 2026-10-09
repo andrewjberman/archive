@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_CANON.TO-CN-a-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "12adb87963"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "155ac2ce67",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-a-2.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_CANON~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_gold_parquet.py",
+      "kind": "script",
+      "commit_or_etag": "4fc14f14cd",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-2; no AWS write, no deploy grant (order bound 2.1)."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_gold_consolidator.py",
+      "kind": "script",
+      "commit_or_etag": "4fc14f14cd",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; the issuer's CloudOps deploys after the drain."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py",
+      "kind": "script",
+      "commit_or_etag": "4fc14f14cd",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; one PACKAGE row added."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/tests/test_mdpf_gold_parquet.py",
+      "kind": "test",
+      "commit_or_etag": "4fc14f14cd",
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; 20 synthetic cases."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: r1_emit.py -- expect: ROUND 1 PARQUET WRITER: 7 of 7 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round1/checks/r1_emit.py\"; echo \"exit=$?\"",
+      "output_evidence": "ARM PASS KEYS: 16 partition URIs equal address(mdpf, scope, gold, artifact, date=..., object=data.parquet) :: 16 of 16 partition URIs equal address()\nARM PASS UNTYPED: the writer module types no s3:// and no opal-data- string :: no s3:// and no opal-data- literal in the module\nARM PASS WRITE ONCE: written, then unchanged with no second put, then conflict with the stored bytes untouched :: written, unchanged (no second put), conflict (bytes untouched)\nARM PASS ROUND TRIP: the stored object is parquet and its rows equal the records :: parquet round trip equal at mdpf/global/gold/aum_metrics/date=2026-10-08/data.parquet\nARM PASS SESSIONS: a firm scope assumes its own env ARN (unset refuses); global assumes none :: each firm assumes its env ARN; global assumes none; an unset ARN refuses\nARM PASS STATUS: run_status reads PASS only when every intended scope was built (M16) :: PASS only when every intended scope was built\nARM PASS WIRED: the consolidator imports and calls the writer; the package ships the module :: the consolidator imports and calls the writer; the package ships it\nROUND 1 PARQUET WRITER: 7 of 7 arms\nexit=0",
+      "denominator": "7 of 7 arms",
+      "status": "PASS",
+      "expect": "ROUND 1 PARQUET WRITER: 7 of 7 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: pytest data/mdpf/scripts/gold/tests with the three known-red test_global_fold_flag2 cases deselected -- expect: passed, with 0 failed -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest data/mdpf/scripts/gold/tests -q --deselect data/mdpf/scripts/gold/tests/test_global_fold_flag2.py::test_carry_within_window_carries_and_labels --deselect data/mdpf/scripts/gold/tests/test_global_fold_flag2.py::test_carry_beyond_window_absent_for_real --deselect data/mdpf/scripts/gold/tests/test_global_fold_flag2.py::test_carry_source_is_measured_never_interpolated; echo \"exit=$?\"",
+      "output_evidence": "114 passed, 3 deselected in 1.61s\nexit=0",
+      "denominator": "114 passed, 0 failed, 3 deselected (94 at base + 20 new)",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is JUDGMENT, graded on the issuer's real run at the round-1 close: after CloudOps deploys the package, one ad-hoc QA run writes data.parquet at address() for each built scope and artifact; a second run reads unchanged; the legacy JSON is byte-identical to a run without the change.",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment=true: no invocation; graded on the issuer's round-1 close run",
+      "output_evidence": "Wiring: mdpf_gold_consolidator.emit_gold_parquet() runs after the JSON emit loop, writes via mdpf_gold_parquet.write_partition (create-only), and puts run_status into manifest.run.gold_parquet; the JSON emits and the run status are not edited. Synthetic test TestConsolidatorWiring covers written then unchanged. Not run against AWS (order bound 2.1).",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round-1 close run",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "r1_emit.py at the base (module absent): 0 of 7 arms (issuer's measurement, order preflight); 7 of 7 against the issuer's reference tree.",
+      "expected": "0 of 7 before the module; 7 of 7 after.",
+      "observed": "7 of 7 exit=0 at 4fc14f14cd.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "r1_emit.py and the pytest line each run twice on the final source (before and after the naming-gate fix).",
+      "observed": "both green both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No AWS read or write by the worker; cottonwood standalone account_units read from the staged sidecar only at run time in the Lambda",
+      "reason": "Order bound 2.1: no AWS write; the issuer's CloudOps lane deploys and runs QA."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "r1_emit.py",
+      "result": "ROUND 1 PARQUET WRITER: 7 of 7 arms"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "data/mdpf/scripts/gold/tests (3 deselected)",
+      "result": "114 passed, 3 deselected"
+    }
+  ]
+}
