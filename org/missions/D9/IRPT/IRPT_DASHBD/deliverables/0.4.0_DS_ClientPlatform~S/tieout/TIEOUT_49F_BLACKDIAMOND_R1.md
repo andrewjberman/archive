@@ -14,7 +14,7 @@
 | acct#89d0916a | 2026-03-16 .. 2026-08-28 | 116 | 104 / 115 | 11 | -5.7099% | -6.0299% | -5.8650% | -5.8954% | 0.1551% |
 | acct#89d0916a | 2026-04-08 .. 2026-06-30 | 58 | 54 / 58 | 4 | -8.1799% | -9.8772% | -9.8772% | -9.8772% | 1.6973% |
 | acct#89d0916a | 2026-07-01 .. 2026-08-28 | 42 | 39 / 42 | 3 | +2.6385% | +4.3139% | +4.3139% | +4.3139% | 1.6754% |
-| 0076459710 | 2026-07-08 .. 2026-08-28 | 38 | 34 / 38 | 4 | +12.7830% | +9.1259% | +9.1259% | +9.1259% | 3.6572% |
+| acct#6b914f88 | 2026-07-08 .. 2026-08-28 | 38 | 34 / 38 | 4 | +12.7830% | +9.1259% | +9.1259% | +9.1259% | 3.6572% |
 
 **Summary (preferred convention START):** median **1.6754%**, p90 **3.6572%**, max **3.6572%**.
 **Per convention medians:** END 1.6973%, START 1.6754%, MIDPOINT 1.6754%.
@@ -28,7 +28,7 @@
 It is the rule executed faithfully, but the quantity it is a percentile *of* is not a disagreement
 between two calculations of the same thing: Opal's geometric link **excludes the account-days it
 withheld** while Black Diamond's return covers its full `daysHeld`, so the difference is dominated
-by *which days each series counts*. The clearest case is account 0076459710, where Opal links 34 of
+by *which days each series counts*. The clearest case is account acct#6b914f88, where Opal links 34 of
 38 days to +9.1259% against BD's +12.7830% over all 38 -- and the withheld days include the
 **$1,108,201.80 inception funding**. A 3.7% bar on a client-facing return would enshrine that
 mismatch as acceptable agreement.
@@ -53,8 +53,8 @@ discriminating days the gold withholds.
 ## What was NOT measured
 
 - **Three of five roster accounts never enter.** Only 3 of 5 carry a `bd_internal_id` at all;
-  0035940058 and 0091939812 are `pending_resolution`, absent from `dim_account_xref`, so no vendor
-  response maps to them. 0084073310 carries an id but has no landed response.
+  acct#f08ffd13 and acct#d0cf6c92 are `pending_resolution`, absent from `dim_account_xref`, so no vendor
+  response maps to them. acct#ffa615d2 carries an id but has no landed response.
 - **5,314 of 5,318 landed responses were skipped** -- their relationships carry no roster row
   (refusal clause; denominator printed in the record).
 - **Four calendar-year ranges (2024, 2025) are vendor-absent**, not zero: `daysHeld 0` and an empty
@@ -67,7 +67,7 @@ discriminating days the gold withholds.
 ## Corroboration worth recording
 
 Black Diamond's own `startDate` equals this seat's independently measured gold inception on **both**
-mapped accounts: acct#89d0916a -> 2026-03-16 and 0076459710 -> 2026-07-08. Those dates were measured
+mapped accounts: acct#89d0916a -> 2026-03-16 and acct#6b914f88 -> 2026-07-08. Those dates were measured
 from the custodian's balance partitions by `first_data_dates()` before any vendor file was read.
 Separately, BD reports `shortAllocation 0.4557` on acct#89d0916a, corroborating row S9's finding that
 the Tax SMA product is short by design.

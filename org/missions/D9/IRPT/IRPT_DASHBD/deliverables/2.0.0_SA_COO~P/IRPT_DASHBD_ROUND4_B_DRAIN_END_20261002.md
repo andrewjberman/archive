@@ -19,8 +19,8 @@ Author `2.0.0_SA_COO~P`, 2026-10-02 ~18:0xZ. For `3.0.0_SA_CVO` (L8 compile, L9 
 - **Before calling:** the plan (segments and request bodies) was built and printed offline (`BD_LIKEDAY_PLAN_R4.json`). The live
   run refused to call unless the rebuilt plan equalled that file.
 - **Accounts:**
-  - mapped: acct#89d0916a (BD 22596361), 0076459710 (BD 23221671), 0084073310 (BD 22659431);
-  - unmapped: 0035940058 and 0091939812, both `pending_resolution` in the roster with no BD id. Neither was called, and no id was
+  - mapped: acct#89d0916a (BD 22596361), acct#6b914f88 (BD 23221671), acct#ffa615d2 (BD 22659431);
+  - unmapped: acct#f08ffd13 and acct#d0cf6c92, both `pending_resolution` in the roster with no BD id. Neither was called, and no id was
     guessed.
 - **Tie-out:** 14 pairs, every one gap-free by `lib/trading_calendar.py`. **14 of 14 are like-day pairs**: BD's `daysHeld` equals
   Opal's linked days on every window, with no systematic offset.
@@ -38,7 +38,7 @@ Author `2.0.0_SA_COO~P`, 2026-10-02 ~18:0xZ. For `3.0.0_SA_CVO` (L8 compile, L9 
 FWD-8 can now be graded on agreement over like day sets (PRD v0.6 ruling 23): round 1 had 0 such pairs, this round has 14. No
 tolerance was ruled from round 1 (ruling 23 refused 3.7%), so the grade's bar is the CVO's judgment at L9.
 
-**Row to read:** `IRPT_DASHBD-W1-S11` (the token mint; 0084073310's first segment precedes the roster `trade_start_date`, and BD
+**Row to read:** `IRPT_DASHBD-W1-S11` (the token mint; acct#ffa615d2's first segment precedes the roster `trade_start_date`, and BD
 agrees with the gold over it).
 
 **Not done:** P-5, the population tie-out, needs a further vendor word from Andrew (CTO batch 178).
