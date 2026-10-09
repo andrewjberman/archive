@@ -6,6 +6,7 @@ Global's last date:
          entry carries value - overlap) or NAMED in sma_additive_withheld (reason OVERLAP / OVERLAP_UNMEASURED); none is silent.
   FWD-6  every Global SMA tree member states inside_model_figure (bool) and held_out (list); each Cottonwood member with overlap > 0
          is in its row's held_out with that overlap; each additive entry carries inside_model_value.
+  FWD-7  the Cottonwood slice carries unidentified_strategies {as_of, names_scanned > 0, rows of {firm_id, name, dollars, reason}}.
   TOTAL  Global opal_aggregate_aua = base_excluding_tax_aua + tax_additive_aua + sma_additive_aua on that date (within a cent), and
          Client equals the pre-deploy Client when --pre-client is given.
 Prints R2-RUN-READ PASS or FAIL with the failed item named.
@@ -80,6 +81,16 @@ def main():
             fails.append("FWD-6 by_model[%s] lacks inside_model_value" % mid)
         print("  %s bucket=%s value %.2f overlap %r -> %s | row inside_model_figure=%r held_out=%r"
               % (mid, rows.get(mid, ("-",))[0], v, ov, state.strip(), row.get("inside_model_figure"), row.get("held_out")))
+    ub = cot.get("unidentified_strategies")
+    if not isinstance(ub, dict):
+        fails.append("FWD-7 the Cottonwood slice carries no unidentified_strategies block")
+    else:
+        bad = [r for r in ub.get("rows", []) if set(r) < {"firm_id", "name", "dollars", "reason"}]
+        if bad or not (ub.get("names_scanned") or 0) > 0:
+            fails.append("FWD-7 block malformed (names_scanned %r, %d rows lacking a field)" % (ub.get("names_scanned"), len(bad)))
+        # Names only, never an account id (CTO half condition 5): the list is keyed by sleeve/model name.
+        print("  FWD-7 as_of %s names_scanned %s listed %d: %s" % (ub.get("as_of"), ub.get("names_scanned"), len(ub.get("rows", [])),
+              [(r["name"], round(r["dollars"] or 0, 2), r["reason"]) for r in ub.get("rows", [])]))
     t = g["opal_aggregate_aua"][i]
     parts = [g.get(k, [None] * (i + 1))[i] or 0.0 for k in ("base_excluding_tax_aua", "tax_additive_aua", "sma_additive_aua")]
     if abs(t - sum(parts)) > 0.01:

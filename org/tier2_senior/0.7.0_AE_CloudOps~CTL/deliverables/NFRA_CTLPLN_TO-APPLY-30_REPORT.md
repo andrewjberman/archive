@@ -231,3 +231,77 @@ each ADD, because a backstop that depends on the message it is backing up is not
 `org/critical_paths/change_management/20261009T1607Z_svc-irpt-served-read-w3-laptop-20261009_deploy_completion.md`
 -- opened 16:07Z before the put, both legs closed with the proof above, entry **CLOSED** 16:36:57Z, sentinel
 removed.
+
+---
+
+# AMENDMENT 3 -- window 5
+
+The issuer's numbering: this is **window 5** of the ledger's whole history, not of this lane's count. This
+lane has now run four of them (1, 2, 3, 5); the earlier `svc-irpt` entries of 2026-10-08 and the st26/st28
+windows are the rest. AMENDMENT 3 runs under a FRESH laptop CTO consent (msg 108068, addendum
+@`91d0d7982c`), not the 107976 consent that covered windows 1-3 -- a service-secret window is consented per
+use. Its two conditions (R3 reads cottonwood's own route only; the evidence carries counts and sha256 only)
+bind **G2's evidence**, not this seat's act; they are recorded here to show they were read and not adopted.
+
+## WINDOW 5 WAS OPEN 7 MINUTES 54 SECONDS AND IS SHUT -- TWO READS LANDED
+
+| event | time (UTC) |
+|---|---|
+| issuer's GO (msg 108070) | 17:51:10Z |
+| start read (live = signed BEFORE) | 17:54:59Z |
+| fourth NEVER-2 entry opened, **before** the put | 17:56Z |
+| **ADD put** | **17:57:39 - 17:57:43Z** |
+| G2's R3 read (its act, in memory only) | ~17:57:5xZ -- **97 s after the put** |
+| G2's R4 read | ~17:59:1xZ |
+| G2 called R DONE | 17:59:20Z |
+| this seat's put-time relay reached MSTR | 18:01:39Z -- **139 s too late** |
+| **REMOVE put** | **18:05:35 - 18:05:37Z** |
+| ledger + sentinel CLOSED | 18:12:49Z |
+| hard close (ADD + 30m) | 18:27:43Z -- met with 22 min 6 s to spare |
+
+Both legs graded as the previous three: start `SET-EQUAL` to the document it should match and `NOT SET-EQUAL`
+to the other, read-back the same, token census over the whole document (dell2 **2** after the ADD, **0**
+after the REMOVE), and three simulations per leg -- dell2 **allowed** / dell1 **explicitDeny** / walker
+**allowed** on the ADD, dell2 **explicitDeny** / dell1 **explicitDeny** / walker **allowed** on the REMOVE.
+**AC1** present. Zero `GetSecretValue` calls by this seat.
+
+## A DEFECT OF THIS SEAT, recorded as FAIL
+
+The order says to send the ADD put time to the issuer and to dell2 **at once**. On window 5 this seat sent
+it at 18:01:39Z -- **236 seconds after the put and 139 seconds after G2 had already finished and called R
+DONE** -- because it ran the read-back, the three simulations and the alarm first, and composed the relay
+after. The issuer reported the time "never reached MSTR or dell2".
+
+Measured rather than accepted: the message **was** written, and is present in `0.0.0_AB_MSTR`'s `read/` dir
+at 1,134 bytes. So delivery did not fail; **ordering** did. G2 was unblocked only because it polled the live
+grant and acted 97 seconds after the put -- it did not need this seat's message, which is luck, not design.
+Had G2 been waiting on the time instead of watching the grant, it would have burned four minutes of a
+thirty-minute window.
+
+**Remedy adopted for any further window:** the put time goes out immediately after the put returns, before
+the read-back, the simulations, the alarm or any ledger work. The proof of the ADD can be assembled a minute
+later; the consumer waiting on the time cannot.
+
+This is a self-caused, on-task, in-lane ordering fault, so it is recorded here and in the ledger proof and
+reported to the issuer -- not filed as a surprise row, which is the carrier for an off-task
+spec-versus-world finding.
+
+## All four windows this lane ran
+
+| window | ADD put | REMOVE put | open | closed by | hard close met by |
+|---|---|---|---|---|---|
+| 1 | 13:37:36Z | 13:45:41Z | 8 min 5 s | G2's REMOVE NOW | 21 min 55 s |
+| 2 (AMD 1) | 14:19:50Z | 14:35:09Z | 15 min 19 s | R DONE 14:26:19Z | 14 min 41 s |
+| 3 (AMD 2) | 16:08:46Z | 16:33:06Z | 24 min 20 s | R DONE 16:22:49Z | 5 min 40 s |
+| 5 (AMD 3) | 17:57:43Z | 18:05:37Z | 7 min 54 s | R DONE 17:59:20Z | 22 min 6 s |
+
+Eight legs, eight start reads, eight read-backs, **sixteen** negative controls, **twenty-four** simulated
+decisions. Total open window **55 minutes 38 seconds**. Four NEVER-2 entries, all CLOSED, all sentinels
+removed. Zero `GetSecretValue` calls by this seat on any leg; dell2's five reads are G2's acts under its own
+ledger. Every REMOVE ran on G2's call, ahead of its own armed alarm, and every alarm was armed anyway.
+
+## Ledger (window 5)
+
+`org/critical_paths/change_management/20261009T1756Z_svc-irpt-served-read-w5-laptop-20261009_deploy_completion.md`
+-- opened 17:56Z before the put, both legs closed with the proof above (the ADD leg's proof names the relay
+defect), entry **CLOSED** 18:12:49Z, sentinel removed.
