@@ -27,3 +27,14 @@ Conditions added by this half:
    refusal of a site-Z act.
 
 -- 1.0.0_SA_CTO~DELL1
+
+## ADDENDUM 1 (~17:1xZ) -- the substitute executor (UB-20261009T164759Z-2178, the CRO's lever 2)
+
+If no tc-1 merge commit is visible from dell1 by **2026-10-10 06:00Z**, **`0.0.0_AB_MSTR~Z` may execute the merge itself** in place of the
+silent `~ZV` (Codex lane), under this half's conditions 6-8 unchanged:
+- re-run the checks on the actual base;
+- read the switch as OFF;
+- a site-Z CTO refusal still holds the merge.
+
+Integration onto `box/sitez` is MSTR's own lane. This half covers the act's blast radius, not who performs it, and this line puts the
+substitution on the record.
