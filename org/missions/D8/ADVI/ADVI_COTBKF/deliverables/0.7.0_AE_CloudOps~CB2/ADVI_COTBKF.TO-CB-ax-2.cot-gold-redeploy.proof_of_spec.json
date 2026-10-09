@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ax-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ax-2.cot-gold-redeploy.md",
+    "group": "OTHER",
+    "vintage_commit": "2d0c98c8e3"
+  },
+  "assignee": "0.7.0_AE_CloudOps~CB2",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round50.md",
+    "vintage_commit": "e221da2dd3",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ax-2.cot-gold-redeploy.md"
+  },
+  "acceptance": [
+    {
+      "criterion_id": "CB50ax2-AC1",
+      "criterion_verbatim": "python -m pytest data/cot/scripts/gold/tests/test_cot_gold_failclosed.py -q expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest data/cot/scripts/gold/tests/test_cot_gold_failclosed.py -q",
+      "expect": "passed",
+      "output_evidence": "rc 0; '6 passed in 17.95s'. Run in a detached scratch worktree at HEAD (C:/dev/wk-cb-ax-2-proof-1735) in which ALL FIVE inputs the test copies from were replaced with the FETCHED SERVED bytes and re-hashed in place first (the writer, B_00, ticker_overrides.py at GOLD/lib/, legacy_addresses.json, and scopes.json -- the last included although this act does not write it). The no-opal_naming condition is enforced by the test itself: each arm runs in a child interpreter whose sys.path is the temp dir only, with a hard import blocker on opal_naming, and _setup asserts the copied lib/ subset has no opal_naming.py. Worktree removed after; shared tree verified clean and all five files still at their served hashes.",
+      "status": "PASS",
+      "denominator": "6 of 6 arms: both scripts alone with no ImportError incl. _ff_worker on a synthetic rps day; scopes-absent STOP with 0 writes; overrides-absent STOP with 0 writes; 757 overrides and 104 corrections; legacy-absent STOP with 0 writes; and the written-key census equal to the pre-change keys"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.7.0_AE_CloudOps~CB2/cot_gold_redeploy.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-cot/code/gold/ticker_overrides.py",
+      "kind": "s3_object",
+      "commit_or_etag": "qjQFQTPz7i9Xgo031VXGSJ0qA3K2HG8V",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "MINTED FIRST by one put-object, 404-gated in the same script so the put was unreachable unless the key read absent and any non-absence head_object error also exited. The 404 carried a positive control (code/gold/scopes.json reads 19,210 B). Exact repo blob bytes from data/cot/scripts/gold/lib/ticker_overrides.py, 65,021 B, sha256 4d407c3a...7015 checked before the put and again on the served object. Note the deliberate flattening: the repo path carries a lib/ segment, the deployed key does not, which is the point of round 50 since the scripts must load it from beside themselves with no lib/ on the path. SSE AES256 read from the prefix. Never deleted by this seat.",
+      "artifact_covered_by": [
+        "CB50ax2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-cot/code/gold/legacy_addresses.json",
+      "kind": "s3_object",
+      "commit_or_etag": "q.zGXhcophZPLllhNrEn6xAlqV0wMQw8",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "MINTED SECOND by one put-object, same 404 gate shape. Exact repo blob bytes from infra/logic/registry/legacy_addresses.json, 8,176 B, sha256 34dfcb37...fe17, with no json round trip anywhere in the path (re-serialising would move key order, whitespace and unicode escaping off the signed value). SSE AES256 read from the prefix. Both beside-files were in place BEFORE either script was deployed, which is the ordering the pair requires because the new scripts fail closed without them. Never deleted by this seat.",
+      "artifact_covered_by": [
+        "CB50ax2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-cot/code/gold/build_canonical_prices_v2.py",
+      "kind": "s3_object",
+      "commit_or_etag": "QCY7q9UQQ_k0gcWSnm8Aab_WUxe2iU1Y",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Deployed THIRD via .tools/safe-deploy.sh (rc 0, no --allow-stale, no bypass audit entry), behind a version gate that re-read the prior GAOI7tORcF7V7F0fW9NMH35bonjXEwzj in the same invocation. 1 path, 0 bundle-members. Served sha256 8b733bb1...a76b, 42,400 B. Census: 182 changed lines (added 151, removed 31) across 5 hunks, exactly the pair's 182. Prior version KEPT and proven still retrievable (36,335 B) as one of the two rollback sources.",
+      "artifact_covered_by": [
+        "CB50ax2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-cot/code/gold/B_00.canonical_holdings.py",
+      "kind": "s3_object",
+      "commit_or_etag": "oLzqVDS_pXpbotVgv.unFNA17V3HBtoO",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Deployed FOURTH via .tools/safe-deploy.sh (rc 0, gate PASS, own comp-pipescript deployed VERIFY OK), behind a version gate that re-read the prior hU7ZrZTD5NDlVvuSo9aBMUd1hKUg_lAe. Served sha256 2b38b142...a36ec, 68,327 B. Census: 26 changed lines (added 22, removed 4) in 2 hunks, exactly the pair's 26 -- the own-firm reader at HEAD 96-116 and the opal_naming replacement at HEAD 1383, inside _ff_worker (1360-1442). Prior version KEPT and proven still retrievable (67,281 B).",
+      "artifact_covered_by": [
+        "CB50ax2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T1723Z_advi-cotbkf-cot-gold-redeploy-cb-ax-2-20261009_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "9f6f320f42",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "opened with 7 legs BEFORE the first write at @9f6f320f42 (open self-commits its own two files); C1, M1, M2, D1, D2, P1 and V1 each closed with proof; entry CLOSED with all 7 proven and the sentinel removed",
+      "artifact_covered_by": [
+        "CB50ax2-AC1"
+      ]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "safe-deploy.sh",
+      "invocation": "two separate invocations, the writer then B_00, each with --author this seat and no bypass flags",
+      "result": "rc 0 both; 1 path / 0 bundle-member each; B_00's run printed gate PASS and its own comp-pipescript deployed VERIFY OK. On the writer's run CROSSBOX-DEPLOY read verdict=STOP (open_deploy=hit, an unreadable worktree) and proceeded only because the gate is WARN; on B_00's run the same gate read verdict=CLEAR. Both readings are recorded in the ledger and the STOP was resolved by measurement, not by the WARN mode"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open / close-leg x7 / close --slug advi-cotbkf-cot-gold-redeploy-cb-ax-2-20261009",
+      "result": "7 legs declared before the first write; CLOSED with all 7 proven; sentinel removed; nothing left staged"
+    },
+    {
+      "tool": "NEVER-2 open-deploy census (git worktree list --porcelain + ls-tree per tree)",
+      "invocation": "run when the crossbox gate read STOP, before adding any further write",
+      "result": "denominator 68 live worktrees, 66 readable, 2 unreadable both rc=128 'not a git repository' -- stale registrations (two paths absent, one with no .git), so the hole is administrative debris and cannot conceal a deploy. Shared tree's 25 current sentinels: the only one OPEN against cot code/gold is this act's own; the cot-adjacent secclass entries are HELD-SOVEREIGN-GATED"
+    },
+    {
+      "tool": "ast import-closure reader (AMENDMENT 1 / ADDENDUM 23)",
+      "invocation": "written for this order over the SERVED bytes, module-level AND in-function imports, checked against a paginated listing of the mirror",
+      "result": "IMPORT-CLOSURE b00_modules=18 writer_modules=17 missing=0. Mirror denominator 110 objects over 1 page with lib/ holding 16, independently reproducing the issuer's 16. B_00's three local imports all resolve in the listing; the writer carries zero local static imports because it loads ticker_overrides.py from beside itself via importlib.util"
+    },
+    {
+      "tool": "aws s3api / boto3",
+      "invocation": "before-reads (2 x 404 with a positive control, 2 VersionIds), 2 put-objects, 4 get-objects for the read-back, 2 head-objects by prior VersionId, 1 extra get for the served scopes.json",
+      "result": "every count with its denominator; both zeros with a control; 4 of 4 served sha256 equal; both rollback sources retrievable"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> CB50ax2-AC1",
+      "result": "run BEFORE the complete flip, as the order's <proof_of_spec> block requires"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "byte-equality chains rather than re-runs, since this is a four-key deploy: repo/blob vs the pair's table before the writes, served vs the same table after them, and served-prior vs the versions this seat itself deployed earlier today",
+      "observed": "all four repo-side files equalled the pair's sha256 table with git status clean; all four served objects hash to the same four values after the writes; and the two served PRIORS hash 3ac0a502... and 45fbbd92..., exactly the values this seat read back at CB-ap-2 and CB-ao-1, so the baseline is continuous rather than inherited. The changed-line counts reproduced the pair's 182 and 26 on the nose, and the import-closure reproduced the issuer's lib/ count of 16",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the suite is itself adversarial by construction and no additional mutant was planted, because its arms ARE the negative controls: three of the six remove a required beside-file (scopes.json, ticker_overrides.py, legacy_addresses.json) and assert the script STOPs with a named error and ZERO writes. A passing suite therefore already demonstrates the scripts fail closed rather than merely run, and demonstrates the tests bind to the files under test -- removing one changes the verdict.",
+      "expected": "with a required beside-file absent the script must STOP with a named error and write nothing; with the files present it must run clean",
+      "observed": "all three absence arms passed (named STOP, 0 writes), the presence arms passed (no ImportError on a synthetic rps day, 757 overrides and 104 corrections loaded), and the census arm passed -- 6 of 6, rc 0. The one thing the suite cannot show is which bytes it read, and that is covered instead by re-hashing all five inputs IN PLACE in the worktree before the run",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "writing code/gold/scopes.json",
+      "reason": "explicitly NOT in this write set: its served sha256 already equals the repo blob, so there is nothing to write. Its served bytes were nonetheless fetched and used for the proof, since the gold run reads the deployed copy"
+    },
+    {
+      "item": "deleting either minted key",
+      "reason": "a minted key's delete is Andrew's act. Rollback is copy-object of the two overwritten scripts' prior VersionIds only, and both were proven retrievable after the writes. The minted files are inert to the prior scripts, which imported lib.ticker_overrides and resolved addresses through opal_naming"
+    },
+    {
+      "item": "pruning the stale worktree registrations",
+      "reason": "they are what left the crossbox gate unable to clear, and under ENFORCE would block every cot deploy on this device, but pruning is device infrastructure and not this seat's grant. Surfaced separately rather than acted on"
+    },
+    {
+      "item": "the first manual silver-prep after this deploy",
+      "reason": "CTO condition 3 names it as D2-S62's closing census (source_firm=cottonwood, BREACH=0, resolved paths printed). It is the live arm and the issuer's act, not this order's"
+    },
+    {
+      "item": "any client account id in a ledger line or report",
+      "reason": "containment ruling item 6, restated in the order. This act's evidence is code bytes, versions and import graphs, and no account id appears in any leg proof or in the report"
+    }
+  ]
+}

@@ -70,6 +70,30 @@ TICKET_FN = "opal-ticket-api"
 # and says nothing either way, so a selector test on them is a category error.
 NO_SELECTOR_CARRIER = frozenset({"/api/scoped/tickets", "/api/scoped/tickets/metrics"})
 
+# AMENDMENT 4's limb 2: "leak = an off-list payload that DIFFERS from the own-firm answer, OR CODE THAT
+# READS THE SELECTOR for an off-list target. A selector-ignoring route whose firm comes only from the token
+# is not a STOP." Limb 2 is a CODE question, so it is answered by a code read and carried here as DATA.
+#
+# >> WHY THIS IS A TABLE AND NOT A SOURCE-DIR WALK. A walk of each function's own source_dir UNDERSTATES:
+#    irpt-holdings counts 0 occurrences of `selected_tenant` in its own dir, yet it refuses an off-list
+#    target with FIRM_BINDING, because the clamp lives in the SHARED _authz/served.py that is BUNDLED into
+#    every IRPT host and sits outside that dir. A bundled shared module is invisible to the walk, so the
+#    walk would clear a route that does read the selector. Measured counts per own source_dir, for the
+#    record: irpt-status 5, irpt-export-render 1, irpt-directory-search 16, irpt-ycharts-generate 6,
+#    irpt-performance-adapter 3, irpt-narrative 17, irpt-holdings 0, irpt-49f-reporting-read-lambda 0 --
+#    and the last two still read it through the shared boundary.
+READS_SELECTOR = {
+    # every IRPT-served host reaches selected_tenant through the shared _authz/served.py boundary
+    "irpt-status": True, "irpt-export-render": True, "irpt-directory-search": True,
+    "irpt-ycharts-generate": True, "irpt-narrative": True, "irpt-holdings": True,
+    "irpt-performance-adapter": True, "irpt-49f-reporting-read-lambda": True,
+    # 0 occurrences anywhere in the module; firm comes only from the edge-injected header
+    "opal-amgt-scoped-api": False,   # CTO msg 3747 code read + verified here: lib/research/api/scoped_amgt.py == 0
+    "opal-ticket-api": False,        # 0 in 12 files; clamped by _in_profile_scope on the ticket's requester.firm
+    "opal-portal-content-api": False,
+    "opal-partners-data": False,     # scoped by its own advisor-scoping check, not by the selector
+}
+
 _VERDICTS = {}
 
 
@@ -412,20 +436,35 @@ def census(token, run_id):
     # error. Treating every selector-ignored arm as a STOP (which run 2 did) re-stops on exactly the arms
     # run 1 had already classified as expected. The census verdict is the discriminator: an ignored selector
     # is a REAL finding only on a route the census says resolves to one or more FIRMS.
-    unexpected_all = [t for t in selector_ignored
-                      if verdict_of(t[1] + " " + t[2]) in ("MORE_THAN_ONE", "ONE_FIRM")
-                      and t[2] not in NO_SELECTOR_CARRIER]
-    expected_all = [t for t in selector_ignored if t not in unexpected_all]
-    summary["selector_ignored_expected"] = expected_all
-    summary["selector_ignored_unexpected"] = unexpected_all
+    # AMENDMENT 4 limb 2: a selector-ignoring route leaks only if its CODE reads the selector. A route whose
+    # firm comes only from the token is explicitly NOT a STOP. UNKNOWN is never cleared: it is carried as
+    # UNKNOWN so it can be read by a code read rather than assumed either way.
+    leak_by_code, cleared_by_code, unknown_by_code = [], [], []
+    for t in selector_ignored:
+        reads = READS_SELECTOR.get(t[0])
+        if reads is True:
+            leak_by_code.append(t)
+        elif reads is False:
+            cleared_by_code.append(t)
+        else:
+            unknown_by_code.append(t)
+    summary["selector_ignored_cleared_by_code_read"] = cleared_by_code
+    summary["selector_ignored_leak_by_code_read"] = leak_by_code
+    summary["selector_ignored_code_read_UNKNOWN"] = unknown_by_code
+    summary["leak_criterion"] = ("AMENDMENT 4: an off-list payload DIFFERING from the own-firm answer, OR code "
+                                 "that reads the selector for an off-list target. A selector-ignoring route "
+                                 "whose firm comes only from the token is not a STOP.")
     stop = None
     if off_admits:
-        stop = "OFF-LIST FIRM ADMIT on %d arm(s): %s" % (len(off_admits), off_admits[:4])
-    elif unexpected_all:
-        stop = ("BEHAVES AS ALL on %d arm(s) of a FIRM-SCOPED route: %s"
-                % (len(unexpected_all), unexpected_all[:4]))
-    print("  => selector-ignored: %d expected (NO_FIRM or no selector carrier), %d UNEXPECTED"
-          % (len(expected_all), len(unexpected_all)))
+        stop = "LEAK limb 1 -- OFF-LIST PAYLOAD DIFFERS on %d arm(s): %s" % (len(off_admits), off_admits[:4])
+    elif leak_by_code:
+        stop = ("LEAK limb 2 -- a selector-READING route answered an off-list target on %d arm(s): %s"
+                % (len(leak_by_code), leak_by_code[:4]))
+    elif unknown_by_code:
+        stop = ("LEAK limb 2 UNDECIDABLE -- %d arm(s) on a host with no code read: %s"
+                % (len(unknown_by_code), unknown_by_code[:4]))
+    print("  => selector-ignored: %d CLEARED by code read (firm from the token only), %d leak, %d UNKNOWN"
+          % (len(cleared_by_code), len(leak_by_code), len(unknown_by_code)))
     print("  => armed %d | off-list admits %d | behaves-as-ALL %d | create arms not naming the firm %d"
           % (len(armed), len(off_admits), len(selector_ignored), len(create_fails)))
     print("  => STOP=%s" % stop)
@@ -458,8 +497,13 @@ def hops(token, advisor, trace):
         if isinstance(d, dict):
             input_id = d.get("input_id") or input_id
             upload_id = d.get("upload_id") or upload_id
+        # AnalysisUploadResult carries `state` on the RESULT itself (contract: resolving["state"] ==
+        # "RESOLVING"), not under the status envelope. Run 3 read only status.state and saw None for all
+        # 14 polls, so it never recognised NORMALIZED and polled the full budget although the input_id
+        # had already landed on poll 2. Read the result first, then fall back to the envelope.
         st = p.get("status")
-        state = st.get("state") if isinstance(st, dict) else None
+        state = (d.get("state") if isinstance(d, dict) else None) \
+            or (st.get("state") if isinstance(st, dict) else None)
         a["status"], a["state_seen"], a["polls"] = res["status"], state, i + 1
         print("  (a) poll %2d http=%s state=%r reason=%r input_id=%r"
               % (i + 1, res["status"], state, res["reason"], input_id))
@@ -504,11 +548,25 @@ def hops(token, advisor, trace):
         named.append({"hop": "c_claim", "status": res["status"], "reason": res["reason"]})
     save(trace)
 
+    # THE SUBMISSION BODY IS THE PUBLISHED CONTRACT, read rather than guessed:
+    # docs/contracts/investor-reporting/v1/AnalysisSubmissionRequest.schema.json -- required are
+    # request_id, client_id, account_ids, snapshot_id, variant, comparison_keys, report_title and
+    # prepared_for, with additionalProperties false; allOf[0] says that WITH an input_id, client_id and
+    # snapshot_id MUST be null and account_ids empty; allOf[1] says variant "overview" takes no
+    # comparison_keys. Run 3 sent only {input_id, ticket_id} and was refused MISSING_REQUEST_FIELD
+    # (RequestRefused, classifier INVALID_INPUT, visible only in CloudWatch).
+    # request_id is CLIENT-SUPPLIED, so (e) polls the value minted here.
+    rid_sent = "sar1b-" + file_sha[:24]
     res = call(token, "POST", "/api/scoped/investor-reporting/analysis",
-               {"selected_tenant": FIRM}, {"input_id": input_id, "ticket_id": tkt})
+               {"selected_tenant": FIRM},
+               {"request_id": rid_sent, "client_id": None, "account_ids": [], "snapshot_id": None,
+                "variant": "overview", "comparison_keys": [],
+                "report_title": "[TEST TCKT_VNEXT FWD-1] seat arm",
+                "prepared_for": HOUSEHOLD, "input_id": input_id, "ticket_id": tkt})
     p = res["parsed"] if isinstance(res["parsed"], dict) else {}
     inner = p.get("data") if isinstance(p.get("data"), dict) else p
-    rid = inner.get("request_id") if isinstance(inner, dict) else None
+    rid = (inner.get("request_id") if isinstance(inner, dict) else None) or (
+        rid_sent if res["status"] < 400 else None)
     h["d_analysis"]["status"], h["d_analysis"]["request_id"] = res["status"], rid
     print("  (d) analysis http=%s reason=%r request_id=%r" % (res["status"], res["reason"], rid))
     save(trace)
@@ -524,17 +582,25 @@ def hops(token, advisor, trace):
                    {"selected_tenant": FIRM})
         p = res["parsed"] if isinstance(res["parsed"], dict) else {}
         inner = p.get("data") if isinstance(p.get("data"), dict) else p
-        rstate = (inner or {}).get("state") or (inner or {}).get("status") if isinstance(inner, dict) else None
+        # THE PROGRESS FIELD IS `stage`, per docs/contracts/investor-reporting/v1/AnalysisRequest.schema.json:
+        # RECEIVED | PARSED | NEEDS_CORRECTION | READY | SUBMITTING | GENERATED | RELEASED | FAILED.
+        # Run 4 polled `state` instead and read 'UNAVAILABLE' -- a value that is NOT IN THAT ENUM -- for all
+        # 60 polls, so it never observed the field that carries progress and named (e) a failure on its own
+        # blindness. Read `stage` first; keep `state` only as a trailing annotation.
+        rstage = (inner or {}).get("stage") if isinstance(inner, dict) else None
+        rstate = (inner or {}).get("state") if isinstance(inner, dict) else None
         if isinstance(rstate, dict):
             rstate = rstate.get("state")
+        e["state_annotation"] = rstate
+        rstate = rstage or rstate
         e["status"], e["polls"], e["state"] = res["status"], i + 1, rstate
         if i % 5 == 0 or rstate in ("READY", "AVAILABLE", "FAILED", "REFUSED"):
             print("  (e) poll %2d http=%s state=%r" % (i + 1, res["status"], rstate))
-        if rstate in ("READY", "AVAILABLE", "FAILED", "REFUSED"):
+        if rstate in ("READY", "GENERATED", "RELEASED", "FAILED", "NEEDS_CORRECTION"):
             break
         time.sleep(10)
     save(trace)
-    if rstate not in ("READY", "AVAILABLE"):
+    if rstate not in ("READY", "GENERATED", "RELEASED"):
         named.append({"hop": "e_ready", "status": e["status"], "reason": rstate,
                       "note": "never reached READY in the poll budget; not retried into a pass"})
 
@@ -660,7 +726,18 @@ def save(trace):
         if not isinstance(doc, dict):
             doc = {}
         if doc.get("run_id") and doc.get("run_id") != trace.get("run_id"):
-            doc["run_2"] = trace          # keep run 1 at the top level, add run 2 beside it
+            # Allocate the NEXT FREE run_N, reusing the slot this same run already owns. Keying every
+            # later run to a fixed "run_2" made run 3 overwrite run 2's section in the working file
+            # (run 2 was recovered from commit e2c7f7b25a). A record is still a record: do not clobber it.
+            slot = next((k for k in doc
+                         if k.startswith("run_") and isinstance(doc[k], dict)
+                         and doc[k].get("run_id") == trace.get("run_id")), None)
+            if slot is None:
+                n = 2
+                while "run_%d" % n in doc:
+                    n += 1
+                slot = "run_%d" % n
+            doc[slot] = trace
         else:
             doc = dict(doc, **trace)
         p.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
@@ -680,6 +757,23 @@ def main(argv):
         "amendment_3": ("run 2 under the same pair and halves, started by the precondition rather than a new GO: "
                         "irpt-status LastModified later than 15:43:11Z, CodeSha256 not VC/r14ka..., and ONE real "
                         "call non-500. Fresh row and token; the full census re-run because a host changed."),
+        "amendment_4_cto_code_read_verbatim": {
+            "source": "order AMENDMENT 4, from CTO msg 3747 / v2.2 half AMENDMENT 2; copied verbatim as the GO requires",
+            "subject": "GET /api/scoped/amgt/watchlist is NOT a STOP, proved by a code read rather than by byte comparison",
+            "block": [
+                ("lib/research/api/scoped_amgt.py:6409-6421 _firm_id(event): \"The ONLY source of firm identity in "
+                 "this module: the header `auth-validator-edge` injects after verifying the JWT ... The firm is "
+                 "never read from the path or the body.\""),
+                (":6922 firm_id = _firm_id(event) in handler; :6986-6987 if rest == [\"watchlist\"] and method == "
+                 "\"GET\": return _response(200, read_starred(firm_id))."),
+                ("selected_tenant occurrences in the module: 0. So the route returns the CALLER's own firm list, "
+                 "opal-capital, for every target, and can never read another firm's partition."),
+            ],
+            "independently_verified_by_this_seat": ("grep -c selected_tenant lib/research/api/scoped_amgt.py = 0; "
+                                                    "_firm_id reads FIRM_HEADER only and raises 401 when absent "
+                                                    "(fails closed); the watchlist branch returns "
+                                                    "read_starred(firm_id)."),
+        },
         "entry": {"host": HOST, "transport": "HTTPS through CloudFront",
                   "not_used": "direct lambda invoke (CTO IRPT_YCDGEN @d54e0b7515 condition 1)"},
         "preconditions": {"read27": a.read27, "cto_half_v2_2": "022ee70258", "row_written": None,
