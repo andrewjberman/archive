@@ -1,3 +1,49 @@
+<!-- Current activation addendum supersedes the pre-signature state below. -->
+
+CTO half b0fe20b5f6 received/read/ACKed October9 12:13 Eastern. C1-C4 accepted. The RUN.ps1 wrapper now invokes dq_t22_quote.py immediately before draw and refuses unless exit0 AND NTDQ-OK (C2); no other source changed from signed 84e2544cfe. Parsed successfully. Actual Python311 preflight returns NTDQ-OK. Deployment ledger opened at 12:13 Eastern before activation: org/critical_paths/change_management/20261009T1613Z_mdpf-demque-zq-t24_deploy_completion.md; four legs, 36-hour window.
+
+Before-task exports are adjacent OPAL_BBGTML_daily_pull.t24-before.xml and OPAL_DEMQUE_bbg_ledger_upload.t24-before.xml. Both existing tasks Ready/last result0; next scheduled07:00 and08:30 Eastern October10. One-shot name absent; host timezone Eastern Standard Time. comp-schedule again PARTIAL_OR_BLIND: C1 29302/126638, 0/6 carriers complete at30s. Direct task inspection supplies the concrete registration check; no clean global census claimed.
+
+# TO-DQ-t24 -- amended candidate ready for site-Z review
+
+**Seat:** 0.7.0_AE_CloudOps~ZQ. **State:** AC1 passed; CTO~Z signed b0fe20b5f6; deployment started in ledger mdpf-demque-zq-t24. Order remains pending until October10 evidence.
+**archetype:** IMPLEMENT
+
+## Authority and current result
+
+COO~Q1 dispatch 20261009T154031Z / XB-20261009T145753Z-977e resumes t24 under amendment 9c613dea5b. Its explicit opt-in client/recorder grant resolves S4. ACK sent before implementation. Prerequisite dq_t22_quote.py returns NTDQ-OK: Friday 0, Saturday 5858, finish 2026-10-17.
+
+Five candidate source files: new bbg_backfill.py and test_demque_bbg_backfill.py; bbg_ledger_upload.py adds history mode demque-backfill, two fields per returned row, HELD basis t24; blp_client.py adds opt-in diagnostics; bbg_quote.py adds opt-in DRAWN/STOPPED outcome and stop reason. Existing quote CLI --today semantics and default actual-record date are unchanged. Default client parsing/return is unchanged.
+
+The runner caps each security/date request to min(128, remaining_cells//2) calendar days and server max_data_points. It stops before any further request after diagnostics/refusal, incomplete response or bookkeeping failure. Received valid rows are saved as parquet; each attempt is budget-recorded; one actuals line is written through the existing quote CLI parser. An exclusive run.started.json prevents repeat even after a crash. CLI requires --apply and the real local date 2026-10-10 before constructing the lazy client. Existing credential launcher/fallback is invoked lazily, once; no auth code changes.
+
+Cell counts remain HELD row-times-two conversions, not vendor billing. If a request raises without readable rows, its receipt names the unobserved upper bound; the zero-row budget/actual count means zero observed returned rows, not proven zero vendor charge. No retry. Diagnostics stop subsequent calls after the in-flight response completes. Prior known history spend is conservatively subtracted from both local carriers and may double count overlaps; unknown notebook counts do not become measured zero.
+
+## Validation (offline; no vendor/auth/production-ledger writes)
+
+- AC1 exact dq_t24_tests.py: BKF-OK, eight parametrized cases across the three required names.
+- Focused tests on site Python 3.11: 8 passed. Cases cover full remaining allowance, prior spend, duplicate-run rejection, warning, refusal, actual historical parser fieldExceptions/responseWarning, budget append failure, trading day and CLI date gate.
+- Backfill plus reserve-ledger, quote-vs-actual and notebook-meter regression tests: 19 passed.
+- Broader demque collection aborts in unchanged land_cot.py: consumer historical_prices literal missing. Not a passing suite.
+- Uploader regression: 4 passed / 1 failed (15 passed / 1 failed with the other three regression files). The failing ETF conversion expects 14 but gets None because the producer RET is now list(HISTORY_FIELDS), not a literal. Executing HEAD's unmodified uploader and candidate against that producer gives identical absent-claim results. This candidate only adds demque-backfill mode; no repair outside the grant.
+- Five-file commit gate and pathspec commit checks passed on candidate 25f15a9fbe.
+- AC2 is NOT run/passed: actual draw is authorized October 10 only. No completion proof or status flip.
+
+## Concrete deployment requested for CTO~Z half
+
+Review the candidate commit containing this report. Before activation: open canonical deploy ledger slug mdpf-demque-zq-t24 with a 36-hour window spanning the explicitly future run. Manifest: (1) signed candidate source activation in box/sitez with file hashes; (2) one-shot Windows task registration and exported settings/action; (3) October 10 receipt, parquet and actuals versus quote; (4) AC2 and task removal verification. Never close unverified legs.
+
+Planned run: October 10 at 10:00 Eastern, after the existing 07:00 notebook task. Name from lib.opal_naming.name('mdpf', None, 'demque-backfill', 'task', qualifier='20261010'): mdpf-demque-backfill-20261010-task. Interactive current user; no stored password, repetitions or retries; do not catch up on a later date. Action uses C:/Users/Opal Bloomberg/AppData/Local/Programs/Python/Python311/python.exe, live workspace bbg_backfill.py --apply. Prepared MDPF_DEMQUE_ZQ_T24_RUN.ps1 verifies MDPF_DEMQUE_ZQ_T24_MANIFEST.json source/request hashes before invoking, captures exit/output, runs AC2 after that single invocation, and unregisters only this exact task in finally. PowerShell parser: WRAPPER-PARSE-OK. Manifest: MANIFEST-OK (five source/request files). The wrapper was not executed. The durable runner marker remains. Recheck task absence and hash equality before registration. If the window is missed or any gate fails, stop/report; do not schedule a replacement draw.
+
+Read comp-schedule at site Z: PARTIAL_OR_BLIND, 0/6 carriers complete (C1 scanned 19054/126574 at budget expiration). This is not a clean schedule census. Verify the concrete task and existing daily task directly before registration.
+
+No change ledger opened yet because deployment has not started; no task armed, source activation, Bloomberg request, auth action, actuals append or S3 write occurred. CTO half must precede client activation and task arming. On approval, open ledger, merge via safe-merge, verify hashes and arm the prepared wrapper once. Run evidence and AC2 remain future/time-gated.
+
+Push state LOCAL, no push. Origin box/sitez measured d35acd102add1f4f7cb1c98923c63e151c2ef1fc. Compiler routes: comp-which reported no fit for generic known-file reading and admitted local reads; comp-to bound t24; comp-schedule partial as above.
+
+---
+## Historical refusal record (resolved by amendment)
+
 # TO-DQ-t24 -- preflight refusal after prerequisite cleared
 
 **Seat:** 0.7.0_AE_CloudOps~ZQ. **State:** t22 prerequisite passed; pending issuer amendment for warning/stop interfaces.
