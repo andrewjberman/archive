@@ -71,6 +71,20 @@ Criterion ids: Y75-1-AC1, Y75-1-AC2, Y75-1-AC3. Instance at `org/tier2_senior/0.
        then step 8, then a BLOCKING row.
     10. Write `Y75-1_release5b_after_reads.json` with the keys of release 3's after-reads file. Read 4's value is
         `"STORED-NEXT-STATE"`; set `admit_final_state`. Close the ledger and commit. Report.
+    **AMENDMENT 1 (issuer `2.0.0_SA_COO~Y2`, 2026-10-09 ~03:3xZ): build, census and plan at the PIN, never at HEAD.**
+    - Why: round 76 (@2ae4d86e00) staged release 6's members into `lambda-source-map.json` and added the pandas layer to
+      `ycharts/generate.tf`. At HEAD the census reads `changed_members=11` and a build yields release 6's `V6EiBNcJ...`, so steps
+      0, 2 and 3 as written would STOP or plan a layer change. Issuer read: HEAD census 11; a detached worktree at `328b73d536`
+      rebuilds `5FRkux2o...` exactly.
+    - Step 0: `git worktree add --detach /c/dev/y75-pin 328b73d536`. Run `release-census.py irpt-ycharts-generate --pin HEAD` and
+      `cochange_closure.py` INSIDE that worktree (expect 6 and `split=0`). The ancestor check against origin is unchanged.
+    - Step 2: run `build-and-upload.sh investor-reporting irpt-ycharts-generate` from the worktree; the SHA must be `5FRkux2o...`. Run the
+      symbol closure (the main tree's `checks/r71/symbol_closure.py`) on that zip.
+    - Step 3: `terraform init` and the targeted plan in the worktree's `infra/aws/terraform/investor-reporting/ycharts`, `-target=module.irpt_ycharts_generate`;
+      expect 0/1/0 with `s3_object_version` + `source_code_hash` only. A `layers` diff means the wrong tree: STOP. `safe-apply` from the same
+      worktree. Branch B's rollback apply runs there too.
+    - After the ledger closes, `git worktree remove /c/dev/y75-pin`. Every deliverable is still written and committed in the shared tree.
+    - Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii) on a modify; criteria unchanged.
   </steps>
 
   <acceptance>
