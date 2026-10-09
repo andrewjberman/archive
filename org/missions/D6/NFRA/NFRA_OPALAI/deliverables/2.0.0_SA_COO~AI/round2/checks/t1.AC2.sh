@@ -20,7 +20,7 @@ for f in $KEEP; do k=$((k+1)); if [ "$(git rev-parse -q --verify "HEAD:$f")" = "
 # AMENDMENT 3 (2.0.0_SA_COO~AI, drive tick 2, row Z-W12-S1): the catalog diff counts ONLY this slot's own commits on it
 # since the round-2 cut. Other seats (NFRA_MCPINDEX) edit the catalog by design; a cut-to-HEAD diff went stale twice.
 # Authorship survives the drain merge, so the count is the same on the worker's branch and after the drain.
-ns=$(git log --no-merges --format=%H --author="0.9.0_WK_NFRA_OPALAI~12 <" "$OA_R2_BASE"..HEAD -- "$C" \n  | while read -r h; do git diff --numstat "$h~1" "$h" -- "$C"; done | awk '{a+=$1; d+=$2} END {print a+0" "d+0}')
+ns=$(git log --no-merges --format=%H --author="0.9.0_WK_NFRA_OPALAI~12 <" "$OA_R2_BASE"..HEAD -- "$C" | while read -r h; do git diff --numstat "$h~1" "$h" -- "$C"; done | awk '{a+=$1; d+=$2} END {print a+0" "d+0}')
 [ -z "$ns" ] && ns="0 0"
 gr=no; git show "HEAD:$C" | grep -q 'guardrails_ref: opal_ai/opal/agent/refs/BLOOMBERG_GUARDRAILS.md' && gr=yes
 PAT='0\.0\.3_BG_BBGTerminal/(refs/(BLOOMBERG_GUARDRAILS|BUCKET_ALLOWLIST|PORTAL_RETRIEVAL|RELAUNCH|REQUEST_CATALOG|TEAMS_DUTY|THREAD_MEMORY)|prompt\.md|tools/portal_lookup)|skills/bbg-teams-assist'
