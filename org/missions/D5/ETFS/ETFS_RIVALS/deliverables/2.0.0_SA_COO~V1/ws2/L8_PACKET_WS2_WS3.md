@@ -31,3 +31,18 @@ RIV-wb-1 has no judgment criterion.
 D1-S2 (BLOCKING, ARMED; disarmed by the switch held unset; ruled @c5fb809173), D1-S3 (crossbox lane), D1-S4 (stale repeat
 labels), D1-W23-S1, D1-W24-S1 (ruled: names from the frame), D1-W25-S1..S4 (S1/S2 repaired by wc-2's AMENDMENT 1),
 D1-W26-S1 (ARMED, disarm owner this seat: publish_page half done 7a25a44c24; ai_accounts half after the 13:00Z read).
+
+## ADDENDUM 1 (~08:5xZ) -- the repeat clause of RIV-wd-1's J1, corrected; three more WS3 orders terminal
+
+- **Correction.** The packet's reading of wd-1's repeat clause (rows D1-S4, then D1-S5) is superseded by row
+  ETFS_RIVALS-D1-S7 (@ba1667dea2): canonical_shape partitions are ALREADY the vendor's claimed as-of (a dry run over
+  18,000+ rebuilt Bloomberg rows: as-of != partition in 0 rows), so CGIC's trade windows were dated right all along. The
+  defect was the calendar comparing a claim with the REQUESTED day, which read a one-day-lagged daily fund as `repeat`.
+- **The fix, RIV-wf-1** (merged 451b193828; CTO ADDENDUM 4 msg 2128): the calendar compares each claim with the previous
+  capture's: newer `new`, equal `repeat`, older `regressed`. Local calendar run on live data (replay 09-28..10-08, local
+  writes): CGIC 10-05 new (10-02), 10-06 new (10-05), 10-07 new (10-06); 10-01 and 10-02 repeat (09-30), both captures
+  carrying the same 09-30 report -- genuine repeats. So wd-1's repeat clause can be graded MET on this artifact once the
+  page is rebuilt with wf-1, or held for the served page.
+- RIV-we-1 (ba92996a72) and RIV-we-2 (598173c0fa) are merged and are no-ops on real data (D1-S7); RIV-we-1's
+  `delivered_on` now takes the requested date (wf-1). ADDENDUM 3's history rebuild is WITHDRAWN.
+- None of we-1, we-2, wf-1 carries a judgment criterion. Merged suite: 977 passed, 6 skipped.
