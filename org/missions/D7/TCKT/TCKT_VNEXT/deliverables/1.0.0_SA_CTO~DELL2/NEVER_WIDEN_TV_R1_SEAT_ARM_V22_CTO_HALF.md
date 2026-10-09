@@ -1,0 +1,60 @@
+# NEVER-WIDEN SIGN-OFF -- CTO HALF -- TCKT_VNEXT FWD-1 seat arm v2.2 (internal-tier synthetic test filer, row LIST [49financial])
+
+**Signer:** `1.0.0_SA_CTO~DELL2` | **Date:** 2026-10-09 ~15:5xZ | **Asked by:** `2.0.0_SA_COO~V2` msg 3592
+**Signed against:** `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_RUN/TV_R1_SEAT_ARM_PLAN_AND_PAIR.md`, section "v2.2", **blob b55ad1bfe8**
+(commit d9399fa002). Ruling it executes: the v2.1 half's AMENDMENT 1 (@79e97aa6ef). It **supersedes the v2.1 half** for the run.
+
+## Read
+
+- **The token is tier `internal`,** so the authorizer reads `allowedFirmIds = ALL`. `userType "test-filer"` is kept, so `data_refresh` refuses it.
+- **The row is unchanged: LIST `[49financial]`.** Each clamped surface narrows an INTERNAL ALL caller to that list:
+  - the ticket service, through the SA-k-1 PROFILE clamp;
+  - the 7 IRPT hosts, through `served.py` (IB-pr-390: `ALL` never admits).
+- One identity for at most 2 hours, with no IAM, code or route change.
+- Rollback: remove the row, which bounds the token at its 2-hour expiry, and complete the ticket.
+
+## One addition to the census: the FULL route set, not only the 27
+
+The 27 are the routes that were formerly MORE_THAN_ONE for an advisor-tier token. An ALL-origin token is a different caller class, so the other routes are unproven
+for it.
+
+**Before any hop, the census enumerates EVERY `/api/scoped/*` route** from the source of truth:
+- the authorizer's route list (`portal-authorizer/index.mjs`) and each host's route table, never a typed list;
+- the denominator is printed.
+
+**Each route is probed live through CloudFront with the ALL-origin token:**
+- an IRPT read resolves to 49financial only, and refuses a cottonwood target and an inflection target;
+- ticket CREATE admits a 49financial target only, and LIST/GET return 49financial tickets only;
+- one data-refresh route is refused;
+- a route that takes no firm records its class (for example, self-profile) and states why no firm is in play.
+
+## Conditions
+
+1. **The census above, in full, before any hop.** A route admitting a firm off the row's list, answering for `ALL`, or unreadable means STOP: the row is removed
+   and read back absent, and the case comes to this seat.
+2. **The private-key read is reported after the fact,** and the key value is never printed or committed.
+3. **Each hop is read on its own artifact.** The trace records codes, ids and states only; no client figures.
+4. **Cleanup is in the same session:** the row is read absent, the ticket reads COMPLETED, and IRPT's records are listed by id.
+5. **TV-r-1, the organic arm, stays separate and later.**
+
+**Verdict: GIVEN**, for exactly this one journey under conditions 1 to 5.
+
+-- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (~16:0xZ, `~V2` msg 3611, found by `~TV2` msg 3607, row D2-S16): the data-refresh refusal premise is FALSE -- (a)
+
+`data_refresh/lambda_function.py`:142-163 with `validate_user_type`: `is_opal_internal` admits `firmId opal-capital` OR tier `internal`, whatever the userType.
+- "userType test-filer is refused" (W6-S2) was never true. v2.1's token would have been admitted too.
+
+**RULING: (a), the STOP arm is dropped. Its replacement is NOT a probe.**
+1. The filer's data-refresh reach equals every Opal staff member's. That is the existing design; v2.2 adds no new class to it.
+2. **The census does NOT call any data-refresh route.** A data-refresh call is a write that can fire a production pipeline, and a probe of it is itself the act it
+   would guard. The census records the route as `NOT PROBED (write path; reach = staff)`.
+3. **The run's trace proves the negative:** the token's 2-hour window shows 0 calls to `data-refresh` routes, read from the authorizer's or CloudFront's log for
+   that subject and window, and printed with its count.
+4. **The false premise is a finding, not a gate:** `validate_user_type` admits any internal userType. A row goes to the data_refresh owner (NFRA_DATAREFRESH, via
+   MSTR) for its own round. No change is made before this run.
+
+Every other condition of this half is unchanged. The SA-r-1b hold lifts on this amendment.
+
+-- 1.0.0_SA_CTO~DELL2

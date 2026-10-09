@@ -1,0 +1,177 @@
+{
+ "schema_version": "1.0",
+ "to_id": "MDPF_SECHIST.TO-READ-R2-L3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "spec_ref": {
+  "doc": "org/missions/D8/MDPF/MDPF_SECHIST/task-orders/MDPF_SECHIST.TO-READ-R2-L3.pull-exit-and-budget-line-sitez.md",
+  "group": "OTHER",
+  "vintage_commit": "cc2a7a5430"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D8/MDPF/MDPF_SECHIST/decompositions/MDPF_SECHIST_DECOMP.md",
+  "vintage_commit": "f8a41e7902",
+  "to_ref": "org/missions/D8/MDPF/MDPF_SECHIST/task-orders/MDPF_SECHIST.TO-READ-R2-L3.pull-exit-and-budget-line-sitez.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/MDPF/MDPF_SECHIST/deliverables/0.7.0_AE_CloudOps~Z/evidence/sh_t1_l3_fire_20261009.txt",
+   "kind": "doc",
+   "commit_or_etag": "b2f35b9159",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The ONE evidence file the order scopes, written inside its 11:45Z-13:30Z window. Three sections as required. `## task`: the Get-ScheduledTaskInfo read -- LastRunTime 10/09/2026 07:00:13 local = 2026-10-09T11:00:13Z, LastTaskResult 0, State Ready (NOT Running, so step 1's still-running STOP does not apply), NextRunTime 10/10 07:00, NumberOfMissedRuns 0 -- plus the task's action named as step 1 requires (cmd.exe /c scheduled_daily_pull.cmd, principal Opal Bloomberg, logontype Interactive). `## fire log`: the WHOLE log of that run, unedited, with its path, 172 lines, 14020 bytes and write time 2026-10-09T11:08:47Z. `## budget ledger`: every line of the day's ledger with its path, 3 lines and 310 bytes, then `spent 2026-10-09 = 1274` computed by the order's own command. READ ONLY: nothing was run, re-registered or edited, the task was not fired by this seat, and no Bloomberg call was made by it.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/MDPF/MDPF_SECHIST/deliverables/0.7.0_AE_CloudOps~Z/L3_REPORT_20261009.md",
+   "kind": "doc",
+   "commit_or_etag": "7dc005b8af",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The order's `<report>` block as a FILE, because its six required items exceed Rule 31's 150-word cap and the admitted form is then a path plus one line. It carries the commit hash with its measured push state, AC1's printed count, LastRunTime and LastTaskResult, the fire log's last three lines verbatim, every `\"mode\": \"backfill\"` ledger line, and the day's spent total. Routed to 2.0.0_SA_COO~H1 via 0.0.0_AB_MSTR~Z's bus relay, which the order itself names as the path when there is no direct route -- that lane reads NOT REGISTERED on this broker, so a message addressed to it would have been a wish rather than a delivery.",
+   "artifact_covered_by": [
+    "AC2",
+    "AC3",
+    "AC4",
+    "AC5"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/MDPF/MDPF_SECHIST/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "5f63775be5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Row MDPF_SECHIST-Z-S1, filed while taking the PRE-WINDOW control read rather than after the fact: the SH-t-4 run-record reland is at HEAD (19e50528d3, on Andrew's yes) but the vehicle that runs is the WORKING TREE of etf_daily_pull.py, which is HEAD minus that 15-line block. L2 is intact -- the working-tree blob 0e399c9523 is byte-identical to the blob the order pins leg L2 to -- so HEAD moved past the vehicle rather than the vehicle drifting off L2. Filed ARMED because an uncommitted delta IS the deployed artifact: a routine checkout, stash, clean or merge would move the deployed bytes with nothing recorded. disarm_owner 2.0.0_SA_COO~H1 read NOT REGISTERED, so the row was written as a PARKED carrier naming the condition that un-parks it; 1.0.0_SA_CTO~Z relayed the owner's disposition at 09:02Z (msg 32597).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: grep -c '^## budget ledger$' <the evidence file> expects 1.",
+   "method": "command",
+   "invocation": "grep -c '^## budget ledger$' org/missions/D8/MDPF/MDPF_SECHIST/deliverables/0.7.0_AE_CloudOps~Z/evidence/sh_t1_l3_fire_20261009.txt",
+   "output_evidence": "1\n\n(The criterion's invocation is a bare `grep -c`, so its stdout is the single digit above; its exit was 0.\nWhat the 1 stands for, so a reader need not open the file to know the count is not vacuous:)\n\n  ## budget ledger\n    path       : C:/Users/Opal Bloomberg/AppData/Local/opal_bbg_budget/bbg_budget_2026-10-09.jsonl\n    line count : 3\n    bytes      : 310\n  {\"at\": \"2026-10-09T11:07:22Z\", \"mode\": \"backfill\", \"rows\": 514, \"batch_id\": \"etf_history_backfill_2026-10-08\"}\n  {\"at\": \"2026-10-09T11:08:08Z\", \"mode\": \"daily\", \"rows\": 752, \"batch_id\": \"batch-20261009T110739Z\"}\n  {\"at\": \"2026-10-09T11:08:47Z\", \"mode\": \"names\", \"rows\": 8, \"batch_id\": \"names-20261009T110846Z\"}\n  spent 2026-10-09 = 1274",
+   "denominator": "One line-anchored heading in the one evidence file. 1 of 1 expected.",
+   "status": "PASS",
+   "status_reason": "The budget-ledger section exists in the evidence file. This criterion is a PRESENCE check and I am not quoting it as more than that -- it proves the section is there, not that what it contains is right. The substance sits beside it and is what the leg actually turns on: the day's ledger carries ONE `\"mode\": \"backfill\"` line, `{\"at\": \"2026-10-09T11:07:22Z\", \"mode\": \"backfill\", \"rows\": 514, \"batch_id\": \"etf_history_backfill_2026-10-08\"}`, with 514 rows and the batch_id prefixed as etf_daily_pull.py:609's `_bb.record(\"backfill\", ...)` writes it. So neither of the two outcomes the order names as findings -- an absent line, or a zero-row line -- applies. RIVALFUNDS_BBG_BUDGET_DIR was checked UNSET at process, user AND machine scope before the default path was trusted, because the order names that variable as the one thing that would move this file.",
+   "expect": "1"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 (judgment): leg L3's proof as the ledger states it -- the manifest, leg exit 0, and a backfill line in the day's bbg_budget ledger.",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT -- the order says in terms: 'AC2 (leg L3's proof as the ledger states it) is the issuer's to grade: do not mark it.'",
+   "output_evidence": "Not produced by this seat, and deliberately not marked. The issuer has since graded it: 2.0.0_SA_COO~H1 (dell1, msg 2621) returned PASS, relayed by 1.0.0_SA_CTO~Z in msg 32832. That grade is recorded here as the issuer's act, not adopted as mine.",
+   "denominator": "3 clauses in the ledger's own statement of leg L3 (the manifest, leg exit 0, a backfill line); 0 graded by this seat.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Graded by the issuer 2.0.0_SA_COO~H1, which has returned PASS. I record the grade and do not mark the criterion, because the order forbids it and because the issuer reads one of the three clauses -- the manifest at s3://opal-data-etfs/bbg/<asof>/run_manifest.json -- itself. WHAT I DID ESTABLISH, all of it in the evidence file: LastTaskResult 0, and every leg exit from the run read out rather than summarised away (models 0, publish 0, ETF leg 0, constituents 0, price 0, rivalfunds 90 landed, enrichment 94 landed), with the PRECONDITION line reading 'PASS -- DAPI UP, an entitled session answered a real refdata request'. THE ETF LEG'S 0 IS THE LOAD-BEARING ONE and it is why I flagged the risk hours before the window opened: on the 2026-10-08 rc=50 path scheduled_daily_pull.cmd jumps to :prune and SKIPS the ETF leg entirely, which would have left this leg's manifest ABSENT. Yesterday's fire took that path; today's did not. The one thing I could NOT establish is the manifest itself, which the order assigns to the issuer and which I did not read.",
+   "expect": "Judgment criterion -- the issuer's verdict; no command expectation."
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 (judgment): a send that writes a firm data bucket, or assumes the 49F principal outside the runner's own job, is told to the laptop FIRST.",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT -- a dell1 IAM-parity condition the issuer grades from the report",
+   "output_evidence": "NOT EXERCISED. This order made no send of any kind, wrote no firm data bucket, and assumed no principal: every act in it was a local read (a scheduled-task query, two local file reads and one env-scope check). There was nothing to tell the laptop about.",
+   "denominator": "0 sends made of 0 that would require it.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Recorded NOT EXERCISED and left to the issuer, per the order's own note that each of AC3-AC5 'reads NOT EXERCISED when held; the issuer grades them from the report'. The distinction matters and is stated rather than blurred: NOT EXERCISED is not the same as PASS. The condition was never put to the test by this order, so nothing here is evidence that it holds -- only that it did not arise. ABSENT is not EXERCISED-AGAINST.",
+   "expect": "Judgment criterion -- the issuer's verdict; no command expectation."
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "AC4 (judgment): every send to mdpf-daily-runner is reported after the fact with its command id and purpose.",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT -- a dell1 IAM-parity condition the issuer grades from the report",
+   "output_evidence": "NOT EXERCISED. No send to mdpf-daily-runner was made by this order, so there is no command id to report. The order's rules forbade running the task, the pull, or any Bloomberg call, and none was run.",
+   "denominator": "0 sends to mdpf-daily-runner, so 0 command ids owed.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Recorded NOT EXERCISED and left to the issuer, as the order directs. Same qualification as AC3: the condition did not arise, which is not the same as having been satisfied under test.",
+   "expect": "Judgment criterion -- the issuer's verdict; no command expectation."
+  },
+  {
+   "criterion_id": "AC5",
+   "criterion_verbatim": "AC5 (judgment): 49 Financial data never goes into another firm's tree.",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT -- a dell1 IAM-parity condition the issuer grades from the report",
+   "output_evidence": "NOT EXERCISED. This order moved no firm's data anywhere. The evidence file it wrote contains a scheduled-task read, a Bloomberg pull log and a budget ledger, all of which are site-Z operational records rather than any firm's data, and it was written only into this project's own deliverables tree.",
+   "denominator": "0 firm-data movements of any kind.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Recorded NOT EXERCISED and left to the issuer, as the order directs. Same qualification as AC3 and AC4. Worth one explicit line because the condition is about cross-firm leakage and the evidence file is long: it carries no firm's positions, holdings or account identifiers -- the ledger lines are row COUNTS and batch ids, and the fire log's S3 paths are under opal-data-etfs and the rivalfunds prefixes, not a firm tree.",
+   "expect": "Judgment criterion -- the issuer's verdict; no command expectation."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Readers were shown able to go both ways. (1) The task read DISCRIMINATES a successful fire from a failed one on the same instrument: LastTaskResult reads 0 today and read 50 for the 2026-10-08 run, and the exit contract in scheduled_daily_pull.cmd documents 50 as 'DAPI-liveness PRECONDITION FAILED, the pull was NOT attempted'. So today's 0 is a measured contrast, not an isolated pass. (2) The ledger read can distinguish a real backfill from an absent one: the order names both an absent line and a zero-row line as findings, and the day's line reads 514 rows with the expected mode and batch_id prefix. (3) The ledger PATH was falsified before being trusted -- RIVALFUNDS_BBG_BUDGET_DIR checked unset at all three scopes -- so the file read is the live one rather than a default that happened to exist. (4) The pre-window control read, taken hours before the window, is what makes the window's result interpretable: it established that yesterday's fire had failed at the DAPI precondition and that the rc=50 path skips the ETF leg, so today's ETF leg 0 answers a question that had already been posed.",
+   "expected": "LastTaskResult distinguishes today's fire from yesterday's; the backfill line is present and non-zero; and the ledger path is the live one.",
+   "observed": "LastTaskResult 0 today against 50 on 2026-10-08. One backfill line, 514 rows, batch_id etf_history_backfill_2026-10-08. RIVALFUNDS_BBG_BUDGET_DIR unset at process, user and machine scope. Every leg exit 0 or a landed code.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Every figure is a direct read of a named artifact at a stated time, with its path, line count and write time recorded beside it, and the whole fire log embedded unedited rather than summarised. The task read and the two file reads are independent instruments answering different clauses. No Bloomberg call and no task run, so the observed state was not perturbed by the observation.",
+   "observed": "The task's LastRunTime (11:00:13Z) and the fire log's own write time (11:08:47Z) are consistent with a run of the observed length, and the ledger's three `at` timestamps (11:07:22Z, 11:08:08Z, 11:08:47Z) fall inside that window -- three artifacts written by different code paths agreeing on when the run happened.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "AC2's manifest clause -- s3://opal-data-etfs/bbg/<asof>/run_manifest.json.",
+   "reason": "The order assigns the manifest read to the issuer ('the issuer reads it itself') and forbids this seat from marking AC2. I did not read it, and I say so rather than implying the leg is fully evidenced from my side."
+  },
+  {
+   "item": "The status flip on this order.",
+   "reason": "The order says in terms: 'Leave the status flip to the issuer.' The issuer has since graded AC2 PASS and, per the relay (msg 32832), directs that the instance and the flip land in one commit -- so the flip in this commit is the ISSUER'S instruction carried out, not this seat's own closure of its own work."
+  },
+  {
+   "item": "Any Bloomberg entitlement test.",
+   "reason": "An agent-turn Bloomberg call is barred by R-21, and the order forbids running the task, the pull or any Bloomberg call. Transport reachability was read locally (bbcomm listening on 127.0.0.1:8194 with an established vendor link) and 0.0.3_BG_BBGTerminal independently reported bloomberg_health ok:true, but this seat did NOT test entitlement and does not claim to have."
+  },
+  {
+   "item": "Anything under integrations/bloomberg/pipeline/, the task registration, the fire log and the ledger.",
+   "reason": "The order's rules forbid editing any of them, and none was edited. That constraint is also why row MDPF_SECHIST-Z-S1 names the SH-t-4 vehicle gap rather than fixing it: restoring the hunk would have moved a producer's bytes hours before its scheduled fire with no sign-off."
+  }
+ ],
+ "surprises": [
+  "MDPF_SECHIST-Z-S1: OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~H1 -- DISPOSITIONED. The SH-t-4 run-record reland is at HEAD (19e50528d3) but not in the working tree that this cell's vehicle actually runs, so the 11:00Z fire emitted no 'history backfill budget ... ledger remainder' line. L2 is intact: the working-tree blob 0e399c9523 is byte-identical to the blob the order pins leg L2 to, so HEAD moved past the vehicle rather than the vehicle drifting off L2. Filed ARMED because the uncommitted delta IS the deployed artifact. Filed as a PARKED carrier with its un-parking condition named, because the disarm_owner lane read NOT REGISTERED. 2.0.0_SA_COO~H1 then recorded that this working tree IS the deployed state through today's fire and that no checkout, stash, clean, reset or merge touches that path on site Z until the run is read; relayed by 1.0.0_SA_CTO~Z, msg 32597. Bounded: L3's own subject is unaffected, because _bb.record survives at line 609 and only the extra log line is missing."
+ ],
+ "session_log": "This seat is a SESSION seat, not an L7 worker subagent. The cell is a READ with a hard window (11:45Z-13:30Z) and the useful decision was made BEFORE it opened: at ~07:2xZ, hours early, I took a pre-window control read of the scheduled task and found LastTaskResult 50 on the 2026-10-08 fire, then read scheduled_daily_pull.cmd to learn what 50 means (DAPI-liveness precondition failed, the pull NOT attempted) and that on that path the script jumps to :prune and SKIPS the ETF leg entirely -- the leg this order turns on. That told me, before the window, that the read could come back with an ABSENT manifest and why, and it is what let the window's actual result (ETF leg 0) be reported as the answer to a posed question rather than as an unremarkable pass. It also surfaced row MDPF_SECHIST-Z-S1, filed at that point rather than after the fact. Inside the window the read was mechanical: the task, the whole fire log unedited, every ledger line, and the spent total by the order's own command, with the ledger's path falsified first (RIVALFUNDS_BBG_BUDGET_DIR unset at all three scopes) rather than assumed. The report went to the issuer as a FILE via MSTR~Z's bus relay, which the order names as the route when there is no direct one -- the issuer's lane reads NOT REGISTERED here, so an addressed message would have been a wish. AC2 and the flip were left to the issuer as the order requires; the issuer has since graded AC2 PASS and directed that the instance and the flip land together, which is what this commit does. Nothing was run, re-registered or edited, and no Bloomberg call was made by this seat.",
+ "compiler_tools": [
+  {
+   "tool": "Get-ScheduledTask / Get-ScheduledTaskInfo (PowerShell)",
+   "invocation": "the task's info and its Actions, read twice -- once ~4h BEFORE the window as a control, once inside it",
+   "result": "PASS",
+   "note": "The earlier read is the one that earned its place: it returned LastTaskResult 50 for the prior day's fire, which is what sent me to the .cmd's exit contract and produced the ETF-leg-skip finding before the window opened rather than after."
+  },
+  {
+   "tool": "named-file reads (scheduled_daily_pull.cmd, the fire log, the budget ledger)",
+   "invocation": "cat / tail / wc on each, with path, line count and write time recorded",
+   "result": "PASS",
+   "note": "Reading the .cmd changed what the window's result MEANT: without its exit contract, 'LastTaskResult 0' is a bare pass, and with it the ETF leg's 0 is the discriminator between a run that landed the manifest and one that skipped the leg."
+  },
+  {
+   "tool": "env-scope check (process / user / machine)",
+   "invocation": "RIVALFUNDS_BBG_BUDGET_DIR read at all three scopes before trusting the default ledger path",
+   "result": "PASS",
+   "note": "The order names that variable as the one thing that would move the file, so the default path was falsified rather than assumed. All three read empty."
+  },
+  {
+   "tool": "surprise-row-gate.py / surprise-corpus",
+   "invocation": "fired at commit on the channel append",
+   "result": "PASS",
+   "note": "The row's id used the admitted Tier-2 Z-S<k> form and its next free k was read at write time."
+  },
+  {
+   "tool": "comp-schedule / comp-iam / comp-adversary",
+   "invocation": "NOT RE-RUN -- the order's own preflight dispositions taken as given",
+   "result": "SKIP",
+   "note": "Deliberate and the preflight says why: comp-schedule DECLARED-NOT-APPLICABLE for a read of a fire that has already run, comp-iam DECLARED-NOT-APPLICABLE for a cell with no AWS call. comp-adversary was declared RUN by the issuer and its four named traps were each honoured in the read: not reading before the run completed (step 1's Running check), the wrong day's ledger (the file is named by date and was read for 2026-10-09), a redirected ledger dir (the env check above), and an absent file read as zero (forbidden by steps 2-3 and not encountered -- both files were present)."
+  }
+ ]
+}

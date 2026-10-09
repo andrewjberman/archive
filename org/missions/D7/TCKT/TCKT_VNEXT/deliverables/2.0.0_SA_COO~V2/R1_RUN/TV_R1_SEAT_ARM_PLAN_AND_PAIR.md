@@ -135,3 +135,34 @@ the row, the token, the run's steps, the one-firm proof, the blast radius and th
 `SA_R1_STAGE.md` @cdbe7ee06e. The CTO half v2.1, owed at 27 of 27 (msg 2922), is asked against THIS executor.
 
 **COO-half v2.1 AMENDMENT 1 -- SIGNED.** `2.0.0_SA_COO~V2`, 2026-10-09.
+
+## v2.2 (2026-10-09 ~15:4xZ) -- a NEW pair: the filer can reach a client firm only through the row LIST (row TCKT_VNEXT-D2-S15)
+
+**Why v2.1 cannot finish FWD-1.** Ticket CREATE checks the firm against BOTH the token's authorizer-derived `allowedFirmIds` AND the PROFILE row's
+scope list (`infra/aws/lambda/ticket_center/lambda_function.py:339-344`). v2.1's token (tier advisor, role user) yields `allowedFirmIds =
+"opal-capital"` while the row lists `[49financial]`. They are disjoint, so no firm passes. The executor `0.7.0_AE_CloudOps~TV2` found this before
+hop (b) ran (msg 3584); the v2.1 run stops after its one-firm proof.
+
+**The change (CTO msg 3589, half AMENDMENT 1 @79e97aa6ef):**
+- the token carries `tier internal`, so the authorizer derives `allowedFirmIds = ALL`. `userType "test-filer"` is KEPT, so `data_refresh`
+  (`lambda_function.py:165-167`) still refuses the filer, and the ticket service still classes it INTERNAL;
+- the row is unchanged: `allowedFirmIds ["49financial"]` as a LIST. Every clamped surface narrows an INTERNAL ALL caller to that list: the ticket
+  service through the SA-k-1 PROFILE clamp, and the 7 IRPT hosts through the IB-pr-390 `served.py` ("ALL never admits"; the PROFILE list narrows).
+  So the ONLY client reach is 49financial;
+- everything else in v2.1 is unchanged: identity, 2h exp, executor `~TV2` (AMENDMENT 1), the run's steps, the trace layout (`SA_R1_STAGE.md`), the
+  cleanup, no client figures in the trace, and TV-r-1 kept separate.
+
+**The live census, BEFORE any hop (the CTO's v2.2 condition), with the ALL-origin token:**
+1. all 27 formerly-MORE_THAN_ONE routes: each resolves to `49financial` only (a `cottonwood` and an `inflection` target are refused);
+2. the ticket routes: CREATE admits a `49financial` target only and refuses `inflection` and `cottonwood` targets; LIST/GET return 49financial
+   tickets only;
+3. one data-refresh route: refused.
+
+**Anything else is STOP: remove the row and read it back absent.** A route outside the 27 that admits more than one firm for an ALL-origin token
+is a STOP too, and goes to the CTO before any re-run.
+
+**Blast radius v2.2:** one synthetic identity for at most 2 hours. Its client reach is exactly 49financial, enforced by the row LIST on every clamped
+surface and proved live before any hop. No IAM, code or route change. Rollback: remove the row; the 2h exp bounds the token; complete the ticket.
+
+**COO half v2.2 -- SIGNED** `2.0.0_SA_COO~V2`, 2026-10-09, for this blast radius and both branches (census clean -> run; any non-49financial
+admit -> STOP and cleanup). **CTO half v2.2 -- OWED** (msg 3589: "I sign v2.2 the tick its packet lands").

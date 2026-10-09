@@ -1,0 +1,100 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-100",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e8f96f579c"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "dc2cf4a330",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-100.defect-w73-s1.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_DASHBD~75",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~75/W73_S1_RESOLUTION.json",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~75/W73_S1_RESOLUTION.json",
+   "kind": "config_data",
+   "commit_or_etag": "f5645bb6e9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record the checker reads: 74 segments, each BD_SIDE with an evidence anchor",
+   "artifact_covered_by": [
+    "DB49-2-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~75/W73_S1_EVIDENCE.json",
+   "kind": "config_data",
+   "commit_or_etag": "f5645bb6e9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the file every BD_SIDE evidence anchor names: both sides' values, the custodian rows and the tier per segment",
+   "artifact_covered_by": [
+    "DB49-2-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~75/resolve_w73_s1.py",
+   "kind": "script",
+   "commit_or_etag": "f5645bb6e9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only (S3 GETs) script that writes the two records above; no deploy by this order",
+   "artifact_covered_by": [
+    "DB49-2-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB49-2-AC1",
+   "criterion_verbatim": "DB49-2-AC1 -- each of the 74 W73-S1 segments is a producer fix with a test, or a Black Diamond-side finding with evidence. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r49/p49_round49.py\" . DB49-2-AC1",
+   "output_evidence": "OK: 74 segments: {'BD_SIDE': 74}\nDB49-2-AC1 PASS",
+   "denominator": "74 of 74 W73-S1 DEFECT segments carry a disposition: 0 PRODUCER_FIX, 74 BD_SIDE, each evidence anchor naming W73_S1_EVIDENCE.json at HEAD f5645bb6e9; exit code 0",
+   "status": "PASS",
+   "expect": "DB49-2-AC1 PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the checker reads the committed resolution record and the evidence file; no run state",
+   "observed": "printed the same last line on a second read",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The checker against a copy of the resolution record whose first segment names an evidence file that does not exist.",
+   "expected": "DB49-2-AC1 FAIL",
+   "observed": "FAIL: BD_SIDE without evidence at HEAD: 'org/nonexistent.json#x'; DB49-2-AC1 FAIL (rc 1)",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a producer change and a producer test",
+   "reason": "No segment is a producer defect: the served series equals the custodian equity on both boundary days in 74 of 74, so account_return_daily.py and its tests are unchanged."
+  },
+  {
+   "item": "closing the return gap",
+   "reason": "The criterion grades the disposition; the restated return stays within 0.35pp of the BD gross return in 14 of 74 only (row IRPT_DASHBD-D2-W75-S2)."
+  },
+  {
+   "item": "vendor call, secret read, S3 write, deploy, bun, download",
+   "reason": "Bounds of the order; none made (S3 GETs only)."
+  }
+ ],
+ "surprises": [
+  "IRPT_DASHBD-D2-W75-S1",
+  "IRPT_DASHBD-D2-W75-S2"
+ ],
+ "compiler_tools": [
+  {
+   "tool": "ruff via .tools/commit-gate.sh",
+   "invocation": "bash .tools/safe-commit.sh ... (py_compile + ds-precommit + ruff)",
+   "result": "passed on the second commit attempt after two lint fixes"
+  }
+ ]
+}

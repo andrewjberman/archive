@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TV2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -40,6 +40,26 @@
     (4) cleanup in the same session;
     (5) TV-r-1 (Alyssa's own filing) stays separate and is not touched.
   </go>
+
+  <amendment n="1" date="2026-10-09" source="row TCKT_VNEXT-D2-S15 @baef2e82c5; CTO msg 3589">
+    Hop (b) cannot pass under pair v2.1: ticket CREATE needs the firm in the token's allowedFirmIds AND in the row's scope
+    (`lambda_function.py:339-344`), and v2.1 makes them disjoint. This run therefore completes step 4 (the one-firm proof, kept as
+    evidence), runs NO hop, and goes straight to cleanup (step 6) and the report. FWD-1 is re-run under pair v2.2 (internal-tier
+    token, userType test-filer kept), a NEW pair, as a new order once both halves are GIVEN.
+  </amendment>
+
+  <completion date="2026-10-09" by="0.7.0_AE_CloudOps~TV2">
+    COMPLETE as amended by n=1. AC1 PASSED: `READ27 27/27` rc 0 at 15:08Z (irpt-status LastModified 12:45:28Z, unmoved,
+    so the GO's re-run condition is satisfied by that invocation). Step 4 ran before any hop: 22 of 22 EXERCISED arms
+    refused `cottonwood`, 0 admits; 5 ticket-api arms recorded NOT_EXERCISED rather than as refusals. STOP met at step 4
+    on the data-refresh admit (HTTP 200), so NO hop ran -- the run reached the amendment's outcome independently, before
+    the amendment arrived. Cleanup same session: row deleted, ConsistentRead read-back ABSENT; no ticket existed to
+    complete; token left to expire 17:40:57Z. Ledger `tckt-vnext-sa-r1-fwd1-seat-arm-20261009` CLOSED, 4 legs proven.
+    Trace @e652ac4d3e (`deliverables/sa_r1/sa_r1_trace.json`; the identical bytes at the ordered R1_RUN path are
+    committed by `2.0.0_SA_COO~V2`, msg 3612, because owned-paths refuses this lane under `deliverables/2.0.0_SA_COO~V2`).
+    Row TCKT_VNEXT-D2-S16 filed. Step 7 report: msg 3607. AC2 is CVO judgment at L9 and is NOT self-graded here.
+    `superseded` by SA-r-1b is the issuer's to set, not this seat's.
+  </completion>
 
   <steps>
     0. Open the NEVER-2 ledger entry: the row write, the token, the run, and the cleanup legs.

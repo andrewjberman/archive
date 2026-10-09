@@ -1,0 +1,56 @@
+{
+  "slug": "tckt-vnext-sa-r1b-fwd1-seat-arm-v22-20261009",
+  "title": "TCKT_VNEXT SA-r-1b: ONE live FWD-1 journey under pair v2.2 (internal-tier token), widened live census, no data-refresh probe",
+  "author": "0.7.0_AE_CloudOps~TV2",
+  "status": "OPEN",
+  "opened_at": "2026-10-09T16:17:42.132092+00:00",
+  "window_hours": 3.0,
+  "entry_path": "org/critical_paths/change_management/20261009T1617Z_tckt-vnext-sa-r1b-fwd1-seat-arm-v22-20261009_deploy_completion.md",
+  "legs": [
+    {
+      "id": "ROW",
+      "kind": "verify",
+      "target": "opal-users-v2",
+      "proof_required": "conditional put attribute_not_exists(PK) of USER#tckt-fwd1-testfiler-20261009@opal.invalid + ConsistentRead read back present, allowedFirmIds LIST [49financial]",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "TOK",
+      "kind": "verify",
+      "target": "opal/auth/jwt-private-key",
+      "proof_required": "ONE RS256 token, CURRENT slot, v2.2 claims (tier internal, userType test-filer kept), exp=iat+2h, memory only; key read reported after via MSTR~DELL2",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "RUN",
+      "kind": "verify",
+      "target": "live /api/scoped census + hops",
+      "proof_required": "census over EVERY live /api/scoped route with the denominator PRINTED (live table, not the source census; a differing count printed as a finding), data-refresh host SKIPPED per AMENDMENT 2, CREATE arms carrying the synthetic attachment per AMENDMENT 1 (an off-list 4xx passes only when the body NAMES the firm); any off-list admit or behaves-as-ALL is STOP; then hops a-g into R1_RUN/sa_r1b_trace.json, status+artifact id only",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "CLN",
+      "kind": "verify",
+      "target": "cleanup same session",
+      "proof_required": "row REMOVEd and read back absent; EVERY ticket this run created completed (the journey's and AMENDMENT 1's 49financial census arm); token left to expire",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "DRZ",
+      "kind": "verify",
+      "target": "/aws/lambda/opal-data-refresh-api",
+      "proof_required": "AMENDMENT 2's negative proof: filter_log_events for the filer email over [token iat, cleanup end], log group + window + query + match count PRINTED in the trace, expect 0; a failed retrieval is recorded UNREAD and never read as a zero",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261009T161742Z OPENED by 0.7.0_AE_CloudOps~TV2 with 5 leg(s)"
+  ],
+  "last_red_at": null,
+  "device": "dell2"
+}
