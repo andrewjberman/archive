@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-29.dell-plan-read-ses-and-svc-custody-statement-apply-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~CTL/task_orders/NFRA_CTLPLN.TO-APPLY-29.dell-plan-read-ses-and-svc-custody-statement-apply-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "22328677a9373e6ba1fdd49c84607d4190a38c8e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
+    "vintage_commit": "7dd661eb9f5f42815d2541ac729747c3d8a25cbc",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~CTL/task_orders/NFRA_CTLPLN.TO-APPLY-29.dell-plan-read-ses-and-svc-custody-statement-apply-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~CTL",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T1214Z_nfra-ctlpln-to29-dell-ses-custody-laptop-20261009_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "967bbc7cb98ad749dd6868c3497e290b5cbebb38",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NEVER-2 entry OPENED 12:14Z pre-apply; L1 and L2 closed with proof; rollback named as re-apply at merge first parent ee9dd2f594",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~CTL/deliverables/NFRA_CTLPLN_TO-APPLY-29_REPORT.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the report carries the plan count, the saved default version ids, the applied time and all 8 simulation arms",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo \"exit=$?\" -> exit=0",
+      "method": "live_read",
+      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo \"exit=$?\"",
+      "expect": "exit=0",
+      "output_evidence": "exit=0; 'No changes. Your infrastructure matches the configuration.' run 2026-10-09T12:22Z, after the apply, untargeted, default variables",
+      "denominator": "1 root, 2 policy addresses in the pre-apply plan (0 to add, 2 to change, 0 to destroy); 18 diff-marked lines, 0 of them removals",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "existence": {
+      "description": "Each policy carries a NEW default version after the apply, and neither gained anything but the one graded element",
+      "expected_landed": "cloudops-dell-agent-plan-reads-policy v2 -> v3 and cloudops-dell-agent-platform-secrets-policy v3 -> v4, UpdateDate 2026-10-09T12:21:00Z",
+      "expected_not_landed": "both policies still at v2 and v3 with their pre-apply UpdateDate",
+      "observed": "v3 and v4, both UpdateDate 2026-10-09T12:21:00Z (live get-policy read after the apply)",
+      "status": "PASS"
+    },
+    "grant_reachability": {
+      "description": "Four arms per Dell user on the live policies, one --resource-arns per call (IAM trap 1), the allow arm run in isolation beside each deny",
+      "expected_landed": "ses:DescribeConfigurationSet allowed; ses:DeleteConfigurationSet refused; GetSecretValue on svc-custody-statement-9CmPmS allowed; GetSecretValue on the ...-other sibling refused",
+      "expected_not_landed": "any refused arm reading allowed, or any allowed arm reading implicitDeny",
+      "observed": "8 of 8 arms as specified for cloudops-dell1-agent-user and cloudops-dell2-agent-user: allowed / implicitDeny / allowed / implicitDeny",
+      "status": "PASS"
+    },
+    "action_name_validity": {
+      "description": "IAM trap 3 control -- a nonexistent action name simulates implicitDeny indistinguishably from a missing grant, so the two SES action names and GetSecretValue were validated independently",
+      "expected_landed": "zero INVALID_ACTION findings",
+      "expected_not_landed": "an INVALID_ACTION finding naming a mistyped action",
+      "observed": "aws accessanalyzer validate-policy over ses:DescribeConfigurationSet, ses:DeleteConfigurationSet and secretsmanager:GetSecretValue returned zero ERROR findings",
+      "status": "PASS"
+    },
+    "no_value_read": {
+      "description": "The order forbids reading the secret value; this seat ran no GetSecretValue call",
+      "expected_landed": "0 GetSecretValue API calls by this seat",
+      "expected_not_landed": "any get-secret-value invocation",
+      "observed": "0 -- every secret-facing call was iam simulate-principal-policy, which evaluates policy and returns no value",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "the laptop step E platform-key pair, COO half @9a8758bddf1bdec5ad881fc9cc5286b15e6205ec; dell2's pair signed COO @a319fc74b85919e7628217f66b14698b7f99c7bc AMENDMENT 2; the plan-read is the AMENDMENT 20 plan-reads class cell",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO -- the laptop step E platform-key CTO half @ee3578d886122bf57c9d836110551da44bf10603; dell2 CTO half carried by dell2 msg 2440"
+  },
+  "risk_class": "WORLD",
+  "rollback": "Re-apply the root at the merge's first parent ee9dd2f594688429c97ac5128277c530eb67ed2d, which restores cloudops-dell-agent-plan-reads-policy without ReadSesConfigurationSetPlanReads and cloudops-dell-agent-platform-secrets-policy without the svc-custody-statement ARN. Both changes are in-place IAM policy versions and are fully reversible.",
+  "scope": "One Terraform root, two aws_iam_policy addresses, one SES describe action on Resource * and one Secrets Manager ARN added. No file edited, no other address touched, no secret value read, no shared branch pushed.",
+  "declared_exclusions": [
+    {
+      "item": "The Dells' USE of the svc-custody-statement value",
+      "reason": "outside this seat's read -- the comp-adversary BLIND arm; the Dells' own ledgers carry it"
+    },
+    {
+      "item": "comp-iam gaps' 38 missing / 3 resource-mismatch rows",
+      "reason": "a standing fabric-wide census in other roles (etfs-reports-reporter, opal-gateway, opal-ipset-reconciler); zero rows name either graded policy, so none is re-filed here"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~CTL/deliverables/NFRA_CTLPLN_TO-APPLY-29_REPORT.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to NFRA_CTLPLN.TO-APPLY-29.dell-plan-read-ses-and-svc-custody-statement-apply-laptop",
+      "result": "session TO_ID set race-free per seat+session"
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam gaps",
+      "result": "AE minimum after the iam.tf change that arrived in @97fb0b2abf. 886 calls verdicted across 105 mapped roles; 38 missing / 302 deny-present / 1 coverage-unknown / 3 resource-mismatch across 34 services. ZERO rows name cloudops-dell-agent-plan-reads-policy or cloudops-dell-agent-platform-secrets-policy. Necessary, not sufficient (it models action, never action+resource)."
+    }
+  ]
+}
