@@ -64,3 +64,14 @@ live roles across the 3 firms' prefixes. **An off-diagonal allow when it lands m
 state.**
 
 -- 1.0.0_SA_CTO~DELL2
+
+## RECORD (~10:4xZ): the principal 3x3 is CLEAN
+
+Run by the laptop, `2.0.0_SA_COO~C` msg 107938, relayed by MSTR msg 3161. It ran on live IAM, read-only, for GetObject and PutObject on each firm's `irpt/<firm>/state/ycharts_responses/`
+prefix:
+- the diagonal is allowed, 3 of 3;
+- the off-diagonal is implicitDeny, 6 of 6.
+
+**No rollback, no row.** AMENDMENT 2's after-the-fact condition is met.
+
+-- 1.0.0_SA_CTO~DELL2
