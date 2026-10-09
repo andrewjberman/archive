@@ -1,0 +1,225 @@
+# opal-assets plan AFTER the A2 repin (worktree at 7af0b6bc3d), plan only, -lock=false, no apply.
+# RESOURCE LIST:
+#   # aws_cloudwatch_event_rule.cot_rebalancer_runner_daily will be updated in-place
+#   # aws_iam_policy.monolith_write_per_source["schwab"] must be replaced
+#   # aws_iam_policy.silver_write_per_source["schwab"] must be replaced
+#   # aws_iam_role_policy.silver_read_bronze["schwab"] will be updated in-place
+#   # aws_iam_role_policy_attachment.silver_write["schwab:schwab"] must be replaced
+#   # aws_s3_bucket_notification.monolith_bronze will be updated in-place
+#   # module.silver_converter["schwab"].aws_lambda_function.this will be updated in-place
+# Plan: 3 to add, 4 to change, 3 to destroy. New vs plans/opal-assets.txt: module.silver_converter["schwab"].aws_lambda_function.this in place, OPAL_BUILD_COMMIT 1f03a3f209 -> 47c3c75f11 (the code hash moves only after the artifact upload).
+# Unrelated: cot_rebalancer_runner_daily (row S5) -- never in the -target list.
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+  # aws_cloudwatch_event_rule.cot_rebalancer_runner_daily will be updated in-place
+  ~ resource "aws_cloudwatch_event_rule" "cot_rebalancer_runner_daily" {
+        id                  = "cot-rebalancer-runner-daily"
+        name                = "cot-rebalancer-runner-daily"
+      ~ schedule_expression = "cron(0 6 * * ? *)" -> "cron(45 12 * * ? *)"
+        tags                = {
+            "Project" = "WSE_COTMDL"
+            "System"  = "OpalAssets"
+        }
+        # (9 unchanged attributes hidden)
+    }
+
+  # aws_iam_policy.monolith_write_per_source["schwab"] must be replaced
+-/+ resource "aws_iam_policy" "monolith_write_per_source" {
+      ~ arn              = "arn:aws:iam::313476888478:policy/opal-assets-write-schwab" -> (known after apply)
+      ~ attachment_count = 0 -> (known after apply)
+      ~ description      = "Write + read-back-verify ONLY the schwab tree of s3://opal-data-assets, scoped to [08242234, 08335338]. Attach to the producer that owns it." -> "Write + read-back-verify ONLY the schwab tree of s3://opal-data-assets, scoped to [08242234, 08335338, 08403355]. Attach to the producer that owns it." # forces replacement
+      ~ id               = "arn:aws:iam::313476888478:policy/opal-assets-write-schwab" -> (known after apply)
+        name             = "opal-assets-write-schwab"
+      + name_prefix      = (known after apply)
+      ~ policy           = jsonencode(
+          ~ {
+              ~ Statement = [
+                  ~ {
+                      ~ Resource = [
+                            # (1 unchanged element hidden)
+                            "arn:aws:s3:::opal-data-assets/schwab/08335338/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/*",
+                        ]
+                        # (3 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ StringLike = {
+                              ~ "s3:prefix" = [
+                                    # (1 unchanged element hidden)
+                                    "schwab/08335338/*",
+                                  + "schwab/08403355/*",
+                                ]
+                            }
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+      ~ policy_id        = "ANPAUR7FNW6PLBTIFD4K2" -> (known after apply)
+        tags             = {
+            "Project" = "OPAL_ASSETS"
+            "Source"  = "schwab"
+            "System"  = "OpalAssets"
+        }
+        # (2 unchanged attributes hidden)
+    }
+
+  # aws_iam_policy.silver_write_per_source["schwab"] must be replaced
+-/+ resource "aws_iam_policy" "silver_write_per_source" {
+      ~ arn              = "arn:aws:iam::313476888478:policy/opal-assets-silver-write-schwab" -> (known after apply)
+      ~ attachment_count = 1 -> (known after apply)
+      ~ description      = "Converter grant: write + read-back-verify ONLY the schwab silver/ + meta/ trees of s3://opal-data-assets, scoped to [08242234, 08335338]. Bronze is NOT writable here (17a one layer up)." -> "Converter grant: write + read-back-verify ONLY the schwab silver/ + meta/ trees of s3://opal-data-assets, scoped to [08242234, 08335338, 08403355]. Bronze is NOT writable here (17a one layer up)." # forces replacement
+      ~ id               = "arn:aws:iam::313476888478:policy/opal-assets-silver-write-schwab" -> (known after apply)
+        name             = "opal-assets-silver-write-schwab"
+      + name_prefix      = (known after apply)
+      ~ policy           = jsonencode(
+          ~ {
+              ~ Statement = [
+                  ~ {
+                      ~ Resource = [
+                            # (3 unchanged elements hidden)
+                            "arn:aws:s3:::opal-data-assets/schwab/08335338/meta/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/silver/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/meta/*",
+                        ]
+                        # (3 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ StringLike = {
+                              ~ "s3:prefix" = [
+                                    # (3 unchanged elements hidden)
+                                    "schwab/08335338/meta/*",
+                                  + "schwab/08403355/silver/*",
+                                  + "schwab/08403355/meta/*",
+                                ]
+                            }
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+      ~ policy_id        = "ANPAUR7FNW6PNIRH5PC3N" -> (known after apply)
+        tags             = {
+            "Project" = "OPAL_ASSETS"
+            "Source"  = "schwab"
+            "System"  = "OpalAssets"
+        }
+        # (2 unchanged attributes hidden)
+    }
+
+  # aws_iam_role_policy.silver_read_bronze["schwab"] will be updated in-place
+  ~ resource "aws_iam_role_policy" "silver_read_bronze" {
+        id          = "opal-assets-silver-schwab-role:opal-assets-silver-schwab-read-bronze"
+        name        = "opal-assets-silver-schwab-read-bronze"
+      ~ policy      = jsonencode(
+          ~ {
+              ~ Statement = [
+                  ~ {
+                      ~ Resource = [
+                            # (1 unchanged element hidden)
+                            "arn:aws:s3:::opal-data-assets/schwab/08335338/bronze/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/bronze/*",
+                        ]
+                        # (3 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ StringLike = {
+                              ~ "s3:prefix" = [
+                                    # (1 unchanged element hidden)
+                                    "schwab/08335338/bronze/*",
+                                  + "schwab/08403355/bronze/*",
+                                ]
+                            }
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (2 unchanged attributes hidden)
+    }
+
+  # aws_iam_role_policy_attachment.silver_write["schwab:schwab"] must be replaced
+-/+ resource "aws_iam_role_policy_attachment" "silver_write" {
+      ~ id         = "opal-assets-silver-schwab-role-20260714093711977500000010" -> (known after apply)
+      ~ policy_arn = "arn:aws:iam::313476888478:policy/opal-assets-silver-write-schwab" -> (known after apply) # forces replacement
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_s3_bucket_notification.monolith_bronze will be updated in-place
+  ~ resource "aws_s3_bucket_notification" "monolith_bronze" {
+        id          = "opal-data-assets"
+        # (2 unchanged attributes hidden)
+
+      ~ lambda_function {
+          ~ filter_prefix       = "schwab/08335338/meta/complete/" -> "schwab/08403355/bronze/"
+          ~ filter_suffix       = ".json" -> ".zip"
+          ~ id                  = "advi-49f-silver-complete-accelerator" -> "silver-schwab-08403355"
+          ~ lambda_function_arn = "arn:aws:lambda:us-east-1:313476888478:function:advi-49f-gold-dispatch" -> "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-silver-schwab"
+            # (1 unchanged attribute hidden)
+        }
+      ~ lambda_function {
+          ~ filter_prefix       = "blackdiamond/49financial/bronze/insurance_relationshipaccountdetailsearch/" -> "schwab/08335338/meta/complete/"
+          + filter_suffix       = ".json"
+          ~ id                  = "silver-bd49finsurance-detailsearch" -> "advi-49f-silver-complete-accelerator"
+          ~ lambda_function_arn = "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-silver-bd49finsurance" -> "arn:aws:lambda:us-east-1:313476888478:function:advi-49f-gold-dispatch"
+            # (1 unchanged attribute hidden)
+        }
+      ~ lambda_function {
+          ~ filter_prefix       = "blackdiamond/49financial/bronze/insurance_insurancerelationshiplist_export/" -> "blackdiamond/49financial/bronze/insurance_relationshipaccountdetailsearch/"
+          ~ id                  = "silver-bd49finsurance-list-export" -> "silver-bd49finsurance-detailsearch"
+            # (3 unchanged attributes hidden)
+        }
+      + lambda_function {
+          + events              = [
+              + "s3:ObjectCreated:*",
+            ]
+          + filter_prefix       = "blackdiamond/49financial/bronze/insurance_insurancerelationshiplist_export/"
+          + id                  = "silver-bd49finsurance-list-export"
+          + lambda_function_arn = "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-silver-bd49finsurance"
+        }
+
+        # (8 unchanged blocks hidden)
+    }
+
+  # module.silver_converter["schwab"].aws_lambda_function.this will be updated in-place
+  ~ resource "aws_lambda_function" "this" {
+        id                             = "opal-assets-silver-schwab"
+        tags                           = {
+            "ManagedBy" = "Terraform"
+            "Module"    = "yang-lambda"
+            "System"    = "OpalAssets"
+        }
+        # (31 unchanged attributes hidden)
+
+      ~ environment {
+          ~ variables = {
+              ~ "OPAL_BUILD_COMMIT" = "1f03a3f209" -> "47c3c75f11"
+                # (3 unchanged elements hidden)
+            }
+        }
+
+        # (3 unchanged blocks hidden)
+    }
+
+Plan: 3 to add, 4 to change, 3 to destroy.
+
+Changes to Outputs:
+  ~ monolith_write_policy_arns                = {
+      ~ schwab       = "arn:aws:iam::313476888478:policy/opal-assets-write-schwab" -> (known after apply)
+        # (7 unchanged attributes hidden)
+    }
