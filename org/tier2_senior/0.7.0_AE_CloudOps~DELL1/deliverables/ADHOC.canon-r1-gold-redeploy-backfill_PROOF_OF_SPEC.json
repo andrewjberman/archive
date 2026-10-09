@@ -1,0 +1,233 @@
+{
+  "genre": "DEPLOY",
+  "schema_version": "1.0",
+  "to_id": "ADHOC.canon-r1-gold-redeploy-backfill",
+  "firm": "MDPF",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/task_orders/ADHOC.canon-r1-gold-redeploy-backfill.md",
+    "group": "OTHER",
+    "vintage_commit": "adc58f5a37"
+  },
+  "assignee": "0.7.0_AE_CloudOps~DELL1",
+  "never_widen_pair": {
+    "coo_half": "NONE OWED -- the order's own context states it: 'Not served output. The new writes are gold parquet at address() (the firm buckets via the gold-writer roles, the composite in opal-data-mdpf). No served key moves and no never-widen pair is owed. The legacy JSON emits are unchanged.' Measured against that claim rather than assuming it: the 537 partitions all landed under mdpf/{scope}/gold/<artifact>/date=.../data.parquet, and the legacy tree at portal/gold/mdpf/ was only READ (746 keys listed, get_object per source key), never written.",
+    "cto_half": "NONE OWED, same line. The governing authorities are the PRD's CONTRACTS section and CTO ruling 015625Z (qa_local writes nothing), both cited in the order.",
+    "read_before_first_live_act": "The order was read verbatim at its pin before the first act, and each of its four amendments was read at its own pin before the act it permits. AMENDMENT 1 (the MDPF_GOLD_COMMIT literal) was applied after the build and before the apply, as its text requires; AMENDMENT 3 moved the package row to MDPF_STRATID, so this order made no package edit; AMENDMENT 4's statement was applied only after r1_iam.py re-read 6 of 6 arms.",
+    "amendment": "FOUR, all the issuer's own under rule 27 L6, each cited at its pin: A1 @adc58f5a37 (the one MDPF_GOLD_COMMIT literal, on this seat's msg 3111), A2 @1dd9a375cb (the opal_unidentified.py package row, on msg 3128), A3 (reversing A2 -- the package row rides MDPF_STRATID instead, on msg 3135/3143), A4 (the composite ListBucket statement, on msg 3158). The gate limb each one was graded against is the issuer's to state; none of the four is a newly-added task order, so to-pipeline-gate LIMB 6 did not fire."
+  },
+  "risk_class": "WORLD",
+  "rollback": "PER LAYER, each reference measured before the act it would undo. CODE: the artifact object is versioned -- restore opal-data-assets portal/gold/mdpf/_code/mdpf-gold-lambda.zip to VersionId TymlNPlXHmGdsymao2Ycj4W4cdS9aiQ_ (content-sha256 d3a6883e229c4a81, the F2 build), or _pWbXJYWUSA2lYzd3uHL5XQF3dblOFcV (2ff586a867ba4c9d, this order's own first build), or d07ETsSAb4PLJtvyW7IW2PXlyMr8__In (ca5f21600fae67a2, ff1a8867a6), then plan and safe-apply; the stamp follows the pin in the same commit. READ ROW MDPF_CANON-D1-S5 FIRST: every one of those three packages fails the daily path for a reason of its own, so a rollback is a choice between known failures, not a return to health -- the live 88e974ca10 build is the only one that reads 16 of 16. IAM: delete-role-policy is not the rollback for AMENDMENT 4's statement; the policy is Terraform-managed, so the rollback is removing the GoldCompositeListScoped block and re-applying, which returns the backfill path to AccessDenied. DATA: the 537 partitions are NEW keys under previously empty prefixes (every firm series read 0 before the act), so the rollback is a delete of exactly those keys -- an S3 delete, which needs a human's confirmation and is not taken here; DEC-2 (history is never rewritten) argues against it in any case, and every partition is reproducible from its legacy JSON because the backfill skips what is already present.",
+  "scope": "MDPF_CANON round 1 cells CN-a-2 and CN-a-3. Redeploy mdpf-gold-lambda from a pin carrying the round's new code, one qa_local read (zero writes) as the daily path's read, and the on-demand run_class=backfill that writes the dated history as parquet partitions at address() -- the firm series through the three per-firm gold-writer roles created by the preceding IAM order, the composite in opal-data-mdpf. Three deploys landed in the end rather than one, because the first exercise of the bytes found two defects in sequence (rows D1-S3 then D1-S5) and a third in the IAM grant (D1-S6); every one was ruled by its issuer and fixed forward in session.",
+  "status": "COMPLETE. C1-C7 all PASS, C3 on the issuer-deferred re-read of the final bytes (msg 3153). The ledger reads CLOSED with all 5 legs proven and the sentinel unlinked. Three BLOCKING/ARMED rows were filed and all three are now cleared in the world: D1-S3 (the missing package module) by MDPF_STRATID's F2, D1-S5 (the L-1 key-set failure) by its F3/F4 at 88e974ca10, D1-S6 (the composite ListBucket) by AMENDMENT 4. The live function reads green 16 of 16 with errors [].",
+  "go_message": "2.0.0_SA_COO~D1, the order file itself, plus four amendments by message (3112 A1, 3131 A2, 3142 A3, 3161 A4) and the path ruling at 3153 that unblocked C4. 2.0.0_SA_COO~S1 msgs 3132/3137/3144/3154/3180 govern the MDPF_STRATID forward fixes this order's reads surfaced; its L4 re-point to 55c3cc4642 was recorded on entry mdpf-stratid-r2-global-fold at the start of this order's deploy, as that issuer asked.",
+  "controls": {
+    "build_equality_discriminates": {
+      "description": "C1 asks whether two files are byte-equal across pins. An equality test that cannot see a difference is not evidence of equality, so the same comparison was run on a file the pin range DOES change, in the same invocation.",
+      "expected_landed": "the two MDPF_STRATID files EQUAL across the pins, and the control file UNEQUAL -- DISCRIMINATES True",
+      "expected_not_landed": "every file reading EQUAL, which is what a broken comparison would also print",
+      "observed": "dim_mdpf_aum_metrics.py 3e61464a68cfcda7 == 3e61464a68cfcda7 and mdpf_category_registry.py 46cd167214d2331c == 46cd167214d2331c, while the control mdpf_gold_consolidator.py reads zip 996de45486feb813 against git@ff1a8867a6 3d78e9550c1b50e8 -- DIFFERS True. DISCRIMINATES True.",
+      "status": "PASS"
+    },
+    "the_key_set_fix_is_in_the_shipped_bytes": {
+      "description": "The third build claims to carry MDPF_STRATID's key-set padding. A merge message is not evidence that the fix ships, so the shipped zip member was searched for the line and the previous pin was used as the negative control.",
+      "expected_landed": "the padding line present in the zip's mdpf_gold_consolidator.py, which is itself byte-equal to git show 88e974ca10 of its path, and ABSENT at the previous pin",
+      "expected_not_landed": "the line present at both pins (the test cannot tell them apart) or absent at both (the fix did not ship)",
+      "observed": "shipped member 2cd88dc41ce6a0bb (178,035 B) equals git@88e974ca10; the padding present True at 88e974ca10 and False at 79e30151a6.",
+      "status": "PASS"
+    },
+    "zero_writes_is_a_measurement_not_a_mode_claim": {
+      "description": "C3's zero-write arm could be taken from the fact that qa_local is a dry run. It was instead measured as a pre/post set difference over the 16 gold prefixes, on all three qa_local runs of the session, with the denominator printed and an UNREADABLE row kept distinct from a zero.",
+      "expected_landed": "0 keys added on each dry run, 16 of 16 prefixes read, 0 UNREADABLE",
+      "expected_not_landed": "any key added, or a prefix that could not be listed being silently counted as empty",
+      "observed": "run 1 (20:14:51Z) 0 added, pre 4 post 4; run 2 (20:37:11Z) 0 added; run 3 (21:11:54Z, the green one) 0 added, pre 537 post 537. 16 of 16 prefixes on every census, 0 UNREADABLE.",
+      "status": "PASS"
+    },
+    "conflict_zero_and_error_zero_are_proven_from_the_code": {
+      "description": "C4 asks for conflict 0 and error 0, and the response's tally carries neither key. An absent key is not a zero unless the producer's rule says so, so the rule was read.",
+      "expected_landed": "mdpf_gold_backfill.run tallies EVERY plan row by verdict, with an except arm that tallies 'error' rather than raising, so sum(tally.values()) == planned proves no row went unaccounted",
+      "expected_not_landed": "a tally built only from successes, where an absent key would mean nothing",
+      "observed": "run (:73-83) increments tally[verdict] for every row and catches exceptions into verdict 'error'; planned 537 and tally {'written': 537} sum to 537 == 537. So conflict 0 and error 0 are measurements, not silences.",
+      "status": "PASS"
+    },
+    "c5_c6_compare_date_sets_not_counts": {
+      "description": "Two equal counts over different dates would read identical to a correct backfill, so each series' parquet date set was compared with its legacy date set for extras and omissions.",
+      "expected_landed": "every series with legacy content MATCHING on the date set, 0 extra and 0 missing",
+      "expected_not_landed": "equal counts with differing dates, which a count-only check would pass",
+      "observed": "First read, before the fixtures were deleted: 13 of 13 series with legacy content MATCH exactly, two correct 0/0 absences, and one row that was not a match and not this act's -- global account_units 0 legacy / 1 parquet, the fixture this seat's 20:12Z baseline census had already recorded. Final read, after the deletion and the second backfill: 16 of 16 series read, 0 UNREADABLE, 0 MISMATCHES, three correct 0/0 absences.",
+      "status": "PASS"
+    }
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-assets/portal/gold/mdpf/_code/mdpf-gold-lambda.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "nKhbjRSSpCuz5jTk34Lf2jxpXiPluo92",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The live package, built at pin 88e974ca10: 1,768,036 B, zip sha256 884bd67cd62d80cad7ce10ce8c1bb0a1127db20b1b65508a533e88bbdc84366d, metadata content-sha256 equal to that hex, read back by get-object with cmp IDENTICAL against the local build. 44 modules, 45 members, carrying opal_unidentified.py at 6b9c1d7fff26dc9f and the padded consolidator at 2cd88dc41ce6a0bb. THREE OBJECTS WERE PUT TO THIS KEY IN SESSION, in order: _pWbXJYWUSA2lYzd3uHL5XQF3dblOFcV (55c3cc4642, cottonwood dies), TymlNPlXHmGdsymao2Ycj4W4cdS9aiQ_ (79e30151a6, cottonwood builds and the L-1 assertion kills the run), nKhbjRSSpCuz5jTk34Lf2jxpXiPluo92 (88e974ca10, green). The bucket is versioned, so all three remain addressable as rollback references."
+    },
+    {
+      "path_or_key": "arn:aws:lambda:us-east-1:313476888478:function:mdpf-gold-lambda",
+      "kind": "aws_resource",
+      "commit_or_etag": "88e974ca10237b6555bcda633ca83a54e4a5dcc9",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "get-function-configuration after the final apply: CodeSha256 iEvWfNYtgMrXzhDOjBuwoRJ9sgsbZVCKUz6Iu9yENm0=, which is exactly the base64 of the built zip's digest COMPUTED BEFORE THE UPLOAD -- a prediction confirmed, not a hash copied from the result. CodeSize 1,768,036 equal to the built zip; LastModified 2026-10-09T21:10:34Z; State Active; LastUpdateStatus Successful; Runtime python3.11; MemorySize 3008; Timeout 900. Environment carries 8 variables including GOLD_WRITER_ROLE_ARN_49FINANCIAL/_INFLECTION/_COTTONWOOD (each its own mdpf-*-gold-writer-role arn) and MDPF_GOLD_COMMIT 88e974ca10237b6555bcda633ca83a54e4a5dcc9. A targeted re-plan with -detailed-exitcode reads 'No changes' rc=0. Each of the three applies in session was graded per attribute from show -json with 14 forbidden attributes read before == after."
+    },
+    {
+      "path_or_key": "arn:aws:iam::313476888478:role/mdpf-gold-lambda-role inline policy mdpf-gold-writer-assume-policy",
+      "kind": "aws_resource",
+      "commit_or_etag": "601f623b8c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AMENDMENT 4's statement is live. get-role-policy reads 3 statements: GoldWriterAssumeScopedRoles (sts:AssumeRole on the three writer ARNs), GoldCompositePutGet (Put/Get on the four composite gold prefixes) and the new GoldCompositeListScoped (s3:ListBucket on arn:aws:s3:::opal-data-mdpf, StringLike s3:prefix over 8 values -- the four mdpf/global/gold/<artifact>/ prefixes and their *). The targeted plan read 0 to add, 1 to change, 0 to destroy with name and role unchanged, the two pre-existing statements byte-equal before and after, and no aws_iam_role and no aws_lambda_function anywhere in it."
+    },
+    {
+      "path_or_key": "540 dated parquet partitions at mdpf/{scope}/gold/<artifact>/date=YYYY-MM-DD/data.parquet across opal-data-49financial, opal-data-inflection, opal-data-cottonwood and opal-data-mdpf",
+      "kind": "s3_object",
+      "commit_or_etag": "backfill run 726a5cda-38ae-401e-a1bd-75de3c184fe8",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Written by the one run_class=backfill invocation at 20:56:16Z: planned 537, tally {'written': 537}, sum == planned so 0 conflict and 0 error. Read back as DATE SETS against the legacy tree rather than as counts: 13 of 13 series with legacy content match exactly (49financial 44/51/42, inflection 58/50/41, cottonwood 34/32/42/34, global 37/42/33), 0 extra and 0 missing on every one, 16 of 16 prefixes read with 0 UNREADABLE. Every key counted matches date=YYYY-MM-DD/data.parquet and no non-partition key appeared under any series prefix. The three global series each skipped 1 already-present date on that run, the 19:10Z fixtures on row MDPF_CANON-D1-S4; after those fixtures were deleted on Andrew's word a second backfill wrote the three real global 2026-10-08 partitions (13,867 / 85,531 / 5,841 B against the fixtures' 1,131 / 763 / 1,037 B), bringing the total to 540 and the final read to 16 of 16 series with 0 mismatches."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C1",
+      "criterion_verbatim": "the manifest lists mdpf_gold_parquet.py and mdpf_gold_backfill.py; both MDPF_STRATID files are byte-equal to ff1a8867a6",
+      "method": "command",
+      "invocation": "the build at --pin 55c3cc4642: its BUILD_MANIFEST.json, and sha256 of dim_mdpf_aum_metrics.py and mdpf_category_registry.py in the zip against `git show ff1a8867a6:data/mdpf/scripts/gold/<file>`",
+      "output_evidence": "Build at --pin 55c3cc4642: 1,763,365 B, zip sha256 2ff586a867ba4c9d..., pin resolved to 55c3cc4642099907b1603423f7388199c09f008e, modules=43 (41 at ff1a8867a6 -- the two new files), import-closure OK over 30 packaged .py files. The IN-ZIP BUILD_MANIFEST.json (the one that ships, not the sidecar) lists mdpf_gold_parquet.py and mdpf_gold_backfill.py, and both are zip members: 2 of 2 on each test. Byte-equality read as the zip member against git show ff1a8867a6:<repo path>: dim_mdpf_aum_metrics.py 3e61464a68cfcda7 on both sides (38,462 B), mdpf_category_registry.py 46cd167214d2331c on both sides (80,284 B). DISCRIMINATION CONTROL in the same invocation: mdpf_gold_consolidator.py, which the range changes, reads DIFFERS True -- so the instrument returns EQUAL for the two and UNEQUAL for a changed file, DISCRIMINATES True. Both files were re-checked at the two later pins and are unchanged there too.",
+      "denominator": "2 of 2 new files listed in the manifest and present in the zip; 2 of 2 STRATID files byte-equal to ff1a8867a6; 1 control file, DIFFERS True",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C2",
+      "criterion_verbatim": "plan 0/1/0; live CodeSha256 equals the build's; Environment carries the three GOLD_WRITER_ROLE_ARN_* (each the arn of its mdpf-*-gold-writer-role) and MDPF_GOLD_COMMIT naming 55c3cc4642",
+      "method": "command",
+      "invocation": "the targeted plan on aws_lambda_function.mdpf_gold, then .tools/aws lambda get-function-configuration --function-name mdpf-gold-lambda",
+      "output_evidence": "MET AS WRITTEN at the apply this criterion describes (20:11:00Z): plan 'Plan: 0 to add, 1 to change, 0 to destroy', graded per attribute from show -json -- 9 resource_changes, 8 no-op, 1 update, exactly 4 of 46 attributes differing (environment, last_modified, s3_object_version, source_code_hash) and 14 of 14 forbidden attributes before == after. Live CodeSha256 L/WGqGe6TJ370T7t5WTgxv3KlyD+GVbUqmoMo1BN8Kc= equalled the base64 of the built zip's digest computed BEFORE the upload. Environment carried the three GOLD_WRITER_ROLE_ARN_* (each its own mdpf-*-gold-writer-role arn, 3 of 3 MATCH) and MDPF_GOLD_COMMIT 55c3cc4642099907b1603423f7388199c09f008e -- which only exists because AMENDMENT 1 permitted that one literal: a commit cannot embed its own hash, so no source at 55c3cc4642 could have named it, and the literal at HEAD held the stale e20899bce7. STATED PLAINLY BECAUSE THE LIVE VALUE HAS SINCE MOVED: two further redeploys followed under MDPF_STRATID's forward fixes, so the live stamp now reads 88e974ca10237b6555bcda633ca83a54e4a5dcc9 and CodeSha256 iEvWfNYtgMrXzhDOjBuwoRJ9sgsbZVCKUz6Iu9yENm0=, each the pin actually built with. C2's arms were met at the apply it names; the current state is the green one.",
+      "denominator": "3 applies in session, each graded per attribute; 4 of 46 attributes differing on each; 14 of 14 forbidden attributes unchanged; 4 of 4 env values MATCH at each read",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3",
+      "criterion_verbatim": "a response with status and a4_objects_built; no error naming mdpf_gold_parquet; and NO new object under any mdpf/*/gold/ prefix of the four artifacts (zero writes)",
+      "method": "command",
+      "invocation": ".tools/aws lambda invoke --function-name mdpf-gold-lambda --payload '{\"qa_local\": true}' (cli-binary-format raw-in-base64-out)",
+      "output_evidence": "GRADED ON THE RE-READ OF THE FINAL BYTES, which is the issuer's own sequencing (msg 3153: 'C3 (qa_local, the daily path) re-runs after row D1-S5 is fixed'). At 21:11:54Z: StatusCode 200 with NO FunctionError field, body {\"status\": \"green\", \"qa_local\": true, \"out_dir\": \"/tmp/qa-a4\", \"errors\": [], \"a4_objects_built\": 16}. The log carries the positive signal rather than only the absence of the old error: 'L-1 key-set identity PASS (aggregate-aua-timeseries): 28 canonical keys x 4 scopes; ruled extras [inflection_non_model_aua]' plus PASS on aum-metrics (8 x 4), account-distribution (9 x 4) and category-views (9 x 4); 'gold parquet: NOT_RUN_DRY_RUN -- built [] of intended [49financial, inflection, cottonwood, global]; 16 partition(s), 0 absent, 0 error(s)'; 'cycle complete: 16/16 A4 objects built; errors=none'. Zero writes measured as a set difference: 0 keys added across 16 of 16 prefixes, 537 before and 537 after. THE TWO EARLIER RUNS ARE PART OF THIS RECORD, not hidden by the green one: at 20:14:51Z the 55c3cc4642 build returned status non-green with errors [cottonwood, global] and 8 of 16, because the package omitted opal_unidentified.py (row D1-S3); at 20:37:11Z the F2 build returned Runtime.ExitError because cottonwood then built and the L-1 assertion refused its new field (row D1-S5). Both wrote nothing, each measured the same way.",
+      "denominator": "3 qa_local runs, each with a pre/post census of 16 of 16 prefixes, 0 UNREADABLE and 0 keys added; the final run 16 of 16 A4 objects, errors []",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C4",
+      "criterion_verbatim": "status \"backfill\", planned > 0, tally with written > 0, conflict 0, error 0; the log shows one \"BACKFILL {scope}/{artifact}: n of m source dates (k already present)\" line per series",
+      "method": "command",
+      "invocation": ".tools/aws lambda invoke --function-name mdpf-gold-lambda --payload '{\"run_class\": \"backfill\"}'",
+      "output_evidence": "At 20:56:16Z: StatusCode 200, no FunctionError, {\"status\": \"backfill\", \"planned\": 537, \"tally\": {\"written\": 537}}. CONFLICT 0 AND ERROR 0 PROVEN FROM THE PRODUCER'S RULE, not from a missing key: mdpf_gold_backfill.run (:73-83) increments tally[verdict] for EVERY plan row and catches exceptions into verdict 'error' rather than raising, so sum(tally.values()) == planned is the discriminating test -- 537 == 537. 13 per-series lines plus the tally line, each printing n of m: 49financial account_distribution 44 of 44, aggregate_aua_timeseries 51 of 51, aum_metrics 42 of 42; inflection 58 of 58, 50 of 50, 41 of 41; cottonwood account_distribution 34 of 34, account_units 32 of 32, aggregate_aua_timeseries 42 of 42, aum_metrics 34 of 34; global account_distribution 36 of 37, aggregate_aua_timeseries 41 of 42, aum_metrics 32 of 33 -- summing to exactly 537. The three global '(1 already present)' entries are the issuer's predicted fixtures (row D1-S4); the fourth fixture, global/account_units, was never planned because that series has no legacy source date, a distinction the n-of-m line makes visible. ONE PREREQUISITE NOT IN THE ORDER: the 20:46:03Z attempt was refused with AccessDenied on s3:ListBucket for arn:aws:s3:::opal-data-mdpf (run_backfill lists each scope's series directory before planning, consolidator:2970), which the live policy confirmed; filed as row D1-S6, granted as AMENDMENT 4, landed and applied, and the same failure incidentally exercised CN-a-1's per-firm grants end to end -- global is LAST in SCOPES, so all three firm legs had assumed their roles and listed successfully first. Duration 76,080.72 ms of 900 s; Max Memory 253 MB of 3008. C4 WAS THEN RUN A SECOND TIME ON THE ISSUER'S WORD (msg 3205), after the four synthetic global 2026-10-08 partitions were deleted on Andrew's word (record @991c4cae64, laptop CTO; this seat made no delete): at 21:25:18Z, status backfill with planned 3 and tally written 3, the per-series lines reading global account_distribution 1 of 37, aggregate_aua_timeseries 1 of 42 and aum_metrics 1 of 33 while ALL TEN other series read 0 of N with N already present -- the idempotence arm read as data rather than asserted. The three new keys carry the composite's real figures, measured by version and size rather than inferred from the run: the 21:25:24Z latest versions are 13,867 B, 85,531 B and 5,841 B, standing over delete markers from 21:06:4xZ and, behind those, the 2-row synthetic versions of 1,131 B, 763 B and 1,037 B from 19:10:38-39Z.",
+      "denominator": "run 1: 537 planned, 537 written, 0 conflict, 0 error, sum == planned. run 2: 3 planned, 3 written, same identity. 13 of 13 series lines printed on each, 10 of 13 reading 0 of N on the second. 540 partitions in all",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C5",
+      "criterion_verbatim": "one date=YYYY-MM-DD/data.parquet per legacy dated object (the counts match, denominators printed)",
+      "method": "command",
+      "invocation": ".tools/aws s3api list-objects-v2 --bucket opal-data-49financial --prefix mdpf/49financial/gold/aum_metrics/ (count printed), and the same prefix count of opal-data-assets portal/gold/mdpf/49financial/aum-metrics/",
+      "output_evidence": "The named arm: opal-data-49financial mdpf/49financial/gold/aum_metrics/ holds 42 date=YYYY-MM-DD/data.parquet partitions and portal/gold/mdpf/49financial/aum-metrics/ holds 42 legacy dated objects -- and the DATE SETS are equal, 0 extra and 0 missing, which is stronger than the matching counts the criterion asks for. The legacy denominator was listed once with pagination followed: 746 keys under portal/gold/mdpf/, of which 540 are backfillable dated objects across 13 series. EVERY FIRM SERIES READ, not just the named one: 49financial 44=44, 51=51, 42=42; inflection 58=58, 50=50, 41=41; cottonwood 34=34, 32=32, 42=42, 34=34. Two firm series read 0 legacy and 0 parquet (49financial and inflection account_units) -- a correct absence, printed rather than omitted. 16 of 16 prefixes read, 0 UNREADABLE; a failed listing is reported as UNREADABLE and never folded into a zero. FINAL STATE after the second backfill: 16 of 16 series read with 0 MISMATCHES of any kind.",
+      "denominator": "16 of 16 series read, 0 UNREADABLE; 13 of 13 series with legacy content matching on the date set; 540 backfillable legacy objects of 746 keys listed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C6",
+      "criterion_verbatim": "the composite's partitions for the artifacts its legacy tree holds, each a date=YYYY-MM-DD/data.parquet",
+      "method": "command",
+      "invocation": ".tools/aws s3api list-objects-v2 --bucket opal-data-mdpf --prefix mdpf/global/gold/ --max-items 1000 (count printed per artifact)",
+      "output_evidence": "The composite's three artifacts with legacy content all match on the date set: account_distribution 37 legacy = 37 parquet, aggregate_aua_timeseries 42 = 42, aum_metrics 33 = 33, each key of the form date=YYYY-MM-DD/data.parquet and no non-partition key under any series prefix. THE ONE EXCEPTION WAS THE ISSUER'S OWN FINDING AND IS NOW GONE: until 21:06Z global account_units read 0 legacy and 1 parquet -- the date=2026-10-08 fixture written 19:10:38-39Z on row MDPF_CANON-D1-S4, which this seat's PRE-INVOKE baseline census at 20:12Z already recorded before any act of this order, and which the backfill could never have touched because a series with no legacy source date is never planned. All four fixtures were deleted on Andrew's word at 21:06:41-48Z (delete markers read with list-object-versions; record @991c4cae64), after which the second backfill refilled three of them with the composite's real figures while account_units correctly stayed empty. The final read is 0 legacy and 0 parquet there, and 37=37, 42=42, 33=33 on the other three.",
+      "denominator": "4 composite series read; 3 of 3 with legacy content MATCH on the date set including 2026-10-08; account_units 0 of 0; 0 mismatches in the final read of all 16 series",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C7",
+      "criterion_verbatim": "this order's ledger CLOSED, every leg proven",
+      "method": "command",
+      "invocation": "python .tools/deploy_ledger.py check",
+      "output_evidence": "'OK: CLOSED deploy ledger mdpf-canon-r1-gold-redeploy-backfill-dell1-20261009 -- all 5 legs proven; sentinel removed'. VERIFIED THREE WAYS rather than taken from the close's own sentence: the slug appears 0 times in deploy_ledger.py check; the sentinel org/critical_paths/.open_deploys/mdpf-canon-r1-gold-redeploy-backfill-dell1-20261009.json is unlinked (0 hits, listed with ls -a since ls -1 hides dotfiles); and the entry's log tail reads '20261009T210336Z CLOSED -- all 5 legs proven'. The five legs: L1 the code artifact, mdpf-gold-lambda the tf-lambda apply, L3 the qa_local read, L4 the backfill, L5 the written partitions. L1 and the tf-lambda leg carry an explicit SUPERSEDED note naming the later forward-fix build and its ledger, so neither proof can be read as describing the live artifact. TWO FURTHER ENTRIES carry the forward fixes this order's reads surfaced: mdpf-opal-unidentified-forward-fix-dell1-20261009 CLOSED 4 of 4, and mdpf-stratid-r2-keyset-f3f4-dell1-20261009 which stays OPEN BY DESIGN with all 4 legs proven, because deploy-ledger-names.py admits a code-prefix deploy only while the entry's status is exactly OPEN and F3's purpose is to name the consolidator for the next push. A FOURTH entry, mdpf-canon-r1-global-1008-refill-dell1-20261009, carries the second backfill on the issuer's word after the fixture deletion and reads CLOSED 2 of 2.",
+      "denominator": "5 of 5 legs closed with proof; 0 open; slug count in check = 0; 1 sentinel expected gone, 0 found",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "The four 2-row synthetic composite partitions at mdpf/global/gold/*/date=2026-10-08 in opal-data-mdpf",
+      "reason": "The issuer's own row MDPF_CANON-D1-S4: written 19:10:38-39Z before any apply or deploy. Three of the four were skipped as already present by the first backfill's plan; the fourth (account_units) has no legacy source and was never planned. This order neither wrote nor removed them -- this seat's 20:12Z baseline census is the proof they predate it, and the delete markers at 21:06:41-48Z are another seat's act on Andrew's word (record @991c4cae64). What this order DID do afterwards, on the issuer's instruction, was re-run the backfill so the three series with legacy sources carry the composite's real figures."
+    },
+    {
+      "item": "The L-1 key-set contract and the unidentified_strategies field",
+      "reason": "MDPF_STRATID's, not this order's. The field is its ST-w-7 feature and the remedy it chose was padding every scope at consolidator:1887-1890 (pin 88e974ca10), not an R2_RULED_EXTRAS entry -- that issuer ruled the extras list is the one contract-ruled exception (msg 3154). This seat deployed the fix and read it; it did not write the contract."
+    },
+    {
+      "item": "The runner-side push of mdpf_gold_consolidator.py to opal-data-mdpf code/scripts/",
+      "reason": "F3's ask is to NAME the consolidator on an OPEN ledger entry so the next push deploys it, which is done and verified by the gate (LEDGERED). The push itself is not this order's act and not this seat's to make; the entry stays OPEN until it lands."
+    },
+    {
+      "item": "A git tag for the pipeline (cloud-ops rule 6)",
+      "reason": "Not done. Three code deploys landed inside one session under three ledger entries, and no version was named by any order; the stamp MDPF_GOLD_COMMIT carries the vintage on the applied plane, which is what the file's own instruction asks of it."
+    },
+    {
+      "item": "Any claim that the 2026-10-10 13:30Z scheduled fire will read green",
+      "reason": "ABSENT is not EXERCISED-AGAINST. The qa_local read exercises the full build with dry-run semantics and zero writes; the scheduled path's puts and its conditional-immutable G2 equality load were not exercised. That fire is MDPF_STRATID R2's L4 acceptance read, which stays its issuer's by that order's step 5."
+    }
+  ],
+  "surprises": [
+    "MDPF_CANON-D1-S3 @7ce182e0ca (this seat, BLOCKING/ARMED): the gold package omitted data/assets/scripts/silver/opal_unidentified.py, which build_cottonwood_mdpf_slice.py imports at both pins, so the cottonwood scope died with ModuleNotFoundError and global was skipped behind it -- 8 of 16 A4 objects where the two prior scheduled fires read 16 of 16. CLEARED IN THE WORLD by MDPF_STRATID's forward fix F2 @79e30151a6 (the package row) plus F1 (the runner's first mint of the same module), both landed and read back by this seat.",
+    "MDPF_CANON-D1-S5 @eb69888d49 (this seat, BLOCKING/ARMED): with the module packaged, cottonwood built and the L-1 key-set assertion raised SystemExit on its new unidentified_strategies field BEFORE the A4 emission loop, so the daily path reached no put at all -- worse than the broken package. CLEARED by MDPF_STRATID's F3/F4 at 88e974ca10, deployed and read green by this seat (16 of 16, errors []).",
+    "MDPF_CANON-D1-S6 @ee1b30ab88 (this seat, BLOCKING/ARMED): the backfill was refused at the composite leg because CN-a-1 granted Put/Get but no s3:ListBucket on opal-data-mdpf, and run_backfill lists before it plans. CLEARED by AMENDMENT 4's GoldCompositeListScoped statement, applied after r1_iam.py re-read 6 of 6 arms.",
+    "MDPF_CANON-D1-S4 @4e66c34616 (the ISSUER's, BLOCKING/ARMED, not this seat's and not cleared): the four 19:10Z synthetic composite partitions. Read, respected and reported against in C5/C6; removal is an S3 delete awaiting a human's word.",
+    "MDPF_CANON-D1-S2 (this seat, INERT): iam:SimulatePrincipalPolicy is denied to this box for any policy source but its own, recorded under the preceding IAM order and still standing (MDPF_HEALGAP-D1-S11).",
+    "MDPF_STRATID-D1-S7 (2.0.0_SA_COO~S1's, ARMED with this lane as disarm owner): the runner-side exposure of the same missing module. F1 disarmed its S3 half by minting the object; the slice push remains that issuer's."
+  ],
+  "forward_notes": [
+    "The 2026-10-10 13:30Z scheduled fire is the first production exercise of these bytes and of the parquet write path against the live buckets. qa_local proved the build and the key sets; it did NOT put a single object, so the write path, the G2 equality load and the conditional-immutable put remain unexercised. That fire is R2's L4 and belongs to 2.0.0_SA_COO~S1.",
+    "Entry mdpf-stratid-r2-keyset-f3f4-dell1-20261009 stays OPEN with all 4 legs proven, because the ledger-names gate admits a code-prefix deploy only while status is exactly OPEN and F3 exists to name the consolidator for the next push. Its 6-hour window elapses at about 03:06Z, well before the 12:52Z dispatch, so a PAST-WINDOW reading on it before that push is expected and tracked rather than drift -- closing it is one command once the push lands.",
+    "build_cottonwood_mdpf_slice.py reads HELD on the same ledger-names run that reads the consolidator LEDGERED. F3's ask named only the consolidator, and this seat did not widen the entry; if the slice also needs deploying, that is one more named path on an OPEN entry. Reported to 2.0.0_SA_COO~S1 as a question, not acted on.",
+    "The builder's import-closure check exempts nested lazy imports by design, which is exactly how the opal_unidentified gap shipped green. The class is live: any guarded `try: import X / except ImportError: sys.path.insert(..., \"../silver\")` in a packaged producer resolves in the repo and fails in the flat package layout. A sweep of guarded imports in the packaged set against the PACKAGE list would close it; nobody owns that sweep today.",
+    "MDPF_GOLD_COMMIT advanced three times in one session, each time following its build. The literal has now gone stale four times historically, as its own comment block records. It is a DECLARATION in a file no build reads; a derived value (the in-zip BUILD_MANIFEST's source_vintage, which the package already carries) would make the class unrepresentable rather than merely documented."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/2026-10-09/partner_roster_closed_and_r2_deployed_reading_the_gate_before_editing.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'opal_unidentified' --limit 20 ; comp-find 'L-1 KEY-SET IDENTITY FAILED' data/mdpf/scripts/gold --limit 10",
+      "result": "PASS -- located the module at data/assets/scripts/silver/opal_unidentified.py and its two import sites in build_cottonwood_mdpf_slice.py (40 hits across 78,789 files scanned), then the single assertion site at mdpf_gold_consolidator.py:1081 (1 hit across 47 files). Two rail denials on the way, both answered by running the comp-find the rail named; one AWS-plane denial answered with an audited '# rail-checked' because C5 names that exact list-objects-v2 as its invocation and asks for a count, which comp-freshness does not give."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open / close-leg / hold / close / check across three entries",
+      "result": "PASS -- this order's entry CLOSED 5 of 5 and verified three ways; the forward-fix entry CLOSED 4 of 4; the F3/F4 entry OPEN with 4 of 4 proven, deliberately, for the push gate. A probe established that close-leg OVERWRITES a closed leg's proof, which is how L1 and the tf-lambda leg got their SUPERSEDED notes after a later build replaced the artifact they describe."
+    },
+    {
+      "tool": "deploy-ledger-names.py",
+      "invocation": "python .tools/deploy-ledger-names.py data/mdpf/scripts/gold/mdpf_gold_consolidator.py data/assets/scripts/gold/build_cottonwood_mdpf_slice.py",
+      "result": "PASS -- 'LEDGERED ... mdpf-stratid-r2-keyset-f3f4-dell1-20261009' for the consolidator and 'HELD' for the slice in the same run, so the gate is discriminating here rather than admitting everything. Read as the VERDICT on F3, not assumed from having written the path into the entry."
+    },
+    {
+      "tool": "r1_iam.py (the round's own check, the issuer's)",
+      "invocation": "python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round1/checks/r1_iam.py\"",
+      "result": "PASS -- ROUND 1 GOLD WRITERS 6 of 6 arms, re-run BEFORE the AMENDMENT 4 apply as that amendment requires, including the PLANTED arm that refuses platinum, state, wildcard and typed-bucket grants."
+    },
+    {
+      "tool": "safe-apply.sh with naming-plan-gate and naming-apply-gate",
+      "invocation": ".tools/safe-apply.sh -chdir=infra/aws/terraform/mdpf-pipeline apply ... <graded planfile>, three times",
+      "result": "PASS -- every apply ran the GRADED planfile rather than a fresh plan; both naming limbs WARN only, on pre-existing legacy names in this root that none of these acts created."
+    },
+    {
+      "tool": "msys_argv_guard.msys_safe_run",
+      "invocation": "every .tools/aws call inside the census and read-back scripts",
+      "result": "PASS -- .tools/aws is a shell script and a bare subprocess.run of it raises FileNotFoundError [WinError 2] on this box; routing through the guard made that class unrepresentable across roughly 100 listing calls."
+    }
+  ],
+  "regression_reads": {
+    "runtime_sizing_and_identity_unchanged": "Across three applies: Runtime python3.11, MemorySize 3008, Timeout 900, handler, role, architectures, layers, ephemeral_storage, vpc_config, s3_bucket and s3_key all read before == after in every plan (14 forbidden attributes x 3 applies), and the live config confirms 3008/900/python3.11 after the last one.",
+    "the_legacy_json_tree_was_only_read": "The backfill lists portal/gold/mdpf/ and get_objects each source key; 746 keys were listed and none written. The order's 'the legacy JSON emits are unchanged' is therefore measured, not assumed.",
+    "the_roles_other_policies_unmoved": "mdpf-gold-lambda-role's other inline policies (mdpf-gold-scoped, mdpf-gold-taxsma-policy, mdpf-gold-etf-universe-policy) were untouched by AMENDMENT 4's apply: the plan's only mover was aws_iam_role_policy.mdpf_gold_writers, with name and role unchanged and the two pre-existing statements byte-equal before and after.",
+    "zero_diff_replan_after_each_apply": "Targeted re-plan with -detailed-exitcode after each of the three Lambda applies: 'No changes. Your infrastructure matches the configuration.' rc=0.",
+    "no_firm_data_crossed_a_boundary": "Every write landed under mdpf/{scope}/gold/ in that scope's OWN bucket (the firm series through the firm's own assumed role, whose policy is prefix-conditioned on its own firm) or in opal-data-mdpf for the composite. No firm's key was written by another firm's credentials, and the three assumed-role legs each listed and wrote only their own prefix."
+  }
+}
