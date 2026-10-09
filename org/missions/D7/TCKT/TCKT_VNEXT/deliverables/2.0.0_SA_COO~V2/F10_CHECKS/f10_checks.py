@@ -65,7 +65,58 @@ def _regress():
     return True, "passed=%d failed=0" % passed
 
 
+P2_TEST = Path("src/pages/TicketCenter/__tests__/commentary-package.test.tsx")
+P2_NAMES = ["shows the draft commentary labelled DRAFT on an analysis ticket",
+            "lists the four package refs with attached time and attacher",
+            "shows nothing for a ticket without draft or package"]
+BUILD_TEST = Path("infra/aws/terraform/ticket-center/tests/test_build_only.sh")
+
+
+def _bun(portal):
+    import shutil
+    root = Path(portal)
+    test = root / P2_TEST
+    if not test.exists():
+        return False, "absent: %s" % test.as_posix()
+    src = test.read_text(encoding="utf-8")
+    missing = [n for n in P2_NAMES if ("'%s'" % n) not in src and ('"%s"' % n) not in src]
+    if missing:
+        return False, "missing test(s): %s" % ", ".join(missing)
+    bun = shutil.which("bun")
+    if not bun:
+        return False, "bun not on PATH"
+    r = subprocess.run([bun, "test", P2_TEST.as_posix()], cwd=str(root), capture_output=True, text=True, timeout=170)
+    out = re.sub(r"\x1b\[[0-9;]*m", "", r.stdout + r.stderr)
+    passed = int((re.search(r"(\d+) pass", out) or [0, 0])[1])
+    failed = int((re.search(r"(\d+) fail", out) or [0, 0])[1])
+    if r.returncode != 0 or failed or passed < len(P2_NAMES):
+        return False, "rc=%d pass=%d fail=%d of %d" % (r.returncode, passed, failed, len(P2_NAMES))
+    return True, "pass=%d" % passed
+
+
+def _build_only():
+    if not BUILD_TEST.exists():
+        return False, "absent: %s" % BUILD_TEST.as_posix()
+    r = subprocess.run(["bash", BUILD_TEST.as_posix()], capture_output=True, text=True, timeout=170)
+    out = r.stdout + r.stderr
+    if r.returncode != 0 or "BUILD-ONLY-TEST-PASS" not in out:
+        tail = [ln for ln in out.splitlines() if ln.strip()][-1:] or [""]
+        return False, "rc=%d %s" % (r.returncode, tail[0])
+    return True, "BUILD-ONLY-TEST-PASS"
+
+
 def main(argv):
+    if argv and argv[0] == "f10-p2":
+        if "--portal" not in argv:
+            print("F10-P2-FAIL --portal <dir> required")
+            return 1
+        ok, why = _bun(argv[argv.index("--portal") + 1])
+        print("F10-P2-%s %s" % ("OK" if ok else "FAIL", why))
+        return 0 if ok else 1
+    if argv and argv[0] == "f10-buildonly":
+        ok, why = _build_only()
+        print("F10-BUILDONLY-%s %s" % ("OK" if ok else "FAIL", why))
+        return 0 if ok else 1
     subs = list(NAMES) + ["f10-regress"]
     if not argv or argv[0] not in subs:
         print("usage: f10_checks.py {%s}" % "|".join(subs))

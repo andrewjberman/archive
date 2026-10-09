@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -14,6 +14,11 @@
 <owned_cells>CT-a-1</owned_cells>
 <decomp_context>A second use of the svc-irpt secret-reader window (TO-APPLY-15/16's form) for dell2's ledger irpt-ycdgen-f1-st26-20261008. dell2 2.0.0_SA_COO~G2 msg 2025 (relay 107563): V1 closed 01:08Z. CTO consent for this ledger: named in the GO.</decomp_context>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~01:5xZ). ADD put 2026-10-09T01:20:15Z (CTO yes, msg 107569); REMOVE 01:34:00Z on X1. Issuer live read after
+    REMOVE: dell2 GetSecretValue explicitDeny. Ledger closed (@2901ee108c).
+  </closure>
 
   <objective>
     LEG ADD: set the resource policy of `arn:aws:secretsmanager:us-east-1:313476888478:secret:irpt/svc-irpt-analysis/password-rfHf9l` to

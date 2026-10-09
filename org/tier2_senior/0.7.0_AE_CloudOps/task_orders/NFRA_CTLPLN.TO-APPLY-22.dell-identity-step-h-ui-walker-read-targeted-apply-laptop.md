@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -14,6 +14,12 @@
 <owned_cells>CT-a-1</owned_cells>
 <decomp_context>The apply leg of AMENDMENT 22 (merged @9e17e06278): the Dells may read exactly /opal/ui-walker/password (CTO msg 107538).</decomp_context>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~01:5xZ). APPLIED TARGETED 2026-10-09T01:26:36Z at aws_iam_policy.dell_agent_plan_reads (0/1/0, dell2's window
+    untouched). Issuer live read: GetParameter on /opal/ui-walker/password allowed and DeleteParameter implicitDeny, both Dells. The CTO's
+    convergence read (untargeted 0/0/0 after C2) passed (TO-APPLY-20 report).
+  </closure>
 
   <objective>
     Apply STEP H as a TARGETED apply: one statement added to `aws_iam_policy.dell_agent_plan_reads`. `0 to add, 1 to change, 0 to destroy`.
