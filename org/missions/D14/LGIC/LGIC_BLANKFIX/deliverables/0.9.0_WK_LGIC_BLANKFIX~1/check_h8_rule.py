@@ -12,7 +12,7 @@ import opal_naming_rootcheck as rc  # noqa: E402
 
 D = "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/"
 OWNED = D + "0.9.0_WK_LGIC_BLANKFIX~4/HOLES_OWNED_round8.md"
-BEFORE = D + "2.0.0_SA_COO~G/ALL_ROOTS_round8.txt"
+BEFORE = D + "2.0.0_SA_COO~B1/ALL_ROOTS_round9_base.txt"
 MAP = "infra/logic/registry/root_map.json"
 
 
