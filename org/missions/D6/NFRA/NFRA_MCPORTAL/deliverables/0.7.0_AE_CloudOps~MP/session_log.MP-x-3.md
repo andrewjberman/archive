@@ -154,3 +154,73 @@ never pushed; no `origin/wk-mp-x3` exists.
 - **A disk census for a Terraform provider must include `C:/tmp`.** A first scan scoped to Desktop
   and AppData returned zero for `external 2.4.2` and would have produced a false step-6 blocker;
   every worktree on this device lives under `C:/tmp`, where the provider was found.
+
+---
+
+## MP-x-3 RESUMED under AMENDMENT 1 -- applied and verified
+
+**archetype:** DEPLOY
+
+The issuer ruled on row `Z-S21` within minutes (msg 32308, acked READ): **option (a)**. Amendment 1
+@`807220a352` moves the policy name to the Rule 30 builder's output
+`gateway-mcportal-fabric-read-policy`, written as a **literal** like the two sibling MCPORTAL
+policies on this same role, and moves `x3.AC1.sh`'s lookup with it. Row ids move from the illegal
+`A7` coordinate to `Z-S<k>`, which is what this seat had already used. Merged cleanly into
+`wk-mp-x3` (no conflicts).
+
+### What changed in the tree
+
+- `mcportal_fabric_read.tf`: `name` is now the literal, carrying a comment explaining *why* a
+  literal -- the commit limb grades a new name's own bytes and cannot resolve `var.name`, while
+  the apply limb resolves it and refuses an out-of-pattern addition, so an interpolated name is
+  refused only after the ledger is open. The header's rollback and live-verify commands moved to
+  the new name. `fmt` rc=0, 0 non-ascii, AC3 tokens still 6 of 6.
+- `graph-read.tf`: **no edit needed** -- a repo-wide census of the refused string (21 hits / 6
+  files) showed it names the *file*, not the policy name.
+- Ledger entry + sentinel: every forward-looking occurrence moved to the amended name, with an
+  `AMENDMENT 1` section recording the refusal verbatim and why the entry was HELD rather than RED.
+- Row `Z-S21`: **left exactly as written.** A surprise row is append-only and is superseded by a
+  new row citing it, never edited in place; the disposition flip is the CVO's.
+
+### Result -- all three PASS, plus 0-diff
+
+| id | before | after |
+|---|---|---|
+| AC1 | `NoSuchEntity` rc=254 | `actions=s3:GetObject+s3:ListBucket resources=3 problems=0` **PASS** |
+| AC2 | `3 of 6` | `simulation arms matched 6 of 6` **PASS** |
+| AC3 | absent (issuer's base read) | `carve-out tokens present 6 of 6` **PASS** |
+
+Post-apply re-plan: `No changes. Your infrastructure matches the configuration.`
+
+**On AC2's arms, the position reverses across the apply.** Pre-apply the three *negative* arms
+passed on the grant's mere absence and discriminated nothing; the three *positive* arms were the
+only evidence, and all three moved `implicitDeny -> allowed`. Post-apply all six carry evidence:
+the policy now exists, so an over-broad grant would have flipped get-warehouse, put-activity or
+list-warehouse to `allowed`, and none did. That second half is the real negative control on the
+carve-out.
+
+An unplanned but decisive control came free: the naming limb **refused** the old name and
+**passed** the new one with nothing else changed, which shows the gate is live and discriminating
+rather than a rubber stamp.
+
+### Ledger
+
+**CLOSED** -- all 3 legs proven, sentinel removed, and `deploy_ledger.py check` no longer lists it.
+L1 plan (`1 to add, 0 to change, 0 to destroy`), L2 apply (end state on three planes, not the
+producer's self-report -- terraform's own `Apply complete!` line scrolled past the output filter
+and is explicitly **not** quoted), L3 the three AC reads.
+
+### Commits
+
+`e5a036a659` build -> `4f639cc38d` ledger open -> `fc4e478587` row + close-out -> `ab37e7da13`
+proof+log -> merge of `807220a352` -> the amendment commit. Push state MEASURED **LOCAL**; the
+issuer drains `wk-mp-x3`.
+
+### Two tool behaviours worth the issuer's attention
+
+- **`deploy_ledger.py close-leg` overwrites an already-closed leg's proof with no warning.** That
+  is what let the resumed act re-prove L1 and L2 in place, and would equally let a careless call
+  erase a proof.
+- **Row `Z-S21`'s option (c) is not resolved by this amendment.** The commit limb RAISEs (G3) a
+  name the apply limb then refuses, so every new interpolated name in this module will discover
+  its refusal only after its ledger is open. That stays for the gate's owner.
