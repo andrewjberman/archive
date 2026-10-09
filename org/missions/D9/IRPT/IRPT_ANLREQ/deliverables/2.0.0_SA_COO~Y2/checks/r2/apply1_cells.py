@@ -17,8 +17,8 @@ from pathlib import Path
 
 F = "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_anlreq_r1/APPLY-Y1_after_reads.json"
 FN = "irpt-status"
-BUILT = "t6OJTCcmOnWGVl8iglcvfGoYb3PbPJqJYqsSgJBpGdI="  # AMENDMENT 2: pair REVISION 3 at 5240156380 (rev 2 BjUZjt2o, rev 1 WTGCJPiS)
-ROLLBACK = "BjUZjt2oq8GPJSibq4vD/0m8/LfdN0GF3THwCaBMVOM="  # AMENDMENT 2: revision 2 is the rollback of revision 3
+BUILT = "VC/r14kaXm6FqaZOOFm3fT+8qngsyGI5Yr7U+DgYx64="  # AMENDMENT 4: pair REVISION 4 at 287b105600 (rev 3 t6OJTCcm, rev 2 BjUZjt2o)
+ROLLBACK = "t6OJTCcmOnWGVl8iglcvfGoYb3PbPJqJYqsSgJBpGdI="  # AMENDMENT 4: revision 3 is the rollback of revision 4
 ROUTE = "GET /api/scoped/investor-reporting/analysis/requests/{requestId}/original"
 READS = [str(i) for i in range(0, 8)]  # AMENDMENT 2: 6 = REQ-5e4149d2 served (no RetentionRefused), 7 = per-member diff exactly reporting_policies.json
 
