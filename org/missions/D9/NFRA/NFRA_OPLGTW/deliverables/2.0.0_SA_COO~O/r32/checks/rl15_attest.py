@@ -34,14 +34,14 @@ def _served_ok(b: dict, deployed: str) -> bool:
 
 
 def _grants_ok(b: dict, deployed: str) -> bool:
-    # The CTO ruling msg 32087: exactly two principals' grants, the reach field only, set to 13 calendar months; no other
-    # field or principal; the prior reach recorded per key for rollback.
+    # The CTO ruling msg 32087, narrowed by OG-rl-15 A7 D3: Alyssa's grant only (Andrew has no profile), the reach field
+    # only, set to 13 calendar months; no other field or principal; the prior reach recorded for rollback.
     return (b.get("served_release") == deployed
-            and b.get("principals_changed") == 2
+            and b.get("principals_changed") == 1
             and b.get("fields_changed") == ["calendar_months"]
-            and b.get("calendar_months_after") == [13, 13]
+            and b.get("calendar_months_after") == [13]
             and b.get("other_principals_changed") == 0
-            and isinstance(b.get("prior_reach_recorded"), int) and b.get("prior_reach_recorded") == 2
+            and isinstance(b.get("prior_reach_recorded"), int) and b.get("prior_reach_recorded") == 1
             and b.get("thirteen_month_read_available_dates_min", 0) >= 1)
 
 
