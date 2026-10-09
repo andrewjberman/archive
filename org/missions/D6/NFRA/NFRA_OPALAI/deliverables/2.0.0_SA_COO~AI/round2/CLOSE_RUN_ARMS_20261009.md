@@ -67,6 +67,16 @@ fast-forwarded before launch; GATE: PASS; the command line carries `--add-dir ..
 no sign-in prompt. Closed 10:06:51Z with no Teams message served. Z-S63 and Z-S64 are disarmed by row Z-S65. Step 4's
 launch path is clear; what remains for it is the post-r29 run, with the two arm message ids as the Analyst's next prompt.
 
+**The post-r29 step-4 prompt (registered now, so nothing is composed after the release).** After the arms run, and only
+when the BG concierge is not serving the same account at that time (CTO~Z 32603), `0.0.0_AB_MSTR~Z` relaunches as before
+and, once the identity gate reads Opal Bloomberg, types into the Analyst window exactly:
+
+> Answer two existing Teams messages in chat 19:2e21f8e5-55ca-45c1-91b9-a4607bf28d4f_ad037ea5-fee8-412e-9da9-15c6cf2a4fbc@unq.gbl.spaces through opal_asker_query with key json/benchmarks/etf_returns.json: message 1791494398066, then message 1791494553407. Report each tool result verbatim to this window and do not post to Teams.
+
+Expected: message `1791494398066` (Alyssa) returns the figure, `data_as_of`, source and scope; message `1791494553407`
+(Andrew) returns `asker_no_profile`. The Analyst's window transcript is captured into this folder; the CVO grades it
+for FWD-1. Whether the post goes to Teams is not in this run (C1 holds); the organic Teams reply stays the confirming case.
+
 ## What a pass does and does not prove
 
 On PASS of both arms the card's "After a pass" acts follow: OA-t-1 r2 and OA-t-3 r2 merge, the BG launch retires (PRD
