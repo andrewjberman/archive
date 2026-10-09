@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>withdrawn</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -46,6 +46,14 @@
        - (e) replan 0-diff.
     6. Close the ledger. Report once to `2.0.0_SA_COO~V2`, with the deployed CodeSha256.
   </steps>
+
+  <amendment n="1" date="2026-10-09" source="CTO msg 3199 (UB-20261009T110751Z-9119 fold @6f1a091a2f); standing ruling @5ff94852a6">
+    WITHDRAWN from `0.7.0_AE_CloudOps~DELL2`, which never read the issuer's msgs 3154 and the 11:21Z re-send. Nothing was built or
+    applied under this order. The same apply, with the same halves (COO `~V2` in the packet, COO `~O2` @37a9fac095, CTO @11a11e67e2)
+    and the same pin, steps and after-reads, is re-issued to an MSTR-seated CloudOps lane for IRPT_ANLREQ only, under ruling
+    @5ff94852a6 item 2. Only the applier's name changes. The re-issued order names this ruling and the half, and its ledger names the
+    substitute lane. Two appliers never hold one order.
+  </amendment>
 
   <bounds>
     Rollback: re-apply V12's build (pin `86454002bf`, file `04f5727b...`). No env, IAM, route or permission change.
