@@ -1,0 +1,18 @@
+diff --git a/infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf b/infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf
+index 960ff90451..f1fb50bc13 100644
+--- a/infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf
++++ b/infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf
+@@ -86,6 +86,13 @@ resource "aws_iam_role_policy" "cot_rebalancer_runner_write" {
+           "arn:aws:s3:::${local.monolith_bucket}/blackdiamond/cottonwood/meta/*",
+         ]
+       },
++      # R2-1 / HG-t-8 (ADHOC.healgap-r2-1-runner-reads-own-result): healed_at needs a read of the runner's own earlier result object.
++      {
++        Sid      = "ReadOwnRunResult"
++        Effect   = "Allow"
++        Action   = "s3:GetObject"
++        Resource = "arn:aws:s3:::${local.monolith_bucket}/blackdiamond/cottonwood/meta/*-result.json"
++      },
+       {
+         Sid      = "ListCottonwoodForLandingGuard"
+         Effect   = "Allow"

@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-81",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "30c815767d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-81.fee-slices-partial.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~58",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~58/INF_FEE_SLICES_R38.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~58/INF_FEE_SLICES_R38.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "six fee slices re-derived from the copied round-37 record, offline, no S3 or vendor call; no account identifiers.",
+      "artifact_covered_by": [
+        "DB38-4-AC1",
+        "DB38-4-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB38-4-AC1",
+      "criterion_verbatim": "DB38-4-AC1 -- six slices, each with value, readable, denominator, and a status that follows the rule. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r38/p38_round38.py\" . DB38-4-AC1",
+      "output_evidence": "OK: 6 slices; PARTIAL ['supervised', 'unsupervised', 'billed', 'unbilled']\nDB38-4-AC1 PASS",
+      "denominator": "6 of 6 slices carry value/readable/denominator/status; 4 PARTIAL (supervised and unsupervised 494 of 562, billed and unbilled 36 of 562), 2 COMPLETE (the totals, 562 of 562)",
+      "status": "PASS",
+      "expect": "DB38-4-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB38-4-AC2",
+      "criterion_verbatim": "DB38-4-AC2 -- every PARTIAL slice stated with readable of denominator. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r38/p38_round38.py\" . DB38-4-AC2",
+      "output_evidence": "OK: 4 PARTIAL slice(s) stated with their denominators\nDB38-4-AC2 PASS",
+      "denominator": "4 of 4 PARTIAL slices carry a statement naming readable of denominator",
+      "status": "PASS",
+      "expect": "DB38-4-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "checker reads the record only",
+      "observed": "same last lines on rerun",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "In a scratch root, billed.status set to COMPLETE although readable 36 < 562 (real record untouched).",
+      "expected": "DB38-4-AC1 FAIL naming billed",
+      "observed": "FAIL: slices not {value, readable, denominator, status by rule}: ['billed']\nDB38-4-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any S3 write, vendor call, deploy, or edit under data/, infra/, portal/",
+      "reason": "Bounds of the order; none made. The totals are shown COMPLETE at 562 of 562 because they sum every account's fee figure and need no flag."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile p38_round38.py (the checker; no worker .py was written)",
+      "result": "rc 0"
+    }
+  ]
+}
