@@ -1,0 +1,191 @@
+{
+  "genre": "DEPLOY",
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-dd-4",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "65532d8a7b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-dd-4.the-code-redeploy-from-dell1.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-dd-4.the-code-redeploy-from-dell1.md",
+    "group": "OTHER",
+    "vintage_commit": "eb01ba2c6f"
+  },
+  "assignee": "0.7.0_AE_CloudOps~DELL1",
+  "risk_class": "WORLD",
+  "never_widen_pair": {
+    "coo_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND80_DD4_COO_HALF.md@db906ef3d1 (sha256 382ef5f7a5f85c2abe107e08a096b54990589c03313cbb4038649fb65ee2cb4b), ADDENDUM 1 @c79b9318b8 wording @5d24268e09",
+    "cto_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND80_DD4_CTO_HALF.md@f35ac7640a (sha256 93adc61cb13c6c87729354b64a61b7123099d115b502c56537ee594a910313eb), SIGNED with conditions 1-4, ADDENDUM 1 @b7f8b30f32 adding condition 5",
+    "read_before_first_live_act": "Both halves read at their pins, and both sha256 recorded in the change-management entry at open, before any live act -- the COO half requires exactly that and says to STOP if either is absent. Both ADDENDUM 1 halves were likewise read at their pins before resuming from step 3, and AMENDMENT 2 was verified verbatim at eb01ba2c6f before leg L6 was closed.",
+    "order_amendments": "RE-GO @5ec702af81 (admits the three registry data members; adds CTO condition 5). AMENDMENT 1 @3c9385489c (admits ONE terraform init of harvest/ fetching providers; narrows EGRESS NONE to the build). AMENDMENT 2 @eb01ba2c6f (re-scopes step 6 to the landed half; row D1-S6 carries the rest to the drain-end packet)."
+  },
+  "rollback": "NAMED and EXERCISED ONCE IN-SESSION. The live package was downloaded from Code.Location before the build and hash-checked equal to ltXvElwZ4iyRx6bJLDQRWksbDoiTesc8xvu1h+p3QI0= (42015430 bytes), kept at scratchpad/amgt/LIVE_ROLLBACK_opal-amgt-scoped-api_ltXvElwZ.zip. Trigger: any criterion failing. Act: that file through the module, one safe-apply. It was ACTUALLY USED once -- when the apply was blocked by the uninitialized root (row D1-S5), the already-uploaded artifact was rolled back by re-uploading that kept package with its original stamp, returning the key to Size 42015430 / content-sha256 ltXvElwZ.. so no later harvest apply by anyone was left primed. Still available: artifact object version b1DslJVdUV3xG.4dZ6coig25byb2jPGG is intact in the versioned bucket.",
+  "scope": "ONE code leg on us-east-1 opal-amgt-scoped-api, built from a detached worktree at build pin 65532d8a7b exactly, plus step 6's source-map record. No IAM, no memory, no route, no schedule, no store write, no other function.",
+  "status": "COMPLETE. AC1 and AC2 both PASS; every ledger leg L1-L7 closed with proof and the ledger CLOSED. Step 6 re-scoped by AMENDMENT 2 to the half that landed; the two halves that did not are carried by row AMGT_RESAPP-D1-S6 to the round-80 drain-end packet.",
+  "go_message": "2.0.0_SA_COO~R1 msg 1476 (GO), msg 1535 (RE-GO from step 3), msg 1564 (AMENDMENT 1, the init), msg 1606 (AMENDMENT 2, step 6 re-scope). All four acked by 0.7.0_AE_CloudOps~DELL1 on the READ clock.",
+  "controls": {
+    "base_vs_new_code_sha256": {
+      "description": "The discriminating control section 5 names: the function's CodeSha256 before and after the act. It is the read whose value differs between 'the new package is serving' and 'it is not', and the order makes an UNCHANGED hash a STOP in its own right (a 0-diff deploy).",
+      "expected_landed": "OUOsYXaJSklKJ65vpIe2jWfcXm9jvP0bCyia15F8Bxs= -- the sha256 of the file built at pin 65532d8a7b",
+      "expected_not_landed": "ltXvElwZ4iyRx6bJLDQRWksbDoiTesc8xvu1h+p3QI0= -- the pre-act hash, built at pin 63f0605039",
+      "observed": "Pre-act read: ltXvElwZ4iyRx6bJLDQRWksbDoiTesc8xvu1h+p3QI0= at LastModified 2026-10-08T17:35:08Z. Post-apply read: OUOsYXaJSklKJ65vpIe2jWfcXm9jvP0bCyia15F8Bxs= at 2026-10-09T03:37:34Z, State Active, LastUpdateStatus Successful. The two differ, so the read discriminates, and the new value equals the built file.",
+      "status": "PASS"
+    },
+    "untargeted_plan_as_the_blast_radius_oracle": {
+      "description": "The order forbids grading this apply on a targeted plan: the plan is graded UNTARGETED so that any resource the act would move -- not merely the one it intends to move -- is visible before the apply. That makes the plan itself the control on blast radius.",
+      "expected_landed": "exactly ONE resource moving, module.scoped_amgt_api.aws_lambda_function.this, with code hash and artifact object version only",
+      "expected_not_landed": "any second resource in the plan, which the order makes a STOP before the apply",
+      "observed": "Untargeted plan over the whole harvest root: 'Plan: 0 to add, 1 to change, 0 to destroy', sole resource module.scoped_amgt_api.aws_lambda_function.this updated in-place, attributes s3_object_version b1DslJVdUV3xG.4dZ6coig25byb2jPGG -> DwpuvyCnJpldSRQtrmACBNKDrgQqpggu and source_code_hash ltXvElwZ.. -> OUOsYXaJ.. plus last_modified (known after apply). 0 errors. Apply matched it: 'Resources: 0 added, 1 changed, 0 destroyed'. Untargeted re-plan afterwards: 'No changes.'",
+      "status": "PASS"
+    },
+    "crlf_vs_lf_build_input": {
+      "description": "A control carried over from the same session's partner-roster act, applied here pre-emptively: the worktree was cut with core.autocrlf=false so the packaged bytes are the committed bytes. Without it every packaged .py would differ from the deployed package's LF bytes and the step-3 CONTENT-DIFF gate would list hundreds of files, making a clean build indistinguishable from a wholesale change.",
+      "expected_landed": "a CONTENT-DIFF whose non-identical set is only the pair's admitted files -- 6 members",
+      "expected_not_landed": "a CONTENT-DIFF listing most of the 393 members, which is what a CRLF checkout produces",
+      "observed": "git -C /c/tmp/dd4-build ls-files --eol reads i/lf w/lf for both dd-2 files; the CONTENT-DIFF came back files 393, IDENTICAL 387, CHANGED 5, ADDED 1, REMOVED 0 -- 6 non-identical, all admitted, OFF-LIST COUNT 0.",
+      "status": "PASS"
+    },
+    "pip_resolution_is_local_not_remote": {
+      "description": "The build's EGRESS NONE declaration is only as good as a read of the pip log. The control is the log itself rather than the absence of an error, because pip prints a pypi.org line even when it is declining the index.",
+      "expected_landed": "0 network fetches and every wheel resolved from the local folder",
+      "expected_not_landed": "any 'Starting new HTTPS connection' or 'GET /simple' line, i.e. a real index request",
+      "observed": "0 matches for 'Starting new HTTPS connection|Added .* from http|GET /simple'. 5 of 5 wheels logged as 'Local files found: C:\\tmp\\r80-wheels\\...'. The log's two pypi.org lines read 'Ignoring indexes: https://pypi.org/simple' -- pip DECLINING the index. A careless grep for pypi.org counts those two as index requests and reports a clean build as egress.",
+      "status": "PASS"
+    }
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "DwpuvyCnJpldSRQtrmACBNKDrgQqpggu",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Built file 42020671 bytes, sha256 base64 OUOsYXaJSklKJ65vpIe2jWfcXm9jvP0bCyia15F8Bxs=. head-object reads that version with content-sha256 OUOsYXaJ.. read back exact (modules/yang-lambda/main.tf:39 reads that metadata key as source_code_hash). Prior version b1DslJVdUV3xG.4dZ6coig25byb2jPGG intact as the rollback target."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/scoped-amgt-api.tf",
+      "kind": "terraform",
+      "commit_or_etag": "eafdafc265",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Config UNCHANGED by this act; the act moved only the artifact the module reads, so the pin is the shared-tree commit this seat applied from. Resource module.scoped_amgt_api.aws_lambda_function.this. Applied via .tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply (Rule 18, UNTARGETED): 0 added, 1 changed, 0 destroyed. get-function-configuration CodeSha256 OUOsYXaJ.., Memory 1769 / Runtime python3.11 / Timeout 29 unchanged. Untargeted re-plan 'No changes.'"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "eafdafc265",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Step 6's landed half: the opal-amgt-scoped-api entry carries last_deployed_commit 271e8f8b432f811c548f065d88981583eb0f1f91 and last_deployed_at 2026-10-09T03:46:54Z, written by record-terraform-deploy.sh scoped with --function to this one function. artifact_sha256 remains absent -- see declared_exclusions and row AMGT_RESAPP-D1-S6."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T0304Z_amgt-resapp-r80-dd4-scoped-api-dell1_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "23a6ece42d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The ONE NEVER-2 entry the order requires, opened at deploy-START with 7 legs and both halves' sha256 recorded, before the first live act; sentinel committed in the same commit. All 7 legs later closed with proof and the ledger CLOSED (sentinel removed)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every listed round-80 deployed check passes; R80 DEPLOYED: YES n of n with n equal to the count the GO states; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round80/checks/r80_deployed.py\"; echo \"exit=$?\"",
+      "output_evidence": "PASS exit=0 :: python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round80/checks/r80_dd4_served.py --where deployed :: PASS D3 served locations with a letterless heading: 0 of 271 [] | R80 DD4 SERVED: YES  //  R80 DEPLOYED: YES 1 of 1  //  exit=0. n=1 equals the count the GO states (r80_deployed_cells.txt holds 1 line). The base read was 4 of 271; the deployed read is 0 of 271, which is also CTO half condition 3's served-citation arm. Run directly, the same check prints PASS D1 the names were read and answered 200: 12 of 12 and PASS D2 served locations: 271. THE ARTIFACT THIS EXERCISES: every read above is driven against the deployed opal-amgt-scoped-api function, whose code is the artifact s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip at version DwpuvyCnJpldSRQtrmACBNKDrgQqpggu (sha256 OUOsYXaJSklKJ65vpIe2jWfcXm9jvP0bCyia15F8Bxs=, equal to the live CodeSha256), so this battery is the acceptance of that object and not of a local build.",
+      "denominator": "1 of 1 listed round-80 deployed checks passed; 271 served citation locations read, 0 letterless; 12 of 12 names answered 200",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "R78 DEPLOYED: YES and R79 DEPLOYED: YES on the deployed function (no regression); and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round78/checks/r78_deployed.py\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round79/checks/r79_deployed.py\"; echo \"exit=$?\"",
+      "output_evidence": "R78 DEPLOYED: YES 3 of 3 -- r78_bb17 AC1 'no sampled peer row is served a United States record's currency behind a foreign price' rows read 60, wrong 0; r78_bb5 AC1 'the three controls sit in their classes'; r78_bb6 AC1 'the named case carries both labels over a sentence that is not a recommendation'. R79 DEPLOYED: YES 1 of 1 -- r79_cc6 AC1 SERVED: YES. exit=0. No regression on either round. Both regression arms run against the same deployed opal-amgt-scoped-api function, i.e. the artifact s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip at version DwpuvyCnJpldSRQtrmACBNKDrgQqpggu.",
+      "denominator": "4 of 4 regression checks passed (3 from round 78, 1 from round 79); 60 peer rows sampled, 0 wrong",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "artifact_sha256 in the function's source-map entry (step 6's other half)",
+      "reason": "Re-scoped out by AMENDMENT 2 @eb01ba2c6f. record-terraform-deploy.sh's reconcile printed '0 reconciled, 0 HELD, 1 already-in-parity' and wrote nothing, leaving the field None; comp-lambdamap sha reads 'no-record: 41' both before and after, unchanged, so the NO-RECORD class is not cleared. The issuer judges this a defect in reconcile-deployed's parity classification for a NULL recorded sha, reaching all 41 no-record functions. Carried by row AMGT_RESAPP-D1-S6 to the round-80 drain-end packet. Moves no served byte."
+    },
+    {
+      "item": "The recorder's infra/aws/terraform/harvest/CHANGELOG.json entry",
+      "reason": "The naming limb (LGIC_ENFORCE DEC-6, ENFORCE) refuses it at :3 (the 'harvest' hand-kept carrier, read it through lookup('harvest')) and :14 (opal-amgt-scoped-api OUT-OF-PATTERN as API_GW). Both names are EXISTING, so per CLAUDE.md rule 30 and this order's own condition that is a missing registry row to report, never a hand-fix; no name was edited and no override taken. AMENDMENT 2 directs the file be left UNTRACKED, which it is, so the entry survives for whoever adds the row."
+    },
+    {
+      "item": "Step 6's 'quote its line' for comp-lambdamap",
+      "reason": "Not expressible against the instrument: `comp-lambdamap sha --help` prints no options and the subcommand emits only aggregate counts, with no per-function NO-RECORD lines. The aggregate (no-record: 41, unchanged) is quoted instead rather than substituting a different reading silently."
+    },
+    {
+      "item": "dd-1's code (document.py, fetch.py, section_coverage.py)",
+      "reason": "Explicitly NOT covered by either half: a site-Z producer path under its own pair with 1.0.0_SA_CTO~Z's half (msg 1389 ruling). The build pin 65532d8a7b carries dd-2 @a06f7f9c20 and does not carry dd-1."
+    },
+    {
+      "item": "IAM, memory, routes, schedules, store writes, any other function",
+      "reason": "Bounds section 2 forbids them and the untargeted plan proves none moved: exactly one resource, code hash and object version only. Memory stayed 1769 on the post-apply read."
+    },
+    {
+      "item": "The generated .terraform.lock.hcl",
+      "reason": "AMENDMENT 1 requires its sha256 recorded in the ledger and the file NOT committed (site Z inits this root from its own tree). sha256 7831b9e173a15b9211b3c01b2885e0e0b85f5abe23b4e0ae4e3cadc237451f73; it is also structurally uncommittable here, .gitignore:208 matching **/.terraform.lock.hcl."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-S4: dd-4 STOPPED at step 3 -- the built package changed three infra/logic/registry/*.json DATA MEMBERS that neither half named, because the pair's content-diff census ran over the four closure ROOTS while the package's population also carries those declared data members; admitted on the RE-GO by both ADDENDUM 1 halves.",
+    "AMGT_RESAPP-D1-S5: dd-4 could not apply from dell1 -- infra/aws/terraform/harvest/ had never been initialized on this box and carries no tracked lock file, so a plan needed a provider fetch; the already-uploaded artifact was rolled back same-session and the function never touched. Resolved by AMENDMENT 1 plus law edit 4d77a9c3ea.",
+    "AMGT_RESAPP-D1-S6: dd-4 step 6's record is half absent -- reconcile-deployed classed a NULL recorded sha as already-in-parity and wrote no artifact_sha256 (no-record 41 before and after), and the naming limb refuses the recorder's CHANGELOG.json on two existing names. Re-scoped by AMENDMENT 2; carried to the drain-end packet."
+  ],
+  "regression_reads": {
+    "round_78_arm": "R78 DEPLOYED: YES 3 of 3 on the deployed function -- bb17 AC1 (60 peer rows, 0 wrong), bb5 AC1, bb6 AC1.",
+    "round_79_arm": "R79 DEPLOYED: YES 1 of 1 -- cc6 AC1 SERVED: YES.",
+    "sizing_unmoved": "Memory 1769, Runtime python3.11, Timeout 29 all unchanged on the post-apply get-function-configuration -- the act moved code only.",
+    "zero_diff_replan": "Untargeted terraform plan over the whole harvest root after the apply: 'No changes. Your infrastructure matches the configuration.'",
+    "accept_refuse_unchanged": "Served citation count held at 271 across the act (D2), with the letterless subset moving 4 -> 0; no citation was added or dropped.",
+    "issuer_independent_run": "2.0.0_SA_COO~R1's own real run on live OUOsYXa reads R80 YES (0 of 271), R79 YES, R78 YES (@838c35ebc7) -- an independent second reading of the same live function."
+  },
+  "cold_reads": {
+    "function_state_after_apply": "State Active, LastUpdateStatus Successful on get-function-configuration -- the update settled rather than sitting in Pending.",
+    "thesis_route_live": "12 of 12 /thesis GETs against the deployed function answered 200 with real bodies (per-name locations counts, e.g. SAP_GY_Equity 200 locations=32 letterless=0) -- CTO condition 5's post-apply arm."
+  },
+  "forward_notes": [
+    "ISSUER ACT NEEDED for this instance to validate: proof-of-spec-check refuses genre=DEPLOY unless the order carries the marker <proof_genre>DEPLOY</proof_genre> on its own line, and this order does not (grep count 0 at eb01ba2c6f) even though section 5 itself states 'The instance is genre DEPLOY'. This seat did not add the marker: it is the issuer's declaration of genre at the cut, and self-certifying it is the self-grading the limb exists to prevent. Same pattern as ADHOC.partner-roster-t1, where the issuer added it and the instance then read VALID rc=0.",
+    "The artifact_sha256 / reconcile-deployed defect is the one worth a cell of its own: a function with NO recorded sha reads 'already-in-parity', so the 41 no-record functions can never be reconciled by this path. That is a tooling defect, not a dd-4 defect.",
+    "The naming registry needs rows for the 'harvest' carrier and for opal-amgt-scoped-api as an API_GW name, or record-terraform-deploy.sh can never commit its CHANGELOG for this function on an enforcing box.",
+    "infra/aws/terraform/harvest/ is now initialized on dell1 (hashicorp/aws v5.100.0). A later apply of this root from this box no longer needs the init AMENDMENT 1 admitted."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/2026-10-08/grant_cell_and_crlf_phantom.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'infra/logic/registry' infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --limit 12",
+      "result": "PASS, and it is what turned the step-3 STOP from a puzzle into a diagnosis: it put the DATA_MEMBERS declaration at :253 on screen, proving the three registry JSONs are packaged by construction rather than by accident."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'record-terraform-deploy*' --limit 10",
+      "result": "PASS -- the order names the script as if it were in .tools/; it is actually at infra/aws/lambda/ci/record-terraform-deploy.sh. Denominator 3 hits / 76,938 files."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read 'org/missions/.../round80/checks/r80_dd4_served.py' --for 'how does the --where deployed path read the served data?'",
+      "result": "PASS -- showed the check reads via lam.invoke with a synthetic /thesis event rather than HTTP, which is what made condition 5's post-apply arm measurable without hunting an API Gateway endpoint."
+    },
+    {
+      "tool": "comp-lambdamap",
+      "invocation": "comp-lambdamap sha  (before and after the record)",
+      "result": "PARTIAL -- the aggregate is sound and decisive ('no-record: 41' both times, which is the finding), but the subcommand accepts no flags and emits no per-function line, so step 6's 'quote its line' cannot be satisfied for one function. Recorded as an instrument limit, not worked around."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "DECLARED-NOT-APPLICABLE per the order's preflight (no IAM line moves; the plan STOPs on any IAM change)",
+      "result": "SKIPPED -- and the untargeted plan is the positive evidence that none moved: exactly one resource, code hash and object version only."
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "DECLARED-NOT-APPLICABLE per the order's preflight (no new cron, alarm, monitor or cadence)",
+      "result": "SKIPPED -- the daily snapshot schedule is unchanged; the untargeted plan moved no schedule resource."
+    }
+  ]
+}
