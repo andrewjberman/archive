@@ -1,0 +1,64 @@
+{
+  "kind": "lambda",
+  "name": "irpt-commentary-composition-read-lambda",
+  "name_builder": "lib/opal_naming.py name('irpt', None, 'commentary-composition-read', 'lambda')",
+  "operation": "commentary-composition-read",
+  "invocation": "direct invoke (lambda:InvokeFunction), RequestResponse; no API route, no CloudFront behavior, no event source",
+  "handler": "infra/aws/lambda/investor-reporting/reports/commentary_composition.py: lambda_handler",
+  "subject": "svc-commentary (reports/repository.py SERVICE_READERS: family REQUEST_COMPOSITION only, read-only, bound to the request tenant)",
+  "request": {
+    "tenant": "<firm id from the READY item>",
+    "request_ref": "REQ-<24 hex> (or {\"request_id\": \"REQ-<24 hex>\"})",
+    "refused_keys": "any other key (principal, account_ids, firm_id, and the like) is refused by name"
+  },
+  "response": {
+    "ok": {
+      "status": "OK",
+      "tenant": "<tenant>",
+      "request_ref": "REQ-...",
+      "composition": "<the retained REQUEST_COMPOSITION document; the members that name its holder are removed and counted in redacted_count>",
+      "sha256": "<sha256 of the retained artifact, equal to composition_ref.sha256 on the READY item>",
+      "byte_length": "<int>",
+      "redacted_count": "<int>"
+    },
+    "refused": {
+      "status": "REFUSED",
+      "reason": "INVALID_REQUEST | UNAVAILABLE | INTEGRITY"
+    }
+  },
+  "server_side": [
+    "GetItem analysis#<request_id>#1 in the tenant partition (acceptance.DynamoAcceptance.get)",
+    "take record.composition_ref (family, immutable, artifact_id, sha256)",
+    "ArtifactRepository.get(service principal, artifact_id, data_firm=tenant) with its retention check kept"
+  ],
+  "caller_iam": [
+    {
+      "effect": "Allow",
+      "action": [
+        "lambda:InvokeFunction"
+      ],
+      "resource": [
+        "arn:aws:lambda:us-east-1:313476888478:function:irpt-commentary-composition-read-lambda"
+      ],
+      "policy": "irpt-commentary-composition-invoke-policy (aws_iam_policy.commentary_composition_invoke, DESIRED, not applied)",
+      "attach_to_role": "outlook-global-commentary-draft-role"
+    }
+  ],
+  "caller_holds_no": [
+    "dynamodb:GetItem",
+    "kms:Decrypt",
+    "s3:GetObject*"
+  ],
+  "desired_terraform": "infra/aws/terraform/investor-reporting/export/commentary_composition.tf (nothing applied)",
+  "function_role_reads": [
+    "dynamodb:GetItem on irpt-requests, leading keys = the served firms",
+    "s3:GetObject and GetObjectVersion on the REQUEST_COMPOSITION prefix of the served firms",
+    "kms:Decrypt via dynamodb and via s3 only"
+  ],
+  "release_dependencies": [
+    "register the zip in infra/aws/lambda/ci/lambda-source-map.json",
+    "attach the invoke policy from the transcripts root",
+    "~V2 amends svc-commentary's sign-off pair before the read deploys"
+  ],
+  "status": "DESIRED"
+}
