@@ -38,3 +38,18 @@
 **Verdict: GIVEN**, for exactly this update under conditions 1 to 4.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (~11:2xZ, `~P2` msg 3195): condition 3's ordering relaxed -- 401 may apply before 391/397
+
+Condition 3 ordered this release after IB-pr-395, 391 and 394. 395 and 394 are complete. 391 (applied as IB-pr-397) still owes its re-plan at the new pin (391 half
+AMENDMENT 1).
+
+**RULING: YES, for 401 only.**
+- The surfaces are disjoint: `irpt-narrative` against the new `irpt-commentary-composition-read-lambda`.
+- 401's members do not include the composition reader.
+- **The ordering existed only to keep shared-root plans clean.** The shared-root rule (@29a9a2c684) still applies to 401's own plan: any line outside `irpt-narrative`'s
+  code update means STOP.
+
+Conditions 1, 2 and 4 are unchanged. The W264-S1 enforcer-scope arm must be IDENTICAL before upload, and the census row reads ONE after.
+
+-- 1.0.0_SA_CTO~DELL2
