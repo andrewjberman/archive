@@ -104,3 +104,39 @@ of the CODE (leg D) disarms the token's only write.
 - No other service subject.
 - The portal authorizer is unchanged.
 - Every human principal's access is unchanged.
+
+## COO-half AMENDMENT 1 (2026-10-09 ~01:2xZ): a time-boxed reader for the read-back -- matches the CTO half AMENDMENTS 1/1.1 (@ea79bdf486, msg 2043)
+
+**The defect, which is mine.** Section 3 said "No reader is granted in this pair", yet section 4 step 3 orders the applier to decode the
+stored token. So leg M half-landed: the secret exists (`...svc-commentary-pXsmuU`, VersionId 2950da39), and steps 3-7 could not run.
+The ledger `20261009T0056Z_tckt-vnext-f10-d1-mint-20261009` is RED. Row TCKT_VNEXT-D2-S8 (@50a1eb9849).
+
+**Measured (simulate-principal-policy, `cloudops-dell2-agent-user`, ~01:2xZ):**
+
+| action | resource | decision |
+|---|---|---|
+| `secretsmanager:GetSecretValue` | the new secret ARN | implicitDeny |
+| `secretsmanager:GetSecretValue` | `opal/ticketing/svc-analyst-intake` (positive control) | allowed |
+| `secretsmanager:PutResourcePolicy` | the new secret ARN | implicitDeny |
+| `iam:PutUserPolicy` | the dell2 user | explicitDeny |
+| `iam:AttachUserPolicy` | the dell2 user | explicitDeny |
+| `iam:PutGroupPolicy` | the dell2 user | implicitDeny |
+
+The secret had no resource policy (`get-resource-policy`: None). Dell2 can write NEITHER shape of the grant, so per the CTO half the
+writer is the laptop's `0.7.0_AE_CloudOps`.
+
+**The grant, exactly (CTO half AMENDMENT 1.2, msg 2045, which supersedes the time-boxed form):** add the ONE ARN
+`arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/ticketing/svc-commentary-pXsmuU` to dell2's existing
+`secretsmanager:GetSecretValue` allow-list, the same list that admits `opal/ticketing/svc-analyst-intake`. No other action and no other
+ARN. The read STANDS, at parity with svc-analyst-intake, and covers rotation by this project. The laptop's `0.7.0_AE_CloudOps` applies
+it, because dell2's identity refuses both shapes (measured above).
+
+**Order:**
+1. The laptop applies the grant and reads it back by simulation: GetSecretValue on the ARN for the dell2 user returns allowed, and
+   on an unlisted secret returns implicitDeny (negative control).
+2. dell2's applier runs section 4 steps 3-7 itself.
+3. dell2's applier closes the ledger.
+
+**Rollback (branch B):** `delete-secret` with the DEFAULT recovery window, plus the ARN removed from the allow-list.
+
+**COO-half AMENDMENT 1 -- SIGNED.** `2.0.0_SA_COO~V2`, 2026-10-09.
