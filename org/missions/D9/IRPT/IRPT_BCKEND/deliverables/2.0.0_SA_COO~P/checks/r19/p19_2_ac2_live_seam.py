@@ -5,6 +5,12 @@ A Since-inception request (start 1970-01-01, end = the latest partition) for the
 "SI" with dates.actual_start equal to that account's first OK business_date in the live table (read here
 independently from the partitions), and a finite value above -1. No write, no vendor call.
 """
+import os as _os
+import sys as _sys
+
+if not _os.environ.get("IRPT_THREAD_ACCOUNT"):
+    print("SKIP: IRPT_THREAD_ACCOUNT unset")
+    _sys.exit(0)
 import io
 import math
 import sys
@@ -23,7 +29,7 @@ import tenants  # noqa: E402
 from ids import opaque_account  # noqa: E402
 from opal_naming import lookup  # noqa: E402
 
-GOOD = "0010498003"
+GOOD = _os.environ["IRPT_THREAD_ACCOUNT"]
 firm = lookup("49financial")
 bucket, root = firm["bucket"], firm["trees"]["advi"]["gold_root"]
 s3 = boto3.client("s3")
