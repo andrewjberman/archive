@@ -1,0 +1,113 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-102",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e8f96f579c"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "dc2cf4a330",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-102.method-version-from-source.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_DASHBD~77",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~77/METHOD_FROM_SOURCE.json",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+   "kind": "script",
+   "commit_or_etag": "26a3f3a38b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "producer edit; offline tests only, no deploy, no AWS call, 0 served bytes move",
+   "artifact_covered_by": [
+    "DB49-4-AC1"
+   ]
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/irpt_reporting/sources.json",
+   "kind": "config_data",
+   "commit_or_etag": "26a3f3a38b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "custodian entry carries method_version 2; declaration file, not deployed by this order",
+   "artifact_covered_by": [
+    "DB49-4-AC1"
+   ]
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_method_version_from_source.py",
+   "kind": "test",
+   "commit_or_etag": "26a3f3a38b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "4 new tests incl. the negative arm; offline",
+   "artifact_covered_by": [
+    "DB49-4-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~77/METHOD_FROM_SOURCE.json",
+   "kind": "config_data",
+   "commit_or_etag": "26a3f3a38b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record the checker reads",
+   "artifact_covered_by": [
+    "DB49-4-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~77/METHOD_ROW_RULE24.md",
+   "kind": "doc",
+   "commit_or_etag": "26a3f3a38b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "rule-24 record of the method rows",
+   "artifact_covered_by": [
+    "DB49-4-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB49-4-AC1",
+   "criterion_verbatim": "DB49-4-AC1 -- build_manifest takes method_version from the source entry, never a default 2, tested with a negative arm. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r49/p49_round49.py\" . DB49-4-AC1",
+   "output_evidence": "OK: build_manifest takes method_version from the entry; 106 passed\nDB49-4-AC1 PASS",
+   "denominator": "106 of 106 irpt_reporting tests passed (0 failed, 4 new); 1 of 1 declared source entries carries method_version (2); exit code 0",
+   "status": "PASS",
+   "expect": "DB49-4-AC1 PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the checker reads the committed record, producer and sources.json at HEAD",
+   "observed": "printed the same last line on a second read",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The checker against a scratch tree whose build_manifest writes METHOD_VERSION directly again.",
+   "expected": "DB49-4-AC1 FAIL",
+   "observed": "FAIL: build_manifest still writes METHOD_VERSION directly; DB49-4-AC1 FAIL (rc 1)",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a Cottonwood sources entry and its method row 3 population",
+   "reason": "The order declares no Cottonwood entry; none exists at this base, so row 3 has no consumer yet."
+  },
+  {
+   "item": "vendor call, secret read, S3 write, deploy, bun, download, AWS call",
+   "reason": "Bounds of the order; none made."
+  }
+ ],
+ "surprises": [],
+ "compiler_tools": [
+  {
+   "tool": "ruff via .tools/commit-gate.sh",
+   "invocation": "bash .tools/safe-commit.sh ... (py_compile + ds-precommit + ruff)",
+   "result": "passed on the commit"
+  }
+ ]
+}

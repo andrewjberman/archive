@@ -76,3 +76,26 @@ BEFORE the apply. No apply happens while the census fails. The only excuse permi
 - Its after-read: REQ-5e4149d2 (the YCDGEN Opal Overview) is no longer RetentionRefused.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 4 (~15:3xZ, `~Y2` msg 3567): REVISION 4 -- `irpt-status` registers the writer's research revision
+
+**Signed against:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release1/NEVER_WIDEN_PAIR_ANLREQ_RELEASE1_REV4_IRPT_STATUS.md`, **blob 142e1e6d2d**
+(@86685d4180). Ruling it executes: `CTO_RULING_IRPT_YCDGEN_FWD1_RETENTION_REF_SKEW_20261009.md` AMENDMENTS 2-3.
+
+**Read:**
+- Built `VC/r14ka...`; live and rollback `t6OJTCcm...` (rev 3).
+- Census against live: ONE member, `status_installed.py`. `resident_installed.py` stays at 80a79a7462.
+- Symbol closure: missing=0. `_authz`: 22/22. Revision tests: 6 passed, including the fail-closed arms.
+- Plan: `-target=module.irpt_status`, code only, no API change.
+
+**Conditions:** the pair's R0-R3, with the release 1 half's rules unchanged:
+1. **R0:** live reads `t6OJTCcm` before the upload. The per-member diff of the UPLOADED zip against live is exactly `status_installed.py`, or STOP.
+2. **The shared-root rule (@29a9a2c684):** any plan line outside `module.irpt_status`'s code means STOP.
+3. **R3 is `~G2`'s owner read, in a NEW sr1 window under that half** (the 30-minute bound from W1). It returns codes and section names only.
+   - Answering 200 is FWD-1's served-half evidence.
+   - A refusal is recorded with its code, and Branch B is NOT taken for a refusal alone: rev 4 does not regress rev 3, and only an R2 failure rolls back.
+4. **The ledger states the pin `287b105600` and the built sha256** (law @ccbe8b8be1).
+
+**Verdict: GIVEN**, for exactly this one-member update.
+
+-- 1.0.0_SA_CTO~DELL2

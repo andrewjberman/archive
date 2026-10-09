@@ -1,0 +1,23 @@
+{
+ "task_order": "IRPT_DASHBD.TO-DB-b-99",
+ "registered_by": "0.9.0_WK_IRPT_DASHBD~74",
+ "registered_before_any_run": true,
+ "classifier": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~73/classify_unexplained.py",
+ "inputs": "the same inputs DB-b-98 read: TIEOUT_COMPOUND_V2.json plus its gold and bronze loads, and the landed Black Diamond account points (S3 GETs only)",
+ "denominator": 990,
+ "peak_cut": [0.005, 0.01, 0.02],
+ "peak_cut_note": "NEAR_ZERO_BASE test: lowest balance <= peak_cut x peak. 0.01 is the DB-b-98 setting.",
+ "dollar_tie": [
+  {"name": "tight", "abs": 0.5, "rel": 0.0005},
+  {"name": "current", "abs": 1.0, "rel": 0.001},
+  {"name": "loose", "abs": 2.0, "rel": 0.002}
+ ],
+ "dollar_tie_note": "tie(a,b) = |a-b| <= max(abs, rel x max(|a|,|b|)). The abs value also moves the ZERO_GAIN_VENDOR_TWR 'gain under $abs' test, as the classifier couples them. Current is the DB-b-98 setting.",
+ "grid": "full cross product: 3 peak cuts x 3 dollar ties = 9 settings, each named '<peak_cut>|<dollar_tie name>'",
+ "unchanged": "tolerance 0.35 pp, the test order and the reason set are not varied",
+ "baseline_setting": "0.01|current",
+ "robustness_rule": "For each reason r with baseline count n0 > 0: spread = max over the 9 settings of count(r) minus min over the 9 settings of count(r). r is robust: false when spread > 0.5 x n0, else robust: true. The four V2 reasons (FLOW_TIMING, INCOME_DATE, MISSING_PRICE, COVERAGE_DAYS) are assigned by V2 and are not threshold-dependent, so their counts are constant by construction and they are robust: true.",
+ "final_rule": "final.by_reason = baseline counts, with every robust: false reason's segments moved to UNEXPLAINED (the reason key stays, with count 0). DEFECT segments stay DEFECT.",
+ "claim_rule": "confirmed only where a field of Black Diamond's own landed record states the cause; inferred otherwise. A reason read from dollars and daysHeld by a test is inferred.",
+ "mechanical_rule": "mechanical: true only for the reasons the CTO named as two-sided reads of flow timing or income date; the basis for each is recorded beside the flag."
+}
