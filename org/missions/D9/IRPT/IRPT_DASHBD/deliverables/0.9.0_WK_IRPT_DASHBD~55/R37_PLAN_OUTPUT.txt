@@ -1,0 +1,160 @@
+module.irpt_reporting_gold.data.aws_s3_object.artifact: Reading...
+data.aws_iam_policy_document.irpt_reporting_gold_assume: Reading...
+data.aws_caller_identity.current: Reading...
+data.aws_lambda_layer_version.irpt_performance_native: Reading...
+data.aws_iam_policy_document.irpt_reporting_gold_assume: Read complete after 0s [id=2690255455]
+aws_iam_role.irpt_reporting_gold: Refreshing state... [id=irpt-49f-reporting-gold-role]
+data.aws_caller_identity.current: Read complete after 0s [id=313476888478]
+data.aws_iam_policy_document.irpt_reporting_gold: Reading...
+data.aws_iam_policy_document.irpt_reporting_gold: Read complete after 0s [id=526733111]
+data.aws_lambda_layer_version.irpt_performance_native: Read complete after 0s [id=arn:aws:lambda:us-east-1:313476888478:layer:irpt-performance-native-layer:1]
+module.irpt_reporting_gold.data.aws_s3_object.artifact: Read complete after 0s [id=opal-313476888478-lambda-artifacts/investor-reporting/irpt-reporting-gold-lambda.zip]
+aws_iam_role_policy.irpt_reporting_gold: Refreshing state... [id=irpt-49f-reporting-gold-role:irpt-49f-reporting-gold-policy]
+module.irpt_reporting_gold.aws_lambda_function.this: Refreshing state... [id=irpt-49f-reporting-gold-lambda]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # aws_iam_role.irpt_reporting_gold will be updated in-place
+  ~ resource "aws_iam_role" "irpt_reporting_gold" {
+      ~ description           = "IRPT_DASHBD cell DB-b-7: the reporting-gold function. Reads the three Schwab silver prefixes and the holdings_performance_daily + account_return_daily gold prefixes; writes ONLY the account_return_daily gold prefix." -> "IRPT_DASHBD cells DB-b-7, DB-b-34 and DB-b-41: the reporting-gold function. Reads the Schwab silver prefixes (custody and lot tables), the holdings_performance_daily + account_return_daily + account_class_daily + account_activity_daily + account_lot_realized + account_lot_unrealized_daily gold prefixes and the class table by key; writes ONLY the account_return_daily, account_class_daily, account_activity_daily, account_lot_realized and account_lot_unrealized_daily gold prefixes."
+        id                    = "irpt-49f-reporting-gold-role"
+        name                  = "irpt-49f-reporting-gold-role"
+        tags                  = {}
+        # (11 unchanged attributes hidden)
+
+        # (1 unchanged block hidden)
+    }
+
+  # aws_iam_role_policy.irpt_reporting_gold will be updated in-place
+  ~ resource "aws_iam_role_policy" "irpt_reporting_gold" {
+        id          = "irpt-49f-reporting-gold-role:irpt-49f-reporting-gold-policy"
+        name        = "irpt-49f-reporting-gold-policy"
+      ~ policy      = jsonencode(
+          ~ {
+              ~ Statement = [
+                  ~ {
+                      ~ Condition = {
+                          ~ StringLike = {
+                              ~ "s3:prefix" = [
+                                    # (2 unchanged elements hidden)
+                                    "schwab/08335338/silver/fact_trn/*",
+                                  + "schwab/08335338/silver/fact_rld/*",
+                                  + "schwab/08335338/silver/fact_uln/*",
+                                  + "schwab/08335338/silver/fact_ult/*",
+                                ]
+                            }
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Resource = [
+                          + "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/fact_ult/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/fact_uln/*",
+                            "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/fact_trn/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/fact_rld/*",
+                            "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_position/*",
+                            # (1 unchanged element hidden)
+                        ]
+                        # (3 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ StringLike = {
+                              ~ "s3:prefix" = [
+                                    # (1 unchanged element hidden)
+                                    "irpt/49financial/gold/account_return_daily/*",
+                                  + "irpt/49financial/gold/account_class_daily/*",
+                                  + "irpt/49financial/gold/account_activity_daily/*",
+                                  + "irpt/49financial/gold/account_lot_realized/*",
+                                  + "irpt/49financial/gold/account_lot_unrealized_daily/*",
+                                ]
+                            }
+                        }
+                      ~ Sid       = "ListExactlyTheTwoGoldPrefixes" -> "ListExactlyTheSixGoldPrefixes"
+                        # (3 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Resource = [
+                            # (1 unchanged element hidden)
+                            "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_return_daily/*",
+                          + "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_lot_unrealized_daily/*",
+                          + "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_lot_realized/*",
+                          + "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_class_daily/*",
+                          + "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_activity_daily/*",
+                        ]
+                      ~ Sid      = "ReadTheTwoGoldPrefixesOnly" -> "ReadTheSixGoldPrefixesOnly"
+                        # (2 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Resource = "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_return_daily/*" -> [
+                          + "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_return_daily/*",
+                          + "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_lot_unrealized_daily/*",
+                          + "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_lot_realized/*",
+                          + "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_class_daily/*",
+                          + "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_activity_daily/*",
+                        ]
+                      ~ Sid      = "WriteTheAccountReturnDailyPrefixOnly" -> "WriteTheFiveGoldPrefixesOnly"
+                        # (2 unchanged attributes hidden)
+                    },
+                  + {
+                      + Action   = "dynamodb:GetItem"
+                      + Effect   = "Allow"
+                      + Resource = "arn:aws:dynamodb:us-east-1:313476888478:table/etf-classifications"
+                      + Sid      = "ReadTheClassTableByKeyOnly"
+                    },
+                    {
+                        Action   = [
+                            "logs:PutLogEvents",
+                            "logs:CreateLogStream",
+                        ]
+                        Effect   = "Allow"
+                        Resource = "arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/irpt-49f-reporting-gold-lambda:*"
+                        Sid      = "OwnLogStreamOnly"
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (2 unchanged attributes hidden)
+    }
+
+  # module.irpt_reporting_gold.aws_lambda_function.this will be updated in-place
+  ~ resource "aws_lambda_function" "this" {
+        id                             = "irpt-49f-reporting-gold-lambda"
+      ~ last_modified                  = "2026-10-09T04:31:10.000+0000" -> (known after apply)
+      ~ s3_object_version              = "HJZgXM5o8nsaP1ED.7K_OJ2cCuD_RrMX" -> "pPnoTZs86qlqo2waxfP4h2ogXwq3hoR5"
+      ~ source_code_hash               = "Mex71Y5gk9RYE9q885knj3Ph12xV2Y9eVqMl3uJ1Z44=" -> "ciTGx5UVE3BJ4mMgwlzSYCDpYBkvtefHbNlT2KCxh5Y="
+        tags                           = {
+            "Cell"      = "DB-b-7"
+            "ManagedBy" = "Terraform"
+            "Module"    = "yang-lambda"
+            "Project"   = "IRPT_DASHBD"
+            "System"    = "InvestorReporting"
+        }
+        # (28 unchanged attributes hidden)
+
+        # (3 unchanged blocks hidden)
+    }
+
+Plan: 0 to add, 3 to change, 0 to destroy.
+
+Warning: Resource targeting is in effect
+
+You are creating a plan with the -target option, which means that the result
+of this plan may not represent all of the changes requested by the current
+configuration.
+
+The -target option is not for routine use, and is provided only for
+exceptional situations such as recovering from errors or mistakes, or when
+Terraform specifically suggests to use it as part of an error message.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: r37.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "r37.tfplan"
