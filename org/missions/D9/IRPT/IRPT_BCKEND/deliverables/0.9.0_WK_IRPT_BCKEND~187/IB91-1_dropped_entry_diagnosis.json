@@ -1,0 +1,71 @@
+{
+ "to_id": "IRPT_BCKEND.TO-IB-pr-379",
+ "measured_on": "2026-10-09T00:0xZ from dell2, AWS reads only",
+ "served": {
+  "inflection": {
+   "as_of": "2026-10-08",
+   "revision": "irpt-dir/inflection/2026-10-08/1.0",
+   "entry_count": 294
+  },
+  "cottonwood": {
+   "as_of": "2026-10-07",
+   "revision": "irpt-dir/cottonwood/2026-10-07/1.0",
+   "entry_count": 269
+  }
+ },
+ "firms": {
+  "inflection": {
+   "disappeared_count": 1,
+   "disappeared_ids": [
+    "cli_eee3d5ecc6dda8132ba25158"
+   ],
+   "comparison": "previous = last READY build (directory/2026-09-25, 292 entries, 292 distinct keys); new = directory/2026-10-08 (294 entries); compute_delta: added 3, disappeared 1",
+   "cause": "SOURCE_REMOVAL",
+   "evidence": "The disappeared id is a HOUSEHOLD client (scope_kind CLIENT; opaque of household_id). Re-minted against the source dims with the production opaque function: in silver/api_dims household_rep_mapping and accounts_v2 at snapshot 2026-10-05 the household is present (321 households in the map, its one active account row carries it); at snapshot 2026-10-06 it is absent from BOTH tables (320 households) and stays absent at 2026-10-08. Its single account (acc_4db46f6f05117cc9b6747e21) is still in accounts_v2, active, now carrying household cli_7f8b2aacad67b512d1e05a29, a household that already existed (2 accounts at 10-05, 3 from 10-06). So the vendor retired the household key by merging it into an existing household on 2026-10-06; the build faithfully emitted what the source holds. The build is right. A KEY_CHANGE reading (same client re-keyed) would need an old-to-new id successor, which the source does not carry. Not a filter, join, eligibility or parse fault: no other account moved client (1 of 862), and the 3 added clients are new households.",
+   "added_ids": [
+    "cli_2576ea9f1c4cc39f7f9276af",
+    "cli_4b14d30e2556db11096dedf7",
+    "cli_e461ae97fab83ee64e8f5a66"
+   ],
+   "source_first_absent": "2026-10-06"
+  },
+  "cottonwood": {
+   "disappeared_count": 1,
+   "disappeared_ids": [
+    "cli_6be3d8625139a8d2613ab8af"
+   ],
+   "comparison": "previous = last READY build (directory/2026-10-05, 270 entries, 259 distinct keys); new = directory/2026-10-07 (269 entries, 259 distinct keys); compute_delta: added 1, disappeared 1",
+   "cause": "SOURCE_REMOVAL",
+   "evidence": "The disappeared id is an account-only entry (scope_kind ACCOUNT, relationship_id sentinel 0, so client id = opaque of AccountID) for account acc_10e3e4477b42c76fe14e437e: 2 rows in silver fact_allocations at partition 2026-10-05 (Fidelity IWS trust account, market value 0.0, allocation 0.0, Relationship ID 0), 0 rows at 2026-10-06 and 0 rows at 2026-10-07. The account number, original account number and NFS number of those rows appear nowhere in the 2026-10-07 partition, so it was not re-keyed. The one added client (cli_98c7a58b4a0c979ecc371a5f) is an unrelated Schwab brokerage account. The vendor export stopped carrying a zero-value account; the build faithfully emitted what the source holds. Not a filter, join, eligibility or parse fault.",
+   "added_ids": [
+    "cli_98c7a58b4a0c979ecc371a5f"
+   ],
+   "source_first_absent": "2026-10-06"
+  }
+ },
+ "overage_deadline": "2026-10-12",
+ "overage_basis": {
+  "method": "expiry.age_in_trading_days(served_as_of, day) > expiry.MAX_AGE_TRADING_DAYS (2), day walked over weekdays from 2026-10-08, calendar lib/trading_calendar (calendar_source read: NYSE/hardcoded-fallback-2010-2027)",
+  "cottonwood": {
+   "served_as_of": "2026-10-07",
+   "age_by_day": {
+    "2026-10-08": 1,
+    "2026-10-09": 2,
+    "2026-10-12": 3
+   },
+   "first_over_age": "2026-10-12"
+  },
+  "inflection": {
+   "served_as_of": "2026-10-08",
+   "age_by_day": {
+    "2026-10-08": 0,
+    "2026-10-09": 1,
+    "2026-10-12": 2,
+    "2026-10-13": 3
+   },
+   "first_over_age": "2026-10-13"
+  },
+  "either_firm_first": "2026-10-12"
+ },
+ "stop": "Both firms are SOURCE_REMOVAL. Per the task order the cell stops after the diagnosis: no fix, no test, no pin, no build, no packet. The disappearance rule is unchanged."
+}

@@ -1,5 +1,6 @@
 {
   "amendment": "AMENDMENT 1 @f348d52c58 (msg 1938): arms (a) and (c) run on dell2 by this seat, not the laptop, per the laptop CTO ruling msgs 1924/1926. Step F applied dell2 IAM at 23:24:52Z. NO CALL WAS REFUSED on either arm.",
+  "amendment_2": "AMENDMENT 2 (msg 1950, CTO msg 1949): arm (a) passes PER FIRM on either READY at the manifest's OWN as_of, or REFRESH_FAILED + SAFE with the prior directory served; record which branch held. Arm (c) is discharged by IB89-1-AC2. The release stands.",
   "applied_by": "0.7.0_AE_CloudOps~DELL2",
   "applied_on": "dell2",
   "arm_a_driven_refresh": {
@@ -7,8 +8,38 @@
     "cottonwood": "state=FAILED, reason_code=REFRESH_FAILED, action=CORRECT (safe)",
     "fired": "ONE driven fire, {business_date: 2026-10-08}, StatusCode 200, no FunctionError, manifest_written 3 of 3",
     "inflection": "state=FAILED, reason_code=REFRESH_FAILED, action=CORRECT (safe)",
+    "per_firm_branch": {
+      "49financial": {
+        "branch": "READY",
+        "delta": "added 19, current_entry_count 4719",
+        "key": "investor-reporting/directory/_refresh/2026-10-08/manifest.json",
+        "manifest_as_of": "2026-10-08",
+        "reason_code": "REFRESH_COMPLETED_WITH_ADDITIONS",
+        "revision": "irpt-dir/49financial/2026-10-07/1.0"
+      },
+      "cottonwood": {
+        "action": "CORRECT",
+        "branch": "REFRESH_FAILED + SAFE, prior directory served",
+        "key": "investor-reporting/directory/_refresh/2026-10-07/manifest.json",
+        "manifest_as_of": "2026-10-07",
+        "note": "read at the MANIFEST'S OWN as_of, which amendment 2 makes the governing key; a 2026-10-08 fire wrote it under 2026-10-07",
+        "prior_directory_served": "yes",
+        "reason_code": "REFRESH_FAILED",
+        "safe": true
+      },
+      "inflection": {
+        "action": "CORRECT",
+        "branch": "REFRESH_FAILED + SAFE, prior directory served",
+        "key": "investor-reporting/directory/_refresh/2026-10-08/manifest.json",
+        "manifest_as_of": "2026-10-08",
+        "prior_directory_served": "yes -- 'the previous directory stays served until a corrected build lands; no data is removed by this outcome'",
+        "reason_code": "REFRESH_FAILED",
+        "safe": true
+      }
+    },
     "result": "deliverables/0.7.0_AE_CloudOps~DELL2/IB89-1_a_driven_refresh_ready.json",
-    "verdict": "FAIL -- 1 of 3 firms READY",
+    "verdict": "PASS 3 of 3 under amendment 2 (per-firm branch)",
+    "verdict_before_amendment_2": "FAIL -- 1 of 3 READY under the packet's original 'READY at all three firms'",
     "why_not_a_regression": "the CORRECT action reads 'the build dropped an entry the previous build carried; the previous directory stays served until a corrected build lands -- no data is removed by this outcome'. That is the deployed refresh.py's fail-safe accounting working; this release is what makes the condition visible at all. Row IRPT_BCKEND-D2-S13.",
     "write_surface": "only the manifests under investor-reporting/directory/_refresh/*; no directory object and no latest.json"
   },
@@ -20,8 +51,9 @@
       "inflection": "as_of 2026-10-08, 0 trading days behind"
     },
     "ceiling": "MAX_AGE_TRADING_DAYS = 2",
+    "discharged_by": "IB89-1-AC2 per amendment 2 (arm (e) of the five-arm drive proves DIRECTORY_OVER_AGE/STALE against the deployed expiry.py)",
     "result": "deliverables/0.7.0_AE_CloudOps~DELL2/IB89-1_c_over_age_search.json",
-    "verdict": "NOT_DRIVABLE (a measured report, neither a pass nor a fail)",
+    "verdict": "DISCHARGED by IB89-1-AC2 (measured NOT_DRIVABLE in production: every directory in-age)",
     "why": "every directory is in-age, so the over-age branch cannot fire, and the deployed entry.lambda_handler has no directory_fixture injection point to force it (row D2-S12). The branch IS proven against the deployed expiry.py by arm (e) of the five-arm drive."
   },
   "five_arm_drive": {
