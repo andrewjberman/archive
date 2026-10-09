@@ -163,3 +163,71 @@ both sentinels removed. **Zero `GetSecretValue` calls by this seat** on any leg 
 `org/critical_paths/change_management/20261009T1418Z_svc-irpt-served-read-retry-laptop-20261009_deploy_completion.md`
 -- opened 14:18Z before the put, both legs closed with the proof above, entry **CLOSED** 14:38:23Z, sentinel
 removed.
+
+---
+
+# AMENDMENT 2 -- window 3
+
+Staged at ~15:3xZ with an explicit "do not add on this text"; the ADD waited for the issuer's GO, which
+followed G2's "ADD now" at 15:56:55Z once dell2 reported R2 MET @`4a611a8e5f` on
+`IRPT_ANLREQ.TO-APPLY-Y1` rev 4. Same ledger, same CTO consent (msg 107976), same two signed documents, a
+third NEVER-2 entry. Windows 1 and 2 stay closed as recorded.
+
+## WINDOW 3 WAS OPEN 24 MINUTES 20 SECONDS AND IS SHUT -- TWO READS LANDED
+
+| event | time (UTC) |
+|---|---|
+| G2's "ADD now" | 15:56:55Z |
+| issuer's GO (msg 108033) | 16:03:46Z |
+| start read (live = signed BEFORE) | 16:06:10Z |
+| third NEVER-2 entry opened, **before** the put | 16:07Z |
+| **ADD put** | **16:08:43 - 16:08:46Z** |
+| read-back + 3 simulations | 16:09Z |
+| put time relayed to G2 via `0.0.0_AB_MSTR` | 16:11:49Z |
+| **G2's two svc secret reads (its acts, in memory only)** | **before 16:22:49Z** |
+| G2 called R DONE | 16:22:49Z |
+| **REMOVE put** | **16:33:03 - 16:33:06Z** |
+| read-back + 3 simulations | 16:34Z |
+| ledger + sentinel CLOSED | 16:36:57Z |
+| hard close (ADD + 30m) | 16:38:46Z -- **met with 5 min 40 s to spare** |
+
+## LEG ADD (window 3)
+
+Start 16:06:10Z, 816 bytes read whole: `SET-EQUAL` to signed **BEFORE**; `NOT SET-EQUAL` to ADD (exactly the
+two dell2 elements). As in window 2, that start read doubles as the live confirmation that the previous
+window's REMOVE had stayed landed -- measured on the document, not inferred from my own earlier read-back.
+
+Read-back 944 bytes: `SET-EQUAL` to signed **ADD**; `NOT SET-EQUAL` to BEFORE. Token census:
+`cloudops-dell2-agent-user` **2**, `cloudops-dell1-agent-user` **0**. Simulations: dell2 **allowed**, dell1
+**explicitDeny**, walker **allowed** -- the three required, so no revert.
+
+## LEG REMOVE (window 3)
+
+Ran on G2's R DONE. The ADD+27m alarm armed at 16:08:46Z for 16:35:46Z was stopped unused.
+
+Start 16:32:07Z: `SET-EQUAL` to ADD; `NOT SET-EQUAL` to BEFORE. Read-back: `SET-EQUAL` to signed BEFORE;
+`NOT SET-EQUAL` to ADD. Token census: dell2 **0**, dell1 **0**. **AC1**: `Sid: WalkerReadsByExplicitArn`
+present, `Principal.AWS` = `user/Andrew_Berman` alone. Simulations: dell2 **explicitDeny**, dell1
+**explicitDeny**, walker **allowed**.
+
+## All three windows together
+
+| window | ADD put | REMOVE put | open | closed by | hard close met by |
+|---|---|---|---|---|---|
+| 1 | 13:37:36Z | 13:45:41Z | 8 min 5 s | G2's REMOVE NOW | 21 min 55 s |
+| 2 (AMENDMENT 1) | 14:19:50Z | 14:35:09Z | 15 min 19 s | G2's R DONE 14:26:19Z | 14 min 41 s |
+| 3 (AMENDMENT 2) | 16:08:46Z | 16:33:06Z | 24 min 20 s | G2's R DONE 16:22:49Z | 5 min 40 s |
+
+Six legs, six start reads, six read-backs, **twelve** negative controls, **eighteen** simulated decisions.
+Total open window **47 minutes 44 seconds**. Three NEVER-2 entries, all CLOSED, all sentinels removed.
+**Zero `GetSecretValue` calls by this seat on any leg** -- dell2's three reads are G2's acts under its own
+ledger.
+
+Every window closed on G2's call before its own alarm fired. The alarms were armed anyway, at the moment of
+each ADD, because a backstop that depends on the message it is backing up is not a backstop.
+
+## Ledger (window 3)
+
+`org/critical_paths/change_management/20261009T1607Z_svc-irpt-served-read-w3-laptop-20261009_deploy_completion.md`
+-- opened 16:07Z before the put, both legs closed with the proof above, entry **CLOSED** 16:36:57Z, sentinel
+removed.
