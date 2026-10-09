@@ -14,8 +14,8 @@
 Criterion ids: Y77-1-AC1, Y77-1-AC2, Y77-1-AC3. Instance at `org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_y77/IRPT_BCKEND.TO-APPLY-Y77.proof_of_spec.json`, validated with `python .tools/proof-of-spec-check.py <instance> Y77-1-AC1,Y77-1-AC2,Y77-1-AC3`. Shape: `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~159/IRPT_BCKEND.TO-IB-yr-681.release3-a1-run-as-signed.proof_of_spec.json`.
 </proof_of_spec>
 <decomp_ref>
-<decomp_doc>org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R77_Y.md</decomp_doc> round 77, workstream ~Y, cell `APPLY-Y77`.
-<owned_cells>APPLY-Y77</owned_cells>
+<decomp_doc>org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R77_Y.md</decomp_doc> round 77, workstream ~Y, cell `IB-ya-771` (was `APPLY-Y77`).
+<owned_cells>IB-ya-771</owned_cells>
 </decomp_ref>
 
   <objective>
@@ -113,9 +113,9 @@ Criterion ids: Y77-1-AC1, Y77-1-AC2, Y77-1-AC3. Instance at `org/tier2_senior/0.
   </steps>
 
   <acceptance>
-    <criterion id="Y77-1-AC1"><invocation>python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r77/y77_cells.py . Y77-1-AC1</invocation><expect>Y77-1-AC1 PASS</expect></criterion>
-    <criterion id="Y77-1-AC2"><invocation>python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r77/y77_cells.py . Y77-1-AC2</invocation><expect>Y77-1-AC2 PASS</expect></criterion>
-    <criterion id="Y77-1-AC3"><invocation>python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r77/y77_cells.py . Y77-1-AC3</invocation><expect>Y77-1-AC3 PASS</expect></criterion>
+    <criterion id="Y77-1-AC1" cell_refs="IB-ya-771"><invocation>python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r77/y77_cells.py . Y77-1-AC1</invocation><expect>Y77-1-AC1 PASS</expect></criterion>
+    <criterion id="Y77-1-AC2" cell_refs="IB-ya-771"><invocation>python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r77/y77_cells.py . Y77-1-AC2</invocation><expect>Y77-1-AC2 PASS</expect></criterion>
+    <criterion id="Y77-1-AC3" cell_refs="IB-ya-771"><invocation>python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r77/y77_cells.py . Y77-1-AC3</invocation><expect>Y77-1-AC3 PASS</expect></criterion>
   </acceptance>
 
   <bounds>

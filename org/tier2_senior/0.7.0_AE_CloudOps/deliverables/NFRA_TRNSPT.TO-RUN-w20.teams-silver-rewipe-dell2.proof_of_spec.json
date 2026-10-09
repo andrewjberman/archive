@@ -1,0 +1,123 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "<expect>keys=30</expect>; AC1's row also states the 30 new VersionIds against the prior ones and the per-key row counts before and after.",
+      "denominator": "30 keys listed by the tool over the three series' silver prefixes (monday_meeting 15, ocio_ic 7, asset_management_ic 8); 30 rows in R20_REWIPE_PRIOR_VERSIONS.json; the live re-list scanned 30 current parquet keys over 3 list pages",
+      "expect": "keys=30",
+      "invocation": "python -m data.transcripts.scripts.teams.rewipe_silver --series monday_meeting,ocio_ic,asset_management_ic --dry-run",
+      "method": "live_read",
+      "output_evidence": "Run from a clean extract at pin 776d8300716e572ea95f13ecd8281e594c0443cb (tool blob cd3bf1f39cdaf46e5c247820d8a2d2fd8eb1a1cf, content-identical to 4eb7ed184c:data/transcripts/scripts/teams/rewipe_silver.py). BEFORE: REWIPE-SILVER series=monday_meeting,ocio_ic,asset_management_ic keys=30 rows=8873 written=0 failed=0; the 30 listed keys equal the prior-versions JSON key set exactly (only_dry=0, only_prior=0) and research_meeting is absent from every output line. APPLY: REWIPE-SILVER series=monday_meeting,ocio_ic,asset_management_ic keys=30 rows=8873 written=30 failed=0 (held_out 2271 rows). AFTER, same invocation: REWIPE-SILVER series=monday_meeting,ocio_ic,asset_management_ic keys=30 rows=8873 written=0 failed=0. VERSIONS: the post-run live re-list reads 30 of 30 keys on a NEW VersionId, 0 equal to prior; the 30 prior/new pairs are in NFRA_TRNSPT.TO-RUN-w20_result.json rows[]. ROW COUNTS: per-key before equals after with 0 mismatches of 30, rows_total 8873 on both sides.",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "f012dd44d8",
+      "deploy_evidence": "the run result: counts, the 30 keys, their 30 prior and 30 new VersionIds, per-key row counts before and after, held_out per key -- no transcript content",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_TRNSPT.TO-RUN-w20_result.json"
+    },
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "30 new VersionIds (one per key), listed at NFRA_TRNSPT.TO-RUN-w20_result.json rows[].new_version_id",
+      "deploy_evidence": "live list_object_versions IsLatest over the three silver prefixes after the run: 30 current parquet keys, every one on a VersionId that differs from its prior",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "kind": "s3_object",
+      "path_or_key": "s3://opal-data-transcripts/teams/transcripts/silver/ -- the 30 keys of monday_meeting, ocio_ic and asset_management_ic only"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~TR2",
+  "compiler_tools": [
+    {
+      "invocation": "python -m data.transcripts.scripts.teams.rewipe_silver --series monday_meeting,ocio_ic,asset_management_ic --dry-run, then --apply, then --dry-run again",
+      "result": "keys=30 rows=8873 written=0 failed=0 / written=30 failed=0 / written=0 failed=0",
+      "tool": "rewipe_silver.py (TR-w-19)"
+    },
+    {
+      "invocation": "git worktree add --detach /c/dev/wk-trnspt-w20 776d8300716e572ea95f13ecd8281e594c0443cb",
+      "result": "a clean extract of the pin (git status --porcelain empty in the extract), because the shared tree is dirty; the pin carries TR-w-19 @4eb7ed184c and deploy_ledger.py @00d3393ff3 as ancestors, both checked with merge-base --is-ancestor and the tool additionally resolved by CONTENT",
+      "tool": "git worktree"
+    },
+    {
+      "invocation": "python .tools/deploy_ledger.py open | close-leg | close --slug nfra-trnspt-w20-teams-silver-rewipe-20261009",
+      "result": "4 legs opened at deploy start, each closed on its own measured proof, ledger CLOSED; the tool committed its own files at open",
+      "tool": "deploy_ledger.py"
+    },
+    {
+      "invocation": "python .tools/to-check.py --all --assignee 0.7.0_AE_CloudOps~TR2",
+      "result": "total=1 projects=1 scanned=5220 unresolved_serials=0 -- this lane holds exactly this one order",
+      "tool": "to-check.py"
+    }
+  ],
+  "controls": {
+    "prior_version_equality_at_apply": {
+      "description": "CTO half condition 1: each key's current VersionId is re-read at apply and must equal the prior-versions JSON; a key that moved means STOP for that key, never a rewrite over an unknown version.",
+      "expected_landed": "30 of 30 live current VersionIds equal the JSON's prior version and the live key set is exactly those 30 -- the run proceeds",
+      "expected_not_landed": "any key moved, or an extra or missing key -> STOP with a row, nothing rewritten",
+      "observed": "live list_object_versions IsLatest, 3 pages, denominator live_keys_scanned=30: only_live=0, only_prior=0, equal_to_prior=30, differ_from_prior=0. Proceeded.",
+      "status": "PASS"
+    },
+    "research_meeting_untouched": {
+      "description": "the negative arm of the never-widen bound: research_meeting silver (29 keys, the graded Apple exception state) must not move. Measured on the live plane, not inferred from the --series flag.",
+      "expected_landed": "29 current research_meeting parquet keys, none with a LastModified inside this session's window (at or after 2026-10-09T10:00:00Z)",
+      "expected_not_landed": "a research_meeting key in the tool's output, or one whose LastModified falls inside the window",
+      "observed": "29 current keys (1 list page); LastModified range 2026-10-09T06:10:55Z to 06:10:58Z, which is the a17 run; 0 keys moved inside the window; research_meeting absent from every line of the tool's output",
+      "status": "PASS"
+    },
+    "row_count_preservation": {
+      "description": "per-key row count read from the parquet footer before and after the write; the tool itself refuses to write a key whose row count changed",
+      "expected_landed": "0 per-key mismatches of 30 and equal rows_total",
+      "expected_not_landed": "one or more per-key mismatches, or a ValueError refusal from the tool",
+      "observed": "0 mismatches of 30; rows_total 8873 before and 8873 after",
+      "status": "PASS"
+    },
+    "version_change": {
+      "description": "prior vs new VersionId on the literal 30 keys, read live after the run",
+      "expected_landed": "30 changed versions",
+      "expected_not_landed": "0 changed versions",
+      "observed": "30 changed, 0 unchanged",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the post-run residual re-wipe sweep over the 30 rewritten keys, and its planted-token positive control",
+      "reason": "the COO half assigns that proof to the issuer, which reads the 30 rewritten keys back and re-runs the wipe; CTO half condition 2 attaches the planted control to that same sweep. This order's report is counts, keys and version ids, so the sweep is not claimed here and this instance makes no absence-of-residual claim."
+    },
+    {
+      "item": "the reader gate (ADDENDUM 8.1, no reader beyond the named originals)",
+      "reason": "CTO half condition 5: this act does not clear it on its own -- it also needs the pull's wipe-on-landing to be live, which is row D2-S10 and not this order."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/decompositions/NFRA_TRNSPT_DECOMP_R20.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_TRNSPT.TO-RUN-w20.teams-silver-rewipe-dell2.md",
+    "vintage_commit": "051003d7af235c0517050a19cd8cf0a9bf6398ce"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/NEVER_WIDEN_NFRA_TRNSPT_COO_HALF_TEAMS_SILVER_REWIPE_20261009.md @051003d7af, blob 07900c531f",
+    "cto_half": "org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_TEAMS_SILVER_REWIPE_CTO_HALF.md @7a2e7199ed -- verdict GIVEN for the 30 keys exactly under conditions 1 to 5; condition 3 admits a CloudOps lane seated by MSTR under ruling @5ff94852a6, and the order's AMENDMENT 1 re-addresses it to this lane"
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "SERVED",
+  "rollback": "copy each key's prior VersionId back over its key; versioning is Enabled so no delete is needed or authorised. The 30 prior VersionIds are in NFRA_TRNSPT.TO-RUN-w20_result.json rows[].prior_version_id and in the issuer's R20_REWIPE_PRIOR_VERSIONS.json.",
+  "schema_version": "1.0",
+  "scope": "ONE in-place re-wipe of the 30 KMS-encrypted Teams silver parquets of monday_meeting (15), ocio_ic (7) and asset_management_ic (8), then a read-back. These 30 keys only; no other series, prefix, bucket or key policy; no delete; research_meeting never passed to --series.",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_TRNSPT.TO-RUN-w20_result.json",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_TRNSPT.TO-RUN-w20.teams-silver-rewipe-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "18296556f16ae803639c2b2892a91914b5551ffa"
+  },
+  "surprises": [],
+  "to_id": "NFRA_TRNSPT.TO-RUN-w20"
+}
