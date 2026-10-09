@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~G2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>issued</status>
+    <status>pending</status>
     <project_code>IRPT_YCDGEN</project_code>
   </metadata>
 <risk>WORLD</risk>
