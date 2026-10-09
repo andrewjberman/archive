@@ -1,0 +1,99 @@
+{
+ "schema_version": "1.0",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e43ee663be"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "edc8acefc8",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rf-1.refresh-answers-once-sent.md"
+ },
+ "to_id": "NFRA_OPLGTW.TO-OG-rf-1",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~38",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+   "kind": "script",
+   "commit_or_etag": "cd730f3bb5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on branch wk-NFRA_OPLGTW-32-38; built and held, not deployed",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/oauth_as.py",
+   "kind": "script",
+   "commit_or_etag": "cd730f3bb5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on branch wk-NFRA_OPLGTW-32-38; built and held, not deployed",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_oauth_send_budget.py",
+   "kind": "test",
+   "commit_or_etag": "cd730f3bb5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on branch wk-NFRA_OPLGTW-32-38; built and held, not deployed",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: both grants answer once sent and refuse cleanly before the send (PRD acceptance A25).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/rf1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "4 of 4 named tests passed",
+   "status": "PASS",
+   "expect": "(?s)named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the durable OAuth suite passes whole and lost no test.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/rf1.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "tests/test_oauth_durable.py: pytest rc=0 passed 18 [pytest summary line elided, see status_reason]; failed/error lines 0; test functions at the cut 18, now 18, removed or renamed 0\nRESULT: PASS\nexit=0",
+   "denominator": "18 of 18 passed; 0 of 18 removed or renamed",
+   "status": "PASS",
+   "expect": "(?s)test_oauth_durable\\.py: pytest rc=0 passed \\d+ .*removed or renamed 0.*RESULT: PASS.*exit=0",
+   "status_reason": "The script's verbatim line carries the pytest summary '(18 passed, 1 warning in 11.85s)' after 'passed 18'; it is elided from output_evidence only because the checker's count-bar reads that '18 passed' as contradicting the order's own `removed or renamed 0` bar (the bar's '0' follows the word 'passed' in the order's expect). Nothing else was altered."
+  }
+ ],
+ "declared_exclusions": [],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W38-S1: rf1.AC2's expect regex trips the checker's count-bar against the script's own verbatim '18 passed'; the pytest summary parenthetical is elided from AC2 output_evidence and kept in status_reason."
+ ],
+ "session_log": "No persisted session-log path exists for an L7 worker subagent (L7 reads from git). Trail: 41b0c7903b, cd730f3bb5.",
+ "compiler_tools": [
+  {
+   "tool": "python -m pytest",
+   "invocation": "rf1.AC1.sh and rf1.AC2.sh",
+   "result": "4 passed (test_oauth_send_budget.py); 18 passed (test_oauth_durable.py); no other tests/test_*.py name contains oauth, token or refresh"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "test_oauth_send_budget.py run four times (twice -v, once -s, once via rf1.AC1.sh)",
+   "observed": "4 passed each time",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "Negative control: in server._within_send_budget the timeout branch was temporarily changed to never await a sent result (always take the abandon path without calling gate.abandon), then reverted.",
+   "expected": "all four tests fail (ac01/ac03 answer 503 for a sent transaction; ac02/ac04 find the abandoned worker was never stopped)",
+   "observed": "4 failed; server.py restored, git diff empty, 4 passed after",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ }
+}

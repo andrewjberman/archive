@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-55",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e1e0be5ba0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "01b9252fe9",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-55.lots-p95.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~33",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~33/LOTS_P95_E3.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~33/LOTS_P95_E3.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7,604 accounts, 2026-10-06, handler --local no --batch-size: 12 completed runs (2 at 2,000; 5 at 1,500; 5 at 1,000), 2 reaper-interrupted runs recorded apart; at the final default 1,000 p95 total 652.38 s; no S3 write.",
+      "artifact_covered_by": [
+        "DB30-3-AC1",
+        "DB30-3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~33/LOTS_P95_E3.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "counts only; no client figure, account number or lot id.",
+      "artifact_covered_by": [
+        "DB30-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~33/lots_p95_agg.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "folds the runner's per-run records into LOTS_P95_E3.json/.md; reads files only; no S3 write.",
+      "artifact_covered_by": [
+        "DB30-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_activity_lots.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DEFAULT_BATCH_SIZE 2000 -> 1000, one line, form kept; producer tests 45 passed; no S3 write.",
+      "artifact_covered_by": [
+        "DB30-3-AC1",
+        "DB30-3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows IRPT_DASHBD-W33-S1 and IRPT_DASHBD-W33-S2 appended; existing bytes unchanged.",
+      "artifact_covered_by": [
+        "DB30-3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB30-3-AC1",
+      "criterion_verbatim": "DB30-3-AC1 -- at least 5 completed full runs over >= 7,000 accounts at the batch size equal to the producer's DEFAULT_BATCH_SIZE at HEAD. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r30/p30_round30.py\" . DB30-3-AC1",
+      "output_evidence": "OK: 5 runs at batch 1000 over 7604 accounts; totals [625.4, 607.9, 608.3, 659.1, 621.1]\nDB30-3-AC1 PASS",
+      "denominator": "7,604 accounts; 12 completed runs recorded, 5 at the HEAD default 1,000; 2 interrupted runs excluded",
+      "status": "PASS",
+      "expect": "DB30-3-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB30-3-AC2",
+      "criterion_verbatim": "DB30-3-AC2 -- the p95 of those runs' total time, computed by the check, is <= 750 s. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r30/p30_round30.py\" . DB30-3-AC2",
+      "output_evidence": "OK: p95 total 652.4 s <= 750 over 5 runs at batch 1000 (max 659.1)\nDB30-3-AC2 PASS",
+      "denominator": "5 runs at 1,000 per batch; p95 652.4 s, max 659.1 s; the 2,000 default read 824.3/835.4 s and 1,500 read p95 945.2 s before the lowering",
+      "status": "PASS",
+      "expect": "DB30-3-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads LOTS_P95_E3.json and the producer's bytes; no run state",
+      "observed": "printed the same last line on a second read: DB30-3-AC1 PASS",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty root (no record), the order's 'Base: FAIL'.",
+      "expected": "DB30-3-AC1 FAIL at the base",
+      "observed": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~28/TIEOUT_SPLIT_E1.json\nDB30-3-AC1 FAIL",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "whether 1,000 per batch fits 900 s and 2,048 MB on the served pandas 2.2.3 Lambda",
+      "reason": "Measured locally on pandas 3.0.6; lots peak max 1,763.4 MB over 5 runs; the served Lambda was not run. Graded later by the issuer."
+    },
+    {
+      "item": "the two reaper-interrupted runs",
+      "reason": "Killed by the dell2 reaper mid-lots-stage (row IRPT_DASHBD-W33-S1); no record, not entered as timings; listed in interrupted_runs."
+    },
+    {
+      "item": "a fifth-run tail at 2,000",
+      "reason": "Two runs at 2,000 (824.30, 835.42 s) already forced a p95 over 750 s for any five, so the third to fifth were not run (row IRPT_DASHBD-W33-S2)."
+    },
+    {
+      "item": "any S3 write, Lambda invoke, deploy, vendor call, bun or download",
+      "reason": "Bounds of the order; none made. S3 was read only."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W33-S1",
+    "IRPT_DASHBD-W33-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lots_p95_agg.py",
+      "result": "rc 0"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 lots_p95_agg.py account_activity_lots.py",
+      "result": "All checks passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_reporting/tests/test_account_activity_lots.py",
+      "result": "45 passed"
+    }
+  ]
+}
