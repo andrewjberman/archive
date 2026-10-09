@@ -30,8 +30,10 @@ def _served_ok(b: dict, deployed: str) -> bool:
             and isinstance(b.get("mail_domain_entries"), int)
             and b.get("mail_domain_entries") == b.get("mail_domain_entries_signed")
             and b.get("concierge_families_revoked_since_deploy") == 0
-            and b.get("bloomberg_tools_signed") in (4, 5)
-            and b.get("bloomberg_tools_allowed") == b.get("bloomberg_tools_signed")
+            and b.get("bloomberg_unscoped") is True
+            and isinstance(b.get("bloomberg_class_probes"), int) and b.get("bloomberg_class_probes") >= 4
+            and b.get("bloomberg_class_probes_allowed") == b.get("bloomberg_class_probes")
+            and b.get("bloomberg_m365_state") in ("answers", "reconsent_named")
             and b.get("grants_written") == 0)
 
 
@@ -44,7 +46,9 @@ def _grants_ok(b: dict, deployed: str) -> bool:
             and b.get("calendar_months_after") == [13, 13]
             and b.get("other_principals_changed") == 0
             and isinstance(b.get("prior_reach_recorded"), int) and b.get("prior_reach_recorded") == 2
-            and b.get("thirteen_month_read_available_dates_min", 0) >= 1)
+            and b.get("thirteen_month_read_available_dates_min", 0) >= 1
+            and b.get("bloomberg_grant_mirrors_andrew") is True
+            and b.get("bloomberg_prior_grant_recorded") is True)
 
 
 RULES = {"RL15_DIGEST": _served_ok, "RL15G_DIGEST": _grants_ok}
