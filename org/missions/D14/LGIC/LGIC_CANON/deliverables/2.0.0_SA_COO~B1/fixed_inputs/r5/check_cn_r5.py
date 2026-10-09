@@ -40,19 +40,31 @@ def run(args, timeout=900):
     return p.returncode, ((p.stdout or b"") + (p.stderr or b"")).decode("utf-8", "replace").replace("\r\n", "\n")
 
 
+def is_plant(r):
+    """AMENDMENT 1 (CN-q-1): the wave's own planted rows (fictional by construction) are not estate names; the contract
+    marks each by its name's evidence instrument starting with 'planted'."""
+    ev = (((r.get("current") or {}).get("name") or {}).get("evidence") or {})
+    return str(ev.get("instrument") or "").startswith("planted")
+
+
 def contract_names():
     rows = json.load(open(os.path.join(ROOT, CONTRACT), encoding="utf-8"))["rows"]
-    out = []
+    out, plants = [], []
     for r in rows:
         nm = ((r.get("current") or {}).get("name") or {}).get("value")
-        if nm:
-            out.append((r["node_type"], nm))
-    return out
+        if not nm:
+            continue
+        (plants if is_plant(r) else out).append((r["node_type"], nm))
+    print("wave rows=%d planted excluded=%d %s" % (len(rows), len(plants), [n for _t, n in plants]))
+    return out, plants
 
 
 def arm_step13():
-    names = contract_names()
+    names, plants = contract_names()
     need(names, "no names read from %s" % CONTRACT)
+    rul = json.load(open(os.path.join(ROOT, "infra/logic/registry/name_rulings.json"), encoding="utf-8"))["name_rulings"]
+    planted_rows = [r["name"] for r in rul if (r.get("type"), r.get("name")) in set(plants)]
+    need(not planted_rows, "name_rulings.json carries a row for a planted fictional name: %s" % planted_rows)
     tmp = tempfile.mkdtemp(prefix="cn-r5-")
     path = os.path.join(tmp, "wave_names.tsv")
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
