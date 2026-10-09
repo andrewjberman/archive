@@ -1,0 +1,59 @@
+{
+ "arms": [
+  {
+   "detail": "REAL inputs + real served index (business_date 2026-10-08/2026-10-08), writes captured in memory. BASE (IB-pr-402 bytes): gate=PUBLISHED conditions=[] listed={'new_unclassified': 0} uploaded=True. BUILT: gate=REFUSED conditions=[['classified_security_lost', 53]] listed={'new_unclassified': 6} uploaded=False. The gate CODE is unchanged (evaluate_publish_gate is byte-identical in both members: yes); its OUTCOME on the real candidate is DIFFERENT -- the order expected the same. Mechanism (measured, counts only): {\"base_placed_keys\": 1931, \"base_unclassified_keys\": 17, \"built_unclassified_keys\": 72, \"gate_reported_conditions\": [[\"classified_security_lost\", 53]], \"lost_keys_also_classified_on_a_non_smartx_node_of_the_built_candidate\": 53, \"lost_keys_carried_by_a_smartx_model_asset_node\": 53, \"lost_keys_cusip_namespace\": 53, \"lost_keys_rule_applied_to_base_nodes\": 53}",
+   "name": "fwd14_gate_unchanged",
+   "negative_control": false,
+   "verdict": "FAIL"
+  },
+  {
+   "detail": "The six fixture arms (worse_restored, all_unknown_loses_account, closed_account_not_refused, monday_not_stale, mutant_gate_stubbed) run on each tree's real HoldingsPublication in an in-memory bucket: identical per arm = {\"fx_49financial_all_unknown_loses_account\": true, \"fx_49financial_closed_account_not_refused\": true, \"fx_49financial_monday_not_stale\": true, \"fx_49financial_mutant_gate_stubbed\": true, \"fx_49financial_worse_restored\": true}",
+   "name": "fwd14_gate_fixture_arms_unchanged",
+   "negative_control": false,
+   "verdict": "identical"
+  },
+  {
+   "detail": "NEGATIVE CONTROL (the gate arms discriminate): built tree with evaluate_publish_gate stubbed to PUBLISHED publishes the worse fixture candidate (uploaded=True index_moved=True); the real gate does not",
+   "name": "negative_control_mutant_gate_stubbed",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "BUILT classify_security takes security_id and asks the table for CUSIP:<id> after a symbol miss; BASE classify_security has no security_id parameter (signature read from the base member). Over the 115412 SmartX nodes that newly carry a CUSIP on built: symbol hit 0, symbol miss 115412; of the misses, CUSIP key HIT 1, CUSIP key miss 115411. Nodes NEWLY CLASSIFIED (unclassified/None on base, a class on built): 0 of 115412. Classification changed another way: 115411. CUSIP node whose class did not move: 1. (A node with no symbol reaches the CUSIP key directly: canonical_lookup('') is None.)",
+   "name": "symbol_miss_cusip_fallback",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "Same node ids on both trees = True (155019 / 155019 nodes). Changed 115537, unchanged 39482, only in base 0, only in built 0. Differing fields on changed nodes: {\"asset_class\": 20615, \"asset_class_basis\": 115498, \"classification\": 115450, \"display\": 115412, \"security_id\": 115412, \"sub_asset_class\": 21084}. SmartX SECURITY nodes 115450: 115412 newly carry a CUSIP security_id, 38 keep the source id with 'no CUSIP in source' listed, 0 ambiguous. Changed nodes that are not SmartX SECURITY nodes: 87. Candidate nodes sha256 base 7fb4bfafd53b built see analysis (candidate not landed: REFUSED).",
+   "name": "real_49financial_nodes",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "NEGATIVE CONTROL: nodes the two changes do not reach stay as on base. Nodes that are neither a SmartX model asset nor a custody SECURITY node with a CUSIP security_id: 32037 of 32037 byte-equal to base. SmartX model-asset nodes with NO CUSIP on built (source id kept, 'no CUSIP in source' listed): 38, of which keep identical asset_class/sub_asset_class/asset_class_basis: 38 (their classification facts gain the listing line; that is the only difference).",
+   "name": "negative_control_untouched_nodes_and_no_cusip_nodes",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "e56 on the non-SmartX SECURITY nodes whose security_id is a CUSIP: 7532 such nodes, 87 changed, 32 NEWLY CLASSIFIED (unclassified on base, a class on built), 0 classified->unclassified. (Same node ids on both trees; only classification fields differ on these.)",
+   "name": "custody_cusip_nodes_e56_fallback",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "The 115412 SmartX model-asset nodes that newly carry a CUSIP: class state base->built {\"classified->classified\": 101520, \"classified->unclassified\": 13892}. display.symbol present on base and ABSENT on built: 115412 (fill_display takes `symbol` from a TICKER-namespaced security_id or a ticker= fact; a CUSIP security_id gives it neither, so classify_security then asks the table with no ticker, the CUSIP key misses, and the bd-securities fallback answers by name). The order expects no loss here.",
+   "name": "smartx_model_asset_classification_moves",
+   "negative_control": false,
+   "verdict": "FAIL"
+  }
+ ],
+ "gate_files": {
+  "base_seconds": 443.4,
+  "built_seconds": 330.7
+ },
+ "method": "base tree = IB-pr-402's built 49F bytes (sha256 3f2e738f...), built tree = base + e56 diff + IB-pr-403 diff, each extracted into its own directory outside the worktree and driven by ~265's replay_publish_gate.py `run` (python -I) through replay_driver_cached.py (memoised canonical_lookup; dumps the candidate nodes before the gate sees them). Real arms: the tree's own run_firm on the real 49F sources and the real served index through a read-through client whose writes are captured in memory. Nothing is put anywhere.",
+ "pin": "776d8300716e572ea95f13ecd8281e594c0443cb",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-406"
+}
