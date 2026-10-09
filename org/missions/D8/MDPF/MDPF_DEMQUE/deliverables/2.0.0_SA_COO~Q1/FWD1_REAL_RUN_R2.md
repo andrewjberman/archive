@@ -1,4 +1,4 @@
-# MDPF_DEMQUE round 2 -- the one real run of FWD-1 (2.0.0_SA_COO~Q1; DRAFT, two hops open)
+# MDPF_DEMQUE round 2 -- the one real run of FWD-1 (2.0.0_SA_COO~Q1; round 2 CLOSED 2026-10-09 ~03:1xZ, hop 7 carried forward)
 
 FWD-1 (PRD v0.3 @fe3d0659ad): a named security a living Cottonwood client holds, with no history before, has its daily prices value that
 client's holdings on the client's pages for the dates the backfill fills; those prices agree with the prices the client actually traded
@@ -35,3 +35,9 @@ cells, 50 requests. Its read after the fire: lock outcomes by asset type (the 0.
   `dt=2026-10-09/ledger.jsonl` landed at 0 bytes. Runner now uploads the local day; `dt=2026-10-08/ledger.jsonl` re-uploaded (418 bytes).
   The 0-byte object stays until a delete is confirmed (S3 deletes need a human word).
 - **Finding (row MDPF_DEMQUE-D1-S1):** the lock rule has no agreement-rate floor (PONPX locks at 51 of 83). Round-3 candidate.
+
+## Round-2 close (CTO msg 1511)
+
+Round 2 closed with its orders terminal (DQ-t-6, DQ-t-7 complete; DQ-t-8 SUPERSEDED, msg 1368); round-close-check MAY-CLOSE (3 orders,
+2 complete, 2 proofs OK, 0 judgment). FWD-1 is NOT yet REALIZED: hop 7 (the values on 0QF880237's served page) is an outcome read owed by
+dell2's ADVI_COTBKF and carries forward into round 3 (CTO msg 1511); the 2% bar and the crash-day fill are the CVO's judgment at L9.
