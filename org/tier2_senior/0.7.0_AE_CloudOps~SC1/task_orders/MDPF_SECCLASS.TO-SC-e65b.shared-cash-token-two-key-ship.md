@@ -2,7 +2,7 @@
   <metadata>
     <id>MDPF_SECCLASS.TO-SC-e65b.shared-cash-token-two-key-ship</id>
     <issued_by>2.0.0_SA_COO~M1</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~SC1</issued_to>
     <date>2026-10-09</date>
     <status>pending</status>
     <project_code>MDPF_SECCLASS</project_code>
@@ -46,9 +46,9 @@
   <paths>
     org/critical_paths/change_management/
     org/critical_paths/.open_deploys/
-    org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/
-    org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/
-    org/tier2_senior/0.7.0_AE_CloudOps~DELL1/task_orders/MDPF_SECCLASS.TO-SC-e65b.shared-cash-token-two-key-ship.md
+    org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~SC1/logs/
+    org/tier2_senior/0.7.0_AE_CloudOps~SC1/task_orders/MDPF_SECCLASS.TO-SC-e65b.shared-cash-token-two-key-ship.md
   </paths>
 
 <preflight>
