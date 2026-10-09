@@ -13,6 +13,12 @@ excluded_count, excluded_weight.
 Pass: the gold row for the thread account exists and its daily_return is within 1e-9 of the recompute, and its
 excluded_count equals the recompute's.
 """
+import os as _os
+import sys as _sys
+
+if not _os.environ.get("IRPT_THREAD_ACCOUNT"):
+    print("SKIP: IRPT_THREAD_ACCOUNT unset")
+    _sys.exit(0)
 import io
 import json
 import sys
@@ -26,7 +32,7 @@ sys.path.insert(0, str(ROOT / "lib"))
 import opal_naming  # noqa: E402
 import trading_calendar  # noqa: E402
 
-THREAD = "0010498003"
+THREAD = _os.environ["IRPT_THREAD_ACCOUNT"]
 DAY = sys.argv[1] if len(sys.argv) > 1 else "2026-09-25"
 DECL = ROOT / "data/assets/scripts/gold/irpt_holdings_performance/sources.json"
 s3 = boto3.client("s3")

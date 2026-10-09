@@ -27,7 +27,7 @@ import tenants  # noqa: E402
 from ids import opaque_account  # noqa: E402
 
 PREFIX = "irpt/49financial/gold/holdings_performance_daily/"
-T, OTHER = "0010498003", "0012347125"
+T, OTHER = "9985623272", "9937398723"
 DAYS = {
     "2025-12-31": [(T, 0.004, 100.0, "OK"), (OTHER, 0.001, 50.0, "OK")],
     "2026-01-02": [(T, 0.010, 101.0, "OK"), (OTHER, 0.002, 50.1, "OK")],
