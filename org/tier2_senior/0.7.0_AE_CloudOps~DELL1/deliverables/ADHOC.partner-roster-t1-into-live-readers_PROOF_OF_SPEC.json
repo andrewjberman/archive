@@ -13,12 +13,13 @@
   "never_widen_pair": {
     "coo_half": "org/tier1_exec/2.0.0_SA_COO~G1/deliverables/COO_HALF_PARTNER_ROSTER_DEPLOY_20261009.md@58e5631eb7",
     "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_PARTNER_ROSTER_RETARGETED_20261009.md@af37bb5fca",
-    "read_before_first_live_act": "Both halves were read at their pins before the first live act; the COO half's leg-B expected-outcome table is what C6's two arms were graded against."
+    "read_before_first_live_act": "Both halves were read at their pins before the first live act; the COO half's leg-B expected-outcome table is what C6's two arms were graded against.",
+    "amendment": "A1 @e642b946ef by 2.0.0_SA_COO~G1 (issuer amends its own criteria, rule 27 L6; the amendment commit states the gate limb that graded it: none, to-pipeline-gate LIMB 6 does not fire on a modification). A1 disposed leg A: mint from a dedicated LF linked worktree at HEAD with a pre-mint md5 gate, and do NOT re-normalize the shared working copy."
   },
   "risk_class": "SERVED",
-  "rollback": "LEG B (landed): re-point module.emitter to artifact version LEBxFtsuAQOsw4xcjeDepTZrRCj9CWAt (CodeSha256 n/Tu1ns1eNl1vLBiR29ZttXGVjuzz5DAsjV5gBut/2k=) by targeted apply; that version is INTACT in the versioned bucket, re-read at 2026-10-09T02:38Z. LEG A (never acted): no rollback needed -- the bundle still serves version BtC_0xCV5wIH1yJmIYw1XdDVh5UN_YC6, untouched.",
-  "scope": "Leg A: re-mint bundles.accrual_bridge from HEAD -- HELD, never acted. Leg B: the emitter's vendored partner_roster.json on a PINNED build -- LANDED and verified.",
-  "status": "PARTIAL -- leg B landed and accepted (C3-C6 PASS); leg A HELD pre-act on a write outside this order's <paths>; C7 clock-gated on the 17:15Z scheduled fire. Ledger deliberately OPEN.",
+  "rollback": "LEG B: re-point module.emitter to artifact version LEBxFtsuAQOsw4xcjeDepTZrRCj9CWAt (CodeSha256 n/Tu1ns1eNl1vLBiR29ZttXGVjuzz5DAsjV5gBut/2k=) by targeted apply; that version is INTACT in the versioned bucket. LEG A: copy bundle version BtC_0xCV5wIH1yJmIYw1XdDVh5UN_YC6 back over the key; it is INTACT in version history. Trigger for either: any criterion failing.",
+  "scope": "Leg A: re-mint bundles.accrual_bridge from HEAD -- LANDED under amendment A1 from an LF linked worktree. Leg B: the emitter's vendored partner_roster.json on a PINNED build -- LANDED and accepted.",
+  "status": "BOTH LEGS LANDED AND VERIFIED. C2,C3,C4,C5,C6 PASS. C1 and C7 are the same single remaining fact: leg B4 awaits the 2026-10-09T17:15Z scheduled emitter fire. Ledger deliberately OPEN on that one leg.",
   "go_message": "2.0.0_SA_COO~G1 msg 1448, acked by 0.7.0_AE_CloudOps~DELL1 (READ clock). Second relay context: CTO~DELL1 msgs 1287/1296.",
   "controls": {
     "crlf_discrimination_on_the_b0_rebuild": {
@@ -44,6 +45,13 @@
     }
   },
   "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-assets/portal/gold/mdpf/_code/mdpf-accrual-bridge.tar.gz",
+      "kind": "s3_object",
+      "commit_or_etag": "mzAQC0vZTMcYjXnUJd9ezN2abFt2n3.3",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Re-minted under amendment A1 from an LF linked worktree at HEAD f5268f3c7f. head-object: ETag 16cfe41c6938187f5495e1d01e8d478b equal to the minted md5; roster-authority-sha256 4c104d9bb8509b89.. equal to the HEAD blob sha; script-sha256 648cf3f5.. unchanged. Prior version BtC_0xCV5wIH1yJmIYw1XdDVh5UN_YC6 preserved as the rollback target."
+    },
     {
       "path_or_key": "s3://opal-313476888478-lambda-artifacts/opal-assets/opal-assets-daily-emitter.zip",
       "kind": "s3_object",
@@ -72,20 +80,19 @@
       "criterion_verbatim": "the order's ledger reads CLOSED with legs A1,A2,B0,B1,B2,B3,B4 each proven (or B0 STOP recorded and legs B1-B4 not run)",
       "method": "command",
       "invocation": "python .tools/deploy_ledger.py check",
-      "output_evidence": "NOT CLOSED, deliberately. Legs closed with proof: B0, B1, B2, B3. Legs OPEN: A1 and A2 (leg A held pre-act, see C2) and B4 (clock-gated on the 17:15Z scheduled fire, see C7). The ledger is designed to stay open until every leg is proven, so closing it now would be the false-clean state the tool exists to prevent.",
-      "denominator": "4 of 7 legs closed with proof; 3 open (2 held, 1 clock-gated)",
+      "output_evidence": "6 of 7 legs closed with proof: A1 and A2 (leg A, under amendment A1), B0, B1, B2, B3. Open: B4 only, clock-gated on the 17:15Z scheduled fire. Closing now would be the false-clean state the tool exists to prevent.",
+      "denominator": "6 of 7 legs closed with proof; 1 open (clock-gated)",
       "status": "UNCOMPUTABLE",
-      "status_reason": "Clock- and dependency-gated, not failed. The ledger is held OPEN on purpose: legs A1/A2 await a write outside this order's <paths> (see C2) and leg B4 awaits the 2026-10-09T17:15Z scheduled fire (see C7). The later run that resolves it: close the ledger once the issuer disposes leg A and the 17:15Z read lands."
+      "status_reason": "Clock-gated only, no longer dependency-gated. 6 of 7 legs closed with proof (A1, A2, B0, B1, B2, B3). The single open leg is B4, which awaits the 2026-10-09T17:15Z scheduled fire; the later run that resolves it IS that fire. The ledger stays OPEN by design until then, with its window declared 20h at open."
     },
     {
       "criterion_id": "C2",
       "criterion_verbatim": "roster-authority-sha256 equals `git show HEAD:data/mdpf/config/partner_roster.json | sha256sum`; script-sha256 equals 648cf3f58881058236ff6c85bdb60ee9e20bb4af9a49051237b78dbb8a19e8d5",
       "method": "live_read",
-      "invocation": ".tools/aws s3api head-object --bucket opal-data-assets --key portal/gold/mdpf/_code/mdpf-accrual-bridge.tar.gz --query Metadata",
-      "output_evidence": "NOT ATTEMPTED -- leg A1 HELD before any write. Live metadata still reads the pre-existing roster-authority-sha256 e86e46312d5b00a4e143b2f8859de46e43efdac12cd89790b07753feb1b347ae with script-sha256 648cf3f58881058236ff6c85bdb60ee9e20bb4af9a49051237b78dbb8a19e8d5, on version BtC_0xCV5wIH1yJmIYw1XdDVh5UN_YC6. REASON HELD: safe_deploy_core.py build_bundle_payload materializes members with src.read_bytes() on the WORKTREE path, while deploy_file uses _index_blob for exactly this reason. data/mdpf/config/partner_roster.json reads i/lf w/crlf with NO gitattributes rule (the :153 glob is *.yaml), so the mint would have stamped 9d8ed608c2111af398c591cbe7f8a74e6520418ea92c532cd8eebe53d3911087 instead of the required 4c104d9bb8509b89456ad46f41dc07bec1eb39c5caa045149d26a20e33ff64a6, and would have republished a SERVED bundle whose roster bytes are not HEAD's. Both remedies are outside this order's <paths>. Row ADHOC_PARTNER_ROSTER-D1-S1 @7efcff6f31.",
-      "denominator": "2 of 2 required metadata keys read on the live object; 0 of 1 mint acts attempted",
-      "status": "UNCOMPUTABLE",
-      "status_reason": "Not attempted. The in-flow mint reads the WORKTREE rather than the committed authority (safe_deploy_core.py build_bundle_payload src.read_bytes(), against deploy_file's _index_blob), and the roster is i/lf w/crlf on this box, so the act would have stamped 9d8ed608.. onto a SERVED bundle instead of the required 4c104d9b... Both remedies are outside this order's <paths>, so the substitute oracle is the pre-act measurement recorded in row ADHOC_PARTNER_ROSTER-D1-S1 @7efcff6f31 plus the live head-object read showing the bundle still on its prior version."
+      "invocation": ".tools/aws s3api head-object --bucket opal-data-assets --key portal/gold/mdpf/_code/mdpf-accrual-bridge.tar.gz --query Metadata   (after: git -c core.autocrlf=false worktree add --detach /c/tmp/lega-lf HEAD; pre-mint md5 gate; then that worktree's own .tools/safe-deploy.sh --mint-bundle accrual_bridge)",
+      "output_evidence": "LIVE read, not the mint's self-report. VersionId mzAQC0vZTMcYjXnUJd9ezN2abFt2n3.3, LastModified 2026-10-09T02:59:31Z, ETag 16cfe41c6938187f5495e1d01e8d478b EQUAL to the minted local md5 (bytes landed). Metadata roster-authority-sha256=4c104d9bb8509b89456ad46f41dc07bec1eb39c5caa045149d26a20e33ff64a6, EQUAL to `git show HEAD:data/mdpf/config/partner_roster.json | sha256sum`. script-sha256=648cf3f58881058236ff6c85bdb60ee9e20bb4af9a49051237b78dbb8a19e8d5, UNCHANGED as required. Executed under amendment A1: the LF worktree's pre-mint gate read md5 3d309b26.. / sha256 4c104d9b.. / 0 CRs / w/lf before the mint, and the worktree was removed after C2 read green. Rollback version BtC_0xCV5wIH1yJmIYw1XdDVh5UN_YC6 preserved.",
+      "denominator": "2 of 2 required metadata keys equal; 1 of 1 mint acts attempted and verified",
+      "status": "PASS"
     },
     {
       "criterion_id": "C3",
@@ -136,8 +143,8 @@
   ],
   "declared_exclusions": [
     {
-      "item": "Leg A -- the bundles.accrual_bridge re-mint (criteria C2, ledger legs A1/A2)",
-      "reason": "HELD before any write. The in-flow mint reads the WORKTREE, not the committed authority, and the roster is CRLF on this box, so the mint would have stamped the wrong sha onto a SERVED bundle. Both remedies (re-normalizing the file, or pointing build_bundle_payload at _index_blob) are outside this order's declared <paths>, and the order's conditions say a refusal is a row to report, never a workaround. Row ADHOC_PARTNER_ROSTER-D1-S1."
+      "item": "Re-normalizing the SHARED working copy of data/mdpf/config/partner_roster.json",
+      "reason": "Explicitly excluded by amendment A1: 'The shared working copy is NOT re-normalized by this order.' Leg A was instead minted from a dedicated LF linked worktree, so the CRLF state of the shared tree is untouched and remains an open item for whoever owns it -- recorded separately at 8430c79f13."
     },
     {
       "item": "The deprecated loose key s3://opal-data-mdpf/code/scripts/gold/partner_roster.json",
@@ -161,10 +168,10 @@
   ],
   "forward_notes": [
     "ISSUER ACT NEEDED for this instance to validate: proof-of-spec-check refuses genre=DEPLOY because the order lacks the issuer marker <proof_genre>DEPLOY</proof_genre> on its own line (it carries <risk>SERVED</risk>, and the checker's own note says a LOCAL act is not a deploy). Every other limb passes: schema clean, 3 of 3 named controls discriminate with 0 DID-NOT-DISCRIMINATE, rollback named, artifact-resolution resolved. This seat did NOT add the marker itself even though the order file sits in its <paths>: the marker is the issuer's declaration of genre at the cut, and self-certifying it is the self-grading the checker exists to prevent.",
-    "B4/C7 is the only outstanding read on leg B and is clock-gated to the 2026-10-09T17:15Z scheduled fire.",
-    "Leg A needs a decision from the issuer: either re-normalize data/mdpf/config/partner_roster.json, or fix build_bundle_payload to use _index_blob as deploy_file already does. The second is the durable repair and reaches every declared bundle on every Windows worktree.",
     "The sanctioned uploader cannot upload from dell1: infra/aws/lambda/ci/build-and-upload.sh resolves aws through a hardcoded aws.cmd path and dies 'aws.cmd: FATAL -- no AWS CLI found'. The artifact was uploaded with .tools/aws s3 cp plus the content-sha256 stamp the yang-lambda module requires, verified by read-back. Worth its own repair so a dell box can use the normal path.",
-    "proof-of-spec-check ANNOUNCE (refuses nothing here, but worth the issuer's eye): invocation-alignment reports 3 of 7 rows diverge from the criterion's <invocation> text -- C3, C5 and C6. In each case the instance records the fuller runnable command (the worktree cut for C3, the presigned-URL download for C5, the driver's actual arguments for C6) rather than the criterion's prose summary. Named so the divergence is the issuer's to accept or correct in the order, not something this seat quietly normalised away."
+    "proof-of-spec-check ANNOUNCE (refuses nothing here, but worth the issuer's eye): invocation-alignment reports 3 of 7 rows diverge from the criterion's <invocation> text -- C3, C5 and C6. In each case the instance records the fuller runnable command (the worktree cut for C3, the presigned-URL download for C5, the driver's actual arguments for C6) rather than the criterion's prose summary. Named so the divergence is the issuer's to accept or correct in the order, not something this seat quietly normalised away.",
+    "Leg A landed under amendment A1 after being held; the underlying mint defect (build_bundle_payload reads the worktree, deploy_file uses _index_blob) is NOT fixed by this order and still reaches every declared bundle on every Windows worktree. Row ADHOC_PARTNER_ROSTER-D1-S1.",
+    "B4/C7 is the only outstanding read; it is clock-gated to the 2026-10-09T17:15Z scheduled fire and was deliberately not forced by an ad-hoc invoke."
   ],
   "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/2026-10-08/grant_cell_and_crlf_phantom.md",
   "compiler_tools": [
