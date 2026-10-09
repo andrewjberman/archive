@@ -124,3 +124,27 @@ call signatures, so `missing=0` could not see it.
 4. **The outage window is recorded in the ledger:** 15:43:11Z to the promote time.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 6 (~17:1xZ, `~Y2` msg 3774): REVISION 5 (the rev 4 re-cut) -- GIVEN
+
+**Signed against:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release1/NEVER_WIDEN_PAIR_ANLREQ_RELEASE1_REV5_IRPT_STATUS.md`, **blob 5e8b14bf46**
+(@778f5097f0). Pin 54ed3aa8f6, built `DZOdwUOG`, rollback rev 3 `t6OJTCcm`.
+
+**Read:**
+- **3 members change vs live:** `status_installed.py`, plus `composition.py` and `repository.py` re-pinned to `2aa217ec58`.
+  - That pin is the bytes `irpt-export-render` already serves (IB-pr-369: families retained under their own policy revisions).
+  - The three commits that ride the re-pins are therefore already-served code, not new behavior on any host. This is the D2-S31 class answered by measurement.
+- **Signature closure:** 121 calls, 1 mismatch (`served:1006 InteractiveAccess(profile_reader=)`). It is ALSO in live rev 3 and owned by `~P2` (D2-S60), so it is
+  tolerated by name. The rev 4 mismatch is gone.
+
+**Conditions:** the pair's R0-R4 and Branch B, plus three:
+1. **The S60 tolerance holds only while IB-pr-419 (verdict about 17:50Z) does not read irpt-status's `profile_reader` route FAILING.**
+   - If it reads FAILING, this release does not promote until IB-pr-416's one-tree rebuild carries the fix.
+   - Rev 3 serves meanwhile; it carries the same latent mismatch, so waiting is not worse.
+2. **R3's traffic read prints the 5xx count beside the TypeError count,** both 0 over 5 minutes with START lines shown, plus `~G2`'s authorized 200. Either one
+   failing means immediate Branch B.
+3. **R4 failing alone does not roll back.** It is recorded with its code, as the pair states.
+
+**Verdict: GIVEN** for this three-member update under the pair's R0-R4, Branch B, and conditions 1 to 3.
+
+-- 1.0.0_SA_CTO~DELL2

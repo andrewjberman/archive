@@ -1,0 +1,63 @@
+{
+ "window": {
+  "start": "2026-10-08T17:03:38Z",
+  "end": "2026-10-09T17:03:38Z",
+  "scope": "filter-log-events over /aws/lambda/<function>, auto-paginated, counted client-side"
+ },
+ "functions": [
+  {
+   "function": "irpt-narrative",
+   "cloudwatch_24h": {
+    "unexpected_keyword": 0,
+    "errors_total": 0
+   },
+   "gets": [
+    {
+     "route": "GET /api/scoped/investor-reporting/narrative/{reportId}",
+     "status_code": 200,
+     "error_class": "NOT_AUTHORIZED",
+     "reaches_split": false,
+     "note": "Lambda invoke StatusCode 200, no FunctionError; envelope public_reason_code NOT_AUTHORIZED (no verified internal subject); refused before the split"
+    }
+   ],
+   "verdict": "LATENT",
+   "reason": "0 unexpected-keyword and 0 error lines in 24h; guard_prospect(authorize_owner=, resolve_owner=) is on the CREATE/owned-prospect path behind a verified subject, which the GET did not reach and a synthetic principal cannot supply."
+  },
+  {
+   "function": "irpt-performance-adapter",
+   "cloudwatch_24h": {
+    "unexpected_keyword": 3,
+    "errors_total": 0
+   },
+   "gets": [
+    {
+     "route": "GET /api/scoped/investor-reporting/performance/{accountSetId}",
+     "status_code": 200,
+     "error_class": "NOT_AUTHORIZED",
+     "reaches_split": false,
+     "note": "Lambda invoke StatusCode 200, no FunctionError; envelope public_reason_code NOT_AUTHORIZED (no verified internal subject); refused before the split"
+    }
+   ],
+   "verdict": "FAILING",
+   "reason": "3 live unexpected-keyword events in 24h (3 streams, 15:41Z to 16:49Z), all Enforcer.__init__() got an unexpected keyword argument load_report_owner, operation performance-report, classifier UNEXPECTED; a live caller hit the split. Fails closed (TypeError, no data served). errors_total is 0 because these lines carry no ERROR/Traceback token (structured irpt_internal JSON). The profile_reader split was not seen in logs and not reached by the GET."
+  },
+  {
+   "function": "irpt-status",
+   "cloudwatch_24h": {
+    "unexpected_keyword": 52,
+    "errors_total": 52
+   },
+   "gets": [
+    {
+     "route": "GET /api/scoped/investor-reporting/analysis/requests",
+     "status_code": 200,
+     "error_class": "NOT_AUTHORIZED",
+     "reaches_split": false,
+     "note": "Lambda invoke StatusCode 200, no FunctionError; envelope public_reason_code NOT_AUTHORIZED (no verified internal subject); refused before the split"
+    }
+   ],
+   "verdict": "LATENT",
+   "reason": "All 52 events (1 stream, 16:17Z to 16:22Z) are build_retained_repositories() got an unexpected keyword argument additional_policy_revisions at status_installed.compose_ports, a different split than profile_reader, and stopped before the $LATEST update at 16:43Z; the GET after it built and answered with no error. The profile_reader split (CREATE_INPUT, a write) was not reached and no live caller hit it in the window. Caveat: the 52 were a live outage of a different kwarg, now cleared."
+  }
+ ]
+}
