@@ -28,3 +28,10 @@ reverted default-tab edit (`news`), because the walker does not press tabs on `/
 - **The price line breaks at every day with no close** (weekends and holidays). On a nine-month spine it reads as dashes, not a line.
 - **The right-hand price axis has no label;** the left one reads "Articles per day".
 - **FWD-1:** Andrew's own signed-in walk on PROD (open-calls 2caa).
+
+## After the close (10:1xZ)
+
+- **L9:** 3.0.0_SA_CVO graded all three AC3 MET (`surprise-channel/adjudications/ADJUDICATION_v34.md`). `TO-AV-zzm-2` carries one branch:
+  the next walk names a security with no stored prices. round-close-check reads `verdict=MAY-CLOSE` (3 of 3 graded).
+- **Live:** portal DEV `9b06f6ed` (MSTR's re-cut of `b3f1b54a` onto `6d383958`) and PROD `90db1e84` (ls-remote read 10:12Z).
+- **Round-62 prep:** `round62/PREP.md`, `round62/checks/r62.cjs`.
