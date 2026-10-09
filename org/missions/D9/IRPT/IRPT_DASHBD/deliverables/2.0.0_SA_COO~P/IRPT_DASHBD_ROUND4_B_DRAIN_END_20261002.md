@@ -19,12 +19,12 @@ Author `2.0.0_SA_COO~P`, 2026-10-02 ~18:0xZ. For `3.0.0_SA_CVO` (L8 compile, L9 
 - **Before calling:** the plan (segments and request bodies) was built and printed offline (`BD_LIKEDAY_PLAN_R4.json`). The live
   run refused to call unless the rebuilt plan equalled that file.
 - **Accounts:**
-  - mapped: acct#e7ab8585 (BD 22596361), 0076459710 (BD 23221671), 0084073310 (BD 22659431);
+  - mapped: acct#89d0916a (BD 22596361), 0076459710 (BD 23221671), 0084073310 (BD 22659431);
   - unmapped: 0035940058 and 0091939812, both `pending_resolution` in the roster with no BD id. Neither was called, and no id was
     guessed.
 - **Tie-out:** 14 pairs, every one gap-free by `lib/trading_calendar.py`. **14 of 14 are like-day pairs**: BD's `daysHeld` equals
   Opal's linked days on every window, with no systematic offset.
-  - `abs_diff` median **0.001637** (0.16%), max **0.012130** (1.21%, acct#e7ab8585 over 2026-06-25..07-06, 7 days).
+  - `abs_diff` median **0.001637** (0.16%), max **0.012130** (1.21%, acct#89d0916a over 2026-06-25..07-06, 7 days).
   - Per pair: `deliverables/0.9.0_WK_IRPT_DASHBD~1/TIEOUT_49F_BLACKDIAMOND_R4.{json,md}`.
 - **Records:**
   - `BD_LIKEDAY_PULL_R4.json`;
