@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-dd-1.the-20f-business-section-and-its-census",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "a0db38c8ae6af2bb54619826d7595ac1904bc1a2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "a0db38c8ae6af2bb54619826d7595ac1904bc1a2",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-dd-1.the-20f-business-section-and-its-census.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~315",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/document.py",
+      "kind": "script",
+      "commit_or_etag": "7d54f9feb5d8b720440aa6638929222a22fcb4ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: 20-F key business (Item 4.B. Business Overview) added to _10K_20F_PATTERNS, start item4 B businessoverview / B businessoverview, end C organi[sz]ationalstructure / item4a unresolved / item5 operating; ITEM_CAPS business 60000. 10-K patterns, the three existing 20-F keys and sections_to_excerpt untouched (AC3: 6 of 6 hashes as at the base). Local only; the drain-merge is a site-Z producer-path deploy the issuer holds.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/fetch.py",
+      "kind": "script",
+      "commit_or_etag": "7d54f9feb5d8b720440aa6638929222a22fcb4ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, one line: EXCERPT_ITEMS['20-F'] = ['business', 'risk', 'mdna']. Nothing else in fetch.py changed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/section_census.py",
+      "kind": "script",
+      "commit_or_etag": "7d54f9feb5d8b720440aa6638929222a22fcb4ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: python -m lib.research.filings.section_census --stored; read only (silver_latest for sec and issuer-site, source_object_from_row), no write; output ASCII.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_document.py",
+      "kind": "test",
+      "commit_or_etag": "7d54f9feb5d8b720440aa6638929222a22fcb4ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: class TheTwentyFBusinessSection, 6 plant cases. Full file 15 passed (fitz stubbed on dell1).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_section_census.py",
+      "kind": "test",
+      "commit_or_etag": "7d54f9feb5d8b720440aa6638929222a22fcb4ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 11 tests on planted objects, no store read; stubs fitz itself. 11 passed.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a 20-F's business section is cut from its own heading and closed before C / Item 5; a 20-F without it reads failed with a reason; fetch.EXCERPT_ITEMS 20-F carries business; A1-A3 PASS; R80 R1 AC1 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round80/checks/r80_dd1.py\" --crit AC1; echo \"exit=$?\"",
+      "output_evidence": "NOTE: fitz stubbed for this check (ModuleNotFoundError); cut() does not use it\nA1 PASS: business status=OK, starts='B. Business overview\\nB', own text only=True\nA2 PASS: a 20-F with no Business overview heading reads business FAILED with a reason\nA3 PASS: fetch.EXCERPT_ITEMS['20-F'] = ['business', 'risk', 'mdna']\nR80 R1 AC1 SERVED: YES\nexit=0",
+      "denominator": "3 of 3 A lines PASS (A1 cut from own heading, A2 failed-with-reason, A3 EXCERPT_ITEMS)",
+      "status": "PASS",
+      "expect": "A1 PASS.*A2 PASS.*A3 PASS.*R80 R1 AC1 SERVED: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the census names every stored 20-F the checker reads itself, its SECTION CENSUS denominator equals that count, and ASML_NA_Equity's line reads risk: FALLBACK; C0-C4 PASS; R80 R1 AC2 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round80/checks/r80_dd1.py\" --crit AC2; echo \"exit=$?\"",
+      "output_evidence": "NOTE: fitz stubbed for this check (ModuleNotFoundError); cut() does not use it\nASML_NA_Equity opal-filings-fetch/1.0.0 | risk: FALLBACK \"Risk factors - Cybersecurity and other security\"; mdna: NONE; business: NONE\nBABA_US_Equity opal-filings-fetch/1.0.0 | risk: OWN-HEADING \"D. Risk Factors\"; mdna: OWN-HEADING \"ITEM 5. OPERATING AND FINAN CIAL REVIEW AND\"; business: NONE\nNU_US_Equity opal-filings-fetch/1.0.0 | risk: FALLBACK \"Risk Factors' in this annual report on Form\"; mdna: OWN-HEADING \"Item 5. Operating\"; business: NONE\nPBR_US_Equity opal-filings-fetch/1.0.0 | risk: FALLBACK \"Risk Factors - 2.a) Our controlling shareholder may\"; mdna: NONE; business: NONE\nSAP_GY_Equity opal-filings-fetch/1.0.0 | risk: FALLBACK \"Risk Factors\"; mdna: OWN-HEADING \"ITEM 5. OPERATING AND FINANCIAL REVIEW AND PROSPECTS\"; business: NONE\nSECTION CENSUS: 0 of 5 stored 20-F names carry a business section from its own heading; 1 of 5 risk items came from their own heading\nC1 PASS: census exit=0\nC2 PASS: 5 of 5 stored 20-F names have a census line\nC3 PASS: count line denominator 5, checker's own count 5\nC4 PASS: ASML NA's line names its stored risk text as the fallback heading\nR80 R1 AC2 SERVED: YES\nexit=0",
+      "denominator": "5 of 5 stored 20-F names have a census line; count-line denominator 5 == checker's own count 5; C1-C4 PASS (C0 is the module-exists guard: silent on PASS)",
+      "status": "PASS",
+      "expect": "C1 PASS.*C2 PASS: 5 of 5.*C3 PASS.*C4 PASS.*R80 R1 AC2 SERVED: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the 10-K fixture's three sections and the 20-F risk, mdna and officers sections hash as at the base, every B line PASS; R80 R1 AC3 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round80/checks/r80_dd1.py\" --crit AC3; echo \"exit=$?\"",
+      "output_evidence": "NOTE: fitz stubbed for this check (ModuleNotFoundError); cut() does not use it\nB PASS: 10-K:risk 38ec4f2ff4c8\nB PASS: 10-K:mdna 2f907204b6db\nB PASS: 10-K:officers cfb2041b41e4\nB PASS: 20-F:risk ab299b2f36b1\nB PASS: 20-F:mdna 705604c25dd4\nB PASS: 20-F:officers 9ce8f007a65b\nR80 R1 AC3 SERVED: YES\nexit=0",
+      "denominator": "6 of 6 B lines PASS (10-K risk/mdna/officers, 20-F risk/mdna/officers) against BASE_HASHES",
+      "status": "PASS",
+      "expect": "(B PASS.*){6}R80 R1 AC3 SERVED: YES.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The business key removed from document._10K_20F_PATTERNS['20-F'] in memory, then the order's own AC1 checker run on it (scratch script .scratch/mutant.py).",
+      "expected": "AC1 must FAIL on the mutant: A1 FAIL (no business key) and A2 FAIL, SERVED: NO, exit 1.",
+      "observed": "A1 FAIL: the 20-F cut has no business key (keys: ['mdna', 'officers', 'risk']); A2 FAIL; A3 PASS; R80 R1 AC1 SERVED: NO; mutant exit=1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC3 each run twice and the output md5 compared (AC2 reads the live store and is not hashed).",
+      "observed": "AC3 md5 4407c68a4be9b893d3ec0ca1825ee90b twice; AC1 md5 b1b7ab7e194fbedfe5e145d491c4152a twice.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Re-fetching ASML NA's 20-F, the silver write, the re-analysis and the draft rebuild",
+      "reason": "Out of BOUNDS and the order's own text: no SEC, vendor, model or Bloomberg call, no store write. That is the held STORE half."
+    },
+    {
+      "item": "The filings test folder's collection errors on dell1",
+      "reason": "PyMuPDF does not import here; the order says report them and file no row. 13 of 13 import errors without a stub; 142 run, 0 failed, 0 errors with fitz stubbed."
+    }
+  ],
+  "surprises": [],
+  "session_log": "no separate log file; the session is the git history of branch wk-AMGT_RESAPP-315 (code commit 7d54f9feb5) and this instance's recorded outputs",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/filings/document.py lib/research/filings/fetch.py lib/research/filings/section_census.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh, code commit 7d54f9feb5)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~315 <0.9.0_WK_AMGT_RESAPP~315@opal.agent>\" -F <msgfile> -- <5 code paths>",
+      "result": "ruff first blocked E741 `l` in test_section_census.py; renamed; re-commit passed; commit 7d54f9feb5"
+    }
+  ]
+}
