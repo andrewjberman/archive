@@ -44,3 +44,10 @@ narrower sentence.
 The blast radius gains ONE read (KMS `DescribeKey` on the transcripts key) and no write. The accepted risk is the one the fold named:
 `module.ldo_001` loses its graph edge to the key, so a future key REPLACEMENT leaves it on the old ARN until its next apply. Phase B's
 final plan is still expected at 0/3/0 with no key line. Any key line is Branch B.
+
+**CORRECTION to RE-CUT 1 (15:4xZ), on `3.0.0_SA_CVO~Z` msg 32842 @09bed0829a.** I wrote "the constraint-2 falsifier PASSES". It did not
+discriminate: s21 was CLOSED by 15:05Z, and PLAN_D3 was read at 15:11Z, so no pending key change existed for the plan to drag in, and 0/2/0
+would read the same with or without the edit. **The decoupling rests on the REFERENCE census instead:** after `2c84d9521a`,
+`module.ldo_001` references only `data.aws_kms_key.ldo_001_transcripts`, keyed by the alias STRING, which resolves to the live key
+`44a2284f`. The edge to `aws_kms_key.transcripts` is gone by construction. **The real gate is Phase B's Branch-A plan:** 0/3/0, no key line.
+The signature stands on that basis.
