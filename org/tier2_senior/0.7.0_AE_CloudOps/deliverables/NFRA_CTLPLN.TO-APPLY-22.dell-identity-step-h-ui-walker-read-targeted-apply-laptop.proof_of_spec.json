@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-22.dell-identity-step-h-ui-walker-read-targeted-apply-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-22.dell-identity-step-h-ui-walker-read-targeted-apply-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "15793cc32e5bc354f2ff8e3a6c3aacfcba7cea91"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
+    "vintage_commit": "7dd661eb9f5f42815d2541ac729747c3d8a25cbc",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-22.dell-identity-step-h-ui-walker-read-targeted-apply-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell_steph_20261009/after.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Applied 2026-10-09T01:26:36Z; live policy equals targeted plan; version v2; six of six authorization arms passed; parameter value not read",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "targeted terraform plan exits 0 after Step H",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode -target=aws_iam_policy.dell_agent_plan_reads; echo \"exit=$?\"",
+      "expect": "exit=0",
+      "output_evidence": "dell_steph_20261009/replan.txt: No changes and exit=0; after.json records live equality and all six required arms",
+      "denominator": "one targeted IAM policy address, two Dell principals, and six required live simulation arms",
+      "status": "PASS",
+      "status_reason": "The targeted replan has no changes and exits 0; both Dells can read only the exact walker parameter while delete remains denied and dell2's shell window remains open."
+    }
+  ],
+  "controls": {
+    "exact_parameter_read": {
+      "description": "The intended GetParameter action is allowed while DeleteParameter on the same exact ARN remains denied for both Dells",
+      "expected_landed": "GetParameter allowed and DeleteParameter implicitDeny",
+      "expected_not_landed": "GetParameter denied or DeleteParameter allowed",
+      "observed": "Both Dells GetParameter allowed; both Dells DeleteParameter implicitDeny",
+      "status": "PASS"
+    },
+    "f1_window_preserved": {
+      "description": "The targeted apply does not close the independently open dell2 F1 shell window",
+      "expected_landed": "AWS-RunShellScript and F1 host SendCommand remain allowed",
+      "expected_not_landed": "Either shell document or F1 host SendCommand denied",
+      "observed": "Both shell document and F1 host SendCommand allowed",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_H_UI_WALKER_READ_20261009.md@21dd3c2c23",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_H_UI_WALKER_READ_20261009.md@4d7f665001"
+  },
+  "risk_class": "WORLD",
+  "rollback": "Targeted re-apply only aws_iam_policy.dell_agent_plan_reads at merge 9e17e06278 first parent 2070e381bc7c1e64b86add9d86e8b376aed26a47, then verify both read/delete controls and preserve the independently governed shell window.",
+  "scope": "Step H only: the dell_agent_plan_reads policy gained one exact UI-walker GetParameter statement; the F1 shell-window policy was not in the plan.",
+  "declared_exclusions": [
+    {
+      "item": "Untargeted root convergence read",
+      "reason": "CTO condition defers it until TO-APPLY-20 leg C2 closes; doing it earlier would include the separately governed shell-window closure."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell_steph_20261009/REPORT.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan",
+      "invocation": "targeted only at aws_iam_policy.dell_agent_plan_reads with shared TF_PLUGIN_CACHE_DIR and isolated TF_DATA_DIR",
+      "result": "pre-apply 0/1/0 with one exact statement and no removals; post-apply exit 0 with no changes"
+    },
+    {
+      "tool": "aws iam simulate-principal-policy",
+      "invocation": "six exact action/resource arms across dell1 and dell2",
+      "result": "six of six expected decisions; parameter value not read"
+    }
+  ]
+}
