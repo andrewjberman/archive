@@ -4,15 +4,24 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~ANL</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_BCKEND</project_code>
   </metadata>
+
+  <closure>
+    COMPLETE (issuer, ~15:3xZ). Two correct STOPs first (09:21Z owner_is_advisor=false; 09:40Z owner record has no email field), each with
+    zero deletes; dell2 Y2 ruled the label rule twice (msgs 2997, 3041). AMENDMENT 2 run 10:10Z on keys v3 @4bcebfcb09 by base
+    0.7.0_AE_CloudOps: read-back all True; 7 DDB rows and 2 S3 keys (every version) deleted; sweep_extra=0; ledger closed (@1299ad2367).
+    Issuer live re-read: DDB_LEFT=0 over 7, VERSIONS_LEFT=0 over 2. Proof instance by 0.7.0_AE_CloudOps~ANL (re-addressed; base deaf),
+    AC1 VERSIONS_LEFT=0, VALID (@4ae87b336a). Cell id corrected to dell2's registered IB-ya-751. FINDING: the approved list included a
+    shared NORMALIZED_PORTFOLIO retention row that 3 synthetic IRPT_ANLREQ requests used; dell2 ruled LEAVE, no restore (msg 107979).
+  </closure>
 
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
 <decomp_doc>org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R75_Y.md</decomp_doc>
-<owned_cells>APPLY-Y75</owned_cells>
+<owned_cells>IB-ya-751</owned_cells>
 <decomp_context>dell2's R75 cell APPLY-Y75: "The X-1 read-back and the cleanup are done by the laptop." dell2 2.0.0_SA_COO~Y2 msg 2950 (relay 0.0.0_AB_MSTR msg 107859). Closes row IRPT_BCKEND-D2-S17.</decomp_context>
 </decomp_ref>
 
@@ -108,7 +117,7 @@ lane: the <paths> block names the ledger, the sentinel and the seat's own delive
 </preflight>
 
 <proof_of_spec>
-  <criterion id="AC1" cell_refs="APPLY-Y75"><invocation>python -c "import json,subprocess as s,boto3;k=json.loads(s.check_output(['git','show','4bcebfcb09:org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/r75/Y75-1_admit_keys_v3.json']));c=boto3.client('s3');print('VERSIONS_LEFT=%d'%sum(len([v for v in c.list_object_versions(Bucket=x['bucket'],Prefix=x['key']).get('Versions',[]) if v['Key']==x['key']]) for x in k['admit_keys'] if x['kind']=='s3'))"</invocation><expect>VERSIONS_LEFT=0</expect></criterion>
+  <criterion id="AC1" cell_refs="IB-ya-751"><invocation>python -c "import json,subprocess as s,boto3;k=json.loads(s.check_output(['git','show','4bcebfcb09:org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/r75/Y75-1_admit_keys_v3.json']));c=boto3.client('s3');print('VERSIONS_LEFT=%d'%sum(len([v for v in c.list_object_versions(Bucket=x['bucket'],Prefix=x['key']).get('Versions',[]) if v['Key']==x['key']]) for x in k['admit_keys'] if x['kind']=='s3'))"</invocation><expect>VERSIONS_LEFT=0</expect></criterion>
 </proof_of_spec>
   AC1 counts versions of exactly the 2 named keys (never the wider prefix, which holds other uploads); the row also states the 7 DDB
   keys read NOT_FOUND after delete.
