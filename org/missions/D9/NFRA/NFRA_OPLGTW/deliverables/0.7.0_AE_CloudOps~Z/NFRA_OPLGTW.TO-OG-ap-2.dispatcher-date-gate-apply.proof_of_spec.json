@@ -1,0 +1,163 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "39f5404132"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "02feea1287",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-2.dispatcher-date-gate-apply.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/critical_paths/change_management/20261009T0346Z_nfra-oplgtw-og-bf-1-y-dispatcher-gate_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "2dfe163f12",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Committed at 2dfe163f12, which carried the CLOSE and the sentinel removal (the OPEN state landed earlier: 049fe1c5e2 for OG-ap-1, 26f9669e2a for OG-ap-2). The NEVER-2 ledger, opened with 2 legs before the apply and committed with its sentinel at 26f9669e2a. Both legs are CLOSED with proof and the ledger is CLOSED, so the sentinel is removed: the tf-lambda leg carries the plan audit, the apply and the four read-backs; LA1 carries the Arm 1 invoke with its before/after SSM and host controls.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+   "kind": "config_data",
+   "commit_or_etag": "cdf66df55c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Step 1 and both halves (COO term 3, CTO term 5): trading_calendar.py registered in functions['advi-49f-gold-dispatch'].files in its OWN commit BEFORE the build, because the builder's parity check refuses a top-level .py absent from files[]. Applied as a surgical text edit, not a json round-trip, so the shared file was not reformatted: the diff is 2 insertions / 1 deletion, the file still parses, 229 function entries are intact and a neighbour entry is unchanged. The builder later rewrote artifact_sha256 in the same file after its verified upload; that second, separate edit landed at 19394419c5 and is what had left the path dirty, which was holding site Z's box-sync.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/opal-assets/advi-49f-gold-dispatch.zip",
+   "kind": "s3_object",
+   "commit_or_etag": "5d78d3c5c246a01c5df15c5892568a15",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "VersionId 874BOVx4H5PbboHdqtxW.SwqtNVuFQTF, 11029 bytes, content-sha256 metadata EmlN9/zeB3rk90/QeJd7deRh01yiW3yKXEcLUQpFD0o=. The zip's members equal the ask's section 1 exactly: lambda_function.py 16904 bytes sha256 a524977a86caff1463c2c306f683fba40286dd44ddb8fbe6f62eb1ed0bec9990 and trading_calendar.py 12897 bytes sha256 8ec8e43def5854f67a0dadcef7c735906f44aa07ae5916b2fc62c4c81ca9a3a8, the latter byte-equal to lib/trading_calendar.py. Upload verified by the script's own fail-closed check on size AND sha256 metadata, never by rc=0. Prior version AQ2rQSyBdPpB0sWozwovunpWoL9TWVYA (CodeSha256 TjIWGFWkbUswLkA+mUac9NS+LRZ1q7o6lR1iQLb0kI4=) retained as the named rollback.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ap2_arm1.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Step 5's record of the single Arm 1 invoke: request_id 8f47201f-0cb4-4bed-892e-891404ddee22, invoked_epoch_ms 1791519347767 (2026-10-09T04:15:47.767Z) and the function's response, whose skip_reason is the sentence the halves require.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Rows NFRA_OPLGTW-Z-S70 (the zip cannot carry a BUILD_MANIFEST.json member, because the builder only ships an existing one) and NFRA_OPLGTW-Z-S71 (BLOCKING: AC2's own log query cannot see the line it requires).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the live zip is HEAD's dispatcher and calendar, byte for byte, and no longer the rollback build.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/ap2.sh AC1; echo \"exit=$?\"",
+   "output_evidence": "member lambda_function.py: present=True equal-to-HEAD=True\nmember trading_calendar.py: present=True equal-to-HEAD=True\nlive CodeSha256=EmlN9/zeB3rk90/QeJd7deRh01yiW3yKXEcLUQpFD0o= (rollback TjIWGFWkbUswLkA+mUac9NS+LRZ1q7o6lR1iQLb0kI4=); State=Active LastUpdateStatus=Successful\nRESULT: PASS\nexit=0",
+   "denominator": "Both declared members present and byte-equal to HEAD, plus three live function reads (CodeSha256 moved off the rollback hash, State, LastUpdateStatus). All met.",
+   "status": "PASS",
+   "status_reason": "The deployed zip is HEAD's dispatcher and calendar and is no longer the rollback build. Corroborated independently of this check: the plan was audited as JSON from a saved plan and changed only source_code_hash, s3_object_version and last_modified, with timeout 900, memory 256, role and all 5 environment keys identical before and after; my own read-back gave CodeSha256 EmlN9/.. equal to the built hash, State Active, LastUpdateStatus Successful; and a post-apply re-plan read 'No changes. Your infrastructure matches the configuration.'",
+   "expect": "(?s)member lambda_function\\.py: present=True equal-to-HEAD=True.*member trading_calendar\\.py: present=True equal-to-HEAD=True.*State=Active LastUpdateStatus=Successful.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: a historical record SKIPs on the deployed function, by its own log.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/ap2.sh AC2; echo \"exit=$?\"",
+   "output_evidence": "request 8f47201f-0cb4-4bed-892e-891404ddee22: log events 6; SKIP with 'is not the production T-1' True; 'dispatched: doc=' False\nRESULT: PASS\nexit=0",
+   "denominator": "Over the invocation's whole log window (START..END of its own stream): 6 events, the required 'SKIP:' with 'is not the production T-1' present and 'dispatched: doc=' absent. All three conditions met.",
+   "status": "PASS",
+   "status_reason": "PASS on the repaired instrument, and the history matters. On first run this criterion read FAIL and was REFUSED AS WRITTEN rather than marked PASS, because its query filtered filter-log-events by the RequestId, which in Lambda only START, END and REPORT carry -- so the SKIP: line it required was excluded by its own filter and it saw 3 events. I isolated that to the retrieval rather than the deploy by reproducing the exact query and then running the same window with the filter removed (7 events, including the line), and by the invocation's own Tail LogResult. Row NFRA_OPLGTW-Z-S71 named two one-line repairs. The issuer took option (b) at f5caf28329 -- resolve the START/END markers, then read every line of that stream between them -- and the criterion now reads 6 events with SKIP True and 'dispatched: doc=' False. Nothing about the deployed function changed between the two runs: the same RequestId, the same single Arm 1 invoke, the same ap2_arm1.json record. Only the instrument moved.",
+   "expect": "(?s)SKIP with 'is not the production T-1' True; 'dispatched: doc=' False.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Readers were shown able to go both ways rather than assumed. (1) The issuer recorded both criteria FAILing pre-cut (AC1 because the live CodeSha256 was the rollback hash and the live zip had no trading_calendar.py; AC2 because the record was absent); after the work AC1 reads PASS, so it is not stuck-FAIL. (2) AC2 still reads FAIL, and the cause was isolated to its own retrieval by reproducing its exact query and then running the same window with the filter removed -- the second read found the line the first could not, which separates 'the world is wrong' from 'the instrument cannot see'. (3) The gate chain discriminates: on the sibling order the naming plan gate REFUSED an addition and later read CONFORMANT once the name changed, and here safe-apply's limbs passed while that same gate only WARNed on existing resources.",
+   "expected": "AC1 moves FAIL -> PASS across the apply; AC2's failure is attributable to its filter, demonstrated by the same query minus the filter returning the required line; and no control passes merely because nothing was looked at.",
+   "observed": "AC1 PASS against its recorded pre-cut FAIL. AC2 FAIL, with its own query returning 3 events (START, END, REPORT) and the unfiltered control returning 7 including the SKIP line, 'is not the production T-1' present True and 'dispatched: doc=' present False. The Arm 1 controls held: ssm list-commands for advi-49f-chain-dispatch read 181 before and 181 after with zero new CommandIds, and the host read running before and after. FOLLOW-UP, after the issuer repaired the instrument at f5caf28329: AC2 moved FAIL -> PASS with the DEPLOY UNCHANGED -- same RequestId, same single invoke, same record -- which is the cleanest possible demonstration that the original FAIL was the retrieval and not the world, and that this criterion is not stuck in either direction.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The artifact hash was produced twice by two independent builds (the BUILD_ONLY=1 run and the full upload run), and every world read was taken by an instrument separate from the act: my own aws reads plus the issuer's ap2.sh checks, with the Arm 1 SKIP line additionally read from the invocation's own Tail LogResult. The apply ran from a SAVED plan, pinning the applied set to the audited set.",
+   "observed": "Both builds printed the same sha256 EmlN9/zeB3rk90/QeJd7deRh01yiW3yKXEcLUQpFD0o=, and the uploaded object's content-sha256 metadata equals it. My read-back of CodeSha256, State and LastUpdateStatus agreed with ap2.sh AC1 run separately. The post-apply re-plan read 'No changes'. The SKIP line was identical in the Tail LogResult and in the unfiltered CloudWatch query.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Arm 2, the daily T-1 record dispatching.",
+   "reason": "Organic only, by both halves (COO term 6, CTO term 7) and the order's step 6: no on-demand production chain run is signed. No event naming a T-1 record was sent. The issuer reads the next daily marker, about 09:46Z."
+  },
+  {
+   "item": "A BUILD_MANIFEST.json member in the zip.",
+   "reason": "Unsatisfiable by construction, not skipped: the builder gates its manifest limb on an EXISTING BUILD_MANIFEST.json in the source dir and has no path that writes one, and this function's dir has none. The clause the halves bind on, each member equal to the ask's section 1 hashes, is met, and AC1 grades only those two members. Row NFRA_OPLGTW-Z-S70; the package dir is outside this order's <paths>."
+  },
+  {
+   "item": "Phase D, the 08335338 completion-record write.",
+   "reason": "Not covered by either half; it takes its own fresh pair after this ledger closes and its read-back is committed."
+  },
+  {
+   "item": "Correcting the source map's _build_note, which asserts a BUILD_MANIFEST.json member the zip does not carry.",
+   "reason": "A claim edit wider than the one-entry registration both halves scoped to this leg; named with a concrete fix in row NFRA_OPLGTW-Z-S70. AC2's own repair, also named in a row, was taken up by the issuer at f5caf28329, since r32/checks/ is theirs and not in this order's <paths>."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S70: OBSERVATION -- the dispatcher zip cannot carry a BUILD_MANIFEST.json member, which both halves and the source map's _build_note describe; the builder only ships a manifest that already exists in the source dir. The two member hashes the halves bind on match exactly.",
+  "NFRA_OPLGTW-Z-S71: BLOCKING, now RESOLVED -- AC2 filtered filter-log-events by the RequestId, which in Lambda only START, END and REPORT carry, so the SKIP: line it required was excluded by its own filter. The issuer repaired it at f5caf28329 by reading the invocation's whole log window between its START and END markers; AC2 now PASSes on the unchanged deploy."
+ ],
+ "session_log": "This seat is a SESSION seat (site Z's applier under Andrew-direct ~22:0xZ, msg 32057), not an L7 worker subagent. The trail is this instance, the CLOSED ledger nfra-oplgtw-og-bf-1-y-dispatcher-gate, ap2_arm1.json and rows Z-S70 and Z-S71. Order of acts followed the halves exactly: the source-map registration alone first (cdf66df55c), then the build, then the ledger opened and committed with its sentinel (26f9669e2a), then the upload, then the targeted apply, then the read-backs, then Arm 1, then the ledger closed, then the criteria. The synthetic Arm 1 event was built from the handler's own parsing code (lambda_function.py:184-195 requires a versionId and unquote_plus's the key; :257-258 identifies the accelerator source) rather than guessed at, and the target object version was read for existence first. Arm 1 returned on the SKIP path before any EC2 or SSM call, which is why the host and SSM controls could be clean. A reader should know the host i-01003b035d2988dfb has LaunchTime 2026-10-09T04:00:46Z, about 15 minutes BEFORE this invoke and before my own BEFORE read: it was already running and something other than this call started it; the signed control is 'unchanged across the call', which holds. AFTER the first report: the issuer repaired AC2's query at f5caf28329, taking option (b) from row Z-S71. I re-ran both criteria against the repaired instrument rather than accepting the re-grade on report: AC1 PASS and AC2 PASS (6 events, SKIP true, dispatch false). Both now pass, so this order's <status> is flipped to complete.",
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "--enumerate over lambda-source-map.json, build-and-upload.sh, lambda_function.py, ap2.sh and ap2_check.py; --for on ap2.sh",
+   "result": "PASS",
+   "note": "Two reads changed what I did rather than confirming it: build-and-upload.sh:510 showed the manifest limb is gated on an EXISTING file (so row Z-S70 is a construction limit, not an omission), and ap2_check.py:64-72 showed AC2's RequestId filter-pattern, which is the whole of row Z-S71."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open --lambda advi-49f-gold-dispatch with one added verify leg, close-leg x2, close",
+   "result": "PASS",
+   "note": "Both legs proven and the ledger CLOSED, sentinel removed. The criteria were deliberately not legs: step 7 closes the ledger before running them."
+  },
+  {
+   "tool": "safe-apply.sh",
+   "invocation": "-chdir=infra/aws/terraform/opal-assets apply C:/tmp/ap2_dispatch.tfplan",
+   "result": "PASS",
+   "note": "rc=0 from a SAVED plan at 04:05:40Z, outside 09:45-09:50Z and away from 12:45Z. The naming gate WARNed only, on existing resources. No HALTGT pass is cited as evidence, per cloud-ops."
+  },
+  {
+   "tool": "terraform",
+   "invocation": "plan -target=module.advi_49f_gold_dispatch -out, show -json, apply the saved plan, then plan again",
+   "result": "PASS",
+   "note": "The plan was graded from JSON, not the rendered text: 4 resource_changes, 1 non-no-op, code-only, 5 env keys identical. The re-plan read 'No changes'."
+  },
+  {
+   "tool": "comp-iam",
+   "invocation": "NOT USED",
+   "result": "SKIP",
+   "note": "The order declares comp-iam NOT-APPLICABLE for this act (no role or policy change), and the plan audit confirmed it: role unchanged and no IAM resource in the changed set."
+  }
+ ]
+}

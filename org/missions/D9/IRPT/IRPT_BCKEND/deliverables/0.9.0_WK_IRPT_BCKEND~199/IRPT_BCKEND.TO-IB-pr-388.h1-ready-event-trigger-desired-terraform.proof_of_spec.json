@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-388",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-388.h1-ready-event-trigger-desired-terraform.md",
+    "group": "OTHER",
+    "vintage_commit": "ae687597ec"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "ae687597ec",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-388.h1-ready-event-trigger-desired-terraform.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~199",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/dynamodb.tf",
+      "kind": "config_data",
+      "commit_or_etag": "40082902d4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "requests table: stream_enabled = true, stream_view_type = NEW_IMAGE; DESIRED, not planned or applied",
+      "artifact_covered_by": [
+        "IB97-1-AC1",
+        "IB97-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/ready_trigger.tf",
+      "kind": "config_data",
+      "commit_or_etag": "40082902d4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one aws_lambda_event_source_mapping (filter INSERT/REPORT#/ANALYSIS, DLQ on_failure) + one inline aws_iam_role_policy (4 stream actions + kms:Decrypt); DESIRED",
+      "artifact_covered_by": [
+        "IB97-1-AC1",
+        "IB97-1-AC2",
+        "IB97-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/outputs.tf",
+      "kind": "config_data",
+      "commit_or_etag": "40082902d4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "output requests_stream_arn",
+      "artifact_covered_by": [
+        "IB97-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB97-1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r97/p97_h1.py\" . IB97-1-AC1 -> IB97-1-AC1 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r97/p97_h1.py\" . IB97-1-AC1",
+      "output_evidence": "OK: NEW_IMAGE stream; 1 mapping filtered INSERT/REPORT#/ANALYSIS; SQS on-failure; function by reference; IB97-1-AC1 PASS (rc=0)",
+      "denominator": "1 of 1",
+      "expect": "IB97-1-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB97-1-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r97/p97_h1.py\" . IB97-1-AC2 -> IB97-1-AC2 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r97/p97_h1.py\" . IB97-1-AC2",
+      "output_evidence": "OK: 4 stream actions on requests.stream_arn + kms:Decrypt; no other action; IB97-1-AC2 PASS (rc=0)",
+      "denominator": "1 of 1",
+      "expect": "IB97-1-AC2 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB97-1-AC3",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r97/p97_h1.py\" . IB97-1-AC3 -> IB97-1-AC3 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r97/p97_h1.py\" . IB97-1-AC3",
+      "output_evidence": "OK: terraform fmt -check passes in core; IB97-1-AC3 PASS (rc=0)",
+      "denominator": "1 of 1",
+      "expect": "IB97-1-AC3 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The issuer's dry-run at base 6dea768ce8: AC1 and AC2 FAIL (no stream, no mapping), AC3 PASS.",
+      "expected": "base FAIL on AC1/AC2, patched PASS",
+      "observed": "not re-run at base by the worker; all three PASS after the change",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- static text checks on fixed files",
+      "observed": "single run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "terraform init/validate/plan",
+      "reason": "provider mirror lacks hashicorp/local and the order bounds out any plan against the live backend; the applier's plan grades it"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "terraform",
+      "invocation": "terraform fmt -check -no-color dynamodb.tf outputs.tf ready_trigger.tf (in core)",
+      "result": "rc 0 via IB97-1-AC3"
+    }
+  ]
+}
