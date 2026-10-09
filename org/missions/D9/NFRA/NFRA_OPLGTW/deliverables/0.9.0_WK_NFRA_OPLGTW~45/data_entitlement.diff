@@ -1,0 +1,99 @@
+diff --git a/infra/aws/ec2/opal-gateway/app/data_entitlement.py b/infra/aws/ec2/opal-gateway/app/data_entitlement.py
+index a65ec13d89..892779c801 100644
+--- a/infra/aws/ec2/opal-gateway/app/data_entitlement.py
++++ b/infra/aws/ec2/opal-gateway/app/data_entitlement.py
+@@ -40,8 +40,13 @@ are read strongly -- never cached across requests -- and:
+   store unavailable / record bad   denied                                                  (entitlement_unavailable)
+   no profile (legacy user)         legacy tools pass on to the existing gates unchanged; Schwab tools are hidden
+                                    and denied, so an unknown user sees no Schwab tool      (entitlement_denied)
+-  a profile (restricted)           exactly the Schwab tools its active grant's operations allow; every other tool
+-                                   and the direct REST routes are denied                   (entitlement_denied)
++  a profile (restricted)           CONFINES THE DATA-GRANT FAMILY ONLY (DATA_GRANT_TOOLS: the five schwab_* tools and
++                                   the Black Diamond data tool). Of those, exactly the Schwab tools its active grant's
++                                   operations allow; a family tool outside the grant is denied (entitlement_denied).
++                                   A non-family tool and the direct REST routes are NOT confined by the profile: they
++                                   proceed to the existing gates, as for a principal with no profile (CTO ruling msg
++                                   32383, OG-pf-1). A profile that is not ACTIVE (pending, revoked, or its grant not
++                                   active) is still denied everything -- a tombstone is not a data reach (entitlement_denied).
+ 
+ Enforced at: discovery (tools.py list_tools) and dispatch (tools.py call_tool, the native chokepoint _run, the
+ integration chokepoint run_integration_tool), and on the bearer REST routes /teams/poll and /query/v0 (server.py
+@@ -116,7 +121,7 @@ INTEGRATION_TOOLS = frozenset({
+ })
+ # Tools added after that cut (NFRA_MCPINDEX MX-t-8 item 10), both integrations DORMANT until ENABLED_INTEGRATIONS names
+ # them. Classified `legacy` so they are not denied to everyone: a principal with no profile passes on to the existing
+-# gates, and a restricted (Schwab-grant) principal is denied them exactly as it is every other non-Schwab tool.
++# gates; since OG-pf-1 an ACTIVE profile no longer confines them (only DATA_GRANT_TOOLS are confined).
+ INDEX_TOOLS = frozenset({
+     "mdpf_get_aum_metrics", "mdpf_get_account_distribution", "mdpf_get_aggregate_aua",   # portal_index
+     "mdpf_get_model_benchmarks", "etfs_get_positioning",      # portal_index, NFRA_MCPINDEX MX-t-9 / MX-t-10 (row Z-W15-S2)
+@@ -129,8 +134,17 @@ CLASS_SCHWAB = "schwab"
+ TOOL_CLASSES = {**{t: CLASS_LEGACY for t in NATIVE_TOOLS | INTEGRATION_TOOLS | INDEX_TOOLS},
+                 **{t: CLASS_SCHWAB for t in SCHWAB_TOOLS}}
+ 
++# THE DATA-GRANT FAMILY (OG-pf-1, CTO ruling msg 32383) -- the ONE place it is named. A restricted profile confines
++# exactly these tools and no others. Members:
++#   the five schwab_* tools of SCHWAB_TOOLS (contract `tools`), and
++#   blackdiamond_list_fees, the only Black Diamond data tool (app/integrations/blackdiamond/integration.py TOOL; it
++#   reads s3://opal-data-bd/silver/fees/ firm data; a grant names no Black Diamond tool, so a profiled principal is
++#   denied it exactly as before this cell).
++# Every tool outside this set is a non-data tool: a profile never confines it.
++DATA_GRANT_TOOLS = frozenset(SCHWAB_TOOLS) | frozenset({"blackdiamond_list_fees"})
++
+ # The bearer REST routes that take the principal's own gateway token outside MCP (server.py). A restricted profile
+-# is denied both; everyone else keeps the route's existing policy.
++# is denied both only while it is not active (OG-pf-1); everyone else keeps the route's existing policy.
+ GUARDED_ROUTES = ("/teams/poll", "/query/v0")
+ 
+ _DATE = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
+@@ -424,14 +438,30 @@ def _restricted_reason(access: Access) -> str:
+     return "the principal's restricted profile (revision %d, grant revision %d)" % (p.revision, p.grant_revision)
+ 
+ 
++def _profile_active(access: Access) -> bool:
++    """A restricted principal whose profile AND grant are both active (the only profile that opens anything)."""
++    return bool(access.restricted and access.profile is not None and access.profile.status == "active"
++                and access.grant is not None and access.grant.status == "active")
++
++
+ def decide(tool: str, access: Access) -> Optional[dict]:
+-    """None = the tool may proceed to the existing gates; a dict = the denial."""
++    """None = the tool may proceed to the existing gates; a dict = the denial.
++
++    The rule (OG-pf-1, CTO ruling msg 32383):
++      - a tool this module does not classify is `tool_unclassified` for everyone;
++      - a principal with a profile that is not active (pending, revoked, grant not active) is denied every tool;
++      - a principal with an ACTIVE profile is confined ONLY on the data-grant family (DATA_GRANT_TOOLS): a family tool
++        passes iff its active grant allows it (access.tools), else `entitlement_denied`; a NON-family tool is not
++        denied by the profile and proceeds to the existing gates;
++      - a principal with NO profile is denied every Schwab tool and proceeds on every other tool, unchanged."""
+     cls = classify(tool)
+     if cls is None:
+         return _denial("tool_unclassified",
+                        "tool '%s' is not classified in app/data_entitlement.py, so it is denied to every principal "
+                        "until it is (NFRA_OPLGTW PRD C2)" % tool)
+     if access.restricted:
++        if _profile_active(access) and tool not in DATA_GRANT_TOOLS:
++            return None
+         if tool in access.tools:
+             return None
+         return _denial("entitlement_denied", "%s does not include tool '%s'" % (_restricted_reason(access), tool))
+@@ -497,7 +527,8 @@ def visible_tools(names: list, principal: Optional[Principal] = None,
+ def route_denial(route: str, principal: Optional[Principal] = None,
+                  store: Optional[acs.AccessState] = None) -> Optional[tuple]:
+     """The REST guard for GUARDED_ROUTES: None = the route's existing policy decides; (status, body) = the denial.
+-    A restricted profile is denied every non-MCP route; its Schwab access is the MCP tools only."""
++    An ACTIVE profile does not confine a REST route (OG-pf-1: a route is not in the data-grant family, so the route's
++    existing policy decides); a profile that is not active is denied every route. Its Schwab access is the MCP tools only."""
+     principal = principal if principal is not None else get_current_principal()
+     if principal is None:
+         return 403, _denial("principal_required", "no verified principal is established for this request")
+@@ -507,7 +538,7 @@ def route_denial(route: str, principal: Optional[Principal] = None,
+         access = current_access(principal, store)
+     except (acs.DependencyUnavailable, acs.AccessStateRefused, Malformed) as exc:
+         return 503, _unavailable(exc)
+-    if access.restricted:
++    if access.restricted and not _profile_active(access):
+         return 403, _denial("entitlement_denied",
+                             "%s does not include the REST route %s" % (_restricted_reason(access), route))
+     return None
