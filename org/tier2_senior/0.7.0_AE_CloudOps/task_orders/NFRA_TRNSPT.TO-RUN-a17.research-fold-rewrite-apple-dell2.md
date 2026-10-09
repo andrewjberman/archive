@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~T2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_TRNSPT</project_code>
   </metadata>
 <risk>SERVED</risk>
@@ -14,6 +14,11 @@
 <owned_cells>TR-a-17</owned_cells>
 <decomp_context>Round 17 (CTO msg 2293, analysis ADDENDUM 4, E2): "the Apple re-write on CloudOps~DELL2". Moved from laptop 0.7.0_AE_CloudOps by laptop 1.0.0_SA_CTO frame 24e5ac25 item (3), relayed by 0.0.0_AB_MSTR~DELL2 msg 2229 (Andrew-direct ~02:5xZ: the Dells run their own scripts). MSTR msg 2307 measured that the laptop has not written since its GO.</decomp_context>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, 2026-10-09 ~07:2xZ). Applier msg 2669 @17316450f0 (29/29 new VersionIds, rows 20,473, held_out 3,644, re-wipe 0) and
+    proof VALID @fa0a3dd025 (msg 2785). Issuer read of the stored bytes R18_READBACK_A17_APPLE.json @38c9f3967f: Apple 17 turns in 9 meetings.
+  </closure>
 
   <objective>
     Re-run the research fold once, from box/dell2 @5074835d70, under this seat's identity: it OVERWRITES the same 29 KMS-encrypted
