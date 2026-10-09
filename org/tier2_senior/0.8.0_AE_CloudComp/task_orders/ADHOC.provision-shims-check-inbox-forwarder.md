@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.8.0_AE_CloudComp</issued_to>
 <date>2026-10-09</date>
-<status>pending</status>
+<status>complete</status>
 <risk>LOCAL</risk>
 
 <title>provision-path-shims.sh: one named non-comp forwarder pair, ~/bin/check-inbox + check-inbox.cmd -> org/mcp/check-inbox.sh (low priority, no deadline)</title>
