@@ -27,3 +27,13 @@ It is MET when two read-only acts by the laptop identity, routed via 0.0.0_AB_MS
 
 Was "MET, with R1 disclosed". OW-d-1 status: SERVED (the trade Lambdas are live with C-INITIATOR, the bridge, the
 write-back and the C-NO-SEND fence). The live 409 for a ticket-origin Execute is OW-r-1's, after the ticket release R13.
+
+## Laptop reads (routed via 0.0.0_AB_MSTR~DELL2 msg 3153, from laptop 2.0.0_SA_COO~C msg 107936, ~10:3xZ, live IAM, read-only)
+
+- (1a) `simulate-principal-policy`, UpdateItem on `table/opal-tickets`, `dynamodb:Attributes=[ticket_id,answers]`: **implicitDeny** (no
+  matched statement). Expected DENIED: matches.
+- (1b) The same call with `[ticket_id,linked_submission_id,events,status]`: **allowed**, matched `trade-submission-policy`. Expected
+  ALLOWED: matches.
+- (2) `get-resource-policy` on the table: **PolicyNotFoundException**, so no added principal. R1 is closed.
+
+**Final verdict: OW-d1-AC2 MET** (10:3xZ). OW-d-1: SERVED.
