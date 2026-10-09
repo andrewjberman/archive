@@ -1,0 +1,63 @@
+{
+  "claim": "measured",
+  "counts": {
+    "admitted_only": 1,
+    "gold_rows": 0,
+    "landed": 24,
+    "list_refusals": 0,
+    "listed": 453,
+    "refused": 0,
+    "silver_held_out": 6,
+    "silver_rows": 6,
+    "skipped_known": 8
+  },
+  "newly_landed_dates": [
+    "2025-11-26",
+    "2025-12-24",
+    "2025-12-30",
+    "2026-05-19",
+    "2026-06-28",
+    "2026-06-29"
+  ],
+  "read_plainly": "ALL SIX new silver rows are HELD OUT, so gold gained 0 rows. The backfill added 6 silver rows and NO gold rows. That is internally consistent (a held-out row does not reach gold) but it means this backfill changed nothing a gold consumer can see, which the issuer should weigh rather than infer.",
+  "rollback": "copy each prior silver VersionId back over its key; a NEW key delete is Andrew act, never this seat. 5 prior versions are in the committed list; the 6 new dates are NEW keys.",
+  "seat": "0.7.0_AE_CloudOps~DELL2",
+  "step1_condition6": {
+    "authoritative_resolution": "the key policy grants kms:GenerateDataKey conditioned on kms:EncryptionContext:aws:s3:arn = arn:aws:s3:::opal-data-transcripts and ViaService s3. b17 writes SSE-KMS objects to THAT bucket (confirmed: the analysis_commentary prefixes are in opal-data-transcripts) with THAT key (alias/opal-data-transcripts resolves to 44a2284f, the same key a17 used). a17 empirically wrote to that bucket under a Bucket Key and was admitted.",
+    "control": "kms:Decrypt is granted UNCONDITIONALLY by the key policy yet also reads implicitDeny, so the instrument is blind here: simulate-principal-policy evaluates identity policies only and cannot see a resource-based key policy. None of the three readings is evidence.",
+    "kms_encrypt_is_irrelevant": "every write path is s3.put_object(ServerSideEncryption=aws:kms, SSEKMSKeyId=...) i.e. SSE-KMS THROUGH S3; grep over the outlook module found no direct kms encrypt or generate_data_key call. The only direct KMS call is describe_key, which is granted. So the absent kms:Encrypt grant cannot block this run.",
+    "kms_simulates": {
+      "kms:Decrypt": "implicitDeny",
+      "kms:Encrypt": "implicitDeny",
+      "kms:GenerateDataKey": "implicitDeny"
+    },
+    "s3_putobject_simulates": {
+      "bronze/analysis_commentary": "allowed",
+      "gold/analysis_commentary": "allowed",
+      "silver/analysis_commentary": "allowed",
+      "state/pull_runs": "allowed"
+    },
+    "verdict": "NO MEASURED REFUSAL -- an uninformative instrument is not a refusal, so step 1 is not a STOP"
+  },
+  "step2_versionid_gate": {
+    "citation_correction": "the order cites the prior list at org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/2.0.0_SA_COO~T2/R16_BACKFILL_PRIOR_VERSIONS.json, which does NOT exist at the cited pin d035a3a8a6 (verified with a positive control: CLAUDE.md at that pin reads 30714 bytes). The file is real but lives at org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R16_BACKFILL_PRIOR_VERSIONS.json, found via git log --all over the filename. The gate was run against the real file.",
+    "committed_prior_silver_keys": 5,
+    "key_sets_identical": true,
+    "keys_with_differing_version": 0,
+    "live_current_silver_keys": 5,
+    "verdict": "PASS"
+  },
+  "step3_condition2": {
+    "invocation": "python -m pytest data/transcripts/scripts/tests/test_wipe_planted.py -q at f7a378fcb1",
+    "result": "13 passed",
+    "why_an_extract": "the shared tree is dirty on data/transcripts/scripts/tests/fixtures/outlook_gold_synthetic.parquet, a FIXTURE these very tests consume, so running in the shared tree would not have been the pin result. Run from a clean git archive extract. The outlook and teams scripts are byte-identical between f7a378fcb1 and HEAD (0 changed paths against a 1064-path control), so the extract is equivalent to HEAD code."
+  },
+  "step4_pull": {
+    "gateway_is_opal": "gateway_mail.BASE_URL = https://mcp.opalinvest.dev, Opal own host, so the bounds no-vendor-call holds",
+    "invocation": "python data/transcripts/scripts/outlook/pull.py --gateway --days 365 --apply (ONCE)",
+    "last_line": "OUTLOOK-LANDED candidates=445 ingest=6 excluded_trade_update=0 near_miss=439 fallback_ids=0 pdfs=6 tables=assets+registry listed=453 skipped_known=8 list_refusals=0 admitted_only=1 not_landed_not_admitted=439 landed=24 skipped_identical=0 refused=0 run=20261009T062856Z"
+  },
+  "step5": "silver.build then gold.build, apply=True, for each of the 6 dates. Every silver build read rows=1 held_out=1; every gold build read rows=0 variants {1:0,2:0,3:0}.",
+  "to_id": "NFRA_TRNSPT.TO-RUN-b17.analysis-commentary-365d-backfill-dell2",
+  "verdict": "COMPLETE -- one run, counts only"
+}
