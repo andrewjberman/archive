@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "to_id": "ETFS_RIVALS.TO-RIV-wg-1.direction-verdict-fund-specific-lead",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "27e0630b5b",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-wg-1.direction-verdict-fund-specific-lead.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "27e0630b5b"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~30",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/ai_accounts.py",
+      "kind": "script",
+      "commit_or_etag": "455b28ada6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit on the worker branch; no served write, no deploy",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "J1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r28wg1_direction_opening.py",
+      "kind": "test",
+      "commit_or_etag": "455b28ada6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit on the worker branch; no served write, no deploy",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r28aw1_words_and_figures.py",
+      "kind": "test",
+      "commit_or_etag": "455b28ada6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit on the worker branch; no served write, no deploy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_f5_reading_labels.py",
+      "kind": "test",
+      "commit_or_etag": "455b28ada6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit on the worker branch; no served write, no deploy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a generic Direction Verdict opening is sent back once and replaced; a specific one is not -- expect: ITEM8 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/ws3_item8_prep/item8_generic_opener_check.py",
+      "expect": "ITEM8 RESULT: PASS 0 failures",
+      "output_evidence": "ARM A: corrections sent 1; final text starts: \"Alpha Co is the manager's clearest conviction: it was bought\"; grounding PASS (-)\nARM C: corrections sent 1; final text starts: \"Alpha Co is the manager's clearest conviction: it was bought\"\nARM B (control): corrections sent 0; final text starts: \"Alpha Co is the manager's clearest conviction: it was bought\"\nITEM8 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 arms (A generic, C dated, B control) under timeout 120 (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a below-tolerance row is never a trade fact; the buy and the sell stay -- expect: W26-S1 AI RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/ws3_item8_prep/w26s1_ai_below_tolerance_check.py",
+      "expect": "W26-S1 AI RESULT: PASS 0 failures",
+      "output_evidence": "trade fact: buy Alpha Co in the window ending 2026-10-06: estimated notional 5000000.0 (display: $5.0 million)\ntrade fact: sell Gamma Co in the window ending 2026-10-07: estimated notional -3000000.0 (display: $3.0 million)\nW26-S1 AI RESULT: PASS 0 failures\nrc=0",
+      "denominator": "2 of 2 checks (no below_tolerance fact; buy and sell present) under timeout 120 (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "on the issuer's real run over the 13 funds, no opening leads more than a quarter of the verdicts (verdict_openers_check.py), and the verdicts read as fund-specific",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "none: judgment criterion on the issuer's real run; no vendor call is permitted to this worker",
+      "output_evidence": "Worker-side only: both ws3_item8_prep checks PASS offline; rivalfunds suite 982 passed, 6 skipped. No real-model run was made.",
+      "denominator": "N/A -- judgment criterion; the issuer's 13-fund real run is the object",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion graded by 3.0.0_SA_CVO at L9 on the issuer's real run; the worker records output and no verdict."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "none run: the order names no mutant control.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "python -m pytest -q rivalfunds/tests from data/etfs/scripts, after the final ai_accounts.py edit",
+      "observed": "982 passed, 6 skipped, 0 failed (run once).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.dell1.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~30 <0.9.0_WK_ETFS_RIVALS~30@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "455b28ada6"
+    }
+  ]
+}
