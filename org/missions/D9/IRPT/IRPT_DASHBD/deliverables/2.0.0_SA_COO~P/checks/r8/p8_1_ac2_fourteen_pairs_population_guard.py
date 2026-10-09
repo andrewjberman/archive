@@ -5,7 +5,7 @@ Reads two records in deliverables/0.9.0_WK_IRPT_DASHBD~2/:
   TIEOUT_49F_BLACKDIAMOND_R8.json
     {"tolerance": 0.0035, "vendor_calls": 0, "method_version": <int > 1>,
      "pairs": [{"account", "start", "end", "abs_diff_r4", "abs_diff_now", "bd_accrual", "within": bool, "reason"}],
-     "s22": {"account": "0027265115", "start": "2026-06-25", "residual": <number>, "disposition": "DISARMED" | "RESTATED",
+     "s22": {"account": "acct#89d0916a", "start": "2026-06-25", "residual": <number>, "disposition": "DISARMED" | "RESTATED",
              "reason"}}
   POPULATION_EQUITY_R8.json
     {"day": "2026-10-01", "accounts": 7570, "positive_before": 6685, "positive_after": <int>,
@@ -16,7 +16,7 @@ Grades:
   - the pairs are exactly round 4's 14, keyed (account, start) from deliverables/0.9.0_WK_IRPT_DASHBD~1/TIEOUT_49F_BLACKDIAMOND_R4.json;
   - every pair has numeric abs_diff_now and bd_accrual, and within == (abs_diff_now <= 0.0035);
   - every pair not within carries a non-empty reason;
-  - s22 names the 0027265115 2026-06-25 pair, its residual equals that pair's abs_diff_now, its disposition is DISARMED exactly
+  - s22 names the acct#89d0916a 2026-06-25 pair, its residual equals that pair's abs_diff_now, its disposition is DISARMED exactly
     when the residual is within the tolerance and RESTATED otherwise, and a RESTATED disposition carries a reason;
   - the population record: day 2026-10-01, accounts 7570, positive_before 6685, positive_after an int; both guard_state maps
     are non-empty and sum to the same row count; zero_margin_accounts above 0; zero_margin_rows_changed 0;
@@ -32,7 +32,24 @@ R8 = D + "0.9.0_WK_IRPT_DASHBD~2/TIEOUT_49F_BLACKDIAMOND_R8.json"
 POP = D + "0.9.0_WK_IRPT_DASHBD~2/POPULATION_EQUITY_R8.json"
 R4 = D + "0.9.0_WK_IRPT_DASHBD~1/TIEOUT_49F_BLACKDIAMOND_R4.json"
 TOL = 0.0035
-S22 = ("0027265115", "2026-06-25")
+def _REAL(token):
+    """Resolve an acct# token to the real account id at run time from the private evidence dir (outside the repo)."""
+    import json as _json
+    import os as _os
+    d = _os.environ.get("IRPT_PRIVATE_EVIDENCE_DIR")
+    if not d:
+        raise SystemExit("REFUSE: IRPT_PRIVATE_EVIDENCE_DIR is not set; this historical script needs the private account map")
+    p = _os.path.join(d, "account_map_49financial.json")
+    if not _os.path.isfile(p):
+        raise SystemExit("REFUSE: account_map_49financial.json is absent from IRPT_PRIVATE_EVIDENCE_DIR")
+    with open(p, encoding="utf-8") as fh:
+        m = _json.load(fh)
+    if token not in m:
+        raise SystemExit("REFUSE: token %s is not in the account map" % token)
+    return m[token]
+
+
+S22 = (_REAL("acct#89d0916a"), "2026-06-25")
 
 
 def fail(msg):
@@ -81,7 +98,7 @@ def main():
         by[k] = d
     s = r.get("s22") or {}
     if (s.get("account"), s.get("start")) != S22:
-        fail("s22 does not name the 0027265115 2026-06-25 pair")
+        fail("s22 does not name the acct#89d0916a 2026-06-25 pair")
     res = num(s.get("residual"))
     if res is None or abs(res - by[S22]) > 1e-12:
         fail("s22 residual %r is not that pair's abs_diff_now %r" % (s.get("residual"), by[S22]))

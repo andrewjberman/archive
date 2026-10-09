@@ -38,7 +38,7 @@ The worker's side-by-side (`deliverables/0.9.0_WK_ADVI_COTBKF~35/flow_timing.md`
   pages from the PDF, then re-applying under a never-widen pair. That is the next item.
 - **E2, zero-Amount transfers (D2-S27 answered).** Of 20,403 zero-Amount flow rows, 5,017 are now valued at quantity x the same-day
   close and 15,386 stay blank for no price. On today's prices only 6 months move from UNGRADABLE to graded, all DIFF (row W35-S1).
-  The worked month for the CVO: B3S703388 2025-09, an `lo` of 21 shares at 508.037384, which went from UNGRADABLE to DIFF
+  The worked month for the CVO: acct#e29efebe 2025-09, an `lo` of 21 shares at 508.037384, which went from UNGRADABLE to DIFF
   (0.7664 against a reported 0.84).
 - **E1, flow timing (D2-S28 answered: timing is not the cause).** Start and end of day differ by one MATCH on 937 flow months.
   The no-flow control is identical under both. End is kept.

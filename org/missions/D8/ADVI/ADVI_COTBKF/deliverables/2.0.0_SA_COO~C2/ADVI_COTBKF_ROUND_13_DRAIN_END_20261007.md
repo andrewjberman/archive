@@ -21,7 +21,7 @@ crosswalk (measured against the snapshot); `ileu` unsigned (its one quantity row
 rows, one single `li`, two 0.02-0.029 on one CUSIP), listed with type histories.
 
 **What the fix moves in SERVED tables (nothing applied):** the crosswalk gains 32 MATCHED (439 -> 471, none lost; 33 more NOT_MATCHED rows
-change score); account links swap one link each way (B3S605711 -> B3S676722 gained; RGY003616 -> 0QF882871 lost to LEFT_COMMONWEALTH), 212
+change score); account links swap one link each way (acct#e1e2dacb -> acct#f6464238 gained; acct#d6187d4b -> acct#8f547eb0 lost to LEFT_COMMONWEALTH), 212
 LINKED unchanged; 52 link reasons change text without a status change (row D2-W29-S3). Control: both scripts on the OLD tables reproduce the
 applied tables with 0 changes, so every difference is the rule. A re-apply of both tables needs its own never-widen pair; the COO half is
 drafted beside this packet (`NEVER_WIDEN_R13_REAPPLY_COO_HALF_DRAFT.md`).

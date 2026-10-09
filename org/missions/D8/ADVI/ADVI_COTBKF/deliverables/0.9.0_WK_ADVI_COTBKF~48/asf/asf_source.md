@@ -6,7 +6,7 @@ SOURCED only if (a) a repo document that states a treatment names ASF, or (b) EV
 
 ## The census
 
-- rows: 6; accounts: 1 (B3S606537); trade dates 2019-01-18 to 2019-01-22
+- rows: 6; accounts: 1 (acct#8e3fbc63); trade dates 2019-01-18 to 2019-01-22
 - signs: 3 credit, 3 debit, 0 zero; net Amount 0.00; gross |Amount| 5295.98
 - Transaction_Description (the delivered field): 'ASF' x6
 - CUSIP lines: CFNCASH x6
@@ -16,12 +16,12 @@ SOURCED only if (a) a repo document that states a treatment names ASF, or (b) EV
 
 | account | day | Amount | note kind | tag | other types at the same account, day and Amount | opposite ASF rows (same tag) |
 |---|---|---|---|---|---|---|
-| B3S606537 | 2019-01-18 | 251.48 | Fee Reversal | B3S606540 | ManAltF | 1 |
-| B3S606537 | 2019-01-18 | 276.46 | Fee Reversal | B3S606539 | ManAltF | 1 |
-| B3S606537 | 2019-01-18 | 2120.05 | Fee Reversal | B3S606541 | ManAltF | 1 |
-| B3S606537 | 2019-01-22 | -2120.05 | Returned Payment | B3S606541 | none | 1 |
-| B3S606537 | 2019-01-22 | -276.46 | Returned Payment | B3S606539 | none | 1 |
-| B3S606537 | 2019-01-22 | -251.48 | Returned Payment | B3S606540 | none | 1 |
+| acct#8e3fbc63 | 2019-01-18 | 251.48 | Fee Reversal | acct#cdf8f00c | ManAltF | 1 |
+| acct#8e3fbc63 | 2019-01-18 | 276.46 | Fee Reversal | acct#8449cc57 | ManAltF | 1 |
+| acct#8e3fbc63 | 2019-01-18 | 2120.05 | Fee Reversal | acct#0e12459c | ManAltF | 1 |
+| acct#8e3fbc63 | 2019-01-22 | -2120.05 | Returned Payment | acct#0e12459c | none | 1 |
+| acct#8e3fbc63 | 2019-01-22 | -276.46 | Returned Payment | acct#8449cc57 | none | 1 |
+| acct#8e3fbc63 | 2019-01-22 | -251.48 | Returned Payment | acct#cdf8f00c | none | 1 |
 
 - rows beside a row of another type at the same Amount: 3 of 6; beside ONE type with a stated treatment: 3 of 6
 - the other types seen: ManAltF (stated treatment: flow)
