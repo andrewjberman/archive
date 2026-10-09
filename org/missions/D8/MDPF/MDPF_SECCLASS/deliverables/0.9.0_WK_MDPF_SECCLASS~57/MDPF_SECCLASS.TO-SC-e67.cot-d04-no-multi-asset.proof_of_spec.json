@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e67",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5f4b2f17d0f36d71d1eeef6430133ec234618c2c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R12.md",
+    "vintage_commit": "e6f1fdfc1fcd7773a9cd11b2864f558b7cba09b5",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e67.cot-d04-no-multi-asset.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~57",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/cot/scripts/gold/C_06.client_mix_timeseries.py",
+      "kind": "script",
+      "commit_or_etag": "d87a083772",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "reclass_retired_holdings() + RETIRED_CLASS added; _merge_and_write reclassifies stored existing_conc holdings; process_date maps a table multi_asset to unclassified. Not merged to a pushed range, not uploaded: the COT code prefix is held behind Andrew's limit item 5.",
+      "artifact_covered_by": [
+        "SC12-e67-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/cot/scripts/gold/tests/test_d04_no_multi_asset.py",
+      "kind": "test",
+      "commit_or_etag": "d87a083772",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 tests, no AWS: SGIIX multi_asset in stored history -> equity with the unrelated ticker the same object; no canonical row -> unclassified; other classes untouched; process_date emits no multi_asset with the remapped table and with a stale table.",
+      "artifact_covered_by": [
+        "SC12-e67-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_COT_D04_MULTI_ASSET_20261008.md",
+      "kind": "doc",
+      "commit_or_etag": "d87a083772",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Half request: traced source (C_06 stored history), 6 keys and VersionIds measured by read-only GET scan (227 platinum + 453 gold files, 2 relationships), both branches, rollback per VersionId, cron(30 10 * * ? *) timing, deploy held on limit item 5. COO and CTO halves UNSIGNED.",
+      "artifact_covered_by": [
+        "SC12-e67-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC12-e67-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py data/cot/scripts/gold/tests/test_d04_no_multi_asset.py -- expect: PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py data/cot/scripts/gold/tests/test_d04_no_multi_asset.py",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=4 passed in 0.75s",
+      "denominator": "4 of 4 tests pass",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC12-e67-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_COT_D04_MULTI_ASSET_20261008.md -- expect: HALF-READY",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_COT_D04_MULTI_ASSET_20261008.md",
+      "expect": "HALF-READY",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_COT_D04_MULTI_ASSET_20261008.md",
+      "denominator": "1 of 1 half file ready",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 run twice (before and after the commit) in this worktree; the full COT gold test directory also ran: 25 passed.",
+      "observed": "4 passed both times",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Put the base C_06 (git show e6f1fdfc1f:data/cot/scripts/gold/C_06.client_mix_timeseries.py) over the working file, ran AC1, then restored the fixed file (md5 ea7e6700509611a1866701f4f8e0984e before and after).",
+      "expected": "the new tests fail against the unfixed producer",
+      "observed": "PYTEST-BAD rc=1 summary=4 failed in 1.03s; after restore PYTEST-OK 4 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Upload of code/gold/C_06.client_mix_timeseries.py, any run of the COT gold chain, any write to opal-data-cot.",
+      "reason": "BOUNDS: no deploy and no S3 write; the release waits on Andrew's limit item 5 and both halves. Only read-only GETs were made."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W57-S1"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F msg -- <paths>",
+      "result": "d87a083772 (LOCAL on wk-MDPF_SECCLASS-57)"
+    }
+  ]
+}
