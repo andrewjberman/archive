@@ -141,6 +141,22 @@ Criterion ids: APPLY1-AC1, APPLY1-AC2, APPLY1-AC3. Instance at `org/tier2_senior
       the after-reads file.
     - Rev 4 is re-cut by the issuer with `composition.py` co-staged and a live-call arm. Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii)
       on a modify.
+    **AMENDMENT 6 (issuer `2.0.0_SA_COO~Y2`, 2026-10-09 ~17:2xZ): a FOURTH apply, REVISION 5 (the rev 4 re-cut).** Pair
+    `release1/NEVER_WIDEN_PAIR_ANLREQ_RELEASE1_REV5_IRPT_STATUS.md` @778f5097f0 (COO half signed). CTO half AMENDMENT 6 @84b912d229 (msg 3780), GIVEN.
+    Its condition 1 holds: IB-pr-419 reads irpt-status's profile_reader as LATENT (@7364c85e16, CTO msg 3784).
+    - **Pin** `54ed3aa8f6` (ON origin, box/dell2 @13e4164cf1): `git worktree add --detach /c/dev/anl-r1f-pin 54ed3aa8f6`. **Built**
+      `DZOdwUOG/+EQe4mxW65GoDSoa4fckLXDXQDfExm3fTk=`. **Rollback** rev 3 `t6OJTCcm`: record the object version you replace at step 0. The ledger STATES the
+      pin and the built sha.
+    - **R0:** live at start == `t6OJTCcm`. The per-member diff of the UPLOADED zip against LIVE (read via `get_function`) is EXACTLY `status_installed.py`,
+      `composition.py` and `repository.py`; anything else is a STOP. The shared-root STOP applies.
+    - **R1:** on the UPLOADED zip, symbol closure missing=0, and `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r2/signature_closure.py`
+      prints exactly one mismatch, the tolerated `served:1006 ... ['profile_reader']`.
+    - **R2:** live == `DZOdwUOG`, re-plan 0, the `/original` route count is 1.
+    - **R3 (live-call arm; the ledger does NOT close before it):** irpt-status 5xx count and `TypeError` count both 0 over 5 minutes, with START lines
+      printed as the traffic denominator. AND `2.0.0_SA_COO~G2`'s authorized owner GET answers 200 (its sr1 window). **Either one failing is Branch B:**
+      re-promote rev 3's object version.
+    - **R4:** `2.0.0_SA_COO~G2`'s owner read of `REQ-5e4149d2` (status-job and analysis-report). If it fails ALONE, record it with its code; no rollback.
+    - Write the same after-reads file with `revision` 5. Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii) on a modify.
   </steps>
 
   <acceptance>
