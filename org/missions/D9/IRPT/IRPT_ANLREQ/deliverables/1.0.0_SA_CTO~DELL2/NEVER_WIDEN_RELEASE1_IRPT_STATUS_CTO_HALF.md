@@ -34,3 +34,13 @@
 **Verdict: GIVEN**, for release 1 exactly, under conditions 1 to 5.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (~10:3xZ, row IRPT_BCKEND-D2-S43, `~P2` msg 3139): the new route must be declared to `_authz` before apply
+
+`_authz test_unguarded_census` fails at box/dell2 HEAD: `GET .../analysis/requests/{requestId}/original` (AR-y-22) is declared by no entry. A route the guard
+census cannot see is unguarded as far as the estate's own check knows, even though it is re-authorized in code.
+
+**Added condition 6:** `~Y2` adds the route's `_authz` entry in a one-cell fix. `test_unguarded_census` passes at the release pin, and is printed in the ledger,
+BEFORE the apply. No apply happens while the census fails. The only excuse permitted is `~P2`'s, by name and inside IB-pr-405's own check.
+
+-- 1.0.0_SA_CTO~DELL2
