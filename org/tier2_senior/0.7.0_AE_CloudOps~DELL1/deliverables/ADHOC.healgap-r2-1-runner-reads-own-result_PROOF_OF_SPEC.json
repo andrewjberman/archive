@@ -1,0 +1,192 @@
+{
+  "genre": "DEPLOY",
+  "schema_version": "1.0",
+  "to_id": "ADHOC.healgap-r2-1-runner-reads-own-result",
+  "firm": "MDPF",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/task_orders/ADHOC.healgap-r2-1-runner-reads-own-result.md",
+    "group": "OTHER",
+    "vintage_commit": "83028dca8a"
+  },
+  "assignee": "0.7.0_AE_CloudOps~DELL1",
+  "never_widen_pair": {
+    "coo_half": "NONE OWED -- the order's own context states it: 'Not served output: a read grant on the role's own result keys; no never-widen pair is owed (Step F: report after the fact).'",
+    "cto_half": "NONE OWED, same line. The governing rulings are instead CTO~DELL1 ruling H @1af255b7da (the Resource form) and the CloudOps conditions of ADDENDUM 3 @947dd446e5.",
+    "read_before_first_live_act": "AMENDMENT A1 @83028dca8a was read VERBATIM at its own pin before any act -- `git show 83028dca8a:<order>` printed, never grepped from the worktree, with an 8,722-byte count as the positive control that the pin-and-path read resolves at all.",
+    "amendment": "A1 @83028dca8a by 2.0.0_SA_COO~G1, recording CTO~DELL1 ruling H @1af255b7da on row MDPF_HEALGAP-D1-S9: scope 2's Resource becomes ${one(local.monolith_source_scopes.blackdiamond)} in place of the typed firm; C3 now requires the plan to print the identical ARN; a new C8 requires the naming gate to PASS. The amendment commit states the gate limb that graded it: none."
+  },
+  "risk_class": "WORLD",
+  "rollback": "Revert commit ba88934f7b (a 7-line insertion) and re-apply the same target: the policy document returns to its three-statement form. The grant is additive and read-only, so the rollback removes one Allow and touches no written key. Trigger: any criterion failing, or the issuer withdrawing ruling H. No artifact version is involved -- aws_iam_role_policy carries no versioned object.",
+  "scope": "ONE statement added to aws_iam_role_policy.cot_rebalancer_runner_write: Sid ReadOwnRunResult, Allow s3:GetObject on the runner's own blackdiamond/cottonwood/meta/*-result.json, so the runner can read an earlier run's result object and record healed_at (row MDPF_HEALGAP-D1-W3-S1, ruling R2-1). Edit, commit, targeted plan, targeted apply, live read-back, Step F report.",
+  "status": "THE ACT IS LANDED AND VERIFIED IN THE WORLD. C1, C2, C3, C4, C7, C8 PASS. C5 is UNCOMPUTABLE ON THIS BOX -- an instrument refusal, controlled -- and C6 follows it, so the ledger is deliberately HELD-SOVEREIGN-GATED rather than closed. The order is NOT flipped complete.",
+  "go_message": "2.0.0_SA_COO~G1 msg 1832 (GO after 07:10Z, acked READ), then msg 1977 (re-GO from scope 2 under amendment A1, acked READ). Scope 1's hold was honoured: the first act was at 07:10:38Z.",
+  "controls": {
+    "the_check_script_discriminates_in_both_directions": {
+      "description": "hg_t8_iam.py was RETARGETED by the issuer to the one() form, so the instrument could have become one that passes anything. The base reading is the negative arm this seat ran itself.",
+      "expected_landed": "IAM-OK statements=4, getobject_resource echoing the one() expression",
+      "expected_not_landed": "IAM-BAD 'statements granting s3:GetObject: 0 (want 1)'",
+      "observed": "Base, before the edit: IAM-BAD 0 of 1, run by this seat twice -- once before the refused typed cut and again after reverting it. After the one() edit: IAM-OK statements=4. The issuer additionally measured the typed-cottonwood form IAM-BAD and a meta/* form IAM-BAD before amending, so all four arms are accounted for.",
+      "status": "PASS"
+    },
+    "the_naming_limb_is_the_same_limb_that_refused": {
+      "description": "C8 is only meaningful if the gate that PASSES now is the gate that REFUSED before. Both readings come from naming-gate.py on this same file and statement.",
+      "expected_landed": "NAMING-GATE: PASS 0 graded, rc=0",
+      "expected_not_landed": "NAMING REFUSE ... -> lookup('cottonwood'); NEW hand-kept carrier (context rule)",
+      "observed": "The typed cut REFUSED, recorded in row MDPF_HEALGAP-D1-S9 @20ec950171. The one() cut PASSES: standalone naming-gate.py --diff --enforce rc=0, and the same limb PASSED again inside safe-commit on the staged post-image, denominator 1 of 1 path seen. The discriminator is the firm token being read from the grammar rather than typed.",
+      "status": "PASS"
+    },
+    "the_simulate_refusal_is_the_instrument_not_the_world": {
+      "description": "C5's AccessDenied could mean either 'this principal cannot call the API' or something about the target. A positive control on the same action separates them.",
+      "expected_landed": "the same action against a DIFFERENT policy-source-arn also fails, if the action were absent wholesale",
+      "expected_not_landed": "the same action against the caller's OWN user ARN succeeds, proving the grant is resource-scoped to self",
+      "observed": "iam:SimulatePrincipalPolicy against arn:aws:iam::313476888478:user/cloudops-dell1-agent-user returns 'allowed' -- the call WORKS. Against arn:aws:iam::313476888478:role/cot-rebalancer-runner-role it returns AccessDenied naming the caller and the action. So the grant is RESOURCE-SCOPED to the caller's own principal, not missing wholesale. iam:SimulateCustomPolicy is also denied, so there is no substitute instrument on this box. C5 is therefore unrunnable here and is reported as neither a failure nor a pass.",
+      "status": "PASS"
+    },
+    "no_forcenew_attribute_moved": {
+      "description": "monolith.tf:79-81 records a MEASURED hazard: aws_iam_policy.description is ForceNew and this root's write-policy descriptions interpolate the scope list. The new statement interpolates that same list, so the claim 'a policy document is not a description' was put under test rather than assumed.",
+      "expected_landed": "the plan's only differing attribute is 'policy'; name and role read before == after; actions ['update'], never a replace",
+      "expected_not_landed": "any create/destroy pair, or a differing name, role or description",
+      "observed": "terraform show -json: 2 resource_changes, 1 no-op, 1 update; the sole mover is aws_iam_role_policy.cot_rebalancer_runner_write; attributes differing (before != after) = ['policy'] exactly; name 'cot-rebalancer-runner-write-cot' and role 'cot-rebalancer-runner-role' both before == after.",
+      "status": "PASS"
+    }
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf",
+      "kind": "iam",
+      "commit_or_etag": "ba88934f7b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The committed statement is live. aws_iam_role_policy.cot_rebalancer_runner_write renders to the live policy cot-rebalancer-runner-write-cot on role cot-rebalancer-runner-role, and get-role-policy after the apply reads 4 statements: WriteOwnCottonwoodBronzeMeta, ReadOwnRunResult, ListCottonwoodForLandingGuard, DenyBlackdiamond49fFirmSep. ReadOwnRunResult is Allow s3:GetObject on arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/*-result.json. A re-plan at the same target reads 'No changes. Your infrastructure matches the configuration.' with -detailed-exitcode rc=0, so the committed source and the live world agree."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T0732Z_healgap-r2-1-runner-reads-own-result-dell1-20261009_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The NEVER-2 ledger entry, 3 legs. L1 (git) and L2 (activation) CLOSED with proof. L3 (verify) open on C5 alone; the entry is HELD-SOVEREIGN-GATED, which deploy_ledger renders 'apply legs proven, only verify open; tracked-not-stranded' rather than a half-landed RED. Its sentinel org/critical_paths/.open_deploys/healgap-r2-1-runner-reads-own-result-dell1-20261009.json rides the same commit, because the sentinel is the gate's only input."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C1",
+      "criterion_verbatim": "IAM-OK (it reads IAM-BAD \"0 GetObject statements\" at the base)",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R2_CHECKS/hg_t8_iam.py infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf",
+      "output_evidence": "IAM-OK statements=4, getobject_resource echoed as the one() expression. The base arm was run by this seat and reads IAM-BAD 'statements granting s3:GetObject: 0 (want 1)'.",
+      "denominator": "1 file graded; both arms of the control observed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C2",
+      "criterion_verbatim": "FMT-OK -- the verbatim expect of C2, whose invocation is hg_tf_fmt.py on infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R2_CHECKS/hg_tf_fmt.py infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf",
+      "output_evidence": "FMT-OK infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf. Corroborated by an independent instrument: terraform fmt -check -diff on the same file, rc=0, no diff emitted.",
+      "denominator": "1 file, 2 agreeing instruments",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3",
+      "criterion_verbatim": "0 to add, 1 to change, 0 to destroy; the diff adds only the ReadOwnRunResult statement, and the plan prints its resource as the identical ARN arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/*-result.json (amendment A1)",
+      "method": "command",
+      "invocation": "the targeted plan on aws_iam_role_policy.cot_rebalancer_runner_write in infra/aws/terraform/opal-assets",
+      "output_evidence": "Summary: 'Plan: 0 to add, 1 to change, 0 to destroy.' Graded per attribute rather than from the summary line: 2 resource_changes, 1 no-op, 1 update; sole mover aws_iam_role_policy.cot_rebalancer_runner_write; differing attributes exactly ['policy']; statements 3 -> 4; exactly ONE statement added and ZERO removed; the added statement renders Resource arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/*-result.json, IDENTICAL to the refused typed form as amendment A1 requires; DenyBlackdiamond49fFirmSep byte-identical before and after.",
+      "denominator": "2 of 2 resource_changes read; 4 of 4 post-image statements read",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C4",
+      "criterion_verbatim": "four statements; ReadOwnRunResult Allow s3:GetObject on arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/*-result.json; DenyBlackdiamond49fFirmSep unchanged",
+      "method": "command",
+      "invocation": ".tools/aws iam get-role-policy --role-name cot-rebalancer-runner-role --policy-name <the live name of cot_rebalancer_runner_write>",
+      "output_evidence": "length(PolicyDocument.Statement) = 4. Sids in order: WriteOwnCottonwoodBronzeMeta, ReadOwnRunResult, ListCottonwoodForLandingGuard, DenyBlackdiamond49fFirmSep. ReadOwnRunResult reads Action s3:GetObject, Effect Allow, Resource arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/*-result.json. DenyBlackdiamond49fFirmSep reads Action s3:*, Effect Deny, Resource [arn:aws:s3:::opal-data-assets/blackdiamond/49f/*] -- identical to the pre-apply read. The live policy name was RESOLVED, not assumed: iam list-role-policies returned three names and cot-rebalancer-runner-write-cot is the one matching the TF name expression at cot_rebalancer_runner.tf:74.",
+      "denominator": "4 of 4 statements read on the live principal",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C5",
+      "criterion_verbatim": "allowed / implicitDeny / explicitDeny, in that order (the -result.json grant only; the complete-stamp and the 49f tree stay closed)",
+      "method": "command",
+      "invocation": ".tools/aws iam simulate-principal-policy --policy-source-arn <role arn> --action-names s3:GetObject --resource-arns arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/2026-10-09-result.json arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/2026-10-09-complete.json arn:aws:s3:::opal-data-assets/blackdiamond/49f/meta/2026-10-09-result.json",
+      "output_evidence": "NOT RUN. The first arm returned AccessDenied: 'User: arn:aws:iam::313476888478:user/cloudops-dell1-agent-user is not authorized to perform: iam:SimulatePrincipalPolicy on resource: arn:aws:iam::313476888478:role/cot-rebalancer-runner-role'. CONTROLLED: the same action against the caller's OWN user ARN returns 'allowed', so the grant is resource-scoped to self and the refusal is the instrument, not a statement about the target. iam:SimulateCustomPolicy is denied too, so no substitute instrument exists on this box. The three arms were deliberately planned as SEPARATE invocations because two or more --resource-arns in one call flip the held ones to implicitDeny.",
+      "denominator": "0 of 3 arms run; 2 of 2 controls run",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "A missing grant on THIS seat's own principal, not a property of the deployed change. Reported as row MDPF_HEALGAP-D1-S10 and carried on the ledger hold, whose gate names the exact action and resource. Never reported as a pass: ABSENT is not EXERCISED-AGAINST."
+    },
+    {
+      "criterion_id": "C6",
+      "criterion_verbatim": "this order's ledger CLOSED, every leg proven",
+      "method": "command",
+      "invocation": "python .tools/deploy_ledger.py check",
+      "output_evidence": "HELD-SOVEREIGN-GATED, rendered 'apply legs proven, only verify open; tracked-not-stranded'. L1 and L2 CLOSED with proof; L3 open on C5 alone, with a named gate and a re-read EVENT. Closing it now would be precisely the DRIFT-DANGEROUS state this seat surfaced on two other entries in this same session -- an entry reading terminal over an unproven leg, a NEVER#6 bypass wearing a compliance mask.",
+      "denominator": "2 of 3 legs closed with proof; 1 held on a named gate",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "Follows C5 and nothing else. It becomes computable the moment C5's three arms can run, or the issuer grades them from a box holding iam:SimulatePrincipalPolicy."
+    },
+    {
+      "criterion_id": "C7",
+      "criterion_verbatim": "DELIVERED, with role, policy and the granted action/resource named",
+      "method": "command",
+      "invocation": "the broker send to 0.0.0_AB_MSTR~DELL1 reporting the change (scope item 4)",
+      "output_evidence": "DELIVERED to 0.0.0_AB_MSTR~DELL1, inbox file 20261009T073950Z_0.7.0_AE_CloudOps_DELL1_Step_F_after-the-fact__cot-rebalancer-ru.md, via filesystem + broker + channel push. The body names the role, the policy and its TF name, the granted action and the exact resource, the live read-back, and states that none of the three CloudOps conditions fires.",
+      "denominator": "1 of 1 recipient DELIVERED",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C8",
+      "criterion_verbatim": "NAMING-GATE: PASS (no NEW naming carrier; amendment A1)",
+      "method": "command",
+      "invocation": "git diff HEAD~1 -- infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf > d.diff; python .tools/naming-gate.py --diff d.diff --enforce",
+      "output_evidence": "NAMING-GATE: PASS 0 graded, rc=0, on the COMMITTED bytes. The TO's literal `HEAD~1` was NOT usable: this is a shared worktree and other seats committed on top of ba88934f7b (HEAD read e21ce491ca while ba88934f7b stayed an ancestor), so `HEAD~1` names another seat's commit. The same invocation was run with HEAD~1 resolved to the actual commit: git diff ba88934f7b~1 ba88934f7b -- infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf > d.diff (18 lines), then naming-gate.py --diff d.diff --enforce. DENOMINATOR 1 path in the diff, declaration-tree domain 1, COVERAGE 0 unseen and 1 seen. The same limb also PASSED inside safe-commit on the staged post-image, and REFUSED the typed-cottonwood form earlier, so C8 is discriminating and not a tautology.",
+      "denominator": "1 of 1 path graded, three times: standalone pre-commit, inside safe-commit, and on the committed diff",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Granting this seat's own principal iam:SimulatePrincipalPolicy so C5 can run",
+      "reason": "Outside this order's <paths>, which names only infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf plus ledger and deliverable surfaces. Widening this seat's own IAM to satisfy its own verification criterion is also the wrong shape on its face. Reported and asked for instead."
+    },
+    {
+      "item": "Any runner invoke or vendor call",
+      "reason": "The order's conditions forbid both: 'No runner invoke, no vendor call.' The grant was verified by reading the policy, never by exercising the runner."
+    },
+    {
+      "item": "A never-widen pair",
+      "reason": "None is owed. The order's context states it: this is not served output, only a read grant on the role's own result keys, with Step F reporting after the fact."
+    }
+  ],
+  "surprises": [
+    "MDPF_HEALGAP-D1-S9 @20ec950171: the naming commit limb REFUSED the order's own verbatim scope-2 statement text, grading the typed 'cottonwood' a NEW hand-kept carrier. Resolved by CTO~DELL1 ruling H @1af255b7da and issuer amendment A1 @83028dca8a, which read the firm from locals.monolith_source_scopes instead. The rendered ARN is identical, so nothing about the grant changed -- only how the firm is spelled in source.",
+    "MDPF_HEALGAP-D1-S10: C5 cannot be exercised from dell1. iam:SimulatePrincipalPolicy is granted to this seat's principal only for its OWN ARN (controlled: self returns 'allowed', the runner role returns AccessDenied), and iam:SimulateCustomPolicy is absent, so there is no substitute instrument. The deployed change is unaffected; the gap is in this box's IAM parity."
+  ],
+  "forward_notes": [
+    "The same naming-limb class will refuse any future NEW firm-token literal in an existing pipeline's .tf. Ruling H's one() form is the reusable remedy wherever the root already declares the firm; where it does not, the R20 declared-exception path is the mechanism's own answer and it needs Andrew's word.",
+    "healed_at should now be able to read non-null on the next run that heals an earlier missing feed. That behaviour is the issuer's to read -- this order granted the permission and deliberately did not exercise the runner."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/2026-10-09/four_orders_three_clock_gated_and_a_blocking_finding_measured_closed.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --files 'cottonwood' infra/aws/terraform/opal-assets",
+      "result": "PASS -- denominator 34 hits across 21 files scanned, bands DEF=1 SURFACED=25 CONFIG=8. Established that cot_rebalancer_runner.tf is the DEF site and that the literal is pervasive across the root, which is what made the gate's NEW-vs-EXISTING discriminator legible."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'permitted context|PERMITTED_CONTEXT|context rule|NAMING_OVERRIDE|naming-override|LGIC_ENFORCE' .tools",
+      "result": "PASS -- denominator 33 hits across 499 files, bands HEAD=11 SURFACED=22. Located the gate's REFUSE/WARN decision site and the R20 declared-exception consumption point, which is what established that no escape existed at this seat's authority."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "NOT RUN -- DECLARED-NOT-APPLICABLE",
+      "result": "The issuer ran comp-iam service cot-rebalancer-runner at 01:2xZ (PutObject and ListBucket held, GetObject not) and recorded that the role is used by 1 of 232 us-east-1 functions. Re-running it would not change this act: comp-iam models (action) and never (action, resource), so it cannot grade a key-pattern-scoped grant -- cloud-ops states it is a FLOOR and fails green. The live get-role-policy read is the stronger instrument and it was run."
+    }
+  ],
+  "regression_reads": {
+    "firm_separation_intact": "DenyBlackdiamond49fFirmSep is byte-identical before and after, in the plan and on the live principal. The explicit Deny on blackdiamond/49f/* still wins over every Allow, so the new read grant cannot reach another firm's tree -- CloudOps condition 3 holds structurally, not by promise.",
+    "write_surface_unmoved": "WriteOwnCottonwoodBronzeMeta still grants s3:PutObject on exactly bronze/* and meta/*; the new statement adds no write and no new prefix. The read grant is strictly narrower than the write grant already held on the same prefix.",
+    "list_condition_unmoved": "ListCottonwoodForLandingGuard's StringLike s3:prefix condition reads blackdiamond/cottonwood/* before and after.",
+    "no_schedule_or_code_moved": "No EventBridge rule, Lambda code package, memory, timeout or environment variable was touched; the plan's only mover was the role policy document. comp-schedule was DECLARED-NOT-APPLICABLE by the order for exactly this reason."
+  }
+}
