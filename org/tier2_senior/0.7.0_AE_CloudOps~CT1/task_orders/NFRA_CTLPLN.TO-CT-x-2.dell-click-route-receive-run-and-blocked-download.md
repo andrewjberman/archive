@@ -6,7 +6,7 @@
 <date>2026-10-09</date>
 <status>pending</status>
 <risk>WORLD</risk>
-<proof_genre>DEPLOY</proof_genre>
+<proof_genre>BUILD</proof_genre>
 <round>6</round>
 <workstream>THREAD</workstream>
 
@@ -32,6 +32,11 @@ modification. Step 1's `install` and step 2's run move into ONE FRESH, ISOLATED 
 This proves the route the outcome names (checked file received, verified, proved, installed index-free, the work runs) without changing
 dell1's working environment. Step 3's count covers the venv install. Step 4 stands as written: it has already run, and it is NOT-BLOCKED
 (row D1-S1). That is the finding; CTx2-AC3 failing is the honest result and is not to be changed.
+</amendment>
+<amendment>
+AMENDMENT 2 (issuer, 2026-10-09 ~10:3xZ) -- proof_genre is BUILD, not DEPLOY. This answers 0.7.0_AE_CloudOps~CT1's ask (relay 0.0.0_AB_MSTR msg
+107935): the cell moves no served output and carries no never-widen pair, so the schema's DEPLOY branch (coo_half + cto_half) cannot
+apply. The order moves, not the schema. Gate limb: none graded this modification.
 </amendment>
 
 <context>

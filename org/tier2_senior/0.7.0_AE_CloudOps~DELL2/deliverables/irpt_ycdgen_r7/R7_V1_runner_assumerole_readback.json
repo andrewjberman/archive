@@ -1,0 +1,199 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:DeleteMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueAttributes",
+                "sqs:SendMessage"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:sqs:us-east-1:313476888478:irpt-generation"
+            ],
+            "Sid": "ConsumeTheGenerationQueue"
+        },
+        {
+            "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Query",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:ConditionCheckItem"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:dynamodb:us-east-1:313476888478:table/irpt-jobs",
+                "arn:aws:dynamodb:us-east-1:313476888478:table/irpt-requests"
+            ],
+            "Sid": "JobStateAcceptanceAndRetainedIndexes"
+        },
+        {
+            "Action": [
+                "dynamodb:TransactWriteItems"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:dynamodb:us-east-1:313476888478:table/irpt-jobs",
+                "arn:aws:dynamodb:us-east-1:313476888478:table/irpt-requests"
+            ],
+            "Sid": "TransactionalPublication"
+        },
+        {
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/vendor_documents/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/extraction_evidence/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/49financial/platinum/analysis_reports/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/normalized_portfolios/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/vendor_documents/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/extraction_evidence/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/platinum/analysis_reports/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/normalized_portfolios/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/vendor_documents/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/extraction_evidence/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/inflection/platinum/analysis_reports/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/normalized_portfolios/*"
+            ],
+            "Sid": "RetainVendorPdfEvidenceAndCertifiedAnalysis"
+        },
+        {
+            "Action": [
+                "sts:AssumeRole"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:iam::313476888478:role/irpt-49f-ycharts-research-role",
+                "arn:aws:iam::313476888478:role/irpt-cot-ycharts-research-role",
+                "arn:aws:iam::313476888478:role/irpt-inf-ycharts-research-role"
+            ],
+            "Sid": "AssumeTheFirmResearchPrincipal"
+        },
+        {
+            "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/request_compositions/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/original_holdings/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/request_compositions/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/original_holdings/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/request_compositions/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/original_holdings/*"
+            ],
+            "Sid": "ReadFrozenCompositionAndNormalizedInput"
+        },
+        {
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/ycharts_opal_reports/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/ycharts_opal_reports/*",
+                "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/ycharts_opal_reports/*"
+            ],
+            "Sid": "RetainTheOpalReportPdf"
+        },
+        {
+            "Action": [
+                "dynamodb:GetItem"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:dynamodb:us-east-1:313476888478:table/etf-classifications"
+            ],
+            "Sid": "ReadTheCanonicalClassificationTable"
+        },
+        {
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-etfs/bbg/*"
+            ],
+            "Sid": "ReadTheHeldFundCharacteristics"
+        },
+        {
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Condition": {
+                "StringLike": {
+                    "s3:prefix": [
+                        "bbg/",
+                        "bbg/*"
+                    ]
+                }
+            },
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-etfs"
+            ],
+            "Sid": "ListTheHeldFundCharacteristicsFolder"
+        },
+        {
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:secretsmanager:us-east-1:313476888478:secret:astn/kimi/api-key-??????"
+            ],
+            "Sid": "ReadTheEstateKimiKey"
+        },
+        {
+            "Action": [
+                "kms:Decrypt",
+                "kms:GenerateDataKey"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "kms:ViaService": "s3.us-east-1.amazonaws.com"
+                },
+                "StringLike": {
+                    "kms:EncryptionContext:aws:s3:arn": [
+                        "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/vendor_documents/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/extraction_evidence/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/49financial/platinum/analysis_reports/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/normalized_portfolios/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/vendor_documents/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/extraction_evidence/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/platinum/analysis_reports/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/normalized_portfolios/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/vendor_documents/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/extraction_evidence/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/inflection/platinum/analysis_reports/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/normalized_portfolios/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/request_compositions/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/original_holdings/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/request_compositions/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/original_holdings/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/request_compositions/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/original_holdings/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/ycharts_opal_reports/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/ycharts_opal_reports/*",
+                        "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/ycharts_opal_reports/*"
+                    ]
+                }
+            },
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111"
+            ],
+            "Sid": "ReportEncryptionViaS3ForResidentFamiliesOnly"
+        }
+    ]
+}
