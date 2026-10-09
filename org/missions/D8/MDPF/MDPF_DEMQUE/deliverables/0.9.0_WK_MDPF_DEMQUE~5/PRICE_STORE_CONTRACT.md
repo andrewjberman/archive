@@ -21,6 +21,16 @@ KEY NAMESPACE: the key is Commonwealth's 9-character CUSIP exactly as Commonweal
 - `date` -- trading day, midnight, no time zone.
 - `close_served` -- the close as Yahoo serves it today (adjusted for splits; dividends are not folded in).
 - `as_traded_close` -- the close as it actually printed that day (every later split undone).
+- `cash` -- (DQ-t-21) dividend/interest cash per share, AS TRADED, going ex on that date; 0 on every other day.
+- `total_return` -- (DQ-t-21) the day's total return, a fraction (0.01 = 1%): `TR_t = (P_t + D_t) / (P_{t-1} / s_t) - 1` (P as-traded close, D `cash`, s the split ratio on t). Null on the first row of the history (no prior close). Every consumer reads this column; `close_served`, `as_traded_close` and `cash` stay stored for audit.
+- `tr_source` -- (DQ-t-21) `yahoo` | `bloomberg` | `accrual` | null: where `total_return` came from.
+- `flags` -- (DQ-t-21) list of strings, empty when clean.
+
+The four TR columns come AFTER `date, close_served, as_traded_close`; those three are unchanged (same values, same order, same dtypes), so a reader of the first three is not affected. Builder: `data/mdpf/scripts/demque/tr_column.py`. Two guards, both in the build:
+- **(a) missing cash.** Where Bloomberg's stored `DAY_TO_DAY_TOT_RETURN_GROSS_DVDS` (percent, `s3://opal-data-etfs/bbg/<date>/history_topup.parquet`, read only) exists for the name, a NON-ex-date day (`cash` = 0) whose Yahoo TR differs from Bloomberg's by more than 1 bp (`MISSING_CASH_BP`) carries the flag `missing_cash`: Yahoo has not recorded a distribution the market paid. The writer is given the Bloomberg frame (`write(..., bbg=)`); with none, guard (a) cannot fire.
+- **(b) money market.** A symbol in `data/mdpf/scripts/demque/money_market.csv` (`symbol, cusip, basis`; seed FXFXX, SALXX) is a $1.00-NAV fund whose Yahoo TR is 0, and never takes Yahoo's TR: a date with a Bloomberg daily TR takes it (`tr_source` `bloomberg`); any other date takes the nearest prior Bloomberg daily TR carried forward (next one back-filled before the first) with `tr_source` `accrual` and flag `accrual_carried_bloomberg_rate` (an estimate, flagged on every such row); a name with no Bloomberg value at all gets null `total_return`, null `tr_source` and flag `money_market_tr_unavailable`.
+
+Until the next scheduled draw rewrites a CUSIP, its `prices.parquet` has only the first three columns: a reader that needs `total_return` treats an absent column as not yet drawn.
 
 `splits.parquet` -- whole history: `date`, `ratio` (new shares per old share, 2.0 = two-for-one).
 `dividends.parquet` -- whole history: `date`, `amount` (cash per share). These two keep their full history so a later correction is re-derived, never re-pulled.
