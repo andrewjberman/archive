@@ -2,7 +2,10 @@
 so each is named in the ask for the issuer's word (row Z-W43-S2, narrowed by row Z-W43-S6 after amendment A6 withdrew the Bloomberg rows and with them E1 and E4).
  E2 tests/test_mail_route_domain.py test_ogmd1_ac06 : the pin 'the shipped domain table holds no domain' becomes 'holds exactly the signed entries'.
  E3 deploy/mail_sender_domain_table.txt : the first two header comment lines said the file ships EMPTY; they now say it ships the signed entries.
+ E4 deploy-to-ec2.sh : the MAIL_BEARER leg hunk (A7 D4 option A), built by r29_mail_bearer_leg_patch.py from the cell's own file. The one Terraform line is r29_tf_edit.py.
 usage: python r29_release_time_edits.py <candidate worktree>"""
+import os
+import subprocess
 import sys
 
 G = "/infra/aws/ec2/opal-gateway/"
@@ -39,4 +42,7 @@ def e3(t):
 
 rw("tests/test_mail_route_domain.py", e2)
 rw("deploy/mail_sender_domain_table.txt", e3)
-print("release-time edits E2 E3 applied to", wt)
+HERE = os.path.dirname(os.path.abspath(__file__))
+dep = wt + G + "deploy-to-ec2.sh"
+subprocess.run([sys.executable, os.path.join(HERE, "r29_mail_bearer_leg_patch.py"), dep, dep], check=True)   # E4
+print("release-time edits E2 E3 E4 applied to", wt)

@@ -1,9 +1,8 @@
-"""OG-rl-15 step 2 (form): each CANDIDATE file's hunk set (live aa75078e1b .. candidate working tree) equals the owning cell's OWN diff, where a cell's own diff is
+"""OG-rl-15 step 2 (form): each RELEASE file's hunk set (live aa75078e1b .. candidate working tree) equals the owning cell's OWN diff, where a cell's own diff is
 the NET diff of its build-commit chain (first commit's parent .. last commit) per file. Cells: OG-md-1 = 15b08fdca1; OG-sf-1 = 17b2977f4c; OG-rf-1 = 41b0c7903b + cd730f3bb5; OG-cm-1 = fcedf00b1e.
 A file is EQUAL when its changed-line multiset (added and removed lines, header lines dropped) equals the cell's. The extra-hunk rows are named as such.
 usage: python r29_hunk_equality.py <candidate worktree> <repo with the cell commits>"""
 import collections
-import os
 import subprocess
 import sys
 
@@ -32,12 +31,12 @@ def changed(diff):
     return c
 
 
+LIVE = "aa75078e1b72a28219e6148d3ec8e9bf705ea111"
+
+
 def net(path):
-    tracked = run(WT, "ls-files", "--", path).strip()
-    if tracked:
-        return changed(run(WT, "diff", "HEAD", "--", path))
-    txt = open(os.path.join(WT, path), encoding="utf-8", newline="").read()
-    return collections.Counter("+" + ln for ln in txt.split("\n")[:-1]) if txt.endswith("\n") else collections.Counter("+" + ln for ln in txt.split("\n"))
+    """The release's net change to `path`: live..HEAD of the release worktree (the committed release when the tree is clean; the working tree on top of it otherwise)."""
+    return changed(run(WT, "diff", LIVE, "--", path))
 
 
 ok = True
@@ -54,19 +53,26 @@ for f, cell in FILES + [("../../../../org/standards/NFRA_OPLGTW_CONTRACT.json", 
     if f == "deploy/mail_sender_domain_table.txt" and v == "DIFFER":
         extra = " (only-in-candidate: the %d proposed entries and their comments, and the 2 header lines E3 rewrote; only-in-cell: those 2 header lines)" % sum(x.values())
         v = "CELL+ENTRIES+E3" if sum(y.values()) == 2 else v
+    if f == "deploy-to-ec2.sh" and v == "DIFFER":
+        xo = [k for k in x if k.startswith("+") and "MAIL_BEARER_LABELS=" in k]
+        yo = [k for k in y if k.startswith("+") and "MAIL_BEARER_LABELS=" in k]
+        one_token = len(xo) == 1 and len(yo) == 1 and xo[0][1:].replace("msgpull,commassist", "msgpull") == yo[0][1:]
+        extra = " (E4: only-in-candidate %d lines = the 10-line MAIL_BEARER leg hunk + the printf line; only-in-cell %d = the old printf line; the printf line differs by the one token msgpull -> msgpull,commassist: %s)" % (sum(x.values()), sum(y.values()), one_token)
+        v = "CELL+E4" if (sum(x.values()) == 11 and sum(y.values()) == 1 and one_token) else v
     if f == "tests/test_mail_route_domain.py" and v == "DIFFER":
         extra = " (E2: only-in-candidate %d line(s), only-in-cell %d line(s): the ac06 pin and its comment)" % (sum(x.values()), sum(y.values()))
         v = "CELL+E2" if sum(y.values()) == sum(x.values()) <= 2 else v
     print("%s [%s]: candidate changed-lines %d, cell changed-lines %d, only-in-candidate %d, only-in-cell %d => %s%s" % (
         f if not f.startswith("..") else "org/standards/NFRA_OPLGTW_CONTRACT.json", cell, sum(n.values()), sum(own.values()), sum(x.values()), sum(y.values()), v, extra))
-    ok = ok and v in ("EQUAL", "CELL+ENTRIES+E3", "CELL+E2")
+    ok = ok and v in ("EQUAL", "CELL+ENTRIES+E3", "CELL+E2", "CELL+E4")
 for f in ("identity_tool_allowlist.txt", "app/identity_scope.py", "app/graph_scope_map.py", "tests/test_scoped_consent_r253.py"):   # A6: nothing Bloomberg ships
     n = net(G + f)
     print("%s [A6: must be untouched]: changed lines %d => %s" % (f, sum(n.values()), "UNTOUCHED" if not n else "TOUCHED"))
     ok = ok and not n
 ht = net(G + "tests/test_schwab_host_inputs.py")
 print("tests/test_schwab_host_inputs.py [floor constants]: %s" % sorted(ht.items()))
-nm = [x for x in run(WT, "status", "--short").split("\n") if x.strip()]
-print("files touched in the candidate worktree: %d" % len(nm))
+nm = [x for x in run(WT, "diff", "--name-only", LIVE).split("\n") if x.strip()]
+print("release HEAD %s; files differing live..HEAD: %d; worktree clean: %s" % (run(WT, "rev-parse", "HEAD").strip(), len(nm), "yes" if not run(WT, "status", "--short").strip() else "NO"))
+ok = ok and len(nm) == 19
 print("RESULT:", "PASS" if ok else "FAIL")
 sys.exit(0 if ok else 1)
