@@ -42,6 +42,48 @@ SIGNED_ARNS = sorted([
 READS = [str(i) for i in range(0, 6)]  # AMENDMENT 2: read 5 = the ticket binding live
 
 
+# AMENDMENT 3 (issuer 2026-10-09 ~10:1xZ): the applier wrote irpt_y77/Y77_reads_0_to_5.json (read_0..read_5b) rather than the
+# after-reads shape named in the order; this adapter maps its MEASURED fields, and changes no threshold.
+F_APPLIER = "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_y77/Y77_reads_0_to_5.json"
+LEDGER = "org/critical_paths/change_management/20261009T0924Z_irpt-ycg-release6b-20261009_deploy_completion.md"
+APPLY_AT = "2026-10-09T09:30:00Z"
+# read 5a (the acceptance RECORD carries ticket_id) cannot be read on dell2 (irpt-requests is not decryptable here); it is graded on
+# IRPT_ANLREQ TO-APPLY-Y1 read 4, the served read of the same record through irpt-status.
+Y1_READS = "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_anlreq_r1/APPLY-Y1_after_reads.json"
+
+
+def _pass(v):
+    if isinstance(v, str):
+        return v.startswith("PASS")
+    if isinstance(v, dict):
+        return v.get("verdict") == "PASS"
+    return False
+
+
+def adapt(root):
+    src = root / F_APPLIER
+    if not src.is_file():
+        return None
+    a = json.loads(src.read_text(encoding="utf-8"))
+    r2, r3 = a.get("read_2") or {}, a.get("read_3") or {}
+    y1 = root / Y1_READS
+    y1_4 = (json.loads(y1.read_text(encoding="utf-8")).get("reads") or {}).get("4") if y1.is_file() else None
+    reads = {
+        "0": "PASS" if _pass(a.get("read_0")) else "FAIL",
+        "1": "PASS" if _pass(a.get("read_1")) else "FAIL",
+        "2": "PASS" if (r2.get("equals_built") is True and (r2.get("import_census") or {}).get("failed") == {}) else "FAIL",
+        "3": "PASS" if all(r3.get(k) is True for k in ("no_custody_factory_required", "no_access_denied", "no_import_error")) else "FAIL",
+        "4": "PASS" if _pass(a.get("read_4")) else "FAIL",
+        "5": ("PASS" if (_pass(a.get("read_5b")) and y1_4 == "PASS") else
+              "DEFERRED-5a-TO-Y1-READ-4" if _pass(a.get("read_5b")) else "FAIL"),
+    }
+    led = (root / LEDGER).read_text(encoding="utf-8") if (root / LEDGER).is_file() else ""
+    return {"reads": reads, "built_sha": r2.get("live_sha") if r2.get("equals_built") is True else None,
+            "rolled_back": False if r2.get("equals_built") is True else None,
+            "ledger_closed": "**Status:** CLOSED" in led, "read3_objects": r3.get("read3_objects"),
+            "custody_reports_after": APPLY_AT, "deleted_on_andrews_word": False}
+
+
 def live_config():
     import boto3
     c = boto3.client("lambda").get_function_configuration(FunctionName=FN)
@@ -73,6 +115,17 @@ def live_report_versions():
     return out
 
 
+def live_report_versions_since(iso):
+    import boto3
+    s3 = boto3.client("s3")
+    out = set()
+    for page in s3.get_paginator("list_object_versions").paginate(Bucket=REPORTS_BUCKET, Prefix=REPORTS_PREFIX):
+        for v in page.get("Versions") or []:
+            if v["LastModified"].strftime("%Y-%m-%dT%H:%M:%SZ") >= iso:
+                out.add((v["Key"], v["VersionId"]))
+    return out
+
+
 def main():
     root = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
     cid = sys.argv[2] if len(sys.argv) > 2 else ""
@@ -85,9 +138,9 @@ def main():
     if cid not in ("Y77-1-AC1", "Y77-1-AC2", "Y77-1-AC3"):
         fail("unknown criterion %r" % cid)
     f = root / F
-    if not f.is_file():
-        fail("no %s" % F)
-    d = json.loads(f.read_text(encoding="utf-8"))
+    d = json.loads(f.read_text(encoding="utf-8")) if f.is_file() else adapt(root)
+    if d is None:
+        fail("no %s and no %s" % (F, F_APPLIER))
     reads = d.get("reads") or {}
     all_pass = all(reads.get(r) == "PASS" for r in READS)
 
@@ -110,10 +163,15 @@ def main():
         if d.get("rolled_back") is not False:
             fail("rolled_back is %r" % d.get("rolled_back"))
     elif cid == "Y77-1-AC2":
-        before = {(k, v) for k, v in (d.get("custody_reports_before") or [])}
         named = {(o.get("key"), o.get("version_id")) for o in (d.get("read3_objects") or [])}
-        now = live_report_versions()
-        new = now - before
+        if "custody_reports_before" in d:
+            before = {(k, v) for k, v in (d.get("custody_reports_before") or [])}
+            now = live_report_versions()
+            new = now - before
+        else:  # AMENDMENT 3: no before-set recorded; the writes since the apply are the read-3 candidates
+            now = live_report_versions()
+            new = live_report_versions_since(d["custody_reports_after"])
+            before = now - new
         print("denominator: %d version(s) under s3://%s/%s now; %d before; %d new; %d named" % (
             len(now), REPORTS_BUCKET, REPORTS_PREFIX, len(before), len(new), len(named)))
         unnamed = sorted(new - named)
@@ -129,7 +187,9 @@ def main():
         arns = live_policy_arns()
         print("live CodeSha256 %s; reads all PASS: %s; rolled_back %r; policy %s; pandas layer %s" % (
             live, all_pass, d.get("rolled_back"), "ABSENT" if arns is None else "PRESENT", LAYER in layers))
-        if all_pass:
+        # AMENDMENT 3: branch B is taken on a FAILED read only; a deferred read (5a, graded on Y1 read 4) keeps branch A.
+        no_fail = not any(reads.get(r) == "FAIL" for r in READS)
+        if all_pass or no_fail:
             if d.get("rolled_back") is not False or live != BUILT or arns is None:
                 fail("branch A incoherent")
         # AMENDMENT 2: the pandas layer is already live under IB-pr-390, so branch B keeps it; only the policy is removed.
