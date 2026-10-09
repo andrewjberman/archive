@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-aa-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-aa-3.fwd3-serve-builder.md",
+    "group": "OTHER",
+    "vintage_commit": "165a398127"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~52",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round27.md",
+    "vintage_commit": "165a398127",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-aa-3.fwd3-serve-builder.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_fwd3_serve.py",
+      "kind": "script",
+      "commit_or_etag": "61c911a8bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local build and dry run only; nothing deployed, no S3 write (--apply implemented, never run)",
+      "artifact_covered_by": [
+        "CB27aa3-AC1",
+        "CB27aa3-AC2",
+        "CB27aa3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_fwd3_serve.py",
+      "kind": "test",
+      "commit_or_etag": "61c911a8bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local build and dry run only; nothing deployed, no S3 write (--apply implemented, never run)",
+      "artifact_covered_by": [
+        "CB27aa3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~52/dry_run_ac2.log",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "full dry-run output incl. the one-account read; nothing deployed",
+      "artifact_covered_by": [
+        "CB27aa3-AC2",
+        "CB27aa3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~52/fwd3_manifest.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row counts and content hashes of the local build; nothing deployed",
+      "artifact_covered_by": [
+        "CB27aa3-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB27aa3-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_fwd3_serve.py expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_fwd3_serve.py",
+      "expect": "passed",
+      "output_evidence": "12 passed in 1.81s (rc 0). Stubs: the three schemas equal SCHEMAS and every table carries cash_leg and run_commit on every row; a blank day keeps a null return with its reason (FIRST_DAY, UNPRICED), an unpriced holding a null close, value and price source, an UNGRADABLE month a null computed value and its reason; the reported Month / Year / ITD figures and the benchmark sit beside the computed month, a month no Year row covers carries no Year figure and says so; conflicting duplicate reports carry no value; target addresses come from opal_naming.address (a monkeypatched builder changes them, and a stale dict is not addresses_from_builder); the dry run prints the builder addresses and ends with the FWD3-SERVE line; --verify returns match=True on equal tables and match=False for one changed return, a missing row, and an absent object (served_rows=ABSENT); the content hash is order-free and value-sensitive; the account choice is open, matched, moved; --apply refuses an existing object and writes nothing, then writes the three builder addresses.",
+      "denominator": "12 of 12 tests in test_commonwealth_fwd3_serve.py passed; the whole silver suite at the end: 673 passed, 11 skipped",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB27aa3-AC2",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_fwd3_serve.py --dry-run --data-dir .scratch/advi_cotbkf/r27 --out .scratch/advi_cotbkf/fwd3_serve expect: addresses_from_builder=True",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_fwd3_serve.py --dry-run --data-dir .scratch/advi_cotbkf/r27 --out .scratch/advi_cotbkf/fwd3_serve",
+      "expect": "addresses_from_builder=True",
+      "output_evidence": "rc 0; last line: FWD3-SERVE mode=dry daily_rows=1691729 value_rows=21102041 month_rows=82593 keys=3 addresses_from_builder=True. Targets (opal_naming.address, silver, date=2026-06-23, part-00000.parquet): s3://opal-data-assets/commonwealth/cottonwood/silver/daily_returns/... rows 1691729 hash 72d3e41af6ecd69b9db9df9a385bb3d61e6637d40841e6ee2172c599be49cd8e; .../account_day_value/... rows 21102041 hash d83fc88b99f2fb4f4ee8458cd852c502602e6fb065af4fee693d138f22fd55f2; .../month_grades/... rows 82593 hash 38248f541244f992c84b3f832df53ec1dfc0d9a3017876352e740e71a8c5fdf7. Each hash equals the build manifest's. The data dir is a default run (sweep_regrade --before-list v1 --after-list v1 --before-cash-leg method_r25, after arm method_r26): months_after=3098/886/78609. The build re-derived the day values (1,691,729 account-days, worst abs diff 0.0) and the month grades (82,593) and matched the run. The one-account read (ANALYST-READ account=RGY004256, 547 days, 27 months) is in the log.",
+      "denominator": "3 of 3 tables named with a builder address, row count, schema and hash",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB27aa3-AC3",
+      "criterion_verbatim": "JUDGMENT: the three tables carry what FWD-3's acceptance names (daily return, the reported monthly/yearly/ITD figures and benchmark beside the computed month, blank with reason); the one-account read reads as an analyst's",
+      "method": "manual_read_with_citation",
+      "invocation": "read the dry-run log's ANALYST-READ block and the SCHEMAS in commonwealth_fwd3_serve.py",
+      "expect": "judgment, graded by 3.0.0_SA_CVO at L9",
+      "output_evidence": "PENDING-ADJUDICATION: the three schemas, the manifest and the one-account read (RGY004256: 27 months with computed and reported Month, Year, ITD figures with spans, benchmark, verdict and reason; 547 days each with value, flow, return and a blank reason where blank) are recorded in org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~52/dry_run_ac2.log; no verdict given",
+      "denominator": "1 account of 1,533 read in full; 3 of 3 tables",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment=\"true\" criterion, graded by 3.0.0_SA_CVO at L9 and never self-graded; the worker records output only"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the AC2 invocation run twice on the same build",
+      "observed": "byte-identical output (md5 835fb6b4a69a267146f7b77c874d0c2f both runs)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "content_hash made to drop the return column before hashing; test_commonwealth_fwd3_serve.py run, file restored after",
+      "expected": "test_verify_detects_a_changed_row fails",
+      "observed": "1 failed (test_verify_detects_a_changed_row: assert True is False), 10 passed; restored: 11 passed (12 after the absent-object test was added)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "--apply (the S3 write) and a served --verify",
+      "reason": "the served write is CB-aa-4's; --apply is implemented and unit-tested against stubs, never run. A real --verify against the empty addresses reports served_rows=ABSENT match=False (run, read only)."
+    },
+    {
+      "item": "tier choice silver for the three tables",
+      "reason": "the order does not name a tier; silver is where the reported performance and the account_links output sit. The tier and partition are constants at the top of the builder; address() returned all three, so no registry row is missing."
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W52-S1",
+    "ADVI_COTBKF-D2-W52-S2",
+    "ADVI_COTBKF-D2-W52-S3"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~52/ADVI_COTBKF.TO-CB-aa-3.fwd3-serve-builder.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "commonwealth_sweep_regrade.py --before-list v1 --after-list v1 --before-cash-leg method_r25 --data-dir .scratch/advi_cotbkf/r27 --out .scratch/advi_cotbkf/r27_out",
+      "result": "SWEEP-REGRADE ... months_after=3098/886/78609 control_same=True regressions=0 movers_back=138 year_chain_same=True r22_named=25/25"
+    },
+    {
+      "tool": "python",
+      "invocation": "commonwealth_fwd3_serve.py --build --data-dir .scratch/advi_cotbkf/r27 --out .scratch/advi_cotbkf/fwd3_serve",
+      "result": "FWD3-BUILD daily_rows=1691729 value_rows=21102041 month_rows=82593 cash_leg=method_r26 run_commit=4d4d00aa6f63 day_values_rows_checked=1691729 month_grades_rows_checked=82593 read_account=RGY004256"
+    }
+  ]
+}
