@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t11",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t11.lock-agreement-floor.md",
+    "group": "OTHER",
+    "vintage_commit": "3033ceac2a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "3033ceac2a",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t11.lock-agreement-floor.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~10",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/lock.py",
+      "kind": "script",
+      "commit_or_etag": "52b8a3cca2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no deploy, no AWS call; offline tests",
+      "artifact_covered_by": [
+        "DQ4-t11-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_lock.py",
+      "kind": "test",
+      "commit_or_etag": "52b8a3cca2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no deploy, no AWS call; offline tests",
+      "artifact_covered_by": [
+        "DQ4-t11-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ4-t11-AC1",
+      "criterion_verbatim": "the three new named tests and five round-1 names.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R4_CHECKS/dq_t11_tests.py",
+      "output_evidence": "9 passed in 1.39s; FLOOR-OK; rc=0",
+      "denominator": "8 of 8 named tests passed (3 new + 5 round-1)",
+      "status": "PASS",
+      "expect": "FLOOR-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 run once after commit and once before",
+      "observed": "FLOOR-OK both",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Scratch copy of lock.py (.scratch/mut, uncommitted) with the floor constant set to 0 (floor removed)",
+      "expected": "test_below_ninety_percent_agreement_is_rejected_low_trade_agreement FAILS; the other eight pass",
+      "observed": "1 failed, 8 passed: FAILED test_below_ninety_percent_agreement_is_rejected_low_trade_agreement (LOCKED != REJECTED:LOW_TRADE_AGREEMENT)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "LOW_TRADE_AGREEMENT is emitted only when the old lock conditions (>=min(3,n) passes and an early-third pass) hold but agreement is under 90 pct; otherwise the round-1 REJECTED:PRICE_MISMATCH stands",
+      "reason": "round-1 tests recycled_ticker and mutual_fund_uses_half_percent_band assert PRICE_MISMATCH and the order keeps those names; no round-1 test data was changed"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~10/MDPF_DEMQUE.TO-DQ-t11.lock-agreement-floor.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit lock.py + test_demque_lock.py",
+      "result": "commit 52b8a3cca2"
+    }
+  ]
+}
