@@ -18,6 +18,7 @@ READ-ONLY: S3 GETs/LISTs only; zero vendor calls.
 Usage: python unexplained_classes.py <repo_root> [--cache <pickle>]
 Writes UNEXPLAINED_CLASSES_E2.json and UNEXPLAINED_CLASSES_E2.md beside this file.
 """
+import functools
 import importlib.util
 import json
 import pickle
@@ -30,6 +31,13 @@ _spec = importlib.util.spec_from_file_location("tieout_compound_r30", str(DEL / 
 tc = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(tc)
 r18, r17 = tc.r18, tc.r17
+# the daily-mean fee base (daily_mean_value, fee_base_gross) is defined once, in the project's reader of record (round 32, DB-b-60)
+_rspec = importlib.util.spec_from_file_location("tieout_reader", str(DEL.parent / "tieout" / "tieout_reader.py"))
+reader = importlib.util.module_from_spec(_rspec)
+_rspec.loader.exec_module(reader)
+# this classifier's mean keeps negative daily values (positive_only=False), as it always has, so its recorded output is unchanged
+daily_mean_value = functools.partial(reader.daily_mean_value, positive_only=False)
+fee_base_gross = functools.partial(reader.fee_base_gross, positive_only=False)
 
 COMPOUND_REC = DEL / "0.9.0_WK_IRPT_DASHBD~34" / "TIEOUT_COMPOUND_E1.json"
 OUT_JSON, OUT_MD = "UNEXPLAINED_CLASSES_E2.json", "UNEXPLAINED_CLASSES_E2.md"
@@ -63,20 +71,6 @@ r17.bd_points = _bd_points_plus
 
 
 # ----------------------------------------------------------------------------------------------------------------- the correction
-def mean_daily_value(days):
-    mvs = [d["mv"] for d in days if d.get("mv")]
-    return sum(mvs) / len(mvs) if mvs else None
-
-
-def fee_base_gross(bd_net, fees, days):
-    """BD gross, compounded, with the fee add-back formed on the MEAN DAILY served value over the linked days:
-    (1 + net) * (1 + fees / mean daily value) - 1. No fee, or no positive mean value: the net as it is (as round 30 does)."""
-    avg = mean_daily_value(days)
-    if not fees or not avg or avg <= 0:
-        return bd_net
-    return (1.0 + bd_net) * (1.0 + fees / avg) - 1.0
-
-
 def regrade_all(plan, bronze, gold):
     """Re-grade every gradable segment on the corrected fee base. Returns counts against round 30's compounded verdict (re-derived here)."""
     c = {"graded": 0, "within_round30": 0, "within_fee_base": 0, "outside_to_within": 0, "within_to_outside": 0}
@@ -111,7 +105,7 @@ def classify(seg, days, series, bd):
     opal = seg["opal_return"]
     fees = bd.get("fees")
     gross = fee_base_gross(bd["twr"], fees, days)
-    avg = mean_daily_value(days) or 0.0
+    avg = daily_mean_value(days) or 0.0
     d_new = abs(gross - opal) * 100.0
     if d_new <= TOL:
         return CLASSES[0], "fee add-back on mean daily value %.0f (not (bmv+emv)/2 = %.0f) gives abs_diff %.4f pp (round 30: %.4f pp)" % (

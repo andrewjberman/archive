@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t6",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t6.price-store-and-contract.md",
+    "group": "OTHER",
+    "vintage_commit": "6f37640819"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "6f37640819",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t6.price-store-and-contract.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/price_store.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local code; no deploy and no S3 write in this order (risk LOCAL). Tests use a temp directory only.",
+      "artifact_covered_by": [
+        "DQ2-t6-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_store.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local pytest file; five named tests.",
+      "artifact_covered_by": [
+        "DQ2-t6-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~5/PRICE_STORE_CONTRACT.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A contract document; nothing is deployed.",
+      "artifact_covered_by": [
+        "DQ2-t6-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ2-t6-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R2_CHECKS/dq_t6_tests.py -> STORE-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R2_CHECKS/dq_t6_tests.py",
+      "output_evidence": "STORE-OK (rc=0), run from C:/tmp/wk-demque-5 under timeout 120 at 2026-10-09T01:2xZ: pytest '5 passed in 0.61s'; each of the five named tests printed PASSED.",
+      "denominator": "5 of 5 named tests PASSED",
+      "status": "PASS",
+      "expect": "STORE-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ2-t6-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R2_CHECKS/dq_t6_contract.py -> CONTRACT-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R2_CHECKS/dq_t6_contract.py",
+      "output_evidence": "CONTRACT-OK s3://opal-data-assets/yahoo/global/silver/price_history/cusip=00162Q866 s3://opal-data-assets/yahoo/global/silver/price_history/index (rc=0), run from C:/tmp/wk-demque-5 under timeout 120.",
+      "denominator": "2 of 2 builder addresses present verbatim; KEY NAMESPACE line, 4 column/claim tokens and the AMLP example present",
+      "status": "PASS",
+      "expect": "CONTRACT-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The contract check run from an empty directory, where the deliverable path does not resolve (the base state the order names).",
+      "expected": "CONTRACT-BAD no file ...",
+      "observed": "CONTRACT-BAD no file org\\missions\\D8\\MDPF\\MDPF_DEMQUE\\deliverables\\0.9.0_WK_MDPF_DEMQUE~5\\PRICE_STORE_CONTRACT.md (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The first AC1 run failed on my own test (a changed-history case that did not change the in-range rows); the test was corrected and AC1 re-run.",
+      "observed": "STORE-OK rc=0 on the corrected tests",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Real S3 write path of price_store (boto3 put_object / get_object / list_objects_v2)",
+      "reason": "The order forbids AWS writes and requires tests on a local temp directory only; the first S3 write of the store is the issuer's at the drain."
+    },
+    {
+      "item": "Whether dell2's ADVI_COTBKF can consume the contract",
+      "reason": "Graded at the issuer's AMLP trace, per the order."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -v test_demque_store.py (via dq_t6_tests.py)",
+      "result": "5 passed"
+    }
+  ]
+}
