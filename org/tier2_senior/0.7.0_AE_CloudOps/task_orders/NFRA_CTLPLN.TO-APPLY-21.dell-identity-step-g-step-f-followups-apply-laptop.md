@@ -23,8 +23,8 @@
   <context>
     Root `infra/aws/terraform/nfra-ctlpln-identity/`, trunk containing merge 83326afe6f. Measured by the issuer ~00:0xZ (read-only):
     `Plan: 0 to add, 2 to change, 0 to destroy.` Halves: COO
-    `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_G_STEP_F_FOLLOWUPS_20261008.md`; CTO named
-    in the GO. Set TF_PLUGIN_CACHE_DIR to the shared cache (MSTR msg 107482). YOU READ NO SECRET VALUE.
+    `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_G_STEP_F_FOLLOWUPS_20261008.md`; CTO
+    `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_STEP_G_AND_PARTNER_ROSTER_20261009.md` section 1 (@21a5ceab0f, SIGNED). Set TF_PLUGIN_CACHE_DIR to the shared cache (MSTR msg 107482). YOU READ NO SECRET VALUE.
   </context>
 
   <the_act>
