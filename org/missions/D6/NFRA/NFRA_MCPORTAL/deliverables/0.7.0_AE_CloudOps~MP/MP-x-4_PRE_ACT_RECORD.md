@@ -123,3 +123,162 @@ difference are L4's proof.
 **World state immediately before the act:** `app/admin_fabric.py` ABSENT from `/opt/opal-gateway/app`
 (confirmed on three separate SSM runs), service `active`, MainPID 857046 unchanged across every pre-act
 read, live tree mtime 1791513383 unchanged. Nothing has been deployed, uploaded or restarted by this cell.
+
+
+---
+
+# POST-ACT RECORD -- the release is LIVE
+
+**Act:** 2026-10-09T16:12:05Z, `safe-ec2-deploy.sh opal-gateway infra/aws/ec2/opal-gateway/deploy-to-ec2.sh`
+from the release tree, with `DEPLOY_BASE_REF=c97232408d72bc649c92da7e4e711c0ebf0a3950`.
+**Release commit:** `1e32562729495695c6addaed05f047e46090776f` over `c97232408d72bc649c92da7e4e711c0ebf0a3950`.
+
+## The base changed under this cell, and that is the headline
+
+The hold (issuer msg 32796) put OG-ap-4/OG-tl-1 ahead of this release; it landed, and the live base moved
+`91811b648a` -> `c97232408d`. The recorded base was NOT reused. Everything downstream was re-done, not
+carried:
+
+| re-done | result |
+|---|---|
+| live `deployed_commit` re-read from `EC2_MANIFEST.json` | `c97232408d` (matches the GO, but read from the manifest, not taken from it) |
+| release tree re-cut, old branch deleted | `rel-nfra-mcportal-r5-control-plane` @ `1e32562729` |
+| census re-run vs the NEW base | 4 files, 464 insertions, **0 outside** `infra/aws/ec2/opal-gateway/` |
+| cold read re-measured | 24.443 / 19.728 / 18.118 s (see below) |
+| rollback target re-pointed | `opal-gateway-c97232408d.tar.gz`, not the old base's |
+| tool surface BEFORE re-read | 66, name-for-name identical |
+
+**Two things a stale-base deploy would have hit, both caught by the re-cut:**
+
+1. **The deploy script itself changed.** OG-tl-1 modified `infra/aws/ec2/opal-gateway/deploy-to-ec2.sh`
+   (+13/-3) -- the script this cell RUNS -- adding a precondition that reads
+   `data/transcripts/scripts/teams/meeting_allowlist.json` under `$WORKSPACE_ROOT` and REFUSES (exit 1,
+   before any upload) on an unreadable file or a count other than 4. The cell's sparse list had no
+   `data/`, so the deploy would have refused. Added `data/transcripts/`, then evaluated the script's own
+   expression in the worktree: 4 ids, shape matches its regex, precondition PASSES. So "OG-ap-4 is
+   env-only with no code change" is true of what SHIPS, and false of the deploy path.
+2. **A stale-base deploy would have SILENTLY REVERTED OG-tl-1.** The old script hardcoded
+   `TRANSCRIPT_MEETING_ALLOWLIST=` (EMPTY) in the rendered `.env`; the new one writes the 4 ids. The
+   `.env` is RENDERED by the script, never merged, so building on `91811b648a` would have blanked an
+   allowlist that landed 15 minutes earlier -- and this cell's never-widen blast radius says "no `.env`
+   key", which would have been FALSE. Measured after the act: `.env`
+   `TRANSCRIPT_MEETING_ALLOWLIST` still non-empty (grep count 1), and the script's own
+   `ENV_KEYS_BEFORE`/`ENV_KEYS_AFTER` lists are identical at 52 keys.
+
+## The act, and the guard that fired first
+
+The FIRST invocation was REFUSED outright, before any upload:
+`ERROR: REFUSED (no upload): DEPLOY_BASE_REF is required -- declare the commit this release was cut on`,
+rc=1. That is the stale-base guard doing its job; nothing was built or uploaded. The act then ran with
+the ref declared, rc=0, and the script's own read-back printed `OK: opal-gateway active`, `{"ok":true}`,
+`OK: AS metadata serves`, `/mcp unauth -> 401 (expect 401)`.
+
+**rc=0 is cited nowhere as proof.** Every figure below is an INDEPENDENT read taken after the act (SSM
+command `a356c9bf-5140-48e0-8c6a-b205dcd47a3d`, Status=Success).
+
+## Read-back
+
+| read | value |
+|---|---|
+| `/health` | **200**, body `{"ok":true}` (well inside the order's 90 s bar, so the named rollback was NOT run) |
+| new route, NO identity | **401**, `{"error":"no verified identity"}` -- owner-gated as designed |
+| service | `active`; MainPID **862375 -> 864717**, so the restart demonstrably happened |
+| deployed `app/admin_fabric.py` | md5 **`caa21f671e60c21e4b0a77c566c18149`** = the release module's md5 |
+| `app/refs/fabric_boxes.json` | present (both files were ABSENT live on three separate pre-act reads) |
+| `dashboard/index.html` | present -- the mcportal `d60b4e0` bundle shipped |
+| MCP tool surface | **66 -> 66**, 0 added, 0 removed, **difference EMPTY**, name-for-name |
+
+The md5 equality is the point of that row: it compares DEPLOYED BYTES to the BUILD INPUT, which is the
+CLAUDE.md 22a CODE layer. A filename match would have proved nothing.
+
+## Artifacts and rollback, measured AFTER the act
+
+| key | bytes | ETag | `git-ref` |
+|---|---|---|---|
+| `opal-gateway-1e32562729.tar.gz` (uploaded) | 518165 | `b96315a523842ec46579b146c450faa9` | `1e32562729...` |
+| `opal-gateway-latest.tar.gz` | 518165 | `b96315a523842ec46579b146c450faa9` | `1e32562729...` |
+| `opal-gateway-c97232408d.tar.gz` (ROLLBACK) | 514278 | `16c5f801b546836ddf577696c69d597d` | `c97232408d...` |
+
+`latest` MOVED to this release, exactly as predicted before the act -- which is why the rollback names
+the VERSIONED key. The rollback target is **intact and distinct** after the act, so recovery is still
+available and remains unexercised:
+
+```
+aws iam  # (no IAM in this act)
+# rollback: pull the versioned artifact and restart, never latest
+aws s3 cp s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/opal-gateway-c97232408d.tar.gz \
+  /tmp/rb.tar.gz --region us-east-1
+sudo -u ec2-user tar -xzf /tmp/rb.tar.gz -C /opt/opal-gateway
+sudo systemctl restart opal-gateway && curl -fsS localhost:8080/health
+```
+
+## Cold read on the shipped base, and why nothing was changed
+
+3 samples before the cutover: **24.443 / 19.728 / 18.118 s** over 3788-3793 records, 0 skipped; warm
+0.986-1.096 s. Worst-case margin **5.557 s** under R-13's 30 s bar, **1.23x** headroom. AC3's own
+post-deploy read: **24.2 s over 4,040 records**.
+
+**No load change was made.** The order's remedy (narrow the 6h window to 2h, or warm the body cache at
+boot) fires only ABOVE 30 s. It did not fire, so `app/admin_fabric.py` shipped exactly as MP-x-1 wrote it
+and no criterion was repaired. Narrowing it un-triggered would have changed product behaviour the order
+does not authorise.
+
+The margin is nevertheless TIGHTENING: 13.6-16.8 s over ~3,150 records at 14:0xZ, 18.1-24.4 s over
+~3,790 at 15:5xZ, 24.2 s over 4,040 at 16:2xZ -- headroom 1.79x -> 1.23x in about two hours, ~5.5
+ms/record, bar near ~5,460 records. Filed as row **`NFRA_MCPORTAL-Z-S27`** for the enrichment list. The
+ALB idle timeout is 60 s and the 30 s bar is the order's half-margin, so at 24.4 s the page is ~2.5x from
+a user-visible timeout and ~1.23x from the policy bar.
+
+## Manifest record
+
+Written BY HAND on the trunk branch `wk-mcportal-r5-x4` (6 fields; a guard refused to write unless the
+trunk's pre-act `deployed_commit` read `c97232408d`): `deployed_commit=1e32562729`,
+`previous_deployed_commit=c97232408d`, `mcportal_commit=d60b4e0`, `deployed_at`, `deployed_by`,
+`release_note`.
+
+**The deploy script's own auto-record is wrong and is not the authority.** On the release branch it set
+`previous_deployed_commit=2c0f84966d` -- the value that tree's manifest carried from its own vintage, not
+what was live. That branch is never merged (as every prior gateway release branch), so the trunk entry
+above is authoritative, and the error is named in the `release_note`.
+
+## Acceptance criteria
+
+| criterion | result |
+|---|---|
+| **AC1** | **PASS** -- `entry files at HEAD=1; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR: 20 of 20 sentinel(s) scanned` |
+| **AC2** | **FAIL as run from this worktree** -- see below. REFUSED with its measurement, not repaired |
+| **AC3** | **PASS** -- `status=Success; /health=200; /api/admin/fabric/boxes (no identity)=401; compute_s=24.2 reporting=4 scanned=4040` |
+
+**AC2, stated honestly.** Three of its four clauses pass:
+`deployed=1e32562729... previous=c97232408d... descends=yes; gateway app/tests files changed=4, outside
+MP-x-1's set=0`. The fourth prints the self-contradictory `mcportal_commit=d60b4e0 contains d60b4e0=no`.
+
+Cause: the clause is `git -C mcportal merge-base --is-ancestor d60b4e0 "$MCP" 2>/dev/null`, and
+`_root.sh` cds to the CALLING worktree -- where `mcportal` does not exist, because git checks a nested
+repo out in the MAIN tree only. The command fails for a missing path, `2>/dev/null` hides why, and the
+`&&` chain leaves `mok` at its initialised `no`. An absent repo and a genuinely wrong commit are
+indistinguishable in that output.
+
+The substance is TRUE, verified with a discriminating control: from the main tree,
+`is-ancestor d60b4e0 d60b4e0` exits 0, while the control `is-ancestor d60b4e0 d60b4e0~1` exits non-zero.
+And AC2's logic run VERBATIM from the main tree against this branch's manifest prints
+`... contains d60b4e0=yes` -> **WOULD BE: PASS**. So the issuer's post-drain run from the merged index is
+expected to pass, and this refusal is scoped to running it from a linked worktree before the drain.
+
+Per BOUNDS 3 the criterion was NOT repaired and the check was NOT edited (section 3 makes it
+read-never-write). Filed as row **`NFRA_MCPORTAL-Z-S28`**, with the same root cause as the
+`data/transcripts/` gap above; `deploy-to-ec2.sh:40-44` already carries the `_main/mcportal` fallback AC2
+lacks.
+
+## Commits
+
+| commit | what |
+|---|---|
+| `1e32562729` | release branch: `mcportal_commit=d60b4e0` on the re-cut tree (step 1) |
+| `019b139450` | release branch: the deploy script's own auto-record (NOT authoritative) |
+| `48fff5205a` | trunk: hold released -> OPEN |
+| `e9a1bf5127` | trunk: 4 legs closed with proof, ledger CLOSED, manifest recorded |
+| `d9a121832e` | shared tree: rows Z-S27 + Z-S28 |
+
+Ledger `20261009T1414Z_nfra-mcportal-r5-control-plane-release_deploy_completion.md`: **CLOSED**, all 4
+legs proven, sentinel removed, closed BEFORE the AC reads as the order requires.
