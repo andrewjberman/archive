@@ -1,0 +1,120 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_IAMROLES202609.TO-IAM-u-2",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP_R4.md",
+  "vintage_commit": "44eb421ef6afb056be892bc7c6368f7d40a89e42",
+  "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-u-2.second-run-at-population-scale-and-the-comparison.md"
+ },
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3cadaf52ca569764a91998b44d4ba63b3a224fde"
+ },
+ "assignee": "0.9.0_WK_NFRA_IAMROLES202609~11",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~11/rerun-population.sh",
+   "kind": "script",
+   "commit_or_etag": "0ae63b3772f615508f0d5058b8e7554b49d8e682",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Committed analysis artifact; AWS reads only (list-roles and comp-iam-usage permission-cold), nothing changed in AWS."
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~11/compare-runs.py",
+   "kind": "script",
+   "commit_or_etag": "0ae63b3772f615508f0d5058b8e7554b49d8e682",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Committed analysis artifact; AWS reads only (list-roles and comp-iam-usage permission-cold), nothing changed in AWS."
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~11/permission-cold-raw-bundle.round4.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Committed analysis artifact; AWS reads only (list-roles and comp-iam-usage permission-cold), nothing changed in AWS."
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~11/RERUN_COMPARISON.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Committed analysis artifact; AWS reads only (list-roles and comp-iam-usage permission-cold), nothing changed in AWS."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "output carries a line `COMPARABLE: yes` and a line `INTERSECTION roles=<n>` with n of 1 or greater, computed from the two committed bundles with no cloud call; a missing script or bundle (rc=2) means the criterion is NOT met",
+   "method": "command",
+   "invocation": "python org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~11/compare-runs.py org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/permission-cold-raw-bundle.json org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~11/permission-cold-raw-bundle.round4.json",
+   "output_evidence": "rc=0; COMPARABLE: yes | INTERSECTION roles=219",
+   "denominator": "2 of 2 required lines present; intersection 219 of 219 round-3 roles; round 4 280 of 280 roles returned rc0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "one line: a run_date_utc of 2026-10-09 or later, lookback 90, then attempted, returned_rc0 and the results count, with results equal to attempted",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~11/permission-cold-raw-bundle.round4.json',encoding='utf-8'));print(d['run_date_utc'],d['lookback_days'],d['attempted'],d['returned_rc0'],len(d['results']))\"",
+   "output_evidence": "rc=0; 2026-10-09 90 280 280 280",
+   "denominator": "results 280 of attempted 280; returned_rc0 280 of 280; 0 roles with rc != 0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "rc=0 and output naming `lookback=90` and the `permission-cold` invocation, with no AWS call made",
+   "method": "command",
+   "invocation": "bash org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~11/rerun-population.sh --dry-run",
+   "output_evidence": "rc=0; output carries 'lookback=90' and 'timeout 120 bash \"$REPO_ROOT/.tools/comp-iam-usage\" permission-cold --role <ROLE> --lookback 90 --json'; header 'DRY RUN -- no AWS call is made'",
+   "denominator": "2 of 2 required tokens present",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "AC4 (JUDGMENT -- never self-graded): could a reviewer next quarter run the harness without the builder and put the answer beside this one -- and does RERUN_COMPARISON.md explain the differences it finds rather than only listing them?",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "manual read of org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~11/rerun-population.sh (header usage block), org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~11/compare-runs.py and org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~11/RERUN_COMPARISON.md. NO VERDICT IS RECORDED HERE.",
+   "output_evidence": "RECORDED, NOT GRADED. rerun-population.sh header documents --dry-run, --out, --workdir, --offset/--limit chunking and resume, --assemble-only; RERUN_COMPARISON.md section 4 gives the next-quarter recipe and section 3 attributes each of the 166 transition rows on the 219 shared roles to a cause (grant added 115, aging out of the 90-day window 23, Access Advisor response change 26, newly exercised 2) and names the 61 added roles and the 219 -> 280 population change; where the cause is not determinable it says so.",
+   "denominator": "1 judgment criterion of 1; 0 self-graded",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Judgment criterion; graded by 3.0.0_SA_CVO~Z, never self-graded."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC2 requires results equal to attempted; the PARTIAL bundle (65 of 280) would have read 280 attempted / 65 results.",
+   "expected": "results != attempted for a partial sweep",
+   "observed": "the earlier PARTIAL bundle recorded 65 results of 280 members; the final bundle records 280 of 280 and the PARTIAL file was removed",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "AC1 compare-runs.py is a pure stdlib read of two committed files, run twice (full output and the grep'd COMPARABLE/INTERSECTION lines) under timeout 120; AC2 and AC3 run once under timeout 120.",
+   "observed": "identical COMPARABLE/INTERSECTION lines on both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "10 service-linked roles at Path /aws-service-role/<service>/ not in the 280.",
+   "reason": "Excluded by the population_rule (a prefix match, see row Z-W11-S2); named in the bundle's excluded_service_linked_roles."
+  }
+ ],
+ "surprises": [
+  "NFRA_IAMROLES202609-Z-W11-S1",
+  "NFRA_IAMROLES202609-Z-W11-S2",
+  "NFRA_IAMROLES202609-Z-W11-S3",
+  "NFRA_IAMROLES202609-Z-W11-S4"
+ ],
+ "session_log": "N/A -- no session-log path in this worker write surface.",
+ "compiler_tools": [
+  {
+   "tool": "compare-runs.py",
+   "invocation": "python org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~11/compare-runs.py org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/permission-cold-raw-bundle.json org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~11/permission-cold-raw-bundle.round4.json",
+   "result": "rc=0; COMPARABLE: yes; INTERSECTION roles=219; ROLES ADDED 61, REMOVED 0; 166 transition rows on the intersection"
+  }
+ ]
+}
