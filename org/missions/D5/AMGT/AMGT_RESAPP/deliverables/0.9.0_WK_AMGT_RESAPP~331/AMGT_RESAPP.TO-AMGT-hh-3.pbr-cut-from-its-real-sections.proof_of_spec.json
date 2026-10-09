@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-hh-3.pbr-cut-from-its-real-sections",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "9bac67f9d0028064629cba97b38e3a077f9f6996"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "b46decc0924d8e84a494abaec747ed3fedf103a9",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-hh-3.pbr-cut-from-its-real-sections.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~331",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/document.py",
+      "kind": "script",
+      "commit_or_etag": "37d7dfa19249a670beb5d304cf6c58228fe63550",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, xref mode only: _xref_pieces split out of _xref_tokens (same output); new _xref_whole_cited, _page_headers, _contents_entries, _contents_span and helpers; _cut_xref ranks a business name the table cites whole first and resolves a name with no body heading through the contents page, both only when the report prints 100+ running page headers. _cut_bounded and every other cutter untouched. Local only; the drain-merge is a site-Z producer-path deploy the issuer holds.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_document.py",
+      "kind": "test",
+      "commit_or_etag": "37d7dfa19249a670beb5d304cf6c58228fe63550",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: class TheTwentyFContentsPageResolution, 5 tests on a synthetic report with running page headers; decoys About Us (parent cited by one sub-section) and Liquidity and Capital Resources (5.B child). 3 FAIL and 2 ERROR on the base document.py, 32 of 32 pass on the repair.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PBR's business, risk and mdna each start at the section its cross-reference table names for 4.B, 3.D and 5, and the other four names' twelve cells are unchanged; R83 PBR AC1: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round83_prep/checks/r83_pbr.py\" --crit AC1; echo \"exit=$?\"",
+      "output_evidence": "   PBR_US_Equity business OK     start=319061 chars=60000 full=179295 heading='Exploration & Production'\n   PBR_US_Equity risk     OK     start=209708 chars=70000 full=94490 heading='Risk Factors'\n   PBR_US_Equity mdna     OK     start=549928 chars=43270 full=43270 heading='Consolidated Financial Performance'\nPASS P1 business is the Our Business section (Item 4.B; header page 63; opens 'Exploration & Production')\nPASS P2 risk is the Risks section (Item 3.D; header page 30) closed at 'Cybersecurity Framework and Risk Management' (end 304198, heading 304198)\nPASS P3 mdna is the Operating and Financial Review and Prospects section (Item 5; header page 170; end 593198 <= 593198)\nPASS P4 the other four names' cells unchanged: 12 of 12\nR83 PBR AC1: YES\nexit=0",
+      "denominator": "4 of 4 P lines PASS (P1 business, P2 risk, P3 mdna, P4 12 of 12 other-name cells unchanged)",
+      "status": "PASS",
+      "expect": "R83 PBR AC1: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the 10-K fixture and dd-1's 20-F fixture sections hash as at the base; R82 CUT AC2: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round82_prep/checks/r82_cut.py\" --crit AC2; echo \"exit=$?\"",
+      "output_evidence": "PASS B1 the 10-K and 20-F fixture sections hash as at round 80: R80 R1 AC3 SERVED: YES\nR82 CUT AC2: YES\nexit=0",
+      "denominator": "1 of 1 B lines PASS (B1 fixture hashes as at the base)",
+      "status": "PASS",
+      "expect": "R82 CUT AC2: YES.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "document._PAGE_HEADER_MIN_LINES raised to 10**9 in memory (the contents-page rules switched off), then the order's own AC1 checker run on it (scratch script .scratch/mutant.py).",
+      "expected": "AC1 must FAIL on the mutant: P1 FAIL (business About us at 198623), P3 FAIL (mdna Liquidity and Capital Resources at 568965), R83 PBR AC1: NO, exit 1.",
+      "observed": "business About us start=198623; mdna Liquidity and Capital Resources start=568965; FAIL P1; FAIL P3; PASS P2; PASS P4 12 of 12; R83 PBR AC1: NO; mutant exit=1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice and the output md5 compared.",
+      "observed": "AC1 md5 7583f308b5dc3799108644798f5708d5 twice; AC2 md5 cc6178528a004689c97c3cf42063b8b3 twice.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any fetch of a filing, the silver write and the re-analysis of PBR",
+      "reason": "Out of BOUNDS: the cached texts are the input; no SEC, vendor, model or Bloomberg call, no store write."
+    },
+    {
+      "item": "The filings test folder with the real PyMuPDF",
+      "reason": "PyMuPDF does not import on dell1; the order's stated run uses an empty fitz.py on PYTHONPATH. cut() never reads it. Folder result with the stub: Ran 159 tests, OK."
+    }
+  ],
+  "surprises": [],
+  "session_log": "no separate log file; the session is the git history of branch wk-AMGT_RESAPP-331 (code commit 37d7dfa192) and this instance's recorded outputs",
+  "compiler_tools": [
+    {
+      "tool": "ruff check --target-version py39",
+      "invocation": "ruff check --target-version py39 lib/research/filings/document.py lib/research/filings/tests/test_document.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh, code commit 37d7dfa192)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~331 <0.9.0_WK_AMGT_RESAPP~331@opal.agent>\" -F <msgfile> -- <2 code paths>",
+      "result": "commit-gate OK for 2 of 2 files; commit 37d7dfa192"
+    }
+  ]
+}
