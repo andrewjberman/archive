@@ -28,7 +28,7 @@
 </context>
 
 <scope>
-1. **Do not start until `ADHOC.canon-r1-gold-writer-iam` is CLOSED.** Edit no source file.
+1. **Do not start until `ADHOC.canon-r1-gold-writer-iam` is CLOSED.** Edit no source file, with ONE exception (AMENDMENT 1, issuer ruling on msg 3111): set the one literal `MDPF_GOLD_COMMIT` at `infra/aws/terraform/mdpf-pipeline/gold-lambda.tf:293` to `55c3cc4642...` (the full 40-character hash of the build pin), committed via safe-commit AFTER the build and BEFORE the apply. The stamp names the pin the package was built from (the file's own instruction), never the commit that carries it. The build stays `--pin 55c3cc4642`. The live stamp `e20899bce7` is already stale against the live code `ff1a8867a6`, and this redeploy makes it true.
 2. Open a deploy ledger.
 3. Build the package from the pinned commit: `python infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py --pin 55c3cc4642`.
 4. Deploy by the function's own Terraform path, never `update-function-code`:
@@ -43,6 +43,7 @@
 </scope>
 
 <paths>
+infra/aws/terraform/mdpf-pipeline/gold-lambda.tf
 org/critical_paths/change_management/
 org/critical_paths/.open_deploys/
 org/tier2_senior/0.7.0_AE_CloudOps~DELL1/
