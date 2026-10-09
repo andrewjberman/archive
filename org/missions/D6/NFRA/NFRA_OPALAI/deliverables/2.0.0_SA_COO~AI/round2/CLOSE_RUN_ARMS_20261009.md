@@ -92,6 +92,14 @@ own fresh question, @4e2f00c9fa) until `3.0.0_SA_CVO~Z` rules the CTO's pitch.
 - **Arm (a):** ONLY on Alyssa's own asker question, within 900s, with the J2 raw read pinned in the same minute; never
   on an unrelated message of hers.
 
+## Open call at Andrew (queued 2026-10-09 ~15:0xZ, UB-20261009T144645Z-cb37 item 1)
+
+**May a seat ask Alyssa today, on Teams, to send one portal-figure question to the Opal Bloomberg account (for example
+"How many accounts hold each Opal model portfolio, by firm?")? Yes/no.** REC: yes. It is one message, read-only, and runs
+on her own grant (OA-g-3). It is the only input left to the item-0 close run's critical path: arm (a) fires only on her
+own asker question (CVO ruling). The call it reopens is Andrew-direct 2026-10-06, "nothing we can do on the call 1 at this
+time". While here: any one Teams message from Andrew, in any chat, fires arm (b).
+
 ## Results (filled at the run)
 
 | arm | run at (UTC) | raw response | pinned reference read (same minute) | verdict |
