@@ -1,0 +1,36 @@
+CARRIER DENOMINATOR: 5 identity-based policy document(s) on cot-rebalancer-runner-role
+  inline__cot-rebalancer-runner-invoke-silver-blackdiamond   1 statement(s)
+  inline__cot-rebalancer-runner-session-read                 1 statement(s)
+  inline__cot-rebalancer-runner-write-cot                    4 statement(s)
+  managed__AWSLambdaBasicExecutionRole__v1                   1 statement(s)
+  managed__opal-assets-one-way-fan-in-fence__v1              3 statement(s)
+  TOTAL STATEMENTS SCANNED: 10
+
+CONTROL (C5b belongs to the issuer; here it proves the evaluator discriminates)
+  resource : arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/2026-10-09-result.json
+  expected : allowed       observed: allowed       MATCH
+  Allow matches : ['inline__cot-rebalancer-runner-write-cot/ReadOwnRunResult']
+  Deny  matches : none
+
+C5a arm 1 (A2): no statement grants GetObject on any bronze/* resource
+  resource : arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/bronze/rebalancer_models/2026-10-09/page_000.json
+  expected : implicitDeny  observed: implicitDeny  MATCH
+  Allow matches : none
+  Deny  matches : none
+
+C5a arm 1b (the ORIGINAL C5 implicit arm): the complete-stamp stays closed
+  resource : arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/2026-10-09-complete.json
+  expected : implicitDeny  observed: implicitDeny  MATCH
+  Allow matches : none
+  Deny  matches : none
+
+C5a arm 2: the 49f tree stays closed by EXPLICIT Deny
+  resource : arn:aws:s3:::opal-data-assets/blackdiamond/49f/meta/2026-10-09-result.json
+  expected : explicitDeny  observed: explicitDeny  MATCH
+  Allow matches : none
+  Deny  matches : ['inline__cot-rebalancer-runner-write-cot/DenyBlackdiamond49fFirmSep']
+
+RESULT: 4 of 4 arms match, over a 5-carrier / 10-statement denominator.
+DISCRIMINATION: verdicts across the four arms are allowed / implicitDeny / implicitDeny / explicitDeny -- 3 distinct value(s), so a uniform
+  "implicitDeny everything" or "allow everything" evaluator bug is excluded.
+C5a VERDICT: PASS

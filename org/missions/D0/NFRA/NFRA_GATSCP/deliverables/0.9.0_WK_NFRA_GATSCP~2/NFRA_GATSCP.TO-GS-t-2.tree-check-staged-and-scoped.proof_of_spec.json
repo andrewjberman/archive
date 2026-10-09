@@ -1,0 +1,133 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_GATSCP.TO-GS-t-2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/prd/NFRA_GATSCP_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7cb6183997"
+ },
+ "assignee": "0.9.0_WK_NFRA_GATSCP~2",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/decompositions/NFRA_GATSCP_DECOMP.md",
+  "vintage_commit": "95669cba44",
+  "to_ref": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-t-2.tree-check-staged-and-scoped.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/missions-tree-index.py",
+   "kind": "script",
+   "commit_or_etag": "06637db68751ce31dd992e70c5cef2a90665d5ec",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-2, not pushed; no deploy plane. check --staged (materialise_index: git ls-files -s -z + one git cat-file --batch into a private temp dir, the existing reader run there), check --act / --act-from-env (split_by_act, STANDING lines), self-test 38 -> 52 arms.",
+   "artifact_covered_by": [
+    "GS2-AC1",
+    "GS2-AC2",
+    "GS2-AC3"
+   ]
+  },
+  {
+   "path_or_key": ".tools/git-hooks/missions-tree-check.sh",
+   "kind": "script",
+   "commit_or_etag": "06637db68751ce31dd992e70c5cef2a90665d5ec",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-2, not pushed; no deploy plane. runs check --staged --act-from-env MTC_ACT_PATHS with the staged list (+ staged deletions when OWNED_PATHS_STAGED_FILES unset); prints STANDING lines on rc 0; header known-hole text replaced.",
+   "artifact_covered_by": [
+    "GS2-AC2"
+   ]
+  },
+  {
+   "path_or_key": ".tools/tests/test_missions_tree_index_selftest.py",
+   "kind": "test",
+   "commit_or_etag": "06637db68751ce31dd992e70c5cef2a90665d5ec",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-2, not pushed; no deploy plane. EXPECTED_ARMS 18 -> 52 (the wrapper was 3/4 at the base; row NFRA_GATSCP-D1-W2-S1); wrapper 4/4 PASS after.",
+   "artifact_covered_by": [
+    "GS2-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_GATSCP/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "06637db68751ce31dd992e70c5cef2a90665d5ec",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-2, not pushed; no deploy plane. created with row NFRA_GATSCP-D1-W2-S1."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "GS2-AC1",
+   "criterion_verbatim": "with LGIC_BLANKFIX's row drifted in the index only, check --staged --act <NFRA_GATSCP's row> passes and prints STANDING LGIC_BLANKFIX; --act <LGIC_BLANKFIX's row> is refused (the difference control)",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round1_prep/checks/r1_tree_scope.py\"",
+   "output_evidence": "rc=0\n  PASS bystander-lands: rc=0 standing_LGIC_BLANKFIX=True\n  PASS own-refused: rc=1\nGS-T2-SCOPE ok=True arms=2 failed=0\n(STANDING line as printed by the tool: STANDING LGIC_BLANKFIX INDEX-DRIFT org/projects/LGIC_BLANKFIX.json dep_s)",
+   "denominator": "2 of 2 arms (bystander-lands, own-refused); 50 tree projects, 398 flat rows read from the private index copy",
+   "status": "PASS",
+   "expect": "GS\\-T2\\-SCOPE\\ ok=True"
+  },
+  {
+   "criterion_id": "GS2-AC2",
+   "criterion_verbatim": "the seam: the real hook, given the staged list, lands beside the drift and refuses on it. A working-tree read fails the second arm.",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round1_prep/checks/r1_treehook_seam.py\"",
+   "output_evidence": "rc=0\n  PASS bystander-lands: rc=0 standing_LGIC_BLANKFIX=True\n  PASS own-refused: rc=1\nGS-T2-HOOK ok=True arms=2 failed=0",
+   "denominator": "2 of 2 arms (bystander-lands, own-refused) through .tools/git-hooks/missions-tree-check.sh run under Git Bash",
+   "status": "PASS",
+   "expect": "GS\\-T2\\-HOOK\\ ok=True"
+  },
+  {
+   "criterion_id": "GS2-AC3",
+   "criterion_verbatim": "the tool's own --self-test stays green (every arm PASS, rc 0) and carries at least one PASS arm line naming --staged and one naming --act or STANDING.",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round1_prep/checks/r1_tree_selftest.py\"",
+   "output_evidence": "rc=0\n  PASS self-test-green: rc=0 summary=--self-test: 52/52 PASS\n  PASS has-staged-and-act-arms: staged_arm=True act_arm=True\nGS-T2-SELFTEST ok=True arms=2 failed=0",
+   "denominator": "2 of 2 arms (self-test-green 52/52, has-staged-and-act-arms)",
+   "status": "PASS",
+   "expect": "GS\\-T2\\-SELFTEST\\ ok=True"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Each acceptance check plants a defect (the bystander LGIC_BLANKFIX's tree row dep_stage changed, its generated index not regenerated) in a PRIVATE COPY of the git index and runs the same code twice: once with the act on the bystander's neighbour and once with the act on the bystander itself (the difference control). The self-test adds a working-tree control: a scratch repo whose working tree is clean while its index is drifted is read as CLEAN by a working-tree Estate and as drifted by check --staged.",
+   "expected": "act = another project -> rc 0 and a STANDING LGIC_BLANKFIX line; act = the bystander -> rc 1; a working-tree read of the same estate sees nothing",
+   "observed": "AC1 bystander-lands rc=0 with STANDING LGIC_BLANKFIX INDEX-DRIFT org/projects/LGIC_BLANKFIX.json; own-refused rc=1. AC2 the same through the real hook. Self-test arm '--staged control: the working tree alone reads the drifted project as CLEAN' PASS beside '--staged reads the index: the staged-only drift is seen'. The wrapper's own mutant arm (E MUTANT-RED) PASS.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "each of the three acceptance checks run twice at HEAD 06637db687; last lines compared",
+   "observed": "GS2-AC1: GS-T2-SCOPE ok=True arms=2 failed=0 == GS-T2-SCOPE ok=True arms=2 failed=0; GS2-AC2: GS-T2-HOOK ok=True arms=2 failed=0 == GS-T2-HOOK ok=True arms=2 failed=0; GS2-AC3: GS-T2-SELFTEST ok=True arms=2 failed=0 == GS-T2-SELFTEST ok=True arms=2 failed=0",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Making check --staged read a sparse worker cone's rows by reading both the index and the disk",
+   "reason": "The order says the working tree must not be read under --staged; every row is materialised from the index, so _index_only_projects is switched off under --staged (index_only_scan=False) and nothing is read from disk."
+  },
+  {
+   "item": "GS-t-3 (box-sync and safe-merge calling check --staged --act)",
+   "reason": "A separate order for this worker after this one; the CLI is kept exactly as written for it."
+  },
+  {
+   "item": "Running the full commit chain with an uncommitted STANDING bystander on the shared tree",
+   "reason": "LOCAL risk: the real hook was exercised twice by the AC2 seam and once by this worker's own commit 06637db687 (hook printed 'OK: missions-tree-check -- 1 tree/register path(s) staged; RESULT: 0 violation(s) in the act's projects, 0 STANDING')."
+  }
+ ],
+ "surprises": [
+  "NFRA_GATSCP-D1-W2-S1: the wrapper test .tools/tests/test_missions_tree_index_selftest.py was already 3/4 at the base (EXPECTED_ARMS 18 vs 38 printed) and the order's channel file did not exist; the id carries the D1- coordinate because the row gate refuses a bare id for fabric dell1. OBSERVATION, INERT."
+ ],
+ "session_log": "2026-10-09 ~07:5xZ GROUNDING. Worktree wk-gatscp-2 branch wk-NFRA_GATSCP-2 at a18420e142, TREE-OK. Read the three checks and the tool and hook whole. Base: check 0 violations (1.2 s working tree), self-test 38/38, wrapper 3/4 (W2 stale, row W2-S1). BUILD: materialise_index writes only the files check reads (50 tree rows, 398 flat rows, the contract, the enum source, the close schema, DIRECTIVES/MACROS, PRD and COMPLETION docs) from git ls-files -s -z plus one cat-file --batch; first cut took 8.6 s because it made a directory per tracked path, 2.8 s after de-duplicating. An empty --act-from-env variable is rc 2 so a typo cannot pass every violation. Self-test grew 38 -> 52 on a scratch git repo driven through the CLI with GIT_DIR and GIT_INDEX_FILE. The row gate refused a bare id for fabric dell1; re-filed as NFRA_GATSCP-D1-W2-S1. The worker's own commit ran through the new hook.",
+ "compiler_tools": [
+  {
+   "tool": "git ls-files -s -z / git cat-file --batch",
+   "invocation": "python .tools/missions-tree-index.py check --staged --json",
+   "result": "tree_projects 50, flat_rows 398, read_from 'git index (--staged)'; same counts as the working-tree check (50, 398) at the base."
+  },
+  {
+   "tool": "missions-tree-index.py --self-test",
+   "invocation": "python .tools/missions-tree-index.py --self-test",
+   "result": "missions-tree-index --self-test: 52/52 PASS"
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+{
+ "cell": "TR-s-18",
+ "fwd": "FWD-2",
+ "read_by": "2.0.0_SA_COO~T2",
+ "read_at": "2026-10-09T08:4xZ",
+ "claim": "measured",
+ "question": "Is the latest Research Meeting in the database, arrived by the ordinary scheduled Teams pull (not a seat-started run)?",
+ "answer": "NOT READABLE: the scheduled Teams meeting pull does not exist in AWS.",
+ "evidence": {
+  "pull_tf_header": "infra/aws/terraform/transcripts/pull.tf:1 'DESIRED ONLY: this file is planned, never applied'",
+  "declared_names": {
+   "lambda": "teams-global-transcripts-pull-lambda (pull.tf:20)",
+   "rule": "teams-global-transcripts-pull-hourly cron(0 13-22 ? * MON-FRI *) (pull.tf:23, :121-122)"
+  },
+  "aws_lambda_functions_matching_transcript_or_teams": [
+   "teams-global-chat-assist-ingress-lambda",
+   "teams-global-chat-assist-handler-lambda",
+   "outlook-global-transcripts-pull-lambda"
+  ],
+  "eventbridge_rules_scanned": 153,
+  "transcript_or_teams_rules": [
+   "outlook-global-transcripts-pull-daily cron(30 23 * * ? *) ENABLED",
+   "teams-global-chat-assist-ingress-1min rate(1 minute) ENABLED"
+  ],
+  "positive_control": "outlook-global-transcripts-pull-lambda Active and its daily rule ENABLED: the same reads see a deployed pull",
+  "teams_bronze_series": [
+   "asset_management_ic",
+   "chat_messages",
+   "monday_meeting",
+   "ocio_ic"
+  ],
+  "research_meeting_in_allowlist": true,
+  "research_meeting_in_teams_bronze": false
+ },
+ "missing_hop": "Apply the Teams meeting pull (pull.tf: the Lambda, its hourly EventBridge rule, its role, under a pair). Until then no meeting arrives unaided (FWD-1, FWD-2, FWD-3's 'new one landed' arm), and the 3 bronze meeting series present arrived by seat-started runs."
+}

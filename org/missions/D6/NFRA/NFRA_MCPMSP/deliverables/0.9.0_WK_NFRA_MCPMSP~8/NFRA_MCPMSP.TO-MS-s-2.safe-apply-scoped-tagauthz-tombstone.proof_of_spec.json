@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPMSP.TO-MS-s-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/prd/NFRA_MCPMSP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7ecc812be5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/decompositions/NFRA_MCPMSP_DECOMP.md",
+    "vintage_commit": "848a062a58",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPMSP/task-orders/NFRA_MCPMSP.TO-MS-s-2.safe-apply-scoped-tagauthz-tombstone.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPMSP~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/safe-apply.sh",
+      "kind": "script",
+      "commit_or_etag": "ccc6b4f2c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local gate script; not deployed. Exercised only against a fake terraform in a scratch-root copy (never a real tree).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_safe_apply_scoped_gates.sh",
+      "kind": "script",
+      "commit_or_etag": "ccc6b4f2c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local self-test; not deployed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "working safe-apply: arms PASS 6 of 6, final RESULT: PASS lines>=1; base safe-apply (95d53e2068): arms PASS fewer than 6 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round3/checks/s2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "working safe-apply: arms PASS 6 of 6, final RESULT: PASS lines=1; base safe-apply (95d53e2068): arms PASS 3 of 6\nRESULT: PASS\nexit=0",
+      "denominator": "6 of 6 arms PASS on the working script; 3 of 6 on the base bytes (the two *_refuses_own_plan arms and unscoped_apply_unchanged pass; tagauthz_targeted_grades_own_plan, tombstone_targeted_grades_own_plan and planfile_stages_read_given_planfile FAIL); 1 final RESULT: PASS line",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant; the base-bytes run (95d53e2068) is the difference control inside AC1.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The test alone ran several times and AC1 ran before and after the commit.",
+      "observed": "6 of 6 and base 3 of 6 on every run.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "Tree check TREE-OK on wk-NFRA_MCPMSP-8. Built: the naming plan stage keeps the plan JSON it renders for a scoped apply (SA_SCOPED_JSON, cleaned by an EXIT trap and before the exec) and the tag-authz and tombstone stages grade it instead of re-planning the whole tree; an unscoped apply plans the whole tree exactly as before; a scoped apply whose plan did not render takes each stage's existing could-not-plan branch (tag-authz exit 4 with the naming render's stderr, tombstone WARN gap). Test: scratch root with a copy of the script, fake comp-tagauthz, fake tombstone-gate.py, pass-through naming gate, fake terraform; the six arms run in parallel (about 20 s). MS-s-1's test_safe_apply_targeted.sh still prints RESULT: PASS.",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1",
+      "result": "see the worker report; only the exit code is the verdict."
+    }
+  ]
+}
