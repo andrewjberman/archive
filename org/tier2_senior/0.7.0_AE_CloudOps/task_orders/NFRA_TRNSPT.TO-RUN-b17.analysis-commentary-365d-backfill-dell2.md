@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~T2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_TRNSPT</project_code>
   </metadata>
 <risk>SERVED</risk>
@@ -14,6 +14,12 @@
 <owned_cells>TR-b-17</owned_cells>
 <decomp_context>Round 17 (CTO msg 2293, analysis ADDENDUM 4, E3): "the 365-day backfill on CloudOps~DELL2 under the pair (simulate first, VersionIds first, counts only)". Laptop stand-down CONFIRMED, neither run started, the laptop will not run either (0.0.0_AB_MSTR~DELL2 msg 2319).</decomp_context>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, 2026-10-09 ~08:1xZ). Applier @beef69ea0d: listed 453, landed 24 on 6 dates, skipped_known 8, list_refusals 0; silver 6
+    rows held_out 6; gold 0 rows; pull_runs 18 -> 19; proof VALID @e77cef2f5. Issuer read R18_READBACK_B17_BACKFILL.json @ff31f846ed agrees.
+    Row D2-S9 (empty precedent) ruled empty by the CTO (ADDENDUM 5 @d4a3b1dbb4). No rollback.
+  </closure>
 
   <objective>
     ONE bounded 365-day backfill of the analysis-commentary mail pull, under its GIVEN never-widen pair, from box/dell2 @f7a378fcb1 under this
