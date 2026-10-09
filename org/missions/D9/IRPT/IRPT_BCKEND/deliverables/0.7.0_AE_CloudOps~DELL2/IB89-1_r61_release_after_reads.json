@@ -1,0 +1,161 @@
+{
+  "amendment": "AMENDMENT 1 @f348d52c58 (msg 1938): arms (a) and (c) run on dell2 by this seat, not the laptop, per the laptop CTO ruling msgs 1924/1926. Step F applied dell2 IAM at 23:24:52Z. NO CALL WAS REFUSED on either arm.",
+  "amendment_2": "AMENDMENT 2 (msg 1950, CTO msg 1949): arm (a) passes PER FIRM on either READY at the manifest's OWN as_of, or REFRESH_FAILED + SAFE with the prior directory served; record which branch held. Arm (c) is discharged by IB89-1-AC2. The release stands.",
+  "applied_by": "0.7.0_AE_CloudOps~DELL2",
+  "applied_on": "dell2",
+  "arm_a_driven_refresh": {
+    "49financial": "state=READY, reason_code=REFRESH_COMPLETED_WITH_ADDITIONS, rev irpt-dir/49financial/2026-10-07/1.0, delta added=19 current_entry_count=4719",
+    "cottonwood": "state=FAILED, reason_code=REFRESH_FAILED, action=CORRECT (safe)",
+    "fired": "ONE driven fire, {business_date: 2026-10-08}, StatusCode 200, no FunctionError, manifest_written 3 of 3",
+    "inflection": "state=FAILED, reason_code=REFRESH_FAILED, action=CORRECT (safe)",
+    "per_firm_branch": {
+      "49financial": {
+        "branch": "READY",
+        "delta": "added 19, current_entry_count 4719",
+        "key": "investor-reporting/directory/_refresh/2026-10-08/manifest.json",
+        "manifest_as_of": "2026-10-08",
+        "reason_code": "REFRESH_COMPLETED_WITH_ADDITIONS",
+        "revision": "irpt-dir/49financial/2026-10-07/1.0"
+      },
+      "cottonwood": {
+        "action": "CORRECT",
+        "branch": "REFRESH_FAILED + SAFE, prior directory served",
+        "key": "investor-reporting/directory/_refresh/2026-10-07/manifest.json",
+        "manifest_as_of": "2026-10-07",
+        "note": "read at the MANIFEST'S OWN as_of, which amendment 2 makes the governing key; a 2026-10-08 fire wrote it under 2026-10-07",
+        "prior_directory_served": "yes",
+        "reason_code": "REFRESH_FAILED",
+        "safe": true
+      },
+      "inflection": {
+        "action": "CORRECT",
+        "branch": "REFRESH_FAILED + SAFE, prior directory served",
+        "key": "investor-reporting/directory/_refresh/2026-10-08/manifest.json",
+        "manifest_as_of": "2026-10-08",
+        "prior_directory_served": "yes -- 'the previous directory stays served until a corrected build lands; no data is removed by this outcome'",
+        "reason_code": "REFRESH_FAILED",
+        "safe": true
+      }
+    },
+    "result": "deliverables/0.7.0_AE_CloudOps~DELL2/IB89-1_a_driven_refresh_ready.json",
+    "verdict": "PASS 3 of 3 under amendment 2 (per-firm branch)",
+    "verdict_before_amendment_2": "FAIL -- 1 of 3 READY under the packet's original 'READY at all three firms'",
+    "why_not_a_regression": "the CORRECT action reads 'the build dropped an entry the previous build carried; the previous directory stays served until a corrected build lands -- no data is removed by this outcome'. That is the deployed refresh.py's fail-safe accounting working; this release is what makes the condition visible at all. Row IRPT_BCKEND-D2-S13.",
+    "write_surface": "only the manifests under investor-reporting/directory/_refresh/*; no directory object and no latest.json"
+  },
+  "arm_c_over_age_search": {
+    "age_basis": "freshness_basis: trading-day-frontier (lib/trading_calendar.trading_days_behind)",
+    "ages": {
+      "49financial": "as_of 2026-10-07, 1 trading day behind",
+      "cottonwood": "as_of 2026-10-07, 1 trading day behind",
+      "inflection": "as_of 2026-10-08, 0 trading days behind"
+    },
+    "ceiling": "MAX_AGE_TRADING_DAYS = 2",
+    "discharged_by": "IB89-1-AC2 per amendment 2 (arm (e) of the five-arm drive proves DIRECTORY_OVER_AGE/STALE against the deployed expiry.py)",
+    "result": "deliverables/0.7.0_AE_CloudOps~DELL2/IB89-1_c_over_age_search.json",
+    "verdict": "DISCHARGED by IB89-1-AC2 (measured NOT_DRIVABLE in production: every directory in-age)",
+    "why": "every directory is in-age, so the over-age branch cannot fire, and the deployed entry.lambda_handler has no directory_fixture injection point to force it (row D2-S12). The branch IS proven against the deployed expiry.py by arm (e) of the five-arm drive."
+  },
+  "five_arm_drive": {
+    "against": "deployed",
+    "arms_passed": 5,
+    "arms_total": 5,
+    "deployed_module_sha256": {
+      "expiry.py_pin_bytes": "5c2b68b8a84015ce72383d379440825ddab361585c4889e70b77ef1a1196917f",
+      "refresh.py": "ed3d0c88189082cf311613901b5660e2baeb33edc789169e79a85a6b31705edf",
+      "trading_calendar.py": "41b1c0c12651c62e59d27537a5bafb5bc34a3bb6562d94d57029a2f77ccac4c6"
+    },
+    "how": "refresh.py, expiry.py and trading_calendar.py imported from the UNZIPPED LIVE lambda zip (aws lambda get-function Code.Location), in a shadow tree whose _DIR is the deployed code and whose lib/ is EMPTY so the deployed calendar wins too",
+    "pairwise_distinct": "5 of 5 reason codes, 5 of 5 (state, code) pairs",
+    "rc": 0,
+    "reason_codes": [
+      "REFRESH_COMPLETED_WITH_ADDITIONS",
+      "REFRESH_COMPLETED_WITH_ELIGIBILITY_CHANGE",
+      "REFRESH_TRIGGER_MISSED",
+      "REFRESH_FAILED",
+      "DIRECTORY_OVER_AGE"
+    ]
+  },
+  "functions": {
+    "irpt-directory-refresh": {
+      "built_sha": "RbpsijC23XVUFPE0W34Gr/xqtDil94xYRqDuuZlaYx8=",
+      "census_changed_members": [
+        "refresh.py"
+      ],
+      "census_changed_members_count": 1,
+      "census_verbs": [
+        "changed refresh.py"
+      ],
+      "live_sha_after": "RbpsijC23XVUFPE0W34Gr/xqtDil94xYRqDuuZlaYx8=",
+      "live_sha_before": "DXuzx9jpOPKOq+CjWwL36SumE5tRBZA/kfi3y5jKBgk=",
+      "new_s3_object_version": "Ntv3Br2YU3utvESdPFCiTMkVVatmyzxY",
+      "post_census_changed_members": 0,
+      "replan_changes": 0,
+      "rider_handler_pin": "48313e9c0e",
+      "rider_handler_sha256": "e46922a003791d901d037d80c82cf538c313dfe907096194f4fcca556712702e",
+      "rollback_source_version": "M8O8zFhaS8YGlWPgya0PtiCIXfLSaTmR"
+    },
+    "irpt-directory-search": {
+      "built_sha": "IV7P2AL43cGo9VfyY2ku0zEFAhQWq9BPxge754UynM8=",
+      "census_changed_members": [
+        "entry.py",
+        "expiry.py",
+        "trading_calendar.py"
+      ],
+      "census_changed_members_count": 3,
+      "census_verbs": [
+        "changed entry.py",
+        "added expiry.py",
+        "added trading_calendar.py"
+      ],
+      "live_sha_after": "IV7P2AL43cGo9VfyY2ku0zEFAhQWq9BPxge754UynM8=",
+      "live_sha_before": "cmNmYm1jeyjoaUUeOCEV6AZS+Wdg3zfySn1DxC8Ftx0=",
+      "new_s3_object_version": "7L6kC0.B6Z2viqOJPKYrX86pVYngSWTn",
+      "post_census_changed_members": 0,
+      "replan_changes": 0,
+      "rollback_source_version": "S5vL.tP9KPBcoAnJVlD2z6mBLX5Ai6CR"
+    }
+  },
+  "laptop_file_requests": {
+    "a_driven_refresh_ready": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~DELL2/ib89_1_a_driven_refresh_ready.py",
+    "a_result_path": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~DELL2/IB89-1_a_driven_refresh_ready.json",
+    "c_over_age_search": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~DELL2/ib89_1_c_over_age_search.py",
+    "c_result_path": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~DELL2/IB89-1_c_over_age_search.json",
+    "relayed": "msgs 1916 (0.0.0_AB_MSTR~DELL2) and 1917 (1.0.0_SA_CTO~DELL2), per standing rule msg 215",
+    "scripts_commit": "9653f1edad",
+    "superseded_by_amendment_1": true
+  },
+  "ledger_activation_legs_closed": true,
+  "ledger_entry": "org/critical_paths/change_management/20261008T2259Z_irpt-r61-directory-release-dell2-20261008_deploy_completion.md",
+  "ledger_legs_closed": [
+    "irpt-directory-refresh",
+    "irpt-directory-search",
+    "V1",
+    "V2",
+    "L1",
+    "L2"
+  ],
+  "ledger_legs_open": [],
+  "ledger_slug": "irpt-r61-directory-release-dell2-20261008",
+  "ledger_state": "CLOSED -- all 6 legs proven, sentinel removed; nothing stranded",
+  "limits": [
+    "The five-arm drive is a controlled-clock harness: the CLOCK and the directory builds are fixtures by design; refresh.py, expiry.py and trading_calendar.py are the real deployed modules. It does not exercise the served HTTP door.",
+    "The (a)/(c) laptop routing premise is contradicted on the buckets this release reads: rows S347/S352 measured the LONG-name firm buckets; the applied root's firm_bucket_map names the SHORT ones, where this identity answers. Row IRPT_BCKEND-D2-S12, which also discloses six metadata reads this seat made against the bound.",
+    "No tag was minted: zero investor-reporting-v* tags exist, so CLAUDE.md rule 6's series does not exist for this pipeline and inventing one was out of scope for this order.",
+    "A fresh worktree on dell2 carries no terraform binary (.tools/terraform.exe is untracked), so it was provisioned from the kit and its sha256 verified against the kit MANIFEST before use.",
+    "Targeted applies emit terraform's standard 'Applied changes may be incomplete' warning; the untargeted 0-diff re-plan afterwards is what retires it.",
+    "Arm (a) reached READY at 1 of 3 firms. The two FAILED firms are a BUILD condition (dropped entries), not a release regression, and the fail-safe kept the previous directory served. Row IRPT_BCKEND-D2-S13.",
+    "Arm (c) could not be driven at all today because no directory is over-age; NOT_DRIVABLE is recorded as a report, never as a pass.",
+    "THE MANIFEST KEY IS THE MANIFEST'S OWN as_of_business_date, NOT the event's business_date: a driven fire for 2026-10-08 wrote cottonwood's manifest under _refresh/2026-10-07/. So the packet's '_refresh/<today>/manifest.json at all three firms' cannot hold for a firm whose source lags. Row IRPT_BCKEND-D2-S13.",
+    "TWO DEFECTS IN THIS SEAT'S OWN arm-(a)/(c) SCRIPTS were found by running them and are fixed in-session: (1) the arm-(a) reader compared reason_code to 'READY' when READY is the STATE and reason_code is REFRESH_COMPLETED_WITH_ADDITIONS, and it looked only under the event-date key; (2) the arm-(c) script computed no age at all and could therefore only ever answer NOT_DRIVABLE -- a verdict that would have looked like a measurement. Both corrected before the recorded result."
+  ],
+  "pin": "4710b8007b",
+  "replan_scope": "UNTARGETED plan of the whole directory root after both applies: 'No changes. Your infrastructure matches the configuration.' -- stronger than the per-target re-plan the order asks for",
+  "rolled_back": false,
+  "s357_correction": {
+    "handler_half": "already correct without intervention: the builder writes staged_from[handler.py] = {pin 48313e9c0e, sha256 e46922a00379}, which equals the live handler bytes, so the record no longer misstates running handler bytes",
+    "residual": "last_deployed_commit is 4850c856325d, whose handler.py blob is 3865775e75f8 -- NOT the running e46922a00379. The recorder sets that field to the last commit touching source_dir by design, so it cannot express a member pinned BACK; staged_from is what carries the truth. Recorded, not silently accepted.",
+    "what": "lambda-source-map.json deployed_code_sha256 for both functions still held the PRE-APPLY sha after record-terraform-deploy.sh ran; corrected with record-deploy-scope.py --code-sha256, deploy_ledger 6519c4989e"
+  },
+  "to_id": "IRPT_BCKEND.TO-IB-pr-377"
+}

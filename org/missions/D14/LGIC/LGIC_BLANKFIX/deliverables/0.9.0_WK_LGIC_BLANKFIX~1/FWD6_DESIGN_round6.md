@@ -1,8 +1,20 @@
-# FWD-6 design -- the creator hears at creation (LGIC_BLANKFIX round 6, cell BF-u-6)
+# FWD-6 design -- the creator hears at creation (LGIC_BLANKFIX round 6, cell BF-u-6; repaired in round 7, cell BF-v-3)
 
 **Author:** 0.9.0_WK_LGIC_BLANKFIX~1 for 2.0.0_SA_COO~G. **Date:** 2026-10-08. **Kind:** design only; nothing in `lib/`,
 `.tools/` or `infra/logic/` is changed. **Claim marks:** MEASURED = I ran it in this worktree at trunk `41361dfefe`;
 READ = read in the file cited; UNMEASURED = not run, and the build cell must measure it before relying on it.
+
+**Round-7 repair (BF-v-3, `0.9.0_WK_LGIC_BLANKFIX~1`, 2026-10-08).** The round-6 design was graded NOT MET
+(`org/tier1_exec/3.0.0_SA_CVO/deliverables/LGIC_BLANKFIX_ROUND6_L9_GRADE_BU6_BU7_20261008.md`, section BU6-AC2). This text is
+edited in place and git keeps the round-6 words. Three repairs, each MEASURED on the trunk this worktree sits on:
+(1) the decision rule's step 1 and arm C now agree (step 1 calls `place()` for an unmapped root, and arm C is a name that has a
+`{system}` blank, which the round-6 arm A name never had); (2) arm D is an act that grows the HOLE count, run on a scratch copy of
+the root's text; (3) every HOLE text the code can print has a row in the owed table with an owner, and
+`org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/check_fwd6_design_round7.py` reads the texts from
+`lib/opal_naming_rootcheck.py` and fails if one has none. The runs are
+`org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/armC_run.py` and
+`org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/armD_run.py`, with their outputs `armC_output.txt` and
+`armD_output.txt` in the same folder.
 
 ## Outcome
 
@@ -120,11 +132,20 @@ One placement step, called from the two doors that already exist; no new hook.
 
 For every NEW stored name in the diff (new = absent from its file's pre-image, exactly the test `.tools/naming-gate.py` uses):
 
-1. Find the name's type (the gate already classifies it) and its root (step 5 above). If the name belongs to no root, or to an
-   UNMAPPED root, the rule uses `grade()` alone: the existing REFUSE for a wrong NEW name stands, and a well-formed name
-   passes. A well-formed name is never refused for lacking a registry row; that refusal was withdrawn
-   (`org/missions/D14/LGIC/LGIC_BLANKFIX/prd/LGIC_BLANKFIX_PRD.md` CONTRACTS, row C-CREATE, line 119; and line 174).
-2. Otherwise call `place()` and act on the kind it returns:
+1. Find the name's type (the gate already classifies it) and its root (step 5 above).
+   - **The name belongs to no root:** the rule uses `grade()` alone. The existing REFUSE for a wrong NEW name stands (with its
+     blank unfilled, as today) and a well-formed name passes.
+   - **The name belongs to an UNMAPPED root:** the rule calls `place()` too, for the TEXT. The verdict is still `grade()`'s: the
+     commit is refused exactly when `grade()` refuses the name today, and a well-formed name passes whatever `place()` prints.
+     What changes is what the refused person reads: for a wrong name that has a `{system}` blank, `place()` prints the HOLE
+     `{system}: no map entry for this root` (its owner is in the table below) where the gate printed a bare blank. So a
+     well-formed name is never refused for lacking a registry row; that refusal was withdrawn
+     (`org/missions/D14/LGIC/LGIC_BLANKFIX/prd/LGIC_BLANKFIX_PRD.md` CONTRACTS, row C-CREATE, line 119; and line 174).
+     MEASURED: `check_root` runs on an unmapped root with the root map's entry absent
+     (`python lib/opal_naming_rootcheck.py infra/aws/terraform/smartx-pipeline --map infra/logic/registry/root_map.json --report-only`
+     printed its item lines and `ROOTCHECK ok=True ... items=117 ... hole=48`), so `decide()` has the answers it needs. `place()`
+     calls `decide()` for the one name and never reads `run_items`' exit code, which is 1 whenever a root prints any HOLE.
+2. A name in a MAPPED root: call `place()` and act on the kind it returns:
 
 | Kind `place()` returns | Action | What the person is told |
 |---|---|---|
@@ -137,23 +158,47 @@ For every NEW stored name in the diff (new = absent from its file's pre-image, e
    HEAD, and count its HOLE lines. If the post-image count is larger than HEAD's, REFUSE the commit and print the HOLE
    lines that are new. The comparison is HEAD against post-image, run now, never against a saved file: the BS9-AC1 failure
    (`LGIC_BLANKFIX` row S8) was a check compared with a saved copy of its own output. The ratchet is what catches an OLD name
-   that a diff turns unplaceable -- a root moved (its map key no longer resolves), a map entry removed, a schedule's expression
-   changed so the name's cadence word no longer agrees, or two names given one target (the root check already turns that
-   into HOLE). A diff that removes a HOLE passes; a diff that leaves the count equal passes.
-4. **Unmapped roots** have no lines, so no HOLE count to ratchet. The number of names the scope finds in them is printed as a
-   delta (`UNMAPPED <root> names=N`, before and after) as a notice and never refuses; refusing on it would be the withdrawn rule.
+   that a diff turns unplaceable -- a map entry removed or a root moved, so a name that needs `{system}` prints
+   `{system}: no map entry for this root`; a schedule whose name carries no cadence word given an expression the cadence reader
+   cannot decide (arm D, MEASURED: the count goes from 0 to 1); or two names given one target (the root check already turns that
+   into HOLE). It does NOT catch a cron edit on a name that already carries a cadence word: `decide()` rebuilds that name on
+   the new word and prints FIX, or returns the ruled form from `event_rules.json`, so the HOLE count does not move (READ,
+   `decide` in `lib/opal_naming_rootcheck.py`, the `_rebuild_on_word` branch; the round-6 text listed this as a HOLE cause and
+   was wrong). A diff that removes a HOLE passes; a diff that leaves the count equal passes.
+4. **Unmapped roots** are not ratcheted. The round-6 text said they have no lines; that was wrong (MEASURED in step 1: the root
+   check prints lines for one). They are left out of the count on purpose: the HOLEs an unmapped root prints are largely the
+   absence of its map entry (`no root map entry` on 15 of the 48 in the run above, the rest skipped by a card), so a count there
+   would refuse a diff for a missing row, the withdrawn rule. The number of names the scope finds in them is printed as a
+   delta (`UNMAPPED <root> names=N`, before and after) as a notice and never refuses.
    That is a real limit on half (2) of the ACCEPT, stated again under "What it does not cover".
 
-What each HOLE tells the person they owe (the texts are the root check's own `why` strings, READ in `decide`):
+What each HOLE tells the person they owe. The rows are every text `lib/opal_naming_rootcheck.py` can print under a HOLE: the
+returns of `HOLE`, the 8 blanks `decide()` may fail to fill (its `why` clauses), the collision text, and the 3 reasons
+`_ruling_of` appends to a card or raised HOLE. The CVO's grade counted 14; the code holds 18 (the 14 causes, the frame that
+carries the clauses, and the 3 suffixes), and the checker reads them from the code with `ast`, so a text added later without a
+row fails it. Column two is the needle the checker matches (the longest literal run of the text, as the checker derives it).
 
-| HOLE cause printed by `decide` | What is owed | Owner |
-|---|---|---|
-| `{system}: no map entry for this root` | a root-map entry for the root | `4.0.0_SA_CRO` (writer of `infra/logic/registry/root_map.json`) |
-| `{system}: this root serves more than one firm; its map entry does not give the system` | the entry's `fills` for the system | `4.0.0_SA_CRO` |
-| `{cadence}: no cadence row for this name` / `the schedule says X and ... no such ending to rebuild` | a schedule expression the cadence reader can decide, or a name that already ends in the word | the creator (their own schedule) |
-| `{source}/{scope}: ...` (key class UNDECIDED) | a key ruling row for the key | `4.0.0_SA_CRO` (`infra/logic/registry/key_rulings.json`) |
-| `this target is also given to ...` | one of the two names; nothing here says which keeps it | the creator, with the owner of the older name |
-| `the grader gave verdict ... and no canonical form` | a rule or registry defect, not the creator's | `1.0.0_SA_CTO` (reported as a rule or registry defect, as the gate reports RAISE) |
+| Row | Needle (what the text says) | What is owed, and when it prints | Owner |
+|---|---|---|---|
+| H1 | `several key rulings carry this key and no hint names this fi` | a `declared_in` hint on one key-ruling row that names the file (suffix on a stored-file HOLE) | `4.0.0_SA_CRO` (`infra/logic/registry/key_rulings.json`) |
+| H2 | `one bucket per firm, and the registry holds no per-firm answ` | a per-firm key-ruling row for the key and variable (suffix) | `4.0.0_SA_CRO` |
+| H3 | `so no key ruling is matched` | a key-ruling row, or a literal bucket the reader can see (suffix, bucket not read) | `4.0.0_SA_CRO` |
+| H4 | `it was skipped by a card; the card gives no correct name and` | the card's `canonical` form or its `no_name_owed` line | `4.0.0_SA_CRO` (the card is a registry ruling, `NOT_JUDGED_R13.json`) |
+| H5 | `a brace remains that no per-firm answer admits` | the ruling row's per-firm answer for the brace | `4.0.0_SA_CRO` (`infra/logic/registry/key_rulings.json`) |
+| H6a | `ans['raised']` | the grader's own text names the cause. When it says a word is in no vocabulary, an unresolved token, a first segment that is neither a source nor a tier, or an event token that is not ruled (the classes `hole_class` already separates), a vocabulary or `event_rules.json` row is owed | `4.0.0_SA_CRO` |
+| H6b | `ans['raised']` | any other text the grader raises is a rule defect, reported as the gate reports RAISE | `1.0.0_SA_CTO` |
+| H7 | `has no such ending to rebuild` | a name that already ends in the schedule's word, or an expression that agrees with the word it carries | the creator (their own schedule) |
+| H8 | `the grader gave verdict` | nothing the creator can write: the grader gave a verdict and no form, a rule or registry defect | `1.0.0_SA_CTO` |
+| H9 | `{system}: the role's system is not resolved` | a root-map exception that names the role, or a role the policy reader can place | `4.0.0_SA_CRO` (`infra/logic/registry/root_map.json`) |
+| H10 | `{system}: no map entry for this root` | a root-map entry for the root; reached from an UNMAPPED root (step 1) and from a mapped root whose entry a diff removed | `4.0.0_SA_CRO` (writer of `infra/logic/registry/root_map.json`) |
+| H11 | `{system}: an inline policy takes its role's system; the root` | the inline policy declared under a role the policy reader finds in the root, so the role's system answers | the creator (their own policy) |
+| H12 | `{system}: this root serves more than one firm; its map entry` | the entry's `fills` for the system | `4.0.0_SA_CRO` |
+| H13 | `{cadence}: no cadence row for this name` | the name declared as a literal schedule or event-rule resource the cadence reader can see | the creator (their own schedule) |
+| H14 | `{cadence}` | a schedule expression the cadence reader can decide (it prints its own basis after the colon), or a name that already ends in the word | the creator (their own schedule) |
+| H15 | `{source}/{scope}` | a key ruling row for the key (key class UNDECIDED) | `4.0.0_SA_CRO` (`infra/logic/registry/key_rulings.json`) |
+| H16 | `a blank remains that no module fills` | nothing the creator can write: a blank no module has a rule for, a rule defect | `1.0.0_SA_CTO` |
+| H17 | `could not fill` | the frame `partial form X; could not fill ...` that carries H9 to H16; it is owned by the clause it carries, and a frame printed with no clause cannot happen (H16 is added when none was) | `1.0.0_SA_CTO` |
+| H18 | `two resources cannot take one name, and nothing here says wh` | one of the two names; nothing here says which keeps it | the creator, with the owner of the older name |
 
 The refusal text names the owner and the file; the creator does not write the registry (only `4.0.0_SA_CRO` does), so for a
 registry-owed HOLE the text tells the creator to hand the owner the one line it prints, which is the content of the row.
@@ -184,9 +229,22 @@ A second wrong example from the same run, with a key: `FIX LAMBDA irpt-directory
 present gate prints `NAMING CONFORMANT ... PASS 1 graded`, rc=0; the step must keep that result, and `place()` prints RIGHT).
 
 **Unplaceable (HOLE).** The live whole-estate run has `hole=0` over the 13 mapped roots, so there is no live HOLE line to quote.
-The arm is built in the exercise by removing the root-map entry from a COPY of the map (never from the registry) so the same
-creator act reads `{system}: no map entry for this root`; the text then tells the creator the owner is `4.0.0_SA_CRO` and the
-row to hand over is the root's map entry.
+The arm is built in the exercise, and it cannot reuse arm A's name: `irpt-directory-newjob` has no `{system}` blank (its form
+is `irpt-directory-newjob-{cadence}`, the system `irpt` is already in the name), so removing the root's map entry changes
+nothing it prints. MEASURED: with the `investor-reporting/directory` entry removed from a COPY of the map, the root check
+prints `FIX SCHEDULE irpt-directory-refresh -> irpt-directory-refresh-daily` unchanged. The unplaceable creator act is a NEW
+Lambda named `daily-pull`, which carries no system word, so the grader's form is `{system}-daily-pull-lambda`. MEASURED
+(`org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/armC_output.txt`):
+
+```
+control (the registry's map)        FIX LAMBDA daily-pull -> irpt-daily-pull-lambda
+C  (the root's entry removed)       HOLE LAMBDA daily-pull -> partial form {system}-daily-pull-lambda; could not fill {system}: no map entry for this root
+C2 (entry whose fills is ["scope"]) HOLE LAMBDA daily-pull -> partial form {system}-daily-pull-lambda; could not fill {system}: this root serves more than one firm; its map entry does not give the system
+```
+
+The text then tells the creator the owner is `4.0.0_SA_CRO` (rows H10 and H12) and the row to hand over is the root's map entry
+or its `fills`. The copies of the map are written under the worktree's `.scratch/`, never under `infra/`; the registry is read
+and never written.
 
 **Let through, by design:** an EXISTING wrong name the diff only touches (the gate WARNs, as DEC-6 says); a PATTERN line (a
 code pattern, not a name); a NOT-ASKED name; a name in an unmapped root that `grade()` calls well-formed.
@@ -201,12 +259,18 @@ is run on a unified diff with `python .tools/naming-gate.py --diff FILE`, and a 
 |---|---|---|
 | A. refuse FIX | add the schedule `irpt-directory-newjob` to a copy of `infra/aws/terraform/investor-reporting/directory/schedule.tf` | rc=1; the line names `irpt-directory-newjob-daily` and what is owed; no `{` in the printed form |
 | B. let through (NEGATIVE ARM) | the same resource named `irpt-directory-newjob-daily` | rc=0; `NAMING-GATE: PASS` |
-| C. refuse HOLE | arm A's act against a COPY of the root map with the `investor-reporting/directory` entry removed | rc=1; the line says no map entry, names `4.0.0_SA_CRO` as the owner |
-| D. ratchet grows | a diff that edits a schedule's cron so an EXISTING name's cadence word no longer agrees | rc=1; the new HOLE line printed; count after greater than count at HEAD |
+| C. refuse HOLE (unmapped root) | add a NEW Lambda named `daily-pull` (no system word) to the root, against a COPY of the root map with the `investor-reporting/directory` entry removed; the root is unmapped, so step 1 calls `place()` for the text and `grade()` supplies the refusal | rc=1; the line is `HOLE ... could not fill {system}: no map entry for this root`, and names `4.0.0_SA_CRO` as the owner. Its control, the same act against the registry's map, prints `FIX ... irpt-daily-pull-lambda` and is refused with that name. MEASURED, `armC_output.txt` |
+| C2. refuse HOLE (mapped root) | the same Lambda against a COPY of the map in which the root's entry has `fills` of `["scope"]` | rc=1; the line is `HOLE ... could not fill {system}: this root serves more than one firm; its map entry does not give the system`; owner `4.0.0_SA_CRO`. MEASURED, `armC_output.txt` |
+| D. ratchet grows | a diff that gives the schedule `irpt-directory-refresh` (it carries no cadence word; FIX today) the expression `cron(0/7 9 ? * MON-FRI *)`, which the cadence reader cannot decide; run on a scratch copy of `schedule.tf` | rc=1; the new line is `HOLE SCHEDULE irpt-directory-refresh -> partial form irpt-directory-refresh-{cadence}; could not fill {cadence}: minute field 0/7: not a single minute`; count after 1, count at HEAD 0. MEASURED, `armD_output.txt` |
+| D-neg. ratchet does not grow (NEGATIVE ARM) | a diff that edits the cron of a name that already carries its cadence word (`irpt-directory-refresh-retry-daily` to a weekly cron) | rc=0: `decide()` rebuilds the name on the new word and prints FIX, so the count is equal. READ, not run (the round-6 grade read the same branch) |
 | E. organic case (NEGATIVE ARM) | a diff that touches an existing wrong name without renaming it (the existing `irpt-directory-refresh`) | rc=0 with a WARN, not a refusal |
 | F. ratchet shrinks (NEGATIVE ARM) | a diff that fixes a HOLE | rc=0 |
 | G. switch absent | arm A with the naming-place.enforce switch file absent | the same text, rc=0 (shows the refusal is this step's and not the older gate's) |
 | H. override | arm A carrying an R20 register row id the registry holds | passes with the row id printed; a made-up id still refuses |
+
+Arm D's act is run by `org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/armD_run.py`: only the cadence reader is
+pointed at the scratch text (`org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/armD_scratch/directory_cron_edit.tf.txt`, a
+copy of the root's `schedule.tf` with the one expression changed); the file under `infra/` is not touched.
 
 Two controls, run first: the arm A diff through the CURRENT gate must print `{cadence}` (the baseline already MEASURED above, so the
 exercise can see the difference), and the live root check must print `hole=0` over the mapped roots at the start (the ratchet's
@@ -222,8 +286,8 @@ registry rows (those move daily); the existing bar (`python -m pytest lib/tests 
   as the gate it sits in. Row 23 is a gap in the estate, not in this design; closing it is not proposed here.
 - **A name created outside any diff:** typed into the AWS console, made by a script's boto3 call at run time, or built from
   a variable at run time. Only literals the gate already sees are graded; the PATTERN kind is by definition not a name.
-- **Names in the 74 unmapped roots** (`ROOTS total=87 mapped=13 unmapped=74` at round 5): they have no lines, so the ratchet
-  has no count there. A wrong NEW name in one is refused by `grade()` as today (with a blank still unfilled); a well-formed one
+- **Names in the 74 unmapped roots** (`ROOTS total=87 mapped=13 unmapped=74` at round 5): the root check prints lines for
+  one, but the ratchet does not count them (decision rule, step 4), so it has no count there. A wrong NEW name in one is refused by `grade()` as today (with a blank still unfilled); a well-formed one
   passes. FWD-2 and FWD-7 are what shrinks this; this design does not.
 - **Stored-name carriers the scope enumeration misses** (row `LGIC_BLANKFIX-W1-S14`: names declared through locals, modules
   or a `.json` file): the root check does not list them, so `place()` has no line for them either.

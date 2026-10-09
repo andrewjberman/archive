@@ -87,6 +87,8 @@ def say(*parts):
 
 
 def main(argv):
+    if argv[1] == "--read":
+        return read_only(argv[2], argv[3])
     csv_path, out = argv[1], argv[2]
     data = open(csv_path, "rb").read()
     result = {"principal_role": "the Cottonwood-allowed service principal (svc)", "tenant": TENANT, "api": API,
@@ -135,6 +137,12 @@ def main(argv):
     say("submit HTTP", s, "state", (status or {}).get("state"))
     if s != 200 and s != 202:
         return dump(1)
+    server_id = ((resp.get("data") or {}).get("identity") or {}).get("request_id") if isinstance(resp, dict) else None
+    result.update(server_request_id=server_id)
+    return poll_and_read(h, q, server_id or request_id, result, dump)
+
+
+def poll_and_read(h, q, request_id, result, dump):
     sh = dict(h, **{"X-IRPT-Status-Dates": "prospect-v1"})
     st = None
     deadline = time.time() + 1500
@@ -143,7 +151,7 @@ def main(argv):
         env = resp.get("status") if isinstance(resp, dict) else None
         st = (env or {}).get("state") or (resp.get("data") or {}).get("state") if isinstance(resp, dict) else None
         say("status HTTP", s, "state", st)
-        if st not in ("LOADING", None):
+        if st not in ("LOADING", "QUEUED", "RUNNING", "PROCESSING", None):
             break
         time.sleep(10)
     result.update(final_state=st, final_at=stamp())
@@ -152,6 +160,28 @@ def main(argv):
     result.update(request_read_status=s1, sections_read_status=s2, sections=scrub(sections))
     say("read back: request HTTP", s1, "sections HTTP", s2)
     return dump(0 if st == "READY" and s2 == 200 else 1)
+
+
+def read_only(request_id, out):
+    """Polls and reads back an ALREADY-SUBMITTED request by its server id; submits nothing."""
+    result = {"principal_role": "the Cottonwood-allowed service principal (svc)", "tenant": TENANT, "api": API,
+              "mode": "read-only", "server_request_id": request_id, "started_at": stamp()}
+
+    def dump(rc):
+        result.update(ended_at=stamp(), rc=rc, calls=log)
+        json.dump(result, open(out, "w", encoding="utf-8", newline="\n"), indent=1)
+        return rc
+
+    password = boto3.client("secretsmanager", region_name="us-east-1").get_secret_value(SecretId=SECRET)["SecretString"]
+    s, login = call("POST", "/auth/login", {"email": EMAIL, "password": password}, {"Content-Type": "application/json"},
+                    record_body={"email": "<svc>", "password": "<redacted>"})
+    del password
+    token = login.get("accessToken") if isinstance(login, dict) else None
+    say("login", s, "token present", bool(token))
+    if not token:
+        return dump(1)
+    h = {"Content-Type": "application/json", "Authorization": "Bearer " + token, "X-Contract-Version": "v1"}
+    return poll_and_read(h, "?selected_tenant=" + TENANT, request_id, result, dump)
 
 
 if __name__ == "__main__":

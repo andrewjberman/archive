@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -13,6 +13,11 @@
 <decomp_doc>org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md</decomp_doc> (workstream ACCESS, cell `CT-a-1`, the Dell identity), an issuer's act on `1.0.0_SA_CTO` msgs 107091 and 107099: the laptop writes the policy a Dell cannot (dell2 ledger `irpt-ycdgen-f1-svc-20261008`).
 <owned_cells>CT-a-1</owned_cells>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~21:3xZ). REMOVE put 2026-10-08T21:27:47Z on dell2's request (msgs 1663, 1665), before X1; read back by
+    the issuer live: dell2 explicitDeny. The secret window was open 21:04:07Z-21:27:47Z. Ledger 2126Z closed (commit 2fe5100637).
+  </closure>
 
   <objective>
     Leg REMOVE of a time-boxed window: set the resource policy of ONE secret, `arn:aws:secretsmanager:us-east-1:313476888478:secret:irpt/svc-irpt-analysis/password-rfHf9l`, to the signed document
@@ -27,6 +32,9 @@
     document back WITHOUT waiting for any answer (steps 1-6 as written; at step 1, a live policy equal to the ADD file is the
     expected start), read it back, then report to 2.0.0_SA_COO~C and 1.0.0_SA_CTO. This is the one case where the trigger is
     the clock, not a GO.
+    SET RULE (issuer ruling 2026-10-08 ~21:0xZ, after the 21:01:00Z rollback): AWS may store a Principal.AWS list and an
+    ArnNotEquals value list in a different order. IAM evaluates both as unordered sets, so every comparison of a live policy
+    with a signed file compares THOSE TWO LISTS AS SETS; every other part of the parsed JSON must be equal.
   </context>
 
   <the_act>

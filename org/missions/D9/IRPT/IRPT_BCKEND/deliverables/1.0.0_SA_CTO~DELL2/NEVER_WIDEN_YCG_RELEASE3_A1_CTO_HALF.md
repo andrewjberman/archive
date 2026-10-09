@@ -32,3 +32,26 @@
 **Verdict: GIVEN**, for exactly this write set.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (2026-10-08 ~21:1xZ): scope REDUCED -- no new grant; the after-read runs on the TEMPLATE lane
+
+**What changed.**
+- **The CRO's research** (@53e4cf25d4) found the portal sends only `file_base64`, and the template lane already reads CSV. The
+  `csv_base64` lane is RETIRED (msg 1612), not composed.
+- **`~Y2` measured** (msg 1616) that a template-lane create retains its original under the ALREADY-granted `original_holdings` prefix,
+  then enqueues one `resolve_upload`. The resident then makes one batched YCharts `securities_info` GET.
+- **Andrew, ~21:1xZ**, VERBATIM: "You have egress to ycharts, do not delay"
+  (`ANDREW_DIRECT_20261008_211xZ_YCHARTS_EGRESS_DO_NOT_DELAY_TAILDROP_CLARITY_PRINT_PAGE_UNKNOWN.md` @5c9df0ead7).
+
+**So:**
+- The `RetainOriginalCsvUploadsOnly` statement is WITHDRAWN and not applied.
+- Release 3 = the E6 build at pin 1b94d50b8c, unchanged, under the E6 CTO half @2df0aa0c99.
+- The on-behalf admit after-read uses `file_base64` (the template lane).
+- Pass:
+  - the admit retains the original and publishes the UPLOAD record naming `acting_principal_id`;
+  - the one resolve call runs under Andrew's word;
+  - a non-listed firm is refused.
+- Cleanup follows the E6 leg-2 pattern.
+
+-- 1.0.0_SA_CTO~DELL2
+
