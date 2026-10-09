@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-aj-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-aj-1.cot-price-rewrite-build.md",
+    "group": "OTHER",
+    "vintage_commit": "3593177"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~64",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round36.md",
+    "vintage_commit": "3593177",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-aj-1.cot-price-rewrite-build.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_cot_price_rewrite.py",
+      "kind": "script",
+      "commit_or_etag": "1a21ebbab6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local build only; S3 head/get on 38 named versions in the cot bucket, one ssm get_document, 8 events/scheduler reads; no S3 write. Rule commit 4bc82c2d47 precedes every run.",
+      "artifact_covered_by": [
+        "CB36aj1-AC1",
+        "CB36aj1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~64/cot_price_rewrite.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "per-key diff, Yahoo outcome, writer census with live reads; manifest cot_price_rewrite_manifest.json beside it",
+      "artifact_covered_by": [
+        "CB36aj1-AC1",
+        "CB36aj1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB36aj1-AC1",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_cot_price_rewrite.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~64 expect: COT-PRICE-REWRITE keys=38",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_cot_price_rewrite.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~64",
+      "expect": "COT-PRICE-REWRITE keys=38",
+      "output_evidence": "rc 0; LAST line: COT-PRICE-REWRITE keys=38 rows_removed=1734 rows_repriced=0 other_rows_identical=True bonds_priced=0/3 writers=7 scheduled=0",
+      "denominator": "38 of 38 keys read at the named VersionId and rewritten locally; 38 of 38 current versions equal the provenance table; 6 Yahoo calls in the run (12 across runs 2 and 3)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB36aj1-AC2",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9: other_rows_identical=True on all 38; the bond rule committed before the run; no equity ticker used for a bond; the writer census complete.",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read cot_price_rewrite.md sections 1-3 and the manifest beside the rule docstring of commit 4bc82c2d47",
+      "expect": "CVO grades at L9",
+      "output_evidence": "other_rows_identical=True on 38 of 38 (manifest); rule commit 4bc82c2d47 precedes runs; Yahoo queried only the CUSIPs, never an equity ticker; census lists 7 writers with file:line and 8 live reads; row W64-S1 asks the bond source ruling; row W64-S2 records the census and run history",
+      "denominator": "38 keys; 7 writer files from 780 files scanned; 8 live resource reads plus 1 ssm document read",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment criterion, 3.0.0_SA_CVO at L9 is the oracle"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "second complete run (run 3 after run 2) compared per key on sha256_after",
+      "observed": "38 of 38 sha256_after equal between run 2 and run 3",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the task order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the code mirror the live gold-run document syncs (code/gold/ in the cot bucket)",
+      "reason": "not in the repo and not among the 38 named versions the order lets this worker read; the census says so in its Blind line"
+    },
+    {
+      "item": "the rewritten files under .scratch/advi_cotbkf/cot_price_rewrite/<key>",
+      "reason": "the order says uncommitted; the manifest carries their sha256"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W64-S1",
+    "ADVI_COTBKF-D2-W64-S2"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~64/ADVI_COTBKF.TO-CB-aj-1.cot-price-rewrite-build.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python data/assets/scripts/silver/commonwealth_cot_price_rewrite.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~64",
+      "result": "COT-PRICE-REWRITE keys=38 rows_removed=1734 rows_repriced=0 other_rows_identical=True bonds_priced=0/3 writers=7 scheduled=0"
+    },
+    {
+      "tool": "python",
+      "invocation": "python data/assets/scripts/silver/commonwealth_cot_price_rewrite.py --verify-served --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~64",
+      "result": "COT-PRICE-REWRITE-VERIFY keys=38 match=0/38 (before the write, as expected)"
+    }
+  ]
+}

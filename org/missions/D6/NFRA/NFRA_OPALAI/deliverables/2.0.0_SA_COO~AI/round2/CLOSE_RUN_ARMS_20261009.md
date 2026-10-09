@@ -56,6 +56,12 @@ Dry-run `git merge-tree` against HEAD at 11:4xZ:
   (ARMED, this seat): each edit is ruled PORTED into opal_ai or RETIRED with the BG launch before this merge runs.
 OA-e-8 is unspawned; it continues slot `~12` after the OA-t-1 merge, so its worktree is cut after that merge.
 
+**Z-S67 resolved (12:3xZ):** OA-f-15 ported the post-move edits into opal_ai (live on DEV and PROD `13bc631`); row Z-S69
+disarms Z-S67 and Z-S68. **The cutover merge of `wk-NFRA_OPALAI-12` resolves its two modify/delete conflicts by taking
+the branch's DELETION** of `.claude/skills/bbg-teams-assist/SKILL.md` and `org/tier0_utility/0.0.3_BG_BBGTerminal/refs/
+RELAUNCH.md` (`git rm` both in the merge). Their content now lives in `opal_ai/opal/agent/`, and the one unported edit
+(the P3 row) is ruled RETIRED. The merge still lands on the cutover sitting, after both arms PASS.
+
 ## Results (filled at the run)
 
 | arm | run at (UTC) | raw response | pinned reference read (same minute) | verdict |
