@@ -1,0 +1,96 @@
+{
+ "cell": "IB-pr-382",
+ "task_order": "IRPT_BCKEND.TO-IB-pr-382",
+ "written_by": "0.9.0_WK_IRPT_BCKEND~190",
+ "factory": {
+  "module": "infra/aws/lambda/investor-reporting/_scope/custody_ports.py",
+  "function": "build_accepted_custody_ports",
+  "call": "build_accepted_custody_ports(selection_store=SelectionStore(dynamodb, IRPT_REQUESTS_TABLE), current_authority=<request-bound (principal, owner)->(scope, directory)>, get_object=s3_object_reader(s3), admitted_firms=<installer's ledgered list; default COT only>) -> CustodyPorts; AcceptedCustodyReader(CustodyBindingStore(...), publication_for=<port 2>, **ports.reader_kwargs())"
+ },
+ "ports": {
+  "current_selection": {
+   "module": "infra/aws/lambda/investor-reporting/_scope/custody_ports.py",
+   "function": "build_accepted_custody_ports.<locals>.current_selection",
+   "reads": [
+    {
+     "service": "dynamodb",
+     "resource": "table irpt-requests, key tenant=<firm> request_revision=SELECTION#sel_<64 hex> (ConsistentRead, via SelectionStore.load, once per call)",
+     "action": "dynamodb:GetItem"
+    },
+    {
+     "service": "s3",
+     "resource": "<client-firm bucket>/investor-reporting/directory/* (via the installer's current_authority -> _authz.loaders.load_directory; already granted by generate_directory_read)",
+     "action": "s3:GetObject"
+    },
+    {
+     "service": "s3",
+     "resource": "<client-firm bucket>/platinum/<firm>/ownership_map.json (via current_authority -> _authz.loaders.load_ownership; already granted by generate_ownership_map)",
+     "action": "s3:GetObject"
+    }
+   ]
+  },
+  "interpret_source": {
+   "module": "infra/aws/lambda/investor-reporting/_scope/custody_ports.py",
+   "function": "build_accepted_custody_ports.<locals>.interpret_source (delegates to infra/aws/lambda/investor-reporting/intake/custody_interpreter.py build_custody_ports.interpret_source)",
+   "reads": [
+    {
+     "service": "s3",
+     "resource": "arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/silver/fact_holdings/date=*/data.parquet (COT rows, read by VersionId, sha256 + byte_length checked against the receipt)",
+     "action": "s3:GetObjectVersion"
+    },
+    {
+     "service": "s3",
+     "resource": "arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/silver/fact_allocations/date=*/data.parquet (COT independent totals, by VersionId)",
+     "action": "s3:GetObjectVersion"
+    },
+    {
+     "service": "s3",
+     "resource": "arn:aws:s3:::opal-data-assets/schwab/*/silver/dim_position/date=*/data.parquet (49financial rows; only when the installer admits 49financial)",
+     "action": "s3:GetObjectVersion"
+    },
+    {
+     "service": "s3",
+     "resource": "arn:aws:s3:::opal-data-assets/schwab/*/silver/dim_balance/date=*/data.parquet (49financial totals; only when admitted)",
+     "action": "s3:GetObjectVersion"
+    },
+    {
+     "service": "s3",
+     "resource": "arn:aws:s3:::opal-data-inf/silver/api_dims/positions_mv/snapshot_date=*/data.parquet (inflection rows; only when admitted)",
+     "action": "s3:GetObjectVersion"
+    },
+    {
+     "service": "s3",
+     "resource": "arn:aws:s3:::opal-data-inf/silver/api_dims/accounts_v2/snapshot_date=*/data.parquet (inflection totals; only when admitted)",
+     "action": "s3:GetObjectVersion"
+    },
+    {
+     "service": "kms",
+     "resource": "the CMK that encrypts the opal-data-assets and opal-data-inf buckets (ARN not resolved by this cell; the release-6 pair names it, CTO 100712 object list)",
+     "action": "kms:Decrypt (via S3)"
+    }
+   ]
+  },
+  "validate_evidence": {
+   "module": "infra/aws/lambda/investor-reporting/_scope/custody_ports.py",
+   "function": "build_accepted_custody_ports.<locals>.validate_evidence (delegates to infra/aws/lambda/investor-reporting/intake/custody_interpreter.py _validate -> intake/custody_portfolio._validated)",
+   "reads": []
+  }
+ },
+ "reads_not_made_here": "Port 2 (publication_for capture/load_pinned) is M's and reads the firm publication objects; the binding store (CustodyBindingStore) reads/writes irpt-requests CUSTODY_BINDING# rows (GetItem, PutItem) and is the installer's. The generate role already holds GetItem/PutItem on irpt-requests.",
+ "release6_staged": [
+  "infra/aws/lambda/investor-reporting/_scope/custody_ports.py",
+  "infra/aws/lambda/investor-reporting/_scope/accepted_custody.py",
+  "infra/aws/lambda/investor-reporting/_scope/custody_binding.py",
+  "infra/aws/lambda/investor-reporting/_scope/selection.py",
+  "infra/aws/lambda/investor-reporting/_scope/selection_store.py",
+  "infra/aws/lambda/investor-reporting/intake/custody_interpreter.py",
+  "infra/aws/lambda/investor-reporting/intake/custody_portfolio.py",
+  "infra/aws/lambda/investor-reporting/intake/parse.py",
+  "infra/aws/lambda/investor-reporting/intake/portfolio.py"
+ ],
+ "release6_staged_note": "custody_interpreter imports custody (CustodyOwnershipRefused), ids (the irpt-common layer python/ids.py) and, lazily, custody_portfolio; custody_portfolio imports intake parse and portfolio. Y's symbol closure on the built zip decides what is already staged.",
+ "runtime_prerequisites": [
+  "pyarrow: the interpreter's default row decoder (intake/custody_interpreter.py _read_parquet_rows) imports pyarrow.parquet lazily. The irpt-ycharts-generate function attaches only the irpt-common layer (generate.tf layers = [irpt_common]), which carries jsonschema, referencing, attrs, rpds, bd_helpers and ids and names no pyarrow. Without pyarrow every custody read refuses CUSTODY_SOURCE_SHAPE (fail closed). Release 6 must stage pyarrow or the installer must pass read_rows.",
+  "current_authority: the installer supplies the request-bound (principal, owner) -> (scope, directory) resolver; the recipe is custody.CustodyAccess._current_selection_owner (custody.py:63-88). It must resolve fresh on every call."
+ ]
+}
