@@ -1,0 +1,141 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-386",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-386.svc-commentary-read-only-request-composition.md",
+  "group": "OTHER",
+  "vintage_commit": "c07875956a"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "c07875956a",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-386.svc-commentary-read-only-request-composition.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~197",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/reports/repository.py",
+   "kind": "script",
+   "commit_or_etag": "20534db618",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "SERVICE_READERS rule: svc-commentary admitted by name and family in its own tenant, read-only via get()/head(); put() and ReportRepository refuse it; nothing built or deployed",
+   "artifact_covered_by": [
+    "IB95-3-AC1",
+    "IB95-3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/reports/retention.py",
+   "kind": "script",
+   "commit_or_etag": "20534db618",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the subject passes a retention-liveness read only; reserve/promote refuse it; retention check kept on both sides of the blob read",
+   "artifact_covered_by": [
+    "IB95-3-AC1",
+    "IB95-3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/reports/commentary_composition.py",
+   "kind": "script",
+   "commit_or_etag": "20534db618",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "irpt-commentary-composition-read-lambda handler: request {tenant, request_ref}; GetItem analysis#<id>#1, composition_ref, ArtifactRepository.get server-side; response document + sha256, identity members removed",
+   "artifact_covered_by": [
+    "IB95-3-AC1",
+    "IB95-3-AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_svc_commentary.py",
+   "kind": "test",
+   "commit_or_etag": "20534db618",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "10 tests named svc_commentary; reports suite 141 passed",
+   "artifact_covered_by": [
+    "IB95-3-AC1",
+    "IB95-3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/investor-reporting/export/commentary_composition.tf",
+   "kind": "terraform",
+   "commit_or_etag": "20534db618",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "DESIRED function, execution role + read-only policy, and the caller's lambda:InvokeFunction-only policy; terraform fmt parsed it; no init, plan or apply",
+   "artifact_covered_by": [
+    "IB95-3-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~197/IB95-3_svc_commentary_surface.json",
+   "kind": "config_data",
+   "commit_or_etag": "20534db618",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the surface file: kind lambda, name, request, response, caller_iam (lambda:InvokeFunction on the one function)",
+   "artifact_covered_by": [
+    "IB95-3-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB95-3-AC1",
+   "criterion_verbatim": "IB95-3-AC1 -- in reports/tests, `-k svc_commentary` passes (>= 5): own-tenant read admitted; another tenant refused; another family refused; put refused; another service subject refused. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r95/p95_svccom.py\" . IB95-3-AC1",
+   "expect": "IB95-3-AC1 PASS",
+   "output_evidence": "OK: 10 passed, 131 deselected in 2.51s | IB95-3-AC1 PASS | rc=0",
+   "denominator": "10 svc_commentary tests passed of 10 selected (141 collected in reports/tests); threshold >= 5",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB95-3-AC2",
+   "criterion_verbatim": "IB95-3-AC2 -- the whole reports/tests suite passes. Base: PASS; must stay so.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r95/p95_svccom.py\" . IB95-3-AC2",
+   "expect": "IB95-3-AC2 PASS",
+   "output_evidence": "OK: reports suite 141 passed in 7.45s | IB95-3-AC2 PASS | rc=0",
+   "denominator": "141 passed, 0 failed of 141 collected (131 prior + 10 new); ycharts/generate, export, ops, intake and _scope suites also run green after the change",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB95-3-AC3",
+   "criterion_verbatim": "IB95-3-AC3 -- the surface file names the ONE callable surface (kind route|lambda; name built by lib/opal_naming.py), its request shape (tenant, request_ref), response shape (composition document + sha256, no owner) and the caller's exact IAM (no dynamodb:GetItem, kms:Decrypt or s3:GetObject*). Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r95/p95_svccom.py\" . IB95-3-AC3",
+   "expect": "IB95-3-AC3 PASS",
+   "output_evidence": "OK: surface lambda irpt-commentary-composition-read-lambda; caller IAM [lambda:InvokeFunction on arn:aws:lambda:us-east-1:313476888478:function:irpt-commentary-composition-read-lambda] | IB95-3-AC3 PASS | rc=0",
+   "denominator": "1 of 1 surface named; request keys 2 of 2 (tenant, request_ref); 0 of 4 forbidden actions present in caller_iam",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Three mutants of reports/repository.py, applied in place and restored (sha verified): (1) the family test dropped from _service_allows; (2) the tenant equality dropped; (3) a write (no read_family) skips the subject check.",
+   "expected": "each mutant fails at least one svc_commentary test",
+   "observed": "family-ignored: 2 failed (another_family_is_refused, repository_rule_holds_without_the_retention_layer); tenant-ignored: 1 failed (repository_rule_holds_without_the_retention_layer); put-admitted: 1 failed (same test); before the bare-repository test was added, mutants 2 and 3 survived because retention refuses the subject too, which is why that test exists",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2 run three times (before the commit, at the commit, and the final run recorded here)",
+   "observed": "10 passed and 141 passed every time",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "IRPT_BCKEND-D2-W197-S1: the stored composition itself carries owner and input_owner, so the surface strips them and returns a count",
+  "IRPT_BCKEND-D2-W197-S2: the Lambda's artifact registration and the commentary role's invoke attachment lie outside this order's paths"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/proof-of-spec-check.py <instance> IB95-3-AC1,IB95-3-AC2,IB95-3-AC3",
+   "result": "see final report"
+  }
+ ]
+}

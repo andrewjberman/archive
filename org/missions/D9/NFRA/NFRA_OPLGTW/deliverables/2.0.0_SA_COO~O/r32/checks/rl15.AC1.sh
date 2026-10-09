@@ -20,9 +20,10 @@ if [ -n "$L" ]; then
 fi
 entry=$(git ls-tree -r --name-only HEAD org/critical_paths/change_management/ | grep -c "_${SLUG}_deploy_completion\.md$")
 sent=no; git cat-file -e "HEAD:org/critical_paths/.open_deploys/${SLUG}.json" 2>/dev/null && sent=yes
-ndiff=$(git diff --name-only "$c" HEAD -- "$GW" | grep -v "^$GW/runbooks/SCHWAB_PILOT_RUNBOOK\.md$" | grep -c .)
+CLOUD_ONLY="runbooks/SCHWAB_PILOT_RUNBOOK.md app/admin_api.py app/admin_fabric.py app/refs/fabric_boxes.json tests/test_admin_fabric.py app/teams_route.py tests/test_teams_route.py app/server.py"   # A7 D1: MP-x-1 and CT-i-11, excluded from r29
+ndiff=$(git diff --name-only "$c" HEAD -- "$GW" | sed "s#^$GW/##" | while read -r p; do case " $CLOUD_ONLY " in *" $p "*) ;; *) echo "$p";; esac; done | grep -c .)
 echo "deployed=${c:0:10} descends from aa75078e1b=$desc; host shipped files equal the release bytes: $eq of $n"
-echo "entry files at HEAD=$entry; sentinel at HEAD=$sent; gateway files differing live..CLOUD after drain-back (CLOUD-only runbook excluded) $ndiff"
+echo "entry files at HEAD=$entry; sentinel at HEAD=$sent; gateway files differing live..CLOUD after drain-back (listed CLOUD-only paths excluded) $ndiff"
 f1=no; RL4_ENV_KEYS_BASELINE="$D/r32/ENV_KEYS_R29.txt" bash "$D/r14/checks/rl4.AC1.sh" >/dev/null 2>&1 && f1=yes
 f2=no; HT_ENV_KEYS_COUNT=52 bash "$D/hxteams/checks/ht.AC2.sh" >/dev/null 2>&1 && f2=yes
 echo "floor: rl4.AC1 $f1; ht.AC2 $f2"
