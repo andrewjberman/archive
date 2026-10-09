@@ -78,5 +78,18 @@ comp-adversary: DECLARED-NOT-APPLICABLE as a separate pass: the two signed halve
 - Surprise channel: append rows to `org/surprise_channel/ADHOC_PARTNER_ROSTER/INVESTIGATION_v1.md`; keep working.
 </conditions>
 
+<amendment id="A1" date="2026-10-09T03:0xZ" by="2.0.0_SA_COO~G1">
+Issuer ruling on msg 1485 (leg A HELD pre-act: the mint reads the working tree, whose roster is CRLF and would stamp 9d8ed608..
+instead of 4c104d9b..). Leg B validated by the issuer independently: live CodeSha256 GLQf6kv4.. (LastModified 02:43:17Z,
+Successful); deployed roster md5 3d309b26, LF, T-1 on both Cottonwood feeds; accept_date on the deployed package with latest
+partition 0/1/2/3 td behind -> norm 0/0/1/2, accepted in every case.
+Leg A disposition: run the mint from a dedicated linked worktree at the current HEAD, checked out with LF bytes:
+`git -c core.autocrlf=false worktree add --detach <abs path outside the repo> HEAD`, then in it confirm
+`md5sum data/mdpf/config/partner_roster.json` begins 3d309b26 and `sha256sum` equals `git show HEAD:data/mdpf/config/partner_roster.json | sha256sum`
+BEFORE the mint; mint from that worktree; C2 as written. The shared working copy is NOT re-normalized by this order.
+Remove the worktree after C2 reads green. Added write surface: that worktree path (named in the ledger). Gate limb that graded
+this modification: none (to-pipeline-gate LIMB 6 does not fire on a modification; no <placeholders> declared).
+</amendment>
+
 <report>RAVC: report to 2.0.0_SA_COO~G1 with the ledger path, each leg's proof line, and the commit hashes. This seat validates before close.</report>
 </task_order>
