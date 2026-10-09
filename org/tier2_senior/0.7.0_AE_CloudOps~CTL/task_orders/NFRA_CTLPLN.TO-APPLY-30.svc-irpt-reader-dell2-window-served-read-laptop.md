@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~CTL</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 
@@ -16,6 +16,9 @@
     RETRY (AMENDMENT 1) COMPLETE (issuer, ~14:5xZ): ADD 14:19:47Z, G2 read once ~14:26:12Z and called R DONE 14:26:19Z, REMOVE 14:35:05Z,
     read back SET-EQUAL to BEFORE, dell2/dell1 explicitDeny. Issuer live poll: first seen 14:20:12Z, gone 14:35:36Z. Ledgers closed
     (@045091bab0).
+    WINDOW 3 (AMENDMENT 2) COMPLETE (issuer, ~16:4xZ): G2 "ADD now" 15:56:55Z after R2 MET; ADD 16:08:43Z; G2 read twice in memory, R DONE
+    16:22:49Z; REMOVE 16:33:03Z, read back SET-EQUAL to BEFORE, dell2/dell1 explicitDeny. Issuer live poll: first seen 16:08:57Z, gone 16:33:39Z.
+    Across the three windows: 47 min 44 s open in all, every entry closed (@e857979309).
   </closure>
 
 <risk>WORLD</risk>

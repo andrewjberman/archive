@@ -1,9 +1,9 @@
-"""DB-6-AC1 -- the 1,498.38 USD flow residual on 0027265115 is named from landed responses.
+"""DB-6-AC1 -- the 1,498.38 USD flow residual on acct#89d0916a is named from landed responses.
 
 Reads the worker's record
-  org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/FLOW_RESIDUAL_0027265115_R2.json
+  org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/FLOW_RESIDUAL_acct#89d0916a_R2.json
 and grades:
-  1. account == "0027265115" and vendor_calls == 0;
+  1. account == "acct#89d0916a" and vendor_calls == 0;
   2. abs(abs(residual_usd) - 1498.38) <= 0.01;
   3. leg_named is one of the closed set below and leg_explanation is non-empty;
   4. legs is non-empty; every leg carries an s3:// key and a numeric amount_usd; the legs flagged
@@ -26,14 +26,31 @@ def fail(msg):
     sys.exit(1)
 
 
+def _REAL(token):
+    """Resolve an acct# token to the real account id at run time from the private evidence dir (outside the repo)."""
+    import json as _json
+    import os as _os
+    d = _os.environ.get("IRPT_PRIVATE_EVIDENCE_DIR")
+    if not d:
+        raise SystemExit("REFUSE: IRPT_PRIVATE_EVIDENCE_DIR is not set; this historical script needs the private account map")
+    p = _os.path.join(d, "account_map_49financial.json")
+    if not _os.path.isfile(p):
+        raise SystemExit("REFUSE: account_map_49financial.json is absent from IRPT_PRIVATE_EVIDENCE_DIR")
+    with open(p, encoding="utf-8") as fh:
+        m = _json.load(fh)
+    if token not in m:
+        raise SystemExit("REFUSE: token %s is not in the account map" % token)
+    return m[token]
+
+
 def main():
     root = Path(sys.argv[1] if len(sys.argv) > 1 else ".")
-    rec_path = root / "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/FLOW_RESIDUAL_0027265115_R2.json"
+    rec_path = root / "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/FLOW_RESIDUAL_acct#89d0916a_R2.json"
     if not rec_path.is_file():
         fail("no record at %s" % rec_path)
     rec = json.loads(rec_path.read_text(encoding="utf-8"))
-    if rec.get("account") != "0027265115":
-        fail("account %r != 0027265115" % rec.get("account"))
+    if rec.get("account") != _REAL("acct#89d0916a"):
+        fail("account %r != acct#89d0916a" % rec.get("account"))
     if rec.get("vendor_calls") != 0:
         fail("vendor_calls %r != 0" % rec.get("vendor_calls"))
     try:

@@ -220,7 +220,7 @@ def main():
             return True, "cash row not otherwise classed"
         if r["final"] == "EXTERNAL" or r["cond"]:
             return True, "securities cross the account boundary (table class %s)" % r["cls"]
-        return True, ("an in-kind position removal with no cash leg: on 0054008006 2026-10-02 the day's identity gap equals the "
+        return True, ("an in-kind position removal with no cash leg: on acct#2fcb1889 2026-10-02 the day's identity gap equals the "
                       "cost basis of the lots the adjusting entry removed (see gap_classes)")
     census = []
     grp = trn.groupby(["tran_srcde", "tr_cd", "sb_cd", "debit_credit"], sort=True)
@@ -507,8 +507,8 @@ def assemble(res):
                         "counts": counts, "cause_counts": dict(by_cause), "rows": rows,
                         "counterfactual": {"above_one_cent": len(res["cf_above"]), "above_tolerance": sum(
                             1 for v in res["cf_above"].values() if abs(v) > TOLERANCE),
-                            "note": "with the CONDITIONAL rows resolved the flow term moves 0018321241, 0046329765, 0054008006 and "
-                                    "0072959974; two close, two become other gaps (in-kind lots)"}},
+                            "note": "with the CONDITIONAL rows resolved the flow term moves acct#f0faa651, acct#9a0972ea, acct#2fcb1889 and "
+                                    "acct#2ef9eee4; two close, two become other gaps (in-kind lots)"}},
     }
 
 

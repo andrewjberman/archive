@@ -4,9 +4,9 @@ viewer's scope covers, and refuses one it does not, invoked locally against the 
 Usage: python p1_4_ac1_read_route_local.py <worktree root>
 Imports <root>/infra/aws/lambda/investor-reporting/reporting/entry.py (the worker's module) and calls its documented local entry
 `serve_series(account_id, scope_accounts, which)` where `which` is "series" or "manifest":
-  - ("0027265115", {"0027265115"}, "series")   -> bytes equal to the S3 object at the builder's address (gzip, byte-for-byte);
-  - ("0027265115", {"0027265115"}, "manifest") -> bytes equal to the manifest object;
-  - ("0027265115", {"0000000000"}, "series")   -> raises entry.AccountNotCovered (the refusal branch; no S3 read is made).
+  - ("acct#89d0916a", {"acct#89d0916a"}, "series")   -> bytes equal to the S3 object at the builder's address (gzip, byte-for-byte);
+  - ("acct#89d0916a", {"acct#89d0916a"}, "manifest") -> bytes equal to the manifest object;
+  - ("acct#89d0916a", {"acct#c47e05ed"}, "series")   -> raises entry.AccountNotCovered (the refusal branch; no S3 read is made).
 The module must expose ROUTES with exactly one route key and register function name irpt-49f-reporting-read-lambda.
 Also reads the worker's saved plan org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/reporting-read.plan.txt:
 "0 to destroy" and an aws_lambda_function creation named irpt-49f-reporting-read-lambda.
@@ -21,6 +21,23 @@ root = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 sys.path.insert(0, str(root))
 
 
+def _REAL(token):
+    """Resolve an acct# token to the real account id at run time from the private evidence dir (outside the repo)."""
+    import json as _json
+    import os as _os
+    d = _os.environ.get("IRPT_PRIVATE_EVIDENCE_DIR")
+    if not d:
+        raise SystemExit("REFUSE: IRPT_PRIVATE_EVIDENCE_DIR is not set; this historical script needs the private account map")
+    p = _os.path.join(d, "account_map_49financial.json")
+    if not _os.path.isfile(p):
+        raise SystemExit("REFUSE: account_map_49financial.json is absent from IRPT_PRIVATE_EVIDENCE_DIR")
+    with open(p, encoding="utf-8") as fh:
+        m = _json.load(fh)
+    if token not in m:
+        raise SystemExit("REFUSE: token %s is not in the account map" % token)
+    return m[token]
+
+
 def _thread_account(root):
     """The thread account: the seat's record deliverables/0.4.0_DS_ClientPlatform~S/THREAD_ACCOUNT.json ({"thread_account": "..."}),
     chosen by census in DB-b-1 (issuer amendment 1, 2026-09-30 17:1xZ); the roster's first account is the fallback."""
@@ -29,7 +46,7 @@ def _thread_account(root):
     try:
         return str(_json.loads(p.read_text(encoding="utf-8"))["thread_account"])
     except Exception:  # noqa: BLE001
-        return "0027265115"
+        return _REAL("acct#89d0916a")
 THREAD = _thread_account(root)
 SRC = root / "infra/aws/lambda/investor-reporting/reporting/entry.py"
 PLAN = root / "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/reporting-read.plan.txt"
@@ -75,7 +92,7 @@ got_m = mod.serve_series(THREAD, {THREAD}, "manifest")
 if got_m != want_manifest:
     fail("manifest bytes differ from the S3 object")
 try:
-    mod.serve_series(THREAD, {"0000000000"}, "series")
+    mod.serve_series(THREAD, {_REAL("acct#c47e05ed")}, "series")
     fail("an uncovered account was SERVED (no AccountNotCovered)")
 except mod.AccountNotCovered:
     pass

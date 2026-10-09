@@ -8,12 +8,14 @@ issuer from S3 on 2026-10-09: the 24 names the round-40 census flagged CUT or PR
 aq1  -> `aq1 build <b>/1 control <c>/1`
      build    over every affected name and text field, the re-composed value either ends at a sentence end (one of . ! ? ; : ) ]
               " ' and their curly forms) or ends with an explicit ellipsis ("..." or the single ellipsis character): CUT 0.
-     control  every value that ALREADY ended at a sentence end in the base re-compose (frozen beside the picks) is unchanged,
-              character for character -- the repair touches only cut values.
+     control  every value that ALREADY ended at a sentence end in the base re-compose (frozen beside the picks) keeps its
+              ENDING, character for character (its last 60 characters) -- the repair touches only cut values. AMENDMENT 1
+              (row AMGT_CORPUS-D1-W1-S1): the control grades the arm's own edge, so aq-2's opening repair does not move it.
 aq2  -> `aq2 build <b>/1 control <c>/1`
      build    no re-composed value opens with a scorecard label and score ("<Label> <1-3 digits> <Capital>", e.g.
               "Management/Board 80 Eddie Wu ..."): PREFIX 0 (BABA US and ST SP management at the base).
-     control  every management value with no such prefix at the base is unchanged, character for character.
+     control  every management value with no such prefix at the base keeps its OPENING, character for character (its first
+              60 characters). AMENDMENT 1 (row D1-W1-S1): the arm's own edge, so aq-1's ending repair does not move it.
 Each arm also prints its counts and the offending (name, field, edge) so a failure names what to look at.
 """
 import json
@@ -35,6 +37,7 @@ TEXT_FIELDS = [
 ]
 ENDS = tuple(".!?;:)]\"'”’")
 ELLIPSIS = ("...", "…")
+EDGE = 60  # AMENDMENT 1: the control compares the arm's own edge
 RE_PREFIX = re.compile(r"^[A-Z][A-Za-z/&\- ]{2,40} \d{1,3} (?=[A-Z])")
 
 
@@ -61,7 +64,7 @@ def aq1(fx, now, base):
     for k, edge in cut:
         print("CUT %s ...%r" % (k, edge))
     ended = {k: v for k, v in base.items() if v.endswith(ENDS)}
-    moved = [k for k, v in ended.items() if now.get(k) != v]
+    moved = [k for k, v in ended.items() if not (now.get(k) or "").endswith(v[-EDGE:])]
     for k in moved:
         print("CONTROL-MOVED %s" % k)
     print("aq1 counts cut %d of %d values; control %d values ended at a sentence end at the base, %d moved"
@@ -75,7 +78,7 @@ def aq2(fx, now, base):
     for k, edge in pref:
         print("PREFIX %s %r..." % (k, edge))
     plain = {k: v for k, v in base.items() if k.endswith("|management") and not RE_PREFIX.match(v)}
-    moved = [k for k, v in plain.items() if now.get(k) != v]
+    moved = [k for k, v in plain.items() if not (now.get(k) or "").startswith(v[:EDGE])]
     for k in moved:
         print("CONTROL-MOVED %s" % k)
     print("aq2 counts prefix %d; control %d management values without a prefix at the base, %d moved"

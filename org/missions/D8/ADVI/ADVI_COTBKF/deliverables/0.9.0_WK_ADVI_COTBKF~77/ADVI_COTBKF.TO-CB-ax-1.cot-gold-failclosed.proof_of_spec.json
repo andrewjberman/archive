@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ax-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ax-1.cot-gold-failclosed.md",
+    "group": "OTHER",
+    "vintage_commit": "f616e46440"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~77",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round50.md",
+    "vintage_commit": "f616e46440",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ax-1.cot-gold-failclosed.md"
+  },
+  "acceptance": [
+    {
+      "criterion_id": "CB50ax1-AC1",
+      "criterion_verbatim": "python -m pytest data/cot/scripts/gold/tests/test_cot_gold_failclosed.py -q expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest data/cot/scripts/gold/tests/test_cot_gold_failclosed.py -q",
+      "expect": "passed",
+      "output_evidence": "rc 0; 6 passed in 11.29s on HEAD 19b3550e8a (timeout 120). a-d as before (overrides=757 corrections=104); e: legacy_addresses.json absent -> writer STOP, 0 writes; f: keys read/written = silver/transactions/ (prefix, part-0 listed), silver/historical_prices.parquet, config/ticker_lookup.json, code/gold/, written silver/prices/canonical_prices.parquet -- equal to the pre-change set.",
+      "status": "PASS",
+      "denominator": "6 of 6 tests green"
+    },
+    {
+      "criterion_id": "CB50ax1-AC2",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9: no run-time opal_naming in either script; every key a plain legacy constant with no split; fail-closed on both files; no change beyond these.",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read build_canonical_prices_v2.py and B_00.canonical_holdings.py; git diff 7b85e1a074^ 7b85e1a074 for B_00; .scratch/writer_failclosed_plain_keys.patch for the writer",
+      "output_evidence": "PENDING-ADJUDICATION. B_00 (7b85e1a074) and writer (19b3550e8a) both without opal_naming; writer reads own firm from scopes.json and key values from the legacy_addresses.json rows beside it, fail-closed, ticker_overrides fail-closed. Keys before and after equal (test f). Suites: gold tests 50 passed; silver tests 754 passed, 11 skipped; test_cotbkf_no_split_key_literals 1 passed.",
+      "denominator": "2 of 2 scripts read; 2 of 2 committed",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: 3.0.0_SA_CVO at L9 is the oracle; PENDING-ADJUDICATION"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W77-S1",
+    "ADVI_COTBKF-D2-W77-S2",
+    "ADVI_COTBKF-D2-W77-S3"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ax-1.cot-gold-failclosed.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/cot/scripts/gold/tests/test_cot_gold_failclosed.py",
+      "kind": "test",
+      "commit_or_etag": "2b4531d4a8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test file",
+      "artifact_covered_by": [
+        "CB50ax1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/cot/scripts/gold/B_00.canonical_holdings.py",
+      "kind": "script",
+      "commit_or_etag": "7b85e1a074",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "no deploy; redeploy is CB-ax-2",
+      "artifact_covered_by": [
+        "CB50ax1-AC1",
+        "CB50ax1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/cot/scripts/gold/build_canonical_prices_v2.py",
+      "kind": "script",
+      "commit_or_etag": "19b3550e8a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "no deploy; redeploy is CB-ax-2 (ships scopes.json, ticker_overrides.py, legacy_addresses.json beside the scripts)",
+      "artifact_covered_by": [
+        "CB50ax1-AC1",
+        "CB50ax1-AC2"
+      ]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "data/cot/scripts/gold/tests",
+      "result": "data/cot/scripts/gold/tests: 50 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "data/assets/scripts/silver/tests",
+      "result": "754 passed, 11 skipped (includes test_cotbkf_no_split_key_literals)"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "safe-commit on both py files",
+      "result": "clean; the naming limb REFUSED the writer's keys"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The test alone at the base commit: the unchanged scripts under a hard opal_naming import blocker",
+      "expected": "4 of 4 FAIL on the blocked ImportError",
+      "observed": "4 failed at base",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "new test run three times",
+      "observed": "4 passed with both halves; 4 failed on HEAD, each time",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any S3 write or deploy",
+      "reason": "order grants none; S3 faked"
+    }
+  ]
+}

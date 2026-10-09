@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-aq-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-aq-4.census-learns-three-origins.md",
+    "group": "OTHER",
+    "vintage_commit": "fc43bc18a0821e56b35a8e50af914ba312f323fd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "fc43bc18a0821e56b35a8e50af914ba312f323fd",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-aq-4.census-learns-three-origins.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/readonly_proof.py",
+      "kind": "script",
+      "commit_or_etag": "fc43bc18a0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NAMED_CLEAR_SITES: file basename -> exact write-target expressions (parent/write_path; os.path.dirname(path)/path; old.parent/old) mapped from UNKNOWN to named-clear. No AWS, S3 or Bloomberg call.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "bound test passes -- expect (?m)^1 passed in [\\d.]+s$",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest -q -p no:cacheprovider \"lib/research/corpus/tests/test_readonly_proof_bound.py::test_code_census_arm_leaves_no_amgt_corpus_entry\" 2>&1 | tail -1 | sed 's/\\x1b\\[[0-9;]*m//g'",
+      "output_evidence": "1 passed in 2.53s",
+      "denominator": "1 of 1 passed",
+      "expect": "(?m)^1 passed in [\\d.]+s$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "census reads library 0 unresolved 0, both positive controls flagged",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.readonly_proof --code-census 2>&1",
+      "output_evidence": "positive_control flagged 1\npositive_control_test_file flagged 1\ntristate library 0 unresolved 0 clear 86 write_like_calls 86",
+      "denominator": "86 write-like calls: 0 library, 0 unresolved, 86 clear; controls 2 of 2 flagged",
+      "expect": "(?sm)(?=.*^tristate library 0 unresolved 0 )(?=.*^positive_control flagged 1$)(?=.*^positive_control_test_file flagged 1$)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In-process mutant (.scratch/mutant.py, uncommitted): NAMED_CLEAR_SITES cleared, census run.",
+      "expected": "tristate unresolved 6 (the pre-fix reading), rc 1",
+      "observed": "tristate library 0 unresolved 6 clear 80 write_like_calls 86; rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Census run twice (once printing both arms), plus the bound test file (4 passed).",
+      "observed": "unresolved 0 each time; positive controls flagged 1 and 1 each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "No S3, AWS, Bloomberg or vendor call", "reason": "Order bounds item 1; a static scan of repository source."}
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "lib.research.corpus.readonly_proof --code-census (AC2)",
+      "invocation": "see AC2",
+      "result": "rc 0; tristate library 0 unresolved 0 clear 86"
+    }
+  ]
+}
