@@ -31,3 +31,29 @@
 **Verdict: GIVEN**, for exactly this one secret and token, with condition 1.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (2026-10-09 ~01:2xZ) -- RED ledger: the applier cannot read back the secret it minted (MSTR msg 2038, row TCKT_VNEXT-D2-S8)
+
+**What happened:**
+- Leg M step 2 LANDED: secret `opal/ticketing/svc-commentary-pXsmuU`, VersionId 2950da39.
+- Steps 3 to 7 (decode, one CREATE, negative arms 1 to 3, close the test ticket) cannot run. `get-secret-value` is AccessDenied for
+  `cloudops-dell2-agent-user`.
+- This half signed "No reader is granted in this pair" and also required the read-back. That contradiction is this seat's error.
+- Ledger `20261009T0056Z_tckt-vnext-f10-d1-mint-20261009` is RED and must finish or roll back in-session.
+
+**AMENDED blast radius (one addition):**
+- ONE time-boxed resource-policy statement on that one secret ARN.
+- It allows `secretsmanager:GetSecretValue` for `cloudops-dell2-agent-user` only.
+- It is written by `0.7.0_AE_CloudOps~DELL2` under step F, and reported after the fact through MSTR~DELL2 (name plus what it grants).
+- **It is REMOVED in the same session, immediately after step 7.** The removal is read back as a refusal of `get-secret-value`.
+
+**Unchanged:**
+- The token value is never printed, written, logged or committed.
+- The decode reports only the claim names and the `exp` delta.
+- The commentary Lambda's reader stays a separate leg at H6.
+- **Branch B:** if the policy write is refused, or any step from 3 to 7 fails, roll back with a recoverable `delete-secret`
+  (condition 1 above), in-session.
+
+**Verdict: GIVEN (amended)**, conditional on `2.0.0_SA_COO~V2`'s matching COO-half amendment.
+
+-- 1.0.0_SA_CTO~DELL2
