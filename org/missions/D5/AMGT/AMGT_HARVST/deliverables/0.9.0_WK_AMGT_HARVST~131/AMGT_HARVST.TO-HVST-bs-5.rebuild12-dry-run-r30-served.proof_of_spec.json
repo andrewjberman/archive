@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "to_id": "AMGT_HARVST.TO-HVST-bs-5.rebuild12-dry-run-r30-served",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bs-5.rebuild12-dry-run-r30-served.md",
+    "group": "OTHER",
+    "vintage_commit": "e989f98d03"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "e989f98d03",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bs-5.rebuild12-dry-run-r30-served.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~131",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~131, branch wk-AMGT_HARVST-131-r75, TREE-OK. Wrote the rebuild #12 rule (self-test OK: positive control an R30-class pair gone holds; negative controls a non-class pair gone, a moved list entry, an own-field change on a kept pair all break) and the signing dry run; the R30 class is br-1's own classifier (br1_census.mentions imported by path). Ran it through the capturing client and a read-only guard against rebuild #11's parts (045809Z / 061012Z): 285 R30 removals, ALL in br-1's class, 0 gone outside it; 113 KEPT pairs changed outside the removal class (mention_count reduced by R30 but above 0, br-1 classifier before > after > 0), so the rule BREAKS; PUTS SENT 0. The result is reported, not repaired. A first run was lost (no output past the baseline lines); the second run (about 70 minutes build, plus classifier) is the recorded one. After the run an unused import (collections) was removed from gold_rebuild12.signing.py and an unused assignment from gold_rebuild12_rule.py to pass ruff; the rule self-test was re-run OK, the signing output was not re-generated. No surprise row filed. Order file not edited.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~131/gold_rebuild12.signing.py",
+      "kind": "script",
+      "commit_or_etag": "a7a06fbc3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only S3 GETs through the builders' readers, capturing client plus write-refusing guard, PUTS SENT 0",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~131/gold_rebuild12_rule.py",
+      "kind": "script",
+      "commit_or_etag": "a7a06fbc3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "python gold_rebuild12_rule.py prints SELFTEST OK",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~131/gold_rebuild12.signing.out",
+      "kind": "script",
+      "commit_or_etag": "a7a06fbc3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "R30 REMOVALS: 285; OUTSIDE R30 CLASS: 113; RULE (rebuild #12): BREAKS; PUTS SENT 0",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~131/gold_rebuild12.signing.json",
+      "kind": "script",
+      "commit_or_etag": "a7a06fbc3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "machine form of the dry run",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~131/REBUILD12_REMOVED_SAMPLE.md",
+      "kind": "script",
+      "commit_or_etag": "a7a06fbc3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "30 of 285 removed pairs, every 9th by (security, article key); no verdict",
+      "artifact_covered_by": ["AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~131/gold_rebuild12.signing.out expects PUTS SENT 0",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~131/gold_rebuild12.signing.out",
+      "expect": "PUTS SENT 0",
+      "output_evidence": "rc 0. last line: PUTS SENT 0",
+      "denominator": "1 of 1 dry run; puts captured 2 (mention, daily), sent 0, write calls refused by the guard 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "same file expects regex OUTSIDE R30 CLASS: 0\\b",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~131/gold_rebuild12.signing.out",
+      "expect": "OUTSIDE R30 CLASS: 0\\b",
+      "output_evidence": "rc 0. the file says OUTSIDE R30 CLASS: 113 -- all 113 are KEPT pairs whose mention_count R30 lowered but not to 0 (R30 partial); 0 served pairs gone outside the class (R30 REMOVALS: 285 = every gone pair)",
+      "denominator": "113 of 52709 served mention pairs changed outside the removal class; 285 of 285 gone pairs in the class",
+      "status": "FAIL",
+      "status_reason": "the measured result: 113 kept pairs changed by R30 outside br-1's removal class (count lowered, pair kept); reported, not repaired"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "same file expects regex RULE \\(rebuild #12\\): HOLDS",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~131/gold_rebuild12.signing.out",
+      "expect": "RULE \\(rebuild #12\\): HOLDS",
+      "output_evidence": "rc 0. the file says RULE (rebuild #12): BREAKS: 113 changed mention row(s) UNEXPLAINED (113 of them R30-partial kept pairs)",
+      "denominator": "mention 52709 served pairs, daily 68002 served rows; daily gone 0, OTHER 0; mention lost 0",
+      "status": "FAIL",
+      "status_reason": "the measured result: 113 kept pairs changed by R30 outside br-1's removal class (count lowered, pair kept); reported, not repaired"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "judgment criterion (no invocation)",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~131/REBUILD12_REMOVED_SAMPLE.md",
+      "output_evidence": "REBUILD12_REMOVED_SAMPLE.md lists 30 removed pairs (every 9th of 285 by security then article key) with article key, date, publisher, title and match_forms; no verdict by worker",
+      "denominator": "30 of 285 removed pairs",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the CVO at L9 is the oracle"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any put, delete, served build, collector, backfill_driver or runner, vendor or publisher host, config.json change, .runtime read, or product file change",
+      "reason": "Order: read-only dry run, PUTS SENT 0."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "committed a7a06fbc3c"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "single run",
+      "observed": "not re-run (build about 55 minutes)",
+      "status": "N/A-WITH-REASON",
+      "reason": "dry run over a write-once served snapshot and live silver; the order asks for one run"
+    },
+    "mutant": {
+      "description": "Negative controls in the rule self-test: a non-class pair gone breaks the rule; a moved list entry breaks it; an own-field change on a kept pair breaks it. Positive control: an R30-class pair gone holds.",
+      "expected": "rule does not hold on the negatives, holds on the positive",
+      "observed": "gold_rebuild12_rule.py prints SELFTEST OK with all four asserted",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  }
+}
