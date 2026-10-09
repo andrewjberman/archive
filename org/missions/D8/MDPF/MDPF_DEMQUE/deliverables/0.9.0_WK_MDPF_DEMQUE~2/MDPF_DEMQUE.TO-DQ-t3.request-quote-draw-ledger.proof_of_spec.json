@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t3",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t3.request-quote-draw-ledger.md",
+    "group": "OTHER",
+    "vintage_commit": "6dc65d8cba"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~2",
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "6dc65d8cba",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t3.request-quote-draw-ledger.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/demand_queue.py",
+      "kind": "script",
+      "commit_or_etag": "530ef17ff8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "WORLD-floored order (registry path) but no AWS call, vendor call or deploy in scope (order BOUNDS); local files only",
+      "artifact_covered_by": [
+        "DQ1-t3-AC1",
+        "DQ1-t3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_queue.py",
+      "kind": "test",
+      "commit_or_etag": "530ef17ff8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "WORLD-floored order (registry path) but no AWS call, vendor call or deploy in scope (order BOUNDS); local files only",
+      "artifact_covered_by": [
+        "DQ1-t3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/logic/registry/systems.json",
+      "kind": "config_data",
+      "commit_or_etag": "530ef17ff8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "WORLD-floored order (registry path) but no AWS call, vendor call or deploy in scope (order BOUNDS); local files only",
+      "artifact_covered_by": [
+        "DQ1-t3-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ1-t3-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t3_tests.py expect: QUEUE-OK",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t3_tests.py",
+      "output_evidence": "Run as `timeout 120 python ...dq_t3_tests.py` from the worktree root (rc 0): collected 5 items; test_quote_counts_cells_as_rows_times_fields PASSED, test_quote_finish_date_from_daily_cap_and_queue_ahead PASSED, test_draw_takes_lower_tier_number_first PASSED, test_draw_writes_one_ledger_row_per_request_with_quote_beside_actual PASSED, test_failure_is_a_ledger_row_with_zero_cells PASSED; 5 passed; final line QUEUE-OK.",
+      "denominator": "5 of 5 named tests PASSED",
+      "status": "PASS",
+      "expect": "QUEUE-OK"
+    },
+    {
+      "criterion_id": "DQ1-t3-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t3_home.py expect: HOME-OK",
+      "method": "live_read",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t3_home.py",
+      "output_evidence": "Run as `timeout 120 python ...dq_t3_home.py` from the worktree root (rc 0): HOME-OK s3://opal-data-assets/yahoo/global/bronze/demand_ledger/dt=2026-10-09 (control s3://opal-data-assets/bloomberg/global/bronze/demand_ledger/dt=2026-10-09).",
+      "denominator": "2 of 2 address() calls resolved (yahoo, and the bloomberg control arm)",
+      "status": "PASS",
+      "expect": "HOME-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "copy of demand_queue.py in .scratch/mut with the tier sort removed (draw in file order), run against the same test file",
+      "expected": "test_draw_takes_lower_tier_number_first fails",
+      "observed": "1 failed, 4 passed: test_draw_takes_lower_tier_number_first - assert ['T3', 'T1B', 'T1C', 'T5'] == ['T1B', 'T1C', 'T3', 'T5']",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: AC1 is stubbed fixed-input; AC2 is a pure registry lookup",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "S3 upload of the ledger",
+      "reason": "order: local ledger this round, upload is a later round"
+    },
+    {
+      "item": "__init__.py in data/mdpf/scripts/demque/",
+      "reason": "issuer adds it"
+    },
+    {
+      "item": "any deploy, AWS call, vendor call, timer or background task",
+      "reason": "order BOUNDS"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~2/MDPF_DEMQUE.TO-DQ-t3.request-quote-draw-ledger.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate (py_compile + ds-precommit + ruff)",
+      "invocation": "bash .tools/safe-commit.sh ... -- demand_queue.py test_demque_queue.py systems.json",
+      "result": "committed 530ef17ff8"
+    }
+  ]
+}
