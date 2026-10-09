@@ -23,8 +23,9 @@ def show(path):
     return r.stdout if r.returncode == 0 else None
 
 
-full = show(BASE + f"VEHICLE_LOG_{DAY}_1100Z.full.log")
-summ = show(BASE + f"VEHICLE_LOG_{DAY}_1100Z.txt")
+ALT = "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.7.0_AE_CloudOps~ZV/"   # relay order AMENDMENT 5: the lane's own folder
+full = show(BASE + f"VEHICLE_LOG_{DAY}_1100Z.full.log") or show(ALT + f"VEHICLE_LOG_{DAY}_1100Z.full.log")
+summ = show(BASE + f"VEHICLE_LOG_{DAY}_1100Z.txt") or show(ALT + f"VEHICLE_LOG_{DAY}_1100Z.txt")
 text = full if full is not None else summ
 if text is None:
     print(f"J1-READ: NO-FILE (neither transcription is at {REF}; control: git show {REF}:{BASE} lists the folder)")
@@ -32,7 +33,7 @@ if text is None:
 lines = text.splitlines()
 step = [ln for ln in lines if "RIVALFUNDS ENRICHMENT STEP" in ln]
 exits = [ln for ln in lines if "RIVALFUNDS ENRICHMENT EXIT CODE" in ln]
-fails = [ln for ln in lines if FAIL_RE.search(ln)]
+fails = [ln for ln in lines if FAIL_RE.search(ln) and (full is not None or re.match(r"^\s*\d+:", ln))]  # same rule as owed: the header quotes the selector itself
 owed = [ln for ln in lines if "HISTORY OWED" in ln and (full is not None or re.match(r"^\s*\d+:", ln))]  # the transcription's own header names HISTORY OWED; only copied log lines (<n>: ...) count
 code = None
 if exits:

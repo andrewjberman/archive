@@ -7,7 +7,9 @@
  * Why (ledger/ROUND_ANALYSIS.round62.md @4b7ce964a2 section 2 item 5; round-62 walk shot 032, NVDA): components/TimelinePanel.tsx
  * makeMarkerShape draws each event marker's title in a fixed-width box (EVENT_LABEL_W) on one of two rows chosen by markerIndex % 2,
  * so markers close together draw their titles over each other; the titles are also 10px, under the 11px floor.
- * Arms (exit 0 only on all four):
+ * AMENDED at the round-63 close walk (tmp/ui-walk/20261009T111310Z shot 032): the rows were assigned but each label was still drawn at
+ * y = cy - 22 - row * 14, so a label's height followed its own marker's bar and labels on different rows met. Arm 4 added.
+ * Arms (exit 0 only on all five):
  *   1 NO COLLISION: components/timelineLabels.ts (pure, no page imports) exports layoutEventLabels(items, labelWidth, rows). items are
  *     { x, alignEnd } in pixels, in day order. A label spans [x - 6, x - 6 + labelWidth], or [x + 6 - labelWidth, x + 6] when alignEnd.
  *     It returns one entry per item: a row in [0, rows) such that no two labels on one row overlap, or null when no row is free (that
@@ -15,7 +17,9 @@
  *     the real module).
  *   2 USED: TimelinePanel.tsx lays the labels out with layoutEventLabels (no `% 2` row choice), and draws no label whose row is null.
  *   3 READABLE: the event label text is at least 11px (no text-[10px] on data-timeline-event-label).
- *   4 PLANTED.
+ *   4 ONE BAND: the event label's y comes from its row in one band, not from the marker's own position: no label y expression reads
+ *     cy (the <foreignObject> that holds data-timeline-event-label).
+ *   5 PLANTED.
  * Source read only; no network; writes nothing.
  */
 'use strict';
@@ -68,6 +72,14 @@ const G = {
     if (!m) return ['no data-timeline-event-label element'];
     return /text-\[(?:[0-9]|10)(?:\.\d+)?px\]/.test(m[0]) ? ['the event label text is under 11px'] : [];
   },
+  band: (t) => {
+    if (t === null) return ['TimelinePanel.tsx missing'];
+    const m = /<foreignObject\b[^>]*>(?=[\s\S]{0,400}?data-timeline-event-label)/.exec(t);
+    if (!m) return ['no <foreignObject> holding data-timeline-event-label'];
+    const y = /\by=\{([^}]*)\}/.exec(m[0]);
+    if (!y) return ['the label <foreignObject> carries no y={...}'];
+    return /\bcy\b/.test(y[1]) ? [`the label y (${y[1].trim()}) still follows the marker's own cy`] : [];
+  },
 };
 
 const t = read('components/TimelinePanel.tsx');
@@ -83,6 +95,7 @@ const push = (name, f) => arms.push([name, f.length === 0, f.length ? f.join(' |
 }
 push('USED', G.used(t));
 push('READABLE', G.readable(t));
+push('ONE BAND', G.band(t));
 {
   const p = [];
   const greedy = (items, w, rows) => {
@@ -96,6 +109,10 @@ push('READABLE', G.readable(t));
   if (!G.used(r62).length || !G.readable(r62).length) p.push('the round-62 form admitted');
   const clean = "const rows = layoutEventLabels(items, EVENT_LABEL_W, 3)\n<div data-timeline-event-label={marker.words} className=\"truncate text-[11px] leading-[14px]\">";
   if (G.used(clean).length || G.readable(clean).length) p.push('the clean form refused');
+  const fo = (y) => `<foreignObject x={cx - 6} y={${y}} width={EVENT_LABEL_W} height={14}>
+<div data-timeline-event-label={marker.words} className="truncate text-[11px]">`;
+  if (!G.band(fo('cy - 22 - level * 14')).length) p.push('the cy-relative label admitted');
+  if (G.band(fo('LABEL_BAND_TOP + level * 14')).length) p.push('the one-band label refused');
   push('PLANTED', p);
 }
 let pass = 0;
