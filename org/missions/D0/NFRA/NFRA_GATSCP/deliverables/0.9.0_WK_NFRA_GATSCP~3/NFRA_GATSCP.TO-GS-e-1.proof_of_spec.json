@@ -1,0 +1,80 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_GATSCP.TO-GS-e-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/prd/NFRA_GATSCP_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "ec1becf2a1"
+ },
+ "assignee": "0.9.0_WK_NFRA_GATSCP~3",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/decompositions/NFRA_GATSCP_DECOMP.round2.md",
+  "vintage_commit": "ec1becf2a1",
+  "to_ref": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-e-1.sync-shows-standing.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/box-sync.sh",
+   "kind": "script",
+   "commit_or_etag": "ec1becf2a1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-3, not pushed; grade_merge prints STANDING lines and 'box-sync: N standing' in both branches.",
+   "artifact_covered_by": [
+    "GE1-AC1",
+    "GE1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "GE1-AC1",
+   "criterion_verbatim": "an empty-set sync over a base carrying LGIC_BLANKFIX's drift and channel failure prints both as STANDING and a count two above the clean sync's count; a sync where both sides changed the bystander's row still refuses.",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round2_prep/checks/r2_sync_standing.py\"",
+   "output_evidence": "rc=0\nPASS clean-sync-says-count: count=0\nPASS sync-shows-standing: rc=0 count=2 expected=2 standing_LGIC_BLANKFIX=True\nPASS own-defect-refused: rc=1\nGS-E1-SYNC ok=True arms=3 failed=0",
+   "denominator": "3 of 3 arms PASS",
+   "status": "PASS",
+   "expect": "GS\\-E1\\-SYNC\\ ok=True"
+  },
+  {
+   "criterion_id": "GE1-AC2",
+   "criterion_verbatim": "round 1's grade check still passes (no regression in the non-empty branch).",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round1_prep/checks/r1_boxsync_grade.py\"",
+   "output_evidence": "rc=0\nPASS bystander-lands (box-sync: 1 standing)\nPASS own-refused rc=1\nGS-T3-BOXSYNC ok=True arms=2 failed=0",
+   "denominator": "2 of 2 arms PASS",
+   "status": "PASS",
+   "expect": "GS\\-T3\\-BOXSYNC\\ ok=True"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC1 arm 3 is the difference control: both sides changed the bystander row.",
+   "expected": "arm 3 rc 1; arms 1-2 rc 0 with counts n0 and n0+2",
+   "observed": "arm 3 rc 1; counts 0 and 2",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2 each run once at ec1becf2a1 (AC1 failed at base per order)",
+   "observed": "both ok=True",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "box-sync.sh box / integrate modes",
+   "reason": "Order bounds: only grade is exercised."
+  }
+ ],
+ "surprises": [],
+ "session_log": "2026-10-09 slot ~3. Read check and grade_merge; restructured grade_merge with _standing_priv/_standing_run/_standing_cleanup helpers; both checks PASS; no surprises.",
+ "compiler_tools": [
+  {
+   "tool": "box-sync.sh grade",
+   "invocation": "bash .tools/box-sync.sh grade <P1> <P2>",
+   "result": "empty set with drift: rc 0, 2 STANDING lines, 'box-sync: 2 standing'"
+  }
+ ]
+}

@@ -1,0 +1,89 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_GATSCP.TO-GS-e-6",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/prd/NFRA_GATSCP_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7cb6183997"
+ },
+ "assignee": "0.9.0_WK_NFRA_GATSCP~7",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/decompositions/NFRA_GATSCP_DECOMP.round2.md",
+  "vintage_commit": "06887a5857",
+  "to_ref": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-e-6.close-gate-reads-staged.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/round-close-check.py",
+   "kind": "script",
+   "commit_or_etag": "5fa9bd13281f540f6d4027908d189f94602f294c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-7, not pushed; no deploy plane. --staged: WorkTree/Staged source pair, git ls-files -s -z + git cat-file --batch; selftest 17 -> 20 cases.",
+   "artifact_covered_by": [
+    "GE6-AC1"
+   ]
+  },
+  {
+   "path_or_key": ".tools/git-hooks/missions-tree-check.sh",
+   "kind": "script",
+   "commit_or_etag": "5fa9bd13281f540f6d4027908d189f94602f294c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-7, not pushed; no deploy plane. close_gate() passes --staged and the working-tree dep_stage fallback is replaced by a WARN + continue.",
+   "artifact_covered_by": [
+    "GE6-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "GE6-AC1",
+   "criterion_verbatim": "--staged over a private index that lacks one of round 1's proof instances reads fewer than 3 proofs ok, while the same plant read from the working tree (no --staged) still reads 3 (the difference control).",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round2_prep/checks/r2_close_staged.py\"",
+   "output_evidence": "rc=0\n  PASS staged-clean-3-ok: rc=0 proof_ok=3\n  PASS staged-plant-graded: rm_rc=0 rc=0 proof_ok=2\n  PASS worktree-read-differs: rc=0 proof_ok=3 (worktree read, the control)\nGS-E6-CLOSE ok=True arms=3 failed=0",
+   "denominator": "3 of 3 arms (staged-clean-3-ok, staged-plant-graded, worktree-read-differs)",
+   "status": "PASS",
+   "expect": "GS\\-E6\\-CLOSE\\ ok=True"
+  },
+  {
+   "criterion_id": "GE6-AC2",
+   "criterion_verbatim": "the close gate passes --staged and has no working-tree fallback (structural)",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round2_prep/checks/r2_closegate_staged.py\"",
+   "output_evidence": "rc=0\n  PASS close-gate-passes-staged: function_found=True staged=True\n  PASS no-worktree-fallback: worktree_fallback_present=False\nGS-E6-HOOK ok=True arms=2 failed=0",
+   "denominator": "2 of 2 arms (close-gate-passes-staged, no-worktree-fallback)",
+   "status": "PASS",
+   "expect": "GS\\-E6\\-HOOK\\ ok=True"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC1 plants a missing proof instance in a PRIVATE index (working-tree file stays) and runs the same tool with and without --staged (the difference control).",
+   "expected": "--staged reads 2 ok; no flag reads 3",
+   "observed": "staged clean proof_ok=3; staged plant proof_ok=2 verdict=REFUSED; worktree plant proof_ok=3. Selftest arm: index lacks a proof -> REFUSED, same tree without --staged -> MAY-CLOSE.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "each acceptance check and the selftest run twice at HEAD 5fa9bd1328",
+   "observed": "GS-E6-CLOSE ok=True arms=3 failed=0 (x2); GS-E6-HOOK ok=True arms=2 failed=0 (x2); ROUND-CLOSE-SELFTEST cases=20/20 ok=True (x2)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Exercising the real close gate on a ROUND_CLOSE commit",
+   "reason": "The order states the issuer's real ROUND_CLOSE commit of the round exercises the hook; GE6-AC2 is structural."
+  }
+ ],
+ "surprises": [],
+ "session_log": "2026-10-09 GROUNDING: worktree wk-NFRA_GATSCP-7 TREE-OK at 06887a5857. Read both checks and the tool and hook whole. BUILD: Staged source (git ls-files -s -z, one git cat-file --batch) beside WorkTree; check() split into a wrapper and _check(src,...); --deep under --staged copies the staged instance under .scratch/ because proof-of-spec-check refuses an instance outside its tree (first cut used the system temp dir: proof_bad=3, fixed, proof_ok=3 deep). Hook: --staged and WARN+continue in place of the fallback. Nothing outside the grant edited; no surprise row needed.",
+ "compiler_tools": [
+  {
+   "tool": "round-close-check.py --selftest",
+   "invocation": "python .tools/round-close-check.py --selftest",
+   "result": "ROUND-CLOSE-SELFTEST cases=20/20 ok=True"
+  }
+ ]
+}
