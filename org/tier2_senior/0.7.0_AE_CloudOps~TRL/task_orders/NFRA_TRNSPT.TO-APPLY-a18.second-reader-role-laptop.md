@@ -61,8 +61,8 @@
   </bounds>
 
   <paths>
-    org/tier2_senior/0.7.0_AE_CloudOps/deliverables/
-    org/tier2_senior/0.7.0_AE_CloudOps/logs/
+    org/tier2_senior/0.7.0_AE_CloudOps~TRL/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~TRL/logs/
     org/critical_paths/change_management/
   </paths>
 
