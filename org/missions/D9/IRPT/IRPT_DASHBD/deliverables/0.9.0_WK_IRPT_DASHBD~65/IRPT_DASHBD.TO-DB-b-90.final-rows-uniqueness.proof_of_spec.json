@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-90",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "3f09dbc178",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-90.final-rows-uniqueness.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~65",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~65/FINAL_ROWS_UNIQ.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~65/FINAL_ROWS_UNIQ.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "tests 48 passed / 0 failed, new_test, check_site check_realized_unique.",
+      "artifact_covered_by": [
+        "DB44-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_activity_lots.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "check_realized_unique() runs on the final rows in compute_local() after apply_inkind_reference(); not deployed (a later release).",
+      "artifact_covered_by": [
+        "DB44-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_account_activity_lots.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new test test_a_rewrite_that_makes_a_repeat_of_the_final_realized_key_is_refused_by_name; 48 passed, 0 failed.",
+      "artifact_covered_by": [
+        "DB44-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB44-1-AC1",
+      "criterion_verbatim": "DB44-1-AC1 -- the uniqueness check runs on the final rows, and a test proves a rewrite-made repeat is refused. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r44/p44_round44.py\" . DB44-1-AC1",
+      "output_evidence": "OK: final-rows uniqueness in check_realized_unique(); 48 passed; new test data/assets/scripts/gold/irpt_reporting/tests/test_account_activity_lots.py::test_a_rewrite_that_makes_a_repeat_of_the_final_realized_key_is_refused_by_name\nDB44-1-AC1 PASS",
+      "denominator": "48 passed, 0 failed of 48 in test_account_activity_lots.py (99 passed of 99 folder-wide); exit code 0",
+      "status": "PASS",
+      "expect": "DB44-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads FINAL_ROWS_UNIQ.json and the function and test text; no run state",
+      "observed": "printed the same last line on a second read",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty root (no record), the order's 'Base: FAIL'.",
+      "expected": "DB44-1-AC1 FAIL at the base",
+      "observed": "FAIL: no record file; DB44-1-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the release of the change to the served Lambda",
+      "reason": "No deploy: the change reaches the Lambda in a later release."
+    },
+    {
+      "item": "any S3 write, vendor call, secret read, bun or download",
+      "reason": "Bounds of the order; none made."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_reporting/tests",
+      "result": "99 passed"
+    }
+  ]
+}
