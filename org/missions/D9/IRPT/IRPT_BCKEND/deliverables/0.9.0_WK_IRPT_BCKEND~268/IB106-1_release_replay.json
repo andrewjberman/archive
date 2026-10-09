@@ -1,0 +1,553 @@
+{
+ "to_id": "IRPT_BCKEND.TO-IB-pr-405",
+ "pin": "9489a0fed03951fb242e50a7a1f704f307946e3c",
+ "harness": "replay/run_side.py: the REAL irpt-status modules of ONE extracted zip (flat layout), entry.build_owned_entry + served.lambda_entry, offline doubles for storage only (acceptance table, artifact index, report-index table, retention). Live = the live irpt-status zip (CodeSha256 E7VKvhg3E9D5euWO+S649/iyAJ05xUmFPqHEAKDTFxA=, read 2026-10-09T11:0xZ); built = the candidate-map BUILD_ONLY zip (gff0DKwarcDa/GJHNpPN0UVV+57Bxg4VPnqxglN/EPY=).",
+ "doubles_are_synthetic": "firm, owner and request ids are fixtures; no client data",
+ "limits": "The retention service is a double, so the arms show the READER's authorization and binding, not the live retention rows. The live Lambda's gateway admission of the svc token on GET .../analysis/requests/{requestId} is outside the zip and is not replayed.",
+ "verdict_rule": "identical = the same (ok, public reason code, data hash) on both sides; expected-diff = listed here with its reason; anything else is UNEXPECTED",
+ "arms": [
+  {
+   "name": "ctl_recovered_owner_include_persist_inputs [ctl_recovered_owner_include_persist_inputs]",
+   "arm_id": "ctl_recovered_owner_include_persist_inputs",
+   "verdict": "expected-diff",
+   "negative_control": false,
+   "live": {
+    "ok": false,
+    "code": "INVALID_INPUT",
+    "data_keys": null
+   },
+   "built": {
+    "ok": true,
+    "code": null,
+    "data_keys": [
+     "accepted_at",
+     "identity",
+     "persist_inputs"
+    ],
+    "persist_inputs_keys": [
+     "artifact_id",
+     "composition_sha256",
+     "report_index",
+     "retention_policy"
+    ]
+   },
+   "detail": "POSITIVE control: with retention live again the built read answers the four members (the dead-retention refusal was the retention)"
+  },
+  {
+   "name": "ctl_retention_dead_owner_include_persist_inputs [ctl_retention_dead_owner_include_persist_inputs]",
+   "arm_id": "ctl_retention_dead_owner_include_persist_inputs",
+   "verdict": "expected-diff",
+   "negative_control": true,
+   "live": {
+    "ok": false,
+    "code": "INVALID_INPUT",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "UNEXPECTED",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "built refuses on the dead retention (UNEXPECTED, as the plain read does on both sides); live refuses the include"
+  },
+  {
+   "name": "control: owner plain read with retention dead: refused on both sides [ctl_retention_dead_owner_plain]",
+   "arm_id": "ctl_retention_dead_owner_plain",
+   "verdict": "identical",
+   "negative_control": true,
+   "live": {
+    "ok": false,
+    "code": "UNEXPECTED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "UNEXPECTED",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "control: two report revisions under one report id: the built read refuses, never chooses (live refuses the include) [ctl_two_report_revisions_owner_include_persist_inputs]",
+   "arm_id": "ctl_two_report_revisions_owner_include_persist_inputs",
+   "verdict": "identical",
+   "negative_control": true,
+   "live": {
+    "ok": false,
+    "code": "INVALID_INPUT",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "INVALID_INPUT",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "non-owner in the same firm, include=composition: refused on both sides [non_owner_same_firm_include_composition]",
+   "arm_id": "non_owner_same_firm_include_composition",
+   "verdict": "identical",
+   "negative_control": false,
+   "live": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "non-owner in the same firm, include=persist_inputs: refused on both sides [non_owner_same_firm_include_persist_inputs]",
+   "arm_id": "non_owner_same_firm_include_persist_inputs",
+   "verdict": "identical",
+   "negative_control": true,
+   "live": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "non-owner in the same firm, plain read: refused on both sides [non_owner_same_firm_plain]",
+   "arm_id": "non_owner_same_firm_plain",
+   "verdict": "identical",
+   "negative_control": false,
+   "live": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "another firm, include=composition: refused on both sides [other_firm_include_composition]",
+   "arm_id": "other_firm_include_composition",
+   "verdict": "identical",
+   "negative_control": false,
+   "live": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "another firm, include=persist_inputs: refused on both sides [other_firm_include_persist_inputs]",
+   "arm_id": "other_firm_include_persist_inputs",
+   "verdict": "identical",
+   "negative_control": true,
+   "live": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "another firm (cottonwood advisor, 49financial request), plain read: refused on both sides [other_firm_plain]",
+   "arm_id": "other_firm_plain",
+   "verdict": "identical",
+   "negative_control": false,
+   "live": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "existing caller, owner, include=comparisons: identical [owner_include_comparisons]",
+   "arm_id": "owner_include_comparisons",
+   "verdict": "identical",
+   "negative_control": false,
+   "live": {
+    "ok": true,
+    "code": null,
+    "data_keys": [
+     "accepted_at",
+     "comparisons",
+     "identity"
+    ]
+   },
+   "built": {
+    "ok": true,
+    "code": null,
+    "data_keys": [
+     "accepted_at",
+     "comparisons",
+     "identity"
+    ],
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "existing caller, owner, include=composition: identical [owner_include_composition]",
+   "arm_id": "owner_include_composition",
+   "verdict": "identical",
+   "negative_control": false,
+   "live": {
+    "ok": true,
+    "code": null,
+    "data_keys": [
+     "accepted_at",
+     "composition",
+     "identity"
+    ]
+   },
+   "built": {
+    "ok": true,
+    "code": null,
+    "data_keys": [
+     "accepted_at",
+     "composition",
+     "identity"
+    ],
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "owner_include_persist_inputs_not_persisted [owner_include_persist_inputs_not_persisted]",
+   "arm_id": "owner_include_persist_inputs_not_persisted",
+   "verdict": "expected-diff",
+   "negative_control": false,
+   "live": {
+    "ok": false,
+    "code": "INVALID_INPUT",
+    "data_keys": null
+   },
+   "built": {
+    "ok": true,
+    "code": null,
+    "data_keys": [
+     "accepted_at",
+     "identity",
+     "persist_inputs"
+    ],
+    "persist_inputs_keys": [
+     "artifact_id",
+     "composition_sha256",
+     "report_index",
+     "retention_policy"
+    ]
+   },
+   "detail": "live refuses (INVALID_READ_INCLUDE), built answers the four members, report_index null"
+  },
+  {
+   "name": "owner_include_persist_inputs_persisted [owner_include_persist_inputs_persisted]",
+   "arm_id": "owner_include_persist_inputs_persisted",
+   "verdict": "expected-diff",
+   "negative_control": false,
+   "live": {
+    "ok": false,
+    "code": "INVALID_INPUT",
+    "data_keys": null
+   },
+   "built": {
+    "ok": true,
+    "code": null,
+    "data_keys": [
+     "accepted_at",
+     "identity",
+     "persist_inputs"
+    ],
+    "persist_inputs_keys": [
+     "artifact_id",
+     "composition_sha256",
+     "report_index",
+     "retention_policy"
+    ]
+   },
+   "detail": "live refuses (INVALID_READ_INCLUDE), built answers the four members, report_index set"
+  },
+  {
+   "name": "existing caller, owner, no include: the answer {identity, accepted_at} key for key [owner_plain]",
+   "arm_id": "owner_plain",
+   "verdict": "identical",
+   "negative_control": false,
+   "live": {
+    "ok": true,
+    "code": null,
+    "data_keys": [
+     "accepted_at",
+     "identity"
+    ]
+   },
+   "built": {
+    "ok": true,
+    "code": null,
+    "data_keys": [
+     "accepted_at",
+     "identity"
+    ],
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "svc-custody-statement claiming 49financial: not the subject, refused on both sides [svc_claims_49financial]",
+   "arm_id": "svc_claims_49financial",
+   "verdict": "identical",
+   "negative_control": true,
+   "live": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "svc-custody-statement claiming inflection: not the subject, refused (an ordinary-user rule) on both sides [svc_claims_inflection]",
+   "arm_id": "svc_claims_inflection",
+   "verdict": "identical",
+   "negative_control": true,
+   "live": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "svc-custody-statement (cottonwood) asking for a 49financial request: refused on both sides [svc_cottonwood_for_49financial_request]",
+   "arm_id": "svc_cottonwood_for_49financial_request",
+   "verdict": "identical",
+   "negative_control": true,
+   "live": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "svc-custody-statement (cottonwood) on the sibling owned read analysis-request-history: still refused on both sides (the grant is ONE operation) [svc_cottonwood_history_sibling_read]",
+   "arm_id": "svc_cottonwood_history_sibling_read",
+   "verdict": "identical",
+   "negative_control": true,
+   "live": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "svc_cottonwood_include_persist_inputs [svc_cottonwood_include_persist_inputs]",
+   "arm_id": "svc_cottonwood_include_persist_inputs",
+   "verdict": "expected-diff",
+   "negative_control": false,
+   "live": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": true,
+    "code": null,
+    "data_keys": [
+     "accepted_at",
+     "identity",
+     "persist_inputs"
+    ],
+    "persist_inputs_keys": [
+     "artifact_id",
+     "composition_sha256",
+     "report_index",
+     "retention_policy"
+    ]
+   },
+   "detail": "live refuses (operation outside svc's set), built admits svc for cottonwood and answers the four members"
+  },
+  {
+   "name": "svc_cottonwood_plain_read [svc_cottonwood_plain_read]",
+   "arm_id": "svc_cottonwood_plain_read",
+   "verdict": "expected-diff",
+   "negative_control": false,
+   "live": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": true,
+    "code": null,
+    "data_keys": [
+     "accepted_at",
+     "identity"
+    ],
+    "persist_inputs_keys": null
+   },
+   "detail": "live refuses (operation outside svc's set), built admits svc for cottonwood: the grant is the operation, so the plain read is admitted too"
+  },
+  {
+   "name": "another service email (svc-commentary) claiming cottonwood: refused on both sides [svc_other_email_cottonwood]",
+   "arm_id": "svc_other_email_cottonwood",
+   "verdict": "identical",
+   "negative_control": true,
+   "live": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null
+   },
+   "built": {
+    "ok": false,
+    "code": "NOT_AUTHORIZED",
+    "data_keys": null,
+    "persist_inputs_keys": null
+   },
+   "detail": "same outcome on both sides"
+  },
+  {
+   "name": "static: packaged_policy_irpt_custody_x10_v1 (what the zip carries)",
+   "arm_id": "packaged_policy_irpt_custody_x10_v1",
+   "verdict": "expected-diff",
+   "negative_control": false,
+   "live": "ABSENT:ValueError",
+   "built": {
+    "families": [
+     "CUSTODY_REPORT"
+    ],
+    "state": "ACTIVE"
+   },
+   "detail": "the built zip carries the retention stack that report_index needs; the live zip does not"
+  },
+  {
+   "name": "static: packaged_retention_reference_params (what the zip carries)",
+   "arm_id": "packaged_retention_reference_params",
+   "verdict": "expected-diff",
+   "negative_control": false,
+   "live": [
+    "owner",
+    "family",
+    "logical_id"
+   ],
+   "built": [
+    "owner",
+    "family",
+    "logical_id",
+    "policy_revision"
+   ],
+   "detail": "the built zip carries the retention stack that report_index needs; the live zip does not"
+  },
+  {
+   "name": "static: packaged_repository_KINDS (what the zip carries)",
+   "arm_id": "packaged_repository_KINDS",
+   "verdict": "expected-diff",
+   "negative_control": false,
+   "live": [
+    "PERFORMANCE",
+    "ANALYSIS"
+   ],
+   "built": [
+    "PERFORMANCE",
+    "ANALYSIS",
+    "CUSTODY_REPORT"
+   ],
+   "detail": "the built zip carries the retention stack that report_index needs; the live zip does not"
+  },
+  {
+   "name": "static: installed_handler_composes (what the zip carries)",
+   "arm_id": "installed_handler_composes",
+   "verdict": "expected-diff",
+   "negative_control": false,
+   "live": {
+    "ok": true,
+    "operations": [
+     "analysis-report",
+     "analysis-request-history",
+     "analysis-request-pdf",
+     "analysis-request-read",
+     "status-job",
+     "status-summary"
+    ],
+    "readers": [
+     "OwnedRequestReader",
+     "OwnedAnalysisReader"
+    ]
+   },
+   "built": {
+    "ok": true,
+    "operations": [
+     "analysis-report",
+     "analysis-request-history",
+     "analysis-request-original",
+     "analysis-request-pdf",
+     "analysis-request-read",
+     "status-job",
+     "status-summary"
+    ],
+    "readers": [
+     "OwnedRequestReader",
+     "OwnedAnalysisReader"
+    ]
+   },
+   "detail": "the installed handler composes from the zip's own stack on both sides; the built one also installs analysis-request-original (AR-y-22, pending in the real map)"
+  }
+ ]
+}
