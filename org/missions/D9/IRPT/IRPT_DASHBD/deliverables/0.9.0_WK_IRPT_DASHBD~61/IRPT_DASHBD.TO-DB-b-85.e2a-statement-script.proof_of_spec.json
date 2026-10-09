@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-85",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "885cdeb443",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-85.e2a-statement-script.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~61",
+  "session_log": "data/assets/scripts/gold/irpt_custody/tests/test_e2a_real_statement.py",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/e2a_real_statement.py",
+      "kind": "script",
+      "commit_or_etag": "f6371776e4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline build; run is not executed here (DB-b-86); no AWS write, no live call.",
+      "artifact_covered_by": [
+        "DB41-2-AC2",
+        "DB41-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_e2a_real_statement.py",
+      "kind": "test",
+      "commit_or_etag": "f6371776e4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline test, fake transport/table/bucket.",
+      "artifact_covered_by": [
+        "DB41-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB41-2-AC1",
+      "criterion_verbatim": "DB41-2-AC1 -- the offline test passes: no identity key in the persist body, no figure in the refs. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r41/p41_round41.py\" . DB41-2-AC1",
+      "output_evidence": "OK: 12 passed in 3.93s\nDB41-2-AC1 PASS",
+      "denominator": "12 of 12 tests passed (rc 0)",
+      "status": "PASS",
+      "expect": "DB41-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB41-2-AC2",
+      "criterion_verbatim": "DB41-2-AC2 -- the runner exposes run, verify-submission and verify-persisted. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r41/p41_round41.py\" . DB41-2-AC2",
+      "output_evidence": "OK: the three subcommands are present\nDB41-2-AC2 PASS",
+      "denominator": "3 of 3 subcommands in --help (rc 0)",
+      "status": "PASS",
+      "expect": "DB41-2-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "pytest rerun after the naming-gate edit",
+      "observed": "12 passed both runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "test_refused_key_anywhere_in_the_body_is_refused and test_assert_no_figure_fires_on_a_figure are the positive controls: the guards fire when a refused key / a figure IS present.",
+      "expected": "guards raise RunnerRefused",
+      "observed": "raised for all 5 keys x 3 placements and 4 figure shapes",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "run, verify-submission and verify-persisted against live AWS",
+      "reason": "Bounds of the order: no AWS write or live call; the AE seat runs them in DB-b-86."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W61-S1",
+    "IRPT_DASHBD-W61-S2",
+    "IRPT_DASHBD-W61-S3"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "none",
+      "invocation": "no compiler",
+      "result": "n/a"
+    }
+  ]
+}

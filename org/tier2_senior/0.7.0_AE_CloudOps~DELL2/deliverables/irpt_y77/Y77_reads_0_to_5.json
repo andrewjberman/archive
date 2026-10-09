@@ -1,0 +1,59 @@
+{
+  "amendment": "AMENDMENT 2 -- release 6b",
+  "claim": "measured",
+  "pin": "66207bce7d",
+  "prospect_objects_note": "reads 4 and 5 accepted 3 submissions (REQ-3d76e5b4, REQ-9d59d4d2, REQ-f7ddede9). Objects written under irpt/49financial/state/ in the 09:xx window include request_compositions, normalized_portfolios and original_holdings entries, but they are keyed by ART digest and NOT by request id, and this seat cannot decrypt irpt-requests to map them. ATTRIBUTION BY WRITE-WINDOW IS NOT ATTRIBUTION: the window is shared with other activity, so the list is reported as a window observation for the issuer to bind, not as a this-seat-wrote-these claim. Their deletes wait on Andrew word either way.",
+  "read_0": "PASS -- live at start was ZA0QJ5Wt, the amendment declared value",
+  "read_1": "PASS -- symbol_closure on the UPLOADED zip: modules=66 pairs=299 missing=0, PASS",
+  "read_2": {
+    "equals_built": true,
+    "import_census": {
+      "failed": {},
+      "modules": 66
+    },
+    "layer_note": "both still attached, so IB-pr-390 layer survived rather than being reverted",
+    "layers_after": [
+      "irpt-common:5",
+      "AWSSDKPandas-Python312:16"
+    ],
+    "live_sha": "tdpterTMfJlWXjnoAQCwil+wN/Jf8Q/yLjGxTk7yUkk=",
+    "policy_arns": 11,
+    "policy_statements": 3,
+    "replan": "No changes",
+    "verdict": "PASS on all four limbs"
+  },
+  "read_3": {
+    "evidence": "the CloudWatch line, which the order names as the evidence -- the public answer is deliberately opaque (UNEXPECTED)",
+    "no_access_denied": true,
+    "no_custody_factory_required": true,
+    "no_import_error": true,
+    "read3_objects": [],
+    "read3_objects_note": "EMPTY, measured: list-object-versions on irpt/<firm>/platinum/custody_reports/ for all three firms returns nothing written 2026-10-09. Consistent with a typed refusal BEFORE any custody report was produced, so Andrew authorisation @35fabf20c8 has nothing to delete.",
+    "read3_outcome": "AcceptanceRefused: ACCEPTED_CUSTODY_SELECTION_REQUIRED (public_reason_code UNEXPECTED)",
+    "verdict": "PASS",
+    "why_pass": "the order PASS rule is no CUSTODY_FACTORY_REQUIRED and no ImportError, with the outcome EITHER an accepted custody entry OR a typed refusal from the factory own validation. This is the latter: the factory was REACHED and ran its own acceptance validation. CUSTODY_FACTORY_REQUIRED would have meant the factory was absent."
+  },
+  "read_4": {
+    "immutable": true,
+    "request_id": "REQ-3d76e5b49dae4f91db1694b0",
+    "revision": 1,
+    "verdict": "PASS",
+    "why_pass": "an input_id submission was ACCEPTED and reached the prospect factory, which is what the read asks"
+  },
+  "read_5a": {
+    "limit": "the read asks that the ACCEPTANCE RECORD carry the same ticket_id. The response does not echo it, and this seat cannot decrypt irpt-requests, so the record-side check is NOT verifiable here. The unit test test_ticket_binding.py:75-78 asserts both the returned record and the stored row carry it; live, only acceptance is observable from outside.",
+    "request_id": "REQ-9d59d4d2334f841152914569",
+    "response_echoes_ticket": false,
+    "ticket_id_sent": "TCK-20261009-a1052909",
+    "verdict": "ACCEPTED, with one limb this seat cannot verify"
+  },
+  "read_5b": {
+    "correction": "I first concluded TICKET_REFERENCE was UNREACHABLE at the live boundary because the public code was INVALID_INPUT on both routes. That was wrong: the classifier maps the internal code to a non-revealing public one, exactly as it maps read 3 AcceptanceRefused to UNEXPECTED. The log is where the typed code lives.",
+    "evidence": "CloudWatch shows exception_text TICKET_REFERENCE with exception_type RequestRefused mapped to public_reason_code INVALID_INPUT, TWICE -- once for a schema-malformed ticket and once for a well-formed ticket on a custody basis (submission.py:78-80 raises on either). So the typed refusal does fire.",
+    "exception_type": "RequestRefused",
+    "internal_code": "TICKET_REFERENCE",
+    "public_reason_code": "INVALID_INPUT",
+    "verdict": "PASS"
+  },
+  "to_id": "IRPT_BCKEND.TO-APPLY-Y77"
+}
