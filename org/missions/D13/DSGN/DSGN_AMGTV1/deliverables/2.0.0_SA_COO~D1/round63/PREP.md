@@ -21,3 +21,10 @@ portal DEV `9b06f6ed`.
 
 **The round-62 close walk adds ASML** (`--security "ASML"`, plus `--probe-get` of its thesis bundle). That way the served
 `description_verdict_state` / `description_verdict_reason` are read beside what the page draws, before round 63 is cut.
+
+**The ASML 404 (round-62 walk):**
+- What happened: the search selected the key `ASML`, and `/thesis` and `/overlay` answered 404.
+- Ownership: the CTO (msg 2278) routed the route question to `2.0.0_SA_COO~R1` (AMGT_RESAPP round 84): does `/resolve` offer one
+  candidate for "ASML"?
+- What it means for round 63: the ASML read waits on that answer, or else walks `ASML_NA_Equity` reached through the name the page
+  lists.
