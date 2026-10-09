@@ -1,0 +1,95 @@
+NFRA_CTLPLN.TO-CT-x-1 step 2 -- ONE REAL REFUSED IAM WRITE
+seat: 0.7.0_AE_CloudOps~CT1   device: dell1   date: 2026-10-09
+risk: WORLD   proof_genre: DEPLOY
+
+This record exists because every refusal on NFRA_CTLPLN's record until now was a SIMULATION
+(L10 analysis @333d2b37b3 item E2). The call below is real.
+
+------------------------------------------------------------------------
+1. CALLER IDENTITY (the principal under test is this session's own)
+------------------------------------------------------------------------
+  aws sts get-caller-identity
+    Account : 313476888478
+    UserId  : AIDAUR7FNW6PFHEFTJCVV
+    Arn     : arn:aws:iam::313476888478:user/cloudops-dell1-agent-user
+
+  aws iam get-user --user-name cloudops-dell1-agent-user
+    cloudops-dell1-agent-user  arn:aws:iam::313476888478:user/cloudops-dell1-agent-user  2026-10-07T04:59:51+00:00
+
+------------------------------------------------------------------------
+2. THE GATE: SIMULATION FIRST. Decision required to proceed = explicitDeny
+------------------------------------------------------------------------
+  INVOCATION (one --resource-arns, resource at the grain the action authorizes on -- user):
+    aws iam simulate-principal-policy \
+      --policy-source-arn arn:aws:iam::313476888478:user/cloudops-dell1-agent-user \
+      --action-names iam:CreateAccessKey \
+      --resource-arns arn:aws:iam::313476888478:user/cloudops-dell1-agent-user
+
+  DECISION: explicitDeny
+    EvalActionName          : iam:CreateAccessKey
+    EvalResourceName        : arn:aws:iam::313476888478:user/cloudops-dell1-agent-user
+    EvalDecision            : explicitDeny
+    EvalResourceDecision    : explicitDeny
+    MatchedStatements       : cloudops-dell-agent-iam-roles-policy (IAM Policy), line 1 col 876-2864
+    MissingContextValues    : [] (empty)
+
+  WHY THIS DECISION IS SOUND, not an instrument artifact. The four documented false-deny modes of
+  simulate-principal-policy (cloud-ops skill, IAM INSTRUMENT TRAPS) all fail toward *implicitDeny*:
+  multiple --resource-arns flipping held grants, an unevaluated Condition block, an unvalidated
+  action name (a typo), and a resource ARN at the wrong grain for the action. This result is
+  explicitDeny with a NAMED matched statement and an EMPTY MissingContextValues, so none of the four
+  can produce it. Mitigations were in force regardless: exactly one --resource-arns, user-grain ARN,
+  real action name.
+
+  GATE OUTCOME: explicitDeny -> the order authorizes exactly ONE real call. Proceeding.
+
+------------------------------------------------------------------------
+3. THE REAL CALL -- made once
+------------------------------------------------------------------------
+  INVOCATION:
+    aws iam create-access-key --user-name cloudops-dell1-agent-user
+
+  EXIT: rc=254
+
+  EXACT ERROR TEXT:
+    aws: [ERROR]: An error occurred (AccessDenied) when calling the CreateAccessKey operation: User:
+    arn:aws:iam::313476888478:user/cloudops-dell1-agent-user is not authorized to perform:
+    iam:CreateAccessKey on resource: user cloudops-dell1-agent-user with an explicit deny in an
+    identity-based policy: arn:aws:iam::313476888478:policy/cloudops-dell-agent-iam-roles-policy. Go to
+    https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/authorization-details/37hn1azg2mft1w3uwue6xqdih
+    for complete details, or call the GetRequestAuthorizationDetails API with the following
+    authorization id: 37hn1azg2mft1w3uwue6xqdih
+
+  RESULT: REFUSED. AccessDenied, and the live error names the SAME policy the simulation matched
+  (cloudops-dell-agent-iam-roles-policy). Simulation and world agree, which is the point of the cell:
+  the Deny is APPLIED, not merely DECLARED.
+
+------------------------------------------------------------------------
+4. CONTROL: did the refused call nevertheless mint a key? NO
+------------------------------------------------------------------------
+  INVOCATION:
+    aws iam list-access-keys --user-name cloudops-dell1-agent-user   (auto-paginated, counted client-side)
+
+  DENOMINATOR access keys on cloudops-dell1-agent-user: 1
+    AKIAUR7FNW6PIXDI6Q2N  Active  2026-10-07T05:02:39+00:00
+
+  READ: that one key was created 2026-10-07T05:02:39Z, three minutes after the user itself
+  (2026-10-07T04:59:51+00:00) and TWO DAYS BEFORE this call. It is the credential this session is
+  authenticating with. It is NOT the product of the call above; the call created nothing.
+
+  THEREFORE the order's delete-at-once clause is NOT triggered. That clause fires only "if the real
+  call SUCCEEDED (it must not)". It did not succeed. Deleting AKIAUR7FNW6PIXDI6Q2N would have
+  destroyed this seat's own working credential while proving nothing -- so no delete was made, and no
+  ARMED hazard row is owed.
+
+------------------------------------------------------------------------
+5. WHAT THIS DOES NOT ESTABLISH
+------------------------------------------------------------------------
+  - One action, one principal, one resource. Denominator: 1 user, 1 action (iam:CreateAccessKey) on
+    itself. BLIND to every other IAM action and every other principal, exactly as the order's
+    <preflight> comp-iam line declares.
+  - It says nothing about whether other Deny statements in the same policy are applied; each would
+    need its own real call.
+  - It is a point-in-time read. A policy edit after 2026-10-09T09:20Z is outside this evidence.
+
+AccessDenied
