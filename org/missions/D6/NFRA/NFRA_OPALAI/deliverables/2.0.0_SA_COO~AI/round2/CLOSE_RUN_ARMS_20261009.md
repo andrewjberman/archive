@@ -44,6 +44,18 @@ The arms run at the first read after NFRA_OPLGTW r29 (`NFRA_OPLGTW.TO-OG-rl-15`,
 
 **J2 grades against the pinned reference read**, taken by this seat in the same minute as arm (a), never against a later
 portal read: the key is rewritten daily at about 12:04Z, so a later read can differ from a correct answer.
+The pinned reference is the RAW `gateway_query_catalog` output (`data_as_of` and `generated_at` verbatim, plus its UTC
+read time), committed in this file beside arm (a)'s result; a restatement is not a reference (CVO sign-off condition,
+UB-20261009T083749Z-9a05, 3.0.0_SA_CVO~Z 09:07:24Z). If arm (a) and the CVO's grade fall in the same publication
+window, the CVO also takes its own read as a second instrument.
+
+## Step 4 (Analyst relaunch), before r29
+
+Ruled run-as-built by `1.0.0_SA_CTO~Z` (msg 32603): the launcher's first prompt is fixed at `launcher.ps1:172` (PROD
+`8cdc7b9`); `0.0.0_AB_MSTR~Z` reads the fast-forward line, the gate line, the Analyst's whoami and any sign-in prompt, then
+closes the Analyst before it serves Teams (the BG concierge serves the same account). Measured 09:09Z on site Z: the runtime
+checkout `C:\opal_runtime\opal_ai` reads `8cdc7b9`; a `claude.exe` (pid 8212) started 09:09:06Z under a `powershell.exe`
+started 09:09:04Z. MSTR~Z's four readings: pending.
 
 ## What a pass does and does not prove
 
