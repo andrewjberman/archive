@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t22",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t22.history-on-nontrading-days.md",
+    "group": "OTHER",
+    "vintage_commit": "57c75a37a8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "57c75a37a8",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t22.history-on-nontrading-days.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~19",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_quote.py",
+      "kind": "script",
+      "commit_or_etag": "57c75a37a8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no deploy; quote() history non-trading-day walk, allowance_today, basis, --today",
+      "artifact_covered_by": [
+        "DQ7-t22-AC1",
+        "DQ7-t22-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/ceiling_from_ledger.py",
+      "kind": "script",
+      "commit_or_etag": "57c75a37a8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no deploy; promote_history() writes claim measured on --write",
+      "artifact_covered_by": [
+        "DQ7-t22-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_allowance.json",
+      "kind": "config_data",
+      "commit_or_etag": "57c75a37a8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: local config; history.ceiling 5858 claim measured, written by ceiling_from_ledger.py --write (ledger read only)",
+      "artifact_covered_by": [
+        "DQ7-t22-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_nontrading.py",
+      "kind": "test",
+      "commit_or_etag": "57c75a37a8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest, not deployed",
+      "artifact_covered_by": [
+        "DQ7-t22-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ7-t22-AC1",
+      "criterion_verbatim": "the three named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R7_CHECKS/dq_t22_tests.py",
+      "output_evidence": "3 passed; last line NTD-OK, rc=0. Full suite python -m pytest -q -p no:cacheprovider data/mdpf/scripts/demque: 86 passed.",
+      "denominator": "3 of 3 required tests passed by name",
+      "status": "PASS",
+      "expect": "NTD-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ7-t22-AC2",
+      "criterion_verbatim": "the REAL 15,720-cell request: finish 2026-10-17 quoted on 2026-10-09 with 0 drawable that (trading) day and ceiling claim measured; 5,858 drawable on Saturday 2026-10-10.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R7_CHECKS/dq_t22_quote.py",
+      "output_evidence": "2026-10-09: finish_date=2026-10-17 allowance_today=0 ceiling_claim=measured gap=None; 2026-10-10: finish_date=2026-10-17 allowance_today=5858; NTDQ-OK finish 2026-10-17; trading day 0; Saturday 5858; ceiling measured; rc=0",
+      "denominator": "2 of 2 quotes on the real request file",
+      "status": "PASS",
+      "expect": "NTDQ-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "dq_t22_quote.py run twice",
+      "observed": "identical output (files and calendar only)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any Bloomberg call, any AWS write, any deploy; model_block's history component keeps the weekday rule",
+      "reason": "order BOUNDS; the order names channel history only"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W19-S1",
+    "MDPF_DEMQUE-D1-W19-S2"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~19/MDPF_DEMQUE.TO-DQ-t22.history-on-nontrading-days.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit bbg_quote, ceiling_from_ledger, allowance, test, investigation",
+      "result": "commit 57c75a37a8"
+    }
+  ]
+}
