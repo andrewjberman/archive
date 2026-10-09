@@ -9,13 +9,13 @@ Sign check: Black Diamond's value minus (`net_mv_plus_cash` + `margin_balance` +
 
 | account | window | R4 abs_diff | now abs_diff | BD accrual over window | within |
 |---|---|---|---|---|---|
-| acct#e7ab8585 | 03-17..03-26 | 0.1714 pp | 0.1707 pp | 0.00 | yes |
-| acct#e7ab8585 | 04-09..04-30 | 0.4555 pp | 0.0493 pp | +537.48 | yes |
-| acct#e7ab8585 | 05-08..06-23 | 0.0157 pp | 0.0055 pp | -101.46 | yes |
-| acct#e7ab8585 | 06-25..07-06 | 1.2130 pp | 0.4738 pp | -81.72 | NO (S22) |
-| acct#e7ab8585 | 07-08..08-04 | 0.1561 pp | 0.0107 pp | +108.16 | yes |
-| acct#e7ab8585 | 08-06..08-19 | 0.0042 pp | 0.0325 pp | -325.85 | yes |
-| acct#e7ab8585 | 08-21..10-01 | 0.1954 pp | 0.0223 pp | -248.23 | yes |
+| acct#89d0916a | 03-17..03-26 | 0.1714 pp | 0.1707 pp | 0.00 | yes |
+| acct#89d0916a | 04-09..04-30 | 0.4555 pp | 0.0493 pp | +537.48 | yes |
+| acct#89d0916a | 05-08..06-23 | 0.0157 pp | 0.0055 pp | -101.46 | yes |
+| acct#89d0916a | 06-25..07-06 | 1.2130 pp | 0.4738 pp | -81.72 | NO (S22) |
+| acct#89d0916a | 07-08..08-04 | 0.1561 pp | 0.0107 pp | +108.16 | yes |
+| acct#89d0916a | 08-06..08-19 | 0.0042 pp | 0.0325 pp | -325.85 | yes |
+| acct#89d0916a | 08-21..10-01 | 0.1954 pp | 0.0223 pp | -248.23 | yes |
 | 0076459710 | 07-09..08-04 | 0.0000 pp | 0.0000 pp | 0.00 | yes |
 | 0076459710 | 08-11..08-19 | 0.3307 pp | 0.4998 pp | +6,022.40 | NO |
 | 0076459710 | 08-21..09-09 | 0.0076 pp | 0.4608 pp | -5,766.11 | NO |
@@ -29,7 +29,7 @@ the window; both ends are in the JSON. Black Diamond's accrual stays outside Opa
 
 ## The four beyond 0.35 pp, each with a measured reason
 
-- **acct#e7ab8585 06-25..07-06, 0.4738 pp (S22).** RESTATED, not DISARMED. Black Diamond books the 4,429.53 INTRA/FC/IN "MARGIN INT ADJ" credit as a net
+- **acct#89d0916a 06-25..07-06, 0.4738 pp (S22).** RESTATED, not DISARMED. Black Diamond books the 4,429.53 INTRA/FC/IN "MARGIN INT ADJ" credit as a net
   addition (netAdditions 4,402.22); Opal keeps margin interest internal by ruling (batch 195). Treated as a flow, the pair would be 0.0044 pp
   (counterfactual, never applied; the credit is not re-classed).
 - **0076459710 08-11..08-19, 0.4998 pp, and 08-21..09-09, 0.4608 pp.** Black Diamond's value carries its accrual (+6,022.40 then -5,766.11), which

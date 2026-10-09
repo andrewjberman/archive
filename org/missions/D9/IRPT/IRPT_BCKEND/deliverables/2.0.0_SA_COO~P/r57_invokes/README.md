@@ -72,7 +72,7 @@ Contract header on every payload: `x-contract-version: v1` (`served.py:71-72`).
 - **happy.json:** `GET /api/scoped/investor-reporting/reporting/{account_id}/{which}` (`entry.py:90`) with `account_id`
   `acc_5475ef6b78036e90a79eba33` and `which=manifest`.
   - The account is the 49F ****0090 account of the READY export: `../IRPT_BCKEND_ROUNDS_42_44_P_DRAIN_END_20261004.md:27`.
-    Its raw key `0024480090` has a published platinum series
+    Its raw key `acct#97c956cc` has a published platinum series
     (`surprise-channel/investigations/INVESTIGATION_v1.md:17643`, row W116-S11).
   - Read path: ListBucket on the platinum prefix and GetObject on `manifest.json`. Nothing is written.
   - **Response, before and after (identical):** the raw HTTP response, not the envelope: `statusCode` 200,
@@ -176,7 +176,7 @@ GetObject only, nothing written). The other runs had storage stubbed and AWS end
 
 ## 5. Uncertain
 
-- Whether the reporting-read manifest for `0024480090` is currently published. If not, the answer is NOT_READY on both sides.
+- Whether the reporting-read manifest for `acct#97c956cc` is currently published. If not, the answer is NOT_READY on both sides.
 - The stored route inside the `EXP-e29b...` receipt has not been read.
 - `selected_tenant` against the live bucket maps assumes the deployed `IRPT_DIRECTORY_BUCKET_MAP` equals the Terraform
   derivation.

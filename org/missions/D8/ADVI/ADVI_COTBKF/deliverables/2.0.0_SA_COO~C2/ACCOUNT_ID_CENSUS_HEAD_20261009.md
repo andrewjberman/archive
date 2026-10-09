@@ -196,3 +196,23 @@
 | 1 | evidence | `org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~52/fwd3_manifest.json` |
 | 1 | evidence | `org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~53/fwd3_build.txt` |
 | 1 | evidence | `org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~62/ac2_build_run.log` |
+
+## Re-census with the cot id shapes (containment AMENDMENT 2 @b849a11a9b, msg 3697), ~16:3xZ
+
+- **Added shapes:** `z0` + 9 digits, `cv` + 8 digits, and 11-digit zero-led ids. **Denominator:** 637 tracked files (same scope).
+- **79 files carry an added-shape id.**
+  - 65 of them already carry an original-shape id, so they are in round 51's set. Its redaction pattern lacks the added shapes, so
+    those 65 keep their added-shape ids after round 51.
+  - **14 are hit ONLY by the added shapes:**
+    - 2 filenames are themselves ids (a `cv` shape), one under `deliverables/2.0.0_SA_COO~C2/fwd1_retrace_20261007/` and one under
+      `deliverables/2.0.0_SA_COO~C/`;
+    - 2 are code tests (`test_commonwealth_transactions.py`, `test_commonwealth_crosswalk.py`);
+    - 10 are docs or evidence (task orders CB-c-3, CB-c-4 and CB-a-2; decompositions round 3 and the base DECOMP; the round-7 packet;
+      four proof instances).
+- **Plan (issuer):** ONE residual cell with ALL shapes, cut when round 51 (~78) and round 52 (~79) drain, because they edit the same
+  files. It covers:
+  - the added-shape ids in every file;
+  - the 14 added-only files;
+  - the 2 filename renames to their token;
+  - the 2 test files to synthetic ids.
+  Its 0-hit test uses every shape. The token form is `acct#<first 8 hex of sha256("cottonwood:" + account)>` (AMENDMENT 2).
