@@ -113,8 +113,13 @@ def arm_run():
     reached = [str(s.get("step")) for s in rec.get("reached", [])]
     carded = rec.get("carded", [])
     steps = int(rec.get("steps") or 0)
-    print("steps=%d reached=%d carded=%d" % (steps, len(reached), len(carded)))
-    need(steps == 16 and len(reached) + len(carded) == steps, "reached + carded != 16")
+    # AMENDMENT 2 (CN-q-3, row LGIC_CANON-D1-W1-S32): the order splits step 14 into 14a and 14b, so the 16 checklist steps are 17
+    # units; the units must be exactly {1..13, 14a, 14b, 15, 16}, each once, reached or carded.
+    units = [str(n) for n in range(1, 14)] + ["14a", "14b", "15", "16"]
+    got = reached + [str(c.get("step")) for c in carded]
+    print("steps=%d units=%d reached=%d carded=%d" % (steps, len(units), len(reached), len(carded)))
+    need(steps == 16 and sorted(got) == sorted(units), "reached + carded != the 17 units {1..13,14a,14b,15,16} (missing %s, extra %s)"
+         % (sorted(set(units) - set(got)), sorted(set(got) - set(units))))
     need("13" in reached and "14a" in reached, "step 13 and step 14a are not both REACHED")
     bad = [c for c in carded if str(c.get("step")) not in FIRM_BUCKET_STEPS]
     need(not bad, "carded steps outside the firm-bucket set: %s" % [c.get("step") for c in bad])
