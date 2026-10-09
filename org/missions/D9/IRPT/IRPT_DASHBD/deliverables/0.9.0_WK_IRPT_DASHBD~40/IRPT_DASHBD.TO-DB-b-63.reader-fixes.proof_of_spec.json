@@ -1,0 +1,116 @@
+{
+ "schema_version": "1.0",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "dd8541bb97"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "dd8541bb97",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-63.reader-fixes.md"
+ },
+ "to_id": "IRPT_DASHBD.TO-DB-b-63",
+ "assignee": "0.9.0_WK_IRPT_DASHBD~40",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~40/REGRADE_FIXES_E1.md",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/tieout/tieout_reader.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "BD_FEE_FIELD_IS_FLOW and FIRST_DAY_FLOW_AT_START folded in, each behind a stated predicate (fee_field_is_flow, first_day_flow_start); fee-base writer census still the reader only.",
+   "artifact_covered_by": [
+    "DB33-1-AC1",
+    "DB33-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~40/REGRADE_FIXES_E1.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "9,078 segments, within 8385, reader_sha256, in_to_out 14 each with a reason.",
+   "artifact_covered_by": [
+    "DB33-1-AC1",
+    "DB33-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~40/REGRADE_FIXES_E1.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Counts only.",
+   "artifact_covered_by": [
+    "DB33-1-AC1",
+    "DB33-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Rows IRPT_DASHBD-W40-S1..S3 appended.",
+   "artifact_covered_by": [
+    "DB33-1-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB33-1-AC1",
+   "criterion_verbatim": "DB33-1-AC1 -- the 9,078 re-graded with both fixes, within >= 8,315 and equal to the tally; one fee-base writer; sha matches HEAD. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r33/p33_round33.py\" . DB33-1-AC1",
+   "output_evidence": "OK: 9,078 re-graded with both fixes: within 8385 (>= 8315); writer census 1 of 130; sha matches HEAD\nDB33-1-AC1 PASS (rc 0)",
+   "denominator": "9,078 of 9,078 graded segments; within 8,385 (round 32: 8,315); fee-base writer census 1 file of 130 .py",
+   "status": "PASS",
+   "expect": "DB33-1-AC1 PASS"
+  },
+  {
+   "criterion_id": "DB33-1-AC2",
+   "criterion_verbatim": "DB33-1-AC2 -- every segment that moves IN to OUT against round 32's flow-start re-grade is named, and nothing else. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r33/p33_round33.py\" . DB33-1-AC2",
+   "output_evidence": "OK: 14 IN->OUT against round 32's flow-start re-grade, every one named\nDB33-1-AC2 PASS (rc 0)",
+   "denominator": "14 of 14 IN->OUT segments listed with a reason (FIRST_DAY_START_NOT_BD 14); out-to-in 84",
+   "status": "PASS",
+   "expect": "DB33-1-AC2 PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The same reader with both predicates forced off (fee_field_is_flow False, first_day_flow_start None) re-graded the 9,078 on the same cached read and was compared with round 32's REGRADE_FLOWSTART_E2.json.",
+   "expected": "within 8,315 and 0 segments differing from round 32",
+   "observed": "graded 9078 within 8315 differing from round 32: 0",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Two runs of the reader on one cached read (before and after the in_to_out reason edit) gave within 8,385 and 14 in_to_out both times; tieout_compound_v2.py and unexplained_classes.py were re-run from the cached/S3 reads and their records are byte-identical (git status clean on ~35 and ~36); the ~36 tests pass (3 of 3).",
+   "observed": "identical",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "crossover_e1.py (~35) and large_flow_e3.py (~39) re-run",
+   "reason": "Both raise AttributeError at HEAD on a fee-base name round 32's promotion removed, with or without this edit (row IRPT_DASHBD-W40-S1); the importers re-run are tieout_compound_v2.py and unexplained_classes.py."
+  }
+ ],
+ "surprises": [
+  "IRPT_DASHBD-W40-S1",
+  "IRPT_DASHBD-W40-S2",
+  "IRPT_DASHBD-W40-S3"
+ ],
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "bash .tools/commit-gate.sh org/missions/D9/IRPT/IRPT_DASHBD/tieout/tieout_reader.py",
+   "result": "All checks passed; pre-commit gate clean for 1 of 1 file(s)"
+  }
+ ]
+}
