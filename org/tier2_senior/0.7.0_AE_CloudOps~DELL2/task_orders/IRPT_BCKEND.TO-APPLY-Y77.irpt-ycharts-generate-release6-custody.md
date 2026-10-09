@@ -89,6 +89,27 @@ Criterion ids: Y77-1-AC1, Y77-1-AC2, Y77-1-AC3. Instance at `org/tier2_senior/0.
       init`, the targeted plan and `safe-apply` all run in the worktree's `infra/aws/terraform/investor-reporting/ycharts`.
     - After the ledger closes, `git worktree remove /c/dev/y77-pin`. Every deliverable is still written and committed in the shared tree.
     - Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii) on a modify; criteria unchanged.
+    **AMENDMENT 2 (issuer `2.0.0_SA_COO~Y2`, 2026-10-09 ~08:4xZ): this order now applies RELEASE 6b. It SUPERSEDES the pin, built, rollback and
+    reads named above and in AMENDMENT 1.**
+    - **Why:** IB-pr-390 went live at 07:49Z as `ZA0QJ5Wt...` (via IB-pr-395, CTO msgs 2833/2855). The CTO ruled that release 6's `V6EiBNcJ` must
+      NOT be applied, because it would revert 390's served.py.
+    - **Pair:** `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/release6_custody/NEVER_WIDEN_PAIR_RELEASE6B_CUSTODY.md` @ba6fcb1c14
+      (blob 768db03070; the COO half is signed by this amendment). CTO half
+      `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_RELEASE6B_CUSTODY_CTO_HALF.md` (msg 2888), GIVEN.
+    - **Pin** `66207bce7d` (on origin): `git worktree add --detach /c/dev/y77-pin 66207bce7d`; every build, census, plan and apply step runs there.
+      **Built** `tdpterTMfJlWXjnoAQCwil+wN/Jf8Q/yLjGxTk7yUkk=`.
+    - **Step 0:** live is `ZA0QJ5Wt/7JcwmuzVfHOeNAdFk6th4H5IEeqQStDYm8=`, and the rollback source is S3 version `8rOI5aDff8mlWQQ6YNVy7Is11Pfh8jcn`;
+      otherwise STOP. The census at the pin, against live, reads exactly 3 changed members (`acceptance.py`, `submission.py`,
+      `contracts/AnalysisSubmissionRequest.schema.json`).
+    - **Step 3, the plan:** 1 add (the policy) plus the function's `s3_object_version` + `source_code_hash`. There is NO layer diff (390 attached it).
+      ANY other line is a STOP (CTO condition).
+    - **Reads:** "0"..."5" per the 6b pair, section 4. Read 5 is the ticket binding live: one `input_id` submission with a valid `ticket_id` is
+      accepted and its record carries it; a malformed one refuses `TICKET_REFERENCE`. Record reads 4 and 5's S3 objects as `prospect_objects`
+      [{key, version_id}]. Their deletes wait on Andrew's word (CTO condition); do not delete them.
+    - **Branch B:** re-promote `8rOI5aDf` and remove the policy. The layer STAYS, because it is 390's.
+    - **The ledger is pinned** (CTO condition): it names pin, built, rollback and version. After the apply, re-read the census row (CTO condition).
+    - The checks `checks/r77/y77_cells.py` are amended to these values (AMENDMENT 2). Gate limb that graded this amendment: `to-pipeline-gate.py`
+      GATE (viii) on a modify.
   </steps>
 
   <acceptance>
