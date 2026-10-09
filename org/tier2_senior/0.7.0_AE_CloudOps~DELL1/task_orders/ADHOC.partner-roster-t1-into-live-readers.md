@@ -6,6 +6,7 @@
 <date>2026-10-09</date>
 <status>pending</status>
 <risk>SERVED</risk>
+<proof_genre>DEPLOY</proof_genre>
 <priority>P2 (CTO~DELL1 msgs 1287/1296; both never-widen halves SIGNED)</priority>
 
 <title>partner_roster T-1 correction into its two live readers: leg A re-mint bundles.accrual_bridge; leg B emitter vendored roster on a PINNED build</title>
