@@ -18,9 +18,9 @@
   {
    "path_or_key": "org/critical_paths/change_management/20261009T0205Z_nfra-oplgtw-og-tm-1-taxsma-master_deploy_completion.md",
    "kind": "doc",
-   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "commit_or_etag": "2dfe163f12",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "The NEVER-2 ledger entry, opened with 6 legs before the first act and committed at 049fe1c5e2 with its sentinel. L1, L2, L3, L4 and L6 are CLOSED, each carrying its own world read-back as proof. L5 (Leg A, the EventBridge rule and target) is OPEN and BLOCKED by the LGIC naming plan gate; row NFRA_OPLGTW-Z-AE-S1 carries it. The ledger is therefore NOT closed, so the order's step 6 close-then-criteria sequence could not complete as written.",
+   "deploy_evidence": "Committed at 2dfe163f12, which carried the CLOSE and the sentinel removal (the OPEN state landed earlier: 049fe1c5e2 for OG-ap-1, 26f9669e2a for OG-ap-2). The NEVER-2 ledger entry, opened with 6 legs before the first act and committed at 049fe1c5e2 with its sentinel. L1, L2, L3, L4 and L6 are CLOSED, each carrying its own world read-back as proof. L5 (Leg A, the EventBridge rule and target) is OPEN and BLOCKED by the LGIC naming plan gate; row NFRA_OPLGTW-Z-AE-S1 carries it. The ledger is therefore NOT closed, so the order's step 6 close-then-criteria sequence could not complete as written.",
    "artifact_covered_by": [
     "AC1",
     "AC2",
@@ -56,6 +56,16 @@
    "artifact_covered_by": [
     "AC1"
    ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/canonical-schwab-ec2/monolith-daily-schedule.tf",
+   "kind": "terraform",
+   "commit_or_etag": "897cbc6156",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Leg A's source: worker ~39's drain @897cbc6156 makes the rule's name conditional on local.si2_daily_builder_named, so only 08403355 takes the builder name while the siblings keep the legacy string. Applied through aws_cloudwatch_event_rule.si2_daily[\"08403355\"] and its aws_cloudwatch_event_target at 04:29:02Z from a saved plan reading 2 to add / 0 to change / 0 to destroy; the naming plan gate read CONFORMANT (ADDITION) where it had REFUSED pre-A1. Read back from the world: describe-rule gives name schwab-canonical-si2-08403355-pull-daily, cron(45 10,22 * * ? *), State ENABLED; list-targets-by-rule gives exactly 1 target, SSM AWS-RunPowerShellScript, RunCommandTargets InstanceIds [i-0f3d57a97f14727af], input running -Master 08403355 -Target monolith and naming no other master. The two existing rules are untouched at cron(15 10,22) and cron(45 9,21), both ENABLED. First fire is the next 10:45Z.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
   }
  ],
  "acceptance": [
@@ -64,10 +74,10 @@
    "criterion_verbatim": "AC1 -- the live code object, rule and target carry the new master, 30+ minutes from the other two.",
    "method": "command",
    "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/tm1.sh AC1; echo \"exit=$?\"",
-   "output_evidence": "(a) code object -Master ValidateSet: ['08242234', '08335338', '08403355']\nFAIL: (b) rule canonical-schwab-si2-08403355-daily-pull absent\n(b) canonical-schwab-si2-08242234-daily-pull: cron(15 10,22 * * ? *) ENABLED\n(b) canonical-schwab-si2-08335338-daily-pull: cron(45 9,21 * * ? *) ENABLED\nRESULT: FAIL\nexit=0",
-   "denominator": "Three limbs: (a) the live code object's ValidateSet, (b) the rule, (c) the target. Limb (a) PASSES on the live object and carries all three masters. Limb (b) FAILS because the rule does not exist, so limb (c) is unreachable and was not printed.",
-   "status": "FAIL",
-   "status_reason": "REFUSED WITH ITS MEASUREMENT, and the cause is not in the deployed work. Leg A was refused pre-apply by the LGIC naming plan gate in ENFORCE mode (safe-apply rc=7, 'BLOCKED by the naming plan limb (LGIC_ENFORCE DEC-6, ENFORCE mode, rc=1). Nothing was planned further or applied.'): the rule name canonical-schwab-si2-08403355-daily-pull, which the halves and Andrew's 'exactly same structure' require because it matches both siblings, is not name() output, and the gate wants schwab-canonical-si2-08403355-pull-daily. The resource is an ADDITION, which DEC-6 enforces; the same root's 8 existing out-of-pattern names only WARN, and the gateway apply later WARNed rather than refused on two existing resources, which confirms that reading. This order's BOUNDS forbid overriding a gate, and CLAUDE.md rule 30 routes a builder refusal to a registry row in infra/logic/registry/, outside this order's paths. Row NFRA_OPLGTW-Z-AE-S1 carries the decision to 2.0.0_SA_COO~O with three options. NOTE on the oracle: this check prints exit=0 even on RESULT: FAIL, so the RESULT token is the verdict and the exit code is not a discriminating oracle.",
+   "output_evidence": "(a) code object -Master ValidateSet: ['08242234', '08335338', '08403355']\n(b) schwab-canonical-si2-08403355-pull-daily: cron(45 10,22 * * ? *) ENABLED\n(b) canonical-schwab-si2-08242234-daily-pull: cron(15 10,22 * * ? *) ENABLED\n(b) canonical-schwab-si2-08335338-daily-pull: cron(45 9,21 * * ? *) ENABLED\n(c) targets 1; RunPowerShellScript True; box True; runs -Master 08403355 -Target monolith True\nRESULT: PASS\nexit=0",
+   "denominator": "Three limbs, all three now met: (a) the live code object's ValidateSet carries all three masters; (b) the rule exists at cron(45 10,22 * * ? *) ENABLED, 30 minutes after 08242234's 10:15/22:15 and 60 after 08335338's 09:45/21:45; (c) exactly 1 target, RunPowerShellScript, the right box, running -Master 08403355 -Target monolith.",
+   "status": "PASS",
+   "status_reason": "Was FAIL on limb (b) while Leg A was blocked, and is now PASS. Order amendment A1 @35d90ec7c0 ruled row NFRA_OPLGTW-Z-S68 option (c): the new rule takes the lib/opal_naming.py builder name schwab-canonical-si2-08403355-pull-daily while the two existing rules keep theirs (rule 30 non-application). Worker ~39's drain @897cbc6156 made the TF name conditional on local.si2_daily_builder_named; the issuer's GO (msg 32372) named that commit; I verified it in my tree, re-ran init because the drain adds a module, planned FRESH (the pre-A1 saved plan was stale) at 2 to add 0 to change 0 to destroy, and applied at 04:29:02Z. The naming plan gate read CONFORMANT (ADDITION) on the same limb that had REFUSED, so the gate was satisfied and never overridden.",
    "expect": "(?s)\\(a\\) code object -Master ValidateSet: \\[[^\\]]*'08403355'.*\\(c\\) targets 1; RunPowerShellScript True; box True; runs -Master 08403355 -Target monolith True.*RESULT: PASS.*exit=0"
   },
   {
@@ -97,7 +107,7 @@
   "mutant": {
    "description": "Three readers were shown able to go both ways rather than assumed. (1) The issuer recorded all three criteria FAILing pre-cut (tm1.AC1 ValidateSet 08242234/08335338 and rule absent; ap1.AC3 live CodeSha256 v2Bzt.., 11 rules, 0 on the new prefix; tm1.AC3 the new prefixes explicitDeny); after the work AC2 and AC3 read PASS, so neither is stuck-PASS. (2) AC1 still reads FAIL and names its own cause while its limb (a) flipped to carrying 08403355, so that check moves with the world in BOTH directions rather than being uniformly negative. (3) My own sha256 reader returned an EMPTY value when handed an MSYS /tmp path, which is how that path trap was caught instead of being reported as a content mismatch. (4) Scope control: row S5 names two unapplied drifts sitting in the same two roots (cot_rebalancer_runner_daily, mcportal_grant_writer) that a whole-root apply would carry; every plan was audited as JSON for them.",
    "expected": "AC2 and AC3 move FAIL -> PASS across the apply; AC1 stays FAIL with the rule named absent while its code-object limb flips to PASS; an instrument that cannot read its input reports empty rather than agreeing; and neither forbidden address appears in any applied plan.",
-   "observed": "AC2 PASS and AC3 PASS (13 of 13 simulations as wanted) against their recorded pre-cut FAILs. AC1 FAIL with '(b) rule canonical-schwab-si2-08403355-daily-pull absent' while limb (a) printed ['08242234', '08335338', '08403355'] from the live object. The sha256 reader raised FileNotFoundError and printed an empty hash on the MSYS path, and the real value was then obtained two ways that agreed. Both forbidden addresses ABSENT in both applied plans. Separately the plan's filter_suffix '' -> null on the unrelated bd49finsurance rule was tested against the world: no Suffix FilterRule before, none after, so a state-representation normalization and no world change.",
+   "observed": "AC2 PASS and AC3 PASS (13 of 13 simulations as wanted) against their recorded pre-cut FAILs. AC1 FAIL with '(b) rule canonical-schwab-si2-08403355-daily-pull absent' while limb (a) printed ['08242234', '08335338', '08403355'] from the live object. The sha256 reader raised FileNotFoundError and printed an empty hash on the MSYS path, and the real value was then obtained two ways that agreed. Both forbidden addresses ABSENT in both applied plans. Separately the plan's filter_suffix '' -> null on the unrelated bd49finsurance rule was tested against the world: no Suffix FilterRule before, none after, so a state-representation normalization and no world change. AFTER the A1 unblock, AC1 moved FAIL -> PASS on the same unchanged invocation, which is the strongest form of the control: the one criterion that read FAIL did so for a cause outside the deployed work, and it flipped as soon as that cause was removed, so none of the three is stuck in either direction. The naming gate itself also went REFUSE -> CONFORMANT on the same limb, so that gate discriminates too.",
    "status": "FIRED-AS-EXPECTED"
   },
   "determinism": {
@@ -108,10 +118,6 @@
  },
  "declared_exclusions": [
   {
-   "item": "Leg A: the EventBridge rule and target aws_cloudwatch_event_rule/target.si2_daily[\"08403355\"] (resources 1-2).",
-   "reason": "BLOCKED, not skipped. Refused pre-apply by the LGIC naming plan gate in ENFORCE mode; the order's BOUNDS forbid overriding a gate and rule 30's remedy is a registry row outside this order's paths. The decision is the issuer's, with the CTO where rule 30 binds. Row NFRA_OPLGTW-Z-AE-S1. Because the rule does not exist, nothing pulls on a schedule and no bronze can land, which is the safe ordering both halves require, so the estate is coherent rather than half-landed."
-  },
-  {
    "item": "The QA pull (OG-tm-1 Phase B step 11) and AC2 of OG-tm-1.",
    "reason": "Not this order's: the issuer's worker runs it after this report, per the order's step 7 and the COO half section 4."
   },
@@ -120,15 +126,19 @@
    "reason": "Outside this order's <paths>. The order prescribes BUILD_ONLY=1, which skips the script's source-map writer, so the entry's three deploy fields still name the pre-Leg-C artifact. Row NFRA_OPLGTW-Z-AE-S2. OG-ap-2 authorises this seat to touch that file only to register trading_calendar.py, a different edit kept apart from this one."
   },
   {
-   "item": "Flipping this order's <status> to complete.",
-   "reason": "Section 5 permits the flip only if all three criteria PASS. AC1 does not, so <status> stays pending and the flip is left to the issuer."
+   "item": "The QA pull's own grading, and AC2 of OG-tm-1.",
+   "reason": "Not this order's: the issuer's worker runs the QA pull after this report, per step 7 and the COO half section 4."
+  },
+  {
+   "item": "Editing the task-order file beyond the single <status> tag.",
+   "reason": "Section 5 instructs the assignee to flip the ONE <status> tag, and the TO protocol makes `complete` the assignee's own mark, so it is flipped now that all three criteria PASS. Noting the tension for the record: the order's <paths> list does not itself name the task-order file, so the flip rests on section 5's explicit instruction rather than on <paths>. Nothing else in the order file was touched."
   }
  ],
  "surprises": [
-  "NFRA_OPLGTW-Z-S68: BLOCKING -- Leg A refused by the LGIC naming plan gate (DEC-6, ENFORCE) because the sibling-matching rule name canonical-schwab-si2-08403355-daily-pull is not name() output and the resource is an ADDITION; three options stated, decision left to 2.0.0_SA_COO~O with the CTO where rule 30 binds.",
-  "NFRA_OPLGTW-Z-S69: OBSERVATION -- Leg C makes lambda-source-map.json stale for opal-assets-silver-schwab (artifact_sha256, last_deployed_commit, last_deployed_at); that file is outside this order's <paths>, so it was not edited."
+  "NFRA_OPLGTW-Z-S68: BLOCKING, now RESOLVED -- Leg A was refused by the LGIC naming plan gate (DEC-6, ENFORCE) because the sibling-matching rule name is not name() output and the resource is an ADDITION. Amendment A1 @35d90ec7c0 ruled option (c); worker ~39 drained the builder-named TF @897cbc6156; Leg A applied CONFORMANT.",
+  "NFRA_OPLGTW-Z-S69: OBSERVATION -- Leg C made lambda-source-map.json stale for opal-assets-silver-schwab. Since filed, OG-ap-2 put that path in its own <paths> for a different edit; this converter entry's deploy fields are still the issuer's to place."
  ],
- "session_log": "This seat is a SESSION seat (site Z's applier under Andrew-direct ~22:0xZ, msg 32057), not an L7 worker subagent. The trail is this instance, the NEVER-2 ledger entry with its six legs, and the two surprise rows. Preconditions were verified rather than taken from the producer's report: S4's equality claim was re-measured over the 11 vendored modules the package BUILD_MANIFEST declares, not the 9 I first found under data/assets/scripts/silver (that narrower read was corrected before Leg C), giving 11 of 11 byte-equal; silver_build_commit.schwab reads 47c3c75f11; pytest over the silver suite read 597 passed, 11 skipped, 0 failed; and the three ratified edits are present as written, with the NOT_PUBLISHED disposition applied under an `if x not in bronze` guard, which is the CTO half's narrowing that a landed slm file is never suppressed. ROW IDS: the order prescribes NFRA_OPLGTW-Z-AE-S<k>, which SURPRISE_ID_RE (.tools/proof-of-spec-check.py:1206) cannot match because its optional infix is a single letter plus digits, so a two-letter 'AE' makes the row invisible to the ENFORCE'd SURPRISES limb. Exercised both ways: Z-S68 and Z-S69 match, NFRA_OPLGTW-Z-AE-S1 returns NO MATCH. This project had already settled the same collision for an earlier seat's NFRA_OPLGTW-Z-OG-S1 by continuing the Z-S series, so these rows are Z-S68 and Z-S69 (max in channel was Z-S67, read across all 86 hits rather than off one page). The gate was not overridden; the order's row-id instruction is what needs correcting, and the issuer is told.",
+ "session_log": "This seat is a SESSION seat (site Z's applier under Andrew-direct ~22:0xZ, msg 32057), not an L7 worker subagent. The trail is this instance, the NEVER-2 ledger entry with its six legs, and the two surprise rows. Preconditions were verified rather than taken from the producer's report: S4's equality claim was re-measured over the 11 vendored modules the package BUILD_MANIFEST declares, not the 9 I first found under data/assets/scripts/silver (that narrower read was corrected before Leg C), giving 11 of 11 byte-equal; silver_build_commit.schwab reads 47c3c75f11; pytest over the silver suite read 597 passed, 11 skipped, 0 failed; and the three ratified edits are present as written, with the NOT_PUBLISHED disposition applied under an `if x not in bronze` guard, which is the CTO half's narrowing that a landed slm file is never suppressed. ROW IDS: the order prescribes NFRA_OPLGTW-Z-AE-S<k>, which SURPRISE_ID_RE (.tools/proof-of-spec-check.py:1206) cannot match because its optional infix is a single letter plus digits, so a two-letter 'AE' makes the row invisible to the ENFORCE'd SURPRISES limb. Exercised both ways: Z-S68 and Z-S69 match, NFRA_OPLGTW-Z-AE-S1 returns NO MATCH. This project had already settled the same collision for an earlier seat's NFRA_OPLGTW-Z-OG-S1 by continuing the Z-S series, so these rows are Z-S68 and Z-S69 (max in channel was Z-S67, read across all 86 hits rather than off one page). The gate was not overridden; the order's row-id instruction is what needs correcting, and the issuer is told. LEG A COMPLETED after the first report: amendment A1 @35d90ec7c0 ruled row Z-S68 option (c), the issuer's GO (msg 32372) named worker ~39's drain @897cbc6156, and Leg A applied at 04:29:02Z with the naming gate reading CONFORMANT. All six ledger legs now carry proof and the ledger nfra-oplgtw-og-tm-1-taxsma-master is CLOSED. Before the GO arrived I tried `deploy_ledger.py hold`, which correctly REFUSED because an open APPLY leg cannot be HELD; the tool has no extend verb, so on A1's instruction I extended the sentinel's window 6h -> 18h in place and logged why, which kept a sanctioned wait from surfacing as a RED half-landed deploy.",
  "compiler_tools": [
   {
    "tool": "comp-read",
