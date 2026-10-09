@@ -2,10 +2,12 @@
 
 Commits are built with plumbing only (a private index, commit-tree); no ref moves and no working tree changes.
   B0 = HEAD + the bystander's row drift (a standing defect already on the box)
-  X  = B0 + a new file in this project's tree     Y = B0 + another new file in this project's tree
+  X  = B0 + one new file in this project's tree   Y = B0 + the SAME new file, same bytes (a separate commit)
   X1 = HEAD + the same drift + a new file          Y1 = HEAD + the same drift + another new file
-Arm 1 (bystander): box-sync.sh grade X Y -> rc 0 and a STANDING <bystander> line (the drift sits in the merge
-  base, so it is outside the merge's graded path set).
+Arm 1 (bystander): box-sync.sh grade X Y -> rc 0 and a STANDING <bystander> line. The probe file changed on both
+  sides, so the graded path set is that one file (this project's); the drift sits in the merge base, outside it.
+  (AMENDMENT 2: the cut's first form gave X and Y different files, an EMPTY graded set, which grade_merge SKIPs by
+  design -- row NFRA_GATSCP-D1-W2-S2.)
 Arm 2 (own, the difference control): box-sync.sh grade X1 Y1 -> rc 1 (both sides changed the bystander's row, so
   the row is inside the graded path set, box-sync's existing definition at grade_merge).
 `grade` is read-only: it lands nothing and moves no ref.
@@ -26,8 +28,9 @@ def commit(parent, env, msg):
 dirs = []
 
 
-def build(parent, drift, probe):
-    """A commit on `parent`, optionally carrying the bystander's drift, optionally adding one probe file."""
+def build(parent, drift, probe, tag=""):
+    """A commit on `parent`, optionally carrying the bystander's drift, optionally adding one probe file.
+    `tag` only changes the commit message, so two commits with the same tree stay distinct commits."""
     d, env = temp_index()
     dirs.append(d)
     git(["read-tree", parent], env=env)
@@ -35,14 +38,16 @@ def build(parent, drift, probe):
         plant_row_drift(env)
     if probe:
         plant(env, PROBE % probe, "probe %s\n" % probe)
-    return commit(parent, env, "probe %s" % (probe or "B0: bystander drift"))
+    return commit(parent, env, "probe %s %s" % (probe or "B0: bystander drift", tag))
 
 
 try:
     head = git(["rev-parse", "HEAD"]).stdout.strip()
     b0 = build(head, True, None)
-    x = build(b0, False, "x")
-    y = build(b0, False, "y")
+    x = build(b0, False, "xy", "side X")
+    y = build(b0, False, "xy", "side Y")
+    if x == y:
+        raise SystemExit("ERROR: X and Y are one commit; the merge would be empty")
     x1 = build(head, True, "x1")
     y1 = build(head, True, "y1")
     if not all([b0, x, y, x1, y1]):
