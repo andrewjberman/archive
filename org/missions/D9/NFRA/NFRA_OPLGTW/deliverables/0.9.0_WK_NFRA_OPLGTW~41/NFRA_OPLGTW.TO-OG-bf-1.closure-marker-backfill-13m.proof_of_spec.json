@@ -16,11 +16,11 @@
  },
  "artifacts_produced": [
   {
-   "path_or_key": "s3://opal-data-assets/schwab/08242234/meta/complete/ (256 date=<D>.json) and meta/conversions/ (256 <run_id>.json)",
+   "path_or_key": "s3://opal-data-assets/schwab/{08242234,08335338}/meta/complete/ (512 date=<D>.json) and meta/conversions/ (512 <run_id>.json)",
    "kind": "s3_object",
-   "commit_or_etag": "256 VersionIds in backfill_record.json @2451a59455",
+   "commit_or_etag": "512 VersionIds in backfill_record.json",
    "deployed_state": "DEPLOYED-VERIFIED",
-   "deploy_evidence": "256 invocations of opal-assets-silver-schwab 2026-10-09T00:47:08Z..01:28:01Z, each marker read back at its new VersionId and graded QUALIFIED; VersionIds in backfill_record.json; ledger nfra-oplgtw-og-bf-1-marker-backfill CLOSED 2 of 2 legs.",
+   "deploy_evidence": "08242234: 256 invocations 2026-10-09T00:47:08Z..01:28:01Z (ledger nfra-oplgtw-og-bf-1-marker-backfill CLOSED). 08335338: 256 invocations 2026-10-09T05:48:03Z..06:34:07Z, every record QUALIFIED; re-read live at close: 256 of 256 QUALIFIED at the recorded VersionId, 0 mismatches. Ledger nfra-oplgtw-og-bf-1-phase-d CLOSED 2 of 2 legs @42b4f887ff.",
    "artifact_covered_by": [
     "AC1",
     "AC2",
@@ -32,7 +32,7 @@
    "kind": "config_data",
    "commit_or_etag": "2451a59455",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "started_utc 2026-10-09T00:47:08Z, 256 write rows (marker and manifest VersionIds), masters.08242234.backfilled 256, masters.08335338.unavailable 256.",
+   "deploy_evidence": "started_utc 2026-10-09T00:47:08Z; phase_d_started_utc 2026-10-09T05:48:03Z, phase_d_finished_utc 2026-10-09T06:34:07Z; 512 write rows; masters.08242234 backfilled 256 unavailable 0; masters.08335338 backfilled 256 unavailable 0; phase_d_dispatched_doc_lines 0.",
    "artifact_covered_by": [
     "AC1",
     "AC2"
@@ -75,8 +75,8 @@
    "criterion_verbatim": "(?s)08242234: window .*open 0; backfilled-but-not-qualified 0.*08335338: window .*open 0; backfilled-but-not-qualified 0.*RESULT: PASS.*exit=0",
    "method": "command",
    "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/bf1.sh AC1; echo \"exit=$?\"",
-   "output_evidence": "08242234: window 2025-09-07..2026-10-07; silver dates 273; qualified in window 273; backfilled 256; unavailable named 0; open 0; backfilled-but-not-qualified 0\n08335338: window 2025-09-07..2026-10-07; silver dates 273; qualified in window 17; backfilled 0; unavailable named 256; open 0; backfilled-but-not-qualified 0\nRESULT: PASS\nexit=0",
-   "denominator": "2 of 2 masters; 08242234: 273 of 273 window silver dates QUALIFIED (256 backfilled); 08335338: 256 named unavailable (held: 49F accelerator; Y leg pending (A1)), open 0",
+   "output_evidence": "08242234: window 2025-09-07..2026-10-07; silver dates 273; qualified in window 273; backfilled 256; unavailable named 0; open 0; backfilled-but-not-qualified 0\n08335338: window 2025-09-07..2026-10-07; silver dates 273; qualified in window 273; backfilled 256; unavailable named 0; open 0; backfilled-but-not-qualified 0\nRESULT: PASS\nexit=0",
+   "denominator": "2 of 2 masters; each 273 of 273 window silver dates QUALIFIED (256 backfilled per master), open 0, unavailable 0",
    "status": "PASS"
   },
   {
@@ -84,19 +84,19 @@
    "criterion_verbatim": "(?s)backfilled dates [1-9]\\d*; served objects checked [1-9]\\d*.*RESULT: PASS.*exit=0",
    "method": "command",
    "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/bf1.sh AC2; echo \"exit=$?\"",
-   "output_evidence": "backfilled dates 256; served objects checked 1024\nRESULT: PASS\nexit=0",
-   "denominator": "256 backfilled dates, 1024 served objects checked, 0 modified at or after started_utc 2026-10-09T00:47:08Z",
+   "output_evidence": "backfilled dates 512; served objects checked 2048\nRESULT: PASS\nexit=0",
+   "denominator": "512 backfilled dates (256 per master), 2048 served objects checked, 0 modified at or after started_utc 2026-10-09T00:47:08Z; run under the A2 bound (330s), real 2m28s",
    "status": "PASS"
   },
   {
    "criterion_id": "AC3",
    "criterion_verbatim": "AC3 (judgment, graded by 3.0.0_SA_CVO~Z at L9): what the backfill caused downstream (the 49F accelerator and any other consumer) matches the signed ask's statement, read from the consumers' own logs. RECORD; NO VERDICT.",
    "method": "manual_read_with_citation",
-   "invocation": "read org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~41/NEVER_WIDEN_ASK_OG-bf-1.md section 3 and the COO/CTO halves (option W: 08242234 has no consumer, so no dispatch) against the dispatcher's own log group and ledger leg B2",
-   "output_evidence": "RECORDED, NOT GRADED HERE. Signed statement: 08242234 records have no ObjectCreated consumer (0 of 11 live notification configurations match schwab/08242234/meta/); no dispatch. Read after the backfill: /aws/lambda/advi-49f-gold-dispatch filter_log_events 'START RequestId' from 2026-10-09T00:47:08Z to 01:28Z returned 0 events; host i-01003b035d2988dfb 'stopped' at 01:28Z; schwab/08335338/meta/complete/ held 277 object versions before and 277 after; 08335338 wrote nothing (256 dates listed under unavailable, 0 under backfilled). Ledger nfra-oplgtw-og-bf-1-marker-backfill leg B2 carries the same reads; the silver Lambda's own invocations were ours, 256 of 256 with no FunctionError.",
-   "denominator": "1 consumer prefix pair checked (08242234 meta/complete + meta/conversions); 1 dispatcher log group, 0 events in a 40-minute window; 256 of 256 invocations clean",
+   "invocation": "read NEVER_WIDEN_ASK_OG-bf-1.md section 3 and the COO/CTO halves against the dispatcher's own log group (/aws/lambda/advi-49f-gold-dispatch) and ledger legs B2 and D2",
+   "output_evidence": "RECORDED, NOT GRADED HERE. 08242234 (option W): no ObjectCreated consumer; 0 dispatcher events 00:47:08Z..01:28Z. 08335338 (Phase D, after the Y date gate): /aws/lambda/advi-49f-gold-dispatch filter_log_events 2026-10-09T05:48:03Z..06:40:00Z: 1537 events; START RequestId 256; 'SKIP: accelerator marker date=<D> is not the production T-1 2026-10-08; historical record, not dispatched' 256; dispatched doc= lines 0; ERROR 0. Silver Lambda invocations 256 of 256 with write_guard conditional, converted=0. AC2 difference control (unbounded run): 512 dates, 2048 served objects, none modified after the backfill began.",
+   "denominator": "256 of 256 Phase D records produced exactly one dispatcher invocation each, 256 of 256 SKIPPED not-T1, 0 dispatched; 08242234: 0 events",
    "status": "UNVERIFIABLE-BY-INSTRUMENT",
-   "status_reason": "Reserved to 3.0.0_SA_CVO~Z at L9 by the order. A PASS or FAIL written here would be INVALID.",
+   "status_reason": "Reserved to 3.0.0_SA_CVO~Z at L9 by the order; graded there, never self-graded. A PASS or FAIL written here would be INVALID.",
    "judgment": true
   },
   {
@@ -104,7 +104,7 @@
    "criterion_verbatim": "(?s)dategate: pytest rc=0; named tests passed 4 of 4.*remedy: pytest rc=0 .*removed or renamed 0.*RESULT: PASS.*exit=0",
    "method": "command",
    "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/bf1.AC4.sh; echo \"exit=$?\"",
-   "output_evidence": "dategate: pytest rc=0; named tests passed 4 of 4\nremedy: pytest rc=0 (6 passed in 0.51s); test functions at the cut 6, now 6, removed or renamed 0\nRESULT: PASS\nexit=0",
+   "output_evidence": "dategate: pytest rc=0; named tests passed 4 of 4\nremedy: pytest rc=0 (6 passed in 0.61s); test functions at the cut 6, now 6, removed or renamed 0\nRESULT: PASS\nexit=0",
    "denominator": "4 of 4 named date-gate tests; remedy suite 6 of 6 present and passing, 0 removed or renamed",
    "status": "PASS"
   }
@@ -112,36 +112,35 @@
  "controls": {
   "mutant": {
    "status": "N/A-SPEC-NAMES-NONE",
-   "description": "Phase B is a controlled write whose stop conditions (first non-QUALIFIED readback, any Lambda error, throttle or timeout) never fired, so no negative arm ran against the live write. The instrument arms: the Phase A dry run's no-bronze and future-date controls read UNAVAILABLE; AC4's ogbf1y_ac03/ac04 are the date gate's negative arms.",
+   "description": "Phases B and D is a controlled write whose stop conditions (first non-QUALIFIED readback, any Lambda error, throttle or timeout) never fired, so no negative arm ran against the live write. The instrument arms: the Phase A dry run's no-bronze and future-date controls read UNAVAILABLE; AC4's ogbf1y_ac03/ac04 are the date gate's negative arms.",
    "expected": "n/a",
    "observed": "n/a"
   },
   "determinism": {
    "method": "AC1 and AC2 recompute from live S3 with the gateway's own code; the Phase B per-record readback used the same rule independently.",
-   "observed": "256 of 256 records graded QUALIFIED by both the runner's readback and the issuer's AC1 reader.",
+   "observed": "256 of 256 records per master graded QUALIFIED by the runner's readback; Phase D re-read at close 256 of 256 QUALIFIED at recorded VersionIds; AC1 reader agrees (273 of 273 per master).",
    "status": "STABLE"
   }
  },
  "declared_exclusions": [
   {
-   "item": "Flipping this TO's <status> to complete",
-   "reason": "A1: Phase D (08335338 after the Y leg) is still owed; the order stays open."
-  },
-  {
-   "item": "08335338 backfill, the Y leg deploy, and the 'after' CodeSha256 of the dispatcher zip",
-   "reason": "Held by the signed halves; deploy goes to 0.7.0_AE_CloudOps~Z; the build needs a source-map registration outside this order's paths (row NFRA_OPLGTW-Z-W41-S2)."
+   "item": "The Y leg deploy and the 'after' CodeSha256 of the dispatcher zip",
+   "reason": "Deployed by 0.7.0_AE_CloudOps~Z (outside this worker); the dispatcher's own log shows the date gate SKIPping 256 of 256 historical records."
   }
  ],
  "surprises": [
   "NFRA_OPLGTW-Z-W41-S1",
-  "NFRA_OPLGTW-Z-W41-S2"
+  "NFRA_OPLGTW-Z-W41-S2",
+  "NFRA_OPLGTW-Z-W41-S3",
+  "NFRA_OPLGTW-Z-W41-S4",
+  "NFRA_OPLGTW-Z-W41-S5"
  ],
  "session_log": "",
  "compiler_tools": [
   {
-   "tool": "infra/aws/lambda/opal-assets/opal-assets-silver-schwab (deployed build 1f03a3f209) via lambda invoke RequestResponse",
+   "tool": "infra/aws/lambda/opal-assets/opal-assets-silver-schwab (deployed 1f03a3f209 at Phase B, 47c3c75f11 at Phase D; row S3) via lambda invoke RequestResponse",
    "invocation": "bf1_backfill.py, one invocation per date, newest first, one in flight",
-   "result": "256 of 256 records qualified, write_guard conditional, converted=0"
+   "result": "512 of 512 records qualified (256 per master), write_guard conditional, converted=0"
   }
  ]
 }

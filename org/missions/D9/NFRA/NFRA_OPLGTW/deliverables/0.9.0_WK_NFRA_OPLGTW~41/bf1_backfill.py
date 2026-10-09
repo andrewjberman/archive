@@ -1,7 +1,9 @@
-"""NFRA_OPLGTW OG-bf-1 PHASE B -- the controlled replay over the SIGNED write set: master 08242234 ONLY.
+"""NFRA_OPLGTW OG-bf-1 PHASES B and D -- the controlled replay over a SIGNED write set, one master per run.
 
-Signed (option W): COO half @35ca8013bb, CTO half @f9b1f1fd31. The master is a constant here on purpose: 08335338 is
-HELD (the 49F accelerator), so this tool cannot be pointed at it.
+Phase B (08242234): option W, COO half @35ca8013bb, CTO half @f9b1f1fd31.
+Phase D (08335338): COO half @8be94ecce4, CTO half @fa71e133b6, after the Y date gate went live. For 08335338 the
+run ALSO reads the advi-49f-gold-dispatch log after every date and STOPS on any `dispatched: doc=` line since the
+phase started (the signed stop rule); a date moves from `unavailable` to `backfilled` when written.
 
 Per candidate date, newest first, ONE invocation in flight: list the date's bronze keys, invoke
 opal-assets-silver-schwab RequestResponse (one attempt, no retry) with them as a synthetic S3 event (the OG-c-2 form),
@@ -12,7 +14,7 @@ Lambda error, throttle or timeout. Never run inside 09:30-10:30Z, 12:10-13:00Z (
 State is kept in <out> (backfill_record.json) after every date, so a stop is resumable and nothing is re-written:
 a date already under `backfilled` is skipped.
 
-Usage: python bf1_backfill.py <repo_root> <plan.json> <out_record.json> [max_dates]
+Usage: python bf1_backfill.py <repo_root> <plan.json> <out_record.json> [max_dates] [master: 08242234|08335338]
 """
 from __future__ import annotations
 
@@ -28,9 +30,10 @@ from botocore.config import Config
 BUCKET = "opal-data-assets"
 MASTER = "08242234"
 HELD_MASTER = "08335338"
+DISPATCHER_LOG = "/aws/lambda/advi-49f-gold-dispatch"
 HELD_REASON = "held: 49F accelerator; Y leg pending (A1)"
 FUNCTION = "opal-assets-silver-schwab"
-AVOID = ((9 * 60 + 30, 10 * 60 + 30), (12 * 60 + 10, 13 * 60), (21 * 60 + 30, 22 * 60 + 30))
+AVOID = ((9 * 60 + 30, 10 * 60 + 30), (9 * 60 + 40, 9 * 60 + 55), (12 * 60 + 10, 13 * 60), (21 * 60 + 30, 22 * 60 + 30))
 
 
 def in_avoid_window(now):
@@ -42,7 +45,23 @@ def utc():
     return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def dispatched_lines(logs, start_ms):
+    """Count of `dispatched: doc=` lines in the dispatcher log since start_ms (the signed stop rule)."""
+    n = 0
+    for pg in logs.get_paginator("filter_log_events").paginate(
+            logGroupName=DISPATCHER_LOG, startTime=start_ms, filterPattern='"dispatched: doc="'):
+        n += len(pg["events"])
+    return n
+
+
 def main(argv):
+    global MASTER, HELD_MASTER
+    if len(argv) > 5:
+        if argv[5] not in ("08242234", "08335338"):
+            raise SystemExit("master not in the signed sets")
+        MASTER = argv[5]
+        HELD_MASTER = "08335338" if MASTER == "08242234" else "08242234"
+    phase_d = MASTER == "08335338"
     root = pathlib.Path(argv[1])
     plan = json.loads(pathlib.Path(argv[2]).read_text(encoding="utf-8"))
     out = pathlib.Path(argv[3])
@@ -68,6 +87,10 @@ def main(argv):
                "masters": {MASTER: {"backfilled": [], "unavailable": {}},
                            HELD_MASTER: {"backfilled": [], "unavailable": {d: HELD_REASON for d in held}}}}
     done = set(rec["masters"][MASTER]["backfilled"])
+    logs = boto3.client("logs", region_name="us-east-1")
+    if phase_d and not rec.get("phase_d_started_utc"):
+        rec["phase_d_started_utc"] = utc()
+    d_start_ms = int(dt.datetime.fromisoformat(rec["phase_d_started_utc"].replace("Z", "+00:00")).timestamp() * 1000)         if phase_d else 0
 
     def save():
         out.write_text(json.dumps(rec, indent=1) + "\n", encoding="utf-8", newline="\n")
@@ -142,11 +165,30 @@ def main(argv):
             "closure_status": closure.get("status"), "closure_id": closure.get("closure_id"),
             "write_guard": closure.get("write_guard"), "converted": payload.get("converted")})
         rec["masters"][MASTER]["backfilled"].append(d)
+        rec["masters"][MASTER]["unavailable"].pop(d, None)
         rec["stopped"] = None
         save()
         n += 1
+        if phase_d:
+            hits = dispatched_lines(logs, d_start_ms)
+            if hits:
+                rec["stopped"] = {"at": utc(), "date": d, "why": "STOP RULE: %d dispatched: doc= line(s) in the "
+                                  "dispatcher log since %s" % (hits, rec["phase_d_started_utc"])}
+                save()
+                print("STOP at", d, rec["stopped"]["why"])
+                return 1
         print(d, "OK", new_v, "prior", prior, "%.1fs" % (time.time() - t0), flush=True)
-    rec["finished_utc"] = utc() if len(rec["masters"][MASTER]["backfilled"]) == len(dates) else None
+    if phase_d and len(rec["masters"][MASTER]["backfilled"]) == len(dates):
+        time.sleep(90)  # let the last records' dispatcher invocations reach the log before the final read
+        hits = dispatched_lines(logs, d_start_ms)
+        rec["phase_d_dispatched_doc_lines"] = hits
+        if hits:
+            rec["stopped"] = {"at": utc(), "date": None, "why": "STOP RULE at final read: %d dispatched: doc= line(s)" % hits}
+            save()
+            print("STOP", rec["stopped"]["why"])
+            return 1
+    key = "phase_d_finished_utc" if phase_d else "finished_utc"
+    rec[key] = utc() if len(rec["masters"][MASTER]["backfilled"]) == len(dates) else None
     save()
     print("backfilled", len(rec["masters"][MASTER]["backfilled"]), "of", len(dates))
     return 0

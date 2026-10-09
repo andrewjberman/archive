@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-gg-1.the-20f-cutter-cuts-each-filings-own-headings",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9bac67f9d0028064629cba97b38e3a077f9f6996"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "30757238e7126eef3cfbf6bafb0a9606adb31416",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gg-1.the-20f-cutter-cuts-each-filings-own-headings.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~323",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/document.py",
+      "kind": "script",
+      "commit_or_etag": "60b2ad038994634175a8295fc3fb58ae7e35fe27",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, ADD-ONLY (329 inserted lines, 0 removed): _cut_bounded and every 10-K/20-F pattern are untouched; cut() calls the new _cut_20f_fallback only on a 20-F key _cut_bounded read FAILED. New: _cut_risk_heading (first whole-line 'Risk Factors', optional A.-D. prefix, closed at the nearer of the existing end patterns + Item 5 and the table's Item 16K section), the Item 4 'Information on/about' business fallback (reuses _cut_bounded), and _cut_xref (the closing Form 20-F cross-reference table read: item entry -> named report sections -> first with a usable body heading, closed at the next section the table names for another entry; a name seen more than 5 times, or printed after a bare page number, is not a heading). The merge is a site-Z deploy under 1.0.0_SA_CTO~Z's half; nothing is deployed from this worktree.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_document.py",
+      "kind": "test",
+      "commit_or_etag": "60b2ad038994634175a8295fc3fb58ae7e35fe27",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, ADD-ONLY: 3 classes, 11 tests (TheTwentyFWholeLineRiskHeading x4, TheTwentyFItemFourBusinessFallback x2, TheTwentyFCrossReferenceMode x5), one plant per rule (whole-line risk heading, first-not-last, the Item 4 fallback, a cross-reference table mapping, a running-header name) each with a contents-page decoy that must not be cut. Folder run lib/research/filings/tests: 'Ran 154 tests in 9.567s' then 'OK'.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the five cached real 20-F filings each cut business, risk and mdna from their own body headings, 15 of 15 cells OK with plausible lengths (or FAILED with a named reason the check accepts); R82 CUT AC1: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round82_prep/checks/r82_cut.py\" --crit AC1; echo \"exit=$?\"",
+      "output_evidence": "     ASML_NA_Equity   business=OK(91976)  risk=OK(53968)  mdna=OK(31578)\n     BABA_US_Equity   business=OK(208203)  risk=OK(350005)  mdna=OK(131933)\n     NU_US_Equity     business=OK(220925)  risk=OK(292653)  mdna=OK(93288)\n     PBR_US_Equity    business=OK(11085)  risk=OK(94490)  mdna=OK(19885)\n     SAP_GY_Equity    business=OK(78104)  risk=OK(33745)  mdna=OK(86338)\nPASS C1 business, risk and mdna cut from each real filing's own heading: 15 of 15\nR82 CUT AC1: YES\nexit=0",
+      "denominator": "15 of 15 cells OK (5 filings x business/risk/mdna), each >= 1500 chars with a non-empty heading; base was 6 of 15",
+      "status": "PASS",
+      "expect": "R82 CUT AC1: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the 10-K fixture and dd-1's 20-F fixture sections hash as at the base; R82 CUT AC2: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round82_prep/checks/r82_cut.py\" --crit AC2; echo \"exit=$?\"",
+      "output_evidence": "PASS B1 the 10-K and 20-F fixture sections hash as at round 80: R80 R1 AC3 SERVED: YES\nR82 CUT AC2: YES\nexit=0",
+      "denominator": "all 10-K and 20-F fixture sections of round 80's r80_dd1.py AC3 hash as at the base (check prints YES, exit 0)",
+      "status": "PASS",
+      "expect": "R82 CUT AC2: YES.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted discriminator: the first-not-last rule. Mutant: iterate the whole-line Risk Factors matches in reverse (the parser 1.0.0 'last match' behaviour).",
+      "expected": "TheTwentyFWholeLineRiskHeading goes red on the first-qualified and the contents-decoy tests.",
+      "observed": "Under the mutant: FAIL test_the_body_line_is_cut_and_the_contents_decoy_is_not and FAIL test_the_first_qualified_line_wins_never_the_last, 'FAILED (failures=2)'; document.py restored from the saved copy, 4 tests OK again, git status clean.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice in this session (before and after the commit) on the cached filing texts; the cutter is pure over the text.",
+      "observed": "Identical grids both times: ASML 91976/53968/31578, BABA 208203/350005/131933, NU 220925/292653/93288, PBR 11085/94490/19885, SAP 78104/33745/86338.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any store write, re-cut of the stored sources, model call, deploy or merge",
+      "reason": "Order bounds 1 and 4: this cell edits document.py and its test only; the merge is a site-Z deploy under 1.0.0_SA_CTO~Z's half."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W323-S1: PBR's extracted text has no body heading for 'Our Business' or 'Operating and Financial Review and Prospects', so PBR business is cut from 'About us' (11,085 chars) and mdna from 'Liquidity and Capital Resources' (19,885 chars); ASML mdna includes the risk-management pages; AC1 reads 15 of 15 on status and length alone."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python unittest (lib/research/filings/tests, empty fitz.py on PYTHONPATH)",
+      "invocation": "PYTHONPATH=\"$(pwd):$(pwd)/.scratch/stub\" python -m unittest discover -s lib/research/filings/tests -p \"test_*.py\" -q",
+      "result": "Ran 154 tests in 9.567s; OK"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, surprise-row-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~323 <0.9.0_WK_AMGT_RESAPP~323@opal.agent>\" -F .scratch/msg1.txt -- <3 paths>",
+      "result": "[surprise-row-gate] OK; commit 60b2ad038994634175a8295fc3fb58ae7e35fe27"
+    }
+  ]
+}
