@@ -57,7 +57,7 @@ def load_record():
         return json.loads(RECORD.read_text(encoding="utf-8"))
     return {"order": "NFRA_OPLGTW.TO-OG-bh-1", "worker": "0.9.0_WK_NFRA_OPLGTW~46", "master": "08403355",
             "started_utc": iso(now()), "batches": [], "backfilled": [], "unavailable": {},
-            "qualified_by_scheduled_pull": [], "stops": []}
+            "qualified_by_scheduled_pull": [], "stops": [], "held": {}}
 
 
 def save_record(rec):
@@ -67,6 +67,29 @@ def save_record(rec):
 def census_counts():
     out = json.loads((HERE / "ssm_invocation_census_2000.json").read_text(encoding="utf-8"))["StandardOutputContent"]
     return {d: int(n) for d, n in re.findall(r"^DATE (\d{4}-\d{2}-\d{2}) (\d+)\s*$", out.replace("\r", ""), re.M)}
+
+
+RPS_SUBJECTS = {"fact_rps", "fact_rps_s2", "dim_position", "dim_balance"}
+
+
+def scan_errors(t0, t1):
+    """Converter ERROR log lines in [t0, t1]: (rps SchemaDriftError dates, other error lines)."""
+    logs = boto3.client("logs", region_name="us-east-1")
+    drift, other = set(), []
+    s, e = int(t0.timestamp() * 1000), int(t1.timestamp() * 1000)
+    for pg in logs.get_paginator("filter_log_events").paginate(
+            logGroupName="/aws/lambda/opal-assets-silver-schwab", startTime=s, endTime=e, filterPattern="ERROR"):
+        for ev in pg["events"]:
+            m = ev["message"].strip()
+            if not m.startswith("[ERROR]"):
+                continue
+            mm = re.search(r"bronze/rps/(\d{8})/", m)
+            if mm and "SchemaDriftError" in m and m.count("bronze/") == 1:
+                d = mm.group(1)
+                drift.add(d[:4] + "-" + d[4:6] + "-" + d[6:])
+            else:
+                other.append(m[:300])
+    return drift, other
 
 
 def run_ssm(ssm, params_path):
@@ -173,9 +196,32 @@ def main(first, last, root):
             time.sleep(180)  # one re-read: a record composed by the last sibling event can post a few seconds after the idle poll
             res = tool.grade(grade_from, grade_to, str(CENSUS), root)
             bad = {d: r for d, r in res.items() if r["class"] != "QUALIFIED"}
+        drift, other_errors = scan_errors(t0, now())
+        held_known = rec.setdefault("held", {})
         b["dates_graded"] = len(res)
         b["qualified"] = sum(1 for r in res.values() if r["class"] == "QUALIFIED")
-        b["not_qualified"] = {d: r for d, r in bad.items()}
+        b["held_known_in_range"] = sorted(d for d in bad if d in held_known)
+        new_held = []
+        stop = []
+        for d, r in sorted(bad.items()):
+            if d in held_known or d <= ERA_A_END:
+                continue
+            subjects = set()
+            for f in r.get("closure_findings", []):
+                mm = re.search(r"'subject': '(\w+)'", f)
+                subjects.add(mm.group(1) if mm else "?")
+            if d in drift and subjects and subjects <= RPS_SUBJECTS and r.get("membership_findings") == []:
+                new_held.append(d)
+            else:
+                stop.append("era B/C date %s not qualified and not only an RPS SchemaDriftError: %s" % (d, json.dumps(r)[:240]))
+        if b["metrics"]["Errors"] > 3 * len(drift):
+            stop.append("converter Errors %s exceed 3 attempts x %d RPS drift files" % (b["metrics"]["Errors"], len(drift)))
+        if other_errors:
+            stop.append("converter errors other than RPS SchemaDriftError: %d, first %s" % (len(other_errors), other_errors[0]))
+        for d in new_held:
+            held_known[d] = "held: vendor drift (RPS pin)"
+        b["held_new"] = new_held
+        b["not_qualified"] = {d: r for d, r in bad.items() if d not in held_known}
         sched = ("2026-09-09", "2026-10-08")
         for d, r in sorted(res.items()):
             if r["class"] == "QUALIFIED":
@@ -187,17 +233,14 @@ def main(first, last, root):
             elif d <= ERA_A_END:
                 rec["unavailable"][d] = json.dumps({kk: r[kk] for kk in r if kk != "version_id"}, sort_keys=True)[:600]
         rec["backfilled"].sort()
-        save_record(rec)
-        stop = []
-        if any(d > ERA_A_END for d in bad):
-            stop.append("era B/C date(s) not qualified: %s" % sorted(d for d in bad if d > ERA_A_END)[:6])
-        if b["dlq_after"] > dlq0:
-            stop.append("DLQ depth %d above its baseline %d" % (b["dlq_after"], dlq0))
+        if b["dlq_after"] > dlq0 + len(new_held):
+            stop.append("DLQ depth %d above its baseline %d plus %d newly held RPS files" % (b["dlq_after"], dlq0, len(new_held)))
         if stop:
             rec["stops"].append({"batch": k, "reason": "; ".join(stop)})
             save_record(rec)
             print("STOP:", "; ".join(stop))
             return 4
+        save_record(rec)
         print("BATCH %d OK: dates %d qualified %d (era A unavailable so far %d) puller %.1f min drain +%.1f min" % (
             k, b["dates_graded"], b["qualified"], len(rec["unavailable"]), b.get("puller_minutes") or -1, b["drain_minutes_after_puller"]))
     return 0
