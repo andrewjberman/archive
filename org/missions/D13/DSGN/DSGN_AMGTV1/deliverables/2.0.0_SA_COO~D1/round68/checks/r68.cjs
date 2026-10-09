@@ -17,8 +17,10 @@
  *   2  HEADER EMPTY: with the header serving neither figure while the peer set's subject carries both, both cells read "--".
  *   3  NO OVERLAY: with no overlay at all, both cells read "--".
  *   4  BOUNDED: a subject column with no header tile (the first such column the subject carries) still prints the table's value.
- *   5  PLANTED: the comparator rejects a figure where "--" is wanted and "--" where a figure is wanted; a correct row passes.
- * Prints one line per arm and "ROUND 68 ONE FIELD PER MEASURE: <k> of 5 arms"; exit 0 only at 5 of 5.
+ *   5  UNMEASURED (AMENDMENT 1, the 992 HK close walk 16:07Z): a header EV served with an UNMEASURED currency basis is withheld by the
+ *      tile (CRPS-ao-3, FWD-20: the tile body is a dash, the reason on hover); the subject row applies the SAME rule and reads "--".
+ *   6  PLANTED: the comparator rejects a figure where "--" is wanted and "--" where a figure is wanted; a correct row passes.
+ * Prints one line per arm and "ROUND 68 ONE FIELD PER MEASURE: <k> of 6 arms"; exit 0 only at 6 of 6.
  */
 const fs = require('fs');
 const path = require('path');
@@ -33,10 +35,14 @@ const CT = L.source(SA + 'cscTable.ts');
 const fig = (ov, mn) => ((ov && ov.header_figures) || []).find((f) => f && f.mnemonic === mn);
 const PX = fig(FIX.overlay, 'PX_LAST');
 const EV = fig(FIX.overlay, 'CURR_ENTP_VAL');
-const TILE = {
-  Price: PX ? ST.formatStatValue(Number(PX.value), 'price', PX.currency || null) : null,
-  EV: EV ? ST.formatStatValue(Number(EV.value), 'currency-millions', EV.currency || null) : null,
+// AMENDMENT 1: the tile's own call (HeaderCards resolveFigure) -- the figure's unit and served currency_basis ride along, and a null or
+// unit-not-resolved display is the tile's dash. An UNMEASURED basis therefore reads "--" (CRPS-ao-3, FWD-20).
+const tileText = (f, format) => {
+  if (!f) return null;
+  const d = ST.formatStatValue(f.value, format, f.currency || null, f.unit, ST.figureBasis(f));
+  return d === null || d === ST.UNIT_NOT_RESOLVED_WORDS ? '--' : d;
 };
+const TILE = { Price: tileText(PX, 'price'), EV: tileText(EV, 'currency-millions') };
 
 // The peer set with a subject that carries the members' own Price and EV fields (the 992 HK shape).
 const columns = CT.buildCscTable(FIX.peers, null).columns;
@@ -134,6 +140,16 @@ arm('BOUNDED: a subject column with no header tile keeps the table\'s served val
   else if (g === '--') f.push(`OVERREACH: "${label}" reads "--" though the subject carries it and no tile shows it`);
   return `"${label}" reads "${g}"`;
 });
+arm('UNMEASURED: a header EV served with an UNMEASURED currency basis reads "--" in the row, as its tile withholds it (one rule)', (f) => {
+  if (!EV) { f.push('INPUT: no CURR_ENTP_VAL in the fixture'); return; }
+  const evU = { ...EV, currency_basis: 'UNMEASURED: no read isolates the figure\'s own currency' };
+  const want = tileText(evU, 'currency-millions');
+  if (want !== '--') f.push(`INPUT: the tile rule does not withhold an UNMEASURED EV here (tile reads "${want}")`);
+  const ov = { ...FIX.overlay, header_figures: (FIX.overlay.header_figures || []).map((x) => (x.mnemonic === 'CURR_ENTP_VAL' ? evU : x)) };
+  const r = render(ov);
+  if (r.error) f.push(r.error); else f.push(...faults({ EV: cellUnder(r, 'EV') }, { EV: '--' }).map((x) => x.replace('FALLBACK:', 'TWO RULES:').replace('where the header serves nothing', 'where its tile withholds it')));
+  return `tile "${want}", row reads "${r.error ? '?' : cellUnder(r, 'EV')}"`;
+});
 arm('PLANTED: a fallback figure and a missing tile figure are rejected; a correct row passes', (f) => {
   const want = { Price: 'USD 204.80', EV: '--' };
   if (faults({ Price: 'USD 204.80', EV: '--' }, want).length) f.push('a correct row is rejected');
@@ -145,5 +161,5 @@ arm('PLANTED: a fallback figure and a missing tile figure are rejected; a correc
 
 let pass = 0;
 for (const [n, ok, d] of arms) { if (ok) pass += 1; console.log(`${ok ? 'ARM PASS' : 'ARM FAIL'} ${n} :: ${d}`); }
-console.log(`ROUND 68 ONE FIELD PER MEASURE: ${pass} of 5 arms`);
-process.exit(pass === 5 ? 0 : 1);
+console.log(`ROUND 68 ONE FIELD PER MEASURE: ${pass} of ${arms.length} arms`);
+process.exit(pass === arms.length ? 0 : 1);
