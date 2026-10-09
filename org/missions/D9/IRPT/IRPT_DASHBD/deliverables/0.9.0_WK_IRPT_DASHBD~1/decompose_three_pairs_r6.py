@@ -23,7 +23,24 @@ HERE = Path(__file__).resolve().parent
 s3 = boto3.client("s3")
 doc = ard.load_declaration()
 src = ard.source_entry(doc, ard.declared_sources(doc)[0])
-INT_ADJ = {("0027265115", "2026-06-25"): 4429.53}   # INTRA/FC/IN CREDIT 'MARGIN INT ADJ', read from fact_trn 2026-06-25
+def _REAL(token):
+    """Resolve an acct# token to the real account id at run time from the private evidence dir (outside the repo)."""
+    import json as _json
+    import os as _os
+    d = _os.environ.get("IRPT_PRIVATE_EVIDENCE_DIR")
+    if not d:
+        raise SystemExit("REFUSE: IRPT_PRIVATE_EVIDENCE_DIR is not set; this historical script needs the private account map")
+    p = _os.path.join(d, "account_map_49financial.json")
+    if not _os.path.isfile(p):
+        raise SystemExit("REFUSE: account_map_49financial.json is absent from IRPT_PRIVATE_EVIDENCE_DIR")
+    with open(p, encoding="utf-8") as fh:
+        m = _json.load(fh)
+    if token not in m:
+        raise SystemExit("REFUSE: token %s is not in the account map" % token)
+    return m[token]
+
+
+INT_ADJ = {(_REAL("acct#89d0916a"), "2026-06-25"): 4429.53}   # INTRA/FC/IN CREDIT 'MARGIN INT ADJ', read from fact_trn 2026-06-25
 
 
 def bd_point(acct, start, end):

@@ -25,6 +25,23 @@ def bd_point(acct, start, end):
 
 
 pairs, s22 = [], None
+def _REAL(token):
+    """Resolve an acct# token to the real account id at run time from the private evidence dir (outside the repo)."""
+    import json as _json
+    import os as _os
+    d = _os.environ.get("IRPT_PRIVATE_EVIDENCE_DIR")
+    if not d:
+        raise SystemExit("REFUSE: IRPT_PRIVATE_EVIDENCE_DIR is not set; this historical script needs the private account map")
+    p = _os.path.join(d, "account_map_49financial.json")
+    if not _os.path.isfile(p):
+        raise SystemExit("REFUSE: account_map_49financial.json is absent from IRPT_PRIVATE_EVIDENCE_DIR")
+    with open(p, encoding="utf-8") as fh:
+        m = _json.load(fh)
+    if token not in m:
+        raise SystemExit("REFUSE: token %s is not in the account map" % token)
+    return m[token]
+
+
 for p in rem["pairs"]:
     bd = bd_point(p["account"], p["start"], p["end"])
     bmv, emv = bd["beginningMarketValue"], bd["endingMarketValue"]
@@ -40,7 +57,7 @@ for p in rem["pairs"]:
                                                                   p["sign_check"]["bd_ending_minus_equity_plus_accrual"]]}
     if not within:
         k = (p["account"], p["start"])
-        if k == ("0027265115", "2026-06-25"):
+        if k == (_REAL("acct#89d0916a"), "2026-06-25"):
             cf = p["counterfactual_int_adj_as_flow"]
             rec["reason"] = (MARGIN_ADJ + ". MEASURED: Black Diamond reports netAdditions %.2f over this window and Opal's window external flow was "
                              "0.00 (round 6, DECOMPOSE_THREE_PAIRS_R6.json; a flow does not depend on the value basis); the 4,429.53 INTRA/FC/IN credit of 2026-06-25 treated as a flow moves the pair from %.4f pp to %.4f pp "
