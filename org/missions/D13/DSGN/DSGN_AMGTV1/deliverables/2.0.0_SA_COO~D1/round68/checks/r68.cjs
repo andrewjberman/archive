@@ -19,8 +19,10 @@
  *   4  BOUNDED: a subject column with no header tile (the first such column the subject carries) still prints the table's value.
  *   5  UNMEASURED (AMENDMENT 1, the 992 HK close walk 16:07Z): a header EV served with an UNMEASURED currency basis is withheld by the
  *      tile (CRPS-ao-3, FWD-20: the tile body is a dash, the reason on hover); the subject row applies the SAME rule and reads "--".
- *   6  PLANTED: the comparator rejects a figure where "--" is wanted and "--" where a figure is wanted; a correct row passes.
- * Prints one line per arm and "ROUND 68 ONE FIELD PER MEASURE: <k> of 6 arms"; exit 0 only at 6 of 6.
+ *   6  SAME REASON (AMENDMENT 2, CTO msg 2816: '"--" in both places with the same reason'): the withheld subject EV cell carries the
+ *      tile's own reason as a title (the literal read from HeaderCards.tsx); a shown EV cell carries none.
+ *   7  PLANTED: the comparator rejects a figure where "--" is wanted and "--" where a figure is wanted; a correct row passes.
+ * Prints one line per arm and "ROUND 68 ONE FIELD PER MEASURE: <k> of 7 arms"; exit 0 only at 7 of 7.
  */
 const fs = require('fs');
 const path = require('path');
@@ -73,8 +75,27 @@ function subjectRow(html) {
   const at = html.indexOf('data-csc-row="subject"');
   if (at < 0) return { error: 'no data-csc-row="subject" row' };
   const tr = html.slice(html.lastIndexOf('<tr', at), html.indexOf('</tr>', at));
-  return { heads, cells: cellsOf(tr) };
+  return { heads, cells: cellsOf(tr), raw: Array.from(tr.matchAll(/<td\b[\s\S]*?<\/td>/g)).map((m) => m[0]) };
 }
+// AMENDMENT 2: every title attribute inside one cell, entity-decoded.
+const titlesIn = (raw) => Array.from(String(raw || '').matchAll(/\btitle="([^"]*)"/g)).map((m) =>
+  m[1].replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+const rawUnder = (r, name) => {
+  const i = r.heads.findIndex((h) => h === name || h.startsWith(name + ' '));
+  return i < 0 ? undefined : r.raw[i];
+};
+// The tile's own withheld reason for an UNMEASURED money figure, read from the page's source (HeaderCards.tsx, or StatTile.tsx if the
+// words move there as one shared copy) -- never typed here. Exactly one distinct literal must exist across the two files.
+const REASON = (() => {
+  const lits = new Set();
+  for (const f of ['components/HeaderCards.tsx', 'components/StatTile.tsx']) {
+    const src = fs.readFileSync(path.join(L.base, SA + f), 'utf8');
+    for (const re of [/"([^"\n]*does not confirm this figure[^"\n]*)"/g, /`([^`\n]*does not confirm this figure[^`\n]*)`/g]) {
+      for (const m of src.matchAll(re)) lits.add(m[1]);
+    }
+  }
+  return lits.size === 1 ? [...lits][0] : null;
+})();
 const cellUnder = (r, name) => {
   const i = r.heads.findIndex((h) => h === name || h.startsWith(name + ' '));
   return i < 0 ? undefined : r.cells[i];
@@ -149,6 +170,20 @@ arm('UNMEASURED: a header EV served with an UNMEASURED currency basis reads "--"
   const r = render(ov);
   if (r.error) f.push(r.error); else f.push(...faults({ EV: cellUnder(r, 'EV') }, { EV: '--' }).map((x) => x.replace('FALLBACK:', 'TWO RULES:').replace('where the header serves nothing', 'where its tile withholds it')));
   return `tile "${want}", row reads "${r.error ? '?' : cellUnder(r, 'EV')}"`;
+});
+arm('SAME REASON: the withheld subject EV carries the tile\'s own reason on hover; a shown EV carries none', (f) => {
+  if (!EV) { f.push('INPUT: no CURR_ENTP_VAL in the fixture'); return; }
+  if (!REASON) { f.push('INPUT: the tile\'s UNMEASURED reason literal was not found in HeaderCards.tsx'); return; }
+  const evU = { ...EV, currency_basis: 'UNMEASURED: no read isolates the figure\'s own currency' };
+  const rU = render({ ...FIX.overlay, header_figures: (FIX.overlay.header_figures || []).map((x) => (x.mnemonic === 'CURR_ENTP_VAL' ? evU : x)) });
+  if (rU.error) { f.push(rU.error); return; }
+  const tU = titlesIn(rawUnder(rU, 'EV'));
+  if (!tU.some((t) => t.includes(REASON))) f.push(`NO REASON: the withheld EV cell's titles are ${JSON.stringify(tU)} (want one carrying "${REASON}")`);
+  const rS = render(FIX.overlay);
+  if (rS.error) { f.push(rS.error); return; }
+  const tS = titlesIn(rawUnder(rS, 'EV'));
+  if (tS.some((t) => t.includes(REASON))) f.push('INVENTED REASON: a shown EV cell carries the withheld reason');
+  return `withheld cell title carries "${REASON}"; shown cell carries none`;
 });
 arm('PLANTED: a fallback figure and a missing tile figure are rejected; a correct row passes', (f) => {
   const want = { Price: 'USD 204.80', EV: '--' };
