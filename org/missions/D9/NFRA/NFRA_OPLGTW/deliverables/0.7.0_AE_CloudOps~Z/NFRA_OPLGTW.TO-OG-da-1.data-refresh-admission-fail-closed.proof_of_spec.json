@@ -1,0 +1,229 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-da-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "39f5404132"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "779add6b4c",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-da-1.data-refresh-admission-fail-closed.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/data_refresh/lambda_function.py",
+   "kind": "script",
+   "commit_or_etag": "d9539cc0b7",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "The Phase A fix: validate_user_type admitted on `if not user_type or user_type == 'Dev'`, so an EMPTY userType admitted, and Method 3 (no authorizer context) admitted as a fictional dev@test.com. All three paths now take one rule: userType == 'Dev' admits, else is_opal_internal(context) admits, else REFUSE with the reason logged; Method 3 refuses outright and returns ('unknown'), never an invented actor. New helper is_opal_internal matches tier == 'internal' or firmId == 'opal-capital' by EXACT match after strip(), never by truthiness, and returns False for anything it cannot positively recognise -- which is what refuses the authorizer's literal STRING \"null\" that `if firm_id:` would have admitted. Deployed and verified live: AC2's own instrument downloads the live zip and reads 'lambda_function.py equal-to-HEAD=True'.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/data_refresh/test_admission_gate.py",
+   "kind": "test",
+   "commit_or_etag": "d9539cc0b7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "pytest, offline, no AWS and no network, named exactly as da1.AC1.sh's header requires: test_ogda1_ac01 (Dev admitted, the positive control) through test_ogda1_ac05 (no authorizer refused, and the actor is never dev@test.com). It is a TEST and is deliberately NOT packaged: the source map's files[] for this function lists exactly lambda_function.py and check_triggered_by.py, and the builder asserts the built member set equals that list, so a test file could not have shipped silently.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/data-refresh/opal-data-refresh-api.zip",
+   "kind": "s3_object",
+   "commit_or_etag": "96563a6797ef4a13890778c11e7dc4aa",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "VersionId f0pfQmR1BByh9jcBQHwYymYRSfZ2IKih, 20716 bytes, SSE AES256, content-sha256 user metadata qHMjXkK1/1NhmBmkK/6Q+q+WdXMRoTOprNfTixBIxaM=. Built from HEAD via `git show HEAD:<path>` rather than from the working tree, so the deploy ships the reviewed bytes and an uncommitted edit could not have ridden along; members read 83888 B and 1825 B with 0 CRLF pairs in either, and the builder ASSERTS the built member set equals the source map's declared set. The module reads source_code_hash from this object's content-sha256 user metadata (modules/yang-lambda/main.tf:39), so the upload used --metadata and was verified by head-object on size AND a byte-equality comparison of the metadata string -- never on rc=0, and that check is the one that would have caught an argv mangling of a base64 value containing slashes. Prior version WJQGGIAlTSMp0Vny8avvQ7LxflVuvLf6 (content-sha256 E4944Imr7Y4S4//rTR6HN5sbwczbwLw5DcaH4IZ0D0E=, 19753 B) retained as the named rollback; the bucket is versioned.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/data-refresh/opal-data-refresh-api-qa-scratch.zip",
+   "kind": "s3_object",
+   "commit_or_etag": "15413b4ac88881c9b0e19dae0eceb215",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Created under amendment A1's disposition (b) to PIN the qa-scratch clone off the production key. A server-side copy of production artifact version WJQGGIAlTSMp0Vny8avvQ7LxflVuvLf6 with --metadata-directive REPLACE carrying content-sha256 E4944Imr7Y4S4//rTR6HN5sbwczbwLw5DcaH4IZ0D0E=. Verified by head-object: VersionId vd2cd6VmD378Vs1eiZgBDTZMzYJTACfM, 19753 bytes, SSE AES256, ETag 15413b4ac88881c9b0e19dae0eceb215 EQUAL to the source version's ETag, which is what proves the pinned bytes are byte-identical to what the clone already ran.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/data-refresh/qa-scratch-instance.tf",
+   "kind": "terraform",
+   "commit_or_etag": "99c3b4c1b1",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "artifact_key repointed from the shared production key to the clone's own pinned key, under amendment A1 @888b6c9699, which added this file to <paths>. Applied from a SAVED full-root plan whose single non-no-op row changed s3_key and s3_object_version while source_code_hash did NOT change -- the proof the pin moves no executable byte. Read-back: opal-data-refresh-api-qa-scratch CodeSha256 E4944Imr7Y4S4//rTR6HN5sbwczbwLw5DcaH4IZ0D0E=, State Active, LastUpdateStatus Successful, and a FULL root plan then read 'No changes. Your infrastructure matches the configuration.' at detailed-exitcode rc=0. The pin is a separate KEY and deliberately NOT a version-override variable on ../modules/yang-lambda, which would have put all 231 of that module's consumers in the blast radius to fix one clone.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261009T0742Z_nfra-oplgtw-og-da-1-data-refresh-admit_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "99c3b4c1b1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEVER-2 ledger, opened with 3 legs and committed WITH its sentinel at 0422cbd3ee BEFORE the first act, and CLOSED with the sentinel removed at 99c3b4c1b1. Legs: S3 (upload, verified on size and metadata), opal-data-refresh-api (tf-lambda, the targeted apply with its JSON plan audit), RB (read-back, the 0-diff re-plan, and the full-root finding with its disposition). All 3 proven. No open deploy for this seat.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/NEVER_WIDEN_ASK_OG-da-1.md",
+   "kind": "doc",
+   "commit_or_etag": "d9539cc0b7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The Phase A ask both halves signed: section 0 (the two recognisers and how the ruling's two sentences compose), section 1 (the live-vs-HEAD drift, comments and CRLF only, zero executable drift proven by ast.dump equality with a flipped-return negative control), section 3 (the caller census), sections 5-7 (blast radius, rollback, deploy path). Halves: 1.0.0_SA_CTO~Z @93ddbb1288 (blob fc82968861, 3652 B) and 2.0.0_SA_COO~O @014c45557d (blob 4c79003, 3556 B), both verified AT HEAD by reading their bytes and by `merge-base --is-ancestor` on each named commit BEFORE the first act. Section 5 is also the half this order proved WRONG: see row Z-S72.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/da1_callers.json",
+   "kind": "doc",
+   "commit_or_etag": "d9539cc0b7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "14 days of /aws/lambda/opal-data-refresh-api, auto-paginated and counted client-side: 6 principals by ROLE with no email, token or principal id recorded. 6 of 6 ADMITTED under the new rule (4 via Dev, 2 via tier == 'internal'), each exercised through the patched validate_user_type with Dev as the positive control and 9 of 9 control cases as wanted, including firmId == 'null' REFUSED. Path census: Method 1 = 124, Method 2 (JWT) = 0, Method 3 (no authorizer) = 0, so refusing Method 3 and tightening Method 2 breaks no observed caller. This file is the input AC3 is graded against.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "deee55b3ef",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Row NFRA_OPLGTW-Z-S72 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~O): the artifact key had a SECOND yang-lambda reader that the signed blast radius missed. Disarmed by amendment A1 @888b6c9699 and executed in this order.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the fail-closed rule's five arms, offline.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/da1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0; named tests passed 5 of 5; failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "5 named tests declared by the check's own header (test_ogda1_ac01..ac05); 5 passed, 0 failed/error lines. The invocation was run literally as written, not through a pipe, because the expect pattern includes exit=0 and a pipe would have reported the exit code of the receiver rather than the script.",
+   "status": "PASS",
+   "status_reason": "The five arms of the fail-closed rule pass offline. The issuer recorded this criterion FAILing at the pre-cut base because the test file did not yet exist, so the criterion is demonstrably not stuck-PASS. Corroborated independently of the test battery: each of the 6 observed caller contexts was run through the patched validate_user_type during Phase A and printed ADMITTED, with 9 of 9 control cases as wanted, including the authorizer's literal string \"null\" for firmId REFUSED.",
+   "expect": "(?s)named tests passed 5 of 5; failed/error lines 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the live function runs HEAD's fixed code.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/da1.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "function opal-data-refresh-api: lambda_function.py equal-to-HEAD=True; CodeSha256=qHMjXkK1/1NhmBmkK/6Q+q+WdXMRoTOprNfTixBIxaM= State=Active LastUpdateStatus=Successful\nRESULT: PASS\nexit=0",
+   "denominator": "Three live reads plus a member comparison: the live zip's lambda_function.py byte-compared to HEAD, CodeSha256, State and LastUpdateStatus. All met. The check downloads the live artifact and diffs the deployed member against HEAD, which is the CODE-layer instrument rule 22a requires -- the comparison is against the build input, never against a filename or a plan's 0-diff.",
+   "status": "PASS",
+   "status_reason": "The deployed function runs HEAD's fixed code. Corroborated by instruments separate from this check: the plan was graded from `terraform show -json` rather than the rendered text (which hid 28 attributes behind a redaction line) and its one non-no-op row changed only source_code_hash, s3_object_version and last_modified, with role, environment (5 keys), timeout 60, memory 256, runtime python3.11 and handler identical before and after; the apply ran from a SAVED plan so the applied set equals the audited set; my own read-back gave CodeSha256 equal to the built hash by string comparison; and the targeted re-plan read 'No changes'. The sibling function portal-time-machine was read before and after and is untouched (CodeSha256 0R8pqdEvf4qvWYCYMYbuSrmekB6l9+5jd8I11b70jbk=, LastModified 2026-03-12). The POST-APPLY FULL ROOT PLAN did not read clean, and that is row Z-S72 rather than a defect in this criterion: a second reader of the artifact key, dispositioned by amendment A1 and now pinned, after which the full root plan reads 'No changes' at detailed-exitcode rc=0.",
+   "expect": "(?s)lambda_function\\.py equal-to-HEAD=True; .*State=Active LastUpdateStatus=Successful.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 (judgment, the CVO at L9): each caller named in W/da1_callers.json reads ADMITTED in the function's own log on its first real call after the deploy.",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT -- graded by 3.0.0_SA_CVO at L9 against the function's own log",
+   "output_evidence": "Not produced. At the time of this instance the deploy is 2026-10-09T07:59:39Z old and no post-deploy real call by any of the six roles has been observed by this seat. The order itself directs this seat to record the criterion UNVERIFIABLE-BY-INSTRUMENT and name the CVO, so no output is manufactured here.",
+   "denominator": "6 caller roles in da1_callers.json; 0 of 6 observed on a post-deploy real call at instance time.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Graded by 3.0.0_SA_CVO at L9, per the order's section 4 and its WHEN YOU ARE DONE, which flips <status> on AC1 and AC2 only. This seat cannot sound this criterion: it requires each caller's FIRST REAL CALL after the deploy, and a call this seat generated would not be a real caller's call -- it would consume the discriminator and prove nothing about the principals the rule must admit. ABSENT IS NOT EXERCISED-AGAINST, and the 0 of 6 above is a not-yet-observed, not a pass. What IS established offline and recorded in the ask's section 3: all 6 roles' observed authorizer contexts were run through the patched function and read ADMITTED, 4 via the Dev arm and 2 via tier == 'internal', with Dev as the positive control. The live path census over 14 days was Method 1 = 124, Method 2 = 0, Method 3 = 0, which bounds the risk: the tightened and refused paths fired zero times in the window. The LIMIT is stated rather than hidden -- 14 days is the window, not all time, so a caller that last called 15+ days ago is outside it, and a caller with a non-Dev userType and no internal signal WOULD now be refused. That is the intended effect of the change and the one way this act can bite. The COO half adds the trigger that covers exactly it: if any of the six roles reads REFUSED on its first real call after the apply, roll back in the same window and file an ARMED row naming 2.0.0_SA_COO~O.",
+   "expect": "Judgment criterion -- the CVO's verdict at L9; no command expectation."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Readers were shown able to go both ways rather than assumed. (1) The issuer recorded both mechanical criteria FAILing at the pre-cut base -- AC1 because the test file was absent, AC2 because the live function already differed from HEAD at CodeSha256 E4944Imr... -- and both now read PASS, so neither is stuck-PASS. (2) The qa-scratch read is its own negative control for the production read: the SAME `aws lambda get-function-configuration` call returned a MOVED hash and a 2026-10-09 LastModified for opal-data-refresh-api and an UNMOVED hash with a 2026-08-03 LastModified for opal-data-refresh-api-qa-scratch at the same moment, so the instrument discriminates a function that moved from one that did not. (3) The artifact's content check was run against the BUILT ZIP rather than the source tree, and its own negative control (a token that should not appear) returned 0 while the fix's symbols returned 1 and 2. (4) A crude string census over the artifact initially read the retired condition and dev@test.com as still present; reading the actual lines resolved all of them to docstrings, comments and one refusal log message, with Method 3 returning False and 'unknown' -- recorded here because the next reader running that grep will hit the same false positive.",
+   "expected": "AC1 and AC2 both move FAIL -> PASS across the deploy; the function-config read distinguishes a moved function from a still one; and no control passes merely because nothing was looked at.",
+   "observed": "AC1 PASS and AC2 PASS against their recorded pre-cut FAILs. The paired function-config read discriminated as described. The artifact content check found is_opal_internal defined once and called twice with its negative control at 0. The plan grader, run on the pin plan, reported source_code_hash as NOT changed -- an outcome that would have been invisible in the rendered plan text and which is the positive evidence that the pin moves no executable byte.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Every world read was taken by an instrument separate from the act: this seat's own aws reads plus the issuer's da1.AC1.sh and da1.AC2.sh run separately, with AC2 downloading the live zip and comparing members to HEAD independently of any hash this seat computed. Both applies ran from SAVED plans, pinning the applied set to the audited set, and both plans were graded from `show -json` rather than rendered text. The pinned copy was verified by ETag equality against the source version rather than by re-hashing locally.",
+   "observed": "The built content-sha256 qHMjXkK1/1NhmBmkK/6Q+q+WdXMRoTOprNfTixBIxaM= equals the uploaded object's metadata, equals the live CodeSha256, and equals what AC2 read independently. The pinned key's ETag 15413b4ac88881c9b0e19dae0eceb215 equals the source version's ETag and its content-sha256 equals the clone's pre-existing CodeSha256. The targeted re-plan read 'No changes' and, after the pin, so did the FULL root plan at detailed-exitcode rc=0.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "AC3, each caller's first real call after the deploy.",
+   "reason": "Judgment, the CVO's at L9 by the order's own section 4. This seat cannot sound it without generating the very call that would consume the discriminator. Recorded UNVERIFIABLE-BY-INSTRUMENT with the CVO named, and the 0 of 6 printed as not-yet-observed rather than as a pass."
+  },
+  {
+   "item": "infra/aws/lambda/ci/lambda-source-map.json -- this function's artifact_sha256 and last_deployed_commit/at.",
+   "reason": "STALE AS A RESULT OF THIS DEPLOY and deliberately not edited: the entry still reads artifact_sha256 E4944Imr... and last_deployed_commit 4024664d71b1c472ca322be60c440fabbf1c25b5 / 2026-08-03T17:11:09Z, while the live function now runs qHMjXkK1... from commit d9539cc0b7. That file is NOT in this order's <paths> (nor in amendment A1's addition), so it is surfaced to the issuer in the close report rather than hand-edited. Rule 4's own caveat applies and is worth restating: the map PAIRS a Lambda with its repo dir and does not compare deployed bytes to built-from bytes, so this staleness is a record defect, not a currency control -- AC2 is the currency instrument and it reads equal-to-HEAD=True."
+  },
+  {
+   "item": "A version-override variable on infra/aws/terraform/modules/yang-lambda.",
+   "reason": "REFUSED as the pin mechanism, not overlooked. It is the tidier shape in isolation -- the module hardwires s3_object_version and source_code_hash to data.aws_s3_object.artifact, so it has no pin input at all -- but the module has 231 consumers and is outside this order's <paths>. Amendment A1 named qa-scratch-instance.tf, so the pin was implemented inside that one file by giving the clone its own key."
+  },
+  {
+   "item": "Teardown of the qa-scratch clone.",
+   "reason": "Disposition (c) in row Z-S72 and explicitly the CTO's recorded call in qa-scratch-instance.tf's own header ('CTO's call whether the fixture instance persists as a standing QA harness'). The issuer ruled (b), the pin. Nothing was destroyed."
+  },
+  {
+   "item": "The 6 unpackaged files in infra/aws/lambda/data_refresh/ and the portal_time_machine/ subdir.",
+   "reason": "They must stay unpackaged and did: the source map's files[] lists exactly two members and the builder asserts the built set equals it, so the exclusion is mechanical rather than a promise."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S72: BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~O -- RESOLVED IN THIS ORDER. The ask's section 5 blast radius, which both halves signed, said 'One Lambda's code: opal-data-refresh-api ... Nothing else'. A SECOND yang-lambda in the same root, module.data_refresh_api_qa_scratch in qa-scratch-instance.tf, reads the byte-identical artifact_key, so one production upload became a pending code change on two resources; the miss was mine, from reading main.tf and not qa-scratch-instance.tf. Nothing out-of-radius was deployed -- the apply was -target'd from a saved plan and the clone's live CodeSha256 never moved -- but the root no longer planned clean. 2.0.0_SA_COO~O ruled disposition (b) in amendment A1 @888b6c9699: pin the clone, NOT ratified as a widening. Executed; both limbs of the ruling's Done test now read PASS."
+ ],
+ "session_log": "This seat is a SESSION seat (site Z's applier under Andrew-direct 2026-10-08 ~22:0xZ, relayed msg 32063), not an L7 worker subagent. Order of acts followed the ask's section 7 exactly. Both halves were verified AT HEAD before anything else, by reading their bytes and by is-ancestor on each named commit, rather than by trusting the GO message's words. The ledger was opened with 3 legs and committed WITH its sentinel at 0422cbd3ee before the first act. The artifact was built from `git show HEAD:<path>` rather than the working tree, with the member set taken from the source map's own files[] and ASSERTED equal in the builder, and read in binary because a text-mode read on this device CRLF-ifies content without raising and would have changed every line ending and the hash. The upload was verified on size AND a byte-equality check of the content-sha256 metadata string, which exists because a mangled argv would have produced a plausible wrong hash that Terraform would then have adopted as source_code_hash. One check in the middle disagreed with my own Phase A ask and was run down rather than waved past: a string census over the built artifact read the retired admit-on-empty condition and four dev@test.com occurrences as still present, and reading the actual lines resolved every one to a docstring, a comment or the refusal log message, with Method 3 returning False and 'unknown'. That is recorded in the mutant control because the next reader running the same grep will hit the same false positive. The plan was graded from `show -json`, never the rendered text, which hid 28 attributes behind a redaction line; the apply ran from the SAVED plan. THEN the finding: the post-apply FULL root plan carried one non-no-op row, and it was a second reader of the artifact key that my own signed blast radius had missed. I did not apply it (outside the signed radius) and did not revert the signed change (its read-back was exact and the halves' rollback trigger, a caller reading REFUSED, had not fired); I filed Z-S72 ARMED with the production and clone reads as each other's control, left the ledger OPEN on leg RB, and asked the half-holder for the disposition rather than choosing one. The issuer ruled (b) and added one file to <paths>; the pin was implemented inside that file alone, because the alternative shape -- a pin variable on the shared yang-lambda module -- would have put 231 consumers in the blast radius to fix one clone. Both applies, the criteria and the ledger close are each separately evidenced above. Not done here and surfaced instead: the source map's artifact_sha256 and last_deployed_commit for this function, whose path this order does not carry.",
+ "compiler_tools": [
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open --lambda opal-data-refresh-api with two added legs (S3, RB), close-leg x3, close",
+   "result": "PASS",
+   "note": "The --lambda form was used rather than --pipeline, per the tool's own help, so close() does not blare on phantom S3-code legs a single-function TF apply never touched. All 3 legs proven, ledger CLOSED, sentinel removed. Leg RB was deliberately held open across the Z-S72 finding so the entry read RED while the world was in a state the sign-off did not cover, and closed only after the ruling was executed and both limbs of its Done test read PASS."
+  },
+  {
+   "tool": "terraform",
+   "invocation": "init; plan -target=module.data_refresh_api -out; show -json; apply the saved plan; re-plan -target -detailed-exitcode; then plan (full root) -out; show -json; apply; plan (full root) -detailed-exitcode",
+   "result": "PASS",
+   "note": "Every plan graded from JSON by a script that prints the changed-attribute set and the after_unknown set and compares both against the allow-list the ask names, so 'code only' is a measured verdict rather than an eyeball of redacted text. The second grade is what caught the qa-scratch row AND later proved source_code_hash unchanged by the pin."
+  },
+  {
+   "tool": "safe-apply.sh",
+   "invocation": "-chdir=infra/aws/terraform/data-refresh apply <saved plan>  (x2: the deploy at 07:59Z, the pin at 08:24Z)",
+   "result": "PASS",
+   "note": "Both from SAVED plans. comp-tagauthz PASSED and the tombstone gate read CLEAN on both (0 creates against 7 tombstones). The naming-apply-gate's pre-plan stage noted 5 names that would refuse IF this were an addition; it was a modification in both cases and the plan-time stage did not refuse. No HALTGT pass is cited as evidence, per cloud-ops -- the checkpoint cannot see a ~lane agent's mail at all."
+  },
+  {
+   "tool": "surprise-row-gate.py / surprise-corpus",
+   "invocation": "fired at commit on both channel appends",
+   "result": "PASS",
+   "note": "Z-S72: '1 new row(s) of 444 total checked (443 pre-existing, NOT re-graded)', corpus 10077 rows / 4 known failures / 0 new. The row's id form was taken from the gate's own ID_RE (which admits the Tier-2 Z- form) and its next free k was re-read AT WRITE TIME, because a peer appended a W46 row to the same file during this session."
+  },
+  {
+   "tool": "comp-read / comp-find",
+   "invocation": "named-file reads of qa-scratch-instance.tf, modules/yang-lambda/{main,variables}.tf, lambda-source-map.json, scheduled_daily_pull.cmd",
+   "result": "PASS",
+   "note": "Two reads changed what I did rather than confirming it: variables.tf showed the module has NO pin input, which is what ruled out the module-variable shape and sent the pin to a separate key; and main.tf:39 showed source_code_hash comes from S3 USER METADATA, which is why the upload carries --metadata and why a bare `aws s3 cp` would have broken the apply."
+  },
+  {
+   "tool": "comp-iam",
+   "invocation": "NOT USED",
+   "result": "SKIP",
+   "note": "The order declares comp-iam NOT-APPLICABLE (no role or policy change) and the plan audit confirmed it on both applies: role unchanged and no IAM resource in either changed set. Deliberate per cloud-ops, which states comp-iam models (action) and never (action, resource) and is a FLOOR -- it could not have confirmed this act either way."
+  },
+  {
+   "tool": "commit-gate.sh",
+   "invocation": "fired via safe-commit on each commit",
+   "result": "PASS",
+   "note": "Clean for the 1 of 3 graded files on the deploy commit. Its own WARN is worth carrying: it reads only .py / .sh / .tf / org/projects/*.json, so a 'checked 0 of N' line is not evidence of a clean gate -- on the ledger-open commit it checked 0 of 2 and said so."
+  }
+ ]
+}

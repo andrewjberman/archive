@@ -1,0 +1,24 @@
+"""AMGT-gg-2 rollback for ONE name, no delete: re-write the prior analysis and drafting VersionIds as the newest
+versions (copy-object from the VersionId) and append a newer silver part carrying the prior row (fetched_at re-stamped now).
+usage: py -3.12 rollback_name.py <KEY> <accession> <analysis_prior_vid> <drafting_prior_vid>"""
+import datetime, hashlib, io, sys
+import boto3, pyarrow.parquet as pq
+sys.path.insert(0, ".")
+from lib.research.harvest import store
+B = "opal-data-harvest"
+SILVER_PRIOR = ("sec/harvest/silver/filing_source/date=2026-09-22/part-20260922T033157Z.parquet", "LyJe2lp_G2j7W9NNxTHAdK30iNs3le79")
+key, acc, avid, dvid = sys.argv[1:5]
+s3 = boto3.client("s3", region_name="us-east-1")
+for k, vid in (("filings/v1/%s/%s.analysis.json" % (key, acc), avid), ("drafting/v1/%s.json" % key, dvid)):
+    prior = s3.get_object(Bucket=B, Key=k, VersionId=vid)["Body"].read()
+    r = s3.copy_object(Bucket=B, Key=k, CopySource={"Bucket": B, "Key": k, "VersionId": vid}, ContentType=s3.head_object(Bucket=B, Key=k, VersionId=vid).get("ContentType", "application/json"))
+    new_vid = r["VersionId"]
+    now = s3.get_object(Bucket=B, Key=k, VersionId=new_vid)["Body"].read()
+    print("ROLLBACK %s: new VersionId %s, bytes equal prior %s: %s" % (k, new_vid, vid, now == prior), hashlib.sha256(now).hexdigest())
+raw = s3.get_object(Bucket=B, Key=SILVER_PRIOR[0], VersionId=SILVER_PRIOR[1])["Body"].read()
+row = next(r for r in pq.read_table(io.BytesIO(raw)).to_pylist() if r["security_key"] == key and r["accession"] == acc)
+prior_hash = row.pop("record_hash")
+t = datetime.datetime.now(datetime.timezone.utc)
+row["fetched_at"] = t
+rec = store.silver_append("sec", "filing_source", [row], ("security_key", "accession"), store.stamp(t))
+print("SILVER ROLLBACK:", rec, "prior record_hash", prior_hash)

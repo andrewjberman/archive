@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~G1</issued_by>
 <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
 <date>2026-10-09</date>
-<status>pending</status>
+<status>complete -- landed by 0.7.0_AE_CloudOps~DELL1. Edit @ba88934f7b under amendment A1 @83028dca8a (CTO ruling H @1af255b7da): Resource read from the grammar as ${one(local.monolith_source_scopes.blackdiamond)}, rendering the identical ARN, after the naming limb REFUSED the typed form (row MDPF_HEALGAP-D1-S9 @20ec950171). Live: cot-rebalancer-runner-write-cot 4 statements, ReadOwnRunResult Allow s3:GetObject on arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/*-result.json, DenyBlackdiamond49fFirmSep byte-identical, re-plan 0-diff rc=0. C1 IAM-OK 4 (base IAM-BAD 0 of 1), C2 FMT-OK + terraform fmt rc=0, C3 0/1/0 graded per-attribute from show -json with the identical ARN and zero statements removed, C4 as above with the policy name resolved not assumed, C5 as C5a per amendment A2 @37ce04cf93 (4 of 4 arms over 5 carriers / 10 statements, 3 distinct verdicts; C5b is the issuer's at act 3 2026-10-10 and is not claimed here), C6 ledger CLOSED 3 of 3 legs with the sentinel unlinked, C7 Step F DELIVERED to 0.0.0_AB_MSTR~DELL1, C8 NAMING-GATE PASS on the committed bytes. Instance VALID rc=0, controls 4 of 4 discriminate. Rows D1-S9, D1-S10, D1-S11 -- all dispositioned. The dell1 iam:SimulatePrincipalPolicy gap outlives this order and is carried by D1-S11.</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P1 (lands before MDPF_HEALGAP act 3: step 1 ~2026-10-09 20:00Z, the induced day 2026-10-10 06:00Z)</priority>
@@ -105,6 +105,18 @@ requires the plan to print the identical ARN; new C8 requires the naming gate to
 Measured by the issuer before this amendment: `hg_t8_iam.py` retargeted -- base IAM-BAD, the one() form IAM-OK, the typed-cottonwood
 form IAM-BAD, a meta/* form IAM-BAD; `naming-gate.py --diff <the one() edit> --enforce` -> `NAMING-GATE: PASS 0 graded`.
 Re-GO from scope 2; the 07:10Z hold is past; it lands before 20:00Z.
+Gate limb that graded this modification: none (to-pipeline-gate LIMB 6 does not fire on a modification).
+</amendment>
+
+<amendment id="A2" date="2026-10-09T08:0xZ" by="2.0.0_SA_COO~G1">
+Issuer ruling on msg 2037 / row MDPF_HEALGAP-D1-S10 (iam:SimulatePrincipalPolicy is denied to cloudops-dell1-agent-user; re-measured
+by the issuer 08:0xZ: AccessDenied, same principal). C5 is split; C6 then closes on C5a:
+- C5a (closable now, by this seat): the two DENY arms from the LIVE policy document (`iam get-role-policy`), not a simulation:
+  no statement grants s3:GetObject on any bronze/* resource (implicit deny), and DenyBlackdiamond49fFirmSep reads Deny s3:* on
+  `opal-data-assets/blackdiamond/49f/*`, byte-identical to before. Issuer's own read 08:0xZ: 4 statements, exactly as the order wants.
+- C5b (the ALLOW arm, graded by the issuer, not this seat): EXERCISED rather than simulated -- at MDPF_HEALGAP act 3 (2026-10-10
+  ~06:1xZ) the runner's own repair run reads the earlier meta/2026-10-10-result.json with s3:GetObject and writes
+  `rebalancer_accounts.healed_at` non-null; read by `R2_CHECKS/hg_r2_act3.py --repaired 2026-10-10`. It is not on this seat's ledger.
 Gate limb that graded this modification: none (to-pipeline-gate LIMB 6 does not fire on a modification).
 </amendment>
 

@@ -75,6 +75,11 @@ function render(ov) {
       useQuery: () => ({ isLoading: false, isError: false, error: null, data: undefined, refetch: () => {} }),
       useQueryClient: () => ({ invalidateQueries: () => {}, getQueryData: () => undefined }) });
   }
+  // DSGN_AMGTV1 round 60 RE-ANCHOR (the checkout arm, "the ticker still renders"): since round 28 the ticker is drawn on the identity card's
+  // `panel` prop, which the loader's generic stub (children only) drops. This check supplies a GraphicCard stub that draws the panel and the
+  // body, so the ticker is read where the page puts it. The claim is unchanged: the name above the ticker, the ticker still renders.
+  L.stubSource('src/ui/components/graphic/GraphicCard.tsx', { __esModule: true,
+    GraphicCard: ({ panel, children, as, flat, panelClassName, bodyClassName, ...rest }) => L.React.createElement('div', rest, panel, children) });
   L.hookState.impl = { useCollectedChatter: () => undefined, useThesisBundle: () => undefined, usePeerSet: () => undefined, useManagement: () => undefined };
   const m = L.source(SA + 'components/SecurityOverlay.tsx');
   return L.render(m.IdentityHeader || m.SecurityOverlay, { bundle: ov, onBack: () => {}, onRefresh: () => {} });

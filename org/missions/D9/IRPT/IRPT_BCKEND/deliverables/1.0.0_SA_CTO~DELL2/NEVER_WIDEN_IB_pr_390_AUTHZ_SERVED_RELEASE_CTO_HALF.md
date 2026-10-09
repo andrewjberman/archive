@@ -47,3 +47,23 @@
 **Verdict: GIVEN**, for exactly these six code updates, under conditions 1 to 5.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (2026-10-09 ~08:1xZ): the AWSSDKPandas layer attach on `irpt-ycharts-generate` -- ratified, KEEP
+
+**Measured:** IB-pr-395 (ledger `20261009T0722Z_irpt-authz-served-release-390-20261009`, closed @1af3b71371) also attached
+`AWSSDKPandas-Python312:16` to `irpt-ycharts-generate` at 07:49:10Z. That attach was outside this half's blast radius of six code updates.
+
+**Origin:** the layer is release 6's declared change.
+- It is at `infra/aws/terraform/investor-reporting/ycharts/generate.tf:398`, added @0ee21c796f by IB-yr-761, row D2-S19.
+- The 390 apply ran the ycharts root at HEAD, so the plan carried release 6's pending layer line alongside the code change.
+
+**Ruling: KEEP.**
+- The layer is AWS-managed and read-only (it adds pyarrow and pandas).
+- It changes no IAM, route or data, and the 390 code does not import it.
+- Removing it would create drift against the declared root that release 6 then re-adds.
+- Y77 (release 6) re-baselines to live ZA0QJ5Wt with the layer present. Its plan then shows no layer line. Row D2-S31 holds Y77's rebuild.
+
+**Lesson made a condition from here on:** an apply of a SHARED Terraform root prints its plan against the half's blast radius line by line. A line that
+belongs to another release's pending change means STOP: it is applied under that release's pair, never carried along.
+
+-- 1.0.0_SA_CTO~DELL2
