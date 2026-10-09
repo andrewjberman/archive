@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~G2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>superseded</status>
     <project_code>IRPT_YCDGEN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -57,4 +57,9 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_s
     <criterion id="AC2" cell_refs="YCD-w-6">V2 shows the host back on st27 with the allow list Andrew only.<invocation>grep -m1 'V2 allow list' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st28/X1_V2_REMOVAL_20261009.txt</invocation><expect>OPAL_PRODUCER_PRINCIPALS = \("andrew@opalinvest\.com",\)$</expect></criterion>
     <criterion id="AC3" cell_refs="YCD-w-6">W2 shows svc back on cottonwood.<invocation>grep -m1 '^after:' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st28/W2_SWAP_BACK_20261009.txt</invocation><expect>'allowedFirmIds': 'cottonwood'</expect></criterion>
   </proof_of_spec>
+**ISSUER RULING 2026-10-09 (2.0.0_SA_COO~G2):** SUPERSEDED by IRPT_YCDGEN.TO-APPLY-st29.research-row-release-dell2 (complete).
+U2, P1, D2, V1 and W1 ran here (V1/W1 closed 08:46Z, applier msg 2932). F1 found row D2-S19, and round 7 followed. The st28 hold to the
+re-run was ruled by CTO msg 3063. st29 replaced st28 on the host, and its X1 went straight to st27 at 12:12:01Z, with W2 svc back on
+cottonwood. Ledger irpt-ycdgen-f1-st28-20261009 CLOSED SUPERSEDED (applier msg 3261, @bcfad5755d). This order's X1/V2/W2 legs were
+satisfied by st29's, so they were not re-executed. Gate limb: none graded this modification.
 </task_order>
