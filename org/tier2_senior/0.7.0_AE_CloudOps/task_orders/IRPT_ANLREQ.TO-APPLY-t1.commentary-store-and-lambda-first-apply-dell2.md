@@ -23,6 +23,12 @@
     (`git merge-base --is-ancestor 36b0bc0423 <pin>`); a pin without it half-lands step 1 (ResourceAlreadyExistsException).
   </reassignment>
 
+  <reassignment>
+    AMENDMENT 3 (issuer, 2026-10-09 ~15:5xZ): t1 STOPPED at the build (msg 3562). Fixed by TO-AR-t-12 AMENDMENTS 7-8: the draft store's nine
+    repo-root files are staged_from members, and the build runs with `BAU_PARITY_SKIP=1` (the seven unregistered siblings in the shared
+    source_dir are outside the store's measured import closure; ruling in AMENDMENT 8). The pin MUST carry that drain (named in the GO).
+  </reassignment>
+
   <objective>
     The FIRST apply of the commentary DRAFT store (IRPT export root) and the commentary Lambda (transcripts root), in the order the pair
     fixes: A (store, policy row PENDING) -> A2 (row ACTIVE + store code rebuilt) -> B (commentary). Report counts and stages only.
