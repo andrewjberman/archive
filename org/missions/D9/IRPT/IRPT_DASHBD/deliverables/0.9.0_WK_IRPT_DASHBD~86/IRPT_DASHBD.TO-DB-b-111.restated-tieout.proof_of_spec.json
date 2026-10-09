@@ -1,0 +1,101 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-111",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e8f96f579c"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "7d8eafec78",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-111.restated-tieout.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_DASHBD~86",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~86/RESTATED_TIEOUT.json",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~86/RESTATEMENT_RULE.md",
+   "kind": "doc",
+   "commit_or_etag": "ecbcc9bf44",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "pre-registered rule, committed alone before any run",
+   "artifact_covered_by": [
+    "DB55-3-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~86/restated_tieout.py",
+   "kind": "script",
+   "commit_or_etag": "9a7c6c419c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "local read of private evidence; no S3, no vendor call; no deploy",
+   "artifact_covered_by": [
+    "DB55-3-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~86/RESTATED_TIEOUT.json",
+   "kind": "config_data",
+   "commit_or_etag": "c351fa8186",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "repo record: counts and the private record's path and sha256; per-segment record outside the repo",
+   "artifact_covered_by": [
+    "DB55-3-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB55-3-AC1",
+   "criterion_verbatim": "DB55-3-AC1 -- the 990 outside segments are re-graded on one restated convention by a pre-registered rule, the record holding counts only. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r55/p55_round55.py\" . DB55-3-AC1",
+   "output_evidence": "OK: restated comparator {'BD_RECORD_ENDS_2026-08-20': 549, 'UNEXPLAINED': 244, 'NEAR_ZERO_BASE': 66, 'BOUNDARY_VALUE_GAP': 63, 'DEFECT': 48, 'CONVENTION': 9, 'WINDOW_ONE_DAY_SHIFT': 6, 'COVERAGE_DAYS': 2, 'FLOW_CONVENTION_ENVELOPE': 2, 'MISSING_PRICE': 1}\nDB55-3-AC1 PASS",
+   "denominator": "990 of 990 outside segments re-graded (by_reason sums to 990); 74 restated, 916 not restated; rule_commit ecbcc9bf44 is a strict ancestor of output_commit 9a7c6c419c and touches the rule file; private record sha256 matched; repo record carries no account-like token; exit code 0",
+   "status": "PASS",
+   "expect": "DB55-3-AC1 PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "ran the checker twice on the committed record",
+   "observed": "DB55-3-AC1 printed PASS both times",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "repo record with the first four hex characters of the private sha256 replaced by zeros, checked with DB55-3-AC1, then restored from a copy.",
+   "expected": "DB55-3-AC1 FAIL",
+   "observed": "FAIL: private_record ... sha256 mismatch; DB55-3-AC1 FAIL (rc 1)",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the 916 segments with no per-segment two-sided convention measure were not restated, so CONVENTION (9; 14 before the window test) is a floor",
+   "reason": "Judgment for the issuer and CTO; filed as row IRPT_DASHBD-D2-W86-S2."
+  },
+  {
+   "item": "NOT_COMPARABLE is applied by the date test (549), not as the 319 DB-b-106 flagged",
+   "reason": "Filed as row IRPT_DASHBD-D2-W86-S1; the private record carries both flags."
+  },
+  {
+   "item": "vendor call, secret read, S3 read or write, deploy, bun, download, backend edit",
+   "reason": "Bounds of the order; none made."
+  }
+ ],
+ "surprises": [
+  "IRPT_DASHBD-D2-W86-S1",
+  "IRPT_DASHBD-D2-W86-S2",
+  "IRPT_DASHBD-D2-W86-S3"
+ ],
+ "compiler_tools": [
+  {
+   "tool": "ruff via .tools/commit-gate.sh",
+   "invocation": "bash .tools/safe-commit.sh ... (py_compile + ds-precommit + ruff)",
+   "result": "one unused-import finding on the first attempt, fixed; passed on the second"
+  }
+ ]
+}

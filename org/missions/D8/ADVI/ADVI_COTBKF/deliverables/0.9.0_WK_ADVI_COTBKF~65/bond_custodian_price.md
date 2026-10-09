@@ -38,7 +38,7 @@ held account-days 988 on 988 distinct dates (2022-06-08 .. 2026-05-15)
 
 Transactions: 10 rows. By Transaction_Type: {"by": 1, "int": 8, "lo": 1}
 Trade rows with Amount and Quantity (abs(Amount)/abs(Quantity)): 1 rows, 1 trade dates, 2022-06-08 .. 2022-06-08
-  - 2022-06-08 by acct 0QF879090 qty 25000.0 amount 25156.69 px 1.006268 desc Wells Fargo &co Ser Q MTN Call: Make Who
+  - 2022-06-08 by acct acct#5446c1d7 qty 25000.0 amount 25156.69 px 1.006268 desc Wells Fargo &co Ser Q MTN Call: Make Who
 Positions rows: 0 (Quantity only; no price field)
 cot store rows keyed by this CUSIP: 172
   - store gold-canonical-holdings field market_value label 'bd_snapshot' status foreign:bd: 86 rows, 86 with price>0, dates 2026-06-08 .. 2026-10-08

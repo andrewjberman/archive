@@ -107,6 +107,18 @@ time". While here: any one Teams message from Andrew, in any chat, fires arm (b)
 | (b) | 2026-10-09T13:06:43Z | `{"error": "the cited message is older than the 900s window or carries no parseable createdDateTime; no data was read", "guard_denied": true, "code": "asker_message_stale", "asker_scope_denied": true}` | n/a | NOT PASS: refused, but on staleness before the asker was resolved, not `asker_no_profile` (row Z-S70) |
 | (a) | ~2026-10-09T13:08Z (between the 13:06:43Z and 13:08:45Z reads) | `{"error": "the cited message is older than the 900s window or carries no parseable createdDateTime; no data was read", "guard_denied": true, "code": "asker_message_stale", "asker_scope_denied": true}` | not taken: no data was served, so there is nothing to grade against | NOT PASS: same refusal (row Z-S70) |
 
+**Arm (b) re-run on a fresh message (UB-e1ca ruling as signed): PASS.**
+
+| field | value |
+|---|---|
+| message | chat `19:2e21f8e5-..._c727d432-...` (1:1), message id `1791564933867`, createdDateTime 2026-10-09T16:55:33.867Z |
+| sender | Menachem Goldstein, oid `c727d432-161b-435a-9dd0-1e7e20c2c991`, aadUser, Opal tenant (from `read_chat_messages`) |
+| found by | watcher `poll_addressed_teams_messages(since 16:53Z)` at the 17:04Z tick |
+| profile read at fire time (CVO condition) | `asker_profile_probe.py` 17:06:45Z-17:06:51Z: `scan: pages=1 items=748 policy=17; records naming this oid=0; active profiles=0` / `PROFILE: NONE (fire allowed)` |
+| fired | between 17:06:51Z and 17:07:33Z; message age about 11.5 minutes, inside the 900s bound |
+| raw response | `{"error": "this asker has no active data access yet -- ask Andrew for one (the operator path issues a principal_profile + data_entitlement record); no data was read", "guard_denied": true, "code": "asker_no_profile", "asker_scope_denied": true}` |
+| verdict | PASS (C5): `asker_no_profile`, the how-to-get-access line present, no data read. The message text is not recorded here |
+
 **Trigger read before the arms (13:00:53Z-13:06Z):** OG-ap-3 last `<status>` = `complete` (13:00:53Z); r29 LIVE on
 `91811b648a` (AE~Z @5f1400c4a2, verify 5 of 5); r29 ledger entries in HEAD trees = 2 of 49 worktrees, both the opening
 blob `b3caddee0d` inherited by stale branches whose HEADs are contained in trunk (`C:/tmp/oa-25`,

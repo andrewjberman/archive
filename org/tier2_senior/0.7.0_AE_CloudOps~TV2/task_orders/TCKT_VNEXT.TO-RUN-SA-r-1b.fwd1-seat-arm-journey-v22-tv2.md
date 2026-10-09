@@ -69,6 +69,34 @@
     Everything else in v2.2 and AMENDMENT 1 stands.
   </amendment>
 
+  <amendment n="3" date="2026-10-09" source="SA-r-1b report msg 3712 / trace @be24188c7a; rows TCKT_VNEXT-D2-S18, IRPT_ANLREQ-D2-S16">
+    **Run 1 of this order:** the census is CLEAN (82 armed routes, 0 off-list admits). No hop ran: the executor's length floor STOPPED
+    falsely on an identical empty body (fixed in `sa_r1b_run.py`), and irpt-status answers 500 to every call since its 15:43:11Z deploy
+    (IRPT_ANLREQ release 1 rev 4; Branch B rollback to rev 3 ordered, CTO msg 3681, applier `~AR2`).
+    **Run 2, under the same pair v2.2 and the same halves, with NO new GO needed:**
+    1. Precondition: `irpt-status` LastModified is LATER than 15:43:11Z, CodeSha256 is NOT `VC/r14ka...`, and one real call
+       answers non-500. Otherwise wait; never run hops against a 500 host.
+    2. Mint a FRESH token (the row and token from run 1 are gone) and write the row again.
+    3. Re-run the full census (step 4), because a host changed since run 1. 0 off-list admits is still the gate.
+    4. Run hops (a)-(g) into `R1_RUN/sa_r1b_trace.json` (run 2 section), with no client figures.
+    5. Same-session cleanup and the 0-data-refresh-calls log proof. Then flip the order.
+  </amendment>
+
+  <amendment n="4" date="2026-10-09" source="CTO msg 3747, v2.2 half AMENDMENT 2; run 2 @e2c7f7b25a">
+    **`GET /api/scoped/amgt/watchlist` is NOT a STOP**, proved by a code read rather than by byte comparison (the issuer read it
+    16:5xZ; copy this block into the run record verbatim):
+    - `lib/research/api/scoped_amgt.py:6409-6421` `_firm_id(event)`: "The ONLY source of firm identity in this module: the header
+      `auth-validator-edge` injects after verifying the JWT ... The firm is never read from the path or the body."
+    - `:6922` `firm_id = _firm_id(event)` in `handler`; `:6986-6987` `if rest == ["watchlist"] and method == "GET": return
+      _response(200, read_starred(firm_id))`.
+    - `selected_tenant` occurrences in the module: **0**. So the route returns the CALLER's own firm list, opal-capital, for every
+      target, and can never read another firm's partition.
+
+    **Run 3 (same v2.2 halves; no new GO):** open the ledger FIRST; fresh row and token; full census. **Leak = an off-list payload
+    that DIFFERS from the own-firm answer, OR code that reads the selector for an off-list target.** A selector-ignoring route
+    whose firm comes only from the token is not a STOP. Then hops (a)-(g), cleanup, and the 0-data-refresh-calls proof.
+  </amendment>
+
   <steps>
     0. Open the NEVER-2 ledger entry: the row write, the token, the run, and the cleanup legs.
     1. **STOP 1:** `python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_RUN/reread_27.py` prints `READ27 27/27`.

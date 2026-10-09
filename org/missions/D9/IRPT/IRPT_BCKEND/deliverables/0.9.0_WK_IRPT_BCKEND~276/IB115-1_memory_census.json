@@ -1,0 +1,106 @@
+{
+ "business_date": "2026-10-08",
+ "grade_line": {
+  "fix_peak_under_limit": true,
+  "fix_wall_time_no_worse_than_pre404_x2": true,
+  "fix_wall_time_s": 417.2,
+  "pre404_wall_time_x2_s": 760.4
+ },
+ "harness": "mem_harness.py (python 3.12, Windows 11) -> holdings_snapshot.run_firm per tree, real 49financial inputs, business date 2026-10-08, writes captured in memory",
+ "holdings_snapshot_fix_sha256": "24c6ea6e1b8db2914a721a003768ca005878a1e3c9b12b5f1865171c69b5a42b",
+ "limit_bytes": 3650722201,
+ "method": "Harness: mem_harness.py (python 3.12.10, Windows 11, 16 logical CPUs, 64 GB RAM; a shared dev machine, load ~85 percent from other seats during the runs) drives each tree's OWN holdings_snapshot.run_firm('49financial', as_of 2026-10-08) on the REAL sources (VersionedInputs, S3 + DynamoDB reads) and the REAL served index, with upload=True THROUGH A READ-THROUGH CLIENT: reads go to AWS, every put_object is captured in memory and never leaves the process, every other mutation raises. 'upload false' means no byte is written anywhere; upload=True inside the process is needed because the FWD-14 gate only runs on an upload that captured the firm's index. The captured writes (about 230-240 MB) are held in memory by the harness and are in every tree's peak equally. Peak memory = the OS PEAK WORKING SET of the process (psutil memory_info().peak_wset), read at the end of the run; a psutil rss sampler thread (20 ms) is the cross-check (sampled_peak_rss_bytes, always a little lower). One process per tree, run SEQUENTIALLY and alone on this machine for the census; no memoisation of the table lookup. wall_time_s = the run_firm call plus the harness setup, same harness; cpu_time_s is the process CPU time (immune to the shared machine's load). table_lookups = every call of the tree's security-table lookup _NarrowedClassifier.canonical_lookup, counted at the call (a ticker lookup, or the CUSIP-key fallback after a symbol miss, table_lookups_cusip_key of them). Trees: pre404 = 49F bundle version 3Q_W49U7kMa_xO30Q6LQE7QLsFu7ARur (no gate); b404 = the live bundle irUPjpfrDLoM2zhnhunbBtIG9fP275kI (sha256 3f2e738f83aa...); b410 = b404 + the e56 holdings_snapshot.py and the IB-pr-410 holdings_49f.py (member sha256 a9fe965f9e5a / 401a36ff675a, the IB-pr-410 build's); fix = b410 with the memory fix in the publish-gate code (holdings_snapshot.py sha256 24c6ea6e1b8db291). COMPARABILITY WITH THE 4 GiB t3.medium: not measured on the box (no RSS was recorded there, and its SSM output has no sink). On this harness b404 peaks at 3.71 GiB (92.7 percent of 4 GiB) against pre404 at 2.77 GiB (69.3 percent), and b404/pre404 = 1.337; the box ran pre404 three times without a kill and killed b404 after 5m09s with two other producers' processes and the OS on the same 4 GiB, which is consistent with the kill threshold lying between the two peaks scaled to the box (Linux glibc heap versus the Windows working set differ by an unmeasured factor). The line that matters is the limit_bytes line, applied to the same number the CTO set: fix peak 0.860 of the limit and 1.055 x pre404. Measured ratio b404/fix = 1.268.",
+ "supplementary": {
+  "fix404_gate_fix_only_on_b404_member": {
+   "note": "run concurrently with other runs; wall time not comparable",
+   "peak_rss_bytes": 3047297024,
+   "wall_time_s": 595.9
+  },
+  "fix404_old_gate_replay_run": {
+   "note": "run concurrently with other runs; wall time not comparable; this run also re-evaluated the OLD gate on the same inputs, so its peak is not a clean fix peak",
+   "peak_rss_bytes": 3071688704,
+   "wall_time_s": 430.1
+  }
+ },
+ "trees": {
+  "b404": {
+   "cpu_time_s": 336.2,
+   "gate_outcome": "PUBLISHED",
+   "node_count": 155019,
+   "overlay_bytes_held": 229077131,
+   "peak_rss_bytes": 3981139968,
+   "phase_sampled_peak_rss_bytes": {
+    "build_snapshot": 1126162432,
+    "evaluate_publish_gate": 1834684416,
+    "land": 3792072704,
+    "run_firm": 1116426240,
+    "served_publication": 2066423808,
+    "start": 120803328
+   },
+   "sampled_peak_rss_bytes": 3792072704,
+   "table_lookups": 123005,
+   "table_lookups_cusip_key": 0,
+   "table_lookups_distinct": 1793,
+   "wall_time_s": 437.4
+  },
+  "b410": {
+   "cpu_time_s": 314.9,
+   "gate_outcome": "PUBLISHED",
+   "node_count": 155019,
+   "overlay_bytes_held": 238985638,
+   "peak_rss_bytes": 4099485696,
+   "phase_sampled_peak_rss_bytes": {
+    "build_snapshot": 1131896832,
+    "evaluate_publish_gate": 1870020608,
+    "land": 3901960192,
+    "run_firm": 1184473088,
+    "served_publication": 2091290624,
+    "start": 121229312
+   },
+   "sampled_peak_rss_bytes": 3901960192,
+   "table_lookups": 123315,
+   "table_lookups_cusip_key": 310,
+   "table_lookups_distinct": 1950,
+   "wall_time_s": 420.5
+  },
+  "fix": {
+   "cpu_time_s": 319.5,
+   "gate_outcome": "PUBLISHED",
+   "node_count": 155019,
+   "overlay_bytes_held": 238985638,
+   "peak_rss_bytes": 3139624960,
+   "phase_sampled_peak_rss_bytes": {
+    "build_snapshot": 1131991040,
+    "evaluate_publish_gate": 915931136,
+    "land": 2941775872,
+    "run_firm": 1203625984,
+    "served_publication": 975220736,
+    "start": 121229312
+   },
+   "sampled_peak_rss_bytes": 2941775872,
+   "table_lookups": 123315,
+   "table_lookups_cusip_key": 310,
+   "table_lookups_distinct": 1950,
+   "wall_time_s": 417.2
+  },
+  "pre404": {
+   "cpu_time_s": 293.4,
+   "gate_outcome": "ABSENT (no publish gate in this tree)",
+   "node_count": 155019,
+   "overlay_bytes_held": 229077131,
+   "peak_rss_bytes": 2977062912,
+   "phase_sampled_peak_rss_bytes": {
+    "build_snapshot": 1122672640,
+    "land": 2787975168,
+    "run_firm": 1098891264,
+    "start": 121397248
+   },
+   "sampled_peak_rss_bytes": 2787975168,
+   "table_lookups": 123005,
+   "table_lookups_cusip_key": 0,
+   "table_lookups_distinct": 1793,
+   "wall_time_s": 380.2
+  }
+ },
+ "upload": false
+}

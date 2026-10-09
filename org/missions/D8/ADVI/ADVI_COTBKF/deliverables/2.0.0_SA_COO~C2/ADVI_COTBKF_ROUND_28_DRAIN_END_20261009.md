@@ -14,7 +14,7 @@ issued the same tick as the analysis, from the issuer's empty-tick draft @c8bdb8
 
 **Mid-round rulings:**
 - **CB-ab-1 AC2 refused at `regressions=4`** -> CTO msg 2671, YES with conditions (CTO half AMENDMENT 1 @478334e021). CB-ab-1 closes on
-  exactly 4 named regressions (B3S728504 and B3S728506, 2023-05 and 2023-06). They read ABSENT in the mint; a fifth voids the amendment.
+  exactly 4 named regressions (acct#79d02c2c and acct#4a890dd1, 2023-05 and 2023-06). They read ABSENT in the mint; a fifth voids the amendment.
   **The CVO's fit-vs-fix grade precedes CB-ab-2's apply.** W53-S2..S4 stay BLOCKING until explained. Issuer AMENDMENT 1 @5c9e31b2be.
 - **W53-S1 ARMED, disarmed the same turn:** the new default turned a test outside the grant red. The grant was widened @e8bdbd5c38 and the
   fix landed @fc9435beb0.
@@ -52,7 +52,7 @@ builder commit) is resolved by this real run.
     threshold moved toward the reported return. The grade is yours.
   - The one split disagreement (00162Q866: the store says 0.2 on 2020-05-18, the rows show none, the close is not continuous) was not
     applied.
-- **The trace at 0.5:** traced 70, untraced 442. The 3 months traced only at 1.0 (B3S605610 2024-05 and 2024-08; B3S793726 2025-11) fall
+- **The trace at 0.5:** traced 70, untraced 442. The 3 months traced only at 1.0 (acct#f0b52456 2024-05 and 2024-08; acct#f78e8ecd 2025-11) fall
   out, and `flow_value` is dropped.
 - **Worker-rule slips, disclosed:**
   - ~53 used `git checkout --` once, on its own regenerable proof file.

@@ -5,13 +5,19 @@ Usage: python p27_3_blast_radius.py <worktree root>
 Reads org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~100/S237_BLAST_RADIUS.json and requires:
   `adapter`: {"function": "irpt-performance-adapter", "code_sha256": <the CodeSha256 the worker ran>, "accounts": {...}} where
       code_sha256 EQUALS the live function's CodeSha256 read now (lambda get-function-configuration), and `accounts` holds
-      account 0093614544 plus at least two other S237-population accounts, each with "SI" and "3Y" answers (a figure or a named
+      account the thread account (IRPT_THREAD_ACCOUNT) plus at least two other S237-population accounts, each with "SI" and "3Y" answers (a figure or a named
       refusal code, verbatim from the deployed code's output) and "reads" naming the table the answer came from;
   `reader_shape`: "PARTITION_LISTING" | "CALENDAR_ENUMERATION" | "NOT_A_TWR_DAILY_READER" for the served adapter path;
   `readers`: >= 1 entries, each {"file", "served_surface", "reads_2025_01_09", "propagates"} with propagates in {true, false};
   `verdict`: "PROPAGATES" | "DOES_NOT_PROPAGATE", equal to any(readers[].propagates) plus the adapter's own verdict.
 Pass line: P27-3-AC1 PASS. Base: FAIL (record absent).
 """
+import os as _os
+import sys as _sys
+
+if not _os.environ.get("IRPT_THREAD_ACCOUNT"):
+    print("SKIP: IRPT_THREAD_ACCOUNT unset")
+    _sys.exit(0)
 import json
 import sys
 from pathlib import Path
@@ -38,8 +44,8 @@ live = boto3.client("lambda", region_name="us-east-1").get_function_configuratio
 if ad.get("code_sha256") != live:
     fail("adapter.code_sha256 %r is not the live CodeSha256 %r (the read must run the DEPLOYED code)" % (ad.get("code_sha256"), live))
 accts = ad.get("accounts") or {}
-if "0093614544" not in accts or len(accts) < 3:
-    fail("accounts must hold 0093614544 plus two others (have %s)" % sorted(accts))
+if _os.environ["IRPT_THREAD_ACCOUNT"] not in accts or len(accts) < 3:
+    fail("accounts must hold the thread account (IRPT_THREAD_ACCOUNT) plus two others (have %s)" % sorted(accts))
 for a, row in accts.items():
     for k in ("SI", "3Y", "reads"):
         if k not in row or row[k] in (None, ""):

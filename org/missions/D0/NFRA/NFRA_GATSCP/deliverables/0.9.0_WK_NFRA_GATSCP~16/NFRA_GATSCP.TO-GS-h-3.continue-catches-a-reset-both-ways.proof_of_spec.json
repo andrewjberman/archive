@@ -1,0 +1,98 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_GATSCP.TO-GS-h-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-h-3.continue-catches-a-reset-both-ways.md",
+  "group": "OTHER",
+  "vintage_commit": "b5f9287e72"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/decompositions/NFRA_GATSCP_DECOMP.round4.md",
+  "vintage_commit": "b5f9287e72",
+  "to_ref": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-h-3.continue-catches-a-reset-both-ways.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_GATSCP~16",
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/safe-merge.sh",
+   "kind": "script",
+   "commit_or_etag": "989ee275358ee5cbfeffd82899d0f90e8622eab6",
+   "artifact_covered_by": [
+    "GH3-AC1",
+    "GH3-AC2"
+   ],
+   "introduces": [
+    "$STATE.conflicted",
+    "_CONFLICTED"
+   ],
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A tool in the repo; nothing is deployed to AWS."
+  },
+  {
+   "path_or_key": ".tools/tests/test_safe_merge_continue.py",
+   "kind": "script",
+   "commit_or_etag": "989ee275358ee5cbfeffd82899d0f90e8622eab6",
+   "artifact_covered_by": [
+    "GH3-AC1"
+   ],
+   "introduces": [
+    "clean-path-reset-both-ways-refused",
+    "conflicted-keep-ours-admitted"
+   ],
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A test in the repo; nothing is deployed to AWS."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "GH3-AC1",
+   "criterion_verbatim": "the test is green with at least 16 cases, the clean reset-both-ways case is refused and the conflicted keep-ours case admitted (the negative arm)",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round4_prep/checks/r4_reset_both.py\"",
+   "expect": "GS-H3-RESET ok=True",
+   "output_evidence": "  PASS test-green-16-plus: rc=0 last=('True', '17', '17') :: SM-CONTINUE ok=True cases=17/17\n  PASS reset-both-ways-refused: case line present=True\n  PASS keep-ours-admitted: case line present=True\nGS-H3-RESET ok=True arms=3 failed=0",
+   "denominator": "3 of 3 arms passed; test 17 of 17 cases",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "GH3-AC2",
+   "criterion_verbatim": "safe-merge's self-test stays green and the fast lane keeps its tree check (a control)",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round1_prep/checks/r1_fastlane.py\"",
+   "expect": "GS-T3-FASTLANE ok=True",
+   "output_evidence": "  PASS fast-lane-runs-scoped-tree-check: function_found=True wired=True\n  PASS self-test-green: rc=0\nGS-T3-FASTLANE ok=True arms=2 failed=0",
+   "denominator": "2 of 2 arms passed",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Case clean-path-reset-both-ways-refused plants the lost clean path; conflicted-keep-ours-admitted is the negative arm.",
+   "expected": "rc 7 naming third.txt; rc 0 for conflicted keep-ours",
+   "observed": "both as expected, SM-CONTINUE ok=True cases=17/17",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "not rerun; the test is a real-merge harness taking ~90s",
+   "observed": "one green run at the commit",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Case d (clean reset) shares the case-b merge rather than a separate worktree",
+   "reason": "A separate worktree pushed the test past the check's 115s timeout."
+  }
+ ],
+ "surprises": [],
+ "session_log": "Worker ~16; edits to the two .tools files only; test last line SM-CONTINUE ok=True cases=17/17.",
+ "compiler_tools": [
+  {
+   "tool": "Read",
+   "invocation": "Read _verify_staged_carried and the --continue state block in .tools/safe-merge.sh",
+   "result": "state at :689-699, verifier :318"
+  }
+ ]
+}

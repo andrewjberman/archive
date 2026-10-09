@@ -20,7 +20,7 @@ sys.path.insert(0, str(package / "tests"))
 import test_f49_engine as t  # noqa: E402
 
 f49 = t.f49_engine
-GOOD = "0010498003"
+GOOD = "9985623272"
 DAYS = {
     "2025-12-30": [(GOOD, None, None, None, None)],
     "2025-12-31": [(GOOD, 0.001, 99.0, 100.0, 0.0)],
