@@ -13,8 +13,8 @@ DRAFT: no half signed.
 
 ## 1. Pin and artifact
 
-- **Pin:** box/dell2 `3a6d021e4a`. LOCAL when drafted; it must be on origin before the apply.
-- **Built** (BUILD_ONLY at HEAD = pin, this seat): `WTGCJPiSEWSack1XvAMRyTGSVLX84VSm+3eC3eSPgsQ=`. Import-closure OK, 38 files.
+- **Pin:** box/dell2 `f23639ea21` (REVISION 2; was `3a6d021e4a`). It must be on origin before the apply.
+- **Built** (BUILD_ONLY at HEAD = pin, this seat): `BjUZjt2oq8GPJSibq4vD/0m8/LfdN0GF3THwCaBMVOM=` (REVISION 2; was `WTGCJPiS...`).
 - **Live now / ROLLBACK:** `E7VKvhg3E9D5euWO+S649/iyAJ05xUmFPqHEAKDTFxA=`, LastModified 07:43:46Z. That is IB-pr-395's release of IB-pr-390's
   `served.py` on this host. The applier records the current S3 version at step 0 as the rollback source.
 
@@ -22,9 +22,13 @@ DRAFT: no half signed.
 
 | gate | reading |
 |---|---|
-| census against LIVE (`release-census.py irpt-status --pin HEAD`) | `changed_members=5`: `acceptance.py`, `submission.py` (AR-y-11), `entry.py`, `owned_report.py`, `pdf_link.py` (AR-y-22). No other lane's member rides |
+| census against LIVE (`release-census.py irpt-status --pin HEAD`) | `changed_members=6`: `acceptance.py`, `submission.py` (AR-y-11), `entry.py`, `owned_report.py`, `pdf_link.py`, `status_installed.py` (AR-y-22 and AMENDMENT 4: the installed route table declares `/original`). No other lane's member rides |
 | `checks/r73/cochange_closure.py irpt-status` | `split=0` (42 rows) |
 | `checks/r71/symbol_closure.py` on the BUILT zip | `modules=37 pairs=115 missing=0`, PASS |
+
+| `_authz/tests/test_unguarded_census.py` (CTO condition, row IRPT_BCKEND-D2-S43) | `9 passed`: 22 of 22 in-lane routes guarded, `/original` among them |
+
+**REVISION 2 (2026-10-09 ~10:5xZ):** re-pinned for AR-y-21 AMENDMENT 4 (drained @f23639ea21). The installed route table now declares `/original`, which the release-1 CTO half @723211d44d made a condition (msg 3140). The CTO half re-signs this blob.
 
 ## 3. Terraform, plan-only (this seat)
 

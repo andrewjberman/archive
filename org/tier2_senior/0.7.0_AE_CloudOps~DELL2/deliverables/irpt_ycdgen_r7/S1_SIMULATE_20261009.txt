@@ -1,0 +1,30 @@
+S1 matrix allowed=3 denied=6
+
+IRPT_YCDGEN.TO-APPLY-r7 -- the cross-firm matrix for AC2, graded on the DOCUMENT 3x3 per CTO half
+AMENDMENT 2 (msg 3149, relayed 2.0.0_SA_COO~G2 msg 3152). The principal 3x3 goes to the laptop as
+a record; it is not producible by this seat (see below).
+
+METHOD: each of the three ycdgen_research role policies, taken from the SAVED plan's own policy
+JSON, evaluated against each firm's probe ARN for BOTH s3:GetObject and s3:PutObject, by
+explicit-Deny-wins then any-matching-Allow then implicit-deny.
+
+policy \ target   49financial     cottonwood      inflection
+49financial       allowed         implicitDeny    implicitDeny
+cottonwood        implicitDeny    allowed         implicitDeny
+inflection        implicitDeny    implicitDeny    allowed
+
+allowed = 3 (the diagonal)   denied = 6 (off-diagonal)   OFF-DIAGONAL ALLOWS: NONE
+
+WHY each off-diagonal denies, stated so a reader can check it rather than trust it: every policy's
+Resource list names ONLY its own bucket opal-data-<firm> and its own irpt/<firm>/state/ prefixes,
+so another firm's ARN matches no Resource at all and falls to implicit deny. No Deny statement is
+doing the work -- the isolation is by SCOPE, which cannot be defeated by adding an Allow elsewhere.
+
+WHY NOT THE AWS SIMULATE, measured rather than assumed:
+  iam:SimulateCustomPolicy                      -> AccessDenied for this identity
+  iam:SimulatePrincipalPolicy on the role ARNs  -> AccessDenied for this identity
+  exact cause: cloudops-dell-agent-create-policy Sid SimulateOwnPolicyOnly allows
+  iam:SimulatePrincipalPolicy on arn:aws:iam::313476888478:user/${aws:username} ONLY.
+This seat also did NOT prove isolation functionally by assuming the roles and attempting a
+cross-firm GetObject: a deliberate cross-firm access attempt is reserved, and proving isolation by
+attempting to breach it is not an applier's call.
