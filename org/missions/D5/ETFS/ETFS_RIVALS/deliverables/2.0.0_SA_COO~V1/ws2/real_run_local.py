@@ -44,7 +44,7 @@ class OverlaySink:
 
     def list(self, prefix_uri):
         live = set(self.live.list(prefix_uri))
-        if FRESH and "/gold/canonical_shape/" in prefix_uri:  # --fresh-canonical: rebuild G1 from inputs, never reuse a served revision
+        if FRESH and ("/gold/canonical_shape/" in prefix_uri or "/gold/trade_schedule/" in prefix_uri or "/gold/flow_reconciliation/" in prefix_uri):  # --fresh-canonical: rebuild G1 from inputs, never reuse a served revision
             live = set()
         return sorted(live | set(self.local.list(prefix_uri)))
 
