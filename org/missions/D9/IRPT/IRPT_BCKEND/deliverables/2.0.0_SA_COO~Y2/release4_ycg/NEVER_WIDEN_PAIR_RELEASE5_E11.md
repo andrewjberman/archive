@@ -50,7 +50,12 @@ The riders are exactly the commits to those two files since `3f29017cfc`, other 
 
 ## 4. Owed before signing
 
-- `~G2`: a diff-read note confirming rider `f60e6f1d2a` as shipped in `composition.py` and `repository.py`.
-- `~P2`: a note confirming E9 plus rider `b13bab7495` in `repository.py`.
+- `~G2`: DONE (msg 2012). Rider `f60e6f1d2a` is INERT on the live path: `generate_installed.py:224` passes no additional revisions,
+  and publisher/opal_producer are reached only from the resident. ~G2 also notes `custody_submission.py` has 0 non-test importers at
+  HEAD. So **E11 changes nothing served until a composer imports it** (IRPT_CUSTDY E2a / E10 path); read 3 stays offline.
+  ~G2's second point (default policy drops `OPAL_REPORT_PDF`) does NOT apply to this release, as MEASURED by this seat:
+  - no policy in `infra/logic/registry/reporting_policies.json` carries that family, now or at `3f29017cfc`;
+  - the census changes only the 3 named members, so the packaged registry bytes are identical live vs built.
+- `~P2`: DONE (msg 2011), confirmed by content at the pin: E9 composition 5/5 lines and repository 6/6; rider `b13bab7495` 1/1.
 - The CTO half.
 - Andrew's word on the S3 deletes of the read-4 upload.
