@@ -9,7 +9,11 @@ Usage: python <this file> <repo_root> <criterion_id>
   DB35-1-AC1  S32_READ_E1.json: `runtime_kit` {python 3.12.x, pandas "2.2.3", numpy "1.26.4", pyarrow "14.0.2"} and `runtime_tested`
               {pandas != "2.2.3"} read from each process; `classify_and_sum` {fixture, equal (bool), differences (list)} with equal iff
               differences is empty; `returns_table` {old_pin "bc50d5711e", sha256_old_pin, sha256_head, identical (bool)} with identical
-              iff the two sha256 match; `db_b_43_test` {passed (int > 0), failed == 0} on the kit. Base: FAIL.
+              iff the two sha256 match; `db_b_43_test` on the kit (AMENDMENT 1, issuer, 2026-10-09 ~03:1xZ): `served_default`
+              {passed (int > 0), failed == 0} -- the test bodies with `future.infer_string` left at pandas 2.2.3's default, the mode the
+              served runtime runs in (account_activity_lots.set_served_runtime() forces it off; the returns path never sets it) -- and
+              `forced_option_on` {passed, failed, note} recorded as measured (the test forces the pandas-3 mode, experimental on 2.2.3;
+              row W46-S1). Base: FAIL.
   DB35-1-AC2  `full_run` on the kit: population_count >= 7,000, accounts_run equal, `refusals` (the count of REFUSED / LOTS_SKIPPED /
               CLASS_SKIPPED lines in its log) an integer, lots_stage_completed true; `s33_holds` == (refusals == 0). Base: FAIL.
   DB35-2-AC1  the packet NEVER_WIDEN_PACKET_ACTIVITY_LOT_RELEASE_R35.md: every row of its file-list table (a line `| `<repo_path>` ... |
@@ -66,10 +70,13 @@ def main():
                 or rt.get("identical") is not (rt["sha256_old_pin"] == rt["sha256_head"]):
             fail("returns_table %r" % rt)
         d = r.get("db_b_43_test") or {}
-        if not isinstance(d.get("passed"), int) or d["passed"] <= 0 or d.get("failed") != 0:
-            fail("db_b_43_test %r" % d)
-        print("OK: kit pandas 2.2.3 vs tested %s: classify_and_sum equal=%s (%d difference(s)); returns old pin vs HEAD identical=%s; DB-b-43 %d passed" % (
-            t["pandas"], c["equal"], len(c["differences"]), rt["identical"], d["passed"]))
+        sd, fo = d.get("served_default") or {}, d.get("forced_option_on") or {}
+        if not isinstance(sd.get("passed"), int) or sd["passed"] <= 0 or sd.get("failed") != 0:
+            fail("db_b_43_test.served_default %r (the served mode must pass, 0 failed)" % sd)
+        if not isinstance(fo.get("passed"), int) or not isinstance(fo.get("failed"), int) or not str(fo.get("note") or "").strip():
+            fail("db_b_43_test.forced_option_on %r must be recorded with a note" % fo)
+        print("OK: kit pandas 2.2.3 vs tested %s: classify_and_sum equal=%s (%d difference(s)); returns old pin vs HEAD identical=%s; DB-b-43 served mode %d passed (forced pandas-3 mode: %d/%d, recorded)" % (
+            t["pandas"], c["equal"], len(c["differences"]), rt["identical"], sd["passed"], fo["passed"], fo["passed"] + fo["failed"]))
     elif cid == "DB35-1-AC2":
         f = load(REC).get("full_run") or {}
         if not isinstance(f.get("population_count"), int) or f["population_count"] < 7000 or f.get("accounts_run") != f["population_count"] \

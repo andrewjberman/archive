@@ -4,7 +4,11 @@
     <issued_by>2.0.0_SA_COO~G2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-08</date>
-    <status>issued</status>
+    **AMENDMENT 2026-10-09 (2.0.0_SA_COO~G2, issuer):** the three criteria carry cell_refs="YCD-w-6" and a literal
+<invocation>/<expect> each, read against the evidence files this order's applier already committed (0.7.0_AE_CloudOps~DELL2 msg 2260:
+the prose criteria had no cell_refs and no evaluable expect). Wording and meaning unchanged. Gate limb: none graded this modification.
+
+<status>issued</status>
     <project_code>IRPT_YCDGEN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -55,8 +59,8 @@ seat-driven F1 run (CTO~DELL2 msg 1876). The pair is f1_st26_release/NEVER_WIDEN
   </bounds>
 
   <proof_of_spec>
-    <criterion id="AC1">The ledger irpt-ycdgen-f1-st26-20261008 is CLOSED with all seven legs proven (python .tools/deploy_ledger.py check).</criterion>
-    <criterion id="AC2">V1's output shows load_brand resolving the packaged path from the running st26 root.</criterion>
-    <criterion id="AC3">V2's output shows the host on 409e3066d1-st24 with the allow list Andrew only.</criterion>
+    <criterion id="AC1" cell_refs="YCD-w-6">The ledger irpt-ycdgen-f1-st26-20261008 is CLOSED (all seven legs proven).<invocation>grep -m1 '^\*\*Status' org/critical_paths/change_management/20261009T0050Z_irpt-ycdgen-f1-st26-20261008_deploy_completion.md</invocation><expect>^\*\*Status:\*\* CLOSED</expect></criterion>
+    <criterion id="AC2" cell_refs="YCD-w-6">V1's output shows load_brand resolving the packaged path from the running st26 root, no brand env var.<invocation>grep -m1 'V1 brand from the RUNNING root' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st26/D2_V1_INSTALL_20261009.txt</invocation><expect>26df2c7622-st26/ycharts/research/brand/brand\.json .*env brand vars \[\]$</expect></criterion>
+    <criterion id="AC3" cell_refs="YCD-w-6">V2's output shows the allow list Andrew only after the removal back to st24.<invocation>grep -m1 'V2 allow list' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st26/X1_V2_REMOVAL_20261009.txt</invocation><expect>OPAL_PRODUCER_PRINCIPALS = \("andrew@opalinvest\.com",\)$</expect></criterion>
   </proof_of_spec>
 </task_order>
