@@ -8,7 +8,8 @@ Prints "<id> PASS" or "<id> FAIL" as the last line. Read-only: source map, git b
               blob's sha256: irpt-status submission.py + acceptance.py (+ ops/entry.py + ops/owned_report.py, AMENDMENT 3); irpt-ycharts-generate
               contracts/AnalysisSubmissionRequest.schema.json. Base at AMENDMENT 3: FAIL (2 of 5 lag).
   AR21-y-AC2  no staged commit ships split, for BOTH functions (checks/r73/cochange_closure.py irpt-status and irpt-ycharts-generate).
-  AR21-y-AC3  every imported name resolves in BOTH built zips (BUILD_ONLY, then checks/r71/symbol_closure.py on each).
+  AR21-y-AC3  every imported name resolves in BOTH built zips (BUILD_ONLY, then checks/r71/symbol_closure.py on each), and every
+              call to a packaged callee fits its signature (checks/r2/signature_closure.py; AMENDMENT 8).
 """
 import hashlib
 import json
@@ -28,7 +29,14 @@ ROWS = [
     ("irpt-status", "infra/aws/lambda/investor-reporting/reports/status_installed.py"),
     # AMENDMENT 5 (issuer 2026-10-09 ~12:1xZ, CTO msg 3245, row IRPT_YCDGEN-D2-S20): the research policy row must carry its 3 firms.
     ("irpt-status", "infra/logic/registry/reporting_policies.json"),
+    # AMENDMENT 8 (issuer 2026-10-09 ~16:4xZ, row IRPT_ANLREQ-D2-S16): rev 4 shipped split -- composition.py must carry
+    # build_retained_repositories(additional_policy_revisions=), which status_installed.py now passes.
+    ("irpt-status", "infra/aws/lambda/investor-reporting/reports/composition.py"),
 ]
+# AMENDMENT 8: AC3 also runs checks/r2/signature_closure.py on each built zip. The one mismatch tolerated is pre-existing and
+# owned elsewhere (row IRPT_BCKEND-D2-S60, 2.0.0_SA_COO~P2); any other mismatch FAILS.
+SIG = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r2/signature_closure.py"
+SIG_TOLERATED = ("served:1006 calls interactive_access.InteractiveAccess -- unknown keyword(s) ['profile_reader']",)
 HELD = {  # AMENDMENT 5: graded at this lane's own drained commit; ~P2's worker ~268 changed both after (IB-pr-405 ships it)
     "infra/aws/lambda/investor-reporting/ops/entry.py": "eb70303e8f",
     "infra/aws/lambda/investor-reporting/ops/owned_report.py": "62880e9bfc",
@@ -95,6 +103,13 @@ def main():
             print(fn, " | ".join(tail))
             if s.returncode != 0:
                 fail("%s symbol closure FAIL" % fn)
+            g = subprocess.run([sys.executable, str(root / SIG), zip_path], capture_output=True, text=True)
+            mism = [ln[len("MISMATCH: "):] for ln in g.stdout.splitlines() if ln.startswith("MISMATCH: ")]
+            new = [m for m in mism if m not in SIG_TOLERATED]
+            print(fn, " | ".join(ln for ln in g.stdout.splitlines() if ln.startswith("signature_closure")),
+                  "| tolerated %d (row IRPT_BCKEND-D2-S60)" % (len(mism) - len(new)))
+            if new or not any(ln.startswith("signature_closure") for ln in g.stdout.splitlines()):
+                fail("%s signature closure: %r" % (fn, new))
     print("%s PASS" % cid)
 
 
