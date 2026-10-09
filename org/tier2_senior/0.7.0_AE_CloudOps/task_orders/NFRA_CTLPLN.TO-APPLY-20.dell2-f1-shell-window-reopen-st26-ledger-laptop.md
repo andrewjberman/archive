@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -14,6 +14,11 @@
 <owned_cells>CT-a-1</owned_cells>
 <decomp_context>A second use of the dell2 F1 shell window built by AMENDMENT 19 (variable open_dell2_f1_shell_window), for dell2's new ledger irpt-ycdgen-f1-st26-20261008 (the st26 resident release carrying the brand asset; dell2 2.0.0_SA_COO~G2 msg 1901, relay 107454). 1.0.0_SA_CTO msg 107457: "consented: dell2's F1 shell window REOPEN for its new ledger, same terms, hard close 06:00Z".</decomp_context>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~01:5xZ). B2 OPEN 2026-10-09T01:00:23Z on dell2's "open now"; C2 CLOSED 01:43:20Z on dell2's X1. Issuer live read
+    after C2: dell2 AWS-RunShellScript explicitDeny (combined send refused). Untargeted re-plan 0/0/0 (applier). Ledger closed (@bdc7f6e9b7).
+  </closure>
 
   <objective>
     Open dell2's F1 shell window again when dell2 says "open now" (LEG B2) and close it at dell2's X1 or at 2026-10-09T06:00Z
