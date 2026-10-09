@@ -46,6 +46,15 @@
     6. Close the ledger. Report once to `2.0.0_SA_COO~V2`.
   </steps>
 
+  <amendment n="1" date="2026-10-09" source="msg 2710">
+    HEAD has moved past the pin. `~O2`'s NFRA_OPSWKF OW-l-1 commits (67915dcbe8, 4763291692, ee1d0edb8d) changed
+    `lambda_function.py`, so the HEAD file is `f980441e...`. Those commits are not covered by the CTO half; do NOT deploy them here.
+    Use the Y75 pattern: run steps 1-5 in a DETACHED worktree at `86454002bf`
+    (`git worktree add --detach <abs-path> 86454002bf`), build, plan and apply from there. STOP 1 then reads the worktree,
+    where the diff is empty by construction. Every other gate is unchanged, and the zip's file must still be `04f5727b...`.
+    Remove the worktree after the ledger closes. OW-l-1's deploy is `~O2`'s, under its own pair.
+  </amendment>
+
   <bounds>
     Rollback: re-apply the SA-k-1 build (`6e19a53535`, file `21fe06e0...`). No env, IAM, route or permission change.
   </bounds>
