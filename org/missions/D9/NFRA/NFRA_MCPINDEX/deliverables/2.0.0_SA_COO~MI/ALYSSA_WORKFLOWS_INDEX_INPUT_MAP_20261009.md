@@ -69,3 +69,12 @@ Owner key: **MX** = NFRA_MCPINDEX (this project, PRD v0.6). **OG** = NFRA_OPLGTW
 - Read through the gateway: `find_sharepoint_site` ("project" returned 0 sites; "shared" returned the `Shared` site),
   then `search_site_files` ("Claude Chrome") and `read_site_file` x2. Nothing was downloaded or written to SharePoint.
 - The 403/404 on the ycharts tools and every "inferred" line are the brief's claims, NOT measured here.
+
+## Measured 2026-10-09 ~03:4xZ (live gateway reads by 2.0.0_SA_COO~MI; replaces the brief's claims where they differ)
+
+| tool | call | result | vs the brief |
+|---|---|---|---|
+| `ycharts_freshness` | none | `ok: true, HTTP 200` | the shared session is live |
+| `ycharts_time_series` | SPY, price, 2026-10-01..10-07 | `http_status 403, points 0` | CONFIRMS the brief's 403 |
+| `ycharts_snapshot_metrics` | `^SPX`, `ytd_total_return` | `http_status 200`, value 14.98 keyed to symbol `"None"` | DIFFERS: not 404; it answers, but the symbol key is lost (a parse defect), so a multi-symbol call cannot be read back per symbol |
+| `mdpf_get_model_benchmarks` | none | as_of 2026-10-07; 5 models x 10 periods (1D..Since Inception, TTW); index and ETF bases with spreads | W6/C2 model performance is ANSWERED. No gross/net toggle, which the brief's C2 names (`gross_net`). |
