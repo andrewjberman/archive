@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-aw-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-aw-1.ard-apply-mode.md",
+    "group": "OTHER",
+    "vintage_commit": "2957e97b2c"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~76",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round49.md",
+    "vintage_commit": "2957e97b2c",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-aw-1.ard-apply-mode.md"
+  },
+  "acceptance": [
+    {
+      "criterion_id": "CB49aw1-AC1",
+      "criterion_verbatim": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_ard_apply.py -q expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_commonwealth_ard_apply.py -q",
+      "expect": "passed",
+      "output_evidence": "rc 0; 4 passed (refuse without committed pair files, refuse on sha mismatch, refuse on non-empty prefix, happy path via emit_day(upload=True) + verify match=3/3). Test committed alone first (2957e97b2c) and 4 failed at base. Silver suite: 753 passed, 11 skipped.",
+      "status": "PASS",
+      "denominator": "4 of 4 tests passed"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-aw-1.ard-apply-mode.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local adapter; no S3 write; mint is CB-al-2",
+      "artifact_covered_by": [
+        "CB49aw1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_ard_apply.py",
+      "kind": "test",
+      "commit_or_etag": "2957e97b2c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test file",
+      "artifact_covered_by": [
+        "CB49aw1-AC1"
+      ]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "silver tests dir",
+      "result": "753 passed, 11 skipped"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh on both py files",
+      "result": "clean 2 of 2"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted mutant: one byte appended to a local day file",
+      "expected": "REFUSED on sha256 mismatch, zero puts",
+      "observed": "test_refuses_on_sha_mismatch: SystemExit REFUSED naming 2026-06-19; puts == []",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test file run twice",
+      "observed": "4 passed and 4 passed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any real S3 write",
+      "reason": "order grants none; S3 faked"
+    },
+    {
+      "item": "editing the producer",
+      "reason": "forbidden by the order"
+    }
+  ]
+}
