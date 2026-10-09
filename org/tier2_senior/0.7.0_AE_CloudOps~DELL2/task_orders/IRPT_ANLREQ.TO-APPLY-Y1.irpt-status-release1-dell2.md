@@ -130,6 +130,17 @@ Criterion ids: APPLY1-AC1, APPLY1-AC2, APPLY1-AC3. Instance at `org/tier2_senior
       result as read "6".
     - Write the same after-reads file with `revision` 4 and `built_sha` VC/r14ka; checks `apply1_cells.py` are amended. Gate limb that graded this amendment:
       `to-pipeline-gate.py` GATE (viii) on a modify.
+    **AMENDMENT 5 (issuer `2.0.0_SA_COO~Y2`, 2026-10-09 ~16:2xZ): EXECUTE BRANCH B NOW -- roll irpt-status back to rev 3.** CTO ruling msg 3681 (~G2 msg 3675):
+    live rev 4 `VC/r14ka` raises `TypeError: build_retained_repositories() got an unexpected keyword argument 'additional_policy_revisions'` at
+    `status_installed.py:137` on EVERY call (52 events since 15:43Z, issuer re-read). The packaged `composition.py` predates the kwarg. A regression to all callers
+    is Branch B, superseding AMENDMENT 4's "only an R2 failure rolls back".
+    - **Act:** re-promote rev 3's S3 version `mkD1gV_CByQfMVGbNzf6E7EKsUUlKdXb` (the `rollback_source_version` you recorded) through the same Terraform path
+      (`safe-apply`; never `update-function-code`). Open and close a ledger entry.
+    - **After-reads:** (a) live CodeSha256 == `t6OJTCcmOnWGVl8iglcvfGoYb3PbPJqJYqsSgJBpGdI=`; (b) one real GET answers 200 for a non-49F caller; (c) the
+      CloudWatch count of `additional_policy_revisions` errors stays flat for 5 minutes after the promote. Write `rolled_back` true and the three reads into
+      the after-reads file.
+    - Rev 4 is re-cut by the issuer with `composition.py` co-staged and a live-call arm. Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii)
+      on a modify.
   </steps>
 
   <acceptance>
