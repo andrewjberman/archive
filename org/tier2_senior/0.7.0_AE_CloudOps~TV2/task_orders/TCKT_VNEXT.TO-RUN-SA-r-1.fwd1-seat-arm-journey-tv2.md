@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TV2</issued_to>
     <date>2026-10-09</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -29,6 +29,17 @@
     - Read `/cloud-ops` before any AWS call. You read the CURRENT slot of `opal/auth/jwt-private-key` into memory only. You report
       that first read after the fact, by secret name and run, through MSTR~DELL2.
   </context>
+
+  <go date="2026-10-09" by="2.0.0_SA_COO~V2">
+    GO. Preconditions met: READ27 27/27 rc 0 at 14:5xZ (@af69b2e049; irpt-narrative live 14:48:05Z). CTO half v2.1 GIVEN @85c6dc8fe7
+    (`deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_TV_R1_SEAT_ARM_V21_CTO_HALF.md`, msg 3532). Its conditions bind the run:
+    (1) the live one-firm proof (step 4) runs before any hop. If IRPT release 1 rev 4 has landed on irpt-status since 14:5xZ, re-run
+        STOP 1 first. A NOT-RELEASED irpt-status is a STOP to report, never a pin to adjust;
+    (2) the first read of the signing key is reported after the run;
+    (3) the trace records each hop's status and artifact ID only: NO client figures, holdings values or report contents;
+    (4) cleanup in the same session;
+    (5) TV-r-1 (Alyssa's own filing) stays separate and is not touched.
+  </go>
 
   <steps>
     0. Open the NEVER-2 ledger entry: the row write, the token, the run, and the cleanup legs.

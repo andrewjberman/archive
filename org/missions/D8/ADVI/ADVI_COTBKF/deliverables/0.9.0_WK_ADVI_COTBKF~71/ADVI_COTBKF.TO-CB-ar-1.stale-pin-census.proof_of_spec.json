@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ar-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ar-1.stale-pin-census.md",
+    "group": "OTHER",
+    "vintage_commit": "a8b4151678"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~71",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round44.md",
+    "vintage_commit": "a8b4151678",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ar-1.stale-pin-census.md"
+  },
+  "acceptance": [
+    {
+      "criterion_id": "CB44ar1-AC1",
+      "criterion_verbatim": "python -m pytest data/assets/scripts/silver/tests/test_cot_price_rewrite_pin_check.py -q expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_cot_price_rewrite_pin_check.py -q",
+      "expect": "passed",
+      "output_evidence": "rc 0; 3 passed in 0.76s. Test-alone commit 90feee9 failed 3 of 3 at base (before the change). Silver suite: 743 passed, 11 skipped.",
+      "status": "PASS",
+      "denominator": "3 of 3 tests (same, stale_pin, missing_pin) passed"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~71/ADVI_COTBKF.TO-CB-ar-1.stale-pin-census.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_cot_price_rewrite.py",
+      "kind": "script",
+      "commit_or_etag": "a8b4151678",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pin_check() added before the census; local code only",
+      "artifact_covered_by": [
+        "CB44ar1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_cot_price_rewrite_pin_check.py",
+      "kind": "test",
+      "commit_or_etag": "90feee993e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 tests",
+      "artifact_covered_by": [
+        "CB44ar1-AC1"
+      ]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "via safe-commit.sh on each .py commit",
+      "result": "ruff + py_compile + naming gate; one naming REFUSE on the typed pin key, fixed by joining the parts"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "pytest of the pin-check test run twice at the same HEAD",
+      "observed": "3 passed both runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "planted mutant: pin_check made to return empty on a mismatch (sed on a copy, restored after)",
+      "expected": "test_different_pin_refused_stale fails",
+      "observed": "1 failed, 2 passed; script restored byte-identical",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "live S3 read of the pin",
+      "reason": "S3 faked in the test; the order allows but does not require a live read"
+    }
+  ]
+}
