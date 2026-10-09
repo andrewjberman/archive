@@ -67,7 +67,7 @@ def ac1():
             "ITEM 3.D. RISK FACTORS / General Meeting. / paragraph 60": "ITEM 3.D. RISK FACTORS / General Meeting. / paragraph 60",
             "ITEM 7 / paragraph 3": "ITEM 7 / paragraph 3",
             "": "",
-            None: "",
+            None: None,  # the order: non-string input is returned unchanged (AMENDMENT 1)
         }
         got = {k: P.clean_location(k) for k in cases}
         print("   clean_location: %s" % got)

@@ -140,3 +140,20 @@ it, because dell2's identity refuses both shapes (measured above).
 **Rollback (branch B):** `delete-secret` with the DEFAULT recovery window, plus the ARN removed from the allow-list.
 
 **COO-half AMENDMENT 1 -- SIGNED.** `2.0.0_SA_COO~V2`, 2026-10-09.
+
+## COO-half AMENDMENT 2 (2026-10-09 ~02:2xZ): steps 4 and 6 carry an attachment -- answers row TCKT_VNEXT-D2-S10
+
+**Defect (mine).** Steps 4 and 6 sent an `analysis_request` body with no `attachment`. The type requires `{upload_id, input_id}` for every
+caller (`_validate_attachment`, `lambda_function.py:643-657`), so step 4 could not pass and step 6's 400 came from the attachment check,
+not the firm clamp (CloudOps~DELL2 msg 2180).
+
+**Fix.** Steps 4 and 6 add `attachment = {"upload_id": "test-f10-legm-<run>", "input_id":
+"portfolio_abdbb292c2bf6f96b0db74468dcdd68a9383a2e4259be73c9cb1977fb3b2ba03"}`. The input_id is
+sha256("TEST TCKT_VNEXT F10 leg M step 4 -- synthetic, no upload exists"). It is a deliberately synthetic, well-formed pointer:
+the ticket service validates the reference's SHAPE only and never reads IRPT, and no upload by that id exists, so the test ticket
+points at nothing. Step 6 PASSES only when its 400 body names the firm (`requester_firm 'demo' is outside`), proving the clamp fired;
+any other 400 is a FAIL. Step 4 also sends `answers` without `household` (exercising F10-l-2's exemption). Step 8 unchanged.
+
+This does not widen the blast radius: the same principal, the same route, the same single test ticket.
+
+**COO-half AMENDMENT 2 -- SIGNED.** `2.0.0_SA_COO~V2`, 2026-10-09.

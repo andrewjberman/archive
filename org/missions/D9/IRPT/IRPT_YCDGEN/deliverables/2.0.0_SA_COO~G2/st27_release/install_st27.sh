@@ -1,10 +1,10 @@
 set -u
-# Ledger irpt-ycdgen-st27-20261009, legs D2 + V1: fetch the signed st27 install script BY KEY AND VERSION, verify its sha256, run it
+# Ledger irpt-ycdgen-st27-20261009, legs D2 + V1: fetch the signed st27 install script BY KEY (the host role holds GetObject, not GetObjectVersion), verify its sha256 (it binds the bytes), run it
 # (it stages the tar, checks every member, keeps st24 for rollback and rolls back itself on a failed start), then read the running
 # package back. Sent through Systems Manager by host_read.py. No vendor call. Operator 0.7.0_AE_CloudOps~DELL2 for 2.0.0_SA_COO~G2.
 NEW=e606008994-st27
 KEY=ec2/investor-reporting-ycharts/resident/resident_host_install_$NEW.sh
-VER=__ST26_SCRIPT_VERSION__  # the staged version (fetched by key; the sha256 binds the bytes)
+VER=__ST27_SCRIPT_VERSION__  # the staged version (fetched by key; the sha256 binds the bytes)
 WANT=64a817c58c66ebd181cd00e4663c6fdfc0592f49e29dcc506c38686853bc0eab
 T=/tmp/resident_host_install_$NEW.sh
 R=/opt/irpt-resident
