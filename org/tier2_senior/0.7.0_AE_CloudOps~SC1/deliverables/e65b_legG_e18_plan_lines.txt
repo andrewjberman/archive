@@ -1,0 +1,64 @@
+# e65b leg G -- E_18 plan lines, the 04:00:46Z BD fire
+
+Read from /var/log/gold-layer-runner.log ON THE INSTANCE while it was still running.
+CommandId f4b4083c-7db9-4c68-950b-aa15d1a9995b (extract), d8850bb4-c0fe-4004-8fbb-1dfcab09e314 (marker map).
+
+LAST-BLOCK DISCIPLINE: the log is append-only, 632,411,304 B / 6,456,328 lines, and it still holds
+the PREVIOUS run's E_18 block ending at line 6410011. This run's block is lines 6456141-6456174,
+located by mapping the E_18 markers first and extracting that range -- so the read cannot pick up
+an older run, which is the trap the predecessor leg named.
+
+=== THIS RUN'S E_18 BLOCK, VERBATIM ===
+--- PHASE_B3b: E_18 ---
+  STARTED E_18 (pid 5712)
+
+========================================
+  E_18  (E_18.detect_new_securities.py)
+  2026-10-09T05:07:56Z
+  flags: --upload
+========================================
+[2026-10-09T05:07:56Z] [telemetry] start pid=5725 runner=bd-gold-layer-runner script=E_18 run_id=80c0f41545a1 -> .runtmp/telemetry/2026-10-09/bd-gold-layer-runner/E_18/v032-050756Z-80c0f41545a1.jsonl
+INFO: Found credentials from IAM Role: bd-exporter-ec2-role
+INFO: Loading holdings from gold/holdings_lots/2026-10-02.parquet
+INFO: Resolution table loaded: 4424 resolved names
+WARNING: WARN: Queued 3 new unclassified securities (0 fed to scheduled classification, 0 it could not resolve directly).
+
+  Detection summary (resolution-aware):
+    Total tickerless holdings (unique names): 1,317
+    Already resolved (in resolution table):   0
+    Newly resolved (prefix match):            0
+    Scheduled-classification candidates:      0
+    Scheduled rows written / refused:         0 / 0
+    Scheduled-classification seed_pending:    0
+    Scheduled-classification unresolved:      0
+    Truly unresolved (BD-local, no bd-securities stub written): 3
+
+  Top 10 unresolved by market value:
+     1. $         6,630  U.S. VECTOR EQUITY PORTFOLIO: ETF CLASS SHARES
+     2. $             0  FRANKLIN CORE PLUS BOND FUND R6
+     3. $             0  GENTHERM INC COM
+[PERF] E_18.detect_new_securities  wall=4.0s  cpu=[avg=9.6% min=6.1% max=12.2% p95=12.0%]  mem=[avg=799MB peak=1148MB p95=1145MB (PSS; rss_peak=1187MB)]  io=[N/A]
+[2026-10-09T05:08:02Z] [telemetry] stop pid=5725 ticks=4 run_id=80c0f41545a1 file=.runtmp/telemetry/2026-10-09/bd-gold-layer-runner/E_18/v032-050756Z-80c0f41545a1.jsonl
+[2026-10-09T05:08:02Z] [telemetry] Found credentials from IAM Role: bd-exporter-ec2-role
+[2026-10-09T05:08:02Z] [telemetry] uploaded -> s3://opal-data-bd/logs/gold-layer/telemetry/bd-gold-layer-runner/E_18/80c0f41545a1.jsonl
+  CHECKPOINT E_18 -> gold/.checkpoints/2026-10-09/E_18.done
+  E_18 done (rc=0)
+
+
+=== VERDICT: CTO half @7f68da7051 condition 3 PASSES ===
+Scheduled rows written / refused: 0 / 0. Condition 3 is a CONDITIONAL ON ROWS WRITTEN and the
+count is zero, so no row exists whose class came from a NAME:: key that is not a whole cash phrase.
+This is the half's BRANCH B (branch B changes nothing), not a missed branch A.
+
+ABSENT != EXERCISED-AGAINST, closed on TWO independent arms rather than asserted:
+ (1) BY CODE: both on-instance copies were md5'd at 04:0xZ, BEFORE E_18 executed at 05:07:56Z,
+     and both read 40ffa3fac380551704637adc8a3b6ff3 -- the new bytes. A zero from stale code reads
+     identically to a zero from new code, which is why this arm is not optional.
+ (2) BY CONTENT: the 3 truly-unresolved names carry no CASH token at all --
+     'U.S. VECTOR EQUITY PORTFOLIO: ETF CLASS SHARES', 'FRANKLIN CORE PLUS BOND FUND R6',
+     'GENTHERM INC COM'. So the cash_token rule had nothing to act on in either direction, and
+     the zero is corroborated by what the run actually saw, not merely by its count.
+
+QUALIFIER, stated rather than dropped: E_18 is in NONFATAL_IDS (gold_dispatch.sh:165), so a
+non-zero exit would be logged without aborting the chain. The rc=0 above is read from E_18's OWN
+block ('E_18 done (rc=0)', line 6456174), never inferred from the chain surviving it.

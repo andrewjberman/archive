@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e65b.shared-cash-token-two-key-ship",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5f4b2f17d0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R11.md",
+    "vintage_commit": "194b4de42e",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/task_orders/MDPF_SECCLASS.TO-SC-e65b.shared-cash-token-two-key-ship.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~SC1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-bd/code/gold/lib/_shared/etf_classification_scheduled.py",
+      "kind": "s3_object",
+      "commit_or_etag": "40ffa3fac380551704637adc8a3b6ff3",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ONE safe-deploy run at 2026-10-09T02:37:33Z (the S3 object's own LastModified) on box/dell1: `bash .tools/safe-deploy.sh --tree black_diamond --tree cot infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py`. Line: 'DEPLOYED-SHIPPED infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py -> s3://opal-data-bd/code/gold/lib/_shared/etf_classification_scheduled.py'. Terminal line: 'OK: safe-deploy gate PASS -- 2 named shipped artifact(s) deployed and ETag-verified; 0 script file(s)'. Pre-act ETag 3f1e6be8910952f33c88bf100c610ab6 at VersionId 5BZygWLxJfYjc.0hzSKkxUM_l0enmtKn (the rollback handle, unused); post-act VersionId PXFS5WDfvYHP.8C46EbqxdPgig2bQ.My. The seat-gates limb printed SKIP (no data/<pipeline>/scripts path), correct for an artifact-only deploy and NOT cited as a gate pass.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-cot/code/gold/lib/_shared/etf_classification_scheduled.py",
+      "kind": "s3_object",
+      "commit_or_etag": "40ffa3fac380551704637adc8a3b6ff3",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same single safe-deploy run; line 'DEPLOYED-SHIPPED ... -> s3://opal-data-cot/code/gold/lib/_shared/etf_classification_scheduled.py'. Pre-act ETag 3f1e6be8910952f33c88bf100c610ab6 at VersionId 0e4OsubYyRdw4RnmCvfMYM0SZtLLM9z9 (the rollback handle, unused); post-act VersionId _4Ogad01OypJCIYOI_v3yDzh99284s3K.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/e65_shipped_etag_check.py 40ffa3fac380551704637adc8a3b6ff3 -- expect 'E65-SHIPPED ok=True'",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/e65_shipped_etag_check.py 40ffa3fac380551704637adc8a3b6ff3",
+      "expect": "E65-SHIPPED ok=True",
+      "output_evidence": "E65-SHIPPED ok=True head=40ffa3fac380551704637adc8a3b6ff3 bd=40ffa3fac380551704637adc8a3b6ff3 cot=40ffa3fac380551704637adc8a3b6ff3 control=MATCH -- read immediately after the act and re-read at ledger close with the same result, so neither key drifted in between.",
+      "denominator": "2 of 2 moving keys at the signed ETag; the check's own control reads MATCH. The order states the BASE as 'E65-SHIPPED ok=False head=40ffa3fa... bd=3f1e6be8... cot=3f1e6be8... control=MATCH' at the cut, so this is a discriminator that MOVED, not a check that was always green. Watch set measured as the SUPERSET of the order's 2 keys and the signed halves' 6: 12 keys read pre- and post-act, 12 of 12 with no absences; targets at signed bytes 2 of 2; watch keys unmoved 10 of 10 on BOTH ETag and VersionId; STOPS=0.",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-S17: the e65 ledger's table-side corroboration is a wrong-domain census -- no row in etf-classifications carries an `input` attribute (attribute_exists -> 0 of 11,361), so a scan filtered input=cash_token reads 0 for every value including bd-securities, gics and schwab. Surfaced while building this order's leg G method from the predecessor leg; it does NOT bear on this order's own act, and e65's conclusion stands on its primary evidence. This order's leg G therefore did NOT use that read. OBSERVATION, INERT, UNDER_INVESTIGATION; remediation is the CVO's."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "safe-deploy.sh",
+      "invocation": "bash .tools/safe-deploy.sh --tree black_diamond --tree cot infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py",
+      "result": "OK -- 'OK: safe-deploy gate PASS -- 2 named shipped artifact(s) deployed and ETag-verified; 0 script file(s)'; exactly 2 DEPLOYED-SHIPPED lines and no others."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": ".tools/comp-read .tools/safe_deploy_core.py --for 'what does shipped_artifacts_for return and how does it decide the ship set for a named file path' --width 200",
+      "result": "Surfaced the msg-107147 rule in the function's own docstring ('a deploy ships only the files its own ledger names') and unnamed_artifacts_for's 'They are NOT uploaded', which is what made the named form safe to run where CTO condition 1 had directed the now-retired carrier route."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": ".tools/comp-read org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md --enumerate 'MDPF_SECCLASS-D1-S[0-9]+' --width 150",
+      "result": "34 hits / 16 HEADING bands over 5,822 lines, denominator printed -- S1..S16 taken, so the new row minted as D1-S17 rather than colliding."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": ".tools/deploy_ledger.py open|close-leg|hold|close --slug secclass-e65b-namekey-ship-dell1-20261009",
+      "result": "Entry opened before the act with 3 legs, HELD on the named external gate while only the verify leg was open (so it read KNOWN-HELD rather than blaring a false half-landed RED), released when the gate was met, CLOSED with all 3 legs proven and the sentinel removed."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three arms. (a) SHIP-SET: shipped_artifacts_for(named, (black_diamond, cot)) was called directly before the act and must return exactly the two signed keys; the negative control shipped_artifacts_for(named, ()) -- no --tree -- must return ZERO, which is also the explanation of the msg-499 report that a literal _shared deploy 'ships nothing'. (b) WATCH KEYS: the 10 non-target keys must be unmoved after the act. (c) BEHAVIOURAL, because an ETag proves the bytes and not the behaviour: cash_token_match() exercised IN THE SERVED BYTES (pulled back out of S3, md5 40ffa3fa) across a LANDS arm, a NEGATIVE arm and controls; then BOTH module versions run over real keys -- the OLD bytes from git @03f7f8fb5c, md5 verified 3f1e6be8 and equal to the measured pre-act ETag, against the served NEW bytes.",
+      "expected": "(a) 2 routed, 0 unrouted, 0 from the no-tree control. (b) all 10 watch keys at their pre-act ETag. (c) LANDS False, NEGATIVE still True (no over-narrowing), controls False, and over real keys the change narrowing-ONLY, i.e. OLD-no/NEW-yes = 0.",
+      "observed": "(a) exactly 2 -- opal-data-bd and opal-data-cot code/gold/lib/_shared/etf_classification_scheduled.py; unrouted 0; no-tree control 0. (b) 10 of 10 watch keys identical on BOTH ETag AND VersionId, which is STRICTLY STRONGER than the halves' acceptance (that allowed the six re-uploads to return at their pre-act ETags with fresh VersionIds): under msg 107147 the unnamed members were never re-uploaded, so no watched key saw version churn at all. STOPS=0, compared by script rather than by eye. (c) 9 of 9 cases passed: LANDS 3 (a NAME:: key whose name is not a whole cash phrase is no longer cash, including the S63 unit-trust shape), NEGATIVE 4 (NAME::CASH and NAME::Cash still cash; real ticker forms BDCASHIN and FCASH unchanged), CONTROL 2. Over all 331 real NAME::-keyed cash rows: OLD-yes/NEW-no = 8, OLD-no/NEW-yes = 0 -- narrowing-only CONFIRMED ON LIVE DATA, not merely by reading the diff. The 8 are the historical footprint the CTO half's 'does not land' branch already names, left in place by put-on-absence ('never replaces or edits an existing row').",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The shipped bytes were read at four independent places: git show HEAD:<module> | md5sum; the working-tree file; the S3 object's head-object ETag in both buckets; and the file pulled BACK OUT of opal-data-bd with get-object and md5'd locally. Then the on-instance copies were md5'd over SSM on the runner that executed E_18.",
+      "observed": "40ffa3fac380551704637adc8a3b6ff3 at all four, and at both on-instance paths (/tmp/gold_layer_scripts/... and /home/ubuntu/gold-layer/scripts/...) at 35,360 B with mtime 02:37:33Z -- the S3 LastModified carried down by the runner's copy. The sibling etf_classification.py read 3a033c04678f1c96d116b641545b17bb as a positive control, equal to its served ETag, proving the md5 instrument works and the copies came from S3 rather than a stale bake. 35,360 B also differs from the old module's 35,100 B, consistent with the halves' +6 lines.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The COT A_00 carrier's reading of the new module.",
+      "reason": "CTO condition 3 names the BD E_18 run specifically, and that is what leg G read. COT fires at 10:30Z and its carrier was out of this order's acceptance; the cot KEY is proven at 40ffa3fa by AC1 and by head-object, which is what this order owed."
+    },
+    {
+      "item": "A table-side census attributing rows to the cash_token input source.",
+      "reason": "Not measurable: the module's write() strips the input label, so no persisted attribute distinguishes a cash_token-sourced row (row D1-S17). Leg G rests on the run's own stdout plan lines plus the on-instance md5, which is the sound pair."
+    },
+    {
+      "item": "The 8 pre-existing NAME::-keyed cash rows the new rule would now decline.",
+      "reason": "Out of scope BY DESIGN and signed for: the module is put-on-absence, so it plans only keys with no row and never edits an existing one. The CTO half's 'does not land' branch states this. Fixing them would be a different act with its own pair."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/logs/session_e65b_two_key_ship_and_e71b_0226-0520Z.md"
+}
