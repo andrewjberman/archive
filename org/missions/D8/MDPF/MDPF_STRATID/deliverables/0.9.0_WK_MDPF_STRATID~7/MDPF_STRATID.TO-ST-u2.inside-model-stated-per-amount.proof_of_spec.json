@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_STRATID.TO-ST-u2",
+  "phase": "BUILD-GENERAL",
+  "firm": "MDPF",
+  "assignee": "0.9.0_WK_MDPF_STRATID~7",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-ST-u2.inside-model-stated-per-amount.md",
+    "group": "OTHER",
+    "vintage_commit": "604628912e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/decompositions/MDPF_STRATID_DECOMP_R2.md",
+    "vintage_commit": "604628912e",
+    "to_ref": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-ST-u2.inside-model-stated-per-amount.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_gold_consolidator.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "apply_sma_sleeve_overlay writes inside_model_value and a derived inside_model_figure; _state_inside_model adds inside_model_figure and held_out to each Global SMA tree row; by_firm also on carve-out rows. Not deployed.",
+      "artifact_covered_by": [
+        "ST2-u2-AC1",
+        "ST2-u2-AC2",
+        "ST2-u2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/tests/stratid/test_stratid_round2_inside_model.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four named tests, all PASSED under st_u2_tests.py.",
+      "artifact_covered_by": [
+        "ST2-u2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/tests/stratid/test_stratid_round2_firm_basis.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ST-u-1's own test: one assertion strengthened (carve-out-only row now carries by_firm); outside TO-ST-u2 paths, see row MDPF_STRATID-D1-W7-S3.",
+      "artifact_covered_by": [
+        "ST2-u2-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "ST2-u2-AC1",
+      "criterion_verbatim": "the four named tests pass.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R2_CHECKS/st_u2_tests.py",
+      "expect": "U2-OK",
+      "output_evidence": "4 passed in 0.66s (additive_entry_states_inside_model_value_per_date, tree_member_names_held_out_amounts, carve_out_member_states_it_is_not_inside_a_model, statement_moves_no_figure); final line U2-OK; rc=0",
+      "denominator": "4 of 4 named tests PASSED",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ST2-u2-AC2",
+      "criterion_verbatim": "the seam on real data (read-only S3): every Global SMA tree member carries inside_model_figure and held_out; Cottonwood divz (overlap 1,369,280.57 on 2026-10-08) is named held out with reason OVERLAP; PFDE (overlap 0.0) states inside_model_value 0.0 and is not held out.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R2_CHECKS/st_u2_seam.py",
+      "expect": "SEAM-OK",
+      "output_evidence": "inputs: portal/gold/mdpf/global/aggregate-aua-timeseries/2026-10-08.json (493 dates) | gold/mdpf_revamp/cottonwood/aggregate_aua_timeseries.json (last 2026-10-08) |   divz value 1369280.57 overlap 1369280.57 -> held_out [{'firm_id': 'cottonwood', 'value': 1369280.57, 'reason': 'OVERLAP'}], inside_model_figure True |   pfde value 410420.98 overlap 0.00 -> held_out [], inside_model_figure False | totals: Global 2147378054.74 on 2026-10-08; 2 Cottonwood members stated | SEAM-OK; rc=0",
+      "denominator": "all 6 Global SMA tree members checked for both keys (a failure names the first lacking one); 2 of 2 Cottonwood sma members stated; read-only S3 on opal-data-assets",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ST2-u2-AC3",
+      "criterion_verbatim": "ST-u-1's three checks still pass.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R2_CHECKS/st_u2_regress.py",
+      "expect": "U2-REGRESS-OK",
+      "output_evidence": "st_u1_tests.py -> U1-OK; st_u1_seam.py -> SEAM-OK; st_u1_regress.py -> U1-REGRESS-OK; final line U2-REGRESS-OK; rc=0",
+      "denominator": "3 of 3 ST-u-1 checks",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Changed ONLY the tree row's `row[\"inside_model_figure\"] = any(x[\"reason\"] == SMA_WITHHELD_OVERLAP for x in h)` to `= False` in _state_inside_model, reran the ST-u-2 test file, restored the file.",
+      "expected": "test_tree_member_names_held_out_amounts fails.",
+      "observed": "1 failed, 3 passed: test_tree_member_names_held_out_amounts (assert False is True). Restored file: 4 passed.",
+      "method": "command",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "Synthetic docs, no clock, no network in AC1/AC3 (AC3 includes the seam's read-only S3 read of the latest served key).",
+      "expected": "identical result on rerun",
+      "observed": "ST-u-2 test file run three times, 4 passed each time.",
+      "method": "command",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy, build_all against real S3, never-widen sign-off",
+      "reason": "The issuer's at the drain (BOUNDS)."
+    },
+    {
+      "item": "data/mdpf/tests/stratid/test_stratid_basis.py",
+      "reason": "Round-1 test red under ST-u-1's registry row; outside both orders' paths, left unedited. Row MDPF_STRATID-D1-W7-S1."
+    },
+    {
+      "item": "Portal rendering of the new fields",
+      "reason": "Frontend is out of scope by the PRD BOUNDARY (order preflight)."
+    }
+  ],
+  "surprises": [
+    "MDPF_STRATID-D1-W7-S3: by_firm on carve-out rows reverses ST-u-1's test assertion, in a file outside this order's paths",
+    "MDPF_STRATID-D1-W7-S4: the tree row bool cannot say 'unmeasured'; True only for a measured overlap"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest via _pytest_named.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R2_CHECKS/st_u2_tests.py",
+      "result": "U2-OK"
+    }
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_STRATID/deliverables/0.9.0_WK_MDPF_STRATID~7/MDPF_STRATID.TO-ST-u2.inside-model-stated-per-amount.proof_of_spec.json"
+}

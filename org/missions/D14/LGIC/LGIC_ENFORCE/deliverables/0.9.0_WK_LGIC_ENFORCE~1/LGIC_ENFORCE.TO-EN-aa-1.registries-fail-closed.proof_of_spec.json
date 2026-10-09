@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_ENFORCE.TO-EN-aa-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/prd/LGIC_ENFORCE_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "81cdaa2be3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/decompositions/LGIC_ENFORCE_DECOMP.md",
+    "vintage_commit": "516bdc05fa",
+    "to_ref": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-aa-1.registries-fail-closed.md"
+  },
+  "assignee": "0.9.0_WK_LGIC_ENFORCE~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_lgctfm.py",
+      "kind": "script",
+      "commit_or_etag": "fb9c09bb28",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local engine; no deploy scope (risk LOCAL)",
+      "artifact_covered_by": [
+        "AA1R21-AC1",
+        "AA1R21-AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_lgctfm.py",
+      "kind": "test",
+      "commit_or_etag": "fb9c09bb28",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local test; no deploy scope",
+      "artifact_covered_by": [
+        "AA1R21-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/registries.r21.result.md",
+      "kind": "doc",
+      "commit_or_etag": "607fd6eb8c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "result record; repo document",
+      "artifact_covered_by": [
+        "AA1R21-AC1",
+        "AA1R21-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AA1R21-AC1",
+      "criterion_verbatim": "AA1R21-AC1 -- in a sparse worktree without LEGACY_SERVED_PATHS.json the walk exits non-zero, prints MISSING INPUT naming it, writes no contract; the same walk in the full checkout completes.",
+      "method": "command",
+      "invocation": "timeout 1500 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~B1/fixed_inputs/r21/check_en_r21.py failclosed",
+      "output_evidence": "sparse: rc=3 last='MISSING INPUT org/missions/D14/LGIC/LGIC_NAMING/deliverables/LEGACY_SERVED_PATHS.json'\nfull: rc=0 last='WALK: wrote 198 row(s) (incl. 2 planted) and 135 tension(s), untypeable carried=0 to <tmp dir>'\nPASS-R21-FAILCLOSED\nrc=0",
+      "denominator": "2 of 2 walks (1 sparse, 1 full) run at fb9c09bb28; the sparse walk wrote 0 of 1 contract.json",
+      "status": "PASS",
+      "expect": "PASS-R21-FAILCLOSED"
+    },
+    {
+      "criterion_id": "AA1R21-AC2",
+      "criterion_verbatim": "AA1R21-AC2 -- the engine's own test, with the new arms, holds.",
+      "method": "command",
+      "invocation": "timeout 1500 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~B1/fixed_inputs/r21/check_en_r21.py unit",
+      "output_evidence": "unit: rc=0 7 passed in 2.14s\nPASS-R21-UNIT\nrc=0",
+      "denominator": "7 of 7 tests in lib/tests/test_opal_lgctfm.py passed (4 existing + 3 new arms, one per required registry)",
+      "status": "PASS",
+      "expect": "PASS-R21-UNIT"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The sparse worktree built by the checker omits LEGACY_SERVED_PATHS.json while carrying lib/, infra/, .tools/ and the LGIC mission tree: the pre-change engine returned \"\" for that file and walked on; the changed engine exits 3.",
+      "expected": "sparse walk rc != 0, MISSING INPUT line naming the file, no contract.json",
+      "observed": "sparse rc=3, last line MISSING INPUT org/missions/D14/LGIC/LGIC_NAMING/deliverables/LEGACY_SERVED_PATHS.json, no contract.json",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the full-checkout walk in the same invocation as the sparse walk",
+      "observed": "full walk rc=0, contract.json written, no MISSING INPUT in its output",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "verb `plan` is not gated by require_registries()",
+      "reason": "cmd_plan reads only a run directory's contract.json and opens none of scopes.json, remediations.json or LEGACY_SERVED_PATHS.json; walk, forks and run read them"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/registries.r21.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/tests -q -p no:cacheprovider; python .tools/naming-gate.py --self-test",
+      "result": "196 passed, 1 skipped (base 193 passed, 1 skipped); NAMING-GATE-SELF-TEST: PASS"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_LGIC_ENFORCE~1 <0.9.0_WK_LGIC_ENFORCE~1@opal.agent>\" -F .scratch/msg1.txt -- lib/opal_lgctfm.py lib/tests/test_opal_lgctfm.py",
+      "result": "fb9c09bb28, rc 0; LOCAL"
+    }
+  ]
+}

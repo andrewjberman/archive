@@ -29,11 +29,11 @@ largest gap fell from 1.2130 pp to 0.4998 pp. The four beyond each carry a measu
 | account | window | abs_diff now | reason |
 |---|---|---|---|
 | acct#89d0916a | 06-25..07-06 | 0.4738 pp | Black Diamond books a 4,429.53 MARGIN INT ADJ credit as a net addition; Opal keeps margin interest internal by ruling (batch 195). As a counterfactual flow it would be 0.0044 pp. S22 is RESTATED at this residual. |
-| 0076459710 | 08-11..08-19 | 0.4998 pp | Black Diamond's own accrual moved +6,022.40 (0.4999 pp of its beginning value); the residual is 0.0001 pp. Its accrual stays outside Opal's figure (batch 193). |
-| 0076459710 | 08-21..09-09 | 0.4608 pp | The mirror of the window above: accrual -5,766.11 (0.4501 pp); residual 0.0107 pp. |
-| 0084073310 | 03-20..08-04 | 0.4045 pp | Black Diamond's return is net of a 3,020.96 fee (0.3961 pp of beginning value); Opal's 49 Financial figure is GROSS by ruling. |
+| acct#6b914f88 | 08-11..08-19 | 0.4998 pp | Black Diamond's own accrual moved +6,022.40 (0.4999 pp of its beginning value); the residual is 0.0001 pp. Its accrual stays outside Opal's figure (batch 193). |
+| acct#6b914f88 | 08-21..09-09 | 0.4608 pp | The mirror of the window above: accrual -5,766.11 (0.4501 pp); residual 0.0107 pp. |
+| acct#ffa615d2 | 03-20..08-04 | 0.4045 pp | Black Diamond's return is net of a 3,020.96 fee (0.3961 pp of beginning value); Opal's 49 Financial figure is GROSS by ruling. |
 
-Two of the four (0076459710's) are WORSE than round 4. Round 4's closeness there came from the missing margin balance offsetting
+Two of the four (acct#6b914f88's) are WORSE than round 4. Round 4's closeness there came from the missing margin balance offsetting
 Black Diamond's accrual swing. Row `IRPT_DASHBD-W2-S1` records it, owner 1.0.0_SA_CTO at the round analysis.
 
 ## Population and guard, 2026-10-01 (record `POPULATION_EQUITY_R8.json`)

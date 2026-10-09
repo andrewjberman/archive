@@ -40,7 +40,7 @@ Both run the same code. The manual path of the deployed function is the Lambda e
 series from them. It is idempotent and has no date override.
 MEASURED on the exact artifact: version `qnGujQo2` was downloaded, its hash matched, and its own `handler.py --local` ran without
 `--upload`, writing nothing. It read 562 gold partitions, 2024-07-08..2026-10-01, for 6 accounts: acct#08137b81 (562 days),
-acct#89d0916a (138), 0035940058 (131), 0076459710 (61), 0084073310 (136) and 0091939812 (95).
+acct#89d0916a (138), acct#f08ffd13 (131), acct#6b914f88 (61), acct#ffa615d2 (136) and acct#d0cf6c92 (95).
 - **Branch A, the expected one.** The reporting gold's own schedule fires Monday 2026-10-05 at 07:41 ET. It took 20 s today and
   landed 3 days. It lands 2026-10-02, and the 08:15 fire publishes the 6 accounts `as_of` 2026-10-02.
 - **Branch B.** If that partition is not there at 08:15, the fire publishes `as_of` 2026-10-01: today's measured run. The next fire
@@ -64,14 +64,14 @@ that version: `copy-object` from the version id onto the key.
 | account=acct#08137b81/series.json.gz | OSPEMKS19HstKiUS2_5WXXsq654A4ght |
 | account=acct#89d0916a/manifest.json | tHJwqXHbhvGZOtcg7P3OyzQYyd1B09jx |
 | account=acct#89d0916a/series.json.gz | .5GmBiQ_yH3LAXrn_fNPP9l2t.ObD29E |
-| account=0035940058/manifest.json | 9FVAKupuTsqLMr5mx2Cxi0pe6fJAqjou |
-| account=0035940058/series.json.gz | T7pTUtM4jN.shppkZ0p.BeAzM2Kn_Bkh |
-| account=0076459710/manifest.json | oihjnf2njlacAGNQIiEOFWTQXkPFR1Zz |
-| account=0076459710/series.json.gz | KQJh0PDMQBJRoiwFZUSTorWWIKcDTNGW |
-| account=0084073310/manifest.json | AETUKZdtorpl48WotwXiA_pRQxpUDzDz |
-| account=0084073310/series.json.gz | n2WBOkrubH_Y6p.Wf3k6Wk0jPvktc.Dr |
-| account=0091939812/manifest.json | sv540CJSYROo_KS3kvMOV5jg_IoUdr8u |
-| account=0091939812/series.json.gz | GgejpxNBbKQVG1QxT96o47KDM6D2eK8q |
+| account=acct#f08ffd13/manifest.json | 9FVAKupuTsqLMr5mx2Cxi0pe6fJAqjou |
+| account=acct#f08ffd13/series.json.gz | T7pTUtM4jN.shppkZ0p.BeAzM2Kn_Bkh |
+| account=acct#6b914f88/manifest.json | oihjnf2njlacAGNQIiEOFWTQXkPFR1Zz |
+| account=acct#6b914f88/series.json.gz | KQJh0PDMQBJRoiwFZUSTorWWIKcDTNGW |
+| account=acct#ffa615d2/manifest.json | AETUKZdtorpl48WotwXiA_pRQxpUDzDz |
+| account=acct#ffa615d2/series.json.gz | n2WBOkrubH_Y6p.Wf3k6Wk0jPvktc.Dr |
+| account=acct#d0cf6c92/manifest.json | sv540CJSYROo_KS3kvMOV5jg_IoUdr8u |
+| account=acct#d0cf6c92/series.json.gz | GgejpxNBbKQVG1QxT96o47KDM6D2eK8q |
 
 To stop further fires: a targeted destroy of the schedule, or `state = DISABLED` through the same root.
 

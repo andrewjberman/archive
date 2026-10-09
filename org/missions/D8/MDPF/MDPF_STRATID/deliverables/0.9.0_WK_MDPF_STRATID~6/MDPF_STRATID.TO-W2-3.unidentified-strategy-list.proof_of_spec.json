@@ -40,12 +40,33 @@
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_STRATID/deliverables/0.9.0_WK_MDPF_STRATID~6/UNIDENTIFIED_STRATEGY_CANDIDATES.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "a53204441c",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Recorded list for Cottonwood, Rebalancer date 2026-10-08, from read-only S3.",
       "artifact_covered_by": [
         "W2-3-AC2",
         "W2-4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/build_cottonwood_mdpf_slice.py",
+      "kind": "script",
+      "commit_or_etag": "0c72f3be00",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "unidentified_block + composed['unidentified_strategies'] on the worker branch; ships with round 2's deploy at the issuer's drain; build_composed run in memory only, no S3 write.",
+      "artifact_covered_by": [
+        "W2-7-AC1",
+        "W2-7-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/tests/test_cottonwood_unidentified_wiring.py",
+      "kind": "test",
+      "commit_or_etag": "0c72f3be00",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four named synthetic tests, no network; all PASSED under w2_7_tests.py.",
+      "artifact_covered_by": [
+        "W2-7-AC1"
       ]
     }
   ],
@@ -56,7 +77,7 @@
       "method": "test_suite",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_3_tests.py",
       "expect": "W23-OK",
-      "output_evidence": "8 passed; final line W23-OK; rc=0 (timeout 120)",
+      "output_evidence": "8 passed; final line W23-OK; rc=0 (timeout 120), re-run at A10",
       "denominator": "6 of 6 named tests PASSED (8 of 8 in file)",
       "status": "PASS"
     },
@@ -89,6 +110,26 @@
       "output_evidence": "W24-SEAM-OK; rc=0 (timeout 120). A7 record: RESULT LISTED 3, EXCLUDED-AS-MODEL 35 (roster+definition is_opal union, 37 names, ruling A6), Opal_Muni_Income excluded as a Custom model.",
       "denominator": "4 of 4 required lines present; Opal Satellite 50, Opal Short-Term, Opal_Muni_Income absent from list; Opal_Muni_Sleeve present RULE_NOT_COUNTED",
       "status": "PASS"
+    },
+    {
+      "criterion_id": "W2-7-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_7_tests.py -- the four named tests pass.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_7_tests.py",
+      "expect": "W27-OK",
+      "output_evidence": "4 passed; final line W27-OK; rc=0 (timeout 120)",
+      "denominator": "4 of 4 named tests PASSED",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "W2-7-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_7_seam.py -- the seam on real data (read-only S3): arm A block carries as_of = latest gold value date, names_scanned > 0, config_source naming the S3 list, figures equal served; arm B planted Opal Frontier Sleeve (1234.56) listed cottonwood NO_MEMBER, control clean.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_7_seam.py",
+      "expect": "W27-SEAM-OK",
+      "output_evidence": "A as_of 2026-10-08 names_scanned 18 rows 1 config s3://opal-data-etfs/config/etf_universe.json; figures equal served | B planted 'Opal Frontier Sleeve' listed {'firm_id': 'cottonwood', 'name': 'Opal Frontier Sleeve', 'dollars': 1234.56, 'reason': 'NO_MEMBER'}; control clean | W27-SEAM-OK; rc=0 (timeout 300)",
+      "denominator": "2 of 2 arms (A real build_composed in memory; B planted row vs control)",
+      "status": "PASS"
     }
   ],
   "controls": {
@@ -109,8 +150,8 @@
   },
   "declared_exclusions": [
     {
-      "item": "Wiring the function into any gold or serving path",
-      "reason": "Order serves nothing; the matcher swap is the drain's."
+      "item": "Deploy of the slice carrying the new key",
+      "reason": "No deploy under A10: the slice ships with round 2's deploy at the issuer's drain; build_composed was run in memory only."
     }
   ],
   "surprises": [
