@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # MP-x-3 AC1 (APPLIED, live IAM, ruling (a) relayed as msg 32030): opal-gateway-role carries the inline policy
-# opal-gateway-mcportal-fabric-read, whose statements allow EXACTLY s3:GetObject on the two prefixes
+# gateway-mcportal-fabric-read-policy, whose statements allow EXACTLY s3:GetObject on the two prefixes
 # fabric/activity/v1/* and fabric/open-calls/v1/* of opal-313476888478-globgrph, and s3:ListBucket on that bucket
 # conditioned on s3:prefix to those two prefixes only. No other action, resource or effect.
 . "$(dirname "$0")/_root.sh"
-doc=$(aws iam get-role-policy --role-name opal-gateway-role --policy-name opal-gateway-mcportal-fabric-read --query PolicyDocument --output json 2>&1 | tr -d '\r'); rc=$?
+doc=$(aws iam get-role-policy --role-name opal-gateway-role --policy-name gateway-mcportal-fabric-read-policy --query PolicyDocument --output json 2>&1 | tr -d '\r'); rc=$?
 [ "$rc" = 0 ] || { printf '%s\n' "$doc" | tail -2; echo "get-role-policy rc=$rc"; echo "RESULT: FAIL"; exit 1; }
 out=$(printf '%s' "$doc" | python -c "
 import json,sys,urllib.parse
