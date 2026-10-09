@@ -1,0 +1,89 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-385",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-385.svc-custody-statement-firm-bound-admission.md",
+  "group": "OTHER",
+  "vintage_commit": "c07875956a"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "c07875956a",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-385.svc-custody-statement-firm-bound-admission.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~196",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/_authz/served.py",
+   "kind": "script",
+   "commit_or_etag": "7e0bfc3222",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "verified_svc_custody_statement() + verified_internal_subject() admit sub svc-custody-statement / userType service / edge-verified / firm claim == registry cottonwood; Entry.handle keeps it out of any-firm and global selection and refuses it outside 3 operations; nothing built, uploaded or applied",
+   "artifact_covered_by": [
+    "IB95-2-AC1",
+    "IB95-2-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_svc_custody_statement.py",
+   "kind": "test",
+   "commit_or_etag": "7e0bfc3222",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "23 tests named svc_custody_statement; _authz suite 291 passed",
+   "artifact_covered_by": [
+    "IB95-2-AC1",
+    "IB95-2-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB95-2-AC1",
+   "criterion_verbatim": "IB95-2-AC1 -- in _authz/tests, `-k svc_custody_statement` passes (>= 5): cottonwood admitted on each of the three routes; 49financial and inflection claims refused; no any-firm or ALL selection; another service subject refused. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r95/p95_svc.py\" . IB95-2-AC1",
+   "expect": "IB95-2-AC1 PASS",
+   "output_evidence": "OK: 23 passed, 268 deselected in 3.28s | IB95-2-AC1 PASS | rc=0",
+   "denominator": "23 passed of 23 selected by -k svc_custody_statement (291 collected in _authz/tests); threshold >= 5",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB95-2-AC2",
+   "criterion_verbatim": "IB95-2-AC2 -- the whole _authz/tests suite passes. Base: PASS (268); must stay so.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r95/p95_svc.py\" . IB95-2-AC2",
+   "expect": "IB95-2-AC2 PASS",
+   "output_evidence": "OK: _authz suite 291 passed in 23.36s | IB95-2-AC2 PASS | rc=0",
+   "denominator": "291 passed, 0 failed of 291 collected (268 base + 23 new)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Four mutants of served.py in a scratch copy outside the worktree (with lib/ and the registry copied beside it): (1) internal = subject is not None (svc regains any-firm selection); (2) the operation gate removed; (3) the firm match forced True; (4) the userType == service check removed.",
+   "expected": "each mutant fails at least one svc_custody_statement test; the unmutated copy passes 23",
+   "observed": "control 23 passed; mutant 1: 1 failed (test_svc_custody_statement_has_no_any_firm_or_all_selection); mutant 2: 1 failed (reaches_only_its_three_operations); mutant 3: 6 failed (other_firm_claim_refused x6); mutant 4: 2 failed (requires_service_claim)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2 each run twice (before and after the naming-gate rework of the firm lookup); no clock, network or randomness in the tests",
+   "observed": "23 passed and 291 passed on each run",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "IRPT_BCKEND-D2-W196-S1",
+  "IRPT_BCKEND-D2-W196-S2"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/proof-of-spec-check.py <instance> IB95-2-AC1,IB95-2-AC2",
+   "result": "see final report"
+  }
+ ]
+}

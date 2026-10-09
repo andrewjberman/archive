@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-72",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6375cfa208"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "01661cf0da",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-72.inf-adapter-returns.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~49",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~49/INF_RETURNS_TIEOUT.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~49/orion_account_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "a7be8c1f21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline adapter run once from the repo root with --registry-key and --end 2026-10-08: S3 reads only, no put/upload/copy call in the file; py_compile rc 0, ruff --target-version py39 clean; the commit passed the naming and surprise-row gates.",
+      "artifact_covered_by": ["DB36-3-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~49/orion_sources.json",
+      "kind": "config_data",
+      "commit_or_etag": "a7be8c1f21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the adapter's declaration: Orion type ids, vendor columns, flow classes and the two measured departures; no firm token and no registry_key (row IRPT_DASHBD-W49-S1).",
+      "artifact_covered_by": ["DB36-3-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~49/INF_RETURNS_TIEOUT.json",
+      "kind": "config_data",
+      "commit_or_etag": "a7be8c1f21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the tie-out record: 24 of 562 account-windows within 0.35 pp on the contract's gross basis, 538 misses in 4 declared classes, net-basis recomputation 421 of 562, lots_status NO_LOTS for 562 of 562, 19 output columns, output_sha256 d60344197abbdd03279925a72216785fb4b7f6e1e78491bae8fccb94c8d6be98 (the parquet, 423,186 rows, is kept in .scratch and not committed). Accounts appear as sha256-prefix keys only.",
+      "artifact_covered_by": ["DB36-3-AC1", "DB36-3-AC2", "DB36-3-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB36-3-AC1",
+      "criterion_verbatim": "DB36-3-AC1 -- the sample's within-tolerance count at 0.35 pp printed with its denominator and account count, its source and comparison source named. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r36/p36_round36.py\" . DB36-3-AC1",
+      "output_evidence": "OK: Orion Connect position snapshots (silver api_dims positions_mv, daily account value) and Orion transactions (silver, full-history snapshot 2026-10-08), custodian Fidelity, read through the registry's routed legacy bucket alias against Orion Connect account performance (silver api_dims performance, snapshot 2026-10-08): account-level TWR, TWR, Before-Tax, Net of Fees, Annualized, window Rolling 3-Year: 24 of 562 within 0.35 pp over 562 account(s)\nDB36-3-AC1 PASS",
+      "denominator": "24 of 562 account-windows within 0.35 pp (562 accounts, one Rolling 3-Year window each, 2023-10-09 to 2026-10-08, 752 trading days); gross basis per the contract. Net-basis recomputation 421 of 562, recorded beside it (row IRPT_DASHBD-W49-S2).",
+      "status": "PASS",
+      "expect": "DB36-3-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB36-3-AC2",
+      "criterion_verbatim": "DB36-3-AC2 -- every miss classed in the record's declared classes, none UNCLASSED. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r36/p36_round36.py\" . DB36-3-AC2",
+      "output_evidence": "OK: 538 misses, each classed in ['LINK_BROKEN_NO_BASE', 'FEE_BASIS_GROSS_VS_NET', 'NET_RESIDUAL_LARGE_FLOW', 'NET_RESIDUAL_NO_LARGE_FLOW']\nDB36-3-AC2 PASS",
+      "denominator": "538 of 538 misses classed (562 account-windows - 24 within): LINK_BROKEN_NO_BASE 79, FEE_BASIS_GROSS_VS_NET 400, NET_RESIDUAL_LARGE_FLOW 55, NET_RESIDUAL_NO_LARGE_FLOW 4; 0 UNCLASSED",
+      "status": "PASS",
+      "expect": "DB36-3-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB36-3-AC3",
+      "criterion_verbatim": "DB36-3-AC3 -- the adapter output carries exactly the returns contract's columns, its sha256 printed, no S3 write call, and every sampled account's lots status named NO_LOTS or POPULATED. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r36/p36_round36.py\" . DB36-3-AC3",
+      "output_evidence": "OK: output carries the contract's 19 columns, sha d60344197abb..., no S3 write call\nDB36-3-AC3 PASS",
+      "denominator": "19 of 19 contract columns; 1 .py file under the worker folder scanned, 0 S3 write calls; lots_status maps 562 of 562 sampled accounts, NO_LOTS 562, POPULATED 0 (the four landed Eclipse tables carry 0 lot-shaped columns of 169, row IRPT_DASHBD-W49-S4)",
+      "status": "PASS",
+      "expect": "DB36-3-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads INF_RETURNS_TIEOUT.json and the contract only; no run state",
+      "observed": "printed the same last lines on a second read",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "In a scratch copy of the tree, the first miss's class changed to UNCLASSED (the real record untouched).",
+      "expected": "DB36-3-AC2 FAIL with that miss named",
+      "observed": "FAIL: 1 miss(es) unclassed or outside classes: [{'account': '797eab2e1b2992fe', ... 'class': 'UNCLASSED' ...}]\nDB36-3-AC2 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a tie-out on the contract's own fee basis",
+      "reason": "The reported source is net of fees and the contract is gross; the tie-out is recorded gross (24 of 562) with the net recomputation beside it (421 of 562) and the fee difference classed. Which basis grades is the issuer's and the CTO's call (row IRPT_DASHBD-W49-S2)."
+    },
+    {
+      "item": "the registry row for the Orion custody master",
+      "reason": "The registry is outside the grant; the row is needed, not added (row IRPT_DASHBD-W49-S1)."
+    },
+    {
+      "item": "any POPULATED lots status, any shorter reported window, and the holdings-price guard for this firm",
+      "reason": "No Eclipse tax lot rows are landed (row IRPT_DASHBD-W49-S4); the source reports one Rolling 3-Year window (row IRPT_DASHBD-W49-S5); no holdings neighbour exists, so holdings_price_return is null with NO_HOLDINGS_ROW and guard_state NOT_GRADED_NO_NEIGHBOUR."
+    },
+    {
+      "item": "any S3 write, vendor call, secret read, deploy, bun or download; any edit under data/, infra/ or portal/",
+      "reason": "Bounds of the order; none made. S3 was read only; the parquet is in .scratch and not committed."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W49-S1",
+    "IRPT_DASHBD-W49-S2",
+    "IRPT_DASHBD-W49-S3",
+    "IRPT_DASHBD-W49-S4",
+    "IRPT_DASHBD-W49-S5"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile orion_account_return_daily.py",
+      "result": "rc 0"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 orion_account_return_daily.py",
+      "result": "All checks passed"
+    }
+  ]
+}
