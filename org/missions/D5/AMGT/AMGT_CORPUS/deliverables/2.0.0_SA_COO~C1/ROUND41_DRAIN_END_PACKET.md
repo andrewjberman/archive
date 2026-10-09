@@ -44,6 +44,13 @@ false cut marker; its count printed at leg v; round 42 treats a bullet line's en
   `2.0.0_SA_COO~R1`, un-parks at `1.0.0_SA_CTO~DELL1`'s round-86 analysis. The live reads (BABA US and SHOP CN management -- the route
   serves no `positives` field, so the half's NU US positives read is replaced by SHOP CN management, another gained value) wait on it.
 
+### ADDENDUM 1 (~18:2xZ): `/8` is never served (CTO msg 2968, CTO half ADDENDUM 1)
+
+With 14 of 15 ellipses on whole lines, `/8` reads worse than `/7` for those values, so it is not served. Leg p is re-pointed: RESAPP's
+round-87 redeploy carries `/9`, not `/8` (`2.0.0_SA_COO~R1` told). Round 42 is ONE cell: re-compose `risks` and treat a bullet line's
+end as a sentence end, then write `/9` under the same pair shape; leg v at `/9` must read cut 0, false ellipses 0 MEASURED, prefix 0.
+Ledger `amgt-corpus-r41-aq5` CLOSED (Lw, Lv proven); served state unchanged (API at `/7`; 95 `/8` objects stored, unread).
+
 ## 3. The issuer's real run at close (aq-3)
 
 - **Pick by the read** (`evidence/r41_aq3_close_pick_20261009.txt`): 95 names; a real term AND a headline naming it: 2 (BP/ LN, PBR
