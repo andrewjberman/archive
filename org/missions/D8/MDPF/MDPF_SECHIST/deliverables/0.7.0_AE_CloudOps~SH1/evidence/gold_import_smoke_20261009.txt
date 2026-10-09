@@ -1,0 +1,57 @@
+MDPF_SECHIST.TO-DEPLOY-GOLD step 3 -- the PRE-APPLY IMPORT SMOKE on the unzipped package
+seat 0.7.0_AE_CloudOps~SH1  |  2026-10-09T195706Z  |  pin 09b6a7d580  |  14 members
+
+WHY THIS GATE AND NOT import-closure-check.py
+  That check grades TOP-LEVEL imports only (its own docstring), and etf_positioning_gold.py
+  imports etf_history_gap_record INSIDE functions (:836 / :865 / :931). It therefore PASSES on
+  a package that is missing the module, and the failure would land inside a production run as a
+  half-landed write. This gate imports both modules and resolves the record address.
+
+PACKAGE UNDER TEST
+  zip         etf-positioning-producer.zip, 676850 bytes
+  zip sha256  60461dcc865dd8a429dcd9e08c9e5a9eff117d372c07c32a1b6d7246f08a5613
+  members     14 = the 3 pre-existing + the 11 added for SH-t-15
+  built by    infra/aws/lambda/etfs-pipeline/etf-positioning-producer/build_package.py --pin 09b6a7d580
+
+IMPORT ROOTS -- exactly two, and nothing else
+  [0]  C:/tmp/sechist-smoke/pkg              the unzipped package; the directory was empty before extract
+  [1]  C:/tmp/sechist-smoke/layer_v1/python  opal-trading-calendar-layer VERSION 1, as published
+  cwd was a neutral empty directory and '' was stripped from sys.path, so the repo working tree
+  could not satisfy any import. The MODULE-ORIGIN lines below are what proves that, rather than
+  the claim that it was set up correctly.
+
+  layer provenance, read from the build input and not from a filename:
+    get-layer-version opal-trading-calendar-layer:1 -> CodeSha256 MmLEcXQM2xrE1zQEKCD/UOiJQc736subClk5r5wTO+4=
+    byte-identical to s3://opal-313476888478-lambda-layers/opal-trading-calendar-layer.zip
+    (both hashed in the same run; the published version is what the function attaches)
+    layer contents: python/trading_calendar.py -- so /opt/python serves the flat import.
+
+ARM 1 -- POSITIVE, the gate itself
+  invocation:
+    import etf_positioning_gold, etf_history_gap_record
+    print(etf_history_gap_record.record_address('2026-10-12'))
+  rc = 0
+  stdout:
+s3://opal-data-etfs/bloomberg/etfs/silver/history_gaps/as_of=2026-10-12/gap_record.json
+MODULE-ORIGIN etf_history_gap_record: C:\tmp/sechist-smoke/pkg\etf_history_gap_record.py
+MODULE-ORIGIN lib.opal_naming: C:\tmp/sechist-smoke/pkg\lib\opal_naming.py
+MODULE-ORIGIN trading_calendar: C:\tmp/sechist-smoke/layer_v1/python\trading_calendar.py
+
+  VERDICT: PASS. The address printed is the one the task order names, and every module resolved
+  from the package or from the layer -- never from the repo. lib/ is a namespace package with no
+  __init__.py and it merged with the layer path as the COO half measured: lib.opal_naming came
+  from the package while the flat trading_calendar still came from the layer.
+
+ARM 2 -- NEGATIVE CONTROL, re-measured here rather than inherited
+  Same invocation, same two roots, against a package carrying ONLY today's 3 members.
+  rc = 1
+  ModuleNotFoundError: No module named 'etf_history_gap_record'
+
+  VERDICT: the gate DISCRIMINATES, so ARM 1 passing is evidence and not silence. The COO half
+  cites this control at @81488fde3d; the run recorded here is this seat's own.
+
+INSTRUMENT LIMIT -- stated, not left implicit
+  The local interpreter is Python 3.14.7 and the function runs python3.11. This gate grades
+  IMPORT RESOLUTION and the address string, and neither depends on that difference here. It does
+  NOT grade runtime behaviour under 3.11, the book table, or the publisher stage. Those are the
+  L3 read, which the issuer 2.0.0_SA_COO~H1 owns on the first scheduled run.
