@@ -26,7 +26,7 @@ The empty reads are therefore absences in the world, not a silent instrument fai
 
 ---
 
-## STATE-LIST canonical-schwab-si2-schedule count=0
+STATE-LIST canonical-schwab-si2-schedule count=0
 
 ```
 $ terraform -chdir=infra/aws/terraform/canonical-schwab-si2-schedule init -input=false
@@ -39,7 +39,7 @@ rc=0
 The folder holds `main.tf` and `.terraform.lock.hcl` only. `main.tf` declares `terraform`, `provider` and `locals`
 blocks and **zero `resource` blocks**, which is consistent with the empty state rather than merely compatible with it.
 
-## AWS-OWNED canonical-schwab-si2-schedule count=0
+AWS-OWNED canonical-schwab-si2-schedule count=0
 
 ```
 $ comp-find --corpus aws 'canonical-schwab-si2-schedule'
@@ -65,7 +65,7 @@ The instance the root names in `locals`, `i-0f3d57a97f14727af`, **exists and is 
 `ec2 describe-instances` -> `i-0f3d57a97f14727af running`. It is NOT owned by this root: the root's state is empty,
 so it manages zero resources, and a `locals` reference is not ownership. Retiring the folder does not touch it.
 
-## REMOTE-STATE canonical-schwab-si2-schedule s3://opal-313476888478-terraform-state/canonical-schwab-si2-schedule/tfstate LEFT
+REMOTE-STATE canonical-schwab-si2-schedule s3://opal-313476888478-terraform-state/canonical-schwab-si2-schedule/tfstate LEFT
 
 ```
 $ aws s3api head-object --bucket opal-313476888478-terraform-state \
@@ -77,7 +77,7 @@ LEFT IN PLACE. Deleting it is Andrew's act and is listed in the report; this cel
 
 ---
 
-## STATE-LIST opal-assets-absence count=0
+STATE-LIST opal-assets-absence count=0
 
 ```
 $ terraform -chdir=infra/aws/terraform/opal-assets-absence init -input=false
@@ -89,7 +89,7 @@ rc=0
 
 The folder holds `main.tf` only -- `terraform`, `provider` and `locals` blocks, **zero `resource` blocks**.
 
-## AWS-OWNED opal-assets-absence count=0
+AWS-OWNED opal-assets-absence count=0
 
 ```
 $ comp-find --corpus aws 'opal-assets-absence'
@@ -114,7 +114,7 @@ non-empty state or a resource OWNED by the root, and neither holds. It IS a real
 folder removes its last documentary trace in the repo, so it is filed as a surprise row rather than left in this
 file alone: `LGIC_BLANKFIX-D1-S3`. The order prescribes `LGIC_BLANKFIX-D1-CO1-S<k>`; the live gate refuses only the `CO1` segment -- the `D1` coordinate is REQUIRED for a row filed on dell1, a bare id being the laptop's. The deviation is recorded in the row itself..
 
-## REMOTE-STATE opal-assets-absence s3://opal-313476888478-terraform-state/opal-assets-absence/tfstate LEFT
+REMOTE-STATE opal-assets-absence s3://opal-313476888478-terraform-state/opal-assets-absence/tfstate LEFT
 
 ```
 $ aws s3api head-object --bucket opal-313476888478-terraform-state --key opal-assets-absence/tfstate

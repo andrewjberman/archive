@@ -41,3 +41,9 @@ portal DEV `9b06f6ed`.
    - Test: `__tests__/notFound.test.tsx` covers only the no-candidate arm (Boeing), so a candidate arm is to be added.
    - AMGT_RESAPP round 84 may later collapse ASML to one listing on a served issuer identity. The list stays for names that do not share
      an identity.
+
+**Check for item 4:** `round63/checks/r63a.cjs`.
+- Dry-run at DEV `ce3b0cc4`: 1 of 3. THE SERVED CHOICES ARE READ and THE CHOICES ARE DRAWN fail as expected; PLANTED passes.
+- Positive control: a clean `servedChoices` placed in the real `notFound.ts` passes arm 1, then restored (`git status` clean).
+- The served 404 body is `{refused, reason, candidates: [{security_key, name}]}` (`lib/research/api/scoped_amgt.py:7076-7082`). It
+  reaches the page only inside the thrown message (`api-client.ts:180`, `- <body>`).
