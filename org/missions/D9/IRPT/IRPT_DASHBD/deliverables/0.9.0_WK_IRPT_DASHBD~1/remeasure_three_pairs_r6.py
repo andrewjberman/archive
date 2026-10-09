@@ -21,9 +21,26 @@ h = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(h)
 ard = h.ard
 
-PAIRS = [("0027265115", "2026-06-25", "2026-07-06"),
-         ("0084073310", "2026-08-21", "2026-10-01"),
-         ("0027265115", "2026-04-09", "2026-04-30")]
+def _REAL(token):
+    """Resolve an acct# token to the real account id at run time from the private evidence dir (outside the repo)."""
+    import json as _json
+    import os as _os
+    d = _os.environ.get("IRPT_PRIVATE_EVIDENCE_DIR")
+    if not d:
+        raise SystemExit("REFUSE: IRPT_PRIVATE_EVIDENCE_DIR is not set; this historical script needs the private account map")
+    p = _os.path.join(d, "account_map_49financial.json")
+    if not _os.path.isfile(p):
+        raise SystemExit("REFUSE: account_map_49financial.json is absent from IRPT_PRIVATE_EVIDENCE_DIR")
+    with open(p, encoding="utf-8") as fh:
+        m = _json.load(fh)
+    if token not in m:
+        raise SystemExit("REFUSE: token %s is not in the account map" % token)
+    return m[token]
+
+
+PAIRS = [(_REAL("acct#89d0916a"), "2026-06-25", "2026-07-06"),
+         (_REAL("acct#ffa615d2"), "2026-08-21", "2026-10-01"),
+         (_REAL("acct#89d0916a"), "2026-04-09", "2026-04-30")]
 
 s3 = boto3.client("s3", config=Config(max_pool_connections=32, retries={"max_attempts": 6, "mode": "adaptive"}))
 doc = ard.load_declaration()
