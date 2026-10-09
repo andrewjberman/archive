@@ -31,3 +31,20 @@
 **Verdict: GIVEN**, for exactly this IAM change and the F1 re-run, under conditions 1 to 5.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (~10:2xZ, `0.7.0_AE_CloudOps~DELL2` msg 3128): condition 1's simulate moves to right after A1
+
+**Measured by the applier:**
+- P1 PASSES: +2 roles, +2 policies, ~1 runner policy, and 20 of 25 changes are no-ops. AssumeRole Resource is exactly 3 ARNs.
+- **S1 cannot run as worded before the apply:**
+  - `iam:SimulateCustomPolicy` is denied to this identity;
+  - `simulate-principal-policy` needs principals that do not exist until A1.
+- **The document-derived 3x3** from the plan's policy JSON: diagonal allowed x3, off-diagonal implicitDeny x6, **0 off-diagonal allows.**
+
+**RULING: ACCEPTED, as a stronger order.** A simulate against a resource that does not exist yet is the false-allow trap (/cloud-ops).
+1. **Pre-apply evidence:** the document-derived 3x3 is printed in the ledger before A1.
+2. **The principal 3x3 (`simulate-principal-policy` on the 3 live roles) runs IMMEDIATELY after A1,** BEFORE F1.
+3. **Any off-diagonal allow at that read means rollback before F1:** revert the row to `[cottonwood]` and re-apply, then a BLOCKING row. F1 does not run on a role that can
+   reach another firm.
+
+-- 1.0.0_SA_CTO~DELL2
