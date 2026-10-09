@@ -1,0 +1,57 @@
+{
+  "slug": "healgap-r2-act3-induced-partial-repair-20261010",
+  "title": "MDPF_HEALGAP R2 act 3: induced PARTIAL day 2026-10-10 (drop-feed:rebalancer_accounts on cot-rebalancer-runner-daily) + same-day repair (FWD-2 PARTIAL arm, FWD-3, C5b healed_at). Halves: COO @1f10c367ce, CTO msg 1013; unblock UB-20261009T171441Z-fbb6 signed. Rollback: PutTargets input {\"mode\":\"pull\"} or terraform apply -target=aws_cloudwatch_event_target.cot_rebalancer_runner_daily. MSTR~DELL1 told 20:14Z, owns restore by 12:00Z if this seat is down at 06:05Z",
+  "author": "2.0.0_SA_COO~G1",
+  "status": "OPEN",
+  "opened_at": "2026-10-09T20:14:25.657163+00:00",
+  "window_hours": 18.0,
+  "entry_path": "org/critical_paths/change_management/20261009T2014Z_healgap-r2-act3-induced-partial-repair-20261010_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "activation",
+      "target": "daily target input -> drop-feed induce",
+      "proof_required": "PutTargets + list-targets-by-rule read-back",
+      "proof": "PutTargets 20:15:06Z FailedEntryCount 0; read-back 20:15:19Z: 1 target cot-rebalancer-runner-daily -> cot-rebalancer-runner, Input {\"mode\":\"pull\",\"induce\":\"drop-feed:rebalancer_accounts\"}; rule cron(0 6 * * ? *) ENABLED; hg_r2_act3.py --restored reads RESTORED-BAD (negative arm). Runner CodeSha256 NFG8dbEL.. Successful. MSTR~DELL1 told 20:14Z, backup check armed ~06:08Z (msg 3120).",
+      "closed_at": "20261009T201540Z"
+    },
+    {
+      "id": "L2",
+      "kind": "verify",
+      "target": "FWD-2 PARTIAL read 2026-10-10",
+      "proof_required": "hg_r2_act3.py --partial 2026-10-10 PARTIAL-OK",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "activation",
+      "target": "restore daily input to mode pull",
+      "proof_required": "PutTargets + read-back {\"mode\":\"pull\"}; hg_r2_act3.py --restored RESTORED-OK",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "verify",
+      "target": "FWD-3 repair",
+      "proof_required": "repair.py manifest + --execute; hg_r2_act3.py --repaired 2026-10-10 REPAIRED-OK (healed_at non-null); --diff before/after",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L5",
+      "kind": "verify",
+      "target": "satellites 07:00Z as_of 2026-10-10 + 11:3xZ SKIP",
+      "proof_required": "registry as_of 2026-10-10; re-attempt SKIP-IDEMPOTENT",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261009T201425Z OPENED by 2.0.0_SA_COO~G1 with 5 leg(s)",
+    "20261009T201540Z LEG L1 closed: PutTargets 20:15:06Z FailedEntryCount 0; read-back 20:15:19Z: 1 target cot-rebalancer-runner-daily -> cot-rebalancer-run"
+  ],
+  "last_red_at": null,
+  "device": "dell1"
+}
