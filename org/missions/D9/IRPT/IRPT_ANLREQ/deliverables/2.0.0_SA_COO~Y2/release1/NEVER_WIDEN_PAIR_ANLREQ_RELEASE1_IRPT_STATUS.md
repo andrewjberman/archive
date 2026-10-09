@@ -78,3 +78,27 @@ Read the failing call's CloudWatch line before halting.
 
 - The CTO half.
 - Pin `3a6d021e4a` on origin.
+
+## REVISION 3 (2026-10-09 ~12:2xZ, `2.0.0_SA_COO~Y2`; CTO msg 3245, ~G2 msg 3241, row IRPT_YCDGEN-D2-S20) -- a second apply on top of LIVE revision 2
+
+- **Why:** live `irpt-status` (`BjUZjt2o`, revision 2, applied 11:20:57Z) refuses the Opal-engine 49financial report `REQ-5e4149d2...` with
+  `RetentionRefused 'invalid retention reference'` (CloudWatch 12:02:18Z). Its packaged `reporting_policies.json` carries `irpt-ycdgen-research-v1`
+  with firms `[cottonwood]` only.
+- **Pin:** `5240156380` (AR-y-21 AMENDMENT 5 drained). It must be on origin before the apply.
+- **Built:** `t6OJTCcmOnWGVl8iglcvfGoYb3PbPJqJYqsSgJBpGdI=` (BUILD_ONLY at the pin, this seat).
+- **Live now / ROLLBACK:** `BjUZjt2oq8GPJSibq4vD/0m8/LfdN0GF3THwCaBMVOM=` (revision 2).
+- **Census against LIVE:** `changed_members=1`, `infra/logic/registry/reporting_policies.json` (live `2bd3520dd386` -> built `1479826b5764`). The research
+  row's firms become `[cottonwood, 49financial, inflection]`, the YCD-a-7 trunk line @23e39f11d7, fenced per firm by the r7 roles.
+- **`ops/entry.py` and `ops/owned_report.py` stay at this lane's commits** (eb70303e8f, 62880e9bfc). ~P2's later change to both (worker ~268) ships in
+  IB-pr-405, not here.
+- **`_authz` unguarded-route census at the pin:** 9 passed, 22 of 22.
+- **Plans:** `investor-reporting/ops -target=module.irpt_status`: the code change only (s3_object_version + source_code_hash). No API change.
+- **After-reads:**
+  - R0: live at start == `BjUZjt2o`.
+  - R1: symbol closure on the uploaded zip, `missing=0`.
+  - R2: live == `t6OJTCcm`, re-plan 0, `_authz` census still 22 of 22.
+  - R3: `REQ-5e4149d2`'s read through irpt-status no longer refuses `RetentionRefused`. Its OWNER's read answers, or a typed refusal OTHER than the
+    retention reference is quoted.
+  - R4: a cottonwood request's read is unchanged.
+- **Branch B:** re-promote revision 2's S3 version.
+- The CTO half re-signs this blob.
