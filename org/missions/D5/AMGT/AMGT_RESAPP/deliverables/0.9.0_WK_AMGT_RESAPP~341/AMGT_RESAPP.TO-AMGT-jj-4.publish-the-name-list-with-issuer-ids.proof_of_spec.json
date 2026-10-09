@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-jj-4.publish-the-name-list-with-issuer-ids",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "36845bd58b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "36845bd58b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-jj-4.publish-the-name-list-with-issuer-ids.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~341",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-harvest/crosswalk/v1/2026-10-09.json",
+      "kind": "s3_object",
+      "commit_or_etag": "fa1f2fe42a06eeb8a14462e545c9d13d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "VersionId CHWQWAM0oNxOpU_5Hs8_fy5RUZ_Sgl20; crosswalk --as-of 2026-10-09 --write-pool: uploaded 850056 bytes sha256 a03c8cac74f9ac439a325421683e9be4374b588815c65ef5e57060a97ec64d77, 243 records, 204 with issuer.cik; listing before 7 keys, after 8, diff = one new key; prior latest 2026-10-07.json VersionId XledA4XthVEOE3snOolYp7lkbarhPNkx untouched; change-management entry amgt-resapp-r85-jj4-namelist-issuer CLOSED (2 legs)",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the latest stored name list drops no record of the prior one, both ASML listings carry measured issuer.cik 937966, every issuer.cik is measured with a source, the four other 20-F names carry their filer CIKs; C1-C4 PASS; R85 CROSSWALK AC1: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round85_prep/checks/r85_crosswalk.py\" --crit AC1; echo \"exit=$?\"",
+      "output_evidence": "stored name lists under s3://opal-data-harvest/crosswalk/v1/: 8 (latest crosswalk/v1/2026-10-09.json)\n   this list crosswalk/v1/2026-10-09.json: 243 records; prior crosswalk/v1/2026-10-07.json: 243 records\nPASS C1 no record dropped: 243 of 243 prior records present\n   ASML_NA_Equity issuer ('937966', 'measured', \"s3://opal-data-harvest/sec/harvest/silver/filing_source/date=2026-10-09/part-20261009T093737Z.parquet :: this name's own stored filing 000162828026011378, the CIK in its EDGAR path\")\n   ASML_US_Equity issuer ('937966', 'measured', \"s3://opal-data-harvest/sec/harvest/bronze/company_tickers/date=2026-09-22/company_tickers.json :: the SEC ticker-to-CIK table, this US listing's own ticker 'ASML'\")\nPASS C2 both ASML listings carry measured issuer.cik 937966 with a named source\nPASS C3 every issuer.cik is measured with a named source: 204 of 243 carry one; 0 bad\nPASS C4 the four other stored 20-F names carry their filer CIKs: 4 of 4\nR85 CROSSWALK AC1: YES\nexit=0",
+      "denominator": "C1 243 of 243 prior records; C3 204 of 243 carry issuer.cik, 0 bad; C4 4 of 4 filers",
+      "status": "PASS",
+      "expect": "R85 CROSSWALK AC1: YES[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "every 20-F name's live /thesis still answers 200 from its business item in English (no regression from the new list); R84 STORE AC2 ALL: YES 5 of 5; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round84_prep/checks/r84_store.py\" --key ASML_NA_Equity,BABA_US_Equity,NU_US_Equity,PBR_US_Equity,SAP_GY_Equity --crit AC2 --where deployed; echo \"exit=$?\"",
+      "output_evidence": "== ASML_NA_Equity\n   status 200, served locations 23, business locations 6, sentences 40, English-marked 40 (100%)\nPASS T1 the route answers 200\nPASS T2 a served passage is cited to the business item\nPASS T3 the served sentences are English (100%, floor 80%)\nR84 STORE AC2 ASML_NA_Equity: YES\n== BABA_US_Equity\n   status 200, served locations 20, business locations 10, sentences 40, English-marked 40 (100%)\nPASS T1 the route answers 200\nPASS T2 a served passage is cited to the business item\nPASS T3 the served sentences are English (100%, floor 80%)\nR84 STORE AC2 BABA_US_Equity: YES\n== NU_US_Equity\n   status 200, served locations 39, business locations 3, sentences 53, English-marked 53 (100%)\nPASS T1 the route answers 200\nPASS T2 a served passage is cited to the business item\nPASS T3 the served sentences are English (100%, floor 80%)\nR84 STORE AC2 NU_US_Equity: YES\n== PBR_US_Equity\n   status 200, served locations 28, business locations 14, sentences 40, English-marked 40 (100%)\nPASS T1 the route answers 200\nPASS T2 a served passage is cited to the business item\nPASS T3 the served sentences are English (100%, floor 80%)\nR84 STORE AC2 PBR_US_Equity: YES\n== SAP_GY_Equity\n   status 200, served locations 20, business locations 9, sentences 34, English-marked 34 (100%)\nPASS T1 the route answers 200\nPASS T2 a served passage is cited to the business item\nPASS T3 the served sentences are English (100%, floor 80%)\nR84 STORE AC2 SAP_GY_Equity: YES\nR84 STORE AC2 ALL: YES 5 of 5\nexit=0",
+      "denominator": "5 of 5 names",
+      "status": "PASS",
+      "expect": "R84 STORE AC2 ALL: YES 5 of 5[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no planted discriminator.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: a one-time world publish; the pre-publish diff and listing before/after are the controls",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "redeploy of the function (AMGT-jj-5)",
+      "reason": "Bounds s.2: one new key only; the deployed code ignores issuer, read after the put in asml_deployed.out (two candidates still)."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W341-S1",
+    "AMGT_RESAPP-D1-W341-S2"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~341/",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger",
+      "invocation": "python .tools/deploy_ledger.py open/close-leg/close --slug amgt-resapp-r85-jj4-namelist-issuer",
+      "result": "OPENED (commit 028ea4474d) before the put; both legs closed; CLOSED"
+    }
+  ]
+}
