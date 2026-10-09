@@ -14,6 +14,9 @@ AC1 (build): read the five cached real 20-F texts (default .scratch/r82_20f/<KEY
     P4 the other four names' 12 cells (business, risk, mdna) are unchanged from the merged cutter @9f252e010a: start offset,
        chars and sha256 prefix, as measured 2026-10-09 on the same cache.
     Lengths are printed, never graded: round 82 showed a plausible length on a wrong section.
+    --starts-only (round 84, issuer AMENDMENT to AMGT-ii-2 on row AMGT_RESAPP-D1-W335-S1): P4 compares the 12 cells' START offsets
+       only. A producer that strips text inside a section (ii-2's running-header strip) must change chars and sha256 but must not
+       move a section's start; the default stays strict.
 Verdict: R83 PBR AC1: YES|NO (exit 0|1). At the base (box/dell1 @9f252e010a): NO -- P1 (business is "About us" at 198623) and
     P3 (mdna is "Liquidity and Capital Resources" at 568965) FAIL; P2 and P4 PASS.
 """
@@ -102,7 +105,7 @@ def _cells(document, text):
     return out
 
 
-def ac1(cache):
+def ac1(cache, starts_only=False):
     document = _document(_root())
     path = os.path.join(cache, KEY + ".txt")
     if not os.path.isfile(path):
@@ -136,11 +139,11 @@ def ac1(cache):
         got = _cells(document, open(p, encoding="utf-8").read())
         for item in ITEMS:
             g = got[item]
-            ok = (g["start"], g["chars"], g["sha"]) == want[item]
+            ok = (g["start"] == want[item][0]) if starts_only else ((g["start"], g["chars"], g["sha"]) == want[item])
             same += ok
             if not ok:
                 print("   MOVED %s %s: start %d chars %d sha %s (was %s)" % (key, item, g["start"], g["chars"], g["sha"], want[item]))
-    p4 = say(same == 12, "P4 the other four names' cells unchanged: %d of 12" % same)
+    p4 = say(same == 12, "P4 the other four names' cells unchanged%s: %d of 12" % (" (start offsets)" if starts_only else "", same))
     return p1 and p2 and p3 and p4
 
 
@@ -148,8 +151,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--crit", required=True, choices=["AC1"])
     ap.add_argument("--cache", default=os.path.join(".scratch", "r82_20f"))
+    ap.add_argument("--starts-only", action="store_true")
     a = ap.parse_args()
-    ok = ac1(a.cache)
+    ok = ac1(a.cache, a.starts_only)
     print("R83 PBR AC1: %s" % ("YES" if ok else "NO"))
     return 0 if ok else 1
 
