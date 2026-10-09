@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-ac-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-ac-1.cadence-words-from-fires.md",
+    "group": "OTHER",
+    "vintage_commit": "032773b458"
+  },
+  "assignee": "0.9.0_WK_LGIC_BLANKFIX~1",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round14.md",
+    "vintage_commit": "032773b458",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-ac-1.cadence-words-from-fires.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_naming_cadence.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "word_for() reads a cron hour list of single hours: evenly spaced fires (equal gaps, wrapping the day, on five or more days of the week) take {N}h; uneven fires return no word and the reason with the hours and gaps.",
+      "introduces": [
+        "def _hour_list(field):",
+        "def _gaps(hours):"
+      ],
+      "artifact_covered_by": [
+        "BAC1-AC1",
+        "BAC1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_cadence.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CADENCE-TEST ok=True cases=72: twice a day 12 h apart -> 12h, three a day 8 h apart -> 8h, uneven -> no word with its reason, once-a-day control still daily; the old case cron(0 6,18 * * ? *) -> None now reads 12h by the R1 ruling.",
+      "introduces": [
+        "uneven reason",
+        "once-a-day control"
+      ],
+      "artifact_covered_by": [
+        "BAC1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/check_fwd4_cadence_r14.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Runs the real root check (report_only) over 86 mapped roots, classifies each of 180 schedule lines as agree, partial, mismatch or carried_over against its own expression; a negative arm of 9 planted lines runs first.",
+      "introduces": [
+        "def classify(typ, new, expression):",
+        "def negative_arm():",
+        "def main():"
+      ],
+      "artifact_covered_by": [
+        "BAC1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_fwd4_rename_12h.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Renames keyword-intelligence-generator-daily to news-keyword-intelligence-generator-12h in a temporary copy of eventbridge.tf and runs the real .tools/naming-gate.py --diff --enforce; no apply, no AWS.",
+      "introduces": [
+        "def main(argv):",
+        "def fetch_line():"
+      ],
+      "artifact_covered_by": [
+        "BAC1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row LGIC_BLANKFIX-D1-W1-S9 appended.",
+      "introduces": [
+        "LGIC_BLANKFIX-D1-W1-S9"
+      ],
+      "artifact_covered_by": [
+        "BAC1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BAC1-AC1",
+      "criterion_verbatim": "BAC1-AC1 -- every schedule's word agrees with its expression's fires, or the row prints its partial form; a disagreeing word fails.",
+      "method": "command",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/check_fwd4_cadence_r14.py",
+      "output_evidence": "NEGATIVE-ARM held : planted a twice-a-day, 12 h apart expression under daily -> mismatch (wanted mismatch)\nNEGATIVE-ARM held : planted a once-a-day expression under 12h -> mismatch (wanted mismatch)\nNEGATIVE-ARM held : planted an hourly expression under daily -> mismatch (wanted mismatch)\nNEGATIVE-ARM held : planted an uneven three-a-day expression keeping 45min -> carried_over (wanted carried_over)\nNEGATIVE-ARM held : planted an uneven two-a-day expression keeping daily -> carried_over (wanted carried_over)\nNEGATIVE-ARM held : planted an expression that is not stated, name keeping a word -> carried_over (wanted carried_over)\nNEGATIVE-ARM held : planted the 12 h expression under 12h -> agree (wanted agree)\nNEGATIVE-ARM held : planted the once-a-day expression under daily -> agree (wanted agree)\nNEGATIVE-ARM held : planted an uneven expression with a partial name -> partial (wanted partial)\nCARRIED_OVER EVENT_RULE fred-ingestion-monthly-early -> fred-ingestion-early-monthly [infra/aws/terraform/fred-pipeline/eventbridge.tf:70] expr=cron(0 15 ? * 6#1 *): expression decides no word (day rule dom=? dow=6#1: no cadence w\nCARRIED_OVER EVENT_RULE fear-greed-daily-update -> marketdata-fear-greed-update-daily [infra/aws/terraform/market-overview/eventbridge.tf:20] expr=cron(30 14,21 * * ? *): expression decides no word (2 fires a day at hours 14,21, g\nCARRIED_OVER EVENT_RULE trending-topics-portal-publisher-daily -> news-trending-topics-portal-publisher-daily [infra/aws/terraform/market-overview/eventbridge.tf:105] expr=cron(10 14,21 * * ? *): expression decides no word (2 fire\nCARRIED_OVER EVENT_RULE keyword-drilldown-generator-daily -> news-keyword-drilldown-generator-daily [infra/aws/terraform/news-pipeline/eventbridge.tf:631] expr=cron(25 12,21 * * ? *): expression decides no word (2 fires a day at h\nCARRIED_OVER EVENT_RULE finbert-scoring-post-ingestion-45min -> news-finbert-scoring-post-ingestion-45min [infra/aws/terraform/news-pipeline/finbert-batch.tf:71] expr=cron(55 0,13,20 * * ? *): expression decides no word (3 fires a\nCARRIED_OVER EVENT_RULE teams-global-transcripts-pull-hourly -> teams-global-transcripts-pull-hourly [infra/aws/terraform/transcripts/pull.tf:23] expr=cron(0 13-22 ? * MON-FRI *): expression decides no word (hour field 13-22: more\nFWD4-CADENCE-R14 ok=False schedules=180 agree=148 partial=26 mismatch=0 carried_over=6",
+      "denominator": "180 of 180 schedule lines (86 of 86 mapped roots): agree=148 partial=26 mismatch=0 carried_over=6; rc=1. The four evenly spaced S8 rows now agree on 12h; the six uneven or non-interval S8 rows still carry the old word on the list because the line is made by decide() in lib/opal_naming_rootcheck.py, outside this order's paths (row LGIC_BLANKFIX-D1-W1-S9).",
+      "status": "FAIL",
+      "status_reason": "carried_over=6, not 0: the partial form is built in lib/opal_naming_rootcheck.py decide(), not in the write grant; the expected value is not weakened",
+      "expect": "FWD4-CADENCE-R14 ok=True"
+    },
+    {
+      "criterion_id": "BAC1-AC2",
+      "criterion_verbatim": "BAC1-AC2 -- one twice-a-day schedule renamed -12h from its list line alone passes the real gate.",
+      "method": "command",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_fwd4_rename_12h.py",
+      "output_evidence": "LIST LINE: FIX EVENT_RULE keyword-intelligence-generator-daily -> news-keyword-intelligence-generator-12h  [infra/aws/terraform/news-pipeline/eventbridge.tf:175]\nEXPRESSION: cron(0 8,20 * * ? *) -> 12h (cron(0 8,20 * * ? *): 2 fires a day, 12 hours apart)\n-  name                = \"keyword-intelligence-generator-daily\"\n+  name                = \"news-keyword-intelligence-generator-12h\"\nGATE OUTPUT (rc=0):\nNAMING CONFORMANT infra/aws/terraform/news-pipeline/eventbridge.tf:176 news-keyword-intelligence-generator-12h -> news-keyword-intelligence-generator-12h\nNAMING-GATE: PASS 1 graded\nFWD4-RENAME-12H ok=True name=news-keyword-intelligence-generator-12h grade=CONFORMANT",
+      "denominator": "1 of 1 schedule renamed (keyword-intelligence-generator-daily, EVENT_RULE, cron(0 8,20 * * ? *), one-line diff in a temporary copy; the repository file is not written); NAMING-GATE: PASS 1 graded rc=0; no placement refusal printed.",
+      "status": "PASS",
+      "expect": "FWD4-RENAME-12H ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "negative arm inside check_fwd4_cadence_r14.py: 9 planted lines (three words disagreeing with their expression, three uneven/absent expressions keeping a word, three correct controls) classified by the same function",
+      "expected": "each lands where planted: mismatch x3, carried_over x3, agree x2, partial x1",
+      "observed": "NEGATIVE-ARM held x9 of 9",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the checker's denominator against the base checker and the census",
+      "observed": "schedules=180 equals the round-13 checker's 180 and python lib/opal_naming.py census --all-roots prints ALL-ROOTS ok=True with hole=0 other_holes=0 (right=671 fix=1637, against right=672 fix=1636 at base: one line moved from RIGHT to FIX by 12h); every lib/tests/test_opal_naming_*.py prints ok=True and pytest lib/tests reads 193 passed, 1 skipped",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a live rename or apply of any schedule",
+      "reason": "order BOUNDS: no terraform, no AWS"
+    },
+    {
+      "item": "whether each Terraform expression equals its live one",
+      "reason": "E1 ruling: not measured by anyone; no AWS call"
+    }
+  ],
+  "surprises": [
+    "LGIC_BLANKFIX-D1-W1-S9"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/LGIC_BLANKFIX.TO-BF-ac-1.cadence-words-from-fires.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "check_fwd4_cadence_r14.py",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/check_fwd4_cadence_r14.py",
+      "result": "FWD4-CADENCE-R14 ok=False schedules=180 agree=148 partial=26 mismatch=0 carried_over=6"
+    },
+    {
+      "tool": "exercise_fwd4_rename_12h.py",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_fwd4_rename_12h.py",
+      "result": "FWD4-RENAME-12H ok=True name=news-keyword-intelligence-generator-12h grade=CONFORMANT"
+    }
+  ]
+}
