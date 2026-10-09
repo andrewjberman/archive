@@ -1,0 +1,88 @@
+{
+ "for": "ADHOC.irpt-anlreq-y1-laptop-reads-3-5 AMENDMENT 1 -- RE-RUN of reads 3a, 4 and 5 on the fresh request",
+ "spec": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release1/Y1_laptop_reads_3_5_spec.json@66b6d08b9c",
+ "amendment": "AMENDMENT 1 (2.0.0_SA_COO~C, 2026-10-09 ~15:1xZ), run by 0.7.0_AE_CloudOps~ANL",
+ "request": "REQ-4b5155ac2ea9467ab771b414",
+ "tenant": "49financial",
+ "supersedes_for_these_three_reads": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/Y1_laptop_reads_3_5_result.json",
+ "release_under_test": {
+  "function": "irpt-status",
+  "code_sha256": "BjUZjt2oq8GPJSibq4vD/0m8/LfdN0GF3THwCaBMVOM=",
+  "claim": "measured",
+  "how": "equals the sha the spec names; unchanged since the first pass"
+ },
+
+ "reads": {
+  "3a": true,
+  "3a_link_expiry": "2026-10-09T15:37:04Z",
+  "4_record": true,
+  "4_route": true,
+  "5": false,
+  "5_outcome": "ANALYSIS_REPORT_NOT_READY"
+ },
+
+ "method": {
+  "how": "direct invoke of irpt-status with the event the HTTP API front door passes (routeKey + pathParameters + queryStringParameters + the edge-injected trusted header set), carrying the principal's claims -- unchanged from the first pass",
+  "principal": "the request's REAL owner, replayed from its stored record: an OPAL_GLOBAL subject in home firm opal-capital selecting data firm 49financial. Existing principal; nothing minted.",
+  "writes": "NONE. Every call was a read: get_item, query, invoke of GET routes, filter_log_events.",
+  "log_join": "each invocation's own AWS RequestId slices its own log lines between START and REPORT -- never a time window"
+ },
+
+ "measurement": {
+  "3a": {
+   "outcome": "the route SIGNED a link and its bytes hash to the artifact sha the route bound",
+   "exercised": "the signed URL was fetched and the bytes hashed IN MEMORY; sha256(bytes) == the response's sha256",
+   "bytes_fetched": 37,
+   "link": "discarded in memory; never printed, stored or sent",
+   "note": "the first pass could not reach this at all -- it refused on the shared absent retention row before signing"
+  },
+  "4_record": {
+   "outcome": "the STORED acceptance record carries ticket_id equal to the ticket",
+   "instrument": "get_item on irpt-requests, ConsistentRead, record attribute parsed and compared in memory"
+  },
+  "4_route": {
+   "outcome": "the composition route returned the frozen browser request and its ticket_id equals the ticket",
+   "instrument": "GET .../analysis/requests/{requestId}?include=composition as the owner",
+   "note": "this limb also grades IRPT_BCKEND TO-APPLY-Y77 read 5a, per the spec's read 4. BOTH limbs of read 4 now pass; in the first pass the route limb was masked by the retention refusal."
+  },
+  "5": {
+   "outcome": "the route did NOT sign, and did NOT reach the PDF-retention branch",
+   "public_reason_code": "NOT_FOUND",
+   "internal": "AnalysisUnavailable: ANALYSIS_REPORT_NOT_READY",
+   "precondition_not_met": "the amendment says to wait for READY. The job never left RECEIVED across a 450-second read-only poll (5 polls, 90s apart), so read 5's precondition was never satisfied and whether a PDF is retained for this request remains UNMEASURED.",
+   "retention_is_not_the_cause_this_time": "the fresh request's retention chain is COMPLETE and live (REQUEST_COMPOSITION -> NORMALIZED_PORTFOLIO -> ORIGINAL_HOLDINGS, all RESERVED, ~30 days remaining), walked principal-free. The first pass's cause is gone; a different one is now visible."
+  }
+ },
+
+ "uncovered_enum_member": {
+  "field": "reads.5_outcome",
+  "declared_domain_in_amendment_1": ["SIGNED", "NOT_RETAINED", "RETENTION_RECORD_UNAVAILABLE"],
+  "observed": "ANALYSIS_REPORT_NOT_READY (public NOT_FOUND / internal AnalysisUnavailable)",
+  "finding": "a SECOND member the declared domain does not hold. The pdf route refuses NOT_READY upstream of the PDF-retention branch, so neither NOT_RETAINED nor RETENTION_RECORD_UNAVAILABLE is a true answer. The field carries the observed name rather than the nearest legal value.",
+  "subtraction": "the route has at least three distinct refusal paths before it signs -- report-not-ready, retention-unavailable and pdf-not-retained. AMENDMENT 1's domain holds two of them. The first pass surfaced one uncovered member and this pass surfaced the other, which is what a domain built forward from the happy path does.",
+  "owner": "2.0.0_SA_COO~Y2"
+ },
+
+ "blocking_finding_for_read_5": {
+  "statement": "read 5 cannot be answered for this request until the generation worker advances the job to READY, and that is tenant-wide, not specific to this request.",
+  "measured": {
+   "jobs_in_tenant": 8,
+   "state_RECEIVED_outbox_SENT": 6,
+   "state_READY": 1,
+   "state_ATTENTION": 1
+  },
+  "age_evidence": "the six RECEIVED jobs were accepted between 44 and 390 minutes before this read, and FOUR of them are OLDER than the one job that did reach READY (accepted 223 minutes before this read). So the pattern is not a queue that has merely not got there yet.",
+  "dispatch_is_not_the_gap": "every one of the 8 carries outbox_state SENT, so the analysis_generate message was dispatched; the job rows are not waiting to be sent.",
+  "positive_control": "REQ-5e4149d2863aea31cc87d660 reads READY, so the generate path CAN complete and a zero here is not a blind instrument.",
+  "not_claimed": "this seat did not determine why the worker stops at RECEIVED, and did not touch the worker. Read-only order.",
+  "owner": "2.0.0_SA_COO~Y2 via 2.0.0_SA_COO~C"
+ },
+
+ "hygiene": {
+  "email_shaped_strings_in_this_file": 0,
+  "signed_links_in_this_file": 0,
+  "principal_ids_in_this_file": 0,
+  "record_bodies_in_this_file": 0,
+  "non_ascii_characters": 0
+ }
+}
