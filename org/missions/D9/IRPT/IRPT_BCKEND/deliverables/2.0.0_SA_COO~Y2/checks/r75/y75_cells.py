@@ -71,7 +71,9 @@ def main():
         if d.get("rolled_back") is not False:
             fail("rolled_back is %r" % d.get("rolled_back"))
     elif cid == "Y75-1-AC2":
-        pk = (d.get("test_filer_key") or {}).get("pk")
+        tfk = d.get("test_filer_key")
+        # AMENDMENT 2 (issuer 2026-10-09 ~09:3xZ): the applier records the key as the PK string itself, or as {"pk": ...}.
+        pk = tfk if isinstance(tfk, str) else (tfk or {}).get("pk")
         if not pk:
             fail("no test_filer_key.pk")
         ok = test_row_absent(pk)

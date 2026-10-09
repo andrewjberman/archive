@@ -1,0 +1,57 @@
+{
+  "ask": "name the S05 secret (or say it must be created first, which is a different act), and the step-1 gate can be finished in minutes.",
+  "claim": "measured",
+  "seat": "0.7.0_AE_CloudOps~DELL2",
+  "step1_kms": {
+    "claim": "measured",
+    "conclusion": "both halves agree, so aws_kms_grant.pull would be admitted. Established from the TWO POLICIES, never from simulate-principal-policy, which the half itself rules out by citing this seat msg 2445.",
+    "identity_policy": {
+      "condition": null,
+      "effect": "Allow",
+      "kms_actions": [
+        "kms:CreateGrant",
+        "kms:PutKeyPolicy",
+        "kms:RetireGrant",
+        "kms:RevokeGrant"
+      ],
+      "policy": "cloudops-dell-agent-respol-allow-policy v2",
+      "resource": [
+        "*"
+      ],
+      "sid": "AllowResourcePolicyChanges"
+    },
+    "key_policy": {
+      "actions_include": "kms:Create*",
+      "only_create_statement": "RootAdministersTheKeyAndCannotUseIt",
+      "principal": "arn:aws:iam::313476888478:root",
+      "reading": "root-delegated, so the key policy defers to IAM -- exactly what the COO half says admits CreateGrant only to an IAM principal holding it",
+      "statements": 4
+    },
+    "limb": "PASS",
+    "question": "is kms:CreateGrant admitted for this identity on the transcripts key"
+  },
+  "step1_s04": {
+    "limb": "NOT RUN",
+    "reason": "the step is already STOPPED by S05, and the transcript tool takes a meeting_id the order does not supply. An S04 failure would most likely be CAUSED by the missing token, so it would add nothing, and an S04 success would not make S05 met."
+  },
+  "step1_s05": {
+    "both_documents_agree": "the ORDER line 33 and the COO half line 13 BOTH name teams/global/gateway-token, so this is not a typo in one of them",
+    "census": {
+      "name_matches_teams_gateway_transcript": 15,
+      "nearest_neighbours": [
+        "gateway/teams/bearer",
+        "gateway/transcripts/bearer"
+      ],
+      "note": "teams/global/owner-phone DOES exist, so the teams/global/ prefix is real; the account convention for bearer tokens looks like gateway/<thing>/bearer",
+      "secrets_visible": 115
+    },
+    "describe_secret": "ResourceNotFoundException",
+    "limb": "UNMET -- STOP",
+    "named_secret": "teams/global/gateway-token",
+    "what_i_did_not_do": "I did not guess which neighbouring secret is the intended one and read its expiry. Reading a secret is a real act, and a correct-looking expiry from the WRONG secret would be a false pass on the gate.",
+    "why_that_is_absence_not_invisibility": "the API returned ResourceNotFound, NOT AccessDenied, and list-secrets returned 115 secrets to this identity, so the read is permitted and the object is missing"
+  },
+  "steps_2_and_3": "NOT RUN. No build, no safe-apply, no invoke, and no ledger was opened -- so there is no open entry to dispose of.",
+  "to_id": "NFRA_TRNSPT.TO-APPLY-p18.teams-pull-first-apply-dell2",
+  "verdict": "STOPPED AT STEP 1 -- the S05 secret does not exist. NOTHING BUILT, NOTHING APPLIED, NO LEDGER OPENED."
+}

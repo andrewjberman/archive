@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_BILLING.TO-AB-e-1",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BILLING/task-orders/ADVI_BILLING.TO-AB-e-1.edge-book-probes.md",
+    "group": "OTHER",
+    "vintage_commit": "ff89e118c1"
+  },
+  "assignee": "0.7.0_AE_CloudOps~AB2",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BILLING/decompositions/ADVI_BILLING_DECOMP.md",
+    "vintage_commit": "ff89e118c1",
+    "to_ref": "org/missions/D8/ADVI/ADVI_BILLING/task-orders/ADVI_BILLING.TO-AB-e-1.edge-book-probes.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BILLING/deliverables/0.7.0_AE_CloudOps~AB2/AB_E1_PROBES.json",
+      "kind": "config_data",
+      "commit_or_etag": "4d8f74ffb3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record of the five live GET probes: in_book 200, out_of_book 403, firm_admin 200, other_firm 403, execute_api_bypass 403; minted_at and key_read_at 2026-10-09T09:00:50Z; no token or key byte (the writer refuses on the same eyJ[A-Za-z0-9_-]{10,} regex the criterion applies)",
+      "artifact_covered_by": [
+        "AB2-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T0855Z_advi-billing-edge-probes-r2-20261009_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "606da36dc7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ledger advi-billing-edge-probes-r2-20261009 OPENED at 496e0676e0 before any mint, five verify legs closed one per commit (41a5176833, 45a5a489c6, aca2ec52cc, 2a609f5a0a, 8d9225dd76), CLOSED at 606da36dc7 with the sentinel org/critical_paths/.open_deploys/advi-billing-edge-probes-r2-20261009.json removed",
+      "artifact_covered_by": [
+        "AB2-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AB2-1-AC1",
+      "criterion_verbatim": "AB2-1-AC1 -- five probes recorded (one per class, GET, an integer status, no token bytes) and the ledger closed. Base: FAIL. invocation: python org/missions/D8/ADVI/ADVI_BILLING/deliverables/2.0.0_SA_COO~B2/checks/r2/r2_checks.py . AB2-1-AC1 expect: AB2-1-AC1 PASS",
+      "method": "command",
+      "invocation": "python org/missions/D8/ADVI/ADVI_BILLING/deliverables/2.0.0_SA_COO~B2/checks/r2/r2_checks.py . AB2-1-AC1",
+      "expect": "AB2-1-AC1 PASS",
+      "output_evidence": "rc=0; 'in_book=200; out_of_book=403; firm_admin=200; other_firm=403; execute_api_bypass=403'; AB2-1-AC1 PASS. Base (before AB_E1_PROBES.json existed) FAIL as the RECORD FACE predicted. REFUSER ISOLATION for the fifth probe (the status alone does not name it -- API Gateway returns {\"message\":\"Forbidden\"} for a resource-policy deny and a missing authorizer too): the fifth probe's refuser read from the authorizer's own logs rather than inferred from the status: aws logs filter-log-events --log-group-name /aws/lambda/opal-portal-authorizer --filter-pattern 'Origin verification' since 2026-10-09T08:59:00Z -> 1 of 1 matching event -- 'Origin verification FAILED - request did not come through CloudFront' at 2026-10-09T09:00:56.511Z, which is the isOriginVerified branch at infra/aws/users/lambda/portal-authorizer/index.mjs:340-351. API Gateway returns {\"message\":\"Forbidden\"} for a resource-policy deny and a missing authorizer too, so the status alone does not name the refuser.",
+      "denominator": "5 of 5 classes present and exactly 5 probes; 5 of 5 statuses integers; 5 of 5 method GET with a route; 0 token-byte matches in the record; 1 sentinel path tested for absence, absent",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "two sealed arms against the committed record, each restored with git checkout: (A) the execute_api_bypass probe deleted from probes[]; (B) probes[] intact but ledger_slug re-pointed at irpt-ycdgen-f1-st28-20261009, another seat's ledger whose sentinel is still open -- chosen because it exercises the closed-ledger limb without touching any ledger",
+      "expected": "A fails the five-class test; B fails the closed-ledger test; neither leaves the record mutated",
+      "observed": "A -> rc=1 'probes must be exactly the five classes ...; got [firm_admin, in_book, other_firm, out_of_book]'; B -> rc=1 \"ledger 'irpt-ycdgen-f1-st28-20261009' missing or still open\"; after git checkout the record is clean (git status --short printed nothing) and the criterion PASSes again",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the criterion check run twice back to back on the restored record",
+      "observed": "AB2-1-AC1 PASS both times, identical status line",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the CROSS-FIRM arm of the .004c check (a mockadv token carrying an advisorId)",
+      "reason": "the order's other_firm class names no advisorId, so index.mjs:478-492 (missing identity claims) fires before getOwnershipMap resolves a firm to a bucket; reaching the cross-firm arm needs a sixth probe, which the order's refusal clause forbids. Row ADVI_BILLING-D2-S3 carries it to the issuer."
+    },
+    {
+      "item": "any non-GET request, a sixth probe, a stored or logged token or key byte, a 200 body in any file",
+      "reason": "the order's refusal clause; the record carries error_head only for non-200 responses and the writer refuses the whole record on a token-byte match"
+    },
+    {
+      "item": "every write plane",
+      "reason": "read-only cell: five GETs, one GetSecretValue of opal/auth/jwt-private-key, one GetObject of s3://opal-data-bd/platinum/49financial/ownership_map.json (191 advisors scanned, denominator printed; advisorIds recorded, nothing else from the map). No AWS write, no deploy, no user/role/table change."
+    }
+  ],
+  "surprises": [
+    "ADVI_BILLING-D2-S2",
+    "ADVI_BILLING-D2-S3"
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~AB2/logs/2026-10-09/ab_e1_edge_book_probes.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'jwtPublicKeys.mjs' infra/aws",
+      "result": "1 hit of 9159 files scanned -- infra/aws/lambda/lib/authkeys/jwtPublicKeys.mjs; the path in jwt.ts's import (./lib/authkeys/) is a build-time mirror that does not exist in the tree"
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'tier_policy.mjs' infra/aws --limit 5",
+      "result": "2 hits of 9159 -- the edge copy and shared-advisor-router's; requiredTierForUri returns null for a /api/scoped/partners/ path, so the ROLGAT gate never graded these probes"
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'proof_of_spec*' org/standards --limit 10",
+      "result": "1 hit of 118 -- org/standards/PROOF_OF_SPEC.schema.json, whose phase/method/status enums this instance satisfies"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open|close-leg x5|close --slug advi-billing-edge-probes-r2-20261009",
+      "result": "OPENED 5 legs, each leg closed with its measured status, CLOSED all 5 proven; staged-not-committed each time, so seven commits carry the sentinel and entry together"
+    },
+    {
+      "tool": "aws logs filter-log-events",
+      "invocation": "aws logs filter-log-events --log-group-name /aws/lambda/opal-portal-authorizer --start-time 1791536340000 --filter-pattern '\"Origin verification\"'",
+      "result": "1 event; it names the authorizer as the refuser of the execute-api probe"
+    }
+  ]
+}

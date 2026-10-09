@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "genre": "BUILD",
+  "to_id": "ADVI_BILLING.TO-AB-e-6",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BILLING/task-orders/ADVI_BILLING.TO-AB-e-6.fee-quarter-v2.md",
+    "group": "OTHER",
+    "vintage_commit": "57d48024e5"
+  },
+  "assignee": "0.9.0_WK_ADVI_BILLING~3",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BILLING/decompositions/ADVI_BILLING_DECOMP.md",
+    "vintage_commit": "57d48024e5",
+    "to_ref": "org/missions/D8/ADVI/ADVI_BILLING/task-orders/ADVI_BILLING.TO-AB-e-6.fee-quarter-v2.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/advi_billing/fee_quarter.py",
+      "kind": "script",
+      "commit_or_etag": "9492f23e7d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "v2 committed at 9492f23e7d; ran DRY (no --write) for the thread household, rc 0, no S3 write; the served round-1 object is untouched",
+      "artifact_covered_by": [
+        "AB2-6-AC1",
+        "AB2-6-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/advi_billing/tests/test_fee_quarter_v2.py",
+      "kind": "test",
+      "commit_or_etag": "9492f23e7d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 fixture tests, 5 passed",
+      "artifact_covered_by": [
+        "AB2-6-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/standards/ADVI_BILLING_FEE_QUARTER_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "9492f23e7d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "contract_version 0.2.0, additive fields household_source, smartx_statement, adjustments, formula_fee, adjustment",
+      "artifact_covered_by": [
+        "AB2-6-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AB2-6-AC1",
+      "criterion_verbatim": "python org/missions/D8/ADVI/ADVI_BILLING/deliverables/2.0.0_SA_COO~B2/checks/r2/r2_checks.py . AB2-6-AC1 -- the v2 tests pass, one named *crosswalk*, one named *smartx*. Base: FAIL. expect: AB2-6-AC1 PASS",
+      "method": "command",
+      "invocation": "python org/missions/D8/ADVI/ADVI_BILLING/deliverables/2.0.0_SA_COO~B2/checks/r2/r2_checks.py . AB2-6-AC1",
+      "expect": "AB2-6-AC1 PASS",
+      "output_evidence": "rc=0; passed 5 (two named *crosswalk*, three named *smartx*); AB2-6-AC1 PASS",
+      "denominator": "5 of 5 tests passed; 2 of 5 named *crosswalk*, 3 of 5 named *smartx*",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AB2-6-AC2",
+      "criterion_verbatim": "python org/missions/D8/ADVI/ADVI_BILLING/deliverables/2.0.0_SA_COO~B2/checks/r2/r2_checks.py . AB2-6-AC2 -- the dry-run object for z08219260 conforms to the contract and takes its household from the crosswalk. Base: FAIL. expect: AB2-6-AC2 PASS",
+      "method": "command",
+      "invocation": "python org/missions/D8/ADVI/ADVI_BILLING/deliverables/2.0.0_SA_COO~B2/checks/r2/r2_checks.py . AB2-6-AC2",
+      "expect": "AB2-6-AC2 PASS",
+      "output_evidence": "rc=0; AB2-6-AC2 PASS (object client_key z08219260, household_source household_crosswalk, contract_version 0.2.0)",
+      "denominator": "1 of 1 dry-run object conforms to the round-1 seam shape; 2 of 2 accounts and 4 of 4 components carry the contract keys; household_source household_crosswalk",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the dry-run object mutated three ways and checked with the r1 shape validator: steps deleted; a DIFFERS component with its reason nulled; household_source set to the fee-lines member (the AC2 comparison)",
+      "expected": "each mutant is rejected",
+      "observed": "m1 \"top-level keys missing: ['steps']\"; m2 'DIFFERS without difference_reason'; m3 household_source != household_crosswalk; base '' (conforms)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the test file run twice (directly and through r2_checks)",
+      "observed": "identical 5 passed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a run of the SMArtX path against a real silver partition",
+      "reason": "no silver smartx_fee_statement partition exists yet (the dry run reported none); the path is graded on fixtures only, and row ADVI_BILLING-D2-W3-S3 records the untested platform-rate composition"
+    },
+    {
+      "item": "any S3 write of the v2 object",
+      "reason": "order bounds: dry run only, the served round-1 object stays as written"
+    }
+  ],
+  "surprises": [
+    "ADVI_BILLING-D2-W3-S2",
+    "ADVI_BILLING-D2-W3-S3"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_BILLING/deliverables/0.9.0_WK_ADVI_BILLING~3/ADVI_BILLING.TO-AB-e-6.fee-quarter-v2.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "bash .tools/safe-commit.sh (commit-gate) on the committed .py files",
+      "result": "commit-gate All checks passed at 9492f23e7d; naming-gate PASS (column names and household_source members read from the two contracts)"
+    }
+  ]
+}

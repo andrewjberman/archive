@@ -118,3 +118,10 @@ The token AND the row carry `userType "test-filer"`, which changes v2's "NO user
 **Step 0 gains an arm:** the token on a data-refresh route is refused. The live route census is confirmed at 117 = live (row S13).
 
 **COO half v2.1 -- SIGNED** `2.0.0_SA_COO~V2`, 2026-10-09; it is still held until both clamps are live.
+
+## Gate state (2026-10-09 ~08:4xZ) -- CTO msg 2922: WAIT, no carve-out
+
+- Clamps live: SA-k-1 (04:57Z); IB-pr-395 @770f25558f (6 IRPT hosts). 25 of the 27 MORE_THAN_ONE routes now resolve to one firm.
+- Left: GET .../narrative/{reportId} (irpt-narrative, IB-pr-399, CTO half @1428af7198) and GET .../holdings/{accountSetId}
+  (irpt-holdings, IB-pr-394, CTO half @7f294053f0), both next on `0.7.0_AE_CloudOps~IB2`.
+- CTO ruling: "The rule is about reach, not use." The CTO signs v2.1 once the census reads 27 of 27 ONE.
