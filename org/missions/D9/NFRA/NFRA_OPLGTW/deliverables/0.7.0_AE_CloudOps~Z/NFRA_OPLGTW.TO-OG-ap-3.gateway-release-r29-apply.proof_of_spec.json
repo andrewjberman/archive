@@ -1,0 +1,204 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "39f5404132"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "779add6b4c",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-3.gateway-release-r29-apply.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/gateway-read-secrets.tf",
+   "kind": "terraform",
+   "commit_or_etag": "98501422dc",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Steps 1 AND 2, the secret and its grant, which this one file governs. THE SECRET: gateway/mail/commassist-bearer created out of band, ARN arn:aws:secretsmanager:us-east-1:313476888478:secret:gateway/mail/commassist-bearer-cPYbR3, VersionId 5c368b4d-d6e8-4366-8988-92f4eb4b8fcd, AWSCURRENT, rotation disabled, 64 hex characters = 32 bytes of entropy. THE VALUE NEVER LEFT ONE PROCESS: generated with secrets.token_hex(32) and handed to boto3 in memory, so it never entered argv, a file, a log, Terraform state or a commit, and only its LENGTH was printed. Deliberately not `aws secretsmanager create-secret --secret-string <value>`, which would put the value in argv where a process listing can read it. The create refused to proceed if the name already existed, so a create could not silently become a rotation; describe_secret returned ResourceNotFoundException first. Read back by DESCRIBE only -- get_secret_value was never called. gateway/mail/bearer AWSCURRENT was never written, which is why this is a SECOND secret: the mail-pull Lambda reads that one whole and a comma-joined second value inside it would break it. Step 2, under its OWN ledger. The Terraform line was already at HEAD (98501422dc, verified contained before the act). Plan graded from show -json by DECOMPOSING the policy document rather than diffing it as a string: statements 1 -> 1, Effect Allow unchanged, Action ['secretsmanager:GetSecretValue'] unchanged, Condition None unchanged, resources 4 -> 5 with ADDED exactly the commassist ARN and REMOVED []. That decomposition is the point, because the whole policy is ONE opaque attribute in the plan and '0 add, 1 change, 0 destroy' would read identically had an ARN been dropped or the action widened. Applied from the SAVED plan through safe-apply (comp-tagauthz PASSED, tombstone-gate CLEAN). Live read-back: 1 statement, 1 action, 5 resources, and ALL FOUR prior ARNs confirmed INDIVIDUALLY BY NAME rather than inferred from the count -- 5 would also hold if a prior had been swapped for the new one. Post-apply targeted re-plan: 'No changes.' The added ARN's suffix -cPYbR3 equals the ARN the create returned, so the grant names the secret that was actually made.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+   "kind": "script",
+   "commit_or_etag": "91811b648ab119e73e22f8d401dd09f45b8ab19b",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "The release's own deploy script at the release sha -- the bytes that ran. It carries E4, the MAIL_BEARER leg hunk (a second labelled value read host-side from gateway/mail/commassist-bearer, label commassist). Host i-07dccb1615503ac99, release 91811b648ab119e73e22f8d401dd09f45b8ab19b. Step 3. safe-ec2-deploy rc=0, DEPLOYMENT COMPLETE, all three steps, from C:/tmp/og-rel29 with OPAL_AGENT_SERIAL unset, DEPLOY_BASE_REF=aa75078e1b72a28219e6148d3ec8e9bf705ea111, HALT_ACK=1, AGENT_NAME=0.7.0_AE_CloudOps~Z and NO HALT_OVERRIDE. PRE: live md5 read 97 identical of 97, 0 mismatch, so live WAS r28 and step 3's STOP did not apply. AFTER, via r29_verify.py --expect-changed MAIL_BEARER,MAIL_BEARER_LABELS: VERIFY PASS 5 of 5 -- /health 200 and service active with MainPID 857046 against 791928 before (the one signed restart); shipped md5 98 of 98 identical, not-ok []; tool list unchanged name for name 66 -> 66, added [] removed []; .env key names 51 -> 52 with exactly MAIL_SENDER_DOMAIN_TABLE added and none removed; and every pre-existing .env value's sha256 unchanged except the two expected, equal 49 of 51, changed exactly ['MAIL_BEARER','MAIL_BEARER_LABELS']. No .env value, bearer, token or identity was printed at any point.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/r29/bun_cache_count.json",
+   "kind": "doc",
+   "commit_or_etag": "5f1400c4a2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The R45 fetch control, and it reads ZERO: entries_counted 6441, entries_touched_since_start 0, basis 'top level and one level down of bun's install cache; creation time OR modified time >= deploy_started_utc', with deploy_started_utc 2026-10-09T12:30:22Z. The start time was RE-RECORDED immediately before the successful attempt rather than carried from the first blocked one, so the window cannot miss a fetch by starting too late. Corroborated by an independent instrument: r29_bun_cache_size.py read bytes 1882231173 / files 115217 / dirs 13181 both before (11:36:39Z) and after (12:35:43Z) -- byte-identical and count-identical. Above 0 is a rollback trigger; it is 0, so no trigger fired.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+   "kind": "config_data",
+   "commit_or_etag": "5f1400c4a2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Step 5/7, recorded BY HAND in the MAIN tree as the order requires. The wrapper's own step 3/3 did write and commit the four fields, but only inside the release worktree (ee6bafe2c6 on the detached release HEAD), and its release_note there carried OG-rl-1's older text -- so the main tree's record was the one that counted and it was stale at r28. Applied as a SCOPED surgical text edit, not a json round-trip: many of the 27 services carry the same field names, so the edit was confined to the opal-gateway block located by its key line and the next key at the same indent, then ASSERTED to differ on exactly 6 lines (4, 503, 504, 505, 506, 519). The file still parses and the services denominator still reads 27. release_note was REPLACED rather than appended so it holds r29's note alone, asserted by checking the r28 note's 'OG-rl-14' marker is absent. previous_deployed_commit was taken from THIS record's own prior deployed_commit (aa75078e1b), not from the worktree's divergent 2c0f84966d.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261009T1114Z_nfra-oplgtw-r29-commassist-secret-grant_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "8eefd927c2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The policy line's OWN NEVER-2 ledger, 2 legs (POL, RB), opened with its sentinel before the act and CLOSED with the sentinel removed. Separate from the deploy's ledger because the order gives step 2 its own.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261009T1126Z_nfra-oplgtw-gateway-release-r29_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "5f1400c4a2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The deploy's NEVER-2 ledger, 5 legs (PRE, DEP, VER, CACHE, MAN), opened with its sentinel BEFORE the act and CLOSED with all five proven and the sentinel removed. No open deploy remains for this seat.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "6dee08829e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Rows NFRA_OPLGTW-Z-S74 (the halt gate refuses from a sparse worktree) and Z-S75 (which REFINES and partly corrects S74: A2's variable is discarded at safe-ec2-deploy.sh:57 by design, and the refusing predicate reads that variable alone). Both ARMED, disarm_owner 2.0.0_SA_COO~O, both dispositioned -- A2 @8e7b263404 then A3 @3e14f27aee, which superseded it with the tested cone fix.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the new secret exists and the role policy names it, with the prior four intact.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/ap3.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "secret gateway/mail/commassist-bearer: describe rc=0 arn_present=yes\ngateway-read-secrets-policy: get rc=0; statements 1; resources 5 (want 5); naming the new secret 1 (want 1)\nRESULT: PASS\nexit=0",
+   "denominator": "One secret existence read plus four policy figures: statements 1, resources 5 of a wanted 5, and 1 of those naming the new secret. All met.",
+   "status": "PASS",
+   "status_reason": "The secret exists and the policy grants it, with the statement count and resource count both at their wanted values. Corroborated beyond this check, and the corroboration matters because a resource count alone is a weak oracle: my own live read-back confirmed ALL FOUR prior ARNs individually BY NAME (gateway/transcripts/bearer, gateway/mail/bearer, gateway/principals/rosters, gateway/teams/bearer), because 5 would also hold if a prior ARN had been swapped for the new one. The plan was additionally graded per-statement from show -json before the apply -- Effect, Action and Condition all unchanged, ADDED exactly one ARN, REMOVED none -- and the added ARN's random suffix -cPYbR3 equals the ARN the create call returned, so the grant names the secret that was actually created rather than a plausible string. The issuer recorded the pre-cut live policy as 1 statement and exactly FOUR resources with no commassist ARN, so this criterion moved from a measured 4 to a measured 5.",
+   "expect": "(?s)describe rc=0 arn_present=yes.*resources 5 \\(want 5\\); naming the new secret 1 \\(want 1\\).*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: both ledgers are CLOSED at HEAD with their sentinels removed.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/ap3.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "nfra-oplgtw-r29-commassist-secret-grant: entries at HEAD 1; status CLOSED=yes; sentinel at HEAD=no\nnfra-oplgtw-gateway-release-r29: entries at HEAD 1; status CLOSED=yes; sentinel at HEAD=no\nRESULT: PASS\nexit=0",
+   "denominator": "Two ledgers, three figures each read at HEAD rather than on the worktree: entry present (1), status CLOSED, sentinel absent. 6 of 6 met.",
+   "status": "PASS",
+   "status_reason": "Both ledgers are closed on the committed record, which is the plane that matters -- a sentinel removed only on disk would leave an unindexed open ledger behind. Seven legs across the two were each closed with their own proof and NONE was closed on a prediction: the deploy's CACHE leg waited for the real post-deploy count, and its VER leg for the real 5-of-5 verify. The deploy itself took three attempts and the first two were REFUSALS rather than failures -- the halt gate blocked rc=3 twice, nothing shipped either time (live md5 re-read 97 of 97 after the first), and no HALT_OVERRIDE was used at any point. Rows Z-S74 and Z-S75 carry that, and A3 @3e14f27aee ruled the fix that satisfied the gate's own premise rather than bypassing it.",
+   "expect": "(?s)nfra-oplgtw-r29-commassist-secret-grant: entries at HEAD [1-9]\\d*; status CLOSED=yes; sentinel at HEAD=no.*nfra-oplgtw-gateway-release-r29: entries at HEAD [1-9]\\d*; status CLOSED=yes; sentinel at HEAD=no.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Readers were shown able to go both ways. (1) The issuer recorded the pre-cut live policy at exactly FOUR resources with no commassist ARN, and the secret as not existing (describe -> ResourceNotFoundException, which my own create path re-confirmed before writing); both moved. (2) The halt gate DISCRIMINATED rather than merely passing: it refused rc=3 twice on a real premise and admitted only once that premise was true, and the admission was reached by making the premise true rather than by overriding it. (3) The bun-cache control was read by two independent instruments -- a touched-entry count and a total-bytes/file-count walk -- which agree at zero movement. (4) The .env limb is a sha256 comparison across the whole 51-key set, so it could have failed on any unexpected value and instead named exactly the two the halves signed. (5) The live md5 read distinguished before from after on its own scale: 97 of 97 against the r28 list before, 98 of 98 against the release list after.",
+   "expected": "AC1 moves from a measured 4 resources and an absent secret to 5 and present; AC2 moves from no ledgers to two closed ones; and no control passes because nothing was looked at.",
+   "observed": "AC1 PASS with resources 5 of 5 and the new secret named once. AC2 PASS with both ledgers CLOSED at HEAD and both sentinels absent. The verify limbs read 5 of 5 and the fetch control 0 of 6441. MainPID moved 791928 -> 857046, which is the positive evidence that the service actually restarted rather than the deploy being a no-op.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Every world read came from an instrument separate from the act: the issuer's ap3.AC1.sh and ap3.AC2.sh run on their own, plus r29_verify.py's host reads over SSM, plus my own aws reads of the secret and the policy. Both applies ran from SAVED plans so the applied set equals the audited set, and both plans were graded from show -json rather than rendered text. The release bytes were never re-cut: the worktree stayed at 91811b648a with 0 porcelain lines through all three deploy attempts, and the cone change touched no file the release ships.",
+   "observed": "The policy read back the same 5 resources through two instruments (my own get-role-policy and ap3.AC1.sh). The shipped md5 read 98 of 98 against the release list, having read 97 of 97 against the live list before. The cache instruments agree at zero. The secret's VersionId from the create equals the one describe reports as AWSCURRENT.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Phase C -- the grant write (Alyssa's 30 days -> 13 months) and the served read.",
+   "reason": "Explicitly not this order's: step 6 says the issuer continues the release worker for Phase C and 'you do not write any grant'. No grant was written, no principal's scope was touched, and the 13-month reach is unchanged by this act."
+  },
+  {
+   "item": "The post-deploy READS in r29_postdeploy.sh (RL15_READ.json, the rl4.AC1.sh floor against ENV_KEYS_R29.txt, ht.AC2.sh at 52).",
+   "reason": "Named by r29_verify.py's own header as following separately, and not in this order's step list. The order's step 6 asks for the verify-after line, the bun-cache count and MainPID, all of which are reported."
+  },
+  {
+   "item": "The concierge consent count of 9, which appears in the order's rollback-trigger list.",
+   "reason": "NOT measured by this seat and stated rather than quietly skipped. r29_verify.py's five limbs do not include it (they are /health, shipped md5, tool list, .env key names, .env value hashes), and ANNOUNCE section 11 records the expectation as '9 before and after' with the Bloomberg-adjacent reads belonging to the r30 cell. So I can say no trigger I measured fired, and I cannot say the consent count was checked. The issuer's post-deploy reads cover it."
+  },
+  {
+   "item": "Retiring the Terraform policy line or deleting the new secret.",
+   "reason": "Section 10 item 6 makes those a separate act from the release rollback, and nothing here needed rolling back. gateway/mail/bearer AWSCURRENT was never written, so the mail-pull Lambda and the msgpull holder were never at risk in either direction."
+  },
+  {
+   "item": "The wrapper's own manifest commit inside the release worktree (ee6bafe2c6).",
+   "reason": "Left where it is and NOT merged or cherry-picked. The order anticipates the wrapper's manifest commit being refused by the lane gate and directs a by-hand record instead; that commit sits on a detached release HEAD in a scratch worktree and its release_note was older than r28's. The main tree's record is the authoritative one and it was written by hand."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S74: BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~O -- RESOLVED. safe-ec2-deploy's halt gate refused the r29 deploy rc=3 with 'SERIAL RESOLVES TO NO KNOWN AGENT'. Not the corrupted serial the banner guesses (od -c reads exactly '0.7.0_AE_CloudOps~Z\\n'): the release worktree is a SPARSE checkout, so org/tier2_senior/0.7.0_AE_CloudOps~Z is absent from its disk while present in its HEAD commit tree, and the gate stats the disk. Nothing shipped; live md5 re-read 97 of 97 after the block. Dispositioned by A2, then by A3.",
+  "NFRA_OPLGTW-Z-S75: BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~O -- RESOLVED, and it CORRECTS one half of Z-S74. Amendment A2's remedy could not work as written: safe-ec2-deploy.sh:57 overwrites HALT_GATE_REPO_ROOT unconditionally with the calling worktree, deliberately per ruling R-53, and halt_gate_validate_serial scans THAT variable alone -- the two-root loop that also reads HALT_GATE_SHARED_ROOT belongs to halt_gate_worker_issuer and runs only for 0.9.0_WK_* serials. The re-run under A2 returned the same rc=3. It also records a second finding worth carrying: step (5)'s dry-run instruction cannot catch this class, because a dry run sourced from the main checkout resolves different roots than the deploy sourced from the worktree -- mine read rc 0/0 minutes before the deploy read rc=3 on the same two limbs. A3 @3e14f27aee ruled the tested cone fix and superseded A2."
+ ],
+ "session_log": "This seat is a SESSION seat, not an L7 worker subagent. Order of acts was Half 2's own: the secret, then the policy line under its own ledger, then the deploy under its own ledger, then the immediate verifies, then the manifest, then the closes, then the criteria. Every precondition was measured before the first act rather than taken from the order -- three halves and the ANNOUNCE read AT HEAD by bytes with each named commit tested for containment; both worktrees confirmed to have survived the overnight reboot at exactly their expected shas with clean trees; the live policy read at exactly four resources with no commassist ARN; the secret confirmed absent; and the live host confirmed to be r28 at 97 of 97. One ordering fact turned out to be load-bearing and was spotted in the reading rather than the hard way: gateway-read-secrets.tf resolves the new secret through a `data` source BY NAME, so a plan before the secret exists cannot resolve -- the ANNOUNCE's create-then-plan order is not stylistic. THE DEPLOY TOOK THREE ATTEMPTS AND THAT IS THE SUBSTANCE OF THIS CELL. The halt gate refused twice, fail-closed, and both refusals were correct behaviour on a wrong premise. I did not reach for HALT_OVERRIDE, which the order's BOUNDS forbid; I measured the gate down to its predicate, found that the first diagnosis (sparse checkout) was right about the mechanism while the issuer's A2 remedy could not reach it, filed that as a correcting row rather than quietly trying something else, and asked. When my own dry run had passed rc 0/0 minutes before a deploy that failed on the same two limbs, I treated the disagreement as a finding about the dry run rather than noise -- it had resolved different roots than the deploy would. The fix I proposed and the issuer ruled makes the gate's own premise TRUE rather than re-pointing or weakening it, and I verified before proposing it that it cannot reach the shipped set (the release md5 list carries no org/ path) and leaves the worktree at the release HEAD with zero porcelain. After the deploy returned I ran the three step-6 reads immediately and in order, and the manifest by hand afterwards. Nothing was closed on a prediction and no .env value, bearer, token or identity was printed anywhere in this cell.",
+ "compiler_tools": [
+  {
+   "tool": "r29_ssm_prog.py / r29_md5_host.py",
+   "invocation": "md5 mode, three times: before the act, after the first halt-gate block, and as the PRE leg's proof",
+   "result": "PASS",
+   "note": "The middle run is the one that earns its place: it is how I know a BLOCKED deploy shipped nothing, rather than inferring it from the step the wrapper stopped at. 97 identical of 97 and 0 host-only files, both times."
+  },
+  {
+   "tool": "r29_verify.py",
+   "invocation": "before (state file kept OUT of the repo, per its own header); after --expect-changed MAIL_BEARER,MAIL_BEARER_LABELS",
+   "result": "PASS",
+   "note": "VERIFY PASS 5 of 5. Its fifth limb is the strong one: a sha256 comparison across the whole 51-key .env set, so it could have failed on any unexpected value and instead named exactly the two the halves signed. The before state was captured on live r28 code before the first attempt and survived both blocks unchanged."
+  },
+  {
+   "tool": "r29_bun_cache_size.py / r29_bun_cache_count.py",
+   "invocation": "size before and after; count since a deploy_started_utc re-recorded immediately before the successful attempt",
+   "result": "PASS",
+   "note": "Two independent instruments agreeing at zero movement: 0 entries touched of 6441, and bytes/files/dirs byte-identical before and after. The start time was re-recorded rather than reused so the window could not begin too late and miss a fetch."
+  },
+  {
+   "tool": "safe-ec2-deploy.sh + .tools/halt-gate-check.sh",
+   "invocation": "three attempts; the gate's two limbs dry-run separately four times across three root configurations",
+   "result": "PARTIAL",
+   "note": "PARTIAL and not PASS, deliberately: the deploy succeeded on the third attempt, but the tool chain produced two correct refusals on a wrong premise and its own dry-run guidance cannot reproduce the deploy's roots. Both are rows (Z-S74, Z-S75) rather than notes, and the second is the kind of gap that would otherwise be rediscovered by the next seat deploying from a sparse worktree."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open x2 (2 legs and 5 legs), close-leg x7, close x2",
+   "result": "PASS",
+   "note": "Both entries opened with their sentinels BEFORE their acts and closed with all legs proven. Each leg's proof records the instrument and its denominator, not a verdict word."
+  },
+  {
+   "tool": "terraform",
+   "invocation": "init; plan -target the policy and the new data source, saved; show -json; apply the saved plan; targeted re-plan",
+   "result": "PASS",
+   "note": "Graded by a script that decomposes the policy document per Sid and compares Effect, Action, Condition and the resource sets, because an IAM role policy is one opaque attribute in the plan and the headline counts cannot see a dropped ARN."
+  },
+  {
+   "tool": "boto3 (secretsmanager), via its own one-off script",
+   "invocation": "describe_secret (precondition), create_secret, describe_secret (read-back)",
+   "result": "PASS",
+   "note": "Chosen over the aws CLI specifically so the value never entered argv. The script refuses if the name already exists, so a create cannot silently become a rotation, and get_secret_value is never called so the read-back cannot fetch the value."
+  },
+  {
+   "tool": "comp-iam",
+   "invocation": "NOT USED for the policy read-back",
+   "result": "SKIP",
+   "note": "Deliberate, and the order's own preflight says comp-iam RUN meant the live get-role-policy read at the cut, which was done. cloud-ops states comp-iam models (action) and never (action, resource) and is a FLOOR, so it could not confirm that one specific ARN landed -- which is the entire question here. The live document read, with the prior four confirmed by name, answers it."
+  }
+ ]
+}
