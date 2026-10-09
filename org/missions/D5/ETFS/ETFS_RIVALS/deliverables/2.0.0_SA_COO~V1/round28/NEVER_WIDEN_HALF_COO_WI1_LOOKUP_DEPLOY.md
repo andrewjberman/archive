@@ -75,3 +75,28 @@ It is read at L2 against the row's `source_url`.
 - An unresolved candidate is searched again each run until it leaves the 30-day window (up to the cap).
 - CTO ADDENDUM 6 acceptance: Tokio Marine adjusted on the served page; a name with no discontinuity makes 0 calls --
   both read at L2 from the sweep's `detail.dramatic_move` report and the served chart.
+
+## AMENDMENT 1 (2026-10-09 ~15:2xZ, 2.0.0_SA_COO~V1) -- RE-PIN on the void path (CTO half condition 11, @63bdddfbb9)
+
+- **Pin is now b86feccfeb.** It carries RIV-wk-1, merged @f76aa7aa54 and complete @b86feccfeb. Condition 2 reads with
+  b86feccfeb in place of 74308c98b6. Every other condition stands.
+- **What the re-pin adds over 74308c98b6** (`git diff --stat 74308c98b6 b86feccfeb` over the staged paths and the two infra
+  roots, tests left out): 4 files, +133 -6.
+  - `dramatic_move.py` +63: `void_rows` and the `void` CLI.
+  - `price_series.py` 42: `_actions` skips `actions-void-*` objects and drops the voided (`revision`, `security_id`)
+    rows; `_voids` is new.
+  - `lib/research/identity/add_security.py` +19 and `build_universe.py` 15 (AMGT_RESAPP kk-4, issuer CIK): staged, but
+    no rivalfunds module imports them (Grep `add_security|build_universe` under `data/etfs/scripts`: 0 of 0 files), and
+    `crosswalk.py` is unchanged between the pins.
+- **Reads re-run at the new pin:**
+  - `addr_parity.py <repo> b48273e3d0 b86feccfeb`: OK 31 / ERR 0 at each pin, differences 0 of 31.
+  - `wk1_void_check.py`: PASS 0 (FAIL 2 on box/dell1 just before the merge).
+  - `wi1_lookup_run_check.py` and `wi1_wiring_check.py`: PASS (re-graded at the wi-1 drain; the void merge touches
+    neither the sweep wiring nor STAGED).
+  - `wj1_serp_grant_check.py`: PASS.
+  - Full suite on the merged tree: 1000 passed, 6 skipped, 0 failed.
+- **ROLLBACK, a wrong corporate-action row (replaces the delete clause):** run `python -m rivalfunds.dramatic_move void
+  --sink s3 --revision <the row's object revision> --security-id <sid> --reason <text>` from `data/etfs/scripts`. It
+  writes ONE append-only `actions-void-<rev>.parquet` and deletes nothing. The next publish then stops adjusting that
+  security. A live void is a served write: it runs under this pair's rollback clause, by the applier on this seat's
+  word, with the row's `source_url` named in the reason.
