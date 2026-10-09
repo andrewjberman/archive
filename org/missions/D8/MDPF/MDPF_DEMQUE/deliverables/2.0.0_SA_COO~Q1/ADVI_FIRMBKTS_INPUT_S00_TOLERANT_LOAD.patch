@@ -1,0 +1,169 @@
+diff --git a/data/cot/scripts/gold/build_canonical_prices_v2.py b/data/cot/scripts/gold/build_canonical_prices_v2.py
+index f30b13018c..91590e1a8f 100644
+--- a/data/cot/scripts/gold/build_canonical_prices_v2.py
++++ b/data/cot/scripts/gold/build_canonical_prices_v2.py
+@@ -277,6 +277,41 @@ def build_t1_from_transactions(transactions: pd.DataFrame) -> pd.DataFrame:
+     return t1
+ 
+ 
++def _is_missing_key(e: Exception) -> bool:
++    """True only for an S3 NoSuchKey / 404; any other error must still raise."""
++    err = getattr(e, 'response', None) or {}
++    code = str(err.get('Error', {}).get('Code', ''))
++    status = err.get('ResponseMetadata', {}).get('HTTPStatusCode')
++    return code in ('NoSuchKey', '404') or status == 404
++
++
++def _load_tier2():
++    """Load Tier 2 inputs; an absent object (NoSuchKey/404) skips that tier, any other error raises."""
++    try:
++        yahoo = load_historical_prices()
++    except Exception as e:
++        if not _is_missing_key(e):
++            raise
++        print("WARN: historical prices object absent -- Tier 2 (Yahoo) skipped")
++        yahoo = pd.DataFrame({'ticker': pd.Series(dtype='object'),
++                              'date': pd.Series(dtype='datetime64[ns]'),
++                              'close': pd.Series(dtype='float64')})
++    try:
++        name_to_ticker = load_ticker_lookup()
++    except Exception as e:
++        if not _is_missing_key(e):
++            raise
++        print("WARN: ticker lookup object absent -- starting from an empty mapping")
++        name_to_ticker = dict(YF_OVERRIDES)
++        for asset_name, corrected_ticker in TICKER_CORRECTIONS.items():
++            if asset_name in name_to_ticker:
++                if corrected_ticker is None:
++                    del name_to_ticker[asset_name]
++                else:
++                    name_to_ticker[asset_name] = corrected_ticker
++    return yahoo, name_to_ticker
++
++
+ def load_historical_prices() -> pd.DataFrame:
+     """Load Yahoo Finance prices (Tier 2)."""
+     print("Loading silver/historical_prices.parquet...", end=' ', flush=True)
+@@ -481,8 +516,7 @@ def build_canonical(dry_run: bool = False):
+     # --- Step 1: Load source data ---
+     print("\n=== Step 1: Load source data ===")
+     transactions   = load_transactions()
+-    yahoo          = load_historical_prices()
+-    name_to_ticker = load_ticker_lookup()
++    yahoo, name_to_ticker = _load_tier2()
+ 
+     # --- Step 1b: Build T1 prices from transactions ---
+     t1_prices = build_t1_from_transactions(transactions)
+diff --git a/data/cot/scripts/gold/test_s00_missing_tier2.py b/data/cot/scripts/gold/test_s00_missing_tier2.py
+new file mode 100644
+index 0000000000..2658695262
+--- /dev/null
++++ b/data/cot/scripts/gold/test_s00_missing_tier2.py
+@@ -0,0 +1,93 @@
++"""MDPF_DEMQUE DQ-t-8: build_canonical_prices_v2 tolerates absent Tier-2 objects (S3 stubbed, no AWS)."""
++from __future__ import annotations
++
++import io
++import json
++import os
++import sys
++
++import pandas as pd
++import pytest
++
++sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
++os.environ.setdefault("AWS_DEFAULT_REGION", "us-east-1")
++import build_canonical_prices_v2 as m  # noqa: E402
++
++
++class _ClientError(Exception):
++    def __init__(self, code, status):
++        self.response = {"Error": {"Code": code}, "ResponseMetadata": {"HTTPStatusCode": status}}
++
++
++class _Body:
++    def __init__(self, b):
++        self._b = b
++
++    def read(self):
++        return self._b
++
++
++class _S3:
++    def __init__(self, objects):
++        self.objects = objects
++
++    def get_object(self, Bucket, Key):
++        if Key not in self.objects:
++            raise _ClientError("NoSuchKey", 404)
++        return {"Body": _Body(self.objects[Key])}
++
++
++def _parquet():
++    buf = io.BytesIO()
++    pd.DataFrame({"ticker": ["AAA"], "date": ["2026-01-02"], "close": [10.5]}).to_parquet(buf)
++    return buf.getvalue()
++
++
++HIST_KEY = "silver/historical_prices.parquet"
++LOOK_KEY = "config/ticker_lookup.json"
++LOOKUP = json.dumps([{"asset_name": "Alpha", "ticker": "AAA"}]).encode()
++
++
++def test_missing_historical_prices_skips_tier2_and_writes(monkeypatch, capsys):
++    monkeypatch.setattr(m, "s3", _S3({LOOK_KEY: LOOKUP}))
++    df, mp = m._load_tier2()
++    assert list(df.columns) == ["ticker", "date", "close"] and len(df) == 0
++    assert "WARN:" in capsys.readouterr().out
++    assert mp["Alpha"] == "AAA"
++    # the empty frame still merges onto a spine without error, leaving t2 empty
++    spine = pd.DataFrame({"ticker": ["AAA"], "date": pd.to_datetime(["2026-01-02"])})
++    out = spine.merge(df.rename(columns={"close": "t2_price"}), on=["ticker", "date"], how="left")
++    assert len(out) == 1 and out["t2_price"].isna().all()
++
++    # any other S3 error still raises
++    class Boom(_S3):
++        def get_object(self, Bucket, Key):
++            raise _ClientError("AccessDenied", 403)
++    monkeypatch.setattr(m, "s3", Boom({}))
++    with pytest.raises(_ClientError):
++        m._load_tier2()
++
++
++def test_missing_ticker_lookup_skips_tier2_and_writes(monkeypatch, capsys):
++    monkeypatch.setattr(m, "s3", _S3({HIST_KEY: _parquet()}))
++    df, mp = m._load_tier2()
++    assert "WARN:" in capsys.readouterr().out
++    assert len(df) == 1
++    assert isinstance(mp, dict) and "Alpha" not in mp
++    for k, v in m.YF_OVERRIDES.items():
++        if m.TICKER_CORRECTIONS.get(k, v) is not None:
++            assert k in mp
++            break
++
++
++def test_present_tier2_is_still_joined(monkeypatch, capsys):
++    monkeypatch.setattr(m, "s3", _S3({HIST_KEY: _parquet(),
++                                      LOOK_KEY: LOOKUP}))
++    df, mp = m._load_tier2()
++    assert "WARN:" not in capsys.readouterr().out
++    assert len(df) == 1 and df["close"].iloc[0] == 10.5
++    assert mp["Alpha"] == "AAA"
++    spine = pd.DataFrame({"asset_name": ["Alpha"], "date": pd.to_datetime(["2026-01-02"])})
++    spine["ticker"] = spine["asset_name"].map(mp)
++    out = spine.merge(df.rename(columns={"close": "t2_price"}), on=["ticker", "date"], how="left")
++    assert out["t2_price"].iloc[0] == 10.5
+diff --git a/infra/aws/terraform/cot-pipeline/ssm.tf b/infra/aws/terraform/cot-pipeline/ssm.tf
+index 90d820de8a..7ad4370161 100644
+--- a/infra/aws/terraform/cot-pipeline/ssm.tf
++++ b/infra/aws/terraform/cot-pipeline/ssm.tf
+@@ -372,6 +372,9 @@ resource "aws_ssm_document" "cot_gold_run" {
+           "    fi",
+           "  fi",
+           "}",
++          # MDPF_DEMQUE DQ-t-8: S_00 canonical prices; optional so a failure WARNs and the chain continues (run_gold optional mode).
++          # build_canonical_prices_v2.py takes only --dry-run (no --upload; it always writes), so pass --dry-run under DRY_RUN, else no flag.
++          "run_gold S_00 build_canonical_prices_v2.py \"$(if [ \"$DRY_RUN\" = 'true' ]; then echo --dry-run; fi)\" optional",
+           "run_gold A_00 A_00.accounts_dimension.py \"$UPLOAD_FLAG --incremental\"",
+           "run_gold A_01 A_01.advisor_assignments.py \"$UPLOAD_FLAG\" optional",
+           "run_gold A_02 A_02.fee_rate_history.py \"$UPLOAD_FLAG\" optional",
