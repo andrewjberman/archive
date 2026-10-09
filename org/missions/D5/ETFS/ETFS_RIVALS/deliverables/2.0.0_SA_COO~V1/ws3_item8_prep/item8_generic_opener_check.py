@@ -6,6 +6,8 @@ Drives `ai_accounts.run_chain` with a scripted client on a one-fund fixture (no 
 ARM A: the verdict opens "The last thirty days mostly add to, rather than contradict, the longer trend" (the lead 13 of
 19 verdicts shared on the 2026-10-08 page). The chain must send ONE correction for the direction item that quotes that
 opening, keep the corrected reply, and not set grounding FAIL for the opening.
+ARM C: the verdict opens "From <date> to <date>, the long-run trend is only partly borne out ..." (the lead the
+live prompt a1-chain/7 produced on 2026-10-09 for CGIC and IDVZ). Sent back and replaced, as ARM A.
 ARM B (control): the verdict opens with a named security. No correction is sent for it.
 Exit 0 = PASS, 1 = FAIL.
 """
@@ -28,6 +30,7 @@ FACTS = A.fact_pack("TST", DAY, g5, empty, empty, empty, names={"AAA_US": "Alpha
 WINS = A.period_windows(DAY, FACTS)
 W30, W365 = WINS.get("R30"), WINS.get("R365")
 GENERIC = "The last thirty days mostly add to, rather than contradict, the longer trend."
+DATED = "From 2025-10-07 to 2026-10-07, the long-run trend is only partly borne out by the last 30 days."
 SPECIFIC = "Alpha Co is the manager's clearest conviction: it was bought while Gamma Co was cut."
 
 
@@ -72,6 +75,10 @@ if not d["text"].startswith("Alpha Co"):
     fails.append("A: the corrected reply did not replace the generic one")
 if "open" in str(d["grounding_reason"] or "").lower():
     fails.append("A: the opening set a grounding reason (it must be corrected, never failed)")
+d, corr = run(DATED)
+print(f"ARM C: corrections sent {len(corr)}; final text starts: {d['text'][:60]!r}")
+if not corr or not d["text"].startswith("Alpha Co"):
+    fails.append("C: an opening that leads with the period's dates was not sent back and replaced")
 d, corr = run(SPECIFIC)
 print(f"ARM B (control): corrections sent {len(corr)}; final text starts: {d['text'][:60]!r}")
 if corr:
