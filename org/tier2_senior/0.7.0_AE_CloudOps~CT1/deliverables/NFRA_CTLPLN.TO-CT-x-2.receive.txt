@@ -1,0 +1,141 @@
+NFRA_CTLPLN.TO-CT-x-2 steps 1-3 -- RECEIVE, RUN, COUNT
+seat: 0.7.0_AE_CloudOps~CT1   device: dell1   date: 2026-10-09
+risk: WORLD   proof_genre: DEPLOY
+Under AMENDMENT 1 (issuer, ~09:4xZ): no install into the box interpreter; install and run in ONE
+FRESH VENV, deleted after this file is written.
+
+DELIVERY: the wheel arrived LOOSE at C:/Users/Test/Downloads/click-8.3.1-py3-none-any.whl
+(crossbox XB-20261009T100730Z-a3db), 108274 bytes. There is NO pack and NO MANIFEST.json.
+
+WHICH INSTALL PATH (the amendment asks): the FALLBACK. `intake_receive.py install` takes only
+`--from PACK` and `--dry-run` -- no target interpreter -- and its install is the real `--user`
+install into the box, which AMENDMENT 1 forbids. So the install below is
+`<venv python> -m pip install --no-index --no-deps <the verified wheel path>`.
+
+========================================================================
+STEP 1a -- intake_receive.py verify --from <pack>        rc=1   ok=False
+========================================================================
+PACK-DEFECT: MANIFEST.json absent
+STRAY: click-8.3.1-py3-none-any.whl
+STRAY: click-8.3.1-py3-none-any.whl.check.json
+REFUSED: click-8.3.1-py3-none-any.whl: wheel not listed in manifest; check record not listed in manifest
+INTAKE-VERIFY pack=x2_pack wheels=1 verified=0 checked=0 stray=2 ok=False
+
+========================================================================
+STEP 1b -- intake_receive.py prove --from <pack> --scratch <new dir>   rc=1   ok=False
+========================================================================
+PACK-DEFECT: MANIFEST.json absent
+STRAY: click-8.3.1-py3-none-any.whl
+STRAY: click-8.3.1-py3-none-any.whl.check.json
+REFUSED: click-8.3.1-py3-none-any.whl: wheel not listed in manifest; check record not listed in manifest
+INTAKE-VERIFY pack=x2_pack wheels=1 verified=0 checked=0 stray=2 ok=False
+INTAKE-PROVE-DETAIL import_failed=0 no_module=0
+INTAKE-PROVE device=dell1 python=3.14.7 wheels=1 installed=0 imported=0 import_missing_dep=0 failed=0 refused=1 ok=False
+
+  READ THIS REFUSAL AS WHAT IT IS. The receiving tool's own verification half COULD NOT BE
+  EXERCISED, because a pack is a folder holding, per wheel, the wheel + `.check.json` +
+  `.delivery.txt` + one MANIFEST.json, and the sender shipped a bare wheel. This is the same
+  condition the batch already recorded once for the other file of this batch:
+  org/devices/intake/records/intake-20261008-a/LOOSE_DELIVERY_rpds_py_SITEZ_BY_CTO_RULING_106777.md
+  ("there is NO pack and NO manifest for this file, so intake_receive.py verify cannot be run").
+
+  I DID NOT AUTHOR A MANIFEST TO MAKE THE TOOL PASS. A MANIFEST is the SENDING machine's
+  attestation (intake_check.py pack writes it). Writing one here would make the tool verify MY
+  copy against hashes I computed myself -- a circular pass that would look exactly like a real
+  receipt in the record and prove nothing about what the laptop sent. The refusal above is the
+  honest state of the route's receiving half.
+
+========================================================================
+WHAT AUTHORIZED THE INSTALL INSTEAD, measured here
+========================================================================
+The authorization is the SIGNED CHECK RECORD plus an independent hash, NOT an intake_receive
+receipt (which could not be obtained):
+
+1. Independent sha256 of the delivered file, computed on this box:
+     981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6
+   equals the check record's `held_sha256` and the order's stated digest. MATCH.
+2. Check record verdict: `verdict = "checked"`, checked_by 2.0.0_SA_COO~C at 2026-10-08T07:06:50Z.
+   8 checks: 6 passed, 2 not_applicable (c3 the-version-this-machine-runs, c6 archive-listed).
+   NOTE c6 is `not_applicable`, NOT `failed`: the LOOSE_DELIVERY note above says click was HELD on
+   `c6=failed` under repair in CT-e-3, and that line is STALE. The record's bytes at HEAD say
+   checked. Read the record, not the narrative about it.
+3. Check 8 signature: signer 1.0.0_SA_CTO,
+   org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_CHECK_8_NFRA_CTLPLN_INTAKE_BATCH_20261008_A_CLICK_ONLY.md
+   The record pins signature_file_sha256 = b41ea9dbfe8d85c53a5c0a572eebce668a891cdf8829e737c7381bf05b626389.
+   Hashing that file AS CHECKED OUT gives f8155b87... -- a MISMATCH that is the INSTRUMENT, not
+   tampering: the worktree holds 39 CRLF pairs and the git blob holds 0, 2381 - 2342 = 39 bytes, and
+   LF-normalizing the worktree reproduces b41ea9db... exactly. git log shows ONE commit for that
+   file, by 1.0.0_SA_CTO at 2026-10-08T07:02:54Z, BEFORE the record's 07:06:50Z. The signature is
+   INTACT. (Filed as a row: any receiver on a CRLF checkout that hashes this file as-is reads a
+   false MISMATCH on a good signature.)
+
+========================================================================
+STEP 1c -- index-free install into the FRESH VENV            rc=0
+========================================================================
+  python -m venv <temp>/x2_venv            (Python 3.14.7, no system site packages)
+  ISOLATION CONTROL, before the install:
+    <venv python> -c "import click" -> ModuleNotFoundError: No module named 'click'
+    So the box's own click 8.5.0 does NOT leak into this environment, and the CLICK line below is
+    evidence about the DELIVERED WHEEL, not about the box.
+
+  <venv python> -m pip install --no-index --no-deps -v <pack>/click-8.3.1-py3-none-any.whl
+
+  Using pip 26.2.1 from <temp>/x2_venv/Lib/site-packages/pip (python 3.14)
+  Processing <temp>/x2_pack/click-8.3.1-py3-none-any.whl
+  Installing collected packages: click
+  Successfully installed click-8.3.1
+
+  PROVENANCE OF THE INSTALLED BYTES (stronger than counting log lines):
+    click-8.3.1.dist-info/INSTALLER       -> pip
+    click-8.3.1.dist-info/direct_url.json -> {"archive_info": {"hash":
+      "sha256=981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6", ...},
+      "url": "file:///.../x2_pack/click-8.3.1-py3-none-any.whl"}
+    The source is a `file:///` URL, not an index, and the recorded sha256 equals the CTO-signed
+    digest. The SAME instrument reads direct_url.json ABSENT for the box's click 8.5.0, which is how
+    that one is known to be an index install. One instrument, two opposite verdicts.
+
+========================================================================
+STEP 2 -- the work runs
+========================================================================
+THE REQUESTING LANE: the approval file's batch source
+(org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_CTLPLN_INTAKE_BATCH_20261008_A_FIRST_REAL_FETCH.md
+row 2) names click==8.3.1 as being for "both Dells (the one closure member the Python 3.12 kit could
+not re-pack: an editable install on the laptop)". So the requester is the Python 3.12 KIT CLOSURE for
+the Dells, not a seat lane carrying an ordinary command. THE LANE'S COMMAND WAS NOT FOUND on dell1 --
+there is no lane-owned command to run, because the requester is a dependency-closure member. Per the
+order's own fallback, and per AMENDMENT 1 with the venv interpreter:
+
+  <venv python> -c "import click; print('CLICK', click.__version__)"
+  <string>:1: DeprecationWarning: The '__version__' attribute is deprecated and will be removed in Click 9.1. Use feature detection or 'importlib.metadata.version("click")' instead.
+  CLICK 8.3.1
+
+========================================================================
+STEP 3 -- what dell1 downloaded during step 1
+========================================================================
+  verbose log lines total: 4
+  lines carrying http(s)://: 0
+
+DOWNLOADS-TODAY requests=0
+
+  HONEST LIMIT ON THAT COUNT: 0 of 4 lines is a thin denominator -- a local-wheel install barely
+  logs. The count alone is weak evidence. What actually establishes that nothing was fetched is
+  structural and independent of the log: `--no-index` was passed; that flag was separately proved to
+  REFUSE on this box (the same command with the wheel absent returns "Could not find a version that
+  satisfies the requirement click==8.3.1 (from versions: none)"); and direct_url.json names a
+  file:/// source carrying the signed digest. Three readings, one conclusion.
+
+========================================================================
+CLEANUP
+========================================================================
+The venv is deleted after this file is written, as AMENDMENT 1 requires; the deletion and its
+absence control are recorded in the commit for this cell. Nothing was installed into dell1's own
+interpreter: the box still runs click 8.5.0, unchanged by this cell.
+
+========================================================================
+WHAT IS STILL OWED BY THE ROUTE, not by this seat
+========================================================================
+A real PACK (wheel + .check.json + .delivery.txt + MANIFEST.json, as intake_check.py pack writes it)
+Taildropped to dell1 would let `verify` and `prove` run and return the receipts this route normally
+sends back. Until then FWD-15's "checked" rests on the signed record and an independent hash read on
+the receiver -- which is sound evidence about the BYTES, but it is not the receiving tool's receipt,
+and the difference is the whole point of the pack mechanism.
