@@ -1,0 +1,20 @@
+DELL2 effective set = group policies + bus + ssm as built (simulate-custom-policy), 6 documents
+PUT TO-RUN-x9/b11 research fold                      s3://opal-data-transcripts/teams/transcripts/silver/research_meeting/date=2026-10-08/x.parquet -> allowed
+PUT chat_assist archive                              s3://opal-data-transcripts/teams/transcripts/bronze/chat_messages/date=2026-10-08/x.json -> allowed
+PUT chat_assist archive                              s3://opal-data-transcripts/teams/transcripts/silver/chat_threads/date=2026-10-08/x.parquet -> allowed
+PUT chat_assist archive                              s3://opal-data-transcripts/teams/transcripts/state/chat_assist/x.json            -> allowed
+PUT pull.tf WriteAndReadTeamsTranscriptKeys          s3://opal-data-transcripts/teams/transcripts/bronze/transcripts/date=2026-10-08/x.json -> allowed
+PUT mail_pull.tf WriteAndReadMailTranscriptKeys      s3://opal-data-transcripts/outlook/transcripts/bronze/date=2026-10-08/x.json     -> allowed
+CONTROLS
+positive: dell2 PutObject on opal-data-assets (the ALLOWED list's own arm)                      -> allowed ['S3ObjectsOnOpalBuckets(Allow)']
+negative: dell2 DeleteObject on the transcripts bucket (DenyS3DeletesOnProductionData)          -> explicitDeny ['DenyS3DeletesOnProductionData(Deny)']
+negative: dell2 PutObject on a bucket outside opal-*                                            -> implicitDeny []
+LIVE principal (simulate-principal-policy, user as applied today)
+LIVE PUT teams/transcripts/silver/research_meeting/date=2026-10-08/x.parquet -> allowed matched=['cloudops-dell-agent-deploy-policy']
+LIVE PUT outlook/transcripts/bronze/date=2026-10-08/x.json -> allowed matched=['cloudops-dell-agent-deploy-policy']
+TRANSCRIPT-PUT prefixes=6 dell_put_refused=0
+CONTROL PRE-CHANGE file: shell + F1                                                      -> explicitDeny ['DenyShellDocuments(Deny)', 'SendResidentDocumentsToResidentHost(Allow)']
+CONTROL NEW file minus the shell-script Allow resource: shell + F1                       -> implicitDeny ['SendResidentDocumentsToResidentHost(Allow)']
+CONTROL NEW file: shell + F1                                                             -> allowed ['SendResidentDocumentsToResidentHost(Allow)']
+CONTROL NEW file minus DenyStartSessionOnShellScriptDocument: StartSession on shell      -> implicitDeny []
+CONTROL NEW file: StartSession on shell                                                  -> explicitDeny ['DenyStartSessionOnShellScriptDocument(Deny)']
