@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-d-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-d-1.mail-key-wiring.md",
+    "group": "OTHER",
+    "vintage_commit": "a4fad889d5"
+  },
+  "assignee": "0.9.0_WK_COMM_ASSIST~5",
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round11.md",
+    "vintage_commit": "a4fad889d5",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-d-1.mail-key-wiring.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/transcripts/chat_assist.tf",
+      "kind": "terraform",
+      "commit_or_etag": "6c5fc51261",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "written, not applied: the variable chat_assist_mail_bearer_secret_arn defaults to empty, which leaves the environment and secret_arns unchanged; the targeted plans are reads",
+      "artifact_covered_by": [
+        "CAd1-AC1",
+        "CAd1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~5/PLAN_EMPTY.txt",
+      "kind": "doc",
+      "commit_or_etag": "6c5fc51261",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit; saved output of a read-only targeted plan",
+      "artifact_covered_by": [
+        "CAd1-AC1",
+        "CAd1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~5/PLAN_SET.txt",
+      "kind": "doc",
+      "commit_or_etag": "6c5fc51261",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit; saved output of a read-only targeted plan with the fake probe ARN",
+      "artifact_covered_by": [
+        "CAd1-AC1",
+        "CAd1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~5/PLAN_READ.md",
+      "kind": "doc",
+      "commit_or_etag": "6c5fc51261",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit; the worker's reading of both plans",
+      "artifact_covered_by": [
+        "CAd1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAd1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~R/checks/check_ca_d_1_plans.py\" expect: PLANS-CA-d-1 ok=True",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~R/checks/check_ca_d_1_plans.py\"",
+      "output_evidence": "(run as timeout 120 python ..., rc 0) PLANS-CA-d-1 ok=True",
+      "denominator": "10 of 10 CHECK lines ok=True (2 files present, 4 empty-plan arms, 4 set-plan arms)",
+      "status": "PASS",
+      "expect": "PLANS-CA-d-1 ok=True"
+    },
+    {
+      "criterion_id": "CAd1-AC2",
+      "criterion_verbatim": "python infra/aws/terraform/transcripts/tests/check_chat_assist_bus.py expect: CHAT-ASSIST-BUS ok=True",
+      "method": "command",
+      "invocation": "python infra/aws/terraform/transcripts/tests/check_chat_assist_bus.py",
+      "output_evidence": "(run as timeout 120 python ..., rc 0) CHAT-ASSIST-BUS ok=True boxes=4 statements=4 matched=4 extra=0",
+      "denominator": "4 of 4 register boxes matched, 0 extra statements",
+      "status": "PASS",
+      "expect": "CHAT-ASSIST-BUS ok=True"
+    },
+    {
+      "criterion_id": "CAd1-AC3",
+      "criterion_verbatim": "JUDGMENT, never self-graded: PLAN_READ.md names every change in both plans and nothing in the empty plan beyond the package hash.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~5/PLAN_READ.md against PLAN_EMPTY.txt and PLAN_SET.txt in the same folder",
+      "output_evidence": "No verdict. PLAN_READ.md lists the empty plan's 2 changed addresses (handler and ingress[0]: source_code_hash and last_modified only) and the set plan's 3 (iam_policy.exec: probe ARN added to the secrets-read Resource list; handler and ingress[0]: MAIL_BEARER_SECRET added, plus the same hash change).",
+      "denominator": "2 of 2 empty-plan addresses and 3 of 3 set-plan addresses described",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded by 3.0.0_SA_CVO, never self-graded; no mechanical instrument grades 'names every change'",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; the issuer's check carries its own empty and set arms",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: the plans are this hour's reads of live AWS state; the applier re-plans",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform apply, safe-apply, import, state, taint; any upload, function-code update or secret read",
+      "reason": "the order forbids everything that changes the world; only init in a scratch data directory and two lock-free targeted plans ran"
+    },
+    {
+      "item": "diffing the live Lambda zip against the rebuilt zip",
+      "reason": "outside the order; the source_code_hash change is attributed to the repackaged zip, not measured byte for byte"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~5/COMM_ASSIST.TO-CA-d-1.mail-key-wiring.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~R/checks/check_ca_d_1_plans.py\"",
+      "result": "PLANS-CA-d-1 ok=True"
+    }
+  ]
+}

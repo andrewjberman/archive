@@ -33,6 +33,9 @@ _spec = importlib.util.spec_from_file_location("unexplained_classes_r31", str(DE
 uc = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(uc)
 r17 = uc.r17
+# the daily-mean fee base is defined once, in the reader of record (tieout_reader.py); this module defines none. It binds the reader's
+# functions with positive_only=False, the binding round 31's classifier uses, so the recorded sub-classes are unchanged.
+reader = uc.reader
 
 E2_REC = DEL / "0.9.0_WK_IRPT_DASHBD~36" / "UNEXPLAINED_CLASSES_E2.json"
 OUT_JSON, OUT_MD = "LARGE_FLOW_E3.json", "LARGE_FLOW_E3.md"
@@ -104,7 +107,7 @@ def classify(seg, days, series, bd):
     st = seg["segment"]["start"]
     opal = r17.link([d["r"] for d in days])
     fees, na = bd.get("fees"), bd.get("net_additions")
-    gross = uc.fee_base_gross(bd["twr"], fees, days)
+    gross = reader.fee_base_gross(bd["twr"], fees, days, positive_only=False)
     d0 = abs(gross - opal) * 100.0
     prior = [d for d in sorted(series) if d < st]
     pmv = series[prior[-1]]["mv"] if prior else None
@@ -114,7 +117,7 @@ def classify(seg, days, series, bd):
     for c in ("START", "MID", "ZERO"):
         t[c] = abs(gross - relink(days, pmv, c, set(idx))) * 100.0 if idx else None
     t["START_all_days"] = abs(gross - relink(days, pmv, "START", set(range(len(days))))) * 100.0
-    avg = uc.mean_daily_value(days)
+    avg = reader.daily_mean_value(days, positive_only=False)
     t["landed_gain"] = (abs((bd["emv"] - bd["bmv"] - na) / avg - opal) * 100.0) if (na is not None and avg and bd.get("emv") is not None
                                                                                  and bd.get("bmv") is not None) else None
     t["START_first_day"] = abs(gross - relink(days, pmv, "START", {0})) * 100.0 if 0 in idx else None
@@ -276,7 +279,7 @@ for _k in CLASSES:
 
 def landed_gain_return(bd, days):
     """The fix for BD_FEE_FIELD_IS_FLOW: BD's own landed money gain over the mean daily served value (None when not computable)."""
-    avg = uc.mean_daily_value(days)
+    avg = reader.daily_mean_value(days, positive_only=False)
     na = bd.get("net_additions")
     if na is None or not avg or bd.get("emv") is None or bd.get("bmv") is None:
         return None

@@ -25,3 +25,18 @@ needs that password and could not run on dell1. Owner of the residue and the IAM
 
 The real run is owed when a box that can read the parameter walks `/freshness` on this candidate, or when dell1's user gets the walker's
 SSM actions.
+
+## The one real run -- DONE 2026-10-09 01:50Z (after Step H; laptop CloudOps msg 107607 via MSTR msg 1383)
+
+- Signed-in `/ui-walk --route /freshness` on the local dev build of portal DEV `8d2a08a9` (port 5174, `dev:live`, live data through
+  CloudFront). Walk `tmp/ui-walk/20261009T015010Z` (gitignored; screenshots stay local). 1 screenshot, 0 guard aborts, 0 API issues.
+- Looked at: 95 covered rows; 1 of 95 has an input older than 7 trading days (Lenovo 992 HK, Seeking Alpha last read 2026-09-22).
+  The column head reads "Built analysis", with no "Research pack" anywhere. Every day cell (Oldest input, Bloomberg, Built analysis)
+  stays on one line, and only the Seeking Alpha sentences wrap. The `data-state` attribute is not visible and is graded by r54 arm 1.
+- Walker finding UIW-...-001 (format:dates): two date forms on the page, "2026-09-22" in the cells and "October 8th, 2026" in the
+  footer "Data as of ...". The footer comes before this round. This is an enrichment item for the CTO's round-55 analysis, not a
+  regression.
+- Console: two 401s at login (the sign-in probe) and a duplicate `createRoot` warning, both at login and route load. Not a Freshness defect.
+- Disarm: the walker's own disarm ran the row update, then stopped at `ssm:DeleteParameter` (denied by design, CTO msg 1327). The issuer
+  verified the row reads `status=disabled`, `armedBy` none, and the walk's password is REFUSED at `/auth/login` (HTTP 401). The parameter
+  was not deleted.
