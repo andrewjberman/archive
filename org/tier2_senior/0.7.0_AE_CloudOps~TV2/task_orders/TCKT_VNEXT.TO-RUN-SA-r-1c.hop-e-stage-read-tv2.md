@@ -50,7 +50,19 @@
 
 <amendment n="1" date="2026-10-09" source="to-decomp-ref-lint WARN at issuance @0d1b45a64c (owned-paths clause 4)">
     Step 6 writes the `run_5` section ONLY to `org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/sa_r1/sa_r1b_trace.json`. The issuer
-    copies the identical bytes into `R1_RUN/`. The issuer's folder is removed from `<paths>`.
+    copies the identical bytes into `R1_RUN/`. The issuer's folder is removed from `<amendment n="2" date="2026-10-09" source="CTO msg 3861 (conditions for SA-r-1c under v2.2 AMENDMENTS 1-3)">
+    These conditions replace any GO text that conflicts with them:
+    (1) **Start gate.** irpt-status is rolling back from rev 5 to rev 3. Start only after the live function reads CodeSha256
+        `t6OJTCcm...`, and print that read.
+    (2) **Ledger** opens BEFORE the token mint.
+    (3) **Census.** The FULL ALL-origin census of SA-r-1b (every `/api/scoped` route, denominator printed, the AMENDMENT 4 limbs) runs
+        BEFORE the step 3 GET. This is NOT a GET-only run; `comp-adversary` is RUN.
+    (4) **Token.** `exp` = the run's length + 5 minutes, sized from the census plus the polls (no fixed 15 min).
+    (5) **Rollback.** The row is deleted only after that exp; the proof prints the exp and the delete time.
+    (6) **Key read.** Reported after the fact through MSTR~DELL2.
+  </amendment>
+
+<paths>`.
   </amendment>
 
 <paths>
