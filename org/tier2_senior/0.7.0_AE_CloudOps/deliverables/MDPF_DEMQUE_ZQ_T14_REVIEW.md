@@ -32,4 +32,12 @@ Rollback: unregister only the new named task; restore the prior version/bytes of
 
 ## Outstanding
 
-Awaiting site-Z CTO signature on the committed candidate/act pair. AC2 and schedule are unperformed. Notebook ledger coverage is being checked by source text; no notebook will be executed.
+Awaiting site-Z CTO signature on the committed candidate/act pair. AC2 and schedule are unperformed. No deployment has started, so no open deployment entry is owed yet.
+
+Candidate `492cb5a2f1` was safely merged locally as `ac9945ffe2`; the merge check found all three expected files present and the index matched HEAD on all three. Signature requested from `1.0.0_SA_CTO~Z` in message `20261009T080551Z_0.7.0_AE_CloudOps_ZQ_TO-DQ-t14__site-Z_WORLD_half_requested_o.md`.
+
+Notebook coverage read is complete: the scheduled tplus1 runner and both named notebook sources contain no `bbg_budget` or `.record(` calls. Claim remains held. Appended observations `MDPF_DEMQUE-Z-W1-S1` (mode ambiguity) and `MDPF_DEMQUE-Z-W1-S2` (notebook coverage) to the project's investigation channel; no producer edited.
+
+Observation commit: `db1544544d`. The row gate rejected the issuer-required `W1` identifiers because this assignee is a named seat, not a numeric worker. Used the gate's documented audited `surprise-row-override` with the exact TO BOUNDS requirement as the reason. The row corpus check found zero new schema failures; both override audit entries were written by safe-commit/the hook.
+
+Push state: **LOCAL**. `git ls-remote` read origin `box/sitez` at `1ebbf7ecdf1d9d3c9c22f2023a61f27895181075` and origin `CLOUD` at `393790d6ad4d11054e8b916f3d4c69447fca2817`. This seat has not pushed. Order remains pending.
