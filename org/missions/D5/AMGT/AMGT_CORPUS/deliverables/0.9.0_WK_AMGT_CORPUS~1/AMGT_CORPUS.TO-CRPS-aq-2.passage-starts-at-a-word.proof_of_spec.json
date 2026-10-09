@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-aq-2.passage-starts-at-a-word",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-aq-2.passage-starts-at-a-word.md",
+    "group": "OTHER",
+    "vintage_commit": "47ccc74d42fd5141aff2989d57d6f25c811ee4c5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "47ccc74d42fd5141aff2989d57d6f25c811ee4c5",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-aq-2.passage-starts-at-a-word.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/dossier.py",
+      "kind": "script",
+      "commit_or_etag": "47ccc74d42fd5141aff2989d57d6f25c811ee4c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_strip_scorecard_prefix drops a leading '<Label> <1-3 digits> ' (label at most three words) before a capitalised word, applied in _resolve_section_field after _complete_passage. METHOD_VERSION stays /8.",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_dossier_passage_edges_round41.py",
+      "kind": "test",
+      "commit_or_etag": "47ccc74d42fd5141aff2989d57d6f25c811ee4c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 new tests: 'Management/Board 80 Eddie Wu ...' opens at 'Eddie Wu'; 'Management changed in 2024 ...' unchanged; helper cases.",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round41/aq12_check.py\" aq2",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round41/aq12_check.py\" aq2",
+      "output_evidence": "CONTROL-MOVED 8766_JP_Equity|management\nCONTROL-MOVED SHOP_CN_Equity|management\naq2 counts prefix 0; control 16 management values without a prefix at the base, 2 moved\naq2 build 1/1 control 0/1",
+      "denominator": "build 1 of 1 (prefix 0, base 2); control 0 of 1 (16 values, 2 moved: 8766 JP and SHOP CN management, cut at the base and repaired by aq-1).",
+      "expect": "(?m)^aq2 build 1/1 control 1/1$",
+      "status": "FAIL"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round41/aq12_check.py\" aq1",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round41/aq12_check.py\" aq1",
+      "output_evidence": "CONTROL-MOVED BABA_US_Equity|management\nCONTROL-MOVED ST_SP_Equity|management\naq1 counts cut 0 of 95 values; control 70 values ended at a sentence end at the base, 2 moved\naq1 build 1/1 control 0/1",
+      "denominator": "build 1 of 1 (cut 0 of 95), control 0 of 1 (70 values, 2 moved: BABA US and ST SP management, which ended at a sentence end at the base WITH the scorecard prefix that aq-2 drops).",
+      "expect": "(?m)^aq1 build 1/1 control 1/1$",
+      "status": "FAIL"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest -q -p no:cacheprovider lib/research/corpus/tests/test_dossier_passage_edges_round41.py lib/research/corpus/tests/test_dossier_method_bump.py lib/research/corpus/tests/test_dossier_case_body.py lib/research/corpus/tests/test_dossier_case_unit.py lib/research/corpus/tests/test_dossier_case_positional.py 2>&1 | tail -1 | sed 's/\\x1b\\[[0-9;]*m//g'",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest -q -p no:cacheprovider lib/research/corpus/tests/test_dossier_passage_edges_round41.py lib/research/corpus/tests/test_dossier_method_bump.py lib/research/corpus/tests/test_dossier_case_body.py lib/research/corpus/tests/test_dossier_case_unit.py lib/research/corpus/tests/test_dossier_case_positional.py 2>&1 | tail -1 | sed 's/\\x1b\\[[0-9;]*m//g'",
+      "output_evidence": "48 passed in 0.60s",
+      "denominator": "48 of 48 tests passed, 0 failed.",
+      "expect": "(?m)^\\d+ passed in [\\d.]+s$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "aq12_check.py aq2 run with dossier._strip_scorecard_prefix replaced by an identity function, in a scratch driver; no tracked file edited.",
+      "expected": "build fails: prefix 2 (BABA US and ST SP management), rc 1.",
+      "observed": "aq2 counts prefix 2; control 16 management values without a prefix at the base, 2 moved\naq2 build 0/1 control 0/1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 run under the literal invocations after the last code edit.",
+      "observed": "AC1 build 1/1 control 0/1; AC2 build 1/1 control 0/1; AC3 48 passed; the same two-and-two moved names on every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC1 and AC2 control arms",
+      "reason": "Not jointly satisfiable with both builds met: see row AMGT_CORPUS-D1-W1-S1. Bound 1 forbids editing the check or snapshot."
+    },
+    {
+      "item": "served objects not read",
+      "reason": "Offline re-compose from the frozen fixture only; the served half is the issuer's aq-5."
+    }
+  ],
+  "surprises": ["AMGT_CORPUS-D1-W1-S1"],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "aq12_check.py aq2",
+      "invocation": "PYTHONPATH=. python org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round41/aq12_check.py aq2",
+      "result": "rc 1; aq2 build 1/1 control 0/1"
+    },
+    {
+      "tool": "aq12_check.py aq1",
+      "invocation": "PYTHONPATH=. python org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round41/aq12_check.py aq1",
+      "result": "rc 1; aq1 build 1/1 control 0/1"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider (the five files of AC3)",
+      "result": "rc 0; 48 passed"
+    }
+  ]
+}
