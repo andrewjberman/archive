@@ -1,0 +1,28 @@
+IRPT_YCDGEN.TO-APPLY-st29 -- X1 removal + V2 read-back, 2026-10-09T12:12:01Z, 0.7.0_AE_CloudOps~DELL2
+ssm d983aad5-85f9-4c1a-9fe3-7be53f07fb3a Success rc 0
+
+X1 before: active=active root=/opt/irpt-resident/f0ff4f1653-st29
+X1 queue visible/in-flight before: 0 0
+X1 receipt restored: /opt/irpt-resident/e606008994-st27 bdcce7ef5f8e3bc6
+X1 install-resident.sh (st27 root) rc=0 at 2026-10-09T12:12:01Z
+
+V2 final active: active root=/opt/irpt-resident/e606008994-st27 restarts=0
+V2 allow list: OPAL_PRODUCER_PRINCIPALS = ("andrew@opalinvest.com",)
+V2 worker sha256 9317219ad37ed49235bd11721d35fc18e3190df1620df40a7195d869bee40ce5 (st27 9317219ad37ed492...)
+V2 renderer drop-in: present
+V2 journal 30s: polls=2 tracebacks=0
+V2 queue after: 0 0
+
+WHAT THIS ESTABLISHES:
+  host back on st27        YES -- running root e606008994-st27, read from systemd, restarts 0.
+                           The removal went STRAIGHT to st27 as the order required, not to st28.
+  allow list Andrew only   YES -- OPAL_PRODUCER_PRINCIPALS = ("andrew@opalinvest.com",). The
+                           svc-irpt-analysis principal that st28/st29 carried is GONE, which is the
+                           whole point of the removal: the elevated producer principal does not
+                           outlive the release that needed it.
+  worker back to st27      YES -- 9317219a..., which differs from the st29 worker c0bbea55... So
+                           the swap moved real bytes; an unchanged worker sha would have meant the
+                           unit was still serving the old root.
+  gate honoured            queue 0/0 both before and after, and F1 was DONE (issuer msg 3237,
+                           12:00:39Z) before this ran -- so X1 fired on the EARLIER of F1-done or
+                           13:09:10Z, which was F1-done, with the bound never reached.
