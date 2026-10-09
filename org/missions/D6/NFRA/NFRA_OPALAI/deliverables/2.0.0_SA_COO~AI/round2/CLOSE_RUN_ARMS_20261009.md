@@ -62,6 +62,20 @@ the branch's DELETION** of `.claude/skills/bbg-teams-assist/SKILL.md` and `org/t
 RELAUNCH.md` (`git rm` both in the merge). Their content now lives in `opal_ai/opal/agent/`, and the one unported edit
 (the P3 row) is ruled RETIRED. The merge still lands on the cutover sitting, after both arms PASS.
 
+## Re-fold on fresh messages (CTO~Z ruling @4e2f00c9fa, msg 32767, after row Z-S70)
+
+The 900s bound stays; the live window is not widened. Each arm fires within 15 minutes of a NEW message from its sender,
+and the new message id and send time are recorded beside its result. The calling principal reads the cited message
+through its own delegated token (`whoami` = `Andrew@opalinvest.com`), so the message must sit in a chat that token can
+read:
+- **arm (b), un-admitted:** Andrew sends any message in his 1:1 chat with the Opal Bloomberg account,
+  `19:2e21f8e5-55ca-45c1-91b9-a4607bf28d4f_517aa5ee-b4d0-425a-b493-5a22ff77ac4f@unq.gbl.spaces` (listed in Andrew's
+  `list_chats`). Expected: `asker_no_profile` with the how-to-get-access line, no data read.
+- **arm (a), admitted:** Alyssa sends a portal-figure question at her sitting in a chat Andrew's token reads (their 1:1,
+  `19:2e21f8e5-..._ad037ea5-...`, as registered). Expected: the figure, as-of date, source and scope, with the raw pinned
+  read in the same minute.
+Key unchanged: `json/benchmarks/etf_returns.json`. The timing of (b) was put to Andrew by this seat (no seat sends for him).
+
 ## Results (filled at the run)
 
 | arm | run at (UTC) | raw response | pinned reference read (same minute) | verdict |
