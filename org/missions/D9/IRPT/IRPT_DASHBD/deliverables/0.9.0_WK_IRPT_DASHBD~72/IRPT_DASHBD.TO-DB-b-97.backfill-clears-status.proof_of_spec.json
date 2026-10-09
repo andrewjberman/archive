@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-97",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "56bc28957c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "56bc28957c",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-97.backfill-clears-status.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~72",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "No deploy: the change ships in a later release under its own pair. One added line in run_backfill; 0 served bytes move, no AWS call.",
+      "artifact_covered_by": [
+        "DB47-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_lots_status.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only; in-memory fake bucket, no network.",
+      "artifact_covered_by": [
+        "DB47-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~72/BACKFILL_CLEARS.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Record only.",
+      "artifact_covered_by": [
+        "DB47-3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB47-3-AC1",
+      "criterion_verbatim": "DB47-3-AC1 -- the backfill path clears a landed day from the status record, tested. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r47/p47_round47.py\" . DB47-3-AC1",
+      "output_evidence": "OK: record_lots_status called from 2 sites; 86 passed\nDB47-3-AC1 PASS",
+      "denominator": "86 of 86 reporting-gold tests passed (0 failed); 2 of 2 call sites (catch_up_lots, run_backfill)",
+      "status": "PASS",
+      "expect": "DB47-3-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "handler.py restored to HEAD (no backfill call), same tests folder run.",
+      "expected": "the new backfill tests fail at base",
+      "observed": "4 failed (3 backfill class tests and the one-function test), 82 passed at base; 86 passed after the edit.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "whole reporting-gold tests folder run twice (before and after the base control).",
+      "observed": "86 passed after the edit, both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy of the handler",
+      "reason": "Order states no deploy; ships in a later release under its own pair."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/reporting-gold/tests -q",
+      "result": "86 passed"
+    }
+  ]
+}
