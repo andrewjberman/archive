@@ -32,3 +32,15 @@
 **Verdict: GIVEN**, for steps 1 and 2 exactly, under conditions 1 to 4.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (~08:5xZ, on `~T2` msg 2941): the half STANDS on the corrected fact
+
+The COO half's line "the same wipe for silver" is false (`parse_silver.py:5-6`). New Teams silver lands UNWIPED. This half's blast radius is unchanged:
+- the same 9 creates;
+- the same writer;
+- readers bounded to the named original readers by the key policy.
+
+Ruling (a), recorded in analysis ADDENDUM 8.1, applies. **The release of TO-APPLY-p18 step 2 is GO,** with no reader added on `teams/transcripts/*` until
+the wipe-on-landing fix and the W1-S7 re-wipe ship.
+
+-- 1.0.0_SA_CTO~DELL2

@@ -1,0 +1,60 @@
+{
+ "record_version": "1.0",
+ "task_order": "IRPT_DASHBD.TO-DB-b-82",
+ "source": "silver/api_dims/billing (snapshot 2026-10-08, routed legacy bucket alias): Billing.FeeAmount present / FeeScheduleName a named schedule = billed; no FeeAmount and '0 Fee Schedule Names' = unbilled",
+ "basis": "inferred (derived from the billing dim's fee amount and schedule name, not Orion's IncludedInBilling flag)",
+ "denominator": 562,
+ "readable": 562,
+ "baseline_readable": 36,
+ "gained": 526,
+ "sample_check": {
+  "sample": "accounts with a twr_value in silver/api_dims/performance snapshot 2026-10-08 (round 37's 562)",
+  "in_billing_dim": 562,
+  "with_fee_amount": 509,
+  "named_schedule": 509,
+  "zero_fee_schedule": 53
+ },
+ "searched": [
+  {
+   "where": "silver/api_dims/billing/ (opal-data-inf), 2026-10-08 snapshot, 927 rows",
+   "result": "all 562 sample accounts present; 509 carry fee_amount > 0 and a named schedule, 53 carry no fee_amount and schedule '0 Fee Schedule Names'; state readable for 562"
+  },
+  {
+   "where": "Billing.* paths, data/inf/manual_api/PATH_DISCOVERY.md:160-175",
+   "result": "FeeAmount and FeeScheduleName are OK paths; they are the columns landed in the billing dim above; AsOfDate often empty, not used"
+  },
+  {
+   "where": "Asset.IncludedInBilling, PATH_DISCOVERY.md:158 (round 37 live read)",
+   "result": "readable for 36 of 562 (baseline); 'Error:Not supported' for 526"
+  },
+  {
+   "where": "data/inf/scripts/gold/lib/fee_classification.py",
+   "result": "a ledger-basis fee-earning mask (Management-Fee activity in a trailing window) for gold consumers, not an account billed flag; it records that a fee_amount>0 limb flipped for 102 of 907 accounts longitudinally, so the chosen flag is a point-in-time inference; no per-account mask landed to read"
+  }
+ ],
+ "slices": {
+  "billed": {
+   "value": 4246071.47,
+   "readable": 562,
+   "denominator": 562,
+   "status": "COMPLETE"
+  },
+  "unbilled": {
+   "value": 100.54,
+   "readable": 562,
+   "denominator": 562,
+   "status": "COMPLETE"
+  },
+  "billing_total": {
+   "value": 4246172.01,
+   "readable": 562,
+   "denominator": 562,
+   "status": "COMPLETE"
+  }
+ },
+ "statement": {
+  "billed": "billed: 562 of 562 accounts -- inferred from Billing.FeeAmount and FeeScheduleName in the landed billing dim (509 billed); not Orion's IncludedInBilling",
+  "unbilled": "unbilled: 562 of 562 accounts -- 53 accounts with no bill amount and a zero-fee schedule"
+ },
+ "figures_from": "INF_GROSS_FEE_TIEOUT.json fee_detail.by_bill_presence (round 37, Activity activityOptionId 11); per-account fees were a live pull not landed, so values are the round's aggregates"
+}
