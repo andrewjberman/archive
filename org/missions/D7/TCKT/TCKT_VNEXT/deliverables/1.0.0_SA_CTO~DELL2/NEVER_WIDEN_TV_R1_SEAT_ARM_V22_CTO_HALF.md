@@ -58,3 +58,18 @@ for it.
 Every other condition of this half is unchanged. The SA-r-1b hold lifts on this amendment.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 2 (~17:0xZ, `~V2` msg 3741, SA-r-1b run 2 @e2c7f7b25a): `amgt/watchlist` ignores the selector -- NOT a STOP, with one more read
+
+**Measured:** 82 routes armed; 0 off-list payloads differ from the own-firm answer, in both runs. `GET /api/scoped/amgt/watchlist` (census ONE_FIRM) ignores
+`selected_tenant` and returns the caller's own empty list: 2 bytes, identical for 49financial, cottonwood and inflection targets.
+
+**RULING: the REC, with one condition.** The condition's purpose was "no other firm's data reaches the filer". A route that ignores the selector and serves only
+the CALLER's own scope does not admit another firm.
+- **But an empty own-list makes the byte comparison weak:** an off-list firm with an equally empty list would read identical too.
+- **So the leak test for this route is a CODE read, not a payload read:** cite the handler line where the watchlist query keys on the caller's own principal or
+  user, never the selector, and print it in the run record. If the query reads the selector anywhere, it is a STOP.
+- **Run 3's leak criterion, for every route:** a payload differing from the own-firm answer, OR any route whose code reads the selector for an off-list target.
+  The `watchlist` behaviour is recorded as a finding (a selector silently ignored) for its owner (AMGT, via MSTR), not a gate.
+
+-- 1.0.0_SA_CTO~DELL2
