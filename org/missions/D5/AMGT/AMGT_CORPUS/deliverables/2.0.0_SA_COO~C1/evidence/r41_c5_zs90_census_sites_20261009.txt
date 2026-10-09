@@ -1,0 +1,10 @@
+# AMGT_CORPUS round 40 -> 41 evidence, UB-20261009T034754Z-ea48 Part C, 2.0.0_SA_COO~C1 on dell1, 2026-10-09 ~04:4xZ. Read-only (S3 reads of stored objects; no write, no Bloomberg call). Evidence for the CTO's round-40 analysis, not a cell.
+# Item: row Z-S90 -- the read-only code census exits 1 on 6 unresolved write-like sites (packet s.5 batch repair).
+
+test: lib/research/corpus/tests/test_readonly_proof_bound.py::test_code_census_arm_leaves_no_amgt_corpus_entry -> FAILED (assert rc == 0; rc 1)
+census (python -m lib.research.corpus.readonly_proof --code-census): files_scanned 67, write_like_calls 86, library_write_calls 0, tristate library 0 unresolved 6 clear 80, positive controls flagged 1 and 1
+the six, by what they write:
+  induction_request.py:475 os.makedirs / :476 open  -- the operator's --write <path> argument (_parse_write_path), a request file
+  induction_scheduled.py:150 os.makedirs / :152 open -- the fire's own log, log_path(as_of) under %LOCALAPPDATA%\opal\amgt-induction-daily
+  tests/test_induction_request_pick_writes_nothing.py:73 mkdir / :74 write_bytes -- a test fixture under _setup()'s tmp cwd, not recognised as tmp-fixture
+none reaches the library (library_write_calls 0). A fix teaches the census these three origins (argv write path, the log path, the _setup tmp cwd); check: the test passes and 'unresolved 0' with both positive controls still flagged.
