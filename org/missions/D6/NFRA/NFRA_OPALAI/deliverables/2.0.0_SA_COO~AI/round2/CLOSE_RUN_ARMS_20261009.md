@@ -66,8 +66,20 @@ RELAUNCH.md` (`git rm` both in the merge). Their content now lives in `opal_ai/o
 
 | arm | run at (UTC) | raw response | pinned reference read (same minute) | verdict |
 |---|---|---|---|---|
-| (b) | | | n/a | |
-| (a) | | | `gateway_query_catalog("json/benchmarks/etf_returns.json")`: `data_as_of`, `generated_at`, raw body | the CVO's J2 grade |
+| (b) | 2026-10-09T13:06:43Z | `{"error": "the cited message is older than the 900s window or carries no parseable createdDateTime; no data was read", "guard_denied": true, "code": "asker_message_stale", "asker_scope_denied": true}` | n/a | NOT PASS: refused, but on staleness before the asker was resolved, not `asker_no_profile` (row Z-S70) |
+| (a) | ~2026-10-09T13:08Z (between the 13:06:43Z and 13:08:45Z reads) | `{"error": "the cited message is older than the 900s window or carries no parseable createdDateTime; no data was read", "guard_denied": true, "code": "asker_message_stale", "asker_scope_denied": true}` | not taken: no data was served, so there is nothing to grade against | NOT PASS: same refusal (row Z-S70) |
+
+**Trigger read before the arms (13:00:53Z-13:06Z):** OG-ap-3 last `<status>` = `complete` (13:00:53Z); r29 LIVE on
+`91811b648a` (AE~Z @5f1400c4a2, verify 5 of 5); r29 ledger entries in HEAD trees = 2 of 49 worktrees, both the opening
+blob `b3caddee0d` inherited by stale branches whose HEADs are contained in trunk (`C:/tmp/oa-25`,
+`C:/tmp/wk-oplgtw-r33-48`), so 0 live; COO~O confirms both ledgers CLOSED (ap3.AC2 PASS).
+
+**Why both arms refuse (row Z-S70):** r29 ships asker_scope clause (h), `infra/aws/ec2/opal-gateway/app/asker_scope.py:68`
+@91811b648a: a cited message older than `ASKER_MESSAGE_MAX_AGE_SECONDS` (default 900) is refused `asker_message_stale`.
+The registered messages are from 2026-10-08 21:19Z and 21:22Z. The fold's premise, arms driven from EXISTING messages,
+cannot be met on r29 as configured; each arm needs a message under 15 minutes old from its sender. This is the
+gateway's replay bound working as built: a stale citation is refused with no data read, for an admitted and an
+un-admitted sender alike.
 
 **J2 grades against the pinned reference read**, taken by this seat in the same minute as arm (a), never against a later
 portal read: the key is rewritten daily at about 12:04Z, so a later read can differ from a correct answer.
