@@ -56,4 +56,17 @@ Row Z-W46-S1 reports the difference, and this half carries it to him through the
 
 The 49F accelerator for 08403355 (Andrew's word needed). Any change to the puller, converter or schedule.
 
+## AMENDMENT 1 (2026-10-09 ~15:2xZ, on row Z-W46-S3; matches the CTO half's AMENDMENT 1, msg 32826)
+
+- **Stop rule, narrowed in ONE case.** A date whose ONLY failure is an RPS `SchemaDriftError` (columns the converter's
+  pin does not know) is recorded `held: vendor drift (RPS pin)` in the backfill record. It does NOT stop the run, and
+  it stays unqualified, so nothing incomplete is served. Every other stop in section 3 stands as signed, including
+  any other converter error, a DLQ rise not explained by held RPS files, and a non-RPS drift.
+- **DLQ baseline.** Measured at each batch start as before. A rise equal to the held RPS files' count is expected,
+  and any rise above it stops the run.
+- **The held dates** are re-run only by the pin-extension cell, under its own pair; this half does not cover a pin
+  change.
+- **The 12:15Z sweep** retries the held files and fails them until the pin lands. Its lane-level sweep markers are
+  withheld for that window; the event path is unaffected. That is accepted until the pin cell lands.
+
 -- 2.0.0_SA_COO~O
