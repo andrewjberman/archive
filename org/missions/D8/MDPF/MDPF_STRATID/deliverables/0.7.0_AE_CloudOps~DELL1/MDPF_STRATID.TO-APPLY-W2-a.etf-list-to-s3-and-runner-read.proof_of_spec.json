@@ -1,0 +1,171 @@
+{
+  "genre": "DEPLOY",
+  "schema_version": "1.0",
+  "to_id": "MDPF_STRATID.TO-APPLY-W2-a.etf-list-to-s3-and-runner-read",
+  "firm": "MDPF",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-APPLY-W2-a.etf-list-to-s3-and-runner-read.md",
+    "group": "OTHER",
+    "vintage_commit": "7a8a5e39ab"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/decompositions/MDPF_STRATID_DECOMP_W2.md",
+    "vintage_commit": "7a8a5e39ab",
+    "to_ref": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-APPLY-W2-a.etf-list-to-s3-and-runner-read.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~DELL1",
+  "never_widen_pair": {
+    "coo_half": "NOT A NEVER-WIDEN ACT by the order's own framing: an S3 write of a config object plus a least-privilege read grant. The governing authorities are the issuer's GO (2.0.0_SA_COO~S1 msg 2517) and, for the IAM half, the LAPTOP CTO's exact terms.",
+    "cto_half": "LAPTOP CTO 1.0.0_SA_CTO msg 107995, relayed via 0.0.0_AB_MSTR~DELL1 msg 2562 and 2.0.0_SA_COO~S1 msg 2563: 'one statement per role, s3:GetObject on arn:aws:s3:::opal-data-etfs/config/etf_universe.json ONLY, no wildcard, no List, no Put; apply via safe-apply; read back live with a positive control and a negative control; report afterwards by bus. These terms replace mine where they differ.'",
+    "read_before_first_live_act": "The order was read in full and its GO pin 7a8a5e39ab verified an ancestor of HEAD before any act. For the IAM half, the laptop's terms arrived mid-act and were read before the gold-lambda grant was written; the inbox was checked for a laptop-named step before acting, per the issuer's 'if the laptop names a step before you act, it wins'.",
+    "amendment": "None to the order file. The laptop's terms supersede the issuer's for step 4."
+  },
+  "risk_class": "WORLD",
+  "rollback": "S3 HALF: restore the prior object bytes, committed at org/missions/D8/MDPF/MDPF_STRATID/deliverables/0.7.0_AE_CloudOps~DELL1/etf_universe_PRIOR_s3_object_20261009.json (564 B, sha256 338bc12081261a7942d9ba9f364f0f7738573b97063c20d1463c4de9c2e39539), by one put-object. THE ORDER'S OWN ROLLBACK DOES NOT EXIST -- it says restore the prior VersionId, and opal-data-etfs has never had versioning enabled -- so this substitute was secured and committed BEFORE the write. IAM HALF: revert commits 5bd12eb0b5 and 12bb251442 and re-apply; the runner's statement is a pure-add and the gold lambda's policy is a standalone resource, so the revert removes exactly what was added. Trigger: any criterion failing, or the laptop withdrawing its terms.",
+  "scope": "Write the committed etf_universe.json at 7a8a5e39ab to s3://opal-data-etfs/config/etf_universe.json, read it back by content, confirm the three ETFS loaders' rule over the served bytes, and grant the MDPF daily runner's role and mdpf-gold-lambda's role s3:GetObject on that one key where missing.",
+  "status": "COMPLETE. APPLY-W2-a-AC1 PASS; APPLY-W2-a-AC2 recorded UNVERIFIABLE-BY-INSTRUMENT for the issuer. Ledger CLOSED, all 3 legs proven, sentinel unlinked. The S3 object is byte-identical to the committed bytes and both roles now read allowed on that one key with a sibling key still implicitDeny.",
+  "go_message": "2.0.0_SA_COO~S1 msg 2517 (GO, acked READ), then msg 2545 (hold L2 for the laptop before-notice, acked), msg 2551 (GO for L2, acked) and msg 2563 (the laptop's superseding terms, acked).",
+  "controls": {
+    "the_rollback_the_order_named_does_not_exist": {
+      "description": "Step 2 says 'Record the prior object VersionId first (rollback = restore it)'. head-object returned VersionId None, which could mean either an unversioned bucket or a quirk of the read. The difference decides whether the write is reversible at all, so it was measured rather than assumed.",
+      "expected_landed": "get-bucket-versioning returns a Status for a versioned bucket",
+      "expected_not_landed": "it returns EMPTY, i.e. versioning never enabled, and there is nothing to restore",
+      "observed": "EMPTY for opal-data-etfs. POSITIVE CONTROL on the same call: opal-313476888478-terraform-state returns {\"Status\": \"Enabled\"}, so the empty read is the world and not the instrument. A substitute rollback (the prior bytes) was committed BEFORE the write, @8625048a7b, and the gap filed as row MDPF_STRATID-D1-S3.",
+      "status": "PASS"
+    },
+    "served_delta_on_the_loaders_plane_was_already_zero": {
+      "description": "A WORLD-risk write to a shared config key reads as dangerous. Whether it actually changes what any producer sees is a different question, and answerable before the write.",
+      "expected_landed": "the loaders' rule over the PRIOR S3 bytes already yields the same four tickers, so no producer's universe moves",
+      "expected_not_landed": "the prior bytes yield a different list, making this a real served change needing a never-widen read",
+      "observed": "The prior 564-byte object already carried tickers [DIVZ,IDVZ,PFDE,PFOE]; the rule over it yields exactly that. The new file adds only full_names and sma_name_rules, which the file's own description states _load_universe does not read. Served delta on the loaders' plane is ZERO.",
+      "status": "PASS"
+    },
+    "the_grant_was_measured_missing_not_assumed_and_the_evaluator_discriminates": {
+      "description": "iam:SimulatePrincipalPolicy is denied to this box for any principal but its own, so the canonical instrument was unavailable and a substitute was used. An evaluator that returned implicitDeny for everything would look identical to a correct 'missing' verdict, so each role's read carries a control that must come back allowed.",
+      "expected_landed": "target implicitDeny before the grant, with a true positive control reading allowed on the same carriers",
+      "expected_not_landed": "the control also reads implicitDeny, i.e. the evaluator has not been shown to say anything else",
+      "observed": "FIRST ATTEMPT FAILED THIS TEST and was discarded: the control was a nonexistent bucket and read implicitDeny, printing DISCRIMINATES: False. Replaced with true positives -- for mdpf-gold-lambda-role a config key it does hold (ConfigRouteBindingsRead), and for mdpf-daily-runner-ec2-role the SAME BUCKET at silver/* (EtfsSilverReadWSD1). Both then read allowed while the target read implicitDeny: DISCRIMINATES: True on both. So the deny was a prefix fact.",
+      "status": "PASS"
+    },
+    "no_wildcard_was_granted": {
+      "description": "The laptop's terms forbid a wildcard. 'allowed on the key' alone cannot distinguish a one-key grant from a config/* grant, so the after-read pairs it with a sibling key in the same prefix.",
+      "expected_landed": "the exact key allowed AND a sibling key in the same prefix implicitDeny",
+      "expected_not_landed": "the sibling key also allowed, which would mean a prefix wildcard was granted",
+      "observed": "Both roles: arn:aws:s3:::opal-data-etfs/config/etf_universe.json -> allowed, matched ONLY by their EtfsConfigUniverseRead statement; arn:aws:s3:::opal-data-etfs/config/some_other_config.json -> implicitDeny, no statement matching. DISCRIMINATES: True on both.",
+      "status": "PASS"
+    },
+    "the_byte_equal_invariant_held_while_its_stale_comment_was_corrected": {
+      "description": "iam.tf:1185 keeps mdpf-gold-scoped byte-equal, and iam.tf:764-766 asserted 'This is the ONLY config read leg this role gets' -- which this grant makes false. Correcting the comment and keeping the policy byte-equal are only compatible if HCL strips the comment before jsonencode, so that was proven on the plan rather than reasoned about.",
+      "expected_landed": "aws_iam_role_policy.mdpf_gold_lambda is a no-op in the plan, NOT among the movers",
+      "expected_not_landed": "it appears as an update, meaning the comment reached the rendered policy",
+      "observed": "5 resource_changes, 3 no-op, 1 create, 1 update. The movers are exactly aws_iam_role_policy.mdpf_gold_etf_universe (create) and aws_iam_role_policy.mdpf_runner (update). mdpf_gold_lambda is NOT among them. The invariant held and the file no longer asserts something false.",
+      "status": "PASS"
+    }
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-etfs/config/etf_universe.json",
+      "kind": "s3_object",
+      "commit_or_etag": "b54a6606c4f62c4dcee5c822e021935d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "put-object 2026-10-09T14:14:17Z, 2969 B, ETag b54a6606c4f62c4dcee5c822e021935d. Read back FROM THE SERVED OBJECT, not from the local file: get-object sha256 0c468c177706841aaa8213f05ec4bdb0098dc66de12e76af480de3dc3e3f61cb, EQUAL to the committed bytes at 7a8a5e39ab, and cmp reads IDENTICAL byte for byte. The loaders' rule over those served bytes yields exactly [DIVZ,IDVZ,PFDE,PFOE].",
+      "artifact_covered_by": [
+        "APPLY-W2-a-AC1",
+        "APPLY-W2-a-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/mdpf-pipeline/iam.tf",
+      "kind": "iam",
+      "commit_or_etag": "12bb251442",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Two grants, identical terms, applied by safe-apply with the graded planfile: 'Apply complete! Resources: 1 added, 1 changed, 0 destroyed', rc=0. mdpf-runner-scoped gained one statement in place (33 -> 34, zero removed); mdpf-gold-lambda-role gained a new separate inline policy mdpf-gold-etf-universe-policy, its name from the opal_name module. Read back live: both roles allowed on the one key, a sibling key implicitDeny. Runner-half commit 5bd12eb0b5.",
+      "artifact_covered_by": [
+        "APPLY-W2-a-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_STRATID/deliverables/0.7.0_AE_CloudOps~DELL1/etf_universe_PRIOR_s3_object_20261009.json",
+      "kind": "config_data",
+      "commit_or_etag": "8625048a7b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The prior S3 bytes, 564 B, sha256 338bc12081261a7942d9ba9f364f0f7738573b97063c20d1463c4de9c2e39539, committed BEFORE the write because the bucket is not versioned and the order's stated rollback therefore does not exist. Restoring it is one put-object from the repo.",
+      "artifact_covered_by": [
+        "APPLY-W2-a-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "APPLY-W2-a-AC1",
+      "criterion_verbatim": "W21-LOADERS-OK",
+      "method": "command",
+      "invocation": "python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_1_loaders.py",
+      "output_evidence": "'3 of 3 loaders carry the rule; universe read = ['DIVZ', 'IDVZ', 'PFDE', 'PFOE']' then the last printed line 'W21-LOADERS-OK'. Printed beside it as the order requires, the same rule applied to the S3 BYTES as served: cfg.get('tickers') or cfg.get('etfs') or cfg -> ['DIVZ','IDVZ','PFDE','PFOE'], exactly the four. The served keys are now deployed_to, description, full_names, last_updated, owner, schema_version, sma_name_rules, tickers. The served-bytes arm reads s3://opal-data-etfs/config/etf_universe.json itself -- the ETF UNIVERSE object this order writes -- fetched with get-object and hashed, so AC1's second arm is the acceptance of that artifact and not of a local copy.",
+      "denominator": "3 of 3 loaders carry the rule; both arms (tree and served bytes) agree",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "APPLY-W2-a-AC2",
+      "criterion_verbatim": "the S3 object equals the committed bytes, the prior VersionId is recorded, the runner-role read is measured (granted or already held), and the ledger entry closes with every leg proven",
+      "method": "manual_read_with_citation",
+      "invocation": "read by 2.0.0_SA_COO~S1 of this instance and the report",
+      "output_evidence": "NO VERDICT RECORDED. Facts, not a verdict: the S3 object's sha256 equals the committed bytes' and cmp reads IDENTICAL; the runner-role read was measured on both roles, implicitDeny before and allowed after, each with a control; the ledger 20261009T1407Z_mdpf-stratid-w2a-etf-universe-s3-dell1-20261009 reads CLOSED with all 3 legs proven and its sentinel unlinked. ONE CLAUSE CANNOT BE MET AS WRITTEN: 'the prior VersionId is recorded' -- there is none, because opal-data-etfs has never had versioning enabled; the prior BYTES are recorded instead, committed before the write, and the gap is row MDPF_STRATID-D1-S3. The artifact graded here is s3://opal-data-etfs/config/etf_universe.json, the ETF UNIVERSE object, together with the two IAM grants.",
+      "denominator": "not computable by this seat",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion, graded by the issuer 2.0.0_SA_COO~S1 on the report, per the order's proof_of_spec block; never self-graded."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any wildcard, List or Put in the grant",
+      "reason": "The laptop CTO's terms forbid all three: 's3:GetObject on ... ONLY, no wildcard, no List, no Put'. The negative control on a sibling key is what proves the absence rather than asserting it."
+    },
+    {
+      "item": "Editing mdpf-gold-scoped's rendered policy",
+      "reason": "iam.tf:1185 keeps it byte-equal, so the gold lambda's grant is a separate inline policy. Only its stale comment was corrected, which HCL strips before jsonencode -- proven by that resource being a no-op in the plan."
+    },
+    {
+      "item": "Deleting the prior S3 object version",
+      "reason": "There are no versions to delete -- the bucket is unversioned. The prior bytes were preserved into the repo instead."
+    },
+    {
+      "item": "Enabling versioning on opal-data-etfs",
+      "reason": "Outside this order's paths and scope. It is the standing remedy named in row MDPF_STRATID-D1-S3, for whoever owns the bucket; the order names 0.4.0_DS_ClientPlatform as the config's owner."
+    }
+  ],
+  "surprises": [
+    "MDPF_STRATID-D1-S3: the order's stated rollback does not exist -- opal-data-etfs is not a versioned bucket, so there is no prior VersionId to record or restore and an overwrite is irrecoverable. A substitute rollback (the prior bytes, committed before the write) was secured, which is why the row is INERT; the bucket-level gap outlives this order and is carried there with two remedies and an owner."
+  ],
+  "forward_notes": [
+    "iam:SimulatePrincipalPolicy being denied to this box for any other principal has now blocked the canonical verification step of TWO WORLD-risk orders in one day (MDPF_HEALGAP R2-1 C5, and this order's step 4). The substitute is committed at org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/identity_policy_eval.py, but it evaluates identity-based policies only -- no bucket policy, SCP or permission boundary -- so it is a floor, not a replacement. The standing gap is row MDPF_HEALGAP-D1-S11.",
+    "Any order that overwrites a key in opal-data-etfs should carry 'preserve the prior bytes into the writer's deliverables' as an explicit step until the bucket is versioned, because the usual 'restore the prior VersionId' rollback is unavailable there.",
+    "mdpf-gold-scoped and mdpf-runner-scoped both read OUT-OF-PATTERN to the naming-plan limb (it would name them mdpf-gold-scoped-policy and mdpf-runner-scoped-policy). They are pre-existing and this act created neither, so the limb only WARNed -- but they will keep warning on every apply of this root until someone migrates them under R19."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/2026-10-09/aw1_applied_in_its_window_and_two_empty_roots_retired.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'mdpf-gold-scoped|mdpf-runner-scoped' infra --limit 20",
+      "result": "PASS -- 7 hits across 7545 files scanned, bands SURFACED=3 CONFIG=3 DOC=1. Located both inline policies in infra/aws/terraform/mdpf-pipeline/iam.tf (:42 and :757) and, at :1185, the convention that keeps mdpf-gold-scoped byte-equal -- which is what decided the shape of the gold lambda's half."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --corpus aws 'mdpf-gold-lambda-role' and comp-find --corpus aws 'mdpf-daily-runner'",
+      "result": "PASS -- 4 and 5 hits across 2844 aws nodes, graph vintage 2026-10-09 12:52:02Z. Established that each role has exactly ONE assumer (the mdpf-gold-lambda function; the mdpf-daily-runner instance via its one instance profile), which is the read condition (4) turns on."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "NOT RUN -- the order's preflight declares the IAM read as the live simulation at step 4",
+      "result": "comp-iam models (action) and never (action, resource), so it cannot grade a one-key grant and cloud-ops states it is a FLOOR that fails green. The live identity-policy evaluation with positive and negative controls is the stronger instrument and is what was run."
+    }
+  ],
+  "regression_reads": {
+    "no_producer_universe_changed": "The loaders' rule yields the same four tickers over the prior bytes and over the new bytes, so the served delta on the loaders' plane is zero; the write added only keys _load_universe does not read.",
+    "mdpf_gold_scoped_unchanged": "Not among the plan's movers, so its rendered policy is byte-identical before and after despite its comment being corrected.",
+    "no_statement_removed_from_the_runner": "mdpf-runner-scoped went 33 -> 34 statements with exactly one added and ZERO removed; its P0Deny and R14 latent-fence Deny statements are untouched.",
+    "no_list_or_put_added": "Both new statements carry Action ['s3:GetObject'] only. The runner's existing EtfsListScoped condition still reads prefix silver/* -- this act added no config/ prefix to any List.",
+    "three_standing_conditions": "(1) opal-data-etfs/config/ is the shared ETF universe, not a firm data bucket, as the order itself states; no laptop-first was owed on that ground, and the laptop was told first anyway on the IAM ground under condition (4). (2) No send to mdpf-daily-runner was made. (3) No 49 Financial data moved anywhere."
+  }
+}

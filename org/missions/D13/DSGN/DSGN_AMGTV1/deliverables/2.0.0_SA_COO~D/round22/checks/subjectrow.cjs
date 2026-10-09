@@ -30,7 +30,17 @@ const formatValue = (v) => (Math.abs(v) >= 1000 ? v.toLocaleString('en-US', { ma
 const fig = (ov, mn) => ((ov && ov.header_figures) || []).find((f) => f && f.mnemonic === mn);
 const PX = fig(FIX.overlay, 'PX_LAST');
 const EV = fig(FIX.overlay, 'CURR_ENTP_VAL');
-const WANT = { Price: PX ? formatValue(Number(PX.value)) : null, EV: EV ? formatValue(Number(EV.value)) : null };
+// RE-ANCHOR (DSGN_AMGTV1 round 67, AV-zzr-1, row D1-W141-S1; issuer 2.0.0_SA_COO~D1): the page now prints the subject's money cells
+// through StatTile's formatStatValue with the figure's own served currency ('price' for PX_LAST; 'currency-millions' for
+// CURR_ENTP_VAL, served in millions), the same formatter the header tiles use (FWD-27, one format per measure). The claim is unchanged:
+// the subject row carries the header's served Price and EV. Only the expected strings are derived through the page's one formatter.
+// Was: formatValue(v) -> "204.80" / "193,511".
+const ST = L.source(SA + 'components/StatTile.tsx');
+const WANT = {
+  Price: PX ? ST.formatStatValue(Number(PX.value), 'price', PX.currency || null) : null,
+  EV: EV ? ST.formatStatValue(Number(EV.value), 'currency-millions', EV.currency || null) : null,
+};
+void formatValue;
 
 const cellsOf = (tr) => Array.from(tr.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/g)).map((m) => L.textOf(m[1]));
 function subjectCells(html) {

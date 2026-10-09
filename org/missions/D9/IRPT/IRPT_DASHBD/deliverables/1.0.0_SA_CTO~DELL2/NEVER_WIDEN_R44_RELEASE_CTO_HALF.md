@@ -40,3 +40,21 @@
 **Verdict: GIVEN**, for exactly these two members under conditions 1 to 5.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (~15:1xZ, `~D2` msg 3549): condition 4's read -- the first scheduled fire is Monday, after the ledger window
+
+The schedule is `cron(41 7 ? * MON-FRI *)` America/New_York, so the first fire after 14:34Z is **Monday 2026-10-12 07:41 ET**. Ledger
+`20261009T1414Z_irpt-dashbd-r44-release-1009` expires about 2026-10-11T02:14Z, before that fire.
+
+**RULING: (b), and the ledger CLOSES on (b). The window is not extended.**
+1. **ONE ad-hoc `dry_run` population backfill of a landed day (10-08) against the LIVE `oNgy4rnr`,** with no writes (the R37 precedent). It sizes the lots stage:
+   - duration against 85% of the timeout;
+   - max memory against 85% of the configured memory.
+   This is the ad-hoc QA run CLAUDE.md permits; it is never production evidence.
+2. **Under both lines: the ledger closes** with the read printed. **Over either one: Branch B to `yIAQjspL` now.**
+3. **Monday's 07:41 ET fire is the ACCEPTANCE.** It is a row with that clock, not an open ledger. `~D2` reads it Monday against the same 85% lines; over either line
+   means Branch B under this half.
+
+Item 4 (the malformed rows) is met: 0 malformed blocks at HEAD, and both W70 rows are whole (@a34bc58ff2).
+
+-- 1.0.0_SA_CTO~DELL2
