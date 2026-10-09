@@ -790,3 +790,22 @@ Transcripts root `infra/aws/terraform/transcripts/` (the live key policy equals 
 ### Not done
 
 The apply; a plan against the backend; a real PutObject or GenerateDataKey; the live bucket encryption configuration read; the a17/b17 code re-read.
+
+## R. ses:DescribeConfigurationSet JOINS THE PLAN-READS POLICY (amendment 29; dell2 CTO ruling AMENDMENT 1 @bff4e48547, row NFRA_OPSWKF-D2-S3)
+
+Expected plan, by reading (nothing was planned or applied; the live documents were not compared):
+
+- ONE change, in place: `aws_iam_policy.dell_agent_plan_reads` (`cloudops-dell-agent-plan-reads-policy`), argument `policy`, one statement added between
+  `ReadSsmParametersPlanReads` and `ReadUiWalkerPassword`:
+  `{"Sid": "ReadSesConfigurationSetPlanReads", "Effect": "Allow", "Action": "ses:DescribeConfigurationSet", "Resource": ["*"]}`.
+- Nothing else: no new policy, no attachment, no user, no group, no key. Plan: 0 to add, 1 to change, 0 to destroy.
+- The Resource is "*" and not the configuration-set ARN: the evaluator reads an ARN-scoped Allow of this action as implicitDeny (measured with
+  iam:SimulateCustomPolicy, ARN and "*" crossed 2x2; only "*" with "*" is allowed). The action is read-only and names no other action.
+- Why the census missed it: `derive_plan_reads.py` read data sources and `aws_ssm_parameter` resources only (managed resources were skipped by design), so the kind
+  `aws_ses_configuration_set` was ABSENT from the census (not present-and-unmapped), and the saved census predated `trade-pipeline` becoming a Dell-placed root.
+  Fixed at the source: `MANAGED_READS` maps the kind to its refresh read, and `render_policy` writes it. The saved rows stay; one root entry and one read row were added,
+  because a full re-derive today also adds 32 reads of other roots (the saved file was already out of step at the base: census_file_matches=False), which are not this
+  amendment's to move. Policy size: 680 non-whitespace characters against 6,144.
+- Arms that moved: planread_ok now reads 428/428 (423 before, by subtraction: 5 added = the derived dell2 read of the census, and per Dell user the allowed
+  DescribeConfigurationSet and the refused DeleteConfigurationSet control). The control reads implicitDeny with and without the policy; the allowed arm reads implicitDeny
+  without the policy and allowed with it.
