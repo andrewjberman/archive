@@ -45,7 +45,25 @@ def _grants_ok(b: dict, deployed: str) -> bool:
             and b.get("thirteen_month_read_available_dates_min", 0) >= 1)
 
 
-RULES = {"RL15_DIGEST": _served_ok, "RL15G_DIGEST": _grants_ok}
+def _tl1_ok(b: dict, deployed: str) -> bool:
+    # OG-tl-1 (CTO~Z ruling @261e2c42a0): the host's TRANSCRIPT_MEETING_ALLOWLIST holds exactly the online_meeting_id values
+    # of data/transcripts/scripts/teams/meeting_allowlist.json at HEAD (sha256 of the sorted ids joined by ","), and it is
+    # the only .env value that changed.
+    root = Path(__file__).resolve()
+    while root != root.parent and not (root / ".tools").is_dir():
+        root = root.parent
+    try:
+        ids = sorted(m["online_meeting_id"] for m in json.load(open(
+            root / "data/transcripts/scripts/teams/meeting_allowlist.json", encoding="utf-8"))["meetings"])
+    except Exception:
+        return False
+    want = hashlib.sha256(",".join(ids).encode("utf-8")).hexdigest()
+    return (b.get("served_release") == deployed and b.get("installed_code") is True
+            and b.get("allowlist_count") == len(ids) and b.get("allowlist_sha256") == want
+            and b.get("env_values_changed") == ["TRANSCRIPT_MEETING_ALLOWLIST"])
+
+
+RULES = {"RL15_DIGEST": _served_ok, "RL15G_DIGEST": _grants_ok, "TL1_DIGEST": _tl1_ok}
 
 
 def _aws(args: list) -> tuple:

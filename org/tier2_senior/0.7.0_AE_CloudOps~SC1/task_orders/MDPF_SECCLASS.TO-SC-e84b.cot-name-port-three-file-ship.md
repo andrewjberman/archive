@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~M1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~SC1</issued_to>
     <date>2026-10-09</date>
-    <status>issued</status>
+    <status>pending</status>
     <project_code>MDPF_SECCLASS</project_code>
     <round>17</round>
   </metadata>
@@ -31,7 +31,7 @@
 
   <the_act>
     0. On box/dell1 at or after this order's commit, read both halves. Measure the pre-act state: head-object ETag and VersionId of the three keys (expect 2fef39d1 / ea7e6700 / 6f48eaf3; VersionIds MYI0nB3z..., 55IsnYrr..., vHHfV5Nd...) and of the watch keys code/gold/lib/_shared/etf_classification_scheduled.py and code/gold/E_18.detect_new_securities.py. A key not at its expected ETag is a STOP and a report.
-    1. Window: act only outside a COT gold run. COT fires daily at 11:30Z (bronze, silver, then gold, which completes about 11:38Z). Check that no COT runner is running.
+    1. Window: act only outside a COT gold run. COT fires daily at 11:30Z (bronze, silver, then gold, which completes about 11:38Z). Check that no COT gold run is in flight. AMENDMENT 1 (issuer ruling, 2026-10-09 ~12:0xZ, on ~SC1 msg 2384): "in flight" means the gold chain has not logged completion, NOT that the cot-exporter instance is stopped. The instance stays up after the chain. The window is open when the day's logs/cot-exporter/gold-run/cot-gold-run-<YYYYMMDD>-*.log carries "=== COT GOLD CHAIN COMPLETE" and gold/views/mix_daily_summary.json and platinum/firm/mix_summary.json hold their VersionIds across two reads. 2026-10-09: chain COMPLETE (exit 0) logged 11:37:28Z (cot-gold-run-20261009-113353.log).
     2. Open ONE ledger entry, slug `secclass-e84-cot-name-port-sc1-20261009`, with legs:
        - V: the step-0 reads;
        - P (COO condition 2): BEFORE the next COT fire, the current VersionIds of platinum/firm/mix_summary.json, gold/views/mix_daily_summary.json and every gold/entities/clients/{rid}.json, written to org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/E84_PREFIRE_VERSIONS_20261009.json with the count printed;

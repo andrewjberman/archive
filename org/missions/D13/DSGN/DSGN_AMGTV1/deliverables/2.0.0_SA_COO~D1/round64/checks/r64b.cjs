@@ -51,10 +51,21 @@ const G = {
   guarded: (src) => {
     if (src === null) return ['walk.mjs missing'];
     const f = [];
-    const near = (k) => { const i = src.indexOf(k); return i < 0 ? '' : src.slice(Math.max(0, i - 200), i + 2500); };
+    // ISSUER FIX (drain of ~139): read the press CODE, never a comment. Comments are stripped, and each path is read from the function
+    // that runs it (walkSecurityAnalysis for the security press, the function that iterates opt.windowPresses for the window press).
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`\\])\/\/[^\n]*/g, '$1');
+    const fnWith = (k) => {
+      const re = /async function (\w+)\(/g; let m; const hits = [];
+      while ((m = re.exec(code))) hits.push(m.index);
+      for (let i = 0; i < hits.length; i += 1) {
+        const body = code.slice(hits[i], i + 1 < hits.length ? hits[i + 1] : code.length);
+        if (body.includes(k) && /for \(const \w+ of /.test(body.slice(body.indexOf(k) - 40, body.indexOf(k) + 40))) return body;
+      }
+      return '';
+    };
     for (const k of ['opt.securityPresses', 'opt.windowPresses']) {
-      const s = near(k);
-      if (!s) continue;
+      const s = fnWith(k);
+      if (!s) { f.push(`no function iterates ${k}`); continue; }
       if (!/DO_NOT_CLICK\.test/.test(s)) f.push(`the ${k} path does not test DO_NOT_CLICK`);
       if (!/walker:press-refused/.test(s)) f.push(`the ${k} path records no walker:press-refused`);
       if (!/walker:press-not-found/.test(s)) f.push(`the ${k} path records no walker:press-not-found`);
