@@ -30,6 +30,14 @@ The five stored drafts (`drafting/v1/<KEY>.json`, latest) all read `analyzer_ver
 SAP: current cloud backlog; BABA: Cloud Intelligence Group revenue P0446; PBR: total oil and gas production P0198). **Ruling: the
 provenance splice is UNNEEDED** -- analyze 2.1.0 writes the driver with its passage; D1-W332-S2 -> CLOSED (no act).
 
+## D1-S15 (2026-10-09 ~21:0xZ) -- the peer set's subject market cap vintage
+
+Live `GET /security/ASML_NA_Equity/peers` (b7Lj1J): `subject.market_cap_musd` 541,931.78, `cap_vintage` 2026-09-19T07:53:19Z, `cap_currency`
+EUR, `cap_source` model_block:ASML_NA_Equity:CUR_MKT_CAP (with the stated caveat that no FX is applied against the members' USD caps);
+members' `cap_vintage` 2026-08-06; peers `as_of` 2026-09-24T2252Z. **Answer:** UNCHANGED at HEAD -- the subject cap is three weeks older
+than today's header and on a different vintage from its members. **Defect for round 89:** refresh the subject cap to the header's
+vintage, or drop it with its reason (the row's two branches).
+
 ## Still to read this round
 
-Z-W212-S2 (store url coverage), Z-W266-S3 (driver-chart coverage), D1-S15 (peer subject market-cap vintage).
+Z-W212-S2 (store url coverage), Z-W266-S3 (driver-chart coverage).

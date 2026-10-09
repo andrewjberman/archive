@@ -1,0 +1,92 @@
+{
+ "schema_version": "1.0",
+ "genre": "BUILD",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-t-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-t-1.md",
+  "group": "OTHER",
+  "vintage_commit": "fcaaa21b6e"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~1",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP.md",
+  "vintage_commit": "fcaaa21b6e",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-t-1.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/census.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "listed_at 2026-10-09T20:36:32Z; 131,391 / 99,668 / 7,802 objects in 216 / 174 / 54 classes",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/CENSUS.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "three tables headed by denominator; mixed-classes section names the grammar limits",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~F1/round1/checks/r1_census.py\" --static; echo \"exit=$?\" -- expect: ROUND 1 CENSUS STATIC: 5 of 5 arms -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~F1/round1/checks/r1_census.py\" --static; echo \"exit=$?\"",
+   "expect": "ROUND 1 CENSUS STATIC: 5 of 5 arms -- and exit=0",
+   "output_evidence": "ROUND 1 CENSUS STATIC: 5 of 5 arms -- and exit=0 (opal-data-bd objects=131391 sum(classes)=131391 classes=216; opal-data-inf 99668/99668 classes=174; opal-data-cot 7802/7802 classes=54)",
+   "denominator": "5 of 5 static arms PASS; 3 of 3 buckets' class counts sum to their listing counts",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~F1/round1/checks/r1_census.py\" --live; echo \"exit=$?\" -- expect: ROUND 1 CENSUS LIVE: 2 of 2 arms -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~F1/round1/checks/r1_census.py\" --live; echo \"exit=$?\"",
+   "expect": "ROUND 1 CENSUS LIVE: 2 of 2 arms -- and exit=0",
+   "output_evidence": "ROUND 1 CENSUS LIVE: 2 of 2 arms -- and exit=0 (live=131391/99668/7802; uncovered(before listed_at)=0 in each; empty classes=0 of 216/174/54)",
+   "denominator": "2 of 2 live arms PASS; 238,861 of 238,861 live keys covered (3 of 3 buckets); 444 of 444 classes hold a live key",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "two mutants of census.json run through the issuer's check via --root: (m1) one class's objects +1 so the bucket sum no longer equals its denominator, graded --static; (m2) the silver/transactions/ class of opal-data-inf deleted with the bucket denominator reduced to match, graded --live",
+   "expected": "m1 fails S2 (static below 5 of 5); m2 fails L1 (a live key falls in no class)",
+   "observed": "m1: ROUND 1 CENSUS STATIC: 4 of 5 arms; m2: FAIL L1 with UNCOVERED silver/transactions/2020-06-05.parquet, ROUND 1 CENSUS LIVE: 1 of 2 arms, rc=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the --static check run twice on the unchanged census.json",
+   "observed": "ROUND 1 CENSUS STATIC: 5 of 5 arms both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "homogeneity of collapsed and marker-bound classes",
+   "reason": "the class grammar cannot separate a named kind from entity-id or dated siblings in one directory; the affected classes are named in CENSUS.md section Mixed classes and in row ADVI_FIRMBKTS-D1-W1-S1"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W1-S1"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~1/ADVI_FIRMBKTS.TO-FB-t-1.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~F1/round1/checks/r1_census.py --static / --live",
+   "result": "static 5 of 5, live 2 of 2"
+  }
+ ]
+}
