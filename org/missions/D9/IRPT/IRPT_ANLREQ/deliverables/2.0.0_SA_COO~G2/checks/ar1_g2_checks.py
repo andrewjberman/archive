@@ -2,6 +2,7 @@
 
     python ar1_g2_checks.py g11        the READY signal tests pass (test_ready_signal.py)
     python ar1_g2_checks.py g12        the package tests pass (test_layout_commentary.py, test_opal_packager.py)
+    python ar1_g2_checks.py g13        the resident's I4 poll tests pass (test_package_poll.py)
     python ar1_g2_checks.py regress    the generate and research suites: no file newly red against the base
 
 Run from the worktree root. Prints one RESULT line: AR1-G2-<MODE>-OK or AR1-G2-<MODE>-FAIL <reason>; rc 0 only on OK.
@@ -16,8 +17,9 @@ BASE_RED = {Y + "/generate/tests/test_custody_retained.py", Y + "/generate/tests
 FILES = {
     "g11": [Y + "/generate/tests/test_ready_signal.py"],
     "g12": [Y + "/research/tests/test_layout_commentary.py", Y + "/research/tests/test_opal_packager.py"],
+    "g13": [Y + "/generate/tests/test_package_poll.py"],
 }
-MIN_PASSED = {"g11": 4, "g12": 5}
+MIN_PASSED = {"g11": 4, "g12": 5, "g13": 5}
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 
 
