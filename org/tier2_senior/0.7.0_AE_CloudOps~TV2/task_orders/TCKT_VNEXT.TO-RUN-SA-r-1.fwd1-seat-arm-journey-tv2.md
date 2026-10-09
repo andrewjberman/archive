@@ -41,6 +41,13 @@
     (5) TV-r-1 (Alyssa's own filing) stays separate and is not touched.
   </go>
 
+  <amendment n="1" date="2026-10-09" source="row TCKT_VNEXT-D2-S15 @baef2e82c5; CTO msg 3589">
+    Hop (b) cannot pass under pair v2.1: ticket CREATE needs the firm in the token's allowedFirmIds AND in the row's scope
+    (`lambda_function.py:339-344`), and v2.1 makes them disjoint. This run therefore completes step 4 (the one-firm proof, kept as
+    evidence), runs NO hop, and goes straight to cleanup (step 6) and the report. FWD-1 is re-run under pair v2.2 (internal-tier
+    token, userType test-filer kept), a NEW pair, as a new order once both halves are GIVEN.
+  </amendment>
+
   <steps>
     0. Open the NEVER-2 ledger entry: the row write, the token, the run, and the cleanup legs.
     1. **STOP 1:** `python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_RUN/reread_27.py` prints `READ27 27/27`.
