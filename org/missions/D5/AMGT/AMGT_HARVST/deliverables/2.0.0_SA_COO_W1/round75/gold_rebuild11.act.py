@@ -47,6 +47,7 @@ GATE = os.path.join(CELL, "gold_rebuild11.signing.py")
 HOLDS = "RULE (rebuild #11): HOLDS"
 PUTS0 = "PUTS SENT 0"
 MOVED = ("AIG_US_Equity", "OMAB_MM_Equity", "OMAB_US_Equity")
+EXPECTED_CHANGED = 22  # CTO half condition 2 (@100b9af433)
 CHANGED_OUT = os.path.join(HERE, "REBUILD11_CHANGED_ROWS.json")
 
 
@@ -140,6 +141,12 @@ def main():
     record["changed_moved_rows"] = {"count": len(changed), "file": CHANGED_OUT}
     print("CHANGED LIST-MOVED ROWS: %d (%s)" % (len(changed), CHANGED_OUT))
     verdict = verify(bm, bd, am, ad)
+    # CTO half condition 2 (@100b9af433): exactly the 22 signed rows changed, and no other changed row anywhere.
+    changed_all = verdict.get("mention_changed")
+    if len(changed) != EXPECTED_CHANGED or changed_all != EXPECTED_CHANGED:
+        verdict = dict(verdict, holds=False, reasons=list(verdict.get("reasons") or []) + [
+            "CTO condition 2: changed list-moved rows %d, changed mention rows %s; expected %d and %d" % (
+                len(changed), changed_all, EXPECTED_CHANGED, EXPECTED_CHANGED)])
     record["verify"] = verdict
     print("VERIFY:", json.dumps({k: v for k, v in verdict.items()
                                  if k not in ("daily_other", "mention_removed_named_keys", "mention_unexplained_sample")},
