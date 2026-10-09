@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-y-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-y-1.audit-row-in-its-commit.md",
+    "group": "OTHER",
+    "vintage_commit": "46f6d8a447"
+  },
+  "assignee": "0.9.0_WK_LGIC_BLANKFIX~1",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round10.md",
+    "vintage_commit": "46f6d8a447",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-y-1.audit-row-in-its-commit.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/safe-commit.sh",
+      "kind": "script",
+      "commit_or_etag": "1967058afe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo script; no deploy is made; the switch file org/mcp/naming-place.enforce is untouched",
+      "artifact_covered_by": [
+        "BY1-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/naming-gate.py",
+      "kind": "script",
+      "commit_or_etag": "1967058afe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo script; no deploy is made",
+      "artifact_covered_by": [
+        "BY1-AC1",
+        "BY1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_audit_in_commit.py",
+      "kind": "test",
+      "commit_or_etag": "1967058afe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo script; runs in temporary git repositories and leaves nothing in the repository (arm C11)",
+      "artifact_covered_by": [
+        "BY1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BY1-AC1",
+      "criterion_verbatim": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_audit_in_commit.py expect: AUDIT-IN-COMMIT ok=True",
+      "method": "command",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_audit_in_commit.py",
+      "expect": "AUDIT-IN-COMMIT ok=True",
+      "output_evidence": "AUDIT-IN-COMMIT ok=True arms=11 held=11 (rc 0, under timeout 120)",
+      "denominator": "11 of 11 arms held: C1 the overridden commit's --stat lists the audit file and the .tf and the committed file is the seed row plus one new row; C2 the row's keys are utc, author, id, reason, names, msg_sha256 (empty); C3 the row's id appears in the OVERRIDDEN (audited, id ...) line beside the gate's NAMING OVERRIDDEN line; C4 disk equals the committed blob, status clean, no .log; C5 the same name without the line is refused (rc=1) and the audit file's disk, index and HEAD bytes are the seed (difference control); C6 an override the older limb still refuses leaves no row; C7 and C8 a commit with no refusal does not touch the file; C9 and C10 the gate directly ignores a row on disk only and honours it once staged; C11 the repository's switch and audit file bytes are unchanged",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BY1-AC2",
+      "criterion_verbatim": "python .tools/naming-gate.py --self-test expect: NAMING-GATE-SELF-TEST: PASS",
+      "method": "command",
+      "invocation": "python .tools/naming-gate.py --self-test",
+      "expect": "NAMING-GATE-SELF-TEST: PASS",
+      "output_evidence": "NAMING-GATE-SELF-TEST: PASS (rc 0, under timeout 120)",
+      "denominator": "18 of 18 arms ok, 0 FAIL: 2 judge arms, 9 placement arms, 7 override arms (6 of them reading a jsonl audit file; the 7th is the index-read arm: a row on disk and not staged passes nothing, once staged it passes, a later disk edit does not change what the index holds)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "_np_unwind in .tools/safe-commit.sh neutered to return 0 at its first line (a temporary edit to the worktree copy, restored byte-for-byte afterwards), then exercise_audit_in_commit.py run",
+      "expected": "arm C6 (a refused override leaves no row) FAILS",
+      "observed": "ARM C6 ... got: rc=1 refused, new commit=False, audit disk CHANGED, index CHANGED | FAIL; AUDIT-IN-COMMIT ok=False arms=11 held=10",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "run again after the commit",
+      "observed": "exercise_audit_in_commit.py 11 of 11 held before and after the commit 1967058afe; the new row's id and time differ per run, the verdicts do not",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a run of the whole .tools/safe-commit.sh (hooks, commit-gate, lane gates) in the temporary repository",
+      "reason": "the whole script needs the repository's full tool tree (a first attempt stopped in the commit gate on a missing module); the exercise cuts the real naming stage, which holds the override reader and the audit writer, and lands with the same git commit --only call over the pathspec that cut leaves; the exercise asserts the real script still carries that landing call. Row LGIC_BLANKFIX-D1-W1-S3 records what no hook graded."
+    },
+    {
+      "item": "the ~2 script org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~2/exercise_override.py, left as it was",
+      "reason": "outside the order's write grant; its adjusted copy in the ~1 folder (arms O1, O5, O7, O12 named in its docstring) prints OVERRIDE-ARMS ok=True arms=12 held=12. Row LGIC_BLANKFIX-D1-W1-S2."
+    }
+  ],
+  "surprises": [
+    "LGIC_BLANKFIX-D1-W1-S2",
+    "LGIC_BLANKFIX-D1-W1-S3",
+    "LGIC_BLANKFIX-D1-W1-S4"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/LGIC_BLANKFIX.TO-BF-y-1.audit-row-in-its-commit.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_override.py",
+      "result": "OVERRIDE-ARMS ok=True arms=12 held=12"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~2/exercise_switch_on.py",
+      "result": "SWITCH-ON ok=True arms=11 held=11"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/naming-apply-gate.py --self-test",
+      "result": "NAMING-APPLY-GATE-SELF-TEST: PASS"
+    }
+  ]
+}
