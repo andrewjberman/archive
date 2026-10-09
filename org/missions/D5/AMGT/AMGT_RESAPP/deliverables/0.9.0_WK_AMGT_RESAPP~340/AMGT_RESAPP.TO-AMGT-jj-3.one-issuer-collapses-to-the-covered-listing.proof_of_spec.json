@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-jj-3.one-issuer-collapses-to-the-covered-listing",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "36845bd58b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "36845bd58b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-jj-3.one-issuer-collapses-to-the-covered-listing.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~340",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "a01a239b84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_crosswalk(issuer_sources), load_issuer_sources, --out (local file, no store write), _carry_served keeps a served issuer; local branch only, no deploy in this order.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/name_search.py",
+      "kind": "script",
+      "commit_or_etag": "a01a239b84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "resolve_query collapses to the covered listing when every candidate shares one measured issuer.cik; proven --where local only (the redeploy is a later world act).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "a01a239b84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "identity.other_listings served on the typed-name route; proven --where local only.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_crosswalk_issuer.py",
+      "kind": "test",
+      "commit_or_etag": "a01a239b84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 tests; identity folder last line: 248 passed, 47 warnings, 2 subtests passed in 6.16s",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_name_search_issuer.py",
+      "kind": "test",
+      "commit_or_etag": "a01a239b84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "12 tests incl. Micro-shaped different issuers and the route's other_listings; api folder: 894 passed, 2 failed at the base too (both No module named 'pypdf': test_print_fiscal_year_sort::test_head_copy_raises_on_mixed_keys, test_print_format_rich::test_default_and_fmt_pdf_are_byte_identical_to_build_pack_itself).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~340/crosswalk_local.json",
+      "kind": "config_data",
+      "commit_or_etag": "a01a239b84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The local list: 243 records, 204 with issuer.cik (identity.cik 65, filing_source 12, company_tickers 127; 39 none). Not written to the store.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/identity/crosswalk.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "ac41fdb11f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1 @6c93b9c2f8: adds records.items.properties.issuer and denominators.with_issuer_cik; jsonschema.validate(crosswalk_local.json, schema) OK, 243 records, with_issuer_cik 204.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the local list drops no record, both ASML listings carry measured issuer.cik 937966 with a named source, every issuer.cik is measured with a source, and the four other 20-F names carry their filer CIKs; C1-C4 PASS; R85 CROSSWALK AC1: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round85_prep/checks/r85_crosswalk.py\" --crit AC1 --path \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~340/crosswalk_local.json\"; echo \"exit=$?\"",
+      "output_evidence": "stored name lists under s3://opal-data-harvest/crosswalk/v1/: 7 (latest crosswalk/v1/2026-10-07.json)\n   this list org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~340/crosswalk_local.json: 243 records; prior crosswalk/v1/2026-10-07.json: 243 records\nPASS C1 no record dropped: 243 of 243 prior records present\n   ASML_NA_Equity issuer ('937966', 'measured', \"s3://opal-data-harvest/sec/harvest/silver/filing_source/date=2026-10-09/part-20261009T093737Z.parquet :: this name's own stored filing 000162828026011378, the CIK in its EDGAR path\")\n   ASML_US_Equity issuer ('937966', 'measured', \"s3://opal-data-harvest/sec/harvest/bronze/company_tickers/date=2026-09-22/company_tickers.json :: the SEC ticker-to-CIK table, this US listing's own ticker 'ASML'\")\nPASS C2 both ASML listings carry measured issuer.cik 937966 with a named source\nPASS C3 every issuer.cik is measured with a named source: 204 of 243 carry one; 0 bad\nPASS C4 the four other stored 20-F names carry their filer CIKs: 4 of 4\nR85 CROSSWALK AC1: YES\nexit=0\n[re-run at ac41fdb11f, schema carries issuer + with_issuer_cik]",
+      "denominator": "C1 243 of 243 prior records; C3 204 of 243 carry issuer.cik, 0 bad; C4 4 of 4 filers",
+      "status": "PASS",
+      "expect": "R85 CROSSWALK AC1: YES[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "with the local list, \"ASML\" resolves to ASML_NA_Equity naming the other listing, \"Micro\" still answers its candidate list, and the single-candidate and no-match answers are byte-equal to the base; R1-R3 PASS; R84 LISTING AC1: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" AMGT_CROSSWALK_PATH=\"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~340/crosswalk_local.json\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round84_prep/checks/r84_listing.py\" --crit AC1 --where local; echo \"exit=$?\"",
+      "output_evidence": "thesis 'ASML': status 200, served key 'ASML_NA_Equity', names ASML_US_Equity: True\n   resolve 'ASML': status 200, status field 'exact', security_key 'ASML_NA_Equity'\nPASS R1 'ASML' resolves to the covered listing ASML_NA_Equity and names the other listing\n   thesis 'Micro': status 404, candidates ['AMD_US_Equity', 'MSFT_US_Equity', 'MU_US_Equity']\nPASS R2 different issuers with similar names still answer the candidate list\n   resolve  Nu     now 200:ecb54e1b1b368b1b base 200:ecb54e1b1b368b1b\n   resolve  zzqx   now 200:7fecf0645a815f8f base 200:7fecf0645a815f8f\n   thesis   zzqx   now 404:072e9755e2fa4fd0 base 404:072e9755e2fa4fd0\nPASS R3 the one-candidate and no-match arms are byte-equal to the base: 3 of 3\nR84 LISTING AC1: YES\nexit=0\n[re-run at ac41fdb11f, schema carries issuer + with_issuer_cik]",
+      "denominator": "R1-R3 PASS (3 of 3); R3 byte-equal arms 3 of 3",
+      "status": "PASS",
+      "expect": "R84 LISTING AC1: YES[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no planted discriminator; AC1 and AC2 are the checks over the built list and the local resolver.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: the local list reads live stores (filing_source, the SEC ticker table, universe/v1) so a later build may differ",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any store write, deploy or redeploy",
+      "reason": "Bounds s.2 of the order: no store write, no deploy; the store and function legs are separate world acts."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W340-S1",
+    "AMGT_RESAPP-D1-W340-S2"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~340/",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/ lib/research/api/ -q",
+      "result": "identity 248 passed; api 894 passed, 2 failed (both No module named 'pypdf', at the base too)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity -q",
+      "result": "248 passed, 47 warnings, 2 subtests passed in 6.34s (rc=0) at ac41fdb11f"
+    }
+  ]
+}
