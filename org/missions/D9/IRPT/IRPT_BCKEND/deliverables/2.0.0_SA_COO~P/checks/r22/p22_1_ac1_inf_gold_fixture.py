@@ -47,8 +47,8 @@ except Exception as exc:
     print("arm A (INF YTD): %s: %s" % (type(exc).__name__, str(exc)[:120]))
     a = False
 try:
-    rep = hg.calculate(scope(tenants._CANONICAL_49F, "49F", "0010498003"), "2026-01-01", "2026-01-07",
-                       hg.HoldingsGoldSource(GoldS3(F49_PREFIX, DAYS("0010498003")), bucket="b", prefix=F49_PREFIX))["report"]
+    rep = hg.calculate(scope(tenants._CANONICAL_49F, "49F", "9985623272"), "2026-01-01", "2026-01-07",
+                       hg.HoldingsGoldSource(GoldS3(F49_PREFIX, DAYS("9985623272")), bucket="b", prefix=F49_PREFIX))["report"]
     b = abs(value(rep) - WANT) < 1e-12
     print("arm B (49F unchanged): %s" % b)
 except Exception as exc:
