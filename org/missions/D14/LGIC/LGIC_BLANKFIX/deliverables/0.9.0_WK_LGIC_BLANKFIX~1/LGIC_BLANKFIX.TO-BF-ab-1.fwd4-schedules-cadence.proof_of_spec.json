@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-ab-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-ab-1.fwd4-schedules-cadence.md",
+    "group": "OTHER",
+    "vintage_commit": "ed4a3caf65"
+  },
+  "assignee": "0.9.0_WK_LGIC_BLANKFIX~1",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round13.md",
+    "vintage_commit": "ed4a3caf65",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-ab-1.fwd4-schedules-cadence.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/check_fwd4_cadence.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Runs the real root check (report_only) over all 86 mapped roots, reads every EVENT_RULE/SCHEDULE line (180), compares the cadence word carried by the listed new name (opal_naming_cadence.carried_word) with the word opal_naming_cadence decides from that schedule's own schedule_expression at the line's file:line, and lists every undecided row; reads files only.",
+      "introduces": [
+        "def main():"
+      ],
+      "artifact_covered_by": [
+        "BAB1-AC1",
+        "BAB1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_fwd4_rename.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Takes one FIX schedule list line, writes the rename of its name attribute into a temporary copy of the .tf (the repository is not written), diffs the copy against the repository file and runs the real .tools/naming-gate.py --diff --enforce on that diff; no apply, no AWS.",
+      "introduces": [
+        "def main(argv):",
+        "def fetch_line():"
+      ],
+      "artifact_covered_by": [
+        "BAB1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows LGIC_BLANKFIX-D1-W1-S7 and -S8 appended.",
+      "introduces": [
+        "LGIC_BLANKFIX-D1-W1-S7",
+        "LGIC_BLANKFIX-D1-W1-S8"
+      ],
+      "artifact_covered_by": [
+        "BAB1-AC1",
+        "BAB1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BAB1-AC1",
+      "criterion_verbatim": "BAB1-AC1 -- every listed schedule's cadence word agrees with its own expression, or is listed as undecided.",
+      "method": "command",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/check_fwd4_cadence.py",
+      "output_evidence": "UNDECIDED EVENT_RULE opal-inf-served-guard-on-write -> opal-inf-served-guard-on-write [infra/aws/terraform/served-guard-inf/_root.tf:31] no schedule expression; event rule: its on-{event} token is not ruled (name carries on-write)\nUNDECIDED EVENT_RULE teams-global-transcripts-pull-hourly -> teams-global-transcripts-pull-hourly [infra/aws/terraform/transcripts/pull.tf:23] expr=cron(0 13-22 ? * MON-FRI *): hour field 13-22: more than once a day (name carries hourly)\nUNDECIDED EVENT_RULE ycharts-session-capture-schedule [infra/aws/terraform/ycharts-pipeline/eventbridge.tf:55] line kind NOT-ASKED carries no new name\nFWD4-CADENCE ok=True schedules=180 agree=144 undecided=36 mismatch=0\n(37 output lines: 36 UNDECIDED rows listed, then the last line)",
+      "denominator": "180 of 180 schedule lines (86 of 86 mapped roots; python lib/opal_naming_cadence.py estate reads rows=180 beside it): agree=144 undecided=36 mismatch=0. Negative control: with carried_word patched in-process to return weekly for every name ending -daily the same checker prints mismatch=57 ok=False.",
+      "status": "PASS",
+      "expect": "FWD4-CADENCE ok=True"
+    },
+    {
+      "criterion_id": "BAB1-AC2",
+      "criterion_verbatim": "BAB1-AC2 -- one schedule renamed from its list line alone grades CONFORMANT on the real gate.",
+      "method": "command",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_fwd4_rename.py",
+      "output_evidence": "LIST LINE: FIX SCHEDULE estate-report-0900et -> estate-report-0900et-daily  [infra/aws/terraform/estate-report/orchestrator.tf:56]\nDIFF (temporary copy against the repository file; the repository is not written):\n--- a/infra/aws/terraform/estate-report/orchestrator.tf\n+++ b/infra/aws/terraform/estate-report/orchestrator.tf\n@@ -54,7 +54,7 @@\n # end-to-end run passes the acceptance battery (the astn precedent). The first fire should be a\n # decision, not a surprise at 09:00 ET.\n resource \"aws_scheduler_schedule\" \"estate_report_0900et\" {\n-  name                         = \"estate-report-0900et\"\n+  name                         = \"estate-report-0900et-daily\"\n   # ENABLED 2026-08-04 per Andrew-direct 1745Z (\"no gates holding its progress, it should exist\n   # right now\"), AFTER the clean validation fire: manifest 2026-08-04 PENDING, ai_section PRESENT,\n   # 2 proposals -- the KIMI_EMPTY starvation fix (@95e1f0283) proven on the production prompt.\nGATE OUTPUT (rc=0):\nDENOMINATOR: 1 path(s) in this diff; declaration-tree domain = 1 MINUS EXCLUDED(org/, docs/, run-artifact dirs ^workflows/[^/]+/[^/]+/[0-9]{8}T[0-9]{6}Z-[0-9a-f]{7,40}/) 0 = 1 path(s) [of the excluded, 0 are run artifacts and 0 are org//docs/]\nCOVERAGE: 0 path(s) in the declaration domain the gate could not see (extension outside its graded set and not .gitattributes); 1 seen\nNAMING CONFORMANT infra/aws/terraform/estate-report/orchestrator.tf:57 estate-report-0900et-daily -> estate-report-0900et-daily\n  why: CONFORMANT as SCHEDULE\nNAMING-GATE: PASS 1 graded\nFWD4-RENAME ok=True name=estate-report-0900et-daily grade=CONFORMANT",
+      "denominator": "1 of 1 schedule renamed (estate-report-0900et, SCHEDULE, one-line diff in a temporary copy; git status shows no tracked file changed); NAMING-GATE: PASS 1 graded rc=0. Control: the same schedule renamed to estate-report-0900et-hourly is refused (NAMING-PLACE: REFUSE 1, Owed: use estate-report-0900et-daily), so the placement step ran. The first candidate bd-49f-keepalive-sched is refused for a hand-kept firm token: row LGIC_BLANKFIX-D1-W1-S7.",
+      "status": "PASS",
+      "expect": "FWD4-RENAME ok=True"
+    },
+    {
+      "criterion_id": "BAB1-AC3",
+      "criterion_verbatim": "BAB1-AC3 (judgment) -- 3.0.0_SA_CVO reads three schedules the checker printed (one per cadence word kind if there are several) against their own expressions: does a person reading the schedule agree with the word the list chose?",
+      "method": "command",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/check_fwd4_cadence.py",
+      "judgment": true,
+      "output_evidence": "For 3.0.0_SA_CVO, no verdict. Agree rows, one per word kind (list line | expression): (1) FIX EVENT_RULE bd-49f-keepalive-sched -> blackdiamond-49f-keepalive-sched-15min [infra/aws/terraform/bd-pipeline/bd-49f-interim.tf:148] | rate(15 minutes); (2) FIX SCHEDULE estate-report-0900et -> estate-report-0900et-daily [infra/aws/terraform/estate-report/orchestrator.tf:56] | cron(0 9 * * ? *); (3) FIX SCHEDULE etfs-reports-monthly-run -> etfs-reports-run-monthly [infra/aws/terraform/etfs-reports/orchestrator.tf:178] | cron(0 10 1 * ? *). Other word kinds on the list, same file:line form: weekly incrparity-weekly [infra/aws/terraform/bd-pipeline/eventbridge.tf:376]; hourly access-anomaly-scanner-schedule [infra/aws/terraform/security-ops/events.tf:7]; 6h cost-anomaly-scanner-schedule [infra/aws/terraform/security-ops/events.tf:31]. The ten UNDECIDED rows that state an expression (daily on a twice-a-day cron, 45min on a three-times-a-day cron) are in row LGIC_BLANKFIX-D1-W1-S8.",
+      "denominator": "3 of 3 named schedules recorded (plus 3 further word kinds named); 0 verdicts given",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: the substitute oracle is 3.0.0_SA_CVO at L9, who reads the schedules at the paths above; the grade lands in the CVO's adjudication row",
+      "expect": "recorded paths, no verdict"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "check_fwd4_cadence.py run in-process with opal_naming_cadence.carried_word patched to return weekly for every name ending -daily (no file changed).",
+      "expected": "FWD4-CADENCE ok=False with mismatch greater than 0",
+      "observed": "FWD4-CADENCE ok=False schedules=180 agree=18 undecided=105 mismatch=57 (the patch also moves the root check's own lines, which read the same function)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "BAB1-AC1 denominator against an independent count",
+      "observed": "the checker's 180 schedule lines equal python lib/opal_naming_cadence.py estate rows=180 (a separate reader of the same files); the in-process patched run printed the same 180",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a live rename or apply of any schedule",
+      "reason": "order BOUNDS: no terraform, no AWS; a live rename is a deploy with its own pair"
+    },
+    {
+      "item": "the cot (10 lines) firm-token arm of the gate refusal",
+      "reason": "only the 49f arm was run against the gate (row S7)"
+    }
+  ],
+  "surprises": [
+    "LGIC_BLANKFIX-D1-W1-S7",
+    "LGIC_BLANKFIX-D1-W1-S8"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/LGIC_BLANKFIX.TO-BF-ab-1.fwd4-schedules-cadence.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "check_fwd4_cadence.py",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/check_fwd4_cadence.py",
+      "result": "FWD4-CADENCE ok=True schedules=180 agree=144 undecided=36 mismatch=0"
+    },
+    {
+      "tool": "exercise_fwd4_rename.py",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_fwd4_rename.py",
+      "result": "FWD4-RENAME ok=True name=estate-report-0900et-daily grade=CONFORMANT"
+    }
+  ]
+}
