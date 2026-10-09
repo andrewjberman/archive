@@ -1,0 +1,102 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_GATSCP.TO-GS-f-4",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-f-4.crossbox-record-custody.md",
+  "group": "OTHER",
+  "vintage_commit": "3c199f5b46"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/decompositions/NFRA_GATSCP_DECOMP.round3.md",
+  "vintage_commit": "3c199f5b46",
+  "to_ref": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-f-4.crossbox-record-custody.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_GATSCP~11",
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/owned-paths-validate.py",
+   "kind": "script",
+   "commit_or_etag": "cbfaf85f6502592d85f17e39d03dce87dcba82ee",
+   "artifact_covered_by": [
+    "GF4-AC1"
+   ],
+   "introduces": [
+    "--check-path",
+    "_xbox_to_serial",
+    "_xbox_permits",
+    "_cmd_check_path"
+   ],
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A tool in the repo read in place by the commit gate; nothing is deployed to AWS."
+  },
+  {
+   "path_or_key": ".tools/merge-resolve-known.py",
+   "kind": "script",
+   "commit_or_etag": "cbfaf85f6502592d85f17e39d03dce87dcba82ee",
+   "artifact_covered_by": [
+    "GF4-AC2"
+   ],
+   "introduces": [
+    "fold_crossbox",
+    "CROSSBOX_RE"
+   ],
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A tool in the repo read in place by the integrate; nothing is deployed to AWS."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "GF4-AC1",
+   "criterion_verbatim": "the receiving lane named in the staged record is permitted; another Codex lane and an unnamed COO lane are refused",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round3_prep/checks/r3_xbox_custody.py\" lane",
+   "expect": "GS-F4-LANE ok=True",
+   "output_evidence": "PASS receiver-own-record-permitted: rc=0 :: PERMIT org/devices/crossbox/XB-20261009T105156Z-1c53.json lane=DEVICES_CROSSBOX agent=0.7.0_AE_CloudOps~ZG\n  PASS other-lane-refused: rc=1 :: REFUSE org/devices/crossbox/XB-20261009T105156Z-1c53.json -- lane=DEVICES_CROSSBOX; agent=0.7.0_AE_CloudOps~ZQ is not in permitted_agents and is not the record's to_serial ('0.7.0_AE_CloudOps~ZG'): the receiving lane commits its own record only\n  PASS unnamed-coo-refused: rc=1 :: REFUSE org/devices/crossbox/XB-20261009T105156Z-1c53.json -- lane=DEVICES_CROSSBOX; agent=2.0.0_SA_COO~W1 is not in permitted_agents and is not the record's to_serial ('0.7.0_AE_CloudOps~ZG'): the receiving lane commits its own record only\nGS-F4-LANE ok=True arms=3 failed=0",
+   "denominator": "3 of 3 arms passed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "GF4-AC2",
+   "criterion_verbatim": "a record written on both ends (ack on one, sent on the other) folds with both fields; a same-field clash is refused",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round3_prep/checks/r3_xbox_custody.py\" resolver",
+   "expect": "GS-F4-RESOLVER ok=True",
+   "output_evidence": "PASS fields-folded: rc=0 folded=True :: RESOLVED org/devices/crossbox/XB-20261009T105156Z-1c53.json 81afa0d73817e081695697f423d9d117750ca0f4 crossbox-fold\n  PASS same-field-clash-refused: rc=1 :: UNRESOLVED org/devices/crossbox/XB-20261009T105156Z-1c53.json both sides hold a different ack.by ('0.7.0_AE_CloudOps~ZQ' vs '0.7.0_AE_CloudOps~ZG'): resolve by hand\nGS-F4-RESOLVER ok=True arms=2 failed=0",
+   "denominator": "2 of 2 arms passed",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Each check carries its own difference arms: the lane check permits the receiver and refuses a sibling Codex lane and a COO lane on the same staged record; the resolver check folds a two-ended record and refuses a same-field clash. Self-test mutant arms added to owned-paths-validate.py (sibling lane, base serial, unnamed COO, unreadable record, non-record path).",
+   "expected": "receiver rc 0; other lanes rc 1; fold RESOLVED with both fields; clash rc 1",
+   "observed": "GS-F4-LANE ok=True arms=3; GS-F4-RESOLVER ok=True arms=2",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "both checks run once more after the commit at cbfaf85f65; the last lines were the same",
+   "observed": "GS-F4-LANE ok=True; GS-F4-RESOLVER ok=True",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Live use of the new admission by the real commit gate (safe-commit.sh calling --check-agent with a receiving lane's staged record)",
+   "reason": "check_agent carries the clause, so --check-agent reaches it, but only --check-path is exercised by the checks; the scratch-repo self-test arm exercises check_agent directly."
+  }
+ ],
+ "surprises": [
+  "NFRA_GATSCP-D1-W11-S1",
+  "NFRA_GATSCP-D1-W11-S2"
+ ],
+ "session_log": "Worker 0.9.0_WK_NFRA_GATSCP~11, L7 of 2.0.0_SA_COO~N1, branch wk-NFRA_GATSCP-11. owned-paths-validate.py --self-test last result line: RESULT: 0 arm(s) failed of 20 (+ live census). test-merge-resolve-known.py: RESULT: 0 of 22 failed. owned-paths-validate.py .owned-paths.yaml: OK 99 lanes, 441 path rules.",
+ "compiler_tools": [
+  {
+   "tool": "Read",
+   "invocation": "Read .tools/crossbox-call.py merge (:597-625) and .tools/merge-resolve-known.py",
+   "result": "merge folds sub-fields two-way, null ignored, two different non-null refuse"
+  }
+ ]
+}
