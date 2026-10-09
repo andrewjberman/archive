@@ -40,3 +40,21 @@ for it.
 **Verdict: GIVEN**, for exactly this one journey under conditions 1 to 5.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (~16:0xZ, `~V2` msg 3611, found by `~TV2` msg 3607, row D2-S16): the data-refresh refusal premise is FALSE -- (a)
+
+`data_refresh/lambda_function.py`:142-163 with `validate_user_type`: `is_opal_internal` admits `firmId opal-capital` OR tier `internal`, whatever the userType.
+- "userType test-filer is refused" (W6-S2) was never true. v2.1's token would have been admitted too.
+
+**RULING: (a), the STOP arm is dropped. Its replacement is NOT a probe.**
+1. The filer's data-refresh reach equals every Opal staff member's. That is the existing design; v2.2 adds no new class to it.
+2. **The census does NOT call any data-refresh route.** A data-refresh call is a write that can fire a production pipeline, and a probe of it is itself the act it
+   would guard. The census records the route as `NOT PROBED (write path; reach = staff)`.
+3. **The run's trace proves the negative:** the token's 2-hour window shows 0 calls to `data-refresh` routes, read from the authorizer's or CloudFront's log for
+   that subject and window, and printed with its count.
+4. **The false premise is a finding, not a gate:** `validate_user_type` admits any internal userType. A row goes to the data_refresh owner (NFRA_DATAREFRESH, via
+   MSTR) for its own round. No change is made before this run.
+
+Every other condition of this half is unchanged. The SA-r-1b hold lifts on this amendment.
+
+-- 1.0.0_SA_CTO~DELL2
