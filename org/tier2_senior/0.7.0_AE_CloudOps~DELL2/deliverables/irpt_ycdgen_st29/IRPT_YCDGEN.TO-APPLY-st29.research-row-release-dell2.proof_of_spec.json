@@ -1,0 +1,147 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "The ledger irpt-ycdgen-f1-st29-20261009 is CLOSED.",
+      "denominator": "1 Status line, read from the committed ledger entry; 8 of 8 legs proven",
+      "expect": "^\\*\\*Status:\\*\\* CLOSED",
+      "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-ycdgen-f1-st29-20261009_deploy_completion.md",
+      "method": "command",
+      "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261009T121448Z",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "V2 shows the host back on st27 with the allow list Andrew only.",
+      "denominator": "1 allow-list tuple read from the RUNNING st27 root; it holds 1 principal where st28 and st29 held 2",
+      "expect": "OPAL_PRODUCER_PRINCIPALS = \\(\"andrew@opalinvest\\.com\",\\)$",
+      "invocation": "grep -m1 'V2 allow list' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st29/X1_V2_REMOVAL_20261009.txt",
+      "method": "command",
+      "output_evidence": "V2 allow list: OPAL_PRODUCER_PRINCIPALS = (\"andrew@opalinvest.com\",)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "W2 shows svc back on cottonwood.",
+      "denominator": "1 opal-users-v2 item, which is the entire write surface the order's bounds allow",
+      "expect": "'allowedFirmIds': 'cottonwood'",
+      "invocation": "grep -m1 '^after:' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st29/W2_SWAP_BACK_20261009.txt",
+      "method": "command",
+      "output_evidence": "after: {'allowedFirmIds': 'cottonwood', 'status': 'active', 'updatedAt': '2026-10-09T12:13:57.679766Z', 'userType': 'service'}",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "c8b2acab4d",
+      "deploy_evidence": "the pre-read: st28 running, st27 root present, both installer guards already true",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st29/P1_PRE_READ_20261009.txt"
+    },
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "c8b2acab4d",
+      "deploy_evidence": "the install and its three expectations, including research row firms = 3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st29/D2_V1_INSTALL_20261009.txt"
+    },
+    {
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "commit_or_etag": "c8b2acab4d",
+      "deploy_evidence": "the removal straight to st27 and the Andrew-only allow list AC2 reads",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st29/X1_V2_REMOVAL_20261009.txt"
+    },
+    {
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "commit_or_etag": "c8b2acab4d",
+      "deploy_evidence": "the svc firm swap back, before and after printed by the tool itself",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st29/W2_SWAP_BACK_20261009.txt"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~DELL2",
+  "compiler_tools": [
+    {
+      "invocation": "pre_read.sh | install_st29.sh | remove_st29_to_st27.sh",
+      "result": "ssm 83221192 Success rc 0; install rc=0 at 11:57:41Z; ssm d983aad5 Success rc 0, removal rc=0 at 12:12:01Z",
+      "tool": "host_read.py"
+    },
+    {
+      "invocation": "open | close-leg x8 | close",
+      "result": "irpt-ycdgen-f1-st29-20261009 CLOSED, 8 of 8; and irpt-ycdgen-f1-st28-20261009 CLOSED SUPERSEDED, 9 of 9, its four open legs closed as world-done rather than re-executed",
+      "tool": "deploy_ledger.py"
+    }
+  ],
+  "controls": {
+    "absence_of_the_elevated_principal_after": {
+      "description": "the point of removing st29 is that the svc producer principal must not outlive the release that needed it",
+      "expected_landed": "OPAL_PRODUCER_PRINCIPALS holds andrew ONLY",
+      "expected_not_landed": "svc-irpt-analysis still present, which would be a left-behind grant",
+      "observed": "OPAL_PRODUCER_PRINCIPALS = (\"andrew@opalinvest.com\",) -- 1 principal, down from the 2 st28 and st29 carried",
+      "status": "PASS"
+    },
+    "queue_gate_read_by_two_instruments": {
+      "description": "the CTO half says the installer's gate is NEVER forced, so the 0/0 reading had to be sound: ApproximateNumberOfMessages is approximate by name, so one source would not do",
+      "expected_landed": "0/0 from the SQS API AND from the host's own read",
+      "expected_not_landed": "any non-zero, in which case st29 is not installed at all",
+      "observed": "0/0 from the SQS API and 0/0 from the host's P1 read; 0/0 again at X1",
+      "status": "PASS"
+    },
+    "worker_sha_moved_on_the_way_back": {
+      "description": "a root swap can leave the unit serving the OLD root, which reads as a success everywhere except the running bytes",
+      "expected_landed": "the worker sha256 on st27 DIFFERS from the one on st29",
+      "expected_not_landed": "an unchanged sha, meaning the unit never moved",
+      "observed": "st29 served c0bbea55...; after the removal the running worker reads 9317219a..., st27's own value -- so real bytes moved",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "F1 is not graded by this seat",
+      "reason": "the order assigns F1 to 2.0.0_SA_COO~G2, which reported it done at 12:00:39Z (REQ-5e4149d2863aea31cc87d660 produced on st29, 0 YCharts markers, msg 3237). The leg records the issuer's word, not a grade of mine"
+    },
+    {
+      "item": "the read-side refusal G2 mentions is not investigated here",
+      "reason": "G2 states it is a Lambda finding rather than this host, and this order's bounds are the host plus one opal-users-v2 item -- no Lambda change"
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R7.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/IRPT_YCDGEN.TO-APPLY-st29.research-row-release-dell2.md",
+    "vintage_commit": "d5e3459acbd4a4ebc08a20d0e2d300f2f0f0dd21"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/st29_release/NEVER_WIDEN_PACKET_ST29.md, signed by the issuance",
+    "cto_half": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_ST29_CTO_HALF.md, GIVEN (issuer msg 3184). Its three conditions: D2 only at queue 0/0 and the installer's gate never forced; re-read the tar and script sha256 at D2; and if the queue is not 0/0 by 13:09:10Z, st29 is not installed. All three were honoured and are evidenced in the legs"
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "WORLD",
+  "rollback": "the installer's own rollback to st28, then STOP; not needed. Both the st28 and st27 roots remain on the host, and the host now runs st27",
+  "schema_version": "1.0",
+  "scope": "install st28-plus-the-round-7-research-row on resident host i-0167fd745ad906a66, hand 2.0.0_SA_COO~G2 its F1 re-run, then remove STRAIGHT to st27 and swap svc back to cottonwood. Supersedes TO-APPLY-st28's X1, V2 and W2",
+  "session_log": "org/critical_paths/change_management/20261009T1149Z_irpt-ycdgen-f1-st29-20261009_deploy_completion.md",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/IRPT_YCDGEN.TO-APPLY-st29.research-row-release-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "33ba944f23"
+  },
+  "surprises": [],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-st29"
+}
