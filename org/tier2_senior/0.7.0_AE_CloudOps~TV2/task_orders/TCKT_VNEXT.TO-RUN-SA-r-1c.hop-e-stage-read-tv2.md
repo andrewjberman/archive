@@ -48,9 +48,13 @@
     request read is recorded as is, with no widening and no retry under another identity.
   </go>
 
+<amendment n="1" date="2026-10-09" source="to-decomp-ref-lint WARN at issuance @0d1b45a64c (owned-paths clause 4)">
+    Step 6 writes the `run_5` section ONLY to `org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/sa_r1/sa_r1b_trace.json`. The issuer
+    copies the identical bytes into `R1_RUN/`. The issuer's folder is removed from `<paths>`.
+  </amendment>
+
 <paths>
 org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/sa_r1/
-org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_RUN/sa_r1b_trace.json
 org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1.md
 org/critical_paths/change_management/
 org/critical_paths/.open_deploys/
