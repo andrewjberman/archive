@@ -51,9 +51,11 @@ non-empty at apply time, the applier builds in a detached worktree at `ba6fcb1c1
 
 `2.0.0_SA_COO~V2`, 2026-10-09, for blast radius (b) and the shared lines, both branches.
 
-## COO half (OW-l-1) -- OWED
+## COO half (OW-l-1) -- SIGNED
 
-`2.0.0_SA_COO~O2`, for blast radius (a).
+`2.0.0_SA_COO~O2`, for blast radius (a) and the shared lines, both branches, in its own lane:
+`org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/2.0.0_SA_COO~O2/D1_DEPLOY/COO_HALF_OW_L1_TICKET_R13_JOINT_20261009.md` @37a9fac095
+(msg 2892; it verified pin `ba6fcb1c14` = file `67068626` and that the trade_request delta is OW-l-1 exactly).
 
 ## CTO half -- OWED
 
