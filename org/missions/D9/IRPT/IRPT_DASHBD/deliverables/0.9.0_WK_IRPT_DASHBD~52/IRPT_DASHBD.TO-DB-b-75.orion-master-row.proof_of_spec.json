@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-75",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "30c815767d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "30c815767d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-75.orion-master-row.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~52",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~52/ORION_MASTER_ROW.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/registry/scopes.json",
+      "kind": "config_data",
+      "commit_or_etag": "5f962296ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one MASTER row (key 4698, firm inflection, vendor orion) and masters [\"4698\"] on the inflection FIRM row; python lib/opal_naming.py validate rc 0 (54 system rows, 14 scope rows, 0 warnings); no other registry file, bucket or data touched.",
+      "artifact_covered_by": ["DB37-3-AC1", "DB37-3-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~52/ORION_MASTER_ROW.json",
+      "kind": "config_data",
+      "commit_or_etag": "5f962296ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record: key 4698 and landing {prefix s3://opal-data-inf/bronze/orion-api/, objects 17132, read_at 2026-10-09T05:37Z}, read by s3 ls --recursive --summarize (S3 read only).",
+      "artifact_covered_by": ["DB37-3-AC2", "DB37-3-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB37-3-AC1",
+      "criterion_verbatim": "DB37-3-AC1 -- a MASTER row inflection/orion exists and the firm row names it. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r37/p37_round37.py\" . DB37-3-AC1",
+      "output_evidence": "OK: MASTER 4698 -> inflection / orion, named in inflection.masters\nDB37-3-AC1 PASS",
+      "denominator": "1 of 1 new MASTER row; 1 of 1 inflection FIRM row names it (14 scope rows after, 13 before)",
+      "status": "PASS",
+      "expect": "DB37-3-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB37-3-AC2",
+      "criterion_verbatim": "DB37-3-AC2 -- lib/opal_naming.lookup on the new key returns firm inflection. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r37/p37_round37.py\" . DB37-3-AC2",
+      "output_evidence": "OK: lookup('4698') -> firm inflection\nDB37-3-AC2 PASS",
+      "denominator": "1 of 1 key looked up (4698)",
+      "status": "PASS",
+      "expect": "DB37-3-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB37-3-AC3",
+      "criterion_verbatim": "DB37-3-AC3 -- the record names where that master's data lands, with an object count read by listing. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r37/p37_round37.py\" . DB37-3-AC3",
+      "output_evidence": "OK: 4698 lands under s3://opal-data-inf/bronze/orion-api/ (17132 objects, read 2026-10-09T05:37Z)\nDB37-3-AC3 PASS",
+      "denominator": "17,132 objects under one prefix by one recursive listing (rc 0); opal-data-inflection listed at the same read holds only irpt/",
+      "status": "PASS",
+      "expect": "DB37-3-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads scopes.json and the record only; no run state",
+      "observed": "printed the same PASS last lines on a second read",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "In a scratch copy (.scratch/mut), the inflection firm row's masters emptied; the real registry untouched.",
+      "expected": "DB37-3-AC1 FAIL naming the empty masters",
+      "observed": "FAIL: inflection's masters [] do not name '4698'\nDB37-3-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "re-pointing the Inflection adapter or any pipeline to the new key; any move of data into opal-data-inflection",
+      "reason": "Outside the order: the row is added, the data lands only under the legacy alias opal-data-inf and was not moved."
+    },
+    {
+      "item": "any S3 write, vendor call, secret read, deploy, bun or download; any edit under data/, infra/ (beyond the one registry file) or portal/",
+      "reason": "Bounds of the order; none made. S3 was listed read-only."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "opal_naming validate",
+      "invocation": "python lib/opal_naming.py validate",
+      "result": "VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s), rc 0"
+    }
+  ]
+}
