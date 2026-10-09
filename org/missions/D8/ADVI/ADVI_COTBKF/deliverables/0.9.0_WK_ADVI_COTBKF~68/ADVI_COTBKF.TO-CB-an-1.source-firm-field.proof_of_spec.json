@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-an-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-an-1.source-firm-field.md",
+    "group": "OTHER",
+    "vintage_commit": "8a50861034"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~68",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round40.md",
+    "vintage_commit": "8a50861034",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-an-1.source-firm-field.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/cot/scripts/gold/build_canonical_prices_v2.py",
+      "kind": "script",
+      "commit_or_etag": "298721a585",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code and tests only; no deploy, no S3 write (order BOUNDS)",
+      "artifact_covered_by": [
+        "CB40an1-AC1",
+        "CB40an1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/cot/scripts/gold/tests/test_canonical_prices_source_firm.py",
+      "kind": "script",
+      "commit_or_etag": "eb13fd505d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed alone first; 4 failed, 1 passed at the base",
+      "artifact_covered_by": [
+        "CB40an1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_cot_price_rewrite.py",
+      "kind": "script",
+      "commit_or_etag": "298721a585",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "census reads source_firm; --source-firm-only read the 38 named versions of opal-data-cot (reads only) and printed keys_NOT-CLEAN=38",
+      "artifact_covered_by": [
+        "CB40an1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB40an1-AC1",
+      "criterion_verbatim": "python -m pytest data/cot/scripts/gold/tests/test_canonical_prices_source_firm.py -q expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest data/cot/scripts/gold/tests/test_canonical_prices_source_firm.py -q",
+      "expect": "passed",
+      "output_evidence": "rc 0; 5 passed, 7 warnings in 9.43s. Suites beside it: data/cot/scripts/gold/tests/ 33 passed; data/assets/scripts/silver/tests/ 725 passed, 11 skipped. The test alone (eb13fd505d) failed at the base: 4 failed, 1 passed (the unchanged-columns assertion).",
+      "denominator": "5 of 5 assertions pass (a column after source, b own firm, c foreign firm, d absent, e other columns unchanged)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB40an1-AC2",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: source_firm comes from the input's address via the registry, never from a token; absent is never defaulted to cottonwood; the census reports absent as NOT-CLEAN.",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read resolve_s3_firm / resolve_repo_file_firm / combine_firms / resolve_input_firms in build_canonical_prices_v2.py and source_firm_census in commonwealth_cot_price_rewrite.py at 298721a585",
+      "expect": "CVO grades at L9",
+      "output_evidence": "commonwealth_cot_price_rewrite.py --source-firm-only: SOURCE-FIRM-CENSUS keys=38 rows=11671939 cottonwood=0 BREACH=0 absent=11671939 keys_BREACH=0 keys_NOT-CLEAN=38 keys_CLEAN=0. Firm per input resolved from registry bucket / bucket alias / pipeline tree; surprise rows W68-S1 and W68-S2 disclose a dead Step 5b filter, the run-time registry dependency, the parts-joined key literals and the price-input stamp rule.",
+      "denominator": "38 of 38 named keys read; 4 inputs resolved (3 S3 + 1 repo file)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment criterion, 3.0.0_SA_CVO at L9 is the oracle"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the new test run twice (rc 0 both)",
+      "observed": "5 passed on each run",
+      "status": "N/A-WITH-REASON"
+    },
+    "mutant": {
+      "description": "the task order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a deployed run of the writer; the run host's lib/opal_naming and registry presence; the live S3 output",
+      "reason": "the order is code and tests only, no deploy (BOUNDS); see surprise row W68-S2"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W68-S1",
+    "ADVI_COTBKF-D2-W68-S2"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~68/ADVI_COTBKF.TO-CB-an-1.source-firm-field.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python data/assets/scripts/silver/commonwealth_cot_price_rewrite.py --source-firm-only --out .scratch/sf",
+      "result": "SOURCE-FIRM-CENSUS keys=38 rows=11671939 cottonwood=0 BREACH=0 absent=11671939 keys_BREACH=0 keys_NOT-CLEAN=38 keys_CLEAN=0"
+    }
+  ]
+}
