@@ -13,8 +13,8 @@
  * sentence.
  * Arms (exit 0 only on all five):
  *   1 NO FALSE ABSENCE: the branch that prints the description's sentences draws no "No company description is on file yet.".
- *   2 NO FIXED CAPTION: ThesisCards.tsx carries no "does not describe the business" string; the description is headed by its served
- *     label (description.label).
+ *   2 NO FIXED CAPTION: ThesisCards.tsx carries no "does not describe the business" string (its second clause, the drafted section headed
+ *     by description.label, is SUPERSEDED by the round-63 analysis and round 64 r64a.cjs).
  *   3 SPANS PLACED: components/thesisSpans.ts (pure, no page imports) exports splitOnSpans(text, spans). It returns pieces
  *     [{ text, span }] whose texts join back to the sentence exactly, with each served span that occurs in the text (first occurrence,
  *     in order, no overlap) as its own piece marked span: true; a span not in the text is skipped (loaded through the real module).
@@ -52,7 +52,9 @@ const G = {
     if (t === null) return ['ThesisCards.tsx missing'];
     const f = [];
     if (/does not describe the business/i.test(t)) f.push('the fixed "does not describe the business" caption is still in ThesisCards.tsx');
-    if (!/heading=\{\s*description\.label\s*\}/.test(descriptionBranch(t))) f.push('the description is not headed by its served label (heading={description.label})');
+    // SUPERSEDED (round-63 analysis @f7d74e6665, AV-zzo-1 NOT MET): heading the DRAFTED section with description.label was itself the
+    // false label; round 64 (r64a.cjs) heads the served dossier description and puts the drafted lines under "From the filing". This
+    // arm keeps only the regression guard against the fixed caption.
     return f;
   },
   spans: (fn) => {

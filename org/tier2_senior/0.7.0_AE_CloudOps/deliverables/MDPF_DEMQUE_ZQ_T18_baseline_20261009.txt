@@ -1,0 +1,172 @@
+OPAL_BBGTML scheduled tplus1 pull 
+started: 20261009_070014                  
+                                  
+                                  
+DAPI-LIVENESS PRECONDITION + SIGN-IN FALLBACK 
+[fallback] checking DAPI availability...
+[fallback] DAPI UP -- proceed with pull, no sign-in needed.
+DAPI FALLBACK EXIT: 0     
+PRECONDITION: PASS -- DAPI UP, an entitled session answered a real refdata request. 
+                                  
+OPAL_BBGTML daily pull -- VARIANT: tplus1
+  date rule: today - 1 business day
+  target:    20261008
+  project:   C:\Users\Opal Bloomberg\OneDrive - Opal Capital\Shared - Documents\OCIO Models\Dashboard\202511 Model Portfolio Exposure
+  notebooks: C:\Users\Opal Bloomberg\Desktop\ajb_workspace\integrations\bloomberg\pipeline\tplus1\src
+RUN:  market_indices_data_pull.ipynb (calls the Bloomberg Terminal; minutes, not seconds)
+C:\Anaconda\envs\cma\Lib\site-packages\zmq\_future.py:724: RuntimeWarning: Proactor event loop does not implement add_reader family of methods required for zmq. Registering an additional selector thread for add_reader support via tornado. Use `asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())` to avoid this warning.
+  self._get_loop()
+OK:   market_indices_data_pull.ipynb completed in 141s
+RUN:  model_portfolio_regression_analysis.ipynb (calls the Bloomberg Terminal; minutes, not seconds)
+OK:   model_portfolio_regression_analysis.ipynb completed in 95s
+
+TRIPWIRE (leg 2):
+TRIPWIRE: vintage 20261008
+OK:   data pkl: top-level keys exact
+OK:   data.return_daily: 115403 rows within band [107000, 165000]
+OK:   data.return_daily: no duplicate ['date', 'index_name'] rows
+OK:   data.return_monthly: 29247 rows within band [28400, 43500]
+OK:   data.return_monthly: no duplicate ['date', 'index_name'] rows
+OK:   data.price_monthly: 30415 rows within band [29500, 45300]
+OK:   data.price_monthly: no duplicate ['date', 'index_name'] rows
+OK:   data.return_daily: all 5 model portfolios present
+OK:   data as-of 2026-10-08 matches expected business day
+      custom CIX series graded: 13 of 84 tickers in return_daily (71 vendor series are not custom and are not graded here); as-of 2026-10-08
+OK:   data.return_daily: all 13 custom CIX series reach the as-of 2026-10-08
+OK:   model pkl: top-level keys exact (13)
+OK:   model.regression: UST/ST/INT/LTC/LTA present
+OK:   model.summary: shape (25, 10) exact
+OK:   model.etf_returns: 80428 rows within band [75000, 115000]
+OK:   model.model_returns: 7245 rows within band [6700, 10400]
+OK:   model.holdings: 1547 rows within band [1400, 2300]
+OK:   model.etf_returns: no duplicate ['date', 'ticker'] rows
+OK:   model as-of 2026-10-08 matches expected business day
+
+RESULT: PASS -- both PKLs safe to send (/bbg-send).
+
+NEXT: PKLs for 20261008 are syncing to SharePoint via OneDrive (give it a
+      minute). Then publish on the SAME channel the scheduled run uses:
+        <PY_AWS python> -u integrations/bloomberg/pipeline/publish_to_portal.py
+      No args needed -- the publisher derives the vintage itself, re-runs the
+      as-of-scoped tripwire, and refuses a backward or duplicate publish.
+      PY_AWS is the boto3 interpreter; the cma env used for the pull has no
+      boto3. See scheduled_daily_pull.cmd SEND LEG for both settings.
+WARNING: do NOT publish via opal_data_refresh_upload(). The send leg was moved
+      OFF the m365 gateway (Andrew-direct 2026-08-06, recorded in
+      scheduled_daily_pull.cmd): measured on 2026-08-05 and 2026-08-06 it
+      returns 'transport dropped, response lost' on calls that ALREADY
+      SUCCEEDED server-side, so a retry against that shape DOUBLE-FIRES the
+      pipeline.
+                                  
+PULL EXIT CODE: 0              
+                                  
+PUBLISH LEG                       
+PUBLISH vintage 20261008 (2026-10-08)
+  project: C:\Users\Opal Bloomberg\OneDrive - Opal Capital\Shared - Documents\OCIO Models\Dashboard\202511 Model Portfolio Exposure
+OK:   both PKLs present
+TRIPWIRE: vintage 20261008
+OK:   data pkl: top-level keys exact
+OK:   data.return_daily: 115403 rows within band [107000, 165000]
+OK:   data.return_daily: no duplicate ['date', 'index_name'] rows
+OK:   data.return_monthly: 29247 rows within band [28400, 43500]
+OK:   data.return_monthly: no duplicate ['date', 'index_name'] rows
+OK:   data.price_monthly: 30415 rows within band [29500, 45300]
+OK:   data.price_monthly: no duplicate ['date', 'index_name'] rows
+OK:   data.return_daily: all 5 model portfolios present
+OK:   data.return_daily: all 5 model portfolios have a bar ON the as-of 2026-10-08
+OK:   data as-of 2026-10-08 matches expected business day
+OK:   model pkl: top-level keys exact (13)
+OK:   model.regression: UST/ST/INT/LTC/LTA present
+OK:   model.summary: shape (25, 10) exact
+OK:   model.etf_returns: 80428 rows within band [75000, 115000]
+OK:   model.model_returns: 7245 rows within band [6700, 10400]
+OK:   model.holdings: 1547 rows within band [1400, 2300]
+OK:   model.etf_returns: no duplicate ['date', 'ticker'] rows
+OK:   model as-of 2026-10-08 matches expected business day
+
+RESULT: PASS -- both PKLs safe to send (tzero vintage).
+OK:   as-of-scoped tripwire PASS
+OK:   portal currently serves 2026-10-07 -- 2026-10-08 is newer, safe to advance
+OK:   uploaded data 20261008 v1.pkl (8721825 bytes)
+OK:   uploaded model 20261008 v1.pkl (17961431 bytes)
+OK:   uploaded manifest.json LAST -- pipeline fired
+WAIT: polling served artifact for data_as_of 2026-10-08 (timeout 900s)
+OK:   served data_as_of 2026-10-08 (generated_at 2026-10-09T11:06:33Z)
+OK:   served 1D matches the PKL for all five models
+RESULT: PUBLISHED 2026-10-08 -- verified by content, not by self-report.
+                                  
+PUBLISH EXIT CODE: 0       
+RESULT: END-TO-END OK -- pulled, validated, published, served-content verified. 
+                                  
+ETF LEG (ETFS_POSITIONING L1)    
+[etf_daily] as-of 2026-10-08 (BDay(-1) of 2026-10-09) -- landing under bbg/2026-10-08/
+[etf_daily] run_class=scheduled (default adhoc; only the scheduled chain sets it)
+[etf_daily] universe DERIVED from silver/holdings/2026-10-08.parquet: 168 constituents + 4 funds + 2 extra securities ['GLD', 'VXX'] = 174 (rows 188, sentinels excluded); 168 resolved by ISSUER IDENTIFIER, 6 by ticker
+[etf_daily] prior manifest 2026-10-07: history_window_end=2026-10-07
+[etf_daily] history top-up window: 2026-10-08 -> 2026-10-08
+[etf_daily] characteristics: 174 x 14
+[etf_daily] history top-up: 173 rows
+[etf_daily] vendor observations recorded for 174 securities; 1 returned ZERO rows: 2602335D
+[etf_daily] fund daily: 4 rows
+[etf_daily] history backfill: 5 securities need depth; 5 planned, 0 capped to the next run
+[etf_daily] history backfill: 514 rows for 5 securities
+[etf_daily] written 7 object(s); failed 0
+[etf_daily]   OK   bbg/2026-10-08/characteristics.csv
+[etf_daily]   OK   bbg/2026-10-08/characteristics.parquet
+[etf_daily]   OK   bbg/2026-10-08/history_topup.csv
+[etf_daily]   OK   bbg/2026-10-08/history_topup.parquet
+[etf_daily]   OK   bbg/2026-10-08/fund_daily.csv
+[etf_daily]   OK   bbg/2026-10-08/fund_daily.parquet
+[etf_daily]   OK   bbg/2026-10-08/run_manifest.json
+[etf_daily] field exceptions (why a column is empty):
+[etf_daily]   FUND_EXPENSE_RATIO:NOT_APPLICABLE_TO_REF_DATA  on 166 securities
+[etf_daily]   FUND_TOTAL_ASSETS:NOT_APPLICABLE_TO_REF_DATA  on 166 securities
+[etf_daily]   TOTAL_NUMBER_OF_HOLDINGS_IN_PORT:NOT_APPLICABLE_TO_REF_DATA  on 166 securities
+[etf_daily]   HB_OAS_EFF_DURTN:NOT_APPLICABLE_TO_REF_DATA  on 166 securities
+[etf_daily]   CUR_MKT_CAP:NOT_APPLICABLE_TO_REF_DATA  on 2 securities
+[etf_daily]   TRACKING_ERROR:NOT_APPLICABLE_TO_REF_DATA  on 1 securities
+[etf_daily]   EQY_DVD_YLD_IND_NET:NOT_APPLICABLE_TO_REF_DATA  on 1 securities
+[etf_daily] EXIT 0
+ETF LEG EXIT CODE: 0       
+                                       
+CONSTITUENTS LEG (A4/A4.1)           
+[etf_constituents] as-of 2026-10-08 (prev_trading_day, NYSE/hardcoded-fallback-2010-2027) -- landing under bbg/2026-10-08/constituents/
+[etf_constituents] run_class=scheduled (default adhoc; only the scheduled chain sets it)
+[etf_constituents] leg 1a: {'DIVZ': 'provided:sector_allocation=10,geo_allocation=3,count=31', 'IDVZ': 'provided:sector_allocation=14,geo_allocation=20,count=45', 'PFDE': 'provided:sector_allocation=11,geo_allocation=2,count=89', 'PFOE': 'provided:sector_allocation=7,geo_allocation=9,count=24'}
+[etf_constituents] leg 1b: {'DIVZ': 'refused:entitlement', 'IDVZ': 'refused:entitlement', 'PFDE': 'refused:entitlement', 'PFOE': 'refused:entitlement'}
+[etf_constituents] leg 2: {'DIVZ': 'filled-from:pathfinder:silver/holdings/2026-10-08.parquet:rows=30', 'IDVZ': 'filled-from:pathfinder:silver/holdings/2026-10-08.parquet:rows=43', 'PFDE': 'filled-from:pathfinder:silver/holdings/2026-10-08.parquet:rows=90', 'PFOE': 'filled-from:pathfinder:silver/holdings/2026-10-08.parquet:rows=25'}
+[etf_constituents] written 9 object(s); failed 0
+[etf_constituents]   OK   bbg/2026-10-08/constituents/derived_summary.csv
+[etf_constituents]   OK   bbg/2026-10-08/constituents/derived_summary.parquet
+[etf_constituents]   OK   bbg/2026-10-08/constituents/derived_sector_allocation.csv
+[etf_constituents]   OK   bbg/2026-10-08/constituents/derived_sector_allocation.parquet
+[etf_constituents]   OK   bbg/2026-10-08/constituents/derived_geo_allocation.csv
+[etf_constituents]   OK   bbg/2026-10-08/constituents/derived_geo_allocation.parquet
+[etf_constituents]   OK   bbg/2026-10-08/constituents/constituents_issuer_fill.csv
+[etf_constituents]   OK   bbg/2026-10-08/constituents/constituents_issuer_fill.parquet
+[etf_constituents]   OK   bbg/2026-10-08/constituents/run_manifest.json
+[etf_constituents] EXIT 0
+CONSTITUENTS LEG EXIT CODE: 0  
+                                       
+PRICE LEG (AMGT Lead Panel price axis) 
+[price_axis] universe: 95 of 95 covered name(s) mapped (source: research_dossier (lib.research.coverage.covered_universe.covered_security_keys) via identity crosswalk bloomberg form); 0 unmapped
+[price_axis] as-of 2026-10-08 (lib.trading_calendar.prev_trading_day) -- window 2026-09-08 .. 2026-10-08 (30 days)
+[price_axis] usable PX_LAST series for 94 of 95 ticker(s); 1 insufficient/no history in window: ['ROG SW']
+[price_axis] identity: 94 of 94 ticker(s) resolved to a security_key (source=pool:universe/v1/2026-10-06.json, fallback_reason=None)
+[price_axis] TRENDING_PRICE: ranked 94 row(s); rank 1 = SNPS US (26.967323929291137); rank 94 = QXO US (-16.075471698113216); 1 excluded; generation_id=20261009T110734Z-0b39dfc9e148 state=COMPLETE
+[price_axis] BREAKOUT_PRICE: ranked 94 row(s); rank 1 = SNPS US (0.17797042325344217); rank 94 = BNP FP (-0.09792619396132402); 1 excluded; generation_id=20261009T110734Z-0dd1f43b5fc3 state=COMPLETE
+[price_axis] wrote record copy: C:\Users\Opal Bloomberg\Desktop\ajb_workspace\org\missions\D5\AMGT\AMGT_RESAPP\deliverables\0.9.0_WK_AMGT_RESAPP~6\price_axis_rows_2026-10-08.json
+[price_axis] window step (a): persisted s3://opal-data-harvest/bloomberg/harvest/bronze/price_history_px_last/date=2026-10-08/daily_30d.json (put_performed=True existed=False)
+[price_axis] window step (b): TRENDING_PRICE_90D ranked 94 row(s) state=COMPLETE generation_id=20261009T110736Z-5bd7e0017ce3 pointer_written=True
+[price_axis] window step (b): BREAKOUT_PRICE_90D ranked 94 row(s) state=COMPLETE generation_id=20261009T110737Z-2225b35f799f pointer_written=True
+[price_axis] window step (b): TRENDING_PRICE_365D ranked 95 row(s) state=COMPLETE generation_id=20261009T110738Z-3d0b4fcfd2ec pointer_written=True
+[price_axis] window step (b): BREAKOUT_PRICE_365D ranked 95 row(s) state=COMPLETE generation_id=20261009T110738Z-c22808fd4777 pointer_written=True
+[price_axis] written 188 of 188 row(s) to opal-harvest-security-metrics; pointers_written=2 of 2; failed axes=[]
+PRICE LEG EXIT CODE: 0 -- generation committed; the producer lines above name the as-of, row counts and generation_id. 
+                                       
+RIVALFUNDS BLOOMBERG LEG (ETFS_RIVALS RIV-b-1) 
+{"status": "OK", "batch_id": "batch-20261009T110739Z", "outputs": ["s3://opal-data-etfs/bloomberg/etfs/bronze/holdings/date=2026-10-09/batch-20261009T110739Z-2026-10-08-20261009T110803Z-ddfd4741edc6.json"], "marker": "s3://opal-data-etfs/rivalfunds/etfs/state/fetch_bloomberg/date=2026-10-08/batch-20261009T110739Z.json", "detail": {"captures": {"2026-10-08": "OK"}, "failures": {}}}
+RIVALFUNDS BLOOMBERG LEG EXIT CODE: 90 -- landed, batch whole, fetch-bloomberg marker written. 
+RIVALFUNDS ENRICHMENT STEP (RIV-e-1) 
+{"status": "OK", "batch_id": "batch-20261009T110810Z", "outputs": ["s3://opal-data-etfs/rivalfunds/etfs/gold/corporate_actions/date=2026-10-08/actions-20261008-4b871bd81ab4.parquet"], "marker": "s3://opal-data-etfs/rivalfunds/etfs/state/pull_enrichment/date=2026-10-08/batch-20261009T110810Z.json", "detail": {"rows": 160, "event_rows": 148, "status_rows": 12, "written_new": 1, "revision": "20261008-4b871bd81ab4", "mode": "daily", "securities": 32}, "market": {"status": "OK", "outputs": ["s3://opal-data-etfs/rivalfunds/etfs/gold/security_market/date=2026-10-08/market-20261009T110810Z-128674401446.parquet"], "marker": "s3://opal-data-etfs/rivalfunds/etfs/state/pull_enrichment/date=2026-10-08/batch-20261009T110810Z-market.json", "detail": {"rows": 582, "with_gics_sector": 575, "with_px_close": 579, "written_new": 1, "revision": "20261009T110810Z-128674401446", "mode": "daily", "securities": 582, "security_errors": 0, "as_of_source_counts": {"historical": 0, "pull": 582}, "historical_request_failures": 0, "parsekey_points": 26, "parsekey_failures": 0}}, "names": {"status": "PARTIAL", "outputs": [], "detail": {"candidates": 47, "already_named": 39, "asked": 8, "named": 0, "written": false, "reason": "the fetch returned no usable name"}}}
+RIVALFUNDS ENRICHMENT EXIT CODE: 94 -- landed. 
