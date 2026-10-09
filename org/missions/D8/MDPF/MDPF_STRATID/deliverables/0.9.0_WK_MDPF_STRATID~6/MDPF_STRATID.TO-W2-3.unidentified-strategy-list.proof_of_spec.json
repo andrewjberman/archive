@@ -22,7 +22,8 @@
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Pure function on the worker branch; not deployed (GUARD 1; nothing served, nothing written in AWS).",
       "artifact_covered_by": [
-        "W2-3-AC1"
+        "W2-3-AC1",
+        "W2-4-AC1"
       ]
     },
     {
@@ -30,9 +31,10 @@
       "kind": "test",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Six named tests, all PASSED under w2_3_tests.py.",
+      "deploy_evidence": "Eight named tests (six ST-w-3, two ST-w-4), all PASSED under w2_4_tests.py.",
       "artifact_covered_by": [
-        "W2-3-AC1"
+        "W2-3-AC1",
+        "W2-4-AC1"
       ]
     },
     {
@@ -42,7 +44,8 @@
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Recorded list for Cottonwood, Rebalancer date 2026-10-08, from read-only S3.",
       "artifact_covered_by": [
-        "W2-3-AC2"
+        "W2-3-AC2",
+        "W2-4-AC2"
       ]
     }
   ],
@@ -53,8 +56,8 @@
       "method": "test_suite",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_3_tests.py",
       "expect": "W23-OK",
-      "output_evidence": "6 passed in 0.07s (test_opal_named_unmatched_sleeve_is_listed, test_ticker_named_unmatched_is_listed, test_matched_sleeve_is_not_listed, test_null_member_rule_is_listed_with_reason, test_non_opal_name_is_not_listed, test_row_carries_firm_name_dollars_reason); final line W23-OK; rc=0 (run under timeout 120)",
-      "denominator": "6 of 6 named tests PASSED",
+      "output_evidence": "8 passed in 0.16s (the six ST-w-3 tests plus the two ST-w-4 tests); final line W23-OK; rc=0 (run under timeout 120)",
+      "denominator": "6 of 6 named tests PASSED (8 of 8 in file)",
       "status": "PASS"
     },
     {
@@ -63,16 +66,37 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_3_seam.py",
       "expect": "W23-SEAM-OK",
-      "output_evidence": "RESULT: LISTED 38 ; W23-SEAM-OK ; rc=0 (run under timeout 120). Control row: Opal_Muni_Income 64,119,753.85 RULE_NOT_COUNTED (HOLDINGS 1 of 1 accts).",
-      "denominator": "3 of 3 required lines (SOURCE, DENOMINATOR, RESULT) present; 1 of 1 control name present; 362 distinct names scanned, 38 listed",
+      "output_evidence": "RESULT: LISTED 12 ; W23-SEAM-OK ; rc=0 (run under timeout 120). Control row: Opal_Muni_Income 64,119,753.85 RULE_NOT_COUNTED (HOLDINGS 1 of 1 accts).",
+      "denominator": "3 of 3 required lines (SOURCE, DENOMINATOR, RESULT) present; 1 of 1 control name present; 362 distinct names scanned, 12 listed (record re-made under ST-w-4)",
       "status": "PASS"
+    },
+    {
+      "criterion_id": "W2-4-AC1",
+      "criterion_verbatim": "python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_4_tests.py -- the eight named tests pass.",
+      "method": "test_suite",
+      "invocation": "python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_4_tests.py",
+      "expect": "W24-OK",
+      "output_evidence": "8 passed in 0.20s incl. test_opal_model_is_not_listed and test_opal_model_matching_a_sleeve_rule_is_listed; final line W24-OK; rc=0 (run under timeout 120)",
+      "denominator": "8 of 8 named tests PASSED",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "W2-4-AC2",
+      "criterion_verbatim": "python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_4_seam.py -- the re-made record lists neither Opal Satellite 50 nor Opal Short-Term, still lists Opal_Muni_Income as RULE_NOT_COUNTED, and carries the four lines.",
+      "method": "command",
+      "invocation": "python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_4_seam.py",
+      "expect": "W24-SEAM-OK",
+      "output_evidence": "W24-SEAM-BAD Opal Model(s) still listed: ['Opal Short-Term']; rc=1 (run under timeout 120). Record built exactly as the order words it (opal_models = fact_model_roster is_opal names): RESULT LISTED 12, EXCLUDED-AS-MODEL 26. Opal Short-Term is absent from the roster (present in fact_model_definition, is_opal true); see MDPF_STRATID-D1-W6-S2.",
+      "denominator": "4 of 4 required lines present; 1 of 2 Opal Models absent from the list (Opal Satellite 50 absent, Opal Short-Term listed); 1 of 1 control present",
+      "status": "FAIL",
+      "status_reason": "Criterion cannot be met as written: roster-only opal_models leaves Opal Short-Term (not in the roster) listed; blocked pending issuer ruling, row MDPF_STRATID-D1-W6-S2."
     }
   ],
   "controls": {
     "determinism": {
       "description": "Pure function; the record is generated from read-only S3 objects at fixed partitions (date=2026-10-08 model facts, date=2026-10-07 holdings, slice as_of_last 2026-10-07).",
       "expected": "identical result on rerun",
-      "observed": "AC1 and the generator ran twice with identical RESULT: LISTED 38 on the second generator run; AC1 6 of 6 both times.",
+      "observed": "AC1 and the generator ran twice with identical results at ST-w-3; ST-w-4 record generated once (RESULT LISTED 12).",
       "method": "command",
       "status": "STABLE"
     },
@@ -91,7 +115,9 @@
     }
   ],
   "surprises": [
-    "MDPF_STRATID-D1-W6-S1: 38 of 362 names listed because opal_sma_member_of knows only the four ETF SMAs; ordinary Opal models list NO_MEMBER beside the true unknowns"
+    "MDPF_STRATID-D1-W6-S1: 38 of 362 names listed because opal_sma_member_of knows only the four ETF SMAs; ordinary Opal models list NO_MEMBER beside the true unknowns",
+    "MDPF_STRATID-D1-W6-S2: ST-w-4 AC2 cannot be met with opal_models from the roster alone; Opal Short-Term is a definition-table model name",
+    "MDPF_STRATID-D1-W6-S3: worktree decomp copy lacks cell ST-w-4"
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_STRATID/deliverables/0.9.0_WK_MDPF_STRATID~6/MDPF_STRATID.TO-W2-3.unidentified-strategy-list.proof_of_spec.json",
   "compiler_tools": [
