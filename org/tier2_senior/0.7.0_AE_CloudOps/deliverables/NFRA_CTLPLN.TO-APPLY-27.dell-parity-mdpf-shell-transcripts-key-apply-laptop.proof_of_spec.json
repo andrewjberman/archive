@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-27.dell-parity-mdpf-shell-transcripts-key-apply-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-27.dell-parity-mdpf-shell-transcripts-key-apply-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "501a029bbe85d9de4a7b6e0516a522a7b2d411b1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
+    "vintage_commit": "7dd661eb9f5f42815d2541ac729747c3d8a25cbc",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-27.dell-parity-mdpf-shell-transcripts-key-apply-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell_parity_mdpf_key_20261009/after-identity-policy.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Identity applied 2026-10-09T05:39:17.5938654Z exact 1/1/0; live v8 equals repository policy; dell1 attachment exists once; both Dell users' four arms match; untargeted replan exit=0",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell_parity_mdpf_key_20261009/after-key-policy.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Transcripts key applied 2026-10-09T05:40:13.6853868Z targeted exact 0/1/0; only DellAgentUsersGenerateDataKey added; exact two-principal set and exact two conditions; targeted replan exit=0",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo \"exit=$?\" expects exit=0",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo \"exit=$?\"",
+      "expect": "exit=0",
+      "output_evidence": "dell_parity_mdpf_key_20261009/identity-replan.txt and replan-verdict.json: untargeted=true, default_variables=true, exit=0, no_changes=true",
+      "denominator": "one complete untargeted default-variable plan of the NFRA_CTLPLN identity root after both applies",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "identity_parity": {
+      "description": "Both users' two shell and two PowerShell arms distinguish identical access from a partial attachment or wider shell grant",
+      "expected_landed": "shell allowed on both hosts and PowerShell explicitDeny on both hosts for each user; signatures identical",
+      "expected_not_landed": "any shell arm denied, any PowerShell arm allowed, or signatures differ",
+      "observed": "all eight decisions match and the two four-arm signatures are identical",
+      "status": "PASS"
+    },
+    "transcripts_key": {
+      "description": "The live key-policy delta, principal set, and conditions distinguish the bounded S3 GenerateDataKey grant from broader KMS use",
+      "expected_landed": "one added statement; exactly two Dell principals; GenerateDataKey only; exact ViaService and bucket-context conditions",
+      "expected_not_landed": "a different principal, action, condition, or earlier statement changes",
+      "observed": "all key-policy structure and set comparisons match",
+      "status": "PASS"
+    },
+    "targeted_scope": {
+      "description": "The transcripts plan is targeted because the root contains another cell's pending changes",
+      "expected_landed": "only aws_kms_key.transcripts updates and only its policy differs",
+      "expected_not_landed": "any second address or non-policy key attribute changes",
+      "observed": "exactly one update at aws_kms_key.transcripts; transcripts_only_policy_attribute_changed=true",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL1_DELL2_IDENTICAL_20261009.md@dc5032abde; NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL2_SHELL_PARITY_20261009.md addendum",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261009_035xZ_DELL1_DELL2_IDENTICAL_PERMISSIONS_AND_LAYOUT.md@910951a1e0; key addendum @8fc644a586; mdpf pair @f0a2f049f7; laptop YES addendum @cc4ef8a7ed"
+  },
+  "risk_class": "WORLD",
+  "rollback": "Re-apply both roots at AMENDMENTS 25-28 merge first parent 24fa3da234d646e058c6bf0e5e37c267615c49cd using newly reviewed saved plans in the original order; the transcripts key policy is also restorable directly from before-key-policy.json.",
+  "scope": "Identity root addresses aws_iam_policy.dell2_ssm and aws_iam_user_policy_attachment.dell1_ssm; transcripts root target aws_kms_key.transcripts; no SSM command; no secret/object-value read; no shared-branch push.",
+  "declared_exclusions": [
+    {
+      "item": "host-role reach and later Dell command execution",
+      "reason": "The order verifies IAM and key policy state. Dell sends are governed by the three relayed CTO conditions and reported separately."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell_parity_mdpf_key_20261009/REPORT.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan / .tools/safe-apply.sh",
+      "invocation": "identity untargeted default saved plan followed by transcripts saved plan targeted at aws_kms_key.transcripts; isolated TF_DATA_DIRs and shared TF_PLUGIN_CACHE_DIR",
+      "result": "identity exact 1/1/0, transcripts exact 0/1/0, both applied once, both replans exit=0 with no changes"
+    },
+    {
+      "tool": "comp-iam and aws iam simulate-principal-policy",
+      "invocation": "two Dell users, two documents, two hosts; direct multi-resource calls retained as evidence",
+      "result": "both users shell allowed on both hosts; PowerShell explicitDeny on both hosts; signatures identical"
+    },
+    {
+      "tool": "aws kms get-key-policy",
+      "invocation": "default policy before and after; principal lists compared as sets",
+      "result": "one added statement, exact principal set, exact action, and exact two conditions"
+    },
+    {
+      "tool": "comp-adversary compose",
+      "invocation": "TO-APPLY-27 governing order",
+      "result": "validation context declaration written to adversary-context.json"
+    }
+  ]
+}

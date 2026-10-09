@@ -63,6 +63,9 @@ Instruments: `checks/round40/r41_passage_census.py`, `checks/round40/r41_pillar_
 
 ## 6. Not claimed
 
-- No served page was looked at for a round-40 change after the fire [FILL or keep].
+- **Served since DRAFT 2:** the round-40 portal candidate `1cbc56a75eee` (ap-2..ap-5) reached portal PROD in the promote
+  `f73f9ab0 -> bf780f94` (tag portal-v2.1.205, CI 37889349991 success, 2026-10-09 ~05:40Z, 0.0.0_AB_MSTR~DELL1 msg 1790;
+  `git -C portal merge-base --is-ancestor 1cbc56a75eee bf780f94` true, not in `f73f9ab0`). The signed-in PROD read is
+  `2.0.0_SA_COO~D1`'s walk (DSGN_AMGTV1); this seat has not looked at the PROD page [FILL if D1's walk covers ap-2..ap-5].
 - The method-7 values were read by the CVO for 28 of 950 fields (DRAFT 2 s.6, unchanged).
 - The closure check at `<p>` was not run on dell1 (`fitz` absent); site Z runs it under the re-pin order.

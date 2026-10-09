@@ -4,9 +4,16 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
+
+  <closure>
+    COMPLETE (issuer, ~05:4xZ). Identity 1/1/0 applied 2026-10-09T05:39:17Z (dell2_ssm v8; dell1_ssm attachment created); transcripts key 0/1/0
+    targeted applied 05:40:13Z. Issuer live read: both Dell users AWS-RunShellScript allowed on i-0167fd745ad906a66 and i-02448edb624a7a7cf,
+    AWS-RunPowerShellScript explicitDeny on both; live key policy DellAgentUsersGenerateDataKey for both users with exactly ViaService s3 + the
+    bucket ARN context. Re-plans 0/0/0 (applier). Ledger closed (@97439f0662). CTO and both Dells told, with the three CTO conditions.
+  </closure>
 
 
 <risk>WORLD</risk>

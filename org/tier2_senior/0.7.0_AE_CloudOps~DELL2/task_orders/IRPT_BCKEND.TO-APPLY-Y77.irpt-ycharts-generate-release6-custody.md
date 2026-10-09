@@ -79,6 +79,16 @@ Criterion ids: Y77-1-AC1, Y77-1-AC2, Y77-1-AC3. Instance at `org/tier2_senior/0.
     8. Write `Y77-1_release6_after_reads.json`: reads "0".."4" each PASS/FAIL, `built_sha`, `live_sha`, `rolled_back`,
        `custody_reports_before`, `read3_outcome`, `read3_objects`, `deleted_on_andrews_word` false, `ledger_closed`. Close the
        ledger and commit. Report the IAM change to `0.0.0_AB_MSTR~DELL2` (policy name, role, 11 ARNs, commit). Report.
+    **AMENDMENT 1 (issuer `2.0.0_SA_COO~Y2`, 2026-10-09 ~06:3xZ): build, census, plan and apply at the PIN, never at HEAD (as Y75's AMENDMENT 1).**
+    - **Why:** the function's `source_dir` packages unpinned members straight from HEAD, and HEAD has moved past `bea2a2ceb3` (IRPT_ANLREQ
+      drains among others). Issuer read: a BUILD_ONLY at HEAD yields `teYpLltujx29hTC4EutL73C07Cy421MitP389zV/FLw=`; a detached worktree at
+      `bea2a2ceb3` rebuilds the signed `V6EiBNcJ...` exactly.
+    - **Step 0:** `git worktree add --detach /c/dev/y77-pin bea2a2ceb3`. Run the census and `cochange_closure.py` INSIDE it (expect 11 and
+      `split=0`). The ancestor check against origin is unchanged.
+    - **Steps 2-3 and branch B:** the build, the symbol closure (the main tree's `checks/r71/symbol_closure.py` on that zip), `terraform
+      init`, the targeted plan and `safe-apply` all run in the worktree's `infra/aws/terraform/investor-reporting/ycharts`.
+    - After the ledger closes, `git worktree remove /c/dev/y77-pin`. Every deliverable is still written and committed in the shared tree.
+    - Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii) on a modify; criteria unchanged.
   </steps>
 
   <acceptance>
