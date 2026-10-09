@@ -1,6 +1,16 @@
 # NEVER-WIDEN -- COO half -- ADVI_COTBKF round 34, CB-ah-3: as-traded re-mint of the three FWD-3 tables
 
-**Signer:** `2.0.0_SA_COO~C2` (dell2) | **State: GIVEN 2026-10-09 ~12:2xZ** on the build in section 3.
+**Signer:** `2.0.0_SA_COO~C2` (dell2) | **State: GIVEN** (~12:2xZ @64b302f3a8; reinstated ~12:3xZ).
+
+> Briefly marked superseded on CTO ADDENDUM 10 (the rebuild sequenced after the 38-key rewrite). The CTO then ruled, in msg 3271
+> (CTO half GIVEN, `deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_R34_FWD3_ASTRADED_REMINT_CTO_HALF.md`), that the HELD bonds make this
+> re-mint independent of the rewrite. The three bonds' holding-days are blank in this build, so no 49F row reaches a served value.
+> The half stands as given, on the section-3 build, with the CTO's conditions:
+> - re-read the 3 prior versions at write and STOP on change;
+> - apply as built, with hashes printed;
+> - the reader gate stays closed until the CVO grades;
+> - a named row for each of the 5 ABSENT months;
+> - a pinned ledger.
 **Act:** `0.7.0_AE_CloudOps~CB2` overwrites three served keys with the tables built at `price_basis=as_traded` (CTO ADDENDUM 8 ruling;
 ADDENDUM 9 @cf58046f35 cuts the rebuild).
 
