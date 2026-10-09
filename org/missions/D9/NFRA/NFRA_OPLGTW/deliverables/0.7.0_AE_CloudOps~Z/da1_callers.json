@@ -1,0 +1,145 @@
+{
+ "to_id": "NFRA_OPLGTW.TO-OG-da-1",
+ "phase": "A",
+ "author": "0.7.0_AE_CloudOps~Z",
+ "measured_at": "2026-10-09T06:4xZ",
+ "function": "opal-data-refresh-api",
+ "log_group": "/aws/lambda/opal-data-refresh-api",
+ "window": "14 days, filter-log-events --start-time now-14d, auto-paginated and counted client-side",
+ "privacy": "Callers are listed BY ROLE. No email, token or principal id appears in this file; `ref` is a truncated sha256 of the lowercased address, which is a join key between rows, not an identifier.",
+ "denominators": {
+  "authorizer_context_lines_parsed": 124,
+  "events_returned": 124,
+  "distinct_principals": 6,
+  "path_census_14d": {
+   "method_1_lambda_authorizer": 124,
+   "method_2_jwt_claims": 0,
+   "method_3_no_authorizer_dev_fallback": 0
+  }
+ },
+ "path_census_note": "All observed traffic is Method 1. The JWT path and the no-authorizer development fallback did NOT fire once in 14 days, so refusing Method 3 and tightening Method 2 breaks no observed caller. LIMIT: 14 days is the window, not all time; a caller that last called 15 days ago is outside it and this file does not claim otherwise.",
+ "firm_field_finding": {
+  "question": "Does a firm field reach the Lambda? (order step 3's stop condition)",
+  "answer": "YES, but it is named firmId, not firm.",
+  "evidence": "The live opal-portal-authorizer (index.mjs, downloaded from the function) returns context { email, name, tier, role, advisorId, firmId, officeId, regionId, userType, allowedFirmIds, advisorKey, advisorName, advisorRole, firmRole }. firmId defaults to the STRING 'null' when the claim is absent.",
+  "why_the_log_cannot_answer_it": "opal-data-refresh-api's own log line is a fixed-format print of email, userType and tier only, so it would never show firmId even when present. An earlier count of mine read '0 of 124 lines carry firm=' -- that measured the print statement, not the context, and is corrected here.",
+  "observable_internal_signal": "tier == 'internal', present on 124 of 124 observed calls, and the authorizer's OWN internal test is the same: it grants ALL access on tier === 'internal' and treats role/firmRole admin or userType Dev likewise.",
+  "open_point_for_the_halves": "The ruling names firm 'opal-capital'. The context's firm-bearing field is firmId and its VALUE is not observable from this function's logs. The ask therefore proposes the internal test be tier == 'internal' (observable, and the authorizer's own semantics), optionally also admitting firmId == 'opal-capital', and asks the halves to ratify which."
+ },
+ "callers": [
+  {
+   "role": "Opal internal staff account (role not otherwise distinguished)",
+   "ref": "686bd73c",
+   "calls_14d": 62,
+   "path": "authorizer (Method 1, requestContext.authorizer[.lambda])",
+   "userType_observed": [
+    "<EMPTY>"
+   ],
+   "tier_observed": [
+    "internal"
+   ],
+   "authorizer_context_carries_firm_field": true,
+   "firm_field_name": "firmId",
+   "firm_value_observed": null,
+   "admitted_today": true,
+   "admitted_today_via": "the EMPTY-userType arm of `if not user_type or user_type == 'Dev'`",
+   "admitted_under_ruled_fix": true,
+   "admitted_under_ruled_fix_via": "tier == 'internal'"
+  },
+  {
+   "role": "Opal internal staff account (role not otherwise distinguished)",
+   "ref": "6df1cf2e",
+   "calls_14d": 50,
+   "path": "authorizer (Method 1, requestContext.authorizer[.lambda])",
+   "userType_observed": [
+    "Dev"
+   ],
+   "tier_observed": [
+    "internal"
+   ],
+   "authorizer_context_carries_firm_field": true,
+   "firm_field_name": "firmId",
+   "firm_value_observed": null,
+   "admitted_today": true,
+   "admitted_today_via": "userType == 'Dev'",
+   "admitted_under_ruled_fix": true,
+   "admitted_under_ruled_fix_via": "userType == 'Dev'"
+  },
+  {
+   "role": "Opal principal / operator account",
+   "ref": "7b1bca22",
+   "calls_14d": 4,
+   "path": "authorizer (Method 1, requestContext.authorizer[.lambda])",
+   "userType_observed": [
+    "Dev"
+   ],
+   "tier_observed": [
+    "internal"
+   ],
+   "authorizer_context_carries_firm_field": true,
+   "firm_field_name": "firmId",
+   "firm_value_observed": null,
+   "admitted_today": true,
+   "admitted_today_via": "userType == 'Dev'",
+   "admitted_under_ruled_fix": true,
+   "admitted_under_ruled_fix_via": "userType == 'Dev'"
+  },
+  {
+   "role": "Opal engineering account",
+   "ref": "aab0214e",
+   "calls_14d": 3,
+   "path": "authorizer (Method 1, requestContext.authorizer[.lambda])",
+   "userType_observed": [
+    "Dev"
+   ],
+   "tier_observed": [
+    "internal"
+   ],
+   "authorizer_context_carries_firm_field": true,
+   "firm_field_name": "firmId",
+   "firm_value_observed": null,
+   "admitted_today": true,
+   "admitted_today_via": "userType == 'Dev'",
+   "admitted_under_ruled_fix": true,
+   "admitted_under_ruled_fix_via": "userType == 'Dev'"
+  },
+  {
+   "role": "Opal internal staff account (role not otherwise distinguished)",
+   "ref": "894ae007",
+   "calls_14d": 3,
+   "path": "authorizer (Method 1, requestContext.authorizer[.lambda])",
+   "userType_observed": [
+    "<EMPTY>"
+   ],
+   "tier_observed": [
+    "internal"
+   ],
+   "authorizer_context_carries_firm_field": true,
+   "firm_field_name": "firmId",
+   "firm_value_observed": null,
+   "admitted_today": true,
+   "admitted_today_via": "the EMPTY-userType arm of `if not user_type or user_type == 'Dev'`",
+   "admitted_under_ruled_fix": true,
+   "admitted_under_ruled_fix_via": "tier == 'internal'"
+  },
+  {
+   "role": "non-production test principal (opal.test domain)",
+   "ref": "e95c05c7",
+   "calls_14d": 2,
+   "path": "authorizer (Method 1, requestContext.authorizer[.lambda])",
+   "userType_observed": [
+    "Dev"
+   ],
+   "tier_observed": [
+    "internal"
+   ],
+   "authorizer_context_carries_firm_field": true,
+   "firm_field_name": "firmId",
+   "firm_value_observed": null,
+   "admitted_today": true,
+   "admitted_today_via": "userType == 'Dev'",
+   "admitted_under_ruled_fix": true,
+   "admitted_under_ruled_fix_via": "userType == 'Dev'"
+  }
+ ]
+}
