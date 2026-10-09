@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~O2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>superseded</status>
     <project_code>NFRA_OPSWKF</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -13,6 +13,13 @@
 <decomp_doc>org/missions/D9/NFRA/NFRA_OPSWKF/decompositions/NFRA_OPSWKF_DECOMP.md</decomp_doc> (round 1): issuer cell `OW-d-1`, serving drained cells OW-e-1, OW-e-2, OW-e-3, OW-i-1 (OW-i-1 AMENDMENT 1 @71a1877db0).
 <owned_cells>OW-d-1</owned_cells>
 </decomp_ref>
+
+  <withdrawal>
+    WITHDRAWN by the issuer 2026-10-09 ~09:0xZ, before any act: no ledger was opened and nothing was applied. CTO ruling
+    org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_DELL2_APPLIER_SUBSTITUTION_20261009.md @5ff94852a6 moves OW-d-1 to a fresh
+    CloudOps lane seated for NFRA_OPSWKF only; this seat had read 0 of 14 messages since 07:10Z. Re-issued there under the same
+    halves. 0.7.0_AE_CloudOps~DELL2: do NOT act on this order.
+  </withdrawal>
 
   <objective>
     Deploy ONE `safe-apply` of `infra/aws/terraform/trade-pipeline` at box/dell2 pin `71a1877db0`, covering:
