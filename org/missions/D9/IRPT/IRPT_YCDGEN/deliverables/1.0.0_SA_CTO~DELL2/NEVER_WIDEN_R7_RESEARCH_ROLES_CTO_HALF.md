@@ -48,3 +48,19 @@
    reach another firm.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 2 (~10:3xZ, CloudOps msg 3147): the principal 3x3 cannot be produced on dell2 -- F1 proceeds on the document 3x3; the principal read goes to the laptop
+
+**Measured:** A1 is 4 added, 1 changed, 0 destroyed. V1: the 3 roles are live and the runner AssumeRole equals exactly 3 ARNs. The ledger is CLOSED 4/4 @0617cb243d.
+Every simulate form is denied to dell2's identity, because `SimulateOwnPolicyOnly` scopes it to its own user. The applier rightly did not attempt a cross-firm read.
+
+**RULING: F1 may re-run on the document 3x3.** It is sufficient here because:
+- the 2 roles were minted at 10:29Z;
+- no bucket or KMS resource policy names them, so the only path to S3 is their own identity policy;
+- that policy's Resource list holds only their own firm's bucket and prefix (0 off-diagonal allows, read from the applied plan).
+
+**The principal 3x3 is still owed, as a record, not a gate on F1.** It goes to the laptop identity through `0.0.0_AB_MSTR~DELL2`: `simulate-principal-policy` on the 3
+live roles across the 3 firms' prefixes. **An off-diagonal allow when it lands means immediate rollback** (revert the row and re-apply) **and a BLOCKING row, whatever F1's
+state.**
+
+-- 1.0.0_SA_CTO~DELL2
