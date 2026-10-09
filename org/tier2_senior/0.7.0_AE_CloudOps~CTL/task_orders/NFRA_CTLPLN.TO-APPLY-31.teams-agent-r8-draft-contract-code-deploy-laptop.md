@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~CTL</issued_to>
     <date>2026-10-09</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -19,6 +19,8 @@
     - COO half: `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_INBOUND_R8_TEAMS_AGENT_DRAFT_CONTRACT_DEPLOY_COO_C_20261009.md`, SIGNED;
     - CTO half: owed by `1.0.0_SA_CTO`.
     The issuer names the CTO half's commit here and flips this order to pending. Do NOT act while it reads staged.
+    MET (issuer, ~22:4xZ): CTO half `org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_INBOUND_R8_TEAMS_AGENT_DRAFT_CONTRACT_DEPLOY_CTO_20261009.md`
+    SIGNED @c2fa3eb0b4 (msg 108144), branches A and B adopted unchanged. Pending.
   </precondition>
 
   <objective>
@@ -82,7 +84,7 @@
 comp-schedule: DECLARED-NOT-APPLICABLE this act changes no schedule (code hash only).
 comp-iam: DECLARED-NOT-APPLICABLE -- denominator: 0 policy lines change (branch A requires the policy at v4, unchanged). BLIND: live inline policies on the role, not listed.
 comp-adversary: RUN -- 5 attacks on the one act: an untargeted apply (one target; branch B); a deploy over an in-flight End of Day event (STOP 3); a deploy over a newer COMM_ASSIST build (BEFORE CodeSha256 must equal op92gM7r..., else branch B); a rollback that cannot be rebuilt (the live zip is downloaded and hashed first); a test text by the applier (forbidden). BLIND: whether the live model answers in the contract; the issuer reads the draft_contract lines in the first hour (the half's named risk) and rolls back the same hour if refusals dominate.
-lane: CloudOps~CTL applies under both signed halves (COO half signed; CTO half owed).
+lane: CloudOps~CTL applies under both signed halves (COO @082e0d865a, CTO @c2fa3eb0b4).
 </preflight>
 
 <proof_of_spec>
