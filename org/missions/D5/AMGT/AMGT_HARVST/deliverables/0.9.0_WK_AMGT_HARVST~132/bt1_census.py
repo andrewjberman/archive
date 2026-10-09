@@ -1,6 +1,9 @@
 """AMGT_HARVST round 76, HVST-bt-1 -- THE CENSUS of `1.0.0_SA_CTO~DELL1` R31 (a common-word alias needs a second anchor),
 worker 0.9.0_WK_AMGT_HARVST~132. AMENDMENT 1 (ADDENDUM 4): the common-word set is MEASURED FROM SILVER (`common_word_scan.py` writes
 `common_word_aliases.json`); AMENDMENT 2 (ADDENDUM 5): an alias is common when LOWER / CAP_MID >= `_COMMON_WORD_RATIO` (0.2). This script reads that one file, through the matcher.
+AMENDMENT 3 (ADDENDUM 6): the second anchor is any of A (ticker from the key + stored forms), B (company less legal suffix), C (full names in
+the identity file `lib/opal_data_harvest/config.json` -> `symbol_resolution_source`, fields company.value + aliases.value), D (a sibling listing's
+ticker), E (another non-common alias), with the one-and-two-letter-ticker and name-equals-alias guards; this script adds `ANCHORS USED:` per flagged alias.
 
 Built from round 74's `br1_census.py` (worker ~126); only the rule tested is changed. POPULATION: the SERVED gold mention part
 `amgt/harvest/gold/article_security_mention/date=2026-10-08/part-20261009T093755Z.parquet` (rebuild #12) read by an S3 GET, its
@@ -103,9 +106,9 @@ def spread_over_securities(rows, n, seed):
     picks = {}
     for k in keys:
         items = sorted(by[k], key=lambda r: (r["article_key"], r.get("where", ""), r.get("start", 0)))
-        picks[k] = [items[(i * len(items)) // 3] for i in range(3)] if len(items) > 3 else items
+        picks[k] = [items[(i * len(items)) // 4] for i in range(4)] if len(items) > 4 else items
     out = []
-    for rnd in range(3):
+    for rnd in range(4):
         for k in keys:
             if len(out) < n and rnd < len(picks[k]):
                 out.append(picks[k][rnd])
@@ -123,6 +126,11 @@ def main():
         if c:
             common_by_sec[sk] = c
     n_alias = sum(len(v) for v in common_by_sec.values())
+    ident_path = pg._identity_path()
+    ident = pg._identity_index()
+    emit("IDENTITY FILE (anchor kind C names, kind D siblings): %s" % os.path.relpath(ident_path, ROOT).replace("\\", "/"))
+    emit("  fields read per record: company.value + aliases.value (full names, C), sa_symbol.value (sibling link and sibling ticker, D); "
+         "pool_name is not read; records %d; path from lib/opal_data_harvest/config.json symbol_resolution_source" % len(ident["names"]))
     emit("COMMON-WORD ALIASES (silver): %d over %d securities; articles scanned %d"
          % (n_alias, len(common_by_sec), counted["articles_scanned"]))
     emit("RATIO RULE: flagged when LOWER / CAP_MID >= %s (CAP_MID = 0 with LOWER > 0 counts as flagged)" % pg._COMMON_WORD_RATIO)
@@ -130,6 +138,10 @@ def main():
     for r in flagged:
         emit("  %s: %s  LOWER %d  CAP_MID %d  ratio %.3f" % (r["security_key"], r["alias"], r["lower"], r["cap_mid"],
                                                            (float(r["lower"]) / r["cap_mid"]) if r["cap_mid"] else float("inf")))
+    for sk in sorted(common_by_sec):
+        specs = pg._anchor_specs(securities[sk], common_by_sec[sk])
+        emit("ANCHOR FORMS %s: " % sk + "; ".join("%s %s" % (kind, [f for f, _rx in specs[kind]] or "-") for kind in "ABCD")
+             + "; E %s; siblings %s" % ([a for a in securities[sk]["aliases"] if a not in common_by_sec[sk]] or "-", ident["siblings"].get(sk) or "-"))
     near = sorted((r for r in rows if not pg._is_common_word(r["lower"], r["cap_mid"]) and r["cap_mid"] > 0 and r["lower"] > 0),
                   key=lambda r: (-(float(r["lower"]) / r["cap_mid"]), r["security_key"], r["alias"]))
     seen, misses = set(), []
@@ -161,6 +173,8 @@ def main():
     pairs_removed = pairs_down = 0
     served_equal = served_unequal = 0
     removed_pairs, removed_spans, kept_mentions = [], [], []
+    anchors_used = collections.defaultdict(lambda: {"mentions": 0, "pairs": 0, "present": collections.Counter(),
+                                                     "first": collections.Counter(), "only": collections.Counter()})
     span_control_ok = span_control_bad = 0
     cvo_hit = {}
     found = set()
@@ -214,18 +228,27 @@ def main():
             elif common and after > 0:
                 spans = common_spans(article, sec, common)
                 if spans:
-                    anchor = pg._second_anchor(title, blocks, sec, common)
-                    if anchor is None:
+                    kinds = pg._anchor_kinds(title, blocks, sec, common)
+                    if not kinds:
                         # a counted common-alias span with no anchor cannot be: the rule would have dropped it
                         continue
-                    kind, where_a = anchor
-                    what = {"ticker": ",".join(list(sec.get("ticker_aliases") or []) + list(sec.get("ticker_anchor_symbols") or [])),
-                            "company": sec.get("company"),
-                            "alias": ",".join(a for a in sec.get("aliases") if a not in common)}[kind]
+                    first = next(k for k in "ABCDE" if k in kinds)
+                    forms = {k: v[1] for k, v in kinds.items()}
+                    for alias_text in sorted(set(sp[5] for sp in spans)):
+                        n = sum(1 for sp in spans if sp[5] == alias_text)
+                        slot = anchors_used[(sk, alias_text)]
+                        slot["mentions"] += n
+                        slot["pairs"] += 1
+                        for k in kinds:
+                            slot["present"][k] += n
+                        slot["first"][first] += n
+                        if len(kinds) == 1:
+                            slot["only"][first] += n
                     where, start, end, text, ctx, _form = spans[0]
                     kept_mentions.append({"security_key": sk, "article_key": key, "title": title, "where": where, "start": start,
-                                          "span": text, "context": ctx, "anchor_kind": kind, "anchor_in": where_a,
-                                          "anchor_form": what, "common_spans_counted": len(spans)})
+                                          "span": text, "context": ctx, "anchor_kind": first, "anchor_in": kinds[first][0],
+                                          "anchor_form": forms[first], "kinds_present": "".join(sorted(kinds)),
+                                          "common_spans_counted": len(spans)})
     not_found = len(set(pairs) - found)
     EXTRA.append("TESTED %d pairs on securities with aliases (%d on securities with no alias list, %d on securities not in the list, "
          "not affected); articles not found in silver %d" % (tested, no_aliases, not_in_list, not_found))
@@ -309,13 +332,20 @@ def main():
             emit("  %s | %s | %s | [%s] %s" % ("+".join(sorted(set(r["security_keys"]))), r["article_key"], r["title"][:120],
                                               r["where"], r["context"]))
         sample.extend(picks)
+    for (sk, alias_text) in sorted(anchors_used):
+        slot = anchors_used[(sk, alias_text)]
+        emit("ANCHORS USED %s %s: %d kept mentions over %d kept pairs" % (sk, alias_text, slot["mentions"], slot["pairs"]))
+        emit("  kinds present in the kept article (a mention counts under every kind its article carries): "
+             + ", ".join("%s %d" % (k, slot["present"][k]) for k in "ABCDE"))
+        emit("  first kind in order A-E (each mention counted once): " + ", ".join("%s %d" % (k, slot["first"][k]) for k in "ABCDE"))
+        emit("  the ONLY kind present: " + ", ".join("%s %d" % (k, slot["only"][k]) for k in "ABCDE"))
     ksample = spread_over_securities(kept_mentions, 20, 77)
     emit("KEPT SAMPLE 20: (of %d kept pairs with a counted common-alias mention over %d securities; this sample covers %d securities)"
          % (len(kept_mentions), len(set(r["security_key"] for r in kept_mentions)), len(set(r["security_key"] for r in ksample))))
     for r in ksample:
-        emit("  %s | %s | %s | anchor: %s %r in %s | [%s] %s" % (r["security_key"], r["article_key"], r["title"][:120],
-                                                                 r["anchor_kind"], r["anchor_form"], r["anchor_in"], r["where"],
-                                                                 r["context"]))
+        emit("  %s | %s | %s | anchor: %s %r in %s (present %s) | [%s] %s" % (r["security_key"], r["article_key"], r["title"][:120],
+                                                                 r["anchor_kind"], r["anchor_form"], r["anchor_in"], r["kinds_present"],
+                                                                 r["where"], r["context"]))
     kept_by_kind = collections.Counter(r["anchor_kind"] for r in kept_mentions)
     EXTRA.append("KEPT PAIRS BY ANCHOR KIND: " + ", ".join("%s %d" % kv for kv in sorted(kept_by_kind.items())))
     emit("EXTRA MEASURES (not asked for; controls and denominators):")
@@ -325,7 +355,9 @@ def main():
               "pairs_removed": pairs_removed, "pairs_counted_down": pairs_down, "cvo_rows_removed": cvo_removed,
               "common_word_aliases": common_by_sec, "removed_by_security_pairs": dict(by_sec),
               "removed_by_security_mentions": dict(men_by_sec), "removed_sample": sample, "kept_sample": ksample,
-              "kept_pairs_by_anchor_kind": dict(kept_by_kind), "articles_not_found_in_silver": not_found,
+              "kept_pairs_by_anchor_kind": dict(kept_by_kind),
+              "anchors_used": {"%s|%s" % k: {"mentions": v["mentions"], "pairs": v["pairs"], "present": dict(v["present"]),
+                                             "first": dict(v["first"]), "only": dict(v["only"])} for k, v in anchors_used.items()}, "articles_not_found_in_silver": not_found,
               "common_word_file": os.path.basename(COMMON_JSON), "articles_scanned": counted["articles_scanned"],
               "nearest_misses": misses[:10]}
     with io.open(OUT_JSON, "w", encoding="utf-8", newline="\n") as handle:
