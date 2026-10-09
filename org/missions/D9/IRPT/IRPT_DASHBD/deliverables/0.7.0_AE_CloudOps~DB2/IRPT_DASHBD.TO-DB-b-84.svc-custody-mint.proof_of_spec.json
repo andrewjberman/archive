@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-84",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "885cdeb443",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-84.svc-custody-mint.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~DB2",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.7.0_AE_CloudOps~DB2/MINT_RECORD.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.7.0_AE_CloudOps~DB2/MINT_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record the checker reads: before_read, decoded claims, ttl_days, secret, reader, naming grade, and the acts NOT taken. Holds no token, no signature and no key material.",
+      "artifact_covered_by": [
+        "DB41-1-AC1",
+        "DB41-1-AC2",
+        "DB41-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.7.0_AE_CloudOps~DB2/mint_svc_custody_statement.py",
+      "kind": "script",
+      "commit_or_etag": "5b9cf603a9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the minter. Passed .tools/commit-gate.sh (py_compile + ds-precommit + ruff py39) before commit. It reads the signing key into memory only and hands the token to CreateSecret in-process so no bearer credential enters argv; it refuses if the target secret already exists, and asserts every claim against the pair rather than printing them for a human to eyeball.",
+      "artifact_covered_by": [
+        "DB41-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T0952Z_svc-custody-statement-mint-20261009_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "d8f1432b22",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the deploy-completion ledger, opened before the act and committed after EACH leg (by hand: deploy_ledger.py fix 00d3393ff3 is not yet in dell2 HEAD, MSTR msg 3034). Legs B, M, R closed with proof; NOTE 1 carries the naming grade verdict the ruling required; NOTE 2 carries the rollback trigger.",
+      "artifact_covered_by": [
+        "DB41-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB41-1-AC1",
+      "criterion_verbatim": "`DB41-1-AC1` -- the before-read holds and the token's claims are exactly the pair's (cottonwood, service, no role), TTL at most 90 days. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r41/p41_round41.py\" . DB41-1-AC1",
+      "output_evidence": "OK: before-read holds; claims exact (cottonwood, service), TTL 90.0 d\nDB41-1-AC1 PASS",
+      "denominator": "before-read 3 of 3 limbs hold, each measured on live state and none taken from a producer's self-report: secret ABSENT (ResourceNotFoundException, with a separate-invocation positive control on an existing secret so the absence is a true negative); IB-pr-385 LIVE (irpt-export-render live CodeSha256 c7jOyysB/zo6OjtzCNdUZiu0o4fxNE9XeCM1FxXIHhk= EQUALS the built sha the CLOSED IB-pr-390 ledger declares for that function -- deployed bytes against the BUILD INPUT, never by filename); release 6b LIVE (irpt-ycharts-generate tdpterTMfJlWXjnoAQCwil+wN/Jf8Q/yLjGxTk7yUkk=, LastModified 09:32:22Z). Claims: 7 of 7 pair values exact, 0 of 5 forbidden claims present, and 0 claims outside the pair's set plus iat/exp -- the minter refuses any extra, so the set is closed rather than spot-checked. TTL exp-iat = 90.0 days against the 90-day cap.",
+      "status": "PASS",
+      "expect": "DB41-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB41-1-AC2",
+      "criterion_verbatim": "`DB41-1-AC2` -- the secret is created and its reader grant, routed via MSTR, simulates allowed on it and implicitDeny elsewhere. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r41/p41_round41.py\" . DB41-1-AC2",
+      "output_evidence": "OK: secret created; reader grant routed via MSTR, simulated allowed / implicitDeny\nDB41-1-AC2 PASS",
+      "denominator": "Policy arn:aws:iam::313476888478:policy/cloudops-dell-agent-platform-secrets-policy went 30 -> 31 ARNs, exactly +1, applied 2026-10-09T12:21:00Z by laptop 0.7.0_AE_CloudOps~CTL under NFRA_CTLPLN.TO-APPLY-29; the v4 DOCUMENT was read rather than the version bump trusted (a v4 could have carried AMENDMENT 29 without 30), my ARN is present, wildcards 0, statements 1, actions 1 (GetSecretValue). Simulations are this seat's own, never the laptop's, each its OWN invocation with ONE --resource-arns because 2+ ARNs in a call flip the held ones to implicitDeny: LISTED (the new ARN) allowed, where the identical call read implicitDeny BEFORE the apply -- a true before/after attributable to this one add; UNLISTED (opal/auth/jwt-public-key-Z6dqNK) implicitDeny, re-measured AFTER the apply and chosen ADJACENT on purpose, sharing the opal/auth/ prefix with a LISTED secret, so the deny shows the add did not widen to a prefix; INSTRUMENT CONTROL (the listed opal/ticketing/svc-analyst-intake-HGzn67) allowed in a separate invocation, which is what makes any implicitDeny here the world rather than one of simulate-principal-policy's four false-deny modes. Its one false-ALLOW mode is closed because the target secret exists and was read back.",
+      "status": "PASS",
+      "expect": "DB41-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB41-1-AC3",
+      "criterion_verbatim": "`DB41-1-AC3` -- the ledger names the act. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r41/p41_round41.py\" . DB41-1-AC3",
+      "output_evidence": "OK: ledger org/critical_paths/change_management/20261009T0952Z_svc-custody-statement-mint-20261009_deploy_completion.md\nDB41-1-AC3 PASS",
+      "denominator": "1 ledger entry, opened BEFORE the act (09:52Z) and committed after each of 4 declared legs B/M/R/V; 3 closed with proof at this write and V closing with this instance. Its text names svc-custody-statement, which is the criterion's test. Pre-open union read of .open_deploys across 46 live worktrees found 76 distinct entries and NONE touching custody, secret or an allow-list, so nothing already open contended for this surface.",
+      "status": "PASS",
+      "expect": "DB41-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "each criterion re-run from the issuer's checker against the committed record; the live reads (describe-secret, get-policy-version, simulate-principal-policy) repeated in separate invocations",
+      "observed": "same last line on rerun for all three criteria; the two simulation decisions reproduced (allowed on the listed ARN, implicitDeny on the unlisted)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The discriminating control here is not a planted code mutant -- no product code was written -- it is the PRE-GRANT read of the same principal, action and resource ARN. That read returned implicitDeny while every instrument, credential and command was identical to the post-grant read that returns allowed.",
+      "expected": "implicitDeny before the reader-ARN add, allowed after it",
+      "observed": "implicitDeny measured at ~10:0xZ before the apply; allowed measured after the 12:21:00Z apply. The control DISCRIMINATES: a simulation that reported allowed in both states would have proven nothing about the grant, and an all-deny instrument was separately excluded by the positive control on a known-listed ARN.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the positive and negative arms of the pair (cottonwood persists; 49financial and inflection refused on the three admitted writes; the 23-route census re-run)",
+      "reason": "Explicitly NOT this order's -- steps 4 to 6 of the pair belong to DB-b-86. This order is leg M plus the reader grant only."
+    },
+    {
+      "item": "any IAM user, group or policy write by this seat",
+      "reason": "The GetSecretValue allow-list is an identity policy no Dell may write (the CTO half's correction). This seat routed the one ARN via 0.0.0_AB_MSTR~DELL2 and then verified the laptop's apply; it never wrote IAM."
+    },
+    {
+      "item": "any vendor or Black Diamond call, S3 write, deploy, bun run, or package/script download",
+      "reason": "Bounds of the order; none made."
+    },
+    {
+      "item": "any edit under data/, infra/ or portal/",
+      "reason": "Bounds of the order ('served output does not move'); none made. This is also why rule 30's registry-row remedy was out of grant -- and the CTO ruling then made it moot, since secrets are graded, not built."
+    },
+    {
+      "item": "any read of a secret other than opal/auth/jwt-private-key",
+      "reason": "Only the signing key read is authorised by the face. describe-secret calls on other secrets read METADATA for existence controls and never a value."
+    },
+    {
+      "item": "the created secret itself is NOT a row in artifacts_produced, although it is this order's single produced deliverable",
+      "reason": "PROOF_OF_SPEC.schema.json has no git-exempt artifact kind for a live AWS resource: the checker skips only s3_object/ddb_rows as 'not a git ref', and 'iam' is graded as a REPO artifact, so an ARN row is refused either as 'neither PENDING-THIS-COMMIT nor a 7-40 hex commit-ish' or as a PENDING path that 'does NOT exist in the working tree'. Both refusals were measured, not assumed. The secret is therefore carried in MINT_RECORD.secret (ARN + version id), in the DB41-1-AC2 denominator and in the deploy ledger. The proof is complete; artifacts_produced UNDERSTATES the order's output, which is row IRPT_DASHBD-S41's subject. Closing the gap means a new git-exempt kind in the schema, which belongs to the schema's owner -- org/standards/ is outside this order's grant."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-S38: the LGIC naming builder name() refused the pair-signed svc-* secret name, and rule 30's registry-row remedy sat outside this order's grant. Premise later superseded -- see S39.",
+    "IRPT_DASHBD-S39: S38 superseded by CTO ADDENDUM 9.3 -- secrets are GRADED, not built; grade() returns CONFORMANT for the name and for the svc-analyst-intake control, so the name() refusal was the BUILD verb behaving correctly and no gate defect existed to route. Cause recorded: the module's exports were first filtered by a forward guess, so grade() read as absent.",
+    "IRPT_DASHBD-S41: PROOF_OF_SPEC artifacts_produced has no git-exempt kind for a live AWS resource, so this order's one produced deliverable -- the Secrets Manager secret -- cannot be registered as an artifact row and is carried in MINT_RECORD, the AC2 denominator and the ledger instead. Taxonomy gap (rule 24(i) MECE), routed to the schema owner; not a checker bug."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": ".tools/commit-gate.sh \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.7.0_AE_CloudOps~DB2/mint_svc_custody_statement.py\"",
+      "result": "All checks passed (py_compile + ds-precommit + ruff py39); 1 of 1 file. Its WARN that it reads only .py/.sh/.tf/org/projects/*.json is noted and not cited as validation for the .json or .md artifacts."
+    },
+    {
+      "tool": "opal_naming.grade",
+      "invocation": "lib.opal_naming.grade('opal/investor-reporting/svc-custody-statement', 'SECRET') and the control grade('opal/ticketing/svc-analyst-intake', 'SECRET')",
+      "result": "CONFORMANT for both, canonical form equal to the name as given. Required by the issuer's ruling (msg 3093) and recorded in ledger NOTE 1."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open / close-leg B,M,R / hold (refused) / close",
+      "result": "Opened 09:52Z with 4 legs; hold REFUSED while an apply leg was open ('a half-landed deploy cannot be HELD (stays RED)') -- the half-landed-deploy law working, not overridden. Committed by hand after each leg because fix 00d3393ff3 is not yet in dell2 HEAD."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --files 'issued_to>0.7.0_AE_CloudOps~DB2' org/missions ; comp-find --files 'CONFORMANT' lib infra/logic --limit 20",
+      "result": "0 hits over 21,422 files scanned (118 ephemeral-floor and 2,203 binary excluded and NOT covered by that zero) confirmed no order had landed on disk unannounced; the second located lib/opal_naming.py as the grade verb's home. Two raw recursive greps were DENIED by the rail first and re-run as the comp-find it named."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "not run",
+      "result": "Deliberately not used as the oracle: comp-iam models (action) and never (action, resource), so it reports GRANTED for a principal holding GetSecretValue on ANY secret. This criterion is precisely an (action, resource) question, so the live policy document plus per-ARN simulations with a positive control are the sound instruments. comp-iam would have read green on an ungranted ARN."
+    }
+  ]
+}

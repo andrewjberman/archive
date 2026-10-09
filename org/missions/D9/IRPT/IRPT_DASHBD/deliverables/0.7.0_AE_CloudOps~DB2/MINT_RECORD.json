@@ -103,8 +103,7 @@
     "routed_via": "0.0.0_AB_MSTR~DELL2",
     "routed_at": "2026-10-09T10:10:59Z",
     "routed_message": "20261009T101059Z_0.7.0_AE_CloudOps_DB2__TO-DB-b-84_leg_R__route_to_laptop_0.7.0.md",
-    "applied": false,
-    "applied_note": "PENDING the laptop 0.7.0_AE_CloudOps act. The allow-list is an identity policy no Dell may write (CTO half's correction), so this seat cannot apply it and does not pretend to.",
+    "applied": true,
     "target_policy": {
       "arn": "arn:aws:iam::313476888478:policy/cloudops-dell-agent-platform-secrets-policy",
       "sid": "ReadPlatformKeys",
@@ -113,19 +112,36 @@
       "arns_expected_after": 31,
       "reaches_this_seat_via": "group cloudops-dell-agents-group (the user carries no inline policy; its two attached user policies name no secretsmanager action)"
     },
-    "simulate_listed": "implicitDeny",
+    "simulate_listed": "allowed",
     "simulate_unlisted": "implicitDeny",
     "simulate_baseline_note": "BASELINE, measured BEFORE the grant with ONE --resource-arns in the call: secretsmanager:GetSecretValue for arn:aws:iam::313476888478:user/cloudops-dell2-agent-user on the new secret ARN -> implicitDeny. This deny is what makes a later 'allowed' meaningful; it is recorded as the pre-grant value and will be replaced by the post-grant read, never by a prediction. The resource EXISTS (created and read back this session), which closes simulate-principal-policy's false-allow mode where a pattern matches an ARN nothing has created.",
     "cut_on_laptop_as": "NFRA_CTLPLN.TO-CT-a-1 AMENDMENT 30 by laptop 2.0.0_SA_COO~C (the svc-commentary pattern), relayed via 0.0.0_AB_MSTR~DELL2 msg 3124 -> 2.0.0_SA_COO~D2 msg 3126. It adds this ONE ARN to cloudops-dell-agent-platform-secrets-policy taking it 30 -> 31, lands in ONE apply with AMENDMENT 29, and the laptop simulates both Dells allowed and an unlisted secret refused. The laptop's applied time is relayed to this seat; this seat runs its OWN simulations after that time -- it does not adopt the laptop's.",
     "simulate_unlisted_arn": "arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/auth/jwt-public-key-Z6dqNK",
-    "simulate_unlisted_note": "MEASURED, and grant-independent so it is final: an ADJACENT unlisted secret was chosen deliberately -- opal/auth/jwt-public-key shares the opal/auth/ prefix with the LISTED opal/auth/jwt-private-key-Av5dZz -- so the implicitDeny proves the allow-list is per-ARN and not prefix-wide. A random unrelated secret would not have shown that.",
+    "simulate_unlisted_note": "MEASURED, and grant-independent so it is final: an ADJACENT unlisted secret was chosen deliberately -- opal/auth/jwt-public-key shares the opal/auth/ prefix with the LISTED opal/auth/jwt-private-key-Av5dZz -- so the implicitDeny proves the allow-list is per-ARN and not prefix-wide. A random unrelated secret would not have shown that. RE-MEASURED POST-GRANT because the policy document itself changed: still implicitDeny, which shows the add did not widen the list to the opal/auth/ prefix it sits beside.",
     "instrument_control": {
       "listed_arn": "arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/ticketing/svc-analyst-intake-HGzn67",
       "listed_decision": "allowed",
       "run_as": "a SEPARATE invocation from every other simulation, with ONE --resource-arns, because 2+ resource ARNs in one call flip the held ones to implicitDeny and would silently disarm this very control",
       "why_it_matters": "without it, implicitDeny on the target ARN is indistinguishable from a broken instrument: simulate-principal-policy has four independent false-deny modes. The allowed on a known-listed ARN proves the instrument CAN return allowed for this principal and action, so the target's deny is the world, not the tool.",
       "false_allow_mode_closed": "the target secret EXISTS (created and read back by describe-secret this session), so the mode where a pattern matches an ARN nothing has created does not apply here"
-    }
+    },
+    "applied_utc": "2026-10-09T12:21:00Z",
+    "applied_by": "laptop 0.7.0_AE_CloudOps~CTL under NFRA_CTLPLN.TO-APPLY-29 (AMENDMENTS 29 + 30, re-addressed @22328677a9); relayed by 0.0.0_AB_MSTR~DELL2 -> 2.0.0_SA_COO~D2",
+    "simulate_listed_note": "MEASURED POST-GRANT in its own invocation with ONE --resource-arns. This is a TRUE BEFORE/AFTER: the same principal, action and resource ARN read implicitDeny before the apply (recorded as the baseline) and allowed after it, so the change is attributable to the one ARN add and not to an instrument difference.",
+    "applied_artifact_read": {
+      "policy_default_version": "v4 (was v3)",
+      "policy_updated_utc": "2026-10-09T12:21:00Z",
+      "arn_count": 31,
+      "arn_count_before": 30,
+      "my_arn_present": true,
+      "wildcards_present": "none",
+      "statements": 1,
+      "actions": [
+        "secretsmanager:GetSecretValue"
+      ],
+      "note": "the version BUMP alone was not taken as evidence: a v4 could have carried AMENDMENT 29 without 30. The v4 document was read and the delta measured -- exactly +1 ARN, mine present, no wildcard introduced, still a single GetSecretValue statement. The denominator is printed beside the claim rather than inferred from the bump."
+    },
+    "detected_how": "two independent paths agreed: this seat's own bounded policy-version watch fired on v3 -> v4, and the MSTR/COO relay chain carried the same apply. The watch meant this seat did not depend on the relay alone."
   },
   "acts_taken": [
     "ONE secret created (opal/investor-reporting/svc-custody-statement)",
@@ -142,5 +158,5 @@
   ],
   "rollback": "delete-secret with the DEFAULT recovery window (never force) and the ARN removed from the allow-list (a laptop act). The real control is the code admission IB-pr-385: rolling it back disarms the token everywhere.",
   "positive_and_negative_arms": "NOT this order's -- steps 4 to 6 of the pair (cottonwood persists; 49financial and inflection refused) belong to DB-b-86.",
-  "status_at_write": "legs B and M CLOSED; leg R routed to the laptop via 0.0.0_AB_MSTR~DELL2 and OPEN (the entry stays RED by design -- deploy_ledger refuses a HELD state while an apply/deploy leg is open, which is the half-landed-deploy law working); leg V follows"
+  "status_at_write": "legs B, M and R complete; leg V and the criteria follow"
 }
