@@ -9,6 +9,11 @@ latest stored key), read only:
     C2 ASML_NA_Equity and ASML_US_Equity both carry `issuer.cik` 937966, each with a claim of `measured` and a named source;
     C3 no `issuer.cik` carries an inferred claim or a text source, and every value names its source (count with denominator);
     C4 the four other stored 20-F names carry their filer CIKs (BABA 1577552, NU 1691493, PBR 1119639, SAP 1000184).
+  python r85_crosswalk.py --crit AC1 --reference crosswalk/v1/2026-10-07.json [--admit FIELD,FIELD.SUB,...]
+    C5 (round 86, CTO~DELL1 round-85 analysis R1; binds every later crosswalk publish): every top-level field of the REFERENCE list,
+       and every key one level inside a top-level object, is present in the graded list with an equal value, or is named in --admit
+       (its reference and new values printed); keys the graded list adds are printed and must be admitted too; and
+       research_universe carries a folder count >= 1. Without --reference, C5 is not run and C1-C4 grade as before.
 Verdict: R85 CROSSWALK AC1: YES|NO (exit 0|1). At the base (2026-10-07.json, 243 records): NO -- no record carries `issuer`.
 """
 from __future__ import annotations
@@ -51,10 +56,45 @@ def _issuer(rec):
     return str(iss.get("cik") or "").lstrip("0"), iss.get("claim"), iss.get("source")
 
 
+def _flat(doc):
+    """{dotted path: value} for every top-level field except `records`, and one level inside each top-level object."""
+    out = {}
+    for k, v in doc.items():
+        if k == "records":
+            continue
+        if isinstance(v, dict):
+            for k2, v2 in v.items():
+                out["%s.%s" % (k, k2)] = v2
+            out[k] = "<object>"
+        else:
+            out[k] = v
+    return out
+
+
+def c5(ref, this, admit):
+    rf, tf = _flat(ref), _flat(this)
+    unadmitted = []
+    for path in sorted(set(rf) | set(tf)):
+        a, b = rf.get(path, "<MISSING>"), tf.get(path, "<MISSING>")
+        if json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True):
+            continue
+        tag = "ADMITTED" if path in admit or path.split(".")[0] in admit else "NOT ADMITTED"
+        print("   C5 %-12s %s: reference %s | graded %s" % (tag, path, json.dumps(a)[:90], json.dumps(b)[:90]))
+        if tag == "NOT ADMITTED":
+            unadmitted.append(path)
+    ru = this.get("research_universe") or {}
+    folders = ru.get("folders") if isinstance(ru, dict) else None
+    ok_ru = isinstance(folders, int) and folders >= 1
+    return say(not unadmitted and ok_ru, "C5 every reference field present with an equal value or admitted (%d not admitted%s); "
+               "research_universe folders %r" % (len(unadmitted), (" %s" % unadmitted[:6]) if unadmitted else "", folders))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--crit", required=True, choices=["AC1"])
     ap.add_argument("--path")
+    ap.add_argument("--reference")
+    ap.add_argument("--admit", default="")
     a = ap.parse_args()
     s3, keys = _keys()
     print("   stored name lists under s3://%s/%s: %d (latest %s)" % (BUCKET, PREFIX, len(keys), keys[-1] if keys else None))
@@ -84,6 +124,11 @@ def main():
     c4 = say(not wrong, "C4 the four other stored 20-F names carry their filer CIKs: %d of 4%s" % (
         4 - len(wrong), (" (wrong %s)" % wrong) if wrong else ""))
     ok = c1 and c2 and c3 and c4
+    if a.reference:
+        ref = json.loads(s3.get_object(Bucket=BUCKET, Key=a.reference)["Body"].read())
+        print("   C5 reference %s" % a.reference)
+        admit = {x.strip() for x in a.admit.split(",") if x.strip()}
+        ok = c5(ref, this, admit) and ok
     print("R85 CROSSWALK AC1: %s" % ("YES" if ok else "NO"))
     return 0 if ok else 1
 

@@ -2,6 +2,8 @@
 
   python r85_repair.py --crit AC1 --draft <local repaired NU drafting JSON>
 
+--exclude-section NAME (round 86): drop a section from every count, e.g. company_description, which R5 empties.
+
 Grades a LOCAL repaired copy of drafting/v1/NU_US_Equity.json BEFORE it is written, against the CURRENT stored draft and NU's stored
 filing excerpt (the latest silver `filing_source` row's excerpt text), both read only:
     K1 the same number of sentences as the stored draft (38 at the cut) -- any drop is a STOP;
@@ -34,8 +36,11 @@ def _norm(t):
     return re.sub(r"\s+", " ", t or "").strip()
 
 
+EXCLUDE = set()
+
+
 def _sentences(doc):
-    return [s for sec in doc.get("sections") or [] for s in sec.get("sentences") or []]
+    return [s for sec in doc.get("sections") or [] if (sec.get("section") or "") not in EXCLUDE for s in sec.get("sentences") or []]
 
 
 def _stored_draft():
@@ -60,7 +65,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--crit", required=True, choices=["AC1"])
     ap.add_argument("--draft", required=True)
+    ap.add_argument("--exclude-section", action="append", default=[])
     a = ap.parse_args()
+    EXCLUDE.update(a.exclude_section)
+    if EXCLUDE:
+        print("   sections excluded from every count: %s" % sorted(EXCLUDE))
     root = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
     for p in (root, HERE):
         if p and p not in sys.path:
