@@ -8,7 +8,7 @@ the CTO's CONSOLIDATION addendum; this file does not number new ids.
 Naming: the product is the "Performance client statement" (Andrew-direct ~21:2xZ, @b15e76c232). Code ids are unchanged:
 `CUSTODY_REPORT`, `irpt-custody-x10-v1`, `custody-report-read`.
 
-## 1. Open orders (task-orders/, 22 files; 20 complete, 1 superseded, 1 pending)
+## 1. Open orders (task-orders/, 21 files; 19 complete, 1 superseded, 1 pending)
 
 | order | cell | state | what it waits on | resumes under |
 |---|---|---|---|---|
@@ -23,7 +23,7 @@ PROD is Andrew's word (dell2 open-calls row `dell2-20261008T192510Z-0347`).
 | FWD | status at handover | evidence |
 |---|---|---|
 | FWD-1 (one statement end to end) | hops 1-4 real for 18 of 18 accounts (CTO round-6 analysis section 1). Hop 5: server half live (IB-pr-364/378); real statement NOT yet run (CU-g-5); render through PROD NOT yet (CU-g-6) | round-6 analysis; rows W18-S1, S15 |
-| FWD-2..FWD-8 | no IRPT_CUSTDY order served them. FWD-5 (BD comparisons) folds into DASHBD FWD-8 (ruling item 4) | order census: outcome_ref over 22 orders |
+| FWD-2..FWD-8 | no IRPT_CUSTDY order served them. FWD-5 (BD comparisons) folds into DASHBD FWD-8 (ruling item 4) | order census: outcome_ref over 21 orders (FWD-1 x20 incl. the superseded CU-c-3 and the pending CU-g-2a; FWD-9 x1) |
 | FWD-9 (where Opal gets each BD figure) | map BUILT and read for every field of one real BD 49F report. 7 Run Report bases, 32 pages, 49 fields, 70 rows: 47 MAPPED, 23 MISSING (18 BD-only classification tree, 4 benchmark, 1 MTD period). Structural only: no figure tied out | `deliverables/0.9.0_WK_IRPT_CUSTDY~17/BD_FIELD_MAP_CU-g-3.{json,md}`, drained @63cef63eab; leak check CLEAN (1,671 tokens) |
 
 ## 3. Template state
