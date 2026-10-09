@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t14",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t14.sitez-demand-ledger-uploader.md",
+    "group": "OTHER",
+    "vintage_commit": "ec279f60d3bd9cb18e71134cb8623e67296bf51f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "5edd7283b4b508f00a48038cd8d3a11cf57a42d0",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t14.sitez-demand-ledger-uploader.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~ZQ",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_ledger_upload.py",
+      "kind": "script",
+      "commit_or_etag": "492cb5a2f1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Shared workspace code matches signed pin; initial upload served-byte comparison passes; task action reads this shared path.",
+      "artifact_covered_by": [
+        "DQ4-t14-AC1",
+        "DQ4-t14-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_bbg_ledger_upload.py",
+      "kind": "test",
+      "commit_or_etag": "492cb5a2f1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five fixture-ledger/S3 stub tests pass; tests are not scheduled.",
+      "artifact_covered_by": [
+        "DQ4-t14-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-assets/bloomberg/global/bronze/demand_ledger/dt=2026-10-08/ledger.jsonl",
+      "kind": "s3_object",
+      "commit_or_etag": "84b934f0f0e0c0039b22214f434f0243",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "LEDGER-OK rows=4 cells=17878; 1040 served bytes match local SHA256 5ea616b2aaf151a888cbdd05097b0bb3ba375641c11294b9d490a292d023293f",
+      "artifact_covered_by": [
+        "DQ4-t14-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/MDPF_DEMQUE_ZQ_T14_task.xml",
+      "kind": "schedule",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Get-ScheduledTask: Ready enabled daily 08:30 Eastern; offset-free local StartBoundary 2026-10-09T08:30:00; Interactive Opal Bloomberg; shared workspace action; previous UTC day; missing-day SKIP exits 0. Readback in MDPF_DEMQUE_ZQ_T14_task.json/xml. First scheduled fire not yet observed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ4-t14-AC1",
+      "criterion_verbatim": "the five named tests.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R4_CHECKS/dq_t14_tests.py",
+      "output_evidence": "5 passed; UPL-OK; rc=0",
+      "denominator": "5 of 5 named tests PASSED",
+      "status": "PASS",
+      "expect": "UPL-OK"
+    },
+    {
+      "criterion_id": "DQ4-t14-AC2",
+      "criterion_verbatim": "after the first --apply at site Z: rows exist under the builder ledger home for that day, each with its claim.",
+      "method": "live_read",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R4_CHECKS/dq_t14_ledger.py",
+      "output_evidence": "LEDGER-OK rows=4 cells=17878 under s3://opal-data-assets/bloomberg/global/bronze/demand_ledger/dt=2026-10-08",
+      "denominator": "4 of 4 source records present in 1 daily object, each with held claim; latest UTC day with source file 2026-10-08",
+      "status": "PASS",
+      "expect": "LEDGER-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In a separate Python process change daily holdings multiplier from 16 to 15 in memory, then run the conversion test; no file or deployed artifact mutated.",
+      "expected": "conversion assertion fails at first row: 45 != 48",
+      "observed": "1 failed; assert [45,64,5,14,2] == [48,64,5,14,2]; exit 1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Named idempotence test uploads identical fixture twice against S3 stub then adds a new source record.",
+      "observed": "PASSED: identical key/body for identical inputs; rerun replaces the day rather than appending duplicate rows.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Vendor billing/capacity measurement and OPAL_BBGTML notebook producer instrumentation",
+      "reason": "Order reads existing records and forbids producer edits. Known conversions held; unsupported shapes absent. Notebook coverage gap reported as required."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-Z-W1-S1: Shared backfill mode and mixed-width modes need explicit batch identity or absent conversion.",
+    "MDPF_DEMQUE-Z-W1-S2: Notebook draws are not recorded by the runner or notebook sources inspected; coverage held."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/MDPF_DEMQUE_ZQ_T14_REVIEW.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast bbg_ledger_upload",
+      "result": "SUBJECT_ABSENT_FROM_CORPUS; source and destination inspected directly; not an impact clearance"
+    },
+    {
+      "tool": "comp-diff",
+      "invocation": "comp-diff",
+      "result": "No changed files detected: new untracked files outside view. Explicit Python gate passed 2 of 2 files."
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "comp-schedule --owner 0.7.0_AE_CloudOps~ZQ --budget 10",
+      "result": "PARTIAL_OR_BLIND; live scheduled task trigger/action/principal read directly; existing task unchanged."
+    }
+  ]
+}
