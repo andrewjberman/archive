@@ -42,46 +42,46 @@ Not counted as changes (the order compares only the fields above), rows whose va
 
 Changed rows (account, field, before -> after):
 
-- 0QF878955, status, NOT_MATCHED -> MATCHED
-- 0QF878955, rule,  -> R2-in-kind-transfer
-- 0QF878955, current_account,  -> z0926757511
-- 0QF878955, score,  -> 0.966700
-- 0QF878960, score,  -> 0.483900
-- 0QF878973, score,  -> 0.000000
-- 0QF878982, status, NOT_MATCHED -> MATCHED
-- 0QF878982, rule,  -> R2-in-kind-transfer
-- 0QF878982, current_account,  -> z0926704991
-- 0QF878982, score,  -> 1.000000
-- 0QF878984, status, NOT_MATCHED -> MATCHED
-- 0QF878984, rule,  -> R2-in-kind-transfer
-- 0QF878984, current_account,  -> z0926704451
-- 0QF878984, score,  -> 1.000000
-- 0QF879032, score,  -> 0.000000
-- 0QF879034, score,  -> 0.000000
-- 0QF879081, status, NOT_MATCHED -> MATCHED
-- 0QF879081, rule,  -> R2-in-kind-transfer
-- 0QF879081, current_account,  -> z0926725281
-- 0QF879081, score,  -> 1.000000
-- 0QF879090, status, NOT_MATCHED -> MATCHED
-- 0QF879090, rule,  -> R2-in-kind-transfer
-- 0QF879090, current_account,  -> z0926652341
-- 0QF879090, score,  -> 1.000000
-- 0QF879091, status, NOT_MATCHED -> MATCHED
-- 0QF879091, rule,  -> R2-in-kind-transfer
-- 0QF879091, current_account,  -> z0926652331
-- 0QF879091, score,  -> 1.000000
-- 0QF879098, status, NOT_MATCHED -> MATCHED
-- 0QF879098, rule,  -> R2-in-kind-transfer
-- 0QF879098, current_account,  -> z0926768821
-- 0QF879098, score,  -> 1.000000
-- 0QF879174, score,  -> 0.000000
-- 0QF879245, score,  -> 0.750000
-- 0QF879257, status, NOT_MATCHED -> MATCHED
-- 0QF879257, rule,  -> R2-in-kind-transfer
-- 0QF879257, current_account,  -> z0926725221
-- 0QF879257, score,  -> 1.000000
-- 0QF879299, status, NOT_MATCHED -> MATCHED
-- 0QF879299, rule,  -> R2-in-kind-transfer
+- acct#03b1818c, status, NOT_MATCHED -> MATCHED
+- acct#03b1818c, rule,  -> R2-in-kind-transfer
+- acct#03b1818c, current_account,  -> z0926757511
+- acct#03b1818c, score,  -> 0.966700
+- acct#a56947be, score,  -> 0.483900
+- acct#afff21b7, score,  -> 0.000000
+- acct#fe3aa89f, status, NOT_MATCHED -> MATCHED
+- acct#fe3aa89f, rule,  -> R2-in-kind-transfer
+- acct#fe3aa89f, current_account,  -> z0926704991
+- acct#fe3aa89f, score,  -> 1.000000
+- acct#c35ddef3, status, NOT_MATCHED -> MATCHED
+- acct#c35ddef3, rule,  -> R2-in-kind-transfer
+- acct#c35ddef3, current_account,  -> z0926704451
+- acct#c35ddef3, score,  -> 1.000000
+- acct#7c2950f8, score,  -> 0.000000
+- acct#3514364a, score,  -> 0.000000
+- acct#487a177f, status, NOT_MATCHED -> MATCHED
+- acct#487a177f, rule,  -> R2-in-kind-transfer
+- acct#487a177f, current_account,  -> z0926725281
+- acct#487a177f, score,  -> 1.000000
+- acct#5446c1d7, status, NOT_MATCHED -> MATCHED
+- acct#5446c1d7, rule,  -> R2-in-kind-transfer
+- acct#5446c1d7, current_account,  -> z0926652341
+- acct#5446c1d7, score,  -> 1.000000
+- acct#0d10c089, status, NOT_MATCHED -> MATCHED
+- acct#0d10c089, rule,  -> R2-in-kind-transfer
+- acct#0d10c089, current_account,  -> z0926652331
+- acct#0d10c089, score,  -> 1.000000
+- acct#bd6094c0, status, NOT_MATCHED -> MATCHED
+- acct#bd6094c0, rule,  -> R2-in-kind-transfer
+- acct#bd6094c0, current_account,  -> z0926768821
+- acct#bd6094c0, score,  -> 1.000000
+- acct#6b93dd15, score,  -> 0.000000
+- acct#8179a706, score,  -> 0.750000
+- acct#1665d973, status, NOT_MATCHED -> MATCHED
+- acct#1665d973, rule,  -> R2-in-kind-transfer
+- acct#1665d973, current_account,  -> z0926725221
+- acct#1665d973, score,  -> 1.000000
+- acct#77c2edca, status, NOT_MATCHED -> MATCHED
+- acct#77c2edca, rule,  -> R2-in-kind-transfer
 - ... 121 more in rule_change_rows.csv
 
 ## account_links (key old_account; compared: status, new_account)
@@ -119,8 +119,8 @@ Not counted as changes (the order compares only the fields above), rows whose va
 
 Changed rows (account, field, before -> after):
 
-- B3S605711, status, NOT_LINKED -> LINKED
-- B3S605711, new_account,  -> B3S676722
-- RGY003616, status, LINKED -> NOT_LINKED
-- RGY003616, new_account, 0QF882871 -> 
+- acct#e1e2dacb, status, NOT_LINKED -> LINKED
+- acct#e1e2dacb, new_account,  -> acct#f6464238
+- acct#d6187d4b, status, LINKED -> NOT_LINKED
+- acct#d6187d4b, new_account, acct#8f547eb0 -> 
 

@@ -45,8 +45,8 @@ pytest data/assets/scripts/silver/tests: 626 passed, 11 skipped
     non-sweep purchase.
   - No fix was needed: `method_r25b` = `method_r25`.
 - **E3 graded (round 24 AC4's parked clause, row W47-S2):** 20 of the 22 dividend months do not move between pay and ex date.
-  - The 2 XOM months of RGY003587 (2025-06, 2025-09) turn DIFF -> MATCH under ex-dating.
-  - But the same XOM dividends turn 6 other MATCH months DIFF (0QF878981, 0QF879181, RGY005018).
+  - The 2 XOM months of acct#83c764b4 (2025-06, 2025-09) turn DIFF -> MATCH under ex-dating.
+  - But the same XOM dividends turn 6 other MATCH months DIFF (acct#f6c79f45, acct#eea1157e, acct#65b3b3ea).
   - Net under ex-dating: MATCH 3,098 -> 3,094. Neither date is adopted; the default stays pay date.
 - **Default:** `method` stays the default. `method_r25` is selectable and graded; adopting it as the default is the CTO's to rule
   (0 regressions, +39 MATCH).
@@ -60,7 +60,7 @@ pytest data/assets/scripts/silver/tests: 626 passed, 11 skipped
 2. **The remaining 886 DIFF months:** a fresh cause census on the new baseline.
 3. **Dividend dating:** pay date stays, on the measured +2/-6.
 
-**Cross-fabric, done this round:** an AMLP consumer read for dell1 MDPF_DEMQUE @14d4fc7049. Living client 0QF880237 was valued on
+**Cross-fabric, done this round:** an AMLP consumer read for dell1 MDPF_DEMQUE @14d4fc7049. Living client acct#8039e07b was valued on
 1,058 days with 0 unpriced; trade prices agree 3 of 4 within 2%. dell1's CTO filed it as their hop 6.
 
 **Parked, owner `~C2`:** the ranked price-need list, un-parked by the dell1 data-queue project's L2.

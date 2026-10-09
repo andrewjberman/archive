@@ -53,8 +53,8 @@ The COO half fixes the row counts and lets the hashes move. Both held:
   proves the local files match the manifest written by this same build.
 - **Addresses** byte-identical to the pair's three keys, `addresses_from_builder=True` -- rule 30 holds,
   nothing typed or stale.
-- **`absent_months=4`**, `manifest_list_same=True`, and the four are exactly the pair's four: B3S728504
-  2023-05 (22 days / 66 holding rows), B3S728504 2023-06 (21/63), B3S728506 2023-05 (22/66), B3S728506
+- **`absent_months=4`**, `manifest_list_same=True`, and the four are exactly the pair's four: acct#79d02c2c
+  2023-05 (22 days / 66 holding rows), acct#79d02c2c 2023-06 (21/63), acct#4a890dd1 2023-05 (22/66), acct#4a890dd1
   2023-06 (21/63), each `computed=ABSENT return=ABSENT verdict=ABSENT` with reason `REGRESSED_UNDER_R28`.
   That is CTO AMENDMENT 1 conditions 1 and 2. No fifth regression appeared, which is condition 3.
 

@@ -9,7 +9,7 @@ Round 30 was cut as one issuance @9a2399d831 (`fanout: 1 of 1 chains, cap 8`) on
 
 | order | item | worker | state |
 |---|---|---|---|
-| CB-ad-1 | read-only trace of D2-S45's r28/r26 factor on B3S728504 and B3S728506 | ~57 | complete @816400901c, drained @abe8a94a17 |
+| CB-ad-1 | read-only trace of D2-S45's r28/r26 factor on acct#79d02c2c and acct#4a890dd1 | ~57 | complete @816400901c, drained @abe8a94a17 |
 
 ## The real run, shared tree, after the drain
 
@@ -30,7 +30,7 @@ The issuer's run matches the worker's.
 
 - After 2024-10-11 the ratio is 1.0000.
 - Cash is identical under both methods.
-- Example, B3S728504 on 2022-10-12: 426 sh of 808524102 at 13.3302 (r26) vs 39.9906 (r28).
+- Example, acct#79d02c2c on 2022-10-12: 426 sh of 808524102 at 13.3302 (r26) vs 39.9906 (r28).
 
 **Which level is right is still unmeasured.** Both accounts are classed `untraced` by the pre-written rule:
 - The delivery carries no market value and no trade price for these CUSIPs. They enter only as li/trfi/QA/dv/lo rows: 0 of 10
