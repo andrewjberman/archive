@@ -14,8 +14,8 @@
 Criterion ids: Y75-1-AC1, Y75-1-AC2, Y75-1-AC3. Instance at `org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_y75/IRPT_BCKEND.TO-APPLY-Y75.proof_of_spec.json`, validated with `python .tools/proof-of-spec-check.py <instance> Y75-1-AC1,Y75-1-AC2,Y75-1-AC3`; AC2 is marked FAIL with reason PENDING-ISSUER until the laptop result lands. Shape: `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~159/IRPT_BCKEND.TO-IB-yr-681.release3-a1-run-as-signed.proof_of_spec.json`.
 </proof_of_spec>
 <decomp_ref>
-<decomp_doc>org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R75_Y.md</decomp_doc> round 75, workstream ~Y, cell `APPLY-Y75`.
-<owned_cells>APPLY-Y75</owned_cells>
+<decomp_doc>org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R75_Y.md</decomp_doc> round 75, workstream ~Y, cell `IB-ya-751` (was `APPLY-Y75`).
+<owned_cells>IB-ya-751</owned_cells>
 </decomp_ref>
 
   <objective>
@@ -88,9 +88,9 @@ Criterion ids: Y75-1-AC1, Y75-1-AC2, Y75-1-AC3. Instance at `org/tier2_senior/0.
   </steps>
 
   <acceptance>
-    <criterion id="Y75-1-AC1"><invocation>python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r75/y75_cells.py . Y75-1-AC1</invocation><expect>Y75-1-AC1 PASS</expect></criterion>
-    <criterion id="Y75-1-AC2"><invocation>python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r75/y75_cells.py . Y75-1-AC2</invocation><expect>Y75-1-AC2 PASS</expect></criterion>
-    <criterion id="Y75-1-AC3"><invocation>python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r75/y75_cells.py . Y75-1-AC3</invocation><expect>Y75-1-AC3 PASS</expect></criterion>
+    <criterion id="Y75-1-AC1" cell_refs="IB-ya-751"><invocation>python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r75/y75_cells.py . Y75-1-AC1</invocation><expect>Y75-1-AC1 PASS</expect></criterion>
+    <criterion id="Y75-1-AC2" cell_refs="IB-ya-751"><invocation>python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r75/y75_cells.py . Y75-1-AC2</invocation><expect>Y75-1-AC2 PASS</expect></criterion>
+    <criterion id="Y75-1-AC3" cell_refs="IB-ya-751"><invocation>python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r75/y75_cells.py . Y75-1-AC3</invocation><expect>Y75-1-AC3 PASS</expect></criterion>
     AC2 is graded by the issuer on the laptop's read-back + cleanup result. Leave the status for the issuer.
   </acceptance>
 
