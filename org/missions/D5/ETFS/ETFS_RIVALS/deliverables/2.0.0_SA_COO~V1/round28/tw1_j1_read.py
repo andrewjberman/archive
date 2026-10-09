@@ -33,7 +33,7 @@ if text is None:
 lines = text.splitlines()
 step = [ln for ln in lines if "RIVALFUNDS ENRICHMENT STEP" in ln]
 exits = [ln for ln in lines if "RIVALFUNDS ENRICHMENT EXIT CODE" in ln]
-fails = [ln for ln in lines if FAIL_RE.search(ln)]
+fails = [ln for ln in lines if FAIL_RE.search(ln) and (full is not None or re.match(r"^\s*\d+:", ln))]  # same rule as owed: the header quotes the selector itself
 owed = [ln for ln in lines if "HISTORY OWED" in ln and (full is not None or re.match(r"^\s*\d+:", ln))]  # the transcription's own header names HISTORY OWED; only copied log lines (<n>: ...) count
 code = None
 if exits:
