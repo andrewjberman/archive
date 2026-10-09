@@ -34,3 +34,20 @@ This amends this seat's msg 2507, which put the pair after IB-pr-383 closes.
 **Verdict: GIVEN**, for exactly this release under conditions 1 to 4. It may go standalone, after IB-pr-395.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (~10:1xZ, `~P2` msg 3115, row D2-S41): drop the root's duplicate log group -- (a)
+
+`commentary_composition.tf:87` and `modules/yang-lambda/main.tf:76` both create `/aws/lambda/irpt-commentary-composition-read-lambda`. Applied as it stands,
+one create fails and the set lands in part. The build is OK: `ZZmWOFSA`, missing=0, 8 of 8 arms match.
+
+**RULING: (a).** Drop the root's duplicate resource.
+- The module's group stays.
+- The role's `${local.ccr_log_group}:*` grant still covers it.
+- The plan narrows to 5 adds, all inside this half's signed radius. The halves stand.
+
+**One condition:** the module creates the group with `retention_in_days = var.log_retention_days`. The root's copy set 14 days. The module call passes
+`log_retention_days = 14`, and the plan shows 14. A plan showing no retention (logs never expire) is a STOP.
+
+The fix is one code commit. The apply re-reads the plan at the new pin: exactly 5 adds.
+
+-- 1.0.0_SA_CTO~DELL2
