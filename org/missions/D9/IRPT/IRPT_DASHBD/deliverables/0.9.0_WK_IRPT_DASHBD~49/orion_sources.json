@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "doc": "IRPT_DASHBD reporting adapter declaration for the ORION custody source (TO-DB-b-72, FWD-11). The same law as the 49 Financial producer's sources.json (C-ADAPTERS): one entry per custody source, vendor codes only inside their own adapter, no firm token in this file. Orion transaction type ids and descriptions are allowed to exist ONLY here and in orion_account_return_daily.py. The firm is NOT named here: the run is given the registry key on its command line and resolves the firm and the routed legacy bucket from infra/logic/registry/scopes.json through lib/opal_naming.py lookup(). The registry holds NO custody master for this source and its bindings are null, so there is no registry_key field in this file (surprise row IRPT_DASHBD-W49-S1 names the registry row this adapter needs).",
+  "_reserved_keys_comment": "Every top-level key whose VALUE IS AN OBJECT and whose name is not underscore-prefixed IS A CUSTODY SOURCE.",
+  "orion_fidelity": {
+    "custodian": "fidelity",
+    "vendor": "orion",
+    "bucket_resolution": {
+      "plane": "bucket",
+      "require_routed": true,
+      "basis": "measured",
+      "comment": "The registry's firm bucket exists but holds only the irpt/ prefix; the Orion silver and gold the firm already lands are in the LEGACY bucket the registry entry's alias list names (plane bucket, routed true, lookup false). Both were listed at run time. The adapter reads the alias; it types no bucket."
+    },
+    "positions_prefix": "silver/api_dims/positions_mv/",
+    "positions_partition_form": "snapshot_date=YYYY-MM-DD/data.parquet",
+    "account_column": "account_id",
+    "account_id_zero_pad": 10,
+    "value_column": "current_value",
+    "value_basis": "held",
+    "value_comment": "C-VALUE: the account's value on a day is the SUM of current_value over every position row of that account in that day's snapshot, cash positions included (is_custodial_cash rows are rows of the same table). Orion publishes one snapshot per CALENDAR day, weekends included, so the trading calendar (lib/trading_calendar.py) stays the performance axis. A day with no row for an account makes the account-day's value ABSENT, never zero.",
+    "transactions_key_template": "silver/transactions/{snapshot}.parquet",
+    "transactions_note": "The snapshot named by the run's --end is a FULL-HISTORY file (transDate 2020-06-03 onwards, pull_date = the snapshot), so the flow term reads one object per run.",
+    "transactions_columns": ["accountId", "transDate", "transAmount", "transTypeId", "trans_type_desc", "status"],
+    "transactions_account_column": "accountId",
+    "transactions_date_column": "transDate",
+    "transactions_amount_column": "transAmount",
+    "transactions_type_id_column": "transTypeId",
+    "transactions_type_desc_column": "trans_type_desc",
+    "transactions_status_column": "status",
+    "accepted_status": ["Complete"],
+    "accepted_status_basis": "measured",
+    "accepted_status_comment": "Pending, Rejected, Reversed and Inactive rows are not money that moved. Management Fee alone carries 2,891 Pending and 3,309 Rejected rows next to 15,044 Complete ones. The firm's own NNA producer does not filter on status; this adapter does, and the difference is stated here rather than inherited.",
+    "types": {
+      "EXTERNAL_IN": [
+        {"id": 8, "desc": "Client Contribution"},
+        {"id": 9, "desc": "Employer Contribution"},
+        {"id": 166, "desc": "Rollover Contribution"},
+        {"id": 39, "desc": "Merge In from Other Account"},
+        {"id": 204, "desc": "External Account Activity In"}
+      ],
+      "EXTERNAL_OUT": [
+        {"id": 51, "desc": "Client Distribution"},
+        {"id": null, "desc": "Cancel Account"},
+        {"id": 42, "desc": "Merge Out to Other Account"},
+        {"id": 205, "desc": "External Account Activity Out"}
+      ],
+      "INTER_ACCOUNT_IN": [
+        {"id": 172, "desc": "Internal Account Journal In"}
+      ],
+      "INTER_ACCOUNT_OUT": [
+        {"id": 171, "desc": "Internal Account Journal Out"}
+      ],
+      "TAX_WITHHELD": [
+        {"id": 113, "desc": "Federal Tax Withheld"},
+        {"id": 114, "desc": "State Tax Withheld"}
+      ],
+      "ADVISORY_FEE": [
+        {"id": 24, "desc": "Management Fee"},
+        {"id": 110, "desc": "Fee Credit"}
+      ],
+      "INCOME_CASH": [
+        {"id": 17, "desc": "Dividend to Cash"},
+        {"id": 34, "desc": "Long Term Gain to Cash"},
+        {"id": 49, "desc": "Short Term Gain to Cash"},
+        {"id": 104, "desc": "Interest Paid in Cash"}
+      ]
+    },
+    "types_comment": "EXTERNAL_IN and EXTERNAL_OUT are the firm's ratified NNA set (data/inf/scripts/silver/orion_cashflow_taxonomy.yaml v2, nna_direction in/out), read as prior art. Direction is the CLASS, never the sign of the amount: the amount's absolute value is signed by the class, as the NNA producer does. A row's type id and description are both read and a pair that disagrees with this table is REFUSED (drift), so an id can never silently change meaning. Every other type (trades, reinvestments, exchanges, splits, trading and administrative fees, foreign tax) stays INSIDE the return.",
+    "inter_account_comment": "DEPARTURE FROM THE TAXONOMY, MEASURED. The taxonomy files the Internal Account Journal pair as INTERNAL noise. At the ACCOUNT grain a journal that leaves one account arrives in another, so it crosses this account's boundary, the same rule the 49 Financial producer applies to inter-account legs. On the tie-out sample (562 account-windows, net-of-fee basis, 0.35 pp, calendar-day/365 annualisation) adding the pair as flows moved the net-of-fee within count from 285 to 339 (flow_set_probe in INF_RETURNS_TIEOUT.json).",
+    "tax_withheld_comment": "DEPARTURE FROM THE TAXONOMY, MEASURED. The taxonomy files Federal and State Tax Withheld as RETURN (reducing return). Withholding is cash taken out of a client's distribution, so at account grain it is capital out. Adding the two as outflows on top of the journal pair moved the net-of-fee within count from 339 to 413 of 562 (calendar-day/365 annualisation; 348 to 421 under the declared trading-day/252 one). Foreign tax and Foreign Dividend Tax stay inside the value, as the 49 Financial producer keeps its foreign-tax withholding.",
+    "fee_comment": "GROSS of advisory fees (C-FEERAIL): Management Fee and Fee Credit are signed as they are stored (a fee is negative) and enter F_t as capital out, so V_t - F_t adds the fee back. fee_amount stays null with FEE_RAIL_UNUSED. The comparison source is NET of fees (see comparison).",
+    "income_comment": "income_received is cash income on RECEIPT over the same window as external_flow (the four INCOME_CASH types, absolute value). It is informational: the cash is already inside V_t, so it never enters F_t. Reinvested income is not counted.",
+    "large_flow_ratio": 0.1,
+    "large_flow_ratio_basis": "held",
+    "large_flow_ratio_comment": "|external_flow| / V_(t-1) at or above this flags day_quality LARGE_FLOW, a reader's warning that never removes the value. HELD, not measured: the 49 Financial producer measures its own thresholds from its own distribution, and this offline cell does not."
+  },
+  "comparison": {
+    "orion_account_performance": {
+      "prefix": "silver/api_dims/performance/",
+      "partition_form": "snapshot_date=YYYY-MM-DD/data.parquet",
+      "account_column": "account_id",
+      "value_column": "twr_value",
+      "window_start_column": "date_range_start",
+      "window_end_column": "date_range_end",
+      "window_name_column": "date_range_name",
+      "method_columns": ["twr_calc_method", "twr_tax_method", "twr_fee_method", "twr_annualized"],
+      "reported_basis": "measured",
+      "reported_basis_comment": "Read at the snapshot: twr_calc_method TWR, twr_tax_method Before-Tax, twr_fee_method Net of Fees, twr_annualized Annualized, date_range_name Rolling 3-Year. The figure is a decimal (0.149 is 14.9 percent a year). It is reported only for accounts whose window starts in the first days of the 3-year range; an account with a later start carries a null twr_value and is not part of the sample.",
+      "annualisation": "trading_days_over_252",
+      "annualisation_basis": "held",
+      "annualisation_comment": "The vendor does not state its year-count. Three conventions were tried on the same sample and are printed in the record (annualisation_probe); this one (window trading days / 252) gave the most account-windows within tolerance on the net-of-fee basis (421, against 413 and 414). Choosing it by fit is a held reading, not a measured vendor rule."
+    }
+  },
+  "eclipse_lots": {
+    "tables_prefix_template": "silver/eclipse/{snapshot}/",
+    "bronze_prefix_template": "bronze/eclipse/{snapshot}/",
+    "lot_column_pattern": "lot",
+    "comment": "The census that decides lots_status per sampled account: every Eclipse table the firm already lands for the snapshot is opened and searched for a lot-shaped column. A lot count per account exists only where such a column is found; none found means NO_LOTS for every sampled account. The derived FIFO lots in the firm's own gold are built from transactions by the firm's own script and are NOT Eclipse tax lots; they are counted in the record and never promote a status."
+  }
+}

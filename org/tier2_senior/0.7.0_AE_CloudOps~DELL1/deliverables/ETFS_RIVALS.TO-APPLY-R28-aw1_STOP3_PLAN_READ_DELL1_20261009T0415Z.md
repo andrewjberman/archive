@@ -159,3 +159,96 @@ are quick; the second makes the shipped bytes the committed bytes.
   tree is detached there now" no longer describes any tree; on dell1 the rollback needs its own checkout at that pin.
 - Window discipline for step 4: inside 11:15Z-12:50Z, never inside 10:55Z-11:15Z or 12:55Z-13:15Z, and conditions
   (a)-(d) read by me first.
+
+
+---
+
+# AMENDMENT 3 RE-CUT -- the superseding plan read (2026-10-09 ~04:27Z)
+
+`AMENDMENT 3` @48ca4da4e8 (read verbatim at its pin) answered the ask above: the package carries the pin's
+COMMITTED bytes. Re-cut, re-packaged, re-planned, re-read. **The plan @b29d71000d is spent; the plan below is the
+one step 5 applies.** Still **APPLIED NOTHING**.
+
+## The re-cut
+
+```
+git worktree remove --force C:/tmp/rv-r28-dell1
+git -c core.autocrlf=false worktree add --detach C:/tmp/rv-r28-dell1 39889dd4d7
+HEAD = 39889dd4d71a67bc108fe15ae746ed7ab6cbe6f6      (the pin, still exact)
+```
+
+## The CRLF count AMENDMENT 3 asks for -- and why it is 1, not 0
+
+```
+STAGED-PATH DENOMINATOR: 239 tracked file(s)
+carrying CRLF          : 1 of 239   -- lib/research/identity/crosswalk.schema.json
+```
+
+**The amendment expects 0 of 239. It reads 1, and the checkout is nonetheless correct.** That one file's CRLF is
+in the COMMITTED BLOB, not written by the checkout:
+
+```
+git ls-files --eol -> i/crlf  w/crlf  attr/        (i/ is the INDEX, not the worktree)
+blob at the pin : 19707 bytes, 636 CR
+worktree        : 19707 bytes, 636 CR
+cmp blob vs worktree -> IDENTICAL
+check-attr      -> text: unspecified, eol: unspecified   (no rule covers it)
+```
+
+So "0 files carrying CRLF" is unattainable at this pin by any checkout: the authority itself carries CRLF in one
+file. The amendment's EXPECTATION and its INTENT diverge here, and the intent is the one that can be met and is:
+
+```
+STAGED FILE DENOMINATOR: 239
+BYTE-IDENTICAL to the committed blob at 39889dd4d7: 239
+DIFFERING: 0
+```
+
+**239 of 239 byte-identical to the pin's committed bytes.** That is exactly "the package carries the pin's COMMITTED
+bytes, which both halves measured" -- the halves measured `git show` content, and the package now is that content,
+including the one genuinely-CRLF schema file. Surfaced rather than silently reported as 0.
+
+## The superseding plan
+
+Packaged (rc 0, five trees), then planned in the same tree. The re-cut tree needed `terraform init` again
+(aws v5.100.0, archive v2.8.1, rc 0). Saved plan `C:/tmp/rv_apply28_dell1.tfplan`, **30,393 bytes**, PLAN_RC 0, 0
+errors.
+
+```
+Plan: 0 to add, 5 to change, 0 to destroy.
+resource_changes 45 | no-op 40 | update 5        (matching executor report 1 at site Z)
+other action types: none
+```
+
+Per attribute, declared change set (`before != after`) on each of the five: `['last_modified',
+'source_code_hash']` -- package only. `memory_size` 3008 unchanged on all five; NONE of
+role/timeout/environment/layers/architectures/handler/runtime/vpc_config/kms_key_arn/
+reserved_concurrent_executions differs on any of them.
+
+### The hashes, and the proof the re-cut mattered
+
+| function | before (deployed) | after (this plan) | the spent CRLF plan's after |
+|---|---|---|---|
+| daily | `50EIl4Xbzfq...oRE=` | `6Z77vxU0kHTyYlEwWrVJNj80rNKWfK5bBBrKZuDX8JA=` | `yXMggrJmot8...PXw=` |
+| fetch-holdings | `8sq83jGSW/0...vXg=` | `cXi5kINKTlBzvjV/uYXAYB1jXlo7PA3YxRTjqXtHyjg=` | `60ACs/dBdoC...ITk=` |
+| build-canonical-shape | `PTcMhs7Wuhm...rZE=` | `5ZTAg5KmLs0sQtC2uMpck2hhFELajS13Yka8VJGktkU=` | `eW0O37W3jFX...WH4=` |
+| build-silver | `XcZnD/CPv37...q7U=` | `DLqulrgw7LKUPtVXEyXy/0lagb5PGa+a0xnywqcdEh0=` | `/Ref1HKNAaj...9EM=` |
+| publish-page | `/JVm0SXwsKv...tN8=` | `/ZD6nH7grFuRYJlaMWbe+4HYZIFZzHD6ZLvOhcYE0Aw=` | `9hQ9aXzN8nE...Fy4=` |
+
+**All five after-hashes differ from the spent CRLF plan's.** The re-cut was not cosmetic: a CRLF checkout would
+have shipped five different artifacts for the same pin. That is the ask answered and settled.
+
+## AC1, re-run in the re-cut tree
+
+```
+AC1 RESULT: PASS 0 failures          exit=0
+```
+
+Arms (a)-(j) OK including (j)'s CONTROL. AC2 still not marked -- the issuer's and the CVO's.
+
+## State
+
+APPLIED NOTHING. No safe-apply, no NEVER-2 entry (step 4 opens it), no invoke, no test event, no S3 write, no
+environment set. The re-cut tree and the 30,393-byte saved plan are left in place; AMENDMENT 1's condition (d)
+re-plan at the window uses this same tree, as AMENDMENT 3 directs. Rollback tree still not cut (a second detached
+worktree at `325bd4e0f8`, only if a rollback is ordered).
