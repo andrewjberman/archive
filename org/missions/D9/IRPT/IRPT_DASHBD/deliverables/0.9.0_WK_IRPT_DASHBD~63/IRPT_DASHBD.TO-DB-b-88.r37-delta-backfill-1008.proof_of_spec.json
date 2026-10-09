@@ -1,0 +1,108 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-88",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e8f96f579c"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "3c01cf1110",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-88.r37-delta-backfill-1008.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_DASHBD~63",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~63/R37_DELTA_RECORD.json",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+   "kind": "config_data",
+   "commit_or_etag": "ecfc4868e4",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "account_activity_lots.py re-pinned to 0a41f929a3 @d87079fd89; artifact version a.YllA9SmwwfY34NlajqOaNsex2bBZAy sha256 yIAQjspL0nPX6tJOHxD+Dv0REVoZyBNRkhmHQxUVuEE=; get-function CodeSha256 equals deployed_code_sha256 @ecfc4868e4; targeted plan 0 to add, 1 to change, 0 to destroy, one safe-apply, post-apply plan No changes",
+   "artifact_covered_by": [
+    "DB41b-2-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~63/R37_DELTA_PACKET_1008.md",
+   "kind": "config_data",
+   "commit_or_etag": "db093f6882",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "delta packet sha256 e4231140c59ecee6183cbab525193e612882a4d2c43150863a17f103d6e37ae6; the closed ledger org/critical_paths/change_management/20261009T1247Z_irpt-dashbd-r37-delta-1008_deploy_completion.md is pinned to it",
+   "artifact_covered_by": [
+    "DB41b-2-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~63/R37_DELTA_RECORD.json",
+   "kind": "config_data",
+   "commit_or_etag": "41dc7d8287",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "plan, apply, readback and backfill records; backfill RequestId 0cbe2c8b-c78f-4e6c-940f-bab89ccb1000: realized 35834, unrealized 542546, activity 6901, 0 LOTS_SKIPPED, returns sha256 3151345fec22 before = after, Max Memory 1649 MB, Duration 389121.20 ms",
+   "artifact_covered_by": [
+    "DB41b-2-AC1",
+    "DB41b-2-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB41b-2-AC1",
+   "criterion_verbatim": "DB41b-2-AC1 -- the delta packet names the new key and 2026-10-08, the ledger is pinned to it, plan 0/1/0 applied, live equals the source map. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r41b/p41b_lotkey.py\" . DB41b-2-AC1",
+   "output_evidence": "OK: delta applied {'add': 0, 'change': 1, 'destroy': 0}, live = source map, ledger pinned e4231140\nDB41b-2-AC1 PASS",
+   "denominator": "1 targeted plan (0 add, 1 change, 0 destroy) of 1 planned resource; 1 apply of 1; live CodeSha256 compared with 1 source-map row; delta packet 1 of 1 names 2026-10-08; ledger 1 of 1 carries the packet's sha256 prefix; exit code 0",
+   "status": "PASS",
+   "expect": "DB41b-2-AC1 PASS"
+  },
+  {
+   "criterion_id": "DB41b-2-AC2",
+   "criterion_verbatim": "DB41b-2-AC2 -- one backfill lands 2026-10-08's realized, unrealized and activity rows with no skip, returns byte-equal. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r41b/p41b_lotkey.py\" . DB41b-2-AC2",
+   "output_evidence": "OK: 2026-10-08 lots backfilled (realized 35834, unrealized 542546, activity 6901), returns byte-equal\nDB41b-2-AC2 PASS",
+   "denominator": "1 backfill invoke of 1 (RequestId 0cbe2c8b); 3 lot tables of 3 landed (35834 + 542546 + 6901 rows); lots_skipped 0; returns data.parquet 1 of 1 byte-equal (sha256 3151345fec22); exit code 0",
+   "status": "PASS",
+   "expect": "DB41b-2-AC2 PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the checker reads R37_DELTA_RECORD.json, the source map, the delta packet and the ledger text; no run state",
+   "observed": "printed the same last line on a second read for both criteria",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The checker against an empty root (no record), the order's 'Base: FAIL'.",
+   "expected": "DB41b-2-AC1 and DB41b-2-AC2 FAIL at the base",
+   "observed": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~63/R37_DELTA_RECORD.json\nDB41b-2-AC1 FAIL (rc 1); DB41b-2-AC2 FAIL",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the next scheduled fire",
+   "reason": "No other invoke by this order; the next scheduled fire is the organic read."
+  },
+  {
+   "item": "vendor call, secret read, S3 write by this worker other than the one artifact upload, S3 delete, bun, download",
+   "reason": "Bounds of the order; none made. The S3 writes of the gold prefixes were made by the function under the signed halves; the provider for terraform init came from a local-directory mirror (row IRPT_DASHBD-D2-W63-S1)."
+  }
+ ],
+ "surprises": [
+  "IRPT_DASHBD-D2-W63-S1",
+  "IRPT_DASHBD-D2-W63-S2",
+  "IRPT_DASHBD-D2-W63-S3"
+ ],
+ "compiler_tools": [
+  {
+   "tool": "none",
+   "invocation": "no .py file was edited by this order",
+   "result": "not applicable"
+  }
+ ]
+}
