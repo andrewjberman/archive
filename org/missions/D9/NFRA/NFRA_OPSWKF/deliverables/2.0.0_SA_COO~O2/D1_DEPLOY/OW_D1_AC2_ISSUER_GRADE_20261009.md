@@ -19,5 +19,11 @@ DynamoDB table across `infra/aws/terraform` (3 hits, all unrelated: opal-gateway
 read belongs to a principal holding `dynamodb:GetResourcePolicy`. It is asked of `1.0.0_SA_CTO~DELL2` with this record, and it does not
 gate OW-r-1.
 
-**Verdict: OW-d1-AC2 MET**, with R1 disclosed. OW-d-1 status: SERVED (the trade Lambdas are live with C-INITIATOR, the bridge, the
+**Verdict: OW-d1-AC2 PARTIAL** (corrected 10:3xZ on the CTO's ruling, msg 3143: a deny proved by document alone is not a proved deny).
+It is MET when two read-only acts by the laptop identity, routed via 0.0.0_AB_MSTR~DELL2, read as expected:
+- (1) `simulate-principal-policy` for `trade-submission-lambda-role`: UpdateItem on `table/opal-tickets` with `dynamodb:Attributes=answers`
+  is DENIED, and with the K1/K2 set it is ALLOWED;
+- (2) `dynamodb:GetResourcePolicy` on `table/opal-tickets` returns none, or a policy that adds no principal.
+
+Was "MET, with R1 disclosed". OW-d-1 status: SERVED (the trade Lambdas are live with C-INITIATOR, the bridge, the
 write-back and the C-NO-SEND fence). The live 409 for a ticket-origin Execute is OW-r-1's, after the ticket release R13.
