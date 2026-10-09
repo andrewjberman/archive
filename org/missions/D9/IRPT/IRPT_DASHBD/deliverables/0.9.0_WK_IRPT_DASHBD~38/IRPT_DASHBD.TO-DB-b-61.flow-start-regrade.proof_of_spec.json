@@ -1,0 +1,114 @@
+{
+ "schema_version": "1.0",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "dd8541bb97"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "dd8541bb97",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-61.flow-start-regrade.md"
+ },
+ "to_id": "IRPT_DASHBD.TO-DB-b-61",
+ "assignee": "0.9.0_WK_IRPT_DASHBD~38",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~38/REGRADE_FLOWSTART_E2.md",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/tieout/tieout_reader.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "FLOW_CONVENTION = \"start\"; guarded daily re-link (GUARD_FRAC 2%); round 17 link_alt_flow START imported, not restated.",
+   "artifact_covered_by": [
+    "DB32-2-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~38/REGRADE_FLOWSTART_E2.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "9,078 segments, within 8315, 203 in_to_out each with a reason, reader_sha256.",
+   "artifact_covered_by": [
+    "DB32-2-AC1",
+    "DB32-2-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~38/REGRADE_FLOWSTART_E2.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Counts only.",
+   "artifact_covered_by": [
+    "DB32-2-AC1",
+    "DB32-2-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~38/REGRADE_E1.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Regenerated under the final reader (--flow end): same 8,088 grades, reader_sha256 now the final reader's (row IRPT_DASHBD-W38-S2).",
+   "artifact_covered_by": [
+    "DB32-2-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB32-2-AC1",
+   "criterion_verbatim": "DB32-2-AC1 -- the reader declares flow-start; the re-grade covers 9,078 with within equal to the tally and the sha matching HEAD. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r32/p32_round32.py\" . DB32-2-AC1",
+   "output_evidence": "OK: flow-start re-grade over 9,078: within 8315 (printed, not graded against a floor); sha matches HEAD\nDB32-2-AC1 PASS (rc 0)",
+   "denominator": "9,078 of 9,078 graded segments; within 8,315 (end-of-day 8,088)",
+   "status": "PASS",
+   "expect": "DB32-2-AC1 PASS"
+  },
+  {
+   "criterion_id": "DB32-2-AC2",
+   "criterion_verbatim": "DB32-2-AC2 -- every segment that moves IN to OUT against DB-b-60's re-grade is listed with a reason, and nothing else is. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r32/p32_round32.py\" . DB32-2-AC2",
+   "output_evidence": "OK: 203 segment(s) IN->OUT under flow-start, every one named\nDB32-2-AC2 PASS (rc 0)",
+   "denominator": "203 of 203 IN->OUT segments listed with a reason (START_LARGE_FLOW 174, START_SMALL_FLOW 22, START_GUARD_DAY 7); out-to-in 430",
+   "status": "PASS",
+   "expect": "DB32-2-AC2 PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The same run with FLOW_CONVENTION end (--flow end) was compared with round 31's TIEOUT_COMPOUND_V2.json on all 9,078, and the guard threshold was swept at 1%, 2%, 5% and 10%.",
+   "expected": "end-of-day reproduces 8,088 with 0 differing segments; the flow-start within count is not an artifact of one threshold",
+   "observed": "end: 8,088, 0 of 9,078 differ; flow-start within 8,310 / 8,315 / 8,315 / 8,319 at 1% / 2% / 5% / 10% (row IRPT_DASHBD-W38-S3)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Both conventions run on one cached read of the served gold and BD landing; v2 and the classifier re-run after the edit, records unchanged.",
+   "observed": "identical",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Whether flow-start or a guard threshold is right for BD",
+   "reason": "No floor is graded; the within count is reported as found (8,315 against the CTO's expectation of at least 8,088 plus most of 337)."
+  }
+ ],
+ "surprises": [
+  "IRPT_DASHBD-W38-S2",
+  "IRPT_DASHBD-W38-S3"
+ ],
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -m py_compile org/missions/D9/IRPT/IRPT_DASHBD/tieout/tieout_reader.py",
+   "result": "compiles"
+  }
+ ]
+}

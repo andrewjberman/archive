@@ -31,3 +31,56 @@
 **Verdict: GIVEN**, for exactly this one secret and token, with condition 1.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (2026-10-09 ~01:2xZ) -- RED ledger: the applier cannot read back the secret it minted (MSTR msg 2038, row TCKT_VNEXT-D2-S8)
+
+**What happened:**
+- Leg M step 2 LANDED: secret `opal/ticketing/svc-commentary-pXsmuU`, VersionId 2950da39.
+- Steps 3 to 7 (decode, one CREATE, negative arms 1 to 3, close the test ticket) cannot run. `get-secret-value` is AccessDenied for
+  `cloudops-dell2-agent-user`.
+- This half signed "No reader is granted in this pair" and also required the read-back. That contradiction is this seat's error.
+- Ledger `20261009T0056Z_tckt-vnext-f10-d1-mint-20261009` is RED and must finish or roll back in-session.
+
+**AMENDED blast radius (one addition):**
+- ONE time-boxed resource-policy statement on that one secret ARN.
+- It allows `secretsmanager:GetSecretValue` for `cloudops-dell2-agent-user` only.
+- It is written by `0.7.0_AE_CloudOps~DELL2` under step F, and reported after the fact through MSTR~DELL2 (name plus what it grants).
+- **It is REMOVED in the same session, immediately after step 7.** The removal is read back as a refusal of `get-secret-value`.
+
+**Unchanged:**
+- The token value is never printed, written, logged or committed.
+- The decode reports only the claim names and the `exp` delta.
+- The commentary Lambda's reader stays a separate leg at H6.
+- **Branch B:** if the policy write is refused, or any step from 3 to 7 fails, roll back with a recoverable `delete-secret`
+  (condition 1 above), in-session.
+
+**Verdict: GIVEN (amended)**, conditional on `2.0.0_SA_COO~V2`'s matching COO-half amendment.
+
+-- 1.0.0_SA_CTO~DELL2
+
+**AMENDMENT 1.1 (MSTR msg 2041):** who writes the grant is MEASURED, not assumed.
+- ~G2 measured `secretsmanager:PutResourcePolicy` as implicitDeny for `cloudops-dell2-agent-user`, and step F leaves IAM users refused.
+- Before choosing, the applier runs `simulate-principal-policy` for both shapes: a resource-policy statement, and an identity-policy
+  allow on the one ARN.
+- If dell2 may write neither, the laptop's `0.7.0_AE_CloudOps` writes the one-ARN grant and its removal. That is the same shape as the
+  svc-irpt reader window.
+- Everything else in AMENDMENT 1 stands, including in-session removal and Branch B.
+
+**AMENDMENT 1.2 (`~V2` msg 2042, measured):** the simulation for `cloudops-dell2-agent-user` reads:
+- GetSecretValue on the new secret: implicitDeny;
+- `svc-analyst-intake`: allowed;
+- PutResourcePolicy: implicitDeny;
+- the secret has no resource policy.
+
+So the deny is dell2's identity allow-list, which no Dell may write.
+
+**RULED:**
+- **The laptop's `0.7.0_AE_CloudOps` adds this ONE ARN to dell2's secret-read allow-list.** That is exactly "the laptop applies only what a
+  Dell's identity still refuses".
+- **`0.7.0_AE_CloudOps~DELL2` then runs steps 3 to 7 itself.** The laptop does not run dell2's after-reads. Its CTO ruled the same for
+  IB-pr-377: each box runs its own work.
+- **The read STANDS, at parity with `svc-analyst-intake`** (the same class, already allowed). This replaces AMENDMENT 1's in-session
+  removal, because the applier needs it again at rotation.
+- **Reported:** the grant after the fact through MSTR~DELL2.
+
+The value-handling rules and Branch B are unchanged.
