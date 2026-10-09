@@ -1,0 +1,182 @@
+# Plan of root infra/aws/terraform/opal-gateway at worktree HEAD+edits (commit named in the ask), plan only, -lock=false, no apply.
+# Command: terraform -chdir=infra/aws/terraform/opal-gateway plan -input=false -lock=false -no-color (TF_PLUGIN_CACHE_DIR in scratch). safe-apply.sh has no plan mode (it gates 'apply' only and directs plan to terraform).
+# RESOURCE LIST:
+#   # aws_iam_role_policy.schwab_catalog_read_policy will be updated in-place
+#   # aws_iam_role_policy.schwab_data_read_policy will be updated in-place
+#   # aws_lambda_function.mcportal_grant_writer will be updated in-place
+# Plan: 0 to add, 3 to change, 0 to destroy.
+# (Refresh lines omitted; the plan text below is verbatim from 'Terraform used the selected providers'.)
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # aws_iam_role_policy.schwab_catalog_read_policy will be updated in-place
+  ~ resource "aws_iam_role_policy" "schwab_catalog_read_policy" {
+        id          = "gateway-schwab-catalog-read-role:gateway-schwab-catalog-read-role-policy"
+        name        = "gateway-schwab-catalog-read-role-policy"
+      ~ policy      = jsonencode(
+          ~ {
+              ~ Statement = [
+                    {
+                        Effect    = "Deny"
+                        NotAction = [
+                            "s3:GetObject",
+                            "s3:GetObjectVersion",
+                            "s3:ListBucket",
+                        ]
+                        Resource  = "*"
+                        Sid       = "DenyAllNonReadActions"
+                    },
+                  ~ {
+                      ~ NotResource = [
+                            # (1 unchanged element hidden)
+                            "arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/meta/complete/*",
+                        ]
+                        # (3 unchanged attributes hidden)
+                    },
+                    {
+                        Action      = "s3:ListBucket"
+                        Effect      = "Deny"
+                        NotResource = "arn:aws:s3:::opal-data-assets"
+                        Sid         = "DenyListingOtherBuckets"
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ StringNotLike = {
+                              ~ "s3:prefix" = [
+                                    # (1 unchanged element hidden)
+                                    "schwab/08335338/meta/complete/*",
+                                  + "schwab/08403355/meta/complete/*",
+                                ]
+                            }
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Resource = [
+                            # (1 unchanged element hidden)
+                            "arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/meta/complete/*",
+                        ]
+                        # (3 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ StringLike = {
+                              ~ "s3:prefix" = [
+                                    # (1 unchanged element hidden)
+                                    "schwab/08335338/meta/complete/*",
+                                  + "schwab/08403355/meta/complete/*",
+                                ]
+                            }
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (2 unchanged attributes hidden)
+    }
+
+  # aws_iam_role_policy.schwab_data_read_policy will be updated in-place
+  ~ resource "aws_iam_role_policy" "schwab_data_read_policy" {
+        id          = "gateway-schwab-read-role:gateway-schwab-read-role-policy"
+        name        = "gateway-schwab-read-role-policy"
+      ~ policy      = jsonencode(
+          ~ {
+              ~ Statement = [
+                    {
+                        Effect    = "Deny"
+                        NotAction = [
+                            "s3:GetObject",
+                            "s3:GetObjectVersion",
+                            "s3:ListBucket",
+                        ]
+                        Resource  = "*"
+                        Sid       = "DenyAllNonReadActions"
+                    },
+                  ~ {
+                      ~ NotResource = [
+                            # (7 unchanged elements hidden)
+                            "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_transaction/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/silver/dim_position/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/silver/dim_balance/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/silver/dim_asset/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/silver/dim_transaction/*",
+                        ]
+                        # (3 unchanged attributes hidden)
+                    },
+                    {
+                        Action      = "s3:ListBucket"
+                        Effect      = "Deny"
+                        NotResource = "arn:aws:s3:::opal-data-assets"
+                        Sid         = "DenyListingOtherBuckets"
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ StringNotLike = {
+                              ~ "s3:prefix" = [
+                                    # (7 unchanged elements hidden)
+                                    "schwab/08335338/silver/dim_transaction/*",
+                                  + "schwab/08403355/silver/dim_position/*",
+                                  + "schwab/08403355/silver/dim_balance/*",
+                                  + "schwab/08403355/silver/dim_asset/*",
+                                  + "schwab/08403355/silver/dim_transaction/*",
+                                ]
+                            }
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Resource = [
+                            # (7 unchanged elements hidden)
+                            "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_transaction/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/silver/dim_position/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/silver/dim_balance/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/silver/dim_asset/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08403355/silver/dim_transaction/*",
+                        ]
+                        # (3 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ StringLike = {
+                              ~ "s3:prefix" = [
+                                    # (7 unchanged elements hidden)
+                                    "schwab/08335338/silver/dim_transaction/*",
+                                  + "schwab/08403355/silver/dim_position/*",
+                                  + "schwab/08403355/silver/dim_balance/*",
+                                  + "schwab/08403355/silver/dim_asset/*",
+                                  + "schwab/08403355/silver/dim_transaction/*",
+                                ]
+                            }
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (2 unchanged attributes hidden)
+    }
+
+  # aws_lambda_function.mcportal_grant_writer will be updated in-place
+  ~ resource "aws_lambda_function" "mcportal_grant_writer" {
+        id                             = "mcportal-grant-writer-lambda"
+      ~ last_modified                  = "2026-10-03T20:07:55.000+0000" -> (known after apply)
+      ~ source_code_hash               = "ZyYCPPyP5CV53eZP+UJHIgAjq834J4OsvePgmS6k8rI=" -> "xapNPkgmro0+l2NW1rmWPRsTFWX99+RG6fGTojVaYYM="
+        tags                           = {
+            "Name"   = "mcportal-grant-writer-lambda"
+            "System" = "OpalGateway"
+        }
+        # (27 unchanged attributes hidden)
+
+        # (4 unchanged blocks hidden)
+    }
+
+Plan: 0 to add, 3 to change, 0 to destroy.
