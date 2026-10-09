@@ -1,0 +1,301 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+ <= read (data resources)
+
+Terraform will perform the following actions:
+
+  # aws_iam_policy.commentary_draft_store_invoke will be created
+  + resource "aws_iam_policy" "commentary_draft_store_invoke" {
+      + arn              = (known after apply)
+      + attachment_count = (known after apply)
+      + description      = "IRPT cell AR-t-13: invoke the svc-commentary draft store. No table, bucket or key access."
+      + id               = (known after apply)
+      + name             = "irpt-commentary-draft-store-invoke-policy"
+      + name_prefix      = (known after apply)
+      + path             = "/"
+      + policy           = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action   = [
+                          + "lambda:InvokeFunction",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:lambda:us-east-1:313476888478:function:irpt-commentary-draft-store-lambda",
+                        ]
+                      + Sid      = "InvokeTheDraftStoreOnly"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + policy_id        = (known after apply)
+      + tags_all         = {
+          + "ManagedBy" = "Terraform"
+          + "Project"   = "OpalPortal"
+          + "System"    = "InvestorReporting"
+        }
+    }
+
+  # aws_iam_role.commentary_draft_store will be created
+  + resource "aws_iam_role" "commentary_draft_store" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "IRPT cell AR-t-13: writes a request's DRAFT commentary for svc-commentary, once. ANALYSIS_COMMENTARY prefix only."
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "irpt-commentary-draft-store-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = {
+          + "ManagedBy" = "Terraform"
+          + "Project"   = "OpalPortal"
+          + "System"    = "InvestorReporting"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role_policy.commentary_draft_store will be created
+  + resource "aws_iam_role_policy" "commentary_draft_store" {
+      + id          = (known after apply)
+      + name        = "irpt-commentary-draft-store-policy"
+      + name_prefix = (known after apply)
+      + policy      = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = [
+                          + "dynamodb:GetItem",
+                          + "dynamodb:PutItem",
+                          + "dynamodb:UpdateItem",
+                        ]
+                      + Condition = {
+                          + "ForAllValues:StringEquals" = {
+                              + "dynamodb:LeadingKeys" = [
+                                  + "49financial",
+                                  + "inflection",
+                                  + "cottonwood",
+                                ]
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = [
+                          + "arn:aws:dynamodb:us-east-1:313476888478:table/irpt-requests",
+                        ]
+                      + Sid       = "S1ReadAndWriteRequestIndexAndRetentionRowsInServedFirmPartitions"
+                    },
+                  + {
+                      + Action    = [
+                          + "kms:Decrypt",
+                          + "kms:GenerateDataKey",
+                          + "kms:Encrypt",
+                        ]
+                      + Condition = {
+                          + StringEquals = {
+                              + "kms:EncryptionContext:aws:dynamodb:tableName" = "irpt-requests"
+                              + "kms:ViaService"                               = "dynamodb.us-east-1.amazonaws.com"
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = [
+                          + "arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111",
+                        ]
+                      + Sid       = "S2EncryptAndDecryptIndexRowsViaDynamoOnly"
+                    },
+                  + {
+                      + Action   = [
+                          + "s3:PutObject",
+                          + "s3:GetObject",
+                          + "s3:GetObjectVersion",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/analysis_commentaries/*",
+                          + "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/analysis_commentaries/*",
+                          + "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/analysis_commentaries/*",
+                        ]
+                      + Sid      = "S3WriteAndVerifyDraftCommentariesOnly"
+                    },
+                  + {
+                      + Action    = [
+                          + "kms:GenerateDataKey",
+                          + "kms:Decrypt",
+                        ]
+                      + Condition = {
+                          + StringEquals = {
+                              + "kms:ViaService" = "s3.us-east-1.amazonaws.com"
+                            }
+                          + StringLike   = {
+                              + "kms:EncryptionContext:aws:s3:arn" = [
+                                  + "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/analysis_commentaries/*",
+                                  + "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/analysis_commentaries/*",
+                                  + "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/analysis_commentaries/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = [
+                          + "arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111",
+                        ]
+                      + Sid       = "S4KmsForThatPrefixViaS3Only"
+                    },
+                  + {
+                      + Action   = [
+                          + "logs:CreateLogStream",
+                          + "logs:PutLogEvents",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/irpt-commentary-draft-store-lambda:*",
+                        ]
+                      + Sid      = "S5OwnLogStreamOnly"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + role        = (known after apply)
+    }
+
+  # module.irpt_commentary_draft_store.data.aws_s3_object.artifact will be read during apply
+  # (depends on a resource or a module with changes pending)
+ <= data "aws_s3_object" "artifact" {
+      + arn                           = (known after apply)
+      + body                          = (known after apply)
+      + bucket                        = "opal-313476888478-lambda-artifacts"
+      + bucket_key_enabled            = (known after apply)
+      + cache_control                 = (known after apply)
+      + checksum_crc32                = (known after apply)
+      + checksum_crc32c               = (known after apply)
+      + checksum_crc64nvme            = (known after apply)
+      + checksum_sha1                 = (known after apply)
+      + checksum_sha256               = (known after apply)
+      + content_disposition           = (known after apply)
+      + content_encoding              = (known after apply)
+      + content_language              = (known after apply)
+      + content_length                = (known after apply)
+      + content_type                  = (known after apply)
+      + etag                          = (known after apply)
+      + expiration                    = (known after apply)
+      + expires                       = (known after apply)
+      + id                            = (known after apply)
+      + key                           = "investor-reporting/irpt-commentary-draft-store-lambda.zip"
+      + last_modified                 = (known after apply)
+      + metadata                      = (known after apply)
+      + object_lock_legal_hold_status = (known after apply)
+      + object_lock_mode              = (known after apply)
+      + object_lock_retain_until_date = (known after apply)
+      + server_side_encryption        = (known after apply)
+      + sse_kms_key_id                = (known after apply)
+      + storage_class                 = (known after apply)
+      + tags                          = (known after apply)
+      + version_id                    = (known after apply)
+      + website_redirect_location     = (known after apply)
+    }
+
+  # module.irpt_commentary_draft_store.aws_cloudwatch_log_group.lambda will be created
+  + resource "aws_cloudwatch_log_group" "lambda" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + log_group_class   = (known after apply)
+      + name              = "/aws/lambda/irpt-commentary-draft-store-lambda"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 14
+      + skip_destroy      = false
+      + tags              = {
+          + "ManagedBy" = "Terraform"
+          + "System"    = "InvestorReporting"
+        }
+      + tags_all          = {
+          + "ManagedBy" = "Terraform"
+          + "Project"   = "OpalPortal"
+          + "System"    = "InvestorReporting"
+        }
+    }
+
+  # module.irpt_commentary_draft_store.aws_lambda_function.this will be created
+  + resource "aws_lambda_function" "this" {
+      + architectures                  = (known after apply)
+      + arn                            = (known after apply)
+      + code_sha256                    = (known after apply)
+      + function_name                  = "irpt-commentary-draft-store-lambda"
+      + handler                        = "commentary_draft_store.lambda_handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + layers                         = []
+      + memory_size                    = 512
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "python3.12"
+      + s3_bucket                      = "opal-313476888478-lambda-artifacts"
+      + s3_key                         = "investor-reporting/irpt-commentary-draft-store-lambda.zip"
+      + s3_object_version              = (known after apply)
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + skip_destroy                   = false
+      + source_code_hash               = (known after apply)
+      + source_code_size               = (known after apply)
+      + tags                           = {
+          + "Cell"      = "AR-t-13"
+          + "ManagedBy" = "Terraform"
+          + "Module"    = "yang-lambda"
+          + "Outcome"   = "IRPT_ANLREQ-FWD"
+          + "Project"   = "OpalPortal"
+          + "System"    = "InvestorReporting"
+        }
+      + tags_all                       = {
+          + "Cell"      = "AR-t-13"
+          + "ManagedBy" = "Terraform"
+          + "Module"    = "yang-lambda"
+          + "Outcome"   = "IRPT_ANLREQ-FWD"
+          + "Project"   = "OpalPortal"
+          + "System"    = "InvestorReporting"
+        }
+      + timeout                        = 29
+      + version                        = (known after apply)
+
+      + environment {
+          + variables = {
+              + "IRPT_JOBS_TABLE"     = "irpt-jobs"
+              + "IRPT_REQUESTS_TABLE" = "irpt-requests"
+            }
+        }
+
+      + ephemeral_storage (known after apply)
+
+      + logging_config (known after apply)
+
+      + tracing_config (known after apply)
+    }
+
+Plan: 5 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + commentary_draft_store_function_name     = "irpt-commentary-draft-store-lambda"
+  + commentary_draft_store_invoke_policy_arn = (known after apply)

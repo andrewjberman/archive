@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_ENFORCE.TO-EN-z-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/prd/LGIC_ENFORCE_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "81cdaa2be3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/decompositions/LGIC_ENFORCE_DECOMP.md",
+    "vintage_commit": "8d27dd6749",
+    "to_ref": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-z-4.gate-grades-built-names.md"
+  },
+  "assignee": "0.9.0_WK_LGIC_ENFORCE~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/naming-gate.py",
+      "kind": "script",
+      "commit_or_etag": "ba58b57ed5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local commit-time gate called by .tools/safe-commit.sh; it has no served plane and nothing is deployed. The change is code only: tf_built(), py_built(), grade_built(), built_self_test().",
+      "introduces": [
+        "NAMING BUILT-NOT-GRADED",
+        "built_self_test"
+      ],
+      "artifact_covered_by": ["Z4R20-AC1", "Z4R20-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~2/gate-built-names.r20.result.md",
+      "kind": "doc",
+      "commit_or_etag": "ba58b57ed5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the result file the cell leaves; a repo document with no deploy scope",
+      "artifact_covered_by": ["Z4R20-AC1", "Z4R20-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Z4R20-AC1",
+      "criterion_verbatim": "Z4R20-AC1 -- the module-form and the call-form fixtures each print a graded line for the built name or a BUILT-NOT-GRADED line; the hand-typed control is still graded.",
+      "method": "command",
+      "invocation": "python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~B1/fixed_inputs/r20/check_en_r20.py s9",
+      "output_evidence": "tf-module: NAMING CONFORMANT infra/aws/terraform/zz-r20-s9-probe/main.tf:1 irpt-cot-reporting-gold-scheduler-role\npy-call: NAMING CONFORMANT infra/aws/lambda/zz-r20-s9-probe/handler.py:3 irpt-cot-reporting-gold-scheduler-role\nPASS-R20-S9\nrc=0",
+      "denominator": "3 of 3 fixtures: module form graded, call form graded, hand-typed control graded (run against the committed bytes of ba58b57ed5)",
+      "status": "PASS",
+      "expect": "PASS-R20-S9"
+    },
+    {
+      "criterion_id": "Z4R20-AC2",
+      "criterion_verbatim": "Z4R20-AC2 -- the gate's own arms, including the new ones, hold.",
+      "method": "command",
+      "invocation": "python .tools/naming-gate.py --self-test",
+      "output_evidence": "SELF-TEST arm built tf-module-literal -> CONFORMANT irpt-cot-reporting-gold-scheduler-role: ok\n... (8 built arms ok, 28 of 28 arms ok)\nNAMING-GATE-SELF-TEST: PASS\nrc=0",
+      "denominator": "28 of 28 self-test arms ok, of which 8 are the new built-name arms",
+      "status": "PASS",
+      "expect": "NAMING-GATE-SELF-TEST: PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The first run of s9 after the build, before the carrier-rule exemption for built names, graded the correct built name and the gate REFUSED it as a NEW hand-kept carrier of 'cot'; the same name hand-typed is still REFUSED today (self-test arm py-hand-typed-control -> REFUSE).",
+      "expected": "a built name is graded CONFORMANT, the same name typed by hand keeps its carrier REFUSE",
+      "observed": "built arms CONFORMANT; py-hand-typed-control -> typed literal graded REFUSE: ok",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the s9 arm run twice back to back on the committed bytes (each run under timeout 120)",
+      "observed": "run A: PASS-R20-S9 rc=0; run B: PASS-R20-S9 rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "org/mcp/naming-place.enforce and the registry",
+      "reason": "the order's bounds: no cell touches the switch, and only 4.0.0_SA_CRO writes the registry"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~2/gate-built-names.r20.result.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate: py_compile + ds-precommit + ruff; naming-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_LGIC_ENFORCE~2 <0.9.0_WK_LGIC_ENFORCE~2@opal.agent>\" -F .scratch/msg1.txt -- .tools/naming-gate.py org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~2/gate-built-names.r20.result.md",
+      "result": "[commit-gate] All checks passed!; committed ba58b57ed5 (LOCAL). Two earlier attempts were refused by the gate's own new logic over a hand-typed firm token in the self-test source, which was then built by concatenation."
+    }
+  ]
+}
