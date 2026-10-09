@@ -1,0 +1,19 @@
+diff --git a/infra/aws/ec2/opal-gateway/deploy-to-ec2.sh b/infra/aws/ec2/opal-gateway/deploy-to-ec2.sh
+index 48464dc881..2091d3b4be 100644
+--- a/infra/aws/ec2/opal-gateway/deploy-to-ec2.sh
++++ b/infra/aws/ec2/opal-gateway/deploy-to-ec2.sh
+@@ -370,4 +370,14 @@ MS_INGEST_BEARER=\$(aws secretsmanager get-secret-value --secret-id opal/mcp/ms-
+ TRANSCRIPT_BEARER=\$(aws secretsmanager get-secret-value --secret-id gateway/transcripts/bearer --region ${REGION} --query SecretString --output text)
+ MAIL_BEARER=\$(aws secretsmanager get-secret-value --secret-id gateway/mail/bearer --region ${REGION} --query SecretString --output text)
++# OG-rl-15 A1 (the MAIL_BEARER leg): the laptop Teams agent's OWN mail bearer, a second labelled value. Read host-side like TEAMS_BEARER above: a failed read, an
++# empty value or the CLI's text rendering of a null secret REFUSES (non-zero) before the code is extracted, any .env is written or the service restarts; the value
++# is never printed (length only). The two values are joined with a comma, positionally aligned with MAIL_BEARER_LABELS (msgpull,commassist).
++MAIL_BEARER_COMMASSIST=\$(aws secretsmanager get-secret-value --secret-id gateway/mail/commassist-bearer --region ${REGION} --query SecretString --output text) || { echo "ERROR: REFUSED: the commassist mail bearer could not be read; no code extracted, no .env written, no restart." >&2; exit 3; }
++if [ -z "\$MAIL_BEARER_COMMASSIST" ] || [ "\$MAIL_BEARER_COMMASSIST" = "None" ]; then
++    echo "ERROR: REFUSED: the commassist mail bearer is empty; no code extracted, no .env written, no restart." >&2
++    exit 3
++fi
++echo "OK: commassist mail bearer read host-side (non-empty, \${#MAIL_BEARER_COMMASSIST} characters)"
++MAIL_BEARER="\$MAIL_BEARER,\$MAIL_BEARER_COMMASSIST"
+ # NFRA_CLDGRPH CG-s-5: the estate-graph READ capability bearer (validated constant-time by
+ # /graph/cypher + /graph/health). Fetched from SM with the instance role's scoped grant (terraform

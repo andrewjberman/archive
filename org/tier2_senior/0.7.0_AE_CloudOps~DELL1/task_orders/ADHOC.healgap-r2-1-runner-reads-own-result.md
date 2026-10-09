@@ -47,7 +47,7 @@ org/missions/D8/MDPF/MDPF_HEALGAP/surprise-channel/investigations/INVESTIGATION_
 </paths>
 
 <proof_of_spec>
-<expected_criteria>C1,C2,C3,C4,C5,C6,C7</expected_criteria>
+<expected_criteria>C1,C2,C3,C4,C5,C6,C7,C8</expected_criteria>
 <criterion id="C1" judgment="false">
   <invocation>python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R2_CHECKS/hg_t8_iam.py infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf</invocation>
   <expect>IAM-OK (it reads IAM-BAD "0 GetObject statements" at the base)</expect>
@@ -58,7 +58,7 @@ org/missions/D8/MDPF/MDPF_HEALGAP/surprise-channel/investigations/INVESTIGATION_
 </criterion>
 <criterion id="C3" judgment="false">
   <invocation>the targeted plan on aws_iam_role_policy.cot_rebalancer_runner_write in infra/aws/terraform/opal-assets</invocation>
-  <expect>0 to add, 1 to change, 0 to destroy; the diff adds only the ReadOwnRunResult statement</expect>
+  <expect>0 to add, 1 to change, 0 to destroy; the diff adds only the ReadOwnRunResult statement, and the plan prints its resource as the identical ARN arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/*-result.json (amendment A1)</expect>
 </criterion>
 <criterion id="C4" judgment="false">
   <invocation>.tools/aws iam get-role-policy --role-name cot-rebalancer-runner-role --policy-name <the live name of cot_rebalancer_runner_write></invocation>
@@ -76,6 +76,10 @@ org/missions/D8/MDPF/MDPF_HEALGAP/surprise-channel/investigations/INVESTIGATION_
   <invocation>the broker send to 0.0.0_AB_MSTR~DELL1 reporting the change (scope item 4)</invocation>
   <expect>DELIVERED, with role, policy and the granted action/resource named</expect>
 </criterion>
+<criterion id="C8" judgment="false">
+  <invocation>git diff HEAD~1 -- infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf > d.diff; python .tools/naming-gate.py --diff d.diff --enforce</invocation>
+  <expect>NAMING-GATE: PASS (no NEW naming carrier; amendment A1)</expect>
+</criterion>
 <instance_path>org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/ADHOC.healgap-r2-1-runner-reads-own-result_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
@@ -91,6 +95,18 @@ comp-adversary: DECLARED-NOT-APPLICABLE a read-only grant on the role's own resu
 - No runner invoke, no vendor call. If the plan shows anything beyond the one statement, stop and report.
 - Surprise rows: `MDPF_HEALGAP-D1-S<n>` in the investigation file named in <paths>; keep working.
 </conditions>
+
+<amendment id="A1" date="2026-10-09T07:4xZ" by="2.0.0_SA_COO~G1">
+CTO~DELL1 ruling H @1af255b7da (msg 1974) on row MDPF_HEALGAP-D1-S9 (the naming limb refused the typed "cottonwood"): in scope 2's
+statement the Resource becomes
+`"arn:aws:s3:::${local.monolith_bucket}/blackdiamond/${one(local.monolith_source_scopes.blackdiamond)}/meta/*-result.json"`
+(monolith.tf:89 `blackdiamond = ["cottonwood"]`, same root). Everything else in scope 2 is unchanged. Added proof per the ruling: C3 now
+requires the plan to print the identical ARN; new C8 requires the naming gate to PASS; C1 IAM-OK as before.
+Measured by the issuer before this amendment: `hg_t8_iam.py` retargeted -- base IAM-BAD, the one() form IAM-OK, the typed-cottonwood
+form IAM-BAD, a meta/* form IAM-BAD; `naming-gate.py --diff <the one() edit> --enforce` -> `NAMING-GATE: PASS 0 graded`.
+Re-GO from scope 2; the 07:10Z hold is past; it lands before 20:00Z.
+Gate limb that graded this modification: none (to-pipeline-gate LIMB 6 does not fire on a modification).
+</amendment>
 
 <report>RAVC: report to 2.0.0_SA_COO~G1 with the ledger path, each criterion's proof line, and the commit hashes. This seat validates before close.</report>
 </task_order>

@@ -77,11 +77,17 @@ actions = pd.concat(acts, ignore_index=True) if acts else pd.DataFrame(columns=[
 cands = dramatic_move.detect(g4, actions) if len(g4) else []
 found, written = [], None
 for c in cands:
-    row = dramatic_move.lookup(c, search=dramatic_move.serp_search) if SEARCH else None
-    found.append({"candidate": {k: str(v) for k, v in c.items()}, "row": row})
+    err = None
+    try:
+        row = dramatic_move.lookup(c, search=dramatic_move.serp_search) if SEARCH else None
+    except Exception as e:  # noqa: BLE001 -- a failed search is recorded per candidate, never read as "nothing found"
+        row, err = None, f"{type(e).__name__}: {e}"
+    found.append({"candidate": {k: str(v) for k, v in c.items()}, "row": row, "error": err})
 rows = [f["row"] for f in found if f["row"]]
-if rows:
-    written = dramatic_move.write_rows(s, rows, DAY)
+by_ex = {}
+for row in rows:  # the row lives under its EX-DATE partition: the chart window ends at the as-of day, before the publish day
+    by_ex.setdefault(str(row["ex_date"])[:10], []).append(row)
+written = [dramatic_move.write_rows(s, rs, ex) for ex, rs in sorted(by_ex.items())] or None
 rec["stages"]["dramatic_move"] = {"g4_rows": int(len(g4)), "candidates": len(cands), "found": len(rows), "written": written,
                                   "detail": found, "seconds": round(time.time() - t), "search": SEARCH}
 print("dramatic-move:", {k: v for k, v in rec["stages"]["dramatic_move"].items() if k != "detail"}, flush=True)
@@ -91,7 +97,7 @@ for f in found:
           (f["row"] or {}).get("source_url"), flush=True)
 
 t = time.time()
-r = publish_page.handler_entry({"mode": "replay", "date": DAY, "batch_id": "ws2-real-run-local", "sink": s})
+r = publish_page.handler_entry({"mode": "replay", "date": DAY, "batch_id": f"ws2-real-run-{int(time.time())}", "sink": s})
 rec["stages"]["publish_page"] = {"status": r.get("status"), "outputs": r.get("outputs"), "detail": str(r.get("detail"))[:600],
                                  "seconds": round(time.time() - t)}
 print("publish-page:", r.get("status"), "| detail:", str(r.get("detail"))[:300], flush=True)

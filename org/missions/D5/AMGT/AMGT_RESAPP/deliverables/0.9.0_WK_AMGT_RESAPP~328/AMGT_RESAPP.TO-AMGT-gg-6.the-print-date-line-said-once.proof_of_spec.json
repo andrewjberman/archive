@@ -1,0 +1,89 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-gg-6",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gg-6.the-print-date-line-said-once.md",
+  "group": "OTHER",
+  "vintage_commit": "13c4672dc121db3304beeaf290aff1b781121483"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "13c4672dc121db3304beeaf290aff1b781121483",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gg-6.the-print-date-line-said-once.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~328",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/print/render_pack.py",
+   "kind": "script",
+   "commit_or_etag": "0c685343ea290cb610e56119f38dae86b127d173",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "_header_print_lines added; build_pack prints its lines for the Header block. Serving needs a redeploy under its own pair (not this order).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_header_date_once.py",
+   "kind": "test",
+   "commit_or_etag": "0c685343ea290cb610e56119f38dae86b127d173",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "3 cases (some undated, all dated, text only): 3 passed.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the phrase appears exactly once across AMD's header lines, 0 times when every numeric figure is dated and 0 times for a text-only header; P1-P4 PASS; R82 PRINT AC1: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round82_prep/checks/r82_print.py\" --crit AC1; echo \"exit=$?\"",
+   "output_evidence": "PASS P1 render_pack._header_print_lines exists\nPASS P2 AMD_US_Equity: the phrase appears 1 time(s) across 22 header line(s)\nPASS P3 every numeric header figure dated -> the phrase 0 time(s)\nPASS P4 text-only header -> the phrase 0 time(s)\nR82 PRINT AC1: YES\nexit=0",
+   "denominator": "4 of 4 checks PASS (P1-P4), AMD_US_Equity 22 header lines, 1 phrase",
+   "status": "PASS",
+   "expect": "PASS P4[\\s\\S]*R82 PRINT AC1: YES\\s+exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "every header figure line equals today's line minus the phrase; B1 PASS; R82 PRINT AC2: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round82_prep/checks/r82_print.py\" --crit AC2; echo \"exit=$?\"",
+   "output_evidence": "PASS B1 header figure lines equal today's minus the phrase: 21 of 21 equal []\nR82 PRINT AC2: YES\nexit=0",
+   "denominator": "21 of 21 header figure lines equal",
+   "status": "PASS",
+   "expect": "PASS B1[\\s\\S]*R82 PRINT AC2: YES\\s+exit=0"
+  }
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~328/SESSION_LOG.md",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "python -m pytest lib/research/api/tests -q",
+   "result": "2 failed, 878 passed -- both failures No module named 'pypdf' (test_print_fiscal_year_sort::test_head_copy_raises_on_mixed_keys, test_print_format_rich::test_default_and_fmt_pdf_are_byte_identical_to_build_pack_itself), the base's two"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative control: the base render_pack.py (HEAD~1, no _header_print_lines) is the planted absence; the checker is run against it by the cut (round82_prep dry-run) and reads AC1 NO.",
+   "expected": "At the base AC1 reads P1 FAIL and R82 PRINT AC1: NO, exit 1.",
+   "observed": "Per GROUP_PRINT_NOTES.md dry-run at the base: AC1 NO (P1 helper absent), exit 1; with the helper AC1 YES exit 0 (output above). Header stage at base carried the phrase on 10-11 of ~21 lines.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2 each run once at the committed code after the 3-case test; stored-block read only.",
+   "observed": "Both YES exit 0.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "PDF-rendering tests (pypdf).",
+   "reason": "pypdf is absent on this box; test_print_fiscal_year_sort and test_print_format_rich fail at import at the base too. No row filed per the order."
+  }
+ ],
+ "surprises": []
+}
