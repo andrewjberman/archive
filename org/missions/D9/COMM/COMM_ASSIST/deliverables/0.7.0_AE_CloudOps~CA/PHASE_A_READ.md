@@ -38,3 +38,29 @@
 expected. `COMM_ASSIST-Z-S1` is filed BLOCKING/ARMED with `disarm_owner` `2.0.0_SA_COO~ZZ` (the order prescribes `COMM_ASSIST-Z-AE-S<k>`, which the row gate refuses -- grammar `<CODE>-(Z-)?(W<n>-|C-)?S<k>`; no override taken, and the order's line is the issuer's to correct). This seat applied nothing,
 opened no ledger, read no secret, sent no mail, invoked nothing, and did not continue to step 1. `<status>` stays
 `pending`; no criterion was run (both FAIL at the base by the issuer's own pre-cut read) and no proof instance is written.
+
+---
+
+## PHASE A RE-RUN (amendment A3 @`7b35ae056b`, ruling row `COMM_ASSIST-Z-S2` which disarms `Z-S1`)
+
+A3 permits exactly ONE foreign `-var`, read live at the act. `PHASE_A_PLAN.txt` above stands as the pre-A3 reading.
+
+17. A3 `-var` SOURCE, read at the act and never typed from the order: `aws iam get-role --role-name teams-global-transcripts-second-reader-role` -> trust policy saved at `r12_phase_a/A3_live_trust_read.json`. DENOMINATOR 1 statement of 1, 1 principal of 1; `Principal.AWS` is a STRING, normalised to a one-element JSON list. Derived argument: `second_reader_trust_principal_arns=["arn:aws:iam::313476888478:user/Opal_Terminal"]`. It equals the value the issuer quoted at 12:4xZ, but this seat read it rather than copying it. Role created 2026-10-09T09:55:13Z, so TO-APPLY-a18 has landed.
+18. ARGV CORRUPTION ORACLE (the value carries an ARN with a `/` segment): native-python `repr(sys.argv[1])` echoed the argument back byte-identical to the file, both WITH and WITHOUT `MSYS_NO_PATHCONV=1`. `cmd //c echo` is NOT a usable oracle here -- it re-quotes and, with the guard set, swallowed the `//c` and opened a banner. The plan was run with the guard set, per the ARN-arg rule.
+19. Fresh scratch `TF_DATA_DIR` (`tfdata-ca-d-2-phasea-a3`), confirmed outside every git tree; `init -input=false` rc=0, s3 backend configured, aws v5.100.0, NO migrate and NO reconfigure prompt.
+20. `plan -input=false -no-color -lock=false -target=module.ldo_001 -var <the one above>` -> rc=0, a full plan body, saved as `PHASE_A_PLAN_2.txt` (219 lines). **`Plan: 1 to add, 3 to change, 0 to destroy`** -- NOT the expected `0 to add, 2 to change, 0 to destroy`. The A3 `-var` cleared the evaluation wall of `Z-S1`; what it exposed is a second, different wall.
+21. THE FOUR ADDRESSES, exhaustively (plan line numbers): `aws_iam_role.silver_reader` **will be created** (:45); `aws_kms_key.transcripts` **updated in-place** (:86); `module.ldo_001.aws_lambda_function.handler` updated in-place (:175); `module.ldo_001.aws_lambda_function.ingress[0]` updated in-place (:192). PRECISE DECOMPOSITION: the 1 ADD is `silver_reader`; of the 3 CHANGES, ONE is outside the module (`aws_kms_key.transcripts`) and TWO are the module's own functions.
+22. THE TWO IN-MODULE CHANGES ARE EXACTLY AS SPECIFIED: each function changes `source_code_hash` `xWURpe/nRkiZAc8Uui+arsJpSeVnUErNEHBWqtvrM5Q=` -> `+VT4f32xhMWitwdP9GFaNNXNTqym6uPRv0aif7vpblI=` (the step-5 build) and `last_modified` -> `(known after apply)`, with 27 unchanged attributes and 4 unchanged blocks hidden on each. No env, policy, role or other argument moves inside the module. At the committed default `""`, `MAIL_BEARER_SECRET` is correctly absent from the plan.
+23. STOP CONDITION 1 -- AN ADD: `aws_iam_role.silver_reader` is NFRA_TRNSPT TR-r-21's silver-only reader (`readers.tf:92`), declared there "NOT APPLIED -- plan only". It is not COMM's resource and is not in any of the three signed halves.
+24. STOP CONDITION 2 -- A DEPENDENCY A3 NAMES AS MUST-READ-NO-CHANGE: `aws_kms_key.transcripts`' `policy` reads `jsonencode({...}) -> (known after apply)`. The MINUS side carries 4 Sids -- `RootAdministersTheKeyAndCannotUseIt`, `NamedReadersUseTheKey` (Andrew_Berman + the second reader's role), `DellAgentUsersDecryptOnly`, `DellAgentUsersGenerateDataKey` (both dell1/dell2 agent users). There are ZERO `+` lines: the plan cannot show the replacement at all.
+25. WHY IT IS UNPREDICTABLE, which is a different fact from why the key is in the plan: `main.tf:117` puts `Principal = { AWS = aws_iam_role.silver_reader.arn }` in the key policy, and that role does not exist yet, so the whole document is unknown until apply. (The key is DRAGGED IN because module.ldo_001 takes its id and ARN -- the issuer's A4 reading; the policy is UNKNOWABLE because of the `:117` reference.) An apply here would rewrite the transcripts key policy to a value no half could have signed, since no half can state an outcome the plan cannot print.
+26. `aws_iam_role.second_reader` and its policy -- the other two dependencies A3 names -- read NO change: they appear nowhere in the plan's four addresses. That limb of A3 is satisfied.
+
+## Verdict (A3 re-run)
+
+**Branch A is correctly NOT met, and this seat STOPPED.** Applied nothing, opened no ledger, read no secret value, called no
+route, sent no mail, invoked nothing; did not continue to step 1; `<status>` stays `pending`. No criterion was run and no proof
+instance is written. No new surprise row: the issuer RULED this reading in amendment A4 @`57b66ed3cb` (order lines 156-161) and
+carried the decoupling to round 13, so the finding is owned and dispositioned -- re-filing it as a row would duplicate an owned
+finding. `PHASE B: NOT YET` at HEAD, now also waiting on NFRA_TRNSPT `TO-APPLY-s21` (pending, laptop `0.7.0_AE_CloudOps~TRL`);
+OG-ap-3 is complete (`fab015fa54`).
