@@ -100,7 +100,8 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     priv = OUT / "RESTATED_TIEOUT.json"
     body = {"measured_by": "0.9.0_WK_IRPT_DASHBD~86", "task_order": "IRPT_DASHBD.TO-DB-b-111", "tolerance_pp": TOL_PP,
-            "comparison_window_end": WINDOW_END, "n": len(rows), "segments": rows}
+            "comparison_window_end": WINDOW_END, "rule_commit": rule_commit, "producer_commit": output_commit,
+            "n": len(rows), "segments": rows}
     priv.write_bytes((json.dumps(body, indent=1) + "\n").encode("utf-8"))
     sha = hashlib.sha256(priv.read_bytes()).hexdigest()
 
