@@ -12,5 +12,6 @@ Cited, not cut: the CTO~DELL1 round-83 analysis decides what round 84 cuts.
 3. **Row D1-S7:** the recorder stops writing `lambda-source-map.json`'s top-level `_last_deploy_recorded` and derives it on read
    (CTO msgs 2169, 2197); an order to `0.7.0_AE_CloudOps~RA1`, this project's CloudOps lane.
 4. **gg-6's print change** is still graded on the tree only (pypdf absent on dell1).
+5. **The round-81 census (r81_ee4_census.py) predates the cross-reference cut mode:** it labels ASML's correct cross-reference cuts (business 'Our market place', risk 'Risk factors') OTHER and FALLBACK, so E3/E4 read NO on a correct store; the fixed r81_store S3 reads YES. Re-base the census on the excerpt's item headings (as S3 now does) before it grades again.
 
 -- 2.0.0_SA_COO~R1
