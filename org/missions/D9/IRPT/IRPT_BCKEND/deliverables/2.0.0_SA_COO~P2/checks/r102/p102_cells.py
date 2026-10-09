@@ -27,6 +27,7 @@ D = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/"
 A1 = D + "0.7.0_AE_CloudOps~IB2/IB102-1_reader_release_after_reads.json"
 A2 = D + "0.7.0_AE_CloudOps~IB2/IB102-2_holdings_release_after_reads.json"
 W3, W4 = D + "0.9.0_WK_IRPT_BCKEND~264/", D + "0.9.0_WK_IRPT_BCKEND~265/"
+W2P = D + "0.9.0_WK_IRPT_BCKEND~262/IB99-1_release_replay.json"
 NARR = "infra/aws/lambda/investor-reporting/narrative"
 
 
@@ -82,9 +83,19 @@ def main():
             fail("narrative moved")
         a = load(A2)
         led = a.get("ledger") or {}
-        if led.get("state") != "CLOSED" or not led.get("pin") or not led.get("sha256") or not arms_ok(a.get("replay_rerun_before_ledger") or []):
-            fail("ledger/replay %r" % led)
-        print("OK: holdings live == built; narrative unchanged; ledger CLOSED")
+        if led.get("state") != "CLOSED" or not led.get("pin") or not led.get("sha256"):
+            fail("ledger %r" % led)
+        # AMENDMENT 1: the re-run is graded against the signed packet's own replay, arm for arm (its narrative-side
+        # verdicts are 'admitted' / 'WIDENS irpt-narrative'); no UNEXPECTED verdict and no WIDENS on irpt-holdings.
+        want = {x.get("name"): x.get("verdict") for x in load(W2P).get("arms") or []}
+        got = a.get("replay_rerun_before_ledger") or []
+        if not got or len(got) != len(want):
+            fail("re-run %d arm(s) vs packet %d" % (len(got), len(want)))
+        for x in got:
+            v = str(x.get("verdict"))
+            if want.get(x.get("name")) != v or "UNEXPECTED" in v or ("WIDENS" in v and "irpt-holdings" in v):
+                fail("arm %r: %r vs packet %r" % (x.get("name"), v, want.get(x.get("name"))))
+        print("OK: holdings live == built; narrative unchanged; ledger CLOSED; %d arms match the packet" % len(got))
     elif cid == "IB102-3-AC1":
         for sel, n in (("opal_capital_binding", 2), ("served_error_path", 2)):
             rc, k, last = pyt(root / NARR, "tests", "-k", sel)
