@@ -26,7 +26,7 @@ for m in re.finditer(r"Direction verdict (?:Grounded on an earlier build(?:: [^.
     if not body or body[:120] in seen:
         continue
     seen.add(body[:120])
-    openers.append(" ".join(body.split()[:4]).lower())
+    openers.append(" ".join(re.sub(r"\d{4}-\d{2}-\d{2}", "<date>", body).split()[:4]).lower())  # dates differ per fund; the lead does not
 
 if not openers:
     print(f"NO-MEASUREMENT: 0 Direction Verdicts on {SRC}")
