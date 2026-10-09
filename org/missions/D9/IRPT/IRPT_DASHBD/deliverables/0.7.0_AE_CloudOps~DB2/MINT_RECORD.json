@@ -114,8 +114,18 @@
       "reaches_this_seat_via": "group cloudops-dell-agents-group (the user carries no inline policy; its two attached user policies name no secretsmanager action)"
     },
     "simulate_listed": "implicitDeny",
-    "simulate_unlisted": null,
-    "simulate_baseline_note": "BASELINE, measured BEFORE the grant with ONE --resource-arns in the call: secretsmanager:GetSecretValue for arn:aws:iam::313476888478:user/cloudops-dell2-agent-user on the new secret ARN -> implicitDeny. This deny is what makes a later 'allowed' meaningful; it is recorded as the pre-grant value and will be replaced by the post-grant read, never by a prediction. The resource EXISTS (created and read back this session), which closes simulate-principal-policy's false-allow mode where a pattern matches an ARN nothing has created."
+    "simulate_unlisted": "implicitDeny",
+    "simulate_baseline_note": "BASELINE, measured BEFORE the grant with ONE --resource-arns in the call: secretsmanager:GetSecretValue for arn:aws:iam::313476888478:user/cloudops-dell2-agent-user on the new secret ARN -> implicitDeny. This deny is what makes a later 'allowed' meaningful; it is recorded as the pre-grant value and will be replaced by the post-grant read, never by a prediction. The resource EXISTS (created and read back this session), which closes simulate-principal-policy's false-allow mode where a pattern matches an ARN nothing has created.",
+    "cut_on_laptop_as": "NFRA_CTLPLN.TO-CT-a-1 AMENDMENT 30 by laptop 2.0.0_SA_COO~C (the svc-commentary pattern), relayed via 0.0.0_AB_MSTR~DELL2 msg 3124 -> 2.0.0_SA_COO~D2 msg 3126. It adds this ONE ARN to cloudops-dell-agent-platform-secrets-policy taking it 30 -> 31, lands in ONE apply with AMENDMENT 29, and the laptop simulates both Dells allowed and an unlisted secret refused. The laptop's applied time is relayed to this seat; this seat runs its OWN simulations after that time -- it does not adopt the laptop's.",
+    "simulate_unlisted_arn": "arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/auth/jwt-public-key-Z6dqNK",
+    "simulate_unlisted_note": "MEASURED, and grant-independent so it is final: an ADJACENT unlisted secret was chosen deliberately -- opal/auth/jwt-public-key shares the opal/auth/ prefix with the LISTED opal/auth/jwt-private-key-Av5dZz -- so the implicitDeny proves the allow-list is per-ARN and not prefix-wide. A random unrelated secret would not have shown that.",
+    "instrument_control": {
+      "listed_arn": "arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/ticketing/svc-analyst-intake-HGzn67",
+      "listed_decision": "allowed",
+      "run_as": "a SEPARATE invocation from every other simulation, with ONE --resource-arns, because 2+ resource ARNs in one call flip the held ones to implicitDeny and would silently disarm this very control",
+      "why_it_matters": "without it, implicitDeny on the target ARN is indistinguishable from a broken instrument: simulate-principal-policy has four independent false-deny modes. The allowed on a known-listed ARN proves the instrument CAN return allowed for this principal and action, so the target's deny is the world, not the tool.",
+      "false_allow_mode_closed": "the target secret EXISTS (created and read back by describe-secret this session), so the mode where a pattern matches an ARN nothing has created does not apply here"
+    }
   },
   "acts_taken": [
     "ONE secret created (opal/investor-reporting/svc-custody-statement)",
