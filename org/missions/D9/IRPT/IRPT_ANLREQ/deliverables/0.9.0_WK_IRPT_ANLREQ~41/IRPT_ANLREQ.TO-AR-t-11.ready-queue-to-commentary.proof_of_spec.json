@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-t-11",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/prd/IRPT_ANLREQ_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "8412208d47"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R1.md",
+    "vintage_commit": "8412208d47",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-t-11.ready-queue-to-commentary.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~41",
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/transcripts/commentary.tf",
+      "kind": "terraform",
+      "commit_or_etag": "28906ac237",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DESIRED, NOT APPLIED: no AWS call, plan or apply in this order (WORLD by path floor, LOCAL in act).",
+      "artifact_covered_by": [
+        "AR11-t-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/commentary/lambda_handler.py",
+      "kind": "script",
+      "commit_or_etag": "28906ac237",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not deployed; the commentary Lambda is not re-packaged in this order.",
+      "artifact_covered_by": [
+        "AR11-t-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/commentary/entry.py",
+      "kind": "script",
+      "commit_or_etag": "28906ac237",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not deployed; handler behaviour unchanged for stream records (38 commentary tests green).",
+      "artifact_covered_by": [
+        "AR11-t-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/commentary/NAMES.json",
+      "kind": "config_data",
+      "commit_or_etag": "28906ac237",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ready_queue and ready_dlq are lib/opal_naming.py name() output with qualifier analysis-ready; read by commentary.tf.",
+      "artifact_covered_by": [
+        "AR11-t-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_commentary_ready_queue.py",
+      "kind": "test",
+      "commit_or_etag": "28906ac237",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only, fakes only.",
+      "artifact_covered_by": [
+        "AR11-t-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR11-t-AC1",
+      "criterion_verbatim": "AR11-t-AC1 -- the three named tests pass and the file is green.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R1_CHECKS/ar1_t2_checks.py t11",
+      "output_evidence": "AR1-T11-OK 3 passed in 0.08s (rc=0)",
+      "denominator": "3 of 3 tests in test_commentary_ready_queue.py passed (test_ready_message_admitted_once, test_malformed_or_extra_field_refused, test_tf_subscribes_lambda_to_ready_queue); the 4 test_commentary_*.py files together 38 of 38 passed",
+      "status": "PASS",
+      "expect": "AR1-T11-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order's dry run at base: the check printed 'AR1-T11-FAIL absent: data/transcripts/scripts/tests/test_commentary_ready_queue.py'. The refusal test also feeds 6 refused shapes (extra field, wrong kind, missing field, free-text value, non-canonical bytes, not JSON).",
+      "expected": "FAIL at base; after the edit OK, and every refused shape yields zero entry runs, model calls and ticket posts",
+      "observed": "AR1-T11-OK 3 passed after the edit; 6 of 6 refused shapes refused with the named reason and a batchItemFailures entry, 0 entry runs, 0 model calls, 0 posts.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the criterion's check run twice (once before and once after the commit), plus the 4 test_commentary_*.py files together.",
+      "observed": "3 passed both times; 38 passed across test_commentary_*.py.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "infra/aws/lambda/transcripts-pull/build.sh packaging of keys.py and data/firm_registry.json",
+      "reason": "Outside this order's paths; the deployed package would refuse every message (fail closed). Filed as row IRPT_ANLREQ-D2-W41-S1."
+    },
+    {
+      "item": "The resident's own identity-side SendMessage grant on the new queue",
+      "reason": "Resident-side cell's, not this order's paths; the producer principal in the queue policy is INFERRED from the ycharts root's runner_role_arn. Filed as row IRPT_ANLREQ-D2-W41-S2."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W41-S1",
+    "IRPT_ANLREQ-D2-W41-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/transcripts/scripts/tests/test_commentary_*.py -q -p no:cacheprovider",
+      "result": "38 passed"
+    }
+  ]
+}
