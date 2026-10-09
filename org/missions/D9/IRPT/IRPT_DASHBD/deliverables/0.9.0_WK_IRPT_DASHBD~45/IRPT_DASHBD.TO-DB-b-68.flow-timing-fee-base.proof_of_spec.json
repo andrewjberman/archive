@@ -1,0 +1,102 @@
+{
+ "schema_version": "1.0",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "8a02a14a90"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "8a02a14a90",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-68.flow-timing-fee-base.md"
+ },
+ "to_id": "IRPT_DASHBD.TO-DB-b-68",
+ "assignee": "0.9.0_WK_IRPT_DASHBD~45",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~45/FLOW_TIMING_FEE_E3.md",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~45/flow_timing_fee_e3.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Read-only tracer over the round 31, 32 and 33 records; writes only the E3 record beside itself; no reader edit, no S3, no vendor call.",
+   "artifact_covered_by": [
+    "DB34-3-AC1",
+    "DB34-3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~45/FLOW_TIMING_FEE_E3.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "116 rows each with sub_class and abs_diff_pp_now under the reader of record; counts, within_now 114, dispositions for 5 sub-classes.",
+   "artifact_covered_by": [
+    "DB34-3-AC1",
+    "DB34-3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~45/FLOW_TIMING_FEE_E3.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Counts only.",
+   "artifact_covered_by": [
+    "DB34-3-AC1",
+    "DB34-3-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB34-3-AC1",
+   "criterion_verbatim": "DB34-3-AC1 -- the 116 each carry a sub_class and the abs_diff under the reader; counts and within_now equal the tallies. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r34/p34_round34.py\" . DB34-3-AC1",
+   "output_evidence": "OK: 116 of 116 traced; 114 within now under the reader; {'RESOLVED_BY_FLOW_START': 108, 'STILL_OUT_GUARD_DAY': 1, 'RESOLVED_FIRST_DAY_START': 3, 'RESOLVED_WITH_GUARD_DAY': 3, 'STILL_OUT_FLOW_EXCEEDS_BALANCE': 1}\nDB34-3-AC1 PASS (rc 0)",
+   "denominator": "116 of 116 FLOW_TIMING_AFTER_FEE_BASE rows of round 31's record; within_now 114, outside 2",
+   "status": "PASS",
+   "expect": "DB34-3-AC1 PASS"
+  },
+  {
+   "criterion_id": "DB34-3-AC2",
+   "criterion_verbatim": "DB34-3-AC2 -- every sub_class is dispositioned fixed, named_cause or resolved_by_reader, with its cause. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r34/p34_round34.py\" . DB34-3-AC2",
+   "output_evidence": "OK: every sub-class dispositioned: {'RESOLVED_BY_FLOW_START': 'resolved_by_reader', 'STILL_OUT_GUARD_DAY': 'named_cause', 'RESOLVED_FIRST_DAY_START': 'resolved_by_reader', 'RESOLVED_WITH_GUARD_DAY': 'resolved_by_reader', 'STILL_OUT_FLOW_EXCEEDS_BALANCE': 'named_cause'}\nDB34-3-AC2 PASS (rc 0)",
+   "denominator": "5 of 5 sub-classes dispositioned (resolved_by_reader 3, named_cause 2, fixed 0)",
+   "status": "PASS",
+   "expect": "DB34-3-AC2 PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "A scratch copy of the deliverables tree with FLOW_TIMING_FEE_E3.json within_now set to 115 (true tally 114), checked with DB34-3-AC1 against the scratch root.",
+   "expected": "DB34-3-AC1 FAIL naming the tally",
+   "observed": "FAIL: within_now 115, the tally 114 / DB34-3-AC1 FAIL",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The tracer reads only committed records and has no randomness; it was run once and the checker run on its output.",
+   "observed": "wrote 116 rows; within 114",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "re-running the reader of record against the BD pull",
+   "reason": "The order grades the record round 33 already measured under the reader (reader_sha256 carried in the E3 record); no S3 read was needed and none made."
+  }
+ ],
+ "surprises": [],
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "bash .tools/commit-gate.sh org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~45/flow_timing_fee_e3.py",
+   "result": "recorded at commit"
+  }
+ ]
+}
