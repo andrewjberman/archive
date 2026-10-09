@@ -1,6 +1,6 @@
 """AMGT_HARVST round 76, HVST-bt-1 -- THE CENSUS of `1.0.0_SA_CTO~DELL1` R31 (a common-word alias needs a second anchor),
 worker 0.9.0_WK_AMGT_HARVST~132. AMENDMENT 1 (ADDENDUM 4): the common-word set is MEASURED FROM SILVER (`common_word_scan.py` writes
-`common_word_aliases.json`: LOWER > CAP_MID); the dictionary list is withdrawn. This script reads that one file, through the matcher.
+`common_word_aliases.json`); AMENDMENT 2 (ADDENDUM 5): an alias is common when LOWER / CAP_MID >= `_COMMON_WORD_RATIO` (0.2). This script reads that one file, through the matcher.
 
 Built from round 74's `br1_census.py` (worker ~126); only the rule tested is changed. POPULATION: the SERVED gold mention part
 `amgt/harvest/gold/article_security_mention/date=2026-10-08/part-20261009T093755Z.parquet` (rebuild #12) read by an S3 GET, its
@@ -76,7 +76,7 @@ def pair_texts(article):
 
 def common_spans(article, sec, common):
     """Every span the matcher counts under R30 whose WINNING form is a common alias of `sec`: (where, start, end, text, context).
-    The SAME alias set as the matcher sees (aliases, anchored brands, ticker-anchor names; ticker forms exact-case); each span is
+    (where, start, end, text, context, winning_alias). The SAME alias set as the matcher sees (aliases, anchored brands, ticker-anchor names; ticker forms exact-case); each span is
     graded by running the real `_match_counts` on the span alone, which gives its winning form."""
     aliases = pg._security_aliases(sec) + list(sec.get("anchored_aliases") or []) + list(sec.get("ticker_anchor_aliases") or [])
     exact = pg._security_exact_aliases(sec)
@@ -88,7 +88,7 @@ def common_spans(article, sec, common):
         for m in pattern.finditer(text):
             count, forms = pg._match_counts(m.group(0), aliases, exact)
             if count > 0 and forms and all(f in common for f in forms):
-                out.append((where, m.start(), m.end(), m.group(0), around(text, m.start(), m.end())))
+                out.append((where, m.start(), m.end(), m.group(0), around(text, m.start(), m.end()), forms[0]))
     return out
 
 
@@ -125,10 +125,12 @@ def main():
     n_alias = sum(len(v) for v in common_by_sec.values())
     emit("COMMON-WORD ALIASES (silver): %d over %d securities; articles scanned %d"
          % (n_alias, len(common_by_sec), counted["articles_scanned"]))
-    flagged = sorted((r for r in rows if r["lower"] > r["cap_mid"]), key=lambda r: (r["security_key"], r["alias"]))
+    emit("RATIO RULE: flagged when LOWER / CAP_MID >= %s (CAP_MID = 0 with LOWER > 0 counts as flagged)" % pg._COMMON_WORD_RATIO)
+    flagged = sorted((r for r in rows if pg._is_common_word(r["lower"], r["cap_mid"])), key=lambda r: (r["security_key"], r["alias"]))
     for r in flagged:
-        emit("  %s: %s  LOWER %d  CAP_MID %d" % (r["security_key"], r["alias"], r["lower"], r["cap_mid"]))
-    near = sorted((r for r in rows if r["lower"] <= r["cap_mid"] and r["cap_mid"] > 0 and r["lower"] > 0),
+        emit("  %s: %s  LOWER %d  CAP_MID %d  ratio %.3f" % (r["security_key"], r["alias"], r["lower"], r["cap_mid"],
+                                                           (float(r["lower"]) / r["cap_mid"]) if r["cap_mid"] else float("inf")))
+    near = sorted((r for r in rows if not pg._is_common_word(r["lower"], r["cap_mid"]) and r["cap_mid"] > 0 and r["lower"] > 0),
                   key=lambda r: (-(float(r["lower"]) / r["cap_mid"]), r["security_key"], r["alias"]))
     seen, misses = set(), []
     for r in near:       # one line per alias text: an ADR and its ordinary share carry the same counts
@@ -136,7 +138,7 @@ def main():
             continue
         seen.add(r["alias"].lower())
         misses.append(r)
-    emit("10 NEAREST MISSES (not flagged; highest LOWER / CAP_MID; one line per alias):")
+    emit("10 NEAREST MISSES (not flagged; highest LOWER / CAP_MID; one line per alias text):")
     for r in misses[:10]:
         emit("  %s: %s  LOWER %d  CAP_MID %d  ratio %.3f" % (r["security_key"], r["alias"], r["lower"], r["cap_mid"],
                                                           float(r["lower"]) / r["cap_mid"]))
@@ -201,14 +203,14 @@ def main():
                     pairs_down += 1
                 removed_pairs.append((sk, key, before, after))
                 spans = common_spans(article, sec, common)
-                discarded = [s for s in spans]
+                discarded = list(spans)
                 if len(discarded) == before - after:
                     span_control_ok += 1
                 else:
                     span_control_bad += 1
-                for where, start, end, text, ctx in discarded:
+                for where, start, end, text, ctx, form in discarded:
                     removed_spans.append({"security_key": sk, "article_key": key, "title": title, "where": where,
-                                          "start": start, "span": text, "context": ctx})
+                                          "start": start, "span": text, "context": ctx, "alias": form})
             elif common and after > 0:
                 spans = common_spans(article, sec, common)
                 if spans:
@@ -220,7 +222,7 @@ def main():
                     what = {"ticker": ",".join(list(sec.get("ticker_aliases") or []) + list(sec.get("ticker_anchor_symbols") or [])),
                             "company": sec.get("company"),
                             "alias": ",".join(a for a in sec.get("aliases") if a not in common)}[kind]
-                    where, start, end, text, ctx = spans[0]
+                    where, start, end, text, ctx, _form = spans[0]
                     kept_mentions.append({"security_key": sk, "article_key": key, "title": title, "where": where, "start": start,
                                           "span": text, "context": ctx, "anchor_kind": kind, "anchor_in": where_a,
                                           "anchor_form": what, "common_spans_counted": len(spans)})
@@ -239,6 +241,11 @@ def main():
     for sk, _k, b, a in removed_pairs:
         men_by_sec[sk] += b - a
     EXTRA.append("REMOVED BY SECURITY (pairs, mentions): " + "; ".join("%s %d, %d" % (sk, n, men_by_sec[sk]) for sk, n in by_sec.most_common()))
+    down_by_sec = collections.Counter(sk for sk, _k, _b, a in removed_pairs if a > 0)
+    gone_by_sec = collections.Counter(sk for sk, _k, _b, a in removed_pairs if a == 0)
+    for sk in sorted(common_by_sec):
+        emit("R31 BY SECURITY %s (%s): mentions removed %d, pairs removed %d, pairs counted down %d"
+             % (sk, ", ".join(common_by_sec[sk]), men_by_sec[sk], gone_by_sec[sk], down_by_sec[sk]))
 
     cvo_removed = 0
     cvo_lines = []
@@ -280,11 +287,28 @@ def main():
     for r, company in other:
         emit("  OTHER %s: %s  (company %r)" % (r["security_key"], r["alias"], company))
 
-    sample = spread_over_securities(removed_spans, 20, 76)
-    emit("REMOVED SAMPLE 20: (of %d discarded mentions over %d securities; this sample covers %d securities)"
-         % (len(removed_spans), len(set(r["security_key"] for r in removed_spans)), len(set(r["security_key"] for r in sample))))
-    for r in sample:
-        emit("  %s | %s | %s | [%s] %s" % (r["security_key"], r["article_key"], r["title"][:120], r["where"], r["context"]))
+    # AMENDMENT 2: for EACH flagged alias text, ten removed mentions by (article key ascending, every k-th). A mention shared by
+    # two listings of one alias (Orange: ORA_FP and ORANY) is one line, with both securities named.
+    sample = []
+    for alias in sorted(set(r["alias"] for r in flagged)):
+        pool = {}
+        for r in removed_spans:
+            if r["alias"] != alias:
+                continue
+            k = (r["article_key"], r["where"], r["start"])
+            if k in pool:
+                pool[k]["security_keys"].append(r["security_key"])
+            else:
+                pool[k] = dict(r, security_keys=[r["security_key"]])
+        ordered = [pool[k] for k in sorted(pool)]
+        step = max(1, len(ordered) // 10)
+        picks = ordered[::step][:10]
+        emit("REMOVED SAMPLE %s: 10 (of %d removed mentions on %d distinct (article, place) spans; every %dth by article key, "
+             "%d shown)" % (alias, sum(1 for r in removed_spans if r["alias"] == alias), len(ordered), step, len(picks)))
+        for r in picks:
+            emit("  %s | %s | %s | [%s] %s" % ("+".join(sorted(set(r["security_keys"]))), r["article_key"], r["title"][:120],
+                                              r["where"], r["context"]))
+        sample.extend(picks)
     ksample = spread_over_securities(kept_mentions, 20, 77)
     emit("KEPT SAMPLE 20: (of %d kept pairs with a counted common-alias mention over %d securities; this sample covers %d securities)"
          % (len(kept_mentions), len(set(r["security_key"] for r in kept_mentions)), len(set(r["security_key"] for r in ksample))))

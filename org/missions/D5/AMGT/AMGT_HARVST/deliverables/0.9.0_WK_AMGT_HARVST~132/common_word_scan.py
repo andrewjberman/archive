@@ -1,4 +1,4 @@
-"""AMGT_HARVST round 76, HVST-bt-1 AMENDMENT 1 (`1.0.0_SA_CTO~DELL1` ADDENDUM 4, msg 2353) -- the COMMON-WORD SET, MEASURED FROM SILVER.
+"""AMGT_HARVST round 76, HVST-bt-1 AMENDMENT 1/2 (`1.0.0_SA_CTO~DELL1` ADDENDUM 4 msg 2353, ADDENDUM 5 msg 2380) -- the COMMON-WORD SET, MEASURED FROM SILVER.
 Worker 0.9.0_WK_AMGT_HARVST~132.
 
 For every alias of every security in `0.9.0_WK_AMGT_HARVST~129/securities.universe.r75.json`, over every silver article (title and
@@ -7,8 +7,11 @@ every text block; the SAME read the census uses, `publication_gold._iter_latest_
   CAP_MID whole-word uses whose first letter is a capital and that are NOT the first word of a title or of a sentence.
 A sentence opens at the start of a block (the title is a block), after `. `, `? `, `! `, or after a line break (the character
 before the use is `\\n` or `\\r`). The word bounds are the matcher's own: `(?<!\\w)alias(?!\\w)`, case-insensitive. A use that is
-neither (lower-case first letter with a later capital, `eBay`) is counted in neither column. An alias is a COMMON WORD when
-LOWER > CAP_MID; the matcher applies that test when it loads the file, so the file holds every alias with both counts.
+neither (lower-case first letter with a later capital, `eBay`) is counted in neither column. AMENDMENT 2: an alias is a COMMON WORD
+when LOWER / CAP_MID >= `publication_gold._COMMON_WORD_RATIO` (0.2; CAP_MID = 0 with LOWER > 0 is flagged); the matcher applies that
+test when it loads the file, and the file holds every alias with LOWER, CAP_MID, ratio and the flag.
+`CW_REUSE=1` re-writes the file from the LOWER / CAP_MID counts already in it (no silver read, the counts do not change with the
+threshold), adding the ratio and the flag.
 
 Writes `common_word_aliases.json` beside this script. Nothing is written to S3. Run from the worktree root:
 `PYTHONPATH=. python <this file>`. `CW_LIMIT=<n>` stops after n articles and writes to `.scratch/` (smoke runs only).
@@ -57,7 +60,32 @@ def classify(text, match):
     return None
 
 
+def _finish(rows, scanned):
+    """Add ratio and flag to each row, sort, write `OUT`."""
+    for r in rows:
+        r["ratio"] = (round(float(r["lower"]) / r["cap_mid"], 6) if r["cap_mid"] > 0 else None)
+        r["flagged"] = bool(pg._is_common_word(r["lower"], r["cap_mid"]))
+    rows.sort(key=lambda r: (r["security_key"], r["alias"]))
+    flagged = [r for r in rows if r["flagged"]]
+    doc = {"definition": "COMMON when LOWER / CAP_MID >= %s (CAP_MID = 0 with LOWER > 0 counts as flagged); LOWER = whole-word "
+                         "all-lower-case uses; CAP_MID = whole-word capital-first uses that are not the first word of a title/block "
+                         "or of a sentence (after '. ', '? ', '! ' or a line break); counted over every silver article title and "
+                         "text block" % pg._COMMON_WORD_RATIO,
+           "ratio_threshold": pg._COMMON_WORD_RATIO,
+           "source_list": "0.9.0_WK_AMGT_HARVST~129/securities.universe.r75.json",
+           "articles_scanned": scanned, "aliases_counted": len(rows), "aliases_flagged": len(flagged), "aliases": rows}
+    with io.open(OUT, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(doc, handle, indent=1, ensure_ascii=True)
+        handle.write("\n")
+    print("DONE: articles scanned %d; (security, alias) rows %d; flagged %d; wrote %s" % (scanned, len(rows), len(flagged), OUT))
+    return 0
+
+
 def main():
+    if os.environ.get("CW_REUSE") == "1":
+        old = json.load(open(OUT, encoding="utf-8"))
+        return _finish([{k: r[k] for k in ("security_key", "alias", "lower", "cap_mid", "articles_scanned")} for r in old["aliases"]],
+                       old["articles_scanned"])
     securities = json.load(open(LIST, encoding="utf-8"))
     by_text = {}          # alias lower-cased text -> [compiled regex, lower, cap_mid]
     for sec in securities:
@@ -98,18 +126,7 @@ def main():
             _rx, lower, cap_mid = by_text[low]
             rows.append({"security_key": sec["security_key"], "alias": alias, "lower": lower, "cap_mid": cap_mid,
                          "articles_scanned": scanned})
-    rows.sort(key=lambda r: (r["security_key"], r["alias"]))
-    flagged = [r for r in rows if r["lower"] > r["cap_mid"]]
-    doc = {"definition": "COMMON when LOWER > CAP_MID; LOWER = whole-word all-lower-case uses; CAP_MID = whole-word capital-first "
-                         "uses that are not the first word of a title/block or of a sentence (after '. ', '? ', '! ' or a line "
-                         "break); counted over every silver article title and text block",
-           "source_list": "0.9.0_WK_AMGT_HARVST~129/securities.universe.r75.json",
-           "articles_scanned": scanned, "aliases_counted": len(rows), "aliases_flagged": len(flagged), "aliases": rows}
-    with io.open(OUT, "w", encoding="utf-8", newline="\n") as handle:
-        json.dump(doc, handle, indent=1, ensure_ascii=True)
-        handle.write("\n")
-    print("DONE: articles scanned %d; (security, alias) rows %d; flagged %d; wrote %s" % (scanned, len(rows), len(flagged), OUT))
-    return 0
+    return _finish(rows, scanned)
 
 
 if __name__ == "__main__":
