@@ -1,0 +1,94 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": "s3:ListBucket",
+            "Condition": {
+                "StringLike": {
+                    "s3:prefix": [
+                        "schwab/08335338/silver/dim_position/*",
+                        "schwab/08335338/silver/dim_balance/*",
+                        "schwab/08335338/silver/fact_trn/*",
+                        "schwab/08335338/silver/fact_rld/*",
+                        "schwab/08335338/silver/fact_uln/*",
+                        "schwab/08335338/silver/fact_ult/*"
+                    ]
+                }
+            },
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-assets",
+            "Sid": "ListExactlyTheDeclaredSilverPrefixes"
+        },
+        {
+            "Action": "s3:GetObject",
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/fact_ult/*",
+                "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/fact_uln/*",
+                "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/fact_trn/*",
+                "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/fact_rld/*",
+                "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_position/*",
+                "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_balance/*"
+            ],
+            "Sid": "ReadDeclaredSilverPartitionsOnly"
+        },
+        {
+            "Action": "s3:ListBucket",
+            "Condition": {
+                "StringLike": {
+                    "s3:prefix": [
+                        "irpt/49financial/gold/holdings_performance_daily/*",
+                        "irpt/49financial/gold/account_return_daily/*",
+                        "irpt/49financial/gold/account_class_daily/*",
+                        "irpt/49financial/gold/account_activity_daily/*",
+                        "irpt/49financial/gold/account_lot_realized/*",
+                        "irpt/49financial/gold/account_lot_unrealized_daily/*"
+                    ]
+                }
+            },
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-49financial",
+            "Sid": "ListExactlyTheSixGoldPrefixes"
+        },
+        {
+            "Action": "s3:GetObject",
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/*",
+                "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_return_daily/*",
+                "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_lot_unrealized_daily/*",
+                "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_lot_realized/*",
+                "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_class_daily/*",
+                "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_activity_daily/*"
+            ],
+            "Sid": "ReadTheSixGoldPrefixesOnly"
+        },
+        {
+            "Action": "s3:PutObject",
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_return_daily/*",
+                "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_lot_unrealized_daily/*",
+                "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_lot_realized/*",
+                "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_class_daily/*",
+                "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_activity_daily/*"
+            ],
+            "Sid": "WriteTheFiveGoldPrefixesOnly"
+        },
+        {
+            "Action": "dynamodb:GetItem",
+            "Effect": "Allow",
+            "Resource": "arn:aws:dynamodb:us-east-1:313476888478:table/etf-classifications",
+            "Sid": "ReadTheClassTableByKeyOnly"
+        },
+        {
+            "Action": [
+                "logs:PutLogEvents",
+                "logs:CreateLogStream"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/irpt-49f-reporting-gold-lambda:*",
+            "Sid": "OwnLogStreamOnly"
+        }
+    ]
+}

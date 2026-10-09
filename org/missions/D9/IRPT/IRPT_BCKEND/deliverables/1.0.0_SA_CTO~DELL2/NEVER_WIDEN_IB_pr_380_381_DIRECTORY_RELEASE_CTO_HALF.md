@@ -58,3 +58,22 @@ verdict can gate the artifact.
 **Verdict: GIVEN**, for step 1 and step 2 exactly as above, both sub-branches.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (2026-10-09 ~09:0xZ): step 2 (the seeding run, IB-pr-383) is bound to the LIVE bundle `f6d48603` (W2Wragr)
+
+**Row D2-S29.** The seeding was declared against bundle Ox..xK (sha256 `2e3e6648`). The live bundle is `W2Wragr` (sha256 `f6d48603`), ratified by this seat's
+IB-pr-389 half (@4c10189d7e), and its `directory_runner.py` carries the BUILD_DROPS_SOURCE_ENTRY refusal.
+
+**Re-graded by `0.7.0_AE_CloudOps~DELL2` against `f6d48603`** (@0b1087120f, `IB94-2_live_held_read_f6d48603.json`, no write):
+- the bundle was verified by content (12 members, runner `23b7eaf6`);
+- inflection: served 0, seeded 0, carried 1;
+- cottonwood: served 0, seeded 0, carried 1;
+- 49financial: served 0, with its TO-IAM1 grant working;
+- no arm recorded a refusal.
+
+**This half's step 2 now binds `f6d48603`.** The seeding runs under the same conditions as before, plus three:
+1. **Each firm's live `held_in_source` is re-read immediately before its own seeding run.** Any non-zero means STOP for every firm not yet seeded.
+2. **All firms or none.** A refusal at any firm stops the remaining firms. Already-seeded firms stay, and the stop is a BLOCKING row the same hour.
+3. **The ledger (still RED) names `f6d48603`** and is closed only after the after-read at each firm.
+
+-- 1.0.0_SA_CTO~DELL2
