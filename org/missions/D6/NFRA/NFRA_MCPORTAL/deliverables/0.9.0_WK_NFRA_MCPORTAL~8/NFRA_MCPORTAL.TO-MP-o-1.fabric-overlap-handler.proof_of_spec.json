@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-o-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "adfc7412bf1f0be0c2d5f388c2e3bef3a5c2a82f",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-o-1.fabric-overlap-handler.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-o-1.fabric-overlap-handler.md",
+    "group": "OTHER",
+    "vintage_commit": "7f29d5ccd9e9b15e0ea23aeaea77a3826d2eefd6"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_fabric_overlap.py",
+      "kind": "script",
+      "commit_or_etag": "638b8ae057",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one owner_only handler `overlap` plus _compute(hours, client=None); reuses admin_fabric BUCKET/_s3_client/_roster/_list_keys/_read_records; admin_fabric.py and admin_api.py untouched. The route line is added by the issuer at the merge.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/refs/overlap_rules.json",
+      "kind": "config_data",
+      "commit_or_etag": "638b8ae057",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "version 1; ranks INFRA 60 > CODE 50 > REGISTRY 40 > TOOL 30 > RECORD 20 > APPEND 10; deploy_uplift 100; names rows tf:, lambda-src:, infra:.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_admin_fabric_overlap.py",
+      "kind": "test",
+      "commit_or_etag": "638b8ae057",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 tests: the six named plus test_overlap_hours_is_validated; exercised live by o1.AC1.sh and o1.AC2.sh",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "overlap tests: 0 failed; named tests PASSED 5 of 5 -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/cp2/checks/o1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "overlap tests: ======================== 7 passed, 1 warning in 0.27s =========================; named tests PASSED 5 of 5\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 named tests PASSED; 7 of 7 tests in the file passed, 0 failed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "overlap real capture: 0 failed; named tests PASSED 1 of 1 -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/cp2/checks/o1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "overlap real capture: ======================== 7 passed, 1 warning in 0.31s =========================; named tests PASSED 1 of 1\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 named test PASSED; 7 of 7 tests in the file passed, 0 failed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Neutralised the deploy uplift in app/admin_fabric_overlap.py (`(uplift if named else 0)` -> `(0)`, on disk only, uncommitted) and re-ran o1.AC1.sh.",
+      "expected": "test_terraform_with_open_deploy_rated_above_shared_log fails on the exact rating assertion (INFRA rank + deploy_uplift).",
+      "observed": "1 failed, 6 passed; named tests PASSED 4 of 5; RESULT: FAIL. File restored byte-for-byte from a backup copy (cmp clean) and o1.AC1.sh/o1.AC2.sh re-run PASS. The first mutant run, before the exact-rating assertion was added, still passed (INFRA 60 > APPEND 10 without any uplift), which is why the assertion was added.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "o1.AC1.sh and o1.AC2.sh each run twice more after the final commit, no arguments varied",
+      "observed": "RESULT lines: RESULT: PASS; RESULT: PASS; RESULT: PASS; RESULT: PASS (only the pytest timing differs between runs)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_admin_fabric.py tests/test_admin_fabric_overlap.py",
+      "result": "14 passed (existing MP-x-1 file beside the new one, no cross-pollution)"
+    }
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~8/session_log.MP-o-1.md"
+}
