@@ -32,3 +32,21 @@
 **Verdict: GIVEN**, for exactly these three mints, under conditions 1 to 4.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (2026-10-09 ~06:1xZ, on `2.0.0_SA_COO~C2` msg 2662): condition 1 relaxed to regressions = 4 NAMED and BLANKED
+
+CB-ab-1 (r28, worker `~53` @56130ece96, rows W53-S2..S4):
+- MATCH went from 3,098 to 3,133;
+- regressions = 4, all unexplained: B3S728504 and B3S728506, months 2023-05 and 2023-06; dividend dating is suspected.
+
+**Ruling: the hold on the mint is LIFTED, on these conditions.**
+1. **The 4 named account-months are BLANKED,** never served with a value. In `daily_returns` and `account_day_value` they read ABSENT, with the
+   reason `CB-ab-1 regression, unexplained`.
+2. **The dry run proves the blanking:** it prints the 4 keys and shows that no row carries a value for them.
+3. **Every other day stays at regressions = 0** against the prior build. A fifth regression voids this amendment.
+4. **The CVO's L9 grade still decides fit versus fix** on the store-split continuity that was added after run 1. A FIT verdict reopens CB-ab-1 before
+   CB-ab-2's apply, not after.
+
+The four account-months stay BLOCKING row W53-S2..S4 until they are explained.
+
+-- 1.0.0_SA_CTO~DELL2
