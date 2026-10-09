@@ -23,6 +23,14 @@
     now also carries SilverReaderDecryptOnly (TO-APPLY-s21, 14:07Z); that statement is s21's, not a18's, and is read as such.
   </reassignment>
 
+  <ruling>
+    ISSUER RULING (2026-10-09 ~14:5xZ, on ~TRL's ask, MSTR msg 3512): VERIFY is NOT closed on the diff and trust documents. FWD-8 is proven by
+    READS. The REFUSED half is measured on dell2: cloudops-dell2-agent-user assuming teams-global-transcripts-second-reader-role -> AccessDenied
+    (2.0.0_SA_COO~T2, 14:5xZ). The ADMITTED half is Opal_Terminal assuming the role and reading one transcripts object (status only). That
+    identity's home is site Z, not the laptop, so it routes to site Z via MSTR, and ~TRL's part of this order ends at its role read-back + key
+    diff (DONE, ledger @ce04c2dee3). The ledger stays open until the admitted read is recorded.
+  </ruling>
+
   <objective>
     Apply FWD-8's second named reader: one IAM role (`teams-global-transcripts-second-reader-role`, name() output) that `Opal_Terminal` may
     assume, read-only on `opal-data-transcripts`, plus ONE added principal in the transcripts key policy's `NamedReadersUseTheKey`. Then prove
@@ -53,8 +61,8 @@
   </bounds>
 
   <paths>
-    org/tier2_senior/0.7.0_AE_CloudOps/deliverables/
-    org/tier2_senior/0.7.0_AE_CloudOps/logs/
+    org/tier2_senior/0.7.0_AE_CloudOps~TRL/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~TRL/logs/
     org/critical_paths/change_management/
   </paths>
 
