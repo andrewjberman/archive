@@ -1,0 +1,98 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-SA-c1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-SA-c1.route-firm-census.md",
+  "group": "OTHER",
+  "vintage_commit": "933df2b61a"
+ },
+ "assignee": "0.9.0_WK_TCKT_VNEXT~6",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_SA.md",
+  "vintage_commit": "933df2b61a",
+  "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-SA-c1.route-firm-census.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~6/SA_ROUTE_CENSUS.json",
+   "kind": "doc",
+   "commit_or_etag": "c326f01acf",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only census of source; no deploy, no AWS call",
+   "artifact_covered_by": [
+    "SA-c1-AC1",
+    "SA-c1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~6/SA_ROUTE_CENSUS.md",
+   "kind": "doc",
+   "commit_or_etag": "c326f01acf",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only census of source; no deploy, no AWS call",
+   "artifact_covered_by": [
+    "SA-c1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "SA-c1-AC1",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/SA_CHECKS/sa_checks.py sa-census expect: SA-CENSUS-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/SA_CHECKS/sa_checks.py sa-census",
+   "output_evidence": "run from the worktree root under timeout 120, rc=0: SA-CENSUS-OK rows=117 tokens=2 | T_ADVISOR_OPAL MORE_THAN_ONE=27,NO_FIRM=51,ONE_FIRM=36,UNRESOLVED=3; T_SERVICE_TIER_OPAL MORE_THAN_ONE=27,NO_FIRM=51,ONE_FIRM=36,UNRESOLVED=3",
+   "denominator": "117 rows of 117 routes_found; every firm_source path:line in range (the check reads each cited file)",
+   "status": "PASS",
+   "expect": "SA-CENSUS-OK"
+  },
+  {
+   "criterion_id": "SA-c1-AC2",
+   "criterion_verbatim": "SA-c1-AC2 (JUDGMENT, graded at L9, never self-graded): the census covers EVERY portal route (no root missed), and each verdict follows from its cited line.",
+   "method": "manual_read_with_citation",
+   "invocation": "read SA_ROUTE_CENSUS.json denominator and rows against the Terraform sources; a second parse of the same sources compared the route sets",
+   "output_evidence": "RECORDED, NOT GRADED HERE. 8 roots scanned, 117 rows. Independent parse of the sources: 116 route keys, 0 in source and missing from the census, 0 extra except the console-only ANY $default (included as UNRESOLVED). inf-pipeline excluded: its route is on aws_apigatewayv2_api.inf_otp_relay, not the portal API. Live-only routes cannot be enumerated from source (row TCKT_VNEXT-D2-W6-S3).",
+   "denominator": "117 census rows; 10 Terraform files declaring aws_apigatewayv2_route read",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Judgment criterion reserved to 3.0.0_SA_CVO at L9; no verdict recorded here.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "completeness cross-check: a second, independent regex/JSON parse of the route sources compared against the census row set",
+   "expected": "the two sets are equal apart from the console-only $default",
+   "observed": "source route keys: 116; in source not in census: []; in census not in source: ['ANY $default']; duplicate keys: []",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "ran the SA_CHECKS sa-census invocation before and after the commit on the same bytes",
+   "observed": "identical SA-CENSUS-OK line both runs (rows=117, same verdict counts)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "any live AWS read of the API (apigatewayv2 get-routes, live authorizer or integration settings)",
+   "reason": "the order is read-only with no AWS call; the three UNRESOLVED rows (trade-identifier-cache x2, console-only $default) would need it"
+  },
+  {
+   "item": "building any clamp",
+   "reason": "the order asks only for the smallest clamp in words (SA_ROUTE_CENSUS.md section 2); no code is edited"
+  }
+ ],
+ "surprises": [
+  "TCKT_VNEXT-D2-W6-S1",
+  "TCKT_VNEXT-D2-W6-S2",
+  "TCKT_VNEXT-D2-W6-S3"
+ ],
+ "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~6/TCKT_VNEXT.TO-SA-c1.route-firm-census.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/SA_CHECKS/sa_checks.py sa-census",
+   "result": "SA-CENSUS-OK rows=117 tokens=2"
+  }
+ ]
+}

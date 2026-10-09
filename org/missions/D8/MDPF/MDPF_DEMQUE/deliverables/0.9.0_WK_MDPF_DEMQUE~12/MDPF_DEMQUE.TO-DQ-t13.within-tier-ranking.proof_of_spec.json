@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t13",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t13.within-tier-ranking.md",
+    "group": "OTHER",
+    "vintage_commit": "56f36a77b3"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~12",
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "56f36a77b3",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t13.within-tier-ranking.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/rank.py",
+      "kind": "script",
+      "commit_or_etag": "dc5d3bcc06",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL order: code and tests only; no AWS write, vendor call or deploy in scope (order BOUNDS); read-only S3 reads of the two Commonwealth objects",
+      "artifact_covered_by": [
+        "DQ4-t13-AC1",
+        "DQ4-t13-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_rank.py",
+      "kind": "test",
+      "commit_or_etag": "dc5d3bcc06",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL order: code and tests only; no AWS write, vendor call or deploy in scope (order BOUNDS); read-only S3 reads of the two Commonwealth objects",
+      "artifact_covered_by": [
+        "DQ4-t13-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/demand_queue.py",
+      "kind": "script",
+      "commit_or_etag": "dc5d3bcc06",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL order: code and tests only; no AWS write, vendor call or deploy in scope (order BOUNDS); read-only S3 reads of the two Commonwealth objects",
+      "artifact_covered_by": [
+        "DQ4-t13-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ4-t13-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R4_CHECKS/dq_t13_tests.py expect: RANK-OK",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R4_CHECKS/dq_t13_tests.py",
+      "output_evidence": "Run from the worktree root (rc 0): collected 5 items; test_living_client_outranks_match_open_outranks_gone PASSED, test_within_priority_score_is_held_days_times_accounts_times_largest_purchase PASSED, test_gone_client_unmatchable_fund_is_not_pursued PASSED, test_draw_order_is_tier_then_rank PASSED, test_each_item_carries_its_rank_and_reason PASSED; 5 passed; final line RANK-OK. The whole demque folder: 42 passed (existing tests unchanged).",
+      "denominator": "5 of 5 named tests PASSED",
+      "status": "PASS",
+      "expect": "RANK-OK"
+    },
+    {
+      "criterion_id": "DQ4-t13-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R4_CHECKS/dq_t13_seam.py expect: KSEAM-OK",
+      "method": "live_read",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R4_CHECKS/dq_t13_seam.py",
+      "output_evidence": "Run from the worktree root (rc 0) on the real crosswalk (1533 rows) and transactions (14 trade_year partitions): 10 RANK lines, e.g. RANK 1 cusip=00162Q866 priority=P1 score=56964852046.08; RANK 6 cusip=165167107 priority=P2 score=26683667.68; final line KSEAM-OK 10 ranked; priorities 1111122222. No account number or name printed.",
+      "denominator": "10 of 10 probe rows ranked; priorities P1 x5, P2 x5, P3 x0",
+      "status": "PASS",
+      "expect": "KSEAM-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "copy of the demque folder in .scratch/mut with the request-rank term removed from demand_queue._load_requests sort key (tier, file order only), run against test_demque_rank.py",
+      "expected": "test_draw_order_is_tier_then_rank fails",
+      "observed": "1 failed, 4 passed: test_draw_order_is_tier_then_rank - assert ['d', 'a', 'b', 'c', 'e'] == ['d', 'c', 'b', 'a', 'e']",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: AC1 is synthetic fixed-input; AC2 reads fixed 2026-06-23 silver objects",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "P2/P3 mapping of reason_code",
+      "reason": "stated in the rank.py docstring: gone = CLOSED_BEFORE_CURRENT_HISTORY, NO_SECURITY_POSITIONS; open = AMBIGUOUS, AWAITING_PERSON, NO_CURRENT_ACCOUNT_HOLDS_POSITIONS and any holder absent from the crosswalk; the probe's first 10 rows hold no P3, so the probe does not exercise the not-pursued path (covered by the synthetic test)"
+    },
+    {
+      "item": "any deploy, AWS write, vendor call, timer or background task",
+      "reason": "order BOUNDS"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~12/MDPF_DEMQUE.TO-DQ-t13.within-tier-ranking.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate (py_compile + ds-precommit + ruff)",
+      "invocation": "bash .tools/safe-commit.sh ... -- rank.py test_demque_rank.py demand_queue.py",
+      "result": "committed dc5d3bcc06"
+    }
+  ]
+}
