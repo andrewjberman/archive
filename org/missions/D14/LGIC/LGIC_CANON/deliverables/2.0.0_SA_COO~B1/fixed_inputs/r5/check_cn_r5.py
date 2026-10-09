@@ -40,19 +40,31 @@ def run(args, timeout=900):
     return p.returncode, ((p.stdout or b"") + (p.stderr or b"")).decode("utf-8", "replace").replace("\r\n", "\n")
 
 
+def is_plant(r):
+    """AMENDMENT 1 (CN-q-1): the wave's own planted rows (fictional by construction) are not estate names; the contract
+    marks each by its name's evidence instrument starting with 'planted'."""
+    ev = (((r.get("current") or {}).get("name") or {}).get("evidence") or {})
+    return str(ev.get("instrument") or "").startswith("planted")
+
+
 def contract_names():
     rows = json.load(open(os.path.join(ROOT, CONTRACT), encoding="utf-8"))["rows"]
-    out = []
+    out, plants = [], []
     for r in rows:
         nm = ((r.get("current") or {}).get("name") or {}).get("value")
-        if nm:
-            out.append((r["node_type"], nm))
-    return out
+        if not nm:
+            continue
+        (plants if is_plant(r) else out).append((r["node_type"], nm))
+    print("wave rows=%d planted excluded=%d %s" % (len(rows), len(plants), [n for _t, n in plants]))
+    return out, plants
 
 
 def arm_step13():
-    names = contract_names()
+    names, plants = contract_names()
     need(names, "no names read from %s" % CONTRACT)
+    rul = json.load(open(os.path.join(ROOT, "infra/logic/registry/name_rulings.json"), encoding="utf-8"))["name_rulings"]
+    planted_rows = [r["name"] for r in rul if (r.get("type"), r.get("name")) in set(plants)]
+    need(not planted_rows, "name_rulings.json carries a row for a planted fictional name: %s" % planted_rows)
     tmp = tempfile.mkdtemp(prefix="cn-r5-")
     path = os.path.join(tmp, "wave_names.tsv")
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
@@ -114,7 +126,38 @@ def arm_run():
     return "PASS-R5-RUN"
 
 
-ARMS = {"step13": arm_step13, "paths": arm_paths, "run": arm_run}
+CORE = sorted(["/advisor-intelligence", "/macro", "/market", "/philosophy", "/portfolios", "/positioning", "/valuations"])
+
+
+def arm_paths2():
+    """CN-q-4 (ADDENDUM 1): the 7-page core derived for a client firm with the portal on, plus the firm's registry field
+    tenant.pages; 49financial derives exactly its FIRM_ALLOWED_PATHS entry with 0 carded; `--check` passes on the live map and
+    STOPs (non-zero) when the map grants a page the registry does not hold."""
+    rc, out = run([sys.executable, "lib/opal_portal_paths.py", "49financial", "--json"], timeout=120)
+    need(rc == 0, "the derivation exited %d for 49financial: %s" % (rc, out[-300:]))
+    doc = json.loads(out[out.index("{"):])
+    derived, carded = sorted(doc.get("derived") or []), doc.get("carded") or []
+    want = allowed_today()
+    print("49financial: today=%d derived=%d carded=%d" % (len(want), len(derived), len(carded)))
+    need(set(CORE) <= set(derived), "the 7-page core is not all derived: missing %s" % sorted(set(CORE) - set(derived)))
+    need(derived == want and not carded, "derived != FIRM_ALLOWED_PATHS['49financial'] or something is carded (missing %s, extra %s)"
+         % (sorted(set(want) - set(derived)), sorted(set(derived) - set(want))))
+    rc, out = run([sys.executable, "lib/opal_portal_paths.py", "--check"], timeout=120)
+    print("check live: rc=%d last=%r" % (rc, (out.strip().splitlines() or [""])[-1][:160]))
+    need(rc == 0, "--check fails on the live map")
+    src = open(os.path.join(ROOT, FIRM_ACCESS), encoding="utf-8").read()
+    planted = src.replace("'49financial': new Set([", "'49financial': new Set([\n    '/zz-planted-page-r5',", 1)
+    need(planted != src, "could not plant a page into a copy of firmAccess.ts")
+    tmp = os.path.join(tempfile.mkdtemp(prefix="cn-r5-"), "firmAccess.ts")
+    with open(tmp, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(planted)
+    rc, out = run([sys.executable, "lib/opal_portal_paths.py", "--check", "--access", tmp], timeout=120)
+    print("check planted: rc=%d last=%r" % (rc, (out.strip().splitlines() or [""])[-1][:160]))
+    need(rc != 0 and "/zz-planted-page-r5" in out, "--check did not STOP on a granted page the registry does not hold")
+    return "PASS-R5-PATHS2"
+
+
+ARMS = {"step13": arm_step13, "paths": arm_paths, "run": arm_run, "paths2": arm_paths2}
 
 
 def main():

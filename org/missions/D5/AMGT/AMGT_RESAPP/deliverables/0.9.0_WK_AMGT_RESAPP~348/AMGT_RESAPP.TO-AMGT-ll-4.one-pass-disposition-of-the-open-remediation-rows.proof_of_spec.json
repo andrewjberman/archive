@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ll-4.one-pass-disposition-of-the-open-remediation-rows",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "433e2b510d98830c8f4e4cf48003f2b5b9732476"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "433e2b510d",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ll-4.one-pass-disposition-of-the-open-remediation-rows.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~348",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~348/DISPOSITION_LEDGER.json",
+      "kind": "doc",
+      "commit_or_etag": "0a260717c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "125 ledger entries, one per open remediation row: CLOSED 66, CARRIED 29, DISMISSED 30.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~348/DISPOSITION_NOTES.md",
+      "kind": "doc",
+      "commit_or_etag": "0a260717c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "count after the pass and the six rows carried to 2.0.0_SA_COO~R1 as questions.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every open remediation row is disposed exactly once, no id outside the open set, every CLOSED commit resolves, every CARRIED row names a seat and a condition, every DISMISSED row has a reason, and the count after the pass is printed; L1-L5 PASS; R87 ROWS: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round87_prep/checks/r87_rows.py\" --ledger \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~348/DISPOSITION_LEDGER.json\"; echo \"exit=$?\"",
+      "output_evidence": "domain: 505 remediation rows, 125 read closed:false\nPASS L1 every open row disposed exactly once: 125 of 125 (missing 0 []; duplicated [])\nPASS L2 no ledger id outside the open set: 0 outside []\nPASS L3 every CLOSED commit resolves: 0 bad []\nPASS L4 every CARRIED row names a seat serial and a condition: 0 bad []\nPASS L5 every DISMISSED row carries a reason (and no unknown disposition): 0 bad []\n   count after the pass: CLOSED 66, CARRIED 29, DISMISSED 30 of 125 open; carried without an owner 0\nR87 ROWS: YES\nexit=0",
+      "denominator": "125 open of 505 remediation rows; 125 of 125 disposed exactly once (CLOSED 66, CARRIED 29, DISMISSED 30); carried without an owner 0.",
+      "status": "PASS",
+      "expect": "PASS L1[\\s\\S]*PASS L5[\\s\\S]*R87 ROWS: YES[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no planted discriminator.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: a records pass; the checker is deterministic on the ledger bytes and the live comp-surprise read.",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "served-plane reads",
+      "reason": "the order is a records pass with no AWS or portal read; page-side rows are CARRIED on the producer-side read (DISPOSITION_NOTES.md, limits of this pass)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~348/DISPOSITION_NOTES.md",
+  "compiler_tools": [
+    {
+      "tool": "r87_rows.py",
+      "invocation": "--ledger DISPOSITION_LEDGER.json",
+      "result": "L1-L5 PASS, R87 ROWS: YES, exit=0"
+    }
+  ]
+}
