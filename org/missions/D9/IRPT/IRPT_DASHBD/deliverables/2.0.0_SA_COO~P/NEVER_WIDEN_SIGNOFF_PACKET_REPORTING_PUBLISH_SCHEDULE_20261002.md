@@ -39,8 +39,8 @@ Both run the same code. The manual path of the deployed function is the Lambda e
 **The outcome, read from the rule at signing.** The publisher lists every gold partition present and rebuilds each account's WHOLE
 series from them. It is idempotent and has no date override.
 MEASURED on the exact artifact: version `qnGujQo2` was downloaded, its hash matched, and its own `handler.py --local` ran without
-`--upload`, writing nothing. It read 562 gold partitions, 2024-07-08..2026-10-01, for 6 accounts: acct#b0948265 (562 days),
-acct#e7ab8585 (138), 0035940058 (131), 0076459710 (61), 0084073310 (136) and 0091939812 (95).
+`--upload`, writing nothing. It read 562 gold partitions, 2024-07-08..2026-10-01, for 6 accounts: acct#08137b81 (562 days),
+acct#89d0916a (138), 0035940058 (131), 0076459710 (61), 0084073310 (136) and 0091939812 (95).
 - **Branch A, the expected one.** The reporting gold's own schedule fires Monday 2026-10-05 at 07:41 ET. It took 20 s today and
   landed 3 days. It lands 2026-10-02, and the 08:15 fire publishes the 6 accounts `as_of` 2026-10-02.
 - **Branch B.** If that partition is not there at 08:15, the fire publishes `as_of` 2026-10-01: today's measured run. The next fire
@@ -60,10 +60,10 @@ that version: `copy-object` from the version id onto the key.
 
 | key under `platinum/reporting/` | live version (pre-act) |
 |---|---|
-| account=acct#b0948265/manifest.json | EWsHox5mi6qll4ek.mEpT71YeLHZ81lV |
-| account=acct#b0948265/series.json.gz | OSPEMKS19HstKiUS2_5WXXsq654A4ght |
-| account=acct#e7ab8585/manifest.json | tHJwqXHbhvGZOtcg7P3OyzQYyd1B09jx |
-| account=acct#e7ab8585/series.json.gz | .5GmBiQ_yH3LAXrn_fNPP9l2t.ObD29E |
+| account=acct#08137b81/manifest.json | EWsHox5mi6qll4ek.mEpT71YeLHZ81lV |
+| account=acct#08137b81/series.json.gz | OSPEMKS19HstKiUS2_5WXXsq654A4ght |
+| account=acct#89d0916a/manifest.json | tHJwqXHbhvGZOtcg7P3OyzQYyd1B09jx |
+| account=acct#89d0916a/series.json.gz | .5GmBiQ_yH3LAXrn_fNPP9l2t.ObD29E |
 | account=0035940058/manifest.json | 9FVAKupuTsqLMr5mx2Cxi0pe6fJAqjou |
 | account=0035940058/series.json.gz | T7pTUtM4jN.shppkZ0p.BeAzM2Kn_Bkh |
 | account=0076459710/manifest.json | oihjnf2njlacAGNQIiEOFWTQXkPFR1Zz |
@@ -102,7 +102,7 @@ OWED.
 ## AMENDMENT 1 (2026-10-02 ~13:4xZ, 2.0.0_SA_COO~P) -- the read-back permission (row IRPT_DASHBD-S21)
 
 **What happened.** P1, D1 and V1 closed: apply 7/0/0 at 13:32Z, CodeSha256 equal to the artifact, schedule ENABLED, re-plan No
-changes. Q1, the CTO's QA invoke at 13:35:40Z, wrote `account=acct#b0948265/{series.json.gz,manifest.json}` (`as_of` 2026-10-01), then
+changes. Q1, the CTO's QA invoke at 13:35:40Z, wrote `account=acct#08137b81/{series.json.gz,manifest.json}` (`as_of` 2026-10-01), then
 `handler.py:158` called `head_object` on the series key and got 403. The role has PutObject and no GetObject on
 `platinum/reporting/*`, so the run aborted after the first account. **Rolled back per the signed half:** each of the two keys was
 copied back from its recorded version (`OSPEMKS19...`, `EWsHox5mi...`). The new current versions are `qvtMQgRd...` and `S4JjNhUe...`,

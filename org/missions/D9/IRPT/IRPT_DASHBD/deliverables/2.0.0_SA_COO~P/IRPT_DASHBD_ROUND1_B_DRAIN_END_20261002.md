@@ -20,7 +20,7 @@ three modules; `lib.opal_naming.load_registry()` loads with the new policy row.
 - **FWD-1 hop 1 (gold):** DB-b-1's served gold, read by both later cells (DB-b-2's AC2 links three 20-day windows from the gold rows).
 - **FWD-1 hop 2 (platinum file):** the publisher ran for real once (the local `--upload` run under the closed ledger): six accounts'
   `series.json.gz` + `manifest.json` under `s3://opal-data-49financial/irpt/49financial/platinum/reporting/account=<id>/` (every
-  account in the newest partition, 2026-09-28; the face said five). Thread account acct#b0948265: 559 days, 17,665 bytes gz; the served
+  account in the newest partition, 2026-09-28; the face said five). Thread account acct#08137b81: 559 days, 17,665 bytes gz; the served
   object's sha256 equals a fresh rebuild.
 - **FWD-1 hop 3 (read route):** exercised LOCALLY against the real S3 objects: `serve_series` returned the series (17,665 B) and the
   manifest (385 B) byte-equal for the thread account and refused an uncovered account before any read. **Not served:** neither root is
@@ -57,7 +57,7 @@ The channel's `disposition` fields still read UNDER_INVESTIGATION on all 13: no 
 1. **The thread's served leg:** apply both roots under ONE packet with both never-widen halves (WORLD: a new scheduled function and a
    new served route on the IRPT API), then the signed-in page's one fetch (workstream F) as the real run of FWD-1.
 2. **A retention family for `series.json.gz`** (W1-S1): the registry admits gzip JSON or a second table; the registry owner's call.
-3. **The 1,498.38 USD flow residual on acct#e7ab8585** (PRD v0.6 ruling 25; the fee matches to the cent).
+3. **The 1,498.38 USD flow residual on acct#89d0916a** (PRD v0.6 ruling 25; the fee matches to the cent).
 4. **Carried, not a cell:** like-day tie-out windows need Andrew's per-use vendor word (ruling 23); FWD-8's tolerance stays his.
 5. **Hygiene:** untracked empty directories `data/`, `infra/`, `lib/`, `org/` sit inside `infra/aws/lambda/investor-reporting/reporting/`
    in the worker's worktree (a stopped build's staging); the build packages its source directory, so a rebuild there ships them empty.
