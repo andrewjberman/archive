@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-z-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-z-1.bucket-of-reads-constants.md",
+    "group": "OTHER",
+    "vintage_commit": "32c925520c"
+  },
+  "assignee": "0.9.0_WK_LGIC_BLANKFIX~1",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round11.md",
+    "vintage_commit": "32c925520c",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-z-1.bucket-of-reads-constants.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_naming_keyfill.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bucket_of reads the host of an s3://<bucket>/<path> constant as the bucket of the key that constant holds, accepts a bucket-shaped s3:// host without the registry knowing it, and reads a module-level NAME assigned a bucket-shaped literal as a bucket when the file uses that name as a Bucket= keyword or an s3://{NAME}/ f-string host (the name's spelling is never the evidence). A bucket the item carries still comes first; the folder name is still never read.",
+      "introduces": [
+        "def _s3_url_key_bucket(value, key, v):",
+        "def _bucket_named_consts(tree, v):"
+      ],
+      "artifact_covered_by": [
+        "BZ1-AC1",
+        "BZ1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_keyfill.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Eight new cases: three synthetic (s3:// host, a name used as Bucket=, a name never used as a bucket is no candidate), the NEGATIVE arm (several candidates, the use picks none: None with the candidates listed), and the four keys each read from its real lambda_function.py (found by what the file declares, the line by scan).",
+      "introduces": [
+        "REAL FILE (BF-z-1)"
+      ],
+      "artifact_covered_by": [
+        "BZ1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/check_bucket_of_round11.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Reads the four OWNED 1.0.0_SA_CTO lines, runs bucket_of on each key at its real file with the base-pin module (32c925520c, from git) and the worktree module, merges the drafted key rows for those keys into a temporary copy of infra/logic/registry/, asks opal_naming_rootcheck._ruling_of which row answers each key before and after, and runs the negative arm. Nothing in the repository is written.",
+      "introduces": [
+        "def main():",
+        "def owned_keys():"
+      ],
+      "artifact_covered_by": [
+        "BZ1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BZ1-AC1",
+      "criterion_verbatim": "BZ1-AC1 -- the four keys read their right bucket; a key with several candidates and no pick still returns None.",
+      "method": "command",
+      "invocation": "python lib/tests/test_opal_naming_keyfill.py",
+      "output_evidence": "OK: REAL FILE (BF-z-1): ec2/astn-wsjft/deploy.sh is read at opal-313476888478-lambda-artifacts\nOK: REAL FILE (BF-z-1): ec2/etfs-reports is read at opal-313476888478-lambda-artifacts\nOK: REAL FILE (BF-z-1): contract_integrity/latest.json is read at opal-313476888478-globgrph\nOK: REAL FILE (BF-z-1): warehouse/_branch_head.main.json is read at opal-313476888478-globgrph\nOK: NEGATIVE: several candidates, the key's use picks none -> None, candidates listed\nKEYFILL-TEST ok=True cases=94\nrc=0",
+      "denominator": "94 of 94 cases held (86 before, 8 added); the other nine lib/tests/test_opal_naming_*.py scripts print ok=True; python -m pytest lib/tests -q: 193 passed, 1 skipped (same as the base); python lib/opal_naming.py census --all-roots reads the base line unchanged (roots_total=88 mapped=78 items=2271 hole=0)",
+      "status": "PASS",
+      "expect": "KEYFILL-TEST ok=True"
+    },
+    {
+      "criterion_id": "BZ1-AC2",
+      "criterion_verbatim": "BZ1-AC2 -- the four dropped rows now match their key's bucket on a registry copy.",
+      "method": "command",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/check_bucket_of_round11.py",
+      "output_evidence": "KEY astn-pipeline ec2/astn-wsjft/deploy.sh (astn-wsjft-orchestrator:61): opal-data-astn -> opal-313476888478-lambda-artifacts | row before=none after=matched\nKEY etfs-reports ec2/etfs-reports (etfs-reports-orchestrator:53): opal-data-etfs -> opal-313476888478-lambda-artifacts | row before=none after=matched\nKEY shared-infra contract_integrity/latest.json (infrastructure_monitor:127): opal-data-portal-v2 -> opal-313476888478-globgrph | row before=none after=matched\nKEY shared-infra warehouse/_branch_head.main.json (infrastructure_monitor:124): opal-data-portal-v2 -> opal-313476888478-globgrph | row before=none after=matched\nBUCKET-OF ok=True keys=4 right=4 rows_kept=4 negative_held=True\nrc=0",
+      "denominator": "4 of 4 OWNED 1.0.0_SA_CTO keys read the right bucket; 4 of 4 rows match after and none before (3 drafted rows merged into the copy, the fourth, warehouse/_branch_head.main.json, already in the registry); negative arm held",
+      "status": "PASS",
+      "expect": "BUCKET-OF ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "check_bucket_of_round11.py run with the s3:// host rule of bucket_of switched off (line 'ub = _s3_url_key_bucket(node.value, key, v)' replaced by 'ub = None'; the file restored byte for byte after the run).",
+      "expected": "BUCKET-OF ok=False right=2",
+      "observed": "BUCKET-OF ok=False keys=4 right=2 rows_kept=4 negative_held=True",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the BZ1-AC2 invocation run twice at the same bytes; the two outputs compared with cmp",
+      "observed": "the two 6-line outputs were byte-identical; last line BUCKET-OF ok=True keys=4 right=4 rows_kept=4 negative_held=True",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "whether the registry's owner writes the three drafted key rows",
+      "reason": "only 4.0.0_SA_CRO writes infra/logic/registry/; the check merges them into a temporary copy only"
+    },
+    {
+      "item": "the live objects behind the four keys",
+      "reason": "no AWS call (order BOUNDS)"
+    }
+  ],
+  "surprises": [
+    "LGIC_BLANKFIX-D1-W1-S6"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/LGIC_BLANKFIX.TO-BF-z-1.bucket-of-reads-constants.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "check_bucket_of_round11.py",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/check_bucket_of_round11.py",
+      "result": "BUCKET-OF ok=True keys=4 right=4 rows_kept=4 negative_held=True"
+    }
+  ]
+}
