@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-bv-1.a-pair-error-does-not-stop-the-cycle",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bv-1.a-pair-error-does-not-stop-the-cycle.md",
+    "group": "OTHER",
+    "vintage_commit": "878f9466df"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "878f9466df",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bv-1.a-pair-error-does-not-stop-the-cycle.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~133",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~133 on wk-AMGT_HARVST-133-r78. Local code and tests only: fake collector, no publisher, S3 or site Z contact.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/backfill_driver.py",
+      "kind": "script",
+      "commit_or_etag": "d68e68d25d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--continue-on-pair-error flag (off by default); MAX_CONSECUTIVE_PAIR_ERRORS = 5; retry/gave_up entries keep detail",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/cycle_runner.py",
+      "kind": "script",
+      "commit_or_etag": "d68e68d25d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "passes the flag; record gains failures; completed when every pair reached; <state-dir>/cycle_runner.log",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_bv1_cycle_continues_past_pair_errors.py",
+      "kind": "test",
+      "commit_or_etag": "d68e68d25d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 tests: 242 pairs/3 errors, 5-in-a-row guard, success resets, no-flag unchanged, flag parses, log, guard-removed mutant",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_bv1_cycle_continues_past_pair_errors.py -q -p no:cacheprovider --color=no -- expect: (?m)^\\d+ passed in",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_bv1_cycle_continues_past_pair_errors.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc 0 (run under timeout 120).\n7 passed in 5.61s",
+      "denominator": "7 of 7 tests passed",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_ae4_backfill_driver.py lib/opal_data_harvest/test_ba1_stopped_pair_is_retried.py lib/opal_data_harvest/test_br2_cycle_runner.py -q -p no:cacheprovider --color=no -- expect: (?m)^\\d+ passed in",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_ae4_backfill_driver.py lib/opal_data_harvest/test_ba1_stopped_pair_is_retried.py lib/opal_data_harvest/test_br2_cycle_runner.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc 0 (run under timeout 120).\n53 passed in 2.37s",
+      "denominator": "53 of 53 tests passed, the three files unchanged",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "MAX_CONSECUTIVE_PAIR_ERRORS monkeypatched to 10**9 (guard removed) while the 5-errors scenario runs",
+      "expected": "the 5-errors assertions fail (AssertionError)",
+      "observed": "test_v_mutant_guard_removed_the_five_errors_test_fails passed: the scenario raised AssertionError with the guard removed and passed with it in place",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice (5.61s, 7.03s)",
+      "observed": "7 passed both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "order status flip",
+      "reason": "issuer flips; the order forbids the worker editing it"
+    },
+    {
+      "item": "full-suite baseline",
+      "reason": "lib/opal_data_harvest at base: 4 failed, 771 passed, 3 skipped (ah1 bbg, three aw1; bn1 passed here, the order named 5); after: 4 failed, 778 passed, 3 skipped, the same 4 failures"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W133-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "rc 0 at d68e68d25d (code) and 7a95461ddd (row)"
+    }
+  ]
+}
