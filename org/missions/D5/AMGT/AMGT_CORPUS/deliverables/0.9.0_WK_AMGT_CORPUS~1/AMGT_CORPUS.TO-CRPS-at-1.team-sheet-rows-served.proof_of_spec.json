@@ -27,7 +27,15 @@
       "kind": "script",
       "commit_or_etag": "2126f556af",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "read_thesis_bundle sets model[\"team_sheet\"] through new _team_sheet_rows (call-time import of team_sheet; a raised read or an unresolved key serves the same field shape with class None, rows [] and a reason). No other output of the function changed. Served only after AMGT_RESAPP redeploys the scoped API (issuer's drain ask).",
+      "deploy_evidence": "AMENDMENT 1 (d968cfad03): read_thesis_bundle serves model[\"team_sheet\"] from the served dossier's stored field (older-method dossier serves class None, rows [] and the written-before reason); _team_sheet_rows and every team-sheet import or call removed. No other output of the function changed. Served only after AMGT_RESAPP redeploys the scoped API (issuer's drain ask).",
+      "artifact_covered_by": ["AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/dossier.py",
+      "kind": "script",
+      "commit_or_etag": "d968cfad03",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build stores fields[\"team_sheet\"] = team_sheet.rows_for(security_key, client=client) (a raised read stores class None, rows [], a reason in words); METHOD_VERSION amgt-corpus-dossier/9 -> /10, the literal bumped in the five pinning tests.",
       "artifact_covered_by": ["AC2"]
     },
     {
@@ -45,8 +53,8 @@
       "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round44/at1_check.py\"",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round44/at1_check.py\"",
-      "output_evidence": "at1 classes [('master_absent', 63), ('own_model', 11), ('own_new', 21)] sum 95 served 95\nat1 rows match 31 of 31 own-workbook names\nat1 build 2/2 control 1/1",
-      "denominator": "build 2 of 2 (classes sum 95 of 95 served; rows match 31 of 31 own-workbook names in the check's independent derivation), control 1 of 1; rc 0.",
+      "output_evidence": "at1 classes [('master_absent', 63), ('own_model', 11), ('own_new', 21)] sum 95 served 95\nat1 rows match 32 of 32 own-workbook names\nat1 build 2/2 control 1/1",
+      "denominator": "build 2 of 2 (classes sum 95 of 95 served; rows match 32 of 32 own-workbook names in the check's independent derivation), control 1 of 1; rc 0 (re-run after AMENDMENT 1 at d968cfad03).",
       "expect": "(?m)^at1 build 2/2 control 1/1$",
       "status": "PASS"
     },
@@ -55,9 +63,19 @@
       "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest -q -p no:cacheprovider lib/research/corpus/tests/test_team_sheet_round44.py 2>&1 | tail -1 | sed 's/\\x1b\\[[0-9;]*m//g'",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest -q -p no:cacheprovider lib/research/corpus/tests/test_team_sheet_round44.py 2>&1 | tail -1 | sed 's/\\x1b\\[[0-9;]*m//g'",
-      "output_evidence": "12 passed in 1.30s",
-      "denominator": "12 of 12 tests passed in the one file, rc 0.",
+      "output_evidence": "14 passed in 0.74s",
+      "denominator": "14 of 14 tests passed in the one file, rc 0; the five method-pinning dossier test files also pass (86 passed).",
       "expect": "(?m)^\\d+ passed in [\\d.]+s$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && grep -c \"team_sheet import\\|import team_sheet\\|team_sheet\\.rows_for\" lib/research/api/scoped_amgt.py",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && grep -c \"team_sheet import\\|import team_sheet\\|team_sheet\\.rows_for\" lib/research/api/scoped_amgt.py",
+      "output_evidence": "0\n(grep -c printed 0: no line of lib/research/api/scoped_amgt.py matches team_sheet import, import team_sheet or team_sheet.rows_for (the file was read at worktree HEAD d968cfad03; grep exit 1 is its no-match code.)",
+      "denominator": "0 matching lines in the one file scoped_amgt.py; grep rc 1 (count 0).",
+      "expect": "(?m)^0$",
       "status": "PASS"
     }
   ],
@@ -90,7 +108,8 @@
   ],
   "surprises": [
     "AMGT_CORPUS-D1-W1-S4",
-    "AMGT_CORPUS-D1-W1-S5"
+    "AMGT_CORPUS-D1-W1-S5",
+    "AMGT_CORPUS-D1-W1-S6"
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
@@ -102,7 +121,7 @@
     {
       "tool": "pytest",
       "invocation": "python -m pytest -q -p no:cacheprovider lib/research/corpus/tests/test_team_sheet_round44.py",
-      "result": "rc 0; 12 passed in 1.30s"
+      "result": "rc 0; 14 passed in 0.74s"
     }
   ]
 }
