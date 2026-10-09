@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-25.dell2-f1-shell-window-reopen-st27-ledger-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-25.dell2-f1-shell-window-reopen-st27-ledger-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "54231c4c4f53fe11d7d9492a790e6cf2e93193"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
+    "vintage_commit": "7dd661eb9f5f42815d2541ac729747c3d8a25cbc",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-25.dell2-f1-shell-window-reopen-st27-ledger-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/f1_b2_st27_20261009/after-policy.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "B2 opened 2026-10-09T02:37:46Z at v6; live equals targeted plan; shell and F1 allowed; other host explicitDeny; no SSM command sent; C2 pending",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "untargeted default Terraform plan exits 0 after C2",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo \"exit=$?\"",
+      "expect": "exit=0",
+      "output_evidence": "B2 targeted open-state replan exits 0; the governing criterion requires the untargeted default-variable close-state replan after C2",
+      "denominator": "one full untargeted root plan after C2",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "AC1 is explicitly read after C2, which triggers on dell2 V1 or at 2026-10-09T06:00Z without waiting."
+    }
+  ],
+  "controls": {
+    "window_open": {
+      "description": "The shell document and F1 host distinguish the temporary open policy from the closed policy",
+      "expected_landed": "both exact resources allowed",
+      "expected_not_landed": "either exact resource denied",
+      "observed": "both exact resources allowed",
+      "status": "PASS"
+    },
+    "other_host": {
+      "description": "The named other privileged host distinguishes one-host scope from a wider shell window",
+      "expected_landed": "explicitDeny",
+      "expected_not_landed": "allowed",
+      "observed": "explicitDeny",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_D2_SENDCOMMAND_AND_F1_SHELL_WINDOW_20261008.md@298e731471",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_D2_SENDCOMMAND_AND_F1_SHELL_WINDOW_20261008.md@ac2c6e852d"
+  },
+  "risk_class": "WORLD",
+  "rollback": "C2 uses a plain default-variable exact 0/1/0 saved plan on only aws_iam_policy.dell2_ssm, verifies DenyShellDocuments explicitDeny, requires an untargeted default replan exit 0, closes the ledger, and deletes the scratch directory at V1 or 06:00Z.",
+  "scope": "B2 is complete for st27 under the standing-consent addendum at 5c2d9da8b2; C2 remains mandatory.",
+  "declared_exclusions": [
+    {
+      "item": "C2 close, final AC1, and scratch deletion",
+      "reason": "They trigger on dell2 V1 or at 2026-10-09T06:00Z without waiting."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/f1_b2_st27_20261009/REPORT.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan",
+      "invocation": "targeted at aws_iam_policy.dell2_ssm with open_dell2_f1_shell_window=true, shared TF_PLUGIN_CACHE_DIR, and isolated TF_DATA_DIR",
+      "result": "pre-apply exact 0/1/0; post-apply targeted open-state exit 0 with no changes"
+    },
+    {
+      "tool": "aws iam simulate-principal-policy",
+      "invocation": "three separate exact action/resource arms for cloudops-dell2-agent-user",
+      "result": "shell allowed; F1 allowed; other host explicitDeny; no SSM command sent"
+    }
+  ]
+}

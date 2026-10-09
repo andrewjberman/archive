@@ -1,0 +1,110 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-382",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-382.custody-ports-selection-interpret-validate.md",
+  "group": "OTHER",
+  "vintage_commit": "a49aa6c819"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "a49aa6c819",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-382.custody-ports-selection-interpret-validate.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~190",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/_scope/custody_ports.py",
+   "kind": "script",
+   "commit_or_etag": "4ee5392232",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "new module; build_accepted_custody_ports(...) -> CustodyPorts; ports 3/4 wrap intake/custody_interpreter.build_custody_ports, port 1 is selection.resolve_selection over an installer-supplied current_authority; nothing built, uploaded or applied (release 6 is Y2's)",
+   "artifact_covered_by": [
+    "IB94-1-AC1",
+    "IB94-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/_scope/tests/test_custody_ports.py",
+   "kind": "test",
+   "commit_or_etag": "4ee5392232",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "11 tests: custody_current_selection 3, custody_interpret_source 4, custody_validate_evidence 3, custody_ports_compose 1; _scope suite 234 passed",
+   "artifact_covered_by": [
+    "IB94-1-AC1",
+    "IB94-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~190/IB94-1_custody_ports_read_set.json",
+   "kind": "config_data",
+   "commit_or_etag": "4ee5392232",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "per-port module/function/reads plus 9 release6_staged paths and the runtime prerequisites (pyarrow, current_authority); feeds the release-6 pair's IAM grant",
+   "artifact_covered_by": [
+    "IB94-1-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB94-1-AC1",
+   "criterion_verbatim": "IB94-1-AC1 -- the `custody_current_selection` (>= 2) and `custody_interpret_source` (>= 3) tests pass. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r94/p94_cells.py\" . IB94-1-AC1",
+   "expect": "IB94-1-AC1 PASS",
+   "output_evidence": "OK: current_selection 3 passed, 231 deselected in 2.44s; interpret_source 4 passed, 230 deselected in 2.07s | IB94-1-AC1 PASS | rc=0",
+   "denominator": "3 current_selection and 4 interpret_source tests passed, of 3 and 4 selected by -k (234 collected in _scope/tests)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB94-1-AC2",
+   "criterion_verbatim": "IB94-1-AC2 -- the `custody_validate_evidence` (>= 3) and `custody_ports_compose` (>= 1) tests pass, and the `_scope` suite passes whole. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r94/p94_cells.py\" . IB94-1-AC2",
+   "expect": "IB94-1-AC2 PASS",
+   "output_evidence": "OK: validate_evidence 3 passed, 231 deselected in 2.05s; compose 1 passed, 233 deselected in 2.32s; suite 234 passed, 67 subtests passed in 3.97s | IB94-1-AC2 PASS | rc=0",
+   "denominator": "3 validate_evidence and 1 compose passed; _scope suite 234 passed (0 failed) of 234 collected, 67 subtests passed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB94-1-AC3",
+   "criterion_verbatim": "IB94-1-AC3 -- the read-set file names each port's module, function and AWS reads, plus the paths release 6 must stage. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r94/p94_cells.py\" . IB94-1-AC3",
+   "expect": "IB94-1-AC3 PASS",
+   "output_evidence": "OK: 3 ports named; reads {'current_selection': 3, 'interpret_source': 7, 'validate_evidence': 0}; staged 9 | IB94-1-AC3 PASS | rc=0",
+   "denominator": "3 of 3 ports named with module, function and reads (3, 7, 0 reads); 9 of 9 release6_staged paths exist as files",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Mutants in a scratch copy of _scope/_ids/intake under .scratch/mut (committed files untouched): (1) validate_evidence returns True unconditionally; (2) current_selection caches its first answer; (3) interpret_source skips its own account_ids binding.",
+   "expected": "(1) the validate_evidence tests fail; (2) the current_selection change test and the compose test fail; (3) not required to fail: the inner interpreter binds the same field, so this is an equivalent mutant of a defence-in-depth check",
+   "observed": "control copy 11 passed; mutant 1: 2 failed, 9 passed (test_custody_validate_evidence_is_false_for_every_incomplete_or_unpaired_shape, test_custody_validate_evidence_a_raise_refuses); mutant 2: 2 failed, 9 passed (test_custody_current_selection_observes_a_change_between_calls DID NOT RAISE, test_custody_ports_compose_into_a_real_reader_end_to_end); mutant 3: 11 passed (equivalent, as predicted)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "test_custody_interpret_source_is_deterministic_for_one_pinned_receipt interprets one pinned receipt twice and compares the evidence and its digest; the AC1 and AC2 runs were repeated after the commit",
+   "observed": "first == second and digest equal; reads by version [v-rows, v-totals] x 2; 11 passed in two repeated pytest runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "IRPT_BCKEND-D2-W190-S1: ports 3 and 4 already exist as the admitted interpreter; custody_ports.py wraps them",
+  "IRPT_BCKEND-D2-W190-S2: SelectionStore alone cannot source port 1; a request-bound current_authority is the installer's seam",
+  "IRPT_BCKEND-D2-W190-S3: the interpreter's default decoder needs pyarrow, which the generate function is not shown to carry"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/proof-of-spec-check.py <instance> IB94-1-AC1,IB94-1-AC2,IB94-1-AC3",
+   "result": "see final report"
+  }
+ ]
+}

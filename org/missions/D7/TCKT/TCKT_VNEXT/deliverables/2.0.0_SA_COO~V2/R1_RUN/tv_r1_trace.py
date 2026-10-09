@@ -74,10 +74,14 @@ def main(argv):
     ap.add_argument("--since", required=True)
     ap.add_argument("--ticket")
     ap.add_argument("--out")
+    ap.add_argument("--exclude-created-by", nargs="*", default=[])
     a = ap.parse_args(argv)
     since_dt = dt.datetime.fromisoformat(a.since.replace("Z", "+00:00"))
     now = dt.datetime.now(dt.timezone.utc)
     tickets = [keep(t) for t in scan_tickets(a.since)]
+    if a.exclude_created_by:
+        tickets = [t for t in tickets if t["created_by"] not in a.exclude_created_by]
+        print(f"OK: excluded created_by {a.exclude_created_by}: {len(tickets)} left")
     if a.ticket:
         tickets = [t for t in tickets if t["ticket_id"] == a.ticket]
         print(f"OK: filtered to --ticket {a.ticket}: {len(tickets)}")

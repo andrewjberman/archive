@@ -1,15 +1,16 @@
 {
+  "amendment_2": "COO half AMENDMENT 2 @d6a493570d, issued after row TCKT_VNEXT-D2-S10: adds the SYNTHETIC attachment {upload_id test-f10-legm-<run>, input_id portfolio_abdbb292c2...} to steps 4 and 6 (shape-checked only, no IRPT record read), drops household from step 4, and -- the part that matters -- re-cuts step 6 to pass ONLY if its 400 NAMES the firm. The issuer wrote 'your row D2-S10 is right, and the defect is mine.'",
   "arms": {
     "4_positive": {
-      "answer": "{\"error\": \"attachment is required: {upload_id, input_id}\"}",
-      "created_by": null,
+      "answer": "{\"ticket\": {\"ticket_id\": \"TCK-20261009-a1052909\", \"ticket_type\": \"analysis_request\", \"status\": \"open\", \"title\": \"[TEST TCKT_VNEXT F10] svc-commentary positive arm\", \"description\": \"F10 leg M step 4 positive arm, synthetic test ticket.\", \"requester\": {\"email\": \"svc-commentary\", \"name\": \"svc-commentary\", \"firm\": \"cottonwood\"}, \"created_by\": \"svc-commentary\", \"created_at\": \"2026-10-09T02:24:27.555Z\", \"assignee\": null, \"routing\": {\"primary\": [\"manav@opalinvest.com\", \"alyssa@opalinvest.com\"], \"secondary\": [], \"visibility\": []}, \"source\": \"portal\", \"linked_submission_id\": null, \"events\": [{\"ts\": \"20",
+      "created_by": "svc-commentary",
       "expect": "201 and created_by == svc-commentary",
       "route": "POST /api/scoped/tickets",
       "rows": 0,
-      "status": 400,
-      "ticket_id": null,
-      "verdict": "BLOCKED-BY-SPEC, not a product failure",
-      "why": "analysis_request requires an attachment {upload_id, input_id} unconditionally (_validate_attachment, lambda_function.py:643-657; the only svc-commentary exemption in the type definition is on the question 'household' at :89), and input_id must match ^portfolio_[0-9a-f]{64}$, which only a completed analysis-input-upload produces. The pair's step 4 supplies no attachment, so the arm as written cannot reach 201."
+      "status": 201,
+      "ticket_id": "TCK-20261009-a1052909",
+      "verdict": "PASS",
+      "why": "201 with created_by svc-commentary and ticket_id TCK-20261009-a1052909, once AMENDMENT 2 supplied the attachment the ticket type requires unconditionally"
     },
     "5_ir_directory_search": {
       "answer": "{\"ok\": false, \"contract_version\": \"v1\", \"operation\": \"directory-search\", \"status\": {\"operation\": {\"operation_id\": \"directory-search\", \"operation_kind\": \"read\", \"revision\": \"v1\"}, \"state\": \"UNAVAILABLE\", \"source_dates\": {\"source_completion_date\": null}, \"actions\": [{\"action\": \"NONE\", \"safe\": true, \"description\": \"no retry or recovery action is offered for this outcome\"}], \"public_reason_code\": \"CON",
@@ -26,16 +27,17 @@
       "rows": 0,
       "status": 403,
       "verdict": "PASS",
-      "why": "HTTP 403 'Missing firm identity' -- a direct live confirmation of the pair's central claim that this token carries NO firm reach"
+      "why": "403 'Missing firm identity' -- live confirmation that the token carries NO firm reach"
     },
     "6_off_list_firm": {
-      "answer": "{\"error\": \"attachment is required: {upload_id, input_id}\"}",
-      "expect": "400",
+      "answer": "{\"error\": \"requester_firm 'demo' is outside the principal's allowed firms (server-checked)\"}",
+      "expect": "400 whose message NAMES the firm (AMENDMENT 2)",
+      "names_the_firm": true,
       "route": "POST /api/scoped/tickets (firm=demo)",
       "rows": 0,
       "status": 400,
-      "verdict": "NOT EXERCISED -- expected status for the WRONG reason",
-      "why": "the 400 came from the attachment check (:1063), not the firm clamp _create_firm_allowed (:1072), so COMMENTARY_ALLOWED_FIRMS was never consulted. The body is byte-identical to step 4's refusal. Recording this as a PASS on the status alone would have been a false pass."
+      "verdict": "PASS",
+      "why": "400 whose message NAMES the firm -- \"requester_firm 'demo' is outside the principal's allowed firms (server-checked)\" -- so _create_firm_allowed (:1072) WAS reached and COMMENTARY_ALLOWED_FIRMS was actually consulted. On the first run this arm returned the same 400 from the attachment check (:1063) and tested nothing; the amendment's reason-assertion is what makes it a real arm."
     },
     "7_list": {
       "answer": "{\"error\": \"forbidden: LIST is not permitted to principal class 'svc-commentary'\", \"action\": \"LIST\", \"principal_class\": \"svc-commentary\"}",
@@ -44,11 +46,14 @@
       "rows": 0,
       "status": 403,
       "verdict": "PASS",
-      "why": "HTTP 403 with the exact principal-class message the pair predicts"
+      "why": "403 with the exact principal-class message the pair predicts"
     }
   },
   "host": "https://opalinvest.dev",
-  "row": "TCKT_VNEXT-D2-S10",
+  "rows": [
+    "TCKT_VNEXT-D2-S8 (the read-back ordered with no reader granted)",
+    "TCKT_VNEXT-D2-S10 (step 4 unsatisfiable; step 6 false pass)"
+  ],
   "run": "20261009-one",
   "step_3_claim_readback": {
     "claims_present": 8,
@@ -56,7 +61,6 @@
     "exp_minus_iat_seconds": 7776000,
     "fixed_values_match": true,
     "names_equal_section_2": true,
-    "note": "the grant landed 02:03:17Z (laptop NFRA_CTLPLN.TO-APPLY-24, closure 3e3b61274f); this read was reported as a credential first-read to MSTR for the laptop",
     "secret_version": "2950da39-7bc4-4803-b98e-fba53b7d92cb",
     "six_forbidden_claims_absent": [
       "firmId",
@@ -68,14 +72,21 @@
     ],
     "verdict": "PASS -- on the STORED bytes, decoded WITHOUT verifying"
   },
-  "test_ticket": "NONE CREATED -- step 4 never reached 201, so there is no ticket id to close under step 8 and none is claimed",
+  "test_ticket": {
+    "close": "OWED, and NOT by this seat: CLAIM/COMPLETE are INTERNAL-only (lambda_function.py:114-115) and no seat holds an internal-human token, so the closer is an Opal person on the Ticket Center board, asked through 2.0.0_SA_COO~V2. Recorded OPEN with that reason, per the pair's stated gap -- the record does not claim it closed.",
+    "created_by": "svc-commentary",
+    "firm": "cottonwood",
+    "status_at_create": "open",
+    "ticket_id": "TCK-20261009-a1052909",
+    "ticket_type": "analysis_request"
+  },
   "token_handling": "read into memory from the secret and sent as a Bearer header only; never printed, written or committed",
   "verdicts_summary": {
     "3_claim_readback": "PASS",
-    "4_positive": "BLOCKED-BY-SPEC",
+    "4_positive": "PASS",
     "5_ir_directory_search": "PASS",
     "5_partner_artifact": "PASS",
-    "6_off_list_firm": "NOT EXERCISED",
+    "6_off_list_firm": "PASS",
     "7_list": "PASS"
   }
 }

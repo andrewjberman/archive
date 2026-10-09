@@ -16,6 +16,14 @@
 </decomp_ref>
 
 
+  <amendment>
+    AMENDMENT 1 (issuer, 2026-10-09 ~03:0xZ), on Andrew-direct ~02:5xZ: "the DELLS should not be waiting on us for this function, let's
+    adjust their permissions accordingly". LEG C2 IS SUPERSEDED. Do NOT close the window at dell2's V1 or at 06:00Z. Per the CTO record
+    `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261009_025xZ_DELLS_RUN_THEIR_OWN_SCRIPTS_NO_LAPTOP_WAIT.md` @de8b26aa1f, the
+    window stays open until the CT-a-1 AMENDMENT 24 apply replaces it with standing access; it is never re-closed. AC1 is read after that
+    apply (default variables; the variable no longer exists). The issuer closes this order when the replacing apply lands.
+  </amendment>
+
   <objective>
     Open dell2's F1 shell window again when dell2 says "open now" (LEG B2) and close it at dell2's V1 or at 2026-10-09T06:00Z
     WITHOUT waiting (LEG C2) -- exactly the plans of NFRA_CTLPLN.TO-APPLY-18 legs B and C.
@@ -24,20 +32,23 @@
   <context>
     Root `infra/aws/terraform/nfra-ctlpln-identity/`. Halves: the step D2 pair (COO
     `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_D2_SENDCOMMAND_AND_F1_SHELL_WINDOW_20261008.md`,
-    CTO @ac2c6e852d) with the CTO's consent to this reuse for the st27 ledger (named in the GO). Same send-report rule: dell2 reports every send after the fact.
+    CTO @ac2c6e852d) with the CTO's YES for this ledger (msg 107646 reply) under the STANDING CONSENT addendum to the CTO half (@5c2d9da8b2): one host,
+    targeted 0/1/0, one window at a time on a named open ledger, closed at the ledger's close leg or 4 hours after opening, whichever
+    is first, without waiting, then read back with an untargeted 0/0/0 plan; sends reported after the fact. Same send-report rule: dell2 reports every send after the fact.
     YOU SEND NO COMMAND. Use TF_PLUGIN_CACHE_DIR=C:/Users/AndrewBerman/.terraform.d/plugin-cache, and delete your Terraform scratch dir
     after leg C2's ledger closes (0.0.0_AB_MSTR msg 107626).
   </context>
 
   <the_act>
-    LEG B2 -- OPEN (GO from the issuer when dell2 says "open now", relayed by 0.0.0_AB_MSTR): plan and apply with
+    LEG B2 -- OPEN (GO from the issuer when dell2 says "open now", relayed by 0.0.0_AB_MSTR): plan and apply TARGETED (`-target=aws_iam_policy.dell2_ssm`) with
     `-var open_dell2_f1_shell_window=true`: EXACTLY `0 to add, 1 to change, 0 to destroy` on `aws_iam_policy.dell2_ssm`, or apply
     nothing. Read back: dell2 `AWS-RunShellScript` + `i-0167fd745ad906a66` both resources allowed; + `i-0643a5bee8a8feabf`
     explicitDeny. NEVER-2 entry. Report the open time to me and to dell2 via 0.0.0_AB_MSTR.
 
     LEG C2 -- CLOSE (GO when dell2 calls V1; OR at 2026-10-09T06:00Z WITHOUT waiting for any answer): a plain plan and apply:
     EXACTLY `0 to add, 1 to change, 0 to destroy` on `aws_iam_policy.dell2_ssm`. Read back: dell2 `AWS-RunShellScript` explicitDeny
-    (`DenyShellDocuments`). Close the entry. Report the close time.
+    (`DenyShellDocuments`). Then an UNTARGETED plan with default variables reads `No changes` (0/0/0). Close the entry. Report the
+    close time.
   </the_act>
 
   <bounds>

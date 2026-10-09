@@ -1,6 +1,6 @@
 # CONTRACT -- NFRA_TRNSPT FWD-10, hop H6 -> H5: the commentary drafter writes its draft onto a Ticket Center ticket
 
-Status: **AGREED v0.1** (both sides, 2026-10-08) -- was DRAFT v0.1 -- proposed by `2.0.0_SA_COO~V2` (TCKT_VNEXT, the H5 / C-TICKET owner) to `2.0.0_SA_COO~T2` (NFRA_TRNSPT, H6).
+Status: **v0.2** (2026-10-09; records the shipped behaviour, at `~T2`'s request in msg 2210; see section 8) -- v0.1 AGREED by both sides on 2026-10-08 -- proposed by `2.0.0_SA_COO~V2` (TCKT_VNEXT, the H5 / C-TICKET owner) to `2.0.0_SA_COO~T2` (NFRA_TRNSPT, H6).
 It becomes AGREED when `~T2` commits an acceptance line in section 7. Routing: `1.0.0_SA_CTO~DELL2` msg 1779
 (Andrew-direct record @a4fdb78bbe). PRD rows: NFRA_TRNSPT C-TICKET (`prd/NFRA_TRNSPT_PRD.md:118`), S20 (`:227`).
 
@@ -33,12 +33,12 @@ Body (every field below is REQUIRED unless marked):
 ```json
 {
   "ticket_type": "analysis_request",
-  "title": "Draft commentary -- <household> (<report_type>)",
+  "title": "Draft commentary -- <firm> (<report_type>)   [v0.2: never built from household]",
   "source": "commentary:<request_id>",
   "answers": {
     "advisor": "<from the report request>",
     "firm": "<the report's firm id>",
-    "household": "<from the report request>",
+    "household": "<v0.2: OPTIONAL for svc-commentary -- OMIT the key when the report carries none; never a placeholder>",
     "report_type": "Overview | Comparison | Multi-Comp",
     "comparison_model": "<required unless Overview>",
     "add_commentary": true
@@ -99,3 +99,21 @@ H6 never retries a 201 (no idempotency key in v0.1 -- see open item O2).
 
 - `2.0.0_SA_COO~V2` (H5): proposed v0.1, 2026-10-08.
 - `2.0.0_SA_COO~T2` (H6): ACCEPTED v0.1 @a8410fcca3, msg 1816 (2026-10-08T22:33Z), recorded here by `~V2` at `~T2`'s request; H6 is `NFRA_TRNSPT.TO-TR-t12`.
+
+## 8. v0.2 -- what shipped (opal-ticket-api live since 2026-10-09T01:01:08Z; handler file sha256 01534e2d..., box/dell2 3b04c040fc)
+
+| item | v0.1 | v0.2, as shipped |
+|---|---|---|
+| `answers.household` | required | OPTIONAL for `svc-commentary` ONLY (type data `optional_for`, F10-l-2; CTO msg 1875). Omit the key. The ticket stores no household and no placeholder. Humans still must answer it |
+| `title` | built from household | any non-empty string up to 300 characters (`create_ticket`). Use `Draft commentary -- <firm> (<report_type>)`; never put client identity in the title (C-KIMI) |
+| firm check | the token's `allowedFirmIds` | the token carries NO firm reach. `answers.firm` must be in `COMMENTARY_ALLOWED_FIRMS` = `49financial,cottonwood,inflection` (env, never ALL). Any other firm returns 400 `requester_firm '<firm>' is outside the principal's allowed firms` |
+| token (O1) | open | RESOLVED: secret `opal/ticketing/svc-commentary`, value JSON with `.token`. Claims: sub/name `svc-commentary`, userType/tier `service`, iss `opal-portal-auth`, aud `opal-portal-api`, exp 90 days (minted 2026-10-09 ~02:1xZ; rotate by exp - 14d). Readers today: the dell2 and dell1 agent users (row TCKT_VNEXT-D2-S9). H6's Lambda role needs its own grant, which is H6's pair |
+| O2 (same ticket) | open | Package side: C-PACKAGE route `POST /tickets/{id}/package` is LIVE, and its principal ships EMPTY (refuses everyone) until IRPT_ANLREQ's L5 binds it. Draft side: H6 creates a new ticket (v0.1 unchanged) |
+
+**Proven live** (applier `0.7.0_AE_CloudOps~DELL2`, leg M, @5c513af524):
+- a `svc-commentary` CREATE with no household returns 201 (TCK-20261009-a1052909);
+- an off-list firm returns 400 with the firm message;
+- LIST returns 403;
+- the token returns no firm data on non-ticket routes.
+
+Section 4's response table stands.
