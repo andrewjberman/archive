@@ -3,7 +3,9 @@
 marks a REAL cut only. Read-only and OFFLINE over the round-41 frozen picks (checks/round41/aq12_picks.json: 24 affected names + 5
 controls, AZN LN and BP LN included). No S3, no network.
 
-  PYTHONPATH=. python ar1_check.py
+  PYTHONPATH=. python ar1_check.py            (offline, the frozen picks; the build criterion)
+  PYTHONPATH=. python ar1_check.py --live     (CRPS-ar-2 leg v: every resolved name's picks read from S3, read-only; prints the
+                                               same counts plus `ar1 trailing_comma <n>` (row D1-W1-S3); no control arm)
 
 Per name and text field (the section fields AND `risks`), the value the CURRENT code composes is classed. CONTINUES means the
 report's text goes on past the block in the same style: a pdf block whose NEXT line is non-blank, the same font size (within the
@@ -70,9 +72,24 @@ def _continues(document, names, items):
     return True
 
 
+def _live_picks():
+    from lib.research.harvest import store
+    client = store._default_client()
+    out = {}
+    for key in dossier._resolved_security_keys(client=client):
+        _items, pick_a, pick_b = dossier._picked_reports(key, client)
+        out[key] = (pick_a, pick_b)
+    return out
+
+
 def main():
-    fx = json.load(open(os.path.join(R41, "aq12_picks.json"), encoding="utf-8"))
-    base = json.load(open(os.path.join(R41, "aq12_base_values.json"), encoding="utf-8"))
+    live = "--live" in sys.argv
+    if live:
+        fx = {"picks": _live_picks()}
+        base = {}
+    else:
+        fx = json.load(open(os.path.join(R41, "aq12_picks.json"), encoding="utf-8"))
+        base = json.load(open(os.path.join(R41, "aq12_base_values.json"), encoding="utf-8"))
     counts = {"END": 0, "LINE-END": 0, "ELL-TRUE": 0, "ELL-FALSE": 0, "CUT": 0}
     prefix, n, now, risks_outside = 0, 0, {}, []
     for key, (pick_a, pick_b) in fx["picks"].items():
@@ -108,10 +125,15 @@ def main():
         print("CONTROL-MOVED %s" % k)
     print("ar1 counts cut %d ell_false %d ell_true %d line_end %d prefix %d of %d values"
           % (counts["CUT"], counts["ELL-FALSE"], counts["ELL-TRUE"], counts["LINE-END"], prefix, n))
+    comma = [k for k, v in now.items() if v.endswith(",")]
+    print("ar1 trailing_comma %d%s" % (len(comma), (" " + " ".join(comma)) if comma else ""))
     for k in risks_outside:
         print("RISKS-OUTSIDE %s" % k)
     print("ar1 risks outside the recomposed sections %d" % len(risks_outside))
     build = 1 if counts["CUT"] == 0 and counts["ELL-FALSE"] == 0 and prefix == 0 and not risks_outside else 0
+    if live:
+        print("ar1 live build %d/1" % build)
+        return 0 if build else 1
     print("ar1 build %d/1 control %d/1" % (build, 0 if moved else 1))
     return 0 if build and not moved else 1
 
