@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t4",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t4.land-into-cottonwood-yahoo-tier.md",
+    "group": "OTHER",
+    "vintage_commit": "6dc65d8cba"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "6dc65d8cba",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t4.land-into-cottonwood-yahoo-tier.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/land_cot.py",
+      "kind": "script",
+      "commit_or_etag": "9ca032bff5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL-risk build on the worker branch wk-MDPF_DEMQUE-3; nothing deployed and --apply never run (the issuer's act at the drain).",
+      "artifact_covered_by": [
+        "DQ1-t4-AC1",
+        "DQ1-t4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_land.py",
+      "kind": "test",
+      "commit_or_etag": "9ca032bff5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Six named tests, S3 stubbed; committed on the worker branch, not deployed.",
+      "artifact_covered_by": [
+        "DQ1-t4-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ1-t4-AC1",
+      "criterion_verbatim": "the landing rule, by the six named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t4_tests.py",
+      "output_evidence": "6 passed in 0.69s (test_only_locked_rows_inside_their_range_land, test_close_written_is_the_as_traded_close, test_existing_tickers_rows_are_never_rewritten, test_lookup_entry_maps_cot_asset_name_to_symbol, test_unmatched_security_is_listed_not_landed, test_default_run_writes_nothing, each PASSED by name); final line LAND-OK; rc=0. Base: LAND-BAD no file (order-stated).",
+      "denominator": "6 of 6 named tests PASSED",
+      "status": "PASS",
+      "expect": "LAND-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ1-t4-AC2",
+      "criterion_verbatim": "the seam against Cottonwood's live transactions: rows and assets > 0 and the join key named.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t4_seam.py",
+      "output_evidence": "LSEAM-OK PROBE rows=14198 assets=864 join_key=cusip hist_exists=no lookup_exists=no; rc=0. Latest silver/transactions object (2026-10-08.parquet) of 118 listed, IsTruncated False. Both Tier-2 objects absent, as the order measured.",
+      "denominator": "1 of 1 latest transactions object read (118 objects listed); ListObjectsV2/GetObject/HeadObject only",
+      "status": "PASS",
+      "expect": "LSEAM-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted in land_cot.py: the written close changed from as_traded_close to close_served, then reverted in place.",
+      "expected": "DQ1-t4-AC1 reads LAND-BAD naming test_close_written_is_the_as_traded_close; the other five stay PASSED",
+      "observed": "LAND-BAD not-passed=test_close_written_is_the_as_traded_close rc=1 (assert 18.5 == 11.0, 1 failed 5 passed); after revert LAND-OK again, committed bytes carry the as_traded_close line.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Both criteria invoked repeatedly from the worktree root (before and after the derivation edit, and after the mutant revert).",
+      "observed": "AC1 LAND-OK and AC2 LSEAM-OK with identical PROBE counts (rows=14198 assets=864 join_key=cusip) on every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "land_cot.py --apply and any PutObject",
+      "reason": "order BOUNDS: the issuer's act at the drain; this worker never ran it. The default-run test proves no put without --apply and controls that --apply puts twice, against a stub."
+    },
+    {
+      "item": "a dry-run of the full CLI against the live transactions with real lock rows",
+      "reason": "no lock rows or price directory exist at this cell (they come from other cells); plan() is covered on synthetic frames."
+    },
+    {
+      "item": "creating data/mdpf/scripts/demque/__init__.py",
+      "reason": "order: the issuer adds it."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W3-S1: the naming gate refused typed bucket/key/path literals for Cottonwood's legacy addresses, so land_cot.py derives them from the registry alias and the consumer's own source"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "lib/opal_naming.lookup",
+      "invocation": "python -c \"import opal_naming; print(opal_naming.lookup('cottonwood'))\"",
+      "result": "showed bucket opal-data-cottonwood but alias opal-data-cot routed True with planes ['bucket'], and pipeline_trees[0].dir; used to derive the bucket and consumer path instead of typing them."
+    }
+  ]
+}
