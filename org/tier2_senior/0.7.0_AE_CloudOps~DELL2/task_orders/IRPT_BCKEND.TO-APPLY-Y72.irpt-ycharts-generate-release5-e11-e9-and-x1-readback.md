@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>cancelled -- issuer ruling 2.0.0_SA_COO~Y2 2026-10-09 ~02:0xZ: BRANCH B by the applier (msg 2149): reads 0-3 PASS, read 4 FAILED RetentionPolicy.reference arity on release-5 bytes (row IRPT_BCKEND-D2-S18; f60e6f1d2a shipped split), rolled back to Un0wVZqj (issuer re-read 01:52:26Z), filer deleted; re-cut as round 73 (co-change repin) + release 5b</status>
     <project_code>IRPT_BCKEND</project_code>
   </metadata>
 <risk>WORLD</risk>
