@@ -16,6 +16,14 @@
 </decomp_ref>
 
 
+  <amendment>
+    AMENDMENT 1 (issuer, 2026-10-09 ~03:0xZ), on Andrew-direct ~02:5xZ: "the DELLS should not be waiting on us for this function, let's
+    adjust their permissions accordingly". LEG C2 IS SUPERSEDED. Do NOT close the window at dell2's V1 or at 06:00Z. Per the CTO record
+    `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261009_025xZ_DELLS_RUN_THEIR_OWN_SCRIPTS_NO_LAPTOP_WAIT.md` @de8b26aa1f, the
+    window stays open until the CT-a-1 AMENDMENT 24 apply replaces it with standing access; it is never re-closed. AC1 is read after that
+    apply (default variables; the variable no longer exists). The issuer closes this order when the replacing apply lands.
+  </amendment>
+
   <objective>
     Open dell2's F1 shell window again when dell2 says "open now" (LEG B2) and close it at dell2's V1 or at 2026-10-09T06:00Z
     WITHOUT waiting (LEG C2) -- exactly the plans of NFRA_CTLPLN.TO-APPLY-18 legs B and C.
