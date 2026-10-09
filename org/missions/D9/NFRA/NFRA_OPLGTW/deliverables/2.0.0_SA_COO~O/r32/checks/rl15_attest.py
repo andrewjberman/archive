@@ -63,7 +63,19 @@ def _tl1_ok(b: dict, deployed: str) -> bool:
             and b.get("env_values_changed") == ["TRANSCRIPT_MEETING_ALLOWLIST"])
 
 
-RULES = {"RL15_DIGEST": _served_ok, "RL15G_DIGEST": _grants_ok, "TL1_DIGEST": _tl1_ok}
+def _e2_ok(b: dict, deployed: str) -> bool:
+    # OG-rl-16 (E2 .xlsx release, CTO~Z @14cbf27dec): the installed tool list carries copy_site_file_to_s3 classified
+    # WRITE_REVERSIBLE/write_files and not SAFE; one refused call on a bad quarter wrote nothing; the host's
+    # ADVI_FEE_STATEMENT_S3_ROOT equals address(...)'s fee_statement root; the .pptx pair is NOT live.
+    return (b.get("served_release") == deployed and b.get("installed_code") is True
+            and b.get("tool_listed") is True and b.get("tool_safe") is False
+            and b.get("tool_write_class") == "write_files"
+            and b.get("bad_quarter_refused") is True and b.get("objects_written") == 0
+            and b.get("fee_root_equals_address") is True
+            and b.get("market_update_root_present") is False)
+
+
+RULES = {"RL15_DIGEST": _served_ok, "RL15G_DIGEST": _grants_ok, "TL1_DIGEST": _tl1_ok, "E2_DIGEST": _e2_ok}
 
 
 def _aws(args: list) -> tuple:
