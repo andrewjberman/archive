@@ -1,0 +1,142 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "<expect>\"Active\"</expect>; AC1's row also states step 1's three reads, the outlook pull's CodeSha256 before and after (equal), the invoke's counts and the ledger path.",
+      "denominator": "1 function created by this apply, of the 9 resources the targeted plan added (9 to add, 0 to change, 0 to destroy); step 1 is 3 named reads; the invoke covers 4 of 4 allowlisted series",
+      "expect": "\"Active\"",
+      "invocation": "aws lambda get-function --function-name teams-global-transcripts-pull-lambda --query \"Configuration.State\"",
+      "method": "live_read",
+      "output_evidence": "\"Active\". STEP 1, all three MET with no write: S04 one gateway transcript tool call by name -> status 200, count=20; S05 gateway/transcripts/bearer expiry ABSENT (7 describe-secret metadata keys, no RotationEnabled, no NextRotationDate, a 64-byte opaque payload with no JWT exp claim; value never printed) and EXERCISED live -- the stored bearer is accepted now (403 meeting_not_allowed) against a 401 unauthorized negative control on a wrong bearer; KMS key policy read (4 statements) delegates kms:Create* to account root and user/cloudops-dell2-agent-user holds kms:CreateGrant via group policy cloudops-dell-agent-respol-allow-policy over a denominator of 11 identity documents, so no laptop route was needed. STEP 2: targeted plan 'Plan: 9 to add, 0 to change, 0 to destroy.' over exactly the COO half's nine addresses, the only non-pull line in 220 being a refresh of aws_iam_role.second_reader; safe-apply rc=0 'Apply complete! Resources: 9 added, 0 changed, 0 destroyed.'; 0-diff re-plan 'No changes. Your infrastructure matches the configuration.' SHARED PACKAGE: outlook-global-transcripts-pull-lambda CodeSha256 VGIq85Xxm5KVLCnv16BASS63RsPMHScMEwZJP5SuMNY= before AND after, LastModified 2026-10-07T23:59:05Z unmoved. INVOKE (RequestId 9c155dfe-c40a-4efb-95ae-f78c4077f459): StatusCode 200, no FunctionError, totals listed=0 new=0 held=0 expired=0 refused=4, each of the four series listed=0 landed=0 refused=1 outcome REFUSED 'list refused meeting_not_allowed', run state written to s3://opal-data-transcripts/teams/transcripts/state/pull_runs/run=2026-10-09T11:14:54Z/run.json -- counts only, no transcript text, no token. LEDGER: org/critical_paths/change_management/20261009T1107Z_nfra-trnspt-p18-teams-pull-first-apply-20261009_deploy_completion.md, 5 legs, CLOSED.",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "8d87f6a93f",
+      "deploy_evidence": "the run result: step 1's three reads, the plan and apply lines, the nine created ids, both CodeSha256 readings, the deployed-bytes-vs-build-input equality and the invoke's counts -- no transcript content and no token",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_TRNSPT.TO-APPLY-p18_result.json"
+    },
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "634da92d0604cc77513a46dbdcd2db7677b8f5a4",
+      "deploy_evidence": "the nine resources aws_cloudwatch_log_group.pull, aws_iam_role.pull, aws_iam_policy.pull, aws_iam_role_policy_attachment.pull, aws_kms_grant.pull, aws_lambda_function.pull, aws_cloudwatch_event_rule.pull, aws_cloudwatch_event_target.pull and aws_lambda_permission.pull_from_rule, applied from the clean extract at this pin: Apply complete, 9 added / 0 changed / 0 destroyed; aws lambda get-function Configuration.State reads Active; the live CodeSha256 taFbGTCUAOhM+97EVJi3AfqqeBCV+FIUSLZ8Z4Ge6HA= equals the built zip's base64 sha256 (raw b5a15b19309400e84cfbdec45498b701faaa781095f8521448b67c67819ee870), so the deployed bytes are resolved by CONTENT against the build input; the hourly rule reads cron(0 13-22 ? * MON-FRI *) ENABLED; a targeted re-plan reads 'No changes. Your infrastructure matches the configuration.'",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "kind": "terraform",
+      "path_or_key": "infra/aws/terraform/transcripts/pull.tf"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~TR2",
+  "compiler_tools": [
+    {
+      "invocation": "bash infra/aws/lambda/transcripts-pull/build.sh (in the clean extract at the pin)",
+      "result": "built dist/transcripts-pull.zip, 88 files, 876521 bytes, sha256 b5a15b19309400e84cfbdec45498b701faaa781095f8521448b67c67819ee870; fixed zip timestamps, so identical inputs give an identical hash",
+      "tool": "build.sh"
+    },
+    {
+      "invocation": ".tools/terraform.exe plan -target=<nine pull.tf addresses> -var 'second_reader_trust_principal_arns=[...]' -out=<plan>",
+      "result": "Plan: 9 to add, 0 to change, 0 to destroy; re-run after the apply: No changes",
+      "tool": "terraform plan"
+    },
+    {
+      "invocation": ".tools/safe-apply.sh -chdir=<extract>/infra/aws/terraform/transcripts apply <plan>",
+      "result": "rc=0, Apply complete! Resources: 9 added, 0 changed, 0 destroyed. The HALTGT checkpoint passed and is NOT cited as evidence of not having been halted (ADHC_HALTGT, LD-0267)",
+      "tool": "safe-apply.sh (Rule 18)"
+    },
+    {
+      "invocation": "python .tools/deploy_ledger.py open | close-leg x5 | close --slug nfra-trnspt-p18-teams-pull-first-apply-20261009",
+      "result": "5 legs opened at deploy start naming the pin and the zip sha256 (CTO condition 4), each closed on its own measured proof, ledger CLOSED",
+      "tool": "deploy_ledger.py"
+    },
+    {
+      "invocation": "git worktree add --detach /c/dev/wk-trnspt-p18 634da92d0604cc77513a46dbdcd2db7677b8f5a4",
+      "result": "a clean extract of a pin that carries a9039b8d62 and 488c840f48 as ancestors, with a negative control (HEAD is not an ancestor of a9039b8d62) proving the instrument discriminates",
+      "tool": "git worktree"
+    }
+  ],
+  "controls": {
+    "bearer_live_not_merely_present": {
+      "description": "S05's expiry reads ABSENT, and an absence is not an exercise (CLAUDE.md 22a). The stored bearer was therefore used against the route once, read-only, with a wrong-bearer control beside it.",
+      "expected_landed": "the stored bearer is accepted: any status other than 401, while a wrong 64-char bearer returns 401 unauthorized",
+      "expected_not_landed": "the stored bearer returns 401 unauthorized, i.e. indistinguishable from the control -- an expired or wrong token",
+      "observed": "stored bearer -> 403 meeting_not_allowed; wrong bearer -> 401 unauthorized. The route discriminates on the token, so the bearer is live and the 403 is the host's allowlist",
+      "status": "PASS"
+    },
+    "deployed_bytes_vs_build_input": {
+      "description": "the CODE layer of CLAUDE.md 22a: the deployed bytes are diffed against the BUILD INPUT, never by filename, and never from a green plan",
+      "expected_landed": "the new function's live CodeSha256 equals the built zip's base64 sha256",
+      "expected_not_landed": "they differ -- the function runs bytes that are not the ones this act built",
+      "observed": "live taFbGTCUAOhM+97EVJi3AfqqeBCV+FIUSLZ8Z4Ge6HA= equals the built zip's base64 sha256; equal",
+      "status": "PASS"
+    },
+    "kms_creategrant_available": {
+      "description": "aws_kms_grant.pull needs kms:CreateGrant for the applying identity. The key policy was READ because the simulator is blind to key-policy grants, and the identity half was read over a printed denominator.",
+      "expected_landed": "the key policy delegates kms:Create* to account root AND the applying identity's policy set holds kms:CreateGrant -> the grant is this seat's act",
+      "expected_not_landed": "no root delegation, or no identity grant -> the grant is a laptop act routed via 0.0.0_AB_MSTR~DELL2 and step 2 waits",
+      "observed": "Sid RootAdministersTheKeyAndCannotUseIt delegates kms:Create* to root; cloudops-dell-agent-respol-allow-policy Sid AllowResourcePolicyChanges allows kms:CreateGrant (Resource *, no Condition) over 11 identity documents, no Deny. The grant created: 44a2284f-1e14-4ea1-b6cb-f6121bfde35a:f3f0c7b5b7d3e3e1...",
+      "status": "PASS"
+    },
+    "mail_pull_codesha_unmoved": {
+      "description": "CTO half condition 1, the shared-package hazard measured and not assumed: local.pull_zip is also the package of the live outlook mail pull and the commentary Lambda",
+      "expected_landed": "outlook-global-transcripts-pull-lambda's live CodeSha256 is the same string before and after the apply",
+      "expected_not_landed": "it changes to the rebuilt zip's hash -- the mail pull moved under this act's apply",
+      "observed": "VGIq85Xxm5KVLCnv16BASS63RsPMHScMEwZJP5SuMNY= before and after, LastModified 2026-10-07T23:59:05Z both times; the rebuilt zip's hash taFbGTCU... differs from it, so the control had something to catch",
+      "status": "PASS"
+    },
+    "targeted_plan_scope": {
+      "description": "the shared-root rule @29a9a2c684: the plan shows exactly pull.tf's nine creates and any other line means STOP",
+      "expected_landed": "9 to add, 0 to change, 0 to destroy, and no mail-pull, commentary, chat-assist or second-reader resource in the plan body",
+      "expected_not_landed": "any additional create, change or destroy, or a foreign resource in the plan body -> STOP, nothing applied",
+      "observed": "Plan: 9 to add, 0 to change, 0 to destroy; the nine '# ... will be created' lines are exactly the COO half's list; a grep over all 220 plan lines for mail_pull|outlook-global|commentary|chat_assist|second_reader returns one line and it is a state-refresh line, not a change",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the first scheduled fire of cron(0 13-22 ? * MON-FRI *) and anything it lands",
+      "reason": "the COO half makes the scheduled fire FWD-2's acceptance, read later by the issuer as counts. This order's proof is the one seat invoke, which proves the hop. It is also currently unreachable for a different reason, recorded as row NFRA_TRNSPT-D2-S11."
+    },
+    {
+      "item": "deployment rules 4 (lambda-source-map entry) and 6 (post-apply tag)",
+      "reason": "both targets are outside this order's <paths> (deliverables, logs, change_management): the owned-paths hook refuses the source-map edit, and rule 6 would need a version minted for a root that has been applied before and never tagged. Recorded as row NFRA_TRNSPT-D2-S12 with its owner rather than worked around."
+    },
+    {
+      "item": "the HALTGT checkpoint pass inside safe-apply",
+      "reason": "a HALTGT pass is not evidence of not having been halted -- the checkpoint sees only unread files directly under inbox/<serial>/, and a lane agent with a live Monitor is structurally unhaltable (ADHC_HALTGT, LD-0267). Nobody cites it, so it is not a control here."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/decompositions/NFRA_TRNSPT_DECOMP_R18.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_TRNSPT.TO-APPLY-p18.teams-pull-first-apply-dell2.md",
+    "vintage_commit": "ffa3c6987daa90e6ebb4137e0a99c09645a8ef00"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/NEVER_WIDEN_NFRA_TRNSPT_COO_HALF_TEAMS_PULL_FIRST_APPLY_20261009.md @7dcb3cc48f (blob 4bdcfb584a), with ADDENDUM 1 @507be5a916, which SUSPENDED the half over the false 'same wipe for silver' line and set the resume condition as a CTO re-rule",
+    "cto_half": "org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_TEAMS_PULL_FIRST_APPLY_CTO_HALF.md @b972f130c9, verdict GIVEN for steps 1 and 2 under conditions 1 to 4, plus AMENDMENT 1 @3cbbddbe24 which applies ruling (a) and states 'The release of TO-APPLY-p18 step 2 is GO' with no reader added on teams/transcripts/* until wipe-on-landing and the W1-S7 re-wipe ship. That amendment IS the COO suspension's resume condition; the issuer re-issued the GO after TO-RUN-w20 landed"
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "WORLD",
+  "rollback": "terraform destroy -target of each of the nine created resources (the KMS grant is revoked by its destroy). A destroy, and any deletion of objects a fire lands, is Andrew's act and never this seat's. The nine addresses and their created ids are in NFRA_TRNSPT.TO-APPLY-p18_result.json step2.created_ids.",
+  "schema_version": "1.0",
+  "scope": "The FIRST apply of the Teams meeting pull: step 1 three preconditions read with no write, step 2 one targeted safe-apply of exactly pull.tf's nine resources in infra/aws/terraform/transcripts, then ONE seat invoke. pull.tf's resources only; no other root, key policy or Lambda; no delete; no transcript text or token in any artifact.",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_TRNSPT.TO-APPLY-p18_result.json",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_TRNSPT.TO-APPLY-p18.teams-pull-first-apply-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "4ee59b292a8e8139f24d25acd78cba9186bc14b0"
+  },
+  "surprises": [
+    "NFRA_TRNSPT-D2-S11: the headless /hx/transcripts route refuses all 4 allowlisted meetings 403 meeting_not_allowed for the stored bearer, so the pull sees 4 and lands 0 until the gateway HOST's allowlist carries those ids; owner NFRA_OPLGTW, routed via the issuer.",
+    "NFRA_TRNSPT-D2-S12: 0 of 232 lambda-source-map entries name a transcripts Lambda and 0 transcripts-v* tags exist, so deployment rules 4 and 6 are unmet for this root; both files are outside this order's <paths>."
+  ],
+  "to_id": "NFRA_TRNSPT.TO-APPLY-p18"
+}

@@ -23,8 +23,9 @@ def show(path):
     return r.stdout if r.returncode == 0 else None
 
 
-full = show(BASE + f"VEHICLE_LOG_{DAY}_1100Z.full.log")
-summ = show(BASE + f"VEHICLE_LOG_{DAY}_1100Z.txt")
+ALT = "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.7.0_AE_CloudOps~ZV/"   # relay order AMENDMENT 5: the lane's own folder
+full = show(BASE + f"VEHICLE_LOG_{DAY}_1100Z.full.log") or show(ALT + f"VEHICLE_LOG_{DAY}_1100Z.full.log")
+summ = show(BASE + f"VEHICLE_LOG_{DAY}_1100Z.txt") or show(ALT + f"VEHICLE_LOG_{DAY}_1100Z.txt")
 text = full if full is not None else summ
 if text is None:
     print(f"J1-READ: NO-FILE (neither transcription is at {REF}; control: git show {REF}:{BASE} lists the folder)")
