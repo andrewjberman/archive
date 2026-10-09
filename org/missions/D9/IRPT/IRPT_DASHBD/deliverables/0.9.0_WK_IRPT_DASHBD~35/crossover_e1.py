@@ -19,6 +19,8 @@ _s = importlib.util.spec_from_file_location("tieout_compound_v2", str(HERE / "ti
 v2 = importlib.util.module_from_spec(_s)
 _s.loader.exec_module(v2)
 r30, r18, r17 = v2.r30, v2.r18, v2.r17
+# the daily-mean fee base is defined once, in the reader of record (tieout_reader.py); this module defines none
+reader = v2.reader
 TOL = 0.35
 DEFECT = ["FEE_BASE_BALANCE_PATH"]
 DEL = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
@@ -26,6 +28,12 @@ DEL = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/"
 
 def key(s):
     return (s["account"], s["segment"]["start"], s["segment"]["end"])
+
+
+def base_ratio(days, bd):
+    """Served daily-mean value over the (bmv+emv)/2 base, the daily mean from the reader of record (positive_only=True, as this trace always used)."""
+    two_pt = (bd["bmv"] + bd["emv"]) / 2.0
+    return reader.daily_mean_value(days, positive_only=True) / two_pt
 
 
 def main():
@@ -45,9 +53,7 @@ def main():
         bd = bronze[str(req["bd_account"])][(seg["start"], seg["end"])]
         days = r17.segment_days(gold.get(req["account"]), seg)
         net, opal = bd["twr"], c[k]["opal_return"]
-        two_pt = (bd["bmv"] + bd["emv"]) / 2.0
-        daily = v2.daily_mean_value(days)
-        ratio = daily / two_pt
+        ratio = base_ratio(days, bd)
         _, add_v2 = v2.fee_addback_v2(bd, days)
         diff_v2 = abs(r30.compound_gross(net, add_v2) - opal) * 100.0
         add30 = c[k]["bd_fee_addback"]

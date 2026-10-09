@@ -39,7 +39,11 @@ Written 2026-10-09 ~01:2xZ by `2.0.0_SA_COO~Z`. The move is Andrew-direct ~22:5x
 ## What stays on site Z
 
 - 15 drained worker branches, `wk-AMGT_RESAPP-300` to `-314`. All are ancestors of box/sitez, so they reach origin with
-  it. Their worktrees under `C:/tmp/r79-*` and `C:/tmp/r78-*` are not removed. Removing them needs a word: Andrew
-  gave it for rounds 77-78 only.
+  it. Round 79's six worktrees (`C:/tmp/r79-308` to `-313`) were REMOVED 2026-10-09 ~01:3xZ under Andrew's ruling on
+  call `sitez-20261008T165920Z-ce4b` ("Force-removing merged worktrees is mandatory, if that is already merged it should
+  be gotten rid of"). Each was measured first: merged into HEAD, with 0 dirty tracked files. The scratch folders
+  `C:/tmp/r79-faces`, `r79-half-backup` and `r79-half-scratch` are not worktrees and stay.
+- **Correction:** this file's first version said the worktrees needed a word for rounds after 78. That was wrong:
+  the ruling above was already on the site-Z call list.
 - The ledger `mdpf-sechist-sh-t1-sitez-etf-daily-pull-20261007` (MDPF_SECHIST, not this project) is HELD to the
   2026-10-09 11:00Z pull @8be1b0639b.

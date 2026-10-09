@@ -17,11 +17,11 @@
   "assignee": "0.7.0_AE_CloudOps",
   "artifacts_produced": [
     {
-      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/svc_irpt_st26_20261009/after.json",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/svc_irpt_st26_20261009/remove-after.json",
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "DEPLOYED-VERIFIED",
-      "deploy_evidence": "ADD live under set rule; dell2 allowed, dell1 explicitDeny, walker allowed; REMOVE pending",
+      "deploy_evidence": "X1 GO107592; live start equals signed ADD under set rule; signed BEFORE restored with block-public-policy by 2026-10-09T01:34:00.7406433Z; live readback equals BEFORE; dell2 explicitDeny, dell1 explicitDeny, walker allowed; no secret value read",
       "artifact_covered_by": ["AC1"]
     }
   ],
@@ -32,18 +32,18 @@
       "method": "live_read",
       "invocation": "aws secretsmanager get-resource-policy --secret-id irpt/svc-irpt-analysis/password --query ResourcePolicy --output text",
       "expect": "WalkerReadsByExplicitArn",
-      "output_evidence": "ADD readback contains WalkerReadsByExplicitArn; final signed BEFORE equality is owed after REMOVE",
+      "output_evidence": "svc_irpt_st26_20261009/remove-after.json and remove-put-verdict.json: live policy contains WalkerReadsByExplicitArn and equals the signed BEFORE document under the required set rule",
       "denominator": "one resource policy and 3 principals after REMOVE",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "AC1 is explicitly read after REMOVE at dell2 X1 or 2026-10-09T06:00Z."
+      "status": "PASS",
+      "status_reason": "Live readback after REMOVE equals signed BEFORE; exact-resource simulations show dell2 explicitDeny, dell1 explicitDeny, and Andrew_Berman allowed."
     }
   ],
   "controls": {
     "reader_window": {
-      "description": "dell2 policy simulation before and after signed ADD",
-      "expected_landed": "allowed",
-      "expected_not_landed": "explicitDeny",
-      "observed": "allowed",
+      "description": "dell2 access is removed while the original walker remains allowed",
+      "expected_landed": "dell2 explicitDeny and walker allowed",
+      "expected_not_landed": "dell2 allowed or walker denied",
+      "observed": "dell2 explicitDeny; walker allowed",
       "status": "PASS"
     }
   },
@@ -52,21 +52,16 @@
     "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md@4d7f665001"
   },
   "risk_class": "WORLD",
-  "rollback": "Put signed BEFORE on the exact secret with block-public-policy, verify set equality, then simulate both Dells explicitDeny and walker allowed; mandatory at X1 or 06:00Z.",
-  "scope": "ADD complete; REMOVE pending for the same st26 ledger",
-  "declared_exclusions": [
-    {
-      "item": "REMOVE and final AC1",
-      "reason": "Triggered by dell2 X1 or the 06:00Z hard close."
-    }
-  ],
+  "rollback": "The signed BEFORE document is the closed state. If drift appears, put that same signed BEFORE document on the exact secret with block-public-policy, verify set equality, and rerun both-Dell and walker simulations.",
+  "scope": "Both ADD and REMOVE are complete for the same st26 ledger; the secret policy is restored to signed BEFORE.",
+  "declared_exclusions": [],
   "surprises": [],
   "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/svc_irpt_st26_20261009/REPORT.md",
   "compiler_tools": [
     {
       "tool": "aws iam simulate-principal-policy",
       "invocation": "one exact secret ARN per principal with the signed live resource policy",
-      "result": "dell2 allowed; dell1 explicitDeny; Andrew_Berman allowed; no GetSecretValue call"
+      "result": "After REMOVE: dell2 explicitDeny; dell1 explicitDeny; Andrew_Berman allowed; no GetSecretValue call"
     }
   ]
 }

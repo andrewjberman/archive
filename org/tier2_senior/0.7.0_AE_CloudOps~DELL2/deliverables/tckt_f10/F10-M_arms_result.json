@@ -1,0 +1,81 @@
+{
+  "arms": {
+    "4_positive": {
+      "answer": "{\"error\": \"attachment is required: {upload_id, input_id}\"}",
+      "created_by": null,
+      "expect": "201 and created_by == svc-commentary",
+      "route": "POST /api/scoped/tickets",
+      "rows": 0,
+      "status": 400,
+      "ticket_id": null,
+      "verdict": "BLOCKED-BY-SPEC, not a product failure",
+      "why": "analysis_request requires an attachment {upload_id, input_id} unconditionally (_validate_attachment, lambda_function.py:643-657; the only svc-commentary exemption in the type definition is on the question 'household' at :89), and input_id must match ^portfolio_[0-9a-f]{64}$, which only a completed analysis-input-upload produces. The pair's step 4 supplies no attachment, so the arm as written cannot reach 201."
+    },
+    "5_ir_directory_search": {
+      "answer": "{\"ok\": false, \"contract_version\": \"v1\", \"operation\": \"directory-search\", \"status\": {\"operation\": {\"operation_id\": \"directory-search\", \"operation_kind\": \"read\", \"revision\": \"v1\"}, \"state\": \"UNAVAILABLE\", \"source_dates\": {\"source_completion_date\": null}, \"actions\": [{\"action\": \"NONE\", \"safe\": true, \"description\": \"no retry or recovery action is offered for this outcome\"}], \"public_reason_code\": \"CON",
+      "expect": "refused 401/403, or no firm data",
+      "route": "GET /api/scoped/investor-reporting/directory/search?selected_tenant=cottonwood&q=a",
+      "rows": 0,
+      "status": 200,
+      "verdict": "PASS"
+    },
+    "5_partner_artifact": {
+      "answer": "Missing firm identity",
+      "expect": "refused 401/403, or no firm data",
+      "route": "GET /api/scoped/advisor-intelligence/artifacts/architect_leaderboard.json",
+      "rows": 0,
+      "status": 403,
+      "verdict": "PASS",
+      "why": "HTTP 403 'Missing firm identity' -- a direct live confirmation of the pair's central claim that this token carries NO firm reach"
+    },
+    "6_off_list_firm": {
+      "answer": "{\"error\": \"attachment is required: {upload_id, input_id}\"}",
+      "expect": "400",
+      "route": "POST /api/scoped/tickets (firm=demo)",
+      "rows": 0,
+      "status": 400,
+      "verdict": "NOT EXERCISED -- expected status for the WRONG reason",
+      "why": "the 400 came from the attachment check (:1063), not the firm clamp _create_firm_allowed (:1072), so COMMENTARY_ALLOWED_FIRMS was never consulted. The body is byte-identical to step 4's refusal. Recording this as a PASS on the status alone would have been a false pass."
+    },
+    "7_list": {
+      "answer": "{\"error\": \"forbidden: LIST is not permitted to principal class 'svc-commentary'\", \"action\": \"LIST\", \"principal_class\": \"svc-commentary\"}",
+      "expect": "403",
+      "route": "GET /api/scoped/tickets",
+      "rows": 0,
+      "status": 403,
+      "verdict": "PASS",
+      "why": "HTTP 403 with the exact principal-class message the pair predicts"
+    }
+  },
+  "host": "https://opalinvest.dev",
+  "row": "TCKT_VNEXT-D2-S10",
+  "run": "20261009-one",
+  "step_3_claim_readback": {
+    "claims_present": 8,
+    "exp_minus_iat_days": 90.0,
+    "exp_minus_iat_seconds": 7776000,
+    "fixed_values_match": true,
+    "names_equal_section_2": true,
+    "note": "the grant landed 02:03:17Z (laptop NFRA_CTLPLN.TO-APPLY-24, closure 3e3b61274f); this read was reported as a credential first-read to MSTR for the laptop",
+    "secret_version": "2950da39-7bc4-4803-b98e-fba53b7d92cb",
+    "six_forbidden_claims_absent": [
+      "firmId",
+      "role",
+      "advisorId",
+      "allowedPages",
+      "allowedTabs",
+      "firmRole"
+    ],
+    "verdict": "PASS -- on the STORED bytes, decoded WITHOUT verifying"
+  },
+  "test_ticket": "NONE CREATED -- step 4 never reached 201, so there is no ticket id to close under step 8 and none is claimed",
+  "token_handling": "read into memory from the secret and sent as a Bearer header only; never printed, written or committed",
+  "verdicts_summary": {
+    "3_claim_readback": "PASS",
+    "4_positive": "BLOCKED-BY-SPEC",
+    "5_ir_directory_search": "PASS",
+    "5_partner_artifact": "PASS",
+    "6_off_list_firm": "NOT EXERCISED",
+    "7_list": "PASS"
+  }
+}

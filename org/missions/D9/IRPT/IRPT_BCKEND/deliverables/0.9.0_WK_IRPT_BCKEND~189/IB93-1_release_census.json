@@ -1,0 +1,204 @@
+{
+ "to_id": "IRPT_BCKEND.TO-IB-pr-381",
+ "pin": "7f31bbfa4e06dfcb48af06fea3e20ea9f3606129",
+ "pin_history": "07dc601e48 (first code commit), 5aa352e6dd (SOURCE_KEYS table removed), 7f31bbfa4e (unreadable source keys guarded) -- the pin is the last; the release is cumulative on top of IB-pr-380's 8953eccfca, which is an ancestor of the branch base",
+ "one_release": "IB-pr-380 (8953eccfca: the refresh rule) and IB-pr-381 (this pin) ship together: the refresh zip carries both, the runner bundle carries the runner half",
+ "build_only": {
+  "head": "7f31bbfa4e06dfcb48af06fea3e20ea9f3606129",
+  "porcelain_lines_before": 0,
+  "porcelain_lines_after": 0,
+  "nothing_uploaded": true,
+  "source_map_untouched": true,
+  "reproducible": {
+   "refresh_zip": true,
+   "runner_bundle": true
+  }
+ },
+ "functions": [
+  {
+   "function": "irpt-directory-refresh",
+   "census_command": "python infra/aws/lambda/ci/release-census.py irpt-directory-refresh --pin 7f31bbfa4e06dfcb48af06fea3e20ea9f3606129",
+   "built_members": 5,
+   "live_members": 5,
+   "changed_members": [
+    {
+     "member": "refresh.py",
+     "built_sha256_prefix": "5335860d318a",
+     "live_sha256_prefix": "ed3d0c881890",
+     "owner_commits": [
+      "8953eccfca (IB-pr-380, the rule)",
+      "07dc601e48 (IB-pr-381: served-directory previous state, marker count over the final entry set)"
+     ]
+    }
+   ],
+   "build_command": "BUILD_ONLY=1 bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting irpt-directory-refresh",
+   "deploy_path": "the applier's: upload the zip through the same script without BUILD_ONLY (S3 object s3://opal-313476888478-lambda-artifacts/investor-reporting/irpt-directory-refresh.zip) and the Terraform deploy path of module irpt_directory_refresh (infra/aws/terraform/investor-reporting/directory/schedule.tf); no schedule, IAM or env change",
+   "built_zip": {
+    "sha256_b64": "6eOFTopG9nvfjpJFJxtBNAUL43pBmg0YvHv9sbErfsM=",
+    "sha256_hex": "e9e3854e8a46f67bdf8e9245271b4134050be37a419a0d18bc7bfdb1b12b7ec3",
+    "bytes": 46619,
+    "members": [
+     {
+      "member": "errors.py",
+      "bytes": 10652,
+      "built_sha256_prefix": "784ee313ed70"
+     },
+     {
+      "member": "expiry.py",
+      "bytes": 17658,
+      "built_sha256_prefix": "5c2b68b8a840"
+     },
+     {
+      "member": "handler.py",
+      "bytes": 19406,
+      "built_sha256_prefix": "e46922a00379"
+     },
+     {
+      "member": "refresh.py",
+      "bytes": 84743,
+      "built_sha256_prefix": "5335860d318a"
+     },
+     {
+      "member": "trading_calendar.py",
+      "bytes": 6979,
+      "built_sha256_prefix": "41b1c0c12651"
+     }
+    ]
+   },
+   "live": {
+    "code_sha256_b64": "RbpsijC23XVUFPE0W34Gr/xqtDil94xYRqDuuZlaYx8=",
+    "s3_version": "Ntv3Br2YU3utvESdPFCiTMkVVatmyzxY",
+    "bytes": 43778,
+    "s3_version_last_modified": "2026-10-08T23:00:22Z",
+    "lambda_last_modified": "2026-10-08T23:05:45Z"
+   }
+  },
+  {
+   "function": "irpt-directory-search",
+   "built_members": 24,
+   "live_members": 24,
+   "changed_members": []
+  },
+  {
+   "function": "irpt-holdings",
+   "built_members": 35,
+   "live_members": 35,
+   "changed_members": []
+  },
+  {
+   "function": "irpt-holdings-refresh-lambda",
+   "built_members": 1,
+   "live_members": 1,
+   "changed_members": []
+  },
+  {
+   "function": "irpt-status",
+   "built_members": 49,
+   "live_members": 49,
+   "changed_members": [
+    "canonical_profile_reads.py",
+    "loaders.py",
+    "maintained_sources.py",
+    "served.py"
+   ],
+   "note": "NOT part of this release: none of the four is in the diff of IB-pr-380/381; they come from earlier cells (IB-pr-321, 322, 327, 366) whose function release is a different order"
+  }
+ ],
+ "runner_bundle": {
+  "name": "investor-reporting.tar.gz (the bundle irpt_runner_bundle_uri names in infra/aws/terraform/investor-reporting/directory/schedule.tf)",
+  "s3": "s3://opal-data-mdpf/code/scripts/assets_gold/investor_reporting/investor-reporting.tar.gz",
+  "build_command": "python -c \"import sys; sys.path.insert(0,'.tools'); import safe_deploy_core as sdc; print(len(sdc.build_bundle_payload(sdc.find_bundle('investor_reporting')[2])[0]))\"  (the deterministic offline builder the mint itself uses; nothing uploaded)",
+  "deploy_path": "DS lane (CLAUDE.md rule 13), the applier's act: `bash .tools/safe-deploy.sh data/assets/scripts/gold/investor_reporting/directory_runner.py` routes the member through safe_deploy_core.route_bundle_members to mint_bundle('mdpf','investor_reporting'): build, upload with the sha metadata stamps, head-object verify ETag == local md5 and every stamp",
+  "built": {
+   "sha256": "2e3e6648312f5daad1da91f0c3aaeb4736a81b16cc9bb0dd4f43e5e93886b968",
+   "md5_expected_etag": "b0356a757b1ae92e3a4b46a847378315",
+   "bytes": 112575,
+   "members": 12,
+   "changed_members": [
+    "directory-runner-sha256"
+   ],
+   "member_shas": [
+    {
+     "sha_key": "directory-entry-schema-sha256",
+     "built_sha256_prefix": "6ad840a593a3",
+     "live_sha256_prefix": "6ad840a593a3",
+     "changed": false
+    },
+    {
+     "sha_key": "directory-runner-sha256",
+     "built_sha256_prefix": "08e5e1abc92a",
+     "live_sha256_prefix": "21147de26795",
+     "changed": true
+    },
+    {
+     "sha_key": "firm-registry-sha256",
+     "built_sha256_prefix": "1d249de15ac4",
+     "live_sha256_prefix": "1d249de15ac4",
+     "changed": false
+    },
+    {
+     "sha_key": "holdings-snapshot-schema-sha256",
+     "built_sha256_prefix": "7c221b13df63",
+     "live_sha256_prefix": "7c221b13df63",
+     "changed": false
+    },
+    {
+     "sha_key": "holdings-snapshot-sha256",
+     "built_sha256_prefix": "b4c1c984f6ad",
+     "live_sha256_prefix": "b4c1c984f6ad",
+     "changed": false
+    },
+    {
+     "sha_key": "ids-sha256",
+     "built_sha256_prefix": "43acb10d9895",
+     "live_sha256_prefix": "43acb10d9895",
+     "changed": false
+    },
+    {
+     "sha_key": "runner-common-1-sha256",
+     "built_sha256_prefix": "6176c7c61a8d",
+     "live_sha256_prefix": "6176c7c61a8d",
+     "changed": false
+    },
+    {
+     "sha_key": "runner-common-2-sha256",
+     "built_sha256_prefix": "80a7d89efe26",
+     "live_sha256_prefix": "80a7d89efe26",
+     "changed": false
+    },
+    {
+     "sha_key": "runner-common-3-sha256",
+     "built_sha256_prefix": "ba0a900aa139",
+     "live_sha256_prefix": "ba0a900aa139",
+     "changed": false
+    },
+    {
+     "sha_key": "schwab-account-codes-json-sha256",
+     "built_sha256_prefix": "9cb79f508e54",
+     "live_sha256_prefix": "9cb79f508e54",
+     "changed": false
+    },
+    {
+     "sha_key": "schwab-account-codes-sha256",
+     "built_sha256_prefix": "f39ea75cd8f4",
+     "live_sha256_prefix": "f39ea75cd8f4",
+     "changed": false
+    },
+    {
+     "sha_key": "trading-calendar-sha256",
+     "built_sha256_prefix": "8ec8e43def58",
+     "live_sha256_prefix": "8ec8e43def58",
+     "changed": false
+    }
+   ]
+  },
+  "live": {
+   "s3_version": "JITP9ecNeQyAnAmKo90oxqWyFemEqVaI",
+   "etag": "7de9bbd51be6919a1ee2beb9f69a8860",
+   "bytes": 108774,
+   "last_modified": "2026-10-07T18:33:12+00:00",
+   "directory_runner_blob_equals_base_commit_2c1f4f425d": true
+  },
+  "scheduled_runs_use_it": "the next SSM run after the upload fetches the object at the URI (refresh.py runner_script 'aws s3 cp'); no Terraform change"
+ }
+}
