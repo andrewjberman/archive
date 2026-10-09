@@ -1,0 +1,71 @@
+{
+ "read": "fwd19-no-permission",
+ "verdict": "PASS",
+ "detail": "/security-analysis/BA%20US: PanelNoPermission \"You do not have access to this page. An Opal Capital administrator can grant it.\" for a SIMULATED non-Dev viewer (userType rewritten to null in 2 of the walker's own auth response(s), this browser only); the walker itself (admin, opal-capital, Dev) clears every gate",
+ "route": "/security-analysis/:securityKey (App.tsx:471, requireDev requireAdmin)",
+ "landed": "/security-analysis/BA%20US",
+ "rewrites": [
+  {
+   "method": "POST",
+   "path": "/auth/refresh",
+   "status": 200,
+   "note": "no user object in the body; passed through unchanged"
+  },
+  {
+   "method": "POST",
+   "path": "/auth/refresh",
+   "status": 200,
+   "note": "no user object in the body; passed through unchanged"
+  },
+  {
+   "method": "GET",
+   "path": "/auth/me",
+   "status": 200,
+   "userType_before": "Dev",
+   "userType_after": null,
+   "role": "admin",
+   "firmId": "opal-capital"
+  },
+  {
+   "method": "GET",
+   "path": "/auth/me",
+   "status": 200,
+   "userType_before": "Dev",
+   "userType_after": null,
+   "role": "admin",
+   "firmId": "opal-capital"
+  }
+ ],
+ "probe": {
+  "scope_found": true,
+  "scope_attr": "route-no-permission",
+  "states": [
+   {
+    "kind": "no-permission",
+    "component": "PanelNoPermission",
+    "frame_classes": true,
+    "class": "flex w-full flex-col rounded-[4px] bg-[hsl(var(--bg-surface))] text-[hsl(var(--palette-navy))] border border-[hsl(var(--hairline))] items-center justify-center text-center gap-3 px-6 py-10",
+    "role": "status",
+    "aria_label": null,
+    "skeletons": 0,
+    "retry_button": false,
+    "cause_attr": null,
+    "text": "You do not have access to this page. An Opal Capital administrator can grant it.",
+    "visible": true
+   }
+  ],
+  "text": "You do not have access to this page. An Opal Capital administrator can grant it. Go to Market Overview"
+ },
+ "png_page": "fwd19-no-permission-security-analysis-page.png",
+ "png_panel": "fwd19-no-permission-security-analysis-panel.png",
+ "identity_rendered": false,
+ "code_evidence": [
+  "portal src/components/ProtectedRoute.tsx:115-122 -- a signed-in viewer failing requireAdmin / requireInternal / requireDev gets <RouteNoPermission />",
+  "ProtectedRoute.tsx:128-136 -- RouteNoPermission = div[data-slot=\"route-no-permission\"] > <PanelNoPermission surface=\"panel\" subject=\"this page\" ...>",
+  "portal src/App.tsx:470-471 -- /security-analysis and /security-analysis/:securityKey are requireDev requireAdmin",
+  ".claude/skills/ui-walk/ui_walker_account.py:14, 113-114 -- the walker row is role admin, firmId opal-capital, userType Dev: it clears every gate",
+  "portal src/contexts/AuthContext.tsx:243-253, 170-201, 109-140 -- on load: POST /auth/refresh; claims from its `user` (else GET /auth/me); userType is \"Dev\" or null",
+  "PanelStates.tsx:41-45 says NO-PERMISSION HAS NO LIVE CONSUMER; ProtectedRoute.tsx:2,131 now consumes it (the header comment is stale)"
+ ],
+ "why_simulated": "no page path shows PanelNoPermission to the walker: its row is role admin, firmId opal-capital, userType Dev (ui_walker_account.py:14, 113-114), which clears requireAdmin, requireInternal and requireDev (ProtectedRoute.tsx:118-120). The state IS reachable on a real route for a viewer lacking a gate; the capture stands in that viewer by rewriting userType in the walker's own auth responses, in-browser only."
+}
