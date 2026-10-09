@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-89",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "5bcbe2f559",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-89.runner-onto-owned-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~64",
+  "session_log": "data/assets/scripts/gold/irpt_custody/tests/test_e2a_real_statement.py",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/e2a_real_statement.py",
+      "kind": "script",
+      "commit_or_etag": "cb8cd44033",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline re-cut; no AWS write, no live call.",
+      "artifact_covered_by": [
+        "DB43-1-AC1",
+        "DB43-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_e2a_real_statement.py",
+      "kind": "test",
+      "commit_or_etag": "cb8cd44033",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline test; the owned read is served from a fixture, boto3 is denied.",
+      "artifact_covered_by": [
+        "DB43-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/fixtures/persist_inputs_route_fixture.json",
+      "kind": "config_data",
+      "commit_or_etag": "cb8cd44033",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the IB-pr-405 contract fixtures wrapped in the response schema's envelope; no invented field.",
+      "artifact_covered_by": [
+        "DB43-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB43-1-AC1",
+      "criterion_verbatim": "DB43-1-AC1 -- the built runner holds 0 direct table clients. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r43/p43_round43.py\" . DB43-1-AC1",
+      "output_evidence": "OK: 0 direct table clients in data/assets/scripts/gold/irpt_custody/e2a_real_statement.py (409 code lines)\nDB43-1-AC1 PASS",
+      "denominator": "0 of 409 code lines match the 5 banned patterns (rc 0)",
+      "status": "PASS",
+      "expect": "DB43-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB43-1-AC2",
+      "criterion_verbatim": "DB43-1-AC2 -- a fixture run of run and both verifies passes with irpt-requests access removed. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r43/p43_round43.py\" . DB43-1-AC2",
+      "output_evidence": "OK: 177 passed, fixture run data/assets/scripts/gold/irpt_custody/tests/test_e2a_real_statement.py::test_fixture_run_with_table_access_removed with irpt-requests access removed\nDB43-1-AC2 PASS",
+      "denominator": "177 passed, 0 failed (1 pre-existing xfail) across the irpt_custody tests folder (rc 0)",
+      "status": "PASS",
+      "expect": "DB43-1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "pytest of test_e2a_real_statement.py run twice (14 tests) and the whole tests folder once",
+      "observed": "14 passed both times; 177 passed, 1 xfailed over the folder",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "test_fixture_run_with_table_access_removed asserts boto3's resource/client/Session raise when called (positive control for the denial); test_route_answer_with_a_bad_member_is_refused feeds the route an extra member; the verify tests flip the artifact hash and the persisted state.",
+      "expected": "the denial raises; the runner refuses the extra member; verify prints NOT RETAINED / NOT FOUND",
+      "observed": "all three fired as expected",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "run, verify-submission and verify-persisted against the live route",
+      "reason": "Bounds of the order: no live call and no AWS write; DB-b-86 runs the live statement after IB-pr-405 is read live and the mint's leg R closed."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W64-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "none",
+      "invocation": "no compiler",
+      "result": "n/a"
+    }
+  ]
+}
