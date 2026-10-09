@@ -4,9 +4,16 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~CTL</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
+
+  <closure>
+    COMPLETE (issuer, ~14:0xZ). CTO yes msg 107976. ADD put 13:37:33-13:37:36Z by 0.7.0_AE_CloudOps~CTL -- AFTER dell2 G2's own window
+    13:05:57-13:35:57Z had already closed with NO read (msg 107978), so the access was never used. REMOVE put 13:45:37-13:45:41Z on G2's
+    "remove at once"; read back SET-EQUAL to BEFORE, dell2/dell1 explicitDeny. Issuer live poll: dell2 on the policy first seen 13:38:02Z,
+    gone 13:46:07Z. Ledger closed (@d7e3566b1d). A retry is a new GO, ADD first, the 30 minutes run from W1.
+  </closure>
 
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>

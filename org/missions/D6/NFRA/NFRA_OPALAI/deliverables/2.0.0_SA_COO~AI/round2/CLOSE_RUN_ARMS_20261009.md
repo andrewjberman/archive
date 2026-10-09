@@ -76,6 +76,12 @@ read:
   read in the same minute.
 Key unchanged: `json/benchmarks/etf_returns.json`. The timing of (b) was put to Andrew by this seat (no seat sends for him).
 
+**Arm (b) widened (CTO~Z UB-e1ca fold @2fb30f869c, msg 32783):** fire on the FIRST message at most 900s old from ANY
+sender without an asker profile (anyone but Alyssa today) in any chat the principal reads; record the sender and the
+message's age at fire time. Watcher: each `/canonical-drive` tick (10m) polls `poll_addressed_teams_messages` since the
+previous tick, so a hit is at most about 11 minutes old when it fires, inside the 900s bound. **Arm (a) unchanged** (Alyssa's
+own fresh question, @4e2f00c9fa) until `3.0.0_SA_CVO~Z` rules the CTO's pitch.
+
 ## Results (filled at the run)
 
 | arm | run at (UTC) | raw response | pinned reference read (same minute) | verdict |
