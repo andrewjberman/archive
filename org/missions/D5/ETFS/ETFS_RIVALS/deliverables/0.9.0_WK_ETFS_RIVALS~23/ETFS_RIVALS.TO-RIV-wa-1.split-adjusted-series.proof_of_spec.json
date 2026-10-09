@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-wa-1.split-adjusted-series",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "8b87a0166b",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-wa-1.split-adjusted-series.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "a0db38c8ae"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~23",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/price_series.py",
+      "kind": "script",
+      "commit_or_etag": "a7fd2a53af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "series(..., actions=) adjusts for stored splits, adds adjustment, gaps a threefold move with no applied row; load() reads every corporate_actions object of the window; no deploy, no S3, no vendor call",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/publish_page.py",
+      "kind": "script",
+      "commit_or_etag": "a7fd2a53af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_build_charts copies each series' adjustment into the chart object's security entry (one line); _thin keeps it",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_ws2_wa1_split_adjusted_series.py",
+      "kind": "script",
+      "commit_or_etag": "a7fd2a53af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "12 offline tests (frames, a local sink, the publish fixture); no vendor call",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the cell's interface as the check grades it -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/ws2/checks/ws2-a.AC1.py",
+      "output_evidence": "OK (a) adjusted points [('2026-10-01', 3.3667), ('2026-10-02', 3.3287), ('2026-10-05', 3.306), ('2026-10-06', 3.3667), ('2026-10-07', 3.33)]\nOK (b) adjustment [{'event_type': 'split', 'ratio': 15.0, 'ex_date': '2026-10-07', 'claim': 'MEASURED', 'source_url': None}]\nOK (c) no-action points to 2026-10-06; gap 2026-10-07 'the price moved more than threefold in one day and no corporate action is on file'\nOK (d) adjustment []\nOK (e) adjustment claim INFERRED with source_url\nAC1 RESULT: PASS 0 failures",
+      "denominator": "5 of 5 arms OK; rc 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "the dialog for Tokio Marine (IDVZ) on the first page published with this code reads a continuous 30d curve near 3.3 across 2026-10-07 and names the 15-for-1 split, the factor coming from a stored row",
+      "method": "manual_read_with_citation",
+      "invocation": "none (judgment, graded by 3.0.0_SA_CVO~RV1 on the issuer's one real run)",
+      "output_evidence": "No graded run by the worker; no deploy, no S3 read, by the order.",
+      "denominator": "0 of 0",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion graded by 3.0.0_SA_CVO~RV1 on the issuer's one real run"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "ws2-a.AC1 fails at the base (series() takes no actions keyword).",
+      "expected": "AC1 FAIL at base",
+      "observed": "with the build AC1 PASS 0 failures; rivalfunds suite 928 passed, 6 skipped",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "check and suite run after the last code change",
+      "observed": "all arms OK",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "left to the issuer by the face"
+    },
+    {
+      "item": "RIV-wa-1 J1 (Tokio Marine dialog on the first page published with this code)",
+      "reason": "judgment, graded by 3.0.0_SA_CVO~RV1 on the issuer's one real run"
+    }
+  ],
+  "surprises": ["ETFS_RIVALS-D1-W23-S1"],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.dell1.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~23 <0.9.0_WK_ETFS_RIVALS~23@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "a7fd2a53af"
+    }
+  ]
+}
