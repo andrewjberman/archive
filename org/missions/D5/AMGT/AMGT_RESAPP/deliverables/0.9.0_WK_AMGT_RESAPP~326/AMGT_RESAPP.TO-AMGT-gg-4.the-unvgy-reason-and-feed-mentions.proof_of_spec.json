@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-gg-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gg-4.the-unvgy-reason-and-feed-mentions.md",
+    "group": "OTHER",
+    "vintage_commit": "13c4672dc121db3304beeaf290aff1b781121483"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "13c4672dc121db3304beeaf290aff1b781121483",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gg-4.the-unvgy-reason-and-feed-mentions.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~326",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "7ed6e1de21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New _per_period_forecast_reason(); read_model's reason chain is whole-block reason, then the per-period sentence, then the stamp sentence, then 'no landed model block'. read_feed items gain `mentions` (gold mention_count via top_band._count, None where the row stores none) and most_discussed_basis names the count when any item has one. Serves only through a redeploy of opal-amgt-scoped-api (not in this order's scope).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_r82_reason_and_mentions.py",
+      "kind": "test",
+      "commit_or_etag": "7ed6e1de21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 offline tests: all-per-period sentence, differing reasons each once, unchanged reasons (whole-block, stamp, other scope, no block), feed mentions with order and membership unchanged, a no-count name keeping the ABSENT basis. 5 passed, run twice.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "UNVGY_US_Equity's served forecast reason names the period-end-date absence and no longer carries 'pulled before C-MODEL-FORECASTS'; R82 UNVGY AC1 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round82_prep/checks/r82_unvgy.py\" --crit AC1 --where local; echo \"exit=$?\"",
+      "output_evidence": "forecast_reason: 'no forecast figure is served: no BEST_PERIOD_END_DATE for this period (FY1, FY2, FY3)' | PASS U1 /thesis answered 200 with a forecast_reason | PASS U2 the reason no longer says 'pulled before C-MODEL-FORECASTS' | PASS U3 the reason names the period-end-date absence | R82 UNVGY AC1 SERVED: YES | exit=0",
+      "denominator": "3 of 3 sub-checks (U1-U3) PASS; 1 of 1 name (UNVGY_US_Equity)",
+      "status": "PASS",
+      "expect": "R82 UNVGY AC1 SERVED: YES[\\s\\S]*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "every feed item served for the named names carries mentions from its gold row and the ordering basis is named; R82 FEED AC1 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round82_prep/checks/r82_feed.py\" --crit AC1 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS F1 AMD_US_Equity overlay 200, feed SERVED, items 22 | PASS F2 AMD_US_Equity items carrying an integer mentions: 22 of 22 | PASS F3 AMD most_discussed_basis | PASS F1 BA_US_Equity overlay 200, feed SERVED, items 75 | PASS F2 BA_US_Equity items carrying an integer mentions: 75 of 75 | PASS F3 BA basis | R82 FEED AC1 SERVED: YES | exit=0",
+      "denominator": "2 of 2 names; 97 of 97 items (AMD 22, BA 75) carry an integer mentions; 6 of 6 sub-checks PASS",
+      "status": "PASS",
+      "expect": "R82 FEED AC1 SERVED: YES[\\s\\S]*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The per-period sentence builder is the one thing that moves UNVGY's reason. Planted mutant: _per_period_forecast_reason replaced in-process by a function returning None, then read_model run on a block whose only forecast unresolved entry is FY1 'no BEST_PERIOD_END_DATE for this period'.",
+      "expected": "FIXED: 'no forecast figure is served: no BEST_PERIOD_END_DATE for this period (FY1)'. MUTANT: the false stamp text 'raw stamp ... (pulled before C-MODEL-FORECASTS)'.",
+      "observed": "FIXED: no forecast figure is served: no BEST_PERIOD_END_DATE for this period (FY1) | MUTANT: raw stamp 20261008T131353Z carries no bestdata.json (pulled before C-MODEL-FORECASTS)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The new test file run twice; the two criterion checks each run twice (local, read-only S3 gold/model reads).",
+      "observed": "Test file: 5 passed, 0 failed (both runs). r82_unvgy and r82_feed: identical YES verdicts and identical counts (22, 75) on each run. Whole lib/research/api/tests/: 880 passed, 2 failed (test_print_fiscal_year_sort.py::test_head_copy_raises_on_mixed_keys and test_print_format_rich.py::test_default_and_fmt_pdf_are_byte_identical_to_build_pack_itself, both ModuleNotFoundError: No module named 'pypdf', the two named at the base).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A redeploy of opal-amgt-scoped-api.",
+      "reason": "BOUNDS 1: no deploy. Both fixes serve only after the issuer's redeploy; AC1/AC2 ran --where local."
+    },
+    {
+      "item": "Re-ordering the feed by mentions.",
+      "reason": "The order says no item is re-ordered; order stays newest first and the basis text says so."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~326/AMGT_RESAPP.TO-AMGT-gg-4.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/api/scoped_amgt.py lib/research/api/tests/test_r82_reason_and_mentions.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q lib/research/api/tests/ -p no:cacheprovider",
+      "result": "2 failed, 880 passed, 315 warnings in 57.79s (the 2 are the pypdf ModuleNotFoundError pair)"
+    }
+  ]
+}
