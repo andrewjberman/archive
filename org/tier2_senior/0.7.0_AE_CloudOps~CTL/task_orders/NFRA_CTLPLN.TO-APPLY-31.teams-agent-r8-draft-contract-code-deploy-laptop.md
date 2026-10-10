@@ -26,6 +26,12 @@
         on the same root; it widened nothing, and branch A was met exactly.
     (2) STOP 3 widened from 60 to 180 minutes, to avoid reading an uninformative zero as clean. That is stricter, not looser.
     EXERCISE: the issuer's first-hour draft_contract read runs at ~00:05Z. The first real drafting call is the live exercise.
+    FIRST-HOUR READ (issuer, 00:07:11Z, window 23:03Z-00:07Z, both log groups):
+    - draft_contract lines: 0 (no Teams message needed a draft in the hour);
+    - ingress_poll lines: 64, the positive control;
+    - errors and ingress_step_failed: 0.
+    There are no refusals, so there is no rollback trigger. The exercise remains the first real drafting call: its
+    draft_contract outcome is read at the issuer's next drive tick after one appears.
   </closure>
 
   <precondition>
