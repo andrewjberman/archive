@@ -239,7 +239,7 @@ So **~1.5x**, not 21x. Two honest riders:
 
 Record count continues to climb: 4,543 at step 2, 4,695-4,699 here.
 
-## STATUS: the remedy CANNOT BE COMMITTED, and not for a reason in this cell
+## STATUS as of 2026-10-09 20:0xZ -- SUPERSEDED 2026-10-10 21:2xZ by the section below: the remedy CANNOT BE COMMITTED, and not for a reason in this cell
 
 `commit-gate` refuses, twice, reproducibly:
 
@@ -278,14 +278,66 @@ issuer, since LD-0116 bars a Tier-2 seat from messaging MSTR directly.
 |---|---|
 | 0 hookup | DONE, committed `354d58bc30`, 58/58 tests |
 | 1 release tree + census + manifest + bun | DONE, `74d2522f22`, 8 files / 0 outside, `bc37107`, 77/77 |
-| 2 load condition | **MET under the remedy** (12/12 samples <= 30 s), but the remedy is UNCOMMITTED |
+| 2 load condition | **MET under the remedy** (12/12 samples <= 30 s); remedy COMMITTED `ea58e3662d` 2026-10-10 21:1xZ |
 | 3 rollback proof | DONE, content-verified, unexercised |
-| 4 ledger + act | NOT STARTED -- waits on MX-r-9's ledger close AND on the `.py` commit becoming possible |
+| 4 ledger + act | NOT STARTED -- waits on MX-r-9's ledger close ALONE; the `.py` commit path cleared |
 
 Nothing has been deployed. `/opt/opal-gateway/app/admin_fabric_overlap.py` is still ABSENT, service
 `active`, MainPID **864717** unchanged, live `FETCH_THREADS` still **8**. No entry exists for slug
 `nfra-mcportal-cp2-release`. No POST was ever made to `/api/admin/fabric/calls/close` (BOUNDS 2).
 
-**Two gates now stand between this cell and its act:** MX-r-9's ledger close (the issuer forwards it) and
-a working `.py` commit path on this device. The second is the newer one and nobody outside this record
-knows it yet.
+**ONE gate now stands between this cell and its act:** MX-r-9's ledger close, which the issuer forwards.
+The second gate -- a working `.py` commit path on this device -- is cleared; see the section below.
+
+
+---
+
+# 2026-10-10 21:2xZ -- the `.py` commit gate CLEARED; the remedy is COMMITTED
+
+`ea58e3662d` on `wk-mcportal-cp2-r2`, through `.tools/safe-commit.sh` with NO override, author
+`0.7.0_AE_CloudOps~MP`. The issuer asked for the commit in msg 33012 after reading the gate clean at
+21:0xZ. Before committing, this seat re-ran the gate itself in this tree:
+`.tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/admin_fabric.py` -> "pre-commit gate clean for 1 of
+1 file(s)", rc=0; and the admin/fabric suite at the committed bytes ->
+`tests/test_admin*.py tests/test_entitlement_admin.py` **58 passed, 0 failed**. The committed diff is
+AMENDMENT 5's two changes and nothing else (6 insertions, 2 deletions, one file).
+
+**The fault DID NOT REPRODUCE, and that is a non-reproduction, not a fix.** Measured at 21:1x-21:2xZ, each
+figure beside its denominator:
+
+| trial | result | denominator |
+|---|---|---|
+| `python -m ruff --version`, Python314 (the interpreter Z-S34 blamed) | 20 rc=0, 0 WinError 4551 | 20 |
+| `python -m ruff --version`, Python311 | 20 rc=0, 0 WinError 4551 | 20 |
+| `.tools/commit-gate.sh` on the A5 file, real gate | 5 rc=0, 0 refusals | 5 |
+
+So **Z-S34's interpreter-split diagnosis is falsified as a deterministic mechanism**: the very interpreter
+it named now passes 20 of 20. The issuer independently read 1 refusal in 7 runs at 20:57Z (row Z-S35,
+its own). Low-rate and intermittent is what the two measurements agree on; the interpreter is not the
+discriminator. Z-S34 is left exactly as written, because rows are append-only.
+
+**The instrument trap, which is the reusable part: NEITHER Windows log records this refusal.** Over the
+1,185 `Microsoft-Windows-CodeIntegrity/Operational` events in the 30 hours spanning the whole refusal
+window, **0 name ruff or python** (the 395 Id=3033 blocks are all SentinelOne's `SentinelAmsi64.dll`
+refused into `svchost.exe`, status `0xC0000428`, a separate standing condition this cell does not own).
+`Microsoft-Windows-AppLocker/EXE and DLL` holds only Id=8001 policy-application notices and no block
+event. **Therefore "the event log shows no block" is NOT evidence that the fault is gone** -- the
+instrument never saw it when it WAS happening. Whoever grades the fix must grade it by executing ruff,
+never by reading these logs.
+
+One correlate, named as a correlate and not a cause: AppLocker applied a policy at **2026-10-10
+20:49:42Z**, 8 minutes before the last observed refusal and ~13 minutes before the clean window. The
+ONSET (between `354d58bc30` passing and the 2026-10-09 20:0xZ refusals) has no corresponding event in
+either log, so the pair does not make a mechanism.
+
+**What is unconditionally true regardless of the intermittency**, and still worth the one-line fix with
+`0.0.0_AB_MSTR~Z` as gate owner: `commit-gate.sh:59` execs bare `python`, and the gate reports a failure
+to EXECUTE ruff as "BLOCKED: ruff check failed on <file>". On an intermittent fault that wording is
+costlier than on a deterministic one -- it sends the author hunting a lint defect in correct code when
+the right act is to re-run once. Z-S34 notes (a) and (d).
+
+**Nothing was deployed by any of this.** The host is untouched: live `FETCH_THREADS` still 8, no entry for
+slug `nfra-mcportal-cp2-release`, no POST to `/api/admin/fabric/calls/close` (BOUNDS 2). At the act the
+live base is read from the HOST by md5 against the candidate build input, never from the artifact's
+`-latest` label, which is mislabelled until MX-r-9's re-stamp of `d3c31e972e` lands (msg 33000, relayed
+33004) -- so the release tree is re-cut then, not now.
