@@ -1,0 +1,48 @@
+{
+  "code_sha256": "uibjggn93MPPtuIh33Yvehv1xECqrfhPxsWLdmcdYjE=",
+  "prior_code_sha256": "AzrzJS+91y57ylRdqGccFPGqWaqAGLFn/jhItkAQCzE=",
+  "prior_artifact_version": "bXN11PDXpwx7MqRIO3LCyChhLhc26drn",
+
+  "_contract": "OG-ap-5 step 3 writes exactly code_sha256, prior_code_sha256 and prior_artifact_version; ap5.AC1 reads the first two and compares the first against the LIVE CodeSha256. The extra underscore-prefixed keys below are provenance for a reader and are not part of the contract.",
+  "_claim": "measured",
+  "_recorded_before_the_swap": "This file is committed BEFORE the artifact upload and BEFORE the apply, which is what CTO half @d66a0fb956 condition C2 requires ('The prior artifact VersionId and source_code_hash are recorded before the swap'). The commit timestamp, not this sentence, is the evidence.",
+
+  "_prior_how_measured": {
+    "live_function": "aws lambda get-function --function-name opal-assets-silver-schwab -> CodeSha256 AzrzJS+91y57ylRdqGccFPGqWaqAGLFn/jhItkAQCzE=, State Active, LastUpdateStatus Successful, LastModified 2026-10-09T02:33:06.000+0000, MemorySize 3008, Timeout 600",
+    "live_artifact": "aws s3api head-object --bucket opal-313476888478-lambda-artifacts --key opal-assets/opal-assets-silver-schwab.zip -> VersionId bXN11PDXpwx7MqRIO3LCyChhLhc26drn, LastModified 2026-10-09T02:21:53+00:00, ContentLength 74839, Metadata.content-sha256 AzrzJS+91y57ylRdqGccFPGqWaqAGLFn/jhItkAQCzE=",
+    "cross_check": "The artifact's own content-sha256 metadata EQUALS the live CodeSha256, so the function is running the current S3 object version and the prior pair is self-consistent. Terraform pins s3_object_version = data.aws_s3_object.artifact.version_id and source_code_hash = that metadata key (modules/yang-lambda/main.tf:36-39), so these two values are the exact rollback coordinates."
+  },
+
+  "_build_how_measured": {
+    "command": "BUILD_ONLY=1 bash infra/aws/lambda/ci/build-and-upload.sh opal-assets opal-assets-silver-schwab",
+    "result": "BUILD_ONLY: /tmp/lambda-artifact-opal-assets-silver-schwab.zip sha256=uibjggn93MPPtuIh33Yvehv1xECqrfhPxsWLdmcdYjE= key=opal-assets/opal-assets-silver-schwab.zip; Size 76K; import-closure OK over 12 packaged .py files",
+    "manifest_index_gate": "SKIP -- this BUILD_MANIFEST declares no declared_blobs, so there is no index reference to check. The script prints this as 'not a pass', and it is recorded here as SKIP rather than as a pass.",
+    "build_differs_from_prior": true,
+    "why_that_matters": "A Lambda deploy leg reads as a 0-diff when the artifact was never rebuilt and uploaded, because source_code_hash is read from the S3 object's metadata rather than from the repo. The built hash differing from the prior is what makes the coming plan a real change."
+  },
+
+  "_build_commit_pin": {
+    "from": "47c3c75f11",
+    "to": "b3e481b261",
+    "committed": "d40a3cd977",
+    "authority": "CTO half @d66a0fb956 C2; issuer AMENDMENT 1 @1d77a3d1f5 (row Z-S78 ruled option (a)) added infra/aws/terraform/opal-assets/silver.tf to the order's <paths> and admits the one OPAL_BUILD_COMMIT environment row.",
+    "why_b3e481b261": "git log b3e481b261..HEAD returns 0 commits over data/assets/scripts/silver/ AND 0 over infra/aws/lambda/opal-assets/opal-assets-silver-schwab/, so that commit's silver tree equals the package dir; source and Lambda copy are one blob f9b65e2e74 with a clean working tree.",
+    "rollback_pin": "47c3c75f11"
+  },
+
+  "_plan_isolation_one_variable_at_a_time": {
+    "baseline_before_any_edit": "targeted plan on module.silver_converter[\"schwab\"] read 'No changes' -- a 0-diff proving no memory, timeout, layer, role or environment row was ALREADY pending on this resource, so any such row after the upload would be new and is a STOP",
+    "after_pin_edit_only_no_upload": "'0 to add, 1 to change, 0 to destroy' with exactly one changed key, OPAL_BUILD_COMMIT 47c3c75f11 -> b3e481b261; 3 environment keys and 31 attributes unchanged",
+    "expected_after_upload": "the same one environment row PLUS s3_object_version and source_code_hash; any other row or environment key is a STOP per AMENDMENT 1"
+  },
+
+  "_preconditions_verified_not_taken_on_report": {
+    "cto_C1": "VERIFIED in the bytes at @b3e481b261: DuplicateRoutedSectionError is raised in the plan loop BEFORE any writer exists (schwab_conversion.py), with test_ogpn1_ac04_duplicate_tag_raises added, and the Lambda copy received the same 14 lines. The issuer's note claimed C1 met; this was read rather than accepted.",
+    "tests": "python -m pytest data/assets/scripts/silver/tests/test_ogpn1_rps_pin.py -q -> 4 passed",
+    "ac1_at_base": "FAIL as the issuer predicted -- 'entries at HEAD 0; status CLOSED=no; sentinel at HEAD=no'",
+    "ac2_at_base": "FAIL as the issuer predicted -- 'served dates 758; qualified 752; open 6' and the open list is exactly the six held dates",
+    "bronze_inputs": "6 of 6 PRESENT by head-object, VersionIds and sizes read",
+    "silver_targets": "0 of 24 prefixes NON-EMPTY (4 tables x 6 dates), so every re-run write is a first version and rollback is delete-object --version-id per key. A positive control on schwab/08403355/silver/fact_rps/date=2025-12-22/ returned data.parquet, so the 24 zeros are a true absence and not an instrument that cannot see silver.",
+    "time_gate": "COO half @d41a3068cd decision 3 and the order preflight bar the apply and the re-run inside [09:15,11:35), [12:00,12:50) and [21:15,23:35) UTC. The four schwab EventBridge rules were read and all carry day-of-week '*' (not weekday-only), so the evening window binds on Saturday 2026-10-10."
+  }
+}
