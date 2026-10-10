@@ -365,6 +365,15 @@ moved is the owner field, which is the half of `FWD-4`'s bar ("in code, or a nam
 reason") that nine of sixteen rows could not be measured against, because a census of
 `owner=UNASSIGNED` cannot see a row that carries no owner field at all.
 
+**AMENDED BY `IAM-w-4` (2026-10-09; arithmetic re-cut by the issuer `2.0.0_SA_COO~ZI` 2026-10-10) -- TWO
+TOKENS MOVED, NO OWNER MOVED.** Rows 5 (`finbert-ec2-backfill-role`) and 16 (`workspace-sync-lambda-role`)
+moved from `ADOPT` to `DEFER` on the CTO's home ruling (`ledger/ROUND_ANALYSIS.round5.md` @`f77e32d7c3`,
+lines 22-23), landed as carrier @`6c9703007c`. So the arithmetic above now reads 1 `DECLARED` + 7 `ADOPT`
++ 5 exemption rows + 1 `RETIRE` + 2 `DEFER` = 16, re-counted from the table's first lines. `DEFER` and its
+reopen-condition discipline are defined in `deliverables/0.7.0_AE_CloudOps~IR/round6/DEFER_ROWS_5_16.md`
+@`4dff2b348a`. Both rows keep `owner=0.7.0_AE_CloudOps~Z`, so owner coverage stays `rows=16 unowned=0`.
+The paragraphs above stay as their authors wrote them, at their own vintage.
+
 ## CLASS RULINGS
 
 One ruling disposes of a class rather than one role at a time, stated here once so a reader sees
