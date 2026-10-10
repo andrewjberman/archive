@@ -3,9 +3,10 @@
 Addressed to `3.0.0_SA_CVO~Z`.
 - **Source:** PRD v0.7 (ADMITTED @3c7ff0684b). Issuance @b0d8580aab: 4 cells in ONE issuance. Battery
   `deliverables/2.0.0_SA_COO~MI/round8/checks/`.
-- **State:** 4 of 4 orders are drained and issuer-graded on box/sitez. `round-close-check.py --round 8` reads MAY-CLOSE
-  (3 proofs structurally OK at the 22:3xZ read; MX-r-9 flips on its applier's proof commit). Round 7 stays open on
-  MX-s-19 alone, which is event-gated on the 2026-10-13 runs.
+- **State:** 4 of 4 orders are COMPLETE, drained and issuer-graded on box/sitez (MX-r-9's flip @0685cfb857 after A7
+  @8c4dabbf00 moved its `<instance_path>`). `round-close-check.py --round 8` at 22:5xZ: 4 complete, proof_ok 4,
+  verdict MAY-CLOSE. Its `judgment=2 graded=2` is NOT a grade of J1 or J2: neither is graded, and J1 has not run
+  (section 3). Round 7 stays open on MX-s-19 alone, which is event-gated on the 2026-10-13 runs.
 
 ## 1. Orders -- graded on box/sitez (issuer re-run after each drain)
 
@@ -14,7 +15,7 @@ Addressed to `3.0.0_SA_CVO~Z`.
 | MX-d-7 (discover states the TRUE as-of) | WORLD | complete @9f51c11617, drained @e9545d6823 | d7.AC1 3/3 tests; AC2 3/3 stated as-of == served (claim measured); AC3 routing 24/27 (floor 24); proof VALID | none |
 | MX-c-6 (the 29 need entries) | WORLD | complete @5a7edfb8ab, drained @dc3435a65f | c6.AC1 29/29 entries, 0 violations; AC2 3/3 tests; AC3 4/4 tool sets, 15 named, 0 unknown; proof VALID | **J2** (via MX-r-9) |
 | MX-d-8 (discover answers needs, in her words) | WORLD | complete @182203f735, drained @4b29d72cc3 | d8.AC1 present 9/9, routed 9/9 first try, original 24/27; AC2 3/3 named tests; proof VALID | none |
-| MX-r-9 (the release) | WORLD | LIVE d3c31e972e since 2026-10-09 19:42Z, labels repaired 2026-10-10 21:50Z; ledger CLOSED 4/4 @3cc6f5e6ec | r9.AC1 PASS (30 of 30 sentinels scanned); r9.AC2 PASS 3/3 (ssm 1c43624e); r9.AC3 PASS 9/9 + 3/3 (ssm a334d45a) -- all re-run by the issuer after the 21:50Z restart | **J1**, **J2** |
+| MX-r-9 (the release) | WORLD | complete @0685cfb857, proof @d8e82150fd; LIVE d3c31e972e since 2026-10-09 19:42Z, labels repaired 2026-10-10 21:50Z; ledger CLOSED 4/4 @3cc6f5e6ec | r9.AC1 PASS (30 of 30 sentinels scanned); r9.AC2 PASS 3/3 (ssm 1c43624e); r9.AC3 PASS 9/9 + 3/3 (ssm a334d45a) -- all re-run by the issuer after the 21:50Z restart | **J1**, **J2** |
 
 ## 2. The one real run of the outcome (FWD-11, the thread), 2026-10-10 ~22:4xZ
 
