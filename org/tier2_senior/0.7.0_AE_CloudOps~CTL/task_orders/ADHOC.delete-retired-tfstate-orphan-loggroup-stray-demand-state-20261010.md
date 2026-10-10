@@ -4,8 +4,21 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~CTL</issued_to>
 <date>2026-10-10</date>
-<status>pending</status>
+<status>complete</status>
 <risk>WORLD</risk>
+
+<closure>
+COMPLETE (issuer, ~14:0xZ). AC1 is graded MET by the issuer's live re-read:
+- T1, T2 and T4 `head-object` rc=255 (absent);
+- T3 exact-name describe returns 0;
+- controls: the state bucket still lists objects, and a sibling log group returns 1.
+All four were absent from 13:56Z; ledger CLOSED; receipt
+`org/tier2_senior/0.7.0_AE_CloudOps~CTL/deliverables/ADHOC_DELETES_20261010/RECEIPT.md` @46cca3496a. Recoverability:
+T1, T2 and T4 left delete markers on versioned buckets, plus hashed copies; T3's 4,811 bytes are gone, with its metadata saved.
+Two findings the order did not predict, both favouring the deletes:
+- the retired roots are empty directory husks;
+- T4's request keeps its live state under request_state/, so the deleted demand_state/ object was a stray.
+</closure>
 
 <title>Delete four approved AWS objects: two retired Terraform state objects, one orphan log group, one stray demand_state object -- read each first, delete, read the absence after</title>
 
