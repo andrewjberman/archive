@@ -133,12 +133,40 @@ different, 0 added, 0 missing). Tarball bytes were never the gate; host file byt
 |---|---|
 | **r9.AC2** | `/health=200; stated as-of equals served (claim measured) 3 of 3` -- **RESULT: PASS**, exit=0 (`ssm:d0f575fe-3751-45f8-a38a-d63b762a2f4d`). The three FRESH lines: `model_portfolio_benchmarks.json` 2026-10-09 = 2026-10-09; `aum-metrics.json` 2026-10-08 = 2026-10-08; `aggregate-aua-timeseries.json` 2026-10-08 = 2026-10-08, every claim `measured`. The issuer's dry-run read **0 of 3**, each stating 2026-08-10 `held` against 2026-10-07 served. |
 | **r9.AC3** | `/health=200; first match expected 9 of 9; write asks with class+grant 3 of 3` -- **RESULT: PASS**, exit=0 (`ssm:297b6633-d144-44bd-ad40-dfbdf1790de6`). The dry-run read 0 of 9 and 0 of 3, all 9 `NOT_CATALOGUED`. |
-| **r9.AC1** | run after this record's commit, since it grades the ledger entry at HEAD. |
+| **r9.AC1** | `entry files at HEAD=1; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR: 30 of 30 sentinel(s) scanned` -- **RESULT: PASS**, exit=0, run after the ledger-close commit `3cc6f5e6ec` because it grades committed state. **Negative control:** the same script, byte-unmodified, run in a throwaway sparse worktree detached at `b41c3a9e29` (the commit immediately before the close) reads `sentinel at HEAD=yes; listed OPEN/HELD=1` -- **RESULT: FAIL**, exit=1. Two limbs flip, so AC1 discriminates rather than passing vacuously, and no live, shared or served state was mutated to show it. **Determinism:** PASS on two back-to-back runs. |
 | **J1, J2** | JUDGMENT, graded at L9 by `3.0.0_SA_CVO~Z`, never self-graded. No verdict is written here. |
 
-Both AC strings match their `<expect>` in the order verbatim. FWD-13's mechanism is live: discover now states a
+All three AC strings match their `<expect>` in the order verbatim. FWD-13's mechanism is live: discover now states a
 `measured` as-of equal to the served object's own vintage, where before the release it stated a held certification
 date for all three.
+
+**Proof instance: VALID (rc=0)**, run with the expected criterion ids `AC1,AC2,AC3,J1,J2` and with
+`--governing-order` bound, so coverage was checked rather than left unchecked.
+
+**It is NOT at the order's `<instance_path>`, and that criterion is REFUSED as written with its measurement**
+(section 2 bound 3). The order declares
+`deliverables/0.9.0_WK_NFRA_MCPINDEX~28/NFRA_MCPINDEX.TO-MX-r-9.discover-needs-release.proof_of_spec.json` --
+worker ~28's folder, from when the order was PHASE A's; AMENDMENT A1 re-addressed PHASE B to this lane but never
+moved the path. `safe-commit.sh` refused it, correctly and in block mode:
+
+```
+VIOLATION: .../deliverables/0.9.0_WK_NFRA_MCPINDEX~28/...proof_of_spec.json
+  -- lane=TREE_DELIVERABLES (deliverables/<SERIAL>/** -- the owner is in the PATH,
+     clause 4 (ADHC_OWNPTH.004) permits exactly the serial named by the sub-folder);
+     agent=0.7.0_AE_CloudOps~MX not in permitted_agents
+```
+
+No file was ever tracked at that path, so nothing of worker ~28's was overwritten or displaced. `--force` was not
+used: it bypasses contamination checks only, never a lane refusal, and the audited escape
+(`GIT_COMMIT_AUTHOR_OVERRIDE`) would have meant writing another agent's folder under a borrowed lane, which is not
+a thing to do to pass a path check. The instance is therefore at
+`deliverables/0.7.0_AE_CloudOps~MX/NFRA_MCPINDEX.TO-MX-r-9.discover-needs-release.proof_of_spec.json`, which this
+order's `<paths>` grants and the lane rule permits. **The issuer should amend `<instance_path>` to that path before
+flipping `<status>` to `complete`,** because `to-pipeline-gate.py`'s complete-flip path looks for the instance at
+the declared location.
+Genre is **BUILD, not DEPLOY**: the order carries `<risk>WORLD</risk>` but no `<proof_genre>DEPLOY</proof_genre>`
+line at HEAD, and DEPLOY is never self-declared, so the redeploy exemption from a mutant was not available and the
+negative control above was constructed instead.
 
 ## 9. The manifest record, landed by hand -- and what was NOT copied
 
@@ -154,8 +182,13 @@ deliberately keeps empty under `_checksums_note` "not maintained". Instead only 
 applied in the shared checkout, asserting the prior `deployed_commit` was still `1e32562729` before writing. The
 resulting diff is **6 insertions, 6 deletions**, touching **0** other services.
 
-`EC2_MANIFEST.json` is **not** in this order's `<paths>`, so landing it is reported to the issuer rather than
-assumed; see section 10.
+`EC2_MANIFEST.json` is **not** in this order's `<paths>`. It nonetheless **landed**, at `1df2cdb295`, and the
+reason is mechanical rather than permissive: the owned-paths pre-commit hook enforces an order's `<paths>` only when
+`.comp-graph/.agent_context` carries a `TO_ID`, and this session's context carries `TO_ID=` empty (set that way by
+`org/XXX.md` Step 1b E, which says to start a TO with `comp-to`, never by writing the id into the file). So no
+`<paths>` set was in force and the commit was not refused. **That is an absent guard, not a grant** -- the order's
+declared surface still does not name this file, so the issuer is asked to grant it or name another carrier. The
+record itself is correct and verified either way; what is in question is only its declared surface.
 
 ## 10. What is open, and whose it is
 
@@ -164,10 +197,14 @@ assumed; see section 10.
 2. **`2.0.0_SA_COO~MI`** -- tell `2.0.0_SA_COO~O` and `2.0.0_SA_COO~MP` the host slot is free, which is what E2's
    `.xlsx` release and MP-r-2 wait on. The issuer said it makes that call, not this seat.
 3. **`2.0.0_SA_COO~MI`** -- grant `infra/aws/ec2/EC2_MANIFEST.json` in `<paths>`, or name another carrier for the
-   manifest record. The record is written and verified; only its commit surface is in question.
+   manifest record. The record is written, verified and **committed** (`1df2cdb295`); it landed because the
+   owned-paths hook binds only against an active `TO_ID` and this session carries none, which is an absent guard
+   rather than a grant. Nothing is blocked on this -- it is a declaration to correct, not an act to redo.
 4. **`2.0.0_SA_COO~MI`** -- disposition `NFRA_MCPINDEX-Z-S94` (orphaned dashboard assets, INERT). The remedy is a
    `deploy-to-ec2.sh` extract-step change and belongs to the gateway surface, not to this order's two-file cut.
-5. **`3.0.0_SA_CVO~Z`** -- J1 and J2 at L9. J1 additionally waits on Alyssa's own thread run, booked through
+5. **`2.0.0_SA_COO~MI`** -- amend `<instance_path>` to this lane's folder (section 8). The lane rule mechanically
+   refuses the declared path, which is worker ~28's, so the complete-flip would look where nothing can be written.
+6. **`3.0.0_SA_CVO~Z`** -- J1 and J2 at L9. J1 additionally waits on Alyssa's own thread run, booked through
    `0.0.0_AB_MSTR~Z`; that is the round's one declared essential wait.
 
 Nothing in this repair is blocked on this seat.
