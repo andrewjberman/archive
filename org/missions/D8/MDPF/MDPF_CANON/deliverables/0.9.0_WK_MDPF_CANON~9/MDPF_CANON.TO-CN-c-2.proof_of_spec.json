@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "12adb87963"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "335258e392",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-c-2.md"
+  },
+  "to_id": "MDPF_CANON.TO-CN-c-2",
+  "assignee": "0.9.0_WK_MDPF_CANON~9",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; the BLOCKING row MDPF_CANON-D1-W9-S1 rides this commit. No AWS call."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: r3_checks.py writer -- expect: ROUND 3 WRITER: 3 of 3 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round3/checks/r3_checks.py\" writer; echo \"exit=$?\"",
+      "output_evidence": "ARM 1 NO TYPED: FAIL -- typed-home literals: ['opal-data-mdpf', 'mdpf/bronze/orion_model_composition']; imports opal_naming: False\nARM 2 DEST: FAIL -- AttributeError: module 'r3_writer' has no attribute 'bronze_destination'\nARM 3 GRANT: FAIL -- an orion_model_composition ARN on the builder's bucket and prefix: False; s3:PutObject present: True\nROUND 3 WRITER: 0 of 3 arms\nexit=1",
+      "denominator": "0 of 3 arms",
+      "status": "FAIL",
+      "expect": "ROUND 3 WRITER: 3 of 3 arms",
+      "status_reason": "CN-c-2 stopped at step 2 (BLOCKING row MDPF_CANON-D1-W9-S1): the daily runner does not carry lib/opal_naming.py to the Stage-0 path; the criterion cannot pass until the cell's edits land."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is JUDGMENT, graded at the round-3 close (never self-graded): after CloudOps applies the grant and deploys the script, ONE on-demand run of the step writes the nine model files and the meta at the builder's keys under opal-data-assets, and the objects are read where they landed.",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment=true: no invocation; graded at the round-3 close after CloudOps applies and deploys",
+      "output_evidence": "Not run; no AWS write by the worker. The cell is stopped at step 2 (BLOCKING row MDPF_CANON-D1-W9-S1), so no grant or script exists for the on-demand run to exercise.",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round-3 close",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "r3_checks.py writer at base (issuer's preflight): 0 of 3 expected before the cell's edits; the cell's edits were not made, so no after-state exists.",
+      "expected": "0 of 3 before; 3 of 3 after.",
+      "observed": "0 of 3, exit=1 at base (no edit made).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "check run once at base",
+      "observed": "single run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No edit to data/mdpf/scripts/bronze/pull_orion_model_composition.py, infra/aws/terraform/mdpf-pipeline/iam.tf, infra/logic/registry/scopes.json or generated_locals.tf",
+      "reason": "CN-c-2 step 2 stop: the Stage-0 script cannot import lib.opal_naming on the runner (BLOCKING row MDPF_CANON-D1-W9-S1). The cell does not type the prefix."
+    },
+    {
+      "item": "No terraform plan/apply, no AWS call of any kind",
+      "reason": "Order bound 1: no AWS write; CloudOps applies after the drain."
+    }
+  ],
+  "surprises": [
+    "MDPF_CANON-D1-W9-S1"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "r3_checks.py writer",
+      "result": "ROUND 3 WRITER: 0 of 3 arms"
+    }
+  ]
+}
