@@ -733,18 +733,18 @@ OLD_STREAM = {"logStreams": [st(999_999)]}   # last event one millisecond before
 
 def test_zero_call_read_is_void_on_zero_streams(monkeypatch):
     found = {"events": [{"m": 1}]}
-    # zero active streams, zero matches, a control that DID find the filer: still VOID
+    # GROUP_EMPTY: the group holds 0 streams in total, zero matches, a control that DID find the filer: VOID
     out, w = _zero_call(monkeypatch, {"events": []}, found, streams=NO_STREAMS)
-    assert out["verdict"] == "ZERO_CALL_VOID" and out["streams_active_in_window"] == 0 and out["match_count"] == 0
-    assert any("streams_active_in_window is 0" in r for r in out["void_reasons"])
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_EMPTY"
+    assert out["streams_in_group"] == 0 and out["match_count"] == 0
     assert out["verdict"] != "ZERO_CALLS_PROVEN"
-    # a stream whose last event is before iat is not active: still VOID
+    # a stream whose last event is before iat is in the group but not active: NOT void (see the F1 test)
     out, w = _zero_call(monkeypatch, {"events": []}, found, streams=OLD_STREAM)
-    assert out["verdict"] == "ZERO_CALL_VOID" and out["streams_active_in_window"] == 0
-    # active streams are counted across pages: 0 + 0 is void; a later page with active streams makes the zero countable
+    assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["streams_in_group"] == 1
+    # streams are counted across pages: 0 + 0 in total is GROUP_EMPTY; a later page with streams makes the zero countable
     out, w = _zero_call(monkeypatch, {"events": []}, found,
                         streams=[{"logStreams": [], "nextToken": "p2"}, NO_STREAMS])
-    assert out["verdict"] == "ZERO_CALL_VOID"
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_EMPTY"
     out, w = _zero_call(monkeypatch, {"events": []}, found,
                         streams=[{"logStreams": [], "nextToken": "p2"},
                                  {"logStreams": [st(ACTIVE_MS, "a"), st(ACTIVE_MS, "b")]}])
@@ -760,7 +760,7 @@ def test_zero_call_read_needs_its_positive_control(monkeypatch):
     out, w = _zero_call(monkeypatch, {"events": []}, {"events": []})
     assert out["verdict"] == "ZERO_CALL_VOID" and out["control"]["found"] == 0
     assert out["control"]["log_group"] == "/aws/lambda/opal-ticket-api" and out["control"]["same_filter"] is True
-    assert any("positive control" in r for r in out["void_reasons"])
+    assert out["void_reason"] == "CONTROL_FOUND_NO_FILER"
     assert [e[1] for e in w.events if e[0] == "aws"] == [
         "streams:" + run.DATA_REFRESH_LOG_GROUP, "logs:" + run.DATA_REFRESH_LOG_GROUP,
         "streams:" + run.TICKET_LOG_GROUP, "logs:" + run.TICKET_LOG_GROUP]
@@ -771,12 +771,13 @@ def test_zero_call_read_needs_its_positive_control(monkeypatch):
     # a data-refresh match is reported as non-zero, whatever the control says
     out, w = _zero_call(monkeypatch, {"events": [{"m": 1}]}, {"events": []})
     assert out["verdict"].startswith("NON-ZERO")
-    # the control read raising is UNREAD, never a zero
+    # the control read raising is VOID (the control did not find the filer), never a zero
     out, w = _zero_call(monkeypatch, {"events": []}, RuntimeError("throttled"))
-    assert out["verdict"].startswith("UNREAD") and out["match_count"] is None
-    # the stream read raising is UNREAD too
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "CONTROL_FOUND_NO_FILER"
+    # the stream read raising is VOID too: the group cannot be described
     out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, streams=RuntimeError("denied"))
-    assert out["verdict"].startswith("UNREAD") and out["match_count"] is None
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_NOT_DESCRIBABLE"
+    assert out["match_count"] is None
 
 
 def test_irpt_status_sha_mismatch_is_a_stop_before_any_write(monkeypatch):
@@ -1061,12 +1062,43 @@ def test_stream_denominator_is_streams_active_in_the_window(monkeypatch):
     assert out["control"]["streams_active_in_window"] == 0 and out["verdict"] == "ZERO_CALLS_PROVEN"
 
 
-def test_zero_active_streams_is_void(monkeypatch):
-    # nothing active in the data-refresh group: VOID, whatever else is true
-    for streams in (NO_STREAMS, OLD_STREAM, {"logStreams": [{"logStreamName": "never-wrote"}]}):
+def test_zero_active_streams_alone_is_not_void(monkeypatch):
+    # F1: streams exist but none is active in the window, no matches, control found the filer: a true zero
+    for streams in (OLD_STREAM, {"logStreams": [{"logStreamName": "never-wrote"}]}):
         out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, streams=streams)
-        assert out["verdict"] == "ZERO_CALL_VOID" and out["streams_active_in_window"] == 0, streams
-        assert out["match_count"] == 0 and out["control"]["found"] == 1
-    # an empty answer beside a real event (the live case) does not void a group that has active streams
+        assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["streams_active_in_window"] == 0, streams
+        assert out["streams_in_group"] == 1 and out["match_count"] == 0 and out["control"]["found"] == 1
+        assert "void_reason" not in out
+    # active streams still prove it, and the trace says how many were active
     out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]})
     assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["streams_active_in_window"] == 1
+
+
+def test_group_with_no_streams_at_all_is_void(monkeypatch):
+    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, streams=NO_STREAMS)
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_EMPTY"
+    assert out["streams_in_group"] == 0 and out["streams_active_in_window"] == 0
+
+
+def test_group_not_describable_is_void(monkeypatch):
+    for exc in (RuntimeError("AccessDenied"), KeyError("ResourceNotFoundException")):
+        out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, streams=exc)
+        assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_NOT_DESCRIBABLE", exc
+        assert out["streams_in_group"] is None and out["matches"] is None
+
+
+def test_control_without_the_filer_is_void(monkeypatch):
+    out, w = _zero_call(monkeypatch, {"events": []}, {"events": []})
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "CONTROL_FOUND_NO_FILER"
+    assert out["control"]["matches"] == 0 and out["streams_in_group"] == 1
+
+
+def test_zero_read_records_three_numbers(monkeypatch):
+    two = {"logStreams": [st(ACTIVE_MS, "a"), st(999_999, "old"), {"logStreamName": "empty"}]}
+    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}, {"m": 2}]},
+                        streams=two, control_streams={"logStreams": [st(ACTIVE_MS, "t")]})
+    assert out["verdict"] == "ZERO_CALLS_PROVEN"
+    assert (out["streams_in_group"], out["streams_active_in_window"], out["matches"]) == (3, 1, 0)
+    c = out["control"]
+    assert (c["streams_in_group"], c["streams_active_in_window"], c["matches"]) == (1, 1, 2)
+    assert c["log_group"] == run.TICKET_LOG_GROUP
