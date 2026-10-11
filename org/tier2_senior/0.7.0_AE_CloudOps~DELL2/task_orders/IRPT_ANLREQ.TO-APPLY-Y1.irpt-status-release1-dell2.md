@@ -208,6 +208,20 @@ Criterion ids: APPLY1-AC1, APPLY1-AC2, APPLY1-AC3. Instance at `org/tier2_senior
     - Write the same `APPLY-Y1_after_reads.json` with `revision` 6, `built_sha` `6idtFvAm...`, reads "0".."7", plus `r3` (5xx, TypeError, START per tenant,
       window start and end), `r5_original_count`, `condition5` (both arms, or APPLIED, UNEXERCISED) and `condition9`. The checks `apply1_cells.py` are
       amended to `6idtFvAm`. Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii) on a modify.
+    **AMENDMENT 9 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~04:3xZ): CORRECTION of R5 in AMENDMENT 8 -- the count that stays 1 is the ROUTE count, not an object count.**
+    The source is this issuer's own msg 3866 of 2026-10-09: "one GET .../analysis/requests/{id}/original route answers (count stays 1)". The IB-pr-416
+    packet glossed it as "(the read does not write)", and the REVISION 6 pair section 5 and AMENDMENT 8 then wrote "the object count stays 1". No object
+    was ever named, so that read could not be run (`2.0.0_SA_COO~G2` msg 4052 asked which object). The issuer's error.
+    - **R5 as corrected:** `2.0.0_SA_COO~G2` makes ONE GET `.../analysis/requests/{id}/original` and reports its code; the APPLIER re-reads the
+      `/original` route count after it (`get-routes`): exactly 1. That is the same census as R2, read a second time after the call.
+    - **Branch B as corrected:** "R5's count moving" means that route count reading other than 1. A 5xx or a `TypeError` on the GET is already Branch B
+      under R3.
+    - **Condition 5** cannot be driven in the window (`2.0.0_SA_COO~G2` msg 4052: its grant covers the analysis service credential only). The ledger
+      records the IB-pr-405 widening as APPLIED, UNEXERCISED, in those words, as the CTO half's condition 5 provides.
+    - **CTO msg 4062 (corrected R5 ACCEPTED, no stop):** the ledger close states `the read does not write: NOT MEASURED`, in those words; it is
+      not inferred from the route count. The three widenings (IB-pr-405 and the two of A1) close APPLIED, UNEXERCISED on irpt-status.
+    - The signed pair file is NOT edited (the CTO half binds its blob 1d38417741); this amendment is the correction's carrier, sent to
+      `1.0.0_SA_CTO~DELL2`. Everything else in AMENDMENT 8 stands. Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii) on a modify.
   </steps>
 
   <acceptance>
