@@ -11,6 +11,7 @@
   pk-codes      R2-pk1-AC1  the package route's five 409s carry codes; none returns the ticket
   rn-token      R2-rn1-AC9  (AMENDMENT 5) the idempotency token is unique per run; a hop-(d) refusal is named
   rn-zero3      R2-rn1-AC10 (AMENDMENT 5, G4) the zero-call rule of CTO half AMENDMENT 3
+  rn-accept     R2-rn1-AC11 (AMENDMENT 6) an accepted submission (state QUEUED) is not read as a refusal
   pk-200        R2-pk1-AC3  (AMENDMENT 1) the package route's 200 returns the package identity only
   rr-shape      R2-rr1-AC1  the report route stores a well-formed REQ id and refuses a malformed one with a typed code
   ts-guard      R2-ts1-AC1  by default no ticket_center test can reach a real SES send or a real users-table read
@@ -62,6 +63,11 @@ NAMED = {
                                 "test_zero_call_read_waits_five_minutes_past_exp",
                                 "test_zero_call_block_prints_the_latest_event_time",
                                 "test_active_stream_falls_back_to_the_filter_and_a_ticket_id_control"]),
+    "rn-accept": (RUNNER_TESTS, ["test_queued_with_not_ready_and_an_identity_is_accepted",
+                                 "test_request_id_is_taken_from_data_identity",
+                                 "test_refusal_state_is_a_refusal_whatever_the_code",
+                                 "test_submission_answer_keys_and_state_are_traced",
+                                 "test_accepted_without_a_req_id_is_a_named_failure_not_a_refusal"]),
     "pk-200": (TC_TESTS / "test_package_409_codes.py", ["test_service_principal_200_returns_the_package_identity_only",
                                                        "test_no_package_answer_returns_a_ticket_to_the_service_principal"]),
     "rr-shape": (TC_TESTS / "test_report_ref_shape.py", ["test_well_formed_request_id_stored", "test_malformed_request_id_refused_typed",
