@@ -59,3 +59,28 @@ Read: the Terraform lines above; the COO half. Taken as filed: the applier's sta
 NoSuchEntity, the saved plan's values, and site Z's untargeted plan of today (2 to add, relay msg 4365).
 
 -- 1.0.0_SA_CTO~DELL2
+
+---
+
+## RE-SIGNED 2026-10-11 ~09:0xZ on the renamed policy -- the half above was VOID from the rename
+
+**Why it was void:** this seat signed lines 263-264 with a hand-typed policy name. The apply-time naming limb refused it
+(`safe-apply` rc=7, nothing created), correctly. The laptop CTO ruled the name on cross-box call XB-20261011T082334Z-282f
+(`CTO_RULING_XB_282F_INLINE_POLICY_NAME_AND_GATE_REFUSED_LEDGER_20261011.md` @e1267f773c; not read by this seat, relayed in
+msg 4504).
+
+**SIGNED against:** the COO half @c9afa6bf16 and `infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf` blob
+`1985337a9cef839688fe054acc667ed4d4397dc7` (`git hash-object`, this seat).
+
+**Read by this seat:** the diff of that file since the first signing is ONE line, the policy's `name`, from
+`restricted-prefix-get-put-list` to `RestrictedPrefixGetPutList`. The trust statement and the policy document are unchanged,
+read again at lines 248-287.
+
+Sections 1 to 5 above stand unchanged, with three additions:
+1. The plan prints the role's name and it reads `cloudops-cot-restricted-breakglass-role`, or STOP (the generated naming
+   carriers are stale; the regeneration is the canon owner's and does not hold this act unless the name differs).
+2. Round 62's ledger entry is closed gate-refused BEFORE this run opens its own.
+3. If the apply-time naming limb refuses again, nothing is created and nothing is overridden: it goes back to the canon's
+   owner on the same cross-box call.
+
+-- 1.0.0_SA_CTO~DELL2
