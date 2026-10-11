@@ -15,6 +15,8 @@ Every subprocess is bounded (100 s) so an invocation ends inside a worker's 120 
   y33-store     AR-y-33: BUILD_ONLY of irpt-commentary-draft-store-lambda WITHOUT BAU_PARITY_SKIP prints its
                 BUILD_ONLY line                                                                                -> Y33-STORE-OK
   y33-digest    AR-y-33: the source map records irpt-status's live digest, and a BUILD_ONLY still prints it    -> Y33-DIGEST-OK
+  y37-actor     AR-y-37: `ycharts/generate/tests/test_acceptance_actor.py`, named tests exist and pass        -> Y37-ACTOR-OK
+  y37-keep      AR-y-37: the submission tests that must not move still pass                                 -> Y37-KEEP-OK
   y36-order     AR-y-36: the reproducer the worker recorded (S31_REPRODUCER.json) runs green                   -> Y36-ORDER-OK
 """
 import json
@@ -50,6 +52,11 @@ NAMES = {
         "test_history_row_states_the_client_its_selection_names",
         "test_upload_request_row_states_null_client",
         "test_single_read_wire_is_unchanged"]),
+    "y37-actor": (IR + "/ycharts/generate/tests/test_acceptance_actor.py", [
+        "test_new_accepted_request_records_the_verified_actor",
+        "test_actor_in_the_request_body_is_never_used",
+        "test_a_prior_accepted_record_is_returned_unchanged_and_not_rewritten",
+        "test_submit_passes_the_verified_principal_to_accept"]),
     "y32-dates": (IR + "/ops/tests/test_section_dates_by_branch.py", [
         "test_opal_engine_not_available_row_with_null_date_is_undated",
         "test_ycharts_branch_rule_is_unchanged",
@@ -308,7 +315,7 @@ def main(argv):
                               "src/pages/TicketCenter/__tests__/commentary-package.test.tsx"],
                  "y35-page": [NAMES["y35-page"][0]]}[check]
         return finish(check, portal_tests(check, portal.resolve(), files))
-    if check in ("y32-ref", "y32-history", "y32-dates"):
+    if check in ("y32-ref", "y32-history", "y32-dates", "y37-actor"):
         return finish(check, pytest_file(check, root))
     if check == "y32-contract":
         return finish(check, contract(root))
@@ -316,6 +323,12 @@ def main(argv):
         return finish(check, store(root))
     if check == "y33-digest":
         return finish(check, digest(root))
+    if check == "y37-keep":
+        env = dict(os.environ, AWS_ACCESS_KEY_ID="x", AWS_SECRET_ACCESS_KEY="y", AWS_DEFAULT_REGION="us-east-1")
+        files = [IR + "/ycharts/generate/tests/" + name for name in ("test_submission.py", "test_prospect_submission.py")]
+        rc, out = run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"] + files, root, env)
+        print("\n".join([line for line in out.splitlines() if line.strip()][-3:]))
+        return finish(check, [] if rc == 0 else ["pytest rc=%d on the two submission test files" % rc])
     if check == "y33-control":
         return finish(check, control(root))
     if check == "y34-reads":
