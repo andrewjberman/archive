@@ -1,0 +1,48 @@
+{
+  "slug": "mdpf-demque-zq-t27-standing",
+  "title": "MDPF DEMQUE t27 register the standing non-trading-day drawer mdpf-demque-drawer-daily at site Z",
+  "author": "0.7.0_AE_CloudOps~ZQ",
+  "status": "OPEN",
+  "opened_at": "2026-10-11T08:34:08.911143+00:00",
+  "window_hours": 12.0,
+  "entry_path": "org/critical_paths/change_management/20261011T0834Z_mdpf-demque-zq-t27-standing_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "activation",
+      "target": "Windows task mdpf-demque-drawer-daily, DAILY 10:00 ET, action standing_drawer.py --apply from the repo root",
+      "proof_required": "schtasks /Query of that exact name plus its exported XML showing one daily 10:00 trigger and the repo-root action; the 07:00 and 08:30 task definitions byte-unchanged",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "verify",
+      "target": "AC2 dq_t27_sched.py",
+      "proof_required": "DRSCH-OK: the four non-trading days of 2026-10-12..2026-10-25, the task registered, and a trading day drawing 0 against scratch output and actuals",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "verify",
+      "target": "the first scheduled fire, today 2026-10-11 10:00 ET (CTO half condition 3)",
+      "proof_required": "AC3 FIRE-OK read from the fire's own marker, its actuals line and cells_drawn: outcome DRAWN and cells_drawn equal to min(5858, 15720 minus already drawn) and not over today's room",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "verify",
+      "target": "CTO half condition 2, the non-DRAWN / over-room branch",
+      "proof_required": "either the fire was DRAWN and within room so no rollback is owed, or the task is deleted and a row filed; stated as a read either way, never as a default",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261011T083408Z OPENED by 0.7.0_AE_CloudOps~ZQ with 4 leg(s)"
+  ],
+  "last_red_at": null,
+  "device": "sitez"
+}
