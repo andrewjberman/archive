@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-2.producers-grant-draft",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-2.producers-grant-draft.md",
+    "group": "OTHER",
+    "vintage_commit": "f30d22f82c"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~25",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "f33c93ce43",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-2.producers-grant-draft.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; the two arms carry their own checks (G1 to G4 of r4_grant.py, and the scope arm of r4_scope.py)",
+      "expected": "N/A -- the order names none",
+      "observed": "N/A -- the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "not re-run: each invocation ran once, as the order states; the grant arms read text and git state only",
+      "observed": "N/A -- no second run was made by this worker",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, terraform plan, terraform apply, and every AWS call",
+      "reason": "Bound (order section 2, item 1): the cell drafts the grant only. terraform fmt -check was the one terraform command run; it reads text and needs no backend."
+    },
+    {
+      "item": "The portal submodule path (worktree HEAD 8ed372cb72, index gitlink c96efe1714)",
+      "reason": "Outside the write surface. The worker did not checkout, reset, edit or commit it. Its drift is the cause of the AC2 FAIL and is filed as ADVI_FIRMBKTS-D1-W25-S2."
+    },
+    {
+      "item": "The commit of infra/aws/terraform/bd-pipeline/iam.tf",
+      "reason": "Refused by the commit-time naming limb (LGIC_ENFORCE, ENFORCE): the order's literal policy name and ARNs read as new hand-typed carriers of 49financial. Not forced, overridden or substituted with lookup(), because that would change the strings the order and its checker pin. Filed as ADVI_FIRMBKTS-D1-W25-S1."
+    },
+    {
+      "item": "The order's <status> flip",
+      "reason": "Not flipped by the worker (order section 5). AC2 is FAIL, so the order stays open by the proof's own verdict."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/bd-pipeline/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "UNCOMMITTED -- worktree draft on f30d22f82c (39 insertions, 0 deletions); the commit was refused by the naming limb (S1)",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Not deployed. No terraform init, plan or apply, and no AWS call. The resource is appended in the worktree only: aws_iam_role_policy bd_exporter_advi_49f_platinum_canonical on aws_iam_role.bd_exporter, two Allow statements. r4_grant.py --arms grant: 4 of 4 arms PASS on the working tree.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 reads the resource, its statements, the additive diff against the commit the worktree was cut from, and terraform fmt -check. Expect: ROUND 4 GRANT: 4 of 4 arms",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-25 && timeout 100 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_grant.py --arms grant --root /c/dev/wk-firmbkts-25; echo \"exit=$?\"",
+      "output_evidence": "  policy resources named bd_exporter_advi_49f_platinum_canonical: base=0 now=1\n  statements=2 effects=['Allow'] actions=['s3:GetObject', 's3:ListBucket', 's3:PutObject'] resources=['arn:aws:s3:::opal-data-49financial', 'arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/*'] prefix=['advi/49financial/platinum/*']\n  changed under bd-pipeline/: ['infra/aws/terraform/bd-pipeline/iam.tf']; iam.tf deleted lines=0\n  terraform fmt -check rc=0\nPASS G1 exactly one new aws_iam_role_policy bd_exporter_advi_49f_platinum_canonical on aws_iam_role.bd_exporter\nPASS G2 two Allow statements: Put and Get on the canonical prefix, List scoped to it, nothing wider\nPASS G3 additive: iam.tf deletes 0 lines and no other bd-pipeline file changed\nPASS G4 terraform fmt -check reads clean for iam.tf\nROUND 4 GRANT: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms; exit=0",
+      "status": "PASS",
+      "expect": "ROUND 4 GRANT: 4 of 4 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the write-surface bound. Each invocation terminates inside its bound. Expect: ROUND 4 SCOPE: OK",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-25 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-25 --allow infra/aws/terraform/bd-pipeline/iam.tf --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~25/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/bd-pipeline/iam.tf; echo \"exit=$?\"",
+      "output_evidence": "  CHANGED infra/aws/terraform/bd-pipeline/iam.tf\n  CHANGED portal   <-- OUTSIDE\nROUND 4 SCOPE: FAIL 2 changed, 1 outside, 0 required missing\nexit=1",
+      "denominator": "2 changed paths; 1 outside the write surface; 0 of 1 required paths missing; exit=1",
+      "status": "FAIL",
+      "expect": "ROUND 4 SCOPE: OK",
+      "status_reason": "The write-surface bound does not read OK in this worktree: the submodule portal is reported as changed (checkout 8ed372cb72 vs index gitlink c96efe1714) although the worker did not touch it; filed as ADVI_FIRMBKTS-D1-W25-S2. AC2 is not met by the worker's edit."
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W25-S1: the commit-time naming limb (LGIC_ENFORCE DEC-6, ENFORCE) refused the order's literal policy name and literal ARNs in iam.tf (lines 1288, 1298, 1307) as new hand-typed carriers of 49financial; the draft is uncommitted, BLOCKING, INERT; disposition UNDER_INVESTIGATION, row commit e0abc34252",
+    "ADVI_FIRMBKTS-D1-W25-S2: AC2 reads the submodule portal as CHANGED outside the write surface (checkout 8ed372cb72 vs index gitlink c96efe1714), not caused by the worker's edit; BLOCKING for AC2, INERT; disposition UNDER_INVESTIGATION, row commit e0abc34252"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~25/ADVI_FIRMBKTS.TO-FB-g-2.producers-grant-draft.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "r4_grant.py --arms grant",
+      "invocation": "timeout 100 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_grant.py --arms grant --root /c/dev/wk-firmbkts-25",
+      "result": "ROUND 4 GRANT: 4 of 4 arms; exit=0"
+    },
+    {
+      "tool": "r4_scope.py",
+      "invocation": "timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-25 --allow infra/aws/terraform/bd-pipeline/iam.tf --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~25/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/bd-pipeline/iam.tf",
+      "result": "ROUND 4 SCOPE: FAIL 2 changed, 1 outside, 0 required missing; exit=1"
+    },
+    {
+      "tool": "terraform fmt -check",
+      "invocation": "timeout 60 terraform fmt -check -diff infra/aws/terraform/bd-pipeline/iam.tf",
+      "result": "rc=0"
+    },
+    {
+      "tool": "safe-commit.sh (iam.tf)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~25 <0.9.0_WK_ADVI_FIRMBKTS~25@opal.agent>\" -F .scratch/msg_fb_g2_iam.txt -- infra/aws/terraform/bd-pipeline/iam.tf",
+      "result": "ERROR: BLOCKED -- the naming limb refused (LGIC_ENFORCE DEC-6, ENFORCE mode); commit aborted, files unstaged; no commit made (rc=1)"
+    },
+    {
+      "tool": "safe-commit.sh (surprise rows)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~25 <0.9.0_WK_ADVI_FIRMBKTS~25@opal.agent>\" -F .scratch/msg_fb_g2_rows.txt -- org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit e0abc34252; surprise-row-gate OK (2 new rows); rc=0"
+    }
+  ]
+}
