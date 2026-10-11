@@ -1,0 +1,100 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-g-35",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-35.sms-default-type.md",
+  "group": "OTHER",
+  "vintage_commit": "c4d21f5ab8"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~55",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "vintage_commit": "c4d21f5ab8",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-35.sms-default-type.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/inf-pipeline/inf-ops-alerts-sms-delivery-status.tf",
+   "kind": "terraform",
+   "commit_or_etag": "b0455c7972",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed in b0455c7972 on wk-ADVI_FIRMBKTS-55 (LOCAL); resource aws_sns_sms_preferences account gains default_sms_type = Transactional (one attribute, one comment line); no terraform plan or apply in the inf-pipeline root; no AWS call; the apply is a separate staged order for the laptop lane",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 reads the one attribute, that the others are the base's, that every base line is kept and that the formatter is clean. Each invocation terminates inside its bound.",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-55 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_smstype.py --arms pref --root /c/dev/wk-firmbkts-55 --base 83995c26e6; echo \"exit=$?\"",
+   "expect": "ROUND 4 SMS TYPE: 4 of 4 arms",
+   "output_evidence": "  T1 default_sms_type lines=1\n  T2 other attributes equal base: True\n  T3 base lines kept 56 of 56; other files changed: []\n  T4 fmt rc=0\nPASS T1 the preferences carry default_sms_type = Transactional exactly once\nPASS T2 the resource's other attributes are the base's\nPASS T3 dormant: base lines kept in order and no other file of the root changes\nPASS T4 terraform fmt reads clean\nROUND 4 SMS TYPE: 4 of 4 arms\nexit=0",
+   "denominator": "4 of 4 arms PASS; 56 of 56 base lines kept; 1 default_sms_type line; 1 changed file (the order's one file)",
+   "status": "PASS",
+   "status_reason": "Run at base 83995c26e6 per the coordinator's correction to the face (the order file line 54 carries that base). The face's typo base 8f9c3f1d8c does not resolve and reads 3 of 4 there: surprise row ADVI_FIRMBKTS-D1-W55-S1."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 is the write-surface bound. Each invocation terminates inside its bound.",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-55 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-55 --allow infra/aws/terraform/inf-pipeline/inf-ops-alerts-sms-delivery-status.tf --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~55/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/inf-pipeline/inf-ops-alerts-sms-delivery-status.tf; echo \"exit=$?\"",
+   "expect": "ROUND 4 SCOPE: OK",
+   "output_evidence": "  CHANGED infra/aws/terraform/inf-pipeline/inf-ops-alerts-sms-delivery-status.tf\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md\nROUND 4 SCOPE: OK 2 changed, 0 outside, 0 required missing\nexit=0",
+   "denominator": "2 changed files; 0 outside the three allowed paths; 0 required missing",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the pre-edit base bytes (git show 83995c26e6 of the inf-pipeline file, which carries no default_sms_type line) read through the same T1 attribute pattern, against HEAD b0455c7972",
+   "expected": "base: 0 default_sms_type lines, so T1 would FAIL; HEAD: 1 line, T1 PASS",
+   "observed": "base 83995c26e6: 0 lines; HEAD b0455c7972: 1 line",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the AC1 check run twice on the committed tree at base 83995c26e6; the two outputs compared line by line on inspection",
+   "observed": "both runs: T1 lines=1, T2 True, T3 56 of 56 with no other file changed, T4 rc=0, ROUND 4 SMS TYPE: 4 of 4 arms, exit=0",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "whether SNS honors default_sms_type for the registered toll-free number is not proven: the check reads the file as text and sends nothing",
+   "reason": "the checker's own blindness, stated in the order preflight (comp-adversary); the act's pre-read and its one real SEV1 publish carry it"
+  },
+  {
+   "item": "no terraform plan or apply in the inf-pipeline root and no AWS call",
+   "reason": "order bounds 1 and the preflight: the apply is a separate staged order for the laptop lane under the CTO's AMENDMENT 6"
+  },
+  {
+   "item": "the T3 arm passes vacuously when the base is empty (the face's base 8f9c3f1d8c reads 0 of 0 base lines)",
+   "reason": "recorded as ADVI_FIRMBKTS-D1-W55-S1 for the issuer; the AC1 run uses 83995c26e6 per the coordinator's correction and is not affected"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W55-S1: the worker face's AC1 --base 8f9c3f1d8c does not resolve in the repository; the check reads 3 of 4 arms there and passes T3 vacuously on 0 of 0 base lines; the AC1 run uses 83995c26e6 per the coordinator's correction and reads 4 of 4"
+ ],
+ "session_log": "no session log is committed; the record is commit b0455c7972 (LOCAL on wk-ADVI_FIRMBKTS-55) and surprise row ADVI_FIRMBKTS-D1-W55-S1",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_smstype.py --arms pref --root /c/dev/wk-firmbkts-55 --base 83995c26e6",
+   "result": "ROUND 4 SMS TYPE: 4 of 4 arms; exit=0"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-55 (AC2 allow and require lists as the order states)",
+   "result": "ROUND 4 SCOPE: OK 2 changed, 0 outside, 0 required missing; exit=0"
+  },
+  {
+   "tool": "terraform",
+   "invocation": "terraform fmt -check infra/aws/terraform/inf-pipeline/inf-ops-alerts-sms-delivery-status.tf (the T4 arm of AC1)",
+   "result": "rc=0"
+  }
+ ]
+}
