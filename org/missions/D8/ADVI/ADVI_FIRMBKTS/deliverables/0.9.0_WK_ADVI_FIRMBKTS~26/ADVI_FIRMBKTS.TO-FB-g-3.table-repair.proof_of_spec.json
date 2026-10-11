@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-3.table-repair",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-3.table-repair.md",
+    "group": "OTHER",
+    "vintage_commit": "f30d22f82c"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~26",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "f30d22f82c",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-3.table-repair.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/mapping_v4.json",
+      "kind": "config_data",
+      "commit_or_etag": "658b153b03",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round-4 table: 3,447 rows, 29 re-grid parents, 10 marker families placed, 2 cot positions_cube rows returned to round-1 placement, FAULT 84 (v3) -> 71; AC1 and AC2 run against it (outputs in the cell folder)",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/MAPPING_TABLE_v4.md",
+      "kind": "doc",
+      "commit_or_etag": "658b153b03",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "FAULT before 84 (v3) and after 71; dispositions with object denominators; ruling counts with one example each; re-grid census, live and difference; remaining FAULT by reason with owner",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~26/build_v4.py",
+      "kind": "script",
+      "commit_or_etag": "658b153b03",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the build that wrote mapping_v4.json from mapping_v3.json and the LIST results; reads the census and the channel only through the rulings; no write to S3",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "658b153b03",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "six rows ADVI_FIRMBKTS-D1-W26-S1..S6 appended in fenced json blocks; surprise-row-gate OK at commit",
+      "artifact_covered_by": [
+        "surprises"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "ROUND 4 MAPPING STRUCTURE: 5 of 5 arms",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-26 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_mapping.py --arms structure --root /c/dev/wk-firmbkts-26; echo \"exit=$?\"",
+      "expect": "ROUND 4 MAPPING STRUCTURE: 5 of 5 arms",
+      "output_evidence": "  census classes=444 placed-directly=420 regridded-parents=29 child rows=3020 duplicates=0 unplaced=0 not-in-census=0\n  S9 re-grid parents listed live: 29; differing from the table's listed_objects: 0\n  dispositions: MOVE=363, HOME=2918, RETIRE=93, DECISION=2, FAULT=71\n  placed rows graded through address(): 3281\n    DISTURBED opal-data-bd gold/clients/\n  previous-table placed, retired and decided classes unchanged: 364\nPASS S1 mapping_v4.json names the census it placed and the table it supersedes\nPASS S2 every census class is placed once, or re-gridded into children whose objects sum to its LIVE listing (listed again here, both numbers printed), and no row names a class the census lacks\nPASS S3 every row's disposition is on the enum with its required fields; a FAULT row carries a reason and a named owner serial; the DECISION rows are exactly FWD-7 and FWD-8\nPASS S4 every MOVE/HOME address is exactly address()'s output; MOVE scope is the bucket's firm in its firm bucket, HOME is bronze/silver in opal-data-assets\nFAIL S5 every class the previous table placed, retired or decided keeps its disposition, address and pattern (the difference control: the repair moves only the FAULT rows)\nROUND 4 MAPPING STRUCTURE: 4 of 5 arms\nexit=1",
+      "denominator": "4 of 5 arms; census classes 420 of 444 placed directly and 29 of 444 re-gridded (444 of 444 covered); 29 of 29 re-grid parents equal to their LIVE listing; 364 previous-table classes unchanged of 365 graded (1 disturbed: opal-data-bd gold/clients/, row S1)",
+      "status": "FAIL",
+      "status_reason": "arm S5 DISTURBED opal-data-bd gold/clients/ (the S10 rewrite of a v3-placed row); surprise ADVI_FIRMBKTS-D1-W26-S1"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "ROUND 4 MAPPING REPAIR: 5 of 5 arms",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-26 && timeout 115 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_mapping.py --arms repair --root /c/dev/wk-firmbkts-26; echo \"exit=$?\"",
+      "expect": "ROUND 4 MAPPING REPAIR: 5 of 5 arms",
+      "output_evidence": "  S2 merge rulings=34; placed rows with no table=0; rulings applied=S10,S11,S2,S3,S5,S6,S7,S8,S9\n  S3 round-1 placed rows kept as placed with no kind added: 218\n  S5/S7/S8/S11 marker rows=16 skip markers=0 distinct (bucket,scope,table,partition)=16\n    QA-NAMED-WITHOUT-WRITER opal-data-bd qa-scratch/ds1_run5_log.txt\n    QA-NAMED-WITHOUT-WRITER opal-data-bd qa-scratch/ds1_run6_log.txt\n    QA-NAMED-WITHOUT-WRITER opal-data-bd qa-scratch/ds1_validate/\n    QA-NAMED-WITHOUT-WRITER opal-data-bd qa-scratch/gate2_unit_delta_run7.parquet\n    QA-NAMED-WITHOUT-WRITER opal-data-inf bronze/orion-api/probe/\n  S6 QA-named classes judged by their writer: 86\n  S9/S10 regrids=29 FAULT before=84 after=71 table view ok=True class rows with a partition token=0\nPASS U1 S2: every overlap-0 MERGE names its destination table, no placed row lacks one, and the table lists the rulings it applied\nPASS U2 S3: every round-1 placed row keeps its disposition, address and pattern and gains no `kind`\nPASS U3 S5/S7/S8/S11: every marker row is in a <tier>_complete state family with its writer named, a skip marker where the literal tail is _SKIP.json, and no two writers share a state key\nFAIL U4 S6: every QA-named class names its writer; a QA-tool writer is RETIRE, a production writer is placed\nPASS U5 S9/S10: every re-grid prints census, LIVE and difference, MAPPING_TABLE_v4.md prints FAULT before and after with each re-grid's live count, a class-grain row carries no partition token, and every FAULT has an owner\nROUND 4 MAPPING REPAIR: 4 of 5 arms\nexit=1",
+      "denominator": "4 of 5 arms; 86 of 86 QA-named rows judged (75 production, 6 qa-tool, 5 unresolved); 16 of 16 marker rows named; 34 of 34 merge entries carry a destination table; 2 of 2 round-1 positions_cube rows restored; FAULT 71 of 84 (v3) with an owner on every row",
+      "status": "FAIL",
+      "status_reason": "arm U4 FAIL: five QA-named prefixes have no writer in the pipeline code; surprise ADVI_FIRMBKTS-D1-W26-S3"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "copy of the census, mapping, mapping_v3 and mapping_v4 files under .scratch/mut with one HOME row (opal-data-bd blackdiamond/49financial/bronze/assets_dim_rest/) deleted from mapping_v4; r4_mapping.py --arms structure run against that copy root; the worktree files untouched",
+      "expected": "arm S2 FAIL (the deleted class is UNPLACED); structure arms below 5 of 5; exit=1",
+      "observed": "UNPLACED opal-data-bd blackdiamond/49financial/bronze/assets_dim_rest/; FAIL S2; ROUND 4 MAPPING STRUCTURE: 3 of 5 arms; exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 invocation run twice; outputs compared byte for byte with cmp",
+      "observed": "run1 and run2 identical (CMP IDENTICAL); both exit=1",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "S3 reads: list calls only; no write, copy, delete or configuration change anywhere",
+      "reason": "TO bound 1"
+    },
+    {
+      "item": "object keys: the LIST results are kept in the cell's scratch folder, never in the deliverables or the report",
+      "reason": "TO bound 4 (client ids in some keys)"
+    },
+    {
+      "item": "the order status is not flipped",
+      "reason": "TO section 5: the issuer drains it"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W26-S1: BLOCKING, INERT. S10 rewrites the v3-placed row opal-data-bd gold/clients/, which S5 forbids; AC1 reads 4 of 5 until the CTO rules which governs",
+    "ADVI_FIRMBKTS-D1-W26-S2: BLOCKING, INERT. S7 skip files (1,142 performance_dim_SKIP.json) cannot be a marker row without a second row at a class key; they stay in their date-partition data children",
+    "ADVI_FIRMBKTS-D1-W26-S3: BLOCKING, INERT. five QA-named prefixes have no writer in the pipeline code; S6 cannot name qa-tool or production; U4 reads FAIL, AC2 reads 4 of 5",
+    "ADVI_FIRMBKTS-D1-W26-S4: OBSERVATION, INERT. two round-1 placed cot positions_cube classes share one destination (342 of 342 keys); S3 returns both to placement, the shared keys are unruled",
+    "ADVI_FIRMBKTS-D1-W26-S5: OBSERVATION, INERT. two date partitions and one non-date folder live since the census have no row; added under rule (c) and the live listing; five parents flagged moving",
+    "ADVI_FIRMBKTS-D1-W26-S6: OBSERVATION, INERT. the forwardfill _complete/ markers carry the tail .json, the only tail the groups share"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~26/ADVI_FIRMBKTS.TO-FB-g-3.table-repair.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/.../round4/checks/r4_mapping.py --arms structure --root <worktree>; python org/.../round4/checks/r4_mapping.py --arms repair --root <worktree>; python .scratch/build_v4.py (copy in the cell folder); python .tools/surprise-row-gate.py (via safe-commit)",
+      "result": "AC1 4 of 5 exit 1; AC2 4 of 5 exit 1; table view ok; row gate OK on the commit; safe-commit rc=0 (commit 658b153b03)"
+    }
+  ]
+}
