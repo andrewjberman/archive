@@ -1,0 +1,167 @@
+{
+  "task_order": "DSGN_IRPTV1.TO-IV-e-99",
+  "worker": "0.9.0_WK_DSGN_IRPTV1~55",
+  "accepts": {
+    "old_shape": true,
+    "new_shape": true,
+    "producer_fixture": true
+  },
+  "refuses": {
+    "unknown_top_key": true,
+    "unknown_item_key": true,
+    "wrong_type_unreadable_rows": true,
+    "bad_client_claim": true
+  },
+  "test": {
+    "id": "IVE99-HR (portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-99.history-reader-new-members.test.ts, 6 arms a-f)",
+    "passes": true,
+    "mutant": {
+      "what": "restored the old exact-two-keys top-level check in readOwnedHistory (Object.keys(value).length !== 2) after committing; reverted with git checkout; git status clean",
+      "failed": true,
+      "failures": "2 of 6 arms failed under the mutant: (b) the contract page and (c) the producer fixture through parseIrEnvelope; 4 passed"
+    }
+  },
+  "contract_lines": [
+    {
+      "member": "items",
+      "file": "docs/contracts/investor-reporting/v1/OwnedAnalysisRequestHistory.schema.json",
+      "line": 13,
+      "text": "\"items\": {"
+    },
+    {
+      "member": "items (maxItems)",
+      "file": "docs/contracts/investor-reporting/v1/OwnedAnalysisRequestHistory.schema.json",
+      "line": 15,
+      "text": "\"maxItems\": 50,"
+    },
+    {
+      "member": "items[] required (client_id, client_claim)",
+      "file": "docs/contracts/investor-reporting/v1/OwnedAnalysisRequestHistory.schema.json",
+      "line": 19,
+      "text": "\"required\": ["
+    },
+    {
+      "member": "items[].client_id (type string|null, required at :22; pattern :37)",
+      "file": "docs/contracts/investor-reporting/v1/OwnedAnalysisRequestHistory.schema.json",
+      "line": 32,
+      "text": "\"client_id\": {"
+    },
+    {
+      "member": "items[].client_id pattern",
+      "file": "docs/contracts/investor-reporting/v1/OwnedAnalysisRequestHistory.schema.json",
+      "line": 37,
+      "text": "\"pattern\": \"^[A-Za-z0-9][A-Za-z0-9_.:-]*$\","
+    },
+    {
+      "member": "items[].client_claim (string enum SELECTED|UPLOAD|UNREADABLE, required at :23, no null)",
+      "file": "docs/contracts/investor-reporting/v1/OwnedAnalysisRequestHistory.schema.json",
+      "line": 40,
+      "text": "\"client_claim\": {"
+    },
+    {
+      "member": "items[].client_claim enum",
+      "file": "docs/contracts/investor-reporting/v1/OwnedAnalysisRequestHistory.schema.json",
+      "line": 42,
+      "text": "\"enum\": ["
+    },
+    {
+      "member": "next_cursor (string|null, minLength 1, maxLength 2048)",
+      "file": "docs/contracts/investor-reporting/v1/OwnedAnalysisRequestHistory.schema.json",
+      "line": 52,
+      "text": "\"next_cursor\": {"
+    },
+    {
+      "member": "unreadable_rows (integer, minimum 0, required at :10)",
+      "file": "docs/contracts/investor-reporting/v1/OwnedAnalysisRequestHistory.schema.json",
+      "line": 60,
+      "text": "\"unreadable_rows\": {"
+    },
+    {
+      "member": "page required (items, next_cursor, unreadable_rows)",
+      "file": "docs/contracts/investor-reporting/v1/OwnedAnalysisRequestHistory.schema.json",
+      "line": 7,
+      "text": "\"required\": ["
+    },
+    {
+      "member": "page additionalProperties false",
+      "file": "docs/contracts/investor-reporting/v1/OwnedAnalysisRequestHistory.schema.json",
+      "line": 6,
+      "text": "\"additionalProperties\": false,"
+    }
+  ],
+  "carried": [
+    {
+      "member": "unreadable_rows",
+      "where": "page",
+      "type": "integer >= 0, optional in the reader (transitional)",
+      "type_home": "OwnedHistoryPage in portal/src/pages/InvestorReporting/contracts/owned-requests.ts (hand-written; contracts/wire/ not edited)"
+    },
+    {
+      "member": "client_id",
+      "where": "row",
+      "type": "string matching ^[A-Za-z0-9][A-Za-z0-9_.:-]*$ or null, optional in the reader (transitional)",
+      "type_home": "OwnedHistoryRow in owned-requests.ts"
+    },
+    {
+      "member": "client_claim",
+      "where": "row",
+      "type": "SELECTED|UPLOAD|UNREADABLE, optional in the reader (transitional)",
+      "type_home": "OwnedHistoryRow in owned-requests.ts"
+    }
+  ],
+  "carried_note": "Absent stays absent and null stays null: members are spread in only when present in the answer, never defaulted or coalesced. The generated wire type contracts/wire/OwnedAnalysisRequestHistory.ts still names the two-key page; regeneration is cell IV-e-98. readOwnedHistory's return type OwnedHistoryPage is structurally assignable to OwnedAnalysisRequestHistoryWire, so callers' types are unchanged.",
+  "rendered_changes": [],
+  "rendered_changes_note": "No rendering file was touched; no component reads the new members. The page object may now carry unreadable_rows and each row client_id/client_claim, none of which any component reads. A history read that threw 'Invalid owned request history' on the contract's page now succeeds (the intended repair).",
+  "transitional": "Yes. One comment above readOwnedHistory (owned-requests.ts:118-124) states the tolerance is TRANSITIONAL (CTO msg 4818, ruling B): the contract requires unreadable_rows, client_id and client_claim; this reader takes them as optional; the contract-exact reader is a named later cell, cut after irpt-status release 5 has been live again and read through the page.",
+  "reader_rule": {
+    "page_before": "owned-requests.ts:80 exact(value,['items','next_cursor'])",
+    "page_after": "owned-requests.ts:125-137 readOwnedHistory: items and next_cursor required; unreadable_rows optional (integer >= 0); any other top-level key refused",
+    "row_before": "owned-requests.ts:83 value.items.map(readOwnedRequest): exact keys identity, accepted_at (+comparisons, +composition)",
+    "row_after": "owned-requests.ts:105 readOwnedHistoryRow: the same keys plus optional client_id and client_claim, checked as the contract types them; any other key refused (the remainder goes through readOwnedRequest, unchanged)"
+  },
+  "read_owned_request_unchanged": "git diff 11f25102..HEAD on owned-requests.ts removes 5 lines, all inside readOwnedHistory (old :79-87); readOwnedRequest (now :58-78) is untouched; arm (e) of the test shows readOwnedRequest refusing client_id and client_claim",
+  "existing_tests_updated": [],
+  "typecheck_errors": 0,
+  "typecheck_cmd": "bun run typecheck (tsc -b --noEmit) rc=0, no error lines",
+  "suite_before": {
+    "failed": 7,
+    "passed": 1125,
+    "skipped": 27,
+    "files": 372
+  },
+  "suite_after": {
+    "failed": 7,
+    "passed": 1131,
+    "skipped": 27,
+    "files": 373,
+    "fixed_ids": [],
+    "new_failing_ids": [],
+    "failing_ids_both_runs": [
+      "IVE17-AC3 -- no bridge cast for the landed fields, and the content pin still offers 17 of 17 > every arm holds",
+      "IVE26-AC3 -- gen-wire.ts regeneration is idempotent, data is optional, content pin still 17 of 17 > every arm holds",
+      "fixture set > the smoke map covers every scoped route, one entry each",
+      "producer fixtures > every DECLARED route still publishes the RESPONSE ENVELOPE this client parses",
+      "the content pin > ADDITIVE, non-breaking producer changes leave this battery GREEN",
+      "the content pin > THE MUTATION HARNESS IS TEST-LOCAL -- the contract on disk did not move",
+      "the content pin > the pin names all three axes and the live contract offers every item"
+    ]
+  },
+  "evidence_dir": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~55/ (step0_before.txt, step6_after.txt, typecheck.txt)",
+  "product_files_changed": [
+    {
+      "path": "portal/src/pages/InvestorReporting/contracts/owned-requests.ts",
+      "diff": "+55 -5"
+    }
+  ],
+  "test_files_added": [
+    {
+      "path": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-99.history-reader-new-members.test.ts",
+      "diff": "+113"
+    }
+  ],
+  "portal_commit": "8ed372cb72659b96a5cfb4000a20b8ae315b9be7",
+  "portal_commits": [
+    "cbd5cc66 reader",
+    "8ed372cb test"
+  ]
+}
