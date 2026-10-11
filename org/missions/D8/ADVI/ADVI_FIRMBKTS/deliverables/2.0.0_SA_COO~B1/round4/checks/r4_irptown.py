@@ -7,8 +7,10 @@ ADDENDUM 7, row D1-S25), issuer 2.0.0_SA_COO~B1.
      registered template and the producers' seam's canonical destination for it (read from the tree, never typed here).
   W2 DORMANT: with the directory bucket map pointing at a DIFFERENT live bucket and no canonical list, load_ownership reads
      (routed bucket, legacy key) for a registered owner, while load_directory still reads the map's bucket.
-  W3 ENGAGED: with the routed bucket named in IRPT_PLATINUM_CANONICAL_BUCKETS the key is the canonical key; with another
-     bucket named it stays legacy.
+  W3 ENGAGED: with the routed bucket named in the module's generated CANONICAL_PLATINUM_BUCKETS (set on the imported
+     module, as the act's flip sets the routed value) the key is the canonical key; with another bucket named it stays
+     legacy. The generated list itself equals the destination registry's unique canonical buckets (today one), and does
+     not contain the routed bucket while the routed bucket is a legacy alias (the dormant proof).
   W4 a tenant with no registered owner reads exactly as before (bucket_for(tenant) and the template key).
   W5 loaders.py is the builder's output, validate exits 0, and no other generated target covering scopes.json changes a
      non-mark line against the base.
@@ -49,7 +51,7 @@ def _nm(text):
 
 
 def _load(root, env):
-    for k in ("IRPT_DIRECTORY_BUCKET_MAP", "IRPT_PLATINUM_CANONICAL_BUCKETS", "IRPT_OWNERSHIP_KEY", "IRPT_DIRECTORY_PREFIX"):
+    for k in ("IRPT_DIRECTORY_BUCKET_MAP", "IRPT_OWNERSHIP_KEY", "IRPT_DIRECTORY_PREFIX"):
         os.environ.pop(k, None)
     os.environ.update(env)
     spec = importlib.util.spec_from_file_location("r4_loaders_under_test", os.path.join(root, *LOADERS.split("/")))
@@ -93,8 +95,10 @@ def read(root, base):
         return res + [("W2 dormant read", False), ("W3 engaged read", False), ("W4 unregistered tenant", False),
                       ("W5 in sync and dormant", False)]
 
-    def captured(env, tenant, which):
+    def captured(env, tenant, which, canonical=None):
         m = _load(root, env)
+        if canonical is not None:
+            m.CANONICAL_PLATINUM_BUCKETS = tuple(canonical)
         seen = []
 
         def fake_get_json(bucket, key, s3=None):
@@ -119,11 +123,14 @@ def read(root, base):
     res.append(("W2 dormant: the ownership read is (routed bucket, legacy key) and the directory read stays on the map's "
                 "bucket", bool(ok2)))
 
-    named = captured(dict(env, IRPT_PLATINUM_CANONICAL_BUCKETS=expect[owner]["bucket"]), owner, "ownership")
-    other = captured(dict(env, IRPT_PLATINUM_CANONICAL_BUCKETS="x-some-other-bucket"), owner, "ownership")
+    named = captured(env, owner, "ownership", canonical=[expect[owner]["bucket"]])
+    other = captured(env, owner, "ownership", canonical=["x-some-other-bucket"])
+    dest_buckets = sorted({pd.destination(r["template"], "canonical")[0] for r in rows})
+    listed = sorted(getattr(_load(root, env), "CANONICAL_PLATINUM_BUCKETS", None) or [])
     ok3 = named == [(expect[owner]["bucket"], expect[owner]["canonical"])] and \
-        other == [(expect[owner]["bucket"], expect[owner]["legacy"])]
-    print("  engaged: named %s; other %s" % (named, other))
+        other == [(expect[owner]["bucket"], expect[owner]["legacy"])] and listed == dest_buckets \
+        and expect[owner]["bucket"] not in listed
+    print("  engaged: named %s; other %s; generated list %s vs destinations %s" % (named, other, listed, dest_buckets))
     res.append(("W3 engaged: the named routed bucket reads the canonical key, another stays legacy", ok3))
 
     m = _load(root, env)
