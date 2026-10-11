@@ -1,0 +1,45 @@
+{
+  "to_id": "IRPT_DASHBD.TO-DB-b-132",
+  "function": {
+    "name": "served_thresholds",
+    "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+    "line": 1938,
+    "returns": "a NEW dict: the five THRESHOLD_VALUES (each as given, null allowed) and threshold_claims (the five claims as threshold_claims_of resolves them; an input with no claims serves the defaulted ones); None in, None out",
+    "tieout_value_and_claim_added": false
+  },
+  "call_sites": [
+    {"writer": "build_manifest", "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1867},
+    {"writer": "emit_method_row", "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 2070}
+  ],
+  "keys_before": {
+    "what": "the WHOLE input object, whatever keys the thresholds file held",
+    "tracked_file_at_base": {"file": "data/assets/scripts/gold/irpt_reporting/MEASURED_THRESHOLDS_R1.json", "key_count": 6,
+                             "key_names": ["comparability_max_excluded_weight", "large_flow_share", "plausibility_band_high", "plausibility_band_low", "threshold_claims", "tolerance"]},
+    "last_tracked_49_financial_file_per_row_IRPT_DASHBD-D2-W100-S3": {"key_count": 24, "read_by_this_worker": false}
+  },
+  "keys_after": {
+    "key_count": 6,
+    "key_names": ["tolerance", "large_flow_share", "plausibility_band_low", "plausibility_band_high", "comparability_max_excluded_weight", "threshold_claims"],
+    "threshold_claims_key_names": ["tolerance", "large_flow_share", "plausibility_band_low", "plausibility_band_high", "comparability_max_excluded_weight"],
+    "whole_object_copies_left": 0
+  },
+  "readers": [
+    {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 777, "reads": "WRITES the tracked build manifest's method_row.thresholds as {the five values} plus threshold_claims (already only the five and the claims)"},
+    {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 811, "reads": "reads method_row.thresholds and method_row.threshold_claims of the tracked build manifest (the five values and the claims object only) and passes them to method_row_probe"},
+    {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 884, "reads": "passes extra['thresholds'] (the five values plus threshold_claims, built at line 719) to emit_method_row"},
+    {"file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py", "line": 136, "reads": "load_thresholds reads the thresholds FILE (not a served manifest); the keys read downstream are the five values and threshold_claims; the object is handed to ard.emit_day and ard.emit_method_row"},
+    {"file": "infra/aws/lambda/investor-reporting/reporting/", "line": null, "reads": "no occurrence of a thresholds object in any file of the folder (no reader of a manifest's thresholds object)"}
+  ],
+  "readers_needing_another_key": 0,
+  "tests": {
+    "folder": "data/assets/scripts/gold/irpt_reporting/tests",
+    "base": {"passed": 175, "failed": 0},
+    "after": {"passed": 184, "failed": 0},
+    "new_file": "data/assets/scripts/gold/irpt_reporting/tests/test_served_thresholds.py (9 tests)",
+    "existing_tests_changed": [],
+    "silver_folder": {"base": {"passed": 900, "failed": 0, "skipped": 12}, "after": {"passed": 900, "failed": 0, "skipped": 12}},
+    "mutant": "emit_method_row's call site reverted to the whole object: 3 of 9 new tests FAILED (method manifest keys, method manifest row columns test, no-whole-object-copy test); reverted, 9 of 9 pass"
+  },
+  "s3_writes": 0,
+  "aws_calls": 0
+}

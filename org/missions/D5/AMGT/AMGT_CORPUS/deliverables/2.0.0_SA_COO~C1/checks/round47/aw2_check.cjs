@@ -18,8 +18,12 @@
  *       `format`; the cell's `value` stays the saved value (the full value rides the title);
  *   d4  `teamCensus.labels = {held, factset_line, bloomberg_line, raw}` over the rendered FIGURE rows, with `raw` (a rendered row
  *       label that still has the identifier form) 0; the round-46 census keys are unchanged.
+ *   d5  (AMENDMENT 1, claim `measured`: the team's own label read from the workbook) a row whose `row_labels[i]` has `claim: 'measured'`
+ *       prints `label` = its `text`; its `labelTitle` carries the code, the word `measured` and the `cite`; a `factset` source keeps
+ *       `sourceLabel: 'FactSet, via team model'`; `teamCensus.labels` gains `measured` (the rendered rows whose entry is measured), and the
+ *       measured rows are NOT counted in `held`, `factset_line` or `bloomberg_line`; `raw` stays 0.
  * control c1: a classed teamSheet WITHOUT row_labels / row_formats builds exactly as the base does (snapshot);
- * control c2: no teamSheet builds exactly as the base does (snapshot). Prints `aw2 build <b>/4 control <c>/2`.
+ * control c2: no teamSheet builds exactly as the base does (snapshot). Prints `aw2 build <b>/5 control <c>/2`.
  */
 const fs = require('fs')
 const path = require('path')
@@ -106,6 +110,21 @@ const TEAM_NEW = {
   ],
 }
 
+const TEAM_MEASURED = {
+  ...TEAM_BASE,
+  rows: ['Financial Summary', 'FF_SALES', 'FE_ESTIMATE'],
+  row_classes: ['HEADING', 'FIGURE', 'FIGURE'],
+  row_numbers: [9, 12, 13],
+  periods: TEAM_CLASSED.periods,
+  row_values: [null, [100, 110, 120, 130, 140], [200, 210, 220, 230, 240]],
+  row_labels: [
+    null,
+    { text: 'Revenue', source: 'factset', claim: 'measured', cite: 'Model NEW VERSION!D4', code: 'FF_SALES', why: null },
+    { text: 'Sales', source: 'factset', claim: 'measured', cite: 'Model NEW VERSION!B13', code: 'FE_ESTIMATE', why: null },
+  ],
+  row_formats: [null, ['#,##0', '#,##0', '#,##0', '#,##0', '#,##0'], ['General', 'General', 'General', 'General', 'General']],
+}
+
 function build(team) {
   return m.buildModelSheet(FIGURES, YEARS, null, FC, null, null, team)
 }
@@ -123,6 +142,7 @@ let d1 = 0
 let d2 = 0
 let d3 = 0
 let d4 = 0
+let d5 = 0
 try {
   const built = build(TEAM_NEW)
   const rows = ((built.groups || [])[0] || {}).rows || []
@@ -169,6 +189,17 @@ try {
   d4 = lab.held === 1 && lab.factset_line === 1 && lab.bloomberg_line === 1 && lab.raw === 0
     && cl.FIGURE === 5 && cl.HEADING === 2 && cl.CONTROL === 1 && bs.bloomberg === 1 && bs.team === 3 && bs.why === 1 && c.unmapped === 0 ? 1 : 0
   console.log(`aw2 d4 teamCensus ${JSON.stringify(c)}; ok ${d4 === 1}`)
+  const bm = build(TEAM_MEASURED)
+  const mrows = ((bm.groups || [])[0] || {}).rows || []
+  const mlabels = mrows.map((r) => r.label)
+  const rev = mrows.find((r) => r.teamCite && r.teamCite.label === 'FF_SALES') || {}
+  const mc = (bm.teamCensus || {}).labels || {}
+  d5 = JSON.stringify(mlabels) === JSON.stringify(['Financial Summary', 'Revenue', 'Sales'])
+    && String(rev.labelTitle || '').includes('FF_SALES') && String(rev.labelTitle || '').includes('measured')
+    && String(rev.labelTitle || '').includes('Model NEW VERSION!D4')
+    && rev.sourceLabel === 'FactSet, via team model'
+    && mc.measured === 2 && mc.held === 0 && mc.factset_line === 0 && mc.bloomberg_line === 0 && mc.raw === 0 ? 1 : 0
+  console.log(`aw2 d5 measured labels ${JSON.stringify(mlabels)}; title "${String(rev.labelTitle || '')}"; census ${JSON.stringify(mc)}; ok ${d5 === 1}`)
 } catch (e) {
   console.log('aw2 build threw: ' + String(e && e.message).slice(0, 160))
 }
@@ -179,5 +210,5 @@ if (fs.existsSync(snap)) {
   c1 = JSON.stringify(JSON.parse(JSON.stringify(build(TEAM_CLASSED)))) === JSON.stringify(base.classedOld) ? 1 : 0
   c2 = JSON.stringify(JSON.parse(JSON.stringify(build(undefined)))) === JSON.stringify(base.noTeam) ? 1 : 0
 }
-console.log(`aw2 build ${d1 + d2 + d3 + d4}/4 control ${c1 + c2}/2`)
-process.exit(d1 + d2 + d3 + d4 === 4 && c1 + c2 === 2 ? 0 : 1)
+console.log(`aw2 build ${d1 + d2 + d3 + d4 + d5}/5 control ${c1 + c2}/2`)
+process.exit(d1 + d2 + d3 + d4 + d5 === 5 && c1 + c2 === 2 ? 0 : 1)

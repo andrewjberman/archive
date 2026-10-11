@@ -1,0 +1,95 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-R4-rn2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R4-rn2.runner-one-step-mode.md",
+  "group": "OTHER",
+  "vintage_commit": "6e1d96a576"
+ },
+ "assignee": "0.9.0_WK_TCKT_VNEXT~17",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R4.md",
+  "vintage_commit": "6e1d96a576",
+  "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R4-rn2.runner-one-step-mode.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~8/fwd1_runner/fwd1_run.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "R4-rn-2: new flag --one-step. hops(..., one_step=True) leaves the normal path after the ticket create (the create body carries source ticketcenter:i1; the claim call is never reached) into hops_one_step: the two arms (run_the_two_arms, shared with arms-only), then hop_d_one_step, the ONLY submission, through one_step_submit guarded by the ONE_STEP_SUBMISSIONS counter (a second call raises before it is sent; a timeout is never retried: SUBMISSION_ANSWER_UNREADABLE, possibly accepted, one request-list read to settle it), then record_as_creator (200 then ONE repeat expected 409 REPORT_ALREADY_RECORDED), then the existing hop (e) and hop (g) reads. trace mode ONE_STEP. refused with --arms-only (rc 2). A run without the flag, and an --arms-only run, are unchanged. Never executed against live services.",
+   "artifact_covered_by": [
+    "R4-rn2-AC1",
+    "R4-rn2-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~8/fwd1_runner/test_fwd1_runner.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "7 tests appended after the 61 existing ones (no existing test changed); fake HTTP, fake DynamoDB, fake clock; no AWS, no network",
+   "artifact_covered_by": [
+    "R4-rn2-AC1",
+    "R4-rn2-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R4-rn2-AC1",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R4_CHECKS/r4_checks.py os-mode expect: OS-MODE-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R4_CHECKS/r4_checks.py os-mode",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: OS-MODE-OK passed=7 of 7",
+   "denominator": "7 of 7 named tests found by name and passed",
+   "status": "PASS",
+   "expect": "OS-MODE-OK"
+  },
+  {
+   "criterion_id": "R4-rn2-AC2",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R4_CHECKS/r4_checks.py os-regress expect: OS-REGRESS-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R4_CHECKS/r4_checks.py os-regress",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: OS-REGRESS-OK passed=68 (min 68) failed=0",
+   "denominator": "68 of 68 tests in the runner test file passed (61 at the base plus 7 new)",
+   "status": "PASS",
+   "expect": "OS-REGRESS-OK"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the tests run on fakes with a test-owned clock; no network or wall-clock dependence",
+   "observed": "68 passed in the full file; both r4 checks rc=0",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "one in-place mutant of fwd1_run.py (restored byte-identical, cmp against a saved copy): the at-most-one-submission guard threshold in one_step_submit changed from >= 1 to >= 99",
+   "expected": "the exactly-one-submission test fails",
+   "observed": "1 failed (test_one_step_sends_exactly_one_submission_even_on_timeout: DID NOT RAISE RuntimeError), 6 passed of the 7 one-step tests",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a live run of fwd1_run.py, with or without --one-step",
+   "reason": "the order forbids any AWS or network call; a live one-step run would trigger a real outside sign-in; only the fake-based tests were run"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~17/TCKT_VNEXT.TO-R4-rn2.runner-one-step-mode.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R4_CHECKS/r4_checks.py os-mode",
+   "result": "OS-MODE-OK passed=7 of 7"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R4_CHECKS/r4_checks.py os-regress",
+   "result": "OS-REGRESS-OK passed=68 (min 68) failed=0"
+  }
+ ]
+}
