@@ -147,3 +147,16 @@ live IN release 5's return, under this pair, "whose census lists the binding's t
 - **Rounds since this packet was first written that change what a trunk build of irpt-status carries:** round 7's `AR-y-71` (three
   files) only. Rounds 8 and 9 touch other functions (`irpt-commentary-composition-read-lambda`; release 6) and do not ride this pair.
 
+## 10. REVISION 4 (2026-10-11 ~17:5xZ): the portal's fallback is TRANSITIONAL and this release removes it (CTO msg 5487)
+
+- Round 10's cell `AR-y-101` (portal candidate `3ebc35ebf2`, approved for DEV by the CTO, msg 5487): the Ticket Center's report read
+  sends `ticket_id` and, on the served reason `INVALID_INPUT`, repeats the read once WITHOUT it. Before this release that makes the
+  portal and the service independent of each other's order (row `IRPT_ANLREQ-D2-S51`).
+- **After this release the same fallback is a hole:** a ticket id the service refuses as `INVALID_INPUT` (a malformed id, for one)
+  would be read again WITHOUT the binding and could open a report the binding exists to check. So the pair for this release carries,
+  as a numbered step AFTER the service's after-reads pass: ONE portal cell that removes `readTicketReport`'s second read (and its
+  predicate and the four fallback tests), landed on DEV and then on PROD; and an after-read C4: a report read with a ticket id the
+  service refuses as `INVALID_INPUT` shows the refusal and makes ONE read, not two.
+- Until that cell is on PROD the release's record says in words: the binding is live and bypassable through the fallback on an
+  `INVALID_INPUT` refusal.
+
