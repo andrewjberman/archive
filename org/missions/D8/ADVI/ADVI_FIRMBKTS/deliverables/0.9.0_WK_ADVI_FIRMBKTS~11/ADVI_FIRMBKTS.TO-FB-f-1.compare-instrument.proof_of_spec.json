@@ -1,0 +1,87 @@
+{
+ "schema_version": "1.0",
+ "genre": "BUILD",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-f-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-1.compare-instrument.md",
+  "group": "OTHER",
+  "vintage_commit": "576e574de4"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~11",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R3.md",
+  "vintage_commit": "576e574de4",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-1.compare-instrument.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_f7.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "new file, copy of round2/checks/r2_f7.py at 576e574de4 with three changes: the docstring first line names round 3 and row D1-C-S7; _sha takes an optional VersionId and _sha_manifest_version pages list_object_versions to the version whose ETag equals the manifest's; cmd_compare prints DEST-VS-MANIFEST and SOURCE-VS-MANIFEST before the verdict. py_compile clean; 0 non-ASCII bytes; 0 CR bytes",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "r3_f7_ctl.py --arms live (the seam against the real neighbours, the live source and destination buckets) -- expect: ROUND 3 F7 COMPARE LIVE: 3 of 3 arms",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-11 && timeout 115 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_f7_ctl.py --arms live --root /c/dev/wk-firmbkts-11; echo \"exit=$?\"",
+   "expect": "ROUND 3 F7 COMPARE LIVE: 3 of 3 arms",
+   "output_evidence": "  COMPARE manifest=52910 placed=52910 refused=0 (denominator: manifest objects) | \n  DEST  present=52910 missing=0 mismatch=0 extras-under-advi/49financial/platinum/=0 | \n  SOURCE changed-since-manifest=49110 gone=0 (the producers still write opal-data-bd; a changed source is re-copied by a new manifest, never by this one) | \n  DEST-VS-MANIFEST: EQUAL | \n  SOURCE-VS-MANIFEST: DRIFTED changed=49110 gone=0 | \n  COPY-COMPLETE: every manifest key present and equal | \nPASS L1 a line `DEST-VS-MANIFEST: EQUAL` is printed | PASS L2 `SOURCE-VS-MANIFEST:` is its own line and names the changed count | PASS L3 the verdict is COPY-COMPLETE and the exit code is 0 | ROUND 3 F7 COMPARE LIVE: 3 of 3 arms | exit=0",
+   "denominator": "3 of 3 live arms PASS; 52,910 of 52,910 manifest keys placed and present-and-equal at the destination (0 missing, 0 mismatch, 0 extras); 49,110 of 52,910 source keys changed since the manifest, 0 gone",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "r3_f7_ctl.py --arms mutant (the difference control: one altered ETag in a copy of the manifest must read DIFFERENT and COPY-NOT-COMPLETE) -- expect: ROUND 3 F7 COMPARE MUTANT: 2 of 2 arms",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-11 && timeout 115 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_f7_ctl.py --arms mutant --root /c/dev/wk-firmbkts-11; echo \"exit=$?\"",
+   "expect": "ROUND 3 F7 COMPARE MUTANT: 2 of 2 arms",
+   "output_evidence": "  COMPARE manifest=52910 placed=52910 refused=0 (denominator: manifest objects) | \n  DEST  present=52910 missing=0 mismatch=1 extras-under-advi/49financial/platinum/=0 | \n  SOURCE changed-since-manifest=49110 gone=0 (the producers still write opal-data-bd; a changed source is re-copied by a new manifest, never by this one) | \n  DIFF <one manifest key, withheld: keys carry client ids> | \n  DEST-VS-MANIFEST: DIFFERENT | \n  SOURCE-VS-MANIFEST: DRIFTED changed=49110 gone=0 | \n  COPY-NOT-COMPLETE | \nPASS M1 one mismatch is read at the destination and the verdict is COPY-NOT-COMPLETE | PASS M2 `DEST-VS-MANIFEST: DIFFERENT` is printed and the source line stays its own line | ROUND 3 F7 COMPARE MUTANT: 2 of 2 arms | exit=0",
+   "denominator": "2 of 2 mutant arms PASS; 1 altered single-part entry of 52,910 manifest objects reads as 1 mismatch; the source line stays its own line",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC2 difference control: one single-part ETag in a copy of the manifest set to 32 zeros, written to a temporary directory and not committed; the instrument must read DIFFERENT and COPY-NOT-COMPLETE",
+   "expected": "DEST-VS-MANIFEST: DIFFERENT; COPY-NOT-COMPLETE; mismatch=1; non-zero exit of the compare",
+   "observed": "DEST-VS-MANIFEST: DIFFERENT; COPY-NOT-COMPLETE; mismatch=1; M1 PASS and M2 PASS; ROUND 3 F7 COMPARE MUTANT: 2 of 2 arms; exit=0 from the driver",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "N/A: AC1 and AC2 read different inputs (the live manifest and the one-ETag copy), so no same-input pair of runs exists in this order",
+   "observed": "not computed; the two arms are the seam read and the difference control",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the section 5 flip of this order's <status> to complete",
+   "reason": "the order file is outside this order's <paths> (section 3) and outside this worker's write grant; the flip is not performed and is filed as ADVI_FIRMBKTS-D1-W11-S1 for the issuer"
+  },
+  {
+   "item": "a byte-level re-read of every destination object",
+   "reason": "the instrument's rule is size and ETag equality; a sha256 comparison runs only for multipart ETags and is capped at 50 keys per run, as in round 2"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W11-S1: the section 5 status flip names the order file, which is outside <paths> and this worker's write grant; the flip is not performed, AC1 and AC2 pass",
+  "ADVI_FIRMBKTS-D1-W11-S2: the order does not say whether the SOURCE-VS-MANIFEST changed count includes gone keys; the instrument keeps the round-2 count, in which changed includes gone"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~11/ADVI_FIRMBKTS.TO-FB-f-1.compare-instrument.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_f7_ctl.py --arms live|mutant --root /c/dev/wk-firmbkts-11 (drives r3_f7.py compare against F7_MANIFEST.tsv.gz, read-only)",
+   "result": "live 3 of 3 arms (DEST-VS-MANIFEST: EQUAL, SOURCE-VS-MANIFEST: DRIFTED changed=49110 gone=0, exit 0); mutant 2 of 2 arms (DEST-VS-MANIFEST: DIFFERENT, exit 0 from the driver)"
+  }
+ ]
+}
