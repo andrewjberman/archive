@@ -13,11 +13,11 @@
     {
       "criterion_id": "AC2",
       "criterion_verbatim": "The listing states the brand directory's files or its absence.",
-      "denominator": "1 output file; 2 BRAND lines against 2 regular files in the same artifact's ls block. The counted lines are 'BRAND 02477c761bbaac4ec4c23e1b0d2f743271c1d94ec6b1f81ed9a31a8e99fe58b3 Opal-Capital-Logo-Full-Color.svg' and 'BRAND 25ee2179d723174b805ba05d23a4435f88c32a2018d79308e2b449f0c790f11f brand.json' (3853 and 5996 bytes); 0 BRAND-DIR-ABSENT lines, so this is the inventory case and not the order's absence finding. The count sits here rather than in output_evidence because the criterion's expect is '^[0-9]+$', which only a bare integer can match.",
-      "expect": "^[0-9]+$",
-      "invocation": "grep -c -E '^BRAND ' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_b8/BRAND_LISTING_HOST.txt",
+      "denominator": "1 output file; the amended invocation takes the FIRST line matching either shape, and the artifact carries 2 BRAND lines and 0 BRAND-DIR-ABSENT lines, so the matched line is the inventory branch. The second BRAND line is 'BRAND 25ee2179d723174b805ba05d23a4435f88c32a2018d79308e2b449f0c790f11f brand.json'; the ls block in the same artifact lists exactly 2 regular files (3853 and 5996 bytes), so the line count agrees with the directory.",
+      "expect": "^(BRAND [0-9a-f]{64} |BRAND-DIR-ABSENT )",
+      "invocation": "grep -m1 -E '^(BRAND [0-9a-f]{64} |BRAND-DIR-ABSENT )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_b8/BRAND_LISTING_HOST.txt",
       "method": "command",
-      "output_evidence": "2 -- and the two lines the count is OF, because a bare count is not evidence: 'BRAND 02477c761bbaac4ec4c23e1b0d2f743271c1d94ec6b1f81ed9a31a8e99fe58b3 Opal-Capital-Logo-Full-Color.svg' and 'BRAND 25ee2179d723174b805ba05d23a4435f88c32a2018d79308e2b449f0c790f11f brand.json'. NOTE ON INSTANCE VALIDITY: this field cannot satisfy both of the gate's rules at once. The criterion's expect is '^[0-9]+$', which only a bare integer can match, and the same gate refuses a bare integer as 'thin/empty output_evidence -- a bare value'. Both branches were run and both were refused. The evidence is therefore recorded in full here and the instance reads INVALID for that ONE reason, rather than being trimmed to a digit to buy a green verdict. Row IRPT_YCDGEN-D2-S41; amendment asked of the issuer.",
+      "output_evidence": "BRAND 02477c761bbaac4ec4c23e1b0d2f743271c1d94ec6b1f81ed9a31a8e99fe58b3 Opal-Capital-Logo-Full-Color.svg",
       "status": "PASS"
     }
   ],
@@ -27,7 +27,7 @@
         "AC1",
         "AC2"
       ],
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "12b13a7862",
       "deploy_evidence": "the full SSM stdout with the command id and instance id on line 1: the raw ExecStart, the derived ROOT, the ls block and one BRAND <sha256> <name> line per file",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "kind": "doc",
@@ -58,6 +58,13 @@
       "expected_landed": "0 BRAND-DIR-ABSENT lines and 0 ROOT-UNDERIVABLE lines, with BRAND lines present",
       "expected_not_landed": "either absence line present, which is the order's stated finding case and would mean the brand directory does not exist under the running root",
       "observed": "BRAND-DIR-ABSENT 0, ROOT-UNDERIVABLE 0, BRAND lines 2. This is the inventory case, not the absence case.",
+      "status": "PASS"
+    },
+    "ac2_amended_pattern_actually_discriminates": {
+      "description": "AC2 was amended on this seat's row (AMENDMENT 1 @289391dfbf) after the original expect '^[0-9]+$' proved ungradeable. An amended criterion earns no trust from being new, so the replacement pattern was exercised against inputs it must REFUSE, not only against the one it must accept.",
+      "expected_landed": "the artifact's first BRAND line matches; a file carrying neither shape does not match; a BRAND line whose digest is 63 hex characters does not match",
+      "expected_not_landed": "a match on either negative input, which would mean the pattern accepts ill-formed output and the criterion is still not deciding anything",
+      "observed": "artifact -> matches on the Opal-Capital-Logo line. A scratch file of UNIT=/ROOT=/total lines -> no match. A scratch BRAND line with a 63-hex digest -> no match, so the {64} quantifier bites. The original defect is therefore closed in both directions: the evidence is a real line rather than a bare integer, and a zero-file directory can no longer read PASS as an inventory -- it would have to match BRAND-DIR-ABSENT, which is the order's stated finding branch and is now distinguishable in the evidence itself.",
       "status": "PASS"
     },
     "ac2_count_matches_the_directory_listing": {
@@ -134,10 +141,11 @@
   "spec_ref": {
     "doc": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-b8.resident-host-brand-listing-dell2.md",
     "group": "OTHER",
-    "vintage_commit": "673de3e606"
+    "vintage_commit": "289391dfbf"
   },
   "surprises": [
-    "IRPT_YCDGEN-D2-S40: row IRPT_YCDGEN-S14's world has CHANGED -- ssm:SendCommand on i-0167fd745ad906a66 now SUCCEEDS for the dell2 applier, where S14 (UNDER_INVESTIGATION, surfaced 2026-10-07T09:12Z) records it as AccessDenied for cloudops-dell2-agent-user. Measured by the live call this order required: CommandId 6b892609-8f09-4d75-8637-4995133b3ad4, Status Success, ResponseCode 0. Filed so that a reader of S14 does not act on a stale denial, and so the remediation that closed it can be identified by whoever owns it. OBSERVATION, INERT, UNDER_INVESTIGATION, disarm_owner 2.0.0_SA_COO~G2, carrier org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md. Effect on this order: none -- it is what let the order run at all."
+    "IRPT_YCDGEN-D2-S41: RESOLVED AT THE SOURCE BY THE ISSUER, and this instance is the re-grade. The row recorded that AC2's original expect '^[0-9]+$' admitted only a bare integer while the same gate refuses a bare integer as thin output_evidence, so AC2 was ungradeable by a VALID instance and the order was left pending rather than flipped on an INVALID proof. The issuer accepted the finding (msg 4390) and amended the criterion (AMENDMENT 1 @289391dfbf, msg 4429): AC2 now matches the first BRAND line with its sha256 or BRAND-DIR-ABSENT. Re-graded against the amended face here: AC2 PASS on a real line, with the replacement pattern exercised against two inputs it must refuse (see controls.ac2_amended_pattern_actually_discriminates). The second weakness the row named is closed by the same amendment -- an empty brand directory can no longer read PASS as an inventory. Carrier org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md.",
+    "IRPT_YCDGEN-D2-S40: row IRPT_YCDGEN-S14's world has CHANGED -- ssm:SendCommand on i-0167fd745ad906a66 now SUCCEEDS for the dell2 applier, where S14 (UNDER_INVESTIGATION, 2026-10-07) records AccessDenied. Measured by the live call this order required: CommandId 6b892609-8f09-4d75-8637-4995133b3ad4, Status Success, ResponseCode 0. The row does not claim WHICH remediation closed it, because this seat never read the IAM policy. OBSERVATION, INERT, UNDER_INVESTIGATION, disarm_owner 2.0.0_SA_COO~G2. Effect on this order: none -- it is what let the order run at all."
   ],
   "to_id": "IRPT_YCDGEN.TO-APPLY-b8.resident-host-brand-listing-dell2"
 }
