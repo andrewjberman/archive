@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-11</date>
-    <status>complete -- flipped by issuer 2.0.0_SA_COO~Y2 2026-10-11 ~10:4xZ: APPLY5-AC1 and APPLY5-AC2 print their tokens, re-run by the issuer (AC2 after the issuer fixed its own check's root path, apply5_checks.py parents[8] to parents[9], found by the applier); proof instance VALID rc 0 by the issuer's run. Live irpt-status reads Iw3FADFr (issuer's own read); plan 1 to change, re-plan 0; ledger closed; the source map states this apply. NOT established by this order: the three changed served answers -- after-reads R2 to R7 are the laptop's (TO-READS-Y5, pending), and R8 here compared a refusal envelope only. The rollback version hRe7.zty9CYey5GkmjHlETbeZkKsD.3O is unused and stands ready.</status>
+    <status>in_progress -- AMENDMENT 4: release 5 was applied 10:25Z and its nine reads were made (R4 ABSENT); it is being ROLLED BACK to revision 6 because the portal's history reader refuses the new answer. See AMENDMENT 4.</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -68,6 +68,28 @@ Criterion ids: APPLY5-AC1, APPLY5-AC2. Instance at `org/tier2_senior/0.7.0_AE_Cl
     issuer's own run), record what it prints NOW in the instance with the commit of the fixed check, re-commit, re-validate. The
     order's status does not change. `round-close-check` refuses a complete order beside a FAIL row. Gate limb that graded this
     amendment: this commit's own gate output is the read.
+    **AMENDMENT 4 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~11:2xZ): BRANCH B -- ROLL BACK irpt-status to revision 6 NOW. This supersedes
+    AMENDMENT 3 until it is done.** Authority: the signed pair's section 5 (a served answer that fails takes the rollback) and this
+    order's step 9 (the issuer orders the rollback from your recorded version).
+    WHY: release 5's history answer carries `unreadable_rows` on the page and `client_id` / `client_claim` on every row (MEASURED, the
+    laptop's R3). The portal's reader `readOwnedHistory` admits EXACTLY `items` and `next_cursor` on the page and an exact key set on
+    each row (`src/pages/InvestorReporting/contracts/owned-requests.ts`, read by the issuer at portal PROD `37aa1247ee` and DEV
+    `11f25102dd`): it throws on the new answer. So the live Investor Reporting history view, a client-facing page, refuses every
+    history answer since 10:25Z (INFERRED from the two readings; nobody has looked at the page). Found by `2.0.0_SA_COO~D2` (msg 4804).
+    DO, in this session, in order:
+    a. Read live `CodeSha256` (expect `Iw3FADFr...`) and that S3 object version `hRe7.zty9CYey5GkmjHlETbeZkKsD.3O` of
+       `investor-reporting/irpt-status.zip` still exists with digest `6idtFvAm...`. STOP and report if either read differs.
+    b. Open and COMMIT ledger `irpt-anlreq-r5-rollback-irpt-status-20261011` before any write, naming both digests and that version.
+    c. Re-promote that object version by the same method your TO-APPLY-Y1 branch B names (the version becomes the current object;
+       then `investor-reporting/ops`, `-target=module.irpt_status`: exactly ONE resource to change, 0 add, 0 destroy; commit the plan
+       text; `safe-apply`). Never `aws lambda update-function-code`; never a bare `terraform apply`; no S3 delete of any object or version.
+    d. Read live `CodeSha256` = `6idtFvAmYk73wJdr5DPRIyEPrLeWgzjlqbdNr5f1wxc=`; re-plan 0 changes.
+    e. Source map entry `irpt-status`: `artifact_sha256` and `deployed_code_sha256` back to `6idtFvAm...`, and the three applied-artifact
+       fields state THIS rollback. Do NOT touch the entry's pins: the one-tree re-pin stays for the re-release.
+    f. Write `org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_anlreq_r5/R5_rollback_record.json` (digests before and after,
+       the version promoted, plan and re-plan counts, ledger, `claim: measured`), close the ledger, commit, and report to the issuer
+       citing this path with the live digest read at send time.
+    The order's status is `in_progress` until then. Gate limb that graded this amendment: this commit's own gate output is the read.
     0. Pre-checks; STOP on any miss, before any write:
        - choose the building commit C: a commit ON ORIGIN that contains `ece5ad3477` (`git fetch`, then
          `git merge-base --is-ancestor ece5ad3477 <C>` rc 0 and `<C>` reachable from `origin/box/dell2`); build, plan and apply in a
@@ -121,6 +143,7 @@ Both checks at the base (run by the issuer before this cut): FAIL as expected (l
 org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_anlreq_r5/
 org/critical_paths/change_management/
 org/critical_paths/.open_deploys/irpt-anlreq-r5-irpt-status-20261011.json
+org/critical_paths/.open_deploys/irpt-anlreq-r5-rollback-irpt-status-20261011.json
 infra/aws/lambda/ci/lambda-source-map.json
 org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md
 </paths>
