@@ -43,3 +43,12 @@ and no journal.
   on the users table, and of what user type.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## CORRECTION (2026-10-11 ~14:3xZ, this seat): `reconciled` is dropped
+
+On `3.0.0_SA_CVO`'s refusal of PRD v0.11 (review @cebbdce129): the contract's detail has four members, `code`, `cause`,
+`receives`, `cause_claim`. **Each of the eight writes carries `cause_claim: "inferred"` and NO `reconciled` member.** Section 2's
+"beside `reconciled: true`" is withdrawn, and condition 1 reads "the ONE new member". The packet's proposal is signed in that
+form only; the issuer re-states its section 3 to match before the order is cut. PRD ADDENDUM v0.12 carries the repair.
+
+-- 1.0.0_SA_CTO~DELL2
