@@ -1,0 +1,86 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bw-1",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bw-1.purchase-day.md",
+  "group": "OTHER",
+  "vintage_commit": "f02e98739e"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~132",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round75.md",
+  "vintage_commit": "f02e98739e",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bw-1.purchase-day.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~132/PURCHASE_DAY.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "local measurement record on copies; nothing served, applied or written to any bucket; no product file edited; no account id or account value in it",
+   "artifact_covered_by": [
+    "CB75bw1-AC1",
+    "CB75bw1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~132/PURCHASE_DAY.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the short table and the sentence on which close makes the shares worth the cash; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB75bw1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB75bw1-AC1",
+   "criterion_verbatim": "the rule was written first; the reviewer's count is reproduced; every trade day carries one of three readings (`sum` equals `trade_days`); the issuer reads the reading and how many days the recomputation reproduced.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~132/PURCHASE_DAY.json',encoding='utf-8'));s=d['set'];r=d['reproduced_reviewer'];c=d['recomputation'];print('PURCHASE-DAY rule_written=%s reviewer=%d/%d(%d+%d+%d) changed=%d/%d trade_days=%d reproduced=%d not_reproduced=%d confirmed=%d refuted=%d undecided=%d sum=%d reading=%s'%(bool(d['rule']['written_at']),r['with_a_row'],r['over_10bp'],r['purchases'],r['sales'],r['reinvestments'],s['changed_floor_1e9'],s['changed_floor_1e12'],s['trade_days'],c['reproduced'],c['not_reproduced'],d['confirmed'],d['refuted'],d['undecided'],d['confirmed']+d['refuted']+d['undecided'],d['reading']))\"",
+   "expect": "PURCHASE-DAY rule_written=True",
+   "output_evidence": "PURCHASE-DAY rule_written=True reviewer=22/96(12+2+8) changed=1575/1577 trade_days=37 reproduced=1577 not_reproduced=0 confirmed=37 refuted=0 undecided=0 sum=37 reading=confirmed (rc 0)",
+   "denominator": "37 of 37 trade days carry one reading; 1,577 of 1,577 changed account-days reproduced within 1e-9 (largest gap 4.4e-16) in both builds; 22 of 96 changes over 10 bp carry a share-moving row (12 purchases, 2 sales, 8 reinvestments), 74 do not; rule written 2026-10-11T22:04:03Z before any return was recomputed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB75bw1-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the prediction was written from the build's own formula before any return was recomputed; the recomputation reproduces the builds' returns before it is used; `refuted` and `undecided` are used where they apply; the reading is `confirmed` only under the rule's own test of what would show it wrong; no account id or account value appears.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read PURCHASE_DAY.json (rule.text and rule.written_at, recomputation, by_kind_and_band.reading_test, cash_against_shares, not_established) and PURCHASE_DAY.md",
+   "output_evidence": "rule text and clock timestamp 2026-10-11T22:04:03Z copied into the record; recomputation 1,577 of 1,577 reproduced, 0 not reproduced; refuted 0 and undecided 0 because every trade day had complete inputs and agreed to rounding; reading test: 12 of 12 purchase days confirmed, holding-only prediction explains 0 of 12, control 74 of 74 over 10 bp; no account id or account value in the record",
+   "denominator": "37 trade days of 1,577 changed account-days; 12 purchase days set the reading",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~132/ADVI_COTBKF.TO-CB-bw-1.purchase-day.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB75bw1-AC1)",
+   "result": "PURCHASE-DAY rule_written=True reviewer=22/96(12+2+8) changed=1575/1577 trade_days=37 reproduced=1577 not_reproduced=0 confirmed=37 refuted=0 undecided=0 sum=37 reading=confirmed"
+  }
+ ]
+}
