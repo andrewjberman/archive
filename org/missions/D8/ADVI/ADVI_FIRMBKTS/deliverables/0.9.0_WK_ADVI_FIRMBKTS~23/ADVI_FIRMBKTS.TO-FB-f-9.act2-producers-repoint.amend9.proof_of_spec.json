@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-f-9.act2-producers-repoint",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-9.act2-producers-repoint.md",
+    "group": "OTHER",
+    "vintage_commit": "cf806cf81d"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~23",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R3.md",
+    "vintage_commit": "b96c9e74a1",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-9.act2-producers-repoint.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; the two arms carry their own negative cases (AC1 unset and kept values, AC2 legacy and lib-absent fallbacks)",
+      "expected": "N/A -- the order names none",
+      "observed": "N/A -- the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "not re-run: each arm runs a fixed case table with no clock or random input; the order's invocations were run once each",
+      "observed": "N/A -- no second run was made by this worker",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running gold_dispatch.sh in any mode, the runner, and every AWS call",
+      "reason": "Bound: repository file edits only, and the order says it runs and deploys nothing. The two blocks were read by the arms with stub variables, not run inside the file. Placement: PLATINUM-MODE at lines 1079-1084 after the argument-parsing fi at line 1077; GATE-READ-LOCATION at lines 249-256 inside check_freshness, immediately before the aws s3 cp at line 257."
+    },
+    {
+      "item": "The live S3 mirror of code/gold/ (whether s3://opal-data-bd/code/gold/lib/ holds platinum_dest.py)",
+      "reason": "Not read: the bound is repository files only. The lib/ carrier rests on the recursive sync at infra/aws/ec2/bd-gold-layer-runner/run-gold-layer.sh line 90 and on the dispatcher's existing SCRIPTS/lib use at gold_dispatch.sh line 216."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "kind": "script",
+      "commit_or_etag": "35079cb237ce779721a9cf4597cb70db5c8f5361",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit 35079cb237 on wk-ADVI_FIRMBKTS-23; no deploy. Dormant: with the mode unset the file behaves as before except that a scheduled production chain exports BD_PLATINUM_MODE=canonical, and that takes effect only when the file is deployed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 runs the export block under eight environments (a scheduled chain reads canonical; single, group, a dry-run, the QA keep-alive and the QA marker read unset; a value already set is kept), FAIL at base.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-23 && timeout 100 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_dispatch.py --arm export --root /c/dev/wk-firmbkts-23; echo \"exit=$?\"",
+      "output_evidence": "  PASS scheduled chain, no overrides    -> 'canonical' (want 'canonical')\n  PASS single                           -> 'UNSET' (want 'UNSET')\n  PASS group                            -> 'UNSET' (want 'UNSET')\n  PASS chain dry-run                    -> 'UNSET' (want 'UNSET')\n  PASS QA keep-alive                    -> 'UNSET' (want 'UNSET')\n  PASS QA rebuild marker                -> 'UNSET' (want 'UNSET')\n  PASS mode already set to legacy       -> 'legacy' (want 'legacy')\n  PASS mode already set to canonical    -> 'canonical' (want 'canonical')\n  export cases: 8 of 8\nROUND 3 DISPATCH EXPORT: ALL CASES PASS\nexit=0",
+      "denominator": "8 of 8 export cases; exit=0",
+      "status": "PASS",
+      "expect": "ROUND 3 DISPATCH EXPORT: ALL CASES PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 runs the gate block with the mode unset (today's URI, byte-identical), with canonical (the module's own answer for the key) and with the lib absent (today's URI), FAIL at base.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-23 && timeout 100 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_dispatch.py --arm gate --root /c/dev/wk-firmbkts-23; echo \"exit=$?\"",
+      "output_evidence": "  PASS mode unset (legacy)      -> 's3://opal-data-bd/gold/artifacts/summary/header_metrics.json' (want 's3://opal-data-bd/gold/artifacts/summary/header_metrics.json')\n  PASS mode canonical           -> 's3://opal-data-49financial/advi/49financial/platinum/artifacts/summary/header_metrics.json' (want 's3://opal-data-49financial/advi/49financial/platinum/artifacts/summary/header_metrics.json')\n  PASS lib absent (fallback)    -> 's3://opal-data-bd/gold/artifacts/summary/header_metrics.json' (want 's3://opal-data-bd/gold/artifacts/summary/header_metrics.json')\n  gate cases: 3 of 3\nROUND 3 DISPATCH GATE: ALL CASES PASS\nexit=0",
+      "denominator": "3 of 3 gate cases; exit=0",
+      "status": "PASS",
+      "expect": "ROUND 3 DISPATCH GATE: ALL CASES PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 counts the bytes above 127 in gold_dispatch.sh; the expectation is non-ascii-bytes=0 (19 lines at base, so FAIL at base).",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-23 && python -c \"import sys; b=open(sys.argv[1],'rb').read(); print('non-ascii-bytes=%d' % sum(1 for x in b if x > 127))\" data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "output_evidence": "non-ascii-bytes=0\nexit=0",
+      "denominator": "0 bytes above 127 of 75571 file bytes",
+      "status": "PASS",
+      "expect": "^non-ascii-bytes=0$"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W23-S1: base line 517, an em dash inside a printed FATAL echo; step 2b STOP lifted by amendment 9, replaced with two hyphens at 35079cb237 (BLOCKING, INERT)",
+    "ADVI_FIRMBKTS-D1-W23-S2: base line 921, an em dash inside the show_help heredoc; step 2b STOP lifted by amendment 9, replaced at 35079cb237 (BLOCKING, INERT)",
+    "ADVI_FIRMBKTS-D1-W23-S3: base line 1132, an em dash inside a printed ERROR echo; step 2b STOP lifted by amendment 9, replaced at 35079cb237 (BLOCKING, INERT)",
+    "ADVI_FIRMBKTS-D1-W23-S4: base line 1482, an em dash inside a printed WARN echo; step 2b STOP lifted by amendment 9, replaced at 35079cb237 (BLOCKING, INERT)",
+    "ADVI_FIRMBKTS-D1-W23-S5: base line 1484, an em dash inside a printed echo; step 2b STOP lifted by amendment 9, replaced at 35079cb237 (BLOCKING, INERT)",
+    "ADVI_FIRMBKTS-D1-W23-S6: the step-2 dirname search reaches lib/ on the wrapper path only; direct invocation or an unseen --chain downstream caller falls to the legacy URI on a fresh instance (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~B1; narrows W21-S2); accepted by the issuer, no action",
+    "ADVI_FIRMBKTS-D1-W23-S7: amendment 9 annotation row naming S1 to S5 (OBSERVATION, INERT); S1 to S5 not edited in place (append-only channel)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~23/ADVI_FIRMBKTS.TO-FB-f-9.act2-producers-repoint.amend9.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python r3_dispatch.py --arm export",
+      "invocation": "timeout 100 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_dispatch.py --arm export --root /c/dev/wk-firmbkts-23",
+      "result": "ROUND 3 DISPATCH EXPORT: ALL CASES PASS; export cases 8 of 8; exit=0"
+    },
+    {
+      "tool": "python r3_dispatch.py --arm gate",
+      "invocation": "timeout 100 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_dispatch.py --arm gate --root /c/dev/wk-firmbkts-23",
+      "result": "ROUND 3 DISPATCH GATE: ALL CASES PASS; gate cases 3 of 3; exit=0"
+    },
+    {
+      "tool": "bash -n",
+      "invocation": "bash -n data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "result": "rc=0"
+    },
+    {
+      "tool": "safe-commit.sh (commit-gate, surprise-row gate, to-pipeline gate, msg-verify)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~23 <0.9.0_WK_ADVI_FIRMBKTS~23@opal.agent>\" -F .scratch/msg4.txt -- data/black_diamond/scripts/gold/gold_dispatch.sh org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc=0; commit 35079cb237 MATCH; surprise-row gate OK; 2 files changed, 26 insertions, 5 deletions"
+    }
+  ]
+}
