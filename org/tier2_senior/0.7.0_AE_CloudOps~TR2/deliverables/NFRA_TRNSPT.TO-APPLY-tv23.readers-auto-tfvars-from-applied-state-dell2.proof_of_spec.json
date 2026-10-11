@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "genre": "BUILD",
+  "to_id": "NFRA_TRNSPT.TO-APPLY-tv23.readers-auto-tfvars-from-applied-state-dell2",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TR2/task_orders/NFRA_TRNSPT.TO-APPLY-tv23.readers-auto-tfvars-from-applied-state-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "bf4a4a2cdc5fb1b5a0e197605e802bfe9d2e4d92"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/decompositions/NFRA_TRNSPT_DECOMP_R23.md",
+    "vintage_commit": "bf4a4a2cdc5fb1b5a0e197605e802bfe9d2e4d92",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TR2/task_orders/NFRA_TRNSPT.TO-APPLY-tv23.readers-auto-tfvars-from-applied-state-dell2.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TR2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/transcripts/readers.auto.tfvars",
+      "kind": "terraform",
+      "commit_or_etag": "e284d59428",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New, tracked file holding second_reader_trust_principal_arns = 1 ARN, arn:aws:iam::313476888478:user/Opal_Terminal. The list was GENERATED from the output of `aws iam get-role --role-name teams-global-transcripts-second-reader-role` read at 2026-10-11T06:51:07Z, by a script that flattens the trust policy's Principal.AWS in the order the policy states it -- the ARN was never typed by the applier. Header records the source, the read time, the ruling CTO_RULING_NFRA_TRNSPT_FWD5_WIPED_SILVER_READER_HOLDERS_20261009.md, and that changing the value is a commit under a pair carrying Andrew's C-READERS word. NOTHING IS APPLIED by this order.",
+      "artifact_covered_by": [
+        "TR23-tv23-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/.gitignore",
+      "kind": "config_data",
+      "commit_or_etag": "e284d59428",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ONE negation line, !transcripts/readers.auto.tfvars, added beneath line 5's *.auto.tfvars pattern with a four-line comment stating why. check-ignore BEFORE: 'infra/aws/terraform/.gitignore:5:*.auto.tfvars\tinfra/aws/terraform/transcripts/readers.auto.tfvars'. AFTER: 'infra/aws/terraform/.gitignore:10:!transcripts/readers.auto.tfvars\tinfra/aws/terraform/transcripts/readers.auto.tfvars'. git status then reports the path as '??', i.e. trackable, and git ls-files --error-unmatch resolves it after the commit.",
+      "artifact_covered_by": [
+        "TR23-tv23-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/transcripts/readers.tf",
+      "kind": "terraform",
+      "commit_or_etag": "255007fc37",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "COMMENT HEADERS ONLY -- a diff filter for added/removed lines that are neither comments nor blank returns NONE, across both commits. The variable block is untouched and still carries NO default (printed). TWO headers claimed NOT APPLIED, not one: the second reader's at line 2 (fixed in e284d59428) and the SILVER-ONLY READER's at line 72 (fixed in 255007fc37 after the AC1 check caught it). Both now state measured applied state: the second reader applied 2026-10-09T09:55Z under ledger nfra-trnspt-a18-second-reader-laptop-20261009 (3 added, 1 changed); the silver reader's role CreateDate reads 2026-10-09T14:07:25Z live with teams-global-transcripts-silver-reader-policy attached.",
+      "artifact_covered_by": [
+        "TR23-tv23-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TR23-tv23-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R23_CHECKS/r23_checks.py tv23 expect R23-TV23-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R23_CHECKS/r23_checks.py tv23",
+      "expect": "R23-TV23-OK",
+      "output_evidence": "R23-TV23-OK declared=1 live=1 equal; no default; header states the applied state (rc=0). STEP 1 READ, live at 2026-10-11T06:51:07Z: the trust policy of teams-global-transcripts-second-reader-role names exactly ONE principal, arn:aws:iam::313476888478:user/Opal_Terminal (one Allow statement, sts:AssumeRole). Variable census of the root, matching only a 'default =' ASSIGNMENT: 5 variable blocks, 4 default assignments, and exactly ONE variable with no default -- second_reader_trust_principal_arns -- so no OTHER defaultless variable exists to report. CHECK-IGNORE BEFORE: 'infra/aws/terraform/.gitignore:5:*.auto.tfvars\tinfra/aws/terraform/transcripts/readers.auto.tfvars'. CHECK-IGNORE AFTER: 'infra/aws/terraform/.gitignore:10:!transcripts/readers.auto.tfvars\tinfra/aws/terraform/transcripts/readers.auto.tfvars'. STEP 5 PLAN SUMMARY LINE, with NO -var and no tfvars outside the repo, targeted at all six reader resources (aws_iam_role/aws_iam_policy/aws_iam_role_policy_attachment for second_reader and silver_reader): 'No changes. Your infrastructure matches the configuration.' (rc=0), re-run after the readers.tf header fix with the same result. STEP 6 NEGATIVE CONTROL, tfvars moved aside: rc=1 and 'Error: No value for required variable' 'on readers.tf line 18'; the file was restored and its sha256[:16] read 67db121c3d36e42a before and after, IDENTICAL. NOTHING WAS APPLIED.",
+      "denominator": "1 of 1 trust principal read and written; 5 variable blocks censused with 4 default assignments and 1 defaultless; 6 of 6 reader resources in the 0-change plan; 2 of 2 check-ignore states printed; 4 of 4 scope-control paths confirmed still ignored; 2 of 2 NOT-APPLIED header claims corrected; 3 of 3 check states observed (absent FAIL, present-untracked FAIL, tracked OK)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order's whole proof is a plan that reads 'No changes', which is worthless unless a WRONG committed value would make it read otherwise. So the value was mutated: arn:aws:iam::313476888478:user/Opal_Terminal in readers.auto.tfvars was replaced with the well-formed but wrong arn:aws:iam::313476888478:user/MUTANT_WRONG_PRINCIPAL and the same six-resource plan was re-run. Nothing was applied at any point; a plan cannot apply. The file was then restored and its sha256 compared.",
+      "expected": "the plan stops saying 'No changes' and proposes updating aws_iam_role.second_reader's assume_role_policy, proving the 0-change result discriminates a correct committed value from a wrong one",
+      "observed": "'# aws_iam_role.second_reader will be updated in-place' with '~ assume_role_policy = jsonencode(' and 'Plan: 0 to add, 1 to change, 0 to destroy' (rc=0). After restoring, the file's full sha256 was IDENTICAL to the pre-mutation value and no MUTANT text remained (grep count 0), and the plan returned to 'No changes. Your infrastructure matches the configuration.'",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The two same-input runs the schema asks for: the six-resource reader plan was run twice in succession on the restored tree with identical inputs and its verdict lines compared; the AC1 check was likewise run twice. Both the plan and the check read live AWS, so instability would show as a differing verdict.",
+      "observed": "plan run 1 and run 2 both 'No changes. Your infrastructure matches the configuration.' (rc=0), compared equal; the check printed 'R23-TV23-OK declared=1 live=1 equal; no default; header states the applied state' on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Scope of this order (stated here because a BUILD instance has no root `scope` field)",
+      "reason": "COMMITTED, NOT APPLIED. The reader-trust value of the transcripts root now lives in git, holding exactly what the role's live trust policy reads, and the variable still carries no default so a tree without the file refuses to plan. Row NFRA_TRNSPT-D2-S17 (this lane's own) is retired in substance by this commit: no applier need ever supply the value from outside the repo again. Row D2-S20 (the header stating applied state) is satisfied for BOTH reader headers. NOT in scope: any apply, any change to who may assume either role, and the silver reader's own never-widen pair."
+    },
+    {
+      "item": "Reversal of this order (stated here because a BUILD instance has no root `rollback` field)",
+      "reason": "Revert commits 255007fc37 and e284d59428, which removes readers.auto.tfvars, the one .gitignore negation line and the two header corrections. Nothing in AWS is touched by this order, so there is no applied state to roll back and no key, data or code to restore: the proof of the whole order is a plan that changes nothing. The pre-order state is recoverable exactly, and the negative control already demonstrated what a tree without the file does -- it refuses to plan, which is the designed behaviour rather than a broken one."
+    },
+    {
+      "item": "The order's pre-act dry run, run in its stated position",
+      "reason": "The order names a dry run BEFORE the act expecting 'R23-TV23-FAIL absent: ...'. I wrote the tfvars first and ran the check afterwards, so I did not observe that FAIL in its pre-act position. I recovered the same observation by re-creating the absent state (moving the file aside, running the check, restoring it with a verified identical sha256), which establishes that the check discriminates -- but it is a discrimination control taken after the fact, NOT the pre-act dry run the order asked for, and it is recorded that way rather than presented as compliance."
+    },
+    {
+      "item": "comp-iam's report on the two reader roles",
+      "reason": "The preflight declares comp-iam RUN. It was run and returned 'No role matching' for BOTH reader roles, because their Terraform names are computed from NAMES.json rather than literal. The preflight's intent -- showing the git value equal to the applied value -- was met instead by the live trust read, the 0-change plan over all six reader resources, and the check's own declared-vs-live comparison. The instrument gap is filed as row NFRA_TRNSPT-D2-S27 and is not this order's to fix."
+    },
+    {
+      "item": "Other Terraform roots that read second_reader_trust_principal_arns",
+      "reason": "The preflight lists this as BLIND and asks the applier to say so or name them. Answered: NONE. The identifier appears in exactly three lines of one file, infra/aws/terraform/transcripts/readers.tf (:12 a comment, :15 the variable block, :35 its use in the trust policy), across all of infra/."
+    },
+    {
+      "item": "Retiring row NFRA_TRNSPT-D2-S17 and row D2-S20 formally",
+      "reason": "This commit satisfies both in substance, but a row's disposition is the CVO's and the issuer's, never the applier's. They are named here, not closed here."
+    },
+    {
+      "item": "The DEPLOY proof genre the order's header marks",
+      "reason": "The order declares <proof_genre>DEPLOY</proof_genre> together with <risk>LOCAL</risk>, and those cannot both hold: proof-of-spec-check admits genre DEPLOY only on an order marked <risk>SERVED</risk> or <risk>WORLD</risk> (3.0.0_SA_CVO verdict 29306, condition 1), and the schema then also requires a never_widen_pair, which the CTO's own ruling says this act does not need because a verified DELTA=0 needs no pair. This instance is therefore written as genre BUILD, the only genre it can honestly claim -- the checker states that the graded party cannot confer DEPLOY on itself. Nothing about the work changes; what changes is which limbs grade it, and a BUILD instance is graded more strictly, not less. The header needs ONE of two issuer amendments: <risk>SERVED</risk> if the DEPLOY genre is intended, or <proof_genre>BUILD</proof_genre> if LOCAL is intended. That is the issuer's field to amend, not the applier's, and it is raised in the report rather than worked around silently."
+    }
+  ],
+  "surprises": [
+    "NFRA_TRNSPT-D2-S27: comp-iam is structurally blind to any IAM role whose Terraform name is COMPUTED rather than literal, and it fails SILENT -- 'No role matching' for both transcripts reader roles, which exist and are applied; LGIC rule 30 mandates the computed form, so the blind set grows with every canon-conformant resource."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~TR2/logs/2026-10-11/readers_auto_tfvars_tv23.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam role teams-global-transcripts-second-reader-role; comp-iam role teams-global-transcripts-silver-reader-role; comp-iam roles",
+      "result": "RUN as the preflight declares, and it ANSWERED NOTHING: 'No role matching' for both reader roles. Cause established rather than guessed -- comp-iam roles emitted 884 TF-derived role lines containing no transcripts reader role, while readers.tf:32,45,97,111 set each name from a local resolved by jsondecode of NAMES.json. Filed as row NFRA_TRNSPT-D2-S27."
+    },
+    {
+      "tool": "comp-adversary",
+      "invocation": "comp-adversary compose (run in this session against the round-22 packets; not re-composed for tv23)",
+      "result": "The preflight's four named hazards were each answered by a direct control instead: a typed value (the generator reads live, and the check re-reads live), an over-broad negation (4 scope controls printed), a plan passing on a stray outside tfvars (no -var was passed and step 6 is the negative control), and a default slipped into the variable (the block is printed and the check refuses a default)."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --files '\"genre\": *\"DEPLOY\"' org/tier2_senior org/missions (earlier this session)",
+      "result": "Located the DEPLOY-genre instance convention this file follows; denominator printed (89 hits / 32056 files)."
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's own preflight: nothing is applied and no schedule is touched."
+    }
+  ]
+}
