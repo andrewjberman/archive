@@ -1,0 +1,121 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-f-14.act3b-admission-apply",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-14.act3b-admission-apply.md",
+  "group": "OTHER",
+  "vintage_commit": "0cbbd71714"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FB1",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-14.act3b-admission-apply.md",
+  "vintage_commit": "ce2c8a89fc"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3:opal-data-49financial bucket policy (aws_s3_bucket_policy.opal_data_49financial)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-apply of the saved scoped plan 15:26:58Z-15:27:28Z: Apply complete! Resources: 0 added, 1 changed, 0 destroyed; live policy 29 statements (18 Deny, 11 Allow) equals the rendered policy statement by statement",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ],
+   "commit_or_etag": "id opal-data-49financial; prior policy 4 statements in the file below"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1\\PRIOR_opal-data-49financial_policy_20261011T152348Z.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the live policy printed before any plan, 4 statements: the rollback artifact",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261011T1523Z_advi-firmbkts-fb-f-14-act3b-admission-20261011_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "entry opened before the first read of the live policy, closed with the outputs",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "invocation": "cd /c/dev/ajb_workspace && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_act3b.py --arms live; echo \"exit=$?\"",
+   "expect": "ROUND 4 ACT 3B LIVE: 3 of 3 arms",
+   "output_evidence": "r4_act3b.py --arms live, read 2026-10-11T15:27:50Z, printed:\nstatements live=29 rendered=29; only live=[] only rendered=[] differing=[]\n  allow statements=11; violations=[]\n  anonymous GET of the ownership key -> 403\nPASS L1 the live policy equals the rendered policy, statement by statement\nPASS L2 no Allow writes, deletes, names a wildcard principal or the whole bucket\nPASS L3 an unsigned GET of the ownership key returns 403\nROUND 4 ACT 3B LIVE: 3 of 3 arms\nexit=0",
+   "denominator": "29 live statements against 29 rendered (0 differing); 11 Allow statements, 0 violations; 1 unsigned GET of the ownership key",
+   "status": "PASS",
+   "criterion_verbatim": "cd /c/dev/ajb_workspace && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_act3b.py --arms live; echo \"exit=$?\"",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AC2",
+   "invocation": "cd /c/dev/ajb_workspace/infra/aws/terraform/shared-infra && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target=aws_s3_bucket_policy.opal_data_49financial 2>&1 | grep -E \"^(Plan:|No changes)\"",
+   "expect": "^No changes\\.",
+   "output_evidence": "scoped plan of shared-infra after the apply (terraform resolved to .tools/terraform.exe), read 2026-10-11T15:27:50Z, printed:\nNo changes. Your infrastructure matches the configuration.",
+   "denominator": "1 matched line; the plan targets 1 resource; exit 0",
+   "status": "PASS",
+   "criterion_verbatim": "cd /c/dev/ajb_workspace/infra/aws/terraform/shared-infra && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target=aws_s3_bucket_policy.opal_data_49financial 2>&1 | grep -E \"^(Plan:|No changes)\"",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant is named by the order. The difference control is the prior policy (4 statements) against the planned and the live one (29), and the prior policy as the control for the self-access evaluation.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "AC1 and AC2 each ran once after the apply",
+   "observed": "single read each",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the ten-principal simulation and the two negative-arm simulations",
+   "reason": "the order assigns the close simulation to the laptop lane (iam:SimulatePrincipalPolicy is denied to this identity for roles); this lane ran AC1's three arms and AC2 only"
+  },
+  {
+   "item": "an organization SCP and the OAI's live read",
+   "reason": "invisible to every instrument here; the CTO's act-4 sample reads them (the order's blindness line)"
+  },
+  {
+   "item": "terraform init in the shared-infra root",
+   "reason": "this checkout had no .terraform; init resolved the modules and wrote no state"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-S30: the cross-box seat gate read OPEN-CALL and OPEN-DEPLOY hits (STOP in WARN mode) on the shared-infra root by path token; each was read and found disjoint from the one resource; the OPEN-DEPLOY entry reads CLOSED in this tree and its sentinel was not found in any of 50 worktrees"
+ ],
+ "session_log": "org/critical_paths/change_management/20261011T1523Z_advi-firmbkts-fb-f-14-act3b-admission-20261011_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "terraform 1.15.8 / safe-apply",
+   "invocation": "plan -out scoped to the one resource, show -json, --dry-seat-gates, safe-apply of the saved plan",
+   "result": "Plan: 0 to add, 1 to change, 0 to destroy; Apply complete: 0/1/0"
+  },
+  {
+   "tool": "r4_act3b.py --arms live",
+   "invocation": "AC1 as ordered",
+   "result": "3 of 3 arms"
+  },
+  {
+   "tool": "crossbox-deploy-check.py",
+   "invocation": "--root shared-infra --files-vs-trunk --target <the resource>",
+   "result": "OVERLAP clear; OPEN-CALL and OPEN-DEPLOY hit, each read and disjoint"
+  }
+ ]
+}
