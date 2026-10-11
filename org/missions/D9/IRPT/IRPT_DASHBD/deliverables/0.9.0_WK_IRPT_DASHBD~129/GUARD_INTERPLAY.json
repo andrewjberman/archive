@@ -1,0 +1,198 @@
+{
+ "record": "IRPT_DASHBD.TO-DB-b-160 -- the guard flags FLOW_UNRECONCILED and LARGE_FLOW under each flow convention, counted on a private copy",
+ "worker": "0.9.0_WK_IRPT_DASHBD~129",
+ "firm": "the one firm the tie-out reads, its own gold prefix only, as copied by 0.9.0_WK_IRPT_DASHBD~128",
+ "account_days": 2659140,
+ "on_a_copy": true,
+ "s3_writes": 0,
+ "s3_reads": 0,
+ "s3_reads_note": "none: the previous cell private table and served copy held every column the guard reads (served day_quality, guard_state, holdings_price_return, income_return, income_received, external_flow, market_value_eod, carried_days)",
+ "guard_rule": {
+  "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+  "line": 1498,
+  "lines": {
+   "selection_chain": "1498-1528",
+   "incomplete_flow_to_FLOW_UNRECONCILED": "1502-1505",
+   "ungraded_day_flow_share_over_tolerance_to_FLOW_UNRECONCILED": "1506-1517",
+   "graded_and_disagreed_to_FLOW_UNRECONCILED": "1518-1522",
+   "LARGE_FLOW": "1523-1525",
+   "guard_difference": "1414",
+   "flow_share": "1413",
+   "vocabulary": "138-159",
+   "eligible_band_gate": "1097-1137 (called at 1529)"
+  },
+  "prd": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md ADDENDUM v0.4 rulings 17-19 (lines 445-473)"
+ },
+ "flag_rules": {
+  "FLOW_UNRECONCILED": "three entries: (a) F_t knowably incomplete (unvalued in-kind leg, unparseable cash, unknown cash above the tolerance of V_(t-1)); (b) the guard did not grade the day (outside the comparability domain) and |F_t|/V_(t-1) is above the guard tolerance; (c) the guard graded the day and |r_t - (holdings price return + income return)| is above the guard tolerance. The day is served with a null return and return_basis NOT_MEASURABLE.",
+  "LARGE_FLOW": "reached only after the guard graded the day and agreed: |F_t|/V_(t-1) above the measured large-flow share (a p99 of the share). The day KEEPS its TWR return; the flag is a reader warning, not a refusal."
+ },
+ "flag_depends_on_convention": true,
+ "depends_basis": "FLOW_UNRECONCILED entry (c) compares the day return r_t, which IS the flow-convention quantity, with the holdings price return plus income; entries (a) and (b) use only V_(t-1) and the flow, so as the code is written they do not depend on the convention. LARGE_FLOW tests |F_t|/V_(t-1), which does not depend on the convention, but is reached only when entry (c) passes and the band gate accepts r_t, so it moves with the convention through those two. The base V_(t-1) in the code neither includes nor excludes the flow; the base follows the convention only in the sensitivity block.",
+ "per_flag_basis": {
+  "FLOW_UNRECONCILED": {
+   "depends": true,
+   "through": "the guard difference on graded days (entry c); entries a and b do not move"
+  },
+  "LARGE_FLOW": {
+   "depends": true,
+   "through": "ordering behind the guard difference and the plausibility band, not through its own test"
+  }
+ },
+ "thresholds": {
+  "how_obtained": "not read from S3; inferred from the served flags by bracketing and checked two independent ways. The tolerance lies between the largest guard difference of a served GRADED_AGREED day and the smallest of a served GRADED_DISAGREED day not explained by a skipped-day chain, and the same interval brackets the ungraded days by flow share; the large-flow share lies between the largest flow share of a served MEASURED graded day and the smallest of a served LARGE_FLOW day. Each interval holds exactly one value at the six decimals the code rounds to (lines 1556 and 1563). The plausibility band is the code default and the served returns sit inside it.",
+  "tolerance_consistent_two_ways": true,
+  "large_flow_share_interval_holds_one_6dp_value": true
+ },
+ "end_reproduces": {
+  "FLOW_UNRECONCILED": {
+   "flagged_served": 6096,
+   "flagged_restated": 6090,
+   "differ": 6
+  },
+  "LARGE_FLOW": {
+   "flagged_served": 42458,
+   "flagged_restated": 42464,
+   "differ": 6
+  },
+  "evaluated_days": 2602049,
+  "days_whose_class_differs_at_all": 6,
+  "differ_explained_by": "all 6 differing days carry carried_days 2 and a non-zero flow: a custodian valuation on the skipped day sits inside the window and the served END chains through it (account_return_daily.py lines 1383-1406); the day-pair restatement cannot see it. Same cause the previous cell recorded for its not-equal days. 0 of the 6 differing days carry carried_days 1.",
+  "share_not_reproduced": "6 of 6096 served FLOW_UNRECONCILED days and 6 of 42458 served LARGE_FLOW days (the same 6 days: served disagreed, the day-pair form agrees); under 1 in 1000",
+  "left_as_served": "the 6 differing days and the 19 days the previous cell left as served (its not-equal and no-prior-value days) keep their served class under START and MID, so they are in neither move"
+ },
+ "entry_paths_under_end": {
+  "incomplete_flow_convention_independent": 440,
+  "ungraded_flow_share_over_tolerance_convention_independent": 382,
+  "graded_disagreed_depends": 5274,
+  "note": "the served FLOW_UNRECONCILED days are the sum of the three; only the graded_disagreed ones can move as the code is written"
+ },
+ "flags": {
+  "FLOW_UNRECONCILED": {
+   "under_end": 6096,
+   "under_start": 8617,
+   "under_mid": 7314,
+   "end_not_start": 71,
+   "start_not_end": 2592,
+   "end_not_mid": 48,
+   "mid_not_end": 1266
+  },
+  "LARGE_FLOW": {
+   "under_end": 42458,
+   "under_start": 39940,
+   "under_mid": 41246,
+   "end_not_start": 2589,
+   "start_not_end": 71,
+   "end_not_mid": 1260,
+   "mid_not_end": 48
+  }
+ },
+ "flags_note": "Headline: the code own rule with the day return restated and everything else as served (base V_(t-1), thresholds as served). under_end is the served count. A day moves only if its class under the convention differs; days left as served never move.",
+ "what_a_flagged_day_becomes": {
+  "FLOW_UNRECONCILED": "total_return_daily null, return_basis NOT_MEASURABLE, the link breaks with a stated gap (account_return_daily.py lines 1502-1505, 1515-1517, 1520-1522; PRD addendum v0.4 ruling 17, lines 454-461)",
+  "LARGE_FLOW": "total_return_daily kept, return_basis TWR (lines 1523-1525): a flag only",
+  "price_return_fallback": "none. The order and the original C-GUARD clause say a flagged day falls back to the price return; the code does not: HOLDINGS_INCOME_FALLBACK is never emitted (lines 164-170, NEVER EMITTED; PRD ruling 17 withdraws it) and the previous cell counted 0 such days."
+ },
+ "fallback_days_moved": {
+  "definition": "days whose served treatment changes: the served return switches between a value (MEASURED, LARGE_FLOW) and null with NOT_MEASURABLE (FLOW_UNRECONCILED, NOT_MEASURABLE). There is no price-return fallback to switch to, so the count is of null/value switches.",
+  "start": {
+   "null_to_value": 71,
+   "value_to_null": 2590,
+   "total_return_switches": 2661,
+   "class_changed_any": 2663,
+   "flag_only_class_moves_return_unchanged_in_kind": 2
+  },
+  "mid": {
+   "null_to_value": 48,
+   "value_to_null": 1260,
+   "total_return_switches": 1308,
+   "class_changed_any": 1314,
+   "flag_only_class_moves_return_unchanged_in_kind": 6
+  },
+  "price_return_fallback_days_moved": 0
+ },
+ "sensitivity": {
+  "exclude_carried_days_over_1": {
+   "what": "days with a skipped day inside the window left as served, since an intervening valuation is not visible",
+   "counts": {
+    "start": {
+     "FLOW_UNRECONCILED": {
+      "under_end": 6096,
+      "under_start": 8608,
+      "end_not_start": 71,
+      "start_not_end": 2583
+     },
+     "LARGE_FLOW": {
+      "under_end": 42458,
+      "under_start": 39949,
+      "end_not_start": 2580,
+      "start_not_end": 71
+     }
+    },
+    "mid": {
+     "FLOW_UNRECONCILED": {
+      "under_end": 6096,
+      "under_mid": 7313,
+      "end_not_mid": 47,
+      "mid_not_end": 1264
+     },
+     "LARGE_FLOW": {
+      "under_end": 42458,
+      "under_mid": 41247,
+      "end_not_mid": 1258,
+      "mid_not_end": 47
+     }
+    }
+   }
+  },
+  "base_follows_convention": {
+   "what": "flow share and income return divided by V_(t-1)+F_t under START and V_(t-1)+F_t/2 under MID instead of V_(t-1); evaluated on the days that already have a prior value",
+   "counts": {
+    "start": {
+     "FLOW_UNRECONCILED": {
+      "under_end": 6096,
+      "under_start": 8509,
+      "end_not_start": 72,
+      "start_not_end": 2485
+     },
+     "LARGE_FLOW": {
+      "under_end": 42458,
+      "under_start": 40956,
+      "end_not_start": 2490,
+      "start_not_end": 988
+     }
+    },
+    "mid": {
+     "FLOW_UNRECONCILED": {
+      "under_end": 6096,
+      "under_mid": 7281,
+      "end_not_mid": 48,
+      "mid_not_end": 1233
+     },
+     "LARGE_FLOW": {
+      "under_end": 42458,
+      "under_mid": 41424,
+      "end_not_mid": 1236,
+      "mid_not_end": 202
+     }
+    }
+   },
+   "not_evaluable": "days with no usable prior value under END (null return, NOT_MEASURABLE, guard not reached) whose convention base would be positive and whose flow is non-zero: 433 under START, 428 under MID; their guard status is not in the copy, so they are not classified and are in no move"
+  }
+ },
+ "limits": [
+  "thresholds (guard tolerance, large-flow share) are inferred from the served flags by bracketing, not read from the published method row; the two checks agree and the control reproduces all but 6 days per flag",
+  "the base V_(t-1) is held as the code has it; a convention that also changed the base would move more (see sensitivity.base_follows_convention)",
+  "the day-pair restatement cannot see an intervening custodian valuation on a skipped day (6 differing days; the sensitivity leaves every skipped-day window as served)",
+  "the previous cell left 643 days with a zero START denominator as served; here those keep their served class under START and are restated under MID where the MID denominator is non-zero (so MID differs from the previous cell for those days)",
+  "a day whose START or MID return is not defined keeps its served class",
+  "the plausibility band gate is applied as the code default to the restated return",
+  "no return is written; no figure of any account appears in this record"
+ ],
+ "the_39": {
+  "count": 39,
+  "accrual_class": 31,
+  "unclassed": 8,
+  "statement": "39 of the 90 two-sided segments close under NO timing (31 of the accrual class, 8 unclassed); nothing in this record changes them, and a change of convention would not close the tie-out."
+ }
+}
