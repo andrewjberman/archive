@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t35",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t35.valuation-trace-and-reresolve.md",
+    "group": "OTHER",
+    "vintage_commit": "53842ab400"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "53842ab400",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t35.valuation-trace-and-reresolve.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~27",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~27/VALUATION_TRACE.json",
+      "kind": "doc",
+      "commit_or_etag": "e920d319ef3046ff3fb85d080fbd2b1b444c086a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only trace artifact in the mission tree; no served store, page, price, lock, queue or pacer write"
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~27/VALUATION_TRACE.md",
+      "kind": "doc",
+      "commit_or_etag": "7e998a9930252f20297d916a41028210af6d4e0f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "readable page beside the JSON; no deploy"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t35-AC1",
+      "criterion_verbatim": "the trace file's structure: denominator 4 / 11 / 15, exactly 15 position rows each carrying its hop fields and evidence, a candidates entry for each of the three CUSIPs.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t35_trace.py",
+      "output_evidence": "TRACE-OK 15 positions (4 FTHSX, 11 PFORX), 0 read by a page, candidates for 3 CUSIPs (rc=0)",
+      "denominator": "15 of 15 position rows (4 FTHSX + 11 PFORX); 3 of 3 candidate entries",
+      "status": "PASS",
+      "expect": "TRACE-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t35-AC2",
+      "criterion_verbatim": "(judgment, graded by the CVO at L9, never self-graded) the chain from the price file to the client page is the right one and each read_by_a_page verdict is supported by the cited evidence.",
+      "method": "manual_read_with_citation",
+      "invocation": "manual read of VALUATION_TRACE.json: chain[] hops 1-7 and positions[].read_by_a_page with evidence; the grade is the CVO's at L9, no verdict minted here",
+      "output_evidence": "Chain as read: price store (hop 1) -> land_cot target absent (hop 2) -> ticker map absent, Tier 2 skipped (hop 3) -> canonical_prices present, name-keyed (hop 4) -> B_01 value artifact; opal-data-cot prefix empty, opal-data-bd populated (hop 5) -> D_04 concentration and advisor positions.json, the latter not served (hop 6) -> /api/scoped/advisor-intelligence/platinum/clients/{hhId}/composition.json, firm cottonwood (hop 7, source read). read_by_a_page: 0 true, 15 false; each false row cites the account-bridge failure (surprise S2) and the absent advisor positions.json.",
+      "denominator": "15 read-verdict rows (0 true, 15 false); 7 chain hops",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment row: the grade is the CVO's at L9 (3.0.0_SA_CVO); the oracle is the CVO adjudication row, not this instance",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "build_trace.py run twice on the same tree, outputs compared with cmp",
+      "observed": "byte-identical VALUATION_TRACE.json",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any Bloomberg call",
+      "reason": "order BOUNDS: no Bloomberg call"
+    },
+    {
+      "item": "any write to a served store, lock record, price file, pacer.json, queue or page",
+      "reason": "order BOUNDS: READ-ONLY"
+    },
+    {
+      "item": "a correction to any page or served price (RPIFX, FTHSX or PFORX)",
+      "reason": "CTO ADDENDUM 3: no page change without Andrew's word; no candidate reaches 90 so there is no proposed correction"
+    },
+    {
+      "item": "the full chain at account grain (served household or account JSON for the 15 positions)",
+      "reason": "no custodian-to-account crosswalk was read; recorded as surprise S2"
+    },
+    {
+      "item": "the latest gold/timeseries/holdings_lots object and per-account RPS coverage",
+      "reason": "not read within the order's bounds; recorded as surprises S3 and S4"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W27-S1: the Cottonwood Tier-2 inputs (silver/historical_prices.parquet, config/ticker_lookup.json) are 404 in opal-data-cot, so the Yahoo tier is skipped at the canonical build.",
+    "MDPF_DEMQUE-D1-W27-S2: BLOCKING -- the 15 positions bridge to no served account or household artifact (custodian numbers match no account_id; advisor positions.json not served); read_by_a_page is false for all 15.",
+    "MDPF_DEMQUE-D1-W27-S3: gold/timeseries/holdings_lots/ is empty in opal-data-cot (the reader's default bucket) and populated in opal-data-bd; the bucket binding of writer and reader is not established.",
+    "MDPF_DEMQUE-D1-W27-S4: the page-side lot price is overridden by the custodian RPS closing price where an account has RPS coverage, so the price file need not be the page price.",
+    "MDPF_DEMQUE-D1-W27-S5: the existing name resolvers return no ticker for the FTHSX and PFORX names as written; RPIFX appears in no store; PFORX candidates came from a name-stem match, not a resolver output.",
+    "MDPF_DEMQUE-D1-W27-S6: the TO proof command names only DQ9-t35-AC1 but expected_criteria lists AC1 and AC2; the validator returns INVALID with AC1 alone and VALID with both."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~27/MDPF_DEMQUE.TO-DQ-t35.valuation-trace-and-reresolve.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t35_trace.py",
+      "invocation": "from the worktree root",
+      "result": "TRACE-OK 15 positions (4 FTHSX, 11 PFORX), 0 read by a page, candidates for 3 CUSIPs; rc=0"
+    },
+    {
+      "tool": "python .tools/surprise-row-gate.py <INVESTIGATION_v1.md>",
+      "invocation": "row gate on the channel file",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields"
+    }
+  ]
+}
