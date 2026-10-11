@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-110",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6d0b2b1103"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "e876f9b1b0",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-110.stage-memory-cut.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~85",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~85/STAGE_MEMORY.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~85/STAGE_MEMORY.json",
+      "kind": "config_data",
+      "commit_or_etag": "19ba6fe341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "per-stage peaks on 2026-10-08, lots_read 1725.2 -> 1263.3 MB, five output parquet sha256 equal, tests 200 passed / 0 failed; no S3 write.",
+      "artifact_covered_by": [
+        "DB55-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~85/stage_memory_run.py",
+      "kind": "script",
+      "commit_or_etag": "19ba6fe341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the per-stage RSS harness (handler.local() wrapped; status write to a counting stub); S3 GETs only.",
+      "artifact_covered_by": [
+        "DB55-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "19ba6fe341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read_partition(keep=, on_table=), _kept_frame, _account_mask; commit 19ba6fe341; not deployed (ships in the gold release with DB-b-97/104).",
+      "artifact_covered_by": [
+        "DB55-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_activity_lots.py",
+      "kind": "script",
+      "commit_or_etag": "19ba6fe341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read_day and read_window build only the batch's accounts' rows; commit 19ba6fe341; not deployed.",
+      "artifact_covered_by": [
+        "DB55-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_read_partition_keep.py",
+      "kind": "script",
+      "commit_or_etag": "19ba6fe341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new test test_kept_read_equals_the_full_read_filtered (5 cases) and one default-path test; 6 passed.",
+      "artifact_covered_by": [
+        "DB55-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB55-2-AC1",
+      "criterion_verbatim": "DB55-2-AC1 -- per-stage peaks are measured on a kit day and the largest stage's peak falls after the cut, tested. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r55/p55_round55.py\" . DB55-2-AC1",
+      "output_evidence": "OK: lots_read peak 1725.2 -> 1263.3 MB\nDB55-2-AC1 PASS",
+      "denominator": "10 stages measured on kit day 2026-10-08 (returns, class, lots_read, lots_classify, lots_unrealized, lots_realized, lots_inkind, lots_check, lots_activity, status_write); 5 of 5 output tables sha256-equal before and after; 200 passed, 0 failed (194 existing + 6 new); exit code 0",
+      "status": "PASS",
+      "expect": "DB55-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads STAGE_MEMORY.json and the test file's text; no run state",
+      "observed": "printed the same last line on a second read",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty root (no record), the order's 'Base: FAIL'.",
+      "expected": "DB55-2-AC1 FAIL at the base",
+      "observed": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~85/STAGE_MEMORY.json\nDB55-2-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the process peak between stages (1459.1 MB after, 1725.2 before)",
+      "reason": "Reached in the handler's own table write after lots_days returns, not in a stage this order names; reported in STAGE_MEMORY.json, not cut."
+    },
+    {
+      "item": "whether the served pandas Lambda fits 2048 MB with this read",
+      "reason": "Not this order's question; ships in the gold release with DB-b-97/104 and is graded there. The kit ran pandas 3.0.6."
+    },
+    {
+      "item": "any S3 write, Lambda invoke, deploy, vendor call, secret read, bun or download",
+      "reason": "Bounds of the order; none made. S3 was read only."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W85-S1",
+    "IRPT_DASHBD-D2-W85-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile account_activity_lots.py account_return_daily.py stage_memory_run.py test_read_partition_keep.py",
+      "result": "rc 0 (commit-gate)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_reporting/tests infra/aws/lambda/investor-reporting/reporting-gold/tests",
+      "result": "200 passed"
+    }
+  ]
+}

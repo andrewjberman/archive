@@ -1,0 +1,162 @@
+{
+ "to": "IRPT_DASHBD.TO-DB-b-110",
+ "serial": "0.9.0_WK_IRPT_DASHBD~85",
+ "kit_day": "2026-10-08",
+ "method": "process RSS (psutil memory_info().rss; the Windows working set) sampled every 0.05 s from a second thread while handler.local() ran its stages on the kit day in one process (S3 GETs only; the status write goes to a stub client that only counts); a sample counts for every stage on the stack. A stage's peak includes the memory the process already held when it began.",
+ "harness": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~85/stage_memory_run.py",
+ "stages_basis": "AFTER the cut. The container 'lots' (the whole lots_days call) is left out of stages: it equals its largest member (lots_read) and would tie it.",
+ "stages": [
+  {
+   "stage": "returns",
+   "peak_mb": 243.1
+  },
+  {
+   "stage": "class",
+   "peak_mb": 271.9
+  },
+  {
+   "stage": "lots_read",
+   "peak_mb": 1263.3
+  },
+  {
+   "stage": "lots_classify",
+   "peak_mb": 1224.9
+  },
+  {
+   "stage": "lots_unrealized",
+   "peak_mb": 1228.4
+  },
+  {
+   "stage": "lots_realized",
+   "peak_mb": 1232.9
+  },
+  {
+   "stage": "lots_inkind",
+   "peak_mb": 1232.1
+  },
+  {
+   "stage": "lots_check",
+   "peak_mb": 1214.9
+  },
+  {
+   "stage": "lots_activity",
+   "peak_mb": 792.0
+  },
+  {
+   "stage": "status_write",
+   "peak_mb": 731.8
+  }
+ ],
+ "largest_stage": "lots_read",
+ "before_stages": [
+  {
+   "stage": "returns",
+   "peak_mb": 253.1
+  },
+  {
+   "stage": "class",
+   "peak_mb": 268.1
+  },
+  {
+   "stage": "lots_read",
+   "peak_mb": 1725.2
+  },
+  {
+   "stage": "lots_classify",
+   "peak_mb": 1306.1
+  },
+  {
+   "stage": "lots_unrealized",
+   "peak_mb": 1266.5
+  },
+  {
+   "stage": "lots_realized",
+   "peak_mb": 1264.9
+  },
+  {
+   "stage": "lots_inkind",
+   "peak_mb": 1262.7
+  },
+  {
+   "stage": "lots_check",
+   "peak_mb": 945.3
+  },
+  {
+   "stage": "lots_activity",
+   "peak_mb": 1131.4
+  },
+  {
+   "stage": "status_write",
+   "peak_mb": 819.5
+  }
+ ],
+ "before": {
+  "largest_stage": "lots_read",
+  "largest_stage_peak_mb": 1725.2,
+  "process_peak_mb": 1725.2,
+  "wall_s": 859.7
+ },
+ "after": {
+  "largest_stage": "lots_read",
+  "largest_stage_peak_mb": 1263.3,
+  "process_peak_mb": 1459.1,
+  "wall_s": 750.8
+ },
+ "process_peak_note": "The after process peak (1459.1 MB) is above every stage peak (largest 1263.3): it is reached between the stages, in the handler's own table write after lots_days returns. Not cut here.",
+ "the_cut": {
+  "stage": "lots_read (account_activity_lots.read_window)",
+  "where": [
+   "data/assets/scripts/gold/irpt_reporting/account_return_daily.py read_partition(keep=, on_table=), _kept_frame, _account_mask",
+   "data/assets/scripts/gold/irpt_reporting/account_activity_lots.py read_day, read_window (one_unrealized, one_realized, one_trades)"
+  ],
+  "what": "read_window used to turn every account's rows of each lot, realized and trade partition into a pandas frame for each of the 8 account batches, then keep the batch's rows. It now makes the account mask from the account column alone and converts only the batch's rows from the arrow table; the whole-partition figures it reported (pre-2010 count, realized row count, source files) are taken from the arrow table as it passes. A table where a narrower conversion could change a dtype (an integer or boolean column holding nulls) or that names an index column takes the old full conversion."
+ },
+ "output_hash_equal": true,
+ "output_hashes": {
+  "returns": {
+   "rows": 6901,
+   "sha256_before": "9e5d6e92760d0ae23ba017978a4fba9334822b9b7cc8370a3d0a2bc6f9c9b843",
+   "sha256_after": "9e5d6e92760d0ae23ba017978a4fba9334822b9b7cc8370a3d0a2bc6f9c9b843",
+   "equal": true
+  },
+  "class": {
+   "rows": 25057,
+   "sha256_before": "2028f91d7e2a652ff4d9c240cfe5f69147ca8bc9725b3c9c3363eb2f2cfb6e6e",
+   "sha256_after": "2028f91d7e2a652ff4d9c240cfe5f69147ca8bc9725b3c9c3363eb2f2cfb6e6e",
+   "equal": true
+  },
+  "account_activity_daily": {
+   "rows": 6901,
+   "sha256_before": "f81aaa0b4f33691cea7e7e3f1e45c82183d220b051004a7d238eeaab62941905",
+   "sha256_after": "f81aaa0b4f33691cea7e7e3f1e45c82183d220b051004a7d238eeaab62941905",
+   "equal": true
+  },
+  "account_lot_realized": {
+   "rows": 35834,
+   "sha256_before": "651421e33695394572e423adc9d5dcaad552999cc83b6a078df31139b8daf751",
+   "sha256_after": "651421e33695394572e423adc9d5dcaad552999cc83b6a078df31139b8daf751",
+   "equal": true
+  },
+  "account_lot_unrealized_daily": {
+   "rows": 542546,
+   "sha256_before": "9e2df0d8f7fb0579e6ffa4496c0a83944599bce735f7baa1c47a816997775cb6",
+   "sha256_after": "9e2df0d8f7fb0579e6ffa4496c0a83944599bce735f7baa1c47a816997775cb6",
+   "equal": true
+  }
+ },
+ "hash_basis": "sha256 of each output parquet file's bytes, written by handler.local() on the kit day: before = the producer files at HEAD 8658c32241, after = this order's commit. Frame equality (dtypes, index labels, values) of the cut read was also checked on the kit day for the four partitions read_window reads with the batch's first 1000 accounts.",
+ "before_code": "run started with a clean tree: the four producer/handler files were the HEAD 8658c32241 blobs (git status listed only untracked paths; sha256 of the HEAD blobs: account_activity_lots.py caf7655586b9..., account_return_daily.py 9b23fe34538e..., account_class_daily.py and handler.py unchanged by the cut). The pre-crash before_record.json was NOT reused: the lost tree could not be compared to HEAD.",
+ "after_code_sha256": {
+  "data/assets/scripts/gold/irpt_reporting/account_activity_lots.py": "c5364a9f81f0105ce675c28991fa6691e52f264cbf8a3ff5fc0e64c29fa73d2f",
+  "data/assets/scripts/gold/irpt_reporting/account_return_daily.py": "0722c60b1d00d572e9e103624111dff2e971e9a59fa90c91f19be9fdebe4cb52",
+  "data/assets/scripts/gold/irpt_reporting/account_class_daily.py": "2def366fb5dea1abce76a08ca6e1c29ab8713127a47764695c9bd140178edc11",
+  "infra/aws/lambda/investor-reporting/reporting-gold/handler.py": "ae334f6117b50d0446a632e7fff009b8ab290f1b61be9d7b06581bb70eb61bf9"
+ },
+ "tests": {
+  "passed": 200,
+  "failed": 0,
+  "new_test": "data/assets/scripts/gold/irpt_reporting/tests/test_read_partition_keep.py::test_kept_read_equals_the_full_read_filtered",
+  "invocation": "python -m pytest data/assets/scripts/gold/irpt_reporting/tests infra/aws/lambda/investor-reporting/reporting-gold/tests -q  (194 existing + 6 new)"
+ },
+ "client_data": "this record holds MB, counts and sha256 only; the run's parquet outputs and logs are under C:/dev/_irpt_private_evidence_20261009/IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~85/r2/"
+}
