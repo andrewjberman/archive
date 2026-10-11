@@ -8,6 +8,8 @@
   c6-regress  R5-c61-AC2  the whole ticket service test folder passes (at least 190)
   cm2-lines   R5-cm2-AC1  the draft route does not say which ticket ids exist; the client notice list names three members
   cm2-regress R5-cm2-AC2  the whole ticket service test folder passes (at least 192)
+  cm3-match   R5-cm3-AC1  a draft lands only on the ticket whose own record names that request
+  cm3-regress R5-cm3-AC2  the whole ticket service test folder passes (at least 196)
   ac-read     R5-ac1-AC1  the one-account read's findings file has its keys and every path it cites exists
 
 Each prints <NAME>-OK <detail> or <NAME>-FAIL <reason>; exit 0/1. Every pytest call is bounded at 110 s.
@@ -42,6 +44,11 @@ C6_MIN = 190  # 183 at the base of TO-R5-c61 plus its 7 tests
 CM2_ROW = ["test_draft_route_gives_the_same_deny_for_a_missing_ticket_and_an_off_list_firm",
            "test_client_notice_prohibited_names_the_commentary_members_and_the_package"]
 CM2_MIN = 192  # 190 at the base of TO-R5-cm2 plus its 2 tests
+CM3_ROW = ["test_draft_is_accepted_only_when_the_tickets_recorded_request_id_matches",
+           "test_draft_for_another_request_gets_the_one_deny",
+           "test_draft_on_a_ticket_with_no_recorded_request_gets_the_one_deny",
+           "test_draft_body_must_carry_a_wellformed_request_id"]
+CM3_MIN = 196  # 192 at the base of TO-R5-cm3 plus its 4 tests
 AC_FILE = Path("org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~20/ONE_ACCOUNT_CHECK_READ.json")
 AC_KEYS = {"question", "files_read", "where_an_account_is_named_in_an_uploaded_file", "can_the_door_count_accounts_today",
            "where_the_check_can_live", "what_was_not_read", "claim"}
@@ -107,6 +114,8 @@ CHECKS = {
     "c6-regress": lambda: regress(TK_DIR, C6_MIN),
     "cm2-lines": lambda: named(C6_TESTS, CM2_ROW),
     "cm2-regress": lambda: regress(TK_DIR, CM2_MIN),
+    "cm3-match": lambda: named(C6_TESTS, CM3_ROW),
+    "cm3-regress": lambda: regress(TK_DIR, CM3_MIN),
 }
 
 
