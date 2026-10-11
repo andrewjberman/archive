@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-t9",
+  "firm": "MDPF",
+  "genre": "BUILD",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t9.satellites-second-fire-stamp-gated.md",
+    "group": "OTHER",
+    "vintage_commit": "c8f7662637"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "c8f7662637",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t9.satellites-second-fire-stamp-gated.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_HEALGAP~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/cot-pipeline/satellites-registry-producer.tf",
+      "kind": "terraform",
+      "commit_or_etag": "d90794efd4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TO BOUNDS: no terraform init, plan, apply or safe-apply by this worker; the apply is the issuer's at the drain under its never-widen pair. The HCL is checked by the static reads of the named criteria only.",
+      "artifact_covered_by": [
+        "HG3-t9-AC1",
+        "HG3-t9-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/cot-pipeline/cot-satellites-registry-producer/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "d90794efd4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TO BOUNDS: no Lambda invoke, no update-function-code, no deploy by this worker. Stub-tested only (no AWS call).",
+      "artifact_covered_by": [
+        "HG3-t9-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG3-t9-AC1",
+      "criterion_verbatim": "the existing rule stays at `cron(0 7 * * ? *)`; exactly one other rule at `cron(15 13 * * ? *)` targets the producer, is named by the `opal_name` module and carries a permission.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_r3_rules.py --t9",
+      "output_evidence": "T9-OK new_rule=cot_satellites_registry_producer_stamp_gated schedule=cron(15 13 * * ? *) existing=cot_satellites_registry_producer_daily cron(0 7 * * ? *)  (rc=0). Base, before the patches: T9-BAD rules (other than cot_satellites_registry_producer_daily) targeting module.cot_satellites_registry_producer.function_arn: [] (want exactly 1) (rc=1).",
+      "denominator": "1 other rule of 1 required targets the producer; 2 targets carry the producer function_arn in total (existing 07:00Z and new 13:15Z); the existing rule is at cron(0 7 * * ? *); the new rule name is a module.* reference (module stamp_gated_rule_name, output name = etfs-cot-satellites-registry-producer-stamp-gated-daily, matching python lib/opal_naming.py name() over etfs/cottonwood/satellites-registry-producer/stamp-gated/daily)",
+      "status": "PASS",
+      "expect": "T9-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "HG3-t9-AC2",
+      "criterion_verbatim": "the role gains GetObject on the stamp pattern and one prefix-conditioned ListBucket and nothing wider (no bare `meta/*`, no Put or Delete on the assets bucket).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_r3_rules.py --t9-iam",
+      "output_evidence": "T9IAM-OK stamp GetObject + prefix-conditioned ListBucket, nothing wider  (rc=0). Base, before the patches: T9IAM-BAD no s3:GetObject on arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/*-complete.json; no s3:ListBucket statement (rc=1).",
+      "denominator": "2 of 2 required statements present (GetObject on arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/*-complete.json; ListBucket with s3:prefix blackdiamond/cottonwood/meta/); 0 of 2 widening arms fired (bare meta/* resource; Put or Delete reaching opal-data-assets)",
+      "status": "PASS",
+      "status_reason": "PASS by the named output. Caveat: the checker does not read the ListBucket Resource; the tree's Resource is arn:aws:s3:::opal-data-assets (satellites-registry-producer.tf:118 in the worktree, printed), the bucket ARN with no wildcard. Probe M4 (Resource widened to opal-data-assets/*) passed the checker: surprise MDPF_HEALGAP-D1-W7-S3.",
+      "expect": "T9IAM-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "HG3-t9-AC3",
+      "criterion_verbatim": "four stub arms on the handler: no event field -> no S3 call and the producer runs; stamp present -> the producer runs; 404 -> one `STAMP-ABSENT` line and no rebuild; 403 -> raises.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t9_stamp_gate.py",
+      "output_evidence": "GATE-OK arms A(no stamp read) B(present) C(404 absent) D(403 loud)  (rc=0). Base, before the patches: GATE-BAD B: head_object keys [] != ['blackdiamond/cottonwood/meta/2026-10-11-complete.json']; C: stamp absent, producer.main ran 1 times, want 0; C: 0 log lines start STAMP-ABSENT, want exactly 1; D: a 403 on the stamp read did not raise (a grant fault read as an absent stamp); D: 403, producer.main ran 1 times, want 0  (rc=1).",
+      "denominator": "4 arms of 4 pass (A no event field: 0 head_object calls, producer.main x1; B stamp present: head_object on the derived key, producer.main x1; C 404: 1 STAMP-ABSENT line, producer.main x0; D 403: ClientError raised, producer.main x0)",
+      "status": "PASS",
+      "expect": "GATE-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "hg_t9_stamp_gate.py run after the patches and again after the mutant runs, from the worktree root; hg_r3_rules.py --t9 and --t9-iam run once after the patches. Same tokens and rc on every run that was made.",
+      "observed": "GATE-OK rc=0 on both runs; T9-OK rc=0; T9IAM-OK rc=0.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Scratch copies (.scratch/mut/, uncommitted) that each must make a criterion's checker fail: M1 handler 404 branch disabled (AC3 arm C); M2 every ClientError read as absent (AC3 arm D); M3 the ListBucket s3:prefix condition removed from the producer Terraform (AC2). Run through HG_T9_HANDLER for M1-M2 and by path for M3. A further probe M4 (ListBucket Resource widened to opal-data-assets/*) is not a control of any criterion; it did not fire and is recorded as surprise MDPF_HEALGAP-D1-W7-S3.",
+      "expected": "M1 GATE-BAD naming arm C; M2 GATE-BAD naming arm D; M3 T9IAM-BAD on the prefix condition; all rc=1",
+      "observed": "M1: GATE-BAD C: an absent stamp raised ClientError; C: 0 log lines start STAMP-ABSENT, want exactly 1 (rc=1). M2: GATE-BAD D: a 403 on the stamp read did not raise (a grant fault read as an absent stamp) (rc=1). M3: T9IAM-BAD s3:ListBucket carries no s3:prefix condition on blackdiamond/cottonwood/meta/ (rc=1). Probe M4 (outside the criteria): T9IAM-OK rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan, validate, apply, safe-apply; any AWS write; any Lambda invoke or update-function-code; any vendor call",
+      "reason": "TO BOUNDS: every deploy and apply is the issuer's at the drain. The criteria are static reads and stub tests; no AWS call was made."
+    },
+    {
+      "item": "live read of the runner's cron (cot-rebalancer-runner-daily) and of the stamp object",
+      "reason": "Not a criterion of this cell and not in the grant. The key was read from the writer (cot-rebalancer-runner/lambda_function.py META_PREFIX and _stamp_key) and the silver reader (rebalancer_conversion.py STAMP_PREFIX) at c8f7662637. The landing-time premise is recorded as surprise MDPF_HEALGAP-D1-W7-S1."
+    },
+    {
+      "item": "the 07:00Z fire, its target, its permission and the existing event",
+      "reason": "TO CELL: not changed. The diff adds the new rule, target and permission and leaves the existing blocks as they were (verified by AC1 and by the diff at d90794efd4)."
+    },
+    {
+      "item": "alarm, SNS topic, SES send, freshness checker or monitor",
+      "reason": "TO BOUNDS: standing moratorium. None added; the STAMP-ABSENT log line is the whole record."
+    },
+    {
+      "item": "data/assets/scripts/gold/build_satellites_registry.py",
+      "reason": "TO BOUNDS: DS's producer, read only (ASSETS_BUCKET, ROSTER_KEY); not edited."
+    }
+  ],
+  "surprises": [
+    "MDPF_HEALGAP-D1-W7-S1: the cell and preflight say the runner lands after 07:00Z on some days (preflight: after a 12:45Z landing); the tree's measured record says 06:00:43-44Z every day, and no 12:45Z measurement is in the tree",
+    "MDPF_HEALGAP-D1-W7-S2: the stamp key blackdiamond/cottonwood/meta/<date>-complete.json that the grant and handler encode is the live writer and reader key, but infra/logic/registry/key_rulings.json names blackdiamond/cottonwood/state/pull_complete/ as its canonical form",
+    "MDPF_HEALGAP-D1-W7-S3: the HG3-t9-AC2 checker passes a ListBucket whose Resource is widened to opal-data-assets/* (control M4), so the 'nothing wider' clause is not held on the ListBucket resource by the check",
+    "MDPF_HEALGAP-D1-W7-S4: the TO says the naming gate refuses a new hand-kept cottonwood literal; at d90794efd4 the gate WARNs (RAISE-EXISTING) on the stamp prefix literal at satellites-registry-producer.tf:46 and does not refuse it"
+  ],
+  "session_log": "0.9.0_WK_MDPF_HEALGAP~7 on HG-t-9, worktree C:/Dev/wk_healgap_r3_7, branch wk-MDPF_HEALGAP-7. Base: three criteria run, all BAD as the TO states. git apply --check then git apply of R3_PATCHES/t9_producer_tf.patch and t9_handler.patch (both clean). Post-patch: three criteria OK; controls M1-M4 run from .scratch/mut (uncommitted). Code commit d90794efd4 (TF, handler, investigation rows S1-S3, safe-commit gates clean); row S4 and this instance committed with the TO status flip after the proof check.",
+  "compiler_tools": [
+    {
+      "tool": "git apply --check / git apply",
+      "invocation": "git apply --check org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_PATCHES/t9_producer_tf.patch; same for t9_handler.patch; then git apply",
+      "result": "both checks clean, both applied; git diff --stat 2 files changed, 69 insertions(+), 1 deletion(-)"
+    },
+    {
+      "tool": "python lib/opal_naming.py name() (called via importlib)",
+      "invocation": "python -c with sys.path lib, opal_naming.name('etfs','cottonwood','satellites-registry-producer','daily','stamp-gated', False)",
+      "result": "etfs-cot-satellites-registry-producer-stamp-gated-daily"
+    },
+    {
+      "tool": "R3 checks",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_r3_rules.py --t9 | --t9-iam; python .../hg_t9_stamp_gate.py",
+      "result": "as recorded in the criteria rows"
+    },
+    {
+      "tool": "native Grep and Read on the worktree paths",
+      "invocation": "Grep/Read with absolute paths under C:/Dev/wk_healgap_r3_7 (cited lines printed at base with git show c8f7662637:<path> | grep -n)",
+      "result": "producer schedule and description at base lines 286-287; runner META_PREFIX at lambda line 70 and _stamp_key at 207-208; silver STAMP_PREFIX at 417; key_rulings meta/ entry at 172-174"
+    }
+  ]
+}

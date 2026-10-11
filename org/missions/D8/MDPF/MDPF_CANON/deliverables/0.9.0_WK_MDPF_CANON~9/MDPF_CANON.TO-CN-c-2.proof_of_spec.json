@@ -1,0 +1,209 @@
+{
+  "schema_version": "1.0",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "12adb87963"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "335258e392",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-c-2.md"
+  },
+  "to_id": "MDPF_CANON.TO-CN-c-2",
+  "assignee": "0.9.0_WK_MDPF_CANON~9",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/bronze/pull_orion_model_composition.py",
+      "kind": "script",
+      "commit_or_etag": "9a00f02d65",
+      "artifact_covered_by": ["AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-9 (bronze_destination reads the generated config; no typed home). The runner runs it from code/scripts/ only after CloudOps syncs it. No deploy by the worker. No AWS call."
+    },
+    {
+      "path_or_key": "data/mdpf/config/bronze_homes.json",
+      "kind": "config_data",
+      "commit_or_etag": "9a00f02d65",
+      "artifact_covered_by": ["AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL only; generator bytes of lib/opal_naming.py generate --target data/mdpf/config/bronze_homes.json. Reaches the runner by the dispatch config sync (infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh :130), a hand step per row MDPF_CANON-D1-W9-S7."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/mdpf-pipeline/iam.tf",
+      "kind": "iam",
+      "commit_or_etag": "9a00f02d65",
+      "artifact_covered_by": ["AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL only; grant statements in aws_iam_role_policy.mdpf_runner, bucket and prefix from module.mdpf_scope_buckets.bronze_homes. No terraform plan or apply run by the worker; CloudOps applies after the drain."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/modules/opal_name/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "9a00f02d65",
+      "artifact_covered_by": ["AC2", "AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL only; output bronze_homes added. No plan or apply."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/modules/opal_name/generated_locals.tf",
+      "kind": "terraform",
+      "commit_or_etag": "9a00f02d65",
+      "artifact_covered_by": ["AC2", "AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL only; generator bytes. It keeps the predating 4698 drift (row MDPF_CANON-D1-W9-S6). No plan or apply."
+    },
+    {
+      "path_or_key": "infra/logic/registry/feeds.json",
+      "kind": "config_data",
+      "commit_or_etag": "9a00f02d65",
+      "artifact_covered_by": ["AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL only. validate rc=0 at the commit; a malformed-row negative control refused three fields (see controls)."
+    },
+    {
+      "path_or_key": "lib/opal_naming.py",
+      "kind": "script",
+      "commit_or_etag": "9a00f02d65",
+      "artifact_covered_by": ["AC2", "AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL only. The generator: BRONZE_HOME_FEEDS removed; _bronze_homes() reads feeds.json; targets_report runner-code branch. lib tests 96 passed (test_opal_naming.py) at the commit."
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_bronze_homes.py",
+      "kind": "test",
+      "commit_or_etag": "9a00f02d65",
+      "artifact_covered_by": ["AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL only. 10 passed at the commit (marks, registry files, malformed-feed refusal, runner-code plane)."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/tests/test_mdpf_bronze_homes.py",
+      "kind": "test",
+      "commit_or_etag": "9a00f02d65",
+      "artifact_covered_by": ["AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL only. mismatches(path) is the homes CLEAN and NEGATIVE arm's oracle (AC2 ARM 2 and ARM 3)."
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "9a00f02d65",
+      "artifact_covered_by": ["AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL only. Rows S1-S7 of this order; S7 is new in the code commit. The surprise-row gate and the surprise-corpus check passed at the commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: r3_checks.py writer -- expect: ROUND 3 WRITER: 3 of 3 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round3/checks/r3_checks.py\" writer; echo \"exit=$?\"",
+      "output_evidence": "ARM 1 NO TYPED: PASS -- typed-home literals: none; reads the generated homes file: True; imports lib/opal_naming: False\nARM 2 DEST: PASS -- got ('opal-data-assets', 'mdpf/inflection/bronze/orion_model_composition/date=2026-10-09'), want ('opal-data-assets', 'mdpf/inflection/bronze/orion_model_composition/date=2026-10-09'); put keys compose from the prefix: True\nARM 3 GRANT: PASS -- an orion_model_composition ARN on the builder's bucket and prefix: True; s3:PutObject present: True\nROUND 3 WRITER: 3 of 3 arms\nexit=0",
+      "denominator": "3 of 3 arms",
+      "status": "PASS",
+      "expect": "ROUND 3 WRITER: 3 of 3 arms",
+      "status_reason": "Measured on the committed tree at 9a00f02d65 (clean status before the run). The script reads the generated bronze_homes.json; the grant reads its bucket and prefix from module output."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: r3_checks.py homes -- expect: ROUND 3 HOMES: 3 of 3 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round3/checks/r3_checks.py\" homes; echo \"exit=$?\"",
+      "output_evidence": "ARM 1 GENERATED: PASS -- mark present: True; entry ('opal-data-assets', 'mdpf/inflection/bronze/orion_model_composition/date=2026-10-09') vs builder ('opal-data-assets', 'mdpf/inflection/bronze/orion_model_composition/date=2026-10-09'); regeneration reproduces the committed bytes: True\nARM 2 CLEAN: PASS -- mismatches on the real file: []\nARM 3 NEGATIVE: PASS -- mismatches with one entry altered: 2\nROUND 3 HOMES: 3 of 3 arms\nexit=0",
+      "denominator": "3 of 3 arms",
+      "status": "PASS",
+      "expect": "ROUND 3 HOMES: 3 of 3 arms",
+      "status_reason": "Measured on the committed tree at 9a00f02d65. The generated file reproduces under generate --target (ARM 1). The bucket and prefix come from the registry rows and tiers.json, never typed."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: r3_checks.py libs -- expect: ROUND 3 LIBS: 5 of 5 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round3/checks/r3_checks.py\" libs; echo \"exit=$?\"",
+      "output_evidence": "ARM 1 TESTS: PASS -- pytest rc=0: 96 passed in 17.00s (ANSI colour codes stripped)\nARM 2 VALIDATE: PASS -- lib/opal_naming.py validate rc=0\nARM 3 TARGETS: PASS -- lib/opal_naming.py targets rc=0\nARM 4 DECLARED: PASS -- r6-declared-moves -> PASS-DECLARED-MOVES\nARM 5 DELTA0: PASS -- r6-delta0-ordered -> PASS-DELTA0-IN-ORDER\nROUND 3 LIBS: 5 of 5 arms\nexit=0",
+      "denominator": "5 of 5 arms",
+      "status": "PASS",
+      "expect": "ROUND 3 LIBS: 5 of 5 arms",
+      "status_reason": "Measured on the committed tree at 9a00f02d65. The targets arm reads the SHIP runner-code row for data/mdpf/config/bronze_homes.json (dispatch :130). The S5 UNCLASSIFIED row of the prior run is resolved by the runner-code branch."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 is JUDGMENT, graded at the round-3 close (never self-graded): after CloudOps applies the grant and deploys the script, ONE on-demand run of the step writes the nine model files and the meta at the builder's keys under opal-data-assets, and the objects are read where they landed (listing printed with its denominator).",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment=true: no invocation; graded at the round-3 close after CloudOps applies and deploys",
+      "output_evidence": "Not run; no AWS write by the worker. The grant is not applied and the script is not deployed (CloudOps, after the drain). The config sync to code/config/ is a hand step (row MDPF_CANON-D1-W9-S7).",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round-3 close",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "r3_checks.py homes with one feed key_prefix altered in a copy of the generated file (ARM 3 NEGATIVE), and a registry copy with three malformed feeds.json fields (source, scope, vendor) for validate().",
+      "expected": "mismatches reported (non-empty list) for the altered copy; validate() refuses all three fields of the malformed row.",
+      "observed": "mismatches with one entry altered: 2; validate() on the scratch registry: REFUSED feeds.json[1] source, scope and vendor (count 3). test_a_malformed_feed_row_is_refused passes.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "not run twice; the generate reproduction is ARM 1 of homes (regeneration reproduces the committed bytes: True)",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No terraform plan, apply, or any AWS call of any kind; the iam.tf grant and the script deploy are CloudOps's after the drain",
+      "reason": "Order bound 1: no AWS write. The worker applies nothing."
+    },
+    {
+      "item": "The repo-to-code copy that would make the runner-code plane automatic (nothing in the repo writes the code/ prefix)",
+      "reason": "Not widened: the plane is the runner's own measured sync list. Row MDPF_CANON-D1-W9-S7 is ARMED with the issuer as disarm owner; the mechanism is a CTO or CloudOps ruling."
+    },
+    {
+      "item": "generated_locals.tf 4698 drift (scope masters, four lines)",
+      "reason": "Kept as the generator wrote it, per the order; row MDPF_CANON-D1-W9-S6 (OBSERVATION)."
+    }
+  ],
+  "surprises": [
+    "MDPF_CANON-D1-W9-S1: the runner syncs only code/scripts and code/config, so the Stage-0 script takes its destination from the generated config file (amendment 1).",
+    "MDPF_CANON-D1-W9-S2: the commit-time naming limb refuses a hand-written generator and JSON; the generator is lib/opal_naming.py's own whole-file target (amendment 2).",
+    "MDPF_CANON-D1-W9-S3: the module exposes no tier-bucket output; the bronze_homes module output was added (amendment 2).",
+    "MDPF_CANON-D1-W9-S4: the naming limb refused the literal feed and scope in lib/opal_naming.py; resolved by the feeds.json registry row, read by the renderer (ruling 3457).",
+    "MDPF_CANON-D1-W9-S5: no plane claimed the bronze home (UNCLASSIFIED); resolved by the runner-code branch measured from the dispatch sync list (ruling 3457).",
+    "MDPF_CANON-D1-W9-S6: the committed generated_locals.tf predates the registry; the regenerated file keeps four 4698 lines (OBSERVATION, kept as generated).",
+    "MDPF_CANON-D1-W9-S7: nothing in the repo copies the repo tree to the runner's code/ prefix; the config and script reach the runner by a hand sync (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~D1)."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round3/checks/r3_checks.py writer | homes | libs",
+      "result": "writer: ROUND 3 WRITER: 3 of 3 arms (exit=0); homes: ROUND 3 HOMES: 3 of 3 arms (exit=0); libs: ROUND 3 LIBS: 5 of 5 arms (exit=0)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -I lib/opal_naming.py validate",
+      "result": "rc=0; VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s) at registry@557f0c882e296291 over all 14 registry file(s)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -I lib/opal_naming.py targets",
+      "result": "rc=0; TARGETS: 14; SHIP runner-code data/mdpf/config/bronze_homes.json (dispatch :130); no UNCLASSIFIED row"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -m pytest lib/tests/test_opal_naming_bronze_homes.py -q",
+      "result": "10 passed"
+    },
+    {
+      "tool": ".tools/naming-gate.py",
+      "invocation": ".tools/naming-gate.py --diff <synthetic probe diff>",
+      "result": "CONFORMANT on the bucket literal; the bare dispatch path literal is not graded; no REFUSE at the commit (NAMING-GATE: PASS 0 graded on the staged diff)"
+    }
+  ]
+}
