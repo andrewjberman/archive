@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~T2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete -- flipped by 2.0.0_SA_COO~Y2 (IRPT_ANLREQ interim driver, CTO msg 3904) 2026-10-11 ~06:2xZ on CTO msg 4257: AC1 "Active" re-read by the flipping seat; proof instance VALID rc 0 (run by the flipping seat at HEAD after the applier commit 05456bc047); both ledgers CLOSED (0 irpt-anlreq entries in .open_deploys at HEAD). Step 6b stored a draft (test artifact in the instance). NOT DONE and stated: 6b.4 (the one commentary_ready message stays until about 2026-10-15T06:10Z, row IRPT_ANLREQ-D2-S26 ARMED); step 5 simulate verdicts INFERRED from documents. Row IRPT_ANLREQ-D2-S23 records the missed precondition and step B2.</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -159,6 +159,7 @@ lane: the applier's deliverables, logs, the change ledger, and the one registry 
 
 <proof_of_spec>
   <criterion id="AC1" cell_refs="AR-t-12"><invocation>aws lambda get-function --function-name outlook-global-commentary-draft-lambda --query "Configuration.State"</invocation><expect>"Active"</expect></criterion>
+  Instance at `org/tier2_senior/0.7.0_AE_CloudOps/deliverables/IRPT_ANLREQ.TO-APPLY-t1.proof_of_spec.json` (named here at the flip: the gate searches for the FULL file stem, and the applier wrote the instance under the short id).
 </proof_of_spec>
   AC1's row also states the test invoke's stages, step 5's four simulate verdicts and the ledger path.
 
