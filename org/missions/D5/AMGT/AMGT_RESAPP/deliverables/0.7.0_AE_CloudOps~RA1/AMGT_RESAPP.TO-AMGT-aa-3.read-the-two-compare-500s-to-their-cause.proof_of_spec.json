@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-aa-3.read-the-two-compare-500s-to-their-cause",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "1e92ba6e74",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-aa-3.read-the-two-compare-500s-to-their-cause.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-aa-3.read-the-two-compare-500s-to-their-cause.md",
+    "group": "OTHER",
+    "vintage_commit": "1e92ba6e74"
+  },
+  "assignee": "0.7.0_AE_CloudOps~RA1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~RA1/C-S82_COMPARE_500_READING_20261011.md",
+      "kind": "doc",
+      "commit_or_etag": "dc5c1e60b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A reading, not a deploy: nothing is in a deploy scope. Committed LOCAL on box/dell1 at dc5c1e60b2; blob 12998e83be3e40b67add67eb46ca981a54ca5ec3 at HEAD.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~RA1/logs/2026-10-11/aa3_compare_500_reading.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The seat's session log, written at the issuer's ask (msg 3996) with this instance; not in a deploy scope."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PASS S1 (every heading present, in order, non-empty), PASS S2 (at least three sources, each with an n= denominator), PASS S3, PASS S4, PASS S5 (exactly one allowed CAUSE token), PASS S6 (WRITES: none); R95 READING SHAPE: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round95_prep/checks/r95_reading_check.py\" \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~RA1/C-S82_COMPARE_500_READING_20261011.md\"; echo \"exit=$?\"",
+      "output_evidence": "PASS S1 every heading is present, in order, non-empty  [headings ['Sources', 'Requests', 'Metrics', 'Concurrency', 'Layers', 'Cause', 'Not changed'], empty []]\nPASS S2 at least three sources, each with an n=<integer> denominator  [10 bullets, 0 without a denominator]\nPASS S3 Throttles and ConcurrentExecutions each carry max= and n=\nPASS S4 the reserved concurrency is stated\nPASS S5 exactly one allowed CAUSE line (and MISSING for UNDETERMINED)  [causes ['DEV-PROXY']]\nPASS S6 nothing was written or changed\n   arms passed 6 of 6\nR95 READING SHAPE: YES\nexit=0",
+      "denominator": "6 of 6 arms of the check (S1-S6) on the committed blob 12998e83be; 10 source bullets each carrying n=<integer>; one CAUSE line (DEV-PROXY). Run on the committed bytes at 16:2xZ; a second run of the same invocation was byte-identical.",
+      "expect": "PASS S1[\\s\\S]*PASS S2[\\s\\S]*PASS S3[\\s\\S]*PASS S4[\\s\\S]*PASS S5[\\s\\S]*PASS S6[\\s\\S]*R95 READING SHAPE: YES[\\s\\S]*exit=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the reading's cause follows from its evidence and its denominators; a CAUSE the evidence does not support, or an UNDETERMINED that names no deciding source, is NO (the CVO's judgment)",
+      "method": "manual_read_with_citation",
+      "invocation": "none -- a judgment criterion carries no <invocation>; the CVO reads the reading's ## Cause section against its ## Metrics and ## Layers",
+      "output_evidence": "The reading's Cause section: CAUSE: DEV-PROXY by elimination -- CloudFront 5xxErrorRate max=0.0 (n=15, 405 requests), HTTP API 5xx max=0.0 (n=15, 266), function and authorizer Errors and Throttles max=0.0 (n=15 each), reserved=none against 978 unreserved; installed Vite answers any proxy error 500 with an empty body. Not proven: the proxy's console line (named as the deciding source for the sub-cause).",
+      "denominator": "n=1 judgment criterion; 1 cause token; 4 AWS layers read against printed denominators; 2 of 72 compare rows in the netlog",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the CVO grades it at L9 (spine v3). The seat does not self-grade it."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutated copies of the committed reading and the base case, each run through the same r95_reading_check.py: (A) 'WRITES: none' replaced by prose; (B) a second 'CAUSE: THROTTLED' line added under the cause; (base) a reading path that does not exist.",
+      "expected": "A reads FAIL S6 and R95 READING SHAPE: NO (exit 1); B reads FAIL S5 with causes ['DEV-PROXY', 'THROTTLED'] and NO (exit 1); the base reads FAIL S1 and NO (exit 1); the unmutated reading reads YES (exit 0).",
+      "observed": "A: FAIL S6, arms passed 5 of 6, R95 READING SHAPE: NO, exit=1. B: FAIL S5 [causes ['DEV-PROXY', 'THROTTLED']], arms passed 5 of 6, NO, exit=1. Base: FAIL S1 the reading exists [FileNotFoundError], NO, exit=1. Unmutated: 6 of 6, YES, exit=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of the AC1 invocation on the same committed bytes, outputs compared with cmp",
+      "observed": "byte-identical (cmp rc=0)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The proxy's own console line for the two requests (http proxy error: <url> with its stack)",
+      "reason": "Not readable: the Vite dev server's stdout was not captured to a file by the walk or by any seat. It is the deciding source for the sub-cause (reset, timeout or socket), named in the reading's Cause section."
+    },
+    {
+      "item": "Per-request identification (request id, time) of the two failing requests",
+      "reason": "No layer keeps it: the HTTP API stage has AccessLogSettings null, CloudFront standard logging is off with no real-time log config, the function's lines carry no path, and the netlog has no time or id."
+    },
+    {
+      "item": "The Lambda@Edge `auth-validator-edge:22` viewer-request function's own regional log groups",
+      "reason": "Not read; CloudFront's 5xxErrorRate (max=0.0, n=15) is the stand-in, since CloudFront counts an edge-function error as 5xx. A read of those regional groups would add a per-request line if one exists."
+    },
+    {
+      "item": "A fix",
+      "reason": "Out of the order: a fix is cut only after the reading, as its own cell, by the issuer."
+    },
+    {
+      "item": "The order's status flip and a push",
+      "reason": "The issuer flips the status after the CVO's AC2 (msg 3996); no push of shared branches (BOUNDS 3). Commits are LOCAL."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~RA1/logs/2026-10-11/aa3_compare_500_reading.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "--corpus aws \"d2n2nzpeqf34ge\" --limit 30",
+      "result": "PASS. 3 hits across 2891 nodes: distribution EVTSA9VEHNZVH and its two DNS records."
+    },
+    {
+      "tool": "aws cloudwatch / apigatewayv2 / cloudfront / lambda reads (boto3 and .tools/aws)",
+      "invocation": "get-metric-statistics, filter-log-events, get-distribution-config, get-stages, get-routes, get-integration, get-authorizer, get-function, get-account-settings",
+      "result": "PASS. All read-only; nothing written."
+    },
+    {
+      "tool": "r95_reading_check.py",
+      "invocation": "the order's AC1 invocation",
+      "result": "PASS. 6 of 6 arms, R95 READING SHAPE: YES, exit=0."
+    }
+  ]
+}
