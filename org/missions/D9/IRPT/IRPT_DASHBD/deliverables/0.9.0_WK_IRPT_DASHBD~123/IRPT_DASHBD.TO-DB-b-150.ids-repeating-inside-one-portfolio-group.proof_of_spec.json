@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-150",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "06a610f1c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "f19b96bb47",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-150.ids-repeating-inside-one-portfolio-group.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~123",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~123/SAME_GROUP_REPEATS.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~123/SAME_GROUP_REPEATS.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only counts-only record: one day object of the original Black Diamond transactions store read with a 16-column projection (no money, no account, no client column): 590 ids with two or more rows inside one portfolio group, reproducing DB-b-143; one cause, identical on all readable columns (590 of 590); 0 unexplained; dedupe on the id alone: cannot tell without a money column; no S3 write, no code change",
+      "artifact_covered_by": [
+        "DB78-3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB78-3-AC1",
+      "criterion_verbatim": "DB78-3-AC1 -- the ids that repeat inside one portfolio group on one day are counted and each is placed under a cause with a rule or under unexplained with why. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r78/p78_round78.py\" . DB78-3-AC1",
+      "output_evidence": "OK: 590 id(s) repeating inside one group: 1 cause(s) holding 590, 0 unexplained\nDB78-3-AC1 PASS",
+      "denominator": "one day (2026-10-06): 590 ids with two or more rows inside one group (2337 id-group pairs), all 590 under the one cause; 0 unexplained; exit code 0",
+      "status": "PASS",
+      "expect": "DB78-3-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record from the worktree root and holds no clock or network call",
+      "observed": "the checker printed the same last line on every run",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB78-3-AC1 FAIL",
+      "observed": "FAIL: no record 0.9.0_WK_IRPT_DASHBD~123/SAME_GROUP_REPEATS.json; DB78-3-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "whether the same-group copies are identical on the money columns and the account columns",
+      "reason": "The order forbids reading a money or an account column. Recorded as the cause's dedupe_on_id_alone: cannot tell without a money column, not guessed."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "p78_round78.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r78/p78_round78.py\" . DB78-3-AC1",
+      "result": "DB78-3-AC1 PASS (rc 0); against an empty root it prints DB78-3-AC1 FAIL (rc 1)"
+    }
+  ]
+}
