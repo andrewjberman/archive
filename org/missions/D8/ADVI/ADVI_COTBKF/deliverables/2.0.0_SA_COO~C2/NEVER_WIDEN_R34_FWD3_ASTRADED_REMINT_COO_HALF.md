@@ -66,7 +66,7 @@ For each key, copy the prior VersionId above back as the current version:
 
 - Held: 988 holding-rows / 988 account-days (the three bonds), reason `HELD_SOURCE_UNDER_REVIEW`.
 - ABSENT list (5, reason `REGRESSED_UNDER_AS_TRADED`, `manifest_list_same=True`): acct#aaeb760c 2022-03, acct#aaeb760c 2022-08,
-  acct#f78e8ecd 2026-03, D49151054 2021-07, D49151054 2021-10.
+  acct#f78e8ecd 2026-03, acct#df101fce 2021-07, acct#df101fce 2021-10.
 - **Grades (issuer re-grade, matching CB-ah-2):**
   - MATCH/DIFF/UNGRADABLE goes 3,133/838/78,622 -> 3,678/293/78,622, with `regressions=5`, `movers_back=155` and `year_chain_same=True`.
   - The round-28 four ABSENT months come back MATCH.

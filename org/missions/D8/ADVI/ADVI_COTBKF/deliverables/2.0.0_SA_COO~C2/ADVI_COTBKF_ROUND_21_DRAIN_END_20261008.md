@@ -34,7 +34,7 @@ pytest data/assets/scripts/silver/tests: 522 passed, 11 skipped
 - **The 147:** sweep_balance 72, offsetting 0, other:sweep_trade_day 75, other:unexplained 0.
 - **The 16 core months, classed apart:** sweep_trade_day 15, sweep_balance 1.
 - **No offsetting:** only 2 of the 147 show any flow-component error, so the movers are not two cancelling errors.
-- **The lead (row W42-S1),** traced on D49141714 2019-02:
+- **The lead (row W42-S1),** traced on acct#c7081e97 2019-02:
   - The after arm debits cash for the sweep buys, but the sale of the non-sweep security that paid for them credits no cash.
   - The difference between the arms is a constant -4,010.86 on all 19 days, equal to the net sweep buys.
   - Value: 4,061.90 before, 51.04 after.

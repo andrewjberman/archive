@@ -761,12 +761,12 @@ Verdict moves (before -> after, months):
 | acct#9727ac87 | 2026-01 | 0.1548 | 0.3107 | 0.16 | 0.1507 |
 | acct#99b947c2 | 2025-01 | 0.1791 | 0.1158 | 0.22 | -0.1042 |
 | acct#62a9544e | 2025-01 | 0.1791 | 0.1158 | 0.22 | -0.1042 |
-| D49146094 | 2019-11 | 0.0194 | -6.1447 | 0.02 | -6.1647 |
-| D49146094 | 2020-11 | 0.0 | -6.5635 | 0.0 | -6.5635 |
-| D49146094 | 2021-11 | 0.0 | -7.0246 | 0.0 | -7.0246 |
-| D49146094 | 2022-11 | 0.0246 | -1.0601 | 0.03 | -1.0901 |
-| D49146094 | 2023-11 | 0.0588 | -1.0291 | 0.06 | -1.0891 |
-| D49146094 | 2024-11 | 0.0578 | -1.0333 | 0.06 | -1.0933 |
+| acct#b529d0c1 | 2019-11 | 0.0194 | -6.1447 | 0.02 | -6.1647 |
+| acct#b529d0c1 | 2020-11 | 0.0 | -6.5635 | 0.0 | -6.5635 |
+| acct#b529d0c1 | 2021-11 | 0.0 | -7.0246 | 0.0 | -7.0246 |
+| acct#b529d0c1 | 2022-11 | 0.0246 | -1.0601 | 0.03 | -1.0901 |
+| acct#b529d0c1 | 2023-11 | 0.0588 | -1.0291 | 0.06 | -1.0891 |
+| acct#b529d0c1 | 2024-11 | 0.0578 | -1.0333 | 0.06 | -1.0933 |
 | acct#da970705 | 2023-11 | 0.085 | -0.1769 | 0.06 | -0.2369 |
 | acct#9d0bbc8f | 2023-11 | 0.0878 | -0.2251 | 0.06 | -0.2851 |
 | acct#83c764b4 | 2025-06 | 2.8578 | 2.9803 | 2.84 | 0.1403 |
@@ -795,8 +795,8 @@ Verdict moves (before -> after, months):
 |---|---|---|---|---|---|---|---|---|---|
 | acct#f6c79f45 | 2024-06 | core | -0.88 | -0.8874 | 1.2105 | DIFF | DIFF | 1.6158 | 2.4958 |
 | acct#9727ac87 | 2024-07 | core | -0.08 | -0.0415 | -0.0234 | DIFF | MATCH | -0.0416 | 0.0384 |
-| D49143350 | 2023-11 | core | -4.59 | -4.6175 | -5.3344 | DIFF | DIFF | -4.8291 | -0.2391 |
-| D49143350 | 2026-02 | core | 2.05 | 2.0179 | -16.069 | DIFF | DIFF | -14.041 | -16.091 |
+| acct#865421c2 | 2023-11 | core | -4.59 | -4.6175 | -5.3344 | DIFF | DIFF | -4.8291 | -0.2391 |
+| acct#865421c2 | 2026-02 | core | 2.05 | 2.0179 | -16.069 | DIFF | DIFF | -14.041 | -16.091 |
 | acct#557ce060 | 2026-01 | core | 0.02 | 0.0118 | 0.0988 | DIFF | MATCH | 0.0155 | -0.0045 |
 | acct#c0cea213 | 2024-10 | core | -0.0 | 0.0329 | 0.1609 | DIFF | MATCH | 0.0332 | 0.0332 |
 | acct#7f62f16f | 2025-02 | core | 0.06 | 0.0995 | 0.1518 | DIFF | MATCH | 0.0308 | -0.0292 |
@@ -929,15 +929,15 @@ Verdict moves (before -> after, months):
 | acct#cce589ab | 2025-08 | neither | 2.52 | 2.4854 | 2.7275 | DIFF | DIFF | 2.7173 | 0.1973 |
 | acct#cce589ab | 2025-10 | neither | 1.44 | 1.4272 | 1.8756 | DIFF | DIFF | 1.5524 | 0.1124 |
 | acct#cce589ab | 2026-01 | neither | 1.76 | 1.738 | 2.218 | DIFF | DIFF | 1.8868 | 0.1268 |
-| D49141608 | 2019-02 | neither | 0.04 | 0.0412 | 2.2299 | DIFF | UNGRADABLE |  |  |
-| D49141608 | 2019-03 | neither | 0.05 | 0.0457 | 2.4237 | DIFF | UNGRADABLE |  |  |
-| D49141608 | 2019-04 | neither | 0.05 | 0.0443 | 2.2953 | DIFF | UNGRADABLE |  |  |
-| D49141608 | 2019-05 | neither | 0.05 | 0.0457 | 2.3132 | DIFF | DIFF | 149.2537 | 149.2037 |
-| D49141608 | 2019-06 | neither | 0.05 | 0.0443 | 2.1931 | DIFF | DIFF | 58.0838 | 58.0338 |
-| D49141608 | 2019-07 | neither | 0.05 | 0.0456 | 2.2124 | DIFF | DIFF | 37.8788 | 37.8288 |
-| D49141608 | 2019-08 | neither | 0.04 | 0.0374 | 1.7749 | DIFF | DIFF | 22.5275 | 22.4875 |
-| D49141608 | 2019-09 | neither | 0.03 | 0.0315 | 1.4675 | DIFF | DIFF | 15.4709 | 15.4409 |
-| D49141714 | 2019-02 | neither | 0.04 | 0.0416 | 3.3111 | DIFF | DIFF | 16.3127 | 16.2727 |
+| acct#0f2f0af8 | 2019-02 | neither | 0.04 | 0.0412 | 2.2299 | DIFF | UNGRADABLE |  |  |
+| acct#0f2f0af8 | 2019-03 | neither | 0.05 | 0.0457 | 2.4237 | DIFF | UNGRADABLE |  |  |
+| acct#0f2f0af8 | 2019-04 | neither | 0.05 | 0.0443 | 2.2953 | DIFF | UNGRADABLE |  |  |
+| acct#0f2f0af8 | 2019-05 | neither | 0.05 | 0.0457 | 2.3132 | DIFF | DIFF | 149.2537 | 149.2037 |
+| acct#0f2f0af8 | 2019-06 | neither | 0.05 | 0.0443 | 2.1931 | DIFF | DIFF | 58.0838 | 58.0338 |
+| acct#0f2f0af8 | 2019-07 | neither | 0.05 | 0.0456 | 2.2124 | DIFF | DIFF | 37.8788 | 37.8288 |
+| acct#0f2f0af8 | 2019-08 | neither | 0.04 | 0.0374 | 1.7749 | DIFF | DIFF | 22.5275 | 22.4875 |
+| acct#0f2f0af8 | 2019-09 | neither | 0.03 | 0.0315 | 1.4675 | DIFF | DIFF | 15.4709 | 15.4409 |
+| acct#c7081e97 | 2019-02 | neither | 0.04 | 0.0416 | 3.3111 | DIFF | DIFF | 16.3127 | 16.2727 |
 | acct#a011b5f7 | 2025-04 | neither | 0.41 | 0.4142 | 0.3581 | DIFF | DIFF | -0.0466 | -0.4566 |
 | acct#a011b5f7 | 2025-10 | neither | 0.64 | 0.6038 | 1.0099 | DIFF | MATCH | 0.6255 | -0.0145 |
 | acct#a011b5f7 | 2026-01 | neither | 1.56 | 1.5626 | 1.934 | DIFF | DIFF | 1.6128 | 0.0528 |
@@ -972,7 +972,7 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 |---|---|---|---|---|---|---|---|---|---|---|
 | acct#f6c79f45 | 2024-06 | core | other:sweep_trade_day | -0.88 | MATCH | DIFF | DIFF | DIFF | 1.6158 | 2.4958 |
 | acct#9727ac87 | 2024-07 | core | other:sweep_trade_day | -0.08 | MATCH | DIFF | DIFF | MATCH | -0.0416 | 0.0384 |
-| D49143350 | 2026-02 | core | other:sweep_trade_day | 2.05 | MATCH | DIFF | DIFF | DIFF | -14.041 | -16.091 |
+| acct#865421c2 | 2026-02 | core | other:sweep_trade_day | 2.05 | MATCH | DIFF | DIFF | DIFF | -14.041 | -16.091 |
 | acct#557ce060 | 2026-01 | core | other:sweep_trade_day | 0.02 | MATCH | DIFF | DIFF | MATCH | 0.0155 | -0.0045 |
 | acct#c0cea213 | 2024-10 | core | other:sweep_trade_day | -0.0 | MATCH | DIFF | DIFF | MATCH | 0.0332 | 0.0332 |
 | acct#7f62f16f | 2025-02 | core | other:sweep_trade_day | 0.06 | MATCH | DIFF | DIFF | MATCH | 0.0308 | -0.0292 |
@@ -985,7 +985,7 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 | acct#1b22f63a | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | DIFF | DIFF | 95.0882 | 94.9982 |
 | acct#744c9c00 | 2025-06 | core | other:sweep_trade_day | 0.15 | MATCH | DIFF | DIFF | DIFF | 99.2611 | 99.1111 |
 | acct#5fd6a5d4 | 2026-05 | core | other:sweep_trade_day | 0.03 | MATCH | DIFF | DIFF | MATCH | 0.0284 | -0.0016 |
-| D49143350 | 2023-11 | core | sweep_balance | -4.59 | MATCH | DIFF | DIFF | DIFF | -4.8291 | -0.2391 |
+| acct#865421c2 | 2023-11 | core | sweep_balance | -4.59 | MATCH | DIFF | DIFF | DIFF | -4.8291 | -0.2391 |
 | acct#aaeb760c | 2022-08 | neither | other:sweep_trade_day | -1.06 | MATCH | DIFF | DIFF | MATCH | -1.08 | -0.02 |
 | acct#aaeb760c | 2025-03 | neither | other:sweep_trade_day | -7.16 | MATCH | DIFF | DIFF | DIFF | -6.8898 | 0.2702 |
 | acct#b4db1f25 | 2020-11 | neither | other:sweep_trade_day | 0.08 | MATCH | DIFF | DIFF | DIFF | 0.3206 | 0.2406 |
@@ -1118,15 +1118,15 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 | acct#cce589ab | 2025-01 | neither | sweep_balance | 2.52 | MATCH | DIFF | DIFF | DIFF | 2.7334 | 0.2134 |
 | acct#cce589ab | 2025-02 | neither | sweep_balance | -1.55 | MATCH | DIFF | DIFF | DIFF | -1.7107 | -0.1607 |
 | acct#cce589ab | 2025-08 | neither | sweep_balance | 2.52 | MATCH | DIFF | DIFF | DIFF | 2.7173 | 0.1973 |
-| D49141608 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | DIFF | UNGRADABLE |  |  |
-| D49141608 | 2019-03 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | UNGRADABLE |  |  |
-| D49141608 | 2019-04 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | UNGRADABLE |  |  |
-| D49141608 | 2019-05 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | DIFF | 149.2537 | 149.2037 |
-| D49141608 | 2019-06 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | DIFF | 58.0838 | 58.0338 |
-| D49141608 | 2019-07 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | DIFF | 37.8788 | 37.8288 |
-| D49141608 | 2019-08 | neither | sweep_balance | 0.04 | MATCH | DIFF | DIFF | DIFF | 22.5275 | 22.4875 |
-| D49141608 | 2019-09 | neither | sweep_balance | 0.03 | MATCH | DIFF | DIFF | DIFF | 15.4709 | 15.4409 |
-| D49141714 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | DIFF | DIFF | 16.3127 | 16.2727 |
+| acct#0f2f0af8 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | DIFF | UNGRADABLE |  |  |
+| acct#0f2f0af8 | 2019-03 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | UNGRADABLE |  |  |
+| acct#0f2f0af8 | 2019-04 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | UNGRADABLE |  |  |
+| acct#0f2f0af8 | 2019-05 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | DIFF | 149.2537 | 149.2037 |
+| acct#0f2f0af8 | 2019-06 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | DIFF | 58.0838 | 58.0338 |
+| acct#0f2f0af8 | 2019-07 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | DIFF | 37.8788 | 37.8288 |
+| acct#0f2f0af8 | 2019-08 | neither | sweep_balance | 0.04 | MATCH | DIFF | DIFF | DIFF | 22.5275 | 22.4875 |
+| acct#0f2f0af8 | 2019-09 | neither | sweep_balance | 0.03 | MATCH | DIFF | DIFF | DIFF | 15.4709 | 15.4409 |
+| acct#c7081e97 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | DIFF | DIFF | 16.3127 | 16.2727 |
 | acct#cf292cea | 2024-08 | neither | sweep_balance | 4.62 | MATCH | DIFF | DIFF | MATCH | 4.6488 | 0.0288 |
 | acct#65b3b3ea | 2025-04 | neither | sweep_balance | -11.06 | MATCH | DIFF | DIFF | MATCH | -11.0556 | 0.0044 |
 | acct#65b3b3ea | 2025-07 | neither | sweep_balance | 3.42 | MATCH | DIFF | DIFF | MATCH | 3.4191 | -0.0009 |
@@ -1139,7 +1139,7 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 | account | month | class | cause | AFTER verdict | computed | reported |
 |---|---|---|---|---|---|---|
 | acct#f6c79f45 | 2024-06 | core | other:sweep_trade_day | DIFF | 1.6158 | -0.88 |
-| D49143350 | 2026-02 | core | other:sweep_trade_day | DIFF | -14.041 | 2.05 |
+| acct#865421c2 | 2026-02 | core | other:sweep_trade_day | DIFF | -14.041 | 2.05 |
 | acct#61ebda90 | 2025-04 | core | other:sweep_trade_day | DIFF | 95.0882 | 0.09 |
 | acct#ce1f487c | 2025-04 | core | other:sweep_trade_day | DIFF | 95.0882 | 0.09 |
 | acct#16bf540c | 2025-04 | core | other:sweep_trade_day | DIFF | 95.0882 | 0.09 |
@@ -1148,7 +1148,7 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 | acct#781a748b | 2025-04 | core | other:sweep_trade_day | DIFF | 95.0882 | 0.09 |
 | acct#1b22f63a | 2025-04 | core | other:sweep_trade_day | DIFF | 95.0882 | 0.09 |
 | acct#744c9c00 | 2025-06 | core | other:sweep_trade_day | DIFF | 99.2611 | 0.15 |
-| D49143350 | 2023-11 | core | sweep_balance | DIFF | -4.8291 | -4.59 |
+| acct#865421c2 | 2023-11 | core | sweep_balance | DIFF | -4.8291 | -4.59 |
 | acct#aaeb760c | 2025-03 | neither | other:sweep_trade_day | DIFF | -6.8898 | -7.16 |
 | acct#b4db1f25 | 2020-11 | neither | other:sweep_trade_day | DIFF | 0.3206 | 0.08 |
 | acct#015306a0 | 2023-04 | neither | other:sweep_trade_day | DIFF | 1.1668 | 1.23 |
@@ -1214,15 +1214,15 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 | acct#cce589ab | 2025-01 | neither | sweep_balance | DIFF | 2.7334 | 2.52 |
 | acct#cce589ab | 2025-02 | neither | sweep_balance | DIFF | -1.7107 | -1.55 |
 | acct#cce589ab | 2025-08 | neither | sweep_balance | DIFF | 2.7173 | 2.52 |
-| D49141608 | 2019-02 | neither | sweep_balance | UNGRADABLE |  | 0.04 |
-| D49141608 | 2019-03 | neither | sweep_balance | UNGRADABLE |  | 0.05 |
-| D49141608 | 2019-04 | neither | sweep_balance | UNGRADABLE |  | 0.05 |
-| D49141608 | 2019-05 | neither | sweep_balance | DIFF | 149.2537 | 0.05 |
-| D49141608 | 2019-06 | neither | sweep_balance | DIFF | 58.0838 | 0.05 |
-| D49141608 | 2019-07 | neither | sweep_balance | DIFF | 37.8788 | 0.05 |
-| D49141608 | 2019-08 | neither | sweep_balance | DIFF | 22.5275 | 0.04 |
-| D49141608 | 2019-09 | neither | sweep_balance | DIFF | 15.4709 | 0.03 |
-| D49141714 | 2019-02 | neither | sweep_balance | DIFF | 16.3127 | 0.04 |
+| acct#0f2f0af8 | 2019-02 | neither | sweep_balance | UNGRADABLE |  | 0.04 |
+| acct#0f2f0af8 | 2019-03 | neither | sweep_balance | UNGRADABLE |  | 0.05 |
+| acct#0f2f0af8 | 2019-04 | neither | sweep_balance | UNGRADABLE |  | 0.05 |
+| acct#0f2f0af8 | 2019-05 | neither | sweep_balance | DIFF | 149.2537 | 0.05 |
+| acct#0f2f0af8 | 2019-06 | neither | sweep_balance | DIFF | 58.0838 | 0.05 |
+| acct#0f2f0af8 | 2019-07 | neither | sweep_balance | DIFF | 37.8788 | 0.05 |
+| acct#0f2f0af8 | 2019-08 | neither | sweep_balance | DIFF | 22.5275 | 0.04 |
+| acct#0f2f0af8 | 2019-09 | neither | sweep_balance | DIFF | 15.4709 | 0.03 |
+| acct#c7081e97 | 2019-02 | neither | sweep_balance | DIFF | 16.3127 | 0.04 |
 
 
 ## Round 22's 23 regressions (MATCH under r19, DIFF under repaired), classed, and their result in this re-grade
@@ -1259,7 +1259,7 @@ Under this arm: 7 of 23 are MATCH, 16 are not.
 
 ### Round 22's 25 recovered movers (round-19 movers MATCH under repaired): still MATCH under this arm: 0 of 25
 
-Lost: acct#5aa91f68/2017-07 (DIFF), acct#5aa91f68/2017-08 (DIFF), acct#5aa91f68/2017-09 (DIFF), acct#5aa91f68/2017-10 (DIFF), acct#5aa91f68/2017-12 (DIFF), acct#5aa91f68/2018-01 (DIFF), acct#5aa91f68/2018-02 (DIFF), acct#5aa91f68/2018-03 (DIFF), acct#5aa91f68/2018-04 (DIFF), acct#5aa91f68/2018-05 (DIFF), acct#5aa91f68/2018-06 (DIFF), acct#ab0c6781/2018-01 (DIFF), acct#cce589ab/2024-02 (DIFF), acct#cce589ab/2024-08 (DIFF), acct#cce589ab/2025-02 (DIFF), acct#cce589ab/2025-08 (DIFF), D49141608/2019-02 (UNGRADABLE), D49141608/2019-03 (UNGRADABLE), D49141608/2019-04 (UNGRADABLE), D49141608/2019-05 (DIFF), D49141608/2019-06 (DIFF), D49141608/2019-07 (DIFF), D49141608/2019-08 (DIFF), D49141608/2019-09 (DIFF), D49141714/2019-02 (DIFF)
+Lost: acct#5aa91f68/2017-07 (DIFF), acct#5aa91f68/2017-08 (DIFF), acct#5aa91f68/2017-09 (DIFF), acct#5aa91f68/2017-10 (DIFF), acct#5aa91f68/2017-12 (DIFF), acct#5aa91f68/2018-01 (DIFF), acct#5aa91f68/2018-02 (DIFF), acct#5aa91f68/2018-03 (DIFF), acct#5aa91f68/2018-04 (DIFF), acct#5aa91f68/2018-05 (DIFF), acct#5aa91f68/2018-06 (DIFF), acct#ab0c6781/2018-01 (DIFF), acct#cce589ab/2024-02 (DIFF), acct#cce589ab/2024-08 (DIFF), acct#cce589ab/2025-02 (DIFF), acct#cce589ab/2025-08 (DIFF), acct#0f2f0af8/2019-02 (UNGRADABLE), acct#0f2f0af8/2019-03 (UNGRADABLE), acct#0f2f0af8/2019-04 (UNGRADABLE), acct#0f2f0af8/2019-05 (DIFF), acct#0f2f0af8/2019-06 (DIFF), acct#0f2f0af8/2019-07 (DIFF), acct#0f2f0af8/2019-08 (DIFF), acct#0f2f0af8/2019-09 (DIFF), acct#c7081e97/2019-02 (DIFF)
 
 By new verdict: MATCH=0, DIFF=22, UNGRADABLE=3, ABSENT=0
 
@@ -1281,15 +1281,15 @@ By new verdict: MATCH=0, DIFF=22, UNGRADABLE=3, ABSENT=0
 | acct#cce589ab | 2024-08 | DIFF |
 | acct#cce589ab | 2025-02 | DIFF |
 | acct#cce589ab | 2025-08 | DIFF |
-| D49141608 | 2019-02 | UNGRADABLE |
-| D49141608 | 2019-03 | UNGRADABLE |
-| D49141608 | 2019-04 | UNGRADABLE |
-| D49141608 | 2019-05 | DIFF |
-| D49141608 | 2019-06 | DIFF |
-| D49141608 | 2019-07 | DIFF |
-| D49141608 | 2019-08 | DIFF |
-| D49141608 | 2019-09 | DIFF |
-| D49141714 | 2019-02 | DIFF |
+| acct#0f2f0af8 | 2019-02 | UNGRADABLE |
+| acct#0f2f0af8 | 2019-03 | UNGRADABLE |
+| acct#0f2f0af8 | 2019-04 | UNGRADABLE |
+| acct#0f2f0af8 | 2019-05 | DIFF |
+| acct#0f2f0af8 | 2019-06 | DIFF |
+| acct#0f2f0af8 | 2019-07 | DIFF |
+| acct#0f2f0af8 | 2019-08 | DIFF |
+| acct#0f2f0af8 | 2019-09 | DIFF |
+| acct#c7081e97 | 2019-02 | DIFF |
 
 
 ## The control: months with no listed position
@@ -1379,12 +1379,12 @@ No variant is chosen by its result; the shipped rule is the one the order states
 | acct#602ce60b | 2024-11 | fch_fee_leg_in_month | 0.0210 | -0.3309 | 0.03 |
 | acct#3345c43a | 2022-11 | fch_fee_leg_in_month | 0.1272 | -0.4080 | 0.13 |
 | acct#3345c43a | 2023-11 | fch_fee_leg_in_month | 0.1143 | -0.4169 | 0.12 |
-| D49146094 | 2019-11 | fch_fee_leg_in_month | 0.0194 | -6.1447 | 0.02 |
-| D49146094 | 2020-11 | fch_fee_leg_in_month | 0.0000 | -6.5635 | 0.00 |
-| D49146094 | 2021-11 | fch_fee_leg_in_month | 0.0000 | -7.0246 | 0.00 |
-| D49146094 | 2022-11 | fch_fee_leg_in_month | 0.0246 | -1.0601 | 0.03 |
-| D49146094 | 2023-11 | fch_fee_leg_in_month | 0.0588 | -1.0291 | 0.06 |
-| D49146094 | 2024-11 | fch_fee_leg_in_month | 0.0578 | -1.0333 | 0.06 |
+| acct#b529d0c1 | 2019-11 | fch_fee_leg_in_month | 0.0194 | -6.1447 | 0.02 |
+| acct#b529d0c1 | 2020-11 | fch_fee_leg_in_month | 0.0000 | -6.5635 | 0.00 |
+| acct#b529d0c1 | 2021-11 | fch_fee_leg_in_month | 0.0000 | -7.0246 | 0.00 |
+| acct#b529d0c1 | 2022-11 | fch_fee_leg_in_month | 0.0246 | -1.0601 | 0.03 |
+| acct#b529d0c1 | 2023-11 | fch_fee_leg_in_month | 0.0588 | -1.0291 | 0.06 |
+| acct#b529d0c1 | 2024-11 | fch_fee_leg_in_month | 0.0578 | -1.0333 | 0.06 |
 | acct#da970705 | 2023-11 | fch_fee_leg_in_month | 0.0850 | -0.1769 | 0.06 |
 | acct#9d0bbc8f | 2023-11 | fch_fee_leg_in_month | 0.0878 | -0.2251 | 0.06 |
 | acct#a011b5f7 | 2025-11 | fch_fee_leg_in_month | -0.0799 | -0.2507 | -0.08 |

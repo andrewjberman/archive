@@ -70,7 +70,7 @@ months_after=3133/838/78622 control_same=True regressions=4 year_chain_same=True
   script's own verdict to `6ff13c60ebb5e84db6007f9c2d98e7672dd9a73ec257f42e3e7ae0c9fd779120` -- the hash
   the dry run printed for the local table *before* the write. Equality holds under a second instrument.
 - **Sealed planted mutant.** AC1 rests on `content_hash` discriminating. One cell of the **served**
-  `month_grades` was mutated in memory (row 0, `account`, `00074413503` -> `00074413503X`), nothing
+  `month_grades` was mutated in memory (row 0, `account`, `acct#21a12aa6` -> `00074413503X`), nothing
   written anywhere, and the comparator moved to `16be57682ca8...` -- `FIRED-AS-EXPECTED`. Its control arm
   ran **first**: re-hashing the unmutated served bytes gave `rehash_same=True`, so the mutant's
   difference is the planted mutation and not instrument noise.

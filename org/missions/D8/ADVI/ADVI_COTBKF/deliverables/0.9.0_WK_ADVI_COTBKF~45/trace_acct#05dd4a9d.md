@@ -54,7 +54,7 @@ It is shipped only if the real run keeps round 22's 25 movers MATCH and the cont
 | (a) + (b) + (c), SHIPPED as `conditional` | 793 | 2058/1525/79010 | 1 | 0 |
 
 (c) clears all 13 of acct#05dd4a9d and keeps the 25 (b)+(c): it is shipped. (a) clears 9 of the other 10 but loses all 25 round-22 recovered movers:
-every credit day of the 25's five accounts (acct#5aa91f68, acct#ab0c6781, acct#cce589ab, D49141608, D49141714) sold a security with no price the day before,
+every credit day of the 25's five accounts (acct#5aa91f68, acct#ab0c6781, acct#cce589ab, acct#0f2f0af8, acct#c7081e97) sold a security with no price the day before,
 exactly as the 9 did, so "valued the day before" does not separate the 9 from the 25. The one month left is acct#57e741a5 2025-07: the sold
 security is the money-market fund 316067107 (priced), four credit days (4,871.60 / 4,711.88 / 1,514.07 / 778.15 = 11,875.70) pass every
 condition; r19 value on 2025-07-31 9,816.72, with the credits 21,692.42 (the difference 11,875.70); reported 0.12 pct, r19 matches, the

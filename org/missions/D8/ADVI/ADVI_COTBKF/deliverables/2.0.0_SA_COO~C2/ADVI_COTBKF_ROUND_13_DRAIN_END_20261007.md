@@ -26,7 +26,7 @@ LINKED unchanged; 52 link reasons change text without a status change (row D2-W2
 applied tables with 0 changes, so every difference is the rule. A re-apply of both tables needs its own never-widen pair; the COO half is
 drafted beside this packet (`NEVER_WIDEN_R13_REAPPLY_COO_HALF_DRAFT.md`).
 
-**For L9 (CB13m1-AC3):** `deliverables/0.9.0_WK_ADVI_COTBKF~29/D49141617_read.txt` -- 3,537 rows, 8 `leu` rows on 8 securities, each pair at 0
+**For L9 (CB13m1-AC3):** `deliverables/0.9.0_WK_ADVI_COTBKF~29/acct#0e4ff3a3_read.txt` -- 3,537 rows, 8 `leu` rows on 8 securities, each pair at 0
 after its last transaction; none of the account's 101 non-cash pairs under one share.
 
 ## Rows

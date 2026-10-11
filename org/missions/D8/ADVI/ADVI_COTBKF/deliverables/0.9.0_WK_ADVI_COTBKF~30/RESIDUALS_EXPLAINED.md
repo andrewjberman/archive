@@ -6,7 +6,7 @@ Re-derived from the rebuild (every type signed by commonwealth_signs.SIGN); each
 RESIDUALS explained=5 of 5 sign_gap=0 vendor_rounding=4 source_gap=1
 ```
 
-## B37631286 74440B405 -- VENDOR_ROUNDING
+## acct#fa82ce1d 74440B405 -- VENDOR_ROUNDING
 
 - rebuilt quantity 0.029, snapshot 0.029, last transaction 2026-06-02, 155 rows
 - reason: in 4575.242 over 76 rows, out 4575.213 over 11 rows, net 0.029; last out row sl 861.008 on 2026-06-02 against 861.037 held before it (it carries 3 decimals, the rows reach 3); snapshot holds 0.029 (equal to the rebuild)

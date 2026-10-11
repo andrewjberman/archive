@@ -21,7 +21,7 @@ The crosswalk's near-match list grew 21 -> 22 (row D2-S25): the list for Andrew/
 |---|---|---|---|---|
 | CB-n-1 residuals explained | ~30 | @6f3a844f75 | VALID: AC1 PASS, AC2 6 passed (one arm per class + no-residual control) | `RESIDUALS explained=5 of 5 sign_gap=0 vendor_rounding=4 source_gap=1` |
 
-- B37631286 / acct#3b5864a2 on 74440B405 (0.029, 0.02): VENDOR_ROUNDING -- a `dvr` re-books a `DVRX`-cancelled reinvestment at a slightly
+- acct#fa82ce1d / acct#3b5864a2 on 74440B405 (0.029, 0.02): VENDOR_ROUNDING -- a `dvr` re-books a `DVRX`-cancelled reinvestment at a slightly
   different quantity, and the closing `sl` equals the position before the re-booking.
 - acct#9bd1ed4d / acct#87772861 on 07399D345 (0.00086 each): VENDOR_ROUNDING -- `CAF` rows at 5 decimals, the closing `lo` at 3.
 - acct#2f33cbcc on 60934N500 (0.003): SOURCE_GAP -- one `li` of 0.003 (2025-10-08), no row out; the snapshot still holds it (row D2-W30-S1:

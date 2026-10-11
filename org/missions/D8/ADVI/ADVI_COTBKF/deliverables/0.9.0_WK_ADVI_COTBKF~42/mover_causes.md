@@ -49,7 +49,7 @@ Tests satisfied (a month can satisfy more than one; the class is the first that 
 
 ## The traces (one month per class, the largest |s| of the class)
 
-### TRACE sweep_balance: account D49141714, month 2019-02 -- class `sweep_balance`
+### TRACE sweep_balance: account acct#c7081e97, month 2019-02 -- class `sweep_balance`
 
 Rule reading: s_bal=-3.2159 from no-trade days exceeds s_trade=0.0000.
 
@@ -121,8 +121,8 @@ core months: 16. other:sweep_trade_day=15, sweep_balance=1
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | acct#f6c79f45 | 2024-06 | other:sweep_trade_day | -0.88 | -0.8874 | 1.2105 | -2.0946 | -0.0 | -2.0946 | 0.0511 | -2.1457 | s_trade=-2.1457 from sweep-trade days exceeds s_bal=0.0511 |
 | acct#9727ac87 | 2024-07 | other:sweep_trade_day | -0.08 | -0.0415 | -0.0234 | -0.0181 | -0.0 | -0.0181 | 0.0002 | -0.0183 | s_trade=-0.0183 from sweep-trade days exceeds s_bal=0.0002 |
-| D49143350 | 2023-11 | sweep_balance | -4.59 | -4.6175 | -5.3344 | 0.7545 | -0.0 | 0.7545 | 0.7545 | 0.0 | s_bal=0.7545 from no-trade days exceeds s_trade=0.0000 |
-| D49143350 | 2026-02 | other:sweep_trade_day | 2.05 | 2.0179 | -16.069 | 19.546 | -0.0306 | 19.5154 | -1.2107 | 20.7261 | s_trade=20.7261 from sweep-trade days exceeds s_bal=-1.2107 |
+| acct#865421c2 | 2023-11 | sweep_balance | -4.59 | -4.6175 | -5.3344 | 0.7545 | -0.0 | 0.7545 | 0.7545 | 0.0 | s_bal=0.7545 from no-trade days exceeds s_trade=0.0000 |
+| acct#865421c2 | 2026-02 | other:sweep_trade_day | 2.05 | 2.0179 | -16.069 | 19.546 | -0.0306 | 19.5154 | -1.2107 | 20.7261 | s_trade=20.7261 from sweep-trade days exceeds s_bal=-1.2107 |
 | acct#557ce060 | 2026-01 | other:sweep_trade_day | 0.02 | 0.0118 | 0.0988 | -0.087 | -0.0 | -0.087 | -0.0264 | -0.0606 | s_trade=-0.0606 from sweep-trade days exceeds s_bal=-0.0264 |
 | acct#c0cea213 | 2024-10 | other:sweep_trade_day | -0.0 | 0.0329 | 0.1609 | -0.1279 | 0.0 | -0.1279 | -0.0013 | -0.1266 | s_trade=-0.1266 from sweep-trade days exceeds s_bal=-0.0013 |
 | acct#7f62f16f | 2025-02 | other:sweep_trade_day | 0.06 | 0.0995 | 0.1518 | -0.0547 | 0.0024 | -0.0523 | -0.0052 | -0.0471 | s_trade=-0.0471 from sweep-trade days exceeds s_bal=-0.0052 |
@@ -260,15 +260,15 @@ core months: 16. other:sweep_trade_day=15, sweep_balance=1
 | acct#cce589ab | 2025-08 | sweep_balance | 2.52 | 2.4854 | 2.7275 | -0.2359 | 0.0 | -0.2359 | -0.2359 | 0.0 |
 | acct#cce589ab | 2025-10 | other:sweep_trade_day | 1.44 | 1.4272 | 1.8756 | -0.4411 | -0.0 | -0.4411 | -0.1941 | -0.247 |
 | acct#cce589ab | 2026-01 | other:sweep_trade_day | 1.76 | 1.738 | 2.218 | -0.4707 | -0.0 | -0.4707 | -0.1336 | -0.3371 |
-| D49141608 | 2019-02 | sweep_balance | 0.04 | 0.0412 | 2.2299 | -2.1643 | 0.0 | -2.1643 | -2.1643 | 0.0 |
-| D49141608 | 2019-03 | sweep_balance | 0.05 | 0.0457 | 2.4237 | -2.349 | -0.0 | -2.349 | -2.349 | 0.0 |
-| D49141608 | 2019-04 | sweep_balance | 0.05 | 0.0443 | 2.2953 | -2.225 | -0.0 | -2.225 | -2.225 | 0.0 |
-| D49141608 | 2019-05 | sweep_balance | 0.05 | 0.0457 | 2.3132 | -2.2412 | -0.0 | -2.2412 | -2.2412 | 0.0 |
-| D49141608 | 2019-06 | sweep_balance | 0.05 | 0.0443 | 2.1931 | -2.1251 | 0.0 | -2.1251 | -2.1251 | 0.0 |
-| D49141608 | 2019-07 | sweep_balance | 0.05 | 0.0456 | 2.2124 | -2.1426 | -0.0 | -2.1426 | -2.1426 | 0.0 |
-| D49141608 | 2019-08 | sweep_balance | 0.04 | 0.0374 | 1.7749 | -1.7219 | -0.0 | -1.7219 | -1.7219 | 0.0 |
-| D49141608 | 2019-09 | sweep_balance | 0.03 | 0.0315 | 1.4675 | -1.4253 | -0.0 | -1.4253 | -1.4253 | 0.0 |
-| D49141714 | 2019-02 | sweep_balance | 0.04 | 0.0416 | 3.3111 | -3.2159 | 0.0 | -3.2159 | -3.2159 | 0.0 |
+| acct#0f2f0af8 | 2019-02 | sweep_balance | 0.04 | 0.0412 | 2.2299 | -2.1643 | 0.0 | -2.1643 | -2.1643 | 0.0 |
+| acct#0f2f0af8 | 2019-03 | sweep_balance | 0.05 | 0.0457 | 2.4237 | -2.349 | -0.0 | -2.349 | -2.349 | 0.0 |
+| acct#0f2f0af8 | 2019-04 | sweep_balance | 0.05 | 0.0443 | 2.2953 | -2.225 | -0.0 | -2.225 | -2.225 | 0.0 |
+| acct#0f2f0af8 | 2019-05 | sweep_balance | 0.05 | 0.0457 | 2.3132 | -2.2412 | -0.0 | -2.2412 | -2.2412 | 0.0 |
+| acct#0f2f0af8 | 2019-06 | sweep_balance | 0.05 | 0.0443 | 2.1931 | -2.1251 | 0.0 | -2.1251 | -2.1251 | 0.0 |
+| acct#0f2f0af8 | 2019-07 | sweep_balance | 0.05 | 0.0456 | 2.2124 | -2.1426 | -0.0 | -2.1426 | -2.1426 | 0.0 |
+| acct#0f2f0af8 | 2019-08 | sweep_balance | 0.04 | 0.0374 | 1.7749 | -1.7219 | -0.0 | -1.7219 | -1.7219 | 0.0 |
+| acct#0f2f0af8 | 2019-09 | sweep_balance | 0.03 | 0.0315 | 1.4675 | -1.4253 | -0.0 | -1.4253 | -1.4253 | 0.0 |
+| acct#c7081e97 | 2019-02 | sweep_balance | 0.04 | 0.0416 | 3.3111 | -3.2159 | 0.0 | -3.2159 | -3.2159 | 0.0 |
 | acct#a011b5f7 | 2025-04 | other:sweep_trade_day | 0.41 | 0.4142 | 0.3581 | 0.0558 | 0.0 | 0.0558 | 0.0007 | 0.0552 |
 | acct#a011b5f7 | 2025-10 | other:sweep_trade_day | 0.64 | 0.6038 | 1.0099 | -0.4029 | -0.0 | -0.4029 | -0.0094 | -0.3935 |
 | acct#a011b5f7 | 2026-01 | other:sweep_trade_day | 1.56 | 1.5626 | 1.934 | -0.365 | -0.0 | -0.365 | -0.0084 | -0.3566 |
