@@ -1842,3 +1842,210 @@ def test_arms_only_unexpected_arm_answer_is_a_named_failure_and_exits_1(monkeypa
     assert rc3 == 1 and t3["report_route_arms"]["package_door_denies_the_filer"]["package_absent_after"] is False
     # never rc 3, in any of the three
     assert {rc, rc2, rc3} == {1}
+
+
+# ------------------------------------------------------------------ R4-rn-2: --one-step (four calls, one submission, no claim)
+
+ONE_ARGV = list(ARGV) + ["--one-step"]
+RECORD_OK = res(200, {"ticket": {"ticket_id": TKT, "report_ref": {"request_id": REQ_A, "revision": "1",
+                                                                   "recorded_by": run.FILER}}})
+RECORD_409 = res(409, {"error": "a report is already recorded on this ticket", "code": "REPORT_ALREADY_RECORDED"})
+CLAIM_PATH = "/api/scoped/tickets/%s/claim" % TKT
+
+
+def _os_script(submit=None, arm1=ARM_REFUSED, arm2=PACKAGE_DENIED, record=None, ticket_reads=None, listing_read=None):
+    s = _arms_script(arm1=arm1, arm2=arm2)
+    s.pop(("POST", CLAIM_PATH), None)
+    s[SUBMIT] = submit if submit is not None else accepted_answer(REQ_A)
+    s[("POST", REPORT_PATH)] = [arm1] + (record if record is not None else [RECORD_OK, RECORD_409])
+    s[("GET", TICKET_PATH)] = ticket_reads if ticket_reads is not None else [BARE_TICKET, BARE_TICKET, ticket_with(REQ_A)]
+    s[("GET", rpath(REQ_A))] = report(REQ_A)
+    s[("GET", LIST_PATH)] = listing_read if listing_read is not None else listing()
+    return s
+
+
+def _os_run(monkeypatch, tmp_path, script=None, argv=ONE_ARGV):
+    run.ONE_STEP_SUBMISSIONS["count"] = 0
+    return _arms_run(monkeypatch, tmp_path, script=script if script is not None else _os_script(), argv=argv)
+
+
+def _posts(w, path):
+    return [e for e in w.events if e[0] == "http" and e[1] == "POST" and e[2] == path]
+
+
+def test_one_step_creates_the_ticket_with_the_i1_source_and_never_claims(monkeypatch, tmp_path):
+    sent = []
+    _orig = Fake.__call__
+
+    def spy(self, token, method, path, query=None, body=None, timeout=90):
+        if (method, path) == ("POST", "/api/scoped/tickets"):
+            sent.append(body)
+        return _orig(self, token, method, path, query, body, timeout)
+    monkeypatch.setattr(Fake, "__call__", spy)
+    rc, trace, w = _os_run(monkeypatch, tmp_path)
+    assert len(_posts(w, "/api/scoped/tickets")) == 1
+    assert not _posts(w, CLAIM_PATH), "a claim was made in one-step mode"
+    assert not any("/claim" in e[2] for e in w.events if e[0] == "http")
+    assert trace["mode"] == "ONE_STEP" and trace["journey_ticket"] == TKT
+    h = {x["hop"]: x for x in trace["hops"]}
+    assert h["b_ticket"]["source"] == "ticketcenter:i1" and h["c_claim"]["outcome"] == "NOT_RUN_ONE_STEP"
+    # the body: the create body as today plus the i1 source
+    assert len(sent) == 1 and sent[0]["source"] == "ticketcenter:i1"
+    assert sent[0]["ticket_type"] == "analysis_request" and sent[0]["attachment"] == {"upload_id": "up-1", "input_id": "in-1"}
+    assert sorted(sent[0]) == ["answers", "attachment", "source", "ticket_type", "title"]
+    # the flag is off by default, and it is refused with --arms-only
+    assert run.build_parser().parse_args(ARGV[:]).one_step is False
+    assert run.main(list(ARGV) + ["--one-step", "--arms-only"]) == 2
+
+
+def test_one_step_submission_carries_ticket_id_and_the_tckt_request_id(monkeypatch, tmp_path):
+    sent = []
+    real = run.one_step_submit
+
+    def spy(token, body):
+        sent.append(dict(body))
+        return real(token, body)
+    monkeypatch.setattr(run, "one_step_submit", spy)
+    rc, trace, w = _os_run(monkeypatch, tmp_path)
+    assert len(sent) == 1
+    b = sent[0]
+    assert sorted(b) == sorted(["request_id", "client_id", "account_ids", "snapshot_id", "variant", "comparison_keys",
+                                "report_title", "input_id", "prepared_for", "ticket_id"])
+    assert b["request_id"] == "tckt-" + TKT and b["ticket_id"] == TKT and b["input_id"] == "in-1"
+    assert b["client_id"] is None and b["account_ids"] == [] and b["snapshot_id"] is None and b["report_title"] is None
+    assert b["variant"] == "overview" and b["comparison_keys"] == [] and b["prepared_for"] == run.HOUSEHOLD
+    # the trace names the token and the ticket (ids only)
+    assert trace["submission_request_id_token"] == "tckt-" + TKT and trace["submission_ticket_id"] == TKT
+    assert trace["hops"][3]["status"] == 200 and trace["hops"][3]["status_state"] == "QUEUED"
+    # the token rule: characters outside [A-Za-z0-9_.:-] become "_", cut to 95 in all
+    assert run.one_step_request_id("TCK T/1#") == "tckt-TCK_T_1_"
+    long = run.one_step_request_id("x" * 200)
+    assert len(long) == 95 and long == "tckt-" + "x" * 90
+    assert run.TOKEN_PATTERN.fullmatch(run.one_step_request_id("!!!"))
+
+
+def test_one_step_runs_both_arms_before_the_submission(monkeypatch, tmp_path):
+    rc, trace, w = _os_run(monkeypatch, tmp_path)
+    posts = [(i, e[2]) for i, e in enumerate(w.events) if e[0] == "http" and e[1] == "POST"]
+    sub = next(i for i, p in posts if p == SUBMIT[1])
+    arm1 = next(i for i, p in posts if p == REPORT_PATH)
+    arm2 = next(i for i, p in posts if p == PACKAGE_PATH)
+    assert arm1 < arm2 < sub
+    arms = trace["report_route_arms"]
+    assert arms["report_id_malformed_refused"]["status"] == 400 and arms["report_id_malformed_refused"]["as_expected"] is True
+    assert arms["report_id_malformed_refused"]["report_ref_absent_after"] is True
+    assert arms["package_door_denies_the_filer"]["status"] == 403 and arms["package_door_denies_the_filer"]["as_expected"] is True
+    assert trace["one_step_arms"] == "ARMS_AS_EXPECTED"
+    # an unexpected answer on an arm is a named failure, and the run CONTINUES to the submission
+    d = tmp_path / "unexpected"
+    d.mkdir()
+    rc2, t2, w2 = _os_run(monkeypatch, d, script=_os_script(arm2=res(404, {"code": "NO_SUCH"})))
+    assert any(n["reason"] == "PACKAGE_ARM_UNEXPECTED" for n in t2["named_failures"])
+    assert t2["one_step_arms"] == "ARMS_NOT_AS_EXPECTED" and len(_posts(w2, SUBMIT[1])) == 1 and rc2 == 3
+
+
+def test_one_step_package_door_2xx_stops_before_the_submission(monkeypatch, tmp_path):
+    rc, trace, w = _os_run(monkeypatch, tmp_path, script=_os_script(arm2=res(200, {"package": {}})))
+    assert rc == 1 and trace["result"] == "STOPPED_BEFORE_SUBMISSION" and trace["submission"] == "NOT_SENT"
+    assert not _posts(w, SUBMIT[1]) and run.ONE_STEP_SUBMISSIONS["count"] == 0
+    assert any(n["reason"] == "PACKAGE_DOOR_ADMITTED_THE_FILER" for n in trace["named_failures"])
+    assert any(n["reason"] == "STOPPED_BEFORE_SUBMISSION" for n in trace["named_failures"])
+    # cleaned up as a no-submission run: the row is gone after exp
+    assert trace["cleanup"]["row_removed_read_back_absent"] is True and "state" not in trace["cleanup"]
+    assert_row_deleted_after_exp(w)
+    h = {x["hop"]: x for x in trace["hops"]}
+    assert all(h[k]["outcome"] == "NOT_RUN_ONE_STEP" for k in ("d_analysis", "e_ready", "f_report", "g_open"))
+    # a ticket that re-reads with report_ref (or package) present stops the same way
+    for n, reads in (("b", res(200, {"ticket": {"ticket_id": TKT, "report_ref": {"request_id": REQ_A}}})),
+                     ("c", res(200, {"ticket": {"ticket_id": TKT, "package": {"report_ref": "x"}}}))):
+        d = tmp_path / n
+        d.mkdir()
+        rc2, t2, w2 = _os_run(monkeypatch, d, script=_os_script(ticket_reads=reads))
+        assert rc2 == 1 and t2["result"] == "STOPPED_BEFORE_SUBMISSION", n
+        assert not _posts(w2, SUBMIT[1]) and w2.row is False
+
+
+def test_one_step_records_as_creator_then_repeat_is_409(monkeypatch, tmp_path):
+    rc, trace, w = _os_run(monkeypatch, tmp_path)
+    rc_calls = trace["record_calls"]
+    assert rc_calls["first"]["status"] == 200 and rc_calls["first"]["request_id_recorded"] is True
+    assert rc_calls["first"]["recorded_by_the_filer"] is True and rc_calls["first"]["as_expected"] is True
+    assert rc_calls["repeat"]["status"] == 409 and rc_calls["repeat"]["code"] == "REPORT_ALREADY_RECORDED"
+    assert rc_calls["repeat"]["stored_request_id_unchanged"] is True and rc_calls["repeat"]["as_expected"] is True
+    # three POSTs to the report route in all: the malformed-id arm, the record, ONE repeat; the first two after no claim
+    assert len(_posts(w, REPORT_PATH)) == 3 and not _posts(w, CLAIM_PATH)
+    assert rc_calls["first"]["sent_keys"] == ["request_id", "revision"]
+    assert not [n for n in trace["named_failures"] if n["reason"].startswith("RECORD_")]
+    # the open-from-the-ticket read follows, on the recorded id
+    h = {x["hop"]: x for x in trace["hops"]}
+    assert h["e_ready"]["result"]["result"] == "REPORT_READ" and h["g_open"]["report_opened"] is True
+    # a repeat that is NOT refused 409 is a named failure and the run goes on
+    d = tmp_path / "bad"
+    d.mkdir()
+    rc2, t2, w2 = _os_run(monkeypatch, d, script=_os_script(record=[RECORD_OK, RECORD_OK]))
+    assert any(n["reason"] == "RECORD_REPEAT_UNEXPECTED" for n in t2["named_failures"]) and rc2 == 3
+    assert t2["record_calls"]["repeat"]["as_expected"] is False
+    assert t2["hops"][6]["report_opened"] is True    # the run went on to the open read
+    # an answer without a revision sends request_id alone
+    d2 = tmp_path / "norev"
+    d2.mkdir()
+    ans = accepted_answer(REQ_A)
+    del ans["parsed"]["data"]["identity"]["request_revision"]
+    rc3, t3, w3 = _os_run(monkeypatch, d2, script=_os_script(submit=ans))
+    assert t3["record_calls"]["first"]["sent_keys"] == ["request_id"]
+
+
+def test_one_step_sends_exactly_one_submission_even_on_timeout(monkeypatch, tmp_path):
+    timeout = res(200, {"x": 1})
+    timeout.update({"status": 0, "reason": "TRANSPORT_TimeoutError", "len": 0, "fp": None, "parsed": None})
+    found = res(200, {"data": {"items": [{"identity": {"request_id": REQ_B}, "client_id": "tckt-" + TKT, "accepted_at": 1}]}})
+    rc, trace, w = _os_run(monkeypatch, tmp_path, script=_os_script(submit=timeout, listing_read=found))
+    assert len(_posts(w, SUBMIT[1])) == 1 and run.ONE_STEP_SUBMISSIONS["count"] == 1 and trace["submission_calls"] == 1
+    d = {x["hop"]: x for x in trace["hops"]}["d_analysis"]
+    assert d["result"] == "SUBMISSION_ANSWER_UNREADABLE" and "submitted_at_unix" in d
+    assert any(n["reason"] == "SUBMISSION_ANSWER_UNREADABLE" for n in trace["named_failures"])
+    # the request list was read ONCE to settle it, and what it found is recorded (ids only)
+    lists = [e for e in w.events if e[0] == "http" and e[1] == "GET" and e[2] == LIST_PATH]
+    assert len(lists) == 1
+    assert d["settled_by_list"]["found"] == "ONE" and d["settled_by_list"]["request_ids"] == [REQ_B]
+    # possibly accepted: the row is left in place, rc 3, nothing recorded or read after
+    assert rc == 3 and w.row is True and trace["cleanup"]["state"] == "PENDING_ROW_DELETE"
+    assert len(_posts(w, REPORT_PATH)) == 1 and "record_calls" not in trace   # only the malformed-id arm
+    # a list with no such client id is recorded as NONE
+    d2 = tmp_path / "none"
+    d2.mkdir()
+    rc2, t2, w2 = _os_run(monkeypatch, d2, script=_os_script(submit=timeout))
+    assert {x["hop"]: x for x in t2["hops"]}["d_analysis"]["settled_by_list"]["found"] == "NONE" and rc2 == 3
+    # the guard itself: a second call raises BEFORE anything is sent, and a raising call still counts
+    calls = []
+    monkeypatch.setattr(run, "call", lambda *a, **k: calls.append(a) or (_ for _ in ()).throw(OSError("boom")))
+    run.ONE_STEP_SUBMISSIONS["count"] = 0
+    r1 = run.one_step_submit("tok", {"request_id": "x"})
+    assert r1["status"] == 0 and r1["reason"] == "RAISED_OSError" and run.ONE_STEP_SUBMISSIONS["count"] == 1
+    with pytest.raises(RuntimeError):
+        run.one_step_submit("tok", {"request_id": "x"})
+    assert len(calls) == 1 and run.ONE_STEP_SUBMISSIONS["count"] == 1
+
+
+def test_one_step_accepted_leaves_the_row_and_exits_3(monkeypatch, tmp_path):
+    rc, trace, w = _os_run(monkeypatch, tmp_path)
+    assert rc == 3 == run.RC_PENDING_ROW_DELETE
+    assert [o for o, _ in w.ddb_ops()] == ["put", "get"] and w.row is True
+    c = trace["cleanup"]
+    sub = {x["hop"]: x for x in trace["hops"]}["d_analysis"]["submitted_at_unix"]
+    assert c["state"] == "PENDING_ROW_DELETE" and c["row_left_in_place"] is True
+    assert c["row_delete_not_before_unix"] == sub + 7200 and c["row_removed_read_back_absent"] is False
+    assert trace["mode"] == "ONE_STEP" and trace["submission"] == "SENT_ONCE" and trace["submission_calls"] == 1
+    assert len(_posts(w, SUBMIT[1])) == 1 and c["tickets_completed"] == {TKT: 200}
+    # --finish-cleanup works on a one-step trace
+    p = tmp_path / "os_trace.json"
+    p.write_text(json.dumps(trace, indent=1) + "\n", encoding="utf-8")
+    w.t = trace["cleanup"]["row_delete_not_before_unix"] + 1
+    assert _finish(monkeypatch, p) == 0 and json.loads(p.read_text(encoding="utf-8"))["cleanup"]["state"] == "DONE"
+    # a refused submission cleans up as today: the row is deleted after exp, rc 0, no second submission
+    d = tmp_path / "refused"
+    d.mkdir()
+    rc2, t2, w2 = _os_run(monkeypatch, d, script=_os_script(submit=SUBMISSION_REFUSED))
+    assert rc2 == 0 and t2["result"] == "BRANCH_E_SUBMISSION_REFUSED" and len(_posts(w2, SUBMIT[1])) == 1
+    assert w2.row is False and "record_calls" not in t2
+    assert_row_deleted_after_exp(w2)

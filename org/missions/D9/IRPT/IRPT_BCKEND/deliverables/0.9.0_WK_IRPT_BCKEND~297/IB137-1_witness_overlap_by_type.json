@@ -1,0 +1,331 @@
+{
+ "same_account_days_read": true,
+ "same_account_days_read_basis": "phase 1 (the unchanged IB-pr-438 phase-1 script over the same partitions) totals under the cash rule equal UNGRADEABLE 43,310; ACCT_PRIOR_DATE 55; ACCT_OWN_DATE 19,832; NOTHING_TO_GRADE 13,599; present 76,796, and its v0.35 totals before the cash rule equal IB-pr-435's",
+ "graded_days": 85,
+ "first_graded_day": "2026-06-10",
+ "last_graded_day": "2026-10-09",
+ "instrument_type_field": {
+  "present": false,
+  "name": null,
+  "values": {},
+  "rows_read": 1411352,
+  "partitions_read": 85,
+  "columns_read": [
+   "Account Number",
+   "Account Supervised",
+   "AccountID",
+   "Accrual",
+   "Alternative Identifier",
+   "Asset Display Name",
+   "Asset Name",
+   "AssetID",
+   "CUSIP",
+   "Cash Equivalent",
+   "Expense Ratio",
+   "Holding Supervised",
+   "Last Dividend",
+   "Market Value",
+   "Original Asset Name",
+   "PortfolioID",
+   "Relationship ID",
+   "Symbol",
+   "Ticker",
+   "Unaccrued Market Value",
+   "Units",
+   "_feed",
+   "_schema_version",
+   "_source",
+   "_source_as_of",
+   "_source_file"
+  ],
+  "schema_variants_across_partitions": [
+   {
+    "partitions": 49,
+    "columns": 24,
+    "missing_vs_union": [
+     "Account Supervised",
+     "Holding Supervised"
+    ]
+   },
+   {
+    "partitions": 36,
+    "columns": 26,
+    "missing_vs_union": []
+   }
+  ],
+  "candidates_examined": [
+   {
+    "column": "Cash Equivalent",
+    "values": {
+     "true": 122853,
+     "false": 1288499
+    },
+    "verdict": "NOT a type: a two-valued flag (true/false) saying whether a row is a cash equivalent; the order rules a cash-equivalent flag alone is not an instrument type; it does not separate stocks, funds and bonds"
+   },
+   {
+    "column": "Holding Supervised",
+    "values": {
+     "Unsupervised": 17160,
+     "Supervised": 687275
+    },
+    "verdict": "NOT a type: states whether the holding is supervised by the advisor (Supervised/Unsupervised); present in 36 of 85 partitions only"
+   },
+   {
+    "column": "Account Supervised",
+    "values": {
+     "Unsupervised": 17160,
+     "Supervised": 687275
+    },
+    "verdict": "NOT a type: the same flag at account grain; present in 36 of 85 partitions only"
+   },
+   {
+    "column": "Asset Display Name",
+    "values": {
+     "<null>": 1411352
+    },
+    "verdict": "NOT a type: a name column, null on every row read"
+   },
+   {
+    "column": "_source / _feed / _schema_version",
+    "values": {
+     "_source": {
+      "blackdiamond": 1411352
+     },
+     "_feed": {
+      "holdings": 1411352
+     },
+     "_schema_version": {
+      "1.0": 1411352
+     }
+    },
+    "verdict": "NOT a type: lineage columns, one value each (the feed, not the instrument)"
+   },
+   {
+    "column": "Expense Ratio",
+    "values": {
+     "nonnull": 992683,
+     "null": 418669
+    },
+    "verdict": "NOT a type: a number, non-null on 992683 rows; a non-null ratio tends to sit on funds, but it names no kind and using it would be inventing a type"
+   },
+   {
+    "column": "Last Dividend",
+    "values": {
+     "nonnull": 1127656,
+     "null": 283696
+    },
+    "verdict": "NOT a type: a number (the last dividend), not a kind"
+   },
+   {
+    "column": "Alternative Identifier",
+    "values": {
+     "nonnull": 18639,
+     "null": 1392713
+    },
+    "verdict": "NOT a type: a secondary identifier, non-null on few rows"
+   },
+   {
+    "column": "Asset Name / Original Asset Name / Ticker / Symbol / CUSIP / AssetID",
+    "values": "free text or identifiers (high cardinality)",
+    "verdict": "NOT a type: names and identifiers; the order forbids inventing a type from names or tickers"
+   }
+  ],
+  "which_is_the_type_field_and_why": "none: no column of the source states what KIND of instrument a row is. The nearest, Cash Equivalent, is a two-valued cash flag (the order: a flag alone is not a type). Nothing was derived from names, tickers or Expense Ratio."
+ },
+ "stopped_no_type_field": true,
+ "stopped_note": "Per the order: no overlap table is drawn; the sizing is taken with no class admitted (it equals the rule in force); no Yahoo Finance call was made.",
+ "securities_both_witnesses_carry": {
+  "count": 894,
+  "basis": "securities (CUSIP) held by an account of the source on one or more of the 85 days (1528), carried by the Schwab anchor with a positive closing_price on one or more of the 85 days (898 of those), and with a ticker in the source that is not the CUSIP itself (894 of those)",
+  "held_by_an_account": 1528,
+  "carried_by_the_anchor_too": 898,
+  "with_a_ticker": 894,
+  "distinct_tickers_they_would_need": 890,
+  "distinct_tickers_by_first_ticker_per_security": 890,
+  "over_the_1500_ticker_stop": false,
+  "note": "counted from the cached source and anchor partitions only (S3 reads); no ticker was asked of any reader because the order stops at the missing type field before the fetch"
+ },
+ "fetch": {
+  "calls": [],
+  "call_count": 0,
+  "distinct_tickers_asked": 0,
+  "tickers_asked_more_than_once": 0,
+  "why_no_calls": "no instrument-type field exists, so the order draws no overlap table and goes straight to the sizing; nothing is asked of Yahoo Finance",
+  "edge_bars_had": "not applicable: no reader series was fetched"
+ },
+ "overlap_by_type": {},
+ "one_day_off_rule": "For a security and a trading day t of the 85: the reader's bar for t is compared with the Schwab anchor's closing_price for t at relative 1e-4. equal = within that tolerance. Not equal, and the reader's bar for t is within that tolerance of the anchor's close for the PRIOR or the NEXT trading day = one_day_off. Otherwise neither. No reader bar for t = no_bar. (The classifier is defined and controlled in ib439_measure.py; no table is drawn for want of a type field.)",
+ "unchanged_price_rule": "When the anchor's close for t equals its close for the prior (or next) trading day, the reader's bar equals the anchor's for t and the day is `equal`, never `one_day_off` (equal is tested first); it is counted in `equal` but NOT in `equal_on_days_the_close_moved`, because on an unchanged day a correct date label and a shifted one read the same.",
+ "types_with_an_empty_one_day_off_column": [],
+ "one_day_off_detail": [],
+ "sizing_under_v038": {
+  "what_is_assumed": "A SIZING the CTO rules on, not a stamp. classes_admitted is, by the rule of this cell, the source's type values that are exchange-traded securities AND whose one-day-off column is empty; the source states no instrument type, so no value can be taken, classes_admitted is empty, no security is admitted to YAHOO_CLOSE (a security whose type the source does not state is in no admitted class), mutual funds are not admitted whatever a column reads, and the sizing equals the rule in force. The anchor grades every security it carries, as today. Nothing is re-graded in the product.",
+  "classes_admitted": [],
+  "mutual_funds_admitted": false,
+  "account_days": {
+   "present": 76796,
+   "UNGRADEABLE": 43310,
+   "ACCT_PRIOR_DATE": 55,
+   "ACCT_OWN_DATE": 19832,
+   "NOTHING_TO_GRADE": 13599
+  },
+  "serving_rule": {
+   "eligible": 75796,
+   "served": 31715,
+   "blank": 44081,
+   "blank_share_percent": 58.157,
+   "accounts_never_served": 382,
+   "accounts_with_eligible_days": 999
+  },
+  "rule_in_force": {
+   "blank_share_percent": 58.2,
+   "accounts_never_served": 382,
+   "of_accounts": 999,
+   "equal_to_the_sizing": true
+  },
+  "withdrawn_figure_basis_for_reference_only": {
+   "basis": "funds counted as graded by the reader (IB-pr-438's sizing under the withdrawn v0.37 text)",
+   "blank_share_percent": 36.989,
+   "accounts_never_served": 181,
+   "status": "WITHDRAWN by ADDENDUM v0.38; the blank share with two witnesses is not known and lies between 37.0 and 58.2 percent; with no class admitted it is the upper end, 58.2"
+  },
+  "fpnix_account_days": 12115,
+  "fpnix_account_days_note": "account-days (one digested account on one of the 85 days) on which the account holds a PRICED row of the fund FPNIX (CUSIP 30254T643) that the anchor does not carry that day (an outside-anchor row, the row kind that blocks the claim and for which the reader returned no data), under the cash rule: this run 12115, the figure IB-pr-438 stated (12,115). Beside it, every kind of FPNIX row on any of the 85 days: {\"did_not_move\": 95, \"no_price\": 15474, \"outside_anchor\": 12115, \"own\": 376} (union of account-days 28060); a no_price row (no usable market value or units) and a row the anchor grades do not wait on the reader.",
+  "fpnix_account_days_by_row_kind": {
+   "did_not_move": 95,
+   "no_price": 15474,
+   "outside_anchor": 12115,
+   "own": 376
+  },
+  "fpnix_account_days_any_row": 28060
+ },
+ "fund_transactions": {
+  "table": "blackdiamond/<scope>/silver/fact_transactions/ (date=YYYY-MM-DD partitions; the sibling of the holdings table fact_holdings/ under the same silver parent)",
+  "date_partitions": 121,
+  "first_partition_date": "2026-03-09",
+  "last_partition_date": "2026-10-11",
+  "objects_read": 121,
+  "rows_read": 1042552,
+  "distinct_transaction_ids": 99723,
+  "duplicate_rows_dropped": 942829,
+  "first_trade_date": "2025-10-01",
+  "last_trade_date": "2026-10-09",
+  "rows_with_unparseable_trade_date": 0,
+  "columns_absent_in_objects": {},
+  "fund_dates_with_a_priced_purchase_or_redemption": 361,
+  "funds": 9,
+  "of_which_inside_the_85_days": 346,
+  "funds_inside_the_85_days": 9,
+  "nine_funds_rows_by_type_subtype_price": {
+   "Buy|Buy|priced": 5,
+   "Capital Gains|Long-Term|no_price": 133,
+   "Dividend|Dividend|no_price": 3646,
+   "Dividend Reinvestment|Dividend Reinvestment|priced": 3523,
+   "Journal|Journal|priced": 302,
+   "Sale|Sale|priced": 2717,
+   "Transfer In|Transfer In|priced": 3808,
+   "Transfer Out|Transfer Out|priced": 47
+  },
+  "dividend_reinvestment_fund_dates_priced_not_counted": 47,
+  "ticker_matches_with_other_cusip": [],
+  "reference_only_wider_basis": {
+   "basis": "any security whose SEC Asset Type is registered-investment-company and whose Share Class Type is neither ETF nor Not Available; Buy or Sale with Price > 0; NOT a type used in this cell",
+   "fund_dates": 1099,
+   "funds": 103,
+   "fund_dates_inside_the_85_days": 1044,
+   "funds_inside_the_85_days": 103
+  },
+  "source_found": true,
+  "silver_tables_beside_the_holdings_table": [
+   "fact_allocations",
+   "fact_allocations_s2",
+   "fact_holdings",
+   "fact_holdings_s2",
+   "fact_model_assignment",
+   "fact_model_blend",
+   "fact_model_definition",
+   "fact_model_roster",
+   "fact_realized",
+   "fact_realized_s2",
+   "fact_transactions",
+   "fact_transactions_s2",
+   "fact_unrealized",
+   "fact_unrealized_s2"
+  ],
+  "first_date": "2025-10-01",
+  "last_date": "2026-10-09",
+  "first_date_is": "the earliest and latest Trade Date of the de-duplicated rows; the partitions run 2026-03-09 to 2026-10-11",
+  "other_transaction_table_examined": {
+   "table": "commonwealth/<scope>/silver/transactions/ (the table the ADVI_COTBKF scripts read via commonwealth_crosswalk._silver_prefix)",
+   "used": false,
+   "why": "its schema carries Quantity and Amount but no Price column (25 columns read from the 2026-06-23 partition: Advisor_ID .. source_record), so a purchase or redemption 'with a price' is not stated there; 14 as-of partitions listed, none read beyond one schema and value-count sample; the table beside the holdings table carries Price, Trade Date, Transaction Type and Sub Type"
+  }
+ },
+ "fund_transactions_basis": "no instrument-type field exists, so a 'fund' is one of the nine funds of IB-pr-436 (matched by CUSIP); a purchase or redemption = Transaction Type Buy or Sale (Sub Type Buy, Sale or Redemption) with Price above 0, de-duplicated on TransactionID over every date partition of the table; 'inside the 85 days' = Trade Date is one of the 85 graded trading days. No transaction price was compared with any bar.",
+ "control": {
+  "planted": {
+   "A": {
+    "equal": 1,
+    "one_day_off": 4,
+    "neither": 0,
+    "no_bar": 0,
+    "equal_on_days_the_close_moved": 0
+   },
+   "B": {
+    "equal": 5,
+    "one_day_off": 0,
+    "neither": 0,
+    "no_bar": 0,
+    "equal_on_days_the_close_moved": 5
+   },
+   "C": {
+    "equal": 3,
+    "one_day_off": 0,
+    "neither": 1,
+    "no_bar": 1,
+    "equal_on_days_the_close_moved": 3
+   },
+   "D": {
+    "equal": 1,
+    "one_day_off": 4,
+    "neither": 0,
+    "no_bar": 0,
+    "equal_on_days_the_close_moved": 1
+   }
+  },
+  "read": {
+   "A": {
+    "equal": 1,
+    "one_day_off": 4,
+    "neither": 0,
+    "no_bar": 0,
+    "equal_on_days_the_close_moved": 0
+   },
+   "B": {
+    "equal": 5,
+    "one_day_off": 0,
+    "neither": 0,
+    "no_bar": 0,
+    "equal_on_days_the_close_moved": 5
+   },
+   "C": {
+    "equal": 3,
+    "one_day_off": 0,
+    "neither": 1,
+    "no_bar": 1,
+    "equal_on_days_the_close_moved": 3
+   },
+   "D": {
+    "equal": 1,
+    "one_day_off": 4,
+    "neither": 0,
+    "no_bar": 0,
+    "equal_on_days_the_close_moved": 1
+   }
+  },
+  "equal": true,
+  "what_it_is": "four planted securities over trading days d0..d6 (graded d1..d5): A reader one day LATE, B reader = anchor, C one missing bar and one wrong price, D reader one day EARLY; the shifted ones read one_day_off on the days the price moved, B reads equal"
+ },
+ "claims_regraded_in_product": false,
+ "other_sources_asked": 0
+}

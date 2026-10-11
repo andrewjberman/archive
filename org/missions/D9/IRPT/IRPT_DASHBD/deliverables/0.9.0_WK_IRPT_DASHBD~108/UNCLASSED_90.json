@@ -1,0 +1,79 @@
+{
+ "measured_by": "0.9.0_WK_IRPT_DASHBD~108",
+ "task_order": "IRPT_DASHBD.TO-DB-b-135",
+ "claim": "measured",
+ "denominator": 90,
+ "denominator_source": "REMAINDER list of the ~104 membership.json (private, read in place): 90 entries; each re-joined to the restated tie-out record, where reason_after is UNEXPLAINED for 90 of 90; 86 distinct accounts, 90 (account, start, end) segments; Black Diamond returned a point for 90 of 90 ranges and the served series held the account for 86 of 86",
+ "method": {
+  "two_sided_read": "Per segment, Opal side = the served daily gold (beginning value = last served market value before the start, ending value = last linked day, external flow summed over linked days, gain = ending - beginning - flow); Black Diamond side = the landed bronze reporting_performance point for the same range (beginning/ending value, net additions, net gains, fees, income, beginning/ending accrual, days held, time-weighted return). Reader shapes reused from ~12 tieout_e2 (bronze point and gold columns), ~35 (fee_addback_v2 daily-mean fee base, TOLERANCE 0.35 pp) and ~73/~75 (dollar tie = max(1 dollar, 0.1 percent of the larger); relink under START/MID/END flow timing).",
+  "dollar_tie": "two values tie when they differ by at most max(1 dollar, 0.1 percent of the larger)",
+  "return_test": "BD gross = (1 + BD time-weighted return) * (1 + BD fees / mean served daily value over the linked days) - 1 (the ~35 v2 construction); a restated Opal link closes the gap when it lies within 0.35 pp of BD gross",
+  "order_of_rules": "first rule that holds takes the segment; the classes are exclusive by construction",
+  "what_was_measured_first": {
+   "segments_where_all_four_dollar_items_tie": 51,
+   "segments_where_net_additions_tie_but_a_value_or_the_gain_does_not": 39,
+   "segments_where_net_additions_do_not_tie": 0,
+   "bd_identity_residual_within_1_dollar": "90 of 90 (BD ending - beginning - net additions - net gains)",
+   "bd_days_held_equal_to_linked_days": "90 of 90"
+  },
+  "private_artifacts": "per-segment tables, pickles and scripts: the _irpt_private_evidence folder under C:/dev, IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~108/ (read90.py, table90.py, class90.py; outside the repo)"
+ },
+ "classes": [
+  {
+   "cause": "BD_ACCRUED_INCOME_IN_VALUES_AND_GAINS",
+   "count": 31,
+   "rule": "Net additions tie, at least one of beginning value, ending value or net gains does NOT tie, and every component that differs equals BD's own accrual term within max(1 dollar, 0.1 percent): beginning-value gap = BD beginningAccrual, ending-value gap = BD endingAccrual, net-gains gap = BD endingAccrual - beginningAccrual. Accrued income sits inside BD's values and gains and not in the served market value. AND the return gap closes: Opal's link under START, MID or END flow timing, each scaled by ((ending + endingAccrual)/ending) / ((beginning + beginningAccrual)/beginning), lies within 0.35 pp of BD gross for at least one of the three timings.",
+   "breakdown": {
+    "components_that_differ_exactly_matching_accrual": "beginning value, ending value and gain: 4; ending value and gain: 7; beginning value and gain: 9; gain only: 18 (counts over all 38 segments whose dollar gap equals BD accrual; 31 of those 38 are in this class)",
+    "closes_with_accrual_scaling_under_END_timing": 13,
+    "closes_only_when_START_or_MID_timing_is_used_with_the_accrual_scaling": 18
+   }
+  },
+  {
+   "cause": "FLOW_TIMING_CONVENTION_DOLLARS_TIE",
+   "count": 51,
+   "rule": "All four dollar items tie (beginning value, ending value, net additions, net gains), the day counts are equal, the segment carries flow days, and BD gross lies within 0.35 pp of Opal's link re-stated under START flow timing (flow in the day's opening value) or MID flow timing (half in), using the daily-mean fee base. The two sides hold the same dollars end to end, so the return gap is the timing of the flows inside the days, not a value or a day-count difference. The served convention (END) is the one the gap is measured under.",
+   "breakdown": {
+    "closes_under_START": 50,
+    "closes_under_MID": 48,
+    "closes_under_START_or_MID": 51,
+    "segments_with_bd_fees_nonzero": 31,
+    "segments_with_bd_fees_zero": 20,
+    "segments_whose_balance_range_over_the_segment_is_20_percent_of_the_mean_or_more": 51
+   }
+  }
+ ],
+ "remainder": {
+  "count": 8,
+  "why": "Two groups the rules do not take. (a) 7 segments: the dollar gap IS equal to BD's accrual terms (the accrual rule's dollar half holds) but Opal's link scaled by the boundary accruals stays outside 0.35 pp of BD gross under all three flow timings; only the boundary accruals are known, not the accrual on the days between, so the return gap is not closed. (b) 1 segment: net additions tie but its net-gains gap does not equal BD's accrual change or any other quantity read (fees, income, accrual, BD identity residual, boundary value gaps); no cause is shown by the two sides' numbers.",
+  "breakdown_counts_only": {
+   "accrual_dollar_identity_holds_return_not_closed": 7,
+   "dollar_gap_matches_no_quantity_read": 1
+  }
+ },
+ "sum_check": {
+  "classes": 82,
+  "remainder": 8,
+  "total": 90
+ },
+ "dollar_gap_accounting": {
+  "segments_with_a_dollar_gap": 39,
+  "of_which_gap_equals_bd_accrual_terms": 38,
+  "of_which_no_match": 1,
+  "bd_value_gap_at_beginning_equal_to_beginning_accrual": "13 of 13",
+  "bd_value_gap_at_ending_equal_to_ending_accrual": "11 of 11"
+ },
+ "ledger_note": "BD's landed transaction record (silver_legacy) holds rows inside the window for 90 of 90 segments. A simple sum of its rows labelled Contribution or Withdrawal ties BD net additions for 59 of 90 segments and does not for 31; that sum was NOT used to class and the 31 are not examined (the label set may omit transfer or fee rows). Event dates agree on all 90 by the DB-b-129 membership.",
+ "s3_reads": {
+  "prefixes": [
+   "opal-data-assets/blackdiamond/49financial/bronze/reporting_performance/pull=<2026-10-04>/ (86 account objects, direct GET)",
+   "opal-data-49financial/irpt/49financial/gold/account_return_daily/ (524 date partitions, listed and read; filtered to the 86 accounts)",
+   "opal-data-assets/blackdiamond/49financial/silver_legacy/transactions/ (1878 date objects, listed and read; filtered to the 86 accounts)"
+  ],
+  "objects": 2488
+ },
+ "read_denied": null,
+ "client_figures": 0,
+ "s3_writes": 0,
+ "vendor_calls": 0
+}
