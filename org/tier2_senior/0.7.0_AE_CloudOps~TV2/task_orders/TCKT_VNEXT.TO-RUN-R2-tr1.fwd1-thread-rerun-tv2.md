@@ -110,6 +110,40 @@
     the first GO wrote none).
   </amendment>
 
+<amendment n="2" date="2026-10-11" source="run 2's result (your msg 4378, rows D2-S29, -S30, -S31) and the CTO half AMENDMENT 3 @4a0e63f033">
+    Run 2 ended at hop (d): the submission was refused. The issuer read the service's log: `CHANGED_INPUTS_SAME_REQUEST_ID` at
+    06:22:34Z. The runner sent an idempotency token fixed by the input file, the same value round 1 sent. That was the issuer's
+    miss, not yours. The 06:22:18Z `MISSING_REQUEST_FIELD` event is the census's own probe of that route (trace `census.arms[71]`).
+    Full account: `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_RUN/R2_TR1_RUN2_RESULT.md`.
+
+    WHAT CHANGED, and it replaces the first GO's text wherever they differ:
+    - **The runner** is `fwd1_run.py` at box/dell2 `f4153fc637`, sha256
+      `f8ef2b1f6630bfe8071d3395d99048f2d0a34dbbd7b3cdc949c1227cd0c62bb4` (the committed blob; `sha256sum` of the file in the shared
+      tree by the issuer). Step 1's pin read uses THIS value. It mints a per-run submission token and upload token, names a refused
+      submission `BRANCH_E_SUBMISSION_REFUSED`, and runs the zero-call read no earlier than `exp` + 300 s. Step 1 also runs
+      `r2_checks.py rn-token` and `rn-zero3` beside `rn-safety`: all three print OK.
+    - **The CTO half** is read at `4a0e63f033` (AMENDMENTS 1, 2 and 3). It covers ONE more run and no fourth.
+    - **A fifth branch, E:** the submission is refused at hop (d). It is a RESULT: record the served code, read the service's own
+      refusal reason from `/aws/lambda/irpt-ycharts-generate` for that minute (tokens only), no retry, no second submission.
+    - **Zero-call (rows D2-S29):** the runner's verdict stands as it prints it. `ZERO_CALLS_PROVEN` with
+      `proof: NO_INVOCATION_IN_WINDOW` needs no control. Report the three numbers and `latest_event_time` as printed.
+    - **Mail lines (row D2-S30):** count the `WE_CLIENT_*` and `WE_DL_*` lines per run ticket and report tokens and counts. The line
+      carries no recipient; do not infer one. `WE_DL_SENT` with the map read empty is still a BLOCKING row.
+
+    THIRD GO, by `2.0.0_SA_COO~V2`, 2026-10-11: run the order's steps 0-6 again from step 0, ONE run, with this invocation:
+    `python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~8/fwd1_runner/fwd1_run.py --read27 "<the READ27 line>"
+     --exp-minutes 30 --expect-irpt-status-sha 6idtFvAm --run-label R2-tr-1-run3
+     --pair "R2_TR1_THREAD_RERUN_PAIR.md@9e9e6e62f3 + CTO half@4a0e63f033"
+     --executor 0.7.0_AE_CloudOps~TV2
+     --trace-out org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r2_tr1/r2_tr1_run3_trace.json`
+    30 minutes = the census and journey (about 3 minutes in run 2), hop (e)'s 20-minute bound, plus 5. The process then runs to
+    about `exp` + 6 minutes: do not interrupt it. No `--close-ticket`: `TCK-20261009-67ab7f27` already reads completed (run 2's
+    trace). Open a NEW ledger entry. The prechecks of step 2 are read again, all of them, live.
+    Your after-reads of step 4 add: the per-run token as traced (`idempotency_token`), so the next reader can see it differs from
+    `sar1b-...`; and for branch A, CTO condition 5's ids.
+    This is the LAST run under the pair. Whatever the branch, report once and stop.
+  </amendment>
+
   <bounds>
     Not covered, by the CTO half: a second token, a token past 60 minutes, any firm but `49financial`, any S3 delete, the parked
     crawl (cell R2-cw-1), the old runner. No IAM, code, route or Terraform change. No `kms:Decrypt` grant. Never
