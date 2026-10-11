@@ -21,7 +21,7 @@ from pathlib import Path
 D = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~288/"
 OUT = D + "IB127-2_account_day_claims_v035.json"
 READ = D + "IB127-2_ACCOUNT_DAY_CLAIMS_V035_READ.md"
-CLAIMS = ("UNGRADEABLE", "PRIOR_DATE", "OWN_DATE", "NOTHING_TO_GRADE")
+CLAIMS = ("UNGRADEABLE", "ACCT_PRIOR_DATE", "ACCT_OWN_DATE", "NOTHING_TO_GRADE")  # PRD ADDENDUM v0.36 names
 KINDS = ("ANCHOR_NOT_LANDED", "OUTSIDE_ANCHOR", "NO_CUSIP", "NEITHER_CLOSE", "NEGATIVE_POSITION")
 ACCOUNT_ID = re.compile(r"\bz09[0-9A-Za-z_-]{3,}", re.IGNORECASE)
 OLD = {"present": 76796, "OWN_DATE": 45247, "PRIOR": 425, "ungradeable": 17488, "nothing_to_grade": 13636}
@@ -54,20 +54,20 @@ def main():
         if mv["same_account_days_read"] is True:
             if ad["present"] != OLD["present"]:
                 fail("the same account-days are said to be read, yet present is %d, not %d" % (ad["present"], OLD["present"]))
-            if ad["UNGRADEABLE"] < OLD["ungradeable"] or ad["OWN_DATE"] > OLD["OWN_DATE"]:
-                fail("the repair can only blank more: UNGRADEABLE %d (floor %d), OWN_DATE %d (ceiling %d)" % (
-                    ad["UNGRADEABLE"], OLD["ungradeable"], ad["OWN_DATE"], OLD["OWN_DATE"]))
+            if ad["UNGRADEABLE"] < OLD["ungradeable"] or ad["ACCT_OWN_DATE"] > OLD["OWN_DATE"]:
+                fail("the repair can only blank more: UNGRADEABLE %d (floor %d), ACCT_OWN_DATE %d (ceiling %d)" % (
+                    ad["UNGRADEABLE"], OLD["ungradeable"], ad["ACCT_OWN_DATE"], OLD["OWN_DATE"]))
             if mv["any_other_move"] == 0:
-                if ad["OWN_DATE"] != OLD["OWN_DATE"] - mv["OWN_DATE_to_UNGRADEABLE"] \
-                        or ad["PRIOR_DATE"] != OLD["PRIOR"] - mv["PRIOR_to_UNGRADEABLE"] \
+                if ad["ACCT_OWN_DATE"] != OLD["OWN_DATE"] - mv["OWN_DATE_to_UNGRADEABLE"] \
+                        or ad["ACCT_PRIOR_DATE"] != OLD["PRIOR"] - mv["PRIOR_to_UNGRADEABLE"] \
                         or ad["UNGRADEABLE"] != mv["not_graded_ungradeable_kept"] + mv["OWN_DATE_to_UNGRADEABLE"] + mv["PRIOR_to_UNGRADEABLE"]:
                     fail("the stated moves do not add up to the new counts")
             elif not a.get("other_moves_explained"):
                 fail("%r other move(s) and no explanation" % mv["any_other_move"])
         elif not a.get("source_difference_explained"):
             fail("different account-days were read and the record does not say why")
-        print("OK: %d account-days: UNGRADEABLE %d, PRIOR_DATE %d, OWN_DATE %d, NOTHING_TO_GRADE %d; OWN_DATE to UNGRADEABLE %s" % (
-            ad["present"], ad["UNGRADEABLE"], ad["PRIOR_DATE"], ad["OWN_DATE"], ad["NOTHING_TO_GRADE"], mv["OWN_DATE_to_UNGRADEABLE"]))
+        print("OK: %d account-days: UNGRADEABLE %d, ACCT_PRIOR_DATE %d, ACCT_OWN_DATE %d, NOTHING_TO_GRADE %d; OWN_DATE to UNGRADEABLE %s" % (
+            ad["present"], ad["UNGRADEABLE"], ad["ACCT_PRIOR_DATE"], ad["ACCT_OWN_DATE"], ad["NOTHING_TO_GRADE"], mv["OWN_DATE_to_UNGRADEABLE"]))
     elif cid == "IB127-2-AC2":
         s = a.get("serving_rule") or {}
         if any(not isinstance(s.get(k), int) for k in ("eligible", "served", "blank")) or s["served"] + s["blank"] != s["eligible"]:
