@@ -171,3 +171,35 @@ with their disarm owners; they do not wait on this file.
  }
 ]
 ```
+
+## Added at the rounds 59-62 compile (2026-10-11T05:21:36Z)
+
+Inputs: msg 4142 (rounds 59-62 drained @bbc9e11292, @2f0664fab0, @6d0b3ce3a8, @4d4e3ee317).
+Follow-on with no row yet, for the same slug: the live 49F thresholds file carries no claims, so its next dim row reads `held`
+on two thresholds that are measured (grade file `org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_DASHBD_ROUND_62_L9_GRADE_20261011.md`).
+
+```text
+[
+ {
+  "id": "IRPT_DASHBD-D2-W93-S3",
+  "project": "IRPT_DASHBD",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "The dim_return_method contract's method_versions lists rows 1 and 2, while the producer's METHOD_ROWS holds rows 2 and 3. Row 3 is the row the Cottonwood mint stamps, and the contract does not declare it.",
+  "evidence": [
+   "investigation row IRPT_DASHBD-D2-W93-S3",
+   "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json at HEAD, contract_version 0.4.0"
+  ],
+  "remedy": "The contract lists row 3 before the first row-3 partition is written (the CB-al-2 mint), under the rule-24 record DB-b-102 left beside its deliverable.",
+  "owner": "2.0.0_SA_COO~D2",
+  "round": "v63",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "2.0.0_SA_COO~D2",
+   "round": "v63"
+  },
+  "closed": false
+ }
+]
+```
