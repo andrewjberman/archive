@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t32",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t32.rejected-names-cause-and-held-claim.md",
+    "group": "OTHER",
+    "vintage_commit": "477921e3dcdd433bdd05122ff9d5940b7e78f32c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "477921e3dcdd433bdd05122ff9d5940b7e78f32c",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t32.rejected-names-cause-and-held-claim.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~25",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/lock_cause.py",
+      "kind": "script",
+      "commit_or_etag": "43abb8b537",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only measuring tool; no served write, no schedule. Committed on wk-MDPF_DEMQUE-25; runs at its own path (AC2 LCAUSE-OK).",
+      "artifact_covered_by": ["DQ9-t32-AC1", "DQ9-t32-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/hold_lock_records.py",
+      "kind": "script",
+      "commit_or_etag": "43abb8b537",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Planner; --dry-run only by this worker (AC3 HOLD-OK n=14). --apply is the issuer's act and was not run; no served lock.json written.",
+      "artifact_covered_by": ["DQ9-t32-AC1", "DQ9-t32-AC3"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_lock_cause.py",
+      "kind": "test",
+      "commit_or_etag": "43abb8b537",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three named tests PASSED on a local tmp_path store, no network, no S3 (LC-OK).",
+      "artifact_covered_by": ["DQ9-t32-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t32-AC1",
+      "criterion_verbatim": "the three named tests.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t32_tests.py",
+      "output_evidence": "test_demque_lock_cause.py::test_agreement_is_computed_against_the_old_file_and_the_new_draw PASSED; test_demque_lock_cause.py::test_disagreeing_dates_are_listed_with_exdiv_split_and_trade_type PASSED; test_demque_lock_cause.py::test_hold_record_sets_claim_held_with_the_reason_and_keeps_every_other_key PASSED; 3 passed in 2.16s; LC-OK",
+      "denominator": "3 of 3 named tests PASSED",
+      "status": "PASS",
+      "expect": "LC-OK"
+    },
+    {
+      "criterion_id": "DQ9-t32-AC2",
+      "criterion_verbatim": "the cause instrument on three REAL names (FTHSX, IWS, VWO; S3 and three paced Yahoo reads): every field present, agreement_new_pct within 1.5 of 40.7, 83.3 and 87.2, cause in the closed set.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t32_real.py",
+      "output_evidence": "FTHSX: new=40.7 old=40.7 checked=627 cause=wrong-symbol predates=True disagreeing=372; IWS: new=83.3 old=83.3 checked=240 cause=never-met-floor predates=True disagreeing=40; VWO: new=87.2 old=87.2 checked=313 cause=never-met-floor predates=True disagreeing=40; LCAUSE-OK 3 of 3 names read, causes ['never-met-floor', 'wrong-symbol']",
+      "denominator": "3 of 3 requested names returned; 10 of 10 fields present on each; agreement_new_pct within 1.5 of target on 3 of 3",
+      "status": "PASS",
+      "expect": "LCAUSE-OK"
+    },
+    {
+      "criterion_id": "DQ9-t32-AC3",
+      "criterion_verbatim": "hold_lock_records.py --dry-run on the REAL store plans exactly the names still on three columns, each held with the stated reason.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t32_hold.py",
+      "output_evidence": "independent: 14 three-column names; tool planned 14; HOLD-OK n=14",
+      "denominator": "14 of 14 three-column names planned, each claim_after held with reason containing 'cause under measurement' and '90 pct'",
+      "status": "PASS",
+      "expect": "HOLD-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In a separate Python process, replace lock_cause._cause with a function returning unclassified; run the named disagreeing-dates test. No file mutated.",
+      "expected": "the named test raises AssertionError",
+      "observed": "AssertionError raised (bare assert); MUTANT FIRED-AS-EXPECTED",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "hold_lock_records.py --dry-run run twice on the real store; outputs compared byte for byte.",
+      "observed": "2958 bytes both runs, identical; planned 14 both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "hold_lock_records.py --apply",
+      "reason": "The applying of the claim is the issuer's act (order: 'you do NOT run --apply'). No served lock.json, local or S3, was written by this worker."
+    },
+    {
+      "item": "lock_cause.py over all 14 names",
+      "reason": "The order bounds Yahoo reads to the three AC2 names in a run; the 14-name table is the issuer's act once the tool is merged."
+    },
+    {
+      "item": "Reading the cause of the 10-09 lock pass",
+      "reason": "Measurement only. first_lock_predates_floor is reported per name; the reading of why the 10-09 lock passed is not made here (surprise row MDPF_DEMQUE-D1-W25-S1 holds the observation)."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W25-S1: For FTHSX, IWS and VWO the served file and the fresh draw agree with the trades to the same percentage (40.7, 83.3, 87.2 on both sides), so the draw-column class does not hold for these three."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~25/MDPF_DEMQUE.TO-DQ-t32.session_log.json",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate (safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~25 <0.9.0_WK_MDPF_DEMQUE~25@opal.agent>\" -F .scratch/msg_code.txt -- <three code files>",
+      "result": "rc=0 after one ruff fix (unused imports removed); surprise-row-gate OK (no rows in that commit); to-pipeline-gate OK (no task orders in that commit); msg-verify MATCH"
+    }
+  ]
+}

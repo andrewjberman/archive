@@ -1,0 +1,124 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-f-16.act0-delete-statement-apply",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-16.act0-delete-statement-apply.md",
+  "group": "OTHER",
+  "vintage_commit": "8f22572145"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FB1",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-16.act0-delete-statement-apply.md",
+  "vintage_commit": "08b608eb37"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "iam:role-policy bd-exporter-ec2-role/advi-49f-platinum-canonical-rw-policy (third statement AdviPlatinumCanonicalDelete)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-apply of the saved scoped plan 15:58:27Z-15:58:56Z: Apply complete! Resources: 0 added, 1 changed, 0 destroyed; get-role-policy returns three Sids; the role still holds 17 inline policies",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ],
+   "commit_or_etag": "iam id bd-exporter-ec2-role:advi-49f-platinum-canonical-rw-policy"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1\\PRIOR_advi-49f-platinum-canonical-rw-policy_20261011T155645Z.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the two-statement policy printed before any plan: the rollback artifact",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261011T1556Z_advi-firmbkts-fb-f-16-act0-delete-statement-20261011_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "entry opened before the first read of the live policy, closed with the outputs",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "invocation": "timeout 100 aws iam get-role-policy --role-name bd-exporter-ec2-role --policy-name advi-49f-platinum-canonical-rw-policy --query \"PolicyDocument.Statement[].Sid\" --output text",
+   "expect": "AdviPlatinumCanonicalObjects\\s+AdviPlatinumCanonicalList\\s+AdviPlatinumCanonicalDelete",
+   "output_evidence": "get-role-policy on bd-exporter-ec2-role, Statement[].Sid (run as .tools/aws), read 2026-10-11T15:59:06Z, printed:\nAdviPlatinumCanonicalObjects\tAdviPlatinumCanonicalList\tAdviPlatinumCanonicalDelete",
+   "denominator": "1 of 1 policy named; 3 of 3 statements",
+   "status": "PASS",
+   "criterion_verbatim": "timeout 100 aws iam get-role-policy --role-name bd-exporter-ec2-role --policy-name advi-49f-platinum-canonical-rw-policy --query \"PolicyDocument.Statement[].Sid\" --output text",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AC2",
+   "invocation": "timeout 100 aws iam get-role-policy --role-name bd-exporter-ec2-role --policy-name advi-49f-platinum-canonical-rw-policy --query \"PolicyDocument.Statement[2].[Action,Resource]\" --output text",
+   "expect": "s3:DeleteObject\\s+arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/advisors/\\*\\s+arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/entities/advisors/\\*",
+   "output_evidence": "get-role-policy Statement[2].[Action,Resource] (run as .tools/aws), read 2026-10-11T15:59:06Z, printed:\ns3:DeleteObject\narn:aws:s3:::opal-data-49financial/advi/49financial/platinum/advisors/*\tarn:aws:s3:::opal-data-49financial/advi/49financial/platinum/entities/advisors/*",
+   "denominator": "1 statement (index 2); 1 action; 2 resources; no Condition (compared against the plan JSON of the same statement)",
+   "status": "PASS",
+   "criterion_verbatim": "timeout 100 aws iam get-role-policy --role-name bd-exporter-ec2-role --policy-name advi-49f-platinum-canonical-rw-policy --query \"PolicyDocument.Statement[2].[Action,Resource]\" --output text",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AC3",
+   "invocation": "cd /c/dev/ajb_workspace/infra/aws/terraform/bd-pipeline && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target=module.opal_name_platinum_grant -target=aws_iam_role_policy.bd_exporter_advi_49f_platinum_canonical 2>&1 | grep -E \"^(Plan:|No changes)\"",
+   "expect": "^No changes\\.",
+   "output_evidence": "scoped plan after the apply (terraform resolved to .tools/terraform.exe), read 2026-10-11T15:59:06Z, printed:\nNo changes. Your infrastructure matches the configuration.",
+   "denominator": "1 matched line; the plan targets the module call and the 1 policy resource; exit 0",
+   "status": "PASS",
+   "criterion_verbatim": "cd /c/dev/ajb_workspace/infra/aws/terraform/bd-pipeline && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target=module.opal_name_platinum_grant -target=aws_iam_role_policy.bd_exporter_advi_49f_platinum_canonical 2>&1 | grep -E \"^(Plan:|No changes)\"",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant is named by the order. The difference control is the prior two-statement document against the live three-statement one, and the plan JSON's third statement against the live one.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "AC1 to AC3 each ran once after the apply",
+   "observed": "single read each",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a producer's delete through the role",
+   "reason": "nothing proves a producer can DELETE through the role until the first canonical chain run with a departed advisor (the order's blindness line); the document is the read"
+  },
+  {
+   "item": "the QA runner's reach",
+   "reason": "it shares the role and receives the same Allow (stated by the pair); FB-g-15's dispatcher guard keeps QA off canonical; not exercised here"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-S31: the statement's Terraform (FB-g-25, 555ba2e0f5) is on box/dell1 only, so origin/CLOUD's iam.tf declares the 2-statement policy and the seat gate's OVERLAP arm hit; a bd-pipeline apply from a CLOUD checkout would plan the statement's removal"
+ ],
+ "session_log": "org/critical_paths/change_management/20261011T1556Z_advi-firmbkts-fb-f-16-act0-delete-statement-20261011_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "terraform 1.15.8 / safe-apply",
+   "invocation": "plan -out scoped to the module call and the policy, show -json, --dry-seat-gates, safe-apply of the saved plan",
+   "result": "Plan: 0 to add, 1 to change, 0 to destroy; Apply complete: 0/1/0"
+  },
+  {
+   "tool": "crossbox-deploy-check.py",
+   "invocation": "--root bd-pipeline --files-vs-trunk --target <module and policy>",
+   "result": "8 hits read, each disjoint from the one resource; OVERLAP names iam.tf not yet on CLOUD"
+  }
+ ]
+}

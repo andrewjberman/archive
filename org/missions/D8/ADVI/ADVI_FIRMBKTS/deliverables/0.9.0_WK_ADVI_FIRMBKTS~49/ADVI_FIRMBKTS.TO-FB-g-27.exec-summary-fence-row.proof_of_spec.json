@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-27.exec-summary-fence-row",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-27.exec-summary-fence-row.md",
+    "group": "OTHER",
+    "vintage_commit": "44e7a3f712"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~49",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "44e7a3f712",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-27.exec-summary-fence-row.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant. Negative control measured here: the HEAD registry (9794728d6e) written in place of the row version, then r4_exec.py --arms row run; the row version restored and verified byte-identical.",
+      "expected": "With no exec-summary row, E1 and E2 FAIL and the check reads 2 of 4 arms with exit 1.",
+      "observed": "E1 added=0 ... FAIL; E2 new allow=0 write allows=0 new deny=0 new exemption arns=[] FAIL; E3 PASS; E4 PASS; ROUND 4 EXEC ROW: 2 of 4 arms; exit=1. Restore: cmp identical; git diff --stat 8 insertions, 0 deletions.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice on the same final bytes (row state at 3a6d8aa89d); outputs compared line for line",
+      "observed": "AC1 both runs: E1 added=1, E2 new allow=2 write allows=0 new deny=3 one new exemption ARN, E3 True, E4 rc=0; ROUND 4 EXEC ROW: 4 of 4 arms; exit=0. AC2 both runs: CHANGED infra/logic/registry/exemptions.json; ROUND 4 SCOPE: OK 1 changed, 0 outside, 0 required missing; exit=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The Allow for the Put (FB-g-28), any apply, and any AWS call",
+      "reason": "Outside this order's bounds (section 2, item 1: one file changes; no apply, no AWS call). The Put Allow is identity-side under FB-g-28; the CTO half of the sign-off precedes the apply."
+    },
+    {
+      "item": "The module file and the shared-infra root",
+      "reason": "Bounds 2 item 1: the module renders the row; no module or shared-infra file is edited. The render is read through r4_exec.py E1-E4."
+    },
+    {
+      "item": "Flipping this order's status to complete",
+      "reason": "Order section 5: the issuer drains the status; the worker does not flip it."
+    },
+    {
+      "item": "The commit-gate's check of the registry JSON",
+      "reason": "The gate grades only .py, .sh, .tf and org/projects JSON suffixes; infra/logic/registry/exemptions.json is validated by AC1 and AC2, not by the gate (recorded as ADVI_FIRMBKTS-D1-W49-S1)."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/registry/exemptions.json",
+      "kind": "config_data",
+      "commit_or_etag": "3a6d8aa89d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit 3a6d8aa89d on wk-ADVI_FIRMBKTS-49: one scoped row appended to opal-data-49financial (8 insertions, 0 deletions); no apply, no AWS call; the sign-off pair is unsigned at this write.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 reads the registry against the base (one scoped row added, the grains, the actions), the module's render (the Get and List Allows, the Put on the Deny side, no write Allow, one new exemption) and that every other bucket renders unchanged.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-49 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_exec.py --arms row --root /c/dev/wk-firmbkts-49 --base 44e7a3f712; echo \"exit=$?\"",
+      "output_evidence": "  E1 added=1 base kept=True others same=True grants same=True directory=advi/49financial/platinum/advisors/\n  E2 new allow=2 write allows=0 new deny=3 new exemption arns=['arn:aws:iam::313476888478:role/exec-summary-generator-role']\n  E3 other buckets unchanged=True\n  E4 plan rc=0\nPASS E1 the registry adds exactly the one exec-summary scoped row and nothing else\nPASS E2 the render adds the Get and List Allows and the Put-bearing Deny, no write Allow\nPASS E3 every other bucket renders unchanged\nPASS E4 the real registry plans clean in the tree's module\nROUND 4 EXEC ROW: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms PASS (E1-E4); 1 scoped row added and 0 other rows changed (E1); 2 new Allows, 0 write Allows, 3 new Denys, 1 new exemption ARN (E2); other buckets unchanged (E3); real registry plan rc=0 (E4)",
+      "status": "PASS",
+      "expect": "ROUND 4 EXEC ROW: 4 of 4 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the write-surface bound: every changed path lies inside the granted paths and the required registry file changed.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-49 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-49 --allow infra/logic/registry/exemptions.json --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~49/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/logic/registry/exemptions.json; echo \"exit=$?\"",
+      "output_evidence": "  CHANGED infra/logic/registry/exemptions.json\nROUND 4 SCOPE: OK 1 changed, 0 outside, 0 required missing\nexit=0",
+      "denominator": "1 changed file, 0 outside the grant, 1 of 1 required path changed",
+      "status": "PASS",
+      "expect": "ROUND 4 SCOPE: OK"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W49-S1: safe-commit's commit-gate checked 0 of 1 file (the registry JSON is outside its graded suffixes) and the client-data check printed WARN with the hashed account-id list absent on this device; commit 3a6d8aa89d was not checked for client account ids (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~49/ADVI_FIRMBKTS.TO-FB-g-27.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "r4_exec.py (round-4 exec row check, arms row)",
+      "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_exec.py --arms row --root /c/dev/wk-firmbkts-49 --base 44e7a3f712",
+      "result": "ROUND 4 EXEC ROW: 4 of 4 arms, exit=0 on the row state; ROUND 4 EXEC ROW: 2 of 4 arms, exit=1 on the HEAD-registry mutant."
+    },
+    {
+      "tool": "r4_scope.py (round-4 write-surface bound)",
+      "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-49 --allow infra/logic/registry/exemptions.json --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~49/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/logic/registry/exemptions.json",
+      "result": "ROUND 4 SCOPE: OK 1 changed, 0 outside, 0 required missing"
+    }
+  ]
+}
