@@ -1,0 +1,125 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-qq-2.the-candidate-universe-home-follows-the-scanner-vintage",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-qq-2.the-candidate-universe-home-follows-the-scanner-vintage.md",
+  "group": "OTHER",
+  "vintage_commit": "cbd398d50ec9ab8cf01877abb8bbba38e5cf6347"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "cbd398d50ec9ab8cf01877abb8bbba38e5cf6347",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-qq-2.the-candidate-universe-home-follows-the-scanner-vintage.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~382",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/peers/universe.py",
+   "kind": "script",
+   "commit_or_etag": "4b3126c9dbcb43c8c57b5d256ab1bc4271da100a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The candidate universe's pool home: refresh_candidate_universe writes date=<the document's own vintage>; _pool_state heads the dated key before any put (absent -> crosswalk.write_pool, same bytes -> no put, other bytes -> ValueError, nothing written); _pooled_bytes drops cache_path, cache_sha256, pool_receipt, read_at and source.model_block_dir; load_candidate_universe reads the LATEST dated key via _latest_home (a LIST of the dated prefix, memoised on success, a failed listing falls back to CURRENT_VINTAGE); cache_path takes a vintage; ENV_CACHE and an explicit path make no pool call. crosswalk.py, engine.py and every served reader are untouched. No deploy, no store write.",
+   "introduces": [
+    "_pool_state",
+    "_pooled_bytes",
+    "_latest_home",
+    "_list_dated_vintages",
+    "_split_address"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/peers/tests/test_universe_home.py",
+   "kind": "test",
+   "commit_or_etag": "4b3126c9dbcb43c8c57b5d256ab1bc4271da100a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Pure pytest module, no network, no AWS, a fake S3 client patched at boto3.client and universe._s3. Twelve tests: one per rule (key dated by the document vintage; no overwrite of another dated key; idempotent identical rebuild; rebuild later or from another checkout is idempotent; other bytes at the same vintage refused with nothing written; pooled payload machine- and time-independent; loader reads the latest dated key; old-key-only control; failed listing falls back to the constant; no dated key is a pool miss; ENV_CACHE makes no pool call for load or refresh; no single vintage refused before any write).",
+   "introduces": [
+    "test_refresh_lands_at_key_dated_by_document_vintage",
+    "test_env_cache_path_performs_no_pool_call"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "PASS H1 (the refresh lands at a new key dated by the document's own vintage), PASS H2 (date=2026-08-06 byte-equal), PASS H3a (idempotent), PASS H3b (a different document at the same vintage is refused), PASS H4 (the loader returns the latest dated key), PASS H5 (control: only the old key present returns it); R92 UNIVERSE HOME: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round92_prep/checks/r92_universe_home.py\"; echo \"exit=$?\"",
+   "output_evidence": "PASS H1 the refresh lands at a NEW key dated by the document's own vintage  [puts: ['amgt/harvest/gold/candidate_universe/date=2026-10-02/candidate_universe.json']]\nPASS H2 the existing date=2026-08-06 object is byte-equal afterwards\nPASS H3a the same refresh again is idempotent (no error, no second put)  [puts 1 -> 1]\nPASS H3b a different document at the same vintage is refused and nothing is written  [ValueError]\nPASS H4 the loader returns the LATEST dated key's document  [vintage 2026-10-02]\nPASS H5 control: with only date=2026-08-06 present the loader returns it  [vintage 2026-08-06]\n   arms passed 6 of 6\nR92 UNIVERSE HOME: YES\nexit=0",
+   "denominator": "6 of 6 arms passed (H1, H2, H3a, H3b, H4, H5) at the committed bytes 4b3126c9db; the run was anchored by an explicit cd into the worktree C:/dev/wk-resapp-382 (surprise AMGT_RESAPP-D1-W382-S2: the literal toplevel form answered for the base checkout when the shell cwd was base; base result 2 of 6, exit 1, recorded there, not as this AC's output)",
+   "status": "PASS",
+   "expect": "PASS H1[\\s\\S]*PASS H2[\\s\\S]*PASS H3a[\\s\\S]*PASS H3b[\\s\\S]*PASS H4[\\s\\S]*PASS H5[\\s\\S]*R92 UNIVERSE HOME: YES[\\s\\S]*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the new test file and every existing test under lib/research/peers/tests pass with 0 failed, and exit=0",
+   "method": "test_suite",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/peers/tests/test_universe_home.py lib/research/peers/tests -q; echo \"exit=$?\"",
+   "output_evidence": "146 passed, 21 warnings in 0.66s\nexit=0",
+   "denominator": "146 passed, 0 failed of 146 collected under lib/research/peers/tests: 12 new in test_universe_home.py + 134 existing (the pre-change count of the same directory); the run was anchored by an explicit cd into the worktree (AMGT_RESAPP-D1-W382-S2)",
+   "status": "PASS",
+   "expect": "\\b146 passed\\b[\\s\\S]*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The refusal arm of universe._pool_state is dropped: a dated key holding OTHER bytes is treated as same (no put, no error). The real round-92 check is run in-process by a scratch runner (.scratch/mutant_runner.py, not committed, nothing written to the tree; temp dirs only) with _pool_state wrapped.",
+   "expected": "H3b FAILS (a different document at the same vintage is not refused), the script exits 1 and prints R92 UNIVERSE HOME: NO.",
+   "observed": "FAIL H3b a different document at the same vintage is refused and nothing is written [NOT refused]; PASS H1, H2, H3a, H4, H5; arms passed 5 of 6; R92 UNIVERSE HOME: NO; mutant_exit=1.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Two same-input runs of r92_universe_home.py (the AC1 script, PYTHONPATH at the worktree root), stdout and stderr compared byte-for-byte with cmp. This controls the check's own output only; the payload's determinism across rebuilds is graded by test_pooled_payload_drops_machine_local_and_wall_clock_fields and test_rebuild_at_another_time_or_checkout_is_still_idempotent in AC2.",
+   "observed": "rc1=0 rc2=0; cmp reports the two outputs IDENTICAL, 8 lines.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The task order <status> flip to complete",
+   "reason": "The task order's own text (section 5) states the status flip is the issuer's (2.0.0_SA_COO~R1)."
+  },
+  {
+   "item": "No run against the real pool bucket and no --refresh",
+   "reason": "Task order section 2 bound: the check and the tests use a fake S3 client; no store write, no deploy."
+  },
+  {
+   "item": "crosswalk.write_pool is not changed; the absent-or-same-bytes head is in universe.py",
+   "reason": "Task order section 2 bound and section 1 rule 2."
+  },
+  {
+   "item": "The pooled document no longer carries read_at, cache_path, cache_sha256, pool_receipt or source.model_block_dir",
+   "reason": "Rule 2 requires an identical rebuild to be byte-identical; read_at is wall-clock and model_block_dir is an absolute checkout path. Recorded as AMGT_RESAPP-D1-W382-S1 for the issuer's ruling; the local mirror keeps read_at."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-D1-W382-S1: the built document's read_at (wall clock) and source.model_block_dir (absolute checkout path) make an identical rebuild non-identical bytes; the pooled payload drops them; OBSERVATION, INERT, disarm owner 2.0.0_SA_COO~R1.",
+  "AMGT_RESAPP-D1-W382-S2: the literal proof invocation cd \"$(git rev-parse --show-toplevel)\" answers for the base checkout when the agent shell cwd is the base; the AC runs here are anchored by an explicit cd into the worktree; OBSERVATION, INERT, disarm owner 2.0.0_SA_COO~R1."
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "r92_universe_home.py (round-92 PREP check, the AC1 script)",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round92_prep/checks/r92_universe_home.py\"; echo \"exit=$?\"",
+   "result": "R92 UNIVERSE HOME: YES, exit=0 (6 of 6 arms, anchored to the worktree)"
+  },
+  {
+   "tool": "pytest",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/peers/tests/test_universe_home.py lib/research/peers/tests -q; echo \"exit=$?\"",
+   "result": "146 passed, exit=0 (12 new + 134 existing)"
+  },
+  {
+   "tool": ".scratch/mutant_runner.py (scratch, not committed)",
+   "invocation": "PYTHONPATH=<worktree> python .scratch/mutant_runner.py <worktree> <r92 script path>",
+   "result": "mutant_exit=1, H3b FAIL, R92 UNIVERSE HOME: NO"
+  }
+ ]
+}
