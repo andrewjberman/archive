@@ -13,7 +13,7 @@ ADDENDUM 7, row D1-S25), issuer 2.0.0_SA_COO~B1.
      not contain the routed bucket while the routed bucket is a legacy alias (the dormant proof).
   W4 a tenant with no registered owner reads exactly as before (bucket_for(tenant) and the template key).
   W5 loaders.py is the builder's output, validate exits 0, and no other generated target covering scopes.json changes a
-     non-mark line against the base.
+     non-mark line against the base (firm-config.mjs may only GAIN lines: the generated canonical-bucket list block).
 Plain ASCII output; the last line carries the arm count. Never edit this file.
 """
 import argparse
@@ -157,7 +157,18 @@ def read(root, base):
             gen = open(gen_p, encoding="utf-8", errors="replace").read() if os.path.isfile(gen_p) else None
             if gen is None or cur != gen:
                 stale.append(t)
-            if t != LOADERS and _nm(_git(root, "show", "%s:%s" % (base, t)).stdout) != _nm(cur):
+            if t == LOADERS:
+                continue
+            old_nm, cur_nm = _nm(_git(root, "show", "%s:%s" % (base, t)).stdout), _nm(cur)
+            if t == "infra/aws/lambda-edge/_shared/firm-config.mjs":
+                # the generated CANONICAL_PLATINUM_BUCKETS block is added here: every base line must stay, in order
+                i = 0
+                for ln in cur_nm:
+                    if i < len(old_nm) and ln == old_nm[i]:
+                        i += 1
+                if i != len(old_nm):
+                    drift.append(t)
+            elif old_nm != cur_nm:
                 drift.append(t)
     v = subprocess.run([sys.executable, "lib/opal_naming.py", "validate"], cwd=root, capture_output=True, text=True,
                        timeout=100)
