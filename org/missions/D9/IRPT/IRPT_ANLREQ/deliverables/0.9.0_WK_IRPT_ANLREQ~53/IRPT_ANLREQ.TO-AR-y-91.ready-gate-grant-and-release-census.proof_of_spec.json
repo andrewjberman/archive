@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-91",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/prd/IRPT_ANLREQ_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1251f44685"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R9_Y.md",
+    "vintage_commit": "20f64a4fcb",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-91.ready-gate-grant-and-release-census.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~53",
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/export/commentary_composition.tf",
+      "kind": "terraform",
+      "commit_or_etag": "4b9f44a664",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform text only; no init, plan or apply was run (terraform is not on the path, so fmt -check was not run). S1 gains the jobs table ARN in Resource, S2 names both tables as a list; Action, LeadingKeys and ViaService conditions unchanged.",
+      "artifact_covered_by": [
+        "AR91-y-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~53/r9/COMPOSITION_READ_RELEASE_CENSUS.json",
+      "kind": "config_data",
+      "commit_or_etag": "b493803ecb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Record only. One get-function and one download of the live package (CodeSha256 ZZmWOFSA/GjO0d/cKHSm9G5+xDc5sNfEHOpbmfIabQ0=, 16 members, download digest verified, zip deleted); two BUILD_ONLY builds equal at DbvBUxTGlCsdG4htVOhbI4NBxBMNbmjD6BLpMGu2Yo4=; nothing uploaded.",
+      "artifact_covered_by": [
+        "AR91-y-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR91-y-AC1",
+      "criterion_verbatim": "AR91-y-AC1: S1 and S2 each name the requests table AND the jobs table; S1's Action list is exactly GetItem; both conditions remain.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-53/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r9/ar9_checks.py y91-grant --root C:/dev/wk-irpt-anlreq-53",
+      "output_evidence": "S1 names jobs: True; S2 names jobs: True / Y91-GRANT-OK (rc=0, run at 4b9f44a664)",
+      "denominator": "2 of 2 statements (S1, S2) name both tables",
+      "status": "PASS",
+      "expect": "Y91-GRANT-OK"
+    },
+    {
+      "criterion_id": "AR91-y-AC2",
+      "criterion_verbatim": "AR91-y-AC2: the census holds the live members, the gated file's live blob (found, or not found with what was searched), two equal build digests, and one complete row per changed member.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-53/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r9/ar9_checks.py y91-census --root C:/dev/wk-irpt-anlreq-53",
+      "output_evidence": "live members 16; changed vs live 3 / Y91-CENSUS-OK (rc=0, run at b493803ecb)",
+      "denominator": "16 of 16 live members hashed; 3 of 3 changed members have a moved_members row; 2 of 2 build digests equal",
+      "status": "PASS",
+      "expect": "Y91-CENSUS-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Both checks run against a scratch root holding the PRE-EDIT Terraform file (git show 20534db618:...commentary_composition.tf, no jobs table) and no census.",
+      "expected": "y91-grant and y91-census each print FAIL and exit 1",
+      "observed": "y91-grant: S1 and S2 do not name the jobs table / Y91-GRANT-FAIL rc=1; y91-census: no census file / Y91-CENSUS-FAIL rc=1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "BUILD_ONLY=1 BAU_PARITY_SKIP=1 build of irpt-commentary-composition-read-lambda run twice with separate TMPDIR folders outside the worktree.",
+      "observed": "Both builds DbvBUxTGlCsdG4htVOhbI4NBxBMNbmjD6BLpMGu2Yo4= (equal).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform fmt -check on commentary_composition.tf",
+      "reason": "terraform is not on the path of this device; the edit follows the existing continuation indentation of the file."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "ar9_checks.py",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r9/ar9_checks.py y91-grant|y91-census --root C:/dev/wk-irpt-anlreq-53",
+      "result": "Y91-GRANT-OK, Y91-CENSUS-OK (rc=0 each)"
+    }
+  ]
+}
