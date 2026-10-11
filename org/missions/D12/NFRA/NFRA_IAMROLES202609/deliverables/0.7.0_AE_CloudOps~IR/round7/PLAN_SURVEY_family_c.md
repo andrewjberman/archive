@@ -28,7 +28,7 @@ Row 6's own naming verdict is CLEAN (`NO-SYSTEM-ASKED`, no override owed). Row 1
 ## 1. THE FIVE REQUIRED LINES, PER MODULE
 
 ```
-PLAN: infra/aws/terraform/shared-infra: BLOCKED -- the module cannot init or plan at HEAD. `terraform init` and `plan` both exit with "Error: Invalid function argument ... while calling one(list) ... must be a list, set, or tuple value with either zero or one elements" at s3-lgic-firm-buckets.tf line 197 (NOT in this cell's file). See section 4.
+PLAN: infra/aws/terraform/shared-infra: Plan: 1 to import, 0 to add, 1 to change, 0 to destroy.   [RE-SURVEYED 2026-10-11 ~08:3xZ at the issuer's instruction (msg 33232). This line read BLOCKED at PHASE A @a921f7130f and that reading was correct then; the module now inits and plans rc=0. The value above is the TARGETED plan, which is what PHASE B would apply. The UNTARGETED module plan reads `Plan: 1 to import, 2 to add, 1 to change, 0 to destroy` and the two adds are NOT MINE -- section 4a.]
 DEFAULT_TAGS: infra/aws/terraform/shared-infra: ['Environment', 'ManagedBy', 'Project', 'System']
 AUTH_KEY_COLLISION: infra/aws/terraform/shared-infra:   *** KEY COLLISION: ['Project', 'System'] are BOTH default_tags keys AND authorization keys.
 STATE_KEY: infra/aws/terraform/shared-infra: shared-infra/tfstate
@@ -52,7 +52,8 @@ lines are `comp-tagauthz`'s verbatim, including leading spaces.
 > takes the default and therefore the four tags. This is the first module in the adoption program with
 > an aliased untagged provider, and a reader who checks only "the provider block" could read four tags
 > for a resource that would in fact get none. The pair should bind the plan's own `tags_all` delta, not
-> the provider block -- and for row 6 that delta is currently unobtainable (section 4).
+> the provider block -- and for row 6 that delta was unobtainable at PHASE A (section 4).
+> **IT IS NOW OBTAINED (section 4a) AND IT CONFIRMS THE FOUR KEYS:** the targeted plan's only differing attribute is `tags_all`, `{}` -> `Environment=Production, ManagedBy=Terraform, Project=OpalPortal, System=SharedInfra`. So row 6 takes the DEFAULT provider, not the `untagged` alias, and the caveat resolves in favour of the four keys rather than against them -- which is the right way round, but it was worth stating as a measurement rather than assuming it.
 
 ## 2. THE TWO ROLES' LIVE STATE
 
@@ -210,11 +211,134 @@ not an AE's to adjudicate.**
 `commonwealth/${long}/bronze/crm/` -- i.e. it would quietly scope a restricted CRM policy to one of two
 firms. Which firm (or whether the policy should now be per-firm `for_each`) is a client-data scoping
 decision belonging to the owners above, and `NEVER` bars referencing another firm's data from a pipeline
-tree. Filed as a surprise row.
+tree. Filed as a surprise row -- **`NFRA_IAMROLES202609-Z-S38`, AND FILED LATE: when this sentence was written, no such row existed.** See the note under section 5, which applies to both of this survey's two such claims.
 
 **WHAT IT BLOCKS, precisely:** row 6's `PLAN:` line, and therefore the never-widen pair for row 6's
 PHASE B. It does **not** block row 6's declaration, its live reads, its naming verdict (section 6), its
 `DEFAULT_TAGS`, `STATE_KEY` or `AUTH_KEY_COLLISION`, all of which are delivered above.
+
+## 4a. THE RE-SURVEY -- `shared-infra` PLANS, row 6 is UNBLOCKED, and `-target` is load-bearing here too
+
+**Re-run at the issuer's instruction (msg 33232), 2026-10-11 ~08:3xZ.** Section 4's diagnosis is left
+standing unedited: it was correct about what was wrong, and the record of a cleared blocker is worth
+less if the diagnosis is quietly rewritten to match the outcome.
+
+### 4a.1 THE GUARD WAS DISPOSED, NOT WIDENED -- which is what section 4 asked for
+
+`terraform init` **rc=0** and `plan` **rc=0** (rc captured UNPIPED: `$?` after a pipe to `tail` reads
+`tail`'s status). The fix is `ADVI_COTBKF` @`8c6fc7652a`, confirmed an ancestor of this branch
+(`git merge-base --is-ancestor` -> rc=0). It re-keyed the selector:
+
+```
+WAS: one([for k, s in local.lgic_managed_firm_buckets : s if length(lookup(s, "masters", [])) > 0])
+NOW: one([for k, s in local.lgic_managed_firm_buckets : s if contains(lookup(s, "restricted_prefix_hosts", []), "commonwealth")])
+```
+
+**Section 4 warned that widening `one()` to `[0]`/`sort(...)` would "silently PICK one firm's bucket for
+a CRM prefix" -- a client-data scoping decision. The owner did not do that.** It moved the selection
+onto an EXPLICIT per-row field, so the choice is declared in the registry where it can be read rather
+than inferred from whether a firm happens to carry masters. Measured from
+`infra/logic/registry/scopes.json`, not inferred:
+
+| predicate | managed rows it selects | `one()` receives |
+|---|---|---|
+| OLD -- `masters` non-empty | `inflection`, `cottonwood` | **2 -> failed closed** |
+| NEW -- `restricted_prefix_hosts` contains `commonwealth` | `cottonwood` | **1 -> passes** |
+
+14 scope rows, 4 FIRM-class, 2 in the managed set. The selected row is **`cottonwood`**, bucket
+`opal-data-cottonwood` -- and `commonwealth` is the literal the locals build the prefix from
+(`commonwealth/${long}/bronze/crm/`), so the new predicate matches the thing it scopes.
+
+> **`inflection` IS NOW NOT SELECTED.** That is a consequence a reader of the registry should see here
+> rather than discover later. Whether `inflection` is owed its own CRM prefix is its owner's call and is
+> **not asserted** by this survey or by row `Z-S38`.
+
+### 4a.2 THE MODULE IS NOT AT ZERO DRIFT, AND THE DRIFT IS TWO IAM RESOURCES
+
+**NEGATIVE CONTROL, run FIRST, with `zz_adopt_family_c_row6.tf` HELD OUT:**
+
+```
+Plan: 2 to add, 0 to change, 0 to destroy.
+  # aws_iam_role.restricted_breakglass will be created
+  # aws_iam_role_policy.restricted_breakglass will be created
+```
+
+**NEITHER IS MINE AND NEITHER IS SIGNED.** They are an IAM role and its inline policy declared in the
+module and never applied -- ordinary in-flight work, not a defect, and not this cell's to touch. But it
+makes `-target` **LOAD-BEARING in `shared-infra`**, as A1-r7 found it to be in `market-overview`, and
+for a sharper reason: **an untargeted apply here would CREATE AN IAM ROLE AND A POLICY**, which is the
+very class of object this project exists to bring under custody.
+
+| plan | summary | `restricted_breakglass` addresses |
+|---|---|---|
+| untargeted, declaration in | `1 to import, 2 to add, 1 to change, 0 to destroy` | 2 |
+| **targeted (what PHASE B applies)** | **`1 to import, 0 to add, 1 to change, 0 to destroy`** | **0** |
+
+The zero was measured by filtering **every** `resource_change` address, not by reading the summary.
+0 destroys and 0 replaces in all three plans.
+
+### 4a.3 GRADED PER ATTRIBUTE, because `1 to change` on an IAM role is not a grade
+
+From `terraform show -json` of the saved targeted plan: 1 `resource_change`, 1 non-no-op
+(`aws_iam_role.lambda_ec2_runtime_monitor_role`, `['update']`, importing
+`lambda-ec2-runtime-monitor-role`), **0 non-no-op addresses that are not the adopted role**, and
+**EXACTLY ONE attribute differing:**
+
+```
+tags_all   {}  ->  {Environment: Production, ManagedBy: Terraform, Project: OpalPortal, System: SharedInfra}
+```
+
+`assume_role_policy`, `inline_policy`, `managed_policy_arns`, `description`, `path`,
+`max_session_duration` and `name` all read **byte-identical** before and after. **`managed_policy_arns`
+reads identical carrying `arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole`, so THE
+OMISSION RULE IS CONFIRMED IN THE PLAN on the second role in this program that carries a managed
+attachment** -- setting it, even to `[]`, would detach this role's CloudWatch Logs access.
+
+A bare `1 to change` would read identically for a trust-policy rewrite, which is why the decomposition
+is the measurement and the summary line is not.
+
+### 4a.4 THE ROLE, RE-READ LIVE -- and it is IN USE THIS HOUR
+
+| read | result |
+|---|---|
+| `RoleLastUsed` | **2026-10-11T08:06:34Z, us-east-1** -- in use within the hour of this re-survey |
+| trust / path / description / max session | `lambda.amazonaws.com` / `/` / **`null`, absent** / `3600` |
+| `list-role-policies` | **1** -- `['EC2RuntimeMonitorPolicy']` |
+| `list-attached-role-policies` | **1** -- `['AWSLambdaBasicExecutionRole']` |
+| `list-role-tags` | **0** -- none, so all four tags are additions |
+
+The declaration was re-checked against those values: name, `path = "/"`,
+`max_session_duration = 3600`, the trust document, **no `description` argument**, and **0 lines setting
+`inline_policy` or `managed_policy_arns`**.
+
+### 4a.5 NAMING, RE-GRADED ON THE `.tf` FORM WITH `--no-renames`
+
+Per the issuer's standing instruction. Same verdict as PHASE A, now over a denominator that can be seen:
+
+```
+DENOMINATOR: 1 path(s) in this diff; declaration-tree domain = 1 ... = 1 path(s)
+COVERAGE: 0 path(s) in the declaration domain the gate could not see; 1 seen
+NAMING NO-SYSTEM-ASKED .../zz_adopt_family_c_row6.tf:60  lambda-ec2-runtime-monitor-role -> lambda-ec2-runtime-monitor-role
+  why: NO-SYSTEM-ASKED as IAM_ROLE: no system is asked of this kind of name
+(and the same at :111)
+NAMING-GATE: PASS 2 graded                                  rc=0, NO override owed
+```
+
+**The verdict was read only AFTER the staged diff was confirmed non-empty: 6377 bytes, 1 file, 3
+name-carrying added lines.** A `--diff` grade over an empty denominator prints `PASS` and grades
+nothing, and this cell has been caught by that reader twice -- once with `git add -N` producing a
+0-byte diff, once with a pure R100 rename being structurally invisible to the gate.
+
+### 4a.6 WHAT ROW 6 STILL OWES, and none of it is a blocker any more
+
+1. Its never-widen pair, written against **this** section rather than section 4's BLOCKED reading. The
+   pair must name the two `restricted_breakglass` adds as **NOT SIGNED**, and must bind the `tags_all`
+   delta above rather than the provider block (section 1's note, now resolved).
+2. The issuer's GO for PHASE B.
+
+**The `.tf` copy used for these measurements was removed and never committed, per step 2.** Only
+`.tf.proposed` is tracked. Nothing was applied and no AWS write was made: every plan above is a plan,
+and the only live calls were reads.
 
 ## 5. WHAT IS MINE AND WHAT IS NOT -- and `market-overview` is NOT at zero drift
 
@@ -234,7 +358,13 @@ RECREATE it plus its three sub-resources.** That is a heavier pre-existing drift
 `smartx-pipeline` (three in-place Lambda version bumps, row `Z-S21`): a bucket creation is a new
 world object, and `market_data_v2` is a DATA bucket. **So `-target` scoping in PHASE B is load-bearing
 here, not belt-and-braces as it was in round 6's clean modules.** Not this cell's to repair, and
-recorded so a scoped pass cannot hide it. Filed as a surprise row.
+recorded so a scoped pass cannot hide it. Filed as a surprise row -- **`NFRA_IAMROLES202609-Z-S39`, ALSO FILED LATE.**
+
+> **BOTH OF THIS SURVEY'S "Filed as a surprise row." SENTENCES WERE FALSE WHEN WRITTEN, AND NEITHER ROW EXISTED.** Measured, with a positive control beside each zero so neither could be a broken query: `comp-find 'shared-infra'` and `comp-find 'market_data_v2|market-overview'` each return **0 hit(s) across 8 file(s)** of this project's surprise channel, while `comp-find 'bd-pipeline'` over those same 8 files returns **25**. The rows are now filed as **`Z-S38`** (section 4's blocker) and **`Z-S39`** (this drift), which is why their numbers sit well above the round-7 rows around `Z-S33`.
+>
+> **THE PATTERN IS A WORSE FINDING THAN EITHER INSTANCE.** The sentence was written twice as a habit rather than as the record of an act, and a reader routing either blocker from it would have hunted a row that was never written. "Filed as a surprise row" is a CLAIM ABOUT AN ARTIFACT and carries the same evidence burden as every other claim in this survey; the check costs one grep of the channel before the sentence is written.
+>
+> **AND CHASING THE SECOND CLAIM FOUND SOMETHING LARGER THAN THIS CELL.** `Z-S39` records it. Looking up which bucket name this module actually declares (`opal-market-data-v2`, read from `s3.tf:6` rather than guessed) surfaced that `opal-portal-lambda-role`'s LIVE inline `opal-portal-s3-read` allows `s3:GetObject` + `s3:PutObject` + **`s3:DeleteObject`** + `s3:ListBucket` over 16 ARNs spanning 8 distinct buckets, of which **6 DO NOT EXIST** -- on a role last used `2026-10-11T08:28:51Z` and assumed by **12 of 237** live Lambda functions, including `opal-portal-data-proxy` and both portal authorizers. That is larger on every axis than the two dead-grant rows this project has acted on (`Z-S23`: Get+List, 2 absent buckets, an ORPHAN role; `Z-S32`: Get+Put, 1 absent bucket). **One of the six is `opal-data-smartx` -- the exact bucket x-2 ACT 1 deleted a LESSER grant on this morning, so that hazard was NARROWED, not shut**, and I flag that against my own `POST_APPLY_narrow.md` wording rather than leave it reading as a closure. Outside this cell's scope, filed where it was found, and **no fix proposed**: the remedy is a product call, because `market_data_v2` is DECLARED in Terraform, which makes "recreate the bucket" and "delete the grant" opposite answers to the same reading.
 
 **THE ROW-14 PLAN, GRADED PER ATTRIBUTE** from `show -json` on the saved plan -- never from the summary,
 which at `1 import / 0 add / 1 change / 0 destroy` is exactly what a trust-policy rewrite would print:
@@ -249,7 +379,7 @@ which at `1 import / 0 add / 1 change / 0 destroy` is exactly what a trust-polic
 | **`managed_policy_arns`** | **unchanged** -- `["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]` identical before and after |
 | destroys | 0 |
 
-Row 6's equivalent grading is **unobtainable** until section 4's blocker clears.
+Row 6's equivalent grading was **unobtainable** at PHASE A and is now **DELIVERED in section 4a.3**: 1 `resource_change`, 1 non-no-op, 0 non-no-op addresses that are not the adopted role, and exactly one attribute differing (`tags_all`, `{}` -> 4 keys), with `managed_policy_arns` byte-identical before and after carrying `AWSLambdaBasicExecutionRole`.
 
 ## 6. THE NAMING DRY-GRADE -- run WITHOUT committing, per row Z-S35
 
