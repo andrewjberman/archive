@@ -1,0 +1,101 @@
+# =============================================================================
+# DRAFT -- NOT LIVE, AND NOT EVEN IN A MODULE YET.
+# =============================================================================
+# NFRA_IAMROLES202609 cell IAM-x-1 (round 7, Family C, disposition row 14).
+# Executed by 0.7.0_AE_CloudOps~IR; OWNER OF RECORD is 0.7.0_AE_CloudOps~Z.
+#
+# THIS FILE LIVES IN THE DELIVERABLES DIRECTORY ON PURPOSE. The cell says row
+# 14's declaration goes here "until the issuer amends its module in", because
+# the module is not in this order's <paths> and therefore not grantable yet.
+# PHASE B does not begin for row 14 until that amendment lands.
+#
+# AUTHORITY: ROUND_ANALYSIS.round6.md @2f49aa235b E1; ADOPTION_PLAN_TEN.md
+# @59112aafed Family C; GO for PHASE A = the round-7 issuance @8b61ddf94f.
+#
+# >>> THE HOME THE CELL ASKS FOR CANNOT BE READ THE WAY IT SAYS. The cell says
+# >>> to home row 14 in "the module YOU name in the survey, from where its
+# >>> consumers are declared". ITS CONSUMERS ARE DECLARED NOWHERE. Measured on
+# >>> two planes: the served AWS graph reads the Lambda `sentiment_query_api`,
+# >>> this role, its log group and its API Gateway route ALL as
+# >>> `drift=LIVE-no-DECLARED`; and a content census of infra/aws/terraform
+# >>> finds `sentiment_query_api` in 2 of 836 files, both TEST fixtures under
+# >>> nfra-ctlpln-identity/tests/, and in ZERO .tf declarations.
+# >>> PLAN_SURVEY_family_c.md section 3 carries the full reasoning, the fallback
+# >>> ground, the alternative that was rejected and why, and states plainly that
+# >>> the module is the ISSUER'S call and not this seat's. <<<
+#
+# The proposal recorded there is `infra/aws/terraform/market-overview`, on the
+# only evidence that exists: the role's own consumer is undeclared, so the
+# fallback is its FAMILY -- infra/aws/manifests/lambda/opal-portal-functions.yaml
+# puts `sentiment_query_api` in the `portal_api` group with two siblings, and of
+# those exactly one, `opal-portal-data-proxy`, is declared in Terraform, as
+# aws_lambda_function.portal_data_proxy in market-overview/lambdas.tf:89-90.
+# That ground is THIN and is labelled thin in the survey.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# ROW 14 -- sentiment_query_api-role
+# Live at 2026-10-11 (get-role, list-role-policies, list-attached-role-policies,
+#   list-role-tags): created 2025-11-24T20:33:48Z, RoleLastUsed
+#   2026-01-02T17:29:32Z in us-east-2, path "/", MaxSessionDuration 3600, NO
+#   description, no permissions boundary, 0 tags.
+#
+#   1 inline policy:            DynamoDBAccess
+#   1 ATTACHED MANAGED policy:  AWSLambdaBasicExecutionRole
+#
+# THREE THINGS ABOUT THIS ROLE THAT THE DECLARATION HAS TO RESPECT:
+#
+#   1. AN UNDERSCORE IN THE NAME. `sentiment_query_api-role` mixes an underscore
+#      and hyphens. The NAME is a live string and is reproduced exactly; the
+#      Terraform LABEL below is a separate namespace and uses underscores
+#      throughout, as every label does. The two are not required to match and
+#      must not be "tidied" into each other.
+#
+#   2. THE OMISSION RULE PROTECTS A MANAGED ATTACHMENT, as for row 6: setting
+#      `managed_policy_arns`, even to `[]`, would detach
+#      AWSLambdaBasicExecutionRole and with it this role's CloudWatch Logs
+#      access.
+#
+#   3. ITS LAST USE WAS IN us-east-2, while its consumer Lambda, log group and
+#      API route all live in us-east-1 (served graph, vintage 2026-10-11
+#      04:06:44Z). That is recorded as an OBSERVATION, not acted on: a role is
+#      global, so a us-east-2 assumption is not itself a defect, and this cell
+#      moves custody only. It is in the survey because a reader homing this role
+#      by region would reach a different answer than one homing it by consumer.
+#
+# DESCRIPTION IS OMITTED, not set to "": the live role has none.
+# -----------------------------------------------------------------------------
+resource "aws_iam_role" "sentiment_query_api_role" {
+  name                 = "sentiment_query_api-role"
+  path                 = "/"
+  max_session_duration = 3600
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  # DELIBERATELY ABSENT: `inline_policy` and `managed_policy_arns` (the omission
+  # rule; see note 2 above -- this role carries a managed attachment).
+  # Also deliberately absent: `description`, which the live role does not have.
+  # C-TWO-REMEDIES: this cell moves CUSTODY only. No permission, trust
+  # relationship or usage of this role is touched.
+}
+
+# -----------------------------------------------------------------------------
+# Adoption block. The id of an aws_iam_role is its NAME, underscore included.
+# The label is fully namespaced and matches 0 of the 270 `aws_iam_role`
+# declarations under infra/aws/terraform (measured).
+# -----------------------------------------------------------------------------
+import {
+  to = aws_iam_role.sentiment_query_api_role
+  id = "sentiment_query_api-role"
+}
