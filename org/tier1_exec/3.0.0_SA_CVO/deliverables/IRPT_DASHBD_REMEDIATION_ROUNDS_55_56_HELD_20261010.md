@@ -261,3 +261,17 @@ Input: msg 4541 (round 65 drained @1d9c2fb822).
  }
 ]
 ```
+
+---
+
+## Added at round 66, 2026-10-11T10:31:56Z (input: msg 4722)
+
+Held on the same condition (TO-DB-b-86 terminal):
+
+- **D2-W97-S1** (owner `2.0.0_SA_COO~D2`): the mint path refuses an existing key and no prior version of the served method object
+  exists, so the rewrite of row 3 is an overwrite. Remedy: the pair names the capture step and the rollback bytes before the act.
+- **D2-S11, the limit in this seat's read** (owner `1.0.0_SA_CTO~DELL2`): row 3's income reason names FWD-3, while row 3 is the
+  positions-based method for any entry. Remedy: the reason is worded for the method, or a channel that separates income gets its own row.
+
+**For the slug:** this round closes ADVI_COTBKF row D2-S108 in code only. The served method row still says `cash_when_received`
+until the rewrite lands under its pair.
