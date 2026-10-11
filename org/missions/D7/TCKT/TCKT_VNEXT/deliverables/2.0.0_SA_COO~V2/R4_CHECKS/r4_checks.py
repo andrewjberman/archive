@@ -4,6 +4,8 @@
   pk-regress  R4-pk1-AC2  the whole ticket service test folder passes (at least 175)
   la-arms     R4-la1-AC1  the runner's arms-only mode sends no submission and runs the two arms
   la-regress  R4-la1-AC2  the whole runner test file passes (at least 61)
+  os-mode     R4-rn2-AC1  the runner's one-step mode makes the form's four calls and at most one submission
+  os-regress  R4-rn2-AC2  the whole runner test file passes (at least 68)
 
 Each prints <NAME>-OK <detail> or <NAME>-FAIL <reason>; exit 0/1. Every pytest call is bounded at 110 s.
 """
@@ -27,6 +29,15 @@ LA_ROW = ["test_arms_only_sends_no_submission", "test_arms_only_runs_the_malform
           "test_arms_only_runs_the_package_denial_arm", "test_arms_only_deletes_the_row_after_exp_and_exits_0",
           "test_arms_only_unexpected_arm_answer_is_a_named_failure_and_exits_1"]
 LA_MIN_PASSED = 61  # 56 at the base of TO-R4-la1 plus its 5 tests
+
+OS_ROW = ["test_one_step_creates_the_ticket_with_the_i1_source_and_never_claims",
+          "test_one_step_submission_carries_ticket_id_and_the_tckt_request_id",
+          "test_one_step_runs_both_arms_before_the_submission",
+          "test_one_step_package_door_2xx_stops_before_the_submission",
+          "test_one_step_records_as_creator_then_repeat_is_409",
+          "test_one_step_sends_exactly_one_submission_even_on_timeout",
+          "test_one_step_accepted_leaves_the_row_and_exits_3"]
+OS_MIN_PASSED = 68  # 61 at the base of TO-R4-rn2 plus its 7 tests
 
 
 def _pytest(args):
@@ -64,6 +75,8 @@ CHECKS = {
     "pk-regress": lambda: regress(PK_DIR, PK_MIN_PASSED),
     "la-arms": lambda: named(LA_TESTS, LA_ROW),
     "la-regress": lambda: regress(LA_TESTS, LA_MIN_PASSED),
+    "os-mode": lambda: named(LA_TESTS, OS_ROW),
+    "os-regress": lambda: regress(LA_TESTS, OS_MIN_PASSED),
 }
 
 
