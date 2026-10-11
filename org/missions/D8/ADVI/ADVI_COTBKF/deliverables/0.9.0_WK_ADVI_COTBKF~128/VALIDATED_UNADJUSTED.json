@@ -1,0 +1,270 @@
+{
+ "rule": {
+  "text": "CLOCK_UTC 2026-10-11T20:31:42Z\nRULE FOR THE VALIDATION OF A FUND SERIES AS UNADJUSTED (0.9.0_WK_ADVI_COTBKF~128, TO ADVI_COTBKF.TO-CB-bv-2, round 74). Written before any custodian price has been set beside any cached close in this cell; kept as written.\nState at writing: I have read round 73's record (270 fund series; 101 with both a cached close and a reinvestment row; 42 validated under its best-single-date rule; the nine's 4-in-5 previous-day result). I have run nothing in this cell. The three numbers below are chosen from what the test must be able to show (an accidental pass must be implausible; a true unadjusted fund with imperfect posting must still pass; a refutation must be positive evidence), by the arithmetic written beside each, and NOT from how many funds each choice validates, which I do not know.\n\nINSTRUMENT. Reinvestment row = Transaction_Type 'dvr' with Amount > 0 and Quantity >= 0.05 shares; row price = Amount / Quantity; a CELL (fund, Trade_Date) takes the MEDIAN of its rows' prices (pooled across accounts, so one date counts once however many accounts reinvested). A cell whose rows disagree by more than 5 percent (max-min over median) is not a single price: dropped, counted. Cache = the fund's file in yahoo_census, column Close (unadjusted) and column Adj Close, bars with Close > 0, as it sits on disk. Nothing is fetched.\n\nEQUAL. Two prices are equal when | cache / custodian - 1 | <= 0.005 (0.5 percent).\n\nCOMPARED. A date is compared when the cache holds a bar on the row's own date AND a previous bar of the fund's own cache (the previous trading day), the previous bar within 5 calendar days (a wider gap is not the trading day before). The NEXT bar is NOT required (round 73 required it); the cells this adds over round 73 are counted and reported.\n\nMATCH. A compared date MATCHES when the custodian's price equals the cache Close on the row's own date OR on the previous bar. The Adj Close is read the same way: a date ADJ-MATCHES when the custodian's price equals the cache Adj Close on the row's own date or the previous bar. A date is DISTINGUISHING when the Close matches and the Adj Close does not match. A date is BOTH-DAYS when the Close equals the custodian's price on both days.\n\nTHE THREE NUMBERS.\n  minimum_dates N = 10. Why: the either-date match is the easier test; for a low-volatility fund (the hardest case) the chance that a random date's own-day or previous-day close falls within 0.5 percent of the custodian price is at most about one half. At p = 0.5, with a share of 0.80 required, 5 dates pass by accident about 19 percent of the time, 8 dates about 3.5 percent, 10 dates (8 of 10 needed) about 5.5 percent in the worst case and well under 1 percent for any fund whose chance per date is 0.3 or less (0.04 percent at 0.3). Fewer than 10 independent dates cannot make an accident implausible for the worst-case fund, so fewer than 10 is not enough to validate or refute.\n  share_validated S = 0.80. Why: the nine's round-72 measurement is that a fund whose cache is the traded price still misses on about 5 percent of dates (posted more than one day off, or a price rounded by the custodian); S = 0.80 allows four times that miss rate (one date in five) and still demands that most dates agree, which a series on a different convention cannot do except by accident (above).\n  share_refuted R = 0.30. Why: a refutation is positive evidence that the cache is not the price the fund traded at, so R must sit where a true unadjusted fund would almost never land: for a fund whose true match rate is 0.80 (the lowest I accept as a pass), the chance that 10 dates show 3 or fewer matches is under 0.1 percent; and 0.30 is the largest share that an accidental match (up to 0.5 in the worst case, usually well below) leaves for a series that is NOT the traded price in the typical case. A fund with at least 10 compared dates and at most 30 percent of them matching is refuted.\n\nREADINGS.\n  validated  = compared >= 10 AND matching / compared >= 0.80.\n  refuted    = compared >= 10 AND matching / compared <= 0.30.\n  unreadable = everything else, one reason code, first that applies in this order: no_cached_close (no usable cache file with a Close; a fund with no ticker is this); no_reinvestment_row (no cell at the guard); fewer_than_minimum_dates (compared < 10, including zero); between_refuted_and_validated (compared >= 10 and 0.30 < share < 0.80).\n  The three counts sum to 270.\n\nDOES A VALIDATED FUND NOT SHOWN UNADJUSTED COUNT? YES, as the CTO's wording does not require distinguishing dates: it is COUNTED VALIDATED, LISTED in indistinguishable.validated_funds_not_distinguished, and FLAGGED (the csv carries dates_distinguishing for every fund). A validated fund is NOT DISTINGUISHED when it has fewer than 3 distinguishing dates (3 because one distinguishing date can itself be an accident; three independent dates cannot at the rates above). The funds with exactly zero are named in the md beside. The downstream return cell reads the csv: it takes `validated`, and may exclude those listed.\n\nGROUPS. left_on_store (the 197 series the build left on the store), substituted (the 73 the build already values on the cached close: the control), nine (AMCPX, AMRMX, CWGIX, WGIFX, CPXIX, FINFX, NEWFX, AWSHX, WMFFX, an overlay on the first two).\n\nAGAINST ROUND 73. Its validated set (42, best single date at 0.80 with at least 5 cells of 944) against the readings here; every fund whose validated status changes is listed by ticker with both sets of counts.\n\nSENSITIVITY. If the result looks wrong, the result under this rule is reported, and what another N, S or R gives is reported separately as a sensitivity (never substituted).\n",
+  "written_at": "2026-10-11T20:31:42Z",
+  "minimum_dates": 10,
+  "share_validated": 0.8,
+  "share_refuted": 0.3
+ },
+ "fund_series": 270,
+ "validated": 33,
+ "refuted": 0,
+ "unreadable": 237,
+ "unreadable_reasons": {
+  "no_cached_close": 121,
+  "fewer_than_minimum_dates": 68,
+  "no_reinvestment_row": 48
+ },
+ "by_group": {
+  "left_on_store": {
+   "fund_series": 197,
+   "validated": 19,
+   "refuted": 0,
+   "unreadable": 178,
+   "unreadable_reasons": {
+    "no_cached_close": 121,
+    "fewer_than_minimum_dates": 31,
+    "no_reinvestment_row": 26
+   },
+   "dates_compared": 374,
+   "dates_matching": 374,
+   "validated_tickers": [
+    "ABNFX",
+    "ACTDX",
+    "AMRMX",
+    "ANCFX",
+    "AWSHX",
+    "BALCX",
+    "CAIBX",
+    "CPXIX",
+    "CWGIX",
+    "DFLVX",
+    "DFREX",
+    "DISVX",
+    "FCNTX",
+    "FINFX",
+    "MEIIX",
+    "PRILX",
+    "VEIRX",
+    "WGIFX",
+    "WMFFX"
+   ]
+  },
+  "substituted_control": {
+   "fund_series": 73,
+   "validated": 14,
+   "refuted": 0,
+   "unreadable": 59,
+   "unreadable_reasons": {
+    "fewer_than_minimum_dates": 37,
+    "no_reinvestment_row": 22
+   },
+   "dates_compared": 570,
+   "dates_matching": 566,
+   "validated_tickers": [
+    "CMLAX",
+    "DFCEX",
+    "DFIEX",
+    "FLTRX",
+    "FSKAX",
+    "MAMTX",
+    "NEA",
+    "NHMRX",
+    "PDBZX",
+    "PTTAX",
+    "VBIRX",
+    "VFIAX",
+    "VTSAX",
+    "VWIUX"
+   ]
+  },
+  "nine": {
+   "fund_series": 9,
+   "validated": 7,
+   "refuted": 0,
+   "unreadable": 2,
+   "unreadable_reasons": {
+    "fewer_than_minimum_dates": 2
+   },
+   "dates_compared": 93,
+   "dates_matching": 93,
+   "validated_tickers": [
+    "AMRMX",
+    "AWSHX",
+    "CPXIX",
+    "CWGIX",
+    "FINFX",
+    "WGIFX",
+    "WMFFX"
+   ]
+  }
+ },
+ "against_round_73": {
+  "changes": [
+   {
+    "ticker": "AMCFX",
+    "group": "substituted",
+    "round_73_validated": true,
+    "reading_here": "unreadable",
+    "reason_here": "fewer_than_minimum_dates",
+    "dates_compared_here": 6,
+    "dates_matching_here": 6,
+    "dates_distinguishing_here": 6,
+    "round_73_cells": 6,
+    "round_73_equal_same": 2,
+    "round_73_equal_before": 6,
+    "round_73_equal_after": 2
+   },
+   {
+    "ticker": "FSMAX",
+    "group": "substituted",
+    "round_73_validated": true,
+    "reading_here": "unreadable",
+    "reason_here": "fewer_than_minimum_dates",
+    "dates_compared_here": 5,
+    "dates_matching_here": 5,
+    "dates_distinguishing_here": 3,
+    "round_73_cells": 5,
+    "round_73_equal_same": 5,
+    "round_73_equal_before": 1,
+    "round_73_equal_after": 2
+   },
+   {
+    "ticker": "FSPSX",
+    "group": "substituted",
+    "round_73_validated": true,
+    "reading_here": "unreadable",
+    "reason_here": "fewer_than_minimum_dates",
+    "dates_compared_here": 9,
+    "dates_matching_here": 9,
+    "dates_distinguishing_here": 8,
+    "round_73_cells": 9,
+    "round_73_equal_same": 9,
+    "round_73_equal_before": 1,
+    "round_73_equal_after": 6
+   },
+   {
+    "ticker": "FSSNX",
+    "group": "substituted",
+    "round_73_validated": true,
+    "reading_here": "unreadable",
+    "reason_here": "fewer_than_minimum_dates",
+    "dates_compared_here": 9,
+    "dates_matching_here": 9,
+    "dates_distinguishing_here": 8,
+    "round_73_cells": 9,
+    "round_73_equal_same": 9,
+    "round_73_equal_before": 4,
+    "round_73_equal_after": 4
+   },
+   {
+    "ticker": "FXAIX",
+    "group": "substituted",
+    "round_73_validated": true,
+    "reading_here": "unreadable",
+    "reason_here": "fewer_than_minimum_dates",
+    "dates_compared_here": 7,
+    "dates_matching_here": 7,
+    "dates_distinguishing_here": 5,
+    "round_73_cells": 7,
+    "round_73_equal_same": 7,
+    "round_73_equal_before": 2,
+    "round_73_equal_after": 3
+   },
+   {
+    "ticker": "MISIX",
+    "group": "substituted",
+    "round_73_validated": true,
+    "reading_here": "unreadable",
+    "reason_here": "fewer_than_minimum_dates",
+    "dates_compared_here": 8,
+    "dates_matching_here": 8,
+    "dates_distinguishing_here": 7,
+    "round_73_cells": 8,
+    "round_73_equal_same": 2,
+    "round_73_equal_before": 8,
+    "round_73_equal_after": 3
+   },
+   {
+    "ticker": "NFFFX",
+    "group": "left_on_store",
+    "round_73_validated": true,
+    "reading_here": "unreadable",
+    "reason_here": "fewer_than_minimum_dates",
+    "dates_compared_here": 5,
+    "dates_matching_here": 5,
+    "dates_distinguishing_here": 4,
+    "round_73_cells": 5,
+    "round_73_equal_same": 3,
+    "round_73_equal_before": 5,
+    "round_73_equal_after": 1
+   },
+   {
+    "ticker": "PCBIX",
+    "group": "left_on_store",
+    "round_73_validated": true,
+    "reading_here": "unreadable",
+    "reason_here": "fewer_than_minimum_dates",
+    "dates_compared_here": 8,
+    "dates_matching_here": 8,
+    "dates_distinguishing_here": 7,
+    "round_73_cells": 8,
+    "round_73_equal_same": 8,
+    "round_73_equal_before": 1,
+    "round_73_equal_after": 4
+   },
+   {
+    "ticker": "SGIIX",
+    "group": "left_on_store",
+    "round_73_validated": true,
+    "reading_here": "unreadable",
+    "reason_here": "fewer_than_minimum_dates",
+    "dates_compared_here": 6,
+    "dates_matching_here": 6,
+    "dates_distinguishing_here": 5,
+    "round_73_cells": 6,
+    "round_73_equal_same": 6,
+    "round_73_equal_before": 0,
+    "round_73_equal_after": 5
+   }
+  ],
+  "round_73_validated": 42,
+  "validated_in_both": 33,
+  "validated_here_only": 0,
+  "validated_in_73_only": 9,
+  "cells_compared_here": 944,
+  "cells_compared_round_73": 944,
+  "cells_added_by_dropping_the_next_bar_requirement": 0,
+  "note": "Round 73 compared 944 cells needing the same-date bar plus previous and next bars; here the next bar is not required and the same 944 cells result (every cell with a same-date and a previous bar also had a next bar within 5 days). Round 73 validated on its best single date at 0.80 with at least 5 cells; here the either-date rule with at least 10 dates. Every fund that changes is validated in round 73 and unreadable here on fewer_than_minimum_dates; none is refuted."
+ },
+ "indistinguishable": {
+  "dates_both_days_match": 598,
+  "dates_adjusted_also_matches": 19,
+  "validated_funds_not_distinguished": [],
+  "dates_compared": 944,
+  "dates_matching_either_day": 940,
+  "dates_distinguishing": 921,
+  "dates_adjusted_matches_either_day": 19,
+  "in_validated_funds": {
+   "dates_compared": 804,
+   "dates_matching_either_day": 800,
+   "dates_both_days_match": 548,
+   "dates_adjusted_also_matches": 6,
+   "dates_distinguishing": 794
+  },
+  "distinguishing_minimum_dates": 3,
+  "validated_funds_with_zero_distinguishing_dates": [],
+  "validated_funds_distinguished": 33
+ },
+ "headline": "33 of 270 fund series are VALIDATED UNADJUSTED under the rule as written before the run (at least 10 dates compared, at least 80 percent matching the custodian reinvestment price on the row own date or the day before); 0 are refuted; 237 are unreadable (121 with no cached close, 48 with a cache but no reinvestment row, 68 with fewer than 10 dates compared; none between the two shares). Every validated fund is also DISTINGUISHED: the unadjusted close matches and the adjusted close does not on at least 10 of its dates, and none is listed as not distinguished. Nothing was refuted at any choice of minimum, validated share or refuted share tried, so no fund that could be read has a cached unadjusted close shown to differ from the traded price. The nine: seven validated (AMRMX, CWGIX, WGIFX, CPXIX, FINFX, AWSHX, WMFFX); AMCPX (4 dates, all matching) and NEWFX (3 dates, all matching) are unreadable on the minimum of 10. Nothing was fetched.",
+ "not_established": [
+  "That the custodian price is the fund close of the day it names: a match on either of two days is one test, and 598 of 944 compared dates match on BOTH days (flat prices), so those dates do not say which day the custodian used. The rule validates the cached unadjusted close as the price level, not a date convention.",
+  "Anything for the 121 fund series with no cached close and the 48 with a cache but no reinvestment row: not tested, no finding on them.",
+  "Anything before the cache starts (2020-06-29): 791 reinvestment dates over 71 funds fall outside the cache window and were not compared; a series could be adjusted only in a period not tested.",
+  "The 68 funds with 0 to 9 compared dates (23 of them with none): too few dates to validate or refute under the rule; round 73 minimum of 5 would validate nine of them (listed in against_round_73.changes), every one with all its dates matching.",
+  "That a validated fund build series equals the cached close: the build table was not compared in this cell; the 14 validated substituted funds are a control only on the round-73 statement that their build close is the cache.",
+  "Refutation was never reached: no fund with 10 or more dates fell to 0.30 or below, so the refuted threshold was not exercised by this population and says nothing about how it behaves on an adjusted series.",
+  "Four dates did not match (NEA three, PDBZX one) inside funds that still validate; no fund fell between the two shares.",
+  "The tolerance of 0.5 percent is wide for a fund whose adjustment is under 0.5 percent: the distinguishing count addresses this per date only where the two closes differ by more than 0.5 percent."
+ ]
+}
