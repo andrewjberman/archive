@@ -6,6 +6,7 @@ Every subprocess is bounded (100 s) so an invocation ends inside a worker's 120 
 
   y31-page      AR-y-31: the named tests of portal `package-report-reader.test.tsx` exist and pass            -> Y31-PAGE-OK
   y31-keep      AR-y-31: the package tests that must not move still pass (package-r2, commentary-package)     -> Y31-KEEP-OK
+  portal-tsc    AR-y-31 (AMENDMENT 1): the portal typecheck `tsc -b --noEmit` exits 0                         -> PORTAL-TSC-OK
   y35-page      AR-y-35: the named tests of portal `analysis-firm-choice.test.tsx` exist and pass             -> Y35-PAGE-OK
   y32-ref       AR-y-32: `ops/tests/test_retained_ref_served.py`, named tests exist and pass                  -> Y32-REF-OK
   y32-history   AR-y-32: `ops/tests/test_history_row_client.py`, named tests exist and pass                   -> Y32-HISTORY-OK
@@ -51,7 +52,9 @@ NAMES = {
     "y32-history": (IR + "/ops/tests/test_history_row_client.py", [
         "test_history_row_states_the_client_its_selection_names",
         "test_upload_request_row_states_null_client",
-        "test_single_read_wire_is_unchanged"]),
+        "test_single_read_wire_is_unchanged",
+        "test_unreadable_composition_row_is_listed_with_claim_unreadable",
+        "test_filtered_page_leaves_unreadable_rows_out_and_counts_them"]),
     "y37-actor": (IR + "/ycharts/generate/tests/test_acceptance_actor.py", [
         "test_new_accepted_request_records_the_verified_actor",
         "test_actor_in_the_request_body_is_never_used",
@@ -157,9 +160,17 @@ def contract(root):
     elif sorted(str(t) for t in (client[0].get("type") if isinstance(client[0].get("type"), list)
                                  else [client[0].get("type")])) != ["null", "string"]:
         problems.append("client_id is not typed string-or-null: %r" % client[0].get("type"))
+    claim = list(find(history, "client_claim"))
+    if not claim:
+        problems.append("OwnedAnalysisRequestHistory.schema.json declares no client_claim on its row (CTO msg 4430)")
+    elif sorted(claim[0].get("enum") or []) != ["SELECTED", "UNREADABLE", "UPLOAD"]:
+        problems.append("client_claim is not the enum SELECTED / UPLOAD / UNREADABLE: %r" % claim[0].get("enum"))
+    counted = history.get("properties", {}).get("unreadable_rows")
+    if not isinstance(counted, dict) or counted.get("type") != "integer" or counted.get("minimum") != 0:
+        problems.append("the history page declares no unreadable_rows (integer, minimum 0)")
     single = json.loads((docs / "OwnedAnalysisRequest.schema.json").read_text(encoding="utf-8"))
-    if "client_id" in json.dumps(single):
-        problems.append("OwnedAnalysisRequest.schema.json (the SINGLE read) gained client_id; only the history row may")
+    if "client_id" in json.dumps(single) or "client_claim" in json.dumps(single):
+        problems.append("OwnedAnalysisRequest.schema.json (the SINGLE read) gained client_id or client_claim; only the history row may")
     env = dict(os.environ, AWS_ACCESS_KEY_ID="x", AWS_SECRET_ACCESS_KEY="y", AWS_DEFAULT_REGION="us-east-1")
     rc, out = run([sys.executable, "-m", "pytest", "_contracts", "-q", "-p", "no:cacheprovider", "-rf", "--color=no"], root / IR, env)
     failed = set(item.replace("\\", "/") for item in re.findall(r"^FAILED (\S+)", out, re.M))  # Windows prints backslashes
@@ -248,6 +259,11 @@ def reads(root):
         problems.append("original_read_writes: versions_before %r, versions_after %r" % (before, after))
     if not (isinstance(writes.get("keys_scope"), str) and writes["keys_scope"]):
         problems.append("original_read_writes.keys_scope (which keys were counted) is not stated")
+    census = doc.get("unreadable_compositions") or {}
+    count, total = census.get("count"), census.get("denominator")
+    if (type(count) is not int or type(total) is not int or not 0 <= count <= total or total < 1
+            or census.get("claim") != "measured"):
+        problems.append("unreadable_compositions must state count and denominator as MEASURED integers: %r" % census)
     if "http" in json.dumps(doc).lower():
         problems.append("the result file carries a URL; a signed link is never written to a file")
     print("reads %r; versions %r -> %r" % ({k: got.get(k) for k in ("3a", "3b", "3c", "4_record", "4_route")}, before, after))
@@ -306,6 +322,16 @@ def main(argv):
             print("ERROR: unknown argument " + flag)
             return 2
     root = root.resolve()
+    if check == "portal-tsc":
+        if portal is None:
+            print("ERROR: --portal <portal worktree> is required")
+            return 2
+        rc, out = run(["bun", "x", "tsc", "-b", "--noEmit"], portal.resolve())
+        errors = [line for line in out.splitlines() if "error TS" in line]
+        print("tsc rc=%d, error lines %d" % (rc, len(errors)))
+        for line in errors[:12]:
+            print("  " + line[:220])
+        return finish(check, [] if rc == 0 and not errors else ["the portal typecheck is red (rc=%d, %d error lines)" % (rc, len(errors))])
     if check in ("y31-page", "y31-keep", "y35-page"):
         if portal is None:
             print("ERROR: --portal <portal worktree> is required")

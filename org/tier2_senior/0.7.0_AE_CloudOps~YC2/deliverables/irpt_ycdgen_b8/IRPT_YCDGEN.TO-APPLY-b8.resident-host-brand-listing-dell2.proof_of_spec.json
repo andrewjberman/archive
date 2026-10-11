@@ -1,0 +1,151 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "The listing names the running root.",
+      "denominator": "1 output file, 1 ROOT= line",
+      "expect": "^ROOT=/",
+      "invocation": "grep -m1 '^ROOT=' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_b8/BRAND_LISTING_HOST.txt",
+      "method": "command",
+      "output_evidence": "ROOT=/opt/irpt-resident/e606008994-st27",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "The listing states the brand directory's files or its absence.",
+      "denominator": "1 output file; the amended invocation takes the FIRST line matching either shape, and the artifact carries 2 BRAND lines and 0 BRAND-DIR-ABSENT lines, so the matched line is the inventory branch. The second BRAND line is 'BRAND 25ee2179d723174b805ba05d23a4435f88c32a2018d79308e2b449f0c790f11f brand.json'; the ls block in the same artifact lists exactly 2 regular files (3853 and 5996 bytes), so the line count agrees with the directory.",
+      "expect": "^(BRAND [0-9a-f]{64} |BRAND-DIR-ABSENT )",
+      "invocation": "grep -m1 -E '^(BRAND [0-9a-f]{64} |BRAND-DIR-ABSENT )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_b8/BRAND_LISTING_HOST.txt",
+      "method": "command",
+      "output_evidence": "BRAND 02477c761bbaac4ec4c23e1b0d2f743271c1d94ec6b1f81ed9a31a8e99fe58b3 Opal-Capital-Logo-Full-Color.svg",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "commit_or_etag": "12b13a7862",
+      "deploy_evidence": "the full SSM stdout with the command id and instance id on line 1: the raw ExecStart, the derived ROOT, the ls block and one BRAND <sha256> <name> line per file",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_b8/BRAND_LISTING_HOST.txt"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~YC2",
+  "compiler_tools": [
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order: one read-only command on the resident host; no schedule, trigger or rule is added or read",
+      "tool": "comp-schedule"
+    },
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order: no IAM change; the command runs under the applier's existing SSM grant on this one instance. NOTE: that preflight assertion was NOT free -- see controls.the_preflight_grant_assumption_was_tested_not_assumed.",
+      "tool": "comp-iam"
+    },
+    {
+      "invocation": "the order's own named trap, graded as a control rather than by a tool",
+      "result": "The order's comp-adversary line states the trap in words: 'the trap is listing the wrong root, so the root is READ from the unit's ExecStart and printed, never typed.' That is discharged by controls.root_derived_from_the_unit_not_typed, which prints the raw ExecStart in the artifact so a reader can re-derive ROOT rather than take it on trust.",
+      "tool": "comp-adversary"
+    }
+  ],
+  "controls": {
+    "absence_branches_did_not_fire": {
+      "description": "The command has two explicit absence branches -- BRAND-DIR-ABSENT and ROOT-UNDERIVABLE -- either of which would make the listing a finding rather than an inventory. A reader must be able to tell which case this is.",
+      "expected_landed": "0 BRAND-DIR-ABSENT lines and 0 ROOT-UNDERIVABLE lines, with BRAND lines present",
+      "expected_not_landed": "either absence line present, which is the order's stated finding case and would mean the brand directory does not exist under the running root",
+      "observed": "BRAND-DIR-ABSENT 0, ROOT-UNDERIVABLE 0, BRAND lines 2. This is the inventory case, not the absence case.",
+      "status": "PASS"
+    },
+    "ac2_amended_pattern_actually_discriminates": {
+      "description": "AC2 was amended on this seat's row (AMENDMENT 1 @289391dfbf) after the original expect '^[0-9]+$' proved ungradeable. An amended criterion earns no trust from being new, so the replacement pattern was exercised against inputs it must REFUSE, not only against the one it must accept.",
+      "expected_landed": "the artifact's first BRAND line matches; a file carrying neither shape does not match; a BRAND line whose digest is 63 hex characters does not match",
+      "expected_not_landed": "a match on either negative input, which would mean the pattern accepts ill-formed output and the criterion is still not deciding anything",
+      "observed": "artifact -> matches on the Opal-Capital-Logo line. A scratch file of UNIT=/ROOT=/total lines -> no match. A scratch BRAND line with a 63-hex digest -> no match, so the {64} quantifier bites. The original defect is therefore closed in both directions: the evidence is a real line rather than a bare integer, and a zero-file directory can no longer read PASS as an inventory -- it would have to match BRAND-DIR-ABSENT, which is the order's stated finding branch and is now distinguishable in the evidence itself.",
+      "status": "PASS"
+    },
+    "ac2_count_matches_the_directory_listing": {
+      "description": "AC2's expect is '^[0-9]+$', which a count of ZERO also satisfies. So AC2 as written passes whether or not any brand file exists, and cannot by itself distinguish 'two files listed' from 'directory empty'.",
+      "expected_landed": "the BRAND line count equals the number of regular files in the same artifact's ls block",
+      "expected_not_landed": "a count of 0 reported as PASS, or a count that disagrees with the ls block, either of which would mean the number is not about the files",
+      "observed": "BRAND lines 2; regular files in the ls block 2; equal. The two are Opal-Capital-Logo-Full-Color.svg (3853 bytes, sha256 02477c761bbaac4e...) and brand.json (5996 bytes, sha256 25ee2179d7231748...).",
+      "status": "PASS"
+    },
+    "command_identified_by_its_own_marker_not_by_list_position": {
+      "description": "A RETRIEVAL trap met live. `ssm list-commands` is NOT ordered newest-first: its first rows were commands from 2026-10-08 and 2026-10-06, so reading the top row as 'my command' would have attributed someone else's FAILED invocation to this act.",
+      "expected_landed": "exactly 1 command in the scanned set carries this order's comment marker, and its id is the one whose output is saved",
+      "expected_not_landed": "taking the list's first row, which was a Failed command from three days earlier",
+      "observed": "denominator 545 commands scanned client-side after auto-pagination; 1 matched the TO-APPLY-b8 marker -- 6b892609-8f09-4d75-8637-4995133b3ad4, Success, 2026-10-11T03:08:32-04:00. Sorting the same set by RequestedDateTime independently puts that id first, so the marker and the timestamp agree.",
+      "status": "PASS"
+    },
+    "root_derived_from_the_unit_not_typed": {
+      "description": "THE TRAP THE ORDER NAMES. Listing the wrong root would produce a well-formed, entirely wrong inventory. ROOT was therefore derived inside the command from the unit's own ExecStart -- the argv[] script path cut at the package-internal /ycharts/ boundary -- and the raw ExecStart is printed in the artifact so the derivation is re-checkable.",
+      "expected_landed": "the printed ROOT is a prefix of the argv[] path in the printed raw ExecStart, and no other root string appears in the artifact",
+      "expected_not_landed": "a ROOT that does not appear in the ExecStart line, which would mean it was typed or guessed",
+      "observed": "EXECSTART_RAW carries argv[]=/usr/bin/python3.12 /opt/irpt-resident/e606008994-st27/ycharts/generate/resident_main.py ...; ROOT=/opt/irpt-resident/e606008994-st27 is exactly that path cut at /ycharts/. A sweep of the artifact for /opt/irpt-resident/* yields exactly ONE distinct root, so no second candidate is present. Unit irpt-analysis-resident.service, running since Fri 2026-10-09 12:12:01 UTC, pid 777546.",
+      "status": "PASS"
+    },
+    "the_host_actually_ran_it_not_merely_accepted_it": {
+      "description": "send-command returning a CommandId proves SSM ACCEPTED the request, never that the instance ran it -- the SENT != EMITTED != READ shape on a host plane. A Pending status at send time is not a result.",
+      "expected_landed": "the invocation reads Status Success with ResponseCode 0 and empty StandardErrorContent, and the stdout carries the expected line shapes",
+      "expected_not_landed": "Status Pending/Failed/TimedOut, or a non-zero ResponseCode, or stderr content -- any of which would mean the saved stdout is not a complete reading",
+      "observed": "get-command-invocation: Status Success, ResponseCode 0, StandardErrorContent empty. The send itself returned Status Pending, which is why the invocation was read separately rather than reported from the send.",
+      "status": "PASS"
+    },
+    "the_preflight_grant_assumption_was_tested_not_assumed": {
+      "description": "The order's comp-iam preflight asserts 'the command runs under the applier's existing SSM grant on this one instance', while surprise row IRPT_YCDGEN-S14 (UNDER_INVESTIGATION, surfaced 2026-10-07) records ssm:SendCommand on THIS instance being DENIED to cloudops-dell2-agent-user. Those cannot both be current. The live call was used as the oracle rather than simulate-principal-policy, which has four documented false-deny modes and one false-allow mode.",
+      "expected_landed": "the send is accepted and the host runs it, which falsifies S14's world_is as of now",
+      "expected_not_landed": "AccessDeniedException naming ssm:SendCommand, which would confirm S14 still holds and block the order",
+      "observed": "send accepted (CommandId issued), invocation Status Success, ResponseCode 0. The grant exists now, so S14's measured world has changed since 2026-10-07. Filed as row IRPT_YCDGEN-D2-S40 rather than left for a future reader to re-discover.",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "no file CONTENT was read, only names, sizes and sha256",
+      "reason": "the order's bounds say so explicitly. So this artifact can tell a reader WHICH brand files the running root carries and whether they differ from any other copy by digest, but nothing about what is inside brand.json or the SVG."
+    },
+    {
+      "item": "no comparison was made between these digests and any repo-side or S3-side copy",
+      "reason": "the order asks for the host listing only. A digest is comparable by construction, so the comparison is cheap for whoever owns the question -- but choosing the counterpart copy is a judgment this order does not delegate, and guessing one would manufacture a parity claim nobody asked for."
+    },
+    {
+      "item": "the service was not restarted, reconfigured or otherwise touched, and no other host or directory was read",
+      "reason": "the order's bounds. The command contains no write verb; its only effects are reads and echoes."
+    },
+    {
+      "item": "whether the running root is the root that SHOULD be running",
+      "reason": "this is a listing of what IS. The unit has been running since 2026-10-09 12:12:01 UTC on root e606008994-st27; whether that is the intended release is the issuer's and the CTO's question, and the artifact gives them the pin to answer it with."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R8.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-b8.resident-host-brand-listing-dell2.md",
+    "vintage_commit": "673de3e606"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "NOT REQUIRED AND NOT CLAIMED: this act widens nothing and serves nothing new. It is one read-only SSM command whose write set is empty -- no served output is moved, no IAM or policy changes, no file on the host is created or modified. NEVER-1 binds an act that moves served output; a listing is not such an act, which is why the order carries <risk>SERVED</risk> rather than WORLD and why no pair was issued with it.",
+    "cto_half": "NOT REQUIRED AND NOT CLAIMED, same reason. The authority for the act is the order itself (IRPT_YCDGEN.TO-APPLY-b8 @673de3e606) resting on the CTO round-8 analysis @fe73849335 section 2 and row IRPT_YCDGEN-D2-S3."
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "SERVED",
+  "rollback": "NONE NEEDED AND NONE POSSIBLE, stated rather than left blank: the act's write set is empty. The command reads the unit, lists a directory and hashes its files; it creates no file, moves no served output and changes no configuration, so there is no state to roll back. The only durable effect is this seat's own artifact in the repo, which git reverts.",
+  "schema_version": "1.0",
+  "scope": "ONE read-only listing on resident host i-0167fd745ad906a66: which package root irpt-analysis-resident.service actually runs, read from the unit's ExecStart and never typed, and which files that root carries under ycharts/research/brand/, each with size and sha256. Round 8 cell YCD-d-8, row IRPT_YCDGEN-D2-S3, CTO round-8 analysis @fe73849335 section 2.",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_b8/BRAND_LISTING_HOST.txt",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-b8.resident-host-brand-listing-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "289391dfbf"
+  },
+  "surprises": [
+    "IRPT_YCDGEN-D2-S41: RESOLVED AT THE SOURCE BY THE ISSUER, and this instance is the re-grade. The row recorded that AC2's original expect '^[0-9]+$' admitted only a bare integer while the same gate refuses a bare integer as thin output_evidence, so AC2 was ungradeable by a VALID instance and the order was left pending rather than flipped on an INVALID proof. The issuer accepted the finding (msg 4390) and amended the criterion (AMENDMENT 1 @289391dfbf, msg 4429): AC2 now matches the first BRAND line with its sha256 or BRAND-DIR-ABSENT. Re-graded against the amended face here: AC2 PASS on a real line, with the replacement pattern exercised against two inputs it must refuse (see controls.ac2_amended_pattern_actually_discriminates). The second weakness the row named is closed by the same amendment -- an empty brand directory can no longer read PASS as an inventory. Carrier org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md.",
+    "IRPT_YCDGEN-D2-S40: row IRPT_YCDGEN-S14's world has CHANGED -- ssm:SendCommand on i-0167fd745ad906a66 now SUCCEEDS for the dell2 applier, where S14 (UNDER_INVESTIGATION, 2026-10-07) records AccessDenied. Measured by the live call this order required: CommandId 6b892609-8f09-4d75-8637-4995133b3ad4, Status Success, ResponseCode 0. The row does not claim WHICH remediation closed it, because this seat never read the IAM policy. OBSERVATION, INERT, UNDER_INVESTIGATION, disarm_owner 2.0.0_SA_COO~G2. Effect on this order: none -- it is what let the order run at all."
+  ],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-b8.resident-host-brand-listing-dell2"
+}
