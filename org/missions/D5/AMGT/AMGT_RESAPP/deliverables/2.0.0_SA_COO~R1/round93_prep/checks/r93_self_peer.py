@@ -16,9 +16,12 @@ no index (the default) leaves every result byte-equal.
     E5 backfill: with 13 deeper-rung candidates and the self row ranked first, the set is still 12 members, the self row absent, the next
        ranked present.
     E6 control: an EMPTY index leaves the result byte-equal to the no-index call (ignoring the `vintage` timestamp).
-    E7 wiring (source level): `engine.run_batch` builds the index ONCE and passes it (`held_name_index` is in its source). The member-by-member
-       control of the rebuild is its own pair.
-Verdict: R93 SELF PEER: YES|NO (exit 0|1). At the base (2026-10-11) only E2 PASSes: the keyword does not exist, so E1, E3, E4, E5, E6 raise TypeError and read FAIL, and E7 FAILs.
+    E7 wiring (source level): `engine.run_batch` and `engine.main` take the index and pass it to `peers` (`held_name_index` is in their
+       source). The peers package never imports the api package (a guard test enforces it), so the index comes from a caller above it.
+    E8 the caller above: `lib.research.api.peers_rebuild.main(argv)` builds the index ONCE from `scoped_amgt._held_name_index` and the cleaner
+       `scoped_amgt._clean_display_name` and hands both to `engine.main`; when the index build raises, it REFUSES (ValueError) and calls nothing.
+       The member-by-member control of the rebuild is its own pair.
+Verdict: R93 SELF PEER: YES|NO (exit 0|1). At the base (2026-10-11) only E2 PASSes: the keyword does not exist, so E1, E3, E4, E5, E6 raise TypeError and read FAIL, E7 FAILs and E8 FAILs (no such module).
 """
 import copy
 import inspect
@@ -58,6 +61,35 @@ def tickers(result):
     return [m["ticker"] for m in result.get("members") or []]
 
 
+def e8():
+    label = "E8 the caller above builds the index once, hands it to engine.main, and REFUSES when the build raises"
+    try:
+        from lib.research.api import peers_rebuild, scoped_amgt
+    except ImportError as exc:
+        return say(False, label, "no lib.research.api.peers_rebuild: %s" % exc)
+    seen = {}
+    saved = (engine.main, scoped_amgt._held_name_index)
+    try:
+        engine.main = lambda argv=None, **kw: seen.update(kw, argv=argv) or 0
+        calls = []
+        scoped_amgt._held_name_index = lambda: calls.append(1) or {"tok": ["K_US_Equity"]}
+        rc = peers_rebuild.main(["--as-of", "2026-10-11"])
+        built_once = len(calls) == 1 and seen.get("held_name_index") == {"tok": ["K_US_Equity"]} and callable(seen.get("clean_name"))
+        seen.clear()
+
+        def boom():
+            raise RuntimeError("no names")
+        scoped_amgt._held_name_index = boom
+        refused = False
+        try:
+            peers_rebuild.main(["--as-of", "2026-10-11"])
+        except ValueError as exc:
+            refused = "REFUSED" in str(exc) and not seen
+        return say(rc == 0 and built_once and refused, label, "built once and handed on %s, refused %s" % (built_once, refused))
+    finally:
+        engine.main, scoped_amgt._held_name_index = saved
+
+
 def main():
     results = []
     rows = universe()
@@ -91,8 +123,9 @@ def main():
                       "E5 backfill: the set stays at 12 and the next ranked name takes the place",
                       "E6 control: an empty index leaves the result byte-equal"):
             results.append(say(False, label, "peers() takes no held_name_index: %s" % exc))
-    results.append(say("held_name_index" in inspect.getsource(engine.run_batch),
-                       "E7 wiring: run_batch builds the held-name index and passes it (source level)"))
+    results.append(say("held_name_index" in inspect.getsource(engine.run_batch) and "held_name_index" in inspect.getsource(engine.main),
+                       "E7 wiring: run_batch and main take the held-name index and pass it (source level)"))
+    results.append(e8())
     print("   arms passed %d of %d" % (sum(1 for r in results if r), len(results)))
     ok = all(results)
     print("R93 SELF PEER: %s" % ("YES" if ok else "NO"))

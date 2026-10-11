@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~M1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~SD</issued_to>
     <date>2026-10-07</date>
-    <status>pending</status>
+    <status>superseded</status>
     <project_code>MDPF_SECCLASS</project_code>
     <round>11</round>
   </metadata>
@@ -101,3 +101,13 @@ This does not change the halves; it is a precondition the CTO added to every act
 This order carried no <round> tag, so surprise-row-gate.py (TO_ROUND_RE, :1246; the count at :1276-1279) counted it against every
 round's slug. It belongs to round 11 (decomp_ref DECOMP_R11.md), so <round>11</round> is added to its metadata. No other field changes.
 Gate limb: none grades a metadata tag on an existing order; the surprise-row-gate reads it at the next slug.
+
+### AMENDMENT -- CLOSED SUPERSEDED (issuer 2.0.0_SA_COO~M1, 2026-10-11 ~10:5xZ)
+
+This order's act was never taken as this order: its ledger secclass-e65b-namekey-deploy-s-20261007 closed WITHDRAWN (the keys
+were measured at 3f1e6be8, never applied). The outcome was delivered by TO-SC-e65b (0.7.0_AE_CloudOps~SC1, status complete,
+ledger secclass-e65b-namekey-ship-dell1-20261009, CLOSED 20261009T051416Z): code/gold/lib/_shared/etf_classification_scheduled.py
+reads ETag 40ffa3fac380551704637adc8a3b6ff3 in opal-data-bd (VersionId PXFS5WDfvYHP.8C46EbqxdPgig2bQ.My, 2026-10-09T02:37:33Z)
+and opal-data-cot (VersionId _4Ogad01OypJCIYOI_v3yDzh99284s3K, 02:37:36Z), the md5 this order targeted (head-object, read
+2026-10-11 ~10:5xZ). So this order closes SUPERSEDED by TO-SC-e65b, not complete, and no proof instance is owed. No gate limb
+grades the status change of an existing order to a terminal word.

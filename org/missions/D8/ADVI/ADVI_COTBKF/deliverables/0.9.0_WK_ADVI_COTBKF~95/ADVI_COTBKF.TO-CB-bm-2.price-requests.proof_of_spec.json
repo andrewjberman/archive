@@ -1,0 +1,134 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bm-2",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bm-2.price-requests.md",
+  "group": "OTHER",
+  "vintage_commit": "5d51ad0c54"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~95",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round65.md",
+  "vintage_commit": "5d51ad0c54",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bm-2.price-requests.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~95/PRICE_REQUESTS.json",
+   "kind": "doc",
+   "commit_or_etag": "47a8b55d55",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement record; no S3 write, no deploy, no network call",
+   "artifact_covered_by": [
+    "CB65bm2-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~95/PRICE_REQUEST_YAHOO.md",
+   "kind": "doc",
+   "commit_or_etag": "47a8b55d55",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "written request, NOT SENT; no network call",
+   "artifact_covered_by": [
+    "CB65bm2-AC2",
+    "CB65bm2-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~95/PRICE_REQUEST_YAHOO.csv",
+   "kind": "doc",
+   "commit_or_etag": "47a8b55d55",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "securities list (identifier, kind, first_date, last_date, security_days); no account column",
+   "artifact_covered_by": [
+    "CB65bm2-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~95/PRICE_REQUEST_BLOOMBERG.md",
+   "kind": "doc",
+   "commit_or_etag": "47a8b55d55",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "written request, NOT SENT; no network call",
+   "artifact_covered_by": [
+    "CB65bm2-AC2",
+    "CB65bm2-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~95/PRICE_REQUEST_BLOOMBERG.csv",
+   "kind": "doc",
+   "commit_or_etag": "47a8b55d55",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "securities list (identifier, kind, first_date, last_date, security_days); no account column",
+   "artifact_covered_by": [
+    "CB65bm2-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB65bm2-AC1",
+   "criterion_verbatim": "the totals are the measured ones and the two legs cover every unpriced row exactly once.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~95/PRICE_REQUESTS.json',encoding='utf-8'));L=d['legs'];print('PRICE-REQUESTS-RECORD position_rows=%d unpriced_position_rows=%d legs=%d leg_rows_sum=%d unpriced_securities=%d leg_securities_sum=%d bloomberg_rules=%d'%(d['position_rows'],d['unpriced_position_rows'],len(L),sum(x['unpriced_position_rows'] for x in L),d['unpriced_securities'],sum(x['securities'] for x in L),len(d['bloomberg_rules_relied_on'])))\"",
+   "expect": "PRICE-REQUESTS-RECORD position_rows=21102041 unpriced_position_rows=15993996 legs=2 leg_rows_sum=15993996",
+   "output_evidence": "PRICE-REQUESTS-RECORD position_rows=21102041 unpriced_position_rows=15993996 legs=2 leg_rows_sum=15993996 unpriced_securities=4408 leg_securities_sum=4408 bloomberg_rules=15 (rc 0)",
+   "denominator": "1 of 1 record; 21,102,041 position rows, 15,993,996 unpriced; 2 legs summing to 15,993,996 rows and 4,408 securities; 15 rule citations",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB65bm2-AC2",
+   "criterion_verbatim": "both request documents exist, each marked written and not sent, each with its security list.",
+   "method": "command",
+   "invocation": "python -c \"import io;D='org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~95/';y=io.open(D+'PRICE_REQUEST_YAHOO.md',encoding='utf-8').read();b=io.open(D+'PRICE_REQUEST_BLOOMBERG.md',encoding='utf-8').read();print('PRICE-REQUESTS-STATUS yahoo_not_sent=%s bloomberg_not_sent=%s yahoo_csv_rows=%d bloomberg_csv_rows=%d'%('STATUS: WRITTEN, NOT SENT' in y,'STATUS: WRITTEN, NOT SENT' in b,len(io.open(D+'PRICE_REQUEST_YAHOO.csv',encoding='utf-8').read().splitlines())-1,len(io.open(D+'PRICE_REQUEST_BLOOMBERG.csv',encoding='utf-8').read().splitlines())-1))\"",
+   "expect": "PRICE-REQUESTS-STATUS yahoo_not_sent=True bloomberg_not_sent=True",
+   "output_evidence": "PRICE-REQUESTS-STATUS yahoo_not_sent=True bloomberg_not_sent=True yahoo_csv_rows=3102 bloomberg_csv_rows=1306 (rc 0)",
+   "denominator": "2 of 2 request documents carry the status line STATUS: WRITTEN, NOT SENT; 3,102 Yahoo and 1,306 Bloomberg csv data rows",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB65bm2-AC3",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the Bloomberg request is one a seat that read integrations/bloomberg/READ_HERE.md would write; the unblank counts are stated as upper bounds with their denominator; the legs follow the build's own grouping and Andrew's word; nothing was sent.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read PRICE_REQUEST_BLOOMBERG.md, PRICE_REQUEST_YAHOO.md and PRICE_REQUESTS.json (15 rule citations, 11 evidence rows, 11 not_established items)",
+   "output_evidence": "Bloomberg request: READ_HERE.md read in full; it neither forbids nor establishes historical closes for fixed income and other securities by CUSIP back to 2013 and says so; budget (120,000 points a day, bbg_budget.json:2-3) and queue (CLAUDE.md:267) cited; unblank shares of 1,559,722 blank-for-price account-days: Yahoo alone 80.60 percent, Bloomberg alone 7.63 percent, both needed 11.76 percent, stated as upper bounds; grouping copied from commonwealth_price_need_file.py:41,45-46; no network call, nothing sent; no verdict given by the worker",
+   "denominator": "1,559,722 blank-for-price account-days of 1,669,040; 4,408 unpriced securities; 21,102,041 position rows",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "ADVI_COTBKF-D2-W95-S1"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~95/ADVI_COTBKF.TO-CB-bm-2.price-requests.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB65bm2-AC1)",
+   "result": "PRICE-REQUESTS-RECORD position_rows=21102041 unpriced_position_rows=15993996 legs=2 leg_rows_sum=15993996 unpriced_securities=4408 leg_securities_sum=4408 bloomberg_rules=15"
+  },
+  {
+   "tool": "python",
+   "invocation": "python -c (CB65bm2-AC2 as amended)",
+   "result": "PRICE-REQUESTS-STATUS yahoo_not_sent=True bloomberg_not_sent=True yahoo_csv_rows=3102 bloomberg_csv_rows=1306 (rc 0)"
+  }
+ ]
+}
