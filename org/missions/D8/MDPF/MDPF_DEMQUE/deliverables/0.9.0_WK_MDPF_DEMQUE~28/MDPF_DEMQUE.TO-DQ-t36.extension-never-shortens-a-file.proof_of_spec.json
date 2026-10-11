@@ -21,7 +21,10 @@
       "commit_or_etag": "65759b0327",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Committed on wk-MDPF_DEMQUE-28 only (safe-commit, commit-gate clean, msg-verify MATCH). _latest_valid_to(idx) = max valid_to over price_store.index rows; plan() raises SystemExit when frontier < latest_end, naming the frontier and latest valid_to. apply() calls plan() first, so a refused plan writes no request file and resets no pacer entry. The --plan JSON keys are unchanged. Nothing applied; no served, pacer or queue state touched.",
-      "artifact_covered_by": ["DQ9-t36-AC1", "DQ9-t36-AC2"]
+      "artifact_covered_by": [
+        "DQ9-t36-AC1",
+        "DQ9-t36-AC2"
+      ]
     },
     {
       "path_or_key": "data/mdpf/scripts/demque/test_demque_extend_guard.py",
@@ -29,7 +32,9 @@
       "commit_or_etag": "65759b0327",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Committed with extend_frontier.py. The three named tests use a LOCAL store under tmp_path, a pacer JSON and a queue folder in tmp_path, no network, no S3. The apply test asserts the pacer bytes and the queue snapshot are identical after a refused apply. test_demque_extend_frontier.py is unedited and passes 3 of 3 with the guard.",
-      "artifact_covered_by": ["DQ9-t36-AC1"]
+      "artifact_covered_by": [
+        "DQ9-t36-AC1"
+      ]
     },
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
@@ -37,6 +42,13 @@
       "commit_or_etag": "ee2edf15ab",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Row MDPF_DEMQUE-D1-W28-S1 appended (BLOCKING, INERT, UNDER_INVESTIGATION). surprise-row-gate passed: 1 new row of 44 total. No existing row edited."
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t36.extension-never-shortens-a-file.md",
+      "kind": "doc",
+      "commit_or_etag": "4f98d56d9c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Issuer amendment (2.0.0_SA_COO~Q1) pulled into wk-MDPF_DEMQUE-28 by git merge --no-edit (merge commit d32dffc03b). The AC2 arm is 2026-06-15; the order's status flipped to complete by this worker on the same commit as this instance."
     }
   ],
   "acceptance": [
@@ -52,13 +64,12 @@
     },
     {
       "criterion_id": "DQ9-t36-AC2",
-      "criterion_verbatim": "DQ9-t36-AC2 -- on the REAL served store (S3 read only): `--plan --today 2026-06-30` exits non-zero with no JSON plan and names the store's latest `valid_to`; `--plan --today 2026-10-12` still prints a plan ending 2026-10-12 with 141 symbols.",
+      "criterion_verbatim": "DQ9-t36-AC2 -- on the REAL served store (S3 read only): `--plan --today 2026-06-15` exits non-zero with no JSON plan and names the store's latest `valid_to`; `--plan --today 2026-10-12` still prints a plan ending 2026-10-12 with 141 symbols. (Amended by the issuer 2.0.0_SA_COO~Q1, commit 4f98d56d9c: the arm is 2026-06-15, not 2026-06-30.)",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t36_real.py",
-      "output_evidence": "early: rc=0 {\"cells\": 486732, \"end\": \"2026-06-30\", \"finish_date\": \"2026-06-30\", \"frontier\": \"2026-06-30\", \"request_id\": \"STANDING-T1-EXTEND-2026-06-30\", \"start\": \"2013-04-08\", \"symbols\": 141}; late: rc=0 end=2026-10-12 symbols=141; GUARD-REAL-BAD arms=early_refused,early_names_valid_to; rc=1",
-      "denominator": "1 of 3 arms PASS (late_plans); early_refused and early_names_valid_to FAIL",
-      "status": "FAIL",
-      "status_reason": "The criterion's premise does not hold on the live store. The live read (ps.index over ps.s3_root(), 141 rows) gives max valid_to 2026-06-23 (96 rows at 2026-06-22, 45 at 2026-06-23). 2026-06-30 is AFTER that end, so the specified guard (refuse a frontier before latest valid_to) correctly plans it and extends the store, it does not shorten it. Refusing 2026-06-30 would block every normal daily extension. The criterion was not weakened. Recorded as BLOCKING surprise MDPF_DEMQUE-D1-W28-S1; the order stays pending.",
+      "output_evidence": "early: rc=1 frontier 2026-06-15 is before the store's latest valid_to 2026-06-23: the extension never shortens a served file; late: rc=0 end=2026-10-12 symbols=141; GUARD-REAL-OK a frontier before the store's end is refused; 2026-10-12 plans 141 symbols; AC2 rc=0",
+      "denominator": "3 of 3 arms PASS (early_refused, early_names_valid_to, late_plans)",
+      "status": "PASS",
       "expect": "GUARD-REAL-OK"
     }
   ],
@@ -85,8 +96,8 @@
       "reason": "The order bounds these out. The AC2 reads are read-only index and plan calls."
     },
     {
-      "item": "DQ9-t36-AC2 early arm not met: the guard does not refuse --today 2026-06-30 on the live store.",
-      "reason": "Premise failure, not a weakened check: 2026-06-30 is after the store's latest valid_to 2026-06-23. Refusing a frontier after the store's end would block the normal daily extension. Surprise row MDPF_DEMQUE-D1-W28-S1 (BLOCKING) carries it."
+      "item": "The AC2 early arm was first measured at 2026-06-30 (a frontier after the store's end); the issuer amended it to 2026-06-15 (commit 4f98d56d9c).",
+      "reason": "Issuer defect in the check, recorded as MDPF_DEMQUE-D1-W28-S1 (BLOCKING, INERT). The guard as built is unchanged; the 2026-06-30 plan is correct and extends the store."
     }
   ],
   "surprises": [
