@@ -1,0 +1,111 @@
+{
+ "schema_version": "1.0",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-437",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-437.sections-response-members-typed-for-the-portal-generator.md",
+  "group": "OTHER",
+  "vintage_commit": "1fa968dd21"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "1fa968dd21",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-437.sections-response-members-typed-for-the-portal-generator.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~295",
+ "artifacts_produced": [
+  {
+   "path_or_key": "docs/contracts/investor-reporting/v1/responses/analysis-report.response.schema.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "repo file only; data.properties members typed (four by v1 $ref, sections by type); Opal-form members carry type/const plus an unconditional v2 $ref; no deploy, no AWS call",
+   "artifact_covered_by": [
+    "IB135-1-AC1",
+    "IB135-1-AC2",
+    "IB135-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~295/IB135-1_generator_record.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record: generator command, exit code 0, control exit 1, three portal test result lines, 28 files status-listed (1 with content change), 0 portal files committed",
+   "artifact_covered_by": [
+    "IB135-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~295/IB135-1_portal_wire_regenerated.diff",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "git diff of the portal worktree after the generator ran on the changed schema (responses.ts only has a content change); not committed in portal/",
+   "artifact_covered_by": [
+    "IB135-1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB135-1-AC1",
+   "criterion_verbatim": "IB135-1-AC1 -- every member under data.properties and under each anyOf form is typed, and IB-pr-432's four arms still hold.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r135/p135_cells.py\" . IB135-1-AC1",
+   "expect": "IB135-1-AC1 PASS",
+   "output_evidence": "OK: every member is typed; the two closed forms still validate and refuse as IB-pr-432's arms require | IB135-1-AC1 PASS",
+   "denominator": "every member under data.properties (6) and under both anyOf forms; 4 of 4 IB130 arms",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB135-1-AC2",
+   "criterion_verbatim": "IB135-1-AC2 -- the portal generator ran on the changed schema in this worktree, exit 0, and IVE98, F14-AC13 and F57-AC2 pass.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r135/p135_cells.py\" . IB135-1-AC2",
+   "expect": "IB135-1-AC2 PASS",
+   "output_evidence": "OK: generator exit 0 at portal b92696c1ed; 3 of 3 named portal tests pass; 28 wire file(s) rewritten, 0 committed here | IB135-1-AC2 PASS",
+   "denominator": "3 of 3 named portal tests; control (base schema) exit 1 naming request_ref",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB135-1-AC3",
+   "criterion_verbatim": "IB135-1-AC3 -- the _contracts suite and ops/tests/test_owned_report.py fail only the two base failures and pass at least 235, inside 110 seconds.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r135/p135_cells.py\" . IB135-1-AC3",
+   "expect": "IB135-1-AC3 PASS",
+   "output_evidence": "FAIL: new failures ['test_the_consumer_fixture_source_is_named_and_non_empty', 'test_the_operation_map_covers_the_consumers_own_denominator']; 4 failed, 233 passed in 22.57s | IB135-1-AC3 FAIL",
+   "denominator": "237 tests: 4 failed + 233 passed as run here; 2 failed + 235 passed with the portal fixture file absent",
+   "status": "FAIL",
+   "status_reason": "Not this schema: this worktree carries the provisioned nested portal/, so test_seam_paired.portal_root() reads its fixtures (17 smoke entries, pin 12) instead of the primary checkout's; the BASE schema gives the same 4 failed, 233 passed here. Measured with portal/src/pages/InvestorReporting/fixtures/smoke/default.json moved aside for the run and restored after: 2 failed (all among the 2 base failures), 235 passed (base 235), the check printed its pass line. The criterion as written fails in this worktree; cause in row IRPT_BCKEND-D2-W295-S3."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative control: AC1 run on a scratch root holding the BASE response schema (git show HEAD:<path>) must FAIL.",
+   "expected": "IB135-1-AC1 FAIL naming the five description-only members",
+   "observed": "FAIL: 5 member(s) carry no $ref, const, enum or type: ['data/request_ref', 'data/sections', 'data/extraction_validation', 'data/undated_sections', 'data/extraction_coverage'] | IB135-1-AC1 FAIL | rc=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 run twice at the same bytes in this worktree",
+   "observed": "IB135-1-AC1 PASS both times",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "IRPT_BCKEND-D2-W295-S1",
+  "IRPT_BCKEND-D2-W295-S2",
+  "IRPT_BCKEND-D2-W295-S3"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/proof-of-spec-check.py <instance>",
+   "result": "see final report"
+  }
+ ]
+}
