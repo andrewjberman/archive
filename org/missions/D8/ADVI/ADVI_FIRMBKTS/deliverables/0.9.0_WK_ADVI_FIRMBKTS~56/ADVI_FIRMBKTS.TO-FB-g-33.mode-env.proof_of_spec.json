@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-33",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-33.exec-summary-mode-env.md",
+    "group": "OTHER",
+    "vintage_commit": "9c6d5ea3ba"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~56",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "9c6d5ea3ba",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-33.exec-summary-mode-env.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/exec-summary/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "153ae65e30",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 153ae65e30 on wk-ADVI_FIRMBKTS-56 (LOCAL); the environment variables of exec_summary_generator are the base map through merge() plus one conditional BD_PLATINUM_MODE; the conditional adds nothing while var.platinum_mode is empty. No plan, apply or AWS call; the variable is set nowhere.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/exec-summary/variables.tf",
+      "kind": "terraform",
+      "commit_or_etag": "153ae65e30",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 153ae65e30 on wk-ADVI_FIRMBKTS-56 (LOCAL); variable platinum_mode declared as string, default empty, validation admits exactly empty, legacy and canonical. No .tfvars file and no other default is added.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 reads the variable (declared, string, default empty, validated), the environment (the base's map plus one conditional), that the base's lines are kept and that the formatter is clean. The invocation terminates inside its bound.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-56 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_modeenv.py --arms var --cell exec --root /c/dev/wk-firmbkts-56 --base 9c6d5ea3ba; echo \"exit=$?\"",
+      "expect": "ROUND 4 MODE ENV: 4 of 4 arms",
+      "output_evidence": "  E1 variable declared=True default empty=True validation=True\n  E2 base keys kept=True verbatim=True merge=True conditional=True\n  E3 base lines kept 183 of 183 (env block lines aside); other files changed: []\n  E4 fmt rc=0\nPASS E1 the variable is declared, string, default empty, validated to the three values\nPASS E2 the environment is the base's map plus one conditional BD_PLATINUM_MODE\nPASS E3 dormant: base lines kept in order and no other file of the root changes\nPASS E4 terraform fmt reads clean on the changed files\nROUND 4 MODE ENV: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms PASS; 183 of 183 base lines kept in order; 0 other files of the root changed; 5 base keys kept verbatim",
+      "status": "PASS",
+      "status_reason": "Mechanical: the exit code is 0 and the output line reads 4 of 4 arms. The for-expression wrapper is a deliberate form choice recorded as surprise ADVI_FIRMBKTS-D1-W56-S1 (the check's E3 match stops at the rewrapped variables = line; the literal merge form printed 3 of 4 arms)."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the write-surface bound. Each invocation terminates inside its bound.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-56 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-56 --allow infra/aws/terraform/exec-summary/main.tf --allow infra/aws/terraform/exec-summary/variables.tf --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~56/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/exec-summary/main.tf --require infra/aws/terraform/exec-summary/variables.tf; echo \"exit=$?\"",
+      "expect": "ROUND 4 SCOPE: OK",
+      "output_evidence": "  CHANGED infra/aws/terraform/exec-summary/main.tf\n  CHANGED infra/aws/terraform/exec-summary/variables.tf\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md\nROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing\nexit=0",
+      "denominator": "3 changed paths; 0 outside the four allowed surfaces; 0 required paths missing",
+      "status": "PASS",
+      "status_reason": "Mechanical: exit 0 and the scope line reads OK with 0 outside. The scope check reads the committed diff against base; this instance's own commit adds only the deliverables folder, which the allow list covers."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a copy of the exec-summary root in .scratch/mutant (base main.tf from 9c6d5ea3ba, the new variables.tf) run through r4_modeenv.py --arms var --cell exec: the conditional is absent, so E2 must fail",
+      "expected": "E2 FAIL and 3 of 4 arms, exit 1",
+      "observed": "FAIL E2 the environment is the base's map plus one conditional BD_PLATINUM_MODE; ROUND 4 MODE ENV: 3 of 4 arms; exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 check run twice on the unchanged committed tree; md5 of the full output compared across the two runs",
+      "observed": "3eb64472ad6acbdc13f88330158daab6 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform validate and terraform plan of the exec-summary root are not run",
+      "reason": "the bound: no plan in the root and no AWS call; the for-expression's plan equality with the base map is INFERRED from HCL semantics, not measured"
+    },
+    {
+      "item": "the six pre-existing non-ASCII lines of main.tf (section signs in base comments) are not touched",
+      "reason": "they are base text outside the edit; the added lines are ASCII (counted: 0 non-ASCII added lines)"
+    },
+    {
+      "item": "the checker's E3 defect (an in-order match with no skip) is not repaired",
+      "reason": "r4_modeenv.py is the COO's file and read-only for this order; recorded as ADVI_FIRMBKTS-D1-W56-S1"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W56-S1: the literal merge form of the environment fails r4_modeenv.py E3 (its in-order match never skips a base line; 83 of 183 kept, 3 of 4 arms); the worker wrapped the merge in a for-expression that keeps variables = { byte-identical, which reads 183 of 183 and 4 of 4 arms"
+  ],
+  "session_log": "no session log is committed; the record is the commit 153ae65e30 (LOCAL on wk-ADVI_FIRMBKTS-56) and the surprise row ADVI_FIRMBKTS-D1-W56-S1 in INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_modeenv.py --arms var --cell exec --root /c/dev/wk-firmbkts-56 --base 9c6d5ea3ba",
+      "result": "ROUND 4 MODE ENV: 4 of 4 arms; exit=0 (the literal merge form read 3 of 4 arms, exit=1, before the for-form)"
+    },
+    {
+      "tool": "terraform",
+      "invocation": "terraform fmt -check on infra/aws/terraform/exec-summary/main.tf and variables.tf (terraform v1.15.8)",
+      "result": "rc=0, no formatting diff"
+    }
+  ]
+}
