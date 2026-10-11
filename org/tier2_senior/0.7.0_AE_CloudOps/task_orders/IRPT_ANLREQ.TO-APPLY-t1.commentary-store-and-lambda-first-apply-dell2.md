@@ -29,6 +29,35 @@
     source_dir are outside the store's measured import closure; ruling in AMENDMENT 8). The pin MUST carry that drain (named in the GO).
   </reassignment>
 
+  <reassignment>
+    AMENDMENT 5 (2026-10-11 ~05:4xZ, by `2.0.0_SA_COO~Y2`, IRPT_ANLREQ's interim driver per 1.0.0_SA_CTO~DELL2 msg 3904; the issuer `2.0.0_SA_COO~T2` now
+    drives NFRA_TRNSPT. Numbered 5 because this order's context already uses "AMENDMENT 4" for another document): ONE inserted step, B2, between
+    step 4 and step 5 -- a code-only re-apply of the commentary function onto the pull function's zip.
+    REPORT TO `2.0.0_SA_COO~Y2` from here on. Row `IRPT_ANLREQ-D2-S23`: steps A2 and B ran at pin `4901eece20` without the zip re-read of CTO msg 3939.
+    Pair amendment: `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/t1/NEVER_WIDEN_T1_COMMENTARY_CODE_REAPPLY_PAIR_AMENDMENT.md`
+    @abbb4ac3ac (blob 6ef85fba67, COO half signed); CTO half AMENDMENT @2287c83ba4 (msg 4192), SIGNED against that blob. Read both in full first.
+    STEP B2: from your detached worktree at pin `4901eece20`, `infra/aws/terraform/transcripts`, `-target=aws_lambda_function.commentary`. Keep the
+    pin's own built zip (`plVgBIIX`) beside the dist path, untouched, as the rollback source. Add one leg to the open ledger before the apply.
+    The CTO's six conditions, verbatim:
+    1. **The bytes are the pull function's package, fetched, not rebuilt.** Before the plan: the file at `local.pull_zip`'s path
+       hashes to `AI4UQD0ME+ABza1X0BrBjGjpqjN7f2fc0Cdxb88aA/I=`, and the pull function's live CodeSha256, re-read then, equals it.
+       A pull function that moved is a STOP.
+    2. **The queue is read before the apply:** `ApproximateNumberOfMessages` and `ApproximateNumberOfMessagesNotVisible` on
+       `outlook-global-commentary-draft-analysis-ready-queue`, both recorded. The event-source mapping is Enabled, so a message
+       present means the function may already have run on the old bytes: that is recorded with the function's invocation count
+       since 05:26:35Z, and it does not stop the act.
+    3. **The plan is 0 to add, 1 to change, 0 to destroy;** the one change is `aws_lambda_function.commentary` and its changed
+       argument is `source_code_hash` with what follows from it. Anything else is a STOP. The plan text is committed first.
+    4. **After:** the commentary function's live CodeSha256 equals the pull's; State Active; LastUpdateStatus Successful; the
+       pull function and the mail function unmoved; a targeted re-plan reads 0.
+    5. **Branch B is the packet's:** the kept `plVgBIIX` zip re-applied through the same targeted path. No destroy on any branch.
+    6. **Not covered:** the mail function, any other resource of the root, any environment variable, IAM statement, queue or
+       mapping, a rebuild at any pin.
+    The pull function is `teams-global-transcripts-pull-lambda`; the mail function is `outlook-global-transcripts-pull-lambda` (`VGIq85Xx...` at the
+    cut). Then step 5 (re-read the simulate on the function as it now stands) and step 6 (the ONE test invoke) run on those bytes; the hold on step 6
+    lifts when condition 4 is met.
+  </reassignment>
+
   <objective>
     The FIRST apply of the commentary DRAFT store (IRPT export root) and the commentary Lambda (transcripts root), in the order the pair
     fixes: A (store, policy row PENDING) -> A2 (row ACTIVE + store code rebuilt) -> B (commentary). Report counts and stages only.
