@@ -1,0 +1,62 @@
+{
+  "question": "On each surface that reads a users PROFILE row's allowedFirmIds, what does no row, no attribute, an empty list, a list of firms, the literal ALL, and a malformed value mean today?",
+  "files_read": [
+    "infra/aws/lambda/ticket_center/lambda_function.py:360",
+    "infra/aws/lambda/investor-reporting/_authz/served.py:1100",
+    "infra/aws/lambda/investor-reporting/_authz/served.py:1138",
+    "infra/aws/lambda/investor-reporting/_authz/served.py:1207",
+    "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1669",
+    "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:296"
+  ],
+  "surfaces": [
+    {
+      "surface": "ticket service _profile_scope (internal callers)",
+      "where": "infra/aws/lambda/ticket_center/lambda_function.py:360-390",
+      "no_row": "EVERY_FIRM (line 376-377 returns None,None = no scope; a failed or ambiguous lookup is REFUSED 403, lines 373-381)",
+      "row_without_the_attribute": "EVERY_FIRM (line 383-384, None = no scope)",
+      "empty_list": "EVERY_FIRM (line 386-387, None = no scope)",
+      "list_of_firms": "THE_LISTED_FIRMS (line 388-389, frozenset of the ids)",
+      "the_literal_ALL": "NO_FIRM (inside a list it is a plain id that matches nothing, per the docstring lines 363-364; a bare string ALL is not a list and is REFUSED, line 390); how the frozenset is applied downstream was not opened",
+      "malformed": "REFUSED (line 390, 403 firm scope malformed; includes a list with a non-string or empty member)"
+    },
+    {
+      "surface": "investor-reporting internal firm reader _internal_allowed_firms (applies only when a firm other than the caller's own is selected)",
+      "where": "infra/aws/lambda/investor-reporting/_authz/served.py:1138-1166 and caller 1221-1229",
+      "no_row": "EVERY_FIRM (line 1152-1153 returns None = unchanged, any registered firm selectable)",
+      "row_without_the_attribute": "EVERY_FIRM (line 1152-1153)",
+      "empty_list": "EVERY_FIRM (line 1161-1163, None = unchanged; a list of only blank strings also reads as empty)",
+      "list_of_firms": "THE_LISTED_FIRMS (line 1166; selected firm outside it is refused FIRM_BINDING, line 1228-1229)",
+      "the_literal_ALL": "REFUSED (line 1164-1165 raises; bare string ALL raises at 1157-1158; caller turns a raise into FIRM_BINDING, 1226-1227)",
+      "malformed": "REFUSED (non-list or non-string member raises, 1157-1160; any read error raises)"
+    },
+    {
+      "surface": "investor-reporting service firm reader _service_allowed_firms (applies only when a firm other than the caller's own is selected)",
+      "where": "infra/aws/lambda/investor-reporting/_authz/served.py:1100-1136 and caller 1217-1220",
+      "no_row": "NO_FIRM (line 1121-1122 returns [], refused, never unrestricted)",
+      "row_without_the_attribute": "NO_FIRM (line 1123-1124 returns [])",
+      "empty_list": "NO_FIRM (line 1130-1134 yields an empty list, so no other firm matches)",
+      "list_of_firms": "THE_LISTED_FIRMS (line 1130-1134; a comma-separated string is also split, 1128-1129)",
+      "the_literal_ALL": "EVERY_FIRM (line 1126-1127 returns None only for the string ALL; an ALL member inside a list is just an id, line 1134, so NO_FIRM there)",
+      "malformed": "NO_FIRM (line 1132-1133 and 1135-1136 return [] = restricts everything; any read error likewise)"
+    },
+    {
+      "surface": "partners-data lambda, consumer of the portal authorizer's context string",
+      "where": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:296-310 and 1669-1700",
+      "no_row": "NOT_READ (what the authorizer emits for no row is in the authorizer, not found in this checkout)",
+      "row_without_the_attribute": "NOT_READ for what the authorizer emits; if the context value arrives empty or absent: REFUSED 401 (line 1698-1700) unless the caller's firm is opal-capital, then EVERY_FIRM (line 1688-1690)",
+      "empty_list": "NOT_READ for what the authorizer emits; an empty context string behaves as the absent case above",
+      "list_of_firms": "THE_LISTED_FIRMS (context is read as a comma-separated string, lines 308-310; the authorizer's join was not read)",
+      "the_literal_ALL": "EVERY_FIRM (line 308-309)",
+      "malformed": "NOT_READ (no validation of the string seen; a non-matching string lists no firm)"
+    }
+  ],
+  "where_the_three_surfaces_disagree": [
+    "no_row: ticket service EVERY_FIRM; investor-reporting internal EVERY_FIRM; investor-reporting service NO_FIRM",
+    "row_without_the_attribute: ticket service EVERY_FIRM; investor-reporting internal EVERY_FIRM; investor-reporting service NO_FIRM",
+    "empty_list: ticket service EVERY_FIRM; investor-reporting internal EVERY_FIRM; investor-reporting service NO_FIRM",
+    "the_literal_ALL: ticket service NO_FIRM (in a list) or REFUSED (bare string); investor-reporting internal REFUSED; investor-reporting service EVERY_FIRM",
+    "malformed: ticket service and investor-reporting internal REFUSED; investor-reporting service NO_FIRM (fail closed without a refusal)"
+  ],
+  "what_was_not_read": "The portal authorizer itself: no folder under infra/aws/lambda carries an authorizer name and the only context consumer found (partners-data) says the authorizer lives elsewhere (a portal-authorizer function), so what it puts in context for no row, empty list or malformed is NOT_READ. The ticket service's use of the returned frozenset (_in_profile_scope) and the other allowedFirmIds hits (data_refresh, advi/billing-read, intake/uploads.py, _scope/interactive_access.py, ycharts current_authority.py, canonical_profile_reads.py) were not opened. The ticket service no-row cell is the base state; TO-R7-nr1 is the order that changes it to a refusal.",
+  "claim": "inferred"
+}
