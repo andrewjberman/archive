@@ -1,0 +1,118 @@
+{
+ "schema_version": "1.0",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-427",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-427.cottonwood-lag-by-account.md",
+  "group": "OTHER",
+  "vintage_commit": "26e850cdfc"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "26e850cdfc",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-427.cottonwood-lag-by-account.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~286",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~286/IB125-1_lag_by_account.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read only; 583,996 moved rows over 85 graded days, 1,000 accounts classed, counts only; no AWS write, no deploy",
+   "artifact_covered_by": [
+    "IB125-1-AC1",
+    "IB125-1-AC2",
+    "IB125-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~286/IB125-1_LAG_BY_ACCOUNT_READ.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "one-page read for the CTO; account split, field split, mixing, time, neither, not measured",
+   "artifact_covered_by": [
+    "IB125-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~286/ib427_by_account.py",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the row-level by-account instrument with its planted control (--control)",
+   "artifact_covered_by": [
+    "IB125-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~286/ib427_fetch.py",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "S3 list/get reads into a cache outside the worktree; AccountID digested at read time",
+   "artifact_covered_by": [
+    "IB125-1-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB125-1-AC1",
+   "criterion_verbatim": "IB125-1-AC1 -- row totals add up (own + prior + neither == moved) and the accounts are classed with no remainder: always_own + always_prior + mixed + no_moved_rows == accounts read.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r125/p125_cells.py\" . IB125-1-AC1",
+   "expect": "IB125-1-AC1 PASS",
+   "output_evidence": "OK: 583996 moved rows over 85 days add up; 1000 accounts classed with no remainder {'always_own': 553, 'always_prior': 0, 'mixed': 61, 'no_moved_rows': 386} | IB125-1-AC1 PASS | rc=0",
+   "denominator": "583,996 moved rows = 578,815 own + 3,278 prior + 1,903 neither over 85 graded days; 1,000 accounts = 553 + 0 + 61 + 386; class row blocks sum to 583,996",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB125-1-AC2",
+   "criterion_verbatim": "IB125-1-AC2 -- every field split sums to the row totals (or its absence carries a reason), and the neither rows are split by account class and sum to the neither total.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r125/p125_cells.py\" . IB125-1-AC2",
+   "expect": "IB125-1-AC2 PASS",
+   "output_evidence": "OK: 5 field split(s) each sum to the rows; the 1903 neither rows are split by account class | IB125-1-AC2 PASS | rc=0",
+   "denominator": "5 of 5 field splits sum to 583,996 moved rows; neither by class 1,385 + 0 + 518 = 1,903",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB125-1-AC3",
+   "criterion_verbatim": "IB125-1-AC3 -- the control reports the planted lagged account alone, and neither committed output carries an account id.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r125/p125_cells.py\" . IB125-1-AC3",
+   "expect": "IB125-1-AC3 PASS",
+   "output_evidence": "OK: the planted account is reported alone; 0 account-id tokens in the 2 committed outputs | IB125-1-AC3 PASS | rc=0",
+   "denominator": "1 of 1 planted account reported alone, 0 reported on the clean copy; 0 account-id shaped tokens in 2 of 2 committed outputs",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative control: AC1 run against a scratch copy of the output (scratch root outside the worktree) with rows.own raised by 1 must FAIL.",
+   "expected": "IB125-1-AC1 FAIL, counts do not add up",
+   "observed": "FAIL: rows counts do not add up: [583996, 578816, 3278, 1903] | IB125-1-AC1 FAIL | rc=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the instrument run twice over the same cache (python -I ib427_by_account.py), outputs compared byte for byte (cmp)",
+   "observed": "IDENTICAL; also python -I ib427_by_account.py --control: reported [ACCT_PLANTED], clean fixture []",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "IRPT_BCKEND-D2-W286-S1"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/proof-of-spec-check.py <instance>",
+   "result": "see final report"
+  }
+ ]
+}
