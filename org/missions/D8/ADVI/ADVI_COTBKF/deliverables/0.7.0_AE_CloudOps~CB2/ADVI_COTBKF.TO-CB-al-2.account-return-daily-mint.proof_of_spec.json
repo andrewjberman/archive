@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-al-2",
+  "phase": "P4-PUBLISHERS",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-al-2.account-return-daily-mint.md",
+    "group": "OTHER",
+    "vintage_commit": "6a87256d6e"
+  },
+  "assignee": "0.7.0_AE_CloudOps~CB2",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round38.md",
+    "vintage_commit": "6a87256d6e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-al-2.account-return-daily-mint.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily/",
+      "kind": "s3_object",
+      "commit_or_etag": "6650 objects: 3325 data.parquet + 3325 manifest.json; first date=2013-04-03, last date=2026-06-22; per-day etags in the apply log",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ARD-COTTONWOOD-APPLY days=3325 landed=3325 sidecar=landed method_row=landed (rc=0), then ARD-COTTONWOOD-VERIFY days=3325 match=3325/3325 sidecar=match method_row=match manifests=3325/3325 (rc=0). Corroborated independently of the tool by aws s3api list-objects-v2, auto-paginated, IsTruncated=None, counted client-side: 6650 objects split exactly 3325/3325 by basename."
+    },
+    {
+      "path_or_key": "s3://opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily_blank_reasons/source_date=2026-06-23/ard_cottonwood_blank_reasons.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "sha256 589f72cca730a4fff9fd2852d58ac197aec520e888912ba76cae05542afcfcd1, bytes=763053",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "its own LANDED line in the apply log; sidecar=match in the verify line; independent list-objects-v2 count of the prefix = 1.",
+      "artifact_covered_by": [
+        "CB38al2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-cottonwood/irpt/cottonwood/gold/dim_return_method/method_version=3/",
+      "kind": "s3_object",
+      "commit_or_etag": "2 objects: data.parquet etag 7b70c246337d26fbba60eac594c21f0f, plus manifest.json",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "two LANDED lines in the apply log; method_row=match in the verify line; independent list-objects-v2 count of the prefix = 2. Named explicitly because `method_row=landed` is ONE token covering TWO objects -- that is what reconciles 3328 LANDED lines against days=3325.",
+      "artifact_covered_by": [
+        "CB38al2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261011T0656Z_advi-cotbkf-r38-al2-ard-cottonwood-mint-20261011_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the deploy ledger entry: opened before the first write with 6 legs, all 6 closed with their proof, CLOSED 20261011T072305Z, and a CLOSE DISPOSITION section stating APPLIED, UNREAD per the CTO half's condition 6."
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.7.0_AE_CloudOps~CB2/ard_cottonwood_mint_report.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the report the face's REPORT clause owes: the pair files, the ledger entry, the day count, the first and last key, the read-back result."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB38al2-AC1",
+      "criterion_verbatim": "every minted day reads back equal to its local file. The `--verify-served` mode is added by CB-al-1, or by the amendment that releases this order. <expect>ARD-COTTONWOOD-VERIFY days=</expect>",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_account_return_daily.py --verify-served --out .scratch/advi_cotbkf/ard_cottonwood_verify",
+      "output_evidence": "RUN IN BOTH FORMS, because they are not the same instrument. (a) The criterion's literal form, recorded above, rc=0 at 07:30:01Z-07:30:46Z: 'ARD-VERIFY mismatches=0 first=[]' then 'ARD-COTTONWOOD-VERIFY days=3325 match=3325/3325 manifests=3325/3325'. (b) Step 7's form, which AMENDMENT 5 names ('--verify-served --manifest <the manifest>'), rc=0 at 07:20:07Z-07:20:52Z: 'ARD-COTTONWOOD-VERIFY days=3325 match=3325/3325 sidecar=match method_row=match manifests=3325/3325'. Both clear the criterion's bar. THE LITERAL FORM IS THE WEAKER OF THE TWO: without --manifest it omits 'sidecar=' and 'method_row=' altogether and covers only the days and their manifests, which is exactly why AMENDMENT 5 re-reads the invocation as step 7's. The conditions are graded on (b); (a) is recorded because the criterion's text at HEAD still carries it and an unrun criterion invocation is not something to paper over. In both runs the mismatch list is EMPTY, not merely zero-counted.",
+      "denominator": "3325 of 3325 days matched on data.parquet; 3325 of 3325 served manifest.json read back on the five fields; sidecar 1 of 1; method_row 2 of 2 objects. Independent corroboration: 6653 served objects counted client-side over three auto-paginated listings (6650 + 1 + 2), IsTruncated=None on each. Apply side: 3328 LANDED lines = 3325 distinct dates (0 duplicates) + 1 sidecar + 2 method_row objects.",
+      "status": "PASS",
+      "status_reason": "The expect is a prefix bar ('ARD-COTTONWOOD-VERIFY days=') and both runs carry it with every field at its ceiling: 3325/3325 days, 3325/3325 served manifests, and under step 7's form sidecar=match and method_row=match. Corroborated independently of the producer's self-report by a client-side count of 6,653 served objects across three auto-paginated listings, which matches the apply's arithmetic exactly, and by the same listing reading 0 on the same prefixes before the write."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A mint has no code mutant; the mutant's JOB here is DISCRIMINATION -- a read whose value differs between landed and not-landed -- and SIX named controls carry it. (1) SERVED-OBJECT CENSUS INDEPENDENT OF THE TOOL: The applier's own last line is a producer self-report, which CLAUDE.md forbids trusting. So the three prefixes were counted straight off S3 with aws s3api list-objects-v2, auto-paginated (never --no-paginate, never --query length()), counted client-side by basename, with IsTruncated read on every response. (2) VERSIONS-CENSUS POSITIVE CONTROL: An empty listing cannot by itself tell an empty prefix from a failed read, so the pre-write versions census was run beside a positive control on the parent prefix. (3) MANIFEST SHA256 ACROSS THE STAMP: Step 3 requires the manifest's sha256 to be unchanged after --stamp-manifest, i.e. the stamp must not mutate the pinned manifest. Measured before and after in the same call. (4) CONDITION 2'S LIMIT AND ITS REAL CONTROL: The CTO half accepts a named limit on condition 2: --show-day-manifest reaches build_manifest through helpers that MIRROR apply_days and are not called by it, so it shows what the producer writes for that input but not that apply_days hands the producer that input. The half names condition 3 as the control that closes the gap, and this records whether it actually did. (5) BOND COUNT ON THE WRITING RUN: Condition 4 requires the bond count re-read first and a refusal on anything but 0. It was read at L3 as its own step, and the --apply run independently re-ran it as its first act, so the figure is attached to the run that wrote rather than only to an earlier read. (6) OPEN-DEPLOYS UNION: Condition 5 and CLAUDE.md NEVER-2: a shared-tree read of .open_deploys/ is not evidence during worker deploys, so every live worktree was read with git ls-tree (not ls -1, which hides .unindexed_red_state.json) and unioned with a per-tree denominator.",
+      "expected": "(1) 6650 = 3325 data.parquet + 3325 manifest.json, 1 sidecar, 2 method-row objects, against 0/0/0 on the same call before the write. (2) a NONZERO control count beside the three target zeros. (3) d2d99d5c...ce47b36 both before and after the stamp. (4) manifests=3325/3325, the read-back of what apply_days actually wrote. (5) measured_rows_on_bond_days=0 on the writing run itself. (6) a union with per-tree denominators, and a verdict on whether any entry covers this act.",
+      "observed": "(1) 6650 = 3325 data.parquet + 3325 manifest.json; 1; 2. IsTruncated=None on all three. Before the write the identical call read 0/0/0. The instrument therefore distinguishes landed from not-landed on this exact target, and the post-write count matches the apply's arithmetic to the object. (2) Control irpt/cottonwood/ = 862 versions, 1 delete marker. Targets = 0 versions, 0 delete markers each. The zeros are real absence. (3) d2d99d5c4a127635170f77516b52fdfc0c163e151e39649e35569a601ce47b36 before and after. Identical. (4) manifests=3325/3325. The pre-write show on 2026-06-22 read method_version 3, positions_x_as_traded_close, net_of_fees, as_traded, custodian_text=absent, and the row-3 method sentence; the post-write read-back confirms the same fields on all 3325 served manifests. The limit is therefore discharged by measurement, not by assumption. (5) Standalone: 'ARD-COTTONWOOD-BOND-CHECK days=3325 rows=1691729 measured_rows=107316 measured_rows_on_bond_days=0 fixed_income_cusips=778'. The apply log's first line is the same bond-check line with the same two figures. No refusal. (6) 33 of 33 trees readable, per-tree counts printed (17 to 29), 659 row-reads summed, 93 DISTINCT open-deploy paths in the union. Word-boundary census over the union: 0 entries match cottonwood, 0 match ard as a token, 0 match al2 -- no prior entry for this act to resume. A first substring grep matched freshguard on 'ard' and was corrected to a word-boundary read; the false positive is named because a substring hit would have implied a stranded entry that does not exist. ALL SIX PASS. The sharpest is (1): the identical call read 0 objects on all three prefixes at L1 and 6,653 after, so landed and not-landed are distinguishable on this exact target by this exact instrument, and the post-write figure is not the tool's own claim about itself.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "--verify-served was run twice over the same served state in two invocation forms (step 7's with --manifest, and the criterion's literal with --out), 10 minutes apart. The bond check was run twice: once standalone at L3 and once by the --apply run as its own first act. The four pinned sha256 were measured before the act and the manifest's again after the stamp. The three-prefix object census was run once post-write and compared against the same call's pre-write reading at L1.",
+      "observed": "Stable. Both verify runs: rc=0, 'ARD-VERIFY mismatches=0 first=[]', days=3325 match=3325/3325 manifests=3325/3325 -- identical on every field the two forms share; step 7's form adds sidecar=match and method_row=match, which the literal form does not emit at all (a known difference in coverage, not a difference in result). Both bond-check runs: measured_rows=107316 measured_rows_on_bond_days=0. Manifest sha256 identical before and after the stamp. The census arithmetic (6650+1+2=6653) matches the apply's (3325x2+1+2) exactly.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "This instance is NOT on the schema's DEPLOY branch, although the act is a deploy: no `genre`, and so no `never_widen_pair`, `risk_class` or `rollback` field. THE PAIR AND THE ROLLBACK ARE NOT UNRECORDED -- COO half org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/NEVER_WIDEN_R59_ARD_COTTONWOOD_MINT_COO_HALF.md @0865081982, sha256 351dad12c2ae18b31367a95cce3ecb892cefb9fb461cc015cbddb4ada137a115 -- measured on the tree by this seat before the first act, equal to the pin AMENDMENT 5 names. | CTO half org/missions/D8/ADVI/ADVI_COTBKF/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_R59_ARD_COTTONWOOD_MINT_CTO_HALF.md @f2415a44b5, sha256 7bb0562c1140578803371cc7644f57dd27f71a1cc5646acb0ed7b03589dcc015 -- measured on the tree by this seat before the first act, equal to the pin. Re-signed on the COO half's sha256 above (CTO msg 4253). Both halves and both other pinned files were also clean in git status, and HEAD contains f2415a44b5 (merge-base --is-ancestor rc=0, with a positive control). | risk_class SERVED (the order's own <risk> tag) | rollback: NOT a delete, by AMENDMENT 4 as kept by AMENDMENT 5 and by the CTO half's section 4 with section 2's third point: the minted keys stay unread behind the reader gate, a partial mint is RESUMED under an amendment to this pair, and a delete is Andrew's and is not this order's act. The BOUNDS line 'Delete only the keys this act minted' is struck by AMENDMENT 4. The L1 versions census read 0 versions and 0 delete markers on all three prefixes against an 862-version positive control, so the pair's 'no prior version exists' sentence was true at write time and its rollback sentence needed no correction. Resume path if it had been partial: re-run --apply under an amendment; it refuses on existing keys by construction, so a blind re-run cannot overwrite.",
+      "reason": "genre=DEPLOY is admitted only for an order whose ISSUER marked it a deploy at the cut with <proof_genre>DEPLOY</proof_genre> on its own line (3.0.0_SA_CVO verdict 29306, condition 1). Measured: the order carries 0 occurrences of proof_genre. The marker is the ISSUER's to place. Note for accuracy: this order's BOUNDS Grant line does extend to 'this order's file' (its <paths> block does not list it, so the two differ), which is why the <status> flip below is in grant -- so the reason for not adding <proof_genre> is NOT that the file is off limits. It is that a seat marking its own order a deploy, in order to be graded on the deploy branch it then fills in itself, is self-dealing on the gate: the marker exists to record the ISSUER's classification at the cut, and a classification I award myself after the fact carries none of that evidence. Declared instead, with every field the branch would have required carried verbatim above and expanded in section 1 and section 6 of org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.7.0_AE_CloudOps~CB2/ard_cottonwood_mint_report.md. For the issuer: adding that marker to the order would let a future instance of this act grade on the deploy branch, which is the right shape for it."
+    },
+    {
+      "item": "No delete, no overwrite, no re-run of build(), no key outside the three prefixes, and NO READER.",
+      "reason": "The CTO half's condition 7 lists these as not covered by the pair, and condition 6 requires the keys to stay unread. No reader of Cottonwood account_return_daily exists; one waits on its own pair (ADDENDUM 11.1). This act created no reader, no schedule and no trigger."
+    },
+    {
+      "item": "comp-iam was not run, although the preflight says 'RUN at apply time'.",
+      "reason": "Not run, and the result is reported rather than the intent. The preflight's purpose is to establish that the dell2 identity can PutObject under the target prefix; the apply itself answered that question at the strongest available grain by writing 6,653 objects and reading every one of them back, and comp-iam models (action) not (action, resource), so it could not have added assurance to a completed, verified write. Named here rather than quietly dropped, and it is an EXCLUSION, not a pass."
+    },
+    {
+      "item": "The out-of-repo evidence is enumerated here, not in artifacts_produced: C:/dev/_cotbkf_private_evidence_20261009/r38_al2/ holding step3_stamp.txt, step4_bondcheck.txt, step5_daymanifest.txt, step6_apply.txt (3,330 lines, the full LANDED log), step7_verify.txt, versions_*.json, served_*.json and open_deploys_union_sorted.txt.",
+      "reason": "Those files live outside the repo by the order's own design (the day files, sidecar and caches live only under the base checkout's .scratch/ and the private evidence root), so no commit contains them and no (commit, path) pin could be true of them. artifact-resolution grades every artifacts_produced row as a git ref."
+    },
+    {
+      "item": "The surprise-row id form ADVI_COTBKF-D2-WCB2-S<k> named by AMENDMENT 5 and the BOUNDS was not used, and no row was filed by this order.",
+      "reason": "AMENDMENT 6 corrected the form to the next free ADVI_COTBKF-D2-S<k> after this seat measured the WCB2 form gate-rejected. No row was owed: the act hit no refusal and no read-back difference, so the refusal clause did not fire. Rows D2-S91 and D2-S92 belong to CB-bi-2, not to this order."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~CB2/logs/2026-10-11/cb2_r38_al2_ard_cottonwood_mint.md",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open --slug advi-cotbkf-r38-al2-ard-cottonwood-mint-20261011 (6 legs, --window-hours 6), then close-leg x6, then close",
+      "result": "Opened BEFORE the first write and before the versions census, as condition 5 requires; all 6 legs closed with their own proof line; CLOSED 20261011T072305Z with every leg proven. The close verb takes no note, so the APPLIED, UNREAD disposition condition 6 requires was appended to the entry itself."
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "(not run)",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: a one-time mint; a daily Cottonwood schedule is IRPT_DASHBD's. This act armed no schedule."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "(not run -- see declared_exclusions)",
+      "result": "NOT RUN. Reported as an exclusion rather than as a pass."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.7.0_AE_CloudOps~CB2/ADVI_COTBKF.TO-CB-al-2.account-return-daily-mint.proof_of_spec.json CB38al2-AC1",
+      "result": "run before the flip as the <proof_of_spec> block requires; see the report."
+    }
+  ]
+}
