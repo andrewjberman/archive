@@ -4,6 +4,8 @@
   ml-regress  R5-ml1-AC2  the whole ticket service test folder passes (at least 178)
   fn-fence    R5-fn1-AC1  another firm's caller is refused on a ticket, the list and the report record
   fn-regress  R5-fn1-AC2  the whole ticket service test folder passes (at least 179)
+  c6-fields   R5-c61-AC1  the commentary draft lands on the existing ticket; the ticket records who sent the final commentary
+  c6-regress  R5-c61-AC2  the whole ticket service test folder passes (at least 190)
   ac-read     R5-ac1-AC1  the one-account read's findings file has its keys and every path it cites exists
 
 Each prints <NAME>-OK <detail> or <NAME>-FAIL <reason>; exit 0/1. Every pytest call is bounded at 110 s.
@@ -26,6 +28,15 @@ FN_ROW = ["test_client_of_another_firm_cannot_get_the_ticket",
           "test_caller_scoped_to_another_firm_cannot_record_a_report_as_creator",
           "test_refusals_return_no_field_of_the_other_firms_ticket"]
 FN_MIN = 179  # 175 at the round-5 base plus the 4 tests of TO-R5-fn1
+C6_TESTS = TK_DIR / "test_commentary_same_ticket.py"
+C6_ROW = ["test_commentary_service_sets_the_draft_on_the_existing_ticket",
+          "test_draft_on_a_ticket_of_a_firm_off_the_list_is_refused",
+          "test_draft_is_written_once",
+          "test_only_the_commentary_service_may_set_the_draft",
+          "test_internal_caller_records_commentary_sent_and_the_server_stamps_who_and_when",
+          "test_commentary_sent_is_written_once_and_takes_no_body_field",
+          "test_commentary_sent_outside_the_callers_firm_scope_is_refused"]
+C6_MIN = 190  # 183 at the base of TO-R5-c61 plus its 7 tests
 AC_FILE = Path("org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~20/ONE_ACCOUNT_CHECK_READ.json")
 AC_KEYS = {"question", "files_read", "where_an_account_is_named_in_an_uploaded_file", "can_the_door_count_accounts_today",
            "where_the_check_can_live", "what_was_not_read", "claim"}
@@ -87,6 +98,8 @@ CHECKS = {
     "fn-fence": lambda: named(FN_TESTS, FN_ROW),
     "fn-regress": lambda: regress(TK_DIR, FN_MIN),
     "ac-read": ac_read,
+    "c6-fields": lambda: named(C6_TESTS, C6_ROW),
+    "c6-regress": lambda: regress(TK_DIR, C6_MIN),
 }
 
 
