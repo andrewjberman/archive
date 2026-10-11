@@ -7,8 +7,8 @@ LOCAL or built-dormant cells, `FB-f-8` WORLD (a deploy, applied on the laptop), 
 account SMS preference, executed by the laptop lane), `FB-f-9`, `FB-f-10`, `FB-f-11`, `FB-f-13` WORLD by floor.
 
 `round-close-check.py --project ADVI_FIRMBKTS --round 3`: 13 orders, 8 complete, proofs 8 of 8 structurally OK, judgment=0,
-verdict MAY-CLOSE (FB-f-9, -10, -11, -13 `parked` with owner and conditions; FB-f-12 not complete, outside the verdict:
-see "What is open").
+verdict MAY-CLOSE: 13 orders, 8 complete, 0 not complete (FB-f-9, -10, -11, -12, -13 `parked`, each with owner and
+un-park conditions in its record face; see "What is open").
 
 ## The result
 
@@ -55,7 +55,7 @@ see "What is open").
 | `TO-FB-f-9` | act 2 producers | ~16, ~19, ~20, ~21, ~23 (A to A4) | `b0eebb018d`, `628d9f241b`, `19fb066b50`, `2018982711` | phases A-A4 PASS; phase B **parked** |
 | `TO-FB-f-10` | act 3 delta copy | -- | tool `0223c09037` | **parked** |
 | `TO-FB-f-11` | act 4 router flip | -- | -- | **parked** |
-| `TO-FB-f-12` | SMS delivery-status logging | `0.7.0_AE_CloudOps~FBL` | on CLOUD, `pending` | see below |
+| `TO-FB-f-12` | SMS delivery-status logging | `0.7.0_AE_CloudOps~FBL` | Terraform and patch ready, rows landed `5165905870`, plan saved; nothing written to AWS | **parked** on `LGIC_ENFORCE-D1-S6` |
 | `TO-FB-f-13` | acts 4b/4c phase A | ~22 | `23133da0fb` | AC1-AC3 PASS; the two acts **parked** |
 
 ## What changed at the close (the issuer's acts)
@@ -79,8 +79,13 @@ only the router. The producers' role also holds no grant on the new prefix (row 
 
 ## What is open
 
-- **`TO-FB-f-12`** is with the laptop lane; its read (the first reason line after the next organic publish) is the CTO's.
-  The round does not close until it is terminal.
+- **`TO-FB-f-12`** is PARKED, nothing written: three gates stood between the ruling and the apply, each ruled in turn (a
+  sixth create in the root: a scoped apply on the five addresses; the lane of `name_rulings.json`: the CRO landed the two
+  `none_owed` rows `5165905870`; `safe-apply`'s plan limb ignoring them: the CTO's override was WITHDRAWN when it was
+  measured not to exist, route (a)). It un-parks when `LGIC_ENFORCE-D1-S6` lands (owner `0.0.0_AB_MSTR~DELL1`: the plan
+  limb grades a name that has a `name_rulings` row from that row; its close exercise is the saved plan PASS for the two SNS
+  groups plus a planted no-row REFUSE); `~FBL` then re-runs the saved plan unchanged and the CTO reads the first reason
+  line after the next organic publish.
 - **The producers' role grant** (`D1-S18`), the act-4 readers' own dormant cuts and pairs, the registry change for a
   serving-route bucket separate from the routed alias, and the exec-summary and partners-API acts: round 4.
 - **The 19 objects' shipment and `gold_dispatch.sh`'s deliberate deploy**: the window's first leg, after the GO.
@@ -93,6 +98,8 @@ only the router. The producers' role also holds no grant on the new prefix (row 
 | BLOCKING | `D1-W16-S10`, `D1-W16-S16`, `D1-W21-S1`, `D1-W23-S1` to `S5` | the naming gate's refusal of the first view, the JSON view's lane refusal, and the non-ASCII bound conflict: ruled in `TO-FB-f-9` amendments 3, 6 and 9, merged |
 | BLOCKING | `D1-W22-S4` | the probe's literal: ruled in `TO-FB-f-13` amendment 1 (a client wrapper), merged |
 | BLOCKING | `D1-S18` | the producers' role grant: OPEN, carried to round 4 as its own act |
+| BLOCKING | `S13` to `S18` of the laptop lane (FB-f-12: the sixth create, the lane of `name_rulings.json`, the plan limb, the missing override) | `S13` ruled (scoped apply), `S14` and `S16` landed by the CRO, `S17` and `S18` held under `LGIC_ENFORCE-D1-S6`; the act is parked, nothing written |
+| ARMED | `D1-S19` | the inf-pipeline root's pending `aws_secretsmanager_secret_version.eclipse_jwt_initial`: any unscoped apply of that root creates a new current version of `orion/eclipse_jwt/current`; routed to the root's owner; this project's applies there are scoped |
 | BLOCKING | `D1-W7-S3`, `D1-W8-S1`, `D1-W10-S1`, `D1-W9-S3` to `S5`, `D1-W11-S1`, `D1-W15-S2` | flip-gate, proof-instance naming and write-grant rows of earlier cells: resolved as in round 2 and in this round's drain (the flips landed; the instance names carry the stem) |
 | BLOCKING | `D1-W4-S1`, `D1-W12-S1`, `D1-W12-S4`, `S1` | the cot `positions_cube` collision and the marker-class rows: FAULT, owner `1.0.0_SA_CTO~DELL1`; `S1` (card3 read-logging, an unrelated plan line) is not this project's |
 | ARMED | `D1-S4`, `D1-S7` | the stale-copy and staff-proxy hazards: carried by the pair of acts 3 and 4 (ADDENDA 4 to 7); `D1-S17` (the ownership map) is the CTO's tripwire, disarmed at act 4 |
