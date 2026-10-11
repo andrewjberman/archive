@@ -1,0 +1,96 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-g-28",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-28.exec-summary-put-policy.md",
+  "group": "OTHER",
+  "vintage_commit": "ce2c8a89fc"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~50",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "vintage_commit": "ce2c8a89fc",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-28.exec-summary-put-policy.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/exec-summary/iam.tf",
+   "kind": "iam",
+   "commit_or_etag": "48e1c575f2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed in 48e1c575f2 on wk-ADVI_FIRMBKTS-50 (LOCAL); one module call (opal_name_exec_summary_canonical_put) and one resource (exec_summary_canonical_put) appended after the existing policy; no apply, no plan, no AWS call (order Bounds 1; the apply is a separate staged order per the preflight comp-iam line)",
+   "artifact_covered_by": ["AC1", "AC2"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "cd /c/dev/wk-firmbkts-50 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_execiam.py --arms iam --root /c/dev/wk-firmbkts-50 --base 44e7a3f712; echo \"exit=$?\" -- expect: ROUND 4 EXEC IAM: 5 of 5 arms. Reads the new resource (named by a module call, one Allow statement, s3:PutObject only, one generated ARN), that the module resolves the canonical directory, that nothing else of the root changed and that the formatter is clean.",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-50 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_execiam.py --arms iam --root /c/dev/wk-firmbkts-50 --base 44e7a3f712; echo \"exit=$?\"",
+   "expect": "ROUND 4 EXEC IAM: 5 of 5 arms",
+   "output_evidence": "  I1 resource=True role ok=True module=opal_name_exec_summary_canonical_put module ok=True | I2 statements=['ExecSummaryCanonicalPut'] action ok=True effect ok=True arns=1 no acl/delete/get=True | I3 resolved ARN: arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/advisors/*/exec_summary.json | I4 base lines kept 119 of 119; existing policy unchanged=True; other files: [] | I5 fmt rc=0 | PASS I1 | PASS I2 | PASS I3 | PASS I4 | PASS I5 | ROUND 4 EXEC IAM: 5 of 5 arms | exit=0",
+   "denominator": "5 of 5 arms PASS (I1, I2, I3, I4, I5); base lines kept 119 of 119; 1 statement, 1 generated ARN; other changed files in the root: 0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "cd /c/dev/wk-firmbkts-50 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-50 --allow infra/aws/terraform/exec-summary/iam.tf --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~50/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/exec-summary/iam.tf; echo \"exit=$?\" -- expect: ROUND 4 SCOPE: OK. The write-surface bound.",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-50 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-50 --allow infra/aws/terraform/exec-summary/iam.tf --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~50/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/exec-summary/iam.tf; echo \"exit=$?\"",
+   "expect": "ROUND 4 SCOPE: OK",
+   "output_evidence": "  CHANGED infra/aws/terraform/exec-summary/iam.tf | CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md | ROUND 4 SCOPE: OK 2 changed, 0 outside, 0 required missing | exit=0",
+   "denominator": "2 changed paths checked against 3 allow entries; 0 outside the allow list; 1 of 1 required path present",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "iam.tf copied to .scratch/iam_good.tf; the new statement Action changed in place to [\"s3:PutObject\", \"s3:PutObjectAcl\"] (the ADDENDUM 11 condition 1 violation); r4_execiam.py --arms iam run; file restored from the copy and compared byte-identical",
+   "expected": "I2 FAIL (the statement's Action holds PutObjectAcl), arms 4 of 5",
+   "observed": "I2 action ok=False no acl/delete/get=False; FAIL I2; ROUND 4 EXEC IAM: 4 of 5 arms; exit=1; restored cmp identical; git diff on iam.tf empty",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the --arms iam check run on the unchanged tree: once as AC1, once after the mutant restore",
+   "observed": "ROUND 4 EXEC IAM: 5 of 5 arms exit=0 in both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the face's module source ../../modules/opal_name is not used; the call uses ../modules/opal_name",
+   "reason": "../../modules/opal_name resolves to infra/aws/modules/opal_name, which does not exist; the module is at infra/aws/terraform/modules/opal_name and the check I1 requires ../modules/opal_name. Filed as ADVI_FIRMBKTS-D1-W50-S1"
+  },
+  {
+   "item": "no terraform plan or init in the exec-summary root, no AWS call, no apply",
+   "reason": "the order's Bounds 1; the apply of the new policy is a separate staged order (preflight comp-iam line)"
+  },
+  {
+   "item": "the terraform plan is not evidence of the module's ARN against live AWS",
+   "reason": "the check resolves class_prefix through terraform console against the module only (I3); the live bucket and policy are not read"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W50-S1: the face's module source ../../modules/opal_name does not resolve from the exec-summary root; the call uses ../modules/opal_name (the bd-pipeline shape, the module's real path, and the check's I1 string)"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~50/ADVI_FIRMBKTS.TO-FB-g-28.session.log.txt",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_execiam.py --arms iam --root /c/dev/wk-firmbkts-50 --base 44e7a3f712",
+   "result": "ROUND 4 EXEC IAM: 5 of 5 arms, exit 0"
+  },
+  {
+   "tool": "terraform",
+   "invocation": "terraform fmt -check on infra/aws/terraform/exec-summary/iam.tf (run inside r4_execiam.py as I5)",
+   "result": "rc=0"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-50 (the three --allow and one --require of AC2)",
+   "result": "ROUND 4 SCOPE: OK 2 changed, 0 outside, 0 required missing, exit 0"
+  }
+ ]
+}
