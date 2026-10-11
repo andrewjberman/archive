@@ -1,0 +1,66 @@
+{
+ "reader": "billing",
+ "census_read_at": "2026-10-11T00:00Z",
+ "fixture_fields": [
+  "account",
+  "household",
+  "billing_period",
+  "aum",
+  "fee_rate_bps",
+  "fee_amount",
+  "status"
+ ],
+ "candidates": [
+  {
+   "producer": "Black Diamond silver fees (blackdiamond_list_fees source; data/black_diamond/scripts/silver/convert_fees_to_silver.py)",
+   "location": "s3://opal-data-bd/silver/fees/YYYY-MM-DD.parquet",
+   "denominator": 2002,
+   "denominator_of": "dated partitions listed under the prefix (2020-03-06..2026-10-08); newest 2026-10-08 holds 17344 rows, 34 columns",
+   "served": false,
+   "reason": "Objects ARE served today (scheduled producer, a live read tool). Carries account_fee (17344 of 17344 non-null), basis_points (17344 of 17344), market_value (the trade value, not AUM), billing_start_date (4171 of 17344 non-null), billing_end_date (0 of 17344). Does not carry AUM for a billing period, a billing period, or any paid/invoiced/draft status. served=false here means: does not serve the billing fields (the census instrument forbids served=true under GAP, row NFRA_MCPINDEX-Z-W31-S1)."
+  },
+  {
+   "producer": "Black Diamond silver allocations (weekly snapshot)",
+   "location": "s3://opal-data-bd/silver/allocations/YYYY-MM-DD.parquet",
+   "denominator": 134,
+   "denominator_of": "dated partitions (2026-01-16..2026-10-02); newest holds 7302 rows, 94 columns",
+   "served": false,
+   "reason": "Served weekly snapshot. Carries account_market_value (AUM at the snapshot), basis_points, flat_fee, relationship_name (household), fee schedule fields. Carries no fee amount for a period, no billing period and no paid status. served=false: does not serve the billing fields (Z-W31-S1)."
+  },
+  {
+   "producer": "Schwab master 0833 silver fact_trn (custodian fee debits, tran_srcde TPFEE/SMFEE)",
+   "location": "s3://opal-data-assets/schwab/08335338/silver/fact_trn/date=YYYY-MM-DD/data.parquet",
+   "denominator": 569,
+   "denominator_of": "date partitions (2024-07-08..2026-10-09); newest holds 5561 rows, of which TPFEE 0 and SMFEE 1",
+   "served": false,
+   "reason": "Served daily. Carries the debit per account (gross_amount) with a date, which is the only evidence a fee was taken. Carries no fee rate, no AUM, no household, no billing period, and no status field; paid would have to be derived from a debit match, and ADVI_BILLING's one comparison found the debit and the recompute DIFFER for 2 of 2 accounts. Its AUM sibling fact_rps (569 partitions, newest 110400 rows) is per holding, not per billing period. served=false: does not serve the billing fields (Z-W31-S1)."
+  },
+  {
+   "producer": "ADVI_BILLING gold fee_quarter (AB-t-1 recompute, one household)",
+   "location": "s3://opal-data-49financial/advi/49financial/gold/advi_billing/quarter=<q>/<client_key>.json",
+   "denominator": 1,
+   "denominator_of": "objects under the prefix (one: quarter=2026Q3/z08219260.json, written 2026-10-09 by a one-off worker run)",
+   "served": false,
+   "reason": "Carries per account billable_value, basis_points, computed_fee, debited_fee and reconcile_class. One household of one quarter, written once by a worker; no scheduled producer, so it is not a served source. No paid status field either (debited_fee is a debit amount)."
+  },
+  {
+   "producer": "SMArtX fee statement bronze (ADVI_BILLING e-3 gateway copy of the SharePoint statements)",
+   "location": "s3://opal-data-assets/smartx/49financial/bronze/fee_statement/quarter=<q>/<name>.xlsx",
+   "denominator": 0,
+   "denominator_of": "objects under the prefix (listing read 2026-10-11: KeyCount 0)",
+   "served": false,
+   "reason": "The billing run's own statement is where the 49 Financial rate and days-in-period live; the prefix holds nothing today, and bronze xlsx is not a served shape."
+  },
+  {
+   "producer": "ops kit adapter (tools/ops_kit/adapter.py, OPS_KIT_SOURCE)",
+   "location": "tools/ops_kit/fixtures/billing.json",
+   "denominator": 12,
+   "denominator_of": "fixture rows (TEST-0001..), as_of 2026-10-08",
+   "served": false,
+   "reason": "The fixture is the shape and a test input only (contract 1); its values are synthetic and are never served."
+  }
+ ],
+ "verdict": "GAP",
+ "owner": "ADVI_BILLING",
+ "gap_statement": "No served source carries per-account AUM for a billing period, the fee rate, the fee charged and a paid status. The pieces are split across sources: AUM (BD allocations weekly), schedule rate and fee lines (BD fees), debits (Schwab fact_trn), and none carries status. The paid status exists in no object. ADVI_BILLING (Q-2) is the project that would have to produce a scheduled per-account billing object (its AB-t-1 object is one household, one quarter, written once). Until it does, FWD-19 for billing is not done and no reader is built."
+}
