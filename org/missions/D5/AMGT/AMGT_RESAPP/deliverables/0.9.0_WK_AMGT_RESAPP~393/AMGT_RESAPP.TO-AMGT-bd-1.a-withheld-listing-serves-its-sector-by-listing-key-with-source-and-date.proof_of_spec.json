@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bd-1.a-withheld-listing-serves-its-sector-by-listing-key-with-source-and-date",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bd-1.a-withheld-listing-serves-its-sector-by-listing-key-with-source-and-date.md",
+    "group": "OTHER",
+    "vintage_commit": "c691f466400fff16923e28e907597f6b83002134"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "c691f466400fff16923e28e907597f6b83002134",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bd-1.a-withheld-listing-serves-its-sector-by-listing-key-with-source-and-date.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~393",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "f077e0b58372e2d5cb3466cd73945308a194ecd2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_listing_sector added (reads the listing's newest stored model block via _read_model_block_pool; GICS_SECTOR_NAME value, source 'Bloomberg, listing', block date); _drop_disagreeing_table_names, _rank_series_names and read_rank_series extended for the withheld entry. Read path only: no store write, no deploy, no schedule.",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/api/monthly_chatter.py",
+      "kind": "script",
+      "commit_or_etag": "f077e0b58372e2d5cb3466cd73945308a194ecd2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The collected-chatter row whose table name disagrees carries the three sector keys from scoped_amgt._listing_sector; classification stays None with its round-95 reason.",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_sector_from_listing_block.py",
+      "kind": "test",
+      "commit_or_etag": "f077e0b58372e2d5cb3466cd73945308a194ecd2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW offline test file: one arm per place (ranked row, rank series, collected chatter), a no-GICS_SECTOR_NAME block arm, a failed-read arm and an agreeing-row control. 36 passed with the two edited existing test files.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_classification_withheld.py",
+      "kind": "test",
+      "commit_or_etag": "f077e0b58372e2d5cb3466cd73945308a194ecd2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_fixtures stubs _read_model_block_pool with a no-block reader (one added line) so the round-95 withheld reading stays the one under test.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_names_read_agreement.py",
+      "kind": "test",
+      "commit_or_etag": "f077e0b58372e2d5cb3466cd73945308a194ecd2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_d10 stubs _read_model_block_pool with a no-block reader (two added lines); no other test edited.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "f077e0b58372e2d5cb3466cd73945308a194ecd2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "APPENDED one row, append-only: AMGT_RESAPP-D1-W393-S1 (the round-95 census K1 sector-null clause conflicts with the cell's served sector on a ranked row; AC2 FAILs at K1). No existing row edited.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the two withheld listings and their model-block GICS_SECTOR_NAME values and dates printed (SAN_FP_Equity and CSL_AU_Equity, 'Health Care'); PASS K1 (ranked rows), PASS K2 (rank series), PASS K3 (collected chatter, three windows), PASS K4 (asked by ticker), PASS K5 (186 ranked rows and 186 series carry no new key and equal their table row), PASS K6; arms passed 6 of 6; R97 SECTOR SERVE CENSUS: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-393 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round97_prep/checks/r97_sector_serve_census.py\" --where local; echo \"exit=$?\"",
+      "output_evidence": "   where=local | disagreeing table rows 2: CSL_AU_Equity, SAN_FP_Equity | model-block GICS_SECTOR_NAME read from S3: {\"SAN_FP_Equity\": [\"Health Care\", \"20261011T130935Z\"], \"CSL_AU_Equity\": [\"Health Care\", \"20260930T093804Z\"]}\nPASS K1 every ranked row of a withheld listing serves its sector by listing key with source and as-of date  [served 2, not []]\nPASS K2 every rank series of a withheld ticker serves its sector by listing key with source and as-of date  [served 2, not []]\nPASS K3 every collected-chatter row of a withheld ticker serves its sector by listing key with source and as-of date  [served 3, not []]\nPASS K4 every withheld ticker asked for by ticker serves its sector by listing key and not the table row's name  [asked 2, not []]\nPASS K5 control: a non-disagreeing subject carries no sector key of this rule and its classification is the table row's own  [ranked rows judged 186 differ 0; series judged 186 differ 0]\nPASS K6 no per-security route of a withheld listing carries a classification field  [found []]\n   arms passed 6 of 6\nR97 SECTOR SERVE CENSUS: YES\nexit=0",
+      "denominator": "6 of 6 arms passed (K1-K6); 2 withheld listings; 186 ranked rows and 186 rank series judged in K5 (0 differ)",
+      "status": "PASS",
+      "expect": "PASS K1[\\s\\S]*PASS K6[\\s\\S]*arms passed 6 of 6[\\s\\S]*R97 SECTOR SERVE CENSUS: YES[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the classification stays withheld and the names are unmoved: R95 CLASSIFICATION CENSUS: YES (6 of 6), R94 DISPLAY NAME: YES (12 of 12) and R94 NAME CENSUS: YES (C1, C3, C4 at 0); and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-393 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round95_prep/checks/r95_classification_census.py\" --where local && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round94_prep/checks/r94_display_name.py\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round94_prep/checks/r94_name_census.py\" --where local; echo \"exit=$?\"",
+      "output_evidence": "   where=local subjects 243 | table rows read 243 | disagreeing table rows 2: CSL_AU_Equity, SAN_FP_Equity\nFAIL K1 every ranked row of a disagreeing subject withholds the classification and says why  [withheld 0, still served [('TRENDING/PRICE', 'SAN FP', None, None), ('BREAKOUT/PRICE', 'SAN FP', None, None)]]\nPASS K2 every rank series of a disagreeing ticker withholds the classification and says why  [withheld 2, still served []]\nPASS K3 every collected-chatter row of a disagreeing ticker withholds the classification and says why  [withheld 3, still served []]\nPASS K4 no per-security route of a disagreeing subject carries a classification field  [found []]\nPASS K5 control: a non-disagreeing subject's classification is the table row's own, unchanged  [ranked rows judged 186 differ 0; series judged 186 differ 0]\nPASS K6 every disagreeing ticker asked for by ticker serves no table row's name or classification  [asked 2, still served []]\n   arms passed 5 of 6\nR95 CLASSIFICATION CENSUS: NO\nexit=1\n(the && chain stops at the round-95 census; the round-94 checks run separately with the same PYTHONPATH: R94 DISPLAY NAME: YES, arms passed 12 of 12, rc=0; R94 NAME CENSUS: YES (C1, C3, C4 at 0), rc=0)\nHEAD control (git archive HEAD lib infra org/standards to .scratch/headexp, same census, --where local): K1 PASS (withheld 2, still served []), arms 6 of 6, R95 CLASSIFICATION CENSUS: YES, rc=0",
+      "denominator": "5 of 6 round-95 arms passed (K1 FAIL); HEAD control 6 of 6; round-94 display name 12 of 12; round-94 name census C1, C3, C4 at 0",
+      "status": "FAIL",
+      "status_reason": "K1 of the round-95 census requires a disagreeing ranked row to carry sector null with the withheld reason (census line 127). The cell (step 2) serves the listing's sector on that row with sector_reason null, so both cannot hold on the ranked row. The census is not in this order's write paths and was not edited. Filed as AMGT_RESAPP-D1-W393-S1 (BLOCKING). The HEAD control passes 6 of 6, so the failure is the candidate's served sector, by construction of the cell.",
+      "expect": "R95 CLASSIFICATION CENSUS: YES \\(6 of 6\\)[\\s\\S]*R94 DISPLAY NAME: YES[\\s\\S]*R94 NAME CENSUS: YES[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the control: the new test file and every other test of lib/research/api/tests pass (no failed, no error); and exit=0",
+      "method": "test_suite",
+      "invocation": "cd C:/dev/wk-resapp-393 && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests --ignore=lib/research/api/tests/test_print_format_rich.py -q -p no:cacheprovider; echo \"exit=$?\"",
+      "output_evidence": "961 passed, 2 skipped, 321 warnings in 31.63s\nexit=0",
+      "denominator": "961 passed, 2 skipped, 0 failed, 0 errors of 963 collected (lib/research/api/tests, test_print_format_rich.py ignored as the order names)",
+      "status": "PASS",
+      "expect": "[0-9]+ passed[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant is named by the task order; the worker face bars an adversary lens for this order.",
+      "expected": "N/A: the task order names no mutant.",
+      "observed": "N/A: no mutant was run by this worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: each criterion is a single run of the named check or suite; no same-input comparison was specified. The HEAD control in AC2 is a baseline run, not a determinism comparison.",
+      "observed": "Not measured by this worker.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The task order <status> flip to complete",
+      "reason": "AC2 is FAIL, and a FAIL row leaves the order open. The flip is also the issuer's (2.0.0_SA_COO~R1)."
+    },
+    {
+      "item": "The round-95 census r95_classification_census.py (not edited)",
+      "reason": "Its K1 sector-null clause conflicts with the cell's served sector on a ranked row. The census is outside this order's write paths, so the conflict is filed as AMGT_RESAPP-D1-W393-S1 and not repaired here."
+    },
+    {
+      "item": "The HEAD control export under .scratch/headexp",
+      "reason": "Scratch only (git archive HEAD of lib, infra and org/standards), used for the AC2 positive control. Not a deliverable and not committed."
+    },
+    {
+      "item": "No deploy, store write, schedule, S3 delete, SEC, vendor, model or Bloomberg call",
+      "reason": "Order bounds 1 and the face's EGRESS CLASS NONE. The census reads are S3 and DynamoDB GET or LIST with the caller's own credentials."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W393-S1: the round-95 classification census K1 requires a withheld ranked row of a disagreeing subject to carry sector null with the withheld reason; the cell serves the listing's sector by key with sector_reason null. AC2 FAILs at K1 (5 of 6); the HEAD control passes 6 of 6."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "r97_sector_serve_census.py (AC1, round-97 PREP check, six arms)",
+      "invocation": "cd C:/dev/wk-resapp-393 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round97_prep/checks/r97_sector_serve_census.py\" --where local; echo \"exit=$?\"",
+      "result": "R97 SECTOR SERVE CENSUS: YES, exit=0 (6 of 6 arms)"
+    },
+    {
+      "tool": "r95_classification_census.py (AC2, round-95 PREP check, six arms)",
+      "invocation": "cd C:/dev/wk-resapp-393 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round95_prep/checks/r95_classification_census.py\" --where local",
+      "result": "R95 CLASSIFICATION CENSUS: NO, exit=1 (5 of 6; K1 FAIL). HEAD control (git archive HEAD export under .scratch/headexp): YES, 6 of 6, exit=0."
+    },
+    {
+      "tool": "pytest (AC3)",
+      "invocation": "cd C:/dev/wk-resapp-393 && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests --ignore=lib/research/api/tests/test_print_format_rich.py -q -p no:cacheprovider",
+      "result": "961 passed, 2 skipped, exit=0"
+    }
+  ]
+}
