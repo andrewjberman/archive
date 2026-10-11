@@ -58,6 +58,21 @@ a pushed branch is not a served page).
   the CTO half is asked for: `2.0.0_SA_COO~D2`'s probe (msg 4804) found five readers refusing wrapped fixtures, of which only the
   history reader was traced to this release. Until that census is in, this half is NOT signed for apply: it is the written packet.
 
+## 4a. The reader census is IN (added 2026-10-11 ~12:4xZ; this changes the file's blob, and no half was signed on the earlier one)
+
+`org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~56/READER_CENSUS.json` (blob 7c84796ba3; `2.0.0_SA_COO~D2` msg 4910,
+drained @7914dec2a5). INHERITED from that record and its issuer's message; this seat opened the file for its denominator and its
+`joins_prod_push` member and did not re-run a probe.
+- Denominator: irpt-status serves 7 routes; the portal reads 5 of them at PROD `37aa1247ee` and 7 at DEV.
+- At PROD against release 5's answers: `analysis-request-history` REFUSES (the page, and the rows independently) and PASSES at DEV.
+  The other four PASS: single-request (EXACT, and unchanged by release 5), sections (TOLERANT: `retained_ref` is ignored),
+  status-summary, status-job. The pdf and original routes have no PROD caller.
+- So the PROD push of `8ed372cb72` covers every reader that would refuse. Section 2's condition is unchanged and still UNMET.
+- LIMIT stated by the census itself: the bodies were produced by the producer's offline code at the release pin; NO LIVE BODY was
+  read. After-read C1 (the PROD readers run on the live bodies) is therefore still the first measured proof, and stays first.
+- Two findings of the census that bear on what this release is FOR: the sections view drops `retained_ref` (nothing on a page shows
+  it yet), and the sections reader already reads the OPAL_ENGINE validation member at both commits.
+
 ## 5. After-reads (in order; each recorded with its claim)
 
 R0 to R8 as in the first pair, with these changes:
@@ -82,6 +97,6 @@ R0 to R8 as in the first pair, with these changes:
 ## 7. Owed before any apply order is cut
 
 1. Section 2's condition read as MET (Andrew's word comes first; not this seat's to ask for by this document).
-2. Section 4's census of portal readers at the PROD commit.
+2. Section 4's census of portal readers at the PROD commit: IN, section 4a.
 3. The CTO half on this file's blob, after 1 and 2.
 4. The FWD-1 trace (order TO-AR-y-51), so the release is cut knowing which hop it serves.
