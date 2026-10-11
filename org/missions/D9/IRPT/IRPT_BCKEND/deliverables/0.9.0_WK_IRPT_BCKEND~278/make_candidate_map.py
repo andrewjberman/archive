@@ -2,7 +2,7 @@
     python <this file> <pin> <out_json> [<map_ref>]
 Reads infra/aws/lambda/ci/lambda-source-map.json AT <map_ref> (default HEAD) and writes a map holding ONLY the three functions
 irpt-narrative, irpt-performance-adapter and irpt-status (every other key of each entry verbatim) in which EVERY staged_from row whose
-repo_path is under infra/aws/lambda/investor-reporting/ is re-pinned to <pin>, its sha256 recomputed from `git show <pin>:<repo_path>`.
+repo_path is under infra/aws/lambda/investor-reporting/ or data/assets/scripts/gold/investor_reporting/ is re-pinned to <pin>, its sha256 recomputed from `git show <pin>:<repo_path>`.
 No member-by-member choice: a sibling dragged out of step is the S60 / rev 4 / rev 5 failure. Rows OUTSIDE investor-reporting (lib/,
 org/standards/, infra/logic/registry/, data/, _vendor, inf-pipeline) keep their pin and are listed under _kept_IB_pr_416. The function's
 own source_dir files come from the worktree, which equals <pin> for the investor-reporting tree (the cell edits only its deliverables).
@@ -19,7 +19,7 @@ MAP_REF = sys.argv[3] if len(sys.argv) > 3 else "HEAD"
 FULL = subprocess.run(["git", "rev-parse", pin], capture_output=True, check=True).stdout.decode().strip()
 FUNCS = ["irpt-narrative", "irpt-performance-adapter", "irpt-status"]
 IR = "infra/aws/lambda/investor-reporting/"
-IR_PREFIX = IR
+IR_PREFIX = (IR, "data/assets/scripts/gold/investor_reporting/")    # the lambda tree and the gold investor_reporting scripts it packages
 
 smap = json.loads(subprocess.run(["git", "show", MAP_REF + ":infra/aws/lambda/ci/lambda-source-map.json"], capture_output=True,
                                  check=True).stdout.decode("utf-8"))
