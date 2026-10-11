@@ -44,7 +44,17 @@ def classify(root, rel, served, shared):
         tree = ast.parse(src)
     except SyntaxError:
         return None
-    env = r.Env(tree, dict(shared))
+    local = dict(shared)
+    here = os.path.dirname(rel)
+    for n in ast.walk(tree):
+        if isinstance(n, ast.ImportFrom) and n.module and n.level == 0:
+            cand = os.path.join(here, n.module.replace('.', '/') + '.py').replace(os.sep, '/')
+            if os.path.exists(os.path.join(root, cand)):
+                vals = r.module_values(root, cand)
+                for alias in n.names:
+                    if alias.name in vals:
+                        local[alias.asname or alias.name] = vals[alias.name]
+    env = r.Env(tree, local)
     rows = []
     for n in ast.walk(tree):
         if not (isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr in r.METHODS):
