@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "genre": "BUILD",
+  "to_id": "AMGT_CORPUS.TO-CRPS-av-2.model-tab-renders-row-classes-and-team-values",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-av-2.model-tab-renders-row-classes-and-team-values.md",
+    "group": "OTHER",
+    "vintage_commit": "dd35eea62bd738fbd0b0b00d872822748760a76a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "dd35eea62bd738fbd0b0b00d872822748760a76a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-av-2.model-tab-renders-row-classes-and-team-values.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/modelSheet.ts",
+      "kind": "script",
+      "commit_or_etag": "599e51fbb47ab1cd50459dd3cbae3838ef4febe6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal branch wk-AMGT_CORPUS-46-2-portal, LOCAL, not pushed. buildModelSheet with a served team_sheet carrying row_classes builds the team rows in sheet order: CONTROL counted only; HEADING as rowKind heading with no cells; FIGURE Bloomberg-first (label match with a served figure), then the team's own finite values verbatim per sheet year with teamCite, then a why in words. teamCensus over the sheet rows. Without row_classes the output is byte-equal to the base (AC1 control).",
+      "introduces": [
+        "TeamCell",
+        "TeamCite",
+        "TeamCensus",
+        "isTeamCell"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/ModelTab.tsx",
+      "kind": "script",
+      "commit_or_etag": "599e51fbb47ab1cd50459dd3cbae3838ef4febe6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Heading lines with data-model-row-kind heading; team rows carry a visible team model label and the cite in a title; team values print as saved; why rows say their absentReason on the row and are kept out of the absent footnote. The master_absent one-line reason is unchanged.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/types.ts",
+      "kind": "script",
+      "commit_or_etag": "599e51fbb47ab1cd50459dd3cbae3838ef4febe6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "team_sheet gains optional row_classes, row_numbers, row_values and periods, so an old payload still type-checks (bun run typecheck rc 0 on the committed tree; mutant rc 2).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round46/av2_check.cjs\" portal 2>&1 | tail -1 -- expect (?m)^av2 build 5/5 control 2/2$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round46/av2_check.cjs\" portal 2>&1 | tail -1",
+      "output_evidence": "av2 build 5/5 control 2/2",
+      "denominator": "build 5 of 5: b1 labels [Financial Summary, EPS, Tobocco Volume, Mystery line, Year] with 2 heading rows and the base groups kept; b2 census FIGURE 3, HEADING 2, CONTROL 1, bySource bloomberg 1 team 1 why 1, unmapped 0; b3 EPS source bloomberg with cells 5 and 6; b4 Tobocco Volume source team, values -0.03 0.04 0.05 0.06 0.07, cite Team Book.xlsx row 12; b5 why row names the #VALUE! error in words. control 2 of 2: rows-only payload byte-equal to the base snapshot, no-team payload byte-equal. rc 0.",
+      "expect": "(?m)^av2 build 5/5 control 2/2$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)/portal\" && node src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs > /dev/null 2>&1; echo \"tabs rc=$?\" -- expect (?m)^tabs rc=0$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" && node src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs > /dev/null 2>&1; echo \"tabs rc=$?\"",
+      "output_evidence": "tabs rc=0",
+      "denominator": "1 of 1 tab harness run exited 0. Supplementary, not AC2: bun run typecheck (tsc -b --noEmit) rc 0 on the committed tree; modelPattern.harness.cjs CHECKS-OK 12 of 12.",
+      "expect": "(?m)^tabs rc=0$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The classed-branch condition in buildModelSheet made false (if (false)) in a COPY of modelSheet.ts under the worker's scratch portal root; av2_check.cjs run against that root. The live portal file is untouched.",
+      "expected": "build below 5/5: the team rows come back as the rows-only branch, so b1 to b5 fail while the two controls still hold.",
+      "observed": "av2 build 0/5 control 2/2, rc=1. Live portal tree clean (git status empty) after the run.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "av2_check.cjs run three times at the graded portal commit 599e51fbb4 (pure function, no network).",
+      "observed": "three runs: av2 build 5/5 control 2/2 rc=0 on each run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A rendered-page check of the team branch (browser DOM walk of Model tab rows, heading lines, team model labels, cites).",
+      "reason": "The order's AC2 names only the tab harness exit code, and tabs.harness.cjs renders no team sheet rows. The rendered census over every served name is the issuer's read (CRPS-av-10) once the API serves the fields."
+    },
+    {
+      "item": "exportCompare.harness.cjs run.",
+      "reason": "It requires --pack or --rich and a fixture; the order supplies neither, and a bare run exits 2 with its usage line. Not run."
+    },
+    {
+      "item": "Push of the portal branch and the DEV landing.",
+      "reason": "Order EGRESS CLASS NONE: no push of any portal branch. The DEV landing follows the CTO's review of the candidate."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-D1-W2-S1: the order names the portal branch wk-AMGT_CORPUS-46-portal; the worktree sits on wk-AMGT_CORPUS-46-2-portal, and the commit landed there.",
+    "AMGT_CORPUS-D1-W2-S2: the four-key team cell cannot carry the period column the cite must name, so each team cell carries a fifth key, column (read only by the title)."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "av2_check.cjs (AC1)",
+      "invocation": "node av2_check.cjs portal",
+      "result": "rc 0; av2 build 5/5 control 2/2"
+    },
+    {
+      "tool": "tabs.harness.cjs (AC2)",
+      "invocation": "node src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs",
+      "result": "rc 0"
+    },
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit)",
+      "invocation": "cd portal && bun run typecheck",
+      "result": "rc 0 on the committed tree; a deliberate type error in a temporary file gave rc 2, file removed"
+    }
+  ]
+}
