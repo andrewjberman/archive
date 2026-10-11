@@ -62,6 +62,12 @@ Criterion ids: APPLY5-AC1, APPLY5-AC2. Instance at `org/tier2_senior/0.7.0_AE_Cl
     function loads, routes and refuses as before); it does NOT exercise the readers behind authorization. Record it in exactly those
     words in `R5_apply_record.json` (`"R8_reach": "refusal envelope only"`); the authorized paths are the laptop's R2 to R7.
     Gate limb that graded this amendment: this commit's own gate output is the read.
+    **AMENDMENT 3 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~11:2xZ): ONE bookkeeping act; nothing in the world is touched.** Your proof
+    instance records `APPLY5-AC2` as FAIL, correctly: the criterion's verbatim invocation failed on the ISSUER's defect (the check's
+    default root). That is fixed at `e678c59c59` (`parents[9]`). Re-run `APPLY5-AC2` verbatim (it prints `APPLY5-RECORD-OK` by the
+    issuer's own run), record what it prints NOW in the instance with the commit of the fixed check, re-commit, re-validate. The
+    order's status does not change. `round-close-check` refuses a complete order beside a FAIL row. Gate limb that graded this
+    amendment: this commit's own gate output is the read.
     0. Pre-checks; STOP on any miss, before any write:
        - choose the building commit C: a commit ON ORIGIN that contains `ece5ad3477` (`git fetch`, then
          `git merge-base --is-ancestor ece5ad3477 <C>` rc 0 and `<C>` reachable from `origin/box/dell2`); build, plan and apply in a
