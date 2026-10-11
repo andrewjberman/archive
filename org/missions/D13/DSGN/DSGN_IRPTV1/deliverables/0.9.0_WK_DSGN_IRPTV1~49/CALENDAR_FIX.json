@@ -1,0 +1,53 @@
+{
+  "to_id": "DSGN_IRPTV1.TO-IV-e-89",
+  "worker": "0.9.0_WK_DSGN_IRPTV1~49",
+  "cause": {
+    "text": "The portal module state/tradingCalendar.ts is a generated copy of the frontier's answer, made when the frontier's hard-coded fallback set (NYSE_HOLIDAYS_FALLBACK) spanned 2024-2027, so the module covered 2024-2027 only. The frontier's fallback set was since widened to 2010-2027 (lib/trading_calendar.py blob f54f5589c4, calendar_source NYSE/hardcoded-fallback-2010-2027 under the python that ran) and the portal module was never regenerated. F40-AC5 re-derives every covered day AND asserts the frontier's first fallback year equals the module's firstYear; the days it compared all agreed (1461 of 1461) but expect(frontier.fallback_years[0]).toBe(TRADING_CALENDAR.firstYear) received 2010 against 2024. The module named its source blob 1bb4e9b9fd, the frontier was at f54f5589c4: stale generated artifact, not a hand-edited copy and not a frontier fault.",
+    "evidence": [
+      {"file": "portal/src/pages/InvestorReporting/__tests__/fe-s-40/window.test.ts", "line": 295},
+      {"file": "portal/src/pages/InvestorReporting/__tests__/fe-s-40/window.test.ts", "line": 249},
+      {"file": "lib/trading_calendar.py", "line": 48},
+      {"file": "lib/trading_calendar.py", "line": 57},
+      {"file": "portal/src/pages/InvestorReporting/state/tradingCalendar.ts", "line": 36}
+    ]
+  },
+  "one_frontier": {
+    "text": "lib/trading_calendar.py, its NYSE_HOLIDAYS_FALLBACK set (2010-2027) read through trading_days_between and calendar_source. The portal's state/tradingCalendar.ts is generated from it by the repository's existing generator; the covered years are the span of the frontier's fallback set, so the portal's years follow the frontier and are never typed in the portal.",
+    "source": {"file": "lib/trading_calendar.py", "line": 57}
+  },
+  "generator": {
+    "file": "portal/src/pages/InvestorReporting/__tests__/fe-s-40/gen-trading-calendar.mjs",
+    "existing": true,
+    "header_of_data_file_states_command": true,
+    "data_file": "portal/src/pages/InvestorReporting/state/tradingCalendar.ts"
+  },
+  "regenerate_command": "cd <workspace>/portal && node src/pages/InvestorReporting/__tests__/fe-s-40/gen-trading-calendar.mjs   (PYTHON env names the interpreter if python on PATH is not the one; the frontier file must be committed and unmodified)",
+  "data_changed": {
+    "years_before": "2024-2027",
+    "years_after": "2010-2027",
+    "years_added": "2010-2023 (14 years)",
+    "days_covered": {"before": 1461, "after": 6574, "added": 5113},
+    "trading_days": {"before": 1004, "after": 4526, "added": 3522},
+    "market_closed_weekdays": {"before": 41, "after": 170, "added": 129, "added_by_year": {"2010": 9, "2011": 8, "2012": 11, "2013": 9, "2014": 9, "2015": 9, "2016": 9, "2017": 9, "2018": 10, "2019": 9, "2020": 9, "2021": 9, "2022": 9, "2023": 10}},
+    "years_2024_to_2027": "unchanged: the 41 closed weekdays are identical before and after",
+    "served_effect": "a window boundary dated 2010-2023 was previously compared as written with a limitation note; it is now normalised to trading days (closed-day-only differences read as the same window). Dates 2024-2027 label as before; dates before 2010 or after 2027 are still not claimed (null)."
+  },
+  "product_files_changed": [
+    "portal/src/pages/InvestorReporting/state/tradingCalendar.ts",
+    "portal/src/pages/InvestorReporting/__tests__/fe-s-40/window.test.ts"
+  ],
+  "test_change": "window.test.ts F40-AC4 recorded test: the out-of-range start year was a typed 2019, now covered; it is read from the module as firstYear - 1 (2009). Assertions unchanged.",
+  "portal_commit": "733986d7c6989c8be26a964344e663e7f372a213",
+  "portal_base": "ab697ba120a6452bdcb634038d8114b88f18e4a9",
+  "base_new_failing_ids": [],
+  "suite_after": {
+    "failed": 42,
+    "passed": 1090,
+    "baseline_failed": 43,
+    "fixed_ids": [
+      "fe-s-40/window.test.ts :: F40-AC5 -- the portal calendar agrees with lib/trading_calendar.py, day by day > every day of the covered years, re-derived from the frontier with is_trading_day"
+    ],
+    "new_failing_ids": []
+  },
+  "evidence_logs": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~49/ (base_run.txt, after_run.txt, base_ids.json, after_ids.json)"
+}
