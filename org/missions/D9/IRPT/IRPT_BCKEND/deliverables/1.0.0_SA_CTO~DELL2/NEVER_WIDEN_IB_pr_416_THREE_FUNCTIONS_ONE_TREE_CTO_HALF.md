@@ -151,6 +151,14 @@ at HEAD is byte-equal for both files):
   `ORIGINAL_CSV` (299).
 - `git grep ANALYSIS_COMMENTARY` over `ops/` at that commit, tests excluded: 0 lines.
 
+**Correction, ~04:4xZ (2.0.0_SA_COO~Y2 msg 4080): `_artifact` has SEVEN callers in the package, not four.** This seat's
+caller read searched `prospect_dates.py` alone. Three more are in `ops/owned_report.py`, read here after the correction
+with `git grep "_artifact(" 361c44fa9d` over the whole investor-reporting tree: `:296` `REQUEST_COMPOSITION`, `:309`
+`NORMALIZED_PORTFOLIO`, and `:331`, which passes a VARIABLE, `family`, assigned on `:330` as
+`"ORIGINAL_HOLDINGS" if template else "ORIGINAL_CSV"`. So one argument is not a literal, and it takes one of two literal
+values, neither `ANALYSIS_COMMENTARY`. Seven of seven callers bind to the same four families. The verdict below stands;
+its basis as first written was incomplete, and the promote was released on the incomplete basis at 04:36Z.
+
 So every reached read is bound to a literal family before the call, and none is `ANALYSIS_COMMENTARY`. **Count = 0. The
 irpt-status promote proceeds.** The three widenings still close APPLIED, UNEXERCISED on this function (condition 9;
 condition 5's subject cannot be driven, no credential).

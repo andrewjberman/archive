@@ -8,6 +8,7 @@
   ts-guard      R2-ts1-AC1  by default no ticket_center test can reach a real SES send or a real users-table read
   pg-open       R2-pg1-AC1  (needs --portal <dir>) the ticket's Open report reads the finished report; a stated waiting state
   pg-render     R2-pg1-AC3  (AMENDMENT 1, needs --portal <dir>) the opened report is rendered by the IRPT renderer; id off the words
+  pg-suite      R2-pg1-AC4  (AMENDMENT 2, needs --portal <dir>) every test file under src/pages/TicketCenter passes on the merged tree
   pg-existing   R2-pg1-AC2  (needs --portal <dir>) the existing TicketCenter analysis-request tests still pass
   tc-regress    R2-rr1-AC2 / R2-ts1-AC2  the whole ticket_center/tests directory passes (at least MIN_PASSED, 0 failed)
 
@@ -104,6 +105,23 @@ PG_RENDER = ["the opened report renders its sections with the investor reporting
 
 
 def main(argv):
+    if argv and argv[0] == "pg-suite":
+        if len(argv) != 3 or argv[1] != "--portal":
+            print("PG-SUITE-FAIL --portal <dir> required")
+            return 1
+        import shutil
+        exe = shutil.which("bun")
+        if not exe:
+            print("PG-SUITE-FAIL bun not on PATH")
+            return 1
+        r = subprocess.run([exe, "test", "src/pages/TicketCenter"], cwd=argv[2], capture_output=True, text=True, timeout=110)
+        out = re.sub(r"\x1b\[[0-9;]*m", "", r.stdout + r.stderr)
+        passed = int((re.search(r"(\d+) pass", out) or [0, 0])[1])
+        failed = int((re.search(r"(\d+) fail", out) or [0, 0])[1])
+        files = int((re.search(r"across (\d+) files", out) or [0, 0])[1])
+        ok = r.returncode == 0 and failed == 0 and files >= 7 and passed >= 20
+        print("PG-SUITE-%s rc=%d pass=%d fail=%d files=%d (min 7 files, 20 pass)" % ("OK" if ok else "FAIL", r.returncode, passed, failed, files))
+        return 0 if ok else 1
     if argv and argv[0] == "pg-render":
         if len(argv) != 3 or argv[1] != "--portal":
             print("PG-RENDER-FAIL --portal <dir> required")
