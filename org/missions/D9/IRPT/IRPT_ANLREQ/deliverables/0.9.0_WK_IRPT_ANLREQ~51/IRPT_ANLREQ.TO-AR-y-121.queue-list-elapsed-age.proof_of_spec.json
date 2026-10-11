@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-121",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-121.queue-list-elapsed-age.md",
+    "group": "OTHER",
+    "vintage_commit": "29ccf76931"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R12_Y.md",
+    "vintage_commit": "29ccf76931",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-121.queue-list-elapsed-age.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~51",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/elapsedAge.ts",
+      "kind": "script",
+      "commit_or_etag": "d16b5510",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree branch wk-IRPT_ANLREQ-51-portal-r12 only; not pushed, not deployed. New pure helper elapsedAge(createdAt, now): unit in words, empty string for no/unparseable created time or a created time after now; never reads the clock.",
+      "artifact_covered_by": ["AR121-y-AC1", "AR121-y-AC2", "AR121-y-AC3"]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+      "kind": "script",
+      "commit_or_etag": "d16b5510",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree branch wk-IRPT_ANLREQ-51-portal-r12 only. Exported CreatedCell renders the created time via the unchanged fmtWhen and, for open and in_progress tickets with a non-empty age, a text-white/50 span beside it; the row's created cell uses it with Date.now() at render. No column, sort, fetch or fmtWhen change.",
+      "artifact_covered_by": ["AR121-y-AC1", "AR121-y-AC2", "AR121-y-AC3"]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/__tests__/queue-elapsed-age.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "d16b5510",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file, five tests named exactly as the face names them; every now is a literal derived from a fixed ISO string; no Date.now() or no-argument new Date(); no module mocked, no live call.",
+      "artifact_covered_by": ["AR121-y-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR121-y-AC1",
+      "criterion_verbatim": "AR121-y-AC1: the new test file holds the five named tests, never reads the real clock, and passes.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-51/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r12/ar12_checks.py y121-age --portal C:/dev/wk-irpt-anlreq-51/portal",
+      "output_evidence": "new file: 5 pass, 0 fail (rc=0); Y121-AGE-OK (rc=0)",
+      "denominator": "5 of 5 named tests present and passing in queue-elapsed-age.test.tsx",
+      "status": "PASS",
+      "expect": "Y121-AGE-OK"
+    },
+    {
+      "criterion_id": "AR121-y-AC2",
+      "criterion_verbatim": "AR121-y-AC2: the difference control -- the whole TicketCenter test folder passes (53 at the base, plus yours).",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-51/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r12/ar12_checks.py y121-keep --portal C:/dev/wk-irpt-anlreq-51/portal",
+      "output_evidence": "TicketCenter folder: 58 pass, 0 fail (rc=0); Y121-KEEP-OK (rc=0)",
+      "denominator": "58 of 58 tests in the TicketCenter folder pass (53 at the base plus the 5 new)",
+      "status": "PASS",
+      "expect": "Y121-KEEP-OK"
+    },
+    {
+      "criterion_id": "AR121-y-AC3",
+      "criterion_verbatim": "AR121-y-AC3 (judgment, graded at L9, never by you): a person reading the queue list learns how long each open ticket has waited without subtracting, and nothing else about the list reads differently.",
+      "method": "judgment",
+      "output_evidence": "Open and in-progress rows render the created time unchanged followed by ' (N unit)' in the table's existing text-white/50 class; completed rows and rows with no usable created time render the created time alone. Helper words: 30 seconds 'under a minute'; 1 minute '1 minute'; 59 minutes '59 minutes'; 1 hour '1 hour'; 23 hours '23 hours'; 1 day '1 day'; 40 days '40 days'. git diff --stat origin/DEV HEAD (portal): 3 files changed, 118 insertions(+), 1 deletion(-).",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: the oracle is 3.0.0_SA_CVO at L9; the worker records output and gives no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Before the build the new test file did not exist, so y121-age had nothing to pass (the record face states the base: AC1 FAIL, AC2 PASS at 53).",
+      "expected": "FAIL before the edit; OK after",
+      "observed": "Y121-AGE-OK and Y121-KEEP-OK after the edit; folder grew 53 to 58.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each criterion check run once after the portal commit d16b5510; the test file fixes every now as a literal.",
+      "observed": "Y121-AGE-OK, Y121-KEEP-OK; bun run typecheck rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal lint as a gate",
+      "reason": "The face assigns lint to the issuer at the drain; bun x eslint on the three changed files printed 0 errors, 1 warning (react-refresh/only-export-components at TicketCenter.tsx:88, the existing loadAllowedFirms export)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test ./src/pages/TicketCenter",
+      "result": "58 pass, 0 fail"
+    },
+    {
+      "tool": "bun run typecheck",
+      "invocation": "bun run typecheck (tsc -b --noEmit) in the portal worktree",
+      "result": "rc=0"
+    }
+  ]
+}
