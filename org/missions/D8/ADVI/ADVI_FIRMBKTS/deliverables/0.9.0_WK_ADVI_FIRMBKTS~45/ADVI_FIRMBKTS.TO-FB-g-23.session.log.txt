@@ -1,0 +1,24 @@
+SESSION LOG -- 0.9.0_WK_ADVI_FIRMBKTS~45 on FB-g-23 (module-put-deny-only)
+Worktree: C:/dev/wk-firmbkts-45   branch: wk-ADVI_FIRMBKTS-45   base: a5637f273f
+
+1. TREE-OK: rev-parse printed wk-ADVI_FIRMBKTS-45; org/ and .tools/ present.
+2. Read infra/aws/terraform/modules/opal_name/main.tf (scoped-row closed set, Deny statements, Allow statements, preconditions).
+3. Read round4/checks/r4_modput.py (5 arms) and lib/opal_naming.py scoped-row validation (row keys, scoped_actions, grants).
+4. Edits (uncommitted until step 6):
+   - main.tf: fence_scoped_allowed += s3:PutObject; fence_scoped_object_actions += s3:PutObject (Deny side only); precondition text lists PutObject.
+   - opal_naming.py: scoped_actions += s3:PutObject; refusal wording "closed read set" -> "closed scoped set"; comment updated.
+   - grants stay GetObject only; fence_scoped_allow_statements unchanged (Allow only for GetObject and ListBucket).
+5. Checks, before commit:
+   - AC1 r4_modput.py --arms put: 5 of 5 (run twice; output identical, saved in .scratch/ac1_run2.txt, scratch only).
+   - AC2 terraform init -backend=false; terraform test: Success! 48 passed, 0 failed.
+   - AC3 r4_scope.py: ROUND 4 SCOPE: OK 2 changed, 0 outside, 0 required missing.
+   - lib/opal_naming.py validate: VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s) (real registry).
+   - Builder fixture probe on a scratch copy of the registry (.scratch/reg_neg, a copy only; the real registry was never written):
+     actions [GetObject, PutObject] with exact-ARN principal -> 0 errors; [PutObject] -> 0 errors;
+     [PutObjectAcl], [DeleteObject], [s3:*] -> refused ("closed scoped set").
+6. Commit 8114bac9cf (code, 2 files, 11 insertions, 7 deletions) via safe-commit.sh; commit-gate passed; naming-gate PASS 0 graded.
+   The risk-reflex printed HOLD by basename match on main.tf (six other roots); recorded as ADVI_FIRMBKTS-D1-W45-S1.
+   safe-commit printed WARN that the client-data check could not run (hashed list absent on dell1); recorded as ADVI_FIRMBKTS-D1-W45-S2.
+7. Commit a85062afca (surprise rows W45-S1 and W45-S2 appended to INVESTIGATION_v1.md) via safe-commit.sh; surprise-row-gate OK on 2 new rows.
+   The one-writer gate printed a WARN that the unsuffixed investigation file is written from dell1 (path named by the order; not changed).
+8. Not touched: infra/logic/registry (no row), generated_locals.tf, tests/, the nested portal gitlink (already dirty), .terraform (ignored).
