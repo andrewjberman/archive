@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-101",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-101.open-read-falls-back-once-without-ticket-id.md",
+    "group": "OTHER",
+    "vintage_commit": "487f73663e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R10_Y.md",
+    "vintage_commit": "487f73663e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-101.open-read-falls-back-once-without-ticket-id.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~51",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/analysisRequest.ts",
+      "kind": "script",
+      "commit_or_etag": "d763d48c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree branch wk-IRPT_ANLREQ-51-portal-r7 only; not pushed, not deployed. Adds isUnexpectedOwnedReadQuery (typed IrRequestError.publicReasonCode match, like isReportTicketMismatch) and readTicketReport (read with the ticket id; on UNEXPECTED_OWNED_READ_QUERY only, one more read without it; every other error propagates). openReport goes through it.",
+      "artifact_covered_by": ["AR101-y-AC1", "AR101-y-AC2"]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx",
+      "kind": "script",
+      "commit_or_etag": "d763d48c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree branch wk-IRPT_ANLREQ-51-portal-r7 only. openPackageFile's report read goes through readTicketReport; the binding refusal is still said in words.",
+      "artifact_covered_by": ["AR101-y-AC1", "AR101-y-AC2"]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/__tests__/package-open-ticket-fallback.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "d763d48c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file, four tests named exactly as the face names them; typed fakes, no module mocked, no live call.",
+      "artifact_covered_by": ["AR101-y-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR101-y-AC1",
+      "criterion_verbatim": "AR101-y-AC1: the new test file holds the four named tests and passes.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-51/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r10/ar10_checks.py y101-fallback --root C:/dev/wk-irpt-anlreq-51 --portal C:/dev/wk-irpt-anlreq-51/portal",
+      "output_evidence": "new file: 4 pass, 0 fail (rc=0); Y101-FALLBACK-OK (rc=0)",
+      "denominator": "4 of 4 named tests present and passing in package-open-ticket-fallback.test.tsx",
+      "status": "PASS",
+      "expect": "Y101-FALLBACK-OK"
+    },
+    {
+      "criterion_id": "AR101-y-AC2",
+      "criterion_verbatim": "AR101-y-AC2: the difference control -- the whole TicketCenter test folder passes (49 at the base, plus yours).",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-51/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r10/ar10_checks.py y101-keep --root C:/dev/wk-irpt-anlreq-51 --portal C:/dev/wk-irpt-anlreq-51/portal",
+      "output_evidence": "TicketCenter folder: 53 pass, 0 fail (rc=0); Y101-KEEP-OK (rc=0)",
+      "denominator": "53 of 53 tests in the TicketCenter folder pass (49 at the base plus the 4 new)",
+      "status": "PASS",
+      "expect": "Y101-KEEP-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Before the build the new test file did not exist, so y101-fallback had nothing to pass (base FAIL per the order's record face); the folder stood at 49 pass.",
+      "expected": "FAIL before the edit; OK after",
+      "observed": "Y101-FALLBACK-OK after the edit; the folder 49 pass before, 53 pass 0 fail after.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each criterion check run once after the last edit, before portal commit d763d48c.",
+      "observed": "Y101-FALLBACK-OK, Y101-KEEP-OK.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal typecheck and lint as criteria",
+      "reason": "Not criteria of this order; run anyway: bun run typecheck rc=0 (tsc -b --noEmit, no output); eslint on the three changed files 0 errors, 6 warnings (react-refresh/only-export-components, in AnalysisRequestParts.tsx)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test ./src/pages/TicketCenter",
+      "result": "53 pass, 0 fail"
+    }
+  ]
+}
