@@ -1,0 +1,97 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-g-32",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-32.sev1-sms-publisher-census.md",
+  "group": "OTHER",
+  "vintage_commit": "cd726fdc6c"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~52",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "vintage_commit": "cd726fdc6c",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-32.sev1-sms-publisher-census.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~52/SEV1_SMS_PUBLISHER_CENSUS.json",
+   "kind": "doc",
+   "commit_or_etag": "d0cbb79075",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed in d0cbb79075 on wk-ADVI_FIRMBKTS-52 (LOCAL); six SMS-subscribed topics, N=54 publishers (16 code, 38 aws_service), 38 unable to set an origination attribute; read from AWS (sns, cloudwatch, events, lambda, budgets denied) and the tree; nothing published, subscribed or changed",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 reads the file against the tree: a non-empty topics list with every key, every publisher typed and located, N printed and equal to the entries, and no phone number anywhere. The invocation terminates inside its bound.",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-52 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_smscensus.py --arms census --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~52/SEV1_SMS_PUBLISHER_CENSUS.json --root /c/dev/wk-firmbkts-52; echo \"exit=$?\"",
+   "expect": "ROUND 4 SMS CENSUS: 4 of 4 arms",
+   "output_evidence": "  S1 topics=6\n  S2 publishers=54\n  S3 n_publishers=54 of 54; n_unable=38\nPASS S1 a non-empty topics list with every key\nPASS S2 every publisher is typed, located and its attribute ability stated\nPASS S3 N is printed and equals the entries; the unable count equals the entries that cannot set attributes\nPASS S4 no phone number appears in the file\nROUND 4 SMS CENSUS: 4 of 4 arms\nexit=0",
+   "denominator": "4 of 4 arms PASS; 54 publishers (16 code, 38 aws_service), n_unable 38, 6 topics",
+   "status": "PASS",
+   "status_reason": "Re-graded by the issuer 2.0.0_SA_COO~B1: the worker's run read 3 of 4 because the issuer's arm S4 matched the 12-digit account id inside every topic ARN as a phone number (row ADVI_FIRMBKTS-D1-W52-S2, a check defect). The detector now removes ARNs first; the same invocation on the same census file reads 4 of 4."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "a copy of the written census in .scratch/census_mutant.json with the first publisher where set to infra/aws/compdiff/NO_SUCH_FILE_MUTANT.py:318, run through r4_smscensus.py --arms census",
+   "expected": "S2 FAIL and 2 of 4 arms, exit 1",
+   "observed": "FAIL S2 every publisher is typed, located and its attribute ability stated; ROUND 4 SMS CENSUS: 2 of 4 arms; exit=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the census check run twice on the unchanged census file; md5 of the full output compared",
+   "observed": "e61931e5224cc2d33b79c3e4d918cc85 on both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "publisher completeness is not proven: the AWS reads are the denominator, the code search its complement, and the Lambda list covers environment-wired publishers only",
+   "reason": "the checker's own blindness, stated in the order preflight (comp-adversary)"
+  },
+  {
+   "item": "budget actions for find-insure-budget-alerts are unread",
+   "reason": "budgets:ViewBudget and budgets:DescribeBudgetActionsForAccount denied to the worker identity; recorded as ADVI_FIRMBKTS-D1-W52-S1"
+  },
+  {
+   "item": "the ec2-runtime-monitor publisher and the INF_AOR_DRIFT publisher are not counted",
+   "reason": "the first has no source in the tree and the second's topic is unresolved; recorded as ADVI_FIRMBKTS-D1-W52-S3 and ADVI_FIRMBKTS-D1-W52-S4"
+  },
+  {
+   "item": "AC1 is not made to pass by masking the account id in the topic ARNs",
+   "reason": "a masked ARN is not the ARN the spec names; the choice is the issuer's or the CTO's; recorded as ADVI_FIRMBKTS-D1-W52-S2"
+  },
+  {
+   "item": "no event, subscription or alarm was changed, and no publish was made",
+   "reason": "order rule 1b.1: read only"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W52-S1: the Budgets reads are denied to the worker identity, so the find-insure-budget-alerts Budgets actions are unread",
+  "ADVI_FIRMBKTS-D1-W52-S2: the S4 phone-number check refuses every topic ARN, because each ARN carries the 12-digit account id; AC1 reads 3 of 4 arms",
+  "ADVI_FIRMBKTS-D1-W52-S3: the live Lambda ec2-runtime-monitor publishes to ec2-long-running-alerts but its source is not in this tree, so that topic lists no code publisher",
+  "ADVI_FIRMBKTS-D1-W52-S4: data/inf/scripts/gold/lib/aor_attribution_audit.py:204 publishes to a topic named by INF_AOR_DRIFT_SNS_ARN, which no tree wiring sets; excluded from N",
+  "ADVI_FIRMBKTS-D1-W52-S5: repository Terraform carries E.164 phone-number literals in a comment and a variable default (cited by path only)",
+  "ADVI_FIRMBKTS-D1-W52-S6: AC1 arm S2 tests that each cited code file exists, not that the cited line exists; a mutant at a nonexistent line passes S2"
+ ],
+ "session_log": "no session log is committed; the record is the census commit d0cbb79075 (LOCAL on wk-ADVI_FIRMBKTS-52) and the five surprise rows",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_smscensus.py --arms census --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~52/SEV1_SMS_PUBLISHER_CENSUS.json --root /c/dev/wk-firmbkts-52",
+   "result": "ROUND 4 SMS CENSUS: 3 of 4 arms; exit=1 (S4 FAIL)"
+  },
+  {
+   "tool": "aws",
+   "invocation": "aws sns list-subscriptions --region us-east-1 (client-side count); aws sns list-subscriptions-by-topic per SMS topic; aws cloudwatch describe-alarms (client-side merge); aws events list-rules and list-targets-by-rule (156 rules scanned); aws lambda list-functions (237 functions scanned)",
+   "result": "11 subscriptions, 6 sms (one per topic); 51 metric alarms, 0 composite; 156 rules, 0 errors, 2 rules target a census topic; 237 functions; 17 functions carry an SNS ARN in their environment, 1 of them (ec2-runtime-monitor) publishes to a census topic from source outside the tree"
+  }
+ ]
+}
