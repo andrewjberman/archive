@@ -1,0 +1,98 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bq-3",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bq-3.close-vs-trade-scan.md",
+  "group": "OTHER",
+  "vintage_commit": "f325600fbf"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~108",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round69.md",
+  "vintage_commit": "f325600fbf",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bq-3.close-vs-trade-scan.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~108/CLOSE_VS_TRADE_SCAN.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement record; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB69bq3-AC1",
+    "CB69bq3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~108/CLOSE_VS_TRADE_SCAN.csv",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement table; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB69bq3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~108/CLOSE_VS_TRADE_SCAN.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement note; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB69bq3-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB69bq3-AC1",
+   "criterion_verbatim": "the scan is recorded with its denominator, its six classes summing to the securities compared, and whether the two known cases were found. The CTO reads the counts.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~108/CLOSE_VS_TRADE_SCAN.json',encoding='utf-8'));c=d['classes'];k=d['known_cases'];print('CLOSE-VS-TRADE-SCAN-RECORD securities_compared=%d pairs_compared=%d class_sum=%d constant_scale=%d step=%d isolated=%d known_cases_found=%d/%d measured_account_days_affected=%d'%(d['securities_compared'],d['pairs_compared'],sum(c.values()),c['CONSTANT_SCALE'],c['STEP'],c['ISOLATED'],sum(1 for x in k if x['found']),len(k),d['measured_account_days_affected']))\"",
+   "expect": "CLOSE-VS-TRADE-SCAN-RECORD securities_compared=",
+   "output_evidence": "CLOSE-VS-TRADE-SCAN-RECORD securities_compared=720 pairs_compared=7979 class_sum=720 constant_scale=5 step=2 isolated=15 known_cases_found=2/2 measured_account_days_affected=470 (rc 0)",
+   "denominator": "720 securities with at least one same-date pair of 3,109 share-priced securities traded (1,409 have any close in the build table); 7,979 (cusip, date) pairs; six classes sum 720 of 720; CTVA found as CONSTANT_SCALE, CHPT found as TOO_FEW (one pair, ratio 20.2)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB69bq3-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the traded price is a share price for the kinds compared; the classes follow from the ratios shown; both known cases are found, or the scan says why not; the reach is counted on the served table.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read CLOSE_VS_TRADE_SCAN.json (classes, constant_scale, step, known_cases, not_established, by_store), CLOSE_VS_TRADE_SCAN.md (rules, hand-read of all 7 CONSTANT_SCALE and STEP series) and CLOSE_VS_TRADE_SCAN.csv",
+   "output_evidence": "trades taken: by and sl on Equity, ETF, Mutual Fund, Mutual Fund (Closed End), Unit Investment Trust; fixed income, annuity, alternative investment, cash left out (fixed income: 0 same-date pairs); classes AGREES 315, CONSTANT_SCALE 5, STEP 2, ISOLATED 15, NOISY 37, TOO_FEW 346; all 7 CONSTANT_SCALE and STEP series hand-read; CTVA CONSTANT_SCALE 0.151, CHPT TOO_FEW with one pair at 20.2 (row ADVI_COTBKF-D2-W108-S1); reach 8,411 priced holding-days and 470 measured account-days on the served r34 tables; no verdict given by the worker",
+   "denominator": "720 securities, 7,979 pairs; 7 of 7 CONSTANT_SCALE and STEP hand-read; 2 of 2 STEP securities absent from the 61-row split plan (38 applied, 23 not applied)",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "ADVI_COTBKF-D2-W108-S1"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~108/ADVI_COTBKF.TO-CB-bq-3.close-vs-trade-scan.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB69bq3-AC1)",
+   "result": "CLOSE-VS-TRADE-SCAN-RECORD securities_compared=720 pairs_compared=7979 class_sum=720 constant_scale=5 step=2 isolated=15 known_cases_found=2/2 measured_account_days_affected=470"
+  }
+ ]
+}

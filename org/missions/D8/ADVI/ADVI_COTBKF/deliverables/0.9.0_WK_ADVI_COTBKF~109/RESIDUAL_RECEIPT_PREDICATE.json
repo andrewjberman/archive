@@ -1,0 +1,1257 @@
+{
+ "predicate": {
+  "full_outflow": "FULL_OUTFLOW_RECENT: let O be the sum, over the account's own value rows dated in the 28 calendar days before today (today excluded), of each day's net external outflow as the form values it (the table's flow column, negative days only: withdrawals lo, in-kind transfers out trfo/trco, cancelled contributions LIX, short contributions si, the charge flows and riding tax withholdings of method_r28, a zero-Amount row valued at the close; a day with a deposit and a withdrawal counts only its net outflow; an unvalued flow counts 0). Let B be the account's value at the close of the previous row (the prior value the return divides by). The account had a full outflow when O / (O + B) is at least 0.99, i.e. O is at least 99 times B. Undefined when B is not positive (no base): then the predicate does not apply.",
+  "receipt_types": {
+   "income": {
+    "types": [
+     "dv",
+     "dvlt",
+     "dvst",
+     "int",
+     "roy",
+     "ileu",
+     "dvr",
+     "ac",
+     "DVX",
+     "INTX",
+     "DVRX"
+    ],
+    "source": "commonwealth_flows.py INTERNAL lines 59-70 (income and its cancels, reinvestment dvr :69 and its cancel DVRX :70); all INTERNAL, i.e. kept inside the return"
+   },
+   "fee_refund": {
+    "types": [
+     "man with a positive Amount"
+    ],
+    "source": "commonwealth_flows.py :86 (man INTERNAL) and :121 (man a drag under the method); the positive Amount is the refund/rebate"
+   },
+   "fee_credit_12b1": {
+    "types": [
+     "12b1"
+    ],
+    "source": "commonwealth_flows.py :85 (a fund fee credit booked on the cash sweep; all 1,466 estate rows are positive)",
+    "belongs": "yes, as a fee credit of the same shape as the refund; RECOMMENDED in; it changes 2 blanked days of 410 (408 without it)"
+   },
+   "allowed_beside_a_receipt": {
+    "types": [
+     "sweep buy by and sweep sell sl of a listed sweep (INTERNAL, the same money, commonwealth_flows.internal_sweep_trade)",
+     "lo of the cash balance (CFNCASH or a sweep) i.e. the withdrawal of the receipt",
+     "frntax (foreign tax withheld at source out of the same income, :109)"
+    ],
+    "why": "none of these makes the day a market return: the sweep leg and the cash withdrawal move the same money, and a receipt plus a withdrawal of it is still a receipt on a residual base (the account being swept out)"
+   }
+  },
+  "excludes": {
+   "rule": "The day is NOT a receipt day if any row of the account that day (its effective trading day) has a type outside the receipt and allowed lists. In particular:",
+   "trades": [
+    "by",
+    "sl",
+    "cs",
+    "ss",
+    "BYX",
+    "pyd",
+    "leu (a non-sweep security trade makes the day a market return)"
+   ],
+   "inflows": [
+    "li (cash or securities)",
+    "LISU",
+    "trfi",
+    "TRFIR",
+    "trci",
+    "TRCISU",
+    "LOX",
+    "so",
+    "ci (a contribution is a contribution, not a receipt)"
+   ],
+   "securities_out": [
+    "lo of a security",
+    "trfo",
+    "trco",
+    "LIX",
+    "si (an in-kind removal carries the security day price move)"
+   ],
+   "corporate_actions": [
+    "lica",
+    "licar",
+    "LICASU",
+    "loca",
+    "QA",
+    "CAF",
+    "CAE",
+    "acca",
+    "accal"
+   ],
+   "other_charges_and_taxes": [
+    "man negative",
+    "ManAltT",
+    "ManAltF",
+    "ManCheck",
+    "fch",
+    "fco",
+    "fee",
+    "misc",
+    "csltfee",
+    "genmain",
+    "pcf",
+    "cbf",
+    "bcf",
+    "stp",
+    "term",
+    "ASF",
+    "ftax",
+    "stax"
+   ],
+   "no_number": "no dollar amount, no prior-value threshold and no return threshold appears anywhere in the predicate"
+  },
+  "reads_as": "RECEIPT_AFTER_EXIT"
+ },
+ "constants": {
+  "look_back_calendar_days": {
+   "value": 28,
+   "source": "the 162 target days reach their plateau at 24 days: targets blanked at S=0.99 are 128 at 14 days, 145 at 21, 147 at 22 and 23, 148 at 24 and the same 148 at 25, 26, 27, 28, 30, 35, 45, 60, 90 and 180 days, while the total blanked on all measured days keeps rising (399 at 24, 410 at 28, 414 at 30, 431 at 60, 474 at 180). 28 is the smallest whole number of weeks on the plateau; a window of rows gives the same (20 rows: 148 / 413).",
+   "claim": "measured from the table"
+  },
+  "share_left": {
+   "value": 0.99,
+   "source": "elbow of the marginal yield at look-back 28 days: lowering the share from 0.999 to 0.995 adds 59 target days and 123 blanked days (48 percent targets), 0.995 to 0.99 adds 12 and 23 (52 percent), 0.99 to 0.95 adds 6 and 46 (13 percent), 0.95 to 0.90 adds 3 and 19 (16 percent), 0.90 to 0.80 adds 0 and 30. The marginal day stops being mostly a target day below 0.99. Equivalent to an outflow of 99 times the base, which is also the round-68 worker's 100-times observation.",
+   "claim": "measured from the table"
+  },
+  "no_dollar_or_prior_value_constant": true,
+  "not_constants": "the pre-outflow value is not used: on 152 of the 157 receipt-only target days with an outflow in the window the value before the first outflow is blank in the table (UNPRICED), so a share of the pre-outflow value cannot be computed; the share is taken against O + B, both of which the build has"
+ },
+ "on_the_179": [
+  {
+   "cause": "INCOME_PAID_AFTER_THE_HOLDINGS_LEFT",
+   "days": 119,
+   "blanked": 113,
+   "left": 6
+  },
+  {
+   "cause": "FEE_REFUND_CREDITED_AFTER_THE_ASSETS_LEFT",
+   "days": 43,
+   "blanked": 35,
+   "left": 8
+  },
+  {
+   "cause": "REAL_PRICE_MOVE_ON_A_FULL_BASE",
+   "days": 10,
+   "blanked": 0,
+   "left": 10
+  },
+  {
+   "cause": "TAX_WITHHOLDING_TAKES_THE_WHOLE_BALANCE",
+   "days": 2,
+   "blanked": 0,
+   "left": 2
+  },
+  {
+   "cause": "MANAGEMENT_FEE_DEBIT_ON_A_CASH_ONLY_ACCOUNT",
+   "days": 1,
+   "blanked": 0,
+   "left": 1
+  },
+  {
+   "cause": "FEE_OWED_ELSEWHERE_TAKEN_AS_A_DRAG_ON_A_CASH_BALANCE",
+   "days": 1,
+   "blanked": 0,
+   "left": 1
+  },
+  {
+   "cause": "CUSTODIAN_12B1_CREDIT_ON_A_RESIDUAL_BASE",
+   "days": 1,
+   "blanked": 0,
+   "left": 1
+  },
+  {
+   "cause": "SALE_AT_THE_TRADED_PRICE_AGAINST_A_SPLIT_ADJUSTED_CLOSE",
+   "days": 1,
+   "blanked": 0,
+   "left": 1
+  },
+  {
+   "cause": "IN_KIND_CONTRIBUTION_VALUED_ON_A_MISSCALED_CLOSE",
+   "days": 1,
+   "blanked": 0,
+   "left": 1
+  }
+ ],
+ "targets_blanked": 148,
+ "non_targets_blanked": 0,
+ "on_all_measured": {
+  "measured_rows_with_a_positive_prior_value": 107311,
+  "split_by_abs_return_and_prior_value": [
+   {
+    "abs_return": "abs_return_at_or_below_0.10",
+    "prior_value": "prior_value_under_1.00",
+    "measured": 5373,
+    "blanked": 14
+   },
+   {
+    "abs_return": "abs_return_at_or_below_0.10",
+    "prior_value": "prior_value_1.00_to_under_100.00",
+    "measured": 6341,
+    "blanked": 25
+   },
+   {
+    "abs_return": "abs_return_at_or_below_0.10",
+    "prior_value": "prior_value_100.00_or_more",
+    "measured": 95224,
+    "blanked": 61
+   },
+   {
+    "abs_return": "abs_return_0.10_to_1.00",
+    "prior_value": "prior_value_under_1.00",
+    "measured": 9,
+    "blanked": 3
+   },
+   {
+    "abs_return": "abs_return_0.10_to_1.00",
+    "prior_value": "prior_value_1.00_to_under_100.00",
+    "measured": 35,
+    "blanked": 28
+   },
+   {
+    "abs_return": "abs_return_0.10_to_1.00",
+    "prior_value": "prior_value_100.00_or_more",
+    "measured": 122,
+    "blanked": 96
+   },
+   {
+    "abs_return": "abs_return_above_1.00",
+    "prior_value": "prior_value_under_1.00",
+    "measured": 55,
+    "blanked": 50
+   },
+   {
+    "abs_return": "abs_return_above_1.00",
+    "prior_value": "prior_value_1.00_to_under_100.00",
+    "measured": 95,
+    "blanked": 81
+   },
+   {
+    "abs_return": "abs_return_above_1.00",
+    "prior_value": "prior_value_100.00_or_more",
+    "measured": 57,
+    "blanked": 52
+   }
+  ],
+  "row_totals_by_abs_return": {
+   "abs_return_at_or_below_0.10": {
+    "measured": 106938,
+    "blanked": 100
+   },
+   "abs_return_0.10_to_1.00": {
+    "measured": 166,
+    "blanked": 127
+   },
+   "abs_return_above_1.00": {
+    "measured": 207,
+    "blanked": 183
+   }
+  },
+  "column_totals_by_prior_value": {
+   "prior_value_under_1.00": {
+    "measured": 5437,
+    "blanked": 67
+   },
+   "prior_value_1.00_to_under_100.00": {
+    "measured": 6471,
+    "blanked": 134
+   },
+   "prior_value_100.00_or_more": {
+    "measured": 95403,
+    "blanked": 209
+   }
+  },
+  "measured_rows_with_a_non_positive_or_missing_prior_value": {
+   "rows": 5,
+   "prior_nan": 5,
+   "prior_zero_or_neg": 0,
+   "with_receipt_row": 2,
+   "predicate_does_there": "not applied (no positive base, the share is undefined); none blanked"
+  },
+  "blanked_by_year": {
+   "2013": 6,
+   "2014": 4,
+   "2015": 6,
+   "2016": 11,
+   "2017": 5,
+   "2018": 11,
+   "2019": 4,
+   "2020": 23,
+   "2021": 8,
+   "2022": 5,
+   "2023": 6,
+   "2024": 12,
+   "2025": 23,
+   "2026": 286
+  },
+  "blanked_in_the_two_busiest_months": {
+   "2026-05": 141,
+   "2026-06": 133,
+   "2020-06": 10
+  },
+  "what_the_blanked_days_are": {
+   "targets": {
+    "days": 148,
+    "cash_only_prior": 141,
+    "one_holding_prior": 7,
+    "two_plus": 0,
+    "rows_end_within_10": 105,
+    "later_withdrawal_ge_base_within_10": 106,
+    "income": 114,
+    "fee_refund": 35,
+    "b12": 0
+   },
+   "not_in_179": {
+    "days": 262,
+    "cash_only_prior": 226,
+    "one_holding_prior": 36,
+    "two_plus": 0,
+    "rows_end_within_10": 157,
+    "later_withdrawal_ge_base_within_10": 174,
+    "income": 186,
+    "fee_refund": 74,
+    "b12": 2
+   },
+   "not_in_179_le_0.10": {
+    "days": 100,
+    "cash_only_prior": 98,
+    "one_holding_prior": 2,
+    "two_plus": 0,
+    "rows_end_within_10": 42,
+    "later_withdrawal_ge_base_within_10": 36,
+    "income": 99,
+    "fee_refund": 1,
+    "b12": 0
+   },
+   "not_in_179_gt_0.10": {
+    "days": 162,
+    "cash_only_prior": 128,
+    "one_holding_prior": 34,
+    "two_plus": 0,
+    "rows_end_within_10": 115,
+    "later_withdrawal_ge_base_within_10": 138,
+    "income": 87,
+    "fee_refund": 73,
+    "b12": 2
+   }
+  },
+  "quiet_blanked_days_sample_of_20": [
+   {
+    "month": "2016-08",
+    "types": "dvr+int",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "b_1.00_to_lt_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": ">60",
+    "later_withdrawal_ge_base_within_10": true
+   },
+   {
+    "month": "2019-03",
+    "types": "dvr+int",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "b_1.00_to_lt_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": "11-60",
+    "later_withdrawal_ge_base_within_10": false
+   },
+   {
+    "month": "2021-12",
+    "types": "dvr+int",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "b_1.00_to_lt_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": ">60",
+    "later_withdrawal_ge_base_within_10": true
+   },
+   {
+    "month": "2022-08",
+    "types": "dvr",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "a_lt_1.00",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": ">60",
+    "later_withdrawal_ge_base_within_10": false
+   },
+   {
+    "month": "2023-10",
+    "types": "dvr",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "b_1.00_to_lt_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": ">60",
+    "later_withdrawal_ge_base_within_10": false
+   },
+   {
+    "month": "2025-06",
+    "types": "dv+sweep_by",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "c_ge_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": "11-60",
+    "later_withdrawal_ge_base_within_10": true
+   },
+   {
+    "month": "2025-07",
+    "types": "dvr",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "b_1.00_to_lt_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": ">60",
+    "later_withdrawal_ge_base_within_10": true
+   },
+   {
+    "month": "2025-07",
+    "types": "dvr",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "a_lt_1.00",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": ">60",
+    "later_withdrawal_ge_base_within_10": false
+   },
+   {
+    "month": "2025-08",
+    "types": "dvr",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "b_1.00_to_lt_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": ">60",
+    "later_withdrawal_ge_base_within_10": false
+   },
+   {
+    "month": "2026-04",
+    "types": "dvr+int",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "c_ge_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": "0-10",
+    "later_withdrawal_ge_base_within_10": true
+   },
+   {
+    "month": "2026-05",
+    "types": "man_pos+sweep_by",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "c_ge_100",
+    "share_left": 0.99,
+    "noncash_positions_at_prior": 0,
+    "rows_after": "11-60",
+    "later_withdrawal_ge_base_within_10": true
+   },
+   {
+    "month": "2026-05",
+    "types": "dv+sweep_by",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "c_ge_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": "11-60",
+    "later_withdrawal_ge_base_within_10": true
+   },
+   {
+    "month": "2026-05",
+    "types": "dvr+int+lo_cash+sweep_sl",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "c_ge_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": "0-10",
+    "later_withdrawal_ge_base_within_10": false
+   },
+   {
+    "month": "2026-05",
+    "types": "dv+dvr+int+lo_cash+sweep_sl",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "c_ge_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": "0-10",
+    "later_withdrawal_ge_base_within_10": true
+   },
+   {
+    "month": "2026-05",
+    "types": "dvr+int+lo_cash+sweep_sl",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "b_1.00_to_lt_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": "0-10",
+    "later_withdrawal_ge_base_within_10": false
+   },
+   {
+    "month": "2026-05",
+    "types": "dvr+int+lo_cash+sweep_sl",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "b_1.00_to_lt_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": "11-60",
+    "later_withdrawal_ge_base_within_10": true
+   },
+   {
+    "month": "2026-05",
+    "types": "dvr+int+lo_cash+sweep_sl",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "c_ge_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": "11-60",
+    "later_withdrawal_ge_base_within_10": true
+   },
+   {
+    "month": "2026-05",
+    "types": "dv+dvr+int+sweep_by",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "c_ge_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": "11-60",
+    "later_withdrawal_ge_base_within_10": true
+   },
+   {
+    "month": "2026-05",
+    "types": "dv+dvr+int+lo_cash+sweep_sl",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "c_ge_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": "0-10",
+    "later_withdrawal_ge_base_within_10": false
+   },
+   {
+    "month": "2026-06",
+    "types": "dv+sweep_by",
+    "abs_return_band": "a_le_0.10",
+    "prior_band": "c_ge_100",
+    "share_left": 1.0,
+    "noncash_positions_at_prior": 0,
+    "rows_after": "0-10",
+    "later_withdrawal_ge_base_within_10": true
+   }
+  ],
+  "quiet_days_reading": "100 blanked days have abs(return) at or below 0.10 (0.09 percent of 106,938 measured quiet days). 98 of the 100 sit on a cash-only base and 2 on one holding; none on two or more holdings; 99 carry an income row and 1 a fee refund; all have an outflow of 99 times the base or more in the 28 days before. They are the same phenomenon in kind (a receipt on a residual after the money left), smaller in size; they differ in that only 36 of 100 are followed by a withdrawal of the base within 10 rows (targets 106 of 148) and 42 of 100 end within 10 rows (targets 105 of 148), so more of them are residuals on accounts that stay open. The policy has no return threshold and blanks them; whether a 0.3 percent day of late interest on a stub is wanted blank is the CTO's.",
+  "account_months": {
+   "account_months_with_a_measured_day": 6922,
+   "account_months_touched": 299,
+   "account_months_all_measured_days_blanked": 10,
+   "accounts_touched": 241,
+   "accounts_with_measured_day": 1054
+  }
+ },
+ "total_blanked": 410,
+ "sensitivity": {
+  "note": "every row is the full predicate with one constant moved; other constants at the recommended setting (28 calendar days, 0.99, recommended receipt set). Columns: target days blanked of 162; of the 17 other days among the 179; total blanked of the 107,311; by abs(return) band; by prior-value band.",
+  "look_back": [
+   {
+    "kind": "rows",
+    "w": 10,
+    "S": 0.99,
+    "targets_blanked_of_162": 128,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 337,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 70,
+     "abs_return_0.10_to_1.00": 102,
+     "abs_return_above_1.00": 165
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 53,
+     "prior_value_1.00_to_under_100.00": 106,
+     "prior_value_100.00_or_more": 178
+    },
+    "income_class_blanked_of_119": 94,
+    "fee_refund_class_blanked_of_43": 34
+   },
+   {
+    "kind": "rows",
+    "w": 20,
+    "S": 0.99,
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 413,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 102,
+     "abs_return_0.10_to_1.00": 127,
+     "abs_return_above_1.00": 184
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 68,
+     "prior_value_1.00_to_under_100.00": 135,
+     "prior_value_100.00_or_more": 210
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "kind": "rows",
+    "w": 30,
+    "S": 0.99,
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 423,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 109,
+     "abs_return_0.10_to_1.00": 127,
+     "abs_return_above_1.00": 187
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 69,
+     "prior_value_1.00_to_under_100.00": 139,
+     "prior_value_100.00_or_more": 215
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "kind": "rows",
+    "w": 60,
+    "S": 0.99,
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 1,
+    "total_blanked_of_107311": 444,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 128,
+     "abs_return_0.10_to_1.00": 129,
+     "abs_return_above_1.00": 187
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 70,
+     "prior_value_1.00_to_under_100.00": 144,
+     "prior_value_100.00_or_more": 230
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "kind": "rows",
+    "w": 120,
+    "S": 0.99,
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 1,
+    "total_blanked_of_107311": 473,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 156,
+     "abs_return_0.10_to_1.00": 130,
+     "abs_return_above_1.00": 187
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 71,
+     "prior_value_1.00_to_under_100.00": 152,
+     "prior_value_100.00_or_more": 250
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "kind": "cal",
+    "w": 14,
+    "S": 0.99,
+    "targets_blanked_of_162": 128,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 336,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 69,
+     "abs_return_0.10_to_1.00": 102,
+     "abs_return_above_1.00": 165
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 53,
+     "prior_value_1.00_to_under_100.00": 106,
+     "prior_value_100.00_or_more": 177
+    },
+    "income_class_blanked_of_119": 94,
+    "fee_refund_class_blanked_of_43": 34
+   },
+   {
+    "kind": "cal",
+    "w": 21,
+    "S": 0.99,
+    "targets_blanked_of_162": 145,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 384,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 84,
+     "abs_return_0.10_to_1.00": 122,
+     "abs_return_above_1.00": 178
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 61,
+     "prior_value_1.00_to_under_100.00": 120,
+     "prior_value_100.00_or_more": 203
+    },
+    "income_class_blanked_of_119": 111,
+    "fee_refund_class_blanked_of_43": 34
+   },
+   {
+    "kind": "cal",
+    "w": 24,
+    "S": 0.99,
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 399,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 92,
+     "abs_return_0.10_to_1.00": 126,
+     "abs_return_above_1.00": 181
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 62,
+     "prior_value_1.00_to_under_100.00": 128,
+     "prior_value_100.00_or_more": 209
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "kind": "cal",
+    "w": 28,
+    "S": 0.99,
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 410,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 100,
+     "abs_return_0.10_to_1.00": 127,
+     "abs_return_above_1.00": 183
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 67,
+     "prior_value_1.00_to_under_100.00": 134,
+     "prior_value_100.00_or_more": 209
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "kind": "cal",
+    "w": 30,
+    "S": 0.99,
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 414,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 102,
+     "abs_return_0.10_to_1.00": 127,
+     "abs_return_above_1.00": 185
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 68,
+     "prior_value_1.00_to_under_100.00": 136,
+     "prior_value_100.00_or_more": 210
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "kind": "cal",
+    "w": 45,
+    "S": 0.99,
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 424,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 110,
+     "abs_return_0.10_to_1.00": 127,
+     "abs_return_above_1.00": 187
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 69,
+     "prior_value_1.00_to_under_100.00": 139,
+     "prior_value_100.00_or_more": 216
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "kind": "cal",
+    "w": 60,
+    "S": 0.99,
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 431,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 116,
+     "abs_return_0.10_to_1.00": 128,
+     "abs_return_above_1.00": 187
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 70,
+     "prior_value_1.00_to_under_100.00": 141,
+     "prior_value_100.00_or_more": 220
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "kind": "cal",
+    "w": 90,
+    "S": 0.99,
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 1,
+    "total_blanked_of_107311": 445,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 129,
+     "abs_return_0.10_to_1.00": 129,
+     "abs_return_above_1.00": 187
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 70,
+     "prior_value_1.00_to_under_100.00": 144,
+     "prior_value_100.00_or_more": 231
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "kind": "cal",
+    "w": 180,
+    "S": 0.99,
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 1,
+    "total_blanked_of_107311": 474,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 157,
+     "abs_return_0.10_to_1.00": 130,
+     "abs_return_above_1.00": 187
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 71,
+     "prior_value_1.00_to_under_100.00": 152,
+     "prior_value_100.00_or_more": 251
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   }
+  ],
+  "share_left": [
+   {
+    "kind": "cal",
+    "w": 28,
+    "S": 0.5,
+    "targets_blanked_of_162": 157,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 574,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 250,
+     "abs_return_0.10_to_1.00": 136,
+     "abs_return_above_1.00": 188
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 68,
+     "prior_value_1.00_to_under_100.00": 149,
+     "prior_value_100.00_or_more": 357
+    },
+    "income_class_blanked_of_119": 116,
+    "fee_refund_class_blanked_of_43": 41
+   },
+   {
+    "kind": "cal",
+    "w": 28,
+    "S": 0.8,
+    "targets_blanked_of_162": 157,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 505,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 182,
+     "abs_return_0.10_to_1.00": 135,
+     "abs_return_above_1.00": 188
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 68,
+     "prior_value_1.00_to_under_100.00": 148,
+     "prior_value_100.00_or_more": 289
+    },
+    "income_class_blanked_of_119": 116,
+    "fee_refund_class_blanked_of_43": 41
+   },
+   {
+    "kind": "cal",
+    "w": 28,
+    "S": 0.9,
+    "targets_blanked_of_162": 157,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 475,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 153,
+     "abs_return_0.10_to_1.00": 135,
+     "abs_return_above_1.00": 187
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 68,
+     "prior_value_1.00_to_under_100.00": 144,
+     "prior_value_100.00_or_more": 263
+    },
+    "income_class_blanked_of_119": 116,
+    "fee_refund_class_blanked_of_43": 41
+   },
+   {
+    "kind": "cal",
+    "w": 28,
+    "S": 0.95,
+    "targets_blanked_of_162": 154,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 456,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 138,
+     "abs_return_0.10_to_1.00": 133,
+     "abs_return_above_1.00": 185
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 68,
+     "prior_value_1.00_to_under_100.00": 143,
+     "prior_value_100.00_or_more": 245
+    },
+    "income_class_blanked_of_119": 115,
+    "fee_refund_class_blanked_of_43": 39
+   },
+   {
+    "kind": "cal",
+    "w": 28,
+    "S": 0.99,
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 410,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 100,
+     "abs_return_0.10_to_1.00": 127,
+     "abs_return_above_1.00": 183
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 67,
+     "prior_value_1.00_to_under_100.00": 134,
+     "prior_value_100.00_or_more": 209
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "kind": "cal",
+    "w": 28,
+    "S": 0.995,
+    "targets_blanked_of_162": 136,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 387,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 92,
+     "abs_return_0.10_to_1.00": 113,
+     "abs_return_above_1.00": 182
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 67,
+     "prior_value_1.00_to_under_100.00": 130,
+     "prior_value_100.00_or_more": 190
+    },
+    "income_class_blanked_of_119": 105,
+    "fee_refund_class_blanked_of_43": 31
+   },
+   {
+    "kind": "cal",
+    "w": 28,
+    "S": 0.999,
+    "targets_blanked_of_162": 77,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 264,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 48,
+     "abs_return_0.10_to_1.00": 65,
+     "abs_return_above_1.00": 151
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 62,
+     "prior_value_1.00_to_under_100.00": 106,
+     "prior_value_100.00_or_more": 96
+    },
+    "income_class_blanked_of_119": 59,
+    "fee_refund_class_blanked_of_43": 18
+   }
+  ],
+  "receipt_set": [
+   {
+    "mode": "rec",
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 410,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 100,
+     "abs_return_0.10_to_1.00": 127,
+     "abs_return_above_1.00": 183
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 67,
+     "prior_value_1.00_to_under_100.00": 134,
+     "prior_value_100.00_or_more": 209
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "mode": "income_only",
+    "targets_blanked_of_162": 113,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 299,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 99,
+     "abs_return_0.10_to_1.00": 107,
+     "abs_return_above_1.00": 93
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 41,
+     "prior_value_1.00_to_under_100.00": 85,
+     "prior_value_100.00_or_more": 173
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 0
+   },
+   {
+    "mode": "no_12b1",
+    "targets_blanked_of_162": 148,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 408,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 100,
+     "abs_return_0.10_to_1.00": 125,
+     "abs_return_above_1.00": 183
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 67,
+     "prior_value_1.00_to_under_100.00": 132,
+     "prior_value_100.00_or_more": 209
+    },
+    "income_class_blanked_of_119": 113,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "mode": "no_companions",
+    "targets_blanked_of_162": 17,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 83,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 46,
+     "abs_return_0.10_to_1.00": 10,
+     "abs_return_above_1.00": 27
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 16,
+     "prior_value_1.00_to_under_100.00": 34,
+     "prior_value_100.00_or_more": 33
+    },
+    "income_class_blanked_of_119": 17,
+    "fee_refund_class_blanked_of_43": 0
+   },
+   {
+    "mode": "plus_cash_and_fee_rows",
+    "targets_blanked_of_162": 151,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 457,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 131,
+     "abs_return_0.10_to_1.00": 132,
+     "abs_return_above_1.00": 194
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 71,
+     "prior_value_1.00_to_under_100.00": 165,
+     "prior_value_100.00_or_more": 221
+    },
+    "income_class_blanked_of_119": 116,
+    "fee_refund_class_blanked_of_43": 35
+   },
+   {
+    "mode": "any_other_activity",
+    "targets_blanked_of_162": 152,
+    "non_targets_blanked_of_17": 0,
+    "total_blanked_of_107311": 462,
+    "blanked_by_abs_return": {
+     "abs_return_at_or_below_0.10": 134,
+     "abs_return_0.10_to_1.00": 132,
+     "abs_return_above_1.00": 196
+    },
+    "blanked_by_prior_value": {
+     "prior_value_under_1.00": 71,
+     "prior_value_1.00_to_under_100.00": 167,
+     "prior_value_100.00_or_more": 224
+    },
+    "income_class_blanked_of_119": 116,
+    "fee_refund_class_blanked_of_43": 36
+   }
+  ],
+  "receipt_set_meaning": {
+   "rec": "recommended: income types + positive man + 12b1; sweep legs, cash withdrawal and frntax allowed beside",
+   "income_only": "income types only (no fee refund, no 12b1)",
+   "no_12b1": "recommended without 12b1",
+   "no_companions": "a receipt row and nothing else (no sweep leg, no cash withdrawal)",
+   "plus_cash_and_fee_rows": "also allows cash deposit, cash transfers in/out, negative man, misc and other charge rows, taxes beside the receipt",
+   "any_other_activity": "a receipt row on the day, whatever else is there"
+  },
+  "grid_targets_blanked_of_162": {
+   "rows20_S0.9": 157,
+   "rows20_S0.95": 154,
+   "rows20_S0.99": 148,
+   "rows20_S0.995": 136,
+   "rows20_S0.999": 77,
+   "rows30_S0.9": 157,
+   "rows30_S0.95": 154,
+   "rows30_S0.99": 148,
+   "rows30_S0.995": 136,
+   "rows30_S0.999": 79,
+   "rows60_S0.9": 157,
+   "rows60_S0.95": 155,
+   "rows60_S0.99": 148,
+   "rows60_S0.995": 137,
+   "rows60_S0.999": 79,
+   "cal14_S0.9": 137,
+   "cal14_S0.95": 134,
+   "cal14_S0.99": 128,
+   "cal14_S0.995": 118,
+   "cal14_S0.999": 62,
+   "cal28_S0.9": 157,
+   "cal28_S0.95": 154,
+   "cal28_S0.99": 148,
+   "cal28_S0.995": 136,
+   "cal28_S0.999": 77,
+   "cal60_S0.9": 157,
+   "cal60_S0.95": 155,
+   "cal60_S0.99": 148,
+   "cal60_S0.995": 137,
+   "cal60_S0.999": 79,
+   "cal90_S0.9": 157,
+   "cal90_S0.95": 155,
+   "cal90_S0.99": 148,
+   "cal90_S0.995": 137,
+   "cal90_S0.999": 79
+  },
+  "grid_total_blanked": {
+   "rows20_S0.9": 479,
+   "rows20_S0.95": 460,
+   "rows20_S0.99": 413,
+   "rows20_S0.995": 390,
+   "rows20_S0.999": 266,
+   "rows30_S0.9": 503,
+   "rows30_S0.95": 477,
+   "rows30_S0.99": 423,
+   "rows30_S0.995": 399,
+   "rows30_S0.999": 275,
+   "rows60_S0.9": 560,
+   "rows60_S0.95": 528,
+   "rows60_S0.99": 444,
+   "rows60_S0.995": 413,
+   "rows60_S0.999": 287,
+   "cal14_S0.9": 385,
+   "cal14_S0.95": 369,
+   "cal14_S0.99": 336,
+   "cal14_S0.995": 317,
+   "cal14_S0.999": 203,
+   "cal28_S0.9": 475,
+   "cal28_S0.95": 456,
+   "cal28_S0.99": 410,
+   "cal28_S0.995": 387,
+   "cal28_S0.999": 264,
+   "cal60_S0.9": 528,
+   "cal60_S0.95": 498,
+   "cal60_S0.99": 431,
+   "cal60_S0.995": 405,
+   "cal60_S0.999": 281,
+   "cal90_S0.9": 562,
+   "cal90_S0.95": 529,
+   "cal90_S0.99": 445,
+   "cal90_S0.995": 414,
+   "cal90_S0.999": 288
+  },
+  "formulations_compared": [
+   {
+    "name": "F1 outflow share of (outflow + today base), calendar days",
+    "setting": "28 days, 0.99",
+    "targets_blanked_of_162": 148,
+    "total_blanked": 410,
+    "chosen": true,
+    "why": "computable on every row from the table (flow, value); bounded 0 to 1; gap-free"
+   },
+   {
+    "name": "F1r the same in the account own rows",
+    "setting": "20 rows, 0.99",
+    "targets_blanked_of_162": 148,
+    "total_blanked": 413,
+    "chosen": false,
+    "why": "same result within 3 days; rows are not visible in a transaction list, calendar days are"
+   },
+   {
+    "name": "F2 outflow at least K times today base (round-68 observation), 30 rows",
+    "setting": "K=100 (K=10 / 1000)",
+    "targets_blanked_of_162": "148 (157 / 79)",
+    "total_blanked": "423 (499 / 275)",
+    "chosen": false,
+    "why": "same family as F1 (K = share/(1-share)); K=100 is share 0.990"
+   },
+   {
+    "name": "F3 share of the pre-outflow value that left",
+    "setting": "-",
+    "targets_blanked_of_162": "not computable on 152 of 157",
+    "total_blanked": "n/a",
+    "chosen": false,
+    "why": "value before the first outflow in the window is blank (UNPRICED) on 152 of the 157 receipt-only target days that have an outflow; known on 5; the other blanked days: blank on 194, known on 68"
+   },
+   {
+    "name": "F4 value fell to at most R of its 28-day peak (no outflow test)",
+    "setting": "R=0.01 / 0.05 / 0.10",
+    "targets_blanked_of_162": "7 / 10 / 14",
+    "total_blanked": "98 / 135 / 159",
+    "chosen": false,
+    "why": "the peak is blank for the same reason; catches 7 to 14 targets of 158 receipt-only target days"
+   },
+   {
+    "name": "F0 any outflow at all in 28 days (no size test)",
+    "setting": "O > 0",
+    "targets_blanked_of_162": 157,
+    "total_blanked": 1320,
+    "chosen": false,
+    "why": "blanks 1,320 days; an outflow of a few percent is not a full outflow"
+   }
+  ],
+  "receipt_alone_without_a_full_outflow": "the receipt test alone (no full-outflow test) selects 5,602 measured days, of which 158 targets, and 2 of the other 17 (the one real price-move day that carries a dvr and the 12b1 day); the full-outflow test removes 5,192 of them"
+ },
+ "recommended": {
+  "marked_as": "RECOMMENDATION of the measuring worker, not a ruling; the CTO and the technical authority decide",
+  "setting": {
+   "look_back_calendar_days": 28,
+   "share_left": 0.99,
+   "receipt_set": "income types + positive man + 12b1, with sweep legs, cash withdrawal and frntax allowed beside, any other row excludes",
+   "reads_as": "RECEIPT_AFTER_EXIT"
+  },
+  "result": {
+   "targets_blanked_of_162": 148,
+   "non_targets_blanked_of_17": 0,
+   "total_blanked_of_107311": 410,
+   "quiet_at_or_below_0.10": 100,
+   "account_months_touched": 299
+  },
+  "why": [
+   "it is the narrowest setting that keeps the 148 target days the wider settings keep (no target is gained by a longer look-back, none lost by it until below 24 days)",
+   "below 0.99 the added days are mostly not targets (13 to 16 percent), above it targets are lost fast (0.995 loses 12, 0.999 loses 71)",
+   "0 of the 17 other days among the 179 are blanked; the 10 real price-move days and the 2 withholding days are untouched",
+   "every blanked day has an outflow of 99 times the base or more in the 28 days before: the policy phrase 'a recent full outflow' is a measured quantity, not a prior-value number"
+  ],
+  "cost": "14 target days are left (see on_the_179): 4 by other activity beside the receipt, 10 with a share left of 0.91 to 0.99 or no outflow in 28 days; and 100 quiet days are blanked"
+ },
+ "account_months_touched": 299,
+ "not_established": [
+  "Pre-outflow value: the table's value is blank (UNPRICED) before the exit on 152 of 157 receipt-only target days, so the share of the pre-outflow value that left is not measured; the share is against outflow plus base.",
+  "The look-back is measured from the flow column (the net daily flow of method_r28 in the served table), not re-derived from transactions; the receipt-day test reads transaction types from tx_cache with a weekend or holiday row put on the next row of the account (0 of 1,416,497 rows found no row of its account on or after its date, and 0 found one more than 5 days later).",
+  "A day with a deposit and a withdrawal is counted net in the window; a gross-outflow reading was not run.",
+  "The 14 target days left: 10 have a share left of 0.91 to 0.99 (a remainder of 1 to 9 percent) or no outflow in 28 days; 4 carry a sale, a misc charge, a cash deposit, or a cash transfer in and out beside the receipt. Whether they should be blanked is the CTO's; sensitivity shows 0.95 gains 6 and 0.90 gains 9.",
+  "The quiet blanked days (100 at or below 0.10) are told apart from the targets only by description (sample of 20, holdings, what follows); no ruling was made on whether a late-interest day on a stub that stays open is the policy's phenomenon.",
+  "The real price-move class (10) is not blanked, but one such day carries a dvr and passes the receipt test; only the full-outflow test (0 outflow in 28 days) keeps it. The 12b1 day of the round-68 set is not blanked at 28 days (no outflow); it is at 90 days or more. Both rest on single days.",
+  "5 measured rows have a missing prior value in this table (2 carry a receipt row); the predicate is not applied there and the cause of a measured return beside a missing prior value was not looked into.",
+  "The flow of a zero-Amount withdrawal is the build's price-valued flow; a mis-scaled close would mis-size an outflow (round 68 found one such CUSIP, CTVA); no outflow was re-priced.",
+  "Dates cluster: 286 of the 410 blanked days are in 2026 (141 in May, 133 in June), the account closures; the earlier years hold 124. The predicate was not tested out of sample.",
+  "The code was not changed: the reason code RECEIPT_AFTER_EXIT, its precedence among the existing blank reasons and the flow-timing it assumes (end) are a build matter."
+ ]
+}
