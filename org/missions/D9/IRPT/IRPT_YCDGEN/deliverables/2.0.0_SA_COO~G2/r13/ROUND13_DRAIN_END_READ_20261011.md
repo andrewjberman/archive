@@ -36,7 +36,11 @@ complete, 16 of 16 proofs structurally valid, 0 ungraded, 0 self-graded, **verdi
 - IRPT_YCDGEN-D2-S58: the status route answers FIRM_BINDING to an owner replay whatever the job's state. Its question, does
   a real opal-capital owner with the firm selected read its own status, bears on FWD-1 and is answered by the sitting.
 - IRPT_YCDGEN-D2-S56 (the applier's): the journal names no request. True; the causes are inferred by time and say so.
-- Still ARMED: D2-S45 (no redrive; a redelivered FAILED job is claimed and executed), D2-S38, D2-W10-S4, S16.
+- ARMED: row D2-S45 stays armed by this round's own pair (no redrive; a redelivered FAILED job is claimed and executed).
+  Beyond it, measured at this close: 22 rows carry `hazard_standing` ARMED in the investigation file's own field (150
+  rows parsed). Which of those a later slug has disarmed is the CVO's ledger and was not reconciled by this seat at this
+  close. This seat's working list of the ones still armed, carried from earlier ticks and NOT re-measured: D2-S38,
+  D2-W10-S4, S16.
 
 ## The issuer's own errors this round, each caught before it shipped
 
