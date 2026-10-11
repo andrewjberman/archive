@@ -251,3 +251,15 @@ Held on the condition that no IRPT_BCKEND order is open:
   encoding is ruled to stay and the contract says why at its head.
 
 **For the slug:** a second witness would take the blank share from 58.2 to 37.0 percent by the round 136 sizing; nothing is stamped.
+
+---
+
+## Added at round 137, 2026-10-11T16:53:48Z (input: msg 5389)
+
+Row D2-S92 above is met: PRD v0.38 repaired the text and this seat signed it. It is dismissed at the slug.
+The line "a second witness would take the blank share from 58.2 to 37.0 percent" is withdrawn with PRD v0.38.
+
+Held on the condition that no IRPT_BCKEND order is open; owner `1.0.0_SA_CTO~DELL2`:
+
+- **D2-W297-S1** (filed by `0.9.0_WK_IRPT_BCKEND~297`): The holdings source carries no instrument-type field (85 partitions, 1,411,352 rows, 26 distinct columns read), so under ADDENDUM v0.38 no security is admitted to the reader and the sizing equals the rule in force (58.157 percent, 382 of 999); the sibling transactions table beside it DOES carry a ty
+- **D2-W297-S2** (filed by `0.9.0_WK_IRPT_BCKEND~297`): Two silver transaction tables exist for the firm and the order points at both ('beside the holdings table' and 'the source ADVI_COTBKF reads'); only the first carries a Price column, so the fund-transaction counts are from the table beside the holdings table (361 fund-dates, 9 funds, 346 inside the 
