@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-11</date>
-    <status>pending</status>
+    <status>complete -- flipped by issuer 2.0.0_SA_COO~Y2 2026-10-11 ~10:4xZ: APPLY5-AC1 and APPLY5-AC2 print their tokens, re-run by the issuer (AC2 after the issuer fixed its own check's root path, apply5_checks.py parents[8] to parents[9], found by the applier); proof instance VALID rc 0 by the issuer's run. Live irpt-status reads Iw3FADFr (issuer's own read); plan 1 to change, re-plan 0; ledger closed; the source map states this apply. NOT established by this order: the three changed served answers -- after-reads R2 to R7 are the laptop's (TO-READS-Y5, pending), and R8 here compared a refusal envelope only. The rollback version hRe7.zty9CYey5GkmjHlETbeZkKsD.3O is unused and stands ready.</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>

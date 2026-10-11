@@ -1,0 +1,246 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "The pre-read passed the STOP before anything was installed.",
+      "denominator": "1 output file (P1_PRE_READ_20261011.txt, 16 lines), 1 verdict line. The count is 1 and the FAIL-line control in the same file -- grep -c 'P1 STOP-READ FAIL' -- is 0, so the PASS is a real match rather than an absent-line artifact; pre_read.sh emits exactly one of the two verdict lines and nothing else in the file contains either string. The verdict line reads 'P1 STOP-READ PASS' and is emitted only when the unit Environment, the running process and the unit/drop-in files all read 0 for IRPT_ANALYSIS_READY_QUEUE_URL -- measured 0, 0, 0 at 2026-10-11T10:30:11Z, ssm b47317a9-bbe9-4f20-b941-29a7076e184d Success rc 0.",
+      "expect": "^1$",
+      "invocation": "grep -c 'P1 STOP-READ PASS' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_st30/P1_PRE_READ_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c 'P1 STOP-READ PASS' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_st30/P1_PRE_READ_20261011.txt\n1\nmatched line, verbatim: P1 STOP-READ PASS\nFAIL-line control on the same file, grep -c 'P1 STOP-READ FAIL': zero matches\n(the count stands alone on its own line because the criterion's expect is ^1$ under MULTILINE; the surrounding lines name the invocation and the line the count is of, so the number is not a bare value)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "V1 shows the host running st30.",
+      "denominator": "1 output file (D2_V1_INSTALL_20261011.txt), 1 'V1 running root' line. The root is read from systemd's ExecStart inside the script, never typed: the same artifact prints the raw ExecStart (argv[]=/usr/bin/python3.12 /opt/irpt-resident/37210c771a-st30/ycharts/generate/resident_main.py ...), so the matched line is re-derivable from the unit rather than taken on trust.",
+      "expect": "37210c771a-st30 active=active",
+      "invocation": "grep -m1 'V1 running root' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_st30/D2_V1_INSTALL_20261011.txt",
+      "method": "command",
+      "output_evidence": "V1 running root /opt/irpt-resident/37210c771a-st30 active=active restarts=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "The ledger irpt-resident-st30-20261011 is CLOSED.",
+      "denominator": "the glob resolves to EXACTLY 1 file (ls -1 | wc -l = 1), so -m1 is not hiding a second entry under the same slug; 4 of 4 legs carry proof, and the .open_deploys sentinel for this slug is gone (grep -c over ls -a of org/critical_paths/.open_deploys/ = 0, listed with ls -a because ls -1 hides .unindexed_red_state.json).",
+      "expect": "^\\*\\*Status:\\*\\* CLOSED",
+      "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-resident-st30-20261011_deploy_completion.md",
+      "method": "command",
+      "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261011T103416Z",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the full SSM stdout of pre_read.sh with the command id on line 1: host state before the install, the rollback-root read, the library and wrapper digests, the queue depth, and the three-way STOP read with its verdict line",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_st30/P1_PRE_READ_20261011.txt"
+    },
+    {
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the full SSM stdout of install_st30.sh with the command id on line 1: the on-host sha256 verification of the installer, the installer's own output (294-member SHA256SUMS, 17 named member checks, node --check, factory OK, two queue reads, the stop/start pair), and the eight V1 read-backs",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_st30/D2_V1_INSTALL_20261011.txt"
+    },
+    {
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "opened 20261011T1025Z and closed 20261011T103416Z by .tools/deploy_ledger.py; 4 legs (U2 P1 D2 V1), every one carrying measured proof; the OPEN sentinel was committed at open and removed at close. The entry itself was committed by the tool at open and is MODIFIED IN PLACE by this commit.",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/critical_paths/change_management/20261011T1025Z_irpt-resident-st30-20261011_deploy_completion.md"
+    },
+    {
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "commit_or_etag": "6c93b91b0e122e0ec9f8fdb0195fc126",
+      "deploy_evidence": "read back BY VERSION and sha256 RECOMPUTED FROM THE RETURNED BYTES = e5a6b6251b0e5e971cf73d785770965d4c2f407a6b4d79286508b50a853da241, EQUAL to local and to the order's declared prefix; then verified AGAIN on the host by the installer before extraction (exit 16 not taken)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "kind": "s3_object",
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/ec2/investor-reporting-ycharts/resident/irpt-resident-37210c771a-st30.tar.gz"
+    },
+    {
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "commit_or_etag": "e92966b9c2bb08610cca5e6bd4ba404b",
+      "deploy_evidence": "read back BY VERSION and sha256 RECOMPUTED FROM THE RETURNED BYTES = dd85725806894839bd46fc66d990ba195f966862015a2983bb7bbbef0964b969, EQUAL to local and to the order's declared prefix; then verified AGAIN on the host by install_st30.sh before a line of it ran (exit 31 not taken)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "kind": "s3_object",
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/ec2/investor-reporting-ycharts/resident/resident_host_install_37210c771a-st30.sh"
+    },
+    {
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "commit_or_etag": "042b54ba7fdf494e106e2deccbce87a6866695c7f4db01edd50a9391afa8712f",
+      "deploy_evidence": "manifest_sha 042b54ba7fdf494e106e2deccbce87a6866695c7f4db01edd50a9391afa8712f over 4343 host members (294 package members plus the pydeps the installer copies in). Running root read from systemd's ExecStart, active since 2026-10-11 10:32:22 UTC, MainPID 864777, NRestarts 0, 3 IRPT_RESIDENT_POLL in 60 s, 0 tracebacks; worker sha256 a9f71b6d236e7a9ee0f66f8acb488b2968b8805a47fa90ef454aae3dfbb751fa EQUAL to the installer's declared built member and DIFFERENT from st27's 9317219a.",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "kind": "aws_resource",
+      "path_or_key": "i-0167fd745ad906a66:/opt/irpt-resident/37210c771a-st30"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~YC2",
+  "compiler_tools": [
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: a resident package swap; no schedule, trigger or EventBridge rule is added or read. Checked against the act as executed -- the two SSM sends read and wrote only the host's own unit, root and receipt; no events/rules/targets call was made.",
+      "tool": "comp-schedule"
+    },
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: no IAM change; the host fetch is by key as in st26-st29. Checked against the act as executed -- no iam.tf change, no policy write, no role change. The two grants the act DID exercise were proved by LIVE CALLS rather than by simulate-principal-policy (which has four false-deny modes and one false-allow mode): s3:PutObject/GetObject as cloudops-dell2-agent-user (rc 0 on both puts and both version read-backs) and ssm:SendCommand on this one instance (two Success invocations). The host role's own s3:GetObject was proved by the host actually fetching both objects.",
+      "tool": "comp-iam"
+    },
+    {
+      "invocation": "the order's preflight states it was RUN by the issuer; this seat did not re-run the package gate, and grades the preflight's claim as a control instead",
+      "result": "The preflight reads: 'comp-adversary: RUN -- package gate PASS against the running st27 (added 25, removed 0, changed 61, identical 208); census parts 1 and 2 read every loadable diff; 0 of 294 members under performance/'. This seat exercised the 294 number INDEPENDENTLY on the host: the installer's own `sha256sum -c SHA256SUMS` printed 'package SHA256SUMS OK (294 members)', which agrees with the gate's denominator. The 'identical 208 / changed 61' split is taken as filed -- this seat did not diff st27 against st30 member by member. The gate's own known defect is already on the channel as row IRPT_YCDGEN-D2-S46 (whole-tree mode fails a correct map member; named-list mode was used), filed by the issuer, not re-filed here.",
+      "tool": "comp-adversary"
+    }
+  ],
+  "controls": {
+    "both_never_widen_halves_were_verified_at_the_CURRENT_bytes_not_at_a_citation": {
+      "description": "THE GATE ON THIS WHOLE ACT. A citation ages separately from the text it quotes, and this pair had already been invalidated once: the CTO ruled the half signed against packet blob e6bec0e8cb did NOT cover an install (msg 4662). So the GO was tested by printing the bytes, not by trusting the order's prose.",
+      "expected_landed": "git hash-object of the packet in the working tree EQUALS f81df64584 and equals the blob at b0c75d2f04; b0c75d2f04 is an ancestor of HEAD; the CTO half's working-tree blob equals its blob at e2346b95f8; both files clean in git status",
+      "expected_not_landed": "any blob mismatch, an unclean working tree on either file, or b0c75d2f04 not reachable from HEAD -- any of which would mean the signatures do not cover the bytes this seat was about to install, and the order does not have a GO",
+      "observed": "packet working-tree blob f81df64584525150dcc2e2a41bfec2bb6e3d7102 == blob at b0c75d2f04, identical; b0c75d2f04 IS an ancestor of HEAD; CTO half working-tree blob 983257e456b4d21ebf5e414218f012b4331060a6 == blob at e2346b95f8; git status --porcelain EMPTY for the whole st30_release folder and for the CTO half. The CTO half's own text names blob f81df64584 as what it re-signed, so the signature and the bytes agree in both directions.",
+      "status": "PASS"
+    },
+    "producer_for_was_read_on_all_three_arms_so_the_mapping_still_discriminates": {
+      "description": "The order expects producer_for svc = YCHARTS. Read alone, that single arm would read the same if the function had collapsed to one producer. The packet's restated section 2 turns on this mapping being real, because it is why S1 ships UNEXERCISED.",
+      "expected_landed": "svc -> YCHARTS, andrew -> OPAL, other -> YCHARTS, and the allow list unchanged at Andrew only",
+      "expected_not_landed": "all three arms equal, which would mean the mapping no longer discriminates, or svc-irpt-analysis appearing on the allow list, which the CTO declined to add (PRD line 248: the list changes only on Andrew's word)",
+      "observed": "svc -> YCHARTS | andrew -> OPAL | other -> YCHARTS. The mapping discriminates. OPAL_PRODUCER_PRINCIPALS = (\"andrew@opalinvest.com\",), unchanged from st27 and confirmed live by the imported producer ('allow list (andrew@opalinvest.com,)', family YCHARTS_OPAL_REPORT). Nothing was added to the list.",
+      "status": "PASS"
+    },
+    "the_404_before_the_put_was_absence_not_a_broken_call": {
+      "description": "A RETRIEVAL trap: a failed retrieval returns a VALUE. A 404 from head-object reads identically whether the key is absent or the call, credential or bucket name is wrong -- and the order makes 'each key must be 404 before the put' a precondition, so a broken call would have satisfied it falsely.",
+      "expected_landed": "both target keys return 404 Not Found, AND a positive control in the SAME BUCKET AND THE SAME PREFIX in the same sweep returns a real object",
+      "expected_not_landed": "a 404 on the control too, which would mean the sweep cannot see anything and the two 404s carry no information",
+      "observed": "both st30 keys: 404 Not Found, rc 254. Control irpt-resident-e606008994-st27.tar.gz in the same prefix and the same sweep: rc 0, 876572 bytes, VersionId S51IxQHe6DZBgq9EQLNhc3UTrEbXqi_V, and its own metadata sha256 20916261074c356ab31497b338a6957e3d72cb252b8a3f54432db98610da39e4 EQUALS the packet's declared st27 rollback package -- so one read discharged both the control and a measurement that the rollback artifact is present.",
+      "status": "PASS"
+    },
+    "the_STOP_was_read_three_ways_and_its_two_hiding_places_were_read_too": {
+      "description": "THE ORDER'S STOP. If IRPT_ANALYSIS_READY_QUEUE_URL is set anywhere the unit can see, this release's I3 send goes live and the install must not happen. The packet counts TWO writers of 'whether I3 sends' -- the package bindings and the unit's own environment -- and the unit environment is the one this release does not write, which is why it is read rather than assumed.",
+      "expected_landed": "0 in the unit Environment, 0 in the running process's /proc/PID/environ, 0 across the unit file and its drop-in directory; and the places a drop-in could hide are themselves enumerated",
+      "expected_not_landed": "any non-zero, which prints 'P1 STOP-READ FAIL' and installs nothing",
+      "observed": "unit Environment 0, running process (pid 777546) 0, unit and drop-in files 0. The enumeration is on the record beside it: EnvironmentFiles is EMPTY and the only drop-in is opal-render.conf, so the three zeros are not hiding an unread EnvironmentFile. Verdict line 'P1 STOP-READ PASS' present once, FAIL line 0 times. Confirmed again AFTER the install from the NEW process: V1 read 0 occurrences in pid 864777's environ, with 0 ANALYSIS_READY_SEND_FAILED and 0 ANALYSIS_READY_QUEUE_UNSET in the journal.",
+      "status": "PASS"
+    },
+    "the_brand_comes_from_the_package_not_from_the_environment": {
+      "description": "Round 8's cell left open whether the brand assets are read from the running root or from host environment variables; a release that moved the root would leave an env-fed brand silently pinned to the old one.",
+      "expected_landed": "spec and logo paths resolve UNDER the new root, and the env override list is empty",
+      "expected_not_landed": "a path outside the running root, or a non-empty IRPT_BRAND*/IRPT_OPAL_LOGO env list, which would mean the brand is not package-pinned",
+      "observed": "spec /opt/irpt-resident/37210c771a-st30/ycharts/research/brand/brand.json, logo /opt/irpt-resident/37210c771a-st30/ycharts/research/brand/Opal-Capital-Logo-Full-Color.svg, logo 3853 bytes (equal to the b8 listing's logo size on st27), spec keys colors/extended_palette/logo/typography, and the env brand var list is EMPTY. Read from inside the running root by the installed factory, not by a path this seat typed.",
+      "status": "PASS"
+    },
+    "the_host_ran_it_rather_than_merely_accepting_it": {
+      "description": "A DELIVERY trap on a host plane: send-command returning a CommandId proves SSM ACCEPTED the request, never that the instance ran it. SENT != EMITTED != READ.",
+      "expected_landed": "both invocations read Status Success with ResponseCode 0 and no stderr, and the stdout carries the expected line shapes",
+      "expected_not_landed": "Pending/Failed/TimedOut, a non-zero ResponseCode, or stderr content -- any of which would mean the saved stdout is not a complete reading",
+      "observed": "P1 ssm b47317a9-bbe9-4f20-b941-29a7076e184d Success rc 0; D2+V1 ssm 39cacd01-6a93-4a7e-86be-8080f1c84b80 Success rc 0. host_read.py prints no STDERR block for either, and it only prints a result at all once the invocation leaves Pending/InProgress/Delayed. Each invocation's stdout carries its own UTC timestamps read on the host (10:30:11Z; 10:32:00Z and 10:32:47Z), so the reading is dated by the host rather than by this box.",
+      "status": "PASS"
+    },
+    "the_installers_queue_gate_was_never_forced": {
+      "description": "The installer refuses unless irpt-generation reads 0 visible and 0 in flight, and the CTO half makes that refusal a condition. ApproximateNumberOfMessages is approximate by name, so one reading of it is not the control; and a gate that can be forced is not a gate.",
+      "expected_landed": "0/0 read by more than one instrument, the installer's own two checks pass on their own, and nothing is passed to override them",
+      "expected_not_landed": "a non-zero depth at any read, or the exit-20 branch firing, or any flag or edit that bypasses the check",
+      "observed": "0/0 FOUR times: pre_read.sh's own host read at 10:30:11Z; the SQS API from this box immediately before the D2 send; the installer's own read before the library swap ('queue visible/in-flight before the library swap: 0 0'); and its own read before the stop ('queue visible/in-flight: 0 0'). A fifth read at V1 is also 0/0. The exit-20 branch did not fire, and the script was sent VERBATIM -- host_read.py adds no command of its own, and no flag exists on the installer to force the gate.",
+      "status": "PASS"
+    },
+    "the_ledger_was_open_before_the_first_irreversible_act_not_after_it": {
+      "description": "NEVER-2 requires the entry opened at START. The order lists U2 first and the ledger second; this seat opened the ledger FIRST, so the S3 puts -- the first act with a durable effect outside this box -- were already covered. Noted here because it is a deliberate departure from the order's numbering, in the direction the law requires, with no change to the act.",
+      "expected_landed": "the entry exists and is committed before the first put, declaring all four legs",
+      "expected_not_landed": "a put landing before any entry exists, which is the half-landed-deploy class the rule exists for",
+      "observed": "entry opened 20261011T1025Z with 4 legs and committed by the tool in the same breath ('the OPEN entry is on record and survives a worktree removal'); the first put returned at 2026-10-11T10:27:50Z per the object's own LastModified. Order of legs within the ledger is exactly the order's: U2, P1, D2, V1.",
+      "status": "PASS"
+    },
+    "the_s3_keys_were_taken_from_the_consumer_not_from_the_local_basename": {
+      "description": "The tar's local basename is 37210c771a-st30.tar.gz but the host fetches irpt-resident-37210c771a-st30.tar.gz. Uploading under the basename would have produced two green sha256 read-backs and a host fetch that 404s -- a well-formed U2 and a dead D2. This is the exact trap the st29 ledger records having met.",
+      "expected_landed": "the key used equals the installer's own KEY= line, read at HEAD of the local artifact, and install_st30.sh's fetch line names the installer's key",
+      "expected_not_landed": "a key equal to the local basename, which the host would not find",
+      "observed": "resident_host_install_37210c771a-st30.sh:12 reads KEY=ec2/investor-reporting-ycharts/resident/irpt-resident-$NEW.tar.gz with NEW=37210c771a-st30 (:5); install_st30.sh:11 reads KEY=ec2/investor-reporting-ycharts/resident/resident_host_install_$NEW.sh. Both uploads used exactly those. PROVED BY THE WORLD, not only by reading: the host fetched both objects and verified both sha256 values on itself.",
+      "status": "PASS"
+    },
+    "the_success_is_a_measured_absence_of_the_failure_paths": {
+      "description": "The installer rolls itself back on a failed start and prints BLOCKED on each refusal branch. A report that only looks for the success lines cannot distinguish 'installed clean' from 'installed, rolled back, and the rollback also came up active'.",
+      "expected_landed": "0 'ROLLBACK to' lines and 0 lines beginning BLOCKED or ERROR, with rc=0 on both the install and the wrapper",
+      "expected_not_landed": "any rollback or BLOCKED line, which would mean the host is on st27 and the order's failure branch applies",
+      "observed": "grep -c 'ROLLBACK to' = 0; grep -c of lines beginning BLOCKED or ERROR = 0; 'install 37210c771a-st30 rc=0' and 'D2 install script rc=0 at 2026-10-11T10:32:47Z'. The installer's own post-start assertions all held on their own: active=active, polls_30s=2, tracebacks_30s=0.",
+      "status": "PASS"
+    },
+    "the_swap_moved_real_bytes_rather_than_leaving_the_unit_on_the_old_root": {
+      "description": "A CODE instrument trap: a new directory existing on disk, an rc=0, and an 'active' unit are all compatible with the unit still executing the OLD root. Running-bytes-older-than-built passes every rung. So the test is a digest that MUST change, plus one that must NOT.",
+      "expected_landed": "worker sha256 equals the installer's declared built member AND differs from st27's; the running root comes from systemd rather than from a directory read; the process identity changes",
+      "expected_not_landed": "a worker sha256 unchanged from st27's 9317219a, which would mean the unit never moved however green the rest read",
+      "observed": "worker a9f71b6d236e7a9ee0f66f8acb488b2968b8805a47fa90ef454aae3dfbb751fa == the installer's declared built member, != st27's 9317219ad37ed49235bd11721d35fc18e3190df1620df40a7195d869bee40ce5. Running root read from ExecStart: /opt/irpt-resident/37210c771a-st30. MainPID moved 777546 -> 864777 across one stop/start pair in the journal (10:32:21Z stop, 10:32:22Z start), NRestarts 0. THE NEGATIVE ARM IS ALSO MEASURED: the host capture library is 857d90b81960d69a... before AND after, which is CORRECT and is the packet's stated radius -- the package's library is byte-equal to st27's, so that step rewrote the same bytes. A changed library digest would have been the finding.",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the seven changes were NOT exercised on the host, and this instance claims none of them as exercised",
+      "reason": "the packet and the CTO half both say so, and the order's V1 asks only that the packaged values be read back. S1, S6 and S7 are APPLIED, UNEXERCISED. S3's constant is read back (390) but the read-back path is exercised only if a run's read-back pends. S2 and S5 are exercised by TCKT_VNEXT's fourth run under that project's own pair, not here. S4's row is on the host (3 firms) but its after-read -- the status read of the one retained 49financial research report -- is a separate served-read act this order does not carry."
+    },
+    {
+      "item": "no removal and no rollback was run, and remove_st30_to_st27.sh was not executed",
+      "reason": "the order states it plainly: there is NO removal leg in this order, st30 stays unless V1 fails or the issuer orders X1, and X1 + V2 are 'not to be run without a new word from 2.0.0_SA_COO~G2'. V1 did not fail, so neither arm fired."
+    },
+    {
+      "item": "the gate's 'identical 208 / changed 61 / added 25' split, the census parts 1 and 2, and the tests at the pin are TAKEN AS FILED",
+      "reason": "they are the issuer's measurements and the CTO half signs against them. This seat independently exercised only the member DENOMINATOR -- the installer's own SHA256SUMS check printed 294 members, agreeing with the gate -- and the one claim the install itself can settle, that the running bytes are the built bytes."
+    },
+    {
+      "item": "no request was submitted, no dead letter was received, redriven or deleted, and nothing was sent to Bloomberg",
+      "reason": "the order's bounds. The queue was READ five times and never written. The 8 dead letters on irpt-generation-dlq (row IRPT_YCDGEN-D2-S45) were not touched; that row's hazard is unchanged by this install, which adds no queue binding -- V1 measured commentary_ready_queue_url 0 and analysis_ready_queue_url 0."
+    },
+    {
+      "item": "no IAM, Terraform, Lambda, queue, data or portal change, no secret read, and no host other than i-0167fd745ad906a66",
+      "reason": "the order's bounds. The write set outside this repo is exactly: two new S3 keys under ec2/investor-reporting-ycharts/resident/, and on the one host the new root, the ExecStart, the receipt, the same-bytes library rewrite and one restart. The svc profile was not touched."
+    },
+    {
+      "item": "whether the cutover receipt now reads the st30 root was not read back",
+      "reason": "the installer writes it (ledger irpt-resident-st30-20261011) and restores the st27 copy on every failure branch, and the order's V1 list does not ask for it. P1 read the pre-install receipt (st27 root, manifest bdcce7ef5f8e3bc6, ledger irpt-ycdgen-st27-20261009); the post-install value is unread rather than assumed."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R10.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-st30.the-one-resident-release-dell2.md",
+    "vintage_commit": "4321f665d3"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "SIGNED. org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/st30_release/NEVER_WIDEN_PACKET_ST30.md, blob f81df64584525150dcc2e2a41bfec2bb6e3d7102 @b0c75d2f04, author 2.0.0_SA_COO~G2. VERIFIED BY THIS SEAT AT THE BYTES, not from the order's citation: git hash-object of the working-tree file equals that blob, the blob at b0c75d2f04 equals it, b0c75d2f04 is an ancestor of HEAD, and the file is clean in git status. The half names the blast radius (one host, one new root, one restart, the same-bytes library rewrite, no IAM/data/Lambda/queue/portal change), counts the writers of the property at issue (1 writer of which firms a research write may retain; 2 writers of whether I3 sends, which is why P1 is a STOP), and covers BOTH branches of the act with a rollback package pinned by sha256.",
+    "cto_half": "SIGNED, and RE-SIGNED on the restated packet. org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_RESIDENT_ST30_CTO_HALF.md, blob 983257e456b4d21ebf5e414218f012b4331060a6 @e2346b95f8 (CTO msg 4690), signer 1.0.0_SA_CTO~DELL2. The re-signature names blob f81df64584 explicitly, so the signature and the bytes agree in both directions. THE FIRST HALF DID NOT COVER AN INSTALL -- the CTO ruled so (msg 4662) against blob e6bec0e8cb -- and this seat checked that the half it relied on is the RE-SIGNED one rather than the superseded one. Its seven conditions were all honoured: P1 as a STOP (held, three ways); the installer's refusal left unforced (held, five 0/0 reads); no rollback trigger fired; a failed after-read of S1/S2/S4 is a row not a rollback (none run here); no dead letter redriven, nothing to Bloomberg, no queue binding added (all measured); S3 and S6 stated APPLIED, UNEXERCISED; and condition 7 -- a rebuild makes a new pair -- discharged by both sha256 values measuring EQUAL to the declared pair at staging and again on the host."
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "WORLD",
+  "rollback": "AVAILABLE, NOT RUN, AND NOT THIS ORDER'S TO RUN. The installer rolls itself back to st27 on a failed start, and that branch did not fire (0 'ROLLBACK to' lines). The deliberate arm is remove_st30_to_st27.sh (X1 + V2) in the issuer's st30_release folder, which restores the st27 receipt and root; the order says it is 'not in this order, and not to be run without a new word from 2.0.0_SA_COO~G2'. Both arms are MEASURED ready rather than assumed: the st27 root e606008994-st27 is present on the host AND was the running root at P1; the pre-swap library copy is kept on the host as ycharts_session.js.before-37210c771a-st30; and the rollback package irpt-resident-e606008994-st27.tar.gz is present in S3 with metadata sha256 20916261074c356ab31497b338a6957e3d72cb252b8a3f54432db98610da39e4, equal to the packet's declared value, read as the positive control for U2's 404 check. The packet's rollback triggers stand after this close: a failed V1 (did not happen), any I3 send or send failure (0 and 0 measured), or a resident that stops polling (3 polls in 60 s at V1).",
+  "schema_version": "1.0",
+  "scope": "ONE resident release on host i-0167fd745ad906a66: install the root 37210c771a-st30 over the running e606008994-st27 -- one host, one new root, one restart -- and read it back. Legs U2 (stage the signed tar and installer under ec2/investor-reporting-ycharts/resident/), P1 (the read-only pre-read whose STOP is IRPT_ANALYSIS_READY_QUEUE_URL reading 0 three ways), D2 (the install, gated on irpt-generation at 0 visible and 0 in flight) and V1 (the eight read-backs). Round 10 cell YCD-d-10. No removal leg.",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_st30/D2_V1_INSTALL_20261011.txt",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-st30.the-one-resident-release-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "9f15e3280d"
+  },
+  "surprises": [
+    "IRPT_YCDGEN-D2-S47: install_st30.sh:6 carries an UNSUBSTITUTED placeholder, VER=__ST30_SCRIPT_VERSION__, a leftover of st29's by-version fetch. DEAD TODAY and it did not touch this install -- 1 assignment, 0 reads over the whole file, so the literal never reaches an AWS argument; the fetch is by key and the binding control is the on-host sha256 compare, which this seat saw pass ('D2 install script sha256 verified on the host at 2026-10-11T10:32:00Z'). The hazard is at the NEXT derivation, and it fails loud rather than silently (S3 returns Invalid version id). OBSERVATION, INERT, UNDER_INVESTIGATION, disarm_owner 2.0.0_SA_COO~G2 -- not fixed here because the file is the issuer's and leg D2 is closed. Carrier org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md.",
+    "IRPT_YCDGEN-D2-S46: NOT RE-FILED, named because this order depends on it. The package gate's whole-tree mode fails a correct map member, so the issuer ran it in named-list mode with base pin = pin and an EMPTY list; the packet states the workaround and the CTO accepted it (msg 4644). Effect on this order: none this seat could measure -- the installer's own SHA256SUMS check printed 294 members, agreeing with the gate's denominator, and all 17 named member checks passed on the host. The same row's second observation (the tar's sha256 differs run to run at the same byte length) is the reason the order makes a different sha256 a STOP; both measured EQUAL to the declared pair here, at staging and again on the host, so no rebuild is implied."
+  ],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-st30.the-one-resident-release-dell2"
+}
