@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "fa51c1f544"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "73fdbf8d0a",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-d-5.runner-code-equality-step.md"
+  },
+  "to_id": "MDPF_CANON.TO-CN-d-5",
+  "assignee": "0.9.0_WK_MDPF_CANON~14",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/mdpf-code-equality.py",
+      "kind": "script",
+      "commit_or_etag": "048ddb44ac",
+      "artifact_covered_by": ["AC1", "AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-14 (commit 048ddb44ac). Read-only: boto3 list reads only; no put, copy, delete or sync verb. Not run by any deploy act by the worker; the CloudOps deploy act runs it after the drain. No AWS write by the worker."
+    },
+    {
+      "path_or_key": "docs/deployment/MDPF_RUNNER_CODE_SYNC.md",
+      "kind": "doc",
+      "commit_or_etag": "048ddb44ac",
+      "artifact_covered_by": ["AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-14 (commit 048ddb44ac). 39 lines, LF, ASCII. Carries the five required markers (checked by the issuer's DOC arm). States that no scheduled sync job exists."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: r4_cn_d_5.py tool -- expect: ROUND 4 TOOL: 5 of 5 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round4/checks/r4_cn_d_5.py\" tool; echo \"exit=$?\"",
+      "output_evidence": "ARM COMPILES-HELP: PASS py_compile rc=0; --help rc=0\nARM REUSE-READONLY: PASS reads CODE_TREES, no write verb, no typed code prefix\nARM CLASSIFIES: PASS local=5 exact\nARM REFUSES-UNMAPPED: PASS rc=2\nARM DOC: PASS all 5 markers present\nROUND 4 TOOL: 5 of 5 arms\nexit=0",
+      "denominator": "5 of 5 arms",
+      "status": "PASS",
+      "expect": "ROUND 4 TOOL: 5 of 5 arms",
+      "status_reason": "Measured in the worktree at commit 048ddb44ac (the invocation runs the checker from the worktree root). Run twice: outputs identical (cmp)."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: r4_cn_d_5.py live -- expect: ROUND 4 LIVE: 2 of 2 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round4/checks/r4_cn_d_5.py\" live; echo \"exit=$?\"",
+      "output_evidence": "ARM LIVE-RUN: PASS rc=0 trees=5 summary_lines=1\nARM RECOUNT: PASS tool {'local': 4, 'EQUAL': 2, 'MISSING_ON_S3': 2, 'EXTRA_ON_S3': 0} vs independent {'local': 4, 'EQUAL': 2, 'MISSING_ON_S3': 2, 'EXTRA_ON_S3': 0}\nROUND 4 LIVE: 2 of 2 arms\nexit=0",
+      "denominator": "2 of 2 arms",
+      "status": "PASS",
+      "expect": "ROUND 4 LIVE: 2 of 2 arms",
+      "status_reason": "Real S3, read-only. The tool's config-tree counts equal an independent md5-against-ETag recount made by the issuer's check."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a copy of the tool under .scratch with the multipart-ETag branch disabled (a multipart ETag falls through to the md5 comparison), run through the r4_cn_d_5.py tool arms via --tool",
+      "expected": "CLASSIFIES arm FAILS: a multipart-ETag name must be UNDETERMINED, never DIFFER or EQUAL",
+      "observed": "ARM CLASSIFIES: FAIL local=5 got {'equal': ['same.py', 'sub/n.json'], 'differ': ['diff.py', 'multi.py'], 'missing_on_s3': ['gone.py'], 'extra_on_s3': ['extra.py'], 'undetermined': []}; ROUND 4 TOOL: 4 of 5 arms; mutant exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 tool-arm run twice in the worktree, each stdout captured to a file and compared with cmp",
+      "observed": "determinism IDENTICAL; both runs ROUND 4 TOOL: 5 of 5 arms",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No AWS write of any kind: no put, copy, delete, upload, sync, cp, rm or mv, from the tool, a test, or by hand",
+      "reason": "Order bound 1 (no AWS write); the tool is read-only and the worker's grant is read-only. The copy of named files is a CloudOps deploy act, run after the drain."
+    },
+    {
+      "item": "The CloudOps deploy act (copy of the changed config and script files to code/, and its read-back of the tool's output)",
+      "reason": "Not this cell: the order builds the instrument and writes the step down; a CloudOps act runs it."
+    },
+    {
+      "item": "The live whole-tree state of the runner trees (drift the tool reports on the current S3 prefixes)",
+      "reason": "A fact the tool prints for the deploy act. Not repaired by this cell (the tool never repairs; order bound 2). Reported in the worker report, not judged here."
+    },
+    {
+      "item": "A scheduled sync job, alarm, monitor or notification",
+      "reason": "Order bound 3 and the CTO's ruling (round-3 analysis section 2, W9-S7): none is built."
+    }
+  ],
+  "surprises": ["MDPF_CANON-D1-W14-S1"],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "r4_cn_d_5.py tool (issuer check, offline; never edited)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round4/checks/r4_cn_d_5.py\" tool; echo \"exit=$?\"",
+      "result": "ROUND 4 TOOL: 5 of 5 arms, exit=0"
+    },
+    {
+      "tool": "r4_cn_d_5.py live (issuer check, real S3, read-only)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round4/checks/r4_cn_d_5.py\" live; echo \"exit=$?\"",
+      "result": "ROUND 4 LIVE: 2 of 2 arms, exit=0"
+    },
+    {
+      "tool": "ruff (py39 target)",
+      "invocation": "ruff check --target-version py39 .tools/mdpf-code-equality.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/safe-commit.sh commit gates",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_CANON~14 <0.9.0_WK_MDPF_CANON~14@opal.agent>\" -F .scratch/msg_cn_d_5_code.txt -- .tools/mdpf-code-equality.py docs/deployment/MDPF_RUNNER_CODE_SYNC.md org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit-gate OK; surprise-row gate OK (1 new row); to-pipeline-gate OK; committed 048ddb44ac"
+    }
+  ]
+}
