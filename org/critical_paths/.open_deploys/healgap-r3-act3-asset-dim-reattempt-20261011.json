@@ -1,0 +1,48 @@
+{
+  "slug": "healgap-r3-act3-asset-dim-reattempt-20261011",
+  "title": "MDPF_HEALGAP R3 act 3 (HG-t-11): SSM document opal-bd-asset-dim-download guard published FIRST as a new DEFAULT version, then the 22:40Z re-attempt rule (3 resources) via safe-apply. CTO half SIGNED @c5c432ce9b (msg 3485). Rollback: update-document-default-version 5 (Hash d3a38c7b1a92b3d9..., created 2026-10-01T02:14:59-04:00) and destroy -target of the three rule resources. If ssm:UpdateDocument is denied the act stops with nothing changed.",
+  "author": "2.0.0_SA_COO~G1",
+  "status": "OPEN",
+  "opened_at": "2026-10-11T04:39:37.954859+00:00",
+  "window_hours": 48.0,
+  "entry_path": "org/critical_paths/change_management/20261011T0439Z_healgap-r3-act3-asset-dim-reattempt-20261011_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "verify",
+      "target": "rollback targets read live: SSM DefaultVersion/LatestVersion/Hash and rules on bd-asset-dim-trigger",
+      "proof_required": "values printed from describe-document and list-rule-names-by-target",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "activation",
+      "target": "SSM document opal-bd-asset-dim-download new version from the merged repo file (git show blob, byte-equal) set DEFAULT",
+      "proof_required": "describe-document DefaultVersion = new; get-document content parses and equals the repo blob; carries hg_guard.py",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "activation",
+      "target": "Terraform bd-pipeline: rule bd_asset_dim_reattempt + target + permission (+ opal_name module call) via safe-apply -target",
+      "proof_required": "plan reads exactly 3 to add and nothing else; apply result; list-rules shows cron(40 22 ? * MON-FRI *) ENABLED",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "verify",
+      "target": "first weekday fire pair (Mon 2026-10-12 22:10Z and 22:40Z): the 22:40Z fire logs SKIP-COMPLETE and the instance stops",
+      "proof_required": "logs/asset-dim-download-<date>.log excerpt and ec2 state read",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261011T043937Z OPENED by 2.0.0_SA_COO~G1 with 4 leg(s)"
+  ],
+  "last_red_at": null,
+  "device": "dell1"
+}
