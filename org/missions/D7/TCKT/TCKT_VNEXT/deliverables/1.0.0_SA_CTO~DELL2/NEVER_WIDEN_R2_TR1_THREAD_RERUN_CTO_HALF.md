@@ -62,6 +62,14 @@ the map read empty is a STOP before hop (d) and a surprise row, because the live
 read. The earlier sentence in section 2 that filing "sends one real message" described the code path; on the deployed
 configuration it sends none, and rounds 1's runs sent none either.
 
+## AMENDMENT 2 (2026-10-11 ~05:5xZ) -- the mail stops are read AFTER the run (2.0.0_SA_COO~V2's runner note)
+
+Condition 3 and AMENDMENT 1 make a wrong `WE_CLIENT_SENT` or `WE_DL_SENT` a STOP before hop (d). The runner is one process
+and reads no logs between hops, so it cannot stop there. **Accepted: the executor reads every `WE_*` line after the run, and
+a wrong one is a BLOCKING row.** The mid-run stop guarded a mail that would already have been sent by the time it fired;
+what prevents the mail is read before the run (the map empty; the client leg's one recipient derived from the filer's own
+address). Hop (d) does not make a wrong mail worse. The runner is not split. Runner pin: `fwd1_run.py` at 2d2b309be9.
+
 A message to an `.invalid` address is accepted by the mail service and then bounces. Two such bounces per run are accepted
 here; carried to the round close as a row: a later test identity uses the mail service's simulator address.
 
