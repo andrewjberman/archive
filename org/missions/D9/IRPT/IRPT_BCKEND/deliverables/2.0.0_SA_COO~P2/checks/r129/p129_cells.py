@@ -21,9 +21,9 @@ from pathlib import Path
 D = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/"
 REC = D + "IB129-1_capture_failure_read.json"
 CLAIMS = ("measured", "inferred", "held", "absent")
-FORBIDDEN = (r"systemctl\s+(start|stop|restart|reload|enable|disable|kill)", r"(bash|sh|node|nodejs)\s+\S*(run-ycharts-session|ycharts_session)",
+FORBIDDEN = (r"systemctl\s+(start|stop|restart|reload|enable|disable|kill)", r"(?<![\w./-])(bash|sh|node|nodejs)\s+\S*(run-ycharts-session|ycharts_session)",
              r"get-secret-value", r"put-secret-value", r"update-secret", r"sqs\s+(send|receive|delete|purge)", r"\bcurl\b", r"\bwget\b",
-             r"\bkill\b", r"\brm\s", r"\bmv\s", r"(?<![0-9&])>>?\s*/(?!dev/null)", r"\btee\b", r"dynamodb\s+(put|update|delete)")
+             r"\bkill\b", r"\brm\s", r"\bmv\s", r"(?:^|[\s;|&()0-9])>>?\s*/(?!dev/null)", r"\btee\b", r"dynamodb\s+(put|update|delete)")
 SECRETISH = re.compile(r"(?i)(\"(password|passwd|sessionid|csrftoken|set-cookie|cookie)\"\s*:\s*\"[^\"]{4,})|(sessionid=[A-Za-z0-9]{8,})")
 
 

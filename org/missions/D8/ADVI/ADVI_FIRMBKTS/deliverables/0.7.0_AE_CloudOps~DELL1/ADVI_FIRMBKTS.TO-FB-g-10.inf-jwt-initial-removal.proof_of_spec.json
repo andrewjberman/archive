@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-10.inf-jwt-initial-removal",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-10.inf-jwt-initial-removal.md",
+    "group": "OTHER",
+    "vintage_commit": "cd50c0374e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "cd50c0374e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-10.inf-jwt-initial-removal.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~DELL1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/inf-pipeline/secrets.tf",
+      "kind": "terraform",
+      "commit_or_etag": "7bcadeca37",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "merged to box/dell1 at 47962a23eb; the resource was in config and not in state, so no apply is needed or was run; the unscoped plan reads No changes from the laptop lane",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~DELL1/evidence/secret_version_before.json",
+      "kind": "config_data",
+      "commit_or_etag": "7bcadeca37",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the AWSCURRENT version id recorded from describe-secret metadata before the edit",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the order invocation, expecting ^0$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-31/infra/aws/terraform/inf-pipeline && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color 2>&1 | grep -cE \"^\\s*# aws_secretsmanager_secret_version\\.eclipse_jwt_initial (will|must)\"",
+      "expect": "^0$",
+      "output_evidence": "0\n(laptop lane 0.7.0_AE_CloudOps~FBL via crossbox XB-20261011T124003Z-7f65 at dell1 commit 47962a23eb (laptop commit 7a8f938340, evidence_g10/ac1_ac2_laptop_leg.txt): AC1 grep count of plan change headers naming the resource)",
+      "denominator": "count 0 of the plan change headers naming the resource; the root is byte-identical to the commit (git diff empty)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the order invocation, expecting Plan: 0 to add|No changes",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-31/infra/aws/terraform/inf-pipeline && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color 2>&1 | grep -E \"^(Plan:|No changes)\"",
+      "expect": "Plan: 0 to add|No changes",
+      "output_evidence": "laptop lane 0.7.0_AE_CloudOps~FBL via crossbox XB-20261011T124003Z-7f65 at dell1 commit 47962a23eb (laptop commit 7a8f938340, evidence_g10/ac1_ac2_laptop_leg.txt): AC2 -> \"No changes. Your infrastructure matches the configuration.\"",
+      "denominator": "the same root read 358 resource changes with 1 create before the removal; now No changes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the order invocation, expecting SECRET VERSION: UNCHANGED",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-31 && timeout 70 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_secretver.py --before org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~DELL1/evidence/secret_version_before.json; echo \"exit=$?\"",
+      "expect": "SECRET VERSION: UNCHANGED",
+      "output_evidence": "SECRET VERSION: UNCHANGED (issuer re-run 2026-10-11 ~13:5xZ: recorded f57eb0dc-... equals the live AWSCURRENT, 2 versions; metadata only, the value was never read)",
+      "denominator": "1 AWSCURRENT version id equal to the before-record",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4: the order invocation, expecting ROUND 4 SCOPE: OK",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-31 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-31 --allow infra/aws/terraform/inf-pipeline/secrets.tf --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~DELL1/evidence/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~DELL1/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/inf-pipeline/secrets.tf; echo \"exit=$?\"",
+      "expect": "ROUND 4 SCOPE: OK",
+      "output_evidence": "ROUND 4 SCOPE: OK (issuer: merge 47962a23eb against its first parent changes exactly infra/aws/terraform/inf-pipeline/secrets.tf and the evidence secret_version_before.json)",
+      "denominator": "2 changed paths, 0 outside the grant, 1 required present",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the base plan (secrets.tf with the block) read by the laptop lane before the removal",
+      "expected": "the plan lists the resource as a create (AC1 would read 1, AC2 Plan: 1 to add)",
+      "observed": "the laptop untargeted plan read 358 resource changes with 1 create (this resource) at 11:2xZ",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: read-only plan and metadata reads, each once by its lane",
+      "observed": "not run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC1 and AC2 were graded from the laptop lane, not the dell1 seat",
+      "reason": "the dell1 CloudOps identity is denied sms-voice:DescribeSpendLimits and an inf gold ssm parameter the full plan reads (row D1-S23); the identity was not widened"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO~B1/drive_log_20261011T12Z_desktop-hk1uu7n.md",
+  "compiler_tools": [
+    {
+      "tool": "r4_secretver.py",
+      "invocation": "cd /c/dev/wk-firmbkts-31 && timeout 70 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_secretver.py --before org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~DELL1/evidence/secret_version_before.json; echo \"exit=$?\"",
+      "result": "SECRET VERSION: UNCHANGED"
+    }
+  ]
+}
