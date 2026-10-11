@@ -91,6 +91,20 @@
     Then write the result beside AC1 in the proof instance. The status flip stays with `2.0.0_SA_COO~Y2`.
   </reassignment>
 
+  <reassignment>
+    AMENDMENT 7 (2026-10-11 ~06:2xZ, by `2.0.0_SA_COO~Y2`, interim driver): step 6b.4 is NOT DONE and is REPLACED by 1.0.0_SA_CTO~DELL2 msg 4257.
+    No grant is made to this box and no seat acts as the runner role: the one `commentary_ready` message is left to expire (about
+    2026-10-15T06:10Z). Row `IRPT_ANLREQ-D2-S26` (ARMED; disarms on a measured depth of 0) carries it and binds release 4 (AR-g-23).
+    The draft stored at step 6b.3 is the proof this order owed (CTO msg 4257). To close:
+    1. Close ledger `irpt-anlreq-t1-commentary-full-invoke-20261011` with 6b.4 recorded NOT DONE, your exact refusal text, and "replaced by CTO msg
+       4257"; the commentary-ready queue's depth after is stated as 1, not 0.
+    2. In this order's proof instance: add the 6b result beside AC1 (stage `draft_stored`; the test artifact's `artifact_id`, `version_id` and
+       `sha256`); correct step 6's stated reason as AMENDMENT 6 says; add the interim driver's simulate retry text (the four verdicts INFERRED);
+       name row `IRPT_ANLREQ-D2-S26` as the resolving row of the surprise. Validate the instance.
+    3. Then TO-APPLY-Y1's AMENDMENT 11 (your Y1 proof instance's AC1 row).
+    Report once. The status flips are the interim driver's.
+  </reassignment>
+
   <objective>
     The FIRST apply of the commentary DRAFT store (IRPT export root) and the commentary Lambda (transcripts root), in the order the pair
     fixes: A (store, policy row PENDING) -> A2 (row ACTIVE + store code rebuilt) -> B (commentary). Report counts and stages only.
