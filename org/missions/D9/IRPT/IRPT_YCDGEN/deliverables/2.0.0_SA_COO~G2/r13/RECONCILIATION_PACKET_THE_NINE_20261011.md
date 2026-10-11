@@ -50,7 +50,10 @@ All eight owners read `principal_class` OPAL_GLOBAL, `home_firm_id` opal-capital
 For each of the eight jobs, ONE conditional update of its own row in `irpt-jobs`:
 
 - `state` from `RECEIVED` to `FAILED`;
-- detail `{"code": "DELIVERIES_EXHAUSTED", "cause": <the class of its FIFTH delivery>, "receives": 5, "reconciled": true}`;
+- attribute `job_detail`, a STRING holding the detail as canonical JSON (sorted keys, separators `,` and `:`), with FOUR
+  members and no fifth: `{"cause":"<the class of its FIFTH delivery>","cause_claim":"inferred","code":"DELIVERIES_EXHAUSTED","receives":5}`.
+  A map-typed `job_detail`, or the detail under any other attribute name, is a defect: see
+  `CONDITION1_READERS_OF_A_JOBS_DETAIL_20261011.md` section 1;
 - written ONLY IF the row still reads `state = RECEIVED` at the moment of the write (a job that has moved is left alone and
   reported).
 
@@ -62,10 +65,9 @@ For each of the eight jobs, ONE conditional update of its own row in `irpt-jobs`
 | 7 | RetentionRefused |
 | 8 | SubmissionRefused |
 
-`reconciled: true` is the one member st31's own branch does not write. It says the record was written afterwards from the
-journal, by inference, and not by the worker at the moment of failure. If the CTO does not want a member st31 does not
-write, the alternative is a different code, `DELIVERIES_EXHAUSTED_RECONCILED`; one or the other, so a reader can tell an
-inferred record from a measured one. That choice is the CTO's and is not taken here.
+`cause_claim: "inferred"` carries the whole distinction between this record and one the worker writes at the moment of a
+failure (PRD ADDENDUM v0.12 @aa4a647f6e, CTO msgs 5116 and 5131). No `reconciled` member is written. st31's own branch
+writes `code`, `cause`, `receives`; the member new to every reader is `cause_claim`.
 
 **The ninth is not written to.** A queue message has no record of its own. It is accounted for by this packet's line 9 and
 by request #8's row once written. It stays where it is until its retention ends: sent 2026-10-11T06:10:50Z on a queue that
@@ -87,9 +89,11 @@ moves it to that queue's dead-letter queue.
 - **Branch A (expected):** eight rows written, each read back FAILED with its detail; the two queues unchanged (8 and 0; 1
   and 0).
 - **Branch B:** a row no longer reads RECEIVED: it is not written, and that is reported as a finding with its state.
-- **What this does NOT do:** it does not make a redrive safe. Whether the worker would run, refuse or overwrite a job it
-  finds FAILED on a redelivery was NOT read. The rule stands unchanged: no redrive of any of the eight without a pair naming
-  each.
+- **What this does NOT do:** it does not make a redrive safe. Read since (RESTATEMENT 1): on a redelivery the worker
+  returns early only for ATTENTION and READY (`resident_worker.py` lines 655-675); a FAILED job reaches `store.claim()` at
+  line 676, and the claim's condition (`durable_job.py` line 80) refuses only READY. So a redriven FAILED job is claimed
+  and goes on into execution, by reading, not run. The rule stands unchanged: no redrive of any of the eight without a pair
+  naming each.
 
 ## 5. Rollback, per key
 
@@ -109,9 +113,16 @@ show that queue at 0 and 0, or name what waits there, whenever it is cut.
 - Why each job failed, beyond a class. Who the OTHER owner of #8 is. How a commentary-ready message came to be sent on
   2026-10-11 for a request whose job never left RECEIVED and whose record carries no commentary ref: that is IRPT_ANLREQ's
   to read, and it is the sharper question in this packet.
-- What the worker does with a FAILED job on a redelivery.
+- What the worker does with a FAILED job on a redelivery: read in code since (section 4), never run.
 - The dead-letter queue's expiry for the eight: its retention is 1,209,600 seconds; whether that runs from the original
   send or from the move was not read.
+
+## RESTATEMENT 1 (2026-10-11, this seat, on CTO msgs 5116 and 5131)
+
+Section 3 is restated: four members, `cause_claim` "inferred", no `reconciled`, and the attribute named as `job_detail`, a
+canonical-JSON string. Section 4's redelivery line and section 7's are restated from a code read. Sections 1, 2, 5 and 6 are
+unchanged. The first form is blob 04809a3c38 @f101ddd88e. Section 7's first item is answered in part by `2.0.0_SA_COO~Y2`
+(msgs 5120, 5126): the commentary-ready message is the 06:09Z test invoke, row IRPT_ANLREQ-D2-S26; no unknown sender.
 
 ## COO HALF
 
@@ -121,4 +132,4 @@ write is ordered until the CTO half, and the executor is the laptop's.
 
 ## CTO HALF
 
-(owed; and the PRD line for a failed job's record, which the CTO writes against these cases)
+`deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_R13_RECONCILIATION_OF_THE_EIGHT_CTO_HALF.md` (signed @3b1895866f, corrected @aa4a647f6e), three conditions; the contract is PRD ADDENDUM v0.12.

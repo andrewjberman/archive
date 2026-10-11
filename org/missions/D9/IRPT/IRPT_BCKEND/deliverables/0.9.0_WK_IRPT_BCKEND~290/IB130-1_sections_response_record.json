@@ -1,0 +1,80 @@
+{
+  "files_changed": [
+    "docs/contracts/investor-reporting/v1/responses/analysis-report.response.schema.json",
+    "infra/aws/lambda/investor-reporting/_contracts/tests/test_seam_paired.py",
+    "infra/aws/lambda/investor-reporting/_contracts/fixtures/analysis-report.sections.opal.valid.json",
+    "infra/aws/lambda/investor-reporting/_contracts/fixtures/analysis-report.sections.vendor.valid.json",
+    "infra/aws/lambda/investor-reporting/_contracts/fixtures/analysis-report.sections.opal.invalid.json",
+    "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md (rows D2-W290-S1, S2)",
+    "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-432.sections-response-admits-opal-report-form.md (status flip)",
+    "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~290/(this record, make_sections_fixtures.py, handler_answers.json, registry_control.py, registry_control_output.json, the proof instance)"
+  ],
+  "v2_schema_id": "opal://irpt/contracts/v2/AnalysisReport.schema.json",
+  "schema_shape": "data = anyOf of two closed forms (additionalProperties false each): VENDOR (request_ref, sections, extraction_validation required; undated_sections, extraction_coverage, retained_ref optional; v1 $refs, unchanged) and OPAL_ENGINE (provider, request_ref, sections, computation_validation required; retained_ref optional; the first four by $ref into the v2 schema $defs/opal_engine/properties/*, retained_ref by the v1 $ref)",
+  "handler_answers": [
+    {
+      "form": "YCHARTS",
+      "built_by": "infra/aws/lambda/investor-reporting/ops/owned_report.py:OwnedAnalysisReader.sections",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest ../../../../org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~290/make_sections_fixtures.py -q -p no:cacheprovider -s",
+      "answer_members": [
+        "extraction_validation",
+        "request_ref",
+        "retained_ref",
+        "sections"
+      ],
+      "validates": true,
+      "fixture": "infra/aws/lambda/investor-reporting/_contracts/fixtures/analysis-report.sections.vendor.valid.json"
+    },
+    {
+      "form": "OPAL_ENGINE",
+      "built_by": "infra/aws/lambda/investor-reporting/ops/owned_report.py:OwnedAnalysisReader.sections",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest ../../../../org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~290/make_sections_fixtures.py -q -p no:cacheprovider -s",
+      "answer_members": [
+        "computation_validation",
+        "provider",
+        "request_ref",
+        "retained_ref",
+        "sections"
+      ],
+      "validates": true,
+      "fixture": "infra/aws/lambda/investor-reporting/_contracts/fixtures/analysis-report.sections.opal.valid.json"
+    },
+    {
+      "form": "OPAL_ENGINE+extraction_validation (negative arm)",
+      "built_by": "the OPAL_ENGINE answer plus the vendor extraction_validation member",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest ../../../../org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~290/make_sections_fixtures.py -q -p no:cacheprovider -s",
+      "answer_members": [
+        "computation_validation",
+        "extraction_validation",
+        "provider",
+        "request_ref",
+        "retained_ref",
+        "sections"
+      ],
+      "validates": false,
+      "fixture": "infra/aws/lambda/investor-reporting/_contracts/fixtures/analysis-report.sections.opal.invalid.json"
+    }
+  ],
+  "fixtures_note": "The handler's answers carry no firm id, so no fixture holds a firm name or tenant code and IRPT_FIRM_REGISTRY was not used; the fakes' principal firm id is not in any answer (checked: none of 49financial, inflection, whitfield, advisor.a occurs in the three files).",
+  "registry_control": {
+    "v2_ref_resolves": true,
+    "other_non_v1_ref_resolves": false,
+    "command": "cd infra/aws/lambda/investor-reporting/_contracts/tests && python ../../../../../../org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~290/registry_control.py",
+    "output": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~290/registry_control_output.json",
+    "bounded_edit": "test_seam_paired.py: V2_REPORT_FILE + _v2_report_id() (reads the $id of _contracts/AnalysisReport.v2.schema.json), one branch in _ref_published_path (target == that id -> that file), one resource appended to the registry in _response_validator; no assertion, expected value or skip changed"
+  },
+  "readers_named": [
+    "infra/aws/lambda/investor-reporting/_contracts/tests/test_seam_paired.py -- reads the SCHEMA (response_contract, the registry, the ref-resolution test, the known-good/known-bad control); passes (203) with the 2 base failures",
+    "infra/aws/lambda/investor-reporting/_contracts/tests/test_served_members_ar_y_32.py:48 -- reads the SCHEMA's data.properties as a slice over a served document; passes unedited",
+    "infra/aws/lambda/investor-reporting/ops/tests/test_owned_report.py:163-182 test_sections_projection_matches_existing_closed_response_schema -- reads the SCHEMA's data.properties (expects every key a v1 $ref) and the ANSWER; RED on the new schema, passes at base; outside this order's paths, row IRPT_BCKEND-D2-W290-S2",
+    "infra/aws/lambda/investor-reporting/ops/tests/test_retained_ref_served.py, test_opal_consumers.py, test_owned_entry.py -- read the ANSWER (reader.sections); pass",
+    "infra/aws/lambda/investor-reporting/ops/owned_report.py OwnedAnalysisReader.sections, served via ops/entry.py:202 -- PRODUCES the answer; not edited",
+    "infra/aws/lambda/investor-reporting/_authz/served.py and routetable.py with docs/contracts/investor-reporting/v1/routes.json:88 -- name the file as the operation's response_schema (the path, not the content)",
+    "docs/contracts/investor-reporting/v1/CONTRACT.md lines 116 and 215 -- document the file; line 215 still says 'slice of AnalysisReport.schema.json -- extraction_validation, request_ref, sections' (outside paths, not edited)",
+    "portal/src/pages/InvestorReporting/contracts/{wire/responses.ts, wire/AnalysisReport.ts, wire/consumed.ts, adapt.ts, index.ts} and tabs/analysis/NativeSections.tsx (primary checkout; the worktree's portal/ gitlink is empty) -- read the ANSWER (computation_validation named); no reader goes first"
+  ],
+  "packaged_in_functions": [],
+  "packaged_in_functions_basis": "infra/aws/lambda/ci/lambda-source-map.json has no row naming analysis-report.response.schema.json or any v1/responses path (Grep 'responses' and 'analysis-report' over the file: no matches); reports/build_resident_package.py line 70 excludes /responses/ from the resident package; the file is registered in investor-reporting/PATH_MANIFEST.json only",
+  "suite_before": "base (the order's face): 2 failed, 203 passed -- both failures analysis-request-original. With the candidate schema and no registry edit (row D2-W290-S1): 3 failed, 202 passed (analysis-report Unresolvable).",
+  "suite_after": "cd infra/aws/lambda/investor-reporting && python -m pytest _contracts -q -p no:cacheprovider -rf : 2 failed, 203 passed in 11.75s -- the same two (test_every_declared_route_has_a_response_contract_whose_refs_resolve at analysis-request-original; test_control_a_known_good_document_conforms_and_a_known_bad_one_does_not[analysis-request-original])"
+}

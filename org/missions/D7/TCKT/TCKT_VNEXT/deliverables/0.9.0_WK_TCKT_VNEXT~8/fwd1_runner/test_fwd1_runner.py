@@ -1712,3 +1712,133 @@ def test_trace_records_the_last_job_read_and_the_known_limit(monkeypatch):
     lim = t["cleanup"]["known_limit"]
     assert isinstance(lim, str) and "two hours" in lim and "ATTENTION" in lim and "missing actor" in lim
     assert lim == run.KNOWN_LIMIT
+
+
+# ------------------------------------------------------------------ R4-la-1: --arms-only (no submission, two arms)
+
+ARMS_ARGV = list(ARGV) + ["--arms-only"]
+PACKAGE_PATH = "/api/scoped/tickets/%s/package" % TKT
+TICKET_PATH = "/api/scoped/tickets/%s" % TKT
+BARE_TICKET = res(200, {"ticket": {"ticket_id": TKT}})   # no report_ref, no package
+PACKAGE_DENIED = res(403, {"error": "forbidden", "code": "FORBIDDEN"})
+
+
+def _arms_script(arm1=ARM_REFUSED, arm2=PACKAGE_DENIED, ticket_reads=None):
+    return {("GET", STATUS_PATH): res(200, {"data": {}}),
+            ("POST", ANALYSIS_INPUTS): res(200, {"data": {"input_id": "in-1", "upload_id": "up-1", "state": "NORMALIZED"}}),
+            ("POST", "/api/scoped/tickets"): res(200, {"ticket": {"ticket_id": TKT}}),
+            ("POST", "/api/scoped/tickets/%s/claim" % TKT): res(200, {"ticket": {}}),
+            ("POST", REPORT_PATH): arm1,
+            ("POST", PACKAGE_PATH): arm2,
+            ("GET", TICKET_PATH): ticket_reads if ticket_reads is not None else BARE_TICKET,
+            ("POST", "/api/scoped/tickets/%s/complete" % TKT): res(200, {"ticket": {}})}
+
+
+def _arms_run(monkeypatch, tmp_path, script=None, argv=ARMS_ARGV):
+    (tmp_path / "h.csv").write_bytes(b"synthetic,holdings\n")
+    monkeypatch.setattr(run, "ROOT", tmp_path)
+    monkeypatch.setattr(run, "HOLDINGS", tmp_path / "h.csv")
+    w = World(monkeypatch)
+    rc, trace, w = drive(monkeypatch, argv=argv, world=w, script=script if script is not None else _arms_script())
+    return rc, trace, w
+
+
+def _http(w):
+    return [(e[1], e[2]) for e in w.events if e[0] == "http"]
+
+
+def test_arms_only_sends_no_submission(monkeypatch, tmp_path):
+    # the submission and the report read are made unreachable: if the arms-only path touched them the run would blow up
+    def boom(*a, **k):
+        raise AssertionError("hop (d)/(e)/(f)/(g) was entered in arms-only mode")
+    for name in ("hop_d_analysis", "hop_e_ready", "hop_f_report", "hop_g_open", "hops_d_to_g"):
+        monkeypatch.setattr(run, name, boom)
+    rc, trace, w = _arms_run(monkeypatch, tmp_path)
+    calls = _http(w)
+    assert rc == 0, trace["named_failures"]
+    assert ("POST", "/api/scoped/investor-reporting/analysis") not in calls
+    assert not any(p.startswith("/api/scoped/investor-reporting/analysis/") and p != ANALYSIS_INPUTS for _, p in calls)
+    assert not any(p.endswith("/sections") for _, p in calls)
+    # the only report POST is the malformed-id arm: the sent id is never a REQ id
+    assert [p for m, p in calls if m == "POST" and p == REPORT_PATH] == [REPORT_PATH]
+    # the trace says so
+    assert trace["mode"] == "ARMS_ONLY" and trace["submission"] == "NOT_SENT"
+    h = {x["hop"]: x for x in trace["hops"]}
+    assert all(h[k]["outcome"] == "NOT_RUN_ARMS_ONLY" for k in ("d_analysis", "e_ready", "f_report", "g_open"))
+    # the flag is off by default: the parser keeps the old argument list working
+    assert run.build_parser().parse_args(ARGV[:]).arms_only is False
+    # and --finish-cleanup refuses it, changing nothing
+    assert run.main(["--finish-cleanup", "x.json", "--executor", "e", "--arms-only"]) == 2
+
+
+def test_arms_only_runs_the_malformed_id_arm_and_records_400(monkeypatch, tmp_path):
+    rc, trace, w = _arms_run(monkeypatch, tmp_path)
+    arm = trace["report_route_arms"]["report_id_malformed_refused"]
+    assert arm["status"] == 400 and arm["code"] == "INVALID_REPORT_REQUEST_ID" and arm["as_expected"] is True
+    assert arm["report_ref_absent_after"] is True and arm["reread_status"] == 200
+    posts = [c for c in w.events if c[0] == "http" and c[1] == "POST" and c[2] == REPORT_PATH]
+    assert len(posts) == 1
+    assert rc == 0 and trace["arms_only_result"] == "ARMS_AS_EXPECTED"
+
+
+def test_arms_only_runs_the_package_denial_arm(monkeypatch, tmp_path):
+    base = _arms_script()
+    rc, trace, w = _arms_run(monkeypatch, tmp_path, script=base)
+    arm = trace["report_route_arms"]["package_door_denies_the_filer"]
+    assert arm["status"] == 403 and arm["as_expected"] is True and arm["package_absent_after"] is True
+    assert len([c for c in w.events if c[0] == "http" and c[1] == "POST" and c[2] == PACKAGE_PATH]) == 1
+    # the body sent is syntactically complete: four canonical refs and the firm, nothing else
+    body = run.synthetic_ref("x")
+    parsed = json.loads(body)
+    assert sorted(parsed) == ["artifact_id", "sha256", "version_id"]
+    assert body == json.dumps(parsed, sort_keys=True, separators=(",", ":"))
+    # a 2xx from the door is the named failure and the run exits 1 after cleanup
+    w2 = tmp_path / "second"
+    w2.mkdir()
+    rc2, t2, wo2 = _arms_run(monkeypatch, w2, script=_arms_script(arm2=res(200, {"package": {}})))
+    assert rc2 == 1 and t2["arms_only_result"] == "ARMS_NOT_AS_EXPECTED"
+    assert any(n["reason"] == "PACKAGE_DOOR_ADMITTED_THE_FILER" for n in t2["named_failures"])
+    assert t2["cleanup"]["row_removed_read_back_absent"] is True
+    assert_row_deleted_after_exp(wo2)
+
+
+def test_arms_only_deletes_the_row_after_exp_and_exits_0(monkeypatch, tmp_path):
+    rc, trace, w = _arms_run(monkeypatch, tmp_path)
+    assert rc == 0 and w.row is False
+    assert_row_deleted_after_exp(w)
+    c = trace["cleanup"]
+    assert c["row_removed_read_back_absent"] is True and "state" not in c and "row_left_in_place" not in c
+    assert c["tickets_completed"] == {TKT: 200}
+    # tickets are completed first, then the wait, then the delete
+    done = w.index(lambda e: e[0] == "http" and e[2].endswith("/complete"))
+    assert done and max(done) < w.index(lambda e: e[0] == "sleep")[0] < w.index(lambda e: e[0] == "ddb" and e[1] == "delete")[0]
+    assert trace["data_refresh_zero_calls"] is not None   # the zero-call read ran as today
+
+
+def test_arms_only_unexpected_arm_answer_is_a_named_failure_and_exits_1(monkeypatch, tmp_path):
+    # arm 1 unexpected: a 500 instead of the typed 400
+    rc, trace, w = _arms_run(monkeypatch, tmp_path, script=_arms_script(arm1=res(500, {"message": "x"})))
+    assert rc == 1 and trace["arms_only_result"] == "ARMS_NOT_AS_EXPECTED"
+    n = [x for x in trace["named_failures"] if x["reason"] == "REPORT_ID_ARM_UNEXPECTED"]
+    assert n and n[0]["status"] == 500
+    # not retried, and the cleanup still ran: the row is gone after exp
+    assert len([e for e in w.events if e[0] == "http" and e[1] == "POST" and e[2] == REPORT_PATH]) == 1
+    assert w.row is False
+    assert_row_deleted_after_exp(w)
+    # arm 2 unexpected: a 404, and a package that reads present afterwards
+    d = tmp_path / "b"
+    d.mkdir()
+    rc2, t2, w2 = _arms_run(monkeypatch, d, script=_arms_script(arm2=res(404, {"code": "NO_SUCH"})))
+    assert rc2 == 1
+    n2 = [x for x in t2["named_failures"] if x["reason"] == "PACKAGE_ARM_UNEXPECTED"]
+    assert n2 and n2[0]["status"] == 404
+    assert len([e for e in w2.events if e[0] == "http" and e[1] == "POST" and e[2] == PACKAGE_PATH]) == 1
+    assert_row_deleted_after_exp(w2)
+    # the expected answers, but the ticket reads back a package: still a failure
+    e = tmp_path / "c"
+    e.mkdir()
+    rc3, t3, w3 = _arms_run(monkeypatch, e, script=_arms_script(
+        ticket_reads=res(200, {"ticket": {"ticket_id": TKT, "package": {"report_ref": "x"}}})))
+    assert rc3 == 1 and t3["report_route_arms"]["package_door_denies_the_filer"]["package_absent_after"] is False
+    # never rc 3, in any of the three
+    assert {rc, rc2, rc3} == {1}
