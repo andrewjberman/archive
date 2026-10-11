@@ -1,0 +1,111 @@
+{
+  "to_id": "DSGN_IRPTV1.TO-IV-e-102",
+  "worker": "0.9.0_WK_DSGN_IRPTV1~57",
+  "outcome": "FIXED",
+  "measured": {
+    "opener_mounts_without_client": false,
+    "how": "RENDERED",
+    "evidence": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~57/prospect-open.before.png",
+    "instrument": "supplementary driver org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~57/prospect-open-driver.mjs (a copy of scripts/ui-smoke.mjs's recipe: auth stub, CORS echo, --dist serving through scripts/ui-dist.mjs, full-page screenshot) over `bun run build` of portal 58e15f4c, before any edit; run log prospect-open.before.run.txt. scripts/ui-smoke.mjs itself cannot reach the state: it has no way to choose a file for the Prospect upload input and its fixture map ignores the HTTP method (the upload and the submit are POSTs to paths that are substrings of the GET ones). No dev server, no port.",
+    "what_you_saw": "Analysis tab, header Client search empty (value ''), Prospect card chosen, a synthetic 2-row holdings file reviewed (Normalized total $1,000.00), Prepared for 'Sample Prospect', Generate pressed. The page then shows the button 'Request accepted' and 'Job status: Ready / Business date: 2026-09-30 / Technical details (the request id and ANALYSIS_READY) / Check status'. There is NO 'Your analysis requests' section (data-slot owned-request-history absent, 0 rows) and no other surface that opens the report: the visible buttons in the Analysis tab are Upload holdings, Refresh source data, the three Variant cards, Request accepted, Check status, Back. The page made no GET to analysis/requests (the history read) at all. LOC /investor-reporting, CANVAS rgb(244, 246, 250). The red line under the search, 'client list unavailable ... (ENVELOPE_FIRM_ID)', is an artefact of this fixture's directory/browse answer and is unrelated to the finding (the header holds no client either way).",
+    "other_surface_that_opens_the_report": "none: ProspectJobStatus (the status card under Generate) shows state words, the request id inside Technical details and a Check status button; it has no link or button that opens the report",
+    "mount_condition": {
+      "file": "portal/src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx",
+      "line": 397,
+      "at": "portal 58e15f4c",
+      "text": "{hasClient ? ( <> {hasOwnedReader(api) ? <OwnedRequestHistory .../> : null} </> ) : null}, with hasClient = Boolean(header?.selection) at line 228 (the header's accepted client selection)"
+    },
+    "viewer_note": "/investor-reporting is ProtectedRoute requireAdmin requireInternal requireDev (portal/src/App.tsx lines 462 and 614), so the viewer is an Opal-internal admin Dev user; the Prospect card therefore names a firm (R18) and the Generate goes to that firm's tenant. The driver reproduces that with a Global directory catalogue of one synthetic firm."
+  },
+  "what_the_misleading_comment_guards": "not applicable to the outcome (FIXED). For the record: the comment at AnalysisTab.tsx lines 244-248 and the hasClient gate belong to the GenerateComposer's open-after-submit (W2-07), which only the CLIENT composer called (onSubmitted); the Prospect composer never told the tab anything, so the history had no trigger and no tenant without a client.",
+  "fix": {
+    "rule_after": "The Analysis tab mounts 'Your analysis requests' when the header holds a client (as before) or once a Prospect Generate has been accepted, reading the owner's history through the same listOwnedAnalysisRequests call with the firm tenant that submission went to; each accepted request re-reads the list.",
+    "portal_commits": [
+      "d73741f9868832b22534d537e55fed6b621f5a26",
+      "e9e19a2a6c887572666a1766bb372cd2d7e29745",
+      "01d35ad225026e81b02ceb43eada7605f84d1e8e"
+    ],
+    "mount_condition_after": {
+      "file": "portal/src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx",
+      "line": 402,
+      "text": "{hasClient || prospectIssued !== null ? ("
+    }
+  },
+  "test": {
+    "id": "IVE102",
+    "file": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-102.prospect-open.test.tsx (runs iv-e-102.prospect-open.domrun.tsx in its own bun process)",
+    "arms": "(a) no client: opener absent before Generate (control), present after it with one row, Open shows the report sections, history read once with no tenant; (b) internal card naming a firm: submit and history read both carry that firm; (c) client in the header: history mounted at once, read once, unchanged after a Prospect Generate",
+    "passes": true,
+    "run": "outer 1 pass 0 fail; inner 3 pass 0 fail; VERDICT: PROSPECT-OPEN-OK",
+    "disclosed": "the inner DOM test replaces HeroDialog (a headlessui Transition that throws under happy-dom) with a plain wrapper through mock.module, inside its own process; the real dialog is read in a browser (prospect-open.after-open.png)",
+    "mutant": {
+      "what": "AnalysisTab.tsx's old mount condition restored: `{hasClient ? (` in place of `{hasClient || prospectIssued !== null ? (`, run once on the committed file and reverted with git checkout --",
+      "failed": true,
+      "observed": "inner: arm (a) and arm (b) fail at 'the opener is present'; arm (c) passes; VERDICT: PROSPECT-OPEN-FAIL (1 of 3 arms); outer: 1 fail. After the revert git status --short was empty."
+    }
+  },
+  "after": {
+    "opener_mounts_without_client": true,
+    "evidence": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~57/prospect-open.after.png",
+    "also": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~57/prospect-open.after-open.png",
+    "what_you_saw": "Same state and same instrument over a build of the fix (the build ran after the last product edit): header Client search empty, 'Request accepted' and 'Job status: Ready', and below the composer a section 'Your analysis requests' with 'Refresh request list' and one row 'Requested September 9th, 2026, 8:30p ET  Open  Ready' (history rows 1). With Open pressed (prospect-open.after-open.png) the dialog 'Your analysis request' opens with Job status: Ready, 'Report sections' and two Opal sections reading 'Source: Opal Capital Analysis'. LOC /investor-reporting, CANVAS rgb(244, 246, 250) in both."
+  },
+  "typecheck_errors": 0,
+  "typecheck": "bun run typecheck at 01d35ad2: rc 0, 'tsc -b --noEmit', no error line",
+  "suite_before": {
+    "pass": 1148,
+    "skip": 27,
+    "fail": 2,
+    "tests": 1177,
+    "files": 376,
+    "failing_ids": [
+      "IVE26-AC3",
+      "producer fixtures > every DECLARED route still publishes the RESPONSE ENVELOPE this client parses"
+    ]
+  },
+  "suite_after": {
+    "pass": 1149,
+    "skip": 27,
+    "fail": 2,
+    "tests": 1178,
+    "files": 377,
+    "failing_ids": [
+      "IVE26-AC3",
+      "producer fixtures > every DECLARED route still publishes the RESPONSE ENVELOPE this client parses"
+    ],
+    "new_failing_ids": [],
+    "note": "an earlier form of the test (a real DOM in the suite's own process) added 3 failing ids (IVE138 (e), S60 'Use AAPL', an unnamed unregister); it was changed to run in its own process and the whole scope re-run: the 2 base ids only (row DSGN_IRPTV1-D2-W57-S4)"
+  },
+  "product_files_changed": [
+    "portal/src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx",
+    "portal/src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx"
+  ],
+  "test_files_added": [
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-102.prospect-open.test.tsx",
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-102.prospect-open.domrun.tsx"
+  ],
+  "portal_commit": "01d35ad225026e81b02ceb43eada7605f84d1e8e",
+  "not_measured": "no live request was made: that the live history route answers a read for the Prospect request's firm when no client was ever picked is INFERRED (row DSGN_IRPTV1-D2-W57-S3). The internal viewer's card was reproduced with one synthetic firm; a firm advisor cannot open this page.",
+  "screenshots": [
+    {
+      "state": "BEFORE: no client, Prospect Generate accepted, no opener",
+      "path": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~57/prospect-open.before.png",
+      "canvas": "rgb(244, 246, 250)"
+    },
+    {
+      "state": "AFTER: no client, Prospect Generate accepted, Your analysis requests with Open",
+      "path": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~57/prospect-open.after.png",
+      "canvas": "rgb(244, 246, 250)"
+    },
+    {
+      "state": "AFTER: Open pressed, the Opal report's sections",
+      "path": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~57/prospect-open.after-open.png",
+      "canvas": "rgb(244, 246, 250)"
+    }
+  ],
+  "rows": [
+    "DSGN_IRPTV1-D2-W57-S3",
+    "DSGN_IRPTV1-D2-W57-S4"
+  ],
+  "evidence_private": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~57/ (iv102_base_suite.txt, iv102_after_suite.txt, iv102_typecheck.txt, iv102_mutant_run.txt, iv102_build*.txt)"
+}
