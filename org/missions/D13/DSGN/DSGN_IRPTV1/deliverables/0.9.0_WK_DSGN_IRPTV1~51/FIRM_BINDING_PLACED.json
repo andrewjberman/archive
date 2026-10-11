@@ -1,0 +1,211 @@
+{
+  "to_id": "DSGN_IRPTV1.TO-IV-e-93",
+  "worker": "0.9.0_WK_DSGN_IRPTV1~51",
+  "read_at": {
+    "workspace": "box/dell2 @19e6e9faa9 (worktree branch wk-dsgn-irptv1-r15-51)",
+    "portal": "origin/DEV ab697ba120a6452bdcb634038d8114b88f18e4a9, read by git show <commit>:<path> and git grep -n",
+    "no_live_call": "no AWS call, no request to any deployed service; the wire itself was NOT observed by this worker"
+  },
+  "routes": [
+    "GET /api/scoped/investor-reporting/reporting/client/{client_id}/summary   (operation reporting-summary-read; entry.py:92, :348)",
+    "GET /api/scoped/investor-reporting/reporting/{account_id}/{which}  with which=manifest   (operation reporting-read; entry.py:90, :253; the series is the same route with which=series)"
+  ],
+  "lambda_source_folder": "infra/aws/lambda/investor-reporting/reporting/ (entry.py), wrapped by the shared boundary infra/aws/lambda/investor-reporting/_authz/served.py (Entry.handle); function name irpt-49f-reporting-read-lambda (IRPT_DASHBD_PRD.md:544; entry.py:135)",
+  "denominator": "comp-find FIRM_BINDING over infra/aws/lambda: 106 hit(s) across 5665 file(s) scanned [corpus=all]; 44 SURFACED (first-party source), 62 TEST. Of the 44, the sites on the reporting routes' request path are in _authz/served.py (Entry.handle) and _authz/loaders.py (BucketUnmapped); the other source sites belong to other functions' own code (directory/refresh.py:1175, holdings/snapshot.py:658, intake/corrections.py, ycharts/generate/job.py, ycharts/extract/extract.py:1092, reports/request_composition.py:35, _scope/global.py, narrative/entry.py:165) and are not reached by these two routes, whose compute (reporting/entry.py) holds no FIRM_BINDING literal.",
+  "emitted_at": {
+    "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+    "line": 1214
+  },
+  "other_sites_on_the_path": [
+    {
+      "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "line": 1200,
+      "reached": "NO -- fires only when selected_tenant is the word global; the page sends that word only on resolve-scope (portal index.tsx:112, :127), never on these routes"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "line": 1209,
+      "reached": "NO for this walk -- fires for a non-internal caller whose selected firm differs from its verified firm; the same walk's holdings read (same handle, same selected_tenant) passed it"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "line": 1220,
+      "reached": "NO for this walk -- service-principal allow-list; the walker is internal, not a service row"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "line": 1227,
+      "reached": "NO (INFERRED) -- internal profile-row narrowing reads the same maintained row for every function; the holdings read passed it for the same firm"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "line": 1229,
+      "reached": "NO (INFERRED) -- same reason"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "line": 1236,
+      "reached": "NO -- firm_claims_match(event, verified) with verified := selected; the page restates no other firm"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "line": 1262,
+      "reached": "NOT REACHED: line 1214 returns first. It would be the next gate (enforcer_for -> loaders.bucket_for -> BucketUnmapped, public_reason_code FIRM_BINDING at loaders.py:46)"
+    }
+  ],
+  "why_1214_and_not_another": "Lines 1207-1236 are the same code in every function that wraps served.Entry (holdings/entry.py:22 and :150 does too). The walk's holdings read carried the same selected_tenant and passed all of them, so any gate that depends only on the caller or on the firm word passed for holdings. The one gate in 1207-1236 that depends on the FUNCTION is line 1212, bucket_for(selected), which reads this function's own environment variable IRPT_DIRECTORY_BUCKET_MAP (loaders.py:31, :59-69). For the reporting-read function that map holds ONE firm (reporting-read/locals.tf:57-59, lambda.tf:49); for the holdings function it holds every enabled client firm (holdings/lambda.tf:38-41, :86).",
+  "condition": "At served.py:1207 the request names a selected_tenant that differs from the caller's verified firm (an Opal user is internal, so the request is allowed to ask for a client firm); at :1210-1214 the function looks that selected firm up in its own firm-to-bucket map (bucket_for, loaders.py:59-69, the map being the environment variable IRPT_DIRECTORY_BUCKET_MAP) and, if the firm is not a key in the map, raises BucketUnmapped (a ValueError), which :1213-1214 turns into the refusal FIRM_BINDING. At HEAD the reporting-read function's map is ONE firm: the firm of the custody declaration data/assets/scripts/gold/irpt_reporting/sources.json (registry_key 08335338), which resolves to 49financial; Cottonwood is an enabled client firm in data/firm_registry.json but is not in this function's map. The test compares the firm word the page sent against the keys of that one-entry map.",
+  "page_sends": {
+    "what": "On the summary and the manifest (and series) requests the page puts a selected_tenant QUERY PARAMETER whose value is the registry tenant of the picked client's own firm (for Anna Thiessen, the Cottonwood tenant), taken from the picked client's member scope (scope.registryTenant). It does NOT send global, a header, a path segment, or nothing. READ FROM CODE at the walked commit; the wire was not observed by this worker.",
+    "source": {
+      "file": "src/pages/InvestorReporting/dashboard/reportingRead.ts",
+      "line": 133,
+      "note": "portal commit ab697ba120a6452bdcb634038d8114b88f18e4a9. Manifest request built by reportingReadPath(accountId, manifest, selectedTenant) (:22-31, query at :27); summary request built at :85 by reportingSummaryPath(clientId, selectedTenant) (:38-41, query at :40)."
+    },
+    "value_comes_from": [
+      {
+        "file": "src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx",
+        "line": 537,
+        "says": "focusCtx.selectedTenant = scope.registryTenant"
+      },
+      {
+        "file": "src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx",
+        "line": 581,
+        "says": "const dashboardTenant = focusCtx?.selectedTenant ?? null; passed to readDashboard at :586 and to readClientSummaryAnswer at :626"
+      },
+      {
+        "file": "src/pages/InvestorReporting/tabs/TabShell.tsx",
+        "line": 159,
+        "says": "ReportingTab receives scope={scope}"
+      },
+      {
+        "file": "src/pages/InvestorReporting/index.tsx",
+        "line": 232,
+        "says": "selectedScope = the member scope whose verifiedRequestFirm.firmId equals the picked row's firmId (the picked client's own firm), found in the Global context's firms"
+      },
+      {
+        "file": "src/pages/InvestorReporting/contracts/directory-context.ts",
+        "line": 82,
+        "says": "each Global member scope is accepted only if scope.registry_tenant === firm.tenant, so registryTenant is that firm's tenant"
+      },
+      {
+        "file": "src/pages/InvestorReporting/contracts/adapt.ts",
+        "line": 750,
+        "says": "registryTenant: wire.registry_tenant"
+      }
+    ],
+    "reads_that_passed_in_the_same_walk": [
+      {
+        "read": "directory browse (one request per firm)",
+        "what": "selected_tenant = each firm's context.registryTenant",
+        "source": {
+          "file": "src/pages/InvestorReporting/header/ClientSearch.tsx",
+          "line": 127
+        },
+        "query_built_at": {
+          "file": "src/api/endpoints/investor-reporting.ts",
+          "line": 1222
+        }
+      },
+      {
+        "read": "holdings snapshot (identity card, Holdings tab)",
+        "what": "selected_tenant = scopeRef.selectedTenant = selectedTenantFor(...), i.e. the picked client's firm tenant (firm.tenant from the Global context)",
+        "source": {
+          "file": "src/pages/InvestorReporting/index.tsx",
+          "line": 261
+        },
+        "also": [
+          {
+            "file": "src/pages/InvestorReporting/header/IdentityCard.tsx",
+            "line": 206
+          },
+          {
+            "file": "src/api/endpoints/investor-reporting.ts",
+            "line": 1316
+          },
+          {
+            "file": "src/pages/InvestorReporting/index.tsx",
+            "line": 153
+          }
+        ]
+      }
+    ],
+    "difference": "None in the firm binding. Reporting, holdings and the directory browse all name the same picked client firm in selected_tenant (two code paths reach it: scope.registryTenant for reporting and browse, selectedTenantFor for holdings; both give that firm's tenant). What differs is the FUNCTION that receives it: holdings accepts every enabled client firm, reporting-read accepts one."
+  },
+  "reached_because": "1. The firm selector is at its default Global (All): firm.ts:27 (id global) and :30 (DEFAULT_FIRM_ID); index.tsx:105 starts internal users on it. 2. Under Global the page sends selected_tenant=global only for the catalogue and resolve-scope read (index.tsx:111-112, :127); served.py:1198-1200 refuses global on any other operation, which is why the page must not send it on the reporting routes and does not. 3. The user picks a client of one firm: index.tsx:232 makes the picked client's firm scope the selectedScope; TabShell.tsx:155-159 hands it to ReportingTab as scope. 4. ReportingTab.tsx:535-539 builds focusCtx.selectedTenant = scope.registryTenant (the picked client's firm tenant, directory-context.ts:82); :581 dashboardTenant. 5. :586 readDashboard(accountId, dashboardTenant) -> reportingRead.ts:133 -> GET .../reporting/{acc}/manifest?selected_tenant=<firm tenant> (:22-31); :626 readClientSummaryAnswer -> reportingRead.ts:85 -> GET .../reporting/client/{cli}/summary?selected_tenant=<firm tenant> (:38-41). 6. The routes are served by reporting/entry.py ROUTES (:373) through served.Entry.handle. 7. served.py:1195 reads selected_tenant from the query string (selected_tenant(), :519-544) = the client firm; :1207 selected != the caller's verified firm; the caller is internal (an Opal user; the holdings read passed the same test), so :1210-1212 looks the selected firm up with bucket_for. 8. loaders.py:59-69 looks it up in IRPT_DIRECTORY_BUCKET_MAP; for reporting-read the map is {49financial: bucket} (reporting-read/locals.tf:59, lambda.tf:49); the Cottonwood tenant is not a key; BucketUnmapped is raised (loaders.py:65-68). 9. served.py:1213-1214 returns refuse(..., FIRM_BINDING) before the compute (reporting/entry.py) runs, so no storage is read. 10. The page reads the envelope's reason code as FIRM_BINDING (reportingRead.ts:62-69, :89-90, :137-138): the walk's UNAVAILABLE FIRM_BINDING on summary and manifest.",
+  "because_no_single_firm_selected": "NO",
+  "basis": [
+    {
+      "file": "src/pages/InvestorReporting/dashboard/reportingRead.ts",
+      "line": 27,
+      "repo": "portal@ab697ba1",
+      "says": "the manifest path carries selected_tenant when the argument is set"
+    },
+    {
+      "file": "src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx",
+      "line": 537,
+      "repo": "portal@ab697ba1",
+      "says": "that argument is the picked client's firm scope's registryTenant, not the selector's own value"
+    },
+    {
+      "file": "src/pages/InvestorReporting/index.tsx",
+      "line": 232,
+      "repo": "portal@ab697ba1",
+      "says": "under Global the scope handed to the tabs is the picked client's firm's scope"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "line": 1198,
+      "repo": "workspace@HEAD",
+      "says": "a request bound to global is refused FIRM_BINDING on every operation but resolve-scope: the opposite case, not the one the page sends"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "line": 1212,
+      "repo": "workspace@HEAD",
+      "says": "the refusal that fires tests the selected firm against this function's own map"
+    },
+    {
+      "file": "infra/aws/terraform/investor-reporting/reporting-read/locals.tf",
+      "line": 59,
+      "repo": "workspace@HEAD",
+      "says": "the reporting-read map holds one firm"
+    }
+  ],
+  "basis_status": "INFERRED from code at the walked commit and HEAD, not measured on the wire. The one read that would measure it: the walk's local netlog.tsv (laptop only, named in the walk record at its Local artifacts section) -- the query string of the two refused reporting URLs.",
+  "whose": "SERVICE",
+  "whose_basis": "The PAGE is not at fault on the firm binding: it binds the reporting requests to the picked client's own firm, exactly as it binds holdings and the directory browse. So the premise that the page offers a client of one firm while sending a request bound to none does not hold at the walked commit. The refusal sits on the service side: the reporting-read function is built for ONE firm (reporting-read/locals.tf:35-36 'this single role would then need to become one role per firm'; :57-58 'Any other firm's request is refused as unmapped, never defaulted'), while the project's own text puts a Cottonwood account in scope: IRPT_DASHBD_PRD.md:118-122 (FWD-11: 'an Inflection account and a Cottonwood account each get the same ... as a 49 Financial account') and DSGN_IRPTV1_PRD.md:44-47 (FWD-1: 'real Cottonwood data'). Deciding line: org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md:118-122. DSGN_IRPTV1_PRD.md:309 ('the backend is taken as is') concerns the account-level Performance route structure and does not decide firm coverage.",
+  "whose_open_reading": "Two readings of the SERVICE finding remain for the CTO to name; no line chooses between them: (a) a defect of the deployed reading route against FWD-11 and FWD-1 (a Cottonwood client is offered by the page and refused by a function that cannot take its firm); (b) an outcome not yet built, FWD-11 not yet realized for the reading route, single-firm by deliberate design until the Inflection and Cottonwood adapters publish. Either way it is not a PAGE act, and the SERVICE option's wording (should resolve the firm from the picked client) is not what was found: the page already resolved it; the service lacks the firm in its map.",
+  "what_would_establish_it": "Only for the label between (a) and (b): the CTO's ruling on whether FWD-11's realized state includes the reading route; and, for the code claim, the netlog read named in basis_status.",
+  "opal_user_default_sees": "A selector left at Global (All) (firm.ts:27, :30; index.tsx:105) does not by itself cause the refusal: under it the page binds each reporting read to the picked client's own firm. For a client of Cottonwood (a firm not in the reporting-read map) the user sees what the walk saw: the picker label YTD unavailable and the Performance tab sentence 'Performance is not available for this client yet. It becomes available once Opal Capital computes performance for this account.' (walk record, hop 6), because the manifest and summary are refused FIRM_BINDING and the per-account performance read is refused OBJECT_NOT_COVERED (P2's cell, ruled in msgs 4414 and 4417). A client of 49 Financial would pass served.py:1212 (49financial is the map's one key) and would be answered from the published platinum files, if they are published (INFERRED, see also_live_state). Choosing the Cottonwood firm in the selector instead of Global would send the same firm word (the single-firm scope's registry_tenant), so it would not be expected to change the result (INFERRED; the single-firm resolve response carries registry_tenant only when the wire supplies it, ResolvedScope.ts:38).",
+  "also_live_state": [
+    {
+      "item": "the DEPLOYED environment variable IRPT_DIRECTORY_BUCKET_MAP of irpt-49f-reporting-read-lambda equals the committed Terraform's one-firm map",
+      "status": "INFERRED from reporting-read/lambda.tf:49 and locals.tf:59 at HEAD",
+      "read_that_measures_it": "one live get of the function configuration: aws lambda get-function-configuration --function-name irpt-49f-reporting-read-lambda --query Environment.Variables.IRPT_DIRECTORY_BUCKET_MAP (the keys of the JSON object)"
+    },
+    {
+      "item": "the exact query string the page put on the two refused requests",
+      "status": "INFERRED from code",
+      "read_that_measures_it": "the walk's laptop netlog.tsv rows for the two reporting URLs"
+    },
+    {
+      "item": "whether platinum reporting files (series.json.gz, manifest.json, client summary.json) are published for Cottonwood (the next refusal, NOT_READY, would follow once the firm is mapped), and for the 49 Financial case above",
+      "status": "INFERRED, unmeasured",
+      "read_that_measures_it": "an S3 list of the reporting prefix irpt/<firm>/platinum/reporting/ in the firm's bucket (address builder output for the firm)"
+    },
+    {
+      "item": "that the walker is an internal principal for served.py:1208 and passes the profile narrowing at :1225-1229",
+      "status": "INFERRED from the holdings read passing the same checks in the same walk",
+      "read_that_measures_it": "the walker's profile row allowedFirmIds (one profile read)"
+    }
+  ],
+  "hop7": {
+    "prd_sentence": "FWD-1  An Opal user opens Investor Reporting, picks Anna Thiessen's Cottonwood brokerage account, and reads her identity card, her year-to-date return with its spread to the benchmark, her Models / SMAs / Client split and her security list -- on the live product, end to end",
+    "walk_line": "| 7 | Holdings: Models / SMAs / Client split | PARTIAL | default face splits the total by ACCOUNT (Trust / Brokerage), not by category; the category split (models, SMA, Client) is reached one layer in, by opening an account tile; the Client category dialog renders with its derivation text |",
+    "sources": {
+      "prd": "org/missions/D13/DSGN/DSGN_IRPTV1/prd/DSGN_IRPTV1_PRD.md lines 44-46 (joined with single spaces)",
+      "walk": "org/tier1_exec/4.0.0_SA_CRO/deliverables/UI_WALK_DSGN_IRPTV1_FWD1_20261011T0730Z.md line 23"
+    }
+  }
+}
