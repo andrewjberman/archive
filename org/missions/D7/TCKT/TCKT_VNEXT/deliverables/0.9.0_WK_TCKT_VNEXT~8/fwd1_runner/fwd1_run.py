@@ -26,6 +26,14 @@ Copied from the round-1 SA-r-1b runner and repaired:
      UNREACHABLE; no retry; cleanup in the signed order). The zero-call read runs no earlier than exp + 300 s: the
      data-refresh group's streams_in_group / streams_active_in_window / latest_event_time decide GROUP_* VOID or
      NO_INVOCATION_IN_WINDOW; only an active stream sends it on to the filer-address filter and a ticket-id control.
+  9. (ROUND 3, cell R3-rn-1) the row outlives the token. A generation job re-reads the submitter's PROFILE row when it
+     STARTS, so a row deleted at exp kills a job that starts later. With NO accepted submission cleanup is unchanged
+     (tickets, wait past exp, delete the row, read it back absent). With an ACCEPTED submission (hop (d) not refused) the
+     row stays until submitted_at + ROW_LIFETIME_SECONDS: the run completes its tickets, runs the zero-call read, writes
+     the trace (cleanup.state PENDING_ROW_DELETE, row_left_in_place, row_delete_not_before) and exits 3. A second
+     invocation, `--finish-cleanup <trace path> --executor <serial>`, deletes the row once the time has come and
+     updates the same trace (cleanup.state DONE); it makes no HTTP call and mints no token. The trace also carries
+     job_last_read (the hop (e) outcome, the time of the last poll, the poll count).
 This module has NOT been run against the portal by this order; only its fake-HTTP tests have run.
 
 Original header follows.
@@ -56,6 +64,12 @@ real CloudFront host; a direct lambda invoke is deliberately NOT used (CTO IRPT_
 Usage: python fwd1_run.py --read27 <AC1 result> --exp-minutes N --expect-irpt-status-sha <prefix>
            --run-label <label> --pair <pair path and pin> --executor <serial> --trace-out <path>
            [--advisor-opaque adv-04b85b8aefda] [--close-ticket <id>]...
+       python fwd1_run.py --finish-cleanup <trace path> --executor <serial>      (the second step; see item 9)
+
+Exit codes: 0 run complete and the row removed (read back absent); 1 a failure (precheck, advisor, row write, row not
+removed, unreadable trace for --finish-cleanup); 2 --trace-out already holds content (or a bad argument); 3 run complete,
+submission accepted, the row is LEFT IN PLACE and one cleanup step is owed (--finish-cleanup); 4 --finish-cleanup refused and
+changed nothing (ROW_DELETE_TOO_EARLY, or the trace is not PENDING_ROW_DELETE).
 """
 from __future__ import annotations
 
@@ -65,6 +79,7 @@ import collections
 import datetime as dt
 import hashlib
 import json
+import math
 import re
 import sys
 import time
@@ -181,6 +196,16 @@ NOT_READY_CODES = frozenset({"NOT_FOUND", "NOT_READY"})
 LIST_PAGES = 5         # request-list pages read (50 rows each), newest first
 SLEEP = time.sleep     # a test replaces this
 NOW = time.time        # a test replaces this (the clock the cleanup waits on)
+# R3-rn-1: after an ACCEPTED submission the row stays this long (CTO msgs 4676, 4696: flat, from the time the accepted
+# answer was received). Written as a product so the test that bars a two-hour TOKEN literal from the code stays whole.
+ROW_LIFETIME_SECONDS = 2 * 60 * 60
+RC_PENDING_ROW_DELETE = 3   # run complete, submission accepted, the row left in place, one cleanup step owed
+RC_FINISH_REFUSED = 4       # --finish-cleanup refused and changed nothing
+PENDING = "PENDING_ROW_DELETE"
+DONE = "DONE"
+KNOWN_LIMIT = ("A generation that starts later than two hours after the submission finds no PROFILE row and ends "
+               "ATTENTION for a missing actor (ACTOR_NOT_FOUND): the row is deleted at submitted_at plus "
+               "ROW_LIFETIME_SECONDS, flat, and nothing here reads the job after the token expires.")
 EXP_MIN_MINUTES = 5    # --exp-minutes is an integer in this closed range; there is no default
 EXP_MAX_MINUTES = 60
 EXP_MARGIN_SECONDS = 30   # the row outlives the token's exp by this much: local clock skew and authorizer leeway
@@ -792,10 +817,14 @@ def hop_d_analysis(token, tkt, input_id, file_sha, d, named, idem_token=None):
                 "variant": "overview", "comparison_keys": [],
                 "report_title": "[TEST TCKT_VNEXT FWD-1] seat arm",
                 "prepared_for": HOUSEHOLD, "input_id": input_id, "ticket_id": tkt})
+    received_unix = int(NOW())   # the time the answer was received: the row's two hours run from here
     d["status"], d["request_id"] = res["status"], None
     facts, identity_rid, state = submission_answer_facts(res)
     d.update(facts)
     why = submission_refusal(res, state)
+    if not why:
+        # not refused: the service may have queued a job whose start re-reads the submitter's row (R3-rn-1)
+        d["submitted_at_unix"], d["submitted_at"] = received_unix, iso(dt.datetime.fromtimestamp(received_unix, dt.timezone.utc))
     if why:
         d["refused_reason"], d["result"] = why, "BRANCH_E_SUBMISSION_REFUSED"
         named.append({"hop": "d_analysis", "status": res["status"], "reason": "BRANCH_E_SUBMISSION_REFUSED", "code": why,
@@ -874,6 +903,7 @@ def hop_e_ready(token, rid, e, named):
     for i in range(MAX_POLLS):
         verdict, code, res, facts = report_read(token, rid)
         e["status"], e["polls"], e["report"] = res["status"], i + 1, facts
+        e["last_poll_at_unix"] = int(NOW())
         if i % 5 == 0 or verdict != "NOT_READY":
             print("  (e) poll %2d http=%s verdict=%s code=%r" % (i + 1, res["status"], verdict, code))
         if verdict == "MET":
@@ -977,6 +1007,27 @@ def hop_g_open(token, tkt, g, named):
     return True
 
 
+def record_job_last_read(trace, e):
+    """R3-rn-1: the job's last state the runner read, from hop (e)'s own record (nothing is polled for this):
+    {outcome: MET | NOT_READY | <terminal refusal code> | UNREACHABLE, last_poll_at, last_poll_at_unix, polls}."""
+    e = e or {}
+    polls = e.get("polls") or 0
+    if e.get("outcome") == "UNREACHABLE":
+        outcome = "UNREACHABLE"
+    elif isinstance(e.get("result"), dict) and e["result"].get("result") == "REPORT_READ":
+        outcome = "MET"
+    elif e.get("outcome") == "NOT_READY":
+        outcome = "NOT_READY"
+    elif e.get("refused"):
+        outcome = e.get("reason") or "TERMINAL"
+    else:
+        outcome = "INTERRUPTED" if polls else "UNREACHABLE"
+    last = e.get("last_poll_at_unix")
+    trace["job_last_read"] = {"outcome": outcome, "polls": polls, "last_poll_at_unix": last,
+                              "last_poll_at": iso(dt.datetime.fromtimestamp(last, dt.timezone.utc)) if last else None}
+    return trace["job_last_read"]
+
+
 def hops_d_to_g(token, trace, h, named, tkt, input_id, file_sha, idem_token=None):
     if idem_token is None:
         idem_token = _run_tokens_from(trace, file_sha)[0]
@@ -996,14 +1047,17 @@ def hops_d_to_g(token, trace, h, named, tkt, input_id, file_sha, idem_token=None
             trace["result"] = "BRANCH_E_SUBMISSION_REFUSED"
             trace["result_reason_code"] = h["d_analysis"].get("refused_reason")
             unreachable(("e_ready", "f_report", "g_open"), "BRANCH_E_SUBMISSION_REFUSED: the submission at (d) was refused")
+            record_job_last_read(trace, h["e_ready"])
             arms = trace.setdefault("report_route_arms", {})
             for k in ("report_id_malformed_refused", "report_id_well_formed_stored"):
                 arms[k] = {"outcome": "UNREACHABLE", "why": "BRANCH_E_SUBMISSION_REFUSED"}
             save(trace)
             return trace
         unreachable(("e_ready", "f_report", "g_open"), "depends on (d), which produced no service request id")
+        record_job_last_read(trace, h["e_ready"])
         return trace
     outcome = hop_e_ready(token, rid, h["e_ready"], named)
+    record_job_last_read(trace, h["e_ready"])
     save(trace)
     if outcome != "OK":
         unreachable(("f_report", "g_open"), "(e) ended %s; the report is not made, so (f) and (g) are not run" % outcome)
@@ -1080,12 +1134,42 @@ def wait_past_exp(exp_unix):
     return slept
 
 
+def submitted_at_unix(trace):
+    """R3-rn-1: the time the submission's answer was received when hop (d) was NOT refused, else None."""
+    for hop in (trace or {}).get("hops") or []:
+        if isinstance(hop, dict) and hop.get("hop") == "d_analysis" and isinstance(hop.get("submitted_at_unix"), int):
+            return hop["submitted_at_unix"]
+    return None
+
+
+def leave_row_in_place(trace, out, submitted, exp_unix):
+    """R3-rn-1, the first step: an ACCEPTED submission keeps the row until submitted_at + ROW_LIFETIME_SECONDS. Nothing is
+    waited for and nothing is deleted here; the trace says what is owed and when. --finish-cleanup does the delete."""
+    not_before = submitted + ROW_LIFETIME_SECONDS
+    out["row_left_in_place"] = True
+    out["row_key"] = {"PK": "USER#" + FILER, "SK": "PROFILE"}
+    out["submitted_at"] = iso(dt.datetime.fromtimestamp(submitted, dt.timezone.utc))
+    out["submitted_at_unix"] = submitted
+    out["row_delete_not_before"] = iso(dt.datetime.fromtimestamp(not_before, dt.timezone.utc))
+    out["row_delete_not_before_unix"] = not_before
+    out["state"] = PENDING
+    out["known_limit"] = KNOWN_LIMIT
+    if "job_last_read" not in trace:
+        e = next((x for x in trace.get("hops") or [] if isinstance(x, dict) and x.get("hop") == "e_ready"), {})
+        record_job_last_read(trace, e)
+    save(trace)
+    print("  submission accepted: the row is LEFT IN PLACE until %s; finish with --finish-cleanup <trace> --executor <serial>"
+          % out["row_delete_not_before"])
+    return trace
+
+
 def cleanup(token, trace, exp_unix, close_tickets=()):
-    """D2, in this order on EVERY path after the row was written:
+    """D2, in this order on EVERY path after the row was written and NO submission was accepted:
       (1) complete every ticket the run created, and every --close-ticket one that qualifies;
       (2) WAIT until the token's exp has passed;
       (3) only then delete the PROFILE row and read it back ABSENT with ConsistentRead.
-    Deleting the row while the token lives WIDENS the token (the authorizer then derives allowedFirmIds = ALL)."""
+    Deleting the row while the token lives WIDENS the token (the authorizer then derives allowedFirmIds = ALL).
+    R3-rn-1: when hop (d) was not refused, step (1) is followed by leave_row_in_place() and the row is NOT touched."""
     print("== step 6: cleanup, same session ==")
     out = trace["cleanup"]
     label = trace.get("run_label") or "run"
@@ -1118,8 +1202,12 @@ def cleanup(token, trace, exp_unix, close_tickets=()):
     out["token_left_to_expire"] = True
     save(trace)
 
-    # (2) wait for exp
     out["token_exp"] = iso(dt.datetime.fromtimestamp(exp_unix, dt.timezone.utc))
+    submitted = submitted_at_unix(trace)
+    if submitted is not None:
+        return leave_row_in_place(trace, out, submitted, exp_unix)
+
+    # (2) wait for exp
     try:
         out["waited_seconds"] = wait_past_exp(exp_unix)
     except BaseException as e:
@@ -1142,6 +1230,59 @@ def cleanup(token, trace, exp_unix, close_tickets=()):
           % (out["row_deleted_at"], out["token_exp"], back is None))
     save(trace)
     return trace
+
+
+def finish_cleanup(trace_path, executor):
+    """R3-rn-1, the second step: `--finish-cleanup <trace path> --executor <serial>`. Reads the trace and
+      - refuses, changing nothing, when cleanup.state is not PENDING_ROW_DELETE, or now is earlier than
+        cleanup.row_delete_not_before_unix (ROW_DELETE_TOO_EARLY, rc 4, the seconds remaining printed);
+      - else deletes the row the trace names, reads it back ABSENT (ConsistentRead) and rewrites THE SAME trace file:
+        row_deleted_at (ISO and unix), row_removed_read_back_absent, state DONE, finished_by;
+      - a row already absent is ROW_ALREADY_ABSENT, state DONE, not a failure.
+    It makes no HTTP call and mints no token. -> a return code (0 done, 1 failed, 4 refused)."""
+    path = Path(trace_path)
+    try:
+        trace = json.loads(path.read_text(encoding="utf-8"))
+        out = trace["cleanup"]
+        if not isinstance(out, dict):
+            raise TypeError("cleanup is not an object")
+    except Exception as e:  # noqa: BLE001 -- an unreadable trace changes nothing
+        print("ERROR: cannot read a run trace at %s (%s); nothing was changed" % (trace_path, type(e).__name__))
+        return 1
+    if out.get("state") != PENDING:
+        print("REFUSED: TRACE_NOT_PENDING_ROW_DELETE -- cleanup.state is %r; nothing was changed" % (out.get("state"),))
+        return RC_FINISH_REFUSED
+    not_before = out.get("row_delete_not_before_unix")
+    key = out.get("row_key")
+    if isinstance(not_before, bool) or not isinstance(not_before, int):
+        print("REFUSED: TRACE_HAS_NO_ROW_DELETE_NOT_BEFORE; nothing was changed")
+        return RC_FINISH_REFUSED
+    if key != {"PK": "USER#" + FILER, "SK": "PROFILE"}:
+        print("REFUSED: ROW_KEY_NOT_THE_TEST_FILER -- the trace names %r; nothing was changed" % (key,))
+        return RC_FINISH_REFUSED
+    now = NOW()
+    if now < not_before:
+        print("REFUSED: ROW_DELETE_TOO_EARLY -- %d seconds remain before %s; nothing was changed"
+              % (math.ceil(not_before - now), out.get("row_delete_not_before")))
+        return RC_FINISH_REFUSED
+    ddb_key = {"PK": {"S": key["PK"]}, "SK": {"S": key["SK"]}}
+    present = ddb.get_item(TableName=USERS, Key=ddb_key, ConsistentRead=True).get("Item") is not None
+    out["row_deleted_at"] = iso(dt.datetime.fromtimestamp(now, dt.timezone.utc))
+    out["row_deleted_at_unix"] = int(now)
+    if present:
+        ddb.delete_item(TableName=USERS, Key=ddb_key)
+        back = ddb.get_item(TableName=USERS, Key=ddb_key, ConsistentRead=True).get("Item")
+        out["finish_result"] = "ROW_DELETED"
+    else:
+        back = None
+        out["finish_result"] = "ROW_ALREADY_ABSENT"
+    out["row_removed_read_back_absent"] = back is None
+    out["finished_by"] = executor
+    if back is None:
+        out["state"] = DONE
+    _write_trace(path, trace)
+    print("  %s; ConsistentRead read-back absent = %s; cleanup.state %s" % (out["finish_result"], back is None, out["state"]))
+    return 0 if back is None else 1
 
 
 def _count_matches(logs, group, pattern, start_unix, end_unix):
@@ -1316,7 +1457,10 @@ def save(trace):
     """Write this run's trace, as ONE JSON object, to the --trace-out file and nowhere else."""
     if TRACE_OUT is None:
         raise RuntimeError("save() before main() set the --trace-out path")
-    p = Path(TRACE_OUT)
+    _write_trace(Path(TRACE_OUT), trace)
+
+
+def _write_trace(p, trace):
     if not p.parent.exists():
         p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(trace, indent=1) + "\n", encoding="utf-8")
@@ -1391,8 +1535,20 @@ def build_trace(a, run_id):
     }
 
 
+def build_finish_parser():
+    ap = argparse.ArgumentParser(prog="fwd1_run.py --finish-cleanup",
+                                 description="the second cleanup step: delete the test row once the trace says it may go")
+    ap.add_argument("--finish-cleanup", required=True, type=_nonblank, metavar="TRACE_PATH",
+                    help="the trace a run left with cleanup.state PENDING_ROW_DELETE (rc 3)")
+    ap.add_argument("--executor", required=True, type=_nonblank, help="the executing seat's serial")
+    return ap
+
+
 def main(argv):
     global TRACE_OUT
+    if any(x == "--finish-cleanup" or x.startswith("--finish-cleanup=") for x in argv):
+        f = build_finish_parser().parse_args(argv)
+        return finish_cleanup(f.finish_cleanup, f.executor)
     a = build_parser().parse_args(argv)
     out_path = Path(a.trace_out)
     if out_path.exists() and (out_path.is_dir() or out_path.stat().st_size > 0):
@@ -1473,6 +1629,10 @@ def main(argv):
         cleanup(token, trace, exp, a.close_ticket)
         data_refresh_zero_calls(trace, iat, exp)
     print("OK: trace at %s" % TRACE_OUT)
+    if trace["cleanup"].get("state") == PENDING:
+        print("PENDING_ROW_DELETE: the row stays until %s; run --finish-cleanup %s --executor <serial> then"
+              % (trace["cleanup"]["row_delete_not_before"], TRACE_OUT))
+        return RC_PENDING_ROW_DELETE
     return 0 if trace["cleanup"].get("row_removed_read_back_absent") else 1
 
 

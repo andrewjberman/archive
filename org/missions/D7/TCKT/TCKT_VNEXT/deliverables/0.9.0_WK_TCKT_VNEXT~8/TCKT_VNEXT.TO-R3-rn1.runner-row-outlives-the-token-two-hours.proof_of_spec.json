@@ -1,0 +1,99 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-R3-rn1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R3-rn1.runner-row-outlives-the-token-two-hours.md",
+  "group": "OTHER",
+  "vintage_commit": "c8f0c2c476"
+ },
+ "assignee": "0.9.0_WK_TCKT_VNEXT~8",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R3.md",
+  "vintage_commit": "c8f0c2c476",
+  "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R3-rn1.runner-row-outlives-the-token-two-hours.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~8/fwd1_runner/fwd1_run.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "R3-rn-1: after an accepted submission (hop (d) not refused) cleanup completes the tickets, leaves the row (cleanup.state PENDING_ROW_DELETE, row_left_in_place, row_delete_not_before ISO and unix = submitted_at + ROW_LIFETIME_SECONDS), the zero-call read runs as before, the run exits 3; --finish-cleanup <trace> --executor <serial> deletes the row after that time (rc 4 ROW_DELETE_TOO_EARLY otherwise), updates the same trace to DONE, makes no HTTP call; job_last_read and known_limit in the trace; not run against AWS or the portal",
+   "artifact_covered_by": [
+    "R3-rn1-AC1",
+    "R3-rn1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~8/fwd1_runner/test_fwd1_runner.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "6 new tests (fake AWS, HTTP and clock layer, no network); 1 earlier test changed: test_issued_id_refused_by_report_route_is_branch_b (an accepted-submission path: its delete-after-exp assertions became the left-in-place branch); 56 tests",
+   "artifact_covered_by": [
+    "R3-rn1-AC1",
+    "R3-rn1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R3-rn1-AC1",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R3_CHECKS/r3_checks.py rn-row expect: RN-ROW-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R3_CHECKS/r3_checks.py rn-row",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: RN-ROW-OK passed=6 of 6",
+   "denominator": "6 of 6 named tests found by name and passed (test_accepted_submission_leaves_the_row_and_exits_3, test_refused_submission_still_deletes_after_exp, test_finish_cleanup_refuses_before_the_two_hours, test_finish_cleanup_deletes_and_updates_the_same_trace, test_finish_cleanup_on_an_absent_row_is_done_not_failed, test_trace_records_the_last_job_read_and_the_known_limit)",
+   "status": "PASS",
+   "expect": "RN-ROW-OK"
+  },
+  {
+   "criterion_id": "R3-rn1-AC2",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R3_CHECKS/r3_checks.py rn-regress expect: RN-REGRESS-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R3_CHECKS/r3_checks.py rn-regress",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: RN-REGRESS-OK passed=56 (min 56) failed=0",
+   "denominator": "56 of 56 tests in test_fwd1_runner.py passed (50 at the base plus 6 new); one earlier test changed and listed: test_issued_id_refused_by_report_route_is_branch_b",
+   "status": "PASS",
+   "expect": "RN-REGRESS-OK"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "five in-place mutants of fwd1_run.py (restored byte-identical, compared with the saved bytes): (1) the left-in-place branch bypassed; (2) the --finish-cleanup too-early guard removed; (3) ROW_LIFETIME_SECONDS halved; (4) the absent row treated as present; (5) job_last_read never written",
+   "expected": "each mutant fails at least one test",
+   "observed": "(1) test_issued_id_refused_by_report_route_is_branch_b; (2) test_finish_cleanup_refuses_before_the_two_hours; (3) test_issued_id_refused_by_report_route_is_branch_b; (4) test_finish_cleanup_deletes_and_updates_the_same_trace; (5) test_never_polls_the_sent_token (pytest -x, first failure only)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the tests run on a fake AWS, HTTP, clock and sleep layer; the full file and both r3 checks were run twice",
+   "observed": "56 passed both runs; RN-ROW-OK and RN-REGRESS-OK each rc=0 both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a live run of fwd1_run.py and a live --finish-cleanup against AWS",
+   "reason": "the order forbids any AWS or network call; behaviour is shown against the fake layer only"
+  }
+ ],
+ "surprises": [
+  "TCKT_VNEXT-D2-W8-S11",
+  "TCKT_VNEXT-D2-W8-S12",
+  "TCKT_VNEXT-D2-W8-S13"
+ ],
+ "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~8/TCKT_VNEXT.TO-R3-rn1.runner-row-outlives-the-token-two-hours.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R3_CHECKS/r3_checks.py rn-row",
+   "result": "RN-ROW-OK passed=6 of 6"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R3_CHECKS/r3_checks.py rn-regress",
+   "result": "RN-REGRESS-OK passed=56 (min 56) failed=0"
+  }
+ ]
+}
