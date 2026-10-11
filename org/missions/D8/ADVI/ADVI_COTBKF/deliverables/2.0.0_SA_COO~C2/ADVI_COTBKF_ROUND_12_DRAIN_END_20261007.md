@@ -15,7 +15,7 @@ monthly grade) stay gated on MDPF_SECHIST's first announced price load.
 (0.09 to 1.014) the rebuild holds and the 2026-06-23 snapshot does not list. On the snapshot's own pairs, the rebuild equals 381 of 381
 (the crosswalk's basis). Whether the fractions are residues of a share-class or reinvestment the snapshot rounds away is for the L9 read.
 
-**For L9 (CB12l1-AC3):** one account's daily holdings read across its span against its transactions. A ready account: D49141617, which the
+**For L9 (CB12l1-AC3):** one account's daily holdings read across its span against its transactions. A ready account: acct#0e4ff3a3, which the
 FWD-1 re-trace (D2-S22) already reads row by row, 2016-01-25 to 2026-06-22.
 
 ## Rows

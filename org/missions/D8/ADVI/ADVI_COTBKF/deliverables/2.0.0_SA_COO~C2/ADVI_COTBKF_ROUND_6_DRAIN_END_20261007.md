@@ -27,8 +27,8 @@ Reader census before each: 0 of 135 estate chains, and only the script and its t
 
 **CB4d5-AC3** (round 4, owed at the apply): one statement and one tax form found by account and date and opened. Found from
 `documents.parquet` and fetched from the applied keys, kept device-local at `.scratch/advi_cotbkf/cvo_open/` on dell2:
-- `STMT_B3S-605713_2025-06-30.pdf`: 53,495 B, `%PDF-`, 19 page objects; key `.../doc_type=STMT/STMT20250704081541182579d5-e297-47e6-972c-a1895d2f8fa1_fbd264aa.pdf`
-- `TXRP_B3S-605598_2025-02-09.pdf`: 25,223 B, `%PDF-`, 5 page objects; key `.../doc_type=TXRP/TXRP2025020908353833d06f49-219b-4854-8757-7f9d8b55cf1f_855303e8.pdf`
+- `STMT_acct#6a7d29ca_2025-06-30.pdf`: 53,495 B, `%PDF-`, 19 page objects; key `.../doc_type=STMT/STMT20250704081541182579d5-e297-47e6-972c-a1895d2f8fa1_fbd264aa.pdf`
+- `TXRP_acct#d0662be7_2025-02-09.pdf`: 25,223 B, `%PDF-`, 5 page objects; key `.../doc_type=TXRP/TXRP2025020908353833d06f49-219b-4854-8757-7f9d8b55cf1f_855303e8.pdf`
 This seat could not render them (no poppler on dell2); reading their content is the grade.
 
 ## Rows filed since the round-5 packet
