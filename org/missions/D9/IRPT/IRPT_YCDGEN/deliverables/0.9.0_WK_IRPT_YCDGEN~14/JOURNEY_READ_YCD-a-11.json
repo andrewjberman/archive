@@ -1,0 +1,822 @@
+{
+ "head": "54683e95a48b61956c88e9dcd60a5354cd6532a9",
+ "portal_head": "dbeb6764eaa688230f44cfcc1763bd73db6e1142",
+ "hops": [
+  {
+   "n": 1,
+   "name": "Analysis tab, page 1: Select the portfolio (Client card or Prospect card)",
+   "refs": [
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx",
+     "line": 235
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx",
+     "line": 307
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx",
+     "line": 340
+    }
+   ],
+   "finding": "The tab opens on page 1 with two cards. The Client card is enabled only when the header holds an accepted client (AnalysisTab.tsx:316); the Prospect card is always enabled. Pressing a card sets the page to the client composer (2) or the prospect upload ('prospect'). For Andrew (an Opal-internal principal) the choice is his own at the sitting; this read traces both branches and marks a row on_path YES when it sits on either."
+  },
+  {
+   "n": 2,
+   "name": "The composer and the portfolio basis: the Prospect upload branch, and the picked-client branch",
+   "refs": [
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx",
+     "line": 133
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx",
+     "line": 157
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/stagedProspect.ts",
+     "line": 159
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/GenerateComposer.tsx",
+     "line": 165
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/GenerateComposer.tsx",
+     "line": 209
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/index.tsx",
+     "line": 153
+    }
+   ],
+   "finding": "UPLOAD branch: for an internal principal the card shows a firm select and sends the CARD's firm as selected_tenant; with no firm chosen it sends nothing and says so in words (stagedProspect.ts:159-162, ProspectComposer.tsx:268, 312, 434, 578). Andrew must name Cottonwood there. PICKED-CLIENT branch: the composer takes the header's client and accounts; it refuses to read the catalogue or submit with no firm tenant (GenerateComposer.tsx:165-197), the tenant coming from selectedTenantFor (index.tsx:153-164); but its snapshot id is the browser-built source_set_revision join (GenerateComposer.tsx:209-211, adapt.ts:1121), not the server's cst_ id, so this branch cannot submit (row S13)."
+  },
+  {
+   "n": 3,
+   "name": "The request the browser sends",
+   "refs": [
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/prospect.ts",
+     "line": 139
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/stagedProspect.ts",
+     "line": 171
+    },
+    {
+     "path": "portal/src/api/endpoints/investor-reporting.ts",
+     "line": 1325
+    },
+    {
+     "path": "portal/src/api/endpoints/investor-reporting.ts",
+     "line": 1100
+    }
+   ],
+   "finding": "Upload: POST /analysis/inputs with the file base64 and ?selected_tenant=<firm> (investor-reporting.ts:1100-1103). Generate: POST /analysis with {request_id, input_id, client_id null, account_ids [], snapshot_id null, variant, comparison_keys, report_title, prepared_for} and ?selected_tenant=<firm> (prospect.ts:139-155, stagedProspect.ts:171-174, investor-reporting.ts:1325-1336). No producer flag is sent; nothing the browser sends selects the producer (C-SWITCH)."
+  },
+  {
+   "n": 4,
+   "name": "The route and its authorizer (the verified edge headers, then the firm binding)",
+   "refs": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/entry.py",
+     "line": 147
+    },
+    {
+     "path": "docs/contracts/investor-reporting/v1/routes.json",
+     "line": 71
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/_authz/served.py",
+     "line": 307
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/_authz/served.py",
+     "line": 1177
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/_authz/served.py",
+     "line": 1207
+    }
+   ],
+   "finding": "POST /api/scoped/investor-reporting/analysis is served by irpt-ycharts-generate (entry.py:147-152, routes.json:71-79). Entry.handle requires the verified firm header (served.py:1177-1180); Andrew is an internal subject (x-firm-id opal-capital, served.py:307-319), so a selected_tenant different from the verified firm is admitted if it is in the registry and in his profile row's allowed list (served.py:1207-1230). Without selected_tenant the firm stays opal-capital, which is unmapped (row S12's origin). With Cottonwood chosen the request runs bound to the cottonwood tenant."
+  },
+  {
+   "n": 5,
+   "name": "Owner resolution for an internal principal (who owns the request)",
+   "refs": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/_authz/served.py",
+     "line": 1047
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/_scope/interactive_access.py",
+     "line": 78
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/_scope/interactive_access.py",
+     "line": 123
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/prospect_submission.py",
+     "line": 72
+    }
+   ],
+   "finding": "For an internal subject the owner is built from his own identity at the input's firm: firm_id cottonwood, principal_id andrew@opalinvest.com, principal_class OPAL_GLOBAL (interactive_access.py:78-137, prospect_submission.py:72-73). An on-behalf advisor must be named only if the tenant is in the filer's allowedFirmIds (served.py:1056-1066); whether Andrew's own profile row lists cottonwood is a live data read this read did not make."
+  },
+  {
+   "n": 6,
+   "name": "Acceptance: frozen composition, retained input, atomic accept, queue send",
+   "refs": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/entry.py",
+     "line": 97
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py",
+     "line": 47
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/submission_service.py",
+     "line": 103
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/submission_service.py",
+     "line": 160
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py",
+     "line": 91
+    }
+   ],
+   "finding": "submit_analysis validates the closed public body (submission.py:47-90), then SubmissionService.submit resolves the owner, re-authorizes, freezes the composition as a retained REQUEST_COMPOSITION, accepts it with acting_principal_id, then dispatches one queue message and answers {identity, stage RECEIVED} (submission_service.py:103-167). A failed send leaves the accepted record for recovery (dispatch_pending)."
+  },
+  {
+   "n": 7,
+   "name": "The resident worker polls the queue and re-checks the acting principal",
+   "refs": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 799
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 625
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 637
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/current_authority.py",
+     "line": 89
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 858
+    }
+   ],
+   "finding": "poll_once receives one message at 900 s visibility, execute() rebuilds the closed message from the accepted record and re-grades the owner's current profile row (current_authority.decide: active, home firm, created before acceptance, allowedFirmIds), so an OPAL_GLOBAL Andrew is allowed for cottonwood unless his row lists other firms. The message is deleted only on READY or ATTENTION (resident_worker.py:858-859); any exception leaves it to redeliver, five receives, then the dead-letter queue, with no record written for the generate kind (rows S49, S45)."
+  },
+  {
+   "n": 8,
+   "name": "The resident worker's choice of producer (producer_for, the allow list)",
+   "refs": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 121
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 128
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 686
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/reports/resident_installed.py",
+     "line": 239
+    }
+   ],
+   "finding": "producer_for reads the accepted record's owner.principal_id against OPAL_PRODUCER_PRINCIPALS = ('andrew@opalinvest.com',) (resident_worker.py:121-133). Andrew's owner principal_id is his sign-in (hop 5), so his job is OPAL; any other principal takes the YCharts path. The Opal stores are built only for a listed principal (resident_installed.py:239-251), including the firm's research-principal S3 client, which assumes irpt-<firm>-ycharts-research-role (runner.py:479-493): present for cottonwood, absent for other firms per row D2-S19 (not re-read live)."
+  },
+  {
+   "n": 9,
+   "name": "The Opal producer: read holdings, classify, compute, render, record",
+   "refs": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+     "line": 272
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+     "line": 211
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py",
+     "line": 443
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+     "line": 1053
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+     "line": 297
+    }
+   ],
+   "finding": "produce() reads the frozen holdings from the firm store, reads classifications from the one table, computes the three classified elements and marks every price-based, builder-only and vendor-call element NOT_IN_THIS_VERSION (C-V1), renders the Opal-branded PDF with no vendor wording (layout_overview.py:961-962, 1053-1054; Data: Opal Capital), builds run.json and the AnalysisReport v2 document (opal_producer.py:272-339). No vendor call is made. inputs_as_of carries the date the run read each input, not each input's own date (row W1-S10)."
+  },
+  {
+   "n": 10,
+   "name": "Retention and publish: PDF artifact, document spill, checkpoint, READY",
+   "refs": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 449
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 478
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/publication_worker.py",
+     "line": 55
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/publication_worker.py",
+     "line": 96
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/publisher.py",
+     "line": 167
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+     "line": 305
+    }
+   ],
+   "finding": "run_opal retains the PDF as a YCHARTS_OPAL_REPORT artifact, checkpoints it, retains the whole Opal document as a json artifact on every Opal checkpoint (publication_worker.py:96-99; row W3-S13), publishes through the publisher's Opal branch, marks READY and sends I3 (resident_worker.py:449-490). run.json's report.key names the layout's own S3 address although the PDF went to the artifact (opal_producer.py:305-313; row W3-S16)."
+  },
+  {
+   "n": 11,
+   "name": "The status read and the sections read",
+   "refs": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ops/owned_status.py",
+     "line": 12
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ops/entry.py",
+     "line": 201
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ops/entry.py",
+     "line": 218
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ops/owned_report.py",
+     "line": 83
+    },
+    {
+     "path": "docs/contracts/investor-reporting/v1/responses/analysis-report.response.schema.json",
+     "line": 52
+    }
+   ],
+   "finding": "GET /status/{jobId} (irpt-status) maps the durable phase to a public state; READY becomes READY only when the date opt-in header is sent and the retained input's dates derive (owned_status.py:43-58, prospect_dates.py:30-65 now has an OPAL_ENGINE branch). GET /analysis/{jobId}/sections answers provider, request_ref, sections, computation_validation, retained_ref for an Opal document (owned_report.py:96-100). The published response schema still requires extraction_validation and forbids those members (analysis-report.response.schema.json:48-52; rows W2-S13, W6-S4): the answer is served outside the published contract."
+  },
+  {
+   "n": 12,
+   "name": "The page that opens the report: Your analysis requests, the opened request, Report sections",
+   "refs": [
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx",
+     "line": 397
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx",
+     "line": 326
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx",
+     "line": 392
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx",
+     "line": 151
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/NativeSections.tsx",
+     "line": 105
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/contracts/adapt.ts",
+     "line": 1412
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx",
+     "line": 584
+    }
+   ],
+   "finding": "After Generate the report is opened from OwnedRequestHistory, a dialog that reads the request, then the sections (OwnedRequestHistory.tsx:326-339) and shows RetainedSections (:407). That list is mounted only when the header holds a client (AnalysisTab.tsx:397). RetainedSections calls SectionBlock without the Opal flag and reads a slice that carries no provider (adapt.ts:1412-1419), so an Opal report prints 'Vendor attribution:' per section and 'Extraction validation' under Technical details (OwnedRequestHistory.tsx:155-165, NativeSections.tsx:105-190). The Opal-aware NativeSections is rendered only by RequestList (a list the live client does not serve). The Prospect composer's own inline status mounts without selected_tenant (ProspectComposer.tsx:584). Filed as rows D2-W14-S1 and D2-W14-S2."
+  }
+ ],
+ "rows": [
+  {
+   "id": "IRPT_YCDGEN-D2-S45",
+   "state": "OPEN",
+   "on_path": "NO",
+   "needs_live_read": true,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 794
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 859
+    }
+   ],
+   "note": "ARMED redrive hazard on the 8 dead letters in irpt-generation-dlq: a live queue fact. Andrew's job is a new message on irpt-generation, not one of the 8; the hazard bites only if someone redrives, and a redriven old non-Andrew request would take the YCharts path (producer_for, resident_worker.py:128-133). Read that would settle it: the DLQ inventory (already with the laptop executor) and the queue depth."
+  },
+  {
+   "id": "IRPT_YCDGEN-D2-S49",
+   "state": "OPEN",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 858
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 822
+    }
+   ],
+   "note": "Still true at HEAD: a generate-kind message that raises is never deleted and no code on the generate branch writes a dead-letter record or reason (the exhaustion handler _end_exhausted_resolve exists only for resolve_upload, resident_worker.py:843-849, 927). On Andrew's path only on the failure branch: if his job fails every delivery it reads RECEIVED with no reason."
+  },
+  {
+   "id": "IRPT_YCDGEN-D2-S46",
+   "state": "OPEN",
+   "on_path": "NO",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/live_walk/resident_package_gate.py",
+     "line": 110
+    }
+   ],
+   "note": "Line 110 is unchanged: opal_source = provenance.get('opal_map_source') if base_pin else None. A build-time gate on the resident package; Andrew's submission runs on the already-installed root, not through the gate."
+  },
+  {
+   "id": "IRPT_YCDGEN-D2-S47",
+   "state": "OPEN",
+   "on_path": "NO",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/st30_release/install_st30.sh",
+     "line": 7
+    }
+   ],
+   "note": "Line 7 still reads VER=__ST30_SCRIPT_VERSION__. The install script is run by the applier, never by a submission."
+  },
+  {
+   "id": "IRPT_YCDGEN-S9",
+   "state": "OPEN",
+   "on_path": "NO",
+   "needs_live_read": true,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+     "line": 66
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+     "line": 767
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+     "line": 1108
+    }
+   ],
+   "note": "The FRED risk-free object's age is a served S3 fact (read the object's last write and last observation). Not on Andrew's path: with pricing=False no benchmark or risk-free series is read (layout_overview.py:767, 1108) and C-METHOD bars the FRED object while this row is open."
+  },
+  {
+   "id": "IRPT_YCDGEN-W2-S12",
+   "state": "OPEN",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+     "line": 323
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/_contracts/AnalysisReport.v2.schema.json",
+     "line": 513
+    }
+   ],
+   "note": "The four choices (nullability, inputs_as_of shape, coverage type, VALUE-branch reason) are what Andrew's document is written with (opal_producer.py:323-336); the remedy is a CTO confirmation, a ruling record this read did not search for. Not blocking his run."
+  },
+  {
+   "id": "IRPT_YCDGEN-W1-S4",
+   "state": "MET",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+     "line": 102
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+     "line": 139
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer.py",
+     "line": 348
+    }
+   ],
+   "note": "Every layout reason now passes closed_reason() before it is written (NOT_HELD:* to NOT_IN_THIS_VERSION or INPUT_MISSING:<name>, OUTSIDE_TIME_BUDGET to NOT_IN_THIS_VERSION, others to INPUT_MISSING:<prefix>), and a vendor-call element with no answer is NOT_IN_THIS_VERSION (opal_producer.py:139-142). test_opal_producer.py ran here: 20 passed, including test_closed_reason_maps_every_layout_word_into_the_closed_set."
+  },
+  {
+   "id": "IRPT_YCDGEN-W1-S8",
+   "state": "MET",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+     "line": 961
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+     "line": 1053
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+     "line": 1092
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_overview.py",
+     "line": 845
+    }
+   ],
+   "note": "Confirms the issuer's read. With pricing=False the footer is 'Data: Opal Capital' (layout_overview.py:69, 1092, 1130), builder-only, call-sourced and outside-budget elements print 'Not available in this version.' (1053-1054), and the reason line names no vendor (961-962). fc018ca6c7 is an ancestor of HEAD. test_opal_page_no_vendor_wording ran here: 1 passed."
+  },
+  {
+   "id": "IRPT_YCDGEN-W1-S9",
+   "state": "OPEN",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+     "line": 212
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+     "line": 67
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+     "line": 149
+    }
+   ],
+   "note": "Two of the three parts are met: the closed set is reached through closed_reason (opal_producer.py:102-121) and table values are written as a JSON string (opal_producer.py:149-154). The first part still reads true: layout_overview.py holds only the method NAMES (CLASSIFY_METHODS, line 212); the three classified elements are built in the producer (opal_producer.py:67-88), not carried by the layout. Not blocking: Andrew's run gets the elements from the producer."
+  },
+  {
+   "id": "IRPT_YCDGEN-W1-S10",
+   "state": "OPEN",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+     "line": 297
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+     "line": 299
+    }
+   ],
+   "note": "Still true: inputs_as_of = {name: run_date} and run.json inputs carry as_of_basis READ_DATE (opal_producer.py:297-299)."
+  },
+  {
+   "id": "IRPT_YCDGEN-W2-S13",
+   "state": "OPEN",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ops/owned_report.py",
+     "line": 98
+    },
+    {
+     "path": "docs/contracts/investor-reporting/v1/responses/analysis-report.response.schema.json",
+     "line": 52
+    }
+   ],
+   "note": "Still true: the sections answer for an Opal document carries provider, computation_validation and retained_ref (owned_report.py:96-100) while the published response schema requires extraction_validation and has additionalProperties false on data (schema lines 48-52). The portal reads the Opal slice (responses.ts:166-170), so the page is not blocked by it."
+  },
+  {
+   "id": "IRPT_YCDGEN-W6-S4",
+   "state": "OPEN",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "docs/contracts/investor-reporting/v1/responses/analysis-report.response.schema.json",
+     "line": 48
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ops/owned_report.py",
+     "line": 98
+    }
+   ],
+   "note": "Same fact as W2-S13 on the document schema side: data requires request_ref, sections, extraction_validation (schema line 48-52). No runtime check of the response against this schema was found on the serving path (only contract tests read it)."
+  },
+  {
+   "id": "IRPT_YCDGEN-W3-S12",
+   "state": "MET",
+   "on_path": "NO",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_installed.py",
+     "line": 83
+    }
+   ],
+   "note": "Confirms the issuer's read. python -m pytest reports/tests/test_resident_installed.py run alone: 19 passed, including test_factory_returns_exactly_the_resident_shape_without_any_aws_call (line 83). A test, not a hop."
+  },
+  {
+   "id": "IRPT_YCDGEN-W3-S18",
+   "state": "MET",
+   "on_path": "NO",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+     "line": 20
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_installed.py",
+     "line": 83
+    }
+   ],
+   "note": "Confirms the issuer's read. resident_worker.py:20 still imports extract, but each of the 16 files under reports/tests/ ran alone here and passed (the file with the row's test: 19 passed), so the failure the row states no longer occurs."
+  },
+  {
+   "id": "IRPT_YCDGEN-W2-S14",
+   "state": "MET",
+   "on_path": "NO",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/NativeSections.tsx",
+     "line": 87
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/NativeSections.tsx",
+     "line": 199
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/contracts/index.ts",
+     "line": 695
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/contracts/wire/AnalysisReport.ts",
+     "line": 123
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/contracts/wire/responses.ts",
+     "line": 166
+    }
+   ],
+   "note": "NativeSections now has the Opal form (isOpalReport, Report sections heading, computation validation, method and coverage, no vendor attribution; NativeSections.tsx:40-49, 199-230) and the typed contracts carry provider and the Opal wire (index.ts:691-695, wire/AnalysisReport.ts:123-149, responses.ts:166-170). Not on Andrew's path: the page he opens uses RetainedSections, which does not pass the Opal flag (new row D2-W14-S1)."
+  },
+  {
+   "id": "IRPT_YCDGEN-W4-S8",
+   "state": "OPEN",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "portal/src/pages/InvestorReporting/contracts/adapt.ts",
+     "line": 1009
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/contracts/adapt.ts",
+     "line": 1412
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/NativeSections.tsx",
+     "line": 87
+    }
+   ],
+   "note": "Still true: adaptOpalAnalysisReport (adapt.ts:1009-1033) and adaptAnalysisReportSlice (1412-1419) set no provider on the view; NativeSections decides from sections (NativeSections.tsx:87-89). On Andrew's path the slice view has no provider at all, which is why RetainedSections cannot tell."
+  },
+  {
+   "id": "IRPT_YCDGEN-W3-S13",
+   "state": "OPEN",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/publication_worker.py",
+     "line": 96
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/publisher.py",
+     "line": 43
+    }
+   ],
+   "note": "Still true: for kind OPAL the checkpoint always retains the document as an EXTRACTION_EVIDENCE artifact (publication_worker.py:96-99, publisher.py:43-44); the design is stated (publisher.py:13) but not its cost. Every Opal job of Andrew's passes through it. Not blocking."
+  },
+  {
+   "id": "IRPT_YCDGEN-W3-S16",
+   "state": "OPEN",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+     "line": 305
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+     "line": 309
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/reports/resident_installed.py",
+     "line": 248
+    }
+   ],
+   "note": "Still true: with artifacts injected (resident_installed.py:248) the PDF goes to the retained artifact (opal_producer.py:309-313) while run.json report.key stays the layout's address (305-307)."
+  },
+  {
+   "id": "IRPT_YCDGEN-S12",
+   "state": "MET",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/stagedProspect.ts",
+     "line": 159
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx",
+     "line": 268
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx",
+     "line": 578
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/GenerateComposer.tsx",
+     "line": 195
+    }
+   ],
+   "note": "No longer true in the browser: an internal principal with no firm chosen sends nothing and sees 'Choose the firm this portfolio is for before you review it.' (stagedProspect.ts:145, 159-162; the buttons are disabled at ProspectComposer.tsx:434, 578), and the client composer returns NO_FIRM_MESSAGE (GenerateComposer.tsx:175, 195). Code-read only; the page was not rendered."
+  },
+  {
+   "id": "IRPT_YCDGEN-W2-S16",
+   "state": "MET",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "portal/src/pages/InvestorReporting/index.tsx",
+     "line": 153
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/index.tsx",
+     "line": 261
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/GenerateComposer.tsx",
+     "line": 165
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/GenerateComposer.tsx",
+     "line": 195
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx",
+     "line": 277
+    }
+   ],
+   "note": "No longer true: selectedTenantFor reads the global firm's tenant first (index.tsx:153-164) and feeds the selected scope ref (:259-262); the composer reads and submits nothing when the tenant is missing (GenerateComposer.tsx:165-197, 267). On the picked-client branch only."
+  },
+  {
+   "id": "IRPT_YCDGEN-S13",
+   "state": "OPEN",
+   "on_path": "YES",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "portal/src/pages/InvestorReporting/tabs/analysis/GenerateComposer.tsx",
+     "line": 209
+    },
+    {
+     "path": "portal/src/pages/InvestorReporting/contracts/adapt.ts",
+     "line": 1121
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/_scope/custody_binding.py",
+     "line": 148
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py",
+     "line": 44
+    }
+   ],
+   "note": "Still true on the picked-client branch: the browser snapshot id is the source:revision join with commas (adapt.ts:1121, GenerateComposer.tsx:209-211), which the identifier rule refuses (submission.py:44, 86), and the server needs cst_<64 hex> (custody_binding.py:148, accepted_custody.py:106); no cst_ string exists in the portal source. Not on the Prospect upload branch (input_id, snapshot_id null)."
+  },
+  {
+   "id": "IRPT_YCDGEN-W3-S21",
+   "state": "OPEN",
+   "on_path": "NO",
+   "needs_live_read": true,
+   "evidence": [
+    {
+     "path": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-17.regenerated.test.ts",
+     "line": 75
+    }
+   ],
+   "note": "Settling it means running the portal test suite (which this order forbids, since a run may modify tracked portal files) and reading git status after. The portal checkout read here is clean (git status empty at the read). A test-hygiene row; no part of a submission."
+  },
+  {
+   "id": "IRPT_YCDGEN-D2-W7-S2",
+   "state": "OPEN",
+   "on_path": "NO",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "deck_generation/scripts/03_extract_brand_spec.py",
+     "line": 11
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/brand/brand.json",
+     "line": 234
+    }
+   ],
+   "note": "Still true: the generator reads logo variants from the gitignored logo_package (03_extract_brand_spec.py:11, 170-211) and the packaged brand.json carries formats {} and preferred null (brand.json:234-246). The Opal page reads colors and typography only (no variants reference in layout_overview.py), so the block is read-through but unused."
+  },
+  {
+   "id": "IRPT_YCDGEN-D2-S4",
+   "state": "OPEN",
+   "on_path": "NOT_DETERMINED",
+   "needs_live_read": true,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/_authz/served.py",
+     "line": 1056
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/_authz/served.py",
+     "line": 1069
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/_scope/prospect.py",
+     "line": 34
+    }
+   ],
+   "note": "An on-behalf upload needs a named advisor only when the tenant is in the filer's allowedFirmIds (served.py:1063-1066); otherwise the filer's own owner is used (1066). Andrew's own profile row (opal-users-v2, allowedFirmIds) was not read: if it is absent he is not on-behalf and this row is off his path; if it lists cottonwood he cannot upload (no cottonwood advisor row, per the row). Read that settles it: his user row's allowedFirmIds."
+  },
+  {
+   "id": "IRPT_YCDGEN-D2-S19",
+   "state": "OPEN",
+   "on_path": "NO",
+   "needs_live_read": true,
+   "evidence": [
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py",
+     "line": 479
+    },
+    {
+     "path": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py",
+     "line": 488
+    }
+   ],
+   "note": "The research role is minted by name from the firm (runner.py:479-493); whether irpt-<firm>-ycharts-research-role exists for each firm the policy row names is an IAM fact: read iam get-role and the runner role's AssumeRole statement. Off Andrew's path for a Cottonwood run: the row says the cottonwood role exists."
+  },
+  {
+   "id": "IRPT_YCDGEN-D2-S25",
+   "state": "OPEN",
+   "on_path": "NO",
+   "needs_live_read": false,
+   "evidence": [
+    {
+     "path": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+     "line": 3025
+    }
+   ],
+   "note": "An instrument and wording row about the seats' served-read window ledgers (updatedAt continuity). Nothing in a submission reads updatedAt for a decision: current_authority.decide does not use it (current_authority.py:89-143). The ledgers were not re-read, so the row stays OPEN."
+  }
+ ]
+}
