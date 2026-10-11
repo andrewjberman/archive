@@ -4,8 +4,9 @@
 `ROUND44_GRADED_READS_PACKET.md`'s evidence by reference (unchanged for FWD-15, 18, 21) and adds what round 45 read. Paths are relative
 to `org/missions/D5/AMGT/AMGT_CORPUS/`; `C1/` = `deliverables/2.0.0_SA_COO~C1/`.
 
-**State of the served page:** the live `opal-amgt-scoped-api` is `l8egBo/rf..` (applied 2026-10-11 04:56:11Z), serving dossiers at /11.
-Status of this packet: **PARTIAL.** au-8 is read (below); au-7 (the IMB LN walk) waits on the walk with au-3.
+**State of the served page:** `opal-amgt-scoped-api` was `l8egBo/rf..` from 2026-10-11 04:56:11Z, serving dossiers at /11.
+Status of this packet: **PARTIAL.** au-8, au-5, au-3 and au-4 are read (below); au-7 (the IMB LN Thesis-tab walk) is owed. Since 09:26:42Z the live
+function is `SOzAz9/gf..` (AMGT_RESAPP qq-5's redeploy), not `l8egBo/rf..`; the au-3/au-4 read below was taken on it.
 
 | outcome | missing read (round 44 packet) | state | evidence |
 |---|---|---|---|
@@ -44,7 +45,38 @@ against `roster.derive_roster(...)` of the persisted filing, by content, and eac
 `at5 unchanged 2/2`. **Limit, stated:** `scoped_amgt` ran as the local module at this checkout's HEAD against the store, not the live
 function. The live function's build is the pin a943b1b412; this read does not exercise it. The outcome is the CTO's to grade.
 
+
+## FWD-12 and FWD-20 -- au-3 and au-4 (the rendered rows)
+
+`checks/round45/au3_capture.py` read the LIVE `/thesis` payload of all 95 names (95 ok, 0 failed) from `opal-amgt-scoped-api`
+`SOzAz9/gfKE++UOSB8qWSDJvhOsDQMoE+DDPzaFbeSI=` (LastModified 2026-10-11T09:26:42Z). `checks/round45/au3_rendered_rows.cjs` loaded the REAL
+`modelSheet.ts` and `figureIdentity.ts` from portal `origin/DEV` `ff418947` (which carries the at-2 build `26f621d5`) and called
+`buildModelSheet` with exactly the seven arguments `ModelTab.tsx:542-549` passes. **It is the sheet builder the page calls on served
+data, not a browser DOM walk;** no React render ran. Evidence: `C1/evidence/r45_au3_au4_rendered_rows_20261011.txt` (per name: class,
+workbook, sheet, rendered-vs-team result, `model_rows_beside` count).
+
+| read | result |
+|---|---|
+| au-3: classes | own_new 21, own_model 11, master 0, master_absent 63; sum 95 of 95 served names |
+| au-3: rendered rows vs the team sheet | 32 of 32 names with team rows: the first rendered group's labels equal the team sheet's rows, in order and labels |
+| au-3: the 63 master_absent names | no team rows; the base rows render, with the served reason (the master template is not in the library, at-4) |
+| au-4: names with a model block | 95 of 95 |
+| au-4: census of rendered rows | shown 5008, refused 26, absent 989, **unmapped 3210**, of 9233 |
+| au-4: absent / unmapped reasons | 0 rows missing a reason or carrying "ABSENT", "REFUSED --" or "not read" |
+| controls | c1 mutant (first team row dropped) FIRED-AS-EXPECTED; c2 no team rows served: build equals the base build, 63 of 63 |
+
+**What this does and does not say.** FWD-12's rendered half holds for the 32 names that have an own workbook. FWD-12's master class is
+empty by measurement (63 names `master_absent`): the known gap. **FWD-20's "unmapped reads 0" does NOT hold on the page as built:**
+all 3210 unmapped rows are team-sheet labels with no field behind them (they read the team-row sentence, in words), across 236
+distinct labels, many of them the sheet's own header and override rows (Year, Financial Summary, FE_ESTIMATE, BEST_FPERIOD_OVERRIDE,
+EQY_FUND_YEAR). FWD-12 "the team's rows" and FWD-20 "unmapped 0" conflict until those rows are mapped to fields or the row-label rule
+excludes non-line rows. Surprise row `AMGT_CORPUS-D1-S3` (OBSERVATION, INERT) carries it; the choice is an ENDPOINT-level call and is
+not cut here.
+
 ## Still owed in this packet
 
-FWD-10's IMB LN walk (au-7) and, for FWD-12 and FWD-20, the rendered reads (au-3, au-4): the DEV build is `ff418947`, which carries the
-at-2 build `26f621d5` (measured 2026-10-11).
+FWD-10's IMB LN Thesis-tab walk (au-7): NOT RUN. The `/ui-walk` walker can open a named name's Thesis tab (`--security`, `--window-press`),
+but it first ARMS an admin service account (a DynamoDB write to `opal-users-v2` and an SSM password), and the skill's own prerequisites
+name the laptop's AWS profile for that and say the Dells hold GetParameter only. Whether dell1's role can arm is UNREAD; the issuer did
+not try, and the walk is a development instrument, not acceptance evidence. The read is owed from a seat that can arm, or by a
+DOM read of the DEV build under a person's own session.
