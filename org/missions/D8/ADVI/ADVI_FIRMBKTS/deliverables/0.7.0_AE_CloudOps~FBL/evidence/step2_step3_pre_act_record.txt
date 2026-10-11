@@ -1,0 +1,22 @@
+ADVI_FIRMBKTS TO-FB-f-8 act 1 -- pre-act record, 0.7.0_AE_CloudOps~FBL, 2026-10-11 ~08:1xZ-08:3xZ (laptop, user/Andrew_Berman)
+IDENTITY: sts get-caller-identity -> arn:aws:iam::313476888478:user/Andrew_Berman (the only profile, [default]); groups AdministratorAccessOpalCapital.
+STEP 0b: simulate-principal-policy, ONE resource per call, 8 of 8 allowed:
+  lambda:UpdateFunctionCode, lambda:PublishVersion x {function:shared-advisor-router, :shared-advisor-router:*, function:shared-advisor-router-response, :shared-advisor-router-response:*}
+  positive control (separate call): lambda:GetFunctionConfiguration on shared-advisor-router -> allowed.
+STEP 0c: is-ancestor rc=0 for acf8a16706, d1fe697698, 30bdd99110, d30c5fe203; order file clean at HEAD, last commit 7bc01f770a (crossbox JSON carries no pin field).
+STEP 0: both index.mjs 0 bytes>127 (router 27515 B, guard 13979 B); built artifacts 0 bytes>127 (below).
+STEP 2 live pre-act reads: distribution EVTSA9VEHNZVH Deployed, ETag E1OAC26XEP0FDI; router v26 x5 (origin-request), guard v5 x5 (origin-response).
+  WAF_ACL_NAME=opal-cloudfront-protection WAF_ACL_ID=a09833c0-4043-49fc-a92c-0dcdeaff9abd LockToken=848a6d0b-d69f-40e0-876a-cfc0ce40b6b2 default=Allow; 6 rules: BlockedIPs(0,Block) RateLimitRule(1,Block) AuthLoginRateLimit(2,Block) ip-reputation(3,Count) common-rule-set(4,Count) known-bad-inputs(5,Count)
+  files: pre_get_distribution_config.json, pre_get_web_acl.json
+STEP 2 build (build-nodejs-lambda.sh portal-auth <fn>, bun, from box/laptop HEAD 18a2c76af8):
+  ROUTER_SHA256 = cOG/BuFhy9xcL7EF+4u5VexRZGjDdJq3h364PAPkYsw=  S3 VersionId rFzCqwaX6lC8KHZH0zPBiBpBXgPxxHLU  index.mjs 7509 B, bytes>127 = 0
+  GUARD_SHA256  = YIgGtFjZwFltdXbviIx5dOQbb6FsOAUtIB96caAI0xs=  S3 VersionId H8zfKrvXgbVifrAyEet4RClXGA0OSQFA  index.mjs 3538 B, bytes>127 = 0
+  (S3 head-object metadata content-sha256 equals the zip's own SHA-256 for both.)
+  Differs from the dell1 build (router DENFVwwc..., guard vLZcOM0N...): same byte lengths 7509 / 3538, the minifier chose different local identifier names (e.g. `var E=new Set` vs `var v=new Set`). Noted, not a gate.
+STEP 2a: state s3_object_version before the act = router NWJciPjHZ9WAwJzH2jNtipmj06usuqFg (v26), guard T39sO4P3JJT0ZMfr6MeZLYWNBHQ55Mk5 (v5): the dell1 pre-reconcile read. No refresh-only apply performed.
+STEP 3 plan (terraform 1.15.8, -out outside the repo): 74 resource_changes: 70 no-op, 4 update:
+  aws_cloudfront_distribution.portal (10 lambda_function_association lambda_arn values on ordered behaviors 1,2,3,15,26; no non-association attribute differs)
+  aws_lambda_function.shared_advisor_router[0] (s3_object_version -> rFzCq...; qualified_arn/version/last_modified known after apply)
+  aws_lambda_function.shared_advisor_router_response[0] (s3_object_version -> H8zfK...)
+  aws_wafv2_web_acl.opal_cloudfront_protection (3 managed_rule_group_statement.version attributes, rules 3,4,5; nothing else)
+  distribution NOT no-op, so the qualified_arn pin defect is absent. File: plan_portal-auth_untargeted.out
