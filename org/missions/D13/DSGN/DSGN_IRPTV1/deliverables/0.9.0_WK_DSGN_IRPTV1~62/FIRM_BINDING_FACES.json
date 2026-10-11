@@ -1,0 +1,61 @@
+{
+ "order": "DSGN_IRPTV1.TO-IV-e-112",
+ "worker": "0.9.0_WK_DSGN_IRPTV1~62",
+ "row": "DSGN_IRPTV1-D2-S22",
+ "reads": [
+  {
+   "route": "GET /api/scoped/investor-reporting/reporting/client/{client_id}/summary",
+   "reader": {"file": "portal/src/pages/InvestorReporting/dashboard/reportingRead.ts", "line": 85},
+   "called_from": "portal/src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx:628 (readClientSummaryAnswer, only for a client listing more than one account)",
+   "feeds_face": "Performance tab: the year-to-date line beside each account name in the Account picker (composePickerSuffixes -> AccountFilter accountSuffix)",
+   "on_refusal_before": "nothing: the answer becomes {kind:'absent', reason:'FIRM_BINDING'}, composePickerSuffixes returns undefined when no account is served, and the picker keeps its own figure ('YTD pending'); no sentence. Established by reading the code path to the JSX (ReportingTab.tsx:621-636 and :865; pickerSuffix.ts:88) and by the walk's faces 3 and 9, not by a rendered 'before' test.",
+   "on_refusal_after": "The firm this view is using does not match this client's firm, so the dashboard year-to-date line beside each account name is not shown. Choose the firm this client belongs to in the header's Firm control. (With a firm picked in the header the first words read 'The firm selected in the header'.) On the page's existing refusal component: status icon beside navy text, the code in a closed Details."
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/reporting/{account_id}/manifest",
+   "reader": {"file": "portal/src/pages/InvestorReporting/dashboard/reportingRead.ts", "line": 133},
+   "called_from": "portal/src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx:588 (loadDashboard -> readDashboard, the focused account and the background reads)",
+   "feeds_face": "Performance tab body: whether the account shows the dashboard figure (DashboardPerformance) or the tab's own PATH A report; also the focused account's picker line",
+   "on_refusal_before": "nothing about the refusal: the answer is {kind:'absent', reason:'FIRM_BINDING'}, the tab silently falls back to PATH A and shows that answer (a report, or its own OBJECT_NOT_COVERED words 'It becomes available once Opal Capital computes performance for this account', which names a different cause than the one served). Established by reading the code path to the JSX (ReportingTab.tsx:583-612, :743-772, :871-925), not by a rendered 'before' test.",
+   "on_refusal_after": "The firm this view is using does not match this client's firm, so this account's dashboard performance is not shown. Choose the firm this client belongs to in the header's Firm control. (With a firm picked: 'The firm selected in the header'. When the summary was refused too, one sentence names both: '... this account's dashboard performance and the year-to-date line beside each account name are not shown.') Shown above the body, which keeps whatever PATH A answered."
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/reporting/{account_id}/manifest (export preview)",
+   "reader": {"file": "portal/src/pages/InvestorReporting/dashboard/reportingRead.ts", "line": 133},
+   "called_from": "portal/src/pages/InvestorReporting/export/resolveBundle.ts:332 (readPathB -> readDashboard when no frozen version is named); answer used at :338-342",
+   "feeds_face": "Export preview of a Performance bundle for one account and window (dashboardPerformance, else the PATH A report)",
+   "on_refusal_before": "nothing: an absent answer leaves dashboardPerformance null and the preview resolves PATH A; no sentence. Read from resolveBundle.ts:337-342.",
+   "on_refusal_after": "Unchanged by this cell, and said here: the Export target for a dashboard account exists only after the tab holds a SERVED manifest for the same account and firm (ReportingTab.tsx:787-790), so a FIRM_BINDING refusal here needs the firm to change between the tab's read and the preview; where it occurs the preview falls back to PATH A as before and the Performance tab above carries the firm-binding sentence. Not given a second sentence."
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/reporting/{account_id}/series",
+   "reader": {"file": "portal/src/pages/InvestorReporting/dashboard/reportingRead.ts", "line": 143},
+   "called_from": "readDashboard (after a served manifest) and readFrozenSeries at reportingRead.ts:115 (export print on a render token, via resolveBundle.ts:332)",
+   "feeds_face": "Performance tab dashboard body (DashboardPerformance read) and the frozen export print",
+   "on_refusal_before": "not a FIRM_BINDING face: the series is requested only after the manifest was served for the same firm, and a refused series is already the contract's own refusal on the face (C-HONESTY, DashboardPerformance); the walk saw no refused series read.",
+   "on_refusal_after": "Unchanged: a series refused after a served manifest keeps the existing contract refusal on the face; a FIRM_BINDING on this route was not seen and is not worded by this cell."
+  }
+ ],
+ "firm_selected_known": "not known; the sentence branches on the page's own selected tenant (focusCtx.selectedTenant, ReportingTab.tsx:583): 'The firm selected in the header' when one is sent, 'The firm this view is using' when none is. The only cause stated is the served one (CONTRACT.md:69: the request's firm token does not match the verified binding).",
+ "test": {
+  "id": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-112.firm-binding-said-in-words.test.tsx > every arm holds",
+  "passes": true,
+  "arms": "(a) focused manifest FIRM_BINDING, firm selected; (b) summary FIRM_BINDING, no firm selected (the words do not claim a selected firm); (c) both; CONTROL (d) OBJECT_NOT_COVERED and a served manifest print no firm notice; the code FIRM_BINDING only inside the closed Details",
+  "mutant": {
+   "what": "FIRM_BINDING_REASON in ReportingTab.tsx changed to 'FIRM_BINDINGX' (committed first, reverted with git checkout)",
+   "failed": true,
+   "observed": "VERDICT: FIRM-BINDING-WORDS-FAIL ARM(a): the focused manifest refusal is not said in words; ARM(b) and ARM(c) likewise (1 pass 1 fail); restored: 2 pass"
+  }
+ },
+ "screenshots": ["firm-binding.performance.png"],
+ "screenshots_read": ["firm-binding.performance.png"],
+ "screenshot_notes": "Build via bun run build, then scripts/ui-smoke.mjs --dist dist --type 'Client search=Sample' --option 'Sample Household' with firm-binding.fixture.json (synthetic: the ~53 fixture plus one key answering every .../reporting/ URL, manifest and summary, with ok:false and public_reason_code FIRM_BINDING; FIXTURES-MATCH 6 of 6). Read: Performance tab, Firm control Global (All); the sentence 'The firm this view is using does not match this client's firm, so this account's dashboard performance and the year-to-date line beside each account name are not shown. Choose the firm this client belongs to in the header's Firm control.' sits between the period controls and the body: status icon beside navy text on a white hairline panel, no red block, no tint, Details closed (code hidden). dist removed afterwards. The picked-firm branch is held by the test, not by a screenshot.",
+ "product_files_changed": ["portal/src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx"],
+ "tests_added": ["portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-112.firm-binding-said-in-words.test.tsx"],
+ "lint_errors": 0,
+ "lint_warnings": {"base": 337, "after": 338},
+ "typecheck_errors": 0,
+ "suite_base": {"pass": 1169, "skip": 27, "fail": 0, "files": 382},
+ "suite_after": {"pass": 1171, "skip": 27, "fail": 0, "files": 383, "new_failing_ids": []},
+ "portal_commit": "b77e94dab937b8c12252558723933b4a5292f867"
+}
