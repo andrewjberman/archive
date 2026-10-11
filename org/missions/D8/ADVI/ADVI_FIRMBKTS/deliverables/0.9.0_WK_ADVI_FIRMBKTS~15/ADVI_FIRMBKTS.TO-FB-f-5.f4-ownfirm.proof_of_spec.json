@@ -1,0 +1,99 @@
+{
+ "schema_version": "1.0",
+ "genre": "BUILD",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-f-5",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-5.f4-ownfirm.md",
+  "group": "OTHER",
+  "vintage_commit": "576e574de4"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~15",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R3.md",
+  "vintage_commit": "576e574de4",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-5.f4-ownfirm.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~15/F4_OWNFIRM_EVIDENCE.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "SSM command d1841aa3-50a6-409c-876e-af595954f53f on i-0167fd745ad906a66, status Success, ResponseCode 0; caller arn:aws:sts::313476888478:assumed-role/irpt-cot-ycharts-research-role/fb-r3-5-ownfirm; OWN 431 bytes; OUT AccessDenied (identity side); INF AccessDenied (explicit deny in resource-based policy)",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "cd /c/dev/wk-firmbkts-15 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_f4.py --arms ownfirm --evidence org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~15/F4_OWNFIRM_EVIDENCE.json; echo \"exit=$?\" -- expect: ROUND 3 F4 OWNFIRM: 4 of 4 arms",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-15 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_f4.py --arms ownfirm --evidence org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~15/F4_OWNFIRM_EVIDENCE.json; echo \"exit=$?\"",
+   "expect": "ROUND 3 F4 OWNFIRM: 4 of 4 arms",
+   "output_evidence": "  caller=arn:aws:sts::313476888478:assumed-role/irpt-cot-ycharts-research-role/fb-r3-5-ownfirm\n  OWN: 431 \n  OUT:  An error occurred (AccessDenied) when calling the GetObject operation: User: arn:aws:sts::313476888478:assumed-role/irpt-cot-ycharts-research-role/fb-r3-5-ownfirm is not authorized to perform: s3:Get\n  INF:  An error occurred (AccessDenied) when calling the ListObjectsV2 operation: User: arn:aws:sts::313476888478:assumed-role/irpt-cot-ycharts-research-role/fb-r3-5-ownfirm is not authorized to perform: s3\nPASS O1 the command ran on a named SSM-managed runner and reports Status Success\nPASS O2 the principal that made the calls is an assumed *-cot-* role (its STS ARN is printed)\nPASS O3 the role's GetObject of its own-grant key in opal-data-cottonwood SUCCEEDED (a byte count is printed)\nPASS O4 the other firm's bucket refused the role by the fence's resource-policy deny, and an ungranted own-firm key was refused by the identity side, not by that deny\nROUND 3 F4 OWNFIRM: 4 of 4 arms\nexit=0",
+   "denominator": "4 of 4 arms PASS (O1-O4); 3 AWS calls in the evidence (OWN, OUT, INF) from 1 SSM command",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "cd /c/dev/wk-firmbkts-15 && timeout 90 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round2/checks/r2_f4.py --arms positive; echo \"exit=$?\" -- expect: ROUND 2 F4 POSITIVE: 3 of 3 arms",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-15 && timeout 90 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round2/checks/r2_f4.py --arms positive; echo \"exit=$?\"",
+   "expect": "ROUND 2 F4 POSITIVE: 3 of 3 arms",
+   "output_evidence": "  caller: arn:aws:iam::313476888478:user/cloudops-dell1-agent-user\n  opal-data-inflection: ListBucket KeyCount=1, GetBucketVersioning OK\n  opal-data-cottonwood: ListBucket KeyCount=1, GetBucketVersioning OK\n  opal-data-inflection: versioning=Enabled public-access-block=True encryption=AES256\n  opal-data-cottonwood: versioning=Enabled public-access-block=True encryption=AES256\n  opal-data-inflection: admit list 7 patterns; own firm glob role/*-inf-* present=True; other firm glob absent=True; caller named=True  (POLICY TEXT, not an exercised refusal)\n  opal-data-cottonwood: admit list 7 patterns; own firm glob role/*-cot-* present=True; other firm glob absent=True; caller named=True  (POLICY TEXT, not an exercised refusal)\nPASS P1 the caller (an identity this estate holds, ARN printed above) performs ListBucket and GetBucketVersioning on each of the two buckets and succeeds\nPASS P2 each bucket's versioning is Enabled, all four public-access blocks are on and default encryption is set, read from the live bucket\nPASS P3 each bucket's admit list names its own firm glob, lacks the other firm's, and names the caller (which explains P1)\nROUND 2 F4 POSITIVE: 3 of 3 arms\nexit=0",
+   "denominator": "3 of 3 arms PASS (P1-P3); 2 buckets, live reads by the caller identity of this worker",
+   "status": "PASS",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the spec names no mutant for this cell; the grader's own difference controls (OUT: identity-side refusal, INF: fence-side refusal) are the discrimination and are graded in AC1 arm O4",
+   "expected": "N/A -- no mutant named by the task order",
+   "observed": "N/A -- AC1 O4 PASS shows the two refusals differ in source (identity deny for OUT, resource-policy deny for INF)",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the AC1 grader run twice on the same evidence file, no second SSM send: run 1 is the AC1 invocation, run 2 read into .scratch/ac1_run2.txt",
+   "observed": "run 1: ROUND 3 F4 OWNFIRM: 4 of 4 arms, exit=0; run 2: ROUND 3 F4 OWNFIRM: 4 of 4 arms, exit=0, 4 PASS lines both",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "fence behavior for a principal this cell does not assume",
+   "reason": "the face states the lens is blind to it; this cell exercises one own-firm role, one ungranted own-firm key and one foreign bucket, and the OWN success is not separated from identity grant versus fence admit"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W15-S1: the face names the OUT read by class only; the sender names a concrete ungranted key, and its AccessDenied is the described identity-side class",
+  "ADVI_FIRMBKTS-D1-W15-S2: the face orders the order's <status> flipped to complete, but that element is beyond the lines 1-80 this worker was given, so the flip is not made and the order stays open"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~15/ADVI_FIRMBKTS.TO-FB-f-5.f4-ownfirm.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_f4_send.py --print",
+   "result": "printed one SSM command: instance i-0167fd745ad906a66, role irpt-cot-ycharts-research-role, buckets opal-data-cottonwood (OWN, OUT) and opal-data-inflection (INF); sent nothing"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_f4_send.py --out org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~15/F4_OWNFIRM_EVIDENCE.json --wait 100",
+   "result": "SENT command_id=d1841aa3-50a6-409c-876e-af595954f53f; status=Success (one send)"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_f4.py --arms ownfirm --evidence org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~15/F4_OWNFIRM_EVIDENCE.json",
+   "result": "ROUND 3 F4 OWNFIRM: 4 of 4 arms, exit=0 (run twice)"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round2/checks/r2_f4.py --arms positive",
+   "result": "ROUND 2 F4 POSITIVE: 3 of 3 arms, exit=0"
+  }
+ ]
+}
