@@ -68,6 +68,15 @@ Criterion ids: APPLY5-AC1, APPLY5-AC2. Instance at `org/tier2_senior/0.7.0_AE_Cl
     issuer's own run), record what it prints NOW in the instance with the commit of the fixed check, re-commit, re-validate. The
     order's status does not change. `round-close-check` refuses a complete order beside a FAIL row. Gate limb that graded this
     amendment: this commit's own gate output is the read.
+    **AMENDMENT 5 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~11:2xZ): step e of AMENDMENT 4 is REPLACED, by the CTO's ruling (msg 4805: "the
+    source map re-pinned back").** e. Restore the WHOLE `irpt-status` entry of `infra/aws/lambda/ci/lambda-source-map.json` to its bytes
+    at the parent of the re-pin commit (`git show 01d1f660ad^:infra/aws/lambda/ci/lambda-source-map.json`, that entry only: the three
+    older pins and `artifact_sha256` `6idtFvAm...`), then set its applied-artifact fields (`deployed_code_sha256` `6idtFvAm...`,
+    `last_deployed_commit`, `last_deployed_at`, `deploy_ledger`) to state THIS rollback. No other entry changes. The one-tree re-pin
+    returns with the re-release. The CTO's two after-reads: the digest (your step d), and ONE history read answering with exactly the
+    two keys `items` and `next_cursor` -- that read needs an authorized owner and is the laptop reader's; the issuer relays it. Record
+    in `R5_rollback_record.json` that the history read is NOT yours. Gate limb that graded this amendment: this commit's own gate
+    output is the read.
     **AMENDMENT 4 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~11:2xZ): BRANCH B -- ROLL BACK irpt-status to revision 6 NOW. This supersedes
     AMENDMENT 3 until it is done.** Authority: the signed pair's section 5 (a served answer that fails takes the rollback) and this
     order's step 9 (the issuer orders the rollback from your recorded version).
