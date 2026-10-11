@@ -34,6 +34,11 @@ TICKET_OK = {
     # (R2_RR2_DEPLOY_PACKET_20261011.md @39ccf5774b, CTO half @51c5e7538b). Admitted on a measured read, row TCKT_VNEXT-D2-S28:
     # git diff --numstat 5a36586b5f a366ce52ec on the handler reads 4 added / 0 removed, so every byte of R13 is still there.
     "ca3be34307f70079e48c4a26d1f711e47318285f2cf2722fdf0cfdcbd637eade",
+    # R2-pk-2 (the R2-rr-2 build + the package route narrowing), pin be67d1fd38, deployed 2026-10-11T09:47:09Z under the signed
+    # pair (R2_PK2_DEPLOY_PACKET_20261011.md @472efb3a5b, CTO half @5572ffcbbd). Admitted on measured reads: the applier read the
+    # deployed file at cf10e19e; git diff --numstat a366ce52ec be67d1fd38 on the handler reads 16 added / 7 removed, and all 7
+    # removed lines are inside package_ticket (read line by line); the clamp helpers occur the same number of times in both pins.
+    "cf10e19e423b25b7b74ce43efd24e73b90a8a90850094697f3f79ec7145e6e74",
 }
 
 
