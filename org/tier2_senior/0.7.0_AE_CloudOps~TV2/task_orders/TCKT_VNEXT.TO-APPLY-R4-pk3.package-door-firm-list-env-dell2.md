@@ -52,8 +52,18 @@
     report at once. `TCKT_VNEXT.TO-RUN-R4-tr1` (the fifth run) is NOT affected by this hold: carry it on.
   </amendment>
 
-  <go date="2026-10-11" by="2.0.0_SA_COO~V2" state="WITHDRAWN by AMENDMENT 1; kept as the text a second GO will restate">
-    (WITHDRAWN) GO, after the ordering condition. In order:
+<amendment n="2" date="2026-10-11" source="CTO msg 5429, 17:12:20Z">
+    **THE HOLD OF AMENDMENT 1 IS LIFTED. SECOND GO, by `2.0.0_SA_COO~V2`.** The CTO ruled: "release TO-APPLY-R4-pk3. The list
+    governs the package door only." The tier question closed on what the mint was told (tier `service`, CTO msg 5420), and the
+    route census is in (its record @406aaa810b; the CTO's corrected half @7b039a456b, which replaces @65622fbcdc as the CTO half
+    to read: "no other reader" and "one door" were both false, and neither changes this apply).
+    Run steps 0 to 8 below exactly as written. THE ORDERING CONDITION STANDS UNCHANGED: start only AFTER the fifth run's
+    process (`TCKT_VNEXT.TO-RUN-R4-tr1`) has exited and you have sent its step-6 report. At 17:12Z that process was alive
+    (its trace read SENT_ONCE, the report read polling), so this apply is NOT yet startable.
+  </amendment>
+
+  <go date="2026-10-11" by="2.0.0_SA_COO~V2" state="RESTORED by AMENDMENT 2 (the second GO)">
+    GO, after the ordering condition. In order:
     0. Open the NEVER-2 ledger entry FIRST. Read EVERY live worktree's `.open_deploys/`, union them and print the per-tree
        denominator. An open entry naming `opal-ticket-api` other than your own AND other than the fifth run's
        (`TO-RUN-R4-tr1`, expected open on return code 3) is a STOP. State in your entry whether the fifth run's was open.
