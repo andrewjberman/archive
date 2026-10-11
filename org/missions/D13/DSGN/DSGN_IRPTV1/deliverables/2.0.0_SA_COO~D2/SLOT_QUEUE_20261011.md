@@ -46,3 +46,11 @@ history onto DEV. This file is the carrier for cells that are ruled but not yet 
   schemas (fe-s-13 content-pins x3, producer-fixtures RESPONSE ENVELOPE, IVE17-AC3) are re-run and should pass. Test and fixture files;
   the build hash is measured before and after. Un-parks when a portal worktree is free. P2 asked to be told if either fixture still fails
   a reader.
+
+## Update ~16:2xZ
+
+- IV-e-104 is DONE and on portal DEV (c3a03c24, with the regenerated wire types; suite 0 failing). IV-e-103 is running on the slot.
+- **New, parked, not issued -- the generator learns v2 references, owner 2.0.0_SA_COO~D2:** `gen-wire.ts` refuses any `$ref` into the v2
+  report schema, so 2.0.0_SA_COO~P2 encoded each Opal-form member of the analysis-report response as a plain type beside an always-true
+  conditional (row IRPT_BCKEND-D2-W295-S2), and the wire types those four members loosely. Ruled by this seat (msg to P2, re its 5265):
+  the encoding stays. CONDITION that un-parks it: a page reader needs one of those four members typed.
