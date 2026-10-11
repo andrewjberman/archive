@@ -149,7 +149,7 @@ all sixteen:
    never-widen pair, and any declaration must leave `inline_policy` and `managed_policy_arns` ABSENT (both are
    Optional+Computed and become authoritative when set). Full reasoning:
    deliverables/0.7.0_AE_CloudOps~Z/ACCEPTANCE_ROWS_TEN.md; families and order of application: ADOPTION_PLAN_TEN.md.
-6. `lambda-ec2-runtime-monitor-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
+6. `lambda-ec2-runtime-monitor-role` -- DECLARED (round 7: `infra/aws/terraform/shared-infra/zz_adopt_family_c_row6.tf`, TO-IAM-x-1 complete). Prior token: ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
    assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -165,7 +165,7 @@ all sixteen:
    apply, which is a separate WORLD act under its own never-widen pair, and any declaration must leave `inline_policy`
    and `managed_policy_arns` ABSENT (both are Optional+Computed and become authoritative when set). Full reasoning:
    deliverables/0.7.0_AE_CloudOps~Z/ACCEPTANCE_ROWS_TEN.md; families and order of application: ADOPTION_PLAN_TEN.md.
-7. `lambda-test-role` -- RETIRE owner=0.7.0_AE_CloudOps~Z reason=three planes agree that nothing declares
+7. `lambda-test-role` -- RETIRE (DONE: the role was deleted 2026-10-11 12:07Z by TO-IAM-x-4, read back NoSuchEntity; site-Z recreation record @a3994c4cb7). Prior text: RETIRE owner=0.7.0_AE_CloudOps~Z reason=three planes agree that nothing declares
    it and nothing uses it -- 0 Terraform hits across 415 tracked `.tf` files (IAM-r-3's per-member
    verdict list), 1 of 2382 live nodes with no consumer node pointing at it, and no LastUsedDate
    inside AWS's 400-day tracking window -- so the honest answer is that this role should not
@@ -307,7 +307,7 @@ all sixteen:
     Terraform source at this cell's own re-measurement; see the filed surprise row -- this is not a
     governance finding about the role, it is an instrument discrepancy the governance disposition
     corrects for.
-14. `sentiment_query_api-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
+14. `sentiment_query_api-role` -- DECLARED (round 7: `infra/aws/terraform/market-overview/zz_adopt_family_c_row14.tf`, TO-IAM-x-1 complete; its inline DynamoDBAccess grant on a non-existent us-east-2 table is DEFER, owner 0.7.0_AE_CloudOps~Z, reason: dead account-scoped grant, repoint only if the sentiment_query_api owner revives the function -- ROUND_ANALYSIS.round7.md @fef971046b). Prior token: ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
     `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
     exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
     assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -379,6 +379,12 @@ TOKENS MOVED, NO OWNER MOVED.** Rows 1, 2, 3, 9 and 11 were adopted into Terrafo
 citing its file and completing order. The arithmetic now reads 6 `DECLARED` + 2 `ADOPT` (rows 6, 14) + 5 exemption rows + 1
 `RETIRE` + 2 `DEFER` = 16, re-counted from the table's first lines. Each prior token is kept beside the new one, so
 the row's history stays readable.
+
+**AMENDED BY THE ROUND-7 DRAIN BATCH REPAIR (issuer `2.0.0_SA_COO~ZI`, 2026-10-11, ROUND_ANALYSIS.round7.md @`fef971046b`
+E4) -- TWO TOKENS MOVED, ONE RETIREMENT DONE, NO OWNER MOVED.** Rows 6 and 14 were adopted in round 7 and read `DECLARED`.
+Row 7 keeps its `RETIRE` token, now marked DONE, because the role no longer exists. Row 14 also carries x-2 target 4's DEFER
+on its dead DynamoDB grant. The arithmetic: 8 `DECLARED` + 0 `ADOPT` + 5 exemption rows + 1 `RETIRE` (done) + 2 `DEFER` = 16,
+re-counted from the table's first lines.
 
 ## CLASS RULINGS
 
