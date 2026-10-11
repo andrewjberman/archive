@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-136",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "61f17b5413",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-136.manifest-count-and-readers-onward.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~109",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~109/MANIFEST_COUNT_AND_READERS.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~109/MANIFEST_COUNT_AND_READERS.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only counts-only record: 2 list-objects-v2 calls on 49 Financial's own returns and method-row prefixes (1138 keys, 569 manifest.json keys), no body read, no S3 write, no code change",
+      "artifact_covered_by": [
+        "DB71-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB71-1-AC1",
+      "criterion_verbatim": "DB71-1-AC1 -- the 49 Financial manifests the live package writes are counted per prefix by key listing with first and last dates, and each of the ten readers is read for whether it passes the thresholds object or the whole manifest onward. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r71/p71_round71.py\" . DB71-1-AC1",
+      "output_evidence": "OK: 569 manifest(s) over 2 listed prefix(es); 0 bodies read; 1 of 10 readers pass the object onward\nDB71-1-AC1 PASS",
+      "denominator": "569 manifest keys of 1138 keys listed over 2 of 6 prefixes (the other 4 carry no thresholds object); 10 of 10 census readers read; exit code 0",
+      "status": "PASS",
+      "expect": "DB71-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record from the worktree root",
+      "observed": "run twice, the same last line and rc 0",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB71-1-AC1 FAIL",
+      "observed": "FAIL: no record 0.9.0_WK_IRPT_DASHBD~109/MANIFEST_COUNT_AND_READERS.json; DB71-1-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "which version of the packaged thresholds file each of the 569 objects was written from",
+      "reason": "No body was read (bodies_read 0) and no earlier package was read; NOT_ESTABLISHED."
+    },
+    {
+      "item": "the four prefixes of account_class_daily, account_activity_daily, account_lot_realized and account_lot_unrealized_daily",
+      "reason": "Their manifests carry no thresholds member by the code, so the order does not reach them; not listed."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W109-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p71_round71.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r71/p71_round71.py\" . DB71-1-AC1",
+      "result": "DB71-1-AC1 PASS (rc 0); against an empty root it prints DB71-1-AC1 FAIL (rc 1)"
+    }
+  ]
+}
