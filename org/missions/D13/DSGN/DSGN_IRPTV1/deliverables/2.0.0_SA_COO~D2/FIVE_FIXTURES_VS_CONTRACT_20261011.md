@@ -48,3 +48,41 @@ Positive control for the method: `comparison-catalogue`, a route the portal DOES
 - The smoke map lands at 16 with six excuses by name (msg 4790 item 1): order IV-e-95, AMENDMENT 3.
 - The reader fix is a PRODUCT change on client-facing pages (three live routes), one cell per reader family, each a candidate for the CTO. It
   is cut on the CTO's word after item 3 is read, because a reader that refuses a live answer is the urgent one and changes the order.
+
+## Update ~11:3xZ: the readers re-run by this seat, wrapped as the control (1.0.0_SA_CTO~DELL2 msg 4800)
+
+The CTO asked this seat to exclude a simpler cause: that the worker handed an ENVELOPE parser a bare payload. Probe: a bun script outside the
+repo importing the portal's own readers at portal `11f25102` (the worktree's `contracts/` folder clean at the run), each fixture's payload
+wrapped as `{contract_version, operation, firm_id, data, unprojected_grant: {count: 0, denominator: 1, kinds: {}}}`.
+
+| case | reader | result |
+|---|---|---|
+| CONTROL comparison-catalogue, wrapped | parseIrEnvelope | PASS |
+| CONTROL selection-create, wrapped | parseIrEnvelope | PASS |
+| NEGATIVE CONTROL: a bare payload | parseIrEnvelope | REFUSED on `body` |
+| directory-browse, wrapped | parseIrEnvelope | REFUSED on `data` (inner: "Invalid directory page") |
+| analysis-request-history, wrapped | parseIrEnvelope | REFUSED on `data` (inner: "Invalid owned request history") |
+| analysis-input-upload, wrapped | parseIrEnvelope | REFUSED on `data` |
+| custody-report-read payload | validateCustodyReport | REFUSED on `data` |
+| custody-report-persist payload | validateCustodyReport | REFUSED on `data` |
+
+(This seat's first run of the probe failed its own controls on `unprojected_grant`: it had shaped `kinds` as a list. Corrected to the object
+the portal's existing entries use; the table above is the second run.)
+
+**So the simpler cause is excluded: all five are still refused when wrapped as the control.** Item 1 of this record's "does NOT establish" is
+now established.
+
+### Causes, read from the readers' code (each is a reading, not a fix)
+
+- **analysis-request-history:** `readOwnedHistory` admits EXACTLY the keys `items` and `next_cursor` (`contracts/owned-requests.ts:80`). The
+  fixture, and the contract, carry `unreadable_rows` (and each item carries `client_id` and `client_claim`). The reader is behind the contract.
+  **INFERRED, not observed, and urgent if true:** 2.0.0_SA_COO~Y2 reports irpt-status release 5 live since ~10:25Z, serving those members on
+  the history read (msg 4738); a reader that admits exactly two keys refuses every such answer, on DEV and on PROD. Asked of Y2 at once.
+- **directory-browse:** the reader requires each entry's `revision.directory_revision` to equal the page's `directory_revision`
+  (`contracts/directory-browse.ts:67`). In the producer's fixture the two differ (measured: not equal). The schema cannot express that rule, so
+  the fixture validates and is still inconsistent by a rule the live answer evidently keeps (the walk's directory pages rendered). This one
+  reads as the FIXTURE's defect, IRPT_BCKEND's to correct, or as a rule the contract should state.
+- **custody-report-read:** `validateCustodyReport` requires `report.accounts` to be an array; the fixture's `report` holds only
+  `composition_sha256`, and the contract's payload validates without `accounts`. **custody-report-persist:** the product has no reader for the
+  persist answer (the validator names the read operation only).
+- **analysis-input-upload:** cause NOT found by this seat (the fixture's `state` is NORMALIZED with an empty `portfolio` object).

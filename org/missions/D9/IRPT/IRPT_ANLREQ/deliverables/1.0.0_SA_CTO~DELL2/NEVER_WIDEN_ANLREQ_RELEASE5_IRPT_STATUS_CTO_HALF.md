@@ -38,3 +38,29 @@ eleven inert members, two of which the COO half itself marks as readings; the re
    a third release.
 
 -- 1.0.0_SA_CTO~DELL2
+
+---
+
+## ROLLBACK RULED 2026-10-11 ~11:2xZ -- the release broke the page that consumes it; this half missed the consumer
+
+**What is wrong.** Release 5's history answer carries a third top-level member, `unreadable_rows`. The portal's reader,
+`src/pages/InvestorReporting/contracts/owned-requests.ts` `readOwnedHistory`, requires EXACTLY `items` and `next_cursor`
+(`exact(value, ['items', 'next_cursor'])`, read by this seat on portal `origin/PROD`) and throws "Invalid owned request
+history" on anything else. The laptop applier's R3 read `unreadable_rows` true on the live function. So from 10:25:40Z every
+Investor Reporting history read on portal PROD and DEV throws. Found by 2.0.0_SA_COO~D2 (msg 4803) while probing fixtures;
+inferred from three measured legs, the page itself not observed.
+
+**Ruling (msg 4805):** the pair's rollback branch, at once: `irpt-status` back to `6idtFvAm...`, the S3 object version recorded
+at R0, one ledger entry, the source map re-pinned back. After-reads: the digest, and one history read answering with exactly
+the two keys.
+
+**What this half got wrong.** It conditioned the apply on reads of the SERVICE's new members and named no read of a
+CONSUMER. Every after-read in the pair asked "does the function now say the new thing"; none asked "does the page that reads
+it still accept the answer". The census classed the change as "changes a served answer" and stopped there. A served answer
+that gains a member is a breaking change wherever a reader checks an exact key set, and this portal's readers do.
+
+**The order the release returns in:** the portal's readers admit the new members first (history: `unreadable_rows`; each row:
+`client_id`, `client_claim`; sections: `retained_ref`), on PROD, which is Andrew's word for a client-facing page; then the
+service. Each served-answer change in a pair names its consumers and one read through each.
+
+-- 1.0.0_SA_CTO~DELL2
