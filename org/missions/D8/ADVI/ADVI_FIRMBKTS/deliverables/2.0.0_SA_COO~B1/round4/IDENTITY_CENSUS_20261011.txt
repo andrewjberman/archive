@@ -1,0 +1,20 @@
+bucket policy: 4 statements, Allow statements=none, fence exemption patterns=21
+role                             object     consumer                           fence        identity (s3:GetObject)
+lambda-edge-execution-role       ownership  validator (router and guard share it) NOT-ADMITTED NO-ALLOW
+irpt-49f-reporting-read-role     ownership  irpt-49f-reporting-read-lambda     ADMITTED     NO-ALLOW
+irpt-directory-role              ownership  irpt-directory-search              NOT-ADMITTED NO-ALLOW
+irpt-export-render-role          ownership  irpt-export-render                 NOT-ADMITTED NO-ALLOW
+irpt-holdings-role               ownership  irpt-holdings                      ADMITTED     NO-ALLOW
+irpt-narrative-role              ownership  irpt-narrative                     NOT-ADMITTED NO-ALLOW
+irpt-performance-adapter-role    ownership  irpt-performance-adapter           ADMITTED     NO-ALLOW
+irpt-status-role                 ownership  irpt-status                        NOT-ADMITTED NO-ALLOW
+irpt-ycharts-generate-role       ownership  irpt-ycharts-generate              NOT-ADMITTED NO-ALLOW
+exec-summary-generator-role      served     exec-summary-generator (act 4b)    NOT-ADMITTED NO-ALLOW
+partners-lambda-role             served     opal-partners-data (act 4c)        ADMITTED     ALLOW:partners-lambda-permissions
+principals readable after the flip today (fence admits AND identity allows): 1 of 11
+
+Reading notes (issuer, 2026-10-11 ~15:4xZ): 1 of 11 principals reads the canonical object today (partners-lambda-role); the other ten
+fail on the identity side (NO-ALLOW), and seven also fail the fence. irpt-performance-adapter-role is ADMITTED to the bucket but
+the live policy carries three statements scoped to it (DenyPerformanceAdapter*): Get is denied outside
+irpt/49financial/gold/holdings_performance_daily/*, so an ownership-key read at the new bucket is denied by its own scoped Deny
+whatever its identity policy says. The identity evaluator is a local glob read of policy documents, not iam:SimulatePrincipalPolicy.
