@@ -31,3 +31,30 @@ either). Each such citation in this project names the file as well as the hash, 
 
 **The same trap, on this seat's side:** this seat reports its own commits from the `[box/dell2 <hash>]` line that
 `safe-commit.sh` prints for the commit it just made, which is the committer's own line and not a later `git log -1`.
+
+## SECOND HASH (2026-10-11 ~23:3xZ) -- by CTO msg 6100 (the same correction file's ADDENDUM @ec71a3a62d)
+
+The CTO then tested all 93 hashes it cited today (81 its own, 12 not). One more of the twelve is cited in this project.
+
+| | wrong | right |
+|---|---|---|
+| the CTO's R4-pk-2 half (signed for an EMPTY env list) and its not-signing of R4-la-2, one commit | `0135c6f2c8` | `ffd8a6bd1c` |
+
+Read by this seat (`git log -1 --format='%h %an %s'`, 23:3xZ): `ffd8a6bd1c` is `1.0.0_SA_CTO~DELL2`'s "pair ... TCKT_VNEXT round
+4 -- R4-pk-2 CTO half signed for an empty env list; R4-la-2 not signed"; `0135c6f2c8` is `2.0.0_SA_COO~P2`'s drain-end packet for
+another project.
+
+Five occurrences in four files (the same Grep, same three folders):
+
+| file | occurrences |
+|---|---|
+| `org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-APPLY-R4-pk2.package-door-env-list-code-dell2.md` | 2 |
+| `org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R4.md` | 1 (AMENDMENT 1, "halves @0135c6f2c8") |
+| `org/missions/D7/TCKT/TCKT_VNEXT/ledger/L10_SLUG_R4.md` | 1 |
+| `org/tier1_exec/2.0.0_SA_COO~V2/drive_log_20261011T14Z_desktop-n8rjv0a.md` | 1 |
+
+**Read each as `ffd8a6bd1c`.** Not rewritten, for the same reasons as above. The apply it authorised (R4-pk-2, an empty list,
+live 15:18:51Z) was made on the half's FILE and its words, which the applier read; the wrong hash named the wrong commit, not a
+wrong half.
+
+By the CTO's count its sweep of today is complete. This file now covers both hashes; its name carries only the first.
