@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t30",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t30.lock-reads-latest-partition.md",
+    "group": "OTHER",
+    "vintage_commit": "477921e3dc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "477921e3dc",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t30.lock-reads-latest-partition.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~24",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/lock.py",
+      "kind": "script",
+      "commit_or_etag": "b2b2de64ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-MDPF_DEMQUE-24 only (safe-commit; commit-gate, naming gate and surprise-row gate clean, msg-verify MATCH). TX_PARTITION is None; latest_partition, resolve_partition, trades_through, partition_report and the --partition CLI added; check() takes trades_through. No AWS write, no deploy, daily_draw.py untouched.",
+      "artifact_covered_by": ["DQ9-t30-AC1", "DQ9-t30-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_lock_partition.py",
+      "kind": "test",
+      "commit_or_etag": "b2b2de64ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed with lock.py. Stub S3 client, in-memory parquet, no network. The three named tests PASSED (3 of 3); the existing test_demque_lock.py PASSED unedited (9 of 9).",
+      "artifact_covered_by": ["DQ9-t30-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t30-AC1",
+      "criterion_verbatim": "DQ9-t30-AC1 -- the three named tests: test_latest_partition_is_the_greatest_date_partition_holding_parquet (an empty newer partition is skipped), test_trades_through_is_the_max_trade_date_of_the_loaded_rows, test_claim_is_held_when_the_window_runs_past_the_trades (a locked name with valid_to after trades_through reads held; with valid_to on or before it, measured).",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t30_tests.py",
+      "output_evidence": "3 passed (pytest over test_demque_lock_partition.py); LP-OK; rc=0. Named PASSED lines: test_latest_partition_is_the_greatest_date_partition_holding_parquet, test_trades_through_is_the_max_trade_date_of_the_loaded_rows, test_claim_is_held_when_the_window_runs_past_the_trades. Run from data/mdpf/scripts/demque with test_demque_lock.py alongside: 12 passed, twice (determinism).",
+      "denominator": "3 of 3 named tests PASSED; 12 of 12 with the existing lock file",
+      "status": "PASS",
+      "expect": "LP-OK"
+    },
+    {
+      "criterion_id": "DQ9-t30-AC2",
+      "criterion_verbatim": "DQ9-t30-AC2 -- lock.py --partition on the REAL store equals the check's own listing and its own read of the partition's largest Trade_Date (date=2026-06-23, 2026-06-22, one partition).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t30_real.py",
+      "output_evidence": "independent: {'partition': 'date=2026-06-23', 'trades_through': '2026-06-22', 'partitions': 1} | tool: {'partition': 'date=2026-06-23', 'trades_through': '2026-06-22', 'partitions': 1}; LP-REAL-OK partition=date=2026-06-23 trades_through=2026-06-22; rc=0. The tool line at its own path (python data/mdpf/scripts/demque/lock.py --partition): {\"partition\": \"date=2026-06-23\", \"trades_through\": \"2026-06-22\", \"partitions\": 1}; rc=0.",
+      "denominator": "3 of 3 fields equal (partition, trades_through, partitions=1); 1 partition holds parquet of the store's transactions prefix",
+      "status": "PASS",
+      "expect": "LP-REAL-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In a scratch copy (.scratch/mutant_dq30, uncommitted) disable the held-claim downgrade by returning the row before the trades_through test in _proved_through, then run the held test.",
+      "expected": "test_claim_is_held_when_the_window_runs_past_the_trades fails: the claim stays measured where held is required.",
+      "observed": "1 failed, 2 deselected; FAILED test_claim_is_held_when_the_window_runs_past_the_trades (AssertionError on state/claim assertion, 'LOCKED' == 'LOCKED' with claim measured).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two identical runs of pytest over test_demque_lock_partition.py and test_demque_lock.py, same worktree and inputs, no S3 call in the tests.",
+      "observed": "run 1: 12 passed; run 2: 12 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No AWS write, no Bloomberg call, no Yahoo call, no deploy, no change to daily_draw.py.",
+      "reason": "The order bounds these out. The only AWS touch is the read-only --partition listing and read of the latest partition's Trade_Date column, which is the AC2 criterion itself."
+    },
+    {
+      "item": "No surprise row filed.",
+      "reason": "Every premise held at live state (one partition, date=2026-06-23, trades through 2026-06-22; base check outputs matched the order's stated base lines). The investigation file is in the grant and was not appended."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t30.lock-reads-latest-partition.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider test_demque_lock_partition.py test_demque_lock.py (cwd data/mdpf/scripts/demque)",
+      "result": "12 passed, on two identical runs (determinism control)."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~24 <0.9.0_WK_MDPF_DEMQUE~24@opal.agent>\" -F .scratch/msg_dq30.txt -- data/mdpf/scripts/demque/lock.py data/mdpf/scripts/demque/test_demque_lock_partition.py",
+      "result": "rc=0; commit-gate All checks passed; naming-gate PASS 0 graded; surprise-row-gate OK; committed b2b2de64ad on wk-MDPF_DEMQUE-24."
+    }
+  ]
+}
