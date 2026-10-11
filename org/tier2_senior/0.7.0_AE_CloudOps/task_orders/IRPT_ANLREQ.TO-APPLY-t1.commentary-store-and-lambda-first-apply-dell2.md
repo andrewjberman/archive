@@ -58,6 +58,39 @@
     lifts when condition 4 is met.
   </reassignment>
 
+  <reassignment>
+    AMENDMENT 6 (2026-10-11 ~06:0xZ, by `2.0.0_SA_COO~Y2`, interim driver): step 6b -- ONE further test invoke that reaches the drafter, the model call
+    and the store put. Rulings: 1.0.0_SA_CTO~DELL2 msg 4220 (no status flip on an invoke that stopped at the admit; the simulate verdicts stand as
+    INFERRED, in that word) and msg 4226 (the commentary_ready message). The closed ledger is NOT reopened: a NEW entry carries this act.
+    WHY step 6 stopped, read by the interim driver: `infra/aws/lambda/investor-reporting/reports/commentary_composition.py:71-84` (`parse_request`)
+    answers INVALID_REQUEST on the request id's SHAPE (`REQ-[0-9a-f]{24}`), while an absent request answers UNAVAILABLE (`:117`). The admit's
+    `OPAQUE_ID_RE` (`_keys/keys.py:62`) is wider, so your synthetic id passed the admit and failed the reader. Correct the proof instance's stated
+    reason ("the synthetic request does not exist") to that.
+    THE REQUEST: tenant `49financial`, request id `REQ-4b5155ac2ea9467ab771b414` (synthetic filer, minted under TO-APPLY-Y1 AMENDMENT 3; confirmed by
+    the CTO, msg 4226). The reader needs its accepted composition, not a READY report.
+    THE WRITE SET of one admitted invoke (`data/transcripts/scripts/commentary/lambda_handler.py:305-328`; live env `KIMI_STANDING_WORD_REF` is set):
+    ONE model call (under the standing C-KIMI word, abstract fields only), ONE draft-store put, ONE `commentary_ready` send to
+    `outlook-global-commentary-draft-commentary-ready-queue`. On the queue path the handler writes no ticket.
+    6b.0 Open and commit a new ledger entry `irpt-anlreq-t1-commentary-full-invoke-20261011` before any act.
+    6b.1 MEASURE THE CONSUMER of that queue BEFORE the invoke (CTO msg 4226, item 1, verbatim): "list-event-source-mappings for that queue's ARN,
+         plus the queue's policy and any subscription that could deliver it. Count printed. Any enabled consumer: STOP, no invoke, send me what it
+         does. A draft must never reach a person or a ticket through a path nobody read." Also read, as the one sign of a POLLING consumer an
+         event-source listing cannot show: the queue's CloudWatch `NumberOfEmptyReceives` and `NumberOfMessagesReceived`, summed over the last 24
+         hours. A non-zero sum is an enabled consumer: STOP.
+    6b.2 Read both queues' depth (visible, not-visible, delayed): all 0, recorded. Read the store's `get_ref` for the request: a draft that already
+         EXISTS means the handler would answer DRAFT_EXISTS with no model call and no put -- STOP and report it instead of invoking.
+    6b.3 ONE invoke, the same SQS-shaped event as step 6 with the canonical `analysis_ready` body for that tenant and request id, built by the
+         packaged keys library. Record the stages only. Expected stage: DRAFT_STORED. Record the draft's `artifact_id`, `version_id` and `sha256`
+         as a TEST ARTIFACT. No composition, no draft text, no model output in any file, log line or message.
+    6b.4 (CTO msg 4226, item 2) Receive that ONE message from the commentary-ready queue, record its message id and body sha256, check the body
+         equals the canonical `commentary_ready` for the same tenant and request id, and DELETE it. This one message is the only delete this
+         order permits; the draft object stays (a delete of it is Andrew's word). A receive that returns nothing after the visibility window is
+         reported, not retried indefinitely.
+    6b.5 (item 3) Record both queues' depth after: 0. Record the function's invocation count and its TypeError count for the act. Close the entry.
+    ONE invoke means one: any stage other than DRAFT_STORED is recorded with its closed reason and reported; no second invoke without a new word.
+    Then write the result beside AC1 in the proof instance. The status flip stays with `2.0.0_SA_COO~Y2`.
+  </reassignment>
+
   <objective>
     The FIRST apply of the commentary DRAFT store (IRPT export root) and the commentary Lambda (transcripts root), in the order the pair
     fixes: A (store, policy row PENDING) -> A2 (row ACTIVE + store code rebuilt) -> B (commentary). Report counts and stages only.
