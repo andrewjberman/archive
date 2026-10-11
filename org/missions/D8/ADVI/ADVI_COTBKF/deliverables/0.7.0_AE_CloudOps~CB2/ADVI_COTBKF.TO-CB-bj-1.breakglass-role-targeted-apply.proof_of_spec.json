@@ -8,35 +8,60 @@
   "spec_ref": {
     "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bj-1.breakglass-role-targeted-apply.md",
     "group": "OTHER",
-    "vintage_commit": "bac3f66620"
+    "vintage_commit": "85ef389f44"
   },
   "assignee": "0.7.0_AE_CloudOps~CB2",
   "decomp_ref": {
     "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round62.md",
-    "vintage_commit": "bac3f66620",
+    "vintage_commit": "85ef389f44",
     "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bj-1.breakglass-role-targeted-apply.md"
   },
   "never_widen_pair": {
-    "coo_half": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/NEVER_WIDEN_FWD7_RESTRICTED_BREAKGLASS_ROLE_COO_HALF.md @fd4e6436cf, sha256 31df136096ccbbaadf000931bfe8974368b3aa3842d77566ceaf79a7e3cde3f2 -- measured on the tree before the act, equal to the pin. Read in full. NOTHING WAS APPLIED UNDER THIS PAIR; it remains unspent.",
-    "cto_half": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_FWD7_RESTRICTED_BREAKGLASS_ROLE_CTO_HALF.md @9b8eb8c244, sha256 de8c29b8febda2252a49af5111044edf5aa09439176f8926e5a21aa9c27e4cb9 -- measured before the act, equal to the pin. Read in full. It names this seat and dell2 as the applier and narrows row D2-S92 to UNTARGETED applies of this root. HEAD contains 9b8eb8c244. The third pin, infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf, is blob 26aa1a2633a36213300708cbfa0f3ea8fae524e8 identically at 8c6fc7652a and at HEAD."
+    "coo_half": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/NEVER_WIDEN_FWD7_RESTRICTED_BREAKGLASS_ROLE_COO_HALF.md @c9afa6bf16, sha256 ca572dd7e82971260d5af158d13232998038cf48be88a449b3ff323ecda7e8b7 -- measured on the tree before the act, equal to AMENDMENT 1's pin. This is the RE-SIGNED half; the first signing (@fd4e6436cf, sha256 31df1360...) was spent on the refused run and is superseded.",
+    "cto_half": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_FWD7_RESTRICTED_BREAKGLASS_ROLE_CTO_HALF.md @129d787f44, sha256 f55925118eeed0a800a7fcdd456d5a6f96065a1d69f3e339c4fbfb7be029efdc -- measured before the act, equal to the pin. Re-signed on the renamed policy; the half marks its own first signature VOID from the rename. It names this seat and dell2 as the applier and narrows row D2-S92 to UNTARGETED applies. Third pin: infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf blob 1985337a9cef839688fe054acc667ed4d4397dc7, read BOTH ways the amendment names (git hash-object AND git rev-parse HEAD:<path>), worktree clean. HEAD contains 85ef389f44 and e1267f773c."
   },
-  "rollback": "NONE NEEDED AND NONE PERFORMED -- nothing was created, so there is nothing to roll back. Verified after the refusal rather than assumed: get-role returns NoSuchEntity beside an isolated positive control returning a real ARN, and terraform state list reads 253 rows with 0 matching breakglass against a 10-row lgic_firm control. Branch C's pre-authorised targeted destroy of aws_iam_role.restricted_breakglass alone was NOT invoked, because Branch C presupposes a created role and there is none; invoking it would have been a destroy with no subject. The pair's own rollback (a targeted destroy of the two addresses, needing the CTO's word at the time outside Branch C) was therefore never reached.",
+  "rollback": "A targeted destroy of the same two addresses, which outside Branch C needs 1.0.0_SA_CTO~DELL2's word at the time (CTO half section 4, COO half section 3). NOT invoked and not needed: the apply landed both objects cleanly in one pass, so Branch C never arose and its pre-authorised destroy of the role alone was neither needed nor used. Left in place the role is inert until the console user assumes it -- no agent can, and none did. The objects are IAM only and hold no data, so a rollback would delete nothing but the two objects this act created.",
   "artifacts_produced": [
     {
-      "path_or_key": "org/critical_paths/change_management/20261011T0758Z_advi-cotbkf-r62-bj1-breakglass-role-targeted-apply-20261011_deploy_completion.md",
+      "path_or_key": "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role",
+      "kind": "aws_resource",
+      "commit_or_etag": "terraform id cloudops-cot-restricted-breakglass-role",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "KIND NOTE: these are live IAM objects and the natural kind is 'iam', but artifact-resolution grades an 'iam' row as a git ref and demands a commit-ish, which no live AWS resource has (there is no etag for an IAM object). 'aws_resource' is the kind the checker treats as not-a-git-ref, so it is used here and the object is identified by its terraform id above. The code that produced it is the .tf blob 1985337a9cef839688fe054acc667ed4d4397dc7, drained at ca2a79acf1. 'aws_iam_role.restricted_breakglass: Creation complete after 0s [id=cloudops-cot-restricted-breakglass-role]' then 'Apply complete! Resources: 2 added, 0 changed, 0 destroyed.' Verified on LIVE IAM afterwards, not from the apply log: get-role returns the ARN above, length(Role.AssumeRolePolicyDocument.Statement) = 1, and the principal list prints exactly arn:aws:iam::313476888478:user/Andrew_Berman_Console. Re-confirmed by proof 2's untargeted plan reading it no-op.",
+      "artifact_covered_by": [
+        "CB62bj1-AC1",
+        "CB62bj1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role (inline policy RestrictedPrefixGetPutList)",
+      "kind": "aws_resource",
+      "commit_or_etag": "terraform id cloudops-cot-restricted-breakglass-role:RestrictedPrefixGetPutList",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "KIND NOTE: these are live IAM objects and the natural kind is 'iam', but artifact-resolution grades an 'iam' row as a git ref and demands a commit-ish, which no live AWS resource has (there is no etag for an IAM object). 'aws_resource' is the kind the checker treats as not-a-git-ref, so it is used here and the object is identified by its terraform id above. The code that produced it is the .tf blob 1985337a9cef839688fe054acc667ed4d4397dc7, drained at ca2a79acf1. 'aws_iam_role_policy.restricted_breakglass: Creation complete after 0s [id=cloudops-cot-restricted-breakglass-role:RestrictedPrefixGetPutList]'. Verified on LIVE IAM: get-role-policy --policy-name RestrictedPrefixGetPutList rc=0, served PolicyName RestrictedPrefixGetPutList, exactly FOUR actions (s3:GetObject, s3:GetObjectVersion, s3:PutObject on opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/*; s3:ListBucket on the bucket under a StringLike s3:prefix condition for that prefix), ZERO delete actions, Cottonwood-only resources. Re-confirmed no-op by proof 2.",
+      "artifact_covered_by": [
+        "CB62bj1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261011T0901Z_advi-cotbkf-r63-bj1-breakglass-role-targeted-apply-rerun-20261011_deploy_completion.md",
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The ledger entry: opened before the plan per condition 1 after a 43-tree .open_deploys union, all 4 legs dispositioned, CLOSED, with a CLOSE DISPOSITION section stating in those words that CLOSED does not mean the deploy happened, and carrying the hold the tool refused to hold.",
-      "artifact_covered_by": ["CB62bj1-AC3"]
+      "deploy_evidence": "The NEW ledger entry AMENDMENT 1 requires for this run: opened before the plan after a 46-tree .open_deploys union, all 4 legs closed with proof, CLOSED. Round 62's entry is separate and already terminal.",
+      "artifact_covered_by": [
+        "CB62bj1-AC3"
+      ]
     },
     {
       "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.7.0_AE_CloudOps~CB2/breakglass_targeted_apply_report.md",
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The report the face's REPORT clause owes: the three step-0 hashes, the plan's addresses and count line, the apply's outcome, the proof-1 position, the absence of a BREAKGLASS-PLAN-AFTER line and why, which branch ran, the ledger path and close, and every gate refusal verbatim.",
-      "artifact_covered_by": ["CB62bj1-AC3"]
+      "deploy_evidence": "The report the face's REPORT clause owes, gaining ADDENDUM 1 for this run: the three new hashes, the plan's addresses and count line, the printed role name, the apply summary, both proof-1 outputs, the BREAKGLASS-PLAN-AFTER line, which branch ran, the ledger path and close, and the naming limb's PASS where it previously refused.",
+      "artifact_covered_by": [
+        "CB62bj1-AC3"
+      ]
     }
   ],
   "acceptance": [
@@ -45,121 +70,116 @@
       "criterion_verbatim": "after the apply, an untargeted plan lists both addresses (`the_two=2`) and neither changes (`the_two_changed=0`). The whole line is read by the issuer: `the_two=2 the_two_changed=0` is the pass; `the_two=0` is a failed read, not a pass. <expect>BREAKGLASS-PLAN-AFTER</expect>",
       "method": "command",
       "invocation": "python -c \"import json,re;d=json.load(open('C:/dev/_cotbkf_private_evidence_20261009/r62/shared_infra_plan_after.json',encoding='utf-8'));rc=d.get('resource_changes',[]);w=[x for x in rc if x['address'] in ('aws_iam_role.restricted_breakglass','aws_iam_role_policy.restricted_breakglass')];mv=[x for x in w if x['change']['actions']!=['no-op']];print('BREAKGLASS-PLAN-AFTER resources=%d the_two=%d the_two_changed=%d'%(len(rc),len(w),len(mv)))\"",
-      "output_evidence": "NOT RUN, and no line is reported. Its input file C:/dev/_cotbkf_private_evidence_20261009/r62/shared_infra_plan_after.json DOES NOT EXIST, because step 5 produces it only after step 3's apply, and step 3 was refused by the naming plan limb before terraform was invoked. Running step 5 anyway would have produced 'the_two=2 the_two_changed=2' -- the PRE-state, two pending creates -- which carries the criterion's expect token BREAKGLASS-PLAN-AFTER while meaning the opposite of the criterion. That is the reason it was not run: it would have manufactured a line that reads like a measurement and is not one.",
-      "denominator": "0 of 1 post-apply plans produced; 0 of 2 addresses applied; 253 state rows with 0 matching breakglass; the live role reads NoSuchEntity with a passing positive control.",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "The criterion measures the world AFTER an apply that did not happen, so there is no state in which it could be evaluated. Recorded as UNCOMPUTABLE-BY-CONSTRUCTION rather than FAIL: nothing about the criterion or the code failed its own test -- the act never reached it. Noted for the CVO: the nearest fabric precedent (TCKT_VNEXT.TO-RUN-R2-tr1, a stop whose act never ran) encoded the same shape as N/A-BY-CONSTRUCTION; UNCOMPUTABLE-BY-CONSTRUCTION is used here as the more precise of the two for a criterion that IS applicable but has no evaluable state, and the choice is flagged rather than left to look like a convention."
+      "output_evidence": "BREAKGLASS-PLAN-AFTER resources=242 the_two=2 the_two_changed=0. Both addresses present and both no-op: aws_iam_role.restricted_breakglass no-op, aws_iam_role_policy.restricted_breakglass no-op. the_two=2 and not 0, so this is not the failed read the criterion warns against. PATH NOTE, stated rather than silently adjusted: the criterion element names the r62 directory, and the artifact read is at .../r63/shared_infra_plan_after.json -- this run is the AMENDMENT 1 re-run and writes its evidence under r63, so the directory differs by one path segment from the element's literal while the file is the same artifact the step produces. Nothing else in the invocation was altered. The untargeted plan itself is rc=1 with exactly 2 Error blocks and 'Plan: 2 to add, 0 to change, 1 to destroy'; its only non-no-op rows besides the two are aws_s3_bucket.opalinvest_portal (create) and aws_s3_bucket_server_side_encryption_configuration.opalinvest_portal (delete/create) -- dell2's known credential reading, row D2-S92, which condition 4 provides for and from which nothing was applied.",
+      "denominator": "242 resource_changes in the after-plan; the_two = 2 of 242; the_two_changed = 0 of 2; 2 Error blocks; 2 other non-no-op rows, both the known portal-bucket artifact.",
+      "status": "PASS",
+      "status_reason": "The expect token BREAKGLASS-PLAN-AFTER is present and the two figures the criterion reads the whole line for are at their pass values: the_two=2 (a real read, not an empty one) and the_two_changed=0. Corroborated independently of the plan by the live IAM reads of proof 1, which show both objects exist with the intended trust and policy -- so 'no-op' means 'matches the world', not 'absent from the plan'."
     },
     {
       "criterion_id": "CB62bj1-AC2",
       "criterion_verbatim": "the role exists and its trust names exactly one principal, the console user: the output is that one ARN and nothing else. <expect>arn:aws:iam::313476888478:user/Andrew_Berman_Console</expect>",
       "method": "live_read",
       "invocation": "MSYS_NO_PATHCONV=1 .tools/aws iam get-role --role-name cloudops-cot-restricted-breakglass-role --query \"Role.AssumeRolePolicyDocument.Statement[].Principal.AWS\" --output text",
-      "output_evidence": "NOT MET. The role does not exist, so the trust document cannot be read: get-role on that name returns 'An error occurred (NoSuchEntity) when calling the GetRole operation: The role with name cloudops-cot-restricted-breakglass-role cannot be found.' That ABSENCE is sound rather than an instrument artifact -- an ISOLATED positive control under the same credentials, get-role demo-transform-runner-ec2-role, returns arn:aws:iam::313476888478:role/demo-transform-runner-ec2-role. What the trust WOULD have carried was read from the saved plan instead and matches the halves exactly: one statement, Sid ConsoleUserOnly, sts:AssumeRole, Principal.AWS arn:aws:iam::313476888478:user/Andrew_Berman_Console, no condition, no service, no wildcard. That is a read of the PLAN, not of the world, and is not offered as satisfying this criterion.",
-      "denominator": "1 of 1 get-role calls made, returning NoSuchEntity; 1 of 1 positive controls passing; 0 of 1 roles existing.",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "The criterion reads a live role that the refused apply never created. Not FAIL, because nothing was measured and found wrong -- the subject does not exist. The distinction matters here: a FAIL on an IAM trust criterion would suggest a role exists with the wrong trust, which would be a security-relevant claim and is false."
+      "output_evidence": "arn:aws:iam::313476888478:user/Andrew_Berman_Console -- that one ARN and nothing else, on one line. Two further reads make 'exactly one' measured rather than inferred from a single-line output: length(Role.AssumeRolePolicyDocument.Statement) returns 1, and the plan body that was applied carried one statement with Sid ConsoleUserOnly, no Condition, no service principal and no wildcard. The role's own ARN reads arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role.",
+      "denominator": "1 of 1 trust statements; 1 of 1 principals; 0 service principals; 0 wildcards; 0 conditions on the trust.",
+      "status": "PASS",
+      "status_reason": "The expect string is the whole output. The 'and nothing else' half is the part a single-line read could hide, so the statement count was read separately and returns 1. Note carried from the halves and not resolved by this act: the trust has NO condition (no MFA, no source IP) -- that is the design the CTO half signed as written and recorded as a row for the design's owner, not a defect this act introduced."
     },
     {
       "criterion_id": "CB62bj1-AC3",
       "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the saved plan that was applied named only the two addresses; the inline policy read back carries the four actions on the restricted prefix and no delete; no principal other than the console user can assume the role; no agent assumed it.",
       "method": "manual_read_with_citation",
       "invocation": "(judgment criterion -- no invocation; graded by 3.0.0_SA_CVO at L9)",
-      "output_evidence": "Not self-graded. Material for the grader, with each clause's reachability stated. (a) 'the saved plan that was applied named only the two addresses' -- the saved plan named EXACTLY the two addresses (Plan: 2 to add, 0 to change, 0 to destroy; no third address), but NO PLAN WAS APPLIED, so the clause's subject does not exist. (b) 'the inline policy read back carries the four actions ... and no delete' -- no read-back exists; the four actions and the absence of any delete were read from the PLAN BODY (s3:GetObject, s3:GetObjectVersion, s3:PutObject on arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/*, plus s3:ListBucket on the bucket under a StringLike s3:prefix condition for that prefix). (c) 'no principal other than the console user can assume the role' -- vacuously true of a role that does not exist; from the plan, the trust admits one principal and no other. (d) 'no agent assumed it' -- TRUE and unconditional: no agent assumed the role at any point, and none could have.",
-      "denominator": "4 clauses; 2 unreachable because no apply occurred (a, b), 1 vacuous (c), 1 satisfied outright (d). Plan addresses: 2 of 2 as targeted. Policy actions in the plan: 4, deletes: 0.",
+      "output_evidence": "Not self-graded. Each clause with its evidence, all four now reachable where two were vacuous on the refused run. (a) 'the saved plan that was applied named only the two addresses' -- the plan was saved to breakglass_targeted.tfplan with -target on exactly those two, printed 'Plan: 2 to add, 0 to change, 0 to destroy' with no third address, and safe-apply.sh was handed THAT FILE, not a fresh plan. (b) 'the inline policy read back carries the four actions on the restricted prefix and no delete' -- get-role-policy on the live role returns exactly s3:GetObject, s3:GetObjectVersion, s3:PutObject on opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/* and s3:ListBucket on the bucket under a StringLike s3:prefix condition for that prefix; zero delete actions; no other firm's bucket or prefix. (c) 'no principal other than the console user can assume the role' -- the live trust has one statement and one principal, the console user; no service, no wildcard. (d) 'no agent assumed it' -- TRUE: no sts:AssumeRole was called by this seat at any point, on either the refused run or this one. get-role and get-role-policy read the role's metadata and do not assume it.",
+      "denominator": "4 clauses, all 4 evidenced. Plan addresses 2 of 2 as targeted; policy actions 4, deletes 0; trust statements 1, principals 1; AssumeRole calls 0.",
       "judgment": true,
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
-      "status_reason": "A judgment criterion, graded by 3.0.0_SA_CVO at L9 and never PASS here, per the order's own <proof_of_spec> block. UNVERIFIABLE-BY-INSTRUMENT is this project's standing encoding for judgment=true rows (34 of 80 ADVI_COTBKF instances before this one). Two of its four clauses are additionally unreachable because the apply was refused, which is stated above rather than papered over."
+      "status_reason": "A judgment criterion, graded by 3.0.0_SA_CVO at L9 and never PASS here, per the order's own <proof_of_spec> block. UNVERIFIABLE-BY-INSTRUMENT is this project's standing encoding for judgment=true rows. Unlike the refused run, all four clauses now have live evidence rather than two being vacuous; the grader's remaining question is whether the plan that was applied is provably the plan that was saved, which the apply invocation's argument shows and the ledger's L2 proof records."
     }
   ],
   "controls": {
-    "nothing_was_created": {
-      "description": "The gate's claim 'Nothing was planned further or applied' is a producer self-report about its own behaviour, which CLAUDE.md forbids trusting. The world was therefore read directly after the refusal, on two independent planes (live IAM and terraform state), each with a positive control.",
-      "expected_landed": "Had the apply landed: get-role returns the role's ARN, and terraform state list contains 2 breakglass rows (254 or 255 rows total).",
-      "expected_not_landed": "get-role returns NoSuchEntity while an ISOLATED get-role of an existing role returns its ARN; state list stays at 253 rows with 0 breakglass while a positive control matches 10 lgic_firm rows.",
-      "observed": "The not-landed reading, on both planes. get-role cloudops-cot-restricted-breakglass-role -> NoSuchEntity; isolated control get-role demo-transform-runner-ec2-role -> arn:aws:iam::313476888478:role/demo-transform-runner-ec2-role. terraform state list -> 253 rows, 0 breakglass, 10 lgic_firm. Both planes agree with the gate's claim, so the claim is corroborated rather than taken.",
+    "role_name_stop_and_branch_a": {
+      "description": "AMENDMENT 1 added a STOP that had to be capable of firing: the plan must print the role's name and it must read cloudops-cot-restricted-breakglass-role, because the generated naming carriers are stale at HEAD (row D2-S103) and no seat on dell2 runs generate. The name was read out of the plan JSON's after-values, not from the .tf source and not assumed from the module.",
+      "expected_landed": "name == 'cloudops-cot-restricted-breakglass-role' and 'Plan: 2 to add, 0 to change, 0 to destroy' with exactly the two target addresses -> apply.",
+      "expected_not_landed": "Any other name is Branch B: stop, nothing applied. A stale generated carrier producing a different name was a live possibility, which is why the amendment added the check.",
+      "observed": "planned ROLE name 'cloudops-cot-restricted-breakglass-role' -- MATCH; planned POLICY name 'RestrictedPrefixGetPutList', the name the laptop CTO ruled. Count line 'Plan: 2 to add, 0 to change, 0 to destroy.', exactly the two addresses, rc=0, 0 Error blocks. Branch A.",
       "status": "PASS"
     },
-    "branch_a_gate_before_the_apply": {
-      "description": "Branch B had to be capable of firing, or 'the plan was Branch A' would be an unfalsifiable reading. The plan was targeted to exactly two addresses and its full address list and count line were printed and read, not grepped for a hoped-for string.",
-      "expected_landed": "Exactly 'Plan: 2 to add, 0 to change, 0 to destroy.' and exactly the two target addresses -> proceed to step 3.",
-      "expected_not_landed": "A third address, any change, any destroy, or the role already live or in state -> Branch B, stop, nothing applied. The same session had already measured the untargeted plan of this root at '4 to add, 0 to change, 1 to destroy' with 4 non-no-op addresses, so a non-Branch-A reading was a live possibility on this very root and not a hypothetical.",
-      "observed": "'Plan: 2 to add, 0 to change, 0 to destroy.' with exactly aws_iam_role.restricted_breakglass and aws_iam_role_policy.restricted_breakglass, rc=0, 0 Error blocks. Branch A. The plan body was additionally read field by field against both halves and matched, except one recorded inexactness in the COO half (it says the role has 'no tags'; the plan carries 4 provider default_tags, which are metadata, grant nothing, and are not a Branch B condition).",
+    "the_naming_limb_passed_where_it_refused": {
+      "description": "The same apply-time naming limb that refused this act at round 62 was re-exercised unchanged. AMENDMENT 1 required that a second refusal be reported and never overridden, so whether it passed is the discriminating fact and not a formality.",
+      "expected_landed": "NAMING-PLAN: PASS and no NAMING REFUSE line -> terraform proceeds.",
+      "expected_not_landed": "A second NAMING REFUSE -> nothing created, nothing overridden, refusal text back to the canon's owner on XB-20261011T082334Z-282f. The round-62 run is the measured negative arm of this same control: identical command shape, rc=7, 'NAMING-PLACE: REFUSE 1 / NAMING-PLAN: REFUSE 2 graded'.",
+      "observed": "'[naming-plan-gate] NAMING CONFORMANT aws_iam_role.restricted_breakglass cloudops-cot-restricted-breakglass-role -> cloudops-cot-restricted-breakglass-role' and '[naming-plan-gate] NAMING-PLAN: PASS 2 graded'. Zero NAMING REFUSE lines. safe-apply rc=0 where it was 7. NOTHING was overridden: no HALT_OVERRIDE, no pipeline-override, no edited literal, and the name was not typed in -- it came from the canon owner's fix (@e1267f773c) and round 63's one-line change.",
       "status": "PASS"
     },
-    "the_refusal_is_a_rule_defect_not_a_naming_verdict": {
-      "description": "The gate printed both a REFUSE and an 'Owed' replacement name, which invites typing the replacement in. Whether that is a genuine naming verdict was checked at the source by calling the builder directly on both names, instead of reading the gate's message as authoritative.",
-      "expected_landed": "If the policy name were simply non-conformant, grade() would RETURN a verdict plus a canonical name, and the owed name would be the canon's answer.",
-      "expected_not_landed": "If it is a rule or registry defect, grade() cannot reach a verdict at all and raises.",
-      "observed": "The defect reading. opal_naming.grade('restricted-prefix-get-put-list','IAM_POLICY') RAISES RaiseDefect('R1.f: restricted is in no vocabulary; no registry row resolves it') -- no verdict is returned -- while the sibling opal_naming.grade('cloudops-cot-restricted-breakglass-role','IAM_ROLE') returns ('CONFORMANT', ...) normally. This matches the gate's own parenthetical ('a rule or registry defect, not a naming verdict') and is why the owed name was NOT adopted. Independently: the owed name cloudops-49f-restricted-breakglass-policy carries the 49f firm token on a policy granting only on opal-data-cottonwood's commonwealth/cottonwood/bronze/crm/ prefix, while the same gate blessed the sibling role as cloudops-cot- -- so typing it in would commit a cross-firm mislabel on an IAM object.",
+    "live_iam_rather_than_the_apply_log": {
+      "description": "'Apply complete! 2 added' is the producer's self-report about its own run, which CLAUDE.md forbids trusting. Both objects were therefore read back from live IAM, and the trust's 'exactly one principal' was read as a COUNT rather than inferred from a one-line output.",
+      "expected_landed": "get-role returns the ARN; length(Statement) = 1; the principal list is the console user alone; get-role-policy returns 4 actions and no delete.",
+      "expected_not_landed": "Before this act the same get-role returned NoSuchEntity beside an isolated positive control that returned a real ARN -- so this instrument has a measured reading both ways on this exact name, from earlier today.",
+      "observed": "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role; length(Statement)=1; principal arn:aws:iam::313476888478:user/Andrew_Berman_Console and nothing else; get-role-policy rc=0 with PolicyName RestrictedPrefixGetPutList, 4 actions, 0 deletes, Cottonwood-only resources. All four reads agree with the plan that was applied.",
       "status": "PASS"
     },
-    "d2_s92_narrowing_exercised": {
-      "description": "The CTO half narrowed row D2-S92 (no shared-infra apply from dell2) to UNTARGETED applies, on the reasoning that a targeted apply refreshes only its targets and their dependencies, and the portal bucket is neither. That reasoning is testable on this very run.",
-      "expected_landed": "If the narrowing is sound, the targeted plan refreshes without touching opal-data-portal and returns rc=0 with no AccessDenied.",
-      "expected_not_landed": "If unsound, the targeted plan hits the same two AccessDenied errors the untargeted plan of round 61 did (cur:ListTagsForResource and s3:GetBucketPublicAccessBlock) and returns rc=1.",
-      "observed": "Sound. The targeted plan returned rc=0 with ZERO Error blocks, where the untargeted plan of the same root at round 61 returned rc=1 with exactly 2 AccessDenied errors naming cloudops-dell2-agent-user. The narrowing is confirmed by measurement on the same box and root, not accepted on the ruling alone.",
+    "round_62_entry_measured_not_re_executed": {
+      "description": "The 46-tree .open_deploys union surfaced round 62's own entry, which could have been read as an open deploy needing action. CLAUDE.md NEVER-2 requires measuring the ARTIFACT before acting on any open entry, so it was measured instead of acted on.",
+      "expected_landed": "If genuinely open, the shared tree would carry the open-deploy file and the entry's Status would not read CLOSED.",
+      "expected_not_landed": "If world-done, the shared tree has deleted the file and the entry reads CLOSED -- close SUPERSEDED, never re-execute.",
+      "observed": "World-done. 5 of 46 trees carry a pre-close snapshot and 41 do not; the shared tree's HEAD carries the open-deploy file 0 times, deleted at bb3ab3a85a (is-ancestor of HEAD, confirmed); the entry's Status reads 'CLOSED -- nothing stranded -- closed 20261011T081142Z'. Not re-executed and not re-closed. SEPARATE FINDING, reported not worked around: AMENDMENT 1 directs closing round 62's entry with `deploy_ledger close --gate-refused`, which is not executable -- that entry was already terminal at 08:11:42Z, and the --gate-refused flag was added at 08:35:25Z by commit e1267f773c, 24 minutes later and in response to row D2-S99. The substance the flag exists to record is already in that entry: the refusal verbatim in L2's proof plus the nothing-created reads with their positive control, and a CLOSE DISPOSITION section.",
       "status": "PASS"
     },
     "open_deploys_union_across_every_live_worktree": {
-      "description": "Condition 1 and CLAUDE.md NEVER-2: a shared-tree read of .open_deploys/ is not evidence, so every live worktree was read with git ls-tree (not ls -1, which hides .unindexed_red_state.json) and unioned with a per-tree denominator, before the ledger was opened and before the plan.",
-      "expected_landed": "A union with per-tree denominators printed and a verdict on whether any existing entry covers this act.",
-      "expected_not_landed": "A single-tree read would under-count: the 43 trees returned counts from 17 to 29, so no one tree holds the union.",
-      "observed": "43 of 43 trees readable, per-tree counts 17 to 29, 873 row-reads summed, 101 DISTINCT open-deploy paths. Word-boundary census over the union: 0 entries match breakglass, bj-1 or restricted -- no prior entry for this act to resume. The tree count had grown from 33 to 43 since the earlier union this session, which is why it was re-read rather than reused.",
+      "description": "Condition 1: every live worktree's .open_deploys/ read with git ls-tree (not ls -1, which hides .unindexed_red_state.json) and unioned with a per-tree denominator, before the ledger was opened and before the plan.",
+      "expected_landed": "A union with per-tree denominators printed, and a disposition for any entry that names this act.",
+      "expected_not_landed": "A single-tree read would under-count: the 46 trees returned counts from 17 to 29, so no one tree holds the union.",
+      "observed": "46 of 46 trees readable, per-tree range 17 to 29, 942 row-reads summed, 104 DISTINCT open-deploy paths. One entry named this act and was dispositioned by measuring the artifact (above). The tree count had grown from 43 to 46 since the round-62 union, which is why it was re-read rather than reused.",
       "status": "PASS"
     }
   },
   "declared_exclusions": [
     {
-      "item": "NEITHER of the two IAM objects this order exists to create -- aws_iam_role.restricted_breakglass and aws_iam_role_policy.restricted_breakglass -- appears in artifacts_produced, because neither was produced.",
-      "reason": "The apply was refused before terraform ran. Listing them under any deployed_state would overclaim: DEPLOYED-VERIFIED is false, and STAGED-AWAITING-GATE would imply an artifact is staged somewhere awaiting release when what exists is a saved plan that will not be applied under this order's current pins. Their absence is measured in the nothing_was_created control and in section 4 of the report."
+      "item": "AMENDMENT 1's instruction to close round 62's ledger entry with `deploy_ledger close --gate-refused \"<evidence>\"` was NOT executed.",
+      "reason": "Not executable, and reported rather than faked or silently skipped. That entry was already CLOSED at 20261011T081142Z with the gate-refusal evidence in L2's proof and a CLOSE DISPOSITION section; `close` refuses with 'no open deploy ledger for slug ...' once an entry is terminal. The --gate-refused flag itself landed at 08:35:25Z in commit e1267f773c -- 24 minutes AFTER that close, and added in response to this seat's row D2-S99. The amendment's intent (round 62 terminal and carrying a gate-refused disposition) is satisfied in substance; only the verb could not be run."
     },
     {
-      "item": "The saved plan and the gate output are not in artifacts_produced: C:/dev/_cotbkf_private_evidence_20261009/r62/ holding breakglass_targeted.tfplan, step2_targeted_plan.txt, step3_apply.txt (255 lines, the verbatim refusal), base_init.txt, state_after_refusal.txt and open_deploys_union_sorted.txt.",
-      "reason": "The BOUNDS require plans and their JSON to live OUTSIDE the repo, so no commit contains them and no (commit, path) pin could be true of them; artifact-resolution grades every artifacts_produced row as a git ref. Enumerated here and again in the report's evidence table."
+      "item": "CB62bj1-AC1's recorded invocation reads the after-plan JSON under .../r63/ while the criterion element names .../r62/.",
+      "reason": "This is the AMENDMENT 1 re-run and its evidence is written under r63, so the directory differs by one path segment from the element's literal. The file is the same artifact step 5 produces and nothing else in the invocation was changed. Named here and in output_evidence rather than quietly rewritten, and the r62 path holds no such file (step 5 never ran on the refused run), so pointing the criterion at it would read as a failure of this run rather than as the absence it is."
     },
     {
-      "item": "The 'Owed' name the gate printed was NOT adopted, and neither the .tf literal nor infra/logic/registry/ was edited.",
-      "reason": "Three independent reasons. (1) CLAUDE.md rule 30: a builder refusal is a missing registry row to add, NEVER a hand-typed workaround. (2) Neither infra/logic/registry/ nor the .tf is in this order's <paths> grant, and the registry is the LGIC canon's, owner the laptop 1.0.0_SA_CTO (CTO ruling @27ba4d3769 item 4). (3) Editing the .tf literal would change the blob 26aa1a2633 that BOTH pair halves pinned at 8c6fc7652a, voiding the pair the act runs under. Separately, the owed name carries the wrong firm token (49f on a Cottonwood-only grant), so it should not be adopted by anyone as printed."
+      "item": "No agent assumed the role, and whether the console user can assume it was NOT exercised.",
+      "reason": "Condition 5 forbids any agent assuming it, ever, to test it; the COO half puts the assumption to the console user. The order's own comp-adversary preflight names this as its BLIND. The role is inert until that user assumes it."
     },
     {
-      "item": "Branch C's pre-authorised targeted destroy of aws_iam_role.restricted_breakglass was NOT invoked, and step 5's post-apply plan was NOT run.",
-      "reason": "Branch C presupposes the role created and its policy refused by the applier's CREDENTIALS; here neither object exists and the refuser is an apply-time gate, so the destroy had no subject. Step 5's plan would have produced a BREAKGLASS-PLAN-AFTER line reading the pre-state (the_two_changed=2) while carrying the criterion's expect token -- a number that looks like a measurement and is not one."
+      "item": "The restricted prefix was neither read nor listed, and whether any object already sits under it is unknown.",
+      "reason": "The BOUNDS forbid reading or listing it; the applied bucket policy denies list and get there to every principal but the console user and this role. The COO half records the same as not established. Creating the role reads and writes no object."
     },
     {
-      "item": "<status> was NOT flipped and stays issued; no re-run was attempted.",
-      "reason": "The acceptance was not met and the remedy is owned elsewhere. The order's refusal clause directs a stop plus a new surprise row; rows ADVI_COTBKF-D2-S98 (the refusal and the wrong-firm owed name) and D2-S99 (the ledger has no state for a gate-refused apply) are filed. A re-run belongs to an amendment and takes a NEW ledger entry."
+      "item": "The 2 other non-no-op rows in proof 2's plan were reported and NOT acted on, and nothing was applied from that plan.",
+      "reason": "Condition 4 provides exactly this: whatever else the untargeted plan lists is dell2's known credential reading (row D2-S92) and proof 2 is a PLAN ONLY. They are the same portal-bucket false positive measured at round 61, where head-bucket returns 403 and a truly absent bucket returns 404."
     },
     {
-      "item": "comp-iam and comp-schedule were not run.",
-      "reason": "Both are DECLARED-NOT-APPLICABLE in the order's own preflight, which also records the issuer's BLIND that other Terraform roots and scripts were not searched for the role's name. That BLIND is untouched by this act and still stands."
+      "item": "comp-iam and comp-schedule were not run; the generated naming carriers were not regenerated.",
+      "reason": "Both comp tools are DECLARED-NOT-APPLICABLE in the order's preflight, whose BLIND (other Terraform roots and scripts not searched for the role's name) stands untouched. The stale generated carriers are row D2-S103 and the regeneration is the canon owner's; AMENDMENT 1 states it does not hold this act unless the planned name differs, and it did not."
     }
   ],
   "surprises": [
     "ADVI_COTBKF-D2-S98",
     "ADVI_COTBKF-D2-S99"
   ],
-  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~CB2/logs/2026-10-11/cb2_r62_bj1_breakglass_targeted_apply.md",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~CB2/logs/2026-10-11/cb2_r63_bj1_breakglass_applied.md",
   "compiler_tools": [
     {
       "tool": "deploy_ledger.py",
-      "invocation": "open --slug advi-cotbkf-r62-bj1-breakglass-role-targeted-apply-20261011 (4 legs, --window-hours 4), close-leg x4, hold --pre-apply (REFUSED), hold (REFUSED), close",
-      "result": "Opened before the plan per condition 1. BOTH hold forms refused -- --pre-apply because the plan leg carries proof, a normal hold because an open apply leg reads as 'a half-landed deploy'. Neither fits a gate-refused act, so the legs were closed with REFUSED-BEFORE-APPLY and UNREACHABLE-BY-CONSTRUCTION dispositions in their proof text, the entry closed, and the hold written into the entry as prose. Filed as row D2-S99. check --red no longer lists it."
+      "invocation": "open --slug advi-cotbkf-r63-bj1-breakglass-role-targeted-apply-rerun-20261011 (4 legs, --window-hours 4), close-leg x4, close; plus an attempted `close --gate-refused` on the round-62 slug",
+      "result": "New entry opened before the plan per condition 1, all 4 legs closed with proof, CLOSED. The round-62 `--gate-refused` close returned 'no open deploy ledger for slug' because that entry was already terminal -- see declared_exclusions. The flag now exists and its help text asks for exactly what row D2-S99 said was missing: 'the gate's refusal line plus the nothing-created reads with a positive control'."
     },
     {
       "tool": "safe-apply.sh",
       "invocation": ".tools/safe-apply.sh -chdir=infra/aws/terraform/shared-infra apply -input=false -no-color <the saved plan>",
-      "result": "rc=7, BLOCKED by the naming plan limb (LGIC_ENFORCE DEC-6, ENFORCE). Terraform never invoked. Both seat gates passed first (APPLY-WHO ADMITTED, CROSSBOX-DEPLOY CLEAR). The wrapper did exactly its job: it is the last reversible moment and it held."
+      "result": "rc=0. Seat gates ADMITTED/CLEAR, naming limb 'NAMING-PLAN: PASS 2 graded', then 'Apply complete! Resources: 2 added, 0 changed, 0 destroyed.' The same wrapper returned rc=7 on the round-62 attempt, which is the negative arm of this control."
     },
     {
       "tool": "opal_naming.py (grade)",
-      "invocation": "opal_naming.grade('cloudops-cot-restricted-breakglass-role','IAM_ROLE') and opal_naming.grade('restricted-prefix-get-put-list','IAM_POLICY')",
-      "result": "Role: ('CONFORMANT','cloudops-cot-restricted-breakglass-role'). Policy: RAISES RaiseDefect('R1.f: restricted is in no vocabulary; no registry row resolves it'). Run directly so the gate's message was corroborated at the source rather than taken on its word; it establishes that no verdict exists for the policy name."
-    },
-    {
-      "tool": "comp-rail (comp-find)",
-      "invocation": "denied one recursive grep over the naming-gate sources",
-      "result": "Correct denial; re-run with native Grep, which rule 21 lists FREE. Root-causing why the owed name resolves to 49f was then abandoned as out of scope for this order and recorded as not established."
+      "invocation": "grade('RestrictedPrefixGetPutList','IAM_POLICY'), grade('cloudops-cot-restricted-breakglass-role','IAM_ROLE'), grade('restricted-prefix-get-put-list','IAM_POLICY')",
+      "result": "('NO-SYSTEM-ASKED','restricted-prefix-get-put-list-policy'); ('CONFORMANT','cloudops-cot-restricted-breakglass-role'); and the OLD name still RAISES RaiseDefect R1.f. NO-SYSTEM-ASKED is the INTENDED verdict, not a residual problem: commit e1267f773c's own subject says 'an inline PascalCase IAM policy reaches NO-SYSTEM-ASKED before R1.f (D2-S98)'. Checked at the source before the apply so the gate's PASS was understood rather than merely welcomed."
     },
     {
       "tool": "comp-schedule / comp-iam",
@@ -169,7 +189,7 @@
     {
       "tool": "proof-of-spec-check.py",
       "invocation": "python .tools/proof-of-spec-check.py <this instance> CB62bj1-AC1,CB62bj1-AC2,CB62bj1-AC3",
-      "result": "run before any flip, as the <proof_of_spec> block requires; no flip was made."
+      "result": "run before the flip, as the <proof_of_spec> block requires."
     }
   ]
 }

@@ -1,0 +1,284 @@
+{
+ "to_id": "DSGN_IRPTV1.TO-IV-e-91",
+ "worker": "0.9.0_WK_DSGN_IRPTV1~49",
+ "causes": [
+  {
+   "cause": "The operation table lacked three rows routes.json now carries (24 rows: 22 DECLARED + 2 ROUTED_ELSEWHERE; the table held 21): POST custody-report (custody-report-persist), GET reporting/{account_id}/{which} (reporting-read), GET reporting/client/{client_id}/summary (reporting-summary-read). Two tests also stated the table length / operations named as the DECLARED count (22) while the contract's total is 24.",
+   "ids": [
+    "fe-s-13/routes.test.ts :: the operation table is routes.json > every DECLARED route builds its method and its bound path",
+    "fe-s-13/routes.test.ts :: the operation table is routes.json > every DECLARED route key is in the table with the same method and path",
+    "fe-s-13/routes.test.ts :: the operation table is routes.json > every entry's operation IS the contract's own producer operation",
+    "fe-s-13/routes.test.ts :: the operation table is routes.json > the NO-HANDLER-AT-HEAD population is the FILE's, whatever its size",
+    "fe-s-13/routes.test.ts :: the operation table is routes.json > the routes no consumer operation names are typed and recorded",
+    "mvp-selection/selection.test.ts :: retained selection from the actual guarded producer > canonical producer route table and all browser routes match",
+    "fe-s-14/header.test.ts :: F14-AC15 -- the version header is on every request > HEADER SENT -- every operation of the table builds with the header"
+   ],
+   "fix": "investor-reporting.ts: three IR_ROUTE_TABLE rows, three IrDeclaredOperation members, IrRouteStatus gains ROUTED_ELSEWHERE. fe-s-13/routes.test.ts 'named' and fe-s-14/header.test.ts table length now state _denominator.total (derived); header.test sample ids gain account_id, which, client_id.",
+   "portal_commit": "3e654e4e"
+  },
+  {
+   "cause": "The request corpus held 18 records for 22 DECLARED routes: none for analysis-request-pdf, analysis-request-original, custody-report-read, custody-report-persist.",
+   "ids": [
+    "fe-s-13/request-corpus.test.ts :: the request corpus > no request record and no adapter output carries a server-only key",
+    "fe-s-13/request-corpus.test.ts :: the request corpus > one record per DECLARED route, method and path bound from the route key",
+    "fe-s-14/header.test.ts :: F14-AC15 -- the version header is on every request > CORPUS RECORDS -- every replayable record carries it"
+   ],
+   "fix": "Four records written by the corpus's own generator (fe-s-13/gen-corpus.ts, unchanged, run against the new table). custody-report-persist carries body null (no portal caller, no request schema: nothing to source), as the upload POST record does; custody-report-read carries no query (revision not invented).",
+   "portal_commit": "2e5dbd9d"
+  },
+  {
+   "cause": "IRPT_BCKEND IB-pr-408 added facts.covered_account_ids to the producer's ExportReceipt.valid.json (contract revision 1.2); the portal's copy lacked it.",
+   "ids": [
+    "fe-s-13/producer-fixtures.test.ts :: producer fixtures > every copied fixture carries the same CONSUMED CONTENT as its source"
+   ],
+   "fix": "fixtures/wire/ExportReceipt.valid.json gains the member (the producer's value); contracts/wire/ExportReceipt.ts is the generator's own output for the current schema; the one test sample typed ExportReceiptWire gains the now-required member. tsc -p tsconfig.app.json: 0 errors.",
+   "portal_commit": "b7f1410c"
+  },
+  {
+   "cause": "The export-download response contract (revision 2026-10-03.2) requires data.sha256 and data.byte_length and puts the signed url/expires_at in download_route; the portal's published map answered that route with the receipt's download_route only.",
+   "ids": [
+    "fe-s-14/published-map.test.ts :: F14-AC16 -- the published map is a v1 statement > PUBLISHED MAP -- declared paths, v1 envelopes, contract-required data"
+   ],
+   "fix": "gen-corpus.ts DATA_FOR_OPERATION['export-download'] takes url, expires_at, sha256, byte_length from AnalysisRequestPdf.valid.json (producer's published instance of the same four members); default.json and fe-s-13-wire.json regenerated. Map stays at 12 keys.",
+   "portal_commit": "fbe65e15"
+  },
+  {
+   "cause": "The envelope and carry harnesses required every slice property to $ref a document (export-download defines three inline), compared the schema-bearing route count to the DECLARED count (3 DECLARED routes publish no response schema), and listed no exception for analysis-request-pdf's availability-less view.",
+   "ids": [
+    "fe-s-14/envelope.test.ts :: F14-AC13 -- every declared route parses through the one parser > ENVELOPES PARSED -- 11 of 11, each built from its own response contract",
+    "fe-s-57/carry.test.ts :: F57-AC2 -- unprojected_grant PRESENT-AT-ZERO carried onto every declared route > UNPROJECTED_GRANT PRESENT-AT-ZERO CARRIED ON 17 of 17 OPERATIONS"
+   ],
+   "fix": "Inline slice members are read from the published map entry for the route; the count equality is over DECLARED routes with and without a response schema (schema-less ones printed); analysis-request-pdf joins NO_AVAILABILITY_OPERATIONS beside comparison-catalogue. Test names unchanged.",
+   "portal_commit": "8a14511d"
+  }
+ ],
+ "wire_changes": [
+  {
+   "what": "IR_ROUTE_TABLE row for custody-report-persist",
+   "before": "no row (the client could not build this route)",
+   "after": "POST /api/scoped/investor-reporting/custody-report, body binding, DECLARED",
+   "source": "docs/contracts/investor-reporting/v1/routes.json route_key 'POST /api/scoped/investor-reporting/custody-report' (IB-pr-373) @4554aedfb06c6ef86984e63472e2d8e80a2361ae",
+   "page_effect": "none: no page or client method calls it"
+  },
+  {
+   "what": "IR_ROUTE_TABLE row for reporting-read",
+   "before": "no row",
+   "after": "GET /api/scoped/investor-reporting/reporting/{account_id}/{which}, query binding, ROUTED_ELSEWHERE",
+   "source": "routes.json route_key 'GET /api/scoped/investor-reporting/reporting/{account_id}/{which}' (DB-b-4, declared DB-b-23) @4554aedfb06c6ef86984e63472e2d8e80a2361ae",
+   "page_effect": "none: the reporting page builds this path itself in dashboard/reportingRead.ts"
+  },
+  {
+   "what": "IR_ROUTE_TABLE row for reporting-summary-read",
+   "before": "no row",
+   "after": "GET /api/scoped/investor-reporting/reporting/client/{client_id}/summary, query binding, ROUTED_ELSEWHERE",
+   "source": "routes.json route_key 'GET /api/scoped/investor-reporting/reporting/client/{client_id}/summary' (DB-b-16, declared DB-b-23) @4554aedfb06c6ef86984e63472e2d8e80a2361ae",
+   "page_effect": "none: the reporting page builds this path itself in dashboard/reportingRead.ts"
+  },
+  {
+   "what": "IrRouteStatus type",
+   "before": "'DECLARED' | 'NO-HANDLER-AT-HEAD'",
+   "after": "adds 'ROUTED_ELSEWHERE'",
+   "source": "routes.json _status_values",
+   "page_effect": "none: LiveClient.send refuses only NO-HANDLER-AT-HEAD"
+  },
+  {
+   "what": "ExportReceiptWire type (generated)",
+   "before": "facts without covered_account_ids",
+   "after": "facts.covered_account_ids: readonly string[]",
+   "source": "ExportReceipt.schema.json revision 1.2 (IB-pr-408)",
+   "page_effect": "none: type only; adaptExportReceipt does not name the member"
+  },
+  {
+   "summary": "No change to what any served page SENDS or READS: no route path, request member or envelope member read by a page moved. The five rows above are table and type entries only."
+  }
+ ],
+ "test_only_changes": [
+  {
+   "file": "fe-s-46/timeouts.test.ts",
+   "what": "ALLOWED_HUNKS gains the one fe-s-40/window.test.ts hunk of IV-e-89 (CTO msg 4406)",
+   "commit": "676c5209"
+  },
+  {
+   "file": "fe-s-13/routes.test.ts",
+   "what": "'named' equals _denominator.total (was declared); explained in-line",
+   "commit": "3e654e4e"
+  },
+  {
+   "file": "fe-s-14/header.test.ts",
+   "what": "table length equals _denominator.total (was declared); sample ids account_id, which, client_id",
+   "commit": "3e654e4e"
+  },
+  {
+   "file": "dsgn-irptv1/iv-e-26.submit-data-optional.test.ts",
+   "what": "typed ExportReceiptWire sample gains facts.covered_account_ids",
+   "commit": "b7f1410c"
+  },
+  {
+   "file": "fe-s-14/envelope.test.ts and fe-s-57/carry.test.ts",
+   "what": "inline slice member read from the published map; declared count over routes with and without a response schema; analysis-request-pdf in NO_AVAILABILITY_OPERATIONS (carry only)",
+   "commit": "8a14511d"
+  }
+ ],
+ "fixture_only_changes": [
+  {
+   "file": "fixtures/wire/requests/{analysis-request-pdf,analysis-request-original,custody-report-read,custody-report-persist}.request.json",
+   "commit": "2e5dbd9d"
+  },
+  {
+   "file": "fixtures/wire/ExportReceipt.valid.json",
+   "commit": "b7f1410c"
+  },
+  {
+   "file": "fe-s-13/gen-corpus.ts, fixtures/smoke/default.json, fixtures/smoke/fe-s-13-wire.json",
+   "commit": "fbe65e15"
+  }
+ ],
+ "not_fixed": [
+  {
+   "id": "fe-s-13/content-pins.test.ts :: the content pin > ADDITIVE, non-breaking producer changes leave this battery GREEN",
+   "reason": "The portal is right and the contract is incomplete: the comparison-catalogue and analysis-request-pdf response schemas (additionalProperties false) do not declare unprojected_grant, which the producer's one envelope always sends (served.py response_envelope, CTO ruling @61627f39f9) and the portal's one parser requires (FE-s-57, F57-AC4). Satisfying the pin would mean the portal stops requiring it on two operations. Needs the member in both schemas from IRPT_BCKEND. Row DSGN_IRPTV1-D2-W49-S7."
+  },
+  {
+   "id": "fe-s-13/content-pins.test.ts :: the content pin > THE MUTATION HARNESS IS TEST-LOCAL -- the contract on disk did not move",
+   "reason": "The portal is right and the contract is incomplete: the comparison-catalogue and analysis-request-pdf response schemas (additionalProperties false) do not declare unprojected_grant, which the producer's one envelope always sends (served.py response_envelope, CTO ruling @61627f39f9) and the portal's one parser requires (FE-s-57, F57-AC4). Satisfying the pin would mean the portal stops requiring it on two operations. Needs the member in both schemas from IRPT_BCKEND. Row DSGN_IRPTV1-D2-W49-S7."
+  },
+  {
+   "id": "fe-s-13/content-pins.test.ts :: the content pin > the pin names all three axes and the live contract offers every item",
+   "reason": "The portal is right and the contract is incomplete: the comparison-catalogue and analysis-request-pdf response schemas (additionalProperties false) do not declare unprojected_grant, which the producer's one envelope always sends (served.py response_envelope, CTO ruling @61627f39f9) and the portal's one parser requires (FE-s-57, F57-AC4). Satisfying the pin would mean the portal stops requiring it on two operations. Needs the member in both schemas from IRPT_BCKEND. Row DSGN_IRPTV1-D2-W49-S7."
+  },
+  {
+   "id": "fe-s-13/producer-fixtures.test.ts :: producer fixtures > every DECLARED route still publishes the RESPONSE ENVELOPE this client parses",
+   "reason": "Same cause and same row as the three content-pins ids: the two response envelopes do not declare unprojected_grant. Row DSGN_IRPTV1-D2-W49-S7."
+  },
+  {
+   "id": "dsgn-irptv1/iv-e-17.bridge-dropped.test.ts :: IVE17-AC3 -- no bridge cast for the landed fields, and the content pin still offers 17 of 17 > every arm holds",
+   "reason": "Table-attached id (D2-W50-S1). It spawns the content-pins test and stays red with it: same cause, row DSGN_IRPTV1-D2-W49-S7. Confirmed by run: it fails after all 14 fixes."
+  },
+  {
+   "id": "fe-s-1/fixtures.test.ts :: fixture set > the smoke map covers every scoped route, one entry each",
+   "reason": "Table-attached id (D2-W50-S1). default.json would need 22 keys; fe-s-14 published-map pins the same file at 12 keys and the producer's seam test pins it at 12 (test_seam_paired.py CONSUMER_SMOKE_ENTRIES), and custody-report-read / custody-report-persist have no producer fixture to source a body from. No entry added. Row DSGN_IRPTV1-D2-W49-S8."
+  }
+ ],
+ "bounds_repair": {
+  "test_id": "fe-s-46/timeouts.test.ts :: BOUNDS -- the two files change only the third argument of test( calls > against DEV 1f3ce9f0: every hunk is a third-argument insertion or the one pinned S7 exception",
+  "hunk": {
+   "file": "src/pages/InvestorReporting/__tests__/fe-s-40/window.test.ts",
+   "removed": [
+    "const requested: CalendarWindow = { start: '2019-01-01', end: FROZEN_REQUESTED.end }",
+    "const answered: CalendarWindow = { start: '2019-01-02', end: FROZEN_REQUESTED.end }"
+   ],
+   "added_lines": 4,
+   "reason": "IV-e-89 commit 733986d7, CTO msg 4406"
+  },
+  "portal_commit": "676c5209",
+  "result_after": "1 pass 0 fail run alone at that commit; passes in the whole-scope run after"
+ },
+ "workspace_commit": "4554aedfb06c6ef86984e63472e2d8e80a2361ae",
+ "portal_commit": "8a14511db5d70aa4371b285a65ea69a0e3de9762",
+ "portal_commits_in_order": [
+  "676c5209",
+  "3e654e4e",
+  "2e5dbd9d",
+  "b7f1410c",
+  "fbe65e15",
+  "8a14511d"
+ ],
+ "product_files_changed": [
+  "portal/src/api/endpoints/investor-reporting.ts",
+  "portal/src/pages/InvestorReporting/contracts/wire/ExportReceipt.ts"
+ ],
+ "step0_baseline": {
+  "failed": 35,
+  "includes_bounds": true,
+  "ids_file": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~49/catchup/baseline_ids.json",
+  "base_new_failing_ids": [
+   "fe-s-46/timeouts.test.ts :: BOUNDS -- the two files change only the third argument of test( calls > against DEV 1f3ce9f0: every hunk is a third-argument insertion or the one pinned S7 exception"
+  ]
+ },
+ "suite_after": {
+  "failed": 20,
+  "command": "bun test src/pages/InvestorReporting (cwd portal worktree)",
+  "runner": "Ran 1159 tests across 372 files: 1112 pass, 27 skip, 20 fail",
+  "fixed_ids": [
+   "dsgn-irptv1/iv-e-18.fields-rescope.test.ts :: IVE18-AC3 -- fe-s-5/fields.test.ts re-scoped to the PRD, citing CTO 100865 > two arms",
+   "dsgn-irptv1/iv-e-25.states-rescope.test.ts :: IVE25-AC1 -- fe-s-5/states.test.ts re-scoped to the PRD, citing R6 > two arms",
+   "fe-s-13/producer-fixtures.test.ts :: producer fixtures > every copied fixture carries the same CONSUMED CONTENT as its source",
+   "fe-s-13/request-corpus.test.ts :: the request corpus > no request record and no adapter output carries a server-only key",
+   "fe-s-13/request-corpus.test.ts :: the request corpus > one record per DECLARED route, method and path bound from the route key",
+   "fe-s-13/routes.test.ts :: the operation table is routes.json > every DECLARED route builds its method and its bound path",
+   "fe-s-13/routes.test.ts :: the operation table is routes.json > every DECLARED route key is in the table with the same method and path",
+   "fe-s-13/routes.test.ts :: the operation table is routes.json > every entry's operation IS the contract's own producer operation",
+   "fe-s-13/routes.test.ts :: the operation table is routes.json > the NO-HANDLER-AT-HEAD population is the FILE's, whatever its size",
+   "fe-s-13/routes.test.ts :: the operation table is routes.json > the routes no consumer operation names are typed and recorded",
+   "fe-s-14/envelope.test.ts :: F14-AC13 -- every declared route parses through the one parser > ENVELOPES PARSED -- 11 of 11, each built from its own response contract",
+   "fe-s-14/header.test.ts :: F14-AC15 -- the version header is on every request > CORPUS RECORDS -- every replayable record carries it",
+   "fe-s-14/header.test.ts :: F14-AC15 -- the version header is on every request > HEADER SENT -- every operation of the table builds with the header",
+   "fe-s-14/published-map.test.ts :: F14-AC16 -- the published map is a v1 statement > PUBLISHED MAP -- declared paths, v1 envelopes, contract-required data",
+   "fe-s-40/window.test.ts :: F40-AC5 -- the portal calendar agrees with lib/trading_calendar.py, day by day > every day of the covered years, re-derived from the frontier with is_trading_day",
+   "fe-s-47/no-status-reason.test.ts :: FE-s-47 -- a response with no status says why its state is unknown > F47-AC6 -- the reach, by subtraction over the committed tree",
+   "fe-s-47/no-status-reason.test.ts :: FE-s-47 -- a response with no status says why its state is unknown > F47-AC7 -- no status-optional operation is refused for a reasonless UNCERTAIN",
+   "fe-s-57/carry.test.ts :: F57-AC2 -- unprojected_grant PRESENT-AT-ZERO carried onto every declared route > UNPROJECTED_GRANT PRESENT-AT-ZERO CARRIED ON 17 of 17 OPERATIONS",
+   "fe-s-90/suite-complete-check.test.ts :: FE-s-90 -- suite-complete-check.mjs refuses timeout and crash, reconciles failure identity > CONTROL 1 -- a completed, fully-passing run -> SUITE-COMPLETE: yes, UNEXPECTED-FAIL: 0",
+   "fe-s-90/suite-complete-check.test.ts :: FE-s-90 -- suite-complete-check.mjs refuses timeout and crash, reconciles failure identity > CONTROL 2 -- a completed run with one genuinely unexpected failure -> SUITE-COMPLETE: yes is WRONG; must refuse",
+   "fe-s-90/suite-complete-check.test.ts :: FE-s-90 -- suite-complete-check.mjs refuses timeout and crash, reconciles failure identity > CONTROL 3 -- a completed run whose one failure matches an --allow-listed id -> SUITE-COMPLETE: yes, UNEXPECTED-FAIL: 0",
+   "fe-s-90/suite-complete-check.test.ts :: FE-s-90 -- suite-complete-check.mjs refuses timeout and crash, reconciles failure identity > CONTROL 4 -- a run killed by `timeout` mid-execution -> SUITE-COMPLETE: no, naming the timeout reason (C-S188)",
+   "mvp-selection/selection.test.ts :: retained selection from the actual guarded producer > canonical producer route table and all browser routes match"
+  ],
+  "fixed_by_this_order": [
+   "fe-s-13/routes.test.ts :: the operation table is routes.json > every DECLARED route builds its method and its bound path",
+   "fe-s-13/routes.test.ts :: the operation table is routes.json > every DECLARED route key is in the table with the same method and path",
+   "fe-s-13/routes.test.ts :: the operation table is routes.json > every entry's operation IS the contract's own producer operation",
+   "fe-s-13/routes.test.ts :: the operation table is routes.json > the NO-HANDLER-AT-HEAD population is the FILE's, whatever its size",
+   "fe-s-13/routes.test.ts :: the operation table is routes.json > the routes no consumer operation names are typed and recorded",
+   "mvp-selection/selection.test.ts :: retained selection from the actual guarded producer > canonical producer route table and all browser routes match",
+   "fe-s-14/header.test.ts :: F14-AC15 -- the version header is on every request > HEADER SENT -- every operation of the table builds with the header",
+   "fe-s-13/request-corpus.test.ts :: the request corpus > no request record and no adapter output carries a server-only key",
+   "fe-s-13/request-corpus.test.ts :: the request corpus > one record per DECLARED route, method and path bound from the route key",
+   "fe-s-14/header.test.ts :: F14-AC15 -- the version header is on every request > CORPUS RECORDS -- every replayable record carries it",
+   "fe-s-13/producer-fixtures.test.ts :: producer fixtures > every copied fixture carries the same CONSUMED CONTENT as its source",
+   "fe-s-14/published-map.test.ts :: F14-AC16 -- the published map is a v1 statement > PUBLISHED MAP -- declared paths, v1 envelopes, contract-required data",
+   "fe-s-14/envelope.test.ts :: F14-AC13 -- every declared route parses through the one parser > ENVELOPES PARSED -- 11 of 11, each built from its own response contract",
+   "fe-s-57/carry.test.ts :: F57-AC2 -- unprojected_grant PRESENT-AT-ZERO carried onto every declared route > UNPROJECTED_GRANT PRESENT-AT-ZERO CARRIED ON 17 of 17 OPERATIONS"
+  ],
+  "already_passing_at_step0": [
+   "dsgn-irptv1/iv-e-18.fields-rescope.test.ts :: IVE18-AC3 -- fe-s-5/fields.test.ts re-scoped to the PRD, citing CTO 100865 > two arms",
+   "dsgn-irptv1/iv-e-25.states-rescope.test.ts :: IVE25-AC1 -- fe-s-5/states.test.ts re-scoped to the PRD, citing R6 > two arms",
+   "fe-s-40/window.test.ts :: F40-AC5 -- the portal calendar agrees with lib/trading_calendar.py, day by day > every day of the covered years, re-derived from the frontier with is_trading_day",
+   "fe-s-47/no-status-reason.test.ts :: FE-s-47 -- a response with no status says why its state is unknown > F47-AC6 -- the reach, by subtraction over the committed tree",
+   "fe-s-47/no-status-reason.test.ts :: FE-s-47 -- a response with no status says why its state is unknown > F47-AC7 -- no status-optional operation is refused for a reasonless UNCERTAIN",
+   "fe-s-90/suite-complete-check.test.ts :: FE-s-90 -- suite-complete-check.mjs refuses timeout and crash, reconciles failure identity > CONTROL 1 -- a completed, fully-passing run -> SUITE-COMPLETE: yes, UNEXPECTED-FAIL: 0",
+   "fe-s-90/suite-complete-check.test.ts :: FE-s-90 -- suite-complete-check.mjs refuses timeout and crash, reconciles failure identity > CONTROL 2 -- a completed run with one genuinely unexpected failure -> SUITE-COMPLETE: yes is WRONG; must refuse",
+   "fe-s-90/suite-complete-check.test.ts :: FE-s-90 -- suite-complete-check.mjs refuses timeout and crash, reconciles failure identity > CONTROL 3 -- a completed run whose one failure matches an --allow-listed id -> SUITE-COMPLETE: yes, UNEXPECTED-FAIL: 0",
+   "fe-s-90/suite-complete-check.test.ts :: FE-s-90 -- suite-complete-check.mjs refuses timeout and crash, reconciles failure identity > CONTROL 4 -- a run killed by `timeout` mid-execution -> SUITE-COMPLETE: no, naming the timeout reason (C-S188)"
+  ],
+  "new_failing_ids": [],
+  "remaining_failing_ids": [
+   "dsgn-irptv1/iv-e-109.accounts-ordinal-scale.test.ts :: IVE109 -- W2-08 ordinal brand-hex scale for L-1 account slices > every arm holds",
+   "dsgn-irptv1/iv-e-110.drill-bar-classes.test.ts :: IVE110 -- W2-09 the drill bar aggregates to asset classes > every arm holds",
+   "dsgn-irptv1/iv-e-111.skip-single-level.test.ts :: IVE111 -- W2-21 a level with one member skips its pie + brief-face tile > every arm holds",
+   "dsgn-irptv1/iv-e-112.one-scope.test.ts :: IVE112 -- W2-22 one selection drives the card and (via onAccountDrill) the tab > every arm holds",
+   "dsgn-irptv1/iv-e-115.order-and-disclosure.test.tsx :: IVE115 -- class order, sleeve order and the collapsible bucket > every arm holds",
+   "dsgn-irptv1/iv-e-116.generate-journey.test.tsx :: IV-e-116 -- Generate leads to the request's own status view and the list re-lists itself (W2-07) > every arm holds",
+   "dsgn-irptv1/iv-e-137.comparison-resolve-and-name.test.tsx :: IVE137 -- a comparison is resolved before it is added, and named > (f) wiring",
+   "fe-s-13/content-pins.test.ts :: the content pin > the pin names all three axes and the live contract offers every item",
+   "fe-s-13/content-pins.test.ts :: the content pin > ADDITIVE, non-breaking producer changes leave this battery GREEN",
+   "fe-s-13/content-pins.test.ts :: the content pin > THE MUTATION HARNESS IS TEST-LOCAL -- the contract on disk did not move",
+   "dsgn-irptv1/iv-e-17.bridge-dropped.test.ts :: IVE17-AC3 -- no bridge cast for the landed fields, and the content pin still offers 17 of 17 > every arm holds",
+   "dsgn-irptv1/iv-e-25.colour-by-code.test.ts :: IVE25-AC2 -- model colour by served code; security colour by served class > three arms",
+   "dsgn-irptv1/iv-e-26.wire-regen.test.ts :: IVE26-AC3 -- gen-wire.ts regeneration is idempotent, data is optional, content pin still 17 of 17 > every arm holds",
+   "dsgn-irptv1/iv-e-69.performance-finished.test.tsx :: IVE69-AC1 -- performance-finished answer, one arm per UIC row > every arm holds",
+   "fe-s-1/fixtures.test.ts :: fixture set > the smoke map covers every scoped route, one entry each",
+   "fe-s-1/source-bounds.test.ts :: source bounds > neither source carries any forbidden token",
+   "fe-s-13/producer-fixtures.test.ts :: producer fixtures > every DECLARED route still publishes the RESPONSE ENVELOPE this client parses",
+   "fe-s-25/absent-vs-null.test.ts :: F25-AC2 -- ABSENT and NULL are two different things on the page > on every no-answer state the two render differently, on the path the tabs render",
+   "fe-s-25/absent-vs-null.test.ts :: F25-AC2 -- ABSENT and NULL are two different things on the page > the two renderings are the RIGHT two, and the fact survives on the view document alone",
+   "fe-s-25/absent-vs-null.test.ts :: F25-AC3 -- `?? null` is refused wherever the contract distinguishes > the scan finds none, and the scan can fire"
+  ],
+  "evidence": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~49/catchup/after.txt"
+ },
+ "rows": [
+  "DSGN_IRPTV1-D2-W49-S7",
+  "DSGN_IRPTV1-D2-W49-S8",
+  "DSGN_IRPTV1-D2-W49-S9"
+ ]
+}

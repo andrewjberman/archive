@@ -1,6 +1,6 @@
 """AMGT_RESAPP round-92 PREP -- AMGT-qq-4: every stored analysis object's re-verified driver is the driver the live /thesis route serves.
 
-  PYTHONPATH=<repo root> python r92_driver_reverified.py [--where deployed|local]
+  PYTHONPATH=<repo root> python r92_driver_reverified.py [--where deployed|local] [--hold KEY[,KEY...]]
 
 For each stored analysis object (`filings/v1/<key>/<accession>.analysis.json`, listed, not typed): EXPECTED is what the production path
 `analyze.reverify_stored_thesis_driver(key, accession, dry_run=True)` computes TODAY on the checkout's code (nothing written); SERVED is
@@ -9,6 +9,9 @@ For each stored analysis object (`filings/v1/<key>/<accession>.analysis.json`, l
     R2 control: every name whose expected points equal the stored analysis's is served byte-equal to what it served before (it is
        compared to the same expectation, and any difference is a name the act moved without a reason).
     R3 denominators printed: analysis objects, with a served driver, expected-changed, served-equal.
+    --hold KEY,...  names the issuer HOLDS out of the write (round 92: `SAP_GY_Equity`, whose expected points mix a EUR-millions
+       rendering (2023, 2024) with a EUR-billions one (2025)): a held name must still serve its STORED points (it is not written),
+       its would-be expected points are printed, and a held name that is not expected-changed fails R4 (a stale hold).
 Verdict: R92 DRIVER REVERIFIED: YES|NO (exit 0|1). Before the act the expected-changed names read NO.
 """
 import argparse
@@ -44,6 +47,7 @@ def triples(points):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--where", default="deployed", choices=["deployed", "local"])
+    ap.add_argument("--hold", default="")
     args = ap.parse_args()
     pairs = []
     for page in _S3.get_paginator("list_objects_v2").paginate(Bucket="opal-data-harvest", Prefix="filings/v1/"):
@@ -51,7 +55,9 @@ def main():
             m = re.match(r"^filings/v1/([^/]+)/([^/]+)\.analysis\.json$", o["Key"])
             if m:
                 pairs.append((m.group(1), m.group(2)))
+    hold = {k for k in args.hold.split(",") if k}
     n = served_n = changed = equal = bad_changed = bad_control = 0
+    held_changed = set()
     lines = []
     for key, acc in sorted(pairs):
         n += 1
@@ -67,6 +73,15 @@ def main():
         served_n += 1
         served = triples(td.get("points"))
         is_changed = expected != stored_pts
+        if key in hold:
+            if is_changed:
+                held_changed.add(key)
+            ok = served == stored_pts
+            bad_control += (not ok)
+            equal += 1
+            lines.append("   %-16s HELD    | would-be expected %d point(s) %s | stored %d | served %d | %s" % (
+                key, len(expected), expected, len(stored_pts), len(served), "OK (stored points still served)" if ok else "SERVED != STORED"))
+            continue
         ok = served == expected
         if is_changed:
             changed += 1
@@ -81,10 +96,12 @@ def main():
         args.where, n, served_n, changed, equal))
     r1 = bad_changed == 0 and changed >= 1
     r2 = bad_control == 0
+    r4 = hold <= held_changed
     for ok, label in ((r1, "R1 every expected-changed name is served with the expected points (at least one such name)"),
-                      (r2, "R2 control: every expected-same name is served as expected")):
+                      (r2, "R2 control: every expected-same name (and every held name) is served as expected")) + (
+            ((r4, "R4 every held name is expected-changed (no stale hold): %s" % ",".join(sorted(hold))),) if hold else ()):
         print("%s %s" % ("PASS" if ok else "FAIL", label))
-    ok = r1 and r2
+    ok = r1 and r2 and r4
     print("R92 DRIVER REVERIFIED: %s" % ("YES" if ok else "NO"))
     return 0 if ok else 1
 
