@@ -2,8 +2,9 @@
 
     python read_profile_firms.py andrew@opalinvest.com cottonwood
 
-Prints the row's allowedFirmIds (firm ids), status and userType, and whether the named firm is among them. It reads four
-attributes by name and never the password hash or any other attribute. It writes nothing. ASCII only.
+Prints the row's allowedFirmIds (firm ids), status and userType, and whether the named firm is among them. It finds the row as the product does (the email index, then the
+PROFILE item by the PK the index names), reads four attributes by name and never the password hash or any other attribute,
+and prints the form of the PK, never its value. It writes nothing. ASCII only.
 """
 import sys
 
@@ -18,7 +19,23 @@ def main(argv):
         return 2
     email, firm = argv[1].strip().lower(), argv[2].strip()
     ddb = boto3.client("dynamodb", region_name="us-east-1")
-    item = ddb.get_item(TableName=TABLE, Key={"PK": {"S": "USER#" + email}, "SK": {"S": "PROFILE"}}, ConsistentRead=True,
+    # The lookup the product itself makes (_scope/canonical_profile_reads.py get_user): the email GSI names the row's PK,
+    # then the PROFILE item is read by that PK. A person's PK is NOT assumed to be "USER#<email>": the first version of
+    # this script assumed it and read an absence that was only its own key.
+    found = ddb.query(TableName=TABLE, IndexName="email-index", KeyConditionExpression="email = :email",
+                      ExpressionAttributeValues={":email": {"S": email}}, Limit=2)
+    rows = found.get("Items", [])
+    print("INDEX email-index rows=%d more=%s" % (len(rows), "YES" if found.get("LastEvaluatedKey") else "NO"))
+    if not rows:
+        print("USER-NOT-IN-INDEX %s" % email)
+        return 0
+    if len(rows) > 1 or found.get("LastEvaluatedKey"):
+        print("USER-AMBIGUOUS-IN-INDEX %s" % email)
+        return 0
+    pk = (rows[0].get("PK") or {}).get("S")
+    sk = (rows[0].get("SK") or {}).get("S")
+    print("INDEX-KEY pk_form=%s sk=%s" % ("USER#<email>" if pk == "USER#" + email else "OTHER", sk))
+    item = ddb.get_item(TableName=TABLE, Key={"PK": {"S": pk}, "SK": {"S": "PROFILE"}}, ConsistentRead=True,
                         ProjectionExpression="allowedFirmIds, #s, userType, firmId",
                         ExpressionAttributeNames={"#s": "status"}).get("Item")
     if item is None:

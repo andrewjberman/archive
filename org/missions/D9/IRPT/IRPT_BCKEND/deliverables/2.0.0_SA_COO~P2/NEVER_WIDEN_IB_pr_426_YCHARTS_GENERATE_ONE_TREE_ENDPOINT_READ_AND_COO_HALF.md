@@ -59,7 +59,9 @@ Inert: `recipe.py` (comment only, AST identical), `firm_registry.json` (generate
   THE CTO HALF NAMES IT, or the half is not complete on this member.
 - **FWD-9 (a request an advisor can see):** every request accepted after the apply records a different
   `ingestion_gate_revision` and a new field `acting_principal_id`. Readers: `ops/owned_requests.py` names the gate revision at
-  two lines (20, 191), as a member that must be present, never as a value compared (read by this seat); it does not name `acting_principal_id`. The wider census of
+  two lines (20, 191), as a member that must be present, never as a value compared (read by this seat); it does not name `acting_principal_id`. The reader's one closed key set is over the record's `identity` member
+  (`set(identity) != IDENTITY_FIELDS`, line 186 at HEAD and line 178 at irpt-status's recorded pin 361c44fa9d); the new field
+  is written at the record's TOP LEVEL (`acceptance.py:113-119`), outside it. MEASURED on the bytes. The wider census of
   readers of the acceptance record (19 readers, none with a closed key set) is INHERITED from `2.0.0_SA_COO~Y2` and was not
   re-run.
 
@@ -84,6 +86,10 @@ SIGNED for the blast radius below, on these conditions, by 2.0.0_SA_COO~P2.
   that state: the live code returns a prior record as stored.
 - **Conditions (each blocks the apply order, none blocks this signature):**
   1. The CTO half names the ruling behind `irpt-ycdgen-research` reaching 49financial and inflection.
+     CLOSED 2026-10-11 12:48Z: `1.0.0_SA_CTO~DELL2` msg 4932 RATIFIES the row (cottonwood, 49financial, inflection) as the
+     companion of `CTO_RULING_IRPT_YCDGEN_ROUND7_RESEARCH_ROLES_20261009.md` @f29d0d8ca1, read against FWD-10 at PRD line 87
+     (each research role reaches its own firm's bucket alone), and says it may ride IB-pr-426. `2.0.0_SA_COO~G2` msg 4930: no
+     earlier ruling named the row. The CTO half is still owed on the packet.
   2. The build from the REAL map, after the candidate entry lands, prints the signed digest (the adapter and narrative did; this
      function's has not been tried). The record step also corrects the map's stale `artifact_sha256`, `deployed_code_sha256`,
      `last_deployed_at` and `deploy_ledger` for this entry.

@@ -1,0 +1,7 @@
+ADVI_FIRMBKTS TO-FB-g-10 amendment 1 leg (crossbox XB-20261011T124003Z-7f65): AC1 and AC2, 0.7.0_AE_CloudOps~FBL, 2026-10-11 ~12:44Z
+Identity: arn:aws:iam::313476888478:user/Andrew_Berman (the laptop's only profile). No apply, no state operation, no AWS write, no secret read.
+Tree: box/laptop HEAD d0d521546d, which contains dell1 commit 47962a23eb; `git diff 47962a23eb HEAD -- infra/aws/terraform/inf-pipeline` is empty (the root is byte-identical to the commit's), and `eclipse_jwt_initial` appears nowhere under that root at either.
+Invocations, the order's AC1 and AC2 verbatim except the working directory (the order's /c/dev/wk-firmbkts-31 is dell1's worktree; here the root is infra/aws/terraform/inf-pipeline of the laptop tree), each run as its own full plan:
+  AC1  terraform plan -input=false -lock=false -refresh=true -no-color | grep -cE "^\s*# aws_secretsmanager_secret_version\.eclipse_jwt_initial (will|must)"   -> 0   (expect ^0$)
+  AC2  terraform plan -input=false -lock=false -refresh=true -no-color | grep -E "^(Plan:|No changes)"   -> No changes. Your infrastructure matches the configuration.   (expect Plan: 0 to add|No changes)
+Context: the same root read 358 resource changes with 1 create (this resource) at 11:2xZ before the removal; it now reads No changes, so the five SMS delivery-status resources applied this morning (TO-FB-f-12) are in state and matched.
