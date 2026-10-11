@@ -1,0 +1,130 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bo-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bo-1.split-store-pin.md",
+  "group": "OTHER",
+  "vintage_commit": "3e1c08668d"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~99",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round67.md",
+  "vintage_commit": "3e1c08668d",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bo-1.split-store-pin.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/silver/commonwealth_daily_valuation.py",
+   "kind": "script",
+   "commit_or_etag": "af1f0d4a73",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code and tests only; the runs read the split store (version listing and gets) and wrote nothing to S3, no deploy",
+   "artifact_covered_by": [
+    "CB67bo1-AC1",
+    "CB67bo1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/assets/scripts/silver/commonwealth_sweep_regrade.py",
+   "kind": "script",
+   "commit_or_etag": "af1f0d4a73",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code and tests only; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB67bo1-AC1",
+    "CB67bo1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/assets/scripts/silver/commonwealth_fwd3_serve.py",
+   "kind": "script",
+   "commit_or_etag": "af1f0d4a73",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code and tests only; --build only, no --apply, no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB67bo1-AC1",
+    "CB67bo1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/assets/scripts/analysis/commonwealth_price_census.py",
+   "kind": "script",
+   "commit_or_etag": "af1f0d4a73",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code and tests only; version-aware read helpers added, no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB67bo1-AC1",
+    "CB67bo1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_split_store_pin.py",
+   "kind": "script",
+   "commit_or_etag": "af1f0d4a73",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "tests on a faked versioned bucket; no S3 call, no deploy",
+   "artifact_covered_by": [
+    "CB67bo1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~99/SPLIT_STORE_PIN.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only local measurement record of the pin and the two proofs; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB67bo1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB67bo1-AC1",
+   "criterion_verbatim": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests -q expect: passed",
+   "method": "test_suite",
+   "invocation": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests -q",
+   "expect": "passed",
+   "output_evidence": "866 passed, 12 skipped, 25 warnings in 50.23s, 0 failed, 0 errors (variable unset) (rc 0), run under timeout 120 on code commit af1f0d4a73; 847 passed before + 19 cases of test_commonwealth_split_store_pin.py",
+   "denominator": "866 passed, 0 failed, 12 skipped, 0 errors of 878 collected",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB67bo1-AC2",
+   "criterion_verbatim": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~99/SPLIT_STORE_PIN.json',encoding='utf-8'));...print('SPLIT-STORE-PIN-RECORD refuses_without_flag=%s ...')\" expect: SPLIT-STORE-PIN-RECORD refuses_without_flag=True proof_a_rows=1691729 proof_a_differing=0 proof_a_held=32 proof_b_price_rows_equal=True proof_b_digest_equal=True",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~99/SPLIT_STORE_PIN.json',encoding='utf-8'));a=d['proof_a'];b=d['proof_b'];print('SPLIT-STORE-PIN-RECORD refuses_without_flag=%s proof_a_rows=%d proof_a_differing=%d proof_a_held=%d proof_b_price_rows_equal=%s proof_b_digest_equal=%s proof_b_minutes_apart=%d'%(d['refuses_without_flag'],a['rows'],a['differing'],a['held_cusips'],b['price_rows_equal'],b['pin_digest_equal'],b['minutes_apart']))\"",
+   "expect": "SPLIT-STORE-PIN-RECORD refuses_without_flag=True proof_a_rows=1691729 proof_a_differing=0 proof_a_held=32 proof_b_price_rows_equal=True proof_b_digest_equal=True",
+   "output_evidence": "rc 0. SPLIT-STORE-PIN-RECORD refuses_without_flag=True proof_a_rows=1691729 proof_a_differing=0 proof_a_held=32 proof_b_price_rows_equal=True proof_b_digest_equal=True proof_b_minutes_apart=30",
+   "denominator": "1691729 of 1691729 daily-return rows compared, 0 differing, 32 of 32 listed CUSIPs held at 2026-10-09T11:52:52Z; 2124908 of 2124908 price rows equal between two valuation runs 30.7 minutes apart at one pin",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "Proof B: the valuation step run twice at the one pin 2026-10-11T11:55:40Z, 30.7 minutes apart, into two data dirs each with its own price-cache copy",
+   "observed": "security_day_price.parquet equal row for row and byte for byte (2124908 rows); SPLIT-STORE-PIN line identical; split_store_pin.json sidecars identical",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "ADVI_COTBKF-D2-W99-S1",
+  "ADVI_COTBKF-D2-W99-S2"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~99/ADVI_COTBKF.TO-CB-bo-1.split-store-pin.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests -q",
+   "result": "866 passed, 12 skipped, 0 failed (variable unset)"
+  }
+ ]
+}
