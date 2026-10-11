@@ -44,6 +44,21 @@ Criterion ids: APPLY6-AC1, APPLY6-AC2. Instance at `org/tier2_senior/0.7.0_AE_Cl
   </context>
 
   <steps>
+    **AMENDMENT 1 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~16:0xZ): the READY request your step 0 stopped on (your msg 5272; record
+    `R6_step0_STOP.json` @a194b69a32). The stop was right; here are CANDIDATES, and the choice stays a read of YOURS.**
+    The laptop reader's snapshot `org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/Y5_before_arms_rev6_snapshot.json` (commit
+    b3b3160b25, taken 2026-10-11 ~10:2xZ on irpt-status revision 6) holds, under `R4R5`, the SERVED job status of 50 accepted
+    requests: 14 read `state: READY`, all in tenant `cottonwood` (issuer's count of that file; the other 36 read UNAVAILABLE or
+    QUEUED). The first six of the 14: `REQ-01c903660d7ab222cd08b2ff`, `REQ-0d97252faeebdee1887c31ce`, `REQ-1352d8c1e0641711d9285688`,
+    `REQ-14fe69cf6ead8a9436379dc2`, `REQ-4b2d437450499dde471c2f98`, `REQ-67e12718b0ba7c0c70ebb45b`; read the file for the rest.
+    That is the laptop's read of a SERVED status five hours ago, INHERITED: it is not the job row. Before you use one, READ ITS JOB ROW
+    YOURSELF (the read that told you REQ-cf1d7894 is ATTENTION): `state` must read `READY` in table `irpt-jobs`, key tenant
+    `cottonwood` and that request id. Take the first that reads READY and record which you took and that row's state.
+    These are REAL requests: the CTO half's condition 1 binds harder for them -- your records hold the answer's `sha256` member, the
+    `status` and the sorted key names, and NOTHING of the body, in any file, log, terminal capture you commit, or message.
+    Your pre-change probe of a non-existent id (200, REFUSED, UNAVAILABLE) is accepted as A3's BEFORE arm; A3 is still read after the
+    code step. `list-attached-role-policies` EMPTY is noted and settles the pair's open point. If none of the 14 reads READY in the
+    job row, STOP again and say how many you read. Gate limb that graded this amendment: this commit's own gate output is the read.
     0. Pre-checks; STOP on any miss, before any write, and report the line that stopped you:
        - the building commit C is on origin and contains `eba5acba8f`; you work in a DETACHED worktree at C;
        - live `CodeSha256` of the function is `ZZmWOFSA...`; record the S3 object version now serving, as the rollback source;
