@@ -1,0 +1,54 @@
+{
+  "flag": "--yahoo-cache <dir>: accepted by commonwealth_daily_valuation.py (main) and commonwealth_sweep_regrade.py (main; required when either arm's price basis is as_traded, passed only to an as_traded arm). commonwealth_fwd3_serve.py does not read the Yahoo cache, so it takes no flag; it carries price_caches from <data-dir>/after/split_store_pin.json into fwd3_manifest.json. The fixed YAHOO_CACHE constant is removed. commonwealth_price_basis_census.py is unchanged (its own --cache-dir flag already existed; it shares no constant with the valuation).",
+  "refuses_without_flag": true,
+  "price_caches": {
+    "price_cache": {
+      "files": 6,
+      "path": ".scratch/w106/price_cache",
+      "sha256": "47fccd56fd122547e08548cedcf05a4764dfae981cfc09a6c920450f66b1d63b"
+    },
+    "yahoo_cache": {
+      "files": 3580,
+      "path": ".scratch/w106/yahoo_census",
+      "sha256": "5b4bb7db3acde4b18f15b22bde58e3d4a27c1e690c5c601f7684bcf62e0cf3cb"
+    }
+  },
+  "default_leg": "method_r29",
+  "tests_changed_for_default": [
+    "test_commonwealth_carried_levels.py::test_method_r25b_is_selectable_and_is_method_r25 (asserted the default)",
+    "test_commonwealth_cash_leg.py::test_method_is_the_default_cash_leg_and_the_older_four_stay_selectable (asserted the default)",
+    "test_commonwealth_method.py::test_the_method_is_the_default_cash_leg_and_the_older_legs_stay_selectable (asserted the default)",
+    "test_commonwealth_split_repair.py::test_method_r28_is_registered_and_selectable_and_method_r26_stays_selectable (was ..._registered_and_the_default_and_...; asserted the default, and now asserts method_r28 registered and selectable)",
+    "test_commonwealth_split_repair.py::test_method_r29_is_registered_the_default_and_in_the_one_set_of_round_28_legs (was ..._registered_selectable_and_in_...; asserted the default)",
+    "test_commonwealth_unlisted_types.py::test_method_is_unchanged_and_stays_selectable (asserted the default)",
+    "test_commonwealth_withholding_flow.py::test_method_r29_is_the_default_leg_and_r28_stays_selectable (was test_method_r28_is_the_default_leg_and_r29_is_selectable; asserted the default)"
+  ],
+  "tests_added": [
+    "test_commonwealth_price_cache_pin.py::test_the_refusal_text_is_the_one_the_order_names",
+    "test_commonwealth_price_cache_pin.py::test_apply_price_basis_as_traded_without_a_directory_refuses_before_reading_anything",
+    "test_commonwealth_price_cache_pin.py::test_apply_price_basis_as_traded_reads_the_directory_it_is_given",
+    "test_commonwealth_price_cache_pin.py::test_both_entry_points_refuse_the_as_traded_basis_without_the_flag_before_any_read",
+    "test_commonwealth_price_cache_pin.py::test_the_digest_is_stable_across_two_reads_and_ignores_mtime_and_creation_order",
+    "test_commonwealth_price_cache_pin.py::test_the_digest_changes_when_one_files_bytes_change_or_a_file_is_added_or_renamed",
+    "test_commonwealth_price_cache_pin.py::test_the_digest_of_a_missing_directory_raises",
+    "test_commonwealth_price_cache_pin.py::test_the_pin_line_names_both_caches_and_is_the_same_for_the_same_directories",
+    "test_commonwealth_price_cache_pin.py::test_the_store_basis_does_not_demand_the_flag",
+    "test_commonwealth_price_cache_pin.py::test_the_sidecar_carries_the_caches_the_run_read_and_the_build_carries_them_into_its_manifest",
+    "test_commonwealth_price_cache_pin.py::test_a_leg_or_a_run_that_wrote_no_caches_is_recorded_as_unrecorded_with_its_reason"
+  ],
+  "proof": {
+    "rc": 0,
+    "price_table_sha256": "3521815dc790980c4b9fef9417dcb73706d9a89129f3cf0ee261b3f9c4883d32",
+    "equals_round_68": true
+  },
+  "not_established": [
+    "The full round-68 sha256 (3521815dc790980c4b9fef9417dcb73706d9a89129f3cf0ee261b3f9c4883d32) is on record in 0.9.0_WK_ADVI_COTBKF~101/CLEAN_CHAIN.json, not_established[6]; equals_round_68 compares the full 64 characters. The as-traded price input also reproduced its round-68 sha256 (fe9d1c0446d984b2cf49ceda94509ba81115df3e66bf5d7d2be84b2365e95dc9, 2134958 rows).",
+    "The digests above are of this worker's scratch COPIES of the two pinned directories (the paths recorded are the copies'); the originals under C:/dev/ajb_workspace/.scratch/advi_cotbkf were not hashed. The same file counts (3580, 6) and the reproduced price table are the only evidence the copies equal them.",
+    "The digest covers every file in each directory, not only the files the run opened; the number of Yahoo files actually opened is not recorded.",
+    "The as-traded basis has a third local input that is not in price_caches: the price-basis census csv (BASIS_CENSUS, which tickers are substituted). It is a tracked file at a fixed path and is not named in the pin.",
+    "The FWD-3 build (commonwealth_fwd3_serve.py --build) was not run: price_caches in fwd3_manifest.json is shown by unit test of the carrier (price_caches_record), not by a built manifest.",
+    "A cash leg that writes no split-store pin (anything outside method_r28 / method_r29) records no price_caches in a sidecar; it prints the PRICE-CACHE-PIN line only. The BEFORE arm's sidecar (store basis) names the price-store cache only.",
+    "The price table does not depend on the withholding rule, so the proof run at method_r29 does not exercise the r29 flow rule; that rule is unchanged and is covered by the existing r29 tests.",
+    "No test relying on the DEFAULT leg implicitly failed after the default moved: of the 10 failures seen on the first run, 7 asserted the default by name (moved to method_r29) and 3 were the new flag's effect on the split-store-pin tests (2 passed unchanged once the split-instant refusal came before the Yahoo refusal; 1 now passes --yahoo-cache). No test that names method_r28 explicitly was changed beyond the test names above."
+  ]
+}

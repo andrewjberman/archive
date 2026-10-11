@@ -237,3 +237,17 @@ Held on the condition that no IRPT_BCKEND order is open:
 **For the slug:** 734 securities sit outside the anchor; the blank share reads 58.2 percent with the cash rule as ruled. An
 independent daily NAV agrees with the custodian's mark on every fund-day measured for eight funds (claim inferred, one source).
 Whether an unofficial reader may anchor a served figure is a PRD question and is not decided.
+
+---
+
+## Added at rounds 135 and 136, 2026-10-11T16:04:13Z (input: msg 5271)
+
+Held on the condition that no IRPT_BCKEND order is open:
+
+- **D2-S92** (BLOCKING; owner `1.0.0_SA_CTO~DELL2`): ADDENDUM v0.37's ratified-text half is refused on two points; the first is
+  that no mutual fund's date label was measured. Remedy: the repairs named in `org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_BCKEND_PRD_v0.37_RATIFIED_TEXT_REVIEW_20261011.md @5810d49063`, then this seat signs.
+- **D2-W295-S2** (owner `1.0.0_SA_CTO~DELL2`): the Opal form's v2 references sit inside an always-true conditional because the
+  portal's generator cannot render a v2 reference. Remedy: the generator learns v2 references and the wrapper is removed, or the
+  encoding is ruled to stay and the contract says why at its head.
+
+**For the slug:** a second witness would take the blank share from 58.2 to 37.0 percent by the round 136 sizing; nothing is stamped.
