@@ -1,6 +1,6 @@
 """MDPF_CANON round 4, cell CN-d-1 -- the served global total's identity is stated and asserted (W8-S3).
 
-One command, five arms; prints `ROUND 4 IDENTITY: k of 5 arms` and exits 0 only on all five.
+One command, six arms; prints `ROUND 4 IDENTITY: k of 6 arms` and exits 0 only on all six.
 Root = $R4_ROOT, else `git rev-parse --show-toplevel` (the invocation runs from inside the worktree).
 
   A1 the consolidator carries assert_global_served_identity(arts)
@@ -11,6 +11,10 @@ Root = $R4_ROOT, else `git rev-parse --show-toplevel` (the invocation runs from 
      non-null opal date -- the 24 dates the 2-term identity missed hold under the 4-term one
   A5 build_global_artifact's docstring (dim_mdpf_aggregate_aua_timeseries.py) names tax_additive_aua and
      sma_additive_aua, so the stale "at EVERY date" 2-term claim is stated as the BASE identity
+  A6 (CTO half of the pair, msg 3573) the guard runs through the scope isolation: guard_global_served_identity(arts, isolated)
+     returns arts unchanged for a conforming global; for a planted violation, with an `isolated` that records and swallows
+     SystemExit as build_all's does, it returns arts with global None and every other scope the SAME object as the control
+     run's, and raises nothing. (Offline instrument: it grades the function build_all calls, not build_all itself.)
 """
 import ast
 import importlib
@@ -139,6 +143,41 @@ def main() -> int:
     ok = bool(doc) and "tax_additive_aua" in doc and "sma_additive_aua" in doc
     print("  A5 %s: build_global_artifact docstring %s" % (
         "PASS" if ok else "FAIL", "names both additive terms" if ok else "does not name tax_additive_aua and sma_additive_aua"))
+    arms.append(ok)
+
+    # A6
+    ok = False
+    gfn = getattr(gc, "guard_global_served_identity", None) if gc is not None else None
+    if gfn is not None and fn is not None:
+        try:
+            errors = {}
+
+            def _isolated(scope, f):
+                try:
+                    return f()
+                except BaseException as e:                    # noqa: BLE001 -- mirrors build_all._isolated
+                    if isinstance(e, KeyboardInterrupt):
+                        raise
+                    errors[scope] = str(e)
+                    return None
+
+            firm = {"dates": ["2026-10-01"], "model_aua": [1.0], "opal_aggregate_aua": [1.0]}
+            control = dict(_synthetic())
+            control.update({"49financial": firm, "inflection": dict(firm), "cottonwood": dict(firm)})
+            planted = dict(_synthetic(delta=1.0, bad_index=2))
+            planted.update({k: v for k, v in control.items() if k != "global"})
+            out_c = gfn(control, _isolated)
+            out_p = gfn(planted, _isolated)
+            same_firms = all(out_p.get(k) is control[k] for k in ("49financial", "inflection", "cottonwood"))
+            ok = (out_c.get("global") is control["global"] and out_p.get("global") is None and same_firms
+                  and "global" in errors and "2026-10-05" in errors["global"])
+            print("  A6 %s: control keeps global=%s; planted -> global %s, firm scopes unchanged=%s, error recorded=%s" % (
+                "PASS" if ok else "FAIL", out_c.get("global") is control["global"],
+                "None" if out_p.get("global") is None else "kept", same_firms, "global" in errors))
+        except BaseException as exc:                          # noqa: BLE001
+            print(f"  A6 FAIL: {type(exc).__name__}: {str(exc)[:160]}")
+    else:
+        print("  A6 FAIL: guard_global_served_identity absent from mdpf_gold_consolidator")
     arms.append(ok)
 
     k = sum(1 for a in arms if a)
