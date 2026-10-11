@@ -426,8 +426,10 @@ def test_never_records_a_non_req_id(monkeypatch, sleeps):
 import types  # noqa: E402
 
 ARGV = ["--read27", "R27", "--exp-minutes", "5", "--expect-irpt-status-sha", "Zm9v",
-        "--run-label", "R2-test-1", "--pair", "org/pair/path@abc123", "--executor", "0.9.0_WK_TEST~1"]
+        "--run-label", "R2-test-1", "--pair", "org/pair/path@abc123", "--executor", "0.9.0_WK_TEST~1",
+        "--trace-out", "UNUSED_NO_SUCH_DIR/trace_test.json"]
 LIVE_SHA = "Zm9vYmFyLIVE"
+ACTIVE_MS = 4_000_000_000_000   # a last-event time later than any iat the tests use
 STATUS_PATH = "/api/scoped/investor-reporting/status"
 FILER_EMAIL = run.FILER
 
@@ -461,6 +463,8 @@ class World:
         self.lambda_raises, self.mint_raises, self.sleep_raises = False, False, None
         self.claims = []
         self.log_resp = {}
+        self.stream_resp = {}    # per log group: one describe_log_streams page, or a list of pages
+        self.log_calls = []      # (api, kwargs) for every logs call, in order
         self.mp = monkeypatch
         monkeypatch.setattr(run, "NOW", lambda: self.t)
         monkeypatch.setattr(run, "SLEEP", self.sleep)
@@ -495,11 +499,19 @@ class World:
                 raise RuntimeError("secret unreadable")
             return {"SecretString": "pem"}
 
+        def streams(**kw):
+            w.events.append(("aws", "streams:" + kw["logGroupName"], w.t))
+            w.log_calls.append(("describe_log_streams", dict(kw)))
+            r = w.stream_resp.get(kw["logGroupName"], {"logStreams": [{"logStreamName": "s", "lastEventTimestamp": ACTIVE_MS}]})
+            if isinstance(r, Exception):
+                raise r
+            return r.pop(0) if isinstance(r, list) else r
+
         def logs(**kw):
             w.events.append(("aws", "logs:" + kw["logGroupName"], w.t))
-            default = ({"events": [], "searchedLogStreams": [{"logStreamName": "s1"}]}
-                       if kw["logGroupName"] == run.DATA_REFRESH_LOG_GROUP
-                       else {"events": [{"message": "x"}], "searchedLogStreams": [{"logStreamName": "s2"}]})
+            w.log_calls.append(("filter_log_events", dict(kw)))
+            default = ({"events": []} if kw["logGroupName"] == run.DATA_REFRESH_LOG_GROUP
+                       else {"events": [{"message": "x"}]})
             r = w.log_resp.get(kw["logGroupName"], default)
             if isinstance(r, Exception):
                 raise r
@@ -507,7 +519,7 @@ class World:
 
         return {"lambda": types.SimpleNamespace(get_function_configuration=lam),
                 "secretsmanager": types.SimpleNamespace(get_secret_value=secret),
-                "logs": types.SimpleNamespace(filter_log_events=logs)}[name]
+                "logs": types.SimpleNamespace(filter_log_events=logs, describe_log_streams=streams)}[name]
 
     def http(self, script):
         fake = Fake(script)
@@ -573,7 +585,7 @@ def test_token_exp_is_the_argument_and_capped(monkeypatch):
         a = parser.parse_args(ARGV[:3] + [str(good)] + ARGV[4:])
         assert a.exp_minutes == good and isinstance(a.exp_minutes, int)
     # every other required argument is required too
-    for flag in ("--read27", "--expect-irpt-status-sha", "--run-label", "--pair", "--executor"):
+    for flag in ("--read27", "--expect-irpt-status-sha", "--run-label", "--pair", "--executor", "--trace-out"):
         i = ARGV.index(flag)
         with pytest.raises(SystemExit):
             parser.parse_args(ARGV[:i] + ARGV[i + 2:])
@@ -697,52 +709,75 @@ def test_tickets_are_completed_before_the_row_is_touched(monkeypatch):
     assert trace["cleanup"]["row_removed_read_back_absent"] is True
 
 
-def _zero_call(monkeypatch, data, control):
+def _zero_call(monkeypatch, data, control, streams=None, control_streams=None):
+    """Run the zero-call read over iat=1000 against the fake logs layer. `streams` / `control_streams` are the
+    describe_log_streams pages for the data-refresh group and the ticket API's group (default: one active stream)."""
     w = World(monkeypatch)
     w.log_resp = {run.DATA_REFRESH_LOG_GROUP: data, run.TICKET_LOG_GROUP: control}
+    if streams is not None:
+        w.stream_resp[run.DATA_REFRESH_LOG_GROUP] = streams
+    if control_streams is not None:
+        w.stream_resp[run.TICKET_LOG_GROUP] = control_streams
     trace = {}
     run.data_refresh_zero_calls(trace, 1000, 1300)
     return trace["data_refresh_zero_calls"], w
 
 
+def st(ms, name="s"):
+    return {"logStreamName": name, "lastEventTimestamp": ms}
+
+
+NO_STREAMS = {"logStreams": []}
+OLD_STREAM = {"logStreams": [st(999_999)]}   # last event one millisecond before iat=1000 s
+
+
 def test_zero_call_read_is_void_on_zero_streams(monkeypatch):
-    found = {"events": [{"m": 1}], "searchedLogStreams": [{"n": "s"}]}
-    # zero streams searched, zero matches, a control that DID find the filer: still VOID
-    out, w = _zero_call(monkeypatch, {"events": [], "searchedLogStreams": []}, found)
-    assert out["verdict"] == "ZERO_CALL_VOID" and out["searched_log_streams"] == 0 and out["match_count"] == 0
-    assert any("streams searched is 0" in r for r in out["void_reasons"])
+    found = {"events": [{"m": 1}]}
+    # GROUP_EMPTY: the group holds 0 streams in total, zero matches, a control that DID find the filer: VOID
+    out, w = _zero_call(monkeypatch, {"events": []}, found, streams=NO_STREAMS)
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_EMPTY"
+    assert out["streams_in_group"] == 0 and out["match_count"] == 0
     assert out["verdict"] != "ZERO_CALLS_PROVEN"
-    # streams are counted across pages: 0 + 0 is void; a later page with streams makes the zero countable
-    out, w = _zero_call(monkeypatch, [{"events": [], "searchedLogStreams": [], "nextToken": "p2"},
-                                      {"events": [], "searchedLogStreams": []}], found)
-    assert out["verdict"] == "ZERO_CALL_VOID"
-    out, w = _zero_call(monkeypatch, [{"events": [], "searchedLogStreams": [], "nextToken": "p2"},
-                                      {"events": [], "searchedLogStreams": [{"n": "s"}, {"n": "t"}]}], found)
-    assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["searched_log_streams"] == 2
+    # a stream whose last event is before iat is in the group but not active: NOT void (see the F1 test)
+    out, w = _zero_call(monkeypatch, {"events": []}, found, streams=OLD_STREAM)
+    assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["streams_in_group"] == 1
+    # streams are counted across pages: 0 + 0 in total is GROUP_EMPTY; a later page with streams makes the zero countable
+    out, w = _zero_call(monkeypatch, {"events": []}, found,
+                        streams=[{"logStreams": [], "nextToken": "p2"}, NO_STREAMS])
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_EMPTY"
+    out, w = _zero_call(monkeypatch, {"events": []}, found,
+                        streams=[{"logStreams": [], "nextToken": "p2"},
+                                 {"logStreams": [st(ACTIVE_MS, "a"), st(ACTIVE_MS, "b")]}])
+    assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["streams_active_in_window"] == 2
     assert out["window"]["from"] < out["window"]["to"]
-    assert len(w.index(lambda e: e[0] == "aws" and e[1].startswith("logs:"))) == 3   # two pages + the control
+    # two describe pages on the data-refresh group, one on the control; one filter page on each group
+    assert len(w.index(lambda e: e[0] == "aws" and e[1].startswith("streams:"))) == 3
+    assert len(w.index(lambda e: e[0] == "aws" and e[1].startswith("logs:"))) == 2
 
 
 def test_zero_call_read_needs_its_positive_control(monkeypatch):
-    streams = [{"logStreamName": "s"}]
     # the control over the ticket API's log group finds nothing: the zero is VOID
-    out, w = _zero_call(monkeypatch, {"events": [], "searchedLogStreams": streams},
-                        {"events": [], "searchedLogStreams": streams})
+    out, w = _zero_call(monkeypatch, {"events": []}, {"events": []})
     assert out["verdict"] == "ZERO_CALL_VOID" and out["control"]["found"] == 0
     assert out["control"]["log_group"] == "/aws/lambda/opal-ticket-api" and out["control"]["same_filter"] is True
-    assert any("positive control" in r for r in out["void_reasons"])
-    assert [e[1] for e in w.events if e[0] == "aws"] == ["logs:" + run.DATA_REFRESH_LOG_GROUP, "logs:" + run.TICKET_LOG_GROUP]
-    # streams > 0 AND control >= 1 AND matches == 0 is the one PROVEN case
-    out, w = _zero_call(monkeypatch, {"events": [], "searchedLogStreams": streams},
-                        {"events": [{"m": 1}], "searchedLogStreams": streams})
+    assert out["void_reason"] == "CONTROL_FOUND_NO_FILER"
+    assert [e[1] for e in w.events if e[0] == "aws"] == [
+        "streams:" + run.DATA_REFRESH_LOG_GROUP, "logs:" + run.DATA_REFRESH_LOG_GROUP,
+        "streams:" + run.TICKET_LOG_GROUP, "logs:" + run.TICKET_LOG_GROUP]
+    # active streams > 0 AND control >= 1 AND matches == 0 is the one PROVEN case
+    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]})
     assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["control"]["found"] == 1 and out["match_count"] == 0
+    assert out["streams_active_in_window"] == 1 and out["control"]["streams_active_in_window"] == 1
     # a data-refresh match is reported as non-zero, whatever the control says
-    out, w = _zero_call(monkeypatch, {"events": [{"m": 1}], "searchedLogStreams": streams},
-                        {"events": [], "searchedLogStreams": streams})
+    out, w = _zero_call(monkeypatch, {"events": [{"m": 1}]}, {"events": []})
     assert out["verdict"].startswith("NON-ZERO")
-    # the control read raising is UNREAD, never a zero
-    out, w = _zero_call(monkeypatch, {"events": [], "searchedLogStreams": streams}, RuntimeError("throttled"))
-    assert out["verdict"].startswith("UNREAD") and out["match_count"] is None
+    # the control read raising is VOID (the control did not find the filer), never a zero
+    out, w = _zero_call(monkeypatch, {"events": []}, RuntimeError("throttled"))
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "CONTROL_FOUND_NO_FILER"
+    # the stream read raising is VOID too: the group cannot be described
+    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, streams=RuntimeError("denied"))
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_NOT_DESCRIBABLE"
+    assert out["match_count"] is None
 
 
 def test_irpt_status_sha_mismatch_is_a_stop_before_any_write(monkeypatch):
@@ -915,7 +950,8 @@ def test_trace_header_names_this_run_not_round_one(monkeypatch):
         assert round_one not in blob, round_one
     # a different invocation names a different run
     i = ARGV.index("--run-label")
-    b = run.build_parser().parse_args(ARGV[:i] + ["--run-label", "R2-tr-1", "--pair", "P@1", "--executor", "0.9.0_WK_OTHER~2"])
+    b = run.build_parser().parse_args(ARGV[:i] + ["--run-label", "R2-tr-1", "--pair", "P@1", "--executor", "0.9.0_WK_OTHER~2",
+                                        "--trace-out", "UNUSED_NO_SUCH_DIR/other.json"])
     t2 = run.build_trace(b, "R2-tr-1-x")
     assert (t2["run_label"], t2["pair"], t2["executor"]) == ("R2-tr-1", "P@1", "0.9.0_WK_OTHER~2")
     # and the trace main() builds, end to end, carries it too; the source holds no hard-coded round-one header
@@ -926,3 +962,143 @@ def test_trace_header_names_this_run_not_round_one(monkeypatch):
     code = _code_only(run.__file__)
     for lit in ('"order_pin"', '"amendment_3"', '"amendment_4_cto_code_read_verbatim"', '"v2.2"', '"SA-r-1b-"'):
         assert lit not in code, lit
+
+
+# ------------------------------------------------------------------ AMENDMENT 3 / AC7: --trace-out, the measured stream denominator
+
+def test_trace_out_is_required_and_is_the_only_file_written(monkeypatch, tmp_path):
+    import builtins
+    real_save = run.save
+    # the argument is required
+    i = ARGV.index("--trace-out")
+    with pytest.raises(SystemExit):
+        run.build_parser().parse_args(ARGV[:i] + ARGV[i + 2:])
+    assert run.build_parser().parse_args(ARGV).trace_out == ARGV[i + 1]
+    # run main end to end with the REAL save, every write intercepted: all of them target the one --trace-out file
+    out = tmp_path / "nested" / "my_trace.json"
+    argv = ARGV[:i] + ["--trace-out", str(out)]
+    w = World(monkeypatch)
+    monkeypatch.setattr(run, "save", real_save)
+    w.http({("GET", STATUS_PATH): res(200, {"data": {}})})
+    monkeypatch.setattr(run, "census", lambda token, run_id: ({"tickets_created_by_the_census": []}, None))
+    monkeypatch.setattr(run, "hops", lambda token, advisor, trace: None)
+    writes = []
+    real_open, real_wt, real_wb = builtins.open, Path.write_text, Path.write_bytes
+
+    def spy_open(f, mode="r", *a, **k):
+        if any(c in str(mode) for c in "wax+"):
+            writes.append(str(Path(f).resolve()))
+        return real_open(f, mode, *a, **k)
+
+    def spy_wt(self, *a, **k):
+        writes.append(str(self.resolve()))
+        return real_wt(self, *a, **k)
+
+    def spy_wb(self, *a, **k):
+        writes.append(str(self.resolve()))
+        return real_wb(self, *a, **k)
+
+    monkeypatch.setattr(builtins, "open", spy_open)
+    monkeypatch.setattr(Path, "write_text", spy_wt)
+    monkeypatch.setattr(Path, "write_bytes", spy_wb)
+    rc = run.main(argv)
+    monkeypatch.undo()
+    assert rc == 0
+    assert writes and set(writes) == {str(out.resolve())}, set(writes)
+    # the file is ONE JSON object for this run: its run_id, no run_N section, no older run appended
+    doc = json.loads(out.read_text(encoding="utf-8"))
+    assert doc["run_id"].startswith("R2-test-1-")
+    assert not [k for k in doc if k.startswith("run_") and k not in ("run_id", "run_label")]
+    assert doc["data_refresh_zero_calls"]["verdict"] == "ZERO_CALLS_PROVEN"
+    assert [p.name for p in tmp_path.rglob("*") if p.is_file()] == ["my_trace.json"]
+    # a path that already holds a run's trace is refused, untouched: nothing appended, nothing overwritten
+    before = out.read_bytes()
+    w = World(monkeypatch)
+    monkeypatch.setattr(run, "save", real_save)
+    assert run.main(argv) == 2
+    assert out.read_bytes() == before and w.events == []
+
+
+def test_no_round_one_trace_path_remains():
+    src = Path(run.__file__).read_text(encoding="utf-8")
+    for banned in ("R1_RUN", "sa_r1b_trace", "searchedLogStreams", "0.7.0_AE_CloudOps~TV2"):
+        assert banned not in src, banned
+    assert not hasattr(run, "TRACE") and not hasattr(run, "MY_TRACE")
+    # save() with no --trace-out set writes nothing and raises: there is no fallback path
+    saved = run.TRACE_OUT
+    try:
+        run.TRACE_OUT = None
+        with pytest.raises(RuntimeError):
+            run.save({"run_id": "x"})
+    finally:
+        run.TRACE_OUT = saved
+
+
+def test_stream_denominator_is_streams_active_in_the_window(monkeypatch):
+    # The window starts at iat=1000 s = 1_000_000 ms. Active: last event >= iat (a stream AT iat counts). Not active:
+    # before iat, or no last event time at all. The API field naming the streams a filter searched is never read:
+    # the filter answers below carry an unrelated key and the denominator comes from describe_log_streams alone.
+    page1 = {"logStreams": [st(ACTIVE_MS, "a"), st(1_000_000, "at-iat"), st(999_999, "before"), {"logStreamName": "empty"}],
+             "nextToken": "p2"}
+    page2 = {"logStreams": [st(1_000_001, "c"), st(5, "ancient")]}
+    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]},
+                        streams=[dict(page1), dict(page2)], control_streams={"logStreams": [st(1_000_000, "t")]})
+    assert out["streams_active_in_window"] == 3     # a, at-iat, c
+    assert out["control"]["streams_active_in_window"] == 1
+    assert "searched_log_streams" not in out and "searched_log_streams" not in out["control"]
+    assert out["verdict"] == "ZERO_CALLS_PROVEN"
+    # every page of describe_log_streams was read, ordered by last event time, with the page token passed on
+    d = [kw for api, kw in w.log_calls if api == "describe_log_streams" and kw["logGroupName"] == run.DATA_REFRESH_LOG_GROUP]
+    assert len(d) == 2 and "nextToken" not in d[0] and d[1]["nextToken"] == "p2"
+    assert all(kw["orderBy"] == "LastEventTime" for kw in d)
+    # filter_log_events reads every page too
+    out, w = _zero_call(monkeypatch, [{"events": [], "nextToken": "f2"}, {"events": [{"m": 1}], "nextToken": "f3"},
+                                      {"events": [{"m": 2}]}], {"events": [{"m": 1}]})
+    f = [kw for api, kw in w.log_calls if api == "filter_log_events" and kw["logGroupName"] == run.DATA_REFRESH_LOG_GROUP]
+    assert [kw.get("nextToken") for kw in f] == [None, "f2", "f3"]
+    assert out["match_count"] == 2 and out["verdict"].startswith("NON-ZERO")
+    # the control group's denominator is measured too, and a control with no active stream does not void by itself
+    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, control_streams=NO_STREAMS)
+    assert out["control"]["streams_active_in_window"] == 0 and out["verdict"] == "ZERO_CALLS_PROVEN"
+
+
+def test_zero_active_streams_alone_is_not_void(monkeypatch):
+    # F1: streams exist but none is active in the window, no matches, control found the filer: a true zero
+    for streams in (OLD_STREAM, {"logStreams": [{"logStreamName": "never-wrote"}]}):
+        out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, streams=streams)
+        assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["streams_active_in_window"] == 0, streams
+        assert out["streams_in_group"] == 1 and out["match_count"] == 0 and out["control"]["found"] == 1
+        assert "void_reason" not in out
+    # active streams still prove it, and the trace says how many were active
+    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]})
+    assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["streams_active_in_window"] == 1
+
+
+def test_group_with_no_streams_at_all_is_void(monkeypatch):
+    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, streams=NO_STREAMS)
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_EMPTY"
+    assert out["streams_in_group"] == 0 and out["streams_active_in_window"] == 0
+
+
+def test_group_not_describable_is_void(monkeypatch):
+    for exc in (RuntimeError("AccessDenied"), KeyError("ResourceNotFoundException")):
+        out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, streams=exc)
+        assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_NOT_DESCRIBABLE", exc
+        assert out["streams_in_group"] is None and out["matches"] is None
+
+
+def test_control_without_the_filer_is_void(monkeypatch):
+    out, w = _zero_call(monkeypatch, {"events": []}, {"events": []})
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "CONTROL_FOUND_NO_FILER"
+    assert out["control"]["matches"] == 0 and out["streams_in_group"] == 1
+
+
+def test_zero_read_records_three_numbers(monkeypatch):
+    two = {"logStreams": [st(ACTIVE_MS, "a"), st(999_999, "old"), {"logStreamName": "empty"}]}
+    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}, {"m": 2}]},
+                        streams=two, control_streams={"logStreams": [st(ACTIVE_MS, "t")]})
+    assert out["verdict"] == "ZERO_CALLS_PROVEN"
+    assert (out["streams_in_group"], out["streams_active_in_window"], out["matches"]) == (3, 1, 0)
+    c = out["control"]
+    assert (c["streams_in_group"], c["streams_active_in_window"], c["matches"]) == (1, 1, 2)
+    assert c["log_group"] == run.TICKET_LOG_GROUP
