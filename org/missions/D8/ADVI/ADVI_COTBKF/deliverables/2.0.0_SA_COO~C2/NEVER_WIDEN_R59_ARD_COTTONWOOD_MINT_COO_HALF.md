@@ -1,6 +1,7 @@
 # NEVER-WIDEN -- COO half -- ADVI_COTBKF CB-al-2 (re-cut after round 59): mint Cottonwood `account_return_daily`, its reasons sidecar and its method row 3
 
-**Signer:** `2.0.0_SA_COO~C2` (dell2) | **State: GIVEN 2026-10-11 ~05:5xZ** | **Supersedes:**
+**Signer:** `2.0.0_SA_COO~C2` (dell2) | **State: GIVEN, RE-PINNED 2026-10-11T06:11Z after round 60** (first given ~05:5xZ @41395d1eb5, file sha256
+`b8e44814...feae49ad`, which the CTO half @1013274c3f signed; that pin is void, see Pins) | **Supersedes:**
 `NEVER_WIDEN_R38_ARD_COTTONWOOD_MINT_COO_HALF.md` (its CTO half was REFUSED, msg 3626; it cited a manifest since removed).
 
 **Counts, hashes, addresses and reason codes only.** No client account id appears here.
@@ -8,8 +9,10 @@
 **Act:** `0.7.0_AE_CloudOps~CB2` runs, from the base checkout on dell2,
 `COTBKF_SWEEPS_CONFIG=<the path in org/devices/state/dell2/cotbkf_sweeps_config_pointer.json> python data/assets/scripts/silver/commonwealth_account_return_daily.py --apply --pair <this half> --pair <CTO half> --manifest org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~79/ard_cottonwood_manifest.json`.
 
-**Pins.** Adapter `commonwealth_account_return_daily.py` last changed @84ef9e0972 (drained @6e4419bcd7; file sha256 starts
-`8a2c3c12b8fc3713`). Producer `account_return_daily.py` and `sources.json` last changed @ac6a174677 (IRPT_DASHBD's; imported, not
+**Pins.** Adapter `commonwealth_account_return_daily.py` last changed @b8995a1400 (round 60, CB-bh-1; drained @f32b096b42; file sha256
+`38f06ba93cc82318d3fd7bc587baac2184acb03f9c9b7e4809acba4afcbb51c9`). The first cut of this half pinned @84ef9e0972; round 60 moved it by
+adding a no-write `--show-day-manifest` mode and widening `verify_served`. Issuer read of the diff cb39f6fce6..620da664d1: 4 hunks,
+all additions, 0 lines changed inside `apply_days` or `build`. Producer `account_return_daily.py` and `sources.json` last changed @ac6a174677 (IRPT_DASHBD's; imported, not
 edited). Manifest sha256 `d2d99d5c4a127635170f77516b52fdfc0c163e151e39649e35569a601ce47b36` @84ef9e0972. A change to any of the three
 after this half voids it.
 
@@ -39,7 +42,7 @@ sha256 `589f72cca730a4fff9fd2852d58ac197aec520e888912ba76cae05542afcfcd1` and ro
 |---|---|---|
 | manifest bytes | sha256 `d2d99d5c...ce47b36`; `day_files` unchanged from the round-52 manifest `924987f6...c1cb` | issuer stamp run at 6e4419bcd7: `days=3325 day_hashes_equal=3325/3325`, second run changes 0 bytes |
 | rows | 1,691,729; 107,316 measured (`return_basis` TWR), the rest NOT_MEASURABLE | issuer bond-check run at 6e4419bcd7, same line |
-| method | `method_version` 3, passed through `src` = the `_commonwealth_delivery` entry, so each day manifest states row 3 and not the custodian method | IRPT_DASHBD record `COTTONWOOD_VALUE_RULE24` @b01e44444e (EXISTING_VALUES_SUFFICE); NOT re-read by the issuer |
+| method | `method_version` 3, passed through `src` = the `_commonwealth_delivery` entry, so each day manifest states row 3 and not the custodian method | issuer run at f32b096b42 of `--show-day-manifest` (no S3 call) on three real days, 2013-04-03, 2020-03-16 and 2026-06-22: each reads `method_version=3 valuation_source=positions_x_as_traded_close fee_treatment=net_of_fees price_basis=as_traded custodian_text=absent`. That is 3 of 3,325 days built locally; the served manifests are read back 3,325 of 3,325 after the mint. IRPT_DASHBD record `COTTONWOOD_VALUE_RULE24` @b01e44444e was not re-read by the issuer. |
 | method row 3 | five thresholds null, each claimed `absent`; no tie-out passed, so the tie-out claim is absent | manifest `method_row`; IRPT_DASHBD contract 0.5.0 @915e48125f; exercised on faked S3 only |
 | bonds | measured rows on a bond-holding account-day: **0 of 107,316** | issuer run; positive control: all 141,555 bond-holding account-days are in the files, each NOT_MEASURABLE (row D2-S87). The mint re-reads this count first and refuses on anything but 0. |
 | bonds, the rule | the producer path of this project REFUSES a measured row on a bond-holding day under `method_version` 3 (`BondDayMeasuredError`, round 58) | so the pair says "refuses", not "never happened". The stored bond close reads DIRTY (round 57; CB57be1-AC2 MET). |
@@ -95,4 +98,15 @@ under its own pair.
 
 Open-deploy ledgers are read across EVERY live worktree first (CLAUDE.md NEVER-2), and this act's ledger entry is opened before the
 first write and closed with the `--verify-served` line: `ARD-COTTONWOOD-VERIFY days=3325 match=3325/3325 sidecar=match
-method_row=match`.
+method_row=match manifests=3325/3325`.
+
+The CTO half @1013274c3f added conditions this half now supports with a tool mode each:
+- its condition 1 (`list-object-versions`, every page, on the three prefixes) is a CLI read by the applier; no adapter mode exists
+  for it and none is claimed;
+- its condition 2 is `--show-day-manifest --manifest <the manifest>` (no S3 client is created; a non-zero exit is a STOP);
+- its condition 3 is the `manifests=<k>/<n>` part of the `--verify-served` line, which reads every served `manifest.json` with the
+  same check the show mode uses.
+
+**Not established by the show mode:** it builds `first_data_date` and loads the day frame through helpers that mirror `apply_days`
+line for line but are not called by it (round 60 was barred from changing `apply_days`). Two copies of those ten lines can drift;
+today they are equal by the issuer's read.

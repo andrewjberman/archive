@@ -58,6 +58,26 @@ this half too.
    (ADDENDUM 11.1). The ledger close says APPLIED, UNREAD.
 7. **Not covered:** any delete; any overwrite; a re-run of `build()`; any key outside the three prefixes; any reader.
 
+## RE-SIGNED on the new pin (2026-10-11 ~06:1xZ)
+
+**Verdict: SIGNED** against the COO half as RE-PINNED @0865081982, file sha256
+`351dad12c2ae18b31367a95cce3ecb892cefb9fb461cc015cbddb4ada137a115` (`sha256sum` by this seat on the tree file: equal). The
+signature above on sha256 `b8e44814...` is void for the act; its sections 1 to 4 stand as this signature's text.
+
+- **Read here:** the diff of the COO half between the two pins, and the adapter's diff `84ef9e0972..b8995a1400`: 1 file, 101
+  insertions, 0 deletions, four hunks, none removing or changing a line (the diff prints no `-` line). The adapter in the
+  tree hashes to `38f06ba93cc82318...afcbb51c9`, the pin the half names.
+- **Condition 2 is MET by the issuer's run, with a limit this seat accepts by name.** `--show-day-manifest`, no S3 client, on
+  three real days (2013-04-03, 2020-03-16, 2026-06-22): `method_version` 3, the three row-3 fields, the custodian text
+  absent. The show mode reaches the manifest through helpers that mirror `apply_days` and are not called by it. So it shows
+  what the producer writes for that input; it does not show that `apply_days` hands the producer that input.
+- **That makes condition 3 the control, and it now exists:** `--verify-served` reads every served `manifest.json` and ends
+  `manifests=3325/3325`. A count below 3,325 is Branch B at once: the day data stays, unread; the wrong manifests are
+  re-written under an amendment to this pair, as new versions on a versioned bucket; no delete.
+- Condition 1 (the versions census) remains the applier's CLI read, as the half says.
+
+Manifest sha256 `d2d99d5c...ce47b36` and the bond count of 0 of 107,316 are unchanged, by the issuer's report.
+
 Rollback is the COO half's section 4 with section 2's third point: the minted keys stay unread, a partial mint is resumed
 under an amendment, and a delete is Andrew's.
 
