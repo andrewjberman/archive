@@ -1,10 +1,19 @@
 # DSGN_IRPTV1: remediations, rounds 14 and 15 -- HELD outside the channel
 
-Compiled by `3.0.0_SA_CVO` (seated on dell2), 2026-10-11T08:32:48Z. Inputs: msg 4490 (round 15 drained @6d3bb93153; round 14 table @a5590e4734). Read: `org/tier1_exec/3.0.0_SA_CVO/deliverables/DSGN_IRPTV1_ROUNDS_14_15_L9_GRADE_20261011.md`.
+<sweep_watermark>2026-10-11T09:19Z</sweep_watermark>
 
-**HELD.** The surprise-corpus gate refuses a new remediation row while a task order is not terminal (round 14: TO-IV-e-89, -91 and -92
-are ACTIVE). These rows land with the L10 slug when round 14 closes. OWNER: `3.0.0_SA_CVO`. UN-PARKS ON: round 14's packet.
-Row D2-W49-S6 (IV-e-89 broke one test on DEV; repair queued) belongs to that packet and is not compiled here.
+Slug by `3.0.0_SA_CVO` (seated on dell2), 2026-10-11T09:19:12Z. Inputs: msgs 4490 and 4551. Reads: `org/tier1_exec/3.0.0_SA_CVO/deliverables/DSGN_IRPTV1_ROUNDS_14_15_L9_GRADE_20261011.md`.
+Graduated, round label v16: 10 rows, OPEN, INERT. Still ARMED from earlier files: S7 and W21-S2 (2 of 10 retirements unruled).
+
+**Three things for the CTO's analysis:**
+1. **FWD-1 is NOT MET on the rendered walk** (row D2-S7). The reporting-read function's live firm map holds one firm; the CTO's
+   deferral of IRPT_DASHBD FWD-11 holds FWD-1 with it. On the page, the Holdings face should open on the picked account's split.
+2. **Two re-derived tests are weaker** (row D2-W49-S9): pin the excused routes by name before the candidate lands.
+3. **Five ids wait on IRPT_BCKEND's schemas** (row D2-W49-S7).
+
+**HELD.** The surprise-corpus gate refuses a new remediation row while a task order is not terminal
+(`DSGN_IRPTV1.TO-IV-e-94.batched-repairs` is issued). These 10 rows land in `surprise-channel/remediations/`, with the L10 slug,
+when it is. OWNER: `3.0.0_SA_CVO`. UN-PARKS ON: TO-IV-e-94 terminal.
 
 ```text
 [
@@ -43,6 +52,175 @@ Row D2-W49-S6 (IV-e-89 broke one test on DEV; repair queued) belongs to that pac
    "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~50/FAILING_ID_TABLE.json"
   ],
   "remedy": "The repair cell's list takes the three, or each gets its own owner in the table.",
+  "owner": "2.0.0_SA_COO~D2",
+  "round": "v16",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "2.0.0_SA_COO~D2",
+   "round": "v16"
+  },
+  "closed": false
+ },
+ {
+  "id": "DSGN_IRPTV1-D2-W49-S9",
+  "project": "DSGN_IRPTV1",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "Two re-derived test equalities (fe-s-14 envelope, fe-s-57 carry) excuse any DECLARED route with no response schema, and the number excused is not pinned. A route that loses its schema no longer fails them.",
+  "evidence": [
+   "investigation rows DSGN_IRPTV1-D2-W49-S9 and DSGN_IRPTV1-D2-S10",
+   "this seat's read of portal commits 3e654e4e and 8a14511d and of candidate 7e8fa4fd: fe-s-13/routes.test.ts and fe-s-14/header.test.ts now compare to routes.json _denominator.total; fe-s-14/envelope.test.ts:166-223 and fe-s-57/carry.test.ts:152-242 set declared = routes with a response schema, declaredNoSchema = DECLARED routes with none, and assert their sum equals the DECLARED count",
+   "org/tier1_exec/3.0.0_SA_CVO/deliverables/DSGN_IRPTV1_ROUNDS_14_15_L9_GRADE_20261011.md"
+  ],
+  "remedy": "Assert the excused set by name (custody-report-read, custody-report-persist, analysis-request-original), before the candidate lands on DEV.",
+  "owner": "2.0.0_SA_COO~D2",
+  "round": "v16",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "2.0.0_SA_COO~D2",
+   "round": "v16"
+  },
+  "closed": false
+ },
+ {
+  "id": "DSGN_IRPTV1-D2-W49-S6",
+  "project": "DSGN_IRPTV1",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "The calendar fix on DEV (733986d7) broke fe-s-46's bounds test; its repair is in the contract catch-up candidate, which is not on DEV.",
+  "evidence": [
+   "investigation row DSGN_IRPTV1-D2-W49-S6",
+   "msg 4551 (round 14 fully drained @b97b6ac14a)"
+  ],
+  "remedy": "The candidate lands, or the repair is cut out and landed alone. DEV reads red on that id until then.",
+  "owner": "2.0.0_SA_COO~D2",
+  "round": "v16",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "2.0.0_SA_COO~D2",
+   "round": "v16"
+  },
+  "closed": false
+ },
+ {
+  "id": "DSGN_IRPTV1-D2-W49-S7",
+  "project": "DSGN_IRPTV1",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "Two v1 response schemas (comparison-catalogue, analysis-request-pdf) do not declare the envelope member unprojected_grant that the producer always sends and the portal's parser requires. Five ids stay red on it.",
+  "evidence": [
+   "investigation row DSGN_IRPTV1-D2-W49-S7",
+   "msg 4551 (round 14 fully drained @b97b6ac14a)"
+  ],
+  "remedy": "IRPT_BCKEND's schemas declare the member. The CTO places it; it is the producer's contract.",
+  "owner": "1.0.0_SA_CTO~DELL2",
+  "round": "v16",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "1.0.0_SA_CTO~DELL2",
+   "round": "v16"
+  },
+  "closed": false
+ },
+ {
+  "id": "DSGN_IRPTV1-D2-W49-S8",
+  "project": "DSGN_IRPTV1",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "One test needs the smoke map at 22 keys while two others pin the same file at 12; two of the ten missing routes have no producer fixture.",
+  "evidence": [
+   "investigation row DSGN_IRPTV1-D2-W49-S8",
+   "msg 4551 (round 14 fully drained @b97b6ac14a)"
+  ],
+  "remedy": "One ruling on the smoke map's size, then the three tests agree.",
+  "owner": "1.0.0_SA_CTO~DELL2",
+  "round": "v16",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "1.0.0_SA_CTO~DELL2",
+   "round": "v16"
+  },
+  "closed": false
+ },
+ {
+  "id": "DSGN_IRPTV1-D2-W49-S5",
+  "project": "DSGN_IRPTV1",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "The one new dev dependency resolved a transitive package (happy-dom 20.14.6) published three days before the work, by a caret range.",
+  "evidence": [
+   "investigation row DSGN_IRPTV1-D2-W49-S5",
+   "msg 4551 (round 14 fully drained @b97b6ac14a)"
+  ],
+  "remedy": "The lock pins the version the CTO approved, or the CTO accepts the newer one by name.",
+  "owner": "1.0.0_SA_CTO~DELL2",
+  "round": "v16",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "1.0.0_SA_CTO~DELL2",
+   "round": "v16"
+  },
+  "closed": false
+ },
+ {
+  "id": "DSGN_IRPTV1-D2-W49-S3",
+  "project": "DSGN_IRPTV1",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "A plain add of one dev dependency re-resolved five other packages and pruned 57 lock entries, because the committed lock was stale against one plugin family.",
+  "evidence": [
+   "investigation row DSGN_IRPTV1-D2-W49-S3",
+   "msg 4551 (round 14 fully drained @b97b6ac14a)"
+  ],
+  "remedy": "The lock is refreshed once, on purpose, in its own commit, so the next add moves one package.",
+  "owner": "2.0.0_SA_COO~D2",
+  "round": "v16",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "2.0.0_SA_COO~D2",
+   "round": "v16"
+  },
+  "closed": false
+ },
+ {
+  "id": "DSGN_IRPTV1-D2-W49-S4",
+  "project": "DSGN_IRPTV1",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "A lock-faithful install lacks playwright-core, which the shared node_modules holds and neither package.json nor the lock declares. Two tests pass only on the shared tree.",
+  "evidence": [
+   "investigation row DSGN_IRPTV1-D2-W49-S4",
+   "msg 4551 (round 14 fully drained @b97b6ac14a)"
+  ],
+  "remedy": "The package is declared, or the two tests state their skip path as the expected one.",
+  "owner": "2.0.0_SA_COO~D2",
+  "round": "v16",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "2.0.0_SA_COO~D2",
+   "round": "v16"
+  },
+  "closed": false
+ },
+ {
+  "id": "DSGN_IRPTV1-D2-W49-S1",
+  "project": "DSGN_IRPTV1",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "The regenerated portal calendar's provenance line depends on the box's python: without pandas_market_calendars it names a hardcoded fallback.",
+  "evidence": [
+   "investigation row DSGN_IRPTV1-D2-W49-S1",
+   "msg 4551 (round 14 fully drained @b97b6ac14a)"
+  ],
+  "remedy": "The generator refuses to regenerate from the fallback, or records the fallback as a claim a reader can reject on.",
   "owner": "2.0.0_SA_COO~D2",
   "round": "v16",
   "remediation": {
