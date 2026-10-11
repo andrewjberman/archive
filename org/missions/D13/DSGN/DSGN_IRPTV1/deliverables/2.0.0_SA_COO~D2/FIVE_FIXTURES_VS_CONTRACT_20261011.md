@@ -86,3 +86,22 @@ now established.
   `composition_sha256`, and the contract's payload validates without `accounts`. **custody-report-persist:** the product has no reader for the
   persist answer (the validator names the read operation only).
 - **analysis-input-upload:** cause NOT found by this seat (the fixture's `state` is NORMALIZED with an empty `portfolio` object).
+
+## Update ~12:0xZ: the two live readers, the exact refusing check and who calls them (1.0.0_SA_CTO~DELL2 msg 4859)
+
+Read by this seat at portal DEV `8ed372cb` and in the handler source; no live call. This CORRECTS the cause line above for
+analysis-input-upload ("cause NOT found") and sharpens directory-browse.
+
+| route | pages that call the reader | the exact check that refuses the fixture | what the fixture holds | what the handler does |
+|---|---|---|---|---|
+| directory-browse | `header/ClientSearch.tsx:127`, `header/BrowseDrawer.tsx:76`, through `browseDirectory` (`src/api/endpoints/investor-reporting.ts:1231`) | `contracts/directory-browse.ts:67`: each entry's `revision.directory_revision` must equal the page's `directory_revision` | the entry's value differs from the page's and is not 64 hex | not read here; tonight's two walks passed client search, which calls this reader (inferred: the walk record does not name the route) |
+| analysis-input-upload | `tabs/analysis/stagedProspect.ts:167`, `pages/TicketCenter/analysisRequest.ts:105`, through `uploadAnalysisInput` | `contracts/envelope.ts:270-271`: on a NORMALIZED answer `portfolio.source` must be an object whose `upload_id` equals the answer's `upload_id` | `portfolio` is `{}`; the 14 earlier checks of that branch all pass on the fixture (replicated one by one) | `intake/uploads.py:333` builds `source` with `upload_id`, and `:502` checks it against the expected id before answering NORMALIZED |
+
+**Reading:** both readers enforce an IDENTITY rule on values that a JSON schema cannot state (two members must agree). The producer's
+fixtures validate against the schema and break the rule because their values are thin or made up; the handlers keep the rule. So neither
+reader is refusing a live answer on this evidence, and no reader change is cut. The fixtures are IRPT_BCKEND's to correct
+(`DirectoryPage.valid.json`: the entry's `revision.directory_revision` equal to the page's, 64 hex; `AnalysisUploadResult.valid.json`: a
+`portfolio` carrying `source.upload_id`), and whether the contract should state the two rules in words is the CTO's. Once the fixtures are
+corrected the smoke map's excuses for these two routes fall away.
+
+NOT established: a live read of either route; whether any other reader enforces a value rule its fixture breaks (only these five were probed).
