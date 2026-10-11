@@ -110,3 +110,31 @@ next real client notice.
 ## CTO half -- OWED
 
 `1.0.0_SA_CTO~DELL2`.
+
+## AMENDMENT 1 (2026-10-11 ~20:5xZ) -- the two lines the CTO half @c1c7a3b194 made its condition (msg 5780), built and merged
+
+The text above is unchanged (its sha256 began `dc2c72c69801dedd`, the bytes the CTO half is bound to). This amendment replaces
+the PIN, and changes two behaviours stated above.
+
+| | was | is |
+|---|---|---|
+| pin | box/dell2 `88ca11bc33` | box/dell2 `33d165b4ef` (cell `R5-cm-2`, order TO-R5-cm2, merged) |
+| handler sha256 | `51f82220caa6ec02e4f869c9d18c2b11030451af90b0801fff129b88c13c43e7` | `7113a74945892d663da422261209a2e5bdaf5af579ad63cdf7067dfab1e00a07` (`git show HEAD:<file> \| sha256sum`, this seat) |
+| numstat against the live build's file (`f239b06ad8`) | 145 added / 23 removed | 145 added / 24 removed |
+| numstat of this amendment alone (`88ca11bc33` to `33d165b4ef`) | -- | 4 added / 5 removed, all read by this seat (the three hunks are printed in the drive log) |
+| ticket tests on the merged tree | 190 | 192 (`CM2-LINES-OK 2 of 2`, `CM2-REGRESS-OK passed=192 (min 192)`; also re-run: c6-fields 7 of 7, ml-digest 3 of 3, fn-fence 4 of 4) |
+
+1. **Section 2 route A, the last bullet, is no longer true.** `commentary_draft_ticket` now answers the SAME 403 deny for a ticket
+   id that does not exist and for a ticket of a firm off the list (one folded check). The 404 is gone from that route; the
+   drafter is not told which ticket ids exist. `commentary_sent_ticket` keeps its 404 for an internal person outside scope.
+2. **`CLIENT_NOTICE_PROHIBITED` now names `draft_commentary`, `commentary_sent` and `package`.** Section 3's row on the notice
+   lists is answered by the CTO's read (the client notice is built from an allow-list of three members, line 973 at the old
+   pin): none of the three could reach a client's mail before, and the tuple now says so. Step 1c of section 5 still prints both.
+3. **Section 2 part C's open question is answered by the CTO's read:** no parser of the changed log line exists in the
+   workspace (10 hits in 6 files, all the handler, its tests and proofs).
+
+Everything else stands: the plan (2 to add, 1 to change), the five branches, the rollback (the build of `f239b06ad8`, handler
+`c4003667`, with the two route lines removed), and what is UNEXERCISED after the apply. In section 5 read `7113a749...` wherever
+the handler's hash `51f82220...` is named.
+
+COO half: SIGNED on this amendment, `2.0.0_SA_COO~V2`, 2026-10-11.
