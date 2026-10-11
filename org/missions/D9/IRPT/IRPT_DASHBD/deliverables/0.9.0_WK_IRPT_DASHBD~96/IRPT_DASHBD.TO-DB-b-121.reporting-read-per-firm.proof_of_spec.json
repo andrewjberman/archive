@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-121",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "06a610f1c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "06a610f1c2",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-121.reporting-read-per-firm.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~96",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~96/REPORTING_READ_PER_FIRM.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~96/REPORTING_READ_PER_FIRM.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "14 per-firm needs graded for Cottonwood (6 PRESENT, 7 ABSENT, 0 ACCESS_DENIED, 1 NOT_ESTABLISHED) over 16 S3 LIST reads, each Cottonwood list beside the 49 Financial control; ytd_needs_summary NO from portal origin/DEV 733986d7c6; hop3 reads 7 sources, reads_cottonwood_returns_gold false, existing_readers 0.",
+      "artifact_covered_by": [
+        "DB65-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB65-1-AC1",
+      "criterion_verbatim": "DB65-1-AC1 -- every per-firm need of the reporting read is listed with its source and graded for Cottonwood, the year-to-date question is answered from the page's own branch, and hop3's reads are listed. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r65/p65_round65.py\" . DB65-1-AC1",
+      "output_evidence": "OK: 14 per-firm need(s); Cottonwood: {'PRESENT': 6, 'ABSENT': 7, 'ACCESS_DENIED': 0, 'NOT_ESTABLISHED': 1}; the YTD needs the summary: NO; hop3 reads the Cottonwood returns gold: False\nDB65-1-AC1 PASS",
+      "denominator": "14 needs, 11 portal basis entries, 7 hop3 reads; checker exit code 0. The checker tests shape and that each cited repo file exists; every cited line was also printed and read by the worker.",
+      "status": "PASS",
+      "expect": "DB65-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record only; no run state",
+      "observed": "the same last line on a second run",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty root (no record), the order Base: FAIL.",
+      "expected": "DB65-1-AC1 FAIL at the base",
+      "observed": "FAIL: no record\nDB65-1-AC1 FAIL (rc 1), run against an empty root",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the one-page .md named in the order's face",
+      "reason": "The Write tool refused to create a report .md in this session; the same content is in the worker's final report and the JSON carries every finding."
+    },
+    {
+      "item": "the deployed IRPT_DIRECTORY_BUCKET_MAP, live IAM and the live Cottonwood bucket policy",
+      "reason": "No lambda, IAM or bucket-policy call is inside this order's S3-LIST-only reach."
+    },
+    {
+      "item": "any object body of the Cottonwood or 49 Financial gold",
+      "reason": "No download is allowed; N14 and the count of accounts with a clean 2026 window are NOT_ESTABLISHED for that reason."
+    },
+    {
+      "item": "the live Investor Reporting page",
+      "reason": "The year-to-date answer is read from the portal branch by content, not observed on the wire."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W96-S1: hop3_real_run.py cannot read the Cottonwood returns gold; the DB-b-86 unblock condition would be met by a 49 Financial file (ARMED, disarm owner 2.0.0_SA_COO~D2)",
+    "IRPT_DASHBD-D2-W96-S2: the reporting publisher would refuse every Cottonwood account (income, value and flow null against never-null series columns)",
+    "IRPT_DASHBD-D2-W96-S3: the Cottonwood gold account_id and the directory's raw key look to be two id spaces (INFERRED, not measured)",
+    "IRPT_DASHBD-D2-W96-S4: the order names tabs/ReportingTab.tsx; the portal file is tabs/reporting/ReportingTab.tsx"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python local import of lib/opal_naming.py (read-only)",
+      "invocation": "address() and name() for 49financial and cottonwood; legacy_address() for the hop3 ownership-map key",
+      "result": "every address(), name() and lookup() call for both firms returned; one REFUSAL (legacy_address for cottonwood: KeyError, no legacy_addresses.json row)"
+    }
+  ]
+}
