@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "opal://irpt/contracts/v1/responses/analysis-report.response.schema.json",
+  "title": "analysis-report -- the RESPONSE contract for GET /api/scoped/investor-reporting/analysis/{jobId}/sections",
+  "description": "The extracted sections of a generated analysis. ONE ENVELOPE FOR EVERY ROUTE IN v1. Every response on every scoped investor-reporting route is this shape: {contract_version, operation, firm_id, data, status?}, additionalProperties false. A consumer writes ONE parser and branches on `operation`. Published by cell IB-rt-1 at the criterion re-cut (channel row IRPT_BCKEND-S26) that disarmed row IRPT_BCKEND-W2-S16: the eleven document schemas say what an artifact IS and could never say what a route ANSWERS, and the remedy was the missing half rather than a loosened document.",
+  "x-contract-version": "v1",
+  "x-response-contract": {
+    "operation": "analysis-report",
+    "route_key": "GET /api/scoped/investor-reporting/analysis/{jobId}/sections",
+    "handler": "irpt-status",
+    "producer": "IRPT_BCKEND",
+    "consumer": "IRPT_FNTEND",
+    "published_by": "IB-rt-1 / 0.9.0_WK_IRPT_BCKEND~2",
+    "status_required": false
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "operation",
+    "firm_id",
+    "data",
+    "unprojected_grant"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "v1",
+      "description": "The contract version this response was produced under. REQUIRED here, unlike on the document schemas: a response is minted fresh on every call, so there are no pre-existing instances to invalidate, and a consumer that cannot tell which contract an answer speaks cannot safely parse it. It MUST equal the X-Contract-Version the caller sent and the dispatcher checked."
+    },
+    "operation": {
+      "const": "analysis-report",
+      "description": "The operation this response answers, as the one authority names it -- routes.json's `operation` field. It is the value a consumer branches on, so it is a const per schema rather than a free string: a response that could name any operation would make the envelope unparseable by design."
+    },
+    "firm_id": {
+      "allOf": [
+        {
+          "$ref": "opal://irpt/contracts/v1/ResolvedScope.schema.json#/properties/verified_request_firm_id"
+        },
+        {
+          "type": "string",
+          "pattern": "^fir_[0-9a-f]{24}$"
+        }
+      ],
+      "description": "THE OPAQUE ISSUED FIRM ID, TYPED AT THE BOUNDARY (bound 13). The $ref carries the MEANING from the producer's own definition -- 'the firm the request was VERIFIED against on the server, never the firm the client asked for' -- and the pattern carries the WIRE FORM: the issued opaque id, never the registry spelling (`49financial`), never a display name, never a request-controlled token. The two spellings are reconciled only by FirmBinding (row IRPT_BCKEND-W2-S9), so a response that echoed the registry spelling would hand a consumer an id it cannot join on."
+    },
+    "data": {
+      "type": "object",
+      "description": "The sections answer, in exactly TWO closed forms and nothing between them (IRPT_BCKEND PRD ADDENDUM v0.28 item 29; the handler is ops/owned_report.py `sections`). VENDOR form (no `provider`; a YCHARTS report): the typed sections with their units, dates and source coordinates, the request they answer, and the extraction validation with its own denominator. OPAL form (`provider` OPAL_ENGINE): `provider`, `request_ref`, `sections` and `computation_validation` in place of the vendor members, with `retained_ref` optional; the vendor members `extraction_validation`, `undated_sections` and `extraction_coverage` are ABSENT, never null. The two forms are disjoint by `provider` (the Opal form requires it, the vendor form does not admit it), so `anyOf` here grades as exactly one. The Opal members are taken by $ref from the v2 report contract, never retyped. The vendor artifact hash, the disclosures and the release half are NOT on this route: they belong to the released export, and a sections view that carried a release state would let a consumer treat an unreleased draft as released.",
+      "properties": {
+        "request_ref": {
+          "description": "Typed by the form that carries it: the vendor form or the Opal form, in `anyOf` below. Listed here so the member is named once for a consumer that reads `properties`; the shape is stated in the branch."
+        },
+        "sections": {
+          "description": "Typed by the form that carries it: the vendor form or the Opal form, in `anyOf` below. Listed here so the member is named once for a consumer that reads `properties`; the shape is stated in the branch."
+        },
+        "extraction_validation": {
+          "description": "Typed by the form that carries it: the vendor form or the Opal form, in `anyOf` below. Listed here so the member is named once for a consumer that reads `properties`; the shape is stated in the branch."
+        },
+        "undated_sections": {
+          "description": "Typed by the form that carries it: the vendor form or the Opal form, in `anyOf` below. Listed here so the member is named once for a consumer that reads `properties`; the shape is stated in the branch."
+        },
+        "extraction_coverage": {
+          "description": "Typed by the form that carries it: the vendor form or the Opal form, in `anyOf` below. Listed here so the member is named once for a consumer that reads `properties`; the shape is stated in the branch."
+        },
+        "retained_ref": {
+          "$ref": "opal://irpt/contracts/v1/AnalysisReport.schema.json#/properties/retained_ref"
+        }
+      },
+      "anyOf": [
+        {
+          "title": "VENDOR form",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "request_ref",
+            "sections",
+            "extraction_validation"
+          ],
+          "properties": {
+            "request_ref": {
+              "$ref": "opal://irpt/contracts/v1/AnalysisReport.schema.json#/properties/request_ref"
+            },
+            "sections": {
+              "$ref": "opal://irpt/contracts/v1/AnalysisReport.schema.json#/properties/sections"
+            },
+            "extraction_validation": {
+              "$ref": "opal://irpt/contracts/v1/AnalysisReport.schema.json#/properties/extraction_validation"
+            },
+            "undated_sections": {
+              "$ref": "opal://irpt/contracts/v1/AnalysisReport.schema.json#/properties/undated_sections"
+            },
+            "extraction_coverage": {
+              "$ref": "opal://irpt/contracts/v1/AnalysisReport.schema.json#/properties/extraction_coverage"
+            },
+            "retained_ref": {
+              "$ref": "opal://irpt/contracts/v1/AnalysisReport.schema.json#/properties/retained_ref"
+            }
+          }
+        },
+        {
+          "title": "OPAL_ENGINE form",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "provider",
+            "request_ref",
+            "sections",
+            "computation_validation"
+          ],
+          "properties": {
+            "provider": {
+              "$ref": "opal://irpt/contracts/v2/AnalysisReport.schema.json#/$defs/opal_engine/properties/provider"
+            },
+            "request_ref": {
+              "$ref": "opal://irpt/contracts/v2/AnalysisReport.schema.json#/$defs/opal_engine/properties/request_ref"
+            },
+            "sections": {
+              "$ref": "opal://irpt/contracts/v2/AnalysisReport.schema.json#/$defs/opal_engine/properties/sections"
+            },
+            "computation_validation": {
+              "$ref": "opal://irpt/contracts/v2/AnalysisReport.schema.json#/$defs/opal_engine/properties/computation_validation"
+            },
+            "retained_ref": {
+              "$ref": "opal://irpt/contracts/v1/AnalysisReport.schema.json#/properties/retained_ref"
+            }
+          }
+        }
+      ]
+    },
+    "status": {
+      "$ref": "opal://irpt/contracts/v1/PublicStatusEnvelope.schema.json",
+      "description": "The operation's status envelope: state, public_reason_code, source_dates, actions, operation, internal_correlation_id. PRESENT ON A SUCCESS TOO, not only a failure -- a partial answer is a real answer here (missing history is an answer, not an empty state), and `public_reason_code` is the only place a caller learns WHICH. A refusal carries a CODE, never the refused value."
+    },
+    "unprojected_grant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "denominator",
+        "kinds"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kinds": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}
