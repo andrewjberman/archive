@@ -4,7 +4,7 @@
 
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
   IB118-1-AC1  the three functions' entries in infra/aws/lambda/ci/lambda-source-map.json equal the candidate map's
-               (row D2-W278-S2), and the after-reads file names the commit that landed them. Base: FAIL (entries differ).
+               apart from artifact_sha256, which for the two applied functions equals the built digest (AMENDMENT 1; row D2-W278-S2), and the after-reads file names the commit that landed them. Base: FAIL (entries differ).
   IB118-1-AC2  live irpt-performance-adapter CodeSha256 == 9kYLdR64...; its after-reads row: BUILD_ONLY digest matched,
                not rolled back, live-call status not 500, 0 TypeError lines. Base: FAIL (live == o/643qVE...).
   IB118-1-AC3  live irpt-narrative CodeSha256 == x0SqAx2U...; its after-reads row as AC2's; ledger CLOSED. Base: FAIL.
@@ -64,9 +64,15 @@ def main():
     if cid == "IB118-1-AC1":
         cand = load(CAND).get("functions") or {}
         real = load(REAL).get("functions") or {}
+        # AMENDMENT 1 (row D2-S68): build-and-upload.sh rewrites `artifact_sha256` to the DEPLOYED digest at the apply, so the
+        # entries are compared without that field; for an applied function the field must then equal the signed built digest.
+        def strip(e):
+            return {k: v for k, v in (e or {}).items() if k != "artifact_sha256"}
         for fn in MAP_FUNCTIONS:
-            if fn not in cand or real.get(fn) != cand[fn]:
-                fail("source-map entry of %s differs from the candidate" % fn)
+            if fn not in cand or strip(real.get(fn)) != strip(cand[fn]):
+                fail("source-map entry of %s differs from the candidate beyond artifact_sha256" % fn)
+            if fn in BUILT and (real.get(fn) or {}).get("artifact_sha256") != BUILT[fn]:
+                fail("source-map artifact_sha256 of %s is not the signed built digest" % fn)
         if not load(A1).get("source_map_commit"):
             fail("after-reads names no source_map_commit")
         print("OK: 3 of 3 source-map entries equal the candidate; landing commit named")

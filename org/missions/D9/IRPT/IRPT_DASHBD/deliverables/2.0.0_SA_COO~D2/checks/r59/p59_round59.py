@@ -4,7 +4,7 @@ Cell: DB-b-115 the reporting-gold handler passes the firm's declared source entr
 the method row the entry names (2) and its three method fields, never the literal `absent`.
 
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
-  DB59-1-AC1  every `ard.emit_day(` call in reporting-gold handler.py passes `src=`; ~90/HANDLER_SRC_FIX.json records the manifest the fixed
+  DB59-1-AC1  every `ard.emit_day(` call in reporting-gold handler.py (2 calls; `aal.emit_day` takes no src, AMENDMENT 1) passes `src=`; ~90/HANDLER_SRC_FIX.json records the manifest the fixed
               handler's own call writes on a fixture: method_version == 2 and valuation_source, fee_treatment, price_basis each equal to
               the 49F custody entry's value in sources.json at HEAD, none of them `absent`; tests {passed > 0, failed == 0, new_test} with
               the new test file present at HEAD.
@@ -32,9 +32,12 @@ def main():
     if cid != "DB59-1-AC1":
         fail("unknown criterion %r" % cid)
     tree = ast.parse((root / HANDLER).read_text(encoding="utf-8"))
-    calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == "emit_day"]
-    if not calls:
-        fail("no emit_day call found in the handler")
+    # AMENDMENT 1 (row IRPT_DASHBD-D2-W90-S1): only the RETURNS writer `ard.emit_day` takes `src`. `aal.emit_day` (the lots writer) is another
+    # function with no `src` parameter; the first version of this check matched it by attribute name alone, which was the check's defect.
+    calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == "emit_day"
+             and isinstance(n.func.value, ast.Name) and n.func.value.id == "ard"]
+    if len(calls) != 2:
+        fail("expected 2 ard.emit_day calls in the handler, found %d" % len(calls))
     bare = [n.lineno for n in calls if "src" not in [k.arg for k in n.keywords]]
     if bare:
         fail("emit_day call(s) without src= at line(s) %r (of %d call(s))" % (bare, len(calls)))
