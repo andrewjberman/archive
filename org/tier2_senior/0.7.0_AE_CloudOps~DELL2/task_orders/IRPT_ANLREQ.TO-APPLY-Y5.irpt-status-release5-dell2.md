@@ -44,6 +44,14 @@ Criterion ids: APPLY5-AC1, APPLY5-AC2. Instance at `org/tier2_senior/0.7.0_AE_Cl
   </context>
 
   <steps>
+    **AMENDMENT 1 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~10:0xZ): a precondition on step 1 and everything after it.** Do steps 0's
+    READS now (they write nothing). Do NOT open the ledger, upload, plan or apply until the issuer tells you, citing this order's path,
+    that the laptop reader is seated: crossbox ORDER `XB-20261011T095749Z-6fe4` (TO-READS-Y5) ACKED by `0.7.0_AE_CloudOps~ANL`.
+    Why: `0.0.0_AB_MSTR~DELL2` msg 4647 -- that lane was stood down on the laptop at 09:1xZ and needs a respawn. After-reads R2 to R7 are
+    the only reads of the three members that change a served answer, and the pair's rollback branch hangs on them; an apply with nobody
+    seated to read them leaves the release live and unread for an unknown time. If you had already begun a write when you read this,
+    FINISH that deploy per NEVER-2 (do not half-land it) and say so in your report. Gate limb that graded this amendment: this commit's
+    own gate output is the read.
     0. Pre-checks; STOP on any miss, before any write:
        - choose the building commit C: a commit ON ORIGIN that contains `ece5ad3477` (`git fetch`, then
          `git merge-base --is-ancestor ece5ad3477 <C>` rc 0 and `<C>` reachable from `origin/box/dell2`); build, plan and apply in a
