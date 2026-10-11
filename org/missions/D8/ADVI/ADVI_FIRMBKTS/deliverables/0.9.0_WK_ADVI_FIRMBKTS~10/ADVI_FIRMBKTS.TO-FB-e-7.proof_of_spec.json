@@ -1,0 +1,123 @@
+{
+ "schema_version": "1.0",
+ "genre": "BUILD",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-e-7",
+ "firm": "COT",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-e-7.s11-tolerant-load.md",
+  "group": "OTHER",
+  "vintage_commit": "76bff7e7d4"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~10",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R2.md",
+  "vintage_commit": "76bff7e7d4",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-e-7.s11-tolerant-load.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/cot/scripts/gold/build_canonical_prices_v2.py",
+   "kind": "script",
+   "commit_or_etag": "62f4b5441e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed 62f4b5441e on wk-ADVI_FIRMBKTS-10; LOCAL order, no deploy act; the optional S_00 ssm step is not part of this cell",
+   "introduces": [
+    "_load_tier2"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "data/cot/scripts/gold/tests/test_s00_missing_tier2.py",
+   "kind": "test",
+   "commit_or_etag": "62f4b5441e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed 62f4b5441e; 3 passed under AC1 with S3 stubbed, no AWS act",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && timeout 110 python -m pytest -q -p no:cacheprovider data/cot/scripts/gold/tests/test_s00_missing_tier2.py; echo \"exit=$?\" -- expect: 3 passed -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 110 python -m pytest -q -p no:cacheprovider data/cot/scripts/gold/tests/test_s00_missing_tier2.py; echo \"exit=$?\"",
+   "expect": "3 passed.*exit=0",
+   "output_evidence": "3 passed in 17.91s\nexit=0",
+   "denominator": "3 of 3 tests in data/cot/scripts/gold/tests/test_s00_missing_tier2.py pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && timeout 110 python \"org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round2/checks/r2_s11.py\"; echo \"exit=$?\" -- expect: S11 NAMING GATE: PASS -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 110 python \"org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round2/checks/r2_s11.py\"; echo \"exit=$?\"",
+   "expect": "S11 NAMING GATE: PASS.*exit=0",
+   "output_evidence": "S11 DIFF: 131 added line(s) across build_canonical_prices_v2.py, test_s00_missing_tier2.py since fda1c4f0cc\nS11 NAMING GATE: PASS (0 REFUSE; gate said: NAMING-GATE: PASS 0 graded)\nexit=0",
+   "denominator": "0 REFUSE over 2 changed files (131 added lines) since fda1c4f0cc; the gate reports 0 graded of 2 paths seen",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && timeout 115 python -m pytest -q -p no:cacheprovider data/cot/scripts/gold/tests/test_canonical_prices_source_firm.py data/cot/scripts/gold/tests/test_canonical_prices_input_resolution.py; echo \"exit=$?\" -- expect: 12 passed -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 115 python -m pytest -q -p no:cacheprovider data/cot/scripts/gold/tests/test_canonical_prices_source_firm.py data/cot/scripts/gold/tests/test_canonical_prices_input_resolution.py; echo \"exit=$?\"",
+   "expect": "12 passed.*exit=0",
+   "output_evidence": "12 passed, 9 warnings in 10.38s\nexit=0",
+   "denominator": "12 of 12 tests in test_canonical_prices_source_firm.py and test_canonical_prices_input_resolution.py pass (the writer's two existing price tests, difference control)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "(m1) _is_missing_key returns True for every error, so the AccessDenied 403 no longer raises; graded by the test that asserts other errors still raise",
+   "expected": "test_present_inputs_are_joined_and_other_errors_raise FAILS with DID NOT RAISE; the other two tests still pass",
+   "observed": "1 failed, 2 passed: FAILED test_present_inputs_are_joined_and_other_errors_raise - Failed: DID NOT RAISE _ClientError; builder restored to committed bytes after the run (git diff empty)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "N/A -- stubbed S3 with fixed in-memory inputs; the asserted path has no clock, randomness or network read, so a second same-input run would reproduce the first",
+   "observed": "not re-run",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the ssm.tf S_00 hunk of ADVI_FIRMBKTS_INPUT_S00_TOLERANT_LOAD.patch",
+   "reason": "not applied: the order applies the builder hunks only; the optional S_00 SSM step is not part of this cell (comp-schedule DECLARED-NOT-APPLICABLE)"
+  },
+  {
+   "item": "the patch's own test file data/cot/scripts/gold/test_s00_missing_tier2.py",
+   "reason": "not applied: the order supplies data/cot/scripts/gold/tests/test_s00_missing_tier2.py, whose keys are read from INPUT_ADDRESSES, never typed"
+  },
+  {
+   "item": "one live run of build_canonical_prices_v2 against S3 with the Tier-2 objects absent",
+   "reason": "no AWS act in this cell (comp-iam DECLARED-NOT-APPLICABLE); the S3 absence is stubbed in the test; risk class LOCAL"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~10/ADVI_FIRMBKTS.TO-FB-e-7.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "git apply",
+   "invocation": "git apply --include='data/cot/scripts/gold/build_canonical_prices_v2.py' org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/2.0.0_SA_COO~Q1/ADVI_FIRMBKTS_INPUT_S00_TOLERANT_LOAD.patch",
+   "result": "rc=0; builder hunks only, 36 insertions and 2 deletions"
+  },
+  {
+   "tool": "python -m pytest",
+   "invocation": "python -m pytest -q -p no:cacheprovider data/cot/scripts/gold/tests/test_s00_missing_tier2.py",
+   "result": "3 passed in 17.91s"
+  },
+  {
+   "tool": "safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~10 <0.9.0_WK_ADVI_FIRMBKTS~10@opal.agent>\" -F <msgfile> -- data/cot/scripts/gold/build_canonical_prices_v2.py data/cot/scripts/gold/tests/test_s00_missing_tier2.py",
+   "result": "rc=0; commit 62f4b5441e; commit-gate and naming-gate PASS (naming-gate 0 graded)"
+  }
+ ]
+}
