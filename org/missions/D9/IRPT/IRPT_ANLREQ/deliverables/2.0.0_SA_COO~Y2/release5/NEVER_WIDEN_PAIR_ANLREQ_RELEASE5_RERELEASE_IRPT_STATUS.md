@@ -100,3 +100,35 @@ R0 to R8 as in the first pair, with these changes:
 2. Section 4's census of portal readers at the PROD commit: IN, section 4a.
 3. The CTO half on this file's blob, after 1 and 2.
 4. The FWD-1 trace (order TO-AR-y-51), so the release is cut knowing which hop it serves.
+
+## 8. REVISION 2 (2026-10-11 ~14:3xZ): round 7 changed what this release is; sections 3 and 5 are superseded where they differ
+
+Still WRITTEN, NOT APPLIED; no half is signed on any blob of this file. CTO ruling msg 5108: the ticket binding (cell `AR-y-71`) goes
+live IN release 5's return, under this pair, "whose census lists the binding's three files among its moved members"; no composed build.
+
+- **The artifact is no longer the stored object.** Section 3 said to promote the stored `Iw3FADFr` version without rebuilding. That
+  build predates round 7. The return is a FRESH one-tree build at the trunk commit of the day, with the map's two member pins (row
+  D2-S45) removed in the same act. Its digest is NOT KNOWN until it is built; this pair is re-issued with the digest, built twice
+  identical, before any half is asked for. `Iw3FADFr`'s stored version stays as a record and is not the release.
+- **Moved members against revision 6, expected:** the 14 of the first census, plus the binding's files -- `owned_report.py` (already
+  among the 14; it now also carries the binding), `entry.py` and `_authz/served.py` (both NEW to the moved set). The census
+  (`REPIN_CENSUS_IRPT_STATUS.json`, blob 89725a4ba9) is RE-RUN at that build: any member that moved on the trunk since `ee3fd7c5e5`
+  joins it with its owning commit, its served effect and, where it changes an answer, an after-read. Not re-run yet.
+- **`_authz/served.py` gains one value** (`REPORT_TICKET_MISMATCH` in `BOUNDARY_ADDITIONS`, commit `7133cbccc5`): INERT for every
+  route but `analysis-report` with a `ticket_id` (the reader census `deliverables/0.9.0_WK_IRPT_ANLREQ~52/r7/PUBLIC_REASON_READERS.json`,
+  80 rows: no portal runtime reader refuses the value at PROD or DEV; WORKER's read).
+- **`entry.py` now ADMITS one query member on one route.** Live revision 6 refuses any query member but `selected_tenant`
+  (`ops/entry.py:164-165` at `361c44fa9d`, read by this seat). So the portal candidate that SENDS `ticket_id`
+  (`wk-IRPT_ANLREQ-51-portal-r7` @5f64f409b0, reviewed sound by the CTO, msg 5104) lands on DEV only AFTER this release is live, on a
+  measured digest read. That landing is a step of this release's close, named here so it is not forgotten.
+- **After-reads added to section 5:**
+  - **B1:** `analysis-report` for a READY owned request with NO `ticket_id` sent: the body equals the BEFORE arm but for `retained_ref`.
+  - **B2:** the same with the request's OWN stored `ticket_id`: answers. With ANOTHER well-formed ticket id: `REPORT_TICKET_MISMATCH`.
+    Needs one ticket-filed request that is readable; if none exists the result is ABSENT with its census, and ABSENT is not EXERCISED.
+  - **B3:** a caller not admitted to the request, sending a wrong ticket id: the same answer as with none.
+  - **B4 (the count CTO msg 4955 asked for):** how many accepted requests store NO `ticket_id`, of how many; a laptop read.
+  - **C3:** after the portal candidate lands, one Open report from a ticket on DEV: the report renders.
+- **Rollback is unchanged:** revision 6, `6idtFvAm`, by copying its stored object version onto the key; the map's two pins return.
+  If the rollback happens AFTER the portal candidate landed, that candidate is reverted on DEV first, or every Open is refused.
+- **Order of the whole return:** (1) the history reader on portal PROD (Andrew's word); (2) the build, the re-run census, this pair
+  re-issued, the CTO half; (3) the apply and R0 to R8, B1 to B4, C1, C2; (4) the portal candidate on DEV and C3.
