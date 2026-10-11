@@ -79,6 +79,41 @@
     `aws apigatewayv2 update-api --api-id w8jnzvs21g --no-disable-execute-api-endpoint`, then `get-api` reads `false`.
   </bounds>
 
+  <amendment_2>
+    AMENDMENT 2 (issuer, 2026-10-11 ~23:4xZ). RE-OPENED after your STOP at step 4 (msg 6142), which was right: the probes as first
+    written carried no stage and reached no route. The error was the issuer's (row NFRA_OPSWKF-D2-S14).
+    READ BOTH NEW FILES WHOLE before the first request:
+    - Pair AMENDMENT 1, COO half (SIGNED): org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/2.0.0_SA_COO~O2/S_DEPLOY/OW_SD3_FWD10_SECOND_DOOR_CLOSE_PAIR_AMENDMENT_1_STAGE_PREFIX_20261011.md
+      @fd4b29c634, sha256 begins bea9652d4eca2242.
+    - CTO half on it (SIGNED, msg 6151): org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/1.0.0_SA_CTO~DELL2/CTO_HALF_OW_SD3_FWD10_AMENDMENT_1_STAGE_PREFIX_20261011.md
+      @816d90c51e. It GOVERNS where it differs.
+
+    THIS AMENDMENT REPLACES the two probes and the steps that use them; every other step, read, bound and the restoring command stand.
+    - **N2:** `GET https://w8jnzvs21g.execute-api.us-east-1.amazonaws.com/prod/fwd10-no-such-route-20261011`
+    - **U2:** `GET https://w8jnzvs21g.execute-api.us-east-1.amazonaws.com/prod/users`
+    Both with NO `Authorization` header, NO `X-Auth-Token` header, no cookie, no body. Record each answer IN FULL as before
+    (status, whole body, response header NAMES).
+
+    Open a NEW ledger entry (the first is CLOSED NOT EXECUTED and stays so) and commit it at once. Re-read steps 1, 2 and 3 fresh;
+    step 3's window must END after U2 BEFORE so the authorizer's invocations around it are in the read.
+    - **Step 4, replaced.** N2 then U2, once each.
+      - N2 expected `404` `{"message":"Not Found"}` from the API. Record whatever it is; a 5xx is a STOP.
+      - U2 expected `401` `{"message":"Unauthorized"}` with `trade-authorizer`'s invocations flat.
+        - `401`: proceed.
+        - `403`: a REPORTED outcome, NOT a stop (the CTO half): read `trade-authorizer`'s invocation count for that minute (one
+          empty invocation is the expected cause), record it, do NOT send U2 again before the write, and proceed to step 5.
+        - `200` or `404`: STOP. No further request, no write. Report.
+        - 5xx: STOP.
+    - **Step 5 unchanged:** the one write.
+    - **Step 6(b), replaced.** N2 then U2 again, once each, answers in full. Say in one sentence each whether the AFTER answer
+      differs from the BEFORE answer. If BOTH read the same as BEFORE, wait 60 seconds once and repeat both once. If they still read
+      the same: write in the report, in these words, "the effect is not shown by a request; the setting read back true is the
+      proof", do NOT restore the setting, and report. **The write is never held or undone on the probes.**
+    - **Bounds, replaced for the request count only:** with the two requests already spent, at most SIX more: N2 and U2 before, N2
+      and U2 after, and one repeat pair. NEVER a request to `/prod/auth`, `/prod/submit`, `/prod/workflow`, or to any path with a
+      credential. Everything else in `<bounds>` stands.
+  </amendment_2>
+
 <proof_of_spec>
   <criterion id="OW-sd3-AC1" cell_refs="OW-sd-3" judgment="true"/>
 </proof_of_spec>
