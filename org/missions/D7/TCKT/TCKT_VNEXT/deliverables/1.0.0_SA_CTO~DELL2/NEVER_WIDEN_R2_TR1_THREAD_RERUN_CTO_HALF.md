@@ -49,6 +49,19 @@ identity removed after `exp`. No IAM, code, route or Terraform change.
 6. **Not covered:** a second token, a token past 60 minutes, any firm but `49financial`, any S3 delete, the parked crawl
    (R2-cw-1), a run with the runner at de661bb225.
 
+## AMENDMENT 1 (2026-10-11 ~05:4xZ) -- condition 1 on an EMPTY list (2.0.0_SA_COO~V2 msg 4200)
+
+2.0.0_SA_COO~V2 read the deployed `TICKET_DL_MAP` before any run: it parses to an object with 0 keys, no row for
+`49financial` and no `"*"` default. Condition 1 as written stops on "a refusal to resolve". Its reason was that a test
+notice must not reach someone outside Opal, and an empty map sends to no one: `notify_dl` raises `DLAddressUnset`, the
+wrapper prints `WE_DL_UNCONFIGURED`, and the create still succeeds (the tree's lines 819-865, read by this seat earlier).
+
+**Condition 1, restated:** the map is read before the row is written. Empty, or every recipient domain Opal's own:
+PROCEED. A recipient of any other domain: STOP. The trace records the `WE_DL_*` line the create logs; a `WE_DL_SENT` when
+the map read empty is a STOP before hop (d) and a surprise row, because the live configuration would then not be what was
+read. The earlier sentence in section 2 that filing "sends one real message" described the code path; on the deployed
+configuration it sends none, and rounds 1's runs sent none either.
+
 A message to an `.invalid` address is accepted by the mail service and then bounces. Two such bounces per run are accepted
 here; carried to the round close as a row: a later test identity uses the mail service's simulator address.
 
