@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-f-9.act2-producers-repoint",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-9.act2-producers-repoint.md",
+    "group": "OTHER",
+    "vintage_commit": "938e2ed2c4"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~21",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R3.md",
+    "vintage_commit": "576d421c27",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-9.act2-producers-repoint.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "the base file data/black_diamond/scripts/gold/gold_dispatch.sh at 938e2ed2c4, carrying neither marked block: this is the state the order's arms are written to fail on",
+      "expected": "AC1 and AC2 each print a FAIL line naming the absent block and exit=1",
+      "observed": "AC1: 'FAIL the PLATINUM-MODE block is absent', 'ROUND 3 DISPATCH EXPORT: CASES FAIL', exit=1; AC2: 'FAIL the GATE-READ-LOCATION block is absent', 'ROUND 3 DISPATCH GATE: CASES FAIL', exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice; the two output bodies compared with diff, the rc line excluded",
+      "observed": "export body identical across two runs; gate body identical across two runs; both exit=1",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The two marked blocks (PLATINUM-MODE after argument parsing; GATE-READ-LOCATION inside check_freshness) and the replaced aws s3 cp argument in gold_dispatch.sh",
+      "reason": "Not made. The order's bound (1) (diff = those edits only) and bound (3) (no non-ASCII in the file) cannot both hold: the base file carries 19 non-ASCII lines outside the edit zones. Surprise row ADVI_FIRMBKTS-D1-W21-S1 (BLOCKING) carries it; the order's stop clause applies."
+    },
+    {
+      "item": "Step 2 contingency (add the dispatcher's directory as a second search path)",
+      "reason": "Not applied, because the edit is not made. Surprise row ADVI_FIRMBKTS-D1-W21-S2 records that the gate precedes the sync on the downstream path and that the runner's dispatcher directory is not established."
+    },
+    {
+      "item": "Step 4 site list (other aws s3 sites in gold_dispatch.sh under the 11 served prefixes)",
+      "reason": "Read, not changed: the only served-prefix read in the file is the gate at L249. The other S3 sites read silver/, code/, gold/.checkpoints/, gold/logs/, gold/perf_report.json, gold/perf_history/, or the gate artifacts gold/validation/ and gold/canonical/ (wait_phase callers L608, L612). None is served, so no row per site was filed."
+    },
+    {
+      "item": "Any run of gold_dispatch.sh, any AWS call, any deploy",
+      "reason": "Bound by the order: repository files only; the mode is never set here."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d9e2f9c802",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit d9e2f9c802 on wk-ADVI_FIRMBKTS-21; two rows appended inside the final json block (ADVI_FIRMBKTS-D1-W21-S1, ADVI_FIRMBKTS-D1-W21-S2); no existing row edited"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 runs the export block under eight environments (a scheduled chain reads canonical; single, group, a dry-run, the QA keep-alive and the QA marker read unset; a value already set is kept), FAIL at base.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-21 && timeout 100 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_dispatch.py --arm export --root /c/dev/wk-firmbkts-21; echo \"exit=$?\"",
+      "expect": "ROUND 3 DISPATCH EXPORT: ALL CASES PASS",
+      "output_evidence": "  FAIL the PLATINUM-MODE block is absent\nROUND 3 DISPATCH EXPORT: CASES FAIL\nexit=1",
+      "denominator": "8 export cases defined by the check; 0 run, because the block is absent at base (0 of 8 PASS)",
+      "status": "FAIL",
+      "status_reason": "The edit the criterion grades is not made: the order's bounds conflict (surprise row ADVI_FIRMBKTS-D1-W21-S1). The base output is the measured result; the order stays open."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 runs the gate block with the mode unset (today's URI, byte-identical), with canonical (the module's own answer for the key) and with the lib absent (today's URI), FAIL at base.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-21 && timeout 100 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_dispatch.py --arm gate --root /c/dev/wk-firmbkts-21; echo \"exit=$?\"",
+      "expect": "ROUND 3 DISPATCH GATE: ALL CASES PASS",
+      "output_evidence": "  FAIL the GATE-READ-LOCATION block is absent\nROUND 3 DISPATCH GATE: CASES FAIL\nexit=1",
+      "denominator": "3 gate cases defined by the check; 0 run, because the block is absent at base (0 of 3 PASS)",
+      "status": "FAIL",
+      "status_reason": "The edit the criterion grades is not made: the order's bounds conflict (surprise row ADVI_FIRMBKTS-D1-W21-S1). The base output is the measured result; the order stays open."
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W21-S1: BLOCKING, INERT. The order's bounds cannot both hold: gold_dispatch.sh@938e2ed2c4 carries 19 non-ASCII lines outside the edit zones, so 'no non-ASCII in the file' needs edits beyond the two-blocks diff. No edit made; the order is stopped.",
+    "ADVI_FIRMBKTS-D1-W21-S2: OBSERVATION, ARMED (disarm owner 2.0.0_SA_COO~B1). On the --chain downstream path the freshness gate (L1305-1307) reads before any sync_scripts (L473, L532), so SCRIPTS may hold no lib/ on a fresh instance and the step-2 block would fall back to the frozen legacy URI under canonical. Not armed by this act: no edit."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~21/ADVI_FIRMBKTS.TO-FB-f-9.act2-producers-repoint.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python r3_dispatch.py (the order's own acceptance checks)",
+      "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_dispatch.py --arm export|gate --root /c/dev/wk-firmbkts-21",
+      "result": "both arms rc=1 at base, each run twice with identical bodies"
+    },
+    {
+      "tool": "safe-commit.sh (commit-gate, surprise-row gate, one-writer, msg-verify)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~21 <0.9.0_WK_ADVI_FIRMBKTS~21@opal.agent>\" -F <msgfile> -- org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc=0; commit d9e2f9c802 MATCH; surprise-row gate OK (2 new rows of 129 checked); one-writer WARN (unsuffixed laptop file written from dell1, 0 blocked)"
+    }
+  ]
+}
