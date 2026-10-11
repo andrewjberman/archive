@@ -12,7 +12,7 @@
 <preflight>
 comp-schedule: DECLARED-NOT-APPLICABLE -- one read of one table item; no schedule, trigger or rule is added or read
 comp-iam: DECLARED-NOT-APPLICABLE -- no IAM change; the read uses the grant this lane's swap_svc_firm.py reads used in windows 6 to 9, on the same table
-comp-adversary: RUN -- read 1 script (read_profile_firms.py, 44 lines: one get_item with a four-name ProjectionExpression, no write call) and 1 code path (served.py lines 1063-1066, the on-behalf rule the answer feeds); NOT seen: the row itself, which is the point of the read. Traps: reading another attribute of a person's row; reading the wrong user; taking an absent attribute for an empty list (the script prints the shape)
+comp-adversary: RUN -- read 1 script (read_profile_firms.py, 46 lines by wc: one get_item with a four-name ProjectionExpression, no write call) and 1 code path (served.py lines 1063-1066, the on-behalf rule the answer feeds); NOT seen: the row itself, which is the point of the read. Traps: reading another attribute of a person's row; reading the wrong user; taking an absent attribute for an empty list (the script prints the shape)
 </preflight>
 <decomp_ref>
 <decomp_doc>org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R11.md</decomp_doc>
