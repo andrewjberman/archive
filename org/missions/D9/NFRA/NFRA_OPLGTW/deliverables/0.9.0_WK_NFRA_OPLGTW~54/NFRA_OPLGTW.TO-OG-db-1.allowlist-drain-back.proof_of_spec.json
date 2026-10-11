@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-db-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~54",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3566a85699"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "9bb6b88089",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-db-1.allowlist-drain-back.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+      "kind": "script",
+      "commit_or_etag": "33fb4d9708",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source edit on trunk; no deploy run, no AWS call. Commits 3a40dffdcc and 33fb4d9708.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "33fb4d9708",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row NFRA_OPLGTW-Z-W54-S1 appended."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(?s)meeting_allowlist\\.json reads: HEAD [1-9]\\d*, live [1-9]\\d* .*bash -n: yes.*missing 0 \\[\\].*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r34/checks/db1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "meeting_allowlist.json reads: HEAD 5, live 5 (want equal, >=1); bash -n: yes\nrequired .env keys 54; at HEAD 54; missing 0 []\nRESULT: PASS\nexit=0",
+      "denominator": "54 of 54 required .env keys present at HEAD; allowlist refs 5 at HEAD vs 5 live",
+      "status": "PASS",
+      "expect": "(?s)meeting_allowlist\\.json reads: HEAD [1-9]\\d*, live [1-9]\\d* .*bash -n: yes.*missing 0 \\[\\].*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "(?s)clean sparse tree: rc=0 PREFLIGHT OK=yes.*dirty sparse tree: rc=[1-9]\\d* refused naming dirty=yes.*without the import closure: rc=[1-9]\\d* refused naming the closure=yes.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r34/checks/db1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "clean sparse tree: rc=0 PREFLIGHT OK=yes\ndirty sparse tree: rc=1 refused naming dirty=yes\nsparse tree without the import closure: rc=1 refused naming the closure=yes\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 arms as required; run at HEAD 33fb4d9708. NOTE: the order's closure path org/modules/graph/compproof/manifest_check_cli.py is absent at HEAD; the real org/modules/graph/manifest_check_cli.py is checked (row NFRA_OPLGTW-Z-W54-S1).",
+      "status": "PASS",
+      "expect": "(?s)clean sparse tree: rc=0 PREFLIGHT OK=yes.*dirty sparse tree: rc=[1-9]\\d* refused naming dirty=yes.*without the import closure: rc=[1-9]\\d* refused naming the closure=yes.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W54-S1"
+  ],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). Trail: commits 3a40dffdcc, 33fb4d9708.",
+  "compiler_tools": [
+    {
+      "tool": "bash check scripts db1.AC1.sh / db1.AC2.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r34/checks/db1.AC2.sh",
+      "result": "RESULT: PASS exit=0 (AC1 and AC2)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2 first run at 3a40dffdcc with the order's literal closure path: clean arm FAIL (rc=1) because that path does not exist; dirty and closure arms refused as required.",
+      "expected": "clean arm rc=0",
+      "observed": "FAIL before path correction, PASS after (33fb4d9708)",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice (pre and post path correction for AC1; AC2 post-correction once)",
+      "observed": "AC1 PASS both runs",
+      "status": "STABLE"
+    }
+  }
+}
