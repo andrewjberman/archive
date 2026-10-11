@@ -1,0 +1,94 @@
+{
+  "reader": "trade_rec",
+  "census_by": "0.9.0_WK_NFRA_MCPINDEX~30",
+  "census_read_at": "2026-10-11T00:15Z",
+  "method": "Read-only. Every candidate listed with boto3 list_objects_v2 (paginated, counted client-side) and ONE newest-partition get_object per prefix, schema and distinct status-like columns printed, no row value printed. Probe scripts were run from the worktree .scratch (not committed). DynamoDB read was describe-table only.",
+  "need": "A served source carrying BOTH a per-trade Opal status and a per-trade custodian status, joinable to the fixture row grain (account, custodian, trade_date, symbol, side, quantity) per tools/ops_kit/fixtures/trade_rec.json.",
+  "served_semantics_note": "The instrument ops_census.py requires every candidate to read served=false under a GAP verdict. 'served' below therefore means: SURVIVES as a source of the trade_rec shape (scheduled producer, served prefix, AND carries the status fields at the fixture grain). The literal facts about prefix and schedule are kept separately in served_prefix and producer_scheduled. See the surprise row filed with this census.",
+  "candidates": [
+    {
+      "producer": "trade engine S3 export (trade-parquet-batch-export, rule trade-parquet-nightly-export cron(0 2 * * ? *))",
+      "location": "s3://opal-data-trade-submissions/parquet/trades/",
+      "denominator": 2,
+      "denominator_of": "rows in the only object under the prefix (1 object, trades_2026-01-20.parquet, LastModified 2026-01-21T02:00:31Z); 1 fund value, 2 statuses (APPROVED, REJECTED)",
+      "served": false,
+      "served_prefix": false,
+      "producer_scheduled": true,
+      "reason": "Grain is one row per FUND submission (columns submission_id, fund, brokerage, status, initiator/approver/executor, timestamps); no account, no symbol, side or quantity per row, and no custodian status. Latest object is 2026-01-21, so 0 of the last 263 days carry a row. Not a catalogued or gateway-granted prefix."
+    },
+    {
+      "producer": "trade engine system of record (DynamoDB opal-trade-submissions; statuses PENDING_APPROVAL, APPROVED, REJECTED, EXECUTED, COMPLETE)",
+      "location": "dynamodb:opal-trade-submissions",
+      "denominator": 33,
+      "denominator_of": "items in the table (describe-table ItemCount); also 25 submission artifact objects under s3://opal-data-trade-submissions/submissions/ (newest 2026-07-20)",
+      "served": false,
+      "served_prefix": false,
+      "producer_scheduled": false,
+      "reason": "A DynamoDB table, not an S3 served prefix, and outside the gateway read grant. Same fund-level grain with a securities list per submission, no account key, and C-NO-SEND back-office handoff only: the engine has no custodian integration (docs/architecture/TRSB_LEDGER.md section 1), so no custodian status exists on it."
+    },
+    {
+      "producer": "Black Diamond silver transactions (opal-data-bd, the PRD's named candidate)",
+      "location": "s3://opal-data-bd/silver/transactions/YYYY-MM-DD.parquet",
+      "denominator": 1924,
+      "denominator_of": "date partitions (2020-03-06 to 2026-10-10, newest LastModified 2026-10-10T00:18Z); newest partition 84533 rows, 72 columns, of which 0 are status columns",
+      "served": false,
+      "served_prefix": true,
+      "producer_scheduled": true,
+      "reason": "Scheduled and current, but carries NO per-trade status of either kind: the nearest columns are action (20 distinct) and transaction_type (11 distinct), which name the kind of line, not a settlement or rejection state. Black Diamond is the portfolio-accounting system, not the custodian. Has no Opal-side status."
+    },
+    {
+      "producer": "Schwab silver dim_transaction (opal-data-assets, three masters 08242234, 08335338, 08403355)",
+      "location": "s3://opal-data-assets/schwab/<master>/silver/dim_transaction/date=YYYY-MM-DD/data.parquet",
+      "denominator": 1768,
+      "denominator_of": "date partitions across the 3 masters (688 + 569 + 511; newest date=2026-10-09 in all three; newest rows 5489, 5561, 59); 44 columns, of which 0 are status columns",
+      "served": false,
+      "served_prefix": true,
+      "producer_scheduled": true,
+      "reason": "Scheduled and current. A row exists only once Schwab has booked the transaction; the table has trade_date and settlmnt_date but no status field, so a REJECTED or PENDING custodian state is never present and a SETTLED state could only be inferred from a date. Has no Opal-side status. Account overlap with the Orion transactions candidate: 0 of 2471."
+    },
+    {
+      "producer": "Inflection Orion silver transactions (opal-data-inf, orion-rest-transactions)",
+      "location": "s3://opal-data-inf/silver/transactions/YYYY-MM-DD.parquet",
+      "denominator": 1653,
+      "denominator_of": "date partitions (2020-05-26 to 2026-10-10); newest partition 1520347 rows, 49 columns, ONE status column (status: Complete 1335888, Pending 92811, Rejected 90588, Reversed 1054, Pending Corporate Action 4, Inactive 2); custodianName Fidelity_Inflection 1520223, Fidelity_LH 124; orderId and tradeOrderId non-null 0 of 1520347",
+      "served": false,
+      "served_prefix": true,
+      "producer_scheduled": true,
+      "reason": "Carries ONE status per transaction, Orion's own record status, from a single system. No order link (orderId and tradeOrderId null on every row), so it cannot be joined to the engine, and its custodian is Fidelity, for which no custodian silver exists under any served bucket: its accounts overlap Schwab silver on 0 of 871 Orion accountNumber values against 2471 Schwab account_id values. One side of the comparison only; a custodian_status would have to be invented."
+    },
+    {
+      "producer": "Cottonwood Black Diamond-format silver transactions (opal-data-cot)",
+      "location": "s3://opal-data-cot/silver/transactions/YYYY-MM-DD.parquet",
+      "denominator": 120,
+      "denominator_of": "date partitions (2026-03-09 to 2026-10-10); newest partition 16086 rows, 71 columns, 0 status columns (tax_status and tax_status_1 are tax classes)",
+      "served": false,
+      "served_prefix": true,
+      "producer_scheduled": true,
+      "reason": "No per-trade status of either kind; a different firm from Inflection and 49 Financial (C7)."
+    },
+    {
+      "producer": "Commonwealth silver transactions for Cottonwood (opal-data-assets)",
+      "location": "s3://opal-data-assets/commonwealth/cottonwood/silver/transactions/date=*/trade_year=*/part-*.parquet",
+      "denominator": 14,
+      "denominator_of": "parquet objects (one date=2026-06-23 partition split by trade_year 2013-2026; newest object 73800 rows, 25 columns, 0 status columns)",
+      "served": false,
+      "served_prefix": true,
+      "producer_scheduled": false,
+      "reason": "Custodian-side ledger lines (Settle_Date, Trade_Date) with no status column; one dated partition only (LastModified 2026-10-06), so not a daily producer. No Opal-side status."
+    },
+    {
+      "producer": "Orion Eclipse silver (opal-data-inf silver/eclipse, the trade-order system's silver)",
+      "location": "s3://opal-data-inf/silver/eclipse/YYYY-MM-DD/",
+      "denominator": 4,
+      "denominator_of": "parquet objects in the newest partition 2026-10-10 (models, model_composition, portfolios_full, portfolios_simple); 0 of 4 are trade or order tables",
+      "served": false,
+      "served_prefix": true,
+      "producer_scheduled": true,
+      "reason": "Eclipse silver holds model and portfolio structure only; no trade order or order status object exists in it."
+    }
+  ],
+  "verdict": "GAP",
+  "owner": "unowned",
+  "owner_reason": "No chartered project produces a per-account trade table carrying an Opal-side status next to a custodian-side status. NFRA_OPSWKF owns trade-request intake and the engine bridge (its FWD-1), and its ticket status write-back is absent today (ANDREW_DIRECT_20261009_05xxZ_TICKET_CENTER_TRADE_INTAKE_AND_FIT_READ.md section 3), but it writes no custodian side. A custodian-status feed (Schwab silver has none; Fidelity silver does not exist) is owned by no project.",
+  "result": "No served source carries both statuses at the fixture grain. Of 8 candidates: 0 carry an Opal status joinable to an account; 1 (Orion transactions) carries one status from one system; 0 carry a custodian status. No reader is built; FWD-19's trade reconciliation leg is NOT done."
+}
