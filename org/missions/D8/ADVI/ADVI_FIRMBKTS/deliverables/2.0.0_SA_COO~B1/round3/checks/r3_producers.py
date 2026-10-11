@@ -85,14 +85,23 @@ def static(root):
         cfg = importlib.import_module("lib.config")
         old = getattr(cfg, "S3_BUCKET", None)
         ok = callable(getattr(mod, "destination", None)) and bool(old)
+        view_prefixes = {row[0] for row in getattr(importlib.import_module('lib.platinum_dest_view'), 'PLATINUM_CLASSES', ())}
+        carved = [p_ for p_, _pat in table if p_ not in view_prefixes]
+        print('  classes in the F7 table: %d; in the destination view: %d; carved out (legacy in both modes): %d'
+              % (len(table), len(view_prefixes), len(carved)))
         bad_legacy = bad_canon = n_checked = 0
         for k in keys:
             if mod.destination(k) != (old, k) or mod.destination(k, "legacy") != (old, k):
                 bad_legacy += 1
-            want, why = r2.place(k, table, naming)
             got = mod.destination(k, "canonical")
-            if why or got != (r2.DST_BUCKET, want):
-                bad_canon += 1
+            if any(k.startswith(c) for c in carved):
+                # a class the registry CARVED OUT of the move (ADDENDUM 6): legacy in both modes
+                if got != (old, k):
+                    bad_canon += 1
+            else:
+                want, why = r2.place(k, table, naming)
+                if why or got != (r2.DST_BUCKET, want):
+                    bad_canon += 1
             n_checked += 1
         try:
             mod.destination(keys[0], "no-such-mode")
