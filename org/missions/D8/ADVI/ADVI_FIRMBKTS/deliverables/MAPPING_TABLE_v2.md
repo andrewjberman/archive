@@ -7,12 +7,13 @@ Denominators: 444 census classes and 238,861 census objects (census listed_at 20
 
 | accounting | classes |
 |---|---|
-| round-1 placed, retired or decided, copied unchanged (1b) | 218 (MOVE 132, HOME 77, RETIRE 7, DECISION 2) |
+| round-1 placed, retired or decided, copied unchanged (1b) | 216 (MOVE 130, HOME 77, RETIRE 7, DECISION 2) |
+| round-1 placed MOVE classes turned FAULT by the 1e overlap ruling (issuer commit 2ca0be7c81) | 2 |
 | round-1 FAULT classes re-gridded (no own row; children below) | 24 parents |
 | round-1 FAULT classes with an own row | 202 (RETIRE 73, MOVE 58, HOME 13, FAULT 58) |
-| census classes accounted (218 copied + 226 round-1 FAULT) | 444 of 444 |
+| census classes accounted (216 copied + 2 overlap-FAULT + 226 round-1 FAULT) | 444 of 444 |
 
-Rows in `mapping_v2.json`: 498 = 218 copied + 280 new (own rows 202, re-grid children 78). By disposition: MOVE 214, HOME 110, RETIRE 85, FAULT 87, DECISION 2.
+Rows in `mapping_v2.json`: 498 = 216 copied + 2 round-1 MOVE turned FAULT + 280 new (own rows 202, re-grid children 78). By disposition: MOVE 212, HOME 110, RETIRE 85, FAULT 89, DECISION 2.
 
 Census objects in the own-row FAULT classes: 35,087 of 238,861. The re-grid parents keep FAULT remainders (section 3) and their live counts sit in the children rows.
 
@@ -289,8 +290,10 @@ Census objects in the own-row FAULT classes: 35,087 of 238,861. The re-grid pare
 | gold/firm_mix_views_daily.json | FAULT | 1e collision |  |
 | gold/logs/ | RETIRE | RB |  |
 | gold/partner_analytics/ | MOVE | RG3 |  |
+| gold/positions_cube/ | FAULT | 1e overlap | destination-key overlap 342 of 342 keys with gold/timeseries/positions_cube/ (round-1 MOVE turned FAULT; owner 1.0.0_SA_CTO~DELL1; issuer ruling 2ca0be7c81) |
 | gold/timeseries/account_performance.parquet | FAULT | 1e collision |  |
 | gold/timeseries/client_performance.parquet | FAULT | 1e collision |  |
+| gold/timeseries/positions_cube/ | FAULT | 1e overlap | destination-key overlap 342 of 342 keys with gold/positions_cube/ (round-1 MOVE turned FAULT; owner 1.0.0_SA_CTO~DELL1; issuer ruling 2ca0be7c81) |
 | investor-reporting/directory/ | MOVE | RI1 |  |
 | investor-reporting/qa/directory/ | MOVE | RI1 |  |
 | investor-reporting/qa/holdings/ | MOVE | RI1 |  |
@@ -348,11 +351,12 @@ Each re-grid's children sum to its parent's live count (the check's denominator)
 
 ## 4. Remaining FAULT rows, by owner and reason
 
-Owner `1.0.0_SA_CTO~DELL1` on all 87 FAULT rows.
+Owner `1.0.0_SA_CTO~DELL1` on all 89 FAULT rows.
 
 | count | reason |
 |---|---|
 | 39 | destination-key overlap (new class FAULT by collision ruling 1e) |
+| 2 | destination-key overlap 342 of 342 keys: round-1 cot `gold/positions_cube/` and `gold/timeseries/positions_cube/`, both FAULT by issuer ruling 2ca0be7c81 (1e) |
 | 12 | market-price silver: {vendor} is not derivable from the key and is not the bucket's feed vendor |
 | 7 | no repair rule places it |
 | 5 | marker at the class prefix: a re-grid child cannot share its prefix, so the marker stays in the FAULT remainder |
@@ -379,7 +383,7 @@ Round-1 and new MOVE/HOME classes were grouped by (bucket, source, scope, tier, 
 
 - 28 groups with overlap 0 are ruled `merge`; their entries are in `collisions` with `overlap_keys` 0.
 - Groups where a NEW class overlapped another class were ruled by making every new class of the group FAULT (owner CTO, reason `destination-key overlap ...`). 39 new classes are FAULT by this ruling.
-- Round-1 classes stay unchanged (1b). One round-1-only group overlaps and is left UNRULED: `opal-data-cot` `advi/cottonwood/gold/positions_cube`, classes `gold/positions_cube/` and `gold/timeseries/positions_cube/`, both carry the same 171 dated keys (342 of 342 keys shared). A merge ruling needs overlap 0, and making either class FAULT would change a round-1 row. This is surfaced as a surprise row (ADVI_FIRMBKTS-D1-W4-S1) and P2 fails on it.
+- Round-1 classes stay unchanged (1b) EXCEPT the one permitted change (1e, issuer ruling commit 2ca0be7c81): the round-1 MOVE classes `opal-data-cot` `gold/positions_cube/` and `gold/timeseries/positions_cube/`, which share the same 171 dated keys (342 of 342 keys shared, destination `advi/cottonwood/gold/positions_cube`), are both FAULT rows, owner `1.0.0_SA_CTO~DELL1`, reason `destination-key overlap 342 of 342 keys with <the other class>`. They have no collision entry: the group is no longer a group of MOVE/HOME rows. Surfaced earlier as surprise row ADVI_FIRMBKTS-D1-W4-S1.
 
 ## 6. Method notes (round-2 conventions, all surfaced as surprise rows where the spec did not say)
 
