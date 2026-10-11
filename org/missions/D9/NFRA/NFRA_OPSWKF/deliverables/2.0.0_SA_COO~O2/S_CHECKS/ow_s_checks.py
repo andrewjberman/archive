@@ -14,6 +14,9 @@
                          mail, whatever the body; an Opal-internal caller posting a malformed ticket_id reaches the 400
   s9-regress  OW-s3-AC3  FWD-9: the submit handler's whole test directory passes (the pre-existing files included)
 
+  s5-record   OW-s5-AC1  the second-door record exists, ASCII, with its five sections, a context_keys line, a
+                         requests_30d line (a number or NO-METRIC) and a non-zero portal-API control
+
 Prints <TOKEN>-OK or <TOKEN>-FAIL <reason>, exits 0 / 1. Run from the worktree root. Subprocesses are bounded (110 s).
 """
 import importlib
@@ -283,6 +286,33 @@ def _s9_probe():
         refused, len(outsiders) * len(bodies), len(outsiders), len(bodies), reached, len(insiders))
 
 
+S5_DOC = Path("org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/"
+              "NFRA_OPSWKF_SECOND_DOOR_AUTHORIZER_BYTES_AND_TRAFFIC_20261011.md")
+S5_SECTIONS = ["trade-authorizer", "trade-auth-handler", "What the three functions answer through this API today",
+               "Traffic, 30 days", "not_established"]
+
+
+def _s5_record():
+    if not S5_DOC.exists():
+        return False, "absent: %s" % S5_DOC.as_posix()
+    text = S5_DOC.read_text(encoding="utf-8")
+    if any(ord(ch) > 127 for ch in text):
+        return False, "non-ASCII in the record"
+    heads = [h.strip() for h in re.findall(r"^## (.+)$", text, re.M)]
+    missing = [x for x in S5_SECTIONS if not any(h.startswith(x) for h in heads)]
+    if missing:
+        return False, "no section for %s" % "; ".join(missing)
+    if not re.search(r"^context_keys: \S", text, re.M):
+        return False, "no 'context_keys:' line"
+    m = re.search(r"^requests_30d: (\d+|NO-METRIC)\b", text, re.M)
+    if not m:
+        return False, "no 'requests_30d: <number or NO-METRIC>' line"
+    c = re.search(r"^control_portal_api_30d: (\d+)\b", text, re.M)
+    if not c or int(c.group(1)) <= 0:
+        return False, "no 'control_portal_api_30d:' line with a number above zero"
+    return True, "5 of 5 sections, requests_30d=%s, control=%s" % (m.group(1), c.group(1))
+
+
 def _record():
     if not S1_DOC.exists():
         return False, "absent: %s" % S1_DOC.as_posix()
@@ -327,7 +357,8 @@ def main(argv):
     sub = argv[0]
     token = "OW-" + sub.upper()
     fn = {"s1-record": _record, "s2-tests": _tests, "s2-probe": _probe,
-          "s9-tests": lambda: _tests(SUB_TEST, S9_NAMES), "s9-probe": _s9_probe, "s9-regress": _s9_regress}.get(sub)
+          "s9-tests": lambda: _tests(SUB_TEST, S9_NAMES), "s9-probe": _s9_probe, "s9-regress": _s9_regress,
+          "s5-record": _s5_record}.get(sub)
     if fn is None:
         print("unknown check %r" % sub)
         return 2
