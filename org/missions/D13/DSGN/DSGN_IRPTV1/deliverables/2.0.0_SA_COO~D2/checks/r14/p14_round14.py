@@ -14,7 +14,9 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
             not_fixed with a reason; new_failing_ids == []; workspace_commit and portal_commit hex; product_files_changed non-empty.
   IV92-AC1  ~49/TEST_HYGIENE.json: bun {hardcoded_paths_left == 0, source [{file, line}]}; press {supports in TESTING_LIBRARY /
             NATIVE_ACT / NEITHER; NEITHER carries a row and rewritten false; otherwise rewritten true and uses_private_internals
-            false}; f47 {outcome FIXED or RULING_ASKED, with reason}; suite_after.new_failing_ids == []; portal_commit hex.
+            false}; f47 {outcome FIXED or RULING_ASKED, with reason}; suite_after.new_failing_ids == []; portal_commit hex. When
+            dev_dependency is present (AMENDMENT 2): a name, an exact version, lockfile_other_packages_moved == 0, build_equal true with
+            equal before and after hashes, and press.supports == NATIVE_ACT.
 """
 import json
 import re
@@ -108,6 +110,13 @@ def main():
                 fail("press NEITHER wants rewritten false and a row id")
         elif p.get("rewritten") is not True or p.get("uses_private_internals") is not False:
             fail("press %r: want rewritten true and uses_private_internals false" % p)
+        dd = r.get("dev_dependency")
+        if dd is not None:
+            # AMENDMENT 2 (CTO msg 4358): ONE dev dependency, devDependencies only, nothing else moved, the production build byte-equal.
+            if not dd.get("name") or not re.match(r"^\d+\.\d+\.\d+", str(dd.get("version") or "")) or dd.get("lockfile_other_packages_moved") != 0                     or dd.get("build_equal") is not True or not dd.get("build_hash_before") or dd.get("build_hash_before") != dd.get("build_hash_after"):
+                fail("dev_dependency %r is outside the CTO's conditions" % {k: dd.get(k) for k in ("name", "version", "lockfile_other_packages_moved", "build_equal")})
+            if p["supports"] != "NATIVE_ACT":
+                fail("a dev dependency was added and press.supports is %r, want NATIVE_ACT" % p["supports"])
         f = r.get("f47") or {}
         if f.get("outcome") not in ("FIXED", "RULING_ASKED") or not str(f.get("reason") or "").strip():
             fail("f47 %r" % f)
