@@ -1,0 +1,133 @@
+diff --git a/data/mdpf/scripts/demque/standing_drawer.py b/data/mdpf/scripts/demque/standing_drawer.py
+index d3be03d854..b9b5e95743 100644
+--- a/data/mdpf/scripts/demque/standing_drawer.py
++++ b/data/mdpf/scripts/demque/standing_drawer.py
+@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT))
+ from data.etfs.scripts.rivalfunds import bbg_budget  # noqa: E402
+ from data.mdpf.scripts.demque import bbg_ledger_upload, bbg_quote, demand_queue, drawer_schedule  # noqa: E402
+ from lib.opal_naming import lookup, name as _build_name  # noqa: E402
+-from lib.trading_calendar import is_trading_day  # noqa: E402
++from lib.trading_calendar import is_trading_day, trading_days_between  # noqa: E402
+ 
+ MISSION = ROOT / "org/missions/D8/MDPF/MDPF_DEMQUE"
+ REQUESTS_DIR = MISSION / "requests"
+@@ -139,11 +139,38 @@ def _is_drawable(req) -> bool:
+     return all(isinstance(s, dict) and s.get("bloomberg") for s in secs)
+ 
+ 
+-def open_requests(requests_dir, actuals_path) -> list:
+-    """The drawable backfills with cells still owed, ordered as demand_queue orders requests: tier, then the optional
+-    rank (absent last), then file order."""
++def reached_end(latest_stored, start, end) -> bool:
++    """A security has reached its end when NO trading day lies in (its latest stored date, the request's end].
++
++    DQ-t-34 (row MDPF_DEMQUE-Z-S3). The cell-count test it replaces could never close a request: a quote priced on
++    weekdays counts holidays the vendor never returns, so `drawn < quoted` stayed true forever and every later fire
++    appended a 0-cell DRAWN line. Trading days are the only honest cursor, because they are what the vendor returns.
++    A security with nothing stored is measured from the request's start instead, so an empty window reads reached.
++    """
++    end = _d(end)
++    first = _d(latest_stored) + dt.timedelta(days=1) if latest_stored else _d(start)
++    if first > end:
++        return True
++    return not trading_days_between(first, end)
++
++
++def request_complete(req, latest) -> bool:
++    """A request is COMPLETE when every one of its securities has reached its end, on the drawer's own stored cursor."""
++    start, end = req.get("start"), req.get("end")
++    return all(reached_end(latest.get(s["bloomberg"]), start, end) for s in req["securities"])
++
++
++def open_requests(requests_dir, actuals_path, output_dir=None) -> list:
++    """The drawable backfills that are NOT yet COMPLETE, ordered as demand_queue orders requests: tier, then the
++    optional rank (absent last), then file order.
++
++    DQ-t-34: openness is completeness, no longer "drawn cells below quoted cells". The quoted figure is still read,
++    because it caps how much one request may take from a day's room, but it no longer decides whether the request is
++    open -- that was the defect row Z-S3 recorded.
++    """
+     d = Path(requests_dir)
+     drawn = _drawn_by_job(actuals_path)
++    latest = _stored_latest(output_dir if output_dir is not None else OUTPUT)
+     found = []
+     for path in sorted(d.glob("*.json"), key=lambda p: p.name):
+         if ".quote" in path.name:  # covers <id>.quote.json and <id>.quote.superseded-*.json
+@@ -154,13 +181,14 @@ def open_requests(requests_dir, actuals_path) -> list:
+         quoted = _quoted_cells(_quote_doc(path.with_suffix(".quote.json")))
+         if not quoted:
+             continue
++        if request_complete(req, latest):
++            continue  # skipped at the start of a run: no draw and no actuals line, so nothing follows completion
+         rid = req.get("request_id")
+         already = drawn.get(rid, 0)
+-        if already >= quoted:
+-            continue
+         found.append((int(req["tier"]), demand_queue._rank_key(req), path.name, path, req, quoted, already))
+     found.sort(key=lambda t: (t[0], t[1], t[2]))
+-    return [{"path": p, "request": r, "quoted": q, "drawn": a, "remaining": q - a} for _, _, _, p, r, q, a in found]
++    return [{"path": p, "request": r, "quoted": q, "drawn": a, "remaining": max(0, q - a)}
++            for _, _, _, p, r, q, a in found]
+ 
+ 
+ def _stored_latest(output_dir) -> dict:
+@@ -168,7 +196,10 @@ def _stored_latest(output_dir) -> dict:
+     import pandas as pd
+ 
+     latest = {}
+-    dirs = [Path(output_dir)] + [Path(p) for p in PRIOR_OUTPUTS]
++    folder0 = Path(output_dir)
++    # t24's folder is a prior output of the REAL drawer only. Unioning it into a test's tmp dir would read live
++    # securities into a fixture and make an isolated test depend on production state.
++    dirs = [folder0] + ([Path(p) for p in PRIOR_OUTPUTS] if folder0 == OUTPUT else [])
+     for folder in dirs:
+         if not folder.is_dir():
+             continue
+@@ -259,7 +290,7 @@ def run(day, client, requests_dir=None, actuals_path=None, output_dir=None) -> d
+         return {"outcome": "STOPPED", "stop_reason": "ALREADY_RAN_TODAY", "cells_drawn": 0, "day": str(day),
+                 "requests": []}
+ 
+-    entries = open_requests(requests_dir, actuals_path)
++    entries = open_requests(requests_dir, actuals_path, output)
+     allowance = json.loads(bbg_quote.ALLOWANCE_PATH.read_text(encoding="utf-8"))
+     spent_today = _drawn_history_today(day, actuals_path)
+     quote = None
+@@ -311,8 +342,27 @@ def run(day, client, requests_dir=None, actuals_path=None, output_dir=None) -> d
+ 
+         pd.DataFrame(all_rows).to_parquet(parquet, index=False)
+ 
++    # DQ-t-34: each request's outcome is decided BEFORE the receipt is written, so the receipt and the actuals
++    # ledger cannot disagree about a close. A request this run left with every security at its end closes
++    # COMPLETE rather than DRAWN, so no 0-cell DRAWN line can follow completion; a request already COMPLETE at
++    # the start of the run never reached the draw loop, because open_requests skipped it.
++    for entry, got in zip(entries, drawn_per_request):
++        if reason:
++            got["outcome"] = "STOPPED"
++        elif request_complete(entry["request"], latest):
++            got["outcome"] = "COMPLETE"
++        else:
++            got["outcome"] = "DRAWN"
++
+     cells_total = sum(r["cells_drawn"] for r in drawn_per_request)
+-    result = {"outcome": "STOPPED" if reason else "DRAWN", "stop_reason": reason, "cells_drawn": cells_total,
++    outcomes = [r["outcome"] for r in drawn_per_request]
++    if reason:
++        run_outcome = "STOPPED"
++    elif outcomes and all(o == "COMPLETE" for o in outcomes):
++        run_outcome = "COMPLETE"
++    else:
++        run_outcome = "DRAWN"
++    result = {"outcome": run_outcome, "stop_reason": reason, "cells_drawn": cells_total,
+               "rows": len(all_rows), "day": str(day), "allowance_today": room, "spent_before": spent_today,
+               "requests": drawn_per_request, "attempts": attempts,
+               "parquet": str(parquet) if parquet.exists() else None}
+@@ -322,8 +372,7 @@ def run(day, client, requests_dir=None, actuals_path=None, output_dir=None) -> d
+     for entry, got in zip(entries, drawn_per_request):
+         quoted_doc = _quote_doc(entry["path"].with_suffix(".quote.json")) or {}
+         bbg_quote.record_actual(actuals_path, got["request_id"], DRAWER, CHANNEL, got["cells_drawn"],
+-                                quote=quoted_doc, day=day,
+-                                outcome="STOPPED" if reason else "DRAWN", stop_reason=reason)
++                                quote=quoted_doc, day=day, outcome=got["outcome"], stop_reason=reason)
+     return result
+ 
+ 
