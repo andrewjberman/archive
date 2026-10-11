@@ -86,6 +86,10 @@ for f in FUNCS:
         run([sys.executable, "-I", str(HERE / "live_call_runner_416.py"), str(tree), side, str(o3)] + layers, "call %s %s" % (side, f))
         runs[(f, side, "scope")] = load(o2)
         runs[(f, side, "call")] = load(o3)
+        if side != "ctl":
+            o4 = scratch / ("mc_%s_%s.json" % (side, f))
+            run([sys.executable, "-I", str(HERE / "method_call_runner_416.py"), str(tree), side, str(o4), f, str(routes_path)] + layers, "method %s %s" % (side, f))
+            runs[(f, side, "mc")] = load(o4)
 
 arms = []
 
@@ -156,6 +160,22 @@ for f in FUNCS:
     arm(f, "binding cases (userOwn, userSelOther, userClaimOther, noRow, rowCotCot, rowCotInf) through the real entry.ENTRY, live vs built",
         "UNEXPECTED" if harness else ("identical" if not diffs else "expected-diff"),
         "%d cases over %d route(s); differing: %s; HARNESS_* on built: %s, on live: %s" % (n, len(BC), diffs or "none", harness or "none", lharness or "none"))
+
+    # 5 -- the METHOD-call arm (TO AMENDMENT 2): every route's handler called on the zip with a synthetic event, two principals, in-memory fakes
+    ML, MB = runs[(f, "live", "mc")]["routes"], runs[(f, "built", "mc")]["routes"]
+    for rk in MB:
+        b_err = sum(p["arity_error_count"] for p in MB[rk]["principals"].values())
+        l_err = sum(p["arity_error_count"] for p in ML[rk]["principals"].values())
+        esc = [p["escaped"] for p in MB[rk]["principals"].values() if p["escaped"]]
+        depth = "/".join(str(MB[rk]["principals"][k]["functions_entered"]) for k in sorted(MB[rk]["principals"]))
+        arm(f, "method-call arm %s: built handler raises no call-arity TypeError" % MB[rk]["operation"],
+            "UNEXPECTED" if (b_err or esc) else ("expected-diff" if l_err else "identical"),
+            "built arity errors=%d escaped=%s codes=%s functions_entered(%s)=%s | live arity errors=%d codes=%s" % (
+                b_err, esc or "none", {k: v["code"] for k, v in sorted(MB[rk]["principals"].items())}, "/".join(sorted(MB[rk]["principals"])), depth,
+                l_err, {k: v["code"] for k, v in sorted(ML[rk]["principals"].items())}))
+        if l_err:
+            arm(f, "NEGATIVE CONTROL method-call arm %s: the LIVE zip reads arity errors" % MB[rk]["operation"], "expected-diff",
+                "live arity errors=%d at %s" % (l_err, sorted({h["where"] for p in ML[rk]["principals"].values() for h in p["arity_errors"]})), True)
 
 doc = {"pin": pin, "arms": arms, "harness": "replay/run_replay_416.py; offline, no AWS write, AWS reads only for the live zips and layers; one tree per process",
        "cases": {"%s|%s|%s" % k: v for k, v in runs.items()}}

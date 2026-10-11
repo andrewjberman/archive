@@ -16,7 +16,13 @@ ROOT = Path(subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_outp
 scratch, pin, map_path, out_path = Path(sys.argv[1]), sys.argv[2], sys.argv[3], Path(sys.argv[4])
 FUNCS = ["irpt-performance-adapter", "irpt-narrative", "irpt-status"]
 Y2 = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r2/signature_closure.py"
-ATTR = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~278/signature_closure_attr.py"
+DDIR = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~278/"
+ATTR = DDIR + "signature_closure_attr.py"
+METHOD = DDIR + "method_call_limb_416.py"
+PINCOH = DDIR + "pin_coherence_candidate_416.py"
+PINCOH_REAL = str(scratch / "tools" / "pin_coherence.py")       # git show box/dell2:org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r2/pin_coherence.py
+REAL_MAP_REF = sys.argv[5] if len(sys.argv) > 5 else "box/dell2"       # the real source map the live pairing is read from
+REPLAY = json.loads((Path(sys.argv[4]).parent / "IB117-1_replay.json").read_text(encoding="utf-8"))
 
 
 def limbs(zip_path):
@@ -29,6 +35,35 @@ def limbs(zip_path):
     ko = dict(p.split("=") for p in ol.split()[1:])
     return int(ko["mismatched"]), int(kv["attr_mismatched"]), int(kv["attr_checked"]), al
 
+
+
+def method_limb(zip_path):
+    """(checked, mismatched, last_line) of the method-call limb (static) on one zip."""
+    m = subprocess.run([sys.executable, METHOD, str(zip_path)], cwd=str(ROOT), capture_output=True, timeout=120)
+    ml = m.stdout.decode().strip().splitlines()[-1]
+    kv = dict(p.split("=") for p in ml.split()[1:])
+    return int(kv["checked"]), int(kv["mismatched"]), ml
+
+
+def coherence(cmd):
+    """(skewed edges, last_line) of a pin_coherence run (exit 1 on a skew is normal)."""
+    r = subprocess.run([sys.executable] + cmd, cwd=str(ROOT), capture_output=True, timeout=120)
+    ln = r.stdout.decode().strip().splitlines()[-1]
+    return int(dict(p.split("=") for p in ln.split()[1:])["skewed"]), ln
+
+
+def replay_summary(fn):
+    """The replay arms of one function, by kind: counts of identical / expected-diff / other, and the method-call arm per route."""
+    arms = [a for a in REPLAY["arms"] if a["function"] == fn]
+    tally = {}
+    for a in arms:
+        tally[a["verdict"]] = tally.get(a["verdict"], 0) + 1
+    mc = [a for a in arms if a["name"].startswith("method-call arm")]
+    lc = [a for a in arms if a["name"].startswith(("prospect arm", "enforcer build"))]
+    return {"arms": len(arms), "verdicts": tally, "every_route_replayed": [a["name"].split(" ")[1].rstrip(":") for a in mc],
+            "binding_cases_arm": next(a["detail"] for a in arms if a["name"].startswith("binding cases")),
+            "live_call_arm_verdicts": sorted(a["verdict"] for a in lc if not a["negative_control"]),
+            "method_call_arm_verdicts": sorted(a["verdict"] for a in mc), "negative_controls": sum(1 for a in arms if a["negative_control"])}
 
 
 def git(*a):
@@ -102,12 +137,21 @@ for fn in FUNCS:
     lh = hashlib.sha256(live.read_bytes())
     lo, la, lac, ll = limbs(live)
     bo, ba, bac, bl = limbs(z1)
+    lmk, lmm, lml = method_limb(live)
+    bmk, bmm, bml = method_limb(z1)
+    live_skew, live_skew_line = coherence([PINCOH_REAL, str(ROOT), fn, REAL_MAP_REF])
+    built_skew, built_skew_line = coherence([PINCOH, str(ROOT), fn, str(ROOT / map_path)])
     row = {"function": fn, "pin": pin, "built_sha256": base64.b64encode(h1.digest()).decode(), "built_sha256_hex": h1.hexdigest(),
            "built_bytes": z1.stat().st_size, "built_twice_identical": h1.digest() == h2.digest(),
            "live_sha256": base64.b64encode(lh.digest()).decode(), "live_sha256_matches_codesha256": base64.b64encode(lh.digest()).decode() == cfg["CodeSha256"],
            "live_last_modified": cfg["LastModified"],
            "live_signature_mismatched": lo, "live_attribute_mismatched": la, "live_attribute_checked": lac, "live_last_line": ll,
            "built_signature_mismatched": bo, "built_attribute_mismatched": ba, "built_attribute_checked": bac, "built_last_line": bl,
+           "live_method_checked": lmk, "live_method_mismatched": lmm, "live_method_last_line": lml,
+           "built_method_checked": bmk, "built_method_mismatched": bmm, "built_method_last_line": bml,
+           "live_untested_import_pairings": live_skew, "live_pin_coherence_last_line": live_skew_line,
+           "built_untested_import_pairings": built_skew, "built_pin_coherence_last_line": built_skew_line,
+           "replay": replay_summary(fn),
            "repins": json.loads(git("show", "%s:%s" % (pin, map_path)).stdout.decode("utf-8"))["_repins_IB_pr_416"].get(fn, []),
            "changed_members": changed,
            "s3_rollback_version": ho["VersionId"], "s3_content_sha256_metadata": ho.get("Metadata", {}).get("content-sha256"),
