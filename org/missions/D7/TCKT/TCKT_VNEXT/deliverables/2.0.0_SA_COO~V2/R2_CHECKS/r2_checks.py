@@ -5,6 +5,8 @@
   rn-ticket     R2-rn1-AC3  the runner records a REQ id on the ticket and opens the report from the ticket's report_ref
   rr-shape      R2-rr1-AC1  the report route stores a well-formed REQ id and refuses a malformed one with a typed code
   ts-guard      R2-ts1-AC1  by default no ticket_center test can reach a real SES send or a real users-table read
+  pg-open       R2-pg1-AC1  (needs --portal <dir>) the ticket's Open report reads the finished report; a stated waiting state
+  pg-existing   R2-pg1-AC2  (needs --portal <dir>) the existing TicketCenter analysis-request tests still pass
   tc-regress    R2-rr1-AC2 / R2-ts1-AC2  the whole ticket_center/tests directory passes (at least MIN_PASSED, 0 failed)
 
 Each prints <NAME>-OK <detail> or <NAME>-FAIL <reason>; exit 0/1. Every pytest call is bounded at 110 s.
@@ -63,7 +65,43 @@ def regress():
     return True, "passed=%d (min %d) failed=0" % (passed, MIN_PASSED)
 
 
+PG_NEW = "src/pages/TicketCenter/__tests__/open-report.test.tsx"
+PG_OLD = "src/pages/TicketCenter/__tests__/analysis-request.test.tsx"
+PG_NAMES = ["open report reads the finished report, not the request record",
+            "a report not yet generated shows a stated waiting state",
+            "a request record is never presented as the report"]
+
+
+def bun(portal, rel, names):
+    import shutil
+    root = Path(portal)
+    f = root / rel
+    if not f.exists():
+        return False, "absent: %s" % rel
+    src = f.read_text(encoding="utf-8")
+    missing = [n for n in names if n not in src]
+    if missing:
+        return False, "missing test(s): %s" % "; ".join(missing)
+    exe = shutil.which("bun")
+    if not exe:
+        return False, "bun not on PATH"
+    r = subprocess.run([exe, "test", rel], cwd=str(root), capture_output=True, text=True, timeout=110)
+    out = re.sub(r"\[[0-9;]*m", "", r.stdout + r.stderr)
+    passed = int((re.search(r"(\d+) pass", out) or [0, 0])[1])
+    failed = int((re.search(r"(\d+) fail", out) or [0, 0])[1])
+    if r.returncode != 0 or failed or passed < max(1, len(names)):
+        return False, "rc=%d pass=%d fail=%d" % (r.returncode, passed, failed)
+    return True, "pass=%d fail=0" % passed
+
+
 def main(argv):
+    if argv and argv[0] in ("pg-open", "pg-existing"):
+        if len(argv) != 3 or argv[1] != "--portal":
+            print("%s-FAIL --portal <dir> required" % argv[0].upper())
+            return 1
+        ok, why = bun(argv[2], PG_NEW, PG_NAMES) if argv[0] == "pg-open" else bun(argv[2], PG_OLD, [])
+        print("%s-%s %s" % (argv[0].upper(), "OK" if ok else "FAIL", why))
+        return 0 if ok else 1
     if len(argv) != 1 or (argv[0] not in NAMED and argv[0] != "tc-regress"):
         print("usage: r2_checks.py {%s|tc-regress}" % "|".join(sorted(NAMED)))
         return 2

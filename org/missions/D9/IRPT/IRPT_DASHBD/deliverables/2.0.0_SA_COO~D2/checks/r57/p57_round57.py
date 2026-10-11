@@ -5,11 +5,11 @@ Cell: DB-b-113 the R45 never-widen packet REFRESHED after DB-b-110 (the lots rea
 live-pinned members and on HEAD's members with the five output hashes equal, and both halves read UNSIGNED.
 
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
-  DB57-1-AC1  ~88/R45_REFRESH_CENSUS.json: base_codesha256 == oNgy4rnr; members_changed paths are EXACTLY the three (reporting-gold handler.py,
-              account_return_daily.py, account_activity_lots.py); each pin is a commit whose blob sha256 equals the recorded sha256 and HEAD's
+  DB57-1-AC1  ~88/R45_REFRESH_CENSUS.json: base_codesha256 == oNgy4rnr; members_changed paths are EXACTLY the four (reporting-gold handler.py,
+              account_return_daily.py, account_activity_lots.py and, by AMENDMENT 1, sources.json); each pin is a commit whose blob sha256 equals the recorded sha256 and HEAD's
               bytes; each carries base_sha256 (the live-pinned bytes) differing from sha256 and a non-empty commits_since_live_pin list;
               rollback.base_s3_version non-empty.
-  DB57-1-AC2  ~88/R45_REFRESH_DELTA0.json: day 2026-10-08; thresholds_sha256 is the pinned thresholds file's for both runs; tables holds
+  DB57-1-AC2  ~88/R45_REFRESH_DELTA0.json: day 2026-10-08; members_at_head names the four members (the "new" run has all four at HEAD); thresholds_sha256 is the pinned thresholds file's for both runs; tables holds
               exactly the five outputs, each with rows > 0 and sha256_live == sha256_new; output_hash_equal is true.
   DB57-1-AC3  ~88/NEVER_WIDEN_PACKET_R45_RELEASE_REFRESH.md carries "## Supersedes", "## Branch A", "## Branch B", "## Rollback",
               "## Memory headroom", "## DELTA=0 evidence", "## COO half", "## CTO half", each half reading UNSIGNED.
@@ -27,6 +27,7 @@ MEMBERS = {
     "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
     "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
     "data/assets/scripts/gold/irpt_reporting/account_activity_lots.py",
+    "data/assets/scripts/gold/irpt_reporting/sources.json",
 }
 THRESHOLDS = "551920f0c364490d87cac260d5df2ad601ff7dac44f56043176065a3c3c2d177"
 TABLES = {"returns", "class", "account_activity_daily", "account_lot_realized", "account_lot_unrealized_daily"}
@@ -70,11 +71,13 @@ def main():
                 fail("commits_since_live_pin empty for %s" % path)
         if not str((r.get("rollback") or {}).get("base_s3_version") or "").strip():
             fail("rollback.base_s3_version missing")
-        print("OK: three members over oNgy4rnr, each pinned to HEAD bytes with its commits since the live pin")
+        print("OK: four members over oNgy4rnr, each pinned to HEAD bytes with its commits since the live pin")
     elif cid == "DB57-1-AC2":
         r = load(D + "88/R45_REFRESH_DELTA0.json")
         if r.get("day") != "2026-10-08":
             fail("day %r" % r.get("day"))
+        if sorted(r.get("members_at_head") or []) != sorted(MEMBERS):
+            fail("members_at_head %r, want the four members (AMENDMENT 1)" % r.get("members_at_head"))
         if r.get("thresholds_sha256") != THRESHOLDS:
             fail("thresholds_sha256 %r is not the pinned file's" % r.get("thresholds_sha256"))
         ts = r.get("tables") or {}
