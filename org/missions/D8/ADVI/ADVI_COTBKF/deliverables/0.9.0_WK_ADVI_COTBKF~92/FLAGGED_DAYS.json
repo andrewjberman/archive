@@ -1,0 +1,172 @@
+{
+ "emptied_measured_days": 1757,
+ "flagged": 24,
+ "flagged_above_100pct": 3,
+ "classes": [
+  {
+   "class": "INCOME_CREDITED_ON_THE_EMPTIED_DAY",
+   "flagged": 8,
+   "above_100pct": 3,
+   "other_emptied_days_same_mechanism": 16,
+   "kind": "TRUE",
+   "mechanism": "The emptied day carries a dividend or reinvested distribution (dv / dvr; interest, int, is the same kind and is counted in the sizing) that the flow table keeps INSIDE the return, and the day's outflow is the prior day's value PLUS that income, so outflow / prior value = 1 + income / prior value. The return is income / prior value, the same number the form gives if the account were not emptied; the zero day-end value does not cause it. In 6 of 8 the prior day holds cash only and the income is a cash-sweep dividend (5 of those 5 dated on the last trading day of a month) or a dividend paid on a security sold 21 days earlier (1 of 6); in 2 of 8 a reinvested distribution of a fund that is fully withdrawn in kind (the reinvested shares leave with the rest). The base is the residual left after the account was drawn down: prior value under one dollar on 4 of 8 and on 3 of 3 of the days above 100 percent (outflow / prior value 2.00 on each). A dv equal to the whole base is a month of income posted once on the day the residual is withdrawn.",
+   "file": "data/assets/scripts/silver/commonwealth_flows.py",
+   "line": 59
+  },
+  {
+   "class": "MANAGEMENT_FEE_TAKES_THE_RESIDUAL",
+   "flagged": 2,
+   "above_100pct": 0,
+   "other_emptied_days_same_mechanism": 0,
+   "kind": "TRUE",
+   "mechanism": "A management fee (man) is booked on the emptied day. Fee types are a drag inside the return and never a flow (METHOD_DRAG), so a fee that takes 7 percent of the prior value (one day, outflow / prior value 0.93) or the whole residual (one day, zero flow) shows as a return of about -7 percent and -100 percent. The return is after fees by the form's stated design; the outflow is below the prior value because the fee is not an outflow.",
+   "file": "data/assets/scripts/silver/commonwealth_flows.py",
+   "line": 121
+  },
+  {
+   "class": "IN_KIND_WITHDRAWAL_VALUED_AT_THE_DAY_CLOSE",
+   "flagged": 12,
+   "above_100pct": 0,
+   "other_emptied_days_same_mechanism": 28,
+   "kind": "TRUE",
+   "mechanism": "Securities leave in kind as withdrawal rows with a zero or null Amount (1 to 19 such rows on a day), which flow_rows values as abs(Quantity) x the day's price of the CUSIP. The prior day's value is the same shares at the PRIOR close, so outflow / prior value is the price move of the withdrawn securities from the prior close to the day close (end-of-day flow timing). Rebuilt from the r34 security_day_price table and the cached withdrawal quantities, outflow / prior value matches the day's to three decimals on 12 of 12 days (the ratios are 0.97 to 1.02). On 3 of the 12 the withdrawn quantity also exceeds the prior quantity by a reinvested distribution that is under 0.05 percent of the value.",
+   "file": "data/assets/scripts/silver/commonwealth_daily_returns.py",
+   "line": 150
+  },
+  {
+   "class": "WITHHOLDING_WITH_NO_WITHDRAWAL_ROW",
+   "flagged": 2,
+   "above_100pct": 0,
+   "other_emptied_days_same_mechanism": 0,
+   "kind": "FORM",
+   "mechanism": "Federal tax withholding (ftax) equal to the whole prior balance is the cash leaving, with no same-day withdrawal (lo) row and none within 12 days either side. A withholding is a flow only when it rides a same-day lo (R25_RIDING_WITHHOLDING, rides_withdrawal); otherwise it is INTERNAL, a drag. So the flow is zero (or only a small charge) while the value goes to zero and the return is -100 percent. Taking the same ftax as an outflow gives 0.00 on both days. The disagreement is the form's treatment of a withholding with no withdrawal, not the prior value.",
+   "file": "data/assets/scripts/silver/commonwealth_flows.py",
+   "line": 172
+  }
+ ],
+ "unexplained": 0,
+ "evidence": [
+  {
+   "id": "E1",
+   "finding": "set rebuilt as the face defines it",
+   "count": "107,316 measured (return_basis TWR) rows in 3,325 day files; 1,757 have no row in account_day_value.parquet for that account and day; 24 with abs(total_return_daily) > 0.01; 3 with abs > 1",
+   "denominator": "1,757 emptied measured days",
+   "source": "ard_cottonwood_r47 day files joined to fwd3_serve_r34/account_day_value.parquet on (account, date as YYYY-MM-DD)"
+  },
+  {
+   "id": "E2",
+   "finding": "every emptied day is in the FWD-3 daily_returns table with value 0 and no blank reason, with the same flow and return as the day file",
+   "count": "1,757 of 1,757 (largest absolute difference 0.0 in flow and in return)",
+   "denominator": "1,757",
+   "source": "fwd3_serve_r34/daily_returns.parquet"
+  },
+  {
+   "id": "E3",
+   "finding": "the 24 flagged days: prior row is the previous trading day; prior value positive; unpriced positions on the prior day; prior day's own return measured",
+   "count": "24 of 24; 24 of 24; 0 unpriced positions in the 24 prior days; 23 of 24 measured (one prior day is blank with reason UNPRICED inherited from its own prior day; its own value is present and priced)",
+   "denominator": "24",
+   "source": "daily_returns.parquet, account_day_value.parquet"
+  },
+  {
+   "id": "E4",
+   "finding": "positions held on the prior day of the 24",
+   "count": "1 position (the cash line only) on 11; 2 to 4 positions on 8; 5 or more on 5",
+   "denominator": "24",
+   "source": "account_day_value.parquet"
+  },
+  {
+   "id": "E5",
+   "finding": "identity of the cell: with value 0 the day return is outflow / prior value - 1 (commonwealth_daily_returns.py:271), so every flagged cell is a statement about outflow versus prior value; on the other 1,733 days outflow / prior value is 1.00 +- 0.01 (min 0.99, max 1.01; largest absolute return 0.0095)",
+   "count": "1,733 of 1,733",
+   "denominator": "1,733",
+   "source": "day files, daily_returns.parquet"
+  },
+  {
+   "id": "E6",
+   "finding": "which disagrees, by class: A outflow exceeds the prior value by the day's income; B outflow is below the prior value by the fee; C outflow (valued at the day close) differs from the prior value (prior close) by the price move; D outflow is only the small charges because the withholding that took the balance is not counted as an outflow",
+   "count": "A 8, B 2, C 12, D 2; outflow / prior value 1.02 to 2.00 (A), 0.00 and 0.93 (B), 0.97 to 1.02 (C), 0.00 and 0.00 (D)",
+   "denominator": "24",
+   "source": "derived from the flow and value columns"
+  },
+  {
+   "id": "E7",
+   "finding": "transfers and flows dated a day off: position-transfer types (trfi, trfo, trci, trco, TRFIR) within 2 days of a flagged day; an external-flow row dated a day off the day within 2 days",
+   "count": "0 of 24 carry a position-transfer type; 2 of 24 carry an external-flow row on another day (a li two days before; a lo the day before at 0.01 of the prior value); neither explains the ratio",
+   "denominator": "24",
+   "source": "tx_cache transactions, effective trading day by the daily-holdings rule"
+  },
+  {
+   "id": "E8",
+   "finding": "zero or null Amount in-kind external rows on the flagged day (valued from the day's price by flow_rows)",
+   "count": "14 of 24 (12 in class C, 2 in class A)",
+   "denominator": "24",
+   "source": "tx_cache; commonwealth_daily_returns.py:131-153"
+  },
+  {
+   "id": "E9",
+   "finding": "reconstruction: outflow / prior value rebuilt from the withdrawn quantities x the r34 security_day_price at the day, plus the other lines at their prior value",
+   "count": "14 of 14 in-kind flagged days reproduce the day's outflow / prior value to three decimals (class C 12; class A 2, where the reinvested-shares part is 0.033 and the price-move part 0.000)",
+   "denominator": "14",
+   "source": "r34/after/security_day_price.parquet, tx_cache, account_day_value.parquet"
+  },
+  {
+   "id": "E10",
+   "finding": "class A: income against base",
+   "count": "income / prior value equals outflow / prior value - 1 on 6 of 6 cash-base days (two decimals); on the 5 cash-sweep days an earlier value within the previous 40 rows was at least 1,000 times the prior value (5 of 5); the sixth (a dividend on a security sold 21 days before) held a flat residual",
+   "denominator": "6 cash-base days of class A",
+   "source": "tx_cache dv rows, daily_returns.parquet"
+  },
+  {
+   "id": "E11",
+   "finding": "class D: with ftax counted as an outflow the return is 0.00; no lo row within 12 days either side",
+   "count": "2 of 2",
+   "denominator": "2",
+   "source": "tx_cache; commonwealth_flows.py:172-173,213"
+  },
+  {
+   "id": "E12",
+   "finding": "code that carries each class: income stays inside the return commonwealth_flows.py:59 (dv), :69 (dvr); the return form commonwealth_daily_returns.py:271 (end timing); fee drag commonwealth_flows.py:86 and :121 (man); in-kind valuation commonwealth_daily_returns.py:150-152; a withholding is a flow only when it rides a withdrawal commonwealth_flows.py:172,213 and commonwealth_daily_returns.py:118; the DVR_CLOSE_STEP blank keys on a day-end holding (commonwealth_daily_valuation.py:633-634), so an emptied day is never in it",
+   "count": "line citations",
+   "denominator": "6 citation groups",
+   "source": "files named"
+  },
+  {
+   "id": "E13",
+   "finding": "DVR_CLOSE_STEP check on the reinvested-distribution rows of flagged days 20 to 24: close step over per-share distribution outside the band 0.5 to 1.5, or distribution under 2 percent of the prior close (days 20, 21: step 0.00; 22, 23: 4.98; 24: 0.61 with a yield of 0.16 percent)",
+   "count": "0 of 5 rows tested is a close-step day (a second CUSIP on day 23 has no prior close in the table and was not tested)",
+   "denominator": "5 rows with both closes",
+   "source": "account_day_value.parquet closes; commonwealth_daily_valuation.py:589-640 rule"
+  },
+  {
+   "id": "E14",
+   "finding": "size of each mechanism among the 1,733 emptied days that stayed under 1 percent, by presence on the emptied day of: A a dv, dvr or int row (13 dv or dvr, 3 int); B a man row; C a zero or null Amount in-kind external row on a non-cash CUSIP with a Quantity; D ftax or stax with no lo that day",
+   "count": "A 16, B 0, C 28, D 0; A and C overlap on 10 of those days",
+   "denominator": "1,733",
+   "source": "tx_cache by account and effective trading day"
+  },
+  {
+   "id": "E15",
+   "finding": "shapes of the other 1,733 days: lo with sl 1,516; lo alone 99; li with lo 26; ftax with lo 19 and ftax with lo and sl 17 (a withholding that rides a withdrawal is a flow)",
+   "count": "1,516 + 99 + 26 + 36 = 1,677 of 1,733 (the remaining 56 are smaller shapes)",
+   "denominator": "1,733",
+   "source": "tx_cache day type sets"
+  },
+  {
+   "id": "E16",
+   "finding": "membership by index (date order): A = 3,4,5,6,7,8,20,21; B = 1,9; C = 11,12,13,14,15,16,17,18,19,22,23,24; D = 2,10. The 3 above 100 percent are 4, 7, 8 (all class A). Both zero-flow days of the 1,757 are flagged: 2 (class D) and 9 (class B)",
+   "count": "24 of 24 placed, 0 unexplained",
+   "denominator": "24",
+   "source": "derived"
+  }
+ ],
+ "not_established": [
+  "Whether Commonwealth's own reported return for the same days agrees: no custodian return at day grain was read.",
+  "Class A: that the income accrued over earlier days (a month's sweep income paid once; a fund distribution paid on full redemption) is inferred from the earlier larger balance and the month-end dates, not read from a custodian statement. TRUE means the number follows from the posted data and the stated form, not that a daily figure on a sub-dollar base means anything economically.",
+  "Class B: whether the management fee booked on the emptied day is a final close-out fee is not stated in the file.",
+  "Class C: the closes are the r34 price table's own; whether each close is as-traded was not tested. The reproduction shows the number follows from that table, not that the table is right.",
+  "Class D: whether the custodian file omits the withdrawal of the net proceeds (DATA) or the whole balance was truly withheld was not settled: no lo row within 12 days either side, and for one of the two accounts no row at all after the day. Kind FORM rests on the 0.00 return when the withholding is an outflow, not on a custodian statement.",
+  "The 'other 1,733' sizes count the presence of a row type on the day, not that the day was affected: a day with one of these rows and a return under 1 percent is counted whether the effect is 0.01 percent or 0.99 percent.",
+  "Transaction effective days were recomputed with lib/trading_calendar next_trading_day; the day file's external_flow was read as produced (equal to the FWD-3 flow on 1,757 of 1,757) and not re-derived row by row.",
+  "The second CUSIP of reinvested distribution on flagged day 23 was not tested for a close step (no prior close in the table)."
+ ]
+}
