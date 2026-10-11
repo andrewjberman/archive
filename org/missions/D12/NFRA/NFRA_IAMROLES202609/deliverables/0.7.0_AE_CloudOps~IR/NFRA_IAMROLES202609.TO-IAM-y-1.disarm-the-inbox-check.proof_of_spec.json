@@ -1,0 +1,140 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_IAMROLES202609.TO-IAM-y-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IR",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3cadaf52ca"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP_R8.md",
+  "vintage_commit": "e27d52cb19",
+  "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-y-1.disarm-the-inbox-check.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".claude/skills/cloud-ops/SKILL.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New subsection 18a, placed immediately after rule 18's HALT-gate caveat and before the IAM instrument traps -- 'beside rule 18's HALT-gate caveat' as the cell directs, because 18's own caveat is what creates the need (a ~lane agent is unhaltable, so the direct inbox read is its only pre-apply mail guard). It records the DO-NOT-USE form with all three measured defects, then both limbs: the broker read as PRIMARY and a find-based filesystem read as FALLBACK, with a missing path ERRORing rather than reading 0. It also records the root cause I found while grading -- ls is aliased to ls -F here, so any ls-based name filter on read/ fails -- and prints both counts so the number carries its denominator. 2776 bytes of pure ASCII added to a file that already carried 98 non-ASCII characters; read and written with explicit encoding='utf-8' on both ends, which is the allowed move, rather than stripping a subset.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round8/INBOX_CHECK_GRADE.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The grade, carrying both lines AC2 greps plus the evidence behind each: the negative run from a linked worktree with the OLD form's 0 printed beside it in the same shell for contrast; the positive control's broker reading before the ack and again after, so the 1 -> 0 transition is visible rather than a single number; the three-plane table showing the file plane reading 0 at the exact moment the broker read 1; and section 4, which reports a defect in the fallback form the ORDER specified and the root cause behind it.",
+   "artifact_covered_by": [
+    "AC2",
+    "AC4"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "1 or more -- the recorded form names the broker read as the primary limb",
+   "method": "command",
+   "invocation": "grep -c -E 'get_delivery_state' .claude/skills/cloud-ops/SKILL.md",
+   "output_evidence": "1\nexit=0",
+   "denominator": "1 occurrence, in subsection 18a's PRIMARY limb. The criterion asks for 1 or more; one mention is sufficient because the limb is named once and then described, rather than repeated.",
+   "status": "PASS",
+   "status_reason": "A GREP FOR A TOKEN CANNOT TELL WHETHER THE FORM IS SOUND, only that the word appears, so what matters is what the subsection says around it -- and the substantive choice is WHY the broker read is primary rather than a nicety. A file-based check goes quiet exactly when mail arrives, because a live Monitor mv's the message into read/ before any agent sees it; I measured that in this cell's own positive control, where the planted message was already in read/ at the instant the broker still reported it unread. That is the ADHC_HALTGT orphan shape with a HEALTHY watcher. The subsection also records that READ is the only delivery state claiming an AGENT saw a message, SENT and EMITTED being transport. PLACEMENT WAS PART OF THE ACT: 18a sits immediately after rule 18's HALT-gate caveat, because that caveat is what creates the need -- it states that a ~lane agent is unhaltable, which is precisely why such a seat has no guard but this one. Base reading recorded by the issuer: 0, since the subsection did not exist, so this is not a stuck PASS."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "`neg=1 pos=1` -- the missing-path run ERRORs, and the planted control counts as one unread",
+   "method": "command",
+   "invocation": "bash -c \"f=org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round8/INBOX_CHECK_GRADE.md; test -f \\$f || { echo MISSING:\\$f; exit 2; }; echo neg=\\$(grep -c -E '^CHECK-NEGATIVE: .*ERROR' \\$f) pos=\\$(grep -c -E '^CHECK-POSITIVE: unread=1\\$' \\$f)\"",
+   "output_evidence": "neg=1 pos=1\nexit=0",
+   "denominator": "2 limbs to grade, 2 lines present. The negative was run in C:/tmp/iam-w1b, a linked worktree (.git is a FILE pointing at the main gitdir), with the worktree-relative path -- the exact shape the old check was cited with in three round-7 apply records.",
+   "status": "PASS",
+   "status_reason": "THE TWO LIMBS PROVE DIFFERENT THINGS AND NEITHER IS SUFFICIENT ALONE, which is why the cell asks for both. The NEGATIVE shows the check can no longer fail toward clean: from the worktree the new form prints 'ERROR: inbox path absent ... this is NOT an empty inbox' and exits 2, and the OLD form was run on the same path in the same shell for contrast and printed '0'. That single character is the whole of Z-S42. But a guard that ERRORed on everything would pass the negative and be worthless -- so the POSITIVE is what establishes it can still SEE mail: a message was planted (id 33322, subject 'Z-S42 control'), the broker limb counted 1 row not READ BEFORE any ack, and after the ack the same read returned 0 not-READ. THE 1 -> 0 TRANSITION ACROSS THE ACK IS THE PROOF, not the 1 on its own, because it shows the limb tracks READERSHIP rather than file location. AND THE FILE PLANE WAS MEASURED AT THE SAME MOMENT: the live Monitor had already mv'd the planted message into read/, so message files directly in the lane inbox read 0 while the broker read 1. That is the silence the primary limb closes, demonstrated rather than argued. Base reading recorded by the issuer: MISSING: the grade file, exit=2, so the test -f limb is live."
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "AC4 (JUDGMENT, never self-graded; UNVERIFIABLE-BY-INSTRUMENT, status_reason naming 3.0.0_SA_CVO~Z): can the recorded check still read CLEAN when mail is waiting, from any tree?",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT -- judgment, graded by 3.0.0_SA_CVO~Z",
+   "output_evidence": "Not produced. The order marks AC4 judgment=true, so no verdict is manufactured here. The material to grade: .claude/skills/cloud-ops/SKILL.md subsection 18a, and INBOX_CHECK_GRADE.md sections 2, 3, 3a and 4.",
+   "denominator": "The question has two halves and both are enumerable: (i) from which trees -- main and linked worktree, both exercised; (ii) with mail in which state -- delivered-and-unacked, which is the only state that matters because an acked message is not waiting. The 'any tree' half is the one the old check failed.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Graded by 3.0.0_SA_CVO~Z. The honest answer to the question as posed is NO for the two cases exercised, and the reasoning is worth checking rather than taking. From a LINKED WORKTREE the primary limb is a broker call that does not depend on a checkout at all, so the tree is irrelevant to it; and the fallback's missing-path case, which is the only way a worktree differed, now ERRORs with a non-zero exit instead of printing 0 -- demonstrated. From the MAIN tree with mail delivered and unacked, the primary limb returned 1 while the file plane returned 0, so the limb that could read clean is no longer the one being relied on. WHERE I WOULD NOT CLAIM MORE THAN I MEASURED: if the broker itself is unreachable the primary limb is simply unavailable, and the seat then rests on the fallback -- which is why the fallback's missing-path rule is an ERROR rather than a count, and why I would not describe the pair as unconditionally sound. I exercised two trees and one mail state; I did not exercise a broker outage. THE SHARPEST THING A GRADER SHOULD CHECK IS SECTION 4, because it is a defect in the CELL'S OWN SPECIFIED FORM and I found it only by grading it. The cell says the fallback should be 'ls -A, counting files other than read/'. Run literally that returns 3 against an inbox holding zero messages, because ls is aliased here to ls -F, which appends a slash to a directory, so ls -A emits 'read/' and grep -v '^read$' never matches it -- the alias defeats ls -1 and ls -A identically, which means switching one for the other fixes nothing. The two state dotfiles add two more. A guard that always reads 3 cannot fail toward clean, so it satisfies the cell's stated goal, but it is a tripwire that is always tripped and a seat will learn to ignore it: a different failure with the same ending. So the recorded form uses find -maxdepth 1 -type f with a message-name pattern, which the rendering cannot fool, and prints the state-marker count beside the message count so the number carries its denominator. That is a deliberate departure from the cell's literal text in the direction of its stated intent, and it is reported to the issuer rather than absorbed -- the issuer wrote that form. ONE THING I AM NOT RE-LITIGATING: whether round 7's three applies were safe. They were, verified after the fact by reading the directory, and Z-S42 says so; the defect was in the evidence, not the acts."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The check was built so that both failure directions are exercised, not just the one that prompted the cell. (1) The issuer recorded AC1 reading 0 (the subsection absent) and AC2 MISSING:/exit=2 at the base; both now read their expected values. (2) THE NEGATIVE IS A TRUE MUTANT: the OLD form was run on the same path in the same shell as the new one and printed 0 where the new one ERRORs -- the defect reproduced and disarmed side by side, rather than described. (3) THE POSITIVE IS THE CONTROL ON THE NEGATIVE: a guard that ERRORed on everything would pass section 2, so a real message was planted and the limb had to count it; it did, and the count fell to 0 across the ack. (4) THE FILE PLANE WAS READ AT THE SAME INSTANT as the broker, which is what turns 'a file check could go quiet' into a measurement: 0 against 1, with the message already in read/. (5) THE CELL'S OWN SPECIFIED FALLBACK WAS GRADED AND FAILED -- it returns 3 against an empty inbox -- and the root cause (an ls -F alias) was isolated by printing ls -A's raw output with cat -A and then reading `type ls`. (6) The replacement form was verified from the main tree after the fix: unread=0 state_markers=2.",
+   "expected": "AC1 moves 0 -> 1 or more; AC2 moves MISSING -> neg=1 pos=1; the new form ERRORs non-zero from a worktree where the old printed 0; the broker limb counts a planted message as 1 before the ack and 0 after; the file plane reads 0 at the moment the broker reads 1.",
+   "observed": "AC1 1. AC2 neg=1 pos=1. Worktree: new form 'ERROR: inbox path absent ...' exit 2; old form 0. Broker: id 33322 [SENT] with rows-not-READ 1 at 15:31Z, then [READ] with rows-not-READ 0 after the ack at 15:39:56Z. File plane at the same moment: message files in the lane inbox 0, the control already in read/. The cell's literal fallback: 3 against 0 messages, cause 'ls is aliased to ls -F --color=auto --show-control-chars'. Replacement form from the main tree: unread=0 state_markers=2.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Both limbs are re-runnable and neither depends on this session: the broker limb is a single API read keyed on the lane serial, and the fallback resolves the main workspace root explicitly rather than trusting the cwd. The negative was run in a named linked worktree whose status was itself verified (test -f .git -> a file, not a directory). The positive's before and after readings are keyed to message id 33322 with timestamps, so the transition is reconstructable from the broker rather than from my prose. The ls-alias root cause was isolated with cat -A on the raw output plus `type ls`, so it is a property of the shell configuration rather than an observation about one listing. Byte hygiene measured on both files written: the grade is 6409 bytes with 0 non-ASCII, and the skill's 98 non-ASCII characters were confirmed identical to HEAD's, so the 2776 bytes I added contain none.",
+   "observed": "Negative: reproducible in any linked worktree lacking the inbox path. Positive: id 33322 SENT@15:31:31Z then READ@15:39:56Z, both from get_delivery_state. Fallback after the fix: unread=0 state_markers=2 from the main tree. AC1 and AC2 re-run as their own separate invocations at close.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Wiring the check into .tools/safe-apply.sh.",
+   "reason": "Outside the cell's BOUNDS, which name only the skill text and the grade file, and outside its PATHS. It would also be a different act with a different blast radius: safe-apply runs for every seat, not only the ~lane seats this guard exists for, and a guard that ERRORs would then stop applies for seats that have HALTGT and do not need it. Recording the form where cloud-ops seats read it is what the cell asked for."
+  },
+  {
+   "item": "A broker-outage exercise.",
+   "reason": "Not performed and not claimed. I exercised two trees and one mail state (delivered-and-unacked). If the broker is unreachable the primary limb is unavailable and the seat rests on the fallback, which is exactly why the fallback's missing-path case ERRORs rather than counting. AC4's status_reason says so rather than implying the pair is unconditionally sound."
+  },
+  {
+   "item": "Re-verifying round 7's three applies.",
+   "reason": "Already settled and not re-litigated here. Each was checked after the fact by reading the lane inbox directly, and no round-7 apply was taken over unread mail; Z-S42 records that the defect was in the EVIDENCE rather than the acts. Re-running them is impossible and re-arguing them would add nothing."
+  },
+  {
+   "item": "Changing the two state dotfiles or the watcher's mv behaviour.",
+   "reason": "Neither is a defect and neither is mine. .unread-deliveries and .watcher.owner are the broker's and the watcher's own bookkeeping, and the watcher moving a message into read/ before emitting is its design. The guard was made robust to both rather than asking either to change."
+  }
+ ],
+ "surprises": [
+  "NFRA_IAMROLES202609-Z-S42: the row this cell disarms, filed by this seat against itself at the end of round 7. Its three defects are now recorded in cloud-ops 18a as a DO-NOT-USE form, and the grade reproduces the worst of them -- the worktree 0 -- beside the replacement's ERROR in the same shell. GRADING THE FIX FOUND THE ROOT CAUSE THE ROW HAD MISSED: the row attributed the over-count to ls -1 hiding dotfiles and to the read/ slash, but did not say WHY the slash was there. It is an alias -- ls is ls -F --color=auto --show-control-chars on this device -- which means the defect defeats ls -1 and ls -A identically and the cell's own suggested replacement inherits it. That is reported to the issuer rather than absorbed."
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-10/ir_lane_iamroles_r6_w1_phase_b_and_w2_phase_a.md, round-7 section (round 8's record follows it). This seat is a SESSION seat, not an L7 worker subagent. GO: the round-8 issuance @e27d52cb19, on ROUND_ANALYSIS.round7.md @fef971046b E1. THIS CELL IS THE DISARM OF A DEFECT I FILED AGAINST MYSELF, and that shape is worth recording: the guard was mine, I cited it in three apply records, I caught it only because one of its readings contradicted my own action, and the issuer then cut a cell to fix it with a positive control that tests the exact failing case. Grading it turned up two further things. First, the root cause Z-S42 had missed -- an ls -F alias, which means the defect is not about ls -1 versus ls -A at all and the cell's own suggested fallback inherits it. Second, the sharper general point: a guard that cannot read clean is not automatically a good guard. The cell's literal form returns 3 against an empty inbox, which satisfies 'never clean' and is useless, because a tripwire that is always tripped gets ignored. The recorded form therefore prints the message count beside the state-marker count, so the number carries its denominator -- the same discipline this project has applied to every other census.",
+ "compiler_tools": [
+  {
+   "tool": "get_delivery_state (the broker read -- the PRIMARY limb, and the thing being installed)",
+   "invocation": "get_delivery_state('0.7.0_AE_CloudOps~IR') before the ack and again after",
+   "result": "PASS",
+   "note": "This is both the instrument and the subject. Before the ack: id 33322 [SENT], TOTALS READ=2 SENT=1 over denominator 3, so rows not READ = 1. After: [READ], TOTALS READ=2 over denominator 2, so 0. The tool prints its own ACKABLE DENOMINATOR and READ COVERAGE, which is why it can be counted on without a second instrument -- and READ is the only state it reports that claims an AGENT saw a message."
+  },
+  {
+   "tool": "send_message (to plant the control)",
+   "invocation": "send_message(to_agent='0.7.0_AE_CloudOps~IR', subject='Z-S42 control')",
+   "result": "PASS",
+   "note": "Self-addressed, per the cell, so nothing was asked of another seat. Delivered to inbox 0.7.0_AE_CloudOps/~IR as id 33322. The live Monitor then mv'd it into read/ within seconds and emitted its [INBOX] event -- which is not a nuisance but the demonstration: that mv is what silences a file-based check."
+  },
+  {
+   "tool": "find / ls / type (isolating the root cause)",
+   "invocation": "ls -A | cat -A to see the raw output; `type ls` to read the alias; find -maxdepth 1 -type f with and without a name pattern",
+   "result": "PASS",
+   "note": "cat -A is what made the defect visible as 'read/$' rather than 'read$', and `type ls` named the cause: ls is aliased to ls -F --color=auto --show-control-chars. find -maxdepth 1 -type f is immune because it selects on file TYPE rather than on rendered name, so no alias can fool it. This is the pair of reads that turned Z-S42 from a symptom into a mechanism."
+  },
+  {
+   "tool": "git (as the byte-hygiene instrument on a file that already carries non-ASCII)",
+   "invocation": "git show HEAD:.claude/skills/cloud-ops/SKILL.md compared against the working copy for non-ASCII counts and codepoints",
+   "result": "PASS",
+   "note": "The skill carries 98 non-ASCII characters at HEAD (U+2014, U+2192, U+26A0, U+26D4, U+00A7). CLAUDE.md permits only two moves on such a file -- all non-ASCII out, or every reader explicit -- and never a subset. I took the second: read and wrote with encoding='utf-8' on both ends, then proved the count UNCHANGED at 98 and my own 2776-byte section at 0, rather than stripping another seat's characters."
+  },
+  {
+   "tool": "safe-apply / terraform / comp-iam / deploy_ledger",
+   "invocation": "NOT RUN",
+   "result": "SKIP",
+   "note": "LOCAL cell: no AWS write, no plan, no apply, no ledger -- the order says so and the BOUNDS confine the act to the skill text and the grade file. deploy_ledger in particular would be wrong here: NEVER-2 opens an entry at the start of an ACT on the world, and nothing in the world moves."
+  }
+ ]
+}
