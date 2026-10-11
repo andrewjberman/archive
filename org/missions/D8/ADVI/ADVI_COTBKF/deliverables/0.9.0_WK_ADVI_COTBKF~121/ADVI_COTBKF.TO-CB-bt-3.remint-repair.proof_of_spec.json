@@ -1,0 +1,129 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bt-3",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bt-3.remint-repair.md",
+  "group": "OTHER",
+  "vintage_commit": "e77f18b19c"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~121",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round72.md",
+  "vintage_commit": "e77f18b19c",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bt-3.remint-repair.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+   "kind": "script",
+   "commit_or_etag": "a24adedd5d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code only; the --remint mode was NOT run against any bucket, no AWS call was made, no deploy; the code contains no delete call",
+   "artifact_covered_by": [
+    "CB72bt3-AC1",
+    "CB72bt3-AC2",
+    "CB72bt3-AC3"
+   ]
+  },
+  {
+   "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py",
+   "kind": "script",
+   "commit_or_etag": "a24adedd5d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "synthetic tests on a faked, versioned S3 stub under tmp_path; no AWS call, no deploy",
+   "artifact_covered_by": [
+    "CB72bt3-AC1",
+    "CB72bt3-AC2",
+    "CB72bt3-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~121/REMINT_REPAIR.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "record of the four repairs against the 18 failure points; no deploy",
+   "artifact_covered_by": [
+    "CB72bt3-AC2",
+    "CB72bt3-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~121/REMINT_REPAIR.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "what an operator now sees for each kind of failure; no deploy",
+   "artifact_covered_by": [
+    "CB72bt3-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bt-3.remint-repair.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "status flip issued -> complete only",
+   "artifact_covered_by": [
+    "CB72bt3-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB72bt3-AC1",
+   "criterion_verbatim": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests -q expect: passed",
+   "method": "test_suite",
+   "invocation": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests -q",
+   "expect": "passed",
+   "output_evidence": "999 passed, 12 skipped, 398 warnings in 112.04s (0:01:52), 0 failed, 0 errors (variable unset) (rc 0), on code commit a24adedd5d; the baseline at this base read 967 passed, 12 skipped, 267 warnings in 107.15s; +32 collected cases, all in test_commonwealth_ard_remint.py",
+   "denominator": "999 passed, 0 failed, 12 skipped, 0 errors of 1011 collected",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB72bt3-AC2",
+   "criterion_verbatim": "python -c \"import json;d=json.load(open('.../0.9.0_WK_ADVI_COTBKF~121/REMINT_REPAIR.json',...));...print('REMINT-REPAIR repairs=%d points=%d described=%d ...')\" expect: REMINT-REPAIR repairs=4 points=18",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~121/REMINT_REPAIR.json',encoding='utf-8'));f=d['failure_points_now'];a=open('data/assets/scripts/silver/commonwealth_account_return_daily.py',encoding='utf-8').read();t=open('data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py',encoding='utf-8').read();print('REMINT-REPAIR repairs=%d points=%d described=%d not_described=%d defect_comments_left=%d half_pair_line=%s begin_line=%s delete_calls=%d not_run_against_the_bucket=%s'%(len(d['repairs']),len(f),sum(1 for x in f if x['described']),sum(1 for x in f if not x['described']),t.count('DEFECT (CB-bs-3)'),'HALF-PAIR' in a,'REMINT-BEGIN' in a,a.count('delete_object'),d['not_run_against_the_bucket']))\"",
+   "expect": "REMINT-REPAIR repairs=4 points=18",
+   "output_evidence": "rc 0. REMINT-REPAIR repairs=4 points=18 described=18 not_described=0 defect_comments_left=0 half_pair_line=True begin_line=True delete_calls=0 not_run_against_the_bucket=True (still_not_described lists the hard-kill limit of F8, which no test can show)",
+   "denominator": "1 record, 18 failure points, 1 adapter file and 1 test file read; defect_comments_left counts 'DEFECT (CB-bs-3)' in the test file; delete_calls counts 'delete_object' in the adapter",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB72bt3-AC3",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: each repair is shown by a test that plants the failure; a key is reported written from the bucket's own state; every refusal still precedes any put; nothing is deleted; what a hard kill leaves is stated for what it is; the mode was not run against a real bucket.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "judgment -- no invocation; the CVO reads data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py, remint_days() and _remint_state() in data/assets/scripts/silver/commonwealth_account_return_daily.py at commit a24adedd5d, and REMINT_REPAIR.json / REMINT_REPAIR.md beside this instance",
+   "output_evidence": "Recorded, not graded. Repair tests: test_repair1_a_put_that_raises_is_printed_not_written_and_the_ones_before_it_written[1..7]; test_repair2_a_pair_with_one_new_file_is_flagged_with_both_keys_and_which_is_new[2,4,7]; test_failure_F7d_a_method_row_manifest_that_is_stored_wrong_is_refused[3] and _F7d_b; test_repair4_a_keyboard_interrupt_during_the_nth_put_prints_the_keys_written_and_propagates[1..7]; test_a_head_that_fails_during_the_report_prints_unknown_and_the_original_failure_stands; test_the_plan_is_printed_before_the_first_put_and_lists_exactly_the_keys_later_put. Refusals before any put: the unchanged refusal tests plus test_all_reads_come_before_the_first_put and test_a_refusal_prints_no_begin_line_and_no_put. Nothing deleted: test_the_code_deletes_nothing and the fake raising on any delete call. Hard kill: stated in the docstring, the block comment, the help text and REMINT_REPAIR.json still_not_described. The mode was not run against any bucket; no AWS call was made; the producer was not edited.",
+   "denominator": "N/A -- judgment criterion, no count",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion; the oracle is 3.0.0_SA_CVO at L9, never the worker"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the new test file run alone and then inside the whole silver suite, same code commit",
+   "observed": "99 passed alone; 999 passed in the suite (twice: the first full run and again on the exact AC1 invocation)",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control; the worker nonetheless planted four mutants in a scratch copy of the adapter (method-manifest check always true; every attempted key reported WRITTEN; the interrupt handler returning instead of re-raising; a failing head propagating) and each made the repair tests fail (3, 20, 9, 2 failures); the adapter was restored byte for byte before the commit",
+   "expected": "n/a",
+   "observed": "each of the four mutants failed the tests that plant its failure",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~121/ADVI_COTBKF.TO-CB-bt-3.remint-repair.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests -q",
+   "result": "999 passed, 12 skipped, 0 failed (variable unset)"
+  }
+ ]
+}

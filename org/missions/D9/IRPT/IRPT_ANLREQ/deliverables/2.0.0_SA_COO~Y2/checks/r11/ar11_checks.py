@@ -6,7 +6,10 @@ Usage:  python ar11_checks.py <check> --root <workspace root> [--portal <portal 
                 member, and the ticket page's reader named on each trunk                                -> Y111-DEV-OK
   y112-remove   AR-y-112: the Ticket Center's fallback is gone, a one-read test is named, and the folder
                 passes (needs --portal)                                                                  -> Y112-REMOVE-OK
-  y113-poller   AR-y-113: irpt-intake-poller builds with NO parity skip and prints its recorded digest  -> Y113-POLLER-OK
+  y113-poller   AR-y-113 (RETIRED criterion): irpt-intake-poller builds with NO parity skip and prints its
+                recorded digest                                                                          -> Y113-POLLER-OK
+  y113-result   AR-y-113 closed as a RESULT: the record states the finding, and neither the map entry
+                nor the source folder was changed to pretend the entry builds                            -> Y113-RESULT-OK
 
 --root is REQUIRED. Each check prints its token last, or the token with -FAIL after one FAIL line per problem. Writes nothing
 (the build check builds into a temp folder outside the tree with BUILD_ONLY=1; it never uploads).
@@ -28,7 +31,8 @@ HELPER = "src/pages/TicketCenter/analysisRequest.ts"
 FALLBACK_TEST = "src/pages/TicketCenter/__tests__/package-open-ticket-fallback.test.tsx"
 BINDING_TEST = "src/pages/TicketCenter/__tests__/package-open-ticket-binding.test.tsx"
 ONE_READ = "a read refused as invalid input is shown after one read"
-TOKENS = {"y111-dev": "Y111-DEV", "y112-remove": "Y112-REMOVE", "y113-poller": "Y113-POLLER"}
+TOKENS = {"y111-dev": "Y111-DEV", "y112-remove": "Y112-REMOVE", "y113-poller": "Y113-POLLER", "y113-result": "Y113-RESULT"}
+RESULT = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~53/r11/INTAKE_POLLER_MAP_ENTRY.json"
 
 
 def finish(check, problems):
@@ -97,6 +101,29 @@ def main(argv):
                                                                   got.returncode))
         if got.returncode != 0 or not failed or int(failed.group(1)) != 0 or not passed or int(passed.group(1)) < 49:
             problems.append("the TicketCenter folder does not pass whole")
+        return finish(check, problems)
+    if check == "y113-result":
+        doc = json.loads((root / RESULT).read_text(encoding="utf-8"))
+        entry = json.loads((root / MAP).read_text(encoding="utf-8"))["functions"][POLLER]
+        live = doc.get("live") or {}
+        if live.get("equals_recorded") is not True or live.get("code_sha256") != entry.get("deployed_code_sha256"):
+            problems.append("the record does not state a live digest equal to the entry's recorded digest")
+        if doc.get("served_member_commit") is not None:
+            problems.append("the record names a commit for the served member; the result is that there is none")
+        after = str((doc.get("members_equal_live") or {}).get("after", ""))
+        found = re.match(r"(\d+) of (\d+)", after)
+        if not found or int(found.group(1)) >= int(found.group(2)):
+            problems.append("members_equal_live.after does not state fewer members equal to live than the package holds")
+        if (doc.get("build") or {}).get("equals_target") is not False:
+            problems.append("the record must state that the build does not equal the target")
+        if any(str(row.get("packaged_as")) == "firm_registry.json" for row in entry.get("staged_from") or []):
+            problems.append("the map entry pins firm_registry.json; the ruling is that the map is not edited")
+        if (root / "infra/aws/lambda/investor-reporting/intake/firm_registry.json").exists():
+            problems.append("firm_registry.json is present in the source folder")
+        got = subprocess.run(["git", "status", "--porcelain", "--", MAP], cwd=str(root), capture_output=True, text=True)
+        if got.returncode != 0 or got.stdout.strip():
+            problems.append("the source map is modified in this tree")
+        print("members equal to live: %s" % after[:60])
         return finish(check, problems)
     entry = json.loads((root / MAP).read_text(encoding="utf-8"))["functions"][POLLER]
     recorded = entry.get("deployed_code_sha256") or entry.get("artifact_sha256")
