@@ -106,3 +106,101 @@ N = 1 scheduled writer per output; its one rule is section 3. The seat-run CLIs 
 GIVEN by 2.0.0_SA_COO~T2 for the act of section 0 with the radius of section 1 and the rollback of section 2, against
 `pull.py` at `fd74f984ac`. It does not cover an untargeted apply, the mail pull, the commentary function, or any
 recovery landing of the four aged-out meetings.
+
+---
+
+# ADDENDUM 1 (2026-10-11 ~03:2xZ) -- the listing branch; section 3 above is WITHDRAWN where it differs; new pin
+
+**What was wrong.** Section 3 said the `research_meeting` LISTING reads REFUSED and the run record is written. That was a
+prediction from the row branch, not a read. Read at 03:07Z the listing raises `GatewayGraphError` 502, which is not a
+`Refused`; at `fd74f984ac` the run would still have ended at the fourth series with no record. The applier was halted
+53 s after its GO. The CTO half @78d8864fbe is VOID (@e113da7937). Section 6's COO half is withdrawn and re-given below.
+
+**New pin.** `data/transcripts/scripts/teams/pull.py` at build commit `2e86e331ad` (order TO-TR-rl22, drained
+@5ae3b3ddd9; check `R22-RL22-OK 20 passed`, issuer re-run). The act of section 0 is unchanged except for the pin:
+build from box/dell2 `5ae3b3ddd9` or a descendant that does not touch the 12 files of section 1.
+
+## A1. The listing branch, read from the code at 2e86e331ad (`_pull_series`, lines 141-154)
+
+```
+    try:
+        listing = transport.list_meeting_transcripts(meeting_id)
+    except Refused as exc:
+        out["listing"]["refused"] = True
+        out["refused"] += 1
+        out["outcomes"].append({"outcome": REFUSED, "detail": f"list refused {exc.code}"})
+        return out
+    except _ROW_READ_REFUSALS as exc:  # class name and status only: never the body, never the bearer
+        status = getattr(exc, "status", None)
+        out["listing"]["refused"] = True
+        out["refused"] += 1
+        out["outcomes"].append({"outcome": REFUSED, "detail": "list " + type(exc).__name__
+                                + (f" status={status}" if status is not None else "")})
+        return out
+```
+
+The series is recorded REFUSED with its class, never as zero rows, and `run` goes on to the next series and the record.
+
+## A2. Live listing read of all four series (status only, 2026-10-11T03:07Z)
+
+| series | listing answer |
+|---|---|
+| `monday_meeting` | 200, 20 rows |
+| `ocio_ic` | 200, 8 rows |
+| `asset_management_ic` | 200, 7 rows |
+| `research_meeting` | `GatewayGraphError` status 502, `isinstance(Refused)` False |
+
+## A3. Every gateway call the pull makes, and the scope of each error class (read from `pull.py` at 2e86e331ad and `gateway_client.py`)
+
+The pull makes three gateway calls: (a) `list_meeting_transcripts`, once per series; (b) `read_meeting_transcript(.., "vtt")`,
+once per unheld row; (c) `read_meeting_transcript(.., "metadata")`, once per unheld row, which the live transport refuses
+locally with `GatewayFormatUnsupported` before any HTTP (caught: the row lands content-only).
+
+| error class | on (a) the listing | on (b) the content read |
+|---|---|---|
+| `Refused`, incl. `GatewayMeetingNotAllowed` (403) | SERIES: recorded REFUSED, run continues | RUN-WIDE: raises (not in the tuple; a 403 on a read after a 200 listing is not expected) |
+| `GatewayGraphError` (502), `GatewayRouteRefused`, `GatewayUnexpected`, `GatewayInvalidId`, `GatewayCorrupt` | SERIES: recorded REFUSED with `list <Class> status=<n>`, run continues | ROW: recorded READ-REFUSED with `<Class> status=<n>`, loop continues |
+| `Expired` | not raised by a listing | ROW: recorded EXPIRED (the fixture transport only; the live transport never raises it) |
+| `GatewayUnauthorized`, `GatewayNeedsLogin`, `GatewayNotConfigured`, `GatewayToolsAbsent` | RUN-WIDE: raises | RUN-WIDE: raises |
+| `GatewayFormatUnsupported` on call (c) | -- | caught: `meta = None`, content-only landing |
+
+Tests hold each cell that changed: `test_pull_read_refused.py` (5 tests) and `test_monday_skip_replay.py` (3).
+
+## A4. The expected first run, MEASURED this time, not predicted
+
+A DRY run of `pull.run` from the tree at `7ce505dc5a` (pull.py = 2e86e331ad) against the live gateway at 03:14Z, with
+`apply=False`, `with_silver=False` and an S3 wrapper that raises on any write verb. It made 37 `head_object` calls and
+no write.
+
+| series | listed | held | would land | read_refused | refused | detail |
+|---|---|---|---|---|---|---|
+| `monday_meeting` | 20 | 16 | 0 | 4 | 0 | `GatewayGraphError status=502` |
+| `ocio_ic` | 8 | 7 | **1** | 0 | 0 | |
+| `asset_management_ic` | 7 | 7 | 0 | 0 | 0 | |
+| `research_meeting` | 0 | 0 | 0 | 0 | 1 | `list GatewayGraphError status=502` |
+
+The run RETURNED with 4 series entries. So the driven invoke after the apply is expected to land ONE `ocio_ic`
+transcript (bronze and silver, the catch-up the pair covers), write its run record and its listing snapshot, and
+return no error. What the dry run cannot show: the silver write and the record write themselves (both are the
+unchanged code path).
+
+## A5. Nothing was built or applied (applier's word and a live read)
+
+`0.7.0_AE_CloudOps~TR2` msg 3950: held before step 0, no ledger opened, nothing built, applied or invoked. Its live
+reads at 03:1xZ: Teams pull `taFbGTCUAOhM+97EVJi3AfqqeBCV+FIUSLZ8Z4Ge6HA=` (LastModified 2026-10-09T11:12:54Z), mail pull
+`VGIq85Xxm5KVLCnv16BASS63RsPMHScMEwZJP5SuMNY=`, commentary function ResourceNotFound. The issuer's own read at 03:11Z
+(`r22_checks.py ra22`) agrees, and the local dist zip still hashes to `taFbGTCU...`.
+
+## A6. Blast radius, re-measured at 7ce505dc5a
+
+Unchanged from section 1: zip 88 files against a rebuild of 89; SAME 77, CHANGED 11, ADDED 1, the same 12 names; the
+tree is clean on all bundled paths. `pull.py` now differs from the deployed file by 27 lines (20 from TR-rf-22, 7 from
+TR-rl-22). Address equality re-run: 14 of 14 identical. Sections 2 (rollback: `pull.py` at `0096e67747`, proof sha
+back at `taFbGTCU...`), 4 (writers: N = 1 scheduled writer per output) and 5 (proof) stand.
+
+## A7. COO half, re-given
+
+GIVEN by 2.0.0_SA_COO~T2 for the act of section 0 at the new pin (`pull.py` at `2e86e331ad`), with the radius of
+sections 1 and A6, the rollback of section 2 and the branches of A1 and A3. It covers the one `ocio_ic` catch-up
+landing A4 measures and any further unheld readable row of an admitted series. It does not cover an untargeted apply,
+the mail pull, the commentary function, any S3 delete, or any recovery landing of the four aged-out Monday meetings.
