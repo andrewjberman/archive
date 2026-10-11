@@ -7,7 +7,8 @@ W="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~56"
 [ -f "$W/gw1_plan.txt" ] && [ -f "$W/gw1_plan.rc" ] || { echo "plan or rc file absent"; echo "RESULT: FAIL"; exit 1; }
 rc=$(tr -d '\r\n ' < "$W/gw1_plan.rc"); plan=$(tr -d '\r' < "$W/gw1_plan.txt")
 summ=$(printf '%s\n' "$plan" | grep -E '^Plan: ' | tail -1)
-addrs=$(printf '%s\n' "$plan" | grep -E '^\s*# [a-z_.\[\]"0-9-]+ will be' | sed -E 's/^\s*# ([^ ]+) will be.*/\1/' | sort -u)
+# row Z-W56-S2: the first cut's bracket expression ended at its first ']', counting 0 on every plan; match any non-space address
+addrs=$(printf '%s\n' "$plan" | grep -E '^[[:space:]]*# [^ ]+ will be ' | sed -E 's/^[[:space:]]*# ([^ ]+) will be .*/\1/' | sort -u)
 n=$(printf '%s\n' "$addrs" | grep -c .)
 echo "plan rc=$rc; summary: $summ; changed addresses $n: $(printf '%s ' $addrs)"
 [ "$rc" = 0 ] && [ "$summ" = "Plan: 0 to add, 1 to change, 0 to destroy." ] && [ "$n" = 1 ] \
