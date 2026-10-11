@@ -1,0 +1,93 @@
+# ADVI_FIRMBKTS round 2 close run -- 2.0.0_SA_COO~B1 -- 2026-10-11T05:07:07Z -- HEAD 31555a39bb
+
+## FB-e-2/3 blind readers: r2_agree.py
+readers: A=0.9.0_WK_ADVI_FIRMBKTS~5 B=0.9.0_WK_ADVI_FIRMBKTS~6; locations=418; arm map=418
+ARM canonical n=209 | system agree 207 of 209 (an unknown in 2) | firm agree 209 of 209 (an unknown in 0) | tier agree 209 of 209 (an unknown in 0) | table agree 197 of 209 (an unknown in 2) | all four agree 195 of 209
+ARM legacy    n=209 | system agree 54 of 209 (an unknown in 155) | firm agree 209 of 209 (an unknown in 0) | tier agree 204 of 209 (an unknown in 5) | table agree 169 of 209 (an unknown in 7) | all four agree 47 of 209
+pairs written: 418 to org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round2/R2_CLOSE_PAIRS.json
+rc=0
+
+## FB-e-1 table: r2_mapping.py --arms structure
+  census classes=444 placed-directly=420 regridded-parents=24 child rows=78 duplicates=0 unplaced=0 not-in-census=0
+  dispositions: MOVE=212, HOME=110, RETIRE=85, DECISION=2, FAULT=89
+  placed rows graded through address(): 322
+  round-1 placed, retired and decided classes unchanged: 216; turned FAULT by a measured key overlap: 2
+PASS V1 mapping_v2.json names the census it placed and the table it supersedes
+PASS V2 every census class is placed once, or re-gridded into children whose objects sum to its own, and no row names a class the census lacks
+PASS V3 every row's disposition is on the enum with its required fields; a FAULT row carries a reason and a named owner serial; the DECISION rows are exactly FWD-7 and FWD-8
+PASS V4 every MOVE/HOME address is exactly address()'s output; MOVE scope is the bucket's firm in its firm bucket, HOME is bronze/silver in opal-data-assets
+PASS V5 every class round 1 placed, retired or decided keeps its disposition, address and pattern, except a MOVE or HOME class a measured key overlap turned FAULT (the difference control: the repair moves only the FAULT classes)
+ROUND 2 MAPPING STRUCTURE: 5 of 5 arms
+rc=0
+
+## FB-e-1 table: r2_mapping.py --arms repair
+  round-1 FAULT classes=226 re-gridded or placed=168; FAULT rows remaining=89 owners={"1.0.0_SA_CTO~DELL1": 89}
+  destination-table collisions in the final rows=28 ruled=28 unruled=0 stray entries=0
+PASS P1 every round-1 FAULT class is re-gridded or placed, or still a FAULT row with a reason and a named owner serial
+PASS P2 every destination table that two or more classes of one bucket still share has a merge ruling with a reason and a measured overlap of 0 keys
+PASS P3 no worker-made DECISION row exists and every RETIRE row carries its reason (RETIRE moves nothing and deletes nothing)
+PASS P4 MAPPING_TABLE_v2.md exists and states the counts per disposition with the census class and object denominators
+ROUND 2 MAPPING REPAIR: 4 of 4 arms
+rc=0
+
+## FB-e-7 tolerant load: r2_s11.py
+S11 DIFF: 131 added line(s) across build_canonical_prices_v2.py, test_s00_missing_tier2.py since fda1c4f0cc
+S11 NAMING GATE: PASS (0 REFUSE; gate said: NAMING-GATE: PASS 0 graded)
+rc=0
+
+## FB-e-4 arms: r2_f4.py negative (worker's saved SSM record)
+  caller=arn:aws:sts::313476888478:assumed-role/irpt-cot-ycharts-research-role/fb-r2-4-negarm
+  INF:  An error occurred (AccessDenied) when calling the ListObjectsV2 operation: User: arn:aws:sts::313476888478:assumed-role/irpt-cot-ycharts-research-role/fb-r2-4-negarm is not authorized to perform: s3:
+  COT:  An error occurred (AccessDenied) when calling the ListObjectsV2 operation: User: arn:aws:sts::313476888478:assumed-role/irpt-cot-ycharts-research-role/fb-r2-4-negarm is not authorized to perform: s3:
+PASS N1 the command ran on a named SSM-managed runner and reports Status Success
+PASS N2 the principal that made the calls is an assumed `*-cot-*` role (its STS ARN is printed)
+PASS N3 the role's read of opal-data-inflection was REFUSED, and the refusal's text names an explicit deny in a resource-based policy
+PASS N4 the same role's read of opal-data-cottonwood was NOT refused by that deny (the difference control: the fence refuses the other firm's role and not its own)
+ROUND 2 F4 NEGATIVE: 4 of 4 arms
+rc=0
+
+## FB-e-4 arms: r2_f4.py positive (LIVE, read-only, caller's own identity) -- 2026-10-11T05:07:30Z
+  caller: arn:aws:iam::313476888478:user/cloudops-dell1-agent-user
+  opal-data-inflection: ListBucket KeyCount=1, GetBucketVersioning OK
+  opal-data-cottonwood: ListBucket KeyCount=1, GetBucketVersioning OK
+  opal-data-inflection: versioning=Enabled public-access-block=True encryption=AES256
+  opal-data-cottonwood: versioning=Enabled public-access-block=True encryption=AES256
+  opal-data-inflection: admit list 7 patterns; own firm glob role/*-inf-* present=True; other firm glob absent=True; caller named=True  (POLICY TEXT, not an exercised refusal)
+  opal-data-cottonwood: admit list 7 patterns; own firm glob role/*-cot-* present=True; other firm glob absent=True; caller named=True  (POLICY TEXT, not an exercised refusal)
+PASS P1 the caller (an identity this estate holds, ARN printed above) performs ListBucket and GetBucketVersioning on each of the two buckets and succeeds
+PASS P2 each bucket's versioning is Enabled, all four public-access blocks are on and default encryption is set, read from the live bucket
+PASS P3 each bucket's admit list names its own firm glob, lacks the other firm's, and names the caller (which explains P1)
+ROUND 2 F4 POSITIVE: 3 of 3 arms
+rc=0
+
+## FB-e-5 F7 copy: r2_f7.py compare (LIVE listing of destination and source against the worker's manifest) -- 2026-10-11T05:07:32Z
+COMPARE manifest=52910 placed=52910 refused=0 (denominator: manifest objects)
+  DEST  present=52910 missing=0 mismatch=0 extras-under-advi/49financial/platinum/=0
+  SOURCE changed-since-manifest=0 gone=0 (the producers still write opal-data-bd; a changed source is re-copied by a new manifest, never by this one)
+COPY-COMPLETE: every manifest key present and equal
+rc=0
+
+## FB-e-5 F7 residue bound: r2_f7.py residue --check (LIVE counts under gold/advi/ and _campaign/ against before/after records)
+  gold/advi/   before=26411 after=26411 now=26411
+  _campaign/   before=1 after=1 now=1
+RESIDUE UNCHANGED: gold/advi/ and _campaign/ key counts equal before, after and now
+rc=0
+
+## FB-e-6 F6 dormant router: the order's AC1-AC3 at the merged HEAD ba3ee9bd48, main checkout -- 2026-10-11T05:08:23Z
+-- AC1
+{"event":"scope_denied","rule":"satellites_unknown_leaf","callerFirmId":"cottonwood","path":"/api/scoped/satellites/Holdings.json"}
+Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+{"event":"scope_denied","rule":"satellites_unknown_leaf","callerFirmId":"cottonwood","path":"/api/scoped/satellites/../../gold/views/firm_composition.json"}
+
+[0m[32m 39 pass[0m
+[0m[2m 0 fail[0m
+ 29 expect() calls
+Ran 39 tests across 3 files. [0m[2m[[1m496.00ms[0m[2m][0m
+exit=0
+-- AC2
+F6 DIFF: identical 193 of 193 events through handleWithMap; 193 of 193 through handler
+exit=0
+-- AC3
+F6 SEAM: 20 of 20 served-class requests rewrite to the key the table gives (router-reachable classes 10 of 11; not reachable by any route: gold/platinum/firm/)
+F6 SEAM CONTROLS: 10 of 10 (empty list inert; unplaced refused; other firms, twin class, PII block, satellites unchanged)
+exit=0
