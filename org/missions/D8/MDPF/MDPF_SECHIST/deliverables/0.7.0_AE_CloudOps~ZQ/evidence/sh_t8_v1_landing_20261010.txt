@@ -1,4 +1,6 @@
-SH-t8 V1: PARTIAL -- landing verified; first scheduled run pending
+SH-t8 V1: COMPLETE -- landing verified (L1, 2026-10-09) and the first scheduled run accepted (L2, 2026-10-10).
+The L1 header read "PARTIAL -- landing verified; first scheduled run pending" and is superseded IN PLACE by this line;
+everything below the L1 block is the original L1 text, unedited, including its own PENDING/UNVERIFIED language.
 Seat: 0.7.0_AE_CloudOps~ZQ
 Measured landing read: 2026-10-09T15:56:00.232026-04:00
 Order: MDPF_SECHIST.TO-VERIFY-SH-T8.sitez-pull-landing
@@ -29,3 +31,50 @@ L2 and the ledger stay open until those checks pass. On acceptance failure, foll
 No change to integrations/bloomberg/pipeline/, auth, tasks or producers by this act.
 Push state LOCAL; no push by this seat. Origin read: 674a3d52550b88bb23e4a3e0f9a3f73f449ff389	refs/heads/box/sitez
 Compiler tools: comp-which known path / no-fit read routing; comp-to bound exact order. No schedule change, so compiler schedule gate N/A per order.
+
+================================================================================
+L2 -- FIRST SCHEDULED RUN, read 2026-10-10 23:0xZ by 0.7.0_AE_CloudOps~ZQ
+================================================================================
+Scheduled fire measured, not assumed: Get-ScheduledTaskInfo OPAL_BBGTML_daily_pull ->
+LastRunTime 10/10/2026 7:00:01 AM local, LastTaskResult 0, NumberOfMissedRuns 0,
+NextRunTime 10/11/2026 7:00:00 AM. No manual invocation by this seat.
+
+Run log (retained exact path):
+  C:/Users/Opal Bloomberg/opal_bbg_logs/bbg_tplus1_20261010_070002.log  (13451 bytes)
+  Identified among a printed denominator of 30 bbg_tplus1_*.log files in that directory.
+
+ETF leg classification and exit, quoted from that log:
+  line 102  [etf_daily] as-of 2026-10-09 (BDay(-1) of 2026-10-10) -- landing under bbg/2026-10-09/
+  line 103  [etf_daily] run_class=scheduled (default adhoc; only the scheduled chain sets it)
+  line 135  [etf_daily] EXIT 0
+  line 136  ETF LEG EXIT CODE: 0
+
+The required run-log line, copied ONCE as the order asks (log line 117):
+  [etf_daily] history backfill exhausted count: 2
+Named per security at log lines 115-116: PFDE since 2026-10-09, PFOE since 2026-10-09.
+
+Manifest read live from the served artifact, not from the log:
+  s3://opal-data-etfs/bbg/2026-10-09/run_manifest.json  (4994 bytes, generated_utc 2026-10-10T11:06:43Z)
+  PRESENCE tested, never truthiness, against a printed denominator of 24 top-level keys,
+  with a negative control (history_backfill_exhaustedX -> present=False):
+    run_class                   present=True   value 'scheduled'
+    history_gap_fill            present=True   value {'record_as_of': None, 'listed_tickers': 0,
+                                               'requested': {}, 'deferred': [], 'estimate': 0,
+                                               'rows': 0, 'error': None}
+    history_backfill_exhausted  present=True   value {'PFDE': '2026-10-09', 'PFOE': '2026-10-09'}
+  history_gap_fill is present with zero counts because the producer found no gap record within
+  10 days of as-of (log line 111). A zero with its cause named, not an absence.
+  Supporting fields, same read: history_backfill_error None, history_backfill_capped [],
+  history_backfill_budget estimate 395 / recorded 0 / remainder 120000 of 120000,
+  history_window 2026-10-09 .. 2026-10-09, objects_written 7, objects_failed [].
+
+Producer identity re-read at L2 close, so the run is attributable to the signed landing:
+  git hash-object integrations/bloomberg/pipeline/etf_daily_pull.py returns the same blob L1
+  recorded above, and git status for that path is empty. No producer, auth, schedule or
+  pipeline edit by this verifier at either leg; V2 (nothing else under
+  integrations/bloomberg/pipeline/ moves) holds.
+
+ACCEPTANCE: PASS. No rollback executed and none owed -- the order's rollback arms only on an
+acceptance failure, and blob 73735f44d6 was never restored.
+NEVER-2 ledger mdpf-sechist-zq-sh-t8-v1: L1 closed 20261009T195809Z, L2 closed at this read,
+entry CLOSED with both legs proven.
