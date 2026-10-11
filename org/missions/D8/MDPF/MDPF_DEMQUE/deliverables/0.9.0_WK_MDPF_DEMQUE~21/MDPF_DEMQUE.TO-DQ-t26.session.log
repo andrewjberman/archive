@@ -1,0 +1,16 @@
+MDPF_DEMQUE.TO-DQ-t26 -- worker session log, 0.9.0_WK_MDPF_DEMQUE~21, worktree C:/dev/wk-demque-21, branch wk-MDPF_DEMQUE-21, base 36946338e8 (DQ-t-25 accepted)
+
+1. Tree check: git rev-parse --abbrev-ref HEAD -> wk-MDPF_DEMQUE-21; test -d org && test -d .tools -> TREE-OK.
+2. Baseline (before edits): dq_t26_tests.py and dq_t26_real.py not run as baseline; the order states RF-BAD no file ... and REFRZ-BAD no file ...refreeze.py at the base.
+3. Edits: drawer_schedule.py (new); bbg_quote.py (fire_days parameter, _is_fire helper, _finish_non_trading walk on fire days, HISTORY_BASIS clause, docstring sentence); refreeze.py (new); quote_vs_actual.py (read() superseded list, _superseded helper); test_demque_refreeze.py (new, three named tests).
+4. Commit 277294a59c (code, tests, quote_vs_actual) via safe-commit.sh; commit-gate passed on 5 of 5 files.
+5. Checks after edits:
+   python -m py_compile (four modules) -> COMPILE-OK
+   pytest data/mdpf/scripts/demque --ignore data/mdpf/scripts/demque/test_demque_land.py -q -> 1 failed, 96 passed (the known failure: test_demque_bbg_ledger_upload.py::test_reads_record_lines_and_converts_rows_to_cells_per_mode, row MDPF_DEMQUE-D1-W21-S1)
+   dq_t26_tests.py -> 3 passed in 0.95s; RF-OK; rc=0
+   dq_t26_real.py -> "new: finish=2026-10-17 supersedes=DEMQUE-TR-COMPARISON-DIVIDEND-PAYERS.quote.superseded-2026-10-11.json"; "old: finish=2026-10-13 reason=rule changed, round 6 R1"; "qva: {... \"finish_date\": \"2026-10-17\", ... \"verdict\": \"OPEN\" ... \"cells_drawn\": 5858 ...}"; REFRZ-OK; rc=0
+6. Default-output equivalence: golden grid (.scratch/golden.py, uncommitted) compared quote() at committed t-25 source (16b6e889a8) against the new module over 5 claim pairs x 5 tiers x 5 cell counts x 21 days x 2 drawn values = 5,250 requests: 0 differing, with the one intended change (the HISTORY_BASIS clause) normalized out.
+7. Mutant control (.scratch/mutant26.py, uncommitted): _is_fire patched to ignore the fire set; test_quote_counts_only_scheduled_non_trading_days FAILS; test_refreeze_writes_beside_and_keeps_the_superseded_quote PASSES (it does not depend on the set); the third named test was not run in this mutant pass.
+8. Determinism: dq_t26_real.py run twice, stdout md5 659e0df4f56f680ff8df3db0837eca7e on both runs.
+9. Scratch re-freeze of the real TR files (.scratch/refreeze_demo, uncommitted; the real folder untouched, git status clean): CLI output {"finish_date": "2026-10-17", "status": "REFROZEN", "superseded": "DEMQUE-TR-COMPARISON-DIVIDEND-PAYERS.quote.superseded-2026-10-11.json", "superseded_finish_date": "2026-10-13"}; a second call -> {"status": "ALREADY_REFROZEN"}, rc=0.
+10. Surprise row MDPF_DEMQUE-D1-W21-S3 (refreeze.py adds allowance_gap; collision counter placement) committed 5ec90f2d4d.
