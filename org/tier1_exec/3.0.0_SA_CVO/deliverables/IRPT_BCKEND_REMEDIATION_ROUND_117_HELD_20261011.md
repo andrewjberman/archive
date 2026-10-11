@@ -319,3 +319,28 @@ Two read-only orders (IB-pr-443, IB-pr-444), no judgment criterion, nothing buil
   capture has no challenge test while the read path has one (row D2-W302-S1). To graduate with W302-S2 and S3.
 - D2-W301-S1 and S3 are wording and window notes; to dismiss at the compile. D2-W301-S2 (the last-day question unanswered) stays
   open as a question the round did not answer.
+
+---
+
+## Added at rounds 142 to 144, 2026-10-11T19:35:44Z (input: msg 5668, packet @a3fea932da)
+
+Four read-only orders (IB-pr-445 to 448), no judgment criterion, nothing built, served or written. Held on the same condition
+(IB-pr-449 and IB-pr-450 are running). This seat read round 142's record whole at its review of PRD v0.40 and re-ran nothing.
+
+- **D2-W303-S1** (OBSERVATION, INERT): An 'equal to the cent' reading of the guard is not the stricter one the face assumes: in the overlap table it un-grades 192 FEWER security-days than relative 1e-4 (943 against 1,135), in the seven types outside the first witness 80 more security-days but 200 fewer row-days.
+- **D2-W303-S2** (OBSERVATION, INERT): Under the guard all 12 types of the overlap table have an empty one-day-off column with equal above 0, so the listed 'types with an empty one-day-off column' is every type, including one with zero days equal on which the close moved (Cash and Cash Equivalents / Not Available); th
+- **D2-W304-S1** (OBSERVATION, INERT): The time ycharts/session/current was last changed (2026-10-05T10:04Z) is not the time of the last capture: since st12 the resident rewrites that secret on every cookie rotation, so the read 'no capture has written a bundle in six days' does not follow from it.
+- **D2-W304-S2** (OBSERVATION, INERT): A successful capture writes no journal line, so the extract of 11 capture failures in 14 days cannot show how many captures succeeded, and 'failures before 2026-10-05 exist' cannot be set against a success count from that extract.
+- **D2-W304-S3** (OBSERVATION, INERT): The probe's transport is stated in code to be 'the resident's own client class' but is a different program from the resident's client (Node https against Python urllib), with a different Referer and a different cookie selection; whether they look alike to the vendor has no record
+- **D2-W304-S4** (OBSERVATION, INERT): A change on our side since 2026-10-04 that is not in the capture code: the host's Python path made research-runner calls on the same account and stored session from 2026-10-04T18:42Z to 2026-10-05T13:01Z, three runs stopped by a 202 with a waf action at the 7th call.
+- **D2-W305-S1** (OBSERVATION, INERT): The task order's premise that dropping firm_registry.json from the poller's package is an outage does not hold for the live bytes: the handler returns before any registry read, because LiveTransport raises unconditionally.
+- **D2-W305-S2** (OBSERVATION, INERT): The served firm_registry.json has the same parsed content as the tree's generated view data/firm_registry.json, differing only by the view's _generated key (5229 vs 5326 bytes), so the 'no true source' note is true of the bytes but not of the content.
+
+**For the slug.**
+- Round 142 is in the contract already: PRD v0.40 (the guard) and v0.41 (no prior bar, no grade), both signed by this seat.
+- Round 143: the capture's probe is sent by a different program from the one a generation uses, and whether the vendor treats the
+  two alike has no record. The issuer corrected its own statement that captures worked until 2026-10-05: the last recorded automated
+  sign-in success is 2026-10-02. The vendor path stays stopped; the question is with Andrew.
+- Round 144: the live intake poller's registry read is not reached at run time, by a read of the call path with nothing exercised;
+  the handler returns before it because its transport refuses on every path. A release that drops the file has no effect only while
+  that refusal stands. This bears on IRPT_ANLREQ row D2-W53-S2.
