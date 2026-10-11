@@ -1,0 +1,197 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_IAMROLES202609.TO-IAM-w-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IR",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3cadaf52ca"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP_R6.md",
+  "vintage_commit": "59d56f3848",
+  "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-w-2.adopt-family-a-bd.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/bd-pipeline/zz_adopt_family_a.tf",
+   "kind": "terraform",
+   "commit_or_etag": "869c01686c",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "The declaration for BOTH BD roles, now live. Landed as a pure R100 rename of the PHASE A .tf.proposed, committed BEFORE any import per A4-r6. THIS COMMIT IS THE ONE THAT PROVES THE R20 PATH WORKS: it took NO override of any kind, where the first attempt at the identical bytes was refused 4 times by the naming gate's carrier limb (row Z-S34). The gate read both names DECLARED-EXCEPTION at all 4 sites under R20 register entry X17 (waivers NFRA-IAMROLES-R20-01/02, owner 1.0.0_SA_CTO~Z, cutoff 2026-12-31), verdict WARN 4 graded. Row 2's ecs-tasks trust and its ABSENT description are both carried as live, never copied from the sibling role.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round6/POST_APPLY_family_a.md",
+   "kind": "doc",
+   "commit_or_etag": "ee46dead92",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The record of the act. Carries the one POST-APPLY-PLAN line AC2 greps with terraform's verbatim 'No changes' quoted beside it; the untargeted module plan; the per-attribute grading table with the printed ECS trust value; the live post-apply reads; the full account of the Z-S34 hold and what cleared it, including Andrew's verbatim 'YES, the exception, \"for now\"' and the cutoff that carries it; and two limits recorded against this seat -- the unread Apply-complete line and the first hold that never persisted.",
+   "artifact_covered_by": [
+    "AC2",
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261011T0003Z_iamroles-r6-family-a_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "ee46dead92",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The ledger, and the only entry in this round that travelled OPEN -> HELD-PRE-APPLY -> OPEN -> CLOSED. Opened before the act @ae27a5f5f8 (3 legs), held @47955fd728 on the Z-S34 gate with a named re-read event when the step-5 commit was refused, released @b0fdae1419 once the R20 entries were at HEAD, closed here with all 3 legs proven. Released rather than closed NOT-APPLIED and re-minted, because the entry was opened before the act as NEVER-2 requires and nothing was ever applied under it; closing and re-opening would have erased the fact that the act was authorised, prepared and stopped at a named gate. The issuer's instruction permitted either, conditioned on the ~06:03Z window, which had not lapsed.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/bd-pipeline/bd-served-vintage-alarm.tf",
+   "kind": "terraform",
+   "commit_or_etag": "a18b96fd5d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Step 1a (amendment A6-r6), committed ALONE: one clause of local.bd_served_vintage_keys's if gains && can(e.as_of_field) && can(e.frontier_page_trading_days). 1 insertion, 1 deletion, YAML untouched. This is what made the module plannable at all -- it could not plan for nine days (row Z-S29) after an NFRA_MCPINDEX config edit gave two entries a freshness_basis without the attributes this file reads unguarded. 2.0.0_SA_COO~MI ruled the remedy; this seat proposed none, because the two candidates differ in MEANING. Its plan delta is ZERO, measured, confirming ~MI's premise that nothing consumes those locals.",
+   "artifact_covered_by": [
+    "AC2",
+    "AC4"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: exactly `0` -- the declaration exists under its .tf name and sets neither inline_policy nor managed_policy_arns; a \"No such file\" error means PHASE B has not landed",
+   "method": "command",
+   "invocation": "grep -c -E '^[[:space:]]*(inline_policy|managed_policy_arns)' infra/aws/terraform/bd-pipeline/zz_adopt_family_a.tf",
+   "output_evidence": "0\nexit=1 (grep -c exits 1 on a zero count, which is the expected value here)",
+   "denominator": "The whole declaration file, 120 lines, covering BOTH roles. 0 of them set either argument.",
+   "status": "PASS",
+   "status_reason": "A zero, so: what would have made it non-zero is setting either argument, which makes it authoritative and detaches every live policy the list does not name -- here that is bd-merge-daily-policy on row 1 and BDPipelineTaskPolicy on row 2. The issuer recorded this FAILing at the base 6e61646e81 (file absent), and I watched it go the other way twice in this session: during PHASE A the same invocation errored on the absent .tf, and during the FIRST PHASE B attempt the file existed on my branch and read 0 while the commit was refused -- so the criterion's two limbs are independent and both were exercised. Corroborated on two further planes rather than left as a text count: the saved plan's per-attribute decomposition shows inline_policy and managed_policy_arns absent from the delta on BOTH roles, and the live post-apply reads show each role still carrying its one inline policy with 0 attached managed policies."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: exactly 1 -- each module plans clean after its apply, so the declaration matches live; fewer is a finding recorded in that file",
+   "method": "command",
+   "invocation": "grep -c -E '^POST-APPLY-PLAN: .+: 0 to add, 0 to change, 0 to destroy$' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round6/POST_APPLY_family_a.md",
+   "output_evidence": "1\nexit=0",
+   "denominator": "1 module in this cell's scope, so exactly 1 line is owed and exactly 1 is present. The file's other plan line is labelled UNTARGETED-MODULE-PLAN so it cannot match this regex.",
+   "status": "PASS",
+   "status_reason": "DECLARED DEPARTURE, the same one w-1's and w-3's AC2 carried. The targeted re-plan output is the sentence 'No changes. Your infrastructure matches the configuration.', not a count line; the canonical POST-APPLY-PLAN line is this seat's canonical form of that result, with terraform's verbatim output quoted beside it in section 1 so a reader can judge the translation rather than take it. A difference in RENDERING, not in result. CORROBORATED IN A WAY THIS CELL ALMOST COULD NOT BE: the untargeted module plan also reads 'No changes', and PHASE A's negative control read 'No changes' BEFORE the act -- but only AFTER step 1a's guard made the module plannable at all. For nine days this module could not produce ANY plan (Z-S29), so the before/after comparison that makes this criterion meaningful had to be created by a separate, separately-committed act before the criterion could be read at all."
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3: `open=0` and `closed=` 1 or greater -- each module's ledger entry opened and closed",
+   "method": "command",
+   "invocation": "bash -c \"echo open=\\$(ls -a org/critical_paths/.open_deploys/ | grep -c 'iamroles-r6-family-a') closed=\\$(ls org/critical_paths/change_management/ | grep -c 'iamroles-r6-family-a')\"",
+   "output_evidence": "open=0 closed=1\nexit=0",
+   "denominator": "1 module, 1 ledger entry owed, 1 present and closed. ls -a not ls -1, because the sentinel .unindexed_red_state.json is a dotfile ls -1 hides.",
+   "status": "PASS",
+   "status_reason": "As in w-3, the `closed=` limb is satisfied the moment the entry OPENS -- deploy_ledger.py writes the completion-record file into change_management/ at open time -- so it counts entries that EXIST, not entries that are closed, and the `open=0` limb is what carries this criterion. w-1's AC3 had the mirror-image defect. Sound only as a conjunction, in all three cells. THE SUBSTANTIVE POINT FOR THIS ENTRY is that it is the only one in the round that travelled OPEN -> HELD-PRE-APPLY -> OPEN -> CLOSED, and the open=0 reading is correct at each end for a different reason: before the act it was 0 because nothing had opened, during the hold it was 1 with the sentinel present and the status HELD, and now it is 0 because the close removed the sentinel. A criterion read only at the end cannot distinguish those, which is why the record carries the sequence. AND ONE THING AGAINST MYSELF: the first HOLD on this entry never persisted -- run in a worktree, its uncommitted write discarded by my own git checkout during an unrelated revert, so the drained record still read OPEN with three legs stranded until I re-ran and committed it. That is the September lesson about deploy_ledger in a linked worktree, hit a second time by a different discard path."
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "AC4 (JUDGMENT, never self-graded; UNVERIFIABLE-BY-INSTRUMENT, status_reason naming 3.0.0_SA_CVO~Z): did the apply move custody without moving a permission, and did the survey name every tag the apply wrote before the pair was signed?",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT -- judgment, graded by 3.0.0_SA_CVO~Z",
+   "output_evidence": "Not produced. The order directs this seat to record AC4 UNVERIFIABLE-BY-INSTRUMENT naming the CVO. The material to grade: PLAN_SURVEY_family_a.md @a1667d4af4 (its PLAN line written only after step 1a; its earlier committed state @d27dec64c2 carries the BLOCKED line and the four controls behind Z-S29), the two halves @1ad6f36ca2 and @dadc1ec69a, POST_APPLY_family_a.md @ee46dead92 sections 3 and 4, and rows Z-S25/Z-S29/Z-S34/Z-S35.",
+   "denominator": "2 questions x 2 roles. Question 2 has a crisp denominator: 4 tags written per role, 4 named per role in the survey, 0 unnamed. Question 1 has no count and is the judgment.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Graded by 3.0.0_SA_CVO~Z. On question 2 the record is a chronology rather than a claim: PLAN_SURVEY_family_a.md section 1 carries the module's four default_tags keys and section 2 both roles' live tag state, it was committed before either half was signed, and both halves were written against that pin. On question 1, custody-without-permission, the evidence is on two planes: the saved plan's per-attribute decomposition shows exactly one attribute differing per role (tags_all, four keys, exact equality match) with assume_role_policy, inline_policy, managed_policy_arns and description all absent from the delta, and the live post-apply reads show row 2's trust principal still ecs-tasks.amazonaws.com, its description still absent, each role's one inline policy intact and 0 attached managed. THREE THINGS A GRADER SHOULD WEIGH AGAINST ME, all of them in this cell's own history. (1) THE FIRST PHASE B ATTEMPT: I opened the ledger and renamed the file before knowing whether the commit could land, and it could not -- the carrier limb refused it 4 times. Nothing reached AWS, because A4-r6 had already moved the commit ahead of the import, so the cost was zero; but the ordering protection was the amendment's, not my foresight, and in w-1 the same class of refusal arrived after the apply and left a live IAM role planned for destruction. (2) THE FIRST HOLD did not persist, as AC3 records. (3) THE APPLY'S OWN COMPLETION LINE was never captured -- my output filter was carried over from earlier cells and the naming-apply-gate's WARNs on unrelated files pushed 'Apply complete!' out of the window -- so I had rc=0 from the producer and nothing else, and confirmed the apply from live reads and terraform state list instead. That is the sounder oracle, but I did not choose it deliberately; I fell back to it because the first one was missing."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "(1) The issuer recorded the base dry-run at 6e61646e81 as AC1, AC2 and AC3 all FAILing; all three now read their expected values. (2) AC1's two limbs were BOTH exercised in this session, in opposite directions: it errored on the absent .tf during PHASE A, and read 0 on a present .tf whose commit was refused during the first PHASE B attempt. (3) THE SHARPEST CONTROL IS THE PAIR OF STEP-5 COMMITS ON IDENTICAL BYTES. The first, with a valid audited placement override, was REFUSED 4 times (NAMING-GATE: REFUSE 4 graded, no NAMING-PLACE line). The second, with NO override at all but the R20 entries at HEAD, read DECLARED-EXCEPTION at all 4 sites (WARN 4 graded). Same file, same bytes, same seat -- the only variable is the register entry, so the R20 path is shown to be what cleared it rather than assumed. (4) The plan was decomposed per attribute, because 2 import / 0 add / 2 change / 0 destroy is exactly what a trust-policy rewrite would print, which is this cell's named stop condition. (5) The tag set was checked by EQUALITY against the four keys the pair signs, not by eye. (6) Step 1a's guard was verified by ~MI's own two checks run BEFORE and AFTER the edit -- FAIL/FAIL then PASS/PASS -- and re-run in the SHARED tree after the drain, so they discriminate rather than always passing. (7) The Z-S34 hold was reported as correctly standing on a MEASURED zero (comp-find over infra/logic: 0 hits across 29 files) before the entries landed, and the ancestry of bd2cacee69 was verified by this seat with a self-ancestry positive control rather than taken from the issuer's 'by my ancestry read'.",
+   "expected": "AC1, AC2 and AC3 move FAIL -> PASS; the saved plan shows exactly one differing attribute per role and zero other addresses; the two step-5 commits on identical bytes differ in verdict only because of the R20 entry; and the post-drain shared-tree untargeted plan reads 0 to destroy.",
+   "observed": "AC1 0 (base: absent; mid-session: errored, then 0-under-refusal). AC2 1 (base: absent). AC3 open=0 closed=1 (base: open=0 closed=0). Plan: 2 resource_changes, 2 non-no-op, 1 attribute each, tags_all exact-match on 4 keys for both, policies/trust/description unchanged, 0 other addresses, 0 destroys. Step-5 verdicts on identical bytes: REFUSE 4 graded (override present) -> DECLARED-EXCEPTION, WARN 4 graded (no override, R20 at HEAD). Live: 4 tags, 1 inline, 0 managed, ecs-tasks trust and absent description on row 2. Post-drain shared-tree plan: 'No changes'.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The plan was written to a file with -out and the apply was handed THAT FILE. Grading ran off terraform show -json, and the tag comparison was an equality test against the pair's four keys rather than an eyeball. Every post-apply claim is a live AWS read plus terraform state list -- which in this cell is load-bearing rather than stylistic, since the producer's own completion line was never captured. The declaration landed as a pure rename: git diff --cached -M reports R100, bytes identical to HEAD's .tf.proposed. Byte hygiene checked rather than assumed: pure LF and byte-delta 0 on the .tf and, after one correction, on POST_APPLY_family_a.md -- it initially carried a single non-ASCII character (U+26A0) that its sibling records do not, found by a byte-delta of 2 and removed. The step 1a edit was applied by a non-shell writer that refuses unless its anchor occurs exactly once.",
+   "observed": "git: R100. Applied plan == graded plan by construction. Targeted and untargeted re-plans: 'No changes'. Post-drain shared-tree plan: 'No changes'. Live tags: exactly the four keys on both roles by equality. Step 1a: 1 insertion / 1 deletion, YAML untouched, zero plan delta, ~MI's checks FAIL/FAIL -> PASS/PASS and PASS/PASS again in the shared tree. POST_APPLY_family_a.md: byte-delta 0 and 0 non-ASCII characters after the correction.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "AC4, both of its questions.",
+   "reason": "Judgment, never self-graded, recorded UNVERIFIABLE-BY-INSTRUMENT naming 3.0.0_SA_CVO~Z per the order. It asks whether this seat's own act moved only custody, which the actor cannot score for itself; what this seat could do was put both planes of evidence and three things against itself on the record."
+  },
+  {
+   "item": "The canonical forms the naming gate asks for ({system}-49f-merge-daily-lambda-role, {system}-49f-pipeline-task-role).",
+   "reason": "Not available and not attempted. An IAM role cannot be renamed in place, so adopting under a canonical form is a create-plus-delete WORLD act outside the cell's BOUNDS and outside the signed pair. Resolved properly instead: Rule 30's R20 route, which is the mechanism the canon itself names for a deliberate departure -- Andrew answered 'YES, the exception, \"for now\"' and 1.0.0_SA_CTO~Z landed register entry X17 with cutoff 2026-12-31. This cell took NO override once that existed."
+  },
+  {
+   "item": "Choosing the remedy for Z-S29, although a one-line fix was obvious.",
+   "reason": "The two candidates differ in MEANING: guarding the comprehension with can()/try() silently drops two tables from the alarm's served-key coverage, which is a freshness-coverage decision and not a syntax fix. That belongs to the BD pipeline's owner and to 2.0.0_SA_COO~MI, whose cell authored the breaking edit. I filed the row with its controls and owners and proposed nothing; ~MI ruled it as NFRA_MCPINDEX-Z-S96 and A6-r6 carried the ruling into this order as step 1a, which I then executed."
+  },
+  {
+   "item": "The pre-existing terraform fmt -check failures in bd-pipeline, and the naming-apply-gate WARNs on alarms.tf and bd-49f-etf-ownership-daily.tf.",
+   "reason": "All pre-existing, none this cell's, none a REFUSE. Outside this order's <paths>; formatting or renaming unrelated resources is a rider on a WORLD cell. Surfaced in the survey and the POST_APPLY record instead."
+  },
+  {
+   "item": "Any alert, monitor, schedule or Access Analyzer call.",
+   "reason": "Barred by the cell's BOUNDS G-21 and G-25 and by the standing moratorium. None was built, called or proposed -- and notably the module this cell touched is itself a served-vintage ALARM file, so step 1a was scoped to one clause of a locals comprehension and changed no alarm, schedule or notification."
+  }
+ ],
+ "surprises": [
+  "NFRA_IAMROLES202609-Z-S25: BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~ZI -- the naming gate reads an ADOPTED pre-existing role name as NEW, because judge() decides NEW from the graded file's pre-image. For this cell it resolved not by override but by the R20 route (see Z-S34).",
+  "NFRA_IAMROLES202609-Z-S27: BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~ZI -- an import landing before its declaration is committed leaves a DESTROY planned in the shared tree. THIS CELL IS THE CLEAREST VINDICATION OF A4-r6's fix: the step-5 commit was refused 4 times, and because the commit now precedes the import, nothing was in AWS and the cost was zero. The required post-drain untargeted plan in the SHARED tree reads 'No changes'.",
+  "NFRA_IAMROLES202609-Z-S29: BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~ZI -- bd-pipeline could not plan AT ALL for nine days: 4 x 'Unsupported attribute' in bd-served-vintage-alarm.tf after NFRA_MCPINDEX commit 3d7fb62105 gave two BD silver entries a freshness_basis without the two attributes that file reads unguarded. Filed with four independent controls and its owners named, with no fix proposed because the candidates differ in meaning. Ruled by 2.0.0_SA_COO~MI (NFRA_MCPINDEX-Z-S96), carried here as A6-r6 step 1a, landed by this seat @a18b96fd5d with zero plan delta.",
+  "NFRA_IAMROLES202609-Z-S34: BLOCKING, INERT, disarm_owner 2.0.0_SA_COO~ZI -- the gate's OLDER carrier limb refuses the two 'bd' names and the audited placement override does NOT reach it, measured on two runs printing no NAMING-PLACE line at all while the same override text converted four rows for w-3 in the same session. CLEARED by the R20 route: Andrew's 'YES, the exception, \"for now\"' (@5e10dd2dc5 item 4) and 1.0.0_SA_CTO~Z's entries NFRA-IAMROLES-R20-01/02 @bd2cacee69, register X17, cutoff 2026-12-31. I surfaced the 'for now' qualifier to the issuer because its relay had compressed it to 'yes' and an R20 entry carries a cutoff; the cutoff landed carrying it.",
+  "NFRA_IAMROLES202609-Z-S35: OBSERVATION, INERT -- my own error, filed against myself: a gate 'probe' that used the real safe-commit invocation committed two w-3 declarations prematurely, reverted and local-only. The ambiguity is in my own row Z-S27's prescription. This cell is where the corrected form was applied: the step-5 commit WAS the probe, run in its proper place in the ruled order, so its refusal cost nothing and needed no separate dry run."
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-10/ir_lane_iamroles_r6_w1_phase_b_and_w2_phase_a.md. This seat is a SESSION seat, not an L7 worker subagent. GO msg 33097, RESUME msg 33162, both halves verified as files at HEAD by this seat. This was the hardest of round 6's four adoptions and none of the difficulty was in the apply, which is two imports and eight tags. It was blocked three separate times by three different mechanisms, each owned elsewhere and each resolved by its owner once named: the module could not plan at all for nine days because another project's config edit broke a comprehension it shares (Z-S29, ruled by ~MI, carried as step 1a); the step-5 commit was refused by a naming limb no override reaches (Z-S34, cleared by Andrew's R20 word and the CTO's register entry); and in between, my own first hold on the ledger silently failed to persist. What made the sequence survivable was A4-r6's ordering: every one of those refusals arrived BEFORE the import, so at no point was there a live IAM role in shared state without its declaration -- which is exactly the hazard w-1 created and this cell therefore never repeated. The things I did right were to measure rather than accept relays (the hold's correctness on a printed zero, bd2cacee69's ancestry with a positive control, the R20 entries' own fields), to propose no remedy for a finding whose candidates differ in meaning, and to surface Andrew's dropped qualifier rather than let a compressed 'yes' decide a cutoff. The things against me are in AC4's status_reason.",
+ "compiler_tools": [
+  {
+   "tool": "terraform (as the grading instrument and, here, as the only apply oracle)",
+   "invocation": "init; plan -target=<two addresses> -out=<file>; show -json <file> decomposed per resource_change and per attribute with an equality check on the four signed keys; apply <that saved file> through safe-apply; targeted re-plan; untargeted plan; state list; then the untargeted plan again in the SHARED tree after the drain",
+   "result": "PASS",
+   "note": "state list earned its place in this cell rather than being a formality: the apply's own completion line was never captured, so 'both addresses are in state' plus the live IAM reads is what established the apply had happened. An rc is not an oracle."
+  },
+  {
+   "tool": "safe-apply.sh (Rule 18)",
+   "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/bd-pipeline apply -no-color -input=false <saved plan>",
+   "result": "PARTIAL",
+   "note": "It behaved correctly; the PARTIAL is about my reading of it. comp-tagauthz PASSED over 0 candidate resources, recorded with its denominator. tombstone-gate CLEAN. The naming-apply-gate emitted WARNs on names in OTHER files (alarms.tf, bd-49f-etf-ownership-daily.tf) -- all pre-existing, none a REFUSE -- and those lines pushed 'Apply complete!' out of my grep window, which is a lesson about carrying an output filter from one cell to the next without widening it for a noisier module."
+  },
+  {
+   "tool": "aws iam (live reads as the oracle)",
+   "invocation": "get-role, list-role-policies, list-attached-role-policies, list-role-tags on both roles, before and after the apply",
+   "result": "PASS",
+   "note": "Four tags on each, one inline each with 0 detachments, 0 attached managed, and row 2's ecs-tasks trust plus absent description unchanged. simulate-principal-policy deliberately NOT run: no permission moved, so there is no grant to simulate, and its false-deny and false-allow modes would add noise rather than evidence."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open with 3 --leg specs; hold --pre-apply (TWICE -- see the note); hold --release; close-leg x3; close; plus list as the precondition read",
+   "result": "PARTIAL",
+   "note": "The PARTIAL is mine, not the tool's. The FIRST hold --pre-apply was run in a worktree and its uncommitted write was discarded by my own git checkout during an unrelated revert, so the drained shared record still read OPEN with three legs stranded; I caught it by reading the entry at HEAD rather than trusting the tool's OK line, and re-ran it. That is the September lesson about this exact tool in a linked worktree, hit again by a different discard path. Also worth recording: AC3's closed= limb is satisfied at OPEN time, because open writes the completion file immediately."
+  },
+  {
+   "tool": "safe-commit.sh with naming-gate.py -- the pair of step-5 attempts is this cell's sharpest instrument",
+   "invocation": "the identical renamed bytes committed twice: once with a valid '# naming-place-override:' (REFUSED, NAMING-GATE: REFUSE 4 graded, no NAMING-PLACE line) and once with NO override after the R20 entries landed (DECLARED-EXCEPTION at all 4 sites, WARN 4 graded)",
+   "result": "PASS",
+   "note": "Two runs on identical bytes with one variable changed is what makes the Z-S34 finding and the R20 remedy both evidence rather than inference. Reading comp-read's view of judge() told me WHICH limb fired; only the second commit proved what cleared it."
+  },
+  {
+   "tool": "comp-find (as the instrument that kept the hold honest)",
+   "invocation": "comp-find 'bd-merge-daily-lambda-role|bd-pipeline-task-role' infra/logic -> 0 hits across 29 files, before the entries landed; and the same pattern over infra/aws/terraform for the label and declaration censuses",
+   "result": "PASS",
+   "note": "The printed-zero-with-denominator is what let me report 'the hold correctly stands' as a measurement rather than a deferral, and then decline to run a gate probe on the ground that the next check would not change what I do."
+  },
+  {
+   "tool": "2.0.0_SA_COO~MI's f1r.AC1.sh / f1r.AC2.sh",
+   "invocation": "both run BEFORE the step 1a edit (FAIL/FAIL) and AFTER (PASS/PASS), then both re-run in the SHARED tree after the drain (PASS/PASS)",
+   "result": "PASS",
+   "note": "Another seat's instruments, and the best-built checks I was handed this session: AC1 reads init rc, plan -detailed-exitcode rc AND the counts of Unsupported-attribute and ^Error lines, so it cannot pass on a plan that merely exits oddly; AC2 goes through terraform console to enumerate the EVALUATED locals, and its pre-fix output independently confirmed Z-S29's count from a plane I had not used."
+  },
+  {
+   "tool": "comp-iam / comp-blast / comp-pipescript",
+   "invocation": "NOT RUN",
+   "result": "SKIP",
+   "note": "Triggers absent. comp-iam gaps is bound to an iam.tf change and service to a new boto3 call; this cell changed no iam.tf and wrote no code, and comp-iam models (action) never (action, resource) so it could not answer the question anyway. comp-blast's trigger is an infra change of unknown blast radius, and here the radius is the signed half's table plus a targeted plan naming every resource it could touch. comp-pipescript gates gold-run triggers: no pipeline script, no gold run, no data in scope."
+  }
+ ]
+}
