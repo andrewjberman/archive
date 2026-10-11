@@ -1,0 +1,169 @@
+{
+  "to_id": "IRPT_DASHBD.TO-DB-b-136",
+  "worker": "0.9.0_WK_IRPT_DASHBD~109",
+  "firm": "49 Financial",
+  "client_data_rule": "counts, dates and booleans only; no bucket name, key, account id or figure is written here",
+  "prefixes": [
+    {
+      "role": "returns gold, table account_return_daily: one manifest.json per date= partition (written by emit_day via build_manifest; the scheduled Lambda writes it)",
+      "table": "account_return_daily",
+      "carries_thresholds_object": true,
+      "carries_basis": "build_manifest sets \"thresholds\" from its thresholds argument. In the live function (code sha256 of 2026-10-09 17:32Z, read by ~105) the argument is the whole 24-key file; in HEAD (TO-DB-b-132, ddbd882a4f, 2026-10-11, built and not released) it is served_thresholds(): the five values plus threshold_claims.",
+      "listed": true,
+      "manifests": 567,
+      "first_date": "2024-07-08",
+      "last_date": "2026-10-08",
+      "keys_listed": 1134,
+      "partition_values_parsed": 567,
+      "distinct_partitions": 567,
+      "object_last_modified_first": "2026-10-03",
+      "object_last_modified_last": "2026-10-09",
+      "object_last_modified_note": "562 of the 567 manifest objects carry a last-modified date of 2026-10-03 (a rewrite of the history); the other 5 are 2026-10-05, 2026-10-06, 2026-10-07 and two on 2026-10-09 (the latest at 12:59Z, before the live function's 17:32Z code date).",
+      "reason": "listed to the end by auto-paginated list-objects-v2: 1134 keys, each partition holding a data file and a manifest; 567 keys named manifest.json"
+    },
+    {
+      "role": "method row, table dim_return_method: one manifest.json per method_version= partition (written by emit_method_row)",
+      "table": "dim_return_method",
+      "carries_thresholds_object": true,
+      "carries_basis": "emit_method_row writes {**row, \"thresholds\": served_thresholds(thresholds)}; in the code before TO-DB-b-132 the member was the whole thresholds object (git: {**row, \"thresholds\": thresholds} from 63b7945fc4 on 2026-09-30 to ddbd882a4f^). The scheduled Lambda does NOT call emit_method_row (handler.py docstring and run() path), so these manifests come from producer command-line runs.",
+      "listed": true,
+      "manifests": 2,
+      "first_date": "2026-10-01",
+      "last_date": "2026-10-03",
+      "keys_listed": 4,
+      "partition_values_parsed": 2,
+      "distinct_partitions": 2,
+      "date_basis": "first_date and last_date are the last-modified dates of the 2 manifest objects, because the partition values are method versions (1 and 2), not dates",
+      "reason": "listed to the end by auto-paginated list-objects-v2: 4 keys; 2 named manifest.json. Not written by the live Lambda; listed because the order names the method row"
+    },
+    {
+      "role": "class table, account_class_daily",
+      "table": "account_class_daily",
+      "carries_thresholds_object": false,
+      "carries_basis": "account_class_daily.py emit_class_day builds its manifest from table, asof, firm_scope, counts, class_source, unclassified share, calendar_source and address; no thresholds member",
+      "listed": false,
+      "reason": "not listed: the code shows this table's manifest.json holds no thresholds object, so the order's rule (list the prefixes that carry it) does not reach it"
+    },
+    {
+      "role": "activity table, account_activity_daily",
+      "table": "account_activity_daily",
+      "carries_thresholds_object": false,
+      "carries_basis": "account_activity_lots.py emit_day builds its manifest from table, asof, firm_scope, counts, primary_key, coverage census, calendar_source and address; no thresholds member",
+      "listed": false,
+      "reason": "not listed: the code shows this table's manifest.json holds no thresholds object, so the order's rule (list the prefixes that carry it) does not reach it"
+    },
+    {
+      "role": "lot table, account_lot_realized",
+      "table": "account_lot_realized",
+      "carries_thresholds_object": false,
+      "carries_basis": "same emit_day as the activity table; no thresholds member",
+      "listed": false,
+      "reason": "not listed: the code shows this table's manifest.json holds no thresholds object, so the order's rule (list the prefixes that carry it) does not reach it"
+    },
+    {
+      "role": "lot table, account_lot_unrealized_daily",
+      "table": "account_lot_unrealized_daily",
+      "carries_thresholds_object": false,
+      "carries_basis": "same emit_day as the activity table; no thresholds member",
+      "listed": false,
+      "reason": "not listed: the code shows this table's manifest.json holds no thresholds object, so the order's rule (list the prefixes that carry it) does not reach it"
+    }
+  ],
+  "total_manifests": 569,
+  "bodies_read": 0,
+  "s3_writes": 0,
+  "listing": {
+    "call": "s3api list-objects-v2 through .tools/aws, CLI auto-pagination (no --no-paginate, no --query length), 2 calls, rc 0 each; counted client-side",
+    "denominator": "1134 keys under the returns prefix, 4 keys under the method-row prefix; 1138 keys in all; the listing files are outside the repo",
+    "prefix_source": "each address from the producer's own opal_naming.address builder via account_return_daily (TABLE_RETURNS, TABLE_METHOD) and the firm from firm_scope; nothing typed"
+  },
+  "count_means": "A count of keys says how many objects COULD carry the object. Whether each one does was read for ONE day only (TO-DB-b-131 read the 2026-10-08 manifest: 24 keys, the same names as the packaged file). No body was read here.",
+  "thresholds_file_history": {
+    "keys_15_at": "603af56136 (2026-09-30): the thresholds file in its project folder had 15 top-level keys and no per_account_day_quality",
+    "keys_24_at": "6be02af162 (2026-10-01 03:47 -04:00): 24 keys including per_account_day_quality (the amendment 5 re-measure)",
+    "build_manifest_whole_object_since": "63b7945fc4 (2026-09-30): the producer's manifest first carried the thresholds argument whole",
+    "head_form": "ddbd882a4f (2026-10-11, TO-DB-b-132): served_thresholds, five values plus threshold_claims; the packaged file in HEAD has 6 keys",
+    "against_the_listing": "the earliest manifest object of the returns prefix is dated 2026-10-03 and the method-row ones 2026-10-01 and 2026-10-03, so every returns manifest was written after the 24-key file was committed; which version of the packaged file each object was written from is NOT_ESTABLISHED (the live package was read only as of 2026-10-09 17:32Z, and no earlier package was read). The method-row manifest of 2026-10-01 may predate the 03:47 -04:00 commit, which would put it under the 15-key file: NOT_ESTABLISHED.",
+    "path_note": "the project-folder copy was removed from HEAD on 2026-10-09 (df127f168c); history was read with git show per commit"
+  },
+  "readers": [
+    {
+      "file": "data/assets/scripts/gold/irpt_custody/client_report_figures.py",
+      "line": 676,
+      "found_at": 676,
+      "passes_onward": false,
+      "to_what": "nothing: read_first_data reads the day's manifest with store.read_json, takes the first_data_date member and returns only that account-to-date dict (or {}); the manifest local, and so any thresholds member, dies in the function. The caller uses the dates to place a start anchor in the figures build."
+    },
+    {
+      "file": "data/assets/scripts/gold/irpt_custody/client_report_figures.py",
+      "line": 1304,
+      "found_at": 1304,
+      "passes_onward": false,
+      "to_what": "nothing: a self-test fixture helper that loads a fixture manifest it wrote itself (which holds only first_data_date, written at :1266), sets one entry and writes it back to the same temp file; the real object is never read and the fixture holds no thresholds."
+    },
+    {
+      "file": "data/assets/scripts/gold/irpt_custody/tests/test_si_anchor.py",
+      "line": 67,
+      "found_at": 67,
+      "passes_onward": false,
+      "to_what": "nothing: a test helper that loads the fixture manifest, updates first_data_date and writes it back to the same temp file; the fixture holds no thresholds."
+    },
+    {
+      "file": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+      "line": 425,
+      "found_at": 604,
+      "passes_onward": false,
+      "to_what": "nothing: the line moved (the file gained lines above); at its new place the loop reads each local day manifest and counts members of METHOD_FIELDS that are absent, then drops the dict. The manifests were built with thresholds=None, so their thresholds member is null."
+    },
+    {
+      "file": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+      "line": 427,
+      "found_at": 606,
+      "passes_onward": true,
+      "to_what": "YES, the whole manifest dict, with a null thresholds member: the line moved to 606; sample is the last day's whole manifest, put into the build manifest as sample_day_manifest (:649), which goes to split_manifest (it removes first_data_date and keeps the rest) and is written by write_manifests to the tracked build manifest file in out_dir and to SCRATCH/MANIFEST (:659); six members of the sample are also printed. It is built by build_manifest(thresholds=None) at :573, so the object that leaves holds \"thresholds\": null and not the 24-key object; the dict does leave the function into written files."
+    },
+    {
+      "file": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+      "line": 437,
+      "found_at": 616,
+      "passes_onward": false,
+      "to_what": "nothing: the line moved to 616; it reads each local day manifest, takes method_version only, adds to a counter that is printed, and drops the dict."
+    },
+    {
+      "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/p2_window/p2_backfill_driver.py",
+      "line": 61,
+      "found_at": 61,
+      "passes_onward": false,
+      "to_what": "nothing onward: manifest(day) returns the whole served dict, but its only callers in the same script (:87, :99) read method_version and rows and print those two values in a failure line; the dict is not returned out of the script, written or logged whole. It reads the SERVED object by get_object."
+    },
+    {
+      "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~88/manifest_probe.py",
+      "line": 45,
+      "found_at": 45,
+      "passes_onward": false,
+      "to_what": "nothing: loads the manifest body captured from emit_day's put_object (a stub client, no S3) and writes a record of key presence, three named fields, the method sentence and len(m); the thresholds member is not copied."
+    },
+    {
+      "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~92/manifest_probe.py",
+      "line": 45,
+      "found_at": 45,
+      "passes_onward": false,
+      "to_what": "nothing: the same code as ~88 (no differing line); it writes key presence, three named fields, the method sentence and len(m)."
+    },
+    {
+      "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~92/manifest_compare.py",
+      "line": 70,
+      "found_at": 70,
+      "passes_onward": false,
+      "to_what": "not the object: it loads captured manifest bodies and writes a field-by-field verdict record, each field value through show(), which writes a value verbatim only if it is a scalar or a small container with no float and no 6-digit run, else as sha256 plus length; the thresholds object holds floats, so it is written as a digest and a key count only. Other manifest fields (small ones) do travel into that record and a printed line, so the whole manifest is not suppressed, but the thresholds object is not passed."
+    }
+  ],
+  "any_passes_onward": true,
+  "readers_not_in_census": [
+    {
+      "file": "data/assets/scripts/gold/irpt_custody/tests/test_si_anchor_bounded.py",
+      "line": 97,
+      "note": "an eleventh reader of the same fixture manifest, same shape as test_si_anchor.py:67 (loads, updates first_data_date, writes back); not in ~94's census of ten; passes nothing onward. See row IRPT_DASHBD-D2-W109-S1."
+    }
+  ]
+}
