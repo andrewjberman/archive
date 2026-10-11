@@ -1812,3 +1812,54 @@ seat's row is `NFRA_TRNSPT-S<k>`; the CVO's adjudication rows live in `../adjudi
   "notes": "For the CVO's remediation row D2-S19: disarm state DISARMED at 2026-10-11T05:06Z by this act. Sizes, hashes, statuses and counts only."
 }
 ```
+
+```json
+{
+  "id": "NFRA_TRNSPT-D2-S22",
+  "project": "NFRA_TRNSPT",
+  "fabric": "dell2",
+  "surfaced_by": "2.0.0_SA_COO~T2",
+  "surfaced_at": "2026-10-11T05:35:00Z",
+  "hazard_standing": "ARMED",
+  "disarm_owner": "1.0.0_SA_CTO~DELL2",
+  "one_line": "An untargeted apply of infra/aws/terraform/transcripts from a tree lacking fd74f984ac, 5ae3b3ddd9 and 7bca11ddee reverts the Teams pull's code and its memory setting: one dist zip path feeds three functions, and a pre-fix zip was built and applied from on this box at 05:26Z.",
+  "class": "BLOCKING",
+  "grounding": {
+    "status": "GROUNDED",
+    "evidence": [
+      "issuer live read 2026-10-11T05:29Z: teams pull AI4UQD0ME+ABza1X0BrBjGjpqjN7f2fc0Cdxb88aA/I= (05:03:47Z, 1024 MB); mail pull VGIq85Xx... unmoved; commentary function plVgBIIXTNPVV/JtDADhavy/BgWQp+kRw6gcwpwHjyA= (05:26:35Z) -- a different zip from the pull's",
+      "1.0.0_SA_CTO~DELL2 msg 4174 (2.0.0_SA_COO~Y2 msg 4173: the commentary function was applied from pin 4901eece20, which lacks fd74f984ac) and its ruling msg 4182",
+      "infra/aws/terraform/transcripts/pull.tf:19 local.pull_zip is a file path read by pull.tf, mail_pull.tf and commentary.tf"
+    ]
+  },
+  "disposition": "UNDER_INVESTIGATION",
+  "spec_asserts": "The transcripts root's three functions are built from one zip, and a tree applying the root carries the pull's two fixes and its memory line.",
+  "world_is": "The stack runs three different zips today (pull AI4UQD0M, mail pull VGIq85Xx, commentary plVgBIIX), and at least one tree on dell2 built a zip without the pull fix. The pull itself is unreverted (measured after the 05:26Z apply). Nothing refuses an untargeted apply from a stale tree; the plan would show the pull's source_code_hash and memory_size changing back.",
+  "notes": "Filed on the CTO's ruling (msg 4182). DISARMS on two measured reads, both printed in the disarming row: (1) the commentary function's live CodeSha256 equals the pull's after 2.0.0_SA_COO~Y2's re-apply; (2) git merge-base --is-ancestor of each of the three commits against origin CLOUD reads yes. Until then the CTO's signing condition on this root: the apply is targeted and the tree's dist zip hashes to the pull's live digest before the plan. No new gate. Hashes, times and sizes only."
+}
+```
+
+```json
+{
+  "id": "NFRA_TRNSPT-D2-S23",
+  "project": "NFRA_TRNSPT",
+  "fabric": "dell2",
+  "surfaced_by": "2.0.0_SA_COO~T2",
+  "surfaced_at": "2026-10-11T05:40:00Z",
+  "hazard_standing": "INERT",
+  "one_line": "RESTATEMENT of row NFRA_TRNSPT-D2-S22's disarm read (1), on the CTO's word (msg 4193): ALL THREE functions of the transcripts root must read one live CodeSha256, not two.",
+  "class": "OBSERVATION",
+  "grounding": {
+    "status": "GROUNDED",
+    "evidence": [
+      "1.0.0_SA_CTO~DELL2 msg 4193, 2026-10-11T05:35Z (citing 2.0.0_SA_COO~Y2's packet @abbb4ac3ac)",
+      "issuer live read 2026-10-11T05:29Z: teams pull AI4UQD0M..., mail pull VGIq85Xx... (LastModified 2026-10-07T23:59:05Z), commentary plVgBIIX... -- three digests",
+      "the row gate refuses an edit of an existing row (0 new rows of 81), so the restatement is this new row"
+    ]
+  },
+  "disposition": "UNDER_INVESTIGATION",
+  "spec_asserts": "Row D2-S22 notes, disarm read (1): the commentary function's live CodeSha256 equals the pull's.",
+  "world_is": "The root has THREE functions on local.pull_zip. The mail pull (outlook-global-transcripts-pull-lambda) has run a third digest since 2026-10-07. Disarm read (1) of D2-S22 is therefore: teams pull, mail pull and commentary all read the same live CodeSha256. Read (2) (the three commits are ancestors of origin CLOUD) is unchanged.",
+  "notes": "The mail pull's re-apply onto the pull's bytes is this issuer's cell at its next issuance (code-only, targeted, its own pair, packet shape as 2.0.0_SA_COO~Y2's: member diff, the mail handler's import closure against the changed set, key producers equal). Not before the Monday 2026-10-12 13:00Z fire: the issuer reads no risk to the mail pull from waiting, since nothing has moved its bytes since 2026-10-07. Hashes and dates only."
+}
+```

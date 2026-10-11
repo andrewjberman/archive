@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t26",
+  "firm": "MDPF",
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "ba3ee9bd48",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t26.schedule-and-refreeze.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/ledger/ROUND_ANALYSIS.round7.md",
+    "group": "OTHER",
+    "vintage_commit": "f5553ca3d5"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~21",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/drawer_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "277294a59c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "no deploy in this order; reads the trading calendar only (TO BOUNDS: no AWS write, no Bloomberg call, no deploy)",
+      "artifact_covered_by": ["DQ8-t26-AC1", "DQ8-t26-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/refreeze.py",
+      "kind": "script",
+      "commit_or_etag": "277294a59c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "no deploy in this order; AC2 re-freezes a scratch copy only, the real requests folder is the issuer's act after the merge",
+      "artifact_covered_by": ["DQ8-t26-AC1", "DQ8-t26-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_quote.py",
+      "kind": "script",
+      "commit_or_etag": "277294a59c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "no deploy in this order; quote() reads files and the trading calendar only",
+      "artifact_covered_by": ["DQ8-t26-AC1", "DQ8-t26-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/quote_vs_actual.py",
+      "kind": "script",
+      "commit_or_etag": "277294a59c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "no deploy in this order; reads files only",
+      "artifact_covered_by": ["DQ8-t26-AC1", "DQ8-t26-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_refreeze.py",
+      "kind": "test",
+      "commit_or_etag": "277294a59c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pytest-only test file; no deploy in this order"
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "5ec90f2d4d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "surprise row MDPF_DEMQUE-D1-W21-S3 appended; no deploy in this order"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ8-t26-AC1",
+      "criterion_verbatim": "DQ8-t26-AC1 -- the three named tests (test_quote_counts_only_scheduled_non_trading_days, test_refreeze_writes_beside_and_keeps_the_superseded_quote, test_quote_vs_actual_grades_the_refrozen_quote_and_prints_both); expect RF-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R8_CHECKS/dq_t26_tests.py",
+      "output_evidence": "3 passed in 0.95s (test_demque_refreeze.py: test_quote_counts_only_scheduled_non_trading_days PASSED, test_refreeze_writes_beside_and_keeps_the_superseded_quote PASSED, test_quote_vs_actual_grades_the_refrozen_quote_and_prints_both PASSED); RF-OK; rc=0",
+      "denominator": "3 of 3 named tests PASSED (rc=0)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DQ8-t26-AC2",
+      "criterion_verbatim": "DQ8-t26-AC2 -- the REAL TR request re-frozen in a scratch copy of the requests folder (the real folder is untouched): new finish 2026-10-17, the 2026-10-13 quote kept with \"rule changed, round 6 R1\", quote_vs_actual on 2026-10-11 reads OPEN against 2026-10-17 with 5,858 drawn and prints the superseded finish; expect REFRZ-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R8_CHECKS/dq_t26_real.py",
+      "output_evidence": "new: finish=2026-10-17 supersedes=DEMQUE-TR-COMPARISON-DIVIDEND-PAYERS.quote.superseded-2026-10-11.json | old: finish=2026-10-13 reason=rule changed, round 6 R1 | qva: {\"cells_drawn\": 5858, \"cells_quoted\": 15720, \"drawn_date\": null, \"finish_date\": \"2026-10-17\", \"superseded\": [{\"file\": \"DEMQUE-TR-COMPARISON-DIVIDEND-PAYERS.quote.superseded-2026-10-11.json\", \"finish_date\": \"2026-10-13\", \"reason\": \"rule changed, round 6 R1\", \"superseded_on\": \"2026-10-11\"}], \"verdict\": \"OPEN\"} | REFRZ-OK re-frozen finish 2026-10-17, superseded 2026-10-13 kept with its reason, graded OPEN on the new quote with both printed; rc=0",
+      "denominator": "1 real request re-frozen in a scratch copy; 4 of 4 checks PASS (new finish, old kept, graded on new, both printed)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "MUTANT: _is_fire patched to ignore the fire_days set (the standing schedule always governs) in a scratch runner; the named tests called directly against it",
+      "expected": "test_quote_counts_only_scheduled_non_trading_days FAILS (the set is ignored)",
+      "observed": "FAIL test_quote_counts_only_scheduled_non_trading_days; PASS test_refreeze_writes_beside_and_keeps_the_superseded_quote (does not depend on the set); the third named test was not run in this mutant pass; MUTANT fails 1 of 3 named tests",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "dq_t26_real.py run twice, stdout md5 compared",
+      "observed": "659e0df4f56f680ff8df3db0837eca7e on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The real requests folder is not re-frozen (DEMQUE-TR-COMPARISON-DIVIDEND-PAYERS.quote.json untouched)",
+      "reason": "the re-freeze of the real file is the issuer's act after the merge (TO: this order builds the tools); AC2 re-freezes a scratch copy"
+    },
+    {
+      "item": "The standing drawer (DQ-t-27) and its schedule are not built here",
+      "reason": "other cell of round 8 (DQ-t-27); this order only supplies drawer_schedule.is_fire_day for the quote"
+    },
+    {
+      "item": "test_demque_land.py not run",
+      "reason": "excluded by the order's pytest invocation: fails to collect for row MDPF_DEMQUE-D1-S7 (a later cell)"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W21-S3: TO-DQ-t26 does not place two details of refreeze.py: the re-frozen quote also carries allowance_gap, and the collision counter follows the date (<id>.quote.superseded-<date>-2.json)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~21/MDPF_DEMQUE.TO-DQ-t26.session.log",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile data/mdpf/scripts/demque/bbg_quote.py data/mdpf/scripts/demque/refreeze.py data/mdpf/scripts/demque/drawer_schedule.py data/mdpf/scripts/demque/quote_vs_actual.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/mdpf/scripts/demque --ignore data/mdpf/scripts/demque/test_demque_land.py -q",
+      "result": "1 failed, 96 passed; the failure is outside the order's paths and is the known row MDPF_DEMQUE-D1-W21-S1 (test_demque_bbg_ledger_upload.py)"
+    }
+  ]
+}

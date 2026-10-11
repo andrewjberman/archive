@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-120",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "5b92cff3ff",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-120.row3-in-contract-tieout-claim.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~95",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~95/ROW3_AND_TIEOUT_CLAIM.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~95/ROW3_AND_TIEOUT_CLAIM.json",
+      "kind": "config_data",
+      "commit_or_etag": "ac6a174677",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rule-24 record (first committed at 66bd1fa8bc before any producer or contract edit; re-cited at final lines at ac6a174677)",
+      "artifact_covered_by": [
+        "DB64-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "ac6a174677",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "producer source only; no deploy, no S3 write, no AWS call",
+      "artifact_covered_by": [
+        "DB64-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_tieout_claim.py",
+      "kind": "test",
+      "commit_or_etag": "ac6a174677",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "16 tests, offline, synthetic thresholds",
+      "artifact_covered_by": [
+        "DB64-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_threshold_claims.py",
+      "kind": "test",
+      "commit_or_etag": "ac6a174677",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two pins updated (column set, null-type list); 32 tests pass",
+      "artifact_covered_by": [
+        "DB64-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "ac6a174677",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "contract at 0.5.0 (29 columns, schema_hash recomputed, row 3 listed); no served object moved",
+      "artifact_covered_by": [
+        "DB64-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB64-1-AC1",
+      "criterion_verbatim": "DB64-1-AC1 -- the contract at 0.5.0 lists row 3 and names exactly the row's columns, and the tie-out carries its claim and is typed. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r64/p64_round64.py\" . DB64-1-AC1",
+      "output_evidence": "OK: contract 0.5.0 lists row 3; its 29 columns equal the row's keys; the tie-out carries its claim and is typed\nDB64-1-AC1 PASS",
+      "denominator": "29 of 29 contract columns equal the 29 keys of the row; method_versions row 3 valuation_source equals METHOD_ROWS[3]; 2 of 2 tie-out cases (no tieout -> absent; tieout=0.037 -> held); exit code 0",
+      "status": "PASS",
+      "expect": "DB64-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB64-1-AC2",
+      "criterion_verbatim": "DB64-1-AC2 -- the rule-24 record answers the four postulates with file-and-line evidence and the new test file passes. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r64/p64_round64.py\" . DB64-1-AC2",
+      "output_evidence": "OK: rule-24 record present; data/assets/scripts/gold/irpt_reporting/tests/test_tieout_claim.py passes\nDB64-1-AC2 PASS",
+      "denominator": "4 of 4 postulates with evidence resolving at HEAD; new test file 16 passed 0 failed (gold folder 160 passed, lambda folder 90 passed); exit code 0",
+      "status": "PASS",
+      "expect": "DB64-1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record, contract and producer at HEAD",
+      "observed": "printed the same last line on a second read",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB64-1-AC2 FAIL",
+      "observed": "FAIL: no record; DB64-1-AC2 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "vendor call, secret read, S3 read or write, AWS call, deploy, bun, download",
+      "reason": "Bounds of the order; none made."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "none",
+      "invocation": "named files read directly",
+      "result": "no census run; the record states its denominator (6 values) as a subtraction"
+    }
+  ]
+}
