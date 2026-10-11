@@ -6,6 +6,7 @@ Every subprocess is bounded (100 s) so an invocation ends inside a worker's 120 
 
   y31-page      AR-y-31: the named tests of portal `package-report-reader.test.tsx` exist and pass            -> Y31-PAGE-OK
   y31-keep      AR-y-31: the package tests that must not move still pass (package-r2, commentary-package)     -> Y31-KEEP-OK
+  portal-tsc    AR-y-31 (AMENDMENT 1): the portal typecheck `tsc -b --noEmit` exits 0                         -> PORTAL-TSC-OK
   y35-page      AR-y-35: the named tests of portal `analysis-firm-choice.test.tsx` exist and pass             -> Y35-PAGE-OK
   y32-ref       AR-y-32: `ops/tests/test_retained_ref_served.py`, named tests exist and pass                  -> Y32-REF-OK
   y32-history   AR-y-32: `ops/tests/test_history_row_client.py`, named tests exist and pass                   -> Y32-HISTORY-OK
@@ -321,6 +322,16 @@ def main(argv):
             print("ERROR: unknown argument " + flag)
             return 2
     root = root.resolve()
+    if check == "portal-tsc":
+        if portal is None:
+            print("ERROR: --portal <portal worktree> is required")
+            return 2
+        rc, out = run(["bun", "x", "tsc", "-b", "--noEmit"], portal.resolve())
+        errors = [line for line in out.splitlines() if "error TS" in line]
+        print("tsc rc=%d, error lines %d" % (rc, len(errors)))
+        for line in errors[:12]:
+            print("  " + line[:220])
+        return finish(check, [] if rc == 0 and not errors else ["the portal typecheck is red (rc=%d, %d error lines)" % (rc, len(errors))])
     if check in ("y31-page", "y31-keep", "y35-page"):
         if portal is None:
             print("ERROR: --portal <portal worktree> is required")
