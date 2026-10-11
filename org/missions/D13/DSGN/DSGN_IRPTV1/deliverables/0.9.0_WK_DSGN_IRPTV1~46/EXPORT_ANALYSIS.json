@@ -1,0 +1,46 @@
+{
+  "to_id": "DSGN_IRPTV1.TO-IV-e-85",
+  "worker": "0.9.0_WK_DSGN_IRPTV1~46",
+  "cell": "IV-e-85",
+  "outcome_ref": "FWD-9",
+  "finding": "NEEDS_SERVED_ROUTE",
+  "row": "DSGN_IRPTV1-D2-W46-S2",
+  "other_rows": ["DSGN_IRPTV1-D2-W46-S3"],
+  "product_files_changed": [],
+  "portal_commit": null,
+  "why_no_signal": {
+    "text": "The header Export is one ExportButton built in index.tsx from a target the ACTIVE tab publishes upward. Performance publishes through ReportingTab's onExportTarget effect (told to index.tsx via TabShell's onReportingExportTarget into performanceExportTarget state); the target is built from the report's own retained_ref (report_id, revision), and is null when the report is not answer-bearing. Holdings has no export kind. AnalysisTab supplies none: it has no onExportTarget-shaped prop, TabShell mounts it without one, index.tsx has no state for one and hard-codes the Analysis gate closed (analysisExportGateOk = false), and its own comment says only that the header's Export 'targets this tab'. The reason a prop alone cannot be added: an Analysis export needs the retained Analysis report's id, revision and sha256, because the server resolves exactly one retained report by authorized_report_revisions[0].report_id and .revision and pins it as analysis_report_ref. No Analysis response served to the browser carries that identity: the Analysis wire and the owned-history slice carry request_id and attempt_id only, while the Performance wire carries retained_ref. Without an override index.tsx would name the client scope revision as the report ref, which is not a retained report id. Deriving one on the page, or sending the request id as report_id, would invent a payload.",
+    "evidence": [
+      {"file": "portal/src/pages/InvestorReporting/index.tsx", "line": 64},
+      {"file": "portal/src/pages/InvestorReporting/index.tsx", "line": 216},
+      {"file": "portal/src/pages/InvestorReporting/index.tsx", "line": 293},
+      {"file": "portal/src/pages/InvestorReporting/index.tsx", "line": 299},
+      {"file": "portal/src/pages/InvestorReporting/index.tsx", "line": 311},
+      {"file": "portal/src/pages/InvestorReporting/index.tsx", "line": 319},
+      {"file": "portal/src/pages/InvestorReporting/index.tsx", "line": 416},
+      {"file": "portal/src/pages/InvestorReporting/tabs/TabShell.tsx", "line": 55},
+      {"file": "portal/src/pages/InvestorReporting/tabs/TabShell.tsx", "line": 160},
+      {"file": "portal/src/pages/InvestorReporting/tabs/TabShell.tsx", "line": 164},
+      {"file": "portal/src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx", "line": 268},
+      {"file": "portal/src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx", "line": 793},
+      {"file": "portal/src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx", "line": 70},
+      {"file": "portal/src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx", "line": 430},
+      {"file": "portal/src/pages/InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx", "line": 236},
+      {"file": "portal/src/pages/InvestorReporting/contracts/index.ts", "line": 1408},
+      {"file": "portal/src/pages/InvestorReporting/contracts/wire/PerformanceReport.ts", "line": 64},
+      {"file": "portal/src/pages/InvestorReporting/contracts/wire/AnalysisReport.ts", "line": 14},
+      {"file": "portal/src/pages/InvestorReporting/export/ExportButton.tsx", "line": 239},
+      {"file": "portal/src/pages/InvestorReporting/export/submit.ts", "line": 116},
+      {"file": "portal/src/pages/InvestorReporting/contracts/adapt.ts", "line": 1575},
+      {"file": "portal/src/api/endpoints/investor-reporting.ts", "line": 1274},
+      {"file": "infra/aws/lambda/investor-reporting/export/retained_export.py", "line": 95},
+      {"file": "infra/aws/lambda/investor-reporting/export/submit_service.py", "line": 73}
+    ]
+  },
+  "other_tabs_export_target": {
+    "performance": "ReportingTab publishes via onExportTarget (ReportingTab.tsx:783-793; target built from report.retainedReport at :268-277 or from the dashboard series at :785-786); TabShell passes onReportingExportTarget through at TabShell.tsx:160; index.tsx stores it at :216 and reads it only on the reporting tab at :293 and :299; the Export props come from it at :316-332.",
+    "holdings": "none: EXPORT_KIND_BY_TAB maps holdings to null (index.tsx:66), so the header shows the disabled control."
+  },
+  "what_is_missing": "A served member on the Analysis report response for the request being shown: the retained Analysis report's report_id, revision and sha256 with report_kind ANALYSIS (the shape Performance already serves as retained_ref). The CTO rules which route returns it and which of the tab's report sources Export follows.",
+  "not_established": "Whether the producer already holds an Analysis retained report id that a route could return; no producer handler returns one today. Whether a live Analysis export through the current ExportButton is refused by the server was not exercised (no AWS call, no dev server)."
+}

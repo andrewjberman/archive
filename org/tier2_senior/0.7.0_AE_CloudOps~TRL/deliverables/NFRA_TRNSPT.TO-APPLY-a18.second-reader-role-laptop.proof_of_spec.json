@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_TRNSPT.TO-APPLY-a18.second-reader-role-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TRL/task_orders/NFRA_TRNSPT.TO-APPLY-a18.second-reader-role-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "3428e115da0b41911ef1a7723c012ef08bc2f2cd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/decompositions/NFRA_TRNSPT_DECOMP_R18.md",
+    "vintage_commit": "ffa3c6987daa90e6ebb4137e0a99c09645a8ef00",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TRL/task_orders/NFRA_TRNSPT.TO-APPLY-a18.second-reader-role-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TRL",
+  "artifacts_produced": [
+    {
+      "path_or_key": "arn:aws:iam::313476888478:role/teams-global-transcripts-second-reader-role",
+      "kind": "aws_resource",
+      "commit_or_etag": "trust=user/Opal_Terminal",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply SUCCESS 2026-10-09T09:55Z (3 added, 1 changed, 0 destroyed; ledger APPLY leg closed); role read-back and one-principal key-policy diff by 0.7.0_AE_CloudOps~TRL @ce04c2dee3; issuer live read 2026-10-11T06:27Z: get-role returns the role, AssumeRolePolicyDocument principal exactly arn:aws:iam::313476888478:user/Opal_Terminal",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T0933Z_nfra-trnspt-a18-second-reader-laptop-20261009_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "ce04c2dee39ce8fdab307893848d5ce2f702fab1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ledger APPLY leg CLOSED with the safe-apply receipt; the entry stays HELD-SOVEREIGN-GATED on the ADMITTED read, which this instance declares as an exclusion and does not claim",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "aws iam get-role --role-name teams-global-transcripts-second-reader-role --query \"Role.RoleName\" expect \"teams-global-transcripts-second-reader-role\"",
+      "method": "live_read",
+      "invocation": "aws iam get-role --role-name teams-global-transcripts-second-reader-role --query \"Role.RoleName\"",
+      "expect": "\"teams-global-transcripts-second-reader-role\"",
+      "output_evidence": "\"teams-global-transcripts-second-reader-role\" (issuer 2.0.0_SA_COO~T2, 2026-10-11T06:27Z, through the .tools/aws shim). Same read: AssumeRolePolicyDocument principals = [{AWS: arn:aws:iam::313476888478:user/Opal_Terminal}], one statement. PLAN LINE (applier, 2026-10-09): 3 to add, 1 to change, 0 to destroy. KEY-POLICY DIFF: one principal added to NamedReadersUseTheKey (~TRL @ce04c2dee3, from CloudTrail). REFUSED status: a dell2 identity outside the trust assuming the role -> AccessDenied (issuer, 2026-10-09 14:5xZ). ADMITTED status: NOT RUN -- see declared_exclusions. LEDGER: org/critical_paths/change_management/20261009T0933Z_nfra-trnspt-a18-second-reader-laptop-20261009_deploy_completion.md.",
+      "denominator": "1 role read; 1 trust statement with 1 principal; plan 4 resource changes (3 create, 1 update); 1 refused read; 0 admitted reads",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "existence": {
+      "description": "AC1 is a name read; a role of that name with a different trust would pass it. The trust principal is read beside it.",
+      "expected_landed": "the role exists and its trust is exactly user/Opal_Terminal",
+      "expected_not_landed": "a role of the right name trusted to another or a wider principal",
+      "observed": "get-role 2026-10-11T06:27Z: RoleName matches; AssumeRolePolicyDocument.Statement[].Principal = [{AWS: arn:aws:iam::313476888478:user/Opal_Terminal}] -- one statement, one principal",
+      "status": "PASS"
+    },
+    "refused_arm": {
+      "description": "The negative arm of FWD-8: an identity NOT in the trust must not reach the bucket through this role.",
+      "expected_landed": "AccessDenied for a dell2 identity outside the trust",
+      "expected_not_landed": "a successful AssumeRole or GetObject by an unnamed identity",
+      "observed": "cloudops-dell2-agent-user assuming teams-global-transcripts-second-reader-role -> AccessDenied (2.0.0_SA_COO~T2, 2026-10-09 14:5xZ, recorded in the order's ISSUER RULING)",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/NEVER_WIDEN_NFRA_TRNSPT_COO_HALF_SECOND_READER_20261009.md@056809859f",
+    "cto_half": "org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_FWD8_SECOND_READER_CTO_HALF.md@f2ec32dea4; the move of the ADMITTED read out of this order is 1.0.0_SA_CTO~DELL2's ruling msg 4272 (2026-10-11)"
+  },
+  "risk_class": "WORLD",
+  "rollback": "re-apply the prior key policy from the ledger's before-image (kms-key-policy.before.json in org/tier2_senior/0.7.0_AE_CloudOps/deliverables/nfra_trnspt_a18_20261009/); the role's destroy is Andrew's word.",
+  "scope": "The second-reader role, its policy, the attachment and ONE added principal in the transcripts key policy, as applied 2026-10-09T09:55Z, plus the role read-back and the REFUSED arm. This instance was written by the ISSUER on 2026-10-11 (order AMENDMENT 2) because the applier's lane left the order held on a read no fabric seat can make; it claims nothing the applier or the issuer did not measure.",
+  "declared_exclusions": [
+    {
+      "item": "the ADMITTED arm of step 2: as the new role (assumed from Opal_Terminal), GetObject one transcripts key = ADMITTED",
+      "reason": "NOT RUN and not claimed. The Opal_Terminal key is on none of laptop, site Z or dell2 (site Z stopped at its identity guard on crossbox XB-20261011T055148Z-00a7), and no credential is copied to a box (CTO rulings msgs 4271 and 4272). The criterion moved, text unchanged and UNMET, to org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/2.0.0_SA_COO~T2/PARKED_FWD8_ADMITTED_READ_OPAL_TERMINAL_20261011.md. Owner: Andrew. FWD-8 stays UNGRADED until it is run on the device that holds that key."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/critical_paths/change_management/20261009T0933Z_nfra-trnspt-a18-second-reader-laptop-20261009_deploy_completion.md",
+  "compiler_tools": [
+    {
+      "tool": "aws iam get-role (one named resource, live)",
+      "invocation": "aws iam get-role --role-name teams-global-transcripts-second-reader-role",
+      "result": "PASS: role present, trust exactly user/Opal_Terminal"
+    }
+  ]
+}
