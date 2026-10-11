@@ -23,7 +23,7 @@
         "IV110-AC1"
       ],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Workspace worktree commit (LOCAL) plus portal worktree commit 78ec66db (LOCAL, not pushed); a candidate, nothing deployed."
+      "deploy_evidence": "Workspace worktree commit (LOCAL) plus portal worktree commit 1ba3ae5b (LOCAL, not pushed; AMENDMENT 1 re-cut on top of 78ec66db); a candidate, nothing deployed."
     }
   ],
   "acceptance": [
@@ -32,45 +32,51 @@
       "criterion_verbatim": "when the listed securities sum to less than the card the table says in a sentence how much it does not itemise and names the two reasons, the sentence is absent when the rows sum to the card, a rendered test holds it, and a screenshot was read. Base: FAIL.",
       "method": "command",
       "invocation": "python \"org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/checks/r24/p24_round24.py\" . IV110-AC1",
-      "output_evidence": "OK: the table states what it does not itemise (portal/src/pages/InvestorReporting/tabs/holdings/SecurityList.tsx:297), naming two reasons; shown when short, absent when whole; 1 screenshot(s) read; IV110-AC1 PASS",
-      "denominator": "1 criterion; 1 record (UNLISTED_SLEEVES.json); 2 reasons named; 4 cases (2 shown, 2 absent); 1 screenshot, read; 5 test arms, 1 mutant (fails 2 of 5); whole scope 1201 tests across 383 files, 1174 pass / 27 skip / 0 fail after (base 1169 / 27 / 0); lint 0 errors; typecheck rc 0",
+      "output_evidence": "OK: the table states what it does not itemise (portal/src/pages/InvestorReporting/tabs/holdings/SecurityList.tsx:370), naming two reasons; shown when short, absent when whole; 1 screenshot(s) read; IV110-AC1 PASS (rc 0)",
+      "denominator": "1 criterion; 1 record (UNLISTED_SLEEVES.json); 2 reasons named; 9 cases (line one shown in 7, residual line shown in 3, neither in 1 whole table); 1 screenshot, read; 9 test arms, 2 mutants (fail 9 of 9 and 6 of 9); whole scope 1205 tests across 383 files, 1178 pass / 27 skip / 0 fail on run 2 (run 1: 1 fail F45-AC2, passes alone, row W60-S5; base 1174 / 27 / 0); lint 0 errors; typecheck rc 0",
       "status": "PASS",
       "expect": "IV110-AC1 PASS"
     }
   ],
   "controls": {
     "determinism": {
-      "method": "bun test src/pages/InvestorReporting before the edit and after, at portal ca23f110 and 78ec66db",
-      "observed": "before: 1169 pass / 27 skip / 0 fail; after: 1174 pass / 27 skip / 0 fail; 0 new failing ids",
+      "method": "bun test src/pages/InvestorReporting at portal 3a221dcc before the edit and 1ba3ae5b after (two runs)",
+      "observed": "before: 1174 pass / 27 skip / 0 fail; after run 1: 1177 / 27 / 1 fail (F45-AC2, a dev-server probe; passes alone 6 of 6); after run 2: 1178 / 27 / 0 fail; 0 new failing ids on the run recorded; the criterion's own test file read 9 pass 0 fail in every run (STABLE for it); the one flipped id was outside this order's files (row DSGN_IRPTV1-D2-W60-S5)",
       "status": "STABLE"
     },
     "mutant": {
-      "description": "SecurityList.tsx unlistedSleevesFrom(): the gate on the gap replaced so the sentence shows whatever the gap (committed first, reverted with git checkout --)",
-      "expected": "the absent-when-whole arm fails",
-      "observed": "3 pass 2 fail; arms (b) and (d) failed",
+      "description": "Two temporary mutants on committed code, each reverted with git checkout --: (1) the no-security-beneath exclusion removed from sleevesWithoutSecurity(); (2) the residual gate replaced by `left > Infinity` in unlistedViewFrom()",
+      "expected": "line one's cash-child and whole arms fail; line two's arms fail",
+      "observed": "mutant 1: 0 pass 9 fail; mutant 2: 3 pass 6 fail",
       "status": "FIRED-AS-EXPECTED"
     }
   },
   "declared_exclusions": [
     {
-      "item": "apportioning the unlisted amount between the two reasons",
-      "reason": "no served node says a sleeve is cash only (only a withheld drill is marked), so both reasons are named without apportioning (row DSGN_IRPTV1-D2-W60-S3)"
+      "item": "apportioning line one between the two reasons",
+      "reason": "no served node says a sleeve is cash only (only a withheld drill is marked), so line one names the producer's two reasons and states no cause of its own (row DSGN_IRPTV1-D2-W60-S3)"
+    },
+    {
+      "item": "a printed statement for a negative residual",
+      "reason": "nothing printed; see row DSGN_IRPTV1-D2-W60-S4"
     }
   ],
   "surprises": [
-    "DSGN_IRPTV1-D2-W60-S3"
+    "DSGN_IRPTV1-D2-W60-S3",
+    "DSGN_IRPTV1-D2-W60-S4",
+    "DSGN_IRPTV1-D2-W60-S5"
   ],
   "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~60/UNLISTED_SLEEVES.json",
   "compiler_tools": [
     {
       "tool": "bun test",
-      "invocation": "bun test src/pages/InvestorReporting (cwd portal worktree; before and after)",
-      "result": "before 1169 pass / 27 skip / 0 fail; after 1174 pass / 27 skip / 0 fail"
+      "invocation": "bun test src/pages/InvestorReporting (cwd portal worktree; before and after, two after runs)",
+      "result": "before 1174 / 27 / 0; after run 1 1177 / 27 / 1 (F45-AC2 flake); after run 2 1178 / 27 / 0"
     },
     {
       "tool": "vite build + holdings-face-driver.mjs",
-      "invocation": "bun run build; node holdings-face-driver.mjs client <png> <fixture> <dist>",
-      "result": "built in 25.31s; one PNG written and read; dist removed"
+      "invocation": "bun run build; node holdings-face-driver.mjs client unlisted-sleeves.two-lines.client.png <fixture> dist",
+      "result": "built in 23.26s; one PNG written and read; dist removed"
     }
   ]
 }

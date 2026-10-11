@@ -1,0 +1,76 @@
+"""TO-DB-b-139: compare the five output tables of the kit run WITH THE REPLACEMENT THRESHOLDS FILE to REFRESH 4's candidate run
+(~110/out_new7) and to the live-pinned run (~88/out_live) by sha256, and read the thresholds object of the captured returns
+manifest. Counts, key names, hashes and booleans only.  Usage: python cmp_swap.py > out.json (paths are fixed below)."""
+import hashlib
+import json
+import re
+from pathlib import Path
+
+import pyarrow.parquet as pq
+
+S = Path("C:/dev/_irpt_private_evidence_20261009/IRPT_DASHBD")
+me = S / "0.9.0_WK_IRPT_DASHBD~112"
+r4 = S / "0.9.0_WK_IRPT_DASHBD~110"
+live = S / "0.9.0_WK_IRPT_DASHBD~88/out_live"
+swap = me / "out_swap"
+r4out = r4 / "out_new7"
+TABLES = ("returns", "class", "account_activity_daily", "account_lot_realized", "account_lot_unrealized_daily")
+rec = json.loads((me / "record_swap.json").read_text(encoding="utf-8"))
+
+
+def h(p):
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+out = {"tables": {}}
+for t in TABLES:
+    f = t + ".parquet"
+    hs, h4, hl = h(swap / f), h(r4out / f), h(live / f)
+    out["tables"][t] = {"rows": pq.ParquetFile(str(swap / f)).metadata.num_rows, "sha256_swap": hs, "sha256_refresh4": h4,
+                        "sha256_live_pinned": hl, "equal_to_refresh4": hs == h4, "equal_to_live_pinned": hs == hl,
+                        "record_hash_equals_file": hs == rec["output_hashes"][t]["sha256"]}
+out["tables_total"] = len(TABLES)
+out["tables_equal_to_refresh4"] = sum(1 for v in out["tables"].values() if v["equal_to_refresh4"])
+out["tables_equal_to_live_pinned"] = sum(1 for v in out["tables"].values() if v["equal_to_live_pinned"])
+ts = pq.read_table(str(swap / "returns.parquet"))
+tl = pq.read_table(str(live / "returns.parquet"))
+ms, ml = ts.column("method_version").to_pylist(), tl.column("method_version").to_pylist()
+out["method_version_rows"] = len(ms)
+out["method_version_equal_rows"] = sum(1 for a, b in zip(ms, ml) if a == b) if len(ms) == len(ml) else None
+out["method_version_values_swap"] = sorted(set(ms))
+for k in ("wall_s", "process_peak_mb", "stage_peak_mb", "status_stub_puts", "code_sha256"):
+    out[k] = rec[k]
+
+
+def returns_manifest(cap):
+    for k, b in cap["run_bodies"].items():
+        m = json.loads(b)
+        if m.get("table") == "account_return_daily" or k.rstrip("/").split("/")[-3:-2] == ["account_return_daily"]:
+            return m
+    raise SystemExit("no returns manifest in capture")
+
+
+cs = json.loads((me / "capture_swap.json").read_text(encoding="utf-8"))
+c4 = json.loads((r4 / "capture_new7.json").read_text(encoding="utf-8"))
+cl = json.loads((S / "0.9.0_WK_IRPT_DASHBD~92/capture_live.json").read_text(encoding="utf-8"))
+ma, m4, mlv = returns_manifest(cs), returns_manifest(c4), returns_manifest(cl)
+tha, th4, thl = ma["thresholds"], m4["thresholds"], mlv["thresholds"]
+out["returns_manifest"] = {
+    "keys_swap": len(ma), "keys_refresh4": len(m4), "keys_live": len(mlv),
+    "thresholds_keys_swap": list(tha.keys()), "thresholds_key_count_swap": len(tha),
+    "thresholds_key_count_refresh4": len(th4), "thresholds_key_count_live": len(thl),
+    "claims_served_swap": dict(tha["threshold_claims"]),
+    "claims_served_refresh4": dict(th4["threshold_claims"]),
+    "five_values_equal_refresh4": {k: tha.get(k) == th4.get(k) for k in tha if k != "threshold_claims"},
+    "five_values_equal_live": {k: tha.get(k) == thl.get(k) for k in tha if k != "threshold_claims"},
+    "swap_thresholds_has_8plus_digit_run": bool(re.search(r"\d{8,}", json.dumps(tha))),
+    "fields_other_than_thresholds_equal_refresh4": {k: json.dumps(ma.get(k), sort_keys=True) == json.dumps(m4.get(k), sort_keys=True)
+                                                    for k in sorted(set(ma) | set(m4)) if k != "thresholds"},
+}
+out["objects_captured"] = {"swap": len(cs["run_keys"]), "refresh4": len(c4["run_keys"])}
+out["capture_swap_put_count"] = cs["run_put_count"]
+out["other_objects_equal_refresh4"] = {
+    "/".join(k.split("/")[-3:-1]): cs["run_bodies"][k] == c4["run_bodies"][k2]
+    for k in cs["run_keys"] for k2 in c4["run_keys"] if k.split("/")[-3:] == k2.split("/")[-3:] and "account_return_daily" not in k}
+out["status_forced_equal_refresh4"] = cs["status_forced"] == c4["status_forced"]
+print(json.dumps(out, indent=1))

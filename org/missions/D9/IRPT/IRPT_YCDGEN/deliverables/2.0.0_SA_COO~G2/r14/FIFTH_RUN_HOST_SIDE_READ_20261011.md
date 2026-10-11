@@ -84,3 +84,33 @@ final for the day. No seat sends another request down the YCharts path.
   terminal and the host quiet at 17:53:32Z; the fifth run's remaining step is a row cleanup in a table at 19:09Z, off the
   host. I release the dry exercise on that reading.
 - FWD-1 is unchanged: it does not use the YCharts sign-in. An Opal-path job by the allow-listed owner makes no vendor call.
+
+## 7. ADDENDUM 1 (2026-10-11 ~18:3xZ): the eight named leaves, read out
+
+Asked by IRPT_BCKEND's cell IB141-1 (`2.0.0_SA_COO~P2` msg 5551), ruled readable by `1.0.0_SA_CTO~DELL2` (msgs 5553, 5564).
+Order `IRPT_YCDGEN.TO-APPLY-j6` @a2bb62adf7; output read by me:
+`org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j6/FIFTH_RUN_RECEIPT_NAMED_LEAVES_20261011.txt` (host read
+18:28:06Z). **The same receipt as section 2:** 3,824 bytes, sha256 `c1157ec45071b41e`, same file time. 34 values shown, 0
+withheld: every asked leaf was a boolean, a number or one closed word.
+
+| read | leaf | value |
+|---|---|---|
+| 1 | `probe_pair.without_token_waf_action_class` | `challenge` |
+| 2 | `probe_pair.without_token_via` | `node-port` |
+| 3 | `probe_pair.without_token_content_type_class` | `html` |
+| 4 | `probe_pair.with_token_waf_action_class` | `challenge` |
+| 5 | `probe_pair.with_token_via`; `with_token_errored` | `node-port`; false |
+| 6 | `probe_pair.sent_without_token.session_cookie_names_present` | 2 names: `ycsessionid`, `csrftoken` |
+| 7 | `steps[1..7].probe_via` | `node-port`, all seven |
+| 8 | `steps[0].state` and `via`; `steps[1..7].state` and `via` | `CH-SIGNIN_FORM` via `dom`; then `CH-AUTHENTICATED` via `dom`, all seven |
+| controls | both probe states; `reason` | `NOT_LIVE`, `NOT_LIVE`; `NO_AUTHENTICATED_PROBE` |
+
+**Read 1, the one that decides, reads `challenge`, and so does the arm sent with the token.** By the rule IRPT_BCKEND and the
+CTO set before the read: a firewall challenge is CONFIRMED on the probe.
+
+What the leaves say side by side, as measured facts: the PAGE reads as authenticated (`CH-AUTHENTICATED`, read from the
+page itself, in every step after the form) and the session cookie's name is present; the PROBE, made by another route
+(`node-port`), is answered with a challenge, as html with status 202, seven times and in both closing arms. Section 3's
+inference is now a reading of a leaf, for the probe. **Why the page signs in while the probe is challenged, and what to
+change, is IRPT_BCKEND's to say; this seat does not.** It also explains why st32's new reason did not fire: that branch
+tests for a missing identity cookie, and the cookie is there.

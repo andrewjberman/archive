@@ -1,0 +1,52 @@
+"""TO-DB-b-139: write THRESHOLDS_FILE_SWAP.json from the kit comparison output and the packet. Usage: python build_record.py <repo_root>
+Run AFTER the packet's last edit: packet.sha256 is the packet file's hash."""
+import hashlib
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1]).resolve()
+M = root / "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~112"
+E = Path("C:/dev/_irpt_private_evidence_20261009/IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~112")
+PATH = "data/assets/scripts/gold/irpt_reporting/MEASURED_THRESHOLDS_R1.json"
+pin = subprocess.run(["git", "-C", str(root), "log", "-1", "--format=%H", "--", PATH], capture_output=True, text=True).stdout.strip()
+blob = subprocess.run(["git", "-C", str(root), "show", "%s:%s" % (pin, PATH)], capture_output=True).stdout
+cmp = json.loads((E / "cmp_swap_out.json").read_text(encoding="utf-8"))
+packet = M / "NEVER_WIDEN_PACKET_GOLD_PACKAGE_THRESHOLDS_FILE.md"
+rm = cmp["returns_manifest"]
+rec = {
+    "to_id": "IRPT_DASHBD.TO-DB-b-139", "worker": "0.9.0_WK_IRPT_DASHBD~112", "day": "2026-10-08",
+    "file": {"path": PATH, "pin": pin, "sha256": hashlib.sha256(blob).hexdigest(),
+             "top_level_keys": sorted(json.loads(blob.decode("utf-8"))), "changed_by_this_cell": False,
+             "why_unchanged": "the tracked file already holds exactly the five threshold values and threshold_claims; nothing removed, no provenance sibling written"},
+    "kit": {"ran": True, "kit": "kit_swap (REFRESH 4's kit_new7 with ONE file replaced: the thresholds file)", "tables": cmp["tables_total"],
+            "tables_equal_to_refresh4": cmp["tables_equal_to_refresh4"], "tables_equal_to_live_pinned": cmp["tables_equal_to_live_pinned"],
+            "reason": "n/a (ran)", "method_version_equal_rows": cmp["method_version_equal_rows"], "returns_rows": cmp["method_version_rows"],
+            "wall_s": cmp["wall_s"], "process_peak_mb": cmp["process_peak_mb"],
+            "kit_files_compared_to_refresh4": 19, "kit_files_differing_from_refresh4": 1,
+            "per_table": {t: {"rows": v["rows"], "swap_sha256": v["sha256_swap"], "refresh4_sha256": v["sha256_refresh4"],
+                              "live_pinned_sha256": v["sha256_live_pinned"], "equal_to_refresh4": v["equal_to_refresh4"],
+                              "equal_to_live_pinned": v["equal_to_live_pinned"]} for t, v in cmp["tables"].items()}},
+    "manifest_thresholds_keys": rm["thresholds_keys_swap"],
+    "claims_served": rm["claims_served_swap"],
+    "claims_served_refresh4": rm["claims_served_refresh4"],
+    "claims_changed_vs_refresh4": sum(1 for k in rm["claims_served_swap"] if rm["claims_served_swap"][k] != rm["claims_served_refresh4"][k]),
+    "five_values_equal_refresh4": all(rm["five_values_equal_refresh4"].values()),
+    "five_values_equal_live": all(rm["five_values_equal_live"].values()),
+    "manifest_fields_other_than_thresholds_equal_refresh4": "%d of %d" % (
+        sum(1 for v in rm["fields_other_than_thresholds_equal_refresh4"].values() if v), len(rm["fields_other_than_thresholds_equal_refresh4"])),
+    "other_captured_objects_equal_refresh4": "%d of %d" % (sum(1 for v in cmp["other_objects_equal_refresh4"].values() if v), len(cmp["other_objects_equal_refresh4"])),
+    "keys_dropped_from_package": 19, "dropped_keys_with_8plus_digit_run": 3,
+    "source_map_entry": {"function": "irpt-49f-reporting-gold-lambda", "staged_from_index": 6, "lines_at_head": "6062-6065",
+                         "fields_that_change": ["repo_path", "pin", "sha256"], "packaged_as_unchanged": True, "edited_by_this_cell": False},
+    "live": {"function": "irpt-49f-reporting-gold-lambda", "read_at": "2026-10-11T18:23:25Z", "code_sha256": "oNgy4rnrduvN9N2axhsHBfe9izZKd8dZGeFGXAIh+cM=",
+             "memory_mb": 3008, "timeout_s": 900, "state": "Active", "last_update_status": "Successful",
+             "refresh4_applied": False, "swap_applied": False},
+    "packet": {"path": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~112/NEVER_WIDEN_PACKET_GOLD_PACKAGE_THRESHOLDS_FILE.md",
+               "sha256": hashlib.sha256(packet.read_bytes()).hexdigest(), "halves": "both UNSIGNED"},
+    "tests": {"dir": "data/assets/scripts/gold/irpt_reporting/tests", "before": "190 passed", "after": "190 passed", "tracked_file_changed": False},
+    "s3_writes": 0,
+}
+(M / "THRESHOLDS_FILE_SWAP.json").write_text(json.dumps(rec, indent=1) + "\n", encoding="utf-8")
+print("written", rec["file"]["pin"], rec["packet"]["sha256"])
