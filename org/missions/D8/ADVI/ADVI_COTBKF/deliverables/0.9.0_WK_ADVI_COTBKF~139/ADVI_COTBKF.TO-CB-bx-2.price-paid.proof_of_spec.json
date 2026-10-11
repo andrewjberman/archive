@@ -1,0 +1,96 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bx-2",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bx-2.price-paid.md",
+  "group": "OTHER",
+  "vintage_commit": "ac8000c35b"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~139",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round76.md",
+  "vintage_commit": "ac8000c35b",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bx-2.price-paid.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~139/PRICE_PAID.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement record on local copies; nothing fetched; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB76bx2-AC1",
+    "CB76bx2-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~139/PRICE_PAID.csv",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only per-fund table of counts and ratios; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB76bx2-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~139/PRICE_PAID.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only note with the band tables; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB76bx2-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB76bx2-AC1",
+   "criterion_verbatim": "the control reproduces; every denominator is printed; each trade row with a served close sits in one band (band_sum equals with_a_served_close); the issuer reads the bands and the fund series not reached.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~139/PRICE_PAID.json',encoding='utf-8'));p=d['population'];b=d['bands'];c=d['control'];print('PRICE-PAID control=%d/%d fund_series=%d trade_rows=%d with_amount_and_quantity=%d with_a_served_close=%d funds_with_a_row=%d accounts=%d within_1=%d b1_5=%d b5_20=%d over_20=%d band_sum=%d not_reached=%d'%(c['within_1pct'],c['days'],p['fund_series'],p['trade_rows'],p['with_amount_and_quantity'],p['with_a_served_close'],p['funds_with_a_row'],p['accounts'],b['within_1'],b['b1_5'],b['b5_20'],b['over_20'],b['within_1']+b['b1_5']+b['b5_20']+b['over_20'],d['not_reached']['fund_series']))\"",
+   "expect": "PRICE-PAID control=0/12 fund_series=270",
+   "output_evidence": "PRICE-PAID control=0/12 fund_series=270 trade_rows=91533 with_amount_and_quantity=91533 with_a_served_close=14250 funds_with_a_row=92 accounts=544 within_1=10523 b1_5=213 b5_20=303 over_20=3211 band_sum=14250 not_reached=178 (rc 0)",
+   "denominator": "91,533 by/sl rows of 270 fund series -> 91,533 with amount and quantity -> 91,495 past the 0.05 quantity guard -> 91,040 units -> 14,250 units with a served close (76,790 before the series first stored close); 247 funds with a row -> 92 funds with a read unit; 928 -> 544 accounts; 12 of 12 control days matched; 178 of 270 series not reached",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB76bx2-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the denominators run from every trade row down to the rows read, with what dropped at each step; the substituted funds are reported as a control whichever way they read; purchases and sales are kept apart; the fund series the instrument cannot reach are counted; no account id or amount appears.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read PRICE_PAID.json (population.chain, control, by_kind, by_group, not_reached, not_established), PRICE_PAID.md and PRICE_PAID.csv",
+   "output_evidence": "population.chain runs 91,533 rows to 14,250 units read with the drop at each step; the 73 substituted funds read 10,411 of 10,636 units within 1 percent; purchase and sale bands reported apart, by direction and by group; 178 of 270 series not reached by group; counts, ratios, tickers, dates only, no account id, amount, quantity or balance written",
+   "denominator": "91,533 rows; 14,250 units read; 270 series; 178 not reached; 12 control days",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~139/ADVI_COTBKF.TO-CB-bx-2.price-paid.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB76bx2-AC1)",
+   "result": "PRICE-PAID control=0/12 fund_series=270 trade_rows=91533 with_amount_and_quantity=91533 with_a_served_close=14250 funds_with_a_row=92 accounts=544 within_1=10523 b1_5=213 b5_20=303 over_20=3211 band_sum=14250 not_reached=178"
+  }
+ ]
+}
