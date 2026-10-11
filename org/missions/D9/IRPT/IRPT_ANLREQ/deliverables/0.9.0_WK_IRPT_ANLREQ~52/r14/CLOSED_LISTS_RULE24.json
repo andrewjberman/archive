@@ -1,0 +1,33 @@
+{
+  "cell": "AR-y-142",
+  "claim": "measured by .scratch/census.py over the fixture files named in domain; no real uploaded file was read",
+  "population_note": "Fixture files that hold sheets: intake/fixtures/holdings/ (7 csv, 2 xlsx = 10 sheets; holdings_multi_sheet.xlsx holds 2 sheets) and intake/fixtures/graph/attachments/att-0001,0002,0003,0005.bin (4 csv text files). The face names intake/tests/fixtures/holdings/; that folder does not exist (tests/fixtures holds only lookup_capture/, 3 json files that hold no sheet) -- see surprise row IRPT_ANLREQ-D2-W52-S*. The ycharts/ tree holds no csv or xlsx fixture: ycharts/extract/fixtures (3 pdf + 2 json + 2 py), ycharts/generate/fixtures/har (11 json + 1 pdf) -- 0 sheets.",
+  "account_words": {
+    "members": ["account", "acct", "account number", "account no", "account id", "acct #", "custodian account"],
+    "where_in_code": "infra/aws/lambda/investor-reporting/intake/template_reader.py:32 (ACCOUNT_WORDS); matched in _several_accounts",
+    "domain": "row-1 header cells in columns C and beyond (A and B are the ticker and unit headers), compared as a WHOLE cell after trim, lower-casing, whitespace collapse and removal of a trailing '.' or ':'; the column counts only when it holds 2 or more distinct non-empty values in the rows below",
+    "denominator": "12 distinct header cells (first row) of 13 fixture files (14 sheets)",
+    "uncovered_by_subtraction": [],
+    "subtraction": "12 distinct first-row cells: 1200, Currency, Description, Market Value, Market Value (CAD), Name, Quantity, SPY, Shares, Symbol, Ticker, Weight (1200 and SPY are the first data row of holdings_no_header.csv, which has no header). 0 are on the list; the 12 remaining each name no account (a security, a description, a name of the holding, a unit, a currency, a quantity); so nothing is uncovered and nothing is added.",
+    "deliberately_excluded": [
+      {"word": "Account Type", "why": "names the kind of account (taxable / IRA), several values can sit in ONE account's file; not an account word, whole-cell match means it is never matched"},
+      {"word": "Account Name", "why": "a label for the account, but one account can carry joint holders or a nickname written several ways; a refusal on it would turn back a one-account file. Not on the list, a gap named for the L9 grader. Not present in any fixture."},
+      {"word": "portfolio / sleeve / model / strategy / household / group", "why": "split INSIDE one account or name a client; a one-account sheet may carry them (read r13 ONE_ACCOUNT_CHECK_READ.json account_recognition[0])"},
+      {"word": "Currency", "why": "the one other column header a fixture carries beyond A/B/name; names a unit, not an account"}
+    ]
+  },
+  "total_words": {
+    "members": ["total", "totals", "grand total", "portfolio total", "total portfolio"],
+    "where_in_code": "infra/aws/lambda/investor-reporting/intake/template_reader.py:35 (TOTAL_WORDS); matched in the read_template row loop",
+    "domain": "the column-A label of every row below the header, compared as a WHOLE cell after trim, lower-casing and whitespace collapse (never a substring); a formula cell is not compared",
+    "denominator": "10 distinct column-A labels that are not a ticker, of 13 fixture files (20 distinct column-A labels in all; the 10 tickers are AGG, BNS, ENB, FXAIX, IWM, QQQ, SPY, VEA, VTSAX, VWO)",
+    "uncovered_by_subtraction": ["Equity Subtotal", "Fixed Income Subtotal"],
+    "subtraction": "10 non-ticker labels: $:CASH, Cash, Equity, Equity Subtotal, Fixed Income, Fixed Income Subtotal, OPAL-SIP, Portfolio Total, Private Placement 2019, Total. 2 are on the list (Portfolio Total, Total). 8 remain: $:CASH and Cash (cash holdings), OPAL-SIP and Private Placement 2019 (holdings the offline resolver handles), Equity and Fixed Income (group header lines of one account, label-only), Equity Subtotal and Fixed Income Subtotal (subtotals of ONE account split by asset class). The last two are total-like and found by subtraction; they are excluded, not added.",
+    "deliberately_excluded": [
+      {"word": "Equity Subtotal / Fixed Income Subtotal / any '<x> Subtotal'", "why": "CTO ruling 4 (NOT a signal): a subtotal is evidence of a totals row at most, the only subtotal in the fixtures is one account split by asset class; matching it would turn back a valid one-account sheet. A test pins that it is not turned back."},
+      {"word": "Equity / Fixed Income / Cash", "why": "label-only group headers and a cash holding of one account (holdings_clean.csv); NOT a signal (ruling 4)"},
+      {"word": "Total Return", "why": "a fund name; matched as a whole cell only, so it stays a holding (a test pins it)"},
+      {"word": "Sum / All / Net / blank label", "why": "not a stated total word; an unlabelled total cannot be found by label (reported as what the reader still cannot see)"}
+    ]
+  }
+}
