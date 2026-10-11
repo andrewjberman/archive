@@ -1,0 +1,40 @@
+{
+  "slug": "iamroles-r7-narrow-smartx",
+  "title": "NFRA_IAMROLES202609 IAM-x-2 PHASE B ACT 1: delete two dead inline policies off opal-smartx-lambda-role via the IAM API (A3-r7); no Terraform runs in smartx-pipeline",
+  "author": "0.7.0_AE_CloudOps~IR",
+  "status": "OPEN",
+  "opened_at": "2026-10-11T07:12:14.393513+00:00",
+  "window_hours": 6.0,
+  "entry_path": "org/critical_paths/change_management/20261011T0712Z_iamroles-r7-narrow-smartx_deploy_completion.md",
+  "legs": [
+    {
+      "id": "DELETE",
+      "kind": "activation",
+      "target": "opal-smartx-lambda-role inline opal-smartx-s3-access + opal-smartx-secrets",
+      "proof_required": "both delete-role-policy calls return rc=0, and AFTERWARDS list-role-policies reads EXACTLY [\"opal-smartx-logs\"] -- one name, not three. Rollback documents were committed BEFORE this leg at af85a44c38, each proven equal to a fresh live get-role-policy read",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "READBACK",
+      "kind": "verify",
+      "target": "opal-smartx-lambda-role",
+      "proof_required": "get-role-policy on each DELETED name reads NoSuchEntity, BESIDE A POSITIVE CONTROL: get-role-policy on opal-smartx-logs returns its document. Without that control a NoSuchEntity is indistinguishable from a broken call -- a failed retrieval returns a value",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "UNTOUCHED",
+      "kind": "verify",
+      "target": "opal-smartx-lambda-role",
+      "proof_required": "the role itself is unchanged: trust still lambda.amazonaws.com, the four round-6 tags still exactly Environment ManagedBy Project System=SmartXPipeline, path / and max_session_duration 3600, 0 attached managed policies. This is a NARROWING: nothing added, no trust or tag moves",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261011T071214Z OPENED by 0.7.0_AE_CloudOps~IR with 3 leg(s)"
+  ],
+  "last_red_at": null,
+  "device": "sitez"
+}
