@@ -1,0 +1,501 @@
+{
+ "source": {
+  "bucket": "opal-data-assets",
+  "entry": "blackdiamond_z09",
+  "prefix_template": "{monolith}/{scope}/silver/fact_holdings/date=YYYY-MM-DD/",
+  "prefix_resolved_by": "holdings_performance.resolved_prefix(blackdiamond_z09, positions_prefix, firm_scope) -> 45 characters, same as the gold script",
+  "anchor": "schwab/08335338/silver/dim_position/date=YYYY-MM-DD/ (closing_price by cusip; the Schwab own-date close)",
+  "price": "Market Value / Units, rows with Units > 0 and Market Value > 0 and a CUSIP",
+  "account_key": "AccountID, replaced at read time by a one-way digest; used only to group rows, never written"
+ },
+ "tolerance": {
+  "kind": "relative",
+  "value": 0.0001,
+  "rule": "abs(a-b) <= 1e-4 * max(abs(a), abs(b), 1e-9)",
+  "taken_from": "IB-pr-425 s252_all_partitions.py same()"
+ },
+ "days": 85,
+ "range_graded": [
+  "2026-06-10",
+  "2026-10-09"
+ ],
+ "days_ungradeable": [
+  "2026-06-09"
+ ],
+ "accounts": 1000,
+ "claim_rule": "One claim per account-day, by the first row that applies: (1) the account-day holds at least one moved priced row at NEITHER close -> NOT_GRADED (reason neither_row), whatever else it holds; (2) else at least one moved priced row at the PRIOR close -> PRIOR_CLOSE (an account-day holding both own and prior rows and no neither row is PRIOR_CLOSE); (3) else at least one moved priced row and all of them at the own close -> OWN_DATE; (4) else no moved priced row -> NOT_GRADED (reason no_moved_security).  A moved row is a priced row whose security moved on D (anchor close(D) vs close(prior trading day), 1e-4 relative); it is own / prior / neither as in IB-pr-427.  Nothing is dropped: every account present in a graded-day partition has a claim.",
+ "account_days": {
+  "present": 76796,
+  "OWN_DATE": 45247,
+  "PRIOR_CLOSE": 425,
+  "NOT_GRADED": 31124
+ },
+ "mixed_account_days": {
+  "own_and_prior_rows_both_held": 8,
+  "neither_row_held_with_own_or_prior_rows": 788,
+  "treatment": "own and prior both held, no neither row -> PRIOR_CLOSE; a neither row with any own or prior rows -> NOT_GRADED (neither_row); the two counts overlap when an account-day holds all three (it is NOT_GRADED)"
+ },
+ "not_graded_by_reason": {
+  "no_moved_security": 30201,
+  "neither_row": 923
+ },
+ "not_graded_split_rule": "AMENDMENT 1.  A NOT_GRADED account-day is `ungradeable` when it holds at least one priced security the instrument cannot grade: a priced security the anchor does not carry (outside_anchor), a moved row at neither close (neither_row), or a valued row the instrument cannot price (no_cusip: Units > 0 and Market Value > 0 and no CUSIP; negative_position: Units < 0 and Market Value < 0) -- the last two are kinds the face did not list, named here because such a row could sit on the wrong date; otherwise `nothing_to_grade`.  An account-day holding both kinds is ungradeable, named by the first kind that applies in the order neither_row, outside_anchor, no_cusip, negative_position (the kinds held are all counted in not_graded_holdings_breakdown).  nothing_to_grade classes name the kinds held (cash = Cash Equivalent flag, did_not_move, no_priced_row); an account-day holding more than one kind carries the joined name.",
+ "not_graded_split_two_kinds_only": {
+  "note": "the same split if only the two ungradeable kinds the face names (outside_anchor, neither_row) count; no_cusip and negative_position rows then count as nothing to grade",
+  "nothing_to_grade": 21821,
+  "ungradeable": 9303
+ },
+ "not_graded_split": {
+  "nothing_to_grade": {
+   "account_days": 13636,
+   "by_holdings_class": {
+    "cash_and_no_priced_row": 12685,
+    "no_priced_row": 928,
+    "cash_and_did_not_move_and_no_priced_row": 23
+   }
+  },
+  "ungradeable": {
+   "account_days": 17488,
+   "by_holdings_class": {
+    "outside_anchor": 8380,
+    "no_cusip": 7930,
+    "neither_row": 923,
+    "negative_position": 255
+   }
+  }
+ },
+ "not_graded_holdings_breakdown": {
+  "reason_by_side": {
+   "no_moved_security": {
+    "nothing_to_grade": 13636,
+    "ungradeable": 16565
+   },
+   "neither_row": {
+    "ungradeable": 923
+   }
+  },
+  "ng_account_days_holding_each_kind_of_row": {
+   "note": "an account-day can hold several kinds, so these do not sum to the NOT_GRADED total; each counts the NOT_GRADED account-days of that reason that hold at least one row of the kind",
+   "no_moved_security": {
+    "cash": 19510,
+    "did_not_move": 229,
+    "no_price": 22451,
+    "outside_anchor": 8380,
+    "no_cusip": 8084,
+    "negative_position": 256,
+    "cash_priced_outside_anchor": 4302,
+    "neither": 0
+   },
+   "neither_row": {
+    "cash": 882,
+    "did_not_move": 431,
+    "no_price": 923,
+    "outside_anchor": 611,
+    "no_cusip": 155,
+    "negative_position": 0,
+    "cash_priced_outside_anchor": 455,
+    "neither": 923
+   }
+  },
+  "kinds_defined": {
+   "cash": "row flagged Cash Equivalent = true that is not a graded moved row (priced or not)",
+   "did_not_move": "priced row, security carried by the anchor on D and the prior trading day, did not move",
+   "outside_anchor": "priced row, security not carried by the anchor on D or on the prior trading day, not flagged cash-equivalent",
+   "no_cusip": "valued row (Units > 0 and Market Value > 0) with no CUSIP, not flagged cash-equivalent: the instrument cannot match it to the anchor.  A kind the face did not list; counted as ungradeable",
+   "negative_position": "valued row with Units < 0 and Market Value < 0, not flagged cash-equivalent: the instrument's Units > 0 filter leaves it out.  A kind the face did not list; counted as ungradeable",
+   "no_price": "any other row the instrument does not price (null or zero Units / Market Value), not flagged cash-equivalent",
+   "cash_priced_outside_anchor": "a cash-equivalent-flagged row that is priced and outside the anchor; counted as cash (nothing to grade)"
+  },
+  "sensitivity_nothing_to_grade_account_days_that_hold_a_cash_flagged_priced_row_outside_the_anchor": 2263
+ },
+ "accounts_never_graded_on_a_moved_security": {
+  "accounts": 386,
+  "basis": "accounts with no moved priced row on any graded day (IB-pr-427's no_moved_rows).  Each is classed once over its 85 days: if on any day it held a priced security outside the anchor -> holds_outside_anchor_on_some_day; else a valued row with no CUSIP -> holds_no_cusip_valued_row_on_some_day; else a negative position -> holds_negative_position_on_some_day; else the set of kinds it held on any day (cash, did_not_move, no_priced_row).",
+  "by_holdings": {
+   "holds_no_cusip_valued_row_on_some_day": 136,
+   "holds_outside_anchor_on_some_day": 131,
+   "cash_and_no_priced_row": 110,
+   "no_priced_row": 6,
+   "holds_negative_position_on_some_day": 3
+  }
+ },
+ "accounts_with_every_present_day_NOT_GRADED": {
+  "all": 389,
+  "every_day_ungradeable": 146,
+  "every_day_nothing_to_grade": 116
+ },
+ "rows_moved": {
+  "own": 578815,
+  "moved": 583996,
+  "neither": 1903,
+  "prior": 3278
+ },
+ "serving_rule": {
+  "eligible": 75796,
+  "served": 43932,
+  "blank": 31864,
+  "blank_by_reason": {
+   "today_NOT_GRADED": 30601,
+   "today_PRIOR_CLOSE": 422,
+   "yesterday_PRIOR_CLOSE": 101,
+   "yesterday_NOT_GRADED": 740
+  },
+  "blank_share_percent": 42.039,
+  "accounts": {
+   "with_eligible_days": 999,
+   "never_served": 403,
+   "always_served": 142,
+   "sometimes_served": 454
+  },
+  "description": "AS WRITTEN (CTO msg 4825): eligible = present today and on the prior graded day; served when today and the prior trading day both read OWN_DATE; blank otherwise, with the reason taken in the order today_PRIOR_CLOSE, today_NOT_GRADED, yesterday_PRIOR_CLOSE, yesterday_NOT_GRADED (the first that applies).",
+  "first_day_treatment": {
+   "first_graded_day": "2026-06-10",
+   "its_prior_partition": "2026-06-09",
+   "treatment": "The prior partition of the first graded day (2026-06-09) is ungraded, so no claim exists for it.  The 707 account-days of 2026-06-10 are NOT eligible and are outside the serving counts (they are still claimed and counted in account_days).  Eligible account-days are those present today and on the prior GRADED day.",
+   "first_day_account_days_present_also_on_the_prior_partition": 680,
+   "if_instead_counted_eligible_and_blank_as_yesterday_NOT_GRADED": {
+    "eligible": 76476,
+    "blank": 32544,
+    "blank_share_percent": 42.555
+   },
+   "account_days_after_the_first_day_not_eligible_because_the_account_was_absent_the_prior_day": 293
+  },
+  "per_account_served_share_distribution": {
+   "basis": "per account, 100 * served / eligible account-days, over accounts with eligible days",
+   "accounts": {
+    "zero": 403,
+    "above_0_to_50": 36,
+    "50_to_90": 64,
+    "90_to_below_100": 354,
+    "100": 142
+   }
+  }
+ },
+ "serving_rule_alternative_two_kinds_only": {
+  "eligible": 75796,
+  "served": 64971,
+  "blank": 10825,
+  "blank_by_reason": {
+   "today_ungradeable": 9120,
+   "today_PRIOR_CLOSE": 422,
+   "yesterday_PRIOR_CLOSE": 102,
+   "yesterday_ungradeable": 1181
+  },
+  "blank_share_percent": 14.282,
+  "accounts": {
+   "with_eligible_days": 999,
+   "never_served": 47,
+   "always_served": 425,
+   "sometimes_served": 527
+  },
+  "description": "NOT THE RULE IN FORCE.  The alternative above, counting as ungradeable only the two kinds the face names (outside_anchor, neither_row); a valued row with no CUSIP or a negative position counts as nothing to grade.  A sensitivity."
+ },
+ "serving_rule_alternative": {
+  "eligible": 75796,
+  "served": 56865,
+  "blank": 18931,
+  "blank_by_reason": {
+   "today_ungradeable": 17181,
+   "today_PRIOR_CLOSE": 422,
+   "yesterday_PRIOR_CLOSE": 102,
+   "yesterday_ungradeable": 1226
+  },
+  "blank_share_percent": 24.976,
+  "accounts": {
+   "with_eligible_days": 999,
+   "never_served": 169,
+   "always_served": 286,
+   "sometimes_served": 544
+  },
+  "description": "NOT THE RULE IN FORCE (CTO's ruling of msg 4825 is HELD, msg 4833).  The alternative the CTO describes: an account-day is good when it reads OWN_DATE or is nothing_to_grade; a return is served when today and the prior trading day are both good.  Same eligible set.  Blank reasons in the order today_PRIOR_CLOSE, today_ungradeable, yesterday_PRIOR_CLOSE, yesterday_ungradeable.",
+  "per_account_served_share_distribution": {
+   "basis": "as the rule as written",
+   "accounts": {
+    "zero": 169,
+    "above_0_to_50": 111,
+    "50_to_90": 74,
+    "90_to_below_100": 359,
+    "100": 286
+   }
+  }
+ },
+ "instrument_input_timing": {
+  "recent_days": [
+   {
+    "date": "2026-09-30",
+    "source_objects": 1,
+    "source_last_modified_utc": "2026-10-01T11:46:06+00:00",
+    "anchor_objects": 1,
+    "anchor_last_modified_utc": "2026-10-01T09:46:39+00:00",
+    "anchor_minus_source_minutes": -119.5,
+    "last_to_land": "source",
+    "source_hhmm_utc": "11:46",
+    "anchor_hhmm_utc": "09:46",
+    "source_day_offset": 1,
+    "anchor_day_offset": 1
+   },
+   {
+    "date": "2026-10-01",
+    "source_objects": 1,
+    "source_last_modified_utc": "2026-10-02T11:46:06+00:00",
+    "anchor_objects": 1,
+    "anchor_last_modified_utc": "2026-10-02T09:46:38+00:00",
+    "anchor_minus_source_minutes": -119.5,
+    "last_to_land": "source",
+    "source_hhmm_utc": "11:46",
+    "anchor_hhmm_utc": "09:46",
+    "source_day_offset": 1,
+    "anchor_day_offset": 1
+   },
+   {
+    "date": "2026-10-02",
+    "source_objects": 1,
+    "source_last_modified_utc": "2026-10-03T11:46:15+00:00",
+    "anchor_objects": 1,
+    "anchor_last_modified_utc": "2026-10-03T09:46:36+00:00",
+    "anchor_minus_source_minutes": -119.7,
+    "last_to_land": "source",
+    "source_hhmm_utc": "11:46",
+    "anchor_hhmm_utc": "09:46",
+    "source_day_offset": 1,
+    "anchor_day_offset": 1
+   },
+   {
+    "date": "2026-10-05",
+    "source_objects": 1,
+    "source_last_modified_utc": "2026-10-06T11:46:02+00:00",
+    "anchor_objects": 1,
+    "anchor_last_modified_utc": "2026-10-06T09:46:38+00:00",
+    "anchor_minus_source_minutes": -119.4,
+    "last_to_land": "source",
+    "source_hhmm_utc": "11:46",
+    "anchor_hhmm_utc": "09:46",
+    "source_day_offset": 1,
+    "anchor_day_offset": 1
+   },
+   {
+    "date": "2026-10-06",
+    "source_objects": 1,
+    "source_last_modified_utc": "2026-10-07T11:46:03+00:00",
+    "anchor_objects": 1,
+    "anchor_last_modified_utc": "2026-10-07T09:46:55+00:00",
+    "anchor_minus_source_minutes": -119.1,
+    "last_to_land": "source",
+    "source_hhmm_utc": "11:46",
+    "anchor_hhmm_utc": "09:46",
+    "source_day_offset": 1,
+    "anchor_day_offset": 1
+   },
+   {
+    "date": "2026-10-07",
+    "source_objects": 1,
+    "source_last_modified_utc": "2026-10-08T11:46:03+00:00",
+    "anchor_objects": 1,
+    "anchor_last_modified_utc": "2026-10-08T09:46:43+00:00",
+    "anchor_minus_source_minutes": -119.3,
+    "last_to_land": "source",
+    "source_hhmm_utc": "11:46",
+    "anchor_hhmm_utc": "09:46",
+    "source_day_offset": 1,
+    "anchor_day_offset": 1
+   },
+   {
+    "date": "2026-10-08",
+    "source_objects": 1,
+    "source_last_modified_utc": "2026-10-09T11:46:07+00:00",
+    "anchor_objects": 1,
+    "anchor_last_modified_utc": "2026-10-09T09:46:44+00:00",
+    "anchor_minus_source_minutes": -119.4,
+    "last_to_land": "source",
+    "source_hhmm_utc": "11:46",
+    "anchor_hhmm_utc": "09:46",
+    "source_day_offset": 1,
+    "anchor_day_offset": 1
+   },
+   {
+    "date": "2026-10-09",
+    "source_objects": 1,
+    "source_last_modified_utc": "2026-10-10T11:46:13+00:00",
+    "anchor_objects": 1,
+    "anchor_last_modified_utc": "2026-10-10T09:46:43+00:00",
+    "anchor_minus_source_minutes": -119.5,
+    "last_to_land": "source",
+    "source_hhmm_utc": "11:46",
+    "anchor_hhmm_utc": "09:46",
+    "source_day_offset": 1,
+    "anchor_day_offset": 1
+   }
+  ],
+  "all_graded_days": {
+   "days": 85,
+   "anchor_landed_last": 23,
+   "source_landed_last": 62,
+   "anchor_minus_source_minutes": {
+    "min": -6214.3,
+    "median": -119.4,
+    "max": 1096.6
+   }
+  },
+  "note": "Object LastModified from list_objects_v2, times only.  A LastModified is the last write of the object, so a later rewrite of an old day shows the rewrite time; the recent days are the least affected."
+ },
+ "instrument_daily_needs": [
+  {
+   "need": "The account's holdings partition for day D: CUSIP, Market Value, Units, AccountID (the claim), plus the Cash Equivalent flag (the NOT_GRADED split; present on 91 of 91 partitions read)",
+   "where_from": "s3://opal-data-assets/<blackdiamond_z09 positions_prefix, resolved by holdings_performance.resolved_prefix>date=D/ (Cottonwood silver positions)",
+   "by_when": "last-modified 11:46 UTC on the calendar day after D, on each of the last 8 trading days (2026-09-30 to 2026-10-09); one object per partition; over all 85 graded days the source partition was the later of the two on 62.  THE LAST INPUT TO LAND."
+  },
+  {
+   "need": "The anchor's own-date close for day D, by CUSIP (closing_price), to decide which securities moved and what the own close is",
+   "where_from": "s3://opal-data-assets/schwab/08335338/silver/dim_position/date=D/ (Schwab silver dim_position, closing_price by cusip)",
+   "by_when": "last-modified 09:46 UTC on the calendar day after D, on each of the last 8 trading days; about 119 minutes before the Cottonwood partition (median over 85 graded days 119)"
+  },
+  {
+   "need": "The anchor's close for the prior trading day p, by CUSIP, to decide which securities moved and what the prior close is",
+   "where_from": "the same anchor prefix, date=p",
+   "by_when": "already in place: it landed the morning after p, a full cycle before D's inputs"
+  },
+  {
+   "need": "The account's holdings partition for the prior trading day p, to know whether the account was present (eligibility for the serving rule)",
+   "where_from": "the same Cottonwood prefix, date=p",
+   "by_when": "already in place: it landed the morning after p"
+  },
+  {
+   "need": "The trading calendar, to name the prior trading day p",
+   "where_from": "lib/trading_calendar.py (NYSE closures table 2010-2027 in the repo; pandas_market_calendars when installed)",
+   "by_when": "no landing time: a static table, covers every date to 2027-12-31"
+  },
+  {
+   "need": "The claim stamped for the same account on the prior trading day p (the serving rule reads yesterday's claim)",
+   "where_from": "the instrument's own output for day p, stored by the gold; none exists for 2026-06-09, the first partition",
+   "by_when": "stamped one cycle earlier, so it exists whenever the run for p completed; a missed day leaves the next day without a prior claim"
+  }
+ ],
+ "binding_need": "The Cottonwood holdings partition for day D (need 1).  It lands about two hours after the anchor's close for D, which lands the same morning; the prior-day inputs and the calendar are already in place.  A claim for D can be stamped no earlier than that partition.",
+ "control": {
+  "planted": {
+   "OWN_DATE": 7,
+   "PRIOR_CLOSE": 1,
+   "NOT_GRADED": 8,
+   "NG_no_moved_security": 7,
+   "NG_neither_row": 1,
+   "nothing_to_grade_cash_only": 1,
+   "nothing_to_grade_cash_and_did_not_move": 1,
+   "nothing_to_grade_no_priced_row": 2,
+   "ungradeable_neither_row": 1,
+   "ungradeable_outside_anchor": 1,
+   "ungradeable_no_cusip": 1,
+   "ungradeable_negative_position": 1,
+   "served": 4,
+   "blank": 8,
+   "blank_by_reason": {
+    "today_PRIOR_CLOSE": 1,
+    "yesterday_PRIOR_CLOSE": 1,
+    "today_NOT_GRADED": 6
+   },
+   "accounts_never_always_sometimes": [
+    2,
+    1,
+    1
+   ],
+   "alt_served": 6,
+   "alt_blank": 6,
+   "alt_blank_by_reason": {
+    "today_PRIOR_CLOSE": 1,
+    "yesterday_PRIOR_CLOSE": 1,
+    "today_ungradeable": 3,
+    "yesterday_ungradeable": 1
+   },
+   "alt_accounts_never_always_sometimes": [
+    0,
+    1,
+    3
+   ],
+   "alt_two_kinds_only_served": 8,
+   "alt_two_kinds_only_blank": 4,
+   "alt_two_kinds_only_blank_by_reason": {
+    "today_PRIOR_CLOSE": 1,
+    "yesterday_PRIOR_CLOSE": 1,
+    "today_ungradeable": 2
+   },
+   "alt_two_kinds_only_accounts_never_always_sometimes": [
+    0,
+    2,
+    2
+   ]
+  },
+  "read": {
+   "OWN_DATE": 7,
+   "PRIOR_CLOSE": 1,
+   "NOT_GRADED": 8,
+   "NG_no_moved_security": 7,
+   "NG_neither_row": 1,
+   "nothing_to_grade_cash_only": 1,
+   "nothing_to_grade_cash_and_did_not_move": 1,
+   "nothing_to_grade_no_priced_row": 2,
+   "ungradeable_neither_row": 1,
+   "ungradeable_outside_anchor": 1,
+   "ungradeable_no_cusip": 1,
+   "ungradeable_negative_position": 1,
+   "served": 4,
+   "blank": 8,
+   "blank_by_reason": {
+    "today_PRIOR_CLOSE": 1,
+    "yesterday_PRIOR_CLOSE": 1,
+    "today_NOT_GRADED": 6
+   },
+   "accounts_never_always_sometimes": [
+    2,
+    1,
+    1
+   ],
+   "alt_served": 6,
+   "alt_blank": 6,
+   "alt_blank_by_reason": {
+    "today_PRIOR_CLOSE": 1,
+    "yesterday_PRIOR_CLOSE": 1,
+    "today_ungradeable": 3,
+    "yesterday_ungradeable": 1
+   },
+   "alt_accounts_never_always_sometimes": [
+    0,
+    1,
+    3
+   ],
+   "alt_two_kinds_only_served": 8,
+   "alt_two_kinds_only_blank": 4,
+   "alt_two_kinds_only_blank_by_reason": {
+    "today_PRIOR_CLOSE": 1,
+    "yesterday_PRIOR_CLOSE": 1,
+    "today_ungradeable": 2
+   },
+   "alt_two_kinds_only_accounts_never_always_sometimes": [
+    0,
+    2,
+    2
+   ]
+  },
+  "fixture": "4 trading days, 4 accounts, 2 moving securities and one that does not move; B is at the prior close on D2 (planted prior-close day); C holds cash only on D1, cash + an unmoved security on D2, a moved row at neither close on D3 (planted neither row) and a priced security outside the anchor on D4; E holds a valued row with no CUSIP on D1, a negative position on D2 and a row with null Units and Market Value on D3 and D4"
+ },
+ "reconciliation_with_IB_pr_427": {
+  "ib_pr_427_rows": {
+   "moved": 583996,
+   "own": 578815,
+   "prior": 3278,
+   "neither": 1903
+  },
+  "this_cell_rows": {
+   "own": 578815,
+   "moved": 583996,
+   "neither": 1903,
+   "prior": 3278
+  },
+  "moved_rows_equal": true,
+  "prior_rows_equal": true,
+  "neither_rows_equal": true,
+  "own_rows_equal": true,
+  "days_equal": true,
+  "accounts_read_equal": true,
+  "ib_pr_427_accounts_with_no_moved_rows": 386,
+  "this_cell_accounts_with_no_moved_row_on_any_day": 386
+ }
+}
