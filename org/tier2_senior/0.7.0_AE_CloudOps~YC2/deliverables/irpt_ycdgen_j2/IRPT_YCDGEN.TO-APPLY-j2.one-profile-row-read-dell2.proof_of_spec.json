@@ -3,21 +3,21 @@
     {
       "criterion_id": "AC1",
       "criterion_verbatim": "The read states the row or its absence.",
-      "denominator": "1 output file, and the script emits EXACTLY ONE of the two branch lines: PROFILE... when get_item returns an Item, PROFILE-ROW-ABSENT when it returns None. The file carries 1 PROFILE-ROW-ABSENT line and 0 PROFILE lines, so the matched line is the absence branch and not the inventory branch. It is the ABSENCE branch that fired, which is why there is no ALLOWED-FIRMS line and no FIRM-NAMED line: those two are printed only after an Item is returned.",
-      "expect": "^(PROFILE andrew@opalinvest\\.com status=|PROFILE-ROW-ABSENT andrew@opalinvest\\.com)",
-      "invocation": "grep -m1 -E '^(PROFILE |PROFILE-ROW-ABSENT )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_20261011.txt",
+      "denominator": "AC1 is a FOUR-WAY disjunction after AMENDMENT 1 and the FIRST arm fired: 1 PROFILE line, 0 PROFILE-ROW-ABSENT, 0 USER-NOT-IN-INDEX, 0 USER-AMBIGUOUS-IN-INDEX in the file. THE ROW EXISTS. The two index arms were live possibilities, not decoration: the index returned rows=1 more=NO, so the lookup was neither empty nor ambiguous, and the Limit=2 plus LastEvaluatedKey guard is what makes those two states distinguishable from each other rather than both reading as one hit.",
+      "expect": "^(PROFILE andrew@opalinvest\\.com status=|PROFILE-ROW-ABSENT andrew@opalinvest\\.com|USER-NOT-IN-INDEX andrew@opalinvest\\.com|USER-AMBIGUOUS-IN-INDEX andrew@opalinvest\\.com)",
+      "invocation": "grep -m1 -E '^(PROFILE |PROFILE-ROW-ABSENT |USER-NOT-IN-INDEX |USER-AMBIGUOUS-IN-INDEX )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_2_20261011.txt",
       "method": "command",
-      "output_evidence": "grep -m1 -E '^(PROFILE |PROFILE-ROW-ABSENT )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_20261011.txt\nPROFILE-ROW-ABSENT andrew@opalinvest.com\nthe file's own header line records the exact key read: opal-users-v2, PK=USER#andrew@opalinvest.com SK=PROFILE, ConsistentRead, four named attributes, script rc=0",
+      "output_evidence": "grep -m1 -E '^(PROFILE |PROFILE-ROW-ABSENT |USER-NOT-IN-INDEX |USER-AMBIGUOUS-IN-INDEX )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_2_20261011.txt\nPROFILE andrew@opalinvest.com status=active userType=Dev firmId=opal-capital\npreceded in the same file by: INDEX email-index rows=1 more=NO / INDEX-KEY pk_form=OTHER sk=PROFILE",
       "status": "PASS"
     },
     {
       "criterion_id": "AC2",
       "criterion_verbatim": "The read answers the firm question, or records the row's absence.",
-      "denominator": "the criterion is a DISJUNCTION and the second arm is what fired: 0 FIRM-NAMED lines, 1 PROFILE-ROW-ABSENT line. So the firm question is NOT answered YES or NO -- it is recorded as having no row to answer from, which is the arm the issuer wrote into the criterion. Stating which arm fired is the whole content of this row: a reader who sees only PASS would otherwise take it for a FIRM-NAMED verdict.",
-      "expect": "^(FIRM-NAMED cottonwood (YES|NO)$|PROFILE-ROW-ABSENT andrew@opalinvest\\.com)",
-      "invocation": "grep -m1 -E '^(FIRM-NAMED cottonwood (YES|NO)|PROFILE-ROW-ABSENT )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_20261011.txt",
+      "denominator": "THE CRITERION PASSES AND THE ANSWER NEEDS ITS QUALIFIER, which is the whole content of this row. The matched line is FIRM-NAMED cottonwood NO. That NO is reached from shape=ABSENT count=0 -- the attribute allowedFirmIds is NOT PRESENT on the row -- and the same NO would be printed for a present-but-empty value and for a present list not containing cottonwood. So three distinct world states collapse into one criterion outcome, which is the order's own named trap (taking an absent attribute for an empty list) occurring LIVE rather than hypothetically. Filed as row IRPT_YCDGEN-D2-S53. Denominator for the collapse claim: the 4 output branches the amended script can emit once a row is found, of which 1 (NO) is reachable from 3 world states.",
+      "expect": "^(FIRM-NAMED cottonwood (YES|NO)$|PROFILE-ROW-ABSENT andrew@opalinvest\\.com|USER-NOT-IN-INDEX andrew@opalinvest\\.com|USER-AMBIGUOUS-IN-INDEX andrew@opalinvest\\.com)",
+      "invocation": "grep -m1 -E '^(FIRM-NAMED cottonwood (YES|NO)|PROFILE-ROW-ABSENT |USER-NOT-IN-INDEX |USER-AMBIGUOUS-IN-INDEX )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_2_20261011.txt",
       "method": "command",
-      "output_evidence": "grep -m1 -E '^(FIRM-NAMED cottonwood (YES|NO)|PROFILE-ROW-ABSENT )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_20261011.txt\nPROFILE-ROW-ABSENT andrew@opalinvest.com\n0 FIRM-NAMED lines in the file: the firm question has no row to answer from, it is not answered NO",
+      "output_evidence": "grep -m1 -E '^(FIRM-NAMED cottonwood (YES|NO)|PROFILE-ROW-ABSENT |USER-NOT-IN-INDEX |USER-AMBIGUOUS-IN-INDEX )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_2_20261011.txt\nFIRM-NAMED cottonwood NO\nqualified by the preceding line in the same file: ALLOWED-FIRMS shape=ABSENT count=0 ids=- -- the NO rests on an ABSENT attribute, not on a list that lacks cottonwood",
       "status": "PASS"
     }
   ],
@@ -28,7 +28,15 @@
         "AC2"
       ],
       "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deploy_evidence": "the script's full output with the UTC time of the read, the exact table and key, the projection and the script's rc on the first line: read at 2026-10-11T12:36:36Z, opal-users-v2, PK=USER#andrew@opalinvest.com SK=PROFILE, ConsistentRead, four named attributes, rc=0, no write",
+      "deploy_evidence": "the amended script's full output with the UTC time, the exact table, index, projection and the script's rc on the first line: read at 2026-10-11T12:44:21Z, ONE query on opal-users-v2 index email-index (Limit 2) then ONE ConsistentRead get_item on the PK it names, SK=PROFILE, four named attributes, rc=0, no write. Five output lines: INDEX, INDEX-KEY, PROFILE, ALLOWED-FIRMS, FIRM-NAMED.",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_2_20261011.txt"
+    },
+    {
+      "artifact_covered_by": [],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "THE SUPERSEDED FIRST READ, kept because AMENDMENT 1 says to keep it and because it is the evidence of what the first script actually did. Its answer PROFILE-ROW-ABSENT andrew@opalinvest.com is VOID by the issuer's own word, and it grades NO criterion -- artifact_covered_by is deliberately empty. It is not wrong, it is NARROW and was labelled so at the time: the key it read, printed on its own first line, was PK=USER#andrew@opalinvest.com, and the second read measures pk_form=OTHER, so that key genuinely does not exist. The first instance of this proof declared exactly this gap as an exclusion -- whether Andrew has a record under another PK shape -- and the amendment closed it.",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "kind": "doc",
       "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_20261011.txt"
@@ -38,94 +46,96 @@
   "compiler_tools": [
     {
       "invocation": "not run",
-      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: one read of one table item; no schedule, trigger or rule is added or read. Checked against the act as executed -- the script makes one boto3 dynamodb get_item call and nothing else.",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: one read of one table item; no schedule, trigger or rule is added or read. Re-checked against the AMENDED act -- the widened bounds add one index query on the same table and nothing else; the script makes exactly two read calls and no other.",
       "tool": "comp-schedule"
     },
     {
       "invocation": "not run",
-      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: no IAM change; the read uses the grant this lane's swap_svc_firm.py reads used in windows 6 to 9, on the same table. Checked against the act as executed, and the grant was proved by the LIVE call returning rc=0 with a well-formed response rather than by simulate-principal-policy, which has four false-deny modes and one false-allow mode. NOTE on the direction of the evidence: an AccessDenied would have RAISED, not returned None, so the absence is not a masked permission failure.",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight. NOTE THAT THE AMENDMENT ADDED A GRANT SURFACE the preflight did not contemplate: dynamodb:Query on opal-users-v2/index/email-index, where the first version needed only GetItem on the table. The amendment makes the live call the oracle -- if the query is refused, save the error class and stop -- and the live call SUCCEEDED (rows=1, rc=0), so the grant exists for this identity. Proved by the call rather than by simulate-principal-policy, which has four false-deny modes and one false-allow mode, and whose GRAIN trap bites exactly here: an index ARN is a different grain from a table ARN and a wrong-grain ARN returns implicitDeny even for an admin principal.",
       "tool": "comp-iam"
     },
     {
-      "invocation": "the order's three named traps, graded as controls",
-      "result": "PASS on all three. The preflight names them: reading another attribute of a person's row; reading the wrong user; taking an absent attribute for an empty list. The first two are discharged by controls.the_script_was_read_before_it_was_run and controls.the_key_read_is_the_key_recorded; the third could not fire here and the reason is itself evidence -- see controls.an_absent_ROW_and_an_absent_ATTRIBUTE_are_different_states.",
+      "invocation": "the order's three named traps, graded as controls against the AMENDED act",
+      "result": "PASS on all three, and the THIRD ONE FIRED LIVE. Reading another attribute of a person's row: refused by the four-name projection, swept. Reading the wrong user: the key is no longer typed at all -- it comes from the index -- and the form is printed, pk_form=OTHER. Taking an absent attribute for an empty list: THIS IS THE ACTUAL STATE of the row, shape=ABSENT, and it is caught only because the script classifies the shape; the criterion's own NO does not distinguish it. Filed as row IRPT_YCDGEN-D2-S53. The preflight line still describes the 46-line first script; AMENDMENT 1 supersedes it and the 63-line amended script was swept afresh.",
       "tool": "comp-adversary"
     },
     {
-      "invocation": "comp-find \"swap_svc_firm\" --files --limit 10 --band HEAD",
-      "result": "PASS. 76 hits across 89695 files scanned, HEAD band 2, which located the st28 and st29 copies of the script whose prior successful reads are this instance's positive control.",
-      "tool": "comp-find"
-    },
-    {
       "invocation": "python .tools/proof-of-spec-check.py <this instance>",
-      "result": "see the run recorded at close; 2 of 2 criteria PASS",
+      "result": "see the run recorded at close; 2 of 2 criteria PASS against the amended criteria",
       "tool": "proof-of-spec-check.py"
     }
   ],
   "controls": {
-    "an_absent_ROW_and_an_absent_ATTRIBUTE_are_different_states_and_the_script_prints_different_lines": {
-      "description": "The order's third named trap: taking an absent attribute for an empty list. This is the exact trap this lane MET on the real table during st28 -- allowedFirmIds is a SCALAR STRING, and a reader who asked for .L on it got [] BY CONSTRUCTION, which reads as the firm list being empty. The question here is whether this result could be that trap wearing a different hat.",
-      "expected_landed": "the script branches on the ROW first and on the ATTRIBUTE SHAPE second, printing distinguishable lines for each, so an absent row cannot be mistaken for an empty firm list",
-      "expected_not_landed": "a single line that reads the same for a missing row, a missing attribute and an empty list",
-      "observed": "read_profile_firms.py returns at PROFILE-ROW-ABSENT when get_item yields no Item, BEFORE it ever touches allowedFirmIds. Had the row existed, it classifies the attribute into five named shapes -- ABSENT, STRING, LIST, STRING_SET, OTHER:<keys> -- and prints ALLOWED-FIRMS shape=... count=... ids=..., so an absent attribute would have read shape=ABSENT count=0 and NOT as an empty list. THEREFORE this result is the ROW branch: the trap did not fire and could not have, and the absence of any ALLOWED-FIRMS or FIRM-NAMED line in the record is the positive evidence of which branch ran. A FIRM-NAMED cottonwood NO would have been the dangerous output here, and it was not produced.",
+    "nothing_was_written_and_the_widened_bounds_were_not_exceeded": {
+      "description": "AMENDMENT 1 widens the bounds by EXACTLY one index query on the same table. A widened bound is an invitation to drift, and the obvious drift here was tempting: having found the row, re-read it with a wider projection to see what else it carries.",
+      "expected_landed": "one index query, one get_item, one table, zero writes, and no wider re-read after the answer",
+      "expected_not_landed": "a third call of any kind, another user, another table, or a wider projection -- the last of which the unamended order forbids by name and the amendment does not relax",
+      "observed": "The amended script was run ONCE, rc=0. Two read calls total, both on opal-users-v2. NO WIDER RE-READ was made even though the row turned out to be missing the one attribute the question is about -- that absence is reported and handed to the issuer rather than chased with another projection. The only other reads this act performed were REPO reads: the amended order, the amended script, and the prior window records. The first read's artifact was KEPT, not overwritten, as the amendment requires.",
       "status": "PASS"
     },
-    "nothing_was_written_and_the_act_is_one_call_wide": {
-      "description": "The bounds say ONE get_item on ONE key, no write, no scan, no query, no other table, no secret read. A read-only claim is worth stating only if something could have made it false.",
-      "expected_landed": "one get_item, zero writes, zero scans, zero queries, one table, no retry",
-      "expected_not_landed": "a second call of any kind, a retry with a wider projection after the absence -- which the order forbids by name and which an operator surprised by an absent row would be tempted into",
-      "observed": "The script was run ONCE, rc=0, and returned PROFILE-ROW-ABSENT. NO RETRY WAS MADE: the order says no retry with a wider projection, so the absence was reported as the answer rather than investigated, and the question of whether Andrew has a row elsewhere is handed to the issuer instead of being chased. The only other reads this act performed were REPO reads -- the script itself, swap_svc_firm.py and this lane's own window records for the positive control -- none of which touches the table.",
+    "the_amended_script_was_read_before_it_was_run_with_a_printed_verb_denominator": {
+      "description": "The script changed under this order and the order's own preflight still describes the OLD one (46 lines, one get_item). Grading the new script on the old preflight, or on the amendment's prose, would make a self-report the control twice over.",
+      "expected_landed": "the file matches the AMENDMENT's description -- one index query with Limit 2, one get_item by the PK the index names, four named attributes -- and a verb sweep returns zero on every write verb and on scan",
+      "expected_not_landed": "any write verb, a scan, a second get_item, a wider projection, or a printed PK VALUE",
+      "observed": "63 lines, up from 46. Verb sweep, every count printed: put_item 0, update_item 0, delete_item 0, batch_write_item 0, transact_write_items 0, .scan( 0, get_item 1, query 1. The query carries IndexName=email-index, KeyConditionExpression on email, Limit=2. The get_item carries ConsistentRead=True and ProjectionExpression of exactly four attributes with status aliased as a reserved word. The PK is printed only as a FORM -- the ternary emits USER#<email> or OTHER -- so the value never reaches the output or this repo.",
       "status": "PASS"
     },
-    "the_ABSENT_verdict_carries_a_positive_control_taken_from_the_record_because_the_bounds_forbid_a_new_one": {
-      "description": "THE CONTROL THIS WHOLE INSTANCE TURNS ON. A get_item returning None reads identically whether the item is absent, the key shape is wrong, or the table name is wrong -- a failed retrieval returns a VALUE. An ABSENT verdict therefore needs a positive control. The bounds forbid one: no other user, no other table, no wider projection. So the control is taken from this lane's OWN prior measured acts rather than from a new read, and the fact that it is not fresh is stated rather than hidden.",
-      "expected_landed": "a prior act of this lane, on the SAME table with the SAME key shape and the SAME call shape, that RESOLVED a row -- proving the shape and the credentials reach real items",
-      "expected_not_landed": "no such prior act, which would leave the None uninterpretable, or a prior act that used a different table or key shape, which would not control this one",
-      "observed": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/st29_release/swap_svc_firm.py:16-22 reads TABLE = opal-users-v2 and KEY = {PK: USER#svc-irpt-analysis@opalinvest.com, SK: PROFILE} via get_item(..., ConsistentRead=True) -- the same table, the same PK=USER#<email>/SK=PROFILE shape and the same consistent get_item that read_profile_firms.py builds. THIS LANE RAN IT FOUR TIMES TODAY and the row resolved every time with real attributes: W1/W2 window 9 record before {allowedFirmIds: cottonwood, status: active, userType: service} and after {allowedFirmIds: 49financial, ...}, in deliverables/irpt_ycdgen_sr1/W1_SWAP_OUT_WINDOW9.txt and W2_SWAP_BACK_WINDOW9.txt. So the table resolves, the key shape resolves, and this lane's credentials reach items on it. LIMIT, stated: the control is from 07:15-07:36Z today, not from this call, so it proves the instrument works and not that nothing changed on the table in the five hours between.",
+    "the_amendments_own_premise_is_now_MEASURED_rather_than_asserted": {
+      "description": "AMENDMENT 1 rests on a claim about the world: that a person's PK is NOT USER#<email>, which is why the first read's absence was its own key rather than a fact. An amendment is not evidence because it is new, and accepting that premise on the issuer's word would leave the void verdict unexplained.",
+      "expected_landed": "the amended read prints the PK's FORM, and that form is OTHER -- i.e. not USER#<email> -- which independently explains why the first get_item returned None",
+      "expected_not_landed": "pk_form=USER#<email>, which would mean the first script's key was right, the first absence was real, and the two reads contradict each other with no account of why",
+      "observed": "INDEX-KEY pk_form=OTHER sk=PROFILE. So the first read's PROFILE-ROW-ABSENT was a TRUE absence of a key that does not exist, and the two reads do not contradict: they read different keys. The script prints the form and never the value, so the account is on the record without putting the person's PK in the repo. Corroboration from the other direction: the same PK shape DOES resolve for a SERVICE row -- swap_svc_firm.py pins PK=USER#svc-irpt-analysis@opalinvest.com and this lane read it four times today -- so the shape is real for services and wrong for people, which is precisely the asymmetry the issuer named.",
       "status": "PASS"
     },
-    "the_absence_is_scoped_to_ONE_KEY_and_the_scope_is_printed_beside_it": {
-      "description": "An absence is only as wide as the read that found it. The dangerous reading of this result is the wide one -- Andrew has no user record -- which this read cannot support and which would be acted on if left unqualified. Rule 24(i): the tell is a denominator whose scope in PATH is narrower than the sentence beside it.",
-      "expected_landed": "the saved record names the exact table and the exact key, so the absence is readable as an absence of THAT key and nothing wider",
-      "expected_not_landed": "a bare PROFILE-ROW-ABSENT line with no key beside it, which invites the wide reading",
-      "observed": "The record's first line reads: opal-users-v2, PK=USER#andrew@opalinvest.com SK=PROFILE, ConsistentRead, four named attributes. WHAT IS ESTABLISHED: the item at that one key is not present. WHAT IS NOT: whether Andrew has a record under another SK, another PK shape, another table, or a differently-cased or aliased email -- the bounds forbid all four reads, so none was attempted and none is claimed. The script does lowercase the email before building the key, so a case mismatch on the INPUT is excluded; a differently-cased stored PK is not.",
+    "the_index_lookup_was_neither_empty_nor_ambiguous_and_both_were_testable": {
+      "description": "A GSI lookup that returns one row looks identical to one that returns the FIRST of several unless the query asks for more than it needs. One hit taken from a multi-hit index would attribute somebody else's firm list to this person -- a well-formed, entirely wrong answer.",
+      "expected_landed": "the query asks for Limit=2 and reports both the row count and whether more pages exist, so exactly-one is distinguishable from at-least-one",
+      "expected_not_landed": "rows>1 or more=YES, either of which prints USER-AMBIGUOUS-IN-INDEX and stops rather than picking a row",
+      "observed": "INDEX email-index rows=1 more=NO. Exactly one row, no further page, so the PK the get_item used is the only candidate the index offers. The ambiguity branch is real code, not a comment: the script returns at USER-AMBIGUOUS-IN-INDEX on len(rows)>1 OR LastEvaluatedKey, and AC1 and AC2 both admit that line as an outcome.",
       "status": "PASS"
     },
-    "the_key_read_is_the_key_recorded_and_the_user_is_the_ordered_user": {
-      "description": "The order's second named trap: reading the wrong user. A well-formed answer about the wrong row is the failure that looks most like success, and it is unfalsifiable from the output alone unless the key travels with it.",
-      "expected_landed": "the key is built from argv inside the script, the email on the command line is the one the order names, and the key appears in the saved record so a reader can re-derive it",
-      "expected_not_landed": "a hardcoded key inside the script, or an email other than andrew@opalinvest.com, or a record that does not say which key was read",
-      "observed": "The invocation was exactly the order's step 1: read_profile_firms.py andrew@opalinvest.com cottonwood. The script builds Key={PK: USER# + email, SK: PROFILE} from argv[1] after lowercasing it -- no hardcoded key, unlike swap_svc_firm.py which pins its own. The echoed email in the output line, PROFILE-ROW-ABSENT andrew@opalinvest.com, is the key's own email, so the output names the row it is about. One user, one key, one call.",
+    "the_order_was_regraded_against_the_amended_bytes_not_the_bytes_already_graded": {
+      "description": "This order was flipped complete against @14494224c2 and then AMENDED, which re-opened it. A citation ages separately from the text it quotes, and the specific hazard here is grading the second read against the FIRST version's criteria, which name the first file.",
+      "expected_landed": "the working-tree order equals the amended bytes, the only local delta beforehand was this seat's own status flip, and both criteria in this instance are the AMENDED ones naming the second file",
+      "expected_not_landed": "an instance carrying the first version's invocations, or a working tree that differs from the cited commit in any way other than the status field",
+      "observed": "git diff against 76744e25ce showed ONE hunk, the status line this seat had flipped; the order was re-opened to pending and the working-tree blob then equalled da08492157585589137455584b08bccbd76fd516, the blob at 76744e25ce, exactly. 76744e25ce is an ancestor of HEAD. Both invocations recorded here name PROFILE_FIRMS_READ_2_20261011.txt and carry the amended four-way expects, and the checker's invocation-alignment limb compares them against the order's own criterion text.",
       "status": "PASS"
     },
-    "the_script_was_read_before_it_was_run_with_a_printed_write_verb_denominator": {
-      "description": "The order hands this seat a script written by the issuer and points it at a production table holding people's rows. Running it on the preflight's description alone would make the preflight the control, and a self-report is not a control.",
-      "expected_landed": "the file matches its stated shape -- 46 lines, one get_item, a four-name ProjectionExpression -- and a sweep for write and wide-read verbs returns zero on every one",
-      "expected_not_landed": "any put_item/update_item/delete_item/batch_write_item/transact_write_items, or a scan or query, or a projection wider than the four named attributes",
-      "observed": "46 lines by wc, matching the preflight. Verb sweep, each count printed: put_item 0, update_item 0, delete_item 0, batch_write_item 0, transact_write_items 0, scan 0, query 0. One get_item, ProjectionExpression=\"allowedFirmIds, #s, userType, firmId\" with ExpressionAttributeNames {#s: status} -- four attributes, the fourth aliased because status is a DynamoDB reserved word. ConsistentRead=True, which is correct for a read a decision rests on: an eventually-consistent read could return a stale absence.",
+    "the_shape_classifier_is_what_kept_an_ABSENT_attribute_from_reading_as_an_empty_list": {
+      "description": "THE ORDER'S THIRD NAMED TRAP, and here it is the live case rather than a hypothetical. This lane MET this trap on this table during st28: allowedFirmIds is a SCALAR STRING, and a reader asking for .L on it got [] BY CONSTRUCTION, which reads as the firm list being empty.",
+      "expected_landed": "the attribute's shape is classified into one of five named states and printed beside the count, so ABSENT is visibly different from an empty STRING, LIST or STRING_SET",
+      "expected_not_landed": "a bare count=0 or a bare FIRM-NAMED NO with no shape beside it, which is the trap: it reads as a firm list that does not include cottonwood",
+      "observed": "ALLOWED-FIRMS shape=ABSENT count=0 ids=-. The attribute is NOT PRESENT on the row. count=0 and ids=- are consequences of ABSENT, not independent measurements, and the FIRM-NAMED cottonwood NO on the next line is reached from that same state. THE CRITERION CANNOT SEE THE DIFFERENCE: AC2 admits only YES or NO once a row is found, so ABSENT, present-and-empty and present-and-not-containing all grade NO. The shape line is the only thing in the whole act that separates them, which is why the answer is reported WITH it and why row IRPT_YCDGEN-D2-S53 exists.",
+      "status": "PASS"
+    },
+    "the_two_reads_have_different_consistency_and_the_weaker_one_is_named": {
+      "description": "The act is now TWO calls with DIFFERENT consistency guarantees, and the composite is only as strong as its weakest link. A DynamoDB GSI cannot be read consistently -- ConsistentRead is not available on a global secondary index -- so the index half is eventually consistent by construction. An instance that reported the whole answer as a consistent read would be overclaiming.",
+      "expected_landed": "the item read is ConsistentRead=True, and the index half is stated as eventually consistent rather than implied to be strong",
+      "expected_not_landed": "a claim that the whole answer is strongly consistent, or silence about the asymmetry",
+      "observed": "get_item carries ConsistentRead=True, so the ROW's four attributes are a strong read: shape=ABSENT is not a stale value. The email-index query is NOT and cannot be consistent. WHAT THAT LIMITS: a USER-NOT-IN-INDEX or a stale PK from a very recently written user is possible in principle. It is not what happened here -- the index named a PK, the consistent get_item found a live row at it, and a stale index entry pointing at a non-existent row would have printed PROFILE-ROW-ABSENT instead. So the two halves corroborate each other in the direction that matters.",
       "status": "PASS"
     }
   },
   "declared_exclusions": [
     {
-      "item": "no fresh positive control was run, because the bounds forbid reading another user",
-      "reason": "the strongest control for a None from get_item is the same call against a key known to exist, and that is a second user. The bounds say no other user, so the control is taken from this lane's own measured acts of 07:15-07:36Z today instead. The consequence is stated: the instrument is proved to work, and nothing here excludes a change to the table between those reads and this one."
-    },
-    {
-      "item": "whether Andrew has a user record under any OTHER key, SK, table or email spelling",
-      "reason": "the bounds forbid another user, another table, another attribute and a wider projection. So this instance establishes that one key is absent and deliberately does not answer the wider question, which is the one an unqualified reading of PROFILE-ROW-ABSENT would silently claim."
-    },
-    {
-      "item": "which rule an on-behalf upload takes when the filer's PROFILE row is ABSENT",
-      "reason": "the decomp context names served.py lines 1063-1066 as the rule the answer feeds, and the issuer's preflight records having read it. This seat did NOT read it and offers no view: an absent row is a THIRD state beside the two the rule's branches contemplate, and choosing which branch it takes is an adjudication for 2.0.0_SA_COO~G2 and the CTO, not for the applier. Surface, do not adjudicate."
+      "item": "which branch served.py lines 1063-1066 takes when allowedFirmIds is ABSENT",
+      "reason": "this is now the live question and it is deliberately unanswered. This seat read the TABLE, not that code. Whether the rule treats a missing attribute as an empty set, raises on it, or takes a different path is an adjudication for 2.0.0_SA_COO~G2 and the CTO. Surface, do not adjudicate. Carried as row IRPT_YCDGEN-D2-S53."
     },
     {
       "item": "row IRPT_YCDGEN-D2-S4 is NOT dispositioned here",
-      "reason": "this read is its INPUT, not its resolution. The row (2.0.0_SA_COO~G2, 2026-10-09T01:56:00Z) states that no registered partner firm has a row E5 can resolve as FIRM_OPERATIONS and that cottonwood has no FIRM_ADVISOR-capable row either. The absence measured here is consistent with that picture and enriches it -- the filer's own PROFILE row is absent too -- but the row is the issuer's and no new row was filed, because an absence the order explicitly admits as an outcome is the answer rather than a surprise."
+      "reason": "this read is its INPUT. The row (2.0.0_SA_COO~G2, 2026-10-09T01:56:00Z) states that no registered partner firm has a row E5 can resolve as FIRM_OPERATIONS and that cottonwood has no FIRM_ADVISOR-capable row. What this read adds is the filer's own side: his row is present and active but is userType=Dev, firmId=opal-capital, and carries no allowedFirmIds at all. Consistent with the row, and the row stays the issuer's."
+    },
+    {
+      "item": "the person's actual PK value, and every attribute of the row other than the four named",
+      "reason": "the script prints the PK's FORM only, and the projection names four attributes. So this instance can say the PK is not USER#<email> and cannot say what it is -- which is the right trade for a record that lives in git. The password hash and every other attribute were never requested."
+    },
+    {
+      "item": "whether the email index is current",
+      "reason": "a DynamoDB GSI cannot be read with ConsistentRead, so the lookup half of this act is eventually consistent by construction. The item half is strong. Stated rather than left implicit, because a USER-NOT-IN-INDEX outcome would have inherited that weakness and this one does not need to."
     },
     {
       "item": "no deploy-completion ledger was opened",
-      "reason": "NEVER-2 binds a confirmed DEPLOY. This act's write set is EMPTY -- one get_item, no write, no host change, no S3 put -- so there is nothing that could be left half-landed."
+      "reason": "NEVER-2 binds a confirmed DEPLOY. This act's write set is EMPTY -- one index query and one get_item, no write, no host change, no S3 put -- so there is nothing that could be left half-landed."
     }
   ],
   "decomp_ref": {
@@ -136,20 +146,22 @@
   "firm": "FABRIC",
   "genre": "DEPLOY",
   "never_widen_pair": {
-    "coo_half": "NOT REQUIRED AND NOT CLAIMED: this act widens nothing and serves nothing new. ONE read-only get_item whose write set is empty -- no served output moved, no IAM or policy change, no item created, modified or deleted, no secret read. NEVER-1 binds an act that moves served output; a single-item read is not such an act, which is why the order carries <risk>SERVED</risk> rather than WORLD and why no pair was issued with it.",
-    "cto_half": "NOT REQUIRED AND NOT CLAIMED, same reason. The authority for the act is the order itself, IRPT_YCDGEN.TO-APPLY-j2 @14494224c2 -- verified at the bytes: the working-tree blob bc4a507171cd2ba929d0966de8e62e8a6d391ed9 equals the blob at that commit, and 14494224c2 is an ancestor of HEAD -- resting on cell YCD-d-11 of IRPT_YCDGEN_DECOMP_R11.md and on the journey read's hop 5."
+    "coo_half": "NOT REQUIRED AND NOT CLAIMED: this act widens nothing and serves nothing new. Two read-only DynamoDB calls whose write set is empty -- no served output moved, no IAM or policy change, no item created, modified or deleted, no secret read. NEVER-1 binds an act that moves served output; a single-item read behind an index lookup is not such an act, which is why the order carries <risk>SERVED</risk> rather than WORLD and why no pair was issued with it, before or after AMENDMENT 1.",
+    "cto_half": "NOT REQUIRED AND NOT CLAIMED, same reason. The authority is the order itself at its AMENDED bytes, IRPT_YCDGEN.TO-APPLY-j2 @76744e25ce -- verified: after this seat re-opened the status it had flipped, the working-tree blob da08492157585589137455584b08bccbd76fd516 equals the blob at that commit, which is an ancestor of HEAD. The amendment is the issuer's own, which CLAUDE.md rule 27 permits without a CTO ruling, and it widens the bounds by exactly one index query on the same table."
   },
   "phase": "BUILD-GENERAL",
   "risk_class": "SERVED",
-  "rollback": "NONE NEEDED AND NONE POSSIBLE, stated rather than left blank: the act's write set is empty. One get_item with a four-attribute projection creates nothing, modifies nothing and deletes nothing; the script contains zero write verbs, a count printed in controls rather than asserted. The only durable effects are this seat's own artifacts in the repo, which git reverts. Nothing on the resident host and nothing in S3 was touched by this order, so the st30 release's own rollback arm (remove_st30_to_st27.sh, X1 + V2) is unaffected and remains unrun, still needing a new word from 2.0.0_SA_COO~G2.",
+  "rollback": "NONE NEEDED AND NONE POSSIBLE, stated rather than left blank: the act's write set is empty. One index query and one projected get_item create nothing, modify nothing and delete nothing; the amended script contains zero write verbs and zero scans, counts printed in controls rather than asserted. The only durable effects are this seat's own artifacts in the repo, which git reverts, and the superseded first read is KEPT by the amendment's instruction rather than removed. Nothing on the resident host and nothing in S3 was touched, so the st30 release's rollback arm (remove_st30_to_st27.sh, X1 + V2) is unaffected and remains unrun, still needing a new word from 2.0.0_SA_COO~G2.",
   "schema_version": "1.0",
-  "scope": "ONE read-only get_item on ONE key of opal-users-v2 -- PK=USER#andrew@opalinvest.com, SK=PROFILE -- for four attributes by name (allowedFirmIds, status, userType, firmId), to say whether that row names cottonwood. Round 11 cell YCD-d-11; the input to row IRPT_YCDGEN-D2-S4, which this instance does NOT dispose of.",
-  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_20261011.txt",
+  "scope": "Read ONE person's PROFILE row the way the product finds it -- ONE query on opal-users-v2 index email-index (Limit 2), then ONE ConsistentRead get_item on the PK that index names, SK=PROFILE, four attributes by name (allowedFirmIds, status, userType, firmId) -- and say whether that row names cottonwood. Graded against AMENDMENT 1 @76744e25ce, which VOIDED the first read's answer and moved both criteria onto the second file. Round 11 cell YCD-d-11; the input to row IRPT_YCDGEN-D2-S4, which this instance does NOT dispose of.",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_2_20261011.txt",
   "spec_ref": {
     "doc": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-j2.one-profile-row-read-dell2.md",
     "group": "OTHER",
-    "vintage_commit": "14494224c2"
+    "vintage_commit": "76744e25ce"
   },
-  "surprises": [],
+  "surprises": [
+    "IRPT_YCDGEN-D2-S53: FIRM-NAMED cottonwood NO rests on an ABSENT attribute, not on a list that lacks cottonwood. andrew@opalinvest.com's PROFILE row is present and active (userType=Dev, firmId=opal-capital) but carries NO allowedFirmIds at all (shape=ABSENT count=0 ids=-), and AC2's vocabulary collapses three world states -- ABSENT, present-and-empty, present-and-not-containing -- into the same NO. This is the order's own third named trap occurring live. Whether served.py lines 1063-1066 treat a missing attribute as an empty set, raise on it, or branch elsewhere is NOT established: this seat read the table, not that code. OBSERVATION, INERT (a reading hazard, nothing armed), UNDER_INVESTIGATION, disarm_owner 2.0.0_SA_COO~G2. Carrier org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md."
+  ],
   "to_id": "IRPT_YCDGEN.TO-APPLY-j2.one-profile-row-read-dell2"
 }
