@@ -1,0 +1,668 @@
+{
+ "reproduced_nine": {
+  "funds": 9,
+  "dates": 92,
+  "dates_below": 87,
+  "min_ratio": 0.47,
+  "reviewer": {
+   "funds": 9,
+   "dates": 92,
+   "dates_below": 87,
+   "min_ratio": 0.47
+  },
+  "rows": 1121,
+  "events_total": 221,
+  "events_without_same_date_close": 129,
+  "dates_above_by_more_than_0_5_pct": 1,
+  "dates_within_0_5_pct": 4,
+  "dates_below_0_98_the_rule_threshold": 86,
+  "dates_below_1": 89,
+  "funds_with_a_date_below": 9,
+  "cells_dropped_for_wide_spread": 0,
+  "definition": "Reviewer's instrument as reproduced: type dvr, shares >= 0.05 (no row in the nine is below it), pooled amount over shares per (fund, date), same-date close, below = ratio < 0.995 (more than 0.5 percent).",
+  "difference_from_reviewer": "none: 9 / 92 / 87 / 0.47 reproduced exactly (1,121 rows in 221 events, 1 above, 4 within 0.5 percent)",
+  "per_fund": [
+   {
+    "ticker": "AMCPX",
+    "dates": 4,
+    "dates_below": 4,
+    "min_ratio": 0.5112
+   },
+   {
+    "ticker": "AMRMX",
+    "dates": 10,
+    "dates_below": 10,
+    "min_ratio": 0.6342
+   },
+   {
+    "ticker": "AWSHX",
+    "dates": 11,
+    "dates_below": 11,
+    "min_ratio": 0.47
+   },
+   {
+    "ticker": "CPXIX",
+    "dates": 17,
+    "dates_below": 17,
+    "min_ratio": 0.837
+   },
+   {
+    "ticker": "CWGIX",
+    "dates": 11,
+    "dates_below": 11,
+    "min_ratio": 0.591
+   },
+   {
+    "ticker": "FINFX",
+    "dates": 12,
+    "dates_below": 10,
+    "min_ratio": 0.6639
+   },
+   {
+    "ticker": "NEWFX",
+    "dates": 3,
+    "dates_below": 3,
+    "min_ratio": 0.7034
+   },
+   {
+    "ticker": "WGIFX",
+    "dates": 12,
+    "dates_below": 11,
+    "min_ratio": 0.6816
+   },
+   {
+    "ticker": "WMFFX",
+    "dates": 12,
+    "dates_below": 10,
+    "min_ratio": 0.6483
+   }
+  ],
+  "under_the_rule": [
+   {
+    "ticker": "AMCPX",
+    "usable_dates": 4,
+    "reading": "nothing_to_test_on",
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "AMRMX",
+    "usable_dates": 10,
+    "reading": "confirmed_adjusted",
+    "reason": ""
+   },
+   {
+    "ticker": "CWGIX",
+    "usable_dates": 11,
+    "reading": "confirmed_adjusted",
+    "reason": ""
+   },
+   {
+    "ticker": "WGIFX",
+    "usable_dates": 12,
+    "reading": "confirmed_adjusted",
+    "reason": ""
+   },
+   {
+    "ticker": "CPXIX",
+    "usable_dates": 17,
+    "reading": "confirmed_adjusted",
+    "reason": ""
+   },
+   {
+    "ticker": "FINFX",
+    "usable_dates": 12,
+    "reading": "confirmed_adjusted",
+    "reason": ""
+   },
+   {
+    "ticker": "NEWFX",
+    "usable_dates": 3,
+    "reading": "nothing_to_test_on",
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "AWSHX",
+    "usable_dates": 11,
+    "reading": "confirmed_adjusted",
+    "reason": ""
+   },
+   {
+    "ticker": "WMFFX",
+    "usable_dates": 12,
+    "reading": "confirmed_adjusted",
+    "reason": ""
+   }
+  ]
+ },
+ "rule": "CLOCK_UTC 2026-10-11T18:37:42Z\nRULE FOR \"CONFIRMED\" (0.9.0_WK_ADVI_COTBKF~119, TO ADVI_COTBKF.TO-CB-bt-1). Fixed before the whole-table run; kept as written.\nPositive control (the reviewer's nine, reproduced first with pooling and no spread filter) was run before this rule was written; nothing else was run over the table.\n\nINSTRUMENT. Reinvestment rows = Transaction_Type 'dvr' only, with Amount > 0 and Quantity >= 0.05 shares (stricter sensitivity: >= 1 share, same rule).\nDVRX / DVX are not used (every DVRX row coincides with a dvr row of the same account, cusip and date; DVX has no quantity).\nCell = (cusip, date). Cell price = sum(Amount) / sum(Quantity) over the cell's rows, pooled across accounts. Per-account price = that account's summed Amount / summed Quantity on the date.\nSpread of a cell = (max - min) / median of per-account prices, defined when the cell has >= 2 accounts. A cell with spread > 0.05 is DROPPED (counted, not read).\nUsable date = a kept cell with a close in the build price table (r34/after) on the SAME date. Pairs within one trading day are counted separately and never enter the reading.\nRatio = close / cell price. \"Below\" = ratio < 0.98. \"At 1\" = 0.98 <= ratio <= 1.02. N = number of usable dates of the series.\n\nREADING (applied to every fund series; Mutual Fund and Mutual Fund (Closed End) by the transaction Asset_Type mode, the round 71 join; ETF and Equity with the same rule, separately):\n confirmed_adjusted : N >= 5 AND share of usable dates below 0.98 >= 0.60 AND median ratio of the later half of the usable dates (by date, N//2 dates) > median ratio of the earlier half (N//2 dates)  [the ratio rises toward the present].\n confirmed_not      : N >= 5 AND share of usable dates at 1 (within 2 percent) >= 0.80 AND at least 3 of those at-1 dates fall >= 730 days before the series' last close date in the table [dates far enough back that an adjusted series would show].\n nothing_to_test_on : everything else, with a reason code: no_cells (no dvr row at the guard), no_paired_date (cells exist, none on a date the table has a close), n_lt_5, undecided (N >= 5, neither pattern), at_1_but_too_recent (N >= 5 and 80 percent at 1 but fewer than 3 far-back dates).\n A series with too few dates is never confirmed_not. 'undecided' is NOT evidence of not-adjusted.\n\nREACH. Account-days of confirmed_adjusted fund series: priced holding rows in account_day_value (value not null) dated <= L, where L = the last usable reinvestment date at which the ratio is < 0.98; MEASURED = those whose (account, date) has a non-null return in daily_returns. (Strict < L is reported beside.) Ratio per account-day = ratio of the latest usable cell dated on or before the day (carried forward; the first cell's ratio for days before the first cell, counted separately); bands counted at < 0.9, < 0.75, < 0.5.\n",
+ "fund_series": 270,
+ "confirmed_adjusted": 19,
+ "confirmed_not": 15,
+ "nothing_to_test_on": 236,
+ "nothing_to_test_on_by_reason": {
+  "no_paired_date": 129,
+  "no_cells": 72,
+  "n_lt_5": 32,
+  "at_1_but_too_recent": 3
+ },
+ "against_round_71": {
+  "table": {
+   "read_adjusted_72": {
+    "series": 72,
+    "confirmed_adjusted": 19,
+    "confirmed_not": 0,
+    "nothing_to_test_on": 53,
+    "nothing_by_reason": {
+     "no_cells": 23,
+     "n_lt_5": 18,
+     "no_paired_date": 12
+    }
+   },
+   "read_not_adjusted_1": {
+    "series": 1,
+    "confirmed_adjusted": 0,
+    "confirmed_not": 0,
+    "nothing_to_test_on": 1,
+    "nothing_by_reason": {
+     "no_paired_date": 1
+    }
+   },
+   "substituted_73": {
+    "series": 73,
+    "confirmed_adjusted": 0,
+    "confirmed_not": 15,
+    "nothing_to_test_on": 58,
+    "nothing_by_reason": {
+     "no_cells": 22,
+     "no_paired_date": 21,
+     "n_lt_5": 13,
+     "at_1_but_too_recent": 2
+    }
+   },
+   "untested_124": {
+    "series": 124,
+    "confirmed_adjusted": 0,
+    "confirmed_not": 0,
+    "nothing_to_test_on": 124,
+    "nothing_by_reason": {
+     "no_paired_date": 95,
+     "no_cells": 27,
+     "at_1_but_too_recent": 1,
+     "n_lt_5": 1
+    }
+   }
+  },
+  "disagreements": [],
+  "disagreement_definition": "A disagreement is a series both instruments read definitely and oppositely (round 71 adjusted with this instrument confirmed_not, or round 71 not adjusted with this instrument confirmed_adjusted). Series this instrument cannot read are not disagreements; the ones that round 71 read adjusted are listed below.",
+  "read_adjusted_in_71_not_confirmed_here": [
+   {
+    "ticker": "ABALX",
+    "usable_dates": 0,
+    "reason": "no_paired_date"
+   },
+   {
+    "ticker": "ACEIX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "AEPGX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "AGTHX",
+    "usable_dates": 3,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "AIVSX",
+    "usable_dates": 0,
+    "reason": "no_paired_date"
+   },
+   {
+    "ticker": "AMBFX",
+    "usable_dates": 4,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "AMCPX",
+    "usable_dates": 4,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "AMECX",
+    "usable_dates": 1,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "ANEFX",
+    "usable_dates": 1,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "ANWFX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "ANWPX",
+    "usable_dates": 2,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "BALCX",
+    "usable_dates": 3,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "CGFAX",
+    "usable_dates": 0,
+    "reason": "no_paired_date"
+   },
+   {
+    "ticker": "CISIX",
+    "usable_dates": 0,
+    "reason": "no_paired_date"
+   },
+   {
+    "ticker": "CIVIX",
+    "usable_dates": 0,
+    "reason": "no_paired_date"
+   },
+   {
+    "ticker": "CNPAX",
+    "usable_dates": 0,
+    "reason": "no_paired_date"
+   },
+   {
+    "ticker": "CSRIX",
+    "usable_dates": 0,
+    "reason": "no_paired_date"
+   },
+   {
+    "ticker": "CSXAX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "DODGX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "DSMFX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "FBALX",
+    "usable_dates": 1,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "FBGRX",
+    "usable_dates": 0,
+    "reason": "no_paired_date"
+   },
+   {
+    "ticker": "FKGRX",
+    "usable_dates": 0,
+    "reason": "no_paired_date"
+   },
+   {
+    "ticker": "FNWFX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "FOCPX",
+    "usable_dates": 4,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "FUNFX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "GFFFX",
+    "usable_dates": 4,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "HACAX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "HLMEX",
+    "usable_dates": 0,
+    "reason": "no_paired_date"
+   },
+   {
+    "ticker": "IHGIX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "JGVVX",
+    "usable_dates": 1,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "JLGMX",
+    "usable_dates": 1,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "JMVSX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "JVAAX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "MDLOX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "MEIAX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "MGIAX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "MIGFX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "NEWFX",
+    "usable_dates": 3,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "NFFFX",
+    "usable_dates": 4,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "NOSIX",
+    "usable_dates": 0,
+    "reason": "no_paired_date"
+   },
+   {
+    "ticker": "NRGSX",
+    "usable_dates": 1,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "OIEJX",
+    "usable_dates": 2,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "OLGAX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "PRGFX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "PRSCX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "PRWCX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "SMCWX",
+    "usable_dates": 2,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "TBCIX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "TIBAX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   },
+   {
+    "ticker": "VAFAX",
+    "usable_dates": 0,
+    "reason": "no_paired_date"
+   },
+   {
+    "ticker": "VGHAX",
+    "usable_dates": 3,
+    "reason": "n_lt_5"
+   },
+   {
+    "ticker": "VWINX",
+    "usable_dates": 0,
+    "reason": "no_cells"
+   }
+  ],
+  "of_those_with_usable_dates_all_below_0_98_but_too_few": [
+   "AGTHX",
+   "AMBFX",
+   "AMCPX",
+   "AMECX",
+   "ANEFX",
+   "ANWPX",
+   "BALCX",
+   "FBALX",
+   "FOCPX",
+   "JGVVX",
+   "JLGMX",
+   "NEWFX",
+   "NRGSX",
+   "OIEJX",
+   "SMCWX",
+   "VGHAX"
+  ],
+  "of_those_leaning_adjusted_count": 16,
+  "confirmed_adjusted_here_that_were_untested_or_not_in_71": 0,
+  "note": "Of the 73 substituted funds (round 71: all not adjusted) this instrument can read 15, and all 15 read confirmed_not."
+ },
+ "other_kinds": {
+  "ETF": {
+   "series": 276,
+   "confirmed_adjusted": 0,
+   "confirmed_not": 26,
+   "nothing_to_test_on": 250,
+   "nothing_by_reason": {
+    "no_cells": 224,
+    "no_paired_date": 19,
+    "n_lt_5": 4,
+    "at_1_but_too_recent": 2,
+    "undecided": 1
+   },
+   "sensitivity_guard_1_share": {
+    "confirmed_adjusted": 0,
+    "confirmed_not": 11,
+    "nothing_to_test_on": 265
+   },
+   "round_71_read_adjusted": [
+    "VNM",
+    "XAR"
+   ],
+   "round_71_adjusted_under_this_instrument": {
+    "nothing_to_test_on": 2
+   },
+   "disagreements": []
+  },
+  "Equity": {
+   "series": 934,
+   "confirmed_adjusted": 0,
+   "confirmed_not": 5,
+   "nothing_to_test_on": 929,
+   "nothing_by_reason": {
+    "no_cells": 802,
+    "no_paired_date": 99,
+    "n_lt_5": 20,
+    "undecided": 8
+   },
+   "sensitivity_guard_1_share": {
+    "confirmed_adjusted": 0,
+    "confirmed_not": 2,
+    "nothing_to_test_on": 932
+   },
+   "round_71_read_adjusted": [
+    "GEHC",
+    "KGC",
+    "PWR",
+    "PYPL",
+    "RNG",
+    "TXT",
+    "WDC"
+   ],
+   "round_71_adjusted_under_this_instrument": {
+    "nothing_to_test_on": 7
+   },
+   "disagreements": []
+  }
+ },
+ "reach": {
+  "priced_holding_account_days": 261182,
+  "measured_account_days": 712,
+  "ratio_bands": {
+   "basis": "per account-day, the ratio of the latest usable reinvestment cell on or before the day (carried forward); counts only",
+   "priced": {
+    "n": 261182,
+    "lt_0_9": 259952,
+    "lt_0_75": 233427,
+    "lt_0_5": 1470,
+    "pre_first_cell": 30256
+   },
+   "measured_account_days_sum_over_series": {
+    "n": 1030,
+    "lt_0_9": 1030,
+    "lt_0_75": 728,
+    "lt_0_5": 0,
+    "pre_first_cell": 0
+   },
+   "measured_distinct_account_days_min_ratio_per_day": {
+    "n": 712,
+    "lt_0_9": 712,
+    "lt_0_75": 459,
+    "lt_0_5": 0
+   }
+  },
+  "detail": {
+   "round_71": {
+    "priced_holding_account_days": 287912,
+    "measured_account_days": 3187
+   },
+   "series": 19,
+   "series_with_holdings": 19,
+   "priced_distinct_account_days": 250213,
+   "measured_rows_sum_over_series": 1030,
+   "strict_before_last_date_priced": 261152,
+   "strict_before_last_date_measured_rows": 1027,
+   "strict_before_last_date_measured_distinct": 710,
+   "served_measured_account_days_in_all_daily_returns": 107316,
+   "definition": "Priced = (account, date, security) rows with a value, dated on or before L, over the confirmed_adjusted fund series, summed over series; measured = distinct (account, date) with a non-null return among them. L = the series' last usable reinvestment date with ratio < 0.98. Round 71's figures use the last distribution date on 72 series."
+  }
+ },
+ "headline": "Of 270 fund series in the build's price table, 19 are confirmed dividend-adjusted by the custodian's reinvestment price, 15 are confirmed not adjusted, and 236 have nothing to test on (72 have no reinvestment row at the share guard, 129 have rows but none on a date the table has a close, 32 have fewer than 5 such dates, 3 are undecided or too recent).",
+ "not_established": [
+  "The 72 round 71 read adjusted are NOT cleared or confirmed beyond the 19 here: 53 cannot be read by this instrument (the table holds a close on only 796 of the 4568 fund reinvestment dates) and 16 of those 53 lean adjusted on 1 to 4 dates, all below 0.98, which is under the rule's 5 and is not counted.",
+  "The reviewer's AMCPX (4 paired dates) and NEWFX (3) are nothing_to_test_on under the rule as written before the run; a 3-date minimum would confirm them (reported beside, not adopted).",
+  "confirmed_not rests on 15 substituted funds read at 1; no fund left on the store reads confirmed_not (the one such fund round 71 read not adjusted has no paired date). The 124 untested of round 71 stay untested: 95 have no paired date, 27 no reinvestment row, 1 fewer than 5 dates, 1 at 1 but too recent.",
+  "The ratio is read only on reinvestment dates; between them it is carried forward, so the band counts for other days are an estimate, and for days before a fund's first paired date an upper bound on the ratio.",
+  "'dvr' only: no other transaction type was shown to be a reinvestment at the day's price (DVRX coincides with dvr rows). No cell was dropped for spread (largest spread across accounts 1.8 percent); pairing is same-date only; fund cells within one trading day but with no same-date close are 3 and are not read.",
+  "Why a close is adjusted, who made it, and whether the served output carries it is not examined; no return was recomputed; the reach counts holdings that rest on an adjusted close, not return error. The kind of a security is the transaction Asset_Type mode (the round 71 join); reach inputs are the round 34 serve.",
+  "ETF and Equity: 0 confirmed adjusted, but round 71's 9 (2 ETF, 7 Equity) that read adjusted have no reinvestment row at all, so they are untested here, not cleared."
+ ],
+ "sensitivities": {
+  "guard_1_share": {
+   "confirmed_adjusted": 19,
+   "confirmed_not": 12,
+   "nothing_to_test_on": 239,
+   "confirmed_adjusted_set_identical_to_guard_005": true
+  },
+  "different_rule_minimum_3_dates_not_5": {
+   "confirmed_adjusted": 27,
+   "confirmed_not": 17,
+   "nothing_to_test_on": 226,
+   "note": "same other conditions; adds AGTHX, AMCPX, BALCX, FOCPX, GFFFX, NEWFX, NFFFX, VGHAX as adjusted (AMCPX and NEWFX are among the reviewer's nine) and FEMKX, MHYIX as not adjusted; reported, not adopted"
+  }
+ },
+ "cells": {
+  "dvr_cells_all_kinds": 7632,
+  "dvr_cells_fund": 4568,
+  "fund_cells_with_same_date_close": 796,
+  "fund_cells_dropped_wide_spread": 0,
+  "fund_cells_without_same_date_close_but_within_one_trading_day": 3,
+  "spread_across_accounts": {
+   "cells_with_2_or_more_accounts": 3693,
+   "median": 0.00051,
+   "max": 0.01761,
+   "cells_over_1_pct": 151,
+   "cells_over_5_pct_dropped": 0
+  }
+ },
+ "control_substituted": {
+  "series": 73,
+  "confirmed_not": 15,
+  "confirmed_adjusted": 0,
+  "nothing_to_test_on": 58
+ },
+ "confirmed_adjusted_tickers": [
+  "ABNFX",
+  "AMRMX",
+  "ANCFX",
+  "AWSHX",
+  "CAIBX",
+  "CPXIX",
+  "CWGIX",
+  "DFLVX",
+  "DFREX",
+  "DISVX",
+  "FCNTX",
+  "FINFX",
+  "MEIIX",
+  "PCBIX",
+  "PRILX",
+  "SGIIX",
+  "VEIRX",
+  "WGIFX",
+  "WMFFX"
+ ],
+ "confirmed_not_tickers": [
+  "DFCEX",
+  "DFIEX",
+  "FLTRX",
+  "FSKAX",
+  "FSMAX",
+  "FSPSX",
+  "FSSNX",
+  "MAMTX",
+  "NHMRX",
+  "PDBZX",
+  "PTTAX",
+  "VBIRX",
+  "VFIAX",
+  "VTSAX",
+  "VWIUX"
+ ]
+}
