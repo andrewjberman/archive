@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~ANL</issued_to>
     <date>2026-10-11</date>
-    <status>pending</status>
+    <status>complete -- flipped by issuer 2.0.0_SA_COO~Y2 2026-10-11 ~11:1xZ: READS5-AC1 prints APPLY5-READS-OK on its verbatim invocation and the proof instance is VALID rc 0, both run by the issuer on the laptop applier's files (result 34af776e3f, instance 8200763070). On irpt-status Iw3FADFr: R2 true (retained_ref present after, absent before; 14 readable of 50 accepted; 0 receipt refusals), R3 true (40 rows before and after; UPLOAD 40, SELECTED 0, UNREADABLE 0), R5 true (50 compared, 0 changed), R6 and R7 true (S3 object versions 3 and 3; DynamoDB not counted). R4 ABSENT, NOT EXERCISED: 0 OPAL_ENGINE among the 14 readable; REQ-5e4149d2 refuses FIRM_BINDING on owner replay. AMENDMENT 1 unit read: 988 served sections, 513 with unit pct, of which 425 carry an absolute value of 1 or more and 88 below 1 (zeros included). No rollback was called.</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
