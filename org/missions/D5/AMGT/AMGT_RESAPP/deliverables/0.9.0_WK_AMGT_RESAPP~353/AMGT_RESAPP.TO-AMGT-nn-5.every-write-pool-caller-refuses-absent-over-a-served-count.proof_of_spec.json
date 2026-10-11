@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-nn-5.every-write-pool-caller-refuses-absent-over-a-served-count",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_AMGT_RESAPP_S5_WRITE_POOL_GUARD_20261010.md",
+    "group": "OTHER",
+    "vintage_commit": "16d359ecc3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "16d359ecc3",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-nn-5.every-write-pool-caller-refuses-absent-over-a-served-count.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~353",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "0e14335de2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: new _refuse_absent_over_served(document, served) raises ValueError (text begins REFUSED:, names the served research_universe.folders count, states NO put was attempted) when the document's research_universe carries no folders and the served latest document carries folders; write_pool calls it inside the existing served-union block, after _carry_served, reusing the single _read_pool_latest result; the block runs only when document is supplied, bucket is POOL_BUCKET and the key matches CROSSWALK_KEY_RE, so a no-document write is byte-identical. main() early refusal unchanged.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/identity/add_security.py",
+      "kind": "script",
+      "commit_or_etag": "0e14335de2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: the swallowing twin _research_folders_disclosure() is deleted; _build_document calls crosswalk._research_folders_for_disclosure(), the one guarded helper. No other behaviour changed.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_write_pool_union.py",
+      "kind": "test",
+      "commit_or_etag": "0e14335de2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, one line: the patch at line 93 repointed from add_security._research_folders_disclosure to crosswalk._research_folders_for_disclosure. The test is kept, not deleted; its three arms are unchanged.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_write_pool_guard.py",
+      "kind": "test",
+      "commit_or_etag": "0e14335de2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 7 tests over the stubbed harness of test_write_pool_union.py (_FakeS3, _document): door B refused with no put and the served bytes unchanged; the refusal text begins REFUSED: and carries folders=97; control with folders lands; first publish with no served research_universe lands; nothing served lands; a write with no document is never refused; door A (add_security._mint_pool, library probe and issuer read stubbed) refused with no put and the served bytes unchanged.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "0e14335de2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "APPENDED: three rows AMGT_RESAPP-D1-W353-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~R1), -S2 and -S3 (OBSERVATION, INERT). The gate accepted 3 new rows of 1027 total.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PASS G1 (door A, add_security._mint_pool with the library absent: no put, the served object unchanged), PASS G2 (door B, write_pool with a document whose research_universe is absent: no put, the served object unchanged), PASS G3 (control: a document carrying research folders is written over the served count), PASS G4 (the union write with no document lands byte-identical); R89 WRITE-POOL GUARD: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_write_pool_guard.py\"; echo \"exit=$?\"",
+      "output_evidence": "   door A: raised=True puts=[] served sha equal=True ValueError: REFUSED: the document's research_universe carries no folders (absent), and the served latest crosswalk carries research_universe.folders=97\nPASS G1 door A (add_security._mint_pool, library absent): no put, the served object unchanged\n   door B: raised=True puts=[] served sha equal=True ValueError: REFUSED: the document's research_universe carries no folders (absent), and the served latest crosswalk carries research_universe.folders=97\nPASS G2 door B (write_pool, document research_universe absent): no put, the served object unchanged\n   control: puts=['crosswalk/v1/2026-09-19.json']\nPASS G3 control: a document carrying research folders is written over the served count\nPASS G4 the union write (no document) lands byte-identical\nR89 WRITE-POOL GUARD: YES\nexit=0",
+      "denominator": "4 of 4 gates PASS (G1, G2, G3, G4); exit 0",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the whole identity test folder passes with 0 failed (266 passed at the base, plus the new file's tests); and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/identity/tests -q; echo \"exit=$?\"",
+      "output_evidence": "3 failed, 270 passed, 47 warnings, 2 subtests passed in 15.51s\nexit=1\nFAILED lib/research/identity/tests/test_writers_carry_issuer.py::AddSecurityCarriesIssuer::test_record_carries_issuer_cik_from_the_stubbed_source - AttributeError\nFAILED lib/research/identity/tests/test_writers_carry_issuer.py::AddSecurityCarriesIssuer::test_record_carries_none_when_no_source_measures_it - AttributeError\nFAILED lib/research/identity/tests/test_writers_carry_issuer.py::AddSecurityCarriesIssuer::test_unreadable_sources_refuse_the_build - AttributeError",
+      "denominator": "270 passed of 273 collected (266 at the base plus 7 new); 3 failed; the order requires 0 failed",
+      "status": "FAIL",
+      "status_reason": "BLOCKING AMGT_RESAPP-D1-W353-S1: the retired name _research_folders_disclosure is patched at test_writers_carry_issuer.py lines 34, 47 and 53, a file outside the order's <paths>. The worker did not edit it (a path it lacks is a BLOCKING row, not an override); the order stays open until the issuer widens <paths> or rules.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The check's own discriminator: the same r89 check run on the unguarded base 3f97e49c5f, where write_pool has no refusal.",
+      "expected": "G1 and G2 FAIL (a put lands over the served object), G3 and G4 PASS, R89 WRITE-POOL GUARD: NO, exit=1",
+      "observed": "At 3f97e49c5f: 'puts=['crosswalk/v1/2026-09-19.json']' on door A and door B; 'FAIL G1 door A ...', 'FAIL G2 door B ...', 'PASS G3 control ...', 'PASS G4 the union write ...', 'R89 WRITE-POOL GUARD: NO', exit=1. At the committed tree the same G1 and G2 lines read PASS.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of the AC1 invocation on the committed tree (a post-change run and the literal proof run) compared line by line; the pytest folder counted twice at the change",
+      "observed": "The AC1 deciding lines (PASS G1, PASS G2, PASS G3, PASS G4, R89 WRITE-POOL GUARD: YES, exit=0) are identical in both runs. The identity folder read 3 failed, 270 passed in both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No put against the real opal-data-harvest bucket by this worker; every put in AC1 and in the new tests goes through _FakeS3.",
+      "reason": "Bound of the order: stubbed client only, no store write. The check's door A does a read-only GET through crosswalk.load_issuer_sources() on the real bucket (surprise row AMGT_RESAPP-D1-W353-S2); that read is recorded, not excluded."
+    },
+    {
+      "item": "The three test_writers_carry_issuer.py tests are not repointed.",
+      "reason": "That file is outside the order's <paths>. A path the worker lacks is a BLOCKING row on AC2, never an override (surprise row AMGT_RESAPP-D1-W353-S1)."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W353-S1",
+    "AMGT_RESAPP-D1-W353-S2",
+    "AMGT_RESAPP-D1-W353-S3"
+  ],
+  "session_log": "Worker session of 0.9.0_WK_AMGT_RESAPP~353 at the worktree C:/dev/wk-resapp-353 (branch wk-AMGT_RESAPP-353), base 3f97e49c5f, issuance 16d359ecc3 an ancestor. Code and rows committed at 0e14335de2; this instance committed on top.",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/identity/crosswalk.py lib/research/identity/add_security.py lib/research/identity/tests/test_write_pool_guard.py lib/research/identity/tests/test_write_pool_union.py",
+      "result": "rc=0 (COMPILE-OK)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, surprise-row-gate, to-pipeline-gate, missions-tree-check)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~353 <0.9.0_WK_AMGT_RESAPP~353@opal.agent>\" -F .scratch/commit1.msg -- <the five paths>",
+      "result": "rc=0; surprise-row-gate OK (3 new rows of 1027 total); missions-tree-check 0 violation(s); commit 0e14335de2"
+    }
+  ]
+}
