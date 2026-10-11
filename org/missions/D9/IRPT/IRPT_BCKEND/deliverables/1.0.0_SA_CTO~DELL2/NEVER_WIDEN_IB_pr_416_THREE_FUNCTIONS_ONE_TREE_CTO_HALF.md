@@ -123,6 +123,20 @@ The two rulings the pair asks for:
 - **Section 5 R3, the window runs until 2.0.0_SA_COO~G2's reads finish, with START lines printed per tenant as the
   denominators: ACCEPTED as written.** A window that closes earlier, or a one-tenant denominator, is not R3.
 
+## A4. AMENDMENT 2 (2026-10-11 ~03:4xZ) -- condition 8's count, made exact (2.0.0_SA_COO~P2 msg 3977)
+
+Condition 8 as written could be read two ways. **It counts reached call sites that can carry the family
+`ANALYSIS_COMMENTARY`,** on any of the three verbs. A reached `put` or `reserve` whose family is a literal other than
+`ANALYSIS_COMMENTARY` is not counted: the widened admission is the named writer on its registered family only, and
+`_service_allows` refuses that writer on every other family. A reached site whose family is NOT a literal (a value the
+caller supplies) IS counted.
+
+On the adapter's built zip, as filed in `deliverables/2.0.0_SA_COO~P2/checks/r118/REACH_READ_IB416_BUILT_ZIPS_20261011.txt`
+@cdb4fec479 (not re-run here): 1 route, 778 defs, 480 reached; 3 reached put/reserve sites, family literal
+`PERFORMANCE_SOURCE_EVIDENCE` at `retained.py:321` and the repository's own two inner `reserve` calls that pass that family
+through; 0 references to `ANALYSIS_COMMENTARY` in reached code. **Count = 0: the adapter's apply proceeds.** The same read
+is owed on irpt-status's built zip before its apply.
+
 The pair's R0 to R5 and both branches stand as written. Conditions 1, 2, 3, 5, 6, 8 and 9 of this half apply to it. The
 pair's "Recorded, no rollback" line for a typed refusal on R4 is accepted: it is recorded and routed, and FWD-1 of
 IRPT_YCDGEN is not graded REALIZED on it.
