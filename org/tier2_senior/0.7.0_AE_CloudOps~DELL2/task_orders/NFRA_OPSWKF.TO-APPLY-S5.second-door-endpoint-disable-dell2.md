@@ -26,7 +26,7 @@
     READ BOTH HALVES WHOLE BEFORE STEP 0, the files and not this restatement, and say so in the ledger's opening entry:
     - Packet and COO half (SIGNED): org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/2.0.0_SA_COO~O2/S_DEPLOY/OW_SD3_FWD10_SECOND_DOOR_CLOSE_PAIR_20261011.md
       @90f5a700f4, sha256 begins c33bea1f5feceb16.
-    - CTO half (SIGNED): org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/1.0.0_SA_CTO~DELL2/CTO_HALF_OW_SD3_FWD10_SECOND_DOOR_CLOSE_20261011.md @114c77fb01 (msg 6063). Where it differs from the packet it GOVERNS.
+    - CTO half (SIGNED): org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/1.0.0_SA_CTO~DELL2/CTO_HALF_OW_SD3_FWD10_SECOND_DOOR_CLOSE_20261011.md @87957ba554 (msgs 6063 and 6069; the first message cited 114c77fb01, another seat's commit, and the CTO corrected it; the half's bytes and the pair's sha256 are unchanged). Where it differs from the packet it GOVERNS.
     The API is NOT in Terraform: this is one CLI call, not a `safe-apply`. The ledger and the packet are its only record.
 
     The two probes, each a plain HTTPS GET to `https://w8jnzvs21g.execute-api.us-east-1.amazonaws.com`, with NO `Authorization` header,
