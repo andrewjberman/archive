@@ -1,0 +1,77 @@
+{
+ "settings": {
+  "cash_leg_baseline": "method_r28",
+  "cash_leg_compared": "method_r29",
+  "price_basis_of_the_returns_tables": "as_traded",
+  "regrade_pairing": {
+   "before_cash_leg": "method_r28",
+   "before_price_basis": "store",
+   "after_price_basis": "as_traded",
+   "after_cash_leg_r28_run": "method_r28",
+   "after_cash_leg_r29_run": "method_r29",
+   "lists": "v1/v1"
+  },
+  "serve_build": "commonwealth_fwd3_serve.py --build, hold list none, cache C:/dev/ajb_workspace/.scratch/advi_cotbkf/cache",
+  "run_commit_r28": "7dec032cc6",
+  "run_commit_r29": "e0aea14b12",
+  "run_commit_note": "the two commits differ in no file under data/ or lib/ except three test files (git diff --name-only 7dec032cc6 e0aea14b12 -- data lib: 3 files, all data/assets/scripts/silver/tests/); the computing code is the same bytes",
+  "served_build_for_the_drift_count": "C:/dev/ajb_workspace/.scratch/advi_cotbkf/fwd3_serve_r34 (run commit 728d223ddc)"
+ },
+ "control": {
+  "rows": 1691729,
+  "differing": 30
+ },
+ "rows_union": 1691729,
+ "classes": {
+  "both_measured_same": 107314,
+  "both_measured_different": 2,
+  "measured_r28_only": 0,
+  "measured_r29_only": 0,
+  "both_blank_same_reason": 1584413,
+  "both_blank_reason_changed": 0,
+  "row_r28_only": 0,
+  "row_r29_only": 0
+ },
+ "changed_account_days": 2,
+ "changed_dates": 2,
+ "first_changed_date": "2014-12-03",
+ "last_changed_date": "2020-11-13",
+ "changed_by_origin": {
+  "withholding_day": 2,
+  "same_account_other_day": 0,
+  "other_account": 0
+ },
+ "month_verdicts_changed": 0,
+ "month_absent_changed": 0,
+ "inputs_equal": {
+  "split_store_lines_equal": true,
+  "price_rows_equal": true,
+  "attempts": 1
+ },
+ "drift_vs_served": {
+  "account_days": 30,
+  "dates": 29
+ },
+ "drift_days_also_changed_by_rule": 0,
+ "evidence": [
+  "control (AMENDMENT 1, a finding and not a pass condition): today's method_r28 daily returns against the served local table, 1,691,729 of 1,691,729 rows compared on (account, date, return to 1e-12, blank_reason), 30 account-days differ on 29 dates (28 return values in one account over 28 trading days 2020-10-12..2020-11-18; 2 blank reasons UNPRICED -> INKIND_UNDERSTATED); cause measured in CONTROL_RECORD.json: the split-history store read live from S3 lists 141 held CUSIPs, 32 at the served run",
+  "inputs equal across the two runs, 1 attempt (the r28 pair was not re-run): the 41 R28-SPLIT lines and the SPLIT-STORE and R28-REPAIRS lines of the two regrade logs are identical (SPLIT-STORE listed=141 held_by_the_accounts=141; R28-REPAIRS splits_applied=42 splits_not_applied=37 disagreements=4 dvr_close_step_security_days=32 dvr_account_days_blank=1069); after/security_day_price.parquet 2,124,908 rows x 4 columns equal row for row (DataFrame.equals True); before/security_day_price.parquet (2,127,988 rows) and before/account_day_value.parquet (1,691,729 rows) also equal; month_grades_before.parquet and month_grades_after.parquet of the regrade: 82,593 keys each, 0 grades differ between the runs",
+  "runs: regrade r29 577 s, serve build r29 496 s (r28: 589 s and 376 s); every command local, no --apply, no --overwrite, no S3 write; the r28 run is the baseline of CONTROL_RECORD.json",
+  "pairing and the BEFORE side: the regrade's before arm is method_r28 on the store price basis in BOTH runs (so identical; its grades differ in 0 of 82,593 keys); the serve tables are re-derived from the AFTER arm (method_r28 or method_r29, as_traded). The only use of the before side in the serve is the ABSENT list (MATCH before and DIFF after). Because both runs pair store with as_traded, the ABSENT reason is REGRESSED_UNDER_AS_TRADED in both, and the ABSENT list of each run is the 5 account-months MATCH at (r28, store) and DIFF at (that run's rule, as_traded); the same 5 in both: 0 months turn ABSENT or stop being ABSENT under r29",
+  "classes (sum to the union 1691729): both_measured_same 107314, both_measured_different 2, measured_r28_only 0, measured_r29_only 0, both_blank_same_reason 1584413, both_blank_reason_changed 0, row_r28_only 0, row_r29_only 0; no row exists under one rule only",
+  "changed account-days by origin: both changed days are among the 71 withholding account-days with no same-day CFNCASH withdrawal row (recomputed from the transaction cache: 4,115 account-days carry a CFNCASH ftax or stax row, 71 without a same-day CFNCASH lo, 70 of the 71 on a row of the returns table, 7 of the 71 measured under r28); same_account_other_day 0; other_account 0 (so there is nothing to explain in other_account)",
+  "why 2 of the 7 measured withholding days change: of the 7 measured days, 2 have a different flow and a different return; 5 have an unchanged flow (their summed Amount of the day's ftax/stax rows is 0.0, so the withholding row adds no outflow). Of the 71 (70 on a table row), 43 carry a changed flow (2 measured; 41 blank under r28, which stay blank under r29), so a changed flow on those is invisible in the return. One more account-day outside the 71 has a changed flow: the account's table date 2 calendar days after the 71st withholding day, which has no row of its own in the returns table (inferred from the date offset and the account match, not traced row by row). 44 account-days flow-differ in all: 2 measured and different, 42 blank under both rules with reason UNPRICED (all 42), unchanged in class. value column: 0 of 1,691,729 differ",
+  "magnitude: the two changed returns differ by at most 1.0 in decimal terms between the rules; no account, value, flow or return is recorded",
+  "changed dates: 2 (2014-12-03 and 2020-11-13), CHANGED_DATES.csv lists those 2 with the rule count and the count of account-days that differ from the served table on that date (0 and 1); the 29 dates on which today's r28 differs from the served table by drift are listed in R28_VS_R29.md; drift_days_also_changed_by_rule is 0 (the one drift account-day on 2020-11-13 is not the account-day the rule changes that date)",
+  "months: month_grades.parquet of the two serve builds, 82,593 account-months keyed on both sides, verdict (ABSENT counted as a value) changes in 0; ABSENT in 5 under each and the same 5, reason REGRESSED_UNDER_AS_TRADED; computed_pct changes in 1 account-month (verdict unchanged)"
+ ],
+ "not_established": [
+  "whether the S3 copies of the served tables (as opposed to the local copy fwd3_serve_r34) equal the local copy",
+  "which entry of the live split store, and when, moved the 30 drift account-days: the cause is measured to the store (141 held CUSIPs listed against 32) and to 4 CUSIPs and 3,034 price points in CONTROL_RECORD.json, not to the individual store rows",
+  "the sources of the 5 measured withholding days with an unchanged flow: their day's summed Amount is 0.0; whether that is zero-Amount rows or offsetting debit and credit rows was not read",
+  "the 41 withholding days (plus 1 neighbouring day) that carry a changed flow and are blank (UNPRICED) under both rules: if the blank were later priced their return would change under r29; this comparison cannot say by how much, and the list of changed dates (a list of answers that differ today) does not include them",
+  "whether the 44th flow-changed account-day is the 71st withholding day's flow rolled to the next table date: inferred, not traced",
+  "the cache of transactions used for the origin count is the local tx_cache of the advi_cotbkf scratch; its row count against the silver S3 transactions was not re-checked",
+  "any later input movement: the r28 and r29 runs were made on the same day and agree on every price row and split line; a third run later might not"
+ ]
+}
