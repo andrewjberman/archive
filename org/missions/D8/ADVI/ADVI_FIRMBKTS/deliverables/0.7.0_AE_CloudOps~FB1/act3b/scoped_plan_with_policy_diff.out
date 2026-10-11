@@ -1,0 +1,548 @@
+# scoped terraform plan, refresh lines trimmed (denominator 552 lines, kept 548); no value redacted
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # aws_s3_bucket_policy.opal_data_49financial will be updated in-place
+  ~ resource "aws_s3_bucket_policy" "opal_data_49financial" {
+        id     = "opal-data-49financial"
+      ~ policy = jsonencode(
+          ~ {
+              ~ Statement = [
+                  ~ {
+                      ~ Condition = {
+                          ~ ArnNotLike = {
+                              ~ "aws:PrincipalArn" = [
+                                    # (19 unchanged elements hidden)
+                                    "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                  + "arn:aws:iam::313476888478:role/lambda-edge-execution-role",
+                                  + "arn:aws:iam::313476888478:role/irpt-directory-role",
+                                  + "arn:aws:iam::313476888478:role/irpt-export-render-role",
+                                  + "arn:aws:iam::313476888478:role/irpt-narrative-role",
+                                  + "arn:aws:iam::313476888478:role/irpt-status-role",
+                                  + "arn:aws:iam::313476888478:role/irpt-ycharts-generate-role",
+                                    "arn:aws:iam::313476888478:role/irpt-performance-adapter-role",
+                                  + "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E139998VWH0PD",
+                                ]
+                            }
+                        }
+                        # (5 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ ArnLike = {
+                              ~ "aws:PrincipalArn" = [
+                                  ~ "arn:aws:iam::313476888478:role/irpt-performance-adapter-role" -> "arn:aws:iam::313476888478:role/lambda-edge-execution-role",
+                                ]
+                            }
+                        }
+                      ~ NotAction = [
+                            "s3:GetObject",
+                          - "s3:ListBucket",
+                        ]
+                      ~ Sid       = "DenyPerformanceAdapterAnyOtherAction" -> "DenyScopedExemption1AnyOtherAction"
+                        # (3 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Action      = "s3:GetObject" -> [
+                          + "s3:GetObject",
+                        ]
+                      ~ Condition   = {
+                          ~ ArnLike = {
+                              ~ "aws:PrincipalArn" = [
+                                  ~ "arn:aws:iam::313476888478:role/irpt-performance-adapter-role" -> "arn:aws:iam::313476888478:role/lambda-edge-execution-role",
+                                ]
+                            }
+                        }
+                      ~ NotResource = [
+                          ~ "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/*" -> "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      ~ Sid         = "DenyPerformanceAdapterReadsOutsideTheHoldingsGold" -> "DenyScopedExemption1ObjectsOutsidePrefix"
+                        # (2 unchanged attributes hidden)
+                    },
+                  ~ {
+                      - Action    = "s3:ListBucket"
+                      ~ Condition = {
+                          ~ ArnLike       = {
+                              ~ "aws:PrincipalArn" = [
+                                  ~ "arn:aws:iam::313476888478:role/irpt-performance-adapter-role" -> "arn:aws:iam::313476888478:role/irpt-directory-role",
+                                ]
+                            }
+                          - StringNotLike = {
+                              - "s3:prefix" = [
+                                  - "irpt/49financial/gold/holdings_performance_daily/*",
+                                ]
+                            }
+                        }
+                      + NotAction = [
+                          + "s3:GetObject",
+                        ]
+                      ~ Resource  = [
+                            "arn:aws:s3:::opal-data-49financial",
+                          + "arn:aws:s3:::opal-data-49financial/*",
+                        ]
+                      ~ Sid       = "DenyPerformanceAdapterListingOutsideTheHoldingsGold" -> "DenyScopedExemption2AnyOtherAction"
+                        # (2 unchanged attributes hidden)
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                        ]
+                      + Condition   = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/irpt-directory-role",
+                                ]
+                            }
+                        }
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Principal   = "*"
+                      + Sid         = "DenyScopedExemption2ObjectsOutsidePrefix"
+                    },
+                  + {
+                      + Condition = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/irpt-export-render-role",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                        ]
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial",
+                          + "arn:aws:s3:::opal-data-49financial/*",
+                        ]
+                      + Sid       = "DenyScopedExemption3AnyOtherAction"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                        ]
+                      + Condition   = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/irpt-export-render-role",
+                                ]
+                            }
+                        }
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Principal   = "*"
+                      + Sid         = "DenyScopedExemption3ObjectsOutsidePrefix"
+                    },
+                  + {
+                      + Condition = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/irpt-narrative-role",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                        ]
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial",
+                          + "arn:aws:s3:::opal-data-49financial/*",
+                        ]
+                      + Sid       = "DenyScopedExemption4AnyOtherAction"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                        ]
+                      + Condition   = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/irpt-narrative-role",
+                                ]
+                            }
+                        }
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Principal   = "*"
+                      + Sid         = "DenyScopedExemption4ObjectsOutsidePrefix"
+                    },
+                  + {
+                      + Condition = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/irpt-status-role",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                        ]
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial",
+                          + "arn:aws:s3:::opal-data-49financial/*",
+                        ]
+                      + Sid       = "DenyScopedExemption5AnyOtherAction"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                        ]
+                      + Condition   = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/irpt-status-role",
+                                ]
+                            }
+                        }
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Principal   = "*"
+                      + Sid         = "DenyScopedExemption5ObjectsOutsidePrefix"
+                    },
+                  + {
+                      + Condition = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/irpt-ycharts-generate-role",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                        ]
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial",
+                          + "arn:aws:s3:::opal-data-49financial/*",
+                        ]
+                      + Sid       = "DenyScopedExemption6AnyOtherAction"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                        ]
+                      + Condition   = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/irpt-ycharts-generate-role",
+                                ]
+                            }
+                        }
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Principal   = "*"
+                      + Sid         = "DenyScopedExemption6ObjectsOutsidePrefix"
+                    },
+                  + {
+                      + Condition = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/irpt-performance-adapter-role",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                          + "s3:ListBucket",
+                        ]
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial",
+                          + "arn:aws:s3:::opal-data-49financial/*",
+                        ]
+                      + Sid       = "DenyScopedExemption7AnyOtherAction"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                        ]
+                      + Condition   = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/irpt-performance-adapter-role",
+                                ]
+                            }
+                        }
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Principal   = "*"
+                      + Sid         = "DenyScopedExemption7ObjectsOutsidePrefix"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:ListBucket",
+                        ]
+                      + Condition = {
+                          + ArnLike       = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:role/irpt-performance-adapter-role",
+                                ]
+                            }
+                          + StringNotLike = {
+                              + "s3:prefix" = [
+                                  + "irpt/49financial/gold/holdings_performance_daily/*",
+                                  + "advi/49financial/platinum/49financial/ownership_map.json",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial",
+                        ]
+                      + Sid       = "DenyScopedExemption7ListingOutsidePrefix"
+                    },
+                  + {
+                      + Condition = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E139998VWH0PD",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                        ]
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial",
+                          + "arn:aws:s3:::opal-data-49financial/*",
+                        ]
+                      + Sid       = "DenyScopedExemption8AnyOtherAction"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                        ]
+                      + Condition   = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E139998VWH0PD",
+                                ]
+                            }
+                        }
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/accounts/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/advisors/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/artifacts/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/clients/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/entities/accounts/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/entities/advisors/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/entities/clients/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/firm/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/views/*",
+                        ]
+                      + Principal   = "*"
+                      + Sid         = "DenyScopedExemption8ObjectsOutsidePrefix"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/lambda-edge-execution-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Sid       = "AllowScopedExemption1Objects"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/irpt-directory-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Sid       = "AllowScopedExemption2Objects"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/irpt-export-render-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Sid       = "AllowScopedExemption3Objects"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/irpt-narrative-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Sid       = "AllowScopedExemption4Objects"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/irpt-status-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Sid       = "AllowScopedExemption5Objects"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/irpt-ycharts-generate-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Sid       = "AllowScopedExemption6Objects"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Sid       = "AllowScopedExemption7Objects"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:ListBucket",
+                        ]
+                      + Condition = {
+                          + StringLike = {
+                              + "s3:prefix" = [
+                                  + "irpt/49financial/gold/holdings_performance_daily/*",
+                                  + "advi/49financial/platinum/49financial/ownership_map.json",
+                                ]
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial",
+                        ]
+                      + Sid       = "AllowScopedExemption7Listing"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E139998VWH0PD"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/accounts/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/advisors/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/artifacts/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/clients/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/entities/accounts/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/entities/advisors/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/entities/clients/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/firm/*",
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/views/*",
+                        ]
+                      + Sid       = "AllowScopedExemption8Objects"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/irpt-holdings-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Sid       = "AllowGrant1Objects"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/irpt-49f-reporting-read-role"
+                        }
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json",
+                        ]
+                      + Sid       = "AllowGrant2Objects"
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (1 unchanged attribute hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+
+Warning: Resource targeting is in effect
+
+You are creating a plan with the -target option, which means that the result
+of this plan may not represent all of the changes requested by the current
+configuration.
+
+The -target option is not for routine use, and is provided only for
+exceptional situations such as recovering from errors or mistakes, or when
+Terraform specifically suggests to use it as part of an error message.
+
+-----------------------------------------------------------------------------
+
+Saved the plan to:
+C:/Users/Test/AppData/Local/Temp/claude/C--dev-ajb-workspace/689e6109-116b-4e15-86f4-473fe5f2090d/scratchpad/fbf14/policy.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "C:/Users/Test/AppData/Local/Temp/claude/C--dev-ajb-workspace/689e6109-116b-4e15-86f4-473fe5f2090d/scratchpad/fbf14/policy.tfplan"
