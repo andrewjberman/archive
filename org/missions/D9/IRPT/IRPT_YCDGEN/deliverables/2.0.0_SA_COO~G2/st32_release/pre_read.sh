@@ -24,11 +24,9 @@ echo "P1 STOP-READ IRPT_ANALYSIS_READY_QUEUE_URL: unit Environment=$E1 running p
 echo "P1 unit EnvironmentFiles: $(systemctl show $UNIT -p EnvironmentFiles --value)"
 echo "P1 unit drop-ins: $(ls /etc/systemd/system/$UNIT.d 2>&1 | tr '\n' ' ')"
 [ "$E1" = 0 ] && [ "$E2" = 0 ] && [ "$E3" = 0 ] && echo "P1 STOP-READ PASS" || echo "P1 STOP-READ FAIL: do not install; report to 2.0.0_SA_COO~G2"
-# STOP 2 (st32 census group D5): the ownership-map read for 49financial moves from the bucket the process environment maps
-# to a bucket named in the code (opal-data-bd). They must be the same bucket, or this release changes an address.
-B49=$(tr '\0' '\n' < /proc/$MP/environ | grep '^IRPT_DIRECTORY_BUCKET_MAP=' | cut -d= -f2- | python3.12 -c "import json,sys;print(json.loads(sys.stdin.read() or '{}').get('49financial','UNMAPPED'))" 2>&1)
-echo "P1 STOP-READ-2 running process maps 49financial to bucket: $B49 (must be opal-data-bd); IRPT_OWNERSHIP_KEY set in the process: $(tr '\0' '\n' < /proc/$MP/environ | grep -c '^IRPT_OWNERSHIP_KEY=') (must be 0)"
-[ "$B49" = "opal-data-bd" ] && [ "$(tr '\0' '\n' < /proc/$MP/environ | grep -c '^IRPT_OWNERSHIP_KEY=')" = 0 ] && echo "P1 STOP-READ-2 PASS" || echo "P1 STOP-READ-2 FAIL: do not install; report to 2.0.0_SA_COO~G2"
-# STOP 3: the library the host holds must be st31's, the one the kept copy will be taken from.
-[ "$(sha256sum $H/ycharts_session.js | cut -d' ' -f1)" = "857d90b81960d69a7a6700be6fffe33d86628694aef95f8cfb64aca7a82cb839" ] && echo "P1 STOP-READ-3 PASS: host library is st31's" || echo "P1 STOP-READ-3 FAIL: host library is not st31's; do not install"
+# INFORMATION (st32 census group D5): the ownership loader that moved is not on the resident's path. This prints whether the
+# unit's process carries the bucket-map variable at all. It is not a STOP.
+echo "P1 info: IRPT_DIRECTORY_BUCKET_MAP present in the running process environment: $(tr '\0' '\n' < /proc/$MP/environ | grep -c '^IRPT_DIRECTORY_BUCKET_MAP=') (0 expected: the unit has no environment file)"
+# STOP 2: the library the host holds must be st31's, the one the kept copy will be taken from.
+[ "$(sha256sum $H/ycharts_session.js | cut -d' ' -f1)" = "857d90b81960d69a7a6700be6fffe33d86628694aef95f8cfb64aca7a82cb839" ] && echo "P1 STOP-READ-2 PASS: host library is st31's" || echo "P1 STOP-READ-2 FAIL: host library is not st31's; do not install"
 echo "P1 sign-in baseline: journal lines since the unit started naming a capture, an eviction or a session refresh = $(journalctl -u $UNIT --since "$(systemctl show $UNIT -p ActiveEnterTimestamp --value)" --no-pager | grep -c -i -E 'capture|EVICTION|session_refresh|SIGNED_OUT|NO_AUTHENTICATED')"

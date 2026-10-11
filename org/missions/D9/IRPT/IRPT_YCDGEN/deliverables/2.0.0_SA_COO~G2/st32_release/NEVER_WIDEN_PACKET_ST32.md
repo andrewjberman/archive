@@ -6,8 +6,8 @@ seat's, in the st31 form from a trunk pin; three things beyond st31's packet). *
 (`decompositions/IRPT_YCDGEN_DECOMP_R13.md`, AMENDMENT 1). **Census:** `CENSUS_ST32_AGAINST_ST31_20261011.md`.
 
 **Three things change what the resident does, and NONE of them runs at a restart: the capture library and its receipt
-(only at a capture), and one more member on a dead-letter record (only at a fifth failed delivery). One address moves from
-the environment into code and must read equal on the host first. No binding is added. No sign-in is made.**
+(only at a capture), and one more member on a dead-letter record (only at a fifth failed delivery). No binding is
+added. No sign-in is made.**
 
 ## 1. The act
 
@@ -23,7 +23,7 @@ the environment into code and must read equal on the host first. No binding is a
 - **Artifacts** (`C:/dev/irpt-release-st32/`, local only, NOT staged):
   - tar `0485393f3a-st32.tar.gz`, sha256 `e59596e4d731a89c0349dd28d36d34eaafa4d1237e43e36a598bd40b36a34f1e` (1,017,315 B);
   - `resident_host_install_0485393f3a-st32.sh`, sha256 `05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf`.
-- **Scripts** (this folder, derived from st31's): `pre_read.sh` (P1, three STOP reads), `install_st32.sh` (D2 + V1),
+- **Scripts** (this folder, derived from st31's): `pre_read.sh` (P1, two STOP reads), `install_st32.sh` (D2 + V1),
   `remove_st32_to_st31.sh` (X1 + V2, which also puts the old library back).
 
 ## 2. The three things the CTO named (msg 5179)
@@ -61,14 +61,16 @@ or browser children of the unit, expect 0.
 
 **The first sign-in after st32 is the fifth run, on the CTO's word. Nothing in this packet drives one.**
 
-## 3. The address that moves into code (census group D5): a STOP
+## 3. One change that looks like the resident's and is not (census group D5)
 
-`_authz/loaders.py`, loaded by the resident on every generation job, now reads 49financial's ownership map from bucket
-`opal-data-bd`, named in a generated table (ADVI_FIRMBKTS `FB-g-16`), at the same key as before. st31 takes the bucket from
-`IRPT_DIRECTORY_BUCKET_MAP` in the process environment. If the host's environment maps 49financial to `opal-data-bd`, the
-address is unchanged and so is the role's grant. If it maps anything else, this release would change which object answers
-"who owns what" for 49financial. **P1 prints the mapped bucket (a bucket name, no data) and says FAIL; on FAIL nothing is
-installed.** This rode the trunk from another project; it is in this packet because the whole tree ships.
+`_authz/loaders.py` `load_ownership` now reads 49financial's ownership map from a bucket named in a generated table
+(`opal-data-bd`, ADVI_FIRMBKTS `FB-g-16`) where it took the bucket from `IRPT_DIRECTORY_BUCKET_MAP`. That would be an
+address moving from the environment into code. **It is not on the resident's path:** every caller of `load_ownership` in
+the package sits behind the Lambda boundary (`served.Entry`), which the resident never constructs; the two resident-side
+modules that import `loaders` take only `bucket_for`, unchanged. Importing the resident's three start modules from the
+built package loads 25 package modules and `loaders` is not among them. st31's P1 read the unit with no environment file,
+which fits: a resident that called it would have refused every job. P1 prints whether the process carries the variable,
+as information, not as a STOP. The first draft of this packet made it a STOP; that was wrong and would have failed falsely.
 
 ## 4. What else moves, and why it is not a served change here (census groups D4, D6 to D9)
 
@@ -89,9 +91,8 @@ Writers of `cause_claim`: the worker (`measured`, from this release) and, once, 
 ## 6. Order, STOP and rollback
 
 1. **U2 stage** the tar and the install script; each key 404 before the put; read both sha256 back.
-2. **P1 pre-read** (read only). **Three STOPs, all must say PASS:** the unit carries no `IRPT_ANALYSIS_READY_QUEUE_URL`; the
-   running process maps 49financial to `opal-data-bd` and sets no `IRPT_OWNERSHIP_KEY`; the host library is st31's. st31
-   running. On any FAIL nothing is installed.
+2. **P1 pre-read** (read only). **Two STOPs, both must say PASS:** the unit carries no `IRPT_ANALYSIS_READY_QUEUE_URL`;
+   the host library is st31's. st31 running. On either FAIL nothing is installed.
 3. **D2 + V1 install.** The installer refuses unless `irpt-generation` reads 0 and 0, moves the library, and rolls the
    root, the receipt and the library back itself on a failed start.
 4. **Rollback (X1 + V2):** `remove_st32_to_st31.sh` refuses unless the kept library is st31's, restores the st31 receipt,
@@ -108,13 +109,13 @@ a resident that stops polling.
 - D1 and D2 (the capture and its receipt) have no after-read a seat can drive: the first capture is the fifth run.
 - `host_capture.py` (+223) and `lib/opal_naming.py` (+268) were read by function name and size, not line by line. The
   first rests on IRPT_BCKEND's drained cell and its tests (127 passed here); the second on the 129-address differential.
-- Whether the host's environment maps 49financial to `opal-data-bd`: P1's read, not yet made.
+- That no job on the host reaches `load_ownership`: an import read and a caller search, not a host run.
 
 ## COO HALF
 
 **COO half SIGNED** -- `2.0.0_SA_COO~G2`, at trunk pin `0485393f3a` and the tar above, on the gate result, the census of 17
 changed and 3 added members, both capture pins read from the built package, the stamp, the code read that a restart runs no
-capture, no binding added, and three P1 STOPs.
+capture, no binding added, and two P1 STOPs.
 
 ## CTO HALF
 
