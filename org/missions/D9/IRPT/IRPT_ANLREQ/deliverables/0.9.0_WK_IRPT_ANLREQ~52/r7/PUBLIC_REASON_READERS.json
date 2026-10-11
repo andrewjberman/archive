@@ -1,0 +1,653 @@
+{
+  "new_public_reason": "REPORT_TICKET_MISMATCH",
+  "declared_in": [
+    "infra/aws/lambda/investor-reporting/ops/owned_report.py:20 (class ReportTicketMismatch, raised at :77 by _require_ticket)",
+    "infra/aws/lambda/investor-reporting/ops/entry.py:261 (the irpt-status owned entry's reasons table: ReportTicketMismatch -> REPORT_TICKET_MISMATCH)",
+    "docs/contracts/investor-reporting/v1/CONTRACT.md:79 (a row of THE CLOSED public_reason_code VOCABULARY, in the generator's grammar)",
+    "docs/contracts/investor-reporting/v1/routes.json:91 (the analysis-report ticket_id query note)",
+    "infra/aws/lambda/investor-reporting/_authz/served.py:140-146 BOUNDARY_ADDITIONS -- NOT COMMITTED: outside this order's paths (the _authz lane); patch r7/served_py_boundary_addition.patch; block row IRPT_ANLREQ-D2-W52-S6"
+  ],
+  "searched": "SERVICE: native Grep over infra/aws/lambda/investor-reporting (648 tracked files) for public_reason_code, BOUNDARY_REASONS, PUBLIC_REASONS, reason_for(, public_reason_for and .reasons outside tests/fixtures: 38 files matched (including the two schema files and two _contracts test files), read for those that enumerate, validate or receive a public reason; plus the tests that name the set: _authz/tests/test_reason_codes_W124.py, test_reason_codes_S260_S175.py, test_wire_reason_codes.py, test_public_line_matches_answer.py, test_response_envelope_public_status.py, performance/tests/test_public_reasons.py, _contracts/test_owned_outer_contracts.py. PORTAL: git -C <wk-51 portal> grep over src at origin/PROD @37aa1247ee (1405 src files) and origin/DEV @f00c7b8ee8 (1429 src files), fetched at the start: (1) publicReasonCode|public_reason_code|reasonCode|ReasonCode -> PROD 235 files incl. tests and fixtures, 34 non-test; DEV 240 and 35; (2) the bare code names NOT_FOUND, NOT_READY, INVALID_INPUT, NOT_AUTHORIZED, UNSUPPORTED_OPERATION, KEY_REFUSED, FIRM_BINDING, RATE_LIMITED, OBJECT_NOT_COVERED, SELECTION_UNSUPPORTED, DEPENDENCY_UNAVAILABLE, CONFLICT, SUPERSEDED outside tests -> PROD 14 files, DEV 15; (3) CONTRACT_NAMED_REASON_CODES, IR_REFUSAL_REASON_CODES and docs/contracts readers in src. The non-test files were read for union types, validators, switches and message tables; the portal has no union type or enum of reason codes (PublicReasonCode is `string`). Tests were read only where they pin the set (fe-s-40 reason-codes.test.ts, fe-s-42 every-site.test.ts, fe-s-13 content-pins.test.ts: the last is a one-way subset pin the new code does not touch; fe-s-42 reads only CONTRACT_NAMED_REASON_CODES[0]). The new value can reach a portal only on analysis-report with ticket_id sent; neither branch sends ticket_id yet. Rows are listed once per branch, PROD then DEV, where the reader exists on it; the DEV TicketCenter rows have no PROD counterpart and the PROD TicketCenter row has no DEV counterpart (DEV has since replaced it).",
+  "readers": [
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/_authz/errors.py:48",
+      "what_it_does": "Declares PUBLIC_REASONS, the closed 14-member tuple of the estate's public reasons.",
+      "key_policy": "EXACT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "The new value is a BOUNDARY addition (served.py BOUNDARY_ADDITIONS, the way SELECTION_UNSUPPORTED is), not a member of this tuple; the readers of this tuple alone (error_envelope, fail) are not on the irpt-status boundary path."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/_authz/errors.py:98",
+      "what_it_does": "error_envelope raises ReasonNotDeclared for any code outside PUBLIC_REASONS.",
+      "key_policy": "EXACT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Its only caller is errors.fail (errors.py:218), used by directory/handler.py:343 and export/handler.py:103, whose operations never raise ReportTicketMismatch; served.py builds its own status envelope and never calls error_envelope."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/_authz/errors.py:125",
+      "what_it_does": "reason_for takes an exception's declared public_reason_code only if it is a PUBLIC_REASONS member, else maps by type name, else UNEXPECTED.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "ReportTicketMismatch declares no attribute (it is not a PUBLIC_REASONS member), so reason_for answers UNEXPECTED and served.py public_reason_for then walks the MRO to the reasons-table entry."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/_authz/errors.py:160",
+      "what_it_does": "public_line prints the code only if it is in the vocabulary the caller passes, else prints UNEXPECTED.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "served.py passes BOUNDARY_REASONS (served.py:108), so once REPORT_TICKET_MISMATCH is in BOUNDARY_ADDITIONS the log line prints it as itself; before that line is committed it clamps to UNEXPECTED in the log only."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/_authz/errors.py:214",
+      "what_it_does": "fail classifies an exception to a PUBLIC_REASONS code and builds the error envelope.",
+      "key_policy": "EXACT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Only the directory and export handlers call it; neither raises the new refusal."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/holdings/errors.py:48",
+      "what_it_does": "A packaged copy of errors.py (PUBLIC_REASONS, error_envelope, reason_for, public_line, fail) for the holdings function.",
+      "key_policy": "EXACT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "The holdings function never serves analysis-report; the new reason is raised only by OwnedAnalysisReader.sections under irpt-status."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/_authz/served.py:140",
+      "what_it_does": "Declares BOUNDARY_ADDITIONS and BOUNDARY_REASONS, the closed set of codes the boundary may answer with.",
+      "key_policy": "EXACT",
+      "meets_new_value": "PASS",
+      "why": "PASS once REPORT_TICKET_MISMATCH is added to BOUNDARY_ADDITIONS: that one-line edit is OUTSIDE this order's paths (the _authz lane) and is NOT in the committed change; the exact patch is r7/served_py_boundary_addition.patch and the block is row IRPT_ANLREQ-D2-W52-S6. Until it lands the boundary clamps the value to UNEXPECTED."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/_authz/served.py:332",
+      "what_it_does": "status_envelope raises EntryError for any public_reason_code outside BOUNDARY_REASONS.",
+      "key_policy": "EXACT",
+      "meets_new_value": "PASS",
+      "why": "PASS once declared in BOUNDARY_ADDITIONS (see served.py:140); never reached with an undeclared value because public_reason_for clamps to UNEXPECTED first."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/_authz/served.py:874",
+      "what_it_does": "public_reason_for classifies an exception: errors.reason_for first, then the entry's reasons table by class name along the MRO, and clamps a code outside BOUNDARY_REASONS to UNEXPECTED.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Finds ReportTicketMismatch in the ops reasons table before AnalysisUnavailable (the most-derived declared class wins); with the declaration it answers REPORT_TICKET_MISMATCH, without it UNEXPECTED."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/_authz/served.py:944",
+      "what_it_does": "_handle_owner_read admits the caller with authorize_record_owner BEFORE compute runs, then refuses with refuse(code) where code is NOT_AUTHORIZED for a not-admitted owner or public_reason_for(exc).",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "This is the order that makes the new reason admitted-only: a not-admitted caller is refused NOT_AUTHORIZED at served.py:971-987 before the ticket comparison in the reader can run."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/ops/entry.py:261",
+      "what_it_does": "The irpt-status owned entry's reasons table maps exception class names to public reasons (AnalysisUnavailable -> NOT_FOUND, and now ReportTicketMismatch -> REPORT_TICKET_MISMATCH).",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "A class not in the table falls to the next class along the MRO and finally UNEXPECTED; the new entry is the declaration of the mapping."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/ops/status.py:140",
+      "what_it_does": "build_status validates public_reason_code against REASON_CODE_RE ^[A-Z0-9_]+$ and looks up CORRECTION_WORDS (an unmapped code adds nothing).",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Serves status-summary and status-job; the analysis-report refusal is built by served.py status_envelope and never passes through here. The value would match the shape rule."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/ops/status.py:244",
+      "what_it_does": "validate_envelope requires public_reason_code to match REASON_CODE_RE.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Shape check only, on the status-summary and status-job path; REPORT_TICKET_MISMATCH matches the shape."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/performance/entry.py:375",
+      "what_it_does": "Performance's own reasons table (class name -> public reason, including SelectionUnsupported -> SELECTION_UNSUPPORTED).",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Per-function table; the performance function never raises ReportTicketMismatch. The same holds for the reasons/public_reason_code declarations in narrative, reporting, export, holdings, directory, intake, ycharts/generate, reports and _scope (38 files in the search)."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/_contracts/PublicStatusEnvelope.schema.json:223",
+      "what_it_does": "Types status.public_reason_code as a string with pattern ^[A-Z0-9_]+$ (no enum).",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "REPORT_TICKET_MISMATCH matches the pattern; the same pattern is in _contracts/StatusEnvelope.schema.json:224 and docs/contracts/investor-reporting/v1/PublicStatusEnvelope.schema.json and StatusEnvelope.schema.json."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/performance/tests/test_public_reasons.py:66",
+      "what_it_does": "Contract test: SELECTION_UNSUPPORTED is in served.BOUNDARY_REASONS and is a CONTRACT.md row in the generator's grammar.",
+      "key_policy": "EXACT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Pins SELECTION_UNSUPPORTED only; it enumerates no other member, so adding a code changes nothing in it. The new test in ops/tests/test_report_ticket_binding.py pins the same two facts for REPORT_TICKET_MISMATCH."
+    },
+    {
+      "side": "SERVICE",
+      "file_line": "infra/aws/lambda/investor-reporting/_authz/tests/test_reason_codes_S260_S175.py:46",
+      "what_it_does": "Contract test: each maintained-source subclass's code is in errors.PUBLIC_REASONS.",
+      "key_policy": "EXACT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Membership of the existing subclasses' own codes; it does not enumerate the tuple, so the new boundary addition does not touch it. _contracts (2 base failures) and _authz (4 base failures) ran with the declaration applied and failed exactly as at the base."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/api/endpoints/investor-reporting.ts:579",
+      "what_it_does": "sanitizePublicReasonCode: a string matching ^[A-Z0-9][A-Z0-9_-]{0,63}$ passes through, any other string becomes UNSPECIFIED.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "REPORT_TICKET_MISMATCH (22 characters, upper-snake) matches and is carried as itself."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/api/endpoints/investor-reporting.ts:600",
+      "what_it_does": "sanitizePublicReasonCode: a string matching ^[A-Z0-9][A-Z0-9_-]{0,63}$ passes through, any other string becomes UNSPECIFIED.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "REPORT_TICKET_MISMATCH (22 characters, upper-snake) matches and is carried as itself."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/api/endpoints/investor-reporting.ts:459",
+      "what_it_does": "reasonCodeNamesRevocation: true when the code upper-cased contains REVOK.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "The new value contains no REVOK stem, so it is not read as a revocation; a name with that stem would have signed the viewer out."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/api/endpoints/investor-reporting.ts:480",
+      "what_it_does": "reasonCodeNamesRevocation: true when the code upper-cased contains REVOK.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "The new value contains no REVOK stem, so it is not read as a revocation; a name with that stem would have signed the viewer out."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/api/endpoints/investor-reporting.ts:469",
+      "what_it_does": "isRevocationSignal: HTTP 401/403, or a REVOK-stem code on an UNAVAILABLE/FAILED state.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "The refusal is HTTP 200 with state UNAVAILABLE and a code without the stem, so no revocation is signalled."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/api/endpoints/investor-reporting.ts:490",
+      "what_it_does": "isRevocationSignal: HTTP 401/403, or a REVOK-stem code on an UNAVAILABLE/FAILED state.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "The refusal is HTTP 200 with state UNAVAILABLE and a code without the stem, so no revocation is signalled."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/api/endpoints/investor-reporting.ts:621",
+      "what_it_does": "buildTelemetry: records the sanitized public reason code on the telemetry record.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Passes through sanitizePublicReasonCode; the new value is recorded as itself."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/api/endpoints/investor-reporting.ts:642",
+      "what_it_does": "buildTelemetry: records the sanitized public reason code on the telemetry record.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Passes through sanitizePublicReasonCode; the new value is recorded as itself."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/api/endpoints/investor-reporting.ts:1070",
+      "what_it_does": "LiveClient.send: on a refused envelope throws IrRequestError carrying parsed.publicReasonCode.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Any code is carried on the error unchanged; the caller decides what to do with it."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/api/endpoints/investor-reporting.ts:1091",
+      "what_it_does": "LiveClient.send: on a refused envelope throws IrRequestError carrying parsed.publicReasonCode.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Any code is carried on the error unchanged; the caller decides what to do with it."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/api/endpoints/investor-reporting.ts:975",
+      "what_it_does": "readCustodyReportAnswer: reads a custody-report-read refusal's status.public_reason_code through sanitizePublicReasonCode.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "custody-report-read only; the new reason is emitted by analysis-report only."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/api/endpoints/investor-reporting.ts:996",
+      "what_it_does": "readCustodyReportAnswer: reads a custody-report-read refusal's status.public_reason_code through sanitizePublicReasonCode.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "custody-report-read only; the new reason is emitted by analysis-report only."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/api/endpoints/investor-reporting.ts:1473",
+      "what_it_does": "extractEnvelope: reads an envelope's publicReasonCode through sanitizePublicReasonCode.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Pass-through of a well-formed code."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/api/endpoints/investor-reporting.ts:1518",
+      "what_it_does": "extractEnvelope: reads an envelope's publicReasonCode through sanitizePublicReasonCode.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Pass-through of a well-formed code."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/api/endpoints/investor-reporting.ts:1153",
+      "what_it_does": "getOwnedAnalysisReport (LiveClient): sends analysis-report with the query {selected_tenant} only and no ticket_id.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "The service emits the new reason only when ticket_id is sent; neither PROD nor DEV portal sends it today (the sender is AR-y-72, not yet on either branch), so this client cannot receive it yet."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/api/endpoints/investor-reporting.ts:1198",
+      "what_it_does": "getOwnedAnalysisReport (LiveClient): sends analysis-report with the query {selected_tenant} only and no ticket_id.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "The service emits the new reason only when ticket_id is sent; neither PROD nor DEV portal sends it today (the sender is AR-y-72, not yet on either branch), so this client cannot receive it yet."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/contracts/envelope.ts:161",
+      "what_it_does": "IR_REFUSAL_REASON_CODES: the two dispatcher refusal codes CONTRACT_VERSION and ROUTE_UNKNOWN.",
+      "key_policy": "EXACT",
+      "meets_new_value": "PASS",
+      "why": "A closed list of two, but it only marks the dispatcher refusals; the analysis-report refusal arrives as ok:false, which parseIrEnvelope already treats as refused (envelope.ts:358), so a code outside the list is not an error."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/contracts/envelope.ts:161",
+      "what_it_does": "IR_REFUSAL_REASON_CODES: the two dispatcher refusal codes CONTRACT_VERSION and ROUTE_UNKNOWN.",
+      "key_policy": "EXACT",
+      "meets_new_value": "PASS",
+      "why": "A closed list of two, but it only marks the dispatcher refusals; the analysis-report refusal arrives as ok:false, which parseIrEnvelope already treats as refused (envelope.ts:358), so a code outside the list is not an error."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/contracts/envelope.ts:306",
+      "what_it_does": "isRefusalCode: true when the code is one of the two dispatcher codes.",
+      "key_policy": "EXACT",
+      "meets_new_value": "PASS",
+      "why": "False for the new value, which is correct: the boundary refusal path (ok:false) carries it."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/contracts/envelope.ts:307",
+      "what_it_does": "isRefusalCode: true when the code is one of the two dispatcher codes.",
+      "key_policy": "EXACT",
+      "meets_new_value": "PASS",
+      "why": "False for the new value, which is correct: the boundary refusal path (ok:false) carries it."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/contracts/envelope.ts:358",
+      "what_it_does": "parseIrEnvelope: refused = ok:false or a dispatcher code; a refusal returns state UNAVAILABLE with the publicReasonCode and no data.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "The new refusal is an ok:false envelope with a well-formed public status, returned as a refusal carrying its code."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/contracts/envelope.ts:359",
+      "what_it_does": "parseIrEnvelope: refused = ok:false or a dispatcher code; a refusal returns state UNAVAILABLE with the publicReasonCode and no data.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "The new refusal is an ok:false envelope with a well-formed public status, returned as a refusal carrying its code."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/contracts/public-status.ts:25",
+      "what_it_does": "requirePublicStatus: public_reason_code must be a string matching ^[A-Z0-9_]+$ or the whole status is refused.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "The new value matches the pattern; it is a shape rule, not a list."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/contracts/public-status.ts:25",
+      "what_it_does": "requirePublicStatus: public_reason_code must be a string matching ^[A-Z0-9_]+$ or the whole status is refused.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "The new value matches the pattern; it is a shape rule, not a list."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/contracts/adapt.ts:575",
+      "what_it_does": "adaptStatusEnvelope: copies wire.public_reason_code to publicReasonCode and to each safe action's reasonCode.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Copies the string; no lookup."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/contracts/adapt.ts:576",
+      "what_it_does": "adaptStatusEnvelope: copies wire.public_reason_code to publicReasonCode and to each safe action's reasonCode.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Copies the string; no lookup."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/contracts/validate.ts:93",
+      "what_it_does": "Validator: publicReasonCode must be a nullable string (also at :625).",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Type check only."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/contracts/validate.ts:93",
+      "what_it_does": "Validator: publicReasonCode must be a nullable string (also at :625).",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Type check only."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/state/status.ts:274",
+      "what_it_does": "envelopeFromRefusal: a thrown refusal carrying a non-empty code becomes an UNAVAILABLE envelope carrying that code.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Carries any non-empty code; no list."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/state/status.ts:274",
+      "what_it_does": "envelopeFromRefusal: a thrown refusal carrying a non-empty code becomes an UNAVAILABLE envelope carrying that code.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Carries any non-empty code; no list."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/state/status.ts:186",
+      "what_it_does": "defaultSafeActions: switches on the envelope STATE, putting the code into the action's reasonCode.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "The switch is on state (UNAVAILABLE -> contact-support), never on the code."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/state/status.ts:186",
+      "what_it_does": "defaultSafeActions: switches on the envelope STATE, putting the code into the action's reasonCode.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "The switch is on state (UNAVAILABLE -> contact-support), never on the code."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/tabs/StatusPanel.tsx:57",
+      "what_it_does": "StatusPanel: prints the envelope's public reason code verbatim, with UnnamedReasonCodeFlag beside a code the contract does not name.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Printed verbatim; until the portal's named set is regenerated the screen carries the words 'code not defined by the v1 contract' beside it (cosmetic, nothing refused)."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/tabs/StatusPanel.tsx:57",
+      "what_it_does": "StatusPanel: prints the envelope's public reason code verbatim, with UnnamedReasonCodeFlag beside a code the contract does not name.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Printed verbatim; until the portal's named set is regenerated the screen carries the words 'code not defined by the v1 contract' beside it (cosmetic, nothing refused)."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/render/Page.tsx:108",
+      "what_it_does": "CONTRACT_NAMED_REASON_CODES: the GENERATED list of 20 codes the v1 contract names; isContractNamedReasonCode (:116) tests membership.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Runtime: an unlisted code is rendered verbatim and flagged, not refused. The set is regenerated by __tests__/fe-s-40/gen-named-codes.mjs from CONTRACT.md, which now names the new code (see reason-codes.test.ts)."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/render/Page.tsx:108",
+      "what_it_does": "CONTRACT_NAMED_REASON_CODES: the GENERATED list of 20 codes the v1 contract names; isContractNamedReasonCode (:116) tests membership.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "Runtime: an unlisted code is rendered verbatim and flagged, not refused. The set is regenerated by __tests__/fe-s-40/gen-named-codes.mjs from CONTRACT.md, which now names the new code (see reason-codes.test.ts)."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/__tests__/fe-s-40/reason-codes.test.ts:243",
+      "what_it_does": "F40-AC7: re-reads docs/contracts/investor-reporting/v1/ in the workspace and asserts the renderer's CONTRACT_NAMED_REASON_CODES equals the set the contract names (expect(runtimeEqual).toBe(true) at :259).",
+      "key_policy": "EXACT",
+      "meets_new_value": "REFUSES",
+      "why": "FINDING (test, not runtime): the CONTRACT.md row this change adds names REPORT_TICKET_MISMATCH in the generator's grammar, so in any checkout that holds the new CONTRACT.md beside the portal this test fails until the set is regenerated with gen-named-codes.mjs; it does not affect a running page."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/__tests__/fe-s-40/reason-codes.test.ts:243",
+      "what_it_does": "F40-AC7: re-reads docs/contracts/investor-reporting/v1/ in the workspace and asserts the renderer's CONTRACT_NAMED_REASON_CODES equals the set the contract names (expect(runtimeEqual).toBe(true) at :259).",
+      "key_policy": "EXACT",
+      "meets_new_value": "REFUSES",
+      "why": "FINDING (test, not runtime): the CONTRACT.md row this change adds names REPORT_TICKET_MISMATCH in the generator's grammar, so in any checkout that holds the new CONTRACT.md beside the portal this test fails until the set is regenerated with gen-named-codes.mjs; it does not affect a running page."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/TicketCenter/analysisRequest.ts:336",
+      "what_it_does": "isReportNotReady: an IrRequestError is 'not ready' only for NOT_READY, NOT_FOUND or HTTP 404; anything else is rethrown by openReport (:351).",
+      "key_policy": "EXACT",
+      "meets_new_value": "PASS",
+      "why": "The new value is not read as 'waiting': openReport rethrows it, which is the outcome the amendment is for (the page can no longer mistake a mismatch for a report not yet made). DEV only; it is reached only once a caller sends ticket_id (AR-y-72)."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/TicketCenter/AnalysisRequestParts.tsx:322",
+      "what_it_does": "The Open control's catch shows e.message in an alert.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "PASS",
+      "why": "The message is 'investor-reporting analysis-report refused' and does not name the reason, so a mismatch shows as a refusal with no words of its own; naming it is AR-y-72's work."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/TicketCenter/analysisRequest.ts:179",
+      "what_it_does": "PROD openReport reads the request record through getOwnedAnalysisRequest (analysis-request-read), not analysis-report.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "The route that emits the new reason is not called by the PROD Ticket Center."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx:61",
+      "what_it_does": "Calls api.getOwnedAnalysisReport(id, selectedTenant) to reopen an owned request.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Sends no ticket_id, so the service never answers it the new reason."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx:61",
+      "what_it_does": "Calls api.getOwnedAnalysisReport(id, selectedTenant) to reopen an owned request.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Sends no ticket_id, so the service never answers it the new reason."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/tabs/analysis/ProspectJobStatus.tsx:49",
+      "what_it_does": "REASON_CODE_WORDS / reasonInWords: one mapped code, every other code is lower-cased into words.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Reads the status-job status, not analysis-report; an unmapped code would read 'report ticket mismatch'."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/tabs/analysis/ProspectJobStatus.tsx:49",
+      "what_it_does": "REASON_CODE_WORDS / reasonInWords: one mapped code, every other code is lower-cased into words.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Reads the status-job status, not analysis-report; an unmapped code would read 'report ticket mismatch'."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx:319",
+      "what_it_does": "wordedRefusalFor: a table of words for two performance refusal codes; any other code returns null.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Performance operation only."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx:319",
+      "what_it_does": "wordedRefusalFor: a table of words for two performance refusal codes; any other code returns null.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Performance operation only."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/tabs/holdings/HoldingsTab.tsx:318",
+      "what_it_does": "Compares the envelope's code with NOT_READY to choose the holdings not-ready screen.",
+      "key_policy": "EXACT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Holdings operation only; an equality test, any other code takes the generic path."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/tabs/holdings/HoldingsTab.tsx:361",
+      "what_it_does": "Compares the envelope's code with NOT_READY to choose the holdings not-ready screen.",
+      "key_policy": "EXACT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Holdings operation only; an equality test, any other code takes the generic path."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/header/IdentityCard.tsx:237",
+      "what_it_does": "Compares availability.publicReasonCode with UNPROJECTED_GRANT.",
+      "key_policy": "EXACT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Directory identity only; an equality test with a default."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/header/IdentityCard.tsx:237",
+      "what_it_does": "Compares availability.publicReasonCode with UNPROJECTED_GRANT.",
+      "key_policy": "EXACT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Directory identity only; an equality test with a default."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/header/ClientSearch.tsx:73",
+      "what_it_does": "failureClass: returns the error's publicReasonCode/code/kind string as the failure class.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Directory search only; passes any string through."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/header/ClientSearch.tsx:73",
+      "what_it_does": "failureClass: returns the error's publicReasonCode/code/kind string as the failure class.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Directory search only; passes any string through."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/export/submit.ts:446",
+      "what_it_does": "publicReasonCodeFor: the status's publicReasonCode, else the receipt's validation reason.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Export operations only; passes any string through."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/export/submit.ts:446",
+      "what_it_does": "publicReasonCodeFor: the status's publicReasonCode, else the receipt's validation reason.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Export operations only; passes any string through."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/dashboard/reportingRead.ts:67",
+      "what_it_does": "Reads status.public_reason_code (or a regex ^[A-Z0-9_]+$ match on the text) from a summary read refusal.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Dashboard summary read only; shape rule."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/dashboard/reportingRead.ts:67",
+      "what_it_does": "Reads status.public_reason_code (or a regex ^[A-Z0-9_]+$ match on the text) from a summary read refusal.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Dashboard summary read only; shape rule."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/tabs/analysis/composer.ts:421",
+      "what_it_does": "reasonCodeOf: the error's publicReasonCode or reasonCode, or null.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Submission/generation errors only; passes any string through."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/tabs/analysis/composer.ts:421",
+      "what_it_does": "reasonCodeOf: the error's publicReasonCode or reasonCode, or null.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Submission/generation errors only; passes any string through."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx:37",
+      "what_it_does": "publicFailure: prints 'This action is unavailable (<code>)' for any string code.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Composer actions only; passes any string through."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx:37",
+      "what_it_does": "publicFailure: prints 'This action is unavailable (<code>)' for any string code.",
+      "key_policy": "TOLERANT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "Composer actions only; passes any string through."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/PROD:src/pages/InvestorReporting/tabs/analysis/InputReview.tsx:31",
+      "what_it_does": "switch on an input finding's reasonCode.",
+      "key_policy": "EXACT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "A different vocabulary (findings about an uploaded file), never a public reason code of a read."
+    },
+    {
+      "side": "PORTAL",
+      "file_line": "origin/DEV:src/pages/InvestorReporting/tabs/analysis/InputReview.tsx:31",
+      "what_it_does": "switch on an input finding's reasonCode.",
+      "key_policy": "EXACT",
+      "meets_new_value": "NOT_REACHED",
+      "why": "A different vocabulary (findings about an uploaded file), never a public reason code of a read."
+    }
+  ]
+}
