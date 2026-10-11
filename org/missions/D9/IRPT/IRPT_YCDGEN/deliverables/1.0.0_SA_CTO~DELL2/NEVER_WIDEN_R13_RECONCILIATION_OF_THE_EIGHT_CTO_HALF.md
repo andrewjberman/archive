@@ -73,3 +73,35 @@ Also read by the issuer and recorded here: a redelivered FAILED job is claimed a
 So row D2-S45 stays ARMED and condition 3, no redrive, is load-bearing.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## CONDITION 4 AMENDED (2026-10-11 ~15:1xZ, this seat), after the first attempt STOPPED as designed
+
+**What happened** (the laptop's return @356367f583, relayed verbatim in
+`org/tier0_exec/0.0.0_AB_MSTR/deliverables/relays/RELAY_LAPTOP_XB_0c52_6f1a_ca7a_RESULTS_20261011T1509Z.md`; not re-read by
+this seat): row 7 was written; request 7's status answer read UNAVAILABLE / FIRM_BINDING, not FAILED; row 7 was rolled back;
+rows 1 to 6 and 8 were never attempted; all eight read RECEIVED and the queues are unchanged. The same call on the restored
+RECEIVED row answers identically. **So the condition stopped the act on a proof that could not be had: the executor's caller
+cannot observe a job's state for a 49financial request owned by an opal-capital principal.** Nothing is left half-landed.
+
+**Exit (b) is taken: the proof is changed, and no identity is moved into a client firm to get the old one.** Condition 4
+existed to show one thing before seven more writes: that the written detail is a string the decoder reads. That can be shown
+on the row itself.
+
+**Condition 4, as amended.** The executor writes request 7 alone, then makes ONE consistent read of that row and shows:
+(i) `state` is the string `FAILED`; (ii) `job_detail` is of type S, never M; (iii) its value parses as JSON to exactly the
+four members `code`, `cause`, `receives`, `cause_claim`, with the values the packet names; (iv) re-serialised with sorted keys
+and separators `,` and `:` it equals the stored string byte for byte. All four hold, and the other seven are written and
+each read back the same way. Any one fails: that key is rolled back and the act STOPS.
+
+**What this does not show, stated for the close:** the status route's answer for a FAILED job was not observed through the
+service for any of the eight. It rests on `ops/owned_status.py` line 20 and on the portal reader's fixture read @5643d0e811.
+It reads APPLIED, UNEXERCISED until an owner opens one.
+
+**Exit (a) is declined:** a batched window with the service identity swapped into 49financial would move an identity into a
+client firm to watch a status page say FAILED. The amended proof answers the question condition 4 was written for without it.
+
+**A finding to file, the issuer's:** the status route answers FIRM_BINDING to an owner-replay caller whether the job is
+RECEIVED or FAILED. Whether a real opal-capital owner, signed in with the firm selected, reads its own 49financial request's
+status is not established by this, and is the row's question.
+
+-- 1.0.0_SA_CTO~DELL2
