@@ -5,6 +5,7 @@
     python ar1_g2_checks.py g13        the resident's I4 poll tests pass (test_package_poll.py)
     python ar1_g2_checks.py g21        round 2: READY records i3_sent_at and a redelivery re-sends (test_ready_resend.py)
     python ar1_g2_checks.py g22        round 2: the packager speaks I7 and I5' (test_packager_i7.py)
+    python ar1_g2_checks.py g31        round 3: the packager's two live ticket ports (test_packager_live_ports.py)
     python ar1_g2_checks.py regress    the generate and research suites: no file newly red against the base
 
 Run from the worktree root. Prints one RESULT line: AR1-G2-<MODE>-OK or AR1-G2-<MODE>-FAIL <reason>; rc 0 only on OK.
@@ -25,8 +26,10 @@ FILES = {
     "g13": [Y + "/generate/tests/test_package_poll.py"],
     "g21": [Y + "/generate/tests/test_ready_resend.py"],
     "g22": [Y + "/research/tests/test_packager_i7.py", Y + "/research/tests/test_opal_packager.py"],
+    "g31": [Y + "/research/tests/test_packager_live_ports.py", Y + "/research/tests/test_opal_packager.py",
+            Y + "/research/tests/test_packager_i7.py"],
 }
-MIN_PASSED = {"g11": 4, "g12": 5, "g13": 5, "g21": 4, "g22": 5}
+MIN_PASSED = {"g11": 4, "g12": 5, "g13": 5, "g21": 4, "g22": 5, "g31": 6}
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 
 
