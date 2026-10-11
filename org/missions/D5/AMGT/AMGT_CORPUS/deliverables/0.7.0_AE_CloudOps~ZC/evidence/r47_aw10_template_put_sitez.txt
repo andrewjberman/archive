@@ -1,76 +1,127 @@
-AMGT_CORPUS r47 cell CRPS-aw-10 -- WRITE evidence (site Z) -- 2026-10-11T17:43:43Z -- HEAD 03cae2683f94ad216b132234b56a2be108dc238c -- executor 0.7.0_AE_CloudOps~ZC -- order AMGT_CORPUS.TO-WRITE-R47-aw10.template-put-sitez (workstream TEMPLATE) -- RESULT: STOP 3 AT STEP 3. NOTHING WAS PUT.
+AMGT_CORPUS r47 cell CRPS-aw-10 -- WRITE evidence (site Z) -- 2026-10-11T18:38:16Z..18:53:00Z -- HEAD 005295f427a9e811beaa5b7368e0c7b2c77e6043 -- executor 0.7.0_AE_CloudOps~ZC -- order AMGT_CORPUS.TO-WRITE-R47-aw10.template-put-sitez AS AMENDED (AMENDMENT 1, issuer, ~18:2xZ) -- workstream TEMPLATE -- RESULT: SERVED. One new write-once key. Write-once proven by a second put.
 
 ## verdict
-STOP 3: the locate step printed `matches 0`, not `matches 1`. Per step 3 the executor writes
-nothing further, commits this evidence and reports. No --write ran, in either of its two ordered
-forms; no bronze key was created; the library and every source file are untouched.
+The master template was found, its labels read, and it was stored write-once under the
+`research_template` table. The put ran exactly twice, as steps 6 and 7: the first created the key
+(`put_performed True existed False`), the second proved immutability (`put_performed False existed
+True`) at the SAME key and the SAME sha256. No STOP fired. Nothing else was written: no dossier,
+no page, no schedule change, no vendor call, no delete, and no edit to the library or any source.
 
-The four criteria AC1-AC4 therefore read 0, 0, 0 and 0 rather than 2, 1, 1 and 1. That is the
-CORRECT reading of a STOP'd order and not a proof failure: steps 4 to 7 are the steps that emit
-the graded lines, and the order forbids reaching them once STOP 3 fires.
+## CORRECTION to this file's superseded version
+This path previously carried a STOP 3 reading, committed at ec5c71c561, which stated that the
+master template is ABSENT from the synced library. THAT CONCLUSION WAS WRONG, and the error was
+one of SCOPE, not of measurement.
 
-## gates cleared before step 3
-STOP 0  both halves on origin/box/dell1: CTO half author 1.0.0_SA_CTO~DELL1 and its line 6 begins
-        `**SIGNED**` (bytes printed at the cited line, not grepped for the quote; positive control
-        on the same ref returned 9587 bytes). COO half author 2.0.0_SA_COO~C1.
-STOP 1  template.py e03d6a8acf65d3fd..., team_sheet.py 0442f28ed1f661a0..., store.py
-        34b344de8ed116560... -- all three match the pair's required prefixes.
-STOP 2  0 processes carrying lib.research.corpus.template, of 70 python processes on this machine;
-        0 carrying lib.research.corpus at all.
+Both of this lane's earlier readings -- the r44 PowerShell search (@2274227184) and the v1 locate
+walk (@ec5c71c561) -- covered the library ROOT that `library.library_root()` derives,
+`.../Asset Management/Research`. The issuer's AMENDMENT 1 identified that the SharePoint item sits
+in `.../Asset Management/`, the root's PARENT, which neither reading looked at. The amended script
+walks the root AND lists the parent's direct files, and it finds the file immediately:
+`matches 1 of files_walked 378 in_root 0 in_parent 1`.
+
+`in_root 0` reproduces both earlier zeros exactly, so the earlier numbers were TRUE of the
+population they measured and FALSE of the question being asked. The issuer's correction stands;
+the file was one directory level above every search this lane had run. The size confirms identity
+independently: 383839 bytes, equal to the Graph-read size of item 01L6LHKF...MJXN, and an mtime of
+2026-07-24T13:04:50Z equal to the item's modified time -- so `size_equal True` is not a coincidence
+of two files sharing a name.
+
+## gates
+STOP 0  re-read for the amended order: CTO half author 1.0.0_SA_CTO~DELL1, its line 6 begins
+        `**SIGNED**`; COO half author 2.0.0_SA_COO~C1. Both on origin/box/dell1 after a fetch.
+STOP 1  template.py e03d6a8acf65, team_sheet.py 0442f28ed1f6, store.py 34b344de8ed1 -- all MATCH.
+STOP 2  0 processes carrying lib.research.corpus.template, of 71 python processes; 0 carrying
+        lib.research.corpus at all.
+STOP 3  not fired: matches 1.
+STOP 4  not fired: size_equal True.
+STOP 5  not fired: rc=0 on both puts, and no BronzeImmutableError, AccessDenied or Traceback in any
+        of the three put outputs (dry-run, put, put again).
+STOP 6  not fired: dossier_writing 0 (see `## scheduled tasks`).
 
 ## locate
-$ python org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round47/aw10_locate.py
-   (the invocation EXACTLY as step 3 writes it -- it does not run on this box)
-Traceback (most recent call last):
-  File [35m"C:\Users\Opal Bloomberg\Desktop\ajb_workspace\org\missions\D5\AMGT\AMGT_CORPUS\deliverables\2.0.0_SA_COO~C1\checks\round47\aw10_locate.py"[0m, line [35m17[0m, in [35m<module>[0m
-    from lib.research.corpus import library, team_sheet
-[1;35mModuleNotFoundError[0m: [35mNo module named 'lib.research'[0m
-rc=1
-
-rc=1 is NEITHER of the script's documented exits (0 = one match, 3 = none or more than one), so
-this is an INSTRUMENT FAILURE and was not read as `matches 0`. Cause, measured: `python <path>`
-puts the SCRIPT's directory on sys.path, never the current directory, so `from lib.research.corpus
-import ...` cannot resolve even when the cwd IS the repository root -- and the cwd was the repo root
-(printed above the run). `python -c` by contrast reports an empty sys.path[0], i.e. the cwd, which is
-why every `python -m lib.research...` step in round 45's order worked and why au1_accounting.py
-worked (it imports only `re` and `sys`). The script's own docstring says to run it `from the
-repository root of the site-Z checkout`, so the repo root is what the ordered form fails to supply.
-
 $ PYTHONPATH=. python org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round47/aw10_locate.py
-   (the SAME script, unmodified, with the repo root importable -- only sys.path differs)
 template_locate root C:\Users\Opal Bloomberg\OneDrive - Opal Capital\Shared - Documents\Asset Management\Research source env:OneDriveCommercial+relative
-template_locate matches 0 of files_walked 378
-template_locate expected_size 383839 size_equal None
-rc=3
-
-rc=3 is the script's documented `none or more than one`. The walk covered files_walked 378, which
-equals the library census's own file count (`folders 102 files 378`, read twice today at 02:38Z and
-09:47Z), so the zero is a reading of the WHOLE library and not a truncated walk.
-
-## corroboration -- this is the second independent reading of the same absence
-This lane measured the same thing 15 hours earlier under order TO-READ-R44-at-4, by a DIFFERENT
-instrument (PowerShell Get-ChildItem -Recurse -Filter, not os.walk in Python), and recorded it in
-deliverables/0.7.0_AE_CloudOps~Z/evidence/r44_at4_fence14_store_match_sitez.txt @2274227184:
-  `0 matches under <root>`, with a positive control of 79 .xlsx files and 0 enumeration errors,
-  and the nearest name being the UN-PREFIXED `..._v1.xlsx` under Total Energies TTE FP.
-Two instruments, two languages, 15 hours apart, same root, same verdict. The master
-`FactSet Based ONE PAGER TEMPLATE 2026 03 09_v2.xlsx` is ABSENT from the synced library.
-
-The issuer's own search (deliverables/2.0.0_SA_COO~C1/evidence/r47_aw7_master_template_search_20261011.md)
-found the item in SHAREPOINT -- site `Shared`, item 01L6LHKFRTYYYRWCI37VGLHJQPCL3KMJXN, 383839 bytes,
-modified 2026-07-24T13:04:50Z. Both readings can be true at once, and the gap between them IS the
-finding: the item exists in SharePoint and has not reached this device's OneDrive sync. Note also
-that today's 09:47Z census read `placeholders 0 of 378` AFTER round 45's ingest hydrated all 11
-placeholders, so the absence is not an unhydrated-placeholder artefact either -- there is no
-placeholder standing in for this file.
+template_locate parent C:\Users\Opal Bloomberg\OneDrive - Opal Capital\Shared - Documents\Asset Management exists True files_directly_in_parent 13
+template_locate matches 1 of files_walked 378 in_root 0 in_parent 1
+template_locate match C:\Users\Opal Bloomberg\OneDrive - Opal Capital\Shared - Documents\Asset Management\FactSet Based ONE PAGER TEMPLATE 2026 03 09_v2.xlsx size 383839 mtime 2026-07-24T13:04:50Z
+template_locate expected_size 383839 size_equal True
+rc=0
 
 ## scheduled tasks
-NOT RUN, deliberately. Step 3a is a condition of the CTO half gating the PUT (`before any put`), and
-step 3 directs the executor to write nothing further once STOP 3 fires. With no put to gate, running
-the task census would be proceeding past a STOP to manufacture a criterion line. For the issuer's
-re-cut: the same census was run and recorded 7 hours earlier for round 45's au-1 under the identical
-condition (then over four tokens, not five) and read `schtasks_named 1 dossier_writing 0` over 295
-task blocks, in deliverables/0.7.0_AE_CloudOps~ZC/evidence/r45_au1_bronze_ingest_and_four_count_sitez.txt
-@cc1f7b2dfa. That is a PRIOR reading offered as context, NOT this order's evidence, and the fifth
-token `template` was not in its filter.
+$ schtasks /query /fo LIST /v
+DENOMINATOR: 295 scheduled tasks, which equals schtasks' own count of `TaskName:` and
+`Task To Run:` fields (295 each).
+Note on the parse: splitting the listing on `HostName:` yields 296 groups, because the listing
+opens with a `Folder: \` header before the first task. That leading group carries no
+`Task To Run:` line, so it is not a task and cannot match any token; filtering to groups that
+have a `Task To Run:` line gives 295. The real count is 295 and the 296 is named here rather than
+quietly reconciled, because a denominator that disagrees with its source needs its cause stated.
+
+Blocks below are copied WHOLE for every task whose action (Task To Run) names any of the FIVE
+tokens this round filters on -- dossier, continuation, substrate, corpus, template. Round 45's
+condition filtered on four; `template` is new this round and adds no further match.
+
+HostName:                             OPAL_BLOOMBERG
+TaskName:                             \amgt-induction-daily
+Next Run Time:                        10/12/2026 9:00:00 AM
+Status:                               Ready
+Logon Mode:                           Interactive only
+Last Run Time:                        10/11/2026 9:00:02 AM
+Last Result:                          0
+Author:                               N/A
+Task To Run:                          cmd.exe /c "set OPAL_INDUCTION_FIRE=1&& "C:\Users\Opal Bloomberg\AppData\Local\Programs\Python\Python311\python.exe" -m lib.research.corpus.induction_scheduled --mode fire"
+Start In:                             C:\Users\Opal Bloomberg\Desktop\opal-pinned\amgt-induction-daily\7580fe909cf3
+Comment:                              N/A
+Scheduled Task State:                 Enabled
+Idle Time:                            Disabled
+Power Management:                     Stop On Battery Mode, No Start On Batteries
+Run As User:                          Opal Bloomberg
+Delete Task If Not Rescheduled:       Disabled
+Stop Task If Runs X Hours and X Mins: 02:00:00
+Schedule:                             Scheduling data is not available in this format.
+Schedule Type:                        Daily 
+Start Time:                           9:00:00 AM
+Start Date:                           10/9/2026
+End Date:                             N/A
+Days:                                 Every 1 day(s)
+Months:                               N/A
+Repeat: Every:                        Disabled
+Repeat: Until: Time:                  Disabled
+Repeat: Until: Duration:              Disabled
+Repeat: Stop If Still Running:        Disabled
+
+The one named task matches on `corpus` only, via the module path
+`lib.research.corpus.induction_scheduled`. It carries none of the three writer commands and no
+`template ... --put` form. Its `Start In` is the PINNED tree
+C:\Users\Opal Bloomberg\Desktop\opal-pinned\amgt-induction-daily\7580fe909cf3, so the pinned
+bytes are what runs and what was read earlier today for round 45's identical condition:
+`induction_scheduled.py` matches none of dossier|continuation|substrate|write_one|bronze_put and
+delegates to `induction_run`, which also matches none (765 lines, 20 defs; positive control: the
+same grep returns 46 hits on backlog.py). So no scheduled task on this box writes a dossier or a
+`research_template` object.
+
+schtasks_named 1 dossier_writing 0
+
+## labels
+$ python -m lib.research.corpus.template --labels "<the single template_locate match path>"
+template_labels measured 9 metric_name 1 pass_through 8 two_label_left 0 fallback 19 bloomberg_held 1 codes 29
+
+## dry-run
+$ python -m lib.research.corpus.template --put "<match>" --item-id 01L6LHKFRTYYYRWCI37VGLHJQPCL3KMJXN --source-mtime 2026-07-24T13:04:50Z
+template_put DRY-RUN key amgt/harvest/bronze/research_template/template=01L6LHKFRTYYYRWCI37VGLHJQPCL3KMJXN/00bb23a6b08b35ca/FactSet Based ONE PAGER TEMPLATE 2026 03 09_v2.xlsx sha256 00bb23a6b08b35ca25275435689861a4651d4c0b62eb171de88dc3b974b55843
+
+## put
+$ (the same command) --write      [started 2026-10-11T18:48:11Z, ended 18:48:13Z, rc=0]
+template_put key amgt/harvest/bronze/research_template/template=01L6LHKFRTYYYRWCI37VGLHJQPCL3KMJXN/00bb23a6b08b35ca/FactSet Based ONE PAGER TEMPLATE 2026 03 09_v2.xlsx sha256 00bb23a6b08b35ca25275435689861a4651d4c0b62eb171de88dc3b974b55843 put_performed True existed False
+
+## put again
+$ (the same command) --write      [started 2026-10-11T18:52:57Z, ended 18:53:00Z, rc=0]
+template_put key amgt/harvest/bronze/research_template/template=01L6LHKFRTYYYRWCI37VGLHJQPCL3KMJXN/00bb23a6b08b35ca/FactSet Based ONE PAGER TEMPLATE 2026 03 09_v2.xlsx sha256 00bb23a6b08b35ca25275435689861a4651d4c0b62eb171de88dc3b974b55843 put_performed False existed True
+
+Key and sha256 are byte-identical across both puts, checked by extracting and comparing them
+rather than by eye: KEYS EQUAL, SHA256 EQUAL
+(00bb23a6b08b35ca25275435689861a4651d4c0b62eb171de88dc3b974b55843).
+
+The argument path survived the shell intact, checked with the corruption oracle before any put:
+python echoed argv[1] back unchanged, with `exists True` and `size 383839`.
 
