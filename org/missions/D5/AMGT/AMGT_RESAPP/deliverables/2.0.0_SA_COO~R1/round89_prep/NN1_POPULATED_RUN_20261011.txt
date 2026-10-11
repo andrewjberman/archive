@@ -1,0 +1,38 @@
+# AMGT-nn-1 -- condition 4 DRIVEN against a populated watchlist (issuer act, 2.0.0_SA_COO~R1, 2026-10-11 ~04:0xZ)
+# Arm 1: the DEPLOYED reader (member read from the live package) over an in-memory COPY of the watchlist store, two firms non-empty. Nothing written, no served write.
+   deployed function opal-amgt-scoped-api CodeSha256 KlosR/ap8O3tYrjDfNkUofT/vTQ5pTt32EvYL8mCqs8= LastModified 2026-10-09T22:55:03.000+0000
+   reader = lib/research/api/scoped_amgt.py read from that package: 372953 bytes, sha256 5b987a17468e59fc
+   [the deployed reader]
+   firm_a: no selector -> 200 ['AAPL', 'MSFT', 'NVDA'] (planted ['AAPL', 'MSFT', 'NVDA'])
+     off-list query selected_tenant      -> 200 ['AAPL', 'MSFT', 'NVDA'] byte-equal=True
+     off-list query selectedTenant       -> 200 ['AAPL', 'MSFT', 'NVDA'] byte-equal=True
+     off-list header x-selected-tenant   -> 200 ['AAPL', 'MSFT', 'NVDA'] byte-equal=True
+     S1 populated=True S2 byte-equal on every channel=True S3 no leak of firm_b=True
+   firm_b: no selector -> 200 ['TSLA', 'AMZN'] (planted ['TSLA', 'AMZN'])
+     off-list query selected_tenant      -> 200 ['TSLA', 'AMZN'] byte-equal=True
+     off-list query selectedTenant       -> 200 ['TSLA', 'AMZN'] byte-equal=True
+     off-list header x-selected-tenant   -> 200 ['TSLA', 'AMZN'] byte-equal=True
+     S1 populated=True S2 byte-equal on every channel=True S3 no leak of firm_a=True
+   [NEGATIVE CONTROL: a reader that drops every list when a selector is present]
+   firm_a: no selector -> 200 ['AAPL', 'MSFT', 'NVDA'] (planted ['AAPL', 'MSFT', 'NVDA'])
+     off-list query selected_tenant      -> 200 [] byte-equal=False
+     off-list query selectedTenant       -> 200 [] byte-equal=False
+     off-list header x-selected-tenant   -> 200 [] byte-equal=False
+     S1 populated=True S2 byte-equal on every channel=False S3 no leak of firm_b=True
+   firm_b: no selector -> 200 ['TSLA', 'AMZN'] (planted ['TSLA', 'AMZN'])
+     off-list query selected_tenant      -> 200 [] byte-equal=False
+     off-list query selectedTenant       -> 200 [] byte-equal=False
+     off-list header x-selected-tenant   -> 200 [] byte-equal=False
+     S1 populated=True S2 byte-equal on every channel=False S3 no leak of firm_a=True
+PASS S1-S3 the deployed reader: populated lists, byte-equal on every selector channel, no cross-firm entry
+PASS S4 the negative control FAILS the same comparison (the instrument discriminates on populated lists)
+R89 POPULATED SELECTOR: YES
+
+# Arm 2: the request path in front of scoped_amgt.py -- who reads a selected_tenant / selectedTenant / x-selected-tenant?
+# (a) repo source, comp-find -i over three scopes, denominators as printed:
+#   infra/aws/lambda      : 58 hit(s) across 5659 file(s) scanned; 22 files, ALL under infra/aws/lambda/investor-reporting (_authz, directory, narrative, ops, performance + tests). None is the scoped API or an authorizer.
+#   infra/aws/lambda-edge : 0 hit(s) across 23 file(s) scanned (the edge authorizer auth-validator-edge lives HERE, not under infra/aws/lambda)
+#   infra/aws/terraform   : 0 hit(s) across 763 file(s) scanned | 2 floor and 9 binary NOT searched
+# (b) the DEPLOYED edge authorizer package, read from the live function:
+#   auth-validator-edge CodeSha256 eNvtV2EFQF/pnJCJQyXtEaiHSePaJNL56Cws7m8tf5w= LastModified 2026-10-03T17:41:09Z nodejs20.x: 1 package member, 0 matches
+# LIMIT: the router between the edge and the function is API Gateway / CloudFront configuration; its deployed state was not read, only its terraform source (0 of 763).

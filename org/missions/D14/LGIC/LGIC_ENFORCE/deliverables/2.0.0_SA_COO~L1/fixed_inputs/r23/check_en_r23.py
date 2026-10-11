@@ -162,6 +162,18 @@ def load_live():
     return picks[0][0], picks[0][1], vintage
 
 
+VINTAGE_RE = re.compile(r"as of (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d UTC)")
+
+
+def vintage_now():
+    """The plane's vintage date as comp-find prints it now (a one-name pull, seconds). None when it cannot be read."""
+    rc, out = run([sys.executable, os.path.join(ROOT, ".tools", "comp-find"), "--corpus", "aws", "--name", "^r23-vintage-probe$", "--all"],
+                  timeout=300)
+    m = re.search(r"^  VINTAGE: (.+)$", out, re.M)
+    d = VINTAGE_RE.search(m.group(1)) if m else None
+    return d.group(1) if d else None
+
+
 def arm_rename():
     with practice() as wt:
         write(wt, SRC_REL, tf_role(RENAME_NAME))
@@ -198,7 +210,7 @@ def adoption_text(wt, name, typ, rel=ADOPT_REL):
 
 def arm_adopt():
     name, typ, vintage = load_live()
-    asof = re.search(r"as of (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d UTC)", vintage)
+    asof = VINTAGE_RE.search(vintage)
     need(asof is not None, "cannot read the vintage date out of %r" % vintage)
     print("live pick: %s (%s); vintage %s" % (name, typ, asof.group(1)))
     with practice() as wt:
@@ -211,8 +223,16 @@ def arm_adopt():
         need(rc == 0 and summ != "REFUSE" and graded >= 1, "the gate did not admit the adoption (rc=%d, %s, %d graded)" % (rc, summ, graded))
         text = " ".join(lines)
         need(FAILED_TOKEN not in text, "the admitted adoption carries %s although the live read worked: %s" % (FAILED_TOKEN, text[:300]))
-        need(LIVE_TOKEN in text and typ in text and asof.group(1) in text,
-             "the verdict text lacks %s, the node type %s or the vintage date %s: %s" % (LIVE_TOKEN, typ, asof.group(1), text[:400]))
+        # the graph DB is rebuilt on its own schedule: the gate's read may be newer than the one above, so the date it printed must
+        # be a vintage the plane reported before the gate ran or reports after it (an invented or stale date is neither)
+        after = vintage_now()
+        known = [d for d in (asof.group(1), after) if d]
+        printed = VINTAGE_RE.search(text.split(LIVE_TOKEN, 1)[1]) if LIVE_TOKEN in text else None
+        print("vintage: before=%s after=%s printed=%s" % (asof.group(1), after, printed.group(1) if printed else None))
+        need(("%s %s '" % (LIVE_TOKEN, typ)) in text and printed is not None,
+             "the verdict text lacks `%s %s '<name>'` (the node type the plane matched) or a vintage date: %s" % (LIVE_TOKEN, typ, text[:400]))
+        need(printed.group(1) in known,
+             "the vintage date %s the gate printed is neither the plane's before (%s) nor after (%s) reading" % (printed.group(1), asof.group(1), after))
         # the difference control: a name the plane does not hold is refused exactly as today
         git(wt, "reset", "-q", "--hard", "HEAD")
         git(wt, "clean", "-fdq")

@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-nn-3",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "16d359ecc320abc28aa7fb46360429981c21fc07",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-nn-3.the-peer-sets-subject-cap-is-on-its-own-records-vintage.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-nn-3.the-peer-sets-subject-cap-is-on-its-own-records-vintage.md",
+    "group": "OTHER",
+    "vintage_commit": "63aa8c4fe3"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~351",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/peers/subject_cap.py",
+      "kind": "script",
+      "commit_or_etag": "42fb1199c89b47f295375a263a05a8e6f8419ce3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pure module, no read and no write: refresh_fields(stored_subject, derived_subject). A numeric derived market_cap_musd returns the five cap fields from the derived subject, cap_stored_vintage (the stored cap_vintage replaced) and cap_refresh REFRESHED with a reason naming both vintages; otherwise only cap_refresh ABSENT with the order's sentence.",
+      "introduces": ["refresh_fields", "CAP_FIELDS"],
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "42fb1199c89b47f295375a263a05a8e6f8419ce3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One decorator _with_subject_cap(served, security_key) added after _with_subject_display_name, and one call site in read_peer_set: _with_member_display_names(_with_subject_cap(_with_subject_display_name(served, security_key), security_key)) inside the existing chain. The block is read with _read_model_block_pool and derived with engine._subject_from_model_block; an absent block (None) or a read or derivation that raises serves the stored cap with cap_refresh UNREADABLE (raise, or POOL_READ_FAILED) or ABSENT. Every other subject field and every member is served as stored. AMGT-nn-2's decorator is unchanged.",
+      "introduces": ["_with_subject_cap"],
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_peer_subject_cap.py",
+      "kind": "test",
+      "commit_or_etag": "42fb1199c89b47f295375a263a05a8e6f8419ce3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "nine tests monkeypatching scoped_amgt._read_model_block_pool: a fresh block replaces the five cap fields and records the stored vintage; a raising read, an absent block and a POOL_READ_FAILED block leave the stored cap unchanged and say why; a block with no cap leaves the stored figure; no member is touched; the stored dict is not mutated; refresh_fields is pure and refuses a non-numeric or boolean cap; a raising derivation is named UNREADABLE.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~351/mutant_subject_cap.py",
+      "kind": "test",
+      "commit_or_etag": "d5ccfd115d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the BUILD mutant control: runs the issuer's r89_subject_cap.py main() with _with_subject_cap replaced by the identity function. Output: C1 FAIL, C2 PASS, C3 FAIL, R89 SUBJECT CAP: NO, exit=1. Re-runnable: PYTHONPATH=<repo root> python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~351/mutant_subject_cap.py",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "42fb1199c89b47f295375a263a05a8e6f8419ce3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one row appended: AMGT_RESAPP-D1-W351-S1 (OBSERVATION, disposition UNDER_INVESTIGATION). The gate printed: surprise-row-gate OK: 1 file(s), all new rows carry their step-7/step-10 fields.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PASS C1 (the served subject's market_cap_musd, market_cap_vintage, cap_vintage and cap_source equal the subject's current model block's), PASS C2 (every other subject field and every member's ticker, name, price, cap, ratio and distance equal the stored object's), PASS C3 (an unreadable block serves the stored cap unchanged and says why in cap_refresh); R89 SUBJECT CAP: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_subject_cap.py\" --where local; echo \"exit=$?\"",
+      "output_evidence": "   where=local status=200 | stored cap 541931.7824388 @ 2026-09-19T07:53:19Z | fresh block derived/model_block/ASML_NA_Equity/20261010T130156Z/model_block.json cap 621657.4380015999 @ 2026-10-10T13:01:55Z | served cap 621657.4380015999 @ 2026-10-10T13:01:55Z\nPASS C1 the served subject's cap fields equal the subject's current model block's (market_cap_musd=621657.4380015999, cap_vintage='2026-10-10T13:01:55Z')\nPASS C2 every other subject field and every member's ticker, name, price, cap, ratio, distance equal the stored object's\nPASS C3 an unreadable model block serves the stored cap unchanged and says why in cap_refresh (unchanged=True said=True)\nR89 SUBJECT CAP: YES\nexit=0",
+      "denominator": "3 of 3 probes PASS (C1 served subject cap fields vs the current block, C2 other subject fields and 12 members on ticker, name, price, cap, ratio, distance, C3 raising read arm); stored subject cap 541931.7824388 at 2026-09-19T07:53:19Z; served subject cap 621657.4380015999 at 2026-10-10T13:01:55Z",
+      "status": "PASS",
+      "expect": "R89 SUBJECT CAP: YES.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the existing peers tests and AMGT-nn-2's new file pass with 0 failed; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests/test_numeric_member_tickers.py lib/research/api/tests/test_peer_price_currency.py lib/research/api/tests/test_adapter_hookups_bb17.py lib/research/api/tests/test_peer_listed_identity.py lib/research/peers/tests -q; echo \"exit=$?\"",
+      "output_evidence": "97 passed in 3.57s\nexit=0",
+      "denominator": "97 passed of 97 collected across the five named paths (91 base plus AMGT-nn-2's 6 in test_peer_listed_identity.py); 0 failed",
+      "status": "PASS",
+      "expect": "97 passed.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the new test file passes with at least 5 tests and 0 failed; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests/test_peer_subject_cap.py -q; echo \"exit=$?\"",
+      "output_evidence": "9 passed in 0.71s\nexit=0",
+      "denominator": "9 of 9 tests in lib/research/api/tests/test_peer_subject_cap.py passed (at least 5 required); 0 failed",
+      "status": "PASS",
+      "expect": "9 passed.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the serve-time decorator is the load-bearing behaviour: with _with_subject_cap replaced by the identity function in read_peer_set, the issuer's r89_subject_cap.py must FAIL C1 and C3. Run as deliverables/0.9.0_WK_AMGT_RESAPP~351/mutant_subject_cap.py.",
+      "expected": "REAL route: C1 PASS, C2 PASS, C3 PASS, R89 SUBJECT CAP: YES. MUTANT (decorator removed): C1 FAIL, C2 PASS, C3 FAIL, R89 SUBJECT CAP: NO, exit 1.",
+      "observed": "REAL route (AC1 run): C1 PASS, C2 PASS, C3 PASS, R89 SUBJECT CAP: YES, exit=0. MUTANT: FAIL C1 served 541931.7824388 at 2026-09-19T07:53:19Z against the block's 621657.4380015999 at 2026-10-10T13:01:55Z; PASS C2; FAIL C3 (unchanged=True said=False); R89 SUBJECT CAP: NO; exit=1. CONTROL FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 check run twice against the live (unchanged) model block derived/model_block/ASML_NA_Equity/20261010T130156Z/model_block.json and the stored peers object.",
+      "observed": "run 1 (pre-commit) and run 2 (on the committed bytes at 42fb1199c8) both print market_cap_musd=621657.4380015999, cap_vintage 2026-10-10T13:01:55Z, PASS C1, PASS C2, PASS C3, R89 SUBJECT CAP: YES, exit=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The producer lib/research/peers/engine.py, the portal and any stored peers object or model block",
+      "reason": "Order section 1 and bound 1: the fix is serve-time only. engine._subject_from_model_block is called, not changed."
+    },
+    {
+      "item": "Deploy of the route, any store write, any schedule, SEC, vendor, model or Bloomberg call",
+      "reason": "Order bound 1 and preflight EGRESS CLASS NONE. The check ran with --where local, a read of the pool through the route's own readers. No npm, pip or bun install."
+    },
+    {
+      "item": "Member caps, cap_ratio_to_subject and any member field",
+      "reason": "Order section 1: do not change member caps or cap_ratio_to_subject. The C2 probe equals each member's ticker, name, price, cap, ratio and distance to the stored object's."
+    },
+    {
+      "item": "The <status> flip of AMGT-nn-3 in the task order file",
+      "reason": "Order section 5: the status flip is the issuer's (2.0.0_SA_COO~R1). This worker does not edit the task order."
+    }
+  ],
+  "surprises": ["AMGT_RESAPP-D1-W351-S1"],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "round-89 subject cap check (AC1)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_subject_cap.py\" --where local",
+      "result": "rc 0; R89 SUBJECT CAP: YES; stored 541931.7824388 at 2026-09-19T07:53:19Z; served 621657.4380015999 at 2026-10-10T13:01:55Z; run twice, identical."
+    },
+    {
+      "tool": "pytest (AC2)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests/test_numeric_member_tickers.py lib/research/api/tests/test_peer_price_currency.py lib/research/api/tests/test_adapter_hookups_bb17.py lib/research/api/tests/test_peer_listed_identity.py lib/research/peers/tests -q",
+      "result": "rc 0; 97 passed, 0 failed"
+    },
+    {
+      "tool": "pytest (AC3)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests/test_peer_subject_cap.py -q",
+      "result": "rc 0; 9 passed, 0 failed"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh lib/research/peers/subject_cap.py lib/research/api/scoped_amgt.py lib/research/api/tests/test_peer_subject_cap.py",
+      "result": "rc 0; OK: pre-commit gate clean for 3 of 3 file(s)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (code commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~351 <0.9.0_WK_AMGT_RESAPP~351@opal.agent>\" -F .scratch/msg_code.txt -- lib/research/api/scoped_amgt.py lib/research/peers/subject_cap.py lib/research/api/tests/test_peer_subject_cap.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit 42fb1199c8 on wk-AMGT_RESAPP-351 (LOCAL); commit-gate, naming-gate, to-pipeline-gate, surprise-row-gate, surprise-corpus and missions-tree-check all OK; msg-verify MATCH"
+    }
+  ]
+}
