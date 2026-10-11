@@ -1,0 +1,171 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-431",
+  "firm": "49F",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-431.ycharts-host-capture-signin-failure-read.md",
+    "group": "OTHER",
+    "vintage_commit": "8655d3c005"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "8655d3c005",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-431.ycharts-host-capture-signin-failure-read.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~IB2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB129-1_capture_failure_read.json",
+      "kind": "doc",
+      "commit_or_etag": "6a254507a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The record the order specifies: instance, unit and root each CONFIRMED rather than taken from the order (the wrapper is /opt/investor-reporting-ycharts, not the path the order guessed); the journal window with host_tz stated before any --since and 74348 lines scanned; where the capture record goes, read from the code; 11 capture attempts with time, code and source line; the stored state; the cause with claim inferred and 9 evidence lines; the last READY; ready_by_day and refused_by_day; 6 host commands with SSM-verbatim scripts and Success statuses; one void send recorded separately; sign_in_attempted false, secret_values_read 0, vendor_calls_made 0; 8 not_established items.",
+      "artifact_covered_by": ["IB129-1-AC1", "IB129-1-AC2", "IB129-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB129-1_CAPTURE_FAILURE_READ.md",
+      "kind": "doc",
+      "commit_or_etag": "6a254507a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one page the order asks for: the cause, the last READY, what real requests met, and what is not established, plus the per-day table and the account-lock assessment.",
+      "artifact_covered_by": ["IB129-1-AC1", "IB129-1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB129-1_journal_capture_attempts.txt",
+      "kind": "doc",
+      "commit_or_etag": "6a254507a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The raw journal extract beside the record, carrying its SSM command id, the unit's journal span (earliest 2026-09-24T09:35:20Z, so the 14-day window is bounded by the order and not by retention), every CAPTURE_FAILED and SESSION_REFRESH line in the window, and the counted ATTENTION codes, EVICTION verdicts, RESOLVE states per day and retained_for_retry codes per day.",
+      "artifact_covered_by": ["IB129-1-AC1", "IB129-1-AC2", "IB129-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB129-1_capture_receipt_and_state.txt",
+      "kind": "doc",
+      "commit_or_etag": "6a254507a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The raw host reads: the capture receipt file's stat and its eight step lines; the RESOLVE lines today; the secret-id POINTERS, which are names and not values; the wrapper and library sha256 with the note that both EQUAL the repo bytes at box/dell2 HEAD; the lease item unprojected; the describe-secret dates with the day-granularity trap stated; and the kms:Decrypt denial recorded rather than worked around.",
+      "artifact_covered_by": ["IB129-1-AC1", "IB129-1-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB129-1-AC1",
+      "criterion_verbatim": "IB129-1-AC1: the record states the capture failure: every capture attempt found in the window with its time and code, and a cause statement carrying its claim (measured / inferred / held / absent) and the evidence lines behind it.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r129/p129_cells.py\" . IB129-1-AC1",
+      "expect": "IB129-1-AC1 PASS",
+      "output_evidence": "OK: 11 capture attempt(s) listed; cause stated as inferred with 9 evidence line(s) | IB129-1-AC1 PASS | rc=0",
+      "denominator": "11 capture attempts over the 14-day window, each with at_utc, code and source_line; the unit's journal spans 2026-09-24 to 2026-10-11 and 74348 lines were scanned, so the window is bounded by the order rather than by journal retention. 10 of the 11 are sign-in-bearing; CAPTURE_FAILED:LEASE_NOT_HELD fails before the runner starts. One attempt of the 11 has a surviving receipt; the other 10 do not, because the stderr file is truncated at every run.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB129-1-AC2",
+      "criterion_verbatim": "IB129-1-AC2: the record states the last READY of a YCharts-path job on the host, or that none is in the window, with the window's start, the lines scanned and READY counts per day.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r129/p129_cells.py\" . IB129-1-AC2",
+      "expect": "IB129-1-AC2 PASS",
+      "output_evidence": "OK: last READY 2026-10-11T11:18:44Z (inferred); window since 2026-09-27T00:00:00Z, 74348 lines; 11 day(s) with a READY | IB129-1-AC2 PASS | rc=0",
+      "denominator": "64 READY lines across 15 days of the window, 11 of those days carrying at least one, summing to the ready_by_day table. The claim is inferred and the count UNDIVIDED because a field census of IRPT_RESIDENT_RESOLVE over the whole window returns only state= (READY 64, RETRY 34, ATTENTION 11): no field names the vendor-versus-Opal branch, and the order's instruction for that case is followed rather than guessed around. A separate genuinely MEASURED bound is recorded instead: ycharts/session/current last changed 2026-10-05T10:04Z, so no capture has written a session bundle in six days.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB129-1-AC3",
+      "criterion_verbatim": "IB129-1-AC3: the bounds held, by the record's own command list: every host command is listed verbatim with its SSM command id and terminal status; none starts, stops or restarts a unit, runs the session runner, reads or writes a secret value, touches a queue or calls the vendor; and no output file carries a cookie or password member.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r129/p129_cells.py\" . IB129-1-AC3",
+      "expect": "IB129-1-AC3 PASS",
+      "output_evidence": "OK: 6 host command(s), all Success, none forbidden; no sign-in; 0 secret-like members in 3 file(s) | IB129-1-AC3 PASS | rc=0",
+      "denominator": "6 host commands, each status read with get-command-invocation from the instance and each script read back from ssm list-commands Parameters.commands, so the recorded text is what SSM RECEIVED rather than what the operator believed it sent. 0 of 6 match any forbidden pattern; 2 output files plus the record scanned for cookie or password members, 0 hits. One further send is recorded in host_commands_void, not here: its script as SSM recorded it is the empty string, so it carries nothing to grade and could violate no bound. THIS CRITERION FAILED FIRST and was not worked around: it read FAIL at the unedited record on two false positives of its own patterns, which the issuer fixed in AMENDMENT 1 @8655d3c005; the record was never edited to suit it.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A mutant root outside every worktree holding copies of the record, both raw extracts and the check, with the BASELINE run there first and reading PASS on all three. Three mutants, one per criterion: (1) cause.claim set to 'probably', a value outside the ratified enum; (2) last_ready.at_utc set to null while claim stayed 'measured', the specific contradiction AC2 names; (3) a forbidden command appended to host_commands, 'systemctl restart irpt-analysis-resident.service'.",
+      "expected": "AC1 FAIL on (1), AC2 FAIL on (2), AC3 FAIL on (3)",
+      "observed": "(1) FAIL: cause needs statement, claim in ('measured','inferred','held','absent') and evidence_lines | AC1 FAIL rc=1. (2) FAIL: a null last READY cannot be measured; it is absent within the window | AC2 FAIL rc=1. (3) FAIL: host command mutant-0001 matches the forbidden pattern systemctl\\s+(start|stop|restart|reload|enable|disable|kill) | AC3 FAIL rc=1. Each was reverted and all three re-read PASS. SEPARATELY, AND STRONGER THAN A PLANTED MUTANT: AC3's discrimination was demonstrated by the WORLD rather than by a copy -- it genuinely failed on the real record before AMENDMENT 1, and the amendment was then controlled in both directions (see determinism).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The amendment that unblocked AC3 was controlled rather than accepted: both repaired patterns were exercised against cases that must still match and cases that must not, to establish the fix NARROWED the check without blinding it. Separately, the diagnosis itself rests on bytes whose identity was checked: the host's run-ycharts-session.sh and ycharts_session.js were hashed on the instance and compared with the repository's at box/dell2 HEAD.",
+      "observed": "10 of 10 control cases correct. Runner pattern: still matches 'bash .../run-ycharts-session.sh', 'node .../ycharts_session.js' and 'sh .../ycharts_session.js'; no longer matches 'sha256sum a.sh b.js' or 'stat a.sh b.js'. Redirect pattern: still matches 'echo hi > /opt/x/file' and 'cat a >> /var/log/b'; no longer matches '2>/dev/null', a sed replacement containing >/I, or 'wc -l < /opt/x/f'. Host bytes: 55ddb8f7947cba7c and 857d90b81960d69a7a both EQUAL the repo, so the code quoted in the cause is the code that ran.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any sign-in attempt, any run of run-ycharts-session.sh or ycharts_session.js, and any vendor call",
+      "reason": "The order's HARD BOUNDS forbid them and the whole point of the cell is that the path is stopped. None was made: the record carries sign_in_attempted false and vendor_calls_made 0 with the evidence, and the journal shows no capture attempt after 11:19:20Z, before this read began at 12:54:41Z."
+    },
+    {
+      "item": "Any secret VALUE, including the YCharts login and session bundles",
+      "reason": "Forbidden; get-secret-value was never invoked. Only describe-secret (dates and version stages) was used, and only the secret NAMES were read from secret-ids.env, which is what that file holds. secret_values_read is 0."
+    },
+    {
+      "item": "Starting, stopping or restarting the resident unit, touching the queue, or any write on the host",
+      "reason": "Forbidden. systemctl was used only with `show`. No redirection to a host path, no temp file and no tee: the reads are one journalctl pass piped into one grep or awk per command, plus stat, wc, grep, find, sha256sum and two read-only get-items."
+    },
+    {
+      "item": "Driving a caller the function ADMITS, to see what a real request now gets",
+      "reason": "Outside this cell: it would be a sign-in and a vendor call. It is also impossible from this seat, which cannot mint a verified internal subject -- the same ceiling 0.9.0_WK_IRPT_BCKEND~281 met."
+    },
+    {
+      "item": "The current values of capture_not_before and intent_session_refresh",
+      "reason": "Both live on rows not locatable without a table scan, which is outside the describe-and-listing read shape the order sanctions. Where each is stored, when it is set and what clears it are read from the code instead, and the cooldown's 900 s EFFECT is measured five times from journal spacing."
+    },
+    {
+      "item": "A grant of kms:Decrypt to this seat's user, to read the irpt-jobs rows directly",
+      "reason": "An IAM change, outside this read-only order entirely. The denial is recorded as row IRPT_BCKEND-D2-IB2-S4 and the row was read through the instance's own role, which the order names as the read path for that host."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-IB2-S1",
+    "IRPT_BCKEND-D2-IB2-S2",
+    "IRPT_BCKEND-D2-IB2-S3",
+    "IRPT_BCKEND-D2-IB2-S4"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ssm send-command + get-command-invocation",
+      "invocation": "6 read-only scripts against i-0167fd745ad906a66; each status read with get-command-invocation, never inferred from the CommandId",
+      "result": "PASS -- 6 of 6 Success. A seventh send was VOID: its script as SSM recorded it is the empty string, and it returned Success rc 0 with empty output (row IRPT_BCKEND-D2-IB2-S2)."
+    },
+    {
+      "tool": "ssm list-commands",
+      "invocation": "Parameters.commands per command id",
+      "result": "PASS -- the authoritative verbatim script for the record, and the instrument that proved the void send carried [\"\"]"
+    },
+    {
+      "tool": "journalctl through SSM",
+      "invocation": "one pass per command, piped into one grep or awk, with the host time zone established BEFORE any --since",
+      "result": "PASS -- host tz is UTC so no conversion was owed; the unit's span was read first, which is what shows the window is not truncated by retention"
+    },
+    {
+      "tool": "describe-secret",
+      "invocation": "ycharts/login/credentials and ycharts/session/current, dates and version stages only",
+      "result": "PASS -- and the day-granularity of LastAccessedDate is stated in the record rather than read as a time"
+    },
+    {
+      "tool": "dynamodb get-item",
+      "invocation": "the lease row, first from this seat and then through the host's role",
+      "result": "PARTIAL -- denied to this seat by kms:Decrypt (row IRPT_BCKEND-D2-IB2-S4); read through the instance, which showed the row is the session-publication FENCE row and carries no capture_not_before"
+    },
+    {
+      "tool": "p129_cells.py",
+      "invocation": "the three criteria at the repo root, before and after AMENDMENT 1; baseline and three mutants in a mutant root",
+      "result": "PASS -- AC3 genuinely FAILED first on two of its own false positives and was reported that way rather than worked around; after AMENDMENT 1 all three PASS on the UNEDITED record, and 3 of 3 mutants fire after a passing baseline"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "--author ... -F <msgfile>, message files written by the Write tool outside the worktree",
+      "result": "PARTIAL -- the 4 deliverables committed at 6a254507a6; the channel commit carrying rows S1 to S4 was REFUSED by the surprise-corpus pass on 6 standing failures in another project's file (D8 ADVI_COTBKF REMEDIATION_v34.md), raised with 0.0.0_AB_MSTR~DELL2 as infrastructure"
+    },
+    {
+      "tool": "comp rail",
+      "invocation": "2 raw recursive greps attempted",
+      "result": "PASS -- both DENIED and both correctly; each was answered with the native Grep tool, and one of those answers found the three module lines that settled how the artifact version resolves"
+    }
+  ]
+}
