@@ -1,0 +1,74 @@
+{
+  "to_id": "IRPT_DASHBD.TO-DB-b-142",
+  "worker": "0.9.0_WK_IRPT_DASHBD~115",
+  "method": {
+    "comparison": "for every flow day of every one of the 51 contested segments (a flow day = a day inside the segment on which the served day flow is nonzero or the custodian copy carries a Contribution or Withdrawal row), the custodian copy's signed external-flow day total against the served day flow, tolerance half a cent (0.005)",
+    "naive_sum": "every Contribution/Withdrawal row of the day, signed by its label, added",
+    "id_once_sum": "the same rows with EACH TRANSACTION ID COUNTED ONCE inside the (account, day)",
+    "sources": [
+      "49 Financial's own Black Diamond silver_legacy transactions copy, every date prefix (1878 date prefixes, 1878 objects, all carrying a transaction id column), re-read for the 49 accounts of the 51 segments, keeping the transaction id and portfolio group",
+      "49 Financial's served account_return_daily gold day flow, as ~108 downloaded it for the 51 segments"
+    ],
+    "rows_without_a_transaction_id": 0,
+    "ids_with_more_than_one_amount_or_direction_inside_one_account_day": 0
+  },
+  "segments": {
+    "total": 51,
+    "agree_at_cent": 33,
+    "differ_at_cent": 18,
+    "note": "differ_at_cent = segments with at least one flow day whose naive ledger sum differs from the served day flow by more than half a cent; ~113 found 18 segments at the wider tolerance and the day count here is 51 against its 50"
+  },
+  "flow_days": {
+    "total": 235,
+    "differing_at_cent": 51,
+    "reproduced_by_id_once": 50,
+    "not_reproduced": 1,
+    "note": "differing_at_cent is the days whose NAIVE sum differs at the cent; it equals reproduced_by_id_once plus not_reproduced. The 50 reproduced days are the 50 ~113 found at the wider tolerance. Every flow day of the 33 segments that agree reproduces both naively and by the id-once rule."
+  },
+  "residual_days": [
+    {
+      "count": 1,
+      "transaction_types": ["Cash Withdrawal", "Expense"],
+      "note": "one flow day of one segment. The day holds two ledger flow rows, a Cash Withdrawal and one Expense row (action Other Fee) that Black Diamond tags Withdrawal. The id-once sum with the Expense row left out reproduces the served day flow to half a cent; with it counted the day differs. The Other Fee row is the row of investigation row IRPT_DASHBD-D2-W113-S3; it is the only day of the 235 on which an Other Fee row appears."
+    }
+  ],
+  "fee_row": {
+    "transaction_type": "Expense (transaction sub-type Expense, action Other Fee), labelled Withdrawal by Black Diamond",
+    "method_rule": {
+      "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+      "line": 706,
+      "quote": "#   - FEE-ADMIN -> an expense of the account, not an advisory fee: it stays inside the return."
+    },
+    "method_rule_also": [
+      {
+        "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+        "line": "713-717",
+        "quote": "crosses = ( (t[\"_final\"] == \"EXTERNAL\") | (t[\"_final\"] == \"FEE-MANAGEMENT\") | t[\"_prov\"].isin(ACCOUNT_BOUNDARY_PROV) )"
+      },
+      {
+        "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+        "line": "702-705",
+        "quote": "#   - FEE-MANAGEMENT (all three partitions map to this class) -> an ADVISORY fee debited from the account is capital out ... That is what turns the arithmetic gross of advisory fees, as `fee_basis GROSS_ONLY` has always claimed (amendment 5 (d));"
+      },
+      {
+        "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+        "line": 123,
+        "quote": "\"fee_basis\": \"GROSS_ONLY\","
+      }
+    ],
+    "is_flow_by_the_method": false,
+    "reason": "The method's flow term F_t is the legs of class EXTERNAL, class FEE-MANAGEMENT (an advisory fee: capital out, which is what makes the figure gross of advisory fees) and inter-account legs (lines 713-717). A class FEE-ADMIN leg, an expense of the account that is not an advisory fee, is not in that set and stays inside the return (line 706). The custodian copy's external-flow label is Black Diamond's own and the method does not take it: it takes a code class. An Other Fee expense row is an administrative expense, not an advisory management fee, so the method does not count it as a flow and the served flow rightly omits it; the two definitions of 'external flow' differ by definition and this is NOT a defect in the served number. Measured support, on the 235 flow days: the 56 days that carry a Management Fee row (the advisory fee class the method does count) all reproduce with that row counted, and the one Other Fee day reproduces only with the row left out, so the served flow treats the two fee kinds as the method's rule says. NOT_ESTABLISHED: the fact_trn code row and the shared code table's class for this one Other Fee row were not read (the order's grant is the Black Diamond copy and the served gold); the class FEE-ADMIN is read from the rule's text and from the served number's behaviour, not from that row's code.",
+    "defect_in_served_number": false,
+    "day_count_if_it_were_a_defect": 0
+  },
+  "tieout_state": {
+    "total": 244,
+    "classed": 185,
+    "contested": 51,
+    "unclassed": 8,
+    "called_closed": false,
+    "note": "no segment moved between groups; the contested flow-timing question is not ruled on here"
+  },
+  "client_figures": 0,
+  "s3_writes": 0
+}
