@@ -1,0 +1,32 @@
+SESSION LOG -- 0.9.0_WK_ADVI_FIRMBKTS~51 on ADVI_FIRMBKTS.TO-FB-g-29 (read-only census; no AWS call, no invoke, no deploy)
+worktree: /c/dev/wk-firmbkts-51  branch: wk-ADVI_FIRMBKTS-51
+
+1. git rev-parse --abbrev-ref HEAD -> wk-ADVI_FIRMBKTS-51 ; test -d org && test -d .tools -> TREE-OK
+2. Premises re-grounded at the tree:
+   - lambda-source-map.json: the eight IRPT source_dirs under infra/aws/lambda/investor-reporting/ and auth-validator-edge under infra/aws/lambda-edge/
+   - Terraform handlers: reporting-read/lambda.tf:38, directory/lambda.tf:28, export/lambda.tf:50, holdings/lambda.tf:65, narrative/lambda.tf:37, performance/lambda.tf:27, ops/lambda.tf:39, ycharts/generate.tf:375, portal-auth/lambda-edge.tf:88
+   - ownership read: _authz/loaders.py:241 load_ownership; OWNERSHIP_READ 74-76 (bucket opal-data-bd, legacy and canonical keys); CANONICAL_PLATINUM_BUCKETS 81
+   - generated validator lists: _shared/firm-config.mjs:68 (bucket), :97-98 (keys), :103-105 (canonical buckets)
+   - route table: docs/contracts/investor-reporting/v1/routes.json (the one carrier)
+   - shared boundary: _authz/served.py lambda_entry 1392-1432, installed_entry 1435-1465, handle 1168, enforcer_for 820 (ownership read 868-869), _owner_read/_prospect dispatch 1244-1251
+3. Per-function read of the compute that each candidate operation runs (after the ownership read, which precedes every compute):
+   - reporting-read (reporting/entry.py:253-256): reads only
+   - directory-search (directory/entry.py:210-258): search reads; selection save only in create_selected_set (entry.py:315)
+   - custody-report-read (export/custody_read.py:57-78): read through retained_export.resolve
+   - holdings-snapshot (holdings/entry.py:67-71): selection load, snapshot read
+   - narrative-packet (narrative/entry.py:85-108): read
+   - performance-report (performance/entry.py:179-227, retained.py:321): fresh computation puts PERFORMANCE_SOURCE_EVIDENCE via stores.artifacts.put -> side effect
+   - status-summary (ops/entry.py:102-108, read_memo.py:23 _WRITES guard): read
+   - comparison-catalogue (ycharts/generate/entry.py:161-166, docstring "writes nothing"): read
+   - auth-validator-edge (index.mjs:381, 491, 164-175): JWT verify, Secrets Manager read, S3 GetObject; console logs only
+4. Event shape: served.handle reads X-Contract-Version (served.py:487-490), X-Firm-Id (VERIFIED_FIRM_HEADER, served.py:113), routeKey (served.py:800-817), query and path carriers (served.py:519-544). Fixture shape: holdings/tests/test_entry_guarded.py:72-73 and _authz/tests/test_guarded_entries.py:114-117, 145-151. Placeholders replace every identifier and identity value.
+5. Census written: org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~51/IRPT_INVOCATION_CENSUS.json (commit 51d6658f6f)
+6. Rows filed: ADVI_FIRMBKTS-D1-W51-S1 (validator call-line token), ADVI_FIRMBKTS-D1-W51-S2 (validator needs a live JWT); commit 51d6658f6f
+7. AC1 (verbatim invocation, timeout 118):
+   V1 entries=9 ; V2 call chains verified against the tree: True ; V3 events are objects with an existing source: True ; V4 side_effects none=8 of 9
+   PASS V1 / PASS V2 / PASS V3 / PASS V4
+   ROUND 4 INVOKE CENSUS: 4 of 4 arms ; exit=0
+8. Mutant control: validator call line (index 3 of the chain) set to index.mjs:99999 in .scratch/census_mutant.json
+   V2 call chains verified against the tree: False ; FAIL V2 ; ROUND 4 INVOKE CENSUS: 3 of 4 arms ; exit=1
+9. Determinism control: the census check run twice on the unchanged census; output md5 f25f297883f2a2df3eb3f3cd712c1da5 on both runs
+10. Not run: no event invoked (cell rule 1 and preflight); the act-4 actor invokes each event after the flip.
