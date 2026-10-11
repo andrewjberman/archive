@@ -1,0 +1,146 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-f-20.sms-default-type-apply",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-20.sms-default-type-apply.md",
+  "group": "OTHER",
+  "vintage_commit": "7c7bfd890d"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FBL",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "vintage_commit": "7c7bfd890d",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-20.sms-default-type-apply.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/inf-pipeline/inf-ops-alerts-sms-delivery-status.tf",
+   "kind": "terraform",
+   "commit_or_etag": "f55374d418",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "scoped safe-apply of the saved plan 17:19:08Z-17:19:40Z rc=0, 0 added 1 changed 0 destroyed; scoped plan after apply: No changes",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "sns:account-sms-preferences/us-east-1",
+   "kind": "aws_resource",
+   "commit_or_etag": "account 313476888478 us-east-1",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "get-sms-attributes after apply: DefaultSMSType Transactional, MonthlySpendLimit 50, sampling 0, DeliveryStatusIAMRole opal-sms-delivery-status-role unchanged",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261011T1717Z_advi-firmbkts-fb-f-20-sns-default-sms-type-laptop-20261011_deploy_completion.md",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "change-management entry opened before the write, 3 legs, closed with proof",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FBL/evidence_f20/plan.txt",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "scoped plan output, 17:18:39Z",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FBL/evidence_f20/apply.txt",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "safe-apply output, 17:19:08Z-17:19:40Z",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "timeout 60 aws sns get-sms-attributes --region us-east-1 --query \"attributes.DefaultSMSType\" --output text",
+   "method": "command",
+   "invocation": "timeout 60 aws sns get-sms-attributes --region us-east-1 --query \"attributes.DefaultSMSType\" --output text",
+   "expect": "^Transactional$",
+   "output_evidence": "account DefaultSMSType after the apply (the pre-read of the same call returned the attribute absent), printed:\nTransactional",
+   "denominator": "1 attribute read",
+   "status": "PASS",
+   "status_reason": "output matches the expected pattern"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "timeout 60 aws sns get-sms-attributes --region us-east-1 --query \"attributes.[MonthlySpendLimit,DeliveryStatusSuccessSamplingRate]\" --output text",
+   "method": "command",
+   "invocation": "timeout 60 aws sns get-sms-attributes --region us-east-1 --query \"attributes.[MonthlySpendLimit,DeliveryStatusSuccessSamplingRate]\" --output text",
+   "expect": "^50\\s+0$",
+   "output_evidence": "account MonthlySpendLimit and DeliveryStatusSuccessSamplingRate after the apply (both equal to the pre-read), printed:\n50\t0",
+   "denominator": "2 attributes read",
+   "status": "PASS",
+   "status_reason": "output matches the expected pattern"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "cd infra/aws/terraform/inf-pipeline && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target=aws_sns_sms_preferences.account 2>&1 | grep -E \"^(Plan:|No changes)\"",
+   "method": "command",
+   "invocation": "cd infra/aws/terraform/inf-pipeline && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target=aws_sns_sms_preferences.account 2>&1 | grep -E \"^(Plan:|No changes)\"",
+   "expect": "^No changes\\.",
+   "output_evidence": "scoped plan on inf-pipeline after the apply (the pre-apply saved plan read 'Plan: 0 to add, 1 to change, 0 to destroy.'), printed:\nNo changes. Your infrastructure matches the configuration.",
+   "denominator": "1 attribute read",
+   "status": "PASS",
+   "status_reason": "output matches the expected pattern"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant is named by the order.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "not measured: one apply",
+   "observed": "not measured",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "real SEV1 publish moving NumberOfNotificationsDelivered",
+   "reason": "the act's real close waits on Andrew's word, which the CTO has asked for; this act sends no text"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261011T1717Z_advi-firmbkts-fb-f-20-sns-default-sms-type-laptop-20261011_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "aws sns get-sms-attributes / aws pinpoint-sms-voice-v2 describe-phone-numbers",
+   "invocation": "pre-read: DefaultSMSType absent; 1 number ACTIVE TRANSACTIONAL TOLL_FREE us-east-1 (last four 7943); denominator 1, no NextToken",
+   "result": "agrees with the CTO's reading; no STOP"
+  },
+  {
+   "tool": "terraform plan -target + show -json",
+   "invocation": "saved plan f20.tfplan",
+   "result": "Plan: 0 to add, 1 to change, 0 to destroy; 5 resource_changes (4 no-op), diff default_sms_type alone"
+  },
+  {
+   "tool": ".tools/safe-apply.sh",
+   "invocation": "apply of the saved plan",
+   "result": "rc=0, 17:19:08Z-17:19:40Z"
+  }
+ ]
+}
