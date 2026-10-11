@@ -40,10 +40,30 @@ the grade. The script is left as signed; this packet names the gap.
 - Branch A holds on the three named names. The other 92 names were not read live at this step; the pair named three for the issuer's
   read, and leg v's 95-name stored read (ADJUDICATION_v55) is the stored-side evidence.
 - Branch B / C: not observed.
-- No rollback applies. Round 44 L10 still waits on the at-1 and at-4 order closes (at-4 AC2 NOT MET: an ingest owed at site Z).
+- No rollback applies. At the 05:1xZ write this read "L10 waits on the at-1 and at-4 order closes"; since then the at-4 order closed
+  @da1bdbf0ee (AC2 NOT MET stands: an ingest owed at site Z) and no at-1 order is open. What the slug waits on now is the Addendum below.
 
 ## Evidence
 
 All under `deliverables/2.0.0_SA_COO~C1/`: `checks/round44/at10_legp_read.py`, `checks/round44/at10_legp_keydiff.py`,
 `evidence/r44_at10_legp_pre_snapshot_20261011.json`, `evidence/r44_at10_legp_post_read_20261011.out`,
 `evidence/r44_at10_legp_post_keydiff_20261011.out`.
+
+## Addendum (2026-10-11 ~09:1xZ): the one BLOCKING row the round-44 slug waits on
+
+Measured by `comp-surprise --project AMGT_CORPUS --all --json` at 09:11Z (denominator: 187 investigation items, 72 adjudication rows,
+1083 files): ARMED 0 by latest carrier; OPEN 52, all INERT, 51 OBSERVATION and 1 BLOCKING.
+
+**`AMGT_CORPUS-D1-W1-S6` (BLOCKING, INERT, UNDER_INVESTIGATION, surfaced 2026-10-09T21:35Z by `0.9.0_WK_AMGT_CORPUS~1`):** AMENDMENT 1 of
+CRPS-at-1 could not be committed because the order was terminal. No `ADJUDICATION_v*` file carries the id (the only file naming it is
+`INVESTIGATION_v1.md`). The cause is resolved by committed acts, named here as grounds for the CVO's carrier, not as a disposition:
+
+| act | commit |
+|---|---|
+| issuer reopened the order "for AMENDMENT 1 (rules row D1-W1-S6)" | c207f91bdd |
+| worker landed AMENDMENT 1, team_sheet computed at dossier build | d968cfad03; proof, order complete @60000ebcac |
+| AMENDMENT 2, team_sheet moves to METHOD /11 (CTO ruling msg 3213) | f7e3db56ca; merged @60e1975973 |
+| served effect read on the live function | this packet, Branch A |
+
+The remaining open rows surfaced since 2026-10-09 are `D1-W1-S4`, `D1-W1-S5` and `Z-S91`, all OBSERVATION and INERT; none gates the slug.
+The disposition is `3.0.0_SA_CVO`'s: the issuer files none.
