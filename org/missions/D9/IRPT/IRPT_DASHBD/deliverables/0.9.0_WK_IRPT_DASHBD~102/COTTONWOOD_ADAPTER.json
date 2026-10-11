@@ -1,0 +1,146 @@
+{
+  "to_id": "IRPT_DASHBD.TO-DB-b-127",
+  "worker": "0.9.0_WK_IRPT_DASHBD~102",
+  "base": "box/dell2 @0db7244334 (branch wk-irpt-dashbd-68-102)",
+  "client_data_rule": "counts and booleans only; no account id, client name or client figure appears here",
+  "s3_writes": 0,
+  "stale_statements": [
+    {
+      "where": "data/assets/scripts/silver/commonwealth_account_return_daily.py module docstring, column mapping, method_version (lines 44-45); the same statement repeats in the same docstring at line 69 (THE METHOD CLAIM) and is corrected there too",
+      "before": "method_version                NULL. The producer's METHOD_VERSION 2 points at a dim_return_method row whose value_basis is the custodian's equity; writing it would claim the custodian method on a positions-rebuilt row.  (line 69: method_version stays NULL on the rows: the producer's version 2 names the custodian equity as V.)",
+      "after": "method_version                3 on every row (BOND_METHOD_VERSION): the version the entry `_commonwealth_delivery` names in sources.json, read by the producer's method_version_of(). It points at dim_return_method row 3 (V rebuilt from positions), not at row 2, whose value_basis is the custodian's equity ...  (line 69: method_version is 3 on the rows, the entry's own, through the producer's method_version_of ...)",
+      "also_corrected": [
+        "line ~498 printed line ARD-METHOD-CLAIM: method_version=null -> method_version=%s with mv_entry",
+        "line ~669 report text: 'method_version null' -> 'method_version %s' with mv_entry"
+      ]
+    },
+    {
+      "where": "data/assets/scripts/silver/commonwealth_account_return_daily.py COLUMNS_NULL['method_version'] (line 156); the literal also feeds the build manifest key columns_null (line 645) and the report line 'Nulls:' (line 675)",
+      "before": "NULL on purpose: the producer's version 2 names the custodian equity as V",
+      "after": "NOT NULL: stamped 3 from the sources.json entry (the producer's version 2 names the custodian equity as V; 3 names V rebuilt from positions)",
+      "literal_changed": true,
+      "literal_reasoning": "Every use of COLUMNS_NULL read: the build manifest key columns_null and the build report 'Nulls:' line, both local build outputs. --apply, --stamp-manifest and --verify-served read the manifest file and the day files, never the literal; the day manifests and the dim row come from the producer. The key set of columns_null is unchanged (the key method_version is kept). What the change moves: the text a future --out build writes under columns_null.method_version and in the local report; nothing served, minted or verified moves. Not moved, left for the issuer (row IRPT_DASHBD-D2-W102-S1): the tracked ADVI_COTBKF ~79 manifest keeps the old text."
+    }
+  ],
+  "row3_sentences": {
+    "read": 14,
+    "how": "RUN: emit_method_row(None, firm_scope(entry), thresholds(all five absent), upload=False, src=entry) for _commonwealth_delivery, and ard.build_manifest(one-row frame, ..., src=entry); every string member that carries wording was read",
+    "members_read": [
+      {
+        "member": "row.method",
+        "verdict": "TRUE_AS_WRITTEN",
+        "note": "TWR_DAILY_GEOMETRIC; the adapter's CLAIM_REVIEW reviews TWR TRUTHFUL"
+      },
+      {
+        "member": "row.flow_convention",
+        "verdict": "UNSTATED_FOR_COTTONWOOD",
+        "note": "END is the producer default, no claim; value agrees with FWD-3's end timing (commonwealth_daily_returns.py:65)"
+      },
+      {
+        "member": "row.income_basis_reason",
+        "verdict": "TRUE_AS_WRITTEN",
+        "note": "true of Cottonwood (income inside the value through the cash leg; income columns null); wording belongs to DB-b-128, not changed"
+      },
+      {
+        "member": "row.value_basis",
+        "verdict": "TRUE_AS_WRITTEN",
+        "note": "positions rebuilt at the entry's declared price_basis plus cash is what FWD-3 does; it does not itself say as-traded close (see fee_basis finding)"
+      },
+      {
+        "member": "row.value_basis_ruling",
+        "verdict": "TRUE_AS_WRITTEN",
+        "note": "a citation of ADDENDUM 13.2"
+      },
+      {
+        "member": "row.fee_basis",
+        "verdict": "UNSTATED_FOR_COTTONWOOD",
+        "note": "PER_ENTRY_FEE_TREATMENT is a pointer; net of fees is stated only by the day manifest"
+      },
+      {
+        "member": "row.guard_substitution",
+        "verdict": "TRUE_AS_WRITTEN",
+        "note": "no guard is consulted for Cottonwood (GUARD_NOT_REACHED); HOLDINGS_INCOME_FALLBACK is never emitted"
+      },
+      {
+        "member": "row.day_count",
+        "verdict": "TRUE_AS_WRITTEN",
+        "note": "Account365 is a label the producer states for every row; no Cottonwood-specific contradiction found"
+      },
+      {
+        "member": "row.tieout_tolerance_ruling",
+        "verdict": "NOT_EXAMINED",
+        "note": "a citation of batch 181 beside the constant 0.0035; whether that tolerance was measured on a custodian channel only was not examined"
+      },
+      {
+        "member": "row.gips_alignment",
+        "verdict": "NOT_EXAMINED",
+        "note": "a methodological claim, not checkable by a read in this cell"
+      },
+      {
+        "member": "manifest.method",
+        "verdict": "TRUE_AS_WRITTEN",
+        "note": "formula is the end-flow form FWD-3 uses; names the three declared fields; states no custodian or fee claim of its own"
+      },
+      {
+        "member": "manifest.valuation_source",
+        "verdict": "TRUE_AS_WRITTEN",
+        "note": "positions_x_as_traded_close"
+      },
+      {
+        "member": "manifest.fee_treatment",
+        "verdict": "TRUE_AS_WRITTEN",
+        "note": "net_of_fees (FWD-3 is after fees)"
+      },
+      {
+        "member": "manifest.price_basis",
+        "verdict": "TRUE_AS_WRITTEN",
+        "note": "as_traded"
+      }
+    ],
+    "false_for_cottonwood": [
+      {
+        "sentence": "row 3 fee_basis PER_ENTRY_FEE_TREATMENT and value_basis '... at the entry's declared price_basis ...': the row does not state as-traded close or net of fees for Cottonwood (unstated in the row; stated only by the day manifest). Nothing in it is false.",
+        "disposition": "ROW_FOR_ISSUER",
+        "row": "IRPT_DASHBD-D2-W102-S2"
+      },
+      {
+        "sentence": "row 3 flow_convention END: the producer's default (winner or END), no claim beside it; it equals Cottonwood's own FWD-3 end timing, but the row does not say it is Cottonwood's and not the custodian channel's measured winner.",
+        "disposition": "ROW_FOR_ISSUER",
+        "row": "IRPT_DASHBD-D2-W102-S3"
+      }
+    ],
+    "income_reason": "read, not false for Cottonwood, not changed (DB-b-128's)"
+  },
+  "account_id": {
+    "measured": true,
+    "gold_form": "a custodian account number of 8 or 9 characters mixing digits and letters (not digits-only, no firm prefix; none carries the z09 vendor prefix)",
+    "directory_form": "NOT MEASURED against the artifact (it is empty); declared by _ids/raw_keys.json: a vendor account key with the firm prefix z09 followed by digits, 11 characters",
+    "joins": "NOT_ESTABLISHED",
+    "how": "One gold partition (the Cottonwood manifest's last day) listed, then account_id read alone by ranged GETs and pq.read_table(columns=['account_id']); the extract saved outside the repo. The directory artifact is the list of published account= prefixes under the firm's platinum reporting table (entry.py _published_accounts, the source raw_account_for mints from); that list call succeeded and returned 0 prefixes. Ids minted with _ids.opaque_account(firm, raw) as raw_account_for does. No AccessDenied on either read. The comparison is over an empty directory, so the join is not established either way.",
+    "counts_only": true,
+    "counts": {
+      "gold_ids": 12,
+      "directory_ids": 0,
+      "joined": 0,
+      "gold_rows": 12,
+      "gold_null_or_empty": 0,
+      "minted_gold_distinct": 12,
+      "minted_directory_distinct": 0,
+      "joined_share": "undefined (0 of 0 directory ids)"
+    },
+    "form_vs_declared_key": "0 of 12 gold ids have the z09 prefix of the directory's declared raw key; a declaration, not a measure of the artifact",
+    "row": "IRPT_DASHBD-D2-W102-S4"
+  },
+  "tests": {
+    "passed": 45,
+    "failed": 0,
+    "baseline_passed": 45,
+    "baseline_failed": 0,
+    "files": [
+      "test_commonwealth_ard_bond_guard.py",
+      "test_commonwealth_ard_day_manifest.py",
+      "test_commonwealth_ard_mint_claims.py",
+      "test_commonwealth_ard_apply.py"
+    ]
+  }
+}
