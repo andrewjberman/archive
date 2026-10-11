@@ -1,0 +1,108 @@
+{
+ "schema_version": "1.0",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-425",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-425.s252-lagged-close-on-every-partition.md",
+  "group": "OTHER",
+  "vintage_commit": "953d34c9bb"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "953d34c9bb",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-425.s252-lagged-close-on-every-partition.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~284",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~284/IB123-1_s252_all_partitions.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read only; 91 partitions listed, 86 trading-day day rows (85 graded, 1 first day), 423 lagged securities; no AWS write, no deploy",
+   "artifact_covered_by": [
+    "IB123-1-AC1",
+    "IB123-1-AC2",
+    "IB123-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~284/IB123-1_S252_READ.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "one-page read for the CTO; share per day, classes, top securities, stability, neither, not measured",
+   "artifact_covered_by": [
+    "IB123-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~284/s252_all_partitions.py",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the extended instrument with its planted control (--control); s252_fetch.py beside it does the S3 reads",
+   "artifact_covered_by": [
+    "IB123-1-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB123-1-AC1",
+   "criterion_verbatim": "IB123-1-AC1 -- the day table covers every trading-day partition listed (graded + first-day-no-prior + ungradeable == listed, each ungradeable day with its reason), and each graded day's counts add up.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r123/p123_cells.py\" . IB123-1-AC1",
+   "expect": "IB123-1-AC1 PASS",
+   "output_evidence": "OK: 86 of 86 trading-day partitions accounted for ({'FIRST_DAY_NO_PRIOR': 1, 'GRADED': 85}); every graded day's counts add up | IB123-1-AC1 PASS | rc=0",
+   "denominator": "86 of 86 trading-day partitions have a day row (85 GRADED, 1 FIRST_DAY_NO_PRIOR, 0 UNGRADEABLE); 91 partitions listed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB123-1-AC2",
+   "criterion_verbatim": "IB123-1-AC2 -- the security table: one row per security ever read at the prior close, each with days_lagged <= days_moved, a class, and totals equal to the day table's.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r123/p123_cells.py\" . IB123-1-AC2",
+   "expect": "IB123-1-AC2 PASS",
+   "output_evidence": "OK: 423 securities ever at the prior close, 2514 lagged security-days over 85 graded days; classes {'ETF': 57, 'equity': 333, 'fund': 32, 'other': 1} | IB123-1-AC2 PASS | rc=0",
+   "denominator": "423 securities, 2,514 lagged security-days equal to the sum of prior_close over 85 graded days; lagged_by_class sums to 423",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB123-1-AC3",
+   "criterion_verbatim": "IB123-1-AC3 -- the control: on a planted fixture the instrument reports the planted lagged security and no other.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r123/p123_cells.py\" . IB123-1-AC3",
+   "expect": "IB123-1-AC3 PASS",
+   "output_evidence": "OK: the planted lagged security is reported alone; the clean fixture reports none | IB123-1-AC3 PASS | rc=0",
+   "denominator": "1 of 1 planted security reported alone on the planted fixture; 0 reported on the clean copy (same grade_day and accumulate path as the measurement)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative control: AC1 run against a scratch copy of the output with one graded day's own_close raised by 1 (scratch root, not committed) must FAIL.",
+   "expected": "IB123-1-AC1 FAIL, counts do not add up on the mutated day",
+   "observed": "FAIL: 2026-06-17 counts do not add up: moved 361 own 340 prior 0 neither 22 | IB123-1-AC1 FAIL | rc=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the instrument run twice over the same cache (python -I s252_all_partitions.py), outputs compared byte for byte (cmp) and as parsed JSON",
+   "observed": "IDENTICAL: 86 day rows, 423 lagged securities, both runs; also the planted control (python -I s252_all_partitions.py --control): reported [PLANT0001], clean fixture [] ",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "IRPT_BCKEND-D2-W284-S1"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/proof-of-spec-check.py <instance>",
+   "result": "see final report"
+  }
+ ]
+}
