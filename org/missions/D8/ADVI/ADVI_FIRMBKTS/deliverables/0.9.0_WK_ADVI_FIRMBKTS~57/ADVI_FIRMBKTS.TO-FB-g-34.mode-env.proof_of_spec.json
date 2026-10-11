@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-34.partners-mode-env",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "1d4c0cbfd6",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-34.partners-mode-env.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "group": "OTHER",
+    "vintage_commit": "1d4c0cbfd6"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~57",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/partners-api/variables.tf",
+      "kind": "terraform",
+      "commit_or_etag": "ee3e4f6b45",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on the worker branch wk-ADVI_FIRMBKTS-57 as a new file declaring variable platinum_mode (default empty, validated). No terraform plan or apply run in the partners-api root; order section 2.1 bounds the write to this file and lambdas.tf."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/partners-api/lambdas.tf",
+      "kind": "terraform",
+      "commit_or_etag": "ee3e4f6b45",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on the worker branch: environment_variables is now merge(base map USERS_TABLE unchanged, var.platinum_mode == '' ? {} : { BD_PLATINUM_MODE = var.platinum_mode }). No apply; the variable stays empty so the plan is byte-identical until the act passes it."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 reads the variable (declared, string, default empty, validated), the environment (the base's map plus one conditional), that the base's lines are kept and that the formatter is clean.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-57 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_modeenv.py --arms var --cell partners --root /c/dev/wk-firmbkts-57 --base 9c6d5ea3ba; echo \"exit=$?\"",
+      "output_evidence": "  E1 variable declared=True default empty=True validation=True\n  E2 base keys kept=True verbatim=True merge=True conditional=True\n  E3 base lines kept 11 of 15 (env block lines aside); other files changed: []\n  E4 fmt rc=0\nPASS E1 the variable is declared, string, default empty, validated to the three values\nPASS E2 the environment is the base's map plus one conditional BD_PLATINUM_MODE\nFAIL E3 dormant: base lines kept in order and no other file of the root changes\nPASS E4 terraform fmt reads clean on the changed files\nROUND 4 MODE ENV: 3 of 4 arms\nexit=1",
+      "denominator": "4 arms (E1-E4): 3 PASS, 1 FAIL (E3)",
+      "status": "FAIL",
+      "status_reason": "E3 fails on the greedy in-order match: the environment_variables header and its close are changed by the mandated merge form and are not excluded by the arm. Filed as ADVI_FIRMBKTS-D1-W57-S1 (BLOCKING). The order stays open; the check file is the COO's and is not edited here.",
+      "expect": "ROUND 4 MODE ENV: 4 of 4 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the write-surface bound. Each invocation terminates inside its bound.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-57 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-57 --allow infra/aws/terraform/partners-api/lambdas.tf --allow infra/aws/terraform/partners-api/variables.tf --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~57/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/partners-api/lambdas.tf --require infra/aws/terraform/partners-api/variables.tf; echo \"exit=$?\"",
+      "output_evidence": "  CHANGED infra/aws/terraform/partners-api/lambdas.tf\n  CHANGED infra/aws/terraform/partners-api/variables.tf\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md\nROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing\nexit=0",
+      "denominator": "3 changed paths, 0 outside the allow list, 2 of 2 required paths changed",
+      "status": "PASS",
+      "expect": "ROUND 4 SCOPE: OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for this cell; the arms read the text of the edit.",
+      "expected": "N/A: the spec names no mutant",
+      "observed": "N/A: the spec names no mutant",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: the arms are text reads and a formatter check, not a computed value; a second run would repeat the same read.",
+      "observed": "AC1 and AC2 were each run once at the recorded state. The E3 count (11 of 15) was reproduced by a separate in-order diagnostic at ee3e4f6b45 (.scratch/e3_diag.py, not committed); that diagnostic is not a second run of AC1.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform plan or apply in the partners-api root, and any AWS call",
+      "reason": "Order section 2.1 bounds the cell to repository files; the act that passes the variable is staged under the COO and CTO halves of the never-widen ledger."
+    },
+    {
+      "item": "setting platinum_mode in any .tfvars or as a non-empty default",
+      "reason": "Order section 2.2: the variable stays absent by default so the trunk plan is byte-identical."
+    },
+    {
+      "item": "a for-expression wrapper that would keep the environment_variables header line verbatim and pass E3",
+      "reason": "Not the spec's merge(<base map>, cond) form and would game the arm; the E3 defect is filed as a surprise row instead."
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W57-S1: AC1 reads 3 of 4 arms; the E3 in-order matcher of r4_modeenv.py cannot pass on the spec's merge form because it stalls at the environment_variables header (BLOCKING, INERT).",
+    "ADVI_FIRMBKTS-D1-W57-S2: the safe-commit risk-reflex advisory cited a device memory note absent from this device's memory directory; the note was not read (OBSERVATION, INERT).",
+    "ADVI_FIRMBKTS-D1-W57-S3: the client-data-check ran WARN because the hashed account-id list is absent on this device, so the commit was not checked for client account ids (OBSERVATION, INERT).",
+    "ADVI_FIRMBKTS-D1-W57-S4: the one-writer gate asked for the per-box investigation file for a path the order names as unsuffixed; the rows were written at the named path (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform fmt -check",
+      "invocation": "terraform fmt -check -diff infra/aws/terraform/partners-api/lambdas.tf ; terraform fmt -check -diff infra/aws/terraform/partners-api/variables.tf",
+      "result": "rc=0 on both files"
+    },
+    {
+      "tool": "terraform console (offline expression test in a scratch directory, no provider, no AWS)",
+      "invocation": "echo 'merge({USERS_TABLE = \"opal-users-v2\"}, \"\" == \"\" ? {} : { BD_PLATINUM_MODE = \"\" })' | terraform console ; echo 'merge({USERS_TABLE = \"opal-users-v2\"}, \"canonical\" == \"\" ? {} : { BD_PLATINUM_MODE = \"canonical\" })' | terraform console",
+      "result": "empty branch returns {USERS_TABLE = opal-users-v2}; canonical branch returns {BD_PLATINUM_MODE = canonical, USERS_TABLE = opal-users-v2}; both rc=0, so the conditional's types unify"
+    }
+  ]
+}
