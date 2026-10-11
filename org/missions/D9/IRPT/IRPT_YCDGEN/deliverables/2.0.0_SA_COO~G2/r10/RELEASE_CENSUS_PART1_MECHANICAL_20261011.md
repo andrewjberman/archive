@@ -170,5 +170,10 @@ The running root `e606008994-st27`. Its package tar `e606008994-st27.tar.gz` and
   range over-counts trunk commits whose content st27 already carried by cherry-pick.
 - A project is read from commit subjects by pattern; `SHA256SUMS` and `reports/resident_bindings.json` are build outputs
   with no repo path.
-- The import closure is static. A module loaded by a computed name would be missed; none was found by reading
-  `resident_main.py` and `resident_installed.py` for `import_module` calls with a constant argument.
+- **The import closure is a LOWER BOUND, and an earlier version of this line was wrong.** It said no module is loaded by a
+  computed name. Measured on the built package afterwards: `ycharts/generate/resident_main.py:46` loads the runtime with
+  `importlib.import_module(module)`, the module coming from the unit's `--factory module:function` argument;
+  `lib/opal_naming.py:2337` and `_authz/routetable.py:222` load a file by path (`spec_from_file_location`); and
+  `_contracts/opal_naming_runtime.py:8` imports `lib.opal_naming` by a constant string. The closure follows import
+  statements and constant-argument `import_module` calls only. So REACHABLE is "at least these"; a member classed
+  NOT_IMPORTED may still be loaded by one of those three paths. Part 2 reads each of them before any member is called inert.
