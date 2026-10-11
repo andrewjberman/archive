@@ -615,8 +615,8 @@ Reading notes: 11 of the 11 single-flow months have a listed-sweep sale of any a
 | acct#f0b52456 | 2022-11 | 20000.0 | 0.984 | 20000.0 | DIFF | 2.2108 | DIFF | 2.2108 |
 | acct#f0b52456 | 2023-05 | 20000.0 | 0.99 | 20000.0 | DIFF | -6.2534 | DIFF | -6.2534 |
 | acct#1f02bee1 | 2023-02 | 28574.88 | 1.0 | 28574.88 | DIFF | 5.9962 | DIFF | 5.9962 |
-| D49143349 | 2022-12 | 75000.0 | 0.999 | 75000.0 | DIFF | 1.8833 | DIFF | 1.8833 |
-| D49151054 | 2021-08 | 8055.0 | 0.992 | 8055.0 | DIFF | 9.7228 | DIFF | 9.7228 |
+| acct#c287750d | 2022-12 | 75000.0 | 0.999 | 75000.0 | DIFF | 1.8833 | DIFF | 1.8833 |
+| acct#df101fce | 2021-08 | 8055.0 | 0.992 | 8055.0 | DIFF | 9.7228 | DIFF | 9.7228 |
 | acct#c0cea213 | 2025-04 | 264824.0 | 0.943 | 53311.8 | DIFF | 0.1692 | DIFF | 0.1692 |
 | acct#6834d5a2 | 2025-04 | 75743.0 | 0.983 | 0.69 | DIFF | 0.551 | DIFF | 0.551 |
 
@@ -656,8 +656,8 @@ Verdict moves (before -> after, months):
 |---|---|---|---|---|---|---|---|---|---|
 | acct#f6c79f45 | 2024-06 | core | -0.88 | -0.8874 | 1.2105 | DIFF | DIFF | -0.8239 | 0.0561 |
 | acct#9727ac87 | 2024-07 | core | -0.08 | -0.0415 | -0.0234 | MATCH | MATCH | -0.0798 | 0.0002 |
-| D49143350 | 2023-11 | core | -4.59 | -4.6175 | -5.3344 | DIFF | DIFF | -3.4367 | 1.1533 |
-| D49143350 | 2026-02 | core | 2.05 | 2.0179 | -16.069 | DIFF | DIFF | 2.4881 | 0.4381 |
+| acct#865421c2 | 2023-11 | core | -4.59 | -4.6175 | -5.3344 | DIFF | DIFF | -3.4367 | 1.1533 |
+| acct#865421c2 | 2026-02 | core | 2.05 | 2.0179 | -16.069 | DIFF | DIFF | 2.4881 | 0.4381 |
 | acct#557ce060 | 2026-01 | core | 0.02 | 0.0118 | 0.0988 | MATCH | MATCH | 0.0233 | 0.0033 |
 | acct#c0cea213 | 2024-10 | core | -0.0 | 0.0329 | 0.1609 | MATCH | MATCH | 0.0468 | 0.0468 |
 | acct#7f62f16f | 2025-02 | core | 0.06 | 0.0995 | 0.1518 | MATCH | MATCH | 0.0645 | 0.0045 |
@@ -790,15 +790,15 @@ Verdict moves (before -> after, months):
 | acct#cce589ab | 2025-08 | neither | 2.52 | 2.4854 | 2.7275 | MATCH | MATCH | 2.5124 | -0.0076 |
 | acct#cce589ab | 2025-10 | neither | 1.44 | 1.4272 | 1.8756 | MATCH | MATCH | 1.4418 | 0.0018 |
 | acct#cce589ab | 2026-01 | neither | 1.76 | 1.738 | 2.218 | MATCH | MATCH | 1.7554 | -0.0046 |
-| D49141608 | 2019-02 | neither | 0.04 | 0.0412 | 2.2299 | MATCH | MATCH | 0.0419 | 0.0019 |
-| D49141608 | 2019-03 | neither | 0.05 | 0.0457 | 2.4237 | MATCH | MATCH | 0.0466 | -0.0034 |
-| D49141608 | 2019-04 | neither | 0.05 | 0.0443 | 2.2953 | MATCH | MATCH | 0.0452 | -0.0048 |
-| D49141608 | 2019-05 | neither | 0.05 | 0.0457 | 2.3132 | MATCH | MATCH | 0.0465 | -0.0035 |
-| D49141608 | 2019-06 | neither | 0.05 | 0.0443 | 2.1931 | MATCH | MATCH | 0.0451 | -0.0049 |
-| D49141608 | 2019-07 | neither | 0.05 | 0.0456 | 2.2124 | MATCH | MATCH | 0.0465 | -0.0035 |
-| D49141608 | 2019-08 | neither | 0.04 | 0.0374 | 1.7749 | MATCH | MATCH | 0.0381 | -0.0019 |
-| D49141608 | 2019-09 | neither | 0.03 | 0.0315 | 1.4675 | MATCH | MATCH | 0.0321 | 0.0021 |
-| D49141714 | 2019-02 | neither | 0.04 | 0.0416 | 3.3111 | MATCH | MATCH | 0.0421 | 0.0021 |
+| acct#0f2f0af8 | 2019-02 | neither | 0.04 | 0.0412 | 2.2299 | MATCH | MATCH | 0.0419 | 0.0019 |
+| acct#0f2f0af8 | 2019-03 | neither | 0.05 | 0.0457 | 2.4237 | MATCH | MATCH | 0.0466 | -0.0034 |
+| acct#0f2f0af8 | 2019-04 | neither | 0.05 | 0.0443 | 2.2953 | MATCH | MATCH | 0.0452 | -0.0048 |
+| acct#0f2f0af8 | 2019-05 | neither | 0.05 | 0.0457 | 2.3132 | MATCH | MATCH | 0.0465 | -0.0035 |
+| acct#0f2f0af8 | 2019-06 | neither | 0.05 | 0.0443 | 2.1931 | MATCH | MATCH | 0.0451 | -0.0049 |
+| acct#0f2f0af8 | 2019-07 | neither | 0.05 | 0.0456 | 2.2124 | MATCH | MATCH | 0.0465 | -0.0035 |
+| acct#0f2f0af8 | 2019-08 | neither | 0.04 | 0.0374 | 1.7749 | MATCH | MATCH | 0.0381 | -0.0019 |
+| acct#0f2f0af8 | 2019-09 | neither | 0.03 | 0.0315 | 1.4675 | MATCH | MATCH | 0.0321 | 0.0021 |
+| acct#c7081e97 | 2019-02 | neither | 0.04 | 0.0416 | 3.3111 | MATCH | MATCH | 0.0421 | 0.0021 |
 | acct#a011b5f7 | 2025-04 | neither | 0.41 | 0.4142 | 0.3581 | MATCH | MATCH | 0.4142 | 0.0042 |
 | acct#a011b5f7 | 2025-10 | neither | 0.64 | 0.6038 | 1.0099 | MATCH | MATCH | 0.6039 | -0.0361 |
 | acct#a011b5f7 | 2026-01 | neither | 1.56 | 1.5626 | 1.934 | MATCH | MATCH | 1.5628 | 0.0028 |
@@ -833,7 +833,7 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 |---|---|---|---|---|---|---|---|---|---|---|
 | acct#f6c79f45 | 2024-06 | core | other:sweep_trade_day | -0.88 | MATCH | DIFF | DIFF | DIFF | -0.8239 | 0.0561 |
 | acct#9727ac87 | 2024-07 | core | other:sweep_trade_day | -0.08 | MATCH | DIFF | MATCH | MATCH | -0.0798 | 0.0002 |
-| D49143350 | 2026-02 | core | other:sweep_trade_day | 2.05 | MATCH | DIFF | DIFF | DIFF | 2.4881 | 0.4381 |
+| acct#865421c2 | 2026-02 | core | other:sweep_trade_day | 2.05 | MATCH | DIFF | DIFF | DIFF | 2.4881 | 0.4381 |
 | acct#557ce060 | 2026-01 | core | other:sweep_trade_day | 0.02 | MATCH | DIFF | MATCH | MATCH | 0.0233 | 0.0033 |
 | acct#c0cea213 | 2024-10 | core | other:sweep_trade_day | -0.0 | MATCH | DIFF | MATCH | MATCH | 0.0468 | 0.0468 |
 | acct#7f62f16f | 2025-02 | core | other:sweep_trade_day | 0.06 | MATCH | DIFF | MATCH | MATCH | 0.0645 | 0.0045 |
@@ -846,7 +846,7 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 | acct#1b22f63a | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
 | acct#744c9c00 | 2025-06 | core | other:sweep_trade_day | 0.15 | MATCH | DIFF | MATCH | MATCH | 0.1533 | 0.0033 |
 | acct#5fd6a5d4 | 2026-05 | core | other:sweep_trade_day | 0.03 | MATCH | DIFF | MATCH | MATCH | 0.0284 | -0.0016 |
-| D49143350 | 2023-11 | core | sweep_balance | -4.59 | MATCH | DIFF | DIFF | DIFF | -3.4367 | 1.1533 |
+| acct#865421c2 | 2023-11 | core | sweep_balance | -4.59 | MATCH | DIFF | DIFF | DIFF | -3.4367 | 1.1533 |
 | acct#aaeb760c | 2022-08 | neither | other:sweep_trade_day | -1.06 | MATCH | DIFF | MATCH | MATCH | -1.027 | 0.033 |
 | acct#aaeb760c | 2025-03 | neither | other:sweep_trade_day | -7.16 | MATCH | DIFF | MATCH | MATCH | -7.1115 | 0.0485 |
 | acct#b4db1f25 | 2020-11 | neither | other:sweep_trade_day | 0.08 | MATCH | DIFF | MATCH | MATCH | 0.0808 | 0.0008 |
@@ -979,15 +979,15 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 | acct#cce589ab | 2025-01 | neither | sweep_balance | 2.52 | MATCH | DIFF | MATCH | MATCH | 2.5101 | -0.0099 |
 | acct#cce589ab | 2025-02 | neither | sweep_balance | -1.55 | MATCH | DIFF | MATCH | MATCH | -1.5729 | -0.0229 |
 | acct#cce589ab | 2025-08 | neither | sweep_balance | 2.52 | MATCH | DIFF | MATCH | MATCH | 2.5124 | -0.0076 |
-| D49141608 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | MATCH | MATCH | 0.0419 | 0.0019 |
-| D49141608 | 2019-03 | neither | sweep_balance | 0.05 | MATCH | DIFF | MATCH | MATCH | 0.0466 | -0.0034 |
-| D49141608 | 2019-04 | neither | sweep_balance | 0.05 | MATCH | DIFF | MATCH | MATCH | 0.0452 | -0.0048 |
-| D49141608 | 2019-05 | neither | sweep_balance | 0.05 | MATCH | DIFF | MATCH | MATCH | 0.0465 | -0.0035 |
-| D49141608 | 2019-06 | neither | sweep_balance | 0.05 | MATCH | DIFF | MATCH | MATCH | 0.0451 | -0.0049 |
-| D49141608 | 2019-07 | neither | sweep_balance | 0.05 | MATCH | DIFF | MATCH | MATCH | 0.0465 | -0.0035 |
-| D49141608 | 2019-08 | neither | sweep_balance | 0.04 | MATCH | DIFF | MATCH | MATCH | 0.0381 | -0.0019 |
-| D49141608 | 2019-09 | neither | sweep_balance | 0.03 | MATCH | DIFF | MATCH | MATCH | 0.0321 | 0.0021 |
-| D49141714 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | MATCH | MATCH | 0.0421 | 0.0021 |
+| acct#0f2f0af8 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | MATCH | MATCH | 0.0419 | 0.0019 |
+| acct#0f2f0af8 | 2019-03 | neither | sweep_balance | 0.05 | MATCH | DIFF | MATCH | MATCH | 0.0466 | -0.0034 |
+| acct#0f2f0af8 | 2019-04 | neither | sweep_balance | 0.05 | MATCH | DIFF | MATCH | MATCH | 0.0452 | -0.0048 |
+| acct#0f2f0af8 | 2019-05 | neither | sweep_balance | 0.05 | MATCH | DIFF | MATCH | MATCH | 0.0465 | -0.0035 |
+| acct#0f2f0af8 | 2019-06 | neither | sweep_balance | 0.05 | MATCH | DIFF | MATCH | MATCH | 0.0451 | -0.0049 |
+| acct#0f2f0af8 | 2019-07 | neither | sweep_balance | 0.05 | MATCH | DIFF | MATCH | MATCH | 0.0465 | -0.0035 |
+| acct#0f2f0af8 | 2019-08 | neither | sweep_balance | 0.04 | MATCH | DIFF | MATCH | MATCH | 0.0381 | -0.0019 |
+| acct#0f2f0af8 | 2019-09 | neither | sweep_balance | 0.03 | MATCH | DIFF | MATCH | MATCH | 0.0321 | 0.0021 |
+| acct#c7081e97 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | MATCH | MATCH | 0.0421 | 0.0021 |
 | acct#cf292cea | 2024-08 | neither | sweep_balance | 4.62 | MATCH | DIFF | MATCH | MATCH | 4.6488 | 0.0288 |
 | acct#65b3b3ea | 2025-04 | neither | sweep_balance | -11.06 | MATCH | DIFF | MATCH | MATCH | -11.0556 | 0.0044 |
 | acct#65b3b3ea | 2025-07 | neither | sweep_balance | 3.42 | MATCH | DIFF | MATCH | MATCH | 3.4191 | -0.0009 |
@@ -1000,8 +1000,8 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 | account | month | class | cause | AFTER verdict | computed | reported |
 |---|---|---|---|---|---|---|
 | acct#f6c79f45 | 2024-06 | core | other:sweep_trade_day | DIFF | -0.8239 | -0.88 |
-| D49143350 | 2026-02 | core | other:sweep_trade_day | DIFF | 2.4881 | 2.05 |
-| D49143350 | 2023-11 | core | sweep_balance | DIFF | -3.4367 | -4.59 |
+| acct#865421c2 | 2026-02 | core | other:sweep_trade_day | DIFF | 2.4881 | 2.05 |
+| acct#865421c2 | 2023-11 | core | sweep_balance | DIFF | -3.4367 | -4.59 |
 | acct#015306a0 | 2023-04 | neither | other:sweep_trade_day | DIFF | 1.1702 | 1.23 |
 | acct#fa488a0b | 2023-07 | neither | other:sweep_trade_day | DIFF | 2.9899 | 2.9 |
 | acct#25880078 | 2021-07 | neither | other:sweep_trade_day | DIFF | -0.1154 | -0.04 |
@@ -1082,15 +1082,15 @@ By new verdict: MATCH=25, DIFF=0, UNGRADABLE=0, ABSENT=0
 | acct#cce589ab | 2024-08 | MATCH |
 | acct#cce589ab | 2025-02 | MATCH |
 | acct#cce589ab | 2025-08 | MATCH |
-| D49141608 | 2019-02 | MATCH |
-| D49141608 | 2019-03 | MATCH |
-| D49141608 | 2019-04 | MATCH |
-| D49141608 | 2019-05 | MATCH |
-| D49141608 | 2019-06 | MATCH |
-| D49141608 | 2019-07 | MATCH |
-| D49141608 | 2019-08 | MATCH |
-| D49141608 | 2019-09 | MATCH |
-| D49141714 | 2019-02 | MATCH |
+| acct#0f2f0af8 | 2019-02 | MATCH |
+| acct#0f2f0af8 | 2019-03 | MATCH |
+| acct#0f2f0af8 | 2019-04 | MATCH |
+| acct#0f2f0af8 | 2019-05 | MATCH |
+| acct#0f2f0af8 | 2019-06 | MATCH |
+| acct#0f2f0af8 | 2019-07 | MATCH |
+| acct#0f2f0af8 | 2019-08 | MATCH |
+| acct#0f2f0af8 | 2019-09 | MATCH |
+| acct#c7081e97 | 2019-02 | MATCH |
 
 
 ## The method, row type by row type (commonwealth_sweeps.CASH_POSTINGS / CFN_POSTINGS, commonwealth_flows.METHOD_*)
@@ -1212,12 +1212,12 @@ The 35 of round 24's 98 regressions (MATCH under `conditional`, DIFF under `meth
 | acct#655e1810 | 2018-06 | cbf x 1: flow (sourced charge) | 0.02 | -0.0557 | 0.0215 | MATCH | MATCH |
 | acct#248f2de0 | 2022-05 | fco x 1: flow (sourced charge) | 0.0 | -2.0825 | 0.0008 | MATCH | MATCH |
 | acct#9d0bbc8f | 2023-09 | ftax x 1: flow (rides a same-day lo); stax x 1: flow (rides a same-day lo) | 0.07 | -1.6944 | 0.0651 | MATCH | MATCH |
-| cv18643456 | 2014-01 | ftax x 1: flow (rides a same-day lo) | 0.0 | -5.9733 | 0.0017 | MATCH | MATCH |
-| cv18643456 | 2014-02 | ftax x 1: flow (rides a same-day lo) | 0.0 | -9.9287 | 0.0017 | MATCH | MATCH |
-| cv18643456 | 2015-09 | ftax x 1: flow (rides a same-day lo) | 0.0 | -14.9997 | 0.0003 | MATCH | MATCH |
-| cv18643456 | 2015-10 | ftax x 1: flow (rides a same-day lo) | 0.0 | -14.9996 | 0.0003 | MATCH | MATCH |
-| cv18643456 | 2015-11 | ftax x 1: flow (rides a same-day lo) | 0.0 | -14.9996 | 0.0003 | MATCH | MATCH |
-| cv18643456 | 2015-12 | ftax x 2: flow (rides a same-day lo) | 0.0 | -3750038.4541 | 0.0001 | MATCH | MATCH |
+| acct#bf9a0262 | 2014-01 | ftax x 1: flow (rides a same-day lo) | 0.0 | -5.9733 | 0.0017 | MATCH | MATCH |
+| acct#bf9a0262 | 2014-02 | ftax x 1: flow (rides a same-day lo) | 0.0 | -9.9287 | 0.0017 | MATCH | MATCH |
+| acct#bf9a0262 | 2015-09 | ftax x 1: flow (rides a same-day lo) | 0.0 | -14.9997 | 0.0003 | MATCH | MATCH |
+| acct#bf9a0262 | 2015-10 | ftax x 1: flow (rides a same-day lo) | 0.0 | -14.9996 | 0.0003 | MATCH | MATCH |
+| acct#bf9a0262 | 2015-11 | ftax x 1: flow (rides a same-day lo) | 0.0 | -14.9996 | 0.0003 | MATCH | MATCH |
+| acct#bf9a0262 | 2015-12 | ftax x 2: flow (rides a same-day lo) | 0.0 | -3750038.4541 | 0.0001 | MATCH | MATCH |
 
 MATCH under this arm: 35 of 35.
 
@@ -1247,7 +1247,7 @@ Each month is a round-24 regression (MATCH under `conditional`, DIFF under `meth
 | acct#16f4eae3 | 615 | 2024-06-25 | -0.0 | -0.0 (2026-06-11) | 0 | 0 | 0 | no | -1545.89 | 6/16, 2/20 |
 | acct#cce589ab | 330 | 2023-05-11 | -0.0 | -0.0 (2026-05-22) | 0 | 0 | 0 | no | -40907.8 | 2/32, 22/12 |
 | acct#9727ac87 | 220 | 2023-03-23 | -0.0 | -0.0 (2025-01-02) | 0 | 0 | 0 | no | -30292.25 | 1/30, 36/1 |
-| D49141625 | 2308 | 2016-01-26 | 0.0 | -0.0 (2019-09-16) | 0 | 0 | 0 | no | 74950.02 | 35/32, 23/43 |
+| acct#08d09234 | 2308 | 2016-01-26 | 0.0 | -0.0 (2019-09-16) | 0 | 0 | 0 | no | 74950.02 | 35/32, 23/43 |
 | acct#6834d5a2 | 144 | 2024-04-04 | 0.0 | -909.67 (2025-01-23) | 1 | 0 | 0 | no | 134287.28 | 1/11, 0/12 |
 
 Runs of days with the method's running level below -0.5 (all accounts): acct#04ebe1d1 from 2018-11-19, lowest -9.78, recovered 2018-11-21; acct#e29efebe from 2024-04-05, lowest -138.63, recovered 2024-04-24; acct#e29efebe from 2025-04-07, lowest -73.7, recovered 2025-04-10; acct#6834d5a2 from 2025-01-23, lowest -909.67, recovered 2025-01-24.
@@ -1280,20 +1280,20 @@ Runs of days with the method's running level below -0.5 (all accounts): acct#04e
 | acct#16f4eae3 | 2025-11 | carried_level:dv | 0.9064 / 1.0173 / 0.89 | 2023-03-27 | 2024-06-25 566.38 | by -1935.25, synthetic:LIX 1935.25, dv 1425.41, man -859.03, sl 859.03, synthetic:LOX -859.03 (+2 more) | method level supported by the rows (the account's checks above); the baseline departs (closes at -1545.89): postings the baseline never makes (the step by row type, left) |
 | acct#cce589ab | 2025-12 | carried_level:pre_first_valued_day | 0.3466 / 0.8711 / 0.32 | 2023-03-23 | 2023-05-11 37591.96 | by -44391.38, synthetic:LIX 44391.38, sl 38850.68, man -1350.68, synthetic:LOX -1350.68, dv 1008.83 (+2 more) | method level supported by the rows (the account's checks above); the baseline departs (closes at -40907.8): postings the baseline never makes (the step by row type, left) |
 | acct#9727ac87 | 2026-01 | carried_level:mixed_rows | 0.1548 / 0.2923 / 0.16 | 2023-03-29 | 2023-03-29 -995277.78 | synthetic:LOX -995277.78, sl 995277.78, by -995000.0, man -277.78 | method level supported by the rows (the account's checks above); the baseline departs (closes at -30292.25): a sweep sale funds a non-sweep purchase: the baseline credits the sale and never debits the purchase |
-| D49141625 | 2017-10 | carried_level:ManAltF | 0.021 / 0.0791 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
-| D49141625 | 2017-11 | carried_level:ManAltF | 0.021 / 0.079 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
-| D49141625 | 2018-01 | carried_level:ManAltF | 0.0158 / 1.9802 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
-| D49141625 | 2020-08 | carried_level:ManAltF | 0.0093 / 0.3953 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
-| D49141625 | 2020-09 | carried_level:ManAltF | 0.0093 / 0.3937 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
-| D49141625 | 2020-10 | carried_level:ManAltF | 0.0093 / 0.3922 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
-| D49141625 | 2021-01 | carried_level:ManAltF | 0.0093 / 0.3891 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
-| D49141625 | 2021-02 | carried_level:ManAltF | 0.0093 / 0.3876 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
-| D49141625 | 2021-03 | carried_level:ManAltF | 0.0093 / 0.3861 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
-| D49141625 | 2021-04 | carried_level:ManAltF | 0.0464 / 1.9231 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
-| D49141625 | 2021-05 | carried_level:ManAltF | 0.0185 / 0.7547 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
-| D49141625 | 2021-06 | carried_level:ManAltF | 0.0093 / 0.3745 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
-| D49141625 | 2021-07 | carried_level:ManAltF | 0.0093 / 0.3731 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
-| D49141625 | 2021-08 | carried_level:ManAltF | 0.0093 / 0.3717 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2017-10 | carried_level:ManAltF | 0.021 / 0.0791 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2017-11 | carried_level:ManAltF | 0.021 / 0.079 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2018-01 | carried_level:ManAltF | 0.0158 / 1.9802 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2020-08 | carried_level:ManAltF | 0.0093 / 0.3953 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2020-09 | carried_level:ManAltF | 0.0093 / 0.3937 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2020-10 | carried_level:ManAltF | 0.0093 / 0.3922 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2021-01 | carried_level:ManAltF | 0.0093 / 0.3891 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2021-02 | carried_level:ManAltF | 0.0093 / 0.3876 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2021-03 | carried_level:ManAltF | 0.0093 / 0.3861 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2021-04 | carried_level:ManAltF | 0.0464 / 1.9231 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2021-05 | carried_level:ManAltF | 0.0185 / 0.7547 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2021-06 | carried_level:ManAltF | 0.0093 / 0.3745 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2021-07 | carried_level:ManAltF | 0.0093 / 0.3731 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
+| acct#08d09234 | 2021-08 | carried_level:ManAltF | 0.0093 / 0.3717 / 0.0 | 2017-10-09 | 2017-10-09 -105.2 | ManAltF -105.2, sl 105.2, synthetic:LOX -105.2 | method level supported by the rows (the account's checks above); the baseline departs (closes at 74950.02): ManAltF payment made for another account: the baseline never debits it |
 | acct#6834d5a2 | 2024-10 | carried_level:trade_cash | -1.6819 / -3.1292 / -1.69 | 2024-04-08 | 2024-04-08 -140000.0 | by -140000.0, sl 140000.0, synthetic:LOX -140000.0 | method level supported by the rows (the account's checks above); the baseline departs (closes at 134287.28): a sweep sale funds a non-sweep purchase: the baseline credits the sale and never debits the purchase |
 
 Of the 39 months: method level supported and the baseline's departs: 39; untraced: 0. First wrong month of the METHOD's level found: none.
@@ -1345,15 +1345,15 @@ AFTER verdict of the 163: MATCH 138, DIFF 25, UNGRADABLE 0, ABSENT 0.
 | acct#cce589ab | 2024-08 | MATCH | 1.7854 | 1.79 | -0.0046 | MATCH |
 | acct#cce589ab | 2025-02 | MATCH | -1.5729 | -1.55 | -0.0229 | MATCH |
 | acct#cce589ab | 2025-08 | MATCH | 2.5124 | 2.52 | -0.0076 | MATCH |
-| D49141608 | 2019-02 | MATCH | 0.0419 | 0.04 | 0.0019 | MATCH |
-| D49141608 | 2019-03 | MATCH | 0.0466 | 0.05 | -0.0034 | MATCH |
-| D49141608 | 2019-04 | MATCH | 0.0452 | 0.05 | -0.0048 | MATCH |
-| D49141608 | 2019-05 | MATCH | 0.0465 | 0.05 | -0.0035 | MATCH |
-| D49141608 | 2019-06 | MATCH | 0.0451 | 0.05 | -0.0049 | MATCH |
-| D49141608 | 2019-07 | MATCH | 0.0465 | 0.05 | -0.0035 | MATCH |
-| D49141608 | 2019-08 | MATCH | 0.0381 | 0.04 | -0.0019 | MATCH |
-| D49141608 | 2019-09 | MATCH | 0.0321 | 0.03 | 0.0021 | MATCH |
-| D49141714 | 2019-02 | MATCH | 0.0421 | 0.04 | 0.0021 | MATCH |
+| acct#0f2f0af8 | 2019-02 | MATCH | 0.0419 | 0.04 | 0.0019 | MATCH |
+| acct#0f2f0af8 | 2019-03 | MATCH | 0.0466 | 0.05 | -0.0034 | MATCH |
+| acct#0f2f0af8 | 2019-04 | MATCH | 0.0452 | 0.05 | -0.0048 | MATCH |
+| acct#0f2f0af8 | 2019-05 | MATCH | 0.0465 | 0.05 | -0.0035 | MATCH |
+| acct#0f2f0af8 | 2019-06 | MATCH | 0.0451 | 0.05 | -0.0049 | MATCH |
+| acct#0f2f0af8 | 2019-07 | MATCH | 0.0465 | 0.05 | -0.0035 | MATCH |
+| acct#0f2f0af8 | 2019-08 | MATCH | 0.0381 | 0.04 | -0.0019 | MATCH |
+| acct#0f2f0af8 | 2019-09 | MATCH | 0.0321 | 0.03 | 0.0021 | MATCH |
+| acct#c7081e97 | 2019-02 | MATCH | 0.0421 | 0.04 | 0.0021 | MATCH |
 
 
 ## Cross-month dividends graded BOTH ways: NOT GRADED, no ex-date source

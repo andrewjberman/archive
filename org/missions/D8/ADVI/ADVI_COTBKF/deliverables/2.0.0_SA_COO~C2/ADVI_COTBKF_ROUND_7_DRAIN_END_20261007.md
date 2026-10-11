@@ -8,7 +8,7 @@ Round 7 was cut as one issuance (@28e63ee8e6, `fanout: 3 of 3 chains, cap 8`) on
 | order | worker | drain | criteria | real run on dell2 (shared tree, after the drain) |
 |---|---|---|---|---|
 | CB-g-1 price-store scanner (FWD-3) | ~21 | @d97b008a7c | VALID: AC1 11 passed (denied-vs-empty control), AC2 PASS | `PRICE-STORE-SCAN bucket=opal-data-cottonwood prefix=irpt/cottonwood/ status=DENIED objects=0 candidates=0 security_days_possible=0 need=9388961` rc 3, probed again 10:4xZ after the fence join landed on two other buckets (msgs 359, 372). The real listing is relayed to the laptop (msgs 377-378); E1 criteria (2)-(3) wait on that FILE |
-| CB-g-2 FWD-8 read | ~22 | @ce7a734b92 | VALID: AC1 6 passed, AC2 PASS | `FWD8-READ matched_read=439 lined_up=1 near_matches_awaiting=21 near_matches_linked=0`; page `deliverables/0.9.0_WK_ADVI_COTBKF~22/FWD8_READ.md` (old 04003450617, advisor HKJ -> z0927272491, R2 score 1.0, 7 of 7 positions carried) |
+| CB-g-2 FWD-8 read | ~22 | @ce7a734b92 | VALID: AC1 6 passed, AC2 PASS | `FWD8-READ matched_read=439 lined_up=1 near_matches_awaiting=21 near_matches_linked=0`; page `deliverables/0.9.0_WK_ADVI_COTBKF~22/FWD8_READ.md` (old acct#cdf76705, advisor HKJ -> acct#efafd1dc, R2 score 1.0, 7 of 7 positions carried) |
 | CB-g-3 FWD-6 coverage statement | ~23 | @03244ba441 | VALID: AC1 4 passed, AC2 PASS, AC3 JUDGMENT | `COVERAGE-STATEMENT tables=11 every_not_covered_has_reason_and_row=True rows_cited=15 rows_missing=0`; page `deliverables/0.9.0_WK_ADVI_COTBKF~23/COVERAGE_STATEMENT.md` |
 
 Drain hygiene: `py_compile` and ruff (py39) clean on the three scripts and their tests. Real-run outputs went to `.scratch/` so the

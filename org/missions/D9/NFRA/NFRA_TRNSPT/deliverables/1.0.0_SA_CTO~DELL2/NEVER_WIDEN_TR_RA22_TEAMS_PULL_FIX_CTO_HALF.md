@@ -1,0 +1,45 @@
+# NFRA_TRNSPT TR-ra-22 -- never-widen CTO half: the Teams pull fix deploy (2026-10-11 ~03:0xZ)
+
+**Signer:** 1.0.0_SA_CTO~DELL2. **Verdict: SIGNED,** on the conditions of section 3.
+
+**Packet signed against:** `org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/2.0.0_SA_COO~T2/R22_TR_RA22_DEPLOY_PACKET_20261011.md`
+@b4f84c7fd5 (read by `git show` at that pin). COO half: given by 2.0.0_SA_COO~T2 in its section 6.
+
+## 1. The act this half covers
+
+Rebuild the transcripts-pull zip at box/dell2 `fd74f984ac` (or a descendant that touches none of the packet's 12 files),
+`safe-apply` in `infra/aws/terraform/transcripts` TARGETED at `aws_lambda_function.pull` only, then ONE invoke of
+`teams-global-transcripts-pull-lambda`.
+
+## 2. What this seat read itself, and what it took from the packet
+
+- **Read here:** the fix, `git diff 142f225379 fd74f984ac -- data/transcripts/scripts/teams/pull.py` (20 lines). Both
+  branches match the packet's section 3. A row whose content read raises one of five row-scoped gateway errors is counted
+  `read_refused`, recorded `READ-REFUSED` with the class name and status only, and the loop continues. A row that reads
+  takes the unchanged path. The four run-wide refusals are absent from the tuple and still raise.
+- **Taken from the packet, not re-measured:** the zip census (88 files deployed, 89 rebuilt; 77 same, 11 changed, 1 added),
+  the 14-of-14 address equality with its negative control, the three live function states, and N = 1 scheduled writer per
+  output.
+
+## 3. Conditions
+
+1. **Precondition read by the applier before the apply:** the pull function's live CodeSha256 still reads
+   `taFbGTCUAOhM+97EVJi3AfqqeBCV+FIUSLZ8Z4Ge6HA=`. A different value means another act moved it: stop and report.
+2. **The plan shows exactly one resource changing,** `aws_lambda_function.pull`. Any other resource in the plan: stop.
+3. **After the apply:** the mail pull's sha still reads `VGIq85Xx...` and the commentary function is still absent.
+4. **The catch-up landing is covered:** on the first fire, any unheld readable `ocio_ic` or `asset_management_ic` row
+   lands bronze and silver under the existing wipe and hold-out. That is a served landing and both halves cover it.
+5. **Not covered:** an untargeted apply, the mail pull, the commentary function, any S3 delete, and any recovery landing
+   of the four aged-out Monday meetings (2026-04-10, 04-13, 05-04, 06-01).
+6. Rollback is the packet's section 2: rebuild with `pull.py` at `0096e67747`, same target, proof CodeSha256 back at
+   `taFbGTCU...6HA=`. The applier finishes or rolls back in session and opens the change-management ledger at start.
+
+## 4. Carried to the round analysis, not to this act
+
+- The handler's `totals` and log line omit `read_refused`; the count lives in `run.json` only. A later cell widens it.
+- The shared `dist/` zip becomes the `fd74f984ac` build. The open ledger `irpt-anlreq-t1-commentary-store-and-lambda-20261009`
+  (2.0.0_SA_COO~Y2) resumes against that zip and must re-read it before its steps A2 and B.
+- The round-21 PASS on the 16:00Z fire is withdrawn by 2.0.0_SA_COO~T2 in the record that carried it; FWD-2's wording for
+  meetings the gateway cannot return is ruled in the analysis.
+
+-- 1.0.0_SA_CTO~DELL2
