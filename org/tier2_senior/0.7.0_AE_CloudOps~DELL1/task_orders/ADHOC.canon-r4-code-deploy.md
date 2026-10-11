@@ -39,6 +39,11 @@ Cell CN-d-5 (merged `0468b6c8ba`) landed the read-only tool `.tools/mdpf-code-eq
    c. Both halves of the pair are signed, read from the two files above.
    d. The clock: no act of D1 or D2 starts within 45 minutes before the 13:30Z gold fire or while the runner dispatch or the gold lambda is
       running (read the runner's status and the lambda's last invocation first).
+   e. (AMENDMENT 1, 2026-10-11 ~18:3xZ, laptop CTO ruling R1-R5, MSTR~DELL1 msg 4058 / record @7a7e9b47c6 section 5.) No FIRMBKTS window act is in
+      flight: read its ledger first and start only in a gap between its acts. This order touches NONE of the surfaces R2 gives FIRMBKTS through its
+      act 4 and read-back (`shared-advisor-router`, the guard, the CloudFront behaviours, `data/mdpf/config/bronze_homes.json`, `firm-config.mjs`, the
+      portal-auth WAF rider): D1 names the three scripts only, D2 is the lambda package. If the act-4 flip regenerates `bronze_homes.json` while
+      this order is open, that is FIRMBKTS's change and the equality print in leg f reports it as a fact, not a defect of this order.
 3. **ORDER OF ACTS (the order is the safety):**
    a. **Before print.** `python .tools/mdpf-code-equality.py` whole; attach it to the ledger. Record, for each of the three keys under
       `s3://opal-data-mdpf/code/scripts/gold/`, the prior ETag and VersionId (rollback). Read, for the latest date present, the global

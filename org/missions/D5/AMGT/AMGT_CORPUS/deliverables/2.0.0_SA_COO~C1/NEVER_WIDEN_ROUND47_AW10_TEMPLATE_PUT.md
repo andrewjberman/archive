@@ -33,7 +33,11 @@ A site-Z tree whose bytes for any of the three differ from these is a STOP for t
 - **Readers of the table: 1.** `team_sheet._master_reading` (and the once-per-census master search in `census`), reached only through a dossier write
   (`dossier.write_one` via `continuation.write_one`) or an operator's `--census`. The served page reads the stored gold dossier, not this table. Whether any
   schedule runs a dossier write is NOT read here; the CTO half confirms it (the same condition as round 45's pair; site Z's scheduled tasks are not in the repo).
-- **The file:** one of `Shared Documents/Asset Management/Research/` (the library root, derived by `library.library_root()`); located by name by the issuer's
+- **The file (AMENDMENT 1, 2026-10-11 ~18:2xZ, after `~ZC`'s STOP 3):** the SharePoint item sits in `Shared Documents/Asset Management/` (the issuer's
+  Graph listing), the PARENT of the library root `.../Asset Management/Research` that `library.library_root()` derives; the first walk read the root only
+  (0 of 378 files). The locate script now lists the root's walk AND the files directly in its parent. The act, its one key, its blobs and its blast radius are
+  unchanged; only where the source file is looked for moved one folder up. Before the amendment: one of `Shared Documents/Asset Management/Research/`
+  (the library root, derived by `library.library_root()`); located by name by the issuer's
   `checks/round47/aw10_locate.py`, which refuses unless exactly ONE file carries the master's name. Expected size 383839 bytes (the SharePoint item's, read by Graph
   2026-10-11); a different size is a STOP, since the file moved after the read and the pair does not cover bytes it did not read.
 
