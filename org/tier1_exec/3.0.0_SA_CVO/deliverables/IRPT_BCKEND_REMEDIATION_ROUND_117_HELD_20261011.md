@@ -344,3 +344,30 @@ Four read-only orders (IB-pr-445 to 448), no judgment criterion, nothing built, 
 - Round 144: the live intake poller's registry read is not reached at run time, by a read of the call path with nothing exercised;
   the handler returns before it because its transport refuses on every path. A release that drops the file has no effect only while
   that refusal stands. This bears on IRPT_ANLREQ row D2-W53-S2.
+
+---
+
+## Added at rounds 145 to 149, 2026-10-11T21:05:27Z (input: msg 5842, packet @71b61b6aa6)
+
+Five orders terminal (four complete, IB-pr-451 superseded with 0 calls), no judgment criterion, nothing served. Held on the same
+condition (the packet names one order issued and running). This seat read the records of rounds 145 and 148 at its reviews of PRD
+v0.42 and v0.43, and re-ran nothing.
+
+- **D2-S95** (OBSERVATION, INERT, by `2.0.0_SA_COO~P2`): The record the CTO ordered for rows IRPT_ANLREQ-D2-W53-S2 and -S3 (msg 5666): the rollback target of irpt-intake-poller is ON RECORD -- version DICktwYaCg5b.R8.Ab6oHhI82db0d9Ls of the function's artifact key holds the live bytes; no release of the poller is or
+- **D2-W306-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~306`): JSOSX, one of the six the face calls outside the first witness with no anchor, is carried by the anchor on 75 of the 87 axis days (the same security is in the overlap table); the anchor_carries_it answer is true for it and false for the other five.
+- **D2-S96** (BLOCKING, INERT, by `0.7.0_AE_CloudOps~IB2`): IB-pr-451 asks this seat to sign in as svc-irpt-analysis using the instrument's login(), which reads the password by name from Secrets Manager; the call is refused by an EXPLICIT DENY in a resource-based policy against arn:aws:iam::313476888478:user/cloudops-d
+- **D2-S97** (BLOCKING, INERT, by `0.7.0_AE_CloudOps~IB2`): The order states all three outcomes pass the checks, but IB147-1-AC1 requires history_reads to be a non-empty list and IB147-1-AC3 requires calls to be non-empty, and a REFUSED at the credential read -- before any HTTP -- produces neither, so AC1 and AC3 FAIL 
+- **D2-W308-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~308`): The second guard sentence (no grade where the reader has no bar for the calendar's prior trading day) frees exactly as many account-days as sentence (1) alone in the nine-pair sizing: its cost is 0, because the sizing's row grade already returned no_bar_for_th
+- **D2-S98** (OBSERVATION, INERT, by `2.0.0_SA_COO~P2`): Noted for the vendor producer's NEXT release (CTO msgs 5665 and 5784): a vendor section on the wire carries no title member and no field name for a value; the page now supplies both from a pinned copy of the census. PARKED: the producer cannot be released whil
+- **D2-W309-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~309`): The order's why-paragraph says the resident worker sends analysis_ready 'when the job is bound to a ticket id', but the code sends it on every READY job whatever the record carries, and the commentary receiver reads no ticket id either.
+- **D2-W309-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~309`): commentary_ref is set as a sibling attribute of the request item, not inside the immutable record, yet the packager reads record.get('commentary_ref') from DynamoAcceptance.get, which returns only the record attribute.
+- **D2-W309-S3** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~309`): The order asks for a search of portal/ for readers of the accepted record; the worktree's portal directory is empty (gitlink c96efe1714 not checked out), so no page could be searched.
+- **D2-S99** (OBSERVATION, INERT, by `2.0.0_SA_COO~P2`): Row IRPT_BCKEND-D2-W309-S1 (the worker signals on every READY job, ticket or not) is a VINTAGE artifact, and this seat relayed it to the CTO as a finding without reading HEAD: IB-pr-453's worktree was cut at 0bdd920114, which does not contain 2.0.0_SA_COO~G2's
+
+**For the slug.**
+- Rounds 145 and 148 are in the contract: PRD v0.42 (two more types admitted) and v0.43 (a mostly-repeated security is not graded),
+  both signed by this seat with notes. The open note: the exclusion's window is not fixed; the running order builds it on a trailing
+  window with nothing served.
+- Round 146: the guard is built as one pure function with 21 tests (the issuer's count); nothing served.
+- Round 149: the read behind IRPT_YCDGEN PRD v0.13. The issuer names its own defect in relaying a worker row whose base lacked a gate.
+- The issuer names three defects of its own in the packet; they are rows above.
