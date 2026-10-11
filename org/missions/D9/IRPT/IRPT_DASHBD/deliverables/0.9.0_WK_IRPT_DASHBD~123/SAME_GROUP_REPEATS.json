@@ -1,0 +1,52 @@
+{
+  "to": "IRPT_DASHBD.TO-DB-b-150",
+  "worker": "0.9.0_WK_IRPT_DASHBD~123",
+  "claim": "measured",
+  "day": "2026-10-06",
+  "store": "s3://opal-data-bd/silver/transactions/2026-10-06.parquet (bucket bound to 49 Financial by the naming registry, per ORIGINAL_STORE_SHAPE.json of ~116; one object, one day; no other bucket or prefix read)",
+  "denominator": 590,
+  "denominator_basis": "ids with two or more rows inside one portfolio group, measured by this worker on the same object as DB-b-143. Reproduced exactly: 119973 rows, 23371 distinct ids, 22573 ids with more than one row, 590 ids with two or more rows inside one group. The object has not been rewritten on any of these counts. Those 590 ids hold 2337 (id, group) pairs with two or more rows, 2709 rows beyond the first; rows per such pair: 2 rows in 2009 pairs, 3 in 302, 4 in 8, 5 in 18.",
+  "schema_read": {
+    "method": "parquet footer only (column names and types), then ranged GETs of the 16 columns marked neither below; 7 ranged GETs in all",
+    "columns_total": 71,
+    "marked_neither_and_read": [
+      {"column": "transaction_id", "type": "int64", "reason": "the transaction key, not money, not an account"},
+      {"column": "portfolio_group", "type": "string", "reason": "the group label the earlier record already read; read in ~116"},
+      {"column": "trade_date", "type": "timestamp", "reason": "a date"},
+      {"column": "return_date", "type": "timestamp", "reason": "a date"},
+      {"column": "entry_date", "type": "timestamp", "reason": "a date"},
+      {"column": "settle_date", "type": "timestamp", "reason": "a date"},
+      {"column": "action", "type": "string", "reason": "an action category"},
+      {"column": "transaction_type", "type": "string", "reason": "a type category"},
+      {"column": "transaction_sub_type", "type": "string", "reason": "a type category"},
+      {"column": "external_flow", "type": "string", "reason": "a flow label"},
+      {"column": "asset_id", "type": "int64", "reason": "a security identifier, not an account; can tell two legs on different securities apart"},
+      {"column": "asset_name", "type": "string", "reason": "a security name, not a client name"},
+      {"column": "cusip", "type": "string", "reason": "a security identifier"},
+      {"column": "_source_file", "type": "string", "reason": "a load provenance stamp"},
+      {"column": "_ingested_at", "type": "string", "reason": "a load timestamp"},
+      {"column": "as_of_date", "type": "string", "reason": "a date label"}
+    ],
+    "marked_money_not_read": ["price", "units (a quantity; kind treated as forbidden because the name does not say it is not an amount)", "market_value", "transaction_fee", "income", "account_fee", "expense_ratio", "the split_pct columns (house, additional_advisor, architect, consultant, implementor, local_ops: shares of fees)"],
+    "marked_account_or_client_not_read": ["account_number", "account_id", "original_account_number", "account_display_name", "account_name", "original_account_name", "account_owner", "account_owner_type", "client_name", "client_city", "client_state", "client_zip_code", "relationship_* (8 columns)", "portfolio_name", "portfolio_id", "portfolio_display_name", "previous_system_key", "manager", "managed_account_manager_name", "account_is_open and the account/portfolio/history date columns", "tax_status, tax_status_1, goal, investment_strategy_name, manager_strategy"],
+    "marked_unclear_treated_as_forbidden_not_read": ["description (free text; may hold a name or an account reference)", "fund_manager, additional_advisor, consultant, architect, implementor, local_ops (name columns, kind unclear)", "custodial_cost_basis_sync and asset_display_name (no use for this question)"]
+  },
+  "causes": [
+    {
+      "cause": "identical on all readable columns",
+      "ids": 590,
+      "rule": "For an id with two or more rows in one portfolio group, every row of that id (inside the group and across all its groups) carries the same value on each of the 15 readable columns other than portfolio_group: the four dates, action, transaction_type, transaction_sub_type, external_flow, asset_id, asset_name, cusip, _source_file, _ingested_at and as_of_date. Re-apply: group the rows by transaction_id and portfolio_group; take the set of the 15-column tuples over the group's rows; the set has size 1. Tested on every one of the 590 ids: 590 of 590 satisfy it, and 2337 of 2337 (id, group) pairs. Nothing readable tells the copies apart, including the load stamp and source file.",
+      "dedupe_on_id_alone": "cannot tell without a money column",
+      "dedupe_on_id_alone_why": "If the copies are the same transaction re-sent, keeping one is correct; if they are separate legs or lots that differ only in units, price or amount (money or account columns this read may not see), keeping one drops a real row. Nothing on the 15 readable columns separates the two readings."
+    }
+  ],
+  "unexplained": {
+    "ids": 0,
+    "why": "none: all 590 ids sit under the one cause. What stays NOT_ESTABLISHED is not an unplaced id but what the cause means: whether the same-group copies also match on the money columns (units, price, market value, fees, income) and the account columns, which this read may not see. Only a read of those columns can say whether they are re-sent copies or real separate rows."
+  },
+  "differing_columns_among_same_group_rows": {},
+  "ids_where_a_readable_column_differs": 0,
+  "dedupe_drops_a_real_row": "not shown: no cause was shown to drop a real row, so no row naming the readers (A_03, B_01, B_03, nna_flows) is filed; and no served number is shown wrong. The question stays open for a read that may see the money columns.",
+  "corrected": 0,
+  "s3_writes": 0
+}
