@@ -12,7 +12,7 @@
 <preflight>
 comp-schedule: DECLARED-NOT-APPLICABLE -- one read-only command on the resident host; no schedule, trigger or rule is added or read
 comp-iam: DECLARED-NOT-APPLICABLE -- no IAM change; the command runs under the applier's existing SSM grant on this one instance, the grant TO-APPLY-b8 and TO-APPLY-st30 used
-comp-adversary: RUN -- read 1 file (resident_worker.py of the installed package, its 12 print sites of the forms IRPT_RESIDENT_, WARN: and ERROR:); NOT seen: the host journal itself, so what an unnamed line or a traceback body carries is unknown and is why neither is printed. A journal read that changes nothing: no write, no restart, no receive on any queue, no table read. The trap is a journal line that carries a client's or a security's name: the command prints only the worker's own named lines and the CLASS of an exception, never an exception's message or a traceback body
+comp-adversary: RUN -- read 1 file (resident_worker.py of the installed package, 25 lines matching its print sites of the forms IRPT_RESIDENT_, WARN:, ERROR: and named_line, counted by grep); NOT seen: the host journal itself, so what an unnamed line or a traceback body carries is unknown and is why neither is printed. A journal read that changes nothing: no write, no restart, no receive on any queue, no table read. The trap is a journal line that carries a client's or a security's name: the command prints only the worker's own named lines and the CLASS of an exception, never an exception's message or a traceback body
 </preflight>
 <decomp_ref>
 <decomp_doc>org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R11.md</decomp_doc>
