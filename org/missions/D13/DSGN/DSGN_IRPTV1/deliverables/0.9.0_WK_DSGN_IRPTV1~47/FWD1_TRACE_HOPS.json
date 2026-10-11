@@ -1,0 +1,190 @@
+{
+  "to_id": "DSGN_IRPTV1.TO-IV-e-87",
+  "worker": "0.9.0_WK_DSGN_IRPTV1~47",
+  "claim": "READ FROM THE REPOSITORY ONLY. No token, no row, no AWS call, no request to a deployed service. Every value that needs a live read is in the packet under OWED AT SIGNING.",
+  "portal_commit": "1cd1cf252eae0eee0d67cba4bde31630a71f975c",
+  "portal_read_by": "git -C <workspace>/portal show <portal_commit>:<path>; a source.file under portal/ is read at portal_commit",
+  "backend_read_at": "the workspace base commit d1ed899ba9 (infra/aws/lambda/investor-reporting/**, infra/aws/terraform/investor-reporting/**); a source.file under infra/ is read there",
+  "client_data_rule": "The named client and the named account are never written here. The firm token is the registry's spelling.",
+  "sign_in": [
+    {
+      "method": "POST",
+      "route": "{auth_api}/auth/refresh",
+      "source": {"file": "portal/src/contexts/AuthContext.tsx", "line": 174},
+      "note": "The page's only session-establishing request on mount: it needs the refresh cookie (credentials: include). The synthetic identity has no password and no cookie, so no HTTP sign-in exists on the API-runner path: the executor mints the token offline (packet, The identity). On the browser path this request is expected to fail (packet, Branches F)."
+    }
+  ],
+  "hops": [
+    {
+      "hop": "H1-sign-in-and-page-open",
+      "what_the_user_does": "Signs in and lands on the portal; the session context loads, then the user opens Investor Reporting.",
+      "issued_in": "browser session only; the API runner issues none of these (it holds the token)",
+      "requests": [
+        {"method": "POST", "route": "{auth_api}/auth/refresh", "source": {"file": "portal/src/contexts/AuthContext.tsx", "line": 174}, "is_sign_in": true},
+        {"method": "GET", "route": "{auth_api}/auth/me", "source": {"file": "portal/src/contexts/AuthContext.tsx", "line": 193}, "condition": "only when the refresh answer carries no user object (AuthContext.tsx:188-204)"},
+        {"method": "POST", "route": "{analytics_api}/ingest", "source": {"file": "portal/src/services/analytics.ts", "line": 777}, "condition": "flushed on a 10 s timer (analytics.ts:177) and by sendBeacon on unload (analytics.ts:774); started by OpalAnalytics.init at AuthContext.tsx:221"},
+        {"method": "GET", "route": "/api/scoped/advisor-intelligence/platinum/firm/partner_analytics_{suffix}.json?firm={bucket suffix}", "source": {"file": "portal/src/contexts/AuthContext.tsx", "line": 46}, "condition": "prefetch after auth lands; an internal-tier claim sends the 49financial override (AuthContext.tsx:36,42); endpoint path at portal/src/api/endpoints/advisor-intelligence.ts:397"},
+        {"method": "GET", "route": "/api/scoped/advisor-intelligence/platinum/firm/timeseries_overview.json?firm={bucket suffix}", "source": {"file": "portal/src/contexts/AuthContext.tsx", "line": 52}, "condition": "same prefetch; endpoint path at advisor-intelligence.ts:380"},
+        {"method": "GET", "route": "/api/scoped/advisor-intelligence/platinum/firm/cumulative_chart.json?firm={bucket suffix}", "source": {"file": "portal/src/contexts/AuthContext.tsx", "line": 58}, "condition": "same prefetch; endpoint path at advisor-intelligence.ts:419"},
+        {"method": "GET", "route": "/api/scoped/advisor-intelligence/platinum/firm/dashboard.json?firm={bucket suffix}", "source": {"file": "portal/src/contexts/AuthContext.tsx", "line": 67}, "condition": "same prefetch; fetch at advisor-intelligence.ts:503"},
+        {"method": "GET", "route": "/api/scoped/advisor-intelligence/platinum/firm/mix_summary.json?firm={bucket suffix}", "source": {"file": "portal/src/contexts/AuthContext.tsx", "line": 68}, "condition": "same prefetch; endpoint path at advisor-intelligence.ts:559"}
+      ],
+      "records": {"keeps": ["hop", "status", "code"], "what": "the browser path's session result and the status of each page-level request; nothing from a body"}
+    },
+    {
+      "hop": "H2-scope-resolved",
+      "what_the_user_does": "Opens Investor Reporting; the page resolves its scope and the firm catalogue before showing the client search (an internal-tier user starts on Global).",
+      "issued_in": "API runner and browser",
+      "requests": [
+        {"method": "POST", "route": "/api/scoped/investor-reporting/directory/resolve", "source": {"file": "portal/src/pages/InvestorReporting/index.tsx", "line": 111}, "note": "body selected_tenant = global. The page's second resolve (index.tsx:125) carries the same query key (index.tsx:107 and :123, firmId defaults to global at :105), so ONE request is made. Route row: portal/src/api/endpoints/investor-reporting.ts:227; sender :1238-1255."}
+      ],
+      "records": {"keeps": ["hop", "status", "counts", "code"], "what": "the status; the count of firms listed, the count READY, the count UNAVAILABLE. Expected on a one-firm row LIST: 1 READY, the rest UNAVAILABLE (FIRM_BINDING), so the page prints its 'Global results are incomplete' line (index.tsx:404-407)."}
+    },
+    {
+      "hop": "H3-client-list-and-pick",
+      "what_the_user_does": "Opens the client search, types part of the named client's name (two characters or more) and picks the client from the list.",
+      "issued_in": "API runner and browser",
+      "requests": [
+        {"method": "GET", "route": "/api/scoped/investor-reporting/directory/browse?q={query}&limit=100&selected_tenant={firm}", "source": {"file": "portal/src/pages/InvestorReporting/header/ClientSearch.tsx", "line": 127}, "note": "once per READY firm context, at the empty query on open, then once per typed query (ClientSearch.tsx:104,115,162). Route row investor-reporting.ts:212; sender :1214-1229."}
+      ],
+      "records": {"keeps": ["hop", "status", "counts", "code"], "what": "status; the count of entries returned; whether the named client is among them (a yes/no, never the name)"}
+    },
+    {
+      "hop": "H4-selection-accepted",
+      "what_the_user_does": "The pick is sent for the server to accept as the client's account set (the user sees 'Checking the selected accounts' and then the client's card).",
+      "issued_in": "API runner and browser",
+      "requests": [
+        {"method": "POST", "route": "/api/scoped/investor-reporting/selections", "source": {"file": "portal/src/pages/InvestorReporting/index.tsx", "line": 247}, "note": "body {scope_kind, scope_ids} for the picked client; selected_tenant = the picked client's firm. Route row investor-reporting.ts:225; sender :1197-1202."}
+      ],
+      "records": {"keeps": ["hop", "status", "counts", "code"], "what": "status; the count of accounts the selection names. The returned account_set_id is held in memory for the next hop and never written."}
+    },
+    {
+      "hop": "H5-identity-card",
+      "what_the_user_does": "Reads the identity card: who the client is, what is held in total, as of when.",
+      "issued_in": "API runner and browser",
+      "requests": [
+        {"method": "GET", "route": "/api/scoped/investor-reporting/holdings/{accountSetId}?root_ref={ref}&selected_tenant={firm}&include=target", "source": {"file": "portal/src/pages/InvestorReporting/header/IdentityCard.tsx", "line": 206}, "note": "the one shared snapshot of the client set; the Holdings tab reads it again with no second fetch (HoldingsTab.tsx:217-221). Route row investor-reporting.ts:237; sender :1311-1321."}
+      ],
+      "records": {"keeps": ["hop", "status", "counts", "code"], "what": "status; the availability state word; the count of account nodes in the snapshot; whether a name, a total and an as-of date are present (yes/no, no value)"}
+    },
+    {
+      "hop": "H6-performance-ytd-and-spread",
+      "what_the_user_does": "The Performance tab is the tab at rest: it opens on the client's largest account and shows its year-to-date return with the spread to the benchmark.",
+      "issued_in": "API runner (focused account only) and browser (the browser also runs the per-account picker requests below)",
+      "requests": [
+        {"method": "POST", "route": "/api/scoped/investor-reporting/selections", "source": {"file": "portal/src/pages/InvestorReporting/tabs/reporting/accountFocus.ts", "line": 68}, "note": "the one-account selection for the focused account (ReportingTab.tsx:548-569, settleAccountFocus). Cached per account and directory revision (accountFocus.ts:60-62)."},
+        {"method": "GET", "route": "/api/scoped/investor-reporting/reporting/{account_id}/manifest?selected_tenant={firm}", "source": {"file": "portal/src/pages/InvestorReporting/dashboard/reportingRead.ts", "line": 133}, "note": "PATH B read, started by ReportingTab.tsx:586/603. Route built at reportingRead.ts:22-31; not a row of the IR route table."},
+        {"method": "GET", "route": "/api/scoped/investor-reporting/reporting/{account_id}/series?selected_tenant={firm}", "source": {"file": "portal/src/pages/InvestorReporting/dashboard/reportingRead.ts", "line": 143}, "note": "read only after the manifest is served (reportingRead.ts:137-141)."},
+        {"method": "GET", "route": "/api/scoped/investor-reporting/reporting/client/{client_id}/summary?selected_tenant={firm}", "source": {"file": "portal/src/pages/InvestorReporting/dashboard/reportingRead.ts", "line": 85}, "note": "only when the client lists more than one account (ReportingTab.tsx:619,626). Route built at reportingRead.ts:38-41."},
+        {"method": "GET", "route": "/api/scoped/investor-reporting/performance/{accountSetId}?start={date}&end={date}&selected_tenant={firm}", "source": {"file": "portal/src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx", "line": 751}, "note": "PATH A. Skipped only when the account's PATH B answer is ALREADY held (ReportingTab.tsx:748); both effects start together after the focus resolves, so the page may issue this before the manifest answers. Route row investor-reporting.ts:228; sender :1257-1265."},
+        {"method": "POST", "route": "/api/scoped/investor-reporting/selections", "source": {"file": "portal/src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx", "line": 349}, "note": "the Performance chooser's per-account figure, one account at a time, for every listed account PATH B does not serve (ReportingTab.tsx:685-713, resolveAccountYtd :341-366). Browser path only; the API runner reads the focused account."},
+        {"method": "GET", "route": "/api/scoped/investor-reporting/performance/{accountSetId}?start={date}&end={date}&selected_tenant={firm}", "source": {"file": "portal/src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx", "line": 350}, "note": "the chooser's per-account figure request. Browser path only."}
+      ],
+      "records": {"keeps": ["hop", "status", "counts", "code"], "what": "per request: status and refusal code; for PATH B, whether a manifest and a series were served and the series' point count; whether a year-to-date value and a spread value are present (yes/no, no value)"}
+    },
+    {
+      "hop": "H7-holdings-split-and-securities",
+      "what_the_user_does": "Opens the Holdings tab and reads the Models / SMAs / Client split and the security list.",
+      "issued_in": "API runner (no new request) and browser",
+      "requests": [
+        {"method": "GET", "route": "/api/scoped/investor-reporting/holdings/{accountSetId}?root_ref={ref}&selected_tenant={firm}&include=target", "source": {"file": "portal/src/pages/InvestorReporting/tabs/holdings/HoldingsTab.tsx", "line": 228}, "note": "FALLBACK only: the tab reads the shared snapshot from H5 and issues no request when it is published (HoldingsTab.tsx:217-221). The API runner reuses H5's answer and records the three slices it holds."},
+        {"method": "POST", "route": "/api/scoped/investor-reporting/selections", "source": {"file": "portal/src/pages/InvestorReporting/tabs/holdings/HoldingsTab.tsx", "line": 271}, "note": "background per-account prefetch, only when the snapshot lists more than one drillable account (HoldingsTab.tsx:283-287); the one-account selection comes from resolveAccountFocus (accountFocus.ts:68). Browser path only."},
+        {"method": "GET", "route": "/api/scoped/investor-reporting/holdings/{accountSetId}?root_ref={ref}&selected_tenant={firm}&include=target", "source": {"file": "portal/src/pages/InvestorReporting/tabs/holdings/HoldingsTab.tsx", "line": 271}, "note": "the same prefetch's one-account snapshot read (api.getHoldingsSnapshot, HoldingsTab.tsx:271). Browser path only."}
+      ],
+      "records": {"keeps": ["hop", "status", "counts", "code"], "what": "status; the count of slices (Models, SMAs, Client) present and the count of security rows; no label, no weight, no figure"}
+    }
+  ],
+  "non_get_requests": [
+    {
+      "method": "POST",
+      "route": "{auth_api}/auth/refresh",
+      "is_sign_in": true,
+      "writes_server_side": "NOT_ESTABLISHED",
+      "source": {"file": "portal/src/contexts/AuthContext.tsx", "line": 174},
+      "handler_found": false,
+      "would_establish": "the auth service's refresh handler (the Lambda behind VITE_AUTH_API_URL); a comp-find for 'auth/refresh' over infra/aws/lambda found 0 hits across 5663 files, so the handler is not in the tree this cell read. Refresh normally rotates or reads a refresh-token record; that is a presumption, not a reading.",
+      "finding_for_the_halves": "The one request the CTO's bound excepts. On the browser path it needs a refresh cookie the synthetic identity does not have."
+    },
+    {
+      "method": "POST",
+      "route": "{analytics_api}/ingest",
+      "is_sign_in": false,
+      "writes_server_side": "NOT_ESTABLISHED",
+      "source": {"file": "portal/src/services/analytics.ts", "line": 777},
+      "handler_found": false,
+      "would_establish": "the ingest handler behind the analytics API base set at AuthContext.tsx:222; a comp-find for 'analytics/ingest' over infra/aws/lambda found only unrelated ingestion files. Its name says it stores session events.",
+      "finding_for_the_halves": "A browser session sends this POST on a timer and on unload for as long as the page is open; it is a non-GET that is not the sign-in. The API runner never sends it."
+    },
+    {
+      "method": "POST",
+      "route": "/api/scoped/investor-reporting/directory/resolve",
+      "is_sign_in": false,
+      "writes_server_side": false,
+      "source": {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 261},
+      "handler_range": "directory/entry.py:261-304 (resolve); the global form is directory/entry.py:414-456 (global_context), which calls the same guarded boundary once per registry firm",
+      "handler_found": true,
+      "reads_only_because": "resolve() returns browser_safe_view(resolved) after reading the directory and ownership artifacts (entry.py:292-304); it calls no store. The one write in that package, refresh.py:169 put_object, is the directory refresh job, not a route (ROUTES, entry.py:389-398, lists four routes and none is refresh). The guard keeps an in-container directory cache (_authz/loaders.py:162-170) and nothing else the grep for put_item/put_object/update_item/publish found in _authz (hits only in tests/).",
+      "finding_for_the_halves": "A POST that only reads. The CTO's bound is 'every request a GET but the sign-in'; this one is not the sign-in. The halves rule whether it is inside the pair. The page cannot open Investor Reporting without it."
+    },
+    {
+      "method": "POST",
+      "route": "/api/scoped/investor-reporting/selections",
+      "is_sign_in": false,
+      "writes_server_side": true,
+      "source": {"file": "infra/aws/lambda/investor-reporting/_scope/selection_store.py", "line": 45},
+      "handler_range": "directory/entry.py:307-315 (create_selected_set) -> _scope/selection.py:77-107 (create_requested_selection) and :60-74 (create_selection, save_selection(...) at :73) -> selection_store.py:37-53 (save: put_item with attribute_not_exists on tenant and request_revision)",
+      "handler_found": true,
+      "what_it_writes": "ONE DynamoDB item per distinct (firm, sorted account ids, directory revision): key tenant = the firm token, request_revision = 'SELECTION#' + the content-addressed reference; value = the selection record. Table = the core stack's 'requests' output (directory/lambda.tf:46, performance/lambda.tf:44). Immutable and idempotent: a repeat is a ConditionalCheckFailed that loads and compares the stored record (selection_store.py:46-53); nothing is ever updated or deleted.",
+      "finding_for_the_halves": "The page cannot reach any account-level hop without this POST. It is a server-side write by a request the bound does not except. The halves rule whether a content-addressed, immutable, idempotent selection record is inside 'read-only'."
+    }
+  ],
+  "get_requests_with_server_side_effects": [
+    {
+      "method": "GET",
+      "route": "/api/scoped/investor-reporting/performance/{accountSetId}",
+      "handler": {"file": "infra/aws/lambda/investor-reporting/performance/retained.py", "line": 279},
+      "effect": "A read-through store. With an accepted pointer for the key it reopens (a read, retained.py:281-285). With none it computes and PERSISTS: artifacts.put (retained.py:321), retention.promote (:324), reports.persist (:330), index.publish (:338). The route's own operation_kind says 'read' (performance/entry.py:281).",
+      "for_the_named_firm": "The firm token is the vendor branch, not the holdings branch: COMPOSED_FIRMS holds it (retained.py:78) but _holdings_sources installs holdings sources for two OTHER firms only (performance/installed.py:68), so holdings_firm is false (retained.py:193) and the fresh path takes the vendor branch (retained.py:304-315). That branch needs a server-installed single-use approved plan (authorization.py:65-90) and, when one matches, writes a claim row (authorization.py:94) and makes a vendor call. With no matching plan it refuses (authorization.py:90) before any write. An existing retained vendor figure is refused on reopen (retained.py:259-261).",
+      "owed": "Whether IRPT_PERFORMANCE_APPROVED_PLAN is set on the live function (set only when the Terraform variable is non-null: performance/lambda.tf:51-54)."
+    },
+    {
+      "method": "GET",
+      "route": "/api/scoped/investor-reporting/holdings/{accountSetId}",
+      "handler": {"file": "infra/aws/lambda/investor-reporting/holdings/entry.py", "line": 76},
+      "effect": "None found. The handler reads (load_snapshot, snapshot.py:158-165, a version-pinned read of the accepted publication); operation_kind is 'read' (holdings/entry.py:137). The publication writers (holdings/publication.py:206,304, publish at :222) have no call site in holdings/entry.py, handler.py, resolve.py or snapshot.py (a grep of those files found none); which job calls them was not read."
+    },
+    {
+      "method": "GET",
+      "route": "/api/scoped/investor-reporting/reporting/{account_id}/{which}",
+      "handler": {"file": "infra/aws/lambda/investor-reporting/reporting/entry.py", "line": 275},
+      "effect": "None found. S3 get_object and list only (reporting/entry.py:190,283); a grep of reporting/ for put_item/put_object/update_item/delete_item/send_message/publish found 0 hits."
+    },
+    {
+      "method": "GET",
+      "route": "/api/scoped/investor-reporting/directory/browse",
+      "handler": {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 318},
+      "effect": "None found (browse(), entry.py:318-380, builds a page from the loaded directory; no store call)."
+    }
+  ],
+  "identity": {
+    "tier": "internal",
+    "firm_list": ["cottonwood"],
+    "firm_list_note": "The registry's spelling of the firm token (portal header/firmDisplayNames.generated.ts keys, generated from the naming registry; also tenants.py:80-88 canonical ids). The firm of the named client is read from the PRD's FWD-1 sentence and the walks the state table cites (prod-uiwalk lines 40 and 53 name this firm's relationship). It is not client data.",
+    "token_max_minutes": 30,
+    "token_minutes_rule": "exp = iat + (the run's sized length + 5) minutes, never more than 30; the executor prints the sized length and the sum before minting",
+    "removed_after_exp": true,
+    "user_type": "test-reader",
+    "role": "user",
+    "row_key": "USER#irpt-fwd1-trace-reader@opal.invalid / PROFILE",
+    "row_fields": {"firmId": "opal-capital", "status": "active", "userType": "test-reader", "allowedFirmIds": ["cottonwood"]},
+    "clamps": [
+      {"route": "every scoped Investor Reporting route with a selected_tenant different from the verified firm", "what": "an internal caller is narrowed by the PROFILE row's allowedFirmIds list; a firm outside it is refused FIRM_BINDING; 'ALL' never admits an internal caller", "source": {"file": "infra/aws/lambda/investor-reporting/_authz/served.py", "line": 1207}, "also": "served.py:1138-1166 (_internal_allowed_firms) and :1224-1229 (the check)"},
+      {"route": "POST /directory/resolve with selected_tenant = global", "what": "the global form is admitted for an internal caller only (served.py:1198-1200) and resolves each registry firm through the same boundary (directory/entry.py:430-435), so each firm outside the row LIST comes back UNAVAILABLE (entry.py:446-451), not a whole-registry grant", "source": {"file": "infra/aws/lambda/investor-reporting/directory/entry.py", "line": 430}},
+      {"route": "GET /reporting/{account_id}/{which} and GET /reporting/client/{client_id}/summary", "what": "the account or the client's accounts must be in the viewer's current permitted set (_check_covered), else OBJECT_NOT_COVERED", "source": {"file": "infra/aws/lambda/investor-reporting/reporting/entry.py", "line": 274}},
+      {"route": "POST /selections", "what": "every selected account must be currently permitted and present in the firm's directory population", "source": {"file": "infra/aws/lambda/investor-reporting/_scope/selection.py", "line": 47}}
+    ],
+    "not_clamped_here": "The five advisor-intelligence prefetch GETs in H1 are served by other functions; whether the row LIST clamps them is NOT_ESTABLISHED by this cell."
+  },
+  "repo_carries": ["hop", "status", "counts", "code"],
+  "repo_carries_note": "The CTO ruled hop, status and counts; code is the refusal code of a refused hop. byte_length and sha256_prefix are not carried: no hop needs a fingerprint, and a fingerprint of a client body is not required to tell the hop was answered."
+}

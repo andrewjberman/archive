@@ -3,6 +3,7 @@
     python w6_reads.py R3 <out.json>                 # one owner GET of the history, svc on its native firm (cottonwood)
     python w6_reads.py R45 <request_id> <out.json>   # status-job + analysis-report sections + ONE GET .../original (49financial)
     python w6_reads.py R6 <request_id> <out.json>    # ONE status-job read with the portal's date opt-in header (49financial)
+    python w6_reads.py CENSUS <request_id> <out.json> # ONE sections read; writes only counts by page, status, method and masked reason
 
 Reuses f1_svc_run.py's call() and scrub(): the password is read by NAME into memory and never printed or written; the record
 keeps codes, ids and section names only. Submits nothing. ASCII only.
@@ -69,8 +70,35 @@ def main(argv):
             summary.append(dict(read="R6 status-job with X-IRPT-Status-Dates", http=s, state=d.get("state"),
                                 public_reason_code=d.get("public_reason_code"),
                                 source_date_keys=sorted((d.get("source_dates") or {}).keys())))
+        elif mode == "CENSUS":
+            # Round 8 cell YCD-c-8: ONE read of the report's sections; only an aggregate is written. The raw answer is
+            # read with a plain opener so `page` and `reason` are seen before any scrub; no value is kept and every digit
+            # in a reason is masked, so the record carries counts and reason shapes, never a figure.
+            import collections
+            import re
+            import urllib.request
+            rid = argv[2]
+            req = urllib.request.Request(f1.API + f1.BASE + "/analysis/" + rid + "/sections?selected_tenant=49financial",
+                                         headers=h, method="GET")
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                status, raw = resp.status, json.loads(resp.read().decode("utf-8"))
+            data = raw.get("data") if isinstance(raw, dict) and isinstance(raw.get("data"), dict) else {}
+            rows = data.get("sections") if isinstance(data.get("sections"), list) else []
+            tally = collections.Counter()
+            for row in rows:
+                reason = row.get("reason")
+                reason = re.sub(r"[0-9]", "#", reason) if isinstance(reason, str) else None
+                page = row.get("page") if isinstance(row.get("page"), int) else None
+                tally[(page, row.get("status"), row.get("method") if row.get("status") != "VALUE" else "(a value)",
+                       row.get("section_type"), reason)] += 1
+            census = [{"page": k[0], "status": k[1], "method": k[2], "section_type": k[3], "reason": k[4], "sections": n}
+                      for k, n in sorted(tally.items(), key=lambda kv: (kv[0][0] or 0, str(kv[0][1]), str(kv[0][2]),
+                                                                        str(kv[0][3]), str(kv[0][4])))]
+            result.update(request=rid, provider=data.get("provider"), sections_total=len(rows), census=census,
+                          computation_validation_status=(data.get("computation_validation") or {}).get("status"))
+            summary.append(dict(read="CENSUS sections", http=status, sections_total=len(rows), groups=len(census)))
         else:
-            raise SystemExit("mode must be R3, R45 or R6")
+            raise SystemExit("mode must be R3, R45, R6 or CENSUS")
     for row in summary:
         f1.say(json.dumps(row))
     result.update(ended_at=f1.stamp(), summary=summary, calls=f1.log)
