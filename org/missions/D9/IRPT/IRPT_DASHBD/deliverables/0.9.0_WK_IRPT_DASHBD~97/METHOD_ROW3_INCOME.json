@@ -1,0 +1,238 @@
+{
+  "record": "METHOD_ROW3_INCOME",
+  "to_id": "IRPT_DASHBD.TO-DB-b-122",
+  "authored_by": "0.9.0_WK_IRPT_DASHBD~97",
+  "authored_before_code": true,
+  "base": "box/dell2 @94acc5a925 (branch wk-irpt-dashbd-66-97). The record was committed at cf1cfaef0c BEFORE any producer, test or contract edit, citing base lines; this final version re-cites every line as it stands at the final commit and adds the tests, the contract and the packet fields. No postulate failed on the ordered shape, so no stop row was needed.",
+  "rule_extended": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~93/THRESHOLD_CLAIM_RULE24.json (TO-DB-b-118) and 0.9.0_WK_IRPT_DASHBD~95/ROW3_AND_TIEOUT_CLAIM.json (TO-DB-b-120): a claim drawn from the law's four-member provenance set, beside the value, in a column a reader can reject on.",
+  "order": "1.0.0_SA_CTO~DELL2 ruling msg 4634: method row 3 states income ABSENT by design with its reason (FWD-3 does not separate income; it sits inside the value through the cash leg); rows 1 and 2 unchanged and a test shows it.",
+  "changes_covered": [
+    "A. income_basis becomes a per-row fact carried by METHOD_ROWS: row 2 keeps cash_when_received, row 3 carries no value (None).",
+    "B. Two new flat string columns on the method row: income_basis_claim (a member of THRESHOLD_CLAIMS: absent for row 3, held for row 2) and income_basis_reason (row 3: the plain-words reason; row 2: null).",
+    "C. income_basis lands typed string (a null never lands as the null type); the contract goes to 0.6.0 with income_basis nullable."
+  ],
+  "domain": "how emit_method_row knows the income treatment it states on a dim_return_method row (the one non-threshold method fact whose truth differs between the two rows the producer writes today)",
+  "rule24": {
+    "mece": {
+      "finding": "MECE by subtraction from a printed denominator of TWO rows (METHOD_ROWS has keys 2 and 3 at the base; row 1 is a served partition with no producer row, never rewritten). Row 2 states cash_when_received: the producer neither measured it from the run's data (not `measured`) nor derived it from other values by a rule (not `inferred`); it is a method choice GIVEN to the writer by the design (the build spec names income as received cash) and carried by it, which is the law's `held`. Row 3 states no income value: FWD-3 does not separate income, it sits inside the value through the cash leg, so the claim is `absent`. Two rows minus those two placements leaves ZERO unplaced. NO enum member is minted: `absent` and `held` are already members of THRESHOLD_CLAIMS (four members, unchanged) and enums.income_basis keeps its one value (cash_when_received); a null is not an enum value, it is the absence the claim states. income_basis_reason is free text, not a closed set, so no value-enum is proposed and a reader rejects on the claim, never on the sentence. Stated limit: the subtraction is over the rows the producer can write today (denominator 2), not over every future row.",
+      "subtraction": {
+        "denominator": 2,
+        "rows": [
+          2,
+          3
+        ],
+        "placed": {
+          "held": [
+            "row 2 income_basis=cash_when_received (a given method choice)"
+          ],
+          "absent": [
+            "row 3 income_basis=None (inside the value via the cash leg)"
+          ],
+          "measured": [],
+          "inferred": []
+        },
+        "unplaced": 0
+      },
+      "evidence": [
+        {
+          "file": "docs/doctrine/A_VALUE_MUST_CARRY_ITS_CLAIM.md",
+          "line": 19,
+          "shows": "the law's provenance set: measured / inferred / held / absent"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 119,
+          "shows": "METHOD_ROWS: the two rows (2 and 3) the producer can write, now carrying the per-row income triple"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1894,
+          "shows": "THRESHOLD_CLAIMS, the four members, unchanged by this cell"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 2003,
+          "shows": "income_basis is now the row's own value, no longer the literal on every row (the defect, fixed)"
+        },
+        {
+          "file": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+          "line": 23,
+          "shows": "the Cottonwood table states income_received NULL: FWD-3 does not separate income, it is inside the value through the cash leg"
+        },
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 209,
+          "shows": "enums.income_basis holds one member; no member is added"
+        }
+      ]
+    },
+    "same_grain": {
+      "finding": "SAME GRAIN. income_basis is one value of one method row; its claim and its reason are two more flat string keys of the same row dict, written by the same function, at the grain 'one value of one method row' the five threshold claims and the tie-out claim already have (not a struct, not a table-level claim). The per-row fact lives in METHOD_ROWS, whose grain is one entry per method_version, the grain the table has.",
+      "evidence": [
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 2021,
+          "shows": "the existing claims are flat string keys of the same row dict; the income claim and reason sit beside income_basis in it"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 119,
+          "shows": "METHOD_ROWS: one entry per method_version"
+        },
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 8,
+          "shows": "grain: ONE ROW PER METHOD VERSION"
+        }
+      ]
+    },
+    "intent_coherence": {
+      "finding": "INTENT COHERENCE. The table answers ONE question, what arithmetic produced the numbers that point at it. Stating that income is not separated, and why, is part of what the arithmetic is; the claim column answers the one question the other six claim columns answer (how does the writer know this value); the reason answers 'why is there no value', which is the absent member's explanation and not a second intent. It adds no quality count and no per-account fact. Stating cash_when_received on row 3 was a statement the table did not make true, so the correction moves the row toward its one intent.",
+      "evidence": [
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 232,
+          "shows": "the table answers ONE question: what arithmetic produced the numbers that point at it"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 2019,
+          "shows": "the DB-b-118 comment: one claim per value, how the writer knows each"
+        },
+        {
+          "file": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+          "line": 153,
+          "shows": "the reason, in the Cottonwood producer's own words: FWD-3 does not separate income (inside the value through the cash leg)"
+        }
+      ]
+    },
+    "state_coherence": {
+      "finding": "STATE COHERENCE (which values one remedy does NOT move). Moving row 3's income statement moves income_basis, income_basis_claim and income_basis_reason together and moves none of the other 26 columns, row 2's income triple (cash_when_received, held, null) or any threshold, tie-out, value-basis or fee-basis column. The state pairs are refused, as the thresholds' are: a value under the claim absent, a null under any other claim, a reason beside a non-absent claim, and an absent claim with no reason. Served partitions written before this cell (version 1, and any version 2 or 3 partition already landed) carry none of the two new columns; a reader of such a partition must read its income as unclaimed, never as measured, and the packet for the one served row-3 object is the act that moves it. comparability() and the grading paths read no income column and are untouched. Rows 1 and 2 are unchanged, and the new test pins row 2 on all 29 pre-existing columns.",
+      "evidence": [
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1929,
+          "shows": "the existing state pair: a null only under absent"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1953,
+          "shows": "a value never sits under absent (the tie-out refusal income_basis_of follows)"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1958,
+          "shows": "income_basis_of: the refusals of the incoherent value / claim / reason pairs"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 2045,
+          "shows": "typed: the explicit arrow types by which a null lands typed, now including the income triple"
+        },
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 267,
+          "shows": "landed_row_note: a partition lacking the claim columns reads as unclaimed, never measured"
+        }
+      ]
+    }
+  },
+  "row2_claim": {
+    "chosen": "held",
+    "why": "cash_when_received is a method choice given to the writer by the design, not computed from the run's data (not measured) and not derived from other values by a stated rule (not inferred); the law defines held as 'given, neither measured nor derived by the writer'. absent would be false (a value is stated)."
+  },
+  "token_census": {
+    "scope": "word-boundary, comp-find -i over the repo (corpus=all), read at the base 94acc5a925; denominators printed per token",
+    "tokens": {
+      "income_basis": {
+        "denominator": "57 hit(s) across 69542 file(s) scanned",
+        "writers": "1 first-party writer: data/assets/scripts/gold/irpt_reporting/account_return_daily.py:1969 (the literal on every row)",
+        "readers": "code: tests pin the column set (tests/test_threshold_claims.py:159, tests/test_tieout_claim.py:115) and one issuer check reads the contract's column (deliverables/2.0.0_SA_COO~P/checks/r1/p1_1_ac1_gold_under_contract.py:8,87); the rest are the contract (org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json:32,197,237,268,287,304), records and prose. ZERO consumers of the SERVED value (the reporting-publish source reads method_version from the return rows and never the method row)."
+      },
+      "cash_when_received": {
+        "denominator": "35 hit(s) across 69542 file(s) scanned",
+        "writers": "1: account_return_daily.py:1969",
+        "readers": "contract enum and example rows (contract:198,237,268,287,304), prior records and prose; no code compares against the string"
+      },
+      "income_basis_claim": {
+        "denominator": "9 hit(s) across 69539 file(s) scanned",
+        "writers": "0 at the base (new with this cell)",
+        "readers": "0 at the base; hits are only this round's check (p66_round66.py) and this order"
+      },
+      "income_basis_reason": {
+        "denominator": "6 hit(s) across 69542 file(s) scanned",
+        "writers": "0 at the base (new with this cell)",
+        "readers": "0 at the base; hits are only this round's check and this order"
+      }
+    },
+    "finding": "NO COLLISION: the two new names exist nowhere in first-party code or the contract at the base. income_basis and cash_when_received have one writer; no code reads the served value. No enum member is added. Stated limit: a name census of what this cell touches over the repo, not a census of the served bucket."
+  },
+  "decision": "(1) METHOD_ROWS carries income_basis, income_basis_claim and income_basis_reason per row: row 2 (cash_when_received, held, None), row 3 (None, absent, the reason). (2) emit_method_row writes the three from the row and REFUSES the incoherent pairs. (3) The three land typed string. (4) The other 26 columns keep their values for the same input. (5) The contract goes to 0.6.0 with income_basis nullable, the two columns, a recomputed schema_hash and a supersedes naming 0.5.0 and its hash.",
+  "contract": {
+    "version": "0.6.0",
+    "path": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+    "schema_hash": "fd468e209e53f14514380089c9281b0ca90f947ab8eaf53c841bdee666bdfba1",
+    "supersedes": "0.5.0 10760b7d2daf1fcfcae66ace286b2f541180cc907c930604f389f5bc28a8da9c"
+  },
+  "row3_income_before_after": {
+    "before": {
+      "income_basis": "cash_when_received",
+      "income_basis_claim": "(no such column)",
+      "income_basis_reason": "(no such column)"
+    },
+    "after": {
+      "income_basis": null,
+      "income_basis_claim": "absent",
+      "income_basis_reason": "FWD-3 does not separate income: it sits inside the value through the cash leg, so this method states no income basis (its income columns are null on every row)"
+    },
+    "after_table_schema": {
+      "income_basis": "string",
+      "income_basis_claim": "string",
+      "income_basis_reason": "string"
+    }
+  },
+  "tests": {
+    "passed": 168,
+    "failed": 0,
+    "failing_before_this_cell_started": 0,
+    "baseline": "160 passed, 0 failed in data/assets/scripts/gold/irpt_reporting/tests at the base, before the first edit",
+    "new_test": "data/assets/scripts/gold/irpt_reporting/tests/test_method_row3_income.py",
+    "new_test_count": 8,
+    "pins_updated": [
+      "data/assets/scripts/gold/irpt_reporting/tests/test_threshold_claims.py: the column-set pin (two further string columns, the income claim and reason)",
+      "data/assets/scripts/gold/irpt_reporting/tests/test_tieout_claim.py: the column-set pin (the same two columns)"
+    ],
+    "also_run": "data/assets/scripts/silver/tests/test_commonwealth_ard_mint_claims.py: 11 passed (it calls emit_method_row for row 3)"
+  },
+  "packet": {
+    "path": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~97/NEVER_WIDEN_PACKET_METHOD_ROW3_INCOME.md",
+    "sha256": "ba3a7fb2fb8e87510886863787ca2915293f0a021666c4cf05192eab2d37c66b",
+    "object_address": "s3://opal-data-cottonwood/irpt/cottonwood/gold/dim_return_method/method_version=3",
+    "writers_counted": 2,
+    "readers_counted": 1,
+    "rollback": "capture both keys first (get-object body outside the repo, sha256, size, ETag 7b70c246337d26fbba60eac594c21f0f for data.parquet and 5951829e6839cf07e4ef3ce1afdca914 for manifest.json, get-bucket-versioning); restore by put-object of the captured bytes then head-object size and sha256 match, or copy-object from the prior version id if the bucket is versioned; never a delete",
+    "live_read": {
+      "command": ".tools/aws s3api list-objects-v2 --bucket opal-data-cottonwood --prefix irpt/cottonwood/gold/dim_return_method/method_version=3",
+      "at": "2026-10-11T10:16:35Z",
+      "rc": 0,
+      "denied": false,
+      "keys": [
+        {
+          "Key": "irpt/cottonwood/gold/dim_return_method/method_version=3/data.parquet",
+          "Size": 10421,
+          "LastModified": "2026-10-11T07:17:07+00:00",
+          "ETag": "7b70c246337d26fbba60eac594c21f0f"
+        },
+        {
+          "Key": "irpt/cottonwood/gold/dim_return_method/method_version=3/manifest.json",
+          "Size": 1831,
+          "LastModified": "2026-10-11T07:17:07+00:00",
+          "ETag": "5951829e6839cf07e4ef3ce1afdca914"
+        }
+      ],
+      "version_id": "not returned by list-objects-v2; bucket versioning not read (a second AWS call this order does not allow)"
+    }
+  },
+  "s3_writes": 0,
+  "aws_calls": 1
+}
