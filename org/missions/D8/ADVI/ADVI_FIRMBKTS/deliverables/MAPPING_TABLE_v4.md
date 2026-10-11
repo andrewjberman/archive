@@ -1,8 +1,8 @@
 # MAPPING TABLE v4 -- ADVI_FIRMBKTS round 4, cell FB-g-3 (rulings S2-S11)
 
-Supersedes mapping_v3.json. Census listed_at 2026-10-09T20:36:32Z. Live listing for this table at 2026-10-11T12:28:17Z (LIST calls only).
+Supersedes mapping_v3.json. Census listed_at 2026-10-09T20:36:32Z. Live listing for this table at 2026-10-11T12:49:12Z (LIST calls only).
 Classes: 444 census classes (444 in census buckets, all 444 accounted: placed directly or re-gridded).
-Census objects: 238,861. Live objects of the 29 re-grid parents at the listing: 41,028.
+Census objects: 238,861. Live objects of the 29 re-grid parents at the listing: 41,053.
 
 FAULT before: 84 (mapping_v3.json rows; the check's before reads mapping_v2.json, which carries 89)
 FAULT after: 71
@@ -11,9 +11,9 @@ FAULT after: 71
 
 | disposition | rows | objects |
 |---|---:|---:|
-| MOVE | 363 | 33,368 |
-| HOME | 2,918 | 27,307 |
-| RETIRE | 93 | 42,247 |
+| MOVE | 365 | 34,516 |
+| HOME | 2,920 | 26,181 |
+| RETIRE | 93 | 42,250 |
 | DECISION | 2 | 0 |
 | FAULT | 71 | 11,840 |
 
@@ -22,10 +22,10 @@ FAULT after: 71
 - S2: 41. overlap-0 merges name a destination table: 34 merge entries carry destination_table = table; the 7 overlap-0 FAULT rows name no table in the row or the groups, so they stay FAULT citing S2
 - S3: 2. round-1 placed rows stay as placed: the 2 cot positions_cube rows return to their round-1 MOVE placement; the silver/_silver_complete/ and gold/meta/pull-complete.json placements are untouched (no kind field)
 - S5: 4. state families named on 4 placed marker rows (cot bronze/, bronze/orion-api/, gold/eclipse/, silver/eclipse/); their v3 address and pattern are kept (S5 difference control)
-- S6: 86. 86 QA-named rows judged by writer: production 75, qa-tool 6, unresolved 5 (qa-scratch/ x4 and bronze/orion-api/probe/ x1: no writer found in the pipeline code)
-- S7: 0. 0 rows: no row can carry the *_SKIP.json tail without a second row at the same bronze/orion-api/ key; the 1,142 skip objects stay in their date-partition data children (surprise row filed)
+- S6: 2. 2 QA-named rows not placed, retired or decided by v3 judged by writer (production 2); 0 FAULT rows with reason 'S6: no writer found'; the 84 QA-named rows v3 placed or retired are copied unchanged and not re-judged (S3, S5): qa-scratch/ x4 (RETIRE) and bronze/orion-api/probe/ (RETIRE) among them
+- S7: 1. 1 row: skip marker for bronze/orion-api/ (kind marker, marker_kind skip, partition performance, marker_match _SKIP.json, writer inf-performance-daily) beside the complete marker row; 1,142 skip objects counted as markers, not data (CTO ruling S7, amendment 1 S2)
 - S8: 2. 2 rows: bronze/eclipse/ (writer pull_eclipse_portfolios.py) and bronze/eclipse_qa/ (writer inf-api-eclipse lambda) become state/bronze_complete markers partitioned by writing class
-- S9: 21. 5 regrid parents re-listed with a moving count, 12 child counts re-derived, 3 new partition or folder rows, 1 excluded_markers re-derived
+- S9: 2320. 9 regrid parents re-listed with a moving count, 1162 child counts re-derived, 6 new partition or folder rows, 1143 excluded_markers re-derived; bronze/orion-api/ carries marker_objects 2919 + data_objects 14269 = listed 17188
 - S10: 1. 1 row: opal-data-bd gold/clients/ re-written at class grain (no partition token)
 - S11: 10. 10 rows: the forwardfill _complete/ groups of bd and cot become state/bronze_complete markers partitioned by writing class (writer cot_bronze_ingest.py); marker_match is .json (the group's only tail)
 
@@ -45,7 +45,7 @@ FAULT after: 71
 | opal-data-bd | gold/snapshots/ | 7 | 7 | 0 | 7 | no |
 | opal-data-bd | gold/summary/ | 2 | 2 | 0 | 2 | no |
 | opal-data-bd | gold/timeseries/ | 2,640 | 2,644 | 4 | 2,644 | no |
-| opal-data-bd | logs/ | 9,107 | 9,239 | 132 | 9,239 | no |
+| opal-data-bd | logs/ | 9,107 | 9,242 | 135 | 9,242 | yes: live count 9239 (v3 listing 2026-10-11T06:59:50Z: 9239) -> 9242 (listing 2026-10-11T12:49: |
 | opal-data-bd | scripts/ | 154 | 154 | 0 | 154 | no |
 | opal-data-bd | silver/transactions_enriched/ | 519 | 519 | 0 | 519 | no |
 | opal-data-inf | gold/timeseries/ | 2 | 2 | 0 | 2 | no |
@@ -53,15 +53,15 @@ FAULT after: 71
 | opal-data-cot | forwardfill_v2/account_attributes/ | 82 | 84 | 2 | 84 | no |
 | opal-data-cot | forwardfill_v2/allocations/ | 199 | 201 | 2 | 201 | no |
 | opal-data-cot | forwardfill_v2/holdings/ | 168 | 170 | 2 | 170 | no |
-| opal-data-cot | forwardfill_v2/realized/ | 204 | 208 | 4 | 208 | yes: live count 206 (v3 listing 2026-10-11T06:30:42Z: 206) -> 208 (listing 2026-10-11T12:28:13Z |
-| opal-data-cot | forwardfill_v2/transactions/ | 207 | 211 | 4 | 211 | yes: live count 209 (v3 listing 2026-10-11T06:30:42Z: 209) -> 211 (listing 2026-10-11T12:28:13Z |
+| opal-data-cot | forwardfill_v2/realized/ | 204 | 208 | 4 | 208 | yes: live count 206 (v3 listing 2026-10-11T06:30:42Z: 206) -> 208 (listing 2026-10-11T12:49:06Z |
+| opal-data-cot | forwardfill_v2/transactions/ | 207 | 211 | 4 | 211 | yes: live count 209 (v3 listing 2026-10-11T06:30:42Z: 209) -> 211 (listing 2026-10-11T12:49:06Z |
 | opal-data-cot | forwardfill_v2/unrealized/ | 199 | 201 | 2 | 201 | no |
-| opal-data-cot | silver/ | 803 | 812 | 9 | 812 | yes: live count 809 (v3 listing 2026-10-11T06:30:42Z: 809) -> 812 (listing 2026-10-11T12:28:13Z |
-| opal-data-inf | bronze/eclipse/ | 1,785 | 1,798 | 13 | 1,798 | no |
-| opal-data-inf | bronze/eclipse_qa/ | 858 | 884 | 26 | 884 | yes: live count 871 (v3 listing 2026-10-11T06:56:05Z: 871) -> 884 (listing 2026-10-11T12:28:13Z |
+| opal-data-cot | silver/ | 803 | 812 | 9 | 812 | yes: live count 809 (v3 listing 2026-10-11T06:30:42Z: 809) -> 812 (listing 2026-10-11T12:49:07Z |
+| opal-data-inf | bronze/eclipse/ | 1,785 | 1,811 | 26 | 1,811 | yes: live count 1798 (v3 listing 2026-10-11T06:56:05Z: 1798) -> 1811 (listing 2026-10-11T12:49: |
+| opal-data-inf | bronze/eclipse_qa/ | 858 | 884 | 26 | 884 | yes: live count 871 (v3 listing 2026-10-11T06:56:05Z: 871) -> 884 (listing 2026-10-11T12:49:07Z |
 | opal-data-inf | bronze/orion-api/ | 17,151 | 17,188 | 37 | 17,188 | yes: live count 17170 (v3 listing 2026-10-11T06:56:06Z: 17170) -> 17188 (listing 2026-10-11T12: |
-| opal-data-inf | gold/eclipse/ | 525 | 529 | 4 | 529 | no |
-| opal-data-inf | silver/eclipse/ | 655 | 660 | 5 | 660 | no |
+| opal-data-inf | gold/eclipse/ | 525 | 533 | 8 | 533 | yes: live count 529 (v3 listing 2026-10-11T06:56:09Z: 529) -> 533 (listing 2026-10-11T12:49:12Z |
+| opal-data-inf | silver/eclipse/ | 655 | 665 | 10 | 665 | yes: live count 660 (v3 listing 2026-10-11T06:56:09Z: 660) -> 665 (listing 2026-10-11T12:49:12Z |
 
 ## Remaining FAULT classes by reason (owner 1.0.0_SA_CTO~DELL1 on every row)
 

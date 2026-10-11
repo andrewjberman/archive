@@ -212,7 +212,34 @@ for i in ff_rows:
     applied["S11"] += 1
 
 # ---------------------------------------------------------------- S7: *_SKIP.json is a marker by literal tail (blocked)
-applied["S7"] = 0  # no row can carry it: the 1,142 skip objects sit inside date-partition data children (see surprise row)
+# S7 (issuer amendment 1, ruling S2): ONE skip marker row for opal-data-inf bronze/orion-api/, beside the complete marker row.
+# It sits BEFORE the complete row so the check's last-wins key map keeps the complete row for the v3 comparison (S5).
+SKIP_WRITER = ("infra/aws/lambda/inf-pipeline/inf-performance-daily/lambda_function.py (_skip_key "
+               "bronze/orion-api/{date}/performance_dim_SKIP.json, line 92); "
+               "infra/aws/lambda/inf-pipeline/inf-performance-daily/pull_inflection_performance_dim.py "
+               "(marker_key performance_dim_SKIP.json, line 212)")
+orion_i = one("opal-data-inf", "bronze/orion-api/", kind="marker")
+sk = copy.deepcopy(rows[orion_i])
+sk_addr = naming.address("orion", "inflection", "state", "bronze_complete", "performance", object="{object}")
+sk.update({
+    "dest": {"source": "orion", "scope": "inflection", "tier": "state", "table": "bronze_complete",
+             "partition": "performance", "object": "{object}"},
+    "address": sk_addr,
+    "dest_pattern": pattern(sk_addr, "inflection"),
+    "marker_kind": "skip",
+    "marker_match": ["_SKIP.json"],
+    "marker_max_bytes": 110,
+    "state_family": "bronze_complete",
+    "writer": SKIP_WRITER,
+    "disposition": "MOVE",
+    "objects": 0,
+    "rule": ("S7 (CTO ruling, amendment 1 S2): performance_dim_SKIP.json of bronze/orion-api/ date partitions is a marker "
+             "by literal tail under ADDENDUM 1; one skip marker row beside the complete marker row, state family "
+             "bronze_complete, partition = the performance dimension"),
+})
+sk.pop("excluded_markers", None)
+rows.insert(orion_i, sk)
+applied["S7"] = 1
 
 # ---------------------------------------------------------------- new date partitions live since the census (rule (c) per date)
 NEW = []  # (bucket, parent, prefix, template_index, kind)
@@ -250,6 +277,35 @@ fr["fault_owner"] = OWNER
 rows.append(fr)
 NEW = [len(rows) - 3, len(rows) - 2, len(rows) - 1]
 
+# ---------------------------------------------------------------- live date partitions missing from the table (rule (c) per date)
+DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})/")
+ADDED_DATES = []
+for g in regrids:
+    b, p = g["bucket"], g["parent"]
+    P = LIVE_BY[(b, p)]
+    cover = [rows[i]["prefix"] for i in range(len(rows)) if rows[i]["bucket"] == b and rows[i].get("parent") == p]
+    rest = [k for k, s in P["keys"] if k != p and not any(k.startswith(c) for c in cover)]
+    nondate = [k for k in rest if not DATE_RE.match(k[len(p):])]
+    assert not nondate, (b, p, nondate[:3])
+    for date in sorted({DATE_RE.match(k[len(p):]).group(1) for k in rest}):
+        dated = [r for r in rows if r["bucket"] == b and r.get("parent") == p and r.get("dest")
+                 and DATE_RE.match(r["prefix"][len(p):])]
+        t = max(dated, key=lambda r: r["prefix"])
+        old = DATE_RE.match(t["prefix"][len(p):]).group(1)
+        nr = copy.deepcopy(t)
+        nr["prefix"] = p + date + "/"
+        d = dict(nr["dest"])
+        d["partition"] = date
+        nr["dest"] = d
+        nr["address"] = naming.address(d["source"], d["scope"], d["tier"], d["table"], date)
+        nr["dest_pattern"] = pattern(nr["address"], d["scope"])
+        nr["rule"] = t["rule"].replace(old, date) + " [S9: partition live since the census; added as a child of the re-grid under rule (c)]"
+        nr["objects"] = 0
+        rows.append(nr)
+        ADDED_DATES.append((b, p, date))
+print("ADDED_DATES", ADDED_DATES)
+NEW = NEW + [len(rows) - i - 1 for i in range(len(ADDED_DATES))][::-1] if ADDED_DATES else NEW
+
 # ---------------------------------------------------------------- S9: re-derive every re-grid child from the LIVE listing
 regrid_stats = {}
 child_changes = 0
@@ -272,9 +328,11 @@ for g in regrids:
             assert len(ph) == 1, (b, p)
             cnt[("ROW", ph[0])] += 1
             continue
-        if cl and tail_ok(k, cl_tails) and k.startswith(p):
-            cnt[("CL", cl[0])] += 1
-            cl_max[cl[0]] = max(cl_max.get(cl[0], 0), s)
+        cl_hit = [i for i in cl if tail_ok(k, rows[i].get("marker_match", []))]
+        if cl_hit and k.startswith(p):
+            i0 = cl_hit[0]
+            cnt[("CL", i0)] += 1
+            cl_max[i0] = max(cl_max.get(i0, 0), s)
             # the date partition it sits in
             for cp in kid_prefixes:
                 if k.startswith(cp):
@@ -316,6 +374,12 @@ for g in regrids:
         total += new
     live = P["count"]
     assert total == live, (b, p, total, live)
+    if (b, p) == ("opal-data-inf", "bronze/orion-api/"):
+        mk = sum(cnt[("CL", i)] for i in cl)
+        dt = sum(cnt[("ROW", i)] for i in kids)
+        assert mk + dt == live, (mk, dt, live)
+        g["marker_objects"] = mk
+        g["data_objects"] = dt
     g["census_objects"] = g["census_objects"]
     g["parent_objects"] = live
     g["listed_objects"] = live
@@ -347,9 +411,12 @@ QA_WRITER = {
 }
 qa_judged = []
 unmatched = []
+PREV = {(r["bucket"], r["prefix"]) for r in m3["rows"] if r["disposition"] != "FAULT"}
 for i, r in enumerate(rows):
     if not QA_RE.search(str(r.get("prefix", ""))):
         continue
+    if (r["bucket"], r["prefix"]) in PREV:
+        continue  # placed, retired or decided by the previous table: copied unchanged, not re-judged (S3, S5)
     hit = None
     for pre, val in QA_WRITER.items():
         if r["prefix"].startswith(pre) and (pre != "qa/" or r["bucket"] == "opal-data-inf"):
@@ -360,7 +427,16 @@ for i, r in enumerate(rows):
         continue
     writer, verdict = hit
     if verdict == "unresolved":
-        r["qa_writer"] = "UNRESOLVED: no writer of this prefix found in the pipeline code (grep of infra, data, workflows, lib, .tools)"
+        # S3 (amendment 1): a QA-named class with no writer in the code is a FAULT row citing the search
+        r["disposition"] = "FAULT"
+        for f in ("dest", "address", "dest_pattern"):
+            r.pop(f, None)
+        r["reason"] = ("S6: no writer found; searched infra/, data/, workflows/, lib/, .tools/ for the prefix tokens "
+                       "(grep, 0 pipeline hits)")
+        r["fault_owner"] = OWNER
+        r["qa_verdict"] = "unresolved"
+        qa_judged.append((r["bucket"], r["prefix"], "FAULT", "unresolved"))
+        continue
     else:
         r["qa_writer"] = writer
     r["qa_verdict"] = verdict
@@ -370,6 +446,7 @@ for i, r in enumerate(rows):
         assert r["disposition"] in ("MOVE", "HOME"), (r["bucket"], r["prefix"], r["disposition"])
     qa_judged.append((r["bucket"], r["prefix"], r["disposition"], verdict))
 applied["S6"] = len(qa_judged)
+n_prev_qa = sum(1 for r in rows if QA_RE.search(str(r.get("prefix", ""))) and (r["bucket"], r["prefix"]) in PREV)
 print("QA_UNMATCHED", unmatched)
 
 # ---------------------------------------------------------------- FAULT rows: owner and reason on every remaining FAULT
@@ -413,15 +490,22 @@ ruling_text = {
           "silver/_silver_complete/ and gold/meta/pull-complete.json placements are untouched (no kind field)",
     "S5": "state families named on 4 placed marker rows (cot bronze/, bronze/orion-api/, gold/eclipse/, silver/eclipse/); "
           "their v3 address and pattern are kept (S5 difference control)",
-    "S6": "86 QA-named rows judged by writer: production 75, qa-tool 6, unresolved 5 (qa-scratch/ x4 and "
-          "bronze/orion-api/probe/ x1: no writer found in the pipeline code)",
-    "S7": "0 rows: no row can carry the *_SKIP.json tail without a second row at the same bronze/orion-api/ key; the "
-          "1,142 skip objects stay in their date-partition data children (surprise row filed)",
+    "S6": "%d QA-named rows not placed, retired or decided by v3 judged by writer (%s); %d FAULT rows with reason "
+          "'S6: no writer found'; the %d QA-named rows v3 placed or retired are copied unchanged and not re-judged (S3, S5): "
+          "qa-scratch/ x4 (RETIRE) and bronze/orion-api/probe/ (RETIRE) among them" % (
+              len(qa_judged), ", ".join("%s %d" % kv for kv in collections.Counter(v[3] for v in qa_judged).items()),
+              sum(1 for v in qa_judged if v[3] == "unresolved"), n_prev_qa),
+    "S7": "1 row: skip marker for bronze/orion-api/ (kind marker, marker_kind skip, partition performance, marker_match "
+          "_SKIP.json, writer inf-performance-daily) beside the complete marker row; 1,142 skip objects counted as "
+          "markers, not data (CTO ruling S7, amendment 1 S2)",
     "S8": "2 rows: bronze/eclipse/ (writer pull_eclipse_portfolios.py) and bronze/eclipse_qa/ (writer inf-api-eclipse "
           "lambda) become state/bronze_complete markers partitioned by writing class",
     "S9": "%d regrid parents re-listed with a moving count, %d child counts re-derived, %d new partition or folder rows, "
-          "%d excluded_markers re-derived" % (sum(1 for v in regrid_stats.values() if v[0] == "MOVING"), child_changes,
-                                             len(NEW), excl_changes),
+          "%d excluded_markers re-derived; bronze/orion-api/ carries marker_objects %d + data_objects %d = listed %d" % (
+              sum(1 for v in regrid_stats.values() if v[0] == "MOVING"), child_changes, len(NEW), excl_changes,
+              [g for g in regrids if g["parent"] == "bronze/orion-api/"][0]["marker_objects"],
+              [g for g in regrids if g["parent"] == "bronze/orion-api/"][0]["data_objects"],
+              [g for g in regrids if g["parent"] == "bronze/orion-api/"][0]["listed_objects"]),
     "S10": "1 row: opal-data-bd gold/clients/ re-written at class grain (no partition token)",
     "S11": "10 rows: the forwardfill _complete/ groups of bd and cot become state/bronze_complete markers partitioned by "
            "writing class (writer cot_bronze_ingest.py); marker_match is .json (the group's only tail)",
