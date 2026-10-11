@@ -65,11 +65,24 @@ def main():
                 fail("%s lists no envelope_keys" % op)
         print("OK: every route records the schema result and its envelope keys; every DIFFERS names its members")
     elif cid == "IB126-1-AC3":
+        # AMENDMENT 1 (row D2-W287-S1): the control's whole answer DIFFERS, on one envelope member its closed response schema
+        # omits (`unprojected_grant`, which response_envelope always adds by CTO ruling @61627f39f9). That is a finding about
+        # the schema, not a method failure. The control passes when its DATA member has the fixture's shape and every envelope
+        # difference is that one named member; any other difference still fails.
         c = a.get("control") or {}
-        if c.get("operation") != "comparison-catalogue" or c.get("verdict") != "SAME_AS_FIXTURE" \
-                or c.get("evidence") not in ("existing_test_run", "in_process_call") or not c.get("invocation"):
+        if c.get("operation") != "comparison-catalogue" or c.get("evidence") not in ("existing_test_run", "in_process_call") \
+                or not c.get("invocation"):
             fail("control %r" % c)
-        print("OK: the control route went through the same method and reads SAME_AS_FIXTURE")
+        if c.get("data_verdict") != "SAME_AS_FIXTURE":
+            fail("control data_verdict %r" % c.get("data_verdict"))
+        gap = c.get("envelope_schema_gap")
+        if not isinstance(gap, list) or [g for g in gap if g != "unprojected_grant"]:
+            fail("control envelope_schema_gap %r names a member other than unprojected_grant" % gap)
+        for op in ROUTES:
+            r = rows.get(op) or {}
+            if r.get("data_verdict") not in VERDICTS or not isinstance(r.get("envelope_schema_gap"), list):
+                fail("%s lacks data_verdict or envelope_schema_gap" % op)
+        print("OK: the control's data member has the fixture's shape; its envelope gap is %s; every route carries both fields" % gap)
     else:
         fail("unknown criterion %r" % cid)
     print("%s PASS" % cid)
