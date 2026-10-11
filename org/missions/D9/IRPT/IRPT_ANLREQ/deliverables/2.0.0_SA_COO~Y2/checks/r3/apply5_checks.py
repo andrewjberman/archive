@@ -49,7 +49,7 @@ def main(argv):
         print(__doc__)
         return 2
     check = argv[1]
-    root = Path(argv[argv.index("--root") + 1]) if "--root" in argv else Path(__file__).resolve().parents[8]
+    root = Path(argv[argv.index("--root") + 1]) if "--root" in argv else Path(__file__).resolve().parents[9]
     problems = []
     if check == "live":
         rc, last = live_sha(root)
