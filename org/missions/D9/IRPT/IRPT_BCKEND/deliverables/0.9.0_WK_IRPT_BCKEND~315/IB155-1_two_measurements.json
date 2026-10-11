@@ -1,0 +1,384 @@
+{
+ "schema": "IB155-1 two measurements (IB-pr-459)",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-459",
+ "assignee": "0.9.0_WK_IRPT_BCKEND~315",
+ "base_commit": "9f5ecc2f80",
+ "read_only": true,
+ "counts_only": "no account id, balance or holding of an account; no security is named",
+ "landed_prices_store": {
+  "address_built_by": "data/assets/scripts/silver/commonwealth_price_basis_census.py:161 (pc.legacy_uri(SPEC['legacy'])), through data/assets/scripts/analysis/commonwealth_price_census.py:282-286 -> lib/opal_naming.py:2339 legacy_address, row infra/logic/registry/legacy_addresses.json:11",
+  "address_resolved_by_the_builder": "s3://opal-data-cot/silver/prices/canonical_prices.parquet",
+  "last_modified_utc": "2026-10-09T13:41:04Z",
+  "rows": 11289398,
+  "columns": [
+   "date",
+   "asset_name",
+   "ticker",
+   "price",
+   "source"
+  ],
+  "content_length_mb": 92.9,
+  "how_a_point_is_labelled_yahoo": "column `source` == 'yahoo_finance' (YAHOO_LABEL, commonwealth_price_basis_census.py:78); the store's other labels and their row counts are in source_label_row_counts",
+  "source_label_row_counts": {
+   "linear_interpolation": 7831140,
+   "yahoo_finance": 3396067,
+   "transaction_observed": 50143,
+   "scoped_override": 12042,
+   "transaction_observed_capped": 6
+  },
+  "distinct_tickers_in_store": 4001,
+  "newest_day_any_label": "2026-06-09",
+  "newest_yahoo_labelled_day": "2026-06-05",
+  "refresh": {
+   "schedule_found": false,
+   "writer": "data/cot/scripts/gold/build_canonical_prices_v2.py (silver-prep S_00 of the cot gold chain): upload_file at :907, output key from OUTPUT_KEY :174 (_legacy_key of the same registry row), bucket :115 (BD_S3_BUCKET default). By the file's own header (:21, :30) and the dispatcher's chain table (gold_dispatch.sh:78) it is the script that writes this object.",
+   "schedule_or_trigger": "none found. The cot chain's daily anchor (schedule-et.tf:78-91, cron(30 7) America/New_York, then session -> bronze -> silver -> gold events, eventbridge.tf:219-245) ends in the SSM document opal-cot-gold-run (ssm.tf:303-), whose run_gold list (ssm.tf:375-) never names build_canonical_prices_v2.py / S_00; gold_dispatch.sh runs S_00 before its freshness gate only for `--chain full` (:1069-1083), and no cot trigger of gold_dispatch.sh was found. The bd twin has a daily 04:00 UTC rule (bd-pipeline/eventbridge.tf:374-384) for ITS OWN object.",
+   "searched": [
+    "infra/aws/terraform/cot-pipeline (all .tf; search for build_canonical_prices, S_00, silver-prep, canonical_prices: 0 hits)",
+    "infra/aws/terraform/cot-pipeline/eventbridge.tf, schedule-et.tf, ssm.tf (read at the lines cited)",
+    "infra/aws (search gold_dispatch|gold-dispatch: 40 files shown, none under cot-pipeline or a cot EC2 dir; bd, inf and 49f dispatchers)",
+    "data/cot/scripts/gold/gold_dispatch.sh, gold_pipeline_deps.yaml, build_canonical_prices_v2.py (read)",
+    "data/mdpf/scripts/demque/land_cot.py (the lander of the writer's Tier 2 inputs, not a writer of this object)",
+    "comp-pipescript io on the writer: out of the curated graph (AST answer only, 9 call sites, 0 resolved)"
+   ],
+   "last_modified_history": [
+    "2026-10-09T13:41:04Z",
+    "2026-06-09T20:42:16Z"
+   ],
+   "versions_kept": 2,
+   "bucket_versioning": "Enabled",
+   "history_note": "2 version(s) of the key are held; the bucket keeps versions (Enabled) but a lifecycle rule on non-current versions was not read, so the count is a floor, not the write count",
+   "claim": "inferred"
+  }
+ },
+ "tickers": {
+  "asked": 878,
+  "outcomes": {
+   "every_compared_day_equal": 618,
+   "some_days_not_equal": 30,
+   "no_yahoo_labelled_point_in_the_store": 9,
+   "not_in_the_store": 214,
+   "no_bar_from_the_reader": 7
+  },
+  "with_a_bar_from_the_reader": 871,
+  "outcome_definitions": {
+   "no_bar_from_the_reader": "the reader returned no bar for the ticker (checked first)",
+   "not_in_the_store": "the ticker has a reader bar and no row of any label in the store",
+   "no_yahoo_labelled_point_in_the_store": "has a reader bar and store rows, but no yahoo_finance-labelled point on a date where the reader has a bar inside the window (9 of these hold yahoo-labelled points outside the window or on no reader day)",
+   "every_compared_day_equal / some_days_not_equal": "one or more compared ticker-days, all equal / at least one not equal"
+  }
+ },
+ "ticker_days": {
+  "compared": 23976,
+  "equal": 23596,
+  "not_equal": 380,
+  "equality_rule": "abs(store_price / reader_Close - 1) <= 1e-4 (relative; the module's EQ_TOL, commonwealth_price_basis_census.py:73); store price = median of the ticker's yahoo_finance-labelled rows for the date; reader Close = Yahoo Close with auto_adjust=False; compared only on dates in the window (85 graded days plus the 40 trading days before the first) where both exist"
+ },
+ "not_equal_by_cause": {
+  "constant_ratio_store_over_Close_whole_number_or_its_reciprocal (a different share basis: split-like)": 174,
+  "store_equals_close_of_an_adjacent_reader_day (a different day)": 7,
+  "within_half_percent_of_close_not_equal (rounding or small drift)": 18,
+  "constant_ratio_store_over_Close_not_a_whole_number (a different basis or unit)": 162,
+  "other (beyond half a percent, not a constant ratio, not Adj Close, not an adjacent day)": 19
+ },
+ "store_coverage": {
+  "window": {
+   "graded_days": 85,
+   "trading_days_before_them": 40,
+   "days": 125,
+   "first": "2026-04-14",
+   "last": "2026-10-09"
+  },
+  "needed_day_definition": "a window day on which the reader returned a bar for the ticker",
+  "tickers_with_every_needed_day_in_the_store": 0,
+  "tickers_with_gaps": 648,
+  "tickers_in_store_with_yahoo_points_but_none_on_a_needed_day": 9,
+  "needed_ticker_days": 81936,
+  "covered_ticker_days": 23976,
+  "newest_day_the_store_holds_yahoo_labelled": "2026-06-05",
+  "newest_day_the_reader_returns": "2026-10-09",
+  "tickers_whose_newest_store_day_is_before_their_newest_reader_day": 657
+ },
+ "the_store_holds_the_unadjusted_close": "FOR_SOME",
+ "route_read": {
+  "arm": "READER_CODE_OVER_SERVED_GOLD",
+  "arm_in_words": "NOT the deployed route. This is the route reader's OWN code at the base commit (holdings_gold.HoldingsGoldSource and holdings_gold.calculate, the source composed by installed._holdings_source_for) run locally over the SERVED holdings gold read from S3 (get/list only; no Lambda invoked, no sign-in, no call to the API). What could differ from the deployed function: the deployed package's bytes (the packaged copy, the dependencies, the mapping loader), the route's authorization, scope resolution and response envelope (the scope here is built in memory, one permitted account), and the ruled period set it offers a caller; the reader's answer dict is read, not the route's HTTP body.",
+  "entry": "orion",
+  "entry_basis": "the sources.json key whose monolith is orion (sources.json:66-68), the Inflection holdings entry; the route composes this firm's gold at installed.py:68 (tenants._CANONICAL_INF). The 49 Financial entry's key carries an eight-digit master number and is not written here (the check refuses such a token); not read.",
+  "reader_code_line": "infra/aws/lambda/investor-reporting/performance/holdings_gold.py:246 (non-OK rows dropped), :254 (the chain over the remaining rows), :314-317 (the PARTIAL excluded_rows absence)",
+  "windows_tried": [
+   {
+    "window": "SI",
+    "start": "1970-01-01",
+    "end": "2026-10-08",
+    "partitions": 1619,
+    "accounts": 979,
+    "max_rows_for_an_account": 1619,
+    "accounts_with_all_ok_and_a_full_window": 0,
+    "accounts_with_1_to_5_non_ok_inside": 0
+   },
+   {
+    "window": "1Y",
+    "start": "2025-10-08",
+    "end": "2026-10-08",
+    "partitions": 249,
+    "accounts": 979,
+    "max_rows_for_an_account": 249,
+    "accounts_with_all_ok_and_a_full_window": 641,
+    "accounts_with_1_to_5_non_ok_inside": 1
+   },
+   {
+    "window": "YTD",
+    "start": "2026-01-01",
+    "end": "2026-10-08",
+    "partitions": 190,
+    "accounts": 979,
+    "max_rows_for_an_account": 190,
+    "accounts_with_all_ok_and_a_full_window": 671,
+    "accounts_with_1_to_5_non_ok_inside": 1
+   }
+  ],
+  "status_values_in_the_served_gold_all_partitions": {
+   "NON-POSITIVE-BASE": 575039,
+   "OK": 855536
+  },
+  "with_a_non_ok_day": {
+   "window": "1Y: 2025-10-08 to 2026-10-08 (a ruled period at the latest landed day; the route has no default window. The longest window the code offers is SI, which holds 0 accounts with every row OK across all its partitions, so no control: this is the longest window with both kinds of account)",
+   "days_in_window": 249,
+   "partitions_in_window": 249,
+   "non_ok_days": 1,
+   "non_ok_status_values": [
+    "NON-POSITIVE-BASE"
+   ],
+   "days_excluded": 1,
+   "days_observed": 249,
+   "days_linked": 248,
+   "claim": "measured",
+   "value_facts_claim": "measured",
+   "claim_basis": "measured (the reader's own return; a figure was returned)",
+   "absences": [
+    {
+     "fact": "accrual_basis",
+     "status": "UNSUPPORTED"
+    },
+    {
+     "fact": "fees_and_income",
+     "status": "UNSUPPORTED"
+    },
+    {
+     "fact": "money_weighted_return",
+     "status": "UNSUPPORTED"
+    },
+    {
+     "fact": "excluded_rows",
+     "status": "PARTIAL"
+    },
+    {
+     "fact": "linked_days",
+     "status": "PARTIAL"
+    },
+    {
+     "fact": "linked_days",
+     "status": "PARTIAL"
+    },
+    {
+     "fact": "linked_days",
+     "status": "PARTIAL"
+    }
+   ],
+   "excluded_rows_absence_text": "1 of 249 observed days were non-OK (price-missing or excluded, ruling 4) and skipped from the chain",
+   "answer_keys": [
+    "absences",
+    "claim",
+    "contract_validated",
+    "evidence",
+    "refusals",
+    "report"
+   ],
+   "report_keys": [
+    "dates",
+    "lineage",
+    "measurement_basis",
+    "optional_facts",
+    "returns"
+   ],
+   "refusals": [],
+   "a_figure_was_returned": true
+  },
+  "control_all_ok": {
+   "window": "1Y: 2025-10-08 to 2026-10-08 (a ruled period at the latest landed day; the route has no default window. The longest window the code offers is SI, which holds 0 accounts with every row OK across all its partitions, so no control: this is the longest window with both kinds of account)",
+   "days_in_window": 249,
+   "partitions_in_window": 249,
+   "non_ok_days": 0,
+   "non_ok_status_values": [],
+   "days_excluded": 0,
+   "days_observed": 249,
+   "days_linked": 249,
+   "claim": "measured",
+   "value_facts_claim": "measured",
+   "claim_basis": "measured (the reader's own return; a figure was returned)",
+   "absences": [
+    {
+     "fact": "accrual_basis",
+     "status": "UNSUPPORTED"
+    },
+    {
+     "fact": "fees_and_income",
+     "status": "UNSUPPORTED"
+    },
+    {
+     "fact": "money_weighted_return",
+     "status": "UNSUPPORTED"
+    },
+    {
+     "fact": "linked_days",
+     "status": "PARTIAL"
+    },
+    {
+     "fact": "linked_days",
+     "status": "PARTIAL"
+    },
+    {
+     "fact": "linked_days",
+     "status": "PARTIAL"
+    }
+   ],
+   "excluded_rows_absence_text": null,
+   "answer_keys": [
+    "absences",
+    "claim",
+    "contract_validated",
+    "evidence",
+    "refusals",
+    "report"
+   ],
+   "report_keys": [
+    "dates",
+    "lineage",
+    "measurement_basis",
+    "optional_facts",
+    "returns"
+   ],
+   "refusals": [],
+   "a_figure_was_returned": true
+  },
+  "chained_over_the_non_ok_day": true,
+  "planted": false
+ },
+ "fetch": {
+  "call_count": 18,
+  "distinct_tickers_asked": 878,
+  "tickers_asked_more_than_once": 0,
+  "counted_before_fetching": true,
+  "source": "Yahoo Finance through fetch_yahoo (commonwealth_price_basis_census.py:200), driver ib150_fetch_yahoo.py of ~310 run unchanged; start 2026-01-30, end exclusive 2026-10-14; 50 a call, 8 s pause, none parallel",
+  "calls": [
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 49,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 48,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 49,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 49,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 49,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 49,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 28,
+    "with_bars": 28,
+    "rate_limited": 0
+   }
+  ]
+ },
+ "not_established": [
+  "whether the constant store/Close ratios (whole-number multiples or reciprocals) are the store holding a pre-split price while the reader's Close is split-adjusted: not tested against a split calendar",
+  "the ticker-days whose constant ratio is not a whole number: their basis (unit, share class, a different security under the ticker) was not identified",
+  "why the store's yahoo-labelled points end 2026-06-05 and every point ends 2026-06-09 although the object was last written 2026-10-09: the writer's inputs were not read for that run",
+  "the tickers not in the store: whether they are other firms' securities or tickers the store spells differently (a ticker was matched by exact string)",
+  "any write or run history of the writer outside the object's own retained versions (a lifecycle rule on non-current versions, an EC2 cron, a manual run log): not read; schedule_found false is an absence in the places searched",
+  "the tickers with no reader bar: the reason (delisted, renamed, a ticker Yahoo does not carry) was not classified",
+  "the deployed route's answer: only the reader's code over served data was run; the deployed package's bytes, authorization and envelope were not read",
+  "a second account with a different non-OK status: the served gold of this entry holds two status tokens (OK, NON-POSITIVE-BASE) and the reader's filter (holdings_gold.py:246) is status-agnostic by code, not tested per token",
+  "the other entry the route composes (49 Financial's): not read; its sources.json key carries an eight-digit master number that the order's check refuses in the outputs"
+ ],
+ "aws_writes_made": 0,
+ "sign_ins_made": 0,
+ "functions_invoked": 0,
+ "product_files_edited": 0,
+ "builds_proposed": 0,
+ "other_sources_asked": 0
+}
