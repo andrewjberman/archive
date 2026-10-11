@@ -897,11 +897,14 @@ def test_issued_id_refused_by_report_route_is_branch_b(monkeypatch):
     assert not any(e[0] == "http" and e[1] == "GET" and e[2] == "/api/scoped/tickets/%s" % TKT for e in w.events)
     assert trace["report_route_arms"]["report_id_malformed_refused"]["as_expected"] is True
     assert trace["report_route_arms"]["report_id_well_formed_stored"]["as_expected"] is False
-    # then cleanup per D2: the ticket is completed, the wait happens, the row goes last and after exp
+    # then cleanup (R3-rn-1: the submission at (d) was ACCEPTED, so the row is LEFT IN PLACE, not deleted at exp): the
+    # ticket is completed, the row is never touched, the trace owes one step and the run exits 3
     done = w.index(lambda e: e[0] == "http" and e[2].endswith("/complete"))
-    assert done and max(done) < w.index(lambda e: e[0] == "sleep")[0] < w.index(lambda e: e[0] == "ddb" and e[1] == "delete")[0]
-    assert_row_deleted_after_exp(w)
-    assert trace["cleanup"]["row_removed_read_back_absent"] is True
+    assert done and not w.index(lambda e: e[0] == "ddb" and e[1] == "delete")
+    assert rc == 3 and w.row is True and [o for o, _ in w.ddb_ops()] == ["put", "get"]
+    assert trace["cleanup"]["state"] == "PENDING_ROW_DELETE" and trace["cleanup"]["row_left_in_place"] is True
+    assert trace["cleanup"]["row_removed_read_back_absent"] is False
+    assert trace["cleanup"]["row_delete_not_before_unix"] == h["d_analysis"]["submitted_at_unix"] + 7200
     # a 200 on the issued id is the other arm, recorded stored
     fake, hops, named, trace = _flow(monkeypatch, _ddg_script(ARM_REFUSED, res(200, {"ticket": {}})))
     assert trace["report_route_arms"]["report_id_well_formed_stored"] == {"status": 200, "as_expected": True}
@@ -1494,3 +1497,218 @@ def test_accepted_without_a_req_id_is_a_named_failure_not_a_refusal(monkeypatch,
     hops, named = trace_hops()
     assert run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named, SENT) == REQ_B
     assert hops["d_analysis"]["request_id_source"] == "request_list" and named == []
+
+
+# ------------------------------------------------------------------ ROUND 3, cell R3-rn-1: the row outlives the token
+
+FINISH = "--finish-cleanup"
+OK_TICKET = res(200, {"ticket": {"ticket_id": TKT}})
+
+
+def _utc(unix):
+    import datetime
+    return run.iso(datetime.datetime.fromtimestamp(unix, datetime.timezone.utc))
+
+
+def _real_hops(token, advisor, trace):
+    h = {x["hop"]: x for x in trace["hops"]}
+    trace["journey_ticket"] = TKT
+    return run.hops_d_to_g(token, trace, h, trace["named_failures"], TKT, "in-1", FILE_SHA)
+
+
+def _r3_script(submit=None, report_read=None):
+    s = _ddg_script(ARM_REFUSED, OK_TICKET)
+    s[("GET", STATUS_PATH)] = res(200, {"data": {}})
+    s[("POST", "/api/scoped/tickets/%s/complete" % TKT)] = res(200, {"ticket": {}})
+    if submit is not None:
+        s[SUBMIT] = submit
+    if report_read is not None:
+        s[("GET", rpath(REQ_A))] = report_read
+    return s
+
+
+def _r3_run(monkeypatch, submit=None, report_read=None, world=None):
+    w = world or World(monkeypatch)
+    rc, trace, w = drive(monkeypatch, world=w, script=_r3_script(submit, report_read), hops_fn=_real_hops)
+    return rc, trace, w
+
+
+def _pending_trace_file(monkeypatch, tmp_path):
+    """An accepted run's trace, written to a file as the runner leaves it. -> (path, trace, world)."""
+    rc, trace, w = _r3_run(monkeypatch)
+    assert rc == 3 and trace["cleanup"]["state"] == "PENDING_ROW_DELETE"
+    p = tmp_path / "pending_trace.json"
+    p.write_text(json.dumps(trace, indent=1) + "\n", encoding="utf-8")
+    return p, trace, w
+
+
+def _finish(monkeypatch, path, executor="0.9.0_WK_TEST~9"):
+    """Run the second step through main(); the HTTP layer raises, so any call it makes fails the test."""
+    def no_http(*a, **k):
+        raise AssertionError("--finish-cleanup made an HTTP call")
+    monkeypatch.setattr(run, "call", no_http)
+    return run.main([FINISH, str(path), "--executor", executor])
+
+
+def test_accepted_submission_leaves_the_row_and_exits_3(monkeypatch):
+    assert run.ROW_LIFETIME_SECONDS == 7200
+    rc, trace, w = _r3_run(monkeypatch)
+    h = {x["hop"]: x for x in trace["hops"]}
+    sub = h["d_analysis"]["submitted_at_unix"]
+    c = trace["cleanup"]
+    # rc 3, the row untouched, no delete anywhere, and the run did NOT wait two hours
+    assert rc == 3 == run.RC_PENDING_ROW_DELETE
+    assert [o for o, _ in w.ddb_ops()] == ["put", "get"] and w.row is True
+    assert w.t - 1_800_000_000 < run.ROW_LIFETIME_SECONDS
+    # the trace says what is owed and when
+    assert c["state"] == "PENDING_ROW_DELETE" and c["row_left_in_place"] is True
+    assert c["row_delete_not_before_unix"] == sub + 7200 and c["row_delete_not_before"] == _utc(sub + 7200)
+    assert c["row_removed_read_back_absent"] is False and "row_deleted_at" not in c
+    assert c["row_key"] == {"PK": "USER#" + run.FILER, "SK": "PROFILE"}
+    # tickets completed first, then the zero-call read as today (no earlier than exp + 300 s)
+    done = w.index(lambda e: e[0] == "http" and e[2].endswith("/complete"))
+    reads = w.index(lambda e: e[0] == "aws" and e[1] == "streams:" + run.DATA_REFRESH_LOG_GROUP)
+    assert done and reads and max(done) < reads[0]
+    iat = trace["preconditions"]["token_iat_unix"]
+    assert w.events[reads[0]][2] >= iat + 300 + run.ZERO_CALL_DELAY_SECONDS
+    # every stop path after the accepted submission takes the same branch: no delete, rc 3
+    for rd in (refusal("NOT_FOUND"),      # (e) bounded out as NOT_READY
+               refusal("UNEXPECTED"),     # (e) terminal
+               res(500, {"message": "x"})):
+        rc2, t2, w2 = _r3_run(monkeypatch, report_read=rd)
+        assert rc2 == 3 and t2["cleanup"]["state"] == "PENDING_ROW_DELETE", rd
+        assert not w2.index(lambda e: e[0] == "ddb" and e[1] == "delete") and w2.row is True
+    # an accepted submission whose answer carries no id still leaves the row (the job may have been queued)
+    noid = accepted_answer(REQ_A)
+    noid["parsed"]["data"]["identity"] = {"tenant_id": "SYN-TENANT-MARK"}
+    rc3, t3, w3 = _r3_run(monkeypatch, submit=noid)
+    assert rc3 == 3 and w3.row is True and not w3.index(lambda e: e[0] == "ddb" and e[1] == "delete")
+
+
+def test_refused_submission_still_deletes_after_exp(monkeypatch):
+    # a refused submission: unchanged cleanup (tickets, wait past exp, delete, read back absent), rc 0, no pending state
+    rc, trace, w = _r3_run(monkeypatch, submit=SUBMISSION_REFUSED)
+    assert trace["result"] == "BRANCH_E_SUBMISSION_REFUSED"
+    assert rc == 0 and w.row is False
+    assert_row_deleted_after_exp(w)
+    c = trace["cleanup"]
+    assert c["row_removed_read_back_absent"] is True and "state" not in c and "row_left_in_place" not in c
+    assert "known_limit" not in c and "row_delete_not_before" not in c
+    done = w.index(lambda e: e[0] == "http" and e[2].endswith("/complete"))
+    assert done and max(done) < w.index(lambda e: e[0] == "sleep")[0] < w.index(lambda e: e[0] == "ddb" and e[1] == "delete")[0]
+    # a failure before hop (d): the default hops stop at the upload; the same unchanged cleanup
+    rc2, t2, w2 = drive(monkeypatch, world=World(monkeypatch))
+    assert rc2 == 0 and "state" not in t2["cleanup"] and t2["cleanup"]["row_removed_read_back_absent"] is True
+    assert_row_deleted_after_exp(w2)
+    # an HTTP error on the submission is a refusal too
+    rc3, t3, w3 = _r3_run(monkeypatch, submit=res(409, {"code": "REQUEST_CONFLICT", "error": "x"}))
+    assert rc3 == 0 and w3.row is False
+    assert_row_deleted_after_exp(w3)
+
+
+def test_finish_cleanup_refuses_before_the_two_hours(monkeypatch, tmp_path, capsys):
+    p, trace, w = _pending_trace_file(monkeypatch, tmp_path)
+    nb = trace["cleanup"]["row_delete_not_before_unix"]
+    before = p.read_bytes()
+    n_events = len(w.events)
+    # 100 s early: refused, rc 4, the named result and the seconds remaining printed, nothing changed
+    w.t = float(nb - 100)
+    capsys.readouterr()
+    assert _finish(monkeypatch, p) == run.RC_FINISH_REFUSED == 4
+    said = capsys.readouterr().out
+    assert "ROW_DELETE_TOO_EARLY" in said and "100 seconds" in said
+    assert p.read_bytes() == before and w.row is True and len(w.events) == n_events
+    # one second early is still early
+    w.t = float(nb - 1)
+    assert _finish(monkeypatch, p) == 4 and p.read_bytes() == before and w.row is True
+    # a trace that does not say PENDING_ROW_DELETE is refused too, and left as it is
+    for state in (None, "DONE", "SOMETHING"):
+        t = json.loads(before.decode("utf-8"))
+        if state is None:
+            del t["cleanup"]["state"]
+        else:
+            t["cleanup"]["state"] = state
+        q = tmp_path / ("other_%s.json" % state)
+        q.write_text(json.dumps(t), encoding="utf-8")
+        raw = q.read_bytes()
+        w.t = float(nb + 5)
+        assert _finish(monkeypatch, q) == 4, state
+        assert q.read_bytes() == raw and w.row is True
+    assert not w.index(lambda e: e[0] == "ddb" and e[1] == "delete")
+
+
+def test_finish_cleanup_deletes_and_updates_the_same_trace(monkeypatch, tmp_path):
+    p, trace, w = _pending_trace_file(monkeypatch, tmp_path)
+    nb = trace["cleanup"]["row_delete_not_before_unix"]
+    minted, n_events = len(w.claims), len(w.events)
+    w.t = float(nb)    # exactly the time: not early
+    assert _finish(monkeypatch, p, executor="0.9.0_WK_TEST~9") == 0
+    after = json.loads(p.read_text(encoding="utf-8"))
+    c = after["cleanup"]
+    assert c["state"] == "DONE" and c["row_removed_read_back_absent"] is True and c["finished_by"] == "0.9.0_WK_TEST~9"
+    assert c["row_deleted_at_unix"] == nb and c["row_deleted_at"] == c["row_delete_not_before"]
+    assert c["finish_result"] == "ROW_DELETED"
+    # the SAME file, everything the run wrote is still in it
+    assert after["run_label"] == trace["run_label"] and after["hops"] == json.loads(json.dumps(trace["hops"]))
+    assert c["row_delete_not_before_unix"] == nb and c["tickets_completed"] == trace["cleanup"]["tickets_completed"]
+    assert after["job_last_read"] == trace["job_last_read"]
+    assert sorted(x.name for x in tmp_path.iterdir()) == ["pending_trace.json"]
+    # the row was deleted and read back absent (a get after the delete); no token, no HTTP call, no AWS client call
+    new = w.events[n_events:]
+    assert [e[1] for e in new if e[0] == "ddb"] == ["get", "delete", "get"]
+    assert w.row is False and len(w.claims) == minted
+    assert not [e for e in new if e[0] in ("http", "aws")]
+    # a second invocation finds the trace DONE: refused, nothing changed
+    raw = p.read_bytes()
+    assert _finish(monkeypatch, p) == 4 and p.read_bytes() == raw
+
+
+def test_finish_cleanup_on_an_absent_row_is_done_not_failed(monkeypatch, tmp_path):
+    p, trace, w = _pending_trace_file(monkeypatch, tmp_path)
+    nb = trace["cleanup"]["row_delete_not_before_unix"]
+    w.row = False        # someone removed it already
+    w.t = float(nb + 60)
+    n_events = len(w.events)
+    assert _finish(monkeypatch, p) == 0
+    c = json.loads(p.read_text(encoding="utf-8"))["cleanup"]
+    assert c["finish_result"] == "ROW_ALREADY_ABSENT" and c["state"] == "DONE"
+    assert c["row_removed_read_back_absent"] is True and c["finished_by"] == "0.9.0_WK_TEST~9"
+    assert not [e for e in w.events[n_events:] if e[0] == "ddb" and e[1] == "delete"]
+    # an unreadable trace, and a row the trace does not name as the test filer, change nothing
+    bad = tmp_path / "not_json.json"
+    bad.write_text("{", encoding="utf-8")
+    assert _finish(monkeypatch, bad) == 1 and bad.read_text(encoding="utf-8") == "{"
+    t = json.loads(p.read_text(encoding="utf-8"))
+    t["cleanup"].update({"state": "PENDING_ROW_DELETE", "row_key": {"PK": "USER#someone@example.invalid", "SK": "PROFILE"}})
+    q = tmp_path / "other_key.json"
+    q.write_text(json.dumps(t), encoding="utf-8")
+    raw, w.row = q.read_bytes(), True
+    assert _finish(monkeypatch, q) == 4 and q.read_bytes() == raw and w.row is True
+
+
+def test_trace_records_the_last_job_read_and_the_known_limit(monkeypatch):
+    iat = 1_800_000_000
+    # MET: the report was read on the second poll
+    rc, t, w = _r3_run(monkeypatch, report_read=[refusal("NOT_FOUND"), report(REQ_A)])
+    j = t["job_last_read"]
+    assert j["outcome"] == "MET" and j["polls"] == 2 and j["last_poll_at_unix"] == iat + run.POLL_SECONDS
+    assert j["last_poll_at"] == _utc(iat + run.POLL_SECONDS)
+    # NOT_READY: the bound reached
+    rc, t, w = _r3_run(monkeypatch, report_read=refusal("NOT_FOUND"))
+    j = t["job_last_read"]
+    assert j["outcome"] == "NOT_READY" and j["polls"] == run.MAX_POLLS
+    assert j["last_poll_at_unix"] == iat + (run.MAX_POLLS - 1) * run.POLL_SECONDS
+    # a terminal refusal code is the outcome, after one poll
+    rc, t, w = _r3_run(monkeypatch, report_read=refusal("ANALYSIS_FORBIDDEN"))
+    assert t["job_last_read"]["outcome"] == "ANALYSIS_FORBIDDEN" and t["job_last_read"]["polls"] == 1
+    # UNREACHABLE: the submission was refused, hop (e) never ran, no poll time; the row is not left, no limit stated
+    rc, t, w = _r3_run(monkeypatch, submit=SUBMISSION_REFUSED)
+    assert t["job_last_read"] == {"outcome": "UNREACHABLE", "polls": 0, "last_poll_at_unix": None, "last_poll_at": None}
+    assert "known_limit" not in t["cleanup"]
+    # nothing new is polled for it: the report reads are exactly hop (e)'s two and hop (g)'s one
+    rc, t, w = _r3_run(monkeypatch, report_read=[refusal("NOT_FOUND"), report(REQ_A)])
+    assert len(w.index(lambda e: e[0] == "http" and e[1] == "GET" and e[2] == rpath(REQ_A))) == 3
+    # the row left in place carries the known limit as a sentence
+    lim = t["cleanup"]["known_limit"]
+    assert isinstance(lim, str) and "two hours" in lim and "ATTENTION" in lim and "missing actor" in lim
+    assert lim == run.KNOWN_LIMIT
