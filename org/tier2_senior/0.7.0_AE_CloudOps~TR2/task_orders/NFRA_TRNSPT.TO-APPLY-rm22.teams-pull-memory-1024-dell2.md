@@ -26,11 +26,27 @@
   <context>
     The pair binds; read both halves first.
     COO half and packet: `org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/2.0.0_SA_COO~T2/R22_TR_RM22_MEMORY_PACKET_20261011.md`.
-    CTO half: named, with its pin and conditions, in the GO message. Its conditions bind over this order where they differ.
+    CTO half, SIGNED: `org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_TR_RM22_TEAMS_PULL_MEMORY_CTO_HALF.md` @16fa3b73b8,
+    against the packet @f6f35a8841. Its six conditions are below verbatim and bind over this order where they differ.
     The Terraform edit is YOURS (the file is in the AE lane; the issuer's commit of it was refused by owned-paths): in
     `infra/aws/terraform/transcripts/pull.tf`, resource `aws_lambda_function.pull`, add the three lines of the packet's section 0 between
     `timeout          = 300` and `filename         = local.pull_zip` -- byte for byte, nothing else in the file.
   </context>
+
+  <cto_conditions_verbatim>
+    (CTO half SIGNED @16fa3b73b8, section 3; AMENDMENT 1 of this order, issuer, 2026-10-11 ~04:5xZ. They bind over the steps below.)
+    1. **The plan changes exactly one resource, and on it exactly one attribute, `memory_size`.** Any other resource or
+       attribute in the plan: stop. In particular no reader resource and no `source_code_hash` change.
+    2. **After the apply:** `MemorySize` 1024; the pull's CodeSha256 unchanged at `AI4UQD0ME+ABza1X0BrBjGjpqjN7f2fc0Cdxb88aA/I=`;
+       the mail pull's sha unmoved; the commentary function still absent.
+    3. **The reader-trust variable is READ from applied state** into a tfvars file outside the repo, never typed (row D2-S17).
+    4. **The `pull.tf` edit is the packet's three lines, byte for byte,** committed by the applier under its own author line
+       before the plan.
+    5. **The driven invoke proves the setting is live, not the peak.** Its close states that in words. The first REPORT line
+       of a run that lands a transcript is read beside its `run.json` and its `Max Memory Used` is recorded as the first
+       measured peak. A peak above 768 MB is a row, not a second raise.
+    6. **Not covered:** a rebuild, an untargeted apply, the mail pull, the commentary function, any S3 delete.
+  </cto_conditions_verbatim>
 
   <the_act>
     0. Read the open deploy ledgers per CLAUDE.md NEVER-2. Open a change ledger naming this order, the box/dell2 HEAD you apply from, the
@@ -51,6 +67,8 @@
     4. PROOF, driven: ONE invoke (empty event). Report: no `errorMessage`; the number of series entries (expected 4); per series
        `listed`, `landed`, `held`, `read_refused`, `refused`; that the run record and the listing snapshot exist; and the REPORT line's
        `Memory Size` and `Max Memory Used` as numbers. A landing is not a failure: report its series and count before the ledger closes.
+       Per condition 5, your close states in words that this invoke proves the SETTING is live, not the peak; if the invoke LANDS a
+       transcript, its `Max Memory Used` is the first measured peak: report it, and a peak above 768 MB is a surprise row, not a second raise.
     5. Close the ledger on step 4's result. If step 3 or 4 fails: ROLL BACK in session (remove the `memory_size` line, re-apply the same
        target, proof MemorySize 128 with the CodeSha256 unchanged) and say so.
   </the_act>
