@@ -1,0 +1,21 @@
+TO-FB-f-9 phase B, step 2 reads, 0.7.0_AE_CloudOps~FB1, 2026-10-11T09:58:07Z (read-only; no object written)
+(a) opal-data-bd versioning: Enabled. 20 keys under s3://opal-data-bd/code/gold/: 18 carry a prior VersionId, 2 are absent
+    (lib/platinum_dest.py and lib/platinum_dest_view.py are NEW keys; nothing to roll back to, nothing deleted by this act).
+    deployed-equal before-read at 09:52:24Z: DEPLOY EQUAL: 0 of 20 objects equal the repository at HEAD.
+(b1) actor identity user/cloudops-dell1-agent-user, iam simulate on its own ARN, one resource per call: s3:PutObject allowed on
+    code/gold/gold_dispatch.sh, lib/platinum_dest.py, lib/platinum_dest_view.py, D_00.portal_aggregates.py; s3:GetObject allowed;
+    s3:DeleteObject on gold_dispatch.sh explicitDeny (the control reads as designed).
+(b2) the producers' role: gold runner i-01003b035d2988dfb -> instance profile bd-exporter-profile -> role bd-exporter-ec2-role
+    (the QA runner uses the same profile). iam:SimulatePrincipalPolicy on that role is AccessDenied for the actor identity
+    ("no identity-based policy allows the iam:SimulatePrincipalPolicy action"), so the order's instrument cannot run.
+    SUBSTITUTE, a policy-document read and NOT a simulation: all 18 attached and inline policies of the role evaluated by IAM
+    glob against the exact targets: s3:PutObject on opal-data-49financial/advi/49financial/platinum/* -> 0 Allow, 0 Deny;
+    s3:GetObject the same -> 0 Allow, 0 Deny; s3:ListBucket on opal-data-49financial with prefix advi/49financial/platinum/ ->
+    1 Allow match (AdviChain49fListScoped) whose condition is s3:prefix StringLike gold/advi/* or _code/* (not met). Positive
+    control, PutObject on opal-data-49financial/gold/advi/*: 1 Allow (AdviChainGoldRW). The destination bucket's policy has 4
+    statements, all Deny (DenyForeignFirmPrincipals excludes bd-exporter-ec2-role, so it is not denied there; no Allow).
+    The 11 classes' destinations (lib/platinum_dest_view.py PLATINUM_CLASSES): all bucket opal-data-49financial under
+    advi/49financial/platinum/<class>/.
+(c) schedule: EventBridge bd-gold-nightly-fallback ENABLED cron(0 23 ? * MON-SAT *) -> Lambda bd-gold-trigger (no input);
+    bd-gold-layer-monthly-trigger DISABLED cron(0 8 1 * ? *) -> bd-gold-trigger {"mode":"full"}. The last legacy chain's end is
+    read at the GO, not now (it would be stale by then). comp-schedule is the gate ledger, not a job timetable.
