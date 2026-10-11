@@ -4,14 +4,14 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete -- flipped by issuer 2.0.0_SA_COO~Y2 2026-10-11 ~06:3xZ: APPLY1-AC1, APPLY1-AC2 and APPLY1-AC3 PASS, re-run by the issuer; proof instance VALID rc 0, run by the issuer at HEAD after the applier pin commit 19fa5dbbd7; live irpt-status 6idtFvAm (revision 6, the IB-pr-416 one-tree build); ledger irpt-anlreq-r1-irpt-status-rev6-20261011 CLOSED. STATED, not met here: read 5 is re-homed to release 4 (AMENDMENT 11, CTO msg 4240; criterion REL4-READ5 reads FAIL, row IRPT_ANLREQ-D2-S25 parked with 2.0.0_SA_COO~G2); reads 3 and 4 were measured 2026-10-09 on revision 2, not on revision 6; the three widenings closed APPLIED, UNEXERCISED; "the read does not write" NOT MEASURED.</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <placeholders>NONE</placeholders>
 <proof_of_spec>
-Criterion ids: APPLY1-AC1, APPLY1-AC2, APPLY1-AC3. Instance at `org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_anlreq_r1/IRPT_ANLREQ.TO-APPLY-Y1.proof_of_spec.json`, `to_id` the FULL id, validated with `python .tools/proof-of-spec-check.py <instance> APPLY1-AC1,APPLY1-AC2,APPLY1-AC3`. Shape: `org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_y75/IRPT_BCKEND.TO-APPLY-Y75.proof_of_spec.json`.
+Criterion ids: APPLY1-AC1, APPLY1-AC2, APPLY1-AC3. Instance at `org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_anlreq_r1/IRPT_ANLREQ.TO-APPLY-Y1.proof_of_spec.json`, `to_id` the FULL id, validated with `python .tools/proof-of-spec-check.py <instance> APPLY1-AC1,APPLY1-AC2,APPLY1-AC3`. Shape: the TO-APPLY-Y75 instance in `org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_y75/` (its file name is not spelled here: two literal instance paths in this block make the flip gate fall back to a stem search that finds neither).
 </proof_of_spec>
 <decomp_ref>
 <decomp_doc>org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R2.md</decomp_doc> round 2, workstream ~Y, release 1 of cell `AR-y-21` (and `AR-y-22`, AMENDMENT 2).
