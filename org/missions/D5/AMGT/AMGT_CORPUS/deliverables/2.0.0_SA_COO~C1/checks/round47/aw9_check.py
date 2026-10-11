@@ -109,6 +109,10 @@ def workbook_bytes():
 
 
 def main():
+    # Round 48 (CRPS-ax-5): the shipped factset_descriptions.json now holds nine cross-workbook entries, one of which (FF_COM_SHS_OUT_EPS_DIL) names a code this
+    # fixture uses as its "two labels reference it" case. This check tests the MEASURED-label rules and the master arm, not the shipped data, so the entries
+    # cache is emptied here (the entries' own precedence is ax5_check.py's).
+    team_sheet._LABEL_CACHE["factset"] = {}
     body = workbook_bytes()
     client = FakeS3()
     b1 = b2 = b3 = b4 = 0
