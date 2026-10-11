@@ -1,0 +1,127 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-g-19.fence-prefix-list",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-19.fence-prefix-list.md",
+  "group": "OTHER",
+  "vintage_commit": "d2d6ec2370"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~41",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-19.fence-prefix-list.md",
+  "vintage_commit": "d2d6ec2370"
+ },
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant. Base-tree control: the list-prefix fixture is refused by the base module (plan rc=1, printed by AC1 R2), so the list rendering is new capability and not pre-existing; the five malformed fixtures are refused at head.",
+   "expected": "Base module refuses the list-prefix fixture (rc != 0); head renders it; malformed fixtures refused 5 of 5.",
+   "observed": "AC1 output: 'list-prefix fixture: head renders=True; base module plan rc=1' and 'malformed prefix fixtures refused: 5 of 5'.",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "not re-run: each invocation was run once; AC1 R1 compares the base and head renders of the same registry bytes inside one run; AC3 was also run after the code commit (same result)",
+   "observed": "N/A -- no second run of the same invocation on the same bytes was made as a separate determinism run",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/modules/opal_name/main.tf",
+   "kind": "terraform",
+   "commit_or_etag": "25d33dd9b5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "local commit 25d33dd9b5 on wk-ADVI_FIRMBKTS-41; no terraform apply and no AWS call; the module renders no resource; dormant (AC1 R1 diff 0 over the real registry, 7 buckets identical base and head).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "lib/opal_naming.py",
+   "kind": "script",
+   "commit_or_etag": "25d33dd9b5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "local commit 25d33dd9b5 on wk-ADVI_FIRMBKTS-41; validate() accepts a list prefix under the string rules; the real registry still validates (VALIDATE: OK); the builder probe over 8 scratch registries returned 8 of 8 as expected (scratch only, not committed).",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "cd /c/dev/wk-firmbkts-41 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_modfence.py --arms render --root /c/dev/wk-firmbkts-41; echo \"exit=$?\"  -- expect: ROUND 4 MODULE FENCE: 4 of 4 arms",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-41 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_modfence.py --arms render --root /c/dev/wk-firmbkts-41; echo \"exit=$?\"",
+   "output_evidence": "  buckets rendered base=['opal-data-49financial', 'opal-data-bd', 'opal-data-cot', 'opal-data-cottonwood', 'opal-data-demo', 'opal-data-inf', 'opal-data-inflection'] head=['opal-data-49financial', 'opal-data-bd', 'opal-data-cot', 'opal-data-cottonwood', 'opal-data-demo', 'opal-data-inf', 'opal-data-inflection']; identical=True \n  list-prefix fixture: head renders=True; base module plan rc=1\n  malformed prefix fixtures refused: 5 of 5\n  real registry plan rc=0\nPASS R1 diff 0: the base and the tree render the same fence_scoped_statements for the real registry\nPASS R2 a list-prefix row renders NotResource and StringNotLike over both prefixes, and the base module refuses it\nPASS R3 a list holding *, an empty string, a prefix not ending in /, or nothing is refused\nPASS R4 the real registry plans clean in the tree's module\nROUND 4 MODULE FENCE: 4 of 4 arms\nexit=0",
+   "denominator": "4 of 4 arms PASS; 7 of 7 registry buckets rendered identically at base and head; 5 of 5 malformed prefix fixtures refused; base module refuses the list fixture (rc=1)",
+   "expect": "ROUND 4 MODULE FENCE: 4 of 4 arms",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "cd /c/dev/wk-firmbkts-41/infra/aws/terraform/modules/opal_name && timeout 100 terraform init -backend=false -input=false -no-color > /dev/null && timeout 100 terraform test -no-color 2>&1 | tail -n 3  -- expect: Success! \\d+ passed, 0 failed",
+   "method": "test_suite",
+   "invocation": "cd /c/dev/wk-firmbkts-41/infra/aws/terraform/modules/opal_name && timeout 100 terraform init -backend=false -input=false -no-color > /dev/null && timeout 100 terraform test -no-color 2>&1 | tail -n 3",
+   "output_evidence": "tests\\opal_name.tftest.hcl... pass\n\nSuccess! 48 passed, 0 failed.",
+   "denominator": "48 of 48 module tests passed, 0 failed (base count 48)",
+   "expect": "Success! \\d+ passed, 0 failed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "cd /c/dev/wk-firmbkts-41 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-41 --allow infra/aws/terraform/modules/opal_name/main.tf --allow lib/opal_naming.py --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~41/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/modules/opal_name/main.tf; echo \"exit=$?\"  -- expect: ROUND 4 SCOPE: OK",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-41 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-41 --allow infra/aws/terraform/modules/opal_name/main.tf --allow lib/opal_naming.py --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~41/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/modules/opal_name/main.tf; echo \"exit=$?\"",
+   "output_evidence": "  CHANGED infra/aws/terraform/modules/opal_name/main.tf\n  CHANGED lib/opal_naming.py\nROUND 4 SCOPE: OK 2 changed, 0 outside, 0 required missing\nexit=0",
+   "denominator": "2 of 2 changed paths inside the allow list, 0 outside; 1 of 1 required path present (measured before and after the code commit 25d33dd9b5)",
+   "expect": "ROUND 4 SCOPE: OK",
+   "status": "PASS"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "Any terraform apply, any AWS call, any deploy, and any registry row (infra/logic/registry/*.json untouched)",
+   "reason": "Bounds 2 item 1 and the preflight: repository files only. The check's fixture rows exist only in the mirror tree it builds under a temp directory."
+  },
+  {
+   "item": "The module's test suite (tests/opal_name.tftest.hcl) is not extended with list-prefix cases",
+   "reason": "tests/ is outside the order's <paths>; AC2 runs the existing 48 tests, and the list behaviour is graded by AC1 and the scratch probe instead."
+  },
+  {
+   "item": "The S3 behaviour of a bucket policy built from list-prefix statements",
+   "reason": "Blindness the issuer declared in the preflight: the check cannot see how S3 evaluates the rendered statements. No AWS call was made under this order."
+  },
+  {
+   "item": ".terraform/ and .terraform.lock.hcl in the module folder, and the builder probe under .scratch/",
+   "reason": "Gitignored (**/.terraform/, **/.terraform.lock.hcl) or scratch only; not in the commit (safe-commit names the two code paths explicitly)."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~41/ADVI_FIRMBKTS.TO-FB-g-19.session.log.txt",
+ "compiler_tools": [
+  {
+   "tool": "terraform 1.15.8 (init -backend=false, test) on the module folder",
+   "invocation": "cd /c/dev/wk-firmbkts-41/infra/aws/terraform/modules/opal_name && terraform init -backend=false -input=false -no-color && terraform test -no-color",
+   "result": "Success! 48 passed, 0 failed."
+  },
+  {
+   "tool": "python lib/opal_naming.py validate",
+   "invocation": "cd /c/dev/wk-firmbkts-41 && python lib/opal_naming.py validate",
+   "result": "VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s) over all 15 registry file(s); validate_rc=0"
+  },
+  {
+   "tool": "builder probe over scratch registry copies (.scratch/fb19_validate_probe.py, not committed)",
+   "invocation": "cd /c/dev/wk-firmbkts-41 && python .scratch/fb19_validate_probe.py",
+   "result": "PROBE: OK (8 cases): string ok, list ok, five malformed lists refused, wrong firm token refused"
+  },
+  {
+   "tool": "bash .tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~41 <0.9.0_WK_ADVI_FIRMBKTS~41@opal.agent>\" -F .scratch/fb19_msg1.txt -- infra/aws/terraform/modules/opal_name/main.tf lib/opal_naming.py",
+   "result": "[wk-ADVI_FIRMBKTS-41 25d33dd9b5] 2 files changed, 21 insertions(+), 8 deletions(-); commit-gate All checks passed; naming-gate PASS 0 graded; surprise-row-gate OK; msg-verify MATCH"
+  }
+ ]
+}

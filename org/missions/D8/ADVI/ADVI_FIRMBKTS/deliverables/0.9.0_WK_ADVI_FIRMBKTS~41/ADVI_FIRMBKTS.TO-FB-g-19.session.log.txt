@@ -1,0 +1,16 @@
+ADVI_FIRMBKTS.TO-FB-g-19.fence-prefix-list -- session log, worker 0.9.0_WK_ADVI_FIRMBKTS~41 (branch wk-ADVI_FIRMBKTS-41)
+
+1. TREE-OK: branch wk-ADVI_FIRMBKTS-41; org/ and .tools/ present in /c/dev/wk-firmbkts-41.
+2. Pre-edit base run of r4_modfence.py was not repeated; the check itself prints the base control (base module plan rc=1 on the list fixture).
+3. Edited infra/aws/terraform/modules/opal_name/main.tf:
+   - fence_scoped_prefixes: each scoped row's prefix as a list, try(tolist(prefix), [prefix]).
+   - NotResource and StringNotLike now map over that list.
+   - fence_malformed_scoped_rows: every member held to the string rules; empty list refused.
+   - error message of the fence_exemption_arns precondition names the list form.
+4. Edited lib/opal_naming.py validate(): list prefix accepted, each member checked, firm token checked per member.
+5. Probe .scratch/fb19_validate_probe.py (scratch only): 8 of 8 cases as expected (string ok, list ok, five malformed refused, wrong firm refused).
+6. AC1 r4_modfence.py --arms render: 4 of 4 arms, exit 0.
+7. AC2 terraform init -backend=false, terraform test: 48 passed, 0 failed.
+8. AC3 r4_scope.py: ROUND 4 SCOPE: OK 2 changed, 0 outside, 0 required missing (run before and after the code commit).
+9. Commit 25d33dd9b5 (code and builder) via .tools/safe-commit.sh. risk-reflex HOLD lines matched the basename main.tf to unrelated modules; read the cited note, which concerns a different main.tf (shared-infra EC2 snapshot role). Not applicable to this change; no surprise row.
+10. No surprise rows filed.

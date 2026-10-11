@@ -7,7 +7,8 @@ For each reader role it prints (identity Allow?, fence admits?) for ONE canonica
   - a served platinum object for the two partner Lambdas' roles (acts 4b, 4c).
 "Identity Allow" is a LOCAL glob evaluation of the role's inline and attached policy documents against the action and the
 object ARN (an Allow statement whose Action and Resource match, no matching Deny, and a condition on an Allow is printed as
-CONDITIONED, never counted as an unconditional Allow). "Fence admits" reads the live bucket policy's
+CONDITIONED, never counted as an unconditional Allow). "Permissions boundary" is read with iam:GetRole (CTO ADDENDUM 10: an implicit deny there limits a role-ARN grant).
+"Fence admits" reads the live bucket policy's
 DenyForeignFirmPrincipals ArnNotLike list the same way. It is not iam:SimulatePrincipalPolicy (denied to this identity for
 roles); a role the evaluation cannot read prints UNREADABLE.
 
@@ -101,7 +102,8 @@ def main():
         ("exec-summary-generator-role", "served", "exec-summary-generator (act 4b)"),
         ("partners-lambda-role", "served", "opal-partners-data (act 4c)"),
     ]
-    print("%-32s %-10s %-34s %-12s %s" % ("role", "object", "consumer", "fence", "identity (s3:GetObject)"))
+    print("%-32s %-10s %-34s %-12s %-44s %s" % ("role", "object", "consumer", "fence", "identity (s3:GetObject)",
+                                                  "permissions boundary"))
     n_ok = 0
     for role, kind, who in roster:
         key = a.ownership if kind == "ownership" else a.served
@@ -114,7 +116,12 @@ def main():
             ident = "UNREADABLE(%s)" % str(e)[:60]
         if fence == "ADMITTED" and ident.startswith("ALLOW"):
             n_ok += 1
-        print("%-32s %-10s %-34s %-12s %s" % (role, kind, who, fence, ident))
+        try:
+            pb = aws("iam", "get-role", "--role-name", role)["Role"].get("PermissionsBoundary", {}).get(
+                "PermissionsBoundaryArn", "none")
+        except Exception as e:  # noqa: BLE001
+            pb = "UNREADABLE(%s)" % str(e)[:50]
+        print("%-32s %-10s %-34s %-12s %-44s %s" % (role, kind, who, fence, ident, pb))
     print("principals readable after the flip today (fence admits AND identity allows): %d of %d" % (n_ok, len(roster)))
     return 0
 
