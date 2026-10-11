@@ -97,8 +97,52 @@ def main(argv):
             result.update(request=rid, provider=data.get("provider"), sections_total=len(rows), census=census,
                           computation_validation_status=(data.get("computation_validation") or {}).get("status"))
             summary.append(dict(read="CENSUS sections", http=status, sections_total=len(rows), groups=len(census)))
+        elif mode == "INTERSECT":
+            # Round 8 cell YCD-e-8: ONE read of the request's ORIGINAL upload (Ticker,Dollars). The tickers are compared, in
+            # memory, with the key set of a held-characteristics parquet given on the command line. Only COUNTS are written:
+            # no ticker, no amount, no file byte. argv: INTERSECT <request_id> <characteristics.parquet> <out.json>
+            import csv
+            import io
+            import urllib.request
+            import pyarrow.parquet as pq
+            rid, parquet_path = argv[2], argv[3]
+            req = urllib.request.Request(f1.API + f1.BASE + "/analysis/requests/" + rid + "/original?selected_tenant=49financial",
+                                         headers=h, method="GET")
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                status, answer = resp.status, json.loads(resp.read().decode("utf-8"))
+            route = ((answer.get("data") or {}).get("download_route") or {}) if isinstance(answer, dict) else {}
+            url = route["url"]
+            own = url.startswith("/") or url.startswith(f1.API)
+            url = f1.API + url if url.startswith("/") else url
+            # the bearer goes only to Opal's own origin; a pre-signed link to another host is fetched bare
+            freq = urllib.request.Request(url, headers=(h if own else {}), method="GET")
+            with urllib.request.urlopen(freq, timeout=60) as resp:
+                file_status, body = resp.status, resp.read()
+            import hashlib
+            file_sha = hashlib.sha256(body).hexdigest()
+            rows = [r for r in csv.reader(io.StringIO(body.decode("utf-8-sig"))) if r]
+            head = [c.strip().lower() for c in rows[0]]
+            col = head.index("ticker") if "ticker" in head else 0
+            tickers = sorted({r[col].strip().upper() for r in rows[1:] if len(r) > col and r[col].strip()})
+            table = pq.read_table(parquet_path).to_pydict()
+            keys = [str(k) for k in table["security"]]
+            by_plain = {k.rsplit(" US Equity", 1)[0].strip().upper(): i for i, k in enumerate(keys) if k.endswith(" US Equity")}
+            exact = {k.strip().upper() for k in keys}
+            per_input = {}
+            for field in ("CNTRY_OF_DOMICILE", "GICS_SECTOR_NAME"):
+                column = table[field]
+                per_input[field] = sum(1 for t in tickers if t in by_plain and column[by_plain[t]] not in (None, ""))
+            result.update(request=rid, original_sha256=file_sha, original_matches_served_sha=(file_sha == (answer.get("data") or {}).get("sha256")),
+                          securities_in_request=len(tickers), store_rows=len(keys),
+                          store_keys_with_us_equity_suffix=len(by_plain),
+                          request_tickers_matching_a_store_key_after_suffix_strip=sum(1 for t in tickers if t in by_plain),
+                          request_tickers_matching_a_store_key_exactly=sum(1 for t in tickers if t in exact),
+                          request_tickers_with_a_non_null_value=per_input)
+            summary.append(dict(read="INTERSECT original", http=status, file_http=file_status, securities_in_request=len(tickers),
+                                matching_after_suffix_strip=result["request_tickers_matching_a_store_key_after_suffix_strip"],
+                                matching_exactly=result["request_tickers_matching_a_store_key_exactly"], per_input=per_input))
         else:
-            raise SystemExit("mode must be R3, R45, R6 or CENSUS")
+            raise SystemExit("mode must be R3, R45, R6, CENSUS or INTERSECT")
     for row in summary:
         f1.say(json.dumps(row))
     result.update(ended_at=f1.stamp(), summary=summary, calls=f1.log)
