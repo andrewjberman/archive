@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-2.producers-grant-draft",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-2.producers-grant-draft.md",
+    "group": "OTHER",
+    "vintage_commit": "be150697b7"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~36",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "be150697b7",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-2.producers-grant-draft.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; its acceptance is the four grant arms (module call and resource, the two statements built from module outputs, the additive diff, terraform fmt) and the write-surface bound",
+      "expected": "N/A -- the order names none",
+      "observed": "N/A -- the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "not re-run: each invocation was run once; AC1 ran after terraform fmt and before the commit, and the committed bytes are the bytes it read",
+      "observed": "N/A -- no second run was made by this worker",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, terraform plan, terraform apply, and any AWS call of any kind",
+      "reason": "Bound 1 of the order: the cell DRAFTS the grant. The grant is applied by FB-g-8 under its own signed pair, with a scoped plan and a live get-role-policy read. AC1 blindness (order preflight): the check reads the policy text only; it cannot show that the role's other inline policies or its permission boundary leave the new Allow in force, nor that the module outputs resolve at plan time."
+    },
+    {
+      "item": "The nested portal submodule (git status shows ' M portal')",
+      "reason": "Not this worker's edit and not staged: the commits name paths only, and the portal pointer is outside the order's paths."
+    },
+    {
+      "item": "The eight non-ASCII comment lines already present in iam.tf at base be150697b7",
+      "reason": "Pre-existing, outside the order's additive grant (zero deleted lines). The appended block is ASCII-only. Recorded as row ADVI_FIRMBKTS-D1-W36-S1 (OBSERVATION, INERT)."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/bd-pipeline/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "594029834f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit 594029834f on wk-ADVI_FIRMBKTS-36; drafted, not applied. Appends one module opal_name_platinum_grant call and one aws_iam_role_policy bd_exporter_advi_49f_platinum_canonical (44 lines added, 0 deleted). No terraform init, plan or apply; no AWS call. The grant is applied by FB-g-8.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6c056245ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit 6c056245ad: row ADVI_FIRMBKTS-D1-W36-S1 appended. Row gate: 1 new row OK.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 reads the module call, the resource, its statements (built from the module outputs, nothing typed), the additive diff against the commit the worktree was cut from, and terraform fmt -check. Expect: ROUND 4 GRANT: 4 of 4 arms.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-36 && timeout 100 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_grant.py --arms grant --root /c/dev/wk-firmbkts-36; echo \"exit=$?\"",
+      "output_evidence": "  module name() -> advi-49f-platinum-canonical-rw-policy\n  new module blocks=1, new policy resources=1, scope arg='49financial'\n  statements=2 effects=['Allow'] actions=['s3:GetObject', 's3:ListBucket', 's3:PutObject'] resources=['arn:aws:s3:::${module.opal_name_platinum_grant.bucket}', 'arn:aws:s3:::${module.opal_name_platinum_grant.bucket}/${module.opal_name_platinum_grant.platinum_prefix}*'] prefix=['${module.opal_name_platinum_grant.platinum_prefix}*']\n  changed under bd-pipeline/: ['infra/aws/terraform/bd-pipeline/iam.tf']; iam.tf deleted lines=0\n  terraform fmt -check rc=0\nPASS G1 one new opal_name module call and one new aws_iam_role_policy named by its name output\nPASS G2 two Allow statements built from the module's bucket and platinum_prefix outputs, nothing wider, no typed literal\nPASS G3 additive: iam.tf deletes 0 lines and no other bd-pipeline file changed\nPASS G4 terraform fmt -check reads clean for iam.tf\nROUND 4 GRANT: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms PASS; exit=0; 1 new module block and 1 new policy resource; 2 statements; iam.tf 44 lines added, 0 deleted; measured on the uncommitted worktree after terraform fmt, before commit 594029834f",
+      "status": "PASS",
+      "expect": "ROUND 4 GRANT: 4 of 4 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the write-surface bound: the changed files are inside the order's paths, and the required files are changed. Expect: ROUND 4 SCOPE: OK.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-36 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-36 --allow infra/aws/terraform/bd-pipeline/iam.tf --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~36/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/bd-pipeline/iam.tf; echo \"exit=$?\"",
+      "output_evidence": "  CHANGED infra/aws/terraform/bd-pipeline/iam.tf\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md\nROUND 4 SCOPE: OK 2 changed, 0 outside, 0 required missing\nexit=0",
+      "denominator": "2 changed paths measured against the merge-base with the primary checkout; 2 of 2 inside the write grant; 1 of 1 required path changed; measured after commits 594029834f and 6c056245ad and before this instance was written; exit=0",
+      "status": "PASS",
+      "expect": "ROUND 4 SCOPE: OK"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W36-S1: TO-FB-g-2 bound 4 asks for ASCII-only content in iam.tf, which already carries 8 non-ASCII comment lines at base; the appended block is ASCII-only and no existing line was touched (OBSERVATION, INERT)"
+  ],
+  "session_log": "0.9.0_WK_ADVI_FIRMBKTS~36 on worktree /c/dev/wk-firmbkts-36, branch wk-ADVI_FIRMBKTS-36, base be150697b7. Module call and policy resource appended to infra/aws/terraform/bd-pipeline/iam.tf, terraform fmt applied (no change to existing lines), committed as 594029834f (naming gate CONFORMANT: advi-49f-platinum-canonical-rw-policy). Surprise row committed as 6c056245ad. AC1 4 of 4 PASS, AC2 OK. No terraform init, plan or apply, no AWS call, no status flip.",
+  "compiler_tools": [
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt infra/aws/terraform/bd-pipeline/iam.tf; terraform fmt -check infra/aws/terraform/bd-pipeline/iam.tf",
+      "result": "first check rc=3 (the appended block's Condition alignment); fmt rc=0 rewrote the appended block only (numstat 44 added, 0 deleted); re-check rc=0"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~36 <0.9.0_WK_ADVI_FIRMBKTS~36@opal.agent>\" -F .scratch/msg-iam.txt -- infra/aws/terraform/bd-pipeline/iam.tf",
+      "result": "[wk-ADVI_FIRMBKTS-36 594029834f] 1 file changed, 44 insertions(+); NAMING-GATE PASS 1 graded (advi-49f-platinum-canonical-rw-policy CONFORMANT as IAM_POLICY); msg-verify MATCH; rc=0"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~36 <0.9.0_WK_ADVI_FIRMBKTS~36@opal.agent>\" -F .scratch/msg-surprise.txt -- org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "[wk-ADVI_FIRMBKTS-36 6c056245ad] 1 file changed, 27 insertions(+); surprise-row-gate OK 1 new row; msg-verify MATCH; rc=0"
+    }
+  ]
+}

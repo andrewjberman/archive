@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-1.validator-ownership-key",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-1.validator-ownership-key.md",
+    "group": "OTHER",
+    "vintage_commit": "be150697b7"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~35",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "be150697b7",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-1.validator-ownership-key.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "Two one-line mutations of the helper, each applied in place, run once against the spec, then the file restored byte-identical to the committed copy: M-A replaces the canonical selection with the legacy key (return entry.legacy) and M-B replaces it with the canonical key (return entry.canonical).",
+      "expected": "M-A fails only (iii); M-B fails (ii) and (iv). The spec is not a passing assertion that no mutation reaches.",
+      "observed": "M-A: 1 fail, 5 pass; the failing test is (iii) with canonical = [b1], firm fa on bucket b1 reads its canonical key. M-B: 2 fail, 4 pass; the failing tests are (ii) each firm reads its legacy key on any bucket and (iv) the same firm on bucket b2 reads its legacy key.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- each invocation was run once by the worker, as the order requires; the two mutation runs are the control, not a repeat",
+      "observed": "N/A -- no same-input second run was made",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any deploy, any AWS call, any edit to package.json or any dependency, and the population of CANONICAL_PLATINUM_BUCKETS",
+      "reason": "Bounds 2.1 and 2.2 of the order: repository files only; engaging the list is the cutover act's, in the same deploy as the registry value flip. The deploy is act 4's, by the laptop identity."
+    },
+    {
+      "item": "The commit gate's own check of the three committed files",
+      "reason": "The commit gate printed 'checked 0 of 3 file(s) -- NOTHING WAS CHECKED' (it reads .py, .sh, .tf and org/projects JSON only). The three files are .mjs; they are graded by AC2 (the bun spec), not by the commit gate. The naming gate printed PASS 0 graded for the same reason."
+    },
+    {
+      "item": "The client-data check of the commit gate (surprise row ADVI_FIRMBKTS-D1-W35-S1)",
+      "reason": "The hashed account-id list is absent on this device, so the check printed WARN and did not run. Recorded as a row, not repaired: placing the list is outside this order's paths."
+    },
+    {
+      "item": "The nested portal submodule (git status shows ' M portal')",
+      "reason": "Not this worker's edit and not staged: the commits name paths only, and the portal pointer is outside the order's paths."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/ownership_key.mjs",
+      "kind": "script",
+      "commit_or_etag": "711d72b756",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit 711d72b756 on wk-ADVI_FIRMBKTS-35; no deploy, no AWS call. Exports CANONICAL_PLATINUM_BUCKETS (Object.freeze([]), empty) and ownershipMapKey(firmId, bucket, canonical, keys); it contains no key, bucket or firm literal.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/index.mjs",
+      "kind": "script",
+      "commit_or_etag": "711d72b756",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit 711d72b756; the diff is 3 lines: one import of ownershipMapKey from ./ownership_key.mjs, and the key line in getOwnershipMap now reads ownershipMapKey(firmId, bucket). The bucket line, the cache, the schema check and every log field are unchanged. The file keeps its one pre-existing non-ASCII comment byte run; the edit adds none.",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/tests/ownership_key.spec.mjs",
+      "kind": "test",
+      "commit_or_etag": "711d72b756",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit 711d72b756; bun:test spec, 6 tests, 0 fail (AC2). Imports only ../ownership_key.mjs and ../../_shared/firm-config.mjs.",
+      "artifact_covered_by": ["AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "e60ae55888",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit e60ae55888: row ADVI_FIRMBKTS-D1-W35-S1 appended. Row gate: 1 new row OK.",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 reads the helper's exports and its import, its dormant keys for every generated firm, its engaged keys (compared with the producers' seam's own canonical destination for the same legacy key, read from the checkout), and the call site by text. Expect: ROUND 4 VALIDATOR KEY: 4 of 4 arms.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-35 && timeout 110 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_validator.py --arms key --root /c/dev/wk-firmbkts-35; echo \"exit=$?\"",
+      "output_evidence": "  helper exports: {\"names\":[\"CANONICAL_PLATINUM_BUCKETS\",\"ownershipMapKey\"],\"frozen\":true,\"len\":0}\n  dormant: 1 listed firms, 5 unlisted firms all throw=True\n  engaged: firms=1, firms whose key moves=['<firm token elided per the naming rule>']\n  index.mjs uses the helper=True, key literal left in code=False\nPASS K1 ownership_key.mjs imports OWNERSHIP_KEYS and exports a frozen empty CANONICAL_PLATINUM_BUCKETS and ownershipMapKey\nPASS K2 dormant: the shipped list reads each firm's legacy key and an unknown firm throws\nPASS K3 engaged: a named bucket reads the seam's canonical key and an unnamed one stays legacy\nPASS K4 index.mjs builds the key through the helper, with no key literal left in code\nROUND 4 VALIDATOR KEY: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms PASS; exit=0; 1 listed firm of 5 FIRM_CONFIG firms; the 4 unlisted FIRM_CONFIG firms and 1 absent firm id all throw (the printed unlisted count of 5 includes the absent id)",
+      "status": "PASS",
+      "expect": "ROUND 4 VALIDATOR KEY: 4 of 4 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is your spec.",
+      "method": "test_suite",
+      "invocation": "export PATH=\"$PATH:$HOME/.bun/bin\" && cd /c/dev/wk-firmbkts-35/infra/aws/lambda-edge/auth-validator-edge && timeout 110 env -u FORCE_COLOR bun test tests/ownership_key.spec.mjs 2>&1 | tail -n 6",
+      "output_evidence": " 6 pass\n 0 fail\n 17 expect() calls\nRan 6 tests across 1 file. [1042.00ms]",
+      "denominator": "6 of 6 tests pass, 0 fail, 17 expect() calls, 1 file",
+      "status": "PASS",
+      "expect": "^\\s*0 fail$"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound: the changed files are inside the order's paths, and the required files are changed. Expect: ROUND 4 SCOPE: OK.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-35 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-35 --allow infra/aws/lambda-edge/auth-validator-edge/index.mjs --allow infra/aws/lambda-edge/auth-validator-edge/ownership_key.mjs --allow infra/aws/lambda-edge/auth-validator-edge/tests/ownership_key.spec.mjs --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~35/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/lambda-edge/auth-validator-edge/index.mjs --require infra/aws/lambda-edge/auth-validator-edge/ownership_key.mjs; echo \"exit=$?\"",
+      "output_evidence": "  CHANGED infra/aws/lambda-edge/auth-validator-edge/index.mjs\n  CHANGED infra/aws/lambda-edge/auth-validator-edge/ownership_key.mjs\n  CHANGED infra/aws/lambda-edge/auth-validator-edge/tests/ownership_key.spec.mjs\nROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing\nexit=0",
+      "denominator": "3 changed paths, 0 outside the write grant, 0 of 2 required files missing; measured on the worktree before the surprise-row commit e60ae55888, which touches the granted investigation file only",
+      "status": "PASS",
+      "expect": "ROUND 4 SCOPE: OK"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W35-S1: the commit-time client-data check did not run on this device (the hashed account-id list is absent at its default path), so commit 711d72b756 landed unchecked for client account ids; class OBSERVATION, standing ARMED, disarm owner named by reading rule 32 for the issuer to confirm"
+  ],
+  "session_log": "0.9.0_WK_ADVI_FIRMBKTS~35 on worktree /c/dev/wk-firmbkts-35, branch wk-ADVI_FIRMBKTS-35, fast-forwarded to be150697b7 (the merged head) before the cut. Helper, index.mjs call site and spec committed as 711d72b756; surprise row committed as e60ae55888; this instance committed second. AC1 4 of 4 PASS, AC2 6 of 6 PASS, AC3 PASS. The AC runs were made on the uncommitted worktree before 711d72b756; the committed bytes equal the bytes measured. No deploy, no AWS call, no status flip. The first seat's (~24) uncommitted files were not used.",
+  "compiler_tools": [
+    {
+      "tool": "python r4_validator.py --arms key (issuer check, read-only)",
+      "invocation": "timeout 110 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_validator.py --arms key --root /c/dev/wk-firmbkts-35",
+      "result": "ROUND 4 VALIDATOR KEY: 4 of 4 arms; exit=0"
+    },
+    {
+      "tool": "bun test (bun 1.4.2)",
+      "invocation": "cd /c/dev/wk-firmbkts-35/infra/aws/lambda-edge/auth-validator-edge && timeout 110 env -u FORCE_COLOR bun test tests/ownership_key.spec.mjs",
+      "result": "6 pass, 0 fail, 17 expect() calls; mutation controls M-A 1 fail and M-B 2 fail as recorded in controls.mutant"
+    },
+    {
+      "tool": "python r4_scope.py (issuer check, read-only)",
+      "invocation": "timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-35 (with the four --allow and two --require arguments of AC3)",
+      "result": "ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing; exit=0"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~35 <0.9.0_WK_ADVI_FIRMBKTS~35@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "711d72b756 (3 files, 68 insertions, 1 deletion; naming gate PASS 0 graded; commit gate checked 0 of 3); e60ae55888 (surprise row; row gate OK 1 new row); exit=0 for both"
+    }
+  ]
+}
