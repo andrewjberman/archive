@@ -1,0 +1,77 @@
+{
+  "attribute": "restricted_prefix_hosts",
+  "shape": "list of strings on a FIRM scope row of infra/logic/registry/scopes.json; each string a key of a row in infra/logic/registry/systems.json (the systems whose restricted prefix this row's bucket holds). ABSENT or [] means the row's bucket holds the restricted prefix of no system; no row needs editing except the one that holds it. Not a boolean and does not name the CRM (CTO terms relayed by the coordinator, 4 terms).",
+  "value_domain": "systems.json keys",
+  "value_domain_check": "every value in every restricted_prefix_hosts list is a key present in infra/logic/registry/systems.json: [('cottonwood', 'commonwealth', True)] over the 14 scope rows (commonwealth is the systems.json row whose \"key\" is at systems.json:73); read by python at 2026-10-11T06:1xZ in the worktree",
+  "row": "cottonwood",
+  "row_evidence": [
+    "Before 5f962296ae the selector (s3-lgic-firm-buckets.tf:197 at 5f962296ae^, `one([for ... in local.lgic_managed_firm_buckets : s if length(lookup(s, \"masters\", [])) > 0])`) chose the managed FIRM rows carrying masters. At 5f962296ae^ scopes.json carried masters on 49financial (:21, NOT managed: no bucket_managed_by) and cottonwood (:167, managed, :166) only; inflection (:120-127) is managed but carried no masters. So the one row selected was cottonwood.",
+    "git show 5f962296ae adds `\"masters\": [\"4698\"]` to the inflection row only: that is the commit that made the proxy select two rows.",
+    "Commit 8e58736597 (ADVI_COTBKF.TO-CB-d-4, 0.9.0_WK_ADVI_COTBKF~15) states in its body: 'three Deny statements on the cottonwood row of aws_s3_bucket_policy.lgic_firm only ... plus the cloudops-cot-restricted-breakglass-role'; the .tf comment at :238 repeats cloudops-cot-restricted-breakglass-role.",
+    "Today scopes.json:162 (cottonwood, key) / :169 (bucket_managed_by) / :170 (masters) / :171 (the new attribute)."
+  ],
+  "postulates": [
+    {
+      "postulate": "i. MECE over a declared domain",
+      "domain": "the 14 rows of scopes.json \"scopes\" (printed by python over the file): FIRM 4 (49financial :14, inflection :121, cottonwood :162, demo :212), GLOBAL 1 (global :231), MASTER 4 (08242234, 08335338, z09, 4698), PRODUCT 5 (mdpf, etfs, irpt, harvest, transcripts). The claim's population is 'scope rows whose bucket holds the restricted prefix of a systems.json system'.",
+      "subtraction": "population (14) minus the one row whose bucket holds commonwealth's restricted prefix (cottonwood, per row_evidence) = 13 rows that hold none; each of the 13 is the absent-key case, and absent means holds none, so the 14 rows partition into {carries a non-empty list: 1} and {absent: 13} with no overlap and no row uncovered. Of the 13, the other managed FIRM row (inflection :121, bucket_managed_by :128) is the only one the selector's comprehension ranges over besides cottonwood, so the comprehension's domain (2 managed FIRM rows: managed_firm_rows=2 in CB61bi1-AC1) is covered as 1 + 1.",
+      "evidence": "infra/logic/registry/scopes.json:14,121,162,212,231 (FIRM/GLOBAL rows) and :162-171 (the carrying row); infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf:96-102 (lgic_managed_firm_buckets) and :198 (the selector)"
+    },
+    {
+      "postulate": "ii. SAME GRAIN",
+      "grain": "one scope-row field, one value per row, a list of system keys (the grain of masters :21,:129,:170 and of pipeline_trees/monolith_scopes: a per-row list/map of keys of other registry rows).",
+      "evidence": "scopes.json:170 masters is a list of MASTER row keys checked by lib/opal_naming.py:459-462; the new field at scopes.json:171 is a list of systems.json keys; systems.json:73 is the key 'commonwealth' it holds. It is not a system-level field and not a bucket-level field: a FIRM row's bucket is one-to-one with the row (scopes.json:167 bucket, 'opal-data-cottonwood')."
+    },
+    {
+      "postulate": "iii. INTENT COHERENCE (one axis, one intent)",
+      "intent": "'this firm bucket holds a restricted prefix belonging to these systems' only. It is not who manages the bucket (bucket_managed_by :169), not which vendor master accounts belong to the firm (masters :170, whose intent is Black Diamond/Orion account ids, validated at lib/opal_naming.py:459-462), not a tenant fact. The old selector read masters for the CRM's firm; the proxy broke when masters' own intent (a second firm's master, 5f962296ae, true row) legitimately repeated.",
+      "evidence": "scopes.json:7 (view_fields, now naming the field and its single intent) ; scopes.json:169-171; s3-lgic-firm-buckets.tf:189-192 (comment now states the selector reads the field and not masters)"
+    },
+    {
+      "postulate": "iv. STATE COHERENCE (name what one remedy does NOT move)",
+      "does_not_move": "Adding the attribute moves none of: bucket_provisioned (:168), bucket_managed_by (:169), masters (:170), the managed-row set lgic_managed_firm_buckets (.tf:96-102), the CRM prefix local lgic_crm_prefix (.tf:199), the bucket local (.tf:200) and the three Deny statements (.tf:207-235), or lib/opal_naming.py validate (run after the edit: 'VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s)', rc 0, the same counts as before the edit). The remedy for 'a second row would also host commonwealth' is NOT this field: one() still fails the plan closed on 2 rows (.tf:198), and the remedy for 'no row hosts it' is a one() failure on 0 rows. Removing the field from cottonwood fails the plan on 0 rows rather than choosing another firm.",
+      "evidence": "infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf:96-102,198-200; infra/logic/registry/scopes.json:168-171"
+    }
+  ],
+  "token_census": [
+    {
+      "token": "restricted_prefix_hosts",
+      "pattern": "\\brestricted_prefix_hosts\\b",
+      "phase": "BEFORE this worker's edits (run started before the edits landed)",
+      "hits": 0,
+      "files": 0,
+      "denominator": "0 hit(s) across 79319 file(s) scanned in scope [corpus=all] | 139 EPHEMERAL-FLOOR, NOT searched | 14401 BINARY, NOT searched (a second run before the edits read 79320 files, also 0 hits)"
+    },
+    {
+      "token": "crm_prefix_holder",
+      "pattern": "\\bcrm_prefix_holder\\b",
+      "phase": "rejected candidate",
+      "hits": 0,
+      "files": 0,
+      "denominator": "0 hit(s) across 79320 file(s) scanned in scope [corpus=all] | 139 EPHEMERAL-FLOOR, NOT searched | 14401 BINARY, NOT searched"
+    },
+    {
+      "token": "restricted_hosts",
+      "pattern": "\\brestricted_hosts\\b",
+      "phase": "rejected candidate",
+      "hits": 0,
+      "files": 0,
+      "denominator": "0 hit(s) across 79320 file(s) scanned in scope [corpus=all] | 139 EPHEMERAL-FLOOR, NOT searched | 14401 BINARY, NOT searched"
+    },
+    {
+      "token": "restricted_prefix_hosts",
+      "pattern": "\\brestricted_prefix_hosts\\b",
+      "phase": "AFTER the edits, page 2 of 2",
+      "hits": 7,
+      "files": 4,
+      "denominator": "7 hit(s) across 79320 file(s) scanned in scope [corpus=all] | 139 EPHEMERAL-FLOOR, NOT searched | 14401 BINARY, NOT searched; BANDS SURFACED=5 CONFIG=2; every hit is this worker's own: scopes.json (2: view_fields :7, row :171), s3-lgic-firm-buckets.tf (2: :189, :198), and the comp-find call logs .comp-graph/.comp_dedup and org/mcp/comp-tool-runs.jsonl (3). No other file carries the token. The log hits grow with every census call."
+    }
+  ],
+  "rejected": [
+    {"candidate": "crm_prefix_holder", "why": "names the CRM, which CTO term 1 forbids, and ties a registry schema field to one consumer; a second restricted prefix would need a second field. 0 hits, no collision, rejected on intent coherence (postulate iii)."},
+    {"candidate": "restricted_hosts", "why": "does not say what is hosted (a prefix) and reads as hosts-as-machines. 0 hits, rejected on clarity of the axis (postulate iii)."},
+    {"candidate": "a boolean (e.g. holds_restricted_crm)", "why": "a boolean cannot say whose restricted prefix, so the selector would be the same proxy with a better name and the .tf could not select by the 'commonwealth' token it already carries; rejected by CTO term 1."},
+    {"candidate": "masters (status quo)", "why": "the proxy that broke: two managed FIRM rows now carry it (5f962296ae) and the registry edit stands (CTO ruling XB-20261011T055236Z-0989 item 1)."}
+  ],
+  "strongest_case_against": "The field is a registry fact that exactly one consumer (the shared-infra .tf) reads, and no validator reads it: lib/opal_naming.py validate passes with or without it and with a value that is not a systems.json key, so the value_domain check is a one-time python read here, not an enforced constraint, and the field can drift from the bucket it describes. Setting it by hand on the wrong FIRM row would make the plan select that firm's bucket for the Deny statements; one() only guards the count of rows, not that the row is the right one."
+}

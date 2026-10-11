@@ -1,0 +1,101 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bi-1",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bi-1.crm-scope-attribute.md",
+  "group": "OTHER",
+  "vintage_commit": "28fbb42d46"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~88",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round61.md",
+  "vintage_commit": "28fbb42d46",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bi-1.crm-scope-attribute.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/logic/registry/scopes.json",
+   "kind": "doc",
+   "commit_or_etag": "31263d7d3a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "registry data edit on the worker branch wk-ADVI_COTBKF-88; not merged, no terraform, no AWS call",
+   "artifact_covered_by": [
+    "CB61bi1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf",
+   "kind": "doc",
+   "commit_or_etag": "31263d7d3a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "selector line edit on the worker branch; no terraform command was run, nothing planned or applied by this order",
+   "artifact_covered_by": [
+    "CB61bi1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~88/CRM_SCOPE_ATTRIBUTE_RULE24.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "rule 24 record; no deploy",
+   "artifact_covered_by": [
+    "CB61bi1-AC1",
+    "CB61bi1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB61bi1-AC1",
+   "criterion_verbatim": "exactly one of the 2 managed firm rows carries the attribute, the one selector line reads it and no longer reads masters, and the record carries four postulates and its census.",
+   "method": "command",
+   "invocation": "python -c \"import json,re;r=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~88/CRM_SCOPE_ATTRIBUTE_RULE24.json',encoding='utf-8'));a=r['attribute'];s=json.load(open('infra/logic/registry/scopes.json',encoding='utf-8'))['scopes'];m=[x for x in s if x.get('class')=='FIRM' and (x.get('bucket_managed_by','')=='s3-lgic-firm-buckets.tf' or (x.get('bucket_managed_by','')=='' and x.get('bucket_provisioned') is False))];h=[x for x in m if x.get(a)];t=open('infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf',encoding='utf-8').read();l=[y for y in t.splitlines() if re.match(r'\\s*lgic_crm_scope\\s*=',y)];print('CRM-SCOPE-SELECT managed_firm_rows=%d rows_with_attribute=%d selector_lines=%d reads_attribute=%s reads_masters=%s postulates=%d census_tokens=%d'%(len(m),len(h),len(l),a in l[0],'masters' in l[0],len(r['postulates']),len(r['token_census'])))\"",
+   "expect": "CRM-SCOPE-SELECT managed_firm_rows=2 rows_with_attribute=1 selector_lines=1 reads_attribute=True reads_masters=False postulates=4",
+   "output_evidence": "CRM-SCOPE-SELECT managed_firm_rows=2 rows_with_attribute=1 selector_lines=1 reads_attribute=True reads_masters=False postulates=4 census_tokens=4 (rc 0)",
+   "denominator": "2 managed FIRM rows of 14 scope rows; 1 selector line; 4 postulates; 4 census entries",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB61bi1-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the row chosen is the row the selector chose before 5f962296ae, on the cited evidence; each postulate's evidence resolves at its cited line, and the subtraction ran over every scope row; the token census carries denominators and the name collides with nothing.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read CRM_SCOPE_ATTRIBUTE_RULE24.json (row_evidence, four postulates, token_census) against git show 5f962296ae^ and scopes.json",
+   "output_evidence": "row cottonwood (at 5f962296ae^ the only managed FIRM row carrying masters; commit 8e58736597 names the cottonwood row); attribute restricted_prefix_hosts, 0 hits before the edits over 79319/79320 files; rejected crm_prefix_holder and restricted_hosts, 0 hits each; python lib/opal_naming.py validate rc 0; no verdict given by the worker",
+   "denominator": "14 scope rows in the subtraction; 4 census entries each with a denominator; 4 postulates",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~88/ADVI_COTBKF.TO-CB-bi-1.crm-scope-attribute.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB61bi1-AC1)",
+   "result": "CRM-SCOPE-SELECT managed_firm_rows=2 rows_with_attribute=1 selector_lines=1 reads_attribute=True reads_masters=False postulates=4 census_tokens=4"
+  },
+  {
+   "tool": "python lib/opal_naming.py validate",
+   "invocation": "python lib/opal_naming.py validate",
+   "result": "VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s) at registry@7b43d4fe02425839 over all 14 registry file(s)"
+  }
+ ]
+}

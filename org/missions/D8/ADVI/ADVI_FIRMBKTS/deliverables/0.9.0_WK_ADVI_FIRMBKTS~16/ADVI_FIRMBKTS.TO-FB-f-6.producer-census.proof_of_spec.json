@@ -1,0 +1,95 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-f-6.producer-census",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-6.producer-census.md",
+  "group": "OTHER",
+  "vintage_commit": "576e574de4"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~16",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R3.md",
+  "vintage_commit": "576e574de4",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-6.producer-census.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~16/PRODUCER_CENSUS.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "sha256 dc43d94512460c818cccf85ae3620ecd28d2349cf7c04fe6424db04c768950fb; PRODUCER_CENSUS.json built by .scratch/build_census.py from line reads; each of 58 writer lines re-read (key text present); 11 classes; object counts from F7_MANIFEST.tsv.gz (52,910 objects, sum equal); seam 42 importers; r3_census.py AC1 3 of 3 (see acceptance)",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~16/PRODUCER_CENSUS.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "sha256 fe1dcdb9e9f3f38a9d8c9b66051cd19a94cad579f467e9c6ab4e776c62e642f6; human view rendered from PRODUCER_CENSUS.json by .scratch/build_md.py; 172 lines; ASCII; section 7 lists the four surprise rows filed",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "ROUND 3 PRODUCER CENSUS: 3 of 3 arms (python r3_census.py --census PRODUCER_CENSUS.json: C1 every served class has exactly one entry with objects equal to the F7 manifest's and a writer or an evidenced orphan; C2 every writer's named line exists and contains the quoted key text; C3 the seam definition line exists and the gold importer count equals the recount)",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-16 && timeout 110 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round3/checks/r3_census.py --census org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~16/PRODUCER_CENSUS.json --root /c/dev/wk-firmbkts-16; echo \"exit=$?\"",
+   "expect": "ROUND 3 PRODUCER CENSUS: 3 of 3 arms",
+   "output_evidence": "  classes in the table=11 entries=11 objects=52910 (manifest 52910)\n  writers=58 with the named line re-read and containing the quoted key text=58\n  seam definition line holds S3_BUCKET: True; scripts importing it recounted=42 census=42\nPASS C1 every served class has exactly one entry, its objects equal the F7 manifest's, and it names a writer or is an evidenced orphan\nPASS C2 every writer's named line exists and contains the key text the census quotes, and names its bucket expression and runner\nPASS C3 the bucket seam's definition line exists and the number of gold scripts importing it equals the recount\nROUND 3 PRODUCER CENSUS: 3 of 3 arms\nexit=0",
+   "denominator": "3 of 3 arms; 11 of 11 served classes; 52,910 of 52,910 manifest objects; 58 of 58 writer lines re-read; 42 of 42 seam importers recounted",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC1 grader run on a copy of PRODUCER_CENSUS.json (.scratch/mutant_census.json, not committed) with the gold/artifacts/ object count moved from 44 to 45 (one object off by one)",
+   "expected": "C1 FAIL on the object count; the other two arms unchanged; ROUND 3 PRODUCER CENSUS: 2 of 3 arms; exit=1",
+   "observed": "    OBJECTS gold/artifacts/ census=45 manifest=44\n  classes in the table=11 entries=11 objects=52911 (manifest 52910)\n  writers=58 with the named line re-read and containing the quoted key text=58\n  seam definition line holds S3_BUCKET: True; scripts importing it recounted=42 census=42\nFAIL C1 every served class has exactly one entry, its objects equal the F7 manifest's, and it names a writer or is an evidenced orphan\nPASS C2 every writer's named line exists and contains the key text the census quotes, and names its bucket expression and runner\nPASS C3 the bucket seam's definition line exists and the number of gold scripts importing it equals the recount\nROUND 3 PRODUCER CENSUS: 2 of 3 arms\nexit=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "r3_census.py re-run on the unchanged PRODUCER_CENSUS.json, output compared byte for byte with the first run",
+   "observed": "two runs identical (cmp rc=0); both end 'ROUND 3 PRODUCER CENSUS: 3 of 3 arms', exit=0",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "schedule and trigger of each writer (recorded null)",
+   "reason": "no live AWS read in bounds; no scheduler resource for bd-gold-layer-runner found in infra/aws/terraform; the out-of-repo scheduler question is UNKNOWN"
+  },
+  {
+   "item": "runner of the E-series writers E_01 and E_24",
+   "reason": "not declared in gold_dispatch.sh; recorded UNKNOWN with the search"
+  },
+  {
+   "item": "legacy dual-write targets of the D_02 and D_03 advisor and client builders",
+   "reason": "the LEGACY map was read; the per-builder legacy targets were not all resolved; UNKNOWN whether any lands under a served prefix"
+  },
+  {
+   "item": "any repoint proposal",
+   "reason": "FB-f-6 bounds: the cell states what a repoint would touch and proposes none"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W16-S1: comp-pipescript io reports one write for D_04 (partner_analytics_key, which D_04 reads at lines 1974-1975) and omits the 25 D_04 platinum writes that go through _write_batch and _write_json_to_s3; the census is built from line reads, not from the graph",
+  "ADVI_FIRMBKTS-D1-W16-S2: D_00f.advisor_nna_canonical.py hard-codes S3_BUCKET = 'opal-data-bd' (line 87), writes platinum/firm/advisor_nna_canonical.json, and sits outside the 42-importer seam, so the premise that D_04 alone writes platinum/firm/ and that an env-var repoint moves every writer does not hold",
+  "ADVI_FIRMBKTS-D1-W16-S3: comp-pipescript io returns Script not found for 25 of the 26 E-series bd-gold ids; E_01 and E_24 write served-class keys to opal-data-bd and no E_ id appears in gold_dispatch.sh",
+  "ADVI_FIRMBKTS-D1-W16-S4: the worker face (lines 1-96) carries no <status> element and the order file is outside this worker's <paths>, so the step-5 status flip was not made"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~16/ADVI_FIRMBKTS.TO-FB-f-6.producer-census.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -I .scratch/build_census.py; python -I .scratch/build_md.py; python -I .scratch/append_rows.py; python -I .scratch/build_proof.py (the grader run is the AC1 invocation)",
+   "result": "census built from 58 re-read writer lines; 11 classes; 52,910 objects; 42 importers; markdown view 172 lines; four surprise rows appended to INVESTIGATION_v1.md"
+  }
+ ]
+}

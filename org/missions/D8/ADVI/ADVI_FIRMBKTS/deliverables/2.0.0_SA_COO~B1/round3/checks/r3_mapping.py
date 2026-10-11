@@ -56,11 +56,16 @@ def structure(root):
 
     want = {(b, c["prefix"]): c["objects"] for b, bd in census["buckets"].items() for c in bd["classes"]}
     regrids = {(g.get("bucket"), g.get("parent")): g for g in (m3.get("regrids") or [])}
-    own = [(r.get("bucket"), r.get("prefix")) for r in rows if not r.get("parent")]
-    kids = [(r.get("bucket"), r.get("prefix"), r.get("parent")) for r in rows if r.get("parent")]
-    dup = len(own) + len(kids) - len(set(own) | {(b, p) for b, p, _ in kids})
+    # a rule-3a row is an OBJECT-grain RETIRE of one zero-byte placeholder whose key equals its class prefix; the class's
+    # data keeps its own class-grain row at the same prefix (ruling (a): the class is unblocked), so the two never collide
+    ph = [r for r in rows if r.get("placeholder_key") and str(r.get("rule", "")).startswith("3a")]
+    cls_rows = [r for r in rows if r not in ph]
+    own = [(r.get("bucket"), r.get("prefix")) for r in cls_rows if not r.get("parent")]
+    own_ph = [(r.get("bucket"), r.get("prefix")) for r in ph]
+    kids = [(r.get("bucket"), r.get("prefix"), r.get("parent")) for r in cls_rows if r.get("parent")]
+    dup = (len(own) + len(kids) - len(set(own) | {(b, p) for b, p, _ in kids})) + (len(own_ph) - len(set(own_ph)))
     ok2 = not dup
-    covered = set(own)
+    covered = set(own) | set(own_ph)
     for b, p, parent in kids:
         if (b, parent) not in regrids or not p.startswith(parent):
             print("    CHILD-WITHOUT-REGRID %s %s (parent %s)" % (b, p, parent))
@@ -206,6 +211,13 @@ def repair(root):
             print("    MARKER-NOT-STATE %s %s disposition=%r tier=%r" % (r.get("bucket"), r.get("prefix"),
                                                                        r.get("disposition"), d.get("tier")))
             t2 = False
+        # CTO ADDENDUM 1 (ROUND_ANALYSIS.round2.md): a marker row is at class grain, matched by literal key tails
+        mm = r.get("marker_match")
+        if (not isinstance(mm, list) or not mm
+                or any((not isinstance(x, str)) or not x.strip() or re.search(r"[*?\[\]]", x) for x in mm)):
+            print("    MARKER-MATCH %s %s marker_match=%r (a non-empty list of literal tails, never a wildcard)"
+                  % (r.get("bucket"), r.get("prefix"), mm))
+            t2 = False
     mixed = 0
     for (b, parent), g in regrids.items():
         kinds = {r.get("kind") == "marker" for r in rows if r.get("bucket") == b and r.get("parent") == parent}
@@ -272,6 +284,16 @@ def repair(root):
         if any(g.get(k) is None for k in need) or g["difference"] != g["listed_objects"] - g["census_objects"]:
             print("    REGRID-COUNTS %s %s %s" % (b, p, {k: g.get(k) for k in need}))
             t5 = False
+        if g.get("marker_objects") is not None:
+            # ADDENDUM 1: per class the live listing = marker matches + data-child keys, difference 0; a matched
+            # object over 4 KiB is a finding, never placed silently
+            if g.get("data_objects") is None or g["listed_objects"] != g["marker_objects"] + g["data_objects"]:
+                print("    LISTING-NOT-MARKERS-PLUS-DATA %s %s listed=%r markers=%r data=%r"
+                      % (b, p, g.get("listed_objects"), g.get("marker_objects"), g.get("data_objects")))
+                t5 = False
+            if (g.get("marker_max_bytes") or 0) > 4096 and g.get("finding") is not True:
+                print("    MARKER-OVER-4KIB-UNREPORTED %s %s %r" % (b, p, g.get("marker_max_bytes")))
+                t5 = False
     md = os.path.join(root, DELIV, "MAPPING_TABLE_v3.md")
     ok_md = False
     faults = [r for r in rows if r.get("disposition") == "FAULT"]

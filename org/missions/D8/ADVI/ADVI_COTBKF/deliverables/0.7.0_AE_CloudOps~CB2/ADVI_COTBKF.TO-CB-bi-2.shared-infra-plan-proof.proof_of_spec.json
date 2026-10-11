@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-bi-2",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bi-2.shared-infra-plan-proof.md",
+    "group": "OTHER",
+    "vintage_commit": "6d616df83c"
+  },
+  "assignee": "0.7.0_AE_CloudOps~CB2",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round61.md",
+    "vintage_commit": "28fbb42d46",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bi-2.shared-infra-plan-proof.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.7.0_AE_CloudOps~CB2/shared_infra_plan_proof.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The report the face's REPORT clause owes."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB61bi2-AC1",
+      "criterion_verbatim": "the plan succeeded (the JSON exists), the watched set is not empty, and 0 watched resources change. Report the watched count: a watched count of 0 is a failed read, not a pass. <expect>watched_changed=0</expect>",
+      "method": "command",
+      "invocation": "python -c \"import json,re;d=json.load(open('C:/dev/_cotbkf_private_evidence_20261009/r61/shared_infra_plan.json',encoding='utf-8'));rc=d.get('resource_changes',[]);pat=re.compile(r'lgic_firm|restricted|breakglass|crm',re.I);w=[x for x in rc if pat.search(x['address'])];mv=[x for x in w if x['change']['actions']!=['no-op']];oth=[x for x in rc if not pat.search(x['address']) and x['change']['actions']!=['no-op']];print('CRM-PLAN resources=%d watched=%d watched_changed=%d other_changed=%d'%(len(rc),len(w),len(mv),len(oth)))\"",
+      "output_evidence": "CRM-PLAN resources=242 watched=12 watched_changed=2 other_changed=2 -- stable across two independent plan runs of the same commit. Expected watched_changed=0; read 2. The two are aws_iam_role.restricted_breakglass and aws_iam_role_policy.restricted_breakglass, both ['create']. The other 10 of 12 watched resources read no-op, including both aws_s3_bucket_policy.lgic_firm rows, which are the CRM restricted-prefix statements themselves.",
+      "denominator": "242 resource_changes in the plan; 12 watched of 242 (watched is NOT empty, so this is not a failed read); 2 of 12 watched changed; 10 of 12 watched no-op; 15 aws_iam_role in the plan of which 14 read no-op against live; 253 terraform state rows of which 0 match breakglass and 10 match lgic_firm; 2 'Error:' blocks in the plan run.",
+      "status": "FAIL",
+      "status_reason": "The expect is watched_changed=0 and the read is 2. The plan DID succeed and the watched set is NOT empty (12 of 242), so neither of the criterion's other two conditions is what failed. The 2 are aws_iam_role.restricted_breakglass and aws_iam_role_policy.restricted_breakglass, both ['create'], both absent from terraform state (0 of 253) and absent from live IAM (NoSuchEntity with an isolated positive control passing) -- i.e. code that has never been applied, not a delta the selector introduced. Recorded FAIL against the criterion AS WRITTEN rather than reinterpreted: step 4 and the refusal clause route a watched-resource change to 1.0.0_SA_CTO~DELL2 as a never-widen act, and that re-reading is the CTO's to make, not this seat's."
+    },
+    {
+      "criterion_id": "CB61bi2-AC2",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the watched pattern covers the CRM restricted-prefix statements, the break-glass role and the firm bucket policies (each named by address in the report); the control of step 2 is real.",
+      "method": "manual_read_with_citation",
+      "invocation": "(judgment criterion -- no invocation; graded by 3.0.0_SA_CVO at L9)",
+      "output_evidence": "Not self-graded. The two facts the CVO needs are laid out by address in the report: all 12 watched addresses with their actions, and the control's verbatim error. Coverage note offered as material, not as a verdict: the pattern's four words reach the firm bucket policies (aws_s3_bucket_policy.lgic_firm[*]) and the break-glass role and policy (aws_iam_role[_policy].restricted_breakglass); the CRM restricted-prefix statements are not separate resources but inline statements INSIDE aws_s3_bucket_policy.lgic_firm[\"cottonwood\"], which reads no-op. data.aws_iam_user.restricted_console matches the pattern but is a data source and so appears in no resource_changes row -- the preflight's named BLIND.",
+      "denominator": "12 watched addresses of 242 resource_changes, each printed with its action in the report; 1 control run, rc=1, error text quoted verbatim.",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "A judgment criterion, graded by 3.0.0_SA_CVO at L9 and never self-graded; the order's own <proof_of_spec> block says a judgment criterion is never recorded PASS. UNVERIFIABLE-BY-INSTRUMENT is this project's standing encoding for that state (34 of 80 ADVI_COTBKF proof_of_spec files use it for judgment=true rows). The material the CVO needs is supplied and not scored: all 12 watched addresses with their actions, and the control's verbatim error."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The face's step-2 control is the negative arm and it was RUN HERE, not cited: the same root at the branch's base commit 28fbb42d46, in a detached control worktree C:/dev/wk-cotbkf-bi2ctl. `terraform init` itself fails rc=1 with 'Error: Invalid function argument / on s3-lgic-firm-buckets.tf line 197, in locals / 197: lgic_crm_scope = one([for k, s in local.lgic_managed_firm_buckets : s if length(lookup(s, \"masters\", [])) > 0]) / while calling one(list) / local.lgic_managed_firm_buckets is object with 2 attributes / Invalid value for \"list\" parameter: must be a list, set, or tuple value with either zero or one elements.' The positive arm is the same root at 84457822bb, where init returns rc=0 and the plan evaluates the selector and renders 242 resource changes. A second, independent control guards the live-absence reading of the break-glass role: get-role on the role returns NoSuchEntity while an ISOLATED get-role on demo-transform-runner-ec2-role returns its ARN under the same credentials, so the absence is the world and not the instrument. A third guards the 'bucket deleted' reading: head-bucket on opalinvest-portal returns 403 Forbidden where head-bucket on a deliberately nonexistent name returns 404 Not Found.",
+      "status": "FIRED-AS-EXPECTED",
+      "expected": "The negative arm must FAIL at the base commit with the one() error, and the positive arm must succeed at 84457822bb -- otherwise 'the plan evaluates' says nothing about the fix. The two live-read controls must DISCRIMINATE: an absent role and an existing role must read differently under the same credentials, and an existing-but-forbidden bucket must read differently from a truly absent one.",
+      "observed": "All three fired. (1) Base 28fbb42d46: init rc=1 with 'Invalid value for \"list\" parameter' at s3-lgic-firm-buckets.tf line 197, while 84457822bb init rc=0 and the plan renders 242 resource changes -- the arms differ. (2) get-role on the break-glass role -> NoSuchEntity; isolated get-role on demo-transform-runner-ec2-role -> its ARN. In-plan corroboration: 14 of 15 aws_iam_role rows read no-op. (3) head-bucket opalinvest-portal -> 403 Forbidden; head-bucket on a nonexistent name -> 404 Not Found. A first attempt at control (2) used a guessed role name, opal-demo-transform-runner, which does not exist and returned NoSuchEntity; it was discarded as non-discriminating and re-run on the real name read out of the plan's prior state. The discarded attempt is named because a non-discriminating control that is quietly dropped is how a false absence survives."
+    },
+    "determinism": {
+      "description": "The refreshing plan was run twice at the same commit. Both runs: rc=1, exactly 2 'Error:' blocks with the same two actions denied to the same user, 'Plan: 4 to add, 0 to change, 1 to destroy', and the AC1 line identical at resources=242 watched=12 watched_changed=2 other_changed=2. The -refresh=false plan at the same commit is rc=0 and 'Plan: 2 to add, 0 to change, 0 to destroy' on both the human-readable and JSON reads.",
+      "status": "STABLE",
+      "method": "The refreshing plan was run twice against the same commit in the same worktree, each time writing its own plan file and JSON, and the AC1 invocation was run on each. The -refresh=false plan was read twice, once as human-readable output and once as JSON.",
+      "observed": "Identical across runs: rc=1, exactly 2 'Error:' blocks naming the same two denied actions and the same user, 'Plan: 4 to add, 0 to change, 1 to destroy', and 'CRM-PLAN resources=242 watched=12 watched_changed=2 other_changed=2'. The -refresh=false read is rc=0 and 'Plan: 2 to add, 0 to change, 0 to destroy' on both the text and JSON paths (watched_changed=2, other_changed=0)."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The plan, its JSON and the control's output are NOT listed in artifacts_produced, although they are this order's primary evidence: C:/dev/_cotbkf_private_evidence_20261009/r61/shared_infra_plan.json (1,212,652 B, the criterion's artifact), shared_infra.tfplan (201,499 B), branch_plan_refresh.txt (35,385 B, full stdout with both Error blocks), shared_infra_plan_norefresh.json (1,208,525 B), shared_infra_norefresh.tfplan (200,786 B), branch_plan_norefresh.txt (5,919 B), ctl_init.txt (782 B, the step-2 control verbatim), ctl_plan.txt (468 B), state_list.txt (12,353 B, 253 rows).",
+      "reason": "Step 1 of the face requires the plan and its JSON to live OUTSIDE the repo, so no commit contains them and no (commit, path) pin can be true of them. artifact-resolution grades every artifacts_produced row as a git ref, and a row carrying a pin git refutes is worse than no row: it asserts a containment that does not exist. They are enumerated here with byte counts, and again in section 'Evidence files' of org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.7.0_AE_CloudOps~CB2/shared_infra_plan_proof.md, which does ride this commit. Every figure quoted in the acceptance rows was computed from them."
+    },
+    {
+      "item": "No `terraform apply`, no state verb (import, mv, rm, taint) and no AWS write of any kind.",
+      "reason": "The face forbids all of them and this is a plan proof. `terraform state list` was run, which is a READ verb, not a state-mutating verb."
+    },
+    {
+      "item": "The order's acceptance was not met, so <status> was NOT flipped and no `complete` is claimed.",
+      "reason": "Step 4 and the refusal clause both route a watched-resource change to 1.0.0_SA_CTO~DELL2 and stop the order. The order is left at its issued state for the issuer; a re-grade or an amended criterion is the issuer's and the CTO's."
+    },
+    {
+      "item": "The row ids the face prescribes (ADVI_COTBKF-D2-WCB2-S<k>) were NOT used.",
+      "reason": "Measured at HEAD against the live SURPRISE_ID_RE in .tools/proof-of-spec-check.py:1212: 'ADVI_COTBKF-D2-WCB2-S2' is REJECTED, 'ADVI_COTBKF-D2-S91' PARSES. The same wall is already recorded by row ADVI_COTBKF-D2-WCB2-S1's own text, and that row filed under the project's non-worker namespace for the same reason. Rows filed as D2-S91 and D2-S92 rather than silently renamed or left unfiled; the departure is declared here and in the rows."
+    },
+    {
+      "item": "Nothing was merged or pushed, and the CB-bi-1 worktree C:/dev/wk-cotbkf-80 was not modified.",
+      "reason": "The BOUNDS forbid a merge of the worker's branch. init did create a .terraform directory inside that worktree, which is gitignored build state and not a tracked edit."
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-S91",
+    "ADVI_COTBKF-D2-S92"
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~CB2/logs/2026-10-11/cb2_r61_bi2_shared_infra_plan_proof.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-schedule",
+      "invocation": "(not run)",
+      "result": "DECLARED-NOT-APPLICABLE by the order's own preflight: a plan; nothing is applied and no schedule is touched."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "(not run)",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight, which also declares the BLIND that comp-iam was not run on this root by the issuer. The HUD advised comp-iam during the live get-role reads; not taken, because the question was whether ONE named role exists, which get-role answers directly and comp-iam models at the (action) grain only. The BLIND stands as the issuer wrote it."
+    },
+    {
+      "tool": "comp-adversary",
+      "invocation": "(run by the issuer at cut time; not re-run here)",
+      "result": "Its named BLIND is the one that bit: 'a resource the selector feeds whose address matches none of the four pattern words'. In the event the pattern matched MORE than expected, not less -- it caught the break-glass role, which is the resource that stopped the order."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.7.0_AE_CloudOps~CB2/ADVI_COTBKF.TO-CB-bi-2.shared-infra-plan-proof.proof_of_spec.json CB61bi2-AC1,CB61bi2-AC2",
+      "result": "see the report; run before the commit as the <proof_of_spec> block requires."
+    }
+  ]
+}
