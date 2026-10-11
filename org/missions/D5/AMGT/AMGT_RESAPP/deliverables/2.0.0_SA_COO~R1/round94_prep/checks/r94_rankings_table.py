@@ -22,18 +22,19 @@ NOISE = re.compile(r"(read_at|fetched_at|generated_at|served_at|_clock|elapsed|d
 _LAM = boto3.client("lambda", region_name="us-east-1")
 
 
-def event(movement, subject):
-    return {"rawPath": "%s/lead-panel/rankings/%s/%s" % (scoped_amgt.ROUTE_PREFIX, movement, subject), "queryStringParameters": None,
+def event(movement, subject, route="rankings", tickers=None):
+    return {"rawPath": "%s/lead-panel/%s/%s/%s" % (scoped_amgt.ROUTE_PREFIX, route, movement, subject),
+            "queryStringParameters": {"tickers": ",".join(tickers)} if tickers else None,
             "requestContext": {"http": {"method": "GET"}}, "headers": {"x-firm-id": "opal"}}
 
 
-def live(movement, subject):
-    r = json.loads(_LAM.invoke(FunctionName=FN, Payload=json.dumps(event(movement, subject)).encode())["Payload"].read())
+def live(movement, subject, route="rankings", tickers=None):
+    r = json.loads(_LAM.invoke(FunctionName=FN, Payload=json.dumps(event(movement, subject, route, tickers)).encode())["Payload"].read())
     return json.loads(r.get("body") or "{}")
 
 
-def local(movement, subject):
-    r = scoped_amgt.handler(event(movement, subject))
+def local(movement, subject, route="rankings", tickers=None):
+    r = scoped_amgt.handler(event(movement, subject, route, tickers))
     return json.loads(r.get("body") or "{}")
 
 
@@ -63,6 +64,15 @@ def main():
                              "status_before": b.get("ranking_status"), "status_after": a.get("ranking_status")}
             for path, before, after in walk(b, a):
                 diffs.append({"combo": combo, "path": path, "before": before, "after": after, "noise": bool(NOISE.search(path))})
+            # AMENDMENT 2: the rank timeseries of every ticker the list holds (a series `name` is served from the table by bare ticker)
+            tickers = [row.get("ticker") for row in (b.get("rows") or []) if row.get("ticker")]
+            if tickers:
+                tb, ta = live(movement, subject, "timeseries", tickers), after_fn(movement, subject, "timeseries", tickers)
+                served[combo + " timeseries"] = {"rows_before": len(tb.get("series") or []), "rows_after": len(ta.get("series") or []),
+                                                 "status_before": "series", "status_after": "series"}
+                for path, before, after in walk(tb, ta):
+                    diffs.append({"combo": combo + " timeseries", "path": path, "before": before, "after": after,
+                                  "noise": bool(NOISE.search(path))})
     pattern = collections.Counter()
     combos = collections.defaultdict(set)
     noise = collections.Counter()
