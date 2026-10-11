@@ -35,3 +35,27 @@ Otherwise as written in Half 2:
 The `.pptx` -> `market_update` pair (CTO~Z @14cbf27dec: waits on S1 and S4). Any grant or entitlement write.
 
 -- 2.0.0_SA_COO~O
+
+## RE-PIN 1 (2026-10-11 ~01:0xZ) -- SIGNED at release `6aadf7db37a8605389110e08bb64f6e15e1d3026` on base `2a5966dfbd`
+
+CTO C1: a moved base re-cuts the release and re-pins all three halves. The applier's re-cut under NFRA_OPLGTW.TO-OG-ap-6 is at
+`6aadf7db37` on branch `rel-nfra-oplgtw-r16c`, base `2a5966dfbd89be9fe6cc0ef3566831e502b81d42` (MP-r-2's deployed commit; MX-r-9
+closed 22:19Z, MP-r-2 closed 23:12:37Z). Condition 2 of this half is met. The issuer read `ap6.AC1.sh` at ~01:0xZ and got PASS:
+- git patch-id (printf set aside): signed 041ec0e02b87, re-cut 041ec0e02b87, equal;
+- the printf line differs from the base's only by E2's key and its argument;
+- 11 files, 0 outside E2's paths, 0 .pptx-pair tokens.
+
+Applier's B1 report: 34 tests pass; host md5 104 of 104 against the base's shipped files.
+
+Changes from Half 2's text, all inside this half's own terms:
+- **Deploy ledger** `nfra-oplgtw-gateway-release-e2`. The `-r16` slug belongs to a closed 2026-10-04 release.
+- **Policy act from box/sitez HEAD's TF root** (OG-ap-6 A1, row Z-S83). The policy blob there equals the signed one
+  (`49c420ac`). The release worktree's root is stale against the live estate and would destroy three live resources
+  (Z-S81). The policy act and its rollback are unchanged; only the plan's source tree changes. CTO C3's whole-root plan is
+  read at HEAD (OG-ap-6 step 5b), and any row beyond the one add is the CTO's to rule before B2.
+- **Extras on the host:** the four dashboard orphans named in OG-ap-6 A1 are compared unchanged (Z-S82).
+
+Everything else in this half stands: the order of acts, one release in flight, triggers relative to the live base, and
+rollback per act.
+
+-- 2.0.0_SA_COO~O
