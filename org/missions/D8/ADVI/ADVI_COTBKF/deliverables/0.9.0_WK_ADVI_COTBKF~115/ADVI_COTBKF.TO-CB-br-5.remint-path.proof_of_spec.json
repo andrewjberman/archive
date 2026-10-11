@@ -1,0 +1,108 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-br-5",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-br-5.remint-path.md",
+  "group": "OTHER",
+  "vintage_commit": "a91be43451"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~115",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round70.md",
+  "vintage_commit": "a91be43451",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-br-5.remint-path.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+   "kind": "script",
+   "commit_or_etag": "c60405954f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code only; the --remint mode was NOT run against any bucket, no AWS call was made, no deploy; the code contains no delete call",
+   "artifact_covered_by": [
+    "CB70br5-AC1",
+    "CB70br5-AC2",
+    "CB70br5-AC3"
+   ]
+  },
+  {
+   "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py",
+   "kind": "script",
+   "commit_or_etag": "c60405954f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "synthetic tests on a faked, versioned S3 stub under tmp_path; no AWS call, no deploy",
+   "artifact_covered_by": [
+    "CB70br5-AC1",
+    "CB70br5-AC2",
+    "CB70br5-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-br-5.remint-path.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "status flip issued -> complete only",
+   "artifact_covered_by": [
+    "CB70br5-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB70br5-AC1",
+   "criterion_verbatim": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests -q expect: passed",
+   "method": "test_suite",
+   "invocation": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests -q",
+   "expect": "passed",
+   "output_evidence": "939 passed, 12 skipped, 149 warnings in 75.93s (0:01:15), 0 failed, 0 errors (variable unset) (rc 0), on code commit c60405954f; the baseline at this base read 900 passed, 12 skipped, 39 warnings in 72.49s; 39 cases added in test_commonwealth_ard_remint.py (37 test functions, two parametrized); no existing test or fixture changed",
+   "denominator": "939 passed, 0 failed, 12 skipped, 0 errors of 951 collected",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB70br5-AC2",
+   "criterion_verbatim": "python -c \"a=open('data/assets/scripts/silver/commonwealth_account_return_daily.py',encoding='utf-8').read();t=open('data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py',encoding='utf-8').read();print('ARD-REMINT-PATH mode=%s ...' ...)\" expect: ARD-REMINT-PATH mode=True list_flag=True capture_flag=True last_line=True",
+   "method": "command",
+   "invocation": "python -c \"a=open('data/assets/scripts/silver/commonwealth_account_return_daily.py',encoding='utf-8').read();t=open('data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py',encoding='utf-8').read();print('ARD-REMINT-PATH mode=%s list_flag=%s capture_flag=%s last_line=%s tests=%d delete_calls=%d'%('--remint' in a,'--remint-list' in a,'--capture' in a,'ARD-COTTONWOOD-REMINT listed=' in a,t.count('def test_'),a.count('delete_object')))\"",
+   "expect": "ARD-REMINT-PATH mode=True list_flag=True capture_flag=True last_line=True",
+   "output_evidence": "rc 0. ARD-REMINT-PATH mode=True list_flag=True capture_flag=True last_line=True tests=37 delete_calls=0",
+   "denominator": "1 adapter file and 1 test file read; tests=37 counts 'def test_' occurrences in the new test file; delete_calls=0 counts 'delete_object' in the adapter",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB70br5-AC3",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: every refusal fires before any write, by test; an unlisted differing day refuses; a moved capture refuses; nothing is deleted; the mint path is unchanged; the mode was not run against the bucket.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "judgment -- no invocation; the CVO reads data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py and remint_days() in data/assets/scripts/silver/commonwealth_account_return_daily.py at commit c60405954f",
+   "output_evidence": "Recorded, not graded. Refusal tests (each asserts the faked bucket saw zero puts and zero deletes): test_refuses_an_empty_list, test_refuses_a_listed_date_that_is_not_in_the_manifest, test_refuses_when_the_capture_lacks_a_listed_date, test_refuses_when_the_capture_etag_moved, test_refuses_when_the_capture_version_id_moved, test_refuses_when_the_served_object_moved_after_the_capture, test_refuses_a_listed_day_whose_new_file_equals_the_served_one, test_refuses_when_a_day_not_on_the_list_differs[1,3], test_refuses_a_manifest_without_a_pinned_split_store[absent,unpinned], test_refuses_a_manifest_without_hold_cusips, test_refuses_when_the_pair_files_are_absent; clean run test_clean_remint_of_two_of_five_days_puts_exactly_those_objects (puts == the 4 keys); test_all_reads_come_before_the_first_put; test_the_code_deletes_nothing; test_apply_still_refuses_an_existing_key. The mode was not run against any bucket; no AWS call was made.",
+   "denominator": "N/A -- judgment criterion, no count",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion; the oracle is 3.0.0_SA_CVO at L9, never the worker"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the new test file run alone and then inside the whole silver suite, same code commit",
+   "observed": "39 passed alone; 939 passed in the suite",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~115/ADVI_COTBKF.TO-CB-br-5.remint-path.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests -q",
+   "result": "939 passed, 12 skipped, 0 failed (variable unset)"
+  }
+ ]
+}

@@ -1,0 +1,161 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "The read states the running root.",
+      "denominator": "1 output file, 1 ROOT= line, and the criterion's own anchor requires the line to END at the root path, so a trailing field would have failed it. The root is DERIVED inside the command from the unit's ExecStart and never typed. It reads 0485393f3a-st32, the root this seat installed at 16:09Z, and the START field on the next line is that install's own ActiveEnterTimestamp -- so the read is demonstrably about the release the fifth run is waiting on.",
+      "expect": "^ROOT=/opt/irpt-resident/[0-9a-z-]+$",
+      "invocation": "grep -m1 '^ROOT=' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j4/SIGNIN_BASELINE_BEFORE_FIFTH_RUN_20261011.txt",
+      "method": "command",
+      "output_evidence": "ROOT=/opt/irpt-resident/0485393f3a-st32",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "The read states the count of sign-in lines since the start.",
+      "denominator": "exactly 1 SIGNIN_LINES line, and its value is 0 -- the answer the waiting run order needs. THE CRITERION IS A PRESENCE TEST, SO THE SCRIPT WAS BUILT SO THAT AN UNRESOLVED WINDOW EMITS NO SUCH LINE: on a failed timestamp conversion it prints SIGNIN_WINDOW_UNRESOLVED and no count, which drives this count to 0 and fails the criterion rather than reporting a number taken over the wrong span. That marker reads 0 in the file. The LINE block is also absent (0 lines), consistent with a count of 0; a non-zero count would have printed one LINE per match.",
+      "expect": "^1$",
+      "invocation": "grep -c -E '^SIGNIN_LINES=[0-9]+$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j4/SIGNIN_BASELINE_BEFORE_FIFTH_RUN_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c -E '^SIGNIN_LINES=[0-9]+$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j4/SIGNIN_BASELINE_BEFORE_FIFTH_RUN_20261011.txt\n1\nthe line itself: SIGNIN_LINES=0\nSIGNIN_WINDOW_UNRESOLVED occurrences: zero; LINE entries: zero",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "The read ran to its end.",
+      "denominator": "1 output file, exactly 1 line equal to END. The truncation detector: END is the script's last statement and comes after the optional LINE block, so a read cut off mid-output would print no END -- which matters here because a truncated output could drop a LINE block and read as a clean baseline. The prepended header line is not equal to END and cannot inflate the count.",
+      "expect": "^1$",
+      "invocation": "grep -c '^END$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j4/SIGNIN_BASELINE_BEFORE_FIFTH_RUN_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c '^END$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j4/SIGNIN_BASELINE_BEFORE_FIFTH_RUN_20261011.txt\n1\nmatched line, verbatim: END",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the command's full output with the SSM command id c835eb56-24ef-4b79-9c9f-574364a3f924 and the instance id i-0167fd745ad906a66 on its first line, plus the window and redaction note: the seven printed lines (AT, ROOT, ACTIVE/RESTARTS/START, SIGNIN_LINES, CHILDREN, POLLS_60S/TRACEBACKS_SINCE_START, LIBRARY) and END, with no LINE block",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j4/SIGNIN_BASELINE_BEFORE_FIFTH_RUN_20261011.txt"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~YC2",
+  "compiler_tools": [
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: one read-only command on the resident host; no schedule, trigger or rule is added or read. Checked against the act as executed -- the command contains systemctl show reads, journalctl reads, pgrep, sha256sum and date, and no write verb.",
+      "tool": "comp-schedule"
+    },
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: no IAM change; the command runs under the applier's existing SSM grant on this one instance, the grant TO-APPLY-j1, j3 and st32 used. Checked against the act as executed, and the grant was proved by the LIVE call (Status Success, ResponseCode 0) rather than by simulate-principal-policy.",
+      "tool": "comp-iam"
+    },
+    {
+      "invocation": "the order's named trap, discharged in the script's own design",
+      "result": "PASS. The preflight names the trap: a count taken over a window that STARTS AFTER the unit's own start, which would make a capture between the unit's start and the window's start invisible -- the worst possible failure for a baseline whose whole job is to authorise a first sign-in. The window is the unit's ActiveEnterTimestamp, read from systemd and printed in the output, and a failed normalisation of it emits no count at all. See controls.the_window_is_the_units_own_start_and_a_failure_to_resolve_it_emits_NO_count.",
+      "tool": "comp-adversary"
+    },
+    {
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "see the run recorded at close; 3 of 3 criteria PASS",
+      "tool": "proof-of-spec-check.py"
+    }
+  ],
+  "controls": {
+    "nothing_was_written_to_the_host": {
+      "description": "The bounds say read-only commands only, no write to the host.",
+      "expected_landed": "no temp file, no redirection to any host path, no write verb",
+      "expected_not_landed": "any file created on the host, or any systemctl start/stop/restart",
+      "observed": "The command's only verbs are systemctl show, systemctl is-active, journalctl, pgrep, sha256sum, date, grep, cut and sed; the only redirections are pipes. No temp path appears in it. No queue was read or written at all under this order, no table read, no secret read, and no vendor call.",
+      "status": "PASS"
+    },
+    "the_host_ran_it_rather_than_merely_accepting_it": {
+      "description": "A DELIVERY trap on a host plane: send-command returning a CommandId proves SSM ACCEPTED the request, never that the instance ran it -- and an urgent order is exactly where that shortcut is tempting.",
+      "expected_landed": "Status Success, ResponseCode 0, no stderr, and the output reaching END",
+      "expected_not_landed": "Pending/Failed/TimedOut, a non-zero ResponseCode, or stderr content",
+      "observed": "ssm c835eb56-24ef-4b79-9c9f-574364a3f924 Success rc 0. host_read.py prints no STDERR block and only prints a result once the invocation leaves Pending/InProgress/Delayed. The output's own AT line is stamped by the HOST (2026-10-11T16:49:27Z) and AC3's END proves the script reached its last statement.",
+      "status": "PASS"
+    },
+    "the_same_instrument_as_st32s_V1_was_used_so_the_two_numbers_are_comparable": {
+      "description": "The issuer's preflight compares this read to st32's V1 NO SIGN-IN line. If this read used a different pattern or a different child probe, the two numbers would not be the same measurement and the comparison would be an illusion.",
+      "expected_landed": "the same case-insensitive token set and the same child probe as st32's V1 line",
+      "expected_not_landed": "a narrowed or widened pattern, which would make a 0 here mean something different from the 0 there",
+      "observed": "Pattern: capture|EVICTION|session_refresh|SIGNED_OUT|NO_AUTHENTICATED, case-insensitive -- character for character st32's V1 set, as the order itself specifies. Child probe: pgrep -P on the MainPID filtered on node|chrom, the same as st32's V1. So st32's V1 zero at 16:10Z and this zero at 16:49Z are the same measurement at two times, which is what the waiting run order needs. The pattern was also shown to MATCH real journal content earlier today: the same three of those tokens against this lane's j1 run-4 record return 5.",
+      "status": "PASS"
+    },
+    "the_saved_file_needed_no_redaction_and_that_was_read_not_assumed": {
+      "description": "The order requires any line naming a person, a client or a security to be replaced with REDACTED <timestamp>. That judgment needs the output read; on this read it is also structurally easy, because the only lines that could carry such text are the LINE entries.",
+      "expected_landed": "the LINE block absent, and every printed line carrying only counts, digests, timestamps and the root path",
+      "expected_not_landed": "a LINE entry naming a person, client or security committed to the repo",
+      "observed": "0 LINE entries, consistent with SIGNIN_LINES=0. The seven printed lines carry a UTC timestamp, the root path, systemd fields, four counts and one sha256 -- no name, no identifier, no ticker. 0 lines redacted, and the saved file's header line says so.",
+      "status": "PASS"
+    },
+    "the_window_is_the_units_own_start_and_a_failure_to_resolve_it_emits_NO_count": {
+      "description": "THE TRAP THE ORDER NAMES, and the one that matters most on this read: the count must cover the whole life of the running unit. A relative window (--since '-40 min', say) would begin AFTER the unit started and a capture in the gap would be invisible -- and this baseline is what authorises a first sign-in, so a false zero here is the costly direction. A second hazard sits behind it: systemd prints ActiveEnterTimestamp as 'Sun 2026-10-11 16:09:55 UTC', which journalctl --since does not take verbatim, so it must be normalised, and a silently failed normalisation would hand journalctl an empty --since.",
+      "expected_landed": "the window is derived from the unit's own ActiveEnterTimestamp, the raw stamp is printed so a reader can re-derive it, and a failed conversion prints SIGNIN_WINDOW_UNRESOLVED and NO SIGNIN_LINES line at all",
+      "expected_not_landed": "a relative window, or an empty --since, or a count printed beside an unresolved window -- any of which would produce a number whose scope in TIME is narrower than the sentence beside it",
+      "observed": "START=Sun 2026-10-11 16:09:55 UTC is printed, and it EQUALS the ActiveEnterTimestamp st32's own V1 read printed at install time, so the window covers the unit's whole life on this root. The count was taken with --since on the normalised form of that exact stamp. SIGNIN_WINDOW_UNRESOLVED occurrences: 0, so the conversion succeeded; and because the SIGNIN_LINES line lives in the ELSE branch of that check, AC2's presence test would have failed rather than passing on a bad window. RESTARTS=0 corroborates that the unit has not restarted since, so there is no earlier start whose window this read would miss.",
+      "status": "PASS"
+    },
+    "the_zero_is_corroborated_by_three_other_readings_in_the_same_output": {
+      "description": "A single zero from a token sweep is the weakest possible evidence, and on st32 this seat already met a case where a sweep of the WRONG corpus returned a misleading number. So the baseline is not reported on SIGNIN_LINES alone.",
+      "expected_landed": "the journal count, the child count, the traceback count and the library digest all consistent with a resident that has polled since 16:09:55Z and never captured",
+      "expected_not_landed": "any of them disagreeing -- a child process with no journal line, or a journal line with no child, either of which would mean the picture is incomplete",
+      "observed": "SIGNIN_LINES=0; CHILDREN=0 (no node or chromium child of the MainPID); TRACEBACKS_SINCE_START=0; LIBRARY=a1c2880169c5f7996cc7c5880e4fe36db90f0a2c1f5a1cd01e0d1d8153544841, st32's pin, so the host is still carrying the release whose baseline this is. POLLS_60S=3 shows the resident is alive and polling rather than wedged, which is what makes a zero capture count meaningful instead of vacuous. And the LINE block is absent, which is the script's own cross-check on its own count.",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the CHILDREN probe counts DIRECT children only",
+      "reason": "pgrep -P on the MainPID lists direct children, so a browser spawned as a grandchild would not be counted. The same limit was declared on st32's V1 and the instrument is deliberately unchanged for comparability. The journal half of the baseline and the resident's own polling state are what carry the claim; the child count corroborates rather than establishes it."
+    },
+    {
+      "item": "this read says nothing about whether a sign-in WOULD succeed",
+      "reason": "it is a baseline, not an exercise. It establishes that no capture, eviction or session refresh has happened on this root since 16:09:55Z. Whether the new capture library's diagnosis fires correctly is the fifth run's business, and the first sign-in after st32 is on the CTO's word."
+    },
+    {
+      "item": "no queue, table or record was read",
+      "reason": "the bounds forbid it. So this instance cannot say whether anything is waiting on irpt-generation, only that the resident has not captured. The 0-and-0 queue state was last measured under st32 at 16:09Z."
+    },
+    {
+      "item": "no after-the-fact report was sent to 0.0.0_AB_MSTR~DELL2",
+      "reason": "stated because the three st-series orders required one and this one does not: TO-APPLY-j4's the_act names only the message to 2.0.0_SA_COO~G2, as j1 and j3 did. The host-send reporting line belongs to the install orders, and this is a read."
+    },
+    {
+      "item": "no deploy-completion ledger was opened",
+      "reason": "NEVER-2 binds a confirmed DEPLOY. This act's write set outside this repo is EMPTY -- one read-only command -- so there is nothing that could be left half-landed."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R13.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-j4.resident-sign-in-baseline-before-fifth-run-dell2.md",
+    "vintage_commit": "8353754553"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "NOT REQUIRED AND NOT CLAIMED: this act widens nothing and serves nothing new. One read-only SSM command whose write set is empty -- no served output moved, no IAM or policy change, no file created or modified on the host, no queue message received or deleted. NEVER-1 binds an act that moves served output; a journal and systemd read is not such an act, which is why the order carries <risk>SERVED</risk> rather than WORLD.",
+    "cto_half": "NOT REQUIRED AND NOT CLAIMED, same reason. The authority is the order itself, IRPT_YCDGEN.TO-APPLY-j4 @8353754553 -- verified at the bytes: the working-tree blob 93880952b3a6993207126b6996786b75cb977553 equals the blob at that commit, which is an ancestor of HEAD -- resting on cell YCD-d-13 of IRPT_YCDGEN_DECOMP_R13.md. NOTED, as the issuer said itself: 8353754553 is LOCAL on box/dell2, which is all the blob comparison needs. The order file was in this lane's folder BEFORE its dispatch message arrived (it rode the issuer's own commit); this seat did not act on it until the dispatch landed and was acked, because for a Tier-2 seat the dispatch is the authorisation."
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "SERVED",
+  "rollback": "NONE NEEDED AND NONE POSSIBLE, stated rather than left blank: the act's write set outside this repo is empty. The command reads systemd, the journal, the process table and one file digest, and echoes; it creates nothing, modifies nothing and deletes nothing. The only durable effects are this seat's own artifacts in the repo, which git reverts. The st32 release installed earlier remains the running root -- this read confirms it -- with its own rollback arm (remove_st32_to_st31.sh, X1 + V2) unrun and still needing a new word from 2.0.0_SA_COO~G2; the kept library copy that arm depends on was verified at st31's digest at st32's V1 and this read shows the host still carrying st32's library, so nothing about that arm has changed.",
+  "schema_version": "1.0",
+  "scope": "ONE read-only SSM command on resident host i-0167fd745ad906a66: the running root, when the unit started, and how many journal lines SINCE THAT START name a capture, an eviction or a session refresh, plus the child count, the poll and traceback counts and the host capture-library digest. URGENT: TCKT_VNEXT's fifth run starts only when this host has made no capture since st32 started, and 2.0.0_SA_COO~V2 writes this read's values into the run order. Round 13 cell YCD-d-13.",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j4/SIGNIN_BASELINE_BEFORE_FIFTH_RUN_20261011.txt",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-j4.resident-sign-in-baseline-before-fifth-run-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "8353754553"
+  },
+  "surprises": [],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-j4.resident-sign-in-baseline-before-fifth-run-dell2"
+}
