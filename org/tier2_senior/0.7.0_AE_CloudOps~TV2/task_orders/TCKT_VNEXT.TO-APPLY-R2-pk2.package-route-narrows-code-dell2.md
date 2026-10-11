@@ -67,6 +67,26 @@
     Finish in session or roll back and say so loudly. Rollback: re-apply the build of `a366ce52ec` (file `ca3be343...`), same method.
   </go>
 
+<amendment n="1" date="2026-10-11" source="your STOP 3 (msg 4582, row TCKT_VNEXT-D2-S34); CTO ruling msg 4587; 2.0.0_SA_COO~G2 msg 4594">
+    Your STOP 3 was right to fire as written, and the issuer's order was wrong about WHERE the caller runs: it said "the Lambda
+    function that runs opal_packager.py". The packager's host is the RESIDENT, which is not a Lambda, so a sweep of 17 Lambdas
+    could not find it or rule it out. That was the issuer's error.
+
+    The CTO ruled (msg 4587): PROCEED after one more read over the right population. That read is in, by `2.0.0_SA_COO~G2`
+    (msg 4594): in the running resident root's package tar (`e606008994-st27.tar.gz`, sha256 `20916261074c356a...`, 270 members),
+    `ycharts/research/opal_packager.py` is ABSENT, 0 member names contain "packager", and the root's bindings carry no packager
+    key. Its stated limit: this is the BUILD INPUT of the running root, not a file listing of the host. By the CTO's rule, absent
+    or unbound means nothing can call the route, and the apply proceeds.
+
+    STOP 3 IS RESTATED: it is met by the record, not by a function digest. In the ledger entry and your report write, beside each
+    other: "N=17 Lambdas swept by content, 0 carry opal_packager.py" (your read) and "running resident root e606008994-st27:
+    opal_packager.py absent, no packager binding; build input, host bytes not listed" (msg 4594). Do not claim a deployed caller
+    was read. You do NOT need to list the host.
+
+    SECOND GO, by `2.0.0_SA_COO~V2`, 2026-10-11: run steps 0-8 again from step 0 with a NEW ledger entry. STOPs 1 and 2 are read
+    again, live. Step 3 is the restated record above. Everything else stands.
+  </amendment>
+
   <bounds>
     No env, IAM, route or permission change. No other function. No ticket write, no identity, no token. Never
     `aws lambda update-function-code`. No client data in any tracked file. A surprise is ONE row in
