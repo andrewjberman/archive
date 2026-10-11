@@ -5,7 +5,8 @@
 For each keyed crosswalk subject (243), the peers route of the live function (Lambda invoke, GET only; `--where local` calls the repo's
 own handler on the same live pool) is read, and for every member the rule would own -- a ticker that is NOT all digits and NOT a United
 States alphabetic ticker -- the expectation is computed independently from the member's own name and the held-name index:
-    D1 a member whose name token names exactly one held company serves that key, identity MEASURED, matched_as company_name.
+    D1 a member whose name token names exactly one held company, and whose raw name carries no `Class X` or `Series X`
+       designator, serves that key, identity MEASURED, matched_as company_name.
     D2 a member whose name names no held company, or two, serves no key from this rule (it is byte-equal to the stored member).
     D3 denominators: members examined, candidates (D1's population), served correctly; the candidate count must be at least 1.
 SHARED DEPENDENCY, stated: the expectation and the route both read `scoped_amgt._held_name_index()`; the index is not graded here.
@@ -13,6 +14,7 @@ Verdict: R91 NAME MATCH DEPLOYED: YES|NO (exit 0|1). At the base (2026-10-11, Kl
 """
 import argparse
 import json
+import re
 import sys
 
 import boto3
@@ -22,6 +24,9 @@ from lib.research.identity import crosswalk
 from lib.research.peers import numeric_tickers as nt
 
 FN = "opal-amgt-scoped-api"
+# AMENDMENT 1 (round 91): a name carrying a share-class or series designator is refused (another listing's key, another listing's
+# currency): it is not a candidate and must not be served by this rule.
+CLASS_RE = re.compile(r"(?i)\b(?:class|series)\s+[a-z0-9]{1,2}\b")
 PREFIX = "/api/scoped/amgt"
 _LAM = boto3.client("lambda", region_name="us-east-1")
 
@@ -65,7 +70,7 @@ def main():
             held = sorted(set(index.get(tok) or [])) if tok else []
             ident = m.get("identity") if isinstance(m.get("identity"), dict) else {}
             served = ident.get("security_key") if ident.get("resolution") == "MEASURED" else None
-            if len(held) == 1:
+            if len(held) == 1 and not CLASS_RE.search(str(m.get("name") or "")):
                 candidates += 1
                 if served == held[0] and ident.get("matched_as") == nt.MATCHED_AS_NAME:
                     served_ok += 1
