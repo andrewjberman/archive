@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e89",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3f97e49c5f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R20.md",
+    "vintage_commit": "3f97e49c5f",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e89.seat-gates-own-entry-and-slug-limbs.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~79",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/crossbox-deploy-check.py",
+      "kind": "script",
+      "commit_or_etag": "fbd85532fb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only cross-box check; no deploy, no AWS call. Adds resolve_serial(), counts one hit per slug in measure_open_deploy, and prints serial= in the header line. measure_open_call and safe-deploy.sh unchanged.",
+      "artifact_covered_by": [
+        "SC20-e89-AC1",
+        "SC20-e89-AC2",
+        "SC20-e89-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC20-e89-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R20_CHECKS/seatgates_limbs_check.py call -- expect: LIMB-CALL ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R20_CHECKS/seatgates_limbs_check.py call",
+      "expect": "LIMB-CALL ok=True",
+      "output_evidence": "LIMB-CALL ok=True unrelated=0 related=1 rc=0 (base 3f97e49c5f: identical; control)",
+      "denominator": "2 of 2 call cases (unrelated 0, related 1)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC20-e89-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R20_CHECKS/seatgates_limbs_check.py own -- expect: LIMB-OWN ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R20_CHECKS/seatgates_limbs_check.py own",
+      "expect": "LIMB-OWN ok=True",
+      "output_evidence": "LIMB-OWN ok=True resolved=0.7.0_AE_CloudOps~SC1 own_hits=0 other_hits=1 rc=0 (base: ok=False resolved=MISSING own_hits=1 other_hits=1)",
+      "denominator": "2 of 2 open-deploy assertions (own entry 0 hits, other lane 1 hit)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC20-e89-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R20_CHECKS/seatgates_limbs_check.py slug -- expect: LIMB-SLUG ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R20_CHECKS/seatgates_limbs_check.py slug",
+      "expect": "LIMB-SLUG ok=True",
+      "output_evidence": "LIMB-SLUG ok=True hits=1 rc=0 (base: ok=False hits=2)",
+      "denominator": "1 of 1 slug (2 readings, 2 statuses, 2 worktrees) counted once",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base 3f97e49c5f, before the change: call control holds; own and slug limbs reproduce the defects.",
+      "expected": "LIMB-CALL ok=True; LIMB-OWN ok=False; LIMB-SLUG ok=False",
+      "observed": "LIMB-CALL ok=True unrelated=0 related=1; LIMB-OWN ok=False resolved=MISSING own_hits=1 other_hits=1; LIMB-SLUG ok=False hits=2",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each of the three checks run twice after the change",
+      "observed": "identical outputs both runs: LIMB-CALL ok=True unrelated=0 related=1; LIMB-OWN ok=True own_hits=0 other_hits=1; LIMB-SLUG ok=True hits=1",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e89.seat-gates-own-entry-and-slug-limbs.md",
+  "compiler_tools": [
+    {
+      "tool": "seatgates_limbs_check.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R20_CHECKS/seatgates_limbs_check.py <call|own|slug>",
+      "result": "call ok=True; own ok=True; slug ok=True (rc=0 each)"
+    },
+    {
+      "tool": "test_apply_who_and_crossbox.py",
+      "invocation": "python .tools/tests/test_apply_who_and_crossbox.py",
+      "result": "APPLY-GATES-TEST cases=96/96 ok=True (rc=0; regression, not a criterion)"
+    }
+  ]
+}
