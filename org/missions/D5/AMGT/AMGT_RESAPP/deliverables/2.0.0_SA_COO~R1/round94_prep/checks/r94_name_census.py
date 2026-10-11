@@ -13,7 +13,11 @@ dropped) share at least one token of two or more letters; a pair that shares non
        own model-block header NAME (`scoped_amgt._model_block_names`); a served name is a DIFFERENT company only when it shares no token with ANY of them;
        a subject with no reference at all is UNJUDGED (a count, not a pass); the spelling variants (the names differ, the company is the same) are LISTED,
        not counted as defects.
-Verdict: R94 NAME CENSUS: YES|NO (exit 0|1).
+    C3 (round 94 amendment 1) the ranked lists: for each `/lead-panel/rankings/{movement}/{subject}` (`scoped_amgt.MOVEMENTS` x `SUBJECTS`) every row that carries
+       a `name` and a `security_key` the crosswalk registers a name for is judged by the same token rule against that registered name; a row whose name is a
+       different company is counted (the base reads 2: row `SAN_FP_Equity` of TRENDING/PRICE and of BREAKOUT/PRICE, 'Banco Santander S.A.'). The list's row
+       count and the rows judged are printed beside the number.
+Verdict: R94 NAME CENSUS: YES|NO (exit 0|1) -- YES only when C1 and C3 both read 0 with a non-zero denominator.
 """
 import argparse
 import json
@@ -40,6 +44,24 @@ def served_deployed(key):
              "requestContext": {"http": {"method": "GET"}}, "headers": {"x-firm-id": "opal"}}
     r = json.loads(_LAM.invoke(FunctionName=FN, Payload=json.dumps(event).encode())["Payload"].read())
     return (json.loads(r.get("body") or "{}")).get("display_name")
+
+
+def ranked_rows(where):
+    """[(combo, security_key, name)] for every row of every ranked list, from the live function or the checkout's own handler."""
+    out, sizes = [], {}
+    for movement in scoped_amgt.MOVEMENTS:
+        for subject in scoped_amgt.SUBJECTS:
+            event = {"rawPath": "%s/lead-panel/rankings/%s/%s" % (PREFIX, movement, subject), "queryStringParameters": None,
+                     "requestContext": {"http": {"method": "GET"}}, "headers": {"x-firm-id": "opal"}}
+            if where == "deployed":
+                r = json.loads(_LAM.invoke(FunctionName=FN, Payload=json.dumps(event).encode())["Payload"].read())
+            else:
+                r = scoped_amgt.handler(event)
+            rows = (json.loads(r.get("body") or "{}")).get("rows") or []
+            sizes["%s/%s" % (movement, subject)] = len(rows)
+            for row in rows:
+                out.append(("%s/%s" % (movement, subject), row.get("security_key"), row.get("name")))
+    return out, sizes
 
 
 def main():
@@ -96,6 +118,24 @@ def main():
         print("   DIFFERENT %-18s served=%r registered=%r" % d)
     ok = wrong == 0 and judged > 0
     print("%s C1 no served subject name is another company's (%d)" % ("PASS" if ok else "FAIL", wrong))
+    rows, sizes = ranked_rows(args.where)
+    r_judged, r_wrong = 0, []
+    for combo, key, name in rows:
+        reg = registered.get(key)
+        if not (key and name and reg):
+            continue
+        r_judged += 1
+        clean = scoped_amgt._clean_display_name(reg)
+        if str(name).strip().lower() == str(clean).strip().lower() or tokens(name) & tokens(clean) or tokens(name) & tokens(reg):
+            continue
+        r_wrong.append((combo, key, name, reg))
+    print("   ranked lists (%s): rows %d across %d lists (%s) | judged against a registered name %d | DIFFERENT company %d" % (
+        args.where, len(rows), len(sizes), ", ".join("%s %d" % kv for kv in sorted(sizes.items())), r_judged, len(r_wrong)))
+    for w in r_wrong:
+        print("   DIFFERENT row %-18s %-16s served=%r registered=%r" % (w[1], w[0], w[2], w[3]))
+    ranked_ok = len(r_wrong) == 0 and r_judged > 0
+    print("%s C3 no ranked row's name is another company's (%d of %d judged)" % ("PASS" if ranked_ok else "FAIL", len(r_wrong), r_judged))
+    ok = ok and ranked_ok
     print("R94 NAME CENSUS: %s" % ("YES" if ok else "NO"))
     return 0 if ok else 1
 
