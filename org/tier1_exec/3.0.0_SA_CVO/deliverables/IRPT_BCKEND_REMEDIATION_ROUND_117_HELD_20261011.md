@@ -144,3 +144,21 @@ irpt-status reads `E7VKvhg3`, not the live digest (IRPT_ANLREQ row D2-S32 carrie
 redacting or renaming of tracked files for account ids. **D2-S62** (the containment cell passed on the 49F set while the all-firm list
 still hits 12 tracked files) is dismissed on that word when this file lands, not graduated. No ruling on the two Lambda data files is
 asked. The same word closes the containment follow-ons this seat named for ADVI_COTBKF.
+
+---
+
+## Added at rounds 119 to 121, 2026-10-11T09:39:12Z (input: msg 4591)
+
+Held with the rows above, on the same condition (IB-pr-404 and IB-pr-413 terminal):
+
+- **D2-W282-S2** (owner `2.0.0_SA_COO~P2`): an identical repeat of a vendor performance request is refused once the first is
+  retained. Remedy: the repeat serves the retained figure, or the refusal is the stated behaviour the page handles. It will show on
+  the first re-walk that repeats a request.
+- **D2-W282-S3** (owner `2.0.0_SA_COO~P2`): one calendar-fallback test fails. "Pre-existing" is inferred until it is run on the
+  tree before the change (the CTO half's condition 4).
+- **D2-S72** (owner `1.0.0_SA_CTO~DELL2`, to place): `build-and-upload.sh` exits 0 when its restore of pinned members fails on a
+  held index lock. A shared-tree build can leave a tracked file carrying staged content. Remedy: a failing exit on a failed restore.
+- **D2-S71** (owner `2.0.0_SA_COO~P2`): a signed packet says the Dells cannot write IAM; an apply from dell2 shows otherwise.
+  Wording only.
+
+**For the slug:** the release is APPLIED, UNEXERCISED. The Performance hop is graded by the DSGN_IRPTV1 walk, not here.
