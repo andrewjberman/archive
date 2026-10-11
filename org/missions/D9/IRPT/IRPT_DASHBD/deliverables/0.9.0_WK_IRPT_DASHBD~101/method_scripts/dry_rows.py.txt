@@ -1,0 +1,29 @@
+import importlib.util, json, sys, hashlib
+from pathlib import Path
+kit = Path(sys.argv[1]).resolve()
+P = kit / "data/assets/scripts/gold/irpt_reporting"
+sys.path.insert(0, str(kit)); sys.path.insert(0, str(P))
+spec = importlib.util.spec_from_file_location("ard_dry", str(P / "account_return_daily.py"))
+ard = importlib.util.module_from_spec(spec); spec.loader.exec_module(ard)
+th = json.loads((P / "MEASURED_THRESHOLDS_R1.json").read_bytes().decode("utf-8"))
+src = json.loads((P / "sources.json").read_bytes().decode("utf-8"))
+out = {}
+for k, v in src.items():
+    if not (isinstance(v, dict) and not k.startswith("_")):
+        continue
+    firm = ard.firm_scope(v)
+    try:
+        r = ard.emit_method_row(None, firm, th, upload=False, src=v)
+    except TypeError:
+        r = ard.emit_method_row(None, firm, th, upload=False)
+    except SystemExit as e:
+        r = {"refused": str(e)}
+    out[k] = r
+rec = {}
+for k, r in out.items():
+    if "row" not in r:
+        rec[k] = r; continue
+    row = dict(r["row"]); pass
+    rec[k] = {"columns": list(row.keys()), "n": len(row), "row": {c: (v if not isinstance(v, float) else "<float>") for c, v in row.items()},
+              "table_schema": r.get("table_schema")}
+print(json.dumps({"module_sha256": hashlib.sha256((P / "account_return_daily.py").read_bytes()).hexdigest(), "rows": rec}, default=str))
