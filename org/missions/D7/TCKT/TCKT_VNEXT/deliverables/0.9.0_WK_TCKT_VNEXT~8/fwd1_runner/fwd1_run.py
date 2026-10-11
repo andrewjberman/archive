@@ -1050,10 +1050,10 @@ def _count_matches(logs, group, pattern, start_unix, end_unix):
             return n
 
 
-def _streams_active_in_window(logs, group, since_unix):
-    """The denominator: how many log streams of the group had an event at or after `since_unix` (the token's iat).
-    describe_log_streams ordered by last event time, EVERY page read; a stream with no last event time is not active."""
-    n, tok = 0, None
+def _stream_counts(logs, group, since_unix):
+    """describe_log_streams over the group, EVERY page -> (streams_in_group, streams_active_in_window). Active = last
+    event time at or after `since_unix` (the token's iat); a stream with no last event time is in the group, not active."""
+    total, n, tok = 0, 0, None
     since_ms = since_unix * 1000
     while True:
         kw = {"logGroupName": group, "orderBy": "LastEventTime", "descending": True}
@@ -1061,20 +1061,32 @@ def _streams_active_in_window(logs, group, since_unix):
             kw["nextToken"] = tok
         r = logs.describe_log_streams(**kw)
         for st in r.get("logStreams", []):
+            total += 1
             last = st.get("lastEventTimestamp")
             if isinstance(last, (int, float)) and last >= since_ms:
                 n += 1
         tok = r.get("nextToken")
         if not tok:
-            return n
+            return total, n
+
+
+def _streams_active_in_window(logs, group, since_unix):
+    return _stream_counts(logs, group, since_unix)[1]
+
+
+def _read_group(logs, group, pattern, start_unix, end_unix):
+    """The three numbers for one log group: streams_in_group, streams_active_in_window, matches."""
+    total, active = _stream_counts(logs, group, start_unix)
+    return {"streams_in_group": total, "streams_active_in_window": active,
+            "matches": _count_matches(logs, group, pattern, start_unix, end_unix)}
 
 
 def data_refresh_zero_calls(trace, start_unix, end_unix):
-    """D4: prove ZERO data-refresh calls for the filer over iat..exp, from its own logs. The denominator is
-    streams_active_in_window (log streams whose last event is at or after iat). Recorded ZERO_CALLS_PROVEN only when
-    the data-refresh group has active streams > 0 AND the positive control over the ticket API's log group found the
-    filer >= 1 time AND the data-refresh matches == 0. Zero active streams, or a control that finds nothing, is
-    ZERO_CALL_VOID."""
+    """D4 (AMENDMENT 4): prove ZERO data-refresh calls for the filer over iat..exp, from its own logs. Records three
+    numbers per group (streams_in_group, streams_active_in_window, matches). ZERO_CALL_VOID only when the data-refresh
+    group cannot be described (void_reason GROUP_NOT_DESCRIBABLE), holds 0 streams in total (GROUP_EMPTY), or the
+    positive control over the ticket API's group finds the filer fewer than 1 time (CONTROL_FOUND_NO_FILER).
+    Otherwise matches == 0 is ZERO_CALLS_PROVEN whatever the active count, and matches > 0 is NON-ZERO."""
     print("== zero data-refresh calls, from the log group ==")
     logs = _client("logs")
     pattern = '"%s"' % FILER
@@ -1084,31 +1096,36 @@ def data_refresh_zero_calls(trace, start_unix, end_unix):
            "query": "filter_log_events logGroupName=%s filterPattern=%s startTime=%d endTime=%d (all pages); "
                     "describe_log_streams orderBy=LastEventTime (all pages), active = last event >= iat"
                     % (DATA_REFRESH_LOG_GROUP, pattern, start_unix * 1000, end_unix * 1000)}
+    reason = None
     try:
-        active = _streams_active_in_window(logs, DATA_REFRESH_LOG_GROUP, start_unix)
-        n = _count_matches(logs, DATA_REFRESH_LOG_GROUP, pattern, start_unix, end_unix)
-        c_active = _streams_active_in_window(logs, TICKET_LOG_GROUP, start_unix)
-        c_n = _count_matches(logs, TICKET_LOG_GROUP, pattern, start_unix, end_unix)
-        out["match_count"], out["streams_active_in_window"] = n, active
-        out["control"] = {"log_group": TICKET_LOG_GROUP, "same_filter": True, "found": c_n,
-                          "streams_active_in_window": c_active}
-        void = []
-        if active == 0:
-            void.append("streams_active_in_window is 0 on %s" % DATA_REFRESH_LOG_GROUP)
-        if c_n < 1:
-            void.append("the positive control found the filer %d time(s) in %s, needs >= 1" % (c_n, TICKET_LOG_GROUP))
-        if n > 0:
-            out["verdict"] = "NON-ZERO -- report it"
-        elif void:
-            out["verdict"], out["void_reasons"] = "ZERO_CALL_VOID", void
-        else:
-            out["verdict"] = "ZERO_CALLS_PROVEN"
-        print("  %s: %d match(es), %d active stream(s); control %s: %d found, %d active -> %s"
-              % (DATA_REFRESH_LOG_GROUP, n, active, TICKET_LOG_GROUP, c_n, c_active, out["verdict"]))
+        g = _read_group(logs, DATA_REFRESH_LOG_GROUP, pattern, start_unix, end_unix)
+        out.update(g)
+        out["match_count"] = g["matches"]
     except Exception as e:  # noqa: BLE001 -- a failed retrieval returns a VALUE; say so, never read it as zero
-        out["match_count"] = None
-        out["verdict"] = "UNREAD -- %s: %s" % (type(e).__name__, str(e)[:160])
-        print("  WARN: the log read did NOT complete: %s. A failed retrieval is NOT a zero." % out["verdict"])
+        out.update({"streams_in_group": None, "streams_active_in_window": None, "matches": None, "match_count": None,
+                    "error": "%s: %s" % (type(e).__name__, str(e)[:160])})
+        reason = "GROUP_NOT_DESCRIBABLE"
+    if reason is None:
+        try:
+            c = _read_group(logs, TICKET_LOG_GROUP, pattern, start_unix, end_unix)
+            out["control"] = dict(c, log_group=TICKET_LOG_GROUP, same_filter=True, found=c["matches"])
+        except Exception as e:  # noqa: BLE001
+            out["control"] = {"log_group": TICKET_LOG_GROUP, "same_filter": True, "streams_in_group": None,
+                              "streams_active_in_window": None, "matches": None, "found": 0,
+                              "error": "%s: %s" % (type(e).__name__, str(e)[:160])}
+        if out["streams_in_group"] == 0:
+            reason = "GROUP_EMPTY"
+        elif out["matches"] == 0 and out["control"]["found"] < 1:   # a real match is evidence whatever the control says
+            reason = "CONTROL_FOUND_NO_FILER"
+    if reason:
+        out["verdict"], out["void_reason"] = "ZERO_CALL_VOID", reason
+    elif out["matches"] > 0:
+        out["verdict"] = "NON-ZERO -- report it"
+    else:
+        out["verdict"] = "ZERO_CALLS_PROVEN"
+    print("  %s: %s match(es), %s stream(s), %s active; -> %s%s"
+          % (DATA_REFRESH_LOG_GROUP, out["matches"], out["streams_in_group"], out["streams_active_in_window"],
+             out["verdict"], (" (" + reason + ")") if reason else ""))
     trace["data_refresh_zero_calls"] = out
     save(trace)
 
