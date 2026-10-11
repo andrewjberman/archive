@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "fa51c1f544"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "73fdbf8d0a",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-d-2.x2-basis-counts-carries.md"
+  },
+  "to_id": "MDPF_CANON.TO-CN-d-2",
+  "assignee": "0.9.0_WK_MDPF_CANON~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~11/X2_GLOBAL_BASIS.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; document only. Twelve read-only s3api get-object reads of portal/gold/mdpf/<scope>/{aum-metrics,account-distribution,aggregate-aua-timeseries}/2026-10-08.json; no AWS write. Carries the carry rule, the Carries table (2 rows, age 58 each) and by_model min firms 1."
+    },
+    {
+      "path_or_key": "infra/logic/06_CONFORMANCE_LEDGER.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; one row changed: the X2 row's written basis path moves from the ~8 path to the ~11 path by exact string replacement. Status GRANTED, decider and date unchanged."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (cell_refs CN-d-2): r4_cn_d_2.py -- expect: ROUND 4 CARRIES: 4 of 4 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round4/checks/r4_cn_d_2.py\"; echo \"exit=$?\"",
+      "output_evidence": "  B1 PASS: org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~11/X2_GLOBAL_BASIS.md\n  B2 PASS: nonzero-count global entries neither held by a firm nor wearing count_as_of: none; carries read: 2\n  B3 PASS: carries 2, unlisted none, word CARRY present\n  B4 PASS: ledger X2 row GRANTED and cites the new basis\nROUND 4 CARRIES: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms",
+      "status": "PASS",
+      "expect": "ROUND 4 CARRIES: 4 of 4 arms",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is JUDGMENT, graded at the round-4 close (never self-graded): a seat that did not write the file reads the same objects at the same as-of and reads back every min firms integer, every carry row (entry, count_as_of, age) and every single-firm entry's account count equal.",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment=true: no invocation; graded at the round-4 close by a seat that did not write the file",
+      "output_evidence": "Not run by the worker (judgment row). The worker's measured values for the reader: min firms = 3 (headline sums), 1 (by_model, carries excluded), 1 (non_model_aua), 1 (inflection_non_model_aua); carries = 2 (opal_growth_sma, count_as_of 2026-07-17, age 58 trading days, 45 accounts; opal_div_sma, count_as_of 2026-07-17, age 58 trading days, 40 accounts; firms holding none); single-firm entries 10 of 20 (aggregate-aua-timeseries), 9 of 14 (account-distribution), 2 of 7 (aum-metrics), listed with account counts in X2_GLOBAL_BASIS.md.",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round-4 close",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "r4_cn_d_2.py with R4_ROOT pointing at an empty reference tree (no basis file, no ledger): the base state of the check, where only the served-data arm holds.",
+      "expected": "fewer than 4 of 4 arms, exit nonzero.",
+      "observed": "  B1 FAIL: file absent\n  B2 PASS\n  B3 FAIL: no basis file or no served read\n  B4 FAIL: ledger X2 row does not read GRANTED with the new basis path\nROUND 4 CARRIES: 1 of 4 arms\nexit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "second single run of r4_cn_d_2.py on the final tree",
+      "observed": "ROUND 4 CARRIES: 4 of 4 arms, exit=0 (second run; same carry rows and ages as the first)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No AWS write of any kind; no served-key move",
+      "reason": "Read-only s3api get-object for twelve objects; the basis is a document and one ledger citation."
+    },
+    {
+      "item": "Whether a 2026-07-17 carry should still serve",
+      "reason": "Andrew's X2 call (open call fe9b); the cell directs that the basis not describe it."
+    },
+    {
+      "item": "Fix or argument that the figure is safe",
+      "reason": "Out of scope by the cell: the basis states what is emitted and proposes nothing."
+    },
+    {
+      "item": "Round-3 basis edit",
+      "reason": "Read-only by the cell; the round-3 file at ~8 is not edited and the ledger row is the only other change."
+    },
+    {
+      "item": "AC2 judgment grading",
+      "reason": "Graded at the round-4 close by a seat that did not write the file."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round4/checks/r4_cn_d_2.py",
+      "result": "ROUND 4 CARRIES: 4 of 4 arms, exit=0 (base state with R4_ROOT at an empty tree: 1 of 4 arms, exit=1)"
+    },
+    {
+      "tool": "aws s3api get-object (read-only, via .tools/aws)",
+      "invocation": "s3api get-object --bucket opal-data-assets --key portal/gold/mdpf/<scope>/<object>/2026-10-08.json (12 objects)",
+      "result": "rc=0 for all 12; each object present at 2026-10-08"
+    },
+    {
+      "tool": "python -I (inline), lib/trading_calendar.py trading_days_between",
+      "invocation": "len(trading_days_between(2026-07-18, 2026-10-08))",
+      "result": "58 (matches a hand count of the NYSE sessions in the interval, Labor Day 2026-09-07 excluded)"
+    }
+  ]
+}
