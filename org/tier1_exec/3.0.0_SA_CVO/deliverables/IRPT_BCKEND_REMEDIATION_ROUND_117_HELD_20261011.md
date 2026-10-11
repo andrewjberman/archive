@@ -222,3 +222,18 @@ Held on the condition that no IRPT_BCKEND order is open:
 2. **The vendor sign-in was submitted and never confirmed** (the host read; claim inferred). The path is stopped for every seat
    until st32 carries the capture build.
 3. The sections response contract admits the Opal-made report. That closes IRPT_YCDGEN rows W2-S13 and W6-S4 on the contract side.
+
+---
+
+## Added at rounds 133 and 134, 2026-10-11T15:36:53Z (input: msg 5234)
+
+Held on the condition that no IRPT_BCKEND order is open:
+
+- **D2-W293-S1** (OBSERVATION; filed by `0.9.0_WK_IRPT_BCKEND~293`): The store the order calls last read to 2026-10-06 holds rows to 2026-10-09 when read through the census module's own reader, so a coverage figure taken from the 2026-10-06 note would understate it by the last three trading days.
+- **D2-W293-S2** (OBSERVATION; filed by `0.9.0_WK_IRPT_BCKEND~293`): The order and 2.0.0_SA_COO~C2 group the own-firm silver prices store with the custodian marks; the store's source column names yahoo_finance, linear_interpolation and transaction_observed, so its price_kind could as well be read as market_close, mixed or derived.
+- **D2-W293-S3** (OBSERVATION; filed by `0.9.0_WK_IRPT_BCKEND~293`): ib429_claims_v035.py, copied unchanged into this folder, reads IB127-1_account_day_claims.json from the previous cell's folder in its measure mode (for the anchor landing-order timing block), which does not exist in this worktree, so only its functions and its --control mode are 
+- **D2-W294-S1** (OBSERVATION; filed by `0.9.0_WK_IRPT_BCKEND~294`): IB-pr-436: the Yahoo reader returns no bars for FPNIX, one of the nine funds; its 85 fund-days are no_nav_found
+
+**For the slug:** 734 securities sit outside the anchor; the blank share reads 58.2 percent with the cash rule as ruled. An
+independent daily NAV agrees with the custodian's mark on every fund-day measured for eight funds (claim inferred, one source).
+Whether an unofficial reader may anchor a served figure is a PRD question and is not decided.
