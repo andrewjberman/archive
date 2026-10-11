@@ -101,7 +101,7 @@ print("four dollar items tie, by group:", {g: sum(1 for t in tab if t["grp"] == 
 print("flow-day sets equal, by group:", {g: sum(1 for t in tab if t["grp"] == g and t["days_same"]) for g in ("M51", "M31", "M8")})
 print("plain return closes under >=1 of START/MID/END (no accrual scaling), by group:",
       {g: sum(1 for t in tab if t["grp"] == g and t["n_close"] >= 1) for g in ("M51", "M31", "M8")})
-print("RECONCILES rule (>=1 timing closes AND four tie AND flow-day sets equal), by group:",
+print("RESTATED_CLOSE rule as computed here (>=1 of START/MID/END closes AND four tie AND flow-day sets equal), by group:",
       {g: sum(1 for t in tab if t["grp"] == g and t["n_close"] >= 1 and t["four"] and t["days_same"]) for g in ("M51", "M31", "M8")})
 print("51: closes per timing START/MID/END:", [sum(1 for t in t51 if t["close"][c]) for c in ("START", "MID", "END")])
 print("51: n timings closing:", dict(collections.Counter(t["n_close"] for t in t51)))
@@ -121,16 +121,16 @@ cells = collections.Counter()
 for t in tab:
     reconciles = t["n_close"] >= 1 and t["four"] and t["days_same"]
     if not reconciles:
-        cells[("RECONCILES_NO", "NOT_APPLICABLE")] += 1
+        cells[("RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING", "NOT_APPLICABLE")] += 1
     elif t["n_close"] == 1:
-        cells[("RECONCILES_YES", "TIMING_" + [c for c in ("START", "MID", "END") if t["close"][c]][0])] += 1
+        cells[("RESTATED_CLOSES_UNDER_OTHER_TIMING", "TIMING_" + [c for c in ("START", "MID", "END") if t["close"][c]][0])] += 1
     else:
-        cells[("RECONCILES_YES", "TIMING_NOT_DETERMINED")] += 1
+        cells[("RESTATED_CLOSES_UNDER_OTHER_TIMING", "TIMING_NOT_DETERMINED")] += 1
 print("PLACEMENT of the 90 (counts):", {" / ".join(k): v for k, v in sorted(cells.items())}, sum(cells.values()))
 cells51 = collections.Counter()
 for t in t51:
     reconciles = t["n_close"] >= 1 and t["four"] and t["days_same"]
-    key = ("RECONCILES_YES" if reconciles else "RECONCILES_NO",
+    key = ("RESTATED_CLOSES_UNDER_OTHER_TIMING" if reconciles else "RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING",
            ("TIMING_" + [c for c in ("START", "MID", "END") if t["close"][c]][0]) if t["n_close"] == 1 else "TIMING_NOT_DETERMINED")
     cells51[key] += 1
 print("PLACEMENT of the 51:", {" / ".join(k): v for k, v in sorted(cells51.items())}, sum(cells51.values()))
