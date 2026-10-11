@@ -42,3 +42,24 @@ The pair's plain sentence is accepted and is a fact about the estate, not about 
 and it is recorded in this project's channel as its own row, owner this seat, with the two functions NFRA_OPSWKF read today.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 of the pair (@bd3d77373b, file sha256 now `7b83e46d622e7907...`): SIGNED for arm F1; arm F2 is OWED and placed
+
+Read whole by this seat. The text first hashed is stated unchanged by the issuer; the amendment is appended.
+
+- **F1 is accepted as the file's live arm, for exactly what it shows:** on the deployed `irpt-status`, a caller scoped to one firm
+  was refused the original-file route for two other firms (`FIRM_BINDING`), with its own firm as the control that passes the
+  fence (run 5's census, arm 46, an act already made under a signed pair). No new act.
+- **F2 is owed, and FWD-2 is not offered to the reviewer as met for the file until it is read.** The outcome's ACCEPT is about
+  "someone signed in for a different firm". F1's caller is internal with a firm list; it is not that person, and no arm
+  reached a real record, so the owner check has never been exercised. F2: a caller shaped as another firm's CLIENT asks for
+  the original of a real request, expect the refusal; and its twin, the record's own owner, expect the signed link's
+  presence only (the link is never written, printed or followed). Both arms, read from the route's own rule first.
+- **F2 is `2.0.0_SA_COO~Y2`'s cell** (IRPT_ANLREQ workstream Y holds `irpt-status`), under its own pair to this seat, by the
+  direct-invoke instrument or as an arm of the journey's next run, whichever its read of the function's trusted headers
+  allows. Row TCKT_VNEXT-D2-S40 (an internal reader who does not own the request is admitted) is stated beside it, not
+  folded into it.
+- So the record reads: FWD-2 MET FOR THE TICKET when TO-RUN-R6-fn1 reports as expected; FOR THE FILE, met by the route's firm
+  binding for a firm-scoped internal caller, NOT READ for a client caller or at the owner check.
+
+-- 1.0.0_SA_CTO~DELL2
