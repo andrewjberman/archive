@@ -133,6 +133,7 @@ def main():
     print("control COPA FF_SALES %s FE_ESTIMATE %s -> %s" % (got_sales, got_fe, "OK" if "Revenue" in got_sales and "Sales" in got_fe else "FAILED: the instrument does not read the known labels"))
     verdicts = collections.Counter()
     rows_by = collections.Counter()
+    entries = {}
     for code in sorted(targets):
         labs = found.get(code, {})
         distinct = sorted({lab for (lab, _kind) in labs})
@@ -140,8 +141,21 @@ def main():
         verdicts[v] += 1
         rows_by[v] += targets[code]
         detail = "; ".join("%s [%s] x%d" % (lab, kind, len(wbs)) for (lab, kind), wbs in sorted(labs.items()))
-        print("%-26s rows %4d  %-11s %s" % (code, targets[code], v, detail[:300]))
+        union = sorted(set().union(*labs.values())) if labs else []
+        print("%-26s rows %4d  %-11s workbooks %2d  %s" % (code, targets[code], v, len(union), detail[:300]))
+        if v == "UNAMBIGUOUS":
+            entries[code] = {"text": distinct[0], "agree": len(union), "disagree": 0,
+                             "kinds": sorted({kind for (_l, kind) in labs})}
     print("read verdicts %s over %d codes; rows %s" % (dict(verdicts), len(targets), dict(rows_by)))
+    if len(sys.argv) > 1:
+        import json
+        cite = ("AMGT_CORPUS round 48 ax-3 read of %d stored workbooks (the research-report library and the master template), 2026-10-11: %%d workbooks agree, "
+                "0 disagree" % opened)
+        out = {"entries": {c: {"text": e["text"], "cite": cite % e["agree"]} for c, e in sorted(entries.items())},
+               "provenance": {"read": "checks/round48/ax3_label_read.py", "rule": "CTO round-47 analysis ADDENDUM 1 (msg 4113): a code's single label across "
+                              "workbooks at any count, claim held; own-sheet measured wins", "agree": {c: e["agree"] for c, e in sorted(entries.items())}}}
+        json.dump(out, open(sys.argv[1], "w", encoding="utf-8"), indent=2, ensure_ascii=True, sort_keys=True)
+        print("entries written %d to %s" % (len(entries), sys.argv[1]))
     return 0
 
 
