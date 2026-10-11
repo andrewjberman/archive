@@ -60,3 +60,41 @@ upload routes, and 21 of the partners routes. Both tokens were told `service`
   can present a token at all: it was seen, not analysed.
 - The REST API behind `opal-portal-rest-authorizer`, a different API, not read.
 - For the investor-reporting functions, the per-function code beyond the shared boundary.
+
+## 6. ADDENDUM 1 (2026-10-11 ~17:2xZ): `trade-dashboard-api` read by this seat, handler by handler (CTO msg 5428)
+
+**Question:** for a signed-in caller of ANOTHER firm, or a client login, what does each of its nine routes return?
+**Answer: eight of the nine return trade data or the user list to ANY verified caller, with no firm, role or identity
+check. It is a cross-firm read by code, not untidiness.** Read at box/dell2 HEAD,
+`infra/aws/lambda/trade-pipeline/trade-dashboard-api/src/dashboard_api.py` (527 lines), whole router and every handler named.
+
+**Why no handler can check the caller:** the router (`lambda_handler`, lines 38-85) passes each handler only the query
+string or a path id. The event, which carries the authorizer's context, is passed to ONE handler, `get_users_me`. The other
+eight never receive it.
+
+| route (`routes.tf`, authorizer `portal_jwt`) | handler | returns to any verified caller | submissions | user list |
+|---|---|---|---|---|
+| `GET /api/general/trades/submissions` | `get_recent_submissions` (313) | the last 7 days of submissions, whole items, up to `limit` | YES | no |
+| `GET .../submissions/pending` | `get_pending_submissions` (168) | every submission pending approval, whole items | YES | no |
+| `GET .../submissions/by-status` | `get_by_status` (232) | every submission in a status the caller names | YES | no |
+| `GET .../submissions/by-initiator` | `get_by_initiator` (184) | every submission of an email the CALLER types in the query | YES | no |
+| `GET .../submissions/by-approver` | `get_by_approver` (206) | every decision of an email the caller types | YES | no |
+| `GET .../submissions/{id}` | `get_submission` (88) | one submission by id, whole item | YES | no |
+| `GET .../submissions/{id}/excel` | `get_excel_download` (100) | a download link, valid one hour, to that submission's spreadsheet | YES (the file) | no |
+| `GET .../users` | `get_users` (346) | every row of the trade users table, or those of a role, with only `password` and `api_key` removed | no | **YES** |
+| `GET .../users/me` | `get_users_me` (371) | the CALLER's own email, name, groups and role, from the authorizer's email; empty groups if it has no row | no | own row only |
+
+Eight of nine: 7 return submissions, 1 returns the user list. `get_by_date` (257) has no route key of its own in `routes.tf`, but
+the router matches any path containing `/submissions/by-date` before it tries an id, so a request to the `{id}` route with
+`by-date` in the id's place reaches it: submissions for a date or range the caller names. (My first form of this sentence
+said nothing reached it; the router's own branch does.) The ninth route is the only one that uses the verified identity, and it returns only the
+caller's own row.
+
+**What I did not establish, and it decides how bad this is:**
+- What a submission item holds (accounts, securities, quantities, a client's name) and whether one table holds more than
+  one firm's trades. I read the handlers, not the table or its writer.
+- Whether a client login or another firm's login can in practice reach these paths: the authorizer has an origin gate
+  (the request must come through the portal's front door) and the portal's pages may not offer the route, but neither is an
+  authorization check on the caller, and a signed-in person holds a token the gate accepts.
+- Deployed bytes. This is the repo.
+- The other three class A functions remain the search agent's read except the two I verified in section 3.
