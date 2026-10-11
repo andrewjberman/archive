@@ -1,0 +1,19 @@
+ADVI_FIRMBKTS.TO-FB-g-21.module-allow-grants -- worker session log
+serial: 0.9.0_WK_ADVI_FIRMBKTS~43   worktree: C:\dev\wk-firmbkts-43   branch: wk-ADVI_FIRMBKTS-43
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-ADVI_FIRMBKTS-43; TREE-OK (org and .tools present).
+2. Premises re-grounded at the worktree: module main.tf had no grants handling and a prefix check requiring a trailing /;
+   lib/opal_naming.py validate() refused any prefix entry not ending in /; exemptions.json had no grants key (absent is the empty map).
+3. Edits: infra/aws/terraform/modules/opal_name/main.tf (key entries, fence_scoped_allow_statements, grants locals, malformed-grants refusal)
+   and lib/opal_naming.py (validate: key entries under the same rules and firm-token check; grants object).
+4. Builder check (scratch, C:\dev\wk-firmbkts-43\.scratch\fb21_builder_check.py): valid string prefix, valid key-entry list and valid grant
+   accepted (0 refusals each); 7 malformed grants and prefix fixtures refused (1 or 2 refusals each).
+5. Plan refusal check (scratch planfix mirror): a grants row with keys [advi/49financial/x/*] fails terraform plan at
+   "Module output value precondition failed ... output fence_scoped_allow_statements", naming grants.opal-data-49financial[0].
+6. Commit c64a667818 (code, 2 files, 132 insertions, 8 deletions) via safe-commit; naming-gate PASS 0 graded; commit-gate All checks passed.
+   Risk-reflex printed HOLD on main.tf by basename (surprise row W43-S1); client-data-check WARN, list absent (row W43-S2).
+7. Commit 6e832b9577 (surprise rows W43-S1, W43-S2 only; INVESTIGATION_v1.md 48 insertions, 0 deletions); surprise-row-gate OK.
+8. AC1 r4_modallow.py --arms render: 5 of 5 arms, run twice on the final code bytes (identical lines). generate --target regenerated
+   generated_locals.tf byte-identically (git status clean for it). validate on the real registry: VALIDATE: OK rc=0.
+9. AC2 terraform test in the module folder: Success! 48 passed, 0 failed. (.terraform and .terraform.lock.hcl are gitignored, not committed.)
+10. AC3 r4_scope.py: ROUND 4 SCOPE: OK.
