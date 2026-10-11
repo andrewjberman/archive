@@ -1,12 +1,36 @@
-// Dormancy grid: base (HEAD) vs new router and guard over every (firmId, tenant dir, path class) decision.
+// Dormancy grid: base (576e574de4) vs the new router and guard over every (firmId, tenant dir, path class) decision.
+// The base copies are built HERE from git (git show 576e574de4:<path>) into <worktree>/.scratch/base, mirroring the
+// repo layout so the relative imports (../_shared/firm-config.mjs, ./tier_policy.mjs) resolve exactly as at base.
+// Usage: bun dormancy_grid.mjs <worktree root>
 import { pathToFileURL } from "node:url";
-import { resolve } from "node:path";
+import { resolve, dirname } from "node:path";
+import { execFileSync } from "node:child_process";
+import { mkdirSync, writeFileSync, existsSync, symlinkSync } from "node:fs";
+
+const BASE_REF = "576e574de4";
 const W = resolve(process.argv[2]);   // worktree root
 const B = resolve(W, ".scratch/base");
-const base = await import(pathToFileURL(resolve(B, "shared-advisor-router/index.mjs")).href);
+const BASE_FILES = [
+  "infra/aws/lambda-edge/shared-advisor-router/index.mjs",
+  "infra/aws/lambda-edge/shared-advisor-router/tier_policy.mjs",
+  "infra/aws/lambda-edge/_shared/firm-config.mjs",
+  "infra/aws/lambda-edge/shared-advisor-router-response/index.mjs",
+];
+for (const p of BASE_FILES) {
+  const bytes = execFileSync("git", ["show", `${BASE_REF}:${p}`], { cwd: W, maxBuffer: 16 * 1024 * 1024 });
+  const out = resolve(B, p);
+  mkdirSync(dirname(out), { recursive: true });
+  writeFileSync(out, bytes);
+}
+// The base guard imports @aws-sdk/client-sns; resolve it from the worktree's installed packages.
+const guardNm = resolve(W, "infra/aws/lambda-edge/shared-advisor-router-response/node_modules");
+const guardNmBase = resolve(B, "infra/aws/lambda-edge/shared-advisor-router-response/node_modules");
+if (!existsSync(guardNmBase)) symlinkSync(guardNm, guardNmBase, "junction");
+
+const base = await import(pathToFileURL(resolve(B, "infra/aws/lambda-edge/shared-advisor-router/index.mjs")).href);
 const neu = await import(pathToFileURL(resolve(W, "infra/aws/lambda-edge/shared-advisor-router/index.mjs")).href);
 const cfg = (await import(pathToFileURL(resolve(W, "infra/aws/lambda-edge/_shared/firm-config.mjs")).href)).FIRM_CONFIG;
-const gBase = await import(pathToFileURL(resolve(B, "shared-advisor-router-response/index.mjs")).href);
+const gBase = await import(pathToFileURL(resolve(B, "infra/aws/lambda-edge/shared-advisor-router-response/index.mjs")).href);
 const gNew = await import(pathToFileURL(resolve(W, "infra/aws/lambda-edge/shared-advisor-router-response/index.mjs")).href);
 const map = Object.fromEntries(Object.entries(cfg).map(([k, v]) => [k, v.bucket]));
 const A = "/api/scoped/advisor-intelligence/";
@@ -14,8 +38,8 @@ const firms = [...Object.keys(cfg), "opal-capital", "unmapped-x"];
 const slugs = [...new Set(Object.values(cfg).map((v) => v.bucket.replace(/^opal-data-/, "")))].concat(["none-x"]);
 const dirs = [...Object.keys(cfg), "not-a-firm"];
 const paths = dirs.map((d) => `platinum/advi/${d}/mix_summary.json`).concat(["platinum/firm/h.json", "views/v.json"]);
-const quiet = async (fn) => { const l = console.log, w = console.warn; console.log = () => {}; console.warn = () => {};
-  try { return await fn(); } finally { console.log = l; console.warn = w; } };
+const quiet = async (fn) => { const l = console.log, w = console.warn, e = console.error; console.log = () => {}; console.warn = () => {}; console.error = () => {};
+  try { return await fn(); } finally { console.log = l; console.warn = w; console.error = e; } };
 const ev = (firmId, uri, qs) => { const h = {}; if (firmId) h["x-firm-id"] = [{ key: "X-Firm-Id", value: firmId }];
   h["x-user-tier"] = [{ key: "X-User-Tier", value: "internal" }];
   return { Records: [{ cf: { request: { method: "GET", uri: A + uri, querystring: qs, headers: h,
@@ -48,3 +72,4 @@ for (const c of gcases) {
 }
 console.log(`GUARD GRID: identical ${gsame} of ${gcases.length} (firmId x tenant-dir x ?firm x served bucket); differing ${gdiff.length}`);
 for (const d of gdiff) console.log("  GDIFF " + JSON.stringify(d));
+console.log(`DORMANCY: router differing ${diffs.length}, guard differing ${gdiff.length}`);
