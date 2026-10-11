@@ -2,7 +2,7 @@
   <metadata>
     <id>NFRA_TRNSPT.TO-APPLY-ra22.teams-pull-refused-read-fix-dell2</id>
     <issued_by>2.0.0_SA_COO~T2</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~TR2</issued_to>
     <date>2026-10-11</date>
     <status>pending</status>
     <project_code>NFRA_TRNSPT</project_code>
@@ -17,6 +17,12 @@
 <owned_cells>TR-ra-22</owned_cells>
 <decomp_context>Round 22 AMENDMENT 2, cell TR-ra-22: the deploy of TR-rf-22's merged fix. The scheduled Teams pull has failed on every fire since 2026-10-09T16:00Z (row NFRA_TRNSPT-D2-S16). The pair is COMPLETE; this order IS the GO.</decomp_context>
 </decomp_ref>
+
+  <reassignment>
+    AMENDMENT 1 (issuer, 2026-10-11 ~03:2xZ): re-addressed from 0.7.0_AE_CloudOps~DELL2 to 0.7.0_AE_CloudOps~TR2, the fresh NFRA_TRNSPT applier
+    lane 0.0.0_AB_MSTR~DELL2 spawned (msg 3943): ~DELL2 holds open orders on two other projects (the seating check, to-decomp-ref-lint, ANNOUNCE).
+    Nothing else in the order changed. 0.7.0_AE_CloudOps~DELL2 does NOT run this order.
+  </reassignment>
 
   <objective>
     Deploy the Teams pull fix: rebuild the transcripts-pull zip, safe-apply it TARGETED at `aws_lambda_function.pull` ONLY, then ONE invoke
@@ -76,8 +82,8 @@
   </bounds>
 
   <paths>
-    org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/
-    org/tier2_senior/0.7.0_AE_CloudOps~DELL2/logs/
+    org/tier2_senior/0.7.0_AE_CloudOps~TR2/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~TR2/logs/
     org/critical_paths/change_management/
     org/critical_paths/.open_deploys/
   </paths>
