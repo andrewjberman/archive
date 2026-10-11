@@ -7,6 +7,13 @@
 
 **SEVEN groups change what the resident does. This is not a four-change release.** One build, one pair, one restart.
 
+**RESTATED 2026-10-11 on CTO msgs 4662, 4669, 4682.** The first version of this packet (blob `e6bec0e8cb`, @4387c36e01)
+offered four after-reads as drivable by a seat. Three were not: st30's allow list for the Opal producer is Andrew's
+sign-in only (`OPAL_PRODUCER_PRINCIPALS = ("andrew@opalinvest.com",)`, the same as st27), so a request a seat submits
+as `svc-irpt-analysis` takes the YCharts producer, which is vendor-facing. Section 2 now states each after-read as it
+truly is. The tar, the pin and the three host scripts are UNCHANGED. Nothing is added to the allow list: PRD line 248,
+"The list changes only on Andrew's word", and the CTO has carried that question to him.
+
 ## 1. The act
 
 - **Pin:** `37210c771a`, scratch branch `rel-resident-r5`: box/dell2 @f6b74199a9 plus a cherry-pick of the 390 s half
@@ -25,17 +32,20 @@
 - **Scripts** (this folder, derived from st29's): `pre_read.sh` (P1), `install_st30.sh` (D2 + V1),
   `remove_st30_to_st27.sh` (X1 + V2).
 
-## 2. What changes, by project (each with its own after-read)
+## 2. What changes, by project, and how each is read after the install
 
-| # | change | project | after-read | expected / other branch |
+| # | change | project | state after the install | what exercises it |
 |---|---|---|---|---|
-| S1 | reason fix and page sentence | IRPT_YCDGEN | section census on a report generated after the install | 0 sections state `INPUT_MISSING:held_<group>` for a no-rule or no-row cause / any such section is a finding, no rollback |
-| S2 | ticket reference admitted, named on the READY receipt | IRPT_ANLREQ release 4; TCKT_VNEXT's likely thread fix | `python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r2/apply1_cells.py . REL4-READ5` expecting `REL4-READ5 PASS` | PASS / a refusal is a finding for `2.0.0_SA_COO~Y2` and `2.0.0_SA_COO~V2` |
-| S3 | read-back release 390 s | IRPT_BCKEND | V1 prints the packaged constant. NOT drivable without a vendor-facing run; none is ordered | 390 / - |
-| S4 | research policy row names 3 firms (digest `6e3286a3d962` to `aebe35b9a054`) | IRPT_YCDGEN round 7 | status read of the one retained research report (49financial, 2026-10-09T12:00:29Z) | it reads (expected) / it stays refused: the digest on the record was not st29's; a row, no rollback. 0 artifacts exist under the old digest |
-| S5 | one WARN journal line per READY, no message | IRPT_ANLREQ AR-g-21 | the regenerated report's READY shows `ANALYSIS_READY_QUEUE_UNSET` and 0 send failures | as stated / a send or a send failure means the variable is set: X1 at once |
-| S6 | refusals carry a reason class | IRPT_BCKEND | none short of a failing job; the suites at the pin | - |
-| S7 | optional schema members | IRPT_ANLREQ | S1's report persists (it validates against v2) | - |
+| S1 | reason fix and page sentence | IRPT_YCDGEN | APPLIED, UNEXERCISED | Only the one listed sign-in reaches the Opal producer. It waits on Andrew's word about `svc-irpt-analysis`, carried to him by the CTO, or on his own sitting. Then: the section census on that report, 0 sections stating `INPUT_MISSING:held_<group>` for a no-rule or no-row cause |
+| S2 | ticket reference admitted, named on the READY receipt | IRPT_ANLREQ release 4; TCKT_VNEXT's thread | APPLIED, UNEXERCISED until TCKT_VNEXT's fourth run | That run, under TCKT_VNEXT's own pair, on the YCharts producer path. Reaching READY exercises the admission and the receipt (`resident_worker.py` line 434 to `mark_ready`). A run ending ATTENTION exercises the admission only. The criterion on that run: `python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r2/apply1_cells.py . REL4-READ5` expecting `REL4-READ5 PASS`. A refusal is also TCKT_VNEXT's answer: the `ticket_id` schema was not the cause of the dead letters |
+| S3 | read-back release 390 s | IRPT_BCKEND | APPLIED, UNEXERCISED | V1 prints the packaged constant. Exercised only if the fourth run's read-back pends |
+| S4 | research policy row names 3 firms (digest `6e3286a3d962` to `aebe35b9a054`) | IRPT_YCDGEN round 7 | READ by a seat in the batch window | The status read of the one retained research report (49financial, 2026-10-09T12:00:29Z). It reads (expected), or it stays refused: then the digest on the record was not st29's; a row, no rollback. 0 artifacts exist under the old digest |
+| S5 | one WARN journal line per READY, no message | IRPT_ANLREQ AR-g-21 | APPLIED, UNEXERCISED until a READY | The fourth run's READY: the journal shows `ANALYSIS_READY_QUEUE_UNSET` for its request and 0 send failures. A send or a send failure means the variable is set: X1 at once |
+| S6 | refusals carry a reason class | IRPT_BCKEND | APPLIED, UNEXERCISED | none short of a failing job; the suites at the pin |
+| S7 | optional schema members | IRPT_ANLREQ | APPLIED, UNEXERCISED | the first report persisted after the install validates against v2 |
+
+**So the install itself is followed by ONE seat-driven after-read (S4) and V1.** Everything else is stated as
+unexercised until the act named beside it.
 
 Inert until a binding this release does NOT carry: the packager poll and the I3 send (no `commentary_ready_queue_url`, no
 `analysis_ready_queue_url`; V1 prints both counts), service subjects, custody reports. No commentary queue binding. I3 is
@@ -57,14 +67,15 @@ second is why P1 is a STOP.
 2. **P1 pre-read** (read only). **STOP:** `P1 STOP-READ PASS` is required: the unit Environment, the running process and
    the unit files all show 0 for `IRPT_ANALYSIS_READY_QUEUE_URL`. On FAIL nothing is installed.
 3. **D2 + V1 install.** The installer refuses unless `irpt-generation` reads 0/0, and rolls back itself on a failed start.
-4. **After-reads** S1, S2, S4, S5 in ONE served-read window, with the three reads already listed for it (one dead letter
-   read with no delete; TCKT_VNEXT run 3's request id and state; the status re-read of REQ-5e4149d2).
+4. **After-read S4** in ONE served-read window, with the three reads already listed for it (one dead letter read with
+   no delete; TCKT_VNEXT run 3's request id and state; the status re-read of REQ-5e4149d2). No generation is submitted
+   by this seat in that window or any other.
 5. **Rollback (X1 + V2):** `remove_st30_to_st27.sh` restores the st27 receipt and root. The st27 root stays on the host.
    Rollback package: `e606008994-st27.tar.gz`, sha256
    `20916261074c356ab31497b338a6957e3d72cb252b8a3f54432db98610da39e4`.
 
-Rollback is run on: a failed V1, any I3 send or send failure, or a resident that stops polling. A failed after-read of
-S1, S2 or S4 is a finding and a row, not a rollback, unless the CTO rules otherwise on the read.
+Rollback is run on: a failed V1, any I3 send or send failure, or a resident that stops polling. A failed read of S4, or
+of S2 on TCKT_VNEXT's run, is a finding and a row, not a rollback, unless the CTO rules otherwise on the read.
 
 No dead letter is redriven. Nothing goes to Bloomberg. One CVO packet per project follows the install.
 
@@ -76,9 +87,11 @@ three host scripts pass `bash -n` and have not run.
 
 ## COO HALF
 
-**COO half SIGNED** -- `2.0.0_SA_COO~G2`, at pin `37210c771a`, on the gate result, the census parts 1 and 2, the seven
-changes and four after-reads above, and P1 as a STOP.
+**COO half SIGNED on the RESTATED packet** -- `2.0.0_SA_COO~G2`, at pin `37210c771a` and the unchanged tar, on the gate
+result, the census parts 1 and 2, the seven changes with their after-install states as section 2 now states them, and
+P1 as a STOP. My signature on the first version is withdrawn with that version.
 
 ## CTO HALF
 
-(owed)
+(owed on this blob; the half @42972d0ea5 was signed against blob `e6bec0e8cb` and the CTO ruled it does not cover an
+install, msg 4662)
