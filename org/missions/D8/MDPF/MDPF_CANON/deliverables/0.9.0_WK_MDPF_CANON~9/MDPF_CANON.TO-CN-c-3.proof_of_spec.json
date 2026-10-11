@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "12adb87963"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "335258e392",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-c-3.md"
+  },
+  "to_id": "MDPF_CANON.TO-CN-c-3",
+  "assignee": "0.9.0_WK_MDPF_CANON~9",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/build_mdpf_wsc_inflection_feeder.py",
+      "kind": "script",
+      "commit_or_etag": "7682d8e0e0",
+      "artifact_covered_by": ["AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-9 (commit 7682d8e0e0). bronze_partition_prefix reads the generated data/mdpf/config/bronze_homes.json; no lib import; MDPF_BRONZE_PREFIX removed. The runner runs the feeder from code/scripts/ only after CloudOps syncs it. No deploy by the worker. No AWS call."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: r3_checks.py reader -- expect: ROUND 3 READER: 3 of 3 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round3/checks/r3_checks.py\" reader; echo \"exit=$?\"",
+      "output_evidence": "ARM 1 NO TYPED: PASS -- old bronze path literals: none; reads the generated homes file: True; imports lib/opal_naming: False\nARM 2 SOURCE: PASS -- got ('opal-data-assets', 'mdpf/inflection/bronze/orion_model_composition/date=2026-10-09'), want ('opal-data-assets', 'mdpf/inflection/bronze/orion_model_composition/date=2026-10-09')\nARM 3 ROLL: PASS -- 2026-10-09 -> ('2026-10-07', 2), 2026-10-07 -> ('2026-10-07', 0)\nROUND 3 READER: 3 of 3 arms\nexit=0",
+      "denominator": "3 of 3 arms",
+      "status": "PASS",
+      "expect": "ROUND 3 READER: 3 of 3 arms",
+      "status_reason": "Measured in the worktree at commit 7682d8e0e0 (the invocation runs the checker from the worktree root, not the primary tree)."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 (judgment=\"true\"): /seams on the writer-to-reader seam, grounded on the DEPLOYED artifact after CloudOps deploys both scripts and one on-demand pull has landed -- MECHANICAL (the feeder reads the files the pull wrote at the builder's keys), DECLARATIVE (the census and the docstrings match the code), SEMANTIC (the feeder's model_composition output for the as-of is value-equal to the output built from the old home's same date).",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; graded by the issuer at the round-3 close (/seams), never self-graded by the worker",
+      "output_evidence": "NOT MEASURED BY THE WORKER: the deployed artifact is not reachable from this worktree (no AWS write, no deploy). The worker's only declarative evidence is the feeder docstring at commit 7682d8e0e0 (Inputs line names the builder address and retires the old home).",
+      "denominator": "N/A -- judgment criterion (no verdict by the worker)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round-3 close",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a copy of the feeder under .scratch/mut with the runner layout (scripts/gold and config) and one homes key_prefix altered to the old bronze home",
+      "expected": "bronze_partition_prefix(2026-10-09) differs from the builder address, so the ARM 2 comparison fails",
+      "observed": "got ('opal-data-assets', 'mdpf/bronze/orion_model_composition/date=2026-10-09'), equal-to-want False",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 invocation run twice in the worktree, each stdout captured to a file and compared with cmp",
+      "observed": "IDENTICAL-OUTPUTS: both runs exit 0 with the same ROUND 3 READER: 3 of 3 arms lines",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No AWS call of any kind: no S3 listing or read of the new home, no pull, no apply, no deploy, no sync of data/mdpf/config to the runner",
+      "reason": "Order bound 1 (no AWS write) and the read-only grant. The live S3 path is exercised by CloudOps after the drain, and the judgment criterion AC3 grades it at the round-3 close."
+    },
+    {
+      "item": "The feeder's OUTPUT bucket (opal-data-mdpf) and its parquet writes",
+      "reason": "Out of this cell: the order leaves MDPF_BUCKET and every output write alone."
+    },
+    {
+      "item": "The writer data/mdpf/scripts/bronze/pull_orion_model_composition.py and iam.tf",
+      "reason": "CN-c-2's cell; not edited (order bound 2)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "r3_checks.py reader (issuer check, read-only)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round3/checks/r3_checks.py\" reader; echo \"exit=$?\"",
+      "result": "ROUND 3 READER: 3 of 3 arms, exit=0"
+    },
+    {
+      "tool": "ruff 0.15.11 (py39 target)",
+      "invocation": "ruff check --target-version py39 data/mdpf/scripts/gold/build_mdpf_wsc_inflection_feeder.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/safe-commit.sh commit gates",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_CANON~9 <0.9.0_WK_MDPF_CANON~9@opal.agent>\" -F .scratch/msg_cn_c_3_code.txt -- data/mdpf/scripts/gold/build_mdpf_wsc_inflection_feeder.py",
+      "result": "commit-gate OK; surface-check and surprise-row gate OK; committed 7682d8e0e0"
+    }
+  ]
+}
