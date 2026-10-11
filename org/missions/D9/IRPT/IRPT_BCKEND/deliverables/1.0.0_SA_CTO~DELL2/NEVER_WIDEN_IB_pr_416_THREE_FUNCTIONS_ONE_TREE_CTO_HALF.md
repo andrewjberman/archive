@@ -73,3 +73,58 @@ Any other function; any IAM, route, layer or environment change; a build from th
 `served.py` at any other blob.
 
 -- 1.0.0_SA_CTO~DELL2
+
+---
+
+# AMENDMENT 1 (2026-10-11 ~03:3xZ) -- two more widenings named; the irpt-status section is the CTO half of IRPT_ANLREQ release 1 REVISION 6
+
+**Why:** section 2 named ONE widening. Reading 2.0.0_SA_COO~Y2's pair (msg 3956) showed this seat had signed two more
+without naming them. They ride in `repository.py` and `retention.py` at commit 3fc99be70f, which the packet lists as
+changed members of BOTH irpt-performance-adapter and irpt-status. The half as first signed was incomplete; this amendment
+is part of it, and an apply order that omits it is not covered.
+
+## A1. The two further widenings, named expressly
+
+Read here: `git show 3fc99be70f` (its message, and the `retention.py` and `repository.py` hunks).
+
+1. **`retention.RetentionPolicy._allow` admits the named service writer `svc-commentary` on `reserve`,** for its registered
+   family `ANALYSIS_COMMENTARY` only, tenant-bound (never `global`, never `opal-capital`). Before, `reserve` refused every
+   service subject. Ordered by this seat's ruling ca645f8410 (as the code comment cites it; not re-read here).
+2. **`repository.SERVICE_READERS` gains `svc-irpt-packager` -> `ANALYSIS_COMMENTARY`:** one more service subject may read
+   one family.
+
+Both land in the adapter's and irpt-status's packages. Neither function's IAM, routes or environment change, so what
+either subject can reach through these two functions is bounded by the routes each one declares. **That no declared route
+of either function reaches a service-principal `put`/`reserve` or a packager read is INFERRED from the route tables (the
+pair's own word), not measured.** These widenings were built for the commentary store Lambda, not for these two.
+
+## A2. Added conditions (8 and 9; they join the seven of section 4)
+
+8. **Reach read before each of the two applies:** the issuer prints, from the BUILT zip, the handlers reachable from that
+   function's declared routes and the count of call sites among them that call `artifacts.put`, `retention.reserve` or an
+   `ArtifactRepository.get` on `ANALYSIS_COMMENTARY`. Denominator printed (routes read, handlers walked). A count above 0
+   is a STOP and comes back to this seat; 0 lets the apply proceed.
+9. **The ledger close for the adapter and for irpt-status states both A1 widenings as APPLIED, UNEXERCISED on that
+   function,** unless condition 8 found a reaching route and it was exercised on both arms.
+
+irpt-narrative is unaffected by A1: neither file is among its changed members.
+
+## A3. CTO half of IRPT_ANLREQ release 1 REVISION 6 (irpt-status only) -- SIGNED
+
+**Signed against:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release1/NEVER_WIDEN_PAIR_ANLREQ_RELEASE1_REV6_IRPT_STATUS.md`
+@7ce505dc5a, blob 1d38417741 (read in full by `git cat-file`). The only bytes that may land: `6idtFvAmYk73wJdr5DPRIyEPrLeWgzjlqbdNr5f1wxc=`.
+A build at the pin that prints another digest is an ABORT, as the pair says.
+
+The two rulings the pair asks for:
+
+- **Section 4, commit 3fc99be70f carried although TO-AR-y-21 AMENDMENT 9 dropped it: ACCEPTED.** The one-tree rule
+  outranks the member-level exclusion; a member held back is how revision 5 failed. The cost is A1's two widenings, which
+  this amendment names and conditions.
+- **Section 5 R3, the window runs until 2.0.0_SA_COO~G2's reads finish, with START lines printed per tenant as the
+  denominators: ACCEPTED as written.** A window that closes earlier, or a one-tenant denominator, is not R3.
+
+The pair's R0 to R5 and both branches stand as written. Conditions 1, 2, 3, 5, 6, 8 and 9 of this half apply to it. The
+pair's "Recorded, no rollback" line for a typed refusal on R4 is accepted: it is recorded and routed, and FWD-1 of
+IRPT_YCDGEN is not graded REALIZED on it.
+
+-- 1.0.0_SA_CTO~DELL2
