@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-99",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/prd/DSGN_IRPTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9dcf03f83b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "c5c609f30e",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-99.history-reader-admits-new-members.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~55",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/contracts/owned-requests.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "cbd5cc66",
+      "artifact_covered_by": [
+        "IV99-AC1",
+        "IV99-AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit cbd5cc66 on branch wk-dsgn-irptv1-r19-55 (LOCAL, not pushed). readOwnedHistory takes the two-key page and the contract's page; new readOwnedHistoryRow reads client_id/client_claim; readOwnedRequest untouched; types OwnedHistoryPage/OwnedHistoryRow exported; transitional comment (CTO msg 4818)."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-99.history-reader-new-members.test.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "8ed372cb",
+      "artifact_covered_by": [
+        "IV99-AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 8ed372cb (LOCAL, not pushed). IVE99-HR, 6 arms, 6 pass."
+    },
+    {
+      "path_or_key": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~55/HISTORY_READER.json",
+      "kind": "frontend_component",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "IV99-AC1",
+        "IV99-AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The record the issuer's check reads."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IV99-AC1",
+      "criterion_verbatim": "IV99-AC1 -- the reader takes the two-key answer, the contract's answer and the producer's fixture, refuses four malformed ones, a test holds it and a mutant breaks it. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/checks/r19/p19_round19.py\" . IV99-AC1",
+      "output_evidence": "OK: the reader takes the two-key answer, the contract's answer and the producer's fixture, and refuses four malformed ones; 11 contract line(s) cited\nIV99-AC1 PASS",
+      "denominator": "accepts 3 of 3 (old_shape, new_shape, producer_fixture); refuses 4 of 4 (unknown_top_key, unknown_item_key, wrong_type_unreadable_rows, bad_client_claim); test IVE99-HR 6 of 6 arms pass; mutant (exact-two-keys restored) failed 2 of 6 arms; 11 contract lines cited",
+      "status": "PASS",
+      "expect": "IV99-AC1 PASS"
+    },
+    {
+      "criterion_id": "IV99-AC2",
+      "criterion_verbatim": "IV99-AC2 -- the new members are carried, what a user could see differently is listed, typecheck reads 0 errors and no new id fails. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/checks/r19/p19_round19.py\" . IV99-AC2",
+      "output_evidence": "OK: 3 member(s) carried, 0 rendered change(s); typecheck 0 errors; no new failing id\nIV99-AC2 PASS",
+      "denominator": "3 of 3 members carried; rendered_changes 0; bun run typecheck 0 errors; whole scope 1165 tests across 373 files: 7 fail before (1159 across 372), the same 7 fail after, new_failing_ids [] (7 unique failing test names compared)",
+      "status": "PASS",
+      "expect": "IV99-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Committed first. In readOwnedHistory the new top-level key check (key !== items/next_cursor/unreadable_rows) was replaced by the old exact-two-keys rule (Object.keys(value).length !== 2); the new test file was run; then reverted with git checkout -- owned-requests.ts and git status --short confirmed clean. Never committed.",
+      "expected": "The contract-page arm (b) and the producer-fixture arm (c) fail; the two-key arm and the refusal arms still pass.",
+      "observed": "2 fail (b the contract page; c the producer fixture through parseIrEnvelope), 4 pass; after the revert git status --short and git diff --stat were empty.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The new test ran 3 times on the same bytes (before the mutant, with the whole-scope run after, and in isolation), plus typecheck once.",
+      "observed": "6 pass 0 fail on each unmutated run; bun run typecheck rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "showing client_id, client_claim or unreadable_rows on the page",
+      "reason": "A separate page half; this order is the reader only (order item 3). rendered_changes is []."
+    },
+    {
+      "item": "readOwnedRequest lacking persist_inputs",
+      "reason": "A separate gap named in AMENDMENT 1; not this cell."
+    },
+    {
+      "item": "regenerating contracts/wire/OwnedAnalysisRequestHistory.ts",
+      "reason": "Generated folder is not hand-edited; the members are carried in owned-requests.ts's own exported types. Regeneration is cell IV-e-98."
+    },
+    {
+      "item": "the 7 whole-scope failures present before this cell",
+      "reason": "They fail identically before and after (content-pin and smoke-map tests); outside this cell. new_failing_ids is []."
+    }
+  ],
+  "surprises": [
+    "DSGN_IRPTV1-D2-W55-S1"
+  ],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~55/HISTORY_READER.json",
+  "compiler_tools": [
+    {
+      "tool": "bun run typecheck",
+      "invocation": "bun run typecheck (tsc -b --noEmit, from the portal worktree)",
+      "result": "rc=0, 0 errors"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-99.history-reader-new-members.test.ts",
+      "result": "6 pass / 0 fail, 54 expect() calls"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting (whole scope, before and after)",
+      "result": "before 1125 pass 27 skip 7 fail (372 files); after 1131 pass 27 skip 7 fail (373 files); the same 7 failing names"
+    }
+  ]
+}

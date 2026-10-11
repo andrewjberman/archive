@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-11</date>
-    <status>in_progress -- AMENDMENT 4: release 5 was applied 10:25Z and its nine reads were made (R4 ABSENT); it is being ROLLED BACK to revision 6 because the portal's history reader refuses the new answer. See AMENDMENT 4.</status>
+    <status>complete -- ROLLED BACK. Release 5 (Iw3FADFr) was live 2026-10-11T10:25:40Z to 11:26:53Z and its nine reads were made (R4 ABSENT); it was rolled back to revision 6 (6idtFvAm) under AMENDMENTS 4 and 5 because the portal's exact-key history reader refuses its answer. Issuer's own reads: live 6idtFvAm; 0 release-5 ledger sentinels open; the map entry restored. The laptop's post-rollback history read (relayed) shows the two original keys, 40 rows. The criteria APPLY5-AC1 and AC2 were true while the release was live and are NOT true now by design: the instance records them as of 10:4xZ. Rows IRPT_ANLREQ-D2-S43 (disarmed) and the map-build hazard row filed with this flip.</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
