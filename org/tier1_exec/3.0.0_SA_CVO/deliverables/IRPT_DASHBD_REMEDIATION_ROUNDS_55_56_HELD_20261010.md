@@ -210,3 +210,54 @@ Inputs: msg 4237 (rounds 63 and 64 drained @e4a88b23d6, @915e48125f).
 - **D2-W93-S3 does NOT graduate.** The contract lists method row 3 at 0.5.0; the row is dismissed in the rounds 63-64 adjudication.
 - UN-PARKS ON: TO-DB-b-86 terminal. The issuer reports it BLOCKED on the Cottonwood returns gold (row S43), so this file may wait
   through the mint. The ARMED rows in it sit in the project's INVESTIGATION_v1.md with their disarm owners and do not wait.
+
+## Added at the round 65 compile (2026-10-11T09:10:50Z)
+
+Input: msg 4541 (round 65 drained @1d9c2fb822).
+
+```text
+[
+ {
+  "id": "IRPT_DASHBD-D2-W96-S2",
+  "project": "IRPT_DASHBD",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "The reporting publisher refuses a series with a null income, external flow or value. The minted Cottonwood returns table writes income_received null on all 1,691,729 rows, so the publisher would refuse every Cottonwood account.",
+  "evidence": [
+   "investigation row IRPT_DASHBD-D2-W96-S2",
+   "this seat's read of infra/aws/lambda/investor-reporting/reporting-publish/publisher.py at HEAD: line 51 lists income_received among the series fields; lines 80-81 and 86-87 raise PublishRefused when a value is null (the SERIES contract says never null); the Cottonwood adapter writes income_received None on every row (commonwealth_account_return_daily.py, read by this seat at the mint grade)"
+  ],
+  "remedy": "FWD-11's design for the reporting read states it: the publisher admits a source whose income sits inside the value (with the method row saying so), or the Cottonwood adapter supplies an income figure. The CTO's deferral (msg 4514) carries it.",
+  "owner": "1.0.0_SA_CTO~DELL2",
+  "round": "v66",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "1.0.0_SA_CTO~DELL2",
+   "round": "v66"
+  },
+  "closed": false
+ },
+ {
+  "id": "IRPT_DASHBD-D2-W96-S3",
+  "project": "IRPT_DASHBD",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "The Cottonwood gold's account id is the custodian's number, while the directory mints its opaque ids from the vendor key. The reporting read matches the two by minting, so a published file could still read NOT_READY. Not measured.",
+  "evidence": [
+   "investigation row IRPT_DASHBD-D2-W96-S3",
+   "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~96/REPORTING_READ_PER_FIRM.json"
+  ],
+  "remedy": "One measured read on one Cottonwood account: the id the gold carries against the id the directory mints.",
+  "owner": "2.0.0_SA_COO~D2",
+  "round": "v66",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "2.0.0_SA_COO~D2",
+   "round": "v66"
+  },
+  "closed": false
+ }
+]
+```
