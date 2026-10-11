@@ -1,0 +1,99 @@
+{
+  "ledger": {
+    "slug": "irpt-bckend-ib424-vendor-path-rollback-20261011",
+    "state": "CLOSED"
+  },
+  "source_map_commit": "6a10f86bee",
+  "tree_restore_commit": "b1e2bddfa6",
+  "function": {
+    "name": "irpt-performance-adapter",
+    "live_after": "9kYLdR64P0p2TEbDXcQu1hrpQ9KtqjPNnFDpoE/W31A=",
+    "live_before_rollback": "OF+8j4ucXsxwJ195NKEQZnma22T8bYVUriw9YP859RU=",
+    "s3_version": "B_U4XGkpDqMHPVl6u.quhmEerpseF5oC",
+    "s3_version_bytes": 445438,
+    "s3_version_content_sha256": "9kYLdR64P0p2TEbDXcQu1hrpQ9KtqjPNnFDpoE/W31A=",
+    "pre_release_version_reread": "7IkeCAOa8F8IzqgaW1_WCLczFhmtzaLn",
+    "build_only_digest_matched": true,
+    "rolled_back_at": "2026-10-11T10:03:25Z",
+    "plan": {
+      "scope": "FULL ROOT",
+      "adds": 0,
+      "changes": 1,
+      "destroys": 0,
+      "changed_resource": "module.irpt_performance_adapter.aws_lambda_function.this"
+    },
+    "mechanism_note": "The yang-lambda module sets s3_object_version = data.aws_s3_object.artifact.version_id and source_code_hash = that object's content-sha256 metadata (module main.tf:17,38,39), and the data source reads the LATEST version of the key. So the rollback could NOT be done by re-pointing Terraform at version 7IkeCAOa8F8IzqgaW1_WCLczFhmtzaLn; the latest version had to become one carrying the pre-release bytes. That version was re-read first as still present with content-sha256 9kYLdR64... and 445438 bytes, then the restored source-map entry was rebuilt -- BUILD_ONLY printed 9kYLdR64..., which is the proof the restored entry reproduces the pre-release bytes -- and uploaded as a NEW version with the same digest and size. The pre-release package is therefore live by CONTENT, which is what the order's after-read requires."
+  },
+  "role_policies_after": [
+    "irpt-performance-adapter-directory-read-policy",
+    "irpt-performance-adapter-logs",
+    "irpt-performance-adapter-ownership-map-read-policy",
+    "irpt-performance-adapter-selection-read-policy",
+    "irpt-performance-adapter-service-profile-read-policy",
+    "irpt-performance-render-grant-read-policy",
+    "irpt-performance-retained-policy"
+  ],
+  "role_policies_after_count": 7,
+  "removed_policies_confirmed_absent_by_name": {
+    "irpt-performance-approved-session-policy": "NoSuchEntity",
+    "irpt-performance-approved-orion-session-policy": "NoSuchEntity"
+  },
+  "targeted_destroy_plan": {
+    "adds": 0,
+    "changes": 0,
+    "destroys": 2,
+    "exact": true,
+    "deviation_from_the_order": "The order's two -target flags alone were REFUSED by Terraform: 'Moved resource instances excluded by targeting', naming the two additional targets to add. Restoring retained.tf restored the count meta-argument on all four session blocks, so each applied object's address moved from the un-indexed form to the count-indexed [0] form, and the two DATA sources moved with the two policies. The plan was re-run with the two policy targets PLUS data.aws_secretsmanager_secret.performance_cot_session and data.aws_secretsmanager_secret.performance_inf_session, exactly as Terraform's own error instructed; its alternative, dropping targeting altogether, would have been less targeted rather than more. Those two are data sources which, with count now 0, are removed from state and not read; even when read they resolve a secret NAME to an ARN and never a secret VALUE. The count gate still governed and was exact. Recorded because it changed HOW the plan was produced, not what landed.",
+    "destroy_annotations": "each policy at index [0], 'because index [0] is out of range for count' and 'moved from' its un-indexed address, each showing its single secretsmanager:GetSecretValue statement removed; no other resource action"
+  },
+  "fresh_request": {
+    "how": "OPTION TWO of the order's two, recorded as the order requires. This seat cannot drive a caller the function ADMITS, because a synthetic principal cannot supply a verified internal subject -- which is precisely why IB-pr-423's live-call arm could not have caught the defect this rollback undoes. So the request is the IDENTICAL event used as IB-pr-423's live call (routeKey GET /api/scoped/investor-reporting/performance/{accountSetId}, non-49F X-Firm-Id cottonwood), plus the prescribed read of the function's log from the rollback promote on.",
+    "refused": true,
+    "public_reason_code": "NOT_AUTHORIZED",
+    "status": 200,
+    "function_error": null,
+    "vendor_reached": false,
+    "served_outcomes_since_rollback": 0,
+    "post_rollback_log_read": {
+      "window_start": "2026-10-11T10:03:25Z",
+      "events_denominator": 6,
+      "served_spellings_tried": [
+        "\"served\"",
+        "outcome\":\"served",
+        "SERVED"
+      ],
+      "served_count": 0,
+      "secretsmanager": 0,
+      "GetSecretValue": 0,
+      "blackdiamond": 0,
+      "orion": 0,
+      "PERFORMANCE_USE#": 0,
+      "VendorUse": 0,
+      "performanceSeries": 0,
+      "performancePeriod": 0,
+      "TypeError": 0,
+      "AccessDenied": 0
+    }
+  },
+  "full_root_plan": "No changes. Your infrastructure matches the configuration. -- confirmed machine-readably as well as in prose: the same plan with -detailed-exitcode returns rc=0, where 0 is no-changes and 2 would be changes-pending, so the verdict does not rest on matching a sentence. This is the same reading the IB-pr-422 packet recorded for the UNEDITED tree before the release.",
+  "served_while_live": {
+    "window_start": "2026-10-11T09:19:10Z",
+    "window_end": "2026-10-11T10:03:25Z",
+    "events_denominator": 31,
+    "served_count": 3,
+    "not_authorized_count": 2,
+    "report_lines": 5,
+    "use_record_count": "not read",
+    "use_record_note": "Stated as NOT READ rather than as zero. PERFORMANCE_USE# appears 0 times in the LOG GROUP, but the use record is a DynamoDB PutItem into the requests table, which a log read does not reach; 0 log occurrences is therefore not evidence of 0 records written. The order explicitly asks for 'not read' where the read does not reach.",
+    "corroboration": "The served_count of 3 matches the escalation's independent count of three served at 09:45Z.",
+    "preserved": "Per the order's bound, neither the retained vendor reports nor the use records written while the release was live were deleted or altered: they are the record of what was served."
+  },
+  "tests_after_restore": {
+    "command": "py -3.12 -m pytest -q tests, in infra/aws/lambda/investor-reporting/performance/",
+    "last_line": "1 failed, 251 passed, 2 warnings in 7.11s",
+    "the_one_failure": "tests/test_holdings_gold_calendar_gap.py::test_the_fallback_calendar_is_graded_in_its_own_years_and_clipped_outside_them, raising trading_calendar.CalendarCoverageError",
+    "why_it_matters": "This is the test the COO half recorded as row IRPT_BCKEND-D2-W282-S3, writing 'It was NOT run on the pre-change tree, so pre-existing is inferred'. CTO condition 4 asked for it to be run on the pre-change tree so pre-existing is MEASURED. The rollback restored exactly that tree, so this run IS that measurement: the failure is present with the release absent, making it pre-existing as fact rather than inference. It imports none of the five modules the release touched.",
+    "count_check": "The COO half read 1 failed, 268 passed on the release tree; the pre-change tree reads 1 failed, 251 passed. The 17-test difference is the release's own tests, gone with it."
+  },
+  "method": "Every digest was read from the LIVE function or from the S3 object's own content-sha256 metadata, never from the builder's stdout alone. The role was read back from the LIVE role twice over: list-role-policies for the set and count, and get-role-policy per removed name for an explicit NoSuchEntity. Both log windows were read with filter-log-events, auto-paginated and counted client-side with the denominator printed. No vendor was called and no secretsmanager get-secret-value was run at any point in this act. Counts, digests, status and reason codes only: no account id, balance or figure appears here."
+}
