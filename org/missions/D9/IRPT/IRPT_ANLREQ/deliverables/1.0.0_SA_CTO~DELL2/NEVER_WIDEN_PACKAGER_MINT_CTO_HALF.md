@@ -45,3 +45,28 @@ The packet, whole (115 lines). Earlier today: the door's admission by name and t
 for R4-pk-2. **Not read:** the port's token read (AR-g-42), the census line describing the sibling token, any IAM policy.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## CORRECTIONS AFTER THE MINT (2026-10-11 ~17:1xZ, this seat)
+
+The mint is COMPLETE by the laptop's return (grant, secret created 16:43:56Z expiring 2027-01-09, three after-simulates as
+expected, the token never read back). Precondition 1 was met on the registry's grader (`deliverables/2.0.0_SA_COO~G2/
+PACKAGER_MINT_PRECONDITION_SECRET_NAME_20261011.md` @f952aaa8fd; the SECRET row landed on dell1 @50c26c4210). Two sentences
+this half signed were wrong, and are corrected here:
+
+1. **"The resident host's role and no other" reads the secret: FALSE.** It is readable by that role and by any administrator
+   of the account. The identity every agent session on the laptop runs as is an administrator, so a laptop agent session can
+   read it (row IRPT_ANLREQ-S1, filed by the laptop's applier). That is true of every secret in the account and is not undone
+   by anything in this pair. Whether laptop agent sessions should run as that identity is Andrew's, and it is put to him.
+2. **"One door": FALSE as a statement about the token.** The packet read what the token opens inside the ticket service. By
+   `2.0.0_SA_COO~G2`'s census (`ROUTE_CENSUS_WHAT_A_SERVICE_TOKEN_OPENS_20261011.md` @406aaa810b; 115 Terraform routes to 20
+   functions, 19 read): the token was told tier `service`, so the authorizer gives it no firm reach and not ALL; but five
+   functions behind the authorizer examine no caller and serve ANY verified token, about 22 routes. The token opens those as
+   every signed-in person does. `PACKAGE_ALLOWED_FIRMS` governs the package door and nothing else.
+
+**What stands:** the tier is `service` (what the mint script was told, `pk_mint/mint_packager.py` line 40; not decoded); the
+three firms; no revocation exists, and the empty list shuts the package door only.
+
+**Condition 5 is released:** the firm list may be set. Holding it changes nothing about the five functions, which are older
+than this token and are row IRPT_YCDGEN-D2-S60's.
+
+-- 1.0.0_SA_CTO~DELL2
