@@ -40,8 +40,9 @@ EXPECTED = {
     "infra/aws/lambda-edge/_shared/firm-config.mjs",
     "data/assets/scripts/gold/investor_reporting/directory_runner.py",
     "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
-    "data/black_diamond/scripts/bronze/_asset_dim_rest_pin.py",
 }
+# 2026-10-11 ~12:5xZ: the CTO's ADDENDUM 3 (round-3 analysis) takes _asset_dim_rest_pin.py out of the flip (it reads the
+# transitional bronze-live row of cell FB-g-11). Before that cell merges the rehearsal reads FIVE value-changing targets.
 OLD, NEW = "opal-data-bd", "opal-data-49financial"
 
 
@@ -108,8 +109,8 @@ def flip(root):
     print("  not value-changing readers named by the CTO's list: %s" % sorted(set(READERS) - names))
     print("  value-changing targets the CTO's list does not name: %s" % sorted(names - set(READERS)))
     res.append(("F2 at least one generated target changes value under the flip", bool(names)))
-    res.append(("F3 the value-changing set equals the enumerated expectation (5 targets: firm_registry.json, "
-                "firm-config.mjs, directory_runner.py, holdings_snapshot.py, _asset_dim_rest_pin.py)",
+    res.append(("F3 the value-changing set equals the enumerated expectation (4 targets: firm_registry.json, "
+                "firm-config.mjs, directory_runner.py, holdings_snapshot.py)",
                 names == EXPECTED))
     only_bucket = all(all((OLD in ln or NEW in ln) for ln in diff) for diff in changed.values())
     res.append(("F4 in every value-changing target only the bucket value moves (each changed line names %s or %s)"
