@@ -1,0 +1,19 @@
+TO-FB-g-6 (row D1-S12 reconcile) -- forms tried against the provider's own targeted plan, 0.7.0_AE_CloudOps~FB1, 2026-10-11T12:26:35Z
+Command (each): terraform plan -input=false -lock=false -refresh=true -no-color -target=aws_wafv2_web_acl.opal_cloudfront_protection
+Root: infra/aws/terraform/portal-auth (terraform 1.15.8, aws provider 5.100.0 per the tracked lock file), worktree /c/dev/wk-firmbkts-30.
+Nothing applied, no state operation, no AWS write; the file was restored to its original bytes after every form (sha-equal read).
+
+base                                   Plan: 0 to add, 1 to change, 0 to destroy  (ACL update; 3 managed groups' version '' -> null)  ~49 s
+(i)   ignore_changes on the groups' version paths   Error: Cannot index a set value (x3)           plan cannot be built
+(ii)  explicit version = null on the 3 groups        Plan: 0 to add, 1 to change, 0 to destroy      NO EFFECT (config already null)
+(iii-a) version = ""                                 Error: expected length of ...version to be in the range (1 - 128), got  (x3)  schema refuses it
+(iii-b) ignore_changes = [tags, tags_all, rule]      No changes. Your infrastructure matches the configuration.   CLEARS -- MEASURED ONLY, NOT APPLIED TO THE FILE
+        (the whole-array form the file's own comments (waf-cloudfront.tf lines 371-377 and 415-421) record as refused:
+         "a rule array IS the security control, so ignoring it destroys the evidence that no rule moved ... DO NOT extend it to rule")
+
+Version pin (not run as a plan; read from the API): list-available-managed-rule-group-versions, scope CLOUDFRONT:
+  AWSManagedRulesAmazonIpReputationList  CurrentDefaultVersion None, 0 versions  -> an explicit version cannot be named for ip-reputation
+  AWSManagedRulesCommonRuleSet           CurrentDefaultVersion Version_1.23, 21 versions
+  AWSManagedRulesKnownBadInputsRuleSet   CurrentDefaultVersion Version_1.26, 24 versions
+A pin for the other two would stop following AWS's default version (a behavior change over time, bound 2) and would itself plan as an update.
+AC2 at the unchanged base (r4_waf.py --arms waf): A1 FAIL (no file changed), A2 PASS, A3 PASS: ROUND 4 WAF: 2 of 3 arms, exit 1.
