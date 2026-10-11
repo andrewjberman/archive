@@ -50,3 +50,15 @@ Of those, the CTO ruled three cuts (msg 4919): the ATTACH RELEASE for hops 9, 11
     release, cell 4). Un-parks at this lane's next issuance.
   - Hops 9, 11, 14: the attach release is four cells in workstream G (CTO msg 4972); its third reads this lane's row S26 message.
 
+### PARKED for this seat's NEXT issuance (owner `2.0.0_SA_COO~Y2`; un-parks at the next L10 analysis this seat receives, or sooner on a CTO word)
+
+- **The one-account check (TCKT_VNEXT FWD-3's ACCEPT line), passed 2026-10-11 ~20:1xZ by `2.0.0_SA_COO~V2` msg 5744 on CTO ruling
+  msg 5737** ("its issuer is the lane the owned-paths tool names for intake/parse.py ... pass FWD-3's ACCEPT line to that issuer for
+  its next issuance"). The lane read by `2.0.0_SA_COO~V2`: `IRPT_COMPLETION_Y`, this seat. DONE WHEN (TCKT_VNEXT PRD :41-45): a
+  known-bad sheet (several accounts in one file, a totals row, a holding that cannot be priced) is turned back with what to fix,
+  and a known-good sheet goes through. ACCEPT: a file that today would come back by email comes back from the form instead.
+  RECORD (the TCKT_VNEXT worker's read, `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~20/ONE_ACCOUNT_CHECK_READ.json`):
+  the normalizer sees NO account column today (`intake/parse.py` reads identifier, name, unit and currency headers only), so the
+  cell must first make an account column visible to it. Not read by this seat: `parse.py` itself. Owed to `2.0.0_SA_COO~V2`: the
+  order id when it is cut.
+
