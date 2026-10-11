@@ -35,11 +35,21 @@ def listing(*ids, cursor=None):
                               "next_cursor": cursor}})
 
 
-def read(stage, findings=None):
-    body = {"identity": {"request_id": REQ_A}, "accepted_at": 1, "stage": stage}
-    if findings:
-        body["findings"] = [{"code": c} for c in findings]
-    return res(200, {"data": body})
+def report(rid=REQ_A, sections=2):
+    """The finished-report answer (operation analysis-report): ids and synthetic section stubs only."""
+    return res(200, {"contract_version": "v1", "operation": "analysis-report", "data": {
+        "request_ref": {"request_id": rid, "request_revision": 1},
+        "sections": [{"section_id": "syn-%d" % i} for i in range(sections)]}})
+
+
+def refusal(code):
+    """A refusal envelope as served.refuse() builds it: HTTP 200, ok false, status.public_reason_code."""
+    return res(200, {"ok": False, "contract_version": "v1", "operation": "analysis-report",
+                     "status": {"public_reason_code": code}})
+
+
+def rpath(rid):
+    return "/api/scoped/investor-reporting/analysis/%s/sections" % rid
 
 
 class Fake:
@@ -141,10 +151,9 @@ def test_never_polls_the_sent_token(monkeypatch, sleeps):
     fake = install(monkeypatch, {
         ("GET", LIST_PATH): [listing(REQ_OLD), listing(REQ_C, REQ_OLD)],
         SUBMIT: res(200, {"data": {"request_id": SENT}}),
-        ("GET", LIST_PATH + "/" + REQ_C): [read("RECEIVED"), read("GENERATED")],
+        ("GET", rpath(REQ_C)): [refusal("NOT_FOUND"), report(REQ_C)],
         ("POST", "/api/scoped/tickets/%s/report" % TKT): res(200, {"ticket": {"ticket_id": TKT}}),
-        ("GET", "/api/scoped/tickets/%s" % TKT): ticket_with(REQ_C),
-        ("GET", LIST_PATH + "/" + REQ_C + "/pdf"): res(200, {"data": {"sha256": "ab" * 32, "byte_length": 10}})})
+        ("GET", "/api/scoped/tickets/%s" % TKT): ticket_with(REQ_C)})
     hops, named = trace_hops()
     trace = {"hops": list(hops.values()), "named_failures": named}
     run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA)
@@ -180,54 +189,58 @@ def test_ambiguous_request_list_is_a_named_failure(monkeypatch, sleeps):
     assert hops["e_ready"]["outcome"] == "UNREACHABLE" and hops["g_open"]["outcome"] == "UNREACHABLE"
 
 
-# ------------------------------------------------------------------ AC2: hop (e) reads `stage`
+# ------------------------------------------------------------------ AC2: hop (e) reads the finished report
 
 def test_reads_stage_field_until_generated(monkeypatch, sleeps):
-    fake = install(monkeypatch, {("GET", LIST_PATH + "/" + REQ_A): [
-        read("RECEIVED"), read("PARSED"), read("READY"), read("SUBMITTING"), read("GENERATED")]})
+    """(name kept) Amendment 1: no `stage` is read. The not-ready code is polled until the report is read."""
+    fake = install(monkeypatch, {("GET", rpath(REQ_A)): [
+        refusal("NOT_FOUND"), refusal("NOT_READY"), refusal("NOT_FOUND"), refusal("NOT_FOUND"), report(REQ_A)]})
     hops, named = trace_hops()
     assert run.hop_e_ready("tok", REQ_A, hops["e_ready"], named) == "OK"
-    assert hops["e_ready"]["polls"] == 5 and hops["e_ready"]["stage"] == "GENERATED"
+    assert hops["e_ready"]["polls"] == 5 and hops["e_ready"]["report"]["sections"] == 2
+    assert "stage" not in hops["e_ready"] and "state" not in hops["e_ready"]
     assert sleeps == [run.POLL_SECONDS] * 4
     assert named == []
-    assert set(fake.paths("GET")) == {LIST_PATH + "/" + REQ_A}
+    assert set(fake.paths("GET")) == {rpath(REQ_A)}
 
 
 def test_failed_stage_is_recorded_not_retried(monkeypatch, sleeps):
+    """(name kept) A terminal answer ends hop (e) at once, is recorded with its code, and (f) and (g) are UNREACHABLE."""
     fake = install(monkeypatch, {
         ("GET", LIST_PATH): [listing(), listing(REQ_A)],
         SUBMIT: res(200, {"data": {"request_id": REQ_A}}),
-        ("GET", LIST_PATH + "/" + REQ_A): read("FAILED", ["SYN_FINDING"])})
+        ("GET", rpath(REQ_A)): refusal("UNEXPECTED")})
     hops, named = trace_hops()
     trace = {"hops": list(hops.values()), "named_failures": named}
     run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA)
     e = hops["e_ready"]
-    assert e["polls"] == 1 and e["result"] == {"stage": "FAILED", "reason_codes": ["SYN_FINDING"]}
+    assert e["polls"] == 1 and e["reason"] == "UNEXPECTED" and e["refused"] is True
     assert sleeps == []
     assert hops["f_report"]["outcome"] == "UNREACHABLE" and hops["g_open"]["outcome"] == "UNREACHABLE"
     assert not any(p.endswith("/report") for p in fake.paths("POST"))
-    assert [n["reason"] for n in named] == ["UNREACHABLE", "UNREACHABLE"]
-    # NEEDS_CORRECTION is a result of the same kind
-    install(monkeypatch, {("GET", LIST_PATH + "/" + REQ_A): read("NEEDS_CORRECTION")})
+    assert [n["reason"] for n in named] == ["UNEXPECTED", "UNREACHABLE", "UNREACHABLE"]
+    # a non-200 is terminal of the same kind, even when its body carries a not-ready code
+    fake = install(monkeypatch, {("GET", rpath(REQ_A)): res(404, {"status": {"public_reason_code": "NOT_FOUND"}})})
     hops, named = trace_hops()
-    assert run.hop_e_ready("tok", REQ_A, hops["e_ready"], named) == "RESULT"
-    assert hops["e_ready"]["result"]["reason_codes"] == ["NEEDS_CORRECTION"]
+    assert run.hop_e_ready("tok", REQ_A, hops["e_ready"], named) == "FAILED"
+    assert hops["e_ready"]["polls"] == 1 and hops["e_ready"]["status"] == 404 and len(fake.calls) == 1
 
 
 def test_poll_budget_is_bounded(monkeypatch, sleeps):
-    fake = install(monkeypatch, {("GET", LIST_PATH + "/" + REQ_A): read("SUBMITTING")})
-    assert run.POLL_MAX == 40 and run.POLL_SECONDS == 30
+    fake = install(monkeypatch, {("GET", rpath(REQ_A)): refusal("NOT_FOUND")})
+    assert run.MAX_POLLS == 40 and run.POLL_MAX == 40 and run.POLL_SECONDS == 30
     hops, named = trace_hops()
-    assert run.hop_e_ready("tok", REQ_A, hops["e_ready"], named) == "FAILED"
+    assert run.hop_e_ready("tok", REQ_A, hops["e_ready"], named) == "NOT_READY"
     assert len(fake.calls) == 40 and hops["e_ready"]["polls"] == 40
     assert sleeps == [30] * 39
-    assert named[-1]["reason"] == "STAGE_NOT_TERMINAL"
+    assert named[-1]["reason"] == "NOT_READY"
 
 
 def test_refusal_envelope_is_not_a_read(monkeypatch, sleeps):
+    ok_data = {"request_ref": {"request_id": REQ_A}, "sections": [{"section_id": "syn-0"}]}
     for body in ({"status": {"public_reason_code": "INVALID_REQUEST_ID"}},
-                 {"code": "INVALID_REQUEST_ID", "data": {"stage": "GENERATED"}}):
-        fake = install(monkeypatch, {("GET", LIST_PATH + "/" + REQ_A): res(200, body)})
+                 {"code": "INVALID_REQUEST_ID", "data": ok_data}):
+        fake = install(monkeypatch, {("GET", rpath(REQ_A)): res(200, body)})
         hops, named = trace_hops()
         assert run.hop_e_ready("tok", REQ_A, hops["e_ready"], named) == "FAILED"
         e = hops["e_ready"]
@@ -237,11 +250,124 @@ def test_refusal_envelope_is_not_a_read(monkeypatch, sleeps):
 
 
 def test_missing_stage_is_a_named_failure_not_a_pass(monkeypatch, sleeps):
-    install(monkeypatch, {("GET", LIST_PATH + "/" + REQ_A): res(200, {"data": {
-        "identity": {"request_id": REQ_A}, "accepted_at": 1}})})
+    """(name kept) A 200 that is not the report asked for -- no sections, or another request's id -- is a named
+    failure, never a pass and never polled."""
+    for data in ({"request_ref": {"request_id": REQ_A}, "sections": []},
+                 {"request_ref": {"request_id": REQ_A}},
+                 {"request_ref": {"request_id": REQ_B}, "sections": [{"section_id": "syn-0"}]},
+                 {"sections": [{"section_id": "syn-0"}]}):
+        install(monkeypatch, {("GET", rpath(REQ_A)): res(200, {"data": data})})
+        hops, named = trace_hops()
+        assert run.hop_e_ready("tok", REQ_A, hops["e_ready"], named) == "FAILED"
+        assert named[-1]["reason"] == "REPORT_BODY_NOT_THE_REPORT" and hops["e_ready"]["polls"] == 1
+
+
+# ------------------------------------------------------------------ AC4: Amendment 1 -- the finished-report read
+
+def _code_only(path):
+    """The module source with comments and docstrings removed (tokenize), so a source check reads code, not prose."""
+    import io
+    import tokenize
+    out = []
+    for tok in tokenize.generate_tokens(io.StringIO(Path(path).read_text(encoding="utf-8")).readline):
+        if tok.type == tokenize.COMMENT:
+            continue
+        if tok.type == tokenize.STRING and tok.string.startswith(('"""', "'" * 3)):
+            continue
+        out.append(tok.string)
+    return " ".join(out)
+
+
+def test_hop_e_reads_the_report_route_never_stage(monkeypatch, sleeps):
+    """Hop (e) calls operation analysis-report with selected_tenant, never the request read or the pdf route, and a
+    `stage` field in the answer is not read: a body that carries stage=GENERATED but no report is not a pass."""
+    fake = install(monkeypatch, {("GET", rpath(REQ_A)): report(REQ_A, 3)})
+    hops, named = trace_hops()
+    assert run.hop_e_ready("tok", REQ_A, hops["e_ready"], named) == "OK"
+    assert fake.calls == [("GET", rpath(REQ_A), {"selected_tenant": run.FIRM}, None)]
+    e = hops["e_ready"]
+    assert e["route"] == "analysis-report" and e["polls"] == 1 and named == []
+    assert e["report"]["request_id_matches"] is True and e["report"]["sections"] == 3
+    assert "stage" not in json.dumps(e)
+    # a request-read body (carries `stage`, no report) is NOT a pass
+    install(monkeypatch, {("GET", rpath(REQ_A)): res(200, {"data": {
+        "identity": {"request_id": REQ_A}, "accepted_at": 1, "stage": "GENERATED"}})})
     hops, named = trace_hops()
     assert run.hop_e_ready("tok", REQ_A, hops["e_ready"], named) == "FAILED"
-    assert named[-1]["reason"] == "STAGE_ABSENT" and hops["e_ready"]["polls"] == 1
+    assert named[-1]["reason"] == "REPORT_BODY_NOT_THE_REPORT"
+    # the module's code (comments and docstrings removed) reads no stage and calls no pdf route
+    code = _code_only(run.__file__)
+    assert '"stage"' not in code and "STAGE" not in code and "/pdf" not in code and "stage" not in code
+
+
+def test_not_ready_code_is_polled_within_the_bound(monkeypatch, sleeps):
+    assert run.NOT_READY_CODES == frozenset({"NOT_FOUND", "NOT_READY"})
+    assert isinstance(run.NOT_READY_CODES, frozenset)
+    # each code in the set is polled, and a success on the last poll (40th) still counts: inside the bound
+    fake = install(monkeypatch, {("GET", rpath(REQ_A)): [refusal("NOT_FOUND")] * 20 + [refusal("NOT_READY")] * 19
+                                 + [report(REQ_A)]})
+    hops, named = trace_hops()
+    assert run.hop_e_ready("tok", REQ_A, hops["e_ready"], named) == "OK"
+    assert hops["e_ready"]["polls"] == 40 and len(fake.calls) == 40
+    assert sleeps == [run.POLL_SECONDS] * 39 and named == []
+
+
+def test_bound_reached_is_not_ready_never_a_pass(monkeypatch, sleeps):
+    fake = install(monkeypatch, {
+        ("GET", LIST_PATH): [listing(), listing(REQ_A)],
+        SUBMIT: res(200, {"data": {"request_id": REQ_A}}),
+        ("GET", rpath(REQ_A)): refusal("NOT_FOUND")})
+    hops, named = trace_hops()
+    trace = {"hops": list(hops.values()), "named_failures": named}
+    run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA)
+    e = hops["e_ready"]
+    assert e["outcome"] == "NOT_READY" and e["result"] == {"result": "NOT_READY", "last_code": "NOT_FOUND", "polls": 40}
+    assert e["polls"] == 40 and sleeps == [run.POLL_SECONDS] * 39
+    assert e.get("report_opened") is not True and "refused" not in e
+    assert hops["f_report"]["outcome"] == "UNREACHABLE" and hops["g_open"]["outcome"] == "UNREACHABLE"
+    assert not any(p.endswith("/report") for p in fake.paths("POST"))
+    assert [n["reason"] for n in named] == ["NOT_READY", "UNREACHABLE", "UNREACHABLE"]
+
+
+def test_other_refusal_code_is_terminal(monkeypatch, sleeps):
+    for code in ("NOT_AUTHORIZED", "INVALID_INPUT", "UNEXPECTED", "FIRM_BINDING", "DEPENDENCY_UNAVAILABLE",
+                 "INVALID_REQUEST_ID", "RATE_LIMITED"):
+        assert code not in run.NOT_READY_CODES
+        fake = install(monkeypatch, {("GET", rpath(REQ_A)): refusal(code)})
+        hops, named = trace_hops()
+        assert run.hop_e_ready("tok", REQ_A, hops["e_ready"], named) == "FAILED"
+        e = hops["e_ready"]
+        assert e["polls"] == 1 and e["reason"] == code and len(fake.calls) == 1 and sleeps == []
+        assert named[-1]["reason"] == code
+    # a transport failure (status 0) is terminal too
+    install(monkeypatch, {("GET", rpath(REQ_A)): {"status": 0, "reason": "TRANSPORT_X", "len": 0, "fp": None,
+                                                  "parsed": None}})
+    hops, named = trace_hops()
+    assert run.hop_e_ready("tok", REQ_A, hops["e_ready"], named) == "FAILED" and hops["e_ready"]["polls"] == 1
+
+
+def test_hop_g_reads_the_report_for_the_ticket_request_id(monkeypatch, sleeps):
+    """The id in memory is REQ_A; the ticket's report_ref names REQ_B. The report GET must use REQ_B, and the record
+    carries status, echoed id, section count, byte length and a sha256 prefix -- no section text."""
+    ans = report(REQ_B, 4)
+    fake = install(monkeypatch, {("GET", "/api/scoped/tickets/%s" % TKT): ticket_with(REQ_B),
+                                 ("GET", rpath(REQ_B)): ans})
+    hops, named = trace_hops()
+    assert run.hop_g_open("tok", TKT, hops["g_open"], named) is True
+    gets = [c[1] for c in fake.calls if c[1].endswith("/sections")]
+    assert gets == [rpath(REQ_B)] and REQ_A not in " ".join(c[1] for c in fake.calls)
+    g = hops["g_open"]
+    assert g["report_ref_request_id"] == REQ_B and g["report_opened"] is True
+    assert g["report"] == {"status": 200, "len": ans["len"], "sha256_prefix": ans["fp"],
+                           "request_id_echoed": REQ_B, "request_id_matches": True, "sections": 4}
+    assert "syn-" not in json.dumps(g) and named == []
+    # an unmet read is not an open: a refusal, or another request's report
+    for answer in (refusal("NOT_FOUND"), report(REQ_A, 1)):
+        install(monkeypatch, {("GET", "/api/scoped/tickets/%s" % TKT): ticket_with(REQ_B),
+                              ("GET", rpath(REQ_B)): answer})
+        hops, named = trace_hops()
+        assert run.hop_g_open("tok", TKT, hops["g_open"], named) is False
+        assert hops["g_open"]["report_opened"] is False and named
 
 
 # ------------------------------------------------------------------ AC3: the ticket carries a REQ id
@@ -256,20 +382,22 @@ def test_records_req_id_on_ticket(monkeypatch, sleeps):
 
 
 def test_opens_report_from_ticket_report_ref(monkeypatch, sleeps):
-    """The id in memory is REQ_A; the ticket's report_ref names REQ_B. The pdf GET must use REQ_B."""
+    """The id in memory is REQ_A; the ticket's report_ref names REQ_B. The finished-report GET must use REQ_B."""
+    ans = report(REQ_B, 2)
     fake = install(monkeypatch, {
         ("GET", "/api/scoped/tickets/%s" % TKT): ticket_with(REQ_B),
-        ("GET", LIST_PATH + "/" + REQ_B + "/pdf"): res(200, {"data": {"sha256": "cd" * 32, "byte_length": 1234}})})
+        ("GET", rpath(REQ_B)): ans})
     hops, named = trace_hops()
     assert run.hop_g_open("tok", TKT, hops["g_open"], named) is True
-    pdf_gets = [c[1] for c in fake.calls if c[1].endswith("/pdf")]
-    assert pdf_gets == [LIST_PATH + "/" + REQ_B + "/pdf"]
+    report_gets = [c[1] for c in fake.calls if c[1].endswith("/sections")]
+    assert report_gets == [rpath(REQ_B)]
+    assert not any(c[1].endswith("/pdf") for c in fake.calls)
     assert REQ_A not in " ".join(c[1] for c in fake.calls)
     g = hops["g_open"]
     assert g["report_ref_request_id"] == REQ_B and g["report_opened"] is True
-    assert g["pdf"] == {"status": 200, "content_type": "application/json", "len": g["pdf"]["len"],
-                        "sha256_prefix": "cd" * 8, "byte_length": 1234}
-    assert named == []
+    assert g["report"]["request_id_echoed"] == REQ_B and g["report"]["sections"] == 2
+    assert g["report"]["len"] == ans["len"] and g["report"]["sha256_prefix"] == ans["fp"]
+    assert "pdf" not in g and named == []
 
 
 def test_never_records_a_non_req_id(monkeypatch, sleeps):
@@ -284,4 +412,4 @@ def test_never_records_a_non_req_id(monkeypatch, sleeps):
     hops, named = trace_hops()
     assert run.hop_g_open("tok", TKT, hops["g_open"], named) is False
     assert named[-1]["reason"] == "REPORT_REF_NOT_A_REQ_ID"
-    assert not any(c[1].endswith("/pdf") for c in fake.calls)
+    assert not any(c[1].endswith("/sections") or c[1].endswith("/pdf") for c in fake.calls)

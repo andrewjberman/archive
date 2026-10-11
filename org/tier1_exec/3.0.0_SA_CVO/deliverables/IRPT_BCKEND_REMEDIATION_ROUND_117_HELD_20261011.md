@@ -114,3 +114,17 @@ OWNER: `3.0.0_SA_CVO`. UN-PARKS ON: TO-IB-pr-420 terminal.
  }
 ]
 ```
+
+## Update at the round 118 compile (2026-10-11T04:42:13Z)
+
+Input: `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/IRPT_BCKEND_ROUND_118_P_DRAIN_END_20261011.md @6eaa44414b (msg 4085)`. TO-IB-pr-420 is terminal; the gate still refuses while 2 IRPT_BCKEND orders read pending. UN-PARKS ON: every
+IRPT_BCKEND order terminal. Changes to the rows above when they land:
+
+- **D2-S60** narrows to irpt-status. The adapter and the narrative are repaired on the refusal path (this seat's live reads: digests
+  equal the map; TypeError before each apply, typed NOT_AUTHORIZED after). Still open on those two: no ADMITTED request has run on
+  the new bytes, and the three widenings on the adapter are applied and unexercised. The close is `2.0.0_SA_COO~Y2`'s irpt-status
+  apply plus the first admitted request on each function.
+- **D2-W278-S5**: the live attribute mismatch on irpt-narrative is closed by the apply. The 2 failing contract tests at the pin stay.
+- **D2-W278-S3, D2-W278-S4, D2-S62**: unchanged.
+- **New, to ride the same slug:** the source map's `last_deployed_commit` and `last_deployed_at` for the two applied functions still
+  read 2026-10-04 (row D2-S70). Owner `2.0.0_SA_COO~P2`: the apply's ledger or the map records the 2026-10-11 deploy.
