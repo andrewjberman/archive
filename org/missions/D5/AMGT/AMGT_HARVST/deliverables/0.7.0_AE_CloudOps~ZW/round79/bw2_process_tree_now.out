@@ -1,0 +1,27 @@
+READ AT: 2026-10-11T02:40Z
+INSTRUMENT: Get-CimInstance Win32_Process -Filter "Name='python.exe' OR Name='pythonw.exe'", command line matched against cycle_runner|backfill_driver|opal_data_harvest
+SCOPE: this is the AMENDMENT 1 read taken NOW (step 7, first read). The second step-7 read is taken at bw-2's cycle read.
+
+PROCESS TREE:
+PID 21512 PARENT 2668 STARTED 2026-10-10T22:15:26Z CMD "C:\Program Files\Python314\python.exe" -m lib.opal_data_harvest.cycle_runner --state-dir "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state" --runtime-root "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/runtime" --stop-file "C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-b5a7a3a4b6\.runtime\harvest-cycle\STOP" --publishers bbg wsj barrons
+PID 34496 PARENT 21512 STARTED 2026-10-11T02:39:09Z CMD "C:\Program Files\Python314\python.exe" -m lib.opal_data_harvest --runtime-root "C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-c1be67f53c\.runtime\harvest-cycle\runtime" run --harvest-grammar --retrieval-mode backfill --floor 2026-10-09 --new-only --no-sign-in --security-json "C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-c1be67f53c\.runtime\harvest-cycle\state\cycles\bbg\securities\security-de87a5f8b93104df.json" --publishers bbg --max-jobs 1
+RUNNERS: 1
+MATCHED_TOTAL: 2
+
+FINDINGS FOR THE ISSUER (the question step 7 was cut to answer):
+- PID 37816, the OLD-pin python the bw-1 reaper dry run listed as exempt, is ABSENT from this read. It is not a second
+  runner at this read. Denominator: 2 python processes matched the three tokens out of the full python process list;
+  only one of them is a cycle_runner. RUNNERS: 1, so the two-runner hazard is not live now.
+- PID 21512 is NOT the runner bw-1 started. bw-1's Start-ScheduledTask ran at 2026-10-09T19:59:57.6202406Z; this
+  runner's creation time is 2026-10-10T22:15:26Z, which is the /govern worktree-GC remedy time named in AMENDMENT 2
+  (row AMGT_HARVST-Z-S111). The runner bw-1 started was killed with cycle 20261010T204810Z.
+- PID 34496 (parent 21512) is the runner's OWN per-security collector child, one security-json, --max-jobs 1,
+  --publishers bbg. It is the current cycle doing work, not an independent harvest.
+- The runner's --state-dir and --runtime-root point at the wk-harvest-runner-pin-c1be67f53c worktree while its
+  --stop-file points at wk-harvest-runner-pin-b5a7a3a4b6. That split is what bw-1 registered (state dir kept at
+  c1be67f53c per the cell; stop file on the re-pinned tree per AMENDMENT 2, C-g). Stated here as measured, not
+  flagged as a defect.
+
+BW-2 START CONDITION AT THIS READ: NOT MET. cycles/bbg holds no .cycle.json after 20261010T204810Z; the next cycle
+20261010T221526Z has a checkpoint but no cycle record, and PID 21512 plus its child are live, so it is still running.
+Per AMENDMENT 2 a cycle still running is not this read. Nothing restarted, nothing stopped.
