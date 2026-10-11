@@ -5,7 +5,7 @@
 `names_read.display_names(keys, classifications)` serves, per key, the classifications table's name looked up by the key's BARE Bloomberg ticker
 (`SAN FP` -> `SAN`), else the crosswalk's registered name. A bare ticker is not a company: `SAN` is Banco Santander on Madrid and Sanofi on Paris, so the
 table's row for `SAN` named Sanofi's key "Banco Santander S.A." (row D1-S23, served on the overlay and the peers subject). The rule: the classification name
-is served only when it AGREES with the registered name (the cleaned name tokens share at least one token of four or more letters); when they disagree the
+is served only when it AGREES with the registered name (the cleaned name tokens, the generic words com, stk, cl, class, cos, holdings, holding, group, del, new, and, corp, co, inc, ltd removed, share at least one token of two or more characters); when they disagree the
 registered name is served, source `crosswalk`. A registered name that is only the bare ticker, or no registered name, leaves the chain as it was.
 
     D1 SAN FP: classification 'Banco Santander S.A.' against registered 'SANOFI' -> the registered name, source `crosswalk`.
