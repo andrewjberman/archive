@@ -2,7 +2,8 @@
 
 Usage:  python ar7_checks.py <check> --root <workspace root> [--portal <portal root>]
 
-  y71-bind   AR-y-71: the service test file holds the five named tests and passes                 -> Y71-BIND-OK
+  y71-bind   AR-y-71: the service test file holds the seven named tests and passes, and the reader
+             census of the public-reason set exists with every row filled                         -> Y71-BIND-OK
   y71-keep   AR-y-71: the ops test folder passes whole (the difference control)                   -> Y71-KEEP-OK
   y72-open   AR-y-72: the portal test file holds the three named tests and passes (needs --portal) -> Y72-OPEN-OK
   y72-keep   AR-y-72: the whole TicketCenter test folder passes (needs --portal)                  -> Y72-KEEP-OK
@@ -23,6 +24,8 @@ SVC_NAMES = (
     "test_report_read_with_no_ticket_id_answers_as_before",
     "test_request_with_no_stored_ticket_id_answers_whatever_ticket_asks",
     "test_malformed_ticket_id_is_refused_before_any_read",
+    "test_a_viewer_not_admitted_reads_the_same_answer_with_a_wrong_ticket_as_with_a_right_one",
+    "test_an_admitted_caller_is_told_the_ticket_does_not_match_by_its_own_public_reason",
 )
 PORTAL_TEST = "src/pages/TicketCenter/__tests__/package-open-ticket-binding.test.tsx"
 PORTAL_NAMES = (
@@ -61,6 +64,22 @@ def main(argv):
         for name in SVC_NAMES:
             if not re.search(r"^def %s\(" % name, text, flags=re.M):
                 problems.append("no test named %s" % name)
+        import json
+        census = root / "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r7/PUBLIC_REASON_READERS.json"
+        if not census.is_file():
+            problems.append("no reader census of the public-reason set (r7/PUBLIC_REASON_READERS.json)")
+        else:
+            doc = json.loads(census.read_text(encoding="utf-8"))
+            readers = doc.get("readers") or []
+            if not (isinstance(doc.get("new_public_reason"), str) and doc["new_public_reason"]):
+                problems.append("the census does not name the new public reason")
+            if not readers or not isinstance(doc.get("searched"), str) or not doc.get("searched"):
+                problems.append("the census lists no reader, or does not say what was searched")
+            for row in readers:
+                if row.get("key_policy") not in ("EXACT", "TOLERANT") or row.get("side") not in ("SERVICE", "PORTAL") \
+                        or not row.get("file_line") or row.get("meets_new_value") not in ("PASS", "REFUSES", "NOT_REACHED"):
+                    problems.append("census row incomplete: %r" % (row.get("file_line"),))
+            print("public-reason readers censused: %d" % len(readers))
         rc, out = run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", SVC_TEST], root, env)
         print("\n".join([line for line in out.splitlines() if line.strip()][-1:]))
         if rc != 0:
