@@ -1,0 +1,54 @@
+{
+ "flag": "--split-store-as-of <ISO-8601 UTC instant with an explicit offset, e.g. 2026-10-09T11:52:52Z>. Accepted by commonwealth_daily_valuation.py (main) and commonwealth_sweep_regrade.py (main); both take it for the round-28 repair legs (method_r28, method_r29), which are the only legs that read the split store. commonwealth_fwd3_serve.py does NOT read the store (it re-derives from the run's own security_day_price and repair sidecar), so it takes no flag and CARRIES the pin the run wrote to <data-dir>/after/split_store_pin.json into fwd3_manifest.json as split_store {address, as_of, listed, held, sha256, pinned, read_by, carried_from}; a run with no sidecar (made before this change) or a leg that does not read the store is recorded as split_store {pinned: false, read_by: none, note}. The log line is SPLIT-STORE-PIN address=<s3 prefix> as_of=<UTC> listed=<n> held=<n> sha256=<over sorted (cusip, version_id) pairs read>. The store is read through list_object_versions + get_object(VersionId); the version read for a partition is the newest splits.parquet whose LastModified is at or before the instant, a partition whose first version is later or whose current entry is a delete marker is not listed.",
+ "refuses_without_flag": true,
+ "served_as_of": {
+  "instant": "2026-10-09T11:52:52Z",
+  "which": "the mtime (07:52:52.9 -0400 local = 11:52:52Z) of the first file the served regrade wrote, .scratch/advi_cotbkf/r34/before/repair_days.parquet, which is written after the split store was loaded and before the BEFORE arm finished; the store was therefore read at or before this instant",
+  "evidence": [
+   "the served run's regrade log .scratch/advi_cotbkf/c2_r34_regrade.txt (mtime 08:01:11 -0400) line 'SPLIT-STORE listed=32 held_by_the_accounts=32'; the same log's PRICE-INPUT path r34_price_input.parquet (mtime 07:54:43 -0400) and the data dir r34 (before/ files 07:52:52..07:52:57, after/ files 07:56:05..07:56:12, all -0400) are the run that fwd3_serve_r34 (daily_returns.parquet 08:09:47 -0400, fwd3_manifest.json 08:10:37 -0400) was built from; the run's directories were created at 07:48:25 -0400 (11:48:25Z)",
+   "the manifest of fwd3_serve_r34 records no split-store time (run_commit 728d223ddca5 only); the instant is taken from file mtimes, not from a recorded read time"
+  ],
+  "listed_held_behaviour_around_it": "the store's own version listing (636 entries under cusip=, 141 partitions, 141 with splits.parquet, 0 delete markers): the first splits.parquet version is 2026-10-09T01:28:12Z, the 32nd partition's first version is 2026-10-09T02:39:06Z and the 33rd's is 2026-10-10T02:33:18Z, and the 18 rewrites (second versions) are all 2026-10-11T05:31:44Z..05:32:00Z. So from 2026-10-09T02:39:06Z to 2026-10-10T02:33:17Z (about 24 h) the store lists exactly 32 partitions at one fixed set of versions (digest 4aca4f1f...); one second earlier it lists 31, at 02:33:18Z on the 10th it lists 33. The three instants the evidence offers (11:48:25Z run directories created, 11:52:52Z first output, 12:09:47Z served daily_returns written) all fall inside that interval and give the identical 32 pairs and digest, so the result does not depend on which is used; Proof A was run at 11:52:52Z only (the two neighbours differ in no input).",
+  "proof_a_commands": [
+   "COTBKF_SWEEPS_CONFIG=<private config> python data/assets/scripts/silver/commonwealth_sweep_regrade.py --before-list v1 --after-list v1 --before-cash-leg method_r28 --after-cash-leg method_r28 --before-price-basis store --after-price-basis as_traded --data-dir .scratch/w99/proofA --out .scratch/w99/proofA_out --cache C:/dev/ajb_workspace/.scratch/advi_cotbkf/cache --price-cache .scratch/w99/proofA_price_cache --price-input-out .scratch/w99/proofA_price_input.parquet --movers .scratch/w99/inputs/mover_classes.parquet --causes .scratch/w99/inputs/mover_causes.parquet --traced .scratch/w99/inputs/diff_trace.parquet --round22 .scratch/w99/inputs/r22 --r24-grades .scratch/w99/inputs/r24 --split-store-as-of 2026-10-09T11:52:52Z   (587 s, rc 0; the five input flags are report inputs only, see row ADVI_COTBKF-D2-W99-S1; a first run without them stopped at the report after 489 s)",
+   "COTBKF_SWEEPS_CONFIG=<private config> python data/assets/scripts/silver/commonwealth_fwd3_serve.py --build --data-dir .scratch/w99/proofA --out .scratch/w99/proofA_fwd3 --grades .scratch/w99/proofA_out/month_grades_after.parquet --grades-before .scratch/w99/proofA_out/month_grades_before.parquet --cache C:/dev/ajb_workspace/.scratch/advi_cotbkf/cache --cash-leg method_r28 --price-basis as_traded   (361 s, rc 0, run_commit af1f0d4a73b8)"
+  ],
+  "proof_a_comparison": "daily_returns.parquet of .scratch/w99/proofA_fwd3 vs C:/dev/ajb_workspace/.scratch/advi_cotbkf/fwd3_serve_r34/daily_returns.parquet on (account, date, return, blank_reason): rows 1691729 and 1691729, 0 rows on one side only, 0 null mismatches, 0 returns differing by more than 1e-12, 0 blank_reason differences. The regrade log lines match the served log: R28-REPAIRS splits_applied=38 splits_not_applied=23 disagreements=0 dvr_close_step_security_days=32 dvr_account_days_blank=1069; SWEEP-REGRADE months_before=3133/838/78622 months_after=3678/293/78622 regressions=5. The table content hash differs from the served manifest's (c8b22e7b... vs 880fd12a...) because every row carries the run_commit column.",
+  "proof_a_pin_line": "SPLIT-STORE-PIN address=s3://opal-data-assets/yahoo/global/silver/price_history/ as_of=2026-10-09T11:52:52Z listed=32 held=32 sha256=4aca4f1fa311712424df5daf91b68048ff362a88874033e53b31c8b706a362c7",
+  "proof_b_runs": "valuation step alone: python data/assets/scripts/silver/commonwealth_daily_valuation.py --out <o> --data-dir <d> --cache C:/dev/ajb_workspace/.scratch/advi_cotbkf/cache --price-cache <d>/price_cache --cash-leg method_r28 --price-basis as_traded --split-store-as-of 2026-10-11T11:55:40Z, into .scratch/w99/pbB1 (started 2026-10-11T12:00:40Z, ended 12:03:05Z, 145 s) and .scratch/w99/pbB2 (started 12:31:24Z, ended 12:33:38Z, 134 s), each with its own copy of the price cache. security_day_price.parquet: 2124908 rows both, equal row for row and byte for byte (file sha256 equal); the SPLIT-STORE-PIN line identical; the two split_store_pin.json sidecars identical. Start to start 30.7 minutes, end of the first to start of the second 28.3 minutes (the issuer re-runs it later for the hour)."
+ },
+ "proof_a": {"rows": 1691729, "differing": 0, "held_cusips": 32},
+ "proof_b": {"as_of": "2026-10-11T11:55:40Z", "minutes_apart": 30, "price_rows_equal": true, "pin_digest_equal": true},
+ "today": {"as_of": "2026-10-11T11:55:40Z", "listed": 141, "held": 141, "digest": "c414ea2b56a6596affb78d17dafcee3a82845c862a09ed6df649fd09e80811ae"},
+ "tests_added": [
+  "test_commonwealth_split_store_pin.py::test_a_version_written_after_as_of_is_not_read",
+  "test_commonwealth_split_store_pin.py::test_the_version_read_is_named_in_the_pin",
+  "test_commonwealth_split_store_pin.py::test_a_partition_created_after_as_of_is_not_listed",
+  "test_commonwealth_split_store_pin.py::test_listed_counts_the_store_and_held_counts_the_accounts",
+  "test_commonwealth_split_store_pin.py::test_the_listing_is_fully_paged",
+  "test_commonwealth_split_store_pin.py::test_a_delete_marker_current_at_as_of_hides_the_partition",
+  "test_commonwealth_split_store_pin.py::test_without_the_flag_the_load_refuses_and_reads_nothing (3 cases: None, empty, blank)",
+  "test_commonwealth_split_store_pin.py::test_an_instant_that_names_no_state_is_refused",
+  "test_commonwealth_split_store_pin.py::test_the_instant_is_read_as_utc",
+  "test_commonwealth_split_store_pin.py::test_the_valuation_main_refuses_a_repair_leg_without_the_flag_before_any_read",
+  "test_commonwealth_split_store_pin.py::test_the_regrade_refuses_a_repair_leg_without_the_flag_before_any_read",
+  "test_commonwealth_split_store_pin.py::test_a_leg_that_does_not_read_the_store_does_not_demand_the_flag",
+  "test_commonwealth_split_store_pin.py::test_two_loads_at_one_as_of_return_the_same_pairs_and_digest",
+  "test_commonwealth_split_store_pin.py::test_the_pin_digest_is_over_the_sorted_pairs",
+  "test_commonwealth_split_store_pin.py::test_the_pin_names_the_store_the_builder_names",
+  "test_commonwealth_split_store_pin.py::test_a_repair_run_writes_the_pin_sidecar_and_another_removes_a_stale_one",
+  "test_commonwealth_split_store_pin.py::test_the_build_carries_the_pin_into_its_manifest"
+ ],
+ "tests_changed": [],
+ "not_established": [
+  "No existing test called load_store_splits, the valuation main, the regrade main or fwd3_serve.build, so none needed an instant added; tests_changed is empty by measurement (grep of the silver tests), not by omission.",
+  "The baseline suite was not run on the unchanged tree before the edits; the final line is 866 passed, 12 skipped = the 847 passed, 12 skipped the order expects plus the 19 cases added.",
+  "The served manifest records no read time of the store; the served instant is inferred from file mtimes (the store read happened before 11:52:52Z and after the run began about 11:48Z). It does not matter to the result because the store's state is constant over about 24 h around it.",
+  "The two 'neighbouring instants' were checked on the version listing only (same 32 pairs, same digest), not by running the chain again.",
+  "The regrade's report inputs (round 22/24/27 grades, movers, causes) were copied from another worker's untracked files; whether they are byte-identical to the ones the round-34 run read is not established (row ADVI_COTBKF-D2-W99-S1). They do not feed the returns.",
+  "A second live read remains: the as-traded price input's as_of column is the first price store's current LastModified (row ADVI_COTBKF-D2-W99-S2). It does not reach the returns (equal on 1691729 of 1691729 rows) but the input file's own sha256 differs from the served run's.",
+  "A same-second tie between a version and a delete marker of one key is read as hidden; S3 gives no finer order. No such tie exists in the store today.",
+  "The served S3 tables were not compared; the comparison is against the local served copy fwd3_serve_r34/daily_returns.parquet.",
+  "Whether this box's identity may list object versions of the store: it may (list_object_versions answered, 636 entries); it was not tested whether other boxes' identities may."
+ ]
+}
