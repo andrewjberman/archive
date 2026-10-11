@@ -1,0 +1,99 @@
+{
+ "to": "IRPT_DASHBD.TO-DB-b-154",
+ "worker": "0.9.0_WK_IRPT_DASHBD~125",
+ "claim": "measured",
+ "day": "2026-10-09",
+ "moved": 34,
+ "s3_writes": 0,
+ "rebuild": {
+  "basis": "silver/transactions/2026-10-09.parquet in the one firm bucket (the day object of DB-b-149), 4 columns read (transaction_id, asset_name, units, market_value), the path's extract_t1_prices expression for expression, with and without each transaction_id counted once, compared at 8 decimals as DB-b-149 did. DB-b-149's list of the moved assets was not saved (its result.json holds counts only), so the comparison was re-run.",
+  "rows": 5216,
+  "medians": 160,
+  "compared": 160,
+  "moved": 34,
+  "unmoved": 126,
+  "bands": {
+   "under_0.1_percent": 26,
+   "0.1_to_1_percent": 6,
+   "over_1_percent": 2
+  },
+  "agrees_with_DB_b_149": true
+ },
+ "precedence_in_code": {
+  "script_path": "data/black_diamond/scripts/silver/bd_price_update.py build_target_date_rows lines 416-487: scoped override first (lines 445-451, 'ALWAYS win'), then a Yahoo close for a tickered asset (lines 459-461), then the transaction median (lines 463-464), then carry forward (lines 466-467). SOURCE_RANK lines 65-71 repeats this order (scoped_override -2, yahoo_finance -1).",
+  "lambda_path": "infra/aws/lambda/bd-pipeline/bd-price-update/lambda_function.py build_target_date_rows lines 274-320: the transaction median FIRST (lines 301-302), then Yahoo (lines 303-304), then carry forward (lines 305-306). No override layer. SOURCE_RANK lines 60-65 puts transaction_observed first.",
+  "where_they_differ": "Opposite order between Yahoo and the transaction median, and the script alone has the scoped-override layer. Under the Lambda a median always becomes the row for an asset that has one; under the script a Yahoo close or an override outranks it.",
+  "code_override_names_among_the_34": 0
+ },
+ "final_served": {
+  "count": "NOT_ESTABLISHED",
+  "outranked_by_yahoo": "NOT_ESTABLISHED",
+  "outranked_by_override": "NOT_ESTABLISHED",
+  "not_placed": "NOT_ESTABLISHED",
+  "basis": "The two served price objects the order names DISAGREE on the 2026-10-09 rows of the 34, and the served rows carry a source column, so the split is measured per object (by_served_object) and no single object is chosen here. The daily price file silver/prices/2026-10-09.parquet (one version only, written 2026-10-09T00:14:50Z, never rewritten) holds 34 of 34 as source transaction_observed with the price equal to the un-deduplicated median (0 equal the once-per-id median). The canonical_prices.parquet version first written that day (00:14:48Z) says the same. The version current at the end of that day (2026-10-09T23:03:03Z; the 23:02:48Z version agrees) holds 0 of 34 as transaction_observed: all 34 are linear_interpolation. The current version (2026-10-11T12:48:11Z) holds 28 yahoo_finance, 4 linear_interpolation and 2 transaction_observed whose price is not the median. NOT_ESTABLISHED because this read cannot say which object a consumer reads for those rows: gold B_01 load_latest_prices (lines 319-361) concatenates the canonical object and every daily file and keeps one row per asset by latest date, so the daily-file row and the canonical row of the same date tie, and the tie order was not established. No override row or Yahoo row outranked a median in the daily file or the first canonical version; the later canonical rewrites are by a writer this read could not identify (see script_path_runs_today)."
+ },
+ "by_served_object": [
+  {
+   "object": "silver/prices/2026-10-09.parquet (daily price file), the single version, written 2026-10-09T00:14:50Z",
+   "final_served": 34,
+   "outranked_by_yahoo": 0,
+   "outranked_by_override": 0,
+   "not_placed": 0,
+   "price_equals_once_per_id_median": 0,
+   "over_one_percent_final_served": 2
+  },
+  {
+   "object": "silver/prices/canonical_prices.parquet, version written 2026-10-09T00:14:48Z",
+   "final_served": 34,
+   "outranked_by_yahoo": 0,
+   "outranked_by_override": 0,
+   "not_placed": 0,
+   "price_equals_once_per_id_median": 0,
+   "over_one_percent_final_served": 2
+  },
+  {
+   "object": "silver/prices/canonical_prices.parquet, version current at the end of 2026-10-09 (written 2026-10-09T23:03:03Z)",
+   "final_served": 0,
+   "outranked_by_yahoo": 0,
+   "outranked_by_override": 0,
+   "not_placed": 34,
+   "not_placed_reason": "all 34 rows carry source linear_interpolation, a source that is neither the Yahoo tier nor the override tier; the price equals the once-per-id median for 3",
+   "over_one_percent_final_served": 0
+  },
+  {
+   "object": "silver/prices/canonical_prices.parquet, current version (written 2026-10-11T12:48:11Z)",
+   "final_served": 0,
+   "outranked_by_yahoo": 28,
+   "outranked_by_override": 0,
+   "not_placed": 6,
+   "not_placed_reason": "4 rows linear_interpolation; 2 rows transaction_observed whose price is not the un-deduplicated median",
+   "over_one_percent_final_served": 0,
+   "over_one_percent_outranked_by_yahoo": 1,
+   "over_one_percent_not_placed": 1
+  }
+ ],
+ "held_on_served_account_day": {
+  "count": "NOT_ESTABLISHED",
+  "basis": "Depends on which assets are final-served, which is not established. The join itself was measured: object gold/timeseries/holdings_lots/2026-10-09.parquet (the B_01 output, one version, written 2026-10-11T05:04:51Z), column asset_name only (27 columns exist; only that one was read, by ranged reads), 1314828 rows, 11285 distinct asset keys. Joined by exact string equality of the price object's asset_name with the holdings asset_name (after whitespace strip): 159 of the 160 priced assets joined, and 34 of the 34 moved assets joined (with B_01's three-entry NAME_ALIASES applied to the price name, still 34 of 34; 1 of the 34 is an alias source name). So whichever object is taken, every one of the 34 that is final-served is held: 34 under the daily-file reading, 0 under the end-of-day canonical reading. Held here means the asset key appears in the holdings object; no account, value or quantity was read."
+ },
+ "over_one_percent": {
+  "moved": 2,
+  "final_served": "NOT_ESTABLISHED",
+  "held": "NOT_ESTABLISHED",
+  "basis": "Same test as the 34. Daily file and the first canonical version of 2026-10-09: 2 of 2 final-served and 2 of 2 held (both keys appear in the holdings object). End-of-day canonical version (23:03:03Z): 0 of 2 final-served, both linear_interpolation. Current canonical version: 0 of 2 final-served (1 yahoo_finance, 1 linear_interpolation). NOT_ESTABLISHED as a single count for the same reason as final_served."
+ },
+ "script_path_runs_today": {
+  "answer": "NOT_ESTABLISHED",
+  "basis": "Evidence for 'only the Lambda wrote the day's daily price file': bd-price-update (state Active, last code update 2026-04-06T15:08:05Z, timeout 900) has a log stream for 2026-10-11 with first event 2026-10-11T00:18:42Z and newest event 2026-10-11T00:19:50Z, and streams for 2026-10-10 (00:18:40Z to 00:19:40Z) and 2026-10-09 (00:14:14Z to 00:15:03Z); the daily price files 2026-10-11 (00:19:28Z), 2026-10-10 (00:19:25Z) and 2026-10-09 (00:14:50Z) and the canonical versions written at 00:19:26Z, 00:19:23Z and 00:14:48Z fall inside those windows. The 2026-10-09 daily file has 106 tickered assets priced from the transaction median (Lambda order; the script would prefer a Yahoo close where one exists) and no scoped_override row although the canonical object holds scoped_override rows (the script's override layer would have written them). No EventBridge rule targets the function (list-rule-names-by-target returned nothing). The SSM document opal-bd-allocation-download (version 6, Active) is read live: it is a RETIRED no-op with no price step, so the manifest's weekday-run claim is not carried by it. Against calling the script path dead: canonical_prices.parquet is rewritten four times a day (about 04:03Z, 09:49Z, 12:47Z and 23:02Z, each a pair of writes 15 seconds apart) with no Lambda log event near them, so another writer exists whose identity was not established. NOT_ESTABLISHED because the EC2 service bd-price-runner named in infra/aws/ec2/EC2_MANIFEST.json, the SSM command history and the unidentified canonical writer were not read (ssm:ListDocuments is denied to this identity; an EC2 or SSM-history read is outside the order's reads)."
+ },
+ "limits": [
+  "Counts and bands only; no asset name, price value, account or client name was written to the repo.",
+  "The served rows were read from local copies of the exact versions named, downloaded outside the repo; no write of any kind to S3.",
+  "ssm:ListDocuments is denied to this identity (AccessDeniedException), recorded and not retried by another route; get-document on the one named document succeeded.",
+  "Which object a consumer reads for a 2026-10-09 row (B_01's tie between a daily-file row and a canonical row of the same date, and its latest-date rule) was not established; hence the NOT_ESTABLISHED headline counts.",
+  "The writer of the four-times-daily canonical rewrites was not identified.",
+  "Moved-ness is at 8 decimals as in DB-b-149; the once-per-id median is the reference, either keep gives the same."
+ ],
+ "private_files": "the private evidence folder outside the repo, under the IRPT_DASHBD private root, subfolder 0.9.0_WK_IRPT_DASHBD~125 (copies of the objects and the detailed result; not in the repo)",
+ "producer_script": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~125/severity125.py (tracked copy of the classification script; it reads local copies only)"
+}
