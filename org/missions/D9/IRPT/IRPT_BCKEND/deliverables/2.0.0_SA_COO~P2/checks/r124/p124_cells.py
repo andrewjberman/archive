@@ -3,8 +3,8 @@
                       in a candidate map, a census of every member that moves against live, a never-widen packet.
 
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
-  IB124-1-AC1  census: built twice identical from one pin that contains the performance/ restoration (c267b71edb); 0 name /
-               attribute / method mismatches; live_before == tdpterTM...; every moved member carries its owning commits, a
+  IB124-1-AC1  census: built twice identical from one pin that contains the performance/ restoration (c267b71edb); 0 name and
+               attribute mismatches, and no method mismatch that the live package does not also carry (AMENDMENT 1); live_before == tdpterTM...; every moved member carries its owning commits, a
                class served|inert and a one-line reason; acceptance.py and submission_service.py move together.
                Base: FAIL (no census).
   IB124-1-AC2  replay: every arm identical / expected-diff, at least one negative control, and every member classed
@@ -49,9 +49,23 @@ def main():
             fail("pin %s does not contain the performance/ restoration %s" % (str(c["pin"])[:10], RESTORED))
         if c.get("built_twice_identical") is not True or c.get("live_before") != LIVE_BEFORE:
             fail("twice %r / live_before %r" % (c.get("built_twice_identical"), c.get("live_before")))
-        for k in ("built_signature_mismatched", "built_attribute_mismatched", "built_method_mismatched"):
+        for k in ("built_signature_mismatched", "built_attribute_mismatched"):
             if c.get(k) != 0:
                 fail("%s = %r" % (k, c.get(k)))
+        # AMENDMENT 1 (row D2-W285-S1): the method limb is name-based and reads the same 4 collisions on the LIVE package.
+        # The build may carry a method mismatch only if the live package carries the same site; a site that is new in the
+        # build fails. Sites are keyed by module and call text, not by line (a line moves when a file changes).
+        sites = c.get("method_mismatch_sites") or []
+        if c.get("built_method_mismatched") != len(sites) or not isinstance(c.get("live_method_mismatched"), int):
+            fail("built_method_mismatched %r, %d site row(s), live_method_mismatched %r" % (
+                c.get("built_method_mismatched"), len(sites), c.get("live_method_mismatched")))
+        for x in sites:
+            if not x.get("module") or not x.get("call") or not x.get("reason"):
+                fail("method mismatch site row %r" % x)
+            if x.get("in_live") is not True:
+                fail("method mismatch NEW in the build (not on the live package): %s %s" % (x.get("module"), x.get("call")))
+        if len(sites) > c["live_method_mismatched"]:
+            fail("the build carries %d method mismatch(es), the live package %d" % (len(sites), c["live_method_mismatched"]))
         if not moved:
             fail("no moved_members")
         for m in moved:
