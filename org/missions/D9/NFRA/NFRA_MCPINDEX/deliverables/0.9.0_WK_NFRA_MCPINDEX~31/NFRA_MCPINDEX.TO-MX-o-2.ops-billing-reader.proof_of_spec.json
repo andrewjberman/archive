@@ -1,0 +1,97 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_MCPINDEX.TO-MX-o-2",
+ "phase": "BUILD-GENERAL",
+ "firm": "FABRIC",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "0eff9e0e6d"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+  "vintage_commit": "cf8c9463e3",
+  "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-o-2.ops-billing-reader.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_MCPINDEX~31",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~31/census_billing.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Census of 6 candidate producers with denominators; verdict GAP, owner ADVI_BILLING. No AWS write, no deploy. Live reads: BD silver fees 2002 partitions, BD allocations 134, Schwab fact_trn 569, ADVI_BILLING gold 1 object, SmartX bronze fee_statement 0 objects.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "census billing: candidates n (n >= 2), each with a denominator n of n; verdict SERVED or GAP; violations 0 -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/o2.AC1.sh; echo \"exit=$?\"",
+   "expect": "RESULT: PASS.*exit=0",
+   "output_evidence": "census billing: candidates 6, each with a denominator 6 of 6; verdict GAP; violations 0\nRESULT: PASS\nexit=0",
+   "denominator": "6 of 6 candidates carry a denominator; 6 candidates examined",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "SERVED: pytest rc=0; named tests passed 3 of 3; failed/error tests 0. GAP: no reader built -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/o2.AC2.sh; echo \"exit=$?\"",
+   "expect": "RESULT: PASS.*exit=0",
+   "output_evidence": "census verdict: GAP\nGAP branch: no reader built\nRESULT: PASS\nexit=0",
+   "denominator": "GAP branch: reader folder absent (0 of 0 tests required)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "SERVED: rows n (n >= 1), fixture keys n of n rows exact; as_of stated, claim measured; completeness stated; violations 0. GAP: PASS by branch -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/o2.AC3.sh; echo \"exit=$?\"",
+   "expect": "RESULT: PASS.*exit=0",
+   "output_evidence": "census verdict: GAP; probe_scope: -\nGAP branch: no reader to probe\nRESULT: PASS\nexit=0",
+   "denominator": "GAP branch: PASS by branch (0 rows probed, none required)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The battery dry-run is the control: before the census existed o2.AC1 read 'census absent' FAIL (checker branch [ -f $C ] || FAIL); the GAP branch of AC2 would FAIL if the ops_billing folder existed.",
+   "expected": "census absent -> FAIL; census present -> PASS",
+   "observed": "census present -> PASS on all three",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "o2.AC1.sh/AC2/AC3 read a committed file and the folder state only",
+   "observed": "inputs fixed; same output on rerun",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The reader app/integrations/ops_billing/ and tests/test_ops_billing.py",
+   "reason": "Verdict GAP: no served source carries AUM for a billing period, fee rate, fee amount and a paid status together; the order says build NO reader on GAP. FWD-19 for billing is not done."
+  },
+  {
+   "item": "A derived join of BD fees + BD allocations + Schwab debits",
+   "reason": "Not a served object; the paid status exists in no source and a debit-match would be inferred, not measured (ADVI_BILLING's own comparison read DIFFERS on 2 of 2 accounts). Contract 2 says found, never assumed."
+  }
+ ],
+ "surprises": [
+  "NFRA_MCPINDEX-Z-W31-S1"
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~31/census_billing.json",
+ "compiler_tools": [
+  {
+   "tool": "round9/checks o2.AC1.sh o2.AC2.sh o2.AC3.sh (issuer's checks; ops_census.py)",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/o2.AC1.sh; bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/o2.AC2.sh; bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/o2.AC3.sh",
+   "result": "AC1 PASS exit=0; AC2 PASS exit=0; AC3 PASS exit=0"
+  }
+ ]
+}
