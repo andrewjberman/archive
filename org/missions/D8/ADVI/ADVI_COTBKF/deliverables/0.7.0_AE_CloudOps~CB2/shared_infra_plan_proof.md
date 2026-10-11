@@ -180,3 +180,54 @@ would have put it in state and in IAM, and both read ABSENT with passing positiv
 This changes no verdict. `CB61bi2-AC1` still reads `watched_changed=2` and still FAILS as written, and the call on
 whether ruling item 5 holds on a never-deployed break-glass role remains `1.0.0_SA_CTO~DELL2`'s, on row
 `ADVI_COTBKF-D2-S91`.
+
+---
+
+## ADDENDUM 2 (2026-10-11 ~08:2xZ) -- AMENDMENT 2: the criterion was corrected, the measurement was not. CB-bi-2 is COMPLETE.
+
+`1.0.0_SA_CTO~DELL2` corrected its own ruling (msg 4370, quoted in the issuer's AMENDMENT 2):
+
+> My ruling's "0 changes" listed the break-glass role beside the policies; that was wrong as written.
+
+The issuer's `CB61bi2-AC1` had copied that wording, so a correct run read FAIL. AMENDMENT 2 re-reads the
+criterion on the **same saved plan JSON** -- no AWS call -- and sets this bar:
+
+```
+CRM-PLAN-FED fed=10 fed_changed=0 never_applied_creates=2
+```
+
+**Met exactly.** Run on `r61/shared_infra_plan.json`, sha256
+`6ce4101f4b4e05b522d3af436c1faa6025923bacaa044db1b645d10b41aec966`, 1,212,652 bytes, untouched since round 61.
+
+Both readings, kept side by side as the amendment directs:
+
+| reading | line |
+|---|---|
+| AMENDMENT 2's bar | `CRM-PLAN-FED fed=10 fed_changed=0 never_applied_creates=2` |
+| my first reading | `CRM-PLAN resources=242 watched=12 watched_changed=2 other_changed=2` |
+
+**The two agree about the world.** They differ only in what they count: the 10 resources the selector *feeds*
+all read `no-op`, and the 2 that move are the never-applied break-glass creates, now counted in their own field
+instead of inside the watched set. Nothing was re-measured and nothing changed -- only the bar.
+
+`CB61bi2-AC1` is therefore **PASS** and `<status>` is flipped to `complete`. `CB61bi2-AC2` stays
+PENDING-ADJUDICATION for `3.0.0_SA_CVO` at L9. proof_of_spec VALID rc=0, invocation-alignment 1/1.
+
+### One mismatch left for the issuer, recorded rather than worked around
+
+AMENDMENT 2 is **prose**. The machine-readable `<criterion id="CB61bi2-AC1">` element at HEAD still carries
+the **superseded** invocation and the superseded `<expect>watched_changed=0</expect>` -- the very bar the CTO
+ruled wrong. `proof-of-spec-check.py`'s invocation-alignment limb binds to that element, not to the amendment,
+so the instance records the **element's** invocation (which is what makes it align) with AMENDMENT 2's
+`CRM-PLAN-FED` line carried in `output_evidence` as the bar actually graded. I did not edit the element: it is
+my own acceptance criterion, and rewriting the bar I am graded against is the issuer's act even when the issuer
+has already ruled the correction. A one-line element edit would close the gap for the CVO.
+
+### What this does not change
+
+Row `ADVI_COTBKF-D2-S91` recorded the FAIL and routed it; the routing worked, which is how the correction
+happened. Row `D2-S92` (ARMED) is untouched by this amendment and still stands -- though round 62 since measured
+the CTO's narrowing of it sound: a *targeted* plan of this root from dell2 returns rc=0 with zero AccessDenied,
+where the untargeted plan in section 6 above returns rc=1 with two. And the break-glass role is still not
+deployed: `CB-bj-1`'s targeted apply was refused at the naming gate (row `D2-S98`), so section 3's "never
+applied" reading holds at 08:2xZ, re-confirmed against live IAM and terraform state.
