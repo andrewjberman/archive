@@ -23,7 +23,7 @@
         "AC1"
       ],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL; the BLOCKING row MDPF_CANON-D1-W9-S1 rides this commit. No AWS call."
+      "deploy_evidence": "LOCAL; rows MDPF_CANON-D1-W9-S2 (GRANT, BLOCKING) and MDPF_CANON-D1-W9-S3 (naming refusal, BLOCKING) ride this commit. No AWS call. The code files (generator, bronze_homes.json, repo test, script edit) are NOT in any commit: see S3 and declared_exclusions."
     }
   ],
   "acceptance": [
@@ -32,18 +32,29 @@
       "criterion_verbatim": "AC1: r3_checks.py writer -- expect: ROUND 3 WRITER: 3 of 3 arms -- and exit=0",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round3/checks/r3_checks.py\" writer; echo \"exit=$?\"",
-      "output_evidence": "ARM 1 NO TYPED: FAIL -- typed-home literals: ['opal-data-mdpf', 'mdpf/bronze/orion_model_composition']; imports opal_naming: False\nARM 2 DEST: FAIL -- AttributeError: module 'r3_writer' has no attribute 'bronze_destination'\nARM 3 GRANT: FAIL -- an orion_model_composition ARN on the builder's bucket and prefix: False; s3:PutObject present: True\nROUND 3 WRITER: 0 of 3 arms\nexit=1",
-      "denominator": "0 of 3 arms",
+      "output_evidence": "ARM 1 NO TYPED: PASS -- typed-home literals: none; reads the generated homes file: True; imports lib/opal_naming: False\nARM 2 DEST: PASS -- got ('opal-data-assets', 'mdpf/inflection/bronze/orion_model_composition/date=2026-10-09'), want ('opal-data-assets', 'mdpf/inflection/bronze/orion_model_composition/date=2026-10-09'); put keys compose from the prefix: True\nARM 3 GRANT: FAIL -- an orion_model_composition ARN on the builder's bucket and prefix: False; s3:PutObject present: True\nROUND 3 WRITER: 2 of 3 arms\nexit=1",
+      "denominator": "2 of 3 arms",
       "status": "FAIL",
       "expect": "ROUND 3 WRITER: 3 of 3 arms",
-      "status_reason": "CN-c-2 stopped at step 2 (BLOCKING row MDPF_CANON-D1-W9-S1): the daily runner does not carry lib/opal_naming.py to the Stage-0 path; the criterion cannot pass until the cell's edits land."
+      "status_reason": "GRANT not written: no opal_name module output carries the bronze tier bucket (opal-data-assets); the cell's registry-row fallback needs a ruling (BLOCKING row MDPF_CANON-D1-W9-S2). The code arms pass in the worktree; the code commit is refused by the naming limb (MDPF_CANON-D1-W9-S3)."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: r3_checks.py homes -- expect: ROUND 3 HOMES: 3 of 3 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round3/checks/r3_checks.py\" homes; echo \"exit=$?\"",
+      "output_evidence": "ARM 1 GENERATED: PASS -- provenance fields 3 of 3, generator file present: True, entry ('opal-data-assets', 'mdpf/inflection/bronze/orion_model_composition/date=2026-10-09') vs builder ('opal-data-assets', 'mdpf/inflection/bronze/orion_model_composition/date=2026-10-09')\nARM 2 CLEAN: PASS -- mismatches on the real file: []\nARM 3 NEGATIVE: PASS -- mismatches with one entry altered: 2\nROUND 3 HOMES: 3 of 3 arms\nexit=0",
+      "denominator": "3 of 3 arms",
+      "status": "PASS",
+      "expect": "ROUND 3 HOMES: 3 of 3 arms",
+      "status_reason": "Measured on the worktree files at e4a8f39862 plus the uncommitted generator output; the same bytes are not yet in a commit (MDPF_CANON-D1-W9-S3)."
     },
     {
       "criterion_id": "AC3",
       "criterion_verbatim": "AC3 is JUDGMENT, graded at the round-3 close (never self-graded): after CloudOps applies the grant and deploys the script, ONE on-demand run of the step writes the nine model files and the meta at the builder's keys under opal-data-assets, and the objects are read where they landed.",
       "method": "manual_read_with_citation",
       "invocation": "judgment=true: no invocation; graded at the round-3 close after CloudOps applies and deploys",
-      "output_evidence": "Not run; no AWS write by the worker. The cell is stopped at step 2 (BLOCKING row MDPF_CANON-D1-W9-S1), so no grant or script exists for the on-demand run to exercise.",
+      "output_evidence": "Not run; no AWS write by the worker. The grant is not written (MDPF_CANON-D1-W9-S2), so no on-demand run can exercise it.",
       "denominator": "N/A -- judgment row",
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
       "status_reason": "graded at the round-3 close",
@@ -52,21 +63,25 @@
   ],
   "controls": {
     "mutant": {
-      "description": "r3_checks.py writer at base (issuer's preflight): 0 of 3 expected before the cell's edits; the cell's edits were not made, so no after-state exists.",
-      "expected": "0 of 3 before; 3 of 3 after.",
-      "observed": "0 of 3, exit=1 at base (no edit made).",
+      "description": "r3_checks.py writer and homes at base e4a8f39862 (before any cell edit): 0 of 3 and 0 of 3, exit=1. The homes check at the worktree after the edits: 3 of 3, exit=0.",
+      "expected": "0 of 3 before; 3 of 3 after for homes; 3 of 3 after for writer once the grant lands.",
+      "observed": "writer 0 of 3 at base (predecessor record); after edits writer 2 of 3 (GRANT open); homes at base not measured in the worktree (the generated file was absent), 3 of 3 after the generator ran.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "check run once at base",
-      "observed": "single run",
+      "method": "writer and homes each run twice in the worktree",
+      "observed": "writer 2 of 3 both runs; homes 3 of 3 both runs",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "No edit to data/mdpf/scripts/bronze/pull_orion_model_composition.py, infra/aws/terraform/mdpf-pipeline/iam.tf, infra/logic/registry/scopes.json or generated_locals.tf",
-      "reason": "CN-c-2 step 2 stop: the Stage-0 script cannot import lib.opal_naming on the runner (BLOCKING row MDPF_CANON-D1-W9-S1). The cell does not type the prefix."
+      "item": "No iam.tf edit and no registry or generated_locals.tf edit",
+      "reason": "CN-c-2 section 1.3: the grant's bucket is not expressible from an opal_name module output; a registry row for a new scope is a ruling (MDPF_CANON-D1-W9-S2). The cell does not type the bucket."
+    },
+    {
+      "item": "Code commit not landed",
+      "reason": "The naming limb refused the code paths (MDPF_CANON-D1-W9-S3); the cell does not work around a graded literal. The files stay in the worktree for the CTO's ruling."
     },
     {
       "item": "No terraform plan/apply, no AWS call of any kind",
@@ -74,14 +89,15 @@
     }
   ],
   "surprises": [
-    "MDPF_CANON-D1-W9-S1"
+    "MDPF_CANON-D1-W9-S2",
+    "MDPF_CANON-D1-W9-S3"
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "python",
-      "invocation": "r3_checks.py writer",
-      "result": "ROUND 3 WRITER: 0 of 3 arms"
+      "invocation": "r3_checks.py writer; r3_checks.py homes",
+      "result": "writer: ROUND 3 WRITER: 2 of 3 arms (exit=1); homes: ROUND 3 HOMES: 3 of 3 arms (exit=0)"
     }
   ]
 }
