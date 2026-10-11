@@ -1,0 +1,106 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-f-18.exec-summary-canonical-put-apply",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-18.exec-summary-canonical-put-apply.md",
+  "group": "OTHER",
+  "vintage_commit": "57802a7435"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FB1",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-18.exec-summary-canonical-put-apply.md",
+  "vintage_commit": "53842ab400"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "iam:role-policy exec-summary-generator-role/advi-49f-exec-summary-canonical-put-policy",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-apply of the saved scoped plan 16:11:49Z-16:12:25Z: Apply complete! Resources: 1 added, 0 changed, 0 destroyed; get-role-policy returns the one statement; the role holds exactly the legacy policy and this one",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ],
+   "commit_or_etag": "iam id exec-summary-generator-role:advi-49f-exec-summary-canonical-put-policy"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management\\20261011T1610Z_advi-firmbkts-fb-f-18-exec-summary-canonical-put-20261011_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "entry opened before the first write, closed with the outputs",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "invocation": "timeout 100 aws iam get-role-policy --role-name exec-summary-generator-role --policy-name advi-49f-exec-summary-canonical-put-policy --query \"PolicyDocument.Statement[].[Sid,Action,Resource]\" --output text",
+   "expect": "ExecSummaryCanonicalPut\\s+s3:PutObject\\s+arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/advisors/\\*/exec_summary\\.json",
+   "output_evidence": "get-role-policy Statement[].[Sid,Action,Resource] (run as .tools/aws), read 2026-10-11T16:12:25Z, printed:\nExecSummaryCanonicalPut\ns3:PutObject\narn:aws:s3:::opal-data-49financial/advi/49financial/platinum/advisors/*/exec_summary.json",
+   "denominator": "1 of 1 policy named; 1 statement; 1 action; 1 resource (compared with the plan JSON of the same statement)",
+   "status": "PASS",
+   "criterion_verbatim": "timeout 100 aws iam get-role-policy --role-name exec-summary-generator-role --policy-name advi-49f-exec-summary-canonical-put-policy --query \"PolicyDocument.Statement[].[Sid,Action,Resource]\" --output text",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AC2",
+   "invocation": "timeout 100 aws iam list-role-policies --role-name exec-summary-generator-role --query PolicyNames --output text",
+   "expect": "advi-49f-exec-summary-canonical-put-policy\\s+exec-summary-generator-policy|exec-summary-generator-policy\\s+advi-49f-exec-summary-canonical-put-policy",
+   "output_evidence": "list-role-policies on exec-summary-generator-role (run as .tools/aws; one policy before, two after), read 2026-10-11T16:12:25Z, printed:\nadvi-49f-exec-summary-canonical-put-policy\texec-summary-generator-policy",
+   "denominator": "2 of 2 inline policies of the role (unpaginated list, count read client-side)",
+   "status": "PASS",
+   "criterion_verbatim": "timeout 100 aws iam list-role-policies --role-name exec-summary-generator-role --query PolicyNames --output text",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AC3",
+   "invocation": "cd /c/dev/ajb_workspace/infra/aws/terraform/exec-summary && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target=module.opal_name_exec_summary_canonical_put -target=aws_iam_role_policy.exec_summary_canonical_put 2>&1 | grep -E \"^(Plan:|No changes)\"",
+   "expect": "^No changes\\.",
+   "output_evidence": "scoped plan after the apply (terraform resolved to .tools/terraform.exe), read 2026-10-11T16:12:25Z, printed:\nNo changes. Your infrastructure matches the configuration.",
+   "denominator": "1 matched line; the plan targets the module call and the 1 policy resource; exit 0",
+   "status": "PASS",
+   "criterion_verbatim": "cd /c/dev/ajb_workspace/infra/aws/terraform/exec-summary && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target=module.opal_name_exec_summary_canonical_put -target=aws_iam_role_policy.exec_summary_canonical_put 2>&1 | grep -E \"^(Plan:|No changes)\"",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant is named by the order. The difference control is the role's one-policy list before against two after, and the plan JSON's statement against the live one.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "AC1 to AC3 each ran once after the apply",
+   "observed": "single read each",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the generator's Put at the canonical home",
+   "reason": "nothing proves the generator can PUT through the role until act 4b's first run after the move (the order's blindness line); the document is the read, and the bucket-side exemption is act 3c's (FB-f-17 @5a8c78f135)"
+  },
+  {
+   "item": "terraform init in the exec-summary root",
+   "reason": "this checkout had no .terraform; init resolved the module and wrote no state"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management\\20261011T1610Z_advi-firmbkts-fb-f-18-exec-summary-canonical-put-20261011_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "terraform 1.15.8 / safe-apply",
+   "invocation": "plan -out scoped to the module call and the policy, show -json, --dry-seat-gates, safe-apply of the saved plan",
+   "result": "Plan: 1 to add, 0 to change, 0 to destroy; Apply complete: 1/0/0; seat gates CLEAR"
+  }
+ ]
+}
