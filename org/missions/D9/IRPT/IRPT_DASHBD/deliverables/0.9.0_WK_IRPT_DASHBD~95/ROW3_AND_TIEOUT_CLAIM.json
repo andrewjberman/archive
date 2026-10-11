@@ -1,0 +1,180 @@
+{
+  "record": "ROW3_AND_TIEOUT_CLAIM",
+  "to_id": "IRPT_DASHBD.TO-DB-b-120",
+  "authored_by": "0.9.0_WK_IRPT_DASHBD~95",
+  "authored_before_code": true,
+  "base": "box/dell2 @5b92cff3ff. The record was committed at 66bd1fa8bc BEFORE any producer or contract edit, citing base lines; the final commit re-cites every line as it stands there (the producer and contract grew by the DB-b-120 change).",
+  "rule_extended": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~93/THRESHOLD_CLAIM_RULE24.json (TO-DB-b-118): a per-value claim drawn from the law's four-member provenance set, over the declared domain 'how emit_method_row knows the value it writes'.",
+  "changes_covered": [
+    "A. tieout_tolerance_proposed becomes a SIXTH member of the claim domain: a new string column tieout_tolerance_proposed_claim, a member of THRESHOLD_CLAIMS; the value column is nullable only under the claim absent and is written with the arrow type double so a null lands typed.",
+    "B. The dim_return_method contract lists method row 3 in method_versions. Row 3 is already METHOD_ROWS[3] in the producer; the contract catches up. This adds a row of the table and no enum member."
+  ],
+  "domain": "how emit_method_row knows each value it writes into a dim_return_method row that is not a fixed constant of the writer",
+  "rule24": {
+    "mece": {
+      "finding": "MECE over the declared domain, by subtraction from a printed denominator of SIX values (the five guard thresholds DB-b-118 placed, plus tieout_tolerance_proposed). The five are placed by DB-b-118 and are not re-opened. The sixth, tieout_tolerance_proposed, has exactly the routes the four members name: a number given to the writer by the tie-out cell (--tieout) that the writer neither measured nor derived is `held` (the contract already says DB-b-3 PROPOSES it and the writer only carries it); a number the writer computes from its own data would be `measured` and none does; a number derived from other values by a stated rule would be `inferred` and none is; no number is `absent` (Cottonwood, where no tie-out has been run). Six values minus those routes leaves ZERO unplaced, and the member `absent` is exercised by the null the column already can hold. The claim set is NOT widened: THRESHOLD_CLAIMS stays the same four members, so the sixth value takes the same claim, not a fifth way of knowing. Listing row 3 adds a ROW to method_versions (a second positive: method_version 3 beside 1 and 2) and adds no member to any enum: the contract's enums block, which holds method, flow_convention, income_basis, fee_basis, day_count, threshold_claims and threshold_claims_source, is unchanged by it. Stated limit: this subtraction is over the values the method row WRITES today (denominator 6), not over every field a future method row could carry.",
+      "subtraction": {
+        "denominator": 6,
+        "values": [
+          "tolerance",
+          "large_flow_share",
+          "plausibility_band_low",
+          "plausibility_band_high",
+          "comparability_max_excluded_weight",
+          "tieout_tolerance_proposed"
+        ],
+        "placed_by_DB-b-118": 5,
+        "placed_here": {
+          "held": [
+            "tieout_tolerance_proposed (a given number)"
+          ],
+          "absent": [
+            "tieout_tolerance_proposed (no tie-out run)"
+          ],
+          "measured": [],
+          "inferred": []
+        },
+        "unplaced": 0
+      },
+      "evidence": [
+        {
+          "file": "docs/doctrine/A_VALUE_MUST_CARRY_ITS_CLAIM.md",
+          "line": 19,
+          "shows": "the law's provenance set: measured / inferred / held / absent"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1886,
+          "shows": "THRESHOLD_CLAIMS, the four members, which this change leaves as they are"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1994,
+          "shows": "tieout_tolerance_proposed is written as the bare argument, with no claim beside it"
+        },
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 137,
+          "shows": "the contract says DB-b-3 PROPOSES the value and the column must be able to say 'not yet proposed'"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 119,
+          "shows": "METHOD_ROWS[3], the row the contract is to list"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1995,
+          "shows": "the new claim column, written beside the value"
+        }
+      ]
+    },
+    "same_grain": {
+      "finding": "SAME GRAIN. The five thresholds carry their claim at the grain 'one value of one method row'; the tie-out is one value of one method row, written in the same dict by the same function, so its claim sits at that grain and is one more flat string column of the same row (not a struct, not a table-level claim). Row 3 in method_versions is one entry per method_version, the grain the method_versions list already has (rows 1 and 2).",
+      "evidence": [
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1985,
+          "shows": "the five claims are flat string keys of the same row dict"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1994,
+          "shows": "the tie-out is a key of that same row dict, one value of one method row"
+        },
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 260,
+          "shows": "method_versions: one entry per method version"
+        }
+      ]
+    },
+    "intent_coherence": {
+      "finding": "INTENT COHERENCE. The claim column answers one question, 'how does the writer know this value', which is the question the five claim columns answer; it is not a quality count or a per-account fact, so it stays inside the table's one question (what arithmetic produced the numbers that point at it). The tie-out value is a statement ABOUT the method (a tolerance proposed for graded tie-outs), not a return, so it already belongs on this row; the claim does not add a second intent. Row 3 serves the same intent as rows 1 and 2: it states the arithmetic that produced the returns pointing at method_version 3, with the fields the row leaves to the source entry named as such rather than invented.",
+      "evidence": [
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 220,
+          "shows": "the table answers ONE question: what arithmetic produced the numbers that point at it"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1983,
+          "shows": "the DB-b-118 comment: one claim per value, how the writer knows each"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+          "line": 126,
+          "shows": "the Cottonwood entry states the fields METHOD_ROWS[3] leaves open (valuation_source, fee_treatment, price_basis)"
+        }
+      ]
+    },
+    "state_coherence": {
+      "finding": "STATE COHERENCE (which values one remedy does NOT move). Filling the tie-out (a run of the tie-out cell, passing --tieout) moves tieout_tolerance_proposed and its claim together and moves none of the five thresholds, their claims or threshold_claims_source; re-measuring the thresholds moves none of the tie-out pair. The ratified tieout_tolerance and its ruling are untouched by either. A claim the input does not state is defaulted by the DB-b-118 rule (null reads absent, a value reads held), and a caller that passes five stated threshold claims and no tie-out claim keeps working unchanged: its tie-out claim is defaulted, and threshold_claims_source still describes only the five. Adding row 3 to method_versions moves no row-1 or row-2 field, and the thresholds, which the entry and the thresholds file own, are not asserted for row 3. landed_row (the version-1 partition as read) is not touched.",
+      "evidence": [
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 221,
+          "shows": "the table's own state-coherence record: DB-b-3 filling tieout_tolerance_proposed moves that column alone"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1907,
+          "shows": "the DB-b-118 no-claims rule the tie-out takes: absent for a null, held for a value"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 2121,
+          "shows": "the tie-out reaches emit_method_row as the --tieout argument, apart from the thresholds"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1936,
+          "shows": "no stated tie-out key: a null reads absent, a value reads held"
+        }
+      ]
+    }
+  },
+  "token_census": {
+    "scope": "the new column name and the claim string tokens, over data/assets/scripts/gold/irpt_reporting, org/standards and the IRPT_DASHBD deliverables, read at the base",
+    "tokens": [
+      "tieout_tolerance_proposed_claim",
+      "positions_based",
+      "PER_ENTRY_FEE_TREATMENT"
+    ],
+    "finding": "tieout_tolerance_proposed_claim is new with this cell; positions_based and PER_ENTRY_FEE_TREATMENT are values METHOD_ROWS[3] already carries, read by the contract and not minted by it. No enum member is added: the claim values are the four of enums.threshold_claims. Stated with its limit: this is a name census of what this cell introduces, not a census of the estate."
+  },
+  "decision": "(1) The claim is one flat string column tieout_tolerance_proposed_claim, in THRESHOLD_CLAIMS, non-nullable. (2) A stated threshold_claims object MAY carry the key tieout_tolerance_proposed and then the same rules bind: a claim outside the set refuses, a null only under absent, a value never under absent. (3) When it does not carry the key, the DB-b-118 no-claims rule is applied to this one value: null reads absent, a value reads held, so five stated claims with no tie-out keeps working. (4) tieout_tolerance_proposed is written as an arrow double so a null lands typed. (5) comparability() and the grading paths are untouched. (6) The contract goes to 0.5.0 with the new column, the nullable tie-out, method row 3, a recomputed schema_hash and a supersedes naming 0.4.0 and its hash.",
+  "tests": {
+    "passed": 16,
+    "failed": 0,
+    "new_test": "data/assets/scripts/gold/irpt_reporting/tests/test_tieout_claim.py",
+    "folders": {
+      "data/assets/scripts/gold/irpt_reporting/tests/": {
+        "passed": 160,
+        "failed": 0,
+        "includes_new_file": 16
+      },
+      "infra/aws/lambda/investor-reporting/reporting-gold/tests/": {
+        "passed": 90,
+        "failed": 0
+      }
+    },
+    "pins_updated": "data/assets/scripts/gold/irpt_reporting/tests/test_threshold_claims.py: the column-set pin (one further string column, the tie-out claim) and the null-type pin (no column lands null now); no other change"
+  },
+  "row_example": {
+    "basis": "measured",
+    "read_from": "emit_method_row(None, firm, five absent thresholds with five absent claims, upload=False) on the declared 49F entry, no tieout",
+    "fields": {
+      "tolerance_claim": "absent",
+      "large_flow_share_claim": "absent",
+      "plausibility_band_low_claim": "absent",
+      "plausibility_band_high_claim": "absent",
+      "comparability_max_excluded_weight_claim": "absent",
+      "threshold_claims_source": "stated",
+      "tieout_tolerance_proposed": null,
+      "tieout_tolerance_proposed_claim": "absent"
+    },
+    "table_schema_tieout_tolerance_proposed": "double"
+  }
+}
