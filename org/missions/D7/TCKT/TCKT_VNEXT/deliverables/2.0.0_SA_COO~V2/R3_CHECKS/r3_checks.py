@@ -4,6 +4,8 @@
                         deployed member's content, with no typed list of allowed builds
   rn-row      R3-rn1-AC1  the runner leaves the row for two hours after an accepted submission; a second step deletes it
   rn-regress  R3-rn1-AC2  the whole runner test file passes (at least 56)
+  rf-filer    R3-rf1-AC1  the creator of a one-step analysis-request ticket records its report id, once
+  rf-regress  R3-rf1-AC2  the whole ticket service test folder passes (at least 167)
   pc-hosts  R3-pc1-AC2  the IRPT hosts keep their release-set rule and the totals line; a host that cannot be read is named
 
 Each prints <NAME>-OK <detail> or <NAME>-FAIL <reason>; exit 0/1. Every pytest call is bounded at 110 s.
@@ -34,6 +36,14 @@ RN_ROW = ["test_accepted_submission_leaves_the_row_and_exits_3", "test_refused_s
           "test_finish_cleanup_on_an_absent_row_is_done_not_failed",
           "test_trace_records_the_last_job_read_and_the_known_limit"]
 RN_MIN_PASSED = 56  # 50 at the round-3 base plus the 6 tests of TO-R3-rn1
+
+RF_DIR = Path("infra/aws/lambda/ticket_center/tests")
+RF_TESTS = RF_DIR / "test_report_creator_records.py"
+RF_ROW = ["test_creator_records_the_report_on_its_own_open_ticket", "test_creator_cannot_replace_a_recorded_report",
+          "test_a_caller_who_is_neither_creator_nor_assignee_is_refused",
+          "test_creator_is_refused_on_a_ticket_that_is_not_an_analysis_request",
+          "test_creator_sending_a_malformed_id_is_refused", "test_assignee_path_on_an_in_progress_ticket_is_unchanged"]
+RF_MIN_PASSED = 167  # 161 at the base of TO-R3-rf1 plus its 6 tests
 
 
 def _pytest(args):
@@ -66,6 +76,26 @@ def rn_regress():
     return True, "passed=%d (min %d) failed=0" % (passed, RN_MIN_PASSED)
 
 
+def rf_filer():
+    if not RF_TESTS.exists():
+        return False, "absent: %s" % RF_TESTS.as_posix()
+    src = RF_TESTS.read_text(encoding="utf-8")
+    missing = [n for n in RF_ROW if not re.search(r"^\s*def %s\(" % re.escape(n), src, re.M)]
+    if missing:
+        return False, "missing test(s): %s" % ", ".join(missing)
+    rc, passed, failed, errors = _pytest([RF_TESTS.as_posix(), "-k", " or ".join(RF_ROW)])
+    if rc != 0 or passed < len(RF_ROW) or failed or errors:
+        return False, "rc=%d passed=%d of %d failed=%d errors=%d" % (rc, passed, len(RF_ROW), failed, errors)
+    return True, "passed=%d of %d" % (passed, len(RF_ROW))
+
+
+def rf_regress():
+    rc, passed, failed, errors = _pytest([RF_DIR.as_posix()])
+    if rc != 0 or failed or errors or passed < RF_MIN_PASSED:
+        return False, "rc=%d passed=%d (min %d) failed=%d errors=%d" % (rc, passed, RF_MIN_PASSED, failed, errors)
+    return True, "passed=%d (min %d) failed=0" % (passed, RF_MIN_PASSED)
+
+
 def run(names):
     if not PC_TESTS.exists():
         return False, "absent: %s" % PC_TESTS.as_posix()
@@ -86,6 +116,10 @@ def run(names):
 def main(argv):
     if len(argv) == 1 and argv[0] in ("rn-row", "rn-regress"):
         ok, why = rn_row() if argv[0] == "rn-row" else rn_regress()
+        print("%s-%s %s" % (argv[0].upper(), "OK" if ok else "FAIL", why))
+        return 0 if ok else 1
+    if len(argv) == 1 and argv[0] in ("rf-filer", "rf-regress"):
+        ok, why = rf_filer() if argv[0] == "rf-filer" else rf_regress()
         print("%s-%s %s" % (argv[0].upper(), "OK" if ok else "FAIL", why))
         return 0 if ok else 1
     if len(argv) != 1 or argv[0] not in NAMED:

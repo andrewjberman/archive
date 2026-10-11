@@ -86,6 +86,10 @@ SIGNED for the blast radius below, on these conditions, by 2.0.0_SA_COO~P2.
   that state: the live code returns a prior record as stored.
 - **Conditions (each blocks the apply order, none blocks this signature):**
   1. The CTO half names the ruling behind `irpt-ycdgen-research` reaching 49financial and inflection.
+     CLOSED 2026-10-11 12:48Z: `1.0.0_SA_CTO~DELL2` msg 4932 RATIFIES the row (cottonwood, 49financial, inflection) as the
+     companion of `CTO_RULING_IRPT_YCDGEN_ROUND7_RESEARCH_ROLES_20261009.md` @f29d0d8ca1, read against FWD-10 at PRD line 87
+     (each research role reaches its own firm's bucket alone), and says it may ride IB-pr-426. `2.0.0_SA_COO~G2` msg 4930: no
+     earlier ruling named the row. The CTO half is still owed on the packet.
   2. The build from the REAL map, after the candidate entry lands, prints the signed digest (the adapter and narrative did; this
      function's has not been tried). The record step also corrects the map's stale `artifact_sha256`, `deployed_code_sha256`,
      `last_deployed_at` and `deploy_ledger` for this entry.
