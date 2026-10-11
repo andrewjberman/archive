@@ -8,6 +8,9 @@ Built LOCALLY only. Nothing is staged, installed or deployed.
 answer or a recorded outcome; four are inert until a named binding or caller; four were read with no served change
 found for the resident; two items are not classified.**
 
+**AMENDED after `1.0.0_SA_CTO~DELL2` msg 4597: section 8 closes its four items. Both section-4 items are now classified
+(inert on the resident), S4 is counted, and `name()` is probed. Sections 1 to 7 stand as first written.**
+
 How each line below was reached is stated in its last column: READ means I read the diff of the running root's file against
 the new one; MEASURED means a script compared the two; NOT READ means exactly that.
 
@@ -75,3 +78,82 @@ listed (the 07:4xZ host listing read the unit's root path and the brand director
 - S3 has no after-read this release can drive, and S6 has none short of a failing job. The pair says so; it does not offer a
   green line for them.
 - Part 1's import closure is a lower bound (its section 8).
+
+## 8. The four items of CTO msg 4597, closed
+
+### 8.1 S4 -- what is retained under the research policy row, counted
+
+Only ONE family of the row is retained through the retention index: `YCHARTS_OPAL_REPORT` (`resident_installed.py:59-60`).
+The other two families (`YCHARTS_RESPONSE`, `YCHARTS_RUN`) are written straight to the firm bucket by address and carry no
+retention record, so no digest gates them.
+
+Where a retained report's bytes go was asked of the builder, not typed: `reporting_destination(<firm>,
+"YCHARTS_OPAL_REPORT", ..., policy_revision="irpt-ycdgen-research-v1")` answers bucket `opal-data-irpt`, prefix
+`irpt/<firm>/state/ycharts_opal_reports/`. Listed there (names and times only; positive control: the bucket's `irpt/`
+root lists all three firms):
+
+| firm | retained research reports | written |
+|---|---|---|
+| cottonwood | 0 | - |
+| 49financial | 1 | 2026-10-09T12:00:29Z |
+| inflection | 0 | - |
+| **all three** | **1** | |
+
+The row's canonical hash in every package held on dell2:
+
+| package | research row | firms |
+|---|---|---|
+| st26, st27 (running), st28 | `6e3286a3d962` | cottonwood |
+| st29, and this release | `aebe35b9a054` | cottonwood, 49financial, inflection |
+
+Reading: the one retained report belongs to 49financial. `RetentionPolicy._policy` refuses a reserve for a firm the row does
+not name, so only st29 could have written it, under the digest THIS release carries. On the running root it is refused
+(its firm is not in the row); after the install it reads again. **0 artifacts exist under the old digest, so the release
+takes no retained report away from anyone; it gives one back.**
+
+Who reads a retained research report through the resident: `resident_worker.py` and `ycharts/generate/publisher.py`, which
+take the retained ref to publish the Opal PDF. The other reader is the irpt-status Lambda (`reports/status_installed.py`),
+which runs from its OWN package and is not moved by this release.
+
+Limits: the digest ON the record was not read. Retention records live in table `irpt-requests`, behind the `kms:Decrypt`
+fence no seat crosses for a census; "written under st29's digest" is inferred from the reserve rule and the write time,
+not measured. The irpt-status Lambda's own packaged row was not read: if it still carries the one-firm row, it refuses
+this artifact whatever the resident runs. The one object under `opal-data-cottonwood/.../ycharts_opal_reports/`
+(`request=YCD-R1-20261004T1944Z/overview.pdf`) is a producer run file written by address, not a retained artifact.
+
+### 8.2 `_ids/ids.py` -- no resident path
+
+The changed line sits in `projection_with_seam`, reached only through `projection_for_firm`. Its callers in the package
+are `ops/entry.py`, `reports/generate_installed.py` and `ycharts/generate/entry.py`: three Lambda entry modules the
+resident does not import. `resident_installed.py`, `resident_worker.py` and `resident_main.py` name no `id_projection`
+(0 occurrences each). INERT on the resident.
+
+Found beside it, and a correction to part 1: `_ids/data/custodian_key_seam.json` is classed NOT_NAMED there, but it is
+loaded by a COMPUTED name (`load_seam_index(seam_name)`). It changed: 6,202 entries to 5,376, and null-like mapped values
+826 to 0. The data and the guard make the same repair. Same callers, so also inert on the resident.
+
+### 8.3 `routes.json` and the unread schemas -- read; two tighten, neither reaches the resident
+
+| member | change | tightens? |
+|---|---|---|
+| `routes.json` | 5 route rows added (2 custody-report, 1 original-upload, 2 reporting-read as `ROUTED_ELSEWHERE`), one query note, counts 19 to 24 | no (a document; named by `_authz` modules the resident does not enter) |
+| `ExportBundle.schema.json` | `custody_report_ref` added as a third alternative ref; `narrative_state` members | no (a new admitted alternative) |
+| `ExportReceipt.schema.json` | revision 1.1 to 1.2; `covered_account_ids` added AND added to a `required` list | **YES** |
+| `HoldingsSnapshot.schema.json` | `multi_asset` removed from 5 enums | **YES** |
+| `OwnedAnalysisRequest.schema.json` | optional `persist_inputs` | no |
+| `OwnedAnalysisRequestHistory.schema.json` | `unreadable_rows` required; rows become their own shape with `client_id`, `client_claim` | YES for a history document |
+| the two response schemas | follow `retained_ref` and `persist_inputs` | no |
+
+The resident passes three schema names to its validator: `AnalysisReport`, `AnalysisReport.v2`, `RequestComposition`
+(`resident_installed.py:53-56,124-134`). `RequestComposition` is unchanged. None of the three references another schema
+(`$ref` closure of each = itself). No module the resident can import names `HoldingsSnapshot`, `ExportReceipt`,
+`OwnedAnalysisRequestHistory`, `multi_asset` or `covered_account_ids`. So the tightened schemas are loaded into the
+store and validated against by nothing the resident runs. Limit: a schema chosen by a computed name would escape this
+read; none was found in the three resident files.
+
+### 8.4 `name()` -- the resident's research runner calls it once; probed
+
+One call in the package outside the builder: `ycharts/research/runner.py:488`, `name(system="irpt", scope=<firm>,
+function="ycharts-research", kind="role")`. Old and new builder, each in its own interpreter: identical for all three
+firms (`irpt-cot-`, `irpt-49f-`, `irpt-inf-ycharts-research-role`). The research modules' five `address()` call shapes
+were probed the same way: 12 of 12 identical. Record: `naming_differential_2.json` beside the build.
