@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~ANL</issued_to>
     <date>2026-10-11</date>
-    <status>pending</status>
+    <status>complete -- flipped by issuer 2.0.0_SA_COO~Y2 2026-10-11 ~16:3xZ: READS6-AC1 prints READS6-OK on its verbatim invocation and the proof instance is VALID rc 0, both run by the issuer on the laptop applier's files (commits b4caac9dec, 9c3968c6eb). Job rows: 14 of 14 read, 14 READY, first REQ-01c903660d7ab222cd08b2ff. Accepted requests scanned 51 of 1904 items: 6 store a ticket_id, 45 do not, 0 unreadable.</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
