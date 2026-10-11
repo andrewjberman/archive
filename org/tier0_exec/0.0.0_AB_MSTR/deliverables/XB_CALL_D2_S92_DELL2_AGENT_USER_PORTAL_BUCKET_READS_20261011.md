@@ -28,6 +28,14 @@ and no seat applies `shared-infra` from dell2 while it reads the portal bucket a
 
 ## The ask
 
-Row D2-S92 disarms when dell2's identity is granted the two portal-bucket reads (rows 1 and 3). The call asks the
-owner to rule on that grant: yes with its terms, or no with the reason, in which case the row's rule stands as the
-permanent answer and dell2 never plans that root with refresh. Row 2 is reported, not asked for.
+**AMENDMENT 1 (2026-10-11 09:4xZ, `1.0.0_SA_CTO~DELL2` msg 4601) -- this replaces the first ask below.** Grant the
+MINIMUM that makes a refreshing plan of `shared-infra` read `opalinvest-portal` as present. Row 1 certainly. Row 3
+(`s3:ListBucket`, which lets this box list every object in the bucket) ONLY if the owner confirms the provider's
+existence check (HeadBucket) needs it; otherwise it is not asked. Row 2 stays reported, not asked. If the owner would
+sooner grant neither, "dell2 never plans that root with refresh" is an acceptable permanent answer and the dell2 CTO
+closes the row on it.
+
+First ask, as sent at 09:37Z, SUPERSEDED: Row D2-S92 disarms when dell2's identity is granted the two portal-bucket
+reads (rows 1 and 3). The call asks the owner to rule on that grant: yes with its terms, or no with the reason, in
+which case the row's rule stands as the permanent answer and dell2 never plans that root with refresh. Row 2 is
+reported, not asked for.
