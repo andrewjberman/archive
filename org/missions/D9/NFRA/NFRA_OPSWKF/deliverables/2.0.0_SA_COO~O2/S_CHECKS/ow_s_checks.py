@@ -4,7 +4,8 @@
                          file:line basis that resolves in this tree
   s2-tests    OW-s2-AC1  the worker's named tests exist and pass
   s2-probe    OW-s2-AC2  the ISSUER's own probe of dashboard_api.lambda_handler: every route but users/me refuses a
-                         caller whose tier is not internal BEFORE any table or S3 access, and serves an internal one;
+                         caller who is not OPAL-INTERNAL (tier exactly internal OR firmId exactly opal-capital; PRD v0.6)
+                         BEFORE any table or S3 access, and serves one who is, whichever comparison admits it;
                          users/me still answers a client-tier caller with its own row
 
 Prints <TOKEN>-OK or <TOKEN>-FAIL <reason>, exits 0 / 1. Run from the worktree root. Subprocesses are bounded (110 s).
@@ -23,7 +24,9 @@ S2_NAMES = ["test_internal_caller_served_on_every_route",
             "test_service_tier_refused_on_every_route",
             "test_no_authorizer_context_refused_on_every_route",
             "test_refusal_touches_no_table_and_no_s3",
-            "test_users_me_unchanged_for_client_tier"]
+            "test_users_me_unchanged_for_client_tier",
+            "test_opal_capital_firm_served_whatever_the_tier",
+            "test_advisor_tier_of_another_firm_refused"]
 
 S1_DOC = Path("org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/0.9.0_WK_NFRA_OPSWKF~7/"
               "FOUR_FUNCTIONS_WHAT_A_NON_INTERNAL_CALLER_CAN_DO.md")
@@ -117,11 +120,19 @@ def _probe():
     except Exception as e:  # noqa: BLE001
         return False, "import failed: %s" % e
     callers = {
-        "client": {"email": "c@client.test", "tier": "client", "userType": "client"},
-        "service": {"email": "svc-x", "tier": "service", "userType": "service"},
+        "client": {"email": "c@client.test", "tier": "client", "userType": "client", "firmId": "some-client-firm"},
+        "service": {"email": "svc-x", "tier": "service", "userType": "service", "firmId": "null"},
+        "advisor-other-firm": {"email": "a@partner.test", "tier": "advisor", "firmId": "49financial"},
+        "dev-other-firm": {"email": "d@partner.test", "tier": "advisor", "userType": "Dev", "firmId": "49financial"},
         "empty-tier": {"email": "e@x.test", "tier": ""},
-        "null-tier": {"email": "n@x.test", "tier": "null"},
+        "null-tier-null-firm": {"email": "n@x.test", "tier": "null", "firmId": "null"},
+        "near-miss": {"email": "m@x.test", "tier": "Internal", "firmId": "opal-capital-x"},
         "no-context": None,
+    }
+    insiders = {
+        "tier-internal": {"email": "staff@opal.test", "tier": "internal", "userType": "Dev", "firmId": "opal-capital"},
+        "tier-internal-no-firm": {"email": "staff2@opal.test", "tier": "internal", "firmId": "null"},
+        "advisor-tier-opal-firm": {"email": "staff3@opal.test", "tier": "advisor", "firmId": "opal-capital"},
     }
     refused = 0
     for who, claims in callers.items():
@@ -140,20 +151,20 @@ def _probe():
                 return False, "%s %s touched %s before refusing" % (who, path, touched)
             refused += 1
     served = 0
-    internal = {"email": "staff@opal.test", "tier": "internal", "userType": "Dev"}
-    for path, query in GATED:
-        mod.dynamodb, mod.s3 = _EmptyDDB(), _Tripwire()
-        resp = mod.lambda_handler(_event(path, query, internal), None)
-        code = resp.get("statusCode")
-        if code not in (200, 404):
-            return False, "internal %s answered %s, expected 200 or 404" % (path, code)
-        served += 1
+    for who, internal in insiders.items():
+        for path, query in GATED:
+            mod.dynamodb, mod.s3 = _EmptyDDB(), _Tripwire()
+            resp = mod.lambda_handler(_event(path, query, internal), None)
+            code = resp.get("statusCode")
+            if code not in (200, 404):
+                return False, "%s %s answered %s, expected 200 or 404" % (who, path, code)
+            served += 1
     mod.dynamodb, mod.s3 = _EmptyDDB(), _Tripwire()
     me = mod.lambda_handler(_event(BASE + "/users/me", {}, callers["client"]), None)
     if me.get("statusCode") != 200 or '"c@client.test"' not in me.get("body", ""):
         return False, "users/me for a client-tier caller answered %s" % me.get("statusCode")
-    return True, "refused=%d of %d (5 callers x %d routes), internal served=%d of %d, users/me own row" % (
-        refused, 5 * len(GATED), len(GATED), served, len(GATED))
+    return True, "refused=%d of %d (%d outsiders x %d routes), served=%d of %d (%d insiders), users/me own row" % (
+        refused, len(callers) * len(GATED), len(callers), len(GATED), served, len(insiders) * len(GATED), len(insiders))
 
 
 def _record():
