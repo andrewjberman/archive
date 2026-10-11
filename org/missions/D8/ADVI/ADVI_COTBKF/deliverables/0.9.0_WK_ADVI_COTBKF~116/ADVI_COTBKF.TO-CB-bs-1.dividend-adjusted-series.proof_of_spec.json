@@ -1,0 +1,108 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bs-1",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bs-1.dividend-adjusted-series.md",
+  "group": "OTHER",
+  "vintage_commit": "eb6423b898"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~116",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round71.md",
+  "vintage_commit": "eb6423b898",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bs-1.dividend-adjusted-series.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~116/DIVIDEND_ADJUSTED_SERIES.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement record; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB71bs1-AC1",
+    "CB71bs1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~116/DIVIDEND_ADJUSTED_SERIES.csv",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement table; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB71bs1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~116/DIVIDEND_ADJUSTED_SERIES.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement note; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB71bs1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~116/DIVIDEND_ADJUSTED_SERIES_DETAIL.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement detail (pairs and daily steps of the nine); no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB71bs1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB71bs1-AC1",
+   "criterion_verbatim": "all nine carry a reading, and the whole-table count is printed with its tested and untested denominators.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~116/DIVIDEND_ADJUSTED_SERIES.json',encoding='utf-8'));n=d['nine'];t=d['table'];print('DIVIDEND-ADJUSTED-RECORD nine=%d nine_reads=%s fund_series=%d substituted=%d left_on_store=%d tested=%d reads_adjusted=%d reads_not_adjusted=%d untested=%d measured_account_days=%d'%(len(n),','.join(sorted(set(x['reads'] for x in n))),t['fund_series'],t['substituted'],t['left_on_store'],t['tested'],t['reads_adjusted'],t['reads_not_adjusted'],t['untested'],d['reach']['measured_account_days']))\"",
+   "expect": "DIVIDEND-ADJUSTED-RECORD nine=9",
+   "output_evidence": "DIVIDEND-ADJUSTED-RECORD nine=9 nine_reads=DIVIDEND_ADJUSTED fund_series=270 substituted=73 left_on_store=197 tested=73 reads_adjusted=72 reads_not_adjusted=1 untested=124 measured_account_days=3187 (rc 0)",
+   "denominator": "nine of nine tested series carry a reading (9 DIVIDEND_ADJUSTED); 270 fund series: 73 substituted, 197 left on the store, of which 73 tested (72 adjusted, 1 not adjusted) and 124 untested; control 0 of 73 substituted read adjusted",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB71bs1-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the distributions come from a source independent of the close series; each reading follows from the comparison shown, and UNDECIDED is used where it does not; the whole-table count states what was tested and what was not; no correction is sized on what was not tested.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read DIVIDEND_ADJUSTED_SERIES.json (nine, per_share_source, table, other_kinds, reach, headline, not_established), DIVIDEND_ADJUSTED_SERIES.md and DIVIDEND_ADJUSTED_SERIES_DETAIL.json",
+   "output_evidence": "per-share distributions from the custodian's dv/dvlt rows over the account's share balance (1,591 account-date rows, 1,583 kept, 229 events), cross-checked against Yahoo's Adj/Close factor (103 of 104 pairs within 2 percent); all nine read DIVIDEND_ADJUSTED on shape (201 of 201 daily steps on a distribution, 0 down) while the face's 80-percent-within-2-percent amplitude test fails for all nine (0 to 2 of 4 to 18 pairs), stated in the md and the surprise row; whole table 72 adjusted of 73 tested, 124 untested by reason, control 0 of 73; no correction sized; no verdict given by the worker",
+   "denominator": "9 funds, 104 pairs; 270 fund series (73 tested, 124 untested, 73 substituted control); ETF 276 and Equity 934 counted with their own tested and untested",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "ADVI_COTBKF-D2-W116-S1"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~116/ADVI_COTBKF.TO-CB-bs-1.dividend-adjusted-series.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB71bs1-AC1)",
+   "result": "DIVIDEND-ADJUSTED-RECORD nine=9 nine_reads=DIVIDEND_ADJUSTED fund_series=270 substituted=73 left_on_store=197 tested=73 reads_adjusted=72 reads_not_adjusted=1 untested=124 measured_account_days=3187"
+  }
+ ]
+}
