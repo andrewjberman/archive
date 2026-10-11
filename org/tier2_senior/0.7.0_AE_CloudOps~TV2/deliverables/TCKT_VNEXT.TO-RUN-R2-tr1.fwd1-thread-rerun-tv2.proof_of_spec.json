@@ -5,21 +5,32 @@
   "spec_ref": {
     "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-RUN-R2-tr1.fwd1-thread-rerun-tv2.md",
     "group": "OTHER",
-    "vintage_commit": "bc3a095fd2"
+    "vintage_commit": "f0d4c2db95"
   },
   "assignee": "0.7.0_AE_CloudOps~TV2",
   "decomp_ref": {
     "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R2.md",
-    "vintage_commit": "bc3a095fd2",
+    "vintage_commit": "f0d4c2db95",
     "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-RUN-R2-tr1.fwd1-thread-rerun-tv2.md"
   },
   "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r2_tr1/r2_tr1_run3_trace.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "RUN 3's trace (68822 bytes), the order's final artifact, written by the NEW runner at f4153fc637 under the THIRD AND LAST GO; path confirmed absent beforehand. It adds result, result_reason_code and upload_idempotency_token over run 2's shape, and records BOTH report-route arms EXPLICITLY as UNREACHABLE rather than as an empty object. Statuses, codes, ids, counts and hash prefixes only.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
     {
       "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r2_tr1/r2_tr1_trace.json",
       "kind": "config_data",
       "commit_or_etag": "da19026e07",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The order's one artifact, 68459 bytes, written by the runner at pin 2d2b309be9 under the SECOND GO. It carries run_id, run_label R2-tr-1, executor, the pair string, preconditions, the full census, 7 hop records, report_route_arms (empty), named_failures, journey_ticket, cleanup and data_refresh_zero_calls. Statuses, codes, ids, counts and hash prefixes only: no report contents, no client figures, no account ids. Identical bytes are the issuer's to copy into R2_RUN/ per the pair's step 10.",
+      "deploy_evidence": "RUN 2's trace (68459 bytes), written by the runner at 2d2b309be9 under the SECOND GO. Retained because one TO produced three ledgered attempts and this is the record of the second; run 3 writes a separate file.",
       "artifact_covered_by": [
         "AC1",
         "AC2"
@@ -31,6 +42,13 @@
       "commit_or_etag": "da19026e07",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "The SECOND GO's NEVER-2 entry, opened first as the amendment requires (the first attempt's entry having closed at ad586be837), 4 legs, CLOSED with all 4 proven. The .open_deploys row was read back ABSENT."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261011T0806Z_tckt-vnext-r2-tr1-fwd1-thread-rerun-run3-20261011_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The THIRD GO's NEVER-2 entry, opened first (runs 1 and 2 having closed at ad586be837 and da19026e07), 4 legs, CLOSED with all 4 proven. Its .open_deploys row was read back ABSENT against an 18-row control."
     },
     {
       "path_or_key": "org/critical_paths/change_management/20261011T0551Z_tckt-vnext-r2-tr1-fwd1-thread-rerun-20261011_deploy_completion.md",
@@ -59,6 +77,13 @@
       "commit_or_etag": "N/A -- created and removed within the run",
       "deployed_state": "DEPLOYED-VERIFIED",
       "deploy_evidence": "Written 2026-10-11T06:20:46Z under attribute_not_exists and read back PRESENT with allowedFirmIds={'L':[{'S':'49financial'}]}; deleted at 07:06:17Z, which is 31 s AFTER the token exp of 07:05:46Z (the D2-S20 ordering, with waited_seconds 2621.24), and read back ABSENT twice -- once by the runner and once by me with --consistent-read after the process exited, against a control that returned 1 item. Net world change to the identity surface: none."
+    },
+    {
+      "path_or_key": "opal-tickets TCK-20261011-61631267 (run 3 journey) and TCK-20261011-7731261a (run 3 census create arm)",
+      "kind": "ddb_rows",
+      "commit_or_etag": "N/A -- live rows created by run 3",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Both created under 49financial and COMPLETED at http 200 in cleanup. The journey ticket was re-read directly: firm 49financial, status completed, created_at 2026-10-11T08:14:27.233Z, report_ref NULL -- correct, because hop (f) never ran. TCK-20261009-67ab7f27 was NOT touched this run: no --close-ticket was passed, per the amendment, since run 2's trace already showed it completed."
     }
   ],
   "acceptance": [
@@ -67,46 +92,50 @@
       "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_RUN/reread_27.py expect: READ27 27/27",
       "method": "command",
       "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_RUN/reread_27.py",
-      "output_evidence": "PASS on the second GO: READ27 27/27, rc 0, with all eight hosts reading CLAMPED including opal-ticket-api at ca3be343. Recorded in full because this criterion is why the order ran twice. On the FIRST GO it read READ27 21/27, rc 1, and opal-ticket-api read NOT-RELEASED at the same ca3be343 bytes -- that was branch D, nothing of the journey ran, and I filed row TCKT_VNEXT-D2-S28 rather than editing the script, which sits outside this order's <paths>. The issuer then owned it: commit bc3a095fd2, AMENDMENT 1, added ca3be343 to the script's hand-kept TICKET_OK on its own reads and carried the second GO. The deployed bytes did NOT change between the two runs -- same member hash, same LastModified 2026-10-11T04:19:14Z -- so only the instrument's allow-list moved, and I did not grade my own criterion into a pass. I also verified the amendment was COMMITTED before treating it as authority, since an uncommitted edit to an acceptance instrument is not a GO.",
-      "denominator": "8 of 8 hosts read and printed; 27 of 27 routes clamped on the second GO, against 21 of 27 on the first",
+      "output_evidence": "PASS on runs 2 and 3: READ27 27/27, rc 0, all eight hosts CLAMPED including opal-ticket-api at ca3be343. Run 3's reading was taken LIVE again rather than carried over, as AMENDMENT 2 directs. Recorded in full because this criterion is why the order ran three times: on the FIRST GO it read READ27 21/27, rc 1, with opal-ticket-api NOT-RELEASED at the same ca3be343 bytes -- branch D, nothing of the journey ran, and I filed row S28 rather than editing the script, which sits outside this order's <paths>. The issuer then owned it at bc3a095fd2 (AMENDMENT 1), adding ca3be343 to the hand-kept TICKET_OK on its own reads. The deployed bytes never changed across the three attempts -- same member hash, same LastModified 2026-10-11T04:19:14Z -- so only the instrument's allow-list moved, and I did not grade my own criterion into a pass. On each resumption I verified the governing amendment was COMMITTED before treating it as authority, since an uncommitted edit to an acceptance instrument is not a GO.",
+      "denominator": "8 of 8 hosts read and printed; 27 of 27 routes clamped on runs 2 and 3, against 21 of 27 on run 1",
       "status": "PASS"
     },
     {
       "criterion_id": "AC2",
       "criterion_verbatim": "JUDGMENT (graded by the CVO at L9 on the trace): FWD-1's ACCEPT, 'the report is made from the filed file, and the finished report opens from the same ticket', shown by hop (e) and hop (g) reading the finished report for the id the service issued and the ticket holds; one firm only; the row removed after exp.",
       "method": "live_read",
-      "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~8/fwd1_runner/fwd1_run.py --read27 \"READ27 27/27\" --exp-minutes 45 --expect-irpt-status-sha 6idtFvAm --run-label R2-tr-1 --pair \"R2_TR1_THREAD_RERUN_PAIR.md@9e9e6e62f3 + CTO half@a65bb46697\" --executor 0.7.0_AE_CloudOps~TV2 --trace-out org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r2_tr1/r2_tr1_trace.json --close-ticket TCK-20261009-67ab7f27",
-      "output_evidence": "NOT SELF-GRADED; the evidence is stated and the verdict withheld. THE ACCEPT WAS NOT SHOWN, and the reason is one hop upstream of where the criterion looks. Hops (a), (b), (c) MET: upload input_id portfolio_9d98a603...c476 at state NORMALIZED; ticket TCK-20261011-b13495db at http 201; claim at http 200. Hop (d), the submission, was REFUSED: POST /api/scoped/investor-reporting/analysis returned http 200 carrying refused_reason INVALID_INPUT with request_id null -- a 200 wrapping a refusal envelope, which is why HTTP status alone is not the oracle here. With no issued service request id, the runner marked hops (e), (f) and (g) UNREACHABLE in named_failures, and report_route_arms is the EMPTY OBJECT, so neither report-route arm ran. THE TWO CLAUSES OF THE ACCEPT THAT CAN BE JUDGED, both independent of hop (d): ONE FIRM ONLY is MET and measured positively as well as negatively -- 82 of 91 live /api/scoped routes armed (9 data-refresh skipped per AMENDMENT 2), off_list_admits is the EMPTY LIST across three firm arms, 16 selector-ignored arms all cleared by code read with 0 leak and 0 UNKNOWN, census STOP null, and GET /api/scoped/tickets listed n=14 with firms=['49financial'] exactly. THE ROW REMOVED AFTER EXP is MET: deleted 07:06:17Z against exp 07:05:46Z, read back absent by two independent callers. The REPORT clause -- the report made from the filed file and opening from the same ticket -- is UNPROVEN and untouched by this run: no request was accepted, no report was generated, the vendor generation behind irpt-ycharts-generate was never requested, and the journey ticket carries no report_ref.",
-      "denominator": "3 of 7 hops MET, 1 refused, 3 UNREACHABLE; 0 of 2 report-route arms exercised; 82 of 91 live /api/scoped routes armed with 0 off-list admits; 2 of 3 ACCEPT clauses judgeable and met, 1 unproven",
+      "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~8/fwd1_runner/fwd1_run.py --read27 \"READ27 27/27\" --exp-minutes 30 --expect-irpt-status-sha 6idtFvAm --run-label R2-tr-1-run3 --pair \"R2_TR1_THREAD_RERUN_PAIR.md@9e9e6e62f3 + CTO half@4a0e63f033\" --executor 0.7.0_AE_CloudOps~TV2 --trace-out org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r2_tr1/r2_tr1_run3_trace.json   (runner at f4153fc637; no --close-ticket)",
+      "output_evidence": "NOT SELF-GRADED; the evidence is stated and the verdict withheld. THE ACCEPT WAS NOT SHOWN, on run 3 as on run 2, and the blocking hop is the same one. Hops (a)(b)(c) MET: upload NORMALIZED on the SECOND poll (poll 1 RESOLVING with input_id null), ticket TCK-20261011-61631267 at 201, claim 200. Hop (d) REFUSED: POST analysis, http 200, request_id null, refused_reason NOT_READY, result BRANCH_E_SUBMISSION_REFUSED. Hops (e)(f)(g) UNREACHABLE and BOTH report-route arms recorded UNREACHABLE with why BRANCH_E_SUBMISSION_REFUSED. THE AMENDMENT'S FIX DID WORK, and that is checkable rather than assumed: hop (d)'s idempotency_token reads r2tr1run3-a5e6c43e3bbe069d00ef4894 against run 2's sar1b-bb079cbf53aaa2be7ce3fb6b, so the token is per-run and the CHANGED_INPUTS_SAME_REQUEST_ID collision that ended run 2 is gone. A DIFFERENT refusal replaced it, and the service logs no reason for it (row S32). THE TWO JUDGEABLE ACCEPT CLAUSES ARE MET AND MEASURED, as on run 2. ONE FIRM ONLY: the census armed with zero off-list admits across three firm arms and STOP null. ROW REMOVED AFTER EXP: deleted 08:43:02Z against exp 08:42:32Z, read back absent by two independent callers. THE REPORT CLAUSE remains UNPROVEN and untouched: no request accepted, no report generated, the vendor generation behind irpt-ycharts-generate never requested across ANY of the three runs, and the journey ticket carries no report_ref.",
+      "denominator": "run 3: 3 of 7 hops MET, 1 refused, 3 UNREACHABLE; 0 of 2 report-route arms exercised; 2 of 3 ACCEPT clauses judgeable and met, 1 unproven. Across all three attempts: 0 of 2 arms ever exercised",
       "status": "N/A-BY-CONSTRUCTION",
-      "status_reason": "judgment=true on the order's face: graded by 3.0.0_SA_CVO at L9 on the trace and never self-graded (CLAUDE.md rule 27 L9). FWD-1 remains NOT REALIZED. Reported as branch C, whose consequences fit exactly -- a RESULT, the code recorded, no re-run, no widening -- while stating that the signed branch set does not literally name a hop-(d) refusal, rather than widening C's text or inventing a branch E; that gap is row TCKT_VNEXT-D2-S31. Explicitly NOT branch B: the report route was never called with an issued id, so the R2-rr-2 rollback is not triggered and the report-id shape check is not implicated in either direction."
+      "status_reason": "judgment=true on the order's face: graded by 3.0.0_SA_CVO at L9 on the run-3 trace and never self-graded (CLAUDE.md rule 27 L9). FWD-1 remains NOT REALIZED. Outcome BRANCH E, the fifth branch CTO AMENDMENT 3 added in answer to row S31 -- so unlike run 2 this outcome IS named by the signed branch set, and run 2 is recorded as branch E after the fact. Explicitly NOT branch B: the report route was never called with an issued id on any of the three runs, so the R2-rr-2 rollback is not triggered and the report-id shape check is not implicated. No fourth run exists under this half: CTO AMENDMENT 3 part 1 directs the next act to the round's slug, not another GO."
     }
   ],
   "controls": {
     "mutant": {
-      "description": "SIX negative controls across the two attempts, each run so the reading it guards could have come out the other way. (1) The zero-call POSITIVE CONTROL: the same filter over /aws/lambda/opal-ticket-api must find the filer, or a 0 in the data-refresh group proves nothing. (2) The worktree denominator: the count enumerated into the loop must equal the count grep reports, because an earlier while-read pipe in this session silently dropped the final porcelain record and under-counted 18 as 17. (3) The four-name STOP grep: a string containing all four function names must match all four. (4) The numstat zero behind the clamp-intact finding: the same instrument must report non-zero removals somewhere on that file. (5) The ConsistentRead ABSENT on the filer row: the same read path must find a row that does exist. (6) AMENDMENT 3 limb 3: one real authenticated irpt-status call rather than a log read, because an empty log group shows absence of traffic and not health.",
-      "expected": "(1) control matches >= 1. (2) enumerated == grepped. (3) all four names match. (4) at least one history row with removals > 0. (5) the control read returns >= 1 item. (6) a non-500 answer from a real call.",
-      "observed": "(1) THE CONTROL FAILED: 167 streams, 1 active in window, 0 matches for the filer -- so the runner returned ZERO_CALL_VOID (CONTROL_FOUND_NO_FILER) and NO zero-call claim is made. The guard worked; the claim is withheld. Row S29. (2) 29 enumerated and 29 grepped on both STOP passes; the tree count had moved 18 -> 29 during the session and one tree's HEAD advanced MID-CENSUS, which is why the test was re-taken at single fresh instants (06:17:08Z for this attempt). (3) all four matched once each, and against that control the four-name grep over the one open entry at my own HEAD authored by another lane returned nothing -- genuinely not one of the four. (4) 18 of the last 40 history rows on the handler carry removals > 0, so the 4-added/0-removed reading behind S28 is a measurement. (5) the control scan returned 1 item while the filer row's get-item returned no Item at all. (6) GET /api/scoped/investor-reporting/status answered 200 with reason NOT_FOUND, non_500 true.",
+      "description": "SIX negative controls across the two attempts, each run so the reading it guards could have come out the other way. (1) The zero-call POSITIVE CONTROL: the same filter over /aws/lambda/opal-ticket-api must find the filer, or a 0 in the data-refresh group proves nothing. (2) The worktree denominator: the count enumerated into the loop must equal the count grep reports, because an earlier while-read pipe in this session silently dropped the final porcelain record and under-counted 18 as 17. (3) The four-name STOP grep: a string containing all four function names must match all four. (4) The numstat zero behind the clamp-intact finding: the same instrument must report non-zero removals somewhere on that file. (5) The ConsistentRead ABSENT on the filer row: the same read path must find a row that does exist. (6) AMENDMENT 3 limb 3: one real authenticated irpt-status call rather than a log read, because an empty log group shows absence of traffic and not health. (7) Run 3 adds two: the per-run idempotency token must DIFFER from run 2's, or the amendment's fix is unproven; and the branch-E service-log read must be able to surface a reason when one exists, for which the two census arms are the control.",
+      "expected": "(1) control matches >= 1. (2) enumerated == grepped. (3) all four names match. (4) at least one history row with removals > 0. (5) the control read returns >= 1 item. (6) a non-500 answer from a real call. (7) run 3's token differs from run 2's; and the service-log read surfaces the reasons it does carry.",
+      "observed": "(1) THE CONTROL FAILED: 167 streams, 1 active in window, 0 matches for the filer -- so the runner returned ZERO_CALL_VOID (CONTROL_FOUND_NO_FILER) and NO zero-call claim is made. The guard worked; the claim is withheld. Row S29. (2) 29 enumerated and 29 grepped on both STOP passes; the tree count had moved 18 -> 29 during the session and one tree's HEAD advanced MID-CENSUS, which is why the test was re-taken at single fresh instants (06:17:08Z for this attempt). (3) all four matched once each, and against that control the four-name grep over the one open entry at my own HEAD authored by another lane returned nothing -- genuinely not one of the four. (4) 18 of the last 40 history rows on the handler carry removals > 0, so the 4-added/0-removed reading behind S28 is a measurement. (5) the control scan returned 1 item while the filer row's get-item returned no Item at all. (6) GET /api/scoped/investor-reporting/status answered 200 with reason NOT_FOUND, non_500 true. (7) The tokens DIFFER (r2tr1run3-a5e6c43e3bbe069d00ef4894 vs sar1b-bb079cbf53aaa2be7ce3fb6b), so the fix is demonstrated and not assumed. The service-log read DID surface two public_reason_codes in the window, NOT_AUTHORIZED and INVALID_INPUT, both census arms -- which proves the read works and makes the absence of any reason for hop (d) a MEASURED absence rather than a failed query. ALSO on run 3: the zero-call control is retired by CTO AMENDMENT 3 and replaced by streams_active_in_window == 0 under two printed conditions, which now reads ZERO_CALLS_PROVEN (NO_INVOCATION_IN_WINDOW) -- read_at 08:47:32Z, exactly exp + 300 s, and latest_event_time 2026-10-09T15:41:41Z, real and two days outside the window.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "the order was executed twice under two GOs, so the prechecks are repeated rather than single-shot; the open-deploy STOP test was taken at two separate fresh instants; the filer row's absence was read by two independent callers",
-      "observed": "the prechecks were stable across both attempts on everything except the one criterion the issuer then fixed: runner hash, rn-safety 6/6, rn-zero 4/4, rn-arms 4/4, opal-ticket-api W03VREoM, irpt-status 6idtFvAm and TICKET_DL_MAP 0 keys all read identically, while reread_27.py moved 21/27 -> 27/27 on an instrument change with the deployed bytes unchanged. The STOP verdict was stable across both union passes despite the tree count moving. The absent read agreed between the runner and me.",
+      "method": "the order was executed three times under three GOs, so every precheck is repeated twice over; the open-deploy STOP test was taken at three separate fresh instants; the filer row's absence was read by two independent callers on each run that wrote one",
+      "observed": "the prechecks were stable across all three attempts on everything except the one criterion the issuer fixed: the runner hash (each against its own pin), rn-safety 6/6, opal-ticket-api W03VREoM, irpt-status 6idtFvAm and TICKET_DL_MAP 0 keys read identically every time, while reread_27.py moved 21/27 -> 27/27 on an instrument change with the deployed bytes unchanged. The STOP verdict was stable across all three union passes although the tree count moved 18 -> 29 -> 42. THE OUTCOME WAS NOT STABLE, AND THAT IS THE FINDING: runs 2 and 3 are both branch E but on DIFFERENT codes -- INVALID_INPUT off an idempotency collision, then NOT_READY with no logged reason -- so the first cause was real and is fixed, and a second cause sits behind it.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
+      "item": "The service's own refusal reason for hop (d) on run 3",
+      "reason": "DOES NOT EXIST on the surface the amendment names. A full read of /aws/lambda/irpt-ycharts-generate across the token window returned 41 events in which the token NOT_READY never occurs, and the only two reason-bearing events are census arms that both precede the journey ticket's created_at of 08:14:27.233Z. Branch E's second instruction therefore cannot be satisfied as written. The served code is recorded as served; the absence is recorded as an absence, and the argument does not depend on identifying which invocation served hop (d). Row S32."
+    },
+    {
       "item": "Hops (e), (f) and (g), and BOTH report-route arms",
       "reason": "UNREACHABLE: hop (d) returned 200 INVALID_INPUT with no issued request id, and all three depend on it. report_route_arms is empty, so the malformed-id arm is unexercised too. Not retried: the order is ONE run and the pair forbids re-running or widening the read."
     },
     {
-      "item": "The zero data-refresh calls claim",
-      "reason": "VOID by the pair's own rule -- the positive control found no filer in the ticket-api group (167 streams, 1 active, 0 matches) although the filer created two tickets through that function in the window. The claim is withheld, not weakened. Row S29."
+      "item": "The zero data-refresh calls claim -- VOID on run 2, PROVEN on run 3",
+      "reason": "On run 2 the positive control found no filer in the ticket-api group and the runner returned ZERO_CALL_VOID, so the claim was withheld (row S29). On run 3, under CTO AMENDMENT 3's restated rule, the read returns ZERO_CALLS_PROVEN with proof NO_INVOCATION_IN_WINDOW: 442 streams, 0 active in window, latest_event_time 2026-10-09T15:41:41Z (real, two days outside it), read at exp + 300 s exactly. matches is null by design, because the filter runs only if a stream was active. S29 closes on this."
     },
     {
       "item": "CTO condition 3's recipient check",
-      "reason": "UNVERIFIABLE FROM ITS OWN INSTRUMENT: the single WE_CLIENT_SENT line carries kind, ticket, firm, message_id and the SENDER's from= only, with no recipient field. Neither violated nor confirmed; no BLOCKING row filed because nothing evidences a foreign recipient, and no clean bill given because nothing evidences the filer. The intended recipient was inferred from the ticket's requester.email domain (opal.invalid) plus the CTO half's own code read -- code-plus-data, never a measured delivery. Row S30."
+      "reason": "UNVERIFIABLE FROM ITS OWN INSTRUMENT: the single WE_CLIENT_SENT line carries kind, ticket, firm, message_id and the SENDER's from= only, with no recipient field. Neither violated nor confirmed; no BLOCKING row filed because nothing evidences a foreign recipient, and no clean bill given because nothing evidences the filer. The intended recipient was inferred from the ticket's requester.email domain (opal.invalid) plus the CTO half's own code read -- code-plus-data, never a measured delivery. Row S30. On run 3, under CTO AMENDMENT 3 part 3, the condition is met on the agreed basis -- the CTO's code read plus per-ticket WE_CLIENT_* counts (journey ticket: WE_DL_UNCONFIGURED 1, WE_CLIENT_SENT 1; census ticket: WE_DL_UNCONFIGURED 1; WE_DL_SENT 0 across the window) -- with no recipient inferred. S30 closes on this."
     },
     {
       "item": "The second expected client-mail leg",
@@ -131,20 +160,30 @@
     {
       "item": "comp-schedule and comp-iam",
       "reason": "DECLARED-NOT-APPLICABLE by the order's preflight (one run, no schedule; no IAM change). comp-adversary was declared RUN via the runner's census, and on this attempt it DID run -- 82 armed routes, another firm refused on each, 0 off-list admits -- so that preflight declaration is met, unlike on the first attempt."
+    },
+    {
+      "item": "Any fourth attempt",
+      "reason": "None exists. CTO half AMENDMENT 3 part 1: 'No fourth run under this half. If run 3 stops short of hop (g), the next act is the round's slug, not another GO.' Run 3 stopped at hop (d), so this seat reports once and stops."
     }
   ],
   "surprises": [
     "TCKT_VNEXT-D2-S28",
     "TCKT_VNEXT-D2-S29",
     "TCKT_VNEXT-D2-S30",
-    "TCKT_VNEXT-D2-S31"
+    "TCKT_VNEXT-D2-S31",
+    "TCKT_VNEXT-D2-S32"
   ],
-  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/logs/2026-10-11/tv2_r2_tr1_fwd1_thread_rerun.md",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/logs/2026-10-11/tv2_r2_tr1_run3.md",
   "compiler_tools": [
     {
       "tool": "deploy_ledger.py",
       "invocation": "TWO entries: tckt-vnext-r2-tr1-fwd1-thread-rerun-20261011 (attempt 1, 4 legs) and ...-run2-20261011 (attempt 2, 4 legs); open, close-leg x4, close on each",
       "result": "both CLOSED with every leg proven or dispositioned; each .open_deploys row read back ABSENT against a printed control. The second entry was opened fresh because AMENDMENT 1 required it."
+    },
+    {
+      "tool": "fwd1_run.py at f4153fc637 (run 3's NEW pin)",
+      "invocation": "ONE invocation under the third GO, backgrounded (the process runs to about exp + 6 minutes)",
+      "result": "rc 0, 145 lines, never interrupted; the per-run idempotency token confirmed different from run 2's; branch E on NOT_READY"
     },
     {
       "tool": "fwd1_run.py at 2d2b309be9",
@@ -153,8 +192,8 @@
     },
     {
       "tool": "r2_checks.py",
-      "invocation": "rn-safety, rn-zero, rn-arms -- on both attempts",
-      "result": "6 of 6, 4 of 4, 4 of 4 each time. All three run because the GO names rn-safety and rn-zero while the pair's section 6 names rn-safety and rn-arms; running all three settles the discrepancy by evidence rather than by choosing a document."
+      "invocation": "runs 1-2: rn-safety, rn-zero, rn-arms. Run 3 per AMENDMENT 2: rn-safety, rn-token, rn-zero3",
+      "result": "every check OK on every attempt: 6 of 6, 4 of 4, 4 of 4 each time. rn-token is what makes the per-run-token fix checkable before the run rather than after it."
     },
     {
       "tool": "reread_27.py",
@@ -180,6 +219,11 @@
       "tool": "safe-commit.sh",
       "invocation": "-F message files written by a non-shell writer, one commit per act",
       "result": "msg-verify MATCH on each; the surprise-row gate graded each new row and passed"
+    },
+    {
+      "tool": "aws logs filter-log-events (service-side, run 3)",
+      "invocation": "full-window read of /aws/lambda/irpt-ycharts-generate 08:12:32-08:42:32Z, then a token census over every event",
+      "result": "41 events; NOT_READY absent; two public_reason_codes present (NOT_AUTHORIZED, INVALID_INPUT), both census arms, both before the journey ticket's created_at -- the measurement behind row S32"
     }
   ]
 }
