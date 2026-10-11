@@ -388,3 +388,26 @@ read, is running). This seat ran the grading module's tests at its review of PRD
   signed): 40 trading days, a floor of 20 compared days.
 - Round 151: a submission may carry `commentary_requested`, in the tree only; not released. This is the service half of IRPT_YCDGEN
   PRD v0.13.
+
+---
+
+## Added at rounds 152, 153, 154 and 156, 2026-10-11T23:50:01Z (input: msg 6165, packet @f70b0e0c45)
+
+Two release reads with their pairs and two code reads; nothing applied by these four; no judgment criterion. Held on the same
+condition (IB-pr-459 is running and IB-pr-461, an apply under a signed pair, is with the applier). This seat re-ran nothing.
+
+- **D2-W313-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~313`): A search of the repo by the gold's table name finds 34 files; the readers that reach the gold by the producer's table constant are 4 more, one of them a reader the name search missed
+- **D2-W313-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~313`): The existing 07:30 and 07:41 America/New_York fires are before the entry's partition usually lands (11:46Z) while daylight time holds; a producer for the entry that reused those times would grade a day before its partition exists
+- **D2-W313-S3** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~313`): The performance route's holdings reader skips a non-OK day and chains the remaining days (a partial absence, not a refusal), so a blank account-day written as a non-OK status would be chained over
+- **D2-W312-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~312`): The source map's artifact_sha256 for irpt-commentary-draft-store-lambda is not the live CodeSha256 and its _build_note still says DESIRED, not built; the other three entries' digests equal live
+- **D2-W312-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~312`): For irpt-ycharts-generate two of the three changed members are NATIVE to its source_dir, so no map row pins them: a minimal candidate re-pins only the schema row, and two riders move that no row can hold back
+- **D2-W312-S3** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~312`): The resident_worker.py inside the irpt-ycharts-generate zip, live and built, has neither producer_for nor send_ready_if_ticketed, so the Opal-producer branch and the I3 gate AMENDMENT 1 leans on are not in this package; the host's installed package was not rea
+- **D2-W316-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~316`): No staged_from row pins commentary_draft_store.py in the irpt-commentary-draft-store-lambda map entry: the member is native to source_dir, so the minimal candidate re-pins 0 rows and equals the real map byte for byte
+
+**For the slug.**
+- IB-pr-459 asks whether the landed price store holds the unadjusted close, to make it the second witness. ADVI_COTBKF measured that
+  store today against the price paid on trades: funds whose price was not replaced are over 20 percent off on 3,205 of 3,614 read
+  trades; replaced funds are within 1 percent on 10,411 of 10,636 (this seat's own re-derivation, grade @d299fd357a). The CTO has
+  told that cell to report per fund class (msg 6164).
+- By the issuer's code read, no IRPT_BCKEND surface reads that store; holdings take a price from the custodian's own market value
+  over units. Not read by this seat.
