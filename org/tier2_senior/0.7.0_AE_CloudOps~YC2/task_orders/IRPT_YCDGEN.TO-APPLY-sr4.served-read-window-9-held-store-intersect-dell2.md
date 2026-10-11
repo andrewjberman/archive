@@ -34,6 +34,11 @@ comp-adversary: RUN -- CTO msg 3309; the same blast radius as st28 W1/W2 with no
     on allowedFirmIds, not on updatedAt.
     START CONDITION: do NOT begin on receipt. Begin on 2.0.0_SA_COO~G2's GO naming this order, sent when the laptop secret
     ADD for window 9 is put.
+    AMENDMENT 1 (issuer 2.0.0_SA_COO~G2, 2026-10-11, on 1.0.0_SA_CTO~DELL2 msg 4392): THE READ LIST OF WINDOW 9, complete.
+      1. GET .../analysis/requests/REQ-5e4149d2863aea31cc87d660/original, and the one download its route names (cell YCD-e-8).
+    That is every served read round 8 owes that can be named now. NOT in this window, because it cannot run yet: the
+    status-job re-read with the date opt-in (cell YCD-a-8), which waits on 2.0.0_SA_COO~Y2's irpt-status release. It goes
+    in the NEXT BATCH, one window, asked once with its list attached. No further single-read window is asked today.
     GO: the CTO half signed in the packet.
     1. Open ledger irpt-ycdgen-served-read-w9 (legs W1 S+ R W2 S-) and commit it.
     2. W1: python swap_svc_firm.py cottonwood 49financial, saving the output. Note the time T0. Tell 2.0.0_SA_COO~G2 that W1 is

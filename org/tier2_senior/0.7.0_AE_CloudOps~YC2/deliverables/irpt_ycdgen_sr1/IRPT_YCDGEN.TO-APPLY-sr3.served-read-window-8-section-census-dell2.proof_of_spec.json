@@ -1,0 +1,184 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "The ledger irpt-ycdgen-served-read-w8 is CLOSED.",
+      "denominator": "1 ledger entry; the AC1 pathspec glob expands to exactly 1 file, printed as 1 before the run",
+      "expect": "^\\*\\*Status:\\*\\* CLOSED",
+      "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-ycdgen-served-read-w8_deploy_completion.md",
+      "method": "command",
+      "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261011T072102Z",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "W2 shows svc back on cottonwood.",
+      "denominator": "1 output file, 1 'after:' line; plus 2 controls -- W1's file for the firm value, and the w6/w7/w8 W2 file set (3 files) for the stale-artifact case",
+      "expect": "'allowedFirmIds': 'cottonwood'",
+      "invocation": "grep -m1 '^after:' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_sr1/W2_SWAP_BACK_WINDOW8.txt",
+      "method": "command",
+      "output_evidence": "after: {'allowedFirmIds': 'cottonwood', 'status': 'active', 'updatedAt': '2026-10-11T07:15:30.808070Z', 'userType': 'service'}",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the 5-leg manifest with per-leg proof and the CLOSED status line",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/critical_paths/change_management/20261011T0712Z_irpt-ycdgen-served-read-w8_deploy_completion.md"
+    },
+    {
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the tool's before/after pair for the restore; its after-stamp equals the live row's updatedAt and no other window's file does",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_sr1/W2_SWAP_BACK_WINDOW8.txt"
+    },
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the tool's before/after pair for the swap-out, and the T0 the 30-minute bound runs from",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_sr1/W1_SWAP_OUT_WINDOW8.txt"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~YC2",
+  "compiler_tools": [
+    {
+      "invocation": "open | close-leg x5 (W1, R, W2, S+, S-) | close --slug irpt-ycdgen-served-read-w8",
+      "result": "CLOSED, all 5 legs proven, closed 20261011T072102Z",
+      "tool": "deploy_ledger.py"
+    },
+    {
+      "invocation": "comp-adversary compose org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/r7/NEVER_WIDEN_PACKET_SERVED_READ_WINDOW.md",
+      "result": "CITED, NOT RE-RUN THIS WINDOW, and that choice is stated rather than hidden. It was run on byte-identical packet bytes (blob 716925a28e, re-verified unchanged at this window's preflight) at window 6 and again at window 7, returning the same single PARSER-ZERO flag both times. Its only time-varying source is 4 (comp-state drift), which is a declaration input and not a gate on this act. Re-running a deterministic read over identical bytes for a third time would not change what this seat does, so CLAUDE.md section 2 says stop. A reader who wants the third run has the exact invocation here.",
+      "tool": "comp-adversary"
+    },
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order: two conditional row writes; no schedule, trigger or EventBridge rule is added or read",
+      "tool": "comp-schedule"
+    },
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order: no IAM change on dell2; the secret resource-policy ADD/REMOVE is the laptop executor's leg, routed by MSTR",
+      "tool": "comp-iam"
+    }
+  ],
+  "controls": {
+    "ac1_graded_on_the_verbatim_invocation_not_a_substitute": {
+      "description": "The comp-rail denies AC1's pathspec glob as an unscoped search. Rewriting it to a literal path would have graded a substitute for the criterion the order names.",
+      "expected_landed": "the glob expands to exactly 1 file, and the verbatim grep produces the evidence line",
+      "expected_not_landed": "a glob expanding to 2+ files, which would make '-m1' pick an arbitrary one, or a silently substituted invocation",
+      "observed": "glob denominator 1; the verbatim invocation, run under an audited '# rail-checked:' annotation, returned the CLOSED status line",
+      "status": "PASS"
+    },
+    "ac2_not_satisfiable_by_any_prior_window_artifact": {
+      "description": "THE CONTROL THAT GROWS. Every window's W2 file reads 'allowedFirmIds': 'cottonwood', necessarily, because every window restores to the same value. The directory now holds THREE such files (w6, w7, w8), so AC2's firm string identifies none of them and the criterion would pass on any one -- including on all of them if W2 had never fired this window. The candidate set grows by one file per window, so this control gets MORE necessary each round, not less.",
+      "expected_landed": "exactly ONE of the three W2 after-stamps equals the LIVE row's updatedAt, and it is this window's",
+      "expected_not_landed": "two or more matching live (impossible unless a file was copied), or the w8 stamp failing to match, which would mean AC2's PASS is not about this window's act",
+      "observed": "live updatedAt 2026-10-11T07:15:30.808070Z. w8 after-stamp 07:15:30.808070Z MATCHES; w7 05:30:33.951270Z does not; w6 04:53:41.258001Z does not. Exactly 1 of 3 matches, and it is this window's.",
+      "status": "PASS"
+    },
+    "after_read_confirmed_off_instrument": {
+      "description": "AC2 reads the swap tool's own stdout. A producer's self-report is not evidence of served state, so the restore was re-read from DynamoDB directly.",
+      "expected_landed": "a ConsistentRead get-item returns allowedFirmIds {S: cottonwood} with updatedAt equal to W2's own 6-decimal write",
+      "expected_not_landed": "any other firm value, or an updatedAt later than W2's, which would mean a write followed the restore",
+      "observed": "allowedFirmIds {S: cottonwood}, status {S: active}, userType {S: service}, updatedAt {S: 2026-10-11T07:15:30.808070Z} -- equal to W2's write, so nothing wrote the row after W2",
+      "status": "PASS"
+    },
+    "cto_half_re_measured_for_this_window_not_carried_over": {
+      "description": "A half binds to the BYTES it signed, so neither window 6's nor window 7's verification covers window 8: the packet could have been amended in the interval, leaving the half bound to bytes that no longer exist at HEAD. This is the third independent re-measurement, not an inherited result.",
+      "expected_landed": "rev-parse HEAD:<packet> and hash-object <packet> both equal the signed blob 716925a28e, and the half file is unmoved",
+      "expected_not_landed": "a moved blob (the half is stale against HEAD) or a moved half (a different verdict applies)",
+      "observed": "both reads 716925a28e88cf24e5ba7206edc5bc6e920fe471, unchanged; half unmoved at da885deef2, Verdict GIVEN; sibling packet e8aa773790, so the read discriminates. The half signs FIVE LEGS and names no window number, so window 8 is inside the signed act.",
+      "status": "PASS"
+    },
+    "grant_close_was_arithmetic_this_window_and_the_reader_deadline_was_stated_exactly": {
+      "description": "Window 7 had only a PRESENCE read of the principal, forcing this seat to derive the grant close as an upper bound. This window the issuer relayed a MEASURED put time with the GO, so the deadline is arithmetic from the start. The ordering still favours the writer: the W2 bound falls AFTER the grant close, so the constraint lands on the READER.",
+      "expected_landed": "the close is computable as put + 30min, and the reader is told that figure rather than the W2 bound",
+      "expected_not_landed": "pacing the reader off the W2 bound, which is later than the grant close and would invite a read against an expired grant",
+      "observed": "put 07:08:28Z -> close 07:38:28Z. T0 07:12:54Z -> W2 bound 07:42:54Z, which is 4m26s LATER than the close. The W1 report at 07:13:19Z told the issuer to pace off 07:38:28Z and explicitly not off 07:42:54Z. R done arrived 07:13:59Z, 65s after T0, so the deadline was never approached.",
+      "status": "PASS"
+    },
+    "read_instrument_discriminates_present_from_absent": {
+      "description": "A get-item that always answers would read 'cottonwood' for reasons unrelated to the restore. The same call was run, as a separate invocation, against a key that does not exist.",
+      "expected_landed": "the real key returns an Item; the non-existent key returns no Item",
+      "expected_not_landed": "both keys returning an Item, which would make the positive read uninformative",
+      "observed": "USER#svc-irpt-analysis@opalinvest.com/PROFILE returns the Item; USER#svc-irpt-analysis-NOSUCHUSER9999@opalinvest.com/PROFILE returns no Item",
+      "status": "PASS"
+    },
+    "type_tag_shape_checked_against_the_st28_trap": {
+      "description": "allowedFirmIds is the attribute whose .L read returned an empty list BY CONSTRUCTION during st28. A restore confirmed through the wrong shape would certify nothing.",
+      "expected_landed": "the type tag prints as S (scalar string)",
+      "expected_not_landed": "an L tag, or an empty list, which is the st28 reading",
+      "observed": "{S: cottonwood}",
+      "status": "PASS"
+    },
+    "w2_fired_only_on_an_r_done_that_names_this_order": {
+      "description": "This seat now holds several live orders from the same issuer, and 'R done' is a recurring subject line. Firing the restore on the wrong window's reply would swap a row that another window was mid-read on.",
+      "expected_landed": "the W2 invocation executes only inside a machine-checked test that the delivered message names TO-APPLY-sr3",
+      "expected_not_landed": "firing on subject-line recognition or on the mere arrival of an inbox event",
+      "observed": "W2 ran inside a `grep -q 'TO-APPLY-sr3'` guard against the delivered R-done file (msg 4356), which names the order path explicitly. The guard printed its branch before the act, so the decision is in the record.",
+      "status": "PASS"
+    },
+    "w1_and_w2_conditions_fired_on_correct_reads": {
+      "description": "swap_svc_firm.py writes only when the row reads exactly the <from> firm, service and active, so a REFUSED line would mean nothing moved and the window would be a no-op wearing a success.",
+      "expected_landed": "rc=0 on both legs with the before/after pair the direction implies, and no REFUSED line in either output",
+      "expected_not_landed": "'REFUSED: the row does not read allowedFirmIds=...' with rc=1 on either leg",
+      "observed": "W1 rc=0 cottonwood -> 49financial; W2 rc=0 49financial -> cottonwood; no REFUSED line in either output",
+      "status": "PASS"
+    }
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R7.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-sr3.served-read-window-8-section-census-dell2.md",
+    "vintage_commit": "d5e3459acbd4a4ebc08a20d0e2d300f2f0f0dd21"
+  },
+  "declared_exclusions": [
+    {
+      "item": "the secret resource-policy state on irpt/svc-irpt-analysis/password was not read by this seat, at either end of the window",
+      "reason": "the order's bounds say no secret read and its preflight declares comp-iam NOT-APPLICABLE because the policy legs are the laptop's. S+ : ADD put 07:08:28Z (msgs 4343, 4373). S- : REMOVE put 07:16:18-07:16:19Z by laptop 0.7.0_AE_CloudOps~CTL with a SET-EQUAL read-back at 07:16:21Z (MSTR msg 4366), corroborated by the issuer's read at 07:19:09Z. TWO reads this window, against THREE in window 7 -- a real difference in corroboration depth, recorded rather than smoothed over. All of them reach this seat through 2.0.0_SA_COO~G2, so the instruments are independent while the carrier is single."
+    },
+    {
+      "item": "the 257-section count from R",
+      "reason": "this is the round-8 section census the window exists to enable, and it is the READER's number. This seat makes no owner read and holds no instrument that can see a section count, so 257 is HELD on the issuer's report (msg 4356). Whether 257 is the right census for cell YCD-c-8 is the issuer's and the CVO's grade, not this seat's."
+    },
+    {
+      "item": "whether the read settles cell YCD-c-8 or grades FWD-1",
+      "reason": "CTO half condition 5 is explicit that R's 200 is evidence for FWD-1 and not its grade; FWD-1 is graded at the round analysis on the CVO's slug. This seat records only that the window given was 30 minutes and was not extended."
+    }
+  ],
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/r7/NEVER_WIDEN_PACKET_SERVED_READ_WINDOW.md, blob 716925a28e -- COO half SIGNED in the packet. The packet's own '## CTO HALF' section still reads '(owed)' at HEAD; that section is NOT the instrument, the separate half file is. THREE windows have now each paid the same re-derivation to establish that, and it has been raised with the issuer twice.",
+    "cto_half": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_SERVED_READ_WINDOW_CTO_HALF.md @da885deef2, Verdict GIVEN for exactly five legs under conditions 1 to 5; signed against packet blob 716925a28e, RE-MEASURED for this window and unchanged. Condition 4 admits an MSTR-seated CloudOps lane as substitute operator, which is this lane. The read this window is the round-8 section census per CTO round-8 analysis @fe73849335 section 3 item 3."
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "WORLD",
+  "rollback": "W2 is itself the rollback for W1, and it runs in every branch of R -- R done, R failed, or no R -- bounded at T0+30min. Executed: T0 07:12:54Z, bound 07:42:54Z, W2 fired 07:15:31Z on the issuer's R-done rather than on the clock, and inside the grant's 07:38:28Z close. Restored state confirmed by an independent ConsistentRead get-item with an absent-key control, not the tool's echo.",
+  "schema_version": "1.0",
+  "scope": "WINDOW 8: window 6's act again for the SECTION CENSUS of round 8 cell YCD-c-8 (CTO round-8 analysis @fe73849335 section 3 item 3) -- ONE read of REQ-5e4149d2's analysis-report sections by 2.0.0_SA_COO~G2. Two conditional writes on svc-irpt-analysis's PROFILE allowedFirmIds: W1 cottonwood -> 49financial, then W2 back. Write surface: ONE opal-users-v2 item. The laptop secret ADD and REMOVE are the laptop executor's legs, routed cross-box by MSTR, and are NOT this seat's acts.",
+  "session_log": "org/critical_paths/change_management/20261011T0712Z_irpt-ycdgen-served-read-w8_deploy_completion.md",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-sr3.served-read-window-8-section-census-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "673de3e606"
+  },
+  "surprises": [
+    "IRPT_YCDGEN-D2-S25: RECURRED A THIRD TIME, as the row predicts -- no new row filed, because this is the same finding already carried. W2's BEFORE-updatedAt 2026-10-11T07:13:53.579Z carries 3-decimal milliseconds where swap_svc_firm.py emits 6-decimal microseconds; it is the issuer's 07:13:5xZ login for the GET, which /auth/login stamps on the row. The issuer folded the row into this order, so the continuity claim here is stated on allowedFirmIds (before-read cottonwood, the state window 7's W2 left and the state W1 requires). Carrier org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md. Effect on this order: none."
+  ],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-sr3.served-read-window-8-section-census-dell2"
+}
