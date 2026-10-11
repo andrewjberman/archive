@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t33",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t33.remaining-cells-trading-days-complete.md",
+    "group": "OTHER",
+    "vintage_commit": "477921e3dc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "477921e3dc",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t33.remaining-cells-trading-days-complete.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~26",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_quote.py",
+      "kind": "script",
+      "commit_or_etag": "00ca5a6f1e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-MDPF_DEMQUE-26 only (LOCAL). Trading-day history cells, drawn_to_date remaining-cells quote, --actuals, COMPLETE outcome. No served path is changed by this order; the real re-freeze of the TR request is the issuer's act.",
+      "artifact_covered_by": ["DQ9-t33-AC1", "DQ9-t33-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/quote_vs_actual.py",
+      "kind": "script",
+      "commit_or_etag": "00ca5a6f1e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-MDPF_DEMQUE-26 only. A COMPLETE line closes the request: the earlier of the COMPLETE date and the coverage date is drawn_date. The AC2 run prints both superseded finishes (2026-10-17, 2026-10-13) with verdict OPEN.",
+      "artifact_covered_by": ["DQ9-t33-AC1", "DQ9-t33-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/refreeze.py",
+      "kind": "script",
+      "commit_or_etag": "00ca5a6f1e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-MDPF_DEMQUE-26 only. A chained re-freeze is allowed under a different reason and writes the next free superseded name; the same reason returns ALREADY_REFROZEN. The AC2 run on a scratch copy writes a second superseded file.",
+      "artifact_covered_by": ["DQ9-t33-AC1", "DQ9-t33-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_quote_remaining.py",
+      "kind": "test",
+      "commit_or_etag": "00ca5a6f1e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, committed with its producers. The four named tests PASSED (4 of 4); tmp_path only, no network. The mutant control (trading days replaced by weekdays) FAILED the history test, 1 failed 3 passed.",
+      "artifact_covered_by": ["DQ9-t33-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "00ca5a6f1e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows MDPF_DEMQUE-D1-W26-S1 to S4 appended (OBSERVATION, INERT, UNDER_INVESTIGATION); the file's array parses with 40 unique ids and no existing row was edited. The one-writer gate printed a WARN for the unsuffixed file name; the order names this file, so it was appended as named."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t33-AC1",
+      "criterion_verbatim": "`DQ9-t33-AC1` -- the four named tests.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t33_tests.py",
+      "output_evidence": "QR-OK (rc=0). pytest on data/mdpf/scripts/demque/test_demque_quote_remaining.py: test_requote_of_a_partly_drawn_request_prices_the_remaining_cells PASSED; test_history_cells_are_priced_on_trading_days PASSED; test_complete_row_closes_the_request_and_sets_the_drawn_date PASSED; test_refreeze_chains_a_second_superseded_quote PASSED; 4 passed. Full folder: python -m pytest data/mdpf/scripts/demque -q: 115 passed (111 pre-existing unedited plus 4 new).",
+      "denominator": "4 of 4 named tests PASSED; 115 of 115 folder tests PASSED",
+      "status": "PASS",
+      "expect": "QR-OK"
+    },
+    {
+      "criterion_id": "DQ9-t33-AC2",
+      "criterion_verbatim": "`DQ9-t33-AC2` -- the REAL TR request in scratch copies: re-quoted at 2026-10-11 with the ledger through that day it prices the full request on trading days, reports `cells_remaining` = cells minus 11,716 drawn, finishes 2026-10-17 and carries the label; a chained re-freeze writes a second superseded file and `quote_vs_actual` prints both superseded finishes (OPEN).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t33_real.py",
+      "output_evidence": "QR-REAL-OK (rc=0). Re-quote line (bbg_quote.py --quote on the real request file, read only, with a scratch ledger through 2026-10-11): {\"cells\": {\"bloomberg_history\": 15120}, \"cells_remaining\": 3404, \"finish_date\": \"2026-10-17\", \"label\": \"remaining-cells quote: 11716 of 15120 already drawn\"}. Chained re-freeze on a scratch copy: second superseded file written; quote_vs_actual verdict OPEN with superseded finishes 2026-10-17 and 2026-10-13.",
+      "denominator": "7 of 7 arms PASS (cells, remaining, finish, label, second_superseded, supersedes_new, qva_both); cells 15120 = 1260 trading days x 2 fields x 6 securities",
+      "status": "PASS",
+      "expect": "QR-REAL-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In a scratch copy of the demque folder and lib/ (.scratch/mutant, uncommitted) replace the trading-day count in _trading_days with the weekday count, then run the four named tests.",
+      "expected": "The history-cells test fails (the trading-day count of a Thanksgiving week is 4, not 5), the other three pass.",
+      "observed": "1 failed, 3 passed: test_history_cells_are_priced_on_trading_days AssertionError {'bloomberg_history': 5} == {'bloomberg_history': 4}",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of dq_t33_tests.py and dq_t33_real.py compared (output identical modulo the pytest timing line)",
+      "observed": "AC1 run1 and run2 rc=0 QR-OK; AC2 run1 and run2 rc=0 QR-REAL-OK with the same line",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No Bloomberg call, no AWS write, no deploy. The real requests folder and the real ledger were read only; AC2 ran on scratch copies. The real re-freeze of the TR request is not run.",
+      "reason": "The order bounds these out (Bounds: the real re-freeze is the issuer's act)."
+    },
+    {
+      "item": "test_demque_bbg.py is unedited.",
+      "reason": "Its only history assertion covers 2026-10-05..2026-10-11, a week with no NYSE holiday, so trading days equal weekdays (5); the order's amendment clause did not bind. The folder passes unedited."
+    },
+    {
+      "item": "The drawn_today channel filter and the model_block refusal are judgment choices outside the order's text.",
+      "reason": "Filed as surprise rows MDPF_DEMQUE-D1-W26-S2 and S3 (OBSERVATION, INERT) rather than resolved by edit."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W26-S1: refreeze.py prices the full request from as_of with 0 drawn; the AC2 re-freeze at --as-of 2026-10-11 reads finish 2026-10-18 for 15120 cells with 11716 drawn, where the remaining-cells quote reads 2026-10-17.",
+    "MDPF_DEMQUE-D1-W26-S2: bbg_quote.quote() refuses a model_block request with drawn_to_date above 0 (ValueError); the order names no remaining-cells rule for model_block.",
+    "MDPF_DEMQUE-D1-W26-S3: the CLI drawn_today filters ledger lines on the REQUEST channel, not the literal history; identical for the TR request.",
+    "MDPF_DEMQUE-D1-W26-S4: quote_vs_actual takes the EARLIER of a COMPLETE date and the coverage date; the literal reading would flip an on-time request to LATE when COMPLETE lands after the finish."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t33.remaining-cells-trading-days-complete.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/mdpf/scripts/demque -q -p no:cacheprovider",
+      "result": "115 passed (111 pre-existing, all unedited, plus the 4 new named tests); baseline before edits was 111 passed."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~26 <0.9.0_WK_MDPF_DEMQUE~26@opal.agent>\" -F <msgfile> -- <five paths>",
+      "result": "committed 00ca5a6f1e; commit-gate, naming-gate, to-pipeline-gate, surprise-row-gate (4 new rows, 0 failures new) and missions-tree-check passed; one-writer WARN on the unsuffixed investigation file recorded above."
+    }
+  ]
+}
