@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t31",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t31.standing-extension-to-frontier.md",
+    "group": "OTHER",
+    "vintage_commit": "477921e3dc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "477921e3dc",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t31.standing-extension-to-frontier.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~24",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/extend_frontier.py",
+      "kind": "script",
+      "commit_or_etag": "4234a2dcb2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-MDPF_DEMQUE-24 only (safe-commit; commit-gate, naming gate and surprise-row gate clean, msg-verify MATCH). plan() reads the locked CUSIPs through price_store.index and the frontier through trading_calendar.expected_last_trading_day; apply() writes ONE Z-STANDING-T1-EXTEND.json and resets exactly the plan symbols with redraw_stale.reset_pacer. apply was NOT run: no served, pacer or queue state touched.",
+      "artifact_covered_by": ["DQ9-t31-AC1", "DQ9-t31-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_extend_frontier.py",
+      "kind": "test",
+      "commit_or_etag": "4234a2dcb2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed with extend_frontier.py. Local store under tmp_path, pacer JSON and queue in tmp_path, no network, no S3. The three named tests PASSED (3 of 3).",
+      "artifact_covered_by": ["DQ9-t31-AC1"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/run_daily_draw.sh",
+      "kind": "script",
+      "commit_or_etag": "4234a2dcb2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "extend_frontier.py --apply runs before the daily_draw.py line with the script's own failure line (ERROR: extension rc=N, exit 1). bash -n syntax-checked by commit-gate. Ordering is graded by the named test test_run_daily_draw_runs_the_extension_before_the_draw (PASSED). The schedule is not changed.",
+      "artifact_covered_by": ["DQ9-t31-AC1"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/daily_draw.py",
+      "kind": "script",
+      "commit_or_etag": "4234a2dcb2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "lock.check now receives trades_through, computed per CUSIP from that name's own trade-price rows (lock.trades_through of trades renamed to Trade_Date); a name with no trade rows passes none. No other change. Not run against the store. Covered by the directory run of the existing demque tests (117 of 117 PASSED), not by a named criterion.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "4234a2dcb2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row MDPF_DEMQUE-D1-W24-S1 appended (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Q1, UNDER_INVESTIGATION). surprise-row-gate passed: 1 new row of 37 total. The one-writer WARN (unsuffixed file written from dell1, per-box file WARN until C-QUEUE) is recorded, not a block."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t31-AC1",
+      "criterion_verbatim": "DQ9-t31-AC1 -- the three named tests: test_plan_window_ends_at_the_expected_last_trading_day_and_lists_every_locked_symbol (a Sunday gives the prior Friday; a trading Monday gives itself), test_apply_resets_exactly_the_plan_symbols_and_replaces_the_standing_request_file (other pacer symbols and day/count unchanged; the request passes demand_queue.validate; a second apply leaves ONE file), test_run_daily_draw_runs_the_extension_before_the_draw (the extend_frontier.py --apply line precedes the daily_draw.py line).",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t31_tests.py",
+      "output_evidence": "3 passed (pytest over test_demque_extend_frontier.py); XF-OK; rc=0. Named PASSED lines: test_plan_window_ends_at_the_expected_last_trading_day_and_lists_every_locked_symbol, test_apply_resets_exactly_the_plan_symbols_and_replaces_the_standing_request_file, test_run_daily_draw_runs_the_extension_before_the_draw. Directory run of test_demque_*.py: 117 passed.",
+      "denominator": "3 of 3 named tests PASSED; 117 of 117 demque tests in the directory PASSED",
+      "status": "PASS",
+      "expect": "XF-OK"
+    },
+    {
+      "criterion_id": "DQ9-t31-AC2",
+      "criterion_verbatim": "DQ9-t31-AC2 -- --plan on the REAL served store (S3 read only): --today 2026-10-12 ends 2026-10-12, --today 2026-10-11 ends 2026-10-09, symbols equals the check's own count (141), start the earliest valid_from.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t31_plan.py",
+      "output_evidence": "independent: symbols=141 earliest_valid_from=2013-04-08; monday: {\"cells\": 497166, \"end\": \"2026-10-12\", \"finish_date\": \"2026-10-12\", \"frontier\": \"2026-10-12\", \"request_id\": \"STANDING-T1-EXTEND\", \"start\": \"2013-04-08\", \"symbols\": 141}; sunday: {\"cells\": 497025, \"end\": \"2026-10-09\", \"finish_date\": \"2026-10-12\", \"frontier\": \"2026-10-09\", \"request_id\": \"STANDING-T1-EXTEND\", \"start\": \"2013-04-08\", \"symbols\": 141}; XPLAN-OK n=141; rc=0. The tool at its own path printed the same two lines.",
+      "denominator": "4 of 4 arms PASS (monday_end, sunday_end, symbols 141 = 141 = 141, start 2013-04-08); 141 CUSIP prefixes with both prices.parquet and lock.json",
+      "status": "PASS",
+      "expect": "XPLAN-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In a scratch copy (.scratch/mutant_dq31, uncommitted) disable the pacer reset in apply (n_reset = 0), loaded by path after the real siblings, then run the named apply test.",
+      "expected": "test_apply_resets_exactly_the_plan_symbols_and_replaces_the_standing_request_file fails at the reset and symbol-set assertions.",
+      "observed": "MUTANT FIRED-AS-EXPECTED: AssertionError at assert first[\"symbols\"] == 2 and first[\"reset\"] == 2 and first[\"frontier\"] == \"2026-10-09\". The same harness on the real module PASSED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two identical runs of pytest over test_demque_extend_frontier.py, same worktree and inputs; the plan reads the real store and the apply writes only under tmp_path.",
+      "observed": "run 1: 3 passed; run 2: 3 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "apply was never run against the real home (~/.opal/demque or OPAL_DEMQUE_HOME), the served store, or the real pacer and queue.",
+      "reason": "The order makes --apply the issuer's act; the served apply is HELD for the CTO's word (INVESTIGATION_v1 MDPF_DEMQUE-D1-S11). The daily draw was not run."
+    },
+    {
+      "item": "No AWS write, no Bloomberg call, no Yahoo call, no deploy, no schedule change.",
+      "reason": "The order bounds these out. The AC2 S3 reads are read-only index reads through the existing price_store path."
+    },
+    {
+      "item": "The standing request is not drawn daily as ruled: demand_queue.draw skips a request id that already has a DRAWN ledger row.",
+      "reason": "Surprise MDPF_DEMQUE-D1-W24-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Q1). demand_queue.py is outside this grant and the request id is pinned by the order, so the defect is filed, not worked around. The criteria do not exercise the draw."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W24-S1: demand_queue.draw skips the standing request (fixed id STANDING-T1-EXTEND) once its ledger row is DRAWN, so the daily extension would run once and then go silent; BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Q1. Scratch probe: fetch calls on day 2 = 0."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t31.standing-extension-to-frontier.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider test_demque_*.py (cwd data/mdpf/scripts/demque)",
+      "result": "117 passed; the named file test_demque_extend_frontier.py 3 passed on two identical runs (determinism control)."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~24 <0.9.0_WK_MDPF_DEMQUE~24@opal.agent>\" -F .scratch/msg_dq31.txt -- <five t31 paths>",
+      "result": "rc=0; commit-gate All checks passed (bash -n on run_daily_draw.sh); surprise-row-gate OK 1 new row of 37; committed 4234a2dcb2 on wk-MDPF_DEMQUE-24."
+    }
+  ]
+}
