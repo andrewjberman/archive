@@ -17,7 +17,11 @@ dropped) share at least one token of two or more letters; a pair that shares non
        a `name` and a `security_key` the crosswalk registers a name for is judged by the same token rule against that registered name; a row whose name is a
        different company is counted (the base reads 2: row `SAN_FP_Equity` of TRENDING/PRICE and of BREAKOUT/PRICE, 'Banco Santander S.A.'). The list's row
        count and the rows judged are printed beside the number.
-Verdict: R94 NAME CENSUS: YES|NO (exit 0|1) -- YES only when C1 and C3 both read 0 with a non-zero denominator.
+    C4 (round 94 amendment 3) the rank timeseries: for each ranked list's tickers, `/lead-panel/timeseries/{movement}/{subject}?tickers=...` serves a `name` per
+       series from the table by bare ticker; a series whose ticker matches a covered security key (`scoped_amgt._covered_bloomberg_index`, the exact match the
+       ranked join uses) that has a registered name is judged by the same token rule. The base reads 2: SAN FP in TRENDING/PRICE and BREAKOUT/PRICE ('Banco
+       Santander S.A. ADR').
+Verdict: R94 NAME CENSUS: YES|NO (exit 0|1) -- YES only when C1, C3 and C4 all read 0 with a non-zero denominator.
 """
 import argparse
 import json
@@ -48,7 +52,7 @@ def served_deployed(key):
 
 def ranked_rows(where):
     """[(combo, security_key, name)] for every row of every ranked list, from the live function or the checkout's own handler."""
-    out, sizes = [], {}
+    out, sizes, tickers_by_combo = [], {}, {}
     for movement in scoped_amgt.MOVEMENTS:
         for subject in scoped_amgt.SUBJECTS:
             event = {"rawPath": "%s/lead-panel/rankings/%s/%s" % (PREFIX, movement, subject), "queryStringParameters": None,
@@ -59,9 +63,28 @@ def ranked_rows(where):
                 r = scoped_amgt.handler(event)
             rows = (json.loads(r.get("body") or "{}")).get("rows") or []
             sizes["%s/%s" % (movement, subject)] = len(rows)
+            tickers_by_combo[(movement, subject)] = [row.get("ticker") for row in rows if row.get("ticker")]
             for row in rows:
                 out.append(("%s/%s" % (movement, subject), row.get("security_key"), row.get("name")))
-    return out, sizes
+    return out, sizes, tickers_by_combo
+
+
+def series_names(where, tickers_by_combo):
+    """[(combo, ticker, name)] of every series of every rank timeseries read for the tickers a ranked list holds."""
+    out = []
+    for (movement, subject), tickers in sorted(tickers_by_combo.items()):
+        if not tickers:
+            continue
+        event = {"rawPath": "%s/lead-panel/timeseries/%s/%s" % (PREFIX, movement, subject),
+                 "queryStringParameters": {"tickers": ",".join(tickers)},
+                 "requestContext": {"http": {"method": "GET"}}, "headers": {"x-firm-id": "opal"}}
+        if where == "deployed":
+            r = json.loads(_LAM.invoke(FunctionName=FN, Payload=json.dumps(event).encode())["Payload"].read())
+        else:
+            r = scoped_amgt.handler(event)
+        for series in (json.loads(r.get("body") or "{}")).get("series") or []:
+            out.append(("%s/%s" % (movement, subject), series.get("ticker"), series.get("name")))
+    return out
 
 
 def main():
@@ -118,7 +141,7 @@ def main():
         print("   DIFFERENT %-18s served=%r registered=%r" % d)
     ok = wrong == 0 and judged > 0
     print("%s C1 no served subject name is another company's (%d)" % ("PASS" if ok else "FAIL", wrong))
-    rows, sizes = ranked_rows(args.where)
+    rows, sizes, tickers_by_combo = ranked_rows(args.where)
     r_judged, r_wrong = 0, []
     for combo, key, name in rows:
         reg = registered.get(key)
@@ -136,6 +159,25 @@ def main():
     ranked_ok = len(r_wrong) == 0 and r_judged > 0
     print("%s C3 no ranked row's name is another company's (%d of %d judged)" % ("PASS" if ranked_ok else "FAIL", len(r_wrong), r_judged))
     ok = ok and ranked_ok
+    index = scoped_amgt._covered_bloomberg_index()
+    s_rows = series_names(args.where, tickers_by_combo)
+    s_judged, s_wrong = 0, []
+    for combo, ticker, name in s_rows:
+        reg = registered.get(index.get(ticker))
+        if not (name and reg):
+            continue
+        s_judged += 1
+        clean = scoped_amgt._clean_display_name(reg)
+        if str(name).strip().lower() == str(clean).strip().lower() or tokens(name) & tokens(clean) or tokens(name) & tokens(reg):
+            continue
+        s_wrong.append((combo, ticker, name, reg))
+    print("   rank timeseries (%s): series %d | judged against a registered name %d | DIFFERENT company %d" % (
+        args.where, len(s_rows), s_judged, len(s_wrong)))
+    for w in s_wrong:
+        print("   DIFFERENT series %-10s %-16s served=%r registered=%r" % (w[1], w[0], w[2], w[3]))
+    series_ok = len(s_wrong) == 0 and s_judged > 0
+    print("%s C4 no rank series name is another company's (%d of %d judged)" % ("PASS" if series_ok else "FAIL", len(s_wrong), s_judged))
+    ok = ok and series_ok
     print("R94 NAME CENSUS: %s" % ("YES" if ok else "NO"))
     return 0 if ok else 1
 
