@@ -18,35 +18,46 @@
   "tolerance": "0.35 percentage points between the custodian gross return (custodian time-weighted return grossed up by fees over the daily-mean served value, the ~35 v2 construction) and the restated served return; TOL_PP = 0.35 in the same scripts; UNCLASSED_90.json method.return_test",
   "dollars_tie": "each of the four items (beginning value, ending value, net additions, net gains) ties within max(1 dollar, 0.1 percent of the larger): UNCLASSED_90.json method.dollar_tie",
   "flow_days_tie": "the set of days on which the custodian transaction rows carry an external flow (by return date, day sums above half a cent) equals the set of served flow days: as ~120 x1_crosstab.py dates_same; CONTESTED_51.json date_sets_ledger_vs_served",
-  "what_dollars_and_flow_days_tying_means_here": "the four aggregates tie and the day SETS are equal. It does not require each day's amount to reproduce; that stronger test (234 of 235 flow days, 50 of 51 segments, DB-b-142 as quoted in CONTESTED_51_MEANING.json) is reported, not made a condition. The one segment with a day that does not reproduce carries an administrative expense row; under either reading it stays RECONCILES_YES and TIMING_NOT_DETERMINED (both START and MID close)."
+  "what_dollars_and_flow_days_tying_means_here": "the four aggregates tie and the day SETS are equal. It does not require each day's amount to reproduce; that stronger test (234 of 235 flow days, 50 of 51 segments, DB-b-142 as quoted in CONTESTED_51_MEANING.json) is reported, not made a condition. The one segment with a day that does not reproduce carries an administrative expense row; under either reading it stays RESTATED_CLOSES_UNDER_OTHER_TIMING and TIMING_NOT_DETERMINED (both START and MID close)."
  },
- "new_tokens": ["RECONCILES_YES", "RECONCILES_NO", "TIMING_START", "TIMING_MID", "TIMING_END", "TIMING_NOT_DETERMINED"],
- "spelling_style": "UPPER_SNAKE, as the tie-out's existing cause classes (FLOW_TIMING_CONVENTION_DOLLARS_TIE, BD_ACCRUED_INCOME_IN_VALUES_AND_GAINS, EVENT_DATE_SETS_DIFFER, ZERO_GAIN_BOTH_SIDES_UNDER_ONE_DOLLAR in UNEXPLAINED_244.json and UNCLASSED_90.json). The axis prefix (RECONCILES_, TIMING_) is carried so a value is never read as the other axis's.",
+ "new_tokens": ["RESTATED_CLOSES_UNDER_OTHER_TIMING", "RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING", "TIMING_START", "TIMING_MID", "TIMING_END", "TIMING_NOT_DETERMINED"],
+ "superseded_tokens": {
+  "tokens": ["RECONCILES_YES", "RECONCILES_NO"],
+  "retired_by": "1.0.0_SA_CTO~DELL2 msg 5886 (2026-10-11 ~21:40Z)",
+  "why": "END is the SERVED convention, and END closes in 0 of 51. So no segment's served return closes against the custodian's; what closes is a RESTATEMENT under START or MID. RECONCILES_YES would be read as 'our number matches'. It does not. Nothing served is relabelled.",
+  "replaced_by": {"RECONCILES_YES": "RESTATED_CLOSES_UNDER_OTHER_TIMING", "RECONCILES_NO": "RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING"},
+  "reason_for_the_chosen_tokens": "Each token carries RESTATED (what was done to the return) and OTHER_TIMING (the served timing, END, is not the one that closes), so a reader meeting the token alone cannot read it as the served number matching; the lead RESTATED also keeps the axis apart from the TIMING axis, whose name and values lead with TIMING. The negative says DOES_NOT_CLOSE rather than a bare NO, so it is not read as a label of disagreement with the served number (the served END closes in none of the 51; a segment whose only closing timing is END would also fall here).",
+  "alternative_rejected": "RESTATED_CLOSE_YES and RESTATED_CLOSE_NO: a trailing YES or NO is the very shape the ruling objected to (a reader takes the last word and reads 'closes: yes' as 'matches'), and neither names the timing that is not the served one. Also rejected, CLOSES_ONLY_WHEN_RESTATED: false for a segment that closed under END and under START together.",
+  "claim": "the retirement is the CTO's ruling (held); the replacement tokens are a proposal"
+ },
+ "amended_by": {"to": "IRPT_DASHBD.TO-DB-b-155", "worker": "0.9.0_WK_IRPT_DASHBD~121", "what": "first axis renamed from RECONCILES to RESTATED_CLOSE and its two values replaced, per the ruling above; no count and no placement changed; no segment recomputed; the earlier order's proof instance is untouched", "tokens_in_the_record_before": ["RECONCILES_YES", "RECONCILES_NO"]},
+ "spelling_style": "UPPER_SNAKE, as the tie-out's existing cause classes (FLOW_TIMING_CONVENTION_DOLLARS_TIE, BD_ACCRUED_INCOME_IN_VALUES_AND_GAINS, EVENT_DATE_SETS_DIFFER, ZERO_GAIN_BOTH_SIDES_UNDER_ONE_DOLLAR in UNEXPLAINED_244.json and UNCLASSED_90.json). The axis prefix (RESTATED_, TIMING_) is carried so a value is never read as the other axis's.",
  "axes": [
   {
-   "name": "RECONCILES",
-   "question": "Does the segment's return close against the other system's, with its dollars and flow days tying?",
+   "name": "RESTATED_CLOSE",
+   "question": "When the segment's return is restated under an admitted flow timing other than the served one (START or MID; END is the served convention), does the restated return close against the other system's return within tolerance, with the dollars and flow days tying?",
    "domain": "tie-out segments whose dollars and flow days were read on both sides",
-   "values": ["RECONCILES_YES", "RECONCILES_NO"],
+   "domain_changed_by_the_rename": "no: the set is the same 90 segments by the same membership rule. What changes is the condition: a close under END alone no longer counts (END is the served convention). No segment of the 90 is moved by that: END closes in 0 of the 51, and the 39 outside the first value fail the four-item dollar tie in every case (0 of 31, 0 of 8), so none of them could have entered it by an END close.",
+   "values": ["RESTATED_CLOSES_UNDER_OTHER_TIMING", "RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING"],
    "value_meaning": {
-    "RECONCILES_YES": "the return closes within 0.35 pp under at least one of START, MID, END; AND the four dollar items tie; AND the flow-day sets are equal",
-    "RECONCILES_NO": "the segment is in the domain and at least one of those three conditions fails"
+    "RESTATED_CLOSES_UNDER_OTHER_TIMING": "the return restated under START or MID closes within 0.35 pp; AND the four dollar items tie; AND the flow-day sets are equal. It is never a statement that the served number matches: the served convention is END, and END closes in 0 of the 51",
+    "RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING": "the segment is in the domain and at least one of those three conditions fails: no restatement under START or MID closes, or the four items do not all tie, or the flow-day sets differ"
    },
-   "claim_field": "reconciles_claim",
-   "claim_by_value": {"RECONCILES_YES": "measured", "RECONCILES_NO": "measured"},
-   "consumer_rule": "a consumer rejects any RECONCILES_* row whose reconciles_claim is not measured",
+   "claim_field": "restated_close_claim",
+   "claim_by_value": {"RESTATED_CLOSES_UNDER_OTHER_TIMING": "measured", "RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING": "measured"},
+   "consumer_rule": "a consumer rejects any row holding a RESTATED_CLOSE value whose restated_close_claim is not measured",
    "domain_size_now": 90,
    "domain_membership_rule": "a segment is in the domain when a two-sided dollar read (custodian point for the range against the served daily series) and a flow-day comparison exist for it; today that is the 90 segments of worker 108's table"
   },
   {
    "name": "TIMING",
    "question": "Which flow timing did the other system use?",
-   "domain": "segments that reconcile (RECONCILES = RECONCILES_YES)",
+   "domain": "segments whose restated return closes under another timing (RESTATED_CLOSE = RESTATED_CLOSES_UNDER_OTHER_TIMING)",
    "values": ["TIMING_START", "TIMING_MID", "TIMING_END", "TIMING_NOT_DETERMINED"],
    "value_meaning": {
     "TIMING_START": "exactly one admitted timing closes and it is START",
     "TIMING_MID": "exactly one admitted timing closes and it is MID",
-    "TIMING_END": "exactly one admitted timing closes and it is END (no member today: END closes in 0 of the 51)",
+    "TIMING_END": "exactly one admitted timing closes and it is END (no member: END closes in 0 of the 51, and by construction of the renamed domain, which requires a close under START or MID, no member can exist; the ruling keeps the token, and the empty value is filed as a row)",
     "TIMING_NOT_DETERMINED": "more than one admitted timing closes; the data cannot say, and that is the final answer for the segment, not a contest and not a class of disagreement"
    },
    "claim_field": "timing_claim",
@@ -58,36 +69,43 @@
  ],
  "postulates": {
   "mece": {
-   "finding": "MECE over each declared domain, by subtraction from the printed denominators, with 0 uncovered. 244 = 90 in the RECONCILES domain + 154 outside it. 90 = 51 RECONCILES_YES + 39 RECONCILES_NO. 51 = 4 (exactly one timing closes: TIMING_START 3, TIMING_MID 1, TIMING_END 0) + 47 TIMING_NOT_DETERMINED. Inside the TIMING domain the count of closing timings is 1, 2 or 3 (RECONCILES_YES requires at least 1), so 'exactly one' (three values, one per admitted timing) and 'more than one' (one value) leave nothing over. The 185 classed: 154 are outside the RECONCILES domain (no two-sided dollar read exists for them: their classes were set from event-date and day-count tests, UNEXPLAINED_244.json classes) and 31 (the accrual class) are RECONCILES_NO. The 8 unclassed are RECONCILES_NO. On the TIMING axis none of the 185, 8 or 39 applies (outside the domain: TIMING is asked only of segments that reconcile).",
-   "evidence": "y1_place.py output (counts only): domain 90 = {51, 31, 8}; four dollar items tie 51 / 0 / 0; flow-day sets equal 51 / 30 / 8; RECONCILES rule met 51 / 0 / 0; closing timings START 50, MID 48, END 0 of 51; set of closing timings START+MID 47, START 3, MID 1. Sources of the 244, 154, 185, 31, 8, 90: UNEXPLAINED_244.json (sum_check 154 + 90 = 244), UNCLASSED_90.json (sum_check 82 + 8 = 90; classes 31 + 51), CONTESTED_51.json tieout_state (classed 185 = 154 + 31)."
+   "finding": "MECE over each declared domain, by subtraction from the printed denominators, with 0 uncovered. 244 = 90 in the RESTATED_CLOSE domain + 154 outside it. 90 = 51 RESTATED_CLOSES_UNDER_OTHER_TIMING + 39 RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING. 51 = 4 (exactly one timing closes: TIMING_START 3, TIMING_MID 1, TIMING_END 0) + 47 TIMING_NOT_DETERMINED. Inside the TIMING domain the count of closing timings is 1, 2 or 3 (RESTATED_CLOSES_UNDER_OTHER_TIMING requires at least 1, and a close under START or MID among them), so 'exactly one' (three values, one per admitted timing, of which TIMING_END is empty by construction) and 'more than one' (one value) leave nothing over; in the 51 the count is 1 or 2, END closing in none. The 185 classed: 154 are outside the RESTATED_CLOSE domain (no two-sided dollar read exists for them: their classes were set from event-date and day-count tests, UNEXPLAINED_244.json classes) and 31 (the accrual class) are RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING. The 8 unclassed are RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING. On the TIMING axis none of the 185, 8 or 39 applies (outside the domain: TIMING is asked only of segments that reconcile).",
+   "evidence": "y1_place.py output (counts only): domain 90 = {51, 31, 8}; four dollar items tie 51 / 0 / 0; flow-day sets equal 51 / 30 / 8; RESTATED_CLOSE rule met 51 / 0 / 0; closing timings START 50, MID 48, END 0 of 51; set of closing timings START+MID 47, START 3, MID 1. Sources of the 244, 154, 185, 31, 8, 90: UNEXPLAINED_244.json (sum_check 154 + 90 = 244), UNCLASSED_90.json (sum_check 82 + 8 = 90; classes 31 + 51), CONTESTED_51.json tieout_state (classed 185 = 154 + 31)."
   },
   "same_grain": {
-   "finding": "Every value is a property of ONE segment, the (account, start, end) range that is the 244 and the 90 and the 51. RECONCILES is one segment's return against one custodian point plus its own four items and day set; TIMING is read from the same segment's three restated returns. No value is a property of an account (86 accounts hold the 90 segments, so an account value would mix grains), of a flow day, or of a pool: the pooled median log ratio over 86 flow days in CONTESTED_51.json is a pool-level figure and is deliberately NOT used to place any segment.",
+   "finding": "Every value is a property of ONE segment, the (account, start, end) range that is the 244 and the 90 and the 51. RESTATED_CLOSE is one segment's restated returns against one custodian point plus its own four items and day set; TIMING is read from the same segment's three restated returns. No value is a property of an account (86 accounts hold the 90 segments, so an account value would mix grains), of a flow day, or of a pool: the pooled median log ratio over 86 flow days in CONTESTED_51.json is a pool-level figure and is deliberately NOT used to place any segment.",
    "evidence": "each placement in y1_place.py is computed per row of table90.pkl (90 rows); 90 rows, 90 placements; the earlier record states the pooled figure 'is not a segment-level fact' (CONTESTED_51.json measurements.pooled_median_log_ratio_implied_day_return_to_account_noise.reading)."
   },
   "intent_coherence": {
-   "finding": "One axis, one intent. RECONCILES asks only whether the number ties and is measured; TIMING asks only which convention produced it and is inferred. No RECONCILES value says anything about timing and no TIMING value says anything about whether the segment ties: TIMING_NOT_DETERMINED is not RECONCILES_NO (47 of 51 reconcile and cannot be timed), and RECONCILES_NO carries no timing. The label CONTESTED today mixes the two intents: it names a disagreement (the return does or does not tie) for segments whose only open question is a fact no record can state (the time of day), which is the break this proposal separates.",
+   "finding": "One axis, one intent. RESTATED_CLOSE asks only whether a RESTATEMENT closes: whether the return, restated under an admitted timing other than the served one, ties to the other system with its dollars and flow days; it is measured. TIMING asks only which convention produced the other system's number and is inferred. What the CTO ruling (msg 5886) found: END is the served convention and END closes in 0 of 51, so no segment's served return closes against the custodian's, and what closes is a restatement under START or MID. The first axis therefore measures a restatement closing, NOT the served number matching, and the renamed values say so; the earlier RECONCILES tokens could be read as the served number matching, which is not the case for any of the 51. No RESTATED_CLOSE value says anything about which timing and no TIMING value says anything about whether the segment closes: TIMING_NOT_DETERMINED is not RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING (47 of 51 close when restated and cannot be timed), and RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING carries no timing. The label CONTESTED today mixes the two intents: it names a disagreement (the return does or does not tie) for segments whose only open question is a fact no record can state (the time of day), which is the break this proposal separates.",
    "evidence": "CTO msg 5835 item 1 'only one is a disagreement'; CONTESTED_51_MEANING.json what_is_settled_for_all_51 / what_is_not_settled_for_all_51 (all four dollar items tie in 51 of 51, flow days tie in 51 of 51, the open item is the time of day)."
   },
   "state_coherence": {
-   "finding": "Which values one remedy does NOT move. (1) A custodian statement of its flow-timing convention moves TIMING_NOT_DETERMINED (47) to a stated timing and changes its claim; it moves no RECONCILES value, and it leaves the 4 inferred values to be confirmed or contradicted, not re-measured. (2) A change of tolerance or of the return construction (fee base) can move a segment between RECONCILES_YES and RECONCILES_NO and between TIMING_NOT_DETERMINED and a single timing; it is the one remedy that moves both axes, and it is a ruling, not an observation. (3) A ruling that accrual-explained dollar gaps count as tying moves the 31 accrual-class segments from RECONCILES_NO toward RECONCILES_YES and into the TIMING domain; this proposal does not make it. (4) The shared code table's class for the one expense row (cell DB-b-146) moves no value on either axis, because that segment is RECONCILES_YES and TIMING_NOT_DETERMINED under either reading. (5) Reading more of the 154 (a two-sided dollar read) moves segments INTO the RECONCILES domain; it moves no segment already placed. (6) Re-timing the 4 inferred values requires a segment-level read of the custodian's intraday series, which no record read shows.",
+   "finding": "Which values one remedy does NOT move. (1) A custodian statement of its flow-timing convention moves TIMING_NOT_DETERMINED (47) to a stated timing and changes its claim; it moves no RESTATED_CLOSE value, and it leaves the 4 inferred values to be confirmed or contradicted, not re-measured. (2) A change of tolerance or of the return construction (fee base) can move a segment between RESTATED_CLOSES_UNDER_OTHER_TIMING and RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING and between TIMING_NOT_DETERMINED and a single timing; it is the one remedy that moves both axes, and it is a ruling, not an observation. (3) A ruling that accrual-explained dollar gaps count as tying moves the 31 accrual-class segments from RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING toward RESTATED_CLOSES_UNDER_OTHER_TIMING and into the TIMING domain; this proposal does not make it. (4) The shared code table's class for the one expense row (cell DB-b-146) moves no value on either axis, because that segment is RESTATED_CLOSES_UNDER_OTHER_TIMING and TIMING_NOT_DETERMINED under either reading. (5) Reading more of the 154 (a two-sided dollar read) moves segments INTO the RESTATED_CLOSE domain; it moves no segment already placed. (6) Re-timing the 4 inferred values requires a segment-level read of the custodian's intraday series, which no record read shows.",
    "evidence": "CONTESTED_51_MEANING.json groups 1, 3, 4, 5 (what_would_close_it per group) and not_established; UNCLASSED_90.json classes (accrual rule; 13 of the 31 close with accrual scaling under END, 18 only under START or MID, quoted not re-derived); y1_place.py gap figures: START and MID both within tolerance in 47 of 47 NOT_DETERMINED."
   }
  },
  "token_census": [
   {
-   "token": "RECONCILES_YES",
-   "pattern": "\\bRECONCILES_YES\\b",
-   "files_scanned": 76097,
+   "token": "RESTATED_CLOSES_UNDER_OTHER_TIMING",
+   "pattern": "\\bRESTATED_CLOSES_UNDER_OTHER_TIMING\\b",
+   "files_scanned": 76190,
    "hits": 0,
-   "what_the_hits_are": "0 occurrences in any file other than this order's own script (y1_place.py, which holds the token 3 times as the placement labels it prints, and this record). No existing use: no collision. Case-insensitive (-i), native Grep over the worktree tree; denominator 76097 = 76096 tracked + 1 untracked-not-ignored file (git ls-files, git ls-files -o --exclude-standard); gitignored files not scanned."
+   "what_the_hits_are": "0 occurrences in any file, taken BEFORE this order wrote the token into any file (so no hit is this order's own). No existing use: no collision. Case-insensitive (-i), native Grep tool over the worktree; denominator 76190 = 76190 tracked (git ls-files, counted at the start of this order) + 0 untracked-not-ignored (git ls-files -o --exclude-standard); gitignored files not scanned.",
+   "stem_pattern": "\\bRESTATED_CLOSES_UNDER_OTHER\\b",
+   "stem_hits": 0,
+   "stem_what_the_hits_are": "the bare stem (the part before the last underscore, RESTATED_CLOSES_UNDER_OTHER): 0 occurrences, same corpus, same denominator, same time of reading. No collision."
   },
   {
-   "token": "RECONCILES_NO",
-   "pattern": "\\bRECONCILES_NO\\b",
-   "files_scanned": 76097,
+   "token": "RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING",
+   "pattern": "\\bRESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING\\b",
+   "files_scanned": 76190,
    "hits": 0,
-   "what_the_hits_are": "0 occurrences outside this order's own script (y1_place.py, 2 times, as a placement label) and this record. No collision. Same corpus and denominator as above."
+   "what_the_hits_are": "0 occurrences in any file, taken before this order wrote the token into any file. No collision. Same corpus and denominator as above.",
+   "stem_pattern": "\\bRESTATED_DOES_NOT_CLOSE_UNDER_OTHER\\b",
+   "stem_hits": 0,
+   "stem_what_the_hits_are": "the bare stem (RESTATED_DOES_NOT_CLOSE_UNDER_OTHER): 0 occurrences, same corpus, same denominator. No collision.",
+   "family_note": "the shared lead word: \\bRESTATED_[A-Z_]+ (case-insensitive, same corpus) hits 70 times in 20 files. None is either token or either stem. They are RESTATED_TIEOUT and lowercase restated_* column and variable names of this project's restated tie-out (the same sense: a return restated under a convention), RESTATED_KEYS (an unrelated archive script of another project) and restated_flag and restated_delta_vs_chosen (an unrelated flow-ledger and slice builder). Adjacent, not a collision: no second meaning is introduced."
   },
   {
    "token": "TIMING_START",
@@ -118,25 +136,25 @@
    "what_the_hits_are": "0 occurrences outside this order's own script (y1_place.py, 3 times, as a placement label) and this record. Adjacent, not a collision: the bare word NOT_DETERMINED is used in 22 files (28 matching lines, one file being this order's own script, same corpus, same denominator) in the sense 'this run's evidence does not say' (for example a hop table in IRPT_ANLREQ and a producer note in a data catalog); under word boundaries (underscore is a word character) TIMING_NOT_DETERMINED does not match it, and the meaning is the same family, so no second meaning is introduced."
   }
  ],
- "census_instrument_note": "comp-find -i with word boundaries was started for the first token and did not return within the 120 s bound (rc 124); the census was taken with the native Grep tool over the worktree instead, as the order allows. Native Grep does not print its denominator; it is taken as git's tracked count plus untracked-not-ignored count and is therefore the CORPUS Grep honours (gitignored files excluded), not a count Grep itself reported.",
+ "census_instrument_note": "(order DB-b-155 added: the two renamed tokens were censused with the native Grep tool alone, comp-find not run, over 76190 tracked files and 0 untracked-not-ignored; the four TIMING entries keep the earlier denominator of 76097 as filed by order DB-b-148, not re-taken.) comp-find -i with word boundaries was started for the first token and did not return within the 120 s bound (rc 124); the census was taken with the native Grep tool over the worktree instead, as the order allows. Native Grep does not print its denominator; it is taken as git's tracked count plus untracked-not-ignored count and is therefore the CORPUS Grep honours (gitignored files excluded), not a count Grep itself reported.",
  "placement": {
   "total": 51,
   "cells": [
-   {"reconciles": "RECONCILES_YES", "timing": "TIMING_NOT_DETERMINED", "segments": 47, "of_which": "the DB-b-147 groups 2 (3, restated returns within 0.35 pp of one another), 4 (32), 5 (11) and 1 (1, the segment with the expense row): 3 + 32 + 11 + 1 = 47; START and MID both close in all 47, END in none"},
-   {"reconciles": "RECONCILES_YES", "timing": "TIMING_START", "segments": 3, "of_which": "DB-b-147 group 3, START only closes"},
-   {"reconciles": "RECONCILES_YES", "timing": "TIMING_MID", "segments": 1, "of_which": "DB-b-147 group 3, MID only closes"},
-   {"reconciles": "RECONCILES_YES", "timing": "TIMING_END", "segments": 0, "of_which": "no segment: END closes in 0 of 51"},
-   {"reconciles": "RECONCILES_NO", "timing": "NOT_APPLICABLE_OUTSIDE_TIMING_DOMAIN", "segments": 0, "of_which": "none of the 51: all 51 meet the three conditions"}
+   {"reconciles": "RESTATED_CLOSES_UNDER_OTHER_TIMING", "timing": "TIMING_NOT_DETERMINED", "segments": 47, "of_which": "the DB-b-147 groups 2 (3, restated returns within 0.35 pp of one another), 4 (32), 5 (11) and 1 (1, the segment with the expense row): 3 + 32 + 11 + 1 = 47; START and MID both close in all 47, END in none"},
+   {"reconciles": "RESTATED_CLOSES_UNDER_OTHER_TIMING", "timing": "TIMING_START", "segments": 3, "of_which": "DB-b-147 group 3, START only closes"},
+   {"reconciles": "RESTATED_CLOSES_UNDER_OTHER_TIMING", "timing": "TIMING_MID", "segments": 1, "of_which": "DB-b-147 group 3, MID only closes"},
+   {"reconciles": "RESTATED_CLOSES_UNDER_OTHER_TIMING", "timing": "TIMING_END", "segments": 0, "of_which": "no segment: END closes in 0 of 51"},
+   {"reconciles": "RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING", "timing": "NOT_APPLICABLE_OUTSIDE_TIMING_DOMAIN", "segments": 0, "of_which": "none of the 51: all 51 meet the three conditions"}
   ],
   "uncovered": 0,
   "uncovered_method": "subtraction: 51 printed (the members of FLOW_TIMING_CONVENTION_DOLLARS_TIE, 51 of worker 108's 90); 47 + 3 + 1 + 0 + 0 = 51; remaining after subtraction 0",
   "re_derived": "yes, twice: (a) y1_place.py recomputes every close flag from the daily served series and the custodian point, without reading the earlier closes, and compares to ~111 s2_per.pkl: 0 of 51 differ; (b) a byte-identical copy of ~120's x1_crosstab.py with only its output folder repointed was run: timing {both 47, START only 3, MID only 1}, spread under tolerance 3, groups {31+1+11 (=43), 4, 3, 1}. My counts do not differ from the earlier record's.",
   "the_90_and_the_244": {
-   "244": {"in_RECONCILES_domain": 90, "outside_domain_no_two_sided_dollar_read": 154},
-   "90": {"RECONCILES_YES": 51, "RECONCILES_NO": 39},
-   "RECONCILES_NO_39": {"accrual_class_31": "four dollar items do not all tie as served (0 of 31 tie all four); flow-day sets equal in 30 of 31 on the ledger-sum test", "unclassed_8": "four dollar items do not tie (0 of 8)"},
-   "185_classed": {"154": "outside the RECONCILES domain; TIMING does not apply", "31": "RECONCILES_NO; TIMING does not apply"},
-   "8_unclassed": "RECONCILES_NO; TIMING does not apply",
+   "244": {"in_RESTATED_CLOSE_domain": 90, "outside_domain_no_two_sided_dollar_read": 154},
+   "90": {"RESTATED_CLOSES_UNDER_OTHER_TIMING": 51, "RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING": 39},
+   "restated_no_close_39": {"accrual_class_31": "four dollar items do not all tie as served (0 of 31 tie all four); flow-day sets equal in 30 of 31 on the ledger-sum test", "unclassed_8": "four dollar items do not tie (0 of 8)"},
+   "185_classed": {"154": "outside the RESTATED_CLOSE domain; TIMING does not apply", "31": "RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING; TIMING does not apply"},
+   "8_unclassed": "RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING; TIMING does not apply",
    "TIMING_domain_51": {"TIMING_START": 3, "TIMING_MID": 1, "TIMING_END": 0, "TIMING_NOT_DETERMINED": 47}
   }
  },
@@ -150,21 +168,21 @@
    {"start_closes": true, "mid_closes": true, "end_closes": false}
   ],
   "stay_contested": false,
-  "placement_by_the_rule": "all three close under START and under MID (END does not, by a margin of 0.02 to 0.18 pp over the tolerance); more than one timing closes, so each is RECONCILES_YES and TIMING_NOT_DETERMINED. They are not classed and not contested.",
+  "placement_by_the_rule": "all three close under START and under MID (END does not, by a margin of 0.02 to 0.18 pp over the tolerance); more than one timing closes, so each is RESTATED_CLOSES_UNDER_OTHER_TIMING and TIMING_NOT_DETERMINED. They are not classed and not contested.",
   "note": "the three are a sub-case of the 47, not a value: the ruling listed 32, 11 and the expense-row segment as the 'more than one closes' cases; with the three that is 3 + 32 + 11 + 1 = 47."
  },
  "does_not_decide": [
-  "The 185 classed: no segment is moved; the 154 have no two-sided dollar read and are placed outside the RECONCILES domain only, not reclassed; the 31 accrual-class are RECONCILES_NO on the as-served dollar tie and keep their cause class. Whether accrual-explained dollar gaps count as 'tying' is a ruling (moves 31 toward RECONCILES_YES); this proposal does not make it and did not compute their per-timing closes with accrual scaling beyond what UNCLASSED_90.json already states (13 under END with scaling, 18 only under START or MID).",
-  "The 8 unclassed: stay unclassed on the existing cause axis; this proposal places them RECONCILES_NO only (0 of 8 tie all four dollar items).",
+  "The 185 classed: no segment is moved; the 154 have no two-sided dollar read and are placed outside the RESTATED_CLOSE domain only, not reclassed; the 31 accrual-class are RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING on the as-served dollar tie and keep their cause class. Whether accrual-explained dollar gaps count as 'tying' is a ruling (moves 31 toward RESTATED_CLOSES_UNDER_OTHER_TIMING); this proposal does not make it and did not compute their per-timing closes with accrual scaling beyond what UNCLASSED_90.json already states (13 under END with scaling, 18 only under START or MID).",
+  "The 8 unclassed: stay unclassed on the existing cause axis; this proposal places them RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING only (0 of 8 tie all four dollar items).",
   "Any served label: no tie-out wording, status or published figure is changed; whether CONTESTED is retired for the 51 and what replaces it in the served record is the CTO's call after ruling on this.",
   "Whether the existing cause class FLOW_TIMING_CONVENTION_DOLLARS_TIE continues to exist beside the two axes.",
   "The time of day at which the custodian credits a flow: NOT_ESTABLISHED by this record; no record read shows it, and whether the custodian publishes a statement or an intraday series was not looked for.",
-  "Whether to admit a per-day amount reproduction condition into RECONCILES (234 of 235 flow days; would make the one expense-row segment RECONCILES_NO).",
-  "The 154's RECONCILES values: not read here; entering them needs a two-sided dollar read (S3), which the order forbids."
+  "Whether to admit a per-day amount reproduction condition into RESTATED_CLOSE (234 of 235 flow days; would make the one expense-row segment RESTATED_DOES_NOT_CLOSE_UNDER_OTHER_TIMING).",
+  "The 154's RESTATED_CLOSE values: not read here; entering them needs a two-sided dollar read (S3), which the order forbids."
  ],
  "producer": {
   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~121/y1_place.py",
-  "sha256": "ac52c6032bc904f0a1789ae86faad4bc9595b87fc18605ec88e5faaf43432ff5",
-  "reads": "private pickles of workers 108 (inputs) and 111 (comparison only), no AWS; writes y1_cells.json to the private folder of worker 121"
+  "sha256": "904be07816048ca45b205413335b58df790eab37a1fe0f6b165390e915d4b8b6",
+  "label_edit": "order DB-b-155 changed only the printed placement labels and one print caption (the old tokens to the new ones); the logic, the inputs and the counts are unchanged", "reads": "private pickles of workers 108 (inputs) and 111 (comparison only), no AWS; writes y1_cells.json to the private folder of worker 121"
  }
 }
