@@ -9,16 +9,21 @@ Usage (repo root):
 
 The partition date is the producer's own: the newest partition each series holds whose LastModified is at or after
 --fire. It is never predicted from the calendar.
-Arms (read):
-  1 WRITTEN    each of the 4 scopes x 3 legacy-sourced artifacts holds one partition written at/after --fire, at the key
-               address() names (the listing is taken under the address() prefix, so the key IS builder output).
+Arms (read), amended 2026-10-11 (round-2 analysis @71e85b7191 section 2: a fire whose as-of did not advance writes no new
+partition by design, so "written at/after the fire" fails a correct producer). The unit is the partition AT THE T-1 FRONTIER,
+frontier = lib/trading_calendar.prev_trading_day(fire date) (Friday is Monday's answer; Saturday's too):
+  1 CURRENT    each of the 4 scopes x 3 legacy-sourced artifacts holds a partition dated the frontier at the key address()
+               names (the listing is taken under the address() prefix, so the key IS builder output). Written by this fire or
+               already there (unchanged) both pass; the line says which. A series whose newest date is behind the frontier
+               fails and prints how many trading days behind.
   2 UNCHANGED  every snapshot key is still present with its snapshot ETag (history never rewritten); denominator printed.
-  3 PARITY     for every new partition whose legacy dated JSON exists in opal-data-assets (portal/gold/mdpf/{scope}/
-               {type}/{date}.json), the stored rows, decoded, equal the writer's own records_for(legacy) taken through
-               the same pyarrow table. Values, not bytes: parquet bytes carry the encoder's version (the Lambda's
-               layer writes arrow 20.0.0), so a local re-encode differs byte-wise on equal figures.
-               The global scope must have at least one compared partition, and every compared partition must match.
-  4 UNITS      account_units holds a partition written at/after --fire for 49financial, inflection and global.
+  3 PARITY     for every series' frontier partition whose legacy dated JSON exists in opal-data-assets (portal/gold/mdpf/
+               {scope}/{type}/{date}.json), the stored rows, decoded, equal the writer's own records_for(legacy) taken through
+               the same pyarrow table. Values, not bytes: parquet bytes carry the encoder's version (the Lambda's layer writes
+               arrow 20.0.0), so a local re-encode differs byte-wise on equal figures. The global scope must have at least one
+               compared partition, and every compared partition must match.
+  4 UNITS      account_units holds a partition dated at or after the frontier for 49financial, inflection and global
+               (it is dated by the assignment day, which can be the fire date).
 Prints one line per arm and "ROUND 2 DAILY: <k> of 4 arms"; exit 0 only when every arm passes.
 """
 import argparse
@@ -38,6 +43,7 @@ import pyarrow.parquet as pq  # noqa: E402
 from opal_naming import address  # noqa: E402
 
 import mdpf_gold_parquet as gp  # noqa: E402
+import trading_calendar as tc  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SNAP = os.path.join(HERE, "r2_daily_snapshot.json")
@@ -77,8 +83,14 @@ def snapshot(s3):
     print("SNAPSHOT: %d object(s) across %d series -> %s" % (n, len(snap), os.path.relpath(SNAP, ROOT)))
 
 
+def date_of(key):
+    return key.split("date=")[1].split("/")[0]
+
+
 def read(s3, fire):
     snap = json.load(open(SNAP, encoding="utf-8"))["series"]
+    frontier = tc.prev_trading_day(fire.date())
+    print("FRONTIER %s (prev_trading_day of fire date %s)" % (frontier, fire.date()))
     arms, new = [], {}
     gone, moved, kept = [], [], 0
     for scope in SCOPES:
@@ -92,16 +104,22 @@ def read(s3, fire):
                     moved.append(k)
                 else:
                     kept += 1
-            fresh = sorted((o for o in objs if o["LastModified"] >= fire and o["Key"].endswith("/data.parquet")),
-                           key=lambda o: o["Key"])
-            new[(scope, artifact)] = (bucket, fresh)
-    # 1 WRITTEN
+            pq_objs = [o for o in objs if o["Key"].endswith("/data.parquet")]
+            cur = [o for o in pq_objs if date_of(o["Key"]) == frontier.isoformat()]
+            newest = max((date_of(o["Key"]) for o in pq_objs), default=None)
+            new[(scope, artifact)] = (bucket, cur, newest, [o for o in cur if o["LastModified"] >= fire])
+    # 1 CURRENT
     want = [(s, a) for s in SCOPES for a in gp.ARTIFACTS if a != "account_units"]
-    miss = [s + "/" + a for s, a in want if not new[(s, a)][1]]
+    miss = []
     for s, a in want:
-        print("  NEW %s/%s: %s" % (s, a, ", ".join(o["Key"].split("date=")[1].split("/")[0] for o in new[(s, a)][1]) or "none"))
-    arms.append(("WRITTEN", not miss, "%d of %d series wrote at/after the fire%s" % (len(want) - len(miss), len(want),
-                                                                                   "; missing " + ", ".join(miss) if miss else "")))
+        _, cur, newest, wrote = new[(s, a)]
+        behind = tc.trading_days_behind(newest, frontier) if newest else None
+        state = "at frontier, %s" % ("WRITTEN by this fire" if wrote else "already present (unchanged)") if cur             else "BEHIND by %s trading day(s), newest %s" % (behind, newest)
+        print("  %s/%s: %s" % (s, a, state))
+        if not cur:
+            miss.append(s + "/" + a)
+    arms.append(("CURRENT", not miss, "%d of %d series hold a partition at the frontier %s%s"
+                 % (len(want) - len(miss), len(want), frontier, "; behind: " + ", ".join(miss) if miss else "")))
     # 2 UNCHANGED
     total = kept + len(gone) + len(moved)
     arms.append(("UNCHANGED", total > 0 and not gone and not moved,
@@ -109,9 +127,11 @@ def read(s3, fire):
     # 3 PARITY
     legacy = boto3.client("s3")
     cmp_n, ok_n, glob_n, bad = 0, 0, 0, []
-    for (scope, artifact), (bucket, fresh) in sorted(new.items()):
+    for (scope, artifact), (bucket, fresh, _newest, _wrote) in sorted(new.items()):
+        if artifact == "account_units":
+            continue
         for o in fresh:
-            date = o["Key"].split("date=")[1].split("/")[0]
+            date = date_of(o["Key"])
             src = "portal/gold/mdpf/%s/%s/%s.json" % (scope, LEGACY_TYPE[artifact], date)
             payload = gp._read(legacy, LEGACY_BUCKET, src)
             if payload is None:
@@ -125,11 +145,16 @@ def read(s3, fire):
             else:
                 bad.append("%s/%s/%s" % (scope, artifact, date))
     arms.append(("PARITY", cmp_n > 0 and glob_n > 0 and not bad,
-                 "%d of %d new partition(s) value-equal to the writer's records of their legacy JSON (global compared: %d)%s"
+                 "%d of %d frontier partition(s) value-equal to the writer's records of their legacy JSON (global compared: %d)%s"
                  % (ok_n, cmp_n, glob_n, "; differ " + ", ".join(bad) if bad else "")))
     # 4 UNITS
-    umiss = [s for s in UNITS_SCOPES if not new[(s, "account_units")][1]]
-    arms.append(("UNITS", not umiss, "%d of %d scopes hold a new account_units partition%s"
+    for s_ in UNITS_SCOPES:
+        print("  %s/account_units: newest %s" % (s_, new[(s_, "account_units")][2]))
+    # account_units is dated by the assignment day, which may be the fire date (inflection read 2026-10-10 on the 10-10 fire):
+    # the rule is a newest date at or after the frontier, never before it.
+    umiss = [s for s in UNITS_SCOPES
+             if not (new[(s, "account_units")][2] and new[(s, "account_units")][2] >= frontier.isoformat())]
+    arms.append(("UNITS", not umiss, "%d of %d scopes hold an account_units partition at or after the frontier%s"
                  % (len(UNITS_SCOPES) - len(umiss), len(UNITS_SCOPES), "; missing " + ", ".join(umiss) if umiss else "")))
     for i, (name, ok, line) in enumerate(arms, 1):
         print("ARM %d %s: %s -- %s" % (i, name, "PASS" if ok else "FAIL", line))
