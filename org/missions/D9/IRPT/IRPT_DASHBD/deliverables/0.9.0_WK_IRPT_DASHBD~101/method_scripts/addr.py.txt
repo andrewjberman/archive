@@ -1,0 +1,11 @@
+import importlib.util, json, sys
+from pathlib import Path
+kit = Path(sys.argv[1]).resolve(); P = kit / "data/assets/scripts/gold/irpt_reporting"
+sys.path.insert(0, str(kit)); sys.path.insert(0, str(P))
+spec = importlib.util.spec_from_file_location("ard_dry", str(P / "account_return_daily.py")); ard = importlib.util.module_from_spec(spec); spec.loader.exec_module(ard)
+th = json.loads((P / "MEASURED_THRESHOLDS_R1.json").read_bytes().decode("utf-8"))
+print("thresholds top-level keys:", sorted(th.keys()))
+src = json.loads((P / "sources.json").read_bytes().decode("utf-8"))["schwab_08335338"]
+r = ard.emit_method_row(None, ard.firm_scope(src), th, upload=False, src=src)
+print("address:", r["address"]); print("schema:", r["table_schema"]); print("claims:", {k: r["row"][k] for k in r["row"] if k.endswith("_claim") or k=="threshold_claims_source"})
+print("declared_sources:", ard.declared_sources(ard.load_declaration())); print("method_version_of:", ard.method_version_of(src))
