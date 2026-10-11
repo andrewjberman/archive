@@ -24,7 +24,7 @@ MATCH, 1 from MATCH to DIFF).
 
 **How it was made.** Both builds at the served pin under `method_r28`, into a worktree scratch. The baseline equals the served copy:
 1,691,729 of 1,691,729 rows, 107,316 of 107,316 measured, 0 differing at a floor of 1e-12, and it equals the earlier pinned build of
-round 67. The variant differs from the baseline in ONE input: a copy of the basis-census file in which 19 rows change class (18 from
+round 68 (worker ~104's). The variant differs from the baseline in ONE input: a copy of the basis-census file in which 19 rows change class (18 from
 `other`, one from `as_traded`, to `dividend_adjusted`), so the build's own as-traded basis substitutes the cached close for those 19.
 The census path is a module constant with no flag (row D2-W129-S1); both builds ran through one scratch wrapper that sets it, and no
 product file was edited. Moved: the 19 validated funds left on the store and no other security (34,277 security-days differ; 60
