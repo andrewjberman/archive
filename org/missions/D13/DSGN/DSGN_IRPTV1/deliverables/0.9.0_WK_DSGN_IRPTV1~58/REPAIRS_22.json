@@ -1,0 +1,216 @@
+{
+  "to_id": "DSGN_IRPTV1.TO-IV-e-104",
+  "worker": "0.9.0_WK_DSGN_IRPTV1~58",
+  "round": 22,
+  "base": {
+    "workspace": "bec8b0ad9e (box/dell2 merged cleanly into wk-dsgn-irptv1-r14-49; no conflict)",
+    "portal": "cb76f857c5cddd84969dea51e342e0bb39ba36b5",
+    "whole_scope": "bun test src/pages/InvestorReporting: 1156 pass, 27 skip, 5 fail, 1188 tests across 380 files",
+    "failing_ids": [
+      "dsgn-irptv1/iv-e-26.wire-regen.test.ts :: IVE26-AC3 -- gen-wire.ts regeneration is idempotent, data is optional, content pin still 17 of 17 > every arm holds",
+      "dsgn-irptv1/iv-e-98.generators-drift.test.ts :: IVE98 -- the wire folder is generator output and nothing else (gen-wire.ts AND gen-consumed.ts) > every arm holds",
+      "fe-s-13/producer-fixtures.test.ts :: producer fixtures > every DECLARED route still publishes the RESPONSE ENVELOPE this client parses",
+      "fe-s-14/envelope.test.ts :: F14-AC13 -- every declared route parses through the one parser > ENVELOPES PARSED -- 11 of 11, each built from its own response contract",
+      "fe-s-57/carry.test.ts :: F57-AC2 -- unprojected_grant PRESENT-AT-ZERO carried onto every declared route > UNPROJECTED_GRANT PRESENT-AT-ZERO CARRIED ON 17 of 17 OPERATIONS"
+    ],
+    "evidence": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/base_run.txt, base_ids.json"
+  },
+  "reader_remeasure": {
+    "method": "a bun script outside both worktrees importing the portal's parseIrEnvelope, readDirectoryBrowse and adaptAnalysisUpload; each producer fixture's `instance` wrapped as {contract_version v1, operation, firm_id fir_4f9c1a7b2e6d03518ca47b90, data, unprojected_grant {count 0, denominator 1, kinds {}}}",
+    "controls": [
+      "PASS control selection-create SelectedAccounts wrapped: ACCEPTED",
+      "PASS control comparison-catalogue ComparisonCatalogue wrapped: ACCEPTED",
+      "REFUSE control a bare payload: REFUSED investor-reporting selection-create: response envelope field 'body' does not satisfy the v1 contract",
+      "REFUSE control a wrong operation: REFUSED investor-reporting directory-browse: response envelope field 'operation' does not satisfy the v1 contract"
+    ],
+    "subjects": [
+      {
+        "route": "directory-browse",
+        "fixture": "infra/aws/lambda/investor-reporting/_contracts/fixtures/DirectoryPage.valid.json",
+        "parseIrEnvelope": "ACCEPTED",
+        "inner_reader": "readDirectoryBrowse ACCEPTED",
+        "still_refused": false,
+        "refusal_text": null
+      },
+      {
+        "route": "analysis-input-upload",
+        "fixture": "infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisUploadResult.valid.json",
+        "parseIrEnvelope": "ACCEPTED",
+        "inner_reader": "adaptAnalysisUpload ACCEPTED",
+        "still_refused": false,
+        "refusal_text": null
+      }
+    ],
+    "evidence": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/reader_probe.txt"
+  },
+  "smoke_map": {
+    "outcome": "DONE",
+    "routes_declared": 22,
+    "keys": 19,
+    "excused": [
+      {
+        "route": "custody-report-read",
+        "reason_class": "READER_REFUSES_PRODUCER_FIXTURE",
+        "reason": "validateCustodyReport (contracts/envelope.ts:150) requires report.accounts to be an array; the producer's custody-report-read.response.valid.json report holds only composition_sha256, and the issuer validated the fixture as a valid v1 payload (5 of 5, org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/FIVE_FIXTURES_VS_CONTRACT_20261011.md). The READER is out of step with the contract (AMENDMENT 3); the reader change is another cell's.",
+        "evidence": "this session, validateCustodyReport(infra/aws/lambda/investor-reporting/_contracts/fixtures/custody-report-read.response.valid.json instance): REFUSED investor-reporting custody-report-read: response envelope field 'data' does not satisfy the v1 contract [field data]; report keys: composition_sha256 only. Log C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/s2_reader_probe.txt"
+      },
+      {
+        "route": "custody-report-persist",
+        "reason_class": "READER_REFUSES_PRODUCER_FIXTURE",
+        "reason": "the product has no reader of the persist answer: validateCustodyReport names the read operation only, requires a `report` object with an accounts array, and the persist fixture carries sha256 instead. The fixture is a valid v1 payload (org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/FIVE_FIXTURES_VS_CONTRACT_20261011.md); the READER is out of step with the contract (AMENDMENT 3); the reader is another cell's.",
+        "evidence": "this session, validateCustodyReport(infra/aws/lambda/investor-reporting/_contracts/fixtures/custody-report-persist.response.valid.json instance): REFUSED investor-reporting custody-report-read: response envelope field 'data' does not satisfy the v1 contract [field data] (the text names the READ operation, which is the only operation the validator knows). Log C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/s2_reader_probe.txt"
+      },
+      {
+        "route": "analysis-request-original",
+        "reason_class": "NO_PRODUCER_FIXTURE",
+        "reason": "the producer publishes no fixture and no response schema file for it (routes.json response_schema_absent_reason; its note says its data member is the analysis-request-pdf data shape); a body typed here would be invented.",
+        "evidence": "searched this session: Grep for analysis-request-original over infra/aws/lambda/investor-reporting/_contracts -> 0 matches in 0 files; Glob *riginal* over _contracts/fixtures -> no files; Glob * over _contracts/fixtures lists 54 files, none for it; docs/contracts holds the name only in routes.json (earlier session: responses/ 21 files, none for it)."
+      }
+    ],
+    "entries_added": [
+      "directory-browse",
+      "analysis-input-upload"
+    ],
+    "bodies": "the producer's own fixture `instance`, read in place by gen-corpus.ts producerInstanceOf, wrapped by envelope(); the default.json diff is 348 insertions and 0 deletions (the 17 older entries are unchanged bytes)",
+    "tests_followed": [
+      "fe-s-1/fixtures.test.ts (the two excuses removed; keys derived as declared minus excused)",
+      "fe-s-14/published-map.test.ts (excused-by-name list is the three; keys and satisfied 19)"
+    ],
+    "targeted_run": "fe-s-1 fixtures, fe-s-14, fe-s-75, fe-s-81: SMOKE ROUTES 19 of 19 NOT EXCUSED (22 DECLARED, 3 excused by name), keys 19; DATA REQUIRED-SET SATISFIED 19 of 19; PARSED CLEAN 19 of 19; the one failure in those files is F14-AC13, red at the base",
+    "mutant": {
+      "what": "fe-s-1/fixtures.test.ts: the 'directory-browse' excuse put back (committed first; python edit; reverted with git checkout -- the file)",
+      "failed": true,
+      "how": "EXCUSED ROUTES THAT HAVE AN ENTRY: directory-browse: 1 key(s) while excused as READER_REFUSES_PRODUCER_FIXTURE; smoke-map test 8 pass 1 fail",
+      "log": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/p1_mutant.txt"
+    },
+    "generator_note": "gen-corpus.ts also rewrote the request records and fe-s-14-print-v1.json (line endings; comparison-catalogue.request.json lost its `_captured` member, row DSGN_IRPTV1-D2-W53-S8); all restored with git checkout before the commit; only default.json and three test/generator files were committed in part 1"
+  },
+  "rerun_ids": [
+    {
+      "id": "fe-s-13/content-pins.test.ts :: the content pin > the pin names all three axes and the live contract offers every item",
+      "result": "PASS",
+      "reason": "run alone at the base (the whole content-pins file: 5 pass 0 fail, rc 0); the unprojected_grant findings are gone with the producer's schema changes (row DSGN_IRPTV1-D2-W58-S5)"
+    },
+    {
+      "id": "fe-s-13/content-pins.test.ts :: the content pin > ADDITIVE, non-breaking producer changes leave this battery GREEN",
+      "result": "PASS",
+      "reason": "same run: passes at the base"
+    },
+    {
+      "id": "fe-s-13/content-pins.test.ts :: the content pin > THE MUTATION HARNESS IS TEST-LOCAL -- the contract on disk did not move",
+      "result": "PASS",
+      "reason": "same run: passes at the base"
+    },
+    {
+      "id": "fe-s-13/producer-fixtures.test.ts :: producer fixtures > every DECLARED route still publishes the RESPONSE ENVELOPE this client parses",
+      "result": "PASS",
+      "reason": "FAILED at the base alone (expect(withContract).toHaveLength(17), received 19: a stale literal; the envelope-field check itself read 19 of 19). Brought to the contract at portal 223a698c as an exact derived pin (the consumed operation set equals, as a set, the operations routes.json gives a response_schema; its length equals that derived count); two mutants (an extra operation; one operation removed) fail it; 6 pass 0 fail in the file now"
+    },
+    {
+      "id": "IVE17-AC3 -- no bridge cast for the landed fields, and the content pin still offers 17 of 17",
+      "result": "PASS",
+      "reason": "run alone at the base: iv-e-17.bridge-dropped.test.ts 1 pass 0 fail (rc 0)"
+    }
+  ],
+  "rerun_evidence": [
+    "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/p2_contentpins.txt",
+    "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/p2_producer.txt",
+    "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/p2_ive17.txt",
+    "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/p2_producer_after.txt",
+    "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/p2_mutant.txt",
+    "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/p2_mutant2.txt"
+  ],
+  "ive26": {
+    "outcome": "NOT_FIXED",
+    "reason": "IVE26-AC3 arm 1 calls gen-wire.ts generate(), which throws UnrenderableSchemaError at responses/analysis-report.response.schema.json#/properties/data/properties/request_ref (members of that schema left untyped by trunk @8aa28be2a8, IB-pr-432; the project repairing it is on cell IB-pr-437), so the test dies before its third arm. The third arm itself is repaired and shown right by mutant.",
+    "third_arm_before": "hard-coded '17' (operationsMatch[2] === '17', 'expected 17 of 17'); the client consumes 24 (row DSGN_IRPTV1-D2-W54-S1)",
+    "third_arm_after": "expected N = WIRE_CONSUMED_OPERATIONS.length read from the generated contracts/wire/consumed.ts (24), printed as CONSUMED OPERATIONS EXPECTED; gen-consumed.ts derives that list from the client's IR_ROUTE_TABLE and content-pins prints its denominator from the same list; routes.json is not the source because it counts what the contract offers, which can exceed what the client consumes. Committed at portal e661cb44.",
+    "mutants": [
+      {
+        "what": "MUTANT A (temporary, committed test file, reverted with git checkout): generate(tempOut) replaced by after = before so arms 1 and 2 do not stand in the way of arm 3",
+        "observed": "CONSUMED OPERATIONS EXPECTED 24; OFFERED 24 of 24; content-pins rc=0; VERDICT WIRE-REGEN-OK; 1 pass",
+        "log": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/p3_mutA.txt"
+      },
+      {
+        "what": "MUTANT B (A plus the consumed operation 'zz-mutant-not-offered' appended to WIRE_CONSUMED_OPERATIONS in consumed.ts; both files reverted with git checkout)",
+        "observed": "EXPECTED 25; OFFERED 24 of 25; content-pins rc=1; VERDICT WIRE-REGEN-FAILED -- consumed operations offered 24 of 25, expected 25 of 25; 1 fail",
+        "log": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/p3_mutB.txt",
+        "failed": true
+      }
+    ],
+    "limit": "an operation removed from consumed.ts by hand shrinks the expected count with it; this arm does not catch that (the drift test IVE98 does, and it is red on the same throw). Row DSGN_IRPTV1-D2-W58-S6.",
+    "real_run": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/p3_run.txt (the throw)"
+  },
+  "ive97_flip": {
+    "status_complete": true,
+    "proof_valid": true,
+    "checks": [
+      "python org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/checks/r17/p17_round17.py . IV97-AC1 -> IV97-AC1 PASS (OK: the lock is already what package.json asks for: one install left it byte-equal (0 package(s) moved), the build byte-equal, happy-dom held; no new failing id)",
+      "the same with IV97-AC2 -> IV97-AC2 PASS"
+    ],
+    "instance": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~53/DSGN_IRPTV1.TO-IV-e-97.tooling-hygiene.proof_of_spec.json (IV97-AC1 row rewritten FAIL to PASS citing AMENDMENT 1 and row D2-W53-S10)",
+    "validated": "python .tools/proof-of-spec-check.py <instance> IV97-AC1,IV97-AC2 -> VALID (rc=0)"
+  },
+  "portal_commits_in_order": [
+    {
+      "hash": "ae00ed8957908d4babf2a28f21bf1f04db568634",
+      "what": "part 1: the smoke map takes directory-browse and analysis-input-upload (19 entries, 3 excuses): gen-corpus.ts, default.json, fe-s-1 and fe-s-14 tests"
+    },
+    {
+      "hash": "223a698ca5a3225f7f187d1219f8ffd77170fee4",
+      "what": "part 2: producer-fixtures RESPONSE ENVELOPE pin brought to the contract, derived not literal"
+    },
+    {
+      "hash": "e661cb44baada6791b3b523f3e6858645f0dbcf9",
+      "what": "part 3: IVE26-AC3 arm 3 derives the consumed-operation count"
+    }
+  ],
+  "portal_commit": "e661cb44baada6791b3b523f3e6858645f0dbcf9",
+  "push_state": "LOCAL (portal worktree branch wk-dsgn-irptv1-r14-49; not pushed)",
+  "suite_after": {
+    "command": "bun test src/pages/InvestorReporting",
+    "pass": 1157,
+    "skip": 27,
+    "failed": 4,
+    "tests": 1188,
+    "files": 380,
+    "failing_ids": [
+      "dsgn-irptv1/iv-e-26.wire-regen.test.ts :: IVE26-AC3 -- gen-wire.ts regeneration is idempotent, data is optional, content pin still 17 of 17 > every arm holds",
+      "dsgn-irptv1/iv-e-98.generators-drift.test.ts :: IVE98 -- the wire folder is generator output and nothing else (gen-wire.ts AND gen-consumed.ts) > every arm holds",
+      "fe-s-14/envelope.test.ts :: F14-AC13 -- every declared route parses through the one parser > ENVELOPES PARSED -- 11 of 11, each built from its own response contract",
+      "fe-s-57/carry.test.ts :: F57-AC2 -- unprojected_grant PRESENT-AT-ZERO carried onto every declared route > UNPROJECTED_GRANT PRESENT-AT-ZERO CARRIED ON 17 of 17 OPERATIONS"
+    ],
+    "fixed_ids": [
+      "fe-s-13/producer-fixtures.test.ts :: producer fixtures > every DECLARED route still publishes the RESPONSE ENVELOPE this client parses"
+    ],
+    "new_failing_ids": [],
+    "left_red_by_instruction": [
+      "IVE98",
+      "F14-AC13",
+      "F57-AC2"
+    ],
+    "still_red_ive26": "IVE26-AC3 (NOT_FIXED, above)",
+    "evidence": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/after_run.txt, after_ids.json"
+  },
+  "typecheck_errors": 0,
+  "typecheck_evidence": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/typecheck.txt (bun run typecheck, rc 0, no error TS line)",
+  "build_method": "bun run build; one sha256 over dist: each file in sorted relative-path order (paths sorted case-insensitively), update with the relative path (utf-8) then the file bytes; 88 files, 8,322,265 bytes",
+  "build_hash_before": "0657f410e8a1ab9a8379c93a4e888185eaebebaf4becd7c423c594f7d0ba433c",
+  "build_hash_after": "0657f410e8a1ab9a8379c93a4e888185eaebebaf4becd7c423c594f7d0ba433c",
+  "build_equal": true,
+  "build_evidence": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/hash_before.txt, hash_after.txt, build_before.txt, build_after.txt",
+  "product_files_changed": [],
+  "test_and_fixture_files_changed": [
+    "portal/src/pages/InvestorReporting/__tests__/fe-s-13/gen-corpus.ts",
+    "portal/src/pages/InvestorReporting/fixtures/smoke/default.json",
+    "portal/src/pages/InvestorReporting/__tests__/fe-s-1/fixtures.test.ts",
+    "portal/src/pages/InvestorReporting/__tests__/fe-s-14/published-map.test.ts",
+    "portal/src/pages/InvestorReporting/__tests__/fe-s-13/producer-fixtures.test.ts",
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-26.wire-regen.test.ts"
+  ],
+  "rows": [
+    "DSGN_IRPTV1-D2-W58-S5",
+    "DSGN_IRPTV1-D2-W58-S6",
+    "DSGN_IRPTV1-D2-W58-S7"
+  ]
+}
