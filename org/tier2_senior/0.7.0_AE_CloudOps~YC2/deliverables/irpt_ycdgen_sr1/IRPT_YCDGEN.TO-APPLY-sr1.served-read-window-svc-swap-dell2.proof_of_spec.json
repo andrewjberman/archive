@@ -1,0 +1,174 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "The ledger irpt-ycdgen-served-read-w6 is CLOSED.",
+      "denominator": "1 ledger entry; the AC1 pathspec glob expands to exactly 1 file, printed before the run",
+      "expect": "^\\*\\*Status:\\*\\* CLOSED",
+      "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-ycdgen-served-read-w6_deploy_completion.md",
+      "method": "command",
+      "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261011T045706Z",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "W2 shows svc back on cottonwood.",
+      "denominator": "1 output file, 1 'after:' line; plus 1 negative control on W1's file",
+      "expect": "'allowedFirmIds': 'cottonwood'",
+      "invocation": "grep -m1 '^after:' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_sr1/W2_SWAP_BACK_WINDOW6.txt",
+      "method": "command",
+      "output_evidence": "after: {'allowedFirmIds': 'cottonwood', 'status': 'active', 'updatedAt': '2026-10-11T04:53:41.258001Z', 'userType': 'service'}",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the 5-leg manifest with per-leg proof and the CLOSED status line",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/critical_paths/change_management/20261011T0450Z_irpt-ycdgen-served-read-w6_deploy_completion.md"
+    },
+    {
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the tool's before/after pair for the restore",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_sr1/W2_SWAP_BACK_WINDOW6.txt"
+    },
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the tool's before/after pair for the swap-out, and the before-read that opened the D2-S25 row",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_sr1/W1_SWAP_OUT_WINDOW6.txt"
+    },
+    {
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "commit_or_etag": "b8b3fa88e0",
+      "deploy_evidence": "the GO verification, the before-read and the preflight limbs, committed BEFORE the act",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_sr1/PREFLIGHT_WINDOW6.md"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~YC2",
+  "compiler_tools": [
+    {
+      "invocation": "open | close-leg x5 (W1, R, W2, S+, S-) | close --slug irpt-ycdgen-served-read-w6",
+      "result": "CLOSED, all 5 legs proven, closed 20261011T045706Z",
+      "tool": "deploy_ledger.py"
+    },
+    {
+      "invocation": "comp-adversary compose org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/r7/NEVER_WIDEN_PACKET_SERVED_READ_WINDOW.md",
+      "result": "RUN at preflight per the order. One flag, a PARSER zero: 3 commit-shaped hex runs present (20261009, 5e4149d2, 5e4149d2863aea31cc87d660) with 0 parsed as pins -- a date and the request id, not pins. The one pin that gates the act was verified by printing bytes with a negative control instead of by the parser.",
+      "tool": "comp-adversary"
+    },
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order: two conditional row writes; no schedule, trigger or EventBridge rule is added or read",
+      "tool": "comp-schedule"
+    },
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order: no IAM change on dell2; the secret resource-policy ADD/REMOVE is the laptop executor's leg, routed by MSTR",
+      "tool": "comp-iam"
+    }
+  ],
+  "controls": {
+    "ac1_graded_on_the_verbatim_invocation_not_a_substitute": {
+      "description": "The comp-rail denied AC1's pathspec glob as an unscoped search. Rewriting the invocation to a literal path would have graded a substitute, so the glob's denominator was printed first and the order's exact invocation was then run under an audited '# rail-checked:' annotation.",
+      "expected_landed": "the glob expands to exactly 1 file, and the verbatim grep is what produces the evidence line",
+      "expected_not_landed": "a glob expanding to 2+ files, which would make '-m1' pick an arbitrary one, or a silently substituted invocation",
+      "observed": "glob denominator 1 (org/critical_paths/change_management/20261011T0450Z_irpt-ycdgen-served-read-w6_deploy_completion.md); the verbatim invocation returned the CLOSED status line",
+      "status": "PASS"
+    },
+    "after_read_confirmed_off_instrument": {
+      "description": "AC2 reads the swap tool's own stdout. A producer's self-report is not evidence of served state, so the restore was re-read from DynamoDB directly.",
+      "expected_landed": "a ConsistentRead get-item returns allowedFirmIds {S: cottonwood} with updatedAt equal to W2's own 6-decimal write",
+      "expected_not_landed": "any other firm value, or an updatedAt later than W2's, which would mean a write followed the restore",
+      "observed": "allowedFirmIds {S: cottonwood}, status {S: active}, userType {S: service}, updatedAt {S: 2026-10-11T04:53:41.258001Z} -- equal to W2's write, so nothing wrote the row after W2",
+      "status": "PASS"
+    },
+    "cto_half_bound_to_bytes_not_to_a_version_string": {
+      "description": "A half ages separately from the text it signs, so the GO was verified by printing the packet's blob rather than by reading the packet's prose.",
+      "expected_landed": "the signed-against blob equals rev-parse HEAD:<packet> and hash-object <packet>",
+      "expected_not_landed": "a divergence, which would mean the signed text is not the text at HEAD",
+      "observed": "716925a28e88cf24e5ba7206edc5bc6e920fe471 from all three reads; a sibling packet in the same directory reads e8aa773790, so the read discriminates",
+      "status": "PASS"
+    },
+    "read_instrument_discriminates_present_from_absent": {
+      "description": "A get-item that always answers would read 'cottonwood' for reasons unrelated to the restore. The same call was run against a key that does not exist.",
+      "expected_landed": "the real key returns an Item; the non-existent key returns no Item",
+      "expected_not_landed": "both keys returning an Item, which would make the positive read uninformative",
+      "observed": "USER#svc-irpt-analysis@opalinvest.com/PROFILE returns the Item; USER#svc-irpt-analysis-NOSUCHUSER9999@opalinvest.com/PROFILE returns no Item",
+      "status": "PASS"
+    },
+    "type_tag_shape_checked_against_the_st28_trap": {
+      "description": "allowedFirmIds is the attribute whose .L read returned [] BY CONSTRUCTION during st28. A restore confirmed by a read of the wrong shape would certify nothing.",
+      "expected_landed": "the type tag prints as S (scalar string)",
+      "expected_not_landed": "an L tag, or an empty list, which is the st28 reading",
+      "observed": "{S: cottonwood}",
+      "status": "PASS"
+    },
+    "w1_condition_fired_on_a_correct_read_not_a_stale_one": {
+      "description": "swap_svc_firm.py writes only when the row reads exactly the <from> firm, service and active, so a REFUSED line would mean nothing moved.",
+      "expected_landed": "rc=0 with before cottonwood and after 49financial on W1, and the mirror on W2",
+      "expected_not_landed": "'REFUSED: the row does not read allowedFirmIds=...' with rc=1",
+      "observed": "W1 rc=0 cottonwood -> 49financial; W2 rc=0 49financial -> cottonwood; no REFUSED line in either output",
+      "status": "PASS"
+    }
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R7.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-sr1.served-read-window-svc-swap-dell2.md",
+    "vintage_commit": "d5e3459acbd4a4ebc08a20d0e2d300f2f0f0dd21"
+  },
+  "declared_exclusions": [
+    {
+      "item": "the secret resource-policy state on irpt/svc-irpt-analysis/password was not read by this seat, at either end of the window",
+      "reason": "the order's bounds say no secret read and its preflight declares comp-iam NOT-APPLICABLE because the policy legs are the laptop's. Legs S+ and S- are closed on HELD claims -- MSTR msgs 4099 and 4111 for the ADD and the REMOVE, with 2.0.0_SA_COO~G2's own reads at 04:48:09Z and 04:55:57Z as corroboration. Both reports reach this seat through 2.0.0_SA_COO~G2, so the instruments are independent but the carrier is shared. A reader wanting the measured form reads those seats' records."
+    },
+    {
+      "item": "whether the two owner reads settle APPLY-Y1 read 6, or grade FWD-1",
+      "reason": "CTO half condition 5 is explicit that R's 200 is evidence for FWD-1 and not its grade; FWD-1 is graded at the round analysis on the CVO's slug. This seat records only that the window given was 30 minutes and was not extended."
+    },
+    {
+      "item": "the HTTP 200s and the secret-read count inside R",
+      "reason": "reported by 2.0.0_SA_COO~G2 (msg 4105) and not observable from this seat, which performs no owner read and no secret read. Recorded as HELD."
+    }
+  ],
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/r7/NEVER_WIDEN_PACKET_SERVED_READ_WINDOW.md, blob 716925a28e -- COO half SIGNED in the packet. The packet's own '## CTO HALF' section still reads '(owed)' at HEAD; that section is NOT the instrument, the separate half file is (see cto_half).",
+    "cto_half": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_SERVED_READ_WINDOW_CTO_HALF.md @da885deef2, Verdict GIVEN for exactly five legs under conditions 1 to 5; signed against packet blob 716925a28e, which equals the blob at HEAD and in the working tree. Condition 4 admits an MSTR-seated CloudOps lane as substitute operator, which is this lane."
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "WORLD",
+  "rollback": "W2 is itself the rollback for W1, and it runs in every branch of R -- R done, R failed, or no R -- bounded at T0+30min. Executed: T0 04:51:52Z, bound 05:21:52Z, W2 fired 04:53:41Z on the issuer's R-done rather than on the clock, also inside the 05:18:00Z secret-grant hard close. Restored state confirmed by an independent ConsistentRead get-item, not the tool's echo.",
+  "schema_version": "1.0",
+  "scope": "WINDOW 6 of the IRPT_YCDGEN served-read window: two conditional writes on svc-irpt-analysis's PROFILE allowedFirmIds -- W1 cottonwood -> 49financial, then W2 back -- around the authorized owner read by 2.0.0_SA_COO~G2, which in this window is two after-reads of the irpt-status apply (IB-pr-416 packet section 3). Re-addressed to this lane by AMENDMENT 1 (one project per Tier-2 seat instance; 0.0.0_AB_MSTR~DELL2 msgs 4007 and 4012). The laptop secret ADD and REMOVE are the laptop executor's legs, routed cross-box by MSTR, and are NOT this seat's acts. Write surface: ONE opal-users-v2 item.",
+  "session_log": "org/critical_paths/change_management/20261011T0450Z_irpt-ycdgen-served-read-w6_deploy_completion.md",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-sr1.served-read-window-svc-swap-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "cf1a6301d5e41cee0340bc23b4529094469899e0"
+  },
+  "surprises": [
+    "IRPT_YCDGEN-D2-S25: updatedAt on svc's PROFILE row has a second writer (/auth/login), so the window's updatedAt-continuity inference is not a sound no-third-party oracle; the tell is 3-decimal ms vs 6-decimal us precision. OBSERVATION, INERT, UNDER_INVESTIGATION, disarm_owner 2.0.0_SA_COO~G2, carrier org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md. Effect on this order: none -- both conditional writes fired on correct reads, the restore is independently confirmed, and no criterion depends on the falsified inference."
+  ],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-sr1.served-read-window-svc-swap-dell2"
+}
