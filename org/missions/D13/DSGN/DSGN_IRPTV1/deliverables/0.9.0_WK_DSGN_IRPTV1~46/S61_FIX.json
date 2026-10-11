@@ -95,11 +95,77 @@
   "render": {
     "static_html": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~46/S61_review_table_render.html",
     "reading": "Read by the worker: three rows under Holding / Original amount / Analysis dollars. Row 1 Holding reads 'APPL,' then in smaller navy text 'analysed as AAPL' (5698.61 USD, $5,698.61). Row 2 reads 'FBIFX,' then 'analysed as SGOV' (900.5 USD, $900.50). Row 3 reads 'MSFT' alone (256.42 USD, $256.42). The words 'uploaded as' appear nowhere. Under the table the page's own list reads 'APPL is analysed as AAPL, a proxy you named.' and 'FBIFX is analysed as SGOV, a proxy you named.', the same wording. Ink navy #163372 on white, no new colour; body carries tabular-nums. Tailwind is not compiled in the static page; only the cell's classes are approximated.",
-    "ui_smoke": "NOT RUN: no dev server started; the live screenshot is the issuer's act."
+    "ui_smoke": "stock ui-smoke.mjs cannot drive a file upload (no setInputFiles step) and port 5174 is down; the live render is review_table_shot.mjs against a build (see live_render)"
   },
   "surprise_rows": [
-    "DSGN_IRPTV1-D2-W46-S1"
+    "DSGN_IRPTV1-D2-W46-S1",
+    "DSGN_IRPTV1-D2-W46-S4",
+    "DSGN_IRPTV1-D2-W46-S5"
   ],
   "refused_candidate": "2639743c",
-  "wording": "<uploaded>, analysed as <to_value> (AMENDMENT 2, CTO msg 4223): the uploaded symbol first, then what it is analysed as; the page's own disclosure sentence spelling; one wording for a typo correction and a named proxy; no kind field read; no 'uploaded as' anywhere"
+  "wording": "<uploaded>, analysed as <to_value> (AMENDMENT 2, CTO msg 4223): the uploaded symbol first, then what it is analysed as; the page's own disclosure sentence spelling; one wording for a typo correction and a named proxy; no kind field read; no 'uploaded as' anywhere",
+  "live_render": {
+    "commit": "1cd1cf252eae0eee0d67cba4bde31630a71f975c (portal worktree, branch wk-dsgn-irptv1-r11-46; git status clean before and after the build; no product file edited)",
+    "build_dir": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~46/dist_1cd1cf25 (outside both repos)",
+    "build_command": "bun x vite build --configLoader runner --outDir <build_dir> --emptyOutDir (cwd portal worktree). The package.json build script is 'tsc -b && vite build --configLoader runner'; the tsc -b half was not run so nothing is written into the worktree. Result: built in 13.74s, exit 0.",
+    "script": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~46/review_table_shot.mjs",
+    "run_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~46/review_table_shot.run.txt",
+    "route": "/investor-reporting, Analysis tab, Prospect card, Prospect portfolio composer",
+    "reached_review_table": true,
+    "loc_printed": "LOC   : /investor-reporting",
+    "canvas_rgb": "rgb(244, 246, 250)",
+    "stubbed_urls": [
+      {
+        "url": "POST http://localhost:5175/auth/refresh",
+        "body_source": "ui-smoke.mjs SESSION object (internal Dev admin), as ui-smoke builds it"
+      },
+      {
+        "url": "POST http://localhost:5175/api/scoped/investor-reporting/directory/resolve",
+        "body_source": "portal/src/pages/InvestorReporting/tests/opal-scope/server-wire.json `context` (the Entry's actual Global wire: context_kind GLOBAL, two READY firms); the two tenant strings (and registry_tenant) replaced by synthetic firm-alpha / firm-beta; every other field as sourced"
+      },
+      {
+        "url": "POST http://localhost:5175/api/scoped/investor-reporting/analysis/inputs?selected_tenant=firm-alpha",
+        "body_source": "portal/src/pages/InvestorReporting/__tests__/mvp-upload/tests/producer-upload.json normalized.response (envelope and portfolio skeleton) with rows, holdings and disclosures.corrections set as the pin upload-review-corrected-holding.test.tsx builds them; three rows, round dollars 5700 / 900 / 250"
+      }
+    ],
+    "aborted_urls": "none this run (0). Remote requests are aborted and logged by the script; the first exploratory run aborted one: POST https://f7lvfv4bjc.execute-api.us-east-1.amazonaws.com/prod/analytics/ingest (the page's own analytics beacon, a timing-dependent request).",
+    "unfixtured_same_origin_reads_answered_404_by_ui_dist": [
+      "GET /api/scoped/advisor-intelligence/platinum/firm/partner_analytics_quarterly.json?firm=bd",
+      "GET /api/scoped/advisor-intelligence/platinum/firm/timeseries_overview.json?firm=bd",
+      "GET /api/scoped/advisor-intelligence/platinum/firm/cumulative_chart.json?firm=bd",
+      "GET /api/scoped/advisor-intelligence/platinum/firm/dashboard.json?firm=bd",
+      "GET /api/scoped/advisor-intelligence/platinum/firm/mix_summary.json?firm=bd",
+      "GET /api/scoped/portal-content (x2)",
+      "GET /api/scoped/investor-reporting/directory/browse?q=&limit=100&selected_tenant=firm-alpha",
+      "GET /api/scoped/investor-reporting/directory/browse?q=&limit=100&selected_tenant=firm-beta",
+      "GET /api/scoped/investor-reporting/analysis/comparisons?selected_tenant=firm-alpha"
+    ],
+    "what_the_page_shows_for_the_unfixtured_reads": "a red 'The client list is unavailable: firm-alpha (IrRequestError), firm-beta (IrRequestError)' line under the client search and 'Choose a client to see its firm and accounts.'; none touches the review table (the advisor-intelligence and portal-content reads belong to the app shell).",
+    "steps": "load route; click Analysis tab; click Prospect card; the card is in internal firm-choice mode (Global), so choose firm-alpha from its select; setInputFiles on the Holdings file input with a synthetic three-line CSV (APPL 5700, FBIFX 900, MSFT 250); press Review portfolio; wait for the table. Row S4 records the firm-choice and Global-resolve need.",
+    "png_full": "C:/dev/wk-dsgn-irptv1-46/org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~46/review_table_full_1cd1cf25.png (1440 px wide, full page)",
+    "png_table": "C:/dev/wk-dsgn-irptv1-46/org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~46/review_table_crop_1cd1cf25.png",
+    "png_region": "C:/dev/wk-dsgn-irptv1-46/org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~46/review_region_crop_1cd1cf25.png (disclosure list, normalized total, table)",
+    "what_each_row_shows": {
+      "row_1_typo": "Holding cell 'APPL, analysed as AAPL' (APPL at the cell's 14 px, ', analysed as AAPL' at 12 px, same navy); Original amount '5700 USD'; Analysis dollars '$5,700.00'",
+      "row_2_proxy": "Holding cell 'FBIFX, analysed as SGOV'; Original amount '900 USD'; Analysis dollars '$900.00'",
+      "row_3_uncorrected": "Holding cell 'MSFT' alone; Original amount '250 USD'; Analysis dollars '$250.00'",
+      "disclosure_list": "two bullets: 'APPL is analysed as AAPL, a proxy you named.' and 'FBIFX is analysed as SGOV, a proxy you named.' (rendered ABOVE the 'Normalized total: $6,850.00' line and the table, not under it)",
+      "uploaded_as": "the words 'uploaded as' appear nowhere on the page"
+    },
+    "design_notes": {
+      "measured_computed_styles": {
+        "holding_cell_ink": "rgb(22, 51, 114) = #163372 navy, 14px, tabular-nums",
+        "analysed_as_span_ink": "rgb(22, 51, 114), 12px, tabular-nums",
+        "dollars_cell_ink": "rgb(22, 51, 114), 14px, tabular-nums",
+        "disclosure_item_ink": "rgb(22, 51, 114), 14px",
+        "ground_under_cells_and_list": "rgb(255, 255, 255) panel; page canvas rgb(244, 246, 250)"
+      },
+      "C3_C9": "navy #163372 on panel #FFFFFF is 12.00:1 per the C3 ink table; no new colour on the corrected cell, its span or the list. No concern.",
+      "C1": "Lato 400 only in the cell and the span. No concern.",
+      "C2_tabular": "tabular-nums is computed on the dollars cell: holds.",
+      "C2_right_align": "CONCERN (pre-existing, not from this change): 'Original amount' and 'Analysis dollars' are left-aligned (plain <td>, ProspectComposer.tsx:576-577), against C2 'Figures right-align in a column'. Row DSGN_IRPTV1-D2-W46-S5.",
+      "visual_hierarchy": "the 12 px 'analysed as' span reads as a quiet gloss after the uploaded ticker; the uploaded symbol stays first at the same size as the uncorrected MSFT row, so the three rows read as one column. Judged by the CVO at L9, not here.",
+      "off_change_observations": "the table has no hairline or sunken header row (C3's sunken role is optional; nothing violated); '3 source rows retained. Showing 3.' is text-xs slate-500, not a DESIGN palette ink (pre-existing, outside this cell); the narrow firm select's chevron overlaps the synthetic name 'firm-alpha' (pre-existing)."
+    }
+  }
 }
