@@ -1,0 +1,80 @@
+{
+  "to": "IRPT_DASHBD.TO-DB-b-149",
+  "worker": "0.9.0_WK_IRPT_DASHBD~122",
+  "claim": "measured",
+  "day": "2026-10-09",
+  "day_object": "silver/transactions/2026-10-09.parquet in bucket opal-data-bd (the key form and bucket are those of load_transactions_for_date in both paths; the day object, not a trade_date filter, is what the median is taken over)",
+  "paths": [
+    {
+      "file": "data/black_diamond/scripts/silver/bd_price_update.py",
+      "line": 344,
+      "line_note": "line 344 is the median (valid.groupby('asset_name')['calc_price'].median()) inside extract_t1_prices (lines 327-344). The per-date loader that has no id dedupe is load_transactions_for_date at lines 263-271 (the 'near line 265' of ORIGINAL_STORE_SHAPE.json); it is called at line 778 and the median is applied at line 821. Verified by reading the bytes.",
+      "reads": "store s3://opal-data-bd/silver/transactions/<date>.parquet via _load_parquet_bytes (line 194); the price columns asset_name, units, market_value (lines 336-340); transaction_id is not read by this path on the per-date route",
+      "filters": "asset_name not null; units not null and abs(units) > 1e-8; market_value not null and not 0; calc_price = abs(market_value)/abs(units); 0 < calc_price < MAX_UNIT_PRICE (100000, line 59). No trade_date filter, no id dedupe.",
+      "groups_by": "asset_name: one median of calc_price per asset over every qualifying row of the day object",
+      "serves": "Into the row for each existing asset on target_date (build_target_date_rows, lines 416-487) as source transaction_observed, ONLY when the asset has no scoped override (lines 445-451) and no Yahoo close in historical_prices (lines 459-464; Yahoo and overrides outrank T1 in this file, SOURCE_RANK lines 65-71). The rows are upserted into s3://opal-data-bd/silver/prices/canonical_prices.parquet (save_canonical_prices, lines 605-614) and the day's rows into silver/prices/<date>.parquet (save_daily_prices_trigger, lines 617-670, S3 event to bd-gold-trigger). FIRST SERVED THING: the canonical_prices.parquet object, read by the gold steps B_01 holdings_lots (data/black_diamond/scripts/gold/B_01.holdings_lots.py line 341, which also reads the daily price files), A_03 positions_cube (A_03.positions_cube.py line 256), B_00, B_02 (their headers cite the object), whose outputs include gold/timeseries/holdings_lots/<date>.parquet (gold REGISTRY.md line 79) feeding D_02 advisor_client_detail and D_03 composition_artifacts (REGISTRY.md lines 103-104). Which portal page shows a holding value built on it was not followed.",
+      "to_whom": "The Black Diamond gold pipeline (valuations of holdings per account), then the advisor and client composition artifacts the portal publishes (REGISTRY.md lines 103-104); firm by bucket binding: 49financial (opal-data-bd, per ORIGINAL_STORE_SHAPE.json how_firm_was_told).",
+      "scheduled": false,
+      "schedule_basis": "DESIRED, read in the repo: infra/aws/ec2/EC2_MANIFEST.json lines 318-331 declare service bd-price-runner (instance i-0800437d1dbb0b5cc) with a _trigger note 'Invoked at end of opal-bd-allocation-download sequence, ~21:51 UTC weekdays' and '_replaces: bd-price-update Lambda (decommission after EC2 migration verified)'. The repo's SSM documents do NOT carry that invocation: infra/aws/ssm/opal-bd-allocation-download.json has no occurrence of 'price' (Grep, 0 hits). No APPLIED read of the EC2 service or its SSM document was made (outside this order's allowed reads). So: a manifest note asserts a weekday run, no schedule definition in the repo runs the script; scheduled is recorded false as 'no schedule definition found', NOT as 'known not to run'. NOT_ESTABLISHED whether it runs today.",
+      "owner": "Black Diamond silver pipeline (path data/black_diamond/scripts/silver; no owned-paths row found, as in W116)"
+    },
+    {
+      "file": "infra/aws/lambda/bd-pipeline/bd-price-update/lambda_function.py",
+      "line": 202,
+      "line_note": "line 202 is the median inside extract_t1_prices (lines 185-202). The per-date loader with no id dedupe is load_transactions_for_date at lines 141-149 (the 'near line 143' of ORIGINAL_STORE_SHAPE.json); called at line 610, median applied at line 653. Verified by reading the bytes.",
+      "reads": "the same store and key form (bucket constant at line 54, key at line 143); the same price columns asset_name, units, market_value (lines 194-198)",
+      "filters": "identical to the script's, expression for expression: asset_name not null; units not null and abs(units) > 1e-8; market_value not null and not 0; calc_price = abs(market_value)/abs(units); 0 < calc_price < 100000 (line 57). No trade_date filter, no id dedupe.",
+      "groups_by": "asset_name: one median of calc_price per asset over every qualifying row of the day object",
+      "serves": "Into the row for each existing asset on target_date (build_target_date_rows, lines 274-320). In this file T1 OUTRANKS Yahoo (lines 301-304) and SOURCE_RANK puts transaction_observed first (lines 60-65), with no scoped-override layer, so every asset that has a priced row in the day object takes this median. Upserted into silver/prices/canonical_prices.parquet (save_canonical_prices, lines 437-446) and silver/prices/<date>.parquet (lines 449-502, S3 event to bd-gold-trigger). FIRST SERVED THING: the same canonical_prices.parquet object and the same gold readers as the script (B_01 line 341, A_03 line 256), feeding holdings_lots and the D_02 / D_03 portal artifacts.",
+      "to_whom": "The same consumers as the script path: the Black Diamond gold pipeline's holdings valuation, then the advisor and client composition artifacts the portal publishes; firm 49financial by bucket binding.",
+      "scheduled": true,
+      "schedule_basis": "Two reads. DESIRED (Terraform, infra/aws/terraform/bd-pipeline/lambdas.tf lines 185-200: module price_update, function bd-price-update, role bd_processor, 10240 MB, timeout 900) carries NO schedule or trigger of its own; the invokers are in code: data/black_diamond/scripts/silver/merge-daily-incremental.py lines 583-590 and 675-707 (async invoke after a transaction merge that wrote rows), infra/aws/lambda/bd-pipeline/bd-allocation-processor/lambda_function.py lines 110-121 (async invoke when both silver parquets for the date exist), infra/aws/ssm/force-alloc-download.json lines 20-21 (the manual forced route), and the IAM allow at infra/aws/terraform/bd-pipeline/bd-silver-merge.tf lines 68-72. APPLIED (live single-resource reads through the shim): lambda get-function-configuration bd-price-update returned State Active, last modified 2026-04-06, runtime python3.11, 10240 MB; lambda get-policy returned ResourceNotFoundException, i.e. the function has NO resource-based policy, so no EventBridge rule and no S3 event is permitted to invoke it directly (only an IAM caller can); logs describe-log-streams on /aws/lambda/bd-price-update showed the newest log event at 2026-10-11T00:19Z (about 21 hours before this read). So: no cron of its own; it runs when the upstream silver chain invokes it, and it ran on the day before this read. 'scheduled' is recorded true in that sense (event-chained from the daily silver pipeline), not as a cron. NOT_ESTABLISHED: whether the deployed code equals the repo file (deploy pin not read).",
+      "owner": "Black Diamond pipeline lambda (path infra/aws/lambda/bd-pipeline; no owned-paths row found, as in W116)"
+    }
+  ],
+  "paths_compute_the_same_medians": true,
+  "same_medians_basis": "extract_t1_prices is the same function in both files (script lines 327-344, lambda lines 185-202: same filter expressions, same MAX_UNIT_PRICE value, same groupby and median) and both are fed by the same load_transactions_for_date (same key, same trade_date coercion, no dedupe). So the median is computed ONCE and compared once. What differs is only which assets then take that median as their served price (see the two 'serves' cells: the script lets overrides and Yahoo outrank it; the Lambda lets it outrank Yahoo).",
+  "medians": {
+    "measured": true,
+    "compared": 160,
+    "moved": 34,
+    "unmoved": 126,
+    "precision": "8 decimal places: the price is compared after round(8), the precision the paths' own daily price file normalises to (save_daily_prices_trigger, script line 635 and lambda line 467)",
+    "dedupe_rule": "drop_duplicates(subset=['transaction_id'], keep='last') on the whole day frame, before the path's own filters: the rule the same files already use on their history route (script lines 258-259, lambda lines 136-137). A keep='first' run gave the same counts.",
+    "bands": {
+      "under_0.1_percent": 26,
+      "0.1_to_1_percent": 6,
+      "over_1_percent": 2
+    },
+    "largest_relative_move_band": "over_1_percent",
+    "assets_only_in_one_side": 0,
+    "rows_in_day_object": 5216,
+    "distinct_transaction_ids": 1156,
+    "priced_rows_ids_with_more_than_one_row": 1006,
+    "priced_repeated_ids_whose_copies_differ_in_price": 0,
+    "priced_repeated_ids_identical_in_price": 1006,
+    "assets_with_a_repeated_id_among_their_priced_rows": 151,
+    "assets_with_a_median_total": 160,
+    "reading": "Of the 160 per-asset medians the day object yields, 151 are taken over rows where at least one transaction id appears more than once; 34 of the 160 differ once each id is counted once (26 by under 0.1 percent, 6 by 0.1 to 1 percent, 2 by more than 1 percent). Every repeated priced id carries one and the same per-row price in all its copies, so the movement comes only from the weight, as ORIGINAL_STORE_SHAPE.json predicted."
+  },
+  "does_the_served_price_move": {
+    "lambda_path": "yes, for the medians that moved: every asset with a priced row takes its median as the served price (T1 outranks Yahoo there), so the 34 moved medians are 34 served-price candidates for that day. Whether each is the price that landed in canonical_prices on that day was not read (canonical_prices.parquet is outside this order's one read).",
+    "script_path": "only for the assets with no scoped override and no Yahoo close, which was not computed (ticker_lookup.json and historical_prices.parquet are outside this order's one read), so the number of served script prices that move is NOT_ESTABLISHED, between 0 and 34.",
+    "is_the_deduped_price_the_right_one": "not judged. This cell shows the median moves; it does not show which weighting is correct for a price. The history route of the same files counts each id once; the per-date route counts it once per portfolio group copy."
+  },
+  "limits": [
+    "One day (2026-10-09), one object. The day object's trade_date column spans several dates; the paths do not filter on it and neither did this read.",
+    "canonical_prices.parquet, the Yahoo layer, the override layer and ticker_lookup.json were not read, so which asset's served price is the T1 median was not measured.",
+    "gold_dispatch.sh lines 1274-1278 rebuild canonical_prices.parquet (S_00, build_canonical_prices_v2.py, which dedupes on transaction_id per the W116 record) before the gold freshness gate in the full chain; whether that rebuild overwrites the per-date rows before the gold readers use them was not traced. A served price may therefore already be the deduplicated one by the time gold reads it.",
+    "The scheduling of the script path is not established (manifest note versus no SSM carrier). The deployed Lambda code was not compared with the repo file.",
+    "Where a portal page shows a figure built on the holdings_lots artifact was not followed."
+  ],
+  "evidence": {
+    "private_files": "median122.py and result.json under this worker's folder (0.9.0_WK_IRPT_DASHBD~122) of the IRPT_DASHBD private evidence area on C:/dev (outside the repo). The script prints counts and bands only and re-implements the shared extract_t1_prices verbatim.",
+    "aws_calls": "head-object and 3 ranged GETs on the one day object (columns transaction_id, asset_name, units, market_value only; no account column); lambda get-function-configuration, lambda get-policy, logs describe-log-streams (limit 1) on the one named function and its log group. No denial. No write.",
+    "scripts": "median122.py (private)"
+  },
+  "rows": ["IRPT_DASHBD-D2-W122-S1", "IRPT_DASHBD-D2-W122-S2"],
+  "corrected": 0,
+  "s3_writes": 0
+}
