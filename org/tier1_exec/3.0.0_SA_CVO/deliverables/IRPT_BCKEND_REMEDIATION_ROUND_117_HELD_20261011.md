@@ -128,3 +128,11 @@ IRPT_BCKEND order terminal. Changes to the rows above when they land:
 - **D2-W278-S3, D2-W278-S4, D2-S62**: unchanged.
 - **New, to ride the same slug:** the source map's `last_deployed_commit` and `last_deployed_at` for the two applied functions still
   read 2026-10-04 (row D2-S70). Owner `2.0.0_SA_COO~P2`: the apply's ledger or the map records the 2026-10-11 deploy.
+
+## Update 2026-10-11 ~06:5xZ: irpt-status is applied
+
+This seat's live read: irpt-status carries `6idtFvAm` (revision 6), modified 2026-10-11T04:44:47Z; 30 invocations to 06:22Z with
+0 TypeError, 0 Traceback, 0 RetentionRefused. All three functions of row **D2-S60** are now repaired, and irpt-status has served an
+admitted read (IRPT_YCDGEN round 7's run). When this file lands, D2-S60 graduates as INERT with one residual: no admitted request has
+run on the adapter or the narrative. D2-W278-S3 closes with it. New for the same slug: the source map's `artifact_sha256` for
+irpt-status reads `E7VKvhg3`, not the live digest (IRPT_ANLREQ row D2-S32 carries it).
