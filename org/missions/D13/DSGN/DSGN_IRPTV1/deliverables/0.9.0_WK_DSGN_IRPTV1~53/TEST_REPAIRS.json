@@ -84,6 +84,271 @@
     }
   ],
   "smoke_map": {
+    "outcome": "DONE",
+    "portal_commit": "73806e29c6a3fd40e034ca16f965c514dad1ef3a",
+    "amendment": "AMENDMENT 3 as re-measured at portal DEV 00989b8b (the history reader fixed on DEV at 8ed372cb is in the base): 17 entries, 5 excuses, cap six",
+    "routes_declared": 22,
+    "keys": 17,
+    "excused": [
+      {
+        "route": "directory-browse",
+        "reason_class": "READER_REFUSES_PRODUCER_FIXTURE",
+        "reason": "readDirectoryBrowse (contracts/directory-browse.ts:67) requires each entry's revision.directory_revision to equal the page's directory_revision; the producer's DirectoryPage.valid.json carries a different value on the entry (dir-2026-09-10-001) than on the page (64 hex). The FIXTURE is the side out of step, not the reader: it validates against the v1 schema, which cannot state the equality, and the handlers keep the rule (CTO confirmed no reader change, msg 4859; issuer's record org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/FIVE_FIXTURES_VS_CONTRACT_20261011.md, Update ~12:0xZ).",
+        "evidence": "this session, parseIrEnvelope('directory-browse', wrapped infra/aws/lambda/investor-reporting/_contracts/fixtures/DirectoryPage.valid.json): REFUSED investor-reporting directory-browse: response envelope field 'data' does not satisfy the v1 contract [field data]; inner readDirectoryBrowse(instance): REFUSED Invalid directory page (page directory_revision e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855, entry directory_revision dir-2026-09-10-001). Log C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/s2_reader_probe.txt"
+      },
+      {
+        "route": "analysis-input-upload",
+        "reason_class": "READER_REFUSES_PRODUCER_FIXTURE",
+        "reason": "adaptAnalysisUpload (contracts/envelope.ts:270-271) requires, on a NORMALIZED answer, portfolio.source to be an object whose upload_id equals the answer's upload_id; the producer's AnalysisUploadResult.valid.json carries portfolio {} (no source). The FIXTURE is the side out of step, not the reader: it validates against the v1 schema, which cannot state the equality, and the handler (intake/uploads.py) builds source.upload_id and checks it before answering NORMALIZED (CTO confirmed no reader change, msg 4859; issuer's record org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/FIVE_FIXTURES_VS_CONTRACT_20261011.md, Update ~12:0xZ).",
+        "evidence": "this session, parseIrEnvelope('analysis-input-upload', wrapped infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisUploadResult.valid.json): REFUSED investor-reporting analysis-input-upload: response envelope field 'data' does not satisfy the v1 contract [field data]; adaptAnalysisUpload(instance) the same text; instance portfolio {} and upload_id UP-0123456789abcdef.... Log C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/s2_reader_probe.txt"
+      },
+      {
+        "route": "custody-report-read",
+        "reason_class": "READER_REFUSES_PRODUCER_FIXTURE",
+        "reason": "validateCustodyReport (contracts/envelope.ts:150) requires report.accounts to be an array; the producer's custody-report-read.response.valid.json report holds only composition_sha256, and the issuer validated the fixture as a valid v1 payload (5 of 5, org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/FIVE_FIXTURES_VS_CONTRACT_20261011.md). The READER is out of step with the contract (AMENDMENT 3); the reader change is another cell's.",
+        "evidence": "this session, validateCustodyReport(infra/aws/lambda/investor-reporting/_contracts/fixtures/custody-report-read.response.valid.json instance): REFUSED investor-reporting custody-report-read: response envelope field 'data' does not satisfy the v1 contract [field data]; report keys: composition_sha256 only. Log C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/s2_reader_probe.txt"
+      },
+      {
+        "route": "custody-report-persist",
+        "reason_class": "READER_REFUSES_PRODUCER_FIXTURE",
+        "reason": "the product has no reader of the persist answer: validateCustodyReport names the read operation only, requires a `report` object with an accounts array, and the persist fixture carries sha256 instead. The fixture is a valid v1 payload (org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/FIVE_FIXTURES_VS_CONTRACT_20261011.md); the READER is out of step with the contract (AMENDMENT 3); the reader is another cell's.",
+        "evidence": "this session, validateCustodyReport(infra/aws/lambda/investor-reporting/_contracts/fixtures/custody-report-persist.response.valid.json instance): REFUSED investor-reporting custody-report-read: response envelope field 'data' does not satisfy the v1 contract [field data] (the text names the READ operation, which is the only operation the validator knows). Log C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/s2_reader_probe.txt"
+      },
+      {
+        "route": "analysis-request-original",
+        "reason_class": "NO_PRODUCER_FIXTURE",
+        "reason": "the producer publishes no fixture and no response schema file for it (routes.json response_schema_absent_reason; its note says its data member is the analysis-request-pdf data shape); a body typed here would be invented.",
+        "evidence": "searched this session: Grep for analysis-request-original over infra/aws/lambda/investor-reporting/_contracts -> 0 matches in 0 files; Glob *riginal* over _contracts/fixtures -> no files; Glob * over _contracts/fixtures lists 54 files, none for it; docs/contracts holds the name only in routes.json (earlier session: responses/ 21 files, none for it)."
+      }
+    ],
+    "sourced": [
+      {
+        "route": "analysis-request-history",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/OwnedAnalysisRequestHistory.valid.json (instance, whole)",
+        "reader": "parseIrEnvelope",
+        "status": "ACCEPTED this session on the wrapped fixture, which the history reader fix at portal 8ed372cb now admits (before it was refused)"
+      },
+      {
+        "route": "analysis-request-read",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/OwnedAnalysisRequest.valid.json (instance, whole)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "analysis-request-pdf",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisRequestPdf.valid.json (instance, whole)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "selection-create",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/SelectedAccounts.valid.json (instance, whole)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "directory-search",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/DirectoryEntry.valid.json (instance as a one-element array; consumer copy in fixtures/wire/, content-equal)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "resolve-scope",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/ResolvedScope.valid.json (consumer copy in fixtures/wire/, content-equal, with the opaque firm id)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "performance-report",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/PerformanceReport.valid.json (consumer copy in fixtures/wire/, content-equal)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "analysis-requests",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisRequest.valid.json slice {identity, stage} plus the public status (consumer copy, content-equal)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "analysis-report",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.valid.json slice (consumer copy, content-equal)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "narrative-packet",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/NarrativePacket.valid.json (consumer copy, content-equal)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "status-summary",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/StatusEnvelope.valid.json as the public status envelope (consumer copy)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "status-job",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/StatusEnvelope.valid.json as the public status envelope (consumer copy)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "submit-export",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/ExportReceipt.valid.json (consumer copy, content-equal)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "export-receipt",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/ExportReceipt.valid.json (consumer copy, content-equal)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "export-download",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/ExportReceipt.valid.json slice with sha256 and byte_length from the consumer copy of AnalysisRequestPdf.valid.json",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "holdings-snapshot",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/HoldingsSnapshot.valid.json (consumer copy, content-equal)",
+        "reader": "parseIrEnvelope"
+      },
+      {
+        "route": "comparison-catalogue",
+        "source": "infra/aws/lambda/investor-reporting/_contracts/fixtures/ComparisonCatalogue.valid.json (instance, whole)",
+        "reader": "parseIrEnvelope"
+      }
+    ],
+    "sourced_note": "The 12 older entries are unchanged bytes (git diff of default.json is 141 insertions and 0 deletions); they came from fixtures/wire/ copies, as the earlier sessions recorded. The five new bodies are read in place from the producer fixtures by fe-s-13/gen-corpus.ts (producerInstanceOf) and wrapped by its envelope(). Every entry parses clean through parseIrEnvelope (fe-s-75: PARSED CLEAN 17 of 17).",
+    "reader_probe": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/s2_reader_probe.txt (a bun script outside both worktrees importing the portal readers; negative control: a bare payload is refused on field body)",
+    "pins_followed": [
+      {
+        "file": "portal/src/pages/InvestorReporting/__tests__/fe-s-14/published-map.test.ts",
+        "before": "expect(keys).toHaveLength(12); expect(satisfied).toBe(12)",
+        "after": "the declared routes with no key must equal, sorted, the five names (analysis-input-upload, analysis-request-original, custody-report-persist, custody-report-read, directory-browse); keys length == declared - 5 and == 17; satisfied == 17"
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/__tests__/fe-s-1/fixtures.test.ts",
+        "before": "every DECLARED route owns exactly one key; keys == the contract denominator (22)",
+        "after": "five routes excused BY NAME with a reason class (EXCUSED_SMOKE_ROUTES); every other declared route owns exactly one key; an excused route with an entry fails; an excuse naming a non-declared route fails; keys == denominator - 5 (17)"
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/__tests__/fe-s-75/parse-control.test.ts",
+        "before": "CONTROL arm: const firstKey = Object.keys(map)[0]",
+        "after": "CONTROL arm: const firstKey = '/api/scoped/investor-reporting/directory/search' (the first key of the map at base, 12 entries) plus expect(Object.hasOwn(map, firstKey)).toBe(true)"
+      },
+      {
+        "file": "portal/src/pages/InvestorReporting/__tests__/fe-s-81/generator-output-carries-unprojected-grant.test.ts",
+        "before": "CONTROL arm: const firstKey = Object.keys(map)[0]",
+        "after": "CONTROL arm: const firstKey = '/api/scoped/investor-reporting/directory/search' plus expect(Object.hasOwn(map, firstKey)).toBe(true)"
+      }
+    ],
+    "other_pins_followed": "none: the whole-scope run found no other test that restates the 12 pin (the only new failure candidate was fe-s-14 itself, followed above).",
+    "mutants": [
+      {
+        "failure_mode": "a declared route that is not excused has no entry",
+        "what": "fe-s-1/fixtures.test.ts: the 'analysis-request-original' entry deleted from EXCUSED_SMOKE_ROUTES (committed first; python edit; reverted with git checkout -- the file; never committed)",
+        "failed": true,
+        "how": "ROUTES WITHOUT EXACTLY ONE KEY: analysis-request-original: 0 key(s); the smoke-map test fails (8 pass, 1 fail; expect(unmatchedRoutes).toEqual([]) got one element)",
+        "log": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/s2_mutantA.txt"
+      },
+      {
+        "failure_mode": "an excused route gains an entry",
+        "what": "fixtures/smoke/default.json: a directory/browse key added (the selection-create body relabelled operation directory-browse) (committed first; python edit; reverted with git checkout -- the file; never committed)",
+        "failed": true,
+        "how": "EXCUSED ROUTES THAT HAVE AN ENTRY: directory-browse: 1 key(s) while excused as READER_REFUSES_PRODUCER_FIXTURE; the smoke-map test fails (8 pass, 1 fail)",
+        "log": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/s2_mutantB.txt"
+      }
+    ],
+    "mutants_reverted": "both reverted with git checkout; portal git status clean before the whole-scope run (verified)",
+    "producer_pin": {
+      "file": "infra/aws/lambda/investor-reporting/_contracts/tests/test_seam_paired.py",
+      "outcome": "PLACED",
+      "owner": "2.0.0_SA_COO~P2",
+      "note": "not edited; CONSUMER_SMOKE_ENTRIES there equals the old map (12) and is another project's to follow to 17"
+    },
+    "generator_note": "default.json was regenerated with `bun run src/pages/InvestorReporting/__tests__/fe-s-13/gen-corpus.ts`; the other files it writes were restored with git checkout (they differed only in line endings, except comparison-catalogue.request.json, which lost its `_captured` member: row DSGN_IRPTV1-D2-W53-S8).",
+    "rows": [
+      "DSGN_IRPTV1-D2-W53-S8",
+      "DSGN_IRPTV1-D2-W53-S9"
+    ]
+  },
+  "newline_pins": {
+    "files_searched": 448,
+    "search": "every .ts, .tsx, .mjs, .cjs and .js file under portal/src/pages/InvestorReporting/__tests__ (448 files; 269 of them read file text or run git). Two instruments, each a short python script run from the scratchpad: (1) every regex literal whose body holds a bare LF escape not preceded by an optional CR (18 hits; the same scan on the pre-fix iv-e-116 blob found its 2 anchors, so it can fire); (2) every includes/indexOf/lastIndexOf/startsWith/endsWith/toContain/toMatch/replace call whose first string argument holds an LF escape (5 hits). Each of the 23 hits was read in context.",
+    "found": 1,
+    "fixed": 1,
+    "list": [
+      {
+        "file": "portal/src/pages/InvestorReporting/__tests__/fe-s-31/every-page.test.ts",
+        "line": 410,
+        "was": ".replace(/import \\{ isAnswerBearing \\} from '\\.\\.\\/state\\/availability'\\n/, '')",
+        "now": ".replace(/import \\{ isAnswerBearing \\} from '\\.\\.\\/state\\/availability'\\r?\\n/, '')",
+        "why": "strips the import from PrintEntry.tsx's text for the CONTROL arm; the old regex ended on a bare LF directly after a literal and matched nothing on CRLF text (bun -e: old on CRLF false, new on CRLF true, new on LF true)",
+        "portal_commit": "c32d67644baf69ac07458422c8b78f6e3056cd30"
+      }
+    ],
+    "read_and_left": "The other 22 of the 23 hits were read in context and tolerate CRLF: a lazy [\\s\\S]*? body or a line start with the LF in front of the literal (iv-e-117:96, iv-e-118:126, iv-e-17:42, iv-e-26:105, iv-e-31:121, fe-s-47:428, iv-e-19:42, fe-s-35:249); a negated [^LF] tail that is trimmed or only searched (iv-e-148:93, iv-e-31:126, iv-e-48:102, path-a-skip:43, fe-s-25 absent-vs-null:172, fe-s-25 source-age-field:116, fe-s-34:82, fe-s-4:282, fe-s-6:38); and generators or probes (fe-s-50:44 and fe-s-41:629 turn LF into CRLF on purpose, fe-s-46:630 edits text the test generates itself with LF, iv-e-37:206 and gen-wire:356 probe for any LF). iv-e-116 was fixed earlier (a3f4b6dc) and is not counted.",
+    "not_searched": "split('\\n') over a source file followed by an exact-equal line comparison was not enumerated (the order names regexes); the scope's tests pass on this device, whose working copies are CRLF for some files (git ls-files --eol, row D2-W52-S3)."
+  },
+  "portal_commits_in_order": [
+    "0149d6b7569fbe7868edc318758e9f31dbe0beb7",
+    "21011a472fcf65535338d53424bccedd1e7f0d77",
+    "c32d67644baf69ac07458422c8b78f6e3056cd30",
+    "73806e29c6a3fd40e034ca16f965c514dad1ef3a"
+  ],
+  "portal_commit": "73806e29c6a3fd40e034ca16f965c514dad1ef3a",
+  "product_files_changed": [],
+  "test_only_files_changed": [
+    "portal/src/pages/InvestorReporting/__tests__/fe-s-14/envelope.test.ts",
+    "portal/src/pages/InvestorReporting/__tests__/fe-s-57/carry.test.ts",
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-115.order-and-disclosure.test.tsx",
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-69.performance-finished.test.tsx",
+    "portal/src/pages/InvestorReporting/__tests__/fe-s-31/every-page.test.ts",
+    "portal/src/pages/InvestorReporting/__tests__/fe-s-13/gen-corpus.ts",
+    "portal/src/pages/InvestorReporting/fixtures/smoke/default.json",
+    "portal/src/pages/InvestorReporting/__tests__/fe-s-1/fixtures.test.ts",
+    "portal/src/pages/InvestorReporting/__tests__/fe-s-14/published-map.test.ts",
+    "portal/src/pages/InvestorReporting/__tests__/fe-s-75/parse-control.test.ts",
+    "portal/src/pages/InvestorReporting/__tests__/fe-s-81/generator-output-carries-unprojected-grant.test.ts"
+  ],
+  "suite_after": {
+    "failed": 6,
+    "command": "bun test src/pages/InvestorReporting (cwd portal worktree, at 73806e29c6a3fd40e034ca16f965c514dad1ef3a, status clean)",
+    "runner": "Ran 1173 tests across 374 files: 1140 pass, 27 skip, 6 fail (110.01s)",
+    "log": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/s2_after_73806e29.txt",
+    "base_at_00989b8b": {
+      "failed": 8,
+      "runner": "Ran 1173 tests across 374 files: 1138 pass, 27 skip, 8 fail (170.81s), measured before any edit",
+      "log": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/s2_base_00989b8b.txt",
+      "ids": [
+        "fe-s-1/fixtures.test.ts :: fixture set > the smoke map covers every scoped route, one entry each",
+        "fe-s-13/content-pins.test.ts :: IVE17-AC3 -- no bridge cast for the landed fields, and the content pin still offers 17 of 17 > every arm holds",
+        "fe-s-13/content-pins.test.ts :: IVE26-AC3 -- gen-wire.ts regeneration is idempotent, data is optional, content pin still 17 of 17 > every arm holds",
+        "fe-s-13/content-pins.test.ts :: the content pin > ADDITIVE, non-breaking producer changes leave this battery GREEN",
+        "fe-s-13/content-pins.test.ts :: the content pin > THE MUTATION HARNESS IS TEST-LOCAL -- the contract on disk did not move",
+        "fe-s-13/content-pins.test.ts :: the content pin > the pin names all three axes and the live contract offers every item",
+        "fe-s-13/producer-fixtures.test.ts :: producer fixtures > every DECLARED route still publishes the RESPONSE ENVELOPE this client parses",
+        "fe-s-14/published-map.test.ts :: F14-AC16 -- the published map is a v1 statement > PUBLISHED MAP -- declared paths, v1 envelopes, contract-required data"
+      ],
+      "note": "the spawn named 7; the eighth is fe-s-14/published-map.test.ts timing out at 5007.69 ms under load, which passes alone (row DSGN_IRPTV1-D2-W53-S9)"
+    },
+    "compare": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/s2_ids_compare.json",
+    "fixed_ids": [
+      "fe-s-1/fixtures.test.ts :: fixture set > the smoke map covers every scoped route, one entry each"
+    ],
+    "base_flake_not_counted_as_fixed": [
+      "fe-s-14/published-map.test.ts :: F14-AC16 -- the published map is a v1 statement > PUBLISHED MAP -- declared paths, v1 envelopes, contract-required data"
+    ],
+    "new_failing_ids": [],
+    "still_failing": [
+      "fe-s-13/content-pins.test.ts :: IVE17-AC3 -- no bridge cast for the landed fields, and the content pin still offers 17 of 17 > every arm holds",
+      "fe-s-13/content-pins.test.ts :: IVE26-AC3 -- gen-wire.ts regeneration is idempotent, data is optional, content pin still 17 of 17 > every arm holds",
+      "fe-s-13/content-pins.test.ts :: the content pin > ADDITIVE, non-breaking producer changes leave this battery GREEN",
+      "fe-s-13/content-pins.test.ts :: the content pin > THE MUTATION HARNESS IS TEST-LOCAL -- the contract on disk did not move",
+      "fe-s-13/content-pins.test.ts :: the content pin > the pin names all three axes and the live contract offers every item",
+      "fe-s-13/producer-fixtures.test.ts :: producer fixtures > every DECLARED route still publishes the RESPONSE ENVELOPE this client parses"
+    ]
+  },
+  "rows": [
+    "DSGN_IRPTV1-D2-W53-S1",
+    "DSGN_IRPTV1-D2-W53-S2",
+    "DSGN_IRPTV1-D2-W53-S3",
+    "DSGN_IRPTV1-D2-W53-S4",
+    "DSGN_IRPTV1-D2-W53-S8",
+    "DSGN_IRPTV1-D2-W53-S9"
+  ],
+  "smoke_map_history_before_amendment_3": {
     "outcome": "STOPPED",
     "rows": [
       "DSGN_IRPTV1-D2-W53-S1",
@@ -180,39 +445,7 @@
       "done": "nothing of part 2 is committed (portal c32d6764, status clean). Not done, because they depend on the final excused list: the control-arm pin, fe-s-1 and fe-s-14 follow, the two fe-s-1 mutants, the whole-scope run (no portal file moved since the last one)."
     }
   },
-  "newline_pins": {
-    "files_searched": 448,
-    "search": "every .ts, .tsx, .mjs, .cjs and .js file under portal/src/pages/InvestorReporting/__tests__ (448 files; 269 of them read file text or run git). Two instruments, each a short python script run from the scratchpad: (1) every regex literal whose body holds a bare LF escape not preceded by an optional CR (18 hits; the same scan on the pre-fix iv-e-116 blob found its 2 anchors, so it can fire); (2) every includes/indexOf/lastIndexOf/startsWith/endsWith/toContain/toMatch/replace call whose first string argument holds an LF escape (5 hits). Each of the 23 hits was read in context.",
-    "found": 1,
-    "fixed": 1,
-    "list": [
-      {
-        "file": "portal/src/pages/InvestorReporting/__tests__/fe-s-31/every-page.test.ts",
-        "line": 410,
-        "was": ".replace(/import \\{ isAnswerBearing \\} from '\\.\\.\\/state\\/availability'\\n/, '')",
-        "now": ".replace(/import \\{ isAnswerBearing \\} from '\\.\\.\\/state\\/availability'\\r?\\n/, '')",
-        "why": "strips the import from PrintEntry.tsx's text for the CONTROL arm; the old regex ended on a bare LF directly after a literal and matched nothing on CRLF text (bun -e: old on CRLF false, new on CRLF true, new on LF true)",
-        "portal_commit": "c32d67644baf69ac07458422c8b78f6e3056cd30"
-      }
-    ],
-    "read_and_left": "The other 22 of the 23 hits were read in context and tolerate CRLF: a lazy [\\s\\S]*? body or a line start with the LF in front of the literal (iv-e-117:96, iv-e-118:126, iv-e-17:42, iv-e-26:105, iv-e-31:121, fe-s-47:428, iv-e-19:42, fe-s-35:249); a negated [^LF] tail that is trimmed or only searched (iv-e-148:93, iv-e-31:126, iv-e-48:102, path-a-skip:43, fe-s-25 absent-vs-null:172, fe-s-25 source-age-field:116, fe-s-34:82, fe-s-4:282, fe-s-6:38); and generators or probes (fe-s-50:44 and fe-s-41:629 turn LF into CRLF on purpose, fe-s-46:630 edits text the test generates itself with LF, iv-e-37:206 and gen-wire:356 probe for any LF). iv-e-116 was fixed earlier (a3f4b6dc) and is not counted.",
-    "not_searched": "split('\\n') over a source file followed by an exact-equal line comparison was not enumerated (the order names regexes); the scope's tests pass on this device, whose working copies are CRLF for some files (git ls-files --eol, row D2-W52-S3)."
-  },
-  "portal_commits_in_order": [
-    "0149d6b7569fbe7868edc318758e9f31dbe0beb7",
-    "21011a472fcf65535338d53424bccedd1e7f0d77",
-    "c32d67644baf69ac07458422c8b78f6e3056cd30"
-  ],
-  "portal_commit": "c32d67644baf69ac07458422c8b78f6e3056cd30",
-  "product_files_changed": [],
-  "test_only_files_changed": [
-    "portal/src/pages/InvestorReporting/__tests__/fe-s-14/envelope.test.ts",
-    "portal/src/pages/InvestorReporting/__tests__/fe-s-57/carry.test.ts",
-    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-115.order-and-disclosure.test.tsx",
-    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-69.performance-finished.test.tsx",
-    "portal/src/pages/InvestorReporting/__tests__/fe-s-31/every-page.test.ts"
-  ],
-  "suite_after": {
+  "suite_after_before_part2": {
     "failed": 7,
     "command": "bun test src/pages/InvestorReporting (cwd portal worktree, at c32d6764, status clean)",
     "runner": "Ran 1159 tests across 372 files: 1125 pass, 27 skip, 7 fail",
@@ -232,11 +465,5 @@
       "fe-s-1/fixtures.test.ts :: fixture set > the smoke map covers every scoped route, one entry each",
       "fe-s-13/producer-fixtures.test.ts :: producer fixtures > every DECLARED route still publishes the RESPONSE ENVELOPE this client parses"
     ]
-  },
-  "rows": [
-    "DSGN_IRPTV1-D2-W53-S1",
-    "DSGN_IRPTV1-D2-W53-S2",
-    "DSGN_IRPTV1-D2-W53-S3",
-    "DSGN_IRPTV1-D2-W53-S4"
-  ]
+  }
 }

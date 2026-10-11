@@ -1,0 +1,170 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_IAMROLES202609.TO-IAM-x-4",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IR",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3cadaf52ca"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP_R7.md",
+  "vintage_commit": "7203dca6ab",
+  "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-x-4.retire-lambda-test-role.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round7/retire_row7/RECREATE_lambda-test-role.md",
+   "kind": "doc",
+   "commit_or_etag": "a3994c4cb7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "SITE-Z's OWN recreation record, committed BEFORE anything was detached or deleted -- which is the binding part, because the restore path has to exist on this device and in git history before the role stops existing. It carries the verbatim get-role JSON and exactly two rebuild commands (create-role with path /, the live trust document, the description and max-session 3600; then attach-role-policy for AWSLambdaBasicExecutionRole), and states that 0 inline policies, 0 tags and no boundary mean nothing else is owed. IT EXISTS BECAUSE THE LAPTOP'S RECORD IS NOT IN THIS CLONE: a rollback that depends on a file this device cannot read is not a rollback. It also records the two fields a rebuild cannot reproduce (RoleId AROAUR7FNW6PKHOVBXCS4 and CreateDate) and why that is immaterial here, which is the exact concern the round-6 analysis had reserved this delete for.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round7/retire_row7/RETIRE_READBACK.md",
+   "kind": "doc",
+   "commit_or_etag": "a686418d6b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Both read-back outputs verbatim -- the NoSuchEntity error on the deleted role and the positive control's role JSON -- plus the act table in the ruling's order, the two-plane basis for fact 5, and three things stated against the clean result: that the detach leg's proof is a COUNT rather than an rc, that my first read-back printed the wrong rc because $? followed a pipe to head, and that the served graph will keep showing this role until its next stitch so a future reader does not conclude the delete failed.",
+   "artifact_covered_by": [
+    "AC2",
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261011T1203Z_iamroles-r7-retire-row7_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "a686418d6b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The NEVER-2 entry, opened at 12:03Z BEFORE the detach with FOUR legs -- ROLLBACK, DETACH, DELETE, READBACK -- in that deliberate order, so that the restore path is a CLOSED leg before any destructive call is made. All four closed; Status reads CLOSED 20261011T121231Z at HEAD. This pin is the commit that closed it, and it exists because the tool does not make it: the third occurrence today of deploy_ledger.py leaving its close uncommitted.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "2 or more -- the site-Z recreation record carries the rebuild commands (create-role and each attach)",
+   "method": "command",
+   "invocation": "grep -c -E 'aws iam (create-role|attach-role-policy) ' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round7/retire_row7/RECREATE_lambda-test-role.md",
+   "output_evidence": "2\nexit=0",
+   "denominator": "The complete restore for this role is 2 commands: 1 create-role plus 1 attach-role-policy for its single managed attachment. 2 is therefore not merely 'at least 2' here, it is the exact count the role's own shape requires -- 0 inline policies, 0 tags and no permissions boundary mean no further command is owed.",
+   "status": "PASS",
+   "status_reason": "THE CRITERION ASKS FOR COMMANDS IN A FILE, BUT WHAT MATTERS IS THAT THEY RESTORE THE ROLE, SO I CHECKED THE SHAPE AND NOT JUST THE COUNT. Each command's arguments come from this seat's own live get-role read, not from the laptop's record: path /, the assume-role policy document verbatim, description 'Scoped Lambda role - created 2026-02-19 IAM audit', max-session-duration 3600, then the exact managed policy ARN arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole. The order is load-bearing and the record says so: attach-role-policy fails if the role does not yet exist. WHY A SITE-Z RECORD EXISTS AT ALL IS THE SUBSTANTIVE POINT: the laptop CTO wrote its own recreation record and that record is NOT in this clone, so a rollback citing it would have been unexecutable on the device performing the delete. The order anticipated this ('the laptop's record is not in this clone; the rollback must not depend on it') and step 0 exists for it. THE ONE THING THE RECORD CANNOT RESTORE IS STATED IN IT RATHER THAN OMITTED: RoleId AROAUR7FNW6PKHOVBXCS4 and CreateDate are AWS-assigned and a recreated role gets a new RoleId. That is precisely the concern on which the round-6 analysis had reserved this delete for Andrew, and the CTO ruling lifted it on the ground that nothing pins the old principal -- which my own two censuses independently support. The record names what would have made it material, so a future reader who finds a RoleId reference has the sentence to read first. Base reading recorded by the issuer: the file absent, FAIL."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "exactly `1` -- the role is gone, read live (a positive control on an existing role is in RETIRE_READBACK.md)",
+   "method": "command",
+   "invocation": "bash -c \".tools/aws iam get-role --role-name lambda-test-role 2>&1 | grep -c NoSuchEntity\"",
+   "output_evidence": "1\nexit=0",
+   "denominator": "1 role deleted, 1 NoSuchEntity. Read unpiped alongside it: rc=254 on the deleted role against rc=0 and 1337 bytes of role JSON on the control.",
+   "status": "PASS",
+   "status_reason": "A NoSuchEntity ON ITS OWN IS NOT EVIDENCE, WHICH IS WHY THE CRITERION ITSELF POINTS AT THE CONTROL. A failed retrieval returns a value: a call that could not reach IAM, a mistyped role name or an expired credential would produce an error a grep for NoSuchEntity might equally match or equally miss. So the same call shape was run on opal-smartx-lambda-role AS ITS OWN SEPARATE INVOCATION -- a control sharing a call with its target is not a control -- and returned rc=0 with 1337 bytes of role JSON. Both outputs are recorded verbatim in RETIRE_READBACK.md section 1. ONE CORRECTION, MADE BEFORE IT WAS RECORDED AND KEPT IN THE RECORD: my first read-back printed rc=0 for the deleted role, which would have been a strange thing to file beside a NoSuchEntity message. The cause is this device's familiar trap -- $? taken after a pipe to head is head's status, not the AWS call's. Re-measured unpiped it reads rc=254. The NoSuchEntity text was always the real evidence; the rc is now correct too, and the record says what happened rather than quietly showing the corrected number. SOMETHING A GRADER SHOULD KNOW THAT THIS CRITERION CANNOT SEE: the served AWS graph STILL carries an IAM_ROLE node for lambda-test-role, because its stitch source is 2026-10-11T03:01:08Z, hours before the delete. Anyone querying the graph will find the role and could conclude the delete failed. RETIRE_READBACK.md section 4 states this explicitly and names the live plane as the authority. Base reading recorded by the issuer: the role present, so grep -c NoSuchEntity read 0, FAIL."
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "`open=0` and `closed=1` -- the NEVER-2 entry's own Status line reads CLOSED",
+   "method": "command",
+   "invocation": "bash -c \"echo open=\\$(ls -a org/critical_paths/.open_deploys/ | grep -c 'iamroles-r7-retire-row7') closed=\\$(grep -l '^\\*\\*Status:\\*\\* CLOSED' org/critical_paths/change_management/*iamroles-r7-retire-row7* 2>&1 | grep -c '\\.md\\$')\"",
+   "output_evidence": "open=0 closed=1\nexit=0",
+   "denominator": "1 act, 1 ledger entry owed, 1 present with a CLOSED Status line (20261011T121231Z). The open=0 limb's denominator: .open_deploys/ held 26 entries when this act began, of which 0 matched retire-row7.",
+   "status": "PASS",
+   "status_reason": "THE FOUR LEGS ARE IN A DELIBERATE ORDER AND THE FIRST ONE IS THE ROLLBACK, CLOSED BEFORE ANY DESTRUCTIVE CALL. That is the whole design of this entry: ROLLBACK, then DETACH, then DELETE, then READBACK. Closing the rollback leg first means the restore path was committed and proven to exist before the role stopped existing, rather than being assembled afterwards from memory of a deleted object. THE DETACH LEG'S PROOF IS A COUNT RATHER THAN AN rc, and that distinction is written into the leg: detach-role-policy returning rc=0 says only that the call was accepted, while list-attached-role-policies moving from exactly 1 to exactly [] says it worked. It is additionally self-checking in this cell, because delete-role refuses while any policy is attached -- so an rc=0 that had not actually detached would have surfaced as a refusal on the next step rather than passing silently. AND I CHECKED THE CLOSE AT HEAD RATHER THAN ON DISK, FOR THE THIRD TIME TODAY: immediately after deploy_ledger.py close the entry read 'CLOSED -- nothing stranded' on disk and '**Status:** OPEN' at HEAD, with the sentinel deletion unstaged. The tool auto-commits `open` -- its own output says so -- but never `close-leg` or `close`. Committed at a686418d6b and re-verified at HEAD on two independent planes: the Status line through `git show HEAD:<file>` reads CLOSED, and `git ls-tree -r HEAD org/critical_paths/.open_deploys/` carries 0 retire-row7 sentinels. Three occurrences in one session (x-1 row 6 at c0b5dc0c63, x-5 at cfc1fd2c48, this) make it a property of the tool rather than a one-off. Base reading recorded by the issuer: open=0 closed=0, FAIL."
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "AC4 (JUDGMENT, never self-graded; UNVERIFIABLE-BY-INSTRUMENT, status_reason naming 3.0.0_SA_CVO~Z): were the five facts re-read live before the delete, and does the site-Z record rebuild the role exactly as it was?",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT -- judgment, graded by 3.0.0_SA_CVO~Z",
+   "output_evidence": "Not produced. The order directs this seat to record AC4 UNVERIFIABLE-BY-INSTRUMENT naming the CVO, so no verdict is manufactured here. The material to grade: RECREATE_lambda-test-role.md @a3994c4cb7, committed BEFORE any destructive call; RETIRE_READBACK.md @a686418d6b; the CTO ruling @5af6d5e23e; and the ledger entry whose first closed leg is the rollback.",
+   "denominator": "5 facts to re-read x 1 role, plus 2 questions. Question 1 is checkable as a CHRONOLOGY rather than a claim: the recreation record is committed at a3994c4cb7 and the detach happened at 12:05:40Z, after it. Question 2 reduces to whether the two commands reproduce every field that can be reproduced, which is enumerable against the verbatim get-role JSON in the record.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Graded by 3.0.0_SA_CVO~Z. ON QUESTION 1 THE RECORD IS A CHRONOLOGY, NOT AN ASSERTION: all five facts were read live and written into RECREATE_lambda-test-role.md, which was committed at a3994c4cb7, and the first destructive call came at 12:05:40Z after it. All five matched the cell, so step 0's binding STOP did not fire -- RoleLastUsed empty, trust lambda.amazonaws.com with no Condition, 1 managed attachment, 0 inline, nothing naming the role. FACT 5 IS THE ONE WORTH A GRADER'S ATTENTION, because its first instrument is stale and I measured that rather than trusting the vintage line. The served graph returned 1 hit across 2892 nodes -- the role itself -- but its stitch is 03:01:08Z, and the same graph lists 3 inline policies for opal-smartx-lambda-role while a live read returns 1, because cell x-2 deleted two of them at ~07:1xZ this morning. So the graph is roughly eight hours blind and could not have seen a reference created in that window. The live corroboration is what the fact actually rests on: an EMPTY RoleLastUsed means no principal has ever assumed this role since 2026-02-19, and a Lambda assumes its execution role on first invocation, so a never-assumed role has never backed a function that ran. A repo census adds a third plane: 4 hits across 7922 files, every one an INVENTORY that lists the role rather than a policy document granting on or passing it, which agrees with the ruling's own sweep of 301 roles and 78 policies. ON QUESTION 2 I WILL NOT CLAIM THE REBUILD IS EXACT, because it is not, and the honest answer is more useful than a clean one: a recreated role gets a NEW RoleId. Everything else returns identical -- name, path, description, max session, the trust document byte-for-byte, the single managed attachment, and the ARN, which is name-derived. The RoleId is exactly what the round-6 analysis reserved this delete for, and the CTO ruling lifted the reservation on the ground that nothing pins the old principal. My censuses support that, but 'nothing pins it' is a negative over instruments with known limits, so the record names what would make it material instead of implying the question is closed. THE THING I WOULD MOST WANT A GRADER TO WEIGH about my own conduct here is that this is a DELETE, and I treated the authorization as something to read rather than cite: the ruling was read in full at its pin, with a positive control proving an absent ruling reads absent, and it is the ruling itself -- not my judgment -- that places this act outside the 'anything unrecoverable' class needing a human. Had the ruling not reasoned that through explicitly, the autonomy rule would have required stopping."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Each instrument was shown able to go both ways, and one was caught stale before it was relied on. (1) The issuer recorded AC1, AC2 and AC3 all FAILing at the base; all three now read their expected values. (2) THE POSITIVE CONTROL ON THE READ-BACK is what makes NoSuchEntity mean anything: the same call shape on opal-smartx-lambda-role, run as its OWN invocation, returned rc=0 and 1337 bytes. (3) THE SERVED GRAPH WAS CAUGHT STALE AND MEASURED, not assumed: it lists 3 inline policies for a role that live-reads 1, because x-2 deleted two at ~07:1xZ and the graph's stitch is 03:01:08Z -- so fact 5 was moved onto live planes. (4) THE DETACH WAS GRADED ON A COUNT (1 -> []) rather than an rc, and is self-checking because delete-role refuses while a policy is attached. (5) THE READ-BACK rc WAS CORRECTED before being recorded: rc taken after a pipe to head read 0, re-measured unpiped it is 254. (6) The rollback leg was CLOSED BEFORE the first destructive call, so the restore path's existence is a chronology rather than a claim. (7) The repo census printed its denominator (4 of 7922) and every hit was READ and classified as an inventory rather than counted as a reference.",
+   "expected": "AC1 >= 2 with the commands reproducing every reproducible field; AC2 exactly 1 with a control returning a role; AC3 open=0 closed=1 AND holding at HEAD rather than only on disk; attached policies moving 1 -> 0 before the delete; the delete returning rc=0; the deleted role reading rc=254 unpiped.",
+   "observed": "AC1 2. AC2 1, with rc=254 on the target and rc=0 plus 1337 bytes on the control. AC3 open=0 closed=1 at HEAD on two planes (and briefly CLOSED-on-disk / OPEN-at-HEAD). detach rc=0 at 12:05:40Z, attached 1 -> [], inline [] both sides. delete rc=0 at 12:07:35Z. Graph: 1 hit across 2892 nodes, with its staleness demonstrated. Repo: 4 hits across 7922 files, all inventories.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The acts ran in the ruling's stated order and each was verified on the live plane immediately after, so no claim depends on a producer's self-report. The rollback record was written from this device's own get-role output rather than copied from another device's file, and committed before the first destructive call, so its contents are reproducible from git rather than from a deleted object. Every rc that carries a verdict was measured UNPIPED after the first one proved to be head's status. The read-back's control was a separate invocation. Fact 5 rests on three independent planes (served graph, live RoleLastUsed, repo census) rather than one. Byte hygiene measured on both deliverables: CR=0, byte-delta 0, non-ASCII 0.",
+   "observed": "detach then delete then read-back, in order, each with its own live confirmation. AC1, AC2 and AC3 re-run as their own separate invocations at close, AC3 against HEAD. The deleted role reads NoSuchEntity on every subsequent call; the control reads its role on every call.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The GOVERNANCE_DISPOSITION row for row 7.",
+   "reason": "Explicitly the issuer's, per the cell's step 5: 'Leave the GOVERNANCE_DISPOSITION row to the issuer; report the read-back to 2.0.0_SA_COO~ZI.' This cell reports the read-back and takes no view on the disposition."
+  },
+  {
+   "item": "Any other RETIRE candidate in the project.",
+   "reason": "ONE ROLE ONLY, per the cell's BOUNDS. Each further candidate would need its own five facts re-read live, its own recreation record and its own ruling; nothing here generalises to another role, and this record deliberately takes no view on whether others should follow."
+  },
+  {
+   "item": "Updating the served AWS graph, or any census instrument that still lists the role.",
+   "reason": "Outside this cell's PATHS and not this seat's to rebuild -- the graph is QUERY-not-rebuild by Rule 20, and its stitch runs on its own cadence. The consequence is recorded instead: RETIRE_READBACK.md section 4 states that the graph will keep showing this role until its next stitch and names the live plane as the authority, so a reader hitting the stale node does not conclude the delete failed. The four repo inventories that list the role are likewise other projects' artifacts."
+  },
+  {
+   "item": "Re-creating the role to prove the record works.",
+   "reason": "Not attempted and not proposed. Exercising the rollback would mean performing the create-role the ruling authorised only as a restore path, and it would produce a role with a new RoleId for no purpose. The record's correctness is argued from the verbatim get-role JSON it was built from, with the one unreproducible field named."
+  },
+  {
+   "item": "Any alert, monitor or schedule.",
+   "reason": "Barred by the cell's BOUNDS G-21 and by the standing moratorium; none was built, called or proposed."
+  }
+ ],
+ "surprises": [
+  "NFRA_IAMROLES202609-Z-S41: the row recording that smartx-pipeline reads s3_object_version from the LIVE latest object, and correcting two claims of my x-3 drift table. It is cited here because its SECOND correction bears on how I read S3 object history in general: I had taken the version's LastModified as 'when these bytes first appeared', and the CTO established the content first appeared 2026-07-23 and was re-uploaded five times, so I had measured the VERSION's date rather than the CONTENT's first appearance. The same distinction would apply to any future artifact-history read. The row's first correction overturned my HOLD on rest_pull: the 2-byte delta is a docstring line traceable to committed 46d0b98aef, which the CTO found by diffing the artifact CONTENTS where I had stopped at ETag inequality. 'Different bytes' was where I stopped; 'different how' was one download away."
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-10/ir_lane_iamroles_r6_w1_phase_b_and_w2_phase_a.md. This seat is a SESSION seat, not an L7 worker subagent. GO: 2.0.0_SA_COO~ZI msg 33208 named this order alongside x-3; it ran after x-5 on the issuer's stated ordering. THIS IS THE ONLY DESTRUCTIVE ACT OF THE ROUND and the only one whose authorization needed reading rather than citing. The autonomy rule reserves 'anything unrecoverable' for a human, and the round-6 analysis had reserved this delete for Andrew on exactly that ground: a recreated role gets a new RoleId. The CTO ruling @5af6d5e23e lifted the reservation and reasoned it through explicitly -- nothing pins the old principal, the definition is saved, so the act is recoverable in every respect that matters -- so I read the ruling in full at its pin, with a positive control, rather than quoting its title. Had it not reasoned that through, the rule would have required stopping. The one gap the ruling left was practical: it points at the laptop's recreation record, which is not in this clone, so step 0's site-Z record is the actual restore path and it was committed before anything was detached. Three small corrections are in the record rather than smoothed out: the detach leg's proof is a count and not an rc, my first read-back rc was head's status rather than the AWS call's, and the served graph is about eight hours stale so it will keep showing a role that no longer exists.",
+ "compiler_tools": [
+  {
+   "tool": "aws iam (the live plane, before and after)",
+   "invocation": "get-role, list-attached-role-policies, list-role-policies, list-role-tags before the act; detach-role-policy; delete-role; get-role on the deleted role and on a control role after",
+   "result": "PASS",
+   "note": "Every fact in step 0 and every verdict in step 4 is a live read of a named resource. The detach was graded on the attached-policy COUNT moving 1 -> [] rather than on rc=0, and the read-back on NoSuchEntity BESIDE a separate-invocation positive control returning 1337 bytes -- because a failed retrieval returns a value. The one rc I initially misread was corrected before it was recorded."
+  },
+  {
+   "tool": "comp-find --corpus aws (the served graph) -- USED AND THEN DEMOTED",
+   "invocation": "comp-find --corpus aws 'lambda-test-role' with a positive control on opal-smartx-lambda-role",
+   "result": "PARTIAL",
+   "note": "PARTIAL because the instrument was caught stale, not because the query failed. It returned exactly 1 hit across 2892 nodes -- the role itself, no LAMBDA and no IAM_POLICY node -- which is the right answer. But its stitch source is 2026-10-11T03:01:08Z, and the SAME positive control lists 3 inline policies for opal-smartx-lambda-role while a live list-role-policies returns 1, because cell x-2 deleted two of them at ~07:1xZ today. So the graph is roughly eight hours blind and fact 5 was moved onto live planes. Rule 20's query-not-rebuild still holds; the lesson is that a graph answer needs its vintage checked against a live read of something the graph also claims."
+  },
+  {
+   "tool": "comp-find (repo census, with its denominator)",
+   "invocation": "comp-find 'lambda-test-role' repo-wide, then comp-find 'role/lambda-test-role' infra",
+   "result": "PASS",
+   "note": "The scoped ARN census is the one that mattered: 4 hits across 7922 files, and EVERY hit was READ and classified rather than counted -- a census instrument's role inventory, an NFRA_TERRAFORM_P1 IAM slice, a resource-explorer dump and a graph parity dump. None is a Resource element in an Allow or Deny, so nothing grants on or passes the role. The repo-wide census returned 221+ hits that are all governance prose about this very decision (briefs, the cards to Andrew, the analyses), which is why the scoped ARN form is the one cited: the question is about policy documents, not about mentions."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open with 4 --leg specs (ROLLBACK first, deliberately); close-leg x4; close; plus the .open_deploys read as the precondition",
+   "result": "PARTIAL",
+   "note": "The 4-leg order is the design: ROLLBACK closed BEFORE any destructive call, so the restore path's existence is a chronology rather than a claim. PARTIAL is the same finding as twice earlier today -- it auto-commits `open` and says so, but never `close-leg` or `close`, so the entry read CLOSED on disk and OPEN at HEAD with the sentinel deletion unstaged. Committed at a686418d6b and re-verified at HEAD on two planes. Three occurrences in one session make it a property of the tool, not a one-off."
+  },
+  {
+   "tool": "git (as the authorization instrument)",
+   "invocation": "git cat-file -e 5af6d5e23e:<the ruling> with a positive control on an absent path; then git show of the full ruling",
+   "result": "PASS",
+   "note": "For a destructive act the authorization is evidence like any other, so the ruling was proven present AT ITS PIN beside a control showing an absent ruling reads absent, then READ IN FULL rather than grepped for its verdict line. That is what surfaced the sentence the act actually rests on: 'Deletion is therefore recoverable in every respect that matters here, so it does not fall under the \"anything unrecoverable\" class that needs a human.'"
+  },
+  {
+   "tool": "comp-iam / comp-blast / safe-apply / terraform",
+   "invocation": "NOT RUN",
+   "result": "SKIP",
+   "note": "No Terraform is involved: the role is LIVE-no-DECLARED, so there is no declaration to plan and safe-apply has nothing to gate -- the NEVER-2 entry is what bounds the act instead. comp-iam models (action) and never (action, resource) and is explicitly never a deletion warrant; the warrant here is the CTO ruling plus five live facts. comp-blast's trigger is an infra change of unknown blast radius, and this radius is one role with zero references measured on three planes."
+  }
+ ]
+}
