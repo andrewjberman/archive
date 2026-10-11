@@ -1,0 +1,48 @@
+"""TO-DB-b-137: materialize the R45 release kit in the Lambda layout OUTSIDE the repo.
+
+Usage: python build_kit.py <repo_root> <kit_dir>
+Every staged_from entry of the live source map is written from `git show <pin>:<repo_path>` (sha256 checked against the entry),
+except the three producer-side members, which are written from the release's pins, and handler.py from its pin.
+"""
+import hashlib
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+P = "data/assets/scripts/gold/irpt_reporting/"
+MEMBER_PINS = {
+    P + "account_return_daily.py": "739dbb240f19b6dd2c08ce982c44c9b7c17ca322",
+    P + "account_activity_lots.py": "19ba6fe341da80c906d0a1ff7a0db0253fdd2115",
+    P + "sources.json": "f043506a7c3f5a7d997e6e4096ba094435e419a5",
+}
+HANDLER = ("infra/aws/lambda/investor-reporting/reporting-gold/handler.py", "080dc90d92542d96817ae79f4f8a72a85dd9de09")
+
+
+def blob(root, pin, path):
+    r = subprocess.run(["git", "-C", root, "show", "%s:%s" % (pin, path)], capture_output=True)
+    if r.returncode != 0:
+        raise SystemExit("git show %s:%s failed" % (pin, path))
+    return r.stdout
+
+
+def main(root, kit):
+    root = str(Path(root).resolve())
+    kit = Path(kit)
+    sm = json.loads((Path(root) / "infra/aws/lambda/ci/lambda-source-map.json").read_bytes())["functions"]["irpt-49f-reporting-gold-lambda"]
+    bad = 0
+    for s in sm["staged_from"]:
+        pin = MEMBER_PINS.get(s["repo_path"], s["pin"])
+        b = blob(root, pin, s["repo_path"])
+        if s["repo_path"] not in MEMBER_PINS and hashlib.sha256(b).hexdigest() != s["sha256"]:
+            bad += 1
+            print("MISMATCH", s["repo_path"])
+        out = kit / s["packaged_as"]
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_bytes(b)
+    (kit / "handler.py").write_bytes(blob(root, HANDLER[1], HANDLER[0]))
+    print("written", len(sm["staged_from"]) + 1, "files; non-member sha256 mismatches", bad)
+
+
+if __name__ == "__main__":
+    main(*sys.argv[1:3])

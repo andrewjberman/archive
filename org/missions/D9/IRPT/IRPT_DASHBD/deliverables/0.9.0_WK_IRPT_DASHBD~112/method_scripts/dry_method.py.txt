@@ -1,0 +1,55 @@
+"""TO-DB-b-137: producer dry reads on a kit, NO S3 and NO upload (emit_method_row is called with upload=False and s3=None).
+
+Usage: python dry_method.py <kit_dir> <tracked_thresholds_json_or_->
+Prints one JSON object: counts, key names and booleans only.
+"""
+import hashlib
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+kit = Path(sys.argv[1]).resolve()
+tracked = sys.argv[2]
+P = kit / "data/assets/scripts/gold/irpt_reporting"
+sys.path.insert(0, str(kit))
+sys.path.insert(0, str(P))
+spec = importlib.util.spec_from_file_location("ard_dry", str(P / "account_return_daily.py"))
+ard = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(ard)
+staged = json.loads((P / "MEASURED_THRESHOLDS_R1.json").read_bytes().decode("utf-8"))
+doc = ard.load_declaration()
+declared = ard.declared_sources(doc)
+src = doc[declared[0]]
+out = {"module_sha256": hashlib.sha256((P / "account_return_daily.py").read_bytes()).hexdigest(),
+       "declared_sources": declared, "method_version_of_49f": ard.method_version_of(src),
+       "THRESHOLD_VALUES": list(ard.THRESHOLD_VALUES), "staged_top_level_key_count": len(staged)}
+
+
+def view(th):
+    s = ard.served_thresholds(th)
+    claims, source = ard.threshold_claims_of(th)
+    return {"input_key_count": len(th), "served_keys": list(s.keys()), "served_claims_keys": list(s["threshold_claims"].keys()),
+            "claims": dict(s["threshold_claims"]), "threshold_claims_source": source,
+            "served_equals_five_plus_claims": sorted(s.keys()) == sorted(list(ard.THRESHOLD_VALUES) + ["threshold_claims"])}
+
+
+out["served_thresholds_staged_pin"] = view(staged)
+out["served_thresholds_none"] = ard.served_thresholds(None)
+if tracked != "-":
+    tr = json.loads(Path(tracked).read_bytes().decode("utf-8"))
+    out["served_thresholds_tracked_file"] = view(tr)
+    out["tracked_file_sha256"] = hashlib.sha256(Path(tracked).read_bytes()).hexdigest()
+    out["tracked_values_equal_staged_values"] = {v: tr.get(v) == staged.get(v) for v in ard.THRESHOLD_VALUES}
+rows = {}
+for label, th in (("staged_pin", staged),) + ((("tracked_file", tr),) if tracked != "-" else ()):
+    r = ard.emit_method_row(None, ard.firm_scope(src), th, upload=False, src=src)
+    row = r["row"]
+    rows[label] = {"address": r["address"], "n_columns": len(row), "columns": list(row.keys()),
+                   "claims": {k: row[k] for k in row if k.endswith("_claim") or k == "threshold_claims_source"},
+                   "income_basis": row.get("income_basis"), "income_basis_reason": row.get("income_basis_reason")}
+out["method_row_49f_dry"] = rows
+# the handler's call census, read from the kit's handler.py source text
+txt = (kit / "handler.py").read_bytes().decode("utf-8")
+out["handler_mentions_emit_method_row_calls"] = txt.count("emit_method_row(")
+print(json.dumps(out, default=str, indent=1))
