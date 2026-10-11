@@ -120,3 +120,25 @@ Whether each is DISPOSITIONED in the channel's sense is the CVO's to write; this
 3. **The SEV1 page path delivers nothing** (rows `D1-S15`, `D1-S16`): `FB-f-12` enables the reason; the remedy is read from
    the first reason line and goes to Andrew if it costs money.
 4. **The FAULT 84** (owner CTO) and the worktrees `wk-firmbkts-4` and `-9` (submodule disagreement) are unchanged.
+
+## ADDENDUM 1 (2026-10-11 ~11:3xZ) -- `TO-FB-f-12` COMPLETE after the close: nine of thirteen orders complete, four parked
+
+The packet above read `FB-f-12` PARKED on `LGIC_ENFORCE-D1-S6`. The gate fix landed (`59f114b6d9`, `0.0.0_AB_MSTR~DELL1`,
+exercised: the two SNS log groups RULED, a planted no-row group REFUSED, self-test PASS), the order was un-parked
+(`edf6430bbc`, amendment 5) and the laptop lane applied it at 11:2xZ.
+
+| item | result |
+|---|---|
+| order | `TO-FB-f-12` COMPLETE on CLOUD at `62f7598435`; ledger closed `5cbdf9bf06`; the order file on `origin/CLOUD` reads `<status>complete</status>` |
+| apply | scoped `safe-apply` on the five addresses, NO override, AC1 to AC4 PASS (the laptop lane's read-backs, `evidence_f12/read_backs.txt`): role `opal-sms-delivery-status-role` trusted by `sns.amazonaws.com`; the account's `DeliveryStatusIAMRole` set, `DeliveryStatusSuccessSamplingRate` 0; the two SNS delivery log groups at 14 days; `MonthlySpendLimit` 50 unchanged; the post-apply full plan lists only the waived `eclipse_jwt_initial` create (row `D1-S19`) |
+| issuer's independent read, dell1 identity, read-only, 11:28Z | role `arn:aws:iam::313476888478:role/opal-sms-delivery-status-role`, trust `sns.amazonaws.com`; log groups `sns/us-east-1/313476888478/DirectPublishToPhoneNumber` and `.../Failure`, `retentionInDays` 14 on both |
+| not readable by the issuer | AC2 and AC3 (the account's SMS attributes): `sns:get-sms-attributes` is denied to the Dell identities (`sms-voice:DescribeSpendLimits`); the laptop lane's read-back is the evidence |
+| the first reason line | NOT read: it lands in `.../DirectPublishToPhoneNumber/Failure` at the next organic publish and is the CTO's to read; the page path is blind until then and the remedy is read from it |
+
+**Stated, not graded.** (1) The lane's first run hit a 403 `iam:PassRole` on the new role at the last write and the same plan
+succeeded three minutes later; the cause is NOT proven (the lane's own words: an IAM propagation delay is the reading, not
+a measure). (2) The CRO's rows and the gate fix came by three amendments and a withdrawn override; the act used the gate's own
+plan limb after its fix, no bypass. (3) The pending `eclipse_jwt_initial` create is unchanged and not this project's.
+
+**The round after this addendum:** 13 orders, 9 complete, 4 parked (`FB-f-9` phase B, `FB-f-10`, `FB-f-11`, `FB-f-13`'s acts),
+`dep_stage` ROUND_CLOSE unchanged. The round-4 analysis reads the packet and this addendum.
