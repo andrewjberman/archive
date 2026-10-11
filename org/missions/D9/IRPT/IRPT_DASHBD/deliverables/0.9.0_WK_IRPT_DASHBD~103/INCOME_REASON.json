@@ -3,7 +3,7 @@
   "to_id": "IRPT_DASHBD.TO-DB-b-128",
   "authored_by": "0.9.0_WK_IRPT_DASHBD~103",
   "authored_before_code": true,
-  "base": "box/dell2 @53ce87e407 (branch wk-irpt-dashbd-68-103). This first version carries the rule-24 record and the words; tests, contract, packet and proof fields are added by later commits.",
+  "base": "box/dell2 @53ce87e407 (branch wk-irpt-dashbd-68-103). The record (rule24, words, reader) was committed at 4be5736e6c BEFORE any producer, test or contract edit; this final version adds the tests, contract, packet and proof fields. No postulate failed, so no stop row was needed.",
   "client_data_rule": "counts and booleans only; no account id, client name or client figure appears here",
   "reason_before": "FWD-3 does not separate income: it sits inside the value through the cash leg, so this method states no income basis (its income columns are null on every row)",
   "reason_after": "A positions-based method values the account from its positions and cash, so income is inside that value and is not separated from it: the method states no income basis.",
@@ -29,7 +29,9 @@
         "income": "declares no income key (a grep of its object for 'income' returned none); its table states income NULL because income is inside the value through the cash leg"
       }
     ],
-    "list": ["_commonwealth_delivery"],
+    "list": [
+      "_commonwealth_delivery"
+    ],
     "channel_that_separates_income_and_could_name_row_3": "none today (0 of 2). The STOP condition of the order does not fire.",
     "limit": "An entry that DECLARES NO valuation_source is not refused by method_version_of for naming 3, so a future entry that separates income and omits valuation_source could name row 3; none exists in the 2 read. The producer's own build_manifest writes the literal `absent` for such an entry's valuation_source. Recorded here as a limit of the guard, not filed as a stop."
   },
@@ -37,32 +39,76 @@
     "mece": {
       "finding": "MECE by subtraction from a printed denominator. Domain: the objects in sources.json that could be asked for a method row, 2 (the denominator is the count of top-level keys whose value is an object; the 4 string keys are not entries). Placed: the declared custodian-equity source names row 2 and is REFUSED row 3 by the producer (0 of 1 can name 3); _commonwealth_delivery names row 3 (1 of 1). Unplaced after subtraction: 0. Hence one sentence about row 3 has to hold for exactly 1 entry today, and it holds for it. The subtraction is over the entries of this file, not over every future entry; the guard's one gap (an entry declaring no valuation_source) is named in entries_that_can_name_row_3.limit. No enum member is minted: the reason is free text and a reader rejects on income_basis_claim, never on the sentence.",
       "evidence": [
-        {"file": "data/assets/scripts/gold/irpt_reporting/sources.json", "line": 6, "shows": "the one declared source: custodian_reported, method_version 2 (lines 20, 23)"},
-        {"file": "data/assets/scripts/gold/irpt_reporting/sources.json", "line": 123, "shows": "_commonwealth_delivery: method_version 3 (line 125), positions_x_as_traded_close (line 126)"},
-        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1824, "shows": "the class check that refuses a custodian_reported entry naming a positions-based row"},
-        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 319, "shows": "declared_sources: the non-underscore object keys"}
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+          "line": 6,
+          "shows": "the one declared source: custodian_reported, method_version 2 (lines 20, 23)"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/sources.json",
+          "line": 123,
+          "shows": "_commonwealth_delivery: method_version 3 (line 125), positions_x_as_traded_close (line 126)"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1824,
+          "shows": "the class check that refuses a custodian_reported entry naming a positions-based row"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 319,
+          "shows": "declared_sources: the non-underscore object keys"
+        }
       ]
     },
     "same_grain": {
       "finding": "SAME GRAIN. income_basis_reason is one member of one method row (grain: one row per method_version, contract line 8), and METHOD_ROWS[3] is the one place that sets it. The old sentence mixed two grains: a statement about the method (income is inside the value) and statements about one channel's table (an outcome id of one project, and 'its income columns are null on every row', which is a property of that channel's day table, not of the method row). The new sentence keeps only the method-grain statement. The 'income columns null' fact stays where it belongs, in the channel's own day table (silver adapter docstring, lines 23-26).",
       "evidence": [
-        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 130, "shows": "METHOD_ROWS[3] income triple: the single place the reason is set"},
-        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 23, "shows": "the day-table fact (income_received NULL) lives in the channel's own adapter"},
-        {"file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json", "line": 8, "shows": "grain: ONE ROW PER METHOD VERSION"}
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 130,
+          "shows": "METHOD_ROWS[3] income triple: the single place the reason is set"
+        },
+        {
+          "file": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+          "line": 23,
+          "shows": "the day-table fact (income_received NULL) lives in the channel's own adapter"
+        },
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 8,
+          "shows": "grain: ONE ROW PER METHOD VERSION"
+        }
       ]
     },
     "intent_coherence": {
       "finding": "INTENT COHERENCE. The method table answers ONE question: what arithmetic produced the numbers that point at it. A reason on the method row is therefore a statement about the arithmetic. 'A positions-based method values the account from its positions and cash, so income is inside that value' is such a statement and is why the claim is `absent`. A project outcome id says who asked for a channel, which is a second intent (provenance of an order) and a project's id can be retired while the served row outlives it. The new sentence has the one intent.",
       "evidence": [
-        {"file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json", "line": 232, "shows": "the table answers ONE question: what arithmetic produced the numbers that point at it"},
-        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 125, "shows": "row 3's value_basis: the arithmetic the new reason follows from"}
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 232,
+          "shows": "the table answers ONE question: what arithmetic produced the numbers that point at it"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 125,
+          "shows": "row 3's value_basis: the arithmetic the new reason follows from"
+        }
       ]
     },
     "state_coherence": {
       "finding": "STATE COHERENCE (which values the remedy does NOT move). The remedy moves exactly one member of row 3, income_basis_reason, plus the emission instant measured_at that every emit re-stamps. It moves income_basis (still null), income_basis_claim (still `absent`), row 2 entirely (its reason stays null under `held`), the 27 other columns of row 3, the column set (31 columns, none added or removed) and therefore the schema hash. The producer's pair refusals (income_basis_of, lines 1958-1978) are untouched and still bind: a non-empty reason under `absent`, none under any other claim. The served object (written 10:38Z today with the old words, version ids retained) is NOT moved by this cell: it still reads the old sentence until an applier lands the packet, and a reader of it must read the claim, not the sentence.",
       "evidence": [
-        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1958, "shows": "income_basis_of: the state pairs the new sentence must satisfy (non-empty under absent)"},
-        {"file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~98/METHOD_ROW3_APPLY.json", "line": 1, "shows": "the served object's current state: written 10:38Z with the old reason; prior version ids retained"}
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1958,
+          "shows": "income_basis_of: the state pairs the new sentence must satisfy (non-empty under absent)"
+        },
+        {
+          "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~98/METHOD_ROW3_APPLY.json",
+          "line": 1,
+          "shows": "the served object's current state: written 10:38Z with the old reason; prior version ids retained"
+        }
       ]
     }
   },
@@ -71,5 +117,69 @@
     "line": 1035,
     "what": "verify_served reads the served method row's data.parquet (get at line 1031) and checks num_rows == 1, the method_version column, and the five *_claim threshold columns equal to `absent` (lines 1036-1037). It reads no income member: income_basis, income_basis_claim and income_basis_reason are named nowhere in that block.",
     "reads_no_income_member": true
-  }
+  },
+  "producer_edit": {
+    "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+    "member": "METHOD_ROWS[3]['income_basis_reason']",
+    "line": 131,
+    "other_members_moved": 0,
+    "row2_moved": false
+  },
+  "contract": {
+    "path": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+    "edit": "the example row of method_version 3: income_basis_reason only (line 321)",
+    "version_before": "0.6.0",
+    "version_after": "0.6.0",
+    "version_moved": false,
+    "schema_hash_before": "fd468e209e53f14514380089c9281b0ca90f947ab8eaf53c841bdee666bdfba1",
+    "schema_hash_after": "fd468e209e53f14514380089c9281b0ca90f947ab8eaf53c841bdee666bdfba1",
+    "schema_hash_moved": false,
+    "why_not_moved": "a wording change adds, removes and retypes no column; the hash is sha256 over the sorted name:type lines of the producer's table_schema (31 columns), recomputed on this branch and equal to the contract's",
+    "columns_added_or_removed": 0
+  },
+  "tests": {
+    "passed": 175,
+    "failed": 0,
+    "baseline_passed": 174,
+    "baseline_failed": 0,
+    "folder": "data/assets/scripts/gold/irpt_reporting/tests",
+    "new_test": "test_row3_reason_is_worded_for_the_method_and_names_no_channel",
+    "pins_changed": "test_method_row3_income.py: the row 3 reason assertion now pins the exact new sentence",
+    "also_run": "data/assets/scripts/silver/tests/test_commonwealth_ard_mint_claims.py: 23 passed"
+  },
+  "packet": {
+    "path": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~103/NEVER_WIDEN_PACKET_METHOD_ROW3_INCOME_REASON.md",
+    "sha256": "6fbce1ff47a174d0f9f019b79a0c6b3693f473fb5ed1cb60622cc6ffcfe0d064",
+    "object_address": "s3://opal-data-cottonwood/irpt/cottonwood/gold/dim_return_method/method_version=3",
+    "writers_counted": 2,
+    "readers_counted": 1,
+    "applier": "an AE seat under a newly signed pair, never a worker (row IRPT_DASHBD-D2-W87-S1); the apply captures both keys first (the bucket is versioned; the prior version ids are the rollback)"
+  },
+  "live_read": {
+    "command": ".tools/aws s3api list-objects-v2 --bucket opal-data-cottonwood --prefix irpt/cottonwood/gold/dim_return_method/method_version=3",
+    "at": "2026-10-11T15:31:42Z",
+    "rc": 0,
+    "denied": false,
+    "keys": [
+      {
+        "Key": "irpt/cottonwood/gold/dim_return_method/method_version=3/data.parquet",
+        "Size": 11641,
+        "LastModified": "2026-10-11T10:38:24+00:00",
+        "ETag": "9c774f3770e82ed5e7e6b2a4ebe3e7d3"
+      },
+      {
+        "Key": "irpt/cottonwood/gold/dim_return_method/method_version=3/manifest.json",
+        "Size": 2037,
+        "LastModified": "2026-10-11T10:38:25+00:00",
+        "ETag": "6d5aabdd1e0f3cc9ff2a6c544bd327fd"
+      }
+    ],
+    "version_id": "not returned by list-objects-v2; the packet cites the ids from METHOD_ROW3_APPLY.json (~98) and says so; no second AWS call"
+  },
+  "rows": [
+    "IRPT_DASHBD-D2-W103-S1",
+    "IRPT_DASHBD-D2-W103-S2"
+  ],
+  "s3_writes": 0,
+  "aws_calls": 1
 }
