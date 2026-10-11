@@ -1,0 +1,216 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_IAMROLES202609.TO-IAM-x-5",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IR",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3cadaf52ca"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP_R7.md",
+  "vintage_commit": "7203dca6ab",
+  "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-x-5.narrow-portal-s3-read.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round7/portal_s3/PORTAL_S3_SURVEY.md",
+   "kind": "doc",
+   "commit_or_etag": "1edacd5cf7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "PHASE A's reference census, committed BEFORE either half was signed, and the document both halves are 'Read against'. It carries the 6 REFS lines, the CONTROL line, the 6 live NoSuchBucket reads with 2 positive controls, the per-ARN plan grade and the naming grade. ITS MOST IMPORTANT CONTENT IS A CORRECTION OF ITSELF: a first substring census returned three false non-zeros, and the survey classifies every hit rather than reporting the counts. It also flagged a coverage gap (1 of 12 functions' deployed code unreadable) and flagged that the order's own 'breakglass adds unchanged' expectation was already stale -- both of which the halves then acted on.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round7/portal_s3/ROLLBACK_opal-portal-s3-read.json",
+   "kind": "doc",
+   "commit_or_etag": "1edacd5cf7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The as-live document, committed in PHASE A BEFORE any change: RoleName, PolicyName, 1 statement, Sid S3ReadWrite, 4 actions, 16 ARNs. EQUALITY WAS PROVEN AGAINST A SECOND, FRESH get-role-policy CALL rather than against the file just written -- canonical sort_keys compare True -- because comparing a saved file to itself proves nothing, and that ordering is the whole value of the check. The CTO independently re-verified the same equality at ~11:0xZ before signing. It is also the before-image the LIVEDIFF leg diffs against, so it served twice: the restore path and the baseline.",
+   "artifact_covered_by": [
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/shared-infra/opal-portal-lambda-role.tf",
+   "kind": "terraform",
+   "commit_or_etag": "0daa084a68",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "The narrowed declaration, COMMITTED BEFORE THE APPLY per A4-r6 and row Z-S27. The edit drops exactly the 12 dead ARNs and keeps the 4 live ones with all four actions. ITS BLAST RADIUS WAS MEASURED RATHER THAN ASSERTED: 1 diff hunk, 13 lines removed and 1 added, terraform fmt -check rc=0, and the heredoc still parses as JSON. The hunk count is load-bearing because the trailing-comma fix on the last kept ARN was applied with a GLOBAL regex in a file that declares many policies, so 'it touched only my block' is a claim that needed a measurement.",
+   "artifact_covered_by": [
+    "AC2",
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round7/portal_s3/POST_APPLY_portal_s3.md",
+   "kind": "doc",
+   "commit_or_etag": "cfc1fd2c48",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The PHASE B record. Carries the POST-APPLY-PLAN line with terraform's verbatim 'No changes' beside it; the per-ARN plan grade; the live-versus-rollback diff; the 18-policy before/after hash table; the post-change invocation evidence including the actual S3 write; the post-drain shared-tree plan; the CTO's closure of my coverage gap; and section 7's note that deploy_ledger.py's close had to be committed by hand for the second time today.",
+   "artifact_covered_by": [
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261011T1102Z_iamroles-r7-narrow-portal-s3_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "cfc1fd2c48",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The NEVER-2 entry, opened at 11:02:33Z BEFORE the first act with FOUR legs -- TF, LIVEDIFF, REPLAN, INVOCATION -- each proof_required written at open time as a falsifiable condition rather than as a restatement of the act. All four closed on live reads; Status reads CLOSED 20261011T113448Z at HEAD. This pin is the commit that CLOSED it, and it exists because the tool does not: deploy_ledger.py auto-commits `open` but not `close-leg` or `close`.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "`refs=6 control=1` -- a reference count for each of the six names, beside the positive control",
+   "method": "command",
+   "invocation": "bash -c \"f=org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round7/portal_s3/PORTAL_S3_SURVEY.md; test -f \\$f || { echo MISSING:\\$f; exit 2; }; echo refs=\\$(grep -c -E '^REFS: [a-z0-9-]+: env=[0-9]+ code=[0-9]+\\$' \\$f) control=\\$(grep -c -E '^CONTROL: opal-data-portal-v2: env=[0-9]+ code=[0-9]+\\$' \\$f)\"",
+   "output_evidence": "refs=6 control=1\nexit=0",
+   "denominator": "6 dead names, 6 REFS lines; 1 control line. The counts themselves are over 12 of 12 functions for environment variables and 11 of 12 for deployed code, with the 12th closed independently by the CTO before signing -- so the census is 12 of 12 on both planes as of the GO.",
+   "status": "PASS",
+   "status_reason": "ALL SIX NAMES READ env=0 code=0, SO THE NARROWING BREAKS NOTHING -- AND EVERY ONE OF THOSE ZEROS WAS A NON-ZERO ON FIRST MEASUREMENT. That is the most important thing in this cell. A substring census over the same 13 source files returned opal-data-smartx-v2 code=2, opal-data-smartx code=1 and opal-portal-data code=1. All four hits were false positives, and the cell's own rule -- 'a reference found is NOT a reason to keep the grant: it is a broken feature the grant hides. Narrow anyway, and file the reference as its own row naming the function' -- would have had me file three surprise rows naming three production functions for features that are not broken. THREE DISTINCT WAYS A SUBSTRING COUNT LIES, all three present in one census: (i) DOCSTRING PROSE -- both opal-data-smartx-v2 hits are inside check_smartx_pipeline()'s docstring in opal-infrastructure-monitor, which documents that a prior check watched this dead bucket and was REPLACED; proven by counting triple-quote delimiters before the line (11, odd, therefore inside). (ii) PREFIX OF A LONGER IDENTIFIER -- opal-portal-data matched inside opal-portal-data-proxy, the function's own name; a word-boundary re-census with (?![-A-Za-z0-9]) drops it to 0 raw. (iii) THE SAME STRING IN ANOTHER SERVICE -- SMARTX_TABLE = os.environ.get('SMARTX_TABLE', 'opal-data-smartx') is a DynamoDB table name, and this S3 grant does not reach it. Each was resolved by READING THE HIT, not by re-running the count. THE CONTROL IS WHAT MADE THEM FINDABLE: opal-data-portal-v2 reads 16 real code references (DEST_BUCKET=, S3_BUCKET=, BUCKET=, PORTAL_DATA_BUCKET=, SMARTX_SERVED_BUCKET=, REPORT_BUCKET=) across 6 functions plus 1 env reference, so a census returning 0 everywhere would have looked like a working instrument rather than a broken one. Code was read through the SOURCE MAP's declared file list, never by filename, per the order. Base reading recorded by the issuer: MISSING: the survey, exit=2, so the test -f limb is live and this is not a stuck PASS."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "`dead=0` and `live=` 2 or more -- the six names are gone from the live policy and the two live buckets remain (a read that failed would show live=0)",
+   "method": "command",
+   "invocation": "bash -c \".tools/aws iam get-role-policy --role-name opal-portal-lambda-role --policy-name opal-portal-s3-read --output json > /c/tmp/x5_live.json; echo dead=\\$(grep -c -E 'opal-data-smartx|opal-portal-data|opal-data-portal-s3|opal-market-data-v2|opal-data-aaii-sentiment' /c/tmp/x5_live.json) live=\\$(grep -c -E 'opal-data-portal-v2|opal-data-news-v2' /c/tmp/x5_live.json)\"",
+   "output_evidence": "dead=0 live=4\nexit=0",
+   "denominator": "16 ARNs before, 4 after. dead=0 over the five dead-name patterns (the sixth, opal-data-smartx-v2, is covered by the opal-data-smartx pattern as a substring); live=4, being both kept buckets and their /* forms.",
+   "status": "PASS",
+   "status_reason": "THE CRITERION CARRIES ITS OWN GUARD AGAINST THE FAILURE MODE THAT MATTERS, and the issuer wrote it that way deliberately: 'a read that failed would show live=0'. Both limbs are therefore load-bearing as a CONJUNCTION -- dead=0 alone would also be the reading if the get-role-policy call had failed and written an empty or error file, and live=4 is what proves the instrument reached the service and returned a real document. I did not rest on the grep alone. The same claim is established per-ARN against the committed rollback: 16 -> 4, exactly the 12 named ARNs removed, ZERO added, the four kept being opal-data-portal-v2 and opal-data-news-v2 with their /* forms, 1 statement both sides, Sid S3ReadWrite unchanged and all four actions byte-identical. AND THE HALF'S WIDER CLAUSE -- 'every other statement and policy of the role stays byte-identical' -- WAS MEASURED ACROSS ALL 18 of the role's inline documents rather than assumed: each was hashed (sha256 of sort_keys JSON) before the apply and re-hashed after, giving 18 compared, 17 BYTE-IDENTICAL and exactly 1 changed, which is opal-portal-s3-read (aa0fa4e08bdf82dd -> 87ca089e25ba4213). The policy COUNT is 18 on both sides, so nothing was added or dropped either. The role itself is untouched: trust still lambda.amazonaws.com, 0 tags before and after, 0 attached managed policies before and after. Note on this role specifically: it carries NO managed attachments, so the omission rule's managed-policy hazard does not arise here -- its 18 inline policies are separate resources and only one was declared in this act's target. Base reading recorded by the issuer: dead non-zero before the act."
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "`open=0` and `closed=1` -- the NEVER-2 entry's own Status line reads CLOSED",
+   "method": "command",
+   "invocation": "bash -c \"echo open=\\$(ls -a org/critical_paths/.open_deploys/ | grep -c 'iamroles-r7-narrow-portal-s3') closed=\\$(grep -l '^\\*\\*Status:\\*\\* CLOSED' org/critical_paths/change_management/*iamroles-r7-narrow-portal-s3* 2>&1 | grep -c '\\.md\\$')\"",
+   "output_evidence": "open=0 closed=1\nexit=0",
+   "denominator": "1 act, 1 ledger entry owed, 1 present with a CLOSED Status line. The open=0 limb's denominator: .open_deploys/ held 25 entries when this act began, of which 0 matched iamroles-r7 -- which is also the serialization check the GO asked for, since row 6 and x-5 both touch shared-infra.",
+   "status": "PASS",
+   "status_reason": "I CHECKED THIS AT HEAD RATHER THAN ON DISK, AND THAT IS WHY IT IS TRUE. Immediately after deploy_ledger.py close, the entry read 'CLOSED -- nothing stranded -- closed 20261011T113448Z' on disk and '**Status:** OPEN' at HEAD, with the sentinel deletion unstaged. The tool auto-commits `open` -- its own output says so -- but it does NOT commit `close-leg` or `close`. SO A PEER READING HEAD, OR A DRAIN, WOULD HAVE SEEN THIS ENTRY OPEN WITH THE DEPLOY FINISHED: the record lying about itself, in the direction NEVER-2 exists to prevent. This is the SECOND occurrence today -- x-1 row 6 was the first, committed at c0b5dc0c63 -- and the COO half for this very cell cites that fix by name ('with the close COMMITTED (the c0b5dc0c63 fix)'), which is precisely why the check ran. Committed at cfc1fd2c48 and then re-verified at HEAD on two independent planes: the Status line read through `git show HEAD:<file>` is CLOSED, and `git ls-tree -r HEAD org/critical_paths/.open_deploys/` carries 0 narrow-portal-s3 sentinels. All four legs were closed on live reads, each against a proof_required written at open time as a falsifiable condition. Two of those four carry stated deviations rather than clean passes -- REPLAN exceeded its requirement (the module is fully absorbed, not merely free of destroys) and INVOCATION names the log plane explicitly in place of RoleLastUsed. Base reading recorded by the issuer: open=0 closed=0, FAIL."
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "AC4 (JUDGMENT, never self-graded; UNVERIFIABLE-BY-INSTRUMENT, status_reason naming 3.0.0_SA_CVO~Z)",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT -- judgment, graded by 3.0.0_SA_CVO~Z",
+   "output_evidence": "Not produced. The order marks AC4 judgment=true, so no verdict is manufactured here. The material to grade: PORTAL_S3_SURVEY.md @1edacd5cf7 and the rollback at the same pin, both committed BEFORE either half was signed; the halves COO @541e951458 and CTO @55aca92d76; the declaration @0daa084a68, committed before the apply; POST_APPLY_portal_s3.md @cfc1fd2c48; and the ledger entry with its four legs.",
+   "denominator": "The act has one write surface (one policy document) and four claims to carry: that exactly 12 ARNs left, that nothing else in the role moved, that no consumer depended on the removed names, and that the surviving grant still works. Each has its own instrument and each is measured above; what cannot be self-graded is whether the judgment to remove rather than repoint was right for all six names.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Graded by 3.0.0_SA_CVO~Z. This is the LARGEST permission reduction of the project and the first whose subject was a role this seat does not own, so what I could do was make every claim checkable from artifacts that existed before the act. The four planes: the saved plan graded per ARN (16->4, 12 out, 0 added, all four actions and the Sid intact, 0 other addresses, 0 adds, 0 destroys); the live document diffed against a rollback proven equal to a FRESH re-fetch rather than to itself; all 18 inline policies hashed before and after, giving 17 byte-identical and exactly the 1 signed change; and a post-change live invocation. THE SHARPEST THING A GRADER SHOULD CHECK IS THE LAST GUARD, because it is where a weaker oracle would have been easy to accept. The condition is that a portal function on this role succeeded after the change. opal-portal-authorizer gave 239 clean invocations, which proves the role is still assumable at production volume -- but an authorizer need not touch S3 at all, so it cannot speak to the grant. I kept looking and found opal-trending-topics-portal-publisher starting at 11:20:40Z against an apply that returned at 11:15:57Z, writing to s3://opal-data-portal-v2/json/trending/latest.json -- one of the four KEPT ARNs -- and printing 'Publishing to portal bucket... OK: Published successfully! File size: 87.6 KB'. That is a real s3:PutObject on a surviving grant completing after the removal, which is the fact the condition exists to establish. RoleLastUsed was deliberately not used: it lags up to four hours, which I measured on x-1 row 6 earlier in this same session where it still read pre-apply while the consumer had demonstrably run. WHAT I AM NOT CLAIMING: that removing the grant is the right answer for all six names. opal-market-data-v2 is DECLARED in market-overview/s3.tf:6, so Terraform's own intent is that the bucket EXIST, which makes 'recreate the bucket' and 'remove the grant' opposite answers for that one name; RULINGS_LEDGER.jsonl:44 carries a prior DELETE-GATED ruling on it. Removing the grant is unambiguously correct for closing the squatting hazard and does not settle the product question, and six buckets may not share one answer. I proposed no fix there, nor for the policy's name (it says 's3-read' while granting Put and Delete -- the module's own comment at :382 already flags the drift and records why renaming is a destroy-plus-create on a live authorizer role), because those differ in MEANING rather than syntax. TWO THINGS A GRADER SHOULD WEIGH ABOUT MY OWN WORK. First, PHASE A's census was WRONG on first measurement and the survey says so at the top rather than in a footnote: three false non-zeros that would have produced three spurious rows naming production functions. Second, I reported a coverage gap against myself -- 1 of 12 functions' deployed code unreadable -- rather than letting that function's zero stand unqualified, and the CTO closed it by downloading the bundle from Code.Location, never executing it, and finding all six names at 0 with a positive control. The census is 12 of 12 because the gap was declared, not because it was absent."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The instruments were shown able to go both ways, and two of them were caught lying before anything was applied. (1) The issuer recorded AC1 and AC3 FAILing at the base and AC2 reading dead non-zero; all three now read their expected values. (2) THE CENSUS WAS CAUGHT RETURNING THREE FALSE NON-ZEROS and was corrected by READING each hit rather than re-running the count -- docstring prose, a prefix of a longer identifier, and a DynamoDB table sharing an S3 name. (3) THE POSITIVE CONTROL IS WHAT MADE THAT POSSIBLE: opal-data-portal-v2 reads env=1 code=16, so a census returning 0 everywhere would have looked like a working instrument. (4) head-bucket WAS REJECTED AS THE EXISTENCE ORACLE because the order asks for an error CODE and a HEAD request cannot carry one; get-bucket-location returned rc=254 NoSuchBucket for all six, with rc=0 controls on both kept buckets, run as separate invocations. (5) THE EDIT'S DIFF WAS COUNTED IN HUNKS because the comma fix was a global regex on a many-policy file -- 1 hunk is the control on 'it touched only my block'. (6) The rollback's equality was proven against a FRESH re-fetch, not against the file written. (7) All 18 inline policies were hashed before and after, so 'nothing else moved' is a measurement over a printed denominator rather than an assurance. (8) THE LAST GUARD'S FIRST CANDIDATE WAS REJECTED FOR BEING TOO WEAK: 239 clean authorizer invocations prove assumability but not S3, so a function that actually writes to a kept bucket was found instead.",
+   "expected": "AC1 refs=6 control=1 with all six at zero AFTER the false positives are resolved; AC2 dead=0 AND live>=2, both limbs needed; AC3 open=0 closed=1 AND holding at HEAD rather than only on disk; the saved plan shows 1 attribute, 16->4 ARNs, 0 added, 0 other addresses; 17 of 18 policies byte-identical; a post-change invocation that exercises a KEPT S3 ARN and succeeds; 0 error-pattern events in that window.",
+   "observed": "AC1 refs=6 control=1 (first pass: three false non-zeros). AC2 dead=0 live=4. AC3 open=0 closed=1 at HEAD on two planes (and briefly CLOSED-on-disk / OPEN-at-HEAD). Plan: 1 resource_change non-no-op, 1 attribute (policy), name/role/id byte-identical, ARNs 16->4, 12 removed, 0 added, 0 adds, 0 destroys, 0 other addresses. Live vs rollback: identical result. Policies: 18 compared, 17 byte-identical, 1 changed (the signed one), count 18 both sides. Invocation: START 11:20:40Z vs apply return 11:15:57Z, 'OK: Published successfully!' 87.6 KB to a kept ARN, 0 error-pattern events; corroborated by 239 clean authorizer invocations. Post-drain shared-tree plan: 'No changes', 0 destroys.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The plan was written to a file with -out and the apply was handed THAT FILE, so no window exists in which a re-rendered plan could differ from the graded one; grading ran off show -json decomposed per ARN rather than the human summary. The declaration was committed BEFORE the apply, so it existed on the branch before AWS was touched, and the branch was drained in the same session per A4-r6. Every post-apply claim is a live read taken after the apply returned, and the invocation evidence is timestamped in epoch milliseconds against the apply's own return time rather than described as 'after'. The 18-policy comparison uses sha256 over sort_keys JSON, so key ordering cannot produce a spurious difference. Byte hygiene measured on every file written: CR=0, byte-delta 0, non-ASCII 0.",
+   "observed": "Applied plan == graded plan by construction. Targeted re-plan and post-drain untargeted shared-tree plan: both 'No changes. Your infrastructure matches the configuration.', 0 destroys, 0 replaces. The edit reproduced identically in PHASE A and PHASE B: 1 hunk, 13 removed, 1 added, fmt rc=0, JSON parsing, 4 ARNs. AC1, AC2 and AC3 re-run as their own separate invocations at close, AC3 against HEAD.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Whether any of the six removed buckets is meant to EXIST.",
+   "reason": "Not settled by this cell and deliberately not proposed. opal-market-data-v2 is DECLARED in market-overview/s3.tf:6, so Terraform's own intent is that it exist, which makes 'recreate the bucket' and 'remove the grant' opposite answers for that one name; RULINGS_LEDGER.jsonl:44 carries a prior DELETE-GATED ruling on it that should be read before anyone decides. Removing the grant is unambiguously correct for closing the squatting hazard and is what the halves signed. Six buckets may not share one answer, and that is the CTO's call."
+  },
+  {
+   "item": "The policy's NAME, and whether s3:DeleteObject belongs in it.",
+   "reason": "Outside the cell's BOUNDS, which permit only the Resource list to change. The policy is called opal-portal-s3-read while its only statement grants PutObject and DeleteObject; the module's own comment at opal-portal-lambda-role.tf:382 already flags this as 'a name-vs-computation drift that helped this over-grant hide' and records why it was left -- renaming an inline policy is a destroy-plus-create on a live public-authorizer role. Recorded because a grader reading only the policy name would misjudge the blast radius."
+  },
+  {
+   "item": "The DynamoDB table named opal-data-smartx.",
+   "reason": "A table of that exact name is referenced live by opal-portal-data-proxy. This S3 grant never reached it and removing the S3 ARNs cannot affect it, so nothing was done. It is recorded because it is one of the three things that made PHASE A's substring census lie, and a future reader censusing this name will hit it again."
+  },
+  {
+   "item": "The three Z-S21 smartx Lambda drifts and the restricted_breakglass pair in shared-infra.",
+   "reason": "Neither is this act's. -target confined the apply to one aws_iam_role_policy address, and the plan was filtered for EVERY resource_change address to prove it: 0 other addresses, 0 adds, 0 destroys. The breakglass pair was applied by its owner at 09:05:05Z (row Z-S40) and appears in the post-drain plan only as refresh lines; the x-5 half bound the plan shape directly rather than inheriting the order's stale 'adds unchanged' expectation, because PHASE A's survey flagged it."
+  },
+  {
+   "item": "Any alert, monitor, schedule or Access Analyzer call; and simulate-principal-policy.",
+   "reason": "G-21 and G-25 of the cell's BOUNDS and the standing moratorium; none was built, called or proposed. simulate-principal-policy was deliberately not used: this act REMOVED permissions, so the sound oracles are an existence read of each bucket plus a live policy read plus a real post-change invocation. Its false-allow mode -- it matches an ARN against Resource patterns and never asks whether the ARN names anything -- is precisely the trap for ARNs naming nothing, which is this cell's entire subject, and its four false-deny modes would have added noise rather than evidence."
+  }
+ ],
+ "surprises": [
+  "NFRA_IAMROLES202609-Z-S39: the row this cell exists to close, filed by this seat. opal-portal-lambda-role's live opal-portal-s3-read allowed s3:GetObject + PutObject + DELETEOBJECT + ListBucket over 16 ARNs spanning 8 distinct buckets, SIX of which did not exist, on a role used that morning and assumed by 12 of 237 live Lambda functions. It was found while chasing the SECOND of two false 'Filed as a surprise row.' claims in my own x-1 survey, and it is larger on every axis than the two dead-grant rows this project had acted on (Z-S23: Get+List, 2 absent buckets, an orphan role; Z-S32: Get+Put, 1 absent bucket). One of the six is opal-data-smartx, the exact bucket x-2 ACT 1 had closed a LESSER grant on that morning -- so that hazard had been NARROWED, not shut, and POST_APPLY_narrow.md's wording was flagged against myself rather than left reading as a closure. This apply shuts it.",
+  "NFRA_IAMROLES202609-Z-S40: a never-widen half's NEGATIVE-CONTROL BASELINE can go stale between the survey and the signing. Row 6's pair bound the pre-existing 'Plan: 2 to add' in shared-infra as NOT SIGNED and required it recorded UNCHANGED, but ADVI_COTBKF applied that pair at 09:05:05Z, before either half was signed, so the clause was unsatisfiable before that act began. IT IS WHY THIS CELL'S HALF IS WRITTEN DIFFERENTLY: the x-5 COO half binds the plan SHAPE directly and says so explicitly, and the post-drain plan here shows the breakglass pair as refresh-only with 0 planned actions. The general lesson in the row is that serialising on .open_deploys/ cannot catch a change that completed before you looked.",
+  "NFRA_IAMROLES202609-Z-S38: shared-infra could not init or plan at all until ADVI_COTBKF @8c6fc7652a disposed the one() guard at s3-lgic-firm-buckets.tf:197. Without that fix this cell could not have run either, since its target lives in the same module. The row also carries my own record defect -- a survey claiming to have filed a row that did not exist -- which is the defect whose correction led to Z-S39 and therefore to this cell."
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-10/ir_lane_iamroles_r6_w1_phase_b_and_w2_phase_a.md. This seat is a SESSION seat, not an L7 worker subagent. GOs: the round-7 issuance @7203dca6ab for PHASE A, then 2.0.0_SA_COO~ZI msg 33256 for PHASE B, with both halves read as FILES at HEAD before anything moved. THIS CELL EXISTS BECAUSE OF A DEFECT IN MY OWN EARLIER WORK, and the chain is worth recording. x-1's survey claimed twice to have filed a surprise row and had filed neither; checking the second claim meant reading which bucket name market-overview actually declares; asking what else referenced that name surfaced a live WRITE+DELETE grant over six non-existent global bucket names on a 12-function production role. The issuer cut it as this cell within the hour and marked it the round's most urgent. SO THE LARGEST PERMISSION REDUCTION OF THE PROJECT CAME OUT OF CHASING A FALSE SENTENCE IN MY OWN DELIVERABLE, which is the strongest argument I can make for treating 'filed as a surprise row' as a claim that carries evidence. The work itself turned on three instruments that lie: head-bucket cannot carry an error code (so get-bucket-location was used), a substring census returned three false non-zeros (so every hit was read and classified), and deploy_ledger.py does not commit its own close (so HEAD was compared against disk, for the second time today). The one thing I did not resolve, and did not try to, is whether the six buckets should exist; that is a product question with a prior ruling attached and six names that may not share one answer.",
+ "compiler_tools": [
+  {
+   "tool": "aws iam (the live plane, before and after)",
+   "invocation": "list-role-policies; get-role-policy on opal-portal-s3-read before and after; get-role-policy on all 18 inline policies before and after for hashing; get-role for trust and tags; list-attached-role-policies",
+   "result": "PASS",
+   "note": "The 18-policy before/after hash sweep is what turns the half's 'every other policy stays byte-identical' from an assurance into a measurement over a printed denominator: 18 compared, 17 identical, 1 changed, count 18 both sides. Without it, 'nothing else moved' would rest on the plan alone, and a plan is a prediction."
+  },
+  {
+   "tool": "aws s3api get-bucket-location (existence, with controls)",
+   "invocation": "one call per bucket for the six dead names, plus the two kept buckets as separate-invocation positive controls",
+   "result": "PASS",
+   "note": "get-bucket-location rather than head-bucket BECAUSE the order asks for the error CODE and head-bucket cannot carry one -- it is a HEAD request, so the response has no body and the CLI prints a bare HTTP (404). All six returned rc=254 NoSuchBucket; both kept buckets returned rc=0. x-2's AC1 failed on exactly this distinction earlier in the session, so the lesson was applied rather than re-learned."
+  },
+  {
+   "tool": "aws lambda get-function-configuration + the CI source map (the reference census)",
+   "invocation": "get-function-configuration --query Environment.Variables on each of the 12 consumer functions; then the source map's declared file list per function, 13 files read",
+   "result": "PARTIAL",
+   "note": "PARTIAL for two reasons, both named in the survey rather than absorbed into a zero. One function's declared artifact (session-analytics' dist/index.mjs) is not in the repo at all, so 1 of 12 functions' CODE was uncensused by this method -- I checked with a forward-slash path specifically because a mixed separator on this device can make a present file read absent, and it was genuinely gone. The CTO closed that gap before signing by downloading the bundle from Code.Location, never executing it. Second, one function declares files: [] so its source_dir was globbed instead of read from the manifest. Every env dump was also size-checked, because a failed call would otherwise read as zero references."
+  },
+  {
+   "tool": "terraform (as the grading instrument)",
+   "invocation": "plan -target=aws_iam_role_policy.opal_portal_s3_read -out=<file>; show -json decomposed per resource_change and PER ARN; apply <that saved file> through safe-apply; targeted re-plan; post-drain untargeted plan in the SHARED tree; fmt -check on the edited file",
+   "result": "PASS",
+   "note": "A policy is ONE opaque string attribute, so '1 to change' is not a grade: it would read identically if an action had been dropped or a live ARN removed. The per-ARN decomposition is the measurement, and it was run twice -- against the saved plan and again against the committed rollback after the apply. The post-drain plan ran in the SHARED tree rather than the worktree that made the change, because the claim is about the repository every other seat reads."
+  },
+  {
+   "tool": "aws logs (the last guard)",
+   "invocation": "filter-log-events --start-time <apply-return epoch ms> with a START pattern and an error pattern, across the portal functions; then the full message stream of the one invocation that exercised S3",
+   "result": "PASS",
+   "note": "THE FIRST CANDIDATE WAS REJECTED FOR BEING TOO WEAK. opal-portal-authorizer gave 239 clean post-apply invocations, which proves the role is still assumable at production volume but says nothing about S3, since an authorizer need not touch it. opal-trending-topics-portal-publisher is the real oracle: it wrote 87.6 KB to s3://opal-data-portal-v2/json/trending/latest.json -- a KEPT ARN -- at 11:20:40Z against an apply that returned 11:15:57Z. RoleLastUsed was deliberately not used: it lags up to four hours, measured on x-1 row 6 in this same session."
+  },
+  {
+   "tool": "safe-apply.sh (Rule 18)",
+   "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/shared-infra apply -no-color -input=false <saved plan>",
+   "result": "PASS",
+   "note": "Apply complete! Resources: 0 added, 1 changed, 0 destroyed. comp-tagauthz PASSED (no plan resource overwrites an access-granting tag) and tombstone-gate CLEAN over 0 creates against 7 tombstones. HALTGT is NOT cited as evidence: a ~lane seat is structurally unhaltable, so the lane inbox was read directly immediately before the apply (0 unread)."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open with 4 --leg specs; close-leg x4; close; plus the .open_deploys read as the GO's serialization check",
+   "result": "PARTIAL",
+   "note": "PARTIAL is a finding about the tool, for the second time today. It auto-commits `open` and says so in its own output, but it does NOT commit `close-leg` or `close`: after all four legs closed, the entry read CLOSED on disk and '**Status:** OPEN' at HEAD with the sentinel deletion unstaged. Committed at cfc1fd2c48 and re-verified at HEAD on two planes. The COO half for this cell cites the x-1 instance (c0b5dc0c63) by name, which is why the check ran at all."
+  },
+  {
+   "tool": "safe-merge.sh",
+   "invocation": "bash .tools/safe-merge.sh wk-iamroles-r7-x5b, in the SAME session as the apply per A4-r6",
+   "result": "PASS",
+   "note": "Tree check: branch needed 1 file, dropped 0, foreign 0; index check 0 of 1 differing. Draining in the same session as the apply is what closes the Z-S27 window, and the post-drain shared-tree plan reading 'No changes' is the proof it closed."
+  },
+  {
+   "tool": "comp-iam",
+   "invocation": "NOT RUN",
+   "result": "SKIP",
+   "note": "Its own doctrine rules it out for this act. comp-iam models (action) and never (action, resource), so it cannot say anything about a grant on a SPECIFIC absent bucket -- and cloud-ops states explicitly that it must NEVER be read as a deletion warrant, which is exactly the act this cell performed. The warrant here came from per-bucket existence reads with controls, a 12-of-12 reference census, and a post-change live invocation. Its triggers were also absent: no iam.tf changed (this is a zz_-era declaration edit in an adopted module) and no boto3 call was written."
+  },
+  {
+   "tool": "comp-blast / comp-pipescript / comp-validate",
+   "invocation": "NOT RUN",
+   "result": "SKIP",
+   "note": "comp-blast's trigger is an infra change of unknown blast radius; here the radius is one policy document, the half enumerates it, and the targeted plan was filtered for every resource_change address to prove nothing else was in scope -- stronger than a static map. comp-pipescript and comp-validate gate pipeline-script and gold-run triggers: no script was edited, no gold run occurred, no data is in scope."
+  }
+ ]
+}
