@@ -34,7 +34,9 @@ proof-of-spec-check, judgment=0, verdict MAY-CLOSE. (Before the rename in "What 
   difference control is weaker than its wording.
 - **F7 is a snapshot.** The producers still write `opal-data-bd`; the copy is stale from their next write. "Source
   changed 0" is the state at 05:07Z, not a promise. Nothing reads the new prefix (CTO half, condition 2).
-- **F6 is built, not deployed.** No request changes until the registry map value changes.
+- **F6 is built, not deployed.** The router carries an EMPTY `CANONICAL_PLATINUM_BUCKETS` list (row `D1-S9`, the
+  v3 patch): no request changes until a list entry AND the registry map value both change. That is the CTO's cutover
+  window; round 1's analysis and `D1-S8` describe the earlier, map-only gate.
 - **No change-management entry names the F7 copy.** A search of `org/critical_paths/` (1,779 files scanned) finds
   none for this project's round 2. The act's record is the never-widen pair,
   `ledger/NEVER_WIDEN_ROUND2_F7_COPY_COO_HALF.md` and `..._CTO_HALF.md`. A WORLD cell's change-management entry is the
