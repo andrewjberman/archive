@@ -1,0 +1,18 @@
+import hashlib,json,subprocess,sys
+from pathlib import Path
+E=Path(sys.argv[1])
+sn=json.loads(open('infra/aws/lambda/ci/lambda-source-map.json','rb').read())['functions']['irpt-49f-reporting-gold-lambda']
+bad=0
+heads={'data/assets/scripts/gold/irpt_reporting/account_return_daily.py','data/assets/scripts/gold/irpt_reporting/sources.json','data/assets/scripts/gold/irpt_reporting/account_activity_lots.py'}
+for s in sn['staged_from']:
+    p=E/s['packaged_as']
+    h=hashlib.sha256(p.read_bytes()).hexdigest()
+    pinned=hashlib.sha256(subprocess.run(['git','show',s['pin']+':'+s['repo_path']],capture_output=True).stdout).hexdigest()
+    if s['repo_path'] in heads:
+        head=hashlib.sha256(Path(s['repo_path']).read_bytes()).hexdigest()
+        print('MEMBER',s['repo_path'].split('/')[-1],'kit==HEAD',h==head)
+    else:
+        if h!=s['sha256'] or h!=pinned: bad+=1; print('MISMATCH',s['packaged_as'])
+hd=hashlib.sha256((E/'handler.py').read_bytes()).hexdigest()
+print('handler kit==HEAD',hd==hashlib.sha256(open('infra/aws/lambda/investor-reporting/reporting-gold/handler.py','rb').read()).hexdigest())
+print('non-member mismatches',bad)
