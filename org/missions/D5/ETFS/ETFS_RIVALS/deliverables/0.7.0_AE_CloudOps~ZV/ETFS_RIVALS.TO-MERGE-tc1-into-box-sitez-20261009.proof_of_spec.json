@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-MERGE-tc1-into-box-sitez-20261009",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-MERGE-tc1-into-box-sitez-20261009.md",
+    "group": "OTHER",
+    "vintage_commit": "69a2eaef8d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "e1ffbb2a2c",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-MERGE-tc1-into-box-sitez-20261009.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~ZV",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "6061de660d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "THE ROW NAMES THE PRODUCT FILE, NOT THE MERGE COMMIT'S SUBJECT LINE, because the (commit, path) pair is what a verifier can refute: `git show 6061de660d:data/etfs/scripts/rivalfunds/enrichment_bloomberg.py` resolves. The act was the --no-ff merge 6061de660d8ea1f7928699ad16176072c7549979 of wk-ETFS_RIVALS-22 @b0b65368fb into box/sitez, parents 4516c6399c05ace2bd03123c975bdd9b04f4443a and b0b65368fb425bd0e1e20366ce38b10982a077e3, author 0.7.0_AE_CloudOps~ZV, five files changed, 393 insertions, 12 deletions; this file is the one the enrichment leg imports. WHY A MERGE COMMIT IS A DEPLOY HERE, AND WHAT THAT CLAIM DOES NOT COVER. The producer is Scheduled Task OPAL_BBGTML_daily_pull, which runs `cmd.exe /c <workspace>/integrations/bloomberg/pipeline/scheduled_daily_pull.cmd` FROM THE REPOSITORY WORKING TREE -- there is no package, no image and no S3 artifact between the commit and the runner, so the deployed bytes ARE the working tree's bytes. The claim is therefore made on a three-step chain, each step measured rather than assumed: (1) HEAD contains the merge -- `git merge-base --is-ancestor b0b65368fb HEAD` rc=0, with the reversed pair rc=1 as a discriminating control, so the instrument is not stuck on zero; (2) the working tree equals HEAD for EVERY path the merge brought in -- the path set was taken from the FIRST-PARENT diff `git diff --name-only 6061de660d^1 6061de660d` (5 paths) and each was graded with `git status --porcelain -- <path>`: 5 of 5 CLEAN, 0 DIRTY, denominator printed, and the detector was shown to discriminate by reading ' M portal' on a known-dirty path in the same sweep; (3) the merged product file is the one the leg imports -- data/etfs/scripts/rivalfunds/enrichment_bloomberg.py, the module the task order at :67 names as `python -m rivalfunds.enrichment_bloomberg --mode daily`. THE INSTRUMENT TRAP WAS MET AND NOT ABSORBED: `git show --name-only` on a MERGE prints a combined diff and listed 1 of the 5 paths, which would have made a 1-path sweep read as a complete one; the discrepancy against `--stat`'s 5 was the tell, and the first-parent diff is what the sweep actually ran on. NOT COVERED, deliberately: that the merged code behaved correctly on a real fire. The 2026-10-10 11:00Z fire ran with these bytes in the tree, but its enrichment leg exited 97 SKIPPED on empty input, so it exercised nothing of tc-1's behaviour -- that is J1 below, and it is the CVO's. Five files changed, 393 insertions, 12 deletions. No AWS act: no Lambda deploy, no S3 write, no Terraform, so there is no NEVER-2 ledger entry and none was opened.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1's whole oracle is the EXIT CODE of `git merge-base --is-ancestor`, a one-bit instrument whose PASS value is rc=0 -- the same value a great many git invocations return for reasons unrelated to ancestry. An instrument that can only ever print the passing value proves nothing, and that failure mode is invisible because the answer looks right. The planted condition is therefore a pair of objects for which the true answer is NO.",
+      "expected": "The identical command, with the two commit arguments REVERSED so that the true answer is 'no', must return rc=1 rather than rc=0. If it returns 0 both ways the instrument is not reading ancestry and AC1's PASS is void.",
+      "observed": "FIRED. `git merge-base --is-ancestor b0b65368fb HEAD; echo rc=$?` prints rc=0; `git merge-base --is-ancestor HEAD b0b65368fb; echo rc=$?` prints rc=1. Two further live readings in the same family discriminate in both directions, so the one-bit oracle is exercised across four calls and not two: origin/CLOUD @78c1e121d2 as an ancestor of HEAD reads rc=0, and the push-state sweep's reversed control (origin/box/sitez @84da5399cf as a descendant test against 4b8e5e530a) reads rc=1. THE STRONGEST CONTROL IS HISTORICAL AND IS NOT MINE TO RE-RUN: before the merge the same command on the same two objects read rc=1, recorded in this order's step 1 as 'merge-base --is-ancestor b0b65368fb HEAD = rc 1' across all three attempts. So the bit FLIPPED across the act, which is the only form in which a one-bit PASS carries information.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's invocation run twice in immediate succession against the unchanged local repository, compared on the printed rc rather than on a wrapper's exit status; and the push-state reading re-taken from a fresh `git ls-remote` rather than from the cached remote-tracking ref, because a stale origin/box/sitez had already been measured once this session (it read b2f7073fde while ls-remote read b74d364fce minutes later).",
+      "observed": "STABLE on the ancestry read: rc=0 on both runs. NOT STABLE, and reported as such rather than smoothed, on the REMOTE: origin/box/sitez was read three times this session at b2f7073fde, then b74d364fce, then 84da5399cf, because the integrator's box-sync is advancing the branch while this instance is being written. That movement does not touch AC1 -- its invocation reads local HEAD, not the remote -- but it is why every push-state line in this instance names the exact ls-remote value it was measured against instead of a bare 'on origin'.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "J1 -- whether the merged code behaves as tc-1 intends on a real scheduled fire.",
+      "reason": "NOT PROVEN HERE and not provable by this seat. The order places J1 with 3.0.0_SA_CVO on the first 11:00Z vehicle run after the merge that REACHES the enrichment leg. The merge landed 2026-10-09T19:09:40-04:00, so the 2026-10-09 11:00Z fire predates it and cannot serve; the first post-merge fire, 2026-10-10, reads NOT-REACHED (enrichment exit 97, SKIPPED on 'no non-cash securities in G1 canonical_shape at date=2026-10-09'). As of this instance NO qualifying run exists, so J1's evidence does not yet exist -- which is a different statement from J1 being unmet, and is why the row below carries UNVERIFIABLE-BY-INSTRUMENT rather than FAIL."
+    },
+    {
+      "item": "The four acceptance checks and the 1015-test suite as evidence re-measured by this instance.",
+      "reason": "They were run under the commit lock at the time of the act and are recorded in the order's report at the locked HEAD 4516c6399c: tc-1.AC1, tw-1.AC1 and tw-1.AC2 each PASS 0 failures; aw-1.AC1 FAIL on arm (a) only, on PROMPT_VERSION 'a1-chain/8', which AMENDMENT 1 rules superseded and replaces with item8_generic_opener_check (PASS 0 failures); suite reused per AMENDMENT 2 step (c) on an empty two-tree diff, 1015 passed, 3 skipped. This instance does NOT re-run them, and does not restate their output as a fresh reading -- they are cited at their pin. Re-running them now would grade a different tree, since HEAD has moved well past the locked HEAD."
+    },
+    {
+      "item": "The sending half of the four TO-MERGE-tc1 crossbox calls, and the task order's own status.",
+      "reason": "Both are other seats'. The four calls (c9ce, 1f87, 4315, e563) were acked and closed --side to by this seat on 2026-10-11; each printed HALF-CLOSED (to only) and the sending side is dell1's to record. The order's <status> flip is the issuer's by its own report instruction, and this instance does not touch it."
+    },
+    {
+      "item": "Any claim that the merge was pushed to origin by this seat.",
+      "reason": "It was not, and the attempt was refused by mechanism rather than declined by choice: never-rules-gate.sh blocked `git push origin box/sitez` from this serial under LD-0367 rule 2, naming 0.0.0_AB_MSTR / 0.0.0_AB_MSTR~Z as the branch's only pushers, on the stated ground that a push from any other seat publishes every other seat's local commits. The merge nevertheless IS on origin, carried by box-sync: measured rc=0 for `is-ancestor 6061de660d <origin/box/sitez @84da5399cf>` with a discriminating reversed control. The dell1 CTO independently read b0b65368fb as an ancestor of both origin/box/sitez and origin/CLOUD at 05:4xZ."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-S81 (filed @982563d244 by this seat, class OBSERVATION, hazard_standing ARMED, disarm_owner 2.0.0_SA_COO~V1, adjudicates Z-S79): the evidence committed for the first post-merge fire asserts a J1-readability that this project's own J1 reader refuses. transcribe_vehicle_log.py decides reachedness on its vendor-session regex ALONE and carries no exit-code term, so it printed 'the zero-or-one HISTORY OWED reading above is about the leg's own behaviour and is J1-readable' into VEHICLE_LOG_20261010_1100Z.txt, while tw1_j1_read.py:45 -- which carries the `code != 97` clause the transcriber lacks -- prints 'J1-READ: NOT-REACHED -- J1 reads UNVERIFIABLE for this run, never PASS' on that same committed file. It bears directly on this order because this order's J1 is read on exactly those post-merge fires. It never touched the merge: the merge's own criterion AC1 is an ancestry read with no dependence on any log.",
+    "ETFS_RIVALS-Z-S79 (ARMED, disarm_owner moved to 2.0.0_SA_COO~V1 by ETFS_RIVALS-Z-S80): the standing hazard that a J1 read naming a DATE RANGE rather than a reached-leg condition consumes a non-exercising run as a pass. Named here, not re-graded here, because this order's J1 inherits that predicate and the 2026-10-10 fire is the second distinct non-exercising cause under it. Still UNDER_INVESTIGATION; the disarm is the issuer's one sentence."
+  ],
+  "session_log": "THE ACT ITSELF WAS NOT PERFORMED IN THIS SESSION -- the merge landed 2026-10-09T19:09:40-04:00 and this instance is the missing carrier the issuer named when it graded AC1 MET: 'Status stays open: the complete flip needs a proof-of-spec instance the site-Z executor did not write (as TO-PREFLIGHT).' Everything claimed here as a READING was re-measured in this session at box/sitez; everything inherited from the act is cited at its pin and labelled as such, because a two-day-old measurement of a moving tree is not a current reading and the difference is the whole point of the push-state and determinism notes above. THE ACT, for the record it was taken under: the canonical .git/commit-queue.lock was acquired 19:07:58Z and held through the gates, the scratch-worktree removal and the merge, at locked HEAD 4516c6399c, with the shared index empty -- which matters because 1.0.0_SA_CTO~Z's relayed information (msg 32960, READ-acked by this lane 2026-10-11T05:21:07Z) is that a waiting safe-commit reclaims a LIVE holder's lock after LOCK_STALE_SEC=240 and gives up at 300, with about 20 seats committing on box/sitez; the hold here covered a short re-verify and the merge itself and HEAD was re-read immediately before step (e), which is the discipline that keeps an act inside that window. Two earlier attempts STOPPED correctly rather than forcing: the first at step 2 on aw-1.AC1's arm (a), which AMENDMENT 1 then ruled superseded; the second immediately before the live merge, when the HEAD-equality guard refused because box/sitez had moved to 69ed90b9cd under about 20 committers -- that refusal is what produced AMENDMENT 2's locked-HEAD procedure. THIS SESSION'S COMMITS, all under this seat's author line: 4b8e5e530a (the 20261010 transcription), 982563d244 (surprise row Z-S81, appended in the SHARED tree because rule 14b inverts for an append-only channel), 55d280983b (the enrichment lines, act B of TO-CLOSE-XB-AND-AMENDMENT8), 9752fba003 (two report sections, with <status> asserted unchanged before and after the write), and the commit carrying this instance. No push by this seat on any of them.",
+  "compiler_tools": [
+    {
+      "tool": "git ancestry and status, as AC1's and the deploy claim's only oracles",
+      "invocation": "git merge-base --is-ancestor b0b65368fb HEAD; echo rc=$?   |   git diff --name-only 6061de660d^1 6061de660d   |   git status --porcelain -- <each merged path>   |   git ls-remote origin refs/heads/box/sitez",
+      "result": "AC1 rc=0, twice. Reversed pair rc=1 (the control). First-parent diff 5 paths, each CLEAN, 0 DIRTY, with ' M portal' proving the dirty-detector works in the same sweep. ls-remote 84da5399cf. TRAP MET: `git show --name-only` on a merge printed 1 of 5 paths (combined diff); the sweep was re-run on the first-parent diff rather than accepting the short list."
+    },
+    {
+      "tool": "tw1_j1_read.py -- the ISSUER's own J1 reader, run read-only to report its output, never to grade",
+      "invocation": "python -I org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round28/tw1_j1_read.py origin/box/sitez <YYYYMMDD>",
+      "result": "THREE DISTINCT VERDICTS from one script, which is what makes any one of them a reading rather than a default: 20261010 'J1-READ: NOT-REACHED -- J1 reads UNVERIFIABLE for this run, never PASS' (enrichment exit 97); 20261009 control 'J1-READ: REACHED -- J1-readable: no HISTORY OWED line (switch unset, as expected)' (exit 94); 20261011 'J1-READ: NO-FILE'. The grade remains the CVO's; this is the issuer's instrument reporting on itself."
+    },
+    {
+      "tool": "safe-commit.sh, commit-gate.sh and the commit-time gate set",
+      "invocation": ".tools/safe-commit.sh --author '0.7.0_AE_CloudOps~ZV <0.7.0_AE_CloudOps~ZV@opal.agent>' -F <msgfile> -- <paths>",
+      "result": "Every commit message written by a NON-SHELL writer and passed with -F, never -m. Verdicts read by TOKEN, never from a positional slice. surprise-row-gate: '1 new row(s) of 237 total checked (236 pre-existing, NOT re-graded)' then OK. to-pipeline-gate on the report commit: 'GATE (viii) on a modify: 1 of 1 staged-MODIFIED tree order(s) already declare <placeholders> at HEAD and were graded'. commit-gate WARN noted and NOT cited as a clean gate: it reads only .py/.sh/.tf/org/projects/*.json and checked 0 of 1 file on the .txt commits, which its own output says is not evidence of a clean gate."
+    },
+    {
+      "tool": "never-rules-gate.sh (the push refusal, recorded because a refusal is a measurement)",
+      "invocation": "git push origin box/sitez",
+      "result": "BLOCKED for this serial under LD-0367 rule 2 / LD-0368: only 0.0.0_AB_MSTR or ~Z may push the shared branch. No override attempted -- the audited `# never-override:` escape exists but republishes the whole tree, and the order's own step 4 names box-sync as the carrier. Publication therefore went through the hash relay to 0.0.0_AB_MSTR~Z."
+    },
+    {
+      "tool": "comp-find (the proof-of-spec corpus read, to write this instance to the estate's shape rather than invent one)",
+      "invocation": "comp-find --name '*proof*spec*' org/missions/D5/ETFS/ETFS_RIVALS --limit 30",
+      "result": "DENOMINATOR 134 hits across 1000 files scanned, bands HEAD=134. The sibling CloudOps instance deliverables/0.7.0_AE_CloudOps~RV/...RIV-iam-1... was read in full as the nearest model, and org/standards/PROOF_OF_SPEC.schema.json was read for the required key set and for the judgment rule that a judgment row carries its output and NO verdict."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "git merge-base --is-ancestor b0b65368fb HEAD; echo rc=$? -> rc=0",
+      "method": "command",
+      "invocation": "git merge-base --is-ancestor b0b65368fb HEAD; echo rc=$?",
+      "expect": "rc=0",
+      "output_evidence": "rc=0  (run 1)\nrc=0  (run 2, determinism)\nCONTROL, reversed pair: git merge-base --is-ancestor HEAD b0b65368fb; echo rc=$? -> rc=1\nmerge commit: hash=6061de660d8ea1f7928699ad16176072c7549979 author=0.7.0_AE_CloudOps~ZV <0.7.0_AE_CloudOps~ZV@opal.agent> parents=4516c6399c05ace2bd03123c975bdd9b04f4443a b0b65368fb425bd0e1e20366ce38b10982a077e3\ngit status --short data/etfs/scripts/rivalfunds/ -> empty (step 5's second check)",
+      "denominator": "ONE boolean on one pair of named commits, which is why it is reported with its controls rather than alone: 4 ancestry calls run in this session (target-vs-HEAD twice, the reversed pair, origin/CLOUD-vs-HEAD) returning both rc values, plus the pre-act rc=1 recorded in this order's step 1 at all three attempts -- so the bit is shown to FLIP across the act and to be readable in both directions. The deploy claim beside it is graded over 5 of 5 first-parent merged paths, 0 DIRTY.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "J1 is the CVO's to grade on the first 11:00Z run after the merge that reaches the enrichment leg.",
+      "method": "live_read",
+      "invocation": "python -I org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round28/tw1_j1_read.py origin/box/sitez 20261010",
+      "judgment": true,
+      "output_evidence": "source: transcription only (38 lines) at origin/box/sitez\nenrichment STEP lines: 1; exit lines: ['   178: RIVALFUNDS ENRICHMENT EXIT CODE: 97 -- nothing written. ']; vendor-session-failure lines: 0; HISTORY OWED lines: 0\nJ1-READ: NOT-REACHED -- J1 reads UNVERIFIABLE for this run, never PASS\n--- and the two controls, same script, same ref ---\n20261009: exit lines: ['   172: RIVALFUNDS ENRICHMENT EXIT CODE: 94 -- landed. '] / J1-READ: REACHED -- J1-readable: no HISTORY OWED line (switch unset, as expected)\n20261011: J1-READ: NO-FILE",
+      "denominator": "Candidate post-merge 11:00Z fires existing as of this instance: 1 of 1 read (2026-10-10). Qualifying -- i.e. reached-leg -- fires among them: 0 of 1. The 2026-10-09 fire is EXCLUDED on a measured ordering, not on a guess: it ran at 11:00Z and the merge committed at 2026-10-09T19:09:40-04:00, so it predates the bytes it would be grading. 2026-10-11 had not fired at the time of this read (NextRunTime measured 2026-10-11T11:00:00Z).",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "A JUDGMENT criterion, so this row carries its output and NO verdict -- the oracle is 3.0.0_SA_CVO at L9, on the issuer's own real read, and the order states the grade is the CVO's. Beyond the judgment rule, the evidence J1 names DOES NOT YET EXIST: zero post-merge fires have reached the enrichment leg, so there is nothing yet to grade, and that is the reason this is not a FAIL. The standing per-date obligation of relay AMENDMENT 7 is the mechanism that will produce the qualifying run; surprise row ETFS_RIVALS-Z-S81 is ARMED against the specific way this row could be mis-graded in the meantime, namely by reading the transcription's own prose instead of this reader's verdict line."
+    }
+  ]
+}
