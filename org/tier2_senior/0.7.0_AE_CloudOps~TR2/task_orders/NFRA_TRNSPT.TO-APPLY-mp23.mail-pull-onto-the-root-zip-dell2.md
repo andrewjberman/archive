@@ -28,8 +28,30 @@
     Why: row D2-S22 (ARMED). One dist zip path feeds three functions; the mail pull has run a different, older digest (`VGIq85Xx...`)
     since 2026-10-07, so an untargeted apply from any tree would move it unannounced. The CTO ruled it is re-applied now, deliberately,
     under its own pair, in the shape of the commentary function's re-apply (`2287c83ba4`).
-    The pair: the issuer's packet and the CTO half are named in the GO message. Neither exists at this order's cut.
+    The pair, COMPLETE: the issuer's packet `org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/2.0.0_SA_COO~T2/R23_TR_MP23_MAIL_PULL_PACKET_20261011.md`
+    @b73b89ddbd (COO half in its section 8) and the CTO half
+    `org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_TR_MP23_MAIL_PULL_ONE_ZIP_CTO_HALF.md` @f4ec64d888. Read both first.
+    Step 5's grade is the packet's section 4. Sequence: finish NFRA_TRNSPT.TO-APPLY-tv23 first if it is in hand (condition 3 covers either case).
   </context>
+
+  <cto_conditions_verbatim>
+    (CTO half SIGNED @f4ec64d888, section 3; AMENDMENT 1 of this order, issuer, 2026-10-11 ~07:1xZ. They bind over the outline below.)
+    1. **The bytes are the Teams pull's package, not a rebuild.** Before the plan the file at the root's zip path hashes to
+       `AI4UQD0ME+ABza1X0BrBjGjpqjN7f2fc0Cdxb88aA/I=`, and the Teams pull's live CodeSha256, re-read then, equals it. The tree is
+       ahead of that zip (TR-tt-23 @5374271f5c): a `build.sh` anywhere in this act is a STOP.
+    2. **The plan is 0 to add, 1 to change, 0 to destroy;** the one resource is `aws_lambda_function.mail_pull` and its changed
+       argument is `source_code_hash` with what follows from it. `memory_size`, `timeout`, the handler, the environment and the
+       layer are unchanged in the plan. No reader resource appears. Anything else: stop.
+    3. **The reader-trust variable** comes from the committed `readers.auto.tfvars` if TR-tv-23 has landed it, else it is read
+       from applied state into a file outside the repo. Never typed.
+    4. **After the apply:** the three functions read one CodeSha256; the Teams pull's and the commentary function's LastModified
+       are unchanged; the mail pull's MemorySize reads 1024 and Timeout 600.
+    5. **The driven invoke is graded against the packet's section 4:** no `errorMessage`; one `MAIL-PULL-FIRE` line with
+       `window_days=7` and `list_refusals=0`. A message admitted and landed is covered and is reported with its counts before the
+       ledger closes. A `list_refusals` above 0 or any `[ERROR]` is Branch B: the kept `VGIq85Xx` zip is re-applied on the same
+       target, and then the root zip is put back at its path and re-hashed.
+    6. **Not covered:** a rebuild, an untargeted apply, either other function, any setting, any S3 delete.
+  </cto_conditions_verbatim>
 
   <the_act>
     (Outline only. The GO message's conditions are the binding text.)
