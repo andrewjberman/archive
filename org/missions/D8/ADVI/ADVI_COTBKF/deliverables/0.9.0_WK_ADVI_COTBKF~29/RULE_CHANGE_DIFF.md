@@ -44,41 +44,41 @@ Changed rows (account, field, before -> after):
 
 - acct#03b1818c, status, NOT_MATCHED -> MATCHED
 - acct#03b1818c, rule,  -> R2-in-kind-transfer
-- acct#03b1818c, current_account,  -> z0926757511
+- acct#03b1818c, current_account,  -> acct#9bc91c67
 - acct#03b1818c, score,  -> 0.966700
 - acct#a56947be, score,  -> 0.483900
 - acct#afff21b7, score,  -> 0.000000
 - acct#fe3aa89f, status, NOT_MATCHED -> MATCHED
 - acct#fe3aa89f, rule,  -> R2-in-kind-transfer
-- acct#fe3aa89f, current_account,  -> z0926704991
+- acct#fe3aa89f, current_account,  -> acct#5665fbf1
 - acct#fe3aa89f, score,  -> 1.000000
 - acct#c35ddef3, status, NOT_MATCHED -> MATCHED
 - acct#c35ddef3, rule,  -> R2-in-kind-transfer
-- acct#c35ddef3, current_account,  -> z0926704451
+- acct#c35ddef3, current_account,  -> acct#49cf9110
 - acct#c35ddef3, score,  -> 1.000000
 - acct#7c2950f8, score,  -> 0.000000
 - acct#3514364a, score,  -> 0.000000
 - acct#487a177f, status, NOT_MATCHED -> MATCHED
 - acct#487a177f, rule,  -> R2-in-kind-transfer
-- acct#487a177f, current_account,  -> z0926725281
+- acct#487a177f, current_account,  -> acct#c41a7209
 - acct#487a177f, score,  -> 1.000000
 - acct#5446c1d7, status, NOT_MATCHED -> MATCHED
 - acct#5446c1d7, rule,  -> R2-in-kind-transfer
-- acct#5446c1d7, current_account,  -> z0926652341
+- acct#5446c1d7, current_account,  -> acct#ca21da0d
 - acct#5446c1d7, score,  -> 1.000000
 - acct#0d10c089, status, NOT_MATCHED -> MATCHED
 - acct#0d10c089, rule,  -> R2-in-kind-transfer
-- acct#0d10c089, current_account,  -> z0926652331
+- acct#0d10c089, current_account,  -> acct#cec2fc6a
 - acct#0d10c089, score,  -> 1.000000
 - acct#bd6094c0, status, NOT_MATCHED -> MATCHED
 - acct#bd6094c0, rule,  -> R2-in-kind-transfer
-- acct#bd6094c0, current_account,  -> z0926768821
+- acct#bd6094c0, current_account,  -> acct#5c1a5ca7
 - acct#bd6094c0, score,  -> 1.000000
 - acct#6b93dd15, score,  -> 0.000000
 - acct#8179a706, score,  -> 0.750000
 - acct#1665d973, status, NOT_MATCHED -> MATCHED
 - acct#1665d973, rule,  -> R2-in-kind-transfer
-- acct#1665d973, current_account,  -> z0926725221
+- acct#1665d973, current_account,  -> acct#757f6811
 - acct#1665d973, score,  -> 1.000000
 - acct#77c2edca, status, NOT_MATCHED -> MATCHED
 - acct#77c2edca, rule,  -> R2-in-kind-transfer

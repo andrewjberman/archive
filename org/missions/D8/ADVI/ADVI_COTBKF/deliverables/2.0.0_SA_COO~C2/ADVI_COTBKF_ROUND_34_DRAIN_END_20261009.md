@@ -53,7 +53,7 @@ The prior versions named in the pair stay retrievable, which is the rollback.
 - The round-28 four ABSENT months (acct#79d02c2c/06, 2023-05/06) now MATCH.
 - SCHB and SCHZ on 2022-10-12 equal the round-31 Yahoo evidence exactly (41.94 / 44.93). Nothing was tuned.
 - **5 new regressions read ABSENT** (`REGRESSED_UNDER_AS_TRADED`), each with a named row: D2-S53 acct#aaeb760c 2022-03, S54 acct#aaeb760c
-  2022-08, S55 acct#f78e8ecd 2026-03, S56 D49151054 2021-07, S57 D49151054 2021-10. Their causes are untraced. The two D49151054 months
+  2022-08, S55 acct#f78e8ecd 2026-03, S56 acct#df101fce 2021-07, S57 acct#df101fce 2021-10. Their causes are untraced. The two acct#df101fce months
   move by about 0.6 pp, the largest.
 - **The three 49F bonds are held:** 988 account-days blank, `HELD_SOURCE_UNDER_REVIEW` (CB-ah-1 `cross_firm`; round 35 traced the
   route; round 36 rewrites the cot keys).

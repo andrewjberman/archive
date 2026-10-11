@@ -757,20 +757,20 @@ Verdict moves (before -> after, months):
 | acct#16f4eae3 | 2025-12 | 0.8395 | 1.5452 | 0.82 | 0.7252 |
 | acct#cce589ab | 2025-12 | 0.3466 | 0.8711 | 0.32 | 0.5511 |
 | acct#9727ac87 | 2026-01 | 0.1548 | 0.2923 | 0.16 | 0.1323 |
-| D49141625 | 2017-10 | 0.021 | 0.0791 | 0.0 | 0.0791 |
-| D49141625 | 2017-11 | 0.021 | 0.079 | 0.0 | 0.079 |
-| D49141625 | 2018-01 | 0.0158 | 1.9802 | 0.0 | 1.9802 |
-| D49141625 | 2020-08 | 0.0093 | 0.3953 | 0.0 | 0.3953 |
-| D49141625 | 2020-09 | 0.0093 | 0.3937 | 0.0 | 0.3937 |
-| D49141625 | 2020-10 | 0.0093 | 0.3922 | 0.0 | 0.3922 |
-| D49141625 | 2021-01 | 0.0093 | 0.3891 | 0.0 | 0.3891 |
-| D49141625 | 2021-02 | 0.0093 | 0.3876 | 0.0 | 0.3876 |
-| D49141625 | 2021-03 | 0.0093 | 0.3861 | 0.0 | 0.3861 |
-| D49141625 | 2021-04 | 0.0464 | 1.9231 | 0.0 | 1.9231 |
-| D49141625 | 2021-05 | 0.0185 | 0.7547 | 0.0 | 0.7547 |
-| D49141625 | 2021-06 | 0.0093 | 0.3745 | 0.0 | 0.3745 |
-| D49141625 | 2021-07 | 0.0093 | 0.3731 | 0.0 | 0.3731 |
-| D49141625 | 2021-08 | 0.0093 | 0.3717 | 0.0 | 0.3717 |
+| acct#08d09234 | 2017-10 | 0.021 | 0.0791 | 0.0 | 0.0791 |
+| acct#08d09234 | 2017-11 | 0.021 | 0.079 | 0.0 | 0.079 |
+| acct#08d09234 | 2018-01 | 0.0158 | 1.9802 | 0.0 | 1.9802 |
+| acct#08d09234 | 2020-08 | 0.0093 | 0.3953 | 0.0 | 0.3953 |
+| acct#08d09234 | 2020-09 | 0.0093 | 0.3937 | 0.0 | 0.3937 |
+| acct#08d09234 | 2020-10 | 0.0093 | 0.3922 | 0.0 | 0.3922 |
+| acct#08d09234 | 2021-01 | 0.0093 | 0.3891 | 0.0 | 0.3891 |
+| acct#08d09234 | 2021-02 | 0.0093 | 0.3876 | 0.0 | 0.3876 |
+| acct#08d09234 | 2021-03 | 0.0093 | 0.3861 | 0.0 | 0.3861 |
+| acct#08d09234 | 2021-04 | 0.0464 | 1.9231 | 0.0 | 1.9231 |
+| acct#08d09234 | 2021-05 | 0.0185 | 0.7547 | 0.0 | 0.7547 |
+| acct#08d09234 | 2021-06 | 0.0093 | 0.3745 | 0.0 | 0.3745 |
+| acct#08d09234 | 2021-07 | 0.0093 | 0.3731 | 0.0 | 0.3731 |
+| acct#08d09234 | 2021-08 | 0.0093 | 0.3717 | 0.0 | 0.3717 |
 | acct#9d0bbc8f | 2023-09 | 0.0928 | -1.6944 | 0.07 | -1.7644 |
 | acct#83c764b4 | 2025-06 | 2.8578 | 2.9456 | 2.84 | 0.1056 |
 | acct#83c764b4 | 2025-09 | 1.4405 | 1.5387 | 1.42 | 0.1187 |
@@ -778,12 +778,12 @@ Verdict moves (before -> after, months):
 | acct#88e830f4 | 2026-01 | 0.0349 | -0.3323 | 0.03 | -0.3623 |
 | acct#ed5f47fe | 2025-12 | 0.6001 | 1.2868 | 0.56 | 0.7268 |
 | acct#ed5f47fe | 2026-03 | -5.6772 | -5.4448 | -5.65 | 0.2052 |
-| cv18643456 | 2014-01 | 0.0 | -5.9733 | 0.0 | -5.9733 |
-| cv18643456 | 2014-02 | 0.0 | -9.9287 | 0.0 | -9.9287 |
-| cv18643456 | 2015-09 | -0.0 | -14.9997 | 0.0 | -14.9997 |
-| cv18643456 | 2015-10 | 0.0 | -14.9996 | 0.0 | -14.9996 |
-| cv18643456 | 2015-11 | 0.0 | -14.9996 | 0.0 | -14.9996 |
-| cv18643456 | 2015-12 | 0.0 | -3750038.4541 | 0.0 | -3750038.4541 |
+| acct#bf9a0262 | 2014-01 | 0.0 | -5.9733 | 0.0 | -5.9733 |
+| acct#bf9a0262 | 2014-02 | 0.0 | -9.9287 | 0.0 | -9.9287 |
+| acct#bf9a0262 | 2015-09 | -0.0 | -14.9997 | 0.0 | -14.9997 |
+| acct#bf9a0262 | 2015-10 | 0.0 | -14.9996 | 0.0 | -14.9996 |
+| acct#bf9a0262 | 2015-11 | 0.0 | -14.9996 | 0.0 | -14.9996 |
+| acct#bf9a0262 | 2015-12 | 0.0 | -3750038.4541 | 0.0 | -3750038.4541 |
 
 ## The round-19 MATCH -> DIFF months (mover_classes.parquet), with their result in this re-grade
 
@@ -799,8 +799,8 @@ Verdict moves (before -> after, months):
 |---|---|---|---|---|---|---|---|---|---|
 | acct#f6c79f45 | 2024-06 | core | -0.88 | -0.8874 | 1.2105 | DIFF | DIFF | -0.8239 | 0.0561 |
 | acct#9727ac87 | 2024-07 | core | -0.08 | -0.0415 | -0.0234 | DIFF | MATCH | -0.0798 | 0.0002 |
-| D49143350 | 2023-11 | core | -4.59 | -4.6175 | -5.3344 | DIFF | DIFF | -3.4367 | 1.1533 |
-| D49143350 | 2026-02 | core | 2.05 | 2.0179 | -16.069 | DIFF | DIFF | 2.4881 | 0.4381 |
+| acct#865421c2 | 2023-11 | core | -4.59 | -4.6175 | -5.3344 | DIFF | DIFF | -3.4367 | 1.1533 |
+| acct#865421c2 | 2026-02 | core | 2.05 | 2.0179 | -16.069 | DIFF | DIFF | 2.4881 | 0.4381 |
 | acct#557ce060 | 2026-01 | core | 0.02 | 0.0118 | 0.0988 | DIFF | MATCH | 0.0233 | 0.0033 |
 | acct#c0cea213 | 2024-10 | core | -0.0 | 0.0329 | 0.1609 | DIFF | MATCH | 0.0468 | 0.0468 |
 | acct#7f62f16f | 2025-02 | core | 0.06 | 0.0995 | 0.1518 | DIFF | MATCH | 0.0645 | 0.0045 |
@@ -933,15 +933,15 @@ Verdict moves (before -> after, months):
 | acct#cce589ab | 2025-08 | neither | 2.52 | 2.4854 | 2.7275 | DIFF | MATCH | 2.5124 | -0.0076 |
 | acct#cce589ab | 2025-10 | neither | 1.44 | 1.4272 | 1.8756 | DIFF | MATCH | 1.4418 | 0.0018 |
 | acct#cce589ab | 2026-01 | neither | 1.76 | 1.738 | 2.218 | DIFF | MATCH | 1.7554 | -0.0046 |
-| D49141608 | 2019-02 | neither | 0.04 | 0.0412 | 2.2299 | DIFF | MATCH | 0.0419 | 0.0019 |
-| D49141608 | 2019-03 | neither | 0.05 | 0.0457 | 2.4237 | DIFF | MATCH | 0.0466 | -0.0034 |
-| D49141608 | 2019-04 | neither | 0.05 | 0.0443 | 2.2953 | DIFF | MATCH | 0.0452 | -0.0048 |
-| D49141608 | 2019-05 | neither | 0.05 | 0.0457 | 2.3132 | DIFF | MATCH | 0.0465 | -0.0035 |
-| D49141608 | 2019-06 | neither | 0.05 | 0.0443 | 2.1931 | DIFF | MATCH | 0.0451 | -0.0049 |
-| D49141608 | 2019-07 | neither | 0.05 | 0.0456 | 2.2124 | DIFF | MATCH | 0.0465 | -0.0035 |
-| D49141608 | 2019-08 | neither | 0.04 | 0.0374 | 1.7749 | DIFF | MATCH | 0.0381 | -0.0019 |
-| D49141608 | 2019-09 | neither | 0.03 | 0.0315 | 1.4675 | DIFF | MATCH | 0.0321 | 0.0021 |
-| D49141714 | 2019-02 | neither | 0.04 | 0.0416 | 3.3111 | DIFF | MATCH | 0.0421 | 0.0021 |
+| acct#0f2f0af8 | 2019-02 | neither | 0.04 | 0.0412 | 2.2299 | DIFF | MATCH | 0.0419 | 0.0019 |
+| acct#0f2f0af8 | 2019-03 | neither | 0.05 | 0.0457 | 2.4237 | DIFF | MATCH | 0.0466 | -0.0034 |
+| acct#0f2f0af8 | 2019-04 | neither | 0.05 | 0.0443 | 2.2953 | DIFF | MATCH | 0.0452 | -0.0048 |
+| acct#0f2f0af8 | 2019-05 | neither | 0.05 | 0.0457 | 2.3132 | DIFF | MATCH | 0.0465 | -0.0035 |
+| acct#0f2f0af8 | 2019-06 | neither | 0.05 | 0.0443 | 2.1931 | DIFF | MATCH | 0.0451 | -0.0049 |
+| acct#0f2f0af8 | 2019-07 | neither | 0.05 | 0.0456 | 2.2124 | DIFF | MATCH | 0.0465 | -0.0035 |
+| acct#0f2f0af8 | 2019-08 | neither | 0.04 | 0.0374 | 1.7749 | DIFF | MATCH | 0.0381 | -0.0019 |
+| acct#0f2f0af8 | 2019-09 | neither | 0.03 | 0.0315 | 1.4675 | DIFF | MATCH | 0.0321 | 0.0021 |
+| acct#c7081e97 | 2019-02 | neither | 0.04 | 0.0416 | 3.3111 | DIFF | MATCH | 0.0421 | 0.0021 |
 | acct#a011b5f7 | 2025-04 | neither | 0.41 | 0.4142 | 0.3581 | DIFF | MATCH | 0.4142 | 0.0042 |
 | acct#a011b5f7 | 2025-10 | neither | 0.64 | 0.6038 | 1.0099 | DIFF | MATCH | 0.6039 | -0.0361 |
 | acct#a011b5f7 | 2026-01 | neither | 1.56 | 1.5626 | 1.934 | DIFF | MATCH | 1.5628 | 0.0028 |
@@ -976,7 +976,7 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 |---|---|---|---|---|---|---|---|---|---|---|
 | acct#f6c79f45 | 2024-06 | core | other:sweep_trade_day | -0.88 | MATCH | DIFF | DIFF | DIFF | -0.8239 | 0.0561 |
 | acct#9727ac87 | 2024-07 | core | other:sweep_trade_day | -0.08 | MATCH | DIFF | DIFF | MATCH | -0.0798 | 0.0002 |
-| D49143350 | 2026-02 | core | other:sweep_trade_day | 2.05 | MATCH | DIFF | DIFF | DIFF | 2.4881 | 0.4381 |
+| acct#865421c2 | 2026-02 | core | other:sweep_trade_day | 2.05 | MATCH | DIFF | DIFF | DIFF | 2.4881 | 0.4381 |
 | acct#557ce060 | 2026-01 | core | other:sweep_trade_day | 0.02 | MATCH | DIFF | DIFF | MATCH | 0.0233 | 0.0033 |
 | acct#c0cea213 | 2024-10 | core | other:sweep_trade_day | -0.0 | MATCH | DIFF | DIFF | MATCH | 0.0468 | 0.0468 |
 | acct#7f62f16f | 2025-02 | core | other:sweep_trade_day | 0.06 | MATCH | DIFF | DIFF | MATCH | 0.0645 | 0.0045 |
@@ -989,7 +989,7 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 | acct#1b22f63a | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | DIFF | MATCH | 0.0872 | -0.0028 |
 | acct#744c9c00 | 2025-06 | core | other:sweep_trade_day | 0.15 | MATCH | DIFF | DIFF | MATCH | 0.1533 | 0.0033 |
 | acct#5fd6a5d4 | 2026-05 | core | other:sweep_trade_day | 0.03 | MATCH | DIFF | DIFF | MATCH | 0.0284 | -0.0016 |
-| D49143350 | 2023-11 | core | sweep_balance | -4.59 | MATCH | DIFF | DIFF | DIFF | -3.4367 | 1.1533 |
+| acct#865421c2 | 2023-11 | core | sweep_balance | -4.59 | MATCH | DIFF | DIFF | DIFF | -3.4367 | 1.1533 |
 | acct#aaeb760c | 2022-08 | neither | other:sweep_trade_day | -1.06 | MATCH | DIFF | DIFF | MATCH | -1.027 | 0.033 |
 | acct#aaeb760c | 2025-03 | neither | other:sweep_trade_day | -7.16 | MATCH | DIFF | DIFF | MATCH | -7.1115 | 0.0485 |
 | acct#b4db1f25 | 2020-11 | neither | other:sweep_trade_day | 0.08 | MATCH | DIFF | DIFF | MATCH | 0.0808 | 0.0008 |
@@ -1122,15 +1122,15 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 | acct#cce589ab | 2025-01 | neither | sweep_balance | 2.52 | MATCH | DIFF | DIFF | MATCH | 2.5101 | -0.0099 |
 | acct#cce589ab | 2025-02 | neither | sweep_balance | -1.55 | MATCH | DIFF | DIFF | MATCH | -1.5729 | -0.0229 |
 | acct#cce589ab | 2025-08 | neither | sweep_balance | 2.52 | MATCH | DIFF | DIFF | MATCH | 2.5124 | -0.0076 |
-| D49141608 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | DIFF | MATCH | 0.0419 | 0.0019 |
-| D49141608 | 2019-03 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | MATCH | 0.0466 | -0.0034 |
-| D49141608 | 2019-04 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | MATCH | 0.0452 | -0.0048 |
-| D49141608 | 2019-05 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | MATCH | 0.0465 | -0.0035 |
-| D49141608 | 2019-06 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | MATCH | 0.0451 | -0.0049 |
-| D49141608 | 2019-07 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | MATCH | 0.0465 | -0.0035 |
-| D49141608 | 2019-08 | neither | sweep_balance | 0.04 | MATCH | DIFF | DIFF | MATCH | 0.0381 | -0.0019 |
-| D49141608 | 2019-09 | neither | sweep_balance | 0.03 | MATCH | DIFF | DIFF | MATCH | 0.0321 | 0.0021 |
-| D49141714 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | DIFF | MATCH | 0.0421 | 0.0021 |
+| acct#0f2f0af8 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | DIFF | MATCH | 0.0419 | 0.0019 |
+| acct#0f2f0af8 | 2019-03 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | MATCH | 0.0466 | -0.0034 |
+| acct#0f2f0af8 | 2019-04 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | MATCH | 0.0452 | -0.0048 |
+| acct#0f2f0af8 | 2019-05 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | MATCH | 0.0465 | -0.0035 |
+| acct#0f2f0af8 | 2019-06 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | MATCH | 0.0451 | -0.0049 |
+| acct#0f2f0af8 | 2019-07 | neither | sweep_balance | 0.05 | MATCH | DIFF | DIFF | MATCH | 0.0465 | -0.0035 |
+| acct#0f2f0af8 | 2019-08 | neither | sweep_balance | 0.04 | MATCH | DIFF | DIFF | MATCH | 0.0381 | -0.0019 |
+| acct#0f2f0af8 | 2019-09 | neither | sweep_balance | 0.03 | MATCH | DIFF | DIFF | MATCH | 0.0321 | 0.0021 |
+| acct#c7081e97 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | DIFF | MATCH | 0.0421 | 0.0021 |
 | acct#cf292cea | 2024-08 | neither | sweep_balance | 4.62 | MATCH | DIFF | DIFF | MATCH | 4.6488 | 0.0288 |
 | acct#65b3b3ea | 2025-04 | neither | sweep_balance | -11.06 | MATCH | DIFF | DIFF | MATCH | -11.0556 | 0.0044 |
 | acct#65b3b3ea | 2025-07 | neither | sweep_balance | 3.42 | MATCH | DIFF | DIFF | MATCH | 3.4191 | -0.0009 |
@@ -1143,8 +1143,8 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 | account | month | class | cause | AFTER verdict | computed | reported |
 |---|---|---|---|---|---|---|
 | acct#f6c79f45 | 2024-06 | core | other:sweep_trade_day | DIFF | -0.8239 | -0.88 |
-| D49143350 | 2026-02 | core | other:sweep_trade_day | DIFF | 2.4881 | 2.05 |
-| D49143350 | 2023-11 | core | sweep_balance | DIFF | -3.4367 | -4.59 |
+| acct#865421c2 | 2026-02 | core | other:sweep_trade_day | DIFF | 2.4881 | 2.05 |
+| acct#865421c2 | 2023-11 | core | sweep_balance | DIFF | -3.4367 | -4.59 |
 | acct#015306a0 | 2023-04 | neither | other:sweep_trade_day | DIFF | 1.1702 | 1.23 |
 | acct#fa488a0b | 2023-07 | neither | other:sweep_trade_day | DIFF | 2.9899 | 2.9 |
 | acct#25880078 | 2021-07 | neither | other:sweep_trade_day | DIFF | -0.1154 | -0.04 |
@@ -1225,15 +1225,15 @@ By new verdict: MATCH=25, DIFF=0, UNGRADABLE=0, ABSENT=0
 | acct#cce589ab | 2024-08 | MATCH |
 | acct#cce589ab | 2025-02 | MATCH |
 | acct#cce589ab | 2025-08 | MATCH |
-| D49141608 | 2019-02 | MATCH |
-| D49141608 | 2019-03 | MATCH |
-| D49141608 | 2019-04 | MATCH |
-| D49141608 | 2019-05 | MATCH |
-| D49141608 | 2019-06 | MATCH |
-| D49141608 | 2019-07 | MATCH |
-| D49141608 | 2019-08 | MATCH |
-| D49141608 | 2019-09 | MATCH |
-| D49141714 | 2019-02 | MATCH |
+| acct#0f2f0af8 | 2019-02 | MATCH |
+| acct#0f2f0af8 | 2019-03 | MATCH |
+| acct#0f2f0af8 | 2019-04 | MATCH |
+| acct#0f2f0af8 | 2019-05 | MATCH |
+| acct#0f2f0af8 | 2019-06 | MATCH |
+| acct#0f2f0af8 | 2019-07 | MATCH |
+| acct#0f2f0af8 | 2019-08 | MATCH |
+| acct#0f2f0af8 | 2019-09 | MATCH |
+| acct#c7081e97 | 2019-02 | MATCH |
 
 
 ## The method, row type by row type (commonwealth_sweeps.CASH_POSTINGS / CFN_POSTINGS, commonwealth_flows.METHOD_*)
@@ -1313,7 +1313,7 @@ The ledger of every posting of an account (sweep + CFNCASH, one cash position) a
 - months holding a row of an UNLISTED CHARGE/TAX type (the table does not name it; default kept): 35 (cbf 3, fco 1, ftax 30, stax 1, stp 1)
 - months holding a dividend row (dv, dvlt or dvst, dated by its pay date): 45
 - months holding neither: 24
-- accounts: 25; the largest: acct#47bd9af5 20, acct#04ebe1d1 16, D49141625 14, acct#16f4eae3 6, cv18643456 6, acct#fa488a0b 5
+- accounts: 25; the largest: acct#47bd9af5 20, acct#04ebe1d1 16, acct#08d09234 14, acct#16f4eae3 6, acct#bf9a0262 6, acct#fa488a0b 5
 
 ### Every MATCH -> DIFF month with ONE named cause: 98 (traced from the month's own rows, nothing forced, no treatment changed)
 
@@ -1394,20 +1394,20 @@ Counts per cause (sum 98): unlisted_type:ftax 29, dividend_row:dv 21, carried_le
 | acct#16f4eae3 | 2025-12 | 0.8395 | 1.5452 | 0.82 | dividend_row:dv+dvlt | dv+dvlt 2025-12-19: the arms' account value differs by 152.29 more on this day than the day before; 37% of the month's daily-return difference |
 | acct#cce589ab | 2025-12 | 0.3466 | 0.8711 | 0.32 | carried_level:pre_first_valued_day | level at 2025-12-31: arms differ by 42476.86 = pre_first_valued_day 37591.96, dividend_row 18238.95, fee_row -13299.01, charge_row -70.0, mixed_rows 14.96; the largest is pre_first_valued_day (net 37591.96, last step 2023-05-11); no step or flow differs on the days carrying 58% of the month's daily-return difference |
 | acct#9727ac87 | 2026-01 | 0.1548 | 0.2923 | 0.16 | carried_level:mixed_rows | level at 2026-01-30: arms differ by -227842.78 = mixed_rows -995383.29, trade_cash 643749.85, cash_leg_difference 124999.99, fee_row -1209.33; the largest is mixed_rows (net -995383.29, last step 2025-07-03); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2017-10 | 0.021 | 0.0791 | 0.0 | carried_level:ManAltF | level at 2017-10-31: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2017-10-09); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2017-11 | 0.021 | 0.079 | 0.0 | carried_level:ManAltF | level at 2017-11-30: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2017-10-09); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2018-01 | 0.0158 | 1.9802 | 0.0 | carried_level:ManAltF | level at 2018-01-31: arms differ by -251.29 = fee_row -251.29; the largest is fee_row (net -251.29, last step 2018-01-11); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2020-08 | 0.0093 | 0.3953 | 0.0 | carried_level:ManAltF | level at 2020-08-31: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2020-09 | 0.0093 | 0.3937 | 0.0 | carried_level:ManAltF | level at 2020-09-30: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2020-10 | 0.0093 | 0.3922 | 0.0 | carried_level:ManAltF | level at 2020-10-30: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2021-01 | 0.0093 | 0.3891 | 0.0 | carried_level:ManAltF | level at 2021-01-29: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2021-02 | 0.0093 | 0.3876 | 0.0 | carried_level:ManAltF | level at 2021-02-26: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2021-03 | 0.0093 | 0.3861 | 0.0 | carried_level:ManAltF | level at 2021-03-31: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2021-04 | 0.0464 | 1.9231 | 0.0 | carried_level:ManAltF | level at 2021-04-30: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2021-05 | 0.0185 | 0.7547 | 0.0 | carried_level:ManAltF | level at 2021-05-28: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2021-06 | 0.0093 | 0.3745 | 0.0 | carried_level:ManAltF | level at 2021-06-30: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2021-07 | 0.0093 | 0.3731 | 0.0 | carried_level:ManAltF | level at 2021-07-30: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
-| D49141625 | 2021-08 | 0.0093 | 0.3717 | 0.0 | carried_level:ManAltF | level at 2021-08-31: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2017-10 | 0.021 | 0.0791 | 0.0 | carried_level:ManAltF | level at 2017-10-31: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2017-10-09); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2017-11 | 0.021 | 0.079 | 0.0 | carried_level:ManAltF | level at 2017-11-30: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2017-10-09); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2018-01 | 0.0158 | 1.9802 | 0.0 | carried_level:ManAltF | level at 2018-01-31: arms differ by -251.29 = fee_row -251.29; the largest is fee_row (net -251.29, last step 2018-01-11); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2020-08 | 0.0093 | 0.3953 | 0.0 | carried_level:ManAltF | level at 2020-08-31: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2020-09 | 0.0093 | 0.3937 | 0.0 | carried_level:ManAltF | level at 2020-09-30: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2020-10 | 0.0093 | 0.3922 | 0.0 | carried_level:ManAltF | level at 2020-10-30: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2021-01 | 0.0093 | 0.3891 | 0.0 | carried_level:ManAltF | level at 2021-01-29: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2021-02 | 0.0093 | 0.3876 | 0.0 | carried_level:ManAltF | level at 2021-02-26: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2021-03 | 0.0093 | 0.3861 | 0.0 | carried_level:ManAltF | level at 2021-03-31: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2021-04 | 0.0464 | 1.9231 | 0.0 | carried_level:ManAltF | level at 2021-04-30: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2021-05 | 0.0185 | 0.7547 | 0.0 | carried_level:ManAltF | level at 2021-05-28: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2021-06 | 0.0093 | 0.3745 | 0.0 | carried_level:ManAltF | level at 2021-06-30: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2021-07 | 0.0093 | 0.3731 | 0.0 | carried_level:ManAltF | level at 2021-07-30: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
+| acct#08d09234 | 2021-08 | 0.0093 | 0.3717 | 0.0 | carried_level:ManAltF | level at 2021-08-31: arms differ by -105.2 = fee_row -105.2; the largest is fee_row (net -105.2, last step 2018-02-20); no step or flow differs on the days carrying 100% of the month's daily-return difference |
 | acct#9d0bbc8f | 2023-09 | 0.0928 | -1.6944 | 0.07 | unlisted_type:ftax+stax | month holds 2 row(s) of the type(s) the table does not name |
 | acct#83c764b4 | 2025-06 | 2.8578 | 2.9456 | 2.84 | dividend_row:dv | dv 2025-06-10: the arms' account value differs by 268.29 more on this day than the day before; 70% of the month's daily-return difference |
 | acct#83c764b4 | 2025-09 | 1.4405 | 1.5387 | 1.42 | dividend_row:dv | dv 2025-09-10: the arms' account value differs by 268.29 more on this day than the day before; 74% of the month's daily-return difference |
@@ -1415,12 +1415,12 @@ Counts per cause (sum 98): unlisted_type:ftax 29, dividend_row:dv 21, carried_le
 | acct#88e830f4 | 2026-01 | 0.0349 | -0.3323 | 0.03 | fee_row:man | man 2026-01-09: the arms' account value differs by -0.19 more on this day than the day before; 100% of the month's daily-return difference |
 | acct#ed5f47fe | 2025-12 | 0.6001 | 1.2868 | 0.56 | dividend_row:dv | dv 2025-12-23: the arms' account value differs by 96.45 more on this day than the day before; 63% of the month's daily-return difference |
 | acct#ed5f47fe | 2026-03 | -5.6772 | -5.4448 | -5.65 | dividend_row:dv | dv 2026-03-20: the arms' account value differs by 34.74 more on this day than the day before; 51% of the month's daily-return difference |
-| cv18643456 | 2014-01 | 0.0 | -5.9733 | 0.0 | unlisted_type:ftax | month holds 1 row(s) of the type(s) the table does not name |
-| cv18643456 | 2014-02 | 0.0 | -9.9287 | 0.0 | unlisted_type:ftax | month holds 1 row(s) of the type(s) the table does not name |
-| cv18643456 | 2015-09 | -0.0 | -14.9997 | 0.0 | unlisted_type:ftax | month holds 1 row(s) of the type(s) the table does not name |
-| cv18643456 | 2015-10 | 0.0 | -14.9996 | 0.0 | unlisted_type:ftax | month holds 1 row(s) of the type(s) the table does not name |
-| cv18643456 | 2015-11 | 0.0 | -14.9996 | 0.0 | unlisted_type:ftax | month holds 1 row(s) of the type(s) the table does not name |
-| cv18643456 | 2015-12 | 0.0 | -3750038.4541 | 0.0 | unlisted_type:ftax | month holds 2 row(s) of the type(s) the table does not name |
+| acct#bf9a0262 | 2014-01 | 0.0 | -5.9733 | 0.0 | unlisted_type:ftax | month holds 1 row(s) of the type(s) the table does not name |
+| acct#bf9a0262 | 2014-02 | 0.0 | -9.9287 | 0.0 | unlisted_type:ftax | month holds 1 row(s) of the type(s) the table does not name |
+| acct#bf9a0262 | 2015-09 | -0.0 | -14.9997 | 0.0 | unlisted_type:ftax | month holds 1 row(s) of the type(s) the table does not name |
+| acct#bf9a0262 | 2015-10 | 0.0 | -14.9996 | 0.0 | unlisted_type:ftax | month holds 1 row(s) of the type(s) the table does not name |
+| acct#bf9a0262 | 2015-11 | 0.0 | -14.9996 | 0.0 | unlisted_type:ftax | month holds 1 row(s) of the type(s) the table does not name |
+| acct#bf9a0262 | 2015-12 | 0.0 | -3750038.4541 | 0.0 | unlisted_type:ftax | month holds 2 row(s) of the type(s) the table does not name |
 
 ## The 163 round-19 movers re-counted by verdict (round 24)
 
@@ -1447,15 +1447,15 @@ AFTER verdict of the 163: MATCH 138, DIFF 25, UNGRADABLE 0, ABSENT 0.
 | acct#cce589ab | 2024-08 | MATCH | 1.7854 | 1.79 | -0.0046 | MATCH |
 | acct#cce589ab | 2025-02 | MATCH | -1.5729 | -1.55 | -0.0229 | MATCH |
 | acct#cce589ab | 2025-08 | MATCH | 2.5124 | 2.52 | -0.0076 | MATCH |
-| D49141608 | 2019-02 | MATCH | 0.0419 | 0.04 | 0.0019 | MATCH |
-| D49141608 | 2019-03 | MATCH | 0.0466 | 0.05 | -0.0034 | MATCH |
-| D49141608 | 2019-04 | MATCH | 0.0452 | 0.05 | -0.0048 | MATCH |
-| D49141608 | 2019-05 | MATCH | 0.0465 | 0.05 | -0.0035 | MATCH |
-| D49141608 | 2019-06 | MATCH | 0.0451 | 0.05 | -0.0049 | MATCH |
-| D49141608 | 2019-07 | MATCH | 0.0465 | 0.05 | -0.0035 | MATCH |
-| D49141608 | 2019-08 | MATCH | 0.0381 | 0.04 | -0.0019 | MATCH |
-| D49141608 | 2019-09 | MATCH | 0.0321 | 0.03 | 0.0021 | MATCH |
-| D49141714 | 2019-02 | MATCH | 0.0421 | 0.04 | 0.0021 | MATCH |
+| acct#0f2f0af8 | 2019-02 | MATCH | 0.0419 | 0.04 | 0.0019 | MATCH |
+| acct#0f2f0af8 | 2019-03 | MATCH | 0.0466 | 0.05 | -0.0034 | MATCH |
+| acct#0f2f0af8 | 2019-04 | MATCH | 0.0452 | 0.05 | -0.0048 | MATCH |
+| acct#0f2f0af8 | 2019-05 | MATCH | 0.0465 | 0.05 | -0.0035 | MATCH |
+| acct#0f2f0af8 | 2019-06 | MATCH | 0.0451 | 0.05 | -0.0049 | MATCH |
+| acct#0f2f0af8 | 2019-07 | MATCH | 0.0465 | 0.05 | -0.0035 | MATCH |
+| acct#0f2f0af8 | 2019-08 | MATCH | 0.0381 | 0.04 | -0.0019 | MATCH |
+| acct#0f2f0af8 | 2019-09 | MATCH | 0.0321 | 0.03 | 0.0021 | MATCH |
+| acct#c7081e97 | 2019-02 | MATCH | 0.0421 | 0.04 | 0.0021 | MATCH |
 
 
 ## Cross-month dividends graded BOTH ways: NOT GRADED, no ex-date source
@@ -1475,7 +1475,7 @@ Rule, stated before the counts: an account-year is in the control when Commonwea
 
 A month graded MATCH or DIFF (before or after) of an account with no listed-sweep (or listed core-position) transaction on or before the month's end (a CUSIP listed in either arm counts): 667 months, 52 with the same verdict and the same computed return (to 1e-09 pct points): control_same=False.
 
-Differing control months: 00085401932/2023-09, 00085401932/2023-10, 00085401949/2023-09, 00085401949/2023-10, 00088449543/2023-09, 00088449543/2023-10, acct#bf094199/2023-05, acct#bf094199/2023-06, acct#bf094199/2023-07, acct#bf094199/2023-08, acct#bf094199/2023-09, acct#bf094199/2023-10, acct#bf094199/2023-11, acct#bf094199/2023-12, acct#bf094199/2024-01, acct#bf094199/2024-02, acct#bf094199/2024-03, acct#bf094199/2024-04, acct#bf094199/2024-05, acct#bf094199/2024-06, acct#57e741a5/2021-06, acct#f6f1b9cc/2022-08, acct#f6f1b9cc/2022-09, acct#f6f1b9cc/2022-10, acct#f6f1b9cc/2022-11, acct#f6f1b9cc/2022-12, acct#f6f1b9cc/2023-01, cv0QF878957/2013-06, cv0QF878979/2013-06, cv0QF878979/2013-07, cv0QF878979/2013-08, cv0QF878979/2013-09, cv0QF878979/2013-10, cv0QF878979/2013-11, cv0QF878979/2013-12, cv0QF878979/2014-01, cv0QF878979/2014-02, cv0QF878979/2014-03, cv0QF878979/2014-04, cv0QF878979/2014-05, cv0QF878979/2014-06, cv0QF878979/2014-07, cv0QF878979/2014-08, cv0QF878979/2014-09, cv0QF878979/2014-10, cv0QF878979/2014-11, cv0QF878979/2014-12, cv0QF878979/2015-01, cv0QF878979/2015-02, cv0QF878979/2015-03
+Differing control months: acct#9b5537ed/2023-09, acct#9b5537ed/2023-10, acct#cd1810f3/2023-09, acct#cd1810f3/2023-10, acct#f204a0e1/2023-09, acct#f204a0e1/2023-10, acct#bf094199/2023-05, acct#bf094199/2023-06, acct#bf094199/2023-07, acct#bf094199/2023-08, acct#bf094199/2023-09, acct#bf094199/2023-10, acct#bf094199/2023-11, acct#bf094199/2023-12, acct#bf094199/2024-01, acct#bf094199/2024-02, acct#bf094199/2024-03, acct#bf094199/2024-04, acct#bf094199/2024-05, acct#bf094199/2024-06, acct#57e741a5/2021-06, acct#f6f1b9cc/2022-08, acct#f6f1b9cc/2022-09, acct#f6f1b9cc/2022-10, acct#f6f1b9cc/2022-11, acct#f6f1b9cc/2022-12, acct#f6f1b9cc/2023-01, acct#595c71d8/2013-06, acct#b0fc8f4e/2013-06, acct#b0fc8f4e/2013-07, acct#b0fc8f4e/2013-08, acct#b0fc8f4e/2013-09, acct#b0fc8f4e/2013-10, acct#b0fc8f4e/2013-11, acct#b0fc8f4e/2013-12, acct#b0fc8f4e/2014-01, acct#b0fc8f4e/2014-02, acct#b0fc8f4e/2014-03, acct#b0fc8f4e/2014-04, acct#b0fc8f4e/2014-05, acct#b0fc8f4e/2014-06, acct#b0fc8f4e/2014-07, acct#b0fc8f4e/2014-08, acct#b0fc8f4e/2014-09, acct#b0fc8f4e/2014-10, acct#b0fc8f4e/2014-11, acct#b0fc8f4e/2014-12, acct#b0fc8f4e/2015-01, acct#b0fc8f4e/2015-02, acct#b0fc8f4e/2015-03
 
 The differing control months by verdict move: MATCH -> MATCH 465, MATCH -> UNGRADABLE 101, UNGRADABLE -> MATCH 25, DIFF -> MATCH 18, MATCH -> DIFF 6; accounts: 58. Months with the same VERDICT (computed return allowed to move): 517 of 667.
 
