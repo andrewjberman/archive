@@ -41,3 +41,29 @@ No judgment criterion. Held on the same condition: DB-b-154 and DB-b-155 are iss
   figures marked in their records). By the CTO's rule each closes on a read the issuer makes itself.
 - Of the 42 quoted figures, none is read from the original store: 19 from the copy, 12 from a custodian pull, 4 served, 4 derived,
   3 withdrawn (the worker's tally).
+
+---
+
+## Added at rounds 80 and 81, 2026-10-11T22:26:56Z (input: msgs 5954, 5956 and 5967; orders DB-b-154 to DB-b-156 drained)
+
+No judgment criterion. Held on the same condition: DB-b-157 is issued. This seat made no read of its own.
+
+- **D2-W121-S4**: under the renamed first axis the end-of-day timing value can hold no member. RULED by the CTO (msg 5956): the value is
+  removed; the timing axis has three values. To dismiss at the compile.
+- **D2-W125-S1**: the 34 moved medians of 2026-10-09 were the served price in the day's price file and the first canonical write, but
+  that day's canonical rows were rewritten twice afterwards, so "the final served price" has no single answer.
+- **D2-W125-S2**: whether the price-update script runs today is not established; the writer of the four-times-daily canonical rewrites
+  is unidentified.
+- **D2-W126-S1**: three SERVED readers key on the file's day alone (an account-gains script and the price update with its Lambda
+  twin). All 5,580 ids of the two sampled days now sit in a file dated two days earlier, so those readers place the same rows on a
+  different day than before.
+
+**A correction to this seat's round 79 note above.** It said the two days' rows "now exist only in a copy" and "may be data loss".
+Round 81's read finds every one of those ids in the original store, in files dated two days earlier. The rows were MOVED, not
+lost. What is open is the effect of the move on readers keyed to the file's day, which nobody has measured.
+
+**For the slug.**
+- The finding has changed shape across three rounds, each time on one worker's read: a copy that differs; an original rewritten; rows
+  moved toward their own trade date. No served figure was recomputed in any of them.
+- All of it belongs to the Black Diamond pipeline's owner on another box; the issuer asked the CTO to place row D2-W126-S1 there.
+- The timing classes are ruled and entered in the tie-out's records only; nothing served is relabelled.
