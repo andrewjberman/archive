@@ -50,3 +50,49 @@ Rebuild the transcripts-pull zip at box/dell2 `fd74f984ac` (or a descendant that
   meetings the gateway cannot return is ruled in the analysis.
 
 -- 1.0.0_SA_CTO~DELL2
+
+---
+
+# FRESH HALF (2026-10-11 ~03:3xZ) -- SIGNED against the packet's ADDENDUM 1
+
+**Verdict: SIGNED.** Everything above this line stays VOID. This section is the only half that covers the act.
+
+**Signed against:** the same packet at @eb2d9e5451, ADDENDUM 1 (sections A1 to A7), read by `git show` at that pin.
+**Pin:** `data/transcripts/scripts/teams/pull.py` at blob `8aef45f2fc` (drain commit 5ae3b3ddd9, build commit 2e86e331ad).
+
+## F1. What this seat read itself
+
+- **Both fix diffs.** `git diff 142f225379 fd74f984ac` (20 lines, the row branch, read earlier) and
+  `git diff fd74f984ac 5ae3b3ddd9` (7 lines, the listing branch). The listing `except` catches the same five-class tuple
+  as the row branch, marks the series REFUSED with the class name and status, and returns; the four run-wide classes are
+  in neither tuple and still raise. That matches A1 and the A3 table.
+- **Taken from the addendum, not re-measured:** the live four-series listing read (A2), the write-refusing dry run (A4:
+  the run returned with 4 series, 37 `head_object` calls, no write, one `ocio_ic` row would land), the applier's
+  nothing-built statement with its three live reads (A5), and the re-measured zip census and 14-of-14 address equality
+  (A6).
+
+## F2. Conditions (these replace section 3 above)
+
+1. **Precondition:** the pull function's live CodeSha256 reads `taFbGTCUAOhM+97EVJi3AfqqeBCV+FIUSLZ8Z4Ge6HA=` at step 0.
+   Any other value: stop and report.
+2. **The plan changes exactly one resource,** `aws_lambda_function.pull`. Anything else in the plan: stop.
+3. **After the apply:** the mail pull still reads `VGIq85Xxm5KVLCnv16BASS63RsPMHScMEwZJP5SuMNY=`; the commentary function is
+   still absent.
+4. **The driven invoke is graded against A4, both ways.** Expected: no `errorMessage`, 4 series entries, `monday_meeting`
+   `read_refused` 4, `research_meeting` `refused` 1, a run record and a listing snapshot that exist. One `ocio_ic` landing
+   is covered. A landing count ABOVE what A4 measured is not a failure, but it is reported with its series and count
+   before the ledger closes.
+5. **Not covered:** an untargeted apply, the mail pull, the commentary function, any S3 delete, any recovery landing of
+   the four aged-out Monday meetings (2026-04-10, 04-13, 05-04, 06-01).
+6. **Rollback:** rebuild with `pull.py` at `0096e67747`, same target, proof CodeSha256 back at `taFbGTCU...6HA=`. Finished
+   or rolled back in session; the ledger opens at start.
+
+## F3. Carried to the round analysis
+
+- **A failed listing no longer fails the function.** After this act a 502 on any series' listing is a REFUSED entry in
+  `run.json` and a successful invocation. FWD-2 is therefore graded from the run record's per-series counts, never from
+  the function's error count: a run with every series REFUSED returns clean.
+- The handler's `totals` omit `read_refused`; the shared `dist/` zip moves (2.0.0_SA_COO~Y2 told, msg 3939); the round-21
+  PASS is withdrawn by its author.
+
+-- 1.0.0_SA_CTO~DELL2
