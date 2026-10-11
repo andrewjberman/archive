@@ -1,0 +1,379 @@
+{
+ "arm_count": 38,
+ "arms": [
+  {
+   "detail": "ingestion_revision (a digest over the packaged contracts/ directory) moves: live schemas-0181dbd77254 built schemas-88079719e656; the five changed schemas are the only differing files (AnalysisReport, ExportReceipt, HoldingsSnapshot, OwnedAnalysisRequest, OwnedAnalysisRequestHistory). destination_revision (the X10 policy digest) IDENTICAL e0046398e2395145; declared routes IDENTICAL True (3: GET /api/scoped/investor-reporting/analysis/comparisons; POST /api/scoped/investor-reporting/analysis; POST /api/scoped/investor-reporting/analysis/inputs); composed ports IDENTICAL, absent producers IDENTICAL ['ordinary_authorizer']. Every request accepted after a deploy carries the new ingestion_gate_revision.",
+   "members": [
+    "contracts/AnalysisReport.schema.json",
+    "contracts/ExportReceipt.schema.json",
+    "contracts/HoldingsSnapshot.schema.json",
+    "contracts/OwnedAnalysisRequest.schema.json",
+    "contracts/OwnedAnalysisRequestHistory.schema.json"
+   ],
+   "name": "composition: generate_installed.compose_ports over in-memory clients, live vs built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "history: the new row shape (client_id, client_claim, unreadable_rows) live=invalid built=valid; the legacy shape live=valid built=invalid. AnalysisReport.retained_ref: live=unresolvable:_WrappedReferencingError built=valid. OwnedAnalysisRequest.persist_inputs: live=unresolvable:_WrappedReferencingError built=valid. ExportReceipt facts.covered_account_ids: live=unresolvable:_WrappedReferencingError built=valid, and it becomes REQUIRED in facts (['covered_account_ids', 'page_count', 'validation_failures', 'validation_status']). HoldingsSnapshot asset_class 'multi_asset' (five enum nodes lose that value): live=valid built=invalid; 'equity' live=valid built=valid.",
+   "members": [
+    "contracts/AnalysisReport.schema.json",
+    "contracts/ExportReceipt.schema.json",
+    "contracts/HoldingsSnapshot.schema.json",
+    "contracts/OwnedAnalysisRequest.schema.json",
+    "contracts/OwnedAnalysisRequestHistory.schema.json"
+   ],
+   "name": "contract schemas as the zip carries them (contracts/), synthetic documents, live vs built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "differences are only: the new ACTIVE policy irpt-anlreq-x10-v1 (family ANALYSIS_COMMENTARY, firms ['49financial', 'cottonwood', 'inflection']) with its destinations; irpt-ycdgen-research-v1 firms widened ['cottonwood'] -> ['cottonwood', '49financial', 'inflection'] (policy_sha256 6e3286a3d962 -> aebe35b9a054, so 49financial and inflection destinations for its three families become writable); lookup('4698') resolves a MASTER row on built and raises on live. IDENTICAL: the X10 policy irpt-x10-v1 (policy_sha256 e0046398e239, every destination: True), the other policies, 8 holdings addresses (True), lookups of the four firms. Unexpected differing paths: none.",
+   "members": [
+    "lib/opal_naming.py",
+    "infra/logic/registry/reporting_policies.json",
+    "infra/logic/registry/scopes.json",
+    "infra/logic/registry/systems.json",
+    "infra/logic/registry/exemptions.json",
+    "infra/logic/registry/resources.json",
+    "org/standards/NAMING_SCHEMA.json"
+   ],
+   "name": "packaged registry as the function reads it: reporting_policy / reporting_destination / lookup / HoldingsPublication address, every policy revision, live vs built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "control: irpt-ycdgen-research-v1 firms ['cottonwood'] and policy_sha256 6e3286a3d962 (the live values) and no irpt-anlreq-x10-v1 policy -- the policy file is what moves them.",
+   "members": [
+    "infra/logic/registry/reporting_policies.json"
+   ],
+   "name": "NEGATIVE CONTROL registry: the built tree with reporting_policies.json put back to the LIVE bytes",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "composition/naming raised for exemptions, resources, systems and scopes (c_exemptions: \u001b[1;35mjson.decoder.JSONDecodeError\u001b[0m: \u001b[35mExpecting prop; c_resources: \u001b[1;35mjson.decoder.JSONDecodeError\u001b[0m: \u001b[35mExpecting prop; c_systems: \u001b[1;35mjson.decoder.JSONDecodeError\u001b[0m: \u001b[35mExpecting prop; c_scopes: \u001b[1;35mjson.decoder.JSONDecodeError\u001b[0m: \u001b[35mExpecting prop); every holdings address raised for NAMING_SCHEMA.json (8 of 8) -- the function reads each file at runtime, so each is served.",
+   "members": [
+    "infra/logic/registry/exemptions.json",
+    "infra/logic/registry/resources.json",
+    "infra/logic/registry/systems.json",
+    "infra/logic/registry/scopes.json",
+    "org/standards/NAMING_SCHEMA.json"
+   ],
+   "name": "NEGATIVE CONTROL runtime read: each of exemptions.json, resources.json, systems.json, scopes.json and NAMING_SCHEMA.json replaced by invalid JSON in the built tree",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "every probe result (composition, naming, 12 route cases, 7 svc operations, loaders, addresses, schemas) is IDENTICAL with either file; the two files differ only in the _generated header string.",
+   "members": [
+    "firm_registry.json"
+   ],
+   "name": "firm_registry.json (class inert): the built tree with the LIVE firm_registry.json, every probe, against the built tree",
+   "negative_control": false,
+   "verdict": "identical"
+  },
+  {
+   "detail": "12 cases (3 routes, 4 bodies, 3 principals: internal row-listed, cottonwood firm user, svc-custody-statement), codes ['FIRM_BINDING', 'INVALID_INPUT', 'NOT_AUTHORIZED', 'UNEXPECTED']; IDENTICAL live vs built; call-arity TypeErrors on built: 0 (live: 0); nothing escaped. The Entry is built over in-memory clients with stubbed deps, so a case that reaches the compute stops at the in-memory fakes (the pair, the history and the resident are replayed by their own arms).",
+   "members": [
+    "served.py"
+   ],
+   "name": "every route of the function through the real generate_installed.build_boundary (analysis POST custody body and prospect body, upload POST, catalogue GET) x three principals, TypeError arity trace",
+   "negative_control": false,
+   "verdict": "identical"
+  },
+  {
+   "detail": "operation analysis-request-read: live NOT_AUTHORIZED, built UNSUPPORTED_OPERATION (the new allow-list member passes the NOT_AUTHORIZED gate; this function has no handler for it). The six other operations are IDENTICAL: {'analysis-input-upload': 'NOT_AUTHORIZED', 'analysis-requests': 'FIRM_BINDING', 'comparison-catalogue': 'NOT_AUTHORIZED', 'custody-report-persist': 'UNSUPPORTED_OPERATION', 'not-an-operation': 'NOT_AUTHORIZED', 'submit-export': 'UNSUPPORTED_OPERATION'}.",
+   "members": [
+    "served.py"
+   ],
+   "name": "the svc-custody-statement subject on direct-invoke events naming each operation (served.py allow-list), live vs built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "control: analysis-request-read answers NOT_AUTHORIZED (the live code).",
+   "members": [
+    "served.py"
+   ],
+   "name": "NEGATIVE CONTROL svc subject: the built tree with served.py put back to the LIVE bytes",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "17 cases over 2 route(s) of entry.ENTRY; (reached_firm_check, code, roster) IDENTICAL on 17, differing none. Not reachable by this runner: ['POST /api/scoped/investor-reporting/analysis/inputs'] (the runner builds entry.ENTRY, the upload route exists only in generate_installed.build_boundary; it is replayed in the route arm).",
+   "members": [
+    "served.py"
+   ],
+   "name": "binding cases (userOwn, userSelOther, userClaimOther, noRow, rowCotCot, rowCotInf and the svc cases) through each zip's real entry.ENTRY, live vs built",
+   "negative_control": false,
+   "verdict": "identical"
+  },
+  {
+   "detail": "live: {'pointer_empty_key': 'returned', 'pointer_no_key': 'KeyError', 'pointer_not_object': 'TypeError'} ; built: {'pointer_empty_key': 'FirmArtifactIncomplete', 'pointer_no_key': 'FirmArtifactIncomplete', 'pointer_not_object': 'FirmArtifactIncomplete'} (FirmArtifactIncomplete is the NOT_READY refusal named in loaders.py).",
+   "members": [
+    "loaders.py"
+   ],
+   "name": "loaders.load_directory with a latest.json pointer that names no usable key (absent, empty, not an object), live vs built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "control: {'pointer_empty_key': 'returned', 'pointer_no_key': 'KeyError', 'pointer_not_object': 'TypeError'} (the live outcomes).",
+   "members": [
+    "loaders.py"
+   ],
+   "name": "NEGATIVE CONTROL loaders: the built tree with loaders.py put back to the LIVE bytes",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "live record keys ['accepted_at', 'browser_sha256', 'composition_ref', 'identity', 'owner']; built record keys ['accepted_at', 'acting_principal_id', 'browser_sha256', 'composition_ref', 'identity', 'owner']. acting_principal_id is on the built record and equals the verified principal's id; absent on live. Transactions written 2 / 2 (one request row, one job row), 2 / 2 after the replay (the replay writes nothing).",
+   "members": [
+    "acceptance.py",
+    "submission_service.py"
+   ],
+   "name": "acceptance + submission_service: one new submission and one replay through the real service over an in-memory DynamoAcceptance",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "the submission raises TypeError:DynamoAcceptance.accept() missing 1 required keyword-only argument: 'a and writes 0 transactions: one member without the other is a TypeError on every new submission.",
+   "members": [
+    "acceptance.py",
+    "submission_service.py"
+   ],
+   "name": "NEGATIVE CONTROL the pair split: built acceptance.py with the LIVE submission_service.py",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "the submission raises TypeError:DynamoAcceptance.accept() got an unexpected keyword argument 'acting_p and writes 0 transactions: one member without the other is a TypeError on every new submission.",
+   "members": [
+    "acceptance.py",
+    "submission_service.py"
+   ],
+   "name": "NEGATIVE CONTROL the pair split: LIVE acceptance.py with the built submission_service.py",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "built: first mark recorded, second mark a no-op (1 marker write), get_state then reports i3_sent_at (keys ['detail', 'i3_sent_at', 'job_id', 'state']). live: mark_i3_sent does not exist (EXC:AttributeError); get_state keys ['detail', 'job_id', 'state'].",
+   "members": [
+    "durable_job.py"
+   ],
+   "name": "durable_job: get_state and mark_i3_sent (the I3 send is recorded once, conditionally) over an in-memory job row",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "built: queue URL set and send ok -> sent 1, marked 1; URL unset -> sent 0 (WARN logged); send fails -> marked 0 (ERROR logged); mark fails -> sent 1, marked 0; mark_ready writes READY ([['READY', ['report_ref', 'ticket_id']]]) then sends I3 1 time(s); producer_for: allow-listed principal -> OPAL, any other -> YCHARTS. live: send_ready, mark_ready and producer_for do not exist (EXC:AttributeError).",
+   "members": [
+    "resident_worker.py",
+    "durable_job.py"
+   ],
+   "name": "resident_worker: send_ready, mark_ready and producer_for over in-memory fakes (I3 once after READY; marker only after the send returned; the allow-list switch)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "control: send_ready sends 1, records 0 markers and logs ['ERROR: ANALYSIS_READY_MARK_FAILED'] -- without mark_i3_sent the marker is never written.",
+   "members": [
+    "durable_job.py",
+    "resident_worker.py"
+   ],
+   "name": "NEGATIVE CONTROL the I3 marker: the built tree with durable_job.py put back to the LIVE bytes",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "built: ATTACHED deletes the message and prints outcome=ATTACHED; an unknown packager outcome raises EXC:ValueError:PACKAGER_OUTCOME_UNKNOWN and keeps the message; a non-JSON body is deleted with outcome=MESSAGE_NOT_JSON. live: poll_package_once does not exist.",
+   "members": [
+    "resident_worker.py"
+   ],
+   "name": "resident_worker.poll_package_once (the commentary_ready poll) over an in-memory SQS: attached, unknown outcome, malformed body",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "built: returns 0, polls the package queue after the generation poll (stdout ['IRPT_RESIDENT_PACKAGE outcome=ATTACHED', 'IRPT_RESIDENT_POLL handled=0']), 1 package message deleted. live: EXC:ValueError:INSTALLED_RESIDENT_RUNTIME_REQUIRED.",
+   "members": [
+    "resident_main.py",
+    "resident_worker.py"
+   ],
+   "name": "resident_main.main(--once) with a runtime that carries the commentary_ready queue and a packager (five keys)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "live and built both return 0 and print ['IRPT_RESIDENT_POLL handled=0'].",
+   "members": [
+    "resident_main.py"
+   ],
+   "name": "resident_main.main(--once) with the three-key runtime the live resident host passes",
+   "negative_control": false,
+   "verdict": "identical"
+  },
+  {
+   "detail": "control: the five-key runtime raises EXC:ValueError:INSTALLED_RESIDENT_RUNTIME_REQUIRED.",
+   "members": [
+    "resident_main.py"
+   ],
+   "name": "NEGATIVE CONTROL resident_main: the built tree with resident_main.py put back to the LIVE bytes",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "the source line was reached 2 times on built, 2 on live; lookup(scope, registry=None) is the module function opal_naming.lookup, not DynamoAcceptance.lookup(owner, browser); outcomes IDENTICAL: {'cottonwood': 'BackendUnavailable', 'not-a-firm': 'PublicationRefused:REPORT_FIRM_UNREGISTERED'} (a registered firm passes the lookup and stops at the PDF-text backend, which is absent on this box; an unregistered one is refused REPORT_FIRM_UNREGISTERED by the KeyError the lookup raises).",
+   "members": [],
+   "name": "carried method site publication .lookup(1 argument): foreign_firm_names -> the real opal_naming.lookup, firm registered and unregistered",
+   "negative_control": false,
+   "verdict": "identical"
+  },
+  {
+   "detail": "both source lines ([191, 258]) were reached on live and on built; the callee was handed ('ANALYSIS', dict) at each; the Opal path ran to its return (returned), the vendor path stopped after the call at the fake build_publication's missing key. The PDF-text backend and certification are replaced by stand-ins (foreign_firm_names -> [], build_publication -> {fragment: {}}). The injected object is a fake shaped like repository.ReportRepository's validate attribute; the real one is not in this package. Results IDENTICAL on the two trees.",
+   "members": [],
+   "name": "carried method sites publisher .validate(2 arguments) x2: the Opal path and the vendor path of CertifiedReportPublisher.publish with a fake `reports` whose validate is (kind, payload)",
+   "negative_control": false,
+   "verdict": "identical"
+  },
+  {
+   "detail": "the source line was reached on both trees; _RecoveryObserver.__getattr__ forwarded renew to the transport, which recorded ttl=[900]; store.renew() (DynamoGenerationStore.renew, no ttl) ran separately 1 time. The transport is a fake shaped like ycharts/session/operation_lease.py renew(self, *, ttl); the real one is installer-supplied and not in this package. IDENTICAL on live and built.",
+   "members": [
+    "resident_worker.py"
+   ],
+   "name": "carried method site resident_worker .renew(ttl=900): ResidentGenerationWorker.guard() through the real broker._RecoveryObserver over a fake transport with renew(*, ttl)",
+   "negative_control": false,
+   "verdict": "identical"
+  },
+  {
+   "detail": "1576 test ids run on each tree (6 dirs: ycharts/generate, ops, reports, _authz, _ids, intake); PASSED on live and not on built: 0 []; PASSED on built and not on live: 208. Network connects attempted and refused by the offline guard: 200 (tests that need a real S3/DynamoDB client fail identically on both trees). PyMuPDF is stubbed (import only).",
+   "members": [],
+   "name": "no regression: every pin test id that PASSES against the live zip's modules, run against the built zip's modules",
+   "negative_control": false,
+   "verdict": "identical"
+  },
+  {
+   "detail": "4 test ids across ['test_acceptance_actor.py']; passed on built and not on live: 1; passed on live and not on built: 0. Tests that pass only on built: ['test_acceptance_actor.py'].",
+   "members": [
+    "acceptance.py",
+    "submission_service.py"
+   ],
+   "name": "pin test file test_acceptance_actor.py (acceptance actor recorded; the service passes it): run against live and built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "1 of the 1 tests that pass only on built fail again with ['acceptance.py', 'submission_service.py'] at live bytes, so those tests exercise these members; the other 0 of the 1 depend on other moved members and are not claimed for these.",
+   "members": [
+    "acceptance.py",
+    "submission_service.py"
+   ],
+   "name": "NEGATIVE CONTROL for the arm above: the built tree with ['acceptance.py', 'submission_service.py'] put back to the LIVE bytes, same test files",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "45 test ids across ['test_history_row_client.py', 'test_history_pool.py', 'test_history_client_scope.py', 'test_owned_requests.py']; passed on built and not on live: 40; passed on live and not on built: 0. Tests that pass only on built: ['test_history_client_scope.py', 'test_history_pool.py', 'test_history_row_client.py', 'test_owned_requests.py'].",
+   "members": [
+    "owned_requests.py"
+   ],
+   "name": "pin test files for the owned-request history (rows state client_id and client_claim, whole-history newest-first read): run against live and built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "12 of the 40 tests that pass only on built fail again with ['owned_requests.py'] at live bytes, so those tests exercise these members; the other 28 of the 40 depend on other moved members and are not claimed for these.",
+   "members": [
+    "owned_requests.py"
+   ],
+   "name": "NEGATIVE CONTROL for the arm above: the built tree with ['owned_requests.py'] put back to the LIVE bytes, same test files",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "20 test ids across ['test_svc_commentary.py', 'test_commentary_draft_store.py']; passed on built and not on live: 20; passed on live and not on built: 0. Tests that pass only on built: ['test_commentary_draft_store.py', 'test_svc_commentary.py'].",
+   "members": [
+    "repository.py",
+    "retention.py"
+   ],
+   "name": "pin test files for the named service subjects in the retained repository and retention (svc-commentary draft store): run against live and built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "20 of the 20 tests that pass only on built fail again with ['repository.py', 'retention.py'] at live bytes, so those tests exercise these members; the other 0 of the 20 depend on other moved members and are not claimed for these.",
+   "members": [
+    "repository.py",
+    "retention.py"
+   ],
+   "name": "NEGATIVE CONTROL for the arm above: the built tree with ['repository.py', 'retention.py'] put back to the LIVE bytes, same test files",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "27 test ids across ['test_svc_custody_statement.py']; passed on built and not on live: 10; passed on live and not on built: 0. Tests that pass only on built: ['test_svc_custody_statement.py'].",
+   "members": [
+    "served.py"
+   ],
+   "name": "pin test file test_svc_custody_statement.py (the svc-custody-statement subject's operations): run against live and built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "10 of the 10 tests that pass only on built fail again with ['served.py'] at live bytes, so those tests exercise these members; the other 0 of the 10 depend on other moved members and are not claimed for these.",
+   "members": [
+    "served.py"
+   ],
+   "name": "NEGATIVE CONTROL for the arm above: the built tree with ['served.py'] put back to the LIVE bytes, same test files",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "48 test ids across ['test_seam_none_strings.py', 'test_ids.py']; passed on built and not on live: 9; passed on live and not on built: 0. Tests that pass only on built: ['test_seam_none_strings.py'].",
+   "members": [
+    "ids.py",
+    "data/custodian_key_seam.json"
+   ],
+   "name": "pin test files for the id projection and the bundled custodian-key seam (None-like strings are unmapped): run against live and built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "9 of the 9 tests that pass only on built fail again with ['ids.py', 'data/custodian_key_seam.json'] at live bytes, so those tests exercise these members; the other 0 of the 9 depend on other moved members and are not claimed for these.",
+   "members": [
+    "ids.py",
+    "data/custodian_key_seam.json"
+   ],
+   "name": "NEGATIVE CONTROL for the arm above: the built tree with ['ids.py', 'data/custodian_key_seam.json'] put back to the LIVE bytes, same test files",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "30 test ids across ['test_package_poll.py']; passed on built and not on live: 16; passed on live and not on built: 0. Tests that pass only on built: ['test_package_poll.py'].",
+   "members": [
+    "resident_worker.py"
+   ],
+   "name": "pin test file test_package_poll.py (the commentary_ready poll): run against live and built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "16 of the 16 tests that pass only on built fail again with ['resident_worker.py'] at live bytes, so those tests exercise these members; the other 0 of the 16 depend on other moved members and are not claimed for these.",
+   "members": [
+    "resident_worker.py"
+   ],
+   "name": "NEGATIVE CONTROL for the arm above: the built tree with ['resident_worker.py'] put back to the LIVE bytes, same test files",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  }
+ ],
+ "function": "irpt-ycharts-generate",
+ "harness": "replay/run_replay_426.py; offline: boto3 faked in-process, every socket connect refused (guard426 plugin and the probes), AWS never called; one tree per process; synthetic ids only",
+ "pin": "af64b4bca9f6f18e427801fc26e8fe5876e32db8",
+ "tests_run_per_tree": 1576,
+ "tree_sha256": {
+  "built": "MGQu5+58WxJ3pybmZx8cFdJ9nypEPvPGo66cCyiB1ts=",
+  "live": "tdpterTMfJlWXjnoAQCwil+wN/Jf8Q/yLjGxTk7yUkk="
+ }
+}
