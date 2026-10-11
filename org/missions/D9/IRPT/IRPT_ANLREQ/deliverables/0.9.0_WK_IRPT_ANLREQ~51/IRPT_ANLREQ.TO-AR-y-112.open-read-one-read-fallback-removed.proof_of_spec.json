@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-112",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-112.open-read-one-read-fallback-removed.md",
+    "group": "OTHER",
+    "vintage_commit": "39c489dab2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R11_Y.md",
+    "vintage_commit": "39c489dab2",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-112.open-read-one-read-fallback-removed.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~51",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/analysisRequest.ts",
+      "kind": "script",
+      "commit_or_etag": "b8bc5169",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree branch wk-IRPT_ANLREQ-51-portal-r11 only; HELD, not pushed, not deployed, lands only after release 5. readTicketReport and isInvalidInputRefusal removed; openReport calls getOwnedAnalysisReport(requestId, firm, ticket_id) directly.",
+      "artifact_covered_by": ["AR112-y-AC1"]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx",
+      "kind": "script",
+      "commit_or_etag": "b8bc5169",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree branch wk-IRPT_ANLREQ-51-portal-r11 only; HELD. openPackageFile calls the client directly; the unused readTicketReport import is removed.",
+      "artifact_covered_by": ["AR112-y-AC1"]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/__tests__/package-open-ticket-binding.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "b8bc5169",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One test added, named a read refused as invalid input is shown after one read; typed fakes; existing test names unchanged.",
+      "artifact_covered_by": ["AR112-y-AC1"]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/__tests__/package-open-ticket-fallback.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "b8bc5169",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deleted (git rm of that one file) on the HELD candidate branch.",
+      "artifact_covered_by": ["AR112-y-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR112-y-AC1",
+      "criterion_verbatim": "AR112-y-AC1: the helper and its predicate are gone, the fallback test file is gone, the one-read test is named, and the whole TicketCenter test folder passes.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-51/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r11/ar11_checks.py y112-remove --root C:/dev/wk-irpt-anlreq-51 --portal C:/dev/wk-irpt-anlreq-51/portal",
+      "output_evidence": "TicketCenter folder: 50 pass, 0 fail (rc=0); Y112-REMOVE-OK (rc=0)",
+      "denominator": "50 of 50 tests in the TicketCenter folder pass (53 at the base, minus 4 fallback tests, plus 1 new)",
+      "status": "PASS",
+      "expect": "Y112-REMOVE-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "At the base the check FAILED (helper, predicate and fallback test present; the one-read test absent), per the order's record face.",
+      "expected": "FAIL before the edit; OK after",
+      "observed": "Y112-REMOVE-OK after the edit.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "check run once after the last edit; bun test ./src/pages/TicketCenter re-run after the portal commit.",
+      "observed": "Y112-REMOVE-OK; 50 pass, 0 fail both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "landing, push, deploy",
+      "reason": "The candidate is HELD by the order; nothing lands it before release 5's after-reads."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test ./src/pages/TicketCenter",
+      "result": "50 pass, 0 fail"
+    },
+    {
+      "tool": "bun run typecheck",
+      "invocation": "bun run typecheck (tsc -b --noEmit)",
+      "result": "rc=0"
+    },
+    {
+      "tool": "bun x eslint",
+      "invocation": "bun x eslint analysisRequest.ts AnalysisRequestParts.tsx package-open-ticket-binding.test.tsx",
+      "result": "6 problems (0 errors, 6 warnings)"
+    }
+  ]
+}
