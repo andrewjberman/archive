@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-PREFLIGHT-bbg-signin-20261009",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-PREFLIGHT-bbg-signin-20261009.md",
+    "group": "OTHER",
+    "vintage_commit": "2813876b71"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "e1ffbb2a2c",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-PREFLIGHT-bbg-signin-20261009.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~ZV",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-PREFLIGHT-bbg-signin-20261009.md",
+      "kind": "doc",
+      "commit_or_etag": "a6e10dcb67",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deploy_evidence": "THE REPORT SECTION IS THE WHOLE DELIVERABLE OF THIS ORDER, which is why the artifact row names the order file rather than a product file: the order's <rules> permit writing only this seat's deliverables folder and this order's report section, and the act itself wrote nothing else -- no code, no config, no cloud resource, no S3 object, no schedule. `git show a6e10dcb67:org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-PREFLIGHT-bbg-signin-20261009.md` resolves and carries the report, committed by this seat at 2026-10-09T06:38:47-04:00 as 'docs(rivals): record ZV Terminal preflight evidence'. COMMITTED-NOT-DEPLOY-SCOPE is the honest state and not a hedge: a reachability read deploys nothing, so there is no deployed-bytes question to answer, no NEVER-2 ledger entry was owed and none was opened. The issuer read that report and graded on it the next commit, f18b01c227, whose own message records both halves of the position this instance exists to close: 'AC1 MET on the ~ZV report (Terminal reachable 10:37Z, one draw SPY US Equity PX_LAST, no sign-in); status stays open -- no proof instance from the executor'."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The entire act is three live reads of a vendor stack, and every one of them returns a VALUE rather than raising -- the RETRIEVAL trap in its purest form, because a failed retrieval and a successful one are both JSON. ok:true and PX_LAST 773.93 are exactly what a reader WANTS to see, so the question that decides whether they mean anything is whether this stack is capable of printing failure at all. A fresh planted mutant is barred: the order caps the act at ONE metered draw and forbids any further retry, so manufacturing a negative arm now would breach the order to validate it.",
+      "expected": "The negative arm must therefore be found rather than planted, and it must be on the SAME instrument stack and the SAME host: a known signed-out Terminal must be shown to read visibly and unmistakably different from ok:true plus a returned price.",
+      "observed": "FIRED, on a measured historical negative arm rather than a new draw. The 2026-10-08 11:00Z scheduled fire on this same host and the same blpapi endpoint 127.0.0.1:8194 is the signed-out case, and it is recorded verbatim in surprise row ETFS_RIVALS-Z-S79 with its own grounding: repeated 'Failed to connect to 127.0.0.1:8194, status=1, error 8 connect event failed', 'session pool state=Failed', 'Platform failed 3 consecutive times, stopped trying to reconnect', 'ERROR blpapi_sessionimpl.cpp:2913 ... Failed to start session', and the leg's result JSON {\"status\": \"FAILED\", ... \"failures\": {\"batch-0\": \"BloombergError: could not start blpapi session to 127.0.0.1:8194 (is the Terminal running + logged in?)\"}, \"responses\": 0} with \"unreachable\": true, \"session_attempts\": 3. That is the DISCRIMINATION this control needs: the stack prints failure loudly, on this host, within 24 hours of the act, so ok:true and a returned 773.93 are not a shape the instrument emits regardless of the world. A SECOND independent confirmation landed after the act and is not a draw of mine: the 2026-10-10 scheduled fire's RIVALFUNDS BLOOMBERG LEG read {\"status\": \"OK\", ... \"captures\": {\"2026-10-09\": \"OK\"}} and exit 90, a real vendor session on the same endpoint.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "A two-run comparison is NOT AVAILABLE AND WAS NOT FAKED. The order permits exactly one metered reference_data draw (step 3) and allows a second only on a failure of steps 1-3, which did not occur; a repeat purely to satisfy a determinism control would be an unauthorised metered request. It would also not be a same-input run: PX_LAST is a moving quantity, so a second call returning a different number would say nothing about instrument stability.",
+      "observed": "N/A for the draw, by the order's own cap. What IS available and is reported instead: the two NON-METERED reads either side of the draw are internally consistent and were taken within the same 10-second window -- bbg_credentials.py --check exited 0 with 'CREDENTIAL: OK secret=bloomberg/terminal/login user_len=12 user_sha256=f713879ee035 pw_len=9 pw_sha256=b52a0db305ea', and bloomberg_health at 10:37:50.422466Z read {\"ok\": true, \"endpoint\": \"127.0.0.1:8194\", \"service\": \"//blp/refdata\"} against the draw at 10:37:57.125497Z-10:37:57.531319Z. Three instruments agreeing inside seven seconds is corroboration, not repetition, and is named as such rather than counted as a determinism pass.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Whether the Terminal was still signed in at 11:00Z, when the scheduled pulls actually needed it.",
+      "reason": "NOT PROVEN AND STRUCTURALLY UNPROVABLE BY THIS ACT, which is the single most important limit on this instance. The order's own preflight block declares it BLIND ('whether the session holds from 10:45Z to 11:00Z') and the report states it: 'Reachability is proven at the measured instant; persistence until the scheduled fire is not claimed.' A reading about 10:37:50Z is a reading about 10:37:50Z. The 2026-10-09 11:00Z fire did in fact reach Bloomberg (its enrichment leg exited 94 'landed', per tw1_j1_read.py's REACHED verdict on that day's transcription), but that is EVIDENCE FROM THE FIRE ITSELF and not a property this pre-flight established in advance."
+    },
+    {
+      "item": "AC1's verdict.",
+      "reason": "A JUDGMENT criterion, so the schema REFUSES a PASS or FAIL in this instance by construction, and the order declares it so: <criterion id=\"AC1\" cell_refs=\"RIV-tw-1\" judgment=\"true\"/>, with the report's closing line 'AC1 (the Terminal was reachable at the pre-flight) is the issuer's to grade.' The issuer has since graded it MET at f18b01c227. That grade is recorded here as the ORACLE'S OUTPUT, never restated as this seat's finding."
+    },
+    {
+      "item": "The two sibling 11:00Z consumers this one pre-flight was ordered to serve -- MDPF_SECHIST's pull and the AMGT 13:00Z fire.",
+      "reason": "Out of this instance's bounds. The fold record places all three behind one pre-flight, but this order's criterion is about the Terminal's reachability, not about any consumer's outcome; whether either sibling got what it needed is its own project's read. Claiming otherwise would be the ABSENT-equals-EXERCISED-AGAINST error in the opposite direction -- inferring three successes from one reachability instant."
+    },
+    {
+      "item": "The draw's booking on MDPF_DEMQUE as a tier-1 request.",
+      "reason": "Recorded in the report as owed to 2.0.0_SA_COO~Q1 and NOT verified here. This seat made exactly one draw and reported it with security, field and timestamps so the booking CAN be made; whether the entry exists in MDPF_DEMQUE's queue is that project's carrier and that seat's act, and this instance does not read it."
+    },
+    {
+      "item": "Push state of the report commit.",
+      "reason": "ON ORIGIN, measured rather than defaulted, and by a route that disposes of the original report's own caveat. The report said 'Push state LOCAL on box/sitez; origin/box/sitez measured 667902f5c023200582f75836a2c9824a6956ec87 before report commit.' Re-measured 2026-10-11T06:1xZ: a6e10dcb67 is an ancestor of origin/box/sitez @84da5399cf (rc=0, with a reversed-pair control reading rc=1 so the instrument discriminates), and the box-sync commit 2813876b71 that carried it into CLOUD is itself in the order file's history. This seat never pushed: never-rules-gate.sh refuses box/sitez to any serial but the integrator."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-S79 (ARMED, disarm_owner 2.0.0_SA_COO~V1 per ETFS_RIVALS-Z-S80): the row this pre-flight exists BECAUSE of, and the source of this instance's negative control. It records that the 2026-10-08 fire's enrichment leg never reached the OFF path because blpapi could not start a session to a signed-out Terminal, so that day's zero HISTORY OWED lines were evidence of nothing -- which is precisely the failure this order was cut to prevent on 2026-10-09 by reading reachability BEFORE the fire. Named here as the measured signed-out arm of the mutant control, and not re-graded: it remains UNDER_INVESTIGATION and its disarm is the issuer's one sentence.",
+    "ETFS_RIVALS-Z-S81 (filed @982563d244 by this seat, class OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~V1, adjudicates Z-S79): named here only to bound this instance, not because it touches the pre-flight. It shows that a vehicle fire can fail to exercise the enrichment leg for a reason that has NOTHING to do with Terminal reachability -- the 2026-10-10 leg skipped on 'no non-cash securities in G1 canonical_shape at date=2026-10-09' with the vendor session working and the batch landed. A reader must therefore not treat this pre-flight's PASS, or its absence, as explanatory of any later non-exercising run."
+  ],
+  "session_log": "THE ACT WAS NOT PERFORMED IN THIS SESSION. It ran 2026-10-09 at 06:37 Eastern / 10:37Z, inside the order's 10:20Z-10:45Z window, and its report was committed by this seat at a6e10dcb67. This instance is the missing carrier the issuer named twice in its own words -- in the order's metadata comment ('status stays open: the complete flip needs a proof-of-spec instance the site-Z executor did not write') and in the grading commit message f18b01c227 ('no proof instance from the executor'). WHAT IS RE-MEASURED HERE versus WHAT IS CITED: re-measured in this session are the artifact's existence at its pin (git show resolves, with a negative control fatalling rc=128 rather than reading clean-empty) and the push state (is-ancestor against a fresh ls-remote @84da5399cf, with a discriminating reversed control); CITED AT THEIR PIN, and labelled as citations rather than readings, are the three steps' outputs, because they are live vendor reads from two days ago that cannot be re-taken without breaching the order's one-draw cap. That division is deliberate: a two-day-old vendor reading re-presented as current would be exactly the instrument error this project's own channel rows are about. NOTHING WAS RE-RUN, NO SIGN-IN WAS ATTEMPTED, AND NO SECOND DRAW WAS MADE in the writing of this instance. This session's other commits under this seat's author line: 4b8e5e530a (the 20261010 transcription), 982563d244 (surprise row Z-S81, appended in the SHARED tree per rule 14b's append-only inversion), 55d280983b (the 20261010 enrichment lines), 9752fba003 (two report sections, <status> asserted unchanged before and after), and the commit carrying this instance and the TO-MERGE-tc1 instance beside it.",
+  "compiler_tools": [
+    {
+      "tool": "comp-schedule and comp-iam -- both DECLARED-NOT-APPLICABLE by the order, and recorded as such rather than silently skipped",
+      "invocation": "(not run; the order's <preflight> block declares both not applicable)",
+      "result": "The order states: comp-schedule DECLARED-NOT-APPLICABLE because the act triggers no schedule and changes nothing about the 11:00Z task; comp-iam DECLARED-NOT-APPLICABLE because there is no AWS act. Both hold on reading the act: it ran three local/vendor reads and wrote one report section. A declaration is not a clean result and is not cited as one."
+    },
+    {
+      "tool": "bbg_credentials.py --check (step 1), the non-metered credential read",
+      "invocation": "python integrations/bloomberg/auth/bbg_credentials.py --check",
+      "result": "Exit 0: 'CREDENTIAL: OK secret=bloomberg/terminal/login user_len=12 user_sha256=f713879ee035 pw_len=9 pw_sha256=b52a0db305ea'. Cited at its pin from the report; not re-run. Note what it does and does not establish: it proves a credential is retrievable and well-formed, never that a session using it is up -- that is step 2's and step 3's job, which is why the order orders all three."
+    },
+    {
+      "tool": "bloomberg_health (step 2), explicitly NOT a draw",
+      "invocation": "bloomberg_health",
+      "result": "At 10:37:50.422466Z: {\"ok\": true, \"endpoint\": \"127.0.0.1:8194\", \"service\": \"//blp/refdata\"}. The order is explicit that health is not the proof and the draw is, and this instance keeps that ordering: health is corroboration beside step 3, never a substitute for it. Measured against the Z-S79 negative arm, an ok:true here is discriminating rather than vacuous."
+    },
+    {
+      "tool": "reference_data (step 3), THE metered draw -- one security, one field, no overrides",
+      "invocation": "reference_data securities=['SPY US Equity'] fields=['PX_LAST']",
+      "result": "Start 10:37:57.125497Z, complete 10:37:57.531319Z, exit 0, returned {\"SPY US Equity\": {\"PX_LAST\": 773.93}}. TOTAL METERED DRAWS FOR THE WHOLE ACT: 1, the order's cap, booked tier-1 for 2.0.0_SA_COO~Q1. Step 4 (bbg_signin.ps1 -Phase fill / -Phase submit) was NOT reached because steps 1-3 all passed; no sign-in, no retry, no pull, no vehicle leg and no scheduled-task invocation ran."
+    },
+    {
+      "tool": "proof-of-spec-check.py, bound to the governing order",
+      "invocation": "python .tools/proof-of-spec-check.py <this file> AC1 --governing-order org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-PREFLIGHT-bbg-signin-20261009.md",
+      "result": "Run against this instance before committing it, with the criterion set passed so COVERAGE is graded and not only row quality. The checker's verdict is read by its own printed rc convention (rc=2 usage, rc=1 INVALID, rc=0 VALID), never as 'non-zero', because that conflation is the trap its header names."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (the Terminal was reachable at the pre-flight) is the issuer's to grade.",
+      "method": "live_read",
+      "invocation": "python integrations/bloomberg/auth/bbg_credentials.py --check ; bloomberg_health ; reference_data securities=['SPY US Equity'] fields=['PX_LAST']",
+      "judgment": true,
+      "output_evidence": "STEP 1 exit 0: CREDENTIAL: OK  secret=bloomberg/terminal/login  user_len=12 user_sha256=f713879ee035 pw_len=9 pw_sha256=b52a0db305ea\nSTEP 2 at 10:37:50.422466Z: {\"ok\": true, \"endpoint\": \"127.0.0.1:8194\", \"service\": \"//blp/refdata\"}\nSTEP 3 start 10:37:57.125497Z, complete 10:37:57.531319Z, exit 0: {\"SPY US Equity\": {\"PX_LAST\": 773.93}}\nSTEP 4: not reached (steps 1-3 passed) -- no fill, submit, retry, pull, vehicle leg or scheduled-task invocation\nNEGATIVE ARM, same host and endpoint, 2026-10-08 fire (row Z-S79): 'session pool state=Failed' / 'Failed to start session' / \"unreachable\": true, session_attempts 3, responses 0\nISSUER'S GRADE, cited as the oracle's output: f18b01c227 -- 'AC1 MET on the ~ZV report (Terminal reachable 10:37Z, one draw SPY US Equity PX_LAST, no sign-in)'",
+      "denominator": "3 of 3 ordered steps executed and reported, step 4 correctly not reached: 1 credential read, 1 health read, and exactly 1 of 1 permitted metered draw (1 security x 1 field x 0 overrides). Metered draws for the act: 1, against the order's cap of 1, or 2 only on a failure that did not occur. Instrument-capability denominator for the mutant: 2 independent fires on the same host and endpoint bracketing the act, one signed-out (2026-10-08, FAILED/unreachable) and one signed-in (2026-10-10, status OK, exit 90), so the stack is shown to print both outcomes. NOT measured, and no denominator is claimed for it: session persistence from 10:45Z to 11:00Z.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "A JUDGMENT criterion carries its output and NO verdict -- the oracle is 3.0.0_SA_CVO at L9 on the issuer's real read, and the order declares AC1 judgment=\"true\" with the report reserving it to the issuer. SUBSTITUTE ORACLE, named as the schema requires: the issuer 2.0.0_SA_COO~V1, which has already graded AC1 MET at f18b01c227 on this report at origin, with the CVO's L9 adjudication the standing authority above it. The deeper reason this row could never carry a self-verdict is in the exclusions: the criterion as worded is satisfiable only at an instant, and the thing anyone actually wants to know -- that the Terminal was still signed in when the 11:00Z fire needed it -- is declared BLIND by the order itself."
+    }
+  ]
+}
