@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-R2-pk1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R2-pk1.package-route-409s-carry-codes-and-no-ticket.md",
+    "group": "OTHER",
+    "vintage_commit": "54637896bf"
+  },
+  "assignee": "0.9.0_WK_TCKT_VNEXT~12",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R2.md",
+    "vintage_commit": "54637896bf",
+    "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R2-pk1.package-route-409s-carry-codes-and-no-ticket.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "54637896bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "package_ticket only: five 409s carry code; already-attached returns package identity; changed-under-write returns error, code, optional package, no ticket. Not applied; no AWS call. sha256 809d160982c19b52c21fd1ce1ae247db2bce092c178edbd35660ececdd6274f4",
+      "artifact_covered_by": [
+        "R2-pk1-AC1",
+        "R2-pk1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/tests/test_package_409_codes.py",
+      "kind": "test",
+      "commit_or_etag": "54637896bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "five tests on the in-memory fakes of test_package_route.py; no network",
+      "artifact_covered_by": [
+        "R2-pk1-AC1",
+        "R2-pk1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R2-pk1-AC1",
+      "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_CHECKS/r2_checks.py pk-codes expect: PK-CODES-OK",
+      "method": "command",
+      "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_CHECKS/r2_checks.py pk-codes",
+      "output_evidence": "run under timeout 120 from the worktree root at 54637896bf, rc=0: PK-CODES-OK passed=5 of 5",
+      "denominator": "5 of 5 named tests found by name and passed",
+      "status": "PASS",
+      "expect": "PK-CODES-OK"
+    },
+    {
+      "criterion_id": "R2-pk1-AC2",
+      "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_CHECKS/r2_checks.py tc-regress expect: TC-REGRESS-OK",
+      "method": "command",
+      "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_CHECKS/r2_checks.py tc-regress",
+      "output_evidence": "run under timeout 120 from the worktree root at 54637896bf, rc=0: TC-REGRESS-OK passed=159 (min 147) failed=0",
+      "denominator": "159 passed, 0 failed, 0 errors (base 154 plus the 5 new tests)",
+      "status": "PASS",
+      "expect": "TC-REGRESS-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "one in-place mutant of lambda_function.py: the changed-under-write 409 given back its \"ticket\": cur key; file restored byte-identical (cmp)",
+      "expected": "the no-ticket tests fail",
+      "observed": "3 failed 2 passed (test_each_409_has_its_own_code, test_changed_under_write_returns_no_ticket, test_changed_under_write_names_the_package_when_one_landed)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "pk-codes and tc-regress each run twice",
+      "observed": "same counts both runs (5 of 5; 159 passed)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy of the Lambda and any live 409 read",
+      "reason": "the order applies nothing and forbids any AWS call; the apply is a separate order"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~12/TCKT_VNEXT.TO-R2-pk1.package-route-409s-carry-codes-and-no-ticket.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_CHECKS/r2_checks.py pk-codes",
+      "result": "PK-CODES-OK passed=5 of 5"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_CHECKS/r2_checks.py tc-regress",
+      "result": "TC-REGRESS-OK passed=159 (min 147) failed=0"
+    }
+  ]
+}
