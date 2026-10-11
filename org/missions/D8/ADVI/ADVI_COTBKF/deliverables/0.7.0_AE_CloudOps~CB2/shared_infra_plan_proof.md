@@ -151,3 +151,32 @@ silently or left unfiled. The fix is the issuer's, in the clause or in the regex
 | `ctl_init.txt` | 782 | the step-2 control, `one()` error verbatim |
 | `ctl_plan.txt` | 468 | control plan (plugins absent -- init never completed) |
 | `state_list.txt` | 12,353 | 253 state rows, the breakglass/lgic_firm denominators |
+
+---
+
+## ADDENDUM (same seat, 2026-10-11 ~07:4xZ) -- the break-glass role was authored AFTER the last apply, and its own commit says so
+
+Added after the report above was committed, from the seat prompt's launch step 4 (`git tag -l "shared-infra-v*"`).
+It corroborates section 3 from a source independent of state and IAM, and it is **supporting** evidence, not the
+primary read: the direct evidence stays the 0-of-253 state census and the live `NoSuchEntity`.
+
+| fact | measured |
+|---|---|
+| `restricted_breakglass` first entered the `.tf` at | `8e58736597`, **2026-10-07**, by `0.9.0_WK_ADVI_COTBKF~15` (cell `CB-d-4`) |
+| that commit's own subject | "CRM restricted-prefix policy and break-glass role, **planned and simulated, nothing applied**" |
+| newest `shared-infra-v*` tag (48 tags total) | `shared-infra-v1.46.0` at `e4a83d1ebb`, **2026-08-18** |
+| is the role's commit an ancestor of that tag? | **NO** (`merge-base --is-ancestor` rc=1) |
+
+So the role was written **seven weeks after** the last tagged apply of this root, by a cell that recorded at the
+time that it applied nothing. Its `create` in the plan is the first apply it has ever been offered, which is what
+makes it pre-existing undeployed code rather than a delta the CB-bi-1 selector change moved.
+
+**The limit of this instrument, named so it is not over-read:** a tag is a proxy for an apply, not an apply. Rule 6
+requires a tag after every 0-diff apply and compliance was last measured at 93%, so an UNTAGGED apply between
+2026-08-18 and now is not excluded by this read alone. It does not need to be: an apply that had created the role
+would have put it in state and in IAM, and both read ABSENT with passing positive controls. The tag read tells you
+*why* it is absent; the state and IAM reads are what establish *that* it is.
+
+This changes no verdict. `CB61bi2-AC1` still reads `watched_changed=2` and still FAILS as written, and the call on
+whether ruling item 5 holds on a never-deployed break-glass role remains `1.0.0_SA_CTO~DELL2`'s, on row
+`ADVI_COTBKF-D2-S91`.
