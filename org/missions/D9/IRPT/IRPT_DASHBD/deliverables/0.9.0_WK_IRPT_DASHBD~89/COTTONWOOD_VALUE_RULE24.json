@@ -1,0 +1,83 @@
+{
+ "to_id": "IRPT_DASHBD.TO-DB-b-114",
+ "author": "0.9.0_WK_IRPT_DASHBD~89",
+ "question": {
+  "return_basis": "answers which arithmetic produced total_return_daily (contract line 161). Cottonwood's arithmetic is r_t = (value_t - flow_t) / value_(t-1) - 1 (silver daily_returns line 7), the same form as the producer's (line 9): same arithmetic, so TWR.",
+  "valuation_rebuilt_from_positions": "method_version axis: row 3 valuation_source positions_based (producer line 115 onward); the entry's valuation_source is positions_x_as_traded_close (sources.json line 126).",
+  "as_traded_close": "method_version axis, declared in the entry as price_basis as_traded (sources.json); row 3 value_basis reads the entry's declared price_basis.",
+  "net_of_fees": "entry field fee_treatment net_of_fees (sources.json); row 3 fee_basis PER_ENTRY_FEE_TREATMENT. Not a return_basis matter: fees sit inside the value and numerator, not in which arithmetic ran.",
+  "evidence": [
+   {"file": "org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json", "line": 161},
+   {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 115},
+   {"file": "data/assets/scripts/gold/irpt_reporting/sources.json", "line": 126},
+   {"file": "data/assets/scripts/silver/commonwealth_daily_returns.py", "line": 7}
+  ]
+ },
+ "postulates": {
+  "mece": {
+   "finding": "Denominator: the ways a row's return is produced = 2 producers (gold producer, Cottonwood adapter) x 2 outcomes: the form computed (TWR assigned at producer lines 1433/1503/1515/1518; adapter line 371 on a measured day) or no number (NOT_MEASURABLE at 1125/1352/1491/1495/1507/1512; adapter line 371 on a blank day); HOLDINGS_INCOME_FALLBACK is never emitted (line 154 comment block). Subtracting what the 3 members cover leaves nothing on the arithmetic axis: Cottonwood measured rows are the same form as TWR and blank rows are NOT_MEASURABLE. What differs (valuation, price, fees) is not an arithmetic outcome and is covered by the 2 method rows plus the entry fields.",
+   "evidence": [
+    {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1433},
+    {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1125},
+    {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 154},
+    {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 371},
+    {"file": "data/assets/scripts/silver/commonwealth_daily_returns.py", "line": 7}
+   ]
+  },
+  "same_grain": {
+   "finding": "All three return_basis members are account-day properties (contract line 165); method_version is a per-row int pointing at a per-source dim_return_method row (producer lines 1262 and 1849), a per-source fact. TWR plus 3 puts each fact at its own grain; a new return_basis member carrying valuation would mix a per-source fact into a per-account-day axis.",
+   "evidence": [
+    {"file": "org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json", "line": 165},
+    {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1262},
+    {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1849}
+   ]
+  },
+  "intent_coherence": {
+   "finding": "return_basis has one intent (which arithmetic) and method_version one intent (which method row, carrying the valuation source); price and fee detail stay in the entry's fields. A return_basis value saying positions, as-traded, net would put three method facts on the arithmetic axis, the collapse of two axes that contract line 166 names as a defect; row 3 plus the entry fields already carry them on their own axis.",
+   "evidence": [
+    {"file": "org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json", "line": 166},
+    {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 115},
+    {"file": "data/assets/scripts/gold/irpt_reporting/sources.json", "line": 126}
+   ]
+  },
+  "state_coherence": {
+   "finding": "Re-stamping the rows NULL to TWR / 3 moves return_basis and method_version (and the manifest) only. It does NOT move day_quality, guard_state (GUARD_NOT_REACHED in the adapter), history_scope, fee_amount / FEE_RAIL_UNUSED, the null income columns, nor dim row 3's inherited flow_convention and income_basis. A new return_basis value would instead move every reader of the enum (contract lines 139-142, producer _check_enums line 1757, the series contract) and still leave method_version unmoved.",
+   "evidence": [
+    {"file": "org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json", "line": 167},
+    {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1757},
+    {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 380}
+   ]
+  }
+ },
+ "candidates": ["POSITIONS_BASED_TWR", "AS_TRADED_TWR", "POSITIONS_TWR"],
+ "token_census": {
+  "files_scanned": 68382,
+  "scope": "comp-find -i, word-boundary regex over the worktree, corpus=all (tracked + untracked + gitignored minus the ephemeral floor); 7 ephemeral-floor and 4272 binary files not searched. hits = match count; files = files with a match (the --files page total). The runs overlapped this worker's own scratch (since deleted), which adds at most 2 files and 2 hits to a token the scratch named; hits shown are from the earlier run and files are the later total less the scratch files. The three candidates read 0 outside that scratch.",
+  "tokens": {
+   "TWR": {"hits": 2421, "files": 760},
+   "HOLDINGS_INCOME_FALLBACK": {"hits": 48, "files": 27},
+   "NOT_MEASURABLE": {"hits": 10604, "files": 309},
+   "method_version": {"hits": 1409, "files": 496},
+   "POSITIONS_BASED_TWR": {"hits": 0, "files": 0},
+   "AS_TRADED_TWR": {"hits": 0, "files": 0},
+   "POSITIONS_TWR": {"hits": 0, "files": 0}
+  }
+ },
+ "conclusion": "EXISTING_VALUES_SUFFICE",
+ "stamp": {"return_basis": "TWR", "method_version": 3},
+ "reasoning": "return_basis answers which arithmetic ran; Cottonwood's is the producer's form, so TWR is true for the 107,316 measured rows. What differs sits on the method_version axis, and row 3 (positions_based, added by DB-b-102) exists for exactly this, so method_version 3 is true and admitted (the sources.json entry declares it and method_version_of returns 3). STRONGEST CASE AGAINST: (a) the contract describes TWR as 'the C-METHOD form' (line 161) and C-METHOD defines V as the custodian equity, so TWR over a rebuilt V may overstate sameness; answer: the contract names the arithmetic, V is carried by method_version, and the producer header (line 9) states the formula without naming V. (b) dim row 3 as written does not itself say as-traded close or net of fees (those live in the entry fields and the manifest), and it inherits income_basis cash_when_received and a flow convention measured for the custodian channel only, while FWD-3 holds income inside the value through a cash leg; a reader of the dim row alone would not see those facts. That is a gap in what row 3 states, remedied by editing row 3's text under its own rule-24 record; it does not need a new value, and no served claim is false today because the rows carry NULL. NOT ESTABLISHED by this record: whether any dim row 3 partition has been written; whether the 107,316 rows used end or start flow timing (the producer admits a flow convention in its dim row); and whether row 3's inherited income_basis is true for Cottonwood.",
+ "manifest_text": {
+  "answer": "No. At HEAD build_manifest (line 1842) writes method_version via method_version_of(src) (line 1849), which returns 3 for the Cottonwood entry (sources.json line 125), and method via method_text (line 1826), which gives the custodian sentence ONLY when valuation_source equals custodian_reported; the entry's positions_x_as_traded_close takes the generic branch (line 1836) naming valuation_source, fee_treatment and price_basis. Confirmed by calling method_version_of and method_text on the entry locally (no AWS): 3, and a sentence with positions_x_as_traded_close, net_of_fees, as_traded and no custodian text. The constant 2 survives only as row 2's number and the legacy src=None row writer (emit_method_row, line 1889); build_manifest with no src gives absent.",
+  "mint_must_pass": "emit_day(..., src=entry) with entry = the sources.json object _commonwealth_delivery (the adapter does at lines 393 and 552), and a frame whose method_version column is 3 (adapter lines 326 and 380) and whose return_basis is TWR on measured days and NOT_MEASURABLE on blank days (adapter line 371). An entry whose valuation_source crosses class from its method_version is REFUSED (producer lines 1802-1824). The adapter docstring lines 44 and 69 and its COLUMNS_NULL still say method_version NULL while the code reads the entry (surprise row filed).",
+  "evidence": [
+   {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1849},
+   {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1826},
+   {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1802},
+   {"file": "data/assets/scripts/gold/irpt_reporting/sources.json", "line": 125},
+   {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 326},
+   {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 393},
+   {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 552}
+  ]
+ },
+ "if_new": null
+}

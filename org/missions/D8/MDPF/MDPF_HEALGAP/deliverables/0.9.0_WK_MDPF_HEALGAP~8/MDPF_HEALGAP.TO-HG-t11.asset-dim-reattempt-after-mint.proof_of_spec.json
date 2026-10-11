@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-t11",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "287ef0d2ee",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t11.asset-dim-reattempt-after-mint.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t11.asset-dim-reattempt-after-mint.md",
+    "group": "OTHER",
+    "vintage_commit": "287ef0d2ee"
+  },
+  "assignee": "0.9.0_WK_MDPF_HEALGAP~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/bd-pipeline/eventbridge.tf",
+      "kind": "terraform",
+      "commit_or_etag": "25c71ce573",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "not applied: this order runs no terraform init, plan or apply and no safe-apply; the issuer applies at the drain under its never-widen pair"
+    },
+    {
+      "path_or_key": "infra/aws/ssm/opal-bd-asset-dim-download.json",
+      "kind": "config_data",
+      "commit_or_etag": "25c71ce573",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "not sent: this order runs no ssm update-document and no ssm send-command; the first guarded fire is the issuer's at the drain"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG3-t11-AC1",
+      "criterion_verbatim": "the existing rule stays at cron(10 22 ? * MON-FRI *); exactly one other rule targets the same trigger on MON-FRI after 22:20Z, with a permission.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_r3_rules.py --t11",
+      "output_evidence": "T11-OK new_rule=bd_asset_dim_reattempt schedule=cron(40 22 ? * MON-FRI *) existing=bd_asset_dim_pipeline cron(10 22 ? * MON-FRI *)",
+      "denominator": "1 of 1 rule other than bd_asset_dim_pipeline targeting module.asset_dim_trigger.function_arn (want exactly 1); rc=0; repeated twice, identical",
+      "status": "PASS",
+      "expect": "T11-OK"
+    },
+    {
+      "criterion_id": "HG3-t11-AC2",
+      "criterion_verbatim": "the document's own shell, run with the instance's tools stubbed: guard read OK -> the pull is not started, the shutdown is armed, rc 0; guard read failed (rc 1 and 2) -> the pull runs.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t11_assetdim.py --ssm",
+      "output_evidence": "SSMGUARD-OK guard between staging and pull; exists -> skip + shutdown armed; read failed (rc 1,2) -> download runs; rc=0; repeated twice, identical",
+      "denominator": "3 of 3 arms evaluated by the checker PASS (guard read OK -> no pull, shutdown armed, rc 0; guard read FAILED rc 1 -> pull runs; guard read FAILED rc 2 -> pull runs); rc=0",
+      "status": "PASS",
+      "expect": "SSMGUARD-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "always-skip mutant (.scratch/mutant_always_skip.json, uncommitted): the guard decision at line 83 of the document changed from `if [ $GUARD_RC -eq 0 ]; then` to `if true; then`, so a failed read (rc 1, 2) skips the pull. Run through the corrected HG3-t11-AC2 checker: `python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t11_assetdim.py --ssm /c/Dev/wk_healgap_r3_8/.scratch/mutant_always_skip.json`. HG3-t11-AC2 must fail on it.",
+      "expected": "SSMGUARD-BAD (failed-read arm reports the pull did not run)",
+      "observed": "SSMGUARD-BAD guard read FAILED (rc 1) but the pull did not run (a failed read was taken as 'exists'); guard read FAILED (rc 2) but the pull did not run (a failed read was taken as 'exists') -- rc=1. The mutant fires.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs each of hg_r3_rules.py --t11 and hg_t11_assetdim.py --ssm; last lines compared",
+      "observed": "run 1 == run 2 for both: T11-OK ... rc=0 and SSMGUARD-OK ... rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "no terraform init, plan or apply; no safe-apply; no ssm update-document; no ssm send-command; no Lambda invoke; no vendor call",
+      "reason": "order BOUNDS: every apply and the first guarded fire is the issuer's at the drain; this cell sends nothing and reads no firm data"
+    },
+    {
+      "item": "the trigger Lambda and the bd_daily_trigger role were not edited",
+      "reason": "order BOUNDS: NOT edited by this cell; the role is shared by 7 triggers"
+    },
+    {
+      "item": "the surprise row MDPF_HEALGAP-D1-W8-S1 is not edited (append-only); its disposition stays UNDER_INVESTIGATION in the channel",
+      "reason": "the defect was in the checker, corrected by the issuer at 8e197ccf1e (the failed-read arm tests the pull call); the row's disarm owner 2.0.0_SA_COO~G1 holds the disposition"
+    }
+  ],
+  "surprises": [
+    "MDPF_HEALGAP-D1-W8-S1: HG3-t11-AC2's checker could not fail its failed-read arm (the always-skip mutant printed SSMGUARD-OK); corrected by the issuer at 8e197ccf1e; the corrected checker now fires on the always-skip mutant (see controls.mutant)."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~8/MDPF_HEALGAP.TO-HG-t11.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "hg_r3_rules.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_r3_rules.py --t11",
+      "result": "T11-OK new_rule=bd_asset_dim_reattempt schedule=cron(40 22 ? * MON-FRI *) rc=0"
+    },
+    {
+      "tool": "hg_t11_assetdim.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t11_assetdim.py --ssm",
+      "result": "SSMGUARD-OK rc=0; always-skip mutant SSMGUARD-BAD rc=1"
+    }
+  ]
+}

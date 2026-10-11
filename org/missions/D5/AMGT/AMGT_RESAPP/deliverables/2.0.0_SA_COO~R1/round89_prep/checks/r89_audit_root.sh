@@ -12,7 +12,8 @@
 #       tree's org/mass-deletion-audit.log.
 #    A2 the same deletion in block mode: exit 1, and a BLOCKED row in the main tree's log (the verdict is unchanged).
 #    A3 control: the same deletion run from the main worktree itself leaves its row in the main tree (unchanged).
-# Verdict: R89 AUDIT ROOT: YES|NO (exit 0|1). At the base (2026-10-11) A1 and A2's row check FAIL, A3 PASS.
+#    A4 a SUBMODULE commit (its common dir is <super>/.git/modules/<name>): the row lands in a worktree, never under .git/modules.
+# Verdict: R89 AUDIT ROOT: YES|NO (exit 0|1). At the base (2026-10-11) A1 and A2 FAIL, A3 and A4 PASS.
 set -u
 HOOK=""
 if [ "${1:-}" = "--hook" ]; then HOOK="${2:-}"; fi
@@ -54,6 +55,31 @@ ROW_MAIN=0; [ -f "$M/$LOG" ] && ROW_MAIN=$(grep -c ' WARNED ' "$M/$LOG" || true)
 echo "   main worktree: warn rc=$RC_MAIN rows WARNED=$ROW_MAIN"
 if [ "$RC_MAIN" = "0" ] && [ "$ROW_MAIN" -ge 1 ]; then say 1 "A3 control: a deletion from the main worktree leaves its row in the main tree"
 else say 0 "A3 control: a deletion from the main worktree leaves its row in the main tree"; fi
+
+# A4 -- a SUBMODULE commit (the portal is one): its common dir is <super>/.git/modules/<name>, whose parent is NOT a worktree.
+# The row must not be written under <super>/.git/modules; it stays where it landed before this change (the submodule's own tree)
+# or goes to the superproject's tree -- either keeps it readable.
+S="$T/super"
+mkdir -p "$T/sub" && cd "$T/sub" && git init -q . && git config user.name r89 && git config user.email r89@opal.agent
+for i in 1 2 3 4 5; do echo "s$i" > "s$i.txt"; done
+git add -A && git commit -q -m seed
+mkdir -p "$S" && cd "$S" && git init -q . && git config user.name r89 && git config user.email r89@opal.agent
+echo x > x.txt && git add -A && git commit -q -m seed
+git -c protocol.file.allow=always submodule add -q "$T/sub" mod >/dev/null 2>&1
+if [ -d "$S/mod" ] && [ -e "$S/mod/.git" ]; then
+  cd "$S/mod" && git config user.name r89 && git config user.email r89@opal.agent && git rm -q s1.txt s2.txt s3.txt s4.txt
+  MASS_DELETE_THRESHOLD=2 MASS_DELETE_MODE=warn bash "$HOOK" "$MSG" >/dev/null 2>&1; RC_SUB=$?
+  JUNK=0; [ -f "$S/.git/modules/$LOG" ] && JUNK=$(grep -c ' WARNED ' "$S/.git/modules/$LOG" || true)
+  HOME_ROWS=0
+  [ -f "$S/mod/$LOG" ] && HOME_ROWS=$((HOME_ROWS + $(grep -c ' WARNED ' "$S/mod/$LOG" || true)))
+  [ -f "$S/$LOG" ] && HOME_ROWS=$((HOME_ROWS + $(grep -c ' WARNED ' "$S/$LOG" || true)))
+  echo "   submodule: warn rc=$RC_SUB | rows under <super>/.git/modules: $JUNK | rows in the submodule or superproject tree: $HOME_ROWS"
+  if [ "$RC_SUB" = "0" ] && [ "$JUNK" = "0" ] && [ "$HOME_ROWS" -ge 1 ]; then say 1 "A4 a submodule commit's row lands in a worktree, never under <super>/.git/modules"
+  else say 0 "A4 a submodule commit's row lands in a worktree, never under <super>/.git/modules"; fi
+else
+  echo "   submodule arm could not be built (git submodule add failed); A4 not graded"
+  TOTAL=$((TOTAL+1)); echo "FAIL A4 the submodule arm could not be built"
+fi
 
 cd "$T/.." 2>/dev/null; rm -rf "$T"
 if [ "$PASSED" = "$TOTAL" ]; then echo "R89 AUDIT ROOT: YES"; exit 0; fi

@@ -1,0 +1,42 @@
+HVST-bs-4 step 8: steps 3 and 4 of the relaunch, read 2026-10-11T04:0xZ.
+OUTPUT: .runtime\harvest-backfill\r47_sa_run3.out
+
+=== STEP 3 -- THE DECLARATION, VERBATIM ===
+DECLARED dj-20261011T040137Z-1679536 winpid=36228 owner=0.7.0_AE_CloudOps~ZW max_seconds=172800 marker=C:/Users/Opal Bloomberg/Desktop/ajb_workspace/.git/detached-jobs/dj-20261011T040137Z-1679536.json
+
+detached-job.sh list reads LIVE for it, markers=1. The driver process is PID 13220 (parent 20208).
+ARGV: the SAME argv as the recorded last launch (r47/bs4_last_argv.txt, source
+.runtime/harvest-backfill/r54_launch_sa_run2.json) plus `--clear-stop sa`, which step 2 authorizes
+because the stop is transport-class by the driver's own rule (bs4_stop_reason.out section 5):
+python -u -m lib.opal_data_harvest.backfill_driver --checkpoint .runtime/harvest-backfill/r47_sa_checkpoint.json --publishers sa --runtime-root .runtime/opal-data-harvest-sa --stop-file .runtime/harvest-backfill/R47_STOP_SA --auto-resume-transient 2 --clear-stop sa
+The flag takes a PUBLISHER argument (backfill_driver.py:509, choices=REGISTRY["publishers"]), so a bare
+`--clear-stop` would have eaten the next token; it is passed as `--clear-stop sa`.
+No stop FILE was deleted or created: .runtime/harvest-backfill/R47_STOP_SA did not exist at launch
+(checked; the only stop-shaped files in that directory are STOP_FT, another publisher's, and
+r52_stop_status_pairs.json).
+
+=== STEP 4 -- IT RESUMED FROM THE CHECKPOINT, NOT FROM 0 ===
+First lines, verbatim:
+UNIVERSE: 242
+BUDGET sa: 4320 requests/day (pacing 86400/(15s minimum + 10s jitter/2) = 4320; no per-publisher daily cap in config or contracts)
+PLAN sa security-7f05ac6ae2894d23
+PLAN sa security-bef57f862b5eee5d
+PLAN sa security-68ccbb159ab3ee19
+Last line, verbatim:
+CLEARED sa: stop error cleared after cooldown expiry; resuming from its next undone pair
+
+PROOF BY SUBTRACTION, with the denominator printed, because this driver prints a PLAN list rather than a
+done count: UNIVERSE 242, PLAN lines 107. 242 - 107 = 135 pairs it did NOT plan, which is exactly the
+134 `pairs_done` plus the 1 `gave_up` key in the checkpoint. The 107 it did plan are the 104
+`never_started` plus the 3 `retry` rows -- and the first three PLAN lines ARE those three retry keys
+(7f05ac6ae2894d23, bef57f862b5eee5d, 68ccbb159ab3ee19), in the order the checkpoint records them.
+So the resume point is 135 >= 133, and a from-0 run would have printed 242 PLAN lines.
+Total lines in the file at this read: 111 (107 PLAN + UNIVERSE + BUDGET + DECLARED + CLEARED).
+
+=== WHAT IS NOT CLAIMED HERE ===
+This is a START, not a completion. Step 6 (bs4_completed.out and the report to 0.0.0_AB_MSTR~DELL1) is
+owed only on the driver's own PAIRS completion line, and the leg has 107 pairs to attempt at a 15s
+minimum pace. The previous session's failure mode was a collector LAUNCH failure (rc 0xC0000142) that
+produced `run_id=None`, so the first JOB line carrying a real run_id is what will show the condition
+has actually cleared; at this read no JOB line has been printed yet. Step 5's re-declaration before the
+48-hour marker lapses is owed if it runs that long.

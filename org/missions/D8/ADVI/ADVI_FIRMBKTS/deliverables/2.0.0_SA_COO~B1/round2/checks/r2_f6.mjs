@@ -4,7 +4,8 @@
 //                                         handleWithMap() equals the pre-change router (git blob BASE_BLOB) on every
 //                                         event of the corpus, byte for byte.
 //   bun <this file> seam [--router DIR]   the seam to the table: with the map overridden so 49financial and mockadv
-//                                         resolve to opal-data-49financial, every router-reachable served class's
+//                                         resolve to opal-data-49financial AND that bucket named in the canonical list
+//                                         (the router ships it EMPTY), every router-reachable served class's
 //                                         rewritten key equals the key the round-1 table (mapping.json) gives it;
 //                                         unplaced classes are refused; the other firms, the twin class and the
 //                                         satellites branch are unchanged.
@@ -138,6 +139,7 @@ async function seam() {
     "platinum/clients/": "platinum/clients/", "platinum/firm/": "platinum/firm/", "platinum/49financial/": "platinum/49financial/",
   };
   const map = { ...cfg.FIRM_BUCKET_MAP, "49financial": "opal-data-49financial", mockadv: "opal-data-49financial" };
+  const CANON = ["opal-data-49financial"];
   let ok = 0, n = 0;
   const bad = [];
   const unreachable = [];
@@ -149,7 +151,7 @@ async function seam() {
       const want = "/" + r.dest_pattern.replace("{firm}", "49financial").replace("{tail}", tail);
       for (const firmId of ["49financial", "mockadv"]) {
         n++;
-        const out = await mod.handleWithMap(clone(event({ firmId, uri: A + route + tail })), map);
+        const out = await mod.handleWithMap(clone(event({ firmId, uri: A + route + tail })), map, CANON);
         const got = out && out.uri;
         if (got === want && out.origin.s3.domainName === DOMAIN("opal-data-49financial")) ok++;
         else bad.push(`${firmId} ${route + tail} -> ${got} (${out && out.origin && out.origin.s3.domainName}) want ${want}`);
@@ -162,9 +164,15 @@ async function seam() {
   let ctl = 0, nctl = 0;
   const check = async (label, ev, pred) => {
     nctl++;
-    const out = await quiet(async () => mod.handleWithMap(clone(ev), map));
+    const out = await quiet(async () => mod.handleWithMap(clone(ev), map, CANON));
     if (pred(out)) ctl++; else console.log("  CONTROL FAILED: " + label + " -> " + JSON.stringify(out).slice(0, 160));
   };
+  nctl++;
+  {
+    const out = await quiet(async () => mod.handleWithMap(clone(event({ firmId: "49financial", uri: A + "views/firm_composition.json" })), map));
+    if (out.uri === "/gold/views/firm_composition.json") ctl++;
+    else console.log("  CONTROL FAILED: the shipped (empty) list must change nothing even under the cutover map -> " + JSON.stringify(out).slice(0, 160));
+  }
   await check("unplaced class refused", event({ firmId: "49financial", uri: A + "timeseries/synthetic_positions_index.json" }),
     (o) => o.status === "404" && JSON.parse(o.body).error === "unplaced_canonical_resource");
   await check("flat legacy path unplaced", event({ firmId: "49financial", uri: A + "summary/header_metrics.json" }),
@@ -183,7 +191,7 @@ async function seam() {
     (o) => o.uri === "/platinum/satellites/registry.json");
   await check("satellites unknown leaf still 404", event({ firmId: "49financial", uri: "/api/scoped/satellites/nope.json" }),
     (o) => o.status === "404" && JSON.parse(o.body).error === "unknown_satellites_resource");
-  console.log(`F6 SEAM CONTROLS: ${ctl} of ${nctl} (unplaced refused; other firms, twin class, PII block, satellites unchanged)`);
+  console.log(`F6 SEAM CONTROLS: ${ctl} of ${nctl} (empty list inert; unplaced refused; other firms, twin class, PII block, satellites unchanged)`);
   return ok === n && n > 0 && ctl === nctl && bad.length === 0 ? 0 : 1;
 }
 

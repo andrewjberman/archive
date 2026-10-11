@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-t12",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t12.fwd6-census-resweep.md",
+    "group": "OTHER",
+    "vintage_commit": "d08867926c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "d08867926c",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t12.fwd6-census-resweep.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_HEALGAP~9",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~9/FWD6_CENSUS_RESWEEP_R3.md",
+      "kind": "doc",
+      "commit_or_etag": "2c1208d6129128c27c21bbac04050196c637a74d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: a document; read-only AWS calls; no deploy. commit_or_etag is the git blob hash of the document as written (git hash-object), the same bytes as the commit that carries it.",
+      "artifact_covered_by": [
+        "HG3-t12-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG3-t12-AC1",
+      "criterion_verbatim": "the census has equal DENOMINATOR and FRESH-COUNT lines, the seven columns, a valid answer and grounding on every row, the person's act and where it is listed on every EXPOSED-MANUAL row, the seven named pulls, 49F first (completeness of the population is graded by the CVO).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t12_census.py",
+      "output_evidence": "CENSUS-OK rows=20 denominator=164 exposed_manual=7 (rc=0, run twice). Base, doc absent (HG_T12_DOC=.scratch/absent.md): CENSUS-BAD no file .scratch/absent.md (rc=1). Mutant (one EXPOSED-MANUAL reason stripped of 'because', scratch copy): CENSUS-BAD row 'bd-asset-dim-pipeline-trigger ...' answer 'EXPOSED-MANUAL today a cookie that dies ' (rc=1).",
+      "denominator": "20 table rows checked of 20; DENOMINATOR 164 scheduled pulls read = FRESH-COUNT 164 (131 EventBridge rules with a ScheduleExpression via aws events list-rules, plus 33 Scheduler schedules via aws scheduler list-schedules, CLI auto-pagination, 2026-10-11T03:59Z). Rows cover 33 schedules; 131 excluded schedules are listed in section 3; set comparison against the live list shows no name missing, extra or repeated. Answers: RECOVERS 1, NOT-EXPOSED 12, EXPOSED-MANUAL 7.",
+      "status": "PASS",
+      "expect": "CENSUS-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the check was run twice on the committed document content; the second run followed the cot and bd-asset-dim answer fixes. Base: the check run with HG_T12_DOC pointing at a path that does not exist.",
+      "observed": "CENSUS-OK rows=20 denominator=164 exposed_manual=7 on each run; base (doc absent): CENSUS-BAD no file .scratch/absent.md (rc=1)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "scratch copy of the census with one EXPOSED-MANUAL answer reworded so 'because' is absent (.scratch/mut.md, uncommitted), checked via HG_T12_DOC",
+      "expected": "CENSUS-BAD naming the malformed answer",
+      "observed": "CENSUS-BAD row 'bd-asset-dim-pipeline-trigger (Lambda bd-asset-dim' answer 'EXPOSED-MANUAL today a cookie that dies ' (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "completeness of the population",
+      "reason": "order AC1 text: graded by the CVO; the document lists all 164 schedules read, 33 in the census table and 131 excluded with their category"
+    },
+    {
+      "item": "any AWS write, Lambda invoke, vendor call, secretsmanager GetSecretValue",
+      "reason": "order BOUNDS; only list, get, describe and read calls were made (events list-rules, list-targets-by-rule, describe-rule; scheduler list-schedules, get-schedule; no secret read)"
+    },
+    {
+      "item": "source line citations for rows marked 'round-2 grounding carried'",
+      "reason": "stated in the document section 6: schedules, expressions, states and targets re-read live; the round-2 source lines for wsb-49f-model-aua-daily, the ten Orion/Eclipse pulls, opal-inf-bronze-runner-cron and opal-inf-export-schedule were not re-read"
+    }
+  ],
+  "surprises": [
+    "MDPF_HEALGAP-D1-W9-S1: outlook moved from RECOVERS (round 2) to EXPOSED-MANUAL, and teams is EXPOSED-MANUAL, both on the one gateway Microsoft sign-in; the PRD v0.3 addendum names neither",
+    "MDPF_HEALGAP-D1-W9-S2: bd-asset-dim-pipeline-trigger is EXPOSED-MANUAL under a third-answer grammar ('only a person can renew') that does not literally describe a machine-minted login",
+    "MDPF_HEALGAP-D1-W9-S3: the 49F keepalive dead-cookie alert says a person re-captures the cookie while the session trigger's full mint re-issues it automatically",
+    "MDPF_HEALGAP-D1-W9-S4: the open-calls list the v0.3 addendum names has no file path located in this worktree"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~9/MDPF_HEALGAP.TO-HG-t12.fwd6-census-resweep.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "aws CLI read-only enumeration via .tools/aws",
+      "invocation": "aws events list-rules --query 'Rules[?ScheduleExpression!=null].[Name,ScheduleExpression,State]' ; aws scheduler list-schedules --query 'Schedules[].[Name,State]' ; aws events list-targets-by-rule ; aws events describe-rule --name cot-session-complete ; aws scheduler get-schedule (timeout 120 each)",
+      "result": "131 scheduled rules and 33 schedules, 164 total (2026-10-11T03:59Z); 19 rules and 2 schedules DISABLED; targets and inputs read for the census rows named in the cell"
+    },
+    {
+      "tool": "python bucket coverage check (scratch, uncommitted)",
+      "invocation": "python .scratch/buckets.py (reads .scratch/rules.json and .scratch/sched.json)",
+      "result": "table 33 + excluded 131 = 164 unique; live-not-bucketed none; bucketed-not-live none; duplicates none"
+    },
+    {
+      "tool": "census check",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t12_census.py",
+      "result": "CENSUS-OK rows=20 denominator=164 exposed_manual=7 (rc=0)"
+    }
+  ]
+}
