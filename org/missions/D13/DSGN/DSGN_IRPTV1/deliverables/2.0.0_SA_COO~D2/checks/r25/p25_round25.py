@@ -11,7 +11,8 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
              left_out (a list, each {what, why}).
   IV111-AC2  the same record: print_closure {method, entry, closure_files (int > 0), control (a file known to be in the closure,
              found there: true)}; changed_in_closure is a list; when it is empty verdict is CLEAR; when it is not, verdict is
-             WAITS_ON_ANDREW with a row id; lint_errors 0; typecheck_errors 0; suite {fail 0, pass > 0}; build_ok true.
+             WAITS_ON_ANDREW with a row id; lint_errors 0; typecheck_errors 0; suite {pass > 0, fail equal to
+             base_prod.fail, new_failing_ids []} (AMENDMENT 1); build_ok true.
 """
 import json
 import re
@@ -70,10 +71,13 @@ def main():
             fail("verdict %r with an empty changed_in_closure" % r.get("verdict"))
         if r.get("lint_errors") != 0 or r.get("typecheck_errors") != 0:
             fail("lint_errors %r, typecheck_errors %r" % (r.get("lint_errors"), r.get("typecheck_errors")))
+        # AMENDMENT 1: PROD's own base suite is not clean against today's workspace contract (measured 42 failing), so the
+        # criterion is "no new failure over PROD's base", not "0 failing".
         s = r.get("suite") or {}
-        if s.get("fail") != 0 or not isinstance(s.get("pass"), int) or s["pass"] < 1 or r.get("build_ok") is not True:
-            fail("suite %r, build_ok %r" % (s, r.get("build_ok")))
-        print("OK: the print route's closure holds %d file(s) (control found); %d changed file(s) in it; verdict %s; lint, typecheck, suite and build clean"
+        base = s.get("base_prod") or {}
+        if not isinstance(s.get("pass"), int) or s["pass"] < 1 or not isinstance(base.get("fail"), int) or s.get("fail") != base["fail"]                 or s.get("new_failing_ids") != [] or r.get("build_ok") is not True:
+            fail("suite %r, build_ok %r" % ({k: s.get(k) for k in ("pass", "fail", "base_prod", "new_failing_ids")}, r.get("build_ok")))
+        print("OK: the print route's closure holds %d file(s) (control found); %d changed file(s) in it; verdict %s; lint, typecheck and build clean; no new failure over PROD's base"
               % (pc["closure_files"], len(cic), r["verdict"]))
     else:
         fail("unknown criterion %r" % cid)

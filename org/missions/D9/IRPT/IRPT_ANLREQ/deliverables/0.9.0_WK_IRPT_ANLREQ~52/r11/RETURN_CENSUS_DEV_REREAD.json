@@ -1,0 +1,79 @@
+{
+ "read_at": "2026-10-11T18:33:00Z",
+ "dev_ref": "3ebc35ebf2ef7d95318333b95b50657d861d9f20",
+ "prod_ref": "37aa1247ee4ba487e5610dc5b78d65ae28468a99",
+ "first_read_dev_ref": "9ca634c6ea089796c127a9a1399cfa279323a154",
+ "served_members": [
+  {
+   "packaged_as": "entry.py",
+   "portal_reader_dev": {
+    "file_function": "src/api/endpoints/investor-reporting.ts:getOwnedAnalysisReport (line 1201) -> src/pages/InvestorReporting/contracts/adapt.ts:adaptAnalysisReportSlice (:1438)",
+    "admits_new_shape": true,
+    "deciding_line": "adapt.ts:1446 and :1455 `...(wire.retained_ref ? { retainedRef: wire.retained_ref } : {}),` carry the new retained_ref key onto the view, and adapt.ts:1435-1436 add 'retained_ref' to the picked wire; there is still no exact key-set check on the answer's data. This is the sections reader, changed since the first read; the reason-code parser for this member's refusal is unchanged (see the served.py row).",
+    "searched": "git grep -n at origin/DEV (src, tests excluded) for analysis-report, getOwnedAnalysisReport, adaptAnalysisReportSlice, REPORT_TICKET_MISMATCH, retained_ref, ticket_id: readers of the sections route on DEV are api/endpoints/investor-reporting.ts:1201 getOwnedAnalysisReport -> adapt.ts:1438 adaptAnalysisReportSlice (also envelope.ts:193 on the scoped-envelope path), called from TicketCenter/analysisRequest.ts:439 (openReport, sends ticket_id) and TicketCenter/AnalysisRequestParts.tsx:262 (openPackageFile, sends ticket_id), and from InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx:61 (sends no ticket_id). The first census named neither ticket-page caller; both are new since 9ca634c6."
+   },
+   "changed_since_first_read": true
+  },
+  {
+   "packaged_as": "served.py",
+   "portal_reader_dev": {
+    "file_function": "src/pages/InvestorReporting/contracts/public-status.ts:requirePublicStatus and render/Page.tsx:isContractNamedReasonCode",
+    "admits_new_shape": true,
+    "deciding_line": "public-status.ts:25 `if (typeof value.public_reason_code !== 'string' || !/^[A-Z0-9_]+$/.test(value.public_reason_code)) return fail()` admits REPORT_TICKET_MISMATCH (blob e2a43fa4 on both refs); render/Page.tsx:109 CONTRACT_NAMED_REASON_CODES lists 'REPORT_TICKET_MISMATCH' (Page.tsx:99 comment cites CONTRACT.md:79)",
+    "searched": "git grep -n at origin/DEV and origin/PROD (src, tests excluded) for REPORT_TICKET_MISMATCH, CONTRACT_NAMED_REASON_CODES, public_reason_code: the parser is public-status.ts (identical blob on both refs); the name list is Page.tsx (unchanged between 9ca634c6 and DEV; PROD's list lacks the code, so PROD renders it flagged as unnamed)"
+   },
+   "changed_since_first_read": false
+  },
+  {
+   "packaged_as": "owned_report.py",
+   "portal_reader_dev": {
+    "file_function": "src/api/endpoints/investor-reporting.ts:getOwnedAnalysisReport (line 1201) -> src/pages/InvestorReporting/contracts/adapt.ts:adaptAnalysisReportSlice (:1438)",
+    "admits_new_shape": true,
+    "deciding_line": "adapt.ts:1446 and :1455 `...(wire.retained_ref ? { retainedRef: wire.retained_ref } : {}),` carry the new retained_ref key onto the view, and adapt.ts:1435-1436 add 'retained_ref' to the picked wire; there is still no exact key-set check on the answer's data. A sent ticket_id that the stored one does not match is served as REPORT_TICKET_MISMATCH, parsed by public-status.ts:25 and named at Page.tsx:109.",
+    "searched": "git grep -n at origin/DEV (src, tests excluded) for analysis-report, getOwnedAnalysisReport, adaptAnalysisReportSlice, REPORT_TICKET_MISMATCH, retained_ref, ticket_id: readers of the sections route on DEV are api/endpoints/investor-reporting.ts:1201 getOwnedAnalysisReport -> adapt.ts:1438 adaptAnalysisReportSlice (also envelope.ts:193 on the scoped-envelope path), called from TicketCenter/analysisRequest.ts:439 (openReport, sends ticket_id) and TicketCenter/AnalysisRequestParts.tsx:262 (openPackageFile, sends ticket_id), and from InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx:61 (sends no ticket_id). The first census named neither ticket-page caller; both are new since 9ca634c6."
+   },
+   "changed_since_first_read": true
+  },
+  {
+   "packaged_as": "owned_requests.py",
+   "portal_reader_dev": {
+    "file_function": "src/pages/InvestorReporting/contracts/owned-requests.ts:readOwnedHistory and readOwnedHistoryRow",
+    "admits_new_shape": true,
+    "deciding_line": "owned-requests.ts:129 `|| Object.keys(value).some((key) => key !== 'items' && key !== 'next_cursor' && key !== 'unreadable_rows')` and :132 `|| ('unreadable_rows' in value && !(typeof value.unreadable_rows === 'number' && ...` admit the third page key; readOwnedHistoryRow (:107) takes client_id and client_claim aside and passes the rest through readOwnedRequest",
+    "searched": "git grep -n at origin/DEV (src, tests excluded) for analysis/requests, readOwnedHistory, readOwnedRequest, listOwnedAnalysisRequests: the only parser of the history answer is contracts/owned-requests.ts:readOwnedHistory, reached from envelope.ts and investor-reporting.ts; owned-requests.ts is byte-identical between 9ca634c6 and DEV (empty git diff --stat). TicketCenter does not read the history route."
+   },
+   "changed_since_first_read": false
+  },
+  {
+   "packaged_as": "prospect_dates.py",
+   "portal_reader_dev": {
+    "file_function": "src/pages/InvestorReporting/contracts/prospect-dates.ts:readProspectDates",
+    "admits_new_shape": true,
+    "deciding_line": "prospect-dates.ts:41-43 `if (rows.some((row) => !object(row) || !closed(row, ['section_id', 'as_of_date']) ... || !(row.as_of_date === null || date(row.as_of_date)))) return fail()` admits a null-dated row; :46-47 refuse UNDATED_INPUT with a dated row and PER_SECTION with none or all rows dated, so a null-dated row beside a dated one is PER_SECTION and none dated is UNDATED_INPUT (blob a54bb5ad on DEV and PROD)",
+    "searched": "git grep -n at origin/DEV (src, tests excluded) for section_dates, prospect-v1, readProspectDates, date_basis: prospect-dates.ts is the only parser, byte-identical between 9ca634c6 and DEV and equal to PROD's blob"
+   },
+   "changed_since_first_read": false
+  }
+ ],
+ "ticket_page_reader": {
+  "file_function": "src/pages/TicketCenter/analysisRequest.ts:readTicketReport, used by openReport (:439) and by AnalysisRequestParts.tsx:openPackageFile (:262), through src/api/endpoints/investor-reporting.ts:getOwnedAnalysisReport (:1201-1204)",
+  "sends_ticket_id": true,
+  "on_dev": true,
+  "on_prod": false,
+  "on_prod_note": "PROD's Ticket Center does not send a ticket id on a report read at all: PROD analysisRequest.ts:179-182 openReport returns deps.ir.getOwnedAnalysisRequest(requestId, ticket.answers?.firm), the request-read route and not the sections route; PROD's getOwnedAnalysisReport (investor-reporting.ts:1153) takes no ticketId; git grep for getOwnedAnalysisReport and openPackageFile under src/pages/TicketCenter at origin/PROD finds none (rc 1).",
+  "deciding_lines": [
+   "src/pages/TicketCenter/analysisRequest.ts:439 report = await readTicketReport((r, t, k) => deps.ir.getOwnedAnalysisReport(r, t, k), requestId, ticket.answers?.firm, ticket.ticket_id)",
+   "src/pages/TicketCenter/AnalysisRequestParts.tsx:262 report = await readTicketReport((r, t, k) => ir.getOwnedAnalysisReport!(r, t, k), requestId, firm, ticket.ticket_id)",
+   "src/api/endpoints/investor-reporting.ts:1204 'analysis-report', { pathParams: { jobId: requestId }, query: { selected_tenant: selectedTenant, ticket_id: ticketId } }, adaptAnalysisReportSlice, null, null,",
+   "src/pages/TicketCenter/analysisRequest.ts:442 if (isReportTicketMismatch(e)) throw new Error(REPORT_TICKET_MISMATCH_MESSAGE)"
+  ],
+  "fallback": "analysisRequest.ts:427-429: `if (!isInvalidInputRefusal(e)) throw e` then `return read(requestId, selectedTenant)` -- when the read carrying the ticket id is refused with the public reason INVALID_INPUT (what the live service serves today for the unknown ticket_id query member), the same read is made once more WITHOUT the ticket id and that answer is used; every other refusal, REPORT_TICKET_MISMATCH above all, propagates with no second read.",
+  "after_reads": [
+   "(i) A signed-in Opal person opens the report on a ticket whose recorded report belongs to that ticket: the page makes one read carrying the ticket's own id, the service accepts it, and the report's sections show as before. Today, before the release, the live service refuses that read as INVALID_INPUT and the page silently makes the second read without the id, so the person sees the same report. This read can be made today on DEV only (PROD's page reads the request-read route and sends no id, so it has no ticket-bound report read).",
+   "(ii) A signed-in Opal person opens the report on a ticket whose recorded report was filed under ANOTHER ticket: after the release the service refuses with REPORT_TICKET_MISMATCH, the page does not fall back, and it shows the sentence constant REPORT_TICKET_MISMATCH_MESSAGE, \"This ticket's recorded report belongs to another ticket, so it is not shown.\" (analysisRequest.ts:389) through its error presentation, with no report. Before the release this read cannot be made as described: the old service answers INVALID_INPUT, the page falls back to the read without the id, and the other ticket's report is shown. After the release it can be made on DEV only; PROD's page has no ticket-bound read."
+  ],
+  "other_callers_without_ticket_id": "InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx:61 `await api.getOwnedAnalysisReport(id, selectedTenant)` sends no ticket id on DEV or PROD and is unaffected by the new refusal."
+ },
+ "prod_must_carry_first_changed": false,
+ "prod_must_carry_first_note": "Nothing read at DEV 3ebc35eb adds a PROD precondition: the DEV sections reader still admits retained_ref and REPORT_TICKET_MISMATCH and PROD's Ticket Center sends no ticket id (it reads the request-read route), so the round-10 prod_must_carry_first list (the history reader cbd5cc66 with a3f99d6e) is unchanged."
+}

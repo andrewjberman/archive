@@ -1,0 +1,106 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bt-1",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bt-1.reinvestment-price-check.md",
+  "group": "OTHER",
+  "vintage_commit": "e77f18b19c"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~119",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round72.md",
+  "vintage_commit": "e77f18b19c",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bt-1.reinvestment-price-check.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~119/REINVESTMENT_PRICE_CHECK.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement record; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB72bt1-AC1",
+    "CB72bt1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~119/REINVESTMENT_PRICE_CHECK.csv",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement table of 270 fund series; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB72bt1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~119/REINVESTMENT_PRICE_CHECK_DETAIL.csv",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement detail (all kinds, reasons, guard sensitivity); no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB72bt1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~119/REINVESTMENT_PRICE_CHECK.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement note; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB72bt1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB72bt1-AC1",
+   "criterion_verbatim": "the reviewer's nine are reproduced and every fund series carries one of three readings (three_sum equals fund_series), with the reach re-derived.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~119/REINVESTMENT_PRICE_CHECK.json',encoding='utf-8'));n=d['reproduced_nine'];print('REINVESTMENT-PRICE-CHECK nine_funds=%d nine_dates=%d nine_below=%d fund_series=%d confirmed_adjusted=%d confirmed_not=%d nothing_to_test_on=%d three_sum=%d disagreements_with_round_71=%d measured_account_days=%d'%(n['funds'],n['dates'],n['dates_below'],d['fund_series'],d['confirmed_adjusted'],d['confirmed_not'],d['nothing_to_test_on'],d['confirmed_adjusted']+d['confirmed_not']+d['nothing_to_test_on'],len(d['against_round_71']['disagreements']),d['reach']['measured_account_days']))\"",
+   "expect": "REINVESTMENT-PRICE-CHECK nine_funds=9",
+   "output_evidence": "REINVESTMENT-PRICE-CHECK nine_funds=9 nine_dates=92 nine_below=87 fund_series=270 confirmed_adjusted=19 confirmed_not=15 nothing_to_test_on=236 three_sum=270 disagreements_with_round_71=0 measured_account_days=712 (rc 0)",
+   "denominator": "nine of nine funds reproduced (92 dates, 87 below, lowest ratio 0.47); 270 of 270 fund series carry one of three readings (19 + 15 + 236); 0 disagreements with round 71; reach on 19 confirmed series: 261,182 priced rows, 712 distinct measured account-days",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB72bt1-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: no vendor series enters the reading; the rule for \"confirmed\" was stated before the run and kept; too few dates reads nothing_to_test_on, never confirmed_not; every disagreement with round 71 is listed; the reach is counted on the confirmed set only.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read REINVESTMENT_PRICE_CHECK.json (rule, against_round_71, other_kinds, reach, not_established, sensitivities), REINVESTMENT_PRICE_CHECK.md and the two csv files",
+   "output_evidence": "inputs are the build price table and the custodian transactions only (dvr rows, amount over shares); rule written to a file with clock stamp 2026-10-11T18:37:42Z after the nine were reproduced and before the whole-table run, kept unchanged, alternatives reported beside; series with under 5 usable dates read nothing_to_test_on (32) and no series with too few dates reads confirmed_not; disagreements with round 71: none (list empty by the stated definition), the 53 round-71-adjusted series not readable here are listed; reach counted on the 19 confirmed series only",
+   "denominator": "270 fund series (19 / 15 / 236); round 71 groups 72 / 1 / 124 / 73; ETF 276 and Equity 934 counted separately",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~119/ADVI_COTBKF.TO-CB-bt-1.reinvestment-price-check.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB72bt1-AC1)",
+   "result": "REINVESTMENT-PRICE-CHECK nine_funds=9 nine_dates=92 nine_below=87 fund_series=270 confirmed_adjusted=19 confirmed_not=15 nothing_to_test_on=236 three_sum=270 disagreements_with_round_71=0 measured_account_days=712"
+  }
+ ]
+}
