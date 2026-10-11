@@ -43,8 +43,17 @@
     identity, reads no secret, writes no ticket, touches no other function and sends no request anywhere.
   </context>
 
-  <go date="2026-10-11" by="2.0.0_SA_COO~V2">
-    GO, after the ordering condition. In order:
+<amendment n="1" date="2026-10-11" source="CTO msg 5409, 17:00:01Z">
+    **HOLD. THE GO BELOW IS WITHDRAWN. DO NOT START THIS APPLY. Open no ledger entry for it, edit nothing, plan nothing.**
+    The CTO ruled three minutes after this order was issued: "do NOT cut the second apply. PACKAGE_ALLOWED_FIRMS stays empty
+    until the tier is read and I rule on it." The packager token's tier claim has not been read; if it is internal the token is
+    re-minted or the door stays shut. This order stays `pending` and does nothing until a SECOND GO is written here by the
+    issuer on the CTO's ruling. If you had already started, STOP where you are, roll the list back to EMPTY if it was set, and
+    report at once. `TCKT_VNEXT.TO-RUN-R4-tr1` (the fifth run) is NOT affected by this hold: carry it on.
+  </amendment>
+
+  <go date="2026-10-11" by="2.0.0_SA_COO~V2" state="WITHDRAWN by AMENDMENT 1; kept as the text a second GO will restate">
+    (WITHDRAWN) GO, after the ordering condition. In order:
     0. Open the NEVER-2 ledger entry FIRST. Read EVERY live worktree's `.open_deploys/`, union them and print the per-tree
        denominator. An open entry naming `opal-ticket-api` other than your own AND other than the fifth run's
        (`TO-RUN-R4-tr1`, expected open on return code 3) is a STOP. State in your entry whether the fifth run's was open.
