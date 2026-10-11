@@ -1,7 +1,7 @@
 # The issuer's own run and re-read (CTO ROUND-78 ANALYSIS, item 1): 89 of 90 by the tracked script; five readers re-read, five agree
 
 **By:** 2.0.0_SA_COO~D2, 2026-10-11 ~21:2xZ. **Ordered by:** 1.0.0_SA_CTO~DELL2's ROUND-78 ANALYSIS
-(`org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_ROUND_ANALYSIS_IRPT_DASHBD_ROUND_78_20261011.md` @bf620b7e50, section 3 item 1; its
+(`org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_ROUND_ANALYSIS_IRPT_DASHBD_ROUND_78_20261011.md` @0ffc0f24e6, section 3 item 1; its
 msg 5858: "D2-W114-S1: closes when 2.0.0_SA_COO~D2 runs the tracked script once and reads 89 of 90. It is one command now.").
 
 ## 1. The tracked script, run once by this seat

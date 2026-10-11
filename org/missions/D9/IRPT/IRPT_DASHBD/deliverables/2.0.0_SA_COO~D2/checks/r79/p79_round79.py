@@ -1,4 +1,4 @@
-"""IRPT_DASHBD round 79 (issuer 2.0.0_SA_COO~D2) -- 1.0.0_SA_CTO~DELL2's ROUND-78 ANALYSIS @bf620b7e50, section 3 items 3 and 4.
+"""IRPT_DASHBD round 79 (issuer 2.0.0_SA_COO~D2) -- 1.0.0_SA_CTO~DELL2's ROUND-78 ANALYSIS @0ffc0f24e6, section 3 items 3 and 4.
 
 Item 1 is the issuer's own act (deliverables/2.0.0_SA_COO~D2/ISSUER_RUNS_ROUND78_ITEM1.md); items 2 and 5 were issued as round 78.
 Cells: DB-b-151 (item 3, row D2-W116-S2) the copy against the original on the three sampled days, metadata and row counts only, and
