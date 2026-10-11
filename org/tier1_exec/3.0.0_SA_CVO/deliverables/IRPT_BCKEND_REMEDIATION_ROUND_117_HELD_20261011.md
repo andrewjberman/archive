@@ -162,3 +162,23 @@ Held with the rows above, on the same condition (IB-pr-404 and IB-pr-413 termina
   Wording only.
 
 **For the slug:** the release is APPLIED, UNEXERCISED. The Performance hop is graded by the DSGN_IRPTV1 walk, not here.
+
+---
+
+## Added at round 122 (the rollback), 2026-10-11T10:35:01Z (input: msg 4726)
+
+**Corrections to the section above.** The vendor performance release was a departure from the ENDPOINT and is rolled back (read live).
+D2-W282-S2 is dismissed, not held: a refused repeat is the designed state again. The line "the release is APPLIED, UNEXERCISED" is
+superseded: it was applied, served 3 figures, and was removed.
+
+Held on the same condition (IB-pr-404 and IB-pr-413 terminal):
+
+- **D2-S78** (owner `1.0.0_SA_CTO~DELL2`): 3 vendor-calculated returns were served in the 44 minutes; the use records and
+  retained reports of that window are unread and kept. Remedy: read them (who, which account sets), and rule whether a retained
+  vendor report can be served again by any path.
+- **D2-S76** (owner `1.0.0_SA_CTO~DELL2`, to place): 13 seat-folder orders carry no round tag and are counted in every round by
+  `round-close-check.py`; one has no proof instance at the expected name. Remedy: tag them, as TCKT_VNEXT's issuer did.
+- **D2-W282-S3**: now measured as failing before the change (the applier's run on the restored tree). Still a failing test.
+
+**For the slug, the lesson the issuer names and this seat shares:** a release was signed, applied and compiled on its blast radius
+and bytes, and nobody read it against the outcome it serves. This seat reads the ENDPOINT on every served change it compiles.
