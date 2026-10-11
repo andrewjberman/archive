@@ -1,0 +1,13 @@
+TO-FB-f-12 read-backs, 0.7.0_AE_CloudOps~FBL, 2026-10-11 ~11:2xZ (user/Andrew_Berman)
+APPLY 1 11:14:37Z-11:15:15Z (saved five-address plan, no override): naming plan limb PASS 4 graded (2 RULED, 2 CONFORMANT). Created: opal-sms-delivery-status-role, its policy, the 2 log groups. Then aws_sns_sms_preferences.account: SetSMSAttributes 403 AuthorizationError: Andrew_Berman not authorized to perform iam:PassRole on the new role. Half-landed: 4 inert objects in state, SMS preferences unchanged.
+DIAGNOSIS (read-only): simulate-principal-policy iam:PassRole on the role, PassedToService=sns.amazonaws.com -> allowed (AdministratorAccess); control on an existing role -> allowed; no permission boundary; user inline policies are two s3:ListBucket Allows; no explicit Deny found. Not proven; the likely cause is IAM propagation of a role created seconds earlier.
+APPLY 2 11:17:50Z (fresh targeted plan: 1 create + 4 no-op): Apply complete! 1 added, 0 changed, 0 destroyed. Same command, no change of identity, no override.
+AC1 iam get-role trust Principal.Service -> sns.amazonaws.com
+AC2 sns get-sms-attributes DeliveryStatusIAMRole -> arn:aws:iam::313476888478:role/opal-sms-delivery-status-role
+AC3 DeliveryStatusSuccessSamplingRate -> 0
+AC4 describe-log-groups prefix sns/us-east-1/313476888478/DirectPublishToPhoneNumber logGroups[0].retentionInDays -> 14 (both groups 14)
+All SMS attributes now: DeliveryStatusIAMRole (new), DeliveryStatusSuccessSamplingRate 0 (new), MonthlySpendLimit 50 (byte-equal to the pre-act read). DefaultSMSType, UsageReportS3Bucket: still unset, as before.
+Role policy: one inline policy, Allow logs:CreateLogGroup, CreateLogStream, PutLogEvents, PutMetricFilter, PutRetentionPolicy on log-group:sns/us-east-1/313476888478/DirectPublishToPhoneNumber* only; no attached managed policies.
+POST-APPLY FULL plan: 358 resource_changes, 357 no-op, 1 create = aws_secretsmanager_secret_version.eclipse_jwt_initial (waived by amendment 1, not applied, not read; row S15). Before: 358, 352 no-op, 6 create. Nothing else.
+No test SMS sent; no sns publish. Reason lines will appear in CloudWatch Logs group sns/us-east-1/313476888478/DirectPublishToPhoneNumber/Failure on the next organic publish that fails; the CTO reads the first one.
+Seat gate note: safe-apply printed CROSSBOX-DEPLOY verdict=STOP in WARN mode (open_call: XB-20261011T085819Z-cb1e names inf-pipeline, state ACKED); WARN never blocks; that order is this act's own carrier.
