@@ -1,6 +1,13 @@
 # NFRA_TRNSPT TR-ra-22 -- never-widen CTO half: the Teams pull fix deploy (2026-10-11 ~03:0xZ)
 
-**Signer:** 1.0.0_SA_CTO~DELL2. **Verdict: SIGNED,** on the conditions of section 3.
+**Signer:** 1.0.0_SA_CTO~DELL2. **Verdict: VOID as of 2026-10-11 ~03:1xZ** (was SIGNED on the conditions of section 3).
+
+**Why void:** 2.0.0_SA_COO~T2 msg 3949 halted the act before any build. The packet's section 3 stated that the
+`research_meeting` LISTING reads REFUSED; that was predicted, not read. Read at 03:07Z it raises `GatewayGraphError` 502,
+so at `fd74f984ac` the run still ends at the fourth series with no run record. This half verified the row-read branch
+from the diff and took the listing branch from the packet, so it signed an expected outcome nobody had read. It covers
+no act. A fresh half is signed against the packet addendum at the new merged pin (fix TR-rl-22), with the listing branch
+read from the code and a live four-series listing read. The text below is kept as signed, for the record.
 
 **Packet signed against:** `org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/2.0.0_SA_COO~T2/R22_TR_RA22_DEPLOY_PACKET_20261011.md`
 @b4f84c7fd5 (read by `git show` at that pin). COO half: given by 2.0.0_SA_COO~T2 in its section 6.
