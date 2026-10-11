@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-nn-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-nn-4.the-mass-deletion-gate-audits-to-the-shared-tree.md",
+    "group": "OTHER",
+    "vintage_commit": "16d359ecc320abc28aa7fb46360429981c21fc07"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "16d359ecc320abc28aa7fb46360429981c21fc07",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-nn-4.the-mass-deletion-gate-audits-to-the-shared-tree.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~352",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/git-hooks/mass-deletion-check.sh",
+      "kind": "script",
+      "commit_or_etag": "a51ccfeed8cc6d693b2c033e6bc0f0007c67ac19",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AUDIT_ROOT is the common dir's parent, taken only when that parent holds a .git entry (amendment 1: a submodule's common dir <super>/.git/modules/<name> has a parent that is not a worktree and falls back to ROOT). _audit() writes to AUDIT_ROOT for both the mkdir and the append. Nothing else changed: the deletion count, the attribution test, the mode logic, the exit codes and the printed text are untouched. Exercised by the R89 audit-root check (AC1, arms A1-A4) and the --mode self-check (AC2). Local hook; no deploy, no store write.",
+      "introduces": [
+        "$_GCD_PARENT/.git"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PASS A1 (a warn-mode verdict from a linked worktree leaves its row in the shared tree after the worktree is removed), PASS A2 (block mode: exit 1 and a BLOCKED row in the shared tree), PASS A3 (a deletion from the main worktree leaves its row in the main tree), PASS A4 (a submodule commit's row lands in a worktree, never under <super>/.git/modules); R89 AUDIT ROOT: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_audit_root.sh\" --hook \"$(pwd)/.tools/git-hooks/mass-deletion-check.sh\"; echo \"exit=$?\"",
+      "output_evidence": "   linked worktree: warn rc=0 block rc=1 | main-tree rows after removal: WARNED=1 BLOCKED=1\nPASS A1 warn-mode verdict from a linked worktree leaves its row in the shared tree after the worktree is removed\nPASS A2 block-mode: exit 1 and a BLOCKED row in the shared tree\n   main worktree: warn rc=0 rows WARNED=1\nPASS A3 control: a deletion from the main worktree leaves its row in the main tree\n   submodule: warn rc=0 | rows under <super>/.git/modules: 0 | rows in the submodule or superproject tree: 1\nPASS A4 a submodule commit's row lands in a worktree, never under <super>/.git/modules\nR89 AUDIT ROOT: YES\nexit=0",
+      "denominator": "4 of 4 checks PASS (A1, A2, A3, A4); exit 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the script parses (bash -n rc 0), `--mode` prints the gate's ramp state and threshold 25, and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash -n .tools/git-hooks/mass-deletion-check.sh && bash .tools/git-hooks/mass-deletion-check.sh --mode; echo \"exit=$?\"",
+      "output_evidence": "bash-n rc=0\nmass-deletion gate\n  now              : 2026-10-11T03:47:51Z\n  ramp flips at    : 2026-07-11T19:30:00Z\n  MASS_DELETE_MODE : <unset, date-driven>\n  effective mode   : block\n  threshold        : 25 deleted tracked files\nexit=0",
+      "denominator": "2 of 2 sub-checks (bash -n rc 0; --mode threshold 25 printed); exit 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutants through the same AC1 check: the first-fix hook (46b12bd496, no .git-entry guard), measured this session before amendment 1 (A4 FAIL, row under <super>/.git/modules); and the unadopted base hook (16d359ecc3, _audit() still writing to ROOT), measured in the prior instance (A1 and A2 FAIL).",
+      "expected": "first-fix: A4 FAIL and R89 AUDIT ROOT: NO; base: A1 and A2 FAIL and R89 AUDIT ROOT: NO; both exit 1",
+      "observed": "first-fix 46b12bd496: submodule: rows under <super>/.git/modules: 1 | in the submodule or superproject tree: 0; FAIL A4; R89 AUDIT ROOT: NO; exit=1 (A1-A3 PASS). base 16d359ecc3 (prior instance): FAIL A1; FAIL A2; PASS A3; R89 AUDIT ROOT: NO; exit=1 (main-tree rows after removal WARNED=0 BLOCKED=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of AC1 against the amended hook (a51ccfeed8), in this session, compared line for line",
+      "observed": "both runs: linked worktree warn rc=0 block rc=1, main-tree rows WARNED=1 BLOCKED=1; main worktree warn rc=0 rows WARNED=1; submodule warn rc=0 rows under .git/modules 0, in the submodule or superproject tree 1; PASS A1, PASS A2, PASS A3, PASS A4; R89 AUDIT ROOT: YES; exit=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The <status> flip of AMGT_RESAPP.TO-AMGT-nn-4 to complete",
+      "reason": "The order states the status flip is the issuer's (2.0.0_SA_COO~R1), not the worker's."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W352-S1: a submodule commit's common dir is <superproject>/.git/modules/<name>, so the first-fix AUDIT_ROOT resolved to <superproject>/.git/modules. Resolved in the amended hook at a51ccfeed8 (the .git-entry guard); the row itself is unchanged and remains for the disarm owner 2.0.0_SA_COO~R1 to disposition."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "bash -n",
+      "invocation": "bash -n .tools/git-hooks/mass-deletion-check.sh",
+      "result": "rc 0, no output"
+    },
+    {
+      "tool": "r89_audit_root.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_audit_root.sh --hook <worktree>/.tools/git-hooks/mass-deletion-check.sh",
+      "result": "R89 AUDIT ROOT: YES, exit 0 (amended hook at a51ccfeed8); R89 AUDIT ROOT: NO, exit 1 (first-fix hook at 46b12bd496, A4 FAIL)"
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_ENFORCE.TO-EN-ac-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/prd/LGIC_ENFORCE_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "bb91059bfb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/decompositions/LGIC_ENFORCE_DECOMP.md",
+    "vintage_commit": "bb91059bfb",
+    "to_ref": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-ac-1.gate-reads-rename-and-running-name.md"
+  },
+  "assignee": "0.9.0_WK_LGIC_ENFORCE~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/naming-gate.py",
+      "kind": "script",
+      "commit_or_etag": "75bd033fa7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate; no deploy scope (risk LOCAL); commits 810f245ca9 (first cut) and 75bd033fa7 (declared-type match)",
+      "artifact_covered_by": [
+        "AC1R23-AC1",
+        "AC1R23-AC2",
+        "AC1R23-AC3",
+        "AC1R23-AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/gate-rename-and-running-name.r23.result.md",
+      "kind": "doc",
+      "commit_or_etag": "d9dcb0b9e2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "result record; repo document",
+      "artifact_covered_by": [
+        "AC1R23-AC1",
+        "AC1R23-AC2",
+        "AC1R23-AC3",
+        "AC1R23-AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1R23-AC1",
+      "criterion_verbatim": "AC1R23-AC1 -- a staged rename of a file holding an OUT-OF-PATTERN firm-spelled name goes through the practice copy's real save check with no REFUSE and at least one literal graded; the same bytes staged as a COPY are refused (the arm's difference control).",
+      "method": "command",
+      "invocation": "timeout 1500 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~L1/fixed_inputs/r23/check_en_r23.py rename",
+      "output_evidence": "rename: rc=0 WARN 1 graded | ['NAMING OUT-OF-PATTERN infra/aws/terraform/zz-r23-probe/zz_probe.tf:2 bd-zz-r23-probe-role -> {system}-49f-zz-r23-probe-role']\ncopy:   rc=1 REFUSE | ['NAMING REFUSE infra/aws/terraform/zz-r23-probe/zz_probe_copy.tf:2 bd-zz-r23-probe-role -> {system}-49f-zz-r23-probe-role']\nPASS-R23-RENAME\nrc=0",
+      "denominator": "2 of 2 arms at 75bd033fa7: the rename arm 1 of 1 renamed file graded (1 literal, WARN, not REFUSE, rc=0); the copy control 1 of 1 REFUSE (rc=1)",
+      "status": "PASS",
+      "expect": "PASS-R23-RENAME"
+    },
+    {
+      "criterion_id": "AC1R23-AC2",
+      "criterion_verbatim": "AC1R23-AC2 -- a declaration of a name the live plane holds (picked at run time, OUT-OF-PATTERN, firm spelling bd) is admitted with RUNNING-LIVE, the node type and the vintage date in its why text and no LIVE-READ-FAILED; a name running nowhere is refused as NEW and ... exactly as today (the arm's difference control).",
+      "method": "command",
+      "invocation": "timeout 1500 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~L1/fixed_inputs/r23/check_en_r23.py adopt",
+      "output_evidence": "live pick: bd-49f-auto-login (IAM_POLICY); vintage 2026-10-11 02:14:17 UTC\nadopt:  rc=0 WARN 1 graded | [\"NAMING OUT-OF-PATTERN infra/aws/terraform/zz-r23-probe/zz_adopt.tf:2 bd-49f-auto-login -> blackdiamond-49f-auto-login-policy |   why: EXISTING, touched, and OUT-OF-PATTERN as IAM_POLICY: WARN; hand-kept carrier of 'bd' outside every permitted context: read it through lookup('49financial'); RUNNING-LIVE IAM_POLICY 'bd-49f-auto-login' read from the live plane, Built from the estate as of 2026-10-11 02:14:17 UTC. Stitch source: stitch-codebuild built 2026-10-10T03:01:04Z.  manifest: b348aea09b23: EXISTING, not minted by this diff\"]\nabsent: rc=1 | [\"NAMING REFUSE infra/aws/terraform/zz-r23-probe/zz_adopt.tf:2 bd-zz-r23-notrunning-policy -> {system}-49f-zz-r23-notrunning-policy |   why: NEW and OUT-OF-PATTERN as IAM_POLICY: REFUSE; hand-kept carrier of 'bd' outside every permitted context: read it through lookup('49financial')\"]\nPASS-R23-ADOPT\nrc=0",
+      "denominator": "2 of 2 declarations at 75bd033fa7: the held name 1 of 1 literal admitted WARN with RUNNING-LIVE IAM_POLICY, the vintage date and no LIVE-READ-FAILED; the absent name 1 of 1 literal REFUSE as NEW (rc=1)",
+      "status": "PASS",
+      "expect": "PASS-R23-ADOPT"
+    },
+    {
+      "criterion_id": "AC1R23-AC3",
+      "criterion_verbatim": "AC1R23-AC3 -- the AC2 declaration with the live read unreadable (the practice copy's comp-find exits 3) and again with a read that prints no vintage is REFUSED, the why text carries LIVE-READ-FAILED and never RUNNING-LIVE.",
+      "method": "command",
+      "invocation": "timeout 1500 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~L1/fixed_inputs/r23/check_en_r23.py closed",
+      "output_evidence": "undated: rc=1 | [\"NAMING REFUSE infra/aws/terraform/zz-r23-probe/zz_adopt.tf:2 bd-49f-auto-login -> blackdiamond-49f-auto-login-policy |   why: NEW and OUT-OF-PATTERN as IAM_POLICY: REFUSE; hand-kept carrier of 'bd' outside every permitted context: read it through lookup('49financial'); LIVE-READ-FAILED: CensusError: the live pull printed no vintage or no denominator\"]\nunreadable: rc=1 | [\"NAMING REFUSE infra/aws/terraform/zz-r23-probe/zz_adopt.tf:2 bd-49f-auto-login -> blackdiamond-49f-auto-login-policy |   why: NEW and OUT-OF-PATTERN as IAM_POLICY: REFUSE; hand-kept carrier of 'bd' outside every permitted context: read it through lookup('49financial'); LIVE-READ-FAILED: CensusError: the live pull did not scan every node type (rc=3):\"]\nPASS-R23-CLOSED\nrc=0",
+      "denominator": "2 of 2 failed-read stubs at 75bd033fa7 (unreadable: comp-find exit 3; undated: VINTAGE UNREAD): each 1 of 1 literal REFUSE (rc=1) with LIVE-READ-FAILED and 0 with RUNNING-LIVE",
+      "status": "PASS",
+      "expect": "PASS-R23-CLOSED"
+    },
+    {
+      "criterion_id": "AC1R23-AC4",
+      "criterion_verbatim": "AC1R23-AC4 -- python .tools/naming-gate.py --self-test prints a rename arm and an adopt arm, each ok, and ends PASS.",
+      "method": "command",
+      "invocation": "timeout 900 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~L1/fixed_inputs/r23/check_en_r23.py selftest",
+      "output_evidence": "self-test: rc=0 arms=39 rename=2 adopt=5\nPASS-R23-SELFTEST\nrc=0",
+      "denominator": "39 SELF-TEST lines at 75bd033fa7: rename 2 of 2 ok, adopt 5 of 5 ok, 0 FAIL; NAMING-GATE-SELF-TEST: PASS rc=0",
+      "status": "PASS",
+      "expect": "PASS-R23-SELFTEST"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The name-only live lookup (the first cut at 810f245ca9: the declared type ignored), run in memory through the adopt self-test arm by replacing _live_holder; the repo is not written",
+      "expected": "the adopt arm's wrong-type control (the plane holds the name only as EC2_INSTANCE) FAILs",
+      "observed": "SELF-TEST arm adopt wrong-type control ... -> OUT-OF-PATTERN WARN: FAIL; the mutant adopt arm returned False. AC1R23-AC2 alone does not catch this mutant: its first run at 810f245ca9 printed RUNNING-LIVE EC2_INSTANCE and PASS (surprise S6)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of python .tools/naming-gate.py --self-test at 75bd033fa7, output diffed",
+      "observed": "identical SELF-TEST lines and NAMING-GATE-SELF-TEST: PASS in both runs; the only difference was the rc= trailer appended to the first saved log",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "python -m pytest lib/tests/test_opal_naming_fourth_verdict.py -q -p no:cacheprovider as a standing bar",
+      "reason": "the file defines no test_ functions and collects 0 tests (rc=5); it is a mode-script run from __main__; the bar cannot fail under pytest (surprise LGIC_ENFORCE-D1-W1-S5)"
+    },
+    {
+      "item": "grade(), lib/opal_naming.py, infra/logic/registry/, .tools/safe-commit.sh, .tools/naming-apply-gate.py, org/mcp/naming-gate.enforce, org/mcp/naming-place.enforce and the check file",
+      "reason": "not edited: outside the order's grant and its BOUNDS"
+    }
+  ],
+  "surprises": [
+    "LGIC_ENFORCE-D1-W1-S3: the live read trigger is narrowed to NEW literals whose branch would refuse (a carrier, or a typed name graded OUT-OF-PATTERN or ALIAS), not every NEW typed literal as the cell's parenthetical reads; verdicts are identical under either reading.",
+    "LGIC_ENFORCE-D1-W1-S4: the census plane holds one name under two node types, so the live lookup now matches the declared type; a name-only lookup admitted an IAM_POLICY declaration on an EC2_INSTANCE's name.",
+    "LGIC_ENFORCE-D1-W1-S5: the standing bar pytest on lib/tests/test_opal_naming_fourth_verdict.py collects no tests (rc=5), so the bar is vacuous under pytest.",
+    "LGIC_ENFORCE-D1-W1-S6: the adopt criterion's type token is also printed by the verdict text, so AC1R23-AC2 passed on the first cut's wrong-type RUNNING-LIVE line."
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/gate-rename-and-running-name.r23.result.md",
+  "compiler_tools": [
+    {
+      "tool": "naming-gate.py --self-test",
+      "invocation": "python .tools/naming-gate.py --self-test",
+      "result": "NAMING-GATE-SELF-TEST: PASS rc=0 at 75bd033fa7 (39 SELF-TEST lines, the two new arm groups all ok)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit gate: py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_LGIC_ENFORCE~1 <0.9.0_WK_LGIC_ENFORCE~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "first attempt blocked on ruff E731 (two lambda assignments), fixed; 810f245ca9 and 75bd033fa7 rc 0; d9dcb0b9e2 rc 0; all LOCAL"
+    }
+  ]
+}

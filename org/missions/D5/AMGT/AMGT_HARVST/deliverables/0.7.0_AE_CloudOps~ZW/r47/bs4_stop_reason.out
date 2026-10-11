@@ -1,0 +1,81 @@
+HVST-bs-4 step 8 (AMENDMENT 1, row AMGT_HARVST-Z-S109): the verbatim stop reason.
+READ AT: 2026-10-11T03:5xZ
+CHECKPOINT: C:\Users\Opal Bloomberg\Desktop\ajb_workspace\.runtime\harvest-backfill\r47_sa_checkpoint.json
+SUMMARY:    C:\Users\Opal Bloomberg\Desktop\ajb_workspace\.runtime\harvest-backfill\r47_sa_checkpoint.run_summary.json
+
+=== 1. THE CHECKPOINT'S OWN `stopped` MAP, VERBATIM ===
+{
+  "sa": "error"
+}
+
+That is the whole map. The checkpoint records the stop STATUS and no detail; it does not use the words
+"transport-class" either way. The classification below comes from the driver's own rule, not from here.
+
+=== 2. THE RUN SUMMARY'S STOP FIELDS, VERBATIM ===
+"interrupted": false
+"stopped_by_operator": false
+"stopped_by_operator_at": "2026-10-07T06:34:43.437201+00:00"
+"cleared_stops": [
+    {
+      "publisher": "sa",
+      "status": "account_or_harvester_unavailable",
+      "at": "2026-10-06T20:03:29.694346+00:00"
+    }
+  ]
+publishers.sa.stopped: "error"
+publishers.sa.retry_statuses: { "error": 3 }
+publishers.sa.collected: 134   pairs_done: 134   pairs_planned: 242
+publishers.sa.retry: 3   gave_up: 1   never_started: 104
+started_at:  "2026-10-09T08:54:32.400298+00:00"
+finished_at: "2026-10-09T09:59:40.846613+00:00"
+
+=== 3. THE RUN SUMMARY'S UPLOAD-FAILURE FIELDS, VERBATIM ===
+"uploads": {
+    "count": 4,
+    "failed": 4
+  }
+"articles_stored": 5722
+
+All four uploads of that session failed. 5722 articles were stored locally by the collected pairs.
+
+=== 4. THE CHECKPOINT'S RETRY AND GAVE_UP ROWS, VERBATIM ===
+"retry": {
+  "sa|security-7f05ac6ae2894d23": { "attempts": 1, "last_status": "error", "last_run_id": null, "at": "2026-10-09T09:59:39.858783+00:00" },
+  "sa|security-bef57f862b5eee5d": { "attempts": 1, "last_status": "error", "last_run_id": null, "at": "2026-10-09T09:59:40.011366+00:00" },
+  "sa|security-68ccbb159ab3ee19": { "attempts": 1, "last_status": "error", "last_run_id": null, "at": "2026-10-09T09:59:40.389192+00:00" }
+}
+"gave_up": {
+  "sa|security-e62f47b923e0af71": { "attempts": 3, "reason": "upstream_unavailable", "last_run_id": "20261008T221006Z-run-8d0400be", "at": "2026-10-08T22:12:23.628257+00:00" }
+}
+"operator_stops": [ { "at": "2026-10-07T06:34:43.437201+00:00", "stop_file": ".runtime\harvest-backfill\R47_STOP_SA", "done": 44 } ]
+"auto_resumes": 6 rows, the last two at 2026-10-09T09:59:39Z and :40Z, each status "error", n 1
+
+=== 5. CLASSIFICATION, AND WHICH SOURCE SAYS IT (step 2 requires naming this) ===
+TRANSPORT-CLASS: YES, by THE DRIVER'S OWN RULE, quoted verbatim from
+.runtime\harvest-backfill\r47_sa_run2.out lines 117 and 121:
+  "RESUME sa: error is a transport-class stop; resuming after the collector cooldown (1 of 2)"
+  "RESUME sa: error is a transport-class stop; resuming after the collector cooldown (2 of 2)"
+then line 125: "STOP sa: error".
+The leg therefore stopped because it EXHAUSTED its --auto-resume-transient 2 budget on a status its own
+code classifies as transport-class, not because it hit a class it refuses to retry. The checkpoint's
+`stopped` map (section 1) carries the status alone and names no class, so the driver's rule is the only
+source that answers step 8's question, and it answers it TRANSPORT-CLASS. --clear-stop is therefore
+authorized by step 2's condition.
+
+=== 6. WHAT THE LABEL DOES NOT EXPLAIN -- for the issuer, filed as a row, not a reason to hold ===
+The failing pairs' own evidence does not look like an upstream transport fault, and the mechanism matters
+for whether a same-argv relaunch can succeed. Verbatim, r47_sa_run2.out lines 113-125:
+  UPLOAD sa security-0490fed402f54a29 cap=209 rc=3221225794
+  JOB sa security-7f05ac6ae2894d23 status=error run_id=None stored=0
+  UPLOAD sa security-7f05ac6ae2894d23 cap=209 rc=3221225794
+  UPLOAD sa security-bef57f862b5eee5d cap=209 rc=3221225794
+  UPLOAD sa security-68ccbb159ab3ee19 cap=209 rc=3221225794
+rc 3221225794 is 0xC0000142, the Windows STATUS_DLL_INIT_FAILED -- a process that could not INITIALIZE,
+which is a LOCAL box condition, not a network one. `run_id=None` on all three retry rows agrees: the
+collector produced no run record at all, so there was no upstream conversation to fail. The driver's
+"transport-class" label and the measured rc point at different mechanisms, and the label is a producer
+self-report.
+The condition appears to have CLEARED since: the live bbg cycle is collecting now, and its uploads read
+rc=0 (cycle_runner.log 2026-10-11T02:41:47Z, "UPLOAD bbg security-de87a5f8b93104df cap=1 rc=0").
+That is why this relaunch is being attempted rather than withheld, and why its first lines are read
+before anything is claimed.

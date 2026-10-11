@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-t13",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t13.mdaily-runner-slice-read.md",
+    "group": "OTHER",
+    "vintage_commit": "d08867926c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "d08867926c",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t13.mdaily-runner-slice-read.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_HEALGAP~10",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~10/MDAILY_RUNNER_SLICE_READ.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: a document; read-only AWS calls; no deploy, no send, no invoke",
+      "artifact_covered_by": [
+        "HG3-t13-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG3-t13-AC1",
+      "criterion_verbatim": "the document carries the four lines in their grammar and every grounded path exists.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t13_read.py",
+      "output_evidence": "READ-OK verdict=RUNS-SLICE noop=UNKNOWN (rc=0, run twice)",
+      "denominator": "4 of 4 grammar lines present (DENOMINATOR n=6 >= 1, VERDICT, NOOP, GROUNDING); 9 of 9 GROUNDING path:line cites name paths that exist (3 distinct paths)",
+      "status": "PASS",
+      "expect": "READ-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the check was run from the worktree root before the instance was written and again after the row-id correction",
+      "observed": "READ-OK verdict=RUNS-SLICE noop=UNKNOWN on each run, rc=0",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "A scratch copy of the document with the VERDICT line removed (.scratch/mut_noverdict.md, uncommitted), run through the check's HG_T13_DOC override.",
+      "expected": "READ-BAD naming the missing VERDICT line, rc=1",
+      "observed": "READ-BAD no 'VERDICT: RUNS-SLICE|NO-SLICE' line; mutant-rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any AWS write, Lambda invoke, SSM send, instance start, vendor call",
+      "reason": "order BOUNDS; only s3 ls, s3api head-object and s3api list-objects-v2 reads were made; the mdpf-daily-runner EC2 was not contacted and no EC2 describe was made"
+    },
+    {
+      "item": "the NOOP bytes question",
+      "reason": "recorded as NOOP: UNKNOWN with its reason and the read that would answer it (a served-object GET diffed against a rebuild with the date held fixed); the refusal clause of the order applies"
+    }
+  ],
+  "surprises": [
+    "MDPF_HEALGAP-D1-W10-S1: the EC2 6d block also rewrites one cottonwood gold dim partition (dispatch :554) before the slice step; the row's world_is names only the slice",
+    "MDPF_HEALGAP-D1-W10-S2: NOOP for the EC2 slice re-publish is UNKNOWN; the served bytes were not compared with a same-inputs rebuild"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~10/MDPF_HEALGAP.TO-HG-t13.mdaily-runner-slice-read.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "comp-read (single named file, no pipe)",
+      "invocation": "comp-read data/assets/scripts/gold/build_cottonwood_mdpf_slice.py --for <question on writes and keys>",
+      "result": "31 sections, 1512 lines shown in outline; main() at :1491-1508 and the put at :1501 read directly with Read"
+    },
+    {
+      "tool": "aws read-only (.tools/aws)",
+      "invocation": "s3 ls code/scripts/assets_gold/; s3api head-object on the staged slice, on the served slice key, and on the newest gold dim partition; s3api list-objects-v2 on blackdiamond/cottonwood/gold/dim_model_portfolio/",
+      "result": "staged slice 88273 B ETag 2d9b120affde04e98a42271d6740deb6; served slice LastModified 2026-10-10T13:31:08Z; newest dim partition date=2026-10-10 LastModified 2026-10-10T13:30:39Z"
+    },
+    {
+      "tool": "md5sum",
+      "invocation": "md5sum data/assets/scripts/gold/build_cottonwood_mdpf_slice.py",
+      "result": "2d9b120affde04e98a42271d6740deb6, equal to the staged S3 ETag"
+    }
+  ]
+}

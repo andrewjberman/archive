@@ -29,8 +29,10 @@ homes   (CN-c-2, ruling 3417 conditions 1 and 2; AMENDMENT 2 = ruling 3431: the 
               test reproduces the committed bytes exactly.
   2 CLEAN     the test module's mismatches(path) returns [] on the real file.
   3 NEGATIVE  the same function returns a non-empty list on a copy with one entry altered.
-libs    (CN-c-2, ruling 3431) the generator's own proofs: lib/tests/test_opal_naming.py green; check_en_r2.py r6-declared-moves PASS
-        (the new target's registry files are declared and moving one moves its mark); check_en_r2.py r6-delta0-ordered PASS.
+libs    (CN-c-2, rulings 3431 and 3457) the generator's own proofs, 5 arms: lib/tests/test_opal_naming.py green; `validate` exits 0
+        (the registry edit carries its own validate run); `targets` exits 0 (every target classified); check_en_r2.py
+        r6-declared-moves PASS (the new target's registry files are declared and moving one moves its mark); check_en_r2.py
+        r6-delta0-ordered PASS.
   (check_en_r2.py r6-headers-current, r6-undeclared-inert and r6-reproduces read FAIL at the base for reasons that predate this
   project -- row MDPF_CANON-D1-S11 -- and are not asked of this cell.)
 reader  (CN-c-3, M4 slice 1) data/mdpf/scripts/gold/build_mdpf_wsc_inflection_feeder.py
@@ -206,6 +208,13 @@ def libs():
         arm("TESTS", r.returncode == 0 and "passed" in tail[0] and "failed" not in tail[0], "pytest rc=%d: %s" % (r.returncode, tail[0][-100:]))
     except Exception as e:
         arm("TESTS", False, "%s: %s" % (type(e).__name__, str(e)[:100]))
+    for name, args in (("VALIDATE", ["validate"]), ("TARGETS", ["targets"])):
+        try:
+            r = run([sys.executable, "-I", os.path.join(ROOT, "lib", "opal_naming.py")] + args, 240)
+            arm(name, r.returncode == 0, "lib/opal_naming.py %s rc=%d%s" % (args[0], r.returncode,
+                "" if r.returncode == 0 else ": " + ((r.stdout or "") + (r.stderr or "")).strip()[-120:]))
+        except Exception as e:
+            arm(name, False, "%s: %s" % (type(e).__name__, str(e)[:100]))
     for name, sub in (("DECLARED", "r6-declared-moves"), ("DELTA0", "r6-delta0-ordered")):
         try:
             r = run([sys.executable, "-I", os.path.join(REPO, CHECK_EN_R2), sub], 400)
