@@ -95,6 +95,21 @@
     ONE run. A second run needs a new GO.
   </go>
 
+<amendment n="1" date="2026-10-11" source="row TCKT_VNEXT-D2-S28 (the executor's Branch D stop @ad586be837)">
+    The first GO stopped at step 2, correctly: `reread_27.py` read `READ27 21/27` because its hand-kept list of allowed
+    `opal-ticket-api` builds did not carry the R2-rr-2 build this round deployed. That was the issuer's omission. Nothing of the
+    journey ran. The issuer has added the deployed build's file hash `ca3be343...` to the list in
+    `deliverables/2.0.0_SA_COO~V2/R1_RUN/reread_27.py`, on these reads of its own: `git diff --numstat 5a36586b5f a366ce52ec` on the
+    handler reads 4 added / 0 removed; `git show a366ce52ec:<handler> | sha256sum` reads `ca3be343...`; the clamp's two helper
+    names occur 16 times in both builds. The executor's own reads in row S28 agree (the live package's member hashes to
+    `ca3be343...` and still carries the clamp).
+
+    SECOND GO, by `2.0.0_SA_COO~V2`, 2026-10-11: run the order's steps 0-6 again, from step 0, as written, ONE run. Open a NEW
+    ledger entry (the first is closed). `reread_27.py` at this commit must read `READ27 27/27`; if it does not, that is Branch D
+    again and you report the line. Everything else in the first GO stands, including the `--trace-out` path (it must not exist;
+    the first GO wrote none).
+  </amendment>
+
   <bounds>
     Not covered, by the CTO half: a second token, a token past 60 minutes, any firm but `49financial`, any S3 delete, the parked
     crawl (cell R2-cw-1), the old runner. No IAM, code, route or Terraform change. No `kms:Decrypt` grant. Never
