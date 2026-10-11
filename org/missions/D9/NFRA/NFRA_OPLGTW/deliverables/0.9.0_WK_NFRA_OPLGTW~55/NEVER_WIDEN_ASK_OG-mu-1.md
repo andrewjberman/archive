@@ -72,6 +72,7 @@ argument is still required and grammar-checked for a `.pptx` but no longer names
 
 ## 8. Open item the halves should know
 
-AC1 reads FAIL at this commit: `tests/test_og_ab2_pairs.py::test_ogab2_ac02` pins the superseded name-in-key form and that
-file is outside this order's paths (row `NFRA_OPLGTW-Z-W55-S1`, BLOCKING). The ask's code and grant are complete; the
-one-assertion test amendment is the owed act.
+None open. Row `NFRA_OPLGTW-Z-W55-S1` (AC1 FAIL on `test_ogab2_ac02`, which pinned the superseded name-in-key form) was the
+issuer's cut defect; Amendment 1 (@1ceb994ad3) added the file to the order's paths and `test_ogab2_ac02` is re-pinned to the
+content-addressed key. AC1 and AC2 both read PASS (citing row `NFRA_OPLGTW-Z-W55-S3`). The diff by file in section 1 gains
+`infra/aws/ec2/opal-gateway/tests/test_og_ab2_pairs.py`: `test_ogab2_ac02` only (9 insertions, 3 deletions).
