@@ -218,6 +218,8 @@ Criterion ids: APPLY1-AC1, APPLY1-AC2, APPLY1-AC3. Instance at `org/tier2_senior
       under R3.
     - **Condition 5** cannot be driven in the window (`2.0.0_SA_COO~G2` msg 4052: its grant covers the analysis service credential only). The ledger
       records the IB-pr-405 widening as APPLIED, UNEXERCISED, in those words, as the CTO half's condition 5 provides.
+    - **CTO msg 4062 (corrected R5 ACCEPTED, no stop):** the ledger close states `the read does not write: NOT MEASURED`, in those words; it is
+      not inferred from the route count. The three widenings (IB-pr-405 and the two of A1) close APPLIED, UNEXERCISED on irpt-status.
     - The signed pair file is NOT edited (the CTO half binds its blob 1d38417741); this amendment is the correction's carrier, sent to
       `1.0.0_SA_CTO~DELL2`. Everything else in AMENDMENT 8 stands. Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii) on a modify.
   </steps>
