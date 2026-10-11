@@ -1,0 +1,231 @@
+{
+ "quantity": {
+  "text": "QUANTITY (the TRADE term only). Served return on account a, day t, previous row s:\n  ret_t = (V_t - F_t + A_t) / V_s - 1,  V = sum of shares x served close p0, a purchase/sale/reinvestment is internal.\n\nPURCHASE of |q| shares of fund f for cash |c| on effective day t (Trade_Date, next trading day if no bar):\n  the table values the new shares at |q| x p0_t(f); valued at what was paid they are worth |c|.\n  delta_V_t = |c| - |q| x p0_t ;   delta_ret = delta_V_t / V_s.\n  Positive delta_ret = served return too LOW; negative = too high.\n  Several funds in one account-day: the delta_V terms are summed, then divided by V_s once.\n  A fund with no served close on t: unit is no_close, counted, not computed.\n\nSALE of |q| shares for cash |c| on day t:\n  the sold shares are gone from V_t and the cash is in the account, so V_t does not depend on f's close\n  on t for the sold shares: nothing on day t is mis-valued by the served close. The sold shares sat in V_s\n  at p0_s; that is the CARRIED holding, which this item does NOT revalue. Valuing the sale \"at what was\n  received\" on t therefore changes nothing in V_t: the sale's trade term on day t is ZERO under this definition\n  (the symmetric reading, the mis-valuation released that day, |q| x p0_t - |c|, is not in V_t at all, so it is 0 too).\n  Sale rows therefore enter the population and the by_kind count, contribute 0 bp, and never enter the over-10bp count by\n  themselves. Round 75 found 3 sale days with LOWER returns under the full two-build comparison; there the\n  holding at s was revalued (V_s moved), which is the carried-holding term and is outside this quantity.\n  A day with a purchase and a sale: the purchase terms are summed and the sale adds 0.\n\nNOT REVALUED: the holding carried from s at the served close (round 75: on ten of twelve purchase days the trade\n  term was 75-76 percent of the full change, on two it was all of it).\n\nFLOOR: a change is counted when |delta_ret| > 0.001 (10 basis points) for the headline; |delta_ret| > 0.0001 (1 bp) secondary.",
+  "written_at": "2026-10-11T22:47:16Z",
+  "floor": {
+   "headline": "|delta_ret| > 0.001 (10 basis points)",
+   "secondary": "|delta_ret| > 0.0001 (1 basis point)"
+  }
+ },
+ "control": {
+  "days": 12,
+  "reproduced": 12,
+  "rule": "agree = |mine - round75| <= max(5 percent of round75, 1 bp)",
+  "mine": "(|c| - |q| x served_close_t) / V_s, |c| and |q| from the custodian row, served close from security_day_price r34, V_s from the r34 served table",
+  "round75_term": "q x (p1_t - p0_t) / V_s, p1 the UNADJUSTED vendor close (round 74 variant build), p0 the served (dividend-adjusted) close; p1 equals the price paid within 1 percent on 12 of 12",
+  "difference_in_definition": "mine uses the price paid (cash / shares) where round 75 uses the unadjusted close p1; shares and V_s are the same in kind (V_s from the r34 table here, from the round 74 baseline build there)",
+  "ratio_mine_to_round75_min_max": [
+   0.99994,
+   1.00004
+  ],
+  "bp_mine_sorted": [
+   41.5,
+   43.1,
+   44.5,
+   47.0,
+   47.2,
+   47.7,
+   49.2,
+   49.5,
+   49.9,
+   51.6,
+   881.7,
+   882.0
+  ],
+  "ratio_mine_to_observed_round74_two_build_change": [
+   0.9989,
+   0.9994,
+   0.9994,
+   0.9997,
+   1.0,
+   1.0,
+   1.0003,
+   1.0003,
+   1.0009,
+   1.0013,
+   1.0017,
+   1.0037
+  ],
+  "against_round75_pred_minus_pred_h": {
+   "reproduced": 2,
+   "of": 12,
+   "note": "the round 75 record also splits the two-build prediction into a holding-only part Pred_h and a q part Pred - Pred_h (75 to 76 percent of Pred on ten days, all of it on two); that q part is a difference of two builds that nets the holding and the denominator, not the first-order term q x dp / V_s; mine agrees with it on the two all-of-it days only"
+  }
+ },
+ "population": {
+  "trade_account_days": 15103,
+  "with_close": 6174,
+  "no_close": 8929,
+  "measured": 31,
+  "blank": 6143,
+  "blank_by_reason": {
+   "UNPRICED": 6136,
+   "DVR_CLOSE_STEP": 6,
+   "FIRST_DAY": 1
+  },
+  "blank_no_row_in_table_at_all": 0,
+  "accounts": 928,
+  "accounts_with_close": 544,
+  "accounts_measured": 13,
+  "reconciliation": "trade_account_days = measured + blank + no_close; with_close = measured + blank; no_close = no unit of the day has a served close",
+  "account_days_by_kind": {
+   "both": 6299,
+   "purchase": 4863,
+   "sale": 3941
+  },
+  "with_close_by_kind": {
+   "both": 4061,
+   "purchase": 1257,
+   "sale": 856
+  },
+  "measured_days_with_an_unclosed_unit": 0,
+  "units_fund_account_day_kind": 91040,
+  "units_with_close": 14250,
+  "units_no_close": 76790,
+  "rows": {
+   "fund_by_sl_rows_all_funds": 125570,
+   "fund_by_sl_cusips_all_funds": 1017,
+   "rows_in_the_270_series": 91533,
+   "rows_270_excluded_no_amount_or_qty_under_0.05": 38,
+   "rows_270_used": 91495,
+   "funds_among_270_with_a_trade_row": 247,
+   "rows_effective_day_moved_to_next_trading_day": 1
+  }
+ },
+ "changed_over_10bp": 16,
+ "changed_over_1bp": 16,
+ "bands": {
+  "b10_50": 9,
+  "b50_200": 5,
+  "over_200": 2
+ },
+ "by_sign": {
+  "served_return_too_low": 16,
+  "served_return_too_high": 0
+ },
+ "by_kind": {
+  "purchase": {
+   "measured": 17,
+   "changed_over_10bp": 16
+  },
+  "sale": {
+   "measured": 14,
+   "changed_over_10bp": 0
+  },
+  "both": {
+   "measured": 0,
+   "changed_over_10bp": 0
+  }
+ },
+ "by_year": {
+  "2021": {
+   "measured": 4,
+   "changed_over_10bp": 3
+  },
+  "2022": {
+   "measured": 11,
+   "changed_over_10bp": 9
+  },
+  "2023": {
+   "measured": 3,
+   "changed_over_10bp": 2
+  },
+  "2025": {
+   "measured": 7,
+   "changed_over_10bp": 2
+  },
+  "2026": {
+   "measured": 6,
+   "changed_over_10bp": 0
+  }
+ },
+ "by_price_fit": {
+  "within_1pct": {
+   "measured": 7,
+   "changed_over_10bp": 0
+  },
+  "1_to_5pct": {
+   "measured": 1,
+   "changed_over_10bp": 0
+  },
+  "5_to_20pct": {
+   "measured": 6,
+   "changed_over_10bp": 2
+  },
+  "over_20pct": {
+   "measured": 17,
+   "changed_over_10bp": 14
+  }
+ },
+ "largest_bp": {
+  "bp": 882.0,
+  "date": "2025-10-24",
+  "ticker": "FCNTX"
+ },
+ "accounts_changed": 4,
+ "funds_changed": 3,
+ "funds_changed_any_purchase_unit_on_a_changed_day": 4,
+ "moved_19_vs_other": {
+  "moved_19": {
+   "measured": 17,
+   "changed_over_10bp": 12,
+   "funds_changed": 2
+  },
+  "all_other_funds": {
+   "measured": 14,
+   "changed_over_10bp": 4,
+   "funds_changed": 1
+  },
+  "rule": "a day belongs to the group of its largest-contributor fund"
+ },
+ "sanity": {
+  "round75_purchase_days_inside_changed": 12,
+  "of": 12,
+  "round74_changed_accounts": 9,
+  "of_them_among_accounts_changed": 3
+ },
+ "on_blank_days_if_measured": {
+  "rule": "V_s = sum of valued account_day_value rows at the account previous row s (literal); strict = every position at s valued (no null value).",
+  "blank_trade_account_days_with_close": 6143,
+  "cannot_be_evaluated": 13,
+  "cannot_be_evaluated_no_previous_row": 1,
+  "cannot_be_evaluated_no_valued_rows_at_s": 12,
+  "literal_valued_rows_only": {
+   "evaluable": 6130,
+   "over_10bp": 1591,
+   "over_1bp": 1867,
+   "b10_50": 452,
+   "b50_200": 565,
+   "over_200": 574,
+   "over_10bp_by_kind": {
+    "both": 1157,
+    "purchase": 434
+   }
+  },
+  "strict_all_positions_valued": {
+   "evaluable": 122,
+   "over_10bp": 46,
+   "over_1bp": 46,
+   "b10_50": 9,
+   "b50_200": 20,
+   "over_200": 17,
+   "over_10bp_by_kind": {
+    "purchase": 42,
+    "both": 4
+   }
+  },
+  "no_close_days_not_evaluable_here": 8929,
+  "reading": "Literal V_s sums only the positions that are valued; on a blank (UNPRICED) day most positions are not, so V_s is a partial sum, the ratio is inflated, and the literal count is an upper figure, not a measurement. The strict count (every position at s valued) is the sound one.",
+  "validation": "on the measured days the account_day_value sum at s equals the table V_s on 31 of 31"
+ },
+ "headline": "16 of 31 measured trade account-days change by more than 10 basis points when the trade is valued at what was paid (15103 trade account-days in all: 6174 with a served close, 8929 without one); bands 10-50: 9, 50-200: 5, over 200: 2. This is the TRADE term only: the carried holding is not revalued, and a sale contributes nothing to V on its day. The 6143 blank trade account-days are counted apart and are not added.",
+ "not_established": [
+  "Only 31 of 15103 trade account-days are measured: 8929 have no served close for any traded fund and 6143 fall on a blank day (almost all UNPRICED). The count says nothing about the other 15072 account-days, nor about the funds outside the 270 series (no served close) whose trades are not in the population.",
+  "The change counted is the first-order trade term (|c| - |q| x close_t) / V_s on the served table; it is not a rebuilt return: no chain was run, and the carried holding at the served close (and V_s itself) is not revalued, so the full change on a trade day can differ (round 75: on ten of twelve purchase days the q part was 75 to 76 percent of the two-build prediction).",
+  "A sale day contributes zero by definition: the sold shares leave V_t. Whether the mis-valued carried holding in V_s moves the return on sale days (round 75 found 3 sale days with LOWER returns in the two-build comparison) or on the following days is not measured here.",
+  "Price paid is amount over quantity from the custodian and includes any sales charge or fee in the amount; a 1 to 5 percent gap can be a load and not a wrong close. The price-fit bands tell fee-sized gaps from large ones; they do not prove which close is right.",
+  "Multi-fund days sum the unit terms and take the price-fit band from the largest contributor; 0 measured days carry a unit with no close (not computed), which would make that day a lower bound.",
+  "The blank-day count is over a partial V_s on most days (literal rule) and is an upper figure; the strict count covers only blank days whose previous row has every position valued. Neither was added to the headline.",
+  "The 31 measured days sit in 13 accounts and 9 funds: the measured set is what the served table prices, not a sample of the 377 holders."
+ ]
+}
