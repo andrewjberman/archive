@@ -60,3 +60,17 @@ generation hops have still never been reached.
 3. **Condition 3 cannot be read from its own line (row D2-S30).** `WE_CLIENT_SENT` logs the sender's `from=` only, never the
    recipient. REC: the condition is met by the code read you already made (one recipient, `requester.email`, derived from the
    verified identity) plus the count of `WE_CLIENT_*` lines per run ticket; a recipient field on that log line is a later cell.
+
+## 5. ADDENDUM (2026-10-11 ~07:4xZ): the 06:22:18 event is placed, and the CTO's rulings
+
+**The 06:22:18 `MISSING_REQUEST_FIELD` event is the census's own probe of the route, not a hop.** In the run's trace,
+`census.arms[71]` is `POST /api/scoped/investor-reporting/analysis` on `irpt-ycharts-generate`: the `49financial` arm answered
+HTTP 200 with reason `INVALID_INPUT` (the probe body is deliberately not a submission), and the `cottonwood` and `inflection` arms
+were refused `FIRM_BINDING` at the boundary. One handler refusal for the one in-firm probe, 16 seconds before hop (d) at 06:22:34:
+the two events in section 2 are that probe and the submission, in that order. The tie is by route, firm and order; the log line's
+own request identifier was not matched to the trace by this seat.
+
+**CTO rulings (msg 4391; half AMENDMENT 3 @4a0e63f033):** run 3 is covered ONCE, on three conditions (the per-run token merged with
+a two-runs test; a fifth branch E for a refusal at the submission, with run 2 recorded as E; the 06:22:18 event placed first, which
+this addendum does). No fourth run under the half: short of the last hop, the next act is the slug. The zero-call REC is accepted
+with a positive control (read five minutes after the window; print the group's latest event time). The condition-3 REC is accepted.
