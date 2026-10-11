@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-oo-3.the-mass-deletion-gate-exempts-a-merge-in-a-linked-worktree",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-oo-3.the-mass-deletion-gate-exempts-a-merge-in-a-linked-worktree.md",
+    "group": "OTHER",
+    "vintage_commit": "4f8811dd0bd76e31c042813be323c221962e4ed3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "4f8811dd0bd76e31c042813be323c221962e4ed3",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-oo-3.the-mass-deletion-gate-exempts-a-merge-in-a-linked-worktree.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~361",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/git-hooks/mass-deletion-check.sh",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One exemption block changed: the MERGE_HEAD and CHERRY_PICK_HEAD tests now resolve their paths with git rev-parse --git-path (an empty or failing resolution tests false), so a merge in a linked worktree is exempt. One comment line added. AUDIT_ROOT block, deletion count, attribution test, mode logic, exit codes and printed text unchanged. ASCII only. Verified by r90_merge_head.sh (AC1) and r89_audit_root.sh (AC2) run from the worktree.",
+      "introduces": ["_MERGE_HEAD_PATH", "_CHERRY_PICK_PATH"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~361/AMGT_RESAPP.TO-AMGT-oo-3.session.log",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Session log: premise re-ground (base FAIL B1), the one-block edit, post-edit runs, and the working-directory trap that produced one discarded run.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PASS B1 (a merge in a linked worktree that brings deletions is exempt: exit 0, no BLOCKED row), PASS B2 (control: a non-merge mass deletion in the linked worktree is still BLOCKED, exit 1 and a new row), PASS B3 (control: a merge in the main worktree stays exempt); R90 MERGE HEAD: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round90_prep/checks/r90_merge_head.sh\" --hook \"$(pwd)/.tools/git-hooks/mass-deletion-check.sh\"; echo \"exit=$?\"",
+      "output_evidence": "   linked worktree merge: MERGE_HEAD present=1 staged deletions=4 hook rc=0 BLOCKED rows=0\nPASS B1 a merge in a linked worktree that brings deletions is exempt: exit 0, no BLOCKED row\n   linked worktree plain deletion: hook rc=1 BLOCKED rows=1\nPASS B2 control: a non-merge mass deletion in the linked worktree is still BLOCKED (exit 1, a NEW row written)\n   main worktree merge: hook rc=0\nPASS B3 control: a merge in the main worktree stays exempt (exit 0)\nR90 MERGE HEAD: YES (3 of 3)\nexit=0",
+      "denominator": "3 of 3 checks PASS (B1, B2, B3); R90 MERGE HEAD: YES (3 of 3); exit=0. Base hook for contrast: R90 MERGE HEAD: NO (2 of 3), exit=1 (B1 FAIL). Run from the worktree, three identical runs.",
+      "status": "PASS",
+      "expect": "PASS B1 a merge in a linked worktree.*PASS B2 control.*PASS B3 control.*R90 MERGE HEAD: YES \\(3 of 3\\).*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the script parses (bash -n rc 0) and the round-89 audit-root check still reads R89 AUDIT ROOT: YES (A1-A4 PASS), so the audit path this edit sits beside is unchanged; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash -n .tools/git-hooks/mass-deletion-check.sh && bash \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_audit_root.sh\" --hook \"$(pwd)/.tools/git-hooks/mass-deletion-check.sh\"; echo \"exit=$?\"",
+      "output_evidence": "PASS A1 warn-mode verdict from a linked worktree leaves its row in the shared tree after the worktree is removed\nPASS A2 block-mode: exit 1 and a BLOCKED row in the shared tree\n   main worktree: warn rc=0 rows WARNED=1\nPASS A3 control: a deletion from the main worktree leaves its row in the main tree\nPASS A4 a submodule commit's row lands in a worktree, never under <super>/.git/modules\nR89 AUDIT ROOT: YES\nexit=0",
+      "denominator": "bash -n rc 0 (script parses); 4 of 4 round-89 audit-root checks PASS (A1, A2, A3, A4); R89 AUDIT ROOT: YES; exit=0",
+      "status": "PASS",
+      "expect": "PASS A1 .*PASS A2 .*PASS A3 .*PASS A4 .*R89 AUDIT ROOT: YES.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant = the unedited base hook (exemption tests $ROOT/.git/MERGE_HEAD and $ROOT/.git/CHERRY_PICK_HEAD). B1 must FAIL on it, which it does, so the check discriminates the defect.",
+      "expected": "B1 FAIL (linked worktree merge hook rc=1, BLOCKED); R90 MERGE HEAD: NO (2 of 3); exit=1",
+      "observed": "FAIL B1 a merge in a linked worktree that brings deletions is exempt: exit 0, no BLOCKED row; linked worktree merge: MERGE_HEAD present=1 staged deletions=4 hook rc=1 BLOCKED rows=1; R90 MERGE HEAD: NO (2 of 3); exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "three same-input runs of r90_merge_head.sh against the edited worktree hook (post-edit, pre-trim, post-trim, and the literal rerun); outcomes compared",
+      "observed": "each run: PASS B1, PASS B2, PASS B3, R90 MERGE HEAD: YES (3 of 3), exit=0; r89_audit_root.sh rerun: R89 AUDIT ROOT: YES, exit=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The <status> flip of AMGT-oo-3 to complete",
+      "reason": "The order states the status flip is the issuer's (2.0.0_SA_COO~R1)."
+    },
+    {
+      "item": "Any change to .tools/safe-commit.sh or any other hook",
+      "reason": "Bounds: the order names the one script; no other hook is touched."
+    },
+    {
+      "item": "A full repo commit-gate or hook test-suite run",
+      "reason": "Not in the order's criteria. The two named checks (AC1, AC2) plus bash -n are the proof; the script is shell, so commit-gate.sh py checks do not apply."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~361/AMGT_RESAPP.TO-AMGT-oo-3.session.log",
+  "compiler_tools": [
+    {
+      "tool": "r90_merge_head.sh (AC1)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round90_prep/checks/r90_merge_head.sh\" --hook \"$(pwd)/.tools/git-hooks/mass-deletion-check.sh\"; echo \"exit=$?\"",
+      "result": "exit=0; PASS B1, PASS B2, PASS B3; R90 MERGE HEAD: YES (3 of 3). Base hook for contrast: exit=1, B1 FAIL."
+    },
+    {
+      "tool": "bash -n (parse check)",
+      "invocation": "bash -n .tools/git-hooks/mass-deletion-check.sh",
+      "result": "rc 0 (script parses)"
+    },
+    {
+      "tool": "r89_audit_root.sh (AC2)",
+      "invocation": "bash \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_audit_root.sh\" --hook \"$(pwd)/.tools/git-hooks/mass-deletion-check.sh\"",
+      "result": "exit=0; PASS A1, PASS A2, PASS A3, PASS A4; R89 AUDIT ROOT: YES"
+    }
+  ]
+}
