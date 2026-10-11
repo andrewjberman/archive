@@ -1,0 +1,81 @@
+# =============================================================================
+# SMS delivery-status logging for the SEV1 page path (ADVI_FIRMBKTS TO-FB-f-12;
+# CTO ruling CTO_RULING_SEV1_SMS_DELIVERY_STATUS_LOGGING_20261011.md, AMENDMENT 1).
+#
+# The topic opal-infrastructure-alerts has one SMS subscription
+# (inf-ops-alerts-sms.tf). It shows 0 delivered and 28 failed over 14 days and a
+# failure leaves no reason anywhere, because SNS SMS delivery-status logging is an
+# ACCOUNT-level setting (sns set-sms-attributes) and none is configured. There is
+# no topic-level SMS feedback attribute.
+#
+# This file sets ONLY the two delivery-status values at the account:
+#   DeliveryStatusIAMRole             = the one role below
+#   DeliveryStatusSuccessSamplingRate = 0 (failures are always logged, successes never)
+# and declares the two SNS delivery log groups with a 14-day retention (the records
+# carry destination phone numbers). It writes logs; it changes no delivery.
+#
+# monthly_spend_limit is carried at its live value (50, read 2026-10-11) because
+# aws_sns_sms_preferences owns the account's SMS preferences as one object and is
+# Optional+Computed on that attribute; every other preference is unset live and is
+# left unset here. NO test SMS is sent by this change.
+#
+# Names: the role and policy are lib/opal_naming.py name("opal", None,
+# "sms-delivery-status", "role"|"policy") output. The log group names are fixed by
+# SNS and are not ours to choose.
+# =============================================================================
+
+resource "aws_iam_role" "sms_delivery_status" {
+  name = "opal-sms-delivery-status-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "sns.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "sms_delivery_status" {
+  name = "opal-sms-delivery-status-policy"
+  role = aws_iam_role.sms_delivery_status.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid    = "SnsSmsDeliveryLogGroupsOnly"
+      Effect = "Allow"
+      Action = [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:PutMetricFilter",
+        "logs:PutRetentionPolicy",
+      ]
+      Resource = "arn:aws:logs:${local.region}:${local.account_id}:log-group:sns/${local.region}/${local.account_id}/DirectPublishToPhoneNumber*"
+    }]
+  })
+}
+
+resource "aws_cloudwatch_log_group" "sns_sms_delivery" {
+  name              = "sns/${local.region}/${local.account_id}/DirectPublishToPhoneNumber"
+  retention_in_days = 14
+}
+
+resource "aws_cloudwatch_log_group" "sns_sms_delivery_failure" {
+  name              = "sns/${local.region}/${local.account_id}/DirectPublishToPhoneNumber/Failure"
+  retention_in_days = 14
+}
+
+resource "aws_sns_sms_preferences" "account" {
+  monthly_spend_limit                   = "50"
+  delivery_status_iam_role_arn          = aws_iam_role.sms_delivery_status.arn
+  delivery_status_success_sampling_rate = "0"
+
+  depends_on = [
+    aws_iam_role_policy.sms_delivery_status,
+    aws_cloudwatch_log_group.sns_sms_delivery,
+    aws_cloudwatch_log_group.sns_sms_delivery_failure,
+  ]
+}

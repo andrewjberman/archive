@@ -5,7 +5,7 @@
 to `org/missions/D5/AMGT/AMGT_CORPUS/`; `C1/` = `deliverables/2.0.0_SA_COO~C1/`.
 
 **State of the served page:** `opal-amgt-scoped-api` was `l8egBo/rf..` from 2026-10-11 04:56:11Z, serving dossiers at /11.
-Status of this packet: **PARTIAL.** au-8, au-5, au-3 and au-4 are read (below); au-7 (the IMB LN Thesis-tab walk) is owed. Since 09:26:42Z the live
+Status of this packet: **PARTIAL.** au-1/au-2, au-8, au-5, au-3 and au-4 are read (below); au-7 (the IMB LN Thesis-tab walk) is owed. Since 09:26:42Z the live
 function is `SOzAz9/gf..` (AMGT_RESAPP qq-5's redeploy), not `l8egBo/rf..`; the au-3/au-4 read below was taken on it.
 
 | outcome | missing read (round 44 packet) | state | evidence |
@@ -72,6 +72,29 @@ distinct labels, many of them the sheet's own header and override rows (Year, Fi
 EQY_FUND_YEAR). FWD-12 "the team's rows" and FWD-20 "unmapped 0" conflict until those rows are mapped to fields or the row-label rule
 excludes non-line rows. Surprise row `AMGT_CORPUS-D1-S3` (OBSERVATION, INERT) carries it; the choice is an ENDPOINT-level call and is
 not cut here.
+
+## FWD-1 and FWD-14 -- au-1 and au-2 (the site-Z write)
+
+Order `TO-WRITE-R45-au1` (WORLD; pair COO half @f17a5c8d0e, CTO half @e7183b3dcf) ran at site Z 2026-10-11T09:47:52Z-09:59:50Z at HEAD
+b1428d28c7 by `0.7.0_AE_CloudOps~ZC`. Evidence `deliverables/0.7.0_AE_CloudOps~ZC/evidence/r45_au1_bronze_ingest_and_four_count_sitez.txt`
+@cc1f7b2dfa (ancestor of origin/box/sitez a010dd8a8e). The issuer re-ran the criteria on those committed bytes and read the new keys
+back from S3. Order closed @79c9e7babb; instance VALID (rc 0); ledger `amgt-corpus-r45-au1` CLOSED (opened late: an issuer omission).
+
+| read | result |
+|---|---|
+| census (the drive, read after the write) | 102 folders, 378 files, 11 OneDrive placeholders (all 11 hydrated on read) |
+| ingest `--write` | files_in_resolved 368 in 96 resolved folders; stored 368 (put_performed 12, existed 356); read_failed 0 |
+| ingest `--verify` | objects 368 files 368 match 368 mismatch 0 |
+| the identity | census 378 = 368 resolved + 10 unresolved; stored 368 = resolved 368 |
+| the remainder, named | 10 files in 6 folders, each with the crosswalk reason: Brookfield Corporation BN CA (1); Formatting examples (5); ITOCHU 8001 JP (1); Japan Tobacco 2914 JP (1); Mitsubishi Corp 8058 JP (1); Mizuho Financial Group 8411 JP (1) |
+| FWD-14 four-count line, before and after | `fence14 ... sum 102 folders_read 102`, twice |
+| scheduled tasks (CTO half's condition) | 295 task blocks read at site Z; 1 names the four words (`amgt-induction-daily`); 0 write a dossier |
+
+**For the CVO's L9 and the CTO's analysis.** Objects equal the files in RESOLVED folders (368 of 368). They do not equal the drive's 378,
+because 10 files sit in 6 folders whose identities `crosswalk/v1` does not hold; the ingest never guesses a key. The PRD's DONE WHEN reads
+on the files "the library's own folder list resolves to"; the analysis's close read "objects = files = 378". Both numbers are printed
+beside each other here and the choice is the grader's. Resolving the six folders' identities is a `crosswalk/v1` matter, not an
+ingest one, and is not cut this round. `Formatting examples` is not a security at all (5 memo templates).
 
 ## Still owed in this packet
 
