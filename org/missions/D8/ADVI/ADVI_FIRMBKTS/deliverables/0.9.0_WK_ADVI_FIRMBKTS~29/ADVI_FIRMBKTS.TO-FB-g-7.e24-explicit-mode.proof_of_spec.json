@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-7.e24-explicit-mode",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-7.e24-explicit-mode.md",
+    "group": "OTHER",
+    "vintage_commit": "f33c93ce43"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "f33c93ce43",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-7.e24-explicit-mode.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~29",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/E_24.rebuild_fee_scorecard.py",
+      "kind": "script",
+      "commit_or_etag": "0e4e8e8b0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit on wk-ADVI_FIRMBKTS-29; no deploy, no AWS call; import os added; guard after dry_run is computed, before the first S3 call; the seam, key, payload and existing log lines unchanged",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/tests/test_e24_explicit_mode.py",
+      "kind": "test",
+      "commit_or_etag": "0e4e8e8b0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit on wk-ADVI_FIRMBKTS-29; three unittest tests, OK under the AC2 invocation",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: ROUND 4 E24 REFUSE: 4 of 4 arms (E1 the refusal, E2 the explicit modes, E3 the dry run, E4 ASCII and compiles)",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-29 && timeout 170 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_e24.py --arms refuse --root /c/dev/wk-firmbkts-29; echo \"exit=$?\"",
+      "expect": "ROUND 4 E24 REFUSE: 4 of 4 arms",
+      "output_evidence": "  E1 unset --upload: rc=2 names the variable=True reached the read=False\n  E2 mode=legacy --upload: rc=1 reached the read=True\n  E2 mode=canonical --upload: rc=1 reached the read=True\n  E3 unset dry run: rc=1 reached the read=True\n  E4 ascii=True py_compile=True\nPASS E1 --upload with BD_PLATINUM_MODE unset exits non-zero, names the variable and refuses before any read\nPASS E2 --upload with the mode set explicitly (legacy and canonical) passes the guard\nPASS E3 a dry run with the mode unset passes the guard\nPASS E4 the script stays ASCII and compiles\nROUND 4 E24 REFUSE: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms PASS; E2 covers 2 modes (legacy, canonical); E2 and E3 rc=1 are the dead endpoint after the guard, the reached-the-read line being the grade",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: unittest tests.test_e24_explicit_mode, the last 3 lines, expect ^OK$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-29/data/black_diamond/scripts/gold && timeout 110 env -u FORCE_COLOR python -m unittest tests.test_e24_explicit_mode 2>&1 | tail -n 3",
+      "expect": "^OK$",
+      "output_evidence": "Ran 3 tests in 0.912s\n\nOK",
+      "denominator": "3 tests run: (i) unset --upload refused with rc 2, the variable named, zero stub calls; (ii) explicit legacy, canonical and empty-string modes reach the first S3 call (subtests, 3 of 3); (iii) dry run unset reaches the first S3 call; 0 failures, 0 errors",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: ROUND 4 SCOPE: OK (the changed set is within the four --allow prefixes; the two required files are changed)",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-29 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-29 --allow data/black_diamond/scripts/gold/E_24.rebuild_fee_scorecard.py --allow data/black_diamond/scripts/gold/tests/test_e24_explicit_mode.py --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~29/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require data/black_diamond/scripts/gold/E_24.rebuild_fee_scorecard.py; echo \"exit=$?\"",
+      "expect": "ROUND 4 SCOPE: OK",
+      "output_evidence": "  CHANGED data/black_diamond/scripts/gold/E_24.rebuild_fee_scorecard.py\n  CHANGED data/black_diamond/scripts/gold/tests/test_e24_explicit_mode.py\n  CHANGED portal   <-- OUTSIDE\nROUND 4 SCOPE: FAIL 3 changed, 1 outside, 0 required missing\nexit=1",
+      "denominator": "3 changed paths in the worktree at the run (2 in scope, 1 OUTSIDE: portal, a submodule gitlink not written by this worker; see surprise row ADVI_FIRMBKTS-D1-W29-S1); 0 required paths missing; the run was made before this instance was written, so the deliverables folder held no changed file",
+      "status": "FAIL",
+      "status_reason": "the write-surface bound reads the worktree's portal submodule gitlink as OUTSIDE: index c96efe1714 against worktree 8ed372cb72, a state the worker did not write and did not reset (no checkout, no submodule update, outside the <paths> grant). Surprise row ADVI_FIRMBKTS-D1-W29-S1 is open for the issuer."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the base E_24 at f30d22f82c (no guard), copied to .scratch/mut/E_24.base.py and run with --upload and BD_PLATINUM_MODE unset against the same fake credentials and dead endpoint; the guard is the only difference from the committed script",
+      "expected": "the unguarded base reaches the first read and never names BD_PLATINUM_MODE, so AC1 E1 discriminates the guard",
+      "observed": "rc=1; 'Loading advisor_fee_detail' count 1; 'BD_PLATINUM_MODE' count 0; the committed script under the same run refuses with rc=2 and names the variable (AC1 E1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the order bounds each criterion invocation to one run; AC2 runs stub-only with no clock, network or random input, so a second run is not a discriminating check",
+      "observed": "not run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No deploy and no AWS call: the check points AWS at a dead local endpoint with fake credentials",
+      "reason": "E_24 is a manual rebuild tool with no caller; the cell is LOCAL class; the endpoint was the issuer's preflight condition"
+    },
+    {
+      "item": "AC3 is graded FAIL on the portal submodule gitlink, outside this worker's write surface",
+      "reason": "recorded, not resolved: no checkout, reset or submodule update was run, since that act is outside the <paths> grant; the order stays open on AC3 for the issuer"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W29-S1: BLOCKING, INERT. The worktree's portal gitlink is dirty (index c96efe1714, worktree 8ed372cb72), so r4_scope.py reads FAIL on AC3 on a path the worker did not write; AC1 and AC2 PASS on the committed bytes."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~29/ADVI_FIRMBKTS.TO-FB-g-7.e24-explicit-mode.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m unittest",
+      "invocation": "cd data/black_diamond/scripts/gold && env -u FORCE_COLOR python -m unittest tests.test_e24_explicit_mode",
+      "result": "Ran 3 tests, OK"
+    },
+    {
+      "tool": "safe-commit.sh (commit-gate, naming gate, surprise-row gate, msg-verify)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~29 <0.9.0_WK_ADVI_FIRMBKTS~29@opal.agent>\" -F .scratch/msg-fb-g-7-code.txt -- <the two script paths>",
+      "result": "commit 0e4e8e8b0c; commit-gate clean for 2 of 2 files; msg-verify MATCH"
+    }
+  ]
+}
