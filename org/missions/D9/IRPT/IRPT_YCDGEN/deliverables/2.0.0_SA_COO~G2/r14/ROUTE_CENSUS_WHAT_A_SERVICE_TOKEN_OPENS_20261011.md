@@ -84,8 +84,10 @@ eight never receive it.
 | `GET .../users` | `get_users` (346) | every row of the trade users table, or those of a role, with only `password` and `api_key` removed | no | **YES** |
 | `GET .../users/me` | `get_users_me` (371) | the CALLER's own email, name, groups and role, from the authorizer's email; empty groups if it has no row | no | own row only |
 
-Eight of nine: 7 return submissions, 1 returns the user list. `get_by_date` (257) has no route of its own in `routes.tf` and
-is reached by nothing I found. The ninth route is the only one that uses the verified identity, and it returns only the
+Eight of nine: 7 return submissions, 1 returns the user list. `get_by_date` (257) has no route key of its own in `routes.tf`, but
+the router matches any path containing `/submissions/by-date` before it tries an id, so a request to the `{id}` route with
+`by-date` in the id's place reaches it: submissions for a date or range the caller names. (My first form of this sentence
+said nothing reached it; the router's own branch does.) The ninth route is the only one that uses the verified identity, and it returns only the
 caller's own row.
 
 **What I did not establish, and it decides how bad this is:**
