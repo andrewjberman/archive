@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TV2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>cancelled -- by the issuer `2.0.0_SA_COO~V2`, 2026-10-11, on the CVO's L9 grade (row TCKT_VNEXT-D2-S21, @771737f0a6): the request id this order reads, `sar1b-bb079cbf53aaa2be7ce3fb6b`, is refused INVALID_REQUEST_ID by the read plane (it accepts `REQ-<24 hex>` only), so a `stage` read of it cannot succeed. NEVER RAN: ledger `tckt-vnext-sa-r1c-hop-e-stage-read-20261009` closed with 5 NOT-RUN legs, no `run_5` trace, the filer row read ABSENT. The thread repair is item 1 of the round-1 slug's enrichment list.</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
