@@ -161,3 +161,28 @@ this apply would have been refused and routed to a cross-box call it does not ne
 - The packet's **import-closure read and stub-model measurement are cited, not re-derived** by this lane.
 - Row `D2-S31`'s question (who ran `build.sh` at 14:54Z) and the disposition of rows `D2-S22` and `D2-S32` are not the
   applier's acts.
+
+## ADDENDUM 1 (2026-10-11 23:48Z) -- the ORGANIC arm ran, and it is clean
+
+Section 11 declared tonight's 23:30Z scheduled mail-pull fire an excluded limit because it had not happened when the
+report was written. It has now happened. Read, not predicted; a corroboration, so it lands here on the record rather
+than in a second message (rule 31).
+
+```
+MAIL-PULL-FIRE run=20261011T233012Z window_days=7 listed=12 admitted=0 landed=0 skipped_known=0 list_refusals=0 silver_rows=0 held_out=0
+```
+
+One `START`, one `MAIL-PULL-FIRE`, one `REPORT` (Duration 32374.87 ms, Memory Size 1024 MB, Max Memory Used 101 MB).
+**Exactly 1** `MAIL-PULL-FIRE` line since 23:25Z -- one fire, not a retry storm -- and no `ERROR`, `Traceback`,
+`errorMessage` or `Task timed out` in the window. Run record 516 B and `silver.json` 128 B at 23:30:45Z. Field for
+field the same as the driven invoke at 21:31:39Z, so the first UNATTENDED run on the new bytes behaves as the attended
+one did.
+
+**The fire ran on THIS act's bytes, measured rather than assumed.** At 23:48:53Z all three functions still read
+`auyn4IvltKLLl6yw+SsMWGi3VVlYZKnmJKFssjJaVNY=` with `LastModified` unchanged at this act's apply times -- mail pull
+21:19:37Z, teams pull 21:19:49Z, commentary 21:19:43Z -- so nothing re-deployed between the apply and the fire and the
+digest behind the run is not inferred from the clock. The commentary function's log is still at **2** `START` lines
+since 00:00Z: the nightly fire did not reach it either.
+
+Still excluded: Monday's 13:00Z Teams fire, and the commentary function's closed-list behaviour, which stays
+UNEXERCISED LIVE until a real draft's stored `provenance.withheld` is read.
