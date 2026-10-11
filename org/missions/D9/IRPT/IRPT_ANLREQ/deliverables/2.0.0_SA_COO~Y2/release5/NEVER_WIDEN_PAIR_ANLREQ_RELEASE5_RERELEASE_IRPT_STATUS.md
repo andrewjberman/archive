@@ -132,3 +132,18 @@ live IN release 5's return, under this pair, "whose census lists the binding's t
   If the rollback happens AFTER the portal candidate landed, that candidate is reverted on DEV first, or every Open is refused.
 - **Order of the whole return:** (1) the history reader on portal PROD (Andrew's word); (2) the build, the re-run census, this pair
   re-issued, the CTO half; (3) the apply and R0 to R8, B1 to B4, C1, C2; (4) the portal candidate on DEV and C3.
+
+## 9. REVISION 3 (2026-10-11 ~16:3xZ): two measured facts and one more ordering step; still WRITTEN, NOT APPLIED
+
+- **B4 is measured before the release (the count CTO msg 4955 asked for).** `org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/Y6_job_rows_and_ticket_id_count.json`
+  (laptop commits b4caac9dec, 9c3968c6eb; this seat ran `reads6_check.py`: READS6-OK, and the proof: VALID): 51 accepted requests of
+  1904 items scanned; 6 store a `ticket_id`, all in 49financial; 45 store none (49financial 5, cottonwood 39, inflection 1); 0
+  unreadable. So at the release the binding can refuse on at most 6 requests; the other 45 read as today whatever ticket asks.
+  B2 (a request's OWN stored ticket id answers; another refuses) needs one of those 6 to be readable: at the laptop's reads today
+  49financial owners answered FIRM_BINDING or NOT_FOUND on replay, so B2 may read ABSENT, and ABSENT is not EXERCISED.
+- **The portal's contract-named reason set must be on PROD before the service serves `REPORT_TICKET_MISMATCH`.** It is on DEV
+  (`b92696c1ed`, row `IRPT_ANLREQ-D2-S52`) and NOT on PROD. Order of return, step 1, now reads: the history reader AND the reason
+  set on portal PROD (both client-facing page files; Andrew's word), each read by `git merge-base --is-ancestor` against PROD's head.
+- **Rounds since this packet was first written that change what a trunk build of irpt-status carries:** round 7's `AR-y-71` (three
+  files) only. Rounds 8 and 9 touch other functions (`irpt-commentary-composition-read-lambda`; release 6) and do not ride this pair.
+
