@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-bw-2.the-bbg-live-cycle-read-to-its-end",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bw-2.the-bbg-live-cycle-read-to-its-end.md",
+    "group": "OTHER",
+    "vintage_commit": "6b4cb43fa02a1cde67845bde08c5586b7c350b53"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "30b49ff8439ee616a2199f2cddd02b155c8aa855",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bw-2.the-bbg-live-cycle-read-to-its-end.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~ZW",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round79/bw2_bbg_cycle.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local read-only evidence; no deployment change. Holds steps 1-6 and the second step-7 process-tree read.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round79/bw2_bbg_20261010T221526Z.cycle.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Step 6: a byte-for-byte copy of the cycle record beside the read, unchanged (shutil.copyfile).",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round79/bw2_process_tree_now.out",
+      "kind": "doc",
+      "commit_or_etag": "ab9991ed96",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local read-only evidence; the FIRST of step 7's two process-tree reads, taken on AMENDMENT 1's 'read NOW' arm.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "BBG CYCLE \\S+: asked \\d+, attempted \\d+, new \\d+, already_held \\d+, failed \\d+, completed (true|false), stopped \\S",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round79/bw2_bbg_cycle.out",
+      "output_evidence": "BBG CYCLE 20261010T221526Z: asked 242, attempted 242, new 6, already_held 0, failed 8, completed true, stopped none",
+      "denominator": "1 matching line of 791 in the file. `attempted` is NOT a field in the cycle record: the order defines it as the pairs the run summary shows done or failed, never_started excluded, so it is computed and its basis is printed in the file as 'ATTEMPTED BASIS: run_summary publishers.bbg: pairs_done 234 + retry 8 + gave_up 0' = 242.",
+      "expect": "BBG CYCLE \\S+: asked \\d+, attempted \\d+, new \\d+, already_held \\d+, failed \\d+, completed (true|false), stopped \\S",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "REQUEUED: \\S",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round79/bw2_bbg_cycle.out",
+      "output_evidence": "REQUEUED: BA, security-04b81ac7cfd1ecab, security-21f955799be2fd3e, security-85663a3912a0c415, security-9d0e852ab1835d84, security-cb6ae6007770cfa7",
+      "denominator": "6 requeued keys, read from the record's own `requeued` field; 1 matching line of 791. These are the previous cycle's failed pairs re-asked, which is the behaviour the cell describes.",
+      "expect": "REQUEUED: \\S",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "242 of 242 attempted, each failure carries its own detail, and a stop occurs only on the consecutive cap.",
+      "method": "manual_read_with_citation",
+      "invocation": "Read org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round79/bw2_bbg_cycle.out and bw2_bbg_20261010T221526Z.cycle.json",
+      "output_evidence": "Measured, for the CVO to grade, with the third clause answered honestly rather than favourably. (1) 242 OF 242 ATTEMPTED: SATISFIED. asked 242, attempted 242 by the order's own definition (run summary pairs_done 234 + retry 8 + gave_up 0); 0 pairs never_started. (2) A STOP ONLY ON THE CONSECUTIVE CAP: SATISFIED, vacuously and in the strong direction -- the record's `stopped` is null and `completed` is true, so there was no stop of any kind, and the cycle ran 11h23m from 2026-10-10T22:15:26Z to 2026-10-11T09:39:22Z. The runner began the next bbg cycle 22 seconds later, so the end is a cycle boundary, not a halt. (3) EACH FAILURE CARRIES ITS OWN DETAIL: PRESENT BUT EMPTY OF CONTENT, and this seat does not claim it as satisfied. All 8 entries of `failures` carry a `detail` field, each with its own `key` and a `floor` of 2026-10-09, but every `detail` value is the string 'error', identical to that entry's own `status`. So the field exists on 8 of 8 and adds no information beyond the status on 8 of 8. The file states this as a DETAIL READING line rather than reporting 'failures with their detail'. The 8 failure keys are listed individually: security-9d0e852ab1835d84, BA, security-de87a5f8b93104df, security-529750b223e89a00, security-7bdf9491543f7979, security-132e951b77655f5b, security-0f3eb2ded85ad44b, security-b77f8df862cc16be. Also in the record: 253 runner-log lines in the cycle's first 20 minutes and 492 in its last 20, verbatim, each window labelled with its own count; and step 7's SECOND process-tree read, RUNNERS 1 (PID 21512, the same runner as the first read), MATCHED_TOTAL 4, with PID 37816 ABSENT at both reads.",
+      "denominator": "242 pairs asked, 242 attempted, 0 never_started; 8 failures of 242 (3.3%); 8 of 8 failure entries carry a detail field, 0 of 8 carry a detail distinct from their status; 1 cycle_runner process of 4 matched harvest processes.",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "AC3 is the judgment criterion, graded by 3.0.0_SA_CVO at L9 from these records and never self-graded. Two of its three clauses measure as satisfied and the third, 'each failure carries its own detail', is reported as a field that is present but carries nothing beyond the status -- a result for the grader, not something for this seat to resolve or repair."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Read-only cycle read; the governing order names no mutant.",
+      "expected": "N/A",
+      "observed": "Nothing was restarted, stopped or re-pinned, and neither pin worktree nor the scheduled task was modified. The runner was still mid-next-cycle at the read (PID 21512 with collector child PID 30496), which is the state the order requires: it says to read a cycle that has ended, not to stop one.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The cycle record and run summary are fixed artifacts on disk, and step 6 copies the record byte-for-byte beside the read, so AC1 and AC2 re-run identically from the copy. The assembler was exercised against a DIFFERENT record first (the GC-killed 20261010T204810Z) as a negative control before being run on this one.",
+      "observed": "AC1 1 of 1 and AC2 1 of 1 on both the exercise record and this one. The exercise caught a real defect before it reached the deliverable: the first version keyed each failure by its LIST INDEX, rendering 'FAILURE 0: error -- error' and discarding the entry's own `key` field. The failures are a list of dicts each carrying `key`, so the output now uses that key and appends any remaining fields verbatim. The step-7 process-tree limb is NOT deterministic by nature: it reads live processes, and its two reads legitimately differ (MATCHED_TOTAL 2 then 4) because this seat started HVST-bs-4's r47 leg between them.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Push box/sitez",
+      "reason": "Reserved to the integrator MSTR by shared-branch law (LD-0367/0368); this lane's push attempt was refused by never-rules-gate, as designed."
+    },
+    {
+      "item": "AC3's verdict",
+      "reason": "Graded by the CVO at L9. Measured here and explicitly not self-graded, including the clause that does not measure favourably."
+    },
+    {
+      "item": "wsj and barrons cycles",
+      "reason": "Out of this order's scope: it reads BBG's first cycle under the re-pinned runner. cycles/ holds no wsj or barrons directory at all; the issuer's round-78 note places both behind Andrew's sign-in (site-Z call 9f24)."
+    },
+    {
+      "item": "Any repair of the empty failure detail",
+      "reason": "A result, not something to repair (the order says any count is a RESULT). Changing what the harvester writes into `detail` is the project's call."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-S111: the /govern worktree GC killed cycle 20261010T204810Z under the live runner, which is why AMENDMENT 2 excludes it and this read is of the cycle after it.",
+    "AMGT_HARVST-Z-S113: the r47 sa driver labels its stop status 'error' transport-class while the failing pairs carried rc 0xC0000142 with run_id null. Relevant here only because the leg it governs is the reason step 7's second read shows MATCHED_TOTAL 4 rather than 2."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-11/zw_relaunch_bw2_process_tree_and_bs3_unclosable.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md --enumerate 'AMGT_HARVST-Z-S[0-9]+' --page 4",
+      "result": "145 hits / 135 whole / 8555 lines; highest id Z-S112, so Z-S113 was the next free id."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'add_argument.*clear-stop' lib/opal_data_harvest/backfill_driver.py",
+      "result": "1 hit, backfill_driver.py:509 -- the flag takes a PUBLISHER argument, so the sibling order's relaunch used `--clear-stop sa` rather than a bare flag that would have eaten the next token."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'NON-APPEND-EDIT' --limit 20",
+      "result": "339 hits / 177120 files scanned; the DEF hit at .tools/audit-archive-invoker.py:186 named the CRLF/LF baseline false-fire class as already owned, so the startup A.2 findings were not re-filed."
+    }
+  ]
+}
