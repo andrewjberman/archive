@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "IRPT_ANLREQ.TO-READS-Y6.job-rows-and-ticket-id-count-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/task_orders/IRPT_ANLREQ.TO-READS-Y6.job-rows-and-ticket-id-count-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "d259691f96"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R9_Y.md",
+    "vintage_commit": "d259691f96",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/task_orders/IRPT_ANLREQ.TO-READS-Y6.job-rows-and-ticket-id-count-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~ANL",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/Y6_job_rows_and_ticket_id_count.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING_SELF_COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Nothing was deployed; the artifact is a measurement made by get_item and scan in the same run; the checker reads the file at the committed bytes.",
+      "artifact_covered_by": [
+        "READS6-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "READS6-AC1",
+      "criterion_verbatim": "READS6-AC1: the result file holds a state (or NO_ROW, or an error code) for each of the 14, the first READY id consistent with those states, and a ticket-id count whose parts add up to its denominator.",
+      "method": "live_read",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r9/reads6_check.py",
+      "expect": "READS6-OK",
+      "output_evidence": "job rows read READY: 14 of 14; ticket_id count 45 of 51 without / READS6-OK",
+      "denominator": "14 job rows read of 14 READY-served ids (all tenant cottonwood, 0 denied, 0 NO_ROW); 1904 irpt-requests items scanned, 51 accepted analysis requests (49financial 11, cottonwood 39, inflection 1), 0 unreadable",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "read_can_see_a_row": {
+      "description": "The same get_item path returned a state string for every id, so a READY reading is a seen row and not a blind read; a denied read would have raised an error code, none did.",
+      "expected_landed": "a state string per id",
+      "expected_not_landed": "NO_ROW or an error code",
+      "observed": "14 of 14 state strings, all READY",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "NOT APPLICABLE -- read-only",
+    "cto_half": "NOT APPLICABLE -- read-only"
+  },
+  "risk_class": "WORLD",
+  "rollback": "None needed: read-only.",
+  "scope": "READ-ONLY against AWS: DynamoDB get_item on irpt-jobs and scan on irpt-requests. No put, delete, invoke or apply.",
+  "declared_exclusions": [
+    {
+      "item": "Request accepted after the Y5 snapshot",
+      "reason": "The count scan saw 51 accepted requests against 50 in the snapshot; the job-row list is the snapshot's 14 READY ids, so the new request is in the ticket_id count only."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/logs/2026-10-11/anl_lane_y6_job_rows_and_ticket_id_count.md",
+  "compiler_tools": [
+    {
+      "tool": "reads6_check",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r9/reads6_check.py",
+      "result": "READS6-OK"
+    }
+  ]
+}
