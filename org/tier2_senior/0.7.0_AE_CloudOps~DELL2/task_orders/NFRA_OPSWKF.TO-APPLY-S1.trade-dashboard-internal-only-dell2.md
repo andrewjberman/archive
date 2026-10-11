@@ -13,7 +13,7 @@
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
 <decomp_doc>org/missions/D9/NFRA/NFRA_OPSWKF/decompositions/NFRA_OPSWKF_DECOMP.md</decomp_doc> (workstream S): issuer cells `OW-s-d-1` and `OW-s-r-1`, serving drained cell OW-s-2 (merged @abf78fcb7f).
-<owned_cells>OW-s-d-1, OW-s-r-1</owned_cells>
+<owned_cells>OW-sd-1, OW-sr-1</owned_cells>
 </decomp_ref>
 
   <objective>
@@ -99,10 +99,19 @@
     service token is read to make a call. No response body from a served read is written anywhere.
   </bounds>
 
+  <amendment_1>
+    AMENDMENT 1 (issuer, 2026-10-11 ~20:3xZ; applier msg 5769). The two issuer cells are cited by the ids `OW-sd-1` and `OW-sr-1`
+    (the decomposition names them so; the long forms `OW-s-d-1` and `OW-s-r-1` stay as names), because the proof checker's cell-id
+    pattern admits no third dashed segment. Only `<owned_cells>` and the three `cell_refs` changed; no step, bound or criterion id did.
+    The two judgment criteria are GRADED by the issuer: MET, with the tier arm UNEXERCISED on the deployed service
+    (org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/2.0.0_SA_COO~O2/S_DEPLOY/OW_S_D1_ISSUER_GRADE_20261011.md). The applier re-points its
+    instance's cell references to the two ids, re-validates, and flips this order `complete`.
+  </amendment_1>
+
 <proof_of_spec>
-  <criterion id="OW-sd1-AC1" cell_refs="OW-s-d-1"><invocation>python org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/2.0.0_SA_COO~O2/S_CHECKS/ow_s_checks.py s2-probe</invocation><expect>OW-S2-PROBE-OK</expect></criterion>
-  <criterion id="OW-sd1-AC2" cell_refs="OW-s-d-1" judgment="true"/>
-  <criterion id="OW-sr1-AC1" cell_refs="OW-s-r-1" judgment="true"/>
+  <criterion id="OW-sd1-AC1" cell_refs="OW-sd-1"><invocation>python org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/2.0.0_SA_COO~O2/S_CHECKS/ow_s_checks.py s2-probe</invocation><expect>OW-S2-PROBE-OK</expect></criterion>
+  <criterion id="OW-sd1-AC2" cell_refs="OW-sd-1" judgment="true"/>
+  <criterion id="OW-sr1-AC1" cell_refs="OW-sr-1" judgment="true"/>
 </proof_of_spec>
 OW-sd1-AC1 runs at the pin, before the upload (the handler's own print may appear above the check line; the last line is the verdict).
 OW-sd1-AC2 (judgment, graded by the issuer): the plan branch, the member-by-member bytes and the unchanged env. OW-sr1-AC1 (judgment,
