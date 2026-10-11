@@ -36,3 +36,18 @@ Held on the same condition (no DSGN_IRPTV1 order open):
 
 **For the slug:** the reader census finds one PROD reader that refuses release 5, the history reader; its probes are the worker's
 and no live body was read.
+
+---
+
+## Added at round 21, 2026-10-11T15:58:01Z (input: msg 5262)
+
+Held on the same condition (no DSGN_IRPTV1 order open); owner `2.0.0_SA_COO~D2` unless a line says otherwise:
+
+- **D2-S16** (filed by `2.0.0_SA_COO~D2`): IV-e-101 (an Opal report opened on the page prints no vendor wording; portal 58e15f4c on DEV) is UNEXERCISED on a served Opal report: its evidence is a screenshot of synthetic data produced by a driver script, and a static-markup test.
+- **D2-W57-S3** (filed by `0.9.0_WK_DSGN_IRPTV1~57`): The fix mounts OwnedRequestHistory after an accepted Prospect Generate and reads it with selected_tenant = the tenant the submission used (the card's firm for an internal viewer); the page itself is reachable only by an Opal-internal admin Dev user
+- **D2-W58-S3** (filed by `0.9.0_WK_DSGN_IRPTV1~58`): Two things on the Opal document are not vendor WORDS and are left as they are: the Source column prints the wire page number of each value (2, 3, or not stated), and report-level disclosure text prints as the producer supplied it.
+- **D2-W58-S4** (filed by `0.9.0_WK_DSGN_IRPTV1~58`): IV-e-105 is UNEXERCISED on a served Opal report and on a real export: the document was rendered from synthetic fixtures through the print route of a build, not from a backend-produced export.
+- **D2-W53-S12** (filed by `0.9.0_WK_DSGN_IRPTV1~53`): IV-e-97 part 3: this box has no pandas_market_calendars (python 3.14.7), so the package branch of the frontier was exercised by a stub in the new test, not by the real package. The generator's refusal runs against the real package on any box that has one; this worker did not run it there.
+
+**For the slug:** four more changes are on DEV and unexercised on a served Opal report. The Opal wording depends on the provider
+reaching the view; a report with no provider prints the vendor words. The first served Opal report opened on the page settles it.
