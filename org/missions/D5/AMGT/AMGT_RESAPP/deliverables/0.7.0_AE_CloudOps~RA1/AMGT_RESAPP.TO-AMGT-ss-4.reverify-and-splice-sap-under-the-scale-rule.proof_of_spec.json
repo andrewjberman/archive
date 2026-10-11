@@ -1,0 +1,207 @@
+{
+  "genre": "DEPLOY",
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ss-4.reverify-and-splice-sap-under-the-scale-rule",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "cab1577aba",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ss-4.reverify-and-splice-sap-under-the-scale-rule.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ss-4.reverify-and-splice-sap-under-the-scale-rule.md",
+    "group": "OTHER",
+    "vintage_commit": "cab1577aba"
+  },
+  "assignee": "0.7.0_AE_CloudOps~RA1",
+  "risk_class": "WORLD",
+  "never_widen_pair": {
+    "coo_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND93_SAP_DRIVER_COO_HALF.md (msg 3788) (sha256 490a2adf9361a08259817d09c49577472e7102ae442852e821a8727b858014b2)",
+    "cto_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND93_SAP_DRIVER_CTO_HALF.md (msg 3789) (sha256 ac3d029f21509d206504c3e8b5062544c0a08dd3b4ff71dca42485a81497f61e)",
+    "read_before_first_live_act": "Both halves read WHOLE before the entry opened (opened 2026-10-11T11:47Z; the first write at 11:48:21Z).",
+    "conditions_disposition": "1 (pin carries ss-2 and qq-3; the three blobs printed): MET, leg L1. 2 (both VersionIds recorded; r93_scale_table and the dry splice compared with the table; served_validator and moved keys printed): MET, legs L2, L3 and L5. 3 (entry opened first and closed last; the sweep with its denominator): MET, leg L1. 4 (R92 DRIVER REVERIFIED YES; the no-regression arm YES; the served driver for SAP, ASML and BABA before and after): MET, legs L7 and L8."
+  },
+  "rollback": "NAMED, READY BEFORE STEP 1, NOT NEEDED. Copy the recorded prior VersionId of the drafting object, then of the analysis object, to the same key (never a delete): drafting ppUca4bJJDMbWrhpDu178JeH8W2DxYnK, then analysis AWd0Tnoq3G8ZH4eirVrw8cfKKqrUwash. The record is SS4_PRE_ACT_VERSIONIDS_20261011.json and the pre-act drafting bytes are archived beside it. No function, role or schedule moves.",
+  "scope": "Two ordered store writes for SAP_GY_Equity ONLY: filings/v1/SAP_GY_Equity/000110465926020058.analysis.json (ETag-conditional overwrite at its own key) and drafting/v1/SAP_GY_Equity.json (thesis_driver and thesis_driver_provenance only), from a detached checkout at a65e840b3a. No function, role, route or schedule; no S3 delete.",
+  "status": "COMPLETE. AC1 and AC2 PASS; ledger legs L1-L8 closed with proof and the entry CLOSED. Written 2026-10-11T11:48:21Z onward. ASML and BABA untouched.",
+  "go_message": "2.0.0_SA_COO~R1 msg 3817 (GO, run pin a65e840b3a).",
+  "controls": {
+    "recorded_prior_versionids_are_the_rollback_and_the_discriminating_control": {
+      "description": "Order section 5: the recorded VersionIds are the discriminating control, recorded BEFORE step 1 and read back after.",
+      "expected_landed": "SAP's two prior VersionIds equal the COO half's table; after the act exactly those two differ",
+      "expected_not_landed": "a recorded VersionId that differs from the table, or any other object moving",
+      "observed": "(ledger leg L2) PASS -- recorded BEFORE step 1 from the live bucket opal-data-harvest by head_object: file org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~RA1/SS4_PRE_ACT_VERSIONIDS_20261011.json (12 rows: analysis and drafting VersionId, ETag, length, document-sha256, served thesis_driver points). SAP_GY_Equity: analysis filings/v1/SAP_GY_Equity/000110465926020058.analysis.json @AWd0Tnoq3G8ZH4eirVrw8cfKKqrUwash and drafting drafting/v1/SAP_GY_Equity.json @ppUca4bJJDMbWrhpDu178JeH8W2DxYnK, BOTH EQUAL to the COO half's per-key table. ASML_NA_Equity (analysis uelD0RtE9BtYJwl_lci___xW4OPOgstP, drafting C.acV8XBH36kvsgVX4tVHSCYC93Erv2C) and BABA_US_Equity (analysis E9Q7V8bRTY.xUfnWNSFLn0ZTOWB4Rci6, drafting VZehf6otumy15x1J6qbvCFMfprDKdyUP) are the VersionIds round 92's qq-4 wrote and are recorded so the post-act compare shows they did not move. SWEEP NOTE for leg L1: its one hit, qq4-ac1 / amgt-resapp-r92-qq4-stored-driver-dell1.json, is THIS seat's own round-92 entry as it stood in the old detached checkout C:/tmp/qq4-ac1 (at b75fac17a3, before that entry closed); at the shared tree HEAD the entry is CLOSED and its sentinel removed. It is not another seat's.",
+      "status": "PASS"
+    },
+    "scale_table_and_dry_reverify_equal_the_pair_table_on_the_go_day": {
+      "description": "COO condition 2 and bound 7: the table re-run on the day; a dry-run table differing from the half is a STOP.",
+      "expected_landed": "r93_scale_table.py: 12 objects, 11 equal, 1 changed = SAP 1 -> 0; T1 and T2 PASS; the 12-row dry re-verification equals the table",
+      "expected_not_landed": "any other name changing, or SAP expecting other than 0 points",
+      "observed": "(ledger leg L3) PASS -- the pair's table re-run on the GO day (2026-10-11 ~11:5xZ) on the pin. r93_scale_table.py: 12 objects listed, 11 equal, 1 CHANGED = SAP_GY_Equity stored 1 -> expected 0; PASS T1 SAP_GY_Equity expects 0 points, held as a set with a reason naming both scales; PASS T2 control: no other analysis object's expected points move (none); R93 SCALE TABLE: YES. The production dry re-verification (analyze.reverify_stored_thesis_driver dry_run=True) over all 12: stored points read equal the table 12 of 12 and expected equal the table 12 of 12; changed set exactly {SAP_GY_Equity 1 -> 0}; ASML 0 -> 0 and BABA 2 -> 2 (round 92's values, stable under the new rule); nine others equal. SPLICE DRY RUN before step 1 (drafting_build --splice-driver --dry-run --only-keys SAP_GY_Equity): SAP_GY_Equity moved_keys ['thesis_driver_provenance'] driver_points=1 spanned=1 spans [[129709,129715]] served_validator=True analysis=...@AWd0Tnoq3G8ZH4eirVrw8cfKKqrUwash [DRY-RUN: wrote nothing]; DRY-RUN: no pool write. The driver itself moves only after step 1 rewrites the analysis object.",
+      "status": "PASS"
+    },
+    "writer_blobs_at_the_pin_equal_the_half": {
+      "description": "Condition 1: the blobs of the code that writes, printed.",
+      "expected_landed": "analyze.py 58fb485b6608, drafting_build.py fd51d3dd7ffa, crosswalk.py 3603be4be89a at a65e840b3a; ss-2 and qq-3 in the pin",
+      "expected_not_landed": "a differing blob, or ss-2 / qq-3 absent",
+      "observed": "(ledger leg L1) PASS -- read by this seat before any write. PIN: detached checkout C:/tmp/ss4-run HEAD a65e840b3a704beed661c10b00b7ec844ce08531 (the GO's run pin). ANCESTRY: AMGT-ss-2 @f79fdc7f28, AMGT-qq-3 @72f6ede5e0 and AMGT-pp-2 (9376f3bc6b) are ancestors. BLOBS of the writers at the pin equal the half's, 3 of 3: lib/research/filings/analyze.py 58fb485b6608, lib/research/filings/drafting_build.py fd51d3dd7ffa, lib/research/identity/crosswalk.py 3603be4be89a. OPEN-DEPLOY SWEEP of every live worktree: worktrees 24, 17 with an .open_deploys directory read, 339 entries, naming filings/v1 or drafting/v1: [('qq4-ac1', 'amgt-resapp-r92-qq4-stored-driver-dell1.json')] (scheduled producers outside lib/research were not enumerated by the half; this sweep is its named control). Both halves read whole.",
+      "status": "PASS"
+    },
+    "served_validator_true_and_moved_keys_exactly_two": {
+      "description": "Step 2's own dry run, after step 1: the key is validated by the SERVED validator before any write.",
+      "expected_landed": "served_validator=True; moved keys exactly thesis_driver and thesis_driver_provenance",
+      "expected_not_landed": "served_validator=False, or any other top-level key moved",
+      "observed": "(ledger leg L5) PASS -- STEP 2 dry run after step 1 (python -m lib.research.filings.drafting_build --splice-driver --dry-run --only-keys SAP_GY_Equity): SAP_GY_Equity moved_keys ['thesis_driver','thesis_driver_provenance'] driver_points=0 spanned=0 spans=[] served_validator=True analysis=filings/v1/SAP_GY_Equity/000110465926020058.analysis.json@SEdN6G36rkxJMw18d92IAZYWjt_JDdKn [DRY-RUN: wrote nothing]; DRY-RUN: no pool write, no file write. served_validator=True; the moved keys are exactly thesis_driver and thesis_driver_provenance (the half's Branch 2 STOP did not trigger).",
+      "status": "PASS"
+    },
+    "no_other_key_moved_24_object_compare": {
+      "description": "Bound 8: the write set is SAP only; ASML and BABA (round 92's writes) are not touched. All 24 objects of the 12 names re-headed.",
+      "expected_landed": "2 VersionIds moved (SAP analysis and drafting), 22 unchanged including ASML's and BABA's",
+      "expected_not_landed": "any other object's VersionId moving",
+      "observed": "(ledger leg L7) PASS -- all 24 objects of the 12 names re-headed after both steps against the L2 record: 24 compared, VersionId MOVED 2, unchanged 22. The two are exactly the written key: SAP_GY_Equity analysis AWd0Tnoq3G8Z.. -> SEdN6G36rkxJ.., drafting ppUca4bJJDMb.. -> 8g5aPEGlqi7o... ASML_NA_Equity and BABA_US_Equity (round 92's writes) and the nine equal names read the same VersionIds as before. DRAFTING DIFF against the saved pre-act bytes: top-level keys that differ are exactly ['thesis_driver','thesis_driver_provenance'] (key count 15 -> 16: the provenance key is new on this object). SERVED /thesis thesis_driver before -> after: SAP_GY_Equity 1 -> 0 points (the 18,078-under-a-billions-unit point leaves the chart, the set held whole with the scale reason); ASML_NA_Equity 0 -> 0; BABA_US_Equity 2 -> 2.",
+      "status": "PASS"
+    },
+    "drafting_diff_is_only_the_driver_and_its_provenance": {
+      "description": "The splice's own contract, read against the saved pre-act bytes.",
+      "expected_landed": "top-level keys that differ: exactly thesis_driver and thesis_driver_provenance",
+      "expected_not_landed": "any other top-level key differing",
+      "observed": "(ledger leg L7) PASS -- all 24 objects of the 12 names re-headed after both steps against the L2 record: 24 compared, VersionId MOVED 2, unchanged 22. The two are exactly the written key: SAP_GY_Equity analysis AWd0Tnoq3G8Z.. -> SEdN6G36rkxJ.., drafting ppUca4bJJDMb.. -> 8g5aPEGlqi7o... ASML_NA_Equity and BABA_US_Equity (round 92's writes) and the nine equal names read the same VersionIds as before. DRAFTING DIFF against the saved pre-act bytes: top-level keys that differ are exactly ['thesis_driver','thesis_driver_provenance'] (key count 15 -> 16: the provenance key is new on this object). SERVED /thesis thesis_driver before -> after: SAP_GY_Equity 1 -> 0 points (the 18,078-under-a-billions-unit point leaves the chart, the set held whole with the scale reason); ASML_NA_Equity 0 -> 0; BABA_US_Equity 2 -> 2.",
+      "status": "PASS"
+    },
+    "served_driver_before_and_after": {
+      "description": "The visible effect, printed from the live /thesis route: SAP's one point (a scale error) leaves the chart; ASML and BABA do not move.",
+      "expected_landed": "SAP 1 -> 0 points; ASML 0 -> 0; BABA 2 -> 2",
+      "expected_not_landed": "SAP still serving the 18,078-under-billions point, or ASML or BABA moved",
+      "observed": "(ledger leg L7) PASS -- all 24 objects of the 12 names re-headed after both steps against the L2 record: 24 compared, VersionId MOVED 2, unchanged 22. The two are exactly the written key: SAP_GY_Equity analysis AWd0Tnoq3G8Z.. -> SEdN6G36rkxJ.., drafting ppUca4bJJDMb.. -> 8g5aPEGlqi7o... ASML_NA_Equity and BABA_US_Equity (round 92's writes) and the nine equal names read the same VersionIds as before. DRAFTING DIFF against the saved pre-act bytes: top-level keys that differ are exactly ['thesis_driver','thesis_driver_provenance'] (key count 15 -> 16: the provenance key is new on this object). SERVED /thesis thesis_driver before -> after: SAP_GY_Equity 1 -> 0 points (the 18,078-under-a-billions-unit point leaves the chart, the set held whole with the scale reason); ASML_NA_Equity 0 -> 0; BABA_US_Equity 2 -> 2.",
+      "status": "PASS"
+    },
+    "writes_landed_through_the_one_writer_per_property": {
+      "description": "The writer census: analyze.reverify_stored_thesis_driver for the analysis property, analyze.write_outputs(drafting_only) for the drafting property.",
+      "expected_landed": "step 1 through reverify_stored_thesis_driver (put_performed true, own key); step 2 SPLICED 1 of 1 with post-act sha256",
+      "expected_not_landed": "a write through any other path, or a key other than SAP",
+      "observed": "(ledger leg L6) PASS -- STEP 2 write: python -m lib.research.filings.drafting_build --splice-driver --pre-act-dir <dir> --only-keys SAP_GY_Equity (no --dry-run), from the pin checkout. The key was built and validated by the SERVED validator BEFORE the write: served_validator=True. Pre-act drafting bytes saved first (SAP_GY_Equity.json 106830 B; archived in deliverables/0.7.0_AE_CloudOps~RA1/SS4_PRE_ACT_DRAFTING_BYTES/). Output: 'SAP_GY_Equity: SPLICED post_act_sha256=1cfb5b1b4def8579aacaf3c7d8ef53e094208db7f3e0c1ce9cd923880676c34d', 'SPLICED 1 of 1'. New drafting VersionId drafting/v1/SAP_GY_Equity.json 8g5aPEGlqi7owGkr7E5uEGQABQc4cDKu (was ppUca4bJJDMbWrhpDu178JeH8W2DxYnK). The ONE writer analyze.write_outputs(drafting_only=True).",
+      "status": "PASS"
+    },
+    "open_deploy_sweep_of_every_live_worktree": {
+      "description": "Condition 3: sweep every live worktree's open deploys for filings/v1 or drafting/v1; the half did not enumerate scheduled producers outside lib/research, so this is the named control.",
+      "expected_landed": "0 entries from another seat naming filings/v1 or drafting/v1 across the printed denominator (the one hit is this seat's own closed qq-4 entry in an old checkout, stated)",
+      "expected_not_landed": "an entry of another seat naming either prefix",
+      "observed": "(ledger leg L2) PASS -- recorded BEFORE step 1 from the live bucket opal-data-harvest by head_object: file org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~RA1/SS4_PRE_ACT_VERSIONIDS_20261011.json (12 rows: analysis and drafting VersionId, ETag, length, document-sha256, served thesis_driver points). SAP_GY_Equity: analysis filings/v1/SAP_GY_Equity/000110465926020058.analysis.json @AWd0Tnoq3G8ZH4eirVrw8cfKKqrUwash and drafting drafting/v1/SAP_GY_Equity.json @ppUca4bJJDMbWrhpDu178JeH8W2DxYnK, BOTH EQUAL to the COO half's per-key table. ASML_NA_Equity (analysis uelD0RtE9BtYJwl_lci___xW4OPOgstP, drafting C.acV8XBH36kvsgVX4tVHSCYC93Erv2C) and BABA_US_Equity (analysis E9Q7V8bRTY.xUfnWNSFLn0ZTOWB4Rci6, drafting VZehf6otumy15x1J6qbvCFMfprDKdyUP) are the VersionIds round 92's qq-4 wrote and are recorded so the post-act compare shows they did not move. SWEEP NOTE for leg L1: its one hit, qq4-ac1 / amgt-resapp-r92-qq4-stored-driver-dell1.json, is THIS seat's own round-92 entry as it stood in the old detached checkout C:/tmp/qq4-ac1 (at b75fac17a3, before that entry closed); at the shared tree HEAD the entry is CLOSED and its sentinel removed. It is not another seat's.",
+      "status": "PASS"
+    }
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-harvest/filings/v1/SAP_GY_Equity/000110465926020058.analysis.json",
+      "kind": "s3_object",
+      "commit_or_etag": "SEdN6G36rkxJMw18d92IAZYWjt_JDdKn",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "(ledger leg L4) PASS -- STEP 1 ran for SAP_GY_Equity ONLY, from the pin checkout C:/tmp/ss4-run (HEAD a65e840b3a): analyze.reverify_stored_thesis_driver('SAP_GY_Equity','000110465926020058',dry_run=False) through crosswalk.write_pool (put_performed true, the ETag-conditional overwrite of the object's own key). Points 1 -> 0, held_uncited 3 (the 2023 and 2024 millions and the 2025 billions, held WHOLE). filings/v1/SAP_GY_Equity/000110465926020058.analysis.json now VersionId SEdN6G36rkxJMw18d92IAZYWjt_JDdKn (was AWd0Tnoq3G8ZH4eirVrw8cfKKqrUwash), 402161 bytes, document-sha256 54ba2a86a96b50c5.., written 2026-10-11T11:48:21Z. No other key was called; ASML and BABA were not touched; no delete, the prior Version",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/drafting/v1/SAP_GY_Equity.json",
+      "kind": "s3_object",
+      "commit_or_etag": "8g5aPEGlqi7owGkr7E5uEGQABQc4cDKu",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "(ledger leg L6) PASS -- STEP 2 write: python -m lib.research.filings.drafting_build --splice-driver --pre-act-dir <dir> --only-keys SAP_GY_Equity (no --dry-run), from the pin checkout. The key was built and validated by the SERVED validator BEFORE the write: served_validator=True. Pre-act drafting bytes saved first (SAP_GY_Equity.json 106830 B; archived in deliverables/0.7.0_AE_CloudOps~RA1/SS4_PRE_ACT_DRAFTING_BYTES/). Output: 'SAP_GY_Equity: SPLICED post_act_sha256=1cfb5b1b4def8579aacaf3c7d8ef53e094208db7f3e0c1ce9cd923880676c34d', 'SPLICED 1 of 1'. New drafting VersionId drafting/v1/SAP_GY_Equity.json 8g5aPEGlqi7owGkr7E5uEGQABQc4cDKu (was ppUca4bJJDMbWrhpDu178JeH8W2DxYnK). The ONE writer analyze.write_out",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~RA1/SS4_PRE_ACT_VERSIONIDS_20261011.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The rollback list and the discriminating control: 12 names, two VersionIds each, recorded before step 1."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261011T1147Z_amgt-resapp-r93-ss4-sap-driver-dell1_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "2f72ffb516",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The NEVER-2 entry: opened 2026-10-11T11:47Z with 8 legs before step 1, CLOSED after L8; the closed bytes ride the commit that carries this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every analysis object is listed; SAP_GY_Equity reads CHANGED with expected 0 point(s) and served equal to it (OK), ASML and BABA and every other name read OK; PASS R1, PASS R2, PASS R5; R92 DRIVER REVERIFIED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round92_prep/checks/r92_driver_reverified.py\" --write-set SAP_GY_Equity; echo \"exit=$?\"",
+      "output_evidence": "(ledger leg L8) PASS -- AC1 r92_driver_reverified.py --write-set SAP_GY_Equity, exit=0 (the instrument already carries --write-set from round 92's AMENDMENT 2, so no amendment is needed): where=deployed analysis objects 12, with a served driver 12, expected-changed 1, expected-same 11; SAP_GY_Equity CHANGED expected 0 stored 0 served 0 OK; ASML_NA_Equity, BABA_US_Equity (2 points) and the other nine same OK; PASS R1, PASS R2, PASS R5 (every write-set name is a listed analysis object and none held); R92 DRIVER REVERIFIED: YES. AC2 the no-regression arm, exit=0, function CodeSha256 SOzAz9/gfKE++UOSB8qWSDJvhOsDQMoE+DDPzaFbeSI= LastModified 2026-10-11T09:26:42Z re-read in the same output and UNCHANGED: R89 PEER IDENTITY YES, R89 SUBJECT CAP YES, R89 PEERS DEPLOYED YES, R87 DOSSIER YES, R87 WITHHELD AC1 YES, R84 LISTING AC1 YES, R89 DEPLOYED CLOSE YES.",
+      "denominator": "12 stored analysis objects, 12 with a served driver, expected-changed 1 (SAP), expected-same 11",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the no-regression arm: R89 PEERS DEPLOYED: YES and R89 DEPLOYED CLOSE: YES (dossier /11, the withhold and the listing byte-equal) with the function's CodeSha256 re-read, unchanged; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_peers_deployed.sh\" && bash \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_deployed_close.sh\" --want amgt-corpus-dossier/11; echo \"exit=$?\"",
+      "output_evidence": "(ledger leg L8) PASS -- AC1 r92_driver_reverified.py --write-set SAP_GY_Equity, exit=0 (the instrument already carries --write-set from round 92's AMENDMENT 2, so no amendment is needed): where=deployed analysis objects 12, with a served driver 12, expected-changed 1, expected-same 11; SAP_GY_Equity CHANGED expected 0 stored 0 served 0 OK; ASML_NA_Equity, BABA_US_Equity (2 points) and the other nine same OK; PASS R1, PASS R2, PASS R5 (every write-set name is a listed analysis object and none held); R92 DRIVER REVERIFIED: YES. AC2 the no-regression arm, exit=0, function CodeSha256 SOzAz9/gfKE++UOSB8qWSDJvhOsDQMoE+DDPzaFbeSI= LastModified 2026-10-11T09:26:42Z re-read in the same output and UNCHANGED: R89 PEER IDENTITY YES, R89 SUBJECT CAP YES, R89 PEERS DEPLOYED YES, R87 DOSSIER YES, R87 WITHHELD AC1 YES, R84 LISTING AC1 YES, R89 DEPLOYED CLOSE YES.",
+      "denominator": "function CodeSha256 SOzAz9.. re-read in the same output, unchanged since qq-5",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "A rescaling of SAP's series to one unit",
+      "reason": "Not done and not built: the rule holds the set whole and infers no conversion (CTO half). SAP's 2025 figure (21.05 billion) and 2023-2024 millions are not shown until a later cell rescales a series whose excerpt states the conversion."
+    },
+    {
+      "item": "ASML and BABA",
+      "reason": "Written by round 92's qq-4; recorded and read back unchanged here (bound 8); a simulated splice for each moves nothing under the new rule (the COO half's control)."
+    },
+    {
+      "item": "The sweep hit in the old checkout",
+      "reason": "The one entry the sweep printed is this seat's own round-92 qq-4 entry as it stood in the detached checkout C:/tmp/qq4-ac1 (at b75fac17a3, before it closed); the entry is CLOSED at the shared HEAD."
+    },
+    {
+      "item": "A push of the commits",
+      "reason": "TO BOUNDS 3 and the shared-branch law: LOCAL on box/dell1; origin read by ls-remote."
+    }
+  ],
+  "surprises": [],
+  "regression_reads": {
+    "asml_and_baba_unmoved": "ASML 0 -> 0 and BABA 2 -> 2 served; their analysis and drafting VersionIds unchanged (leg L7).",
+    "nine_equal_names_untouched": "BA, COST, HAL, HD, INTU, KMB, NU, PBR, VLO: both VersionIds equal the L2 record (leg L7).",
+    "function_not_moved": "AC2 names CodeSha256 SOzAz9.. unchanged; no function, role or schedule moved (leg L8)."
+  },
+  "cold_reads": {
+    "served_effect": "SAP's driver chart goes from one point that was itself a scale error to an empty driver with the held reason; the Security Analysis page is Opal-internal (staff-only).",
+    "push_state": "The commit carrying this instance is LOCAL on box/dell1; origin read by ls-remote before it. No push by this seat.",
+    "open_deploys_sweep": "Pre-act sweep (leg L1): 24 worktrees listed, 17 with an .open_deploys directory read (339 entries); the only hit is this seat's own closed entry in an old checkout."
+  },
+  "forward_notes": [
+    "A rescale cell for SAP is conditional on the excerpt stating the conversion (the analysis's exception clause), which ss-2 did not build.",
+    "Round 94's first cell: D1-S23 (the held-name index's Sanofi display name)."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~RA1/logs/2026-10-11/ss4_sap_driver_scale_rule.md",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open; close-leg L1-L8; close --slug amgt-resapp-r93-ss4-sap-driver-dell1",
+      "result": "PASS. 8 legs proven; entry CLOSED."
+    },
+    {
+      "tool": "r93_scale_table.py / analyze.reverify_stored_thesis_driver",
+      "invocation": "the GO-day table, the dry re-verification over 12, then dry_run=False for SAP",
+      "result": "PASS. 12 of 12 equal the table; 1 written."
+    },
+    {
+      "tool": "drafting_build --splice-driver",
+      "invocation": "--dry-run, then --pre-act-dir without --dry-run, --only-keys SAP_GY_Equity",
+      "result": "PASS. served_validator=True; SPLICED 1 of 1."
+    },
+    {
+      "tool": "r92_driver_reverified.py / r89 checks",
+      "invocation": "the two order criteria",
+      "result": "PASS x2, exit=0 each."
+    }
+  ]
+}
