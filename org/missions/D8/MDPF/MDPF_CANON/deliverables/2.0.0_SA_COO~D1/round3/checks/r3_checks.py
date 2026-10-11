@@ -1,6 +1,6 @@
 """r3_checks.py -- MDPF_CANON round 3 (issuer 2.0.0_SA_COO~D1): one file, three checks, one per cell.
 
-Usage (repo root of the checkout under test): python <this file> basis|writer|reader
+Usage (repo root of the checkout under test): python <this file> basis|writer|reader|homes
 
 Round-2 analysis (ledger/ROUND_ANALYSIS.round2.md @71e85b7191) section 3 items 2-4. Each subcommand prints one line per arm and
 "ROUND 3 <NAME>: <k> of <n> arms", and exits 0 only when every arm passes. Reads only; writes nothing; no AWS.
@@ -12,16 +12,24 @@ basis   (CN-c-1, M7 recut) deliverables/0.9.0_WK_MDPF_CANON~8/X2_GLOBAL_BASIS.md
               inflection_non_model_aua; each row carries an integer minimum firm count in a cell headed "min firms".
   3 CITED     infra/logic/06_CONFORMANCE_LEDGER.md's X2 row cites this file's path.
 writer  (CN-c-2, M8) data/mdpf/scripts/bronze/pull_orion_model_composition.py and infra/aws/terraform/mdpf-pipeline/iam.tf
+  AMENDED 2026-10-11 (row MDPF_CANON-D1-W9-S1, CTO ruling msg 3417 = B): the runner has no lib/, so the script reads the generated
+  data/mdpf/config/bronze_homes.json (synced to /opt/mdpf/config/); it never imports lib/opal_naming.
   1 NO TYPED  the script carries no string literal (docstrings excluded) containing "mdpf/bronze" and no bucket literal
-              "opal-data-mdpf", and imports the builder (opal_naming).
+              "opal-data-mdpf", names bronze_homes.json, and does not import opal_naming.
   2 DEST      bronze_destination("2026-10-09") returns (bucket, key_prefix) equal to address("mdpf", "inflection", "bronze",
               "orion_model_composition", "date=2026-10-09") split at the bucket; the script puts each model file at
               "<key_prefix>/model_<id>.json" and the meta at "<key_prefix>/_meta/pull_complete.json".
   3 GRANT     iam.tf carries an s3:PutObject statement whose resource is the bucket and prefix of arm 2 (a literal ARN equal to the
               builder's, or an interpolation of a module output).
+homes   (CN-c-2, ruling 3417 conditions 1 and 2) data/mdpf/config/bronze_homes.json and
+        data/mdpf/scripts/gold/tests/test_mdpf_bronze_homes.py
+  1 GENERATED the file carries _provenance.generator (an existing file), generator_commit and registry_sha256, and its
+              orion_model_composition entry (bucket + key_prefix + partition) equals the builder's address() for 2026-10-09.
+  2 CLEAN     the test module's mismatches(path) returns [] on the real file.
+  3 NEGATIVE  the same function returns a non-empty list on a copy with one entry altered.
 reader  (CN-c-3, M4 slice 1) data/mdpf/scripts/gold/build_mdpf_wsc_inflection_feeder.py
-  1 NO TYPED  the script carries no string literal (docstrings excluded) containing "mdpf/bronze", and imports the builder
-              (opal_naming). The feeder's own OUTPUT bucket literal is not this cell's and is not graded.
+  1 NO TYPED  the script carries no string literal (docstrings excluded) containing "mdpf/bronze", names bronze_homes.json, and does
+              not import opal_naming. The feeder's own OUTPUT bucket literal is not this cell's and is not graded.
   2 SOURCE    bronze_partition_prefix("2026-10-09") equals the writer's bronze_destination("2026-10-09") byte for byte.
   3 ROLL      resolve_bronze_date, given a fake S3 listing whose partitions are date=2026-10-05 and date=2026-10-07 under the builder's
               parent prefix, resolves 2026-10-09 to ("2026-10-07", 2), and 2026-10-07 to ("2026-10-07", 0).
@@ -43,6 +51,8 @@ LEDGER = "infra/logic/06_CONFORMANCE_LEDGER.md"
 WRITER = "data/mdpf/scripts/bronze/pull_orion_model_composition.py"
 READER = "data/mdpf/scripts/gold/build_mdpf_wsc_inflection_feeder.py"
 IAM = "infra/aws/terraform/mdpf-pipeline/iam.tf"
+HOMES = "data/mdpf/config/bronze_homes.json"
+HOMES_TEST = "data/mdpf/scripts/gold/tests/test_mdpf_bronze_homes.py"
 arms = []
 
 
@@ -100,6 +110,69 @@ def typed_home(src, bucket_too=True):
     return bad, ("opal_naming" in src)
 
 
+def reads_homes(src):
+    """(the script names the generated homes file, the script imports lib/opal_naming). The runner has no lib/ (row
+    MDPF_CANON-D1-W9-S1; CTO ruling msg 3417: B, a generated code/config JSON of builder output)."""
+    import ast
+    imports_lib = False
+    for node in ast.walk(ast.parse(src)):
+        if isinstance(node, ast.ImportFrom) and node.module and "opal_naming" in node.module:
+            imports_lib = True
+        if isinstance(node, ast.Import) and any("opal_naming" in a.name for a in node.names):
+            imports_lib = True
+    return ("bronze_homes.json" in src), imports_lib
+
+
+def homes():
+    """CN-c-2 (CTO ruling msg 3417, conditions 1 and 2): the generated file and the repo test."""
+    import json
+    import shutil
+    import tempfile
+    raw = text(HOMES)
+    data = None
+    try:
+        data = json.loads(raw) if raw else None
+    except ValueError:
+        data = None
+    if not data:
+        arm("GENERATED", False, "%s is absent or not JSON" % HOMES)
+        arm("CLEAN", False, "no file")
+        arm("NEGATIVE", False, "no file")
+        return finish("HOMES")
+    prov = data.get("_provenance", {})
+    have = [k for k in ("generator", "generator_commit", "registry_sha256") if prov.get(k)]
+    ent = data.get("feeds", {}).get("orion_model_composition", {})
+    want_bucket, want_key = expected_dest("2026-10-09")
+    got = (ent.get("bucket"), (ent.get("key_prefix", "") + "/" + ent.get("partition", "").format(date="2026-10-09")))
+    gen_exists = bool(prov.get("generator")) and os.path.isfile(os.path.join(ROOT, prov.get("generator", "")))
+    arm("GENERATED", len(have) == 3 and gen_exists and got == (want_bucket, want_key),
+        "provenance fields %d of 3, generator file present: %s, entry %s vs builder %s"
+        % (len(have), gen_exists, got, (want_bucket, want_key)))
+    clean, neg = False, False
+    cl, nl = "", ""
+    try:
+        mod = load(HOMES_TEST, "r3_homes_test")
+        miss = mod.mismatches(os.path.join(ROOT, HOMES))
+        clean = miss == []
+        cl = "mismatches on the real file: %s" % (miss,)
+        tmp = tempfile.mkdtemp()
+        alt = json.loads(raw)
+        alt["feeds"]["orion_model_composition"]["key_prefix"] += "_ALTERED"
+        p = os.path.join(tmp, "bronze_homes.json")
+        with open(p, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(alt, f)
+        m2 = mod.mismatches(p)
+        shutil.rmtree(tmp, ignore_errors=True)
+        neg = bool(m2)
+        nl = "mismatches with one entry altered: %d" % len(m2)
+    except Exception as e:
+        cl = cl or "%s: %s" % (type(e).__name__, str(e)[:140])
+        nl = nl or "no test module"
+    arm("CLEAN", clean, cl)
+    arm("NEGATIVE", neg, nl)
+    return finish("HOMES")
+
+
 def basis():
     t = text(BASIS)
     if t is None:
@@ -144,8 +217,11 @@ def writer():
         arm("DEST", False, "absent")
         arm("GRANT", False, "absent")
         return finish("WRITER")
-    bad, imp = typed_home(src)
-    arm("NO TYPED", not bad and imp, "typed-home literals: %s; imports opal_naming: %s" % (bad or "none", imp))
+    bad, _ = typed_home(src)
+    reads, imports_lib = reads_homes(src)
+    arm("NO TYPED", not bad and reads and not imports_lib,
+        "typed-home literals: %s; reads the generated homes file: %s; imports lib/opal_naming: %s"
+        % (bad or "none", reads, imports_lib))
     want_bucket, want_key = expected_dest("2026-10-09")
     ok, line = False, ""
     try:
@@ -181,8 +257,11 @@ def reader():
         arm("SOURCE", False, "absent")
         arm("ROLL", False, "absent")
         return finish("READER")
-    bad, imp = typed_home(src, bucket_too=False)
-    arm("NO TYPED", not bad and imp, "old bronze path literals: %s; imports opal_naming: %s" % (bad or "none", imp))
+    bad, _ = typed_home(src, bucket_too=False)
+    reads, imports_lib = reads_homes(src)
+    arm("NO TYPED", not bad and reads and not imports_lib,
+        "old bronze path literals: %s; reads the generated homes file: %s; imports lib/opal_naming: %s"
+        % (bad or "none", reads, imports_lib))
     want = expected_dest("2026-10-09")
     mod, line, ok = None, "", False
     try:
@@ -222,8 +301,8 @@ def reader():
 
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = {"basis": basis, "writer": writer, "reader": reader}.get(cmd)
+    fn = {"basis": basis, "writer": writer, "reader": reader, "homes": homes}.get(cmd)
     if not fn:
-        print("usage: r3_checks.py basis|writer|reader")
+        print("usage: r3_checks.py basis|writer|reader|homes")
         sys.exit(2)
     sys.exit(fn())
