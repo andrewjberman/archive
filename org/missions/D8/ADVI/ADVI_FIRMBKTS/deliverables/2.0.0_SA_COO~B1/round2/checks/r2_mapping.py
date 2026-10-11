@@ -133,20 +133,29 @@ def structure(root):
 
     v5 = True
     by_key = {(r["bucket"], r["prefix"]): r for r in rows}
-    n_same = 0
+    n_same = n_overlap = 0
     for r in m1["rows"]:
         if r["disposition"] == "FAULT":
             continue
         cur = by_key.get((r["bucket"], r["prefix"]))
         keys = ("disposition", "address", "dest_pattern")
         if cur is None or any(cur.get(k) != r.get(k) for k in keys):
+            # the ONE permitted change to a round-1 row: a MOVE or HOME class whose MEASURED destination-key overlap with
+            # another class is above 0 becomes a FAULT row owned by a named serial (ruling 1e), never a new placement
+            if (cur is not None and r["disposition"] in ("MOVE", "HOME") and cur.get("disposition") == "FAULT"
+                    and str(cur.get("reason", "")).startswith("destination-key overlap")
+                    and SERIAL_RE.match(str(cur.get("fault_owner", "")))):
+                n_overlap += 1
+                continue
             print("    DISTURBED %s %s" % (r["bucket"], r["prefix"]))
             v5 = False
         else:
             n_same += 1
-    print("  round-1 placed, retired and decided classes unchanged: %d" % n_same)
-    res.append(("V5 every class round 1 placed, retired or decided keeps its disposition, address and pattern "
-                "(the difference control: the repair moves only the FAULT classes)", v5 and n_same > 0))
+    print("  round-1 placed, retired and decided classes unchanged: %d; turned FAULT by a measured key overlap: %d"
+          % (n_same, n_overlap))
+    res.append(("V5 every class round 1 placed, retired or decided keeps its disposition, address and pattern, "
+                "except a MOVE or HOME class a measured key overlap turned FAULT (the difference control: the repair "
+                "moves only the FAULT classes)", v5 and n_same > 0))
     return res
 
 
