@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-135",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "61f17b5413",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-135.unclassed-90-custodian-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~108",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~108/UNCLASSED_90.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~108/UNCLASSED_90.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only counts-only record: denominator 90, two classes (82 segments) each with a rule, remainder 8 with its reason; S3 reads only (2488 objects over 3 prefixes of 49 Financial's own tree), no S3 write, no code change",
+      "artifact_covered_by": [
+        "DB70-5-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB70-5-AC1",
+      "criterion_verbatim": "DB70-5-AC1 -- the 90 unclassed segments are classed by cause from the custodian read with a stated rule per class, and the classes and the remainder sum to 90. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r70/p70_round70.py\" . DB70-5-AC1",
+      "output_evidence": "OK: 90 segments: 2 class(es) holding 82, remainder 8\nDB70-5-AC1 PASS",
+      "denominator": "90 of 90 segments placed (51 + 31 in 2 classes, 8 in the remainder); exit code 0",
+      "status": "PASS",
+      "expect": "DB70-5-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record from the worktree root; the classing script reads the private pickles only",
+      "observed": "the classing script re-run gives the same counts (51, 31, remainder 8); the checker prints the same last line on a second run",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB70-5-AC1 FAIL",
+      "observed": "FAIL: no record 0.9.0_WK_IRPT_DASHBD~108/UNCLASSED_90.json; DB70-5-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the 8 remainder segments' cause; the 31 segments whose simple ledger flow sum does not tie BD net additions (not used to class)",
+      "reason": "No cause is shown by the two sides' numbers for the 8; the ledger sum was a supplementary check, not a rule."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W108-S1",
+    "IRPT_DASHBD-D2-W108-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p70_round70.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r70/p70_round70.py\" . DB70-5-AC1",
+      "result": "DB70-5-AC1 PASS (rc 0); against an empty root it prints DB70-5-AC1 FAIL (rc 1)"
+    }
+  ]
+}
