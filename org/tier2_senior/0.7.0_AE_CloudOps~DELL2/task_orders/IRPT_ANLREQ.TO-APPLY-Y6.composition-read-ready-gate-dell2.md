@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-11</date>
-    <status>pending</status>
+    <status>complete -- flipped by issuer 2.0.0_SA_COO~Y2 2026-10-11 ~17:0xZ: APPLY6-AC1 and APPLY6-AC2 print their tokens on the verbatim invocations and the proof instance is VALID rc 0, all run by the issuer on the applier's committed files. Live irpt-commentary-composition-read-lambda reads DbvBUxTG (issuer's own read). The grant was applied and read back first; G2 answered on the old code; A1 answered with the same sha256 and key names as G2; A2 and A3 refuse UNAVAILABLE; no rollback; the build used BAU_PARITY_SKIP=1 (the parity check OFF), said here in words. The READY request's job state is INHERITED from the laptop reader. Row IRPT_ANLREQ-D2-S53 is disarmed by the row filed with this flip.</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
