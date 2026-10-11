@@ -36,11 +36,15 @@ def _root(arg):
 
 
 EXPECTED = {
-    "data/firm_registry.json",
     "infra/aws/lambda-edge/_shared/firm-config.mjs",
-    "data/assets/scripts/gold/investor_reporting/directory_runner.py",
-    "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+    "infra/aws/lambda/investor-reporting/_authz/loaders.py",
 }
+# 2026-10-11 ~15:1xZ: after FB-g-16 the IRPT loaders' generated OWNERSHIP_READ carries the routed bucket, so the set is the
+# router, guard and validator's firm-config.mjs and the IRPT consumers' loaders.py: the two served-tier readers.
+# 2026-10-11 ~14:0xZ: after FB-g-11 (the asset-dim pin reads its tier's live bronze row) and FB-g-14 (firm_registry.json and
+# the two IRPT gold runners read the transitional IRPT live row) the flip changes the router, guard and validator's
+# firm-config.mjs alone: the only served-tier reader. Before those cells the rehearsal read five value-changing targets,
+# then four.
 # 2026-10-11 ~12:5xZ: the CTO's ADDENDUM 3 (round-3 analysis) takes _asset_dim_rest_pin.py out of the flip (it reads the
 # transitional bronze-live row of cell FB-g-11). Before that cell merges the rehearsal reads FIVE value-changing targets.
 OLD, NEW = "opal-data-bd", "opal-data-49financial"
@@ -109,8 +113,8 @@ def flip(root):
     print("  not value-changing readers named by the CTO's list: %s" % sorted(set(READERS) - names))
     print("  value-changing targets the CTO's list does not name: %s" % sorted(names - set(READERS)))
     res.append(("F2 at least one generated target changes value under the flip", bool(names)))
-    res.append(("F3 the value-changing set equals the enumerated expectation (4 targets: firm_registry.json, "
-                "firm-config.mjs, directory_runner.py, holdings_snapshot.py)",
+    res.append(("F3 the value-changing set equals the enumerated expectation (2 targets: the served-tier "
+                "firm-config.mjs and the IRPT loaders.py ownership read)",
                 names == EXPECTED))
     only_bucket = all(all((OLD in ln or NEW in ln) for ln in diff) for diff in changed.values())
     res.append(("F4 in every value-changing target only the bucket value moves (each changed line names %s or %s)"

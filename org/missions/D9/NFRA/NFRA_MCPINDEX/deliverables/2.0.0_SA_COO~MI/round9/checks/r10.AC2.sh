@@ -38,7 +38,8 @@ h=$(printf '%s\n' "$o" | sed -n 's/^health=//p')
 [ -n "$h" ] || echo "INSTRUMENT: empty health with status=${st:-NONE}; fetched output head: $(printf '%s' "$o" | head -c 300 | tr '\n' ' ')"
 printf '%s\n' "$o" | grep -E '^(READ|ROUTE|FWD18|GUIDE) ' | cut -c1-200
 good=$(printf '%s\n' "$o" | grep -E '^READ .* verdict=SERVED rows=' | awk '{for(i=1;i<=NF;i++){split($i,a,"="); v[a[1]]=a[2]} if (v["rows"]>0 && v["rows"]==v["exact"] && v["scope_ok"]=="True" && v["claim"]=="measured" && v["completeness"]=="stated") n++} END {print n+0}')
-rt=$(printf '%s\n' "$o" | grep -E '^ROUTE ' | awk '{split($2,a,"=");split($3,b,"="); if (a[2]==b[2]) n++} END {print n+0}')
+# A ROUTE line is "ROUTE <name> first=<E> want=<E>": the two values are fields 3 and 4 (row Z-S99: $2/$3 read 0 always).
+rt=$(printf '%s\n' "$o" | grep -E '^ROUTE ' | awk '{split($3,a,"=");split($4,b,"="); if (a[2]!="" && a[2]==b[2]) n++} END {print n+0}')
 f18=$(printf '%s\n' "$o" | sed -n -E 's/^FWD18 served=([0-9]+) c3=([0-9]+).*/\1 \2/p')
 gd=$(printf '%s\n' "$o" | sed -n -E 's/^GUIDE first=([^ ]*) codes=([0-9]+).*/\1 \2/p')
 echo "ssm command=${cid:-NONE} status=${st:-NONE}; /health=$h; SERVED readers graded good $good of $want; routes first $rt of 4; fwd18 served,c3=${f18:-none}; guide=${gd:-none}"

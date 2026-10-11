@@ -60,12 +60,14 @@ def structure(root):
     # data keeps its own class-grain row at the same prefix (ruling (a): the class is unblocked), so the two never collide
     ph = [r for r in rows if r.get("placeholder_key") and str(r.get("rule", "")).startswith("3a")]
     cls_rows = [r for r in rows if r not in ph]
-    own = [(r.get("bucket"), r.get("prefix")) for r in cls_rows if not r.get("parent")]
+    # CTO S7: a class may hold a `complete` and a `skip` marker row at one key; they are told apart by marker_kind
+    own = [(r.get("bucket"), r.get("prefix"), r.get("marker_kind") if r.get("kind") == "marker" else None)
+           for r in cls_rows if not r.get("parent")]
     own_ph = [(r.get("bucket"), r.get("prefix")) for r in ph]
     kids = [(r.get("bucket"), r.get("prefix"), r.get("parent")) for r in cls_rows if r.get("parent")]
-    dup = (len(own) + len(kids) - len(set(own) | {(b, p) for b, p, _ in kids})) + (len(own_ph) - len(set(own_ph)))
+    dup = (len(own) - len(set(own))) + (len(kids) - len({(b, p, par) for b, p, par in kids}))         + len({(b, p) for b, p, k in own if k is None} & {(b, p) for b, p, _ in kids}) + (len(own_ph) - len(set(own_ph)))
     ok2 = not dup
-    covered = set(own) | set(own_ph)
+    covered = {(b, p) for b, p, _ in own} | set(own_ph)
     for b, p, parent in kids:
         if (b, parent) not in regrids or not p.startswith(parent):
             print("    CHILD-WITHOUT-REGRID %s %s (parent %s)" % (b, p, parent))
@@ -172,6 +174,8 @@ def structure(root):
     for r in m2["rows"]:
         if r["disposition"] == "FAULT" or r.get("parent"):
             continue
+        if r.get("kind") != "marker" and ("{partition}" in str(r.get("address")) or "{object}" in str(r.get("address"))):
+            continue  # ruling S10 rewrites it at class grain; the difference control does not hold it to its token
         cur = by3.get((r["bucket"], r["prefix"]))
         if cur is None or any(cur.get(k) != r.get(k) for k in ("disposition", "address", "dest_pattern")):
             print("    DISTURBED %s %s" % (r["bucket"], r["prefix"]))
@@ -268,17 +272,24 @@ def repair(root):
     print("  S5/S7/S8/S11 marker rows=%d skip markers=%d distinct (bucket,scope,table,partition)=%d"
           % (len(markers), n_skip, len(seen)))
     res.append(("U3 S5/S7/S8/S11: every marker row is in a <tier>_complete state family with its writer named, a skip "
-                "marker where the literal tail is _SKIP.json, and no two writers share a state key", u3 and bool(markers)))
+                "marker where the literal tail is _SKIP.json (at least one such row: S7), and no two writers share a "
+                "state key", u3 and bool(markers) and n_skip >= 1))
 
     # U4 ruling S6: a QA-named feed is QA only if its WRITER is a QA tool
     u4 = True
     n_qa = 0
     qa_re = re.compile(r"(^|/)(qa|diag|probe|test)[-_/]|[-_/](qa|diag|probe)(/|$)", re.I)
+    # a row the previous table already placed, retired or decided is copied unchanged (S3, S5) and is not re-judged
+    prev_fixed = {(r.get("bucket"), r.get("prefix")) for r in m2["rows"] if r.get("disposition") != "FAULT"}
     for r in rows:
         if not qa_re.search(str(r.get("prefix", ""))):
             continue
+        if (r.get("bucket"), r.get("prefix")) in prev_fixed:
+            continue
         n_qa += 1
         v = r.get("qa_verdict")
+        if v == "unresolved" and r.get("disposition") == "FAULT" and "S6" in str(r.get("reason", ""))                 and SERIAL_RE.match(str(r.get("fault_owner", ""))):
+            continue  # S6 cannot classify without a writer: FAULT with the ruling cited and an owner
         if v not in ("qa-tool", "production") or not str(r.get("qa_writer", "")).strip():
             print("    QA-NAMED-WITHOUT-WRITER %s %s" % (r.get("bucket"), r.get("prefix")))
             u4 = False

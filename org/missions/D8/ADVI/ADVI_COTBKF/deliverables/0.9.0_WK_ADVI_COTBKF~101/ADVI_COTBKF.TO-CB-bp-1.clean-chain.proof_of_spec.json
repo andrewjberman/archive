@@ -1,0 +1,107 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bp-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bp-1.clean-chain.md",
+  "group": "OTHER",
+  "vintage_commit": "f325600fbf"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~101",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round68.md",
+  "vintage_commit": "f325600fbf",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bp-1.clean-chain.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/silver/commonwealth_sweep_regrade.py",
+   "kind": "script",
+   "commit_or_etag": "5f0a2ff9df",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code and tests only; the proof runs read the price stores and the split store (version listing and gets) and wrote nothing to S3, no deploy",
+   "artifact_covered_by": [
+    "CB68bp1-AC1",
+    "CB68bp1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/assets/scripts/silver/commonwealth_daily_valuation.py",
+   "kind": "script",
+   "commit_or_etag": "5f0a2ff9df",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code and tests only; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB68bp1-AC1",
+    "CB68bp1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_clean_chain.py",
+   "kind": "script",
+   "commit_or_etag": "5f0a2ff9df",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "synthetic tests; no S3 call, no deploy",
+   "artifact_covered_by": [
+    "CB68bp1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~101/CLEAN_CHAIN.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only local measurement record of the clean run and the price input's two hashes; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB68bp1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB68bp1-AC1",
+   "criterion_verbatim": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests -q expect: passed",
+   "method": "test_suite",
+   "invocation": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests -q",
+   "expect": "passed",
+   "output_evidence": "877 passed, 12 skipped, 25 warnings in 71.76s, 0 failed, 0 errors (variable unset) (rc 0), on code commit 5f0a2ff9df; the baseline at this base read 866 passed, 12 skipped; 11 cases added in test_commonwealth_clean_chain.py, no existing test changed",
+   "denominator": "877 passed, 0 failed, 12 skipped, 0 errors of 889 collected",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB68bp1-AC2",
+   "criterion_verbatim": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~101/CLEAN_CHAIN.json',encoding='utf-8'));...print('CLEAN-CHAIN-RECORD rc=%d extra_flags=%d report_inputs=%d price_input=%s price_input_equal=%s tables_equal_to_proof_a=%s'...)\" expect: CLEAN-CHAIN-RECORD rc=0 extra_flags=0 report_inputs=5",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~101/CLEAN_CHAIN.json',encoding='utf-8'));c=d['clean_run'];p=d['price_input'];print('CLEAN-CHAIN-RECORD rc=%d extra_flags=%d report_inputs=%d price_input=%s price_input_equal=%s tables_equal_to_proof_a=%s'%(c['rc'],c['extra_flags'],len(d['report_inputs']),p['treatment'],p['equal'],d['tables_equal_to_proof_a']))\"",
+   "expect": "CLEAN-CHAIN-RECORD rc=0 extra_flags=0 report_inputs=5",
+   "output_evidence": "rc 0. CLEAN-CHAIN-RECORD rc=0 extra_flags=0 report_inputs=5 price_input=DROPPED price_input_equal=True tables_equal_to_proof_a=True",
+   "denominator": "5 of 5 report inputs have a stated treatment (5 NOT_AVAILABLE_LINE, 0 REBUILT); the regrade ran twice from this clean worktree at --split-store-as-of 2026-10-09T11:52:52Z with 0 report-input flags, rc 0 both times, last line ending report_inputs_absent=5; the price input's sha256 fe9d1c0446d984b2cf49ceda94509ba81115df3e66bf5d7d2be84b2365e95dc9 in both runs (2134958 rows); security_day_price.parquet equal to Proof A's, 2124908 of 2124908 rows",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the whole regrade run twice from this worktree at one pin (2026-10-09T11:52:52Z), 13:44Z-13:55Z and 13:56Z-14:06Z, into two data dirs",
+   "observed": "the price input file equal byte for byte (one sha256 fe9d1c04...), security_day_price.parquet equal byte for byte (one sha256 3521815d...) and equal to Proof A's",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "ADVI_COTBKF-D2-W101-S1"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~101/ADVI_COTBKF.TO-CB-bp-1.clean-chain.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "env -u COTBKF_SWEEPS_CONFIG python -m pytest data/assets/scripts/silver/tests -q",
+   "result": "877 passed, 12 skipped, 0 failed (variable unset)"
+  }
+ ]
+}

@@ -1,0 +1,223 @@
+{
+  "genre": "DEPLOY",
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ff-5.reverify-and-splice-sap-on-the-units-scale",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "61d50fc7fa",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ff-5.reverify-and-splice-sap-on-the-units-scale.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ff-5.reverify-and-splice-sap-on-the-units-scale.md",
+    "group": "OTHER",
+    "vintage_commit": "090b13df6d"
+  },
+  "assignee": "0.7.0_AE_CloudOps~RA1",
+  "risk_class": "WORLD",
+  "never_widen_pair": {
+    "coo_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND94_SAP_RESCALE_COO_HALF.md (msg 3866) (sha256 6511a74ea4811db3347a80dc73791c1089847aa5c06e67c4b5fc4848fb1a63df)",
+    "cto_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND94_SAP_RESCALE_CTO_HALF.md (msg 3867) with ADDENDUM 1 (msg 3886) (sha256 9340a088ce66d5f050cb5f4c8faa5c129e8ddcdc9038dc6e0342b02f7f110bdb)",
+    "read_before_first_live_act": "Both halves read WHOLE before the entry opened (opened 2026-10-11T13:10Z; the first write at 13:11:38Z). The issuer's msg 3869 corrected the CTO signature reference (msg 3867, not 3868).",
+    "conditions_disposition": "1 (pin carries ff-3; three blobs printed): MET, leg L1. 2 (both VersionIds recorded; r94_rescale_table and the dry splice compared with the table; served_validator and moved keys printed): MET, legs L2, L3 and L5. 3 (entry opened first and closed last; the sweep with its denominator): MET, leg L1. 4 (AC1 YES, the no-regression arm YES, the served driver before and after): MET on the amended AC1, legs L7 and L8; r94_locator.py L5 reads NO for the idempotency defect (D1-S24) and is not an acceptance criterion.",
+    "outcome_deviation": "None in the written state: Branch 1 exactly. The verification instrument AC1 as first written could not read YES because the production re-verification is not idempotent on a rescaled point; ruled ACCEPT by CTO ADDENDUM 1 (msg 3886), AC1 amended @090b13df6d (msg 3890)."
+  },
+  "rollback": "NAMED, READY BEFORE STEP 1, NOT NEEDED. Copy the recorded prior VersionId of the drafting object, then of the analysis object, to the same key (never a delete): drafting 8g5aPEGlqi7owGkr7E5uEGQABQc4cDKu then analysis SEdN6G36rkxJMw18d92IAZYWjt_JDdKn. The record is FF5_PRE_ACT_VERSIONIDS_20261011.json and the pre-act drafting bytes are archived beside it. No function, role or schedule moves.",
+  "scope": "Two ordered store writes for SAP_GY_Equity ONLY: filings/v1/SAP_GY_Equity/000110465926020058.analysis.json (ETag-conditional overwrite at its own key) and drafting/v1/SAP_GY_Equity.json (thesis_driver and thesis_driver_provenance only), from a detached checkout at ae728f0680. No function, role, route or schedule; no S3 delete.",
+  "status": "COMPLETE. AC1 (as amended) and AC2 PASS; ledger legs L1-L8 closed with proof and the entry CLOSED. Written 2026-10-11T13:11:38Z onward. SAP's analysis object is NOT to be re-verified until the idempotency cell lands.",
+  "go_message": "2.0.0_SA_COO~R1 msg 3868 (GO, run pin ae728f0680), msg 3869 (correction), msg 3890 (AMENDMENT 1 @090b13df6d, re-run AC1 and close); CTO~DELL1 msg 3886 (ADDENDUM 1).",
+  "controls": {
+    "recorded_prior_versionids_are_the_rollback_and_the_discriminating_control": {
+      "description": "Order section 5: the recorded VersionIds are the discriminating control, recorded BEFORE step 1 and read back after.",
+      "expected_landed": "SAP's two prior VersionIds equal the COO half's table (round 93's ss-4 writes); after the act exactly those two differ",
+      "expected_not_landed": "a recorded VersionId that differs from the table, or any other object moving",
+      "observed": "(ledger leg L2) PASS -- recorded BEFORE step 1 from the live bucket opal-data-harvest by head_object: file org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~RA1/FF5_PRE_ACT_VERSIONIDS_20261011.json (12 rows: analysis and drafting VersionId, ETag, length, document-sha256, served thesis_driver points). SAP_GY_Equity: analysis filings/v1/SAP_GY_Equity/000110465926020058.analysis.json @SEdN6G36rkxJMw18d92IAZYWjt_JDdKn and drafting drafting/v1/SAP_GY_Equity.json @8g5aPEGlqi7owGkr7E5uEGQABQc4cDKu, BOTH EQUAL to the COO half's per-key table (they are round 93's ss-4 writes). ASML_NA_Equity (analysis uelD0RtE9.., drafting C.acV8XBH3..) and BABA_US_Equity (analysis E9Q7V8bRT.., drafting VZehf6otu..) are recorded so the post-act compare shows they did not move. Rollback = copy each recorded prior VersionId back to the same key, drafting first then analysis; never a delete.",
+      "status": "PASS"
+    },
+    "rescale_table_and_dry_reverify_equal_the_pair_table_on_the_go_day": {
+      "description": "COO condition 2 and bound 7: the table re-run on the day; a dry-run table differing from the half is a STOP.",
+      "expected_landed": "r94_rescale_table.py: 12 objects, 11 equal, SAP 0 -> 3; T1 and T2 PASS; the 12-row dry re-verification equals the table",
+      "expected_not_landed": "any other name changing, or SAP expecting other than 3 points",
+      "observed": "(ledger leg L3) PASS -- the pair's table re-run on the GO day (2026-10-11 ~13:1xZ) on the pin. r94_rescale_table.py: 12 objects listed, 11 equal, 1 CHANGED = SAP_GY_Equity stored 0 -> expected 3; PASS T1 SAP_GY_Equity expects 3 points on the unit's scale (13.745, 18.078, 21.05), each with its stated scale; PASS T2 control: no other analysis object's expected points move (none); R94 RESCALE TABLE: YES. The production dry re-verification over all 12: stored points read equal the table 12 of 12 and expected equal the table 12 of 12; changed set exactly {SAP_GY_Equity 0 -> 3}; ASML 0 -> 0, BABA 2 -> 2, BA 3 -> 3, nine zeros equal. THE THREE POINTS with their units, from the dry run (receipt 'DRY-RUN -- nothing written; 3 points kept, 0 held'): 2024 value 18.078 (stated_value 18078, stated_scale million, rescaled_to billion, span [129709,129715]); 2023 value 13.745 (stated_value 13745, stated_scale million, rescaled_to billion, span [129740,129746]); 2025 value 21.05 (stated_value 21.05, stated_scale billion, rescaled_to billion, span [111203,111208]); the series unit text reads 'EUR billions and % growth at constant currencies', so the shown scale equals the unit's. UNIT CHECK against the filing: the CTO half's quoted passage states 2024 on BOTH scales (18,078 million and 18.08 billion) and 18.078 agrees with 18.08 to the printed rounding; the rescale is million-to-billion arithmetic within one currency, no rate. SPLICE DRY RUN before step 1: SAP_GY_Equity moved_keys [] driver_points=0 served_validator=True (the stored analysis still holds 0 points, equal to the drafting driver) [DRY-RUN: wrote nothing]; the driver itself moves after step 1 rewrites the analysis object.",
+      "status": "PASS"
+    },
+    "units_read_not_assumed": {
+      "description": "A served figure's unit is the failure class of round 91 (a label right for the exchange and wrong by 100x). The three points' stated and shown scales were printed from the dry run and read against the filing's own words.",
+      "expected_landed": "2024 18.078 (stated 18078 million), 2023 13.745 (stated 13745 million), 2025 21.05 (stated 21.05 billion), rescaled_to billion = the series unit text 'EUR billions'; the filing states 2024 as 18,078 million and 18.08 billion in one passage",
+      "expected_not_landed": "a point shown on a scale other than the unit's, or a conversion the source does not state",
+      "observed": "(ledger leg L3) PASS -- the pair's table re-run on the GO day (2026-10-11 ~13:1xZ) on the pin. r94_rescale_table.py: 12 objects listed, 11 equal, 1 CHANGED = SAP_GY_Equity stored 0 -> expected 3; PASS T1 SAP_GY_Equity expects 3 points on the unit's scale (13.745, 18.078, 21.05), each with its stated scale; PASS T2 control: no other analysis object's expected points move (none); R94 RESCALE TABLE: YES. The production dry re-verification over all 12: stored points read equal the table 12 of 12 and expected equal the table 12 of 12; changed set exactly {SAP_GY_Equity 0 -> 3}; ASML 0 -> 0, BABA 2 -> 2, BA 3 -> 3, nine zeros equal. THE THREE POINTS with their units, from the dry run (receipt 'DRY-RUN -- nothing written; 3 points kept, 0 held'): 2024 value 18.078 (stated_value 18078, stated_scale million, rescaled_to billion, span [129709,129715]); 2023 value 13.745 (stated_value 13745, stated_scale million, rescaled_to billion, span [129740,129746]); 2025 value 21.05 (stated_value 21.05, stated_scale billion, rescaled_to billion, span [111203,111208]); the series unit text reads 'EUR billions and % growth at constant currencies', so the shown scale equals the unit's. UNIT CHECK against the filing: the CTO half's quoted passage states 2024 on BOTH scales (18,078 million and 18.08 billion) and 18.078 agrees with 18.08 to the printed rounding; the rescale is million-to-billion arithmetic within one currency, no rate. SPLICE DRY RUN before step 1: SAP_GY_Equity moved_keys [] driver_points=0 served_validator=True (the stored analysis still holds 0 points, equal to the drafting driver) [DRY-RUN: wrote nothing]; the driver itself moves after step 1 rewrites the analysis object.",
+      "status": "PASS"
+    },
+    "writer_blobs_at_the_pin_equal_the_half": {
+      "description": "Condition 1: the blobs of the code that writes, printed.",
+      "expected_landed": "analyze.py 4d1f93c978f0, drafting_build.py fd51d3dd7ffa, crosswalk.py 3603be4be89a at ae728f0680; ff-3, ss-2 and qq-3 in the pin",
+      "expected_not_landed": "a differing blob, or an ancestor missing",
+      "observed": "(ledger leg L1) PASS -- read by this seat before any write. PIN: detached checkout C:/tmp/ff5-run HEAD ae728f06808c9df0b0d5ddba79a889b4e5b769c7 (the GO's run pin). ANCESTRY: AMGT-ff-3 @ae14fab6f5, AMGT-ss-2 @f79fdc7f28 and AMGT-qq-3 @72f6ede5e0 are ancestors. BLOBS of the writers at the pin equal the half's, 3 of 3: lib/research/filings/analyze.py 4d1f93c978f0, lib/research/filings/drafting_build.py fd51d3dd7ffa, lib/research/identity/crosswalk.py 3603be4be89a. OPEN-DEPLOY SWEEP of every live worktree: 38 listed, 29 with an .open_deploys directory read, 571 entries; the one entry naming filings/v1 or drafting/v1 is THIS seat's own round-92 qq-4 entry as it stood in the old detached checkout C:/tmp/qq4-ac1 (at b75fac17a3, before it closed); at the shared HEAD it is CLOSED and its sentinel removed; 0 from another seat (scheduled producers outside lib/research were not enumerated by the half; this sweep is its named control). Both halves read whole; the CTO signature is msg 3867 (the issuer's correction msg 3869).",
+      "status": "PASS"
+    },
+    "served_validator_true_and_moved_keys_exactly_two": {
+      "description": "Step 2's own dry run, after step 1: the key is validated by the SERVED validator before any write.",
+      "expected_landed": "served_validator=True; moved keys exactly thesis_driver and thesis_driver_provenance",
+      "expected_not_landed": "served_validator=False, or any other top-level key moved",
+      "observed": "(ledger leg L5) PASS -- STEP 2 dry run after step 1 (python -m lib.research.filings.drafting_build --splice-driver --dry-run --only-keys SAP_GY_Equity): SAP_GY_Equity moved_keys ['thesis_driver','thesis_driver_provenance'] driver_points=3 spanned=3 spans [[129709,129715],[129740,129746],[111203,111208]] served_validator=True analysis=filings/v1/SAP_GY_Equity/000110465926020058.analysis.json@E3VL3UYIdeIvPMwsQSi5CJW6GPILFMWp [DRY-RUN: wrote nothing]; DRY-RUN: no pool write, no file write. served_validator=True; the moved keys are exactly thesis_driver and thesis_driver_provenance (the half's Branch 2 STOP did not trigger).",
+      "status": "PASS"
+    },
+    "no_other_key_moved_24_object_compare": {
+      "description": "Bound 8: the write set is SAP only; ASML and BABA are not touched. All 24 objects of the 12 names re-headed.",
+      "expected_landed": "2 VersionIds moved (SAP analysis and drafting), 22 unchanged including ASML's and BABA's",
+      "expected_not_landed": "any other object's VersionId moving",
+      "observed": "(ledger leg L7) PASS -- all 24 objects of the 12 names re-headed after both steps against the L2 record: 24 compared, VersionId MOVED 2, unchanged 22. The two are exactly the written key: SAP_GY_Equity analysis SEdN6G36rkxJ.. -> E3VL3UYIdeIvPMwsQSi5CJW6GPILFMWp, drafting 8g5aPEGlqi7o.. -> Ofq79PPDtENGfLcM5NnKm2b7.gRznN4b. ASML_NA_Equity, BABA_US_Equity and the nine equal names read the same VersionIds as before. DRAFTING DIFF against the saved pre-act bytes: top-level keys that differ are exactly ['thesis_driver','thesis_driver_provenance'] (key count 16 -> 16). SERVED /thesis thesis_driver before -> after: SAP_GY_Equity 0 -> 3 points: 2024 value 18.078 (stated_value 18078, stated_scale million, rescaled_to billion), 2023 value 13.745 (stated_value 13745, stated_scale million, rescaled_to billion), 2025 value 21.05 (stated_value 21.05, stated_scale billion, rescaled_to billion), unit text 'EUR billions and % growth at constant currencies' (the shown scale equals the unit's); ASML_NA_Equity 0 -> 0; BABA_US_Equity 2 -> 2. Equal to the pair's table.",
+      "status": "PASS"
+    },
+    "drafting_diff_is_only_the_driver_and_its_provenance": {
+      "description": "The splice's own contract, read against the saved pre-act bytes.",
+      "expected_landed": "top-level keys that differ: exactly thesis_driver and thesis_driver_provenance",
+      "expected_not_landed": "any other top-level key differing",
+      "observed": "(ledger leg L7) PASS -- all 24 objects of the 12 names re-headed after both steps against the L2 record: 24 compared, VersionId MOVED 2, unchanged 22. The two are exactly the written key: SAP_GY_Equity analysis SEdN6G36rkxJ.. -> E3VL3UYIdeIvPMwsQSi5CJW6GPILFMWp, drafting 8g5aPEGlqi7o.. -> Ofq79PPDtENGfLcM5NnKm2b7.gRznN4b. ASML_NA_Equity, BABA_US_Equity and the nine equal names read the same VersionIds as before. DRAFTING DIFF against the saved pre-act bytes: top-level keys that differ are exactly ['thesis_driver','thesis_driver_provenance'] (key count 16 -> 16). SERVED /thesis thesis_driver before -> after: SAP_GY_Equity 0 -> 3 points: 2024 value 18.078 (stated_value 18078, stated_scale million, rescaled_to billion), 2023 value 13.745 (stated_value 13745, stated_scale million, rescaled_to billion), 2025 value 21.05 (stated_value 21.05, stated_scale billion, rescaled_to billion), unit text 'EUR billions and % growth at constant currencies' (the shown scale equals the unit's); ASML_NA_Equity 0 -> 0; BABA_US_Equity 2 -> 2. Equal to the pair's table.",
+      "status": "PASS"
+    },
+    "ac1_amended_to_the_served_route_against_the_table_and_rerun_literal": {
+      "description": "AC1 as first written (R1) re-ran the production re-verification on the rescaled object and so read NO; that re-verification is not idempotent (row D1-S24). The issuer amended AC1 to read the served route against the pair's table; the literal amended AC1 re-ran on a checkout at the amendment.",
+      "expected_landed": "R94 SAP SERVED: YES, V1-V3 PASS, arms 3 of 3: SAP three points with stated scale and value, ASML none, BABA FY2025 118028 and FY2026 158132",
+      "expected_not_landed": "the first-written AC1 read as a pass, or the amended AC1 not run on its own checkout",
+      "observed": "(ledger leg L8) PASS, on the issuer's AMENDMENT 1 (@090b13df6d, msg 3890) and the CTO's ADDENDUM 1 (msg 3886): ACCEPT the served state, no rollback. THE FIRST RUN of AC1 as written, after the writes, read exit=1: R1 FAIL (SAP CHANGED expected 1 stored 3 served 3 SERVED != EXPECTED), PASS R2, PASS R5; r94_locator.py L5 FAIL (kept {2025: 21.05}, held [2023, 2024]). Cause read: the production re-verification does not read stated_value, so a re-run over the rescaled object holds 2023 and 2024 (value not found as a whole number); same from the shared tree and the pin checkout (finding deliverables/0.7.0_AE_CloudOps~RA1/AMGT_RESAPP.TO-AMGT-ff-5.RESCALED_OBJECT_DEGRADES_ON_REVERIFY.md @56a8cd9e37; row D1-S24). THE AMENDED AC1 re-run LITERALLY on a detached checkout at 090b13df6d (C:/tmp/ff5-ac1, HEAD read back 090b13df6dec7034bcef3d96e79cb81c0f62ea1b): r94_sap_served.py, exit=0: PASS V1 SAP serves its three points on the billion scale with their stated scale and value [2024 18.078 stated million, 2023 13.745 stated million, 2025 21.05 stated billion]; PASS V2 ASML serves no points [0]; PASS V3 BABA serves FY2025 = 118028 and FY2026 = 158132; arms passed 3 of 3; R94 SAP SERVED: YES. AC2 (no-regression arm), exit=0, CodeSha256 SOzAz9/gfKE++UOSB8qWSDJvhOsDQMoE+DDPzaFbeSI= LastModified 2026-10-11T09:26:42Z unchanged: R89 PEER IDENTITY YES, R89 SUBJECT CAP YES, R89 PEERS DEPLOYED YES, R87 DOSSIER YES, R87 WITHHELD AC1 YES, R84 LISTING AC1 YES, R89 DEPLOYED CLOSE YES. STATED IN THIS ENTRY, as the CTO's ADDENDUM 1 and the issuer's msg 3890 require: SAP's analysis object (filings/v1/SAP_GY_Equity/000110465926020058.analysis.json, VersionId E3VL3UYIdeIvPMwsQSi5CJW6GPILFMWp) is NOT re-verified by anyone until the idempotency cell lands (round 95's first cell); a re-run of reverify_stored_thesis_driver or r94_locator-style re-verification over it would write 1 point of 3. This seat will not run it; r94_locator.py L5 reads NO for the same reason and is not an acceptance criterion.",
+      "status": "PASS"
+    },
+    "verifier_not_rerun_on_the_rescaled_object": {
+      "description": "The CTO's ADDENDUM 1 and the issuer's msg 3890: SAP's analysis object is not re-verified by anyone until the idempotency cell lands. Stated in the entry; this seat ran the re-verification only as DRY runs, never as a write, after step 1.",
+      "expected_landed": "no write after step 1 except the splice; the statement recorded in leg L8",
+      "expected_not_landed": "a second reverify_stored_thesis_driver(dry_run=False) over the object",
+      "observed": "(ledger leg L8) PASS, on the issuer's AMENDMENT 1 (@090b13df6d, msg 3890) and the CTO's ADDENDUM 1 (msg 3886): ACCEPT the served state, no rollback. THE FIRST RUN of AC1 as written, after the writes, read exit=1: R1 FAIL (SAP CHANGED expected 1 stored 3 served 3 SERVED != EXPECTED), PASS R2, PASS R5; r94_locator.py L5 FAIL (kept {2025: 21.05}, held [2023, 2024]). Cause read: the production re-verification does not read stated_value, so a re-run over the rescaled object holds 2023 and 2024 (value not found as a whole number); same from the shared tree and the pin checkout (finding deliverables/0.7.0_AE_CloudOps~RA1/AMGT_RESAPP.TO-AMGT-ff-5.RESCALED_OBJECT_DEGRADES_ON_REVERIFY.md @56a8cd9e37; row D1-S24). THE AMENDED AC1 re-run LITERALLY on a detached checkout at 090b13df6d (C:/tmp/ff5-ac1, HEAD read back 090b13df6dec7034bcef3d96e79cb81c0f62ea1b): r94_sap_served.py, exit=0: PASS V1 SAP serves its three points on the billion scale with their stated scale and value [2024 18.078 stated million, 2023 13.745 stated million, 2025 21.05 stated billion]; PASS V2 ASML serves no points [0]; PASS V3 BABA serves FY2025 = 118028 and FY2026 = 158132; arms passed 3 of 3; R94 SAP SERVED: YES. AC2 (no-regression arm), exit=0, CodeSha256 SOzAz9/gfKE++UOSB8qWSDJvhOsDQMoE+DDPzaFbeSI= LastModified 2026-10-11T09:26:42Z unchanged: R89 PEER IDENTITY YES, R89 SUBJECT CAP YES, R89 PEERS DEPLOYED YES, R87 DOSSIER YES, R87 WITHHELD AC1 YES, R84 LISTING AC1 YES, R89 DEPLOYED CLOSE YES. STATED IN THIS ENTRY, as the CTO's ADDENDUM 1 and the issuer's msg 3890 require: SAP's analysis object (filings/v1/SAP_GY_Equity/000110465926020058.analysis.json, VersionId E3VL3UYIdeIvPMwsQSi5CJW6GPILFMWp) is NOT re-verified by anyone until the idempotency cell lands (round 95's first cell); a re-run of reverify_stored_thesis_driver or r94_locator-style re-verification over it would write 1 point of 3. This seat will not run it; r94_locator.py L5 reads NO for the same reason and is not an acceptance criterion.",
+      "status": "PASS"
+    },
+    "open_deploy_sweep_of_every_live_worktree": {
+      "description": "Condition 3: sweep every live worktree's open deploys for filings/v1 or drafting/v1.",
+      "expected_landed": "0 entries from another seat naming either prefix across the printed denominator (the one hit is this seat's own closed qq-4 entry in an old checkout, stated)",
+      "expected_not_landed": "an entry of another seat naming either prefix",
+      "observed": "(ledger leg L1) PASS -- read by this seat before any write. PIN: detached checkout C:/tmp/ff5-run HEAD ae728f06808c9df0b0d5ddba79a889b4e5b769c7 (the GO's run pin). ANCESTRY: AMGT-ff-3 @ae14fab6f5, AMGT-ss-2 @f79fdc7f28 and AMGT-qq-3 @72f6ede5e0 are ancestors. BLOBS of the writers at the pin equal the half's, 3 of 3: lib/research/filings/analyze.py 4d1f93c978f0, lib/research/filings/drafting_build.py fd51d3dd7ffa, lib/research/identity/crosswalk.py 3603be4be89a. OPEN-DEPLOY SWEEP of every live worktree: 38 listed, 29 with an .open_deploys directory read, 571 entries; the one entry naming filings/v1 or drafting/v1 is THIS seat's own round-92 qq-4 entry as it stood in the old detached checkout C:/tmp/qq4-ac1 (at b75fac17a3, before it closed); at the shared HEAD it is CLOSED and its sentinel removed; 0 from another seat (scheduled producers outside lib/research were not enumerated by the half; this sweep is its named control). Both halves read whole; the CTO signature is msg 3867 (the issuer's correction msg 3869).",
+      "status": "PASS"
+    }
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-harvest/filings/v1/SAP_GY_Equity/000110465926020058.analysis.json",
+      "kind": "s3_object",
+      "commit_or_etag": "E3VL3UYIdeIvPMwsQSi5CJW6GPILFMWp",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "(ledger leg L4) PASS -- STEP 1 ran for SAP_GY_Equity ONLY, from the pin checkout C:/tmp/ff5-run (HEAD ae728f0680): analyze.reverify_stored_thesis_driver('SAP_GY_Equity','000110465926020058',dry_run=False) through crosswalk.write_pool (put_performed true, the ETag-conditional overwrite of the object's own key). Points 0 -> 3, held_uncited 0: 2024 18.078 (stated 18078 million, rescaled_to billion), 2023 13.745 (stated 13745 million, rescaled_to billion), 2025 21.05 (stated 21.05 billion, rescaled_to billion). filings/v1/SAP_GY_Equity/000110465926020058.analysis.json now VersionId E3VL3UYIdeIvPMwsQSi5CJW6GPILFMWp (was SEdN6G36rkxJMw18d92IAZYWjt_JDdKn), 402304 bytes, document-sha256 116c43aa89caf7e2.., written ",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/drafting/v1/SAP_GY_Equity.json",
+      "kind": "s3_object",
+      "commit_or_etag": "Ofq79PPDtENGfLcM5NnKm2b7.gRznN4b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "(ledger leg L6) PASS -- STEP 2 write: python -m lib.research.filings.drafting_build --splice-driver --pre-act-dir <dir> --only-keys SAP_GY_Equity (no --dry-run), from the pin checkout C:/tmp/ff5-run. The key was built and validated by the SERVED validator BEFORE the write: served_validator=True, driver_points=3 spanned=3. Pre-act drafting bytes saved first (archived in deliverables/0.7.0_AE_CloudOps~RA1/FF5_PRE_ACT_DRAFTING_BYTES/SAP_GY_Equity.json). Output: 'SAP_GY_Equity: SPLICED post_act_sha256=1b7a3e5039be2595d8c4664a87f383875b84fef03e420e61da75ba924135a553', 'SPLICED 1 of 1'. New drafting VersionId drafting/v1/SAP_GY_Equity.json Ofq79PPDtENGfLcM5NnKm2b7.gRznN4b (was 8g5aPEGlqi7owGkr7E5uEGQABQc4cDKu). T",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~RA1/FF5_PRE_ACT_VERSIONIDS_20261011.json",
+      "kind": "doc",
+      "commit_or_etag": "56a8cd9e37",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The rollback list and the discriminating control: 12 names, two VersionIds each, recorded before step 1."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~RA1/AMGT_RESAPP.TO-AMGT-ff-5.RESCALED_OBJECT_DEGRADES_ON_REVERIFY.md",
+      "kind": "doc",
+      "commit_or_etag": "56a8cd9e37",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The finding the CTO ruled on and the issuer amended AC1 on (row D1-S24)."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261011T1310Z_amgt-resapp-r94-ff5-sap-rescale-dell1_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "56a8cd9e37",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The NEVER-2 entry: opened 2026-10-11T13:10Z with 8 legs before step 1, CLOSED after L8; the closed bytes ride the commit that carries this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PASS V1 (SAP serves 2023 = 13.745, 2024 = 18.078, 2025 = 21.05, each with its stated scale and value), PASS V2 (ASML none), PASS V3 (BABA FY2025 and FY2026); arms passed 3 of 3; R94 SAP SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round94_prep/checks/r94_sap_served.py\"; echo \"exit=$?\"",
+      "output_evidence": "(ledger leg L8) PASS, on the issuer's AMENDMENT 1 (@090b13df6d, msg 3890) and the CTO's ADDENDUM 1 (msg 3886): ACCEPT the served state, no rollback. THE FIRST RUN of AC1 as written, after the writes, read exit=1: R1 FAIL (SAP CHANGED expected 1 stored 3 served 3 SERVED != EXPECTED), PASS R2, PASS R5; r94_locator.py L5 FAIL (kept {2025: 21.05}, held [2023, 2024]). Cause read: the production re-verification does not read stated_value, so a re-run over the rescaled object holds 2023 and 2024 (value not found as a whole number); same from the shared tree and the pin checkout (finding deliverables/0.7.0_AE_CloudOps~RA1/AMGT_RESAPP.TO-AMGT-ff-5.RESCALED_OBJECT_DEGRADES_ON_REVERIFY.md @56a8cd9e37; row D1-S24). THE AMENDED AC1 re-run LITERALLY on a detached checkout at 090b13df6d (C:/tmp/ff5-ac1, HEAD read back 090b13df6dec7034bcef3d96e79cb81c0f62ea1b): r94_sap_served.py, exit=0: PASS V1 SAP serves its three points on the billion scale with their stated scale and value [2024 18.078 stated million, 2023 13.745 stated million, 2025 21.05 stated billion]; PASS V2 ASML serves no points [0]; PASS V3 BABA serves FY2025 = 118028 and FY2026 = 158132; arms passed 3 of 3; R94 SAP SERVED: YES. AC2 (no-regression arm), exit=0, CodeSha256 SOzAz9/gfKE++UOSB8qWSDJvhOsDQMoE+DDPzaFbeSI= LastModified 2026-10-11T09:26:42Z unchanged: R89 PEER IDENTITY YES, R89 SUBJECT CAP YES, R89 PEERS DEPLOYED YES, R87 DOSSIER YES, R87 WITHHELD AC1 YES, R84 LISTING AC1 YES, R89 DEPLOYED CLOSE YES. STATED IN THIS ENTRY, as the CTO's ADDENDUM 1 and the issuer's msg 3890 require: SAP's analysis object (filings/v1/SAP_GY_Equity/000110465926020058.analysis.json, VersionId E3VL3UYIdeIvPMwsQSi5CJW6GPILFMWp) is NOT re-verified by anyone until the idempotency cell lands (round 95's first cell); a re-run of reverify_stored_thesis_driver or r94_locator-style re-verification over it would write 1 point of 3. This seat will not run it; r94_locator.py L5 reads NO for the same reason and is not an acceptance criterion.",
+      "denominator": "3 arms: SAP's 3 points, ASML's 0, BABA's 2; run on a detached checkout at 090b13df6d, the amended criterion",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the no-regression arm: R89 PEERS DEPLOYED: YES and R89 DEPLOYED CLOSE: YES (dossier /11, the withhold and the listing byte-equal) with the function's CodeSha256 re-read; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_peers_deployed.sh\" && bash \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_deployed_close.sh\" --want amgt-corpus-dossier/11; echo \"exit=$?\"",
+      "output_evidence": "(ledger leg L8) PASS, on the issuer's AMENDMENT 1 (@090b13df6d, msg 3890) and the CTO's ADDENDUM 1 (msg 3886): ACCEPT the served state, no rollback. THE FIRST RUN of AC1 as written, after the writes, read exit=1: R1 FAIL (SAP CHANGED expected 1 stored 3 served 3 SERVED != EXPECTED), PASS R2, PASS R5; r94_locator.py L5 FAIL (kept {2025: 21.05}, held [2023, 2024]). Cause read: the production re-verification does not read stated_value, so a re-run over the rescaled object holds 2023 and 2024 (value not found as a whole number); same from the shared tree and the pin checkout (finding deliverables/0.7.0_AE_CloudOps~RA1/AMGT_RESAPP.TO-AMGT-ff-5.RESCALED_OBJECT_DEGRADES_ON_REVERIFY.md @56a8cd9e37; row D1-S24). THE AMENDED AC1 re-run LITERALLY on a detached checkout at 090b13df6d (C:/tmp/ff5-ac1, HEAD read back 090b13df6dec7034bcef3d96e79cb81c0f62ea1b): r94_sap_served.py, exit=0: PASS V1 SAP serves its three points on the billion scale with their stated scale and value [2024 18.078 stated million, 2023 13.745 stated million, 2025 21.05 stated billion]; PASS V2 ASML serves no points [0]; PASS V3 BABA serves FY2025 = 118028 and FY2026 = 158132; arms passed 3 of 3; R94 SAP SERVED: YES. AC2 (no-regression arm), exit=0, CodeSha256 SOzAz9/gfKE++UOSB8qWSDJvhOsDQMoE+DDPzaFbeSI= LastModified 2026-10-11T09:26:42Z unchanged: R89 PEER IDENTITY YES, R89 SUBJECT CAP YES, R89 PEERS DEPLOYED YES, R87 DOSSIER YES, R87 WITHHELD AC1 YES, R84 LISTING AC1 YES, R89 DEPLOYED CLOSE YES. STATED IN THIS ENTRY, as the CTO's ADDENDUM 1 and the issuer's msg 3890 require: SAP's analysis object (filings/v1/SAP_GY_Equity/000110465926020058.analysis.json, VersionId E3VL3UYIdeIvPMwsQSi5CJW6GPILFMWp) is NOT re-verified by anyone until the idempotency cell lands (round 95's first cell); a re-run of reverify_stored_thesis_driver or r94_locator-style re-verification over it would write 1 point of 3. This seat will not run it; r94_locator.py L5 reads NO for the same reason and is not an acceptance criterion.",
+      "denominator": "function CodeSha256 SOzAz9.. re-read in the same output, unchanged since qq-5",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "AC1 as first written, and r94_locator.py L5",
+      "reason": "Both re-run the production re-verification on the rescaled object and read NO, because that re-verification looks for the rescaled value rather than stated_value (row D1-S24). Reported (msg 3882), ruled ACCEPT by the CTO (msg 3886) and AC1 amended by the issuer (@090b13df6d); the amended criterion re-ran literally on a checkout at that commit. The locator is not an acceptance criterion and still reads NO until the idempotency cell lands."
+    },
+    {
+      "item": "A re-verification of SAP's analysis object as a write",
+      "reason": "Not run and not to be run by anyone until the idempotency cell lands (CTO ADDENDUM 1 item 4): a re-run would write 1 point of 3."
+    },
+    {
+      "item": "ASML and BABA",
+      "reason": "Written by round 92's qq-4; recorded and read back unchanged (bound 8)."
+    },
+    {
+      "item": "A push of the commits",
+      "reason": "TO BOUNDS 3 and the shared-branch law: LOCAL on box/dell1; origin read by ls-remote."
+    }
+  ],
+  "surprises": [],
+  "regression_reads": {
+    "asml_and_baba_unmoved": "ASML 0 -> 0 and BABA 2 -> 2 served; their analysis and drafting VersionIds unchanged (leg L7).",
+    "nine_equal_names_untouched": "BA, COST, HAL, HD, INTU, KMB, NU, PBR, VLO: both VersionIds equal the L2 record (leg L7).",
+    "function_not_moved": "AC2 names CodeSha256 SOzAz9.. unchanged; no function, role or schedule moved (leg L8)."
+  },
+  "cold_reads": {
+    "served_effect": "SAP's driver chart goes from empty to three points on EUR billions, the series unit text's scale, each carrying its stated value and scale; the Security Analysis page is Opal-internal (staff-only).",
+    "latent_defect": "Row D1-S24: reverify_stored_thesis_driver is not idempotent on a rescaled point (it does not read stated_value). Round 95's first cell closes it; until then SAP's analysis object is not re-verified.",
+    "push_state": "The commit carrying this instance is LOCAL on box/dell1; origin read by ls-remote at 2e74e26544 before it. No push by this seat.",
+    "open_deploys_sweep": "Pre-act sweep (leg L1): 38 worktrees listed, 29 with an .open_deploys directory read (571 entries); the only hit is this seat's own closed entry in an old checkout."
+  },
+  "forward_notes": [
+    "Round 95's first cell (CTO): a point carrying stated_value and stated_scale is located by its stated form; close: re-verifying SAP's written object keeps 3 of 3, negative arm still holds.",
+    "AMGT_CORPUS's leg p (dossier.py dc2ce428d015, METHOD /12) rides the ff-4 redeploy window under its own pair; this act does not touch the function."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~RA1/logs/2026-10-11/ff5_sap_rescale.md",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open; close-leg L1-L8; close --slug amgt-resapp-r94-ff5-sap-rescale-dell1",
+      "result": "PASS. 8 legs proven; entry CLOSED."
+    },
+    {
+      "tool": "r94_rescale_table.py / analyze.reverify_stored_thesis_driver",
+      "invocation": "the GO-day table, the dry re-verification over 12, then dry_run=False for SAP once",
+      "result": "PASS. 12 of 12 equal the table; 1 written."
+    },
+    {
+      "tool": "drafting_build --splice-driver",
+      "invocation": "--dry-run, then --pre-act-dir without --dry-run, --only-keys SAP_GY_Equity",
+      "result": "PASS. served_validator=True; SPLICED 1 of 1."
+    },
+    {
+      "tool": "r94_sap_served.py (amended AC1) / r89 checks",
+      "invocation": "the two order criteria",
+      "result": "PASS x2, exit=0 each."
+    }
+  ]
+}

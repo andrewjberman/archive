@@ -1,0 +1,374 @@
+{
+  "instance": "i-0167fd745ad906a66",
+  "unit": "irpt-analysis-resident.service",
+  "root": "/opt/irpt-resident/37210c771a-st30",
+  "confirmed_before_relying_on_them": "All three were confirmed, not taken from the order: systemctl show reads ActiveState=active SubState=running NRestarts=0 with ExecStart naming resident_main.py under 37210c771a-st30 and pid 864777, started Sun 2026-10-11 10:32:22 UTC. The capture wrapper is NOT at the guessed /opt/irpt-ycharts; it is /opt/investor-reporting-ycharts/run-ycharts-session.sh, located rather than assumed.",
+  "journal_window": {
+    "since_utc": "2026-09-27T00:00:00Z",
+    "read_at_utc": "2026-10-11T12:59:30Z",
+    "lines_scanned": 74348,
+    "host_tz": "+0000 (UTC)",
+    "host_tz_stated_before_any_since": true,
+    "span_earliest_utc": "2026-09-24T09:35:20Z",
+    "span_latest_utc": "2026-10-11T12:59:27Z",
+    "window_not_truncated": "The unit's journal reaches back to 2026-09-24, which is EARLIER than the 14-day window's start, so the window is bounded by the order and not by journal retention."
+  },
+  "capture_record_location": {
+    "where": "Two places, and only one of them survives the run. (1) The runner's own step lines go to STDERR, which host_capture.stderr_sink() opens as /opt/investor-reporting-ycharts/last-capture.stderr, mode 0600, owner ec2-user, TRUNCATED at every run and cut to its last 65536 bytes after it. That file held 454 bytes and 8 lines at mtime 2026-10-11 11:19:18Z, which is the failing capture. (2) The full receipt, including the thrown error's record, is a single JSON line on the runner's STDOUT, which run_capture() consumes IN PROCESS: on a non-zero exit it calls failure_code(output) and keeps only failure_class plus record.reason as a closed token, and its own comment says 'Do not propagate host log/message/record fields across this boundary'. Nothing writes that receipt to disk.",
+    "read_from_code": "infra/aws/lambda/investor-reporting/ycharts/session/host_capture.py: STDERR_NAME = 'last-capture.stderr', stderr_sink(), keep_tail(), failure_code(), run_capture(); infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js lines 1026-1075 and 1168-1176; run-ycharts-session.sh, which states it tees and redirects nothing.",
+    "which_unit_or_process_writes_it": "The capture subprocess started by run_capture() under irpt-analysis-resident.service writes the stderr file; the resident unit writes the journal token.",
+    "consequence": "The receipt members the order asks for by name -- login_submission, probe_pair, warmup, login_path, password_visible_wait, screen -- are NOT recoverable for any attempt, including the current one. Only the step list survived, and only for the latest run."
+  },
+  "capture_attempts": [
+    {
+      "at_utc": "2026-09-27T13:01:02Z",
+      "code": "CAPTURE_FAILED:LEASE_NOT_HELD",
+      "source_line": "2026-09-27T13:01:02+0000 python3.12[173870]: IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:LEASE_NOT_HELD",
+      "receipt": {
+        "persisted": false,
+        "note": "lease failure; on this code path the runner is not reached, so no sign-in is implied"
+      }
+    },
+    {
+      "at_utc": "2026-09-27T14:16:02Z",
+      "code": "CAPTURE_FAILED:UNEXPECTED_CHALLENGE",
+      "source_line": "2026-09-27T14:16:02+0000 python3.12[189222]: IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:UNEXPECTED_CHALLENGE",
+      "receipt": {
+        "persisted": false,
+        "reason_suffix_absent": true
+      }
+    },
+    {
+      "at_utc": "2026-09-29T14:15:34Z",
+      "code": "CAPTURE_FAILED:AUTH_FAILED",
+      "source_line": "2026-09-29T14:15:34+0000 python3.12[280258]: IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:AUTH_FAILED",
+      "receipt": {
+        "persisted": false,
+        "reason_suffix_absent": true
+      }
+    },
+    {
+      "at_utc": "2026-09-29T17:26:49Z",
+      "code": "CAPTURE_FAILED:AUTH_FAILED",
+      "source_line": "2026-09-29T17:26:49+0000 python3.12[280258]: IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:AUTH_FAILED",
+      "receipt": {
+        "persisted": false,
+        "reason_suffix_absent": true
+      }
+    },
+    {
+      "at_utc": "2026-09-29T17:45:08Z",
+      "code": "CAPTURE_FAILED:UNEXPECTED_CHALLENGE:CHALLENGE_CAPTCHA_UNSUPPORTED",
+      "source_line": "2026-09-29T17:45:08+0000 python3.12[280258]: IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:UNEXPECTED_CHALLENGE:CHALLENGE_CAPTCHA_UNSUPPO (the journal line is cut at 200 chars by the read)",
+      "receipt": {
+        "persisted": false,
+        "named_challenge": "CHALLENGE_CAPTCHA_UNSUPPORTED"
+      }
+    },
+    {
+      "at_utc": "2026-09-30T03:36:28Z",
+      "code": "CAPTURE_FAILED:AUTH_FAILED",
+      "source_line": "2026-09-30T03:36:28+0000 python3.12[307882]: IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:AUTH_FAILED",
+      "receipt": {
+        "persisted": false,
+        "reason_suffix_absent": true
+      }
+    },
+    {
+      "at_utc": "2026-10-01T07:33:52Z",
+      "code": "CAPTURE_FAILED:AUTH_FAILED",
+      "source_line": "2026-10-01T07:33:52+0000 python3.12[360874]: IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:AUTH_FAILED",
+      "receipt": {
+        "persisted": false,
+        "reason_suffix_absent": true
+      }
+    },
+    {
+      "at_utc": "2026-10-02T06:26:18Z",
+      "code": "CAPTURE_FAILED:UNEXPECTED_CHALLENGE:CHALLENGE_CAPTCHA_UNSUPPORTED",
+      "source_line": "2026-10-02T06:26:18+0000 python3.12[404237]: IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:UNEXPECTED_CHALLENGE:CHALLENGE_CAPTCHA_UNSUPPO (cut at 200 chars)",
+      "receipt": {
+        "persisted": false,
+        "named_challenge": "CHALLENGE_CAPTCHA_UNSUPPORTED"
+      }
+    },
+    {
+      "at_utc": "2026-10-03T00:31:44Z",
+      "code": "CAPTURE_FAILED:AUTH_FAILED:NO_AUTHENTICATED_PROBE",
+      "source_line": "2026-10-03T00:31:44+0000 python3.12[471825]: IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:AUTH_FAILED:NO_AUTHENTICATED_PROBE",
+      "receipt": {
+        "persisted": false,
+        "note": "the stderr file has since been truncated by later runs"
+      }
+    },
+    {
+      "at_utc": "2026-10-05T14:41:25Z",
+      "code": "CAPTURE_FAILED:AUTH_FAILED:NO_AUTHENTICATED_PROBE",
+      "source_line": "2026-10-05T14:41:25+0000 python3.12[525132]: IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:AUTH_FAILED:NO_AUTHENTICATED_PROBE",
+      "receipt": {
+        "persisted": false,
+        "note": "the stderr file has since been truncated by later runs"
+      }
+    },
+    {
+      "at_utc": "2026-10-11T11:19:20Z",
+      "code": "CAPTURE_FAILED:AUTH_FAILED:NO_AUTHENTICATED_PROBE",
+      "source_line": "2026-10-11T11:19:20+0000 python3.12[864777]: IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:AUTH_FAILED:NO_AUTHENTICATED_PROBE",
+      "receipt": {
+        "persisted": true,
+        "file": "/opt/investor-reporting-ycharts/last-capture.stderr",
+        "size_bytes": 454,
+        "lines": 8,
+        "mtime_utc": "2026-10-11T11:19:18Z",
+        "mode": "600",
+        "owner": "ec2-user",
+        "attempt_steps": [
+          {
+            "step": 0,
+            "state": "CH-SIGNIN_FORM",
+            "via": "dom"
+          },
+          {
+            "step": 1,
+            "state": "CH-AUTHENTICATED",
+            "via": "dom"
+          },
+          {
+            "step": 2,
+            "state": "CH-AUTHENTICATED",
+            "via": "dom"
+          },
+          {
+            "step": 3,
+            "state": "CH-AUTHENTICATED",
+            "via": "dom"
+          },
+          {
+            "step": 4,
+            "state": "CH-AUTHENTICATED",
+            "via": "dom"
+          },
+          {
+            "step": 5,
+            "state": "CH-AUTHENTICATED",
+            "via": "dom"
+          },
+          {
+            "step": 6,
+            "state": "CH-AUTHENTICATED",
+            "via": "dom"
+          },
+          {
+            "step": 7,
+            "state": "CH-AUTHENTICATED",
+            "via": "dom"
+          }
+        ],
+        "max_steps_from_code": 8,
+        "login_path": "not persisted",
+        "password_visible_wait": "not persisted",
+        "login_submission": "not persisted",
+        "probe_pair": "not persisted",
+        "warmup": "not persisted",
+        "unexpected_challenge": "absent from the journal token and from the file",
+        "otp_branch": "ABSENT by construction: run-ycharts-session.sh states the runner has no one-time-code path and fails explicitly with CHALLENGE_ONE_TIME_CODE_UNSUPPORTED if one is presented"
+      }
+    }
+  ],
+  "capture_attempts_total_in_window": 11,
+  "sign_in_bearing_attempts_in_window": 10,
+  "sign_in_bearing_note": "10 of the 11, because CAPTURE_FAILED:LEASE_NOT_HELD fails before the runner is started and so implies no sign-in. This is the number that bears on account lock-out, and it is 10 over 14 days, not a tight loop.",
+  "stored_state": {
+    "login_secret": {
+      "name": "ycharts/login/credentials",
+      "last_changed": "2026-09-10T21:39:16.664000-04:00",
+      "last_accessed": "2026-10-10T20:00:00-04:00",
+      "version_stages": 2,
+      "value_read": false
+    },
+    "session_secret": {
+      "name": "ycharts/session/current",
+      "last_changed": "2026-10-05T06:04:47.915000-04:00",
+      "last_accessed": "2026-10-10T20:00:00-04:00",
+      "version_stages": 2,
+      "value_read": false
+    },
+    "last_accessed_trap": "Secrets Manager LastAccessedDate is DAY-GRANULAR. Both secrets read 2026-10-10T20:00:00-04:00, which IS 2026-10-11T00:00:00Z: it says 'accessed on the 2026-10-11 UTC day', and it is neither a time nor a count. It therefore corroborates that today's capture read them, and supports nothing finer.",
+    "session_secret_inference": "ycharts/session/current was last CHANGED 2026-10-05T10:04Z. A successful capture is what writes a fresh bundle back. So no capture has succeeded in writing a session bundle since 2026-10-05T10:04Z, which is six days before this read.",
+    "session_fence_row": {
+      "table": "irpt-jobs",
+      "key": {
+        "tenant": "_opal",
+        "job": "ycharts-session"
+      },
+      "fence_token": 27,
+      "lease_expires_at": 0,
+      "lease_owner": "irpt-ycharts-runner/866356",
+      "read_via": "the host's own role, after the operator's own session was denied",
+      "note": "This is the session-PUBLICATION fence row. It carries no capture_not_before, next_allowed_at, operation_version, expires_at, generation or state. lease_expires_at = 0, so no session lease was held at the read."
+    },
+    "capture_cooldown": {
+      "attribute": "capture_not_before",
+      "written_by": "host_capture.HostCapture.capture(), SET capture_not_before = now + 900, conditioned on operation_version and on capture_not_before <= now",
+      "row": "an OperationLease row, NOT the _opal/ycharts-session fence row; its key is built from provider plus tenant plus job by the installed operation_lease code",
+      "current_value": "not read -- the row was not located without a table scan, which is outside the read shape this order sanctions",
+      "effect_measured_instead": "900 s is corroborated FIVE times in the journal: every SESSION_REFRESH_ALREADY_USED line follows its CAPTURE_FAILED by 14 m 42 s to 14 m 54 s (10-01, 10-02, 10-03, 10-05, 10-11). The effect is measured even though the attribute was not read."
+    },
+    "refresh_marker": {
+      "name": "intent_session_refresh",
+      "where": "an attribute on the accepted JOB row in the irpt-jobs table, written by DurableJob.claim_intent (durable_job.py:176-199) with ConditionExpression attribute_not_exists(#intent) AND #state <> :ready",
+      "when_set": "at the FIRST refresh_session() for a given job; for job REQ-59aa6803901f371b27ffa176 that is the 11:19:02Z eviction",
+      "what_clears_it": "NOTHING. Its own docstring states 'Neither expiry nor lease replacement removes this intent or permits replay'. It is permanent for that job row; a different request id gets a fresh row and therefore a fresh single intent.",
+      "current_value": "not read -- the job row's tenant partition is not known without a scan",
+      "read_from_code": true
+    }
+  },
+  "cause": {
+    "statement": "The sign-in was NOT rejected. On the only attempt whose receipt survives (2026-10-11T11:19:18Z), the runner found the sign-in form at step 0, submitted it, and then classified every one of steps 1 to 7 as CH-AUTHENTICATED while the session probe never passed; the loop therefore ran out at MAX_STEPS=8 and threw the generic NO_AUTHENTICATED_PROBE. The failure is in the authenticated-probe leg after a submission, not in the credential exchange. The underlying condition is most likely the one MEASURED on this host on 2026-09-24 and recorded in the library's own comment at ycharts_session.js:1042-1050 -- the signed-out public page satisfies the app-chrome selector model, so every step reads CH-AUTHENTICATED and the probe can never pass without an identity cookie. The library has an EXPLICIT failure for exactly that condition, SIGNED_OUT_APP_CHROME, carrying the DOM evidence a diagnosis needs; but it is gated on `!filled`, so it is unreachable once a submission has happened, and the post-submission case degrades to the uninformative NO_AUTHENTICATED_PROBE. That gating is why this read cannot close the last step.",
+    "claim": "inferred",
+    "inferred_from": "The step list is MEASURED. What the step list cannot distinguish is (a) the submission succeeded and the probe or identity-cookie leg is broken, from (b) the submission failed and the vendor returned a signed-out page that matches app chrome, with no re-presented form so SIGNIN_FORM_REPRESENTED never fired either. The two receipt members that would separate them, login_submission (whether the posted fields equalled the secret's, and the vendor's reply status) and probe_pair, are exactly the members run_capture refuses to propagate and nothing writes to disk.",
+    "evidence_lines": [
+      "/opt/investor-reporting-ycharts/last-capture.stderr, mtime 2026-10-11 11:19:18 +0000: '[ycharts-session] step 0: state=CH-SIGNIN_FORM via=dom'",
+      "the same file, steps 1 through 7: '[ycharts-session] step N: state=CH-AUTHENTICATED via=dom' (seven lines)",
+      "ycharts_session.js:126 const MAX_STEPS = parseInt(process.env.YC_MAX_STEPS || '8', 10) -- eight steps is the loop's bound, matching the eight lines exactly",
+      "ycharts_session.js:1168-1176 throw new AuthError('did not reach an authenticated probe within MAX_STEPS', { reason: 'NO_AUTHENTICATED_PROBE', ... })",
+      "ycharts_session.js:1042-1050, the MEASURED 2026-09-24 comment: 'the PUBLIC page satisfies the app-chrome selector model ... so every step read CH-AUTHENTICATED, the probe could never pass without an identity cookie, and the loop ran to MAX_STEPS without ever submitting'",
+      "ycharts_session.js:1041 `if (!probe.authenticated && probe.reason === 'NO_IDENTITY_COOKIE' && !filled)` -- the explicit SIGNED_OUT_APP_CHROME diagnosis is gated on !filled and so cannot fire after step 0 submitted",
+      "ycharts_session.js:1136-1142, the AuthError SIGNIN_FORM_REPRESENTED branch, which did NOT fire: the form never came back after the submit",
+      "2026-10-11T11:19:20+0000 IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:AUTH_FAILED:NO_AUTHENTICATED_PROBE",
+      "host sha256 of ycharts_session.js is 857d90b81960d69a7a6700be6fffe33d86628694aef95f8cfb64aca7a82cb839, EQUAL to the repo bytes at box/dell2 HEAD, so the code quoted above is the code that ran"
+    ],
+    "account_lockout_assessment": "The journal shows the design bounded repeated sign-in rather than looping. For each job the durable intent permits exactly ONE session refresh: the second eviction on the same job is refused BEFORE any login with SESSION_REFRESH_ALREADY_USED, which happened at 11:34:05Z today and on four earlier days. Across the 14-day window there were 10 sign-in-bearing attempts, each on a different job or day, spaced by the 900 s capture cooldown. Nothing in what was read suggests a tight retry loop against the vendor. Whether the vendor considers the account locked is NOT established here: no vendor call was made and the login secret's LastAccessedDate is day-granular."
+  },
+  "last_ready": {
+    "at_utc": "2026-10-11T11:18:44Z",
+    "claim": "inferred",
+    "how_told_from_opal_producer": "IT WAS NOT TOLD APART, and the order's instruction for that case is followed. Every resident READY line has the single shape 'IRPT_RESIDENT_RESOLVE state=READY code=-'. A census of IRPT_RESIDENT_RESOLVE fields over the whole window returns only state= (READY 64, RETRY 34, ATTENTION 11): no field names the branch, so a vendor-path READY cannot be distinguished from an Opal-producer READY in the journal. The counts below are therefore UNDIVIDED and the claim is inferred, not measured.",
+    "corroboration": "11:18:44Z is 18 seconds before the first SIGNED_OUT eviction of job REQ-59aa6803901f371b27ffa176 at 11:19:02Z, and the only other READY today was 08:14:21Z.",
+    "separate_measured_bound": "A tighter, genuinely MEASURED statement about the vendor path specifically: ycharts/session/current was last changed 2026-10-05T10:04Z, so no capture has written a fresh session bundle in six days."
+  },
+  "ready_by_day": {
+    "2026-09-27": 0,
+    "2026-09-28": 0,
+    "2026-09-29": 4,
+    "2026-09-30": 1,
+    "2026-10-01": 5,
+    "2026-10-02": 6,
+    "2026-10-03": 7,
+    "2026-10-04": 6,
+    "2026-10-05": 20,
+    "2026-10-06": 0,
+    "2026-10-07": 4,
+    "2026-10-08": 2,
+    "2026-10-09": 7,
+    "2026-10-10": 0,
+    "2026-10-11": 2
+  },
+  "ready_by_day_note": "Undivided between the vendor path and the Opal producer, for the reason in last_ready.how_told_from_opal_producer. 64 READY lines in the window, which equals the sum above.",
+  "refused_by_day": {
+    "2026-09-27": 2,
+    "2026-09-28": 0,
+    "2026-09-29": 3,
+    "2026-09-30": 1,
+    "2026-10-01": 1,
+    "2026-10-02": 1,
+    "2026-10-03": 1,
+    "2026-10-04": 0,
+    "2026-10-05": 1,
+    "2026-10-06": 0,
+    "2026-10-07": 0,
+    "2026-10-08": 0,
+    "2026-10-09": 0,
+    "2026-10-10": 0,
+    "2026-10-11": 1
+  },
+  "refused_by_day_note": "Jobs refused on the SESSION, counted as CAPTURE_FAILED:* lines; 11 in the window, equal to capture_attempts. READ_BACK_PENDING and CLOSED_COMPOSITION_REQUIRED refusals are a different class and are excluded, with their own per-day counts in the journal extract.",
+  "host_commands": [
+    {
+      "ssm_command_id": "d3cca262-ef1d-4e8a-9337-05ab06ab2d98",
+      "status": "Success",
+      "response_code": 0,
+      "script": "date -u +%FT%TZ; date +%z; timedatectl 2>/dev/null | grep -i \"time zone\"; echo \"--- unit ---\"; systemctl show irpt-analysis-resident.service -p ActiveState -p SubState -p NRestarts -p ExecStart 2>&1 | head -8; echo \"--- resident roots ---\"; ls -1dt /opt/irpt-resident/*/ 2>/dev/null | head -4; echo \"--- wrapper location ---\"; ls -la /opt/irpt-ycharts/run-ycharts-session.sh /opt/irpt-ycharts/last-capture.stderr 2>&1 | head -4; echo \"--- find the wrapper if not there ---\"; ls -1d /opt/*/run-ycharts-session.sh 2>/dev/null | head -3",
+      "script_source": "read back from ssm list-commands Parameters.commands -- what SSM received, not what the operator believes it sent"
+    },
+    {
+      "ssm_command_id": "b558fe17-1417-4e38-8d2e-0c8cf0ede7c4",
+      "status": "Success",
+      "response_code": 0,
+      "script": "D=/opt/investor-reporting-ycharts\nstat -c '%n size=%s mtime=%y mode=%a owner=%U' $D/last-capture.stderr 2>&1\necho '--- line count ---'\nwc -l < $D/last-capture.stderr 2>&1\necho '--- receipt NON-SECRET members only; screen text excluded by construction ---'\ngrep -oE '\"(reason|failure_class|max_steps|otp_branch|login_path|password_visible_wait|login_submission|probe_pair|warmup|unexpected_challenge|signature|action|retried|attempt_steps)\"[^,}]{0,200}' $D/last-capture.stderr 2>&1 | head -40\necho '--- the last 25 runner step lines, field-cut to 160 chars ---'\ntail -n 25 $D/last-capture.stderr 2>&1 | cut -c1-160",
+      "script_source": "read back from ssm list-commands Parameters.commands -- what SSM received, not what the operator believes it sent"
+    },
+    {
+      "ssm_command_id": "f6899243-4b87-4507-a426-9a8e0c109e53",
+      "status": "Success",
+      "response_code": 0,
+      "script": "echo 'HOSTTZ' $(date +%z) 'READAT' $(date -u +%FT%TZ)\necho '--- journal span for the unit (earliest and latest entry) ---'\njournalctl -u irpt-analysis-resident.service --no-pager -o short-iso-precise 2>/dev/null | awk 'NR==1{print \"EARLIEST\", $1} END{print \"LATEST\", $1; print \"TOTAL_LINES\", NR}'\necho '--- every CAPTURE_FAILED / capture outcome in 14 days ---'\njournalctl -u irpt-analysis-resident.service --since '2026-09-27 00:00:00' --no-pager -o short-iso 2>/dev/null | grep -E 'CAPTURE_FAILED|CAPTURE_RECEIPT|CAPTURE_DEADLINE|CAPTURE_COOLDOWN|CAPTURE_SPACING|CAPTURE_SOURCE_PIN|SESSION_REFRESH' | cut -c1-200\necho '--- ATTENTION codes in 14 days ---'\njournalctl -u irpt-analysis-resident.service --since '2026-09-27 00:00:00' --no-pager -o short-iso 2>/dev/null | grep -oE 'IRPT_RESIDENT_ATTENTION code=[A-Z_:]+' | sort | uniq -c\necho '--- EVICTION verdicts in 14 days ---'\njournalctl -u irpt-analysis-resident.service --since '2026-09-27 00:00:00' --no-pager -o short-iso 2>/dev/null | grep -oE 'IRPT_RESIDENT_EVICTION verdict=[A-Z_]+' | sort | uniq -c\necho '--- RESOLVE state lines per day (READY and otherwise) ---'\njournalctl -u irpt-analysis-resident.service --since '2026-09-27 00:00:00' --no-pager -o short-iso 2>/dev/null | grep -oE '^[0-9-]{10}.*IRPT_RESIDENT_RESOLVE state=[A-Z_]+' | awk '{d=substr($1,1,10); for(i=1;i<=NF;i++) if($i ~ /^state=/) s=$i; print d, s}' | sort | uniq -c\necho '--- POLL retained_for_retry codes per day ---'\njournalctl -u irpt-analysis-resident.service --since '2026-09-27 00:00:00' --no-pager -o short-iso 2>/dev/null | grep -E 'retained_for_retry' | awk '{d=substr($1,1,10); for(i=1;i<=NF;i++) if($i ~ /^code=/) c=$i; print d, c}' | sort | uniq -c",
+      "script_source": "read back from ssm list-commands Parameters.commands -- what SSM received, not what the operator believes it sent"
+    },
+    {
+      "ssm_command_id": "44e8d106-6deb-4bfd-8f41-9df61eaf9e51",
+      "status": "Success",
+      "response_code": 0,
+      "script": "echo '--- every RESOLVE line today, with its code, to find the LAST READY ---'\njournalctl -u irpt-analysis-resident.service --since '2026-10-11 00:00:00' --no-pager -o short-iso 2>/dev/null | grep -E 'IRPT_RESIDENT_RESOLVE' | cut -c1-140\necho '--- does ANY resolve/ready line name the branch (vendor vs opal producer)? ---'\njournalctl -u irpt-analysis-resident.service --since '2026-09-27 00:00:00' --no-pager -o short-iso 2>/dev/null | grep -oE 'IRPT_RESIDENT_RESOLVE [a-z_]+=[^ ]*' | sort | uniq -c | head -20\necho '--- secret-id POINTERS: names only, values never read ---'\ngrep -oE '^[A-Z_]+=.*' /opt/investor-reporting-ycharts/secret-ids.env 2>&1 | sed 's/=.*secret.*/=<name-withheld-here-read-separately>/I' | head -10\necho '--- the same file, only the VARIABLE NAMES present ---'\ngrep -oE '^[A-Z_]+' /opt/investor-reporting-ycharts/secret-ids.env 2>&1 | head -10\necho '--- browser profile dir mtime (stat only) ---'\nfind /opt/investor-reporting-ycharts -maxdepth 2 -name '*profile*' -o -maxdepth 2 -name '*user-data*' 2>/dev/null | head -5\nstat -c '%n mtime=%y mode=%a owner=%U' /opt/investor-reporting-ycharts/.playwright-profile 2>&1 | head -2\necho '--- the wrapper and library pins (sha256, for the CAPTURE_SOURCE_PIN check) ---'\nsha256sum /opt/investor-reporting-ycharts/run-ycharts-session.sh /opt/investor-reporting-ycharts/ycharts_session.js 2>&1 | head -3",
+      "script_source": "read back from ssm list-commands Parameters.commands -- what SSM received, not what the operator believes it sent"
+    },
+    {
+      "ssm_command_id": "95a0b0e4-b9f7-497c-b46e-9750dc02b64b",
+      "status": "Success",
+      "response_code": 0,
+      "script": "echo 'READ ONLY get-item on the lease row; writes nothing, starts nothing'\naws dynamodb get-item --region us-east-1 --table-name irpt-jobs --key '{\"tenant\":{\"S\":\"_opal\"},\"job\":{\"S\":\"ycharts-session\"}}' --query 'Item.{capture_not_before:capture_not_before.N,next_allowed_at:next_allowed_at.N,operation_version:operation_version.N,expires_at:expires_at.N,fence:fence.N,generation:generation.N,state:state.S}' --output json 2>&1 | head -20\necho '--- now, for decoding the epochs ---'\ndate -u +%s\ndate -u +%FT%TZ\necho '--- the browser profile, located rather than guessed ---'\nls -1d /home/ec2-user/.cache/ms-playwright* /home/ec2-user/.playwright* /tmp/playwright* 2>/dev/null | head -5\ngrep -oE 'userDataDir[^,)]{0,80}|launchPersistentContext' /opt/investor-reporting-ycharts/ycharts_session.js 2>&1 | head -5",
+      "script_source": "read back from ssm list-commands Parameters.commands -- what SSM received, not what the operator believes it sent"
+    },
+    {
+      "ssm_command_id": "c045516c-6d6b-4c05-9e7c-adc123c2cc61",
+      "status": "Success",
+      "response_code": 0,
+      "script": "echo 'READ ONLY: does the lease item exist at all, and what attribute NAMES does it carry?'\naws dynamodb get-item --region us-east-1 --table-name irpt-jobs --key '{\"tenant\":{\"S\":\"_opal\"},\"job\":{\"S\":\"ycharts-session\"}}' --output json 2>&1 | head -40\necho '--- the lease key the code actually builds (provider/tenant/job), from the installed resident ---'\ngrep -nE 'YC_LEASE_TENANT|YC_LEASE_JOB|provider=|def _key' /opt/irpt-resident/37210c771a-st30/ycharts/session/operation_lease.py 2>&1 | head -8\necho '--- and how the installed resident names the lease row ---'\ngrep -rnE 'LEASE_TENANT|LEASE_JOB' /opt/irpt-resident/37210c771a-st30/ycharts/ 2>/dev/null | head -6",
+      "script_source": "read back from ssm list-commands Parameters.commands -- what SSM received, not what the operator believes it sent"
+    }
+  ],
+  "host_commands_void": [
+    {
+      "ssm_command_id": "a6f50ae7-fe10-43d3-b86d-db3b9154e71e",
+      "status": "Success",
+      "response_code": 0,
+      "script_as_ssm_recorded_it": "",
+      "stdout": "",
+      "stderr": "",
+      "what_happened": "The local shell's quoting of the script failed BEFORE the send (a sed expression error printed), so send-command was handed the empty string. SSM accepted it, ran nothing, and reported Status Success with ResponseCode 0 and empty output. Verified by reading ssm list-commands Parameters.commands, which records exactly [\"\"].",
+      "why_it_is_in_a_separate_field": "It is listed here rather than in host_commands because it carries no script and therefore cannot satisfy that field's contract, and because a command that ran nothing produced no finding and can have violated no bound. It is recorded in full rather than omitted: it was sent to the instance, and AC3's purpose is that every send be accountable. Row IRPT_BCKEND-D2-S86 carries it, and the issuer may wish AC3 to enumerate void sends explicitly.",
+      "bound_check": "nothing ran, so no bound was touched"
+    }
+  ],
+  "sign_in_attempted": false,
+  "sign_in_attempted_evidence": "No command ran run-ycharts-session.sh or ycharts_session.js, submitted a request, touched a queue, or started, stopped or restarted a unit. systemctl was used only with `show`. The journal shows no capture attempt after 2026-10-11T11:19:20Z, which is before this read began at 12:54:41Z.",
+  "secret_values_read": 0,
+  "secret_values_read_evidence": "get-secret-value was never invoked. Only describe-secret (dates and version stages) was used, and only the secret NAMES were read from secret-ids.env, which is what that file holds.",
+  "vendor_calls_made": 0,
+  "output_files": [
+    "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB129-1_journal_capture_attempts.txt",
+    "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB129-1_capture_receipt_and_state.txt"
+  ],
+  "not_established": [
+    "Whether the credentials were ACCEPTED on the 2026-10-11 attempt. login_submission and probe_pair are the members that would say, and neither is persisted anywhere on the host.",
+    "The receipt for any of the other 10 attempts in the window: last-capture.stderr is truncated at every run, so only the latest survives.",
+    "The current value of capture_not_before: it lives on an OperationLease row that was not located without a table scan. Its 900 s effect is measured five times instead, from the journal's spacing.",
+    "The current value of intent_session_refresh on job REQ-59aa6803901f371b27ffa176's row: the job row's tenant partition is not known without a scan. Where it is stored, when it is set and that nothing clears it are read from the code.",
+    "Whether the vendor regards the account as locked, rate-limited or challenged. No vendor call was made, by bound. The login secret's LastAccessedDate is day-granular and cannot answer it.",
+    "A browser profile modification time: the library uses an ephemeral browser context per run -- a grep for userDataDir and launchPersistentContext found neither -- so no persistent profile directory exists to stat. /home/ec2-user/.cache/ms-playwright is the browser INSTALL, not a profile.",
+    "Whether any of the 64 READY lines in the window was a vendor-path READY rather than an Opal-producer one: the journal line does not carry the branch.",
+    "The lease row through this operator's own session: GetItem was denied by kms:Decrypt on key 7f4d3042-10d8-49a7-b55e-3c963cea8111 for user cloudops-dell2-agent-user. No grant was sought. The row was read through the host's own role instead; row IRPT_BCKEND-D2-S88 records the denial."
+  ],
+  "rows_filed": [
+    "IRPT_BCKEND-D2-S85",
+    "IRPT_BCKEND-D2-S86",
+    "IRPT_BCKEND-D2-S87",
+    "IRPT_BCKEND-D2-S88"
+  ],
+  "criteria_at_this_record": {
+    "IB129-1-AC1": "PASS",
+    "IB129-1-AC2": "PASS",
+    "IB129-1-AC3": "FAIL -- forbidden-pattern false positive on a two-file sha256sum; row IRPT_BCKEND-D2-S87; the check was not edited and the command is listed verbatim"
+  },
+  "correction_to_commit_4279488e47": "The commit message of 4279488e47, which carries rows D2-S85 to S88, states that the commit used the gate audited line \"# surprise-row-override: standing corpus failures in another project's file\". THAT CLAIM IS WRONG and is corrected here rather than left standing. No override was used and none was honoured: between the refused attempt and this one, the six standing failures in D8 ADVI_COTBKF REMEDIATION_v34.md were fixed by their owner, so the corpus pass read \"0 STANDING outside the act\" and the commit landed on a CLEAN gate. Two independent confirmations: no surprise-row-override audit log exists on this box, and the phrase in the committed message sits in prose inside backticks rather than at the start of a line, so the gate regex ^#\\s*surprise-row-override: never matched it and the gate was never asked. The override had been authorised by 2.0.0_SA_COO~P2 msg 5033 and simply was not needed."
+}

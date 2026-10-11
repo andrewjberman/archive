@@ -1,0 +1,139 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-R4-pk1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R4-pk1.package-door-env-firms-and-creator-codes.md",
+  "group": "OTHER",
+  "vintage_commit": "4b2749d8ec"
+ },
+ "assignee": "0.9.0_WK_TCKT_VNEXT~15",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R4.md",
+  "vintage_commit": "4b2749d8ec",
+  "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R4-pk1.package-door-env-firms-and-creator-codes.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "R4-pk-1: PACKAGE_ALLOWED_FIRMS env-list constant (built as COMMENTARY_ALLOWED_FIRMS); package_ticket binds body firm to it and no longer reads the users PROFILE row; REPORT_TICKET_COMPLETED and REPORT_NO_ATTACHMENT codes on the creator branch; terraform untouched, env key not set, not deployed, no AWS call",
+   "artifact_covered_by": [
+    "R4-pk1-AC1",
+    "R4-pk1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_package_env_firms.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "new file, 6 tests; no network",
+   "artifact_covered_by": [
+    "R4-pk1-AC1",
+    "R4-pk1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_package_route.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "autouse fixture sets PACKAGE_ALLOWED_FIRMS; no network",
+   "artifact_covered_by": [
+    "R4-pk1-AC1",
+    "R4-pk1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_package_409_codes.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "autouse fixture sets PACKAGE_ALLOWED_FIRMS; no network",
+   "artifact_covered_by": [
+    "R4-pk1-AC1",
+    "R4-pk1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_package_i5p_i7.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "autouse fixture sets PACKAGE_ALLOWED_FIRMS; no network",
+   "artifact_covered_by": [
+    "R4-pk1-AC1",
+    "R4-pk1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_package_principal.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "firm setup moved to the env list; two profile-shape tests rewritten to the env-list side; one renamed; no network",
+   "artifact_covered_by": [
+    "R4-pk1-AC1",
+    "R4-pk1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R4-pk1-AC1",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R4_CHECKS/r4_checks.py pk-env expect: PK-ENV-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R4_CHECKS/r4_checks.py pk-env",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: PK-ENV-OK passed=6 of 6",
+   "denominator": "6 of 6 named tests found by name and passed",
+   "status": "PASS",
+   "expect": "PK-ENV-OK"
+  },
+  {
+   "criterion_id": "R4-pk1-AC2",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R4_CHECKS/r4_checks.py pk-regress expect: PK-REGRESS-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R4_CHECKS/r4_checks.py pk-regress",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: PK-REGRESS-OK passed=175 (min 175) failed=0",
+   "denominator": "175 of 175 tests in the ticket_center tests folder passed (169 at the base plus 6 new)",
+   "status": "PASS",
+   "expect": "PK-REGRESS-OK"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "in-memory table and users doubles; no network or clock dependence",
+   "observed": "6 passed on the new file alone; both r4 checks rc=0",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "one in-place mutant of lambda_function.py (restored byte-identical, cmp against a saved copy): the firm bound `if body[\"firm\"] not in PACKAGE_ALLOWED_FIRMS` replaced by `if False`",
+   "expected": "the denial tests fail",
+   "observed": "3 of 6 new tests failed (not_in_env_list_is_denied, empty_or_unset_env_list_admits_nothing, all_is_not_a_wildcard); the other 3 passed as they should",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a deployed or live run of the ticket service, and setting the env key in terraform",
+   "reason": "the order forbids any AWS or network call, any deploy and any edit under infra/aws/terraform/"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~15/TCKT_VNEXT.TO-R4-pk1.package-door-env-firms-and-creator-codes.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R4_CHECKS/r4_checks.py pk-env",
+   "result": "PK-ENV-OK passed=6 of 6"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R4_CHECKS/r4_checks.py pk-regress",
+   "result": "PK-REGRESS-OK passed=175 (min 175) failed=0"
+  }
+ ]
+}

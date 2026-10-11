@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-17.canonical-list-import",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-17.canonical-list-import.md",
+    "group": "OTHER",
+    "vintage_commit": "8af389e9e2"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~40",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "8af389e9e2",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-17.canonical-list-import.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant. Base-tree control, run once before the edits: The same three invocations run at base (HEAD 8af389e9e2, before the edits) to fix the control counts. Router gate: bash run-gate.sh. Validator spec: bun test tests/ownership_key.spec.mjs. Canonical-list check: r4_canonlist.py --arms list.",
+      "expected": "Canonical-list check 2 of 4 (L2 and L3 FAIL), router gate 51 pass 0 fail, validator spec 6 pass 0 fail.",
+      "observed": "r4_canonlist.py --arms list: PASS L1, FAIL L2, FAIL L3, PASS L4; ROUND 4 CANONICAL LIST: 2 of 4 arms; router gate 51 pass, 0 fail, rc 0; validator spec 6 pass, 0 fail, rc 0",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "not re-run: each proof invocation was run once; AC3 was run before the commit c0d70bdbf4 and the scope it grades is unchanged by that commit",
+      "observed": "N/A -- no second run of the same invocation on the same bytes was made by this worker",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any deploy, any AWS call, any Terraform change, and the edge packaging of the router and the validator",
+      "reason": "Bounds 2 item 1 and the order's preflight: repository files only. The act that deploys the edge functions is act 4 (laptop lane)."
+    },
+    {
+      "item": "_shared/firm-config.mjs (generated) and the guard",
+      "reason": "Order 1a.4: not edited. The list is imported, not regenerated."
+    },
+    {
+      "item": "The router's v15 header comment still says the list is EMPTY today",
+      "reason": "Order 1a.1 keeps every other line of index.mjs; the stale header is filed as surprise ADVI_FIRMBKTS-D1-W40-S3, not edited."
+    },
+    {
+      "item": "The nested portal submodule (git status shows ' M portal')",
+      "reason": "A gitlink already dirty in this worktree before this work; not this worker's edit; not staged or committed."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda-edge/shared-advisor-router/index.mjs",
+      "kind": "script",
+      "commit_or_etag": "c0d70bdbf4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit c0d70bdbf4 on wk-ADVI_FIRMBKTS-40; no deploy. Imports CANONICAL_PLATINUM_BUCKETS from ../_shared/firm-config.mjs; the local empty definition is deleted.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/shared-advisor-router/test/canonical-platinum.spec.mjs",
+      "kind": "test",
+      "commit_or_etag": "c0d70bdbf4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit c0d70bdbf4; one call passes an explicit empty list so the test keeps its intent under the generated default; router gate 51 pass, 0 fail.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/ownership_key.mjs",
+      "kind": "script",
+      "commit_or_etag": "c0d70bdbf4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit c0d70bdbf4; imports and re-exports the generated list unchanged, default of ownershipMapKey's canonical parameter; no list defined here.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/tests/ownership_key.spec.mjs",
+      "kind": "test",
+      "commit_or_etag": "c0d70bdbf4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit c0d70bdbf4; test (i) now asserts the generated list is frozen and holds no generated FIRM_CONFIG bucket; tests (ii) to (vi) unchanged; spec fail 0.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c0d70bdbf4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three appended rows ADVI_FIRMBKTS-D1-W40-S1 to S3; surprise-row-gate OK on the 3 new rows.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 reads the generated list, both imports, and the router's own gate (at least 51 pass, 0 fail) and the validator's spec (0 fail). Expect: ROUND 4 CANONICAL LIST: 4 of 4 arms.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-40 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_canonlist.py --arms list --root /c/dev/wk-firmbkts-40; echo \"exit=$?\"",
+      "output_evidence": "  generated list=['opal-data-49financial'] expected=['opal-data-49financial'] frozen=True routed buckets=['opal-data-bd', 'opal-data-cot', 'opal-data-demo', 'opal-data-inf']\n  router imports the list=True, defines its own=False\n  validator helper imports the list=True, defines its own=False\n  router gate: 51 pass, 0 fail (rc 0); validator spec fail=0\nPASS L1 firm-config.mjs exports the frozen canonical-bucket list equal to the destinations, naming no firm's current routed bucket\nPASS L2 the router imports the generated list and defines none of its own\nPASS L3 the validator's helper imports the generated list and defines none of its own\nPASS L4 the router's gate reads at least 51 pass and 0 fail, and the validator's spec 0 fail\nROUND 4 CANONICAL LIST: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms PASS (L1 to L4); router gate 51 pass of 51 tests, 0 fail (base: 51 pass, 0 fail); validator spec 0 fail (base: 6 pass, 0 fail; the check prints fail only)",
+      "status": "PASS",
+      "expect": "ROUND 4 CANONICAL LIST: 4 of 4 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is a difference control: the validator's key check (dormant keys, engaged keys) must still read 4 of 4. Expect: ROUND 4 VALIDATOR KEY: 4 of 4 arms.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-40 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_validator.py --arms key --root /c/dev/wk-firmbkts-40; echo \"exit=$?\"",
+      "output_evidence": "  helper exports: {\"names\":[\"CANONICAL_PLATINUM_BUCKETS\",\"ownershipMapKey\"],\"frozen\":true,\"len\":1}\n  dormant: 1 listed firms, 5 unlisted firms all throw=True\n  engaged: firms=1, firms whose key moves=['49financial']\n  index.mjs uses the helper=True, key literal left in code=False\nPASS K1 ownership_key.mjs imports OWNERSHIP_KEYS and exports a frozen empty CANONICAL_PLATINUM_BUCKETS and ownershipMapKey\nPASS K2 dormant: the shipped list reads each firm's legacy key and an unknown firm throws\nPASS K3 engaged: a named bucket reads the seam's canonical key and an unnamed one stays legacy\nPASS K4 index.mjs builds the key through the helper, with no key literal left in code\nROUND 4 VALIDATOR KEY: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms PASS (K1 to K4); dormant: 1 listed firm, 5 unlisted firms all throw; engaged: 1 firm whose key moves when its bucket is named",
+      "status": "PASS",
+      "status_reason": "K1 prints len:1 for the list while its label still says EMPTY; the arm tests names and frozenness only. Surprise ADVI_FIRMBKTS-D1-W40-S2.",
+      "expect": "ROUND 4 VALIDATOR KEY: 4 of 4 arms"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound. Expect: ROUND 4 SCOPE: OK.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-40 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-40 --allow infra/aws/lambda-edge/shared-advisor-router/index.mjs --allow infra/aws/lambda-edge/shared-advisor-router/test/ --allow infra/aws/lambda-edge/auth-validator-edge/ownership_key.mjs --allow infra/aws/lambda-edge/auth-validator-edge/tests/ownership_key.spec.mjs --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~40/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/lambda-edge/shared-advisor-router/index.mjs --require infra/aws/lambda-edge/auth-validator-edge/ownership_key.mjs; echo \"exit=$?\"",
+      "output_evidence": "  CHANGED infra/aws/lambda-edge/auth-validator-edge/ownership_key.mjs\n  CHANGED infra/aws/lambda-edge/auth-validator-edge/tests/ownership_key.spec.mjs\n  CHANGED infra/aws/lambda-edge/shared-advisor-router/index.mjs\n  CHANGED infra/aws/lambda-edge/shared-advisor-router/test/canonical-platinum.spec.mjs\nROUND 4 SCOPE: OK 4 changed, 0 outside, 0 required missing\nexit=0",
+      "denominator": "4 changed files, 0 outside the grant, 2 of 2 required paths changed",
+      "status": "PASS",
+      "status_reason": "Measured before the commit c0d70bdbf4, when the four code files were uncommitted and the rows file was not yet committed; the check reported the four code files only. The commit does not change the set of code files.",
+      "expect": "ROUND 4 SCOPE: OK"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W40-S1: canonical-platinum.spec.mjs test 'even a map that names the firm's own bucket' relied on the default list being empty; one call now passes an explicit empty list (OBSERVATION, INERT)",
+    "ADVI_FIRMBKTS-D1-W40-S2: the round-4 validator check K1 label says the list is EMPTY; the list is the generated one (len 1) and K1 still passes because the arm does not test length (OBSERVATION, INERT; check artifact the issuer amends)",
+    "ADVI_FIRMBKTS-D1-W40-S3: the router's v15 header comment still says the list is EMPTY today; kept because the bounds keep every other line (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~40/ADVI_FIRMBKTS.TO-FB-g-17.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "bash run-gate.sh (router gate, bun test test/)",
+      "invocation": "cd /c/dev/wk-firmbkts-40/infra/aws/lambda-edge/shared-advisor-router && bash run-gate.sh",
+      "result": "51 pass, 0 fail, rc 0 at base and after the edits; no bun install was needed (no node_modules in the package)"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~40 <0.9.0_WK_ADVI_FIRMBKTS~40@opal.agent>\" -F .scratch/fb_g17_msg1.txt -- <the five paths>",
+      "result": "[wk-ADVI_FIRMBKTS-40 c0d70bdbf4] 5 files changed, 88 insertions(+), 13 deletions(-); naming-gate PASS 0 graded (the .mjs files are outside its graded set); commit-gate checked 0 of 5 (suffix not graded); surprise-row-gate OK 3 new rows; msg-verify MATCH"
+    }
+  ]
+}

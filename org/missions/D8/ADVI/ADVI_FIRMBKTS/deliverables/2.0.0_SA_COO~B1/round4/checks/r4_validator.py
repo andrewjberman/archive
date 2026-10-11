@@ -1,13 +1,17 @@
-"""ADVI_FIRMBKTS round 4 check for cell FB-g-1 (auth-validator-edge's canonical ownership-map key, DORMANT), issuer
-2.0.0_SA_COO~B1.
+"""ADVI_FIRMBKTS round 4 check for cell FB-g-1 (auth-validator-edge reads the ownership map at the key the generated
+OWNERSHIP_KEYS block names, DORMANT), issuer 2.0.0_SA_COO~B1. Amended after the CTO's round-3 ADDENDUM 4: the key
+templates are no longer typed in the validator; they come from `_shared/firm-config.mjs` (cell FB-g-12).
 
 --arms key [--root <tree>]  grades the validator's key helper in <tree> (4 arms):
-  K1 the helper file exists, exports a frozen EMPTY CANONICAL_PLATINUM_BUCKETS and ownershipMapKey(firmId, bucket, canonical).
-  K2 DORMANT: with the shipped (empty) list every firm and bucket reads the legacy key `platinum/<firm>/ownership_map.json`.
-  K3 ENGAGED: with the firm's own bucket named in the list, the key equals the producers' seam's canonical destination key
-     for `platinum/<firm>/ownership_map.json` (lib/platinum_dest.py destination(), canonical mode) -- read from the
-     CHECKOUT's seam, never typed here; a bucket not named stays legacy.
-  K4 index.mjs builds the key through the helper and no longer carries the literal key template in code.
+  K1 ownership_key.mjs exists, imports OWNERSHIP_KEYS from ../_shared/firm-config.mjs, and exports a frozen EMPTY
+     CANONICAL_PLATINUM_BUCKETS and ownershipMapKey(firmId, bucket, canonical, keys).
+  K2 DORMANT: with the shipped (empty) list, every firm OWNERSHIP_KEYS lists reads its `legacy` key for its own bucket,
+     another bucket and no bucket; a firm it does not list (every other FIRM_CONFIG firm included) throws, and the call
+     site fails closed on the throw as it did on the 404 of a key no producer wrote.
+  K3 ENGAGED: with a firm's own routed bucket named in the list, the key equals the producers' seam's canonical
+     destination key for that firm's legacy key (read from the CHECKOUT's lib/platinum_dest.py, never typed here); a
+     bucket not named stays legacy.
+  K4 index.mjs builds the key through the helper, and no `platinum/${...}/ownership_map.json` literal is left in code.
 Plain ASCII output; the last line carries the arm count. Never edit this file.
 """
 import argparse
@@ -18,7 +22,7 @@ import subprocess
 import sys
 
 VAL = "infra/aws/lambda-edge/auth-validator-edge"
-FIRMS = ("49financial", "inflection", "cottonwood")
+FC = "infra/aws/lambda-edge/_shared/firm-config.mjs"
 
 
 def _root(arg):
@@ -34,74 +38,82 @@ def _bun(root, code):
     return r.returncode, r.stdout.strip(), r.stderr.strip()
 
 
+def _url(root, rel):
+    return json.dumps("file:///" + os.path.join(root, *rel.split("/")).replace("\\", "/").lstrip("/"))
+
+
 def key(root):
-    helper = os.path.join(root, VAL, "ownership_key.mjs")
+    helper_rel = VAL + "/ownership_key.mjs"
+    helper = os.path.join(root, *helper_rel.split("/"))
     res = []
-    spec = "file:///" + helper.replace("\\", "/").lstrip("/")
-    ok1 = os.path.isfile(helper)
-    exports = ""
-    if ok1:
+    ok1, shown = False, ""
+    if os.path.isfile(helper):
+        src = open(helper, encoding="utf-8").read()
+        imports = re.search(r"import\s*\{[^}]*OWNERSHIP_KEYS[^}]*\}\s*from\s*[\"']\.\./_shared/firm-config\.mjs[\"']", src)
         rc, out, err = _bun(root, "import * as m from %s; console.log(JSON.stringify({names:Object.keys(m).sort(),"
                                   "frozen:Object.isFrozen(m.CANONICAL_PLATINUM_BUCKETS),"
-                                  "len:m.CANONICAL_PLATINUM_BUCKETS.length}))" % json.dumps(spec))
+                                  "len:m.CANONICAL_PLATINUM_BUCKETS.length}))" % _url(root, helper_rel))
         try:
             d = json.loads(out)
-            ok1 = (rc == 0 and "ownershipMapKey" in d["names"] and d["frozen"] is True and d["len"] == 0)
-            exports = out
+            ok1 = rc == 0 and bool(imports) and "ownershipMapKey" in d["names"] and d["frozen"] is True
+            shown = out
         except Exception:  # noqa: BLE001
-            ok1 = False
-            exports = "unreadable: " + (err or out)[:120]
-    print("  helper exports: %s" % exports)
-    res.append(("K1 ownership_key.mjs exports a frozen empty CANONICAL_PLATINUM_BUCKETS and ownershipMapKey", ok1))
+            shown = "unreadable: " + (err or out)[:120]
+    print("  helper exports: %s" % shown)
+    res.append(("K1 ownership_key.mjs imports OWNERSHIP_KEYS and exports a frozen empty CANONICAL_PLATINUM_BUCKETS "
+                "and ownershipMapKey", ok1))
     if not ok1:
-        res += [("K2 dormant: the shipped list keeps the legacy key for every firm and bucket", False),
-                ("K3 engaged: a named bucket reads the seam's canonical key and an unnamed one stays legacy", False),
-                ("K4 index.mjs builds the key through the helper, with no key literal left in code", False)]
-        return res
-    code = ("import {ownershipMapKey} from %s; const o={};"
-            "for (const f of %s) { o[f]=[ownershipMapKey(f,'opal-data-bd'),ownershipMapKey(f,'opal-data-'+f),"
-            "ownershipMapKey(f,undefined)]; } console.log(JSON.stringify(o))"
-            % (json.dumps(spec), json.dumps(list(FIRMS))))
+        return res + [("K2 dormant: the shipped list reads each firm's legacy key", False),
+                      ("K3 engaged: a named bucket reads the seam's canonical key", False),
+                      ("K4 index.mjs builds the key through the helper, with no key literal left in code", False)]
+
+    code = ("import {ownershipMapKey} from %s; import {FIRM_CONFIG, OWNERSHIP_KEYS} from %s; const o={};"
+            "for (const f of Object.keys(OWNERSHIP_KEYS)) { o[f]={legacy:OWNERSHIP_KEYS[f].legacy,"
+            "got:[ownershipMapKey(f,FIRM_CONFIG[f].bucket),ownershipMapKey(f,'x-other-bucket'),ownershipMapKey(f,undefined)]}; }"
+            "const unlisted=Object.keys(FIRM_CONFIG).filter(f=>!(f in OWNERSHIP_KEYS)).concat(['no-such-firm-xyz']);"
+            "let threw=unlisted.length>0; for (const f of unlisted) { try { ownershipMapKey(f,'b'); threw=false; } catch(e) {} }"
+            "console.log(JSON.stringify({o,threw,unlisted:unlisted.length}))" % (_url(root, helper_rel), _url(root, FC)))
     rc, out, err = _bun(root, code)
     try:
-        got = json.loads(out)
-        legacy = all(v == ["platinum/%s/ownership_map.json" % f] * 3 for f, v in got.items())
+        d = json.loads(out)
+        legacy_ok = bool(d["o"]) and all(v["got"] == [v["legacy"]] * 3 for v in d["o"].values()) and d["threw"] is True
     except Exception:  # noqa: BLE001
-        got, legacy = {}, False
-    print("  dormant keys: %s" % json.dumps(got)[:200])
-    res.append(("K2 dormant: the shipped list keeps the legacy key for every firm and bucket", rc == 0 and legacy))
+        d, legacy_ok = {}, False
+    print("  dormant: %d listed firms, %s unlisted firms all throw=%s" % (len(d.get("o", {})), d.get("unlisted"),
+                                                                           d.get("threw")))
+    res.append(("K2 dormant: the shipped list reads each firm's legacy key and an unknown firm throws",
+                rc == 0 and legacy_ok))
 
     sys.path.insert(0, os.path.join(root, "data", "black_diamond", "scripts", "gold"))
     from lib import platinum_dest as pd  # noqa: E402
-    want = {}
-    for f in FIRMS:
-        try:
-            want[f] = pd.destination("platinum/%s/ownership_map.json" % f, "canonical")[1]
-        except Exception as e:  # noqa: BLE001
-            want[f] = "ERR:" + type(e).__name__
-    code = ("import {ownershipMapKey} from %s; const o={};"
-            "for (const f of %s) { o[f]=[ownershipMapKey(f,'opal-data-'+f,['opal-data-'+f]),"
-            "ownershipMapKey(f,'opal-data-bd',['opal-data-'+f])]; } console.log(JSON.stringify(o))"
-            % (json.dumps(spec), json.dumps(list(FIRMS))))
+    code = ("import {ownershipMapKey} from %s; import {FIRM_CONFIG, OWNERSHIP_KEYS} from %s; const o={};"
+            "for (const f of Object.keys(OWNERSHIP_KEYS)) { const b=FIRM_CONFIG[f].bucket; o[f]={legacy:OWNERSHIP_KEYS[f].legacy,"
+            "named:ownershipMapKey(f,b,[b]),unnamed:ownershipMapKey(f,b,['x-other-bucket'])}; }"
+            "console.log(JSON.stringify(o))" % (_url(root, helper_rel), _url(root, FC)))
     rc, out, err = _bun(root, code)
     try:
         eng = json.loads(out)
     except Exception:  # noqa: BLE001
         eng = {}
-    # the seam registers the 49financial class only; for the others the seam is the identity (legacy key), so the
-    # helper must agree with the seam firm by firm, whichever it is
-    agree = bool(eng) and all(eng[f][0] == want[f] and eng[f][1] == "platinum/%s/ownership_map.json" % f for f in FIRMS)
-    print("  seam canonical keys: %s" % json.dumps(want)[:220])
-    print("  engaged keys:        %s" % json.dumps(eng)[:220])
+    want = {}
+    for f, v in eng.items():
+        try:
+            want[f] = pd.destination(v["legacy"], "canonical")[1]
+        except Exception as e:  # noqa: BLE001
+            want[f] = "ERR:" + type(e).__name__
+    agree = bool(eng) and all(v["named"] == want[f] and v["unnamed"] == v["legacy"] for f, v in eng.items())
+    moved = [f for f, v in eng.items() if v["named"] != v["legacy"]]
+    print("  engaged: firms=%d, firms whose key moves=%s" % (len(eng), moved))
     res.append(("K3 engaged: a named bucket reads the seam's canonical key and an unnamed one stays legacy",
-                rc == 0 and agree))
+                rc == 0 and agree and bool(moved)))
 
-    src = open(os.path.join(root, VAL, "index.mjs"), encoding="utf-8").read()
+    src = open(os.path.join(root, *(VAL + "/index.mjs").split("/")), encoding="utf-8").read()
     code_only = "\n".join(ln for ln in src.splitlines() if not ln.lstrip().startswith(("//", "*", "/*")))
     uses = re.search(r"ownershipMapKey\s*\(", code_only) is not None and "./ownership_key.mjs" in code_only
-    literal = re.search(r"`platinum/\$\{[^}]*\}/ownership_map\.json`", code_only) is not None
+    literal = re.search(r"platinum/\$\{[^}]*\}/ownership_map\.json", code_only) is not None
     print("  index.mjs uses the helper=%s, key literal left in code=%s" % (uses, literal))
-    res.append(("K4 index.mjs builds the key through the helper, with no key literal left in code", uses and not literal))
+    res.append(("K4 index.mjs builds the key through the helper, with no key literal left in code",
+                uses and not literal))
     return res
 
 

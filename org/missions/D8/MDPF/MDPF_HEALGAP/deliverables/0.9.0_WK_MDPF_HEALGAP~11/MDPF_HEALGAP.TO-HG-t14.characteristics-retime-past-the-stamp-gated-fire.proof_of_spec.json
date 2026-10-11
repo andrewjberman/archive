@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-t14",
+  "firm": "MDPF",
+  "genre": "BUILD",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t14.characteristics-retime-past-the-stamp-gated-fire.md",
+    "group": "OTHER",
+    "vintage_commit": "60ee1f8f3d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "60ee1f8f3d",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t14.characteristics-retime-past-the-stamp-gated-fire.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_HEALGAP~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/cot-pipeline/satellites-characteristics-producer.tf",
+      "kind": "terraform",
+      "commit_or_etag": "fd95aeb659",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TO BOUNDS: no terraform init, plan, validate, apply or safe-apply by this worker; no AWS write. The apply is the issuer's at the drain under its never-widen pair. The HCL is checked by the static read of HG3-t14-AC1 only.",
+      "artifact_covered_by": [
+        "HG3-t14-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG3-t14-AC1",
+      "criterion_verbatim": "the characteristics rule is an every-day wall-clock cron at least 270 s after the stamp-gated registry fire (read from its own tf), not earlier than 12:30Z, with only `schedule_expression` and `description` changed against the base pin.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t14_schedule.py",
+      "output_evidence": "T14-OK characteristics=cron(25 13 * * ? *) stamp_gated=cron(15 13 * * ? *) margin=600 s (need 270 s) scope=ok(4 changed line(s), all schedule_expression)  (rc=0). Negative control, HG_T14_TF pointing at a .scratch copy with schedule_expression cron(16 13 * * ? *): T14-BAD TIME: characteristics fires 13:16Z, only 60 s after the stamp-gated fire 13:15Z; the declared worst case (retries 180 s + timeout 90 s) needs 270 s  (rc=1). Base-pin read: git show 61d007d22c:infra/aws/terraform/cot-pipeline/satellites-characteristics-producer.tf line 358 is cron(30 12 * * ? *), so the check's AC1 FAILS at the base as the order states.",
+      "denominator": "4 limbs graded (TIME, FLOOR, SHAPE, SCOPE), 4 of 4 pass on the edited file; SCOPE grades 4 changed non-comment lines against base pin 61d007d22c, all 4 are schedule_expression or description (2 old, 2 new); TIME margin 600 s against a declared need of 270 s",
+      "status": "PASS",
+      "status_reason": "PASS by the named output: T14-OK rc=0 on two runs (identical); the negative control prints T14-BAD TIME rc=1 on the 13:16Z copy, so the check discriminates the stamp-gated window.",
+      "expect": "T14-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Copy of the edited tf under .scratch/ (uncommitted) with schedule_expression changed to cron(16 13 * * ? *), 60 s after the stamp-gated 13:15Z fire; run through HG_T14_TF.",
+      "expected": "T14-BAD TIME",
+      "observed": "T14-BAD TIME: characteristics fires 13:16Z, only 60 s after the stamp-gated fire 13:15Z; the declared worst case (retries 180 s + timeout 90 s) needs 270 s (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of hg_t14_schedule.py from the worktree root, after the commit fd95aeb659",
+      "observed": "T14-OK characteristics=cron(25 13 * * ? *) stamp_gated=cron(15 13 * * ? *) margin=600 s (need 270 s) scope=ok(4 changed line(s), all schedule_expression); rc=0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform fmt, init, plan, validate, apply, safe-apply; any AWS write; any Lambda invoke; any vendor call",
+      "reason": "TO BOUNDS: the apply is the issuer's under its never-widen pair. No terraform fmt criterion exists in this order, because the base file carries alignment drift (hg_tf_fmt.py FMT-BAD rc=3 at the base) and the edits are a string, a description and comments."
+    },
+    {
+      "item": "the top-of-file WHY block (lines 30-41) that names the registry cron(0 7 * * ? *) rule as the anchor",
+      "reason": "TO CELL: the order names exactly three edits (schedule_expression, description, the comment block above the rule) and forbids touching any other comment block. Filed as surprise MDPF_HEALGAP-D1-W11-S1."
+    },
+    {
+      "item": "data/assets/scripts/gold/build_satellites_characteristics.py and the Lambda wrapper",
+      "reason": "TO BOUNDS: DS's producer and the wrapper are not edited."
+    },
+    {
+      "item": "alarm, SNS topic, SES send, freshness checker or monitor",
+      "reason": "TO BOUNDS: standing moratorium. None added."
+    },
+    {
+      "item": "the registry producer's own 07:00Z daily rule and stamp-gated 13:15Z rule",
+      "reason": "Read only, to derive the margin; not in the grant."
+    }
+  ],
+  "surprises": [
+    "MDPF_HEALGAP-D1-W11-S1: the top-of-file WHY block of satellites-characteristics-producer.tf names only the registry producer's cron(0 7 * * ? *) rule as this trigger's anchor, while holdings.json finality is the stamp-gated cron(15 13 * * ? *) fire; left as found, outside the three named edits"
+  ],
+  "session_log": "0.9.0_WK_MDPF_HEALGAP~11 on HG-t-14 (HG3-t14-AC1), worktree C:/dev/wk_healgap_r3_11, branch wk-MDPF_HEALGAP-11, base HEAD 60ee1f8f3d. Code commit fd95aeb659 (the tf re-time and the surprise row); this instance and the order status flip to complete are committed after it.",
+  "compiler_tools": [
+    {
+      "tool": "hg_t14_schedule.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t14_schedule.py",
+      "result": "T14-OK characteristics=cron(25 13 * * ? *) stamp_gated=cron(15 13 * * ? *) margin=600 s (need 270 s) scope=ok(4 changed line(s), all schedule_expression); rc=0"
+    },
+    {
+      "tool": "hg_t14_schedule.py (negative control, HG_T14_TF on a .scratch copy)",
+      "invocation": "HG_T14_TF=C:/dev/wk_healgap_r3_11/.scratch/hg_t14_negctl.tf python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t14_schedule.py",
+      "result": "T14-BAD TIME: characteristics fires 13:16Z, only 60 s after the stamp-gated fire 13:15Z; the declared worst case (retries 180 s + timeout 90 s) needs 270 s; rc=1"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> HG3-t14-AC1 --governing-order org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t14.characteristics-retime-past-the-stamp-gated-fire.md",
+      "result": "recorded in the flip commit's message and the worker report"
+    }
+  ]
+}

@@ -182,3 +182,20 @@ Held on the same condition (IB-pr-404 and IB-pr-413 terminal):
 
 **For the slug, the lesson the issuer names and this seat shares:** a release was signed, applied and compiled on its blast radius
 and bytes, and nobody read it against the outcome it serves. This seat reads the ENDPOINT on every served change it compiles.
+
+---
+
+## Added at rounds 123 to 128, 2026-10-11T13:11:57Z (input: msg 4965)
+
+Held on the condition that no IRPT_BCKEND order is open (IB-pr-404, IB-pr-413, IB-pr-431, IB-pr-432 are):
+
+- **D2-S82** (BLOCKING; owner `1.0.0_SA_CTO~DELL2`): ADDENDUM v0.34's ratified-text half is refused on two text defects. Remedy:
+  the two repairs named in `org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_BCKEND_PRD_v0.34_RATIFIED_TEXT_REVIEW_20261011.md @3f67123932`, then this seat signs.
+- **D2-S83** (owner `1.0.0_SA_CTO~DELL2`, the gate's owner): the sign-off hash does not see a contract change made by addendum.
+  Remedy: the half's hash covers the addenda that say they change it, or such a change is written into the hashed section.
+- **D2-W284-S1** (owner `2.0.0_SA_COO~P2`): the close-anchor instrument keeps one price per CUSIP while a CUSIP carries different row
+  prices on 50 of 85 days. It bears on what the addendum's claims measure.
+- **D2-W286-S1** (owner `2.0.0_SA_COO~P2`): two columns are absent from 49 of the 85 partitions.
+- **D2-W285-S3** (owner `1.0.0_SA_CTO~DELL2`): two real S3 requests with a literal fake key left the box before the offline fake was
+  installed; refused, nothing read or written. Disclosed by the worker. Remedy: the replay harness installs the fake before any import.
+- **D2-W285-S2** (owner `2.0.0_SA_COO~P2`): the replay box lacks the PDF library, so the pin tests that need a real PDF cannot run.

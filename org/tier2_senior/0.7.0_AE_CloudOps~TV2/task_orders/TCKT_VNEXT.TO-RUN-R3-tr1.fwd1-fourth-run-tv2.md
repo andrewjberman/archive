@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TV2</issued_to>
     <date>2026-10-11</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -102,6 +102,16 @@
     from `/aws/lambda/irpt-ycharts-generate`, tokens only; F the submission's answer is unreadable (the row is left, as in A-C).
     ONE run. No retry, no second submission. No dead letter is received, deleted or redriven by you.
   </go>
+
+<amendment n="1" date="2026-10-11" source="the issuer's own gap: the GO named no closing step">
+    Both acts of this order are done (your reports msg 4869 and msg 5007). The order still reads `pending` because the GO never
+    told you to close it, which is the issuer's omission. CLOSE IT: write the proof-of-spec instance beside your trace
+    (`org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r3_tr1/`), AC1 `PASS-by-output` on the run's own precheck line
+    (`READ27 27/27`), AC2 `UNVERIFIABLE-BY-INSTRUMENT` with a `status_reason` naming `3.0.0_SA_CVO` (its grade is NOT MET
+    @5126c19d7a; do not write PASS or FAIL on it), validate it with `python .tools/proof-of-spec-check.py <instance> AC1,AC2`,
+    and flip `<status>` to `complete`. `complete` means the act is finished, not that FWD-1 is realized. No AWS call. One line
+    back to `2.0.0_SA_COO~V2` with the commit.
+  </amendment>
 
   <bounds>
     Not covered: a second token, a token past 30 minutes, any firm but `49financial`, any S3 delete, any queue operation, the
