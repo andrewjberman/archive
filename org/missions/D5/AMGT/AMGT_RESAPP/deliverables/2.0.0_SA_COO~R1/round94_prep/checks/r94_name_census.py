@@ -3,7 +3,7 @@
   PYTHONPATH=<repo root> python r94_name_census.py [--where deployed|local]
 
 For each of the 243 MEASURED crosswalk subjects the name the page serves (`--where deployed`: the live function's `/overlay` `display_name`; `--where local`: the
-checkout's own chain, `monthly_chatter._display_names`) is compared with the crosswalk's registered company name. The two AGREE when their cleaned name tokens
+checkout's own overlay name path, `scoped_amgt._overlay_name`) is compared with the crosswalk's registered company name. The two AGREE when their cleaned name tokens
 (`numeric_tickers.name_token`, legal endings stripped, then the generic words com, stk, cl, class, cos, holdings, holding, group, del, new, and, corp, co, inc, ltd
 dropped) share at least one token of two or more letters; a pair that shares none is a DIFFERENT COMPANY.
     C1 the count of subjects whose served name is a different company from the registered one: must be 0 (the base reads 2: SAN_FP_Equity served as
@@ -21,7 +21,7 @@ import sys
 
 import boto3
 
-from lib.research.api import monthly_chatter, scoped_amgt
+from lib.research.api import scoped_amgt
 from lib.research.identity import crosswalk
 from lib.research.peers import numeric_tickers
 
@@ -50,8 +50,11 @@ def main():
     keys = [r["security_key"] for r in doc["records"] if r.get("resolution") == "MEASURED" and r.get("security_key")]
     registered = scoped_amgt._crosswalk_names()
     if args.where == "local":
-        chain = monthly_chatter._display_names(keys)
-        served = {k: chain[k][0] for k in keys}
+        # the name the page HEADER serves: the overlay's own name path (`_overlay_name`), not the chatter chain (round 94 amendment 1)
+        served = {}
+        for k in keys:
+            ident = scoped_amgt.resolve_identity(k) or {}
+            served[k] = scoped_amgt._overlay_name(ident, k, ident.get("bloomberg")).get("display_name")
     else:
         served = {k: served_deployed(k) for k in keys}
     records = {r["security_key"]: r for r in doc["records"] if r.get("security_key")}
