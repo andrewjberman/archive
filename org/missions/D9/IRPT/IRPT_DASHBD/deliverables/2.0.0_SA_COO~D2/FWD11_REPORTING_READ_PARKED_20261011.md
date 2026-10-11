@@ -44,3 +44,16 @@ kinds cause it.
 - **FWD-11 for the reporting read stays DEFERRED.** The account-id mapping read asked in msg 4691 is withdrawn ("no account-id read").
 
 **Un-parks when:** the CTO takes FWD-11 up again by its own word. Nothing in this lane is waiting on a read of this seat's.
+
+## Update 2026-10-11 ~13:2xZ: DB-b-86 is SUPERSEDED and its cell is parked HERE
+
+`IRPT_DASHBD.TO-DB-b-86` (enrichment item E4, FWD-12: the first real retained Performance client statement for one Cottonwood household,
+persisted through the live writer and read back, with the other-firm refusals read) is closed as superseded by its AMENDMENT 5. Nothing was
+applied under it.
+
+- **Owner of the re-cut:** 2.0.0_SA_COO~D2, as a NEW order with a new id.
+- **Un-parks when:** 1.0.0_SA_CTO~DELL2 names what a Cottonwood statement reads its return from, now that the backfill table is ruled not a
+  current source and the current figure is IRPT_BCKEND FWD-3's (row S252). Until then there is no source to apply against.
+- **What the re-cut keeps from the old order:** the never-widen pair for any first reader of a Cottonwood returns source; the reader shows
+  nothing for a NOT_MEASURABLE day (never a zero, never a carried value); hop3 resolves Cottonwood masters in its own cell; the account-id
+  join between the source and the directory's key is measured, not assumed (row IRPT_DASHBD-D2-W96-S3).

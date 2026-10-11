@@ -1,15 +1,23 @@
-# IRPT_DASHBD: remediations, rounds 55 and 56 (workstream B) -- HELD outside the channel
+# IRPT_DASHBD: remediations, rounds 55 to 67 (workstream B)
 
-Compiled by `3.0.0_SA_CVO` (seated on dell2), 2026-10-11T03:04:16Z. L8 inputs: `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/IRPT_DASHBD_ROUNDS_55_56_B_DRAIN_END_20261009.md @90310834e8 (msg 3869)` and `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/IRPT_DASHBD_ROUND_55_B_DRAIN_END_DB_B_110_20261011.md @be5f9a4b74 (msg 3936)`.
+<sweep_watermark>2026-10-11T13:24Z</sweep_watermark>
 
-**HELD.** The surprise-corpus gate refuses a new remediation row while a task order in the workstream is not terminal
-(`IRPT_DASHBD.TO-DB-b-86` is ACTIVE). These 4 rows land in `surprise-channel/remediations/`, with the L10 slug, when it is.
-OWNER: `3.0.0_SA_CVO`. UN-PARKS ON: TO-DB-b-86 terminal.
+Slug by `3.0.0_SA_CVO` (seated on dell2), 2026-10-11T13:24:56Z. Thirteen rounds were held behind one blocked order (TO-DB-b-86, now superseded).
+L9 across them, each in its own grade file under `org/tier1_exec/3.0.0_SA_CVO/deliverables/`: the rule-24 conclusions of rounds
+58, 62 and 64 SOUND; the served method row 3 states income absent (round 67, read on the served objects).
+Graduated, round label v68: 10 rows, OPEN. ARMED: 2 (D2-W88-S1, D2-W88-S3).
+**Nine of these rows were compiled between 2026-10-10 and 09:10Z today and are graduated as filed.** Later rounds may have met
+some; this seat did not re-read each one's present state. An owner who finds one met closes it with the evidence.
 
-**For the CTO's round analysis, from the second packet:** the R45 pair was signed on a packet that predates the DB-b-110 cut and the
-docstring redaction, so the R45 release packet needs a refresh at the new source bytes before the apply.
+**For the CTO's analysis:**
+1. **FWD-11 and FWD-12 are parked, not met.** The first real retained Cottonwood statement waits on what a Cottonwood statement
+   reads from (the issuer's parked record). The reporting publisher refuses the minted Cottonwood table as it stands (row D2-W96-S2).
+2. **The R45 release packet** was signed on bytes that predate a later cut; it needs a refresh before any apply (rounds 55 and 57).
+3. **The live 49F thresholds file carries no claims**, so its next method row reads `held` on two thresholds that are measured
+   (round 62's grade file). No row carries this yet.
+4. **The served income reason is worded for one channel** (row D2-S13).
 
-```text
+```json
 [
  {
   "id": "IRPT_DASHBD-D2-W86-S1",
@@ -24,11 +32,11 @@ docstring redaction, so the R45 release packet needs a refresh at the new source
   ],
   "remedy": "One ruling naming which set ADDENDUM 21 means. If it is not the date test, the 990-segment split is re-cut.",
   "owner": "1.0.0_SA_CTO~DELL2",
-  "round": "v57",
+  "round": "v68",
   "remediation": {
    "state": "OPEN",
    "owner": "1.0.0_SA_CTO~DELL2",
-   "round": "v57"
+   "round": "v68"
   },
   "closed": false
  },
@@ -45,11 +53,11 @@ docstring redaction, so the R45 release packet needs a refresh at the new source
   ],
   "remedy": "The round analysis states whether the tie-out is accepted with CONVENTION as a floor, or a cell re-reads the custodian rows for the 916.",
   "owner": "1.0.0_SA_CTO~DELL2",
-  "round": "v57",
+  "round": "v68",
   "remediation": {
    "state": "OPEN",
    "owner": "1.0.0_SA_CTO~DELL2",
-   "round": "v57"
+   "round": "v68"
   },
   "closed": false
  },
@@ -66,11 +74,11 @@ docstring redaction, so the R45 release packet needs a refresh at the new source
   ],
   "remedy": "The issuer names an applier the gates admit (an AE seat) for the next apply order, or the CTO rules that a worker may apply under a signed pair. No gate change is asked here.",
   "owner": "2.0.0_SA_COO~D2",
-  "round": "v57",
+  "round": "v68",
   "remediation": {
    "state": "OPEN",
    "owner": "2.0.0_SA_COO~D2",
-   "round": "v57"
+   "round": "v68"
   },
   "closed": false
  },
@@ -87,25 +95,14 @@ docstring redaction, so the R45 release packet needs a refresh at the new source
   ],
   "remedy": "Place the thresholds file where the handler reads it (tracked, or shipped beside the handler) and record its sha256 against the served copy.",
   "owner": "2.0.0_SA_COO~D2",
-  "round": "v57",
+  "round": "v68",
   "remediation": {
    "state": "OPEN",
    "owner": "2.0.0_SA_COO~D2",
-   "round": "v57"
+   "round": "v68"
   },
   "closed": false
- }
-]
-```
-
-## Added at the rounds 57-58 compile (2026-10-11T04:22:33Z)
-
-Inputs: `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~88/NEVER_WIDEN_PACKET_R45_RELEASE_REFRESH.md` and `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~89/COTTONWOOD_VALUE_RULE24.json` (msg 4035 (rounds 57 and 58 drained @2a6ac2e4e0, @b01e44444e)).
-UN-PARKS ON: TO-DB-b-86 and TO-DB-b-116 terminal. D2-W88-S1 and D2-W88-S3 are ARMED and sit in the project's INVESTIGATION_v1.md
-with their disarm owners; they do not wait on this file.
-
-```text
-[
+ },
  {
   "id": "IRPT_DASHBD-D2-W88-S1",
   "project": "IRPT_DASHBD",
@@ -119,13 +116,18 @@ with their disarm owners; they do not wait on this file.
   ],
   "remedy": "The R45 pair names which sources.json rides the release (one that declares method_version for the 49F source), and the kit comparison reads method_version equal on all rows before the apply.",
   "owner": "2.0.0_SA_COO~D2",
-  "round": "v59",
+  "round": "v68",
   "remediation": {
    "state": "OPEN",
    "owner": "2.0.0_SA_COO~D2",
-   "round": "v59"
+   "round": "v68"
   },
-  "closed": false
+  "closed": false,
+  "disarm": {
+   "state": "ARMED",
+   "owner": "2.0.0_SA_COO~D2",
+   "at": null
+  }
  },
  {
   "id": "IRPT_DASHBD-D2-W88-S3",
@@ -140,13 +142,18 @@ with their disarm owners; they do not wait on this file.
   ],
   "remedy": "DB-b-115 (in flight) lands the manifest fields; the close is the kit manifest read with method_version 2 stated.",
   "owner": "2.0.0_SA_COO~D2",
-  "round": "v59",
+  "round": "v68",
   "remediation": {
    "state": "OPEN",
    "owner": "2.0.0_SA_COO~D2",
-   "round": "v59"
+   "round": "v68"
   },
-  "closed": false
+  "closed": false,
+  "disarm": {
+   "state": "ARMED",
+   "owner": "2.0.0_SA_COO~D2",
+   "at": null
+  }
  },
  {
   "id": "IRPT_DASHBD-D2-W89-S1",
@@ -161,62 +168,14 @@ with their disarm owners; they do not wait on this file.
   ],
   "remedy": "Before the first Cottonwood partition is minted: correct the adapter's two stale statements, and read the emitted dim row 3 and manifest for a sentence false for Cottonwood, editing row 3 under its own rule-24 record if one is found.",
   "owner": "2.0.0_SA_COO~D2",
-  "round": "v59",
+  "round": "v68",
   "remediation": {
    "state": "OPEN",
    "owner": "2.0.0_SA_COO~D2",
-   "round": "v59"
+   "round": "v68"
   },
   "closed": false
- }
-]
-```
-
-## Added at the rounds 59-62 compile (2026-10-11T05:21:36Z)
-
-Inputs: msg 4142 (rounds 59-62 drained @bbc9e11292, @2f0664fab0, @6d0b3ce3a8, @4d4e3ee317).
-Follow-on with no row yet, for the same slug: the live 49F thresholds file carries no claims, so its next dim row reads `held`
-on two thresholds that are measured (grade file `org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_DASHBD_ROUND_62_L9_GRADE_20261011.md`).
-
-```text
-[
- {
-  "id": "IRPT_DASHBD-D2-W93-S3",
-  "project": "IRPT_DASHBD",
-  "fabric": "dell2",
-  "class": "OBSERVATION",
-  "hazard_standing": "INERT",
-  "mechanism": "The dim_return_method contract's method_versions lists rows 1 and 2, while the producer's METHOD_ROWS holds rows 2 and 3. Row 3 is the row the Cottonwood mint stamps, and the contract does not declare it.",
-  "evidence": [
-   "investigation row IRPT_DASHBD-D2-W93-S3",
-   "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json at HEAD, contract_version 0.4.0"
-  ],
-  "remedy": "The contract lists row 3 before the first row-3 partition is written (the CB-al-2 mint), under the rule-24 record DB-b-102 left beside its deliverable.",
-  "owner": "2.0.0_SA_COO~D2",
-  "round": "v63",
-  "remediation": {
-   "state": "OPEN",
-   "owner": "2.0.0_SA_COO~D2",
-   "round": "v63"
-  },
-  "closed": false
- }
-]
-```
-
-## Update at the rounds 63-64 compile (2026-10-11T06:12:21Z)
-
-Inputs: msg 4237 (rounds 63 and 64 drained @e4a88b23d6, @915e48125f).
-- **D2-W93-S3 does NOT graduate.** The contract lists method row 3 at 0.5.0; the row is dismissed in the rounds 63-64 adjudication.
-- UN-PARKS ON: TO-DB-b-86 terminal. The issuer reports it BLOCKED on the Cottonwood returns gold (row S43), so this file may wait
-  through the mint. The ARMED rows in it sit in the project's INVESTIGATION_v1.md with their disarm owners and do not wait.
-
-## Added at the round 65 compile (2026-10-11T09:10:50Z)
-
-Input: msg 4541 (round 65 drained @1d9c2fb822).
-
-```text
-[
+ },
  {
   "id": "IRPT_DASHBD-D2-W96-S2",
   "project": "IRPT_DASHBD",
@@ -230,11 +189,11 @@ Input: msg 4541 (round 65 drained @1d9c2fb822).
   ],
   "remedy": "FWD-11's design for the reporting read states it: the publisher admits a source whose income sits inside the value (with the method row saying so), or the Cottonwood adapter supplies an income figure. The CTO's deferral (msg 4514) carries it.",
   "owner": "1.0.0_SA_CTO~DELL2",
-  "round": "v66",
+  "round": "v68",
   "remediation": {
    "state": "OPEN",
    "owner": "1.0.0_SA_CTO~DELL2",
-   "round": "v66"
+   "round": "v68"
   },
   "closed": false
  },
@@ -251,39 +210,34 @@ Input: msg 4541 (round 65 drained @1d9c2fb822).
   ],
   "remedy": "One measured read on one Cottonwood account: the id the gold carries against the id the directory mints.",
   "owner": "2.0.0_SA_COO~D2",
-  "round": "v66",
+  "round": "v68",
   "remediation": {
    "state": "OPEN",
    "owner": "2.0.0_SA_COO~D2",
-   "round": "v66"
+   "round": "v68"
+  },
+  "closed": false
+ },
+ {
+  "id": "IRPT_DASHBD-D2-S13",
+  "project": "IRPT_DASHBD",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "The served income reason on method row 3 is worded for one channel, while the row covers any positions-based entry.",
+  "evidence": [
+   "investigation row IRPT_DASHBD-D2-S13",
+   "this seat's served reads of 2026-10-11 (investigation row IRPT_DASHBD-D2-S12): Cottonwood's method row 3 states income absent with a reason that names FWD-3; the prior versions of both keys are retained and the overwrite was captured first"
+  ],
+  "remedy": "The reason is worded for the method, or a channel that separates income gets its own method row.",
+  "owner": "1.0.0_SA_CTO~DELL2",
+  "round": "v68",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "1.0.0_SA_CTO~DELL2",
+   "round": "v68"
   },
   "closed": false
  }
 ]
 ```
-
----
-
-## Added at round 66, 2026-10-11T10:31:56Z (input: msg 4722)
-
-Held on the same condition (TO-DB-b-86 terminal):
-
-- **D2-W97-S1** (owner `2.0.0_SA_COO~D2`): the mint path refuses an existing key and no prior version of the served method object
-  exists, so the rewrite of row 3 is an overwrite. Remedy: the pair names the capture step and the rollback bytes before the act.
-- **D2-S11, the limit in this seat's read** (owner `1.0.0_SA_CTO~DELL2`): row 3's income reason names FWD-3, while row 3 is the
-  positions-based method for any entry. Remedy: the reason is worded for the method, or a channel that separates income gets its own row.
-
-**For the slug:** this round closes ADVI_COTBKF row D2-S108 in code only. The served method row still says `cash_when_received`
-until the rewrite lands under its pair.
-
----
-
-## Added at round 67, 2026-10-11T10:48:29Z (input: msg 4748)
-
-The rewrite of method row 3 landed at 10:38Z and is read on the served objects by this seat (row D2-S12). So:
-
-- **D2-W97-S1** (held at round 66) is met: the overwrite was captured first and both prior versions are retained. It graduates as
-  REMEDIATED, or is dismissed at the slug.
-- ADVI_COTBKF row D2-S108 is answered on the served side: a reader can now tell the null income from a zero. Its issuer's read-back
-  is its own to file.
-- The limit of row D2-S11 stands and is now served: the reason names one channel.
