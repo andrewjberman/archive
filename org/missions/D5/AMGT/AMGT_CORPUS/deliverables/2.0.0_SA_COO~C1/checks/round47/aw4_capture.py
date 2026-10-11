@@ -28,12 +28,27 @@ def _one(lam, key):
              "headers": {"x-firm-id": "opal"}, "queryStringParameters": None}
     raw = json.loads(lam.invoke(FunctionName=FN, Payload=json.dumps(event).encode())["Payload"].read())
     body = raw.get("body")
+    # team_sheet bytes AS SERIALISED in this response: the separator style that reproduces the body's own length (default first, then compact)
+    ts_bytes = None
+    try:
+        _p = json.loads(body) if isinstance(body, str) else (body or {})
+        _ts = (_p.get("model") or {}).get("team_sheet")
+        _n = len(body.encode("utf-8")) if isinstance(body, str) else None
+        for _sep, _ea in (((", ", ": "), True), ((",", ":"), True), ((", ", ": "), False), ((",", ":"), False)):
+            if _n is not None and len(json.dumps(_p, separators=_sep, ensure_ascii=_ea).encode("utf-8")) == _n:
+                ts_bytes = len(json.dumps(_ts, separators=_sep, ensure_ascii=_ea).encode("utf-8"))
+                break
+        if ts_bytes is None:
+            ts_bytes = len(json.dumps(_ts).encode("utf-8"))
+    except Exception:  # a capture never fails on the size estimate
+        ts_bytes = None
     size = len(body.encode("utf-8")) if isinstance(body, str) else len(json.dumps(body or {}).encode("utf-8"))
     payload = json.loads(body) if isinstance(body, str) else (body or {})
     model = payload.get("model") or {}
     return key, {
         "status": raw.get("statusCode"),
         "response_bytes": size,
+        "team_sheet_bytes": ts_bytes,
         "model_status": payload.get("model_status"),
         "fiscal_year_figures": payload.get("fiscal_year_figures"),
         "fiscal_years": payload.get("fiscal_years"),

@@ -7,9 +7,12 @@ Per name, one line:
   team_sheet_equals_stored13   the post payload's `model.team_sheet` equals the stored /13 `team_sheet` field, every key (read_dossier at /13)
   others_equal                 every other captured field equals its pre-act read: `fiscal_year_figures`, `fiscal_years`, `header_figures`, `check_face`,
                                `model_status`, `posture`, `dossier_fields` and every `model` key but `team_sheet`
-  bytes pre -> post            the response size, with the CTO's ceiling of 1,048,576 bytes
-Totals: names; equal counts; the max response; names over the ceiling. Branch A needs team_sheet_equals_stored13 on every name that wrote, others_equal
-on every name (a Bloomberg vintage stamp or a value that moved with a daily pull is printed WHOLE, never hidden), and over_1MB 0.
+  bytes pre -> post            the response size, and growth = post - pre against that name's own team_sheet delta (its serialised team_sheet bytes post - pre)
+Bound (the CTO's, msg 4101, replacing the withdrawn 1 MB ceiling): growth may not exceed the name's team_sheet delta, and the maximum response stays
+under 6,291,456 bytes (the synchronous Lambda limit) with the margin printed; exceeding either is Branch C.
+Totals: names; equal counts; the max response and its margin; names whose growth exceeds their delta. Branch A needs team_sheet_equals_stored13 on every
+name that wrote, others_equal on every name (a Bloomberg vintage stamp or a value that moved with a daily pull is printed WHOLE, never hidden), growth
+within delta on every name, and the max under 6 MB.
 Prints `aw4 compare build <b>/1`.
 """
 import json
@@ -18,7 +21,7 @@ import sys
 from lib.research.corpus import dossier
 from lib.research.harvest import store
 
-CEILING = 1048576
+LIMIT = 6291456  # the synchronous Lambda response limit; the CTO's 1 MB ceiling was withdrawn (msg 4101)
 OTHER_TOP = ("fiscal_year_figures", "fiscal_years", "header_figures", "check_face", "model_status", "posture", "dossier_fields")
 
 
@@ -48,6 +51,7 @@ def main(argv):
     ts_eq = oth_eq = n = 0
     biggest = (0, None)
     over = 0
+    grew = 0
     for key in names:
         n += 1
         a, b = pre["keys"].get(key), post["keys"][key]
@@ -73,13 +77,18 @@ def main(argv):
         pb, qb = a.get("response_bytes", 0), b.get("response_bytes", 0)
         if qb > biggest[0]:
             biggest = (qb, key)
-        over += int(qb > CEILING)
-        print("aw4 %s status %s team_sheet_equals_stored13 %s others_equal %s%s bytes %d -> %d class %s" % (
-            key, b.get("status"), int(e1), int(e2), (" DIFF[" + ",".join(diffs) + "]") if diffs else "", pb, qb,
-            (pt or {}).get("class") if isinstance(pt, dict) else None))
-    print("aw4 names %d team_sheet_equals_stored13 %d/%d others_equal %d/%d max_response_bytes %d (%s) over_1MB %d" % (
-        n, ts_eq, n, oth_eq, n, biggest[0], biggest[1], over))
-    build = int(n == len(names) and ts_eq == n and oth_eq == n and over == 0)
+        tsa, tsb = a.get("team_sheet_bytes"), b.get("team_sheet_bytes")
+        delta = (tsb - tsa) if (isinstance(tsa, int) and isinstance(tsb, int)) else None
+        growth = qb - pb
+        exceeds = delta is None or growth > delta
+        grew += int(exceeds)
+        over += int(qb > LIMIT)
+        print("aw4 %s status %s team_sheet_equals_stored13 %s others_equal %s%s bytes %d -> %d growth %d team_sheet_delta %s within %s class %s" % (
+            key, b.get("status"), int(e1), int(e2), (" DIFF[" + ",".join(diffs) + "]") if diffs else "", pb, qb, growth, delta,
+            int(not exceeds), (pt or {}).get("class") if isinstance(pt, dict) else None))
+    print("aw4 names %d team_sheet_equals_stored13 %d/%d others_equal %d/%d max_response_bytes %d (%s) margin_to_6MB %d over_6MB %d growth_exceeds_delta %d" % (
+        n, ts_eq, n, oth_eq, n, biggest[0], biggest[1], LIMIT - biggest[0], over, grew))
+    build = int(n == len(names) and ts_eq == n and oth_eq == n and over == 0 and grew == 0)
     print("aw4 compare build %d/1" % build)
     return 0 if build else 1
 
