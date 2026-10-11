@@ -34,6 +34,12 @@ Copied from the round-1 SA-r-1b runner and repaired:
      invocation, `--finish-cleanup <trace path> --executor <serial>`, deletes the row once the time has come and
      updates the same trace (cleanup.state DONE); it makes no HTTP call and mints no token. The trace also carries
      job_last_read (the hop (e) outcome, the time of the last poll, the poll count).
+10. (ROUND 4, cell R4-la-1) `--arms-only`: the run sends NO analysis submission. It does the prechecks, the row write, the
+     token, the census and hops (a)-(c) as today, then ONLY the two arms (the malformed report id; the package door denying
+     the filer), then the no-accepted-submission cleanup. hop (d), (e), (f), (g) are never called. The trace says
+     "mode": "ARMS_ONLY" and "submission": "NOT_SENT". Exit 0 only when both arms answered as expected and the row was
+     removed; 1 otherwise; never 3. `--arms-only` is refused with `--finish-cleanup` (rc 2). No other option exists that
+     only makes sense after hop (g) (--close-ticket completes OLD tickets in cleanup and is allowed).
 This module has NOT been run against the portal by this order; only its fake-HTTP tests have run.
 
 Original header follows.
@@ -63,13 +69,15 @@ real CloudFront host; a direct lambda invoke is deliberately NOT used (CTO IRPT_
 
 Usage: python fwd1_run.py --read27 <AC1 result> --exp-minutes N --expect-irpt-status-sha <prefix>
            --run-label <label> --pair <pair path and pin> --executor <serial> --trace-out <path>
-           [--advisor-opaque adv-04b85b8aefda] [--close-ticket <id>]...
+           [--advisor-opaque adv-04b85b8aefda] [--close-ticket <id>]... [--arms-only]
        python fwd1_run.py --finish-cleanup <trace path> --executor <serial>      (the second step; see item 9)
 
 Exit codes: 0 run complete and the row removed (read back absent); 1 a failure (precheck, advisor, row write, row not
 removed, unreadable trace for --finish-cleanup); 2 --trace-out already holds content (or a bad argument); 3 run complete,
 submission accepted, the row is LEFT IN PLACE and one cleanup step is owed (--finish-cleanup); 4 --finish-cleanup refused and
 changed nothing (ROW_DELETE_TOO_EARLY, or the trace is not PENDING_ROW_DELETE).
+An --arms-only run exits only 0 (both arms as expected, row removed), 1 (an arm unexpected or not reached, a precheck or
+row failure, row not removed) or 2 (--trace-out holds content, a bad argument, or --arms-only with --finish-cleanup).
 """
 from __future__ import annotations
 
@@ -621,14 +629,14 @@ def census(token, run_id):
 # ---------------------------------------------------------------- step 5
 
 
-def hops(token, advisor, trace):
+def hops(token, advisor, trace, arms_only=False):
     raw = HOLDINGS.read_bytes()
     file_sha = hashlib.sha256(raw).hexdigest()
     sent_token, up_token = _run_tokens_from(trace, file_sha)
     trace["upload_idempotency_token"] = up_token
     h = {x["hop"]: x for x in trace["hops"]}
     named = trace["named_failures"]
-    print("== step 5: hops (a)-(g) ==")
+    print("== step 5: hops (a)-(%s) ==" % ("c, then the two arms; ARMS ONLY, no submission" if arms_only else "g"))
 
     a = h["a_upload"]
     a["file"] = {"path": str(HOLDINGS.relative_to(ROOT)).replace("\\", "/"), "sha256": file_sha}
@@ -695,6 +703,8 @@ def hops(token, advisor, trace):
         named.append({"hop": "c_claim", "status": res["status"], "reason": res["reason"]})
     save(trace)
 
+    if arms_only:   # R4-la-1: the one place the arms-only run leaves the normal path; hop_d_analysis is not reachable from here
+        return hops_arms_only(token, trace, h, named, tkt, res["status"] < 400)
     return hops_d_to_g(token, trace, h, named, tkt, input_id, file_sha, sent_token)
 
 
@@ -1073,6 +1083,94 @@ def hops_d_to_g(token, trace, h, named, tkt, input_id, file_sha, idem_token=None
         hop_g_open(token, tkt, h["g_open"], named)
     else:
         unreachable(("g_open",), "(f) did not attach a report")
+    save(trace)
+    return trace
+
+
+# ---------------------------------------------------------------- R4-la-1: the arms-only mode
+
+ARMS_AS_EXPECTED = "ARMS_AS_EXPECTED"
+ARMS_NOT_AS_EXPECTED = "ARMS_NOT_AS_EXPECTED"
+ARMS_NOT_REACHED = "ARMS_NOT_REACHED"
+NOT_RUN_ARMS_ONLY = "NOT_RUN_ARMS_ONLY"
+
+
+def synthetic_ref(tag):
+    """An obviously synthetic pointer: the canonical JSON of {artifact_id, sha256, version_id}, sorted keys, no spaces."""
+    return json.dumps({"artifact_id": "syn-arms-only-" + tag, "sha256": "0" * 64, "version_id": "syn-v0"},
+                      sort_keys=True, separators=(",", ":"))
+
+
+def ticket_field_absent(token, tkt, field):
+    """Re-read the ticket. -> (http status, True when the ticket read 200 and carries no `field`, else False).
+    A read that is not a 200 proves nothing, so it is never reported as absent."""
+    r = call(token, "GET", "/api/scoped/tickets/%s" % tkt)
+    p = r.get("parsed") if isinstance(r.get("parsed"), dict) else {}
+    t = p.get("ticket") if isinstance(p.get("ticket"), dict) else p
+    return r.get("status"), (r.get("status") == 200 and isinstance(t, dict) and not t.get(field))
+
+
+def arm_package_door_denies_the_filer(token, tkt, arms, named):
+    """R4-la-1 arm 2: ONE package POST as the filer with a syntactically complete synthetic body. The door admits only the
+    packager, so HTTP 403 is expected and the ticket's `package` must still be absent on a re-read. Any 2xx is the named
+    failure PACKAGE_DOOR_ADMITTED_THE_FILER. -> True when the arm is as expected. Not retried."""
+    body = {"report_ref": synthetic_ref("report"), "pdf_ref": synthetic_ref("pdf"),
+            "original_ref": synthetic_ref("original"), "commentary_ref": synthetic_ref("commentary"), "firm": FIRM}
+    res = call(token, "POST", "/api/scoped/tickets/%s/package" % tkt, None, body)
+    parsed = res.get("parsed")
+    code = parsed.get("code") if isinstance(parsed, dict) else None
+    status = res.get("status")
+    arm = {"status": status, "code": code, "sent_shape": "four synthetic canonical refs and firm"}
+    arms["package_door_denies_the_filer"] = arm
+    print("  (arm) package as the filer http=%s code=%r" % (status, code))
+    try:
+        reread, absent = ticket_field_absent(token, tkt, "package")
+    except Exception as e:  # noqa: BLE001 -- an unreadable ticket is DATA, not a stop
+        reread, absent = "RAISED_" + type(e).__name__, False
+    arm["reread_status"], arm["package_absent_after"] = reread, absent
+    if isinstance(status, int) and 200 <= status < 300:
+        arm["as_expected"] = False
+        named.append({"hop": "arm_package", "status": status, "reason": "PACKAGE_DOOR_ADMITTED_THE_FILER", "code": code,
+                      "note": "the package door answered the filer 2xx; it must deny every caller but the packager"})
+        return False
+    if status == 403 and absent:
+        arm["as_expected"] = True
+        return True
+    arm["as_expected"] = False
+    named.append({"hop": "arm_package", "status": status, "reason": "PACKAGE_ARM_UNEXPECTED", "code": code,
+                  "package_absent_after": absent,
+                  "note": "expected HTTP 403 with the ticket's package still absent on a re-read; not retried"})
+    return False
+
+
+def hops_arms_only(token, trace, h, named, tkt, claimed):
+    """R4-la-1: after hop (c), the two arms and nothing else. This function never calls hop_d_analysis, hop_e_ready,
+    hop_f_report or hop_g_open, and sends nothing to the submission route. The trace result is set here."""
+    arms = trace.setdefault("report_route_arms", {})
+    for k in ("d_analysis", "e_ready", "f_report", "g_open"):
+        h[k]["outcome"] = NOT_RUN_ARMS_ONLY
+    if not claimed:
+        arms["report_id_malformed_refused"] = {"outcome": "UNREACHABLE", "why": "hop (c) did not claim the ticket"}
+        arms["package_door_denies_the_filer"] = {"outcome": "UNREACHABLE", "why": "hop (c) did not claim the ticket"}
+        trace["arms_only_result"] = ARMS_NOT_REACHED
+        save(trace)
+        return trace
+    ok1 = arm_malformed_report_id(token, tkt, arms, named)
+    try:
+        reread, absent = ticket_field_absent(token, tkt, "report_ref")
+    except Exception as e:  # noqa: BLE001
+        reread, absent = "RAISED_" + type(e).__name__, False
+    arms["report_id_malformed_refused"]["reread_status"] = reread
+    arms["report_id_malformed_refused"]["report_ref_absent_after"] = absent
+    if ok1 and not absent:
+        arms["report_id_malformed_refused"]["as_expected"] = False
+        named.append({"hop": "arm_report", "status": arms["report_id_malformed_refused"]["status"],
+                      "reason": "REPORT_REF_NOT_ABSENT_AFTER_ARM",
+                      "note": "the ticket did not re-read 200 with report_ref absent after the malformed-id arm"})
+        ok1 = False
+    save(trace)
+    ok2 = arm_package_door_denies_the_filer(token, tkt, arms, named)
+    trace["arms_only_result"] = ARMS_AS_EXPECTED if (ok1 and ok2) else ARMS_NOT_AS_EXPECTED
     save(trace)
     return trace
 
@@ -1500,6 +1598,9 @@ def build_parser():
     ap.add_argument("--close-ticket", action="append", default=[], metavar="TICKET_ID", type=_nonblank,
                     help="an old test ticket to complete in cleanup step 1 if it is in_progress and assigned to the filer; "
                          "repeatable")
+    ap.add_argument("--arms-only", action="store_true",
+                    help="R4-la-1: send NO analysis submission; run hops (a)-(c) and the two arms (malformed report id; "
+                         "package door denies the filer), then the normal no-submission cleanup")
     return ap
 
 
@@ -1547,6 +1648,10 @@ def build_finish_parser():
 def main(argv):
     global TRACE_OUT
     if any(x == "--finish-cleanup" or x.startswith("--finish-cleanup=") for x in argv):
+        if "--arms-only" in argv:
+            print("STOP: --arms-only is refused with --finish-cleanup: an arms-only run sends no submission, so no "
+                  "second cleanup step is ever owed. Nothing was done.")
+            return 2
         f = build_finish_parser().parse_args(argv)
         return finish_cleanup(f.finish_cleanup, f.executor)
     a = build_parser().parse_args(argv)
@@ -1558,6 +1663,8 @@ def main(argv):
     TRACE_OUT = out_path
     run_id = a.run_label + "-" + iso()
     trace = build_trace(a, run_id)
+    if a.arms_only:   # R4-la-1: stated in the trace before anything runs
+        trace["mode"], trace["submission"], trace["arms_only_result"] = "ARMS_ONLY", "NOT_SENT", ARMS_NOT_REACHED
 
     # D3: nothing is written before the build is the expected one
     ok, info = precheck_irpt_status(a.expect_irpt_status_sha)
@@ -1624,11 +1731,18 @@ def main(argv):
                                                     "reason": "STOP_BEFORE_HOPS", "note": stop})
                     print("STOP: %s -- no hop runs; going to cleanup" % stop)
                 else:
-                    hops(token, advisor, trace)
+                    if a.arms_only:
+                        hops(token, advisor, trace, arms_only=True)
+                    else:
+                        hops(token, advisor, trace)
     finally:
         cleanup(token, trace, exp, a.close_ticket)
         data_refresh_zero_calls(trace, iat, exp)
     print("OK: trace at %s" % TRACE_OUT)
+    if a.arms_only:   # R4-la-1: never PENDING_ROW_DELETE (no submission was sent), so never rc 3
+        removed = bool(trace["cleanup"].get("row_removed_read_back_absent"))
+        print("ARMS_ONLY: result=%s row_removed=%s" % (trace.get("arms_only_result"), removed))
+        return 0 if (removed and trace.get("arms_only_result") == ARMS_AS_EXPECTED) else 1
     if trace["cleanup"].get("state") == PENDING:
         print("PENDING_ROW_DELETE: the row stays until %s; run --finish-cleanup %s --executor <serial> then"
               % (trace["cleanup"]["row_delete_not_before"], TRACE_OUT))
