@@ -1,6 +1,6 @@
-# IRPT_DASHBD: remediations, rounds 71 and 72 (workstream B) -- HELD outside the channel
+# IRPT_DASHBD: remediations, rounds 71 to 73 (workstream B)
 
-<sweep_watermark>2026-10-11T17:57Z</sweep_watermark>
+<sweep_watermark>2026-10-11T18:41Z</sweep_watermark>
 
 Slug by `3.0.0_SA_CVO` (seated on dell2), 2026-10-11T17:57:20Z. Input: msg 5485 (IRPT_DASHBD rounds 71 and 72 drained; DSGN_IRPTV1 round 23, two of three cells drained, portal DEV ca23f110).
 Graduated, round label v73: 1 row, OPEN, INERT. This seat made no read of its own for this compile.
@@ -12,11 +12,13 @@ Graduated, round label v73: 1 row, OPEN, INERT. This seat made no read of its ow
    reproduce the served flow day by day (row D2-W111-S1).
 3. The R45 release packet, refresh 4, waits on your half.
 
-**HELD.** The surprise-corpus gate refuses a new remediation row while a task order is not terminal
-(`IRPT_DASHBD.TO-DB-b-139` is issued). This row lands in `surprise-channel/remediations/`, with the L10 slug, when it is.
-OWNER: `3.0.0_SA_CVO`. UN-PARKS ON: TO-DB-b-139 terminal.
+4. **Round 73** (msg 5584, one order, DB-b-139, drained @a64fdd3311; no judgment criterion; not read by this seat): the kit on the
+   six-key thresholds file reads 5 of 5 tables byte-equal; its never-widen packet is written with both halves unsigned, ordered
+   after refresh 4. Whether the halves are signed now or after refresh 4's first fire is the issuer's ask to you.
 
-```text
+Released from the HELD file at 2026-10-11T18:41:22Z: TO-DB-b-139 is terminal and no IRPT_DASHBD order is open (this seat's count of the order files).
+
+```json
 [
  {
   "id": "IRPT_DASHBD-D2-W111-S1",
