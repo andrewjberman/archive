@@ -1,0 +1,73 @@
+"""TO-DB-b-137: compare the five output tables of the release kit run to the live-pinned run, and read the thresholds object of the
+captured returns manifest. Counts, key names, hashes and booleans only.  Usage: python cmp_all.py <repo_root>"""
+import hashlib
+import json
+import re
+import sys
+from pathlib import Path
+
+import pyarrow.parquet as pq
+
+root = Path(sys.argv[1]).resolve()
+S = Path("C:/dev/_irpt_private_evidence_20261009/IRPT_DASHBD")
+me = S / "0.9.0_WK_IRPT_DASHBD~110"
+live = S / "0.9.0_WK_IRPT_DASHBD~88/out_live"
+new = me / "out_new7"
+rec = json.loads((me / "record_new7.json").read_text(encoding="utf-8"))
+old = json.loads((root / "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~101/R45_REFRESH3_DELTA0.json").read_bytes().decode("utf-8"))
+out = {"tables": {}}
+for t, v in old["tables"].items():
+    hl = hashlib.sha256((live / (t + ".parquet")).read_bytes()).hexdigest()
+    hn = hashlib.sha256((new / (t + ".parquet")).read_bytes()).hexdigest()
+    out["tables"][t] = {"rows": pq.ParquetFile(str(new / (t + ".parquet"))).metadata.num_rows,
+                        "rows_live": pq.ParquetFile(str(live / (t + ".parquet"))).metadata.num_rows,
+                        "sha256_live": hl, "sha256_new": hn, "equal": hl == hn,
+                        "live_equals_refresh3_committed": hl == v["sha256_live"],
+                        "new_equals_refresh3_new": hn == v["sha256_new"],
+                        "record_hash_equals_file": hn == rec["output_hashes"][t]["sha256"]}
+tl = pq.read_table(str(live / "returns.parquet"))
+tn = pq.read_table(str(new / "returns.parquet"))
+out["returns_columns_equal"] = tl.column_names == tn.column_names
+ml = tl.column("method_version").to_pylist()
+mn = tn.column("method_version").to_pylist()
+out["method_version_rows"] = len(mn)
+out["method_version_equal_rows"] = sum(1 for a, b in zip(ml, mn) if a == b) if len(ml) == len(mn) else None
+out["method_version_values_new"] = sorted(set(mn))
+out["null_rows_new"] = sum(1 for x in mn if x is None)
+key = [c for c in ("account_id", "business_date") if c in tn.column_names]
+kl = list(zip(*[tl.column(c).to_pylist() for c in key]))
+kn = list(zip(*[tn.column(c).to_pylist() for c in key]))
+out["keys_aligned_row_by_row"] = kl == kn
+for k in ("wall_s", "process_peak_mb", "stage_peak_mb", "status_stub_puts", "code_sha256"):
+    out[k] = rec[k]
+
+
+def returns_manifest(cap):
+    for k, b in cap["run_bodies"].items():
+        m = json.loads(b)
+        if m.get("table") == "account_return_daily" or k.rstrip("/").split("/")[-3:-2] == ["account_return_daily"]:
+            return m
+    raise SystemExit("no returns manifest in capture")
+
+
+cn = json.loads((me / "capture_new7.json").read_text(encoding="utf-8"))
+cl = json.loads((S / "0.9.0_WK_IRPT_DASHBD~92/capture_live.json").read_text(encoding="utf-8"))
+mnw, mlv = returns_manifest(cn), returns_manifest(cl)
+th_n, th_l = mnw["thresholds"], mlv["thresholds"]
+out["returns_manifest"] = {
+    "keys_new": len(mnw), "keys_live": len(mlv),
+    "thresholds_keys_new": list(th_n.keys()), "thresholds_key_count_new": len(th_n),
+    "thresholds_key_count_live": len(th_l),
+    "thresholds_claims_keys_new": list(th_n["threshold_claims"].keys()),
+    "thresholds_claims_values_new": dict(th_n["threshold_claims"]),
+    "five_values_equal_live_vs_new": {k: th_n.get(k) == th_l.get(k) for k in th_n if k != "threshold_claims"},
+    "live_thresholds_keys_dropped": len([k for k in th_l if k not in th_n]),
+    "live_thresholds_keys_with_8plus_digit_run_in_key_or_value": sum(1 for k in th_l if re.search(r"\d{8,}", json.dumps(th_l[k]))),
+    "new_thresholds_has_8plus_digit_run": bool(re.search(r"\d{8,}", json.dumps(th_n))),
+    "other_top_level_fields_equal": {k: json.dumps(mnw.get(k), sort_keys=True) == json.dumps(mlv.get(k), sort_keys=True)
+                                     for k in sorted(set(mnw) | set(mlv)) if k != "thresholds"},
+}
+out["capture_new_put_count"] = cn["run_put_count"]
+out["capture_new_keys"] = [k.split("/", 1)[1][:200] if False else "/".join(k.split("/")[-3:]) for k in cn["run_keys"]]
+print(json.dumps(out, indent=1))
+(me / "cmp_all_out.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
