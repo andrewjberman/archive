@@ -9,6 +9,8 @@
   rn-trace      R2-rn1-AC7  (AMENDMENT 3) the trace path is an argument; the stream denominator is measured
   rn-zero       R2-rn1-AC8  (AMENDMENT 4) the zero-call verdict rule as the CTO ruled it (msg 4164)
   pk-codes      R2-pk1-AC1  the package route's five 409s carry codes; none returns the ticket
+  rn-token      R2-rn1-AC9  (AMENDMENT 5) the idempotency token is unique per run; a hop-(d) refusal is named
+  pk-200        R2-pk1-AC3  (AMENDMENT 1) the package route's 200 returns the package identity only
   rr-shape      R2-rr1-AC1  the report route stores a well-formed REQ id and refuses a malformed one with a typed code
   ts-guard      R2-ts1-AC1  by default no ticket_center test can reach a real SES send or a real users-table read
   pg-open       R2-pg1-AC1  (needs --portal <dir>) the ticket's Open report reads the finished report; a stated waiting state
@@ -53,6 +55,10 @@ NAMED = {
                                                          "test_changed_under_write_returns_no_ticket",
                                                          "test_changed_under_write_names_the_package_when_one_landed",
                                                          "test_the_200_and_the_400s_are_unchanged"]),
+    "rn-token": (RUNNER_TESTS, ["test_idempotency_token_differs_between_two_runs", "test_idempotency_token_fits_the_contract_pattern",
+                                "test_no_token_is_derived_from_the_file_hash_alone", "test_hop_d_refusal_is_its_own_named_branch"]),
+    "pk-200": (TC_TESTS / "test_package_409_codes.py", ["test_service_principal_200_returns_the_package_identity_only",
+                                                       "test_no_package_answer_returns_a_ticket_to_the_service_principal"]),
     "rr-shape": (TC_TESTS / "test_report_ref_shape.py", ["test_well_formed_request_id_stored", "test_malformed_request_id_refused_typed",
                                                          "test_sent_token_shape_refused", "test_refusal_writes_nothing"]),
     "ts-guard": (TC_TESTS / "test_no_real_aws.py", ["test_ses_send_is_guarded_by_default", "test_users_table_read_is_guarded_by_default",
