@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-15.dispatch-qa-guard",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-15.dispatch-qa-guard.md",
+    "group": "OTHER",
+    "vintage_commit": "78b03080f1"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~38",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "78b03080f1",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-15.dispatch-qa-guard.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "kind": "script",
+      "commit_or_etag": "c6aef00dac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds one guard inside the PLATINUM-MODE marked block, before the unchanged export condition: GOLD_KEEP_ALIVE=1 or the QA rebuild marker file, together with BD_PLATINUM_MODE=canonical, exits 2 with an ERROR line. Diff is 5 insertions, 0 deletions in this file. Committed at c6aef00dac on wk-ADVI_FIRMBKTS-38. No deploy, no AWS call.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 runs the block under twelve environments (the eight round-3 cases, a QA run with the mode preset to canonical by keep-alive and by the marker, the same with the mode preset to legacy, and a QA single run with canonical preset). Expect: ROUND 4 DISPATCH EXPORT: ALL CASES PASS.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-38 && timeout 100 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_dispatch.py --arm export --root /c/dev/wk-firmbkts-38; echo \"exit=$?\"",
+      "output_evidence": "  PASS scheduled chain, no overrides          -> 'canonical' (want 'canonical')\n  PASS single                                 -> 'UNSET' (want 'UNSET')\n  PASS group                                  -> 'UNSET' (want 'UNSET')\n  PASS chain dry-run                          -> 'UNSET' (want 'UNSET')\n  PASS QA keep-alive                          -> 'UNSET' (want 'UNSET')\n  PASS QA rebuild marker                      -> 'UNSET' (want 'UNSET')\n  PASS mode already set to legacy             -> 'legacy' (want 'legacy')\n  PASS mode already set to canonical          -> 'canonical' (want 'canonical')\n  PASS QA keep-alive, mode preset canonical   -> 'REFUSED' (want 'REFUSED') rc=2\n  PASS QA marker, mode preset canonical       -> 'REFUSED' (want 'REFUSED') rc=2\n  PASS QA keep-alive, mode preset legacy      -> 'legacy' (want 'legacy')\n  PASS QA single run, mode preset canonical   -> 'REFUSED' (want 'REFUSED') rc=2\n  export cases: 12 of 12\nROUND 4 DISPATCH EXPORT: ALL CASES PASS\nexit=0",
+      "denominator": "12 of 12 export cases PASS; exit=0",
+      "status": "PASS",
+      "expect": "ROUND 4 DISPATCH EXPORT: ALL CASES PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is a difference control (the gate-read block is unchanged). Expect: ROUND 4 DISPATCH GATE: ALL CASES PASS.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-38 && timeout 100 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_dispatch.py --arm gate --root /c/dev/wk-firmbkts-38; echo \"exit=$?\"",
+      "output_evidence": "  PASS mode unset (legacy)      -> 's3://opal-data-bd/gold/artifacts/summary/header_metrics.json' (want 's3://opal-data-bd/gold/artifacts/summary/header_metrics.json')\n  PASS mode canonical           -> 's3://opal-data-49financial/advi/49financial/platinum/artifacts/summary/header_metrics.json' (want 's3://opal-data-49financial/advi/49financial/platinum/artifacts/summary/header_metrics.json')\n  PASS lib absent (fallback)    -> 's3://opal-data-bd/gold/artifacts/summary/header_metrics.json' (want 's3://opal-data-bd/gold/artifacts/summary/header_metrics.json')\n  gate cases: 3 of 3\nROUND 4 DISPATCH GATE: ALL CASES PASS\nexit=0",
+      "denominator": "3 of 3 gate cases PASS; exit=0",
+      "status": "PASS",
+      "expect": "ROUND 4 DISPATCH GATE: ALL CASES PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound. Expect: ROUND 4 SCOPE: OK.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-38 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-38 --allow data/black_diamond/scripts/gold/gold_dispatch.sh --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~38/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require data/black_diamond/scripts/gold/gold_dispatch.sh; echo \"exit=$?\"",
+      "output_evidence": "  CHANGED data/black_diamond/scripts/gold/gold_dispatch.sh\nROUND 4 SCOPE: OK 1 changed, 0 outside, 0 required missing\nexit=0",
+      "denominator": "1 changed path since base, 0 outside the allow list, 0 required missing; exit=0",
+      "status": "PASS",
+      "expect": "ROUND 4 SCOPE: OK"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 is a syntax control, because a syntax error in the deployed dispatcher stops the whole gold chain. Expect: ^SYNTAX-OK$.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-38 && bash -n data/black_diamond/scripts/gold/gold_dispatch.sh && echo SYNTAX-OK",
+      "output_evidence": "SYNTAX-OK\n(exit status 0, read from the shell that ran the invocation)",
+      "denominator": "1 file syntax-checked by bash -n; exit=0",
+      "status": "PASS",
+      "expect": "^SYNTAX-OK$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control on the export arm: the base file (commit 22a468fc79, guard absent) is the mutant. The base reading is recorded by the issuer in the cut's comp-adversary preflight, not re-run by this worker: 9 of 12 read, with the three QA-with-canonical-preset cases failing because the block passes the preset through.",
+      "expected": "the export arm fails the three QA-with-canonical-preset cases on the base file and passes them on this file",
+      "observed": "Issuer-recorded base reading: 9 of 12, the three QA-with-canonical-preset cases FAIL (cut preflight comp-adversary). On c6aef00dac, AC1 reads 12 of 12 with those three cases REFUSED rc=2.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- each invocation was run once by the worker, as the order requires",
+      "observed": "N/A -- no same-input second run was made",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Portal submodule pointer (modified in the worktree before this work, not staged, not committed)",
+      "reason": "Outside this order's <paths>; the worker's commit names only data/black_diamond/scripts/gold/gold_dispatch.sh."
+    },
+    {
+      "item": "Commit-time WARN: client-data-check hashed account-id list ABSENT at the operator path",
+      "reason": "The commit was not checked for client account ids by that gate; absent is not empty. The changed file is a 5-line shell guard with no account-id content."
+    },
+    {
+      "item": "Risk-reflex HOLD on gold_dispatch.sh (pre-commit advisory, cited FRESHNESS_GATE_MANIFEST_20260717.md:74)",
+      "reason": "The cited claim concerns data/cot/scripts/gold/gold_dispatch.sh:174-177 (a COT freshness check), matched on the file basename; the edit touches no freshness line. Commit was not blocked."
+    },
+    {
+      "item": "Any deploy, any AWS call, any consumer change, the INVESTIGATION_v1.md channel",
+      "reason": "Order section 2 bound 1 and the preflight EGRESS CLASS NONE. No surprise row was filed, so the channel file is unchanged."
+    }
+  ],
+  "surprises": [],
+  "session_log": "0.9.0_WK_ADVI_FIRMBKTS~38 on worktree /c/dev/wk-firmbkts-38, branch wk-ADVI_FIRMBKTS-38, issuance vintage 78b03080f1 (HEAD at start 22a468fc79). Premises re-grounded: the PLATINUM-MODE marker block at gold_dispatch.sh lines 1079-1084 matched the order; the round-4 checks directory and the four proof invocations exist. Edit: one guard inserted inside the marked block, before the unchanged export condition. Ran AC1 (12 of 12), AC2 (3 of 3), AC3 (OK, 1 changed, 0 outside), AC4 (SYNTAX-OK), each once. Work committed at c6aef00dac through safe-commit (risk-reflex advisory HOLD printed, commit passed, client-data-check WARN printed). This instance is committed second, with artifacts resolved to c6aef00dac. Status not flipped (issuer drains it).",
+  "compiler_tools": [
+    {
+      "tool": "r4_dispatch.py --arm export",
+      "invocation": "timeout 100 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_dispatch.py --arm export --root /c/dev/wk-firmbkts-38",
+      "result": "export cases: 12 of 12; ROUND 4 DISPATCH EXPORT: ALL CASES PASS; exit=0"
+    },
+    {
+      "tool": "r4_dispatch.py --arm gate",
+      "invocation": "timeout 100 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_dispatch.py --arm gate --root /c/dev/wk-firmbkts-38",
+      "result": "gate cases: 3 of 3; ROUND 4 DISPATCH GATE: ALL CASES PASS; exit=0"
+    },
+    {
+      "tool": "bash -n",
+      "invocation": "bash -n data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "result": "SYNTAX-OK; exit=0"
+    }
+  ]
+}
