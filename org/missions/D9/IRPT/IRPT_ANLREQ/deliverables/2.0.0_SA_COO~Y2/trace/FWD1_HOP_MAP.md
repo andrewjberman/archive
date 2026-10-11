@@ -37,3 +37,16 @@ Of those, the CTO ruled three cuts (msg 4919): the ATTACH RELEASE for hops 9, 11
 ## Change log
 
 - 2026-10-11 ~12:5xZ: first issue, from the trace; the FWD-1 column added; the three cuts of CTO msg 4919 entered. No hop state re-measured by the issuer beyond the spot reads of hops 1, 3 and 16.
+- 2026-10-11 ~14:4xZ: changes since the first issue, each from a record named here; no hop state re-measured by the issuer unless said.
+  - Hop 16 (TCKT_VNEXT, `report_ref` on a one-step-filed ticket): the service half is APPLIED (TCKT_VNEXT R3-rf-2; the integrator's
+    receipt msg 5074 rests on `2.0.0_SA_COO~V2`'s report of its after-reads, not re-read here) and the portal half (this lane's
+    `AR-y-61`) is ON portal DEV `cece88f603` (issuer's `ls-remote`). UNEXERCISED: no real one-step filing has run it.
+  - Hop 19 (the page's Report opens the finished report): a binding was added behind it and is NOT live -- the service cell `AR-y-71`
+    is merged (31d02ad19c) and enters no build until release 5's return; the portal cell `AR-y-72` is a reviewed candidate
+    (`5f64f409b0`) held until the service is live. Both wait on the portal history reader reaching PROD (Andrew's word).
+  - Hops 9 and 10 (the resident's `analysis_ready`; the commentary drafter): the drafter never reads the job or the report
+    (`trace/COMMENTARY_READY_WHAT_IT_READS_20261011.md`). CTO msg 5133: one cell, not urgent, OWED BY THIS LANE and not yet cut -- the
+    drafter refuses a request whose job does not read READY; it lands BEFORE the analysis-ready binding (workstream G's attach
+    release, cell 4). Un-parks at this lane's next issuance.
+  - Hops 9, 11, 14: the attach release is four cells in workstream G (CTO msg 4972); its third reads this lane's row S26 message.
+
