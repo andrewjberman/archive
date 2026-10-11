@@ -3,7 +3,7 @@
   PYTHONPATH=<repo root> python r94_name_census.py [--where deployed|local]
 
 For each of the 243 MEASURED crosswalk subjects the name the page serves (`--where deployed`: the live function's `/overlay` `display_name`; `--where local`: the
-checkout's own chain, `monthly_chatter._display_names`) is compared with the crosswalk's registered company name. The two AGREE when their cleaned name tokens
+checkout's own overlay name path, `scoped_amgt._overlay_name`) is compared with the crosswalk's registered company name. The two AGREE when their cleaned name tokens
 (`numeric_tickers.name_token`, legal endings stripped, then the generic words com, stk, cl, class, cos, holdings, holding, group, del, new, and, corp, co, inc, ltd
 dropped) share at least one token of two or more letters; a pair that shares none is a DIFFERENT COMPANY.
     C1 the count of subjects whose served name is a different company from the registered one: must be 0 (the base reads 2: SAN_FP_Equity served as
@@ -13,7 +13,11 @@ dropped) share at least one token of two or more letters; a pair that shares non
        own model-block header NAME (`scoped_amgt._model_block_names`); a served name is a DIFFERENT company only when it shares no token with ANY of them;
        a subject with no reference at all is UNJUDGED (a count, not a pass); the spelling variants (the names differ, the company is the same) are LISTED,
        not counted as defects.
-Verdict: R94 NAME CENSUS: YES|NO (exit 0|1).
+    C3 (round 94 amendment 1) the ranked lists: for each `/lead-panel/rankings/{movement}/{subject}` (`scoped_amgt.MOVEMENTS` x `SUBJECTS`) every row that carries
+       a `name` and a `security_key` the crosswalk registers a name for is judged by the same token rule against that registered name; a row whose name is a
+       different company is counted (the base reads 2: row `SAN_FP_Equity` of TRENDING/PRICE and of BREAKOUT/PRICE, 'Banco Santander S.A.'). The list's row
+       count and the rows judged are printed beside the number.
+Verdict: R94 NAME CENSUS: YES|NO (exit 0|1) -- YES only when C1 and C3 both read 0 with a non-zero denominator.
 """
 import argparse
 import json
@@ -21,7 +25,7 @@ import sys
 
 import boto3
 
-from lib.research.api import monthly_chatter, scoped_amgt
+from lib.research.api import scoped_amgt
 from lib.research.identity import crosswalk
 from lib.research.peers import numeric_tickers
 
@@ -42,6 +46,24 @@ def served_deployed(key):
     return (json.loads(r.get("body") or "{}")).get("display_name")
 
 
+def ranked_rows(where):
+    """[(combo, security_key, name)] for every row of every ranked list, from the live function or the checkout's own handler."""
+    out, sizes = [], {}
+    for movement in scoped_amgt.MOVEMENTS:
+        for subject in scoped_amgt.SUBJECTS:
+            event = {"rawPath": "%s/lead-panel/rankings/%s/%s" % (PREFIX, movement, subject), "queryStringParameters": None,
+                     "requestContext": {"http": {"method": "GET"}}, "headers": {"x-firm-id": "opal"}}
+            if where == "deployed":
+                r = json.loads(_LAM.invoke(FunctionName=FN, Payload=json.dumps(event).encode())["Payload"].read())
+            else:
+                r = scoped_amgt.handler(event)
+            rows = (json.loads(r.get("body") or "{}")).get("rows") or []
+            sizes["%s/%s" % (movement, subject)] = len(rows)
+            for row in rows:
+                out.append(("%s/%s" % (movement, subject), row.get("security_key"), row.get("name")))
+    return out, sizes
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--where", default="deployed", choices=["deployed", "local"])
@@ -50,8 +72,11 @@ def main():
     keys = [r["security_key"] for r in doc["records"] if r.get("resolution") == "MEASURED" and r.get("security_key")]
     registered = scoped_amgt._crosswalk_names()
     if args.where == "local":
-        chain = monthly_chatter._display_names(keys)
-        served = {k: chain[k][0] for k in keys}
+        # the name the page HEADER serves: the overlay's own name path (`_overlay_name`), not the chatter chain (round 94 amendment 1)
+        served = {}
+        for k in keys:
+            ident = scoped_amgt.resolve_identity(k) or {}
+            served[k] = scoped_amgt._overlay_name(ident, k, ident.get("bloomberg")).get("display_name")
     else:
         served = {k: served_deployed(k) for k in keys}
     records = {r["security_key"]: r for r in doc["records"] if r.get("security_key")}
@@ -93,6 +118,24 @@ def main():
         print("   DIFFERENT %-18s served=%r registered=%r" % d)
     ok = wrong == 0 and judged > 0
     print("%s C1 no served subject name is another company's (%d)" % ("PASS" if ok else "FAIL", wrong))
+    rows, sizes = ranked_rows(args.where)
+    r_judged, r_wrong = 0, []
+    for combo, key, name in rows:
+        reg = registered.get(key)
+        if not (key and name and reg):
+            continue
+        r_judged += 1
+        clean = scoped_amgt._clean_display_name(reg)
+        if str(name).strip().lower() == str(clean).strip().lower() or tokens(name) & tokens(clean) or tokens(name) & tokens(reg):
+            continue
+        r_wrong.append((combo, key, name, reg))
+    print("   ranked lists (%s): rows %d across %d lists (%s) | judged against a registered name %d | DIFFERENT company %d" % (
+        args.where, len(rows), len(sizes), ", ".join("%s %d" % kv for kv in sorted(sizes.items())), r_judged, len(r_wrong)))
+    for w in r_wrong:
+        print("   DIFFERENT row %-18s %-16s served=%r registered=%r" % (w[1], w[0], w[2], w[3]))
+    ranked_ok = len(r_wrong) == 0 and r_judged > 0
+    print("%s C3 no ranked row's name is another company's (%d of %d judged)" % ("PASS" if ranked_ok else "FAIL", len(r_wrong), r_judged))
+    ok = ok and ranked_ok
     print("R94 NAME CENSUS: %s" % ("YES" if ok else "NO"))
     return 0 if ok else 1
 

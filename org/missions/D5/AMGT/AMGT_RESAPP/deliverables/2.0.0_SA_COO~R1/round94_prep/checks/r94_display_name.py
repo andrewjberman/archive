@@ -14,7 +14,16 @@ registered name is served, source `crosswalk`. A registered name that is only th
     D4 control: ICT 'International Container Terminal Services Inc' against 'INTL CONTAINER TERM SVCS INC' (one shared word) keeps the classification name.
     D5 control: the registered name is only the bare ticker -> the classification name (the rule cannot judge it).
     D6 control: classification and registered names equal -> unchanged, source `classification`.
-Verdict: R94 DISPLAY NAME: YES|NO (exit 0|1). At the base (2026-10-11) D1 FAILs and D2-D6 PASS.
+
+AMENDMENT 1 (the same cell): the chain above is ONE of three places the table's name is served. The overlay's header name (`scoped_amgt._overlay_name`, which the
+page header prints) and a ranked row's name (`scoped_amgt._join_ranked_rows`) read the same table by the same bare ticker, each on its own path; the table measured in
+round 94 (live against the merged chain) moved only `peers.subject.display_name` and left the overlay header at 'Banco Santander S.A.'.
+    D7 the overlay: a classification name that disagrees with the registered name is not served as the header name: `_overlay_name` serves the registered name,
+       `display_name_source` `crosswalk`.
+    D8 control: the overlay keeps a spelling variant's classification name (`display_name_source` `etf-classifications`).
+    D9 a ranked row: a classification name that disagrees with the registered name is replaced by the registered name (`name_source` `crosswalk`) in
+       `_join_ranked_rows`; a spelling variant's row keeps the classification name.
+Verdict: R94 DISPLAY NAME: YES|NO (exit 0|1). At the base (2026-10-11) D1, D7 and D9 FAIL and D2-D6, D8 PASS.
 """
 import sys
 
@@ -33,6 +42,46 @@ CASES = {
 def say(ok, label, detail=""):
     print("%s %s%s" % ("PASS" if ok else "FAIL", label, ("  [" + detail + "]") if detail else ""))
     return ok
+
+
+def overlay_and_rows(clean):
+    out = []
+    saved = (scoped_amgt._crosswalk_names, scoped_amgt._classification_for_ticker, scoped_amgt._join_classification,
+             scoped_amgt._join_covered_identity, scoped_amgt._fill_names_from_model_block, scoped_amgt._phase_log)
+    registered = {"SAN_FP_Equity": "SANOFI", "CELH_US_Equity": "CELSIUS HOLDINGS INC"}
+    table = {"SAN": {"name": "Banco Santander S.A. ADR", "status": "SERVED"}, "CELH": {"name": "Celsius Hldgs Inc Com New", "status": "SERVED"}}
+    try:
+        scoped_amgt._crosswalk_names = lambda: registered
+        scoped_amgt._classification_for_ticker = lambda ticker, security_key=None: dict(table.get(str(ticker).split(" ")[0]) or {})
+        san = scoped_amgt._overlay_name({"display_ticker": "SAN FP"}, "SAN_FP_Equity", "SAN FP")
+        out.append(say(san.get("display_name") == clean("SANOFI") and san.get("display_name_source") == "crosswalk",
+                       "D7 the overlay serves the registered name when the classification name disagrees",
+                       "served %r from %s" % (san.get("display_name"), san.get("display_name_source"))))
+        celh = scoped_amgt._overlay_name({"display_ticker": "CELH US"}, "CELH_US_Equity", "CELH US")
+        out.append(say(celh.get("display_name") == clean("Celsius Hldgs Inc Com New") and celh.get("display_name_source") == "etf-classifications",
+                       "D8 control: the overlay keeps a spelling variant's classification name",
+                       "served %r from %s" % (celh.get("display_name"), celh.get("display_name_source"))))
+        rows = [{"ticker": "SAN FP", "security_key": "SAN_FP_Equity"}, {"ticker": "CELH US", "security_key": "CELH_US_Equity"}]
+
+        def join(served):
+            return [dict(r, name=table[r["ticker"].split(" ")[0]]["name"], name_source="etf-classifications", name_state="SERVED",
+                         classification={"sector": None}) for r in served]
+        scoped_amgt._join_classification = join
+        scoped_amgt._join_covered_identity = lambda r: r
+        scoped_amgt._fill_names_from_model_block = lambda r: r
+        scoped_amgt._phase_log = lambda route, phase, started: started
+        got = {r["security_key"]: r for r in scoped_amgt._join_ranked_rows(rows, "test")}
+        a, b = got["SAN_FP_Equity"], got["CELH_US_Equity"]
+        out.append(say(a.get("name_source") == "crosswalk" and clean("SANOFI").lower() in str(a.get("name")).lower()
+                       and b.get("name_source") == "etf-classifications",
+                       "D9 a ranked row takes the registered name on disagreement; a variant keeps the classification name",
+                       "SAN row %r from %s, CELH row %r from %s" % (a.get("name"), a.get("name_source"), b.get("name"), b.get("name_source"))))
+    except Exception as exc:  # noqa: BLE001 -- a fixture that cannot run is a FAIL with its reason, not a crash
+        out.append(say(False, "D7-D9 the overlay and ranked-row arms ran", "%s: %s" % (type(exc).__name__, exc)))
+    finally:
+        (scoped_amgt._crosswalk_names, scoped_amgt._classification_for_ticker, scoped_amgt._join_classification,
+         scoped_amgt._join_covered_identity, scoped_amgt._fill_names_from_model_block, scoped_amgt._phase_log) = saved
+    return out
 
 
 def main():
@@ -61,6 +110,7 @@ def main():
         name, source = got[key]
         want = clean(CASES[key][1])
         results.append(say(name == want and source == "classification", label, "served %r from %s" % (name, source)))
+    results.extend(overlay_and_rows(clean))
     print("   arms passed %d of %d" % (sum(1 for r in results if r), len(results)))
     ok = all(results)
     print("R94 DISPLAY NAME: %s" % ("YES" if ok else "NO"))
