@@ -1,0 +1,120 @@
+{
+ "schema_version": "1.0",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-429",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-429.account-day-claims-and-blank-share.md",
+  "group": "OTHER",
+  "vintage_commit": "ed0c606428"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "09e04c6868",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-429.account-day-claims-and-blank-share.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~288",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~288/IB127-1_account_day_claims.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read only; 76,796 account-days over 85 graded days and 1,000 accounts, counts only; no AWS write, no deploy",
+   "artifact_covered_by": [
+    "IB127-1-AC1",
+    "IB127-1-AC2",
+    "IB127-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~288/IB127-1_ACCOUNT_DAY_CLAIMS_READ.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read for the CTO; first paragraph gives the daily needs and both blank shares; claims, split, serving rule, needs, control, not measured",
+   "artifact_covered_by": [
+    "IB127-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~288/ib429_claims.py",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the account-day claim and serving-rule instrument with its planted control (--control)",
+   "artifact_covered_by": [
+    "IB127-1-AC1",
+    "IB127-1-AC2",
+    "IB127-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~288/ib429_fetch.py",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "S3 list/get reads into a cache outside the worktree; AccountID digested at read time; object last-modified times kept",
+   "artifact_covered_by": [
+    "IB127-1-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB127-1-AC1",
+   "criterion_verbatim": "IB127-1-AC1 -- every account-day present is given exactly one claim, and NOT_GRADED is split by its reason with no remainder (and, per AMENDMENT 1, into nothing_to_grade and ungradeable by holdings class).",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r127/p127_cells.py\" . IB127-1-AC1",
+   "expect": "IB127-1-AC1 PASS",
+   "output_evidence": "OK: 76796 account-days over 85 days and 1000 accounts, one claim each: OWN_DATE 45247, PRIOR_CLOSE 425, NOT_GRADED 31124 {'no_moved_security': 30201, 'neither_row': 923} | IB127-1-AC1 PASS | rc=0",
+   "denominator": "76,796 account-days = 45,247 + 425 + 31,124; NOT_GRADED 31,124 = 30,201 + 923 by reason = 13,636 nothing_to_grade + 17,488 ungradeable; 85 days, 1,000 accounts",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB127-1-AC2",
+   "criterion_verbatim": "IB127-1-AC2 -- the serving rule is counted on the account-days that could carry a return: served + blank == eligible, the blanks are split by reason with no remainder, and the share is stated.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r127/p127_cells.py\" . IB127-1-AC2",
+   "expect": "IB127-1-AC2 PASS",
+   "output_evidence": "OK: 75796 eligible account-days: 43932 served, 31864 blank (42.0%) {'today_NOT_GRADED': 30601, 'today_PRIOR_CLOSE': 422, 'yesterday_PRIOR_CLOSE': 101, 'yesterday_NOT_GRADED': 740}; accounts never served 403 of 999 | IB127-1-AC2 PASS | rc=0",
+   "denominator": "75,796 eligible = 43,932 served + 31,864 blank; blanks 30,601 + 422 + 101 + 740; accounts 403 + 142 + 454 = 999",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB127-1-AC3",
+   "criterion_verbatim": "IB127-1-AC3 -- the daily needs of the instrument are listed, and the control reads as planted with no account id in the outputs.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r127/p127_cells.py\" . IB127-1-AC3",
+   "expect": "IB127-1-AC3 PASS",
+   "output_evidence": "OK: 6 daily needs listed; the control reads as planted; 0 account-id tokens in the 2 outputs | IB127-1-AC3 PASS | rc=0",
+   "denominator": "6 daily needs, each with need, where_from and by_when; control planted equals read on 24 of 24 keys; 0 account-id shaped tokens in 2 of 2 outputs",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative control: AC1 run against a scratch copy of the output (scratch root outside the worktree) with account_days.OWN_DATE raised by 1 must FAIL.",
+   "expected": "IB127-1-AC1 FAIL, claims do not sum to present",
+   "observed": "FAIL: claims sum to 76797, 76796 account-days present | IB127-1-AC1 FAIL | rc=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the instrument run twice over the same cache (python -I ib429_claims.py), outputs compared byte for byte (cmp)",
+   "observed": "IDENTICAL; also python -I ib429_claims.py --control: planted equals read (EQUAL: True)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "IRPT_BCKEND-D2-W288-S1"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/proof-of-spec-check.py <instance>",
+   "result": "see final report"
+  }
+ ]
+}
