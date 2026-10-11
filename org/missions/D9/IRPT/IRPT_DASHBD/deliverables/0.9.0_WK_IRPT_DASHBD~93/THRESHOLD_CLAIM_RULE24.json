@@ -208,7 +208,7 @@
     "field_family": "threshold_claims = the thresholds-input key (an object, value name -> claim) and the name of the claim group; on the row it is written as one string column per value, tolerance_claim, large_flow_share_claim, plausibility_band_low_claim, plausibility_band_high_claim, comparability_max_excluded_weight_claim, plus ONE provenance-of-the-claim column threshold_claims_source (stated | defaulted_no_claims)",
     "where_written": "BOTH surfaces, by one write: the six new columns are keys of the row dict in emit_method_row, so they land in the dim_return_method parquet (flat string columns, no nulls, readable by any engine without parsing a struct or JSON) and, because the manifest.json is {**row, thresholds}, in the manifest beside the thresholds echo that already carries the input's own threshold_claims object. The parquet column is the field a consumer rejects on. The returns tables are not written by this path.",
     "file_without_claims": "A thresholds input that carries NO threshold_claims key is NOT refused and NEVER read as measured: emit_method_row writes, per value, claim `held` when the value is non-null and `absent` when it is null, and stamps threshold_claims_source = defaulted_no_claims. `held` is the one member that is true of a value the writer was handed with no statement of how it was got (the writer neither measured nor derived it). A threshold_claims object that is PRESENT but partial, with a key outside the five, a claim outside the four, a null value under a claim other than absent, or a non-null value under absent, is REFUSED. A thresholds input of None keeps its present behaviour (emit_method_row indexes it and fails; --method-row-only refuses it).",
-    "reasoning": "(1) Per-value grain, because the ways of knowing differ inside one row (same_grain). (2) Flat string columns, because the law wants a field a consumer can reject on, and a struct or JSON column is a field a consumer must parse. (3) Both surfaces in one write, because the manifest already spreads the row; no second writer. (4) The no-claims rule is `held`/`absent` + a source marker rather than a refusal, because a refusal would make every existing caller and test that passes a claim-less thresholds dict fail, and because the row-2 partition already served is never rewritten either way; and rather than writing `measured`, which would assert a provenance nobody stated, the exact defect the law names. (5) The source marker keeps `held` from carrying two meanings (intent_coherence), so a consumer can tell a deliberately held band from a defaulted claim. (6) comparability() and every grading path are untouched: they read values, never claims. KNOWN COST: the dim_return_method contract (org/standards, version 0.3.0) declares exactly the row's current columns and the round-10 check that equates them to the row dict literal will fail until the issuer bumps the contract (and that check pins version 0.3.0 itself, so the issuer re-pins or retires it with the bump); the contract is outside this order's grant and a surprise row is filed rather than hiding the columns from the literal to keep that check green."
+    "reasoning": "(1) Per-value grain, because the ways of knowing differ inside one row (same_grain). (2) Flat string columns, because the law wants a field a consumer can reject on, and a struct or JSON column is a field a consumer must parse. (3) Both surfaces in one write, because the manifest already spreads the row; no second writer. (4) The no-claims rule is `held`/`absent` + a source marker rather than a refusal, because a refusal would make every existing caller and test that passes a claim-less thresholds dict fail, and because the row-2 partition already served is never rewritten either way; and rather than writing `measured`, which would assert a provenance nobody stated, the exact defect the law names. (5) The source marker keeps `held` from carrying two meanings (intent_coherence), so a consumer can tell a deliberately held band from a defaulted claim. (6) comparability() and every grading path are untouched: they read values, never claims. KNOWN COST (CLOSED BY AMENDMENT 1: the contract is bumped to 0.4.0 and DB62-1-AC3 replaces the round-10 check, which pins 0.3.0 and is left unedited): the dim_return_method contract (org/standards, version 0.3.0) declares exactly the row's current columns and the round-10 check that equates them to the row dict literal will fail until the issuer bumps the contract (and that check pins version 0.3.0 itself, so the issuer re-pins or retires it with the bump); the contract is outside this order's grant and a surprise row is filed rather than hiding the columns from the literal to keep that check green."
   },
   "row_example": {
     "case": "all five threshold values null, all five claims `absent`, on the registry firm the address builder requires (the thresholds are synthetic nulls; no client figure)",
@@ -257,6 +257,20 @@
       "schema_version": "1.0",
       "source_pipeline": "irpt-reporting-adapter",
       "firm": "49financial"
+    },
+    "table_schema": {
+      "tolerance": "double",
+      "large_flow_share": "double",
+      "plausibility_band_low": "double",
+      "plausibility_band_high": "double",
+      "comparability_max_excluded_weight": "double",
+      "tolerance_claim": "string",
+      "large_flow_share_claim": "string",
+      "plausibility_band_low_claim": "string",
+      "plausibility_band_high_claim": "string",
+      "comparability_max_excluded_weight_claim": "string",
+      "threshold_claims_source": "string",
+      "_note": "the eleven columns AMENDMENT 1 types explicitly, as returned in table_schema by emit_method_row(upload=False) for this case"
     }
   },
   "readers": {
@@ -271,13 +285,13 @@
       },
       {
         "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
-        "role": "declares the table's columns (0.3.0); not a runtime reader",
-        "breaks": "DRIFTS: declares none of the six new columns (row IRPT_DASHBD-D2-W93-S1)"
+        "role": "declares the table's columns (0.4.0 after AMENDMENT 1); not a runtime reader",
+        "breaks": "NO after AMENDMENT 1: 0.4.0 names the row's 28 columns, schema_hash self-consistent, checked by DB62-1-AC3 (row IRPT_DASHBD-D2-W93-S1 closed here)"
       },
       {
         "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r10/p10_1_ac1_method_contract_matches_row.py",
         "role": "round-10 check: contract columns == emit_method_row literal keys",
-        "breaks": "YES: run at the working tree -> 'columns differ ... row-only [six new columns]', DB10-1-AC1 FAIL, rc 1 (row IRPT_DASHBD-D2-W93-S1)"
+        "breaks": "YES, by design: it pins contract_version 0.3.0; run at the working tree after AMENDMENT 1 -> 'FAIL: contract_version is '0.4.0', not 0.3.0', DB10-1-AC1 FAIL. Another seat's historical check, not edited (AMENDMENT 1 item 3); its job passes to DB62-1-AC3"
       },
       {
         "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r1/p1_1_ac1_gold_under_contract.py",
@@ -331,17 +345,18 @@
       }
     ],
     "not_examined": "the 16 CONFIG and 75 DOC files and the remaining SURFACED/DEF terraform text hits were not opened line by line: they carry the table's name as a string in declarations and prose, none is code that reads a column",
-    "found_breaking": 1
+    "found_breaking": 1,
+    "note_amendment_1": "found_breaking is still 1: the contract no longer drifts, but the round-10 check pins 0.3.0 and fails by design."
   },
   "tests": {
     "new_test": "data/assets/scripts/gold/irpt_reporting/tests/test_threshold_claims.py::test_row_from_five_absent_claims_with_null_values_states_that",
     "new_test_file": "data/assets/scripts/gold/irpt_reporting/tests/test_threshold_claims.py",
-    "passed": 30,
+    "passed": 32,
     "failed": 0,
     "folders": {
       "data/assets/scripts/gold/irpt_reporting/tests": {
         "before": "112 passed",
-        "after": "142 passed, 0 failed"
+        "after": "144 passed, 0 failed (AMENDMENT 1 added 2; 142 before it)"
       },
       "infra/aws/lambda/investor-reporting/reporting-gold/tests": {
         "before": "90 passed",
@@ -359,7 +374,9 @@
       "file without claims -> held/absent defaulted, never measured",
       "claimless numbers unchanged",
       "returns tables and day manifests untouched, writers unreachable from emit_day/build_manifest/compute_range/measure_thresholds",
-      "grading paths do not read claims"
+      "grading paths do not read claims",
+      "AMENDMENT 1: the 22 pre-existing columns keep their 0.3.0 contract arrow types on a row with values; the six new columns are string",
+      "AMENDMENT 1: an all-absent row types the five value columns double and the six claim columns string; the only null-typed column is tieout_tolerance_proposed (no --tieout), as before"
     ]
   }
 }

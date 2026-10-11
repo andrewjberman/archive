@@ -25,5 +25,4 @@ manifest. A thresholds input with NO claims is not refused and is never read as 
 `absent`, source `defaulted_no_claims`. A present-but-malformed claims object is refused (partial, unknown key, claim outside the four, null under
 a claim other than `absent`, non-null under `absent`). `thresholds=None` behaves exactly as before.
 
-**Known cost.** The `dim_return_method` contract (`org/standards`, 0.3.0) declares the row's current columns; the round-10 check that equates them to
-the row literal will fail for the six new columns until the issuer bumps the contract. It is outside this order's grant: a surprise row is filed.
+**Known cost (closed by AMENDMENT 1).** The `dim_return_method` contract is now at 0.4.0 and names the row's 28 columns (DB62-1-AC3 checks it). The round-10 check pins 0.3.0 and is another seat's historical check, left unedited; AC3 takes over its job.
