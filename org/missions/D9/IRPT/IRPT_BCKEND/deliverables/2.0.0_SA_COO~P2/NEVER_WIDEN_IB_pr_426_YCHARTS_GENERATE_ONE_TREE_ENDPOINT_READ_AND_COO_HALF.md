@@ -59,7 +59,9 @@ Inert: `recipe.py` (comment only, AST identical), `firm_registry.json` (generate
   THE CTO HALF NAMES IT, or the half is not complete on this member.
 - **FWD-9 (a request an advisor can see):** every request accepted after the apply records a different
   `ingestion_gate_revision` and a new field `acting_principal_id`. Readers: `ops/owned_requests.py` names the gate revision at
-  two lines (20, 191), as a member that must be present, never as a value compared (read by this seat); it does not name `acting_principal_id`. The wider census of
+  two lines (20, 191), as a member that must be present, never as a value compared (read by this seat); it does not name `acting_principal_id`. The reader's one closed key set is over the record's `identity` member
+  (`set(identity) != IDENTITY_FIELDS`, line 186 at HEAD and line 178 at irpt-status's recorded pin 361c44fa9d); the new field
+  is written at the record's TOP LEVEL (`acceptance.py:113-119`), outside it. MEASURED on the bytes. The wider census of
   readers of the acceptance record (19 readers, none with a closed key set) is INHERITED from `2.0.0_SA_COO~Y2` and was not
   re-run.
 
