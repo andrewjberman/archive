@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-125",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "61f17b5413",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-125.thresholds-file-claims-tracked.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~100",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~100/THRESHOLDS_FILE.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~100/THRESHOLDS_FILE.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a record: the handler's two paths with file and line, the keys read, the five claims with reasons, the served copy (not read, with why), both hashes, per-key values_equal; no S3 write, no AWS call",
+      "artifact_covered_by": [
+        "DB68-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/MEASURED_THRESHOLDS_R1.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the tracked thresholds file at the handler's packaged path: the five values unchanged and threshold_claims; ships only with a later release under its own pair",
+      "artifact_covered_by": [
+        "DB68-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_thresholds_file_claims.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 tests: the handler resolves the tracked file, the producer reads its five claims, the method row carries them",
+      "artifact_covered_by": [
+        "DB68-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB68-2-AC1",
+      "criterion_verbatim": "DB68-2-AC1 -- the thresholds file is tracked at a path the handler reads, carries a claim per threshold, and is compared by hash with the served copy. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r68/p68_round68.py\" . DB68-2-AC1",
+      "output_evidence": "OK: the thresholds file is tracked at data/assets/scripts/gold/irpt_reporting/MEASURED_THRESHOLDS_R1.json with five claims; equal to the served copy: NOT_ESTABLISHED; no S3 write\nDB68-2-AC1 PASS",
+      "denominator": "5 of 5 threshold keys carry a claim with a reason; 1 of 2 handler paths holds the tracked file; served copy read 0 of 1 (the handler reads no S3 object; the served copy is the code package, not downloaded); tests 174 passed, 0 failed (baseline 168 passed, 0 failed); s3_writes 0; exit code 0",
+      "status": "PASS",
+      "expect": "DB68-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record from the worktree root",
+      "observed": "DB68-2-AC1 printed the same last line (PASS) on two further runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB68-2-AC1 FAIL",
+      "observed": "FAIL: no record THRESHOLDS_FILE.json; DB68-2-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any AWS call; a download of the live function's code package; a restore of the deleted blob; the source-map's repo_path; a release of the tracked file",
+      "reason": "Bounds of the order: the handler reads no served S3 object, the package is not downloaded, the blob holds client account numbers, and the tracked file ships with a later release under its own pair. The served comparison reads NOT_ESTABLISHED."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W100-S1",
+    "IRPT_DASHBD-D2-W100-S2",
+    "IRPT_DASHBD-D2-W100-S3"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p68_round68.py",
+      "invocation": "python org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r68/p68_round68.py . DB68-2-AC1",
+      "result": "DB68-2-AC1 PASS (rc 0); against an empty root it prints DB68-2-AC1 FAIL (rc 1)"
+    }
+  ]
+}
