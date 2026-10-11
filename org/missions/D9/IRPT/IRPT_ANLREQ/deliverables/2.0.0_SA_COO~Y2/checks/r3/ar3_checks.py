@@ -17,6 +17,8 @@ Every subprocess is bounded (100 s) so an invocation ends inside a worker's 120 
                 exactly the two ids known at the base                                                          -> Y32-CONTRACT-OK
   y33-store     AR-y-33: BUILD_ONLY of irpt-commentary-draft-store-lambda WITHOUT BAU_PARITY_SKIP prints its
                 BUILD_ONLY line                                                                                -> Y33-STORE-OK
+  y33-repin     AR-y-33 (AMENDMENT 1): the irpt-status entry is pinned to ONE commit, every row sha256 is the blob at
+                it, the 12-member census is complete, and a BUILD_ONLY prints the census digest             -> Y33-REPIN-OK
   y33-digest    AR-y-33: the source map records irpt-status's live digest, and a BUILD_ONLY still prints it    -> Y33-DIGEST-OK
   y37-actor     AR-y-37: `ycharts/generate/tests/test_acceptance_actor.py`, named tests exist and pass        -> Y37-ACTOR-OK
   y37-keep      AR-y-37: the submission tests that must not move still pass                                 -> Y37-KEEP-OK
@@ -286,6 +288,62 @@ def digest(root):
     return problems
 
 
+REPIN = "ee3fd7c5e520243e1a3f58a6b86d22bfc2b1e4d3"
+TWELVE = ("loaders.py", "firm_registry.json", "resident_installed.py", "acceptance.py", "lib/opal_naming.py",
+          "org/standards/NAMING_SCHEMA.json", "infra/logic/registry/exemptions.json",
+          "infra/logic/registry/reporting_policies.json", "infra/logic/registry/resources.json",
+          "infra/logic/registry/scopes.json", "infra/logic/registry/systems.json", "owned_report.py")
+CENSUS = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~53/release5/REPIN_CENSUS_IRPT_STATUS.json"
+
+
+def repin(root):
+    import hashlib
+    problems = []
+    entry = json.loads((root / "infra/aws/lambda/ci/lambda-source-map.json").read_text(encoding="utf-8"))["functions"]["irpt-status"]
+    rows = entry.get("staged_from") or []
+    pins = sorted(set(str(row.get("pin")) for row in rows))
+    print("staged_from rows %d, distinct pins %d" % (len(rows), len(pins)))
+    if pins != [REPIN]:
+        problems.append("staged_from carries %d distinct pin(s), not the one commit %s" % (len(pins), REPIN[:10]))
+    stale = 0
+    for row in rows:
+        got = subprocess.run(["git", "show", "%s:%s" % (row.get("pin"), row.get("repo_path"))], cwd=str(root), capture_output=True)
+        if got.returncode != 0 or hashlib.sha256(got.stdout).hexdigest() != row.get("sha256"):
+            stale += 1
+    print("rows whose sha256 is not the blob at their pin: %d of %d" % (stale, len(rows)))
+    if stale:
+        problems.append("%d row(s) carry a sha256 that is not the blob at the row's pin" % stale)
+    if entry.get("artifact_sha256") != STATUS_LIVE:
+        problems.append("artifact_sha256 moved: it records the LIVE digest until an apply moves it")
+    path = root / CENSUS
+    if not path.is_file():
+        return problems + ["no %s" % CENSUS]
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    members = {str(m.get("packaged_as")): m for m in doc.get("members") or [] if isinstance(m, dict)}
+    if sorted(members) != sorted(TWELVE):
+        problems.append("census members are not exactly the 12 that leave an older pin: %s" % sorted(set(members) ^ set(TWELVE)))
+    for name, m in sorted(members.items()):
+        if not (isinstance(m.get("owning_commits"), list) and m["owning_commits"] and isinstance(m.get("project"), str) and m["project"]):
+            problems.append("%s: owning_commits or project missing" % name)
+        if m.get("served_effect") not in ("CHANGES_SERVED_ANSWER", "INERT"):
+            problems.append("%s: served_effect is %r" % (name, m.get("served_effect")))
+        if not (isinstance(m.get("why"), str) and len(m["why"]) >= 40) or m.get("claim") not in ("measured", "inferred"):
+            problems.append("%s: why (40+ characters) or claim (measured/inferred) missing" % name)
+        if m.get("served_effect") == "CHANGES_SERVED_ANSWER" and not (isinstance(m.get("after_read"), str) and len(m["after_read"]) >= 40):
+            problems.append("%s: changes a served answer and names no after_read" % name)
+    build = doc.get("build") or {}
+    first, second = build.get("sha256_first"), build.get("sha256_second")
+    if not first or first != second:
+        problems.append("the census does not record two equal build digests")
+    if not isinstance(build.get("changed_members_vs_live"), list) or not isinstance(build.get("members"), int):
+        problems.append("the census does not record members and changed_members_vs_live")
+    rc, out, line = build_only(root, "irpt-status")
+    print(line or "\n".join([text for text in out.splitlines() if text.strip()][-3:]))
+    if not first or ("sha256=%s" % first) not in line:
+        problems.append("BUILD_ONLY of irpt-status does not print the digest the census records (rc=%d)" % rc)
+    return problems
+
+
 def order(root):
     worker_dirs = sorted((root / "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables").glob("0.9.0_WK_IRPT_ANLREQ~*/S31_REPRODUCER.json"))
     if not worker_dirs:
@@ -375,6 +433,8 @@ def main(argv):
         return finish(check, contract(root))
     if check == "y33-store":
         return finish(check, store(root))
+    if check == "y33-repin":
+        return finish(check, repin(root))
     if check == "y33-digest":
         return finish(check, digest(root))
     if check == "y37-keep":
