@@ -58,6 +58,40 @@
    "artifact_covered_by": [
     "IB127-1-AC1"
    ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~288/IB127-2_account_day_claims_v035.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read only; 76,796 account-days over 85 graded days, 1,000 accounts, ordered rule of PRD ADDENDUM v0.35 (claims renamed per v0.36), counts only; no AWS write",
+   "artifact_covered_by": [
+    "IB127-2-AC1",
+    "IB127-2-AC2",
+    "IB127-2-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~288/IB127-2_ACCOUNT_DAY_CLAIMS_V035_READ.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "one page, counts only: four claims, moves against IB-pr-429, serving rule beside v0.34 floor, kinds, cash-flagged sensitivity, control, not measured",
+   "artifact_covered_by": [
+    "IB127-2-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~288/ib429_claims_v035.py",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the ordered-rule claim, kinds list, old logic run beside it, serving counter and extended planted control (--control)",
+   "artifact_covered_by": [
+    "IB127-2-AC1",
+    "IB127-2-AC2",
+    "IB127-2-AC3"
+   ]
   }
  ],
  "acceptance": [
@@ -90,13 +124,43 @@
    "output_evidence": "OK: 6 daily needs listed; the control reads as planted; 0 account-id tokens in the 2 outputs | IB127-1-AC3 PASS | rc=0",
    "denominator": "6 daily needs, each with need, where_from and by_when; control planted equals read on 24 of 24 keys; 0 account-id shaped tokens in 2 of 2 outputs",
    "status": "PASS"
+  },
+  {
+   "criterion_id": "IB127-2-AC1",
+   "criterion_verbatim": "IB127-2-AC1 -- every account-day has exactly one of the four claims; the moves against IB-pr-429 are stated and add up; where the same account-days were read, the repair only blanks more.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r127/p127_v035_cells.py\" . IB127-2-AC1",
+   "expect": "IB127-2-AC1 PASS",
+   "output_evidence": "OK: 76796 account-days: UNGRADEABLE 42967, ACCT_PRIOR_DATE 55, ACCT_OWN_DATE 20138, NOTHING_TO_GRADE 13636; OWN_DATE to UNGRADEABLE 25109 | IB127-2-AC1 PASS | rc=0",
+   "denominator": "76,796 = 42,967 + 55 + 20,138 + 13,636; 45,247 - 25,109 = 20,138; 425 - 370 = 55; 17,488 + 25,109 + 370 = 42,967; any other move 0; same account-days read (old-rule totals equal IB-pr-429's file)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB127-2-AC2",
+   "criterion_verbatim": "IB127-2-AC2 -- the serving rule is counted: served + blank == eligible, blanks split by reason with no remainder, the share and the never-served accounts stated; every ungradeable day carries one or more of the five kinds.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r127/p127_v035_cells.py\" . IB127-2-AC2",
+   "expect": "IB127-2-AC2 PASS",
+   "output_evidence": "OK: 75796 eligible: 32341 served, 43455 blank (57.3%); never served 382 of 999 accounts; 1018 ungradeable days hold more than one kind | IB127-2-AC2 PASS | rc=0",
+   "denominator": "75,796 eligible = 32,341 + 43,455; blanks 42,211 + 1,169 + 55 + 20; accounts 382 + 127 + 490 = 999; 0 ungradeable days with no kind of 42,967",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB127-2-AC3",
+   "criterion_verbatim": "IB127-2-AC3 -- the control reads as planted, plants the two cases the repair is about, and no account id is in the outputs.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r127/p127_v035_cells.py\" . IB127-2-AC3",
+   "expect": "IB127-2-AC3 PASS",
+   "output_evidence": "OK: the control reads as planted, both repair cases planted; 0 account-id tokens in the 2 outputs | IB127-2-AC3 PASS | rc=0",
+   "denominator": "control planted equals read on 19 of 19 keys; 0 account-id tokens in 2 of 2 outputs",
+   "status": "PASS"
   }
  ],
  "controls": {
   "mutant": {
-   "description": "Negative control: AC1 run against a scratch copy of the output (scratch root outside the worktree) with account_days.OWN_DATE raised by 1 must FAIL.",
-   "expected": "IB127-1-AC1 FAIL, claims do not sum to present",
-   "observed": "FAIL: claims sum to 76797, 76796 account-days present | IB127-1-AC1 FAIL | rc=1",
+   "description": "Negative control: AC1 run against a scratch copy of the output (scratch root outside the worktree) with account_days.OWN_DATE raised by 1 must FAIL. AMENDMENT 2: Negative control: IB127-2-AC1 run against a scratch root (outside the worktree) holding a copy of the output with account_days.ACCT_OWN_DATE raised by 1 must FAIL.",
+   "expected": "IB127-1-AC1 FAIL, claims do not sum to present ; IB127-2-AC1 FAIL, claims do not sum to present",
+   "observed": "FAIL: claims sum to 76797, 76796 account-days present | IB127-1-AC1 FAIL | rc=1 ; FAIL: the four claims sum to 76797, present is 76796 | IB127-2-AC1 FAIL | rc=1",
    "status": "FIRED-AS-EXPECTED"
   },
   "determinism": {
@@ -107,7 +171,8 @@
  },
  "declared_exclusions": [],
  "surprises": [
-  "IRPT_BCKEND-D2-W288-S1"
+  "IRPT_BCKEND-D2-W288-S1",
+  "IRPT_BCKEND-D2-W288-S2"
  ],
  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
  "compiler_tools": [
