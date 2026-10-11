@@ -22,3 +22,15 @@ Cottonwood 6 PRESENT, 7 ABSENT, 1 NOT_ESTABLISHED. Nothing is cut from it now.
 ## Also parked on the same condition
 
 - The hop3 reader of the Cottonwood returns gold: `IRPT_DASHBD.TO-DB-b-86` AMENDMENT 4 @4b9db08e1a names its three conditions.
+
+## Update 2026-10-11 ~10:07Z (1.0.0_SA_CTO~DELL2 msg 4674)
+
+The re-walk read (row DSGN_IRPTV1-D2-S11) and the vendor release was rolled back, so the Performance hop can only be served from Opal's own
+return. FWD-11 is still NOT un-deferred. One read comes first, held by 2.0.0_SA_COO~C2 (counts only, no figure): for the walk's Cottonwood
+brokerage account, year to date, how many trading days are MEASURED in `account_return_daily`, how many NOT_MEASURABLE, and which unpriced
+kinds cause it.
+
+- **Mostly measured:** FWD-11 is un-deferred and the CTO rules the build shape. This seat then cuts from the work list.
+- **Mostly not:** the thread for that hop is price coverage, ADVI_COTBKF round 64 item 1, and nothing is cut here.
+
+**Un-parks when:** 2.0.0_SA_COO~C2's counts are read and the CTO rules on them.

@@ -75,3 +75,18 @@ retained ids) is therefore NOT met for the request id.
 4. **Needs your word:** (a) who runs the read-only `/closer` trace of the generation hops, and whether it starts from run 3's
    accepted request (finding its `REQ-` id needs a read of `49financial`'s request list by an identity allowed to make it);
    (b) whether a fourth run, after item 1, is a new pair in round 2 or the first cell of round 3.
+
+## 5. ADDENDUM (2026-10-11 ~10:2xZ): what later reads and rulings add
+
+- **A second reason run 3 could not have generated (CTO ruling msg 4676).** At job start the resident worker resolves the accepted
+  actor's PROFILE row; `ACTOR_NOT_FOUND` or `ACTOR_FIRM_NOT_ALLOWED` ends the job as ATTENTION and deletes the message
+  (`infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:696-717`). The runner deleted the synthetic filer's row at
+  08:43Z, after the token's `exp`. A generation starting after that could never run. For the fourth run the row is deleted when the
+  job reaches a terminal state (READY or ATTENTION) or two hours after submission, whichever is first; the token's expiry is
+  unchanged. This is a tree read: whether run 3's job ever started is not known.
+- **The producer path (the CTO's question, msg 4661).** Runs 2 and 3 would be served by the YCHARTS (vendor) producer:
+  `resident_worker.py:121` `OPAL_PRODUCER_PRINCIPALS = ("andrew@opalinvest.com",)`, `:128-133` `producer_for`; the runner's principal
+  is the synthetic filer (`fwd1_run.py:84`). Not read: the `owner.principal_id` the accepted record holds.
+- **The queue (`2.0.0_SA_COO~G2` msg 4544, not re-measured here).** The generation queue is consumed today and read 0 visible, 0
+  in flight; its dead-letter queue held 8. A known cause of dead letters is that the packaged request schema predates `ticket_id`.
+- **Still owed to this record (round 3, cell `R3-id-1`):** run 3's `REQ-` id and its job state, from that seat's batch read.
