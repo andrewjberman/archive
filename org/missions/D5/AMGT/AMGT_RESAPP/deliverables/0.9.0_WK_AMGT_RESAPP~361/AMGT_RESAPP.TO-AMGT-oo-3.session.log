@@ -1,0 +1,17 @@
+SESSION LOG -- 0.9.0_WK_AMGT_RESAPP~361 on AMGT_RESAPP.TO-AMGT-oo-3
+worktree: C:/dev/wk-resapp-361   branch: wk-AMGT_RESAPP-361   cut from 4f8811dd0b
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-AMGT_RESAPP-361; test -d org && test -d .tools -> TREE-OK.
+2. Premise re-ground: r90_merge_head.sh against the UNEDITED base hook -> FAIL B1 (linked worktree merge: MERGE_HEAD present=1, hook rc=1, BLOCKED rows=1),
+   PASS B2, PASS B3, "R90 MERGE HEAD: NO (2 of 3)", exit=1. Matches the preflight claim (B1 FAILs at the base).
+3. Edit: .tools/git-hooks/mass-deletion-check.sh, the one exemption block. MERGE_HEAD and CHERRY_PICK_HEAD now resolved with
+   git rev-parse --git-path; an empty or failing resolution tests false. One comment line added. Nothing else changed.
+4. Post-edit runs (worktree cwd):
+   - r90_merge_head.sh -> PASS B1, PASS B2, PASS B3, "R90 MERGE HEAD: YES (3 of 3)", exit=0 (three runs, identical).
+   - bash -n .tools/git-hooks/mass-deletion-check.sh -> rc 0.
+   - r89_audit_root.sh -> PASS A1..A4, "R89 AUDIT ROOT: YES", exit=0.
+   - grep for non-ASCII bytes in the script -> none.
+5. Working-directory trap: the Bash tool's default cwd is the base checkout (C:/dev/ajb_workspace), where
+   git rev-parse --show-toplevel resolves to the base. One post-edit AC1 run started there and exercised the UNEDITED base hook
+   (FAIL B1). It was discarded; every recorded result above is from a call that cd'd into the worktree first.
+6. Scratch/telemetry: none written by this worker. The r90/r89 checks use their own throwaway repositories.
