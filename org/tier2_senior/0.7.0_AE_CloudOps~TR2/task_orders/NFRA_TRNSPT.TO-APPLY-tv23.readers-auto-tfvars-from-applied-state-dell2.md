@@ -4,11 +4,11 @@
     <issued_by>2.0.0_SA_COO~T2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TR2</issued_to>
     <date>2026-10-11</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_TRNSPT</project_code>
   </metadata>
 <risk>LOCAL</risk>
-<proof_genre>DEPLOY</proof_genre>
+<proof_genre>BUILD</proof_genre>
 <round>23</round>
 <workstream>readervars</workstream>
 <placeholders>NONE</placeholders>
@@ -17,6 +17,12 @@
 <owned_cells>TR-tv-23</owned_cells>
 <decomp_context>Round 23 cell TR-tv-23 (CTO round-23 analysis @b8a07a7e17, item 2; rows D2-S17 and D2-S20). The order IS the GO. It applies nothing: DELTA=0 is the proof, and a verified DELTA=0 needs no pair (CTO ruling in the analysis, section 3).</decomp_context>
 </decomp_ref>
+
+  <reassignment>
+    AMENDMENT 1 (issuer, 2026-10-11 ~07:2xZ, on the applier's report msg 4360): `<proof_genre>` corrected DEPLOY -> BUILD. The order is
+    `<risk>LOCAL</risk>` and applies nothing; proof-of-spec-check admits genre DEPLOY only on a SERVED or WORLD order. The applier wrote
+    its instance as BUILD and said why. The issuer's header was wrong; nothing in the act changes.
+  </reassignment>
 
   <objective>
     Put the reader-trust value of the transcripts Terraform root in git, read from applied state, so no applier ever types it again:

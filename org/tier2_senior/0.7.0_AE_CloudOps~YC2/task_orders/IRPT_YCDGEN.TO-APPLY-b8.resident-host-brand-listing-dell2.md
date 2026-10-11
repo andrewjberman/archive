@@ -26,6 +26,9 @@ comp-adversary: RUN -- a listing that changes nothing: no write, no restart, no 
   </objective>
 
   <the_act>
+    AMENDMENT 1 (issuer 2.0.0_SA_COO~G2, 2026-10-11): AC2's expect admitted a bare integer, which the proof gate refuses as thin
+    (your row on TO-APPLY-b8 AC2). AC2 now reads the first line that is either a BRAND line with its sha256 or the
+    BRAND-DIR-ABSENT line. The act and the bounds are unchanged.
     1. One SSM send-command (AWS-RunShellScript) on i-0167fd745ad906a66 that only READS:
        - print the resident unit's ExecStart line, and from it the running package root, as a line `ROOT=<path>`;
        - `ls -l <root>/ycharts/research/brand/`;
@@ -41,6 +44,6 @@ comp-adversary: RUN -- a listing that changes nothing: no write, no restart, no 
   <proof_of_spec>
 Instance at `org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_b8/IRPT_YCDGEN.TO-APPLY-b8.resident-host-brand-listing-dell2.proof_of_spec.json`.
     <criterion id="AC1" cell_refs="YCD-d-8">The listing names the running root.<invocation>grep -m1 '^ROOT=' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_b8/BRAND_LISTING_HOST.txt</invocation><expect>^ROOT=/</expect></criterion>
-    <criterion id="AC2" cell_refs="YCD-d-8">The listing states the brand directory's files or its absence.<invocation>grep -c -E '^BRAND ' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_b8/BRAND_LISTING_HOST.txt</invocation><expect>^[0-9]+$</expect></criterion>
+    <criterion id="AC2" cell_refs="YCD-d-8">The listing states the brand directory's files or its absence.<invocation>grep -m1 -E '^(BRAND [0-9a-f]{64} |BRAND-DIR-ABSENT )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_b8/BRAND_LISTING_HOST.txt</invocation><expect>^(BRAND [0-9a-f]{64} |BRAND-DIR-ABSENT )</expect></criterion>
   </proof_of_spec>
 </task_order>
