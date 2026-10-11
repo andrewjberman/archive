@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "genre": "BUILD",
+  "to_id": "AMGT_CORPUS.TO-CRPS-ay-2.model-tab-renders-blocks-and-text-cells-by-kind",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ay-2.model-tab-renders-blocks-and-text-cells-by-kind.md",
+    "group": "OTHER",
+    "vintage_commit": "4ff965b89803a9806c5cb4039e6ce70f76dec994"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "4ff965b89803a9806c5cb4039e6ce70f76dec994",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ay-2.model-tab-renders-blocks-and-text-cells-by-kind.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/modelSheet.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "bd66cb6e2768dd56c138fc8e2e582fd050e391dc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal branch wk-AMGT_CORPUS-49-2-portal (portal worktree of this order), LOCAL, not pushed. Commit bd66cb6e2768dd56c138fc8e2e582fd050e391dc on origin/DEV ad774c6f: the issuer's reference patch applied by git apply (clean). buildModelSheet carries sheetBlocks (period, case, unread) and teamCensus.classes.BLOCK and teamCensus.blocks, and carries a text cell of a team FIGURE row (textKind error or word, C-S65) with teamCensus.text.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/ModelTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "bd66cb6e2768dd56c138fc8e2e582fd050e391dc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal branch wk-AMGT_CORPUS-49-2-portal, LOCAL, not pushed (commit bd66cb6e). TeamModelCell prints error in team sheet for a text error and the word verbatim for a word; a period or case block renders as its own table data-sheet-block under the period grid; an unread block prints one line per BLOCK row with its why and no value.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/types.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "bd66cb6e2768dd56c138fc8e2e582fd050e391dc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal branch wk-AMGT_CORPUS-49-2-portal, LOCAL, not pushed (commit bd66cb6e). row_classes admits BLOCK; team_sheet.blocks is optional and typed, so a payload captured before this cell still type-checks (bun run typecheck rc 0 on bd66cb6e).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round49/ay2_check.cjs\" portal 2>&1 | tail -1 -- expect (?m)^ay2 build 8/8 control 2/2$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round49/ay2_check.cjs\" portal 2>&1 | tail -1",
+      "output_evidence": "ay2 build 8/8 control 2/2",
+      "denominator": "build 8 of 8 arms, all ok true: d1 sheetBlocks shape, cells and outOfGrid, census BLOCK 5 with blocks case 2 (rows 5); d2 text cells mix error 1 word 1 empty 1 unclassed 0; d3 range row FIGURE with NA and #N/A carried as text, no block made; d4 no-blocks payload equal to the base except teamCensus.text; d5 inconsistent payload no throw, groups unchanged; d6 ModelTab.tsx carries data-sheet-block, unread, error in team sheet, textKind; d7 unread block no value, census unread 1, withheld 3; d8 block headed 1Q26..4Q26 is a period block. Control 2 of 2: c1 classed payload equal to the base snapshot except teamCensus.text, c2 no teamSheet equal to the base. Run 3 times on bd66cb6e: the same 8/8 control 2/2 line and rc 0 each run.",
+      "expect": "(?m)^ay2 build 8/8 control 2/2$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)/portal\" && node src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs 2>&1 | tail -1 -- expect (?m)^CHECKS-WRONG-WAY short_read_refused,short_read_control_served,generation_captions_present$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" && node src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs 2>&1 | tail -1",
+      "output_evidence": "CHECKS-OK 21 of 21",
+      "denominator": "21 CHECK lines of 21 (all expected true, rc 0), measured with the patch at bd66cb6e and, by git apply -R then re-apply, at base ad774c6f: both print CHECKS-OK 21 of 21. The three named checks short_read_refused, short_read_control_served and generation_captions_present read true in both runs, so the pinned failing set (exactly those three) is not produced in this tree.",
+      "expect": "(?m)^CHECKS-WRONG-WAY short_read_refused,short_read_control_served,generation_captions_present$",
+      "status": "FAIL",
+      "status_reason": "The criterion pins a failing set of three harness checks at origin/DEV ad774c6f. In this worker's portal worktree at ad774c6f (base and patched alike) the harness prints CHECKS-OK 21 of 21, so the expected CHECKS-WRONG-WAY line is not produced. The patch neither adds nor masks a failure here. Recorded as filed under AMGT_CORPUS-D1-W2-S6; the issuer's detached-tree run AMGT_CORPUS-D1-S8 reports the three-check failure, so the difference is not diagnosed. No harness edit was made."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)/portal\" && grep -c \"data-sheet-block\" src/pages/SecurityAnalysis/tabs/ModelTab.tsx -- expect (?m)^[1-9]\\d*$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" && grep -c \"data-sheet-block\" src/pages/SecurityAnalysis/tabs/ModelTab.tsx",
+      "output_evidence": "3\n761:        <ul key={`sheet-block-${block.firstRow}`} data-sheet-block={block.firstRow} data-sheet-block-kind=\"unread\" className={`space-y-0.5 text-[14px] font-normal ${INK_NAVY}`}>\n775:          <table data-sheet-block={block.firstRow} data-sheet-block-kind={block.kind} className=\"w-full\">\n778:                <tr key={`sheet-block-${block.firstRow}-${row.rowNumber}`} data-sheet-block-row={row.rowNumber} data-sheet-row-kind={row.kind} className={`border-t ${BORDER_HAIRLINE}`}>",
+      "denominator": "3 lines of src/pages/SecurityAnalysis/tabs/ModelTab.tsx carry the token data-sheet-block (grep -c counts lines): 761 the unread list, 775 the period or case table, 778 the block row (its attribute data-sheet-block-row contains the token as a substring).",
+      "expect": "(?m)^[1-9]\\d*$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The year-integer rule of buildModelSheet (plainYear, the 1990..2100 test on a title or years cell) changed to 19900..21000 in a COPY of modelSheet.ts under the worker's scratch root (.scratch/mutant); the live portal file untouched. The issuer's ay2_check.cjs run against that root.",
+      "expected": "build below 8/8: arm d1 fails (its cells check, a 2026 header printed as 2,026 or not as the plain integer), the other arms still hold, and the two controls still hold.",
+      "observed": "ay2 build 7/8 control 2/2, rc=1 on the mutant root. Arm d1 printed cells false (d1 true only before the mutation). The live portal tree is unchanged and reads 8/8 control 2/2, rc 0, afterwards.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "ay2_check.cjs run three times at the graded portal commit bd66cb6e (a pure function over a fixture, no network).",
+      "observed": "three runs: ay2 build 8/8 control 2/2, rc=0 on each run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A rendered-page check of the Model tab over every served name (the rendered read, CRPS-ay-5).",
+      "reason": "Order CRPS-ay-2 reads the pure builder, the tab harness and the typecheck. The rendered read follows once the API serves the blocks and the text cells; it is the issuer's per the order's preflight."
+    },
+    {
+      "item": "Push of any portal branch, deploy, AWS, Bloomberg and vendor calls.",
+      "reason": "Order EGRESS CLASS NONE: portal source only. The DEV landing follows the CTO's review of the candidate."
+    },
+    {
+      "item": "Behaviour of the harness at ad774c6f (AC2).",
+      "reason": "AC2 is recorded FAIL on its regex (see its status_reason and AMGT_CORPUS-D1-W2-S6). The three named checks are not CRPS-ay-2's surfaces and were not edited."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-D1-W2-S6: AC2's pinned failing set (short_read_refused, short_read_control_served, generation_captions_present at ad774c6f) is not produced in this worker's portal worktree: the harness prints CHECKS-OK 21 of 21 at base and with the patch; AC2 recorded FAIL on its regex and the order stays open."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ay2_check.cjs (AC1)",
+      "invocation": "node ay2_check.cjs portal",
+      "result": "rc 0; ay2 build 8/8 control 2/2 (three runs)"
+    },
+    {
+      "tool": "tabs.harness.cjs (AC2)",
+      "invocation": "node src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs",
+      "result": "rc 0; CHECKS-OK 21 of 21 (base and patched); the expected WRONG-WAY line not produced"
+    },
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit)",
+      "invocation": "cd portal && bun run typecheck",
+      "result": "rc 0 on portal commit bd66cb6e"
+    }
+  ]
+}
