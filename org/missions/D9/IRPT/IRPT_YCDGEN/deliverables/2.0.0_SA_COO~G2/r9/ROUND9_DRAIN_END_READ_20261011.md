@@ -36,8 +36,7 @@
 
 ## 3. The CVO's watermark against the channel's row count
 
-- Latest compile: `surprise-channel/adjudications/ADJUDICATION_v7.md`, `sweep_watermark>2026-10-11T08:03Z
-sweep_watermark>`.
+- Latest compile: `surprise-channel/adjudications/ADJUDICATION_v7.md`, `sweep_watermark 2026-10-11T08:03Z`.
 - Channel now: 135 headings in `INVESTIGATION_v1.md`. No row was filed in round 9.
 
 ## 4. Armed rows
