@@ -1,0 +1,382 @@
+{
+  "record": "THRESHOLD_CLAIM_RULE24",
+  "to_id": "IRPT_DASHBD.TO-DB-b-118",
+  "authored_by": "0.9.0_WK_IRPT_DASHBD~93",
+  "authored_before_code": true,
+  "base": "box/dell2 @449c59379b (producer unchanged at the time of this record; every producer line cited below is a line of that base)",
+  "schema_adopted": "A per-value CLAIM on each of the five guard thresholds dim_return_method states (tolerance, large_flow_share, plausibility_band_low, plausibility_band_high, comparability_max_excluded_weight), drawn from the law's four-member provenance set measured / inferred / held / absent (CLAUDE.md section 4; docs/doctrine/A_VALUE_MUST_CARRY_ITS_CLAIM.md). Declared domain of the claim: HOW THE ROW'S WRITER (emit_method_row) KNOWS THE THRESHOLD VALUE IT WRITES.",
+  "domain": "how emit_method_row knows each threshold value it writes into a dim_return_method row",
+  "postulates": {
+    "mece": {
+      "finding": "MECE over the declared domain, by subtraction from the printed denominator of FIVE threshold values: tolerance and large_flow_share are computed from the run's own data (measured); comparability_max_excluded_weight is computed from those two and the band by a stated formula (inferred); the two band ends are constants adopted without measurement (held); a value the code cannot produce is None (absent). Five values minus those four routes leaves ZERO values unplaced, and each of the four members has at least one producing line, so none is empty; a value carried in from a file with no stated claim is not a fifth way of knowing, it is a value the writer holds as given (held) and is marked as defaulted in a second field (see intent_coherence).",
+      "subtraction": {
+        "denominator": 5,
+        "values": [
+          "tolerance",
+          "large_flow_share",
+          "plausibility_band_low",
+          "plausibility_band_high",
+          "comparability_max_excluded_weight"
+        ],
+        "placed": {
+          "measured": [
+            "tolerance",
+            "large_flow_share"
+          ],
+          "inferred": [
+            "comparability_max_excluded_weight"
+          ],
+          "held": [
+            "plausibility_band_low",
+            "plausibility_band_high"
+          ],
+          "absent": "reachable for tolerance and large_flow_share (empty series -> None) and for the ceiling (UNDERIVABLE -> None)"
+        },
+        "remainder": 0
+      },
+      "evidence": [
+        {
+          "file": "docs/doctrine/A_VALUE_MUST_CARRY_ITS_CLAIM.md",
+          "line": 19,
+          "shows": "the law's provenance set: measured / inferred / held / absent"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1547,
+          "shows": "tolerance is a p99 of the run's own guard differences, None when the series is empty (measured / absent)"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1554,
+          "shows": "large_flow_share is a p99 of the run's own flow shares, None when empty (measured / absent)"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1556,
+          "shows": "plausibility_band_low is the constant -0.5, not measured (held)"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1557,
+          "shows": "plausibility_band_high is the constant 0.5, not measured (held)"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1588,
+          "shows": "comparability_max_excluded_weight = tolerance / max|band|, derived from other values (inferred)"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1582,
+          "shows": "the ceiling is None when UNDERIVABLE (absent)"
+        },
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 177,
+          "shows": "the table's own landed_row already names its provenance in this vocabulary: basis measured"
+        }
+      ]
+    },
+    "same_grain": {
+      "finding": "The claim is PER THRESHOLD VALUE, the grain at which the ways of knowing differ inside one row: in the same row tolerance is measured while the band ends are held and the ceiling inferred, so a single row-level claim would assert one provenance over values that have three. The row itself stays at the table's grain (one row per method_version); five claims are properties of that row's five threshold columns, not new rows.",
+      "evidence": [
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1547,
+          "shows": "tolerance: measured in the same dict as"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1556,
+          "shows": "the band end: held"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1588,
+          "shows": "and the ceiling: inferred"
+        },
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 167,
+          "shows": "the contract's same-grain statement: every column is a property of the method version"
+        }
+      ]
+    },
+    "intent_coherence": {
+      "finding": "One axis, one intent. The claim columns answer ONE question, how the writer knows the value; they say nothing about whether the value is good, in tolerance, or applied. The second thing a consumer needs, whether the claim was STATED by the input or DEFAULTED by the writer because the input carried none, is a different axis and gets its own single field (threshold_claims_source = stated | defaulted_no_claims), so the member `held` is never overloaded to mean both 'deliberately held' and 'nobody told me'. The grading paths read the VALUES and never the claims, so the claim moves no verdict.",
+      "evidence": [
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 168,
+          "shows": "the table answers one question: what arithmetic produced the numbers that point at it; the claim columns stay inside it"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1044,
+          "shows": "comparability() reads thresholds.get(...) the value, not a claim"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1081,
+          "shows": "guard_state_of reads thresholds[tolerance] the value, not a claim"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1904,
+          "shows": "emit_method_row today writes the bare number with no field a consumer can reject on"
+        }
+      ]
+    },
+    "state_coherence": {
+      "finding": "Values one remedy does NOT move: re-measuring the guard moves tolerance and large_flow_share and, through the formula, the ceiling's VALUE, but not the band ends (held) and not the ceiling's CLAIM (still inferred); promoting a band end from held to measured moves that one claim and no value; filling a null value moves its claim off absent and nothing else; none of these moves a grading path, because the guard reads values, and none moves the already-served 49F row 2 partition, which is a different object written by an earlier run and is never rewritten by this change. The illegal states are refused: a claim outside the four, a null value under any claim but absent, and (the converse, same state) a non-null value claimed absent.",
+      "evidence": [
+        {
+          "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+          "line": 169,
+          "shows": "the table's own state-coherence record: which values re-measuring moves together and which it does not"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1114,
+          "shows": "eligible() reads the band value, so a claim change cannot move grading"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1462,
+          "shows": "the guard's tolerance is read as a value in compute_range"
+        },
+        {
+          "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "line": 1894,
+          "shows": "the row is written at its own method_version partition address; row 2's partition is not an input here"
+        }
+      ]
+    }
+  },
+  "token_census": {
+    "tool": "comp-find -i '\\b<token>\\b' --files --all --corpus default (word boundary, case-insensitive)",
+    "scope": "data/assets/scripts/gold/irpt_reporting + org/standards (the producer and the contracts that declare the table it writes); the field name is censused over the WHOLE repo (corpus all) because it is a new name and a collision can be anywhere",
+    "files_scanned": 131,
+    "tokens": {
+      "measured": {
+        "hits": 514,
+        "files": 65,
+        "scope_files_scanned": 131,
+        "reading": "ordinary provenance word in the contracts; the table's own landed_row uses basis: measured (contract line 177); no rival meaning for a threshold"
+      },
+      "inferred": {
+        "hits": 122,
+        "files": 23,
+        "scope_files_scanned": 131,
+        "reading": "producer hit is the fee label FEE-MANAGEMENT-INFERRED (line 225), a classification code on another object; no collision with a threshold claim"
+      },
+      "held": {
+        "hits": 159,
+        "files": 37,
+        "scope_files_scanned": 131,
+        "reading": "producer hit is ordinary English ('dtype held explicitly', line 578); no rival meaning on this table"
+      },
+      "absent": {
+        "hits": 347,
+        "files": 69,
+        "scope_files_scanned": 131,
+        "reading": "the producer's ABSENT = 'absent' (line 126) already means 'not declared / null' (line 1262), the same meaning the claim member carries"
+      },
+      "threshold_claims": {
+        "hits": 6,
+        "files": 2,
+        "scope_files_scanned": 68576,
+        "reading": "WHOLE-REPO unscoped read: every hit is this cell's own order and the round's check (the constant name THRESHOLD_CLAIMS); no prior use of the name, so no collision"
+      },
+      "tolerance_claim": {
+        "hits": 0,
+        "files": 0,
+        "scope_files_scanned": 68576,
+        "reading": "whole-repo: unused; the row columns are named <value>_claim"
+      },
+      "threshold_claims_source": {
+        "hits": 0,
+        "files": 0,
+        "scope_files_scanned": 68576,
+        "reading": "whole-repo: unused"
+      }
+    },
+    "finding": "NO COLLISION. The four claim words are in the estate with the meaning the law gives them or with no meaning on this table; the chosen names are unused repo-wide before this cell. LIMIT, stated: the four words are common English and the census is scoped to the producer and the standards, not the whole estate, so it shows no collision on THIS table's neighbourhood and says nothing about prose elsewhere."
+  },
+  "decision": {
+    "field_name": "threshold_claims",
+    "field_family": "threshold_claims = the thresholds-input key (an object, value name -> claim) and the name of the claim group; on the row it is written as one string column per value, tolerance_claim, large_flow_share_claim, plausibility_band_low_claim, plausibility_band_high_claim, comparability_max_excluded_weight_claim, plus ONE provenance-of-the-claim column threshold_claims_source (stated | defaulted_no_claims)",
+    "where_written": "BOTH surfaces, by one write: the six new columns are keys of the row dict in emit_method_row, so they land in the dim_return_method parquet (flat string columns, no nulls, readable by any engine without parsing a struct or JSON) and, because the manifest.json is {**row, thresholds}, in the manifest beside the thresholds echo that already carries the input's own threshold_claims object. The parquet column is the field a consumer rejects on. The returns tables are not written by this path.",
+    "file_without_claims": "A thresholds input that carries NO threshold_claims key is NOT refused and NEVER read as measured: emit_method_row writes, per value, claim `held` when the value is non-null and `absent` when it is null, and stamps threshold_claims_source = defaulted_no_claims. `held` is the one member that is true of a value the writer was handed with no statement of how it was got (the writer neither measured nor derived it). A threshold_claims object that is PRESENT but partial, with a key outside the five, a claim outside the four, a null value under a claim other than absent, or a non-null value under absent, is REFUSED. A thresholds input of None keeps its present behaviour (emit_method_row indexes it and fails; --method-row-only refuses it).",
+    "reasoning": "(1) Per-value grain, because the ways of knowing differ inside one row (same_grain). (2) Flat string columns, because the law wants a field a consumer can reject on, and a struct or JSON column is a field a consumer must parse. (3) Both surfaces in one write, because the manifest already spreads the row; no second writer. (4) The no-claims rule is `held`/`absent` + a source marker rather than a refusal, because a refusal would make every existing caller and test that passes a claim-less thresholds dict fail, and because the row-2 partition already served is never rewritten either way; and rather than writing `measured`, which would assert a provenance nobody stated, the exact defect the law names. (5) The source marker keeps `held` from carrying two meanings (intent_coherence), so a consumer can tell a deliberately held band from a defaulted claim. (6) comparability() and every grading path are untouched: they read values, never claims. KNOWN COST (CLOSED BY AMENDMENT 1: the contract is bumped to 0.4.0 and DB62-1-AC3 replaces the round-10 check, which pins 0.3.0 and is left unedited): the dim_return_method contract (org/standards, version 0.3.0) declares exactly the row's current columns and the round-10 check that equates them to the row dict literal will fail until the issuer bumps the contract (and that check pins version 0.3.0 itself, so the issuer re-pins or retires it with the bump); the contract is outside this order's grant and a surprise row is filed rather than hiding the columns from the literal to keep that check green."
+  },
+  "row_example": {
+    "case": "all five threshold values null, all five claims `absent`, on the registry firm the address builder requires (the thresholds are synthetic nulls; no client figure)",
+    "call": "emit_method_row(None, <registry firm>, {five values None, threshold_claims: five x absent}, upload=False)['row']",
+    "claim_fields": {
+      "tolerance_claim": "absent",
+      "large_flow_share_claim": "absent",
+      "plausibility_band_low_claim": "absent",
+      "plausibility_band_high_claim": "absent",
+      "comparability_max_excluded_weight_claim": "absent",
+      "threshold_claims_source": "stated"
+    },
+    "value_fields": {
+      "tolerance": null,
+      "large_flow_share": null,
+      "plausibility_band_low": null,
+      "plausibility_band_high": null,
+      "comparability_max_excluded_weight": null
+    },
+    "row": {
+      "method_version": 2,
+      "method": "TWR_DAILY_GEOMETRIC",
+      "flow_convention": "END",
+      "income_basis": "cash_when_received",
+      "value_basis": "EQUITY = net_mv_plus_cash + margin_balance",
+      "value_basis_ruling": "1.0.0_SA_CTO RULINGS batch 193",
+      "fee_basis": "GROSS_ONLY",
+      "tolerance": null,
+      "large_flow_share": null,
+      "plausibility_band_low": null,
+      "plausibility_band_high": null,
+      "comparability_max_excluded_weight": null,
+      "tolerance_claim": "absent",
+      "large_flow_share_claim": "absent",
+      "plausibility_band_low_claim": "absent",
+      "plausibility_band_high_claim": "absent",
+      "comparability_max_excluded_weight_claim": "absent",
+      "threshold_claims_source": "stated",
+      "guard_substitution": "WITHDRAWN (PRD v0.4 ruling 17): a guard disagreement serves no number; HOLDINGS_INCOME_FALLBACK is never emitted.",
+      "day_count": "Account365",
+      "tieout_tolerance_proposed": null,
+      "tieout_tolerance": 0.0035,
+      "tieout_tolerance_ruling": "1.0.0_SA_CTO RULINGS batch 181",
+      "gips_alignment": "GIPS-aligned, not GIPS-compliant",
+      "measured_at": "2026-10-11T04:52:30Z",
+      "schema_version": "1.0",
+      "source_pipeline": "irpt-reporting-adapter",
+      "firm": "49financial"
+    },
+    "table_schema": {
+      "tolerance": "double",
+      "large_flow_share": "double",
+      "plausibility_band_low": "double",
+      "plausibility_band_high": "double",
+      "comparability_max_excluded_weight": "double",
+      "tolerance_claim": "string",
+      "large_flow_share_claim": "string",
+      "plausibility_band_low_claim": "string",
+      "plausibility_band_high_claim": "string",
+      "comparability_max_excluded_weight_claim": "string",
+      "threshold_claims_source": "string",
+      "_note": "the eleven columns AMENDMENT 1 types explicitly, as returned in table_schema by emit_method_row(upload=False) for this case"
+    }
+  },
+  "readers": {
+    "query": "comp-find -i 'dim_return_method' --files --all --corpus default",
+    "denominator": "246 hit(s) in 107 file(s) of 68573 scanned (4274 binary not searched); bands by file: HEAD 1, DEF 3, SURFACED 12, CONFIG 16, DOC 75 (107 = 1+3+12+16+75)",
+    "portal": "0 of the 107 files are under portal/",
+    "examined": [
+      {
+        "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+        "role": "the only writer",
+        "breaks": false
+      },
+      {
+        "file": "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json",
+        "role": "declares the table's columns (0.4.0 after AMENDMENT 1); not a runtime reader",
+        "breaks": "NO after AMENDMENT 1: 0.4.0 names the row's 28 columns, schema_hash self-consistent, checked by DB62-1-AC3 (row IRPT_DASHBD-D2-W93-S1 closed here)"
+      },
+      {
+        "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r10/p10_1_ac1_method_contract_matches_row.py",
+        "role": "round-10 check: contract columns == emit_method_row literal keys",
+        "breaks": "YES, by design: it pins contract_version 0.3.0; run at the working tree after AMENDMENT 1 -> 'FAIL: contract_version is '0.4.0', not 0.3.0', DB10-1-AC1 FAIL. Another seat's historical check, not edited (AMENDMENT 1 item 3); its job passes to DB62-1-AC3"
+      },
+      {
+        "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r1/p1_1_ac1_gold_under_contract.py",
+        "role": "reads the contract's columns (superset test of what the contract lacks) and S3 day partitions",
+        "breaks": "NO by reading lines 85-90; not run (reads S3)"
+      },
+      {
+        "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r1/p1_1_ac2_guard_seam.py",
+        "role": "reads S3 dim_return_method/method_version=1 and asserts required columns exist",
+        "breaks": "NO: reads partition 1, which this change never writes; extra columns on another partition are not read; not run (S3)"
+      },
+      {
+        "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r1/p1_3_ac2_method_winner_written.py",
+        "role": "reads the served row's flow_convention (S3)",
+        "breaks": "NO: extra columns are not read; not run (S3)"
+      },
+      {
+        "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/p2_window/p2_prewindow_versions.py",
+        "role": "lists S3 keys under the prefix",
+        "breaks": "NO: reads key names, not columns; not run"
+      },
+      {
+        "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r22/p22_release_prep.py",
+        "role": "asserts the write set never names dim_return_method",
+        "breaks": "NO"
+      },
+      {
+        "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r60/p60_round60.py",
+        "role": "round-60 measurement of row 3 vs Cottonwood (record/text)",
+        "breaks": "NO (text mention at line 3)"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+        "role": "does not call emit_method_row (lines 12-16); passes thresholds into emit_day, whose day manifest echoes the thresholds dict as given",
+        "breaks": "NO; a day manifest gains a threshold_claims key only if the thresholds FILE carries one"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/reporting-publish/publisher.py",
+        "role": "reads method_version from the returns rows (lines 56, 173), never the method row",
+        "breaks": "NO"
+      },
+      {
+        "file": "infra/aws/terraform/investor-reporting/reporting-publish/locals.tf",
+        "role": "IAM read grant on the dim_return_method prefix (line 48, 54); no column read",
+        "breaks": "NO"
+      },
+      {
+        "file": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+        "role": "comment mention (line 44)",
+        "breaks": "NO"
+      }
+    ],
+    "not_examined": "the 16 CONFIG and 75 DOC files and the remaining SURFACED/DEF terraform text hits were not opened line by line: they carry the table's name as a string in declarations and prose, none is code that reads a column",
+    "found_breaking": 1,
+    "note_amendment_1": "found_breaking is still 1: the contract no longer drifts, but the round-10 check pins 0.3.0 and fails by design."
+  },
+  "tests": {
+    "new_test": "data/assets/scripts/gold/irpt_reporting/tests/test_threshold_claims.py::test_row_from_five_absent_claims_with_null_values_states_that",
+    "new_test_file": "data/assets/scripts/gold/irpt_reporting/tests/test_threshold_claims.py",
+    "passed": 32,
+    "failed": 0,
+    "folders": {
+      "data/assets/scripts/gold/irpt_reporting/tests": {
+        "before": "112 passed",
+        "after": "144 passed, 0 failed (AMENDMENT 1 added 2; 142 before it)"
+      },
+      "infra/aws/lambda/investor-reporting/reporting-gold/tests": {
+        "before": "90 passed",
+        "after": "90 passed, 0 failed"
+      }
+    },
+    "new_tests_cover": [
+      "claim set is the four",
+      "five absent claims with null values",
+      "stated claims written value for value",
+      "claim outside the set refuses (6 inputs)",
+      "null under measured/inferred/held refuses (15 cases)",
+      "value under absent refuses",
+      "partial/unknown/non-object claims refuse",
+      "file without claims -> held/absent defaulted, never measured",
+      "claimless numbers unchanged",
+      "returns tables and day manifests untouched, writers unreachable from emit_day/build_manifest/compute_range/measure_thresholds",
+      "grading paths do not read claims",
+      "AMENDMENT 1: the 22 pre-existing columns keep their 0.3.0 contract arrow types on a row with values; the six new columns are string",
+      "AMENDMENT 1: an all-absent row types the five value columns double and the six claim columns string; the only null-typed column is tieout_tolerance_proposed (no --tieout), as before"
+    ]
+  }
+}
