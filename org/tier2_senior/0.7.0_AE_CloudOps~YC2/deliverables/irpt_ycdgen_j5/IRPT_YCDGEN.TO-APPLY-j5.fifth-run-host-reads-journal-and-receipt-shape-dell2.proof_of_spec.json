@@ -1,0 +1,190 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "The read states how many journal lines name the request.",
+      "denominator": "exactly 1 REQ_LINES line, and its value is 3; the three REQ lines follow it and are printed, so the count can be checked against the lines themselves rather than taken on trust. Window: 151 journal lines since 2026-10-11 17:05:00, which opens 4m43s before the run's 17:09:43Z submission, so the request's whole life on the host is inside it.",
+      "expect": "^1$",
+      "invocation": "grep -c -E '^REQ_LINES=[0-9]+$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j5/FIFTH_RUN_HOST_READS_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c -E '^REQ_LINES=[0-9]+$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j5/FIFTH_RUN_HOST_READS_20261011.txt\n1\nthe line itself: REQ_LINES=3, followed by its three REQ lines -- EVICTION verdict=SIGNED_OUT 17:09:45, EVICTION verdict=SIGNED_OUT 17:24:48, ATTENTION code=SESSION_REFRESH_ALREADY_USED 17:24:48",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "The read states the receipt's presence or absence.",
+      "denominator": "the criterion is a three-way disjunction and the PRESENT arm fired: 1 RECEIPT line, reading 'RECEIPT present bytes=3824 sha256=c1157ec45071b41e mtime_epoch=1791738604'. The other two arms were live possibilities, not decoration -- ABSENT would have meant no capture ran or it kept nothing, and 'not JSON' would have meant the file exists but cannot be parsed, each printed from its own branch before any field is touched. THE PRESENT ARM IS THE SUBSTANTIVE RESULT: a capture DID run, which is st32's first real exercise, and the file's mtime 1791738604 is 2026-10-11 17:10:04Z, the same second as the journal's retained_for_retry line.",
+      "expect": "^1$",
+      "invocation": "grep -c -E '^RECEIPT (present|ABSENT|not JSON)' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j5/FIFTH_RUN_HOST_READS_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c -E '^RECEIPT (present|ABSENT|not JSON)' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j5/FIFTH_RUN_HOST_READS_20261011.txt\n1\nthe line itself: RECEIPT present bytes=3824 sha256=c1157ec45071b41e mtime_epoch=1791738604",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "The read ran to its end.",
+      "denominator": "1 output file, exactly 1 line equal to END. The truncation detector, and it carries real weight here: END comes after the receipt block, so a read cut off mid-output could drop the CHECK lines and leave a reader with the journal half only -- which would look like a complete read of a run that kept no receipt. It printed one, after 120 LEAF lines. The prepended header is not equal to END.",
+      "expect": "^1$",
+      "invocation": "grep -c '^END$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j5/FIFTH_RUN_HOST_READS_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c '^END$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j5/FIFTH_RUN_HOST_READS_20261011.txt\n1\nmatched line, verbatim: END",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the script's full output with the SSM command id e646ab64-9091-4a94-81c5-e37af35d46ec and the instance id i-0167fd745ad906a66 on its first line, plus this seat's redaction statement: AT, ROOT, ACTIVE, WINDOW, REQ_LINES and its 3 REQ lines, 9 NAMED lines, SIGNIN_LINES and its 4 SIGNIN lines, CHILDREN, QUEUE, 3 FILE lines, RECEIPT, both CHECK lines, LEAVES=120 and its LEAF lines, END",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j5/FIFTH_RUN_HOST_READS_20261011.txt"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~YC2",
+  "compiler_tools": [
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: one read-only command on the resident host; no schedule, trigger or rule is added or read. Checked against the act as executed.",
+      "tool": "comp-schedule"
+    },
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: no IAM change; the command runs under the applier's existing SSM grant on this one instance. Proved by the LIVE call (Status Success, ResponseCode 0). The script's own sqs:GetQueueAttributes read likewise succeeded; no receive.",
+      "tool": "comp-iam"
+    },
+    {
+      "invocation": "the order's named trap, plus an independent review of the leak surface before running",
+      "result": "PASS, and the review found one residual the issuer had already declared. The preflight states the receipt check was run locally on 3 inputs (clean, 4 planted values, absent file) with 0 of 4 planted values printed, and names the trap: quoting the receipt. Before running, this seat read the script's leaf printer and identified the one path by which a VALUE reaches the output -- `shown = s if (CLOSED.fullmatch(s) and not hit)`, where CLOSED is [A-Z][A-Z0-9_]{1,63} -- so a bare upper-case alphanumeric token (base32-shaped) under an innocuously-named key would print verbatim, since KEYBAD tests the KEY and COOKIE and JWT need their own shapes. The issuer declares exactly this in its preflight: a missed value shows as length and hash 'unless it is a closed upper-case token'. So the residual is named, not hidden, and the order puts the final read on this seat -- which is where it belongs. It did not bite: see controls.every_verbatim_printed_leaf_was_inspected_and_none_is_secret_shaped.",
+      "tool": "comp-adversary"
+    },
+    {
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "see the run recorded at close; 3 of 3 criteria PASS",
+      "tool": "proof-of-spec-check.py"
+    }
+  ],
+  "controls": {
+    "every_verbatim_printed_leaf_was_inspected_and_none_is_secret_shaped": {
+      "description": "THE CONTROL THAT MATTERED MOST ON THIS ORDER, because anything the script prints is committed to git and the subject is a sign-in receipt. The script hashes a leaf's value unless it fully matches an upper-case closed-token pattern and trips none of four checks; that whitelist is the single path by which receipt text can reach the repo, and the issuer declares it. So every leaf that printed verbatim was enumerated and read, rather than the count being trusted.",
+      "expected_landed": "every verbatim-printed leaf is a short closed enum; none is long, none carries lower case or punctuation, none is high-entropy",
+      "expected_not_landed": "any verbatim value that could be a credential -- a base32-shaped token, a long opaque string, anything not an enum -- which on a real receipt is a secret committed to git",
+      "observed": "120 LEAF rows: 61 strings shown as length+hash, 43 bool/null/number/list rows, and 16 printed verbatim. The 16 reduce to THREE distinct values: NOT_LIVE (14, the probe_state and probe_reason of steps 1 to 7), AUTH_FAILED (failure_class) and NO_AUTHENTICATED_PROBE (reason). Longest is 22 characters; 0 of the 16 fail the test ^[A-Z][A-Z0-9_]*$. All three are the diagnosis st32 was built to record. NOTHING secret-shaped printed, and the enumeration is on the record so a reader can re-check it rather than take this seat's word.",
+      "status": "PASS"
+    },
+    "the_FOUND_verdict_was_decomposed_rather_than_relayed_as_a_number": {
+      "description": "The order says a FOUND verdict is a finding to report as the four counts. Reported as the bare number 33 it reads as 'the receipt holds 33 secrets', which is false in a way that would have shaped the CTO's condition-2 judgment. The counter's own definition is what separates the readings.",
+      "expected_landed": "the 33 attributed to KEY-NAME matches rather than value matches, the three value-shaped counters read, and the 33 broken out by field name (which the order permits)",
+      "expected_not_landed": "relaying 33 and FOUND without saying what was matched, or quoting any value to make the point",
+      "observed": "posted_value_key=33 increments on KEYBAD.search against the leaf NAME. The three counters that test the VALUE each read 0: cookie_like=0 (name=long-opaque-value), tokenised_url=0 (a URL with a query or fragment), jwt_like=0 (eyJ...). The 33 decompose by name as 25 credential-named fields -- login_submission.password_field, cookie_names[0..9] on both probe arms, session_cookie_names_present[0..1] on both -- and 8 whose names are the probe pair's own arms. All 33 print as length+hash (33 of 33 verified), so the decomposition cost no value.",
+      "status": "PASS"
+    },
+    "the_capture_really_ran_and_three_readings_agree_on_when": {
+      "description": "That a capture ran at all is st32's first exercise and the premise of everything the receipt says. A receipt file existing is not by itself proof that THIS run produced it -- a stale receipt from an earlier capture would look the same.",
+      "expected_landed": "the receipt's mtime, the capture file listing and the journal's own retained_for_retry line agree on a time inside this run's life",
+      "expected_not_landed": "a receipt mtime predating the run, which would mean the file is stale and says nothing about it",
+      "observed": "RECEIPT mtime_epoch=1791738604 = 2026-10-11 17:10:04Z. The FILE listing shows last-capture.receipt.json at 17:10:04Z and last-capture.stderr at 17:10:01Z. The journal's IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:AUTH_FAILED:NO_AUTHENTICATED_PROBE is at 17:10:04 -- the same second as the receipt. All three agree, and all sit between the 17:09:45 eviction and the 17:24:48 attention, so the receipt is THIS run's. A fourth, older capture artifact is also visible and correctly NOT confused with it: capture-20261011T111918Z-00.stderr at 11:19:18Z.",
+      "status": "PASS"
+    },
+    "the_eight_false_positives_were_identified_and_their_cost_stated_as_an_absence": {
+      "description": "KEYBAD contains the bare substring `token`, and the receipt names the two halves of its diagnostic probe with_token_ and without_token_. Any field on either arm therefore flags. That inflates FOUND and, more expensively, hashes values the reader wants.",
+      "expected_landed": "the 8 named exactly, the mechanism stated, and the cost expressed as values NOT read rather than as a guess about what they were",
+      "expected_not_landed": "asserting what the 8 values are, which this read cannot know because the flag hashed them",
+      "observed": "The 8 are probe_pair.with_token_content_type_class, with_token_state, with_token_via, with_token_waf_action_class and the four without_token_ equivalents. Their values are UNREAD. Their names are the shape of closed diagnostic classes and 16 unflagged leaves in the same receipt did print as closed enums, so they would most likely have printed too -- stated as INFERRED from the names, not measured. Filed as row IRPT_YCDGEN-D2-S61 with the cheap fix named (anchor the token test to the last path segment, or exclude the two arm prefixes) and not implemented, because the script is the issuer's.",
+      "status": "PASS"
+    },
+    "the_host_ran_it_rather_than_merely_accepting_it": {
+      "description": "A DELIVERY trap on a host plane: send-command returning a CommandId proves SSM ACCEPTED the request, never that the instance ran it.",
+      "expected_landed": "Status Success, ResponseCode 0, no stderr, the output reaching END",
+      "expected_not_landed": "Pending/Failed/TimedOut, a non-zero ResponseCode, or stderr content",
+      "observed": "ssm e646ab64-9091-4a94-81c5-e37af35d46ec Success rc 0. host_read.py prints no STDERR block and only prints a result once the invocation leaves Pending/InProgress/Delayed. The output's own AT line is stamped by the HOST (2026-10-11T17:53:32Z) and AC3's END proves the script reached its last statement.",
+      "status": "PASS"
+    },
+    "the_hosts_only_write_was_the_scripts_own_temp_file": {
+      "description": "The order allows the script's own temp file and nothing else. This script does write one, unlike the earlier read orders, so the claim is worth measuring rather than restating.",
+      "expected_landed": "one mktemp file under /tmp, used for the journal dump, removed by the script; no other write",
+      "expected_not_landed": "a write anywhere under /opt, or a temp file left behind",
+      "observed": "J=$(mktemp /tmp/j5.XXXXXX), written once by the journalctl redirect, read by six greps and a wc, then rm -f $J before the receipt block. The real directory /opt/investor-reporting-ycharts appears only as H in an ls and as the receipt's path argument -- read, never written. No systemctl verb beyond is-active and show; no sqs receive; no table read; no second request and no retry of anything, as the order requires.",
+      "status": "PASS"
+    },
+    "the_journal_lines_were_read_for_names_before_being_saved": {
+      "description": "The order requires any REQ, NAMED or SIGNIN line naming a person, a client or a security to be replaced with REDACTED <timestamp>, and puts that judgment on this seat before saving or sending.",
+      "expected_landed": "all 16 such lines inspected and found to carry only request ids, verdicts, closed codes and pids",
+      "expected_not_landed": "a person's name, a client or firm name, or a security identifier in any line",
+      "observed": "3 REQ + 9 NAMED + 4 SIGNIN = 16 lines read. Their message bodies are IRPT_RESIDENT_EVICTION verdict=SIGNED_OUT with a job id, IRPT_RESIDENT_ATTENTION code=SESSION_REFRESH_ALREADY_USED, IRPT_RESIDENT_RESOLVE state=READY, IRPT_RESIDENT_POLL handled=1, IRPT_RESIDENT_VENDOR_REQUESTS kept=1, and IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:AUTH_FAILED:NO_AUTHENTICATED_PROBE. The only identifier is the opaque request id the order itself names. 0 lines redacted, and the saved file's header says so.",
+      "status": "PASS"
+    },
+    "the_receipt_and_the_stderr_file_were_opened_by_no_other_command": {
+      "description": "The order is explicit: do NOT open, print, copy or download the receipt or the stderr file by any other command. The temptation is real -- the CHECK verdict read FOUND, and the obvious next move is to look at the file to see how bad it is. That move would have put receipt text into this session and possibly into the repo.",
+      "expected_landed": "the only reader of either file is the issuer's own script, running on the host; every number this seat reports is derived from that script's stdout",
+      "expected_not_landed": "any cat, head, grep, sha256sum, scp or s3 cp of last-capture.receipt.json or last-capture.stderr, on the host or locally",
+      "observed": "Zero such commands were issued. The receipt's bytes, sha256 prefix and mtime come from the script's own RECEIPT line; the file listing comes from its ls block (size, time, name only, by design); every leaf fact comes from its LEAF lines. This seat's own follow-up reads were run against the SAVED OUTPUT in the repo, never against the host files -- and those reads are what produced the verbatim-leaf enumeration and the field-name decomposition above.",
+      "status": "PASS"
+    },
+    "the_window_opens_before_the_submission_so_the_requests_whole_life_is_inside_it": {
+      "description": "A window that opened after the run's submission would miss its acceptance and its first eviction, and the remaining lines would read like the whole story.",
+      "expected_landed": "the window's start precedes the submission time the issuer gave, and the window is printed",
+      "expected_not_landed": "a window opening at or after 17:09:43Z",
+      "observed": "WINDOW since=2026-10-11 17:05:00 lines=151, against a submission at 17:09:43Z -- 4m43s of margin. The host is on UTC (+0000 on every journal line in the output), so the --since literal IS the UTC instant. The first REQ line is 17:09:45, two seconds after submission, which is consistent with the resident picking the message up immediately rather than with a clipped window.",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the CTO half of st32's condition 2 is NOT discharged by this instance",
+      "reason": "condition 2 puts the judgment on a seat reading the first receipt for what it must NOT hold, and the CTO holds that judgment. This read is its mechanical input: it establishes that no VALUE in the receipt matches a cookie, a tokenised URL or a JWT, and that the receipt holds cookie NAMES, a password_field NAME and session cookie names. Whether that content is acceptable is not this seat's call and is not called here."
+    },
+    {
+      "item": "the values of the 8 false-positive leaves, and of the 25 credential-named leaves",
+      "reason": "all 33 print as length and hash by the script's design, so none was read. For the 25 that is the point. For the 8 it is a cost, stated in row IRPT_YCDGEN-D2-S61: their names suggest closed diagnostic classes but this read cannot say what they are."
+    },
+    {
+      "item": "the contents of last-capture.stderr",
+      "reason": "the order forbids opening it, and the script does not. Its existence, size (454 bytes) and mtime (17:10:01Z) are known from the ls block and nothing else is. The older capture-20261011T111918Z-00.stderr is the same size, which is noted and not interpreted."
+    },
+    {
+      "item": "why the sign-in failed, beyond the codes the host printed",
+      "reason": "the run reached AUTH_FAILED / NO_AUTHENTICATED_PROBE with every probe step NOT_LIVE, which is st32's diagnosis firing and recording itself. What that means about the vendor session is IRPT_BCKEND's and the CTO's reading, not this seat's; CTO msg 4917 stands that no seat sends a request down that path until the session failure is read."
+    },
+    {
+      "item": "no queue, table or record was read beyond the script's own get-queue-attributes",
+      "reason": "the bounds forbid a receive or a table read. So this instance says what the RESIDENT did and cannot say what the request's own record now reads."
+    },
+    {
+      "item": "no deploy-completion ledger was opened",
+      "reason": "NEVER-2 binds a confirmed DEPLOY. The write set outside this repo is one temp file the script removed, so there is nothing that could be left half-landed."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R14.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-j5.fifth-run-host-reads-journal-and-receipt-shape-dell2.md",
+    "vintage_commit": "5004cbc9bf"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "NOT REQUIRED AND NOT CLAIMED: this act widens nothing and serves nothing new. A read-only script whose only host write is one temp file it removes -- no served output moved, no IAM or policy change, no queue message received or deleted, no secret read. NEVER-1 binds an act that moves served output; a journal and receipt-shape read is not such an act, which is why the order carries <risk>SERVED</risk>.",
+    "cto_half": "NOT REQUIRED AND NOT CLAIMED, same reason. The authority is the order itself, IRPT_YCDGEN.TO-APPLY-j5 @5004cbc9bf -- verified at the bytes: the working-tree blob 44cbd747060f4ca54f820e13780191fb61cdd473 equals the blob at that commit, which is an ancestor of HEAD -- resting on cell YCD-c-14 of IRPT_YCDGEN_DECOMP_R14.md and on the fifth run's own pair, step 5. SEPARATELY RELEVANT: the st32 release this read exercises WAS installed under a signed pair, and that half's condition 2 is the judgment this read feeds and does not make."
+  },
+  "phase": "INVESTIGATION",
+  "risk_class": "SERVED",
+  "rollback": "NONE NEEDED AND NONE POSSIBLE, stated rather than left blank: the act's only write outside this repo was one /tmp file the script removed. It creates nothing else, modifies nothing and deletes nothing; the real capture directory was read and never written. The only durable effects are this seat's own artifacts in the repo, which git reverts. SEPARATELY, AND IT IS NOW LIVE RATHER THAN THEORETICAL: st32's packet makes a capture, eviction or session-refresh line a ROLLBACK TRIGGER in V1's read -- but V1 is closed and read clean at 16:10Z, and these lines are from a job the issuer deliberately ran afterwards, which is the release's intended first exercise rather than a failed install. This seat does not treat them as a rollback trigger and does not run one: remove_st32_to_st31.sh stays unrun and needs a new word from 2.0.0_SA_COO~G2, and the held order TO-APPLY-x1dry would exercise its library step on copies only.",
+  "schema_version": "1.0",
+  "scope": "ONE read-only script on resident host i-0167fd745ad906a66: what the resident did with request REQ-86a5a08295b65e12749968f9 (TCKT_VNEXT's fifth run, submitted 17:09:43Z), and the SHAPE of the sign-in receipt st32 kept -- with nothing of the receipt quoted but field names, closed tokens, booleans, integers, lengths and hash prefixes. The first real exercise of st32's capture library. Round 14 cell YCD-c-14; the mechanical input to the CTO half of st32's condition 2, whose judgment this instance does not make.",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j5/FIFTH_RUN_HOST_READS_20261011.txt",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-j5.fifth-run-host-reads-journal-and-receipt-shape-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "5004cbc9bf"
+  },
+  "surprises": [
+    "IRPT_YCDGEN-D2-S61: the receipt check's CHECK VERDICT reads FOUND on 33 KEY-NAME matches of which 8 are FALSE POSITIVES -- KEYBAD's bare `token` substring hits the probe pair's own with_token_/without_token_ arm names -- so the verdict overstates the concern AND hashes 8 diagnostic values (state, via, content_type_class, waf_action_class per arm). The three counters that test a VALUE all read 0: cookie_like, tokenised_url, jwt_like. The other 25 are genuinely credential-named fields (password_field, cookie_names on both arms, session_cookie_names_present) whose values are hashed. OBSERVATION, INERT -- the direction is over-redaction and the check fails safe. Cheap fix named, not implemented, because the script is the issuer's. UNDER_INVESTIGATION, disarm_owner 2.0.0_SA_COO~G2. Carrier org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md.",
+    "IRPT_YCDGEN-D2-S51: ANSWERED IN PART by this read, and named because it was this seat's own row. It asked whether the IRPT_RESIDENT_RESOLVE state=READY line is the READY that st30's S5 instruments, since a journal read could not attribute an unlabelled READY. This window carries another RESOLVE state=READY (17:09:31) with no job id, immediately followed by POLL handled=1 -- the same shape as the 11:18:44 line the row is about. So the pattern repeats and the ambiguity is structural rather than a one-off: that line never carries a job id. Still not resolved, and still the issuer's; what would settle it is the print-site read the row names.",
+    "IRPT_YCDGEN-D2-S45: UNCHANGED AND STILL ARMED. No queue was received from, deleted or redriven under this order; the script's only queue call is get-queue-attributes, which read 0 and 0. Named because this read concerns a job that failed and a reader could expect the dead-letter row to have moved."
+  ],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-j5.fifth-run-host-reads-journal-and-receipt-shape-dell2"
+}
