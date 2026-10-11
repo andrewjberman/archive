@@ -6,6 +6,19 @@ objects; nothing written). Run 2026-10-11 ~05:3xZ on dell1.
 
 ## oo-4 / D1-S14 non-US rows -- how many does the identity pool resolve? (CTO ruling, analysis section 2)
 
+> **CORRECTION, 2026-10-11 ~06:0xZ (issuer, `2.0.0_SA_COO~R1`): THE ANSWER BELOW IS SUPERSEDED.** It measured resolution by the
+> scanner's raw ticker and by `<T> US` only. The live decorator `_with_numeric_tickers` (AMGT-av-5) also resolves an all-digit ticker
+> by its Japan code form and by a held company's exact name, and the whole-page read of ROG_SW_Equity showed three such members
+> served MEASURED. Re-measured through the route's own functions (`reads/r90_measure_nonus3.py`, held-name index 107 tokens over
+> 95 held companies): of the 1,816 non-US rows, **769 are all-digit tickers, of which 29 are served today (22 by company name, 7
+> by Japan code)**; of the other **1,047** (SEDOL stems, star-tickers, class-share tickers) **23 name exactly one held company and
+> are not served**. The ceiling the held list allows is 52 of 1,816; 1,764 stay plain-reason rows. **A build cell
+> exists** (`AMGT-oo-4`, decomposition s.98e AMENDMENT 1): extend the same exact-name rule to the 23. It is NOT cut in round 90:
+> the issuance gate refuses a second issuance into a round (row `AMGT_RESAPP-D1-S20`); it is round 91's first cell, check and order
+> drafted. The first read's mistake is the
+> issuer's: it tested one form of the rule and printed a zero beside a denominator that the live code does not use.
+
+
 Scanner: six universes, asOf 2026-10-02 on all six, 2,854 distinct tickers: 1,038 United States alphabetic tickers (the DEMQUE
 request's rows) and 1,816 others. Identity pool: `crosswalk/v1/<latest>` holds **243 records, all MEASURED: 188 under a `US`
 Bloomberg form and 55 non-US** (LN 11, FP 7, JP 7, SW 5, MM 4, HK 3, NA 2, BZ 2, CN 2, IM 2, PM 2, TT 1, IN 1, SM 1).
@@ -21,7 +34,7 @@ Bloomberg form and 55 non-US** (LN 11, FP 7, JP 7, SW 5, MM 4, HK 3, NA 2, BZ 2,
 So "a row the pool resolves gets its currency from the price source on its pool identity" is ALREADY what nn-2 plus
 `price_currency.price_currency_fields` do for the 138 resolvable US rows; for the non-US rows the pool resolves none on its own
 forms and at most 7 after a form is built (a country-to-exchange builder is the parser the ruling refuses). Each non-US member
-already serves its plain reason (`REASON_NO_RECORD`). **No build cell is cut: it would move 0 of 1,816 rows.** The decision this
+already serves its plain reason (`REASON_NO_RECORD`). **(Superseded: see the correction above.)** ~~No build cell is cut: it would move 0 of 1,816 rows.~~ The decision this
 leaves is the CTO's (one message): accept the honest absence for non-US rows, or widen the DEMQUE request once an identifier form
 for the 1,816 is stored. Side finding: 138 of the 1,038 rows in the filed request are held names whose currency is already served.
 
