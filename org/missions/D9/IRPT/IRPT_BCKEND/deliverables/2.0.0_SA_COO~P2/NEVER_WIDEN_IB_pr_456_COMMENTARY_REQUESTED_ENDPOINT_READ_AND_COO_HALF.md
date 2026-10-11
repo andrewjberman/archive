@@ -150,3 +150,42 @@ functions are NOT signed for: this seat recommends they not be released for this
   reads named.
 
 -- 2.0.0_SA_COO~P2
+
+## ADDENDUM 1 (2026-10-11 ~23:1xZ) -- the after-read the CTO ruled, carried into the pair; steps 2 and 3 are WITHDRAWN
+
+On `CTO_RULING_IB_pr_456_SECTION_5_AND_HALF_NOT_YET_SIGNED_20261011.md` @36209e260a (read whole by this seat). The body above is
+kept as written; this addendum governs where the two differ.
+
+- **Section 5's steps 2 and 3 are withdrawn.** The Opal-producer allow list is one principal, Andrew
+  (`resident_worker.py:121`). A submission "by a principal on the allow list" is a submission AS him, which no seat makes; any
+  other principal queues the vendor branch. This seat wrote the two steps without printing that line. Condition 2 of the half
+  (the host-side read before step 2) falls with them; the host-side read itself stands and is asked of `2.0.0_SA_COO~G2`.
+- **The after-read for this release, as ruled** (applier only; no vendor call, no job queued, no identity):
+  1. The digest equals the signed one, and the import census answers `failed: {}`.
+  2. BEFORE the apply, on the live function: a body with a wrong-typed `commentary_requested` is refused as an UNKNOWN member
+     (`UNKNOWN_OR_SERVER_OWNED_FIELD`). AFTER the apply: the same body is refused `COMMENTARY_REQUESTED`, before any write. The
+     two refusals differ, which shows the release took. Neither writes or queues anything.
+  3. A request accepted before the apply reads back unchanged, by `get-item` and through both `irpt-status` routes.
+  4. The replay branch at the pin, offline, as the packet's controls ran it.
+- **WHO MAY INVOKE, read by this seat before writing this line.** The function's resource policy in Terraform admits API
+  Gateway for the route (`infra/aws/terraform/investor-reporting/api/integrations.tf:66-72`, the source ARN narrowed to this
+  project's scoped prefix); the function is also a queue consumer (`ycharts/generate.tf:7`). A DIRECT invoke is decided by the
+  caller's own identity policy: `iam simulate-principal-policy` for this box's applier principal reads
+  `lambda:InvokeFunction` ALLOWED and `lambda:GetFunctionConfiguration` ALLOWED on `irpt-ycharts-generate` (simulated
+  2026-10-11 ~23:0xZ; a simulation, not an invoke). So step 2's two invokes and step 1's census can be made by the dell2
+  applier. NOT read: whether a direct invoke with a constructed event reaches `validate_public_request` before the entry's
+  authorization refuses it. If authorization refuses first, both sides answer the same refusal and step 2 proves nothing: the
+  applier's order reads the entry's order of checks at the pin (`entry.py:97-138`) and constructs the event from that, or
+  reports that the twin cannot discriminate. And `dynamodb:GetItem` on the requests table for the applier was NOT simulated
+  against the table (this seat's simulation named the function's ARN, which says nothing about a table); step 3's `get-item`
+  is simulated on the table's ARN in the apply order before it is relied on.
+- **UNEXERCISED LIVE under this after-read, said as the ruling says it: that the released function ACCEPTS a submission at
+  all.** Acceptance, the copy of the member and the queue send are proven at the pin (the replay's 53 arms, offline) and by
+  the member-by-member diff, and by nothing on the deployed function.
+- **The half is NOT in force as a go.** The CTO half is not signed. The apply waits for (a) Andrew's sitting, whose accepted
+  request is the BEFORE record on the live build, or (b) Andrew's word putting an agent principal on the allow list, after
+  which steps 2 and 3 are made as first written, by that principal, after the host-side read. No apply order is cut on this
+  file. This seat's signature stands for the blast radius of section 7 with condition 1 CLOSED by the ruling, condition 2
+  replaced as above, and conditions 3 and 4 unchanged.
+
+-- 2.0.0_SA_COO~P2
