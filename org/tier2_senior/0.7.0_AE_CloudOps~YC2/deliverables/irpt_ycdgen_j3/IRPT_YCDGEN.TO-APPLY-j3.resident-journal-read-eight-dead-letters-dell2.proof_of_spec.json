@@ -1,0 +1,190 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "The read states how far back the journal reaches.",
+      "denominator": "1 output file; the script emits EXACTLY ONE of the two coverage lines, chosen by comparing the journal's own oldest line for the unit against the window start. THE FULL ARM FIRED, and with 13 days of margin: OLDEST 2026-09-24T09:35:20+0000 against a window opening 2026-10-07T18:00:00+0000. This is the criterion that makes the central result interpretable -- every lines=0 below is scoped by it, and had coverage been PARTIAL the zeros would have been uninterpretable.",
+      "expect": "^COVERAGE (FULL$|PARTIAL from [0-9])",
+      "invocation": "grep -m1 -E '^COVERAGE (FULL|PARTIAL from )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j3/DEAD_LETTER_JOURNAL_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -m1 -E '^COVERAGE (FULL|PARTIAL from )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j3/DEAD_LETTER_JOURNAL_20261011.txt\nCOVERAGE FULL\npreceded in the same file by: OLDEST 2026-09-24T09:35:20+0000 -- 13 days before the window opens, so journal retention explains nothing about the zeros that follow",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "Each of the eight ids has its count line.",
+      "denominator": "8 ids declared by the order, 8 ID lines emitted, and each id is 24 hex characters after REQ- so all eight match the criterion's own shape (checked against the order's list before the send). The script emits one ID line per declared id UNCONDITIONALLY, which is what makes a zero distinguishable from an id that was never looked for -- and all eight read lines=0. THE SUBSTANTIVE RESULT: across WINDOW lines=8535 with COVERAGE FULL, not one of the eight appears. COUNTS ids_declared=8 ids_with_any_line=0 corroborates it from the script's own tally.",
+      "expect": "^8$",
+      "invocation": "grep -c -E '^ID REQ-[0-9a-f]{24} lines=[0-9]+$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j3/DEAD_LETTER_JOURNAL_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c -E '^ID REQ-[0-9a-f]{24} lines=[0-9]+$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j3/DEAD_LETTER_JOURNAL_20261011.txt\n8\nall eight read lines=0, e.g. 'ID REQ-ef7b39c548d08cbb4822f7cc lines=0'; the script's own tally line agrees: COUNTS ids_declared=8 ids_with_any_line=0 retained_lines=40 trace_lines=0 unterminated_traceback=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "The read ran to its end.",
+      "denominator": "1 output file, exactly 1 line equal to END. THIS IS THE TRUNCATION DETECTOR and it carries real weight on this order, which provides for splitting the read into two sends by date if SSM cannot return the output in one answer: every section from WINDOW onward is emitted from awk's END block, so a truncated answer would print no END. It printed one, and the saved file is 6790 bytes -- well under what SSM returns in one answer -- so ONE send sufficed and no split was needed. The prepended header line is not equal to END and cannot inflate the count.",
+      "expect": "^1$",
+      "invocation": "grep -c '^END$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j3/DEAD_LETTER_JOURNAL_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c '^END$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j3/DEAD_LETTER_JOURNAL_20261011.txt\n1\nmatched line, verbatim: END\nsaved file 6790 bytes, 57 lines; one SSM send, no split by date",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the command's full output with the SSM command id 9354a5d3-f754-46da-b1a6-da81e0073eb5 and the instance id i-0167fd745ad906a66 on its first line, plus the one-send note: OLDEST and COVERAGE, the read time and host tz, the WINDOW counts, 8 ID lines with 0 REQ lines, 40 RETAINED lines, 0 TRACE lines, the COUNTS denominator line and END",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j3/DEAD_LETTER_JOURNAL_20261011.txt"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~YC2",
+  "compiler_tools": [
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: one read-only command on the resident host; no schedule, trigger or rule is added or read. Checked against the act as executed -- the command contains two journalctl reads and no write verb of any kind.",
+      "tool": "comp-schedule"
+    },
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: no IAM change; the command runs under the applier's existing SSM grant on this one instance, the grant TO-APPLY-j1 used. Checked against the act as executed, and the grant was proved by the LIVE call (Status Success, ResponseCode 0) rather than by simulate-principal-policy, which has four false-deny modes and one false-allow mode.",
+      "tool": "comp-iam"
+    },
+    {
+      "invocation": "the order's named trap, exercised as a control against a SEEDED input before the host read",
+      "result": "PASS. The order states the trap in words: a line that carries a client's or a security's name, which is why only the worker's own named lines and the CLASS of an exception are printed. Discharged BEFORE the one host read by running the awk program against a seeded journal whose planted traceback ended 'RuntimeError: Acme Family Trust holding NVDA was refused' -- the program emitted 'TRACE 2026-10-08T09:00:06+0000 RuntimeError' and the tokens Acme, Family Trust, NVDA, 'raise RuntimeError' and the frame marker each appeared 0 times in the output while the positive control confirmed they were present in the input. See controls.the_redaction_trap_was_exercised_on_a_seeded_input.",
+      "tool": "comp-adversary"
+    },
+    {
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "see the run recorded at close; 3 of 3 criteria PASS",
+      "tool": "proof-of-spec-check.py"
+    }
+  ],
+  "controls": {
+    "nothing_was_written_to_the_host": {
+      "description": "The bounds say NO WRITE TO THE HOST, and this order adds a specific temptation: if the output were too large it would be natural to buffer it to a file on the host and page it back.",
+      "expected_landed": "journalctl piped straight into awk, no temp file, no redirection to any host path, and the oversize case handled by splitting SENDS rather than by writing on the host",
+      "expected_not_landed": "any file created on the host",
+      "observed": "The command contains two journalctl reads: one piped into head and awk to obtain the unit's oldest line, one piped into awk for the window. The only redirections in the whole script are pipes; no temp path appears in it. The oversize branch was never needed -- the output is 6790 bytes and END is present -- and the order's remedy for it was a second SEND, which also writes nothing. No systemctl start/stop/restart, no sqs receive/delete, no dynamodb call, no secret read, no vendor call.",
+      "status": "PASS"
+    },
+    "the_RETAINED_lines_cannot_be_attributed_to_any_of_the_eight_and_that_is_stated_not_glossed": {
+      "description": "The 40 RETAINED lines are the only material the window offers, and the temptation is to present them as the cause of the eight. They carry no request id -- the order says so itself and asks for them precisely so the ISSUER can match them to an id by time.",
+      "expected_landed": "the lines are reported with their classes and timestamps and NO attribution to any of the eight",
+      "expected_not_landed": "any claim that a given class caused a given dead letter, which this read cannot support",
+      "observed": "All 40 lines reduce to 5 distinct message bodies, every one of the form 'IRPT_RESIDENT_POLL retained_for_retry class=<Class> code=<code>' with no job or request id anywhere in them. The order's own words: these lines carry a class and a closed code and no request id; the issuer matches them to an id by time. No attribution is made here. Their timestamps are preserved in the record so the issuer can do that matching.",
+      "status": "PASS"
+    },
+    "the_host_ran_it_rather_than_merely_accepting_it": {
+      "description": "A DELIVERY trap on a host plane: send-command returning a CommandId proves SSM ACCEPTED the request, never that the instance ran it. SENT is not EMITTED is not READ.",
+      "expected_landed": "Status Success with ResponseCode 0 and no stderr, and the stdout carrying the expected line shapes through to END",
+      "expected_not_landed": "Pending/Failed/TimedOut, a non-zero ResponseCode, or stderr content -- any of which would mean the saved stdout is not a complete reading, and on this order would be indistinguishable from a real absence of the ids",
+      "observed": "ssm 9354a5d3-f754-46da-b1a6-da81e0073eb5 Success rc 0. host_read.py prints no STDERR block, and it only prints a result once the invocation leaves Pending/InProgress/Delayed. The output's own read line is stamped by the HOST (2026-10-11T14:12:21Z), and AC3's END line proves the script reached its own last statement rather than being cut off.",
+      "status": "PASS"
+    },
+    "the_one_read_that_would_sharpen_the_finding_was_NOT_run_and_is_named_instead": {
+      "description": "The finding has a residual ambiguity this read cannot settle, and the honest move is to name it rather than either ignore it or quietly widen the act. The order asks for ONE command over eight NAMED ids; a sweep for any other request id is a different question.",
+      "expected_landed": "the ambiguity stated, the disambiguating read named, and the act kept inside the order's scope",
+      "expected_not_landed": "running an unordered read on this seat's own judgment, or presenting the zeros as settling more than they do",
+      "observed": "NOT RUN: whether the window contains ANY other REQ- token. That one read separates two very different worlds -- the eight were never worked by this resident, versus this worker logs no request id at all in that window, in which case the eight zeros say nothing about the eight. Recommended to 2.0.0_SA_COO~G2 as the next read and carried on row IRPT_YCDGEN-D2-S56. The eight ids themselves were taken verbatim from the order and each verified as 24 hex characters before the send, so a malformed id is excluded as an explanation for its own zero.",
+      "status": "PASS"
+    },
+    "the_redaction_trap_was_exercised_on_a_seeded_input": {
+      "description": "The order's named trap, and the one failure here that could not be undone: a journal line carrying a person, a client or a security committed to the repo. The real journal is a poor test of this -- a clean run proves only that the input was clean -- so the program was run against a journal built to defeat it, before the host read.",
+      "expected_landed": "a seeded traceback whose last line is 'RuntimeError: Acme Family Trust holding NVDA was refused' yields exactly 'TRACE <ts> RuntimeError' and nothing else from that traceback; no frame line and no message text reaches the output",
+      "expected_not_landed": "any part of the text after the colon, or any frame line, reaching the output -- which on a real journal is a client name committed to git",
+      "observed": "TRACE 2026-10-08T09:00:06+0000 RuntimeError -- the class alone, carrying the timestamp of the traceback's LAST line as the order specifies. Token sweep of the output: Acme 0, 'Family Trust' 0, NVDA 0, 'raise RuntimeError' 0, frame marker 0; POSITIVE CONTROL on the same input: Acme 1, NVDA 1. On the real host window the question was moot -- tracebacks=0 and trace_lines=0 -- but that was not knowable before the read, which is the whole reason the control ran first.",
+      "status": "PASS"
+    },
+    "the_resident_was_working_in_that_window_which_is_what_makes_the_absence_mean_something": {
+      "description": "An absence of ids in a window where the service did nothing would be trivial. The finding only has content if the resident was actually handling and refusing work while logging none of the eight.",
+      "expected_landed": "substantive activity in the window, with its refusal classes enumerated and counted rather than summarised",
+      "expected_not_landed": "an idle window, or activity that cannot be characterised, either of which would make the zeros uninformative",
+      "observed": "WINDOW lines=8535 over 47 hours. 40 IRPT_RESIDENT_POLL retained_for_retry lines across FIVE distinct refusal classes, counted: ClientError 10, LayoutRefused 10, RetentionExpired 10, RetentionRefused 5, SubmissionRefused 5. Only the last carries a non-empty code (CLOSED_COMPOSITION_REQUIRED); the other 35 read code=-. Four distinct worker pids appear across the window (622977, 746083, 769840, 777546), so the service restarted during it. So the resident was busy and failing, and still logged none of the eight ids.",
+      "status": "PASS"
+    },
+    "the_saved_file_was_read_before_it_was_saved_and_names_nobody": {
+      "description": "The order's step 3 puts the redaction judgment on this seat: a line naming a person, client or security is replaced with REDACTED <timestamp> and said so in the message. That judgment needs the actual output read, not assumed clean because the program is careful.",
+      "expected_landed": "every saved REQ/RETAINED/TRACE line's message body inspected and found to carry only the worker's own tokens, classes and codes",
+      "expected_not_landed": "a person, client or firm name, or a security identifier, in any saved line",
+      "observed": "40 saved lines reducing to 5 distinct message bodies, all of the form 'IRPT_RESIDENT_POLL retained_for_retry class=<Class> code=<code>'. No name, no identifier, no ticker; not even a job id. 0 lines redacted, and the saved file's header line says so.",
+      "status": "PASS"
+    },
+    "the_window_in_time_is_stated_and_the_tz_assumption_is_measured": {
+      "description": "journalctl's --since and --until are interpreted in the host's LOCAL time while the order specifies UTC instants, and --utc changes only the output. On a non-UTC host the window would be silently shifted -- and a shifted window that happens to miss the eight ids reads exactly like a correct one that misses them.",
+      "expected_landed": "the host's own offset printed in the same command and reading +0000",
+      "expected_not_landed": "any non-zero offset, which would mean the window is not the one the order named and the zeros have a different scope in time than the sentence beside them",
+      "observed": "The record's third line reads: window 2026-10-07 18:00:00 to 2026-10-09 17:00:00 UTC; host tz +0000, printed by date +%z on the host in the same command. Every journal timestamp in the output independently carries +0000, and OLDEST does too. So the --since/--until window IS the UTC window the order specified. This matters more here than on a live read because the window is historical: a one-hour shift could not be caught by anything else in the output.",
+      "status": "PASS"
+    },
+    "the_zeros_are_an_ESTABLISHED_absence_not_an_unread_one": {
+      "description": "THE CONTROL THIS WHOLE INSTANCE TURNS ON. Eight lines reading lines=0 is the single most misreadable output shape there is: it looks identical whether the ids are genuinely absent, the journal does not reach the window, or the matching mechanism is broken. All three had to be closed or the central result says nothing.",
+      "expected_landed": "coverage printed FIRST and reading FULL; the matching mechanism exercised on a seeded input BEFORE the host read; and an in-run demonstration on host data that the same program matches content in that window",
+      "expected_not_landed": "COVERAGE PARTIAL, which would make the zeros uninterpretable; a seeded run where a present id read 0; or a window in which the program matched nothing at all, where the zeros would be consistent with an empty stream",
+      "observed": "(1) RETENTION CLOSED: OLDEST 2026-09-24T09:35:20+0000, COVERAGE FULL, 13 days of margin before the window opens. (2) MECHANISM CLOSED BEFORE THE FACT: the same awk program on a seeded journal carrying two of the eight returned lines=2 and lines=1 for those two, 0 for the other six, printed their lines beneath them, and emitted exactly 8 ID lines matching AC2's own regex. (3) IN-RUN ON HOST DATA: the same single pass matched 40 retained_for_retry lines, so the program was demonstrably matching content in that window rather than reading nothing. All three closed, so the eight zeros are a real absence.",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "no attribution of any RETAINED line to any of the eight ids",
+      "reason": "those lines carry a class and a code and no request id, which the order states and asks for on that basis: the issuer matches them to an id by time. Their timestamps are preserved so that matching is possible, and no attribution is offered here."
+    },
+    {
+      "item": "whether the window contains any OTHER request id",
+      "reason": "the order asks for one command over eight named ids. This is the single read that would sharpen the finding and it was deliberately not run; it is named as the recommended next read instead. Carried on row IRPT_YCDGEN-D2-S56."
+    },
+    {
+      "item": "no queue, table or job record was read, so where else a reason might live is unexamined",
+      "reason": "the bounds forbid a queue or table read. So this instance establishes that the reason is not in the resident journal and says nothing about the job rows, the Lambda side or the queue's own attributes. Row D2-S49 already records that a job can be dead-lettered while its record reads RECEIVED with no reason, so that half is named elsewhere."
+    },
+    {
+      "item": "no exception message, no traceback body, no journal line outside the three named shapes",
+      "reason": "the order's bounds and its comp-adversary line. The consequence is stated rather than implied: if the resident HAD raised in that window this read would give the class and the timestamp and not the reason. In this window it raised nothing -- tracebacks=0, trace_lines=0 -- so nothing was lost to that limit, but that was not knowable before the read."
+    },
+    {
+      "item": "the eight dead letters themselves were not touched",
+      "reason": "the order's bounds and the st31 CTO half's condition 4. No queue was read at all under this order, let alone received from, deleted or redriven. Row D2-S45 stays ARMED and this read leaves its subject exactly as it was."
+    },
+    {
+      "item": "no deploy-completion ledger was opened",
+      "reason": "NEVER-2 binds a confirmed DEPLOY. This act's write set outside this repo is EMPTY -- read-only journal commands, no host write, no S3 put, no service change -- so there is nothing that could be left half-landed."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R13.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-j3.resident-journal-read-eight-dead-letters-dell2.md",
+    "vintage_commit": "3825f1fbd4"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "NOT REQUIRED AND NOT CLAIMED: this act widens nothing and serves nothing new. Read-only journal commands whose write set is empty -- no served output moved, no IAM or policy change, no file created or modified on the host, no queue message received or deleted. NEVER-1 binds an act that moves served output; a journal read is not such an act, which is why the order carries <risk>SERVED</risk> rather than WORLD and why no pair was issued with it.",
+    "cto_half": "NOT REQUIRED AND NOT CLAIMED, same reason. The authority for the act is the order itself, IRPT_YCDGEN.TO-APPLY-j3 @3825f1fbd4 -- verified at the bytes: the working-tree blob 6f9500ce5170497f0d9f4fc291e460d41429b02e equals the blob at that commit, which is an ancestor of HEAD -- resting on cell YCD-a-13 of IRPT_YCDGEN_DECOMP_R13.md and on the CTO round-13 analysis @7fa981f907 section 3 item 1."
+  },
+  "phase": "INVESTIGATION",
+  "risk_class": "SERVED",
+  "rollback": "NONE NEEDED AND NONE POSSIBLE, stated rather than left blank: the act's write set outside this repo is empty. The command reads the unit's journal twice and echoes; it creates no file on the host, moves no served output, receives no queue message and changes no configuration. The only durable effects are this seat's own artifacts in the repo, which git reverts. Nothing on the resident host and nothing in S3 was touched, so the st31 release installed earlier today is unaffected: it remains the running root with its own rollback arm (remove_st31_to_st30.sh, X1 + V2) unrun and still needing a new word from 2.0.0_SA_COO~G2.",
+  "schema_version": "1.0",
+  "scope": "ONE read-only SSM command on resident host i-0167fd745ad906a66: what the irpt-analysis-resident.service journal holds between 2026-10-07 18:00 UTC and 2026-10-09 17:00 UTC for eight dead-lettered generation request ids, as the worker's own named lines and exception CLASSES only, with how far back the journal reaches printed FIRST. Round 13 cell YCD-a-13; the input to the reconciliation packet for the eight dead letters, which this instance does not write.",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j3/DEAD_LETTER_JOURNAL_20261011.txt",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-j3.resident-journal-read-eight-dead-letters-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "3825f1fbd4"
+  },
+  "surprises": [
+    "IRPT_YCDGEN-D2-S56: the resident journal does NOT hold the cause of the eight dead letters, and journal retention is not why. COVERAGE FULL back to 2026-09-24T09:35:20Z (13 days before the window opens) and ZERO of the eight ids appear in 8535 lines across the 47-hour window, with 0 tracebacks. The resident was not idle -- 40 retained_for_retry lines over five classes (ClientError 10, LayoutRefused 10, RetentionExpired 10, RetentionRefused 5, SubmissionRefused 5) -- it logged none of the eight ids. Read with row D2-S49 (a job dead-lettered while its record reads RECEIVED with no reason), that leaves the reason for these eight in no place anyone has looked, which is the hole st31's D1 closes going forward and does nothing for retrospectively. One read would sharpen it and was deliberately NOT run: whether the window holds ANY other REQ- token. OBSERVATION, INERT, UNDER_INVESTIGATION, disarm_owner 2.0.0_SA_COO~G2. Carrier org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md.",
+    "IRPT_YCDGEN-D2-S45: UNCHANGED AND STILL ARMED. This order reads the journal only and touches no queue at all -- no get-queue-attributes, no receive, no delete, no redrive -- so the eight dead letters are exactly as they were. Named because this read is about them and a reader could reasonably expect the row to have moved.",
+    "IRPT_YCDGEN-D2-S49: NOT RE-FILED, named because this read supplies its other half. The row records that a job can fail every delivery and be dead-lettered while its record still reads RECEIVED and holds no reason, 8 of 8 with no ticket_id. This read establishes that the resident journal does not hold the reason either, over a fully covered window. The two together are what make row D2-S56's statement -- the reason is, so far, nowhere -- a measurement rather than a worry."
+  ],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-j3.resident-journal-read-eight-dead-letters-dell2"
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-124",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "61f17b5413",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-124.nine-rows-present-state.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~99",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~99/ROW_STATE.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~99/ROW_STATE.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only record: nine rows each with state, evidence (file and line, or commit), how and reason; the two ARMED rows with disarmed and what_disarms; no S3 write, no AWS call, no code change",
+      "artifact_covered_by": [
+        "DB68-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB68-1-AC1",
+      "criterion_verbatim": "DB68-1-AC1 -- each of the nine rows is read at its present state with evidence, and the two ARMED rows carry whether they are disarmed and by what. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r68/p68_round68.py\" . DB68-1-AC1",
+      "output_evidence": "OK: nine rows read at their present state {'CLOSED_BY_EVIDENCE': 1, 'STILL_OPEN': 8}; the two ARMED rows carry their disarm\nDB68-1-AC1 PASS",
+      "denominator": "9 of 9 row ids covered; 9 of 9 rows carry evidence that names an existing file with an integer line or a hex commit; 2 of 2 ARMED rows carry a boolean disarmed and a what_disarms; exit code 0",
+      "status": "PASS",
+      "expect": "DB68-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record from the worktree root",
+      "observed": "DB68-1-AC1 printed the same last line (PASS) on two further runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB68-1-AC1 FAIL",
+      "observed": "FAIL: no record ROW_STATE.json; DB68-1-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any AWS call; any read of 2.0.0_SA_COO~C2's messages; a re-run of the kit-day DELTA=0 or of the manifest capture on today's producer; a read of the emitted dim row 3 against the other statements it inherits; a body read of any served object",
+      "reason": "Bounds of the order (read-only, tree only, at most single-resource AWS reads where the state lives nowhere else; none was needed). The refresh-2 evidence was read, not re-measured; the re-measure on current bytes is DB-b-126, the row-3 read is DB-b-127."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W99-S1",
+    "IRPT_DASHBD-D2-W99-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p68_round68.py",
+      "invocation": "python org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r68/p68_round68.py . DB68-1-AC1",
+      "result": "DB68-1-AC1 PASS (rc 0); against an empty root it prints DB68-1-AC1 FAIL (rc 1)"
+    }
+  ]
+}
