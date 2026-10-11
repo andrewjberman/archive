@@ -1,0 +1,161 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-f-12.sms-delivery-status-logging",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-12.sms-delivery-status-logging.md",
+  "group": "OTHER",
+  "vintage_commit": "491832d2b2"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FBL",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R3.md",
+  "vintage_commit": "491832d2b2",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-12.sms-delivery-status-logging.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/inf-pipeline/inf-ops-alerts-sms-delivery-status.tf",
+   "kind": "terraform",
+   "commit_or_etag": "d777ef0472",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "scoped safe-apply on the five addresses; post-apply full plan lists only the waived eclipse_jwt_initial create",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3",
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "iam:role/opal-sms-delivery-status-role",
+   "kind": "aws_resource",
+   "commit_or_etag": "arn:aws:iam::313476888478:role/opal-sms-delivery-status-role",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "trust sns.amazonaws.com; one inline policy, five logs actions on the DirectPublishToPhoneNumber* group ARN",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "logs:sns/us-east-1/313476888478/DirectPublishToPhoneNumber and /Failure",
+   "kind": "aws_resource",
+   "commit_or_etag": "retention 14 days",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "describe-log-groups prefix read, both groups 14",
+   "artifact_covered_by": [
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "sns:account SMS preferences",
+   "kind": "aws_resource",
+   "commit_or_etag": "DeliveryStatusIAMRole + sampling 0; MonthlySpendLimit 50 unchanged",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "get-sms-attributes before and after",
+   "artifact_covered_by": [
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261011T1019Z_advi-firmbkts-fb-f-12-sms-delivery-status-logging-20261011_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "5cbdf9bf06",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "entry closed 4 of 4 legs",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3",
+    "AC4"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": ".tools/aws iam get-role --role-name opal-sms-delivery-status-role --query \"Role.AssumeRolePolicyDocument.Statement[0].Principal.Service\" --output text",
+   "method": "command",
+   "invocation": ".tools/aws iam get-role --role-name opal-sms-delivery-status-role --query \"Role.AssumeRolePolicyDocument.Statement[0].Principal.Service\" --output text",
+   "expect": "^sns.amazonaws.com$",
+   "output_evidence": "trust principal of opal-sms-delivery-status-role, read 2026-10-11 ~11:2xZ, printed:\nsns.amazonaws.com",
+   "denominator": "1 of 1 trust statements; the role carries one inline policy and no attached policies",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": ".tools/aws sns get-sms-attributes --region us-east-1 --query \"attributes.DeliveryStatusIAMRole\" --output text",
+   "method": "command",
+   "invocation": ".tools/aws sns get-sms-attributes --region us-east-1 --query \"attributes.DeliveryStatusIAMRole\" --output text",
+   "expect": "^arn:aws:iam::313476888478:role/opal-sms-delivery-status-role$",
+   "output_evidence": "account DeliveryStatusIAMRole, printed:\narn:aws:iam::313476888478:role/opal-sms-delivery-status-role",
+   "denominator": "1 of 1 account-level value; pre-act it was absent",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": ".tools/aws sns get-sms-attributes --region us-east-1 --query \"attributes.DeliveryStatusSuccessSamplingRate\" --output text",
+   "method": "command",
+   "invocation": ".tools/aws sns get-sms-attributes --region us-east-1 --query \"attributes.DeliveryStatusSuccessSamplingRate\" --output text",
+   "expect": "^0$",
+   "output_evidence": "account DeliveryStatusSuccessSamplingRate, printed:\n0",
+   "denominator": "1 of 1; MonthlySpendLimit still 50, byte-equal to the pre-act read; no other attribute set",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": ".tools/aws logs describe-log-groups --log-group-name-prefix sns/us-east-1/313476888478/DirectPublishToPhoneNumber --region us-east-1 --query \"logGroups[0].retentionInDays\" --output text",
+   "method": "command",
+   "invocation": ".tools/aws logs describe-log-groups --log-group-name-prefix sns/us-east-1/313476888478/DirectPublishToPhoneNumber --region us-east-1 --query \"logGroups[0].retentionInDays\" --output text",
+   "expect": "^14$",
+   "output_evidence": "retentionInDays of logGroups[0], printed:\n14",
+   "denominator": "2 of 2 delivery log groups at 14 days (DirectPublishToPhoneNumber and /Failure)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant is named by the order. The difference control is the pre-act read of the same queries: no role, no DeliveryStatusIAMRole, no sampling value, no sns/ log groups (denominator 0), all four read FAIL at base by construction.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "not measured: AC1 to AC4 each read once after the apply",
+   "observed": "not measured",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "aws_secretsmanager_secret_version.eclipse_jwt_initial",
+   "reason": "a pending create in the root that this order does not own; WAIVED by amendment 1; not applied, not read; the post-apply full plan lists exactly it (358 changes, 357 no-op, 1 create)"
+  },
+  {
+   "item": "a delivery test",
+   "reason": "no SMS is sent and nothing is published; the first reason line appears at the next organic failed publish in sns/us-east-1/313476888478/DirectPublishToPhoneNumber/Failure and the CTO reads it"
+  },
+  {
+   "item": "amendment 3's audited override",
+   "reason": "withdrawn by amendment 4; the apply ran with no override after dell1's plan-limb fix @59f114b6d9"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-S13 to S18: the sixth create, the SNS log group names vs the naming gate, the registry lane, the plan-limb refusal, the override that did not exist (all ruled or landed); the first apply created four resources then SetSMSAttributes returned 403 iam:PassRole on the new role, and the same plan continued 3 minutes later with no change of identity and succeeded (cause not proven; simulate allowed, no explicit deny found, IAM propagation likely)"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FBL/evidence_f12/read_backs.txt",
+ "compiler_tools": [
+  {
+   "tool": "terraform 1.15.8 / safe-apply",
+   "invocation": "plan -target x5 -out, show -json, safe-apply of the saved plan (twice: 4 creates, then 1)",
+   "result": "Apply complete 4+1 added, 0 changed, 0 destroyed; naming plan limb PASS 4 graded"
+  },
+  {
+   "tool": "aws iam simulate-principal-policy",
+   "invocation": "iam:PassRole on the new role, PassedToService sns.amazonaws.com, and a control role",
+   "result": "allowed, allowed"
+  }
+ ]
+}
