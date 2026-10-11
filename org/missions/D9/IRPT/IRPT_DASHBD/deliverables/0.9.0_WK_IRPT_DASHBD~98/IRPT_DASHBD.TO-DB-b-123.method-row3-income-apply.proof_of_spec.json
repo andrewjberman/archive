@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-123",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "61f17b5413",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-123.method-row3-income-apply.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~98",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~98/METHOD_ROW3_APPLY.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~98/METHOD_ROW3_APPLY.json",
+      "kind": "config_data",
+      "commit_or_etag": "632852dc3d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the apply record: capture, pre-write diff, write return, head after, served row, diff, mint method-row read, ledger",
+      "artifact_covered_by": [
+        "DB67-1-AC1",
+        "DB67-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-cottonwood/irpt/cottonwood/gold/dim_return_method/method_version=3/data.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "9c774f3770e82ed5e7e6b2a4ebe3e7d3",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head-object after: 11641 bytes, version hcqKO1hmuZIFPMKZrRF6gw7jS0mY4xnU; body read back, income_basis null, claim absent, reason non-empty",
+      "artifact_covered_by": [
+        "DB67-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-cottonwood/irpt/cottonwood/gold/dim_return_method/method_version=3/manifest.json",
+      "kind": "s3_object",
+      "commit_or_etag": "6d5aabdd1e0f3cc9ff2a6c544bd327fd",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head-object after: 2037 bytes, version 9mFo70MiWTNgg3u8xC24yvm3pmOsxQw6 (head only; body not re-read)",
+      "artifact_covered_by": [
+        "DB67-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB67-1-AC1",
+      "criterion_verbatim": "DB67-1-AC1 -- both keys are captured outside the repo with their hashes, bucket versioning is read, and the ledger entry was opened before the write. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r67/p67_round67.py\" . DB67-1-AC1",
+      "output_evidence": "OK: both keys captured outside the repo with their hashes; bucket versioning Enabled; ledger irpt-dashbd-db-b-123-method-row3-income-20261011 opened before the write; branch A_WRITTEN\nDB67-1-AC1 PASS",
+      "denominator": "2 of 2 keys captured with sha256, size, ETag (as listed) and saved_path outside the repo; 1 of 1 bucket versioning read; ledger opened at f7fd3b0503 before the write; exit code 0",
+      "status": "PASS",
+      "expect": "DB67-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB67-1-AC2",
+      "criterion_verbatim": "DB67-1-AC2 -- either the two keys are written, only the three income members moved, the served row states income absent, the mint's verify still matches and the ledger is closed; or the act stopped before the write with nothing written, a reason and a row. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r67/p67_round67.py\" . DB67-1-AC2",
+      "output_evidence": "OK: two keys written; three income members changed and no other column; the served row states income absent; the mint's verify still matches; ledger closed\nDB67-1-AC2 PASS",
+      "denominator": "2 of 2 keys written by one emit_method_row call; 3 of 31 columns changed, 0 of 28 others moved (measured_at excluded); served row read back from S3; mint method-row read method_row=match; ledger 3 of 3 legs closed; exit code 0",
+      "status": "PASS",
+      "expect": "DB67-1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record at HEAD",
+      "observed": "DB67-1-AC2 printed the same last line on two further reads",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB67-1-AC2 FAIL",
+      "observed": "FAIL: no record; DB67-1-AC2 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any S3 read beyond head/get on the two keys, get-bucket-versioning and list-object-versions on the exact prefix; the mint's full verify_served (reads every day key); a 49 Financial method row; Lambda, Terraform, IAM",
+      "reason": "Bounds of the order; the mint's method-row read was performed alone, the day keys were not read."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open / close-leg x3 / close for irpt-dashbd-db-b-123-method-row3-income-20261011",
+      "result": "OPENED (3 legs) at f7fd3b0503 before the write; all 3 legs proven; CLOSED"
+    }
+  ]
+}

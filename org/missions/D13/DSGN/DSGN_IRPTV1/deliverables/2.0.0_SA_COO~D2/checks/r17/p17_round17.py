@@ -7,8 +7,10 @@ once, playwright-core, the calendar's provenance). Nothing is cut for the Perfor
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
   IV95-AC1  ~53/TEST_REPAIRS.json: excused_sets has two entries, each {test_file, excused_by_name (non-empty list of route names),
             mutant {what, failed true}}; regold has the IVE115 and IVE69 ids, each DONE (with ruling, before, after) or STOPPED (row).
-  IV95-AC2  the same record's smoke_map: keys == 22; excused is exactly two {route, reason}; pins_followed non-empty [{file, before,
-            after}]; producer_pin {file, outcome PLACED, owner}.
+  IV95-AC2  the same record's smoke_map (AMENDMENT 1): routes_declared == 22; excused is the MEASURED set of routes with no producer
+            fixture, each {route, reason, searched}, at most 2 of them; keys == routes_declared minus the excused count; every entry's
+            body is sourced [{route, source}] from a producer fixture, one per key; pins_followed non-empty [{file, before, after}];
+            producer_pin {file, outcome PLACED, owner}.
   IV95-AC3  the same record's newline_pins {files_searched > 0, found, fixed == found}; suite_after.new_failing_ids == []; portal_commit hex.
   IV96-AC1  ~53/HOLDINGS_FACE.json: behaviour {test_id, passes true, mutant {what, failed true}}; default_view_before and
             default_view_after non-empty and different; product_files_changed non-empty; suite_after.new_failing_ids == []; portal_commit hex.
@@ -77,13 +79,20 @@ def main():
         sm = load("TEST_REPAIRS.json").get("smoke_map") or {}
         ex = sm.get("excused") or []
         pp = sm.get("producer_pin") or {}
-        if sm.get("keys") != 22 or len(ex) != 2 or any(not text(x.get("route")) or not text(x.get("reason")) for x in ex):
-            fail("smoke_map keys %r with %d excuse(s), want 22 and exactly two named" % (sm.get("keys"), len(ex)))
+        if sm.get("routes_declared") != 22 or len(ex) > 2 or any(not text(x.get("route")) or not text(x.get("reason")) or not text(x.get("searched")) for x in ex):
+            fail("smoke_map routes_declared %r with %d excuse(s): want 22 declared and at most two measured excuses, each with route, reason and searched"
+                 % (sm.get("routes_declared"), len(ex)))
+        if sm.get("keys") != 22 - len(ex):
+            fail("smoke_map keys %r, want %d (22 declared minus %d excused)" % (sm.get("keys"), 22 - len(ex), len(ex)))
+        src = sm.get("sourced") or []
+        if len(src) != sm["keys"] or any(not text(x.get("route")) or not text(x.get("source")) for x in src)                 or set(text(x.get("route")) for x in src) & set(text(x.get("route")) for x in ex):
+            fail("sourced lists %d entr(ies) for %d key(s), or names an excused route" % (len(src), sm["keys"]))
         if not sm.get("pins_followed") or any(not text(x.get("file")) or "after" not in x for x in sm["pins_followed"]):
             fail("pins_followed missing")
         if not text(pp.get("file")) or pp.get("outcome") != "PLACED" or not text(pp.get("owner")):
             fail("producer_pin %r" % pp)
-        print("OK: the smoke map at 22 keys, two routes excused by name, %d pin(s) followed, the producer's pin placed" % len(sm["pins_followed"]))
+        print("OK: the smoke map at %d keys of 22 declared routes, %d excused by name, every body sourced, %d pin(s) followed, the producer's pin placed"
+              % (sm["keys"], len(ex), len(sm["pins_followed"])))
     elif cid == "IV95-AC3":
         r = load("TEST_REPAIRS.json")
         n = r.get("newline_pins") or {}
