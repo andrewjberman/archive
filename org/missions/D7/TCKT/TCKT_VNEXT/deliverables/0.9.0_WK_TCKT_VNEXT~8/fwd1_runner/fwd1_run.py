@@ -734,6 +734,45 @@ def request_id_from_answer(res):
     return None
 
 
+REFUSAL_STATE = "UNAVAILABLE"   # _authz/served.py:183 -- the state served.refuse() stamps; QUEUED is an acceptance
+
+
+def _clip(v):
+    return v[:60] if isinstance(v, str) else None
+
+
+def submission_answer_facts(res):
+    """What hop (d) keeps of the submission answer (AMENDMENT 6, J3): the top-level keys, the keys of `data`, the keys
+    of `status`, status.state, status.public_reason_code and the HTTP status. Key NAMES and those two strings only:
+    no value of `data` beyond the request id. -> (facts, identity_request_id_or_None, state_or_None)."""
+    p = res.get("parsed") if isinstance(res.get("parsed"), dict) else {}
+    data = p.get("data") if isinstance(p.get("data"), dict) else None
+    st = p.get("status") if isinstance(p.get("status"), dict) else None
+    ident = data.get("identity") if isinstance(data, dict) else None
+    rid = ident.get("request_id") if isinstance(ident, dict) else None
+    rid = rid if isinstance(rid, str) and REQ_ID.fullmatch(rid) else None
+    state = _clip(st.get("state")) if st else None
+    facts = {"http_status": res.get("status"), "answer_keys": sorted(p), "data_keys": sorted(data) if data is not None else None,
+             "status_keys": sorted(st) if st is not None else None, "status_state": state,
+             "status_public_reason_code": _clip(st.get("public_reason_code")) if st else None}
+    return facts, rid, state
+
+
+def submission_refusal(res, state):
+    """The reason the submission answer is a REFUSAL, or None when it is not one (AMENDMENT 6, J2). A refusal is
+    decided by STATE and HTTP status, never by the presence of a public reason code: a successful submission answers
+    status.state QUEUED beside the public reason NOT_READY (ycharts/generate/entry.py:130-137). Refused when the HTTP
+    status is not 2xx, status.state is the refusal state (served.py:183), or the body is the refusal shape
+    (`ok: false`, served.refuse(), served.py:476)."""
+    status = res.get("status")
+    parsed = res.get("parsed") if isinstance(res.get("parsed"), dict) else {}
+    if not (isinstance(status, int) and 200 <= status < 300):
+        return refusal_of(res) or "HTTP_%s" % status
+    if state == REFUSAL_STATE or parsed.get("ok") is False:
+        return reason_of(parsed) or "STATE_%s" % (state or "UNKNOWN")
+    return None
+
+
 def hop_d_analysis(token, tkt, input_id, file_sha, d, named, idem_token=None):
     """POST the submission; return the SERVICE's REQ id or None. The value SENT as request_id is an idempotency
     token: it is traced as `idempotency_token` and never polled, recorded on a ticket or written as request_id.
@@ -754,15 +793,21 @@ def hop_d_analysis(token, tkt, input_id, file_sha, d, named, idem_token=None):
                 "report_title": "[TEST TCKT_VNEXT FWD-1] seat arm",
                 "prepared_for": HOUSEHOLD, "input_id": input_id, "ticket_id": tkt})
     d["status"], d["request_id"] = res["status"], None
-    why = refusal_of(res)
+    facts, identity_rid, state = submission_answer_facts(res)
+    d.update(facts)
+    why = submission_refusal(res, state)
     if why:
         d["refused_reason"], d["result"] = why, "BRANCH_E_SUBMISSION_REFUSED"
         named.append({"hop": "d_analysis", "status": res["status"], "reason": "BRANCH_E_SUBMISSION_REFUSED", "code": why,
                       "note": ("the submission was refused (any HTTP status); not retried, no second submission with "
                                "another token; (e)-(g) and both arms are UNREACHABLE; cleanup follows")})
         return None
-    rid = request_id_from_answer(res)
+    rid = identity_rid or request_id_from_answer(res)
     d["request_id_source"] = "submission_answer" if rid else None
+    if identity_rid:
+        # ACCEPTED (J2): an identity id and a state that is not the refusal state. The public reason beside a QUEUED
+        # state (NOT_READY) is the service's "accepted, awaiting dispatch", recorded, never read as a refusal.
+        d["accepted_reason"], d["accepted_state"] = d.get("status_public_reason_code"), state
     if not rid:
         ok, rows, list_why = list_requests(token)
         fresh = {}
@@ -772,6 +817,17 @@ def hop_d_analysis(token, tkt, input_id, file_sha, d, named, idem_token=None):
                 fresh[v] = r["accepted_at"]
         d["candidates"] = len(fresh) if (ok and base_ok) else None
         if not (ok and base_ok) or len(fresh) != 1:
+            if state is not None:
+                # a status envelope with a non-refusal state and no usable REQ id under data.identity: the runner
+                # cannot read the service's answer. NOT a refusal by the service (J2).
+                d["result"] = "SUBMISSION_ANSWER_UNREADABLE"
+                named.append({"hop": "d_analysis", "status": res["status"], "reason": "SUBMISSION_ANSWER_UNREADABLE",
+                              "candidates": d["candidates"], "state": state,
+                              "note": ("the answer is not a refusal (state %s) and carries no REQ id under data.identity; "
+                                       "the request list gave %s candidate row(s). A failure of the runner's reading, "
+                                       "not a refusal by the service; (e)-(g) depend on the id"
+                                       % (state, d["candidates"]))})
+                return None
             named.append({"hop": "d_analysis", "status": res["status"], "reason": "REQUEST_ID_UNRESOLVED",
                           "candidates": d["candidates"],
                           "note": ("the answer carried no REQ id; the request list gave %s candidate row(s) "
