@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-23.module-put-deny-only",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-23.module-put-deny-only.md",
+    "group": "OTHER",
+    "vintage_commit": "a5637f273f"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~45",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "a5637f273f",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-23.module-put-deny-only.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant. Negative controls measured here: the five refusal arms of r4_modput.py (PutObjectAcl, DeleteObject, PutObjectTagging, s3:* and a grants row naming PutObject) and the Put-only arm that asserts no Allow statement is rendered.",
+      "expected": "Each refusal arm refuses at plan (rc non-zero); the Put-only row renders zero Allow statements; the real registry renders identically to base.",
+      "observed": "P4 refused 5 of 5 (no NOT REFUSED line printed); P3 put-only row allow=[] and allow action list ['s3:GetObject'] for the Get+Put row; P1 real registry identical in base and tree=True. Builder probe on a scratch registry copy: [s3:PutObjectAcl], [s3:DeleteObject] and [s3:*] each refused by validate() at the 'closed scoped set' refusal; [s3:GetObject, s3:PutObject] and [s3:PutObject] each returned 0 errors.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 run twice on the same final code bytes (commit 8114bac9cf); outputs compared line for line",
+      "observed": "Both runs print identical arm lines: P1 identical=True; P2 deny sids ['DenyScopedExemption1AnyOtherAction', 'DenyScopedExemption1ObjectsOutsidePrefix']; P3 allow actions ['s3:GetObject'] and put-only allow []; refused 5 of 5; P5 rc=0; ROUND 4 MODULE PUT: 5 of 5 arms; exit=0. Second run saved at .scratch/ac1_run2.txt (scratch only).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any apply, any AWS call, any consumer root, any registry row change",
+      "reason": "Bounds 2 items 1 and 4: repository files only. infra/logic/registry is untouched; the real registry's Deny and Allow outputs are identical to base (AC1 P1). Nothing is applied."
+    },
+    {
+      "item": "The real registry gaining a PutObject row",
+      "reason": "Dormant by spec (1a item 5): the real registry names no write action, so no PutObject row is added. The module and builder accept the action; no bucket changes."
+    },
+    {
+      "item": "The .terraform directory and .terraform.lock.hcl created by terraform init",
+      "reason": "Bounds 2 item 2: kept out of the commit. Both are gitignored; the commits name paths explicitly and git status shows neither."
+    },
+    {
+      "item": "The nested portal submodule (git status shows ' M portal')",
+      "reason": "A gitlink already dirty in this worktree before this work; not this worker's edit; not staged or committed."
+    },
+    {
+      "item": "generated_locals.tf and tests/ in the module folder",
+      "reason": "Not in the order's paths. generated_locals.tf carries no scoped-action list; tests/ is unchanged and terraform test passes 48 of 48."
+    },
+    {
+      "item": "A session-level check of how S3 evaluates the Deny and Allow statements together",
+      "reason": "Blindness recorded in the order's preflight: terraform console and terraform plan over a mirror tree cannot see S3 policy evaluation. Not claimed here."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/modules/opal_name/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "8114bac9cf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit 8114bac9cf on wk-ADVI_FIRMBKTS-45: fence_scoped_allowed and fence_scoped_object_actions gain s3:PutObject (Deny side only); the fence_exemption_arns precondition text lists PutObject. No apply.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_naming.py",
+      "kind": "script",
+      "commit_or_etag": "8114bac9cf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit 8114bac9cf: validate() scoped_actions gains s3:PutObject; the refusal wording reads 'closed scoped set'. validate() on the real registry: VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s), rc=0.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "a85062afca",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two appended rows ADVI_FIRMBKTS-D1-W45-S1 and ADVI_FIRMBKTS-D1-W45-S2; surprise-row-gate OK on 2 new rows (189 pre-existing not re-graded); 48 insertions, 0 deletions.",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 compares the base and tree over the real registry (both outputs identical), a Get+Put fixture (the Deny carries both actions), a Put-only fixture (no Allow) and five refusals.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-45 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_modput.py --arms put --root /c/dev/wk-firmbkts-45; echo \"exit=$?\"",
+      "output_evidence": "  P1 real registry identical in base and tree=True\n  P2 deny sids=['DenyScopedExemption1AnyOtherAction', 'DenyScopedExemption1ObjectsOutsidePrefix']\n  P3 allow actions=['s3:GetObject']; put-only row allow=[]\n  refused 5 of 5\n  P5 real registry plan rc=0\nPASS P1 the real registry renders identically (Deny and Allow)\nPASS P2 a Get+Put row renders both actions on the Deny side\nPASS P3 no Allow is ever rendered for a write action\nPASS P4 PutObjectAcl, DeleteObject, PutObjectTagging, s3:* and a grants Put are refused\nPASS P5 the real registry plans clean in the tree's module\nROUND 4 MODULE PUT: 5 of 5 arms\nexit=0",
+      "denominator": "5 of 5 arms PASS; 5 of 5 refusals refused; real registry plan rc=0; real registry identical to base",
+      "status": "PASS",
+      "expect": "ROUND 4 MODULE PUT: 5 of 5 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the module's own tests, run after terraform init -backend=false: terraform test passes unchanged.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-45/infra/aws/terraform/modules/opal_name && timeout 100 terraform init -backend=false -input=false -no-color > /dev/null && timeout 100 terraform test -no-color 2>&1 | tail -n 3",
+      "output_evidence": "tests\\opal_name.tftest.hcl... pass\n\nSuccess! 48 passed, 0 failed.",
+      "denominator": "48 of 48 terraform tests passed (base 48)",
+      "status": "PASS",
+      "expect": "Success! \\d+ passed, 0 failed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound: every changed path lies inside the four granted paths and the required module file changed.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-45 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-45 --allow infra/aws/terraform/modules/opal_name/main.tf --allow lib/opal_naming.py --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~45/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/modules/opal_name/main.tf; echo \"exit=$?\"",
+      "output_evidence": "  CHANGED infra/aws/terraform/modules/opal_name/main.tf\n  CHANGED lib/opal_naming.py\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~45/ADVI_FIRMBKTS.TO-FB-g-23.session.log.txt\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md\nROUND 4 SCOPE: OK 4 changed, 0 outside, 0 required missing\nexit=0",
+      "denominator": "4 changed files, 0 outside the grant, 1 of 1 required path changed",
+      "status": "PASS",
+      "expect": "ROUND 4 SCOPE: OK"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W45-S1: the pre-commit risk reflex printed HOLD on infra/aws/terraform/modules/opal_name/main.tf by basename match (repeat of W42-S1 and W43-S1); commit 8114bac9cf landed rc=0 (OBSERVATION, INERT)",
+    "ADVI_FIRMBKTS-D1-W45-S2: safe-commit printed WARN that the client-data check could not run (hashed account-id list absent on dell1); a repeat of W43-S2 (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~45/ADVI_FIRMBKTS.TO-FB-g-23.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "lib/opal_naming.py validate (builder, real registry)",
+      "invocation": "python lib/opal_naming.py validate",
+      "result": "VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s) at registry@662da514555cbfae over all 15 registry file(s); rc=0."
+    },
+    {
+      "tool": "lib/opal_naming.py validate (builder, fixture rows on a scratch registry copy)",
+      "invocation": "python -c \"import opal_naming as o; o.validate(reg_dir='.scratch/reg_neg')\" with one appended exemptions row per case",
+      "result": "[s3:GetObject, s3:PutObject] with an exact-ARN principal: 0 errors; [s3:PutObject]: 0 errors; [s3:PutObjectAcl], [s3:DeleteObject], [s3:*]: refused with 'a non-empty list drawn from the closed scoped set'. The real registry copy was not written (the scratch file was restored byte-identical)."
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~45 <0.9.0_WK_ADVI_FIRMBKTS~45@opal.agent>\" -F .scratch/msg_code.txt -- infra/aws/terraform/modules/opal_name/main.tf lib/opal_naming.py",
+      "result": "8114bac9cf (2 files, 11 insertions, 7 deletions); commit-gate All checks passed; naming-gate PASS 0 graded; msg-verify MATCH. Second commit a85062afca (surprise rows W45-S1 and W45-S2) surprise-row-gate OK on 2 new rows."
+    }
+  ]
+}
