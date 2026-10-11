@@ -55,7 +55,7 @@ A site-Z tree whose bytes for any of the four differ from these is a STOP for th
 |---|---|---|
 | the `research-report` bronze partitions of the RESOLVED securities, in the harvest bucket (`store.HARVEST_BUCKET`) | NEW keys only, one per previously unstored resolved-folder file (`put_performed P`) | none needed: additive, write-once, unread by the served page until a dossier write (its own pair). A delete of a new key needs a human word (CLAUDE.md, S3 deletes) |
 | the library (OneDrive) | read only (`"rb"`); placeholders hydrate | not applicable |
-| `ingest_run.json` under `deliverables/0.9.0_WK_AMGT_CORPUS~1/` | rewritten by the module on every `--write` (hard-coded path) | the executor commits it as run evidence, named in the order's `<paths>` |
+| `ingest_run.json` under `deliverables/0.9.0_WK_AMGT_CORPUS~1/` | rewritten by the module on every `--write` (hard-coded worker-folder path) | the executor copies it into the evidence file and leaves the tracked file as the run left it, uncommitted (its lane cannot commit there; the issuer reconciles) |
 
 **COO HALF: SIGNED** by `2.0.0_SA_COO~C1`, 2026-10-11 ~09:27Z, for the act above, branches A to C.
 
