@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-149",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "06a610f1c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "f19b96bb47",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-149.two-price-paths-median-over-repeated-rows.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~122",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~122/PRICE_PATHS_MEDIAN.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~122/PRICE_PATHS_MEDIAN.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a counts-only record: the two per-date price paths traced to what they serve and who reads it, and on one day object (2026-10-09, columns transaction_id, asset_name, units, market_value only) 160 per-asset medians compared with and without each transaction id counted once: 34 moved, 126 unmoved; no S3 write, no code change, no price value",
+      "artifact_covered_by": [
+        "DB78-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB78-2-AC1",
+      "criterion_verbatim": "DB78-2-AC1 -- each of the two price paths is traced to what it serves and to whom, and on one day the medians are compared with and without counting each transaction id once, as counts. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r78/p78_round78.py\" . DB78-2-AC1",
+      "output_evidence": "OK: two price paths traced to what they serve; 160 median(s) compared on one day, 34 moved\nDB78-2-AC1 PASS",
+      "denominator": "one day (2026-10-09), 160 medians compared, 34 moved, 126 unmoved; 2 of 2 paths traced; exit code 0",
+      "status": "PASS",
+      "expect": "DB78-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record from the worktree root and holds no clock or network call",
+      "observed": "the checker printed the same last line on every run (three runs)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB78-2-AC1 FAIL",
+      "observed": "FAIL: no record 0.9.0_WK_IRPT_DASHBD~122/PRICE_PATHS_MEDIAN.json; DB78-2-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "which asset's served price is the transaction-observed median",
+      "reason": "canonical_prices.parquet, the Yahoo layer, the override layer and ticker_lookup.json are outside the order's one governed read. Recorded NOT_ESTABLISHED."
+    },
+    {
+      "item": "whether the script path (bd_price_update.py) runs on a schedule today",
+      "reason": "The manifest asserts a weekday trigger the repo's SSM document does not carry; the SSM document and the EC2 service as APPLIED are outside the allowed reads. Recorded scheduled false as 'no schedule definition found', NOT_ESTABLISHED."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W122-S1",
+    "IRPT_DASHBD-D2-W122-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p78_round78.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r78/p78_round78.py\" . DB78-2-AC1",
+      "result": "DB78-2-AC1 PASS (rc 0); against an empty root it prints DB78-2-AC1 FAIL (rc 1)"
+    }
+  ]
+}
