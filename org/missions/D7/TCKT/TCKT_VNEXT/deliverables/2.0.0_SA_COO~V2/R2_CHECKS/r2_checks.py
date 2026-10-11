@@ -7,6 +7,7 @@
   rn-safety     R2-rn1-AC5  (AMENDMENT 2) token expiry, rollback order, zero-call control, the irpt-status precheck
   rn-arms       R2-rn1-AC6  (AMENDMENT 2) the report-route arms, the old test ticket, the trace header
   rn-trace      R2-rn1-AC7  (AMENDMENT 3) the trace path is an argument; the stream denominator is measured
+  rn-zero       R2-rn1-AC8  (AMENDMENT 4) the zero-call verdict rule as the CTO ruled it (msg 4164)
   rr-shape      R2-rr1-AC1  the report route stores a well-formed REQ id and refuses a malformed one with a typed code
   ts-guard      R2-ts1-AC1  by default no ticket_center test can reach a real SES send or a real users-table read
   pg-open       R2-pg1-AC1  (needs --portal <dir>) the ticket's Open report reads the finished report; a stated waiting state
@@ -43,7 +44,9 @@ NAMED = {
                                "test_old_test_ticket_is_closed_in_the_same_run", "test_trace_header_names_this_run_not_round_one"]),
     "rn-trace": (RUNNER_TESTS, ["test_trace_out_is_required_and_is_the_only_file_written",
                                 "test_no_round_one_trace_path_remains", "test_stream_denominator_is_streams_active_in_the_window",
-                                "test_zero_active_streams_is_void"]),
+                                "test_zero_active_streams_alone_is_not_void"]),
+    "rn-zero": (RUNNER_TESTS, ["test_group_with_no_streams_at_all_is_void", "test_group_not_describable_is_void",
+                               "test_control_without_the_filer_is_void", "test_zero_read_records_three_numbers"]),
     "rr-shape": (TC_TESTS / "test_report_ref_shape.py", ["test_well_formed_request_id_stored", "test_malformed_request_id_refused_typed",
                                                          "test_sent_token_shape_refused", "test_refusal_writes_nothing"]),
     "ts-guard": (TC_TESTS / "test_no_real_aws.py", ["test_ses_send_is_guarded_by_default", "test_users_table_read_is_guarded_by_default",
