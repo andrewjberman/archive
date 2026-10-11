@@ -4,6 +4,8 @@
   rn-stage      R2-rn1-AC2  the runner reads the contract field `stage`, bounded, and records a terminal stage as a result
   rn-ticket     R2-rn1-AC3  the runner records a REQ id on the ticket and opens the report from the ticket's report_ref
   rn-report     R2-rn1-AC4  (AMENDMENT 1) hops (e) and (g) read the finished-report route; not-ready codes polled, bounded
+  rn-safety     R2-rn1-AC5  (AMENDMENT 2) token expiry, rollback order, zero-call control, the irpt-status precheck
+  rn-arms       R2-rn1-AC6  (AMENDMENT 2) the report-route arms, the old test ticket, the trace header
   rr-shape      R2-rr1-AC1  the report route stores a well-formed REQ id and refuses a malformed one with a typed code
   ts-guard      R2-ts1-AC1  by default no ticket_center test can reach a real SES send or a real users-table read
   pg-open       R2-pg1-AC1  (needs --portal <dir>) the ticket's Open report reads the finished report; a stated waiting state
@@ -33,6 +35,11 @@ NAMED = {
     "rn-report": (RUNNER_TESTS, ["test_hop_e_reads_the_report_route_never_stage", "test_not_ready_code_is_polled_within_the_bound",
                                  "test_bound_reached_is_not_ready_never_a_pass", "test_other_refusal_code_is_terminal",
                                  "test_hop_g_reads_the_report_for_the_ticket_request_id"]),
+    "rn-safety": (RUNNER_TESTS, ["test_token_exp_is_the_argument_and_capped", "test_row_is_deleted_only_after_exp",
+                                 "test_tickets_are_completed_before_the_row_is_touched", "test_zero_call_read_is_void_on_zero_streams",
+                                 "test_zero_call_read_needs_its_positive_control", "test_irpt_status_sha_mismatch_is_a_stop_before_any_write"]),
+    "rn-arms": (RUNNER_TESTS, ["test_malformed_report_id_arm_expects_typed_400", "test_issued_id_refused_by_report_route_is_branch_b",
+                               "test_old_test_ticket_is_closed_in_the_same_run", "test_trace_header_names_this_run_not_round_one"]),
     "rr-shape": (TC_TESTS / "test_report_ref_shape.py", ["test_well_formed_request_id_stored", "test_malformed_request_id_refused_typed",
                                                          "test_sent_token_shape_refused", "test_refusal_writes_nothing"]),
     "ts-guard": (TC_TESTS / "test_no_real_aws.py", ["test_ses_send_is_guarded_by_default", "test_users_table_read_is_guarded_by_default",
