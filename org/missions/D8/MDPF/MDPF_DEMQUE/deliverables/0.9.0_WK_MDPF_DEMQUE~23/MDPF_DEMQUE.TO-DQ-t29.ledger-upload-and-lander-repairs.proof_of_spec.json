@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t29",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t29.ledger-upload-and-lander-repairs.md",
+    "group": "OTHER",
+    "vintage_commit": "ba3ee9bd48"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "ba3ee9bd48",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t29.ledger-upload-and-lander-repairs.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~23",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_ledger_upload.py",
+      "kind": "script",
+      "commit_or_etag": "27e8ae878a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-MDPF_DEMQUE-23 only (safe-commit, naming and commit gates clean for this file). The order bounds out any deploy; no served path imports this file in this order.",
+      "artifact_covered_by": ["DQ8-t29-AC1"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_bbg_ledger_upload.py",
+      "kind": "test",
+      "commit_or_etag": "27e8ae878a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed with its producer. test_reads_record_lines_and_converts_rows_to_cells_per_mode is unedited and PASSED; test_name_to_literal_assignment_is_resolved_before_literal_eval is new and PASSED.",
+      "artifact_covered_by": ["DQ8-t29-AC1"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/land_cot.py",
+      "kind": "script",
+      "commit_or_etag": "2e88e042c3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-MDPF_DEMQUE-23 only, through the naming gate with no override (WARN 1 on the pre-existing s3 template line, no refusal). Keys derived as the consumer derives them, per issuer amendment 84806f465f. Import no longer raises SystemExit (COLLECT-OK n=98 land=7).",
+      "artifact_covered_by": ["DQ8-t29-AC1", "DQ8-t29-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_land.py",
+      "kind": "test",
+      "commit_or_etag": "2e88e042c3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed with land_cot.py. test_consumer_keys_resolve_through_the_registry_legacy_rows PASSED; the other 6 land tests PASSED unedited (7 of 7).",
+      "artifact_covered_by": ["DQ8-t29-AC1", "DQ8-t29-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "4f97ac5e54",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row MDPF_DEMQUE-D1-W23-S1 appended (BLOCKING, UNDER_INVESTIGATION). surprise-row-gate passed; the corpus census shows no failure for a W23 row."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ8-t29-AC1",
+      "criterion_verbatim": "the named tests of both files. test_demque_bbg_ledger_upload.py: the existing test_reads_record_lines_and_converts_rows_to_cells_per_mode PASSES again and test_name_to_literal_assignment_is_resolved_before_literal_eval is new. test_demque_land.py: test_consumer_keys_resolve_through_the_registry_legacy_rows is new and the file imports (no SystemExit at collection).",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R8_CHECKS/dq_t29_tests.py",
+      "output_evidence": "rc=0. test_demque_bbg_ledger_upload.py::test_reads_record_lines_and_converts_rows_to_cells_per_mode PASSED; test_demque_bbg_ledger_upload.py::test_name_to_literal_assignment_is_resolved_before_literal_eval PASSED; 6 passed; UPLOAD-OK. test_demque_land.py::test_consumer_keys_resolve_through_the_registry_legacy_rows PASSED; 7 passed; LAND-OK. FIX-OK.",
+      "denominator": "9 of 9 named or file-level tests PASSED: 2 of 2 named upload tests, 1 of 1 named land test, 6 of 6 upload file, 7 of 7 land file",
+      "status": "PASS",
+      "expect": "FIX-OK"
+    },
+    {
+      "criterion_id": "DQ8-t29-AC2",
+      "criterion_verbatim": "pytest --collect-only over data/mdpf/scripts/demque exits 0 with no INTERNALERROR and collects test_demque_land.py's tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R8_CHECKS/dq_t29_land.py",
+      "output_evidence": "98 tests collected in 0.72s; COLLECT-OK n=98 land=7; rc=0. No INTERNALERROR.",
+      "denominator": "98 tests collected over data/mdpf/scripts/demque; 7 of 98 from test_demque_land.py",
+      "status": "PASS",
+      "expect": "COLLECT-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In a separate Python process (.scratch/mutant_dq29.py, uncommitted) replace the Name-to-literal resolver with the identity function, then read the ETF history producer RET declaration.",
+      "expected": "RET cannot be counted: ValueError, so the ETF-history count test fails instead of counting 2.",
+      "observed": "MUTANT ValueError: malformed node or string on line 622: Call(func=Name(id='list'), args=[Name(id='HISTORY_FIELDS')]); mutant rc=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two identical runs of pytest over test_demque_bbg_ledger_upload.py and test_demque_land.py, same worktree and inputs.",
+      "observed": "run 1: 13 passed; run 2: 13 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The first D1-S7 commit attempt with literal row keys was refused by the naming gate.",
+      "reason": "Surprise MDPF_DEMQUE-D1-W23-S1 (BLOCKING), resolved by issuer amendment 84806f465f: the keys are now derived from lookup('cottonwood')['key'] plus the suffixes, as the consumer derives them. The derived form committed at 2e88e042c3 with no refusal."
+    },
+    {
+      "item": "No AWS write, no Bloomberg call, no deploy, no run of land_cot.py --apply.",
+      "reason": "The order bounds these out. The repair is to the key derivation only."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W23-S1: the naming gate refused the literal registry row keys passed to legacy_address() (land_cot.py lines 71-72); resolved by issuer amendment 84806f465f (keys derived from lookup('cottonwood')['key'] plus the suffixes), committed at 2e88e042c3."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t29.ledger-upload-and-lander-repairs.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider data/mdpf/scripts/demque/test_demque_bbg_ledger_upload.py data/mdpf/scripts/demque/test_demque_land.py",
+      "result": "13 passed, on two identical runs (determinism control)."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~23 <0.9.0_WK_MDPF_DEMQUE~23@opal.agent>\" -F <msg> -- <four demque .py files>",
+      "result": "First attempt (literal row keys): REFUSED by the naming gate, NAMING REFUSE land_cot.py:71 and :72. D1-S6 pair committed alone at 27e8ae878a. Second attempt (derived keys, amendment 84806f465f): committed 2e88e042c3, NAMING-GATE WARN 1 graded, no refusal, no override."
+    },
+    {
+      "tool": "naming-gate.py context rule",
+      "invocation": "sed -n 18,40p .tools/naming-gate.py",
+      "result": "The context rule permits a firm token only inside key(), address(), name() or lookup() arguments. legacy_address() is not listed."
+    }
+  ]
+}
