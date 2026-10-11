@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-nn-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-nn-4.the-mass-deletion-gate-audits-to-the-shared-tree.md",
+    "group": "OTHER",
+    "vintage_commit": "16d359ecc320abc28aa7fb46360429981c21fc07"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "16d359ecc320abc28aa7fb46360429981c21fc07",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-nn-4.the-mass-deletion-gate-audits-to-the-shared-tree.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~352",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/git-hooks/mass-deletion-check.sh",
+      "kind": "script",
+      "commit_or_etag": "46b12bd4964c60692249ca33a4d25ca2ee13c8d9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds AUDIT_ROOT (the common dir's parent, falling back to ROOT) and points _audit() at it for both the mkdir and the append. Nothing else changed: the deletion count, the attribution test, the mode logic, the exit codes and the printed text are byte-identical in intent. Exercised by the R89 audit-root check (AC1) and the --mode self-check (AC2). Local hook; no deploy, no store write.",
+      "introduces": [
+        "AUDIT_ROOT"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PASS A1 (a warn-mode verdict from a linked worktree leaves its row in the shared tree after the worktree is removed), PASS A2 (block mode: exit 1 and a BLOCKED row in the shared tree), PASS A3 (a deletion from the main worktree leaves its row in the main tree); R89 AUDIT ROOT: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_audit_root.sh\" --hook \"$(pwd)/.tools/git-hooks/mass-deletion-check.sh\"; echo \"exit=$?\"",
+      "output_evidence": "   linked worktree: warn rc=0 block rc=1 | main-tree rows after removal: WARNED=1 BLOCKED=1\nPASS A1 warn-mode verdict from a linked worktree leaves its row in the shared tree after the worktree is removed\nPASS A2 block-mode: exit 1 and a BLOCKED row in the shared tree\n   main worktree: warn rc=0 rows WARNED=1\nPASS A3 control: a deletion from the main worktree leaves its row in the main tree\nR89 AUDIT ROOT: YES\nexit=0",
+      "denominator": "3 of 3 checks PASS (A1, A2, A3); exit 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the script parses (bash -n rc 0), `--mode` prints the gate's ramp state and threshold 25, and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash -n .tools/git-hooks/mass-deletion-check.sh && bash .tools/git-hooks/mass-deletion-check.sh --mode; echo \"exit=$?\"",
+      "output_evidence": "mass-deletion gate\n  now              : 2026-10-11T03:33:00Z\n  ramp flips at    : 2026-07-11T19:30:00Z\n  MASS_DELETE_MODE : <unset, date-driven>\n  effective mode   : block\n  threshold        : 25 deleted tracked files\nexit=0",
+      "denominator": "2 of 2 sub-checks (bash -n rc 0; --mode threshold 25 printed); exit 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The unadopted hook (base 16d359ecc3, _audit() still writing to ROOT) run through the same AC1 check.",
+      "expected": "A1 and A2 FAIL (row lost with the linked worktree), A3 PASS, R89 AUDIT ROOT: NO, exit 1",
+      "observed": "FAIL A1 warn-mode verdict from a linked worktree leaves its row in the shared tree after the worktree is removed; FAIL A2 block-mode: exit 1 and a BLOCKED row in the shared tree; PASS A3; R89 AUDIT ROOT: NO; exit=1 (main-tree rows after removal WARNED=0 BLOCKED=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of AC1 against the edited hook, at ~03:26Z and ~03:33Z, compared line for line",
+      "observed": "both runs: linked worktree warn rc=0 block rc=1, main-tree rows WARNED=1 BLOCKED=1; PASS A1, PASS A2, PASS A3; R89 AUDIT ROOT: YES; exit=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Submodule commits: the common dir of a submodule is <superproject>/.git/modules/<name>, so AUDIT_ROOT resolves there rather than to the superproject root",
+      "reason": "Outside the order's bounds (change nothing else; the order names the common-dir parent as the rule). Filed as surprise AMGT_RESAPP-D1-W352-S1 for the disarm owner 2.0.0_SA_COO~R1."
+    },
+    {
+      "item": "The <status> flip of AMGT_RESAPP.TO-AMGT-nn-4 to complete",
+      "reason": "The order states the status flip is the issuer's (2.0.0_SA_COO~R1), not the worker's."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W352-S1: a submodule commit's common dir is <superproject>/.git/modules/<name>, so the new AUDIT_ROOT resolves to <superproject>/.git/modules and the mass-deletion row lands there, not in the superproject or submodule tree (measured in a throwaway probe; hook firing inside a submodule commit not measured)."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "bash -n",
+      "invocation": "bash -n .tools/git-hooks/mass-deletion-check.sh",
+      "result": "rc 0, no output"
+    },
+    {
+      "tool": "r89_audit_root.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_audit_root.sh --hook <worktree>/.tools/git-hooks/mass-deletion-check.sh",
+      "result": "R89 AUDIT ROOT: YES, exit 0 (edited hook); R89 AUDIT ROOT: NO, exit 1 (base hook)"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc 0, OK: 1 file(s), all new rows carry their step-7/step-10 fields"
+    }
+  ]
+}
