@@ -1,0 +1,95 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-R3-rf1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R3-rf1.creator-records-report-on-one-step-ticket.md",
+  "group": "OTHER",
+  "vintage_commit": "9535f28831"
+ },
+ "assignee": "0.9.0_WK_TCKT_VNEXT~14",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R3.md",
+  "vintage_commit": "9535f28831",
+  "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R3-rf1.creator-records-report-on-one-step-ticket.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "R3-rf-1: report_ticket admits the assignee (unchanged) and the creator (new): created_by equal case-insensitively, ticket_type analysis_request, status not completed, attachment present, no report_ref; conditional write repeats those conditions; 409 REPORT_ALREADY_RECORDED / REPORT_WRONG_TICKET_TYPE / REPORT_TICKET_CHANGED; neither caller 403; not deployed, no AWS call",
+   "artifact_covered_by": [
+    "R3-rf1-AC1",
+    "R3-rf1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_report_creator_records.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "8 tests (the 6 named plus a lost-race test and a recorded-during-race test, both for REPORT_TICKET_CHANGED); fake table evaluates the ConditionExpression sent; no network; no existing test changed",
+   "artifact_covered_by": [
+    "R3-rf1-AC1",
+    "R3-rf1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R3-rf1-AC1",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R3_CHECKS/r3_checks.py rf-filer expect: RF-FILER-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R3_CHECKS/r3_checks.py rf-filer",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: RF-FILER-OK passed=6 of 6",
+   "denominator": "6 of 6 named tests found by name and passed",
+   "status": "PASS",
+   "expect": "RF-FILER-OK"
+  },
+  {
+   "criterion_id": "R3-rf1-AC2",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R3_CHECKS/r3_checks.py rf-regress expect: RF-REGRESS-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R3_CHECKS/r3_checks.py rf-regress",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: RF-REGRESS-OK passed=169 (min 167) failed=0",
+   "denominator": "169 of 169 tests in the ticket_center tests folder passed (161 at the base plus 8 new)",
+   "status": "PASS",
+   "expect": "RF-REGRESS-OK"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the tests run on an in-memory fake table; no network or clock dependence",
+   "observed": "8 passed on the new file alone; both r3 checks rc=0",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "three in-place mutants of lambda_function.py (restored byte-identical, cmp against a saved copy): (1) the creator branch's report_ref pre-check removed; (2) is_creator forced True; (3) attribute_not_exists(report_ref) removed from the creator's ConditionExpression",
+   "expected": "each mutant fails at least one test",
+   "observed": "(1) test_creator_cannot_replace_a_recorded_report; (2) test_a_caller_who_is_neither_creator_nor_assignee_is_refused; (3) test_creator_write_cannot_replace_a_report_recorded_during_the_race (first run of the file passed 7 of 7 with mutant 3 until that test was added)",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a deployed or live run of the ticket service",
+   "reason": "the order forbids any AWS or network call and any deploy"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~14/TCKT_VNEXT.TO-R3-rf1.creator-records-report-on-one-step-ticket.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R3_CHECKS/r3_checks.py rf-filer",
+   "result": "RF-FILER-OK passed=6 of 6"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R3_CHECKS/r3_checks.py rf-regress",
+   "result": "RF-REGRESS-OK passed=169 (min 167) failed=0"
+  }
+ ]
+}
