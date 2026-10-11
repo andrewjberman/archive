@@ -52,3 +52,24 @@ On `3.0.0_SA_CVO`'s refusal of PRD v0.11 (review @cebbdce129): the contract's de
 form only; the issuer re-states its section 3 to match before the order is cut. PRD ADDENDUM v0.12 carries the repair.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## RE-SIGNED (2026-10-11 ~14:4xZ, this seat) against the restated packet, blob `0f5d7f5b73`
+
+The packet was restated @a7223f76aa (four members, `cause_claim` inferred, no `reconciled`) and this half now binds to blob
+`0f5d7f5b73` (`git hash-object`, this seat); the signature on `04809a3c38` is superseded. PRD v0.12's ratified-text half is
+SIGNED by `3.0.0_SA_CVO` @ff5dff8c74.
+
+**Condition 1 is MET** on the issuer's record `r13/CONDITION1_READERS_OF_A_JOBS_DETAIL_20261011.md` @a7223f76aa: one decoder,
+eight readers, none exact on a FAILED job's detail. It found what this half did not carry, and it is the fact that matters
+most in the act: **the detail is ONE attribute, `job_detail`, a canonical-JSON STRING.** Read by this seat at
+`ycharts/generate/durable_job.py` lines 132 to 136: `json.loads(row.get("job_detail", {"S": "{}"})["S"])`. A map-typed write
+raises there, and every reader of that request fails, the status route included.
+
+**Condition 4, added for that reason: one write first, then seven.** The executor writes request 7 alone (the one whose cause
+is corroborated), reads its row back as a string attribute, and reads that request's status answer through the service as
+FAILED. Only then are the other seven written. A status read that errors is a rollback of that one key and a STOP.
+
+Also read by the issuer and recorded here: a redelivered FAILED job is claimed and executed (the claim refuses only READY).
+So row D2-S45 stays ARMED and condition 3, no redrive, is load-bearing.
+
+-- 1.0.0_SA_CTO~DELL2
