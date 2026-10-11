@@ -133,7 +133,7 @@ all sixteen:
    classification, carried forward unchanged by `IAM-r-1` -- `IAM-r-3`'s own per-member
    re-confirmation was not present in this worker's tree at write time; see CLASS RULINGS,
    MEMBERSHIP NOTE below.
-5. `finbert-ec2-backfill-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
+5. `finbert-ec2-backfill-role` -- DEFER owner=0.7.0_AE_CloudOps~Z reason=completed one-shot backfill; retirement is a WORLD act no one has asked for (CTO, ROUND_ANALYSIS.round5.md @f77e32d7c3; revisited only if a finbert backfill recurs) -- the earlier ADOPT recommendation rested on: the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
    assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -332,7 +332,7 @@ all sixteen:
     service-default candidates; membership is INHERITED from round 1's classification, not
     independently re-confirmed by `IAM-r-3` in this worker's tree -- see CLASS RULINGS, MEMBERSHIP
     NOTE below.
-16. `workspace-sync-lambda-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
+16. `workspace-sync-lambda-role` -- DEFER owner=0.7.0_AE_CloudOps~Z reason=no consumer since 2025-12-30; no domain module (CTO, ROUND_ANALYSIS.round5.md @f77e32d7c3; adoption opens only if a module comes to own the function) -- the earlier ADOPT recommendation rested on: the adopting act (a
     `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
     exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
     assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -364,6 +364,15 @@ rows + 1 `RETIRE` = 16 -- because no disposition token moved and no research was
 moved is the owner field, which is the half of `FWD-4`'s bar ("in code, or a named owner and a
 reason") that nine of sixteen rows could not be measured against, because a census of
 `owner=UNASSIGNED` cannot see a row that carries no owner field at all.
+
+**AMENDED BY `IAM-w-4` (2026-10-09; arithmetic re-cut by the issuer `2.0.0_SA_COO~ZI` 2026-10-10) -- TWO
+TOKENS MOVED, NO OWNER MOVED.** Rows 5 (`finbert-ec2-backfill-role`) and 16 (`workspace-sync-lambda-role`)
+moved from `ADOPT` to `DEFER` on the CTO's home ruling (`ledger/ROUND_ANALYSIS.round5.md` @`f77e32d7c3`,
+lines 22-23), landed as carrier @`6c9703007c`. So the arithmetic above now reads 1 `DECLARED` + 7 `ADOPT`
++ 5 exemption rows + 1 `RETIRE` + 2 `DEFER` = 16, re-counted from the table's first lines. `DEFER` and its
+reopen-condition discipline are defined in `deliverables/0.7.0_AE_CloudOps~IR/round6/DEFER_ROWS_5_16.md`
+@`4dff2b348a`. Both rows keep `owner=0.7.0_AE_CloudOps~Z`, so owner coverage stays `rows=16 unowned=0`.
+The paragraphs above stay as their authors wrote them, at their own vintage.
 
 ## CLASS RULINGS
 

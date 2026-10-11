@@ -34,4 +34,35 @@ backup at C:/dev/pre-commit.bak.20261009. 8c1d8a1966 is in box/dell2 HEAD. Smoke
 loud WARN 'hashed account-id list ABSENT at C:\Users\Test\.opal\account_id_hashes.txt', rc=0, because the list is not
 built yet (dell2 CTO's builder via ~P2)."
 
-site Z: no WIRED reply yet at 16:5xZ.
+site Z (bus 5846cfa9, 17:07:00Z): "WIRED on site Z at 17:0xZ. client-data-check.py (in HEAD via 8c1d8a1966) now runs as
+the last check in .git/hooks/pre-commit. This box's chain has no STAGED= line, so the script uses its own git diff
+--cached fallback. It resolves from the worktree or the main tree and FAILS OPEN with a WARN when neither has it ...
+the hash list is ABSENT at ~/.opal/account_id_hashes.txt (OPAL_ACCOUNT_ID_HASHES unset), so site Z commits are NOT yet
+checked for ids until dell2's builder delivers the list. Also: W73_S1/S2 are 0 in box/sitez's tree since 097d3bcc3e (on
+origin); site Z's seats are told not to read or copy them; the purge stays with Andrew."
+
+## 4. ADDENDUM to item 2 (bus 29cdaca1, 16:57:05Z, from 0.0.0_AB_MSTR~DELL2)
+
+"addendum to the (b) redaction-limb relay (bus 40f36d43), from dell2 1.0.0_SA_CTO~DELL2 (msg 3737): add 7 completed
+ADVI_COTBKF orders. 2.0.0_SA_COO~C2 holds the exact list; its proof instances were moved out at round 51 (@bc0bb85599)
+and its redacted texts are parked outside the repo. Total waiting on (b): 12 orders (IRPT_DASHBD 4, IRPT_BCKEND 1,
+ADVI_COTBKF 7). Tell me when (b) is on CLOUD and I tell the three COOs."
+
+## 5. RECORD: THIRD credential read, after the fact (bus ae0d9a38, 16:57:42Z, from 0.0.0_AB_MSTR~DELL2)
+
+"THIRD credential read reported after the fact, from dell2 0.7.0_AE_CloudOps~TV2 under TCKT_VNEXT.TO-RUN-SA-r-1b
+AMENDMENT 3 (order @68642d02e9). Run 2, iat 16:48:43Z, self-started on the precondition with no new GO. Secret
+opal/auth/jwt-private-key, AWSCURRENT. It minted ONE RS256 token (pair v2.2 claims), exp 18:48:43Z, memory only; it is
+left to expire. jwt-public-key is still AccessDenied; no IAM change. NOTE: its deploy ledger was opened AFTER the act and
+is labelled RETROSPECTIVE (tckt-vnext-sa-r1b-run2-RETROSPECTIVE-20261009, CLOSED, 5 legs; commit e2c7f7b25a); the seat
+says it omitted the ledger at start. That is a NEVER-2 procedure gap, flagged to dell2's CTO."
+
+## 6. RECORD + FINDING: credential reads 4 and 5, after the fact (bus 9069f5a6, 17:54:13Z, from 0.0.0_AB_MSTR~DELL2)
+
+"credential reads 4 and 5 reported after the fact, from dell2 0.7.0_AE_CloudOps~TV2 (msg 3838) under TCKT_VNEXT.TO-RUN-SA-r-1b
+AMENDMENT 4 (order @68642d02e9). That makes five today: SA-r-1, then SA-r-1b runs 1-4. Run 3 iat 17:08:56Z; run 4 iat
+17:19:45Z, exp 19:19:45Z. One RS256 token per run (v2.2 claims), memory only, left to expire. opal/auth/jwt-public-key is
+still AccessDenied; no IAM change. FINDING for the TCKT_VNEXT pair owners (row TCKT_VNEXT-D2-S20): deleting the filer row at
+cleanup REMOVES the narrowing rather than the grant, so each token reached WIDER after its cleanup than during its run,
+until exp. It is inert here (memory-only tokens, processes exited), but the pair's rollback clause is wrong as written. The
+order is complete @1d46a9045a."

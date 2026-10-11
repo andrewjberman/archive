@@ -8,7 +8,12 @@ desc=no; [ -n "$DEP" ] && [ -n "$PREV" ] && git merge-base --is-ancestor "$PREV"
 allow='^infra/aws/ec2/opal-gateway/(app/admin_fabric\.py|app/admin_api\.py|app/refs/fabric_boxes\.json|tests/test_admin_fabric\.py)$'
 files=$(git diff --name-only "$PREV" "$DEP" -- infra/aws/ec2/opal-gateway/app infra/aws/ec2/opal-gateway/tests 2>&1)
 n=$(printf '%s\n' "$files" | grep -c . ); out=$(printf '%s\n' "$files" | grep -cvE "$allow")
-mok=no; [ -n "$MCP" ] && git -C mcportal merge-base --is-ancestor d60b4e0 "$MCP" 2>/dev/null && mok=yes
+# Row Z-S28: resolve the mcportal repo from the MAIN worktree (a linked worktree has no nested checkout), and fail LOUD
+# when it is unreadable or lacks the commit, never as a silent "no".
+MC="$(git worktree list --porcelain | sed -n '1s/^worktree //p')/mcportal"
+git -C "$MC" rev-parse --git-dir >/dev/null 2>&1 || { echo "mcportal repo unreadable at $MC"; echo "RESULT: FAIL"; exit 1; }
+[ -z "$MCP" ] || git -C "$MC" cat-file -e "$MCP^{commit}" 2>/dev/null || { echo "mcportal_commit $MCP absent from $MC"; echo "RESULT: FAIL"; exit 1; }
+mok=no; [ -n "$MCP" ] && git -C "$MC" merge-base --is-ancestor d60b4e0 "$MCP" && mok=yes
 echo "deployed=$DEP previous=$PREV descends=$desc; gateway app/tests files changed=$n, outside MP-x-1's set=$out; mcportal_commit=$MCP contains d60b4e0=$mok"
 printf '%s\n' "$files" | grep -vE "$allow" | sed 's/^/  OUTSIDE: /'
 if [ "$desc" = yes ] && [ "$n" -ge 2 ] && [ "$out" = 0 ] && [ "$mok" = yes ]; then echo "RESULT: PASS"; exit 0; fi

@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-o-1",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c7f0978131"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "c7f0978131",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-o-1.ops-trade-rec-reader.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~30",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~30/census_trade_rec.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census file only, 8 candidate producers, verdict GAP, owner unowned. No reader built, nothing deployed, no AWS write; all AWS calls were list/get/describe reads.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "census trade_rec: candidates n (n >= 2), each with a denominator n of n; verdict SERVED or GAP; violations 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/o1.AC1.sh; echo \"exit=$?\"",
+      "expect": "RESULT: PASS",
+      "output_evidence": "census trade_rec: candidates 8, each with a denominator 8 of 8; verdict GAP; violations 0\nRESULT: PASS\nexit=0",
+      "denominator": "8 of 8 candidates carry an integer denominator and denominator_of",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "SERVED: pytest rc=0; named tests passed 3 of 3; failed/error tests 0. GAP: no reader built -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/o1.AC2.sh; echo \"exit=$?\"",
+      "expect": "RESULT: PASS",
+      "output_evidence": "census verdict: GAP\nGAP branch: no reader built\nRESULT: PASS\nexit=0",
+      "denominator": "GAP branch: 0 of 1 reader folders exist (infra/aws/ec2/opal-gateway/app/integrations/ops_trade_rec absent)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "SERVED: rows n (n >= 1), fixture keys n of n rows exact; as_of stated, claim measured; completeness stated; violations 0. GAP: PASS by branch -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/o1.AC3.sh; echo \"exit=$?\"",
+      "expect": "RESULT: PASS",
+      "output_evidence": "census verdict: GAP; probe_scope: -\nGAP branch: no reader to probe\nRESULT: PASS\nexit=0",
+      "denominator": "GAP branch: PASS by branch; 0 of 0 readers probed",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W30-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "o1.AC1.sh / o1.AC2.sh / o1.AC3.sh (issuer's check scripts, ops_census.py)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/o1.AC1.sh; bash .../o1.AC2.sh; bash .../o1.AC3.sh",
+      "result": "AC1, AC2, AC3 each RESULT: PASS exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The issuer's battery dry-run at issuance base bf8492f48f read o1.AC1-AC3 FAIL with the census absent (task order issuer notes); the census file is the only change that moves them.",
+      "expected": "FAIL with census absent",
+      "observed": "FAIL at base per the issuer's dry-run; PASS after the census file was written",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "census file is static JSON graded offline by ops_census.py; no live read in any of the three criteria on the GAP branch",
+      "observed": "AC1 re-run reads the identical summary line",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Reader, tool name, tests and registry hookup (the SERVED branch of the act).",
+      "reason": "Census verdict GAP: no served source carries both a per-trade Opal status and a custodian status at the fixture grain. The order requires no reader on GAP. FWD-19's trade reconciliation leg is NOT done; owner unowned."
+    },
+    {
+      "item": "Catalog entry for the trade reconciliation reader.",
+      "reason": "MX-c-7's, cut from this census."
+    }
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~30/NFRA_MCPINDEX.TO-MX-o-1.ops-trade-rec-reader.proof_of_spec.json"
+}

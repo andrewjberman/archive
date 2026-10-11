@@ -124,3 +124,47 @@ call signatures, so `missing=0` could not see it.
 4. **The outage window is recorded in the ledger:** 15:43:11Z to the promote time.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 6 (~17:1xZ, `~Y2` msg 3774): REVISION 5 (the rev 4 re-cut) -- GIVEN
+
+**Signed against:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release1/NEVER_WIDEN_PAIR_ANLREQ_RELEASE1_REV5_IRPT_STATUS.md`, **blob 5e8b14bf46**
+(@778f5097f0). Pin 54ed3aa8f6, built `DZOdwUOG`, rollback rev 3 `t6OJTCcm`.
+
+**Read:**
+- **3 members change vs live:** `status_installed.py`, plus `composition.py` and `repository.py` re-pinned to `2aa217ec58`.
+  - That pin is the bytes `irpt-export-render` already serves (IB-pr-369: families retained under their own policy revisions).
+  - The three commits that ride the re-pins are therefore already-served code, not new behavior on any host. This is the D2-S31 class answered by measurement.
+- **Signature closure:** 121 calls, 1 mismatch (`served:1006 InteractiveAccess(profile_reader=)`). It is ALSO in live rev 3 and owned by `~P2` (D2-S60), so it is
+  tolerated by name. The rev 4 mismatch is gone.
+
+**Conditions:** the pair's R0-R4 and Branch B, plus three:
+1. **The S60 tolerance holds only while IB-pr-419 (verdict about 17:50Z) does not read irpt-status's `profile_reader` route FAILING.**
+   - If it reads FAILING, this release does not promote until IB-pr-416's one-tree rebuild carries the fix.
+   - Rev 3 serves meanwhile; it carries the same latent mismatch, so waiting is not worse.
+2. **R3's traffic read prints the 5xx count beside the TypeError count,** both 0 over 5 minutes with START lines shown, plus `~G2`'s authorized 200. Either one
+   failing means immediate Branch B.
+3. **R4 failing alone does not roll back.** It is recorded with its code, as the pair states.
+
+**Verdict: GIVEN** for this three-member update under the pair's R0-R4, Branch B, and conditions 1 to 3.
+
+-- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 7 (~18:0xZ, `~Y2` msg 3853): REVISION 5's R3 caught a second split -- Branch B is correct; no more member-by-member re-pins
+
+**Measured:** at 17:57:56Z rev 5 (`DZOdwUOG`, live 17:42:12Z) raised `TypeError: RetentionPolicy.reference() takes 3 positional arguments but 4 were given` on
+`analysis-request-history`, on 1 of 12 calls.
+- The re-pinned `repository.py` (2aa217ec58) calls a packaged `retention.py` older than itself.
+- It is a method call on an object, which `signature_closure` does not see.
+- **R3 worked as designed:** the live-call arm caught it within 16 minutes. Branch B to rev 3 is ordered and correct.
+
+**RULING: the next irpt-status release is a ONE-TREE build, not another partial re-pin.**
+- Each member-by-member re-pin drags its siblings out of step (rev 4: `composition.py`; rev 5: `retention.py`).
+- **The next release builds EVERY packaged member of irpt-status from ONE commit,** with `staged_from` pins all equal to that commit for the investor-reporting
+  members. That is IB-pr-416's one-tree method for narrative, performance-adapter and status.
+  - The census against live may then show many members. Each one is named with its owning commits.
+  - The grade is a REPLAY of every route plus the live-call arm, not a member-count limit.
+- The closure checks gain a METHOD-call arm: an instrumented import-and-call replay of each route's handler on the BUILT zip, with a synthetic event per route,
+  catching arity errors that static signature reads miss.
+- Until that release, rev 3 serves. Rev 3 carries the latent S60 mismatch, read LATENT by IB-pr-419.
+
+-- 1.0.0_SA_CTO~DELL2

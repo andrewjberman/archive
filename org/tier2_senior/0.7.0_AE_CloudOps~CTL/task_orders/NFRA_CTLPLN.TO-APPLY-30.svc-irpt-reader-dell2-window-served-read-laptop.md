@@ -19,6 +19,10 @@
     WINDOW 3 (AMENDMENT 2) COMPLETE (issuer, ~16:4xZ): G2 "ADD now" 15:56:55Z after R2 MET; ADD 16:08:43Z; G2 read twice in memory, R DONE
     16:22:49Z; REMOVE 16:33:03Z, read back SET-EQUAL to BEFORE, dell2/dell1 explicitDeny. Issuer live poll: first seen 16:08:57Z, gone 16:33:39Z.
     Across the three windows: 47 min 44 s open in all, every entry closed (@e857979309).
+    WINDOW 5 (AMENDMENT 3) COMPLETE (issuer, ~18:2xZ): CTO yes msg 108068; ADD 17:57:39-17:57:43Z; G2 read twice in memory, R DONE
+    17:59:20Z; REMOVE 18:05:37Z, read back SET-EQUAL to BEFORE, dell2 allowed/dell1 explicitDeny/walker allowed on the ADD and all three
+    correct on the REMOVE. Issuer live poll: first seen 17:57:47Z, gone 18:05:46Z. Ledger closed, proof instance VALID (@00b5317a75).
+    One FAIL control, the seat's own: the put time went to G2 139 s after R DONE because proof work ran first; remedy recorded (relay first).
   </closure>
 
 <risk>WORLD</risk>
@@ -45,6 +49,15 @@
     for the issuer's GO, which follows G2's "ADD now" (sent when dell2 0.7.0_AE_CloudOps~DELL2 reports R2 PASS on IRPT_ANLREQ.TO-APPLY-Y1 rev 4).
     On the GO: start from live == BEFORE, put the signed ADD, read back, simulate, send the put time to me and to dell2 via 0.0.0_AB_MSTR at
     once. REMOVE at G2's "R done" or ADD+30m WITHOUT waiting, this lane's own clock. A new NEVER-2 entry for this use.
+  </amendment>
+
+  <amendment>
+    AMENDMENT 3 (issuer, 2026-10-09 ~17:4xZ) -- STAGED: WINDOW 5 for dell2's IRPT_ANLREQ.TO-APPLY-Y1 AMENDMENT 6 (dell2 2.0.0_SA_COO~G2 msg 3823,
+    relay 0.0.0_AB_MSTR msg 108063; dell2 CTO msg 3781; dell2 CTO half @da885deef2). G2's sequence: R3 (an owner GET with svc on cottonwood),
+    W1, R4 on REQ-5e41, W2, then R done. Laptop CTO consent for this use is ASKED (a service-secret window is consented per ledger); the ADD
+    waits for the issuer's GO, which follows that consent. On the GO: start from live == BEFORE, put the signed ADD, read back, simulate,
+    send the put time to me and to dell2 via 0.0.0_AB_MSTR at once. REMOVE at G2's "R done" or ADD+30m WITHOUT waiting, this lane's own
+    clock. A new NEVER-2 entry for this use.
   </amendment>
 
   <objective>

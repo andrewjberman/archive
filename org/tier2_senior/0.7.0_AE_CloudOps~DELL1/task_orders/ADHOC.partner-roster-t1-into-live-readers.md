@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~G1</issued_by>
 <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
 <date>2026-10-09</date>
-<status>pending</status>
+<status>complete -- landed by 0.7.0_AE_CloudOps~DELL1 on the issuer instruction (2.0.0_SA_COO~G1 msg 2897) to close B4 and the ledger then flip. BOTH LEGS LANDED: leg A re-minted bundles.accrual_bridge from an LF linked worktree under amendment A1; leg B shipped the emitter vendored roster on the pinned build. Ledger adhoc-partner-roster-t1 CLOSED, all 7 legs proven, sentinel unlinked, verified three ways. C1-C7 all PASS, C7 on the AMENDMENT A3 @805269589f re-cut: C7a the 17:15Z run (0 errors; rows_built 32 / base 14 / ownership 12 / total 2, IDENTICAL to the prior scheduled run, no refusal in either) and C7b the label (graded by C5 and C6). C7 AS ORIGINALLY WRITTEN WAS NOT READABLE: it asked for declared_cadence on persisted Cottonwood rows and none are written -- declared_cadence lives only in the deployed channel_sources.accept_date() per-call meta, and the run's durable artifact carries 0 occurrences of it and 0 of cottonwood, with partners 49financial and inflection only. Three surfaces were checked before concluding that; B4 was HELD rather than closed on the half that did read, and the issuer re-cut rather than this seat adjudicating. ONE ITEM OPEN AND NOT ABOUT THE WORK: the proof-of-spec instance still reads INVALID because the checker cannot see this order's &lt;proof_genre&gt;DEPLOY&lt;/proof_genre&gt; marker -- the order blob is CRLF (120 CRLF, 0 lone LF) and the checker's matcher permits only spaces and TABs before its end-of-line anchor. The marker is present on line 9. Measured both ways and recorded in the instance forward_notes; reported, not worked around.</status>
 <risk>SERVED</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P2 (CTO~DELL1 msgs 1287/1296; both never-widen halves SIGNED)</priority>
@@ -97,6 +97,22 @@ CloudOps conditions (CTO~DELL1 msg 1814, ADDENDUM 3 @947dd446e5) bind the rest o
 (1) a send that writes a firm data bucket, or assumes the 49F principal outside the runner's own job, is told to the laptop FIRST;
 (2) every send to mdpf-daily-runner is reported after the fact with its command id and purpose; (3) 49 Financial data never goes
 into another firm's tree. The remaining leg is a read of the 17:15Z emitter run, so none is expected to fire.
+Gate limb that graded this modification: none (to-pipeline-gate LIMB 6 does not fire on a modification).
+</amendment>
+
+<amendment id="A3" date="2026-10-09T17:3xZ" by="2.0.0_SA_COO~G1">
+Issuer ruling on msg 2896 (C7 / leg B4). C7 as written assumed persisted Cottonwood rows; there are none. `declared_cadence` lives only
+in `channel_sources.accept_date()`'s per-call meta (deployed :182, :186) and is never written, and the 17:15Z run's durable artifact
+`gold/mdpf_revamp/_aggregate_aua/2026-10-09.json` carries partners 49financial and inflection only (0 occurrences of cottonwood). The
+defect is the issuer's wording. C7 is re-cut to two parts, both closable now:
+- C7a (the run): the 17:15Z run fired with 0 errors and rows_built 32 / base 14 / ownership 12 / total 2, identical to the prior scheduled
+  run, no refusal in either -- read by the assignee 17:2xZ.
+- C7b (the label): graded by C5 (deployed roster T-1 on both Cottonwood feeds) and C6 (deployed accept_date: 2 td behind -> norm 1,
+  within_slip_tolerance; B0 arm 0, at_declared_cadence), both already VALID. No persisted surface exists to read.
+Close B4 and the ledger on C7a + C7b.
+Recorded for the CTO's next read, no act owed here: (1) the emitter's served aggregate carries no Cottonwood partner, so the corrected
+label does not reach a served artifact today -- the "missed Cottonwood day reads healthy" harm (msg 1287) lives in call-time meta only;
+(2) the assignee read that the 2026-10-08 17:15Z run processed run_date 2026-10-05 while today's processed 2026-10-09.
 Gate limb that graded this modification: none (to-pipeline-gate LIMB 6 does not fire on a modification).
 </amendment>
 

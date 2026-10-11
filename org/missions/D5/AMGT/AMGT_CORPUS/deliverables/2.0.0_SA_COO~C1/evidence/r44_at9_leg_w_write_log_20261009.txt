@@ -1,0 +1,34 @@
+# AMGT_CORPUS round 44, CRPS-at-9 leg w -- the WRITE PROCESS's own output (CTO half condition 1: fitz asserted real in-process, a stub aborts), 2.0.0_SA_COO~C1 on dell1. The driver (scratchpad dossier_write_v10.py, reproduced below) printed these lines BEFORE its first write_one.
+## driver
+"""Leg w of CRPS-at-9: dossier.write_one per name in 6 threads of ONE process, with the REAL fitz asserted first (CTO half
+condition 1: a stub ABORTS). No sys.modules stub anywhere in this driver."""
+import sys
+from concurrent.futures import ThreadPoolExecutor
+import fitz
+if not (hasattr(fitz, "open") and hasattr(fitz, "Document")) or type(fitz).__name__ != "module" or not getattr(fitz, "__file__", None):
+    print("ABORT: fitz is not the real library", flush=True); sys.exit(2)
+print("fitz real version %s file %s" % (getattr(fitz, "VersionBind", None), fitz.__file__), flush=True)
+from lib.research.corpus import dossier
+from lib.research.harvest import store
+print("method %s" % dossier.METHOD_VERSION, flush=True)
+if dossier.METHOD_VERSION != "amgt-corpus-dossier/10":
+    print("ABORT: method is not /10", flush=True); sys.exit(2)
+client = store._default_client()
+keys = sorted(dossier._resolved_security_keys(client=client), reverse=True)
+def one(k):
+    try:
+        r = dossier.write_one(k, client=client)
+        return "OK %s wrote %d uri %s" % (k, int(r["wrote"]), r["uri"])
+    except Exception as exc:
+        return "FAIL %s %s: %s" % (k, type(exc).__name__, str(exc)[:200])
+with ThreadPoolExecutor(max_workers=6) as pool:
+    for line in pool.map(one, keys):
+        print(line, flush=True)
+print("threads done names %d" % len(keys), flush=True)
+
+## process output (first lines, then the tally)
+fitz real version 1.28.2 file C:\Users\Test\AppData\Local\Programs\Python\Python314\Lib\site-packages\fitz\__init__.py
+method amgt-corpus-dossier/10
+...
+wrote 1: 95 | wrote 0: 0 | FAIL: 0
+threads done names 95

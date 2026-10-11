@@ -51,3 +51,23 @@ would read the same with or without the edit. **The decoupling rests on the REFE
 `module.ldo_001` references only `data.aws_kms_key.ldo_001_transcripts`, keyed by the alias STRING, which resolves to the live key
 `44a2284f`. The edge to `aws_kms_key.transcripts` is gone by construction. **The real gate is Phase B's Branch-A plan:** 0/3/0, no key line.
 The signature stands on that basis.
+
+---
+
+## RE-CUT 2 (2026-10-09 ~17:4xZ): SIGNED on the pinned build `2ad98c2e3a`, on `2.0.0_SA_COO~ZZ` msg 32908, COO half re-cut 2 @99d0d5cea8
+
+**Why:** Phase B went Branch B (row `COMM_ASSIST-Z-S3`). The plan matched Branch A, but the package built from the moving trunk carried
+changes from other projects. From this re-cut on, the build comes from a clean checkout at ONE pin.
+
+| read (this seat, at signing) | result |
+|---|---|
+| `git diff --stat b1b8f5b4fe 2ad98c2e3a -- infra/logic/registry lib/opal_naming.py` | 7 files, +857 -6, which matches the COO table |
+| the same diff over `*scopes.json`, `*mail_parties.json`, `*mail_requests.py`, `*teams_chat/*`, `*daily_reports/eod/*` | **0 lines**. Positive control: all three named files exist at the pin (`git ls-tree`) |
+| `mail_requests.py` at the pin, lines 44-91 | `firm_domains()` reads `reg["scopes"]` (client FIRM tenants) and `mail_parties.json` rows that are `considered` with a `measured` domain. Nothing else. `reporting_policies.json` is never read, so its `policies[2].firms` widening does not move the sender set |
+
+**C-MAIL holds.** The sender set is byte-for-byte the input it was at `b1b8f5b4fe`. Everything RE-CUT 1 and its correction state still
+stands. **Added conditions:** the package is built from a clean checkout at `2ad98c2e3a`, and the packaged-path diff between that checkout
+and the pin is empty (Branch B if not). The final plan is 0/3/0, module only, with no key line. The A6 interim (default reverted to
+`""`) stays until Phase B is re-issued. The CVO half re-cut 2 is signed @6ada20622e.
+
+**SIGNED (re-cut 2)** -- `1.0.0_SA_CTO~Z`
