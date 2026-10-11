@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "fa51c1f544"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "fc657a79b7",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-e-1.aum-timeseries-reads-the-gold-artifact.md"
+  },
+  "to_id": "MDPF_CANON.TO-CN-e-1",
+  "assignee": "0.9.0_WK_MDPF_CANON~15",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/dim_mdpf_aum_timeseries.py",
+      "kind": "script",
+      "commit_or_etag": "f995149b3f",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-15 (commit f995149b3f). The instrument is run from a repo checkout only; no scheduler, no dispatch call, no deploy, no AWS write. Its read path is latest_gold_aggregate() over partition_uri() from mdpf_gold_parquet.py. The served output is not moved (the instrument prints and exits; --upload logs a SKIP)."
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~4/READER_CENSUS.md",
+      "kind": "doc",
+      "commit_or_etag": "f995149b3f",
+      "artifact_covered_by": ["AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-15 (commit f995149b3f). Two rows edited: the row naming the instrument's staging read is replaced by the gold-tier row citing lines 101 and 116; the served-key row cites line 62. A document; no deploy, no AWS call."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (CN-e-1): run r5_cn_e_1.py reader -- expect: ROUND 5 READER: 5 of 5 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round5/checks/r5_cn_e_1.py\" reader; echo \"exit=$?\"",
+      "output_evidence": "ARM NO-OLD-PLACE: PASS no legacy tree string\nARM ADAPTER: PASS shape ok; newest partition read at the builder address ok; gets=1\nARM COHORT-FROM-REGISTRY: PASS cohort_class ['model'] equals the registry's ['model']; build_aum_timeseries ran\nARM MISSING-CORE-STOPS: PASS a frame without opal_ultra_short_term stops build_aum_timeseries: 'FATAL: core model opal_ultra_short_term absent from the global aggregate by_model'\nARM NO-PARTITION-RAISES: PASS no dated partition raises (\"FATAL: no dated partition of scope 'global' (aggregate_aua_timeseries) under s3:\") and no object is read\nROUND 5 READER: 5 of 5 arms\nexit=0",
+      "denominator": "5 of 5 arms",
+      "status": "PASS",
+      "expect": "ROUND 5 READER: 5 of 5 arms",
+      "status_reason": "Run in the worktree at HEAD f995149b3f. The reader arms are offline; S3 is a fake. The mutant control (section controls) fails the ADAPTER arm as the check requires."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 (CN-e-1): run r5_cn_e_1.py seam -- expect: ROUND 5 SEAM: 1 of 1 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round5/checks/r5_cn_e_1.py\" seam; echo \"exit=$?\"",
+      "output_evidence": "ARM SEAM: PASS cells=2958 unequal=0 common_dates=493 shared_models=5 only_gold=[] only_legacy=[] partition=2026-10-08\nROUND 5 SEAM: 1 of 1 arms\nexit=0",
+      "denominator": "1 of 1 arms",
+      "status": "PASS",
+      "expect": "ROUND 5 SEAM: 1 of 1 arms",
+      "status_reason": "Run in the worktree at HEAD f995149b3f. Read-only S3: the loader's newest partition (2026-10-08) and the legacy staging JSON. DELTA=0 over 2958 cells; the five core models are shared on both sides and no key is carried by one side only."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 (CN-e-1): run r5_cn_e_1_census.py -- expect: ROUND 5 CENSUS: 4 of 4 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round5/checks/r5_cn_e_1_census.py\"; echo \"exit=$?\"",
+      "output_evidence": "  C1 PASS: 2 row(s) name the audit; 0 of them still carry gold/mdpf_revamp/\n  C2 PASS: 3 citation(s) of the audit; unresolved none\n  C3 PASS: citations 3, one on def latest_gold_aggregate yes\n  C4 PASS: dim_mdpf_aum_metrics.py row still listed with the staging tree\nROUND 5 CENSUS: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms",
+      "status": "PASS",
+      "expect": "ROUND 5 CENSUS: 4 of 4 arms",
+      "status_reason": "Run in the worktree at HEAD f995149b3f, after the census edit in the same commit. The check is read-only; the census rows cite instrument lines 101 (def latest_gold_aggregate) and 116 (the partition_uri read) and line 62 (SERVED_KEY)."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 (CN-e-1, judgment=\"true\"): /seams on the instrument-to-artifact seam, grounded on the artifact at the builder's address -- MECHANICAL (the instrument run end to end with --out reads the newest global partition and prints its identity line), DECLARATIVE (the module docstring, the log strings, the help text and the census row name the gold tier, not the staging tree), SEMANTIC (the document built from the gold partition equals the document built from the legacy staging JSON at the same vintage, cell for cell, and the cohort_class the guard reads is the registry's, not the parquet's).",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; graded at the round-5 close by the CVO on /seams (L9), never self-graded by the worker",
+      "output_evidence": "NOT GRADED BY THE WORKER. Measured facts only, at HEAD f995149b3f: (1) mechanical run, python data/mdpf/scripts/gold/dim_mdpf_aum_timeseries.py --out .scratch/aum_ts_cn_e_1.json --upload, exit 0: 'OK: internal identity PASS -- aggregate==2024-11-01..2026-10-08 (493 periods), 5-core sum' / 'latest 2026-10-08: aggregate.aum=1,760,550,358.88 account_count=7974 by_model=5' / 'OK: wrote .scratch/aum_ts_cn_e_1.json' / 'SKIP: staging write RETIRED 2026-07-29 ... No S3 write performed.'; (2) grep -c 'gold/mdpf_revamp' on the instrument = 0; (3) the census row for the instrument names the gold tier; (4) the cohort_class is read from entry_for_key, the guard in build_aum_timeseries unchanged.",
+      "denominator": "N/A -- judgment criterion (no verdict by the worker)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round-5 close",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a copy of the instrument at .scratch/mut_cn_e_1.py with the newest-partition selector flipped (latest = min(dates)), run through the reader arms with --script",
+      "expected": "the ADAPTER arm FAILS: the loader returns the oldest partition, not the newest",
+      "observed": "ARM ADAPTER: FAIL shape WRONG (got keys ['opal_intermediate', 'opal_long_term_aggressive', 'opal_long_term_conservative', 'opal_short_term', 'opal_ultra_short_term']); newest partition read at the builder address WRONG; gets=1; ROUND 5 READER: 4 of 5 arms; exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 reader invocation run twice, each stdout captured to .scratch/det1.txt and .scratch/det2.txt and compared with cmp",
+      "observed": "IDENTICAL-OUTPUTS: both runs exit 0 with the same ROUND 5 READER: 5 of 5 arms lines",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No AWS write of any kind: no put, copy, delete, invoke or apply. The seam arm's read-only gets (one partition and the legacy JSON) and the instrument's read-only listing are the only S3 calls",
+      "reason": "Order bound 1 (no AWS write); read-only get and list are permitted."
+    },
+    {
+      "item": "AC4 judgment was not graded by the worker",
+      "reason": "AC4 is judgment, graded by the CVO at the round-5 close on /seams; the worker records measured facts only."
+    },
+    {
+      "item": "No fallback, dual read or comparison against the old JSON in the instrument; the old tree and its writers untouched",
+      "reason": "Order bound 3 (PRD DEC-14); the old tree's retirement is another cell. The legacy JSON is read only by the issuer's seam arm."
+    },
+    {
+      "item": "mdpf_gold_parquet.py, mdpf_revamp_model_crosswalk.py, lib/opal_naming.py and the issuer's checks not edited",
+      "reason": "Order bound 2; read-only."
+    },
+    {
+      "item": "AWS-facing names are not typed: every address is partition_uri() output; the bucket and key are split from it with urlsplit",
+      "reason": "Order bound 4. The ASSETS_BUCKET constant (the legacy staging bucket name) is left in place, unused, because the order names which constants to delete and does not name this one."
+    },
+    {
+      "item": "The hashed client account-id list was ABSENT on this box, so the commit-time client-data check did not check the commit for account ids",
+      "reason": "Recorded as measured by safe-commit (WARN: client-data-check). The instrument prints per-model aggregates and never an account id."
+    }
+  ],
+  "surprises": [
+    "MDPF_CANON-D1-W15-S1: TO step 1 names only entry_for_key in the crosswalk import, but step 4 catches UnknownModelError; the instrument imports both so the except clause resolves. Behaviour is the step 4 behaviour."
+  ],
+  "session_log": "Worker 0.9.0_WK_MDPF_CANON~15 on DELL1, worktree C:/dev/wk-canon-15, branch wk-MDPF_CANON-15. Artifacts committed at f995149b3f (instrument, census rows, surprise row MDPF_CANON-D1-W15-S1 in org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md). The reader, seam and census arms, the mutant and determinism controls and the --out run were executed in this worktree; this instance and the order flip are the following commit.",
+  "compiler_tools": [
+    {
+      "tool": "r5_cn_e_1.py (issuer check, reader arms, read-only)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round5/checks/r5_cn_e_1.py\" reader; echo \"exit=$?\"",
+      "result": "ROUND 5 READER: 5 of 5 arms, exit=0"
+    },
+    {
+      "tool": "r5_cn_e_1.py (issuer check, seam arm, read-only S3)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round5/checks/r5_cn_e_1.py\" seam; echo \"exit=$?\"",
+      "result": "ROUND 5 SEAM: 1 of 1 arms, exit=0"
+    },
+    {
+      "tool": "r5_cn_e_1_census.py (issuer check, read-only)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round5/checks/r5_cn_e_1_census.py\"; echo \"exit=$?\"",
+      "result": "ROUND 5 CENSUS: 4 of 4 arms, exit=0"
+    },
+    {
+      "tool": "python data/mdpf/scripts/gold/dim_mdpf_aum_timeseries.py --self-test",
+      "invocation": "python data/mdpf/scripts/gold/dim_mdpf_aum_timeseries.py --self-test",
+      "result": "OK: self-test PASS (5-core filter, aggregate==sum(by_model) incl honest-None skip, axis aligned), rc=0"
+    },
+    {
+      "tool": "python data/mdpf/scripts/gold/dim_mdpf_aum_timeseries.py --out .scratch/aum_ts_cn_e_1.json --upload (read-only run; local file only)",
+      "invocation": "python data/mdpf/scripts/gold/dim_mdpf_aum_timeseries.py --out .scratch/aum_ts_cn_e_1.json --upload",
+      "result": "OK: internal identity PASS (493 periods); latest 2026-10-08 by_model=5; SKIP staging write RETIRED; exit 0"
+    },
+    {
+      "tool": "ruff 0.15.11 (py39 target) and .tools/commit-gate.sh",
+      "invocation": "python -m ruff check --target-version py39 data/mdpf/scripts/gold/dim_mdpf_aum_timeseries.py; bash .tools/commit-gate.sh data/mdpf/scripts/gold/dim_mdpf_aum_timeseries.py",
+      "result": "All checks passed!; pre-commit gate clean for 1 of 1 file(s), rc=0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh commit gates (artifacts commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_CANON~15 <0.9.0_WK_MDPF_CANON~15@opal.agent>\" -F .scratch/msg_cn_e_1_artifacts.txt -- data/mdpf/scripts/gold/dim_mdpf_aum_timeseries.py org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~4/READER_CENSUS.md org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "surprise-row-gate OK (1 new row); missions-tree-check OK; committed f995149b3f"
+    }
+  ]
+}
