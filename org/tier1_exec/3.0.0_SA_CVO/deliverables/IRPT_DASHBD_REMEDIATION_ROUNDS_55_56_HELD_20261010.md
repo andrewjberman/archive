@@ -275,3 +275,15 @@ Held on the same condition (TO-DB-b-86 terminal):
 
 **For the slug:** this round closes ADVI_COTBKF row D2-S108 in code only. The served method row still says `cash_when_received`
 until the rewrite lands under its pair.
+
+---
+
+## Added at round 67, 2026-10-11T10:48:29Z (input: msg 4748)
+
+The rewrite of method row 3 landed at 10:38Z and is read on the served objects by this seat (row D2-S12). So:
+
+- **D2-W97-S1** (held at round 66) is met: the overwrite was captured first and both prior versions are retained. It graduates as
+  REMEDIATED, or is dismissed at the slug.
+- ADVI_COTBKF row D2-S108 is answered on the served side: a reader can now tell the null income from a zero. Its issuer's read-back
+  is its own to file.
+- The limit of row D2-S11 stands and is now served: the reason names one channel.
