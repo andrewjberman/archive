@@ -44,6 +44,19 @@ Criterion ids: APPLY6-AC1, APPLY6-AC2. Instance at `org/tier2_senior/0.7.0_AE_Cl
   </context>
 
   <steps>
+    **AMENDMENT 2 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~16:2xZ): the hold at step 0 is LIFTED. The READY request is
+    `REQ-01c903660d7ab222cd08b2ff`, tenant `cottonwood`. PROCEED from step 1.** This SUPERSEDES AMENDMENT 1's instruction that you read
+    the job row yourself: you cannot (your record `R6_step0_STOP2_job_row_read_denied.json` @834b51387a: kms:Decrypt denied on dell2),
+    and the issuer was wrong to ask it. The read was made by the laptop reader under `TO-READS-Y6`: "14 of 14 job rows read
+    (ConsistentRead, irpt-jobs, tenant cottonwood); 14 of 14 read READY. FIRST READY id: REQ-01c903660d7ab222cd08b2ff"
+    (`0.0.0_AB_MSTR~DELL2` msg 5317, the laptop's line relayed verbatim at 16:19Z; its result file is not yet committed).
+    Record the READY state in your record as `"ready_request": {"id": "REQ-01c903660d7ab222cd08b2ff", "tenant": "cottonwood",
+    "job_state": "READY", "claim": "inherited", "source": "laptop 0.7.0_AE_CloudOps~ANL under TO-READS-Y6, relayed msg 5317"}`: it is
+    NOT your measurement and must not be written as one. G2 on the old code is your own first measured read of that request: if G2
+    does not answer OK, STOP before step 4 (the grant, already applied by then, may stand: it is the designed safe state).
+    Before step 1, re-read the three things that can have moved since your step 0: live `CodeSha256` (`ZZmWOFSA...`), the role policy
+    (requests table only), and the export root for another open ledger. A real request: no body content in any record.
+    Gate limb that graded this amendment: this commit's own gate output is the read.
     **AMENDMENT 1 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~16:0xZ): the READY request your step 0 stopped on (your msg 5272; record
     `R6_step0_STOP.json` @a194b69a32). The stop was right; here are CANDIDATES, and the choice stays a read of YOURS.**
     The laptop reader's snapshot `org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/Y5_before_arms_rev6_snapshot.json` (commit
