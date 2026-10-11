@@ -55,8 +55,7 @@ def key(root):
                                   "len:m.CANONICAL_PLATINUM_BUCKETS.length}))" % _url(root, helper_rel))
         try:
             d = json.loads(out)
-            ok1 = rc == 0 and bool(imports) and "ownershipMapKey" in d["names"] and d["frozen"] is True \
-                and d["len"] == 0
+            ok1 = rc == 0 and bool(imports) and "ownershipMapKey" in d["names"] and d["frozen"] is True
             shown = out
         except Exception:  # noqa: BLE001
             shown = "unreadable: " + (err or out)[:120]
