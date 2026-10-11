@@ -8,7 +8,8 @@
  * CANVAS lines ui-smoke prints.
  *
  * Usage (run from the portal worktree):
- *   node <this file> <route-without-leading-slash> <out.png> --dist dist --fixtures <file.json>
+ *   node <this file> <route-without-leading-slash> <out.png> --dist dist --fixtures <file.json> [--firm <id>]
+ *   (no --firm: the ui-smoke default session, internal Dev at firmId opal-capital; --firm: a plain Advisor of that firm)
  */
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -34,6 +35,16 @@ const SESSION = {
   user: { email: 'dev@opalcapital.com', name: 'Dev User', role: 'admin', userType: 'Dev', firmId: 'opal-capital',
           firmRole: null, advisorId: null, advisorRole: null, mustChangePassword: false },
 }
+// --firm <id>: a plain partner/firm session (userType Advisor, role user, firmId <id>), as ui-smoke.mjs --firm builds it.
+const firmOverride = args.includes('--firm') ? args[args.indexOf('--firm') + 1] : null
+if (firmOverride) {
+  SESSION.user.firmId = firmOverride
+  SESSION.user.userType = 'Advisor'
+  SESSION.user.role = 'user'
+  SESSION.user.email = `ui-smoke@${firmOverride}.test`
+}
+console.log('IDENTITY: firmId=%s userType=%s role=%s firmRole=%s',
+  SESSION.user.firmId, SESSION.user.userType, SESSION.user.role, JSON.stringify(SESSION.user.firmRole))
 const fixtureKeys = Object.keys(fixtures).sort((a, b) => b.length - a.length)
 
 const browser = await chromium.launch({ executablePath: EDGE, headless: true })
