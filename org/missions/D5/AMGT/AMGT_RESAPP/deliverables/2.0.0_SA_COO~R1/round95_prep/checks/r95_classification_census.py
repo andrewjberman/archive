@@ -18,9 +18,12 @@ SAN_FP_Equity and CSL_AU_Equity). Then, over the live function (`--where deploye
     K4 the per-security routes of each D subject (overlay, thesis, peers, coverage, compare, timeline) carry no non-null `classification`, `sector`, `sub_asset_class` or
        `asset_class` outside their peers' members (which carry their own companies' sectors); the base serves none, so K4 is a no-regression guard.
     K5 control: every ranked row and rank series of a NON-D subject serves the table row's own classification unchanged (the count judged is printed; 0 differ).
+    K6 (round 95 amendment 2) every disagreeing ticker ASKED FOR BY TICKER on the rank timeseries (`/lead-panel/timeseries/TRENDING/PRICE?tickers=<ticker>`), whether or not a
+       ranked list holds it and whether or not the covered universe holds it, serves its series with `classification` null, a `classification_reason` of the same words and a
+       `name` that is not the table row's (CSL_AU_Equity is a measured subject outside the covered universe: its series read 'Carlisle Cos Inc' and 'US Large Cap' there).
 The table rows of the D tickers are printed whole (name, asset_class, sub_asset_class, classified_by, last_updated, updated_by) beside the registered name, so a reader
 can see which fields of a disagreeing row were the security's own (SAN's 'Health Care' is a legacy classification under another company's cleaned name).
-Verdict: R95 CLASSIFICATION CENSUS: YES|NO (exit 0|1). At the base (2026-10-11): K1, K2, K3 FAIL, K4 and K5 PASS (no per-security route carries a subject classification today: a guard).
+Verdict: R95 CLASSIFICATION CENSUS: YES|NO (exit 0|1). At the base (2026-10-11): K1, K2, K3, K6 FAIL, K4 and K5 PASS (no per-security route carries a subject classification today: a guard).
 """
 import argparse
 import json
@@ -161,6 +164,16 @@ def main():
     res.append(say(ctl_rows > 0 and not ctl_diff and not ctl_series_diff,
                    "K5 control: a non-disagreeing subject's classification is the table row's own, unchanged",
                    "ranked rows judged %d differ %d; series judged %d differ %d" % (ctl_rows, len(ctl_diff), ctl_series, len(ctl_series_diff))))
+    asked_bad = []
+    for k, t in sorted(disagree.items()):
+        body = serve(where, "/lead-panel/timeseries/TRENDING/PRICE", {"tickers": t})
+        series = next((x for x in (body.get("series") or []) if x.get("ticker") == t), None)
+        table_name = (rows_by_key.get(k) or (t, {}))[1].get("name")
+        if (series is None or series.get("classification") is not None or not reason_ok(series.get("classification_reason"))
+                or str(series.get("name")) == str(table_name)):
+            asked_bad.append((k, t, (series or {}).get("name"), ((series or {}).get("classification") or {}).get("sub_asset_class")))
+    res.append(say(not asked_bad and bool(disagree), "K6 every disagreeing ticker asked for by ticker serves no table row's name or classification",
+                   "asked %d, still served %s" % (len(disagree), asked_bad)))
     print("   arms passed %d of %d" % (sum(1 for r in res if r), len(res)))
     ok = all(res)
     print("R95 CLASSIFICATION CENSUS: %s" % ("YES" if ok else "NO"))
