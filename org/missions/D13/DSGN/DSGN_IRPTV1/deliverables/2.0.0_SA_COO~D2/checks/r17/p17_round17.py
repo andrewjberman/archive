@@ -9,7 +9,7 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
             mutant {what, failed true}}; regold has the IVE115 and IVE69 ids, each DONE (with ruling, before, after) or STOPPED (row).
   IV95-AC2  the same record's smoke_map (AMENDMENT 2): routes_declared == 22; excused is the MEASURED set, each {route, reason_class,
             reason, evidence}, reason_class NO_PRODUCER_FIXTURE or READER_REFUSES_PRODUCER_FIXTURE (the latter's evidence is the
-            parser's own refusal text), at most 4; keys == 22 minus the excused count; sourced [{route, source, reader}] one per key
+            parser's own refusal text), at most 6 (AMENDMENT 3, CTO msg 4790); keys == 22 minus the excused count; sourced [{route, source, reader}] one per key
             and none excused; pins_followed non-empty [{file, before, after}]; producer_pin {file, outcome PLACED, owner}.
   IV95-AC3  the same record's newline_pins {files_searched > 0, found, fixed == found}; suite_after.new_failing_ids == []; portal_commit hex.
   IV96-AC1  ~53/HOLDINGS_FACE.json: behaviour {test_id, passes true, mutant {what, failed true}}; default_view_before and
@@ -80,8 +80,8 @@ def main():
         ex = sm.get("excused") or []
         pp = sm.get("producer_pin") or {}
         classes = ("NO_PRODUCER_FIXTURE", "READER_REFUSES_PRODUCER_FIXTURE")
-        if sm.get("routes_declared") != 22 or len(ex) > 4:
-            fail("smoke_map routes_declared %r with %d excuse(s): want 22 declared and at most four measured excuses" % (sm.get("routes_declared"), len(ex)))
+        if sm.get("routes_declared") != 22 or len(ex) > 6:
+            fail("smoke_map routes_declared %r with %d excuse(s): want 22 declared and at most six measured excuses" % (sm.get("routes_declared"), len(ex)))
         for x in ex:
             if not text(x.get("route")) or x.get("reason_class") not in classes or not text(x.get("reason")) or not text(x.get("evidence")):
                 fail("excuse %r lacks a reason_class of %r, a reason or its evidence" % (x.get("route"), classes))
