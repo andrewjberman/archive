@@ -1,0 +1,196 @@
+{
+  "to_id": "IRPT_DASHBD.TO-DB-b-116",
+  "author": "0.9.0_WK_IRPT_DASHBD~91",
+  "question": "Does METHOD_ROWS row 3 (and the dim_return_method row emit_method_row writes for it) describe the Cottonwood rows, field by field; does a dim row 3 partition exist at the builder address.",
+  "denominator": "emit_method_row writes 22 fields (account_return_daily.py lines 1897-1924); METHOD_ROWS row 3 carries 4 keys of its own (lines 119-124: valuation_source, value_basis, value_basis_ruling, fee_basis). 14 field groups below cover all 22 written fields plus valuation_source (23 of 23).",
+  "fields": [
+    {
+      "field": "valuation_source (METHOD_ROWS row 3; read by method_version_of against the entry, not written to the dim row)",
+      "row3_states": "positions_based",
+      "cottonwood_does": "FWD-3 value is positions x as-traded close + cash leg; the entry declares valuation_source positions_x_as_traded_close, which is not custodian_reported, so method_version_of accepts row 3 for it.",
+      "verdict": "TRUE",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 119},
+        {"file": "data/assets/scripts/gold/irpt_reporting/sources.json", "line": 126},
+        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 21}
+      ]
+    },
+    {
+      "field": "method (TWR_DAILY_GEOMETRIC)",
+      "row3_states": "TWR_DAILY_GEOMETRIC (constant, line 1898, inherited by every method row)",
+      "cottonwood_does": "FWD-3 return is ret_t = (value_t - flow_t) / value_(t-1) - 1, a daily return that the adapter links as TWR; same form as the producer's.",
+      "verdict": "TRUE",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1898},
+        {"file": "data/assets/scripts/silver/commonwealth_daily_returns.py", "line": 7},
+        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 371}
+      ]
+    },
+    {
+      "field": "flow_convention",
+      "row3_states": "winner or END (line 1899); no caller passes a winner, so the written value is END (flows at end of day).",
+      "cottonwood_does": "FWD-3 flow timing defaults to end (module constant FLOW_TIMING, CLI default the same): ret_t = (value_t - flow_t) / value_(t-1) - 1, flows at end of day. The adapter takes the delivered return unchanged. The recorded run's command line is not in the repo; the code default is what is established.",
+      "verdict": "TRUE",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1899},
+        {"file": "data/assets/scripts/silver/commonwealth_daily_returns.py", "line": 65},
+        {"file": "data/assets/scripts/silver/commonwealth_daily_returns.py", "line": 7}
+      ]
+    },
+    {
+      "field": "income_basis",
+      "row3_states": "cash_when_received (constant, line 1900, inherited from the row-2 path; METHOD_ROWS row 3 does not override it)",
+      "cottonwood_does": "FWD-3 does not separate income; it is inside the value through the cash leg. The cash ledger posts dv/dvlt/dvst at the file's PAY date (dividend_date default pay; the valuation run call at line 942 does not pass 'ex') and int as signed cash income, so a dividend or interest credit enters value when the cash posts, once (dvr posts -Amount against +Amount). That matches cash_when_received for cash-posted income. NOT ESTABLISHED FROM THE CODE: whether a bond's stored close carries accrued interest (a price-vendor property outside these files), and the exact flags of the 107,316-row run (not recorded in the repo). The adapter's income_received and income_return columns are NULL by design; that is a column statement, not the basis.",
+      "verdict": "TRUE",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1900},
+        {"file": "data/assets/scripts/silver/commonwealth_daily_valuation.py", "line": 466},
+        {"file": "data/assets/scripts/silver/commonwealth_daily_valuation.py", "line": 942},
+        {"file": "data/assets/scripts/silver/commonwealth_sweeps.py", "line": 66},
+        {"file": "data/assets/scripts/silver/commonwealth_sweeps.py", "line": 1014},
+        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 23}
+      ]
+    },
+    {
+      "field": "value_basis",
+      "row3_states": "POSITIONS-BASED EQUITY = account value rebuilt from positions at the entry's declared price_basis, plus the entry's declared cash",
+      "cottonwood_does": "value = positions x as-traded close + cash leg (method_r28 ledger); the entry declares price_basis as_traded.",
+      "verdict": "TRUE",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 120},
+        {"file": "data/assets/scripts/gold/irpt_reporting/sources.json", "line": 128},
+        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 21}
+      ]
+    },
+    {
+      "field": "value_basis_ruling",
+      "row3_states": "1.0.0_SA_CTO~DELL2 ADDENDUM 13.2 (msg 3501): a positions-based channel names its own method row, never 2",
+      "cottonwood_does": "The entry names method_version 3 itself; the adapter stamps it through method_version_of(entry). A citation, not a computation.",
+      "verdict": "TRUE",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 122},
+        {"file": "data/assets/scripts/gold/irpt_reporting/sources.json", "line": 125},
+        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 326}
+      ]
+    },
+    {
+      "field": "fee_basis",
+      "row3_states": "PER_ENTRY_FEE_TREATMENT (the entry's fee_treatment states it)",
+      "cottonwood_does": "Fees are a drag inside the return (a fee is not a flow), so the return is after fees; the entry field fee_treatment carries it as net_of_fees. The adapter's fee_amount is NULL with FEE_RAIL_UNUSED.",
+      "verdict": "NOT_STATED",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 124},
+        {"file": "data/assets/scripts/gold/irpt_reporting/sources.json", "line": 127},
+        {"file": "data/assets/scripts/silver/commonwealth_daily_returns.py", "line": 11}
+      ]
+    },
+    {
+      "field": "tolerance, large_flow_share, plausibility_band_low, plausibility_band_high, comparability_max_excluded_weight",
+      "row3_states": "Values copied from a thresholds file passed at write time (lines 1904-1913); row 3 states none of its own.",
+      "cottonwood_does": "The adapter runs with thresholds=None (no measured thresholds exist for this firm) and every row is GUARD_NOT_REACHED, so the guard never graded a Cottonwood row. emit_method_row indexes thresholds[...] and would refuse None; a row 3 written for Cottonwood would carry numbers measured on another population. No entry field carries them (the entry has only the three method fields). Whether that is acceptable is the CTO's; nothing in row 3's own text is untrue of the rows.",
+      "verdict": "NOT_STATED",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1904},
+        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 38},
+        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 393}
+      ]
+    },
+    {
+      "field": "guard_substitution",
+      "row3_states": "WITHDRAWN (PRD v0.4 ruling 17): a guard disagreement serves no number; HOLDINGS_INCOME_FALLBACK is never emitted.",
+      "cottonwood_does": "The adapter refuses HOLDINGS_INCOME_FALLBACK and emits only TWR or NOT_MEASURABLE.",
+      "verdict": "TRUE",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1914},
+        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 128},
+        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 371}
+      ]
+    },
+    {
+      "field": "day_count",
+      "row3_states": "Account365 (constant, line 1916)",
+      "cottonwood_does": "The daily return uses no day-count; nothing in the Cottonwood path reads or contradicts it. Not establishable from the code either way.",
+      "verdict": "NOT_STATED",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1916},
+        {"file": "data/assets/scripts/silver/commonwealth_daily_returns.py", "line": 7}
+      ]
+    },
+    {
+      "field": "tieout_tolerance_proposed, tieout_tolerance, tieout_tolerance_ruling",
+      "row3_states": "tieout is a run argument (line 1917); tieout_tolerance 0.0035 under batch 181 (lines 259-260).",
+      "cottonwood_does": "The adapter makes no vendor tie-out and cites none; it is a producer constant carried on any row written.",
+      "verdict": "NOT_STATED",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1918},
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 259}
+      ]
+    },
+    {
+      "field": "gips_alignment",
+      "row3_states": "GIPS-aligned, not GIPS-compliant",
+      "cottonwood_does": "The adapter states the same label in its manifest text.",
+      "verdict": "TRUE",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1920},
+        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 68}
+      ]
+    },
+    {
+      "field": "measured_at, schema_version, source_pipeline",
+      "row3_states": "run timestamp; SCHEMA_VERSION; SOURCE_PIPELINE (lines 1921-1923)",
+      "cottonwood_does": "Provenance of the write; the adapter takes SCHEMA_VERSION from the producer. Not a claim about the method.",
+      "verdict": "NOT_STATED",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1921},
+        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 46}
+      ]
+    },
+    {
+      "field": "firm",
+      "row3_states": "the firm scope firm_scope(src) resolves (line 1924)",
+      "cottonwood_does": "The entry's registry_key z09 resolves to the firm cottonwood, the scope the adapter writes under.",
+      "verdict": "TRUE",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1924},
+        {"file": "data/assets/scripts/gold/irpt_reporting/sources.json", "line": 124},
+        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 107}
+      ]
+    },
+    {
+      "field": "method_version",
+      "row3_states": "3 (the key of the row, line 1897)",
+      "cottonwood_does": "The entry names 3; the adapter stamps mv_entry on every row and manifest.",
+      "verdict": "TRUE",
+      "evidence": [
+        {"file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py", "line": 1897},
+        {"file": "data/assets/scripts/gold/irpt_reporting/sources.json", "line": 125},
+        {"file": "data/assets/scripts/silver/commonwealth_account_return_daily.py", "line": 387}
+      ]
+    }
+  ],
+  "verdict": "ROW3_TRUE",
+  "verdict_basis": "No field reads FALSE. Four groups are NOT_STATED (fee_basis, which the entry's fee_treatment carries; the guard thresholds, which no entry field carries and the adapter never supplies; day_count; tie-out and provenance fields).",
+  "open_items": [
+    "Income basis: cash-posted income (dv, dvlt, dvst, int) enters value on the file's pay date; whether a bond's stored close carries accrued interest is not in these files, and the exact flags of the 107,316-row run are not recorded in the repo (code defaults used).",
+    "No dim row 3 partition exists: writing it needs --thresholds-in (the row cannot be written without measured thresholds, line 2031), and the Cottonwood firm has no measured thresholds (adapter runs thresholds=None). Which thresholds a Cottonwood row 3 should carry is not decided by this record."
+  ],
+  "dim_partition": {
+    "address": "s3://opal-data-cottonwood/irpt/cottonwood/gold/dim_return_method/method_version=3",
+    "built_by": "opal_naming.address('irpt', firm_scope(_commonwealth_delivery), 'gold', 'dim_return_method', 'method_version=3'), firm = cottonwood",
+    "exists": false,
+    "read": {
+      "call": ".tools/aws s3api head-object --bucket opal-data-cottonwood --key irpt/cottonwood/gold/dim_return_method/method_version=3/manifest.json",
+      "result": "rc=254 An error occurred (404) when calling the HeadObject operation: Not Found. A 404 from a bucket whose control read on the same shim succeeded; emit_method_row writes manifest.json and data.parquet together (lines 1927-1935 region), so a missing manifest means no partition."
+    }
+  },
+  "positive_control": {
+    "address": "s3://opal-data-49financial/irpt/49financial/gold/dim_return_method/method_version=2",
+    "exists": true,
+    "read": {
+      "call": ".tools/aws s3api head-object --bucket opal-data-49financial --key irpt/49financial/gold/dim_return_method/method_version=2/manifest.json",
+      "result": "rc=0, object present (ContentLength and LastModified returned)"
+    }
+  },
+  "read_history": "Before these two reads, four reads used a mis-built address (registry key z09 / 08335338 in the firm slot instead of the firm token the producer's firm_scope returns): one s3 ls pair and one head-object pair, all not-found, including the control, which is how the mis-build was seen. They are not used as evidence. See the surprise row."
+}
