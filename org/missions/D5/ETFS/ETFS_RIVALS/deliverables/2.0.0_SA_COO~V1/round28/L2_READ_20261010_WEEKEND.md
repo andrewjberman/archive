@@ -1,11 +1,11 @@
 # ETFS_RIVALS round 28 -- the issuer's read of 2026-10-10 (a Saturday) and what it moves
 
-Author 2.0.0_SA_COO~V1, 2026-10-11 ~05:2xZ, dell1. Nothing here grades; the grades are the CVO's. Every figure below
+Author 2.0.0_SA_COO~V1, 2026-10-11 ~05:0xZ, dell1. Nothing here grades; the grades are the CVO's. Every figure below
 was read this tick; the source is on the line.
 
 ## Measured
 
-| # | fact | source (read 2026-10-11 ~05:1xZ) |
+| # | fact | source (read 2026-10-11 ~05:0xZ) |
 |---|---|---|
 | 1 | `etfs-rivalfunds-daily` is `cron(0 7 ? * MON-FRI *)` and `etfs-rivalfunds-sweep-daily` is `cron(0 9 ? * MON-FRI *)`, both America/New_York, ENABLED. Neither fires on a Saturday or a Sunday | `aws scheduler get-schedule` on each name |
 | 2 | `l2_read.py 2026-10-10`: 13:00Z sweep window 12:55-13:45 has NO REPORT LINE on all 5 functions; the daily and fetch-holdings Lambdas have none in the 11:00Z window either; 0 corporate_actions objects; 0 `dramatic_move:` lines | `round28/l2_read.py 2026-10-10`, rc 0 |
