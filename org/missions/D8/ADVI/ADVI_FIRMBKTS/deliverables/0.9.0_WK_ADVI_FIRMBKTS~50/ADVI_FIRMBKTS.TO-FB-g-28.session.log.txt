@@ -1,0 +1,12 @@
+SESSION LOG -- 0.9.0_WK_ADVI_FIRMBKTS~50 on ADVI_FIRMBKTS.TO-FB-g-28 (worktree /c/dev/wk-firmbkts-50, branch wk-ADVI_FIRMBKTS-50)
+
+1. Tree check: git rev-parse --abbrev-ref HEAD printed wk-ADVI_FIRMBKTS-50; test -d org and test -d .tools printed TREE-OK. HEAD at start cdacb5b498.
+2. Premise check: the face's module source ../../modules/opal_name does not resolve from infra/aws/terraform/exec-summary (infra/aws/modules/opal_name absent, rc=2). The module is at infra/aws/terraform/modules/opal_name. The call uses ../modules/opal_name. Surprise row ADVI_FIRMBKTS-D1-W50-S1 filed.
+3. Edit: infra/aws/terraform/exec-summary/iam.tf -- appended module "opal_name_exec_summary_canonical_put" (system advi, scope 49financial, function exec-summary-canonical-put, kind policy) and resource aws_iam_role_policy.exec_summary_canonical_put (one statement, Sid ExecSummaryCanonicalPut, Action s3:PutObject, one generated ARN). Comment lines above the resource. No other line changed.
+4. Commit 48e1c575f2 (iam.tf + INVESTIGATION_v1.md row) via .tools/safe-commit.sh; msg-verify MATCH; naming-gate NAMING CONFORMANT (advi-49f-exec-summary-canonical-put-policy); surprise-row-gate OK.
+5. AC1: timeout 118 python r4_execiam.py --arms iam --root /c/dev/wk-firmbkts-50 --base 44e7a3f712 -> 5 of 5 arms, exit=0.
+6. AC2: timeout 60 python r4_scope.py ... -> ROUND 4 SCOPE: OK 2 changed, 0 outside, 0 required missing, exit=0.
+7. Mutant control: iam.tf copied to .scratch/iam_good.tf; Action changed in place to ["s3:PutObject", "s3:PutObjectAcl"]; r4_execiam.py -> I2 FAIL, 4 of 5 arms, exit=1; file restored from .scratch/iam_good.tf, cmp identical, git diff on iam.tf empty.
+8. Determinism: r4_execiam.py --arms iam rerun on the restored tree -> 5 of 5 arms, exit=0.
+9. Risk reflex on commit 48e1c575f2 printed HOLD lines citing CLAUDE.md:81 (comp-iam for iam.tf changes). comp-iam is the issuer's preflight item and its apply is a separate staged order; nothing was applied and no AWS call was made.
+10. No terraform plan or init, no AWS call, no apply in this session.
