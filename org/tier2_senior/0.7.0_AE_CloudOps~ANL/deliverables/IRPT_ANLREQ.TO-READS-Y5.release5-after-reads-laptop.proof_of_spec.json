@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "IRPT_ANLREQ.TO-READS-Y5.release5-after-reads-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/task_orders/IRPT_ANLREQ.TO-READS-Y5.release5-after-reads-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "7ff2bafc7e89d54a03543c2685893a12cb4a1fa9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R3_Y.md",
+    "vintage_commit": "75d0de663038a7fd77873caa834f4fe24c2adf3c",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/task_orders/IRPT_ANLREQ.TO-READS-Y5.release5-after-reads-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~ANL",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/Y5_after_reads_result.json",
+      "kind": "doc",
+      "commit_or_etag": "612ea01ad75ab3fdf20c3d53d1aee24ac6a6ad10",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Nothing was deployed by this order; the artifact is a measurement. Its digest field was read from get-function-configuration by this seat in the same run (Iw3FADFr..., LastModified 2026-10-11T10:25:40Z) and the checker reads the file at the committed bytes.",
+      "artifact_covered_by": [
+        "READS5-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "READS5-AC1",
+      "criterion_verbatim": "READS5-AC1: R2, R3, R5, R6 and R7 are true on the release build, and R4 is true or ABSENT with its census.",
+      "method": "live_read",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r3/apply5_checks.py reads --root .",
+      "expect": "APPLY5-READS-OK",
+      "output_evidence": "reads {'R2': True, 'R3': True, 'R4': 'ABSENT', 'R5': True, 'R6': True, 'R7': True} / APPLY5-READS-OK. The order's invocation without --root reads the file under org/ (the script's default root is parents[8]) and prints APPLY5-READS-FAIL; the issuer is told.",
+      "denominator": "50 accepted analysis requests scanned over 1894 irpt-requests items on 2 pages (cottonwood 39, 49financial 10, inflection 1); 14 readable by owner replay, all YCHARTS form, 0 OPAL_ENGINE; 3 artifact directories counted for R7, 1 object version each before and after; 5 APIs and 133 routes scanned for 4_route",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "before_snapshot_same_population": {
+      "description": "R2, R3 and R5 are diffs against a snapshot taken on revision 6 by the same script over the same population, so a change is a measured change and an unchanged read is not a blind read.",
+      "expected_landed": "the same 50 requests and the same 14 readable on both builds; retained_ref absent before and present after",
+      "expected_not_landed": "a different request set, or retained_ref present before",
+      "observed": "50 and 14 on both builds; retained_ref on 0 of 14 before and 14 of 14 after",
+      "status": "PASS"
+    },
+    "version_count_can_see_a_write": {
+      "description": "The same list_object_versions call returned the stored objects (1 version each, matching the artifact index rows), so a count of 3 is a seen object set and a before/after equality is not a blind lister.",
+      "expected_landed": "count at least 1 on each counted directory before and after",
+      "expected_not_landed": "0 on a directory the index row says holds an object",
+      "observed": "1 version on each of 3 directories before and after",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "NOT APPLICABLE -- this order writes nothing; the pair belongs to the dell2 apply order",
+    "cto_half": "NOT APPLICABLE -- same"
+  },
+  "risk_class": "WORLD",
+  "rollback": "None needed: read-only. The one signed link was fetched once to hash its bytes in memory and discarded; it was never written anywhere.",
+  "scope": "READ-ONLY against AWS: get-function-configuration, lambda invoke of irpt-status read routes, apigatewayv2 get-apis and get-routes, s3api list-object-versions, DynamoDB get-item/query/scan, S3 get-object of the three counted blobs. No put, delete, apply, grant or SendCommand.",
+  "declared_exclusions": [
+    {
+      "item": "R4 on an OPAL_ENGINE request",
+      "reason": "None is readable from the laptop: REQ-5e4149d2863aea31cc87d660 answers FIRM_BINDING on owner replay, so its provider is not measured. R4 is recorded ABSENT with its census; ABSENT is not a pass of the OPAL_ENGINE branch."
+    },
+    {
+      "item": "Step 0 of the issuer's apply (R0, R1, R8)",
+      "reason": "Those reads belong to the dell2 applier; this order's R2 to R7 only."
+    },
+    {
+      "item": "DynamoDB writes by the /original route",
+      "reason": "R7 counts S3 object versions only; the route reads through a memo that refuses put_item, update_item and delete_item, which is code evidence and not a measurement."
+    },
+    {
+      "item": "49financial history rows in R3",
+      "reason": "The 49financial owners answer FIRM_BINDING or NOT_FOUND on replay from the laptop; R3 counts the cottonwood and inflection histories."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/logs/2026-10-11/anl_lane_y5_after_reads_r2_r7_release5.md",
+  "compiler_tools": [
+    {
+      "tool": "apply5_checks",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r3/apply5_checks.py reads --root .",
+      "result": "APPLY5-READS-OK"
+    }
+  ]
+}
