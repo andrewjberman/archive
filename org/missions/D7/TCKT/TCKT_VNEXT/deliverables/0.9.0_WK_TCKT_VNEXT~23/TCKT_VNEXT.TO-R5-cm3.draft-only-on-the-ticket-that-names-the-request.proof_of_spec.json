@@ -1,0 +1,95 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-R5-cm3",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R5-cm3.draft-only-on-the-ticket-that-names-the-request.md",
+  "group": "OTHER",
+  "vintage_commit": "4fb80c408c"
+ },
+ "assignee": "0.9.0_WK_TCKT_VNEXT~23",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R5.md",
+  "vintage_commit": "4fb80c408c",
+  "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R5-cm3.draft-only-on-the-ticket-that-names-the-request.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commentary_draft_ticket: body is exactly draft_commentary and request_id; one folded deny for missing ticket, off-list firm, no recorded report_ref.request_id, different recorded id; the conditional write carries Attr(report_ref.request_id).eq(request_id); not deployed, no AWS call",
+   "artifact_covered_by": [
+    "R5-cm3-AC1",
+    "R5-cm3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_commentary_same_ticket.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "four new tests; setup of three existing draft-route tests changed to send a request_id and carry a matching report_ref",
+   "artifact_covered_by": [
+    "R5-cm3-AC1",
+    "R5-cm3-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R5-cm3-AC1",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R5_CHECKS/r5_checks.py cm3-match expect: CM3-MATCH-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R5_CHECKS/r5_checks.py cm3-match",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: CM3-MATCH-OK passed=4 of 4",
+   "denominator": "4 of 4 named tests found and passed",
+   "status": "PASS",
+   "expect": "CM3-MATCH-OK"
+  },
+  {
+   "criterion_id": "R5-cm3-AC2",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R5_CHECKS/r5_checks.py cm3-regress expect: CM3-REGRESS-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R5_CHECKS/r5_checks.py cm3-regress",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: CM3-REGRESS-OK passed=196 (min 196) failed=0",
+   "denominator": "196 of 196 tests in the ticket_center tests folder passed (192 at the base plus 4 new)",
+   "status": "PASS",
+   "expect": "CM3-REGRESS-OK"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "in-memory table, no network",
+   "observed": "4 of 4 new tests and folder 196 passed",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "two in-place mutants of lambda_function.py, each restored byte-identical (cmp against a saved copy): (a) the recorded-id comparison removed from the folded deny; (b) the report_ref.request_id leg removed from the ConditionExpression",
+   "expected": "(a) the other-request and no-record deny tests fail; (b) the changed-between-read-and-write test fails",
+   "observed": "(a) 2 failed, 11 passed; (b) 1 failed, 12 passed; after restore cmp clean",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a deployed or live run, any real mail send",
+   "reason": "the order forbids any AWS or network call, deploy and send"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~23/TCKT_VNEXT.TO-R5-cm3.draft-only-on-the-ticket-that-names-the-request.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R5_CHECKS/r5_checks.py cm3-match",
+   "result": "CM3-MATCH-OK passed=4 of 4"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R5_CHECKS/r5_checks.py cm3-regress",
+   "result": "CM3-REGRESS-OK passed=196 (min 196) failed=0"
+  }
+ ]
+}

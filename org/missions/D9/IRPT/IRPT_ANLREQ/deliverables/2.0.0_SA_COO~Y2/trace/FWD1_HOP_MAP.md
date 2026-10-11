@@ -70,4 +70,12 @@ Of those, the CTO ruled three cuts (msg 4919): the ATTACH RELEASE for hops 9, 11
   @6f8aeb03b7): the boolean equals the `add_commentary` answer the form writes to the ticket, sent only on a ticketed request; the
   vendored schema copy moves with it; a portal candidate to the CTO. SERVICE FIRST: the live submission refuses an unknown member,
   so a form that sends it early breaks every filing (the same class as row `IRPT_ANLREQ-D2-S59`: cut after the act, not held by text).
+- **RULED 2026-10-11 ~21:5xZ (CTO msg 5911), binding the upload door's release pair (round 14, cell `AR-y-145` and the issuer's pair):**
+  (a) the live provider ask is WITHDRAWN (it writes rows, a stored original only Andrew may delete, and a vendor call on a stopped
+  path); (b) the release's after-read does NOT include a synthetic upload unless the pair shows, FROM THE CODE, which provider the
+  ticker check calls and that it is not the stopped YCharts path; otherwise the after-read is the reader's refusal alone and the
+  labels SUBTOTAL, SUM and ALL stay UNEXERCISED LIVE, said so; (c) PARKED for this seat's next issuance (owner `2.0.0_SA_COO~Y2`;
+  un-parks at the next L10 analysis): one cell, no call -- are SUBTOTAL, SUM or ALL real tickers? Any that is not joins the total
+  list with a Rule 24 record. INFERRED by this seat, not read from the repository: ALL is a listed company's symbol, so it is not
+  expected to join.
 

@@ -371,3 +371,20 @@ v0.42 and v0.43, and re-ran nothing.
 - Round 146: the guard is built as one pure function with 21 tests (the issuer's count); nothing served.
 - Round 149: the read behind IRPT_YCDGEN PRD v0.13. The issuer names its own defect in relaying a worker row whose base lacked a gate.
 - The issuer names three defects of its own in the packet; they are rows above.
+
+---
+
+## Added at rounds 150 and 151, 2026-10-11T21:54:43Z (input: msg 5927, packet @61319e7cad)
+
+Two build orders (IB-pr-454, IB-pr-455), no judgment criterion, nothing released. Held on the same condition (IB-pr-456, the release
+read, is running). This seat ran the grading module's tests at its review of PRD v0.44 (54 passed) and re-ran nothing else.
+
+- **D2-W310-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~310`): PRD v0.43's sentence and IB-pr-452's script count a 'repeat' differently; the product form follows the sentence and the face, and the seven of IB-pr-452 are the same seven over the whole run
+- **D2-W310-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~310`): The v0.37 kind NEITHER_CLOSE for a row the second witness places at neither close differs from the sizing script, which kept the row's kind OUTSIDE_ANCHOR; the claim is the same
+- **D2-W310-S3** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~310`): Seven of the 878 tickers asked returned no bar, three of them class-share tickers written with a dot (BF.B, BRK.A, BRK.B); the dash spelling was not tried because nothing is re-asked
+
+**For the slug.**
+- Round 150: the grading instrument's product form is in the tree and nothing imports it. Its window is in the contract (PRD v0.44,
+  signed): 40 trading days, a floor of 20 compared days.
+- Round 151: a submission may carry `commentary_requested`, in the tree only; not released. This is the service half of IRPT_YCDGEN
+  PRD v0.13.

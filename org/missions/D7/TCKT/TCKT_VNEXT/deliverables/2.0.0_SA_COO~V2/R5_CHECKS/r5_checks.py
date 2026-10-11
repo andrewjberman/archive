@@ -10,6 +10,8 @@
   cm2-regress R5-cm2-AC2  the whole ticket service test folder passes (at least 192)
   cm3-match   R5-cm3-AC1  a draft lands only on the ticket whose own record names that request
   cm3-regress R5-cm3-AC2  the whole ticket service test folder passes (at least 196)
+  pc2-classes R5-pc2-AC1  the clamp precheck lists every ticket handler the deployed code dispatches, each with a class
+  pc2-regress R5-pc2-AC2  the whole precheck test file passes (at least 21)
   ac-read     R5-ac1-AC1  the one-account read's findings file has its keys and every path it cites exists
 
 Each prints <NAME>-OK <detail> or <NAME>-FAIL <reason>; exit 0/1. Every pytest call is bounded at 110 s.
@@ -49,6 +51,13 @@ CM3_ROW = ["test_draft_is_accepted_only_when_the_tickets_recorded_request_id_mat
            "test_draft_on_a_ticket_with_no_recorded_request_gets_the_one_deny",
            "test_draft_body_must_carry_a_wellformed_request_id"]
 CM3_MIN = 196  # 192 at the base of TO-R5-cm3 plus its 4 tests
+PC2_TESTS = Path("org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~13/clamp_precheck/test_clamp_precheck.py")
+PC2_ROW = ["test_every_dispatched_ticket_handler_is_listed_with_a_class",
+           "test_a_handler_that_calls_a_clamp_helper_is_classed_profile_scope",
+           "test_the_two_commentary_handlers_are_listed_and_classed",
+           "test_a_dispatched_handler_with_no_class_makes_the_exit_nonzero",
+           "test_the_read27_line_and_its_table_rows_are_unchanged"]
+PC2_MIN = 21  # 16 at the base of TO-R5-pc2 plus its 5 tests
 AC_FILE = Path("org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~20/ONE_ACCOUNT_CHECK_READ.json")
 AC_KEYS = {"question", "files_read", "where_an_account_is_named_in_an_uploaded_file", "can_the_door_count_accounts_today",
            "where_the_check_can_live", "what_was_not_read", "claim"}
@@ -116,6 +125,8 @@ CHECKS = {
     "cm2-regress": lambda: regress(TK_DIR, CM2_MIN),
     "cm3-match": lambda: named(C6_TESTS, CM3_ROW),
     "cm3-regress": lambda: regress(TK_DIR, CM3_MIN),
+    "pc2-classes": lambda: named(PC2_TESTS, PC2_ROW),
+    "pc2-regress": lambda: regress(PC2_TESTS, PC2_MIN),
 }
 
 

@@ -22,3 +22,22 @@ while an order is not terminal. OWNER: `3.0.0_SA_CVO`. UN-PARKS ON: no IRPT_DASH
 - The Rule 24 proposal for the timing classes waits on the CTO's ruling: two axes, six new tokens with 0 prior hits each
   (the worker's census), 47 not determined, 3 START, 1 MID.
 - Not established: whether a dedupe on the id alone drops a real row among the 590 ids that repeat inside one group.
+
+---
+
+## Added at round 79, 2026-10-11T21:53:32Z (input: msg 5916, round 79 drained; orders DB-b-151 to DB-b-153)
+
+No judgment criterion. Held on the same condition: DB-b-154 and DB-b-155 are issued. This seat made no read of its own.
+
+- **D2-W124-S1** (filed by `0.9.0_WK_IRPT_DASHBD~124`): the original transactions store was rewritten after the copy was taken. On
+  two of three sampled days the original now holds 0 rows where the copy holds rows; on the third it is the reverse; no id is shared
+  on any of the three. The copy equalled the original when it was taken (3 of 3, by size and ETag against the version then current).
+
+**For the slug.**
+- **This is a finding about a live store another fabric owns, and it may be data loss:** two days whose rows now exist only in a
+  copy. The cause is not established (no run log was read) and whether gold readers now miss those days is not measured. It belongs
+  with the Black Diamond pipeline's owner, where the price-median row already went (CTO msgs 5880 and 5906).
+- Rows D2-W116-S2 and D2-W118-S1 are reported remedied by workers' reads (the copy against the original; the three withdrawn
+  figures marked in their records). By the CTO's rule each closes on a read the issuer makes itself.
+- Of the 42 quoted figures, none is read from the original store: 19 from the copy, 12 from a custodian pull, 4 served, 4 derived,
+  3 withdrawn (the worker's tally).
