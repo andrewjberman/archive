@@ -1,0 +1,96 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bx-4",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bx-4.trade-day-return.md",
+  "group": "OTHER",
+  "vintage_commit": "ac8000c35b"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~141",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round76.md",
+  "vintage_commit": "ac8000c35b",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bx-4.trade-day-return.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~141/TRADE_DAY_RETURN.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement record; nothing fetched; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB76bx4-AC1",
+    "CB76bx4-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~141/TRADE_DAY_RETURN.csv",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only per-fund table of the 247 funds with a trade row; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB76bx4-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~141/TRADE_DAY_RETURN.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement note; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB76bx4-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB76bx4-AC1",
+   "criterion_verbatim": "the quantity was written first; the control reproduces on 12 of 12; the measured trade account-days that change by more than 10 basis points are counted in three bands (band_sum equals changed_over_10bp).",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~141/TRADE_DAY_RETURN.json',encoding='utf-8'));c=d['control'];p=d['population'];b=d['bands'];print('TRADE-DAY-RETURN quantity_written=%s control=%d/%d trade_account_days=%d measured=%d blank=%d accounts=%d accounts_measured=%d changed_over_10bp=%d b10_50=%d b50_200=%d over_200=%d band_sum=%d accounts_changed=%d funds_changed=%d'%(bool(d['quantity']['written_at']),c['reproduced'],c['days'],p['trade_account_days'],p['measured'],p['blank'],p['accounts'],p['accounts_measured'],d['changed_over_10bp'],b['b10_50'],b['b50_200'],b['over_200'],b['b10_50']+b['b50_200']+b['over_200'],d['accounts_changed'],d['funds_changed']))\"",
+   "expect": "TRADE-DAY-RETURN quantity_written=True control=12/12",
+   "output_evidence": "TRADE-DAY-RETURN quantity_written=True control=12/12 trade_account_days=15103 measured=31 blank=6143 accounts=928 accounts_measured=13 changed_over_10bp=16 b10_50=9 b50_200=5 over_200=2 band_sum=16 accounts_changed=4 funds_changed=3 (rc 0)",
+   "denominator": "16 of 31 measured trade account-days over 10 bp; 15103 trade account-days = 31 measured + 6143 blank + 8929 no served close; 12 of 12 round 75 purchase days reproduced; quantity written 2026-10-11T22:47:16Z",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB76bx4-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the quantity is the trade term alone and is stated as such, with the carried holding left out by name; the control is run before the count; the changes are split by the row's price fit so a fee-sized gap is not read as the defect; the blank days are counted apart and not added; no account id or amount appears.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read TRADE_DAY_RETURN.json (quantity, control, population, bands, by_sign, by_kind, by_year, by_price_fit, largest_bp, on_blank_days_if_measured, headline, not_established), TRADE_DAY_RETURN.md and TRADE_DAY_RETURN.csv",
+   "output_evidence": "quantity file stamped 2026-10-11T22:47:16Z before any row was computed, purchase and sale stated separately (sale term zero), carried holding named as not revalued; control 12 of 12 run before the count; by_price_fit 0 of 8 changed within 5 percent of the price paid, 14 of 17 changed over 20 percent off; blank days 6143 counted apart (literal and strict), not added; no account id or account amount in the committed files (scan run after commit)",
+   "denominator": "31 measured trade account-days; 16 changed; 15103 trade account-days; 12 control days; 247 funds in the CSV",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~141/ADVI_COTBKF.TO-CB-bx-4.trade-day-return.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB76bx4-AC1)",
+   "result": "TRADE-DAY-RETURN quantity_written=True control=12/12 trade_account_days=15103 measured=31 blank=6143 accounts=928 accounts_measured=13 changed_over_10bp=16 b10_50=9 b50_200=5 over_200=2 band_sum=16 accounts_changed=4 funds_changed=3"
+  }
+ ]
+}
