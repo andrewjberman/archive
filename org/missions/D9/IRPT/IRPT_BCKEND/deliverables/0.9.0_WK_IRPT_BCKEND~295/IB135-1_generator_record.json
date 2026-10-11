@@ -1,0 +1,75 @@
+{
+  "schema_change_summary": [
+    "data.properties: request_ref, extraction_validation, undated_sections, extraction_coverage are now a v1 $ref into AnalysisReport.schema.json (request_ref is equal sans description in v1 and v2, so true of both forms; the other three exist in the vendor form only); sections is type array (a v1 or v2 $ref there would refuse the other form's item shape).",
+    "OPAL form members provider, request_ref, sections, computation_validation: keep the v2 $ref's validation, moved inside allOf[{if:{},then:{$ref v2}}] beside a type/const the generator renders, because the generator accepts a $ref only to a v1 sibling document and throws on opal://irpt/contracts/v2/... (see row W295-S2).",
+    "Vendor form, additionalProperties false on both forms, required lists and the anyOf: unchanged."
+  ],
+  "generator": {
+    "command": "cd portal && bun run src/pages/InvestorReporting/__tests__/fe-s-13/gen-all.ts",
+    "portal_ref": "b92696c1ed61",
+    "exit_code": 0,
+    "ran_on_the_changed_schema": true,
+    "output_line": "gen-wire: 25 of 25 documents, 19 of 24 routes' responses; gen-consumed: 11 of 11 contracts, 24 operation(s), 24 route key(s), 6 envelope field(s)",
+    "how_the_contract_folder_is_found": "gen-wire.ts CONTRACTS_DIR_URL = new URL('../../../../../../docs/contracts/investor-reporting/v1/', import.meta.url) unless env IRPT_CONTRACTS_DIR is set (not set): six levels up from fe-s-13/ is the workspace root, here C:/dev/wk-irpt-bckend-295 because portal/ is nested in the worktree. Proved by the control: the base schema in this worktree made the generator throw naming request_ref."
+  },
+  "control_base_schema_exit_code": 1,
+  "control_base_schema_error": "UNRENDERABLE SCHEMA at responses/analysis-report.response.schema.json#/properties/data/properties/request_ref: no $ref, const, enum or type this generator can render -- it would have emitted the literal unknown",
+  "intermediate_runs": [
+    "members typed with type only, Opal-form v2 $refs untouched: exit 1, UNRENDERABLE SCHEMA at responses/analysis-report.response.schema.json#/properties/data/oneOf/1/properties/provider: $ref 'opal://irpt/contracts/v2/AnalysisReport.schema.json#/$defs/opal_engine/properties/provider' names no sibling document schema",
+    "data-level members typed by type only, Opal form wrapped: generator exit 0 but F14-AC13 and F57-AC2 stayed red: 'slice property undated_sections is inline in the contract and absent from the published map for analysis-report' (the tests read a $ref member from the producer document and an inline member from portal fixtures/smoke/default.json); fixed by the v1 $refs above"
+  ],
+  "portal_tests": {
+    "IVE98": {
+      "passed": true,
+      "file": "src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-98.generators-drift.test.ts",
+      "result_line": "WIRE FOLDER DRIFT: 0 of 28 file(s) differ from a fresh run of BOTH generators -- (none); 1 pass, 0 fail"
+    },
+    "F14-AC13": {
+      "passed": true,
+      "file": "src/pages/InvestorReporting/__tests__/fe-s-14/envelope.test.ts",
+      "result_line": "5 pass, 0 fail (Ran 5 tests across 1 file)"
+    },
+    "F57-AC2": {
+      "passed": true,
+      "file": "src/pages/InvestorReporting/__tests__/fe-s-57/carry.test.ts",
+      "result_line": "4 pass, 0 fail (Ran 4 tests across 1 file)"
+    }
+  },
+  "wire_files_rewritten_by_generator": [
+    "src/pages/InvestorReporting/contracts/wire/AnalysisReport.ts",
+    "src/pages/InvestorReporting/contracts/wire/AnalysisRequest.ts",
+    "src/pages/InvestorReporting/contracts/wire/AnalysisRequestPdf.ts",
+    "src/pages/InvestorReporting/contracts/wire/AnalysisSubmissionRequest.ts",
+    "src/pages/InvestorReporting/contracts/wire/AnalysisUploadRequest.ts",
+    "src/pages/InvestorReporting/contracts/wire/AnalysisUploadResult.ts",
+    "src/pages/InvestorReporting/contracts/wire/BoundaryRefusal.ts",
+    "src/pages/InvestorReporting/contracts/wire/ComparisonCatalogue.ts",
+    "src/pages/InvestorReporting/contracts/wire/DirectoryContext.ts",
+    "src/pages/InvestorReporting/contracts/wire/DirectoryEntry.ts",
+    "src/pages/InvestorReporting/contracts/wire/DirectoryPage.ts",
+    "src/pages/InvestorReporting/contracts/wire/ExportBundle.ts",
+    "src/pages/InvestorReporting/contracts/wire/ExportReceipt.ts",
+    "src/pages/InvestorReporting/contracts/wire/HoldingsSnapshot.ts",
+    "src/pages/InvestorReporting/contracts/wire/NarrativePacket.ts",
+    "src/pages/InvestorReporting/contracts/wire/OwnedAnalysisRequest.ts",
+    "src/pages/InvestorReporting/contracts/wire/OwnedAnalysisRequestHistory.ts",
+    "src/pages/InvestorReporting/contracts/wire/PerformanceReport.ts",
+    "src/pages/InvestorReporting/contracts/wire/PublicStatusEnvelope.ts",
+    "src/pages/InvestorReporting/contracts/wire/RenderPackage.ts",
+    "src/pages/InvestorReporting/contracts/wire/RequestComposition.ts",
+    "src/pages/InvestorReporting/contracts/wire/ResolvedScope.ts",
+    "src/pages/InvestorReporting/contracts/wire/SelectedAccounts.ts",
+    "src/pages/InvestorReporting/contracts/wire/SelectionRequest.ts",
+    "src/pages/InvestorReporting/contracts/wire/StatusEnvelope.ts",
+    "src/pages/InvestorReporting/contracts/wire/consumed.ts",
+    "src/pages/InvestorReporting/contracts/wire/index.ts",
+    "src/pages/InvestorReporting/contracts/wire/responses.ts"
+  ],
+  "wire_files_with_a_content_change": [
+    "src/pages/InvestorReporting/contracts/wire/responses.ts"
+  ],
+  "wire_files_note": "git status lists all 28 files modified after the run (LF written over a CRLF checkout); git diff --ignore-cr-at-eol shows one file with a content change, responses.ts (+15 -2: the source sha256 and AnalysisReportResponseWire.data). The diff in IB135-1_portal_wire_regenerated.diff is that one change.",
+  "portal_files_committed_by_this_cell": 0,
+  "other_untyped_members_found": [],
+  "other_untyped_members_note": "The generator rendered all 19 response schemas that routes.json declares (19 of 24 routes carry a response_schema; custody-report-read, custody-report-persist, analysis-request-original, reporting-read, reporting-summary-read declare none) and refused none after this change."
+}
