@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "335258e392"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "335258e392",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-c-1.md"
+  },
+  "to_id": "MDPF_CANON.TO-CN-c-1",
+  "assignee": "0.9.0_WK_MDPF_CANON~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~8/X2_GLOBAL_BASIS.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; document only. Twelve read-only s3api get-object reads of portal/gold/mdpf/<scope>/{aum-metrics,account-distribution,aggregate-aua-timeseries}/2026-10-08.json; no AWS write."
+    },
+    {
+      "path_or_key": "infra/logic/06_CONFORMANCE_LEDGER.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; one line changed: the X2 row cites the round-3 basis path in place of the round-2 path. Status GRANTED unchanged."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (cell_refs CN-c-1): r3_checks.py basis -- expect: ROUND 3 BASIS: 3 of 3 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round3/checks/r3_checks.py\" basis; echo \"exit=$?\"",
+      "output_evidence": "ARM 1 SHAPE: PASS -- as-of 2026-10-08, denominator present, headings 3 of 3\nARM 2 FAMILIES: PASS -- 4 of 4 families carry an integer in the min firms column\nARM 3 CITED: PASS -- 6 ledger line(s) name X2; 1 cite the basis path\nROUND 3 BASIS: 3 of 3 arms\nexit=0",
+      "denominator": "3 of 3 arms",
+      "status": "PASS",
+      "expect": "ROUND 3 BASIS: 3 of 3 arms",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is JUDGMENT, graded at the round-3 close (never self-graded): a seat that did not write the file reads the same objects at the same as-of and reads back every min firms integer and every single-firm entry's account count equal.",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment=true: no invocation; graded at the round-3 close by a seat that did not write the file",
+      "output_evidence": "Not run by the worker (judgment row). The worker's measured values for the reader: min firms = 3 (headline sums), 0 (by_model), 1 (non_model_aua), 1 (inflection_non_model_aua); single-firm entries 10 of 20 (aggregate-aua-timeseries), 9 of 14 (account-distribution), 2 of 7 (aum-metrics), listed with account counts in X2_GLOBAL_BASIS.md.",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round-3 close",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "r3_checks.py basis with R3_ROOT pointing at an empty reference tree (no basis file, no ledger): the base state of the check.",
+      "expected": "0 of 3 arms, exit nonzero.",
+      "observed": "ROUND 3 BASIS: 0 of 3 arms, exit=1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "second single run on the final tree",
+      "observed": "ROUND 3 BASIS: 3 of 3 arms, exit=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No AWS write of any kind; no served-key move",
+      "reason": "Read-only s3api get-object for twelve objects; the basis is a document and one ledger citation."
+    },
+    {
+      "item": "X2 row status (GRANTED)",
+      "reason": "Not changed, as the cell directs; the ledger already reads GRANTED, which is recorded as surprise row MDPF_CANON-D1-W8-S5."
+    },
+    {
+      "item": "Fix or argument that the figure is safe",
+      "reason": "Out of scope by the cell: the basis states what is emitted and proposes nothing."
+    },
+    {
+      "item": "AC3 judgment grading",
+      "reason": "Graded at the round-3 close by a seat that did not write the file."
+    }
+  ],
+  "surprises": [
+    "MDPF_CANON-D1-W8-S1: 12 global by_model entries held at one firm is not reproduced; the stated rule gives 10 (aggregate-aua-timeseries)",
+    "MDPF_CANON-D1-W8-S2: two global by_model entries (opal_growth_sma, opal_div_sma) carry non-null figures with no firm holding them at 2026-10-08",
+    "MDPF_CANON-D1-W8-S3: served global opal_aggregate_aua is not model_aua plus non_model_aua at 2026-10-08 (identity holds on 460 of 484 non-null dates)",
+    "MDPF_CANON-D1-W8-S4: single-firm value equality holds for 2 of 9 account-distribution entries",
+    "MDPF_CANON-D1-W8-S5: the X2 ledger row already reads GRANTED; the cell's OWED premise does not match"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round3/checks/r3_checks.py basis",
+      "result": "ROUND 3 BASIS: 3 of 3 arms, exit=0"
+    },
+    {
+      "tool": "aws s3api get-object (read-only, via .tools/aws)",
+      "invocation": "s3api get-object --bucket opal-data-assets --key portal/gold/mdpf/<scope>/<object>/2026-10-08.json (12 objects)",
+      "result": "rc=0 for all 12; each object present at 2026-10-08"
+    }
+  ]
+}
