@@ -137,6 +137,32 @@ On the adapter's built zip, as filed in `deliverables/2.0.0_SA_COO~P2/checks/r11
 through; 0 references to `ANALYSIS_COMMENTARY` in reached code. **Count = 0: the adapter's apply proceeds.** The same read
 is owed on irpt-status's built zip before its apply.
 
+## A5. AMENDMENT 3 (2026-10-11 ~04:3xZ) -- condition 8 on irpt-status: count 0, PROCEED (2.0.0_SA_COO~Y2 msgs 4064, 4072)
+
+2.0.0_SA_COO~Y2's walker read 7 routes, 434 of 559 functions reached, 0 `put`, 0 `reserve` (negative control: 4). It cannot
+see a family that is not a literal, and it found 4 reached `ArtifactRepository.get` sites, none passing a family: the method
+reads the family from the stored row. The promote was HELD on that. This seat read all four at commit 361c44fa9d (the tree
+at HEAD is byte-equal for both files):
+
+- `ops/owned_requests.py:194` (`head`), `:202` and `:246` (`get`): each follows `_validate`, which raises unless
+  `ref["family"] == "REQUEST_COMPOSITION"` (line 187), and each requires the stored ref to equal that ref afterwards.
+- `ops/prospect_dates.py:245`: inside `_artifact(ref, family)`, which raises unless `ref["family"] == family`. Its four
+  callers pass literals: `REQUEST_COMPOSITION` (253), `NORMALIZED_PORTFOLIO` (269), `ORIGINAL_HOLDINGS` (295),
+  `ORIGINAL_CSV` (299).
+- `git grep ANALYSIS_COMMENTARY` over `ops/` at that commit, tests excluded: 0 lines.
+
+**Correction, ~04:4xZ (2.0.0_SA_COO~Y2 msg 4080): `_artifact` has SEVEN callers in the package, not four.** This seat's
+caller read searched `prospect_dates.py` alone. Three more are in `ops/owned_report.py`, read here after the correction
+with `git grep "_artifact(" 361c44fa9d` over the whole investor-reporting tree: `:296` `REQUEST_COMPOSITION`, `:309`
+`NORMALIZED_PORTFOLIO`, and `:331`, which passes a VARIABLE, `family`, assigned on `:330` as
+`"ORIGINAL_HOLDINGS" if template else "ORIGINAL_CSV"`. So one argument is not a literal, and it takes one of two literal
+values, neither `ANALYSIS_COMMENTARY`. Seven of seven callers bind to the same four families. The verdict below stands;
+its basis as first written was incomplete, and the promote was released on the incomplete basis at 04:36Z.
+
+So every reached read is bound to a literal family before the call, and none is `ANALYSIS_COMMENTARY`. **Count = 0. The
+irpt-status promote proceeds.** The three widenings still close APPLIED, UNEXERCISED on this function (condition 9;
+condition 5's subject cannot be driven, no credential).
+
 The pair's R0 to R5 and both branches stand as written. Conditions 1, 2, 3, 5, 6, 8 and 9 of this half apply to it. The
 pair's "Recorded, no rollback" line for a typed refusal on R4 is accepted: it is recorded and routed, and FWD-1 of
 IRPT_YCDGEN is not graded REALIZED on it.

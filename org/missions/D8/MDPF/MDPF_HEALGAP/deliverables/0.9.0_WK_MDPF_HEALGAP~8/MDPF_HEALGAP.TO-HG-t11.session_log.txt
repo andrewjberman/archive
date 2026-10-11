@@ -1,0 +1,34 @@
+SESSION LOG -- 0.9.0_WK_MDPF_HEALGAP~8 on MDPF_HEALGAP.TO-HG-t11 (verbatim command outputs, worktree C:/Dev/wk_healgap_r3_8, branch wk-MDPF_HEALGAP-8)
+
+[base, before patches] python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_r3_rules.py --t11  -> rc=1
+T11-BAD rules (other than bd_asset_dim_pipeline) targeting module.asset_dim_trigger.function_arn: [] (want exactly 1)
+[base, before patches] python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t11_assetdim.py --ssm  -> rc=1
+SSMGUARD-BAD no 'runuser ... hg_guard.py' guard line
+
+[patches] git apply --check t11_eventbridge_tf.patch rc=0 ; git apply --check t11_ssm_document.patch rc=0
+[patches] git apply t11_eventbridge_tf.patch && git apply t11_ssm_document.patch  rc=0 ; git diff --stat: 2 files changed, 69 insertions(+)
+
+[after patches] hg_r3_rules.py --t11  -> rc=0
+T11-OK new_rule=bd_asset_dim_reattempt schedule=cron(40 22 ? * MON-FRI *) existing=bd_asset_dim_pipeline cron(10 22 ? * MON-FRI *)
+[after patches] hg_t11_assetdim.py --ssm  -> rc=0
+SSMGUARD-OK guard between staging and pull; exists -> skip + shutdown armed; read failed (rc 1,2) -> download runs
+
+[reference checks] module source ../modules/opal_name exists (main.tf, variables.tf, generated_locals.tf); output "name" at main.tf:35; kind validation accepts "daily"; function validation accepts "asset-dim-reattempt".
+[reference checks] document runs under set -eo pipefail (line 13); pin data/black_diamond/scripts/bronze/_asset_dim_rest_pin.py defines ASSET_DIM_REST_PIN with bucket opal-data-bd, key_prefix blackdiamond/49financial/bronze/assets_dim_rest, object assets_dim_rest.parquet.
+
+[direct measure, checker's own _arm() harness, real document] guard_rc=0 -> no RUNUSER pull line, SHUTDOWN -h +2 armed, script rc=0
+[direct measure] guard_rc=1 -> RUNUSER ... pull_bd_asset_dim_rest.py pull present, script rc=0
+[direct measure] guard_rc=2 -> RUNUSER ... pull_bd_asset_dim_rest.py pull present, script rc=0
+
+[mutant A, always skip] .scratch/mutant_always_skip.json (-eq 0 changed to -ge 0)
+  guard_rc=0 pull_ran=False shutdown_armed=True ; guard_rc=1 pull_ran=False shutdown_armed=True ; guard_rc=2 pull_ran=False shutdown_armed=True
+  HG_T11_DOC=.scratch/mutant_always_skip.json hg_t11_assetdim.py --ssm -> SSMGUARD-OK ... rc=0   (DID NOT FIRE on the failed-read arm)
+[mutant B, shutdown removed on skip path] .scratch/mutant_noshutdown.json
+  HG_T11_DOC=.scratch/mutant_noshutdown.json hg_t11_assetdim.py --ssm -> SSMGUARD-BAD guard read OK but the shutdown was not armed (the instance would be stranded) rc=1   (FIRED on the skip arm)
+
+[determinism] hg_t11_assetdim.py --ssm, run 1 and run 2 -> both SSMGUARD-OK ... rc=0 (identical)
+[determinism] hg_r3_rules.py --t11, run 1 and run 2 -> both T11-OK ... rc=0 (identical)
+
+[commit] 25c71ce573 impl(MDPF_HEALGAP HG-t-11, 0.9.0_WK_MDPF_HEALGAP~8): asset-dim re-attempt rule at 22:40Z and a guard in the SSM document (LOCAL, branch wk-MDPF_HEALGAP-8); 3 files, 93 insertions
+[not run] no terraform init/plan/apply, no safe-apply, no aws ssm send-command/update-document, no lambda invoke, no vendor call.
+[timers] none armed.

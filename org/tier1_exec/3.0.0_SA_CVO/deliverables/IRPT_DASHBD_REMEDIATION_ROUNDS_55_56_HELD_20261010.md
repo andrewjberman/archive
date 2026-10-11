@@ -97,3 +97,109 @@ docstring redaction, so the R45 release packet needs a refresh at the new source
  }
 ]
 ```
+
+## Added at the rounds 57-58 compile (2026-10-11T04:22:33Z)
+
+Inputs: `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~88/NEVER_WIDEN_PACKET_R45_RELEASE_REFRESH.md` and `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~89/COTTONWOOD_VALUE_RULE24.json` (msg 4035 (rounds 57 and 58 drained @2a6ac2e4e0, @b01e44444e)).
+UN-PARKS ON: TO-DB-b-86 and TO-DB-b-116 terminal. D2-W88-S1 and D2-W88-S3 are ARMED and sit in the project's INVESTIGATION_v1.md
+with their disarm owners; they do not wait on this file.
+
+```text
+[
+ {
+  "id": "IRPT_DASHBD-D2-W88-S1",
+  "project": "IRPT_DASHBD",
+  "fabric": "dell2",
+  "class": "BLOCKING",
+  "hazard_standing": "ARMED",
+  "mechanism": "On the 2026-10-08 kit day the returns table is not hash-equal between the live-pinned members and HEAD's: method_version goes from 2 to null on all 6,901 rows, because HEAD's producer carries DB-b-96 and DB-b-102 while the staged sources.json stays at its pin. An R45 release at HEAD's producer with the pinned sources.json serves a null method_version.",
+  "evidence": [
+   "investigation row IRPT_DASHBD-D2-W88-S1",
+   "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~88/NEVER_WIDEN_PACKET_R45_RELEASE_REFRESH.md"
+  ],
+  "remedy": "The R45 pair names which sources.json rides the release (one that declares method_version for the 49F source), and the kit comparison reads method_version equal on all rows before the apply.",
+  "owner": "2.0.0_SA_COO~D2",
+  "round": "v59",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "2.0.0_SA_COO~D2",
+   "round": "v59"
+  },
+  "closed": false
+ },
+ {
+  "id": "IRPT_DASHBD-D2-W88-S3",
+  "project": "IRPT_DASHBD",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "ARMED",
+  "mechanism": "The returns manifest the four-member candidate writes states method_version, valuation_source, fee_treatment and price_basis as the literal absent, where the live code writes method_version 2.",
+  "evidence": [
+   "investigation row IRPT_DASHBD-D2-W88-S3",
+   "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~88/NEVER_WIDEN_PACKET_R45_RELEASE_REFRESH.md"
+  ],
+  "remedy": "DB-b-115 (in flight) lands the manifest fields; the close is the kit manifest read with method_version 2 stated.",
+  "owner": "2.0.0_SA_COO~D2",
+  "round": "v59",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "2.0.0_SA_COO~D2",
+   "round": "v59"
+  },
+  "closed": false
+ },
+ {
+  "id": "IRPT_DASHBD-D2-W89-S1",
+  "project": "IRPT_DASHBD",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "The Cottonwood adapter's docstring and COLUMNS_NULL entry say method_version is NULL on purpose while the code stamps 3; METHOD_ROWS row 3 does not state as-traded close or net of fees and inherits an income basis and flow convention measured for the custodian channel.",
+  "evidence": [
+   "investigation row IRPT_DASHBD-D2-W89-S1",
+   "org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_DASHBD_ROUND_58_L9_GRADE_20261011.md"
+  ],
+  "remedy": "Before the first Cottonwood partition is minted: correct the adapter's two stale statements, and read the emitted dim row 3 and manifest for a sentence false for Cottonwood, editing row 3 under its own rule-24 record if one is found.",
+  "owner": "2.0.0_SA_COO~D2",
+  "round": "v59",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "2.0.0_SA_COO~D2",
+   "round": "v59"
+  },
+  "closed": false
+ }
+]
+```
+
+## Added at the rounds 59-62 compile (2026-10-11T05:21:36Z)
+
+Inputs: msg 4142 (rounds 59-62 drained @bbc9e11292, @2f0664fab0, @6d0b3ce3a8, @4d4e3ee317).
+Follow-on with no row yet, for the same slug: the live 49F thresholds file carries no claims, so its next dim row reads `held`
+on two thresholds that are measured (grade file `org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_DASHBD_ROUND_62_L9_GRADE_20261011.md`).
+
+```text
+[
+ {
+  "id": "IRPT_DASHBD-D2-W93-S3",
+  "project": "IRPT_DASHBD",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "The dim_return_method contract's method_versions lists rows 1 and 2, while the producer's METHOD_ROWS holds rows 2 and 3. Row 3 is the row the Cottonwood mint stamps, and the contract does not declare it.",
+  "evidence": [
+   "investigation row IRPT_DASHBD-D2-W93-S3",
+   "org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json at HEAD, contract_version 0.4.0"
+  ],
+  "remedy": "The contract lists row 3 before the first row-3 partition is written (the CB-al-2 mint), under the rule-24 record DB-b-102 left beside its deliverable.",
+  "owner": "2.0.0_SA_COO~D2",
+  "round": "v63",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "2.0.0_SA_COO~D2",
+   "round": "v63"
+  },
+  "closed": false
+ }
+]
+```

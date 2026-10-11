@@ -1,0 +1,16 @@
+MDPF_DEMQUE.TO-DQ-t25 -- worker session log, 0.9.0_WK_MDPF_DEMQUE~21, worktree C:/dev/wk-demque-21, branch wk-MDPF_DEMQUE-21, base ba3ee9bd48
+
+1. Tree check: git rev-parse --abbrev-ref HEAD -> wk-MDPF_DEMQUE-21; test -d org && test -d .tools -> TREE-OK.
+2. Baseline (before edits), timeout 120:
+   dq_t25_tests.py -> "TQ-BAD no file data\mdpf\scripts\demque\test_demque_tier_quote.py", rc=1
+   dq_t25_quote.py -> "b: tier=1 finish=2026-10-17 today=0" (the defect: SHT8 tier-1 quoted as a backfill), "TQQ-BAD arms=a,b,c1,c2", rc=1
+3. Edits: bbg_quote.py (docstring paragraph replaced; history branch keyed on tier; helpers _is_tier1, _history_tier1, _history_backfill; constants PRODUCTION_TIER, HISTORY_TIER1_BASIS); test_demque_tier_quote.py (new, three named tests); test_demque_bbg.py (weekday test moved to bql; history backfill test added).
+4. Commit 16b6e889a8 (code, tests) via safe-commit.sh; commit-gate passed on 3 of 3 files.
+5. Checks after edits:
+   python -m py_compile bbg_quote.py -> COMPILE-OK
+   dq_t25_tests.py -> 3 passed in 0.80s, "TQ-OK", rc=0
+   dq_t25_quote.py -> "a: tier=4 finish=2026-10-17 today=0"; "b: tier=1 finish=2026-10-12 today=7322"; "c1: finish=None gap=history allowance per day not positive (ceiling 5858, reserve 7322); history ceiling not measured (claim held)"; "c2: finish=2026-10-24 today=0"; "TQQ-OK ...", rc=0
+   pytest data/mdpf/scripts/demque --ignore data/mdpf/scripts/demque/test_demque_land.py -q -> 1 failed, 93 passed (failure: test_demque_bbg_ledger_upload.py::test_reads_record_lines_and_converts_rows_to_cells_per_mode, outside grant, filed MDPF_DEMQUE-D1-W21-S1)
+6. Mutant control (.scratch/mutant_run.py, uncommitted): _is_tier1 patched to False; named tests -> tier-1 test FAIL, the two others PASS; "MUTANT fails 1 of 3 named tests".
+7. Determinism: dq_t25_quote.py run twice, stdout md5 5975da09185e6b49723d8862070891f7 both times.
+8. Surprise rows MDPF_DEMQUE-D1-W21-S1 (outside-grant test failure) and -S2 (inferred reserve claim and int tier outside 1-5 not stated in the order) committed 67efaf3b35.
