@@ -18,7 +18,8 @@ REQ_B = "REQ-" + "b" * 24
 REQ_C = "REQ-" + "c" * 24
 REQ_OLD = "REQ-" + "0" * 24
 FILE_SHA = hashlib.sha256(b"synthetic").hexdigest()
-SENT = "sar1b-" + FILE_SHA[:24]
+RUN_LABEL, RUN_IAT = "R2-test-1", 1_800_000_000
+SENT = run.submission_token(RUN_LABEL, RUN_IAT, FILE_SHA)
 TKT = "TCKT-SYN-0001"
 LIST_PATH = "/api/scoped/investor-reporting/analysis/requests"
 
@@ -117,7 +118,7 @@ def test_polls_id_from_submit_answer(monkeypatch, sleeps):
     fake = install(monkeypatch, {("GET", LIST_PATH): listing(REQ_OLD),
                                  SUBMIT: res(200, {"data": {"request_id": REQ_A}})})
     hops, named = trace_hops()
-    rid = run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named)
+    rid = run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named, SENT)
     assert rid == REQ_A and hops["d_analysis"]["request_id"] == REQ_A
     assert hops["d_analysis"]["request_id_source"] == "submission_answer"
     assert hops["d_analysis"]["idempotency_token"] == SENT
@@ -132,7 +133,7 @@ def test_falls_back_to_request_list_when_answer_has_no_id(monkeypatch, sleeps):
         ("GET", LIST_PATH): [listing(REQ_OLD), listing(REQ_B, REQ_OLD)],
         SUBMIT: res(200, {"data": {"accepted": True}})})
     hops, named = trace_hops()
-    rid = run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named)
+    rid = run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named, SENT)
     assert rid == REQ_B and hops["d_analysis"]["request_id"] == REQ_B
     assert hops["d_analysis"]["request_id_source"] == "request_list"
     assert hops["d_analysis"]["candidates"] == 1
@@ -145,7 +146,7 @@ def test_a_non_req_id_in_the_answer_is_not_used(monkeypatch, sleeps):
     install(monkeypatch, {("GET", LIST_PATH): [listing(), listing(REQ_B)],
                           SUBMIT: res(200, {"data": {"request_id": SENT}})})
     hops, named = trace_hops()
-    rid = run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named)
+    rid = run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named, SENT)
     assert rid == REQ_B and hops["d_analysis"]["request_id"] != SENT
 
 
@@ -160,7 +161,7 @@ def test_never_polls_the_sent_token(monkeypatch, sleeps):
         ("GET", "/api/scoped/tickets/%s" % TKT): ticket_with(REQ_C)})
     hops, named = trace_hops()
     trace = {"hops": list(hops.values()), "named_failures": named}
-    run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA)
+    run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA, SENT)
     submit_at = next(i for i, c in enumerate(fake.calls) if (c[0], c[1]) == SUBMIT)
     after = fake.calls[submit_at + 1:]
     assert after, "nothing was read after the submission"
@@ -178,18 +179,18 @@ def test_ambiguous_request_list_is_a_named_failure(monkeypatch, sleeps):
         ("GET", LIST_PATH): [listing(REQ_OLD), listing(REQ_A, REQ_B, REQ_OLD)],
         SUBMIT: res(200, {"data": {}})})
     hops, named = trace_hops()
-    assert run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named) is None
+    assert run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named, SENT) is None
     assert hops["d_analysis"]["request_id"] is None and hops["d_analysis"]["candidates"] == 2
     assert named[-1]["hop"] == "d_analysis" and named[-1]["reason"] == "REQUEST_ID_UNRESOLVED"
     assert named[-1]["candidates"] == 2
     # zero candidates is the same named failure
     fake.script[("GET", LIST_PATH)] = [listing(REQ_OLD)]
     hops, named = trace_hops()
-    assert run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named) is None
+    assert run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named, SENT) is None
     assert named[-1]["reason"] == "REQUEST_ID_UNRESOLVED" and named[-1]["candidates"] == 0
     # and a failed request, hence no ids, never lets e..g run
     hops, named = trace_hops()
-    run.hops_d_to_g("tok", {"hops": []}, hops, named, TKT, "in-1", FILE_SHA)
+    run.hops_d_to_g("tok", {"hops": []}, hops, named, TKT, "in-1", FILE_SHA, SENT)
     assert hops["e_ready"]["outcome"] == "UNREACHABLE" and hops["g_open"]["outcome"] == "UNREACHABLE"
 
 
@@ -216,7 +217,7 @@ def test_failed_stage_is_recorded_not_retried(monkeypatch, sleeps):
         ("GET", rpath(REQ_A)): refusal("UNEXPECTED")})
     hops, named = trace_hops()
     trace = {"hops": list(hops.values()), "named_failures": named}
-    run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA)
+    run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA, SENT)
     e = hops["e_ready"]
     assert e["polls"] == 1 and e["reason"] == "UNEXPECTED" and e["refused"] is True
     assert sleeps == []
@@ -323,7 +324,7 @@ def test_bound_reached_is_not_ready_never_a_pass(monkeypatch, sleeps):
         ("GET", rpath(REQ_A)): refusal("NOT_FOUND")})
     hops, named = trace_hops()
     trace = {"hops": list(hops.values()), "named_failures": named}
-    run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA)
+    run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA, SENT)
     e = hops["e_ready"]
     assert e["outcome"] == "NOT_READY" and e["result"] == {"result": "NOT_READY", "last_code": "NOT_FOUND", "polls": 40}
     assert e["polls"] == 40 and sleeps == [run.POLL_SECONDS] * 39
@@ -709,16 +710,19 @@ def test_tickets_are_completed_before_the_row_is_touched(monkeypatch):
     assert trace["cleanup"]["row_removed_read_back_absent"] is True
 
 
-def _zero_call(monkeypatch, data, control, streams=None, control_streams=None):
-    """Run the zero-call read over iat=1000 against the fake logs layer. `streams` / `control_streams` are the
-    describe_log_streams pages for the data-refresh group and the ticket API's group (default: one active stream)."""
-    w = World(monkeypatch)
+RUN_TICKETS = {"journey_ticket": "TCK-J", "census": {"tickets_created_by_the_census": ["TCK-C1"]}}
+
+
+def _zero_call(monkeypatch, data, control, streams=None, trace=None, world=None):
+    """Run the zero-call read over iat=1000 .. exp=1300 against the fake logs layer (the clock is long past
+    exp + 300, so nothing waits). `data` is the data-refresh group's filter answer (page or list of pages), `control` the
+    ticket API group's filter answer, `streams` the data-refresh describe_log_streams page(s) (default: one stream
+    active in the window). The run's ticket ids are TCK-J and TCK-C1 unless `trace` says otherwise."""
+    w = world or World(monkeypatch)
     w.log_resp = {run.DATA_REFRESH_LOG_GROUP: data, run.TICKET_LOG_GROUP: control}
     if streams is not None:
         w.stream_resp[run.DATA_REFRESH_LOG_GROUP] = streams
-    if control_streams is not None:
-        w.stream_resp[run.TICKET_LOG_GROUP] = control_streams
-    trace = {}
+    trace = dict(RUN_TICKETS) if trace is None else trace
     run.data_refresh_zero_calls(trace, 1000, 1300)
     return trace["data_refresh_zero_calls"], w
 
@@ -729,55 +733,69 @@ def st(ms, name="s"):
 
 NO_STREAMS = {"logStreams": []}
 OLD_STREAM = {"logStreams": [st(999_999)]}   # last event one millisecond before iat=1000 s
+FOUND = {"events": [{"m": 1}]}
+NONE_FOUND = {"events": []}
+
+
+def _apis(w):
+    return [(api, kw["logGroupName"]) for api, kw in w.log_calls]
 
 
 def test_zero_call_read_is_void_on_zero_streams(monkeypatch):
-    found = {"events": [{"m": 1}]}
-    # GROUP_EMPTY: the group holds 0 streams in total, zero matches, a control that DID find the filer: VOID
-    out, w = _zero_call(monkeypatch, {"events": []}, found, streams=NO_STREAMS)
+    # GROUP_EMPTY: the group holds 0 streams in total -> VOID, and nothing else is read
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND, streams=NO_STREAMS)
     assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_EMPTY"
-    assert out["streams_in_group"] == 0 and out["match_count"] == 0
+    assert out["streams_in_group"] == 0 and out["match_count"] is None
     assert out["verdict"] != "ZERO_CALLS_PROVEN"
-    # a stream whose last event is before iat is in the group but not active: NOT void (see the F1 test)
-    out, w = _zero_call(monkeypatch, {"events": []}, found, streams=OLD_STREAM)
+    assert _apis(w) == [("describe_log_streams", run.DATA_REFRESH_LOG_GROUP)]
+    # a stream whose last event is before iat is in the group but not active: NOT void (proved by no invocation)
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND, streams=OLD_STREAM)
     assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["streams_in_group"] == 1
-    # streams are counted across pages: 0 + 0 in total is GROUP_EMPTY; a later page with streams makes the zero countable
-    out, w = _zero_call(monkeypatch, {"events": []}, found,
-                        streams=[{"logStreams": [], "nextToken": "p2"}, NO_STREAMS])
+    # streams are counted across pages: 0 + 0 in total is GROUP_EMPTY; a later page with streams makes the group non-empty
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND, streams=[{"logStreams": [], "nextToken": "p2"}, NO_STREAMS])
     assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_EMPTY"
-    out, w = _zero_call(monkeypatch, {"events": []}, found,
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND,
                         streams=[{"logStreams": [], "nextToken": "p2"},
                                  {"logStreams": [st(ACTIVE_MS, "a"), st(ACTIVE_MS, "b")]}])
     assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["streams_active_in_window"] == 2
+    assert out["proof"] == "FILTER_AND_TICKET_ID_CONTROL"
     assert out["window"]["from"] < out["window"]["to"]
-    # two describe pages on the data-refresh group, one on the control; one filter page on each group
-    assert len(w.index(lambda e: e[0] == "aws" and e[1].startswith("streams:"))) == 3
-    assert len(w.index(lambda e: e[0] == "aws" and e[1].startswith("logs:"))) == 2
+    # two describe pages on the data-refresh group, one filter page on it, one filter page on the ticket control
+    assert _apis(w) == [("describe_log_streams", run.DATA_REFRESH_LOG_GROUP)] * 2 + [
+        ("filter_log_events", run.DATA_REFRESH_LOG_GROUP), ("filter_log_events", run.TICKET_LOG_GROUP)]
 
 
 def test_zero_call_read_needs_its_positive_control(monkeypatch):
-    # the control over the ticket API's log group finds nothing: the zero is VOID
-    out, w = _zero_call(monkeypatch, {"events": []}, {"events": []})
-    assert out["verdict"] == "ZERO_CALL_VOID" and out["control"]["found"] == 0
-    assert out["control"]["log_group"] == "/aws/lambda/opal-ticket-api" and out["control"]["same_filter"] is True
-    assert out["void_reason"] == "CONTROL_FOUND_NO_FILER"
-    assert [e[1] for e in w.events if e[0] == "aws"] == [
-        "streams:" + run.DATA_REFRESH_LOG_GROUP, "logs:" + run.DATA_REFRESH_LOG_GROUP,
-        "streams:" + run.TICKET_LOG_GROUP, "logs:" + run.TICKET_LOG_GROUP]
-    # active streams > 0 AND control >= 1 AND matches == 0 is the one PROVEN case
-    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]})
-    assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["control"]["found"] == 1 and out["match_count"] == 0
-    assert out["streams_active_in_window"] == 1 and out["control"]["streams_active_in_window"] == 1
-    # a data-refresh match is reported as non-zero, whatever the control says
-    out, w = _zero_call(monkeypatch, {"events": [{"m": 1}]}, {"events": []})
-    assert out["verdict"].startswith("NON-ZERO")
-    # the control read raising is VOID (the control did not find the filer), never a zero
-    out, w = _zero_call(monkeypatch, {"events": []}, RuntimeError("throttled"))
-    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "CONTROL_FOUND_NO_FILER"
+    # a stream was active, the filter found nothing, and the control over the ticket API's group (keyed on the run's
+    # ticket ids) finds none: the zero is VOID
+    out, w = _zero_call(monkeypatch, NONE_FOUND, NONE_FOUND)
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "CONTROL_FOUND_NO_RUN_TICKET"
+    assert out["control"]["found"] == 0 and out["control"]["log_group"] == "/aws/lambda/opal-ticket-api"
+    assert out["control"]["keyed_on"] == "run_ticket_ids"
+    assert _apis(w) == [("describe_log_streams", run.DATA_REFRESH_LOG_GROUP),
+                        ("filter_log_events", run.DATA_REFRESH_LOG_GROUP), ("filter_log_events", run.TICKET_LOG_GROUP)]
+    # a control that finds a run ticket id makes the zero PROVEN
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND)
+    assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["proof"] == "FILTER_AND_TICKET_ID_CONTROL"
+    assert out["control"]["found"] == 1 and out["match_count"] == 0 and out["streams_active_in_window"] == 1
+    # a data-refresh match is reported as non-zero, and the control is not read
+    out, w = _zero_call(monkeypatch, FOUND, NONE_FOUND)
+    assert out["verdict"].startswith("NON-ZERO") and "control" not in out
+    # the control read raising is VOID (it found nothing), never a zero
+    out, w = _zero_call(monkeypatch, NONE_FOUND, RuntimeError("throttled"))
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "CONTROL_FOUND_NO_RUN_TICKET"
+    assert "error" in out["control"]
+    # a run with no ticket id has nothing to key the control on: VOID, and the ticket group is not read
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND, trace={})
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "CONTROL_FOUND_NO_RUN_TICKET"
+    assert out["control"]["run_ticket_ids"] == [] and ("filter_log_events", run.TICKET_LOG_GROUP) not in _apis(w)
     # the stream read raising is VOID too: the group cannot be described
-    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, streams=RuntimeError("denied"))
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND, streams=RuntimeError("denied"))
     assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_NOT_DESCRIBABLE"
     assert out["match_count"] is None
+    # the filter read raising is VOID as well (a failed retrieval is never a zero)
+    out, w = _zero_call(monkeypatch, RuntimeError("throttled"), FOUND)
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "FILTER_NOT_READABLE"
 
 
 def test_irpt_status_sha_mismatch_is_a_stop_before_any_write(monkeypatch):
@@ -820,7 +838,7 @@ def _flow(monkeypatch, script):
     fake = install(monkeypatch, script)
     hops, named = trace_hops()
     trace = {"hops": list(hops.values()), "named_failures": named}
-    run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA)
+    run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA, SENT)
     return fake, hops, named, trace
 
 
@@ -852,7 +870,7 @@ def test_malformed_report_id_arm_expects_typed_400(monkeypatch, sleeps):
     # the arm never runs when hop (e) is not met
     fake = install(monkeypatch, _ddg_script(ARM_REFUSED, ok, {("GET", rpath(REQ_A)): refusal("UNEXPECTED")}))
     hops, named = trace_hops()
-    run.hops_d_to_g("tok", {"hops": []}, hops, named, TKT, "in-1", FILE_SHA)
+    run.hops_d_to_g("tok", {"hops": []}, hops, named, TKT, "in-1", FILE_SHA, SENT)
     assert not any(c[1] == REPORT_PATH for c in fake.calls)
 
 
@@ -866,7 +884,7 @@ def test_issued_id_refused_by_report_route_is_branch_b(monkeypatch):
     def real_hops(token, advisor, trace):
         h = {x["hop"]: x for x in trace["hops"]}
         trace["journey_ticket"] = TKT
-        return run.hops_d_to_g(token, trace, h, trace["named_failures"], TKT, "in-1", FILE_SHA)
+        return run.hops_d_to_g(token, trace, h, trace["named_failures"], TKT, "in-1", FILE_SHA, SENT)
 
     rc, trace, w = drive(monkeypatch, world=w, script=script, hops_fn=real_hops)
     posts = [e for e in w.events if e[0] == "http" and e[2] == REPORT_PATH]
@@ -978,6 +996,7 @@ def test_trace_out_is_required_and_is_the_only_file_written(monkeypatch, tmp_pat
     out = tmp_path / "nested" / "my_trace.json"
     argv = ARGV[:i] + ["--trace-out", str(out)]
     w = World(monkeypatch)
+    w.stream_resp[run.DATA_REFRESH_LOG_GROUP] = {"logStreams": [{"logStreamName": "old", "lastEventTimestamp": 5}]}
     monkeypatch.setattr(run, "save", real_save)
     w.http({("GET", STATUS_PATH): res(200, {"data": {}})})
     monkeypatch.setattr(run, "census", lambda token, run_id: ({"tickets_created_by_the_census": []}, None))
@@ -1041,11 +1060,10 @@ def test_stream_denominator_is_streams_active_in_the_window(monkeypatch):
     page1 = {"logStreams": [st(ACTIVE_MS, "a"), st(1_000_000, "at-iat"), st(999_999, "before"), {"logStreamName": "empty"}],
              "nextToken": "p2"}
     page2 = {"logStreams": [st(1_000_001, "c"), st(5, "ancient")]}
-    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]},
-                        streams=[dict(page1), dict(page2)], control_streams={"logStreams": [st(1_000_000, "t")]})
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND, streams=[dict(page1), dict(page2)])
+    assert out["streams_in_group"] == 6
     assert out["streams_active_in_window"] == 3     # a, at-iat, c
-    assert out["control"]["streams_active_in_window"] == 1
-    assert "searched_log_streams" not in out and "searched_log_streams" not in out["control"]
+    assert "searched_log_streams" not in out and "searched_log_streams" not in out.get("control", {})
     assert out["verdict"] == "ZERO_CALLS_PROVEN"
     # every page of describe_log_streams was read, ordered by last event time, with the page token passed on
     d = [kw for api, kw in w.log_calls if api == "describe_log_streams" and kw["logGroupName"] == run.DATA_REFRESH_LOG_GROUP]
@@ -1053,52 +1071,271 @@ def test_stream_denominator_is_streams_active_in_the_window(monkeypatch):
     assert all(kw["orderBy"] == "LastEventTime" for kw in d)
     # filter_log_events reads every page too
     out, w = _zero_call(monkeypatch, [{"events": [], "nextToken": "f2"}, {"events": [{"m": 1}], "nextToken": "f3"},
-                                      {"events": [{"m": 2}]}], {"events": [{"m": 1}]})
+                                      {"events": [{"m": 2}]}], FOUND)
     f = [kw for api, kw in w.log_calls if api == "filter_log_events" and kw["logGroupName"] == run.DATA_REFRESH_LOG_GROUP]
     assert [kw.get("nextToken") for kw in f] == [None, "f2", "f3"]
     assert out["match_count"] == 2 and out["verdict"].startswith("NON-ZERO")
-    # the control group's denominator is measured too, and a control with no active stream does not void by itself
-    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, control_streams=NO_STREAMS)
-    assert out["control"]["streams_active_in_window"] == 0 and out["verdict"] == "ZERO_CALLS_PROVEN"
 
 
 def test_zero_active_streams_alone_is_not_void(monkeypatch):
-    # F1: streams exist but none is active in the window, no matches, control found the filer: a true zero
+    # streams exist but none is active in the window: a true zero (the function was not invoked), not a blind one
     for streams in (OLD_STREAM, {"logStreams": [{"logStreamName": "never-wrote"}]}):
-        out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, streams=streams)
+        out, w = _zero_call(monkeypatch, NONE_FOUND, NONE_FOUND, streams=streams)
         assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["streams_active_in_window"] == 0, streams
-        assert out["streams_in_group"] == 1 and out["match_count"] == 0 and out["control"]["found"] == 1
-        assert "void_reason" not in out
-    # active streams still prove it, and the trace says how many were active
-    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]})
+        assert out["proof"] == "NO_INVOCATION_IN_WINDOW" and out["streams_in_group"] == 1
+        assert out["match_count"] is None and "void_reason" not in out and "control" not in out
+        assert _apis(w) == [("describe_log_streams", run.DATA_REFRESH_LOG_GROUP)]
+    # active streams do not decide it alone: they send the read on to the filter
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND)
     assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["streams_active_in_window"] == 1
+    assert out["proof"] == "FILTER_AND_TICKET_ID_CONTROL"
 
 
 def test_group_with_no_streams_at_all_is_void(monkeypatch):
-    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, streams=NO_STREAMS)
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND, streams=NO_STREAMS)
     assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_EMPTY"
     assert out["streams_in_group"] == 0 and out["streams_active_in_window"] == 0
 
 
 def test_group_not_describable_is_void(monkeypatch):
     for exc in (RuntimeError("AccessDenied"), KeyError("ResourceNotFoundException")):
-        out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}]}, streams=exc)
+        out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND, streams=exc)
         assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "GROUP_NOT_DESCRIBABLE", exc
         assert out["streams_in_group"] is None and out["matches"] is None
 
 
 def test_control_without_the_filer_is_void(monkeypatch):
-    out, w = _zero_call(monkeypatch, {"events": []}, {"events": []})
-    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "CONTROL_FOUND_NO_FILER"
+    # (name kept) the control is now keyed on the run's ticket ids; one that finds none voids the zero
+    out, w = _zero_call(monkeypatch, NONE_FOUND, NONE_FOUND)
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "CONTROL_FOUND_NO_RUN_TICKET"
     assert out["control"]["matches"] == 0 and out["streams_in_group"] == 1
 
 
 def test_zero_read_records_three_numbers(monkeypatch):
     two = {"logStreams": [st(ACTIVE_MS, "a"), st(999_999, "old"), {"logStreamName": "empty"}]}
-    out, w = _zero_call(monkeypatch, {"events": []}, {"events": [{"m": 1}, {"m": 2}]},
-                        streams=two, control_streams={"logStreams": [st(ACTIVE_MS, "t")]})
+    out, w = _zero_call(monkeypatch, NONE_FOUND, {"events": [{"m": 1}, {"m": 2}]}, streams=two)
     assert out["verdict"] == "ZERO_CALLS_PROVEN"
     assert (out["streams_in_group"], out["streams_active_in_window"], out["matches"]) == (3, 1, 0)
+    assert out["latest_event_time"]
     c = out["control"]
-    assert (c["streams_in_group"], c["streams_active_in_window"], c["matches"]) == (1, 1, 2)
-    assert c["log_group"] == run.TICKET_LOG_GROUP
+    assert c["log_group"] == run.TICKET_LOG_GROUP and c["matches"] == 2 and c["run_ticket_ids"] == ["TCK-J", "TCK-C1"]
+
+
+# ------------------------------------------------------------------ AMENDMENT 5 / AC9: the per-run idempotency token
+
+def _hops_run(monkeypatch, tmp_path, iat, submit_answer, label=RUN_LABEL):
+    """Run the real hops() for one run (label, iat) over a fake HTTP layer; -> (fake, trace). The file is a synthetic
+    one under a temporary root; the same bytes in every run."""
+    (tmp_path / "h.csv").write_bytes(b"synthetic,holdings\n")
+    monkeypatch.setattr(run, "ROOT", tmp_path)
+    monkeypatch.setattr(run, "HOLDINGS", tmp_path / "h.csv")
+    monkeypatch.setattr(run, "save", lambda trace: None)
+    monkeypatch.setattr(run, "SLEEP", lambda s: None)
+    fake = install(monkeypatch, {
+        ("POST", ANALYSIS_INPUTS): res(200, {"data": {"input_id": "in-1", "upload_id": "up-1", "state": "NORMALIZED"}}),
+        ("POST", "/api/scoped/tickets"): res(200, {"ticket": {"ticket_id": TKT}}),
+        ("POST", "/api/scoped/tickets/%s/claim" % TKT): res(200, {"ticket": {}}),
+        ("GET", LIST_PATH): listing(REQ_OLD),
+        SUBMIT: submit_answer})
+    hops, named = trace_hops()
+    trace = {"run_label": label, "preconditions": {"token_iat_unix": iat}, "hops": list(hops.values()),
+             "named_failures": named}
+    run.hops("tok", "adv@example.invalid", trace)
+    return fake, trace
+
+
+ANALYSIS_INPUTS = "/api/scoped/investor-reporting/analysis/inputs"
+SUBMISSION_REFUSED = res(200, {"ok": False, "contract_version": "v1", "operation": "analysis-submit",
+                               "status": {"public_reason_code": "INVALID_INPUT"}})
+
+
+def _tokens_sent(fake):
+    up = next(c[3]["upload_token"] for c in fake.calls if c[1] == ANALYSIS_INPUTS)
+    sub = next(c[3]["request_id"] for c in fake.calls if (c[0], c[1]) == SUBMIT)
+    return sub, up
+
+
+def test_idempotency_token_differs_between_two_runs(monkeypatch, tmp_path):
+    f1, t1 = _hops_run(monkeypatch, tmp_path, 1_800_000_000, SUBMISSION_REFUSED)
+    f2, t2 = _hops_run(monkeypatch, tmp_path, 1_800_000_007, SUBMISSION_REFUSED)
+    (sub1, up1), (sub2, up2) = _tokens_sent(f1), _tokens_sent(f2)
+    assert sub1 != sub2 and up1 != up2 and sub1 != up1
+    # the formula: <label prefix>-<first 24 hex of sha256(label|iat|file_sha)>, the upload one with -up
+    file_sha = hashlib.sha256(b"synthetic,holdings\n").hexdigest()
+    want = "r2test1-" + hashlib.sha256(("R2-test-1|1800000000|" + file_sha).encode()).hexdigest()[:24]
+    assert sub1 == want and up1 == want + "-up"
+    assert t1["hops"][3]["idempotency_token"] == sub1 and t2["hops"][3]["idempotency_token"] == sub2
+    # the same run (label, iat, file) rebuilds the same token; another label with the same iat does not
+    assert run.submission_token("R2-test-1", 1_800_000_000, file_sha) == sub1
+    assert run.submission_token("R2-test-2", 1_800_000_000, file_sha) != sub1
+    # hop (d) refuses to send without a per-run token
+    hops, named = trace_hops()
+    with pytest.raises(ValueError):
+        run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named)
+    with pytest.raises(ValueError):
+        run.hops_d_to_g("tok", {"hops": []}, hops, named, TKT, "in-1", FILE_SHA)
+
+
+def test_idempotency_token_fits_the_contract_pattern(monkeypatch):
+    import re
+    schema = json.loads((Path(run.ROOT) / "docs/contracts/investor-reporting/v1/AnalysisSubmissionRequest.schema.json")
+                        .read_text(encoding="utf-8"))
+    prop = schema["properties"]["request_id"]
+    pattern = re.compile(prop["pattern"])
+    assert prop["pattern"] == "^[A-Za-z0-9][A-Za-z0-9_.:-]*$" and prop["maxLength"] == 100
+    for label in ("R2-tr-1", "R2-test-1", "", "---", "A" * 80, "x y_z.9:q", "x" + chr(220) + chr(241), "9", "  "):
+        for tok in (run.submission_token(label, 1_800_000_000, FILE_SHA), run.upload_token(label, 1_800_000_000, FILE_SHA)):
+            assert pattern.fullmatch(tok), (label, tok)
+            assert 1 <= len(tok) <= prop["maxLength"], (label, tok)
+            assert tok == tok.lower() and tok.isascii()
+    # the prefix is lower-case letters and digits only, short, then a dash, then 24 hex
+    tok = run.submission_token("R2-tr-1", 1_800_000_000, FILE_SHA)
+    assert re.fullmatch(r"r2tr1-[0-9a-f]{24}", tok), tok
+    assert re.fullmatch(r"r2tr1-[0-9a-f]{24}-up", run.upload_token("R2-tr-1", 1_800_000_000, FILE_SHA))
+
+
+def test_no_token_is_derived_from_the_file_hash_alone(monkeypatch, tmp_path):
+    # two runs, same file, different iat: neither the submission token nor the upload token repeats
+    f1, _ = _hops_run(monkeypatch, tmp_path, 1_800_000_000, SUBMISSION_REFUSED)
+    f2, _ = _hops_run(monkeypatch, tmp_path, 1_800_000_001, SUBMISSION_REFUSED)
+    (sub1, up1), (sub2, up2) = _tokens_sent(f1), _tokens_sent(f2)
+    assert len({sub1, up1, sub2, up2}) == 4
+    file_sha = hashlib.sha256(b"synthetic,holdings\n").hexdigest()
+    for tok in (sub1, up1, sub2, up2):
+        assert file_sha[:16] not in tok and file_sha[:24] not in tok and not tok.startswith("sar1b-")
+    # the code builds no service token from the file hash alone
+    src = _code_only(run.__file__)
+    assert "file_sha[:" not in src
+    assert "sar1b-" + "0" * 24 == run.MALFORMED_REPORT_ID   # the arm's deliberately malformed id is unchanged
+    # a hash-only token is exactly what the service refused; the run token is never equal to it
+    assert sub1 != "sar1b-" + file_sha[:24] and up1 != "sar1b-" + file_sha[:16]
+
+
+def test_hop_d_refusal_is_its_own_named_branch(monkeypatch, tmp_path):
+    codes = ("INVALID_INPUT", "CHANGED_INPUTS_SAME_REQUEST_ID")
+    for code in codes:
+        refused = res(200, {"ok": False, "status": {"public_reason_code": code}})
+        fake, trace = _hops_run(monkeypatch, tmp_path, 1_800_000_000, refused)
+        assert trace["result"] == "BRANCH_E_SUBMISSION_REFUSED" and trace["result_reason_code"] == code
+        h = {x["hop"]: x for x in trace["hops"]}
+        assert h["d_analysis"]["result"] == "BRANCH_E_SUBMISSION_REFUSED" and h["d_analysis"]["refused_reason"] == code
+        assert h["d_analysis"]["request_id"] is None
+        nf = [n for n in trace["named_failures"] if n["hop"] == "d_analysis"]
+        assert len(nf) == 1 and nf[0]["reason"] == "BRANCH_E_SUBMISSION_REFUSED" and nf[0]["code"] == code
+        for k in ("e_ready", "f_report", "g_open"):
+            assert h[k]["outcome"] == "UNREACHABLE", k
+        arms = trace["report_route_arms"]
+        assert arms["report_id_malformed_refused"]["outcome"] == "UNREACHABLE"
+        assert arms["report_id_well_formed_stored"]["outcome"] == "UNREACHABLE"
+        # no retry and no second submission with another token; nothing read or posted after it
+        assert len([c for c in fake.calls if (c[0], c[1]) == SUBMIT]) == 1
+        assert not any("/sections" in c[1] or c[1].endswith("/report") for c in fake.calls)
+    # an HTTP error status is the same branch, with the served code recorded
+    fake, trace = _hops_run(monkeypatch, tmp_path, 1_800_000_000, res(409, {"code": "REQUEST_CONFLICT", "error": "x"}))
+    assert trace["result"] == "BRANCH_E_SUBMISSION_REFUSED" and trace["result_reason_code"] == "REQUEST_CONFLICT"
+    # the other named failure at hop (d) keeps its own name and is NOT this branch
+    install(monkeypatch, {("GET", LIST_PATH): listing(REQ_OLD), SUBMIT: res(200, {"data": {}})})
+    hops, named = trace_hops()
+    trace = {"hops": list(hops.values()), "named_failures": named}
+    run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA, SENT)
+    assert trace.get("result") is None and named[0]["reason"] == "REQUEST_ID_UNRESOLVED"
+    # end to end: the refusal is a result, cleanup runs in the signed order (tickets, wait, row last), no retry
+    w = World(monkeypatch)
+    script = {("GET", STATUS_PATH): res(200, {"data": {}}), ("GET", LIST_PATH): listing(REQ_OLD), SUBMIT: SUBMISSION_REFUSED,
+              ("POST", "/api/scoped/tickets/%s/complete" % TKT): res(200, {"ticket": {}})}
+
+    def real_hops(token, advisor, trace):
+        h = {x["hop"]: x for x in trace["hops"]}
+        trace["journey_ticket"] = TKT
+        return run.hops_d_to_g(token, trace, h, trace["named_failures"], TKT, "in-1", FILE_SHA)
+
+    rc, trace, w = drive(monkeypatch, world=w, script=script, hops_fn=real_hops)
+    assert trace["result"] == "BRANCH_E_SUBMISSION_REFUSED" and trace["result_reason_code"] == "INVALID_INPUT"
+    assert len(w.index(lambda e: e[0] == "http" and e[2] == SUBMIT[1])) == 1
+    done = w.index(lambda e: e[0] == "http" and e[2].endswith("/complete"))
+    assert done and max(done) < w.index(lambda e: e[0] == "sleep")[0] < w.index(lambda e: e[0] == "ddb" and e[1] == "delete")[0]
+    assert_row_deleted_after_exp(w)
+    assert trace["cleanup"]["row_removed_read_back_absent"] is True
+
+
+# ------------------------------------------------------------------ AMENDMENT 5 / AC10: the zero-call rule, final
+
+def test_no_invocation_in_window_is_proven_without_the_filter_control(monkeypatch):
+    out, w = _zero_call(monkeypatch, RuntimeError("must not be read"), RuntimeError("must not be read"),
+                        streams={"logStreams": [st(999_999, "a"), st(5, "b")]})
+    assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["proof"] == "NO_INVOCATION_IN_WINDOW"
+    assert (out["streams_in_group"], out["streams_active_in_window"]) == (2, 0)
+    assert out["matches"] is None and "control" not in out and "void_reason" not in out
+    # nothing but the one group description was read: no filter, no second group
+    assert _apis(w) == [("describe_log_streams", run.DATA_REFRESH_LOG_GROUP)]
+    # and a group that cannot be described, or is empty, is never this proof
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND, streams=NO_STREAMS)
+    assert out["verdict"] == "ZERO_CALL_VOID" and "proof" not in out
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND, streams=RuntimeError("denied"))
+    assert out["verdict"] == "ZERO_CALL_VOID" and "proof" not in out
+
+
+def test_zero_call_read_waits_five_minutes_past_exp(monkeypatch):
+    assert run.ZERO_CALL_DELAY_SECONDS == 300
+    # called early: the read waits (through SLEEP) until exp + 300, and no logs call is made before then
+    w = World(monkeypatch)
+    exp = int(w.t) + 60
+    trace = dict(RUN_TICKETS)
+    run.data_refresh_zero_calls(trace, int(w.t) - 240, exp)
+    first_aws = w.index(lambda e: e[0] == "aws")[0]
+    assert w.events[first_aws][2] >= exp + 300
+    assert all(e[2] >= exp + 300 for e in w.events if e[0] == "aws")
+    assert sum(e[1] for e in w.events if e[0] == "sleep") >= 360
+    out = trace["data_refresh_zero_calls"]
+    assert out["waited_seconds"] >= 360 and out["read_at"] >= out["read_not_before"]
+    # the clock already past exp + 300: no wait
+    w = World(monkeypatch)
+    run.data_refresh_zero_calls(dict(RUN_TICKETS), int(w.t) - 900, int(w.t) - 400)
+    assert w.index(lambda e: e[0] == "sleep") == []
+    # end to end: cleanup comes first (row deleted), the zero-call read follows, no earlier than exp + 300
+    w = World(monkeypatch)
+    rc, trace, w = drive(monkeypatch, world=w)
+    puts = [t for op, t in w.ddb_ops() if op == "put"]
+    exp = int(puts[0]) + 300
+    deleted = w.index(lambda e: e[0] == "ddb" and e[1] == "delete")[0]
+    reads = w.index(lambda e: e[0] == "aws" and e[1].startswith(("streams:", "logs:")))
+    assert reads and min(reads) > deleted
+    assert all(w.events[i][2] >= exp + 300 for i in reads)
+    assert trace["data_refresh_zero_calls"]["read_at"] >= trace["data_refresh_zero_calls"]["read_not_before"]
+
+
+def test_zero_call_block_prints_the_latest_event_time(monkeypatch, capsys):
+    # the newest last-event time across ALL streams (every page), as an ISO string, in the block and on the output
+    pages = [{"logStreams": [st(1_700_000_000_000, "a"), {"logStreamName": "empty"}], "nextToken": "p2"},
+             {"logStreams": [st(1_700_000_123_000, "b"), st(1_699_999_999_000, "c")]}]
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND, streams=pages)
+    assert out["latest_event_time"] == "2023-11-14T22:15:23Z"
+    assert out["streams_in_group"] == 4 and out["streams_active_in_window"] == 3
+    assert "latest event 2023-11-14T22:15:23Z" in capsys.readouterr().out
+    # recorded on the proven-by-no-invocation path too (it is the positive control that the group has a history)
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND,
+                        streams={"logStreams": [st(999_999, "old"), st(500, "older")]})
+    assert out["latest_event_time"] == "1970-01-01T00:16:39Z" and out["verdict"] == "ZERO_CALLS_PROVEN"
+    # a group with no timestamp at all has no latest event time
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND, streams={"logStreams": [{"logStreamName": "x"}]})
+    assert out["latest_event_time"] is None and out["proof"] == "NO_INVOCATION_IN_WINDOW"
+
+
+def test_active_stream_falls_back_to_the_filter_and_a_ticket_id_control(monkeypatch):
+    # an active stream: the filter for the filer address is read (all pages), then the control keyed on the run's tickets
+    out, w = _zero_call(monkeypatch, NONE_FOUND, FOUND)
+    f = [kw for api, kw in w.log_calls if api == "filter_log_events"]
+    assert [kw["logGroupName"] for kw in f] == [run.DATA_REFRESH_LOG_GROUP, run.TICKET_LOG_GROUP]
+    assert f[0]["filterPattern"] == '"%s"' % run.FILER
+    assert f[0]["startTime"] == 1000 * 1000 and f[0]["endTime"] == 1300 * 1000
+    # the control is keyed on the run's ticket ids, NOT on the filer address
+    assert f[1]["filterPattern"] == '?"TCK-J" ?"TCK-C1"' and run.FILER not in f[1]["filterPattern"]
+    assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["proof"] == "FILTER_AND_TICKET_ID_CONTROL"
+    assert out["control"]["keyed_on"] == "run_ticket_ids" and out["control"]["found"] == 1
+    # matches > 0 is NON-ZERO and reads no control
+    out, w = _zero_call(monkeypatch, FOUND, FOUND)
+    assert out["verdict"].startswith("NON-ZERO") and "control" not in out and out["matches"] == 1
+    assert [kw["logGroupName"] for api, kw in w.log_calls if api == "filter_log_events"] == [run.DATA_REFRESH_LOG_GROUP]
+    # matches == 0 and a control that finds no run ticket id: VOID with its reason
+    out, w = _zero_call(monkeypatch, NONE_FOUND, NONE_FOUND)
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "CONTROL_FOUND_NO_RUN_TICKET"
