@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-oo-5.a-united-states-peer-serves-the-currency-the-demque-answer-returned",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-oo-5.a-united-states-peer-serves-the-currency-the-demque-answer-returned.md",
+    "group": "OTHER",
+    "vintage_commit": "4f8811dd0bd76e31c042813be323c221962e4ed3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "4f8811dd0bd76e31c042813be323c221962e4ed3",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-oo-5.a-united-states-peer-serves-the-currency-the-demque-answer-returned.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~362",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/peers/price_currency.py",
+      "kind": "script",
+      "commit_or_etag": "4872a357ff5bb4a500f9fe24547ffec11b873dba",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pure function change: price_currency_fields gains answered=None. A United States member with an alphabetic ticker whose upper-case ticker is an answered key, with a three-letter upper-case value, serves price_currency measured with price_currency_source DEMQUE:AMGT_RESAPP-S14-CRNCY-SCANNER-US. Applies only where the member names no record or its record states no currency; an unreadable record keeps its reason. No read, no write, no store, no deploy.",
+      "introduces": ["answered_currency", "ANSWER_COUNTRY", "ANSWER_SOURCE"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/peers/tests/test_price_currency_answered.py",
+      "kind": "test",
+      "commit_or_etag": "4872a357ff5bb4a500f9fe24547ffec11b873dba",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pure pytest module, no network, no AWS. One test per rule and per negative arm named in the task order section 1.",
+      "introduces": ["test_a_covered_united_states_member_serves_the_answered_code_as_measured_with_its_source"],
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PASS C1 (a covered United States member serves the answered code as MEASURED with its source), PASS C2 (an uncovered member keeps its plain reason, no currency key), PASS C3 (a non-United-States member sharing an answered ticker is not served), PASS C4 (a malformed answered value is never served), PASS C5 (every round-89 case is byte-equal); R90 CURRENCY ANSWERED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round90_prep/checks/r90_currency_answered.py\"; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 a covered United States member serves the answered code as MEASURED with its source  [{\"price_currency\": \"USD\", \"price_currency_claim\": \"measured\", \"price_currency_source\": \"DEMQUE:AMGT_RESAPP-S14-CRNCY-SCANNER-US\"}]\nPASS C2 an uncovered United States member keeps its plain reason and carries no currency key  [{\"price_currency_reason\": \"The scanner price for this peer carries no currency, and this peer is not matched to a company record that states its trading currency.\"}]\nPASS C3 a non-United-States member sharing an answered ticker is not served  [{\"price_currency_reason\": \"The scanner price for this peer carries no currency, and this peer is not matched to a company record that states its trading currency.\"}]\nPASS C4 an answered value that is not a three-letter upper-case code is never served  [arms [True, True]]\nPASS C5 control: every round-89 case is byte-equal (answered absent or None)  [arms [True, True, True, True, True, True]]\n   arms passed 5 of 5\nR90 CURRENCY ANSWERED: YES\nexit=0",
+      "denominator": "5 of 5 arms passed (C1-C5); C4 2 of 2 malformed arms, C5 6 of 6 round-89 cases",
+      "status": "PASS",
+      "expect": "PASS C1[\\s\\S]*PASS C2[\\s\\S]*PASS C3[\\s\\S]*PASS C4[\\s\\S]*PASS C5[\\s\\S]*R90 CURRENCY ANSWERED: YES[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the new test file and the existing route-level price-currency test both pass with 0 failed, and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/peers/tests/test_price_currency_answered.py lib/research/api/tests/test_peer_price_currency.py -q; echo \"exit=$?\"",
+      "output_evidence": "42 passed in 1.11s\nexit=0",
+      "denominator": "42 of 42 tests passed, 0 failed (the new test file and lib/research/api/tests/test_peer_price_currency.py together)",
+      "status": "PASS",
+      "expect": "42 passed[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The answer arm is dropped: price_currency_fields keeps the new answered parameter but ignores it and returns the round-89 output. Run through the real r90_currency_answered.py main() by a scratch runner (.scratch/mutant_runner.py, not committed, nothing written to the tree).",
+      "expected": "C1 FAILS (a covered United States member is not served), the script exits 1 and prints R90 CURRENCY ANSWERED: NO.",
+      "observed": "FAIL C1 a covered United States member serves the answered code as MEASURED with its source; PASS C2, C3, C4, C5; arms passed 4 of 5; R90 CURRENCY ANSWERED: NO; mutant_exit=1. C2-C4 pass under this mutant because it never serves a currency, so they discriminate only the TypeError base, not an accept-and-ignore implementation.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs of r90_currency_answered.py, stdout compared byte-for-byte with cmp.",
+      "observed": "rc1=0 rc2=0; cmp reports the two outputs identical (DETERMINISTIC-SAME-BYTES).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "lib/research/api/scoped_amgt.py and every reader are not edited",
+      "reason": "Task order section 1 and section 2 bound: the reader and wiring are a later cell."
+    },
+    {
+      "item": "No loader for the DEMQUE answer and no decision on where the answer lives or its shape",
+      "reason": "Task order section 1: where the answer lives and its shape are not decided; the answered dict is a function argument only."
+    },
+    {
+      "item": "No deploy, store write, schedule, SEC, vendor, model or Bloomberg call; no bun, npm or pip install",
+      "reason": "Task order section 2 bounds and the preflight EGRESS CLASS NONE."
+    },
+    {
+      "item": "The status flip of the task order to complete",
+      "reason": "Task order section 5: the status flip is the issuer's."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "r90_currency_answered.py (round-90 PREP check)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round90_prep/checks/r90_currency_answered.py\"; echo \"exit=$?\"",
+      "result": "R90 CURRENCY ANSWERED: YES, exit=0 (5 of 5 arms)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/peers/tests/test_price_currency_answered.py lib/research/api/tests/test_peer_price_currency.py -q",
+      "result": "42 passed in 1.11s, exit=0"
+    },
+    {
+      "tool": "safe-commit.sh (commit-gate: py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~362 <0.9.0_WK_AMGT_RESAPP~362@opal.agent>\" -F .scratch/msg_code.txt -- lib/research/peers/price_currency.py lib/research/peers/tests/test_price_currency_answered.py",
+      "result": "rc=0; commit-gate All checks passed; commit 4872a357ff"
+    }
+  ]
+}
