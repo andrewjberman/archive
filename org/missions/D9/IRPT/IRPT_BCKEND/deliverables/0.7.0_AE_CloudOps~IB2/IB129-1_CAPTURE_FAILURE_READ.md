@@ -36,7 +36,7 @@ cannot fire once a submission has happened. The post-submission case therefore d
 (a) the submission succeeded and the probe or identity-cookie leg is broken, from (b) the submission failed and the
 vendor returned a signed-out page that matches app chrome. The two members that would separate them --
 `login_submission` (whether the posted fields equalled the secret's, and the vendor's reply status) and `probe_pair`
--- are exactly the ones `run_capture` refuses to propagate and nothing writes to disk. Row `D2-IB2-S1`.
+-- are exactly the ones `run_capture` refuses to propagate and nothing writes to disk. Row `D2-S85`.
 
 The host runs the repository's current bytes: both `run-ycharts-session.sh` and `ycharts_session.js` hash equal to
 box/dell2 HEAD, so the code quoted above is the code that ran.
@@ -112,9 +112,9 @@ ones, and are counted separately in the journal extract.
 `sha256sum /opt/.../run-ycharts-session.sh /opt/.../ycharts_session.js`, because the alternative `sh` matches the
 **tail of the first filename** and `\S*` then walks to the second path. That command hashed two files and executed
 nothing. The check was **not** edited, the record was **not** doctored to hide the command, and the command is
-listed verbatim as the order requires -- so AC3 reads FAIL and `<status>` stays `pending`. Row `D2-IB2-S3` carries
+listed verbatim as the order requires -- so AC3 reads FAIL and `<status>` stays `pending`. Row `D2-S87` carries
 the demonstration and a narrow fix.
 
-Rows filed: `D2-IB2-S1` (receipt not persisted, and the gated diagnosis), `D2-IB2-S2` (an empty SSM send that
-returned Success), `D2-IB2-S3` (the AC3 false positive), `D2-IB2-S4` (this seat cannot read the lease rows:
+Rows filed: `D2-S85` (receipt not persisted, and the gated diagnosis), `D2-S86` (an empty SSM send that
+returned Success), `D2-S87` (the AC3 false positive), `D2-S88` (this seat cannot read the lease rows:
 `kms:Decrypt` denied).
