@@ -5,7 +5,7 @@
  "spec_ref": {
   "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-8.act0-grant.md",
   "group": "OTHER",
-  "vintage_commit": "9276ef7827"
+  "vintage_commit": "d7af35b8ca"
  },
  "assignee": "0.7.0_AE_CloudOps~FB1",
  "decomp_ref": {
@@ -36,7 +36,7 @@
     "AC2",
     "AC3"
    ],
-   "commit_or_etag": "this commit"
+   "commit_or_etag": "f942dcb9a8"
   }
  ],
  "acceptance": [
@@ -44,7 +44,7 @@
    "criterion_id": "AC1",
    "invocation": "timeout 100 aws iam get-role-policy --role-name bd-exporter-ec2-role --policy-name advi-49f-platinum-canonical-rw-policy --query \"PolicyDocument.Statement[].Sid\" --output text",
    "expect": "AdviPlatinumCanonicalObjects\\s+AdviPlatinumCanonicalList",
-   "output_evidence": "AdviPlatinumCanonicalObjects\tAdviPlatinumCanonicalList",
+   "output_evidence": "get-role-policy advi-49f-platinum-canonical-rw-policy on bd-exporter-ec2-role, Statement[].Sid, read 2026-10-11T13:44:42Z, printed:\nAdviPlatinumCanonicalObjects\tAdviPlatinumCanonicalList",
    "denominator": "1 of 1 policy named; 2 of 2 statements; run as .tools/aws (the repository's shim), read 2026-10-11T13:44:42Z",
    "status": "PASS",
    "criterion_verbatim": "timeout 100 aws iam get-role-policy --role-name bd-exporter-ec2-role --policy-name advi-49f-platinum-canonical-rw-policy --query \"PolicyDocument.Statement[].Sid\" --output text",
@@ -54,7 +54,7 @@
    "criterion_id": "AC2",
    "invocation": "timeout 100 aws iam list-role-policies --role-name bd-exporter-ec2-role --query PolicyNames --output text | tr '\\t' '\\n' | wc -l",
    "expect": "^\\s*17\\s*$",
-   "output_evidence": "17",
+   "output_evidence": "count of the unpaginated PolicyNames list of role bd-exporter-ec2-role after the apply (16 before), read 2026-10-11T13:44:42Z, printed:\n17",
    "denominator": "client-side count of the unpaginated list: 16 before (read 2026-10-11 ~13:40Z), 17 after; run as .tools/aws",
    "status": "PASS",
    "criterion_verbatim": "timeout 100 aws iam list-role-policies --role-name bd-exporter-ec2-role --query PolicyNames --output text | tr '\\t' '\\n' | wc -l",
@@ -62,12 +62,12 @@
   },
   {
    "criterion_id": "AC3",
-   "invocation": "cd /c/dev/ajb_workspace/infra/aws/terraform/bd-pipeline && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target=module.opal_name_platinum_grant -target=aws_iam_role_policy.bd_exporter_advi_49f_platinum_canonical 2>&1 | tail -n 6",
+   "invocation": "cd /c/dev/ajb_workspace/infra/aws/terraform/bd-pipeline && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target=module.opal_name_platinum_grant -target=aws_iam_role_policy.bd_exporter_advi_49f_platinum_canonical 2>&1 | grep -E \"^(Plan:|No changes)\"",
    "expect": "No changes",
-   "output_evidence": "the last 6 lines, as the invocation prints them: 'of this plan may not represent all of the changes requested by the current configuration.' / '' / 'The -target option is not for routine use, and is provided only for' / 'exceptional situations such as recovering from errors or mistakes, or when' / 'Terraform specifically suggests to use it as part of an error message.' -- NO line reads No changes. The same plan's full output (17 lines, evidence/act0/ac3_full_plan.out) reads at line 4: 'No changes. Your infrastructure matches the configuration.'",
-   "denominator": "the plan exit code 0; the sentence sits at line 4 of 17 and the ordered window is the last 6; terraform's -target warning block is 11 lines, so the window can never contain it",
-   "status": "FAIL",
-   "criterion_verbatim": "cd /c/dev/ajb_workspace/infra/aws/terraform/bd-pipeline && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target=module.opal_name_platinum_grant -target=aws_iam_role_policy.bd_exporter_advi_49f_platinum_canonical 2>&1 | tail -n 6",
+   "output_evidence": "amended invocation (grep of the verdict line), read 2026-10-11T13:48:41Z, printed:\nNo changes. Your infrastructure matches the configuration.",
+   "denominator": "1 of 1 matched line; read 2026-10-11T13:48:41Z under the issuer's Amendment 2 (d7af35b8ca); terraform resolved to .tools/terraform.exe; the first run under the original tail -n 6 window (13:44Z) FAILED by that window and is kept at evidence act0/ac3_tail6_as_ordered.out; the same plan's full output is act0/ac3_full_plan.out",
+   "status": "PASS",
+   "criterion_verbatim": "cd /c/dev/ajb_workspace/infra/aws/terraform/bd-pipeline && timeout 118 terraform plan -input=false -lock=false -refresh=true -no-color -target=module.opal_name_platinum_grant -target=aws_iam_role_policy.bd_exporter_advi_49f_platinum_canonical 2>&1 | grep -E \"^(Plan:|No changes)\"",
    "method": "command"
   }
  ],
@@ -86,21 +86,24 @@
  },
  "declared_exclusions": [
   {
-   "item": "AC3 literal match",
-   "reason": "the order's invocation ends in tail -n 6, which lands inside terraform's 11-line targeting warning, so 'No changes' (line 4 of 17) is outside the window by construction; the criterion text is the issuer's to amend (the same defect class as the FORCE_COLOR invocation of an earlier order). The status of the order is NOT flipped by this lane."
-  },
-  {
    "item": "iam:SimulatePrincipalPolicy on the role",
    "reason": "denied to this identity (row D1-S18's second gap); the act's own iam:PutRolePolicy was simulated on this identity's own ARN at the role ARN (allowed, via cloudops-dell-agent-iam-roles-policy) and the apply itself was the oracle"
   },
   {
    "item": "the grant's effect on a producer's request",
    "reason": "nothing proves the producers can PUT through the role until the first canonical-mode run (the order's own blindness line); the document is the read"
+  },
+  {
+   "item": "AC3 original invocation (tail -n 6)",
+   "reason": "failed by its own window at 13:44Z (the sentence is line 4 of 17, the window is the last 6); the issuer amended it to select the verdict line at d7af35b8ca (msg 3902) and it was re-run: PASS"
+  },
+  {
+   "item": "terraform init in the bd-pipeline root",
+   "reason": "the new module call needed 'Module not installed' resolved; init wrote .terraform only and no state"
   }
  ],
  "surprises": [
-  "safe-apply's cross-box seat gate read open_deploy=hit verdict=STOP (mode WARN, proceeds): OPEN-DEPLOY healgap-r3-act3-asset-dim-reattempt-20261011 (2.0.0_SA_COO~G1) names the bd-pipeline root by token. This act's scoped plan changed one resource and none of that entry's; this lane did not run --dry-seat-gates before the apply and should have. Under ENFORCE the apply would have stopped.",
-  "terraform init was needed in the bd-pipeline root for the new module call (Module not installed); init writes .terraform only."
+  "ADVI_FIRMBKTS-D1-S26: safe-apply's cross-box seat gate read open_deploy=hit verdict=STOP (WARN mode, proceeded) for another seat's open deploy naming the bd-pipeline root; this lane did not run --dry-seat-gates before the apply; the scoped plan changed one resource and none of that deploy's"
  ],
  "session_log": "org/critical_paths/change_management/20261011T1340Z_advi-firmbkts-fb-g-8-act0-grant-20261011_deploy_completion.md",
  "compiler_tools": [
