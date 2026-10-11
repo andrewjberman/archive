@@ -1,13 +1,19 @@
-Measured UTC: 2026-10-09T08:54:26.1471222Z
-Python positive control: 59
+STEP 1 RE-RUN for AMENDMENT 1 (step 8), read 2026-10-11T03:5xZ on the site Z box.
+INSTRUMENT: Get-CimInstance Win32_Process -Filter "Name='python.exe' OR Name='pythonw.exe'"
 
+POSITIVE CONTROL (the order requires listing any python process first, so a zero below is a measurement
+and not a dead instrument): 64 python processes on the box. They are the per-session MCP servers and
+bloomberg bridges, 14 agent-poller.py processes, broker.py, the agentbus consumer, teams-watch.py, and
+the live harvest cycle runner PID 21512 with its collector child PID 20268.
 
-ProcessId   : 16136
-Name        : python.exe
-CommandLine : python org/mcp/server.py
+TARGET:
+backfill_driver processes: 0 of 64
+backfill_driver processes for sa (command line matching 'publishers sa' or 'r47_sa'): 0 of 0
 
+VERDICT: no sa backfill driver is running. Step 1's stop-and-report condition is NOT met, so step 8's
+relaunch arm is clear to proceed on that count.
 
-
-
-Harvest process count: 0
-
+NOTE, not a blocker: the bbg CYCLE runner (PID 21512) IS live and collecting, on publishers bbg wsj
+barrons. It does not include sa, so it does not collide with this leg on the publisher axis. It does
+share the box's collector machinery, which matters because the stop this relaunch answers was a
+collector LAUNCH failure (see bs4_stop_reason.out, rc 3221225794).
