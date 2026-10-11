@@ -1,0 +1,70 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-e-2",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R2.md",
+  "vintage_commit": "2e99d5c4a7",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-e-2.reader-a.md"
+ },
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-e-2.reader-a.md",
+  "group": "OTHER",
+  "vintage_commit": "2e99d5c4a7"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~5",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier1_exec/2.0.0_SA_COO~B1/round2/blind/ANSWERS_A.json",
+   "kind": "config_data",
+   "commit_or_etag": "91faa1f947",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Reader A answers file, 418 entries, committed at 91faa1f947; a data file, not a deploy. Read back by r2_reader.py --reader A: 2 of 2 arms, exit=0."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "python r2_reader.py --reader A; expect ROUND 2 READER A: 2 of 2 arms (exit=0 printed on the following line)",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/tier1_exec/2.0.0_SA_COO~B1/round2/blind/r2_reader.py\" --reader A; echo \"exit=$?\"",
+   "output_evidence": "  locations=418 answers=418 duplicates=0 unanswered=0 unknown ids=0\n  answers with a blank field: 0\nPASS R1 every location id is answered exactly once, by a named worker serial\nPASS R2 every answer names system, firm, tier, table and contents (firm and system may read 'unknown')\nROUND 2 READER A: 2 of 2 arms\nexit=0",
+   "denominator": "2 of 2 arms (R1, R2); 418 of 418 location ids answered, 0 duplicates, 0 blank fields",
+   "status": "PASS",
+   "expect": "ROUND 2 READER A: 2 of 2 arms"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant: the cell names no spec mutant; the grader's own two arms are the discrimination.",
+   "expected": "N/A",
+   "observed": "N/A-SPEC-NAMES-NONE",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "two further same-input runs of r2_reader.py --reader A, outputs compared byte for byte",
+   "observed": "run 2 and run 3 identical (cmp); both exit=0 and ROUND 2 READER A: 2 of 2 arms",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Agreement between reader A and reader B",
+   "reason": "Not graded here; the issuer computes agreement at the round's close (order section 4)."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~5/ADVI_FIRMBKTS.TO-FB-e-2.session_log.txt",
+ "compiler_tools": [
+  {
+   "tool": "r2_reader.py (grader, read-only, same folder as LOCATIONS.json)",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO~B1/round2/blind/r2_reader.py --reader A",
+   "result": "ROUND 2 READER A: 2 of 2 arms; exit=0"
+  },
+  {
+   "tool": "python json validation of ANSWERS_A.json against LOCATIONS.json ids",
+   "invocation": "python -c (load both files; compare id sets; check non-empty fields)",
+   "result": "answers 418, unique 418, missing 0, extra 0; every field non-empty; unknown counts system 155, firm 0, tier 5, table 5"
+  }
+ ]
+}
