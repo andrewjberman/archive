@@ -199,3 +199,26 @@ Held on the condition that no IRPT_BCKEND order is open (IB-pr-404, IB-pr-413, I
 - **D2-W285-S3** (owner `1.0.0_SA_CTO~DELL2`): two real S3 requests with a literal fake key left the box before the offline fake was
   installed; refused, nothing read or written. Disclosed by the worker. Remedy: the replay harness installs the fake before any import.
 - **D2-W285-S2** (owner `2.0.0_SA_COO~P2`): the replay box lacks the PDF library, so the pin tests that need a real PDF cannot run.
+
+---
+
+## Added at rounds 127 (amended), 129, 130 and 132, 2026-10-11T14:58:13Z (input: msg 5175)
+
+Row D2-S82 above is met: PRD v0.35 and v0.36 repaired the text and this seat signed both. It is dismissed at the slug.
+
+Held on the condition that no IRPT_BCKEND order is open:
+
+- **D2-W288-S2** (OBSERVATION, INERT; filed by `0.9.0_WK_IRPT_BCKEND~288`): Over the 85 graded days one non-cash row (Units zero, Market Value above zero) fits none of the five ungradeable kinds and has no price; it is counted as sixth_reason_rows 1 and not fitted to a kind.
+- **D2-S85** (OBSERVATION, INERT; filed by `0.7.0_AE_CloudOps~IB2`): The capture's full receipt (login_submission, probe_pair, warmup, login_path, screen) is consumed in process by run_capture and written nowhere, so the only surviving host evidence is eight step lines in a per-run-truncated stderr file; and the library's explicit SIGNED_OUT_APP_CHROME diagnosis for 
+- **D2-S86** (OBSERVATION, INERT; filed by `0.7.0_AE_CloudOps~IB2`): A send-command whose local shell quoting had already failed handed SSM the empty string; SSM accepted it, ran nothing, and reported Status Success with ResponseCode 0 and empty output, so a CommandId and a Success both existed for a read that never happened.
+- **D2-S88** (OBSERVATION, INERT; filed by `0.7.0_AE_CloudOps~IB2`): A GetItem on the irpt-jobs lease row from this seat's own session is denied -- kms:Decrypt on the table's CMK is not granted to cloudops-dell2-agent-user -- so the lease and job rows that hold the capture cooldown and the refresh intent are unreadable from the operator side; the row was read through
+- **D2-W292-S1** (OBSERVATION, INERT; filed by `0.9.0_WK_IRPT_BCKEND~292`): On IB-pr-434 the persisted probe_pair is null in exactly the case the new code SIGNED_OUT_APP_CHROME_AFTER_SUBMIT names, because probeSession returns before the discriminating pair when the browser holds no identity cookie; the pair only exists when an identity cookie was present, so for the 2026-10
+- **D2-S84** (OBSERVATION, INERT; filed by `2.0.0_SA_COO~P2`): IRPT_BCKEND is named EXPIRY OWNER of a TRANSITIONAL live row in the routed 49 Financial bucket alias: dell1's ADVI_FIRMBKTS lets the IRPT readers and the two gold writers keep reading investor-reporting/directory/ there instead of copying it into the firm's canonical bucket; the row expires at IRPT_
+
+**For the slug:**
+1. **The cost of the date-basis rule is now measured: 57.3 percent of eligible Cottonwood account-days blank, 382 of 999 accounts
+   never served.** The largest kind is a priced security the anchor does not carry (34,437 account-days). Cottonwood Performance
+   stays UNAVAILABLE.
+2. **The vendor sign-in was submitted and never confirmed** (the host read; claim inferred). The path is stopped for every seat
+   until st32 carries the capture build.
+3. The sections response contract admits the Opal-made report. That closes IRPT_YCDGEN rows W2-S13 and W6-S4 on the contract side.
