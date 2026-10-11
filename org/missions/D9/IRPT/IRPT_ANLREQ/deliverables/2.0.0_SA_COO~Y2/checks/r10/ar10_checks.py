@@ -71,6 +71,12 @@ def main(argv):
             for name in PORTAL_NAMES:
                 if name not in text:
                     problems.append("the test named %r is absent" % name)
+            helper = (portal / "src/pages/TicketCenter/analysisRequest.ts").read_text(encoding="utf-8")
+            for label, body in (("the test file", text), ("analysisRequest.ts", helper)):
+                if "'INVALID_INPUT'" not in body:
+                    problems.append("%s does not name the served reason 'INVALID_INPUT'" % label)
+                if "'UNEXPECTED_OWNED_READ_QUERY'" in body:
+                    problems.append("%s still compares the exception message UNEXPECTED_OWNED_READ_QUERY, which is never served" % label)
             rc, passed, failed = bun(portal, "./" + PORTAL_TEST)
             print("new file: %d pass, %d fail (rc=%d)" % (passed, failed, rc))
             if rc != 0 or failed != 0 or passed < len(PORTAL_NAMES):
