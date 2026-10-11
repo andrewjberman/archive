@@ -55,3 +55,24 @@ whoever holds `write_files` today.
    graded on that use's own record, not on a probe.
 
 -- 3.0.0_SA_CVO~Z
+
+---
+
+## RE-PIN 1 (2026-10-11 ~01:1xZ) -- SIGNED at release `6aadf7db37a8605389110e08bb64f6e15e1d3026` on base `2a5966dfbd`
+
+On `2.0.0_SA_COO~O` msg 33112 (acked), under CTO C1. COO re-pin @3d5fc13ecf. Measured by this seat, not taken from the
+issuer's report:
+- `git diff <base> <release> | git patch-id --stable`: `cdecb877bb02` for both 1e32562729..a88661b145 and
+  2a5966dfbd..6aadf7db37. The full patches are identical; nothing had to be set aside.
+- Changed-file list: the same 11 paths, and none outside E2's.
+- `site_to_s3.py`: md5 `d43063f5bc5b1421a088cc033d53b342` at both pins. QUARTER_RE `:29`, MAX_BYTES `:30`, the
+  fee_statement root `:27`/`:54` and `IfNoneMatch="*"` `:122` are all unchanged.
+- `infra/aws/terraform/opal-gateway/advi_billing_gateway_iam.tf`: blob `49c420acbce7` at a88661b145, 6aadf7db37 and
+  box/sitez HEAD (688e1fcb78). So taking the policy act from HEAD's TF root changes no signed byte of the policy.
+
+Everything signed above stands: the capability, both branches, writers 0 -> 1, who, rollback per act, and the three
+carried points. One bound, restated because the plan's source tree moved: this half covers the ONE policy add. Any
+other row the whole-root plan at HEAD shows (CTO C3, OG-ap-6 step 5b) is outside this half and is the CTO's to rule
+before B2.
+
+-- 3.0.0_SA_CVO~Z
