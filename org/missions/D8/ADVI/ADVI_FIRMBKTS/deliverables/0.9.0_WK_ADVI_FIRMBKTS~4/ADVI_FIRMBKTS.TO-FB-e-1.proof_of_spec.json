@@ -1,0 +1,109 @@
+{
+ "schema_version": "1.0",
+ "genre": "BUILD",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-e-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-e-1.table-repair.md",
+  "group": "OTHER",
+  "vintage_commit": "2e99d5c4a7"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~4",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R2.md",
+  "vintage_commit": "2e99d5c4a7",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-e-1.table-repair.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/mapping_v2.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "498 rows = 218 round-1 copied + 280 new (202 own, 78 children); 24 regrids; 28 merge entries; census_listed_at 2026-10-09T20:36:32Z",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/MAPPING_TABLE_v2.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "counts per disposition over 444 classes and 238,861 objects; regrids, FAULT reasons, collisions",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round2/checks/r2_mapping.py\" --arms structure; echo \"exit=$?\" -- expect: ROUND 2 MAPPING STRUCTURE: 5 of 5 arms",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round2/checks/r2_mapping.py\" --arms structure; echo \"exit=$?\"",
+   "expect": "ROUND 2 MAPPING STRUCTURE: 5 of 5 arms",
+   "output_evidence": "PASS V1 mapping_v2.json names the census it placed and the table it supersedes | PASS V2 every census class is placed once, or re-gridded into children whose objects sum to its own, and no row names a class the census lacks | PASS V3 every row's disposition is on the enum with its required fields | PASS V4 every MOVE/HOME address is exactly address()'s output | PASS V5 every class round 1 placed, retired or decided keeps its disposition, address and pattern | ROUND 2 MAPPING STRUCTURE: 5 of 5 arms | exit=0",
+   "denominator": "5 of 5 structure arms PASS; census 444 classes, 238,861 objects; 324 placed rows graded through address(); 218 round-1 rows unchanged",
+   "status": "PASS",
+   "status_reason": "both facts read as named: the output line ROUND 2 MAPPING STRUCTURE: 5 of 5 arms and exit=0 (issuer ruling on the expect tail)"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round2/checks/r2_mapping.py\" --arms repair; echo \"exit=$?\" -- expect: ROUND 2 MAPPING REPAIR: 4 of 4 arms",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round2/checks/r2_mapping.py\" --arms repair; echo \"exit=$?\"",
+   "expect": "ROUND 2 MAPPING REPAIR: 4 of 4 arms",
+   "output_evidence": "round-1 FAULT classes=226 re-gridded or placed=168; FAULT rows remaining=87 owners={\"1.0.0_SA_CTO~DELL1\": 87} | destination-table collisions in the final rows=29 ruled=28 unruled=1 stray entries=0 | UNRULED ('opal-data-cot', 'advi', 'cottonwood', 'gold', 'positions_cube') | PASS P1 | FAIL P2 every destination table that two or more classes of one bucket still share has a merge ruling with a reason and a measured overlap of 0 keys | PASS P3 | PASS P4 MAPPING_TABLE_v2.md exists and states the counts per disposition | ROUND 2 MAPPING REPAIR: 3 of 4 arms | exit=1",
+   "denominator": "3 of 4 repair arms PASS; 226 round-1 FAULT classes (168 re-gridded or placed, 58 FAULT by row); 28 of 29 collision groups ruled; 1 unruled",
+   "status": "FAIL",
+   "status_reason": "P2 fails on one round-1-only group: cot gold/positions_cube/ and gold/timeseries/positions_cube/ share 342 of 342 keys. Under 1b the round-1 rows cannot change, and a merge ruling needs overlap 0, so no permitted ruling clears P2. Surfaced as ADVI_FIRMBKTS-D1-W4-S1 (BLOCKING). The order stays open."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "a copy of mapping_v2.json in scratch with one MOVE row's address typed by hand (s3://opal-data-49financial/advi/49financial/typed/by/hand.json), run through the issuer's check via --root",
+   "expected": "V4 fails (builder address mismatch) and V5 fails (difference control)",
+   "observed": "STRUCTURE 3 of 5 arms: V4 FAIL, V5 FAIL; V1 V2 V3 PASS",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the --arms structure check run twice on the unchanged files",
+   "observed": "ROUND 2 MAPPING STRUCTURE: 5 of 5 arms both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the round-1 colliding pair cot gold/positions_cube/ and gold/timeseries/positions_cube/ is left unruled (P2 FAIL)",
+   "reason": "1b keeps round-1 rows unchanged and 1e cannot FAULT them without changing a round-1 row; ADVI_FIRMBKTS-D1-W4-S1"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W4-S1: ROUND-1 COLLISION cot gold/positions_cube/ AND gold/timeseries/positions_cube/ share 171 dated keys; 1b (copy unchanged) and 1e cannot both hold; P2 FAILS on this group",
+  "ADVI_FIRMBKTS-D1-W4-S2: RS4 completion markers have no class identity in the destination; 13 classes in two state/complete groups collide and 1e FAULTs them",
+  "ADVI_FIRMBKTS-D1-W4-S3: a zero-byte marker equal to its class prefix cannot be a re-grid child; it stays in a FAULT remainder (6 bd classes) and gold/clients/ stays FAULT whole",
+  "ADVI_FIRMBKTS-D1-W4-S4: 1e taken literally would FAULT round-1 classes that collide with new ones; only the new classes are FAULTed here to keep 1b",
+  "ADVI_FIRMBKTS-D1-W4-S5: interleaved markers and data need one child per file; 6 classes (23,977 live objects) stay FAULT whole above a 25-child limit the spec does not set",
+  "ADVI_FIRMBKTS-D1-W4-S6: census drift: the 226 FAULT classes hold 114,349 live objects at 2026-10-11T04:01:07Z against 114,045 in census.json"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~4/ADVI_FIRMBKTS.TO-FB-e-1.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round2/checks/r2_mapping.py --arms structure",
+   "result": "5 of 5 arms, exit 0"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round2/checks/r2_mapping.py --arms repair",
+   "result": "3 of 4 arms, exit 1 (P2 FAIL)"
+  },
+  {
+   "tool": "boto3 list_objects_v2",
+   "invocation": "read-only paginated listing of the 226 FAULT classes and the shared-table classes, dell1 identity",
+   "result": "114,349 live objects in the FAULT classes at 2026-10-11T04:01:07Z; overlap measured per group"
+  }
+ ]
+}
