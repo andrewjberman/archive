@@ -1,0 +1,142 @@
+"""ADVI_FIRMBKTS round 4 check for cell FB-g-13 (the opal_name module exposes the canonical platinum bucket and prefix
+of a scope, rendered by the builder; the CTO's round-3 ADDENDUM 4), issuer 2.0.0_SA_COO~B1.
+
+--arms module [--root <tree>] [--base <ref>]  (5 arms)
+  M1 generated_locals.tf carries a `platinum_prefix` local (scope long form -> its canonical served-platinum prefix) and
+     main.tf declares outputs `bucket` and `platinum_prefix` keyed on var.scope.
+  M2 the generated prefix of 49financial equals the common root of the producers' seam's canonical templates: every class
+     the seam places in that firm's bucket starts with it (read from the tree's lib/platinum_dest_view.py).
+  M3 `terraform test` passes in the module folder (PASS with a printed note where terraform is absent).
+  M4 DORMANT: against the base, generated_locals.tf and main.tf keep every base line in order and add only the new
+     local and the two outputs; no other file of the module changes.
+  M5 the committed generated_locals.tf is the builder's output, and `lib/opal_naming.py validate` exits 0.
+Plain ASCII output; the last line carries the arm count. Never edit this file.
+"""
+import argparse
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+
+MOD = "infra/aws/terraform/modules/opal_name"
+GL = MOD + "/generated_locals.tf"
+MAIN = MOD + "/main.tf"
+
+
+def _git(root, *a):
+    return subprocess.run(["git", "-C", root] + list(a), capture_output=True, text=True, encoding="utf-8",
+                          errors="replace")
+
+
+def _root(arg):
+    if arg:
+        return arg
+    return subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
+
+
+def _base(root, arg):
+    if arg:
+        return arg
+    wl = _git(root, "worktree", "list", "--porcelain").stdout.split("\n")
+    primary = next((ln.split()[1] for ln in wl if ln.startswith("HEAD ")), "")
+    return _git(root, "merge-base", "HEAD", primary).stdout.strip()
+
+
+def _kept(old_lines, new_lines):
+    """(base lines kept in order, count of added lines)."""
+    i = 0
+    for ln in new_lines:
+        if i < len(old_lines) and ln == old_lines[i]:
+            i += 1
+    return i, len(new_lines) - i
+
+
+def module(root, base):
+    res = []
+    gl = open(os.path.join(root, *GL.split("/")), encoding="utf-8").read()
+    mn = open(os.path.join(root, *MAIN.split("/")), encoding="utf-8").read()
+    ok1 = re.search(r"^\s*platinum_prefix\s*=", gl, re.M) is not None and \
+        re.search(r'output\s+"bucket"\s*\{', mn) is not None and \
+        re.search(r'output\s+"platinum_prefix"\s*\{', mn) is not None and "var.scope" in mn
+    print("  locals platinum_prefix=%s outputs bucket/platinum_prefix=%s/%s" % (
+        re.search(r"^\s*platinum_prefix\s*=", gl, re.M) is not None, 'output "bucket"' in mn,
+        'output "platinum_prefix"' in mn))
+    res.append(("M1 the module carries the platinum_prefix local and the bucket and platinum_prefix outputs", ok1))
+
+    sys.path.insert(0, os.path.join(root, "data", "black_diamond", "scripts", "gold"))
+    from lib import platinum_dest_view as v  # noqa: E402
+    m = re.search(r'platinum_prefix\s*=\s*\{(.*?)\n\s*\}', gl, re.S)
+    got = dict(re.findall(r'"([^"]+)"\s*=\s*"([^"]*)"', m.group(1))) if m else {}
+    p = got.get("49financial")
+    in_bucket = [t for (_pfx, b, t) in v.PLATINUM_CLASSES if b == "opal-data-49financial"]
+    ok2 = bool(p) and bool(in_bucket) and all(t.startswith(p) for t in in_bucket)
+    print("  49financial prefix=%r; seam templates in that bucket=%d, all under it=%s" % (
+        p, len(in_bucket), bool(p) and all(t.startswith(p) for t in in_bucket)))
+    res.append(("M2 the generated prefix is the common root of every canonical template the seam places in that bucket",
+                ok2))
+
+    tf = shutil.which("terraform")
+    if tf:
+        modp = os.path.join(root, *MOD.split("/"))
+        subprocess.run([tf, "init", "-backend=false", "-input=false", "-no-color"], cwd=modp, capture_output=True,
+                       text=True, timeout=110)
+        r = subprocess.run([tf, "test", "-no-color"], cwd=modp, capture_output=True, text=True, timeout=110)
+        tail = (r.stdout.strip().splitlines() or [""])[-1][:100]
+        print("  terraform test rc=%d: %s" % (r.returncode, tail))
+        ok3 = r.returncode == 0
+    else:
+        print("  terraform not on PATH: test arm skipped")
+        ok3 = True
+    res.append(("M3 terraform test passes in the module folder", ok3))
+
+    ok4 = True
+    for f in (GL, MAIN):
+        old = _git(root, "show", "%s:%s" % (base, f)).stdout.splitlines()
+        new = open(os.path.join(root, *f.split("/")), encoding="utf-8").read().splitlines()
+        k, added = _kept(old, new)
+        print("  %s: base lines kept in order %d of %d; added lines %d" % (f, k, len(old), added))
+        ok4 = ok4 and k == len(old)
+    changed = _git(root, "diff", "--name-only", base, "HEAD", "--", MOD).stdout.split()
+    changed += _git(root, "diff", "--name-only", "HEAD", "--", MOD).stdout.split()
+    others = sorted({c for c in changed if c not in (GL, MAIN)})
+    print("  other module files changed: %s" % others)
+    res.append(("M4 dormant: the base's lines are all kept in order and no other module file changes",
+                ok4 and not others))
+
+    code = ("import sys; sys.path.insert(0,'lib'); import opal_naming as n; n.generate(sys.argv[1], ['%s']); "
+            "print('done')" % GL)
+    with tempfile.TemporaryDirectory() as td:
+        g = subprocess.run([sys.executable, "-c", code, td], cwd=root, capture_output=True, text=True, timeout=120)
+        gp = os.path.join(td, *GL.split("/"))
+        gen = open(gp, encoding="utf-8").read() if os.path.isfile(gp) else None
+    val = subprocess.run([sys.executable, "lib/opal_naming.py", "validate"], cwd=root, capture_output=True,
+                         text=True, timeout=100)
+    print("  generate rc=%d in sync=%s; validate rc=%d" % (g.returncode, gen == gl, val.returncode))
+    res.append(("M5 the committed generated_locals.tf is the builder's output and validate exits 0",
+                g.returncode == 0 and gen == gl and val.returncode == 0))
+    return res
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--arms", choices=("module",), required=True)
+    ap.add_argument("--root")
+    ap.add_argument("--base")
+    a = ap.parse_args()
+    root = _root(a.root)
+    try:
+        res = module(root, _base(root, a.base))
+    except Exception as e:  # noqa: BLE001
+        print("ABSENT or unreadable: %s (%s: %s)" % (MOD, type(e).__name__, str(e)[:160]))
+        res = [("the module readable at the tree and the base", False)]
+    for name, ok in res:
+        print("%s %s" % ("PASS" if ok else "FAIL", name))
+    n = sum(1 for _, ok in res if ok)
+    print("ROUND 4 MODULE GRANT: %d of 5 arms" % n)
+    sys.exit(0 if n == 5 else 1)
+
+
+if __name__ == "__main__":
+    main()

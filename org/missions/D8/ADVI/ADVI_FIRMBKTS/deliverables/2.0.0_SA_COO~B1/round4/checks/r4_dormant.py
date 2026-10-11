@@ -23,7 +23,7 @@ import tempfile
 
 
 def _git(root, *a):
-    return subprocess.run(["git", "-C", root] + list(a), capture_output=True, text=True)
+    return subprocess.run(["git", "-C", root] + list(a), capture_output=True, text=True, encoding="utf-8", errors="replace")
 
 
 def _root(arg):
