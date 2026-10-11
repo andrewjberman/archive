@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~T2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TRL</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_TRNSPT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -21,6 +21,16 @@
     09:55Z (ledger nfra-trnspt-a18-second-reader-laptop-20261009: 3 added, 1 changed). ~TRL runs ONLY the open VERIFY leg as the ledger names
     it -- role read-back, the full key-policy diff, the admitted/refused S3 proof with statuses only -- and closes that ledger. The key policy
     now also carries SilverReaderDecryptOnly (TO-APPLY-s21, 14:07Z); that statement is s21's, not a18's, and is read as such.
+
+    AMENDMENT 2 (issuer, 2026-10-11 ~06:3xZ, on the CTO's ruling msg 4272): this order ENDS at what its act made and measured -- the
+    apply (2026-10-09 09:55Z, 3 added, 1 changed, ledger nfra-trnspt-a18-second-reader-laptop-20261009), the role read-back and the
+    one-principal key-policy diff (~TRL @ce04c2dee3), and the REFUSED half of step 2 (dell2, AccessDenied, 2026-10-09 14:5xZ). It is
+    flipped complete on those and on AC1 (`aws iam get-role ... Role.RoleName`, re-run by the issuer 2026-10-11T06:27Z: the role name,
+    live trust exactly user/Opal_Terminal). The ADMITTED half of step 2 is NOT met and is NOT deleted or reworded: it MOVES, text
+    unchanged, to the parked item `org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/2.0.0_SA_COO~T2/PARKED_FWD8_ADMITTED_READ_OPAL_TERMINAL_20261011.md`
+    (owner Andrew; un-parks when run on the device that holds the Opal_Terminal key). FWD-8 stays UNGRADED until then. Why: neither
+    the laptop, site Z nor dell2 holds that key (site Z stopped at its identity guard on crossbox XB-20261011T055148Z-00a7), and no
+    credential is copied to a box. The ledger stays HELD-SOVEREIGN-GATED on that read; its close is not this order's any more.
   </reassignment>
 
   <ruling>
