@@ -1,0 +1,40 @@
+diff --git a/src/pages/InvestorReporting/contracts/wire/responses.ts b/src/pages/InvestorReporting/contracts/wire/responses.ts
+index 311103a1..70c7bb76 100644
+--- a/src/pages/InvestorReporting/contracts/wire/responses.ts
++++ b/src/pages/InvestorReporting/contracts/wire/responses.ts
+@@ -155,20 +155,33 @@ export interface AnalysisRequestsResponseWire {
+  * analysis-report -- the RESPONSE envelope for `GET /api/scoped/investor-reporting/analysis/{jobId}/sections`.
+  *
+  * Source schema: docs/contracts/investor-reporting/v1/responses/analysis-report.response.schema.json
+- * Source sha256: 327766ca8091dc50ff09a647b323aaa4fad6be539c05622ab3a53589b21d2b1a
++ * Source sha256: cb6911d1ef77faaea8765423eb4c1623e8a5f558d57592451527aeee095859a7
+  */
+ export interface AnalysisReportResponseWire {
+   readonly contract_version: 'v1'
+   readonly operation: 'analysis-report'
+   readonly firm_id: ResolvedScopeWire['verified_request_firm_id'] & string
+   readonly data: {
++    readonly request_ref?: WireProperty<AnalysisReportWire, 'request_ref'>
++    readonly sections?: readonly unknown[]
++    readonly extraction_validation?: WireProperty<AnalysisReportWire, 'extraction_validation'>
++    readonly undated_sections?: WireProperty<AnalysisReportWire, 'undated_sections'>
++    readonly extraction_coverage?: WireProperty<AnalysisReportWire, 'extraction_coverage'>
++    readonly retained_ref?: WireProperty<AnalysisReportWire, 'retained_ref'>
++  } & ({
+     readonly request_ref: WireProperty<AnalysisReportWire, 'request_ref'>
+     readonly sections: WireProperty<AnalysisReportWire, 'sections'>
+     readonly extraction_validation: WireProperty<AnalysisReportWire, 'extraction_validation'>
+     readonly undated_sections?: WireProperty<AnalysisReportWire, 'undated_sections'>
+     readonly extraction_coverage?: WireProperty<AnalysisReportWire, 'extraction_coverage'>
+     readonly retained_ref?: WireProperty<AnalysisReportWire, 'retained_ref'>
+-  }
++  } | {
++    readonly provider: 'OPAL_ENGINE'
++    readonly request_ref: Readonly<Record<string, unknown>>
++    readonly sections: readonly unknown[]
++    readonly computation_validation: Readonly<Record<string, unknown>>
++    readonly retained_ref?: WireProperty<AnalysisReportWire, 'retained_ref'>
++  })
+   readonly status?: PublicStatusEnvelopeWire
+   readonly unprojected_grant: {
+     readonly count: number
