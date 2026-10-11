@@ -229,8 +229,8 @@ def arm_adopt():
         known = [d for d in (asof.group(1), after) if d]
         printed = VINTAGE_RE.search(text.split(LIVE_TOKEN, 1)[1]) if LIVE_TOKEN in text else None
         print("vintage: before=%s after=%s printed=%s" % (asof.group(1), after, printed.group(1) if printed else None))
-        need(LIVE_TOKEN in text and typ in text and printed is not None,
-             "the verdict text lacks %s, the node type %s or a vintage date: %s" % (LIVE_TOKEN, typ, text[:400]))
+        need(("%s %s '" % (LIVE_TOKEN, typ)) in text and printed is not None,
+             "the verdict text lacks `%s %s '<name>'` (the node type the plane matched) or a vintage date: %s" % (LIVE_TOKEN, typ, text[:400]))
         need(printed.group(1) in known,
              "the vintage date %s the gate printed is neither the plane's before (%s) nor after (%s) reading" % (printed.group(1), asof.group(1), after))
         # the difference control: a name the plane does not hold is refused exactly as today
