@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-x-6",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9a072fa60a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "9a072fa60a",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-x-6.emitter-census-dir-and-suite-baseline.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~32",
+  "artifacts_produced": [
+    {
+      "path_or_key": "workflows/atom_decomposition/emit_catalog_v02.py",
+      "kind": "script",
+      "commit_or_etag": "72c66ed594",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "main() refuses a --census-dir whose realpath is outside REPO_ROOT: rc 2, EMIT REFUSED text, before any read or write.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "workflows/atom_decomposition/tests/test_emit_declared_inputs.py",
+      "kind": "test",
+      "commit_or_etag": "72c66ed594",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two tests added; file 12 passed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/suite_delta.py",
+      "kind": "script",
+      "commit_or_etag": "72c66ed594",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stdlib ID-delta grader; --self-test prints SELF-TEST PASS.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/baseline/failing_ids_full.txt",
+      "kind": "config_data",
+      "commit_or_etag": "72c66ed594",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "41 failing ids, full tree.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/baseline/failing_ids_sparse.txt",
+      "kind": "config_data",
+      "commit_or_etag": "72c66ed594",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "99 failing/error ids, sparse cone.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pytest rc=0; named tests passed 2 of 2; failed/error tests 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/x6.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 2 of 2; failed/error tests 0 -- RESULT: PASS -- exit=0",
+      "denominator": "2 of 2 named tests passed; 12 of 12 tests in the file passed.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "SELF-TEST PASS (replay new 0, planted new 1, both baseline sizes printed) -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/x6.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "baseline sparse size 99; replay sparse: new 0; planted sparse: new 1; SELF-TEST PASS -- RESULT: PASS -- exit=0",
+      "denominator": "2 shapes (full 41 ids, sparse 99 ids); each replayed new 0 and planted new 1.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Reverted emit_catalog_v02.py to the base (no refusal) with the new tests held constant.",
+      "expected": "test_census_dir_outside_checkout_refused fails; the other 11 pass.",
+      "observed": "1 failed, 11 passed (test_census_dir_outside_checkout_refused). File restored; 12 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran suite_delta.py --self-test twice and compared output hashes; ran the AC1 file twice.",
+      "observed": "Self-test output hash identical across runs; SELF-TEST PASS both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Fixing any failing gateway test",
+      "reason": "Order bound 1: the baseline records them; their owners fix them."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W32-S1"
+  ],
+  "session_log": "n/a: worker records in git",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests -q -rA -p no:cacheprovider --color=no",
+      "result": "full: 41 failed, 711 passed; sparse (with --continue-on-collection-errors): 49 failed, 50 errors, 525 passed, 21 skipped"
+    }
+  ]
+}
