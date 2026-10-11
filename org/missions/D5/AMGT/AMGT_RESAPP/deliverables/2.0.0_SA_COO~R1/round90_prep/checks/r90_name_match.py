@@ -17,7 +17,9 @@ tickers) name exactly one held company and are NOT served. This cell extends the
     N6 control: an all-digit ticker is answered exactly as before (numeric_fields), and a member already MEASURED is untouched.
     N7 route level: through `_with_numeric_tickers`, a served peer set keeps its member count and order, the matchable
        non-numeric member gains `security_key` and `identity`, every other member is byte-equal.
-Verdict: R90 NAME MATCH: YES|NO (exit 0|1). At the base (2026-10-11) N1-N5 and N7 FAIL (no such function, no such arm), N6 PASSes.
+    N8 a name carrying a `Class X` or `Series X` designator is refused although its cleaned form names one held company (the key
+       would be another listing's, and its record's currency another listing's); the same name without the designator matches.
+Verdict: R90 NAME MATCH: YES|NO (exit 0|1). At the base (2026-10-11) N1-N5, N7 and N8 FAIL (no such function, no such arm), N6 PASSes.
 """
 import copy
 import json
@@ -28,7 +30,9 @@ from lib.research.peers import numeric_tickers as nt
 
 IDX = {
     nt.name_token("ASML Holding NV"): ["ASML_NA_Equity"],
-    nt.name_token("Shopify, Inc. Class A"): ["SHOP_CN_Equity"],
+    nt.name_token("Zeta Holdings, Inc."): ["ZETA_CN_Equity"],
+    nt.name_token("China Construction Bank Corporation"): ["939_HK_Equity"],
+    nt.name_token("Grupo Aeroportuario"): ["OMAB_MM_Equity"],
     nt.name_token("Shared Name Corp"): ["SHR_US_Equity", "SHR_LN_Equity"],
     nt.name_token("Novartis AG"): ["NOVN_SW_Equity"],
 }
@@ -66,8 +70,8 @@ def main():
     results.append(say(ok, "N1 a SEDOL-stem member naming one held company serves its key as MEASURED, matched_as company_name",
                        err or json.dumps(out)))
 
-    out, err = attempt(lambda: match(member("*SHOP", "Shopify, Inc. Class A", country="Canada")))
-    ok = err is None and out.get("security_key") == "SHOP_CN_Equity"
+    out, err = attempt(lambda: match(member("*ZETA", "Zeta Holdings, Inc.", country="Canada")))
+    ok = err is None and out.get("security_key") == "ZETA_CN_Equity"
     results.append(say(ok, "N2 a star-ticker member naming one held company serves its key", err or json.dumps(out)))
 
     out, err = attempt(lambda: match(member("ZZ9999", "Nobody Holdings Ltd")))
@@ -116,6 +120,23 @@ def main():
         ok = same_shape and gained and untouched and numeric_ok
         detail = "shape=%s gained=%s untouched=%s numeric=%s" % (same_shape, gained, untouched, numeric_ok)
     results.append(say(ok, "N7 route level: the matchable non-numeric member gains its key, every other member is byte-equal", detail))
+
+    # N8 -- a share-class or series designator is refused although the cleaned form matches one held company (another listing's key).
+    import re
+
+    def strip_class(n):
+        return re.sub(r"\s+(?:Class|Series)\s+[A-Za-z0-9]{1,2}\s*$", "", n)
+
+    arms8 = []
+    for nm, tk in (("China Construction Bank Corporation Class A", "B24G12"), ("China Construction Bank Corporation Class H", "B0LMTQ"),
+                   ("Grupo Aeroportuario Series B", "B1KFX1")):
+        got, e = attempt(lambda nm=nm, tk=tk: nt.name_match_fields(member(tk, nm, country="China"), IDX, strip_class))
+        arms8.append(e is None and got == {})
+    plain, e2 = attempt(lambda: nt.name_match_fields(member("B0LMTQ", "China Construction Bank Corporation", country="Hong Kong"),
+                                                     IDX, strip_class))
+    arms8.append(e2 is None and plain.get("security_key") == "939_HK_Equity")
+    results.append(say(all(arms8), "N8 a Class or Series designator is refused although its cleaned form matches; the plain name matches",
+                       "arms %s" % arms8))
 
     print("   arms passed %d of %d" % (sum(1 for r in results if r), len(results)))
     verdict = all(results)
