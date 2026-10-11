@@ -21,7 +21,15 @@
       "commit_or_etag": "ed1d3241d9",
       "artifact_covered_by": ["AC1", "AC2"],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-MDPF_CANON-13 (commit ed1d3241d9). The audit is run from a repo checkout only; no scheduler, no dispatch call, no deploy, no AWS write. Its read path is partition_uri() from mdpf_gold_parquet.py. The served output is not moved (the audit prints and exits)."
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-13 (commit ed1d3241d9; unchanged since). The audit is run from a repo checkout only; no scheduler, no dispatch call, no deploy, no AWS write. Its read path is partition_uri() from mdpf_gold_parquet.py. The served output is not moved (the audit prints and exits)."
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~4/READER_CENSUS.md",
+      "kind": "doc",
+      "commit_or_etag": "e019012c69",
+      "artifact_covered_by": ["AC4"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-13 (commit e019012c69). AMENDMENT 2 step 8: the census row for the audit is split into the verification reader (verify_mdpf_revamp_conditions.py) and the repointed audit (lines 147 and 163). A document; no deploy, no AWS call."
     }
   ],
   "acceptance": [
@@ -34,7 +42,7 @@
       "denominator": "3 of 3 arms",
       "status": "PASS",
       "expect": "ROUND 4 READER: 3 of 3 arms",
-      "status_reason": "Measured in the worktree at commit ed1d3241d9 (the invocation runs the checker from the worktree root). The reader arms are offline; S3 is a fake."
+      "status_reason": "Re-run in the worktree at HEAD e019012c69 (AMENDMENT 2 re-run); the audit is unchanged since commit ed1d3241d9. The reader arms are offline; S3 is a fake."
     },
     {
       "criterion_id": "AC2",
@@ -45,14 +53,25 @@
       "denominator": "2 of 2 arms",
       "status": "PASS",
       "expect": "ROUND 4 SEAM: 2 of 2 arms",
-      "status_reason": "Measured in the worktree at commit ed1d3241d9. Read-only S3: the loader's newest partition and the legacy staging JSON, per firm. DELTA=0 over 3388 cells per firm; the tax key on 49financial is the one key only the gold side carries, as the order records."
+      "status_reason": "Re-run in the worktree at HEAD e019012c69. Read-only S3: the loader's newest partition and the legacy staging JSON, per firm. DELTA=0 over 3388 cells per firm; the tax key on 49financial is the one key only the gold side carries, as the order records."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 (CN-d-4, AMENDMENT 2): run r4_cn_d_4_census.py -- expect: ROUND 4 CENSUS: 4 of 4 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round4/checks/r4_cn_d_4_census.py\"; echo \"exit=$?\"",
+      "output_evidence": "  C1 PASS: 1 row(s) name the audit; 0 of them still carry gold/mdpf_revamp/\n  C2 PASS: 2 citation(s) of the audit; unresolved none\n  C3 PASS: citations 2, one on latest_gold_artifact( yes\n  C4 PASS: verify_mdpf_revamp_conditions.py row still listed with the staging tree\nROUND 4 CENSUS: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms",
+      "status": "PASS",
+      "expect": "ROUND 4 CENSUS: 4 of 4 arms",
+      "status_reason": "Run in the worktree at HEAD e019012c69, after the census commit e019012c69. The check is read-only; the census row cites audit lines 147 (def latest_gold_artifact) and 163 (the partition_uri read)."
     },
     {
       "criterion_id": "AC3",
       "criterion_verbatim": "AC3 (judgment=\"true\"): /seams on the audit-to-artifact seam, grounded on the artifact at the builder's address -- MECHANICAL (the audit run end to end, --firm all, reads the newest partitions and prints its coverage and disagreement lines), DECLARATIVE (the module docstring, the log strings and the census row name the gold tier, not the staging tree), SEMANTIC (the audited-date denominators and DISAGREEMENT counts it prints for inflection and 49financial equal those of the run against the old JSON at the same vintage).",
       "method": "manual_read_with_citation",
       "invocation": "N/A -- judgment criterion; graded at the round-4 close by the CVO on /seams (L9), never self-graded by the worker",
-      "output_evidence": "NOT RUN BY THE WORKER: the order gives no invocation for this criterion. Measured declarative facts only, at commit ed1d3241d9: grep -c 'gold/mdpf_revamp' on the audit file = 0; the firm-coverage log line reads 'a firm is staged in the gold tier'; the coverage comment reads 'the gold tier'.",
+      "output_evidence": "NOT RUN BY THE WORKER: the order gives no invocation for this criterion. Measured declarative facts only, at HEAD e019012c69: grep -c 'gold/mdpf_revamp' on the audit file = 0; the firm-coverage log line reads 'a firm is staged in the gold tier'; the coverage comment reads 'the gold tier'; the census names the audit on 1 row (AC4 C1: 0 of them still carry gold/mdpf_revamp/).",
       "denominator": "N/A -- judgment criterion (no verdict by the worker)",
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
       "status_reason": "graded at the round-4 close",
@@ -79,7 +98,7 @@
     },
     {
       "item": "The audit end to end (audit --firm all) was not run by the worker",
-      "reason": "AC3 is judgment, graded by the CVO at the round-4 close on /seams; the worker does not self-grade. The worker ran only the issuer's reader and seam arms."
+      "reason": "AC3 is judgment, graded by the CVO at the round-4 close on /seams; the worker does not self-grade. The worker ran only the issuer's reader, seam and census arms."
     },
     {
       "item": "No fallback, dual read or comparison against the old JSON in the audit; the old tree and its writers untouched",
@@ -88,6 +107,10 @@
     {
       "item": "mdpf_gold_parquet.py, lib/opal_naming.py and the issuer's checks not edited",
       "reason": "Order bound 2; read-only."
+    },
+    {
+      "item": "The order file's <status> is not flipped in this commit: the order file is not in the order's <paths> grant, so the status stays pending",
+      "reason": "The coordinator's condition for the flip (the order file inside the grant) is not met; the flip is left to the issuer."
     },
     {
       "item": "The hashed client account-id list was ABSENT on this box, so the commit-time client-data check did not check the commit for account ids",
@@ -110,14 +133,19 @@
       "result": "ROUND 4 SEAM: 2 of 2 arms, exit=0"
     },
     {
+      "tool": "r4_cn_d_4_census.py (issuer check, read-only)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round4/checks/r4_cn_d_4_census.py\"; echo \"exit=$?\"",
+      "result": "ROUND 4 CENSUS: 4 of 4 arms, exit=0"
+    },
+    {
       "tool": "ruff 0.15.11 (py39 target)",
       "invocation": "python -m ruff check --target-version py39 data/mdpf/scripts/gold/mdpf_revamp_count_source_audit.py",
       "result": "All checks passed!"
     },
     {
       "tool": ".tools/safe-commit.sh commit gates",
-      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_CANON~13 <0.9.0_WK_MDPF_CANON~13@opal.agent>\" -F .scratch/msg_cn_d_4_code.txt -- data/mdpf/scripts/gold/mdpf_revamp_count_source_audit.py",
-      "result": "commit-gate OK; to-pipeline and surprise-row gates OK; NAMING-GATE WARN 2 graded (the inflection and 49financial literals in the issuer's latest_gold_artifact calls, hand-kept carriers, not a refusal); client-data-check WARN (list absent); committed ed1d3241d9"
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_CANON~13 <0.9.0_WK_MDPF_CANON~13@opal.agent>\" -F .scratch/msg_cn_d_4_census.txt -- org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~4/READER_CENSUS.md",
+      "result": "commit-gate and surprise-row gates OK; missions-tree-check OK; committed e019012c69 (census)"
     }
   ]
 }
