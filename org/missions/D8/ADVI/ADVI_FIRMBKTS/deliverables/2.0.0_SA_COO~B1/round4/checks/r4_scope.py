@@ -4,7 +4,7 @@
   --allow <path|dir/>      a path the cell may change (repeatable; an entry ending in / is a directory prefix)
   --require <path>         a path the cell MUST have changed (repeatable)
 Compares the tree's HEAD with the merge-base of HEAD and the primary checkout's HEAD (the commit the worktree was cut
-from), plus any uncommitted change. Prints every changed path and the verdict; the last line reads
+from), plus any uncommitted change. Submodule gitlinks (a worktree's nested checkout) are ignored: a worker never writes them. Prints every changed path and the verdict; the last line reads
 `ROUND 4 SCOPE: OK n changed, 0 outside` or `ROUND 4 SCOPE: FAIL ...`. Never edit this file.
 """
 import argparse
@@ -29,8 +29,8 @@ def main():
     if rc or not base:
         print("ROUND 4 SCOPE: FAIL no merge-base with the primary checkout")
         return 1
-    _, committed = _git(a.root, "diff", "--name-only", base, "HEAD")
-    _, dirty = _git(a.root, "diff", "--name-only", "HEAD")
+    _, committed = _git(a.root, "diff", "--ignore-submodules=all", "--name-only", base, "HEAD")
+    _, dirty = _git(a.root, "diff", "--ignore-submodules=all", "--name-only", "HEAD")
     _, untracked = _git(a.root, "ls-files", "--others", "--exclude-standard")
     changed = sorted({p for p in (committed + "\n" + dirty + "\n" + untracked).split("\n") if p.strip()})
 

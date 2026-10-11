@@ -1,0 +1,79 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-g-9.sev1-test-sms",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-9.sev1-test-sms.md",
+  "group": "OTHER",
+  "vintage_commit": "f33c93ce43"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FBL",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "vintage_commit": "f33c93ce43",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-9.sev1-test-sms.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FBL/evidence/sev1_test_sms_20261011.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record of one send-text-message call, MessageId 88c89911-0012-4041-ae78-0be9b87d1bc9, sent_count 1, retry_count 0, no phone number",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "cd /c/dev/ajb_workspace && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_sms.py --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FBL/evidence/sev1_test_sms_20261011.json; echo \"exit=$?\"",
+   "method": "command",
+   "invocation": "cd /c/dev/ajb_workspace && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_sms.py --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FBL/evidence/sev1_test_sms_20261011.json; echo \"exit=$?\"",
+   "expect": "ROUND 4 SMS RECORD: 3 of 3 arms",
+   "output_evidence": "grader run from the laptop worktree root (path /c/dev/ajb_workspace does not exist on this box; same file, same arguments), printed:\n  fields missing or empty: none\n  sent_count=1 retry_count=0 body ok=True send_api='pinpoint-sms-voice-v2'\n  phone-number-like strings in the record: 0\nPASS M1\nPASS M2\nPASS M3\nROUND 4 SMS RECORD: 3 of 3 arms\nexit=0",
+   "denominator": "3 of 3 arms of the grader over 1 record; 1 send-text-message call in all, 1 destination (1 SMS subscription), 1 toll-free ACTIVE number (1 of 1 numbers)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant is named by the order; the issuer's blind run covers the grader (0 of 3 at base, 3 of 3 on a fixture, 2 of 3 with a retry).",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "not measured: the act is one message, once",
+   "observed": "not measured",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "delivery confirmation",
+   "reason": "no delivery log exists for this API (0 configuration sets, no sms-voice log group; the two SNS groups log SNS publishes and held 0 events); delivery_status is recorded as NO_DELIVERY_LOG_CONFIGURED, never a guess. Whether the text arrived is Andrew's read of his phone."
+  },
+  {
+   "item": "any retry or second send, any sns publish, any change to a number, pool, configuration set, registration, topic or subscription",
+   "reason": "bounds 2.1"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-S19: no delivery log exists for the SMS send API, so delivery_status is NO_DELIVERY_LOG_CONFIGURED; and the order's /c/dev/ajb_workspace path does not exist on the laptop (OBSERVATION, INERT)"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FBL/evidence/sev1_test_sms_20261011.json",
+ "compiler_tools": [
+  {
+   "tool": "aws pinpoint-sms-voice-v2",
+   "invocation": "describe-phone-numbers (read), describe-configuration-sets (read), send-text-message (once)",
+   "result": "1 toll-free ACTIVE number, 0 configuration sets, MessageId 88c89911-0012-4041-ae78-0be9b87d1bc9"
+  },
+  {
+   "tool": "aws logs filter-log-events",
+   "invocation": "both SNS delivery log groups, by id and over 15 minutes, at 12:27Z and 12:28Z",
+   "result": "0 events"
+  }
+ ]
+}
