@@ -1,0 +1,34 @@
+import hashlib, json
+from pathlib import Path
+import pyarrow.parquet as pq
+S = Path("C:/dev/_irpt_private_evidence_20261009/IRPT_DASHBD")
+live = S / "0.9.0_WK_IRPT_DASHBD~88/out_live"; new = S / "0.9.0_WK_IRPT_DASHBD~101/out_new6"
+rec = json.loads((S / "0.9.0_WK_IRPT_DASHBD~101/record_new6.json").read_text(encoding="utf-8"))
+old = json.loads(Path("C:/dev/wk-irpt-dashbd-101/org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~92/R45_REFRESH2_DELTA0.json").read_bytes().decode("utf-8"))
+out = {"tables": {}}
+for t, v in old["tables"].items():
+    hl = hashlib.sha256((live / (t + ".parquet")).read_bytes()).hexdigest()
+    hn = hashlib.sha256((new / (t + ".parquet")).read_bytes()).hexdigest()
+    rows_l = pq.ParquetFile(str(live / (t + ".parquet"))).metadata.num_rows
+    rows_n = pq.ParquetFile(str(new / (t + ".parquet"))).metadata.num_rows
+    out["tables"][t] = {"rows": rows_n, "rows_live": rows_l, "sha256_live": hl, "sha256_new": hn, "equal": hl == hn,
+                        "live_equals_refresh2_committed": hl == v["sha256_live"], "new_equals_refresh2_new": hn == v["sha256_new"],
+                        "record_hash_equals_file": hn == rec["output_hashes"][t]["sha256"]}
+# method_version row by row (counts only)
+tl = pq.read_table(str(live / "returns.parquet")); tn = pq.read_table(str(new / "returns.parquet"))
+out["returns_columns_equal"] = tl.column_names == tn.column_names
+out["returns_has_method_version_column"] = "method_version" in tn.column_names
+ml = tl.column("method_version").to_pylist(); mn = tn.column("method_version").to_pylist()
+out["method_version_rows"] = len(mn)
+out["method_version_equal_rows"] = sum(1 for a, b in zip(ml, mn) if a == b) if len(ml) == len(mn) else None
+out["method_version_values_new"] = sorted(set(mn)); out["method_version_values_live"] = sorted(set(ml))
+out["null_rows_new"] = sum(1 for x in mn if x is None)
+key = [c for c in ("account_id", "business_date") if c in tn.column_names]
+out["key_columns"] = key
+if key:
+    kl = list(zip(*[tl.column(c).to_pylist() for c in key])); kn = list(zip(*[tn.column(c).to_pylist() for c in key]))
+    out["keys_aligned_row_by_row"] = kl == kn
+out["wall_s"] = rec["wall_s"]; out["process_peak_mb"] = rec["process_peak_mb"]; out["stage_peak_mb"] = rec["stage_peak_mb"]
+out["status_stub_puts"] = rec["status_stub_puts"]; out["code_sha256"] = rec["code_sha256"]
+print(json.dumps(out, indent=1))
+Path("C:/dev/_irpt_private_evidence_20261009/IRPT_DASHBD/0.9.0_WK_IRPT_DASHBD~101/cmp_tables_out.json").write_text(json.dumps(out, indent=1), encoding="utf-8")

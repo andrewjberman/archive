@@ -15,8 +15,8 @@ no AWS) and reads the shared-infra file as text. It touches nothing under the ch
      principal are exactly the permitted set's.
   P3 the module's render of the real registry: `fence_scoped_allow_statements` for the bucket holds exactly the ten Allow
      principals of the permitted set, each at its granted resources only (no Put, no Delete, no bucket-wide resource), and
-     `fence_exemption_arns` for the bucket equals the base's list plus the seven new principals (the performance adapter is a
-     registry row now); every OTHER bucket's scoped and allow statements are unchanged.
+     `fence_exemption_arns` for the bucket equals the base's list plus the eight new entries (six readers, the OAI and the
+     performance adapter, which is a registry row now and no longer a hand entry of the blanket Deny); every OTHER bucket's scoped and allow statements are unchanged.
   P4 the shared-infra file: the three hand statements, the performance adapter's data source and the two locals are gone; the
      concat appends `fence_scoped_allow_statements` for the bucket after the scoped Deny statements; the blanket Deny keeps its
      `fence_patterns` and `fence_exemption_arns` lists; nothing else of the file changes (every other base line kept in order).
@@ -151,7 +151,7 @@ def policy(root, base):
                     if r in ("*", "arn:aws:s3:::%s/*" % BUCKET):
                         res_ok = False
         extra_arns = sorted(set(arns_t.get(BUCKET, [])) - set(arns_b.get(BUCKET, [])))
-        want_new = sorted([_role(n) for n in READERS] + [OAI])
+        want_new = sorted([_role(n) for n in READERS] + [_role(ADAPTER), OAI])
         other_same = all(den_t.get(k) == v for k, v in den_b.items() if k != BUCKET) and \
             all(v == [] for k, v in allow.items() if k != BUCKET)
         ok3 = (sorted(pr.keys()) == want_allow and res_ok and extra_arns == [a for a in want_new if a not in
