@@ -18,10 +18,10 @@
     {
       "path_or_key": "data/mdpf/scripts/gold/mdpf_gold_consolidator.py",
       "kind": "script",
-      "commit_or_etag": "ed1c20d805",
+      "commit_or_etag": "1e62b75642",
       "artifact_covered_by": ["AC1"],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-MDPF_CANON-10 (commit ed1c20d805). assert_global_served_identity added after apply_sma_sleeve_overlay and called once in build_all. No deploy, no AWS write by the worker."
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-10 (commit 1e62b75642; first landed at ed1c20d805). assert_global_served_identity after apply_sma_sleeve_overlay; guard_global_served_identity(arts, _isolated) replaces the bare call in build_all (AMENDMENT 2). No deploy, no AWS write by the worker."
     },
     {
       "path_or_key": "data/mdpf/scripts/gold/dim_mdpf_aggregate_aua_timeseries.py",
@@ -42,10 +42,10 @@
     {
       "path_or_key": "data/mdpf/tests/canon/test_global_served_identity.py",
       "kind": "test",
-      "commit_or_etag": "ed1c20d805",
+      "commit_or_etag": "1e62b75642",
       "artifact_covered_by": ["AC1"],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-MDPF_CANON-10 (commit ed1c20d805). 6 synthetic tests, all pass."
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-10 (commit 1e62b75642). 7 synthetic tests (6 identity, 1 isolation under AMENDMENT 2), all pass."
     },
     {
       "path_or_key": "data/mdpf/tests/canon/test_cottonwood_fold_vintage.py",
@@ -59,14 +59,14 @@
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "AC1 cell_refs=CN-d-1: cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round4/checks/r4_cn_d_1.py\"; echo \"exit=$?\" -- expect: ROUND 4 IDENTITY: 5 of 5 arms -- and exit=0",
+      "criterion_verbatim": "AC1 cell_refs=CN-d-1: cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round4/checks/r4_cn_d_1.py\"; echo \"exit=$?\" -- expect: ROUND 4 IDENTITY: 6 of 6 arms -- and exit=0 (AMENDMENT 2 re-cut: arm A6 added, was 5 of 5)",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round4/checks/r4_cn_d_1.py\"; echo \"exit=$?\"",
-      "output_evidence": "  A1 PASS: assert_global_served_identity present\n  A2 PASS: a conforming synthetic global is accepted\n  A3 PASS: refused and named 2026-10-05\n  A4 PASS: served 2026-10-08 object holds the 4-term identity on 484 non-null dates\n  A5 PASS: build_global_artifact docstring names both additive terms\nROUND 4 IDENTITY: 5 of 5 arms\nexit=0",
-      "denominator": "5 of 5 arms",
+      "output_evidence": "  A1 PASS: assert_global_served_identity present\n  A2 PASS: a conforming synthetic global is accepted\n  A3 PASS: refused and named 2026-10-05\n  A4 PASS: served 2026-10-08 object holds the 4-term identity on 484 non-null dates\n  A5 PASS: build_global_artifact docstring names both additive terms\n  A6 PASS: control keeps global=True; planted -> global None, firm scopes unchanged=True, error recorded=True\nROUND 4 IDENTITY: 6 of 6 arms\nexit=0",
+      "denominator": "6 of 6 arms",
       "status": "PASS",
-      "expect": "ROUND 4 IDENTITY: 5 of 5 arms",
-      "status_reason": "Measured in the worktree at commit ed1c20d805 (the invocation runs the checker from the worktree root). A4 is one read-only get of the served 2026-10-08 object; it passed on 484 non-null dates, so no served value is refused."
+      "expect": "ROUND 4 IDENTITY: 6 of 6 arms",
+      "status_reason": "Measured in the worktree at commit 1e62b75642 (the invocation runs the checker from the worktree root). A4 is one read-only get of the served 2026-10-08 object; it passed on 484 non-null dates, so no served value is refused. A6 grades guard_global_served_identity through an isolated that swallows SystemExit."
     },
     {
       "criterion_id": "AC2",
@@ -77,26 +77,26 @@
       "denominator": "3 of 3 arms",
       "status": "PASS",
       "expect": "ROUND 4 VINTAGE: 3 of 3 arms",
-      "status_reason": "Measured in the worktree at commit ed1c20d805. Offline: the units function and sidecar are synthetic; no AWS call."
+      "status_reason": "Measured in the worktree at commit 1e62b75642 (the vintage module is unchanged since ed1c20d805). Offline: the units function and sidecar are synthetic; no AWS call."
     }
   ],
   "controls": {
     "mutant": {
-      "description": "a copy of the scripts tree (plus lib and infra, read-only copies) under .scratch/mutroot with the def line of assert_global_served_identity renamed to _removed_guard_mutant, then the AC1 invocation run with R4_ROOT pointing at that copy",
-      "expected": "A1 FAILS on the absent function; the arm count drops below 5 of 5 and the exit is non-zero",
-      "observed": "A1 FAIL: assert_global_served_identity absent from mdpf_gold_consolidator; A2-A4 FAIL: no function; A5 PASS; ROUND 4 IDENTITY: 1 of 5 arms; exit=1",
+      "description": "a copy of the scripts tree (plus lib and infra, read-only copies) under .scratch/mutroot with the def line of guard_global_served_identity renamed to _removed_guard_mutant, then the AC1 invocation run with R4_ROOT pointing at that copy",
+      "expected": "A6 FAILS on the absent guard; the arm count drops below 6 of 6 and the exit is non-zero",
+      "observed": "A1 PASS ... A5 PASS; A6 FAIL: guard_global_served_identity absent from mdpf_gold_consolidator; ROUND 4 IDENTITY: 5 of 6 arms; exit=1",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "the AC1 invocation run twice in the worktree, each stdout captured to a file in .scratch and compared with cmp",
-      "observed": "IDENTICAL-OUTPUTS: both runs exit 0 with the same ROUND 4 IDENTITY: 5 of 5 arms lines",
+      "observed": "IDENTICAL-OUTPUTS: both runs exit 0 with the same ROUND 4 IDENTITY: 6 of 6 arms lines",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
       "item": "The task order's <status> flip (line 127 of the order file) is NOT made by the worker",
-      "reason": "The order file is outside this order's <paths> write grant (section 3). Recorded as surprise MDPF_CANON-D1-W10-S3; the COO owns the flip."
+      "reason": "The order file is outside this order's <paths> write grant (section 3). Recorded as surprise MDPF_CANON-D1-W10-S3; the COO owns the flip, and the issuer closes the amended order at the drain."
     },
     {
       "item": "No AWS write of any kind; the only AWS contact is the one read-only get of the served 2026-10-08 global object inside AC1 arm A4",
@@ -117,7 +117,7 @@
     {
       "tool": "r4_cn_d_1.py (issuer check, read-only)",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round4/checks/r4_cn_d_1.py\"; echo \"exit=$?\"",
-      "result": "ROUND 4 IDENTITY: 5 of 5 arms, exit=0"
+      "result": "ROUND 4 IDENTITY: 6 of 6 arms, exit=0"
     },
     {
       "tool": "r4_cn_d_1_vintage.py (issuer check, offline)",
@@ -125,9 +125,9 @@
       "result": "ROUND 4 VINTAGE: 3 of 3 arms, exit=0"
     },
     {
-      "tool": "pytest (new canon tests plus the stratid and taxsma regression suites)",
-      "invocation": "python -m pytest -q -p no:cacheprovider data/mdpf/tests/stratid/ data/mdpf/tests/taxsma/ data/mdpf/tests/canon/",
-      "result": "272 passed (263 existing plus 9 new), rc=0"
+      "tool": "pytest (canon, stratid and taxsma suites)",
+      "invocation": "python -m pytest -q -p no:cacheprovider data/mdpf/tests/canon data/mdpf/tests/stratid data/mdpf/tests/taxsma",
+      "result": "273 passed (263 existing plus 10 new canon), rc=0"
     }
   ]
 }
