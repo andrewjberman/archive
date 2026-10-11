@@ -65,7 +65,7 @@ all sixteen:
 
 ## DISPOSITION TABLE -- 16 of 16
 
-1. `bd-merge-daily-lambda-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
+1. `bd-merge-daily-lambda-role` -- DECLARED (round 6: `infra/aws/terraform/bd-pipeline/zz_adopt_family_a.tf`, TO-IAM-w-2 @beeb07f26c). Prior token: ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
    assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -83,7 +83,7 @@ all sixteen:
    pair, and any declaration must leave `inline_policy` and `managed_policy_arns` ABSENT (both are Optional+Computed
    and become authoritative when set). Full reasoning: deliverables/0.7.0_AE_CloudOps~Z/ACCEPTANCE_ROWS_TEN.md;
    families and order of application: ADOPTION_PLAN_TEN.md.
-2. `bd-pipeline-task-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
+2. `bd-pipeline-task-role` -- DECLARED (round 6: `infra/aws/terraform/bd-pipeline/zz_adopt_family_a.tf`, TO-IAM-w-2 @beeb07f26c). Prior token: ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
    assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -99,7 +99,7 @@ all sixteen:
    declaration must leave `inline_policy` and `managed_policy_arns` ABSENT (both are Optional+Computed and become
    authoritative when set). Full reasoning: deliverables/0.7.0_AE_CloudOps~Z/ACCEPTANCE_ROWS_TEN.md; families and
    order of application: ADOPTION_PLAN_TEN.md.
-3. `codebuild-semantic-clustering-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
+3. `codebuild-semantic-clustering-role` -- DECLARED (round 6: `infra/aws/terraform/news-pipeline/zz_adopt_row3.tf`, TO-IAM-w-3 @fc8da02312). Prior token: ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
    assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -221,7 +221,7 @@ all sixteen:
    managed), but this row's LINE cites have aged -- the five are now `main.tf:60`, `:82`, `:101`,
    `:140` and `qa-scratch-instance.tf:53`, and 17 lines of that last shift are MINE, from the OG-da-1
    qa-scratch pin at `99c3b4c1b1`. The substance is unaffected at any line number.
-9. `opal-smartx-lambda-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
+9. `opal-smartx-lambda-role` -- DECLARED (round 6: `infra/aws/terraform/smartx-pipeline/zz_adopt_family_b.tf`, TO-IAM-w-1 @af790901d5). Prior token: ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
    assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -268,7 +268,7 @@ all sixteen:
     here, because accepting custody of a role is not a decision about which module declares it. I also
     accept NO narrowing on the back of the zero-usage reading: `C-TWO-REMEDIES` binds, and a role that
     has never been used is not evidence that a permission is unneeded.
-11. `portfolio-management-lambda-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
+11. `portfolio-management-lambda-role` -- DECLARED (round 6: `infra/aws/terraform/portfolio-management/zz_adopt_family_e.tf`, TO-IAM-w-3 @fc8da02312). Prior token: ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
     `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
     exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
     assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -373,6 +373,12 @@ lines 22-23), landed as carrier @`6c9703007c`. So the arithmetic above now reads
 reopen-condition discipline are defined in `deliverables/0.7.0_AE_CloudOps~IR/round6/DEFER_ROWS_5_16.md`
 @`4dff2b348a`. Both rows keep `owner=0.7.0_AE_CloudOps~Z`, so owner coverage stays `rows=16 unowned=0`.
 The paragraphs above stay as their authors wrote them, at their own vintage.
+
+**AMENDED BY THE ROUND-6 DRAIN BATCH REPAIR (issuer `2.0.0_SA_COO~ZI`, 2026-10-11, ROUND_ANALYSIS.round6.md @`2f49aa235b`) -- FIVE
+TOKENS MOVED, NO OWNER MOVED.** Rows 1, 2, 3, 9 and 11 were adopted into Terraform in round 6 and now read `DECLARED`, each
+citing its file and completing order. The arithmetic now reads 6 `DECLARED` + 2 `ADOPT` (rows 6, 14) + 5 exemption rows + 1
+`RETIRE` + 2 `DEFER` = 16, re-counted from the table's first lines. Each prior token is kept beside the new one, so
+the row's history stays readable.
 
 ## CLASS RULINGS
 
