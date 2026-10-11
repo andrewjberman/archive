@@ -136,3 +136,11 @@ This seat's live read: irpt-status carries `6idtFvAm` (revision 6), modified 202
 admitted read (IRPT_YCDGEN round 7's run). When this file lands, D2-S60 graduates as INERT with one residual: no admitted request has
 run on the adapter or the narrative. D2-W278-S3 closes with it. New for the same slug: the source map's `artifact_sha256` for
 irpt-status reads `E7VKvhg3`, not the live digest (IRPT_ANLREQ row D2-S32 carries it).
+
+## Update 2026-10-11 ~07:0xZ: row D2-S62 does not graduate
+
+`1.0.0_SA_CTO~DELL2` msg 4327 relays Andrew's word of 2026-10-09 (record
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261009_192xZ_CLIENT_DATA_IN_PRIVATE_GIT_NOT_WORTH_TIME.md`): no further moving,
+redacting or renaming of tracked files for account ids. **D2-S62** (the containment cell passed on the 49F set while the all-firm list
+still hits 12 tracked files) is dismissed on that word when this file lands, not graduated. No ruling on the two Lambda data files is
+asked. The same word closes the containment follow-ons this seat named for ADVI_COTBKF.
