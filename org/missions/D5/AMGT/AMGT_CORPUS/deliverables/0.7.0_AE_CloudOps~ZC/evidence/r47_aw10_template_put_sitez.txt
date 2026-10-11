@@ -1,0 +1,76 @@
+AMGT_CORPUS r47 cell CRPS-aw-10 -- WRITE evidence (site Z) -- 2026-10-11T17:43:43Z -- HEAD 03cae2683f94ad216b132234b56a2be108dc238c -- executor 0.7.0_AE_CloudOps~ZC -- order AMGT_CORPUS.TO-WRITE-R47-aw10.template-put-sitez (workstream TEMPLATE) -- RESULT: STOP 3 AT STEP 3. NOTHING WAS PUT.
+
+## verdict
+STOP 3: the locate step printed `matches 0`, not `matches 1`. Per step 3 the executor writes
+nothing further, commits this evidence and reports. No --write ran, in either of its two ordered
+forms; no bronze key was created; the library and every source file are untouched.
+
+The four criteria AC1-AC4 therefore read 0, 0, 0 and 0 rather than 2, 1, 1 and 1. That is the
+CORRECT reading of a STOP'd order and not a proof failure: steps 4 to 7 are the steps that emit
+the graded lines, and the order forbids reaching them once STOP 3 fires.
+
+## gates cleared before step 3
+STOP 0  both halves on origin/box/dell1: CTO half author 1.0.0_SA_CTO~DELL1 and its line 6 begins
+        `**SIGNED**` (bytes printed at the cited line, not grepped for the quote; positive control
+        on the same ref returned 9587 bytes). COO half author 2.0.0_SA_COO~C1.
+STOP 1  template.py e03d6a8acf65d3fd..., team_sheet.py 0442f28ed1f661a0..., store.py
+        34b344de8ed116560... -- all three match the pair's required prefixes.
+STOP 2  0 processes carrying lib.research.corpus.template, of 70 python processes on this machine;
+        0 carrying lib.research.corpus at all.
+
+## locate
+$ python org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round47/aw10_locate.py
+   (the invocation EXACTLY as step 3 writes it -- it does not run on this box)
+Traceback (most recent call last):
+  File [35m"C:\Users\Opal Bloomberg\Desktop\ajb_workspace\org\missions\D5\AMGT\AMGT_CORPUS\deliverables\2.0.0_SA_COO~C1\checks\round47\aw10_locate.py"[0m, line [35m17[0m, in [35m<module>[0m
+    from lib.research.corpus import library, team_sheet
+[1;35mModuleNotFoundError[0m: [35mNo module named 'lib.research'[0m
+rc=1
+
+rc=1 is NEITHER of the script's documented exits (0 = one match, 3 = none or more than one), so
+this is an INSTRUMENT FAILURE and was not read as `matches 0`. Cause, measured: `python <path>`
+puts the SCRIPT's directory on sys.path, never the current directory, so `from lib.research.corpus
+import ...` cannot resolve even when the cwd IS the repository root -- and the cwd was the repo root
+(printed above the run). `python -c` by contrast reports an empty sys.path[0], i.e. the cwd, which is
+why every `python -m lib.research...` step in round 45's order worked and why au1_accounting.py
+worked (it imports only `re` and `sys`). The script's own docstring says to run it `from the
+repository root of the site-Z checkout`, so the repo root is what the ordered form fails to supply.
+
+$ PYTHONPATH=. python org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round47/aw10_locate.py
+   (the SAME script, unmodified, with the repo root importable -- only sys.path differs)
+template_locate root C:\Users\Opal Bloomberg\OneDrive - Opal Capital\Shared - Documents\Asset Management\Research source env:OneDriveCommercial+relative
+template_locate matches 0 of files_walked 378
+template_locate expected_size 383839 size_equal None
+rc=3
+
+rc=3 is the script's documented `none or more than one`. The walk covered files_walked 378, which
+equals the library census's own file count (`folders 102 files 378`, read twice today at 02:38Z and
+09:47Z), so the zero is a reading of the WHOLE library and not a truncated walk.
+
+## corroboration -- this is the second independent reading of the same absence
+This lane measured the same thing 15 hours earlier under order TO-READ-R44-at-4, by a DIFFERENT
+instrument (PowerShell Get-ChildItem -Recurse -Filter, not os.walk in Python), and recorded it in
+deliverables/0.7.0_AE_CloudOps~Z/evidence/r44_at4_fence14_store_match_sitez.txt @2274227184:
+  `0 matches under <root>`, with a positive control of 79 .xlsx files and 0 enumeration errors,
+  and the nearest name being the UN-PREFIXED `..._v1.xlsx` under Total Energies TTE FP.
+Two instruments, two languages, 15 hours apart, same root, same verdict. The master
+`FactSet Based ONE PAGER TEMPLATE 2026 03 09_v2.xlsx` is ABSENT from the synced library.
+
+The issuer's own search (deliverables/2.0.0_SA_COO~C1/evidence/r47_aw7_master_template_search_20261011.md)
+found the item in SHAREPOINT -- site `Shared`, item 01L6LHKFRTYYYRWCI37VGLHJQPCL3KMJXN, 383839 bytes,
+modified 2026-07-24T13:04:50Z. Both readings can be true at once, and the gap between them IS the
+finding: the item exists in SharePoint and has not reached this device's OneDrive sync. Note also
+that today's 09:47Z census read `placeholders 0 of 378` AFTER round 45's ingest hydrated all 11
+placeholders, so the absence is not an unhydrated-placeholder artefact either -- there is no
+placeholder standing in for this file.
+
+## scheduled tasks
+NOT RUN, deliberately. Step 3a is a condition of the CTO half gating the PUT (`before any put`), and
+step 3 directs the executor to write nothing further once STOP 3 fires. With no put to gate, running
+the task census would be proceeding past a STOP to manufacture a criterion line. For the issuer's
+re-cut: the same census was run and recorded 7 hours earlier for round 45's au-1 under the identical
+condition (then over four tokens, not five) and read `schtasks_named 1 dossier_writing 0` over 295
+task blocks, in deliverables/0.7.0_AE_CloudOps~ZC/evidence/r45_au1_bronze_ingest_and_four_count_sitez.txt
+@cc1f7b2dfa. That is a PRIOR reading offered as context, NOT this order's evidence, and the fifth
+token `template` was not in its filter.
+
