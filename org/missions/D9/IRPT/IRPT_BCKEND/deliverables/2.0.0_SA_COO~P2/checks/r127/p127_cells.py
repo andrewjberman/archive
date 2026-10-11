@@ -49,6 +49,16 @@ def main():
         ng = a.get("not_graded_by_reason") or {}
         if not ng or not all(isinstance(v, int) for v in ng.values()) or sum(ng.values()) != c["NOT_GRADED"]:
             fail("not_graded_by_reason %r does not sum to %d" % (ng, c["NOT_GRADED"]))
+        # AMENDMENT 1 (CTO msg 4833): NOT_GRADED is two different things. Every NOT_GRADED account-day is either
+        # nothing-to-grade (no date-basis question) or ungradeable (a real unknown), each split by holdings class.
+        sp = a.get("not_graded_split") or {}
+        for side in ("nothing_to_grade", "ungradeable"):
+            blk = sp.get(side) or {}
+            if not isinstance(blk.get("account_days"), int) or not isinstance(blk.get("by_holdings_class"), dict)                     or not all(isinstance(v, int) for v in blk["by_holdings_class"].values())                     or sum(blk["by_holdings_class"].values()) != blk["account_days"]:
+                fail("not_graded_split.%s %r" % (side, blk))
+        if sp["nothing_to_grade"]["account_days"] + sp["ungradeable"]["account_days"] != c["NOT_GRADED"]:
+            fail("not_graded_split sums to %d, NOT_GRADED is %d" % (
+                sp["nothing_to_grade"]["account_days"] + sp["ungradeable"]["account_days"], c["NOT_GRADED"]))
         if not isinstance(a.get("days"), int) or a["days"] < 80 or not isinstance(a.get("accounts"), int):
             fail("days %r accounts %r" % (a.get("days"), a.get("accounts")))
         if not a.get("claim_rule"):
