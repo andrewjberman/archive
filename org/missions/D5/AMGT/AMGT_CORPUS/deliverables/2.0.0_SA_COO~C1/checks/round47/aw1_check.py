@@ -15,6 +15,11 @@ The rules under test (CTO round-46 analysis ADDENDUM 1, msg 3972; ROUND_ANALYSIS
         None, why states that no published FactSet description was found and the meaning is not inferred from the name;
       - any other identifier: text "Bloomberg line", source "bloomberg", claim "absent", cite None, why states the estate's field
         metadata does not describe it;
+  * the period header (AMENDMENT 1, issuer, 2026-10-11): the first counted row that is not a named CONTROL row and whose integer-year cells
+    (integers 1990..2100) number at least 3, are strictly increasing in column order, and make up at least 80% of the row's numeric cells.
+    A side-panel number elsewhere on the row does not disqualify it; the period columns are the year cells' columns. The same test marks
+    a later year row HEADING. (Round 46's rule required ALL numeric cells to be years; measured on the live store it took the EQY_FUND_YEAR
+    row as the header on CLX, ML FP and BABA and classed their ~190 model rows above it HEADING.)
   * `row_formats[i]` is None unless row i is FIGURE; for a FIGURE row it is the row's cells' Excel number format strings in the
     period columns, aligned with `row_values[i]` ('General' where the workbook says General, None where the sheet carries no
     cell at all).
@@ -68,6 +73,9 @@ def workbook_bytes():
     put(HEADER_ROW, 3, "Financial Summary")
     for k, year in enumerate(YEARS):
         put(HEADER_ROW, PERIOD_COL0 + k, year)
+    # a side-panel number far to the right of the header's years (CLX, ML FP, BABA: 92 / 18076 / 145.49 at column Y): not a year, and
+    # not a reason to refuse the row as the period header (round-47 amendment 1)
+    put(HEADER_ROW, 25, 92)
     rows = [
         # label, values, number format of every period cell
         ("Revenue", [7976, 8671, 8700, 9009, 8753], "#,##0"),

@@ -27,7 +27,8 @@ AMENDMENT 2 (the same cell): a FOURTH path -- the rank timeseries (`scoped_amgt.
 (`SAN FP` -> 'Banco Santander S.A. ADR'), with no security key; the live function's /lead-panel/timeseries read on 2026-10-11 showed it. The fix is a helper
 `scoped_amgt._rank_series_names(tickers)` (the served-names map `read_rank_series` builds) that resolves each ticker to its covered security key by the same exact
 match the ranked join uses (`_covered_bloomberg_index`) and replaces a disagreeing table name by the registered one.
-    D10 a series whose table name disagrees with the registered name serves the cleaned registered name; its `classification` is unchanged and `name_state` is
+    D10 a series whose table name disagrees with the registered name serves the cleaned registered name; its `classification` is withheld (null, with `classification_reason` 'classification not available for this listing': round 95 `AMGT-aa-2`, row D1-S26; round 94's
+        reading was 'unchanged') and `name_state` is
         ABSENT (a crosswalk-filled row's precedent).
     D11 control: a series whose table name agrees (a spelling variant) is returned byte-equal to the table's answer.
     D12 control: a ticker the covered universe does not match is returned byte-equal to the table's answer; one covered-universe index read serves every ticker.
@@ -116,9 +117,11 @@ def series_names(clean):
         scoped_amgt._covered_bloomberg_index = index
         got = helper(["SAN FP", "CELH US", "ZZZ US"])
         a = got.get("SAN FP") or {}
-        out.append(say(a.get("name") == clean("SANOFI") and a.get("name_state") == "ABSENT" and a.get("classification") == table["SAN FP"]["classification"],
-                       "D10 a disagreeing series name is replaced by the registered one",
-                       "served %r name_state %s classification %r" % (a.get("name"), a.get("name_state"), a.get("classification"))))
+        out.append(say(a.get("name") == clean("SANOFI") and a.get("name_state") == "ABSENT" and a.get("classification") is None
+                       and "not available for this listing" in str(a.get("classification_reason")),
+                       "D10 a disagreeing series name is replaced by the registered one and its classification is withheld with the reason",
+                       "served %r name_state %s classification %r reason %r" % (a.get("name"), a.get("name_state"), a.get("classification"),
+                                                                              a.get("classification_reason"))))
         out.append(say(got.get("CELH US") == table["CELH US"], "D11 control: an agreeing series name is byte-equal", "served %r" % (got.get("CELH US") or {}).get("name")))
         out.append(say(got.get("ZZZ US") == table["ZZZ US"] and len(reads) == 1,
                        "D12 control: an unmatched ticker is byte-equal and the index is read once",
