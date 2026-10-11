@@ -276,3 +276,24 @@ Held on the condition that no IRPT_BCKEND order is open:
 
 **For the slug:** a served holdings answer carries sleeves with no security beneath them; the page under-lists silently on a
 client-facing table, and the page's sentence is DSGN_IRPTV1's to cut (CTO msg 5448).
+
+---
+
+## Added at round 139, 2026-10-11T18:25:25Z (input: msg 5516, packet @9940903ada)
+
+One read-only order (IB-pr-442), no judgment criterion, nothing stamped. Held on the same condition (IB-pr-443 is running):
+
+- **D2-W300-S1** (filed by `0.9.0_WK_IRPT_BCKEND~300`): all 38 securities with no type or a mixed one pair "Not Available" with one
+  stated value; the rule that would take the stated value was not applied, so the sizing counts them as waiting.
+- **D2-W300-S2**: the admitted pair Inv grades nothing outside the first witness: its one security there is the fund with no bar,
+  and of the pair's 285 fund trades 284 are that fund.
+- **D2-W300-S3**: two readings of the order the worker fixed and stated. A wording note; to dismiss at the compile.
+
+**For the slug.** Under PRD v0.39 the blank share is 50.3 percent of 75,796 eligible account-days (58.2 in force), and 357 of 999
+accounts are never served: the issuer's figures, not re-derived by this seat. This seat's two points on v0.39 are answered in the
+packet: the three next-day-only trades are all dividend reinvestments in institutional funds; and the admitted pairs rest
+unevenly on evidence (Inv on one trade with a bar; A on 5 of 47 that match any bar).
+
+**Correction to the round 138 note above.** It called the holdings table "client-facing". By the portal's router the Investor
+Reporting page is staff-only on PROD and DEV (this seat's read, row IRPT_ANLREQ-D2-S56). The under-listing is still silent; the
+audience is Opal staff.
