@@ -1,0 +1,380 @@
+{
+  "to_id": "DSGN_IRPTV1.TO-IV-e-100",
+  "worker": "0.9.0_WK_DSGN_IRPTV1~56",
+  "measured_at": "2026-10-11T12:3xZ",
+  "commits": {
+    "prod": "37aa1247ee4ba487e5610dc5b78d65ae28468a99",
+    "dev": "00989b8b9df229e7b765b3a063102873abd9a89d",
+    "release5_source_pin": "ee3fd7c5e520243e1a3f58a6b86d22bfc2b1e4d3",
+    "revision6_source_pin": "361c44fa9d40992c8cacfd625cc789536f84b920",
+    "dev_fetch": "git fetch origin DEV read 00989b8b9d: equal to the worktree HEAD, no merge needed"
+  },
+  "denominator": {
+    "routes_served": 7,
+    "routes_read_by_portal": 7,
+    "routes_read_by_portal_at_prod": 5,
+    "routes_read_by_portal_at_dev": 7,
+    "not_read_by_portal_at_prod": [
+      "analysis-request-pdf",
+      "analysis-request-original"
+    ],
+    "not_read_by_portal_at_dev": [],
+    "how": "routes_served = 7, from the function's own dispatch: infra/aws/terraform/investor-reporting/ops/lambda.tf:39 names handler status_installed.lambda_handler; reports/status_installed.py:57-64 HISTORY_ROUTES (4: analysis-request-history, -read, -pdf, -original) plus ops/entry.py:88-95 ROUTES (3: analysis-report, status-summary, status-job); declared_routes() (status_installed.py:177-180) merges them and :185-187 refuses a built Entry that serves any other set. Cross-check: docs/contracts/investor-reporting/v1/routes.json has 24 entries, 7 with handler irpt-status, the same 7. routes_read_by_portal: LiveClient methods in src/api/endpoints/investor-reporting.ts calling each operation: DEV tip 7 of 7 (history :1137, read :1152, pdf :1165, original :1177, analysis-report :1199 and :1295, status-summary :1484, status-job :1494); PROD 37aa1247ee 5 of 7 (no pdf, no original: client method and route-table row both absent; the exported PROD src has no caller). The rows below are the DEV set of 7; the two PROD-absent routes carry NOT_ESTABLISHED at PROD with the reason."
+  },
+  "rows": [
+    {
+      "route": "analysis-request-history",
+      "http": "GET /api/scoped/investor-reporting/analysis/requests",
+      "client_method": "LiveClient.listOwnedAnalysisRequests (src/api/endpoints/investor-reporting.ts:1137 at DEV; PROD has it too)",
+      "reader": {
+        "name": "readOwnedHistory (rows: readOwnedHistoryRow -> readOwnedRequest)",
+        "file": "src/pages/InvestorReporting/contracts/owned-requests.ts",
+        "line": 125,
+        "line_at_prod": 79
+      },
+      "levels": [
+        {
+          "level": "envelope",
+          "policy": "EXACT",
+          "evidence": "envelope.ts:331-334 (PROD :330-333): parseIrEnvelope refuses any envelope key outside {contract_version, operation, firm_id, data, status, unprojected_grant} (EnvelopeMismatch 'body'); unprojected_grant is EXACT {count, denominator, kinds} at :316-323 / :428-437. Same at both commits. Release 5 adds no envelope member."
+        },
+        {
+          "level": "data (the history page) at DEV tip",
+          "policy": "EXACT",
+          "evidence": "owned-requests.ts:126-131: items and next_cursor required; any key other than items, next_cursor, unreadable_rows refuses (:127); unreadable_rows, when present, must be a non-negative integer (:130)."
+        },
+        {
+          "level": "data (the history page) at PROD",
+          "policy": "EXACT",
+          "evidence": "owned-requests.ts:80 at 37aa1247ee: exact(value, ['items','next_cursor']) -- the key count must equal 2, so unreadable_rows refuses."
+        },
+        {
+          "level": "each row at DEV tip",
+          "policy": "EXACT",
+          "evidence": "owned-requests.ts:105-116 readOwnedHistoryRow admits client_id (null or the id pattern) and client_claim (SELECTED|UPLOAD|UNREADABLE), sets them aside, and passes the rest to readOwnedRequest, whose exact() at :61 refuses any other key."
+        },
+        {
+          "level": "each row at PROD",
+          "policy": "EXACT",
+          "evidence": "owned-requests.ts:61 at 37aa1247ee: exact(value, ['identity','accepted_at', +comparisons, +composition]); client_id and client_claim are unknown keys and refuse."
+        },
+        {
+          "level": "row.identity",
+          "policy": "EXACT",
+          "evidence": "owned-requests.ts:68: exact(identity, the six identity members). Same at both commits."
+        }
+      ],
+      "release5_change": "ADDS page member unreadable_rows and, on every row, client_id and client_claim. Producer key sets run offline: revision 6 page {items, next_cursor}, row {accepted_at, identity}; release 5 page {items, next_cursor, unreadable_rows}, row {accepted_at, client_claim, client_id, identity}.",
+      "release5_answer_source": "Handler source at the release's pin ee3fd7c5e5: infra/aws/lambda/investor-reporting/ops/owned_requests.py:389,392 emit client_id/client_claim per row, :393 returns {items, next_cursor, unreadable_rows}. Bodies RUN offline from the producer's own test world (test_history_row_client.py setup, offline doubles) exported at ee3fd7c5e5, with revision 6 (361c44fa9d) as the before arm. Contract lines: docs/contracts/investor-reporting/v1/OwnedAnalysisRequestHistory.schema.json:60 (unreadable_rows), :32 (client_id), :40 (client_claim). Laptop's live R3 read (relayed, not re-read): NEVER_WIDEN_PAIR_ANLREQ_RELEASE5_RERELEASE_IRPT_STATUS.md section 1.",
+      "at_prod": {
+        "result": "REFUSES",
+        "member": "unreadable_rows (page level, owned-requests.ts:80); then client_id and client_claim (row level, :61)",
+        "how": "RUN: bun probe, readOwnedHistory and parseIrEnvelope imported from a git-archive export of 37aa1247ee. Control passes: the revision-6 two-key page. Refusing controls: unknown page key, unknown row key. Release-5 page refuses on 'data' in all four shapes (UPLOAD, SELECTED, one UNREADABLE row, and with either half of the new members removed): removing unreadable_rows still refuses at the row ('Invalid owned request projection'), removing the row members still refuses at the page ('Invalid owned request history')."
+      },
+      "at_dev": {
+        "result": "PASS",
+        "member": null,
+        "how": "RUN: same probe against a git-archive export of 00989b8b9d. All four release-5 shapes pass; the revision-6 page passes; the same two refusing controls refuse. Each present new member is checked, any other key refuses."
+      }
+    },
+    {
+      "route": "analysis-request-read",
+      "http": "GET /api/scoped/investor-reporting/analysis/requests/{requestId}",
+      "client_method": "LiveClient.getOwnedAnalysisRequest (investor-reporting.ts:1152)",
+      "reader": {
+        "name": "readOwnedRequest (the single-request reader)",
+        "file": "src/pages/InvestorReporting/contracts/owned-requests.ts",
+        "line": 58,
+        "line_at_prod": 58
+      },
+      "levels": [
+        {
+          "level": "envelope",
+          "policy": "EXACT",
+          "evidence": "envelope.ts:331-334 (PROD :330-333): parseIrEnvelope refuses any envelope key outside {contract_version, operation, firm_id, data, status, unprojected_grant} (EnvelopeMismatch 'body'); unprojected_grant is EXACT {count, denominator, kinds} at :316-323 / :428-437. Same at both commits. Release 5 adds no envelope member."
+        },
+        {
+          "level": "data (the request projection)",
+          "policy": "EXACT",
+          "evidence": "owned-requests.ts:61: exact(value, ['identity','accepted_at'] + comparisons if present + composition if present); any other key, including persist_inputs and client_id, refuses. Identical at both commits (the function is byte-identical; only the history wrapper changed)."
+        },
+        {
+          "level": "data.identity",
+          "policy": "EXACT",
+          "evidence": "owned-requests.ts:68, six members."
+        },
+        {
+          "level": "data.comparisons rows",
+          "policy": "EXACT",
+          "evidence": "owned-requests.ts:30: exact(item, ['key','label']); at most five (:28)."
+        },
+        {
+          "level": "data.composition",
+          "policy": "EXACT",
+          "evidence": "owned-requests.ts:46-47: the eight required keys plus optional input_id; any other key refuses."
+        }
+      ],
+      "release5_change": "NONE. The single read is unchanged: its key sets are equal before and after (plain {accepted_at, identity}; with include {accepted_at, comparisons, composition, identity}). The release's own docstring says so (owned_requests.py:334 'The single read (`read`) still carries no client field').",
+      "release5_answer_source": "Handler source ee3fd7c5e5 vs 361c44fa9d: ops/entry.py (read, :178-199) is not in the 12-file diff; owned_requests.py changes only history and _materialize(with_client=False default). Bodies RUN offline from the producer's test world at both pins, equal key sets. The producer's own test test_single_read_wire_is_unchanged asserts it. persist_inputs is served only on include=persist_inputs (entry.py:194-198), which no portal call sends.",
+      "at_prod": {
+        "result": "PASS",
+        "member": null,
+        "how": "RUN: release-5 plain read and the include=comparisons,composition read pass; controls: a persist_inputs member and a history-only client_id member refuse (reader is not widened)."
+      },
+      "at_dev": {
+        "result": "PASS",
+        "member": null,
+        "how": "RUN: same probe, same results."
+      }
+    },
+    {
+      "route": "analysis-report",
+      "http": "GET /api/scoped/investor-reporting/analysis/{jobId}/sections",
+      "client_method": "LiveClient.getOwnedAnalysisReport (investor-reporting.ts:1199; Ticket Center, OwnedRequestHistory) and LiveClient.getAnalysisReport (:1295; AnalysisTab, export/resolveBundle)",
+      "reader": {
+        "name": "adaptAnalysisReportSlice (IR_DATA_ADAPTER['analysis-report'], envelope.ts:193)",
+        "file": "src/pages/InvestorReporting/contracts/adapt.ts",
+        "line": 1427,
+        "line_at_prod": 1420
+      },
+      "levels": [
+        {
+          "level": "envelope",
+          "policy": "EXACT",
+          "evidence": "envelope.ts:331-334 (PROD :330-333): parseIrEnvelope refuses any envelope key outside {contract_version, operation, firm_id, data, status, unprojected_grant} (EnvelopeMismatch 'body'); unprojected_grant is EXACT {count, denominator, kinds} at :316-323 / :428-437. Same at both commits. Release 5 adds no envelope member."
+        },
+        {
+          "level": "data (the sections document)",
+          "policy": "TOLERANT",
+          "evidence": "adapt.ts:1427-1447: the function reads request_ref, sections, extraction_validation (or computation_validation when provider is OPAL_ENGINE, :1428), undated_sections, extraction_coverage by name and never checks the key set, so an unknown key such as retained_ref is ignored (and is not on the view). TOLERANT by absence. A required member that is absent throws a TypeError, caught by parseIrEnvelope as EnvelopeMismatch 'data' (envelope.ts:388)."
+        },
+        {
+          "level": "data.sections rows",
+          "policy": "TOLERANT",
+          "evidence": "adapt.ts adaptAnalysisSections (:933) and adaptOpalSections pick fields by name; no key-set check on a section row. TOLERANT by absence."
+        }
+      ],
+      "release5_change": "ADDS retained_ref {immutable, report_id, report_kind, revision, sha256} to BOTH forms (YCHARTS and OPAL_ENGINE); adds a refusal READY_REPORT_RECEIPT_REQUIRED when a READY report's receipt is not a dict. Producer key sets run offline: YCHARTS before {extraction_validation, request_ref, sections}, after plus retained_ref; OPAL_ENGINE before {computation_validation, provider, request_ref, sections}, after plus retained_ref.",
+      "release5_answer_source": "Handler source ee3fd7c5e5, ops/owned_report.py:91-108 (retained_ref on both forms), :74 _CheckedReport, :94 the new refusal; diff 361c44fa9d..ee3fd7c5e5. Bodies RUN offline from the producer's report_world (test_retained_ref_served.py shape), both pins. Contract: docs/contracts/investor-reporting/v1/AnalysisReport.schema.json:364 and responses/analysis-report.response.schema.json:71 (retained_ref listed; provider and computation_validation NOT in the response schema's data: rows IRPT_YCDGEN-W2-S13, -W6-S4).",
+      "at_prod": {
+        "result": "PASS",
+        "member": null,
+        "how": "RUN: both release-5 forms pass; revision-6 forms pass (controls); refusing controls: without extraction_validation (YCHARTS), without computation_validation (OPAL_ENGINE), without request_ref. PROD's reader already branches on provider and reads computation_validation (adapt.ts:1420 at 37aa1247ee), so the OPAL_ENGINE form does not hit the extraction_validation expectation named in the order."
+      },
+      "at_dev": {
+        "result": "PASS",
+        "member": null,
+        "how": "RUN: same probe, same results."
+      }
+    },
+    {
+      "route": "status-summary",
+      "http": "GET /api/scoped/investor-reporting/status",
+      "client_method": "LiveClient.probeStatus (investor-reporting.ts:1484; the code says no screen reads it)",
+      "reader": {
+        "name": "parseIrEnvelope -> requirePublicStatus + adaptStatusEnvelope (IR_STATUS_DOCUMENT_OPERATIONS, envelope.ts:226)",
+        "file": "src/pages/InvestorReporting/contracts/public-status.ts",
+        "line": 18,
+        "line_at_prod": 18
+      },
+      "levels": [
+        {
+          "level": "envelope",
+          "policy": "EXACT",
+          "evidence": "envelope.ts:331-334 (PROD :330-333): parseIrEnvelope refuses any envelope key outside {contract_version, operation, firm_id, data, status, unprojected_grant} (EnvelopeMismatch 'body'); unprojected_grant is EXACT {count, denominator, kinds} at :316-323 / :428-437. Same at both commits. Release 5 adds no envelope member."
+        },
+        {
+          "level": "data (the status document)",
+          "policy": "EXACT",
+          "evidence": "public-status.ts:20: closed(value, [operation, state, source_dates, actions, public_reason_code], [contract_version]); envelope.ts:353-355 applies it to data."
+        },
+        {
+          "level": "data.operation / data.actions rows",
+          "policy": "EXACT",
+          "evidence": "public-status.ts:22 (three members) and :40 (action, safe, description)."
+        },
+        {
+          "level": "data.source_dates",
+          "policy": "EXACT",
+          "evidence": "public-status.ts:27 (six optional members) and prospect-dates.ts:28 (five members when date_basis/prospect_analysis/section_dates present)."
+        }
+      ],
+      "release5_change": "NONE. status-summary is served by ops/entry.py's loader path, which release 5 does not touch (not among the changed members).",
+      "release5_answer_source": "Not changed: ops/status.py, ops/status_loader.py, ops/entry.py are absent from git diff 361c44fa9d ee3fd7c5e5 (12 files: owned_report.py, owned_requests.py, prospect_dates.py, resident_installed.py and tests). The first pair's R8 (NEVER_WIDEN_PAIR_ANLREQ_RELEASE5_IRPT_STATUS.md section 4) is the before/after comparison of this route's refusal envelope. The probe body is the contract's own fixture, not a served body.",
+      "at_prod": {
+        "result": "PASS",
+        "member": null,
+        "how": "RUN on the contract fixture PublicStatusEnvelope.valid (a stand-in: release 5 does not change this route, so release 5 cannot newly break it; the live body was not read, no live call). Control refuses: an unknown status key."
+      },
+      "at_dev": {
+        "result": "PASS",
+        "member": null,
+        "how": "RUN: same probe, same result."
+      }
+    },
+    {
+      "route": "status-job",
+      "http": "GET /api/scoped/investor-reporting/status/{jobId}",
+      "client_method": "LiveClient.getJobStatus (investor-reporting.ts:1494; called by ProspectJobStatus, OwnedRequestHistory, render/PrintEntry; sends X-IRPT-Status-Dates: prospect-v1)",
+      "reader": {
+        "name": "parseIrEnvelope -> requirePublicStatus + readProspectDates + adaptStatusEnvelope",
+        "file": "src/pages/InvestorReporting/contracts/prospect-dates.ts",
+        "line": 21,
+        "line_at_prod": 21
+      },
+      "levels": [
+        {
+          "level": "envelope",
+          "policy": "EXACT",
+          "evidence": "envelope.ts:331-334 (PROD :330-333): parseIrEnvelope refuses any envelope key outside {contract_version, operation, firm_id, data, status, unprojected_grant} (EnvelopeMismatch 'body'); unprojected_grant is EXACT {count, denominator, kinds} at :316-323 / :428-437. Same at both commits. Release 5 adds no envelope member."
+        },
+        {
+          "level": "data (the status document)",
+          "policy": "EXACT",
+          "evidence": "public-status.ts:20 closed(); same at both commits (files byte-identical PROD to DEV)."
+        },
+        {
+          "level": "data.source_dates",
+          "policy": "EXACT",
+          "evidence": "prospect-dates.ts:28: only date_basis, prospect_analysis, section_dates, source_completion_date, as_of; and public-status.ts:27. envelope.ts:343-348 refuses a source_dates carrying date_basis/prospect_analysis/section_dates on any operation but status-job."
+        },
+        {
+          "level": "data.source_dates.prospect_analysis",
+          "policy": "EXACT",
+          "evidence": "prospect-dates.ts:30: the eight binding members, each pattern-checked."
+        },
+        {
+          "level": "data.source_dates.section_dates rows",
+          "policy": "EXACT",
+          "evidence": "prospect-dates.ts:41: closed(row, ['section_id','as_of_date']); as_of_date null or a date; :46-47 the basis/date equality rules."
+        }
+      ],
+      "release5_change": "Section-date census reads an OPAL_ENGINE report by its own branch (status VALUE or NOT_AVAILABLE; as_of_date null beside NOT_AVAILABLE): an OPAL_ENGINE request that revision 6 REFUSES with SECTION_DATE_CENSUS_INVALID now answers dates in the SAME shape the YCHARTS branch already served (no new key; section_dates rows may carry as_of_date null, which the YCHARTS undated_sections branch already produced). Only on a request whose input is a CSV/template upload read with the prospect-v1 capability.",
+      "release5_answer_source": "Handler source ee3fd7c5e5, ops/prospect_dates.py:39-62 (the opal branch), derive() unchanged at :334-343; consumer ops/owned_status.py:59-61. Body RUN offline: derive() on the producer's OPAL_ENGINE document, build_envelope, public_view, at ee3fd7c5e5 (answer: date_basis PER_SECTION, one null as_of_date row) and at 361c44fa9d (the same input REFUSES SECTION_DATE_CENSUS_INVALID). The first pair's R4 is ABSENT: no OPAL_ENGINE request has been read live. The synthetic document is the producer's test document, not a served one.",
+      "at_prod": {
+        "result": "PASS",
+        "member": null,
+        "how": "RUN: the release-5 OPAL_ENGINE answer passes; refusing controls: unknown source_dates key, unknown section_dates row key, unknown status key, UNDATED_INPUT beside dated rows. Reader files are byte-identical at PROD and DEV."
+      },
+      "at_dev": {
+        "result": "PASS",
+        "member": null,
+        "how": "RUN: same probe, same results."
+      }
+    },
+    {
+      "route": "analysis-request-pdf",
+      "http": "GET /api/scoped/investor-reporting/analysis/requests/{requestId}/pdf",
+      "client_method": "LiveClient.getAnalysisRequestPdf (investor-reporting.ts:1165) -- present at DEV only",
+      "reader": {
+        "name": "adaptAnalysisRequestPdf (IR_DATA_ADAPTER['analysis-request-pdf'], envelope.ts:197)",
+        "file": "src/pages/InvestorReporting/contracts/adapt.ts",
+        "line": 1496,
+        "line_at_prod": 1489
+      },
+      "levels": [
+        {
+          "level": "envelope",
+          "policy": "EXACT",
+          "evidence": "envelope.ts:331-334 (PROD :330-333): parseIrEnvelope refuses any envelope key outside {contract_version, operation, firm_id, data, status, unprojected_grant} (EnvelopeMismatch 'body'); unprojected_grant is EXACT {count, denominator, kinds} at :316-323 / :428-437. Same at both commits. Release 5 adds no envelope member."
+        },
+        {
+          "level": "data (download_route, sha256, byte_length)",
+          "policy": "TOLERANT",
+          "evidence": "adapt.ts:1496-1503 reads download_route.url, download_route.expires_at, sha256, byte_length by name with no key-set check; an absent member throws (caught as EnvelopeMismatch 'data'). TOLERANT by absence."
+        }
+      ],
+      "release5_change": "NONE. pdf/original read the report through OwnedAnalysisReader.read, whose answer is unchanged (the _CheckedReport is equal to the plain document; the producer's test asserts 'retained_ref' not in the plain read). ops/pdf_link.py and ops/entry.py (pdf, original) are not in the diff.",
+      "release5_answer_source": "diff 361c44fa9d..ee3fd7c5e5 of ops/ (pdf_link.py, entry.py absent; owned_report.py hunks touch only sections() and read() internals :68-74, :91-108, :172) and ops/tests/test_retained_ref_served.py (read stays bare). The probe body is the contract fixture AnalysisRequestPdf.valid, not a producer run.",
+      "at_prod": {
+        "result": "NOT_ESTABLISHED",
+        "how": "READ plus RUN: the PROD route table, client class and a search of the exported PROD src were read for a caller (none); the PROD parser was run on the fixture as a side fact. No reader-on-release-5-answer result exists to run.",
+        "reason": "No PROD reader of this route is called: the PROD client (37aa1247ee) has no method and no IR_ROUTE_TABLE row for it (the DEV diff adds both), and no PROD page calls it (search of the exported PROD src for getAnalysisRequestPdf and the route returns only the parser, wire types and a fixture). There is nothing at PROD to test. The PROD parser does carry a pdf adapter (envelope.ts:197) and a fixture body passes it (RUN)."
+      },
+      "at_dev": {
+        "result": "PASS",
+        "member": null,
+        "how": "RUN: the contract fixture passes; control refuses: download_route absent. Release 5 does not change the route."
+      }
+    },
+    {
+      "route": "analysis-request-original",
+      "http": "GET /api/scoped/investor-reporting/analysis/requests/{requestId}/original",
+      "client_method": "LiveClient.getAnalysisRequestOriginal (investor-reporting.ts:1177) -- present at DEV only",
+      "reader": {
+        "name": "adaptAnalysisRequestPdf (IR_DATA_ADAPTER['analysis-request-original'], envelope.ts:198; same adapter as pdf)",
+        "file": "src/pages/InvestorReporting/contracts/adapt.ts",
+        "line": 1496,
+        "line_at_prod": 1489
+      },
+      "levels": [
+        {
+          "level": "envelope",
+          "policy": "EXACT",
+          "evidence": "envelope.ts:331-334 (PROD :330-333): parseIrEnvelope refuses any envelope key outside {contract_version, operation, firm_id, data, status, unprojected_grant} (EnvelopeMismatch 'body'); unprojected_grant is EXACT {count, denominator, kinds} at :316-323 / :428-437. Same at both commits. Release 5 adds no envelope member."
+        },
+        {
+          "level": "data (download_route, sha256, byte_length)",
+          "policy": "TOLERANT",
+          "evidence": "adapt.ts:1496-1503, as for pdf. TOLERANT by absence."
+        }
+      ],
+      "release5_change": "NONE, as for pdf (owned_report.py original() path unchanged; entry.py not in the diff).",
+      "release5_answer_source": "As for analysis-request-pdf: diff 361c44fa9d..ee3fd7c5e5 shows no change to entry.py (original, :214-216) or pdf_link.py. Probe body is the contract fixture AnalysisRequestPdf.valid.",
+      "at_prod": {
+        "result": "NOT_ESTABLISHED",
+        "how": "READ plus RUN: the PROD route table, client class and a search of the exported PROD src were read for a caller (none); the PROD parser was run on the fixture as a side fact. No reader-on-release-5-answer result exists to run.",
+        "reason": "No PROD reader is called: the PROD client has no method and no route-table row for this route, and no PROD page calls it. Side fact (RUN): the PROD parser has NO adapter for 'analysis-request-original' (IR_DATA_ADAPTER at 37aa1247ee lacks the line DEV adds at envelope.ts:198), so a body handed to it refuses on 'operation' even with the PDF-shaped fixture; the control behaves the same. That is not release 5's doing and nothing at PROD sends the request."
+      },
+      "at_dev": {
+        "result": "PASS",
+        "member": null,
+        "how": "RUN: the contract fixture passes; control refuses: download_route absent. Release 5 does not change the route."
+      }
+    }
+  ],
+  "must_not_skip": {
+    "sections_read": "analysis-report",
+    "single_request_read": "analysis-request-read"
+  },
+  "joins_prod_push": [
+    "analysis-request-history"
+  ],
+  "joins_prod_push_needs": {
+    "analysis-request-history": "The PROD reader must admit the history page's optional unreadable_rows (non-negative integer) and, on each row, client_id (null or the contract's id pattern) and client_claim (SELECTED, UPLOAD or UNREADABLE), each present member checked and any other key still refused: exactly what DEV's readOwnedHistory and readOwnedHistoryRow do since 8ed372cb72, so the PROD push of 8ed372cb72's change is the whole need. Not built here."
+  },
+  "not_established": [
+    {
+      "item": "any route's LIVE answer",
+      "reason": "No live call of any kind (the order's bound); release 5 is rolled back. Every body is the producer's own output from its offline test world at the release's pin (provenance string in the producer fixture: 'offline storage/clock doubles; not HTTP or live proof') or a contract fixture. A served body could differ in a way the offline world does not show."
+    },
+    {
+      "item": "status-summary, analysis-request-pdf, analysis-request-original: a produced body",
+      "reason": "Release 5 does not change them, so the probe uses the contract fixtures; the signer path of pdf/original and the loader path of status-summary were not run."
+    },
+    {
+      "item": "an OPAL_ENGINE request through the sections or status-job route on live",
+      "reason": "Never exercised (first pair R4 ABSENT); the OPAL_ENGINE bodies are synthetic producer documents."
+    },
+    {
+      "item": "analysis-request-pdf and analysis-request-original at PROD",
+      "reason": "No PROD reader is called, so no result exists to establish; stated per route above."
+    },
+    {
+      "item": "what the pages DO with a parsed view after the client method returns",
+      "reason": "The census stops at the client method's reader (the parse the page cannot bypass). OwnedRequestHistory, AnalysisTab, TicketCenter and PrintEntry were not traced for their own checks on the returned view."
+    },
+    {
+      "item": "who met the history refusal during the 61 minutes release 5 was live",
+      "reason": "Not this cell's question; the re-release pair records it as NOT MEASURED."
+    }
+  ],
+  "product_files_changed": [],
+  "s3_or_live_calls": 0,
+  "evidence": {
+    "probe": "probe.ts, capture_test.py, probe_prod.json, probe_dev.json, build_census.py in this folder; the same files, the exports of both portal commits and both producer pins, and the captured bodies sit outside both worktrees under C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~56/",
+    "probe_result_prod": "31 cases run; 6 differ from the pass-expected label I gave them, and each is a measured refusal: the 5 release-5 history shapes REFUSE on 'data', and the analysis-request-original fixture REFUSES on 'operation' (no adapter at PROD); every other case, controls included, is as expected.",
+    "probe_result_dev": "31 cases run; every case as expected (release-5 shapes pass, negative controls refuse).",
+    "producer_tests_ran": "pytest in an outside export of ee3fd7c5e5 (test_retained_ref_served.py: 3 passed) before the capture file was added; the capture file ran 4 passed at each pin."
+  }
+}
