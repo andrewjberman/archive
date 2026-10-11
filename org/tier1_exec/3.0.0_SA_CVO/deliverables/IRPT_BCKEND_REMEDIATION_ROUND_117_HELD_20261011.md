@@ -263,3 +263,16 @@ Held on the condition that no IRPT_BCKEND order is open; owner `1.0.0_SA_CTO~DEL
 
 - **D2-W297-S1** (filed by `0.9.0_WK_IRPT_BCKEND~297`): The holdings source carries no instrument-type field (85 partitions, 1,411,352 rows, 26 distinct columns read), so under ADDENDUM v0.38 no security is admitted to the reader and the sizing equals the rule in force (58.157 percent, 382 of 999); the sibling transactions table beside it DOES carry a ty
 - **D2-W297-S2** (filed by `0.9.0_WK_IRPT_BCKEND~297`): Two silver transaction tables exist for the firm and the order points at both ('beside the holdings table' and 'the source ADVI_COTBKF reads'); only the first carries a Price column, so the fund-transaction counts are from the table beside the holdings table (361 fund-dates, 9 funds, 346 inside the 
+
+---
+
+## Added at round 138, 2026-10-11T17:32:52Z (input: msg 5462)
+
+Held on the condition that no IRPT_BCKEND order is open:
+
+- **D2-W298-S1** (filed by `0.9.0_WK_IRPT_BCKEND~298`): The order asks about a SLEEVE node under an account, but the SmartX-overlay firm's served answer carries no node_kind SLEEVE (0 of 154,473); its account-level sleeve is node_kind CATEGORY, and the builder that makes it lives outside the folder the order names.
+- **D2-W299-S1** (filed by `0.9.0_WK_IRPT_BCKEND~299`): The face did not say what a security-day is when the anchor does not carry the security that day, nor which fund trades the reader window can grade; this cell counts a security-day only where the anchor carries the security (anchor_days_not_carried is kept per type) and grades only trades with a Tra
+- **D2-W299-S2** (filed by `0.9.0_WK_IRPT_BCKEND~299`): All 54 securities the type join puts under MIXED pair the transactions table's value 'Not Available' with one stated value on other rows of the same CUSIP (38 with the exchange-traded value, 16 with the registered-investment-company value); under the order's rule they sit in MIXED, and none is one_d
+
+**For the slug:** a served holdings answer carries sleeves with no security beneath them; the page under-lists silently on a
+client-facing table, and the page's sentence is DSGN_IRPTV1's to cut (CTO msg 5448).

@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-36",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-36.partners-event-census.md",
+    "group": "OTHER",
+    "vintage_commit": "8658d57df1"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~58",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "8658d57df1",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-36.partners-event-census.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~58/PARTNERS_EVENT_CENSUS.json",
+      "kind": "doc",
+      "commit_or_etag": "4ebda17b2e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 4ebda17b2e on wk-ADVI_FIRMBKTS-58 (LOCAL); a read-only census file of the Lambda's code; no Lambda file edited; no AWS call and no invocation",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 reads the file against the tree: every key present, the classes a partition of the 11 registered prefixes, every call-chain line in the Lambda's directory and ending in a seam call, side effects and the recommendation agreeing. The invocation terminates inside its bound.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-58 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_pevents.py --arms census --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~58/PARTNERS_EVENT_CENSUS.json --root /c/dev/wk-firmbkts-58; echo \"exit=$?\"",
+      "output_evidence": "  Q1 entries=8\n  Q2 classes covered=8 of 11 registered; not read=['gold/platinum/firm/', 'platinum/49financial/', 'platinum/accounts/']\n  Q3 call chains verified: True\nPASS Q1 a non-empty entries list with every key\nPASS Q2 the entries and the not-read list partition the 11 registered legacy prefixes\nPASS Q3 each call chain is in the Lambda's directory and ends in a read through the seam\nPASS Q4 side effects and invoke_recommended agree; at least one entry is invokable\nROUND 4 PARTNERS EVENTS: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms (Q1, Q2, Q3, Q4 each PASS); 8 entries; 3 of 11 registered legacy prefixes not read",
+      "status": "PASS",
+      "expect": "ROUND 4 PARTNERS EVENTS: 4 of 4 arms",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the census copied under .scratch with two defects: mutant A lists gold/views/ in classes_not_read while an entry reads it; mutant B sets the platinum/firm entry's last call-chain line to lambda_function.py:1812, a line with no seam call",
+      "expected": "A: Q2 FAIL and 3 of 4 arms, exit 1; B: Q3 FAIL and 3 of 4 arms, exit 1",
+      "observed": "A: FAIL Q2 partition, ROUND 4 PARTNERS EVENTS: 3 of 4 arms, exit=1; B: FAIL Q3 call chain, ROUND 4 PARTNERS EVENTS: 3 of 4 arms, exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice on the committed census at the worktree HEAD (the first run and a rerun), outputs compared line by line",
+      "observed": "both runs: Q1 entries=8, Q2 not read = the three prefixes, Q3 True, Q4 PASS, 4 of 4 arms, exit=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "no event is invoked; the before/after invocation and response-body diff is the act-4c actor's, not this worker's",
+      "reason": "order 1b rule 1 (read only, invoke nothing) and the preflight, which names the act-4c actor"
+    },
+    {
+      "item": "the entity-keyed events (account, advisor and relationship timeseries; advisor and relationship platinum-summary) carry ACCT_PLACEHOLDER, ADV_PLACEHOLDER and REL_PLACEHOLDER, so the seam read targets a key expected to be absent and the 404 body is what diffs; the census shows the seam is reached, not a live entity body",
+      "reason": "order 1a: no client or advisor identifier appears in the file; the events are synthetic by design"
+    },
+    {
+      "item": "FIRM#49financial in opal-users-v2 (the get_firm_bucket lookup that precedes every seam read) and the existence of gold/artifacts/filters/dimensions.json, platinum/firm/clients-tab-slim.json and gold/views/firm_composition.json under opal-data-49financial are not verified",
+      "reason": "order 1b rule 1 (no AWS call); the firm key 49financial and its bucket come from infra/logic/registry/scopes.json only"
+    },
+    {
+      "item": "the side_effects value none counts the CloudWatch Logs print lines each invocation emits as not writes; the one put_metric_data path fires only for firmId inflection, which no census event carries",
+      "reason": "the spec's write list is data writes, email, queue sends and table puts; log lines are emitted by every invocation of any Lambda"
+    },
+    {
+      "item": "the three not-read classes and the eight read classes are a static reading of the directory (prefix-token grep and the seam call sites), and each event's routing is traced by reading lambda_handler, not by running it",
+      "reason": "no invocation under the order's bounds; the census is a code reading, its runtime confirmation is the act-4c actor's"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W58-S1: FB-g-36 says to use the placeholders the fixtures use, but opal-partners-data has no test fixture or event sample in the tree; the census events use ACCT_PLACEHOLDER, ADV_PLACEHOLDER, REL_PLACEHOLDER and the firm key 49financial, chosen by the worker"
+  ],
+  "session_log": "no session log is committed; the record is commit 4ebda17b2e (LOCAL on wk-ADVI_FIRMBKTS-58) and surprise row ADVI_FIRMBKTS-D1-W58-S1",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_pevents.py --arms census --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~58/PARTNERS_EVENT_CENSUS.json --root /c/dev/wk-firmbkts-58",
+      "result": "ROUND 4 PARTNERS EVENTS: 4 of 4 arms; exit=0"
+    }
+  ]
+}

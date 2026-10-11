@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t39",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t39.hold-a-name-that-gains-a-split.md",
+    "group": "OTHER",
+    "vintage_commit": "49021b968e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "49021b968e",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t39.hold-a-name-that-gains-a-split.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~31",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/price_store.py",
+      "kind": "script",
+      "commit_or_etag": "fa581364c2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no deploy; write() holds a gained split against the stored splits.parquet; AC2 writes to a local scratch root only",
+      "artifact_covered_by": [
+        "DQ9-t39-AC1",
+        "DQ9-t39-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_split_hold.py",
+      "kind": "test",
+      "commit_or_etag": "fa581364c2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest on synthetic frames under tmp_path, no network, not deployed",
+      "artifact_covered_by": [
+        "DQ9-t39-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t39-AC1",
+      "criterion_verbatim": "the three named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t39_tests.py",
+      "output_evidence": "test_demque_split_hold.py::test_a_name_that_gains_a_split_row_is_not_written_and_says_why PASSED; test_a_name_with_no_new_split_row_is_written_as_before PASSED; test_the_first_write_of_a_name_with_no_prior_file_is_unaffected PASSED; 3 passed in 1.49s; SPLIT-OK; rc=0. Base (49021b968e): SPLIT-BAD no file data\\mdpf\\scripts\\demque\\test_demque_split_hold.py.",
+      "denominator": "3 of 3 named tests passed by name",
+      "status": "PASS",
+      "expect": "SPLIT-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t39-AC2",
+      "criterion_verbatim": "one REAL served name copied to a scratch root (S3 read only): a result carrying its stored splits plus a gained split row is held and every scratch file stays byte-identical; the same result without the gained row writes and advances max(date).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t39_real.py",
+      "output_evidence": "a: {\"written\": false, \"reason\": \"split gained: the name keeps its prior files (pair held)\", \"split_rows\": [{\"date\": \"2026-06-25\", \"ratio\": 2.0}]} identical=True; b: {\"written\": true, \"reason\": \"ok\", \"cusip\": \"001419688\", \"rows\": 3306} max_date=2026-06-25; SPLIT-REAL-OK a gained split row holds the name untouched; no new split row writes the extension (CUSIP 001419688); rc=0. Base: SPLIT-REAL-BAD arms=a_not_written,a_bytes_identical.",
+      "denominator": "2 of 2 arms on 1 real served CUSIP (001419688): arm a held with 0 scratch bytes changed; arm b written with max(date) advanced",
+      "status": "PASS",
+      "expect": "SPLIT-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "dq_t39_real.py run twice on the same tree (fa581364c2), outputs compared",
+      "observed": "run 1 and run 2 identical: a written false, split_rows [2026-06-25 ratio 2.0], identical=True; b written true, max_date=2026-06-25; SPLIT-REAL-OK",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the pre-change price_store.py (base 49021b968e, no split hold): the same two checks run on the base tree",
+      "expected": "SPLIT-BAD and SPLIT-REAL-BAD arms=a_not_written,a_bytes_identical",
+      "observed": "SPLIT-BAD no file data\\mdpf\\scripts\\demque\\test_demque_split_hold.py; SPLIT-REAL-BAD arms=a_not_written,a_bytes_identical",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "daily_draw.py not edited (the run output carries write's return through stored); no write to the served store, no Yahoo or Bloomberg call, no AWS write, no deploy, no timer; AC2 writes to a tempdir",
+      "reason": "order BOUNDS"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~31/MDPF_DEMQUE.TO-DQ-t39.hold-a-name-that-gains-a-split.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit price_store.py + test_demque_split_hold.py",
+      "result": "commit-gate clean 2 of 2; msg-verify MATCH; committed fa581364c2"
+    }
+  ]
+}
