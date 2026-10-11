@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-21.module-allow-grants",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-21.module-allow-grants.md",
+    "group": "OTHER",
+    "vintage_commit": "f63d88ccb5"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~43",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "f63d88ccb5",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-21.module-allow-grants.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant. The base-tree control is the issuer's preflight measurement (comp-adversary, not re-run by this worker): r4_modallow.py --arms render at base reads 1 of 5 (R5 PASS; R1 to R4 FAIL). Negative control measured here: a fixture grants row with keys [advi/49financial/x/*] under a planned mirror of the module reads plan rc=1 with 'Module output value precondition failed ... output fence_scoped_allow_statements', naming grants.opal-data-49financial[0] and infra/logic/registry/exemptions.json.",
+      "expected": "At base: 1 of 5 arms (preflight figure, not re-run). After the edits: 5 of 5 arms. The negative fixture must refuse at the new precondition, not pass.",
+      "observed": "After the edits AC1 reads 5 of 5 arms (R1 to R5 PASS). The negative fixture planned rc=1 at the fence_scoped_allow_statements precondition, naming grants.opal-data-49financial[0]. The base reading is the issuer's preflight figure, not re-run here.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 run twice on the same final code bytes (commit c64a667818), outputs compared line for line",
+      "observed": "Both runs print identical arm lines: R1 deny identical=True, string-prefix fixture identical=True, allow output empty=True; R2 allow sids and NotResource identical; R3 allow=1 deny=0 in exemption arns=False; malformed fixtures refused: 10 of 10; real registry plan rc=0; ROUND 4 MODULE ALLOW: 5 of 5 arms; exit=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any apply, any AWS call, any consumer root, any registry row change",
+      "reason": "Bounds 2 items 1 and 4: repository files only. The real registry gains no row; the new Allow output is the empty list for every bucket. Nothing is applied."
+    },
+    {
+      "item": "The .terraform directory and .terraform.lock.hcl created by terraform init",
+      "reason": "Bounds 2 item 2: kept out of the commit. Both are gitignored (**/.terraform/ and **/.terraform.lock.hcl in .gitignore); the commits name paths explicitly."
+    },
+    {
+      "item": "The nested portal submodule (git status shows ' M portal')",
+      "reason": "A gitlink already dirty in this worktree before this work; not this worker's edit; not staged or committed."
+    },
+    {
+      "item": "generated_locals.tf and tests/ in the module folder",
+      "reason": "Not in the order's paths. lib/opal_naming.py generate --target rewrites generated_locals.tf byte-identically (git status shows it unchanged), so no edit is needed; tests/ is unchanged and terraform test passes 48 of 48."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/modules/opal_name/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "c64a667818",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit c64a667818 on wk-ADVI_FIRMBKTS-43; key-entry rendering in fence_scoped_statements (byte-identical for /-ending prefixes); new locals fence_scoped_allow_statements, fence_grant_rows and the malformed-grants list; new output fence_scoped_allow_statements with a precondition. No apply.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_naming.py",
+      "kind": "script",
+      "commit_or_etag": "c64a667818",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit c64a667818; validate() accepts an exact key in a prefix list under the same rules and firm-token check, and checks a grants object (closed key set, GetObject only, exact keys, exact principal). validate on the real registry: VALIDATE: OK rc=0.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6e832b9577",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two appended rows ADVI_FIRMBKTS-D1-W43-S1 and ADVI_FIRMBKTS-D1-W43-S2; surprise-row-gate OK on 2 new rows (186 pre-existing not re-graded); 48 insertions, 0 deletions.",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 evaluates the base module and the tree's over the real registry (Deny identical, allow empty), a string-prefix fixture (Deny identical), a key-entry fixture (Deny and Allow), a grants fixture, and ten malformed fixtures (all refused).",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-43 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_modallow.py --arms render --root /c/dev/wk-firmbkts-43; echo \"exit=$?\"",
+      "output_evidence": "  real buckets=['opal-data-49financial', 'opal-data-bd', 'opal-data-cot', 'opal-data-cottonwood', 'opal-data-demo', 'opal-data-inf', 'opal-data-inflection'] deny identical=True; string-prefix fixture identical=True (2 statements); allow output empty for all=True\n  R2 allow sids=['AllowScopedExemption1Listing', 'AllowScopedExemption1Objects'] deny NotResource=['arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/*', 'arn:aws:s3:::opal-data-49financial/advi/49financial/platinum/49financial/ownership_map.json']\n  R3 allow=1 deny=0 in exemption arns=False\n  malformed fixtures refused: 10 of 10\n  real registry plan rc=0\nPASS R1 real registry Deny identical, string-prefix fixture Deny identical, allow output empty\nPASS R2 a prefix list with an exact key renders the Deny and one Allow per class from the same row\nPASS R3 a grants row renders one Allow on the exact key, no Deny, no exemption\nPASS R4 every malformed prefix entry and grants row is refused\nPASS R5 the real registry plans clean in the tree's module\nROUND 4 MODULE ALLOW: 5 of 5 arms\nexit=0",
+      "denominator": "5 of 5 arms PASS (R1 to R5); 10 of 10 malformed fixtures refused; 7 of 7 real buckets Deny-identical to base; real registry plan rc=0",
+      "status": "PASS",
+      "expect": "ROUND 4 MODULE ALLOW: 5 of 5 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the module's own tests (48 at base).",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-43/infra/aws/terraform/modules/opal_name && timeout 100 terraform init -backend=false -input=false -no-color > /dev/null && timeout 100 terraform test -no-color 2>&1 | tail -n 3",
+      "output_evidence": "tests\\opal_name.tftest.hcl... pass\n\nSuccess! 48 passed, 0 failed.",
+      "denominator": "48 of 48 terraform tests passed (base 48)",
+      "status": "PASS",
+      "expect": "Success! \\d+ passed, 0 failed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-43 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-43 --allow infra/aws/terraform/modules/opal_name/main.tf --allow lib/opal_naming.py --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~43/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/modules/opal_name/main.tf; echo \"exit=$?\"",
+      "output_evidence": "  CHANGED infra/aws/terraform/modules/opal_name/main.tf\n  CHANGED lib/opal_naming.py\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~43/ADVI_FIRMBKTS.TO-FB-g-21.module-allow-grants.proof_of_spec.json\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~43/ADVI_FIRMBKTS.TO-FB-g-21.session.log.txt\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md\nROUND 4 SCOPE: OK 5 changed, 0 outside, 0 required missing\nexit=0",
+      "denominator": "5 changed files, 0 outside the grant, 1 of 1 required path changed (the two code files, the instance, the session log and the investigation file; all inside the granted paths)",
+      "status": "PASS",
+      "expect": "ROUND 4 SCOPE: OK"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W43-S1: the pre-commit risk reflex printed HOLD on infra/aws/terraform/modules/opal_name/main.tf by basename match (repeat of W42-S1); the commit landed rc=0 on c64a667818 (OBSERVATION, INERT)",
+    "ADVI_FIRMBKTS-D1-W43-S2: safe-commit printed WARN that the client-data check could not run (hashed account-id list absent on dell1); the commit diff carries no 12-digit number (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~43/ADVI_FIRMBKTS.TO-FB-g-21.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "lib/opal_naming.py generate (builder)",
+      "invocation": "python lib/opal_naming.py generate --out /c/dev/wk-firmbkts-43 --target infra/aws/terraform/modules/opal_name/generated_locals.tf",
+      "result": "GENERATE: 1 written, 0 skipped; rc=0. git status shows generated_locals.tf unchanged (byte-identical regeneration)."
+    },
+    {
+      "tool": "lib/opal_naming.py validate (builder, real registry)",
+      "invocation": "python lib/opal_naming.py validate",
+      "result": "VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s) at registry@662da514555cbfae over all 15 registry file(s); rc=0."
+    },
+    {
+      "tool": "terraform plan (scratch mirror, negative fixture)",
+      "invocation": "terraform plan -input=false -no-color in a scratch mirror of infra/aws/terraform/modules/opal_name and infra/logic/registry with one grants row keys [advi/49financial/x/*]",
+      "result": "Error: Module output value precondition failed on main.tf line 298, in output fence_scoped_allow_statements; grants.opal-data-49financial[0] named; plan rc=1."
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~43 <0.9.0_WK_ADVI_FIRMBKTS~43@opal.agent>\" -F .scratch/fb21_msg1.txt -- infra/aws/terraform/modules/opal_name/main.tf lib/opal_naming.py",
+      "result": "c64a667818 (2 files, 132 insertions, 8 deletions); commit-gate All checks passed; naming-gate PASS 0 graded; msg-verify MATCH. Second commit 6e832b9577 (surprise rows) surprise-row-gate OK, missions-tree-check 0 violation(s)."
+    }
+  ]
+}
