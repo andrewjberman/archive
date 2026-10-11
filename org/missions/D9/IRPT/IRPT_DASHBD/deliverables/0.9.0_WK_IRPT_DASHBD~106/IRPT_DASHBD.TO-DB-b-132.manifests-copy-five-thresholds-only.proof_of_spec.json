@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-132",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "61f17b5413",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-132.manifests-copy-five-thresholds-only.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~106",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~106/MANIFEST_THRESHOLDS.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "ddbd882a4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "served_thresholds added; build_manifest and emit_method_row serve it; ships only with a later release under its own pair",
+      "artifact_covered_by": [
+        "DB70-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_served_thresholds.py",
+      "kind": "test",
+      "commit_or_etag": "ddbd882a4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "9 tests: extra keys (one named like a per-account member, a synthetic 9-digit key) stay out of the returns manifest and the method manifest",
+      "artifact_covered_by": [
+        "DB70-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~106/MANIFEST_THRESHOLDS.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a record: function, call sites, keys before and after, readers, tests; no S3 write, no AWS call",
+      "artifact_covered_by": [
+        "DB70-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB70-2-AC1",
+      "criterion_verbatim": "DB70-2-AC1 -- the producer's two manifest writers serve only the five thresholds and their claims, through one function, and no whole-object copy is left. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r70/p70_round70.py\" . DB70-2-AC1",
+      "output_evidence": "OK: served_thresholds keeps the five values and their claims and drops 2 of 2 extra keys; 0 whole-object copies left\nDB70-2-AC1 PASS",
+      "denominator": "2 of 2 manifest writers serve served_thresholds; 0 whole-object copies left (base 2); 2 of 2 extra keys dropped; gold tests 184 passed, 0 failed (base 175 passed, 0 failed); silver tests 900 passed, 12 skipped, 0 failed (base 900 passed, 12 skipped, 0 failed); s3_writes 0; exit code 0",
+      "status": "PASS",
+      "expect": "DB70-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker imports the producer from the worktree root",
+      "observed": "DB70-2-AC1 printed PASS on the pre-commit run and the final run",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "emit_method_row's call site reverted to the whole object (committed first, reverted after).",
+      "expected": "the method-manifest tests and the no-whole-object-copy test FAIL",
+      "observed": "3 failed, 6 passed in test_served_thresholds.py; after restoring, 9 passed",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any AWS call; an upload=True call against S3; a release; a read of a served manifest",
+      "reason": "Bounds of the order: nothing is served until a later release or upload under its own pair. The method-manifest upload path was exercised on a fake client only."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "p70_round70.py",
+      "invocation": "python org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r70/p70_round70.py . DB70-2-AC1",
+      "result": "DB70-2-AC1 PASS (rc 0); at base it printed FAIL: the producer still copies the whole thresholds object at 2 site(s) (rc 1)"
+    }
+  ]
+}

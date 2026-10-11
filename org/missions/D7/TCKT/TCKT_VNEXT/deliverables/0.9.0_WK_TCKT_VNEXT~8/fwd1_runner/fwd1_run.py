@@ -40,6 +40,16 @@ Copied from the round-1 SA-r-1b runner and repaired:
      "mode": "ARMS_ONLY" and "submission": "NOT_SENT". Exit 0 only when both arms answered as expected and the row was
      removed; 1 otherwise; never 3. `--arms-only` is refused with `--finish-cleanup` (rc 2). No other option exists that
      only makes sense after hop (g) (--close-ticket completes OLD tickets in cleanup and is allowed).
+11. (ROUND 4, cell R4-rn-2) `--one-step`: the portal form's four calls and exactly ONE analysis submission, no claim. After
+     the same prechecks, row write, token and census: upload, then the ticket (create body plus source "ticketcenter:i1";
+     NO claim call is ever made), then the two arms as the filer who created the ticket, then the one submission (request_id
+     "tckt-<ticket id>", ticket_id named), then the issued id recorded on the ticket as its creator (and one repeat, expected
+     409 REPORT_ALREADY_RECORDED), then the existing report read and open-from-the-ticket read. The submission route is
+     called at most once per process: ONE_STEP_SUBMISSIONS is the counter, `one_step_submit` is the only caller and
+     refuses a second; a timeout or transport error is never retried (SUBMISSION_ANSWER_UNREADABLE, possibly accepted, the
+     row left, rc 3, the request list read once to settle it). The trace says "mode": "ONE_STEP". `--one-step` is refused
+     with `--arms-only` (rc 2). An arm that shows report_ref or package present, or the package door answering 2xx, stops
+     the run before the submission (STOPPED_BEFORE_SUBMISSION, no-submission cleanup, rc 1). A one-step run exits 0, 1, 2 or 3.
 This module has NOT been run against the portal by this order; only its fake-HTTP tests have run.
 
 Original header follows.
@@ -69,7 +79,7 @@ real CloudFront host; a direct lambda invoke is deliberately NOT used (CTO IRPT_
 
 Usage: python fwd1_run.py --read27 <AC1 result> --exp-minutes N --expect-irpt-status-sha <prefix>
            --run-label <label> --pair <pair path and pin> --executor <serial> --trace-out <path>
-           [--advisor-opaque adv-04b85b8aefda] [--close-ticket <id>]... [--arms-only]
+           [--advisor-opaque adv-04b85b8aefda] [--close-ticket <id>]... [--arms-only | --one-step]
        python fwd1_run.py --finish-cleanup <trace path> --executor <serial>      (the second step; see item 9)
 
 Exit codes: 0 run complete and the row removed (read back absent); 1 a failure (precheck, advisor, row write, row not
@@ -629,14 +639,15 @@ def census(token, run_id):
 # ---------------------------------------------------------------- step 5
 
 
-def hops(token, advisor, trace, arms_only=False):
+def hops(token, advisor, trace, arms_only=False, one_step=False):
     raw = HOLDINGS.read_bytes()
     file_sha = hashlib.sha256(raw).hexdigest()
     sent_token, up_token = _run_tokens_from(trace, file_sha)
     trace["upload_idempotency_token"] = up_token
     h = {x["hop"]: x for x in trace["hops"]}
     named = trace["named_failures"]
-    print("== step 5: hops (a)-(%s) ==" % ("c, then the two arms; ARMS ONLY, no submission" if arms_only else "g"))
+    print("== step 5: hops (a)-(%s) ==" % ("c, then the two arms; ARMS ONLY, no submission" if arms_only else
+                                          "b, the two arms, the one submission, record, read; ONE STEP, no claim" if one_step else "g"))
 
     a = h["a_upload"]
     a["file"] = {"path": str(HOLDINGS.relative_to(ROOT)).replace("\\", "/"), "sha256": file_sha}
@@ -677,7 +688,7 @@ def hops(token, advisor, trace, arms_only=False):
     b = h["b_ticket"]
     res = call(token, "POST", "/api/scoped/tickets", None,
                {"ticket_type": "analysis_request", "title": "[TEST TCKT_VNEXT FWD-1] seat arm",
-                "source": "portal",
+                "source": ONE_STEP_SOURCE if one_step else "portal",
                 "answers": {"advisor": adv_label(advisor), "firm": FIRM,
                             "household": HOUSEHOLD, "report_type": "Overview"},
                 "attachment": {"upload_id": upload_id, "input_id": input_id}})
@@ -685,7 +696,7 @@ def hops(token, advisor, trace, arms_only=False):
     if isinstance(res["parsed"], dict):
         t = res["parsed"].get("ticket")
         tkt = (t or {}).get("ticket_id") if isinstance(t, dict) else None
-    b["status"], b["ticket_id"], b["source"] = res["status"], tkt, "portal"
+    b["status"], b["ticket_id"], b["source"] = res["status"], tkt, (ONE_STEP_SOURCE if one_step else "portal")
     print("  (b) ticket http=%s reason=%r ticket_id=%r" % (res["status"], res["reason"], tkt))
     save(trace)
     if not tkt:
@@ -695,6 +706,9 @@ def hops(token, advisor, trace, arms_only=False):
             named.append({"hop": k, "status": None, "reason": "UNREACHABLE", "note": "depends on (b)"})
         return trace
     trace["journey_ticket"] = tkt
+
+    if one_step:   # R4-rn-2: the one place the one-step run leaves the normal path; the claim call below is not reachable from here
+        return hops_one_step(token, trace, h, named, tkt, input_id)
 
     res = call(token, "POST", "/api/scoped/tickets/%s/claim" % tkt, None, {})
     h["c_claim"]["status"] = res["status"]
@@ -1143,18 +1157,9 @@ def arm_package_door_denies_the_filer(token, tkt, arms, named):
     return False
 
 
-def hops_arms_only(token, trace, h, named, tkt, claimed):
-    """R4-la-1: after hop (c), the two arms and nothing else. This function never calls hop_d_analysis, hop_e_ready,
-    hop_f_report or hop_g_open, and sends nothing to the submission route. The trace result is set here."""
-    arms = trace.setdefault("report_route_arms", {})
-    for k in ("d_analysis", "e_ready", "f_report", "g_open"):
-        h[k]["outcome"] = NOT_RUN_ARMS_ONLY
-    if not claimed:
-        arms["report_id_malformed_refused"] = {"outcome": "UNREACHABLE", "why": "hop (c) did not claim the ticket"}
-        arms["package_door_denies_the_filer"] = {"outcome": "UNREACHABLE", "why": "hop (c) did not claim the ticket"}
-        trace["arms_only_result"] = ARMS_NOT_REACHED
-        save(trace)
-        return trace
+def run_the_two_arms(token, trace, tkt, arms, named):
+    """The two arms of R4-la-1, shared by --arms-only and --one-step: the malformed report id (then a ticket re-read for
+    report_ref) and the package door denying the filer. -> (ok1, ok2). Not retried."""
     ok1 = arm_malformed_report_id(token, tkt, arms, named)
     try:
         reread, absent = ticket_field_absent(token, tkt, "report_ref")
@@ -1170,7 +1175,252 @@ def hops_arms_only(token, trace, h, named, tkt, claimed):
         ok1 = False
     save(trace)
     ok2 = arm_package_door_denies_the_filer(token, tkt, arms, named)
+    return ok1, ok2
+
+
+def hops_arms_only(token, trace, h, named, tkt, claimed):
+    """R4-la-1: after hop (c), the two arms and nothing else. This function never calls hop_d_analysis, hop_e_ready,
+    hop_f_report or hop_g_open, and sends nothing to the submission route. The trace result is set here."""
+    arms = trace.setdefault("report_route_arms", {})
+    for k in ("d_analysis", "e_ready", "f_report", "g_open"):
+        h[k]["outcome"] = NOT_RUN_ARMS_ONLY
+    if not claimed:
+        arms["report_id_malformed_refused"] = {"outcome": "UNREACHABLE", "why": "hop (c) did not claim the ticket"}
+        arms["package_door_denies_the_filer"] = {"outcome": "UNREACHABLE", "why": "hop (c) did not claim the ticket"}
+        trace["arms_only_result"] = ARMS_NOT_REACHED
+        save(trace)
+        return trace
+    ok1, ok2 = run_the_two_arms(token, trace, tkt, arms, named)
     trace["arms_only_result"] = ARMS_AS_EXPECTED if (ok1 and ok2) else ARMS_NOT_AS_EXPECTED
+    save(trace)
+    return trace
+
+
+# ---------------------------------------------------------------- R4-rn-2: the one-step mode
+
+ONE_STEP_SOURCE = "ticketcenter:i1"
+STOPPED_BEFORE_SUBMISSION = "STOPPED_BEFORE_SUBMISSION"
+NOT_RUN_ONE_STEP = "NOT_RUN_ONE_STEP"
+REQUEST_ID_PREFIX = "tckt-"
+REQUEST_ID_MAX = 95   # the form's cut: "tckt-" plus at most 90 characters
+# THE GUARD (exactly one submission): the count of calls to the analysis submission route made by this process in
+# one-step mode. `one_step_submit` is the only caller; it raises BEFORE the call when the count is already 1, and it
+# counts BEFORE the call, so a call that raises or times out still counts. main() resets it for each run.
+ONE_STEP_SUBMISSIONS = {"count": 0}
+
+
+def one_step_request_id(tkt):
+    """The submission's request_id token, as the form builds it: "tckt-" + the ticket id with every character outside
+    [A-Za-z0-9_.:-] replaced by "_", cut to REQUEST_ID_MAX characters in all."""
+    return (REQUEST_ID_PREFIX + re.sub(r"[^A-Za-z0-9_.:-]", "_", str(tkt)))[:REQUEST_ID_MAX]
+
+
+def one_step_submit(token, body):
+    """The ONLY call of the analysis submission route in one-step mode. At most once per process, structurally: a second
+    call raises before anything is sent. A transport error or timeout comes back as data (status 0), never retried."""
+    if ONE_STEP_SUBMISSIONS["count"] >= 1:
+        raise RuntimeError("one-step mode sends exactly one analysis submission; a second was refused before it was sent")
+    ONE_STEP_SUBMISSIONS["count"] += 1
+    try:
+        return call(token, "POST", ANALYSIS, {"selected_tenant": FIRM}, body)
+    except Exception as e:  # noqa: BLE001 -- the call may have been sent; the answer is unreadable, never a retry
+        return {"status": 0, "reason": "RAISED_" + type(e).__name__, "len": 0, "fp": None, "parsed": None}
+
+
+def settle_unreadable(token, sent, d):
+    """ONE read of the request list (first page, 50 rows) for a request whose client id is the tckt-... value sent, so a
+    possibly-accepted submission is settled as far as the list can. Records ids and counts only. Not a retry of anything."""
+    out = {"reads": 1, "token": sent}
+    try:
+        res = call(token, "GET", REQUESTS, {"selected_tenant": FIRM, "limit": 50})
+        why = refusal_of(res)
+    except Exception as e:  # noqa: BLE001
+        res, why = {}, "RAISED_" + type(e).__name__
+    if why:
+        out.update({"list_read": "FAILED", "reason": why, "found": None})
+        d["settled_by_list"] = out
+        return out
+    _, inner = body_of(res)
+    items = [it for it in (inner.get("items") or []) if isinstance(it, dict)]
+    hits = []
+    for it in items:
+        if '"%s"' % sent in json.dumps(it):
+            ident = it.get("identity")
+            rid = ident.get("request_id") if isinstance(ident, dict) else None
+            hits.append(rid if isinstance(rid, str) and REQ_ID.fullmatch(rid) else None)
+    out.update({"list_read": "OK", "items_seen": len(items), "matches": len(hits), "request_ids": hits,
+                "found": ("ONE" if len(hits) == 1 else "NONE" if not hits else "MORE_THAN_ONE")})
+    d["settled_by_list"] = out
+    return out
+
+
+def hop_d_one_step(token, tkt, input_id, d, named, trace):
+    """R4-rn-2 step (4): the ONE submission, as the form sends it, and the existing state-and-identity classification.
+    -> the service's REQ id, or None. Never retried; an unreadable answer is possibly accepted (submitted_at is set, so the
+    row is left) and is settled by one request-list read."""
+    sent = one_step_request_id(tkt)
+    d["idempotency_token"] = trace["submission_request_id_token"] = sent
+    d["ticket_id"] = trace["submission_ticket_id"] = tkt
+    trace["submission"] = "SENT_ONCE"
+    res = one_step_submit(token, {"request_id": sent, "client_id": None, "account_ids": [], "snapshot_id": None,
+                                  "variant": "overview", "comparison_keys": [], "report_title": None,
+                                  "input_id": input_id, "prepared_for": HOUSEHOLD, "ticket_id": tkt})
+    received_unix = int(NOW())
+    trace["submission_calls"] = ONE_STEP_SUBMISSIONS["count"]
+    status = res.get("status")
+    d["status"], d["request_id"] = status, None
+    facts, identity_rid, state = submission_answer_facts(res)
+    d.update(facts)
+
+    def possibly_accepted():
+        d["submitted_at_unix"] = received_unix
+        d["submitted_at"] = iso(dt.datetime.fromtimestamp(received_unix, dt.timezone.utc))
+
+    unreadable = (not isinstance(status, int)) or status == 0 or status in (502, 503, 504) \
+        or (200 <= status < 300 and not isinstance(res.get("parsed"), dict))
+    if unreadable:
+        d["result"] = "SUBMISSION_ANSWER_UNREADABLE"
+        possibly_accepted()
+        named.append({"hop": "d_analysis", "status": status, "reason": "SUBMISSION_ANSWER_UNREADABLE",
+                      "code": res.get("reason"),
+                      "note": ("no readable answer (timeout, transport error or gateway status); the submission was NOT "
+                               "retried and is treated as possibly accepted: the row is left; the request list is read "
+                               "once to settle it")})
+        settle_unreadable(token, sent, d)
+        return None
+    why = submission_refusal(res, state)
+    if why:
+        d["refused_reason"], d["result"] = why, "BRANCH_E_SUBMISSION_REFUSED"
+        named.append({"hop": "d_analysis", "status": status, "reason": "BRANCH_E_SUBMISSION_REFUSED", "code": why,
+                      "note": "the submission was refused (any HTTP status); not retried; the rest is UNREACHABLE; cleanup follows"})
+        return None
+    possibly_accepted()
+    rid = identity_rid or request_id_from_answer(res)
+    d["request_id_source"] = "submission_answer" if rid else None
+    if identity_rid:
+        d["accepted_reason"], d["accepted_state"] = d.get("status_public_reason_code"), state
+    if not rid:
+        d["result"] = "SUBMISSION_ANSWER_UNREADABLE"
+        named.append({"hop": "d_analysis", "status": status, "reason": "SUBMISSION_ANSWER_UNREADABLE", "state": state,
+                      "note": ("the answer is not a refusal and carries no REQ id under data.identity; not retried; the "
+                               "request list is read once to settle it")})
+        settle_unreadable(token, sent, d)
+        return None
+    d["request_id"] = rid
+    inner = body_of(res)[1]
+    ident = inner.get("identity") if isinstance(inner, dict) else None
+    rev = ident.get("request_revision") if isinstance(ident, dict) else None
+    d["request_revision"] = rev if isinstance(rev, (str, int)) and not isinstance(rev, bool) else None
+    return rid
+
+
+def _ticket_report_ref(token, tkt):
+    """Re-read the ticket -> (http status, report_ref object or None)."""
+    r = call(token, "GET", "/api/scoped/tickets/%s" % tkt)
+    p = r.get("parsed") if isinstance(r.get("parsed"), dict) else {}
+    t = p.get("ticket") if isinstance(p.get("ticket"), dict) else p
+    ref = t.get("report_ref") if isinstance(t, dict) else None
+    return r.get("status"), (ref if isinstance(ref, dict) else None)
+
+
+def record_as_creator(token, tkt, rid, revision, trace, named):
+    """R4-rn-2 step (5): record the issued id on the ticket as its creator, then ONE repeat of the same call.
+    Expected: 200 with report_ref.request_id the issued id and recorded_by the filer; then 409 REPORT_ALREADY_RECORDED and a
+    re-read showing the stored value unchanged. Anything else is a named failure; the run goes on. -> True when as expected."""
+    calls = trace.setdefault("record_calls", {})
+    body = {"request_id": rid}
+    if revision is not None:
+        body["revision"] = str(revision)   # the route takes a string
+    path = "/api/scoped/tickets/%s/report" % tkt
+    ok = True
+    first = call(token, "POST", path, None, dict(body))
+    fp = first.get("parsed") if isinstance(first.get("parsed"), dict) else {}
+    ref = (fp.get("ticket") or {}).get("report_ref") if isinstance(fp.get("ticket"), dict) else None
+    ref = ref if isinstance(ref, dict) else {}
+    e1 = {"status": first.get("status"), "request_id_recorded": ref.get("request_id") == rid,
+          "recorded_by_the_filer": str(ref.get("recorded_by") or "").lower() == FILER.lower(),
+          "sent_keys": sorted(body)}
+    e1["as_expected"] = first.get("status") == 200 and e1["request_id_recorded"] and e1["recorded_by_the_filer"]
+    calls["first"] = e1
+    print("  (record) first http=%s recorded=%s by_filer=%s" % (e1["status"], e1["request_id_recorded"], e1["recorded_by_the_filer"]))
+    if not e1["as_expected"]:
+        ok = False
+        named.append({"hop": "f_report", "status": e1["status"], "reason": "RECORD_AS_CREATOR_UNEXPECTED",
+                      "code": fp.get("code"),
+                      "note": "expected 200 with report_ref.request_id the issued id and recorded_by the filer; not retried"})
+    again = call(token, "POST", path, None, dict(body))
+    ap = again.get("parsed") if isinstance(again.get("parsed"), dict) else {}
+    e2 = {"status": again.get("status"), "code": ap.get("code")}
+    try:
+        reread, stored = _ticket_report_ref(token, tkt)
+    except Exception as e:  # noqa: BLE001
+        reread, stored = "RAISED_" + type(e).__name__, None
+    e2["reread_status"] = reread
+    e2["stored_request_id_unchanged"] = bool(stored) and stored.get("request_id") == rid
+    e2["as_expected"] = (again.get("status") == 409 and ap.get("code") == "REPORT_ALREADY_RECORDED"
+                         and e2["stored_request_id_unchanged"])
+    calls["repeat"] = e2
+    print("  (record) repeat http=%s code=%r stored_unchanged=%s" % (e2["status"], e2["code"], e2["stored_request_id_unchanged"]))
+    if not e2["as_expected"]:
+        ok = False
+        named.append({"hop": "f_report", "status": e2["status"], "reason": "RECORD_REPEAT_UNEXPECTED", "code": e2["code"],
+                      "note": "expected 409 REPORT_ALREADY_RECORDED and the stored value unchanged on a re-read"})
+    return ok
+
+
+def hops_one_step(token, trace, h, named, tkt, input_id):
+    """R4-rn-2: after the ticket is created (NO claim): the two arms as the filer, the ONE submission, the record as
+    creator, the existing report read and open-from-the-ticket read. hop_d_analysis, hop_f_report and the claim are never
+    called from here; the submission goes through one_step_submit only."""
+    h["c_claim"]["outcome"] = NOT_RUN_ONE_STEP
+    h["f_report"]["outcome"] = "RECORD_AS_CREATOR_SEE_record_calls"
+    arms = trace.setdefault("report_route_arms", {})
+    ok1, ok2 = run_the_two_arms(token, trace, tkt, arms, named)
+    a1, a2 = arms["report_id_malformed_refused"], arms["package_door_denies_the_filer"]
+    why = []
+    if a1.get("reread_status") == 200 and a1.get("report_ref_absent_after") is False:
+        why.append("report_ref present on the ticket after the malformed-id arm")
+    if a2.get("reread_status") == 200 and a2.get("package_absent_after") is False:
+        why.append("package present on the ticket after the package arm")
+    if isinstance(a2.get("status"), int) and 200 <= a2["status"] < 300:
+        why.append("the package door answered the filer 2xx")
+    trace["one_step_arms"] = ARMS_AS_EXPECTED if (ok1 and ok2) else ARMS_NOT_AS_EXPECTED
+    if why:
+        trace["result"], trace["result_reason"], trace["submission"] = STOPPED_BEFORE_SUBMISSION, why, "NOT_SENT"
+        for k in ("d_analysis", "e_ready", "f_report", "g_open"):
+            h[k]["outcome"] = NOT_RUN_ONE_STEP
+        named.append({"hop": "d_analysis", "status": None, "reason": STOPPED_BEFORE_SUBMISSION, "note": "; ".join(why)})
+        print("STOP: %s -- %s" % (STOPPED_BEFORE_SUBMISSION, "; ".join(why)))
+        save(trace)
+        return trace
+    save(trace)
+    rid = hop_d_one_step(token, tkt, input_id, h["d_analysis"], named, trace)
+    print("  (d) analysis http=%s request_id=%r source=%s" % (
+        h["d_analysis"]["status"], rid, h["d_analysis"].get("request_id_source")))
+    save(trace)
+
+    def unreachable(keys, note):
+        for k in keys:
+            h[k]["outcome"] = "UNREACHABLE"
+            named.append({"hop": k, "status": None, "reason": "UNREACHABLE", "note": note})
+
+    if not rid:
+        if h["d_analysis"].get("result") == "BRANCH_E_SUBMISSION_REFUSED":
+            trace["result"] = "BRANCH_E_SUBMISSION_REFUSED"
+            trace["result_reason_code"] = h["d_analysis"].get("refused_reason")
+        unreachable(("e_ready", "g_open"), "depends on (d), which produced no service request id")
+        record_job_last_read(trace, h["e_ready"])
+        save(trace)
+        return trace
+    record_as_creator(token, tkt, rid, h["d_analysis"].get("request_revision"), trace, named)
+    save(trace)
+    outcome = hop_e_ready(token, rid, h["e_ready"], named)
+    record_job_last_read(trace, h["e_ready"])
+    save(trace)
+    if outcome != "OK":
+        unreachable(("g_open",), "(e) ended %s; the report is not made, so the open-from-the-ticket read is not run" % outcome)
+    else:
+        hop_g_open(token, tkt, h["g_open"], named)
     save(trace)
     return trace
 
@@ -1601,6 +1851,9 @@ def build_parser():
     ap.add_argument("--arms-only", action="store_true",
                     help="R4-la-1: send NO analysis submission; run hops (a)-(c) and the two arms (malformed report id; "
                          "package door denies the filer), then the normal no-submission cleanup")
+    ap.add_argument("--one-step", action="store_true",
+                    help="R4-rn-2: the portal form's four calls and exactly ONE analysis submission, no claim; refused "
+                         "with --arms-only")
     return ap
 
 
@@ -1655,6 +1908,10 @@ def main(argv):
         f = build_finish_parser().parse_args(argv)
         return finish_cleanup(f.finish_cleanup, f.executor)
     a = build_parser().parse_args(argv)
+    if a.one_step and a.arms_only:
+        print("STOP: --one-step is refused with --arms-only: one sends the analysis submission and the other sends none. "
+              "Nothing was done.")
+        return 2
     out_path = Path(a.trace_out)
     if out_path.exists() and (out_path.is_dir() or out_path.stat().st_size > 0):
         print("STOP: --trace-out %s already holds content; a trace is one run's record and is never appended to or "
@@ -1665,6 +1922,9 @@ def main(argv):
     trace = build_trace(a, run_id)
     if a.arms_only:   # R4-la-1: stated in the trace before anything runs
         trace["mode"], trace["submission"], trace["arms_only_result"] = "ARMS_ONLY", "NOT_SENT", ARMS_NOT_REACHED
+    if a.one_step:   # R4-rn-2: stated in the trace before anything runs; the counter starts at zero for this run
+        ONE_STEP_SUBMISSIONS["count"] = 0
+        trace["mode"], trace["submission"], trace["submission_calls"] = "ONE_STEP", "NOT_SENT", 0
 
     # D3: nothing is written before the build is the expected one
     ok, info = precheck_irpt_status(a.expect_irpt_status_sha)
@@ -1733,6 +1993,8 @@ def main(argv):
                 else:
                     if a.arms_only:
                         hops(token, advisor, trace, arms_only=True)
+                    elif a.one_step:
+                        hops(token, advisor, trace, one_step=True)
                     else:
                         hops(token, advisor, trace)
     finally:
@@ -1743,6 +2005,11 @@ def main(argv):
         removed = bool(trace["cleanup"].get("row_removed_read_back_absent"))
         print("ARMS_ONLY: result=%s row_removed=%s" % (trace.get("arms_only_result"), removed))
         return 0 if (removed and trace.get("arms_only_result") == ARMS_AS_EXPECTED) else 1
+    if a.one_step:   # R4-rn-2: stopped before the submission is rc 1 whatever the cleanup did
+        print("ONE_STEP: result=%s submission=%s calls=%s" % (trace.get("result"), trace.get("submission"),
+                                                             ONE_STEP_SUBMISSIONS["count"]))
+        if trace.get("result") == STOPPED_BEFORE_SUBMISSION:
+            return 1
     if trace["cleanup"].get("state") == PENDING:
         print("PENDING_ROW_DELETE: the row stays until %s; run --finish-cleanup %s --executor <serial> then"
               % (trace["cleanup"]["row_delete_not_before"], TRACE_OUT))
