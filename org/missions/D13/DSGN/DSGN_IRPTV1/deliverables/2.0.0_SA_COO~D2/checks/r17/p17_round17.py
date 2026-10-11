@@ -131,12 +131,17 @@ def main():
     elif cid == "IV97-AC1":
         r = load("TOOLING.json")
         k = r.get("lock") or {}
-        if k.get("refreshed") is not True or k.get("package_json_dependencies_changed") is not False or not isinstance(k.get("packages_moved"), int) \
+        # AMENDMENT 1 (row DSGN_IRPTV1-D2-W53-S10): a lock the installer leaves byte-equal has nothing to refresh. That outcome is
+        # admitted only as a MEASURED no-op: one install run, the lock equal before and after, 0 packages moved.
+        noop = (k.get("refreshed") is False and k.get("bun_lock_before_equals_after") is True and k.get("packages_moved") == 0
+                and k.get("bun_install_runs") == 1)
+        if (k.get("refreshed") is not True and not noop) or k.get("package_json_dependencies_changed") is not False or not isinstance(k.get("packages_moved"), int) \
                 or k.get("build_equal") is not True or not text(k.get("build_hash_before")) or k.get("build_hash_before") != k.get("build_hash_after") \
                 or k.get("happy_dom") != "20.14.5":
             fail("lock %r" % {x: k.get(x) for x in ("refreshed", "package_json_dependencies_changed", "packages_moved", "build_equal", "happy_dom")})
         suite(r)
-        print("OK: the lock refreshed once (%d package(s) moved), the build byte-equal, happy-dom held; no new failing id" % k["packages_moved"])
+        print("OK: the lock %s (%d package(s) moved), the build byte-equal, happy-dom held; no new failing id"
+              % ("is already what package.json asks for: one install left it byte-equal" if noop else "refreshed once", k["packages_moved"]))
     elif cid == "IV97-AC2":
         r = load("TOOLING.json")
         p = r.get("playwright_core") or {}
