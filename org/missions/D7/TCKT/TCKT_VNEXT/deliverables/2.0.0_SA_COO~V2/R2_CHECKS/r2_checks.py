@@ -8,6 +8,7 @@
   rn-arms       R2-rn1-AC6  (AMENDMENT 2) the report-route arms, the old test ticket, the trace header
   rn-trace      R2-rn1-AC7  (AMENDMENT 3) the trace path is an argument; the stream denominator is measured
   rn-zero       R2-rn1-AC8  (AMENDMENT 4) the zero-call verdict rule as the CTO ruled it (msg 4164)
+  pk-codes      R2-pk1-AC1  the package route's five 409s carry codes; none returns the ticket
   rr-shape      R2-rr1-AC1  the report route stores a well-formed REQ id and refuses a malformed one with a typed code
   ts-guard      R2-ts1-AC1  by default no ticket_center test can reach a real SES send or a real users-table read
   pg-open       R2-pg1-AC1  (needs --portal <dir>) the ticket's Open report reads the finished report; a stated waiting state
@@ -47,6 +48,11 @@ NAMED = {
                                 "test_zero_active_streams_alone_is_not_void"]),
     "rn-zero": (RUNNER_TESTS, ["test_group_with_no_streams_at_all_is_void", "test_group_not_describable_is_void",
                                "test_control_without_the_filer_is_void", "test_zero_read_records_three_numbers"]),
+    "pk-codes": (TC_TESTS / "test_package_409_codes.py", ["test_each_409_has_its_own_code",
+                                                         "test_already_attached_returns_the_stored_package_identity",
+                                                         "test_changed_under_write_returns_no_ticket",
+                                                         "test_changed_under_write_names_the_package_when_one_landed",
+                                                         "test_the_200_and_the_400s_are_unchanged"]),
     "rr-shape": (TC_TESTS / "test_report_ref_shape.py", ["test_well_formed_request_id_stored", "test_malformed_request_id_refused_typed",
                                                          "test_sent_token_shape_refused", "test_refusal_writes_nothing"]),
     "ts-guard": (TC_TESTS / "test_no_real_aws.py", ["test_ses_send_is_guarded_by_default", "test_users_table_read_is_guarded_by_default",
