@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t28",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t28.redraw-stale-price-files.md",
+    "group": "OTHER",
+    "vintage_commit": "ba3ee9bd48"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "ba3ee9bd48",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t28.redraw-stale-price-files.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~22",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/redraw_stale.py",
+      "kind": "script",
+      "commit_or_etag": "54dea4c437",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on the worker branch wk-MDPF_DEMQUE-22 (LOCAL). --list was run read only against the served store (141 CUSIPs, 32 stale). --apply was NOT run: it is the issuer's act at the drain, against the real pacer state and queue home. No write to the served store, the real pacer or the real queue.",
+      "artifact_covered_by": [
+        "DQ8-t28-AC1",
+        "DQ8-t28-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_redraw_stale.py",
+      "kind": "test",
+      "commit_or_etag": "54dea4c437",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The three required names present; 3 of 3 PASSED at the committed tree on 2026-10-11 (RDS-OK). Local tmp_path store and pacer JSON only; no network, no S3.",
+      "artifact_covered_by": [
+        "DQ8-t28-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "54dea4c437",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two append-only rows MDPF_DEMQUE-D1-W22-S1 and MDPF_DEMQUE-D1-W22-S2 appended at the end of the fenced array; the 24 earlier rows not re-graded. The surprise-row gate at commit: OK, 2 new row(s) of 26 total checked.",
+      "artifact_covered_by": [
+        "DQ8-t28-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~22/MDPF_DEMQUE.TO-DQ-t28.session_log.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim output of both acceptance invocations and the --list read at the committed tree, with exit codes.",
+      "artifact_covered_by": [
+        "DQ8-t28-AC1",
+        "DQ8-t28-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ8-t28-AC1",
+      "criterion_verbatim": "the three named tests.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R8_CHECKS/dq_t28_tests.py",
+      "output_evidence": "3 passed in 0.70s; RDS-OK; rc=0. Collected and PASSED: test_lists_only_files_with_the_original_three_columns; test_resets_exactly_those_symbols_in_the_pacer_and_enqueues_one_request; test_second_run_with_no_stale_files_enqueues_nothing.",
+      "denominator": "3 of 3 required names PASSED",
+      "status": "PASS",
+      "expect": "RDS-OK"
+    },
+    {
+      "criterion_id": "DQ8-t28-AC2",
+      "criterion_verbatim": "`DQ8-t28-AC2` -- `redraw_stale.py --list` on the REAL served store (S3 read only): its stale set and its total equal the check's own read of the parquet footers (32 of 141 at 2026-10-11 ~04Z).",
+      "method": "live_read",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R8_CHECKS/dq_t28_stale.py",
+      "output_evidence": "independent: stale=32 of 141; tool: stale=32 of 141 / STALE-OK n=32 of 141; rc=0. The tool's own --list (rc=0) printed total 141 and 32 stale rows, first three 00141B204 LCEYX, 00162Q866 AMLP, 01883A107 NFJ; all 32 rows end 2026-06-23.",
+      "denominator": "32 of 141 CUSIP prefixes holding a prices.parquet (stale set equal to the independent footer read, total equal)",
+      "status": "PASS",
+      "expect": "STALE-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted mutant of reset_pacer in .scratch/mutant_run.py (scratch, not committed): the function ignores the named symbols and empties the whole symbols map, then runs the three named tests unchanged against the real module.",
+      "expected": "test_resets_exactly_those_symbols_in_the_pacer_and_enqueues_one_request and test_second_run_with_no_stale_files_enqueues_nothing fail on the reset count; test_lists_only_files_with_the_original_three_columns passes (it does not touch the pacer).",
+      "observed": "MUTANT-RUN pytest rc=1: 2 failed (assert 3 == 2 in the reset test; assert 3 == 0 in the second-run test), 1 passed. Positive control on the unmutated module: 3 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of enqueue() on identical rows and the fixed date 2026-10-11, each into an empty directory under .scratch/det; sha256 of the written request file compared; plus two reads of the served store with redraw_stale.py --list compared byte for byte",
+      "observed": "enqueue sha256 prefix a33aa21ad88e27c6 == a33aa21ad88e27c6 (IDENTICAL); --list output of the second read identical to the first (True)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running redraw_stale.py --apply (the reset of the 32 pacer entries and the enqueue of the request)",
+      "reason": "The order names it the issuer's act at the drain. Not run against the real home ~/.opal/demque; no write to the real pacer.json or queue/."
+    },
+    {
+      "item": "The Yahoo draw of the 32 symbols and the price store write it produces",
+      "reason": "The re-draw reaches the store at the next scheduled draw, which is the issuer's run. No Yahoo or Bloomberg call was made by this worker; no write to the served store, local or S3."
+    },
+    {
+      "item": "The request window of the enqueued request",
+      "reason": "Built as the order specifies (each stale row's own date min and max). Measured on the served store, every stale row ends 2026-06-23; the consequence is carried as a surprise row for the issuer to read before --apply, not changed here."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W22-S1: all 32 stale price files end 2026-06-23, so a redraw request built from each file's own date window ends 2026-06-23, not at the current frontier; the issuer should read this before running --apply.",
+    "MDPF_DEMQUE-D1-W22-S2: demand_queue.upload_ledger derives its repo root four dirname levels up from the file (lands on data/), so its lib.opal_naming import holds only under the PYTHONPATH run_daily_draw.sh exports; redraw_stale.py takes the repo root itself."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~22/MDPF_DEMQUE.TO-DQ-t28.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, surprise-row-gate, to-pipeline-gate, missions-tree-check)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~22 <0.9.0_WK_MDPF_DEMQUE~22@opal.agent>\" -F .scratch/msg1.txt -- redraw_stale.py test file INVESTIGATION_v1.md",
+      "result": "commit-gate: All checks passed; surprise-row-gate OK: 2 new row(s) of 26 total checked; to-pipeline-gate OK; missions-tree-check OK 0 violation(s). WARN (not blocking): one-writer notes the investigation file is the unsuffixed laptop file written from dell1 (WARN until C-QUEUE); client-data-check hashed list absent at C:\\Users\\Test\\.opal (not checked for account ids)."
+    }
+  ]
+}

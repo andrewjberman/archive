@@ -2,6 +2,7 @@
 
     python w6_reads.py R3 <out.json>                 # one owner GET of the history, svc on its native firm (cottonwood)
     python w6_reads.py R45 <request_id> <out.json>   # status-job + analysis-report sections + ONE GET .../original (49financial)
+    python w6_reads.py R6 <request_id> <out.json>    # ONE status-job read with the portal's date opt-in header (49financial)
 
 Reuses f1_svc_run.py's call() and scrub(): the password is read by NAME into memory and never printed or written; the record
 keeps codes, ids and section names only. Submits nothing. ASCII only.
@@ -57,8 +58,19 @@ def main(argv):
                                ("R5 original", "/analysis/requests/" + rid + "/original" + q)):
                 s, r = f1.call("GET", f1.BASE + path, None, h)
                 summary.append(dict(read=name, http=s, **codes(r)))
+        elif mode == "R6":
+            # CTO~DELL2 msg 4152: ONE status-job re-read WITH the portal's date opt-in (portal
+            # contracts/prospect-dates.ts PROSPECT_DATE_HEADER; ops/entry.py job_status reads it).
+            rid = argv[2]
+            hh = dict(h)
+            hh["X-IRPT-Status-Dates"] = "prospect-v1"
+            s, r = f1.call("GET", f1.BASE + "/status/" + rid + "?selected_tenant=49financial", None, hh)
+            d = r.get("data") if isinstance(r, dict) and isinstance(r.get("data"), dict) else {}
+            summary.append(dict(read="R6 status-job with X-IRPT-Status-Dates", http=s, state=d.get("state"),
+                                public_reason_code=d.get("public_reason_code"),
+                                source_date_keys=sorted((d.get("source_dates") or {}).keys())))
         else:
-            raise SystemExit("mode must be R3 or R45")
+            raise SystemExit("mode must be R3, R45 or R6")
     for row in summary:
         f1.say(json.dumps(row))
     result.update(ended_at=f1.stamp(), summary=summary, calls=f1.log)
