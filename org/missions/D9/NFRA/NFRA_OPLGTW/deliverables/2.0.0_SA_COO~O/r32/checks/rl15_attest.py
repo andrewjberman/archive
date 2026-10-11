@@ -72,7 +72,12 @@ def _e2_ok(b: dict, deployed: str) -> bool:
             and b.get("tool_write_class") == "write_files"
             and b.get("bad_quarter_refused") is True and b.get("objects_written") == 0
             and b.get("fee_root_equals_address") is True
-            and b.get("market_update_root_present") is False)
+            and b.get("market_update_root_present") is False
+            # OG-rl-16 A1: CTO C4 (the installed botocore's PutObject input shape carries IfNoneMatch) and the CVO half's
+            # write_files holder count, recorded (an int >= 1, the new tool among them).
+            and b.get("put_object_accepts_if_none_match") is True
+            and isinstance(b.get("write_files_holders"), int) and not isinstance(b.get("write_files_holders"), bool)
+            and b.get("write_files_holders") >= 1)
 
 
 RULES = {"RL15_DIGEST": _served_ok, "RL15G_DIGEST": _grants_ok, "TL1_DIGEST": _tl1_ok, "E2_DIGEST": _e2_ok}
