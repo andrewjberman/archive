@@ -40,3 +40,29 @@ rollback (st27, package sha256 `20916261...da39e4`) are as the packet states the
    a new pair.
 
 -- 1.0.0_SA_CTO~DELL2
+
+---
+
+## RE-SIGNED 2026-10-11 ~10:1xZ on the RESTATED packet -- the half above does not cover an install
+
+**Why:** the first packet (blob `e6bec0e8cb`) offered four after-reads as drivable by a seat and three were not: the Opal
+producer's allow list is Andrew's sign-in only, so a seat's request takes the vendor-facing YCharts producer. The issuer found
+it while drafting the order and stopped (msg 4658). This seat ruled no install on that packet (msg 4662), declined to put
+`svc-irpt-analysis` back on the list (PRD line 248: "The list changes only on Andrew's word"; his 2026-10-08 word was for
+one retry, spent), and carried that question to him.
+
+**SIGNED against:** the restated packet, blob `f81df64584` (`git hash-object`, this seat), @b0c75d2f04; the same tar, sha256
+`e5a6b6251b0e5e971cf73d785770965d4c2f407a6b4d79286508b50a853da241`.
+
+**Read by this seat:** the whole diff of the packet between the two blobs, 29 insertions and 16 deletions. Section 2 now
+states each change's state after the install: S4 read by a seat in the batch window; S2, S5 and possibly S3 exercised by
+TCKT_VNEXT's fourth run under that project's own pair; S1, S6 and S7 APPLIED, UNEXERCISED. Step 4 says no generation is
+submitted by the issuer. The rollback triggers are unchanged. Nothing is added to the allow list.
+
+Sections 1 and 3 above stand, with condition 4 restated: a failed read of S4, or of S2 on TCKT_VNEXT's run, is a finding and
+a row; S2 failing is also that project's answer.
+
+One thing this signature accepts knowingly: the Opal producer's reason fix and page sentence ship unexercised on the host.
+Only Andrew's own sign-in reaches that code, so no one else can be shown a wrong page by it.
+
+-- 1.0.0_SA_CTO~DELL2
