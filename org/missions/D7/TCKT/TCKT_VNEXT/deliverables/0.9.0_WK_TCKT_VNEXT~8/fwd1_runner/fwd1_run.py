@@ -4,9 +4,12 @@ Copied from org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/sa_r1/sa_r1b_run
      `call` and the poll sleeper `SLEEP` are module attributes a test replaces.
   2. the analysis request id is the SERVICE's: the submission answer, else the firm's request list. The client
      token sent as the submission's request_id is NEVER polled, recorded on a ticket or written as a hop request_id.
-  3. hop (e) reads the contract field `stage` (AnalysisRequest.schema.json), bounded by POLL_MAX x POLL_SECONDS.
+  3. (AMENDMENT 1) hop (e) reads the FINISHED REPORT (operation `analysis-report`, GET .../analysis/<REQ id>/sections),
+     never `stage`. Only the refusal codes in NOT_READY_CODES are polled, at most MAX_POLLS x POLL_SECONDS; a bound
+     reached is the named result NOT_READY, never a pass; every other refusal and any non-200 is terminal at once.
   4. a refusal envelope is a refusal at ANY HTTP status.
-  5. hop (f) sends a REQ-<24 hex> id only; hop (g) opens the report from the TICKET's own report_ref.
+  5. hop (f) sends a REQ-<24 hex> id only; hop (g) takes report_ref.request_id FROM THE TICKET and reads the finished
+     report for that id by the same read as hop (e). The pdf route is no longer called.
 This module has NOT been run against the portal by this order; only its fake-HTTP tests have run.
 
 Original header follows.
@@ -147,11 +150,17 @@ SYN = {
 TRIVIAL_BODY = 80
 
 REQ_ID = re.compile(r"^REQ-[0-9a-f]{24}$")
-POLL_MAX = 40          # hop (e): at most this many polls
+MAX_POLLS = 40         # hop (e): at most this many polls of the finished-report read
+POLL_MAX = MAX_POLLS   # the name the first build used; same value
 POLL_SECONDS = 30      # hop (e): seconds between polls
-IN_FLIGHT = ("RECEIVED", "PARSED", "READY", "SUBMITTING")
-DONE_STAGES = ("GENERATED", "RELEASED")
-RESULT_STAGES = ("FAILED", "NEEDS_CORRECTION")
+# The public refusal codes that mean "the report is not generated yet" on the finished-report read. PROPOSED, from
+# the handler read (the refusal table is in this worker's report and row TCKT_VNEXT-D2-W8-S3; the file
+# REPORT_READ_REFUSALS.md could not be written): the issuer's run pair confirms it. Every other code is terminal.
+#   NOT_FOUND  AnalysisUnavailable("ANALYSIS_REPORT_NOT_READY") for a job whose state is not READY (owned_report.py:119),
+#              answered NOT_FOUND by the boundary (ops/entry.py:254).
+#   NOT_READY  ReportBundleAbsent: the report is READY and indexed but its retained bytes are not in the store yet
+#              (owned_report.py:20-29, :137).
+NOT_READY_CODES = frozenset({"NOT_FOUND", "NOT_READY"})
 LIST_PAGES = 5         # request-list pages read (50 rows each), newest first
 SLEEP = time.sleep     # a test replaces this
 _CLIENTS = {}
@@ -700,48 +709,57 @@ def hop_d_analysis(token, tkt, input_id, file_sha, d, named):
     return rid
 
 
-def _finding_codes(inner):
-    out = []
-    for f in (inner.get("findings") or []):
-        if isinstance(f, dict) and isinstance(f.get("code"), str):
-            out.append(f["code"][:60])
-    return out[:5]
+def report_read(token, rid):
+    """One finished-report read (operation `analysis-report`): GET .../analysis/<REQ id>/sections, selected_tenant=FIRM.
+    -> (verdict, code, res, facts). verdict is MET | NOT_READY | TERMINAL.
+      MET       HTTP 200, not a refusal envelope, the id in the body equals the id asked for, >= 1 section.
+      NOT_READY HTTP 200 refusal envelope whose code is in NOT_READY_CODES (the only thing ever polled).
+      TERMINAL  any other refusal code, any non-200, or a 200 body that is not the report asked for.
+    facts carries ids, counts, a byte length and a sha256 prefix only: no section text, no figures."""
+    res = call(token, "GET", ANALYSIS + "/" + rid + "/sections", {"selected_tenant": FIRM})
+    facts = {"status": res.get("status"), "len": res.get("len"), "sha256_prefix": res.get("fp")}
+    why = refusal_of(res)
+    if res.get("status") != 200:
+        return "TERMINAL", why or "HTTP_%s" % res.get("status"), res, facts
+    if why:
+        return ("NOT_READY" if why in NOT_READY_CODES else "TERMINAL"), why, res, facts
+    _, inner = body_of(res)
+    ref = inner.get("request_ref")
+    echoed = ref.get("request_id") if isinstance(ref, dict) else None
+    sections = inner.get("sections")
+    facts["request_id_echoed"] = echoed if isinstance(echoed, str) and REQ_ID.fullmatch(echoed) else None
+    facts["request_id_matches"] = facts["request_id_echoed"] == rid
+    facts["sections"] = len(sections) if isinstance(sections, list) else None
+    if facts["request_id_matches"] and facts["sections"]:
+        return "MET", None, res, facts
+    return "TERMINAL", "REPORT_BODY_NOT_THE_REPORT", res, facts
 
 
 def hop_e_ready(token, rid, e, named):
-    """Poll the owned request read and read the contract field `stage`. -> "OK" | "RESULT" | "FAILED"."""
-    for i in range(POLL_MAX):
-        res = call(token, "GET", REQUESTS + "/" + rid, {"selected_tenant": FIRM})
-        e["status"], e["polls"] = res["status"], i + 1
-        why = refusal_of(res)
-        if why:
-            e["state"], e["refused"], e["reason"] = None, True, why
-            named.append({"hop": "e_ready", "status": res["status"], "reason": why,
-                          "note": "the request read was refused; recorded as refused and not polled again"})
-            return "FAILED"
-        p, inner = body_of(res)
-        stage = inner.get("stage") if inner.get("stage") is not None else p.get("stage")
-        e["state"] = e["stage"] = stage
-        if i % 5 == 0 or stage not in IN_FLIGHT:
-            print("  (e) poll %2d http=%s stage=%r" % (i + 1, res["status"], stage))
-        if stage in DONE_STAGES:
-            e["result"] = {"stage": stage}
+    """Poll the finished-report read. -> "OK" | "NOT_READY" | "FAILED".
+    Only NOT_READY_CODES are polled (MAX_POLLS x POLL_SECONDS); the bound reached is NOT_READY, never a pass."""
+    e["route"] = "analysis-report"
+    for i in range(MAX_POLLS):
+        verdict, code, res, facts = report_read(token, rid)
+        e["status"], e["polls"], e["report"] = res["status"], i + 1, facts
+        if i % 5 == 0 or verdict != "NOT_READY":
+            print("  (e) poll %2d http=%s verdict=%s code=%r" % (i + 1, res["status"], verdict, code))
+        if verdict == "MET":
+            e["result"] = {"result": "REPORT_READ", "sections": facts["sections"]}
             return "OK"
-        if stage in RESULT_STAGES:
-            codes = _finding_codes(inner) or [stage]
-            e["result"] = {"stage": stage, "reason_codes": codes}
-            return "RESULT"
-        if stage not in IN_FLIGHT:
-            named.append({"hop": "e_ready", "status": res["status"],
-                          "reason": "STAGE_ABSENT" if stage is None else "STAGE_UNKNOWN",
-                          "note": "the request read carried no usable contract field `stage`; not polled again"})
+        if verdict == "TERMINAL":
+            e["refused"], e["reason"] = True, code
+            named.append({"hop": "e_ready", "status": res["status"], "reason": code,
+                          "note": "the finished-report read ended terminal; recorded with its code and not polled again"})
             return "FAILED"
-        if i < POLL_MAX - 1:
+        e["last_code"] = code
+        if i < MAX_POLLS - 1:
             SLEEP(POLL_SECONDS)
-    named.append({"hop": "e_ready", "status": e.get("status"), "reason": "STAGE_NOT_TERMINAL",
-                  "note": "stage still %r after %d polls %d s apart; not retried into a pass"
-                          % (e.get("stage"), POLL_MAX, POLL_SECONDS)})
-    return "FAILED"
+    e["outcome"], e["result"] = "NOT_READY", {"result": "NOT_READY", "last_code": e.get("last_code"), "polls": MAX_POLLS}
+    named.append({"hop": "e_ready", "status": e.get("status"), "reason": "NOT_READY",
+                  "note": "code %r on all %d polls %d s apart; the report was not read. Not retried into a pass"
+                          % (e.get("last_code"), MAX_POLLS, POLL_SECONDS)})
+    return "NOT_READY"
 
 
 def hop_f_report(token, tkt, rid, f, named):
@@ -763,7 +781,9 @@ def hop_f_report(token, tkt, rid, f, named):
 
 
 def hop_g_open(token, tkt, g, named):
-    """GET the ticket, take report_ref.request_id FROM THE TICKET, and open the report through the pdf route."""
+    """GET the ticket, take report_ref.request_id FROM THE TICKET, and read the finished report for that id by the
+    same read as hop (e) (one read, not polled). Records status, the id echoed in the body, the section count, the
+    body byte length and a sha256 prefix; no section text, no figures. The pdf route is not called."""
     r1 = call(token, "GET", "/api/scoped/tickets/%s" % tkt)
     g["status"], g["report_opened"] = r1["status"], False
     why = refusal_of(r1)
@@ -780,17 +800,12 @@ def hop_g_open(token, tkt, g, named):
                       "note": "report_ref absent on the ticket, or its request_id is not REQ-<24 hex>"})
         return False
     g["report_ref_request_id"] = ref_rid
-    r2 = call(token, "GET", REQUESTS + "/" + ref_rid + "/pdf", {"selected_tenant": FIRM})
-    g["second_status"] = r2["status"]
-    _, inner = body_of(r2)
-    sha = inner.get("sha256")
-    g["pdf"] = {"status": r2["status"], "content_type": r2.get("content_type"), "len": r2["len"],
-                "sha256_prefix": (sha[:16] if isinstance(sha, str) else r2["fp"]),
-                "byte_length": inner.get("byte_length") if isinstance(inner.get("byte_length"), int) else None}
-    why2 = refusal_of(r2)
-    print("  (g) ticket http=%s pdf http=%s refused=%r" % (r1["status"], r2["status"], why2))
-    if why2:
-        named.append({"hop": "g_open", "status": r2["status"], "reason": why2, "note": "the report did not open"})
+    verdict, code, r2, facts = report_read(token, ref_rid)
+    g["second_status"], g["report"] = r2["status"], facts
+    print("  (g) ticket http=%s report http=%s verdict=%s code=%r" % (r1["status"], r2["status"], verdict, code))
+    if verdict != "MET":
+        named.append({"hop": "g_open", "status": r2["status"], "reason": code or verdict,
+                      "note": "the finished report did not open from the ticket's report_ref"})
         return False
     g["report_opened"] = True
     return True
@@ -980,10 +995,10 @@ def main(argv):
             {"hop": "b_ticket", "call": "POST /api/scoped/tickets", "status": 0, "ticket_id": "", "source": ""},
             {"hop": "c_claim", "call": "POST /api/scoped/tickets/{ticketId}/claim", "status": 0},
             {"hop": "d_analysis", "call": "POST /api/scoped/investor-reporting/analysis", "status": 0, "request_id": ""},
-            {"hop": "e_ready", "call": "GET /api/scoped/investor-reporting/analysis/requests/{requestId}",
-             "status": 0, "polls": 0, "state": ""},
+            {"hop": "e_ready", "call": "GET /api/scoped/investor-reporting/analysis/{requestId}/sections",
+             "status": 0, "polls": 0},
             {"hop": "f_report", "call": "POST /api/scoped/tickets/{ticketId}/report", "status": 0},
-            {"hop": "g_open", "call": "GET /api/scoped/tickets/{ticketId}; GET .../analysis/requests/{requestId}",
+            {"hop": "g_open", "call": "GET /api/scoped/tickets/{ticketId}; GET .../analysis/{requestId}/sections",
              "status": 0, "report_opened": False},
         ],
         "named_failures": [], "journey_ticket": None,
