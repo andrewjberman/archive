@@ -1,5 +1,5 @@
 """TCKT_VNEXT FWD-1 seat-arm runner, REPAIRED for round 2 (cell R2-rn-1, 0.9.0_WK_TCKT_VNEXT~8).
-Copied from org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/sa_r1/sa_r1b_run.py and repaired:
+Copied from the round-1 SA-r-1b runner and repaired:
   1. importable with no side effect: boto3/jwt/clients are built on first use, never at import; the HTTP layer
      `call` and the poll sleeper `SLEEP` are module attributes a test replaces.
   2. the analysis request id is the SERVICE's: the submission answer, else the firm's request list. The client
@@ -14,8 +14,12 @@ Copied from org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/sa_r1/sa_r1b_run
      cleanup completes the tickets FIRST, WAITS until the token's exp has passed, and only then deletes the PROFILE
      row (deleting it earlier would WIDEN the token) and reads it back absent, on every stop path after the row was
      written; a REQUIRED --expect-irpt-status-sha precheck stops before any write; the data-refresh zero-call read is
-     VOID on zero streams searched or a silent positive control; two report-route arms (malformed id refused 400,
+     VOID on zero active log streams or a silent positive control; two report-route arms (malformed id refused 400,
      issued id stored); --close-ticket completes an old test ticket; the trace header names this run.
+  7. (AMENDMENT 3) the trace path is the REQUIRED argument --trace-out: the runner writes its trace to that one file
+     only, one JSON object for this run, and writes nothing else to disk. The zero-call read's stream denominator is
+     streams_active_in_window, counted from describe_log_streams (every page); the logs API field that lists the
+     streams a filter searched is never read, because it comes back empty.
 This module has NOT been run against the portal by this order; only its fake-HTTP tests have run.
 
 Original header follows.
@@ -44,7 +48,7 @@ real CloudFront host; a direct lambda invoke is deliberately NOT used (CTO IRPT_
    detector fires on: both arms 2xx AND identical fingerprints AND length past a trivial floor.
 
 Usage: python fwd1_run.py --read27 <AC1 result> --exp-minutes N --expect-irpt-status-sha <prefix>
-           --run-label <label> --pair <pair path and pin> --executor <serial>
+           --run-label <label> --pair <pair path and pin> --executor <serial> --trace-out <path>
            [--advisor-opaque adv-04b85b8aefda] [--close-ticket <id>]...
 """
 from __future__ import annotations
@@ -138,8 +142,7 @@ SYN_ATTACHMENT = {
 
 ROOT = Path(__file__).resolve().parents[8]
 CENSUS = ROOT / "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~6/SA_ROUTE_CENSUS.json"
-TRACE = ROOT / "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_RUN/sa_r1b_trace.json"
-MY_TRACE = ROOT / "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/sa_r1/sa_r1b_trace.json"
+TRACE_OUT = None   # the one file the trace is written to: set from --trace-out by main(), never a constant path
 HOLDINGS = ROOT / "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/aapl-vnq-12.03.csv"
 
 SYN = {
@@ -1032,9 +1035,9 @@ def cleanup(token, trace, exp_unix, close_tickets=()):
     return trace
 
 
-def _scan_group(logs, group, pattern, start_unix, end_unix):
-    """filter_log_events over a group and window, all pages -> (matching events, log streams searched)."""
-    n, streams, tok = 0, 0, None
+def _count_matches(logs, group, pattern, start_unix, end_unix):
+    """filter_log_events over a group and window, EVERY page -> the number of matching events."""
+    n, tok = 0, None
     while True:
         kw = {"logGroupName": group, "filterPattern": pattern,
               "startTime": start_unix * 1000, "endTime": end_unix * 1000}
@@ -1042,33 +1045,56 @@ def _scan_group(logs, group, pattern, start_unix, end_unix):
             kw["nextToken"] = tok
         r = logs.filter_log_events(**kw)
         n += len(r.get("events", []))
-        streams += len(r.get("searchedLogStreams", []))
         tok = r.get("nextToken")
         if not tok:
-            return n, streams
+            return n
+
+
+def _streams_active_in_window(logs, group, since_unix):
+    """The denominator: how many log streams of the group had an event at or after `since_unix` (the token's iat).
+    describe_log_streams ordered by last event time, EVERY page read; a stream with no last event time is not active."""
+    n, tok = 0, None
+    since_ms = since_unix * 1000
+    while True:
+        kw = {"logGroupName": group, "orderBy": "LastEventTime", "descending": True}
+        if tok:
+            kw["nextToken"] = tok
+        r = logs.describe_log_streams(**kw)
+        for st in r.get("logStreams", []):
+            last = st.get("lastEventTimestamp")
+            if isinstance(last, (int, float)) and last >= since_ms:
+                n += 1
+        tok = r.get("nextToken")
+        if not tok:
+            return n
 
 
 def data_refresh_zero_calls(trace, start_unix, end_unix):
-    """D4: prove ZERO data-refresh calls for the filer over iat..exp, from its own logs. Recorded ZERO_CALLS_PROVEN only
-    when streams searched > 0 AND the positive control over the ticket API's log group found the filer >= 1 time AND
-    the data-refresh matches == 0. Zero streams searched, or a control that finds nothing, is ZERO_CALL_VOID."""
+    """D4: prove ZERO data-refresh calls for the filer over iat..exp, from its own logs. The denominator is
+    streams_active_in_window (log streams whose last event is at or after iat). Recorded ZERO_CALLS_PROVEN only when
+    the data-refresh group has active streams > 0 AND the positive control over the ticket API's log group found the
+    filer >= 1 time AND the data-refresh matches == 0. Zero active streams, or a control that finds nothing, is
+    ZERO_CALL_VOID."""
     print("== zero data-refresh calls, from the log group ==")
     logs = _client("logs")
     pattern = '"%s"' % FILER
     out = {"claim": "measured", "log_group": DATA_REFRESH_LOG_GROUP,
            "window": {"from": iso(dt.datetime.fromtimestamp(start_unix, dt.timezone.utc)),
                       "to": iso(dt.datetime.fromtimestamp(end_unix, dt.timezone.utc))},
-           "query": "filter_log_events logGroupName=%s filterPattern=%s startTime=%d endTime=%d"
+           "query": "filter_log_events logGroupName=%s filterPattern=%s startTime=%d endTime=%d (all pages); "
+                    "describe_log_streams orderBy=LastEventTime (all pages), active = last event >= iat"
                     % (DATA_REFRESH_LOG_GROUP, pattern, start_unix * 1000, end_unix * 1000)}
     try:
-        n, streams = _scan_group(logs, DATA_REFRESH_LOG_GROUP, pattern, start_unix, end_unix)
-        c_n, c_streams = _scan_group(logs, TICKET_LOG_GROUP, pattern, start_unix, end_unix)
-        out["match_count"], out["searched_log_streams"] = n, streams
+        active = _streams_active_in_window(logs, DATA_REFRESH_LOG_GROUP, start_unix)
+        n = _count_matches(logs, DATA_REFRESH_LOG_GROUP, pattern, start_unix, end_unix)
+        c_active = _streams_active_in_window(logs, TICKET_LOG_GROUP, start_unix)
+        c_n = _count_matches(logs, TICKET_LOG_GROUP, pattern, start_unix, end_unix)
+        out["match_count"], out["streams_active_in_window"] = n, active
         out["control"] = {"log_group": TICKET_LOG_GROUP, "same_filter": True, "found": c_n,
-                          "searched_log_streams": c_streams}
+                          "streams_active_in_window": c_active}
         void = []
-        if streams == 0:
-            void.append("streams searched is 0 on %s" % DATA_REFRESH_LOG_GROUP)
+        if active == 0:
+            void.append("streams_active_in_window is 0 on %s" % DATA_REFRESH_LOG_GROUP)
         if c_n < 1:
             void.append("the positive control found the filer %d time(s) in %s, needs >= 1" % (c_n, TICKET_LOG_GROUP))
         if n > 0:
@@ -1077,8 +1103,8 @@ def data_refresh_zero_calls(trace, start_unix, end_unix):
             out["verdict"], out["void_reasons"] = "ZERO_CALL_VOID", void
         else:
             out["verdict"] = "ZERO_CALLS_PROVEN"
-        print("  %s: %d match(es), %d stream(s) searched; control %s: %d found -> %s"
-              % (DATA_REFRESH_LOG_GROUP, n, streams, TICKET_LOG_GROUP, c_n, out["verdict"]))
+        print("  %s: %d match(es), %d active stream(s); control %s: %d found, %d active -> %s"
+              % (DATA_REFRESH_LOG_GROUP, n, active, TICKET_LOG_GROUP, c_n, c_active, out["verdict"]))
     except Exception as e:  # noqa: BLE001 -- a failed retrieval returns a VALUE; say so, never read it as zero
         out["match_count"] = None
         out["verdict"] = "UNREAD -- %s: %s" % (type(e).__name__, str(e)[:160])
@@ -1126,33 +1152,13 @@ def limb3_non_500(token):
 
 
 def save(trace):
-    """Run 2 is a SECTION: run 1's committed object stays exactly as the issuer committed it (@be24188c7a)."""
-    for p in (TRACE, MY_TRACE):
+    """Write this run's trace, as ONE JSON object, to the --trace-out file and nowhere else."""
+    if TRACE_OUT is None:
+        raise RuntimeError("save() before main() set the --trace-out path")
+    p = Path(TRACE_OUT)
+    if not p.parent.exists():
         p.parent.mkdir(parents=True, exist_ok=True)
-        doc = {}
-        if p.exists():
-            try:
-                doc = json.loads(p.read_text(encoding="utf-8"))
-            except ValueError:
-                doc = {}
-        if not isinstance(doc, dict):
-            doc = {}
-        if doc.get("run_id") and doc.get("run_id") != trace.get("run_id"):
-            # Allocate the NEXT FREE run_N, reusing the slot this same run already owns. Keying every
-            # later run to a fixed "run_2" made run 3 overwrite run 2's section in the working file
-            # (run 2 was recovered from commit e2c7f7b25a). A record is still a record: do not clobber it.
-            slot = next((k for k in doc
-                         if k.startswith("run_") and isinstance(doc[k], dict)
-                         and doc[k].get("run_id") == trace.get("run_id")), None)
-            if slot is None:
-                n = 2
-                while "run_%d" % n in doc:
-                    n += 1
-                slot = "run_%d" % n
-            doc[slot] = trace
-        else:
-            doc = dict(doc, **trace)
-        p.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
+    p.write_text(json.dumps(trace, indent=1) + "\n", encoding="utf-8")
 
 
 def _exp_minutes_arg(text):
@@ -1184,6 +1190,8 @@ def build_parser():
     ap.add_argument("--run-label", required=True, type=_nonblank, help="names this run in the trace, e.g. R2-tr-1")
     ap.add_argument("--pair", required=True, type=_nonblank, help="the pair's path and pin, as one string")
     ap.add_argument("--executor", required=True, type=_nonblank, help="the executing seat's serial")
+    ap.add_argument("--trace-out", required=True, type=_nonblank,
+                    help="the one file the trace is written to (created if absent; refused if it already holds content)")
     ap.add_argument("--close-ticket", action="append", default=[], metavar="TICKET_ID", type=_nonblank,
                     help="an old test ticket to complete in cleanup step 1 if it is in_progress and assigned to the filer; "
                          "repeatable")
@@ -1223,7 +1231,14 @@ def build_trace(a, run_id):
 
 
 def main(argv):
+    global TRACE_OUT
     a = build_parser().parse_args(argv)
+    out_path = Path(a.trace_out)
+    if out_path.exists() and (out_path.is_dir() or out_path.stat().st_size > 0):
+        print("STOP: --trace-out %s already holds content; a trace is one run's record and is never appended to or "
+              "overwritten. Nothing was done." % a.trace_out)
+        return 2
+    TRACE_OUT = out_path
     run_id = a.run_label + "-" + iso()
     trace = build_trace(a, run_id)
 
@@ -1295,8 +1310,7 @@ def main(argv):
     finally:
         cleanup(token, trace, exp, a.close_ticket)
         data_refresh_zero_calls(trace, iat, exp)
-    print("OK: trace at %s" % TRACE.relative_to(ROOT))
-    print("OK: own copy at %s" % MY_TRACE.relative_to(ROOT))
+    print("OK: trace at %s" % TRACE_OUT)
     return 0 if trace["cleanup"].get("row_removed_read_back_absent") else 1
 
 
