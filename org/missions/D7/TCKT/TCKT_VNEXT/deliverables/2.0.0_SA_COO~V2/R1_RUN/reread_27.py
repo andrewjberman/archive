@@ -30,6 +30,10 @@ SERVED_RELEASES = {
 TICKET_OK = {
     "04f5727bebf83e7c19493f944bc1c8ed2f7a28404b5137d6cf2cb32b699f9a38",  # V12 (contains SA-k-1)
     "670686262068808fcf1d3e0c05ce8e92e32441f9382efeb9361c789ab19457a8",  # R13 (V12 + AR-v-21 + OW-l-1)
+    # R2-rr-2 (R13 + the report-id shape check), pin a366ce52ec, deployed 2026-10-11T04:19:14Z under the signed pair
+    # (R2_RR2_DEPLOY_PACKET_20261011.md @39ccf5774b, CTO half @51c5e7538b). Admitted on a measured read, row TCKT_VNEXT-D2-S28:
+    # git diff --numstat 5a36586b5f a366ce52ec on the handler reads 4 added / 0 removed, so every byte of R13 is still there.
+    "ca3be34307f70079e48c4a26d1f711e47318285f2cf2722fdf0cfdcbd637eade",
 }
 
 

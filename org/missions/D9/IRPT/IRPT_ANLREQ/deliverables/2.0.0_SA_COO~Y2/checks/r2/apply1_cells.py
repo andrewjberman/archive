@@ -23,7 +23,11 @@ ROUTE = "GET /api/scoped/investor-reporting/analysis/requests/{requestId}/origin
 # AMENDMENT 5: reads 3 and 4 come from the laptop's re-run on the fresh request (dell2 cannot decrypt irpt-requests); read 5 is
 # graded on release 4's ticket-bound run (decomposition R2 AMENDMENT 3, row IRPT_ANLREQ-D2-S15) and stays not-PASS until then.
 LAPTOP = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release1/Y1_laptop_reads_3a_4_5_rerun_result.json"
-READS = [str(i) for i in range(0, 8)]  # AMENDMENT 2: 6 = REQ-5e4149d2 served (no RetentionRefused), 7 = per-member diff exactly reporting_policies.json
+# AMENDMENT 11 (CTO msg 4240): read "5" is RE-HOMED, text and logic unchanged, to release 4's apply order as criterion REL4-READ5 below. AC1 is
+# graded on the reads this order's own act made. The read still has to pass; only the order that owes it changed.
+READS = [str(i) for i in range(0, 8) if i != 5]  # 6 = REQ-5e4149d2 served (no RetentionRefused), 7 = the per-member diff
+READ5_TEXT = ("release 1 read 5: ONE ticket-bound request reaches READY and analysis-request-pdf behaves as before on it "
+              "(TO-APPLY-Y1 step 6; decomposition R2 AMENDMENT 3: graded on release 4's run)")
 
 
 def live_sha():
@@ -62,7 +66,7 @@ def main():
         print("%s FAIL" % (cid or "APPLY1"))
         sys.exit(1)
 
-    if cid not in ("APPLY1-AC1", "APPLY1-AC2", "APPLY1-AC3"):
+    if cid not in ("APPLY1-AC1", "APPLY1-AC2", "APPLY1-AC3", "REL4-READ5"):
         fail("unknown criterion %r" % cid)
     f = root / F
     if not f.is_file():
@@ -77,6 +81,12 @@ def main():
         if lr.get("5") is not True:
             reads["5"] = "DEFERRED-RELEASE4"
     all_pass = all(reads.get(r) == "PASS" for r in READS)
+    if cid == "REL4-READ5":
+        print(READ5_TEXT)
+        if reads.get("5") != "PASS":
+            fail("read 5 is %r, not PASS" % reads.get("5"))
+        print("%s PASS" % cid)
+        return
 
     if cid == "APPLY1-AC1":
         if not all_pass:
