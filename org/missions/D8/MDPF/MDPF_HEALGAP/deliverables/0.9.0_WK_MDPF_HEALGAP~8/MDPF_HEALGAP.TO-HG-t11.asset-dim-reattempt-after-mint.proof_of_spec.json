@@ -37,7 +37,7 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_r3_rules.py --t11",
       "output_evidence": "T11-OK new_rule=bd_asset_dim_reattempt schedule=cron(40 22 ? * MON-FRI *) existing=bd_asset_dim_pipeline cron(10 22 ? * MON-FRI *)",
-      "denominator": "1 of 1 rule other than bd_asset_dim_pipeline targeting module.asset_dim_trigger.function_arn (want exactly 1); rc=0",
+      "denominator": "1 of 1 rule other than bd_asset_dim_pipeline targeting module.asset_dim_trigger.function_arn (want exactly 1); rc=0; repeated twice, identical",
       "status": "PASS",
       "expect": "T11-OK"
     },
@@ -46,23 +46,22 @@
       "criterion_verbatim": "the document's own shell, run with the instance's tools stubbed: guard read OK -> the pull is not started, the shutdown is armed, rc 0; guard read failed (rc 1 and 2) -> the pull runs.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t11_assetdim.py --ssm",
-      "output_evidence": "SSMGUARD-OK guard between staging and pull; exists -> skip + shutdown armed; read failed (rc 1,2) -> download runs. CONTROL (same harness, always-skip mutant -eq 0 changed to -ge 0): HG_T11_DOC=.scratch/mutant_always_skip.json prints SSMGUARD-OK rc=0 while guard_rc=1 and guard_rc=2 both give pull_ran=False. DIRECT MEASURE of the real document: guard_rc=1 and guard_rc=2 each run RUNUSER ... pull_bd_asset_dim_rest.py pull.",
-      "denominator": "2 arms of 2 evaluated by the checker (guard read OK; guard read failed rc 1 and 2); the failed-read arm is NON-DISCRIMINATING: 0 of 1 always-skip mutant fired on it; the skip arm discriminates: 1 of 1 no-shutdown mutant fired",
-      "status": "FAIL",
-      "status_reason": "The invocation's failed-read arm tests only the substring pull_bd_asset_dim_rest.py in the stub calls log, which the staging aws s3 cp line writes before any guard runs, so it is always true. The always-skip mutant passes SSMGUARD-OK. The real document meets the bar on direct measure, but the criterion's own invocation does not evidence it. Surprise MDPF_HEALGAP-D1-W8-S1 (BLOCKING). The checker is outside this order's grant and is not edited.",
+      "output_evidence": "SSMGUARD-OK guard between staging and pull; exists -> skip + shutdown armed; read failed (rc 1,2) -> download runs; rc=0; repeated twice, identical",
+      "denominator": "3 of 3 arms evaluated by the checker PASS (guard read OK -> no pull, shutdown armed, rc 0; guard read FAILED rc 1 -> pull runs; guard read FAILED rc 2 -> pull runs); rc=0",
+      "status": "PASS",
       "expect": "SSMGUARD-OK"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "always-skip mutant (.scratch/mutant_always_skip.json): the guard test changed from -eq 0 to -ge 0, so a failed read (rc 1, 2) skips the pull; HG3-t11-AC2 must fail on it",
+      "description": "always-skip mutant (.scratch/mutant_always_skip.json, uncommitted): the guard decision at line 83 of the document changed from `if [ $GUARD_RC -eq 0 ]; then` to `if true; then`, so a failed read (rc 1, 2) skips the pull. Run through the corrected HG3-t11-AC2 checker: `python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t11_assetdim.py --ssm /c/Dev/wk_healgap_r3_8/.scratch/mutant_always_skip.json`. HG3-t11-AC2 must fail on it.",
       "expected": "SSMGUARD-BAD (failed-read arm reports the pull did not run)",
-      "observed": "SSMGUARD-OK rc=0; direct measure guard_rc=1 pull_ran=False, guard_rc=2 pull_ran=False. Control mutant (skip-path shutdown removed) printed SSMGUARD-BAD rc=1, so the skip arm fires.",
-      "status": "DID-NOT-FIRE (deliverable INVALID)"
+      "observed": "SSMGUARD-BAD guard read FAILED (rc 1) but the pull did not run (a failed read was taken as 'exists'); guard read FAILED (rc 2) but the pull did not run (a failed read was taken as 'exists') -- rc=1. The mutant fires.",
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "two same-input runs each of hg_t11_assetdim.py --ssm and hg_r3_rules.py --t11; last lines compared",
-      "observed": "run 1 == run 2 for both: SSMGUARD-OK ... rc=0 and T11-OK ... rc=0",
+      "method": "two same-input runs each of hg_r3_rules.py --t11 and hg_t11_assetdim.py --ssm; last lines compared",
+      "observed": "run 1 == run 2 for both: T11-OK ... rc=0 and SSMGUARD-OK ... rc=0",
       "status": "STABLE"
     }
   },
@@ -76,12 +75,12 @@
       "reason": "order BOUNDS: NOT edited by this cell; the role is shared by 7 triggers"
     },
     {
-      "item": "the HG3-t11-AC2 failed-read arm is graded by the document's behaviour measured directly, not by the criterion's invocation",
-      "reason": "the checker cannot fail its negative arm (surprise MDPF_HEALGAP-D1-W8-S1); the checker is outside grant and was not weakened or edited"
+      "item": "the surprise row MDPF_HEALGAP-D1-W8-S1 is not edited (append-only); its disposition stays UNDER_INVESTIGATION in the channel",
+      "reason": "the defect was in the checker, corrected by the issuer at 8e197ccf1e (the failed-read arm tests the pull call); the row's disarm owner 2.0.0_SA_COO~G1 holds the disposition"
     }
   ],
   "surprises": [
-    "MDPF_HEALGAP-D1-W8-S1: HG3-t11-AC2's checker cannot fail its failed-read arm (the always-skip mutant prints SSMGUARD-OK); BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~G1."
+    "MDPF_HEALGAP-D1-W8-S1: HG3-t11-AC2's checker could not fail its failed-read arm (the always-skip mutant printed SSMGUARD-OK); corrected by the issuer at 8e197ccf1e; the corrected checker now fires on the always-skip mutant (see controls.mutant)."
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~8/MDPF_HEALGAP.TO-HG-t11.session_log.txt",
   "compiler_tools": [
@@ -93,7 +92,7 @@
     {
       "tool": "hg_t11_assetdim.py",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t11_assetdim.py --ssm",
-      "result": "SSMGUARD-OK rc=0; negative arm non-discriminating (mutant always-skip DID-NOT-FIRE)"
+      "result": "SSMGUARD-OK rc=0; always-skip mutant SSMGUARD-BAD rc=1"
     }
   ]
 }
