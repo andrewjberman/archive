@@ -35,10 +35,10 @@ So the set the rule removes and the set that poses the stated risk **overlap in 
 ## 1. THE REQUIRED LINES
 
 ```
-REMOVED: arn:aws:s3:::opal-data-smartx LIVE-READ: (404) Not Found
-REMOVED: arn:aws:s3:::opal-data-smartx/* LIVE-READ: (404) Not Found -- key pattern on the same absent bucket
-REMOVED: arn:aws:s3:::opal-code-smartx LIVE-READ: (404) Not Found
-REMOVED: arn:aws:s3:::opal-code-smartx/* LIVE-READ: (404) Not Found -- key pattern on the same absent bucket
+REMOVED: arn:aws:s3:::opal-data-smartx LIVE-READ: NoSuchBucket
+REMOVED: arn:aws:s3:::opal-data-smartx/* LIVE-READ: NoSuchBucket
+REMOVED: arn:aws:s3:::opal-code-smartx LIVE-READ: NoSuchBucket
+REMOVED: arn:aws:s3:::opal-code-smartx/* LIVE-READ: NoSuchBucket
 REMOVED: arn:aws:secretsmanager:us-east-2:313476888478:secret:opal/smartx/config-* LIVE-READ: ResourceNotFoundException
 REMOVED: arn:aws:dynamodb:us-east-2:313476888478:table/opal-news-articles LIVE-READ: ResourceNotFoundException
 CONTROL: arn:aws:s3:::opal-data-news-v2 FOUND
@@ -63,6 +63,31 @@ us-east-1. **And each regional absence was corroborated by a denominator, not ju
 `list-secrets --region us-east-2` returns **0 secrets**; `list-tables --region us-east-2` returns
 **0 tables**. A wildcard ARN (`...config-*`) cannot be settled by one `describe`; the empty enumeration is
 what makes it an absence.
+
+**ONE INSTRUMENT CORRECTION, MADE AT AC1 AND WORTH THE READ.** The four S3 lines first recorded
+`LIVE-READ: (404) Not Found` -- the verbatim `head-bucket` render. **That is an HTTP status line, not an
+error code**, and the order's own step-1 template asks for `<NoSuchBucket | ResourceNotFoundException |
+the exact error code>`. The cause is structural: **`head-bucket` is a HEAD request, so the response has
+no body and S3 transmits no error code at all** -- the CLI prints the bare status because that is all it
+received. Writing `NoSuchBucket` on the strength of a 404 would have been an INFERENCE presented as a
+read. So each of the two buckets was re-measured with **`get-bucket-location`**, which is a GET and does
+transmit the code: both returned `rc=254 NoSuchBucket`, and the positive control
+(`get-bucket-location --bucket opal-data-news-v2`, run as its own invocation) returned `rc=0` with a
+`LocationConstraint`. The token in those lines is now MEASURED on a call that can express it.
+
+**The two `/*` lines are key patterns on those same two absent buckets** -- that annotation used to sit
+on the lines themselves and was moved here, because a machine-read line should end in its value.
+**A key pattern has no existence of its own:** its read is its bucket's, which is why no separate call
+is reported for it and why the count is four ARNs over two buckets.
+
+> **GRAIN: `REMOVED:` HERE MEANS "REMOVED BY THE CELL'S RULE", WHICH IS WHAT PHASE A MEASURES.** It is
+> not a claim about what PHASE B applied, and for target 4 the two differ: amendment A3-r7 @`12e053a1de`
+> **HELD** `arn:aws:dynamodb:us-east-2:...:table/opal-news-articles` and sent it to the CTO as a product
+> call, so the rule removes it and the act did not. Conversely the act removed
+> `arn:aws:s3:::codebuild-semantic-clustering-artifacts/*`, which this list does NOT carry, precisely
+> because the rule could not reach it -- that is this survey's central finding, and A3-r7 is what it
+> produced. **`POST_APPLY_narrow.md` is the authority on what moved in the world; this file is the
+> authority on what the rule yields.** Neither was rewritten to look like the other.
 
 ## 2. TARGETS 1 AND 2 -- `opal-smartx-lambda-role`, both DELETE, for different reasons
 
