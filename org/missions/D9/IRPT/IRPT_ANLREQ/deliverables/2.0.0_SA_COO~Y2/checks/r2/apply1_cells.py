@@ -17,7 +17,7 @@ from pathlib import Path
 
 F = "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_anlreq_r1/APPLY-Y1_after_reads.json"
 FN = "irpt-status"
-BUILT = "VC/r14kaXm6FqaZOOFm3fT+8qngsyGI5Yr7U+DgYx64="  # AMENDMENT 4: pair REVISION 4 at 287b105600 (rev 3 t6OJTCcm, rev 2 BjUZjt2o)
+BUILT = "6idtFvAmYk73wJdr5DPRIyEPrLeWgzjlqbdNr5f1wxc="  # AMENDMENT 8: pair REVISION 6 at 5c35a6f9f9, IB-pr-416 one-tree build (rollback rev 3)
 ROLLBACK = "t6OJTCcmOnWGVl8iglcvfGoYb3PbPJqJYqsSgJBpGdI="  # AMENDMENT 4: revision 3 is the rollback of revision 4
 ROUTE = "GET /api/scoped/investor-reporting/analysis/requests/{requestId}/original"
 # AMENDMENT 5: reads 3 and 4 come from the laptop's re-run on the fresh request (dell2 cannot decrypt irpt-requests); read 5 is
