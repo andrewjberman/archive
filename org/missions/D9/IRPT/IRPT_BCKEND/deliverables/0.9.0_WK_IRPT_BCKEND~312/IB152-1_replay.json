@@ -1,0 +1,602 @@
+{
+ "arm_count": 53,
+ "arms": [
+  {
+   "detail": "DynamoAcceptance.accept over an in-memory store: live and built both write 2 transactions (one request row, one job row) and both records carry no commentary_requested (read back through get: identical). Compared with the AR-y-37 member acting_principal_id removed from the key list (the next arm shows it). Through the real SubmissionService (submit -> lookup -> accept -> dispatch): calls ['returned'], queue sends 1 / 1, transactions 2 / 2, stored record identical.",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "submission.py",
+    "acceptance.py",
+    "submission_service.py"
+   ],
+   "name": "irpt-ycharts-generate: a submission WITHOUT commentary_requested is accepted and recorded identically (live vs built)",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "identical"
+  },
+  {
+   "detail": "live record keys ['accepted_at', 'browser_sha256', 'composition_ref', 'identity', 'owner']; built record keys ['accepted_at', 'acting_principal_id', 'browser_sha256', 'composition_ref', 'identity', 'owner']. Built passes acting_principal_id when its tree's accept takes it (the keyword is REQUIRED in the built acceptance.py).",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "acceptance.py"
+   ],
+   "name": "irpt-ycharts-generate: full record of a submission WITHOUT the member: the one key built adds is acting_principal_id (AR-y-37, commit 2f7cc7be42, earlier than IB-pr-455)",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "member_true: live SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (0 writes); built accepted, record carries commentary_requested=True as sent, read back through get the same (2 writes); member_false: live SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (0 writes); built accepted, record carries commentary_requested=False as sent, read back through get the same (2 writes); through the real SubmissionService the same: live refuses before any write or send; built accepts and sends the queue message once.",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-ycharts-generate: a submission WITH commentary_requested (true, false) is refused by live and accepted by built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "live refuses all 4 as ['SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD'] (the member is unknown to it); built refuses all 4 as ['SubmissionRefused:COMMENTARY_REQUESTED']. Neither writes anything.",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "submission.py"
+   ],
+   "name": "irpt-ycharts-generate: a wrong-typed commentary_requested (string, integer, null, list) is refused by BOTH, nothing written; the reason code differs",
+   "negative_control": false,
+   "refused_by_both": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "first and second call: live returned / returned, built returned / returned; transactions after the replay 2 / 2 (unchanged).",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-ycharts-generate: the same submission WITHOUT the member sent twice: the replay returns the prior record and writes nothing (live vs built)",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "identical"
+  },
+  {
+   "detail": "first call without the member, second with it. LIVE: first call returned, second call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (the member is refused outright whenever it is sent); BUILT: first call returned, second call IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID, transactions 2 after the first and 2 after the second (the second writes nothing).",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-ycharts-generate: same_request_id_different_member (member_added)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "first call with the member, second without it. LIVE: first call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, second call returned (the member is refused outright whenever it is sent); BUILT: first call returned, second call IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID, transactions 2 after the first and 2 after the second (the second writes nothing).",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-ycharts-generate: same_request_id_different_member (member_dropped)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "first call with true, second with false. LIVE: first call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, second call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (the member is refused outright whenever it is sent); BUILT: first call returned, second call IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID, transactions 2 after the first and 2 after the second (the second writes nothing).",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-ycharts-generate: same_request_id_different_member (member_true_then_false)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "stored record without the member, read through get and through lookup(same body): identical on live and built; lookup(body WITH the member): live SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, built IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID.",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-ycharts-generate: same_request_id_different_member against a record accepted BEFORE any release (no member stored): get and lookup of the same body identical; lookup with the member differs",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "live calls ['returned', 'SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD'] (queue sends 1); built calls ['returned', 'IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID'] (queue sends 1, transactions 2): the second call is refused CHANGED_INPUTS_SAME_REQUEST_ID (an IdempotencyConflict, public_reason_code INVALID_INPUT) and sends nothing.",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "submission.py",
+    "acceptance.py",
+    "submission_service.py"
+   ],
+   "name": "irpt-ycharts-generate: same_request_id_different_member through the real SubmissionService (member_added): what a caller sees",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "live calls ['SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD', 'returned'] (queue sends 1); built calls ['returned', 'IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID'] (queue sends 1, transactions 2): the second call is refused CHANGED_INPUTS_SAME_REQUEST_ID (an IdempotencyConflict, public_reason_code INVALID_INPUT) and sends nothing.",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "submission.py",
+    "acceptance.py",
+    "submission_service.py"
+   ],
+   "name": "irpt-ycharts-generate: same_request_id_different_member through the real SubmissionService (member_dropped): what a caller sees",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "answers: {\"returned\": {\"accepted_at\": 100, \"identity\": {\"destination_policy_revision\": \"v1\", \"immutable\": true, \"ingestion_gate_revision\": \"v1\", \"request_id\": \"REQ-000000000000000000000000\", \"revision\": 1, \"tenant_firm_id\": \"synthetic-firm-one\"}}}. The answer does not depend on the member, and live and built answer alike.",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "OwnedRequestReader.py"
+   ],
+   "name": "irpt-ycharts-generate: reader OwnedRequestReader.read over a stored record WITHOUT the member and WITH it (true, false): the answer is the same, live and built",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "identical"
+  },
+  {
+   "detail": "hasattr(resident_worker, 'send_ready_if_ticketed') and hasattr(..., 'producer_for') are False on both trees: the staged row pins resident_worker.py at the live bytes, so this release does not move the gate.",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "resident_worker.py"
+   ],
+   "name": "irpt-ycharts-generate: the zip's resident_worker.py is the OLD one (no send_ready_if_ticketed, no producer_for): the worker gate IB-pr-455 merged is not in this package, live or built",
+   "negative_control": false,
+   "verdict": "identical"
+  },
+  {
+   "detail": "live properties lack commentary_requested; built declares it as boolean, additionalProperties false on both. The rule generate_installed.ingestion_revision_for hashes contracts/*.schema.json: live schemas-0181dbd77254, built schemas-c63ed980b16c, so every request accepted after a release carries the new ingestion_gate_revision.",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "contracts/AnalysisSubmissionRequest.schema.json"
+   ],
+   "name": "irpt-ycharts-generate: the packaged AnalysisSubmissionRequest.schema.json: the member is declared (boolean) on built and absent on live; the schemas digest the function stamps as ingestion_gate_revision moves",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "control: member_true -> SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, 0 writes (the live answer): submission.py is the member that admits it.",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "submission.py"
+   ],
+   "name": "irpt-ycharts-generate: NEGATIVE CONTROL: the built tree with submission.py put back to the LIVE bytes -- a submission WITH the member is refused again",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "control: built submission.py admits the member (validate_public_request returns it), but with the LIVE acceptance.py the real SubmissionService raises TypeError:DynamoAcceptance.accept() got an unexpected keyword argument 'acting_principal_i and writes 0 transactions (the built service passes acting_principal_id; the live accept takes no such keyword): the pair cannot be split.",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "acceptance.py"
+   ],
+   "name": "irpt-ycharts-generate: NEGATIVE CONTROL: the built tree with acceptance.py put back to the LIVE bytes",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "control: the live service calls accept without acting_principal_id, which the built acceptance.py requires: TypeError:DynamoAcceptance.accept() missing 1 required keyword-only argument: 'acting_prin, 0 transactions written. This is the pairing the one-tree census stated; it holds here because this function packages its only caller of accept.",
+   "function": "irpt-ycharts-generate",
+   "members": [
+    "acceptance.py",
+    "submission_service.py"
+   ],
+   "name": "irpt-ycharts-generate: NEGATIVE CONTROL: the built tree with submission_service.py put back to the LIVE bytes (built acceptance.py, live service) -- every new submission, WITH or WITHOUT the member",
+   "negative_control": true,
+   "submission_without_the_member": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "DynamoAcceptance.accept over an in-memory store: live and built both write 2 transactions (one request row, one job row) and both records carry no commentary_requested (read back through get: identical). Compared with the AR-y-37 member acting_principal_id removed from the key list (the next arm shows it).",
+   "function": "irpt-status",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-status: a submission WITHOUT commentary_requested is accepted and recorded identically (live vs built)",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "identical"
+  },
+  {
+   "detail": "live record keys ['accepted_at', 'browser_sha256', 'composition_ref', 'identity', 'owner']; built record keys ['accepted_at', 'acting_principal_id', 'browser_sha256', 'composition_ref', 'identity', 'owner']. Built passes acting_principal_id when its tree's accept takes it (the keyword is REQUIRED in the built acceptance.py).",
+   "function": "irpt-status",
+   "members": [
+    "acceptance.py"
+   ],
+   "name": "irpt-status: full record of a submission WITHOUT the member: the one key built adds is acting_principal_id (AR-y-37, commit 2f7cc7be42, earlier than IB-pr-455)",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "member_true: live SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (0 writes); built accepted, record carries commentary_requested=True as sent, read back through get the same (2 writes); member_false: live SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (0 writes); built accepted, record carries commentary_requested=False as sent, read back through get the same (2 writes).",
+   "function": "irpt-status",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-status: a submission WITH commentary_requested (true, false) is refused by live and accepted by built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "live refuses all 4 as ['SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD'] (the member is unknown to it); built refuses all 4 as ['SubmissionRefused:COMMENTARY_REQUESTED']. Neither writes anything.",
+   "function": "irpt-status",
+   "members": [
+    "submission.py"
+   ],
+   "name": "irpt-status: a wrong-typed commentary_requested (string, integer, null, list) is refused by BOTH, nothing written; the reason code differs",
+   "negative_control": false,
+   "refused_by_both": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "first and second call: live returned / returned, built returned / returned; transactions after the replay 2 / 2 (unchanged).",
+   "function": "irpt-status",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-status: the same submission WITHOUT the member sent twice: the replay returns the prior record and writes nothing (live vs built)",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "identical"
+  },
+  {
+   "detail": "first call without the member, second with it. LIVE: first call returned, second call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (the member is refused outright whenever it is sent); BUILT: first call returned, second call IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID, transactions 2 after the first and 2 after the second (the second writes nothing).",
+   "function": "irpt-status",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-status: same_request_id_different_member (member_added)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "first call with the member, second without it. LIVE: first call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, second call returned (the member is refused outright whenever it is sent); BUILT: first call returned, second call IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID, transactions 2 after the first and 2 after the second (the second writes nothing).",
+   "function": "irpt-status",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-status: same_request_id_different_member (member_dropped)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "first call with true, second with false. LIVE: first call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, second call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (the member is refused outright whenever it is sent); BUILT: first call returned, second call IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID, transactions 2 after the first and 2 after the second (the second writes nothing).",
+   "function": "irpt-status",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-status: same_request_id_different_member (member_true_then_false)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "stored record without the member, read through get and through lookup(same body): identical on live and built; lookup(body WITH the member): live SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, built IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID.",
+   "function": "irpt-status",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-status: same_request_id_different_member against a record accepted BEFORE any release (no member stored): get and lookup of the same body identical; lookup with the member differs",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "answers: {\"returned\": {\"accepted_at\": 100, \"identity\": {\"destination_policy_revision\": \"v1\", \"immutable\": true, \"ingestion_gate_revision\": \"v1\", \"request_id\": \"REQ-000000000000000000000000\", \"revision\": 1, \"tenant_firm_id\": \"synthetic-firm-one\"}}}. The answer does not depend on the member, and live and built answer alike.",
+   "function": "irpt-status",
+   "members": [
+    "OwnedRequestReader.py"
+   ],
+   "name": "irpt-status: reader OwnedRequestReader.read over a stored record WITHOUT the member and WITH it (true, false): the answer is the same, live and built",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "identical"
+  },
+  {
+   "detail": "control: member_true -> SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, 0 writes (the live answer): submission.py is the member that admits it.",
+   "function": "irpt-status",
+   "members": [
+    "submission.py"
+   ],
+   "name": "irpt-status: NEGATIVE CONTROL: the built tree with submission.py put back to the LIVE bytes -- a submission WITH the member is refused again",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "control: the built submission.py admits the member but the live acceptance.py (no copy line) records a record with commentary_requested <absent>: acceptance.py is the member that writes it.",
+   "function": "irpt-status",
+   "members": [
+    "acceptance.py"
+   ],
+   "name": "irpt-status: NEGATIVE CONTROL: the built tree with acceptance.py put back to the LIVE bytes",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "DynamoAcceptance.accept over an in-memory store: live and built both write 2 transactions (one request row, one job row) and both records carry no commentary_requested (read back through get: identical). Compared with the AR-y-37 member acting_principal_id removed from the key list (the next arm shows it).",
+   "function": "irpt-commentary-draft-store-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-draft-store-lambda: a submission WITHOUT commentary_requested is accepted and recorded identically (live vs built)",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "identical"
+  },
+  {
+   "detail": "live record keys ['accepted_at', 'browser_sha256', 'composition_ref', 'identity', 'owner']; built record keys ['accepted_at', 'acting_principal_id', 'browser_sha256', 'composition_ref', 'identity', 'owner']. Built passes acting_principal_id when its tree's accept takes it (the keyword is REQUIRED in the built acceptance.py).",
+   "function": "irpt-commentary-draft-store-lambda",
+   "members": [
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-draft-store-lambda: full record of a submission WITHOUT the member: the one key built adds is acting_principal_id (AR-y-37, commit 2f7cc7be42, earlier than IB-pr-455)",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "member_true: live SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (0 writes); built accepted, record carries commentary_requested=True as sent, read back through get the same (2 writes); member_false: live SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (0 writes); built accepted, record carries commentary_requested=False as sent, read back through get the same (2 writes).",
+   "function": "irpt-commentary-draft-store-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-draft-store-lambda: a submission WITH commentary_requested (true, false) is refused by live and accepted by built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "live refuses all 4 as ['SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD'] (the member is unknown to it); built refuses all 4 as ['SubmissionRefused:COMMENTARY_REQUESTED']. Neither writes anything.",
+   "function": "irpt-commentary-draft-store-lambda",
+   "members": [
+    "submission.py"
+   ],
+   "name": "irpt-commentary-draft-store-lambda: a wrong-typed commentary_requested (string, integer, null, list) is refused by BOTH, nothing written; the reason code differs",
+   "negative_control": false,
+   "refused_by_both": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "first and second call: live returned / returned, built returned / returned; transactions after the replay 2 / 2 (unchanged).",
+   "function": "irpt-commentary-draft-store-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-draft-store-lambda: the same submission WITHOUT the member sent twice: the replay returns the prior record and writes nothing (live vs built)",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "identical"
+  },
+  {
+   "detail": "first call without the member, second with it. LIVE: first call returned, second call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (the member is refused outright whenever it is sent); BUILT: first call returned, second call IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID, transactions 2 after the first and 2 after the second (the second writes nothing).",
+   "function": "irpt-commentary-draft-store-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-draft-store-lambda: same_request_id_different_member (member_added)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "first call with the member, second without it. LIVE: first call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, second call returned (the member is refused outright whenever it is sent); BUILT: first call returned, second call IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID, transactions 2 after the first and 2 after the second (the second writes nothing).",
+   "function": "irpt-commentary-draft-store-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-draft-store-lambda: same_request_id_different_member (member_dropped)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "first call with true, second with false. LIVE: first call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, second call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (the member is refused outright whenever it is sent); BUILT: first call returned, second call IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID, transactions 2 after the first and 2 after the second (the second writes nothing).",
+   "function": "irpt-commentary-draft-store-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-draft-store-lambda: same_request_id_different_member (member_true_then_false)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "stored record without the member, read through get and through lookup(same body): identical on live and built; lookup(body WITH the member): live SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, built IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID.",
+   "function": "irpt-commentary-draft-store-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-draft-store-lambda: same_request_id_different_member against a record accepted BEFORE any release (no member stored): get and lookup of the same body identical; lookup with the member differs",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "answers: {\"returned\": \"synthetic-firm-one\"}. The answer does not depend on the member, and live and built answer alike.",
+   "function": "irpt-commentary-draft-store-lambda",
+   "members": [
+    "commentary_draft_store.py"
+   ],
+   "name": "irpt-commentary-draft-store-lambda: reader commentary_draft_store.resolve_request over a stored record WITHOUT the member and WITH it (true, false): the answer is the same, live and built",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "identical"
+  },
+  {
+   "detail": "control: member_true -> SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, 0 writes (the live answer): submission.py is the member that admits it.",
+   "function": "irpt-commentary-draft-store-lambda",
+   "members": [
+    "submission.py"
+   ],
+   "name": "irpt-commentary-draft-store-lambda: NEGATIVE CONTROL: the built tree with submission.py put back to the LIVE bytes -- a submission WITH the member is refused again",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "control: the built submission.py admits the member but the live acceptance.py (no copy line) records a record with commentary_requested <absent>: acceptance.py is the member that writes it.",
+   "function": "irpt-commentary-draft-store-lambda",
+   "members": [
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-draft-store-lambda: NEGATIVE CONTROL: the built tree with acceptance.py put back to the LIVE bytes",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "DynamoAcceptance.accept over an in-memory store: live and built both write 2 transactions (one request row, one job row) and both records carry no commentary_requested (read back through get: identical). Compared with the AR-y-37 member acting_principal_id removed from the key list (the next arm shows it).",
+   "function": "irpt-commentary-composition-read-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-composition-read-lambda: a submission WITHOUT commentary_requested is accepted and recorded identically (live vs built)",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "identical"
+  },
+  {
+   "detail": "live record keys ['accepted_at', 'browser_sha256', 'composition_ref', 'identity', 'owner']; built record keys ['accepted_at', 'acting_principal_id', 'browser_sha256', 'composition_ref', 'identity', 'owner']. Built passes acting_principal_id when its tree's accept takes it (the keyword is REQUIRED in the built acceptance.py).",
+   "function": "irpt-commentary-composition-read-lambda",
+   "members": [
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-composition-read-lambda: full record of a submission WITHOUT the member: the one key built adds is acting_principal_id (AR-y-37, commit 2f7cc7be42, earlier than IB-pr-455)",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "member_true: live SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (0 writes); built accepted, record carries commentary_requested=True as sent, read back through get the same (2 writes); member_false: live SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (0 writes); built accepted, record carries commentary_requested=False as sent, read back through get the same (2 writes).",
+   "function": "irpt-commentary-composition-read-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-composition-read-lambda: a submission WITH commentary_requested (true, false) is refused by live and accepted by built",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "live refuses all 4 as ['SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD'] (the member is unknown to it); built refuses all 4 as ['SubmissionRefused:COMMENTARY_REQUESTED']. Neither writes anything.",
+   "function": "irpt-commentary-composition-read-lambda",
+   "members": [
+    "submission.py"
+   ],
+   "name": "irpt-commentary-composition-read-lambda: a wrong-typed commentary_requested (string, integer, null, list) is refused by BOTH, nothing written; the reason code differs",
+   "negative_control": false,
+   "refused_by_both": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "first and second call: live returned / returned, built returned / returned; transactions after the replay 2 / 2 (unchanged).",
+   "function": "irpt-commentary-composition-read-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-composition-read-lambda: the same submission WITHOUT the member sent twice: the replay returns the prior record and writes nothing (live vs built)",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "identical"
+  },
+  {
+   "detail": "first call without the member, second with it. LIVE: first call returned, second call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (the member is refused outright whenever it is sent); BUILT: first call returned, second call IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID, transactions 2 after the first and 2 after the second (the second writes nothing).",
+   "function": "irpt-commentary-composition-read-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-composition-read-lambda: same_request_id_different_member (member_added)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "first call with the member, second without it. LIVE: first call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, second call returned (the member is refused outright whenever it is sent); BUILT: first call returned, second call IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID, transactions 2 after the first and 2 after the second (the second writes nothing).",
+   "function": "irpt-commentary-composition-read-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-composition-read-lambda: same_request_id_different_member (member_dropped)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "first call with true, second with false. LIVE: first call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, second call SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD (the member is refused outright whenever it is sent); BUILT: first call returned, second call IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID, transactions 2 after the first and 2 after the second (the second writes nothing).",
+   "function": "irpt-commentary-composition-read-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-composition-read-lambda: same_request_id_different_member (member_true_then_false)",
+   "negative_control": false,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "stored record without the member, read through get and through lookup(same body): identical on live and built; lookup(body WITH the member): live SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, built IdempotencyConflict:CHANGED_INPUTS_SAME_REQUEST_ID.",
+   "function": "irpt-commentary-composition-read-lambda",
+   "members": [
+    "submission.py",
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-composition-read-lambda: same_request_id_different_member against a record accepted BEFORE any release (no member stored): get and lookup of the same body identical; lookup with the member differs",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "answers: {\"raised\": \"CompositionReadRefused:INVALID_REQUEST\"}. The answer does not depend on the member, and live and built answer alike.",
+   "function": "irpt-commentary-composition-read-lambda",
+   "members": [
+    "commentary_composition.py"
+   ],
+   "name": "irpt-commentary-composition-read-lambda: reader commentary_composition.read_composition over a stored record WITHOUT the member and WITH it (true, false): the answer is the same, live and built",
+   "negative_control": false,
+   "submission_without_the_member": true,
+   "verdict": "identical"
+  },
+  {
+   "detail": "control: member_true -> SubmissionRefused:UNKNOWN_OR_SERVER_OWNED_FIELD, 0 writes (the live answer): submission.py is the member that admits it.",
+   "function": "irpt-commentary-composition-read-lambda",
+   "members": [
+    "submission.py"
+   ],
+   "name": "irpt-commentary-composition-read-lambda: NEGATIVE CONTROL: the built tree with submission.py put back to the LIVE bytes -- a submission WITH the member is refused again",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  },
+  {
+   "detail": "control: the built submission.py admits the member but the live acceptance.py (no copy line) records a record with commentary_requested <absent>: acceptance.py is the member that writes it.",
+   "function": "irpt-commentary-composition-read-lambda",
+   "members": [
+    "acceptance.py"
+   ],
+   "name": "irpt-commentary-composition-read-lambda: NEGATIVE CONTROL: the built tree with acceptance.py put back to the LIVE bytes",
+   "negative_control": true,
+   "verdict": "expected-diff"
+  }
+ ],
+ "functions": [
+  "irpt-ycharts-generate",
+  "irpt-status",
+  "irpt-commentary-draft-store-lambda",
+  "irpt-commentary-composition-read-lambda"
+ ],
+ "harness": "replay/run_replay_456.py + probe_456.py; offline: no boto3, in-memory fakes, every socket connect refused, AWS never called; one tree per process (python -I); synthetic ids only",
+ "unexpected": []
+}

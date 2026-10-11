@@ -5,7 +5,7 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
              "light"}; shared_ui_changed false; product_files_changed non-empty, every entry under
              src/pages/InvestorReporting/tabs/holdings/; navy_strips {before (int), after (int), removed (int >= 2) with
              before - after == removed, how}; footer_text_contrast {ratio (number >= 4.5), how}; test {file, mutant_failed true};
-             lint_errors 0; typecheck_errors 0; suite_after {fail 0}; screenshots (1 or more) each an existing file, with
+             lint_errors 0; typecheck_errors 0; suite_after.fail no greater than suite_base.fail with new_failing_ids [] (AMENDMENT 1); screenshots (1 or more) each an existing file, with
              screenshot_read true; portal_commit a 40-hex string.
 """
 import json
@@ -56,8 +56,11 @@ def main():
         fail("test needs its file and a mutant that failed")
     if r.get("lint_errors") != 0 or r.get("typecheck_errors") != 0:
         fail("lint_errors %r, typecheck_errors %r" % (r.get("lint_errors"), r.get("typecheck_errors")))
-    if (r.get("suite_after") or {}).get("fail") != 0:
-        fail("suite_after.fail %r" % (r.get("suite_after") or {}).get("fail"))
+    # AMENDMENT 1: no NEW failure over the measured base (the base carried failures that are not this cell's).
+    sb, sa = r.get("suite_base") or {}, r.get("suite_after") or {}
+    if not isinstance(sb.get("fail"), int) or not isinstance(sa.get("fail"), int) or sa["fail"] > sb["fail"] or sa.get("new_failing_ids") != []:
+        fail("suite: base fail %r, after fail %r, new_failing_ids %r (want no new failure over the measured base)"
+             % (sb.get("fail"), sa.get("fail"), sa.get("new_failing_ids")))
     shots = r.get("screenshots") or []
     if not shots or r.get("screenshot_read") is not True or any(not (folder / str(s)).is_file() for s in shots):
         fail("screenshots must each exist in the worker's folder and be read")

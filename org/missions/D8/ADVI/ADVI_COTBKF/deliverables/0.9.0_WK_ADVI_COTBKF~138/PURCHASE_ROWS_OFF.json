@@ -1,0 +1,320 @@
+{
+ "reproduced": {
+  "purchase_rows": 1119,
+  "with_a_close": 936,
+  "within_1pct": 690,
+  "off": 246,
+  "day_convention": "close of the row effective day (Trade_Date, next trading day when NYSE is closed); ratio = |Quantity| x close / |Amount|; rows of one account, day and fund summed (1,119 purchase rows = 1,119 groups); within 1 percent = |ratio - 1| <= 0.01"
+ },
+ "closed_list": {
+  "text": "CLOSED_LIST_WRITTEN_AT=2026-10-11T22:52:32Z\nCLOSED LIST (CB-bx-1, round 76, worker 0.9.0_WK_ADVI_COTBKF~138). Written BEFORE any off row was looked at.\n\nSEEN BEFORE WRITING (and nothing else): (1) step 1 only: the reproduction counts 1119 purchase rows / 936 with a close /\n690 within 1 percent / 246 off, median 0.997191 (round 75's own numbers). (2) the cache SCHEMA and, over ALL 1,119 `by` rows of the\n19 funds (not split by on/off), the distinct values of the descriptive columns: Transaction_Description = \"Buy\" on all rows; AI = 0.0 on all rows;\nCA_Event_Id = \"0\" on all; LongShort_Indicator = \"Long\" on all; Position_Type = \"CASH\" on all; Cost_Date = Trade_Date on all;\nSettle_Date minus Trade_Date in {0,1,2,3,4,5} days; Transaction_Note is free text (fund name + \"PROSPECTUS UNDER SEPARATE COVER\",\n\"DISCRETION EXERCISED\", \"PERIODIC INVESTMENT\", \"SOLICITED ORDER\", \"Buy (confirmed)\", \"Buy\"); a token census of that note over all `by` rows shows\nno token EXCHANGE / REINVEST / SWITCH / DIVIDEND. (3) the sibling share classes on disk (listed below). The off rows' ratios, dates,\nfunds, accounts and quantities were NOT looked at.\n\nSCHEMA RESULT: the cache has NO fee, commission, load, net-vs-gross or price column. Columns are Advisor_ID, Account_Number, Transaction_Type,\nTransaction_Description, Cusip, FundCode, Symbol, Quantity, Amount, AI (all zero on purchases), Trade_Date, Cost_Date, Settle_Date, Asset_Type,\nCA_Event_Id, LongShort_Indicator, Position_Type, Security_Description, Transaction_Note, AsOfDate and source_* lineage. So the \"fee column non-zero\"\nbranch of the fee test is DROPPED (nothing to read); the fee tests below are rate-based and pattern-based only. No fee schedule is on disk.\n\nUNIT AND DEFINITIONS (round 75's, kept). A \"row\" = rows of one account, effective day and fund summed (on the 1,119 purchases no group holds\nmore than one custodian row: 1,119 rows = 1,119 groups). Effective day = Trade_Date, moved to the next trading day when NYSE is closed\n(commonwealth_daily_returns.next_trading_day). r = |Quantity| x close / |Amount| = close / price paid. close = the served UNADJUSTED close\n(w129 variant security_day_price), \"OFF\" = |r - 1| > 0.01 and a close exists on the effective day. \"within 1 percent\" for any cause test = |r_test - 1| <= 0.01,\nwhere r_test uses the named alternative price in place of the effective-day close. prev / next trading day = the previous / next date of that\nfund's own served price series. Yahoo Close / Adj Close are read from yahoo_census/<ticker>.csv on the same effective day.\n\nTHE CAUSES AND THEIR TESTS (a row takes the FIRST that fits in the order run):\n C1 small_quantity: |Quantity| < 0.05 shares OR |Amount| < 0.50 dollars. Derivation: Quantity is carried to three decimals, so its rounding\n    error is up to 0.0005 shares = 1 percent of 0.05 shares; Amount is carried to cents, rounding error up to 0.005 dollars = 1 percent of 0.50 dollars.\n    BELOW these a 1 percent miss is rounding. Benign.\n C2 prior_day_close: |Quantity| x unadjusted close of the PREVIOUS trading day / |Amount| within 1 percent of 1. Benign.\n C3 next_day_close: the same with the NEXT trading day. Benign.\n C4 settle_date_close: the same with the close of the effective day of Settle_Date (the schema carries Settle_Date; added now). Benign (a different day's close).\n C5 adjusted_close: |Quantity| x Yahoo ADJ Close (same effective day) / |Amount| within 1 percent of 1. NOT benign: it says the custodian's price\n    follows the dividend-adjusted series, i.e. the unadjusted close may be the thing that is off.\n C6 another_share_class: |Quantity| x Yahoo Close of another share class of the SAME fund, same effective day, / |Amount| within 1 percent of 1, using only\n    the classes that are in the tx_cache AND have a yahoo_census file (sibling table below; no fetch). Benign (a different instrument).\n C7 reinvestment_or_exchange_recorded_as_purchase: either (a) the same account has a dividend or reinvestment row (types dv, dvlt, dvst, DVX, dvr, DVRX)\n    in the same fund or a sibling class of the sibling table, Trade_Date within +/-5 calendar days of this row's Trade_Date, whose |Amount| is within 1 percent of this\n    row's |Amount|; or (b) the same account has a sale row `sl` (any fund) Trade_Date within +/-1 calendar day with |Amount| within 1 percent of this row's |Amount|\n    (an exchange: one fund sold, the other bought). The amount match is required so a coincidental neighbour does not label a row. The row's own note\n    has no word that says reinvestment or exchange (census above), so no note branch. N = 5 days for (a), 1 day for (b). Benign (not an ordinary purchase at a\n    quoted price, so not evidence about the close) -- reported also with this cause treated as not benign.\n C8 fee_inside_amount (rate): the price paid sits ABOVE the close (r < 1) and d = 1 - r is within +/-0.10 percentage points of one of these front-load rates:\n    5.75, 5.00, 4.50, 4.25, 3.75, 3.50, 2.50, 2.00, 1.00 percent. Where these come from: general knowledge of the class-A breakpoint schedules of the\n    funds' families (the American Funds equity schedule 5.75 / 4.50 / 3.50 / 2.50 / 2.00 / 1.00 by purchase size; the American Funds bond schedule 3.75 / 3.50 / 2.50 / 2.00;\n    Invesco / MFS / Cohen & Steers class A 5.50-5.75 and 4.25 for municipal and 2.50 breakpoints; 5.00 as a common middle rate). NO fee schedule is on\n    disk; this list is from memory and is an assumption. The identity: with a load L inside the Amount, shares = Amount(1-L)/NAV, price paid = NAV/(1-L),\n    so r = close/paid = 1 - L and d = L. Tolerance 0.10 points: price carried to cents on a $10 NAV is 0.05 points. CHANCE CONTROL (declared now): the same test is\n    also run with every row's d shifted by +0.35 points and by -0.35 points; the share of off rows that \"fit\" under a shift is the rate of fitting by chance and is reported beside the real share.\n    Benign (a fee: the close is not shown wrong).\n C9 fee_constant_excess: r < 1 and d > 0.01, and at least one OTHER `by` row of the same account and same fund (any of the 936 with a close, on or off) has its own d\n    within +/-0.10 points of this row's d (the same excess on the same account and fund). Benign (a fee).\n C10 none_found: none of C1-C9 fits. Not benign.\n\nORDER A (stated): C1 small_quantity, C2 prior_day_close, C3 next_day_close, C4 settle_date_close, C5 adjusted_close, C6 another_share_class,\n C7 reinvestment_or_exchange_recorded_as_purchase, C8 fee_inside_amount, C9 fee_constant_excess, C10 none_found.\n WHY: from the least to the most coincidence-prone. A rounding bound is arithmetic and cannot fit by chance on a large quantity; a neighbouring day's close, the adjusted close and\n a sibling's close are measured prices that the paid price either matches or does not; a link to another row (C7) needs a second row and an amount match; the rate-based fee (C8) is last because its nine rates,\n each 0.2 points wide, cover about a third of the 1-6 percent range by chance, and the constant-excess test (C9) follows it because it needs only a repeated number.\nORDER B (alternative): C1 small_quantity, C8 fee_inside_amount, C9 fee_constant_excess, C2 prior_day_close, C3 next_day_close, C4 settle_date_close, C5 adjusted_close,\n C6 another_share_class, C7 reinvestment_or_exchange_recorded_as_purchase, C10 none_found.\n WHY: moves the most ambiguous cause (the rate-based fee, with its pattern twin) from late to early, so any row that both a load rate and a measured price explain is given to the fee.\n The rows whose cause differs between A and B are exactly the rows that two tests explain.\n\nBENIGN (the close is not shown wrong): small_quantity, prior_day_close, next_day_close, settle_date_close, another_share_class, reinvestment_or_exchange_recorded_as_purchase, fee_inside_amount, fee_constant_excess.\nNOT BENIGN: adjusted_close, none_found.\n\nFIT AFTER BENIGN (stated now): purchases: explained_share = (within 1 percent + off rows given a benign cause) / rows with a close; and reproduces_share_set_aside = within 1 percent /\n (rows with a close - rows given a benign cause). Sales: the `sl` rows of the 19 funds with a close on the effective day, same unit and ratio, share within 1 percent, median, and the direction of\n the off rows (r > 1: price received below the close; r < 1: price received above the close). A sale carries no front load.\n\nTHE 183 with no close: classified as (i) effective day before the first served close of that fund, (ii) effective day on or after it but with no bar on that date (including no close at all that day), by year.\n\nNOTHING is added, re-ordered or re-thresholded after the look. If the list is inadequate the rows read none_found and what a better list would hold is stated, marked POST HOC.\n\nSIBLING TABLE (same fund, other class, in tx_cache and with a yahoo_census file):\n BALCX: ABALX, AMBFX, CLBAX | AMRMX: CMLAX | CWGIX: WGIFX, CWIAX | WGIFX: CWGIX, CWIAX | ANCFX: FINFX, CFNAX, FUNFX | FINFX: ANCFX, CFNAX, FUNFX\n AWSHX: WMFFX, CWMAX | WMFFX: AWSHX, CWMAX | MEIIX: MEIAX.\n Funds with no sibling on disk: ABNFX, CAIBX, CPXIX, DISVX, DFLVX, DFREX, FCNTX, PRILX, VEIRX, ACTDX.\n C7(a) uses the same table (the classes it lists, plus the fund itself).\n",
+  "written_at": "2026-10-11T22:52:32Z",
+  "causes": [
+   "small_quantity",
+   "prior_day_close",
+   "next_day_close",
+   "settle_date_close",
+   "adjusted_close",
+   "another_share_class",
+   "reinvestment_or_exchange_recorded_as_purchase",
+   "fee_inside_amount",
+   "fee_constant_excess",
+   "none_found"
+  ],
+  "order": [
+   "small_quantity",
+   "prior_day_close",
+   "next_day_close",
+   "settle_date_close",
+   "adjusted_close",
+   "another_share_class",
+   "reinvestment_or_exchange_recorded_as_purchase",
+   "fee_inside_amount",
+   "fee_constant_excess",
+   "none_found"
+  ],
+  "alternative_order": [
+   "small_quantity",
+   "fee_inside_amount",
+   "fee_constant_excess",
+   "prior_day_close",
+   "next_day_close",
+   "settle_date_close",
+   "adjusted_close",
+   "another_share_class",
+   "reinvestment_or_exchange_recorded_as_purchase",
+   "none_found"
+  ]
+ },
+ "causes": {
+  "small_quantity": {
+   "rows": 0,
+   "median_ratio": null,
+   "funds": 0,
+   "accounts": 0
+  },
+  "prior_day_close": {
+   "rows": 31,
+   "median_ratio": 0.988842,
+   "funds": 2,
+   "accounts": 30
+  },
+  "next_day_close": {
+   "rows": 15,
+   "median_ratio": 0.984601,
+   "funds": 1,
+   "accounts": 8
+  },
+  "settle_date_close": {
+   "rows": 0,
+   "median_ratio": null,
+   "funds": 0,
+   "accounts": 0
+  },
+  "adjusted_close": {
+   "rows": 0,
+   "median_ratio": null,
+   "funds": 0,
+   "accounts": 0
+  },
+  "another_share_class": {
+   "rows": 0,
+   "median_ratio": null,
+   "funds": 0,
+   "accounts": 0
+  },
+  "reinvestment_or_exchange_recorded_as_purchase": {
+   "rows": 21,
+   "median_ratio": 0.984471,
+   "funds": 1,
+   "accounts": 13
+  },
+  "fee_inside_amount": {
+   "rows": 35,
+   "median_ratio": 0.964727,
+   "funds": 1,
+   "accounts": 35
+  },
+  "fee_constant_excess": {
+   "rows": 20,
+   "median_ratio": 0.984525,
+   "funds": 1,
+   "accounts": 5
+  },
+  "none_found": {
+   "rows": 124,
+   "median_ratio": 0.971866,
+   "funds": 2,
+   "accounts": 111
+  }
+ },
+ "alternative": {
+  "small_quantity": {
+   "rows": 0,
+   "median_ratio": null,
+   "funds": 0,
+   "accounts": 0
+  },
+  "fee_inside_amount": {
+   "rows": 51,
+   "median_ratio": 0.974543,
+   "funds": 1,
+   "accounts": 50
+  },
+  "fee_constant_excess": {
+   "rows": 45,
+   "median_ratio": 0.984565,
+   "funds": 1,
+   "accounts": 6
+  },
+  "prior_day_close": {
+   "rows": 13,
+   "median_ratio": 0.987905,
+   "funds": 2,
+   "accounts": 13
+  },
+  "next_day_close": {
+   "rows": 4,
+   "median_ratio": 0.986582,
+   "funds": 1,
+   "accounts": 4
+  },
+  "settle_date_close": {
+   "rows": 0,
+   "median_ratio": null,
+   "funds": 0,
+   "accounts": 0
+  },
+  "adjusted_close": {
+   "rows": 0,
+   "median_ratio": null,
+   "funds": 0,
+   "accounts": 0
+  },
+  "another_share_class": {
+   "rows": 0,
+   "median_ratio": null,
+   "funds": 0,
+   "accounts": 0
+  },
+  "reinvestment_or_exchange_recorded_as_purchase": {
+   "rows": 9,
+   "median_ratio": 0.983399,
+   "funds": 1,
+   "accounts": 9
+  },
+  "none_found": {
+   "rows": 124,
+   "median_ratio": 0.971866,
+   "funds": 2,
+   "accounts": 111
+  }
+ },
+ "rows_that_change_cause_with_the_order": 41,
+ "none_found": {
+  "rows": 124,
+  "rows_alternative_order": 124,
+  "funds": {
+   "VEIRX": 122,
+   "PRILX": 2
+  },
+  "ratio_spread": {
+   "min": 0.8333,
+   "p10": 0.9132,
+   "median": 0.9719,
+   "p90": 0.9867,
+   "max": 0.9883
+  },
+  "looked_at": "the unit and day of the row; the effective-day close; the previous, next and settle-date closes; the Yahoo adjusted close; the Yahoo close of the sibling classes on disk (9 of the 19 funds have a sibling); dividend, reinvestment and sale rows of the same account within a window with an amount match; the size of the Quantity and Amount (rounding); a front-load rate from a nine-rate set; a repeated excess within the same account and fund. The cache has no fee, commission, load or price column.",
+  "post_hoc_marked": {
+   "note": "POST HOC, after the look, NOT in the list and NOT used in any count above: the Amount minus |Quantity| x unadjusted close, in dollars, falls on a short list of constants on every one of the 936 purchase rows with a close (0, 3, 10, 15, 19, 30 or 34 dollars, within 0.15) and not on a rate. Among the 246 off rows, 241 sit at 3, 15, 30 or 34 dollars (the other 5 at 10 or 19); among the 124 none_found rows, 121. A better list would hold fixed_dollar_charge_inside_amount: |Amount| - |Quantity| x close within 0.15 dollars of a constant (the constants were read off the rows, so this is a description and not a test passed). A flat charge puts a row off the 1 percent band exactly when the amount is small (among the 246 off rows the Pearson correlation of the shortfall 1 - ratio with the log of the amount is -0.48), which is why a rate test fits at chance. Not established: what the charge is, who takes it, or why it differs by row.",
+   "purchase_rows_by_excess_dollars": {
+    "0": 112,
+    "3": 34,
+    "10": 3,
+    "15": 60,
+    "19": 24,
+    "30": 502,
+    "34": 201
+   },
+   "sale_rows_with_a_close_by_excess_dollars": {
+    "0": 157,
+    "10": 10,
+    "12": 10,
+    "15": 72,
+    "19": 17,
+    "30": 485,
+    "34": 190,
+    "122": 1
+   },
+   "where_the_off_purchase_rows_sit": "VEIRX 243 of 246 (PRILX 3). 147 of the 243 VEIRX off rows sit on three bulk days; 141 of them on 2024-02-16 (299 VEIRX purchase rows that day, 141 off).",
+   "shifted_close_probe": "for the 124 none_found rows, a close within 1 percent of the price paid exists within +/-5 trading days for 28, within +/-10 for 51, within +/-20 for 76: a window that wide matches by chance; not used."
+  }
+ },
+ "fit_after_benign_causes": {
+  "purchases": {
+   "rows_with_a_close": 936,
+   "within_1pct": 690,
+   "benign_causes": [
+    "small_quantity",
+    "prior_day_close",
+    "next_day_close",
+    "settle_date_close",
+    "another_share_class",
+    "reinvestment_or_exchange_recorded_as_purchase",
+    "fee_inside_amount",
+    "fee_constant_excess"
+   ],
+   "not_benign_causes": [
+    "adjusted_close",
+    "none_found"
+   ],
+   "off_rows_given_a_benign_cause_order": 122,
+   "off_rows_given_a_benign_cause_alternative": 122,
+   "explained_share_order": 0.8675,
+   "explained_share_alternative": 0.8675,
+   "reproduces_share_with_benign_rows_set_aside_order": 0.8477,
+   "reproduces_share_with_benign_rows_set_aside_alternative": 0.8477,
+   "if_reinvestment_or_exchange_is_not_benign": {
+    "explained_share_order": 0.8451,
+    "explained_share_alternative": 0.8579,
+    "reproduces_share_set_aside_order": 0.8263,
+    "reproduces_share_set_aside_alternative": 0.8384
+   },
+   "rows_not_explained_by_the_list": 124,
+   "fee_by_rate_chance_control": {
+    "off_rows_with_ratio_below_1": 246,
+    "fit_real": 51,
+    "fit_shifted_plus_0_35_points": 66,
+    "fit_shifted_minus_0_35_points": 52,
+    "reading": "the load-rate test fits no more rows than the same test shifted off the rates: it is at chance level"
+   }
+  },
+  "sales": {
+   "unit": "rows of one account, effective day and fund summed of type sl; 1,144 sl rows = 1,144 groups; the same ratio |Quantity| x unadjusted close / |Amount|",
+   "sale_rows_of_the_19_funds": 1144,
+   "rows_with_a_close": 942,
+   "rows_without_a_close": 202,
+   "within_1pct": 840,
+   "share_within_1pct": 0.8917,
+   "median_ratio": 1.001289,
+   "off": 102,
+   "off_ratio_above_1_price_received_below_the_close": 102,
+   "off_ratio_below_1_price_received_above_the_close": 0,
+   "off_median_ratio": 1.0186,
+   "off_by_fund": {
+    "VEIRX": 100,
+    "PRILX": 2
+   },
+   "reading": "sales do not fit at about 99 percent: 89.2 percent are within 1 percent, and every off sale row has the price received BELOW the close (the direction a charge taken out of the proceeds would give); purchases are off in the opposite direction (price paid ABOVE the close). Both off sets sit in VEIRX."
+  }
+ },
+ "no_close_that_day": {
+  "rows": 183,
+  "unit": "purchase rows with no unadjusted close on the effective day (same unit)",
+  "before_the_fund_first_served_close": 183,
+  "inside_the_series_with_no_bar": 0,
+  "after_the_last_close": 0,
+  "before_2020_06_29_the_start_of_the_yahoo_cache": 158,
+  "on_or_after_2020_06_29_but_before_the_funds_first_served_close": 25,
+  "by_year": {
+   "2013": 29,
+   "2014": 43,
+   "2015": 42,
+   "2016": 6,
+   "2017": 13,
+   "2018": 10,
+   "2019": 5,
+   "2020": 17,
+   "2021": 14,
+   "2022": 4
+  },
+  "by_fund": {
+   "CPXIX": 99,
+   "BALCX": 49,
+   "PRILX": 9,
+   "MEIIX": 8,
+   "ACTDX": 5,
+   "DFLVX": 3,
+   "CWGIX": 3,
+   "DISVX": 2,
+   "DFREX": 1,
+   "AWSHX": 1,
+   "ANCFX": 1,
+   "WMFFX": 1,
+   "FINFX": 1
+  },
+  "reading": "every one of the 183 sits before the first close the served series holds for its fund (the series start 2020-07 to 2022-04 per fund; ACTDX 2026-03-02); the roll to the next trading day leaves none inside a series without a bar"
+ },
+ "headline": "Of the 246 purchase rows off the unadjusted close, the closed list written first gives 122 a benign cause under either order and leaves 124 as none_found; 41 rows change cause with the order. 243 of the 246 are one fund (VEIRX) and every off row has the price paid ABOVE the close (ratio below 1, median 0.980). The load-rate test fits at chance level (51 real vs 66 and 52 shifted), the cache has no fee column, and the sales of the same funds are off too (10.8 percent, all with the price received BELOW the close). With the benign rows set aside the close reproduces the price on 84.8 percent of purchase rows (86.8 percent explained). POST HOC, not in the list: on all 936 rows the Amount exceeds shares x close by a flat dollar figure from a short list (0, 3, 10, 15, 19, 30, 34), so rows fall outside 1 percent where the amount is small.",
+ "not_established": [
+  "What the flat dollar excess is (a transaction charge, a custodian fee, a ticket or postage charge) and who takes it: the cache has no fee column and no fee schedule is on disk.",
+  "Whether the front-load rate set (from memory) is right for any of the 19 funds: the rate test fits at chance, which says the set does not find a load, not that no load exists; VEIRX Admiral shares are a no-load class (general knowledge, not on disk).",
+  "Whether the effective-day convention (next trading day when closed) is the day the custodian priced; prior, next and settle-day closes were tested and fit 31, 18 and 18 off rows before ordering.",
+  "The sale rows' cause: they were measured (ratio, direction) but not run through the closed list.",
+  "Why 141 of 299 purchases on 2024-02-16 are off and nearly all of the 2023-02-17/21 purchases are not (post hoc, one day).",
+  "Whether the 183 rows before each fund's first served close would fit: the served series does not reach them (158 are before the start of the Yahoo cache, 25 are later than it).",
+  "Nine of the 19 funds have a sibling class on disk; ABNFX, CAIBX, CPXIX, DISVX, DFLVX, DFREX, FCNTX, PRILX, VEIRX, ACTDX have none, so another_share_class could not fire for them (it fired for none).",
+  "The reinvestment/exchange test needs an amount match within 1 percent: a reinvestment or exchange booked with a different amount is not found."
+ ]
+}
