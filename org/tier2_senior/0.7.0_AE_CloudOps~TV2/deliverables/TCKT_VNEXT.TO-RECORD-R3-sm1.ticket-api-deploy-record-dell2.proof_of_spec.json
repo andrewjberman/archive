@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-RECORD-R3-sm1.ticket-api-deploy-record-dell2",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-RECORD-R3-sm1.ticket-api-deploy-record-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "11c612ede3"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TV2",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R3.md",
+    "vintage_commit": "11c612ede3",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-RECORD-R3-sm1.ticket-api-deploy-record-dell2.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "6a5bee406c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The opal-ticket-api entry now describes the live build. Written by the repository's own recorder, not by hand: artifact_sha256 ywAvsfx/j3RTZOoOvN+znGsRhslUT+92XNgHhcglNQA= -> t1EoiJRZWXBsSc0HPw+61IP+zdQxyYGfWEi+8L6lej4=, last_deployed_commit da431554186bd74759f3d85bc4423f42a6c4a8f9 -> 861c9bba65eaf10b123698f8662f340297bc0967, last_deployed_at 2026-10-07T19:37:43Z -> 2026-10-11T10:18:21Z. Scope proven rather than trusted: the map holds 235 entries before and after with 0 added and 0 removed, and exactly ONE entry differs -- opal-ticket-api -- with those three fields and no others.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/ticket-center/CHANGELOG.json",
+      "kind": "config_data",
+      "commit_or_etag": "6a5bee406c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Written by the recorder as its own step, not by me: entry untagged-0a8d4b56, 18 pipeline-scoped commits, 1 function updated, 132 insertions. The version label defaults to the commit SHA because no --version was passed, which the recorder's usage block states."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/source-map-reconcile-audit.jsonl",
+      "kind": "doc",
+      "commit_or_etag": "6a5bee406c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One appended line, the C3 durability record of the reconcile. It entered the commit only because the recorder fingerprints this file with git hash-object BEFORE the reconcile and includes it only if THIS run changed it -- so a file that was already dirty would not have been committed by me."
+    },
+    {
+      "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ONE row, TCKT_VNEXT-D2-S36, class OBSERVATION / hazard INERT: the order's 'no AWS write' bound against the recorder's aws sns publish on its half-landed branch. Appended in binary mode with CRLF kept and read back as one of 47 json blocks, every block parsing, no duplicate id in the file. The id was computed at WRITE time inside the appending script, which closes the race that made me re-identify an earlier row this session."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the map's recorded artifact hash equals the live CodeSha256 -- expect SM1-RECORD-OK",
+      "method": "command",
+      "invocation": "python -c \"import json,subprocess;e=json.load(open('infra/aws/lambda/ci/lambda-source-map.json',encoding='utf-8'))['functions']['opal-ticket-api'];live=subprocess.run(['bash','.tools/aws','lambda','get-function-configuration','--function-name','opal-ticket-api','--region','us-east-1','--query','CodeSha256','--output','text'],capture_output=True,text=True,timeout=100).stdout.strip();print('SM1-RECORD-OK' if live and e['artifact_sha256']==live else 'SM1-RECORD-FAIL map=%s live=%s'%(e['artifact_sha256'][:8],live[:8]))\"",
+      "output_evidence": "PASS: SM1-RECORD-OK. Run at the base BEFORE the recorder as well, where it read SM1-RECORD-FAIL map=ywAvsfx/ live=t1EoiJRZ -- identical to the issuer's own dry-run, so the criterion is shown to discriminate rather than merely to pass. Both readings are from the committed map plus one live get-function-configuration, which is the same pair of planes the criterion itself names.",
+      "denominator": "1 of 1 entry graded; the map's 235 entries read before and after with 1 changed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "FIVE negative controls. (1) AC1 run BEFORE the act as well as after, so a criterion that passes trivially would be caught. (2) The stamped commit's handler checked BY CONTENT against the deployed file -- the order makes a mismatch a reportable finding, so this is the control on the recorder's own stamping rule rather than a formality. (3) The scope: the map's full entry set compared before and after, so 'only one entry moved' is a measured count and not a reading of the diff's shape. (4) The commit's file set listed, so a sweep beyond the recorder's declared pathspec would show. (5) The live function re-read after the act, so 'no AWS write' is checked and not assumed.",
+      "expected": "(1) FAIL before, OK after. (2) the stamped commit's lambda_function.py hashes to the deployed cf10e19e... (3) 235 entries before and after, 1 changed, 0 added, 0 removed. (4) at most the map, the pipeline CHANGELOG and the reconcile audit log. (5) CodeSha256 and LastModified unchanged.",
+      "observed": "(1) SM1-RECORD-FAIL map=ywAvsfx/ live=t1EoiJRZ before, SM1-RECORD-OK after. (2) the recorder stamped 861c9bba65, whose infra/aws/lambda/ticket_center/lambda_function.py hashes to cf10e19e423b25b7b74ce43efd24e73b90a8a90850094697f3f79ec7145e6e74 -- exactly the deployed file, so NO finding is owed. Worth stating why it lines up: 861c9bba65 is the R2-pk-1 AMENDMENT 1 worker commit, the last commit touching the function's source_dir, and it changed the handler by 2 lines plus four test files; the pin I deployed from was the drain merge be67d1fd38, a different commit carrying the same handler bytes, so the recorder's source_dir rule and the deployed bytes agree here by content and not by luck of naming. (3) 235 before, 235 after, 0 added, 0 removed, CHANGED ENTRIES 1 = ['opal-ticket-api'], three fields. (4) exactly three files: the map (6 lines), the reconcile audit log (1 line), the CHANGELOG (132 lines) -- the recorder's declared pathspec and nothing else. (5) CodeSha256 t1EoiJRZ... unchanged and LastModified still 2026-10-11T09:47:09Z, the R2-pk-2 apply's timestamp, so this act wrote nothing to the function.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the entry was read on two planes (the committed map at HEAD and the recorder's own printed before/after line) and the scope on two (the recorder's 'stamped 1 of 1 rows' decision line and my own independent entry-set comparison across the commit)",
+      "observed": "the planes agree: the recorder printed '+ opal-ticket-api da43155418 -> 861c9bba65' and 'stamped 1 of 1 rows under ticket-center', and my own comparison of the 235-entry map across 6a5bee406c^..6a5bee406c independently finds exactly one changed entry with the same commit values. The reconcile printed its own before/after pair, ywAvsfx/j3RTZOoO.. -> t1EoiJRZWXBsSc0H.., matching the committed field.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The order's 'no AWS write' bound is true of this RUN, not of the recorder",
+      "reason": "Step 1 required me to state where the code disagrees with the order, with the code winning. It disagrees here: record-terraform-deploy.sh:871 carries an `aws sns publish` to opal-infrastructure-alerts in the else branch of the reconcile, on the C1 persistent-half-landed path. It DID NOT fire -- the reconcile printed the OK branch, '1 reconciled, 0 HELD', because the R2-pk-2 apply fully landed -- so no AWS write occurred. But the bound held because of the world's state, not because the act cannot write. Row TCKT_VNEXT-D2-S36."
+    },
+    {
+      "item": "No deploy ledger entry was opened",
+      "reason": "The order says a record act opens none unless the recorder itself requires one, and to say so if it does. It does not: the recorder opens no ledger, and its only write path is the git commit through safe-commit.sh. Stated rather than left silent."
+    },
+    {
+      "item": "comp-blast returned no readers for the map",
+      "reason": "NOT a 'nothing breaks' clear, and the tool says so itself: ANSWER-STATE SUBJECT_ABSENT_FROM_CORPUS over a printed denominator of 29860 graph nodes -- the file is not a graph node. I followed its own pointer instead. comp-pydeps names 1 code consumer (lib/research/lists/build_lists.py, INVOKE) and 1 doc mention; a rail search names the tooling readers: .tools/deploy_ledger.py (reads tf_resource for leg targets), .tools/naming-gate.py (reads the functions keys at HEAD), .tools/parity-gates.sh (reads .functions{} keys), infra/aws/ec2/estate-report-runner (joins on source_dir), infra/aws/globgrph/debtscan_canon_scorer.py, infra/aws/lambda/ci/build-and-upload.sh, and verify-local.sh per the recorder's own header, which diffs over source_dir. NO reader was changed: the entry's shape is unchanged and only three field VALUES moved."
+    },
+    {
+      "item": "comp-blast's HOLD block",
+      "reason": "15 claims, which I read rather than stepped over: they are June change_management rows and a memory file whose text mentions lambda-source-map.json in Rule-4 L1 legs about ADDING entries. None is a hold on recording an existing entry, and none names this function. The HOLD matched the filename in old ledger prose."
+    },
+    {
+      "item": "The worktree branch of step 3",
+      "reason": "Did not fire. The order required me to work in my own linked worktree if infra/aws/lambda/ci/ or infra/aws/terraform/ticket-center/ were dirty with lines that are not mine -- my own row S25 had seen 4 uncommitted lines in the map for two other functions. Both paths read 0 dirty rows at step 3, so those lines had since been committed by their author and the shared tree was safe to record in."
+    },
+    {
+      "item": "Tagging and pushing",
+      "reason": "The recorder's closing 'Next steps' suggests git tag -a untagged-0a8d4b56 and a push --follow-tags. Neither is in this order's GO or <paths>, and the version label is a default placeholder rather than a chosen tag, so neither was done."
+    },
+    {
+      "item": "comp-schedule, comp-iam and comp-adversary",
+      "reason": "DECLARED-NOT-APPLICABLE by the order's preflight: no schedule; one read of a function configuration and no write to AWS; and the adversarial read is step 5(b), the stamped commit's file against the deployed file by content, which was run and passed."
+    }
+  ],
+  "surprises": [
+    "TCKT_VNEXT-D2-S36"
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/logs/2026-10-11/tv2_r3_sm1_source_map_record.md",
+  "compiler_tools": [
+    {
+      "tool": "record-terraform-deploy.sh (the repository's recorder, read before it was run)",
+      "invocation": "bash infra/aws/lambda/ci/record-terraform-deploy.sh ticket-center --function opal-ticket-api --author \"0.7.0_AE_CloudOps~TV2 <0.7.0_AE_CloudOps~TV2@opal.agent>\"",
+      "result": "stamped 1 of 1 rows; 0 rows under the pipeline untouched; CHANGELOG entry untagged-0a8d4b56; reconcile OK (1 reconciled, 0 HELD); committed 6a5bee406c through safe-commit.sh. NEVER --all. From the code: --function scopes the row set via record-deploy-scope.py (:499-550), which is forced to python on purpose and REFUSES rc=2 rather than falling back to the pipeline-wide sweep, and the recorder fails closed again on an empty or unparseable resolved set; last_deployed_commit is the last commit touching source_dir, NOT HEAD (the header corrects its own stale prose about HEAD at :26-35); the reconcile (:843-880) sets artifact_sha256 to the DEPLOYED CodeSha256 for that set only, settle-aware at 45 s and audited; the commit pathspec (:885-923) is the map, plus the pipeline CHANGELOG if written, plus the reconcile audit log only if THIS run changed it."
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast infra/aws/lambda/ci/lambda-source-map.json",
+      "result": "SUBJECT_ABSENT_FROM_CORPUS over 29860 nodes -- a NOT-FOUND and not a clear, in the tool's own words. Its pointer to comp-pydeps is what actually answered the readers question."
+    },
+    {
+      "tool": "comp-pydeps",
+      "invocation": "comp-pydeps consumers infra/aws/lambda/ci/lambda-source-map.json",
+      "result": "1 code consumer (lib/research/lists/build_lists.py, INVOKE) and 1 doc mention, scanned over 1148 python files"
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "'lambda-source-map' --band SURFACED, and 'aws sns publish' over the recorder",
+      "result": "named the tooling readers for the report; and 1 hit / 1 file scanned pinning the SNS call site at :871, which is row S36's evidence"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "invoked BY the recorder with my author line forwarded, and once by me for this instance",
+      "result": "the recorder's commit 6a5bee406c carried exactly its declared pathspec. Its gate output is recorded rather than cited as validation: commit-gate WARNed that it checked 0 of 3 files (no .py/.sh/.tf in the set), the risk reflex returned PARTIAL_OR_BLIND on a 97.9h-stale danger map and says 'could not check is not checked clean', the client-data check WARNed that the hashed account-id list is ABSENT so the commit was not checked for client account ids, and [one-writer] WARNed that the reconcile audit log is the laptop's unsuffixed file written from dell2 ('WARN until C-QUEUE'). naming-gate PASSED 0 graded over a 2-path domain."
+    }
+  ]
+}

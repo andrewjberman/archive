@@ -1,0 +1,192 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-424",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-424.vendor-performance-release-rolled-back.md",
+    "group": "OTHER",
+    "vintage_commit": "0246d74b53"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "0246d74b53",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-424.vendor-performance-release-rolled-back.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~IB2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "doc",
+      "commit_or_etag": "6a10f86bee",
+      "deploy_evidence": "Step 1: the irpt-performance-adapter entry restored to its content at f5d33c7aa9^, one commit touching only this file. Compared BYTE FOR BYTE on a sorted-key dump against git show f5d33c7aa9^, not merely field by field: equal. 235 function entries, 1 changed, 234 unchanged, with an assertion refusing any other to move; artifact_sha256 back to 9kYLdR64...; 58 insertions and 58 deletions, symmetric; round-trip byte-faithfulness asserted before the edit.",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "IB122-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/authorization.py",
+      "kind": "script",
+      "commit_or_etag": "b1e2bddfa6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The release's central product change, reverted with the rest of the tree. Step 4: the tree restored to fb3bae3b99 together with retained.tf, in ONE commit of 11 files, 197 insertions and 358 deletions. The delta was computed BEFORE acting -- 10 modified, 1 ADDED, 0 deleted -- and the added file performance/tests/test_vendor_use_gate.py was REMOVED, which git checkout alone would not do. Verified after: git diff --name-status against fb3bae3b99 over both granted paths reads EMPTY. Test suite last line: 1 failed, 251 passed, 2 warnings in 7.11s.",
+      "artifact_covered_by": [
+        "IB122-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/performance/retained.tf",
+      "kind": "terraform",
+      "commit_or_etag": "b1e2bddfa6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Restored to fb3bae3b99 in the same commit, which puts the count meta-argument back on all four session blocks -- the change that makes the targeted destroy of the two policies plan as 0 add, 0 change, 2 destroy. Re-indexing those addresses to the count form is also why Terraform required the two data-source targets.",
+      "artifact_covered_by": [
+        "IB122-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "arn:aws:lambda:us-east-1:313476888478:function:irpt-performance-adapter",
+      "kind": "aws_resource",
+      "commit_or_etag": "9kYLdR64P0p2TEbDXcQu1hrpQ9KtqjPNnFDpoE/W31A=",
+      "deploy_evidence": "Step 2, the leg that stopped the bleed, at 2026-10-11T10:03:25Z. The module resolves s3_object_version and source_code_hash from data.aws_s3_object.artifact, which reads the LATEST version, so version 7IkeCAOa8F8IzqgaW1_WCLczFhmtzaLn could not be re-pointed; it was re-read as present with content-sha256 9kYLdR64... and 445438 bytes, the restored entry was rebuilt (BUILD_ONLY printed 9kYLdR64..., the gate), and the result uploaded as new version B_U4XGkpDqMHPVl6u.quhmEerpseF5oC with the same digest and size. Full-root plan 0 add, 1 change, 0 destroy, the function only; applied from the saved planfile through safe-apply; live CodeSha256 read back as 9kYLdR64..., LastUpdateStatus Successful, State Active.",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "IB122-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "arn:aws:iam::313476888478:role/irpt-performance-adapter-role",
+      "kind": "aws_resource",
+      "commit_or_etag": "b1e2bddfa6",
+      "deploy_evidence": "Step 5: the two session policies REMOVED by targeted destroy, plan 0 add, 0 change, 2 destroy, exact; applied from the saved planfile through safe-apply (2 destroyed). After-read two ways: list-role-policies returns exactly the 7 pre-release names and a count of 7, and get-role-policy on each removed name returns NoSuchEntity, so absence is confirmed by name and not inferred from a list of seven.",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "IB122-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB122-1_vendor_path_rollback_after_reads.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "The ledger state and slug, both restore commits, the function's live digest and S3 version, the role's policy list after, the fresh request with its log read, the full-root plan line, the served-while-live counts and the post-restore test line. Counts, digests, status and reason codes only.",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "IB122-1-AC1",
+        "IB122-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261011T0958Z_irpt-bckend-ib424-vendor-path-rollback-20261011_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "ONE ledger entry, opened and COMMITTED before any write, naming the function, the role and both policies and stating that it is a ROLLBACK of the IB-pr-423 release; six legs, all proven; CLOSED with the sentinel removed.",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "IB122-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB122-1-AC1",
+      "criterion_verbatim": "IB122-1-AC1: live adapter CodeSha256 == 9kYLdR64...; after-reads: one fresh non-49F request refused, no vendor reached, ledger CLOSED.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r122/p122_cells.py\" . IB122-1-AC1",
+      "expect": "IB122-1-AC1 PASS",
+      "output_evidence": "OK: adapter live == 9kYLdR64; one fresh non-49F request refused NOT_AUTHORIZED, no vendor reached; ledger CLOSED | IB122-1-AC1 PASS | rc=0",
+      "denominator": "Live CodeSha256 read from get-function-configuration. The fresh request is OPTION TWO of the order's two, recorded as such: a synthetic principal cannot supply a verified internal subject, so the request is the identical IB-pr-423 event plus the prescribed log read -- 6 events since the rollback promote, served 0 across three spellings tried, and all eight vendor indicators 0, with TypeError 0 and AccessDenied 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB122-1-AC2",
+      "criterion_verbatim": "IB122-1-AC2: the live role holds 7 inline policies and neither session policy.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r122/p122_cells.py\" . IB122-1-AC2",
+      "expect": "IB122-1-AC2 PASS",
+      "output_evidence": "OK: role holds 7 inline policies; 0 of 2 session policies present | IB122-1-AC2 PASS | rc=0",
+      "denominator": "7 of 7 inline policy names read from the live role, against 9 before this act; 0 of 2 session policies present in the list, and each separately confirmed absent by get-role-policy returning NoSuchEntity.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB122-1-AC3",
+      "criterion_verbatim": "IB122-1-AC3: the tree is back: performance/ product source and retained.tf equal their content at fb3bae3b99 (the commit before the release's build), and the adapter's source-map entry equals its entry before f5d33c7aa9 apart from artifact_sha256, which equals 9kYLdR64...",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r122/p122_cells.py\" . IB122-1-AC3",
+      "expect": "IB122-1-AC3 PASS",
+      "output_evidence": "OK: performance/ and retained.tf equal fb3bae3b99; the adapter's source-map entry is its pre-release entry | IB122-1-AC3 PASS | rc=0",
+      "denominator": "git diff --name-only fb3bae3b99 HEAD over the two restored paths returns 0 lines, against 11 before the restore (10 modified plus 1 added). The source-map entry compares equal to its f5d33c7aa9^ content with artifact_sha256 excluded, and that field reads the pre-release digest.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutants were planted ONLY where a scratch root is a faithful stand-in, and observed negatives used where it is not -- stated because a mutant that fails for the wrong reason is worse than none. PLANTED, in a root outside every worktree holding copies of the after-reads, the source map, the check and the self-contained .tools/aws shim, with the BASELINE run there first and reading PASS: (1) fresh_request.refused true -> false; (2) fresh_request.vendor_reached false -> true; (3) ledger.state CLOSED -> OPEN. All three target AC1, whose file inputs a copy reproduces exactly. NOT PLANTED, with reasons: AC3 runs git diff and git show IN the root, so a non-repository scratch copy would fail rc!=0 and FAIL for the wrong reason, proving nothing about discrimination; AC2's only inputs are the live role, with no file a copy could corrupt.",
+      "expected": "AC1 FAIL on each of the three planted mutants; AC2 and AC3 discriminated by observed negatives instead",
+      "observed": "(1) FAIL: fresh_request {... 'refused': False ...} | IB122-1-AC1 FAIL rc=1. (2) FAIL: fresh_request {... 'vendor_reached': True ...} | IB122-1-AC1 FAIL rc=1. (3) FAIL: ledger {'state': 'OPEN'} | IB122-1-AC1 FAIL rc=1. Each was reverted and the baseline re-read PASS. OBSERVED NEGATIVES, which are the real world rather than a copy of it and are therefore stronger: for AC2, the role held 9 inline policies with BOTH session policies present, measured by this seat at the start of this act -- the exact state AC2 fails on; for AC3, the tree carried the release and the source-map entry was the release entry, measured by this seat as an 11-path delta against fb3bae3b99 before the restore, and independently by the issuer whose preflight records 'AC3 FAIL (tree carries the release)'. Each of the three criteria therefore has a demonstrated failing state.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The pre-release digest was produced three independent ways and all agree: the surviving S3 version 7IkeCAOa's content-sha256 metadata, the BUILD_ONLY rebuild from the restored source-map entry, and the live function after the apply. The restored source-map entry was compared byte for byte against its pre-release content, and the restored tree verified by an empty git diff against fb3bae3b99 rather than by a file count. Both applies came from saved planfiles, so the applied change is the graded change, and the closing full-root plan was taken read-only.",
+      "observed": "9kYLdR64P0p2TEbDXcQu1hrpQ9KtqjPNnFDpoE/W31A= at the surviving version, at BUILD_ONLY, in the new version's metadata and live on the function; 445438 bytes throughout. Plans: 0/1/0 for the zip, 0/0/2 for the destroy, then 'No changes' with -detailed-exitcode rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The retained vendor reports and the PERFORMANCE_USE# use records written while the release was live",
+      "reason": "The order's bound forbids deleting or altering them: they are the record of what was served. They were left untouched. The use record COUNT is reported as 'not read' rather than zero, because the record is a DynamoDB PutItem that a log-group read does not reach."
+    },
+    {
+      "item": "Any vendor call to Black Diamond or Orion, and any secretsmanager get-secret-value",
+      "reason": "Forbidden by the order's BOUNDS. None was made at any point in this act. The two secret data sources included in the destroy plan resolve a name to an ARN and never a value, and with count restored to 0 they are removed from state rather than read."
+    },
+    {
+      "item": "Driving a caller the function ADMITS for the fresh-request check",
+      "reason": "This seat cannot supply a verified internal subject, which is why the order offers a second option and why IB-pr-423's live-call arm could not have caught the defect being rolled back. Option two was taken and recorded as such: the identical IB-pr-423 event plus the prescribed log read."
+    },
+    {
+      "item": "Any judgement on whether the IB-pr-423 release should have been ordered",
+      "reason": "Not this seat's. The issuer states the apply was correct to its order and the order was wrong; the CTO ruled the rollback. This act executes the signed Branch B and records what moved."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open | close-leg x6 | close --slug irpt-bckend-ib424-vendor-path-rollback-20261011",
+      "result": "PASS -- one entry, opened and committed before any write, stating it is a rollback; CLOSED with 6 of 6 legs proven"
+    },
+    {
+      "tool": "terraform (plan) + safe-apply.sh",
+      "invocation": "full-root plan for the zip; targeted destroy for the two policies; a final read-only full-root plan",
+      "result": "PASS -- 0/1/0 then 0/0/2, both exact, each applied from its saved planfile; the closing plan reads No changes with -detailed-exitcode rc=0"
+    },
+    {
+      "tool": "build-and-upload.sh",
+      "invocation": "BUILD_ONLY=1 from the restored entry, then plain",
+      "result": "PASS -- printed the pre-release digest 9kYLdR64..., which is the proof the restored entry reproduces the pre-release bytes"
+    },
+    {
+      "tool": "git",
+      "invocation": "diff --name-status against fb3bae3b99 before and after; checkout fb3bae3b99 -- <paths>; an explicit rm of the one added file",
+      "result": "PASS -- 11-path delta before, 0 after; the added test removed, which checkout alone would not have done"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "py -3.12 -m pytest -q tests in infra/aws/lambda/investor-reporting/performance/",
+      "result": "1 failed, 251 passed -- and the one failure MEASURES row D2-W282-S3's 'pre-existing' on the pre-change tree, which the COO half had only inferred"
+    },
+    {
+      "tool": "p122_cells.py",
+      "invocation": "the three criteria at the repo root; AC1's baseline and three mutants in a mutant root",
+      "result": "PASS -- 3 of 3 at the root on the first run; AC1 baseline PASS then 3 of 3 mutants FAIL as expected"
+    },
+    {
+      "tool": "comp rail",
+      "invocation": "one raw recursive grep attempted over the yang-lambda module",
+      "result": "DENIED and correctly -- answered with the native Grep tool, which found the three module lines that settled how s3_object_version resolves"
+    }
+  ]
+}

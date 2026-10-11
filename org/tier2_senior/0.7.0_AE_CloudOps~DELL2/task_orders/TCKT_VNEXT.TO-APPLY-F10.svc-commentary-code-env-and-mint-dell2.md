@@ -8,6 +8,7 @@
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
+<round>1</round>
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
 <decomp_doc>org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_F10.md</decomp_doc> (workstream F10): the apply leg of cell `F10-d-1`, plus the mint (leg M) under its own pair.
