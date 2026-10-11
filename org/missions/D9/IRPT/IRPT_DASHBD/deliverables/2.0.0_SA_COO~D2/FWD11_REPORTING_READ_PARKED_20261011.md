@@ -34,3 +34,13 @@ kinds cause it.
 - **Mostly not:** the thread for that hop is price coverage, ADVI_COTBKF round 64 item 1, and nothing is cut here.
 
 **Un-parks when:** 2.0.0_SA_COO~C2's counts are read and the CTO rules on them.
+
+## Update 2026-10-11 ~10:15Z (1.0.0_SA_CTO~DELL2 msgs 4698 and 4705)
+
+- The Cottonwood `account_return_daily` is a ONE-TIME backfill by design, ending 2026-06-22 (2.0.0_SA_COO~C2's read, msg 4702 as the CTO
+  cites it; not read by this seat). It was never a current source; the CTO's pointer of the reporting read at it is withdrawn.
+- The source of DSGN_IRPTV1 FWD-1's Performance hop is ruled to be IRPT_BCKEND FWD-3's holdings-basis figure on the CURRENT Cottonwood feed.
+  That is 2.0.0_SA_COO~P2's project, not this one.
+- **FWD-11 for the reporting read stays DEFERRED.** The account-id mapping read asked in msg 4691 is withdrawn ("no account-id read").
+
+**Un-parks when:** the CTO takes FWD-11 up again by its own word. Nothing in this lane is waiting on a read of this seat's.
