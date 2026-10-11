@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t25",
+  "firm": "MDPF",
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "ba3ee9bd48",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t25.tier-keyed-history-quote.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/ledger/ROUND_ANALYSIS.round7.md",
+    "group": "OTHER",
+    "vintage_commit": "f5553ca3d5"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~21",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_quote.py",
+      "kind": "script",
+      "commit_or_etag": "16b6e889a8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "no deploy in this order; quote() reads files and the trading calendar only (TO BOUNDS: no AWS write, no Bloomberg call, no deploy)",
+      "artifact_covered_by": ["DQ8-t25-AC1", "DQ8-t25-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_tier_quote.py",
+      "kind": "test",
+      "commit_or_etag": "16b6e889a8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pytest-only test file; no deploy in this order"
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_bbg.py",
+      "kind": "test",
+      "commit_or_etag": "16b6e889a8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pytest-only test file; no deploy in this order"
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "67efaf3b35",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "surprise rows MDPF_DEMQUE-D1-W21-S1 and -S2 appended; no deploy in this order"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ8-t25-AC1",
+      "criterion_verbatim": "DQ8-t25-AC1 -- the three named tests (test_tier2_history_with_both_claims_measured_still_walks_non_trading_days, test_tier1_history_reads_positive_allowance_today_on_a_trading_day_and_finishes_that_day, test_tier2_history_ceiling_not_measured_has_null_finish_with_reason_and_zero_on_trading_day); expect TQ-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R8_CHECKS/dq_t25_tests.py",
+      "output_evidence": "3 passed in 0.80s (test_demque_tier_quote.py::test_tier2_history_with_both_claims_measured_still_walks_non_trading_days PASSED, ::test_tier1_history_reads_positive_allowance_today_on_a_trading_day_and_finishes_that_day PASSED, ::test_tier2_history_ceiling_not_measured_has_null_finish_with_reason_and_zero_on_trading_day PASSED); TQ-OK; rc=0",
+      "denominator": "3 of 3 named tests PASSED (rc=0)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DQ8-t25-AC2",
+      "criterion_verbatim": "DQ8-t25-AC2 -- the REAL requests: the 15,720-cell tier-4 TR request with both claims measured quoted on Friday 2026-10-09 still finishes 2026-10-17 with allowance_today 0; the tier-1 SHT8 history request quoted on Monday 2026-10-12 reads a positive allowance_today and finishes 2026-10-12; the same tier-4 request with the ceiling held reads finish_date null with not measured, and on trading Monday 2026-10-12 allowance_today 0 (the negative arm); expect TQQ-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R8_CHECKS/dq_t25_quote.py",
+      "output_evidence": "a: tier=4 finish=2026-10-17 today=0 | b: tier=1 finish=2026-10-12 today=7322 | c1: finish=None gap=history allowance per day not positive (ceiling 5858, reserve 7322); history ceiling not measured (claim held) | c2: finish=2026-10-24 today=0 | TQQ-OK tier-4 walks non-trading days (claims measured), tier-1 reads reserve on Monday, not-measured ceiling is null with reason; rc=0",
+      "denominator": "4 of 4 arms PASS (a, b, c1, c2) (rc=0)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "MUTANT: _is_tier1 patched to return False (tier keying removed, every history request reads the backfill rule) in a scratch runner, the three named tests called directly against it",
+      "expected": "the tier-1 named test FAILS (tier 1 quoted as a backfill); the tier-2 named tests PASS",
+      "observed": "PASS test_tier2_history_with_both_claims_measured_still_walks_non_trading_days; FAIL test_tier1_history_reads_positive_allowance_today_on_a_trading_day_and_finishes_that_day; PASS test_tier2_history_ceiling_not_measured_has_null_finish_with_reason_and_zero_on_trading_day; MUTANT fails 1 of 3 named tests",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "dq_t25_quote.py run twice, stdout md5 compared",
+      "observed": "5975da09185e6b49723d8862070891f7 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "data/mdpf/scripts/demque/test_demque_land.py not run",
+      "reason": "excluded by the order's pytest invocation: the file fails to collect for row MDPF_DEMQUE-D1-S7, a later cell (DQ-t-29)"
+    },
+    {
+      "item": "bbg_allowance.json not edited; no AWS write; no Bloomberg call; no deploy",
+      "reason": "outside the order's grant (BOUNDS)"
+    },
+    {
+      "item": "The 15,720-cell TR re-freeze and the standing drawer (DQ-t-26, DQ-t-27)",
+      "reason": "other cells of round 8; not in this order"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W21-S1: the demque folder run has one failure outside this order's paths (test_demque_bbg_ledger_upload.py::test_reads_record_lines_and_converts_rows_to_cells_per_mode, cells None where 14 is expected); not edited",
+    "MDPF_DEMQUE-D1-W21-S2: the order states no rule for an inferred tier-1 reserve claim or an int tier outside 1-5; the build carries the claim as it is and reads any int other than 1 as a backfill"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~21/MDPF_DEMQUE.TO-DQ-t25.session.log",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile data/mdpf/scripts/demque/bbg_quote.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/mdpf/scripts/demque --ignore data/mdpf/scripts/demque/test_demque_land.py -q",
+      "result": "1 failed, 93 passed; the failure is outside the order's paths and is filed as MDPF_DEMQUE-D1-W21-S1"
+    }
+  ]
+}
