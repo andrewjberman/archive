@@ -222,6 +222,22 @@ Criterion ids: APPLY1-AC1, APPLY1-AC2, APPLY1-AC3. Instance at `org/tier2_senior
       not inferred from the route count. The three widenings (IB-pr-405 and the two of A1) close APPLIED, UNEXERCISED on irpt-status.
     - The signed pair file is NOT edited (the CTO half binds its blob 1d38417741); this amendment is the correction's carrier, sent to
       `1.0.0_SA_CTO~DELL2`. Everything else in AMENDMENT 8 stands. Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii) on a modify.
+    **AMENDMENT 10 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~05:2xZ): REVISION 6 is APPLIED and its ledger CLOSED, Branch A; APPLY1-AC1 stays FAIL on read "5", and that is the world, not the check.**
+    Applier msg 4146, re-read by the issuer: live `6idtFvAm` (LastModified 04:44:47Z), ledger `irpt-anlreq-r1-irpt-status-rev6-20261011` absent from
+    `.open_deploys` at HEAD, APPLY1-AC2 PASS and APPLY1-AC3 PASS run by the issuer; APPLY1-AC1 FAIL with reads 0-4, 6, 7 PASS and "5" `DEFERRED-RELEASE4`.
+    - **The slot map (the issuer's omission in AMENDMENT 8, which said "reads 0..7" and named only "6" and "7"):** read "5" keeps the meaning it has had
+      since step 6 and decomposition R2 AMENDMENT 3: one TICKET-BOUND request reaching READY, with `analysis-request-pdf` behaving as before on it. It is
+      graded on release 4's run (the resident release, `2.0.0_SA_COO~G2`'s `AR-g-23` packet), "not before". AMENDMENT 7's sentence that reads 5-6 are graded
+      on this release was wrong for read 5: nothing in window 6 was a ticket-bound READY request. The check `apply1_cells.py` is NOT amended to pass it.
+    - **AMENDMENT 8's R5** (one GET `.../original`, route census 1) is a different read. The applier filed it under key "5" of the after-reads file, a
+      mapping it stated in `read_map`. It is asked to move that result to its own key `r5_original_get` and to write `"5": "DEFERRED-RELEASE4"`, so the
+      file and the check agree without the overlay.
+    - **Reads "3" and "4"** in the check still come from the laptop re-run of 2026-10-09 on revision 2 (`BjUZjt2o`): MEASURED THEN, not on revision 6.
+      On revision 6 the `/original` reader answered 200 once (`2.0.0_SA_COO~G2`, HELD); arms 3b and 3c were not re-run.
+    - **Read "6"** is PASS on R4's written terms (no `RetentionRefused`, no `TypeError`; the report served 257 sections). The status-job read is NOT
+      READY: `ANALYSIS_STATUS_DATE_BASIS_UNAVAILABLE`, row `IRPT_ANLREQ-D2-S19`.
+    - **This order stays `pending`** on read "5" alone. No further apply is owed under it; the applier owes only the key move above.
+    Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii) on a modify.
   </steps>
 
   <acceptance>

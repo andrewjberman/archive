@@ -10,6 +10,12 @@ Copied from org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/sa_r1/sa_r1b_run
   4. a refusal envelope is a refusal at ANY HTTP status.
   5. hop (f) sends a REQ-<24 hex> id only; hop (g) takes report_ref.request_id FROM THE TICKET and reads the finished
      report for that id by the same read as hop (e). The pdf route is no longer called.
+  6. (AMENDMENT 2) the shell is safe to run: token expiry is the REQUIRED argument --exp-minutes (5 to 60, no default);
+     cleanup completes the tickets FIRST, WAITS until the token's exp has passed, and only then deletes the PROFILE
+     row (deleting it earlier would WIDEN the token) and reads it back absent, on every stop path after the row was
+     written; a REQUIRED --expect-irpt-status-sha precheck stops before any write; the data-refresh zero-call read is
+     VOID on zero streams searched or a silent positive control; two report-route arms (malformed id refused 400,
+     issued id stored); --close-ticket completes an old test ticket; the trace header names this run.
 This module has NOT been run against the portal by this order; only its fake-HTTP tests have run.
 
 Original header follows.
@@ -37,7 +43,9 @@ real CloudFront host; a direct lambda invoke is deliberately NOT used (CTO IRPT_
    only status, reason, body LENGTH and a 16-hex sha256 PREFIX -- a fingerprint, never content -- and the
    detector fires on: both arms 2xx AND identical fingerprints AND length past a trivial floor.
 
-Usage: python sa_r1b_run.py [--advisor-opaque adv-04b85b8aefda]
+Usage: python fwd1_run.py --read27 <AC1 result> --exp-minutes N --expect-irpt-status-sha <prefix>
+           --run-label <label> --pair <pair path and pin> --executor <serial>
+           [--advisor-opaque adv-04b85b8aefda] [--close-ticket <id>]...
 """
 from __future__ import annotations
 
@@ -163,6 +171,15 @@ POLL_SECONDS = 30      # hop (e): seconds between polls
 NOT_READY_CODES = frozenset({"NOT_FOUND", "NOT_READY"})
 LIST_PAGES = 5         # request-list pages read (50 rows each), newest first
 SLEEP = time.sleep     # a test replaces this
+NOW = time.time        # a test replaces this (the clock the cleanup waits on)
+EXP_MIN_MINUTES = 5    # --exp-minutes is an integer in this closed range; there is no default
+EXP_MAX_MINUTES = 60
+EXP_MARGIN_SECONDS = 30   # the row outlives the token's exp by this much: local clock skew and authorizer leeway
+WAIT_STEP_SECONDS = 60    # the cleanup wait sleeps in steps of at most this
+IRPT_STATUS_FN = "irpt-status"
+TICKET_LOG_GROUP = "/aws/lambda/opal-ticket-api"   # the zero-call read's positive control
+# D5: a well-formed-looking but malformed id; the deployed report route must refuse it 400 INVALID_REPORT_REQUEST_ID
+MALFORMED_REPORT_ID = "sar1b-" + "0" * 24
 _CLIENTS = {}
 
 
@@ -211,7 +228,9 @@ def resolve_advisor(opaque, firm):
     return None
 
 
-def write_row():
+def put_row():
+    """Write the filer's PROFILE row. A raise here means the row is NOT ours (a ConditionalCheckFailed is a row that
+    already existed): nothing is deleted on that path."""
     item = {
         "PK": {"S": "USER#" + FILER}, "SK": {"S": "PROFILE"},
         "email": {"S": FILER}, "firmId": {"S": "opal-capital"},
@@ -219,27 +238,40 @@ def write_row():
         "name": {"S": FILER_NAME}, "allowedFirmIds": {"L": [{"S": FIRM}]},
     }
     ddb.put_item(TableName=USERS, Item=item, ConditionExpression="attribute_not_exists(PK)")
-    back = ddb.get_item(TableName=USERS, Key={"PK": item["PK"], "SK": item["SK"]},
+
+
+def read_row():
+    """ConsistentRead of the PROFILE row -> the item or None."""
+    back = ddb.get_item(TableName=USERS, Key={"PK": {"S": "USER#" + FILER}, "SK": {"S": "PROFILE"}},
                         ConsistentRead=True).get("Item")
-    print("OK: row written; ConsistentRead read-back present=%s allowedFirmIds=%s"
+    print("OK: ConsistentRead read-back present=%s allowedFirmIds=%s"
           % (back is not None, (back or {}).get("allowedFirmIds")))
-    return back is not None
+    return back
 
 
-def mint_token():
-    """ONE RS256 token. v2.2: tier internal, userType test-filer kept."""
+def check_exp_minutes(n):
+    """D1: an integer from EXP_MIN_MINUTES to EXP_MAX_MINUTES. A bool is not an integer here."""
+    if isinstance(n, bool) or not isinstance(n, int) or not (EXP_MIN_MINUTES <= n <= EXP_MAX_MINUTES):
+        raise ValueError("exp minutes must be an integer from %d to %d, got %r" % (EXP_MIN_MINUTES, EXP_MAX_MINUTES, n))
+    return n
+
+
+def mint_token(iat, exp_minutes):
+    """ONE RS256 token. v2.2: tier internal, userType test-filer kept. exp = iat + exp_minutes*60 (D1): the caller
+    fixed iat BEFORE the row was written, so the cleanup knows the exp whatever happens next."""
+    check_exp_minutes(exp_minutes)
     import jwt as pyjwt
     pem = _client("secretsmanager").get_secret_value(
         SecretId=PRIV_SECRET)["SecretString"]
-    issued = int(time.time())
+    exp = iat + exp_minutes * 60
     claims = {"sub": FILER, "iss": "opal-portal-auth", "aud": "opal-portal-api",
               "firmId": "opal-capital", "tier": "internal", "role": "user",
-              "userType": "test-filer", "name": FILER_NAME, "iat": issued, "exp": issued + 7200}
+              "userType": "test-filer", "name": FILER_NAME, "iat": iat, "exp": exp}
     tok = pyjwt.encode(claims, pem, algorithm="RS256")
-    print("OK: token minted  tier=internal userType=test-filer  iat=%s exp=%s  claims=%s"
-          % (iso(dt.datetime.fromtimestamp(issued, dt.timezone.utc)),
-             iso(dt.datetime.fromtimestamp(issued + 7200, dt.timezone.utc)), sorted(claims)))
-    return tok, issued
+    print("OK: token minted  tier=internal userType=test-filer  iat=%s exp=%s (%d min)  claims=%s"
+          % (iso(dt.datetime.fromtimestamp(iat, dt.timezone.utc)),
+             iso(dt.datetime.fromtimestamp(exp, dt.timezone.utc)), exp_minutes, sorted(claims)))
+    return tok, exp
 
 
 def call(token, method, path, query=None, body=None, timeout=90):
@@ -560,7 +592,7 @@ def hops(token, advisor, trace):
             break
         if res["status"] >= 400 and res["reason"] not in (None, "NOT_READY", "RESOLVING", "PENDING"):
             break
-        time.sleep(5)
+        SLEEP(5)
     a["upload_id"], a["input_id"] = upload_id, input_id
     save(trace)
     if not input_id:
@@ -762,8 +794,31 @@ def hop_e_ready(token, rid, e, named):
     return "NOT_READY"
 
 
-def hop_f_report(token, tkt, rid, f, named):
-    """POST the ticket report with the REQ id only. Refuses to send anything that is not a REQ id."""
+def arm_malformed_report_id(token, tkt, arms, named):
+    """D5 arm 1, after hop (e) is met and before hop (f): POST the journey ticket's /report with a MALFORMED id. The
+    deployed id check must refuse it HTTP 400 with code INVALID_REPORT_REQUEST_ID. Anything else is the named failure
+    REPORT_ID_ARM_UNEXPECTED and the run stops before hop (f). -> True when the arm is as expected."""
+    res = call(token, "POST", "/api/scoped/tickets/%s/report" % tkt, None, {"request_id": MALFORMED_REPORT_ID})
+    parsed = res.get("parsed")
+    code = parsed.get("code") if isinstance(parsed, dict) else None
+    arm = {"status": res.get("status"), "code": code, "sent_shape": "sar1b-<24 zeros>"}
+    arms["report_id_malformed_refused"] = arm
+    print("  (arm) malformed id http=%s code=%r" % (res.get("status"), code))
+    if res.get("status") == 400 and code == "INVALID_REPORT_REQUEST_ID":
+        arm["as_expected"] = True
+        return True
+    arm["as_expected"] = False
+    named.append({"hop": "f_report", "status": res.get("status"), "reason": "REPORT_ID_ARM_UNEXPECTED", "code": code,
+                  "note": ("the malformed id was expected to be refused HTTP 400 INVALID_REPORT_REQUEST_ID; "
+                           "the run stops before hop (f)")})
+    return False
+
+
+def hop_f_report(token, tkt, rid, f, named, arms=None):
+    """POST the ticket report with the REQ id only. Refuses to send anything that is not a REQ id.
+    D5 arm 2: a 200 is `report_id_well_formed_stored`; a 400 on the ISSUED id is the named result
+    BRANCH_B_ISSUED_ID_REFUSED: stop at once, no retry, cleanup follows."""
+    arms = arms if arms is not None else {}
     if not (isinstance(rid, str) and REQ_ID.fullmatch(rid)):
         f["status"], f["refused_to_send"] = None, True
         named.append({"hop": "f_report", "status": None, "reason": "NOT_A_REQ_ID",
@@ -773,10 +828,21 @@ def hop_f_report(token, tkt, rid, f, named):
     f["status"], f["request_id"] = res["status"], rid
     why = refusal_of(res)
     print("  (f) report http=%s reason=%r" % (res["status"], why))
+    if res["status"] == 400:
+        parsed = res.get("parsed")
+        code = parsed.get("code") if isinstance(parsed, dict) else None
+        f["refused_reason"], f["result"] = why, "BRANCH_B_ISSUED_ID_REFUSED"
+        arms["report_id_well_formed_stored"] = {"status": 400, "code": code, "as_expected": False}
+        named.append({"hop": "f_report", "status": 400, "reason": "BRANCH_B_ISSUED_ID_REFUSED", "code": code,
+                      "note": ("the deployed route refused the id the service ISSUED; stopped at once, not retried, "
+                               "cleanup follows")})
+        return False
     if why:
         f["refused_reason"] = why
+        arms["report_id_well_formed_stored"] = {"status": res["status"], "code": why, "as_expected": False}
         named.append({"hop": "f_report", "status": res["status"], "reason": why})
         return False
+    arms["report_id_well_formed_stored"] = {"status": res["status"], "as_expected": res["status"] == 200}
     return True
 
 
@@ -830,7 +896,13 @@ def hops_d_to_g(token, trace, h, named, tkt, input_id, file_sha):
     if outcome != "OK":
         unreachable(("f_report", "g_open"), "(e) ended %s; the report is not made, so (f) and (g) are not run" % outcome)
         return trace
-    if hop_f_report(token, tkt, rid, h["f_report"], named):
+    arms = trace.setdefault("report_route_arms", {})
+    if not arm_malformed_report_id(token, tkt, arms, named):
+        unreachable(("f_report", "g_open"), "REPORT_ID_ARM_UNEXPECTED: the run stops before hop (f)")
+        save(trace)
+        return trace
+    save(trace)
+    if hop_f_report(token, tkt, rid, h["f_report"], named, arms):
         save(trace)
         hop_g_open(token, tkt, h["g_open"], named)
     else:
@@ -842,34 +914,145 @@ def hops_d_to_g(token, trace, h, named, tkt, input_id, file_sha):
 # ---------------------------------------------------------------- step 6 + the zero-call proof
 
 
-def cleanup(token, trace):
+def ticket_facts(res):
+    """(status, assignee) a ticket read carries, or (None, None). The assignee is the claimer's email, lower-cased."""
+    p = res.get("parsed") if isinstance(res.get("parsed"), dict) else {}
+    t = p.get("ticket") if isinstance(p.get("ticket"), dict) else p
+    return t.get("status"), str(t.get("assignee") or "").lower()
+
+
+def complete_ticket(token, tkt, label):
+    try:
+        res = call(token, "POST", "/api/scoped/tickets/%s/complete" % tkt, None,
+                   {"resolution": "[TEST] %s arm complete" % label})
+    except Exception as e:  # noqa: BLE001 -- a failed completion is DATA; the row delete must still follow the wait
+        return {"status": 0, "reason": "RAISED_" + type(e).__name__}
+    return {"status": res.get("status"), "reason": res.get("reason")}
+
+
+def close_old_ticket(token, tkt, label):
+    """D6: complete a named OLD ticket when it reads in_progress AND is assigned to the filer; any other state is
+    recorded as found and left alone. -> {before, after, action}."""
+    rec = {"before": None, "after": None, "action": None}
+    try:
+        r = call(token, "GET", "/api/scoped/tickets/%s" % tkt)
+    except Exception as e:  # noqa: BLE001
+        rec["action"], rec["before"] = "READ_RAISED_" + type(e).__name__ + "_LEFT_ALONE", {"http": 0}
+        return rec
+    status, assignee = ticket_facts(r)
+    rec["before"] = {"http": r.get("status"), "status": status, "assigned_to_filer": assignee == FILER.lower()}
+    if r.get("status") != 200 or status is None:
+        rec["action"] = "NOT_READ_LEFT_ALONE"
+        return rec
+    if status != "in_progress" or assignee != FILER.lower():
+        rec["action"], rec["after"] = "FOUND_LEFT_ALONE", dict(rec["before"])
+        return rec
+    done = complete_ticket(token, tkt, label)
+    r2 = call(token, "GET", "/api/scoped/tickets/%s" % tkt)
+    status2, assignee2 = ticket_facts(r2)
+    rec["action"] = "COMPLETED" if done["status"] and done["status"] < 400 else "COMPLETE_REFUSED"
+    rec["complete_http"] = done["status"]
+    rec["after"] = {"http": r2.get("status"), "status": status2, "assigned_to_filer": assignee2 == FILER.lower()}
+    return rec
+
+
+def wait_past_exp(exp_unix):
+    """D2 step 2: sleep (SLEEP, replaceable) until NOW() is past exp + EXP_MARGIN_SECONDS. -> seconds slept."""
+    target = exp_unix + EXP_MARGIN_SECONDS
+    slept = 0.0
+    while NOW() <= target:
+        step = max(1.0, min(float(WAIT_STEP_SECONDS), target - NOW() + 1.0))
+        print("  waiting for the token to expire: %d s left before the row may be deleted" % max(0, target - NOW()))
+        SLEEP(step)
+        slept += step
+    return slept
+
+
+def cleanup(token, trace, exp_unix, close_tickets=()):
+    """D2, in this order on EVERY path after the row was written:
+      (1) complete every ticket the run created, and every --close-ticket one that qualifies;
+      (2) WAIT until the token's exp has passed;
+      (3) only then delete the PROFILE row and read it back ABSENT with ConsistentRead.
+    Deleting the row while the token lives WIDENS the token (the authorizer then derives allowedFirmIds = ALL)."""
     print("== step 6: cleanup, same session ==")
     out = trace["cleanup"]
+    label = trace.get("run_label") or "run"
+
+    # (1) tickets first
+    todo = [t for t in ([trace.get("journey_ticket")] +
+                        (trace.get("census", {}) or {}).get("tickets_created_by_the_census", [])) if t]
+    done, errors = {}, {}
+    if token is None:
+        out["tickets_not_attempted"] = "no token was minted"
+    else:
+        for tkt in dict.fromkeys(todo):
+            r = complete_ticket(token, tkt, label)
+            done[tkt] = r["status"] or 0
+            if r["status"] in (None, 0) or r["status"] >= 400:
+                errors[tkt] = r["reason"]
+            print("  ticket %s complete -> http=%s reason=%r" % (tkt, r["status"], r["reason"]))
+        old = {}
+        for tkt in dict.fromkeys(close_tickets):
+            if tkt in done:
+                continue
+            old[tkt] = close_old_ticket(token, tkt, label)
+            print("  old ticket %s: %s (before %s, after %s)" % (
+                tkt, old[tkt]["action"], (old[tkt]["before"] or {}).get("status"), (old[tkt]["after"] or {}).get("status")))
+        out["old_tickets"] = old
+    out["tickets_completed"] = done
+    out["tickets_completed_all"] = bool(done) and all(v < 400 for v in done.values())
+    if errors:
+        out["ticket_completion_errors"] = errors
+    out["token_left_to_expire"] = True
+    save(trace)
+
+    # (2) wait for exp
+    out["token_exp"] = iso(dt.datetime.fromtimestamp(exp_unix, dt.timezone.utc))
+    try:
+        out["waited_seconds"] = wait_past_exp(exp_unix)
+    except BaseException as e:
+        out["row_left_in_place"] = "interrupted while waiting for exp (%s); the row was NOT deleted" % type(e).__name__
+        save(trace)
+        print("ERROR: %s -- delete the row only AFTER %s plus margin" % (out["row_left_in_place"], out["token_exp"]))
+        raise
+
+    # (3) only now touch the row
+    now = NOW()
+    if now <= exp_unix:   # unreachable after the wait; a refusal rather than an early delete
+        raise RuntimeError("refusing to delete the row before exp")
+    out["row_deleted_at"] = iso(dt.datetime.fromtimestamp(now, dt.timezone.utc))
+    out["row_deleted_at_unix"] = int(now)
     ddb.delete_item(TableName=USERS, Key={"PK": {"S": "USER#" + FILER}, "SK": {"S": "PROFILE"}})
     back = ddb.get_item(TableName=USERS, Key={"PK": {"S": "USER#" + FILER}, "SK": {"S": "PROFILE"}},
                         ConsistentRead=True).get("Item")
     out["row_removed_read_back_absent"] = back is None
-    print("  row removed; ConsistentRead read-back absent = %s" % (back is None))
-
-    # every ticket this run created: the journey's, plus AMENDMENT 1's 49financial census arm
-    todo = [t for t in ([trace.get("journey_ticket")] +
-                        (trace.get("census", {}) or {}).get("tickets_created_by_the_census", [])) if t]
-    done = {}
-    for tkt in dict.fromkeys(todo):
-        res = call(token, "POST", "/api/scoped/tickets/%s/complete" % tkt, None,
-                   {"resolution": "[TEST] SA-r-1b arm complete"})
-        done[tkt] = res["status"]
-        print("  ticket %s complete -> http=%s reason=%r" % (tkt, res["status"], res["reason"]))
-    out["tickets_completed"] = done
-    out["tickets_completed_all"] = bool(todo) and all(v < 400 for v in done.values())
-    out["token_left_to_expire"] = True
+    print("  row removed after exp (%s > %s); ConsistentRead read-back absent = %s"
+          % (out["row_deleted_at"], out["token_exp"], back is None))
     save(trace)
     return trace
 
 
+def _scan_group(logs, group, pattern, start_unix, end_unix):
+    """filter_log_events over a group and window, all pages -> (matching events, log streams searched)."""
+    n, streams, tok = 0, 0, None
+    while True:
+        kw = {"logGroupName": group, "filterPattern": pattern,
+              "startTime": start_unix * 1000, "endTime": end_unix * 1000}
+        if tok:
+            kw["nextToken"] = tok
+        r = logs.filter_log_events(**kw)
+        n += len(r.get("events", []))
+        streams += len(r.get("searchedLogStreams", []))
+        tok = r.get("nextToken")
+        if not tok:
+            return n, streams
+
+
 def data_refresh_zero_calls(trace, start_unix, end_unix):
-    """AMENDMENT 2: prove ZERO data-refresh calls for the filer over the token window, from its own logs."""
-    print("== AMENDMENT 2: zero data-refresh calls, from the log group ==")
+    """D4: prove ZERO data-refresh calls for the filer over iat..exp, from its own logs. Recorded ZERO_CALLS_PROVEN only
+    when streams searched > 0 AND the positive control over the ticket API's log group found the filer >= 1 time AND
+    the data-refresh matches == 0. Zero streams searched, or a control that finds nothing, is ZERO_CALL_VOID."""
+    print("== zero data-refresh calls, from the log group ==")
     logs = _client("logs")
     pattern = '"%s"' % FILER
     out = {"claim": "measured", "log_group": DATA_REFRESH_LOG_GROUP,
@@ -878,23 +1061,24 @@ def data_refresh_zero_calls(trace, start_unix, end_unix):
            "query": "filter_log_events logGroupName=%s filterPattern=%s startTime=%d endTime=%d"
                     % (DATA_REFRESH_LOG_GROUP, pattern, start_unix * 1000, end_unix * 1000)}
     try:
-        n, streams, tok = 0, 0, None
-        while True:
-            kw = {"logGroupName": DATA_REFRESH_LOG_GROUP, "filterPattern": pattern,
-                  "startTime": start_unix * 1000, "endTime": end_unix * 1000}
-            if tok:
-                kw["nextToken"] = tok
-            r = logs.filter_log_events(**kw)
-            n += len(r.get("events", []))
-            streams += len(r.get("searchedLogStreams", []))
-            tok = r.get("nextToken")
-            if not tok:
-                break
-        out["match_count"] = n
-        out["searched_log_streams"] = streams
-        out["verdict"] = "ZERO" if n == 0 else "NON-ZERO -- report it"
-        print("  %s: %d match(es) for the filer over the window (%d stream(s) searched) -> %s"
-              % (DATA_REFRESH_LOG_GROUP, n, streams, out["verdict"]))
+        n, streams = _scan_group(logs, DATA_REFRESH_LOG_GROUP, pattern, start_unix, end_unix)
+        c_n, c_streams = _scan_group(logs, TICKET_LOG_GROUP, pattern, start_unix, end_unix)
+        out["match_count"], out["searched_log_streams"] = n, streams
+        out["control"] = {"log_group": TICKET_LOG_GROUP, "same_filter": True, "found": c_n,
+                          "searched_log_streams": c_streams}
+        void = []
+        if streams == 0:
+            void.append("streams searched is 0 on %s" % DATA_REFRESH_LOG_GROUP)
+        if c_n < 1:
+            void.append("the positive control found the filer %d time(s) in %s, needs >= 1" % (c_n, TICKET_LOG_GROUP))
+        if n > 0:
+            out["verdict"] = "NON-ZERO -- report it"
+        elif void:
+            out["verdict"], out["void_reasons"] = "ZERO_CALL_VOID", void
+        else:
+            out["verdict"] = "ZERO_CALLS_PROVEN"
+        print("  %s: %d match(es), %d stream(s) searched; control %s: %d found -> %s"
+              % (DATA_REFRESH_LOG_GROUP, n, streams, TICKET_LOG_GROUP, c_n, out["verdict"]))
     except Exception as e:  # noqa: BLE001 -- a failed retrieval returns a VALUE; say so, never read it as zero
         out["match_count"] = None
         out["verdict"] = "UNREAD -- %s: %s" % (type(e).__name__, str(e)[:160])
@@ -903,11 +1087,30 @@ def data_refresh_zero_calls(trace, start_unix, end_unix):
     save(trace)
 
 
+def read_irpt_status_sha():
+    """The live irpt-status CodeSha256 (through an AWS client a test can replace)."""
+    return _client("lambda").get_function_configuration(FunctionName=IRPT_STATUS_FN)["CodeSha256"]
+
+
+def precheck_irpt_status(prefix):
+    """D3: runs BEFORE the row is written. -> (ok, info). Not ok when the live CodeSha256 does not start with the
+    expected prefix (IRPT_STATUS_BUILD_MISMATCH, both values recorded) or cannot be read (IRPT_STATUS_BUILD_UNREAD)."""
+    info = {"function": IRPT_STATUS_FN, "expected_prefix": prefix, "live_code_sha256": None}
+    try:
+        live = read_irpt_status_sha()
+    except Exception as e:  # noqa: BLE001 -- an unread build is not a match
+        info["result"], info["live_code_sha256"] = "IRPT_STATUS_BUILD_UNREAD", "UNREAD: " + type(e).__name__
+        return False, info
+    info["live_code_sha256"] = live
+    ok = isinstance(live, str) and bool(prefix) and live.startswith(prefix)
+    info["result"] = "IRPT_STATUS_BUILD_MATCH" if ok else "IRPT_STATUS_BUILD_MISMATCH"
+    return ok, info
+
+
 def limb3_non_500(token):
     """AMENDMENT 3 precondition limb 3: ONE real call must answer non-500 before any hop.
 
-    It cannot be settled from the log group: after the 16:43:21Z rollback that group held ZERO events of
-    any kind, so 'no TypeError' there is ABSENCE OF TRAFFIC and not health. Only a real authenticated call
+    It cannot be settled from the log group: a group with ZERO events of any kind shows ABSENCE OF TRAFFIC, not health. Only a real authenticated call
     discriminates, and the authorizer refuses an unauthenticated one before irpt-status is ever reached --
     so this runs after the mint and gates everything that follows.
     """
@@ -918,8 +1121,8 @@ def limb3_non_500(token):
           % (res["status"], res["reason"], ok))
     return ok, {"claim": "measured", "route": "GET /api/scoped/investor-reporting/status",
                 "status": res["status"], "reason": res["reason"], "non_500": ok,
-                "why_not_from_logs": ("the log group held 0 events of ANY kind after the 16:43:21Z rollback, "
-                                      "so a 0 error count there is absence of traffic, not health")}
+                "why_not_from_logs": ("a log group with no events shows absence of traffic, not health; only a "
+                                      "real authenticated call discriminates")}
 
 
 def save(trace):
@@ -952,42 +1155,51 @@ def save(trace):
         p.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
 
 
-def main(argv):
-    ap = argparse.ArgumentParser()
+def _exp_minutes_arg(text):
+    if not re.fullmatch(r"[0-9]+", text):
+        raise argparse.ArgumentTypeError("--exp-minutes must be an integer from %d to %d, got %r"
+                                         % (EXP_MIN_MINUTES, EXP_MAX_MINUTES, text))
+    n = int(text)
+    try:
+        return check_exp_minutes(n)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(str(e))
+
+
+def _nonblank(text):
+    if not text.strip():
+        raise argparse.ArgumentTypeError("must not be blank")
+    return text.strip()
+
+
+def build_parser():
+    ap = argparse.ArgumentParser(prog="fwd1_run.py")
     ap.add_argument("--advisor-opaque", default="adv-04b85b8aefda")
     ap.add_argument("--read27", required=True,
                     help="AC1's measured result, carried in from the separate STOP 1 invocation")
-    a = ap.parse_args(argv)
-    run_id = "SA-r-1b-" + iso()
+    ap.add_argument("--exp-minutes", required=True, type=_exp_minutes_arg,
+                    help="token lifetime in minutes, an integer from %d to %d; no default" % (EXP_MIN_MINUTES, EXP_MAX_MINUTES))
+    ap.add_argument("--expect-irpt-status-sha", required=True, type=_nonblank,
+                    help="prefix the live irpt-status CodeSha256 must start with; checked before anything is written")
+    ap.add_argument("--run-label", required=True, type=_nonblank, help="names this run in the trace, e.g. R2-tr-1")
+    ap.add_argument("--pair", required=True, type=_nonblank, help="the pair's path and pin, as one string")
+    ap.add_argument("--executor", required=True, type=_nonblank, help="the executing seat's serial")
+    ap.add_argument("--close-ticket", action="append", default=[], metavar="TICKET_ID", type=_nonblank,
+                    help="an old test ticket to complete in cleanup step 1 if it is in_progress and assigned to the filer; "
+                         "repeatable")
+    return ap
 
-    trace = {
-        "run_id": run_id, "executor": "0.7.0_AE_CloudOps~TV2", "claim": "measured",
-        "pair": "v2.2", "order_pin": "68642d02e9",
-        "amendment_3": ("run 2 under the same pair and halves, started by the precondition rather than a new GO: "
-                        "irpt-status LastModified later than 15:43:11Z, CodeSha256 not VC/r14ka..., and ONE real "
-                        "call non-500. Fresh row and token; the full census re-run because a host changed."),
-        "amendment_4_cto_code_read_verbatim": {
-            "source": "order AMENDMENT 4, from CTO msg 3747 / v2.2 half AMENDMENT 2; copied verbatim as the GO requires",
-            "subject": "GET /api/scoped/amgt/watchlist is NOT a STOP, proved by a code read rather than by byte comparison",
-            "block": [
-                ("lib/research/api/scoped_amgt.py:6409-6421 _firm_id(event): \"The ONLY source of firm identity in "
-                 "this module: the header `auth-validator-edge` injects after verifying the JWT ... The firm is "
-                 "never read from the path or the body.\""),
-                (":6922 firm_id = _firm_id(event) in handler; :6986-6987 if rest == [\"watchlist\"] and method == "
-                 "\"GET\": return _response(200, read_starred(firm_id))."),
-                ("selected_tenant occurrences in the module: 0. So the route returns the CALLER's own firm list, "
-                 "opal-capital, for every target, and can never read another firm's partition."),
-            ],
-            "independently_verified_by_this_seat": ("grep -c selected_tenant lib/research/api/scoped_amgt.py = 0; "
-                                                    "_firm_id reads FIRM_HEADER only and raises 401 when absent "
-                                                    "(fails closed); the watchlist branch returns "
-                                                    "read_starred(firm_id)."),
-        },
+
+def build_trace(a, run_id):
+    """The trace header names THIS run (D7): label, pair and executor come from the arguments."""
+    return {
+        "run_id": run_id, "run_label": a.run_label, "executor": a.executor, "claim": "measured",
+        "pair": a.pair,
         "entry": {"host": HOST, "transport": "HTTPS through CloudFront",
                   "not_used": "direct lambda invoke (CTO IRPT_YCDGEN @d54e0b7515 condition 1)"},
-        "preconditions": {"read27": a.read27, "cto_half_v2_2": "022ee70258", "row_written": None,
+        "preconditions": {"read27": a.read27, "irpt_status": None, "row_written": None,
                           "token": "tier internal, userType test-filer, role user, firmId opal-capital",
-                          "token_exp": None},
+                          "token_iat": None, "token_exp": None, "exp_minutes": a.exp_minutes},
         "census": None,
         "hops": [
             {"hop": "a_upload", "call": "POST /api/scoped/investor-reporting/analysis/inputs?selected_tenant=49financial",
@@ -1001,6 +1213,7 @@ def main(argv):
             {"hop": "g_open", "call": "GET /api/scoped/tickets/{ticketId}; GET .../analysis/{requestId}/sections",
              "status": 0, "report_opened": False},
         ],
+        "report_route_arms": {},
         "named_failures": [], "journey_ticket": None,
         "cleanup": {"row_removed_read_back_absent": False, "tickets_completed": {}},
         "data_refresh_zero_calls": None,
@@ -1008,43 +1221,83 @@ def main(argv):
                               "and a 16-hex sha256 PREFIX as a fingerprint -- never payload content."),
     }
 
+
+def main(argv):
+    a = build_parser().parse_args(argv)
+    run_id = a.run_label + "-" + iso()
+    trace = build_trace(a, run_id)
+
+    # D3: nothing is written before the build is the expected one
+    ok, info = precheck_irpt_status(a.expect_irpt_status_sha)
+    trace["preconditions"]["irpt_status"] = info
+    print("== precheck: irpt-status build ==\n  expected prefix %r, live %r -> %s"
+          % (info["expected_prefix"], info["live_code_sha256"], info["result"]))
+    if not ok:
+        trace["named_failures"].append({
+            "hop": "ALL", "status": None, "reason": info["result"],
+            "expected_prefix": info["expected_prefix"], "live_code_sha256": info["live_code_sha256"],
+            "note": "stopped before any write: no row, no token, no census, no hop"})
+        save(trace)
+        print("STOP: %s -- nothing was written" % info["result"])
+        return 1
+
     advisor = resolve_advisor(a.advisor_opaque, FIRM)
     if advisor is None:
         return 1
-    if not write_row():
-        print("ERROR: row not readable after the put")
+
+    # iat and exp are fixed BEFORE the row exists, so every later path knows the exp it must wait for (D1, D2)
+    iat = int(NOW())
+    exp = iat + check_exp_minutes(a.exp_minutes) * 60
+    trace["preconditions"]["token_iat"] = iso(dt.datetime.fromtimestamp(iat, dt.timezone.utc))
+    trace["preconditions"]["token_exp"] = iso(dt.datetime.fromtimestamp(exp, dt.timezone.utc))
+    try:
+        put_row()
+    except Exception as e:  # noqa: BLE001 -- the row is not ours to delete; nothing else ran
+        trace["named_failures"].append({"hop": "ALL", "status": None, "reason": "ROW_WRITE_FAILED",
+                                        "note": "%s: %s; the row was not written by this run and is not deleted"
+                                                % (type(e).__name__, str(e)[:160])})
+        save(trace)
+        print("ERROR: row not written: %s" % type(e).__name__)
         return 1
     trace["preconditions"]["row_written"] = iso()
-    token, issued = mint_token()
-    trace["preconditions"]["token_exp"] = iso(dt.datetime.fromtimestamp(issued + 7200, dt.timezone.utc))
-    save(trace)
 
+    token = None
     try:
-        ok3, limb3 = limb3_non_500(token)
-        trace["preconditions"]["amendment_3_limb_3"] = limb3
-        save(trace)
-        if not ok3:
-            trace["named_failures"].append({
-                "hop": "ALL", "status": limb3["status"], "reason": "PRECONDITION_LIMB_3_FAILED",
-                "note": ("irpt-status still answers 5xx, so AMENDMENT 3 limb 3 is unmet: no census and no "
-                         "hop ran, and the order's 'never run hops against a 500 host' holds.")})
-            print("STOP: limb 3 unmet -- irpt-status answered %s; no census, no hops" % limb3["status"])
-        else:
-            summary, stop = census(token, run_id)
-            trace["census"] = summary
+        # every path from here on ends in cleanup(), which waits for exp before it touches the row
+        if read_row() is None:
+            trace["named_failures"].append({"hop": "ALL", "status": None, "reason": "ROW_NOT_READABLE",
+                                            "note": "the row was not readable after the put; no token minted"})
+            print("STOP: row not readable after the put -- going to cleanup")
             save(trace)
-            if stop:
-                trace["named_failures"].append({"hop": "ALL", "status": None,
-                                                "reason": "STOP_BEFORE_HOPS", "note": stop})
-                print("STOP: %s -- no hop runs; going to cleanup" % stop)
+        else:
+            token, minted_exp = mint_token(iat, a.exp_minutes)
+            assert minted_exp == exp
+            save(trace)
+            ok3, limb3 = limb3_non_500(token)
+            trace["preconditions"]["limb_3_non_500"] = limb3
+            save(trace)
+            if not ok3:
+                trace["named_failures"].append({
+                    "hop": "ALL", "status": limb3["status"], "reason": "PRECONDITION_LIMB_3_FAILED",
+                    "note": ("irpt-status still answers 5xx, so the precondition is unmet: no census and no "
+                             "hop ran.")})
+                print("STOP: limb 3 unmet -- irpt-status answered %s; no census, no hops" % limb3["status"])
             else:
-                hops(token, advisor, trace)
+                summary, stop = census(token, run_id)
+                trace["census"] = summary
+                save(trace)
+                if stop:
+                    trace["named_failures"].append({"hop": "ALL", "status": None,
+                                                    "reason": "STOP_BEFORE_HOPS", "note": stop})
+                    print("STOP: %s -- no hop runs; going to cleanup" % stop)
+                else:
+                    hops(token, advisor, trace)
     finally:
-        cleanup(token, trace)
-        data_refresh_zero_calls(trace, issued, int(time.time()) + 1)
+        cleanup(token, trace, exp, a.close_ticket)
+        data_refresh_zero_calls(trace, iat, exp)
     print("OK: trace at %s" % TRACE.relative_to(ROOT))
     print("OK: own copy at %s" % MY_TRACE.relative_to(ROOT))
-    return 0
+    return 0 if trace["cleanup"].get("row_removed_read_back_absent") else 1
 
 
 if __name__ == "__main__":
