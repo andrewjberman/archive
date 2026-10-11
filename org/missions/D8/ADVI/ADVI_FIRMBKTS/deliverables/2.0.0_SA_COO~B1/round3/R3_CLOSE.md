@@ -86,8 +86,9 @@ only the router. The producers' role also holds no grant on the new prefix (row 
   limb grades a name that has a `name_rulings` row from that row; its close exercise is the saved plan PASS for the two SNS
   groups plus a planted no-row REFUSE); `~FBL` then re-runs the saved plan unchanged and the CTO reads the first reason
   line after the next organic publish.
-- **The producers' role grant** (`D1-S18`), the act-4 readers' own dormant cuts and pairs, the registry change for a
-  serving-route bucket separate from the routed alias, and the exec-summary and partners-API acts: round 4.
+- **The producers' role grant** (`D1-S18`), the act-4 readers' own dormant cuts and pairs (every generated reader of the
+  routed bucket in ONE window: a separate serving-route field in the builder was REFUSED by the CTO, ADDENDUM 7, FWD-3), and
+  the exec-summary and partners-API acts: round 4.
 - **The 19 objects' shipment and `gold_dispatch.sh`'s deliberate deploy**: the window's first leg, after the GO.
 
 ## Rows at this close
@@ -111,8 +112,9 @@ Whether each is DISPOSITIONED in the channel's sense is the CVO's to write; this
 ## For the round-4 analysis (the issuer's reading, not a cut)
 
 1. **Order of the window:** the producers' role grant (laptop, IAM write); the act-4 readers cut dormant (auth-validator-edge
-   and the router through the laptop identity, the IRPT consumers, three gold runners); the serving-route field in the
-   builder; then acts 2, 3, 4, 4b and 4c in one window, each with its pair and entry.
+   and the router through the laptop identity, the IRPT consumers, three gold runners); then acts 2, 3, 4, 4b and 4c in one
+   window, each with its pair and entry. (A separate serving-route field was proposed here and refused: one registry row,
+   no second edit; every generated reader of the routed bucket moves in the one window.)
 2. **A reader census over the whole estate by key, not by prefix literal:** the next one must include `.mjs`, `.sh`, `.yaml`
    and Terraform, and resolve template-literal keys; two readers of the authorization data were missed by both instruments.
 3. **The SEV1 page path delivers nothing** (rows `D1-S15`, `D1-S16`): `FB-f-12` enables the reason; the remedy is read from
