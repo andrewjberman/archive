@@ -1,0 +1,7 @@
+{
+  "files": ["test_receipt_ledger.py", "test_custody_retained.py"],
+  "fails_at_base": true,
+  "base_commit": "1c40c646ed17a4c719f19113d65c6111a3457db4",
+  "base_tail": "2 passed, 32 errors in 3.78s",
+  "leak": "ycharts/generate/tests/test_receipt_ledger.py:11 imports run_offline_suite, whose line 37 runs netguard.install() at import (netguard.py:77-80 replaces socket.socket.connect, connect_ex, socket.create_connection and socket.getaddrinfo; nothing ever restores them), so every later test in the interpreter refuses an external connection (NetGuardRefused). The custody tests drive the directory Entry (directory/tests/test_custody_owner.py:40, ycharts/generate/tests/test_custody_entry.py harness, test_custody_retained.py:282 and :387, line numbers at the base), whose served.py:1225 _internal_allowed_firms builds a default boto3 dynamodb client when load_service_profile is unset (served.py:1146-1151) and reads the caller's profile row LIVE; the refused connection raises, served.py:1226-1227 turns it into FIRM_BINDING, and the selection returns no 'data' key (KeyError 'data'). Alone with working credentials the same read succeeds, which is why the pair passes alone. Fix: the custody tests inject load_service_profile = lambda email: None (the answer for a caller with no profile row), so no test in either file reads the network."
+}
