@@ -21,24 +21,24 @@ qq-5 redeploy), with the shared portal working copy DEV `8ed372cb` (it does not 
 - FWD-16: one PDF-only name was rendered (ADBE US); the openers were not pressed in this walk.
 - FWD-21: the 17 non-December fiscal-year names showing 2027-2029 are the CTO's "CORRECT, not a defect".
 
-## FWD-12 and FWD-20 -- av-10 (the rendered census)
+## FWD-12 and FWD-20 -- av-10 (the rendered census), READ ON THE LIVE FUNCTION `VNcX9ntm` (applied 14:57:44Z)
 
-**State at 14:05Z.** av-1 and av-2 are drained; av-2 is on portal DEV (`f00c7b8ee8`); the /12 write (av-3) is read Branch A (95 of 95, ledger closed
-@444123834e); the API redeploy (av-4) is AMGT_RESAPP's `ff-4` window, earliest GO ~15:00Z. The LIVE function still serves /11, so the REAL read
-(`av_capture.py` over the live function, then `av10_rendered_census.cjs`) is NOT taken yet and nothing below is graded on it.
+Chain: av-1 @f583a91842, av-2 on DEV @f00c7b8ee8, av-3 the /12 write (ledger `amgt-corpus-r46-av3` CLOSED @444123834e, Branch A), av-4 leg p applied by
+AMGT_RESAPP's `ff-4`. Evidence: `C1/evidence/r46_av10_census_live_20261011.txt`, `r46_av4_legp_post_read_20261011.txt`,
+`r46_av4_population_read_20261011.txt`, `r46_av4_post_act_20261011.md`. `av10_rendered_census.cjs` runs the REAL DEV `modelSheet.ts` over the live payloads:
+the sheet builder the page calls, not a browser DOM walk.
 
-**PRE-READ, a prediction, labelled as one.** `av10_preread_inject.py` puts each name's STORED /12 `team_sheet` (exactly what the API will return
-once it picks the /12 objects) into the live capture; `av10_rendered_census.cjs` runs the REAL `modelSheet.ts` of DEV `f00c7b8e` over it
-(`C1/evidence/r46_av10_preread_census_20261011.txt`):
-
-| read | predicted result |
+| read | result |
 |---|---|
-| classes over the 32 own workbooks | FIGURE 3381, HEADING 316, CONTROL 62, sum 3759 = the sheets' rows; per-name sums hold |
-| FIGURE rows by source | Bloomberg 482, team's own value 2899, why 0, refused 0, **unmapped 0** (sum 3381) |
-| rendered | 316 heading rows, 0 CONTROL rows rendered, 0 why-rows with a barred word |
-| the first group | equals the sheet's non-CONTROL rows, in order and labels, on 32 of 32 names with team rows |
-| names | 63 `master_absent` render the base rows with the served reason; the master template is still not in the library |
+| classes over the 32 own workbooks | FIGURE 3381, HEADING 316, CONTROL 62, sum 3759 = the sheets' rows, per name |
+| FIGURE rows by source | Bloomberg 482, team's own value 2899, why 0, refused 0, **unmapped 0** of 3381 |
+| rendered | 316 heading rows; 0 CONTROL rows rendered; 0 reasons with a barred word |
+| first group vs the sheet's non-CONTROL rows | equal on 32 of 32 names with team rows |
+| names | 63 `master_absent` render the base rows with the served reason (the master template is not in the library) |
+| served effect (leg p) | `team_sheet` equals the stored /12 field 95/95; four names 4/4 with every other block EQUAL |
 
-Of the 497 FIGURE rows whose label matches a row spec, 482 have a served Bloomberg figure and 15 fall to the team's value (precedence 1 needs a
-served figure). The 4,296 text cells (for example `#VALUE!`) are not rendered as values by the builder's rule (a team cell is a finite number only; av2_check arms b4 and b5 pin it); this pre-read does not re-read those 4,296 cells one by one.
-**Limit:** the sheet builder on stored fields, not a browser DOM walk and not the live payload; the post-act read replaces it.
+**Two findings the grade should read beside these numbers** (row `AMGT_CORPUS-D1-S5`; the CTO's, not cut here): on the DEV-built "All figures" fold, 1348
+of the 3381 FIGURE rows (40%) are labelled by raw field codes and 72% of the float cells print more than 4 decimals. The census above is true as ruled; the page
+law (no raw code on the face, a PM-readable figure) reads worse for the 32 own-workbook names than before. DEV only; av-2 is not promoted.
+**PROD-unchanged condition:** 67 of 86 PROD-built pairs differ, none on a team-sheet surface; one is a content change (SAN FP's name reads "Sanofi", the ff-4
+display-name rule). See `r46_av4_post_act_20261011.md`.
