@@ -40,6 +40,14 @@
       "artifact_covered_by": ["AC2"]
     },
     {
+      "path_or_key": "lib/research/identity/tests/test_writers_carry_issuer.py",
+      "kind": "test",
+      "commit_or_etag": "f97a368f0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED under AMENDMENT 1 (e961bb1c4e, path now in <paths>): the three patches at lines 34, 47 and 53 repointed from add_security._research_folders_disclosure to crosswalk._research_folders_for_disclosure, same (None, None) return. Tests kept, not deleted; the line-53 with-statement is re-wrapped with a backslash continuation and no other change.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
       "path_or_key": "lib/research/identity/tests/test_write_pool_guard.py",
       "kind": "test",
       "commit_or_etag": "0e14335de2",
@@ -52,7 +60,7 @@
       "kind": "doc",
       "commit_or_etag": "0e14335de2",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "APPENDED: three rows AMGT_RESAPP-D1-W353-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~R1), -S2 and -S3 (OBSERVATION, INERT). The gate accepted 3 new rows of 1027 total.",
+      "deploy_evidence": "APPENDED: three rows AMGT_RESAPP-D1-W353-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~R1), -S2 and -S3 (OBSERVATION, INERT). No row filed in this re-seat. The S1 premise (test_writers_carry_issuer.py outside <paths>) is closed by the issuer's AMENDMENT 1, which adds the file to <paths>; the row itself is not edited.",
       "artifact_covered_by": ["AC2"]
     }
   ],
@@ -72,10 +80,9 @@
       "criterion_verbatim": "the whole identity test folder passes with 0 failed (266 passed at the base, plus the new file's tests); and exit=0",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/identity/tests -q; echo \"exit=$?\"",
-      "output_evidence": "3 failed, 270 passed, 47 warnings, 2 subtests passed in 15.51s\nexit=1\nFAILED lib/research/identity/tests/test_writers_carry_issuer.py::AddSecurityCarriesIssuer::test_record_carries_issuer_cik_from_the_stubbed_source - AttributeError\nFAILED lib/research/identity/tests/test_writers_carry_issuer.py::AddSecurityCarriesIssuer::test_record_carries_none_when_no_source_measures_it - AttributeError\nFAILED lib/research/identity/tests/test_writers_carry_issuer.py::AddSecurityCarriesIssuer::test_unreadable_sources_refuse_the_build - AttributeError",
-      "denominator": "270 passed of 273 collected (266 at the base plus 7 new); 3 failed; the order requires 0 failed",
-      "status": "FAIL",
-      "status_reason": "BLOCKING AMGT_RESAPP-D1-W353-S1: the retired name _research_folders_disclosure is patched at test_writers_carry_issuer.py lines 34, 47 and 53, a file outside the order's <paths>. The worker did not edit it (a path it lacks is a BLOCKING row, not an override); the order stays open until the issuer widens <paths> or rules.",
+      "output_evidence": "273 passed, 2 subtests passed in 23.12s\nexit=0",
+      "denominator": "273 passed of 273 collected (266 at the base plus 7 new in test_write_pool_guard.py); 0 failed",
+      "status": "PASS",
       "judgment": false
     }
   ],
@@ -83,12 +90,12 @@
     "mutant": {
       "description": "The check's own discriminator: the same r89 check run on the unguarded base 3f97e49c5f, where write_pool has no refusal.",
       "expected": "G1 and G2 FAIL (a put lands over the served object), G3 and G4 PASS, R89 WRITE-POOL GUARD: NO, exit=1",
-      "observed": "At 3f97e49c5f: 'puts=['crosswalk/v1/2026-09-19.json']' on door A and door B; 'FAIL G1 door A ...', 'FAIL G2 door B ...', 'PASS G3 control ...', 'PASS G4 the union write ...', 'R89 WRITE-POOL GUARD: NO', exit=1. At the committed tree the same G1 and G2 lines read PASS.",
+      "observed": "At 3f97e49c5f (recorded by the prior session): 'puts=['crosswalk/v1/2026-09-19.json']' on door A and door B; 'FAIL G1 door A ...', 'FAIL G2 door B ...', 'PASS G3 control ...', 'PASS G4 the union write ...', 'R89 WRITE-POOL GUARD: NO', exit=1. At the committed tree the same G1 and G2 lines read PASS (re-run this session).",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "two runs of the AC1 invocation on the committed tree (a post-change run and the literal proof run) compared line by line; the pytest folder counted twice at the change",
-      "observed": "The AC1 deciding lines (PASS G1, PASS G2, PASS G3, PASS G4, R89 WRITE-POOL GUARD: YES, exit=0) are identical in both runs. The identity folder read 3 failed, 270 passed in both runs.",
+      "method": "the AC1 invocation run twice on the committed tree (once in the pre-change pass and once in the literal proof pass); the identity folder run before and after the test repoint",
+      "observed": "The AC1 deciding lines (PASS G1, PASS G2, PASS G3, PASS G4, R89 WRITE-POOL GUARD: YES, exit=0) identical in both runs. The identity folder read 3 failed, 270 passed before the repoint (all three AttributeError on the retired name) and 273 passed, 0 failed after it.",
       "status": "STABLE"
     }
   },
@@ -96,10 +103,6 @@
     {
       "item": "No put against the real opal-data-harvest bucket by this worker; every put in AC1 and in the new tests goes through _FakeS3.",
       "reason": "Bound of the order: stubbed client only, no store write. The check's door A does a read-only GET through crosswalk.load_issuer_sources() on the real bucket (surprise row AMGT_RESAPP-D1-W353-S2); that read is recorded, not excluded."
-    },
-    {
-      "item": "The three test_writers_carry_issuer.py tests are not repointed.",
-      "reason": "That file is outside the order's <paths>. A path the worker lacks is a BLOCKING row on AC2, never an override (surprise row AMGT_RESAPP-D1-W353-S1)."
     }
   ],
   "surprises": [
@@ -107,17 +110,17 @@
     "AMGT_RESAPP-D1-W353-S2",
     "AMGT_RESAPP-D1-W353-S3"
   ],
-  "session_log": "Worker session of 0.9.0_WK_AMGT_RESAPP~353 at the worktree C:/dev/wk-resapp-353 (branch wk-AMGT_RESAPP-353), base 3f97e49c5f, issuance 16d359ecc3 an ancestor. Code and rows committed at 0e14335de2; this instance committed on top.",
+  "session_log": "Worker session of 0.9.0_WK_AMGT_RESAPP~353 (re-seated for AMENDMENT 1) at the worktree C:/dev/wk-resapp-353 (branch wk-AMGT_RESAPP-353). Guard and new tests committed at 0e14335de2 (inherited); AMENDMENT 1 cleared the test_writers_carry_issuer.py <paths> gap (e961bb1c4e); the three-patch repoint committed at f97a368f0a; this instance committed on top.",
   "compiler_tools": [
     {
       "tool": "python -m py_compile",
-      "invocation": "python -m py_compile lib/research/identity/crosswalk.py lib/research/identity/add_security.py lib/research/identity/tests/test_write_pool_guard.py lib/research/identity/tests/test_write_pool_union.py",
-      "result": "rc=0 (COMPILE-OK)"
+      "invocation": "python -m py_compile lib/research/identity/crosswalk.py lib/research/identity/add_security.py lib/research/identity/tests/test_write_pool_guard.py lib/research/identity/tests/test_write_pool_union.py lib/research/identity/tests/test_writers_carry_issuer.py",
+      "result": "rc=0 (COMPILE-OK, as run by the commit gate for the repoint commit)"
     },
     {
-      "tool": ".tools/safe-commit.sh (commit-gate, surprise-row-gate, to-pipeline-gate, missions-tree-check)",
-      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~353 <0.9.0_WK_AMGT_RESAPP~353@opal.agent>\" -F .scratch/commit1.msg -- <the five paths>",
-      "result": "rc=0; surprise-row-gate OK (3 new rows of 1027 total); missions-tree-check 0 violation(s); commit 0e14335de2"
+      "tool": ".tools/safe-commit.sh (commit-gate, surprise-row-gate, to-pipeline-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~353 <0.9.0_WK_AMGT_RESAPP~353@opal.agent>\" -F .scratch/commit_nn5_repoint.msg -- lib/research/identity/tests/test_writers_carry_issuer.py",
+      "result": "rc=0; commit-gate All checks passed; surprise-row-gate OK (no rows in this commit); commit f97a368f0a"
     }
   ]
 }
