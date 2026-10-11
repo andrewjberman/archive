@@ -1,0 +1,14 @@
+43c43
+<                  "--resource-arns", "arn:aws:s3:::%s/%s" % (bucket, key), "--resource-policy", policy_text)
+---
+>                  "--resource-arns", "arn:aws:s3:::%s/%s" % (bucket, key), "--resource-policy", POLICY_FILE_URI)
+60a61,65
+>     global POLICY_FILE_URI
+>     import os
+>     _pf = ".sim_policy_tmp.json"
+>     open(_pf, "w", encoding="utf-8").write(policy_text)
+>     POLICY_FILE_URI = "file://" + _pf
+78c83
+<     oai = [s for s in stm if (s.get("Principal") or {}).get("AWS") in (OAI, [OAI]) and s.get("Effect") == "Allow"]
+---
+>     oai = [s for s in stm if isinstance(s.get("Principal"), dict) and s["Principal"].get("AWS") in (OAI, [OAI]) and s.get("Effect") == "Allow"]
