@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e88",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e88.c06-total-vs-class-sum-trace.md",
+    "group": "OTHER",
+    "vintage_commit": "d29944d19a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R20.md",
+    "vintage_commit": "d29944d19a",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e88.c06-total-vs-class-sum-trace.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~78",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/C06_TOTAL_GAP_TRACE_20261011.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only trace record; no deploy, no write to any table or bucket.",
+      "artifact_covered_by": [
+        "SC20-e88-AC1",
+        "SC20-e88-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two appended surprise rows (MDPF_SECCLASS-D1-W78-S1, MDPF_SECCLASS-D1-W78-S2); no existing row edited.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC20-e88-AC1",
+      "criterion_verbatim": "the record's three published gaps equal the served ones, its recomputed gaps agree within $0.05, and a cause is shown.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R20_CHECKS/c06_gap_record_check.py gap",
+      "output_evidence": "C06-GAP ok=False dates=1 max_abs_err=249.0339 cause_len=1035 basis=rounding (rc=1). Dates agreeing: 2026-10-08 only. 2026-10-06 recomputed gap 167.10 vs served -4.71; 2026-10-07 recomputed gap -120.97 vs served 128.06; the served totals for those two dates are not reproducible from the current partitions (surprise MDPF_SECCLASS-D1-W78-S1).",
+      "denominator": "1 of 3 dates (2026-10-06, 2026-10-07, 2026-10-08)",
+      "status": "FAIL",
+      "status_reason": "Honest FAIL: recomputed gaps for 2026-10-06 and 2026-10-07 disagree with the served gaps because the served totals for those dates are not reproducible from the current partitions (surprise MDPF_SECCLASS-D1-W78-S1). Numbers kept, not weakened."
+    },
+    {
+      "criterion_id": "SC20-e88-AC2",
+      "criterion_verbatim": "the record holds no relationship id, account id or client name.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R20_CHECKS/c06_gap_record_check.py scope",
+      "output_evidence": "C06-SCOPE ok=True bad=0 (rc=0)",
+      "denominator": "0 of 67 walked nodes flagged (65 keys and 2 string values in the record)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Synthetic records in .scratch only: one recomputed gap off by 3 dollars, and a record carrying a relationship_id key; the checker must refuse both.",
+      "expected": "gap: C06-GAP ok=False; scope: C06-SCOPE ok=False",
+      "observed": "C06-GAP ok=False dates=2 max_abs_err=2.9961 basis=rounding (rc=1); C06-SCOPE ok=False bad=1 (rc=1). The served-number positive control reads C06-GAP ok=True dates=3 and C06-SCOPE ok=True bad=0 (rc=0).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: both invocations re-run on the same record",
+      "observed": "C06-GAP ok=False dates=1 max_abs_err=249.0339 cause_len=1035 basis=rounding (identical on both runs); C06-SCOPE ok=True bad=0 (identical on both runs)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Traced cause of the served-snapshot partition change for 2026-10-06 and 2026-10-07",
+      "reason": "Out of this read-only trace; no version history of the partitions was read. Filed as MDPF_SECCLASS-D1-W78-S1."
+    },
+    {
+      "item": "Position-level membership listing (positions array)",
+      "reason": "membership_differs is false: the recomputed run has zero class mass outside the eight classes and zero unclassified-class rows, and the prior partition set needed to list differing positions was not read."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W78-S1: served 2026-10-06 and 2026-10-07 firm totals not reproducible from the current holdings partitions (partitions last written 2026-10-10T23:15Z, after the snapshot at 2026-10-10T05:26Z); 2026-10-08 reproduces to the cent.",
+    "MDPF_SECCLASS-D1-W78-S2: the checker's rounding basis test is an algebraic identity for any honest recompute and cannot separate share rounding from out-of-class mass; only a separate probe does."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e88.c06-total-vs-class-sum-trace.md",
+  "compiler_tools": [
+    {
+      "tool": "c06_gap_record_check.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R20_CHECKS/c06_gap_record_check.py gap",
+      "result": "C06-GAP ok=False dates=1 max_abs_err=249.0339 cause_len=1035 basis=rounding (rc=1)"
+    },
+    {
+      "tool": "c06_gap_record_check.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R20_CHECKS/c06_gap_record_check.py scope",
+      "result": "C06-SCOPE ok=True bad=0 (rc=0)"
+    }
+  ]
+}
