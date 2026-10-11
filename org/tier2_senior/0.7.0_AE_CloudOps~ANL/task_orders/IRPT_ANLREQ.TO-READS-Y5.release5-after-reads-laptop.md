@@ -37,6 +37,16 @@ Criterion id: READS5-AC1. Instance at `org/tier2_senior/0.7.0_AE_CloudOps~ANL/de
   </context>
 
   <steps>
+    **AMENDMENT 1 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~11:0xZ): ONE more recorded member on R2, by the CTO's round-4 analysis
+    (@9da283e89f, section 3, row `IRPT_YCDGEN-D2-S38`: "one read of a served section's unit and value before any formatting change: a
+    fixture is not evidence of a served shape").** Your R2 to R7 stand as filed (@612ea01ad7; the issuer's run of the reads check on that
+    file prints `APPLY5-READS-OK`). Add to the result file, under `reads.R2`, a member `section_unit_read`:
+    `{"sections_read": <n>, "units": {"<unit string as served>": <count>}, "value_json_types": {"number": <n>, "string": <n>, "null": <n>},
+    "percent_unit_values_with_abs_below_1": <n>, "percent_unit_values_with_abs_1_or_more": <n>, "claim": "measured"}`, over the served
+    sections of the READY reports you already read at R2 (14 requests). Counts and unit strings only: no value, no name. The two
+    percent counts say whether a section served with a percent unit carries a fraction (0.07) or a whole number (7); that is the
+    whole question of the row. Re-commit the result and the proof instance. The criterion and its check do not change.
+    Gate limb that graded this amendment: this commit's own gate output is the read.
     0. GATE: `get-function-configuration` on `irpt-status`. If `CodeSha256` is NOT `Iw3FADFr...`, the apply has not landed: do nothing
        further, and wait for the issuer's word that it has. Record the digest and LastModified you read.
        You may run the BEFORE arms (R2, R3, R5 on revision 6, `6idtFvAm...`) while you wait, and should: they are the comparison.
