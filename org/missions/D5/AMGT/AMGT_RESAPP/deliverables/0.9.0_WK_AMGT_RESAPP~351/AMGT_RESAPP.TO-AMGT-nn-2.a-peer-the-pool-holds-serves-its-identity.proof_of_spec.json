@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-nn-2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "16d359ecc320abc28aa7fb46360429981c21fc07",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-nn-2.a-peer-the-pool-holds-serves-its-identity.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-nn-2.a-peer-the-pool-holds-serves-its-identity.md",
+    "group": "OTHER",
+    "vintage_commit": "16d359ecc320abc28aa7fb46360429981c21fc07"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~351",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/peers/listed_identity.py",
+      "kind": "script",
+      "commit_or_etag": "389b36ac90025655e04101828cf456b81eac1e0b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pure module, no read and no write: is_us_listed(member) and listed_fields(member, resolve_form). listed_fields asks the route's lookup for '<ticker> US' and returns {security_key, identity} with identity resolution MEASURED, matched_as us_listed_ticker and any error removed (the shape numeric_tickers._matched builds), or {} when the pool does not hold the form.",
+      "introduces": ["is_us_listed", "listed_fields", "MATCHED_AS_US_LISTED"],
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "389b36ac90025655e04101828cf456b81eac1e0b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One decorator _with_listed_identity(served) added after _with_numeric_tickers, and one call site in read_peer_set: _with_price_currency(_with_numeric_tickers(_with_listed_identity(_with_reason_classes(...)))). A member is copied, never removed or reordered; a member the pool does not hold is returned as stored; a raising lookup is caught per member. The producer engine.py and the stored objects are not touched. Redeploy is AMGT-nn-7, not this order.",
+      "introduces": ["_with_listed_identity"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_peer_listed_identity.py",
+      "kind": "test",
+      "commit_or_etag": "389b36ac90025655e04101828cf456b81eac1e0b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "six tests in the style of test_numeric_member_tickers.py, monkeypatching scoped_amgt._resolve_held_form: US member held (key and MEASURED identity), US member not held (untouched), non-US and all-digit members (untouched, no lookup made), member already MEASURED (untouched), input list not mutated, raising lookup (member as stored).",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~351/mutant_listed_decorator.py",
+      "kind": "test",
+      "commit_or_etag": "a80025dfee284beb07119651a2d50af206b2f00f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the BUILD mutant control: runs the issuer's r89_peer_identity.py main() with _with_listed_identity replaced by the identity function. Re-runnable: PYTHONPATH=<repo root> python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~351/mutant_listed_decorator.py",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~351/count_measured_local.py",
+      "kind": "test",
+      "commit_or_etag": "a80025dfee284beb07119651a2d50af206b2f00f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only count over the local /peers route: served members and members whose identity resolution is MEASURED. Output: status=200 served_members=12 MEASURED=7 tickers=['INTC', 'AMAT', 'LRCX', 'AMD', 'NFLX', 'MU', 'DELL'].",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the printed denominators read 12 members and 10 United States members with at least 1 resolvable under '<T> US'; PASS I1 (every resolvable member serves identity MEASURED with the crosswalk's own key and a matching top-level security_key), PASS I2 (no member outside the pool's holdings serves a MEASURED identity), PASS I3 (nothing removed or reordered; ticker, name, price, country equal to the stored object's); R89 PEER IDENTITY: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_peer_identity.py\" --where local; echo \"exit=$?\"",
+      "output_evidence": "   where=local status=200 stored=peers/v1/ASML_NA_Equity/2026-09-24T2252Z.json served members=12 stored members=12\n   denominators: members 12 | US-ticker members 10 | resolvable under '<T> US' 7\nPASS I1 every member the pool holds under '<ticker> US' serves that identity (7 of 7)\nPASS I2 no member outside the pool's holdings serves a MEASURED identity (leaked: [])\nPASS I3 members neither removed nor reordered; ticker, name, price, country equal to the stored object's\nR89 PEER IDENTITY: YES\nexit=0",
+      "denominator": "12 members served; 10 United States alphabetic-ticker members; 7 resolvable under '<T> US' (I1 7 of 7, no NOT SERVED line); I2 0 leaked of 5 non-held members read; I3 12 of 12 members equal on ticker, name, price, country",
+      "status": "PASS",
+      "expect": "R89 PEER IDENTITY: YES.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the existing peers and numeric-ticker tests pass with 0 failed (91 passed at the base); and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests/test_numeric_member_tickers.py lib/research/api/tests/test_peer_price_currency.py lib/research/api/tests/test_adapter_hookups_bb17.py lib/research/peers/tests -q; echo \"exit=$?\"",
+      "output_evidence": "91 passed, 21 warnings in 1.39s\nexit=0",
+      "denominator": "91 passed of 91 collected across the four named paths; 0 failed (base 91 passed)",
+      "status": "PASS",
+      "expect": "91 passed.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the new test file passes with at least 6 tests and 0 failed; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests/test_peer_listed_identity.py -q; echo \"exit=$?\"",
+      "output_evidence": "6 passed in 0.37s\nexit=0",
+      "denominator": "6 of 6 tests in lib/research/api/tests/test_peer_listed_identity.py passed (at least 6 required); 0 failed",
+      "status": "PASS",
+      "expect": "6 passed.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the serve-time decorator is the load-bearing behaviour: with _with_listed_identity replaced by the identity function in read_peer_set, the issuer's r89_peer_identity.py must FAIL I1. Run as deliverables/0.9.0_WK_AMGT_RESAPP~351/mutant_listed_decorator.py.",
+      "expected": "REAL route: I1 PASS 7 of 7, R89 PEER IDENTITY: YES. MUTANT (decorator removed): I1 FAIL, 0 of 7 resolvable members serve identity, R89 PEER IDENTITY: NO.",
+      "observed": "REAL route (AC1 run): I1 PASS (7 of 7), R89 PEER IDENTITY: YES, exit=0. MUTANT (decorator removed): FAIL I1 every member the pool holds under '<ticker> US' serves that identity (0 of 7); NOT SERVED lines for INTC, AMAT, LRCX, AMD, NFLX, MU, DELL; I2 PASS; I3 PASS; R89 PEER IDENTITY: NO; main rc=1. CONTROL FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 check run twice against the live (unchanged) pool object peers/v1/ASML_NA_Equity/2026-09-24T2252Z.json.",
+      "observed": "run 1 and run 2 both print denominators members 12 | US-ticker members 10 | resolvable 7, PASS I1 (7 of 7), PASS I2, PASS I3, R89 PEER IDENTITY: YES, exit=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The producer lib/research/peers/engine.py and any stored peers/v1 object",
+      "reason": "Order bound 1 and section 1: no change to the producer, the portal or any stored object. The fix is serve-time only."
+    },
+    {
+      "item": "Deploy of the route, the store write, any schedule, SEC, vendor, model or Bloomberg call",
+      "reason": "Order bound 1 and the preflight EGRESS CLASS NONE. The redeploy that serves this is AMGT-nn-7 (staged), not this order. The check ran with --where local, a read of the existing pool object through the route's own readers."
+    },
+    {
+      "item": "The <status> flip of AMGT-nn-2 in the task order file",
+      "reason": "Section 5 of the order: the status flip is the issuer's (2.0.0_SA_COO~R1). This worker does not edit the task order."
+    },
+    {
+      "item": "The decorator for AMGT-nn-3 in scoped_amgt.py",
+      "reason": "Order bound 4: the second order on this worktree edits scoped_amgt.py; its decorator is left to it. This instance covers only _with_listed_identity and its one call site."
+    },
+    {
+      "item": "Item 2 (D1-S14) -- a currency or model block for a non-held peer",
+      "reason": "The issuer's note: a resolved key has no model block for a non-held peer, so no currency follows (decomposition s.97a). Not in this order's cell."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "round-89 peer identity check (AC1)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round89_prep/checks/r89_peer_identity.py\" --where local",
+      "result": "rc 0; R89 PEER IDENTITY: YES; 7 of 7 resolvable members serve identity MEASURED; run twice, identical output (determinism control)."
+    },
+    {
+      "tool": "mutant_listed_decorator.py (BUILD mutant control)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~351/mutant_listed_decorator.py",
+      "result": "rc 0 from the harness; the check inside it printed FAIL I1 (0 of 7) and R89 PEER IDENTITY: NO, main rc=1 -- FIRED-AS-EXPECTED."
+    },
+    {
+      "tool": "count_measured_local.py",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~351/count_measured_local.py",
+      "result": "rc 0; status=200 served_members=12 MEASURED=7 tickers=['INTC', 'AMAT', 'LRCX', 'AMD', 'NFLX', 'MU', 'DELL']"
+    },
+    {
+      "tool": "pytest (AC2)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests/test_numeric_member_tickers.py lib/research/api/tests/test_peer_price_currency.py lib/research/api/tests/test_adapter_hookups_bb17.py lib/research/peers/tests -q",
+      "result": "rc 0; 91 passed, 0 failed"
+    },
+    {
+      "tool": "pytest (AC3)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests/test_peer_listed_identity.py -q",
+      "result": "rc 0; 6 passed, 0 failed"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh lib/research/peers/listed_identity.py lib/research/api/scoped_amgt.py lib/research/api/tests/test_peer_listed_identity.py",
+      "result": "rc 0; OK: pre-commit gate clean for 3 of 3 file(s) (after one ruff F401 fix in the test file, re-run clean)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (code commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~351 <0.9.0_WK_AMGT_RESAPP~351@opal.agent>\" -F .scratch/msg_code.txt -- lib/research/api/scoped_amgt.py lib/research/peers/listed_identity.py lib/research/api/tests/test_peer_listed_identity.py",
+      "result": "commit 389b36ac90 on wk-AMGT_RESAPP-351 (LOCAL); commit-gate, naming-gate, to-pipeline-gate, surprise-row-gate all OK; msg-verify MATCH"
+    }
+  ]
+}
