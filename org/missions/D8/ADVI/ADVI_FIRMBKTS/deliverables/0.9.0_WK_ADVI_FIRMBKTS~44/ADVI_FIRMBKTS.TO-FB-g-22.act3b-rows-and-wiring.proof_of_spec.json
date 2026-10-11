@@ -1,109 +1,117 @@
 {
-  "schema_version": "1.0",
-  "to_id": "ADVI_FIRMBKTS.TO-FB-g-22.act3b-rows-and-wiring",
-  "phase": "BUILD-GENERAL",
-  "spec_ref": {
-    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-22.act3b-rows-and-wiring.md",
-    "group": "OTHER",
-    "vintage_commit": "a5637f273f"
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-g-22.act3b-rows-and-wiring",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-22.act3b-rows-and-wiring.md",
+  "group": "OTHER",
+  "vintage_commit": "a5637f273f"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~44",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "vintage_commit": "a5637f273f",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-22.act3b-rows-and-wiring.md"
+ },
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant. The base-tree control is the issuer's preflight measurement (comp-adversary, not re-run by this worker): r4_policy.py --arms policy at base reads 1 of 6 (P6 clean plan PASS as the control; P1 to P5 FAIL as expected: no row, no grant, no wiring). Not re-run here.",
+   "expected": "At base: 1 of 6 arms (issuer preflight figure, not re-run). After the edits: 6 of 6 arms.",
+   "observed": "After the edits and the issuer's correction of arm P3, AC1 reads 6 of 6 arms (re-graded at the merged head). Base reading 1 of 6 is the issuer's preflight figure.",
+   "status": "N/A-SPEC-NAMES-NONE"
   },
-  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~44",
-  "decomp_ref": {
-    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
-    "vintage_commit": "a5637f273f",
-    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-22.act3b-rows-and-wiring.md"
+  "determinism": {
+   "method": "AC1 run twice on the same committed bytes (commit 057cfa8a1c plus the uncommitted instance), outputs compared line for line",
+   "observed": "Both runs print identical arm lines: P1 base rows kept=True others same=True added=8 scoped, grants=2; P2 key=advi/49financial/platinum/49financial/ownership_map.json OAI prefixes=9 expected=9; P3 allow principals=10, new exemption arns=8, other buckets same=True; P5 adapter row index=7; P6 real registry plan rc=0; P4 hand removed=True wired=True; ROUND 4 POLICY: 5 of 6 arms; exit=1",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Any apply, any AWS call, any plan in the shared-infra root",
+   "reason": "Bounds 2 items 1 and 4 and the preflight: repository files only; the shared-infra root needs state and AWS, and the check does not need it. Nothing is applied; the policy's apply is a separate staged order under the act 3b pair."
   },
-  "controls": {
-    "mutant": {
-      "description": "The order names no mutant. The base-tree control is the issuer's preflight measurement (comp-adversary, not re-run by this worker): r4_policy.py --arms policy at base reads 1 of 6 (P6 clean plan PASS as the control; P1 to P5 FAIL as expected: no row, no grant, no wiring). Not re-run here.",
-      "expected": "At base: 1 of 6 arms (issuer preflight figure, not re-run). After the edits: 6 of 6 arms.",
-      "observed": "After the edits AC1 reads 5 of 6 arms: P1, P2, P4, P5 and P6 PASS; P3 FAIL (new exemption arns = 8, the check expects 7). The base reading is the issuer's preflight figure, not re-run here.",
-      "status": "N/A-SPEC-NAMES-NONE"
-    },
-    "determinism": {
-      "method": "AC1 run twice on the same committed bytes (commit 057cfa8a1c plus the uncommitted instance), outputs compared line for line",
-      "observed": "Both runs print identical arm lines: P1 base rows kept=True others same=True added=8 scoped, grants=2; P2 key=advi/49financial/platinum/49financial/ownership_map.json OAI prefixes=9 expected=9; P3 allow principals=10, new exemption arns=8, other buckets same=True; P5 adapter row index=7; P6 real registry plan rc=0; P4 hand removed=True wired=True; ROUND 4 POLICY: 5 of 6 arms; exit=1",
-      "status": "STABLE"
-    }
+  {
+   "item": "The nested portal submodule (git status shows ' M portal')",
+   "reason": "A gitlink already dirty in this worktree before this work; not this worker's edit; not staged or committed. The scope check ignores submodule gitlinks."
   },
-  "declared_exclusions": [
-    {
-      "item": "Any apply, any AWS call, any plan in the shared-infra root",
-      "reason": "Bounds 2 items 1 and 4 and the preflight: repository files only; the shared-infra root needs state and AWS, and the check does not need it. Nothing is applied; the policy's apply is a separate staged order under the act 3b pair."
-    },
-    {
-      "item": "The nested portal submodule (git status shows ' M portal')",
-      "reason": "A gitlink already dirty in this worktree before this work; not this worker's edit; not staged or committed. The scope check ignores submodule gitlinks."
-    },
-    {
-      "item": "Editing the r4_policy.py check to accept eight ARNs",
-      "reason": "The check is read-only (its own header: never edit this file). The disagreement is filed as ADVI_FIRMBKTS-D1-W44-S1 for the issuer's ruling; the check's expectation is not changed by this worker."
-    }
-  ],
-  "artifacts_produced": [
-    {
-      "path_or_key": "infra/logic/registry/exemptions.json",
-      "kind": "config_data",
-      "commit_or_etag": "057cfa8a1c",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "local commit 057cfa8a1c on wk-ADVI_FIRMBKTS-44; eight scoped rows appended to opal-data-49financial (six readers, the performance adapter, the CloudFront OAI) and a top-level grants object with two exact-key rows; existing rows unchanged; the cloudops-dell1 row gained a trailing comma. No apply.",
-      "artifact_covered_by": ["AC1", "AC2"]
-    },
-    {
-      "path_or_key": "infra/aws/terraform/shared-infra/s3-49financial.tf",
-      "kind": "terraform",
-      "commit_or_etag": "057cfa8a1c",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "local commit 057cfa8a1c on wk-ADVI_FIRMBKTS-44; the adapter data source, the f49 locals and the three DenyPerformanceAdapter statements removed; the adapter ARN removed from the blanket Deny list; the concat appends module.opal_name.fence_scoped_allow_statements. No apply.",
-      "artifact_covered_by": ["AC1", "AC2"]
-    },
-    {
-      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
-      "kind": "doc",
-      "commit_or_etag": "057cfa8a1c",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "two appended rows ADVI_FIRMBKTS-D1-W44-S1 (BLOCKING, INERT) and ADVI_FIRMBKTS-D1-W44-S2 (OBSERVATION, INERT); surprise-row-gate OK on 2 new rows (189 pre-existing not re-graded).",
-      "artifact_covered_by": ["AC2"]
-    }
-  ],
-  "acceptance": [
-    {
-      "criterion_id": "AC1",
-      "criterion_verbatim": "AC1 reads the registry rows against the base (existing rows kept, the permitted set added), the grains (the generated key, the gold prefix, the nine served prefixes, the actions), the module's render of the real registry (ten Allow principals, the new exemptions, every other bucket unchanged), the file's wiring and the adapter's equivalence to its hand statements plus the key.",
-      "method": "command",
-      "invocation": "cd /c/dev/wk-firmbkts-44 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_policy.py --arms policy --root /c/dev/wk-firmbkts-44; echo \"exit=$?\"",
-      "output_evidence": "  P1 base rows kept=True others same=True added=8 scoped, grants=2; reason+signoff_ref ok=True\n  P2 key=advi/49financial/platinum/49financial/ownership_map.json; OAI prefixes=9 expected=9\n  P3 allow principals=10, new exemption arns=8, other buckets same=True\n  P5 adapter row index=7\n  P6 real registry plan rc=0\n  P4 hand removed=True wired=True scoped kept=True deny lists kept=True; added lines=3 (unexpected 0), removed=22\nPASS P1 the registry adds exactly the permitted set's eight scoped rows and two grants rows, nothing else\nPASS P2 every grant is the generated key, the adapter holds gold plus the key, the OAI the served prefixes\nFAIL P3 the render holds exactly the ten Allow principals at their granted resources and the new exemptions\nPASS P4 the shared-infra file drops the hand statements, wires the Allow, keeps the rest\nPASS P5 the adapter's generated Deny equals its hand Deny plus the key\nPASS P6 the real registry plans clean in the tree's module\nROUND 4 POLICY: 5 of 6 arms\nexit=1",
-      "denominator": "5 of 6 arms PASS (P1, P2, P4, P5, P6); P3 FAIL: new exemption arns = 8 (six readers, the adapter, the OAI) against the check's 7; 8 of 8 scoped rows and 2 of 2 grants rows added; 10 Allow principals; 9 of 9 served prefixes; real registry plan rc=0",
-      "status": "FAIL",
-      "status_reason": "Arm P3 expects seven new exemption ARNs (six readers and the OAI); the render yields eight, because the performance adapter is a registry row and fence_exemption_arns carries every row. Filed as ADVI_FIRMBKTS-D1-W44-S1 (BLOCKING, INERT). The check is read-only and was not edited; the order stays open until the issuer rules.",
-      "expect": "ROUND 4 POLICY: 6 of 6 arms"
-    },
-    {
-      "criterion_id": "AC2",
-      "criterion_verbatim": "AC2 is the write-surface bound.",
-      "method": "command",
-      "invocation": "cd /c/dev/wk-firmbkts-44 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-44 --allow infra/logic/registry/exemptions.json --allow infra/aws/terraform/shared-infra/s3-49financial.tf --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~44/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/logic/registry/exemptions.json --require infra/aws/terraform/shared-infra/s3-49financial.tf; echo \"exit=$?\"",
-      "output_evidence": "  CHANGED infra/aws/terraform/shared-infra/s3-49financial.tf\n  CHANGED infra/logic/registry/exemptions.json\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~44/ADVI_FIRMBKTS.TO-FB-g-22.act3b-rows-and-wiring.proof_of_spec.json\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~44/ADVI_FIRMBKTS.TO-FB-g-22.session.log.txt\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md\nROUND 4 SCOPE: OK 5 changed, 0 outside, 0 required missing\nexit=0",
-      "denominator": "5 changed files, 0 outside the grant; 2 of 2 required paths changed (the two code files; the other three are the instance, the session log and the investigation file, all inside the granted paths); measured with the two files committed at 057cfa8a1c and the deliverables uncommitted",
-      "status": "PASS",
-      "expect": "ROUND 4 SCOPE: OK"
-    }
-  ],
-  "surprises": [
-    "ADVI_FIRMBKTS-D1-W44-S1: AC1 arm P3 expects seven new exemption ARNs for opal-data-49financial (six readers and the OAI); the render yields eight, because the performance adapter is now a registry row and fence_exemption_arns carries every row (BLOCKING, INERT)",
-    "ADVI_FIRMBKTS-D1-W44-S2: the IRPT_BCKEND comment lines at s3-49financial.tf:103-112 were kept per the keep-every-other-line bound and now describe removed Denies and locals (OBSERVATION, INERT)"
-  ],
-  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~44/ADVI_FIRMBKTS.TO-FB-g-22.session.log.txt",
-  "compiler_tools": [
-    {
-      "tool": "python r4_policy.py --arms policy (the round-4 policy check, read-only)",
-      "invocation": "timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_policy.py --arms policy --root /c/dev/wk-firmbkts-44",
-      "result": "ROUND 4 POLICY: 5 of 6 arms; exit=1 (P3 FAIL); identical on a second run"
-    },
-    {
-      "tool": "bash .tools/safe-commit.sh (commit 057cfa8a1c)",
-      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~44 <0.9.0_WK_ADVI_FIRMBKTS~44@opal.agent>\" -F .scratch/msg_c1.txt -- infra/logic/registry/exemptions.json infra/aws/terraform/shared-infra/s3-49financial.tf org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
-      "result": "rc=0; commit-gate OK; naming-gate PASS 0 graded; surprise-row-gate OK (2 new rows of 191 checked); missions-tree-check 0 violation(s); msg-verify MATCH; WARN one-writer on the unsuffixed investigation filename (the path the order names); WARN client-data-check hashed account-id list absent on dell1 (the diff carries no 12-digit number)"
-    }
-  ]
+  {
+   "item": "Editing the r4_policy.py check to accept eight ARNs",
+   "reason": "The check is read-only (its own header: never edit this file). The disagreement is filed as ADVI_FIRMBKTS-D1-W44-S1 for the issuer's ruling; the check's expectation is not changed by this worker."
+  }
+ ],
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/logic/registry/exemptions.json",
+   "kind": "config_data",
+   "commit_or_etag": "057cfa8a1c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "local commit 057cfa8a1c on wk-ADVI_FIRMBKTS-44; eight scoped rows appended to opal-data-49financial (six readers, the performance adapter, the CloudFront OAI) and a top-level grants object with two exact-key rows; existing rows unchanged; the cloudops-dell1 row gained a trailing comma. No apply.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/shared-infra/s3-49financial.tf",
+   "kind": "terraform",
+   "commit_or_etag": "057cfa8a1c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "local commit 057cfa8a1c on wk-ADVI_FIRMBKTS-44; the adapter data source, the f49 locals and the three DenyPerformanceAdapter statements removed; the adapter ARN removed from the blanket Deny list; the concat appends module.opal_name.fence_scoped_allow_statements. No apply.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "057cfa8a1c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "two appended rows ADVI_FIRMBKTS-D1-W44-S1 (BLOCKING, INERT) and ADVI_FIRMBKTS-D1-W44-S2 (OBSERVATION, INERT); surprise-row-gate OK on 2 new rows (189 pre-existing not re-graded).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 reads the registry rows against the base (existing rows kept, the permitted set added), the grains (the generated key, the gold prefix, the nine served prefixes, the actions), the module's render of the real registry (ten Allow principals, the new exemptions, every other bucket unchanged), the file's wiring and the adapter's equivalence to its hand statements plus the key.",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-44 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_policy.py --arms policy --root /c/dev/wk-firmbkts-44 --base a5637f273f; echo \"exit=$?\"",
+   "output_evidence": "  P1 base rows kept=True others same=True added=8 scoped, grants=2; reason+signoff_ref ok=True\n  P2 key=advi/49financial/platinum/49financial/ownership_map.json; OAI prefixes=9 expected=9\n  P3 allow principals=10, new exemption arns=8, other buckets same=True\n  P5 adapter row index=7\n  P6 real registry plan rc=0\n  P4 hand removed=True wired=True scoped kept=True deny lists kept=True; added lines=3 (unexpected 0), removed=22\nPASS P1 the registry adds exactly the permitted set's eight scoped rows and two grants rows, nothing else\nPASS P2 every grant is the generated key, the adapter holds gold plus the key, the OAI the served prefixes\nPASS P3 the render holds exactly the ten Allow principals at their granted resources and the new exemptions\nPASS P4 the shared-infra file drops the hand statements, wires the Allow, keeps the rest\nPASS P5 the adapter's generated Deny equals its hand Deny plus the key\nPASS P6 the real registry plans clean in the tree's module\nROUND 4 POLICY: 6 of 6 arms\nexit=0",
+   "denominator": "6 of 6 arms PASS; 8 of 8 scoped rows and 2 of 2 grants rows added; 10 Allow principals; 8 new exemption arns (six readers, the adapter, the OAI); 9 of 9 served prefixes; real registry plan rc=0",
+   "status": "PASS",
+   "status_reason": "Re-graded by the issuer 2.0.0_SA_COO~B1 at merged head ebd37c1059. The worker's first run read 5 of 6 on arm P3 because the ISSUER's check expected seven new exemption ARNs; the render yields eight (the performance adapter is a registry row now), which is the permitted set's count. The check was corrected (issuer defect, ADVI_FIRMBKTS-D1-W44-S1 ruled: check error, no spec change) and re-run with the issuance commit as --base, because after the merge the default base equals the tree.",
+   "expect": "ROUND 4 POLICY: 6 of 6 arms"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 is the write-surface bound.",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-44 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-44 --allow infra/logic/registry/exemptions.json --allow infra/aws/terraform/shared-infra/s3-49financial.tf --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~44/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/logic/registry/exemptions.json --require infra/aws/terraform/shared-infra/s3-49financial.tf; echo \"exit=$?\"",
+   "output_evidence": "  CHANGED infra/aws/terraform/shared-infra/s3-49financial.tf\n  CHANGED infra/logic/registry/exemptions.json\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~44/ADVI_FIRMBKTS.TO-FB-g-22.act3b-rows-and-wiring.proof_of_spec.json\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~44/ADVI_FIRMBKTS.TO-FB-g-22.session.log.txt\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md\nROUND 4 SCOPE: OK 5 changed, 0 outside, 0 required missing\nexit=0",
+   "denominator": "5 changed files, 0 outside the grant; 2 of 2 required paths changed (the two code files; the other three are the instance, the session log and the investigation file, all inside the granted paths); measured with the two files committed at 057cfa8a1c and the deliverables uncommitted",
+   "status": "PASS",
+   "expect": "ROUND 4 SCOPE: OK"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W44-S1: AC1 arm P3 expects seven new exemption ARNs for opal-data-49financial (six readers and the OAI); the render yields eight, because the performance adapter is now a registry row and fence_exemption_arns carries every row (BLOCKING, INERT)",
+  "ADVI_FIRMBKTS-D1-W44-S2: the IRPT_BCKEND comment lines at s3-49financial.tf:103-112 were kept per the keep-every-other-line bound and now describe removed Denies and locals (OBSERVATION, INERT)"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~44/ADVI_FIRMBKTS.TO-FB-g-22.session.log.txt",
+ "compiler_tools": [
+  {
+   "tool": "python r4_policy.py --arms policy (the round-4 policy check, read-only)",
+   "invocation": "timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_policy.py --arms policy --root /c/dev/wk-firmbkts-44",
+   "result": "ROUND 4 POLICY: 5 of 6 arms; exit=1 (P3 FAIL); identical on a second run"
+  },
+  {
+   "tool": "bash .tools/safe-commit.sh (commit 057cfa8a1c)",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~44 <0.9.0_WK_ADVI_FIRMBKTS~44@opal.agent>\" -F .scratch/msg_c1.txt -- infra/logic/registry/exemptions.json infra/aws/terraform/shared-infra/s3-49financial.tf org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "result": "rc=0; commit-gate OK; naming-gate PASS 0 graded; surprise-row-gate OK (2 new rows of 191 checked); missions-tree-check 0 violation(s); msg-verify MATCH; WARN one-writer on the unsuffixed investigation filename (the path the order names); WARN client-data-check hashed account-id list absent on dell1 (the diff carries no 12-digit number)"
+  }
+ ]
 }
