@@ -92,6 +92,10 @@ def trace_hops():
 
 
 SUBMIT = ("POST", "/api/scoped/investor-reporting/analysis")
+# AMENDMENT 2 / D5: the deployed report route refuses a malformed id, typed
+ARM_REFUSED = res(400, {"error": "request_id must be REQ- followed by exactly 24 lower-case hex digits",
+                        "code": "INVALID_REPORT_REQUEST_ID"})
+REPORT_PATH = "/api/scoped/tickets/%s/report" % TKT
 
 
 def ticket_with(rid):
@@ -152,7 +156,7 @@ def test_never_polls_the_sent_token(monkeypatch, sleeps):
         ("GET", LIST_PATH): [listing(REQ_OLD), listing(REQ_C, REQ_OLD)],
         SUBMIT: res(200, {"data": {"request_id": SENT}}),
         ("GET", rpath(REQ_C)): [refusal("NOT_FOUND"), report(REQ_C)],
-        ("POST", "/api/scoped/tickets/%s/report" % TKT): res(200, {"ticket": {"ticket_id": TKT}}),
+        ("POST", "/api/scoped/tickets/%s/report" % TKT): [ARM_REFUSED, res(200, {"ticket": {"ticket_id": TKT}})],
         ("GET", "/api/scoped/tickets/%s" % TKT): ticket_with(REQ_C)})
     hops, named = trace_hops()
     trace = {"hops": list(hops.values()), "named_failures": named}
@@ -413,3 +417,512 @@ def test_never_records_a_non_req_id(monkeypatch, sleeps):
     assert run.hop_g_open("tok", TKT, hops["g_open"], named) is False
     assert named[-1]["reason"] == "REPORT_REF_NOT_A_REQ_ID"
     assert not any(c[1].endswith("/sections") or c[1].endswith("/pdf") for c in fake.calls)
+
+
+# ------------------------------------------------------------------ AMENDMENT 2: the world fake
+# One ordered event log across the HTTP layer, DynamoDB, the other AWS clients and a clock the tests own. No real
+# AWS, no network, no sleeping: SLEEP advances the fake clock.
+
+import types  # noqa: E402
+
+ARGV = ["--read27", "R27", "--exp-minutes", "5", "--expect-irpt-status-sha", "Zm9v",
+        "--run-label", "R2-test-1", "--pair", "org/pair/path@abc123", "--executor", "0.9.0_WK_TEST~1"]
+LIVE_SHA = "Zm9vYmFyLIVE"
+STATUS_PATH = "/api/scoped/investor-reporting/status"
+FILER_EMAIL = run.FILER
+
+
+class FakeDdb:
+    def __init__(self, world):
+        self.w = world
+
+    def put_item(self, **kw):
+        self.w.events.append(("ddb", "put", self.w.t))
+        if self.w.put_raises:
+            raise RuntimeError("ConditionalCheckFailedException")
+        self.w.row = True
+
+    def get_item(self, **kw):
+        self.w.events.append(("ddb", "get", self.w.t))
+        if self.w.first_get_empty:
+            self.w.first_get_empty = False
+            return {}
+        return {"Item": {"PK": {"S": "x"}, "allowedFirmIds": {"L": []}}} if self.w.row else {}
+
+    def delete_item(self, **kw):
+        self.w.events.append(("ddb", "delete", self.w.t))
+        self.w.row = False
+
+
+class World:
+    def __init__(self, monkeypatch, sha=LIVE_SHA):
+        self.t, self.events, self.sha = 1_800_000_000.0, [], sha
+        self.row, self.put_raises, self.first_get_empty = False, False, False
+        self.lambda_raises, self.mint_raises, self.sleep_raises = False, False, None
+        self.claims = []
+        self.log_resp = {}
+        self.mp = monkeypatch
+        monkeypatch.setattr(run, "NOW", lambda: self.t)
+        monkeypatch.setattr(run, "SLEEP", self.sleep)
+        monkeypatch.setattr(run, "save", lambda trace: None)
+        monkeypatch.setattr(run, "ddb", FakeDdb(self))
+        monkeypatch.setattr(run, "_client", self.client)
+        monkeypatch.setattr(run, "resolve_advisor", lambda opaque, firm: "adv@example.invalid")
+        monkeypatch.setitem(sys.modules, "jwt", types.SimpleNamespace(encode=self.encode))
+
+    def sleep(self, s):
+        if self.sleep_raises:
+            raise self.sleep_raises
+        self.events.append(("sleep", s, self.t))
+        self.t += s
+
+    def encode(self, claims, key, algorithm=None):
+        self.claims.append(dict(claims))
+        return "tok"
+
+    def client(self, name):
+        w = self
+
+        def lam(**kw):
+            w.events.append(("aws", "lambda", w.t))
+            if w.lambda_raises:
+                raise RuntimeError("AccessDenied")
+            return {"CodeSha256": w.sha}
+
+        def secret(**kw):
+            w.events.append(("aws", "secret", w.t))
+            if w.mint_raises:
+                raise RuntimeError("secret unreadable")
+            return {"SecretString": "pem"}
+
+        def logs(**kw):
+            w.events.append(("aws", "logs:" + kw["logGroupName"], w.t))
+            default = ({"events": [], "searchedLogStreams": [{"logStreamName": "s1"}]}
+                       if kw["logGroupName"] == run.DATA_REFRESH_LOG_GROUP
+                       else {"events": [{"message": "x"}], "searchedLogStreams": [{"logStreamName": "s2"}]})
+            r = w.log_resp.get(kw["logGroupName"], default)
+            if isinstance(r, Exception):
+                raise r
+            return r.pop(0) if isinstance(r, list) else r
+
+        return {"lambda": types.SimpleNamespace(get_function_configuration=lam),
+                "secretsmanager": types.SimpleNamespace(get_secret_value=secret),
+                "logs": types.SimpleNamespace(filter_log_events=logs)}[name]
+
+    def http(self, script):
+        fake = Fake(script)
+
+        def call(token, method, path, query=None, body=None, timeout=90):
+            self.events.append(("http", method, path, self.t))
+            return fake(token, method, path, query, body, timeout)
+
+        self.mp.setattr(run, "call", call)
+        return fake
+
+    def ddb_ops(self):
+        return [(e[1], e[2]) for e in self.events if e[0] == "ddb"]
+
+    def index(self, pred):
+        return [i for i, e in enumerate(self.events) if pred(e)]
+
+
+def drive(monkeypatch, argv=ARGV, world=None, script=None, census_result=None, hops_fn=None):
+    """Run main() against the world fake. -> (rc, trace, world). `trace` is the dict main last saved."""
+    w = world or World(monkeypatch)
+    w.http(script if script is not None else {("GET", STATUS_PATH): res(200, {"data": {}})})
+    captured = {}
+    monkeypatch.setattr(run, "save", lambda trace: captured.__setitem__("t", trace))
+    monkeypatch.setattr(run, "census", lambda token, run_id: census_result or ({"tickets_created_by_the_census": []}, None))
+    if hops_fn is not None:
+        monkeypatch.setattr(run, "hops", hops_fn)
+    try:
+        rc = run.main(list(argv))
+    finally:
+        w.trace = captured.get("t")
+    return rc, captured.get("t"), w
+
+
+def assert_row_deleted_after_exp(w, minutes=5):
+    ops = w.ddb_ops()
+    deletes = [t for op, t in ops if op == "delete"]
+    assert len(deletes) == 1, ops
+    puts = [t for op, t in ops if op == "put"]
+    assert puts, ops
+    exp = int(puts[0]) + minutes * 60
+    assert deletes[0] > exp, (deletes[0], exp)
+    assert ops[-1][0] == "get", ops   # the read-back follows the delete
+    return exp
+
+
+def tkt_get(status, assignee):
+    return res(200, {"ticket": {"ticket_id": "TCK-OLD", "status": status, "assignee": assignee}})
+
+
+# ------------------------------------------------------------------ AC5: token, rollback order, controls, precheck
+
+def test_token_exp_is_the_argument_and_capped(monkeypatch):
+    # the argument is REQUIRED, an integer from 5 to 60, with no default
+    parser = run.build_parser()
+    without = [x for i, x in enumerate(ARGV) if i not in (2, 3)]
+    with pytest.raises(SystemExit):
+        parser.parse_args(without)
+    for bad in ("4", "61", "0", "-5", "abc", "5.5", "", " 7", "7200", "1e1", "+10", "True"):
+        with pytest.raises(SystemExit):
+            parser.parse_args(ARGV[:3] + [bad] + ARGV[4:])
+    for good in (5, 17, 60):
+        a = parser.parse_args(ARGV[:3] + [str(good)] + ARGV[4:])
+        assert a.exp_minutes == good and isinstance(a.exp_minutes, int)
+    # every other required argument is required too
+    for flag in ("--read27", "--expect-irpt-status-sha", "--run-label", "--pair", "--executor"):
+        i = ARGV.index(flag)
+        with pytest.raises(SystemExit):
+            parser.parse_args(ARGV[:i] + ARGV[i + 2:])
+    # the minted claims: exp == iat + N*60; an out-of-range N mints nothing
+    w = World(monkeypatch)
+    for n in (5, 17, 60):
+        tok, exp = run.mint_token(1000, n)
+        assert tok == "tok" and exp == 1000 + n * 60
+        assert w.claims[-1]["iat"] == 1000 and w.claims[-1]["exp"] == 1000 + n * 60
+    minted, secrets = len(w.claims), len(w.index(lambda e: e[:2] == ("aws", "secret")))
+    for bad in (4, 61, 0, -1, True, "5", 5.0, None, 120):
+        with pytest.raises(ValueError):
+            run.mint_token(1000, bad)
+    assert len(w.claims) == minted and len(w.index(lambda e: e[:2] == ("aws", "secret"))) == secrets
+    # no 2-hour token anywhere in the code
+    assert "7200" not in _code_only(run.__file__)
+    # and the trace records iat, exp and N
+    rc, trace, w = drive(monkeypatch)
+    p = trace["preconditions"]
+    assert p["exp_minutes"] == 5 and p["token_iat"] and p["token_exp"] and p["token_iat"] < p["token_exp"]
+    assert trace["cleanup"]["token_exp"] == p["token_exp"]
+    assert w.claims[0]["exp"] - w.claims[0]["iat"] == 300
+
+
+def test_row_is_deleted_only_after_exp(monkeypatch):
+    # (a) cleanup itself: the delete time is later than exp, after a wait, and the absent read follows
+    w = World(monkeypatch)
+    w.http({})
+    exp = int(w.t) + 300
+    trace = {"cleanup": {}, "run_label": "R2-test-1"}
+    run.cleanup("tok", trace, exp, ())
+    out = trace["cleanup"]
+    assert out["row_deleted_at_unix"] > exp and out["token_exp"]
+    assert out["row_removed_read_back_absent"] is True
+    ops = w.ddb_ops()
+    assert [o for o, _ in ops] == ["delete", "get"] and ops[0][1] > exp
+    assert sum(e[1] for e in w.events if e[0] == "sleep") >= 300
+
+    # (b) every stop path after the row was written: the delete is later than exp, never earlier
+    names = []
+
+    def path(name, raises=None, first_get_empty=False, mint_raises=False, **kw):
+        ww = World(monkeypatch)
+        ww.first_get_empty, ww.mint_raises = first_get_empty, mint_raises
+        if raises:
+            with pytest.raises(raises):
+                drive(monkeypatch, world=ww, **kw)
+        else:
+            rc, trace, _ = drive(monkeypatch, world=ww, **kw)
+            assert trace["cleanup"]["row_removed_read_back_absent"] is True, name
+        assert_row_deleted_after_exp(ww)
+        names.append(name)
+
+    def census_boom(token, run_id):
+        raise ZeroDivisionError("census boom")
+
+    def hops_boom(token, advisor, trace):
+        raise KeyError("hops boom")
+
+    path("clean run")
+    path("row not readable after the put", first_get_empty=True)
+    path("token not minted (secret unreadable)", raises=RuntimeError, mint_raises=True)
+    path("limb 3: irpt-status answers 5xx", script={("GET", STATUS_PATH): res(503, {"message": "x"})})
+    path("census stop", census_result=({"tickets_created_by_the_census": []}, "LEAK limb 1 -- x"))
+    path("hops raise", raises=KeyError, hops_fn=hops_boom)
+    ww = World(monkeypatch)
+    ww.http({("GET", STATUS_PATH): res(200, {"data": {}})})
+    monkeypatch.setattr(run, "census", census_boom)
+    with pytest.raises(ZeroDivisionError):
+        run.main(list(ARGV))
+    assert_row_deleted_after_exp(ww)
+    names.append("census raises")
+    assert len(names) == 7, names
+
+    # (c) an operator interrupt during the wait leaves the row IN PLACE (never an early delete)
+    ww = World(monkeypatch)
+    ww.sleep_raises = KeyboardInterrupt()
+    with pytest.raises(KeyboardInterrupt):
+        drive(monkeypatch, world=ww)
+    assert [o for o, _ in ww.ddb_ops()] == ["put", "get"] and ww.row is True
+
+    # (d) a row that is not ours (the put is refused) is neither deleted nor waited for
+    ww = World(monkeypatch)
+    ww.put_raises = True
+    rc, trace, _ = drive(monkeypatch, world=ww)
+    assert rc == 1 and [o for o, _ in ww.ddb_ops()] == ["put"]
+    assert trace["named_failures"][-1]["reason"] == "ROW_WRITE_FAILED"
+
+
+def test_tickets_are_completed_before_the_row_is_touched(monkeypatch):
+    w = World(monkeypatch)
+    w.http({("POST", "/api/scoped/tickets/TCK-J/complete"): res(200, {"ticket": {}}),
+            ("POST", "/api/scoped/tickets/TCK-C1/complete"): res(403, {"error": "refused"}),
+            ("POST", "/api/scoped/tickets/TCK-OLD/complete"): res(200, {"ticket": {}}),
+            ("GET", "/api/scoped/tickets/TCK-OLD"): [tkt_get("in_progress", FILER_EMAIL), tkt_get("completed", FILER_EMAIL)]})
+    exp = int(w.t) + 600
+    trace = {"cleanup": {}, "journey_ticket": "TCK-J", "census": {"tickets_created_by_the_census": ["TCK-C1"]},
+             "run_label": "R2-test-1"}
+    run.cleanup("tok", trace, exp, ("TCK-OLD",))
+    completes = w.index(lambda e: e[0] == "http" and e[1] == "POST" and e[2].endswith("/complete"))
+    first_ddb = w.index(lambda e: e[0] == "ddb")[0]
+    first_sleep = w.index(lambda e: e[0] == "sleep")[0]
+    assert len(completes) == 3 and max(completes) < first_sleep < first_ddb
+    assert all(e[0] != "ddb" for e in w.events[:first_ddb])
+    # a refused completion is recorded, and the row still follows the wait
+    assert trace["cleanup"]["tickets_completed"] == {"TCK-J": 200, "TCK-C1": 403}
+    assert trace["cleanup"]["tickets_completed_all"] is False and "TCK-C1" in trace["cleanup"]["ticket_completion_errors"]
+    assert trace["cleanup"]["row_deleted_at_unix"] > exp
+    # a completion that RAISES does not skip the wait or the delete
+    w2 = World(monkeypatch)
+
+    def raising(token, method, path, query=None, body=None, timeout=90):
+        w2.events.append(("http", method, path, w2.t))
+        raise OSError("socket")
+    monkeypatch.setattr(run, "call", raising)
+    trace = {"cleanup": {}, "journey_ticket": "TCK-J", "run_label": "R2-test-1"}
+    run.cleanup("tok", trace, int(w2.t) + 60, ())
+    assert trace["cleanup"]["tickets_completed"] == {"TCK-J": 0}
+    first_http = w2.index(lambda e: e[0] == "http")[0]
+    assert first_http < w2.index(lambda e: e[0] == "sleep")[0] < w2.index(lambda e: e[0] == "ddb")[0]
+    assert trace["cleanup"]["row_removed_read_back_absent"] is True
+
+
+def _zero_call(monkeypatch, data, control):
+    w = World(monkeypatch)
+    w.log_resp = {run.DATA_REFRESH_LOG_GROUP: data, run.TICKET_LOG_GROUP: control}
+    trace = {}
+    run.data_refresh_zero_calls(trace, 1000, 1300)
+    return trace["data_refresh_zero_calls"], w
+
+
+def test_zero_call_read_is_void_on_zero_streams(monkeypatch):
+    found = {"events": [{"m": 1}], "searchedLogStreams": [{"n": "s"}]}
+    # zero streams searched, zero matches, a control that DID find the filer: still VOID
+    out, w = _zero_call(monkeypatch, {"events": [], "searchedLogStreams": []}, found)
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["searched_log_streams"] == 0 and out["match_count"] == 0
+    assert any("streams searched is 0" in r for r in out["void_reasons"])
+    assert out["verdict"] != "ZERO_CALLS_PROVEN"
+    # streams are counted across pages: 0 + 0 is void; a later page with streams makes the zero countable
+    out, w = _zero_call(monkeypatch, [{"events": [], "searchedLogStreams": [], "nextToken": "p2"},
+                                      {"events": [], "searchedLogStreams": []}], found)
+    assert out["verdict"] == "ZERO_CALL_VOID"
+    out, w = _zero_call(monkeypatch, [{"events": [], "searchedLogStreams": [], "nextToken": "p2"},
+                                      {"events": [], "searchedLogStreams": [{"n": "s"}, {"n": "t"}]}], found)
+    assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["searched_log_streams"] == 2
+    assert out["window"]["from"] < out["window"]["to"]
+    assert len(w.index(lambda e: e[0] == "aws" and e[1].startswith("logs:"))) == 3   # two pages + the control
+
+
+def test_zero_call_read_needs_its_positive_control(monkeypatch):
+    streams = [{"logStreamName": "s"}]
+    # the control over the ticket API's log group finds nothing: the zero is VOID
+    out, w = _zero_call(monkeypatch, {"events": [], "searchedLogStreams": streams},
+                        {"events": [], "searchedLogStreams": streams})
+    assert out["verdict"] == "ZERO_CALL_VOID" and out["control"]["found"] == 0
+    assert out["control"]["log_group"] == "/aws/lambda/opal-ticket-api" and out["control"]["same_filter"] is True
+    assert any("positive control" in r for r in out["void_reasons"])
+    assert [e[1] for e in w.events if e[0] == "aws"] == ["logs:" + run.DATA_REFRESH_LOG_GROUP, "logs:" + run.TICKET_LOG_GROUP]
+    # streams > 0 AND control >= 1 AND matches == 0 is the one PROVEN case
+    out, w = _zero_call(monkeypatch, {"events": [], "searchedLogStreams": streams},
+                        {"events": [{"m": 1}], "searchedLogStreams": streams})
+    assert out["verdict"] == "ZERO_CALLS_PROVEN" and out["control"]["found"] == 1 and out["match_count"] == 0
+    # a data-refresh match is reported as non-zero, whatever the control says
+    out, w = _zero_call(monkeypatch, {"events": [{"m": 1}], "searchedLogStreams": streams},
+                        {"events": [], "searchedLogStreams": streams})
+    assert out["verdict"].startswith("NON-ZERO")
+    # the control read raising is UNREAD, never a zero
+    out, w = _zero_call(monkeypatch, {"events": [], "searchedLogStreams": streams}, RuntimeError("throttled"))
+    assert out["verdict"].startswith("UNREAD") and out["match_count"] is None
+
+
+def test_irpt_status_sha_mismatch_is_a_stop_before_any_write(monkeypatch):
+    w = World(monkeypatch, sha="QUJDREVGGHI")
+    rc, trace, w = drive(monkeypatch, world=w)
+    assert rc == 1
+    # nothing was written or minted: no row, no secret, no http call, no wait; only the one lambda read
+    assert w.ddb_ops() == [] and w.claims == []
+    assert [e[:2] for e in w.events] == [("aws", "lambda")]
+    f = trace["named_failures"][-1]
+    assert f["reason"] == "IRPT_STATUS_BUILD_MISMATCH"
+    assert f["expected_prefix"] == "Zm9v" and f["live_code_sha256"] == "QUJDREVGGHI"
+    assert trace["preconditions"]["irpt_status"]["result"] == "IRPT_STATUS_BUILD_MISMATCH"
+    # an unreadable build is a stop too (not a match)
+    w = World(monkeypatch)
+    w.lambda_raises = True
+    rc, trace, w = drive(monkeypatch, world=w)
+    assert rc == 1 and w.ddb_ops() == [] and trace["named_failures"][-1]["reason"] == "IRPT_STATUS_BUILD_UNREAD"
+    # positive control: a matching prefix goes on and writes the row, after the build read
+    w = World(monkeypatch)
+    rc, trace, w = drive(monkeypatch, world=w)
+    assert rc == 0 and trace["preconditions"]["irpt_status"]["result"] == "IRPT_STATUS_BUILD_MATCH"
+    assert w.events[0][:2] == ("aws", "lambda")
+    assert w.index(lambda e: e[0] == "ddb")[0] > 0
+
+
+# ------------------------------------------------------------------ AC6: report-route arms, old ticket, trace header
+
+def _ddg_script(arm, issued, extra=None):
+    s = {("GET", LIST_PATH): [listing(), listing(REQ_A)],
+         SUBMIT: res(200, {"data": {"request_id": REQ_A}}),
+         ("GET", rpath(REQ_A)): report(REQ_A),
+         ("POST", REPORT_PATH): [arm, issued],
+         ("GET", "/api/scoped/tickets/%s" % TKT): ticket_with(REQ_A)}
+    s.update(extra or {})
+    return s
+
+
+def _flow(monkeypatch, script):
+    fake = install(monkeypatch, script)
+    hops, named = trace_hops()
+    trace = {"hops": list(hops.values()), "named_failures": named}
+    run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA)
+    return fake, hops, named, trace
+
+
+def test_malformed_report_id_arm_expects_typed_400(monkeypatch, sleeps):
+    # as expected: HTTP 400 + code INVALID_REPORT_REQUEST_ID, recorded as the arm, then hop (f) sends the REQ id
+    ok = res(200, {"ticket": {"ticket_id": TKT}})
+    fake, hops, named, trace = _flow(monkeypatch, _ddg_script(ARM_REFUSED, ok))
+    posts = [c for c in fake.calls if c[1] == REPORT_PATH]
+    assert [p[3] for p in posts] == [{"request_id": "sar1b-" + "0" * 24}, {"request_id": REQ_A}]
+    arms = trace["report_route_arms"]
+    assert arms["report_id_malformed_refused"]["status"] == 400
+    assert arms["report_id_malformed_refused"]["code"] == "INVALID_REPORT_REQUEST_ID"
+    assert arms["report_id_well_formed_stored"] == {"status": 200, "as_expected": True}
+    assert named == [] and hops["g_open"]["report_opened"] is True
+    order = [(c[0], c[1]) for c in fake.calls]
+    assert order.index(("GET", rpath(REQ_A))) < order.index(("POST", REPORT_PATH))   # after hop (e) is met
+    # anything else is REPORT_ID_ARM_UNEXPECTED and the run stops BEFORE hop (f)
+    for unexpected in (res(200, {"ticket": {}}),                                        # the malformed id was stored
+                       res(400, {"error": "x", "code": "SOMETHING_ELSE"}),              # 400, wrong code
+                       res(403, {"error": "x", "code": "INVALID_REPORT_REQUEST_ID"}),   # right code, wrong status
+                       res(500, {"message": "boom"})):
+        fake, hops, named, trace = _flow(monkeypatch, _ddg_script(unexpected, ok))
+        posts = [c for c in fake.calls if c[1] == REPORT_PATH]
+        assert len(posts) == 1 and posts[0][3] == {"request_id": "sar1b-" + "0" * 24}, "hop (f) must not run"
+        assert named[0]["reason"] == "REPORT_ID_ARM_UNEXPECTED"
+        assert hops["f_report"]["outcome"] == "UNREACHABLE" and hops["g_open"]["outcome"] == "UNREACHABLE"
+        assert trace["report_route_arms"]["report_id_malformed_refused"]["as_expected"] is False
+        assert "report_id_well_formed_stored" not in trace["report_route_arms"]
+    # the arm never runs when hop (e) is not met
+    fake = install(monkeypatch, _ddg_script(ARM_REFUSED, ok, {("GET", rpath(REQ_A)): refusal("UNEXPECTED")}))
+    hops, named = trace_hops()
+    run.hops_d_to_g("tok", {"hops": []}, hops, named, TKT, "in-1", FILE_SHA)
+    assert not any(c[1] == REPORT_PATH for c in fake.calls)
+
+
+def test_issued_id_refused_by_report_route_is_branch_b(monkeypatch):
+    w = World(monkeypatch)
+    refused_issued = res(400, {"error": "x", "code": "INVALID_REPORT_REQUEST_ID"})
+    script = _ddg_script(ARM_REFUSED, refused_issued)
+    script[("GET", STATUS_PATH)] = res(200, {"data": {}})
+    script[("POST", "/api/scoped/tickets/%s/complete" % TKT)] = res(200, {"ticket": {}})
+
+    def real_hops(token, advisor, trace):
+        h = {x["hop"]: x for x in trace["hops"]}
+        trace["journey_ticket"] = TKT
+        return run.hops_d_to_g(token, trace, h, trace["named_failures"], TKT, "in-1", FILE_SHA)
+
+    rc, trace, w = drive(monkeypatch, world=w, script=script, hops_fn=real_hops)
+    posts = [e for e in w.events if e[0] == "http" and e[2] == REPORT_PATH]
+    assert len(posts) == 2, "the issued id is posted once and NOT retried"
+    nf = [n for n in trace["named_failures"] if n["hop"] == "f_report"]
+    assert nf[0]["reason"] == "BRANCH_B_ISSUED_ID_REFUSED" and nf[0]["status"] == 400
+    h = {x["hop"]: x for x in trace["hops"]}
+    assert h["f_report"]["result"] == "BRANCH_B_ISSUED_ID_REFUSED"
+    assert h["g_open"]["outcome"] == "UNREACHABLE"
+    assert not any(e[0] == "http" and e[1] == "GET" and e[2] == "/api/scoped/tickets/%s" % TKT for e in w.events)
+    assert trace["report_route_arms"]["report_id_malformed_refused"]["as_expected"] is True
+    assert trace["report_route_arms"]["report_id_well_formed_stored"]["as_expected"] is False
+    # then cleanup per D2: the ticket is completed, the wait happens, the row goes last and after exp
+    done = w.index(lambda e: e[0] == "http" and e[2].endswith("/complete"))
+    assert done and max(done) < w.index(lambda e: e[0] == "sleep")[0] < w.index(lambda e: e[0] == "ddb" and e[1] == "delete")[0]
+    assert_row_deleted_after_exp(w)
+    assert trace["cleanup"]["row_removed_read_back_absent"] is True
+    # a 200 on the issued id is the other arm, recorded stored
+    fake, hops, named, trace = _flow(monkeypatch, _ddg_script(ARM_REFUSED, res(200, {"ticket": {}})))
+    assert trace["report_route_arms"]["report_id_well_formed_stored"] == {"status": 200, "as_expected": True}
+    assert not any(n["reason"] == "BRANCH_B_ISSUED_ID_REFUSED" for n in named)
+
+
+def test_old_test_ticket_is_closed_in_the_same_run(monkeypatch):
+    old_path = "/api/scoped/tickets/TCK-OLD"
+    # qualifying: in_progress and assigned to the filer -> completed, status recorded before and after
+    w = World(monkeypatch)
+    w.http({("GET", old_path): [tkt_get("in_progress", FILER_EMAIL.upper()), tkt_get("completed", FILER_EMAIL)],
+            ("POST", old_path + "/complete"): res(200, {"ticket": {}})})
+    exp = int(w.t) + 300
+    trace = {"cleanup": {}, "run_label": "R2-test-1"}
+    run.cleanup("tok", trace, exp, ("TCK-OLD", "TCK-OLD"))
+    rec = trace["cleanup"]["old_tickets"]["TCK-OLD"]
+    assert rec["action"] == "COMPLETED"
+    assert rec["before"]["status"] == "in_progress" and rec["before"]["assigned_to_filer"] is True
+    assert rec["after"]["status"] == "completed"
+    assert len([e for e in w.events if e[0] == "http" and e[2] == old_path + "/complete"]) == 1   # repeated id, one act
+    assert max(w.index(lambda e: e[0] == "http")) < w.index(lambda e: e[0] == "ddb")[0]
+    # any other state is recorded as found and left alone: no complete is sent
+    for status, who in (("in_progress", "someone.else@example.invalid"), ("open", None), ("completed", FILER_EMAIL),
+                        ("in_progress", None)):
+        w = World(monkeypatch)
+        w.http({("GET", old_path): tkt_get(status, who), ("POST", old_path + "/complete"): res(200, {})})
+        trace = {"cleanup": {}, "run_label": "R2-test-1"}
+        run.cleanup("tok", trace, int(w.t) + 60, ("TCK-OLD",))
+        rec = trace["cleanup"]["old_tickets"]["TCK-OLD"]
+        assert rec["action"] == "FOUND_LEFT_ALONE" and rec["before"]["status"] == status, (status, who)
+        assert rec["after"] == rec["before"], (status, who)
+        assert not any(e[0] == "http" and e[1] == "POST" for e in w.events), (status, who)
+    # an unreadable ticket is left alone
+    w = World(monkeypatch)
+    w.http({("GET", old_path): res(404, {"error": "not found"})})
+    trace = {"cleanup": {}, "run_label": "R2-test-1"}
+    run.cleanup("tok", trace, int(w.t) + 60, ("TCK-OLD",))
+    assert trace["cleanup"]["old_tickets"]["TCK-OLD"]["action"] == "NOT_READ_LEFT_ALONE"
+    assert not any(e[0] == "http" and e[1] == "POST" for e in w.events)
+    # in the same run: --close-ticket on the command line, repeatable, completed before the row is touched
+    w = World(monkeypatch)
+    script = {("GET", STATUS_PATH): res(200, {"data": {}}),
+              ("GET", old_path): [tkt_get("in_progress", FILER_EMAIL), tkt_get("completed", FILER_EMAIL)],
+              ("POST", old_path + "/complete"): res(200, {}),
+              ("GET", "/api/scoped/tickets/TCK-OLD2"): tkt_get("open", None)}
+    rc, trace, w = drive(monkeypatch, argv=ARGV + ["--close-ticket", "TCK-OLD", "--close-ticket", "TCK-OLD2"], world=w,
+                         script=script)
+    assert sorted(trace["cleanup"]["old_tickets"]) == ["TCK-OLD", "TCK-OLD2"]
+    assert trace["cleanup"]["old_tickets"]["TCK-OLD"]["action"] == "COMPLETED"
+    assert trace["cleanup"]["old_tickets"]["TCK-OLD2"]["action"] == "FOUND_LEFT_ALONE"
+    post = w.index(lambda e: e[0] == "http" and e[2] == old_path + "/complete")[0]
+    assert post < w.index(lambda e: e[0] == "sleep")[0] < w.index(lambda e: e[0] == "ddb" and e[1] == "delete")[0]
+    assert run.build_parser().parse_args(ARGV).close_ticket == []
+
+
+def test_trace_header_names_this_run_not_round_one(monkeypatch):
+    a = run.build_parser().parse_args(ARGV)
+    trace = run.build_trace(a, "R2-test-1-2026-10-11T00:00:00Z")
+    blob = json.dumps(trace)
+    assert trace["run_label"] == "R2-test-1" and trace["pair"] == "org/pair/path@abc123"
+    assert trace["executor"] == "0.9.0_WK_TEST~1" and trace["run_id"].startswith("R2-test-1-")
+    for round_one in ("SA-r-1b", "v2.2", "order_pin", "68642d02e9", "amendment_3", "amendment_4", "0.7.0_AE_CloudOps~TV2",
+                      "022ee70258", "16:43:21Z"):
+        assert round_one not in blob, round_one
+    # a different invocation names a different run
+    i = ARGV.index("--run-label")
+    b = run.build_parser().parse_args(ARGV[:i] + ["--run-label", "R2-tr-1", "--pair", "P@1", "--executor", "0.9.0_WK_OTHER~2"])
+    t2 = run.build_trace(b, "R2-tr-1-x")
+    assert (t2["run_label"], t2["pair"], t2["executor"]) == ("R2-tr-1", "P@1", "0.9.0_WK_OTHER~2")
+    # and the trace main() builds, end to end, carries it too; the source holds no hard-coded round-one header
+    rc, trace, w = drive(monkeypatch)
+    assert trace["run_label"] == "R2-test-1" and trace["executor"] == "0.9.0_WK_TEST~1"
+    assert trace["run_id"].startswith("R2-test-1-")
+    assert "SA-r-1b" not in json.dumps(trace) and "order_pin" not in trace
+    code = _code_only(run.__file__)
+    for lit in ('"order_pin"', '"amendment_3"', '"amendment_4_cto_code_read_verbatim"', '"v2.2"', '"SA-r-1b-"'):
+        assert lit not in code, lit
