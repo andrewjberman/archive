@@ -1,4 +1,4 @@
-# NFRA_MCPINDEX task order -- `MX-r-10` -- release MX-o-1, MX-o-2 and MX-c-7 onto the opal-gateway host, then read FWD-19 live there
+# NFRA_MCPINDEX task order -- `MX-r-10` -- release MX-o-1, MX-o-2 and MX-c-7 onto the opal-gateway host, then read FWD-19 and E2 (FWD-18, FWD-11's guidance) live there
 
 <!-- ===================== WORKER FACE -- this is the WHOLE of the worker's context ===================== -->
 
@@ -19,14 +19,20 @@ EGRESS CLASS, declared: NONE beyond Opal's own AWS (SSM, S3 reads on the host).
 
 ## 1. THE CELL -- `MX-r-10` (round 9; PRD v0.8 @0eff9e0e6d FWD-19; decomposition section ROUND 9)
 
-**Start only when MX-c-7 is complete and drained, AND MX-r-9 (round 8) has released.** The issuer continues you with
-this order.
+**Start only when MX-c-7 is complete and drained.** MX-r-9 (round 8) released d3c31e972e and its ledger CLOSED
+(@3cc6f5e6ec). The issuer continues you with this order.
 
-**Follow MX-r-9's order exactly, as amended by A1** (`org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-r-9.discover-needs-release.md`),
-with these differences:
+**Follow MX-r-9's order exactly, as amended A1-A7** (`org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-r-9.discover-needs-release.md`).
+Read the live ref from the host by md5, never from `-latest`'s label. These are the differences:
+0. **THE DEPLOY TREE'S HEAD IS THE DEPLOY-ONLY COMMIT** (ruling 2c, `ledger/ROUND_ANALYSIS.round8.md` @d2eb6c471b;
+   row Z-S92). `deploy-to-ec2.sh` names and stamps the artifact from `git rev-parse HEAD` of the calling tree. Commit
+   the shipped files and check out that commit in the deploy tree. Never leave them as working-tree edits over the
+   base. After the upload, read back `opal-gateway-<deploy sha>.tar.gz` present and `-latest`'s `git-ref` equal to the
+   deploy sha, BEFORE the ledger's first leg closes.
 1. **What ships, by CONTENT.** The live tree, plus:
    - each SERVED reader's new `app/integrations/ops_*/` folder;
-   - MX-c-7's regenerated `app/refs/DATA_CATALOG.yaml`;
+   - MX-c-7's regenerated `app/refs/DATA_CATALOG.yaml`, and its `opal_discover/integration.py` change (E2: the folds
+     retired, E-13's note surfaced);
    - the drain's one registry hookup line per SERVED reader.
    A GAP reader ships nothing but its catalog entry.
 2. **`ENABLED_INTEGRATIONS` WIDENS by exactly the SERVED readers' ids.** This is the release's one widening, so the
@@ -73,7 +79,7 @@ Rows go to `org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/I
 <proof_of_spec>
   <expected_criteria>AC1,AC2</expected_criteria>
   <criterion id="AC1" cell_refs="MX-r-10" judgment="false"><invocation>bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/r10.AC1.sh; echo "exit=$?"</invocation><expect>entry files at HEAD>=1; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR printed -- RESULT: PASS -- exit=0</expect></criterion>
-  <criterion id="AC2" cell_refs="MX-r-10" judgment="false"><invocation>bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/r10.AC2.sh; echo "exit=$?"</invocation><expect>/health=200; SERVED readers graded good n of n; routes first 2 of 2 -- RESULT: PASS -- exit=0</expect></criterion>
+  <criterion id="AC2" cell_refs="MX-r-10" judgment="false"><invocation>bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round9/checks/r10.AC2.sh; echo "exit=$?"</invocation><expect>/health=200; SERVED readers graded good n of n; routes first 4 of 4; fwd18 served,c3=3 3; guide=E-13 5 -- RESULT: PASS -- exit=0</expect></criterion>
   <instance_path>org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~30/NFRA_MCPINDEX.TO-MX-r-10.ops-readers-release.proof_of_spec.json</instance_path>
 </proof_of_spec>
 
@@ -89,6 +95,8 @@ PHASE A ends at the ANNOUNCE: report and stop. After PHASE B, the applier writes
 - r10.AC1 FAIL as expected: no entry at HEAD; SCAN DENOMINATOR 27 of 27.
 - r10.AC2 is not dry-run at the cut. Its census inputs do not exist until MX-o-1 and MX-o-2 write them, so it is run
   once at issuance against the live host (expected: no SERVED reader, routes 0 of 2).
+
+ISSUED 2026-10-10 ~23:4xZ in round 9's ONE issuance, from `ledger/ROUND_ANALYSIS.round8.md` @d2eb6c471b. Battery re-dry-run at issuance base bf8492f48f: every check of this order FAILS there as a build check must.
 
 <status>issued</status>
 <round>9</round>
