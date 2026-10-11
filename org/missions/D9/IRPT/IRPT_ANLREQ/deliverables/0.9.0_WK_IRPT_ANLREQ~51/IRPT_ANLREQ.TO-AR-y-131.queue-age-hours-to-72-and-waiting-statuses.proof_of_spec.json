@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-131",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-131.queue-age-hours-to-72-and-waiting-statuses.md",
+    "group": "OTHER",
+    "vintage_commit": "2f22badbbf"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R13_Y.md",
+    "vintage_commit": "2f22badbbf",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-131.queue-age-hours-to-72-and-waiting-statuses.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~51",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/elapsedAge.ts",
+      "kind": "script",
+      "commit_or_etag": "3188120b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree branch wk-IRPT_ANLREQ-51-portal-r13 only; not pushed, not deployed. Hours up to but not including 72 hours, days from 72; exports WAITING_STATUSES: readonly TicketStatus[] = ['open','in_progress'].",
+      "artifact_covered_by": [
+        "AR131-y-AC1",
+        "AR131-y-AC2",
+        "AR131-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+      "kind": "script",
+      "commit_or_etag": "3188120b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same branch. CreatedCell decides by WAITING_STATUSES.includes(ticket.status); the 'not completed' expression is removed.",
+      "artifact_covered_by": [
+        "AR131-y-AC1",
+        "AR131-y-AC2",
+        "AR131-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/__tests__/queue-elapsed-age.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "3188120b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same branch. Five earlier tests kept by name; four named tests added; now is a literal in every test.",
+      "artifact_covered_by": [
+        "AR131-y-AC1",
+        "AR131-y-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR131-y-AC1",
+      "criterion_verbatim": "AR131-y-AC1: the four named tests are present with the five earlier ones, the file never reads the real clock, a closed list named WAITING_STATUSES exists, the age is no longer decided by \"everything except completed\", and the file passes.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-51/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r13/ar13_checks.py y131-age --portal C:/dev/wk-irpt-anlreq-51/portal",
+      "output_evidence": "age test file: 9 pass, 0 fail (rc=0); Y131-AGE-OK (rc=0)",
+      "denominator": "9 of 9 tests in queue-elapsed-age.test.tsx pass (5 earlier + 4 named)",
+      "status": "PASS",
+      "expect": "Y131-AGE-OK"
+    },
+    {
+      "criterion_id": "AR131-y-AC2",
+      "criterion_verbatim": "AR131-y-AC2: the difference control -- the whole TicketCenter test folder passes (58 at the base, plus yours).",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-51/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r13/ar13_checks.py y131-keep --portal C:/dev/wk-irpt-anlreq-51/portal",
+      "output_evidence": "TicketCenter folder: 62 pass, 0 fail (rc=0); Y131-KEEP-OK (rc=0)",
+      "denominator": "62 of 62 tests in the TicketCenter folder pass (58 at the base plus the 4 new)",
+      "status": "PASS",
+      "expect": "Y131-KEEP-OK"
+    },
+    {
+      "criterion_id": "AR131-y-AC3",
+      "criterion_verbatim": "AR131-y-AC3 (judgment, graded at L9, never by you): the statuses named as waiting are the ones in which a ticket is waiting on Opal, read from the ticket type's definition, and a person ranking the queue is not misled by the unit the age is shown in.",
+      "method": "manual_read_with_citation",
+      "invocation": "none: judgment criterion, graded at L9 by 3.0.0_SA_CVO from portal/src/pages/TicketCenter/elapsedAge.ts at 3188120b, portal/src/api/endpoints/tickets.ts:13 and infra/aws/lambda/ticket_center/lambda_function.py:155",
+      "denominator": "3 of 3 statuses read on each side (open, in_progress, completed); 2 in WAITING_STATUSES; 8 of 8 helper inputs recorded; no verdict by the worker",
+      "output_evidence": "Portal TicketStatus (tickets.ts:13) = open | in_progress | completed; service VALID_STATUSES (lambda_function.py:155) = open, in_progress, completed; no difference. open: unclaimed, in the list (waiting on Opal to claim; claim sets in_progress at line 1290). in_progress: claimed by an analyst, report not yet delivered (report recorded only on in_progress, line 1396), in the list. completed: delivered, not in the list. Helper words: 59 minutes '59 minutes'; 1 hour '1 hour'; 47 hours '47 hours'; 71 hours '71 hours'; 72 hours '3 days'; 95 hours '3 days'; 96 hours '4 days'; 40 days '40 days'. git diff --stat origin/DEV HEAD (portal): 3 files changed, 57 insertions(+), 11 deletions(-).",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: the oracle is 3.0.0_SA_CVO at L9; the worker records output and gives no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Before the build the four tests and WAITING_STATUSES were absent and the old expression present, so y131-age had nothing to pass (record face: AC1 FAIL, AC2 PASS at 58).",
+      "expected": "FAIL before the edit; OK after",
+      "observed": "Y131-AGE-OK and Y131-KEEP-OK after the edit; folder grew 58 to 62.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each criterion check run once after the edit, before portal commit 3188120b; every now in the test file is a literal.",
+      "observed": "Y131-AGE-OK, Y131-KEEP-OK; bun run typecheck rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal typecheck and lint as criteria",
+      "reason": "Not criteria of this order; run anyway: bun run typecheck rc=0 (tsc -b --noEmit, no output); bun x eslint on the three changed files: 0 errors, 1 warning (react-refresh/only-export-components, TicketCenter.tsx 88:23)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test ./src/pages/TicketCenter",
+      "result": "62 pass, 0 fail"
+    }
+  ]
+}
