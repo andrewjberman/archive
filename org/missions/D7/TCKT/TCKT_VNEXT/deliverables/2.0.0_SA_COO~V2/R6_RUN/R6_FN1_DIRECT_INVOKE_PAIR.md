@@ -102,3 +102,54 @@ ONE pass of five calls.
 ## CTO half -- OWED
 
 `1.0.0_SA_CTO~DELL2`.
+
+## AMENDMENT 1 (2026-10-11 ~23:1xZ) -- the attached FILE: where it is served, and its arm (the CTO half's condition, msg 6001)
+
+The text above is unchanged (its sha256 began `d5601efeb977d290`, the bytes the CTO half is bound to). FWD-2's ACCEPT names the
+ticket AND its attached file; sections 1 to 7 cover the ticket only.
+
+### Where the file is served (read by this seat)
+
+- NOT by the ticket service. The ticket holds pointers; `get_ticket` returns no file bytes and no link.
+- By IRPT: `GET /api/scoped/investor-reporting/analysis/requests/{requestId}/original`, operation `analysis-request-original`, on
+  the function `irpt-status` (`infra/aws/lambda/investor-reporting/ops/entry.py:219-222, :241, :245`; its class in that file's own
+  table is `OWNED_RECORD`, `:251`). It answers an Opal-signed link, never bytes. The page reaches it through
+  `getAnalysisRequestOriginal(requestId, firm)` (portal `origin/DEV`, `src/pages/TicketCenter/AnalysisRequestParts.tsx:279`;
+  `src/api/endpoints/investor-reporting.ts:232, :1176`), which needs the ticket's recorded request id.
+- Two fences stand in front of it, in this order: the route's FIRM BINDING (the selected firm must be one the caller may act
+  for), then the record's OWNER check (`ops/owned_requests.py:175-184`: an ordinary viewer must be the record's own firm AND its
+  own principal; an Opal-internal viewer is admitted to any owner, row TCKT_VNEXT-D2-S40).
+
+### The arm, and the fact that it has ALREADY been exercised live
+
+The fifth run's census (trace `org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r4_tr1/r4_tr1_run5_trace.json`, `census.arms[46]`,
+claim `measured`; read by this seat) called this exact route as the one-firm synthetic filer (an internal caller whose users row
+lists `49financial` only), once per firm selector:
+
+| selector | served status | reason | reads as |
+|---|---|---|---|
+| `cottonwood` (another firm) | 200 envelope | `FIRM_BINDING` | REFUSED |
+| `inflection` (another firm) | 200 envelope | `FIRM_BINDING` | REFUSED |
+| `49financial` (the caller's firm) | 200 envelope | `INVALID_INPUT` | NOT refused by firm: the census sends a placeholder request id, so the route goes past the firm fence and fails on the id |
+
+`off_list_admits` for the whole census: empty (82 routes armed).
+
+**What that shows:** a caller scoped to one firm is refused the original-file route for another firm, live, on the deployed
+`irpt-status`, with a control arm (its own firm) that gets past the fence. **What it does NOT show:** (i) the same for a CLIENT
+caller of another firm (the census caller is internal with a firm list); (ii) the OWNER check, because no arm sent a real
+request id; (iii) that a real file's signed link is refused to anyone, since no arm reached a real record.
+
+### What this seat proposes, for the CTO to sign or re-rule
+
+- **Arm F1 (no new act):** the census arm above is cited as the file's live arm for "another firm, by the route's firm binding".
+  It is a measured read from an act already run under a signed pair (`R4_RUN/R4_TR1_FIFTH_RUN_PAIR.md`); nothing is invoked for it.
+- **Arm F2 (NOT proposed for an act now, stated as the gap):** the owner check on a real request, by a caller of another firm.
+  It needs a caller identity on `irpt-status`, whose event shape and trusted headers are another project's
+  (`_authz/served.py`, `x-user-email` and `x-firm-id` behind an origin check), and a direct invoke of a function this project
+  does not own. If the CTO wants it, it is a cell for `2.0.0_SA_COO~Y2` under its own pair, or an arm of the next run of the
+  journey; this pair does not cover it.
+
+**So, as this seat reads it: FWD-2 for the FILE is MET BY THE ROUTE'S FIRM BINDING for a firm-scoped internal caller (measured,
+run 5), and NOT READ for a client caller or at the owner check.** The order TO-RUN-R6-fn1 is unchanged by this amendment.
+
+COO half: SIGNED on this amendment, `2.0.0_SA_COO~V2`, 2026-10-11.
