@@ -1,0 +1,83 @@
+{
+  "verdict": "DIRTY",
+  "income_basis_for_bonds": "FALSE",
+  "bonds_in_measured_rows": 0,
+  "measured_days_with_a_bond": 0,
+  "bonds_in_held_rows": 16,
+  "held_days_with_a_bond": 988,
+  "sawtooth_tested": 86,
+  "sawtooth_shown": 81,
+  "evidence": [
+    {
+      "claim": "A bond position is valued like any holding: amount = quantity x the stored close of that security on that day, merged by (cusip, day); there is no par factor, multiplier or accrued-interest term in the valuation (a bond close is read as a per-unit price, about 1.0 = par).",
+      "file": "data/assets/scripts/silver/commonwealth_daily_valuation.py",
+      "line": 444
+    },
+    {
+      "claim": "The price is merged on (cusip, day) from the stores in order; cash securities are set to 1.0, every other holding with no store row is unpriced and its account-day is not complete.",
+      "file": "data/assets/scripts/silver/commonwealth_daily_valuation.py",
+      "line": 440
+    },
+    {
+      "claim": "The stored price files read: STORES in order silver-canonical-prices (ticker key), gold-canonical-holdings (cusip or ticker key; price_col 'price'), then rivalfunds-etfs-gold-security-market, etfs-bbg-testpull-ticker-history, etfs-bbg-fund-daily, portal-canon-return-daily-values. The only store that holds a price for any Fixed Income CUSIP in the run is gold-canonical-holdings (184 of 778 Fixed Income CUSIPs; 14,421 CUSIP-days, 2026-06-08 to 2026-10-06; every row of that store is labelled bd_snapshot in the cached copy, 564,563 of 564,563 rows).",
+      "file": "data/assets/scripts/analysis/commonwealth_price_census.py",
+      "line": 61
+    },
+    {
+      "claim": "The store's own description of the gold-canonical-holdings price: 'the custodian mark on a held position is a close for that security on that day'. It names no clean or dirty basis; no field name or documentation string in the code or in the stored file (columns kind, key, day, price, source) states one.",
+      "file": "data/assets/scripts/analysis/commonwealth_price_census.py",
+      "line": 59
+    },
+    {
+      "claim": "price_basis as_traded rebuilds only the first store (silver canonical prices) from Yahoo Close; the gold-canonical-holdings points that price the bonds are used as stored.",
+      "file": "data/assets/scripts/silver/commonwealth_daily_valuation.py",
+      "line": 296
+    },
+    {
+      "claim": "Bond rule used: silver transactions column Asset_Type == 'Fixed Income' (column named at this line; one Asset_Type per CUSIP, 0 of 4,634 CUSIPs carry more than one). 778 Fixed Income CUSIPs of 4,634 in 1,416,497 transaction rows. Bond mutual funds and ETFs (24 of the 252 non-bond CUSIPs in measured rows carry a bond-like description word) are funds, not bonds, and are not counted.",
+      "file": "data/assets/scripts/silver/commonwealth_transactions.py",
+      "line": 53
+    },
+    {
+      "claim": "MEASURED ROWS HOLD NO BOND: of 107,316 measured account-days (daily_returns return not null, fwd3_serve_r34), 0 hold a Fixed Income CUSIP; their 229,743 holding rows span 252 distinct CUSIPs, 0 of them Fixed Income. All 141,555 account-days that hold a Fixed Income CUSIP (772 distinct CUSIPs) are blank: UNPRICED 141,379, FIRST_DAY 125, DVR_CLOSE_STEP 51.",
+      "file": ".scratch/advi_cotbkf/fwd3_serve_r34/daily_returns.parquet",
+      "line": 0
+    },
+    {
+      "claim": "HELD ROWS: 988 account-days carry HELD_SOURCE_UNDER_REVIEW in the hold run; all 988 hold CUSIP 95000U2D4 (988 of 988, no account-day outside the set) and 16 distinct Fixed Income CUSIPs are held on those days in all. The hold list names 3 CUSIPs (05613L3H2 0 held days, 95000U2D4 988, 651639AX4 0). 95000U2D4 has no stored close on any of its 988 days (2022-06-08 to 2026-05-15; stored bond closes begin 2026-06-08).",
+      "file": "data/assets/scripts/silver/commonwealth_fwd3_serve.py",
+      "line": 254
+    },
+    {
+      "claim": "The three-bond list the earlier price work used (05613L3H2, 95000U2D4, 651639AX4) is the hold list, not the set of Cottonwood bonds: the Asset_Type rule finds 778.",
+      "file": "data/assets/scripts/silver/commonwealth_cot_price_rewrite.py",
+      "line": 67
+    },
+    {
+      "claim": "SAW-TOOTH, fall half: of 184 Fixed Income CUSIPs with stored closes, 86 are testable (a parsed coupon rate and a maturity month and day in the description, so a semiannual coupon date falls inside the price window with more than 5 days of prices before it); 81 of those 86 show a one-day fall of 0.6 to 1.4 times half the coupon within 4 calendar days of that date (median 1.00 half-coupon, interquartile 0.96 to 1.05). Event study, 86 paths, price change from the day before the date in half-coupon units: day 0 median -1.000, day +5 -0.993, day +10 -1.028. Example: 66285WM78 (coupon 5.0) 103.703 on 2026-06-30 and 101.293 on 2026-07-08 per 100 par. A clean price has no coupon-sized step on a coupon date.",
+      "file": ".scratch/advi_cotbkf/r34/after/security_day_price.parquet",
+      "line": 0
+    },
+    {
+      "claim": "Negative arm and untested: 42 of the 184 have no coupon date inside the window, and 5 of those 42 show a one-day fall of 0.6 half-coupon or more (12 percent; against 94 percent, 81 of 86, on the coupon date). 53 lack a parseable coupon or maturity (descriptions truncated) and 3 are zero coupon. 86 + 42 + 53 + 3 = 184. The 5 of 86 that do not show the fall are unexplained (a date parse or a monthly or quarterly payer is possible).",
+      "file": ".scratch/advi_cotbkf/r34/after/security_day_price.parquet",
+      "line": 0
+    },
+    {
+      "claim": "SAW-TOOTH, climb half NOT resolved: between coupon dates the dirty prediction is a rise of coupon/365 per calendar day. Observed OLS slope on the 112 bonds with the coupon step added back: 0.00046 per coupon point per day (se 0.00202) against 0.00274 predicted; segments move with the rate level over the 120 days and the window cannot separate the two. So the evidence is a coupon-sized fall on the coupon date in 81 of 86, not a full measured saw-tooth.",
+      "file": ".scratch/advi_cotbkf/r34/after/security_day_price.parquet",
+      "line": 0
+    },
+    {
+      "claim": "Coupon cash exists in the income classes: 7,071 'int' rows on Fixed Income CUSIPs (705 CUSIPs, 2013-04-16 to 2026-06-01), and 'int' posts as signed cash income. The transactions end 2026-06-22 and the bond closes begin 2026-06-08, so no coupon cash date falls inside the price window with a matched price jump (0 matched), and 0 buy or sell rows on a Fixed Income CUSIP fall in the window to compare a trade price plus accrued (the AI column) to the stored close.",
+      "file": "data/assets/scripts/silver/commonwealth_sweeps.py",
+      "line": 1028
+    },
+    {
+      "claim": "Consequence for row 3: if the close carries the coupon it leaves on the coupon date, a bond's value holds accrued interest before the pay date and the coupon cash then posts against an equal price fall, so income does not enter value at the cash posting; income_basis cash_when_received is not true for a bond priced from this store. No measured row holds a bond today (0 of 107,316), so no measured row is changed by this.",
+      "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+      "line": 1900
+    }
+  ],
+  "settling_read": ""
+}
