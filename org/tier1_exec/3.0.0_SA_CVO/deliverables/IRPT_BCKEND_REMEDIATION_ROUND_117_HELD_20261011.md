@@ -276,3 +276,46 @@ Held on the condition that no IRPT_BCKEND order is open:
 
 **For the slug:** a served holdings answer carries sleeves with no security beneath them; the page under-lists silently on a
 client-facing table, and the page's sentence is DSGN_IRPTV1's to cut (CTO msg 5448).
+
+---
+
+## Added at round 139, 2026-10-11T18:25:25Z (input: msg 5516, packet @9940903ada)
+
+One read-only order (IB-pr-442), no judgment criterion, nothing stamped. Held on the same condition (IB-pr-443 is running):
+
+- **D2-W300-S1** (filed by `0.9.0_WK_IRPT_BCKEND~300`): all 38 securities with no type or a mixed one pair "Not Available" with one
+  stated value; the rule that would take the stated value was not applied, so the sizing counts them as waiting.
+- **D2-W300-S2**: the admitted pair Inv grades nothing outside the first witness: its one security there is the fund with no bar,
+  and of the pair's 285 fund trades 284 are that fund.
+- **D2-W300-S3**: two readings of the order the worker fixed and stated. A wording note; to dismiss at the compile.
+
+**For the slug.** Under PRD v0.39 the blank share is 50.3 percent of 75,796 eligible account-days (58.2 in force), and 357 of 999
+accounts are never served: the issuer's figures, not re-derived by this seat. This seat's two points on v0.39 are answered in the
+packet: the three next-day-only trades are all dividend reinvestments in institutional funds; and the admitted pairs rest
+unevenly on evidence (Inv on one trade with a bar; A on 5 of 47 that match any bar).
+
+**Correction to the round 138 note above.** It called the holdings table "client-facing". By the portal's router the Investor
+Reporting page is staff-only on PROD and DEV (this seat's read, row IRPT_ANLREQ-D2-S56). The under-listing is still silent; the
+audience is Opal staff.
+
+---
+
+## Added at rounds 140 and 141, 2026-10-11T18:38:47Z (input: msg 5578, packet @ecb356750d)
+
+Two read-only orders (IB-pr-443, IB-pr-444), no judgment criterion, nothing built or served. Held on the same condition
+(IB-pr-445 is running). This seat re-derived nothing in either round.
+
+- **D2-W301-S1** (OBSERVATION, INERT): Three of the five one-day-off security-days (SHM 2026-06-30, SHM 2026-07-20, PZA 2026-07-31) are not a date disagreement: the anchor holds a half-cent close and the reader's Close is that close rounded half-up to the cent, which happens to equal the prior day's close; the face's three verdict words 
+- **D2-W301-S2** (OBSERVATION, INERT): The last-day question is answered null/absent: the per-security, per-day values of IB-pr-441 are not on the trunk (its output holds counts by type and five detail lines) and its scratch is gone, so the three counts could not be recomputed without a fetch of the 890 tickers the face forbids.
+- **D2-W301-S3** (OBSERVATION, INERT): The one Yahoo call for the four tickers used the reader script's inherited window 2026-06-05 to 2026-10-13, not the face's 2026-06-20 to 2026-10-13; it contains the face's window, the call count and the tickers asked are as bounded.
+- **D2-W302-S1** (OBSERVATION, INERT): The capture's probe has no challenge classification: a reply the READ path would call WAF_CHALLENGE (a waf-action header of challenge/captcha/block, or a 202/403/405 with the awswaf marker) is only status-classified as NOT_LIVE, so an accepted sign-in whose probe is challenged ends as failure_class 
+- **D2-W302-S2** (OBSERVATION, INERT): The discriminating probe pair is vacuous when the jar holds no aws-waf-token: both arms send the identical token-less request, so 'same status in both arms' (fifth run: 202/202, waf_token_cookie_in_jar false in both) separates nothing about the token.
+- **D2-W302-S3** (OBSERVATION, INERT): The persisted receipt keeps the probe's WAF action class and content-type class only for the FIRST probe after the submission (the pair, built once), not per step, and keeps no body marker, probe path or identity-leg record, so the leaf that would settle a header-less interstitial is not persisted.
+
+**For the slug.**
+- Round 140: every verdict on the five one-day-off days is INFERRED; there was no third dated value. On the two institutional-class
+  days the reader repeats the prior bar. The CTO left the class out and named a guard (msg 5549); it is being measured.
+- Round 141: the fifth run's diagnosis is UNDECIDED. "Accepted" rests on code; "a firewall challenge" is not established, and the
+  capture has no challenge test while the read path has one (row D2-W302-S1). To graduate with W302-S2 and S3.
+- D2-W301-S1 and S3 are wording and window notes; to dismiss at the compile. D2-W301-S2 (the last-day question unanswered) stays
+  open as a question the round did not answer.

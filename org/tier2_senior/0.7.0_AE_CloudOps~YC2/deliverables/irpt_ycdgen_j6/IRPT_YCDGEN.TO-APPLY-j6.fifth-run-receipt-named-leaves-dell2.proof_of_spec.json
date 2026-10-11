@@ -1,0 +1,171 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "The first asked leaf is answered.",
+      "denominator": "1 ASK 1 line, and the criterion pins the leaf PATH in its own pattern, so a line for a different leaf could not satisfy it. The value is `challenge`, not ABSENT and not WITHHELD -- the three outcomes the script can emit for an asked leaf -- so the leaf exists in the receipt and its value cleared the whitelist. THIS IS THE LEAF THE ORDER IS FOR: the one IB141-1 named to confirm or kill a web firewall challenge.",
+      "expect": "^1$",
+      "invocation": "grep -c '^ASK 1 | probe_pair.without_token_waf_action_class | ' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j6/FIFTH_RUN_RECEIPT_NAMED_LEAVES_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c '^ASK 1 | probe_pair.without_token_waf_action_class | ' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j6/FIFTH_RUN_RECEIPT_NAMED_LEAVES_20261011.txt\n1\nthe line itself: ASK 1 | probe_pair.without_token_waf_action_class | challenge",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "The read states how many values it showed and withheld.",
+      "denominator": "1 tally line, reading SHOWN=34 WITHHELD=0. The pair is what makes the ASK lines auditable as a set: 34 shown is the count of printed values across every ASK line, and 0 withheld means NOT ONE asked leaf held a value that failed the whitelist. A non-zero WITHHELD would have been the interesting case -- a leaf the receipt's own whitelist was expected to keep closed but did not -- and the order's step 2 puts that judgment on this seat.",
+      "expect": "^1$",
+      "invocation": "grep -c -E '^SHOWN=[0-9]+ WITHHELD=[0-9]+$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j6/FIFTH_RUN_RECEIPT_NAMED_LEAVES_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c -E '^SHOWN=[0-9]+ WITHHELD=[0-9]+$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j6/FIFTH_RUN_RECEIPT_NAMED_LEAVES_20261011.txt\n1\nthe line itself: SHOWN=34 WITHHELD=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "The read ran to its end.",
+      "denominator": "1 output file, exactly 1 line equal to END. The truncation detector: END follows the SHOWN/WITHHELD tally, so a read cut off mid-output would print no END and no tally, and a reader would be left with ASK lines whose completeness nothing asserts. The prepended header line is not equal to END.",
+      "expect": "^1$",
+      "invocation": "grep -c '^END$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j6/FIFTH_RUN_RECEIPT_NAMED_LEAVES_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c '^END$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j6/FIFTH_RUN_RECEIPT_NAMED_LEAVES_20261011.txt\n1\nmatched line, verbatim: END",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the script's full output with the SSM command id 55f76a7c-3305-4f4d-9f2e-7ccaf787b43f and the instance id i-0167fd745ad906a66 on its first line, plus this seat's receipt-identity and redaction statement: AT, RECEIPT (bytes, hash and mtime, with j5's values printed beside them by the script itself), ASK 1 to ASK 6, STEPS=8, the ASK 7 and ASK 8 lines, the three c-controls, SHOWN/WITHHELD, END",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j6/FIFTH_RUN_RECEIPT_NAMED_LEAVES_20261011.txt"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~YC2",
+  "compiler_tools": [
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: one read-only command on the resident host; no schedule, trigger or rule is added or read. Checked against the act as executed.",
+      "tool": "comp-schedule"
+    },
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: no IAM change; the command runs under the applier's existing SSM grant on this one instance. Proved by the LIVE call (Status Success, ResponseCode 0). No AWS data-plane call at all this time -- unlike j5, this script makes no queue read.",
+      "tool": "comp-iam"
+    },
+    {
+      "invocation": "the order's named trap, plus this seat's own read of the whitelist before running",
+      "result": "PASS. The preflight states the script was run locally on 1 synthetic receipt with 2 planted values (a cookie pair and a tokenised URL) placed in ASKED leaves, 0 of 2 printed, both shown as WITHHELD with a length and a hash. It names the trap: a leaf whose value is not the closed word the receipt's whitelist promises. This seat read the whitelist itself before sending -- WORD = [A-Za-z][A-Za-z0-9_.:-]{0,39} under fullmatch, 40 characters at most -- and reasoned about what it admits and refuses; see controls.the_whitelist_was_read_and_the_asked_leaf_set_is_what_makes_it_safe.",
+      "tool": "comp-adversary"
+    },
+    {
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "see the run recorded at close; 3 of 3 criteria PASS",
+      "tool": "proof-of-spec-check.py"
+    }
+  ],
+  "controls": {
+    "every_shown_value_was_inspected_against_the_orders_own_four_categories": {
+      "description": "The order's step 2 puts the final filter on this seat: if any ASK line shows something that is not a closed word, a cookie NAME, a boolean or a number, replace that value with REDACTED and say so. That is a judgment, so it needs the values enumerated rather than the tally trusted.",
+      "expected_landed": "every distinct shown value read and placed in one of the four permitted categories, with its length",
+      "expected_not_landed": "any opaque or long value, which would be redacted and reported",
+      "observed": "34 shown values reducing to ELEVEN distinct: NO_AUTHENTICATED_PROBE (22 chars), CH-AUTHENTICATED (16), CH-SIGNIN_FORM (14), ycsessionid (11), node-port (9), csrftoken (9), challenge (9), NOT_LIVE (8), False (5), html (4), dom (3). Nine are closed words, two are cookie NAMES (ycsessionid, csrftoken -- permitted by name in the order), one is a boolean. A sweep for anything failing ^([A-Za-z][A-Za-z0-9_.:-]{0,39}|True|False|None)$ returns 0. 0 lines redacted, and the saved file's header says so.",
+      "status": "PASS"
+    },
+    "the_host_ran_it_rather_than_merely_accepting_it": {
+      "description": "A DELIVERY trap on a host plane: send-command returning a CommandId proves SSM ACCEPTED the request, never that the instance ran it.",
+      "expected_landed": "Status Success, ResponseCode 0, no stderr, the output reaching END",
+      "expected_not_landed": "Pending/Failed/TimedOut, a non-zero ResponseCode, or stderr content",
+      "observed": "ssm 55f76a7c-3305-4f4d-9f2e-7ccaf787b43f Success rc 0. host_read.py prints no STDERR block and only prints a result once the invocation leaves Pending/InProgress/Delayed. The output's own AT line is stamped by the HOST (2026-10-11T18:28:06Z) and AC3's END proves the script reached its last statement.",
+      "status": "PASS"
+    },
+    "the_receipt_is_the_SAME_FILE_j5_read_and_the_order_made_that_a_first_class_check": {
+      "description": "THE ORDER'S OWN FIRST CONTROL: if the RECEIPT line's hash is not j5's, say so FIRST, because a different file is a different capture. It matters because a second capture between j5 and j6 would make these leaf values describe a different event than the one the diagnosis is about, while every line would look identical.",
+      "expected_landed": "bytes and sha256 equal to j5's 3824 and c1157ec45071b41e, and the mtime unchanged",
+      "expected_not_landed": "any difference, which must be reported first and would mean these values are not the fifth run's",
+      "observed": "RECEIPT bytes=3824 sha256=c1157ec45071b41e mtime_epoch=1791738604. All three identical to j5's read at 17:53:32Z -- and the script prints j5's expected values on the same line, so the comparison is in the artifact rather than only in this seat's head. mtime 1791738604 is 2026-10-11 17:10:04Z, the capture of the fifth run. So no capture has run since j5, which is also consistent with x1dry at 18:08Z having touched no unit and no real library.",
+      "status": "PASS"
+    },
+    "the_receipt_was_opened_by_no_other_command_for_the_second_order_running": {
+      "description": "j5's order forbade opening the receipt by any other command and this one repeats it. The temptation is higher here than on j5, because j6's whole purpose is to read values out and the asked list is only 16 of the receipt's 120 leaves -- the obvious move is to look at the rest.",
+      "expected_landed": "the only reader is the issuer's script on the host; every value reported comes from its stdout",
+      "expected_not_landed": "any cat, head, grep, python, scp or s3 cp of last-capture.receipt.json, on the host or locally, and no widening of the asked leaf list",
+      "observed": "Zero such commands across j5 and j6. The asked list was run exactly as the script defines it; no leaf outside it was requested, even though j5's output names all 120 paths and adding one would have been a one-line edit to a script this seat can read. This seat's own follow-up reads ran against the SAVED OUTPUT in the repo -- that is what produced the distinct-value enumeration above.",
+      "status": "PASS"
+    },
+    "the_script_writes_nothing_at_all_which_is_stronger_than_j5s_temp_file": {
+      "description": "The bounds say read-only. j5's script wrote one temp file and removed it; j6's needs none, so the claim can be made absolutely rather than conditionally. Worth measuring because the two orders read the same file and a reader may assume the same write surface.",
+      "expected_landed": "zero write verbs in the script and no temp file at all",
+      "expected_not_landed": "any mktemp, cp, mv, install, rm, redirection or tee",
+      "observed": "Verb sweep before running, each count printed: mktemp 0, cp 0, mv 0, install 0, rm 0, redirection 0, tee 0, sed -i 0. The script's only file access is python's open(path, 'rb') on the receipt. The real directory /opt/investor-reporting-ycharts appears once, as H, and is used only to build the receipt's path. No systemctl verb at all this time, and no AWS call.",
+      "status": "PASS"
+    },
+    "the_two_c_controls_the_asked_list_did_not_include_are_what_place_the_answer": {
+      "description": "The issuer added three leaves beyond IB141-1's list -- the pair's two same-named state leaves and reason -- precisely so the asked values can be placed rather than floating. Without them, a waf_action_class of `challenge` says what the firewall did but not what the probe concluded.",
+      "expected_landed": "the controls answer, and they sit consistently with the asked leaves and with j5's independently read values",
+      "expected_not_landed": "a control disagreeing with j5 -- which, since both reads are of the same bytes, would mean one of the two reads is wrong",
+      "observed": "ASK c1 without_token_state = NOT_LIVE, ASK c2 with_token_state = NOT_LIVE, ASK c3 reason = NO_AUTHENTICATED_PROBE. ALL THREE MATCH j5's independently obtained values: j5 printed NOT_LIVE for the probe states of steps 1 to 7 and reason NO_AUTHENTICATED_PROBE as verbatim enum leaves. Two different scripts, two different whitelists, same bytes, same answers -- which is a cross-check on both readers, not just a repetition.",
+      "status": "PASS"
+    },
+    "the_whitelist_was_read_and_the_asked_leaf_set_is_what_makes_it_safe": {
+      "description": "Anything the script prints is committed to git and the subject is a sign-in receipt. j6's whitelist is WIDER than j5's: j5 printed a value only if it fullmatched [A-Z][A-Z0-9_]{1,63}, where j6 admits mixed case plus dot, colon and hyphen up to 40 characters. A 40-character hex or dotted token starting with a letter would therefore print verbatim.",
+      "expected_landed": "the widened whitelist is safe BECAUSE OF THE LEAF SET it is applied to -- classes, states, vias, a boolean and cookie NAMES, none of them value-bearing fields -- and a header-style value with a space or base64 padding still fails fullmatch and is withheld",
+      "expected_not_landed": "the whitelist applied to a value-bearing leaf such as a cookie value, a token or an authorization header",
+      "observed": "Read before the send. WORD = [A-Za-z][A-Za-z0-9_.:-]{0,39}, fullmatch. The 16 asked leaf paths are waf_action_class, via, content_type_class, errored, session_cookie_names_present, steps[].probe_via, steps[].state, steps[].via, the two probe states and reason -- not one is a credential-valued field, and session_cookie_names_present holds NAMES, which the order explicitly permits. A value with a space (a Via header chain) or with base64 padding would fail fullmatch and be withheld. The run bore this out: WITHHELD=0 because every asked leaf really was a closed word, and the widest value printed is 22 characters.",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "WHAT THE VALUES MEAN is not read here -- the diagnosis belongs to IRPT_BCKEND's cell IB141-1",
+      "reason": "the decomp context is explicit: IB141-1 names the leaves that confirm or kill a web firewall challenge, and THIS SEAT READS THEM OUT. So the facts are reported -- both arms waf_action_class=challenge with content_type_class=html, both probe states NOT_LIVE, steps[1..7].state CH-AUTHENTICATED via dom, session_cookie_names_present holding two names -- and the conclusion is not drawn. Surface, do not adjudicate."
+    },
+    {
+      "item": "104 of the receipt's 120 leaves were not read",
+      "reason": "the asked list is 16 leaves plus three controls the issuer added. j5's output names every leaf path, so widening the read would have been easy and was deliberately not done: the order defines the list, and a receipt is the wrong artifact to browse."
+    },
+    {
+      "item": "the 25 credential-named leaves j5 flagged remain unread as values",
+      "reason": "none of them is in the asked list, and that is correct -- login_submission.password_field and the cookie_names arrays are the fields whose VALUES must not be read. j6 reads session_cookie_names_present, which holds NAMES, and the order permits a cookie NAME by name."
+    },
+    {
+      "item": "whether a second capture could have overwritten the receipt between j5 and j6",
+      "reason": "excluded by measurement rather than assumption: bytes, sha256 and mtime are all identical to j5's, so the file has not been rewritten. What is NOT established is that no capture was ATTEMPTED and failed before writing -- the journal would show that and this order does not read it."
+    },
+    {
+      "item": "no deploy-completion ledger was opened",
+      "reason": "NEVER-2 binds a confirmed DEPLOY. This script writes nothing anywhere, so there is nothing that could be left half-landed."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R14.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-j6.fifth-run-receipt-named-leaves-dell2.md",
+    "vintage_commit": "a2bb62adf7"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "NOT REQUIRED AND NOT CLAIMED: this act widens nothing and serves nothing new. One script that writes NOTHING -- not even a temp file -- and whose only file access is a read of one receipt. No served output moved, no IAM or policy change, no unit touched, no queue call at all. NEVER-1 binds an act that moves served output; reading named leaves of one file is not such an act, which is why the order carries <risk>SERVED</risk>.",
+    "cto_half": "NOT REQUIRED AND NOT CLAIMED, same reason. The authority is the order itself, IRPT_YCDGEN.TO-APPLY-j6 @a2bb62adf7 -- verified at the bytes: the working-tree blob 1694c1cc9cfd157874660b3c7abce709dbcc0bfe equals the blob at that commit, which is an ancestor of HEAD -- resting on cell YCD-c-14 of IRPT_YCDGEN_DECOMP_R14.md, CTO msg 5525 and IB141-1's asked list. RELATED AND STILL OWED ELSEWHERE: st32's CTO half condition 2 -- the judgment on what the receipt must not hold -- remains the CTO's. j5 gave it the shape and the four counts; j6 gives it sixteen named values, all closed words, cookie names or a boolean."
+  },
+  "phase": "INVESTIGATION",
+  "risk_class": "SERVED",
+  "rollback": "NONE NEEDED AND NONE POSSIBLE, stated rather than left blank: this script writes nothing at all -- a stronger claim than j5's, whose one temp file it does not need. No file is created, modified or deleted on the host; the receipt is opened read-only and not copied. The only durable effects are this seat's own artifacts in the repo, which git reverts. Nothing about st32's own rollback arm changed: remove_st32_to_st31.sh stays unrun and needs a new word from 2.0.0_SA_COO~G2, its library step now has the x1dry rehearsal behind it, and the kept library remains on the host at 857d90b81960d69a7a6700be6fffe33d86628694aef95f8cfb64aca7a82cb839.",
+  "schema_version": "1.0",
+  "scope": "ONE read-only script on host i-0167fd745ad906a66 that prints the NAMED leaves of /opt/investor-reporting-ycharts/last-capture.receipt.json -- the list IRPT_BCKEND's cell IB141-1 asked for, to confirm or kill a web firewall challenge -- as closed words, booleans and numbers, withholding anything else as a length and a hash. The same receipt file j5 read by shape; no new run, no request, no sign-in. Round 14 cell YCD-c-14.",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j6/FIFTH_RUN_RECEIPT_NAMED_LEAVES_20261011.txt",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-j6.fifth-run-receipt-named-leaves-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "a2bb62adf7"
+  },
+  "surprises": [
+    "IRPT_YCDGEN-D2-S61: ITS INFERENCE IS NOW MEASURED, which is why no new row is filed. The row recorded that 8 of the CHECK's 33 flags were false positives of the `token` substring hitting the probe pair's own with_token_/without_token_ arm names, that this hashed their values, and that their names SUGGESTED closed diagnostic classes -- stated there as INFERRED, not measured, because the flag hid them. This read returns seven of those eight as values: without_token_waf_action_class=challenge, without_token_via=node-port, without_token_content_type_class=html, with_token_waf_action_class=challenge, with_token_via=node-port, without_token_state=NOT_LIVE, with_token_state=NOT_LIVE. All closed classes, as inferred -- and they ARE the diagnosis IB141-1 asked for, so the false positive cost exactly the answer. The row's cheap fix (anchor the token test to the last path segment, or exclude the two arm prefixes) stands with 2.0.0_SA_COO~G2.",
+    "IRPT_YCDGEN-D2-S45: UNCHANGED AND STILL ARMED. This order makes no queue call whatsoever -- not even get-queue-attributes -- so the eight dead letters are untouched by it. Named because this read concerns a failed run and a reader could expect the dead-letter row to have moved."
+  ],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-j6.fifth-run-receipt-named-leaves-dell2"
+}

@@ -1,0 +1,168 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "The library step passed on the copy.",
+      "denominator": "1 X1 DRY RESULT line, and the file carries 0 occurrences of the string FAIL anywhere -- so the PASS is not sitting beside a failure elsewhere in the run. The step was exercised on copies: X0 prints the temp directory holding a copy of st32's library and a copy of st31's kept file, and X1 prints the restored digest equal to st31's, which is what the step is for.",
+      "expect": "^1$",
+      "invocation": "grep -c '^X1 DRY RESULT: PASS' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_x1dry/X1_DRY_EXERCISE_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c '^X1 DRY RESULT: PASS' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_x1dry/X1_DRY_EXERCISE_20261011.txt\n1\nthe line itself: X1 DRY RESULT: PASS -- the step leaves st31's library in place of st32's\nwith, beside it: X1 library restored: 857d90b81960d69a7a6700be6fffe33d86628694aef95f8cfb64aca7a82cb839 (want 857d90b81960d69a7a6700be6fffe33d86628694aef95f8cfb64aca7a82cb839) and X1 restored file mode and owner: 644 root:root (want 644 root:root)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "The negative control refused a wrong kept copy.",
+      "denominator": "1 X2 line. THIS IS THE CRITERION THAT MAKES AC1 WORTH ANYTHING: a step that restores a file would also 'pass' if it restored any file at all, so the exercise has to show it REFUSES a kept copy that is not st31's. The script's own guard is the kept-copy sha256 check, and the control drives it with a deliberately wrong copy and confirms the refusal happens BEFORE anything moves.",
+      "expect": "^1$",
+      "invocation": "grep -c '^X2 NEGATIVE CONTROL: PASS' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_x1dry/X1_DRY_EXERCISE_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c '^X2 NEGATIVE CONTROL: PASS' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_x1dry/X1_DRY_EXERCISE_20261011.txt\n1\nthe line itself: X2 NEGATIVE CONTROL: PASS -- a kept copy that is not st31's is refused before anything moves",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "The real library is st32's after the exercise.",
+      "denominator": "1 X3 line, and the criterion pins the EXACT digest rather than merely requiring a line, so a changed real library could not satisfy it. Measured on BOTH sides of the act: X0 printed the real library before as the same a1c2880169c5f7996cc7c5880e4fe36db90f0a2c1f5a1cd01e0d1d8153544841. So the exercise ran and the host file it was about is provably unchanged -- which is the whole point of doing the rehearsal on copies.",
+      "expect": "^1$",
+      "invocation": "grep -c '^X3 real library after: a1c2880169c5f7996cc7c5880e4fe36db90f0a2c1f5a1cd01e0d1d8153544841' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_x1dry/X1_DRY_EXERCISE_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c '^X3 real library after: a1c2880169c5f7996cc7c5880e4fe36db90f0a2c1f5a1cd01e0d1d8153544841' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_x1dry/X1_DRY_EXERCISE_20261011.txt\n1\nthe line itself: X3 real library after: a1c2880169c5f7996cc7c5880e4fe36db90f0a2c1f5a1cd01e0d1d8153544841 (want a1c2880169c5f7996cc7c5880e4fe36db90f0a2c1f5a1cd01e0d1d8153544841) kept copy: 857d90b81960d69a7a6700be6fffe33d86628694aef95f8cfb64aca7a82cb839 (want 857d90b81960d69a7a6700be6fffe33d86628694aef95f8cfb64aca7a82cb839)",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the script's full output with the SSM command id bd0f2fb6-8025-4cda-934d-a88aae0b46a3 and the instance id i-0167fd745ad906a66 on its first line, plus the step-1 gate reading taken immediately before the send: X0 (unit state, real library and kept copy before, the temp directory's two copies), X1 (the restored digest, the verdict, the restored mode and owner), X2 (the negative control), X3 (temp dir removed, real library and kept copy after, unit state and root), END",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_x1dry/X1_DRY_EXERCISE_20261011.txt"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~YC2",
+  "compiler_tools": [
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: one command on the resident host; no schedule, trigger or rule is added or read. Checked against the act as executed.",
+      "tool": "comp-schedule"
+    },
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: no IAM change; the command runs under the applier's existing SSM grant on this one instance. Proved by the LIVE call (Status Success, ResponseCode 0). The step-1 gate's sqs:GetQueueAttributes likewise succeeded; no receive.",
+      "tool": "comp-iam"
+    },
+    {
+      "invocation": "the order's named trap, verified in the script BEFORE it was run and while the order was held",
+      "result": "PASS. The preflight names the trap exactly: H pointing at the real directory. Its claim is that H is assigned only from mktemp and that the script prints the real library's sha256 before and after so a touched library is visible in its own output. Both halves were verified by reading the script while the order was still held -- see controls.the_preflights_H_claim_was_verified_by_reading_not_taken_on_trust -- and then confirmed by the run itself: the real library reads identical before and after. The preflight's denominator (2 host files READ, 0 written, every write inside one mktemp directory the script removes) also verified.",
+      "tool": "comp-adversary"
+    },
+    {
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "see the run recorded at close; 3 of 3 criteria PASS",
+      "tool": "proof-of-spec-check.py"
+    }
+  ],
+  "controls": {
+    "a_detail_the_order_did_not_ask_for_and_the_real_arm_depends_on": {
+      "description": "The real rollback installs the kept copy over a root-owned 0644 host file that the factory and the capture both read. A restore that landed the right BYTES with the wrong mode or owner would pass a sha256 check and still break the next capture, and no digest comparison would show it.",
+      "expected_landed": "the restored file's mode and owner are read and equal the host file's own",
+      "expected_not_landed": "bytes verified with mode and owner unverified",
+      "observed": "X1 restored file mode and owner: 644 root:root (want 644 root:root). The step uses install -m 0644 -o root -g root rather than a bare cp, and the exercise confirms the result. Recorded because the order's expectations list does not name it and it is a real way the arm could fail while every digest matched.",
+      "status": "PASS"
+    },
+    "the_host_ran_it_rather_than_merely_accepting_it": {
+      "description": "A DELIVERY trap on a host plane: send-command returning a CommandId proves SSM ACCEPTED the request, never that the instance ran it.",
+      "expected_landed": "Status Success, ResponseCode 0, no stderr, the output reaching END",
+      "expected_not_landed": "Pending/Failed/TimedOut, a non-zero ResponseCode, or stderr content",
+      "observed": "ssm bd0f2fb6-8025-4cda-934d-a88aae0b46a3 Success rc 0. host_read.py prints no STDERR block and only prints a result once the invocation leaves Pending/InProgress/Delayed. The output's own X0 line is stamped by the HOST (2026-10-11T18:08:07Z) and the END line proves the script reached its last statement -- which matters here because a run cut off between the install under test and the X3 reads would have left the temp directory behind and shown no after-state.",
+      "status": "PASS"
+    },
+    "the_negative_control_is_what_makes_the_PASS_mean_something": {
+      "description": "A restore step that puts SOME file back would report success whether or not it checks which file. The whole value of a rehearsal is that it shows the guard refusing. Without X2, AC1 would be satisfied by a step that blindly copies.",
+      "expected_landed": "the control drives the step with a kept copy that is NOT st31's and the step refuses, before moving anything",
+      "expected_not_landed": "the control passing because the step accepted a wrong copy, or the control not being exercised at all",
+      "observed": "X2 NEGATIVE CONTROL: PASS -- a kept copy that is not st31's is refused before anything moves. The guard it exercises is the real arm's own: remove_st32_to_st31.sh refuses unless the kept library is st31's, and the order says that if it is ever run and cannot find that file at that digest it exits before moving anything and this seat reports that. So the behaviour the real rollback depends on is the behaviour this control demonstrated.",
+      "status": "PASS"
+    },
+    "the_order_was_HELD_and_was_not_run_until_its_condition_was_released_by_its_owner": {
+      "description": "THE CONTROL THAT GOVERNED THIS ORDER FOR AN HOUR. Its own text forbids running while TCKT_VNEXT's fifth run is between submission and close, and the order arrived minutes after this seat delivered the j4 baseline that authorises that run -- so the hold was almost certainly live on arrival. The failure mode is not subtle: running a host script during another seat's live run.",
+      "expected_landed": "the script is not sent until the condition's OWNER says the run is closed; everything that does not depend on the condition is done meanwhile",
+      "expected_not_landed": "inferring the condition from a reading that cannot carry it, in particular reading a 0/0/0 queue as proof the run had closed",
+      "observed": "At 16:58Z the step-1 gate read 0 visible / 0 in flight / 0 delayed. THAT WAS NOT TREATED AS THE CONDITION, because an unsubmitted run and a closed run read identically and the baseline had just gone out, making unsubmitted the likelier. The order was parked with its owner and one line asked for. THE WORLD THEN SETTLED IT: at ~17:28Z the same queue read 0 visible / 1 IN FLIGHT, so a run was live on the host; had the 0/0/0 been read as closed, this script would have run during it. The release came at 18:03Z (msg 5523) on the issuer's own reading -- the job terminal ATTENTION at 17:24:48Z, and this seat's j5 read at 17:53:32Z showing 0 children and the queue at 0 and 0 -- and the script was sent at 18:08:07Z, after taking the step-1 gate again (0/0/0), which the release message said still comes first.",
+      "status": "PASS"
+    },
+    "the_preflights_H_claim_was_verified_by_reading_not_taken_on_trust": {
+      "description": "THE ORDER'S NAMED TRAP: H pointing at the real directory. If H were ever assigned from anything but mktemp, the script's installs would land on the real library and its rm -rf would delete the real capture directory. A preflight asserting otherwise is the author's self-report, and this is the one claim whose failure is unrecoverable.",
+      "expected_landed": "exactly one assignment of H in the whole file and it is mktemp -d; every write path under $H; the real directory appearing only as a read source; systemctl read-only",
+      "expected_not_landed": "a second assignment of H, a write whose target is not under $H, or a write verb against the real directory",
+      "observed": "Read while the order was still held, so the review cost nothing and gated nothing. ONE assignment: line 13, H=$(mktemp -d /tmp/st32-rollback-dry.XXXXXX). Every write targets $H -- lines 14 and 15 (the two copies in), 19 (the install under test), 24 (the negative control's wrong copy) -- and line 26 is rm -rf $H. REAL=/opt/investor-reporting-ycharts appears ONCE, at line 7, and is used only as a cp SOURCE on 14, 15 and 24; it is never a write target. systemctl appears on lines 11 and 29 as is-active and show only. So H cannot point at the real directory and rm -rf $H cannot reach it. CONFIRMED BY THE RUN: the temp directory was /tmp/st32-rollback-dry.qYYxLx, a mktemp name, and the real library is byte-identical before and after.",
+      "status": "PASS"
+    },
+    "the_real_host_state_is_unchanged_measured_on_both_sides_of_every_item": {
+      "description": "The order's STOP conditions are a FAIL line, a real library hash that changed, or a restart count that changed. Each needs a before AND an after, because an after alone cannot show that nothing moved.",
+      "expected_landed": "real library, kept copy, restart count and running root all identical before and after, and 0 FAIL lines",
+      "expected_not_landed": "any of them differing, which is a STOP -- change nothing further and report the output as it is",
+      "observed": "real library before a1c2880169c5f7996cc7c5880e4fe36db90f0a2c1f5a1cd01e0d1d8153544841 == after, identical. Kept copy before 857d90b81960d69a7a6700be6fffe33d86628694aef95f8cfb64aca7a82cb839 == after, identical -- which matters because the control deliberately writes a WRONG kept copy inside the temp directory, and this shows that write never reached the real one. restarts=0 at X0 and restarts=0 at X3. root=/opt/irpt-resident/0485393f3a-st32 at X3, still st32. unit active at both. grep -c FAIL over the whole file = 0, so no branch reported a failure anywhere. No STOP condition was met.",
+      "status": "PASS"
+    },
+    "the_temp_directory_was_removed_and_the_claim_is_the_scripts_own": {
+      "description": "The bounds allow writes only inside one new directory the script removes. A leftover directory would be a write left on the host outside the act's declared window.",
+      "expected_landed": "the script reports the directory gone after its own rm",
+      "expected_not_landed": "a leftover directory, or no statement about it",
+      "observed": "X3 temp dir removed: yes, for /tmp/st32-rollback-dry.qYYxLx. LIMIT DECLARED: this is the script's OWN assertion from its own test after its own rm -rf, not an independent read -- the order permits one script and this seat did not add a second host command to re-check it. The claim is therefore as strong as the script, which on every other item in this run agreed with independently measured host state.",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "this is NOT the rollback, and remove_st32_to_st31.sh was not run",
+      "reason": "the order says so plainly. What is now exercised is the library STEP's logic on copies: the kept-copy digest guard, the install, the mode and owner, and the refusal of a wrong copy. The real arm still needs a new word from 2.0.0_SA_COO~G2 and remains unrun."
+    },
+    {
+      "item": "the rest of the real arm is still unexercised",
+      "reason": "remove_st32_to_st31.sh also restores the st31 receipt, stops the unit and runs the st31 root's own installer. None of that is touched here, by design -- the dry exercise is scoped to the one step that had never run. So st32's rollback is now better evidenced than it was, not proven end to end."
+    },
+    {
+      "item": "the temp directory's removal is the script's own assertion",
+      "reason": "the order permits one script and no second host command was added to re-check it independently. Stated rather than presented as an external verification."
+    },
+    {
+      "item": "no queue, table or record was read beyond the step-1 gate",
+      "reason": "the bounds forbid a receive or a table read. The gate was get-queue-attributes only, taken at 16:58Z while held and again immediately before the send at 18:08Z, both 0/0/0."
+    },
+    {
+      "item": "no deploy-completion ledger was opened",
+      "reason": "NEVER-2 binds a confirmed DEPLOY. This act installs nothing, restarts nothing and changes no host file outside one temp directory the script removed, so there is nothing that could be left half-landed. The st32 install that created the need for this exercise had its own ledger, irpt-resident-st32-20261011, CLOSED 20261011T161306Z."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R14.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-x1dry.st32-rollback-library-step-dry-exercise-dell2.md",
+    "vintage_commit": "049834ad31"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "NOT REQUIRED AND NOT CLAIMED: this act widens nothing and serves nothing new. One script whose entire write surface is a single mktemp directory it removes -- no served output moved, no IAM or policy change, no unit touched, no real library file written, no resident root installed or removed. NEVER-1 binds an act that moves served output; a rehearsal on copies is not such an act, which is why the order carries <risk>SERVED</risk> rather than WORLD despite concerning a rollback.",
+    "cto_half": "NOT REQUIRED AND NOT CLAIMED, same reason. The authority is the order itself, IRPT_YCDGEN.TO-APPLY-x1dry @049834ad31 -- verified at the bytes: the working-tree blob 8979fe13292f7c7f413a817c1026b1962b379fc2 equals the blob at that commit, which is an ancestor of HEAD -- resting on cell YCD-c-14 of IRPT_YCDGEN_DECOMP_R14.md and the round-14 analysis section 3 item 3. ITS LINEAGE IS A SIGNED HALF, THOUGH: this order exists because st32's CTO half, condition 1, recorded that the rollback's library step has never run, and because this seat declared that step unexercised in st32's own proof instance. The exercise is the answer to that declaration."
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "SERVED",
+  "rollback": "NONE NEEDED AND NONE POSSIBLE, stated rather than left blank: the act's whole write surface was one mktemp directory under /tmp, and the script removed it. The real library, its kept copy, the unit and every resident root were read and never written -- measured on both sides, identical. The only durable effects are this seat's own artifacts in the repo, which git reverts. WHAT THIS ACT CHANGES ABOUT ROLLBACK is evidential, not operational: st32's arm (remove_st32_to_st31.sh, X1 + V2) is still unrun and still needs a new word from 2.0.0_SA_COO~G2, but its library step now has a run behind it and a demonstrated refusal of a wrong kept copy, where before today it had neither. Every input the arm needs remains measured present: the st31, st30 and st27 roots on the host, the kept library at 857d90b81960d69a7a6700be6fffe33d86628694aef95f8cfb64aca7a82cb839, and the st31 package in S3 at 00532ad07e3e250b4a136b32585f4244ca25c6bf7108c850dc1af600118c4b99.",
+  "schema_version": "1.0",
+  "scope": "ONE script on resident host i-0167fd745ad906a66 that exercises the st32 rollback's LIBRARY STEP on COPIES in a new temp directory, with a negative control, and shows the real library, its kept copy and the unit untouched. It is NOT the rollback: remove_st32_to_st31.sh is not run. Round 14 cell YCD-c-14; it exists because that step had never run, so the first real rollback would otherwise also have been its first run.",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_x1dry/X1_DRY_EXERCISE_20261011.txt",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-x1dry.st32-rollback-library-step-dry-exercise-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "049834ad31"
+  },
+  "surprises": [],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-x1dry.st32-rollback-library-step-dry-exercise-dell2"
+}
