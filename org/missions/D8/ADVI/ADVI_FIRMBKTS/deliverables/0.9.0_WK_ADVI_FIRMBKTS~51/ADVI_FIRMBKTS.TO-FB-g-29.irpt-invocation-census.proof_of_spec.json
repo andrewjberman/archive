@@ -1,0 +1,86 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-g-29",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-29.irpt-invocation-census.md",
+  "group": "OTHER",
+  "vintage_commit": "08b608eb37"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~51",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "vintage_commit": "08b608eb37",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-29.irpt-invocation-census.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~51/IRPT_INVOCATION_CENSUS.json",
+   "kind": "doc",
+   "commit_or_etag": "51d6658f6f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed in 51d6658f6f on wk-ADVI_FIRMBKTS-51 (LOCAL); nine entries (eight IRPT consumers and auth-validator-edge), read from the tree only; no function invoked, nothing deployed",
+   "artifact_covered_by": ["AC1"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 reads the file against the tree: nine entries each with every key; every call-chain line exists and carries its token; every event is a non-empty object whose source exists; at least seven entries have no side effect. The invocation terminates inside its bound.",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-51 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_invoke.py --arms census --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~51/IRPT_INVOCATION_CENSUS.json --root /c/dev/wk-firmbkts-51; echo \"exit=$?\"",
+   "expect": "ROUND 4 INVOKE CENSUS: 4 of 4 arms",
+   "output_evidence": "  V1 entries=9 functions=['auth-validator-edge', 'irpt-49f-reporting-read-lambda', 'irpt-directory-search', 'irpt-export-render', 'irpt-holdings', 'irpt-narrative', 'irpt-performance-adapter', 'irpt-status', 'irpt-ycharts-generate'] | V2 call chains verified against the tree: True | V3 events are objects with an existing source: True | V4 side_effects none=8 of 9 | PASS V1 nine entries, the eight consumers and the validator, every key present | PASS V2 every call-chain line exists in the tree and carries its chain token | PASS V3 every event is a non-empty object whose source file exists | PASS V4 at least seven entries have no side effect; a side-effecting one is not recommended | ROUND 4 INVOKE CENSUS: 4 of 4 arms | exit=0",
+   "denominator": "4 of 4 arms PASS (V1 to V4); 9 entries; 8 of 9 side_effects none; 1 of 9 side-effecting (irpt-performance-adapter, invoke_recommended false)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "a copy of the census in .scratch/census_mutant.json with the auth-validator-edge call line (chain index 3, index.mjs:491) set to index.mjs:99999, run through r4_invoke.py --arms census",
+   "expected": "V2 FAIL and 3 of 4 arms, exit 1",
+   "observed": "V2 call chains verified against the tree: False; FAIL V2 every call-chain line exists in the tree and carries its chain token; ROUND 4 INVOKE CENSUS: 3 of 4 arms; exit=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the census check run twice on the unchanged census file; md5 of the full output compared",
+   "observed": "f25f297883f2a2df3eb3f3cd712c1da5 on both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "no event invoked; the act-4 actor invokes each of the nine events once after the flip and records the live result",
+   "reason": "order rule 1b.1 and preflight: read only, no AWS call, no function invoke"
+  },
+  {
+   "item": "auth-validator-edge event carries a placeholder bearer token; the tree holds no live non-admin JWT",
+   "reason": "recorded as surprise ADVI_FIRMBKTS-D1-W51-S2; the act-4 actor supplies the token"
+  },
+  {
+   "item": "irpt-performance-adapter has no side-effect-free operation; its census entry is invoke_recommended false",
+   "reason": "cell rule 2 (say so in the census); performance-report writes a retained artifact on a fresh computation"
+  },
+  {
+   "item": "the census proves that cited lines exist and carry the chain token, not that an event runs",
+   "reason": "the checker's own blindness, stated in the order preflight; the act-4 actor records the event result"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W51-S1: the validator ownership call site index.mjs:491 (getOwnershipMap) carries no lowercase ownership token, so the census chain ends on the key line index.mjs:175 inside the read",
+  "ADVI_FIRMBKTS-D1-W51-S2: the auth-validator-edge event needs a live signed non-admin JWT, which the tree does not hold and no test fixture builds; the census carries a placeholder"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~51/ADVI_FIRMBKTS.TO-FB-g-29.session.log.txt",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_invoke.py --arms census --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~51/IRPT_INVOCATION_CENSUS.json --root /c/dev/wk-firmbkts-51",
+   "result": "ROUND 4 INVOKE CENSUS: 4 of 4 arms; exit=0"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_invoke.py --arms census --file .scratch/census_mutant.json --root /c/dev/wk-firmbkts-51",
+   "result": "ROUND 4 INVOKE CENSUS: 3 of 4 arms; exit=1 (V2 FAIL, the mutant control)"
+  }
+ ]
+}
