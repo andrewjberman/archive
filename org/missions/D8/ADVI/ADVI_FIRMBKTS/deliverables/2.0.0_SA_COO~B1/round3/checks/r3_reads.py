@@ -165,12 +165,22 @@ def copy_source_parts(call):
     return None, None
 
 
-def sites(root, rel, served, shared):
+def sites(root, rel, served, shared, siblings=False):
     with open(os.path.join(root, rel), encoding='utf-8') as fh:
         src = fh.read()
     lines = src.splitlines()
     tree = ast.parse(src)
     imported = dict(shared)
+    if siblings:  # --files mode: a Lambda's constants live in a sibling module (config.py)
+        here = os.path.dirname(rel)
+        for n in ast.walk(tree):
+            if isinstance(n, ast.ImportFrom) and n.module and n.level == 0:
+                cand = os.path.join(here, n.module.replace('.', '/') + '.py').replace(os.sep, '/')
+                if os.path.exists(os.path.join(root, cand)):
+                    vals = module_values(root, cand)
+                    for alias in n.names:
+                        if alias.name in vals:
+                            imported[alias.asname or alias.name] = vals[alias.name]
     env = Env(tree, imported)
     names = seam_names(tree)
     out = []
@@ -243,22 +253,27 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--root', default=os.getcwd())
     ap.add_argument('--list', action='store_true')
+    ap.add_argument('--files', nargs='+', default=None,
+                    help='grade exactly these files (repo-relative) instead of the 14 writers and their libs')
     a = ap.parse_args()
     root = root_of(a)
     served = served_prefixes(root)
     shared = {}
     for mod in ('s3_layout', 'config'):
         shared.update(module_values(root, '%s/lib/%s.py' % (GOLD, mod)))
-    scripts = writer_files(root)
-    libs = lib_files(root, scripts)
+    if a.files:
+        scripts, libs = list(a.files), []
+    else:
+        scripts = writer_files(root)
+        libs = lib_files(root, scripts)
     allsites = []
     for rel in scripts + libs:
-        allsites += sites(root, rel, served, shared)
+        allsites += sites(root, rel, served, shared, siblings=bool(a.files))
     cnt = {}
     for s in allsites:
         cnt[s[3]] = cnt.get(s[3], 0) + 1
-    print('  files: %d writer scripts + %d lib modules they import; served legacy prefixes: %d'
-          % (len(scripts), len(libs), len(served)))
+    print('  files: %d %s + %d lib modules they import; served legacy prefixes: %d'
+          % (len(scripts), 'named files' if a.files else 'writer scripts', len(libs), len(served)))
     print('  S3 data call sites=%d ROUTED=%d NOT-SERVED=%d EXEMPT=%d UNROUTED=%d'
           % (len(allsites), cnt.get('ROUTED', 0), cnt.get('NOT-SERVED', 0), cnt.get('EXEMPT', 0), cnt.get('UNROUTED', 0)))
     if a.list or cnt.get('UNROUTED', 0) or cnt.get('EXEMPT', 0):
