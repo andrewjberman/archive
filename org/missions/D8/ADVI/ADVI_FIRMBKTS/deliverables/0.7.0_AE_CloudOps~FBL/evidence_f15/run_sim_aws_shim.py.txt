@@ -1,0 +1,11 @@
+import runpy, shutil, subprocess, sys
+_aws = shutil.which("aws")
+_orig = subprocess.run
+def run(args, *a, **k):
+    if isinstance(args, list) and args and args[0] == "aws":
+        args = [_aws] + args[1:]
+    return _orig(args, *a, **k)
+subprocess.run = run
+script = sys.argv[1]
+sys.argv = [script] + sys.argv[2:]
+runpy.run_path(script, run_name="__main__")
