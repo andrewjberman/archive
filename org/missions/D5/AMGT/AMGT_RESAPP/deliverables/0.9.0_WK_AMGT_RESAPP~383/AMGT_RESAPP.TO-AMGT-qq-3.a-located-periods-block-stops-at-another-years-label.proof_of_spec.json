@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-qq-3.a-located-periods-block-stops-at-another-years-label",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9bac67f9d0028064629cba97b38e3a077f9f6996"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "cbd398d50ec9ab8cf01877abb8bbba38e5cf6347",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-qq-3.a-located-periods-block-stops-at-another-years-label.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~383",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/analyze.py",
+      "kind": "script",
+      "commit_or_etag": "918d472d4d4bdc48fe0c12b33cd584d6d6c0be5c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, minimal: _period_blocks(period_labels, excerpt) now bounds each block with the new _block_end_at_other_year (first whole-token four-digit year that is not the period's own year, before the block's present end; FY alias and same-year forms do not end the block; a non-year locate key is not bounded). Both callers (verify_points_against_excerpt and _apply_point_verification) pass the excerpt, so a fresh run and reverify_stored_thesis_driver share the one bound. Columnar, inline-parenthetical and stated-in-period rules are unchanged. No fetch.py, passages.py, drafting_build.py or served reader touched. Library code; no deploy target; no store write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_block_bound.py",
+      "kind": "test",
+      "commit_or_etag": "918d472d4d4bdc48fe0c12b33cd584d6d6c0be5c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 8 pure tests (no network): synthetic refusal, own-figure control before the other year, two-period control, far-from-label control with no other year, table-row refusal after a different year line, FY alias of the own year, decimal digits not a token, part of a longer number not a token. 8 passed.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PASS S1 (a figure stated for a different year is refused for the last located period), PASS S2 (control: the period's own figure still verifies), PASS S3 (control: both periods verify), PASS S4 (the bound is a different year token, not distance), PASS S5 (a figure after a different year token in a table row is refused); R92 BLOCK BOUND: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round92_prep/checks/r92_block_bound.py\"; echo \"exit=$?\"  (run from C:/dev/wk-resapp-383)",
+      "output_evidence": "PASS S1 a figure stated for a different year is refused for the last located period  [kept []] / PASS S2 control: the period's own figure, stated before the other year, still verifies / PASS S3 control: both periods as points both verify  [kept ['2024', '2025']] / PASS S4 the bound is a different year token, not distance  [text 4281 chars] / PASS S5 a figure after a different year token in a table row is refused  [kept []] / arms passed 5 of 5 / R92 BLOCK BOUND: YES / exit=0",
+      "denominator": "5 of 5 arms (S1-S5); the base at 8b41f47422 read 3 of 5 with S1 and S5 FAIL",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the round-91 locator check still reads R91 LOCATOR: YES (13 of 13: L1-L4 verify, K1 keeps its span, E1 and X1-X7 hold) and every test under lib/research/filings/tests passes with 0 failed, and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round91_prep/checks/r91_locator.py\" && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/filings/tests -q; echo \"exit=$?\"  (run from C:/dev/wk-resapp-383)",
+      "output_evidence": "arms passed 13 of 13 / R91 LOCATOR: YES (L1-L4 PASS, K1 PASS, E1 PASS, X1-X7 PASS) / 322 passed in 11.03s / exit=0",
+      "denominator": "13 of 13 locator arms; 322 of 322 collected tests under lib/research/filings/tests (314 base + 8 new), 0 failed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base code at 8b41f47422 (before this change) is the mutant: the bound-free _period_blocks lets a figure after another year's token verify for the last located period. The check must FAIL it.",
+      "expected": "S1 and S5 FAIL at the base (a figure stated for 2024 verifies for 2025; a row figure after the 2026 line verifies for 2025); S2-S4 PASS; R92 BLOCK BOUND: NO; exit=1.",
+      "observed": "At 8b41f47422: FAIL S1 ... [kept ['2025']]; PASS S2; PASS S3; PASS S4; FAIL S5 ... [kept ['2025']]; arms passed 3 of 5; R92 BLOCK BOUND: NO; exit=1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of r92_block_bound.py at 918d472d4d, output captured and compared with cmp",
+      "observed": "run 1 and run 2 byte-identical; both exit=0; R92 BLOCK BOUND: YES",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "reverify_stored_thesis_driver called with dry_run=False or in any writing mode",
+      "reason": "Out of BOUNDS by the order (section 2, item 5). Not called."
+    },
+    {
+      "item": "Any deploy, store write, schedule, SEC, vendor, model or Bloomberg call; any pip, npm or bun install",
+      "reason": "Out of BOUNDS by the order (section 2, items 1-2). Not done. The round-91 S3 GETs of stored objects are the only AWS reads, performed by the locator check as the order permits."
+    },
+    {
+      "item": "Non-year located periods (a locate key that is not a four-digit year)",
+      "reason": "The order's bound is a DIFFERENT four-digit year; such a period has no own year to compare, so its block is left unbounded as before. Filed as AMGT_RESAPP-D1-W383-S1 for the issuer's ruling."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W383-S1: a non-year located period (locate key not a four-digit year) keeps its unbounded block; the order names a DIFFERENT four-digit year bound and does not say what bounds such a period."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~383/AMGT_RESAPP.TO-AMGT-qq-3.a-located-periods-block-stops-at-another-years-label.SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "cd C:/dev/wk-resapp-383 && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/filings/tests -q -p no:cacheprovider",
+      "result": "322 passed in 11.03s"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate: py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~383 <0.9.0_WK_AMGT_RESAPP~383@opal.agent>\" -F .scratch/msg_A.txt -- lib/research/filings/analyze.py lib/research/filings/tests/test_block_bound.py",
+      "result": "pre-commit gate clean for 2 of 2 file(s); commit 918d472d4d"
+    }
+  ]
+}
