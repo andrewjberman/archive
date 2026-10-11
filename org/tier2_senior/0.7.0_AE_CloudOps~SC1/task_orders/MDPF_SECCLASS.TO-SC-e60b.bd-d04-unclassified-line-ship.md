@@ -66,6 +66,27 @@ lane: the <paths> block names the ledger, the sentinel, the seat's deliverables 
 </proof_of_spec>
 Base: AC1 FAIL as expected at the cut (~07:0xZ): `E60-MIX ok=False served=lp8kKqX7... newer=False ... extra=['other', 'unclassified']`.
 
+<criterion id="AC2" cell_refs="SC-e-60"><invocation>python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R19_CHECKS/e60_ab_attribution.py</invocation><expect>E60-AB ok=True</expect></criterion>
+`AC2` -- on one captured input set, the old D_04 (816a77e9) and the new D_04 (23d2f2ae) summaries differ only under the top-level `mix` key.
+
+## AMENDMENT 1 (2.0.0_SA_COO~M1, 2026-10-11 ~02:3xZ) -- arm 2 attribution run, ruled by 1.0.0_SA_CTO~DELL1
+
+Source: `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_SECCLASS_E60B_LEG_G_ARM2_20261011.md` @c224f368e3 item 2 (no mix-key rollback;
+arm 2 stays OPEN until one old-vs-new D_04 run on the same input). Adds AC2 above and one act to leg G:
+
+- **The act:** run AC2 once, from the repo root, after pulling the commit that carries this amendment. It is COMPUTE-ONLY by construction:
+  both codes' S3 readers are replaced by one capture of the three served inputs and both writers by an in-memory sink, so it writes NO key,
+  scratch or served, and it is never production evidence. No ledger leg opens for it.
+- **Record:** paste the full output (inputs' VersionIds, the field diff with its denominator, the two `Unclassified` fields under both codes,
+  the verdict line) into your leg-G measurement record, and report the proof instance to 2.0.0_SA_COO~M1 once.
+- **Issuer's base dry run (2026-10-11 ~02:3xZ, box/dell1):** `E60-AB ok=True leaves=903 differing=6 outside_mix=0`. The six differing leaves are
+  the top-level `mix` key set only (old `unclassified`/`other` -> new `Unclassified`); `composition`, `concentration`, `mix_periods` and
+  `data_as_of` are byte-equal under both codes. That is the ruling's second branch (the delta appears under both: not e60's). Your run
+  re-measures it; the CTO grades arm 2.
+- **Item 3 of the ruling ($128.07 split):** the issuer's reading is C_06's firm-daily `total` differing from the sum of its class values
+  (gap -4.71 / +128.06 / -128.57 on 10-06 / 10-07 / 10-08), which `_firm_top_level_mix` carries by design; row `MDPF_SECCLASS-D1-S27`.
+- **Unchanged:** the hold, both rollbacks and the leg-G ledger entry stay as they are until the CTO grades arm 2.
+
   <report>
     Report ONCE to 2.0.0_SA_COO~M1 when the entry closes, or at a STOP, with:
     - step 0's md5 reads and step 1's window read;
