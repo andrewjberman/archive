@@ -1,0 +1,103 @@
+"""TCKT_VNEXT round 5 -- the issuer's mechanical checks (2.0.0_SA_COO~V2). Run from the worktree root.
+
+  ml-digest   R5-ml1-AC1  the client mail log lines carry a digest of the recipient and never the address
+  ml-regress  R5-ml1-AC2  the whole ticket service test folder passes (at least 178)
+  fn-fence    R5-fn1-AC1  another firm's caller is refused on a ticket, the list and the report record
+  fn-regress  R5-fn1-AC2  the whole ticket service test folder passes (at least 179)
+  ac-read     R5-ac1-AC1  the one-account read's findings file has its keys and every path it cites exists
+
+Each prints <NAME>-OK <detail> or <NAME>-FAIL <reason>; exit 0/1. Every pytest call is bounded at 110 s.
+"""
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+TK_DIR = Path("infra/aws/lambda/ticket_center/tests")
+ML_TESTS = TK_DIR / "test_client_mail_digest.py"
+ML_ROW = ["test_sent_line_carries_the_recipient_digest_and_not_the_address",
+          "test_send_failed_line_carries_the_digest_and_no_error_text_with_the_address",
+          "test_digest_is_the_same_for_the_same_address_in_any_case"]
+ML_MIN = 178  # 175 at the round-5 base plus the 3 tests of TO-R5-ml1
+FN_TESTS = TK_DIR / "test_fence_other_firm.py"
+FN_ROW = ["test_client_of_another_firm_cannot_get_the_ticket",
+          "test_client_of_another_firm_does_not_see_it_in_the_list",
+          "test_caller_scoped_to_another_firm_cannot_record_a_report_as_creator",
+          "test_refusals_return_no_field_of_the_other_firms_ticket"]
+FN_MIN = 179  # 175 at the round-5 base plus the 4 tests of TO-R5-fn1
+AC_FILE = Path("org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~20/ONE_ACCOUNT_CHECK_READ.json")
+AC_KEYS = {"question", "files_read", "where_an_account_is_named_in_an_uploaded_file", "can_the_door_count_accounts_today",
+           "where_the_check_can_live", "what_was_not_read", "claim"}
+
+
+def _pytest(args):
+    r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"] + args,
+                       capture_output=True, text=True, timeout=110)
+    out = re.sub(r"\x1b\[[0-9;]*m", "", r.stdout + r.stderr)
+    passed = int((re.search(r"(\d+) passed", out) or [0, 0])[1])
+    failed = int((re.search(r"(\d+) failed", out) or [0, 0])[1])
+    errors = int((re.search(r"(\d+) error", out) or [0, 0])[1])
+    return r.returncode, passed, failed, errors
+
+
+def named(tests, names):
+    if not tests.exists():
+        return False, "absent: %s" % tests.as_posix()
+    src = tests.read_text(encoding="utf-8")
+    missing = [n for n in names if not re.search(r"^\s*def %s\(" % re.escape(n), src, re.M)]
+    if missing:
+        return False, "missing test(s): %s" % ", ".join(missing)
+    rc, passed, failed, errors = _pytest([tests.as_posix(), "-k", " or ".join(names)])
+    if rc != 0 or passed < len(names) or failed or errors:
+        return False, "rc=%d passed=%d of %d failed=%d errors=%d" % (rc, passed, len(names), failed, errors)
+    return True, "passed=%d of %d" % (passed, len(names))
+
+
+def regress(target, minimum):
+    rc, passed, failed, errors = _pytest([target.as_posix()])
+    if rc != 0 or failed or errors or passed < minimum:
+        return False, "rc=%d passed=%d (min %d) failed=%d errors=%d" % (rc, passed, minimum, failed, errors)
+    return True, "passed=%d (min %d) failed=0" % (passed, minimum)
+
+
+def ac_read():
+    if not AC_FILE.exists():
+        return False, "absent: %s" % AC_FILE.as_posix()
+    try:
+        doc = json.loads(AC_FILE.read_text(encoding="utf-8"))
+    except ValueError as e:
+        return False, "not JSON: %s" % e
+    if not isinstance(doc, dict) or set(doc) != AC_KEYS:
+        return False, "keys differ: missing %s extra %s" % (sorted(AC_KEYS - set(doc)), sorted(set(doc) - AC_KEYS))
+    files = doc["files_read"]
+    if not isinstance(files, list) or not files:
+        return False, "files_read is empty"
+    absent = [f for f in files if not isinstance(f, str) or not Path(f.split(":")[0]).exists()]
+    if absent:
+        return False, "cited path(s) absent: %s" % absent[:5]
+    if doc["claim"] not in ("measured", "inferred"):
+        return False, "claim must be measured or inferred"
+    return True, "keys=%d files_read=%d all present" % (len(doc), len(files))
+
+
+CHECKS = {
+    "ml-digest": lambda: named(ML_TESTS, ML_ROW),
+    "ml-regress": lambda: regress(TK_DIR, ML_MIN),
+    "fn-fence": lambda: named(FN_TESTS, FN_ROW),
+    "fn-regress": lambda: regress(TK_DIR, FN_MIN),
+    "ac-read": ac_read,
+}
+
+
+def main(argv):
+    if len(argv) != 1 or argv[0] not in CHECKS:
+        print("usage: r5_checks.py " + "|".join(sorted(CHECKS)))
+        return 2
+    ok, why = CHECKS[argv[0]]()
+    print("%s-%s %s" % (argv[0].upper(), "OK" if ok else "FAIL", why))
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
