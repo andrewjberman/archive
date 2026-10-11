@@ -1,0 +1,298 @@
+{
+  "fwd1_text_source": "org/missions/D9/IRPT/IRPT_ANLREQ/prd/IRPT_ANLREQ_PRD.md:28",
+  "fwd1_text": "FWD-1  One Analysis Request goes from the Ticket Center form to a finished package on the same open ticket, with no person in between. DONE WHEN EXERCISED -- on DEV, a seat files ONE request through the form (analysis type, Opal-model checkboxes, other ETFs, holdings Excel) for a 49financial client with an eligible advisor; with nobody touching it, the ticket ends up carrying the report, the branded Opal PDF with the investment commentary, and the original Excel, each opened from the ticket page (PRD lines 28-35)",
+  "read_at": "2026-10-11T12:20:12Z",
+  "tree_head": "e41eab5325",
+  "hops": [
+    {
+      "n": 1,
+      "hop": "A person fills the Analysis Request form on the Ticket Center page (analysis type, Opal-model checkboxes, other ETFs, firm choice, holdings file).",
+      "state": "BUILT_NOT_LIVE",
+      "owner": "PORTAL",
+      "waits_on": "A portal DEV to PROD push. Built by TCKT_VNEXT/IRPT_ANLREQ orders TO-AR-v11 and TO-AR-y-35 (both complete). origin/DEV 8ed372cb differs from origin/PROD 37aa1247 by 85 files, 53 of them under src/pages/InvestorReporting, so a whole-branch PROD push moves Investor Reporting pages and waits on Andrew's word unless the page class is shown to be internal-only (the law: unsure = client-facing). No order I read requests that push. PROD carries an OLDER form (free-text firm, report type, one add-commentary checkbox; no model checkboxes, no other-ETF field). FWD-1's own done-when names DEV.",
+      "evidence": [
+        "git -C portal show origin/PROD:src/pages/TicketCenter/AnalysisRequestParts.tsx lines 19-88: fields advisor, firm (free text), household, report_type, add_commentary checkbox; grep for other_etfs/catalogue returned none on PROD",
+        "git -C portal show origin/DEV:src/pages/TicketCenter/AnalysisRequestParts.tsx lines 14-36: comparison_keys (checked Opal models), other_etfs, catalogue import",
+        "git -C portal diff --stat origin/PROD origin/DEV: 85 files changed; --name-only count under src/pages/InvestorReporting: 53; git merge-base --is-ancestor origin/DEV origin/PROD printed 'DEV not in PROD'",
+        "orders at HEAD: IRPT_ANLREQ.TO-AR-v11 status complete; TO-AR-y-35 status complete",
+        "the catalogue route the form reads (GET .../analysis/comparisons) is present in the LIVE irpt-ycharts-generate zip entry.py (hashed and read from the live package)"
+      ],
+      "claim": "measured"
+    },
+    {
+      "n": 2,
+      "hop": "The form sends the holdings file to the upload door (POST analysis/inputs) and the door answers NORMALIZED with an input id.",
+      "state": "LIVE",
+      "owner": "IRPT_ANLREQ_Y",
+      "waits_on": "NOTHING to deploy. Reached through the API by the TCKT_VNEXT seat runner, never by a browser form; the portal form's call to it is DEV-only (hop 1). The source map's artifact_sha256 for this function does not equal the live digest (row IRPT_ANLREQ-D2-S39), so this state rests on the served answer, not on the map.",
+      "evidence": [
+        "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r2_tr1/r2_tr1_run3_trace.json hops[0]: a_upload POST .../analysis/inputs?selected_tenant=49financial status 200 state_seen NORMALIZED, run id R2-tr-1-run3-2026-10-11T08:12:31Z (applier's trace file, opened by this worker)",
+        ".tools/aws lambda get-function-configuration irpt-ycharts-generate: CodeSha256 tdpterTMfJlWXjnoAQCwil+wN/Jf8Q/yLjGxTk7yUkk= LastModified 2026-10-09T09:32:22.000+0000, i.e. unchanged since before that run; the live package downloaded and its sha256 recomputed equals that CodeSha256; it holds uploads.py and upload_entry.py",
+        "source map entry irpt-ycharts-generate artifact_sha256 ZA0QJ5Wt/7Jcwmuz... differs from the live digest (not used as evidence)"
+      ],
+      "claim": "inherited"
+    },
+    {
+      "n": 3,
+      "hop": "The form creates the analysis_request ticket (POST /tickets) holding the answers and the upload handle, only after the door says NORMALIZED.",
+      "state": "LIVE",
+      "owner": "TCKT_VNEXT",
+      "waits_on": "NOTHING to deploy. The older PROD form already performs hops 2 and 3 (fileAnalysisRequest in origin/PROD analysisRequest.ts:92-121); no browser-driven filing has been recorded.",
+      "evidence": [
+        ".tools/aws lambda get-function-configuration opal-ticket-api: CodeSha256 t1EoiJRZWXBsSc0HPw+61IP+zdQxyYGfWEi+8L6lej4= LastModified 2026-10-11T09:47:09.000+0000; equals source map artifact_sha256 for opal-ticket-api",
+        "live package downloaded, sha256 recomputed equals that CodeSha256; its lambda_function.py (90211 bytes, sha256 prefix cf10e19e423b) equals git blob infra/aws/lambda/ticket_center/lambda_function.py at 861c9bba65 (the map's last_deployed_commit) and at HEAD",
+        "r2_tr1_run3_trace.json hops[1]: b_ticket POST /api/scoped/tickets status 201 (before the 09:47Z release; inherited)"
+      ],
+      "claim": "measured"
+    },
+    {
+      "n": 4,
+      "hop": "After the ticket exists, the form immediately posts the analysis request carrying the new ticket id (sequence I1, step 3), so no person claims or clicks.",
+      "state": "BUILT_NOT_LIVE",
+      "owner": "PORTAL",
+      "waits_on": "The same portal DEV to PROD push as hop 1. On PROD the form stops after filing the ticket; the report is requested only when an assignee claims the ticket and clicks Request report (origin/PROD analysisRequest.ts:144-176). On DEV, fileAndRequestAnalysis does it in one sequence.",
+      "evidence": [
+        "git -C portal show origin/DEV:src/pages/TicketCenter/analysisRequest.ts lines 219-252: fileAndRequestAnalysis then sendAnalysisStep -> submitAnalysisRequest with ticket_id; TicketCenter.tsx:289 calls it",
+        "git -C portal show origin/PROD:src/pages/TicketCenter/analysisRequest.ts lines 144-176: requestReport only, gated on status in_progress",
+        "order TO-AR-v11 status complete"
+      ],
+      "claim": "measured"
+    },
+    {
+      "n": 5,
+      "hop": "The analysis service accepts the request, stores ticket_id on the acceptance record and queues the generation job (answer NOT_READY/QUEUED is the accepted answer).",
+      "state": "LIVE",
+      "owner": "IRPT_ANLREQ_Y",
+      "waits_on": "NOTHING to deploy. Not yet seen accepting a request that carries a ticket_id: the fourth run (TCKT_VNEXT.TO-RUN-R3-tr1, status pending, ledger opened 11:09Z) is the first to drive it with the I1 id.",
+      "evidence": [
+        "live irpt-ycharts-generate package (digest tdpterTM..., hashed): submission.py sha256 prefix 82c47bd021c5 contains TICKET_REFERENCE and ticket_id; acceptance.py prefix 06425d4731b7 holds ticket_id x3; both equal git blobs at 1eed34a8c0 (TO-AR-y-11 commit, 2026-10-09T04:57Z, before the live package's LastModified 09:32Z)",
+        "live entry.py returns status envelope reason NOT_READY state QUEUED as the accepted answer (ycharts/generate/entry.py:130-137 at HEAD; same text in the live member)",
+        "r2_tr1_run3_trace.json hops[3]: POST .../analysis status 200 reason NOT_READY (the runner then classed it refused; the CTO read it as accepted: CTO_ROUND_ANALYSIS_TCKT_VNEXT_ROUND_3_20261011.md section 1)",
+        "acceptance.py at HEAD (blob 138da769bdf4) differs from live (y-37 acting-principal writer is NOT live); irrelevant to this hop"
+      ],
+      "claim": "measured"
+    },
+    {
+      "n": 6,
+      "hop": "The queued job is taken from the generation queue by the resident worker on the resident host.",
+      "state": "LIVE",
+      "owner": "IRPT_YCDGEN",
+      "waits_on": "NOTHING to deploy. st30 admits a request that names ticket_id (S2) but is APPLIED, UNEXERCISED; its first exercise is TCKT_VNEXT.TO-RUN-R3-tr1 (pending).",
+      "evidence": [
+        ".tools/aws ssm get-command-invocation 39cacd01-6a93-4a7e-86be-8080f1c84b80 (install, read by this worker): Status Success ResponseCode 0 ended 2026-10-11T10:32:48Z; output lines 'V1 running root /opt/irpt-resident/37210c771a-st30 active=active restarts=0', 'V1 S2 packaged request schema names ticket_id: 1'",
+        ".tools/aws ec2 describe-instances i-0167fd745ad906a66: running; sqs get-queue-attributes irpt-generation: visible 0, in flight 0 at 2026-10-11T12:1xZ",
+        "order IRPT_YCDGEN.TO-APPLY-st30 status complete; ledger 20261011T1025Z_irpt-resident-st30 closed (org/tier2_senior/0.7.0_AE_CloudOps~YC2/logs/2026-10-11/the_one_resident_release_st30_installed.md)",
+        "the running root today was not re-read (a re-read needs an SSM send-command, an act this order does not grant)"
+      ],
+      "claim": "inherited"
+    },
+    {
+      "n": 7,
+      "hop": "The resident generates the report for a ticket-bound request, persists it and reaches READY.",
+      "state": "NOT_DETERMINED",
+      "owner": "IRPT_YCDGEN",
+      "waits_on": "The fourth run (TCKT_VNEXT.TO-RUN-R3-tr1, pending) and the dead-letter record (IRPT_YCDGEN.TO-YCD-e-11 pending; TO-YCD-a-11 pending). Run 3's accepted request was consumed and produced no report, with no failure reason recorded (CTO analysis section 1; 8 dead letters, none from run 3). Nothing has run through st30. Reports for other requests exist (the round-4 packet reads 14 of 50 accepted requests readable) so generation has worked for non-ticket requests.",
+      "evidence": [
+        "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_ROUND_ANALYSIS_TCKT_VNEXT_ROUND_3_20261011.md section 1: 'Three runs were spent; none read a finished report' (read by this worker)",
+        "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/st30_release/ST30_CORRECTION_1_S4_AND_STATE_AFTER_INSTALL_20261011.md section 3: S2 and S5 and S7 'APPLIED, UNEXERCISED'",
+        "orders at HEAD: TCKT_VNEXT.TO-RUN-R3-tr1 pending; IRPT_YCDGEN.TO-YCD-e-11 pending; TO-YCD-a-11 pending",
+        "what would determine it: the fourth run's trace reaching READY or failing with a stated hop"
+      ],
+      "claim": "inherited"
+    },
+    {
+      "n": 8,
+      "hop": "The resident builds the report with the Opal engine (the producer FWD-1's branded report needs) for the person who filed.",
+      "state": "BUILT_NOT_LIVE",
+      "owner": "IRPT_YCDGEN",
+      "waits_on": "The Opal producer allow list, which names one sign-in only; every other caller, including the service identities, takes the vendor-facing YCharts producer. The allow-list question is recorded as carried to Andrew (YC2 log 'Next Steps' item 4; CTO half of the st30 pair). The fourth run is deliberately driven down the YCharts path.",
+      "evidence": [
+        "SSM output of 39cacd01... (read by this worker): 'V1 allow list: OPAL_PRODUCER_PRINCIPALS = (one sign-in)'; 'V1 producer_for svc -> YCHARTS | andrew -> OPAL | other -> YCHARTS'",
+        "org/tier2_senior/0.7.0_AE_CloudOps~YC2/logs/2026-10-11/the_one_resident_release_st30_installed.md 'Next Steps' 4",
+        "TCKT_VNEXT.TO-RUN-R3-tr1 objective: 'ONE synthetic request down the YCharts producer path'"
+      ],
+      "claim": "inherited"
+    },
+    {
+      "n": 9,
+      "hop": "On READY the resident sends the closed analysis_ready message to the commentary queue (interface I3).",
+      "state": "BUILT_NOT_LIVE",
+      "owner": "IRPT_ANLREQ_G",
+      "waits_on": "A resident release that binds the analysis-ready queue (the unit has no IRPT_ANALYSIS_READY_QUEUE_URL, so each READY only logs a WARN). Round-3 workstream G names it 'the attach release (G3, third part)'; no task order for it exists in the order folders I read, and AR-g-23 was folded into st30 without the binding.",
+      "evidence": [
+        "SSM output of 39cacd01... : 'V1 I1/I2 bindings carry: commentary_ready_queue_url=0 analysis_ready_queue_url=0'; 'V1 S5 running process environment names IRPT_ANALYSIS_READY_QUEUE_URL: 0'",
+        "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/st30_release/CVO_PACKET_ST30_IRPT_ANLREQ_20261011.md lines 31-33: 'INERT on this root ... the analysis-ready SEND'",
+        "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R3_G.md lines 20-29 (releases not cells; third part not cut)",
+        "task-orders folders searched at HEAD: IRPT_ANLREQ (23 files), IRPT_YCDGEN, TCKT_VNEXT, org/tier2_senior/*/task_orders IRPT_ANLREQ.* (7 files): none binds the queue",
+        "git merge-base --is-ancestor 5acdefb7cc 37210c771a (AR-g-31): yes, so the code is in the installed root"
+      ],
+      "claim": "inherited"
+    },
+    {
+      "n": 10,
+      "hop": "The commentary function takes an analysis_ready message, reads the report composition, drafts the commentary and stores the DRAFT.",
+      "state": "LIVE",
+      "owner": "OTHER",
+      "waits_on": "NOTHING to deploy (owner: workstream T, 2.0.0_SA_COO~T2, orders TO-AR-t-11, t-12, t-21 all complete). Nothing feeds it: the analysis-ready queue reads 0 and no sender is bound (hop 9). It has run once, on a synthetic request id, to stage draft_stored (record only).",
+      "evidence": [
+        ".tools/aws lambda get-function-configuration outlook-global-commentary-draft-lambda: CodeSha256 AI4UQD0ME+ABza1X0BrBjGjpqjN7f2fc0Cdxb88aA/I= LastModified 2026-10-11T05:44:45Z, Active; equals the transcripts-pull function's digest",
+        "live package downloaded, sha256 recomputed equals that digest; lambda_handler.py, entry.py, drafter.py, ticket_client.py equal HEAD blobs (lambda_handler.py prefix 9ee208df54 consumes analysis_ready and sends commentary_ready)",
+        ".tools/aws lambda get-function-configuration irpt-commentary-draft-store-lambda: AsKY+KWLZBW5...; its commentary_draft_store.py and repository.py equal HEAD blobs (source map digest xyROb11e... is a stale DESIRED entry)",
+        ".tools/aws lambda get-function-configuration irpt-commentary-composition-read-lambda: ZZmWOFSA/GjO0d/c..., equals source map artifact_sha256",
+        "sqs get-queue-attributes outlook-global-commentary-draft-analysis-ready-queue: visible 0, in flight 0",
+        "IRPT_ANLREQ_ROUND2_L8_COMPILE_ADDENDUM_1_RELEASES_20261011.md section 3: one synthetic invoke 06:09:56Z reached stage draft_stored; the event-source mapping 'Enabled' is the applier's statement (TO-APPLY-t1 text line 46), not read by this worker (a list call is barred)"
+      ],
+      "claim": "inherited"
+    },
+    {
+      "n": 11,
+      "hop": "The commentary function puts commentary_ready on its queue and the resident packager takes it (interface I4).",
+      "state": "BUILT_NOT_LIVE",
+      "owner": "IRPT_ANLREQ_G",
+      "waits_on": "The same resident release as hop 9: the unit has no commentary_ready_queue_url binding, so nothing polls the queue. The packager module is in the installed root. One test message sits on the queue (row IRPT_ANLREQ-D2-S26, ARMED, expires about 2026-10-15T06:10Z; only the resident role may consume it).",
+      "evidence": [
+        "sqs get-queue-attributes outlook-global-commentary-draft-commentary-ready-queue: visible 1, in flight 0 at 2026-10-11T12:1xZ",
+        "SSM output of 39cacd01...: commentary_ready_queue_url=0",
+        "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/r10/RELEASE_CENSUS_PART2_SERVED_OR_INERT_20261011.md line 63: 1 packager module classed INERT (I1)",
+        "orders TO-AR-g-13 and TO-AR-g-21 status complete"
+      ],
+      "claim": "inherited"
+    },
+    {
+      "n": 12,
+      "hop": "The packager's own service identity (svc-irpt-packager) exists with a credential the resident can read.",
+      "state": "NOT_DETERMINED",
+      "owner": "IRPT_ANLREQ_G",
+      "waits_on": "The mint was planned as 'the packager mint (G3, second part), under its own pair' (IRPT_ANLREQ_DECOMP_R3_G.md line 26). No order or record that performs it was found among the 26 org markdown files naming svc-irpt-packager, and the ticket service packet of 2026-10-09 says no token existed. Not read live: it needs a read of the ticket users table and a secrets lookup by a name the resident binding (absent) would carry.",
+      "evidence": [
+        "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~V2/AR_V12_DEPLOY_PACKET_20261009.md line 23: '(a) no svc-irpt-packager token exists (its mint is a later pair)'",
+        "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R3_G.md lines 18-29",
+        "what would determine it: a single-resource get-item of that principal's row in the ticket users table (key from the ticket service), and a describe-secret on the secret name once a binding names it"
+      ],
+      "claim": "inherited"
+    },
+    {
+      "n": 13,
+      "hop": "The packager renders the branded PDF with the commentary page from the stored report and the stored draft, and stores it.",
+      "state": "BUILT_NOT_LIVE",
+      "owner": "IRPT_ANLREQ_G",
+      "waits_on": "Hop 11's binding (nothing starts the packager) and hop 12. Never run anywhere: the render and I7 pdf_ref writer are inside the installed root, behind the unset binding.",
+      "evidence": [
+        "git merge-base --is-ancestor 7e66decdff 37210c771a and 73fb27d870 37210c771a: both yes (AR-g-12 Commentary page; AR-g-22 I7 writer); control: 37210c771a is not an ancestor of 5acdefb7cc",
+        "orders TO-AR-g-12 and TO-AR-g-22 status complete",
+        "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/st30_release/CVO_PACKET_ST30_IRPT_ANLREQ_20261011.md line 20: 'No request has run through the new root'"
+      ],
+      "claim": "inherited"
+    },
+    {
+      "n": 14,
+      "hop": "The packager posts the package pointers to the ticket (POST /tickets/{id}/package, interface I5) as svc-irpt-packager.",
+      "state": "BUILT_NOT_LIVE",
+      "owner": "IRPT_ANLREQ_G",
+      "waits_on": "The packager binding (api_base, email, secret_name) is absent, so both live ticket ports refuse PACKAGER_PRINCIPAL_UNSET; and hop 12. Code (TO-AR-g-31, complete) is in the installed root but has not run.",
+      "evidence": [
+        "git show 37210c771a:infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py lines 200-235: live_ticket_ports returns refusing 'unset' ports unless the packager config has exactly api_base, email, secret_name",
+        "git merge-base --is-ancestor 5acdefb7cc 37210c771a: yes",
+        "order TO-AR-g-31 status complete; CVO_PACKET_ST30_IRPT_ANLREQ_20261011.md: no packager binding added"
+      ],
+      "claim": "measured"
+    },
+    {
+      "n": 15,
+      "hop": "The ticket service accepts the package pointers from the one named principal and stores them on the open ticket.",
+      "state": "LIVE",
+      "owner": "TCKT_VNEXT",
+      "waits_on": "NOTHING to deploy. Not exercised with a real call from that principal (it does not exist or is not proven, hop 12).",
+      "evidence": [
+        "live opal-ticket-api package (digest t1EoiJRZ..., hashed): lambda_function.py package_ticket (lines 1392-1468) admits only the service subject equal to package_principal, with the packager's own firm list; the member contains the string svc-irpt-packager once and equals the blob at 861c9bba65",
+        "orders TCKT_VNEXT.TO-F10-l3 package-route and TO-R2-pk1, TO-APPLY-V12, TO-APPLY-R2-pk2 status complete (TO-APPLY-R13 withdrawn; R13b complete)"
+      ],
+      "claim": "measured"
+    },
+    {
+      "n": 16,
+      "hop": "The ticket learns the id of its own report request (report_ref) so the page can open the files; for a ticket filed through the form's one-step sequence nothing records it.",
+      "state": "NO_CODE",
+      "owner": "TCKT_VNEXT",
+      "waits_on": "No order or cell found that records report_ref for an I1 ticket. The only writers are the assignee-only report route (needs an in-progress claimed ticket, which the I1 sequence never makes, and the page hides Request report for I1 tickets) and the commentary service's own ticket create (not used by the analysis_ready path). The page's Open buttons for all four package files need ticket.report_ref.request_id. Row IRPT_ANLREQ-D2-W52-S5 filed.",
+      "evidence": [
+        "infra/aws/lambda/ticket_center/lambda_function.py (equal to the live member): 'report_ref' is written at line 632 (service create, field report_request_id) and line 1377 (report_ticket: status in_progress, assignee only); package_ticket (1392-1468) writes only package",
+        "git -C portal grep recordTicketReport origin/DEV -- src: callers are analysisRequest.ts:314 (requestReport) only; reportRequestRefusal returns 'The backend requests this report itself.' for an I1 ticket (analysisRequest.ts:288-291)",
+        "origin/DEV AnalysisRequestParts.tsx:236-243 packageFileHasReader returns false when ticket.report_ref?.request_id is absent",
+        "opal_packager.py:269 posts only to .../package; data/transcripts/scripts/commentary/lambda_handler.py:23-26: an analysis_ready run posts no ticket",
+        "scope searched: ticket lambda file at HEAD, portal origin/DEV src, opal_packager.py, commentary lambda_handler.py; a writer elsewhere (for example the resident) was not searched"
+      ],
+      "claim": "inferred"
+    },
+    {
+      "n": 17,
+      "hop": "The open ticket page shows the package block (the four pointers and who attached them) as text.",
+      "state": "LIVE",
+      "owner": "PORTAL",
+      "waits_on": "NOTHING. Text refs only on PROD; it renders only once a ticket carries a package (hop 15).",
+      "evidence": [
+        "git -C portal show origin/PROD:src/pages/TicketCenter/AnalysisRequestParts.tsx lines 166-195: AnalysisDraftAndPackage lists Report, Branded PDF, Commentary, Original file refs and 'Attached ... by ...'",
+        "git -C portal show origin/PROD:src/pages/TicketCenter/TicketCenter.tsx lines 454-456 renders it for analysis_request tickets with a draft or a package",
+        "origin/PROD = 37aa1247 (2026-10-09T12:34:12-04:00) after git fetch origin PROD DEV at read time; that PROD is what is deployed is the face's rule, not separately read"
+      ],
+      "claim": "measured"
+    },
+    {
+      "n": 18,
+      "hop": "The Investor Reporting status service serves the finished report for a request id (analysis-report read).",
+      "state": "LIVE",
+      "owner": "IRPT_ANLREQ_Y",
+      "waits_on": "NOTHING to deploy. What is NOT live on this function: retained_ref on that read and the history client (release 5, applied 10:25:40Z and ROLLED BACK 11:26:53Z; row D2-S43/S44), so nothing from rounds 3 or 4 is serving.",
+      "evidence": [
+        ".tools/aws lambda get-function-configuration irpt-status: CodeSha256 6idtFvAmYk73wJdr5DPRIyEPrLeWgzjlqbdNr5f1wxc= LastModified 2026-10-11T11:26:53.000+0000; equals source map artifact_sha256 and last_deployed_at",
+        "live package downloaded, sha256 recomputed equals that CodeSha256 (49 members); entry.py carries the analysis-report, analysis-request-pdf and analysis-request-original operations; owned_report.py holds 0 retained_ref (round-3 change absent)",
+        "map members pinned at 361c44fa9d (34 of 44 staged_from rows); entry.py at that commit routes analysis-request-pdf (ops/entry.py:234,238)",
+        "IRPT_ANLREQ_ROUND2_L8_COMPILE_ADDENDUM_1_RELEASES_20261011.md section 2: an analysis-report read answered 200 with sections on release 1's real run (inherited)"
+      ],
+      "claim": "measured"
+    },
+    {
+      "n": 19,
+      "hop": "From the ticket page, the Report file opens the finished report (not the request record).",
+      "state": "BUILT_NOT_LIVE",
+      "owner": "PORTAL",
+      "waits_on": "The portal DEV to PROD push (same as hop 1) and hop 16 (the Open buttons need report_ref). On PROD, Open report still reads the request record (getOwnedAnalysisRequest), the S20 finding. Built by TO-AR-y-31 and TCKT_VNEXT.TO-R2-pg1 (both complete).",
+      "evidence": [
+        "git -C portal show origin/PROD:src/pages/TicketCenter/analysisRequest.ts lines 176-185: openReport calls getOwnedAnalysisRequest",
+        "git -C portal show origin/DEV:src/pages/TicketCenter/analysisRequest.ts lines 336-360: openReport calls getOwnedAnalysisReport; AnalysisRequestParts.tsx PackageFiles opens the report in OpenedPackageReport",
+        "orders TO-AR-y-31 and TCKT_VNEXT.TO-R2-pg1 status complete"
+      ],
+      "claim": "measured"
+    },
+    {
+      "n": 20,
+      "hop": "From the ticket page, the Branded PDF file opens through a signed link.",
+      "state": "BUILT_NOT_LIVE",
+      "owner": "PORTAL",
+      "waits_on": "The portal DEV to PROD push, hop 16, and hops 13-14 (no PDF exists until the packager has run). The service route (analysis-request-pdf) is in the live irpt-status package; it has never been read against a real PDF by anything I opened.",
+      "evidence": [
+        "git -C portal show origin/DEV:src/api/endpoints/investor-reporting.ts line 1165 getAnalysisRequestPdf; origin/PROD has no getAnalysisRequestPdf (git grep over origin/PROD src returned none)",
+        "origin/DEV AnalysisRequestParts.tsx:248-263 openPackageFile opens the signed url in a new tab",
+        "live irpt-status entry.py: analysis-request-pdf operation present (count 4)",
+        "order TO-AR-v13 and TO-AR-v21 status complete"
+      ],
+      "claim": "measured"
+    },
+    {
+      "n": 21,
+      "hop": "From the ticket page, the Original file opens the advisor's uploaded Excel through a signed link.",
+      "state": "BUILT_NOT_LIVE",
+      "owner": "PORTAL",
+      "waits_on": "The portal DEV to PROD push and hop 16. The service side is live: the original route is on the live API and irpt-status; its read answered 200 on revision 6 (applier's result file, inherited) and the original-file reader in the ticket page is DEV only.",
+      "evidence": [
+        "git -C portal show origin/DEV:src/api/endpoints/investor-reporting.ts line 1177 getAnalysisRequestOriginal; none on origin/PROD",
+        "live irpt-status entry.py and status_installed.py: analysis-request-original present (counts 4 and 1)",
+        "r2_tr1_run3_trace.json census: GET .../analysis/requests/{requestId}/original listed as live and not in the source census",
+        "IRPT_ANLREQ_ROUND3_Y_L8_COMPILE_20261011.md section 3: Y-34 reads 3a, 3b, 4_record, 4_route true on revision 6 (inherited)"
+      ],
+      "claim": "measured"
+    }
+  ],
+  "first_hop_not_live": 1,
+  "not_determined": [7, 12]
+}
