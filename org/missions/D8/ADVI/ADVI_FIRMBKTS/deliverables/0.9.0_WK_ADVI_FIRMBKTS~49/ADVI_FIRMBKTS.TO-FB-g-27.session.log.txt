@@ -1,0 +1,30 @@
+ADVI_FIRMBKTS TO-FB-g-27 (round 4 act 3c) -- worker session log, 0.9.0_WK_ADVI_FIRMBKTS~49, worktree /c/dev/wk-firmbkts-49, branch wk-ADVI_FIRMBKTS-49
+
+Premises re-grounded at start: HEAD 9794728d6e; test -d org and test -d .tools -> TREE-OK; order path infra/logic/registry/exemptions.json present.
+The ledger pair exists: the COO half NEVER_WIDEN_ROUND4_ACT3C_EXECSUM_FENCE_COO_HALF.md; the CTO half is not yet in the ledger folder (expected: it precedes the apply, not this commit). The row's signoff_ref states both paths "unsigned at this write".
+
+Edit: one row appended to opal-data-49financial in infra/logic/registry/exemptions.json, after the OAI row. principal exec-summary-generator-role; actions GetObject, ListBucket, PutObject; prefix advi/49financial/platinum/advisors/. git diff --stat: 8 insertions, 0 deletions. JSON parses; 28 rows for opal-data-49financial (27 before, plus this one).
+
+AC1 run (r4_exec.py --arms row --root /c/dev/wk-firmbkts-49 --base 44e7a3f712), row state:
+  E1 added=1 base kept=True others same=True grants same=True directory=advi/49financial/platinum/advisors/
+  E2 new allow=2 write allows=0 new deny=3 new exemption arns=['arn:aws:iam::313476888478:role/exec-summary-generator-role']
+  E3 other buckets unchanged=True
+  E4 plan rc=0
+  ROUND 4 EXEC ROW: 4 of 4 arms, exit=0
+Second run, same bytes: identical lines, 4 of 4 arms, exit=0.
+
+Mutant control (negative arm): the HEAD registry (git show 9794728d6e:infra/logic/registry/exemptions.json) written in place, AC1 run, then the row version restored from a scratch copy and verified byte-identical with cmp. Result:
+  E1 added=0 ... FAIL; E2 new allow=0 write allows=0 new deny=0 new exemption arns=[] FAIL; E3 PASS; E4 PASS
+  ROUND 4 EXEC ROW: 2 of 4 arms, exit=1
+After the restore git diff --stat shows 8 insertions, 0 deletions.
+
+AC2 run (r4_scope.py with the three --allow paths and --require):
+  CHANGED infra/logic/registry/exemptions.json
+  ROUND 4 SCOPE: OK 1 changed, 0 outside, 0 required missing, exit=0
+Second run identical.
+
+Commit 3a6d8aa89d (registry file only) via safe-commit.sh -F. Gate output: risk reflex clean (1 of 1 file); commit-gate printed "checked 0 of 1 file(s) -- NOTHING WAS CHECKED" (JSON suffix not graded); client-data check WARN (hashed account-id list absent on this device); surprise-row gate OK (no rows in that commit); msg-verify MATCH.
+
+Surprise row filed: ADVI_FIRMBKTS-D1-W49-S1 (OBSERVATION, INERT) in INVESTIGATION_v1.md, on the gate and device-list observation above.
+
+Date stamp: 2026-10-11T15:53:44Z.
