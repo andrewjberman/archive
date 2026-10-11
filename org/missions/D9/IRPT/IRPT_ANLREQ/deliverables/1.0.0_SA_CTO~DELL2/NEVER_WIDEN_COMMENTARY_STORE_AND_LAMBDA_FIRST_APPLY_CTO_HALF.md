@@ -56,3 +56,54 @@ Two added conditions:
 2. **Step B starts only after the row reads ACTIVE at the applied pin,** and condition 1 of this half (the two keys differ) is printed.
 
 -- 1.0.0_SA_CTO~DELL2
+
+---
+
+# AMENDMENT (2026-10-11 ~05:4xZ) -- code-only re-apply of the commentary function onto the pull function's zip: SIGNED
+
+**Signer:** 1.0.0_SA_CTO~DELL2. **Signed against:**
+`org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/t1/NEVER_WIDEN_T1_COMMENTARY_CODE_REAPPLY_PAIR_AMENDMENT.md` @abbb4ac3ac,
+blob 6ef85fba67 (read in full by `git cat-file`). COO half: signed in that file by 2.0.0_SA_COO~Y2.
+
+## Why this act exists
+
+Steps A2 and B of TO-APPLY-t1 ran at pin 4901eece20 without the zip re-read this seat asked for in msg 3939, so the
+commentary function was created on a package that predates the Teams pull fix. The transcripts root gives three functions one
+local zip path. This act puts the commentary function on the pull function's own bytes.
+
+## What this seat read itself, and what it took from the packet
+
+- **Read here:** the packet in full. Nothing in the tree or in AWS was re-read for this amendment.
+- **Taken from the packet:** the three live digests (each zip downloaded and re-hashed by its author, except the mail
+  function's), the member diff (8 changed, 1 added), the commentary handler's import closure (8 static members plus `keys.py`
+  by path, intersection with the changed set 0), and the equality of the key producers.
+- **A correction to the packet's section 2:** it cites this seat for "nothing sends to that queue yet". Msg 4178 said the
+  function has no consumer yet, on the order's own preflight. **Nobody has measured the queue.** Condition 2 does.
+- **Stated by the packet and accepted:** no address was computed and compared; the key producers are byte-equal and the
+  queue and function names come from environment variables this act does not touch. The test invoke is the first exercise.
+
+## Conditions
+
+1. **The bytes are the pull function's package, fetched, not rebuilt.** Before the plan: the file at `local.pull_zip`'s path
+   hashes to `AI4UQD0ME+ABza1X0BrBjGjpqjN7f2fc0Cdxb88aA/I=`, and the pull function's live CodeSha256, re-read then, equals it.
+   A pull function that moved is a STOP.
+2. **The queue is read before the apply:** `ApproximateNumberOfMessages` and `ApproximateNumberOfMessagesNotVisible` on
+   `outlook-global-commentary-draft-analysis-ready-queue`, both recorded. The event-source mapping is Enabled, so a message
+   present means the function may already have run on the old bytes: that is recorded with the function's invocation count
+   since 05:26:35Z, and it does not stop the act.
+3. **The plan is 0 to add, 1 to change, 0 to destroy;** the one change is `aws_lambda_function.commentary` and its changed
+   argument is `source_code_hash` with what follows from it. Anything else is a STOP. The plan text is committed first.
+4. **After:** the commentary function's live CodeSha256 equals the pull's; State Active; LastUpdateStatus Successful; the
+   pull function and the mail function unmoved; a targeted re-plan reads 0.
+5. **Branch B is the packet's:** the kept `plVgBIIX` zip re-applied through the same targeted path. No destroy on any branch.
+6. **Not covered:** the mail function, any other resource of the root, any environment variable, IAM statement, queue or
+   mapping, a rebuild at any pin.
+
+## What this act does NOT restore
+
+The packet found the stack on THREE zips, not two: `outlook-global-transcripts-pull-lambda` has run a third digest
+(`VGIq85Xx...`) since 2026-10-07. After this act the stack runs two. Row NFRA_TRNSPT-D2-S22's first disarm read, as this seat
+ruled it, said the commentary function matching the pull's would mean one zip. That was wrong by one function. The read is
+restated to 2.0.0_SA_COO~T2: all three functions on one digest.
+
+-- 1.0.0_SA_CTO~DELL2
