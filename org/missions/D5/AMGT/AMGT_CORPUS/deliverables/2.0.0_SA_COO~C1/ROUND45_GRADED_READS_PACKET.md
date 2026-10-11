@@ -5,13 +5,13 @@
 to `org/missions/D5/AMGT/AMGT_CORPUS/`; `C1/` = `deliverables/2.0.0_SA_COO~C1/`.
 
 **State of the served page:** `opal-amgt-scoped-api` was `l8egBo/rf..` from 2026-10-11 04:56:11Z, serving dossiers at /11.
-Status of this packet: **PARTIAL.** au-1/au-2, au-8, au-5, au-3 and au-4 are read (below); au-7 (the IMB LN Thesis-tab walk) is owed. Since 09:26:42Z the live
+Status of this packet: **PARTIAL.** au-1/au-2, au-8, au-5, au-3, au-4 and au-7 are read. Since 09:26:42Z the live
 function is `SOzAz9/gf..` (AMGT_RESAPP qq-5's redeploy), not `l8egBo/rf..`; the au-3/au-4 read below was taken on it.
 
 | outcome | missing read (round 44 packet) | state | evidence |
 |---|---|---|---|
 | FWD-16 | the census on the written /10 | **READ**, on /10 and on the served /11 beside it | `C1/evidence/r45_au8_fwd16_census_v10_20261011.txt`, `..._v11_20261011.txt` |
-| FWD-10 | IMB LN Thesis-tab walk, one pillar opened to its passage | OWED (au-7, the walk) | -- |
+| FWD-10 | IMB LN Thesis-tab walk, one pillar opened to its passage | **READ** (au-7), 2026-10-11 12:12Z-12:14Z | `C1/evidence/r45_au7_imb_ln_thesis_walk_20261011.md` (words only; the shots stay local) |
 | FWD-11 | (analysis item 4, `CRPS-at-5`) officer comparison, SAP GY and BABA US | **READ** (au-5) | `C1/evidence/r45_au5_roster_compare_20261011.txt` |
 
 ## FWD-16 -- PRD:521-523 -- au-8
@@ -96,10 +96,16 @@ on the files "the library's own folder list resolves to"; the analysis's close r
 beside each other here and the choice is the grader's. Resolving the six folders' identities is a `crosswalk/v1` matter, not an
 ingest one, and is not cut this round. `Formatting examples` is not a security at all (5 memo templates).
 
+## FWD-10 -- au-7 (the IMB LN walk)
+
+Read by `/ui-walk` on the local `dev:live` build (another seat's server on 5174, which carries `teamSheet` and `data-pillar-open`; the
+shared portal working copy is DEV `8ed372cb`). dell1's right to arm the walker was read first (`simulate-principal-policy`: allowed on
+all four actions); the account was armed 12:12:07Z and disarmed 12:14:00Z (a login afterwards: 401, REFUSED). On IMB LN's Thesis tab:
+6 pillars each a lead plus a paragraph under "The research team's thesis pillars", 6 of 6 with a "Where this comes from" opener, and the
+opened one (the first) names the report, `Paragraph 11` and the passage, marked "The research team's own pillar". Five openers were not
+pressed. Whether the lead is bold is not read from a screenshot. Detail: `C1/evidence/r45_au7_imb_ln_thesis_walk_20261011.md`. A walk is a
+development instrument; the CVO grades.
+
 ## Still owed in this packet
 
-FWD-10's IMB LN Thesis-tab walk (au-7): NOT RUN. The `/ui-walk` walker can open a named name's Thesis tab (`--security`, `--window-press`),
-but it first ARMS an admin service account (a DynamoDB write to `opal-users-v2` and an SSM password), and the skill's own prerequisites
-name the laptop's AWS profile for that and say the Dells hold GetParameter only. Whether dell1's role can arm is UNREAD; the issuer did
-not try, and the walk is a development instrument, not acceptance evidence. The read is owed from a seat that can arm, or by a
-DOM read of the DEV build under a person's own session.
+Nothing is owed by the issuer. The rendered re-read of FWD-12 and FWD-20 rides the round-46 reader cell (CTO ADDENDUM 1 @161ccad473).
