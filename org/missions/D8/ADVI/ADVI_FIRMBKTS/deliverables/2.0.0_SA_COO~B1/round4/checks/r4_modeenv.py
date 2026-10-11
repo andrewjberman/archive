@@ -74,8 +74,13 @@ def check(root, cell, base):
     cur = [ln for ln in new.splitlines() if not ln.strip().startswith("#")]
     # a line that the edit REWRAPS (the environment block) is allowed: compare the multiset of non-env lines
     env_keys = set(c["base_keys"])
-    keep_o = [ln for ln in strip_o if not any(re.search(r'\b%s\b' % k, ln) for k in env_keys)]
-    keep_n = [ln for ln in cur if not any(re.search(r'\b%s\b' % k, ln) for k in env_keys)]
+    # the environment block's own header and closing lines are rewrapped by the merge form: they are not compared
+    header = re.compile(r'^\s*(environment_variables|variables)\s*=\s*(\{|merge\()|^\s*\}\s*,?\s*$|^\s*\}\)\s*$')
+
+    def skip(ln):
+        return any(re.search(r'\b%s\b' % k, ln) for k in env_keys) or header.search(ln) is not None
+    keep_o = [ln for ln in strip_o if not skip(ln)]
+    keep_n = [ln for ln in cur if not skip(ln)]
     i = 0
     for ln in keep_n:
         if i < len(keep_o) and ln == keep_o[i]:
