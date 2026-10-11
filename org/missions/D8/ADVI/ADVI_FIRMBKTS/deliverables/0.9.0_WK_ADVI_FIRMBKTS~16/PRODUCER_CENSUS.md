@@ -2,7 +2,7 @@
 
 Source of truth: `PRODUCER_CENSUS.json` in this folder (the grader reads that file). Read-only measurement:
 no producer, `lib/config.py`, schedule or registry row was edited. Every writer line below was re-read at
-build time (58 of 58 contain the quoted key text). Re-read at phase A (FB-f-9) against the worktree: 62 of 62 contain the quoted key text; the four writes S5 and S6 added; every line relocated to the worktree and each routed line quotes its destination() call.
+build time (58 of 58 contain the quoted key text). Re-read at phase A (FB-f-9) against the worktree: 66 of 66 contain the quoted key text; the four writes S5 and S6 added; every line relocated to the worktree and each routed line quotes its destination() call. The total is 66: the 58 base writers, S5 and S6 (4 lines), and S11 (1 line, D_03) and S12 (3 lines, D_04 split branch).
 (`0.9.0_WK_ADVI_FIRMBKTS~8/F7_MANIFEST.tsv.gz`, 52,910 objects; a key belongs to the longest class prefix).
 
 ## 1. Per class
@@ -11,7 +11,7 @@ build time (58 of 58 contain the quoted key text). Re-read at phase A (FB-f-9) a
 |---|---:|---:|---|---|---|
 | `gold/artifacts/` | 44 | 15 | no | UNKNOWN: no E_ id in gold_dispatch.sh CATALOG or PHASE_*; gold_dispatch.sh PHASE_C5; gold_dispatch.sh PHASE_D1; gold_dispatch.sh PHASE_D2; gold_dispatch.sh PHASE_D3; gold_dispatch.sh PHASE_D4 | null (see section 5) |
 | `gold/entities/accounts/` | 8563 | 1 | no | gold_dispatch.sh PHASE_D3 | null (see section 5) |
-| `gold/entities/advisors/` | 773 | 7 | no | gold_dispatch.sh PHASE_D1; gold_dispatch.sh PHASE_D3 | null (see section 5) |
+| `gold/entities/advisors/` | 773 | 8 | no | gold_dispatch.sh PHASE_D1; gold_dispatch.sh PHASE_D3 | null (see section 5) |
 | `gold/entities/clients/` | 18194 | 5 | no | gold_dispatch.sh PHASE_C5; gold_dispatch.sh PHASE_D1; gold_dispatch.sh PHASE_D3 | null (see section 5) |
 | `gold/platinum/firm/` | 2 | 2 | no | gold_dispatch.sh PHASE_D4 | null (see section 5) |
 | `gold/views/` | 10 | 9 | no | gold_dispatch.sh PHASE_B5; gold_dispatch.sh PHASE_C4; gold_dispatch.sh PHASE_C5; gold_dispatch.sh PHASE_D1 | null (see section 5) |
@@ -19,7 +19,7 @@ build time (58 of 58 contain the quoted key text). Re-read at phase A (FB-f-9) a
 | `platinum/accounts/` | 7562 | 1 | no | gold_dispatch.sh PHASE_D4 | null (see section 5) |
 | `platinum/advisors/` | 980 | 5 | no | gold_dispatch.sh PHASE_D4 | null (see section 5) |
 | `platinum/clients/` | 16766 | 5 | no | gold_dispatch.sh PHASE_D4 | null (see section 5) |
-| `platinum/firm/` | 15 | 11 | no | gold_dispatch.sh PHASE_D4; gold_dispatch.sh PHASE_D5 | null (see section 5) |
+| `platinum/firm/` | 15 | 14 | no | gold_dispatch.sh PHASE_D4; gold_dispatch.sh PHASE_D5 | null (see section 5) |
 | **total** | **52910** | | | | |
 
 ## 2. Writers (script:line -- key expression as it appears on that line)
@@ -55,6 +55,7 @@ build time (58 of 58 contain the quoted key text). Re-read at phase A (FB-f-9) a
 - `data/black_diamond/scripts/gold/D_03.composition_artifacts.py:578` -- `mk = advisor_mix_key(adv_id)` -- bucket: via destination() (lib/platinum_dest.py, phase A; mode unset = legacy): BUCKET (alias of lib.config S3_BUCKET, env BD_S3_BUCKET, default opal-data-bd) -- runner: gold_dispatch.sh PHASE_D1 (gold_dispatch.sh:606-607), run on bd-gold-layer-runner EC2
 - `data/black_diamond/scripts/gold/D_03.composition_artifacts.py:589` -- `tk = advisor_mix_timeseries_key(adv_id)` -- bucket: via destination() (lib/platinum_dest.py, phase A; mode unset = legacy): BUCKET (alias of lib.config S3_BUCKET, env BD_S3_BUCKET, default opal-data-bd) -- runner: gold_dispatch.sh PHASE_D1 (gold_dispatch.sh:606-607), run on bd-gold-layer-runner EC2
 - `data/black_diamond/scripts/gold/D_03.composition_artifacts.py:806` -- `advisor_composition_key(adv_id),` -- bucket: via destination() (lib/platinum_dest.py, phase A; mode unset = legacy): BUCKET (alias of lib.config S3_BUCKET, env BD_S3_BUCKET, default opal-data-bd) via _write_json_batch (line 811) -- runner: gold_dispatch.sh PHASE_D1 (gold_dispatch.sh:606-607), run on bd-gold-layer-runner EC2
+- `data/black_diamond/scripts/gold/D_03.composition_artifacts.py:877` -- `advisor_composition_key(adv_id),` -- bucket: via destination() (lib/platinum_dest.py, phase A; mode unset = legacy): _write_json_batch (non-architect composition items, S11) -> _write_json key put -- runner: gold_dispatch.sh PHASE_D1 (gold_dispatch.sh:606-607), run on bd-gold-layer-runner EC2
 
 ### `gold/entities/clients/` (18194 objects)
 
@@ -118,6 +119,9 @@ build time (58 of 58 contain the quoted key text). Re-read at phase A (FB-f-9) a
 - `data/black_diamond/scripts/gold/D_04.client_portal_summary.py:2551` -- `(slim, 'platinum/firm/clients-tab-slim.json')` -- bucket: via destination() (lib/platinum_dest.py, phase A; mode unset = legacy): _write_batch -> _write_json_to_s3 -> put_object(Bucket=BUCKET) (D_04.client_portal_summary.py:269-270,277-292) -- runner: gold_dispatch.sh PHASE_D4 (gold_dispatch.sh:618-619), run on bd-gold-layer-runner EC2
 - `data/black_diamond/scripts/gold/D_04.client_portal_summary.py:2586` -- `items.append((header_metrics, 'platinum/firm/header_metrics.json'))` -- bucket: via destination() (lib/platinum_dest.py, phase A; mode unset = legacy): _write_batch -> _write_json_to_s3 -> put_object(Bucket=BUCKET) (D_04.client_portal_summary.py:269-270,277-292) -- runner: gold_dispatch.sh PHASE_D4 (gold_dispatch.sh:618-619), run on bd-gold-layer-runner EC2
 - `data/black_diamond/scripts/gold/D_04.client_portal_summary.py:2599` -- `items.append((timeseries_chart, 'platinum/firm/timeseries_chart.json'))` -- bucket: via destination() (lib/platinum_dest.py, phase A; mode unset = legacy): _write_batch -> _write_json_to_s3 -> put_object(Bucket=BUCKET) (D_04.client_portal_summary.py:269-270,277-292) -- runner: gold_dispatch.sh PHASE_D4 (gold_dispatch.sh:618-619), run on bd-gold-layer-runner EC2
+- `data/black_diamond/scripts/gold/D_04.client_portal_summary.py:405` -- `'platinum/firm/dashboard.json'),` -- bucket: via destination() (lib/platinum_dest.py, phase A; mode unset = legacy): _write_batch (split-branch items, S12) -> _write_json_to_s3 put -- runner: gold_dispatch.sh PHASE_D4 (gold_dispatch.sh:618-619), run on bd-gold-layer-runner EC2
+- `data/black_diamond/scripts/gold/D_04.client_portal_summary.py:406` -- `(employee_lb, 'platinum/firm/leaderboard.json'),` -- bucket: via destination() (lib/platinum_dest.py, phase A; mode unset = legacy): _write_batch (split-branch items, S12) -> _write_json_to_s3 put -- runner: gold_dispatch.sh PHASE_D4 (gold_dispatch.sh:618-619), run on bd-gold-layer-runner EC2
+- `data/black_diamond/scripts/gold/D_04.client_portal_summary.py:409` -- `items.append((fee_eff, 'platinum/firm/fee_efficiency.json'))` -- bucket: via destination() (lib/platinum_dest.py, phase A; mode unset = legacy): _write_batch (split-branch items, S12) -> _write_json_to_s3 put -- runner: gold_dispatch.sh PHASE_D4 (gold_dispatch.sh:618-619), run on bd-gold-layer-runner EC2
 
 ## 3. The bucket seam
 
@@ -167,7 +171,7 @@ Settings that point the same variable elsewhere (not opal-data-bd; recorded so n
 - `ADVI_FIRMBKTS-D1-W16-S1` -- graph under-reports D_04 writes and lists a read as a write (INERT).
 - `ADVI_FIRMBKTS-D1-W16-S2` -- D_00f writes a served platinum key through a hard-coded bucket outside the seam (ARMED at base; routed through destination() in phase A).
 - `ADVI_FIRMBKTS-D1-W16-S3` -- comp-pipescript cannot resolve 25 of 26 E-series ids; E_01 and E_24 write served keys with no dispatch entry (INERT).
-- `ADVI_FIRMBKTS-D1-W16-S5` -- three served D_00 `gold/views/` writes (lines 1106-1108) were not in the census; added here (INERT).
+- `ADVI_FIRMBKTS-D1-W16-S5` -- three served D_00 `gold/views/` writes (lines 1106-1108) were not in the census; added (INERT).
 - `ADVI_FIRMBKTS-D1-W16-S6` -- one served C_06 `gold/entities/clients/` write (line 381) was not in the census; added here (INERT).
-- `ADVI_FIRMBKTS-D1-W16-S11` -- D_03 line 870, the non-architect advisor composition tuple (written by `_write_json_batch` at line 883), writes the served `gold/entities/advisors/` key and is NOT in this census (the count is held at 62 by the ruling); routed (INERT).
-- `ADVI_FIRMBKTS-D1-W16-S12` -- D_04's split-branch `_write_batch` (lines 395-408, taken above 200 KB) writes the served `platinum/firm/fee_efficiency.json` key, which is NOT in this census; routed (INERT).
+- `ADVI_FIRMBKTS-D1-W16-S11` -- D_03 base line 870, the non-architect advisor composition tuple (written by `_write_json_batch`), a served `gold/entities/advisors/` write; ADDED to this census (1 line), routed (INERT).
+- `ADVI_FIRMBKTS-D1-W16-S12` -- D_04 split branch (base lines 395-408, taken above 200 KB): the served dashboard, leaderboard and `platinum/firm/fee_efficiency.json` items; ADDED to this census (3 lines), routed through _write_batch (INERT).
