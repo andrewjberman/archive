@@ -23,7 +23,16 @@ round 94 (live against the merged chain) moved only `peers.subject.display_name`
     D8 control: the overlay keeps a spelling variant's classification name (`display_name_source` `etf-classifications`).
     D9 a ranked row: a classification name that disagrees with the registered name is replaced by the registered name (`name_source` `crosswalk`) in
        `_join_ranked_rows`; a spelling variant's row keeps the classification name.
-Verdict: R94 DISPLAY NAME: YES|NO (exit 0|1). At the base (2026-10-11) D1, D7 and D9 FAIL and D2-D6, D8 PASS.
+AMENDMENT 2 (the same cell): a FOURTH path -- the rank timeseries (`scoped_amgt.read_rank_series`) serves each series' `name` straight from the table by bare ticker
+(`SAN FP` -> 'Banco Santander S.A. ADR'), with no security key; the live function's /lead-panel/timeseries read on 2026-10-11 showed it. The fix is a helper
+`scoped_amgt._rank_series_names(tickers)` (the served-names map `read_rank_series` builds) that resolves each ticker to its covered security key by the same exact
+match the ranked join uses (`_covered_bloomberg_index`) and replaces a disagreeing table name by the registered one.
+    D10 a series whose table name disagrees with the registered name serves the cleaned registered name; its `classification` is unchanged and `name_state` is
+        ABSENT (a crosswalk-filled row's precedent).
+    D11 control: a series whose table name agrees (a spelling variant) is returned byte-equal to the table's answer.
+    D12 control: a ticker the covered universe does not match is returned byte-equal to the table's answer; one covered-universe index read serves every ticker.
+Verdict: R94 DISPLAY NAME: YES|NO (exit 0|1). At the base (2026-10-11) D1, D7, D9, D10 FAIL and D2-D6, D8 PASS; D11 and D12 read the helper, which is absent at the
+base, so they FAIL there with the reason "no helper".
 """
 import sys
 
@@ -84,6 +93,43 @@ def overlay_and_rows(clean):
     return out
 
 
+def series_names(clean):
+    out = []
+    helper = getattr(scoped_amgt, "_rank_series_names", None)
+    if helper is None:
+        for arm in ("D10 a disagreeing series name is replaced by the registered one", "D11 control: an agreeing series name is byte-equal",
+                    "D12 control: an unmatched ticker is byte-equal and the index is read once"):
+            out.append(say(False, arm, "no helper scoped_amgt._rank_series_names"))
+        return out
+    saved = (scoped_amgt._crosswalk_names, scoped_amgt._classification_for_ticker, scoped_amgt._covered_bloomberg_index)
+    reads = []
+    table = {"SAN FP": {"status": "SERVED", "name": "Banco Santander S.A. ADR", "classification": {"sector": "Financials"}, "name_state": "SERVED", "reason": None},
+             "CELH US": {"status": "SERVED", "name": "Celsius Hldgs Inc Com New", "classification": {"sector": "Staples"}, "name_state": "SERVED", "reason": None},
+             "ZZZ US": {"status": "SERVED", "name": "Zzz Corp", "classification": {"sector": None}, "name_state": "SERVED", "reason": None}}
+    try:
+        scoped_amgt._crosswalk_names = lambda: {"SAN_FP_Equity": "SANOFI", "CELH_US_Equity": "CELSIUS HOLDINGS INC"}
+        scoped_amgt._classification_for_ticker = lambda ticker, security_key=None: dict(table[ticker])
+
+        def index():
+            reads.append(1)
+            return {"SAN FP": "SAN_FP_Equity", "CELH US": "CELH_US_Equity"}
+        scoped_amgt._covered_bloomberg_index = index
+        got = helper(["SAN FP", "CELH US", "ZZZ US"])
+        a = got.get("SAN FP") or {}
+        out.append(say(a.get("name") == clean("SANOFI") and a.get("name_state") == "ABSENT" and a.get("classification") == table["SAN FP"]["classification"],
+                       "D10 a disagreeing series name is replaced by the registered one",
+                       "served %r name_state %s classification %r" % (a.get("name"), a.get("name_state"), a.get("classification"))))
+        out.append(say(got.get("CELH US") == table["CELH US"], "D11 control: an agreeing series name is byte-equal", "served %r" % (got.get("CELH US") or {}).get("name")))
+        out.append(say(got.get("ZZZ US") == table["ZZZ US"] and len(reads) == 1,
+                       "D12 control: an unmatched ticker is byte-equal and the index is read once",
+                       "served %r, index reads %d" % ((got.get("ZZZ US") or {}).get("name"), len(reads))))
+    except Exception as exc:  # noqa: BLE001 -- a fixture that cannot run is a FAIL with its reason
+        out.append(say(False, "D10-D12 the series-name arms ran", "%s: %s" % (type(exc).__name__, exc)))
+    finally:
+        (scoped_amgt._crosswalk_names, scoped_amgt._classification_for_ticker, scoped_amgt._covered_bloomberg_index) = saved
+    return out
+
+
 def main():
     keys = sorted(CASES)
     registered = {k: v[2] for k, v in CASES.items() if v[2]}
@@ -111,6 +157,7 @@ def main():
         want = clean(CASES[key][1])
         results.append(say(name == want and source == "classification", label, "served %r from %s" % (name, source)))
     results.extend(overlay_and_rows(clean))
+    results.extend(series_names(clean))
     print("   arms passed %d of %d" % (sum(1 for r in results if r), len(results)))
     ok = all(results)
     print("R94 DISPLAY NAME: %s" % ("YES" if ok else "NO"))
