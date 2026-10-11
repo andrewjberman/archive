@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~G2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~YC2</issued_to>
     <date>2026-10-11</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_YCDGEN</project_code>
   </metadata>
 <risk>SERVED</risk>
@@ -26,6 +26,13 @@ comp-adversary: RUN -- read 1 script (read_profile_firms.py, 46 lines by wc: one
   </objective>
 
   <the_act>
+    AMENDMENT 1 (issuer 2.0.0_SA_COO~G2, 2026-10-11): the first read printed PROFILE-ROW-ABSENT, and that answer is VOID. It
+    was the issuer's script defect: it assumed a person's key is USER#<email>, which holds for a service row; the product
+    finds a user through the email index (_scope/canonical_profile_reads.py get_user). The script now does the same: ONE
+    query on index email-index (Limit 2), then ONE get_item by the PK the index names. Re-run step 1 with the amended
+    script and save the output as PROFILE_FIRMS_READ_2_20261011.txt; keep the first file. Bounds widen by exactly that one
+    index query on the same table. If the query is refused for your identity, save the error class and stop: that is the
+    finding. Criteria AC1 and AC2 now read the second file.
     1. From the repo root: python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/r11/read_profile_firms.py andrew@opalinvest.com cottonwood
     2. Save its full output as PROFILE_FIRMS_READ_20261011.txt in your deliverables folder irpt_ycdgen_j2/, with the UTC time of
        the read on its first line.
@@ -33,11 +40,11 @@ comp-adversary: RUN -- read 1 script (read_profile_firms.py, 46 lines by wc: one
        wider projection. If the script errors, save the error class and stop.
   </the_act>
 
-  <bounds>ONE get_item on ONE key, four named attributes. No write, no scan, no query, no other table, no secret read.</bounds>
+  <bounds>ONE query on the email index (Limit 2) and ONE get_item on the key it names, four named attributes. No write, no scan, no other table, no secret read.</bounds>
 
   <proof_of_spec>
 Instance at `org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/IRPT_YCDGEN.TO-APPLY-j2.one-profile-row-read-dell2.proof_of_spec.json`.
-    <criterion id="AC1" cell_refs="YCD-d-11">The read states the row or its absence.<invocation>grep -m1 -E '^(PROFILE |PROFILE-ROW-ABSENT )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_20261011.txt</invocation><expect>^(PROFILE andrew@opalinvest\.com status=|PROFILE-ROW-ABSENT andrew@opalinvest\.com)</expect></criterion>
-    <criterion id="AC2" cell_refs="YCD-d-11">The read answers the firm question, or records the row's absence.<invocation>grep -m1 -E '^(FIRM-NAMED cottonwood (YES|NO)|PROFILE-ROW-ABSENT )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_20261011.txt</invocation><expect>^(FIRM-NAMED cottonwood (YES|NO)$|PROFILE-ROW-ABSENT andrew@opalinvest\.com)</expect></criterion>
+    <criterion id="AC1" cell_refs="YCD-d-11">The read states the row or its absence.<invocation>grep -m1 -E '^(PROFILE |PROFILE-ROW-ABSENT |USER-NOT-IN-INDEX |USER-AMBIGUOUS-IN-INDEX )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_2_20261011.txt</invocation><expect>^(PROFILE andrew@opalinvest\.com status=|PROFILE-ROW-ABSENT andrew@opalinvest\.com|USER-NOT-IN-INDEX andrew@opalinvest\.com|USER-AMBIGUOUS-IN-INDEX andrew@opalinvest\.com)</expect></criterion>
+    <criterion id="AC2" cell_refs="YCD-d-11">The read answers the firm question, or records the row's absence.<invocation>grep -m1 -E '^(FIRM-NAMED cottonwood (YES|NO)|PROFILE-ROW-ABSENT |USER-NOT-IN-INDEX |USER-AMBIGUOUS-IN-INDEX )' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j2/PROFILE_FIRMS_READ_2_20261011.txt</invocation><expect>^(FIRM-NAMED cottonwood (YES|NO)$|PROFILE-ROW-ABSENT andrew@opalinvest\.com|USER-NOT-IN-INDEX andrew@opalinvest\.com|USER-AMBIGUOUS-IN-INDEX andrew@opalinvest\.com)</expect></criterion>
   </proof_of_spec>
 </task_order>
