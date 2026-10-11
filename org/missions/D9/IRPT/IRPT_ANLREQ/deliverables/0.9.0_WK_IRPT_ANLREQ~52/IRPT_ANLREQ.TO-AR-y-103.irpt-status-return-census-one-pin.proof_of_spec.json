@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-103",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-103.irpt-status-return-census-one-pin.md",
+    "group": "OTHER",
+    "vintage_commit": "487f73663e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R10_Y.md",
+    "vintage_commit": "487f73663e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-103.irpt-status-return-census-one-pin.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~52",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r10/IRPT_STATUS_ENTRY_ONE_PIN.json",
+      "kind": "doc",
+      "commit_or_etag": "f1d1d992f4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a record file committed on the worker branch only; the source map was edited uncommitted for two BUILD_ONLY builds and restored byte for byte (git status --porcelain on the map printed nothing); nothing uploaded, applied or invoked",
+      "artifact_covered_by": [
+        "AR103-y-AC1",
+        "AR103-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r10/RETURN_CENSUS_IRPT_STATUS.json",
+      "kind": "doc",
+      "commit_or_etag": "f1d1d992f4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a record file committed on the worker branch only; one get-function on irpt-status and its one download, the signed link never printed or written, both zips deleted",
+      "artifact_covered_by": [
+        "AR103-y-AC1",
+        "AR103-y-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR103-y-AC1",
+      "criterion_verbatim": "python C:/dev/wk-irpt-anlreq-52/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r10/ar10_checks.py y103-census --root C:/dev/wk-irpt-anlreq-52",
+      "method": "test_suite",
+      "invocation": "python C:/dev/wk-irpt-anlreq-52/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r10/ar10_checks.py y103-census --root C:/dev/wk-irpt-anlreq-52",
+      "output_evidence": "proposed entry: members 49, distinct pins 1, unpinned 0 | changed vs live: 16 | Y103-CENSUS-OK (rc=0). The check grades the form of the record only.",
+      "denominator": "49 of 49 members of files[] at one pin; 16 of 16 members that differ from live carry a complete row (5 CHANGES_SERVED_ANSWER with after_read and portal_reader, 11 INERT)",
+      "expect": "Y103-CENSUS-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR103-y-AC2",
+      "criterion_verbatim": "every CHANGES_SERVED_ANSWER row names the portal reader that actually decides whether PROD admits the new answer, and no member read INERT changes what a caller is served",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r10/RETURN_CENSUS_IRPT_STATUS.json moved_members and prod_must_carry_first",
+      "output_evidence": "5 CHANGES_SERVED_ANSWER rows (entry.py, served.py, owned_report.py, owned_requests.py, prospect_dates.py), 11 INERT (10 measured, 1 inferred: acceptance.py). PROD (37aa1247ee) admits_new_shape false for the history answer (owned-requests.ts:readOwnedHistory, exact key set) and true for the sections, refusal-code and status-dates readers; DEV (9ca634c6) true for all. prod_must_carry_first lists the transitional history reader (DEV cbd5cc66 with a3f99d6e).",
+      "denominator": "16 of 16 members that differ from live",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; graded at L9 by 3.0.0_SA_CVO, never by the worker"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Spec names no mutant.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two BUILD_ONLY builds of the one-pin entry, no parity skip, TMPDIR outside the worktree",
+      "observed": "EXu+Izn1LlqNKWI1w4l4yPhi7WA6SPURXa9SbS19tWc= both times (2 of 2 equal)",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W52-S8: five files[] members of irpt-status have no staged_from row; their repo paths in the proposed entry are source_dir plus name; filed OBSERVATION, INERT, UNDER_INVESTIGATION"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "the live function's own environment value for the firm bucket map",
+      "reason": "the order allows exactly one get-function read; the loaders.py row is measured under the bucket map derived from the packaged firm_registry.json and says so"
+    },
+    {
+      "item": "readers of these routes outside the portal repository",
+      "reason": "the order bounds the reader search to the portal repository at origin/PROD and origin/DEV"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python C:/dev/wk-irpt-anlreq-52/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r10/ar10_checks.py y103-census --root C:/dev/wk-irpt-anlreq-52",
+      "result": "Y103-CENSUS-OK printed its token (rc=0)"
+    }
+  ]
+}
