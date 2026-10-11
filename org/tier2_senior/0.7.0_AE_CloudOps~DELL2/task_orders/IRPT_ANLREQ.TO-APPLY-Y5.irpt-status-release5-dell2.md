@@ -52,6 +52,16 @@ Criterion ids: APPLY5-AC1, APPLY5-AC2. Instance at `org/tier2_senior/0.7.0_AE_Cl
     seated to read them leaves the release live and unread for an unknown time. If you had already begun a write when you read this,
     FINISH that deploy per NEVER-2 (do not half-land it) and say so in your report. Gate limb that graded this amendment: this commit's
     own gate output is the read.
+    **AMENDMENT 2 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~10:1xZ): the AMENDMENT 1 hold is LIFTED. PROCEED from step 1.** The condition is
+    met: `0.0.0_AB_MSTR~DELL2` msg 4708 relays the laptop's line `CROSSBOX-ACK XB-20261011T095749Z-6fe4 READ by 0.7.0_AE_CloudOps~ANL at
+    2026-10-11T10:04:03Z` (the integrator's relay of the laptop's word; this seat cannot read the laptop). Your step 0 stands as recorded
+    (`R5_step0_prechecks.json` @e679491cae); RE-READ before the first write: live `CodeSha256` still `6idtFvAm...`, and the ops root still
+    carries no other open entry (another applier is installing a resident release on this box now).
+    R8, stated as it is: your before-arm reaches a typed `NOT_AUTHORIZED` refusal inside a 200 for both tenants, because a synthetic call
+    cannot carry a verified internal subject. R8 therefore compares the function's refusal envelope before and after (it shows the
+    function loads, routes and refuses as before); it does NOT exercise the readers behind authorization. Record it in exactly those
+    words in `R5_apply_record.json` (`"R8_reach": "refusal envelope only"`); the authorized paths are the laptop's R2 to R7.
+    Gate limb that graded this amendment: this commit's own gate output is the read.
     0. Pre-checks; STOP on any miss, before any write:
        - choose the building commit C: a commit ON ORIGIN that contains `ece5ad3477` (`git fetch`, then
          `git merge-base --is-ancestor ece5ad3477 <C>` rc 0 and `<C>` reachable from `origin/box/dell2`); build, plan and apply in a

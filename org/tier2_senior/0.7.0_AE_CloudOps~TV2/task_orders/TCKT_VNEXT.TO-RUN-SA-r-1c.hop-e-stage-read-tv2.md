@@ -8,6 +8,7 @@
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
+<round>1</round>
 <proof_genre>RUN</proof_genre>
 <decomp_ref>
 <decomp_doc>org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_SA.md</decomp_doc> (workstream SA): the seat-driven FWD-1 arm, SA-r-1.
