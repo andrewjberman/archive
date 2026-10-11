@@ -17,32 +17,35 @@
   {
    "path_or_key": "portal/src/pages/TicketCenter/analysisRequest.ts",
    "kind": "frontend_component",
-   "commit_or_etag": "e4b9f8966c",
+   "commit_or_etag": "6ee667df6d",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
    "deploy_evidence": "portal worker branch wk-TCKT_VNEXT-11-portal commit e4b9f8966c; not pushed, not deployed",
    "artifact_covered_by": [
     "R2-pg1-AC1",
-    "R2-pg1-AC2"
+    "R2-pg1-AC2",
+    "R2-pg1-AC3"
    ]
   },
   {
    "path_or_key": "portal/src/pages/TicketCenter/TicketCenter.tsx",
    "kind": "frontend_component",
-   "commit_or_etag": "e4b9f8966c",
+   "commit_or_etag": "6ee667df6d",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "same portal commit; OpenedReportPanel renders the report identity and section names or the waiting message",
+   "deploy_evidence": "portal commit 6ee667df6d on wk-TCKT_VNEXT-11-portal (not pushed): OpenedReportPanel renders the report with Investor Reporting's RetainedSections (route i, import from OwnedRequestHistory.tsx), request id on data-request-id only",
    "artifact_covered_by": [
-    "R2-pg1-AC1"
+    "R2-pg1-AC1",
+    "R2-pg1-AC3"
    ]
   },
   {
    "path_or_key": "portal/src/pages/TicketCenter/__tests__/open-report.test.tsx",
    "kind": "test",
-   "commit_or_etag": "e4b9f8966c",
+   "commit_or_etag": "6ee667df6d",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "3 named tests, bun, stubbed clients, synthetic ids",
+   "deploy_evidence": "5 named tests (3 earlier, 2 AMENDMENT 1), bun, stubbed clients, synthetic ids",
    "artifact_covered_by": [
-    "R2-pg1-AC1"
+    "R2-pg1-AC1",
+    "R2-pg1-AC3"
    ]
   },
   {
@@ -54,6 +57,16 @@
    "artifact_covered_by": [
     "R2-pg1-AC2"
    ]
+  },
+  {
+   "path_or_key": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx",
+   "kind": "frontend_component",
+   "commit_or_etag": "6ee667df6d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "unused OpenedReport removed (B3); no remaining reference under portal/src",
+   "artifact_covered_by": [
+    "R2-pg1-AC3"
+   ]
   }
  ],
  "acceptance": [
@@ -62,8 +75,8 @@
    "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_CHECKS/r2_checks.py pg-open --portal C:/tmp/tckt-r2-11/portal expect: PG-OPEN-OK",
    "method": "command",
    "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_CHECKS/r2_checks.py pg-open --portal C:/tmp/tckt-r2-11/portal",
-   "output_evidence": "run under timeout 120, rc=0: PG-OPEN-OK pass=3 fail=0",
-   "denominator": "3 of 3 named tests found and passed in open-report.test.tsx",
+   "output_evidence": "run under timeout 120, rc=0: PG-OPEN-OK pass=5 fail=0",
+   "denominator": "5 of 5 tests in open-report.test.tsx passed (the 3 named plus the 2 amendment tests)",
    "status": "PASS",
    "expect": "PG-OPEN-OK"
   },
@@ -76,18 +89,28 @@
    "denominator": "4 of 4 tests in analysis-request.test.tsx passed",
    "status": "PASS",
    "expect": "PG-EXISTING-OK"
+  },
+  {
+   "criterion_id": "R2-pg1-AC3",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_CHECKS/r2_checks.py pg-render --portal C:/tmp/tckt-r2-11/portal expect: PG-RENDER-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_CHECKS/r2_checks.py pg-render --portal C:/tmp/tckt-r2-11/portal",
+   "output_evidence": "run under timeout 120, rc=0: PG-RENDER-OK pass=5 fail=0",
+   "denominator": "5 of 5 named tests found and passed in open-report.test.tsx",
+   "status": "PASS",
+   "expect": "PG-RENDER-OK"
   }
  ],
  "controls": {
   "mutant": {
-   "description": "in-process mutant on analysisRequest.ts: openReport calls getOwnedAnalysisRequest instead of getOwnedAnalysisReport (the old behaviour); original restored from a scratch copy",
+   "description": "in-process mutant on analysisRequest.ts: openReport calls getOwnedAnalysisRequest instead of getOwnedAnalysisReport (the old behaviour); original restored from a scratch copy (inherited from the first candidate e4b9f8966c; not re-run for the amendment)",
    "expected": "the new tests fail under the mutant",
    "observed": "open-report.test.tsx under the mutant: 0 pass, 3 fail; bytes restored (git status clean)",
    "status": "FIRED-AS-EXPECTED"
   },
   "determinism": {
-   "method": "pg-open and pg-existing each run twice (before and after a typing fix to the test) with the same counts",
-   "observed": "pass=3 fail=0 and pass=4 fail=0 on both runs; bun x tsc -b rc=0",
+   "method": "pg-render, pg-open and pg-existing each run once after the amendment",
+   "observed": "pass=5 fail=0, pass=5 fail=0, pass=4 fail=0; bun x tsc -b rc=0 with empty output",
    "status": "STABLE"
   }
  },
@@ -98,14 +121,20 @@
   }
  ],
  "surprises": [
-  "TCKT_VNEXT-D2-W11-S1"
+  "TCKT_VNEXT-D2-W11-S1",
+  "TCKT_VNEXT-D2-W11-S2"
  ],
  "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~11/TCKT_VNEXT.TO-R2-pg1.ticket-open-report-opens-the-finished-report.proof_of_spec.json",
  "compiler_tools": [
   {
    "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_CHECKS/r2_checks.py pg-render --portal C:/tmp/tckt-r2-11/portal",
+   "result": "PG-RENDER-OK pass=5 fail=0"
+  },
+  {
+   "tool": "python",
    "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_CHECKS/r2_checks.py pg-open --portal C:/tmp/tckt-r2-11/portal",
-   "result": "PG-OPEN-OK pass=3 fail=0"
+   "result": "PG-OPEN-OK pass=5 fail=0"
   },
   {
    "tool": "python",
