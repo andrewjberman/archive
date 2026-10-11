@@ -17,10 +17,16 @@ Exit 0 only when 9, 2 and True. Plain ASCII. Reports principals and decisions on
 """
 import argparse
 import json
+import os
+import pathlib
+import shutil
 import subprocess
 import sys
+import tempfile
 
 ACCOUNT = "313476888478"
+# the CLI may be aws, aws.cmd or a shim (Windows): resolve it with PATHEXT, allow an override
+AWS = os.environ.get("AWS_CLI") or shutil.which("aws") or shutil.which("aws.cmd") or "aws"
 KEY = "advi/49financial/platinum/49financial/ownership_map.json"
 GOLD_SAMPLE = "irpt/49financial/gold/holdings_performance_daily/date=2026-01-01/part-0.parquet"
 ADMITTED = ["lambda-edge-execution-role", "irpt-directory-role", "irpt-export-render-role", "irpt-narrative-role",
@@ -31,16 +37,17 @@ OAI = "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E139998VWH
 
 
 def aws(*a):
-    r = subprocess.run(["aws"] + list(a) + ["--output", "json"], capture_output=True, text=True, timeout=120)
+    r = subprocess.run([AWS] + list(a) + ["--output", "json"], capture_output=True, text=True, timeout=120)
     if r.returncode:
         return None, (r.stderr.strip().splitlines() or ["failed"])[-1][:200]
     return json.loads(r.stdout or "{}"), ""
 
 
-def decide(policy_text, role, key, bucket):
+def decide(policy_file, role, key, bucket):
     arn = "arn:aws:iam::%s:role/%s" % (ACCOUNT, role)
     d, err = aws("iam", "simulate-principal-policy", "--policy-source-arn", arn, "--action-names", "s3:GetObject",
-                 "--resource-arns", "arn:aws:s3:::%s/%s" % (bucket, key), "--resource-policy", policy_text)
+                 "--resource-arns", "arn:aws:s3:::%s/%s" % (bucket, key), "--resource-policy",
+                 "file://" + pathlib.Path(policy_file).as_posix())
     if d is None:
         return "ERROR", err
     rs = d.get("EvaluationResults", [])
@@ -59,6 +66,11 @@ def main():
         return 1
     policy_text = d["Policy"]
     stm = json.loads(policy_text)["Statement"]
+    # the policy travels as a FILE: a 20 KB inline argument exceeds the Windows command-line limit
+    tmp = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8")
+    tmp.write(policy_text)
+    tmp.close()
+    policy_text = tmp.name
     lines, allowed, denied = [], 0, 0
     for r in ADMITTED:
         dec, e = decide(policy_text, r, KEY, a.bucket)
@@ -75,7 +87,11 @@ def main():
         ok = dec in ("implicitDeny", "explicitDeny")
         denied += ok
         lines.append("NEGATIVE %-34s ownership key: %s%s" % (r, dec, (" (%s)" % e) if e else ""))
-    oai = [s for s in stm if (s.get("Principal") or {}).get("AWS") in (OAI, [OAI]) and s.get("Effect") == "Allow"]
+    def _aws_principal(s):
+        p = s.get("Principal")
+        return p.get("AWS") if isinstance(p, dict) else p
+
+    oai = [s for s in stm if _aws_principal(s) in (OAI, [OAI]) and s.get("Effect") == "Allow"]
     oai_ok = False
     if len(oai) == 1:
         acts = oai[0].get("Action")
@@ -92,6 +108,10 @@ def main():
     last = "ROUND 4 ACT 3B SIM: %d of 9 admitted allowed, %d of 2 negatives not allowed, oai statement ok=%s" % (
         allowed, denied, oai_ok)
     print(last)
+    try:
+        os.unlink(policy_text)
+    except OSError:
+        pass
     if a.out:
         open(a.out, "w", encoding="utf-8", newline="\n").write(out + "\n" + last + "\n")
     return 0 if (allowed == 9 and denied == 2 and oai_ok) else 1
