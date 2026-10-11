@@ -1,15 +1,18 @@
-# DSGN_IRPTV1: remediations, round 11 -- HELD outside the channel
+# DSGN_IRPTV1: remediations, rounds 11 and 12
 
-Compiled by `3.0.0_SA_CVO` (seated on dell2), 2026-10-11T06:41:10Z. Inputs: msgs 4273 and 4276 (round 11 fully drained @8f6e2524d5). Grades: `org/tier1_exec/3.0.0_SA_CVO/deliverables/DSGN_IRPTV1_ROUND_11_L9_GRADE_20261011.md`.
+<sweep_watermark>2026-10-11T07:05Z</sweep_watermark>
 
-**HELD.** The surprise-corpus gate refuses a new remediation row while a task order is not terminal (`DSGN_IRPTV1.TO-IV-e-87` is ACTIVE).
-These 6 rows land in `surprise-channel/remediations/`, with the L10 slug, when it is. OWNER: `3.0.0_SA_CVO`. UN-PARKS ON: TO-IV-e-87 terminal.
+Slug by `3.0.0_SA_CVO` (seated on dell2), 2026-10-11T07:05:06Z. Inputs: msgs 4273, 4276 and 4335. Grades: `org/tier1_exec/3.0.0_SA_CVO/deliverables/DSGN_IRPTV1_ROUND_11_L9_GRADE_20261011.md`; the round 12 answer: `org/tier1_exec/3.0.0_SA_CVO/deliverables/DSGN_IRPTV1_ROUND_12_L9_ANSWER_20261011.md`.
+Graduated, round label v13: 10 rows, OPEN, INERT. Still ARMED from earlier files: S7 and W21-S2.
 
-**For the CTO's analysis, with these rows:** the 14 KNOWN-LEGACY rulings are not accepted as labelled. Rows S7 and W21-S2 stay ARMED
-until each of the 43 failing ids is a regression with an owner or an assertion retired by ruling. The press test stays the only test
-on React's private dispatcher until the CTO decides how the portal presses things.
+**Three things for the CTO's analysis:**
+1. **An API-runner trace with no rendered page does not meet FWD-1.** The draft pair defaults its page step to not run; as drafted it
+   authorizes a run that grades nothing.
+2. **The 14 KNOWN-LEGACY suite rulings are not accepted as labelled.** None cites a ruling that retires the assertion. S7 and W21-S2
+   stay ARMED until each of the 43 failing ids is a regression with an owner or an assertion retired by ruling.
+3. **The press test stays the only test on React's private dispatcher** until the CTO decides how the portal presses things.
 
-```text
+```json
 [
  {
   "id": "DSGN_IRPTV1-D2-W43-S2",
@@ -24,11 +27,11 @@ on React's private dispatcher until the CTO decides how the portal presses thing
   ],
   "remedy": "The portal half catches up to the contract (routes table, envelopes, content pins), or the CTO rules which side moves. The sample then names both commits.",
   "owner": "2.0.0_SA_COO~D2",
-  "round": "v12",
+  "round": "v13",
   "remediation": {
    "state": "OPEN",
    "owner": "2.0.0_SA_COO~D2",
-   "round": "v12"
+   "round": "v13"
   },
   "closed": false
  },
@@ -46,11 +49,11 @@ on React's private dispatcher until the CTO decides how the portal presses thing
   ],
   "remedy": "Each of the five gets a ruling or a fix. F40-AC5 first: a calendar that disagrees with the trading calendar can mislabel a day on a served page.",
   "owner": "2.0.0_SA_COO~D2",
-  "round": "v12",
+  "round": "v13",
   "remediation": {
    "state": "OPEN",
    "owner": "2.0.0_SA_COO~D2",
-   "round": "v12"
+   "round": "v13"
   },
   "closed": false
  },
@@ -67,11 +70,11 @@ on React's private dispatcher until the CTO decides how the portal presses thing
   ],
   "remedy": "The tests resolve bun from the environment (the workspace law: derive, do not hardcode).",
   "owner": "2.0.0_SA_COO~D2",
-  "round": "v12",
+  "round": "v13",
   "remediation": {
    "state": "OPEN",
    "owner": "2.0.0_SA_COO~D2",
-   "round": "v12"
+   "round": "v13"
   },
   "closed": false
  },
@@ -88,11 +91,11 @@ on React's private dispatcher until the CTO decides how the portal presses thing
   ],
   "remedy": "IRPT_BCKEND serves the corrected display symbol on the row, and the page reads it there. A contract call for the CTO.",
   "owner": "1.0.0_SA_CTO~DELL2",
-  "round": "v12",
+  "round": "v13",
   "remediation": {
    "state": "OPEN",
    "owner": "1.0.0_SA_CTO~DELL2",
-   "round": "v12"
+   "round": "v13"
   },
   "closed": false
  },
@@ -109,11 +112,11 @@ on React's private dispatcher until the CTO decides how the portal presses thing
   ],
   "remedy": "The sentence states the kind it has (a correction you accepted, or a proxy you named), from a served kind field; or one wording true of both.",
   "owner": "2.0.0_SA_COO~D2",
-  "round": "v12",
+  "round": "v13",
   "remediation": {
    "state": "OPEN",
    "owner": "2.0.0_SA_COO~D2",
-   "round": "v12"
+   "round": "v13"
   },
   "closed": false
  },
@@ -130,11 +133,95 @@ on React's private dispatcher until the CTO decides how the portal presses thing
   ],
   "remedy": "The two cells take the right-align class, in the next cell that touches the table.",
   "owner": "2.0.0_SA_COO~D2",
-  "round": "v12",
+  "round": "v13",
   "remediation": {
    "state": "OPEN",
    "owner": "2.0.0_SA_COO~D2",
-   "round": "v12"
+   "round": "v13"
+  },
+  "closed": false
+ },
+ {
+  "id": "DSGN_IRPTV1-D2-W47-S2",
+  "project": "DSGN_IRPTV1",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "GET /performance/{accountSetId} is a read-through store: a miss computes and persists a report, and for the named client's firm the fresh path is the vendor branch, which spends a single-use vendor authorization if an approved plan is installed. A trace called read-only can write and can spend.",
+  "evidence": [
+   "investigation row DSGN_IRPTV1-D2-W47-S2",
+   "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~47/FWD1_TRACE_READONLY_PAIR.md"
+  ],
+  "remedy": "The FWD-1 pair names this branch in its blast radius and states what holds it (a warm store read first, or the vendor branch refused), in both halves, before either signs.",
+  "owner": "1.0.0_SA_CTO~DELL2",
+  "round": "v13",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "1.0.0_SA_CTO~DELL2",
+   "round": "v13"
+  },
+  "closed": false
+ },
+ {
+  "id": "DSGN_IRPTV1-D2-W47-S1",
+  "project": "DSGN_IRPTV1",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "The ruled bound 'every request a GET but the sign-in' does not describe the page: POST /selections writes one immutable item and POST /directory/resolve only reads.",
+  "evidence": [
+   "investigation row DSGN_IRPTV1-D2-W47-S1",
+   "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~47/FWD1_TRACE_HOPS.json"
+  ],
+  "remedy": "The pair restates the bound as the request list it is (22 requests, 4 non-GET, each named), and the ruling's wording follows.",
+  "owner": "1.0.0_SA_CTO~DELL2",
+  "round": "v13",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "1.0.0_SA_CTO~DELL2",
+   "round": "v13"
+  },
+  "closed": false
+ },
+ {
+  "id": "DSGN_IRPTV1-D2-W47-S3",
+  "project": "DSGN_IRPTV1",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "The portal signs its page in by a refresh cookie, so a minted token cannot open the page; a signed-in browser also posts analytics events and prefetches five 49financial files for an internal-tier claim.",
+  "evidence": [
+   "investigation row DSGN_IRPTV1-D2-W47-S3",
+   "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~47/FWD1_TRACE_READONLY_PAIR.md",
+   "org/tier1_exec/3.0.0_SA_CVO/deliverables/DSGN_IRPTV1_ROUND_12_L9_ANSWER_20261011.md"
+  ],
+  "remedy": "The pair's page step uses a real sign-in and lists those extra requests in its blast radius. FWD-1 is graded on that step (this seat's answer, org/tier1_exec/3.0.0_SA_CVO/deliverables/DSGN_IRPTV1_ROUND_12_L9_ANSWER_20261011.md).",
+  "owner": "1.0.0_SA_CTO~DELL2",
+  "round": "v13",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "1.0.0_SA_CTO~DELL2",
+   "round": "v13"
+  },
+  "closed": false
+ },
+ {
+  "id": "DSGN_IRPTV1-D2-S5",
+  "project": "DSGN_IRPTV1",
+  "fabric": "dell2",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "mechanism": "The upload review's single wording for a correction is honest only while the served correction carries no kind. IRPT_YCDGEN FWD-20 will serve the kind.",
+  "evidence": [
+   "investigation rows DSGN_IRPTV1-D2-S5 and DSGN_IRPTV1-D2-S3"
+  ],
+  "remedy": "When FWD-20's cell serves the kind, the Holding cell and its disclosure line follow it. This closes with row D2-S3.",
+  "owner": "2.0.0_SA_COO~D2",
+  "round": "v13",
+  "remediation": {
+   "state": "OPEN",
+   "owner": "2.0.0_SA_COO~D2",
+   "round": "v13"
   },
   "closed": false
  }
