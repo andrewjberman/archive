@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-25.delete-grant-statement",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-25.delete-grant-statement.md",
+    "group": "OTHER",
+    "vintage_commit": "923a5f2c52"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~48",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "923a5f2c52",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-25.delete-grant-statement.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant. The discriminating read is AC1 G1 and G2: the policy gains exactly one Allow s3:DeleteObject statement, and its two resources are generated through class_prefix with no other key literal. Those reads were run as the spec's checks, not as mutants.",
+      "expected": "N/A: the order names no mutant.",
+      "observed": "G1 sids new=['AdviPlatinumCanonicalObjects', 'AdviPlatinumCanonicalList', 'AdviPlatinumCanonicalDelete']; G2 lookups=['platinum/advisors/', 'gold/entities/advisors/'] arns=2 other key literals=[].",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 run twice on the same committed bytes (code commit dfb33920da); the two outputs compared with diff.",
+      "observed": "diff of .scratch/ac1_run1.txt and .scratch/ac1_run2.txt: IDENTICAL; both end ROUND 4 DELETE GRANT: 5 of 5 arms, exit=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Applying the policy, any terraform plan or validate in the bd-pipeline root, any AWS call",
+      "reason": "Bounds 2 item 1: repository file only. The act that applies the policy is the separate staged order FB-f-16 under the act-0 addendum, and the root's plan is that act's own first step. Nothing is applied here."
+    },
+    {
+      "item": "comp-iam and comp-adversary runs for the iam.tf change",
+      "reason": "Assigned to the issuer in the cell's preflight ('RUN by the issuer'). The risk-reflex printed HOLD lines for iam.tf at commit time pointing at the same check; the issuer's runs stand for them. Not re-run by this worker."
+    },
+    {
+      "item": "Untracked scratch files .scratch/base_iam.tf, .scratch/ac1_run1.txt, .scratch/ac1_run2.txt",
+      "reason": "Worker scratch only, under the worktree's .scratch/. Not committed; the commits name paths explicitly."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/bd-pipeline/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "dfb33920da",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit dfb33920da on wk-ADVI_FIRMBKTS-48: AdviPlatinumCanonicalDelete appended to aws_iam_role_policy.bd_exporter_advi_49f_platinum_canonical (Action s3:DeleteObject, Effect Allow, two Resource entries through class_prefix, no Condition); comment sentence replaced; 13 insertions, 2 deletions; 1044 of 1044 base non-comment lines kept in order; terraform fmt -check rc=0. No apply, no plan, no AWS call.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 reads the policy's three statements (the two base statements unchanged, one new Delete statement), its two generated resources, that the two legacy prefixes are the directories the code deletes under, the module's resolved directories and that nothing else of the root changed.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-48 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_delgrant.py --arms grant --root /c/dev/wk-firmbkts-48 --base ab97247bd3; echo \"exit=$?\"",
+      "output_evidence": "  G1 sids new=['AdviPlatinumCanonicalObjects', 'AdviPlatinumCanonicalList', 'AdviPlatinumCanonicalDelete'] action ok=True effect ok=True\n  G2 lookups=['platinum/advisors/', 'gold/entities/advisors/'] arns=2 other key literals=[]\n  G3 D_04 delete root literal ok=True; D_02 advisor root=gold/entities/advisors/\n  G4 class_prefix: {'platinum/advisors/': 'advi/49financial/platinum/advisors/', 'gold/entities/advisors/': 'advi/49financial/platinum/entities/advisors/'}\n  G5 base non-comment lines kept in order 1044 of 1044; other root files changed: []\nPASS G1 the policy gains exactly one Allow s3:DeleteObject statement, the two base statements unchanged\nPASS G2 the statement's two resources are generated through class_prefix, no other key literal\nPASS G3 the two legacy prefixes are the directories the code deletes under\nPASS G4 the module resolves both legacy prefixes to canonical directories under the platinum prefix\nPASS G5 dormant: iam.tf keeps every base line in order and no other file of the root changes\nROUND 4 DELETE GRANT: 5 of 5 arms\nexit=0",
+      "denominator": "5 of 5 arms PASS; 3 of 3 policy statements (2 base unchanged, 1 new Delete); 2 of 2 Delete resources generated through class_prefix; 2 of 2 legacy prefixes resolved to canonical directories; 1044 of 1044 base non-comment lines kept in order",
+      "status": "PASS",
+      "expect": "ROUND 4 DELETE GRANT: 5 of 5 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the formatter: terraform fmt must read clean on iam.tf.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-48 && timeout 60 terraform fmt -check infra/aws/terraform/bd-pipeline/iam.tf; echo \"fmt_rc=$?\"",
+      "output_evidence": "fmt_rc=0",
+      "denominator": "1 of 1 file (infra/aws/terraform/bd-pipeline/iam.tf) reads fmt-clean",
+      "status": "PASS",
+      "expect": "^fmt_rc=0$"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound: the changed paths lie inside the granted paths and the required file changed.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-48 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-48 --allow infra/aws/terraform/bd-pipeline/iam.tf --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~48/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/terraform/bd-pipeline/iam.tf; echo \"exit=$?\"",
+      "output_evidence": "  CHANGED infra/aws/terraform/bd-pipeline/iam.tf\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~48/ADVI_FIRMBKTS.TO-FB-g-25.delete-grant-statement.proof_of_spec.json\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~48/ADVI_FIRMBKTS.TO-FB-g-25.session.log.txt\nROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing\nexit=0",
+      "denominator": "3 changed paths (1 code, 2 deliverables), 0 outside the grant, 1 of 1 required paths changed",
+      "status": "PASS",
+      "expect": "ROUND 4 SCOPE: OK"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~48/ADVI_FIRMBKTS.TO-FB-g-25.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "terraform fmt -check",
+      "invocation": "terraform fmt -check infra/aws/terraform/bd-pipeline/iam.tf",
+      "result": "fmt_rc=0 on the final bytes"
+    },
+    {
+      "tool": "terraform fmt (write mode, used in diff form once)",
+      "invocation": "terraform fmt -diff -no-color infra/aws/terraform/bd-pipeline/iam.tf",
+      "result": "re-aligned the Sid/Effect/Action keys of AdviPlatinumCanonicalDelete; without -check fmt writes the file, so the re-alignment is in the committed bytes; fmt -check then rc=0."
+    },
+    {
+      "tool": "r4_delgrant.py",
+      "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_delgrant.py --arms grant --root /c/dev/wk-firmbkts-48 --base ab97247bd3",
+      "result": "ROUND 4 DELETE GRANT: 5 of 5 arms, exit=0 (two runs, identical)"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~48 <0.9.0_WK_ADVI_FIRMBKTS~48@opal.agent>\" -F .scratch/msg_fb_g_25_code.txt -- infra/aws/terraform/bd-pipeline/iam.tf",
+      "result": "dfb33920da (1 file changed, 13 insertions(+), 2 deletions(-)); commit-gate OK; naming-gate PASS 0 graded; surprise-row-gate OK (no rows in commit); to-pipeline-gate OK; msg-verify MATCH len=609."
+    }
+  ]
+}
