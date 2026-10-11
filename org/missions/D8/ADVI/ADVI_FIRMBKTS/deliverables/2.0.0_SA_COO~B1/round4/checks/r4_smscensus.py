@@ -11,7 +11,7 @@ issuer 2.0.0_SA_COO~B1.
   S3 the file carries `n_publishers` (the printed N) equal to the number of publisher entries, and `n_unable` equal to the
      number whose `can_set_message_attributes` is false; `terraform_value_candidates` lists at least one existing
      Terraform file:line that already carries the origination number's identifier or says none does.
-  S4 no phone number appears anywhere in the file: no run of 10 or more digits after an optional +, no `+1`-prefixed number.
+  S4 no phone number appears anywhere in the file: no run of 10 or more digits after an optional +, no `+1`-prefixed number (an ARN's account id is removed first).
 Plain ASCII output; the last line carries the arm count. READ-ONLY. Never edit this file.
 """
 import argparse
@@ -71,7 +71,9 @@ def census(root, file):
                 ok3))
 
     text = open(file, encoding="utf-8").read() if d is not None else ""
-    ok4 = d is not None and re.search(r"\+?\d{10,}", text) is None and re.search(r"\+1\d", text) is None
+    # an ARN carries the 12-digit account id: it is not a phone number, so ARNs are removed before the search
+    bare = re.sub(r"arn:aws:[A-Za-z0-9:/_.*-]+", "", text)
+    ok4 = d is not None and re.search(r"\+?\d{10,}", bare) is None and re.search(r"\+1\d", bare) is None
     res.append(("S4 no phone number appears in the file", ok4))
     return res
 
