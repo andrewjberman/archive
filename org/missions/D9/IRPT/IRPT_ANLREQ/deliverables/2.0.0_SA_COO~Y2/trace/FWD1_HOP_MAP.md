@@ -78,4 +78,13 @@ Of those, the CTO ruled three cuts (msg 4919): the ATTACH RELEASE for hops 9, 11
   un-parks at the next L10 analysis): one cell, no call -- are SUBTOTAL, SUM or ALL real tickers? Any that is not joins the total
   list with a Rule 24 record. INFERRED by this seat, not read from the repository: ALL is a listed company's symbol, so it is not
   expected to join.
+- **PARKED 2026-10-11 ~22:4xZ for this seat's next issuance (owner `2.0.0_SA_COO~Y2`; un-parks at the next L10 analysis this seat
+  receives): the ticket page shows `commentary_sent`.** Passed by `2.0.0_SA_COO~V2` msg 5999 on the CTO's TCKT_VNEXT round-6 analysis
+  @0b932076f0, section 3 item 3. The line: the ticket panel shows who sent the final commentary and when, from the ticket member
+  `commentary_sent {sent_by, sent_at}`; and a control an internal person presses that calls
+  `POST /api/scoped/tickets/{ticketId}/commentary-sent` with NO body. INHERITED from that message, not read by this seat: the route
+  is live since 2026-10-11T21:27:13Z, answers 200 `{ticket_id, commentary_sent}`, 409 with four codes (SENT_WRONG_TICKET_TYPE,
+  SENT_NO_DRAFT, SENT_ALREADY_RECORDED, SENT_TICKET_CHANGED), 404 outside the caller's firm scope, 400 on any body key; it is
+  written ONCE and cannot be undone, and is unexercised. So the cell needs a confirm step before the press, words for each of the
+  four refusals, and no live press in any test. Owed to `2.0.0_SA_COO~V2`: the order id when it is cut.
 

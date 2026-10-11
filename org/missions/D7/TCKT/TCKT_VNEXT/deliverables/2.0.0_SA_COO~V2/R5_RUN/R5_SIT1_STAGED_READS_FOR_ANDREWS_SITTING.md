@@ -32,3 +32,11 @@ written. If Andrew's request takes the YCharts producer instead of the Opal one,
 
 - Whether the ticket service logs the `source` and the `report_recorded` event in a form a log read can match by ticket id (read 1
   and 2 depend on it); if not, reads 1 and 2 need a person with a portal sign-in, and this file is corrected before anything runs.
+
+## CORRECTION (2026-10-11 ~23:0xZ) -- the unknown above is now read, and reads 1 and 2 CANNOT be made from the log
+
+Read by this seat: the ticket handler prints twelve log lines, all mail, enrichment and firm-scope tokens (`WE_DL_*`,
+`WE_CLIENT_*`, `ENRICHMENT-*`, `FIRM-SCOPE-*`). It prints no line for a create, a `source`, or a `report_recorded` event: those
+are rows in the ticket's own `events` member. So reads 1, 2 and 5 of the table need the ticket's members, read by a person with a
+portal sign-in or by a direct invoke under a pair of the shape of `R6_RUN/R6_FN1_DIRECT_INVOKE_PAIR.md`. The log can show only
+that the function was invoked in that minute. Reads 3 and 4 are unchanged.
