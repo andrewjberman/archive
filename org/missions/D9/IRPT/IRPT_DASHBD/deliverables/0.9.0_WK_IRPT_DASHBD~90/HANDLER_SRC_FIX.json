@@ -1,11 +1,6 @@
 {
   "call_sites": [
     {
-      "line": 430,
-      "callee": "aal.emit_day",
-      "passes_src": false
-    },
-    {
       "line": 581,
       "callee": "ard.emit_day",
       "passes_src": true
@@ -25,15 +20,23 @@
   "other_src_consumers": [
     {
       "file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
-      "line": "compute() ~225 resolves src (unchanged); run() and run_backfill() now resolve the same entry with the same expression and pass it"
+      "line": "compute() ~225 resolves src (unchanged); run() ~557 and run_backfill() ~601 resolve the same entry by the same expression and pass it at 581 and 624"
     },
     {
       "file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
-      "line": "emit_classes/catch_up_classes (acd) and emit_lots (aal.emit_day, ~430) take no src: aal.emit_day has no src parameter, so line ~430 cannot pass src= without a producer edit (row IRPT_DASHBD-D2-W90-S1)"
+      "line": "430: aal.emit_day (lots writer, account_activity_lots.py) takes no src; correctly unchanged (row IRPT_DASHBD-D2-W90-S1, ruled by AMENDMENT 1)"
     },
     {
       "file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
-      "line": "no emit_method_row / dim_return_method write exists in the handler (module doc lines 12-16 say so); nothing to fix there"
+      "line": "278-280: acd.compute_classes(s3, ctx['src'], ...) takes src and already receives the entry compute() resolved (_CLASS_CONTEXT, ~256); no defect"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "line": "304: acd.emit_class_day(s3, rows, firm, day, upload=) takes no src (data/assets/scripts/gold/irpt_reporting/account_class_daily.py:569); its manifest states the module constant METHOD_VERSION (lines 581, 617), not a source-entry method; no defect, no code changed"
+    },
+    {
+      "file": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "line": "emit_classes (295) and catch_up_classes (341) only call class_days/acd.emit_class_day; no other src-taking call; no emit_method_row / dim_return_method write exists in the handler"
     }
   ],
   "tests": {

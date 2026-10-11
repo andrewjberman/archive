@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-115",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4597d0d2a7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "4597d0d2a7",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-115.handler-passes-src.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~90",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~90/HANDLER_SRC_FIX.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "kind": "script",
+      "commit_or_etag": "080dc90d92",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "both ard.emit_day calls (lines 581, 624) pass src= the entry compute() resolves; no deploy, rides the R45 release.",
+      "artifact_covered_by": [
+        "DB59-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_handler_passes_src.py",
+      "kind": "script",
+      "commit_or_etag": "080dc90d92",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "synthetic-fixture test: the handler's own call writes method_version 2 and the three fields from the entry, none absent.",
+      "artifact_covered_by": [
+        "DB59-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~90/HANDLER_SRC_FIX.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two ard.emit_day call sites, manifest fields, other src consumers incl. class emitters, test counts 90 and 112.",
+      "artifact_covered_by": [
+        "DB59-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB59-1-AC1",
+      "criterion_verbatim": "DB59-1-AC1 -- every emit_day call in the handler passes src, and the manifest it writes states row 2 and the entry's three method fields, tested. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r59/p59_round59.py\" . DB59-1-AC1",
+      "output_evidence": "OK: 2 emit_day call(s) all pass src=; the manifest states row 2 and the entry's three method fields\nDB59-1-AC1 PASS",
+      "denominator": "2 of 2 ard.emit_day calls pass src=; reporting-gold tests 90 passed 0 failed; producer tests 112 passed 0 failed; exit code 0",
+      "status": "PASS",
+      "expect": "DB59-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "re-ran the check on the committed tree",
+      "observed": "same last line and rc 0 on both runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "handler copy with src=src stripped from both ard.emit_day calls, graded by the same check",
+      "expected": "DB59-1-AC1 FAIL",
+      "observed": "FAIL: emit_day call(s) without src= at line(s) [581, 624] (of 2 call(s))\nDB59-1-AC1 FAIL",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any deploy, AWS call, S3 access, vendor call, secret read",
+      "reason": "Bounds of the order; none made."
+    },
+    {
+      "item": "a run of the Lambda on the new bytes",
+      "reason": "No deploy in this order; bytes ride the R45 release."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W90-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q infra/aws/lambda/investor-reporting/reporting-gold/tests/",
+      "result": "90 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_reporting/tests/",
+      "result": "112 passed"
+    }
+  ]
+}
