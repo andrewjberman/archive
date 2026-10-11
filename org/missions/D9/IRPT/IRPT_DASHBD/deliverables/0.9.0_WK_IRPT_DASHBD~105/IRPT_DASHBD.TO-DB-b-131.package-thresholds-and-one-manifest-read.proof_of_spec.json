@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-131",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "06a610f1c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "ca7abc3666",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-131.package-thresholds-and-one-manifest-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~105",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~105/PACKAGE_AND_MANIFEST_READ.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~105/PACKAGE_AND_MANIFEST_READ.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only key-names-and-counts record of the live package's thresholds file and one served returns manifest; one lambda get-function, one package download outside the repo, one head-object and one get-object; no S3 write, no code change",
+      "artifact_covered_by": [
+        "DB70-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB70-1-AC1",
+      "criterion_verbatim": "DB70-1-AC1 -- the live package's thresholds file and one recent daily returns manifest are each read for their top-level key names and their count of long digit runs, with no value kept. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r70/p70_round70.py\" . DB70-1-AC1",
+      "output_evidence": "OK: package read=True (24 keys, 14 long digit runs); returns manifest read=True (24 keys, 14 long digit runs); equal to tracked: True\nDB70-1-AC1 PASS",
+      "denominator": "2 of 2 parts read (package, returns manifest); exit code 0",
+      "status": "PASS",
+      "expect": "DB70-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record from the worktree root",
+      "observed": "DB70-1-AC1 printed the same last line (PASS) on a second run",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB70-1-AC1 FAIL",
+      "observed": "FAIL: no record 0.9.0_WK_IRPT_DASHBD~105/PACKAGE_AND_MANIFEST_READ.json; DB70-1-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any value of any key; a byte diff of the packaged thresholds file against the tracked one; the manifests of other days",
+      "reason": "Bounds of the order: key names and counts only, no value printed or kept."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W105-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p70_round70.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r70/p70_round70.py\" . DB70-1-AC1",
+      "result": "DB70-1-AC1 PASS (rc 0); against an empty root it prints DB70-1-AC1 FAIL (rc 1)"
+    }
+  ]
+}
