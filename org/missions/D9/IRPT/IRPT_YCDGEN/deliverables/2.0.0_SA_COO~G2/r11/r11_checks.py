@@ -55,6 +55,11 @@ def pytest_line(target):
     return out.returncode, line, int(m.group(1)) if m else 0
 
 
+def bad_count(line):
+    """Failed tests plus errors named in a pytest summary line. `1 xfailed` is an expected failure and is not counted."""
+    return sum(int(n) for n in re.findall(r"(?<![A-Za-z])([0-9]+) (?:failed|errors?)(?![A-Za-z])", line))
+
+
 def main(mode):
     if mode == "a11":
         want = slug_ids()
@@ -135,7 +140,7 @@ def main(mode):
             return 1
         rc, line, passed = pytest_line(GEN + "/tests/test_dead_letter_record.py")
         print("GENERATE_MAX_RECEIVES = %r | %s" % (limit, line))
-        if limit != 5 or type(limit) is not int or rc != 0 or "failed" in line or "error" in line or passed < 6:
+        if limit != 5 or type(limit) is not int or rc != 0 or bad_count(line) or passed < 6:
             print("R11-E11-FAIL limit=%r rc=%d passed=%d (need limit 5, 0 failed, at least 6 passed)" % (limit, rc, passed))
             return 1
         print("R11-E11-OK limit=5 passed=%d" % passed)
@@ -143,7 +148,7 @@ def main(mode):
     if mode == "e11suite":
         rc, line, passed = pytest_line(GEN + "/tests")
         print(line)
-        if rc != 0 or "failed" in line or "error" in line or passed < 503:
+        if rc != 0 or bad_count(line) or passed < 503:
             print("R11-E11SUITE-FAIL rc=%d passed=%d (need >= 503, 0 failed, 0 errors)" % (rc, passed))
             return 1
         print("R11-E11SUITE-OK passed=%d" % passed)
