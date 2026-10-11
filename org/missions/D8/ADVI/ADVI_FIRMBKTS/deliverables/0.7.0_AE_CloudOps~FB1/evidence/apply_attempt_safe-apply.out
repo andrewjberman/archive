@@ -1,0 +1,45 @@
+# plan body between the seat-gate lines and the tagauthz gate trimmed (it is plan_portal-auth_untargeted.out's body); denominator: 254 lines, 45 kept
+apply start 2026-10-11T07:53:53Z
+safe-apply: [seat-gates] mode=WARN APPLY-WHO serial=0.7.0_AE_CloudOps~FB1 kind=CLOUDOPS root=portal-auth verdict=ADMITTED reason=a CLOUDOPS seat applies
+safe-apply: [seat-gates] mode=WARN CROSSBOX-DEPLOY device=dell1 root=portal-auth open_call=clear overlap=clear upset=clear open_deploy=clear verdict=CLEAR
+  [naming-apply-gate] NAMING WARN infra/aws/terraform/portal-auth/cloudwatch-alarms.tf:41 FIRMSEP-auth-advisor-scoping-denied -> firmsep-auth-advisor-scoping-denied-alarm
+safe-apply: infra/aws/terraform/portal-auth sets default_tags -- running the comp-tagauthz pre-apply authorization gate.
+------------------------------------------------------------------------------
+SWEPT (derived from the account, one call: iam get-account-authorization-details):
+  roles 302   local+attached policies 79   users 9   groups 2
+  SCPs: NOT APPLICABLE -- account is not in an AWS Organization (AWSOrganizationsNotInUseException). Stated, not implied.
+NOT SWEPT (named, not implied): S3 bucket policies, KMS key policies,
+  permission boundaries, session policies, resource policies generally.
+tag-conditioned statements found: 9 (4 ours, 5 AWS service-linked)
+------------------------------------------------------------------------------
+
+default_tags keys in infra/aws/terraform/portal-auth: ['Environment', 'ManagedBy', 'Project', 'System']
+  *** KEY COLLISION: ['Project', 'System'] are BOTH default_tags keys AND authorization keys.
+
+MODE: GATE. Scoped to 0 candidate resource(s) this tree would manage.
+
+RESULT: none of the 0 candidate(s) carries a tag that infra/aws/terraform/portal-auth's default_tags ['Environment', 'ManagedBy', 'Project', 'System'] would overwrite.
+safe-apply: comp-tagauthz gate PASSED -- no plan resource overwrites an access-granting tag.
+[tombstone-gate] checked 0 create(s) in this plan against 7 tombstone(s)
+[tombstone-gate] CLEAN: no planned create matches a tombstoned resource.
+aws_lambda_function.shared_advisor_router[0]: Modifying... [id=shared-advisor-router]
+aws_lambda_function.shared_advisor_router_response[0]: Modifying... [id=shared-advisor-router-response]
+aws_wafv2_web_acl.opal_cloudfront_protection: Modifying... [id=a09833c0-4043-49fc-a92c-0dcdeaff9abd]
+aws_wafv2_web_acl.opal_cloudfront_protection: Still modifying... [id=a09833c0-4043-49fc-a92c-0dcdeaff9abd, 00m10s elapsed]
+aws_wafv2_web_acl.opal_cloudfront_protection: Modifications complete after 19s [id=a09833c0-4043-49fc-a92c-0dcdeaff9abd]
+
+Error: updating Lambda Function (shared-advisor-router) code: operation error Lambda: UpdateFunctionCode, https response error StatusCode: 403, RequestID: 18bc7cdb-aa88-4d96-a132-efed2d2d8c9f, api error AccessDeniedException: User: arn:aws:iam::313476888478:user/cloudops-dell1-agent-user is not authorized to perform: lambda:UpdateFunctionCode on resource: arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router with an explicit deny in an identity-based policy: arn:aws:iam::313476888478:policy/cloudops-dell-agent-deploy-policy
+
+  with aws_lambda_function.shared_advisor_router[0],
+  on lambda-edge.tf line 268, in resource "aws_lambda_function" "shared_advisor_router":
+ 268: resource "aws_lambda_function" "shared_advisor_router" {
+
+
+Error: updating Lambda Function (shared-advisor-router-response) code: operation error Lambda: UpdateFunctionCode, https response error StatusCode: 403, RequestID: 7002f6bd-ec66-4f7e-a5c7-8e2f67c62bf5, api error AccessDeniedException: User: arn:aws:iam::313476888478:user/cloudops-dell1-agent-user is not authorized to perform: lambda:UpdateFunctionCode on resource: arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router-response with an explicit deny in an identity-based policy: arn:aws:iam::313476888478:policy/cloudops-dell-agent-deploy-policy
+
+  with aws_lambda_function.shared_advisor_router_response[0],
+  on lambda-edge.tf line 318, in resource "aws_lambda_function" "shared_advisor_router_response":
+ 318: resource "aws_lambda_function" "shared_advisor_router_response" {
+
+apply rc=1
+apply end 2026-10-11T07:54:41Z
