@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-33",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/prd/IRPT_ANLREQ_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5fa5f1a7c8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R3_Y.md",
+    "vintage_commit": "5fa5f1a7c8",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-33.source-map-outside-package-and-status-digest.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~53",
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/build-and-upload.sh",
+      "kind": "script",
+      "commit_or_etag": "951d5632c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD_ONLY only; nothing uploaded or applied. Parity check honours functions[X].outside_package; stale declarations fail the build by name.",
+      "artifact_covered_by": [
+        "AR33-y-AC1",
+        "AR33-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "951d5632c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD_ONLY only; nothing uploaded or applied. Store entry declares seven outside_package files; irpt-status artifact_sha256 = live 6idtFvAm...",
+      "artifact_covered_by": [
+        "AR33-y-AC1",
+        "AR33-y-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR33-y-AC1",
+      "criterion_verbatim": "AR33-y-AC1: without BAU_PARITY_SKIP, the store's BUILD_ONLY prints its BUILD_ONLY: line and none of the seven is in the built zip.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-53/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r3/ar3_checks.py y33-store --root C:/dev/wk-irpt-anlreq-53",
+      "output_evidence": "built members 16; of the seven declared outside, packaged: 0 / Y33-STORE-OK (rc=0)",
+      "denominator": "1 of 1 store build; 0 of 7 declared files in the 16 built members",
+      "status": "PASS",
+      "expect": "Y33-STORE-OK"
+    },
+    {
+      "criterion_id": "AR33-y-AC2",
+      "criterion_verbatim": "AR33-y-AC2: the difference control of AC1 -- a file in the source dir that is neither packaged nor declared outside STILL refuses the build by name.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-53/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r3/ar3_checks.py y33-control --root C:/dev/wk-irpt-anlreq-53",
+      "output_evidence": "probe build: rc=1, BUILD_ONLY line absent, probe named in a parity refusal: True / Y33-CONTROL-OK (rc=0)",
+      "denominator": "1 of 1 probe file refused by name",
+      "status": "PASS",
+      "expect": "Y33-CONTROL-OK"
+    },
+    {
+      "criterion_id": "AR33-y-AC3",
+      "criterion_verbatim": "AR33-y-AC3: the map records 6idtFvAm... for irpt-status and a BUILD_ONLY of irpt-status still prints that digest.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-53/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r3/ar3_checks.py y33-digest --root C:/dev/wk-irpt-anlreq-53",
+      "output_evidence": "map 6idtFvAmYk73wJdr5DPRIyEPrLeWgzjlqbdNr5f1wxc=; BUILD_ONLY sha256=6idtFvAmYk73wJdr5DPRIyEPrLeWgzjlqbdNr5f1wxc= / Y33-DIGEST-OK (rc=0)",
+      "denominator": "1 of 1 irpt-status entry; 1 of 1 build",
+      "status": "PASS",
+      "expect": "Y33-DIGEST-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Stale-declaration negatives run by hand on the edited script: outside_package naming keys.py (also in files[]) and nope.py (no such file), each then restored.",
+      "expected": "each fails the store build with an ERROR line naming the file",
+      "observed": "keys.py: 'outside_package names keys.py but it is also in this function files[]' (PARTIAL 0 built, 1 failed); nope.py: 'no such file exists in .../reports -- stale declaration' (PARTIAL 0 built, 1 failed).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Store BUILD_ONLY digest compared with BAU_PARITY_SKIP=1 at the base and without it after the change.",
+      "observed": "Both AsKY+KWLZBW54N73z9VdnR7SIKMPd9RDoYS8x4vRkpw= (equal; package unchanged).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Other applied-artifact fields on the irpt-status entry (last_deployed_commit, last_deployed_at, recorded_by, deploy_ledger, deployed_code_sha256)",
+      "reason": "The order says leave them untouched and name them in the report; not guessed."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "ar3_checks.py",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r3/ar3_checks.py y33-store|y33-control|y33-digest --root C:/dev/wk-irpt-anlreq-53",
+      "result": "Y33-STORE-OK, Y33-CONTROL-OK, Y33-DIGEST-OK (rc=0 each)"
+    }
+  ]
+}
