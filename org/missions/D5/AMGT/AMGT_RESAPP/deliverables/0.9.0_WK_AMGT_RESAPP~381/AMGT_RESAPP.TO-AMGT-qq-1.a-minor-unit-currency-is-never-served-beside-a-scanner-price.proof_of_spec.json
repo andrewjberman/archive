@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-qq-1.a-minor-unit-currency-is-never-served-beside-a-scanner-price",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-qq-1.a-minor-unit-currency-is-never-served-beside-a-scanner-price.md",
+    "group": "OTHER",
+    "vintage_commit": "cbd398d50e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "cbd398d50e",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-qq-1.a-minor-unit-currency-is-never-served-beside-a-scanner-price.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~381",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/peers/price_currency.py",
+      "kind": "script",
+      "commit_or_etag": "d042d61d9a3f0f1c8b703fd777175ad6d61fcf69",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on branch wk-AMGT_RESAPP-381 at d042d61d9a (the code and tests commit); a pure serve-time decorator with no deploy in this order's scope.",
+      "introduces": [
+        "def is_minor_unit(",
+        "REASON_MINOR_UNIT = ("
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "d042d61d9a3f0f1c8b703fd777175ad6d61fcf69",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on branch wk-AMGT_RESAPP-381 at d042d61d9a; the two-line pop added inside _with_price_currency. No deploy in this order's scope.",
+      "introduces": [
+        "if \"price_currency\" in fields:"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/peers/tests/test_price_currency_minor_unit.py",
+      "kind": "test",
+      "commit_or_etag": "d042d61d9a3f0f1c8b703fd777175ad6d61fcf69",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on branch wk-AMGT_RESAPP-381 at d042d61d9a; pure unit and route-level tests, no network, no AWS."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PASS G1 (a minor-unit CRNCY serves no currency and a plain reason), PASS G2 (control: a major-unit CRNCY is served unchanged), PASS G3 (route level: GBp becomes a reason, EUR a code with no stale reason, no key a plain reason), PASS G4 (nothing else moves); R92 CURRENCY GUARD: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round92_prep/checks/r92_currency_guard.py\"; echo \"exit=$?\"",
+      "output_evidence": "PASS G1 a minor-unit CRNCY serves no currency and a plain reason  [{'GBp': True, 'ZAc': True, 'GBX': True, 'ILA': True}]\nPASS G2 control: a major-unit CRNCY is served unchanged  [{'EUR': True, 'CHF': True, 'SGD': True, 'USD': True, 'JPY': True, 'HKD': True}]\nPASS G3 route level: GBp -> reason, EUR -> code with no stale reason, no key -> plain reason  [GBp: reason | EUR: EUR | none: reason]\nPASS G4 nothing else moves: price, cap_currency, identity and every other field byte-equal  [[]]\n   arms passed 4 of 4\nR92 CURRENCY GUARD: YES\nexit=0",
+      "denominator": "4 of 4 guard arms PASS; G1 4 of 4 minor-unit codes serve no currency; G2 6 of 6 major-unit codes served unchanged; G3 3 of 3 routed members correct; G4 0 of 3 members with a moved field",
+      "status": "PASS",
+      "expect": "PASS G1[\\s\\S]*PASS G2[\\s\\S]*PASS G3[\\s\\S]*PASS G4[\\s\\S]*R92 CURRENCY GUARD: YES[\\s\\S]*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the new test file and the three existing price-currency, listing and route-level test files pass with 0 failed, and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/peers/tests/test_price_currency_minor_unit.py lib/research/peers/tests/test_price_currency_answered.py lib/research/peers/tests/test_price_listing.py lib/research/api/tests/test_peer_price_currency.py -q; echo \"exit=$?\"",
+      "output_evidence": "........................................................................ [ 83%]\n..............                                                           [100%]\n86 passed in 0.96s\nexit=0",
+      "denominator": "86 of 86 tests pass (0 failed) across 4 of 4 test files",
+      "status": "PASS",
+      "expect": "86 passed[\\s\\S]*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base commit cbd398d50e (before the edit) run through the same guard: G1 and G3 must FAIL, which the edit flips.",
+      "expected": "G1 and G3 FAIL at the base; arms passed 2 of 4; R92 CURRENCY GUARD: NO",
+      "observed": "FAIL G1 a minor-unit CRNCY serves no currency and a plain reason  [{'GBp': False, 'ZAc': False, 'GBX': False, 'ILA': False}]\nPASS G2 control: a major-unit CRNCY is served unchanged  [{'EUR': True, 'CHF': True, 'SGD': True, 'USD': True, 'JPY': True, 'HKD': True}]\nFAIL G3 route level: GBp -> reason, EUR -> code with no stale reason, no key -> plain reason  [GBp: {'price_currency': 'GBp'} | EUR: EUR | none: reason]\nPASS G4 nothing else moves: price, cap_currency, identity and every other field byte-equal  [[]]\n   arms passed 2 of 4\nR92 CURRENCY GUARD: NO\nexit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the guard (ac1_run1 and ac1_run2 in session.log) compared",
+      "observed": "IDENTICAL on both runs: PASS G1..G4, arms passed 4 of 4, R92 CURRENCY GUARD: YES, exit=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live reads of the peers route, the 12 GBp rows and the 156 stale-reason rows are not re-measured here.",
+      "reason": "Order EGRESS CLASS NONE and BOUNDS 1: no network, no AWS, no store, no deploy. The census is cited from the order preflight only."
+    },
+    {
+      "item": "No stored object is rewritten: the producer's price_currency_reason text and GBp codes stay as they are in the store.",
+      "reason": "The order says no stored object is rewritten; the fix is a serve-time decorator."
+    },
+    {
+      "item": "No deploy and no schedule of the change.",
+      "reason": "The order declares schedule and deploy not applicable; the change ships with the routed deploy order, not this one."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W381-S1: safe-commit printed a client-data-check WARN (the hashed account-id list is ABSENT), so commit d042d61d9a was not checked for client account ids; the commit carries no client data."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~381/session.log",
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh commit-gate (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~381 <0.9.0_WK_AMGT_RESAPP~381@opal.agent>\" -F .scratch/msg_qq1_code.txt -- lib/research/peers/price_currency.py lib/research/api/scoped_amgt.py lib/research/peers/tests/test_price_currency_minor_unit.py",
+      "result": "[commit-gate] OK: pre-commit gate clean for 3 of 3 file(s); commit d042d61d9a; msg-verify MATCH; surprise-row-gate OK; to-pipeline-gate OK"
+    }
+  ]
+}
