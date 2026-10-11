@@ -1,0 +1,40 @@
+{
+  "slug": "iamroles-r7-family-c-market-overview",
+  "title": "NFRA_IAMROLES202609 IAM-x-1 PHASE B row 14: adopt sentiment_query_api-role into market-overview (-target import + four default tags, System=MarketOverview)",
+  "author": "0.7.0_AE_CloudOps~IR",
+  "status": "OPEN",
+  "opened_at": "2026-10-11T05:59:35.978149+00:00",
+  "window_hours": 6.0,
+  "entry_path": "org/critical_paths/change_management/20261011T0559Z_iamroles-r7-family-c-market-overview_deploy_completion.md",
+  "legs": [
+    {
+      "id": "TF",
+      "kind": "activation",
+      "target": "aws_iam_role.sentiment_query_api_role",
+      "proof_required": "the SAVED targeted plan reads 1 to import / 0 to add / 1 to change / 0 to destroy, tags_all the only changed attribute, EXACTLY FOUR keys Environment ManagedBy Project System=MarketOverview; and the committed .tf blob EQUALS 01c492fb (the CTO half condition, git hash-object). The bucket market_data_v2 and its three sub-resources are NOT SIGNED and must not appear: this module wants to recreate a deleted S3 bucket, so -target is load-bearing here, not belt-and-braces",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "MANAGED",
+      "kind": "verify",
+      "target": "sentiment_query_api-role",
+      "proof_required": "LIVE after the apply: list-attached-role-policies still reads 1 and names AWSLambdaBasicExecutionRole (the omission rule guards a managed attachment on this role), list-role-policies still reads [DynamoDBAccess], trust principal still lambda.amazonaws.com and description still ABSENT",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "REPLAN",
+      "kind": "verify",
+      "target": "infra/aws/terraform/market-overview",
+      "proof_required": "the targeted re-plan reads 0 to add, 0 to change, 0 to destroy; and after the drain the untargeted plan in the SHARED tree still shows ONLY the four pre-existing market_data_v2 adds and 0 to destroy (A4-r6, row Z-S27) -- the pre-existing drift must be unchanged by this act, not absent",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261011T055935Z OPENED by 0.7.0_AE_CloudOps~IR with 3 leg(s)"
+  ],
+  "last_red_at": null,
+  "device": "sitez"
+}
