@@ -1,0 +1,112 @@
+{
+  "to_id": "IRPT_BCKEND.TO-IB-pr-434",
+  "cell": "IB-pr-434",
+  "author": "0.9.0_WK_IRPT_BCKEND~292",
+  "files_changed": [
+    "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js",
+    "infra/aws/ec2/investor-reporting-ycharts/README.md",
+    "infra/aws/ec2/investor-reporting-ycharts/tests/replay_ycharts.js",
+    "infra/aws/ec2/investor-reporting-ycharts/tests/receipt_after_submit.js",
+    "infra/aws/lambda/investor-reporting/ycharts/session/host_capture.py",
+    "infra/aws/lambda/investor-reporting/ycharts/session/tests/test_capture_receipt_persisted.py",
+    "infra/aws/lambda/investor-reporting/ycharts/session/tests/test_host_capture.py",
+    "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~292/write_persisted_receipt_sample.py",
+    "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~292/IB132-1_persisted_receipt_sample.json",
+    "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~292/IB132-1_capture_receipt_record.json"
+  ],
+  "persisted_members": {
+    "where_written": "beside the wrapper (/opt/investor-reporting-ycharts/ on the host): last-capture.receipt.json for the newest run, capture-<stamp>-<nn>.receipt.json for the archived runs, each 0600, at most 16384 bytes, ASCII JSON with sorted keys",
+    "when_written": "by run_capture after the runner's stdout is read, for every run whose receipt carries a login_submission or a probe_pair (failure receipts: record.*; success receipts: record.acquire.*) or a step list; a run that reached neither writes none",
+    "login_submission": [
+      "login_submissions (int 0..9999)",
+      "login_reply_status (int|null)",
+      "observed (bool)",
+      "username_field (short name|null)",
+      "password_field (short name|null)",
+      "login_submission_verified.username_matches_secret (bool)",
+      "login_submission_verified.password_matches_secret (bool)"
+    ],
+    "probe_pair": [
+      "same_cookies (bool)",
+      "with_token_errored (bool, derived from the runner's error message, which is dropped)",
+      "without_token_via / with_token_via (short name)",
+      "without_token_status / with_token_status (int)",
+      "without_token_state / with_token_state (short name)",
+      "without_token_location_present / with_token_location_present (bool, derived: the Location URL is dropped)",
+      "without_token_content_type_class / with_token_content_type_class (json|html|other|null, derived: the header value is dropped)",
+      "without_token_waf_action_class / with_token_waf_action_class (allow|block|captcha|challenge|count|other|null, derived)",
+      "sent_without_token / sent_with_token: cookies_with_values (int), cookie_names (list of names), session_cookie_names_present (list of names), waf_token_cookie_in_jar / waf_token_cookie_sent / waf_header_sent (bool), headers (list of header NAMES), fallback_available (name|null); the user_agent string is dropped"
+    ],
+    "beside_the_two_members": [
+      "schema, ok, failure_class (closed token), reason (closed token)",
+      "steps: list of {step, state, via, probe_reason, probe_via, probe_http_status, probe_state}, at most 16"
+    ],
+    "leaf_rule": "a leaf is kept only if it is a bool, an int 0..9999, null, or a string of 1..64 characters from [A-Za-z0-9_.:-] with no 'http' and no run of 16 hex digits or 8 digits; a list keeps at most 16 items; a member not named above is dropped, and so is a named member whose value fails its leaf test"
+  },
+  "dropped_by_whitelist_example": {
+    "planted_non_whitelisted_members_dropped": ["posted_username", "posted_password", "login_reply_location", "cookie_jar_dump", "user_agent", "cookie_header", "raw_cookie", "screen", "text_sample", "message", "stray_top_level_member", "extra_member_not_on_the_list"],
+    "planted_whitelisted_member_with_a_bad_value_dropped": {"username_field": "a value with '@' fails the short-name rule", "login_reply_status": "the string '200' is not an integer", "login_submissions": "True is a boolean, not an integer", "password_field": "70 characters exceeds the 64 limit"},
+    "planted_derived_members": {"without_token_location": "a URL carrying a token query -> without_token_location_present: true", "with_token_waf_action": "a planted password string -> with_token_waf_action_class: other"},
+    "test": "infra/aws/lambda/investor-reporting/ycharts/session/tests/test_capture_receipt_persisted.py::test_a_member_not_on_the_whitelist_is_dropped_and_a_bad_value_is_dropped_too"
+  },
+  "planted_secrets": [
+    "planted.user@example.test",
+    "Pl4nted-Passw0rd-NOT-REAL",
+    "c00kie-PLANTED-9f8e7d6c5b4a",
+    "https://vendor.example.test/login/?next=/dashboard&token=T0K3N-PLANTED-12345"
+  ],
+  "new_reason_code": {
+    "name": "SIGNED_OUT_APP_CHROME_AFTER_SUBMIT",
+    "fires_when": "one sign-in submission was made (filled), the screen is classified CH-AUTHENTICATED by the app-chrome model (via dom or vision, NOT the provisional post-submit reading), and the probe reason is NO_IDENTITY_COOKIE; thrown at the first such probe (step 1 in the replay, MAX_STEPS 8); no second submission, no retry, no added wait. Its record carries login_submission, probe_pair (null here by construction, see the row), the step list, and a screen census with the URL reduced to its path and the page text withheld.",
+    "four_postulates": {
+      "i_mece": "Domain: the reasons an AuthError of the capture can carry (9 throw sites after this change, 9 distinct closed reasons, counted by test_every_sign_in_failure_site_carries_its_own_closed_reason). The new code covers the one cell the old pair left open: 'app chrome, probe says no identity cookie' crossed with 'a submission was made' (old SIGNED_OUT_APP_CHROME = not made; new = made); the provisional post-submit screen with no app signal stays with the bounded post-submit probe (ChallengeFailure), and a probe with an identity cookie that still fails stays NO_AUTHENTICATED_PROBE. Subtraction from the 8 pre-existing reasons: none already named 'made + app chrome + no cookie'; none of the 8 overlaps it.",
+      "ii_same_grain": "Same grain as its sibling SIGNED_OUT_APP_CHROME and the other AuthError reasons: one name per place the sign-in stopped (a screen state plus a probe leg), not a vendor cause and not a remedy; it names an observation the runner made, not an inference about credentials.",
+      "iii_one_intent": "One axis, one intent: where did the sign-in stop. The code says 'after one submission, the browser holds no identity cookie and the page reads as the app'. It does not say the credentials were rejected (that is SIGNIN_FORM_REPRESENTED, the form came back) and does not say the probe is broken; the persisted login_submission (reply status, field match) is what separates those readings.",
+      "iv_state_coherence": "The code moves one state: the run ends EXPLICITLY at the first post-submit probe instead of at MAX_STEPS, so it ends the run with one submission spent either way. It does NOT move: the one-refresh-per-job allowance, the 900 s capture cooldown, the lease and fence, the stored session bundle (none is written), and the other reasons' branches. The remedy it points to is a read of the persisted receipt and the account state, never a retry; none of the unchanged branches changes."
+    },
+    "token_census": {
+      "scope": "word-boundary token \\bSIGNED_OUT_APP_CHROME_AFTER_SUBMIT\\b (and the sibling \\bSIGNED_OUT_APP_CHROME\\b) over the two trees that read reason codes, infra/aws/ec2/investor-reporting-ycharts/ and infra/aws/lambda/investor-reporting/, tracked files at base commit 70412abcd5 (662 tracked files in the two trees) and in the worktree after the change; counts are matching LINES per file; the target is not a substring-safe name (the old name is a prefix of the new one), so the boundary \\b after CHROME does not match the new name's underscore",
+      "counts": {
+        "base_new_name": 0,
+        "base_old_name": {"ycharts_session.js": 1, "tests/test_host_capture.py": 1},
+        "after_new_name": {"ycharts_session.js": 1, "README.md": 2, "tests/receipt_after_submit.js": 2, "tests/test_capture_receipt_persisted.py": 6, "tests/test_host_capture.py": 2, "files": 5, "lines": 13},
+        "after_old_name": {"ycharts_session.js": 1, "README.md": 2, "tests/receipt_after_submit.js": 2, "tests/test_host_capture.py": 1, "files": 4, "lines": 6},
+        "readers_that_enumerate_reasons": "host_capture.py validates a reason by pattern (_REASON, [A-Z][A-Z0-9_]{2,63}) and does not list them, so the new name passes through as a closed token with no edit (test_failure_code_names_the_sign_in_step); the only enumerators are test_host_capture.py's throw-site count (8 -> 9 and the distinct-reason count 8 -> 9, on purpose, as its own comment asks) and its parametrised list (the new name added)"
+      }
+    }
+  },
+  "stderr_per_run": {
+    "file_name_rule": "newest run: last-capture.stderr (unchanged). On the next run it is renamed to capture-<UTC yyyymmddThhmmssZ of its mtime>-<nn>.stderr, nn two digits rising within one second, so names sort in run order; its receipt takes the same stem with .receipt.json",
+    "runs_kept": 16,
+    "why_16": "twice the floor of 8, and more than the 10 sign-in-bearing attempts the 2026-10-11 read counted in 14 days (IB129-1); 16 runs x (64 KiB stderr + 16 KiB receipt) stays under about 1.3 MiB, so the directory is bounded in count (at most 32 files) and in bytes",
+    "max_bytes_per_run": 65536,
+    "max_bytes_receipt_per_run": 16384,
+    "last_capture_name_kept": "last-capture.stderr is kept as the newest run's name (STDERR_NAME unchanged; the existing posix test reads it), and last-capture.receipt.json is its sibling; the previous run is archived before the new run opens its file, so a stale receipt never outlives its run",
+    "unwritable_directory": "rotate_runs, stderr_sink, persist_receipt and keep_tail each catch OSError; an unwritable directory sends stderr to DEVNULL and writes no receipt, and the capture still returns or refuses exactly as before (tested)"
+  },
+  "hash_pins": [
+    {
+      "where": "bindings.capture.library_sha256 / wrapper_sha256 in the resident package's reports/resident_bindings.json, written by infra/aws/lambda/investor-reporting/reports/build_resident_package.py from its WRAPPER_SHA256 and LIBRARY_SHA256 ARGUMENTS at build time; checked on the host by HostCapture.capture (CAPTURE_SOURCE_PIN) and reports/resident_installed.py (PINNED_FILE_DIFFERS)",
+      "what_it_pins": "ycharts_session.js (this change: base sha256 857d90b81960d69a7a6700be6fffe33d86628694aef95f8cfb64aca7a82cb839 -> a1c2880169c5f7996cc7c5880e4fe36db90f0a2c1f5a1cd01e0d1d8153544841) and run-ycharts-session.sh (not changed here: 55ddb8f7947cba7cdca1b9139d4d0a1a3ad620e330c86ba3ab648d334763aff9)",
+      "what_i_did": "nothing: the pin is a build argument and a host file, not a file in the repo, and it is outside my paths. The new library hash is stated here for the release that carries it; a release built with the OLD library sha against the NEW host bytes (or the reverse) refuses CAPTURE_SOURCE_PIN by design."
+    },
+    {
+      "where": "tests that name the pin fields: reports/tests/test_resident_installed.py and ycharts/generate/tests/test_package_poll.py (and ycharts/session/tests/test_host_capture.py)",
+      "what_i_did": "nothing needed: each computes the sha256 of its own fixture bytes at run time (sha(WRAPPER), sha(LIBRARY), hashlib.sha256(library.read_bytes())); none pins the repo file. reports/tests read 162 passed after the change."
+    },
+    {
+      "where": "historical deploy records that quote the old library hash 857d90b8... (org/critical_paths/change_management/*_irpt-resident-st*_deploy_completion.md, org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_st30/*, org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round6/act/PACKAGE_CENSUS_*.json)",
+      "what_i_did": "nothing: they are records of past releases, outside my paths, and are not read by any test or gate; they remain true of the host's current bytes until a release replaces them. No SHA256SUMS or manifest in the repo pins either changed file (SHA256SUMS is generated on the host after the pydeps merge)."
+    }
+  ],
+  "host_reach": "Neither change reaches the host by merging. host_capture.py is a member of the RESIDENT PACKAGE (reports/build_resident_package.py packs ycharts/session/ except tests/ and __pycache__, as ycharts/session/host_capture.py inside the tarball built from a backend pin) and runs only in a resident release under its own never-widen pair, installed as a new /opt/irpt-resident/<pin>-st<N> root. ycharts_session.js and run-ycharts-session.sh are NOT in that tarball: they live in /opt/investor-reporting-ycharts/ on the host (README of that folder; hashed by the wrapper at capture time against the bindings), so ycharts_session.js reaches the host only by a separate install of the file to that directory, and the release's bindings must carry the NEW LIBRARY_SHA256 (a1c2880169c5...) for the pair to agree. Order matters: the new host_capture.py reads a receipt the old library also produces (record.login_submission and record.probe_pair already ride the old NO_AUTHENTICATED_PROBE receipt), so the host_capture.py half is useful alone; the new reason code appears only once the library is installed. run-ycharts-session.sh is unchanged.",
+  "request_sent": false,
+  "deployed": false,
+  "suites": {
+    "offline_before": "node --require ./tests/netguard.js tests/run_offline_suite.js at base: rc 0, summary a_pass b_pass b2_pass c_pass d_pass e_pass all true (all_pass: true)",
+    "offline_after": "same command after the change: rc 0, a_pass b_pass b2_pass c_pass d_pass e_pass all true (all_pass: true); an earlier draft of the new branch (without the via guard) failed the suite's b_pass arm (the unrecognised post-submit screen became AuthError instead of ChallengeFailure) and was narrowed to via != post-submit before the run recorded here",
+    "new_offline_test": "node --require ./tests/netguard.js tests/receipt_after_submit.js: rc 0, four arm lines PASS plus a netguard line (0 external of 1 connection attempts); negative control: the same test against the base library fails arm a with reason NO_AUTHENTICATED_PROBE (the incident shape) and passes b, c, d",
+    "session_before": "python -m pytest ycharts/session/tests -q -p no:cacheprovider from infra/aws/lambda/investor-reporting: 118 passed, 1 skipped",
+    "session_after": "same command: 127 passed, 2 skipped (8 new passed, 1 new skipped real-bash test that needs posix, 1 new parametrised case)"
+  }
+}
