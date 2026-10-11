@@ -172,3 +172,27 @@ On PASS of both arms the card's "After a pass" acts follow: OA-t-1 r2 and OA-t-3
 C11), OA-e-8 measures speed. Per the CVO's sign-off limit, the arms prove the gateway's entitlement mechanism only.
 FWD-1 stays NOT_REALIZED until step 4's released Analyst answers a real portal-figure question on its own and the CVO
 grades it. Step 4 (the Analyst relaunch) is `0.0.0_AB_MSTR~Z`'s PROCEED act under /govern.
+
+## Call 4d5a answered: "Yes on Monday." -- the Monday ask, registered before the act (2026-10-11 ~03:3xZ)
+
+Andrew-direct ~03:2xZ 2026-10-11 at the laptop `0.0.0_AB_MSTR` terminal, item 2, VERBATIM: "Yes on Monday." Record
+`org/tier0_exec/0.0.0_AB_MSTR/deliverables/ANDREW_DIRECT_20261011_032xZ_OPEN_CALLS_ANSWERED_ITEMS_1_TO_9.md` @5e10dd2dc5
+("2. YES, on Monday (2026-10-12)"); relay `0.0.0_AB_MSTR~Z` msg 33155. Scope as asked: ONE Teams message asking Alyssa
+for ONE portal-figure question. No second message, no follow-up chase.
+
+| field | value |
+|---|---|
+| when | Monday 2026-10-12, 10:03 ET (14:03Z), one-shot session wake on this seat |
+| chat | the Andrew-Alyssa 1:1 registered for arm (a): `19:2e21f8e5-55ca-45c1-91b9-a4607bf28d4f_ad037ea5-fee8-412e-9da9-15c6cf2a4fbc@unq.gbl.spaces` (the principal's token reads it, so her reply is citable) |
+| sender | `send_chat_message` through the gateway, which sends as `Andrew@opalinvest.com` (whoami); the text says an agent sent it |
+| key | `json/benchmarks/etf_returns.json` (unchanged; channel `benchmarks_and_models`, inside her OA-g-3 grant), so the ask points her at that figure |
+
+Text, exactly:
+
+> Hi Alyssa, a quick favor for a test of the Opal Bloomberg assistant: could you reply in this chat with one question about a benchmark ETF return shown on the portal (for example, "What is SPY's 1-year return as of the latest date?")? Nothing else is needed. Thanks! (Sent from Andrew's account by an Opal agent, on his OK.)
+
+After the send: the seat polls `poll_addressed_teams_messages` every 5 minutes, from the send until her reply fires arm (a)
+or until 17:00 ET, whichever comes first, then drops back to the hourly tick. On her reply, inside 900s: the probe line,
+`opal_asker_query(chat_id, <her message id>, key="json/benchmarks/etf_returns.json")`, and the raw `gateway_query_catalog`
+read of the key in the same minute (J2 reference), all three recorded in the Results table. A reply that is not a
+portal-figure question does not fire arm (a) (CVO condition); it is recorded and nothing more is sent.

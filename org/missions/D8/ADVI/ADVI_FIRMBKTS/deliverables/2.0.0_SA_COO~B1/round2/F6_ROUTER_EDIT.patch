@@ -1,0 +1,182 @@
+diff --git a/infra/aws/lambda-edge/shared-advisor-router/index.mjs b/infra/aws/lambda-edge/shared-advisor-router/index.mjs
+index 80f5066109..4fb2f185c1 100644
+--- a/infra/aws/lambda-edge/shared-advisor-router/index.mjs
++++ b/infra/aws/lambda-edge/shared-advisor-router/index.mjs
+@@ -69,9 +69,18 @@
+  *      -- before it, the bucket derived solely from the validated token identity and the
+  *      path could not influence tenancy. So this router ASSERTS the segment against the
+  *      caller's validated tenant and REFUSES (401) on mismatch; it never merely reads it.
++ *
++ * v15: ADVI_FIRMBKTS FB-e-6 -- the canonical firm-bucket key path, DORMANT.
++ *      handleWithMap(event, firmBucketMap) is the handler's body with the firm map passed in; `handler` calls it with the
++ *      registry's generated map, so every request resolves exactly as before. When (and only when) the map names a firm's
++ *      OWN bucket (opal-data-49financial, -inflection, -cottonwood) for the resolved bucket, a request that arrived on the
++ *      advisor-intelligence prefix is rewritten to advi/{firm}/platinum/... by ONE table (CANONICAL_PLATINUM_CLASSES, the
++ *      round-1 mapping table's served classes); a class the table does not place is refused 404, never guessed. The
++ *      platinum/advi/{firm}/ twin class and the satellites branch are untouched. No map value is edited here: the
++ *      cutover is a registry edit (and needs the advTenant remedy named in _shared/firm-config.mjs first).
+  */
+ import { requiredTierForUri, canAccess } from "./tier_policy.mjs";
+-import { FIRM_BUCKET_MAP } from "../_shared/firm-config.mjs";
++import { FIRM_BUCKET_MAP as REGISTRY_FIRM_BUCKET_MAP } from "../_shared/firm-config.mjs";
+ 
+ // --- P4R-3 remedy (A): the canonical serving tier for ADVI advisor twins ------
+ // The twins are published to opal-data-portal-v2/platinum/advi/{firm}/ (CLAUDE.md
+@@ -112,7 +121,29 @@ const SATELLITES_ALLOWED_LEAVES = new Set([
+ // forgeable expression of the same boundary.
+ const SATELLITES_KEY_PREFIX = "platinum/satellites/";
+ 
+-export const handler = async (event) => {
++const CANONICAL_FIRM_BUCKET_SCOPE = Object.freeze({
++  "opal-data-49financial": "49financial",
++  "opal-data-inflection": "inflection",
++  "opal-data-cottonwood": "cottonwood",
++});
++const CANONICAL_PLATINUM_CLASSES = Object.freeze([
++  ["/platinum/", ""],
++  ["/gold/entities/accounts/", "entities/accounts/"],
++  ["/gold/entities/advisors/", "entities/advisors/"],
++  ["/gold/entities/clients/", "entities/clients/"],
++  ["/gold/views/", "views/"],
++  ["/gold/artifacts/", "artifacts/"],
++]);
++function canonicalPlatinumKey(uri, scope) {
++  for (const [from, table] of CANONICAL_PLATINUM_CLASSES) {
++    if (uri.startsWith(from)) return "/advi/" + scope + "/platinum/" + table + uri.slice(from.length);
++  }
++  return null;
++}
++
++export const handler = (event) => handleWithMap(event, REGISTRY_FIRM_BUCKET_MAP);
++
++export async function handleWithMap(event, FIRM_BUCKET_MAP) {
+   const request = event.Records[0].cf.request;
+ 
+   // CORS preflight: return synthetic 204 with CORS headers before X-Firm-Id guard.
+@@ -235,6 +266,7 @@ export const handler = async (event) => {
+   // path class; stays null for every other path, which is what keeps the override
+   // below path-class-scoped.
+   let platinumAdviFirm = null;
++  let viaAdvisorIntel = false;
+ 
+   if (firmId === "opal-capital") {
+     const params = new URLSearchParams(request.querystring || "");
+@@ -262,6 +294,7 @@ export const handler = async (event) => {
+   // /api/scoped/advisor-intelligence/* -> categorized /gold/* layout (GLDRST v8)
+   if (request.uri.startsWith("/api/scoped/advisor-intelligence/")) {
+     const originalUri = request.uri;
++    viaAdvisorIntel = true;
+     const suffix = request.uri.replace("/api/scoped/advisor-intelligence/", "");
+ 
+     // P4R-3: capture the tenant segment of the platinum/advi/{firm}/ path class.
+@@ -420,6 +453,24 @@ export const handler = async (event) => {
+     console.log(`Platinum advi canonical routing: firm=${platinumAdviFirm} bucket=${bucket} uri=${request.uri}`);
+   }
+ 
++  const canonScope = CANONICAL_FIRM_BUCKET_SCOPE[bucket];
++  if (viaAdvisorIntel && platinumAdviFirm === null && canonScope && FIRM_BUCKET_MAP[canonScope] === bucket) {
++    const canon = canonicalPlatinumKey(request.uri, canonScope);
++    if (canon === null) {
++      console.warn(JSON.stringify({ event: "scope_denied", rule: "canonical_unplaced_class", callerFirmId: firmId, path: request.uri }));
++      return {
++        status: "404",
++        statusDescription: "Not Found",
++        headers: {
++          "content-type": [{ key: "Content-Type", value: "application/json" }],
++          "access-control-allow-origin": [{ key: "Access-Control-Allow-Origin", value: "*" }],
++        },
++        body: JSON.stringify({ error: "unplaced_canonical_resource" }),
++      };
++    }
++    request.uri = canon;
++  }
++
+   // Route to firm-specific S3 bucket. Mutate in-place to preserve OAI auth
+   // (do NOT replace entire request.origin — origin object identity matters for
+   // CF auth context; only the domainName/region/host need updating).
+@@ -432,4 +483,4 @@ export const handler = async (event) => {
+   console.log(`Firm routing: firmId=${firmId} bucket=${bucket} uri=${request.uri}`);
+ 
+   return request;
+-};
++}
+diff --git a/infra/aws/lambda-edge/shared-advisor-router/test/canonical-platinum.spec.mjs b/infra/aws/lambda-edge/shared-advisor-router/test/canonical-platinum.spec.mjs
+new file mode 100644
+index 0000000000..07920ecd60
+--- /dev/null
++++ b/infra/aws/lambda-edge/shared-advisor-router/test/canonical-platinum.spec.mjs
+@@ -0,0 +1,74 @@
++// a firm's own bucket for it. Every arm drives handleWithMap() with an explicit firm map so the registry's map is never
++// edited here. The firm map is the single switch (FWD-3); nothing in this file changes a bucket value.
++import { handler, handleWithMap } from "../index.mjs";
++import { FIRM_BUCKET_MAP } from "../../_shared/firm-config.mjs";
++import assert from "node:assert/strict";
++
++const A = "/api/scoped/advisor-intelligence/";
++const CUT = { ...FIRM_BUCKET_MAP, "49financial": "opal-data-49financial", mockadv: "opal-data-49financial" };
++
++function ev({ firmId, suffix, qs = "" }) {
++  const headers = {};
++  if (firmId !== undefined) headers["x-firm-id"] = [{ key: "X-Firm-Id", value: firmId }];
++  headers["x-user-tier"] = [{ key: "X-User-Tier", value: "internal" }];
++  return { Records: [{ cf: { request: {
++    method: "GET", uri: A + suffix, querystring: qs, headers,
++    origin: { s3: { domainName: "opal-data-bd.s3.us-east-1.amazonaws.com", region: "us-east-1",
++      authMethod: "origin-access-identity", customHeaders: {} } },
++  } } }] };
++}
++const quiet = async (fn) => { const l = console.log, w = console.warn; console.log = () => {}; console.warn = () => {};
++  try { return await fn(); } finally { console.log = l; console.warn = w; } };
++
++describe("ADVI_FIRMBKTS FB-e-6 -- canonical platinum key path (dormant)", () => {
++  it("registry map: a 49financial platinum request keeps its legacy key and the legacy bucket", async () => {
++    const r = await quiet(() => handler(ev({ firmId: "49financial", suffix: "platinum/accounts/z1/summary.json" })));
++    assert.equal(r.uri, "/platinum/accounts/z1/summary.json");
++    assert.equal(r.origin.s3.domainName, "opal-data-bd.s3.us-east-1.amazonaws.com");
++  });
++
++  it("registry map: the staff proxy ?firm=49financial is unchanged (legacy key, as today)", async () => {
++    const r = await quiet(() => handler(ev({ firmId: "opal-capital", suffix: "views/firm_composition.json", qs: "firm=49financial" })));
++    assert.equal(r.uri, "/gold/views/firm_composition.json");
++  });
++
++  it("firm map names the firm's own bucket: platinum passes to advi/{firm}/platinum/", async () => {
++    const r = await quiet(() => handleWithMap(ev({ firmId: "49financial", suffix: "platinum/accounts/z1/summary.json" }), CUT));
++    assert.equal(r.uri, "/advi/49financial/platinum/accounts/z1/summary.json");
++    assert.equal(r.origin.s3.domainName, "opal-data-49financial.s3.us-east-1.amazonaws.com");
++  });
++
++  it("firm map names the firm's own bucket: the alias mockadv resolves to the same scope", async () => {
++    const r = await quiet(() => handleWithMap(ev({ firmId: "mockadv", suffix: "platinum/firm/advisor_nna_canonical.json" }), CUT));
++    assert.equal(r.uri, "/advi/49financial/platinum/firm/advisor_nna_canonical.json");
++  });
++
++  it("gold entities, views and artifacts map to platinum entities, views and artifacts", async () => {
++    const e = await quiet(() => handleWithMap(ev({ firmId: "49financial", suffix: "entities/accounts/z1/aua_timeseries.json" }), CUT));
++    const v = await quiet(() => handleWithMap(ev({ firmId: "49financial", suffix: "views/firm_composition.json" }), CUT));
++    const a = await quiet(() => handleWithMap(ev({ firmId: "49financial", suffix: "artifacts/implementor_leaderboard.json" }), CUT));
++    assert.equal(e.uri, "/advi/49financial/platinum/entities/accounts/z1/aua_timeseries.json");
++    assert.equal(v.uri, "/advi/49financial/platinum/views/firm_composition.json");
++    assert.equal(a.uri, "/advi/49financial/platinum/artifacts/implementor_leaderboard.json");
++  });
++
++  it("a class the table does not place is refused with the router's own 404, never guessed", async () => {
++    const r = await quiet(() => handleWithMap(ev({ firmId: "49financial", suffix: "timeseries/synthetic_positions_index.json" }), CUT));
++    assert.equal(r.status, "404");
++    assert.equal(JSON.parse(r.body).error, "unplaced_canonical_resource");
++  });
++
++  it("another firm on a legacy bucket keeps its legacy key even when 49financial is cut over", async () => {
++    const r = await quiet(() => handleWithMap(ev({ firmId: "inflection", suffix: "views/firm_composition.json" }), CUT));
++    assert.equal(r.uri, "/gold/views/firm_composition.json");
++    assert.equal(r.origin.s3.domainName, "opal-data-inf.s3.us-east-1.amazonaws.com");
++  });
++
++  it("the platinum/advi/{firm}/ twin class is untouched and its tenant assertion still refuses a mismatch", async () => {
++    const ok = await quiet(() => handleWithMap(ev({ firmId: "49financial", suffix: "platinum/advi/49financial/mix_summary.json" }), CUT));
++    assert.equal(ok.uri, "/platinum/advi/49financial/mix_summary.json");
++    assert.equal(ok.origin.s3.domainName, "opal-data-portal-v2.s3.us-east-1.amazonaws.com");
++    const bad = await quiet(() => handleWithMap(ev({ firmId: "49financial", suffix: "platinum/advi/inflection/mix_summary.json" }), CUT));
++    assert.equal(bad.status, "401");
++  });
++});
