@@ -1,0 +1,158 @@
+{
+  "to_id": "DSGN_IRPTV1.TO-IV-e-96",
+  "default_view_before": "portal/src/pages/InvestorReporting/tabs/holdings/HoldingsTab.tsx line 248 (base 11f25102): `const [focusedAccountId, setFocusedAccountId] = useState<string | null>(null)` -- unfocused meant focusDisplay returned the all-accounts answer (the card's accounts, Trust / Brokerage) whatever account had been picked; the Models / SMAs / Client split appeared only after a tile click called focusAccount. The picked account was known in two places the tab did not read: the Performance tab's Account select (tabs/reporting/ReportingTab.tsx line 521, tab-local focusedAccountId, the picker the walks used) and the header's HeaderSelection.row / .selection (header/HeaderSelectionContext.ts).",
+  "default_view_after": "When the advisor's picked account (the Performance tab's account select, told up through HeaderSelection.pickedAccountId; else the header's ACCOUNT row; else a selection narrowed to one account) is one of several accounts the answer lists, Holdings starts focused on it -- the same focus path as a tile click, so it shows that account's Models / SMAs / Client split with 'Back to all accounts'; with no single account picked, or the account not listed, the by-account view stays.",
+  "behaviour": {
+    "test_id": "dsgn-irptv1/iv-e-96.picked-account-split.test.tsx :: IVE96 -- the Holdings face opens on the picked account split",
+    "passes": true,
+    "arms": [
+      "(a)(b) picked: tiles Models, SMAs, Client + Back to all accounts",
+      "(a2) ACCOUNT row with a two-id server answer",
+      "(a3) Performance picker choice on a client pick",
+      "(c) client selection and no selection: tiles Account A, Account B, no back link",
+      "(d) answer still being read: by-account stays with the Opening line",
+      "(e) pickedAccountRef rule arms",
+      "(f) way back pinned in source",
+      "(g) wiring pins: ReportingTab, index.tsx, HeaderSelectionContext"
+    ],
+    "result": "8 pass 0 fail (bun test, this file)",
+    "mutant": {
+      "what": "HoldingsTab.tsx: `chosenFocus ? chosenFocus.id : pickedAccountRef(header, snapshot)` replaced by `chosenFocus ? chosenFocus.id : null` (the old default); file committed first, reverted with git checkout -- on a file with no other uncommitted work",
+      "failed": true,
+      "result": "3 pass 5 fail: (a)(b), (a2), (a3), (d), (f) failed; (c), (e), (g) held (evidence mutant_old_default_final.txt)"
+    }
+  },
+  "tests_updated": [
+    {
+      "test": "dsgn-irptv1/iv-e-119.model-scope.test.tsx :: IV-e-119 ... ARM(d) tabResets",
+      "before": "regex pinned `focusAccount = (accountId) => { setModelScope(null); setFocusedAccountId(accountId) }`",
+      "after": "regex pins `focusAccount = (accountId) => { setModelScope(null); setChosenFocus({ id: accountId }) }`; the pinned property (the handler resets the model scope together with the account focus) is unchanged; commit 8a1fec98"
+    }
+  ],
+  "tests_not_weakened": "no other existing test failed; none pinned the old default for a picked account",
+  "product_files_changed": [
+    "portal/src/pages/InvestorReporting/tabs/holdings/HoldingsTab.tsx",
+    "portal/src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx",
+    "portal/src/pages/InvestorReporting/index.tsx",
+    "portal/src/pages/InvestorReporting/header/HeaderSelectionContext.ts"
+  ],
+  "test_files_changed": [
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-96.picked-account-split.test.tsx (new)",
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-119.model-scope.test.tsx (one regex)"
+  ],
+  "portal_commits": [
+    "a24441bc feat: Holdings opens on the picked account's split (selection rule + test)",
+    "ff7f6a24 fix: also reads the picked ACCOUNT row",
+    "8a1fec98 test: IV-e-119 source pin follows the setter",
+    "2b5c443b feat: the Performance tab's account pick reaches Holdings"
+  ],
+  "portal_commit": "2b5c443b",
+  "typecheck": "bun run typecheck: rc 0, no error lines (tsc -b --noEmit), at 2b5c443b",
+  "suite_before": {
+    "command": "bun test src/pages/InvestorReporting (cwd portal) before any edit, at 11f25102",
+    "passed": 1125,
+    "skipped": 27,
+    "failed": 7,
+    "tests": 1159,
+    "files": 372,
+    "failing_ids": [
+      "dsgn-irptv1/iv-e-17.bridge-dropped.test.ts :: IVE17-AC3 -- no bridge cast for the landed fields, and the content pin still offers 17 of 17 > every arm holds",
+      "dsgn-irptv1/iv-e-26.wire-regen.test.ts :: IVE26-AC3 -- gen-wire.ts regeneration is idempotent, data is optional, content pin still 17 of 17 > every arm holds",
+      "fe-s-1/fixtures.test.ts :: fixture set > the smoke map covers every scoped route, one entry each",
+      "fe-s-13/producer-fixtures.test.ts :: producer fixtures > every DECLARED route still publishes the RESPONSE ENVELOPE this client parses",
+      "fe-s-13/content-pins.test.ts :: the content pin > ADDITIVE, non-breaking producer changes leave this battery GREEN",
+      "fe-s-13/content-pins.test.ts :: the content pin > THE MUTATION HARNESS IS TEST-LOCAL -- the contract on disk did not move",
+      "fe-s-13/content-pins.test.ts :: the content pin > the pin names all three axes and the live contract offers every item"
+    ],
+    "evidence": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/step0_base.txt"
+  },
+  "suite_after": {
+    "command": "the same, at 2b5c443b",
+    "passed": 1133,
+    "skipped": 27,
+    "failed": 7,
+    "tests": 1167,
+    "files": 373,
+    "failing_ids": [
+      "dsgn-irptv1/iv-e-17.bridge-dropped.test.ts :: IVE17-AC3 -- no bridge cast for the landed fields, and the content pin still offers 17 of 17 > every arm holds",
+      "dsgn-irptv1/iv-e-26.wire-regen.test.ts :: IVE26-AC3 -- gen-wire.ts regeneration is idempotent, data is optional, content pin still 17 of 17 > every arm holds",
+      "fe-s-1/fixtures.test.ts :: fixture set > the smoke map covers every scoped route, one entry each",
+      "fe-s-13/producer-fixtures.test.ts :: producer fixtures > every DECLARED route still publishes the RESPONSE ENVELOPE this client parses",
+      "fe-s-13/content-pins.test.ts :: the content pin > ADDITIVE, non-breaking producer changes leave this battery GREEN",
+      "fe-s-13/content-pins.test.ts :: the content pin > THE MUTATION HARNESS IS TEST-LOCAL -- the contract on disk did not move",
+      "fe-s-13/content-pins.test.ts :: the content pin > the pin names all three axes and the live contract offers every item"
+    ],
+    "new_failing_ids": [],
+    "evidence": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~53/suite_after4.txt",
+    "note": "one intermediate run (suite_after2) showed IV-e-119 red from the setter rename; fixed in 8a1fec98 and gone in suite_after3 and suite_after4"
+  },
+  "screenshots": [
+    {
+      "state": "no account picked: client picked in the header, Holdings tab, by-account card (Trust / Brokerage)",
+      "path": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~53/holdings-face.driver-client.png",
+      "canvas": "rgb(244, 246, 250)",
+      "instrument": "holdings-face-driver.mjs (supplementary; ui-smoke cannot pick a client, row DSGN_IRPTV1-D2-W53-S6)",
+      "loc": "/investor-reporting",
+      "tiles": [
+        "****1111 / Trust",
+        "****2222 / Brokerage"
+      ]
+    },
+    {
+      "state": "picked account: second account chosen in the Performance tab's Account select, then Holdings tab: that account's Models / SMAs / Client split with Back to all accounts",
+      "path": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~53/holdings-face.driver-picker.png",
+      "canvas": "rgb(244, 246, 250)",
+      "instrument": "holdings-face-driver.mjs (supplementary)",
+      "loc": "/investor-reporting",
+      "tiles": [
+        "Models $350,000.00 70%",
+        "SMAs $100,000.00 20%",
+        "Client $50,000.00 10%"
+      ]
+    },
+    {
+      "state": "the way back: picked account, then Back to all accounts clicked: by-account card again",
+      "path": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~53/holdings-face.driver-back.png",
+      "canvas": "rgb(244, 246, 250)",
+      "instrument": "holdings-face-driver.mjs (supplementary)",
+      "loc": "/investor-reporting",
+      "tiles": [
+        "****1111 / Trust",
+        "****2222 / Brokerage"
+      ]
+    }
+  ],
+  "screenshot_attempt_ui_smoke": "scripts/ui-smoke.mjs --dist dist: `--fill \"Client search=Sample\"` -> FILL-FAIL timeout; `--clickrole combobox:Client search` opens no list; no typing step; static fixtures answer every POST /selections alike. Reached: Holdings tab with no client (neither required state). See ui-smoke-stop.txt and row DSGN_IRPTV1-D2-W53-S6. Fixture bodies are synthetic (holdings-face.no-pick.fixture.json); no real name, account number or figure.",
+  "screenshot_reading": "Each PNG was read. LOC /investor-reporting and CANVAS rgb(244, 246, 250) printed by the driver for each. No light text or ghost-white fill on the canvas or a white panel outside the dark bands; content sits inside panels; the Back to all accounts link is small navy underlined text on the canvas. The page shows several dark bands (Identity header, the All Categories card, Securities map and Securities headers): the known divergence recorded in portal/CLAUDE.md, not from this change. Row S7: the synthetic fixture prints a 130.0% weight in the map and table.",
+  "contract_clauses": [
+    {
+      "clause": "C3",
+      "seen": "canvas #F4F6FA edge to edge; Identity and tab panels white with hairline; navy ink; the All Categories card and panel headers are dark bands (existing band-valued variants, portal/CLAUDE.md 'Known divergence'); this change adds no surface or fill"
+    },
+    {
+      "clause": "C5.8",
+      "seen": "no translucent tint added by this change; it adds no new visual element (Back to all accounts is pre-existing)"
+    },
+    {
+      "clause": "C6",
+      "seen": "the three category tiles keep the /portfolios canon colours (Models lilac, SMAs teal, Client amber); no status colour used for data"
+    },
+    {
+      "clause": "C9",
+      "seen": "Back to all accounts is navy on the canvas (11.09:1); no #6B7280 or #A8B0C0 text on the canvas"
+    },
+    {
+      "clause": "C12",
+      "seen": "no empty or error state drawn in the shown states"
+    },
+    {
+      "clause": "C14",
+      "seen": "at rest one main picture (the card) beside the identity headline; the map and table follow as before; no new disclosure added"
+    }
+  ],
+  "surprises": [
+    "DSGN_IRPTV1-D2-W53-S5",
+    "DSGN_IRPTV1-D2-W53-S6",
+    "DSGN_IRPTV1-D2-W53-S7"
+  ]
+}
