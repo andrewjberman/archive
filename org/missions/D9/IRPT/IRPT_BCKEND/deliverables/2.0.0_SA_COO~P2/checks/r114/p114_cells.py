@@ -3,8 +3,8 @@
                       COO half @ec2d6b6f68, the CTO half @56bc28957c and dell1 ~M1's half; packet blob 92994b0980
 
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
-  IB114-1-AC1  the 49financial key reads (head-object, now) ETag == 1e8ff309... and members-sha256 == 96925f38...; after-reads A: ledger
-               CLOSED with pin 9b7256a99f and the built sha256, rolled_back false. Base: FAIL (ETag == 404's bytes).
+  IB114-1-AC1  the 49financial key reads (head-object, now) ETag == 8b482c8d... and members-sha256 == 73f33c3c... (IB-pr-417); after-reads A: ledger
+               CLOSED with pin 4b008d15 and the built sha256, rolled_back false. Base: FAIL (ETag == 404's bytes).
   IB114-1-AC2  A.replay_on_uploaded: fwd14_gate_unchanged and smartx_class_parity identical. Base: FAIL (no A).
   IB114-1-AC3  A.first_fire: outcome PUBLISHED or REFUSED with output_line, fire_after_landing true, wall_time_s and prior_wall_time_s
                both numbers. Base: FAIL (no A).
@@ -15,9 +15,10 @@ import sys
 from pathlib import Path
 
 A = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB114-1_49f_bundle_after_reads.json"
-SHA = "47be54d6479fdb849477a41b7cffa089319f2f18d38069b3384393fec192dda5"
-MD5 = "1e8ff3096af151f91b96c4e8a3712e4a"
-MSHA = "96925f389381e64beeeb31ebf61eecdd5335fddf30cce0335300b455979bfd62"
+# TO-IB-pr-413 AMENDMENTS 3-5: re-pointed to IB-pr-417 (IB-pr-410's 47be54d6 bundle is NOT applied; row D2-S64)
+SHA = "fe4000cbd31aaee971793854ad6cf26bc7b2d9a37a484e953896a09084f02f2e"
+MD5 = "8b482c8db26c2e913aeee72023bacc7e"
+MSHA = "73f33c3c59b77528c6eaaa56799e9c55f570a7adac23a0c6bcd12e66fe343a81"
 
 
 def head(root):
@@ -48,7 +49,7 @@ def main():
             fail("ETag %r metadata %r" % (h.get("ETag"), h.get("Metadata")))
         a = load()
         led = a.get("ledger") or {}
-        if led.get("state") != "CLOSED" or not str(led.get("pin", "")).startswith("9b7256a99f") or led.get("sha256") != SHA:
+        if led.get("state") != "CLOSED" or not str(led.get("pin", "")).startswith("4b008d15") or led.get("sha256") != SHA:
             fail("ledger %r" % led)
         if a.get("rolled_back") is not False:
             fail("rolled_back %r" % a.get("rolled_back"))
