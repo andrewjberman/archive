@@ -58,7 +58,16 @@ Of those, the CTO ruled three cuts (msg 4919): the ATTACH RELEASE for hops 9, 11
   known-bad sheet (several accounts in one file, a totals row, a holding that cannot be priced) is turned back with what to fix,
   and a known-good sheet goes through. ACCEPT: a file that today would come back by email comes back from the form instead.
   RECORD (the TCKT_VNEXT worker's read, `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~20/ONE_ACCOUNT_CHECK_READ.json`):
-  the normalizer sees NO account column today (`intake/parse.py` reads identifier, name, unit and currency headers only), so the
-  cell must first make an account column visible to it. Not read by this seat: `parse.py` itself. Owed to `2.0.0_SA_COO~V2`: the
+  the normalizer sees NO account column today, so the cell must first make an account column visible to it. CORRECTED 2026-10-11
+  ~21:4xZ (row `IRPT_ANLREQ-D2-W52-S9`, cell `AR-y-146`): that record and this note first named `intake/parse.py` as the file the
+  form's upload reaches. It is NOT: the form reaches `intake/template_reader.py`, and the deployed service refuses the `parse.py`
+  lane by name. Owed to `2.0.0_SA_COO~V2`: the
   order id when it is cut.
+- **UN-PARKED 2026-10-11 ~21:1xZ:** the one-account check above is cut as round 14 (issuance @35c3c4bd45, six cells; the form's
+  door is `intake/template_reader.py`, NOT `parse.py`: row `IRPT_ANLREQ-D2-W52-S9`).
+- **PARKED (owner `2.0.0_SA_COO~Y2`; un-parks when `2.0.0_SA_COO~P2`'s release of the submission's `commentary_requested` member is
+  LIVE AND READ, never before): the form sends `commentary_requested`** (CTO msg 5864, IRPT_YCDGEN PRD v0.13 @e31454a778, signed
+  @6f8aeb03b7): the boolean equals the `add_commentary` answer the form writes to the ticket, sent only on a ticketed request; the
+  vendored schema copy moves with it; a portal candidate to the CTO. SERVICE FIRST: the live submission refuses an unknown member,
+  so a form that sends it early breaks every filing (the same class as row `IRPT_ANLREQ-D2-S59`: cut after the act, not held by text).
 
