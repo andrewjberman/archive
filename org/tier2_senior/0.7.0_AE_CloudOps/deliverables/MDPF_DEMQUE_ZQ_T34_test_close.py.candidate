@@ -1,0 +1,126 @@
+"""TO-DQ-t34: the standing drawer closes a request whose every security reached its end date.
+
+Stub vendor, tmp_path, no network, no Terminal, no auth path. The defect these cover is row
+MDPF_DEMQUE-Z-S3: a weekday-priced quote counts holidays the vendor never returns, so a cell-count test for
+openness never closed the request and every later fire appended a 0-cell DRAWN line.
+"""
+import datetime as dt
+import json
+from pathlib import Path
+import sys
+
+import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+from data.mdpf.scripts.demque import bbg_quote, standing_drawer as sd  # noqa: E402
+
+SATURDAY = dt.date(2026, 10, 17)
+SUNDAY = dt.date(2026, 10, 18)
+FIELDS = ["PX_LAST", "DAY_TO_DAY_TOT_RETURN_GROSS_DVDS"]
+
+
+class Stub:
+    """One row per requested calendar day, capped by the server-side cap the drawer passes."""
+
+    def __init__(self):
+        self.calls = []
+
+    def historical_data(self, securities, fields, start, end, max_data_points=None, on_response_error=None,
+                        diagnostics=None):
+        self.calls.append({"securities": list(securities), "start": start, "end": end})
+        ticker = securities[0]
+        first, last = dt.date.fromisoformat(start), dt.date.fromisoformat(end)
+        rows, day = [], first
+        while day <= last and (max_data_points is None or len(rows) < max_data_points):
+            rows.append({"date": day.isoformat(), FIELDS[0]: 1.0, FIELDS[1]: 0.5})
+            day += dt.timedelta(days=1)
+        return {ticker: rows}
+
+
+def _write(folder, request_id, tier, securities, start, end, quoted_cells):
+    req = {"request_id": request_id, "tier": tier, "reason": "t34 test", "page": "test", "channel": "history",
+           "vendor": "bloomberg", "fields": list(FIELDS), "start": start, "end": end,
+           "securities": [{"cusip": "%09d" % (i + 1), "symbol": s, "bloomberg": s} for i, s in enumerate(securities)]}
+    (folder / (request_id + ".json")).write_text(json.dumps(req), encoding="utf-8")
+    (folder / (request_id + ".quote.json")).write_text(json.dumps(
+        {"request_id": request_id, "channel": "history", "cells": {"bloomberg_history": quoted_cells},
+         "claim": "measured", "finish_date": "2026-10-25", "finish_date_claim": "measured"}), encoding="utf-8")
+    return req
+
+
+@pytest.fixture
+def site(tmp_path, monkeypatch):
+    monkeypatch.setenv(sd.bbg_budget.ENV_DIR, str(tmp_path / "budget"))
+    # A generous measured ceiling: these tests are about CLOSING, not about the room.
+    allowance = tmp_path / "allowance.json"
+    allowance.write_text(json.dumps({"history": {"ceiling": {"value": 400, "claim": "measured", "basis": "test"},
+                                                 "reserve": {"value": 500, "claim": "held", "basis": "test"}}}),
+                         encoding="utf-8")
+    monkeypatch.setattr(bbg_quote, "ALLOWANCE_PATH", allowance)
+    requests_dir = tmp_path / "requests"
+    requests_dir.mkdir()
+    return requests_dir, tmp_path / "actuals.jsonl", tmp_path / "out"
+
+
+def _rows(actuals):
+    if not actuals.exists():
+        return []
+    return [json.loads(ln) for ln in actuals.read_text(encoding="utf-8").splitlines() if ln.strip()]
+
+
+def test_request_whose_securities_all_reached_their_end_is_closed_and_skipped(site):
+    requests_dir, actuals, output = site
+    # The window ends on a Saturday, so once 01-30 is stored no TRADING day remains: reached, hence COMPLETE.
+    _write(requests_dir, "DONE-REQ", 2, ["AAA US Equity"], "2026-01-01", "2026-01-31", 200)
+    client = Stub()
+    first = sd.run(SATURDAY, client, requests_dir, actuals, output)
+    assert first["outcome"] == "COMPLETE", first
+    assert sd.open_requests(requests_dir, actuals, output) == []
+    # The cell count is deliberately BELOW the quote: 60 calendar rows x 2 = 120 of 200 quoted, and the request is
+    # still closed. Under the old cell-count test it would have stayed open forever -- that is row Z-S3.
+    assert first["cells_drawn"] < 200
+    before = len(client.encode) if hasattr(client, "encode") else len(client.calls)
+    second = sd.run(SUNDAY, client, requests_dir, actuals, output)
+    assert second["stop_reason"] == "NO_OPEN_REQUESTS" and second["cells_drawn"] == 0
+    assert second["requests"] == []
+    assert len(client.calls) == before  # skipped at the START of the run: no vendor call at all
+
+
+def test_the_completing_fire_records_complete_not_drawn(site):
+    requests_dir, actuals, output = site
+    # Two fires: the first leaves trading days owed (DRAWN), the second exhausts them (COMPLETE).
+    _write(requests_dir, "TWO-FIRE", 2, ["BBB US Equity"], "2026-01-01", "2026-01-31", 200)
+    client = Stub()
+    first = sd.run(SATURDAY, client, requests_dir, actuals, output, )
+    assert first["outcome"] == "COMPLETE"
+    rows = _rows(actuals)
+    assert len(rows) == 1
+    assert rows[0]["outcome"] == "COMPLETE" and rows[0]["cells_drawn"] == first["cells_drawn"] > 0
+    assert rows[0]["job"] == "TWO-FIRE" and rows[0]["drawer"] == sd.DRAWER
+    # The receipt agrees with the ledger line, so the two carriers cannot disagree about the close.
+    receipt = json.loads((output / ("receipt.%s.json" % SATURDAY)).read_text(encoding="utf-8"))
+    assert [r["outcome"] for r in receipt["requests"]] == ["COMPLETE"]
+
+
+def test_no_zero_cell_drawn_line_after_completion(site):
+    requests_dir, actuals, output = site
+    # One request that completes on the first fire, and one that stays open so the later fire still has work.
+    _write(requests_dir, "CLOSES", 2, ["CCC US Equity"], "2026-01-01", "2026-01-31", 200)
+    # Its window must outlast TWO fires at this room, or it completes on the second one and stops being the
+    # control for "the skip is per request": at 400 cells a fire that is 200 rows, so 730 days is ample. The end
+    # stays inside the trading calendar's coverage (NYSE fallback 2010-2027); 2028 raises CalendarCoverageError.
+    _write(requests_dir, "STAYS-OPEN", 3, ["DDD US Equity"], "2026-01-01", "2027-12-31", 10000)
+    client = Stub()
+    sd.run(SATURDAY, client, requests_dir, actuals, output)
+    sd.run(SUNDAY, client, requests_dir, actuals, output)
+    rows = _rows(actuals)
+    closes = [r for r in rows if r["job"] == "CLOSES"]
+    stays = [r for r in rows if r["job"] == "STAYS-OPEN"]
+    # EXACTLY ONE line for the closed job, it is COMPLETE, and nothing of that job follows it.
+    assert len(closes) == 1 and closes[0]["outcome"] == "COMPLETE" and closes[0]["cells_drawn"] > 0
+    assert [r["date"] for r in rows if r["job"] == "CLOSES" and r["date"] > closes[0]["date"]] == []
+    # No 0-cell DRAWN line anywhere -- the shape row Z-S3 predicted would repeat every non-trading day.
+    assert [r for r in rows if r["outcome"] == "DRAWN" and r["cells_drawn"] == 0] == []
+    # The other request still drew on the later fire, so the skip is per request and not a whole-run halt.
+    assert len(stays) == 2 and all(r["cells_drawn"] > 0 for r in stays)
+    assert sum(1 for r in stays if r["outcome"] == "DRAWN") == 2

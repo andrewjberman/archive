@@ -1,0 +1,147 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_IAMROLES202609.TO-IAM-y-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IR",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3cadaf52ca"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP_R8.md",
+  "vintage_commit": "e27d52cb19",
+  "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-y-2.dead-bucket-sweep.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round8/DEAD_BUCKET_SWEEP.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The sweep: 41 BUCKET lines, the DENOMINATOR line, the controls table, the tombstone cross-reference, and the market_data_v2 section ending in MARKET_DATA_V2_CONSUMERS. THE 41 ROWS WERE GENERATED FROM THE MEASURED DATA, NEVER TRANSCRIBED -- a hand-typed table of 41 rows is how a sweep acquires a wrong number, and this project has already corrected two counts carried in someone's head. Its headline is the cross-reference the cell did not ask for: of 7 absent names, only 1 is tombstoned, so 6 are absences nobody decided on, and 5 of those 6 carry write.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC4"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "`den=1`, and `rows` equal to the number after `names=` -- every distinct bucket name in the denominator has exactly one classified row",
+   "method": "command",
+   "invocation": "bash -c \"f=org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round8/DEAD_BUCKET_SWEEP.md; test -f \\$f || { echo MISSING:\\$f; exit 2; }; echo den=\\$(grep -c -E '^DENOMINATOR: principals=[0-9]+ documents=[0-9]+ names=[0-9]+ wildcard_skipped=[0-9]+\\$' \\$f) rows=\\$(grep -c -E '^BUCKET: [a-z0-9.-]+ class=(ABSENT|FOREIGN|OURS|UNRESOLVED) grants=[0-9]+ write=(yes|no)\\$' \\$f) names=\\$(grep -o -E 'names=[0-9]+' \\$f | head -1)\"",
+   "output_evidence": "den=1 rows=41 names=names=41\nexit=0",
+   "denominator": "41 distinct concrete bucket names enumerated, 41 classified rows. The criterion is a self-consistency check and it closes: rows (41) equals the number after names= (41), so no enumerated name is missing a classification and no row names a bucket the enumeration did not find.",
+   "status": "PASS",
+   "status_reason": "THE CRITERION IS AN INTERNAL-CONSISTENCY CHECK AND IT IS WELL CHOSEN, because the failure it catches is the one this cell is most exposed to: a sweep that enumerates N names and classifies fewer, leaving the gap invisible behind a plausible-looking table. It closes at 41 = 41. THE ENUMERATION'S OWN DENOMINATORS ARE PRINTED RATHER THAN SUMMARISED: 393 principals (303 roles, 9 users, 2 groups, 79 customer-managed policies, all 79 default versions scanned), 651 policy documents, 1666 statements. get-account-authorization-details was auto-paginated and IsTruncated read None, so the 35MB dump is the whole account rather than a first page. TWO DELIBERATE SCOPING DECISIONS ARE VISIBLE IN THE NUMBERS instead of buried. First, ONLY Effect=Allow COUNTS AS A GRANT: a Deny naming a bucket is a guardrail, not an exposure, and counting it would inflate every figure here -- the 2 names appearing only in a Deny or NotResource are tallied separately and excluded. Second, the 3 wildcard names (opal-data-*, opal-*, opal*, 9 occurrences) are COUNTED AND SKIPPED, because a wildcard cannot be classified by a head-bucket call; the sweep says plainly that a wildcard is not evidence of safety, since opal-data-* grants on every future opal-data- bucket including one an attacker creates. Base reading recorded by the issuer: MISSING: the file, exit=2, so the test -f limb is live and this is not a stuck PASS."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "exactly 1 -- market_data_v2's consumers are counted, so next round can rule removal vs owner decision",
+   "method": "command",
+   "invocation": "grep -c -E '^MARKET_DATA_V2_CONSUMERS: [0-9]+$' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round8/DEAD_BUCKET_SWEEP.md",
+   "output_evidence": "1\nexit=0",
+   "denominator": "3 kinds of consumer the cell names -- code, environment variables, grants -- each measured: 1 live IAM grant, 0 environment variables, 0 deployed-code references. The count reported is 1.",
+   "status": "PASS",
+   "status_reason": "THE COUNT IS 1 AND THE ONE IS UNEXERCISABLE, which is the fact that lets the next round rule. The single reference is a live inline grant (role/market-data-generator-lambda-role, market-data-generator-permissions, write=yes) and THAT ROLE READS RoleLastUsed null -- never assumed in its existence -- while the served graph carries an IAM_ROLE and an IAM_POLICY node for it but NO LAMBDA node, so no function exists on the role at all. Environment variables were checked LIVE on the three candidate functions (market-data-generator, opal-market-overview-tiered-generator, opal-portal-data-proxy): 0 references each. Deployed code: 0, and this is the one figure I did not re-derive -- the July 2026 ruling's own gate pulled and grepped the zips of both portal-critical readers and found 0, and nothing has referenced the bucket since. BUT THE ANSWER THAT MATTERS IS NOT THE COUNT, AND IT CORRECTS THE CELL'S OWN PREMISE. The cell describes the bucket as 'deleted out of band', and MY OWN x-1 survey says the same. Both are wrong: infra/aws/terraform/tombstones.json records deleted 2026-07-30, verified_absent (HeadBucket 404), and why 'Andrew ruled DELETE (semantic note 18)', with declaration_removed 'NOT YET -- TF-debt A7, OPEN'. So market-overview's 4-to-add drift is Terraform trying to RESURRECT a bucket Andrew ruled deleted. Filed as Z-S43. I ALSO HAVE TO REPORT THAT THE RECREATE WAS ALREADY GATED AND I NEVER NAMED IT: safe-apply runs a tombstone-gate against that very list, and my own x-6 apply printed 'checked 0 create(s) in this plan against 7 tombstone(s)'. -target was still correct -- a gate you do not know you are relying on is not a control you can cite -- but three of my records describe an unscoped apply as though it would silently recreate a data bucket, and it would have been refused. Three repo copies of the old portal policy also name the bucket; they are stale artifacts rather than consumers, since x-5 removed that ARN from the LIVE document, and they are named so a later sweep does not double-count them."
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "AC4 (JUDGMENT, never self-graded; UNVERIFIABLE-BY-INSTRUMENT, status_reason naming 3.0.0_SA_CVO~Z): does each class carry a control, and could an ABSENT or FOREIGN name be hiding behind an UNRESOLVED row?",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT -- judgment, graded by 3.0.0_SA_CVO~Z",
+   "output_evidence": "Not produced. The order marks AC4 judgment=true, so no verdict is manufactured here. The material to grade: DEAD_BUCKET_SWEEP.md sections 3, 4, 5 and 6, and row Z-S43.",
+   "denominator": "4 classes the schema allows (ABSENT, FOREIGN, OURS, UNRESOLVED); 2 are populated (7 ABSENT, 34 OURS), 2 are empty (0 FOREIGN, 0 UNRESOLVED). So the control question has 2 answerable cases and the hiding question has a denominator of 0.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Graded by 3.0.0_SA_CVO~Z. ON THE SECOND HALF THE ANSWER IS NO, AND IT IS A MEASUREMENT RATHER THAN AN ASSURANCE: there are ZERO UNRESOLVED rows. Every one of the 41 names returned a definite 200 or 404 from head-bucket; no call failed, timed out or returned an unparseable error, so there is no row for an ABSENT or FOREIGN name to hide behind. That is the cleanest possible answer to the question, and it is only worth anything BECAUSE the count is zero -- had even one row read UNRESOLVED, the honest answer would have been 'yes, one could be'. ON THE FIRST HALF, TWO OF THE FOUR CLASSES CARRY A CONTROL AND ONE CANNOT. ABSENT: opal-data-smartx, which round 7 independently proved absent by a different instrument on a different day, is in the swept set and this run classified it ABSENT -- an external anchor rather than a self-consistency check. OURS: all 34 names classified OURS appear in this account's own list-buckets of 40 buckets. FOREIGN: no control, BECAUSE THE CLASS IS EMPTY, and that is a fact about the account rather than a gap in the sweep -- but it is also the one verdict here I cannot corroborate, and I say so rather than implying four-for-four coverage. If a 403 had appeared it would have been the URGENT finding the cell was cut to catch; none did. TWO CROSS-CHECKS GO BEYOND WHAT WAS ASKED and both are clean: 0 names classified OURS are absent from our own bucket list (a 200 on a bucket we do not own would mean cross-account read access and would be a finding in itself), and 0 names classified ABSENT appear in our bucket list (which would be a flat contradiction between two reads and would void the sweep). THE INSTRUMENT CHOICE IS WORTH A GRADER'S ATTENTION because it reverses an earlier finding of mine: head-bucket is the RIGHT tool here and the WRONG one in x-2. It is a HEAD request so it returns no error body, which is exactly why x-2's AC1 failed when I recorded '(404)' where an error CODE was asked for. This sweep needs precisely what a HEAD gives -- the STATUS -- because 403 versus 404 is the whole discrimination, and the cell says '404 / NoSuchBucket' for that reason. An instrument is not good or bad; it answers one question. WHAT I WOULD MOST WANT CHECKED is section 4's cross-reference, because it is the finding the cell did not ask for and it rests on a join: 7 absent names against 7 tombstones gives 1 match, so 6 absences have no record that anyone decided them, and 5 of those carry write. The reverse direction is what makes that meaningful rather than alarming -- 5 of the 6 tombstoned S3 buckets have had their grants cleaned up, so the cleanup pattern exists and was followed, and the 6 untombstoned names are not simply 'how it is always done here'."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The sweep was built so that a wrong number would show, and two of its own premises were tested rather than assumed. (1) The issuer recorded AC1 as MISSING:/exit=2 and AC2 absent at the base; both now read their expected values. (2) AC1 IS ITSELF THE MUTANT CONTROL: it compares the row count against the enumeration's own denominator, so a sweep that classified 40 of 41 names would fail rather than look complete. (3) THE ABSENT CLASS CARRIES AN EXTERNAL ANCHOR: opal-data-smartx was proved absent in round 7 by a different instrument on a different day and this run classified it ABSENT independently. (4) THE OURS CLASS WAS CROSS-CHECKED AGAINST list-buckets: 34 of 34 present, and 0 names classified OURS are missing from our own 40-bucket list -- a 200 on a bucket we do not own would have been its own finding. (5) THE REVERSE CROSS-CHECK WAS RUN: 0 ABSENT names appear in our bucket list, which would have been a contradiction voiding the sweep. (6) ONLY Allow was counted as a grant, with the Deny-only names tallied separately so the scoping choice is auditable. (7) THE TOMBSTONE JOIN WAS RUN IN BOTH DIRECTIONS -- absent-against-tombstoned AND tombstoned-against-granted -- because the first direction alone would have made 6 unexplained absences look like the norm.",
+   "expected": "AC1 den=1 with rows equal to names; AC2 exactly 1; the externally-anchored ABSENT control classified ABSENT by this run; every OURS name present in list-buckets; no ABSENT name present in list-buckets; 0 UNRESOLVED rows.",
+   "observed": "AC1 den=1 rows=41 names=41. AC2 1. opal-data-smartx classified ABSENT. 34 of 34 OURS names in list-buckets; 0 OURS names absent from it; 0 ABSENT names present in it. 0 UNRESOLVED. 7 ABSENT, 34 OURS, 0 FOREIGN. Tombstone join: 1 of 7 absent names tombstoned; 1 of 6 tombstoned S3 buckets still granted on.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The enumeration reads a single auto-paginated dump of get-account-authorization-details whose IsTruncated field was checked (None), so the population is the whole account rather than a page. Classification is one head-bucket call per distinct name, 41 calls, each reading the status rather than a parsed message. The 41 BUCKET rows and the DENOMINATOR line are GENERATED from the measured JSON by a script, not transcribed, so the file cannot drift from the data. Bucket names were written to disk at encoding='ascii', newline='\\n' before the loop, because this device's CRLF trap corrupted exactly this shape earlier in the project (a per-bucket sweep that returned ParamValidation on six names). Byte hygiene measured on the deliverable: 13590 bytes, CR=0, byte-delta 0, non-ASCII 0.",
+   "observed": "41 of 41 names classified, 0 UNRESOLVED, no call retried. AC1 and AC2 re-run as their own separate invocations at close. The generated file reports BUCKET lines=41, DENOMINATOR lines=1, MARKET_DATA_V2_CONSUMERS lines=1.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The three wildcard bucket names (opal-data-*, opal-*, opal*).",
+   "reason": "COUNTED and SKIPPED per the cell, because a wildcard cannot be classified by a head-bucket call -- there is no single name to query. The sweep states that this is not evidence of safety: opal-data-* grants on every future opal-data- bucket, including a name someone else creates. That is a different question needing a different instrument and it is named rather than dropped."
+  },
+  {
+   "item": "Whether any of the six untombstoned ABSENT names should be narrowed or RECREATED.",
+   "reason": "Not this cell's to decide and deliberately not proposed. market_data_v2 is the proof that the inference does not run backwards: for a tombstoned name the answer is narrow the grant, but for an untombstoned one nobody has established whether the bucket or the grant is the mistake. Six names may not share one answer -- the same shape as x-5's six. The cell routes each ABSENT-with-write to round 9's narrowing, which is where the decision belongs."
+  },
+  {
+   "item": "TF-debt A7 (removing market_data_v2's Terraform declaration).",
+   "reason": "Known, tracked and OPEN by this lane's own deliberate choice. RULINGS_LEDGER line 115 records that 0.7.0_AE_CloudOps found A6/A7 in its own July sweep and DISOWNED them as NOT-AUTHORIZED, because they read as an obvious continuation of a thread Andrew had opened but were not inside his approval. Reopening that scope question is Andrew's or the CTO's, and I am not reversing a boundary this seat drew against itself."
+  },
+  {
+   "item": "The 34 OURS names, and whether their live grants are right-sized.",
+   "reason": "Out of scope. This cell asks whether identity grants point at buckets that do not exist, not whether grants on existing buckets are too wide. The 34 are classified and counted; nothing is asserted about their shape."
+  },
+  {
+   "item": "Any bucket creation, policy edit, Access Analyzer call, alert, monitor or schedule.",
+   "reason": "READ-ONLY by the cell's BOUNDS, which also say explicitly never to create a bucket to test a name -- doing so would claim a global name and change the very fact being measured. G-21 and G-25 bar the rest. None was performed or proposed, and no deploy ledger was opened because there is no act to bound."
+  }
+ ],
+ "surprises": [
+  "NFRA_IAMROLES202609-Z-S43: market_data_v2 was NOT deleted out of band -- Andrew ruled it, it is tombstoned with declaration_removed 'NOT YET -- TF-debt A7, OPEN', and safe-apply's tombstone-gate would already refuse the recreate. TWO COMMITTED ARTIFACTS OF THIS PROJECT STATE THE PREMISE BACKWARDS, one of them mine: the IAM-y-2 cell text and my own PLAN_SURVEY_family_c.md section 5. The general lesson is not about this bucket: 'deleted out of band' was an INFERENCE from a plan's shape -- four resources to add, therefore something vanished -- never checked against the estate's own records, which held the answer in a file the very gate I ran on three applies reads. A plan tells you what Terraform intends; it cannot tell you whether the world's state was intended.",
+  "NFRA_IAMROLES202609-Z-S39: the row this cell generalises. Round 7 found dead-bucket grants on three roles and closed six ARNs on one of them; this sweep is the account-wide question nobody had asked. The answer is that the class is wider than the role -- 7 absent names across 8 principals, 6 of them carrying write -- and that NONE of the seven was reachable only through the role x-5 narrowed."
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-10/ir_lane_iamroles_r6_w1_phase_b_and_w2_phase_a.md, round-7 section (round 8 follows). This seat is a SESSION seat, not an L7 worker subagent. GO: the round-8 issuance @e27d52cb19, on ROUND_ANALYSIS.round7.md @fef971046b E2. THE SWEEP'S OWN RESULT IS NARROWER THAN FEARED AND ITS BY-PRODUCT IS SHARPER THAN THE RESULT. Narrower: 41 distinct bucket names in live identity grants across 393 principals, 7 absent, and ZERO in the FOREIGN class -- so the urgent case the cell was cut to catch, a name already belonging to another account with our grant reaching it, does not exist in this account today. Sharper: joining the 7 absences against the estate's own tombstone list shows only ONE was a decision. Six are absences nobody recorded deciding, five of them carrying write, and the reverse join is what makes that a finding rather than a panic -- 5 of 6 tombstoned buckets had their grants cleaned up, so the pattern exists and these six are outside it. And the join corrected a premise I had asserted twice: market_data_v2 was ruled deleted by Andrew, is tombstoned, and its recreate is already refused by a gate I ran three times this session without citing. The instrument lesson is the one I would keep: head-bucket is the right tool here and the wrong one in x-2, because a HEAD returns a STATUS and this sweep needs 403-versus-404 while x-2 needed an error CODE. An instrument is not good or bad; it answers one question.",
+ "compiler_tools": [
+  {
+   "tool": "aws iam get-account-authorization-details (the enumeration)",
+   "invocation": "one auto-paginated call, 35,203,310 bytes, IsTruncated checked",
+   "result": "PASS",
+   "note": "The whole account in one dump: 303 roles, 9 users, 2 groups, 79 customer-managed policies. IsTruncated read None, which is the check that makes this a population rather than a page -- the paginated-list trap this project has already been bitten by, where --query length() returned a per-page count. Every figure the sweep prints descends from this one dump, so the denominators are consistent with each other by construction."
+  },
+  {
+   "tool": "a generated extractor (the classification of what counts as a grant)",
+   "invocation": "python -I over the dump: role, user and group inline policies plus each customer-managed policy's DEFAULT version; Resource and NotResource parsed for arn:aws:s3:::<name>",
+   "result": "PASS",
+   "note": "Two scoping decisions are IN THE CODE and in the output rather than implied. Only Effect=Allow counts as a grant, because a Deny naming a bucket is a guardrail and counting it would inflate every number -- the Deny-only names are tallied separately. Wildcard names are counted and skipped rather than silently dropped. write=yes is computed from s3:Put*, s3:Delete* or s3:* on the granting statement, so it is a property of the statement rather than of the role."
+  },
+  {
+   "tool": "aws s3api head-bucket (the classifier) -- the right tool HERE and the wrong one in x-2",
+   "invocation": "41 calls, one per distinct name, reading the HTTP status",
+   "result": "PASS",
+   "note": "A HEAD request returns no error body, which is exactly why x-2's AC1 failed when I recorded '(404)' where an error CODE was asked for and had to re-measure with get-bucket-location. This sweep needs precisely what a HEAD gives -- the STATUS -- because 403 versus 404 is the whole discrimination between 'someone else already owns this name' and 'anyone can claim it'. The cell says '404 / NoSuchBucket' for that reason. Names were written to disk LF-clean before the loop, because this device's CRLF trap corrupted this exact shape earlier in the project."
+  },
+  {
+   "tool": "aws s3api list-buckets (the OURS control)",
+   "invocation": "one call, 40 buckets",
+   "result": "PASS",
+   "note": "Used in BOTH directions, which is the part that matters: every one of the 34 names classified OURS appears in it, AND no name classified ABSENT appears in it. The first makes the 200s evidence; the second would have caught a flat contradiction between two reads."
+  },
+  {
+   "tool": "infra/aws/terraform/tombstones.json + RULINGS_LEDGER.jsonl (the join the cell did not ask for)",
+   "invocation": "read both; join the 7 tombstones against the 7 ABSENT names, then the reverse",
+   "result": "PASS",
+   "note": "This produced the sweep's sharpest output and corrected a premise I had asserted twice. Running the join in BOTH directions is what made it a finding rather than an alarm: 1 of 7 absences is tombstoned, but 5 of 6 tombstoned buckets have had their grants cleaned up, so the cleanup pattern exists and the six untombstoned names sit outside it. The ledger also supplied the deletion's own gate, which is more thorough than anything this project has run."
+  },
+  {
+   "tool": "aws lambda get-function-configuration + comp-find --corpus aws (the consumer count)",
+   "invocation": "Environment.Variables on three candidate functions; the served graph for market-data-generator's node set; get-role for RoleLastUsed",
+   "result": "PASS",
+   "note": "0 env references on each candidate. The graph returned 2 hits across 2891 nodes for market-data-generator -- an IAM_ROLE and an IAM_POLICY, and NO LAMBDA node -- and get-role read RoleLastUsed null. Those two reads together are what turn 'one grant' into 'one grant nothing can exercise', which is the fact the next round's ruling actually needs."
+  },
+  {
+   "tool": "comp-iam / comp-blast / safe-apply / terraform / deploy_ledger",
+   "invocation": "NOT RUN",
+   "result": "SKIP",
+   "note": "READ-ONLY cell: no plan, no apply, no ledger -- NEVER-2 opens an entry at the start of an act on the world and there is no act. comp-iam in particular could not answer this question and its own doctrine says so: it models (action) and never (action, resource), so it cannot tell whether a grant points at a bucket that exists, which is the entire sweep. The authorization-details dump plus 41 head-bucket calls is the instrument that can."
+  }
+ ]
+}
