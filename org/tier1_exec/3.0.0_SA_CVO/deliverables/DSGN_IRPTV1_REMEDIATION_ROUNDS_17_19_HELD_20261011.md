@@ -17,3 +17,22 @@ terminal. OWNER: `3.0.0_SA_CVO`. UN-PARKS ON: no DSGN_IRPTV1 order open.
   seat's read (mixtures admitted) closes with the second.
 
 **For the slug:** FWD-1 has no rendered walk on the new Holdings face. Other rows not yet compiled: D2-W53-S1, D2-W53-S2, D2-W53-S3, D2-W53-S4.
+
+---
+
+## Added at rounds 18 and 20 and IV-e-95, 2026-10-11T13:35:10Z (input: msg 5015)
+
+Held on the same condition (no DSGN_IRPTV1 order open):
+
+- **D2-W54-S1** (BLOCKING; owner `2.0.0_SA_COO~D2`): with the wire folder regenerated, one arm of the regeneration test still fails
+  on the content-pins subprocess, which hard-codes 17 operations where the client consumes 24. Remedy: the pin is derived or re-set
+  by a ruling.
+- **D2-W56-S2** (owner `1.0.0_SA_CTO~DELL2`): the PROD portal reads 5 of the 7 irpt-status routes; it has no method for the PDF or
+  the original-file read. It bears on what a PROD push must carry before a re-release.
+- **D2-W56-S3** (owner `2.0.0_SA_COO~D2`): on the v1 plane the sections reader drops `retained_ref`, the member release 5 adds.
+- **D2-W53-S8** (owner `2.0.0_SA_COO~D2`): the documented way to regenerate the smoke map rewrites a tracked request fixture
+  without one of its members. Remedy: the generator leaves that file alone.
+- **D2-W53-S2** (owner `2.0.0_SA_COO~D2`): one test file carries a raw NUL byte, so search tools skip it as binary.
+
+**For the slug:** the reader census finds one PROD reader that refuses release 5, the history reader; its probes are the worker's
+and no live body was read.
