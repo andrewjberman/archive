@@ -1,0 +1,77 @@
+{
+  "live_code_sha256": "YpE2MyUwdGzMfLaUGXi8cClxoVHFFmOz5LT1BYmoTa8=",
+  "live_read_at_utc": "2026-10-11T19:05:15Z",
+  "live_function": {
+    "name": "irpt-intake-poller",
+    "last_modified": "2026-09-11T12:55:52.000+0000",
+    "runtime": "python3.12",
+    "state": "Active"
+  },
+  "artifact_bucket_and_key_from": "infra/aws/lambda/ci/lambda-source-map.json, the functions entry keyed 'irpt-intake-poller': artifact_s3_bucket = opal-313476888478-lambda-artifacts and artifact_s3_key = investor-reporting/irpt-intake-poller.zip. Read from the file rather than typed from memory, as the order requires. The same entry independently carries artifact_sha256 and deployed_code_sha256, both equal to the live CodeSha256 read above, and last_deployed_at 2026-10-04T22:04:06Z recorded by record-terraform-deploy.sh.",
+  "bucket_versioning": "Enabled",
+  "artifact_versions": [
+    {
+      "version_id": "DICktwYaCg5b.R8.Ab6oHhI82db0d9Ls",
+      "last_modified": "2026-09-11T12:52:28+00:00",
+      "size": 52312,
+      "is_latest": true,
+      "content_sha256": "YpE2MyUwdGzMfLaUGXi8cClxoVHFFmOz5LT1BYmoTa8=",
+      "etag": "b3d8b9719418d8b68c965985c9e3b6e3",
+      "etag_source": "s3api head-object --version-id, full value; not a prefix"
+    },
+    {
+      "version_id": "uLFEgIP4fHTfPH_Pgc.CezHT6xPUza6L",
+      "last_modified": "2026-09-11T01:49:44+00:00",
+      "size": 49281,
+      "is_latest": false,
+      "content_sha256": "JbZrYN+jgVMNxU428sahOsan6ngXAUNHp555x9gnap0=",
+      "etag": "649bf90111c99f21f3e2c44fdb785e1b",
+      "etag_source": "s3api head-object --version-id, full value; not a prefix"
+    }
+  ],
+  "artifact_versions_count": 2,
+  "artifact_versions_method": "s3api list-object-versions with the key as --prefix, auto-paginated (never --no-paginate), then filtered CLIENT-SIDE to Key equal to the exact artifact key and counted client-side: 2 Versions and 0 DeleteMarkers matched the exact key, out of 2 Versions and 0 DeleteMarkers the prefix returned, and IsTruncated was absent. Each version's content_sha256 is the base64 sha256 of the bytes DOWNLOADED by s3api get-object --version-id into a new empty folder outside the repository, computed locally -- never read from an ETag and never trusted from metadata. No delete marker was present, so no version carries a null content_sha256.",
+  "outcome": "FOUND",
+  "rollback_artifact": {
+    "version_id": "DICktwYaCg5b.R8.Ab6oHhI82db0d9Ls",
+    "content_sha256": "YpE2MyUwdGzMfLaUGXi8cClxoVHFFmOz5LT1BYmoTa8=",
+    "last_modified": "2026-09-11T12:52:28+00:00",
+    "size": 52312,
+    "re_read_by_head_object": true,
+    "head_object_reread": {
+      "at_utc": "2026-10-11T19:10:08Z",
+      "content_length": 52312,
+      "etag": "b3d8b9719418d8b68c965985c9e3b6e3",
+      "object_metadata_content_sha256": "YpE2MyUwdGzMfLaUGXi8cClxoVHFFmOz5LT1BYmoTa8=",
+      "note": "The head-object re-read agrees three ways with the content hash: the object's own content-sha256 metadata, its ContentLength, and the version id. The metadata is corroboration only; the digest that decided FOUND is the one computed from the downloaded bytes. Both versions were head-read at 19:10:08Z and 19:10:13Z respectively; the ETag and the object content-sha256 metadata recorded for each come from those reads at their full length."
+    },
+    "matches_in_the_version_list": 1,
+    "why_this_one": "Exactly ONE of the 2 versions carries the live digest, so 'the newest such version' is unambiguous and no tie-break was needed. It is also the latest version of the key, and its LastModified 2026-09-11T12:52:28Z sits 3 minutes 24 seconds before the live function's LastModified 2026-09-11T12:55:52Z, which is the shape expected of the upload that made the function live."
+  },
+  "noncurrent_expiry": {
+    "rule_present": false,
+    "days": null,
+    "read_from": "s3api get-bucket-lifecycle-configuration on opal-313476888478-lambda-artifacts. The bucket HAS a lifecycle configuration, so the answer is not NoSuchLifecycleConfiguration, but it holds exactly ONE rule -- abort-incomplete-mpu-7d, Enabled, empty prefix filter -- whose only action is AbortIncompleteMultipartUpload after 7 days. There is NO NoncurrentVersionExpiration and no Expiration action of any kind, so nothing in the configuration would expire the found noncurrent-capable version. Stated as rule_present false because the question is specifically about a rule that expires NONCURRENT versions, and there is none; the MPU-abort rule is recorded here so the reading is not mistaken for 'no lifecycle at all'.",
+    "consequence": "No row is owed to the issuer on this point: the found version is not at risk from a lifecycle rule. It is the LATEST version today, and it would only become noncurrent if something else were uploaded to the same key."
+  },
+  "stopped_because": null,
+  "writes_made": 0,
+  "writes_made_evidence": "No put-object, copy-object, delete-object, s3 cp/mv/rm/sync, update-function-code, publish-version, terraform, safe-apply or invoke was run. Every AWS call in `commands` is a get, head, list or describe. The two downloaded zips were hashed and never executed.",
+  "commands": [
+    "bash .tools/aws lambda get-function-configuration --function-name irpt-intake-poller --query {CodeSha256:CodeSha256,LastModified:LastModified,Runtime:Runtime,State:State} --output json",
+    "bash .tools/aws s3api get-bucket-versioning --bucket opal-313476888478-lambda-artifacts --output json",
+    "bash .tools/aws s3api list-object-versions --bucket opal-313476888478-lambda-artifacts --prefix investor-reporting/irpt-intake-poller.zip --output json",
+    "bash .tools/aws s3api get-bucket-lifecycle-configuration --bucket opal-313476888478-lambda-artifacts --output json",
+    "bash .tools/aws s3api get-object --bucket opal-313476888478-lambda-artifacts --key investor-reporting/irpt-intake-poller.zip --version-id DICktwYaCg5b.R8.Ab6oHhI82db0d9Ls <scratch>/DICktwYaCg5b.R8.Ab6oHhI82db0d9Ls.zip --output json",
+    "bash .tools/aws s3api get-object --bucket opal-313476888478-lambda-artifacts --key investor-reporting/irpt-intake-poller.zip --version-id uLFEgIP4fHTfPH_Pgc.CezHT6xPUza6L <scratch>/uLFEgIP4fHTfPH_Pgc.CezHT6xPUza6L.zip --output json",
+    "bash .tools/aws s3api head-object --bucket opal-313476888478-lambda-artifacts --key investor-reporting/irpt-intake-poller.zip --version-id DICktwYaCg5b.R8.Ab6oHhI82db0d9Ls --output json",
+    "py -3.12 (local, no AWS): base64 sha256 of each downloaded zip, compared with live_code_sha256",
+    "py -3.12 (local, no AWS): read artifact_s3_bucket and artifact_s3_key from infra/aws/lambda/ci/lambda-source-map.json"
+  ],
+  "local_housekeeping": "Disclosed separately from `commands` so the AWS command list stays exactly the set AC3 grades, and so a local cleanup is not mistaken for an AWS act. The two versions were downloaded into a NEW EMPTY folder outside every worktree (the session scratchpad under AppData/Local/Temp), created with mkdir -p after an rm -rf of that same path to guarantee it was empty, and removed file by file when the hashing was done. Nothing was written inside the repository by this cell except the record, the proof instance and this lane's report; no ledger entry was opened, because nothing is deployed and nothing moves.",
+  "what_this_does_and_does_not_settle": "It settles WHERE the rollback artifact is: version DICktwYaCg5b.R8.Ab6oHhI82db0d9Ls of the existing artifact key already holds the exact bytes the function runs, so the CTO's 'saved once, version id recorded' is satisfied by recording it and NO second copy is needed or made. It does not settle the separate problem behind the order -- row IRPT_ANLREQ-D2-W53-S3, that 21 of the 28 live members have no blob in git, so the tree still cannot rebuild this package. This record gives a rollback target; it does not restore reproducibility.",
+  "corrections_made_before_commit": [
+    "The second version's etag was first written as the 12-character prefix 649bf90111c9, which a display had truncated. Replaced with the full value 649bf90111c99f21f3e2c44fdb785e1b read from head-object. A truncated digest recorded as a digest is the defect CLAUDE.md names: a value must carry its claim.",
+    "The head-object re-read time was first written as the placeholder 2026-10-11T19:08:xxZ. Replaced with the measured 2026-10-11T19:10:08Z. A placeholder in a time field is not a time."
+  ]
+}
