@@ -1,0 +1,55 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # aws_iam_role_policy.commentary_composition_read will be updated in-place
+  ~ resource "aws_iam_role_policy" "commentary_composition_read" {
+        id          = "irpt-commentary-composition-read-role:irpt-commentary-composition-read-policy"
+        name        = "irpt-commentary-composition-read-policy"
+      ~ policy      = jsonencode(
+          ~ {
+              ~ Statement = [
+                  ~ {
+                      ~ Resource  = [
+                            "arn:aws:dynamodb:us-east-1:313476888478:table/irpt-requests",
+                          + "arn:aws:dynamodb:us-east-1:313476888478:table/irpt-jobs",
+                        ]
+                        # (4 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ StringEquals = {
+                              ~ "kms:EncryptionContext:aws:dynamodb:tableName" = "irpt-requests" -> [
+                                  + "irpt-requests",
+                                  + "irpt-jobs",
+                                ]
+                                # (1 unchanged attribute hidden)
+                            }
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                    {
+                        Action   = [
+                            "s3:GetObject",
+                            "s3:GetObjectVersion",
+                        ]
+                        Effect   = "Allow"
+                        Resource = [
+                            "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/request_compositions/*",
+                            "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/request_compositions/*",
+                            "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/request_compositions/*",
+                        ]
+                        Sid      = "S3ReadRetainedRequestCompositionsOnly"
+                    },
+                    # (2 unchanged elements hidden)
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (2 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
