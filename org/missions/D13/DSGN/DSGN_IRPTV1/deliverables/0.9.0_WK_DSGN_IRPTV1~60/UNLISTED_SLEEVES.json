@@ -1,0 +1,68 @@
+{
+  "to_id": "DSGN_IRPTV1.TO-IV-e-110",
+  "sentence": {
+    "text": "$250,000.00 (25.00%) of the $1,000,000.00 total is held in sleeves this table does not itemise, because the sleeve holds cash only or its detail is withheld.",
+    "where": {
+      "file": "portal/src/pages/InvestorReporting/tabs/holdings/SecurityList.tsx",
+      "line": 297
+    },
+    "drawn_at": "unlistedSleevesWords() (line 297, text) printed by UnlistedSleevesNote (data-slot security-unlisted-sleeves) at lines 478 (no securities at all) and 538 (under the table), inside the Securities panel; navy ink, max-w 720px, no new band or colour"
+  },
+  "reasons_named": [
+    "the sleeve holds cash only",
+    "its detail is withheld"
+  ],
+  "amount_rule": "The card's total less the listed rows, from the served nodes the page holds: snapshot.custodyTotalAmount (the figure the Total Assets card shows) minus the sum of node.amount over the table's rows (securityRowsFrom: every node of kind 'security', a producer CASH node included, whose amount is not zero), taken before the Sleeve/Account selects and the per-security fold (neither changes a sum). Rounded to the cent; the sentence shows only when the result is above 0.01. Share = amount / custodyTotalAmount. With an account picked the snapshot in hand is that account's one-account answer, so the same rule runs over that account. No sentence when custodyTotalAmount is absent or not above zero, when a listed row has a null amount (the gap is then unknown and is not guessed), or under a Sleeve or Account choice in the table. No new request.",
+  "node_says_reason": "No. A served node marks a withheld drill (the 'DRILL WITHHELD' capability fact, classification.capabilityFacts on the sleeve), but nothing marks a sleeve as cash only (the producer's cash-only sleeve carries no mark, and its CASH child is itself a listed row on this page). The sentence therefore names both reasons without apportioning, and says so here. See row DSGN_IRPTV1-D2-W60-S3.",
+  "producer_read": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~298/IB138-1_SLEEVE_LEAF_READ.md (order IB-pr-440): drained to this tree and read.",
+  "cases": [
+    {
+      "case": "Two accounts, each with an SMA sleeve that has no security (150,000 + 100,000): listed rows 750,000 of a 1,000,000 card",
+      "sentence_shown": true
+    },
+    {
+      "case": "The same snapshot with securities under both SMA sleeves: listed rows 1,000,000 of 1,000,000",
+      "sentence_shown": false
+    },
+    {
+      "case": "Account A picked (one-account answer, 150,000 of 500,000 unlisted)",
+      "sentence_shown": true
+    },
+    {
+      "case": "A one-cent gap (rounding), a listed row with no amount, no total served, or a Sleeve choice in the table",
+      "sentence_shown": false
+    }
+  ],
+  "test": {
+    "id": "dsgn-irptv1/iv-e-110.holdings-table-states-unlisted-sleeves.test.tsx :: IVE110 -- the Holdings table says how much of the total it does not itemise",
+    "passes": true,
+    "result": "5 pass 0 fail",
+    "mutant": {
+      "what": "SecurityList.tsx unlistedSleevesFrom(): the gate `if (!(amount > UNLISTED_TOLERANCE)) return null` replaced by `if (amount > Infinity) return null` (the sentence then shows whatever the gap, including none); the file was committed first and reverted with git checkout --",
+      "failed": true,
+      "result": "3 pass 2 fail: arm (b) 'absent when whole' and arm (d) 'a one-cent gap' failed (evidence mutant110.txt in the private evidence folder)"
+    }
+  },
+  "screenshots": [
+    "unlisted-sleeves.client.png"
+  ],
+  "screenshots_read": [
+    "unlisted-sleeves.client.png"
+  ],
+  "screenshots_say": {
+    "unlisted-sleeves.client.png": "From a build (bun run build; dist removed afterwards), the folder's holdings-face-driver.mjs in client mode over the synthetic two-account fixture (0.9.0_WK_DSGN_IRPTV1~53/holdings-face.no-pick.fixture.json). Holdings tab: Total Assets $1,000,000.00; the Securities panel lists two rows (Sample Equity Fund $650,000.00, Sample Client Fund $100,000.00) and, under the table inside the white panel, one navy line: '$250,000.00 (25.00%) of the $1,000,000.00 total is held in sleeves this table does not itemise, because the sleeve holds cash only or its detail is withheld.' No red, no tint, no new band; the dark panel footer follows."
+  },
+  "lint_errors": 0,
+  "lint_warnings": "339 (base 337)",
+  "typecheck_errors": 0,
+  "suite_before": { "command": "bun test src/pages/InvestorReporting at portal ca23f110 before any edit", "pass": 1169, "skip": 27, "fail": 0 },
+  "suite_after": { "command": "bun test src/pages/InvestorReporting at portal 78ec66db", "pass": 1174, "skip": 27, "fail": 0, "tests": 1201, "files": 383, "new_failing_ids": [] },
+  "product_files_changed": [
+    "portal/src/pages/InvestorReporting/tabs/holdings/SecurityList.tsx"
+  ],
+  "test_files_changed": [
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-110.holdings-table-states-unlisted-sleeves.test.tsx (new)"
+  ],
+  "portal_commit": "78ec66dbfcc07cf259842d320ab082b02204eae5",
+  "rows": ["DSGN_IRPTV1-D2-W60-S3"]
+}
