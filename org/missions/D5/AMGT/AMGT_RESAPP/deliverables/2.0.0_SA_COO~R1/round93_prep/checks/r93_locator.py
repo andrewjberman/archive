@@ -121,12 +121,15 @@ def main():
     res.append(say(bool(e) and e["value"] == 21.05 and holds_value("SAP_GY_Equity", e),
                    "L4 SAP 2025 21.05 (a decimal), asked alone, verifies",
                    ("span %s" % e.get("span")) if e else "held: %s" % (h4[0].get("reason") if h4 else None)))
+    # K1 reads the stored point only when the object still carries one: after round 93's `AMGT-ss-4` (SAP's driver re-verified under the
+    # mixed-scale rule) the stored point list is empty, and the span the point had is the literal below.
     stored = {p["period"]: p for p in sap["stored_points"]}
     k1, _h1 = verify(sap, [{"period": "2024", "value": 18078}])
     e = k1[0] if k1 else None
-    res.append(say(bool(e) and e.get("span") == stored["2024"]["span"] == [129709, 129715]
-                   and e.get("passage_id") == stored["2024"]["passage_id"],
-                   "K1 control: SAP 2024 18,078, asked alone, keeps its stored span and passage", "span %s" % (e or {}).get("span")))
+    same_passage = (e.get("passage_id") == stored["2024"]["passage_id"]) if (e and "2024" in stored) else bool(e and e.get("passage_id"))
+    res.append(say(bool(e) and e.get("span") == [129709, 129715] and same_passage,
+                   "K1 control: SAP 2024 18,078, asked alone, keeps its span [129709, 129715] and a passage",
+                   "span %s" % (e or {}).get("span")))
     reasons = " | ".join(str((h or {}).get("reason")) for h in held.values()).lower()
     res.append(say(not kept and sorted(held) == ["2023", "2024", "2025"] and "million" in reasons and "billion" in reasons,
                    "L5 the production re-verification of SAP holds all three points under a reason naming both scales",
