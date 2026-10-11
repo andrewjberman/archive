@@ -8,9 +8,16 @@
                          BEFORE any table or S3 access, and serves one who is, whichever comparison admits it;
                          users/me still answers a client-tier caller with its own row
 
+  s9-tests    OW-s3-AC1  FWD-9: the worker's named tests of the submit handler exist and pass
+  s9-probe    OW-s3-AC2  FWD-9: the ISSUER's own probe of submission_handler.lambda_handler: a caller who is not
+                         OPAL-INTERNAL is answered 403 with the new check's own message before any table, user lookup or
+                         mail, whatever the body; an Opal-internal caller posting a malformed ticket_id reaches the 400
+  s9-regress  OW-s3-AC3  FWD-9: the submit handler's whole test directory passes (the pre-existing files included)
+
 Prints <TOKEN>-OK or <TOKEN>-FAIL <reason>, exits 0 / 1. Run from the worktree root. Subprocesses are bounded (110 s).
 """
 import importlib
+import json
 import os
 import re
 import subprocess
@@ -49,11 +56,25 @@ GATED = [
 ]
 
 
+SUB = Path("infra/aws/lambda/trade-pipeline/trade-submission-handler")
+SUB_TEST = SUB / "tests" / "test_submit_internal_only.py"
+S9_NAMES = ["test_opal_firm_caller_reaches_the_ticket_check",
+            "test_tier_internal_caller_reaches_the_ticket_check",
+            "test_client_tier_refused_with_the_new_message",
+            "test_service_tier_refused_with_the_new_message",
+            "test_outsider_without_email_gets_the_new_message_first",
+            "test_refusal_touches_no_table_no_user_lookup_and_no_mail",
+            "test_opal_caller_legacy_submit_still_stores"]
+S9_MESSAGE = "Forbidden: trade submission answers Opal staff only"
+
+
 def _strip(s):
     return re.sub(r"\x1b\[[0-9;]*m", "", s)
 
 
-def _tests():
+def _tests(test_file=None, names=None):
+    DASH_TEST = test_file or globals()["DASH_TEST"]
+    S2_NAMES = names or globals()["S2_NAMES"]
     if not DASH_TEST.exists():
         return False, "absent: %s" % DASH_TEST.as_posix()
     src = DASH_TEST.read_text(encoding="utf-8")
@@ -167,6 +188,101 @@ def _probe():
         refused, len(callers) * len(GATED), len(callers), len(GATED), served, len(insiders) * len(GATED), len(insiders))
 
 
+def _s9_regress():
+    d = SUB / "tests"
+    if not d.exists():
+        return False, "absent: %s" % d.as_posix()
+    files = sorted(f.name for f in d.glob("test_*.py"))
+    try:
+        r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", d.as_posix()],
+                           capture_output=True, text=True, timeout=110)
+    except subprocess.TimeoutExpired:
+        return False, "timeout"
+    out = _strip(r.stdout + r.stderr)
+    passed = int((re.search(r"(\d+) passed", out) or [0, 0])[1])
+    bad = int((re.search(r"(\d+) failed", out) or [0, 0])[1]) + int((re.search(r"(\d+) error", out) or [0, 0])[1])
+    if r.returncode != 0 or bad or not passed:
+        return False, "rc=%d passed=%d failed+errors=%d across %d file(s)" % (r.returncode, passed, bad, len(files))
+    return True, "passed=%d across %d test file(s)" % (passed, len(files))
+
+
+def _s9_probe():
+    src = SUB / "src"
+    if not (src / "submission_handler.py").exists():
+        return False, "absent: %s" % (src / "submission_handler.py").as_posix()
+    os.environ.setdefault("AWS_DEFAULT_REGION", "us-east-1")
+    sys.path.insert(0, str(src.resolve()))
+    try:
+        mod = importlib.import_module("submission_handler")
+    except Exception as e:  # noqa: BLE001
+        return False, "import failed: %s" % e
+    touched = []
+
+    def trip(name):
+        def _f(*_a, **_k):
+            touched.append(name)
+            raise AssertionError("touched %s" % name)
+        return _f
+
+    for name in ("get_user", "get_users_by_group", "send_approval_request"):
+        if not hasattr(mod, name):
+            return False, "handler module has no %s to guard" % name
+    outsiders = {
+        "client": {"email": "c@client.test", "tier": "client", "userType": "client", "firmId": "some-client-firm"},
+        "service": {"email": "svc-x", "tier": "service", "userType": "service", "firmId": "null"},
+        "advisor-other-firm": {"email": "a@partner.test", "tier": "advisor", "firmId": "49financial"},
+        "dev-other-firm": {"email": "d@partner.test", "tier": "advisor", "userType": "Dev", "firmId": "49financial"},
+        "near-miss": {"email": "m@x.test", "tier": "Internal", "firmId": "opal-capital-x"},
+        "outsider-no-email": {"tier": "advisor", "firmId": "49financial"},
+        "no-context": None,
+    }
+    insiders = {
+        "tier-internal": {"email": "staff@opal.test", "tier": "internal", "firmId": "null"},
+        "advisor-tier-opal-firm": {"email": "staff3@opal.test", "tier": "advisor", "firmId": "opal-capital"},
+    }
+    legacy = {"fund": "PFDE", "brokerage": "vident", "weights_as_of": "2026-09-25", "proposed_trades_as_of": "2026-09-25",
+              "attestations": {"guidelines": True}, "securities": [{"ticker": "AAPL", "proposed_weight": 0.2}]}
+    bodies = {"malformed-ticket": dict(legacy, ticket_id="not-a-ticket-id"), "legacy": legacy, "empty": {},
+              "named-initiator": dict(legacy, initiator_email="someone.else@opal.test")}
+
+    def call(claims, body):
+        ev = {"requestContext": {"http": {"method": "POST"}}, "body": json.dumps(body)}
+        if claims is not None:
+            ev["requestContext"]["authorizer"] = {"lambda": claims}
+        del touched[:]
+        mod.dynamodb = _Tripwire()
+        mod.get_user, mod.get_users_by_group = trip("get_user"), trip("get_users_by_group")
+        mod.send_approval_request = trip("send_approval_request")
+        resp = mod.lambda_handler(ev, None)
+        t = list(touched) + object.__getattribute__(mod.dynamodb, "touched")
+        try:
+            msg = json.loads(resp.get("body") or "{}").get("message")
+        except ValueError:
+            msg = None
+        return resp.get("statusCode"), msg, t
+
+    refused = 0
+    for who, claims in outsiders.items():
+        for bname, body in bodies.items():
+            code, msg, t = call(claims, body)
+            if code != 403 or msg != S9_MESSAGE:
+                return False, "%s / %s answered %s %r, expected 403 %r" % (who, bname, code, msg, S9_MESSAGE)
+            if t:
+                return False, "%s / %s touched %s before refusing" % (who, bname, t)
+            refused += 1
+    reached = 0
+    for who, claims in insiders.items():
+        code, msg, t = call(claims, bodies["malformed-ticket"])
+        if code != 400 or msg != "ticket_id is malformed":
+            return False, "%s / malformed-ticket answered %s %r, expected 400 ticket_id is malformed" % (who, code, msg)
+        if t:
+            return False, "%s / malformed-ticket touched %s before the 400" % (who, t)
+        reached += 1
+    return True, ("refused=%d of %d (%d outsiders x %d bodies) with the new message and nothing touched, "
+                  "insiders at the 400=%d of %d") % (
+        refused, len(outsiders) * len(bodies), len(outsiders), len(bodies), reached, len(insiders))
+
+
 def _record():
     if not S1_DOC.exists():
         return False, "absent: %s" % S1_DOC.as_posix()
@@ -210,7 +326,8 @@ def main(argv):
         return 2
     sub = argv[0]
     token = "OW-" + sub.upper()
-    fn = {"s1-record": _record, "s2-tests": _tests, "s2-probe": _probe}.get(sub)
+    fn = {"s1-record": _record, "s2-tests": _tests, "s2-probe": _probe,
+          "s9-tests": lambda: _tests(SUB_TEST, S9_NAMES), "s9-probe": _s9_probe, "s9-regress": _s9_regress}.get(sub)
     if fn is None:
         print("unknown check %r" % sub)
         return 2
