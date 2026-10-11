@@ -1,0 +1,406 @@
+{
+  "read_at": "2026-10-11T17:44:25Z",
+  "pin": "487f73663eaabf38f7043225909c478f131a3ca2",
+  "carries_ar_y_71": true,
+  "live": {
+    "code_sha256": "6idtFvAmYk73wJdr5DPRIyEPrLeWgzjlqbdNr5f1wxc=",
+    "last_modified": "2026-10-11T11:26:53.000+0000",
+    "member_count": 49,
+    "downloaded_base64_sha256_equals_code_sha256": true
+  },
+  "build": {
+    "parity_skip": false,
+    "sha256_first": "EXu+Izn1LlqNKWI1w4l4yPhi7WA6SPURXa9SbS19tWc=",
+    "sha256_second": "EXu+Izn1LlqNKWI1w4l4yPhi7WA6SPURXa9SbS19tWc=",
+    "bytes": 383562,
+    "members": 49,
+    "changed_members_vs_live": [
+      "acceptance.py",
+      "entry.py",
+      "firm_registry.json",
+      "infra/logic/registry/exemptions.json",
+      "infra/logic/registry/reporting_policies.json",
+      "infra/logic/registry/resources.json",
+      "infra/logic/registry/scopes.json",
+      "infra/logic/registry/systems.json",
+      "lib/opal_naming.py",
+      "loaders.py",
+      "org/standards/NAMING_SCHEMA.json",
+      "owned_report.py",
+      "owned_requests.py",
+      "prospect_dates.py",
+      "resident_installed.py",
+      "served.py"
+    ],
+    "added": [],
+    "removed": []
+  },
+  "moved_members": [
+    {
+      "packaged_as": "entry.py",
+      "repo_path": "infra/aws/lambda/investor-reporting/ops/entry.py",
+      "old_pin": "361c44fa9d40992c8cacfd625cc789536f84b920",
+      "owning_commits": [
+        "359da3005f 0.9.0_WK_IRPT_ANLREQ~52",
+        "420fc49e0e 0.9.0_WK_IRPT_ANLREQ~52"
+      ],
+      "served_effect": "CHANGES_SERVED_ANSWER",
+      "why": "entry.py:201-210 (sections) admits ticket_id in the query beside selected_tenant, passes it to the reader, and entry.py:261 maps ReportTicketMismatch to the public reason REPORT_TICKET_MISMATCH; before, any other query key on this route refused UNEXPECTED_OWNED_READ_QUERY (entry.py:165), served as INVALID_INPUT. A call that sends no ticket_id is unchanged; I ran ops/tests/test_report_ticket_binding.py with test_history_row_client.py from this tree: 12 passed.",
+      "claim": "measured",
+      "after_read": "A seat reads the analysis sections route for a request it owns and adds the optional ticket_id query value naming a ticket other than the one the request was filed under: today the call is refused as INVALID_INPUT (unexpected query); after the release it is refused with the public reason REPORT_TICKET_MISMATCH, and with the right ticket or none it is served as before.",
+      "portal_reader": {
+        "found": true,
+        "PROD": [
+          {
+            "file_function": "src/api/endpoints/investor-reporting.ts:getAnalysisReport (line 1156) -> src/pages/InvestorReporting/contracts/adapt.ts:adaptAnalysisReportSlice (:1420)",
+            "admits_new_shape": true,
+            "deciding_line": "adapt.ts:1420-1441 reads request_ref, sections, extraction_validation, extraction_coverage (YCHARTS) or provider, request_ref, sections, computation_validation (OPAL_ENGINE) by name and carries no exact key-set check on the answer's data, so a further retained_ref key is ignored; envelope.ts:333 exact-checks only the envelope's own top-level keys"
+          },
+          {
+            "file_function": "src/pages/InvestorReporting/contracts/public-status.ts:requirePublicStatus (called from envelope.ts:parseIrEnvelope) and render/Page.tsx:isContractNamedReasonCode",
+            "admits_new_shape": true,
+            "deciding_line": "public-status.ts:25 admits any public_reason_code matching /^[A-Z0-9_]+$/, so REPORT_TICKET_MISMATCH parses; Page.tsx:108 CONTRACT_NAMED_REASON_CODES (source @59d549b04e) does not name it, so PROD renders the code verbatim and flagged as not defined by the v1 contract (data-reason-code-named false), a cosmetic difference, not a refusal"
+          }
+        ],
+        "DEV": [
+          {
+            "file_function": "src/api/endpoints/investor-reporting.ts:getAnalysisReport (line 1201) -> src/pages/InvestorReporting/contracts/adapt.ts:adaptAnalysisReportSlice (:1432)",
+            "admits_new_shape": true,
+            "deciding_line": "adapt.ts:1432-1454 reads the same named members (and provider for OPAL_ENGINE) with no exact key-set check on data; retained_ref is typed on the wire (contracts/wire/AnalysisReport.ts:94,151) and is not rejected"
+          },
+          {
+            "file_function": "src/pages/InvestorReporting/contracts/public-status.ts:requirePublicStatus and render/Page.tsx:isContractNamedReasonCode",
+            "admits_new_shape": true,
+            "deciding_line": "public-status.ts:25 same regex (blob e2a43fa4 equals PROD's); Page.tsx:109 CONTRACT_NAMED_REASON_CODES names REPORT_TICKET_MISMATCH (source @359da3005f, DEV commit f4f116ae)"
+          }
+        ],
+        "searched": "git grep -n on origin/PROD and origin/DEV under src (tests excluded) for ticket_id, analysis/{jobId}/sections, analysis-report, REPORT_TICKET_MISMATCH, retained_ref, CONTRACT_NAMED_REASON_CODES: neither ref sends ticket_id on the sections read (investor-reporting.ts:1156 PROD and :1201 DEV send only selected_tenant; the ticket_id at TicketCenter/analysisRequest.ts DEV:206 goes in the submission request body, not to this function), so no portal caller can be served REPORT_TICKET_MISMATCH today"
+      }
+    },
+    {
+      "packaged_as": "served.py",
+      "repo_path": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "old_pin": "361c44fa9d40992c8cacfd625cc789536f84b920",
+      "owning_commits": [
+        "7133cbccc5 0.9.0_WK_IRPT_ANLREQ~52"
+      ],
+      "served_effect": "CHANGES_SERVED_ANSWER",
+      "why": "served.py:146 adds REPORT_TICKET_MISMATCH to BOUNDARY_ADDITIONS, and served.py:887 serves a reason only when it is in BOUNDARY_REASONS, otherwise UNEXPECTED; without this member the binding's refusal would be served as UNEXPECTED, with it the public reason is the new code. It changes nothing for a caller whose request is not refused with that class.",
+      "claim": "measured",
+      "after_read": "The same read as the entry.py row: the refusal's public reason after the release is REPORT_TICKET_MISMATCH where, had only the other two members shipped, it would be UNEXPECTED.",
+      "portal_reader": {
+        "found": true,
+        "PROD": [
+          {
+            "file_function": "src/pages/InvestorReporting/contracts/public-status.ts:requirePublicStatus (called from envelope.ts:parseIrEnvelope) and render/Page.tsx:isContractNamedReasonCode",
+            "admits_new_shape": true,
+            "deciding_line": "public-status.ts:25 admits any public_reason_code matching /^[A-Z0-9_]+$/, so REPORT_TICKET_MISMATCH parses; Page.tsx:108 CONTRACT_NAMED_REASON_CODES (source @59d549b04e) does not name it, so PROD renders the code verbatim and flagged as not defined by the v1 contract (data-reason-code-named false), a cosmetic difference, not a refusal"
+          }
+        ],
+        "DEV": [
+          {
+            "file_function": "src/pages/InvestorReporting/contracts/public-status.ts:requirePublicStatus and render/Page.tsx:isContractNamedReasonCode",
+            "admits_new_shape": true,
+            "deciding_line": "public-status.ts:25 same regex (blob e2a43fa4 equals PROD's); Page.tsx:109 CONTRACT_NAMED_REASON_CODES names REPORT_TICKET_MISMATCH (source @359da3005f, DEV commit f4f116ae)"
+          }
+        ],
+        "searched": "git grep -n on origin/PROD and origin/DEV under src (tests excluded) for ticket_id, analysis/{jobId}/sections, analysis-report, REPORT_TICKET_MISMATCH, retained_ref, CONTRACT_NAMED_REASON_CODES: neither ref sends ticket_id on the sections read (investor-reporting.ts:1156 PROD and :1201 DEV send only selected_tenant; the ticket_id at TicketCenter/analysisRequest.ts DEV:206 goes in the submission request body, not to this function), so no portal caller can be served REPORT_TICKET_MISMATCH today"
+      }
+    },
+    {
+      "packaged_as": "owned_report.py",
+      "repo_path": "infra/aws/lambda/investor-reporting/ops/owned_report.py",
+      "old_pin": "361c44fa9d40992c8cacfd625cc789536f84b920",
+      "owning_commits": [
+        "359da3005f 0.9.0_WK_IRPT_ANLREQ~52",
+        "420fc49e0e 0.9.0_WK_IRPT_ANLREQ~52",
+        "94713492d8 0.9.0_WK_IRPT_ANLREQ~52"
+      ],
+      "served_effect": "CHANGES_SERVED_ANSWER",
+      "why": "owned_report.py:120-148 makes OwnedAnalysisReader.sections answer a retained_ref key (the receipt read() checked) in both the OPAL_ENGINE and the vendor answer and refuse READY_REPORT_RECEIPT_REQUIRED when it is absent (AR-y-32); owned_report.py:20-77,172 adds ReportTicketMismatch and _require_ticket, raised after the owner, tenant and retention checks when a sent ticket_id differs from the stored one (AR-y-71). I ran ops/tests/test_report_ticket_binding.py and test_history_row_client.py from this tree: 12 passed.",
+      "claim": "measured",
+      "after_read": "A seat reads GET analysis/{jobId}/sections for a READY report it owns: after the release the answer carries one more key, retained_ref (the receipt the report was checked against), in both provider forms; and with a ticket_id that is not the request's ticket it is refused REPORT_TICKET_MISMATCH.",
+      "portal_reader": {
+        "found": true,
+        "PROD": [
+          {
+            "file_function": "src/api/endpoints/investor-reporting.ts:getAnalysisReport (line 1156) -> src/pages/InvestorReporting/contracts/adapt.ts:adaptAnalysisReportSlice (:1420)",
+            "admits_new_shape": true,
+            "deciding_line": "adapt.ts:1420-1441 reads request_ref, sections, extraction_validation, extraction_coverage (YCHARTS) or provider, request_ref, sections, computation_validation (OPAL_ENGINE) by name and carries no exact key-set check on the answer's data, so a further retained_ref key is ignored; envelope.ts:333 exact-checks only the envelope's own top-level keys"
+          },
+          {
+            "file_function": "src/pages/InvestorReporting/contracts/public-status.ts:requirePublicStatus (called from envelope.ts:parseIrEnvelope) and render/Page.tsx:isContractNamedReasonCode",
+            "admits_new_shape": true,
+            "deciding_line": "public-status.ts:25 admits any public_reason_code matching /^[A-Z0-9_]+$/, so REPORT_TICKET_MISMATCH parses; Page.tsx:108 CONTRACT_NAMED_REASON_CODES (source @59d549b04e) does not name it, so PROD renders the code verbatim and flagged as not defined by the v1 contract (data-reason-code-named false), a cosmetic difference, not a refusal"
+          }
+        ],
+        "DEV": [
+          {
+            "file_function": "src/api/endpoints/investor-reporting.ts:getAnalysisReport (line 1201) -> src/pages/InvestorReporting/contracts/adapt.ts:adaptAnalysisReportSlice (:1432)",
+            "admits_new_shape": true,
+            "deciding_line": "adapt.ts:1432-1454 reads the same named members (and provider for OPAL_ENGINE) with no exact key-set check on data; retained_ref is typed on the wire (contracts/wire/AnalysisReport.ts:94,151) and is not rejected"
+          },
+          {
+            "file_function": "src/pages/InvestorReporting/contracts/public-status.ts:requirePublicStatus and render/Page.tsx:isContractNamedReasonCode",
+            "admits_new_shape": true,
+            "deciding_line": "public-status.ts:25 same regex (blob e2a43fa4 equals PROD's); Page.tsx:109 CONTRACT_NAMED_REASON_CODES names REPORT_TICKET_MISMATCH (source @359da3005f, DEV commit f4f116ae)"
+          }
+        ],
+        "searched": "git grep -n on origin/PROD and origin/DEV under src (tests excluded) for ticket_id, analysis/{jobId}/sections, analysis-report, REPORT_TICKET_MISMATCH, retained_ref, CONTRACT_NAMED_REASON_CODES: neither ref sends ticket_id on the sections read (investor-reporting.ts:1156 PROD and :1201 DEV send only selected_tenant; the ticket_id at TicketCenter/analysisRequest.ts DEV:206 goes in the submission request body, not to this function), so no portal caller can be served REPORT_TICKET_MISMATCH today"
+      }
+    },
+    {
+      "packaged_as": "owned_requests.py",
+      "repo_path": "infra/aws/lambda/investor-reporting/ops/owned_requests.py",
+      "old_pin": "361c44fa9d40992c8cacfd625cc789536f84b920",
+      "owning_commits": [
+        "ec09824a59 0.9.0_WK_IRPT_ANLREQ~52",
+        "94713492d8 0.9.0_WK_IRPT_ANLREQ~52"
+      ],
+      "served_effect": "CHANGES_SERVED_ANSWER",
+      "why": "owned_requests.py:325-393 (history) now answers a third page key unreadable_rows and two more keys on every row, client_id and client_claim (SELECTED, UPLOAD or UNREADABLE); a row whose composition cannot name a client, which used to refuse the whole page, is listed UNREADABLE (owned_requests.py:49-52, :389). The single read (read) is unchanged: _public (:242-243) still projects identity and accepted_at only. I ran test_history_row_client.py: passed.",
+      "claim": "measured",
+      "after_read": "A seat reads GET analysis/requests (history) as an owner: today the page has the two keys items and next_cursor and each row has identity and accepted_at; after the release the page also has unreadable_rows (a count) and each row also has client_id and client_claim.",
+      "portal_reader": {
+        "found": true,
+        "PROD": [
+          {
+            "file_function": "src/pages/InvestorReporting/contracts/owned-requests.ts:readOwnedHistory (rows through readOwnedRequest)",
+            "admits_new_shape": false,
+            "deciding_line": "owned-requests.ts:80 exact(value, ['items', 'next_cursor']) refuses the page's third key unreadable_rows, and readOwnedRequest at :61 exact(value, ['identity', 'accepted_at', ...]) refuses a row that carries client_id and client_claim; both throw, and envelope.ts:184 ownedProjection turns the throw into EnvelopeMismatch('data', 'analysis-request-history')"
+          }
+        ],
+        "DEV": [
+          {
+            "file_function": "src/pages/InvestorReporting/contracts/owned-requests.ts:readOwnedHistory and readOwnedHistoryRow",
+            "admits_new_shape": true,
+            "deciding_line": "owned-requests.ts:129 allows the keys items, next_cursor and unreadable_rows (:132 checks unreadable_rows is a non-negative integer when present), and readOwnedHistoryRow (:107) takes client_id and client_claim aside, checks each against the contract and passes the rest through readOwnedRequest; commit cbd5cc66 (reader) with a3f99d6e (route read as that page)"
+          }
+        ],
+        "searched": "git grep -n on origin/PROD and origin/DEV under src (tests excluded) for analysis/requests, readOwnedHistory, readOwnedRequest, listOwnedAnalysisRequests, OwnedAnalysisRequestHistoryWire, OwnedHistoryPage: the only parser of the history answer is contracts/owned-requests.ts:readOwnedHistory, reached from envelope.ts:184 (IR_DATA_ADAPTER) and investor-reporting.ts:1120/1589 on PROD (:1141/1634 on DEV); TicketCenter/analysisRequest.ts does not read the history route"
+      }
+    },
+    {
+      "packaged_as": "prospect_dates.py",
+      "repo_path": "infra/aws/lambda/investor-reporting/ops/prospect_dates.py",
+      "old_pin": "361c44fa9d40992c8cacfd625cc789536f84b920",
+      "owning_commits": [
+        "94713492d8 0.9.0_WK_IRPT_ANLREQ~52"
+      ],
+      "served_effect": "CHANGES_SERVED_ANSWER",
+      "why": "prospect_dates.py:30-60 (section_dates) reads an OPAL_ENGINE report by its own branch: a NOT_AVAILABLE section with a null as_of_date is an undated row, a VALUE section needs an ISO date, and an undated_sections key refuses; before, the same report refused SECTION_DATE_CENSUS_INVALID. I ran section_dates from the extracted live zip and the extracted build zip on four documents: the OPAL report with a NOT_AVAILABLE section refused on live and returned an undated row on the build; the other three (OPAL all VALUE, vendor with an undated section, v1 without provider) returned equal results.",
+      "claim": "measured",
+      "after_read": "A seat reads GET status/{jobId} with the prospect-v1 dates header for a READY prospect analysis whose Opal report has a section stated NOT_AVAILABLE: today the read is refused INVALID_INPUT (section date census invalid); after the release it is served, that section listed in section_dates with a null as_of_date.",
+      "portal_reader": {
+        "found": true,
+        "PROD": [
+          {
+            "file_function": "src/pages/InvestorReporting/contracts/prospect-dates.ts:readProspectDates (via public-status.ts:requirePublicStatus and adapt.ts:adaptStatusEnvelope:578); PROD sends the prospect-v1 header on status-job (investor-reporting.ts:335)",
+            "admits_new_shape": true,
+            "deciding_line": "prospect-dates.ts:41-43 each section_dates row must be exactly {section_id, as_of_date} with as_of_date null or an ISO date, and :46-47 requires date_basis UNDATED_INPUT only when no row is dated and PER_SECTION only when the dates vary or one is null; derive() (prospect_dates.py:335-343) emits exactly that basis for the new null-dated OPAL_ENGINE rows"
+          }
+        ],
+        "DEV": [
+          {
+            "file_function": "src/pages/InvestorReporting/contracts/prospect-dates.ts:readProspectDates (same blob a54bb5ad as PROD; investor-reporting.ts sends the header on status-job)",
+            "admits_new_shape": true,
+            "deciding_line": "same blob as PROD: prospect-dates.ts:41-43 and :46-47 admit a null-dated row beside a dated one, and UNDATED_INPUT when none is dated"
+          }
+        ],
+        "searched": "git grep -n on origin/PROD and origin/DEV under src (tests excluded) for section_dates, prospect-v1, PROSPECT_DATE_CAPABILITY, x-irpt-status-dates, readProspectDates: contracts/prospect-dates.ts (blob a54bb5ad on both refs) and contracts/public-status.ts (blob e2a43fa4 on both refs) are the only parsers; adapt.ts:578 adaptStatusEnvelope calls readProspectDates"
+      }
+    },
+    {
+      "packaged_as": "loaders.py",
+      "repo_path": "infra/aws/lambda/investor-reporting/_authz/loaders.py",
+      "old_pin": "361c44fa9d40992c8cacfd625cc789536f84b920",
+      "owning_commits": [
+        "f41e5a1811 0.9.0_WK_ADVI_FIRMBKTS~39",
+        "7d0f46fe7c 0.9.0_WK_ADVI_FIRMBKTS~39",
+        "3a5e564561 0.9.0_WK_ADVI_FIRMBKTS~37",
+        "e2021e6a5d 0.9.0_WK_ADVI_FIRMBKTS~32",
+        "c676118221 1.0.0_SA_CTO"
+      ],
+      "served_effect": "INERT",
+      "why": "loaders.py:56-90 changes the generator header and adds OWNERSHIP_READ (49financial) and CANONICAL_PLATINUM_BUCKETS, and load_ownership (:274-285) reads that tenant from a fixed bucket and the legacy key unless the bucket is canonical. With the bucket map derived from the packaged firm_registry.json (the Terraform source, ops/iam.tf:128), I called load_ownership for all 5 registry tenants on the live and the build zip's loaders.py with a recording _get_json: the 5 (bucket, key) pairs are identical. The live function's actual environment value was not read.",
+      "claim": "measured"
+    },
+    {
+      "packaged_as": "firm_registry.json",
+      "repo_path": "data/firm_registry.json",
+      "old_pin": "80a79a746284dd586d0e0d2c029b7689ab5d271d",
+      "owning_commits": [
+        "3a5e564561 0.9.0_WK_ADVI_FIRMBKTS~37",
+        "e2021e6a5d 0.9.0_WK_ADVI_FIRMBKTS~32",
+        "6c962b0a52 1.0.0_SA_CTO"
+      ],
+      "served_effect": "INERT",
+      "why": "firm_registry.json:2 is the _generated header. I loaded the live and the build zip's file and compared the keys: the only differing top-level key is _generated, which keys.py and ids.py never read.",
+      "claim": "measured"
+    },
+    {
+      "packaged_as": "resident_installed.py",
+      "repo_path": "infra/aws/lambda/investor-reporting/reports/resident_installed.py",
+      "old_pin": "361c44fa9d40992c8cacfd625cc789536f84b920",
+      "owning_commits": [
+        "3f5321ad36 0.9.0_WK_IRPT_ANLREQ~69",
+        "f18fff5445 0.9.0_WK_IRPT_ANLREQ~68",
+        "a9db722b83 0.9.0_WK_IRPT_ANLREQ~67",
+        "5acdefb7cc 0.9.0_WK_IRPT_ANLREQ~66"
+      ],
+      "served_effect": "INERT",
+      "why": "resident_installed.py:98-130 and :314-345,:423-435 add the packager binding check, two helpers, make_packager's ticket_ports and the live ticket port in build_resident_runtime. irpt-status imports only make_authorize from it (status_installed.py:130); the ast of make_authorize is identical in the live and the build file, and no other packaged module calls load_bindings, build_resident_runtime or make_packager (a read of the 49 members).",
+      "claim": "measured"
+    },
+    {
+      "packaged_as": "acceptance.py",
+      "repo_path": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py",
+      "old_pin": "361c44fa9d40992c8cacfd625cc789536f84b920",
+      "owning_commits": [
+        "2f7cc7be42 0.9.0_WK_IRPT_ANLREQ~54"
+      ],
+      "served_effect": "INERT",
+      "why": "acceptance.py:90-119 makes DynamoAcceptance.accept require acting_principal_id and record it on a NEW accepted record. No packaged module calls .accept( (the writer is the resident's submission service), and the read path projects only identity and accepted_at (owned_requests.py:242-243), so the new field never reaches an answer. I did not execute it.",
+      "claim": "inferred"
+    },
+    {
+      "packaged_as": "lib/opal_naming.py",
+      "repo_path": "lib/opal_naming.py",
+      "old_pin": "80a79a746284dd586d0e0d2c029b7689ab5d271d",
+      "owning_commits": [
+        "b81373cbcc 0.9.0_WK_ADVI_FIRMBKTS~46",
+        "8114bac9cf 0.9.0_WK_ADVI_FIRMBKTS~45",
+        "c64a667818 0.9.0_WK_ADVI_FIRMBKTS~43",
+        "792d612dd3 2.0.0_SA_COO~B1",
+        "25d33dd9b5 0.9.0_WK_ADVI_FIRMBKTS~41",
+        "273de502f0 0.9.0_WK_ADVI_FIRMBKTS~42",
+        "f41e5a1811 0.9.0_WK_ADVI_FIRMBKTS~39",
+        "7d0f46fe7c 0.9.0_WK_ADVI_FIRMBKTS~39",
+        "3a5e564561 0.9.0_WK_ADVI_FIRMBKTS~37",
+        "be150697b7 2.0.0_SA_COO~B1",
+        "61ccc4c96a 0.9.0_WK_ADVI_FIRMBKTS~33",
+        "ce6d97aa39 0.9.0_WK_ADVI_FIRMBKTS~34",
+        "e2021e6a5d 0.9.0_WK_ADVI_FIRMBKTS~32",
+        "7695bf9219 0.9.0_WK_ADVI_FIRMBKTS~22",
+        "e1267f773c 1.0.0_SA_CTO",
+        "b0eebb018d 2.0.0_SA_COO~B1",
+        "56b271d8ff 0.9.0_WK_ADVI_FIRMBKTS~16",
+        "b9557fdc67 0.9.0_WK_ADVI_FIRMBKTS~16",
+        "4e68fb82b0 0.9.0_WK_ADVI_FIRMBKTS~17",
+        "8ecc4d7c29 0.9.0_WK_ADVI_FIRMBKTS~17",
+        "b03106deeb 0.9.0_WK_ADVI_FIRMBKTS~17",
+        "9a00f02d65 0.9.0_WK_MDPF_CANON~9",
+        "4d6ca219e0 0.9.0_WK_LGIC_ENFORCE~1",
+        "56505ce411 0.9.0_WK_LGIC_ENFORCE~1",
+        "43f6416fed 0.9.0_WK_LGIC_BLANKFIX~2",
+        "e15671f611 2.0.0_SA_COO~G",
+        "b419746eca 0.9.0_WK_LGIC_BLANKFIX~2",
+        "736a8f8a06 0.9.0_WK_LGIC_BLANKFIX~1",
+        "9cada5eb48 2.0.0_SA_COO~C",
+        "c17998e4fb 0.9.0_WK_LGIC_BLANKFIX~1",
+        "cc0c2b4b5c 0.9.0_WK_NFRA_CTLPLN~6",
+        "40a21e850b 2.0.0_SA_COO~G",
+        "19b61836e4 0.9.0_WK_LGIC_BLANKFIX~2",
+        "4991b8b11b 4.0.0_SA_CRO",
+        "1ea925a095 4.0.0_SA_CRO"
+      ],
+      "served_effect": "INERT",
+      "why": "lib/opal_naming.py changes 781 lines; the packaged modules call only load_registry (status_installed.py:83), reporting_policy and reporting_destination (status_installed.py:126-127, resident_installed.py:379, pdf_link.py:55) and lookup()['long'] (served.py:283, maintained_sources.py:660). I extracted the live and the build zip and called them on each: 5 policy revisions (4 equal dicts, the 5th is irpt-anlreq-x10-v1, PENDING_ENFORCEMENT -> ACTIVE), 189 destination calls (180 equal, the 9 that differ are all irpt-anlreq-x10-v1 and now return an address instead of a refusal) and lookup()['long'] for 3 firms (equal). irpt-status requests irpt-x10-v1 and the one revision whose families hold YCHARTS_OPAL_REPORT (irpt-ycdgen-research-v1), both equal.",
+      "claim": "measured"
+    },
+    {
+      "packaged_as": "org/standards/NAMING_SCHEMA.json",
+      "repo_path": "org/standards/NAMING_SCHEMA.json",
+      "old_pin": "80a79a746284dd586d0e0d2c029b7689ab5d271d",
+      "owning_commits": [
+        "eb29bf7f37 4.0.0_SA_CRO",
+        "f701d5da50 4.0.0_SA_CRO",
+        "19b61836e4 0.9.0_WK_LGIC_BLANKFIX~2",
+        "1ea925a095 4.0.0_SA_CRO",
+        "01c56eda2b 4.0.0_SA_CRO"
+      ],
+      "served_effect": "INERT",
+      "why": "NAMING_SCHEMA.json (19 added, 10 removed) is read only by lib/opal_naming.py (load_schema). In the same two-zip run each side read its own schema file and the 180 non-anlreq destination results and the 4 other policy dicts are equal.",
+      "claim": "measured"
+    },
+    {
+      "packaged_as": "infra/logic/registry/exemptions.json",
+      "repo_path": "infra/logic/registry/exemptions.json",
+      "old_pin": "80a79a746284dd586d0e0d2c029b7689ab5d271d",
+      "owning_commits": [
+        "3a6d8aa89d 0.9.0_WK_ADVI_FIRMBKTS~49",
+        "057cfa8a1c 0.9.0_WK_ADVI_FIRMBKTS~44",
+        "2a809c975e 4.0.0_SA_CRO",
+        "173f98f24b 4.0.0_SA_CRO",
+        "d5516cb074 4.0.0_SA_CRO",
+        "e7ac51a04c 4.0.0_SA_CRO"
+      ],
+      "served_effect": "INERT",
+      "why": "exemptions.json adds 138 lines of exemption rows. load_registry parses it, but none of the four entry points irpt-status calls reads a row of it; in the two-zip run the file parsed on both sides and the 180 non-anlreq destination results, the 4 other policy dicts and lookup() are equal.",
+      "claim": "measured"
+    },
+    {
+      "packaged_as": "infra/logic/registry/reporting_policies.json",
+      "repo_path": "infra/logic/registry/reporting_policies.json",
+      "old_pin": "eab13e88d3f35aa23dbf641e841f0a63acebf90e",
+      "owning_commits": [
+        "103902e75d 4.0.0_SA_CRO"
+      ],
+      "served_effect": "INERT",
+      "why": "reporting_policies.json (a 2-line change) turns irpt-anlreq-x10-v1 from PENDING_ENFORCEMENT to ACTIVE with a new enforcement_ref. irpt-status asks for irpt-x10-v1 and the revision holding YCHARTS_OPAL_REPORT (status_installed.py:54,76-92,133), both equal on the two zips; the anlreq row is read by no packaged module, and research_revisions returns the same single revision on both.",
+      "claim": "measured"
+    },
+    {
+      "packaged_as": "infra/logic/registry/resources.json",
+      "repo_path": "infra/logic/registry/resources.json",
+      "old_pin": "80a79a746284dd586d0e0d2c029b7689ab5d271d",
+      "owning_commits": [
+        "17ae4222c7 4.0.0_SA_CRO"
+      ],
+      "served_effect": "INERT",
+      "why": "resources.json removes 6 lines (the openpyxl-layer resource row). No irpt-status module reads resources.json directly and none of the four entry points selects a resource row; the file parsed on the build zip and the call results matched apart from the anlreq rows.",
+      "claim": "measured"
+    },
+    {
+      "packaged_as": "infra/logic/registry/scopes.json",
+      "repo_path": "infra/logic/registry/scopes.json",
+      "old_pin": "80a79a746284dd586d0e0d2c029b7689ab5d271d",
+      "owning_commits": [
+        "3a5e564561 0.9.0_WK_ADVI_FIRMBKTS~37",
+        "e2021e6a5d 0.9.0_WK_ADVI_FIRMBKTS~32",
+        "31263d7d3a 0.9.0_WK_ADVI_COTBKF~88",
+        "a15fb36a4c 4.0.0_SA_CRO~DELL1",
+        "5f962296ae 0.9.0_WK_IRPT_DASHBD~52"
+      ],
+      "served_effect": "INERT",
+      "why": "scopes.json adds tenant.pages, restricted_prefix_hosts and masters keys to three firm rows. irpt-status reads these rows only as lookup(name)['long'] and in reporting_destination's bucket lookup; lookup()['long'] is equal for the 3 firms on both zips and the 180 non-anlreq destination results match.",
+      "claim": "measured"
+    },
+    {
+      "packaged_as": "infra/logic/registry/systems.json",
+      "repo_path": "infra/logic/registry/systems.json",
+      "old_pin": "80a79a746284dd586d0e0d2c029b7689ab5d271d",
+      "owning_commits": [
+        "826364c980 4.0.0_SA_CRO~Z",
+        "530ef17ff8 0.9.0_WK_MDPF_DEMQUE~2",
+        "c09b1ad769 4.0.0_SA_CRO",
+        "11f54fba67 4.0.0_SA_CRO",
+        "8e39143feb 4.0.0_SA_CRO"
+      ],
+      "served_effect": "INERT",
+      "why": "systems.json (113 added, 93 removed) re-classes system words; it is consulted by name() and the grader, which no irpt-status module calls. In the two-zip run it parsed on both sides and every policy, destination and lookup result matched apart from the anlreq rows.",
+      "claim": "measured"
+    }
+  ],
+  "portal_refs_read": {
+    "PROD": "37aa1247ee4ba487e5610dc5b78d65ae28468a99",
+    "DEV": "9ca634c6ea089796c127a9a1399cfa279323a154"
+  },
+  "prod_must_carry_first": [
+    "src/pages/InvestorReporting/contracts/owned-requests.ts: the transitional history reader (readOwnedHistory + readOwnedHistoryRow) that admits the page's unreadable_rows and each row's client_id and client_claim; on DEV as cbd5cc66, with a3f99d6e (the route read as that page, investor-reporting.ts and OwnedRequestHistory.tsx) so PROD type-checks; neither is on PROD (git merge-base --is-ancestor rc 1 for both), and PROD's reader refuses the new history answer by an exact key set"
+  ],
+  "not_required_on_prod_first": [
+    "src/pages/InvestorReporting/render/Page.tsx (DEV f4f116ae, REPORT_TICKET_MISMATCH joins CONTRACT_NAMED_REASON_CODES): PROD's public-status.ts admits the code and renders it flagged as unnamed; no portal caller sends ticket_id on the sections read, so it is cosmetic and not a precondition"
+  ],
+  "map_unchanged": true
+}
