@@ -30,3 +30,5 @@ echo "P1 info: IRPT_DIRECTORY_BUCKET_MAP present in the running process environm
 # STOP 2: the library the host holds must be st31's, the one the kept copy will be taken from.
 [ "$(sha256sum $H/ycharts_session.js | cut -d' ' -f1)" = "857d90b81960d69a7a6700be6fffe33d86628694aef95f8cfb64aca7a82cb839" ] && echo "P1 STOP-READ-2 PASS: host library is st31's" || echo "P1 STOP-READ-2 FAIL: host library is not st31's; do not install"
 echo "P1 sign-in baseline: journal lines since the unit started naming a capture, an eviction or a session refresh = $(journalctl -u $UNIT --since "$(systemctl show $UNIT -p ActiveEnterTimestamp --value)" --no-pager | grep -c -i -E 'capture|EVICTION|session_refresh|SIGNED_OUT|NO_AUTHENTICATED')"
+# STOP 3 (CTO half, condition 1): the path the installer keeps the old library under must not already exist.
+test -e $H/ycharts_session.js.before-0485393f3a-st32 && echo "P1 STOP-READ-3 FAIL: the kept-copy path already exists; do not install" || echo "P1 STOP-READ-3 PASS: kept-copy path $H/ycharts_session.js.before-0485393f3a-st32 is absent"
