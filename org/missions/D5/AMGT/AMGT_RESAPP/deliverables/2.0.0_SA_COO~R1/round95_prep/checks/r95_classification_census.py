@@ -124,7 +124,10 @@ def main():
                 tkr = row.get("ticker")
                 key = row.get("security_key") or index.get(tkr)
                 if tkr in d_tickers or key in disagree:
-                    if no_table_field(row.get("classification"), row.get("sector_reason")) and (row.get("classification") is not None or row.get("sector") is None):
+                    # round 97 (`AMGT-bd-1`): the row's own LISTING sector may ride beside the withheld classification (`sector_source` 'Bloomberg, listing', `sector_reason` null);
+                    # what must never appear is the TABLE row's: a classification object from the table, or a sector with no listing source.
+                    from_listing = row.get("sector_source") == "Bloomberg, listing" and row.get("sector") and row.get("sector_reason") is None
+                    if row.get("classification") is None and (from_listing or (row.get("sector") is None and reason_ok(row.get("sector_reason")))):
                         ok_rows += 1
                     else:
                         bad_rows.append((movement + "/" + subject, tkr, (row.get("classification") or {}).get("sub_asset_class"), row.get("sector_reason")))
