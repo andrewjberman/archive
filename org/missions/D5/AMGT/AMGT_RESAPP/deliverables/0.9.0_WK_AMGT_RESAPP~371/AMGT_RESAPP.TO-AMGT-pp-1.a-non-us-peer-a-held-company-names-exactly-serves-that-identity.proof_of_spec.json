@@ -17,11 +17,18 @@
     {
       "path_or_key": "lib/research/peers/numeric_tickers.py",
       "kind": "script",
-      "commit_or_etag": "1797ef3fd7e9c71c586711284fbf44837c8d8295",
+      "commit_or_etag": "e8c295ca210328592ad19511481b10ee31a2f163",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Pure functions added: name_candidate (the gate: a dict with no key, not MEASURED, a non-empty non-all-digit ticker that is not a United States alphabetic ticker) and name_match_fields (the exact-name rule of numeric_fields: one held key for the cleaned name token, else {}). No read, no write, no store, no deploy. Imports listed_identity (no imports of its own, no cycle).",
-      "introduces": ["name_candidate", "name_match_fields"],
-      "artifact_covered_by": ["AC1", "AC2"]
+      "deploy_evidence": "Pure functions: name_candidate (the gate: a dict with no key, not MEASURED, a non-empty non-all-digit ticker that is not a United States alphabetic ticker, and a RAW name with no Class or Series designator) and name_match_fields (the exact-name rule of numeric_fields: one held key for the cleaned name token, else {}). No read, no write, no store, no deploy. Imports listed_identity (no imports of its own, no cycle).",
+      "introduces": [
+        "name_candidate",
+        "name_match_fields",
+        "_LISTING_DESIGNATOR"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
     },
     {
       "path_or_key": "lib/research/api/scoped_amgt.py",
@@ -29,51 +36,60 @@
       "commit_or_etag": "1797ef3fd7e9c71c586711284fbf44837c8d8295",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "_with_numeric_tickers only: the early return also admits a name candidate; after the unchanged numeric pass a second pass applies name_match_fields with the same _held_name_index() and _clean_display_name. A member the rule does not match is kept as the same object. Nothing else in the file is edited. No deploy: the served API is redeployed by AMGT-pp-6.",
-      "introduces": ["name_match_fields"],
-      "artifact_covered_by": ["AC1"]
+      "introduces": [
+        "name_match_fields"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
     },
     {
       "path_or_key": "lib/research/peers/tests/test_name_match_non_numeric.py",
       "kind": "test",
-      "commit_or_etag": "1797ef3fd7e9c71c586711284fbf44837c8d8295",
+      "commit_or_etag": "e8c295ca210328592ad19511481b10ee31a2f163",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Pure pytest module, no network, no AWS. One test per rule and per negative arm named in task order section 1, plus the candidate gate, the route (count, order, byte-equal others, no reason added, no index build when nothing is a candidate) and a raising index build.",
-      "introduces": ["test_a_sedol_stem_naming_one_held_company_serves_its_key", "test_a_raising_index_build_leaves_the_set_byte_equal"],
-      "artifact_covered_by": ["AC2"]
+      "deploy_evidence": "Pure pytest module, no network, no AWS. One test per rule and per negative arm named in task order section 1, the AMENDMENT 1 designator arms (Class A, Class H, Class B, Series B refused; the plain name matches; the raw-name gate; a route arm), the candidate gate, the route (count, order, byte-equal others, no reason added, no index build when nothing is a candidate) and a raising index build.",
+      "introduces": [
+        "test_a_designated_name_is_refused_although_its_cleaned_form_matches",
+        "test_a_raising_index_build_leaves_the_set_byte_equal"
+      ],
+      "artifact_covered_by": [
+        "AC2"
+      ]
     }
   ],
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "PASS N1 (a SEDOL-stem member naming one held company serves its key as MEASURED), PASS N2 (a star-ticker member does the same), PASS N3 (an unmatched name adds nothing), PASS N4 (a name two held companies share is not matched), PASS N5 (a United States alphabetic ticker is left to nn-2), PASS N6 (control: an all-digit ticker is answered as before), PASS N7 (route level: the matchable member gains its key, every other member is byte-equal); R90 NAME MATCH: YES; and exit=0",
+      "criterion_verbatim": "PASS N1 (a SEDOL-stem member naming one held company serves its key as MEASURED), PASS N2 (a star-ticker member does the same), PASS N3 (an unmatched name adds nothing), PASS N4 (a name two held companies share is not matched), PASS N5 (a United States alphabetic ticker is left to nn-2), PASS N6 (control: an all-digit ticker is answered as before), PASS N7 (route level: the matchable member gains its key, every other member is byte-equal), PASS N8 (a name carrying a Class or Series designator is refused although its cleaned form matches one held company); R90 NAME MATCH: YES; and exit=0",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round90_prep/checks/r90_name_match.py\"; echo \"exit=$?\"",
-      "output_evidence": "PASS N1 a SEDOL-stem member naming one held company serves its key as MEASURED, matched_as company_name  [{\"security_key\": \"ASML_NA_Equity\", \"identity\": {\"security_key\": \"ASML_NA_Equity\", \"resolution\": \"MEASURED\", \"matched_as\": \"company_name\"}}]\nPASS N2 a star-ticker member naming one held company serves its key  [{\"security_key\": \"SHOP_CN_Equity\", \"identity\": {\"security_key\": \"SHOP_CN_Equity\", \"resolution\": \"MEASURED\", \"matched_as\": \"company_name\"}}]\nPASS N3 an unmatched name adds nothing (no key, no reason)  [{}]\nPASS N4 a name two held companies share is not matched  [{}]\nPASS N5 a United States alphabetic ticker is left to nn-2  [{}]\nPASS N6 control: an all-digit ticker is answered as before; a MEASURED member is untouched  [numeric_fields -> NOVN_SW_Equity]\nPASS N7 route level: the matchable non-numeric member gains its key, every other member is byte-equal  [shape=True gained=True untouched=True numeric=True]\n   arms passed 7 of 7\nR90 NAME MATCH: YES\nexit=0",
-      "denominator": "7 of 7 arms passed (N1-N7); base run before the cut: 1 of 7 passed (N6), exit 1",
+      "output_evidence": "PASS N1 a SEDOL-stem member naming one held company serves its key as MEASURED, matched_as company_name  [{\"security_key\": \"ASML_NA_Equity\", \"identity\": {\"security_key\": \"ASML_NA_Equity\", \"resolution\": \"MEASURED\", \"matched_as\": \"company_name\"}}]\nPASS N2 a star-ticker member naming one held company serves its key  [{\"security_key\": \"ZETA_CN_Equity\", \"identity\": {\"security_key\": \"ZETA_CN_Equity\", \"resolution\": \"MEASURED\", \"matched_as\": \"company_name\"}}]\nPASS N3 an unmatched name adds nothing (no key, no reason)  [{}]\nPASS N4 a name two held companies share is not matched  [{}]\nPASS N5 a United States alphabetic ticker is left to nn-2  [{}]\nPASS N6 control: an all-digit ticker is answered as before; a MEASURED member is untouched  [numeric_fields -> NOVN_SW_Equity]\nPASS N7 route level: the matchable non-numeric member gains its key, every other member is byte-equal  [shape=True gained=True untouched=True numeric=True]\nPASS N8 a Class or Series designator is refused although its cleaned form matches; the plain name matches  [arms [True, True, True, True]]\n   arms passed 8 of 8\nR90 NAME MATCH: YES\nexit=0",
+      "denominator": "8 of 8 arms passed (N1-N8); run anchored to the worktree C:/dev/wk-resapp-371 (see surprise AMGT_RESAPP-D1-W371-S3); run in the base checkout before the amendment's rule was in the tree: 1 of 8, exit 1",
       "status": "PASS",
-      "expect": "PASS N1[\\s\\S]*PASS N2[\\s\\S]*PASS N3[\\s\\S]*PASS N4[\\s\\S]*PASS N5[\\s\\S]*PASS N6[\\s\\S]*PASS N7[\\s\\S]*R90 NAME MATCH: YES[\\s\\S]*exit=0"
+      "expect": "PASS N1[\\s\\S]*PASS N2[\\s\\S]*PASS N3[\\s\\S]*PASS N4[\\s\\S]*PASS N5[\\s\\S]*PASS N6[\\s\\S]*PASS N7[\\s\\S]*PASS N8[\\s\\S]*R90 NAME MATCH: YES[\\s\\S]*exit=0"
     },
     {
       "criterion_id": "AC2",
       "criterion_verbatim": "the new test file and the three existing numeric-ticker and listed-identity test files pass with 0 failed, and exit=0",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/peers/tests/test_name_match_non_numeric.py lib/research/peers/tests/test_numeric_tickers.py lib/research/api/tests/test_numeric_member_tickers.py lib/research/api/tests/test_peer_listed_identity.py -q; echo \"exit=$?\"",
-      "output_evidence": "37 passed in 0.26s\nexit=0",
-      "denominator": "37 passed, 0 failed, 0 errors of 37 collected across 4 files (1 new, 3 existing)",
+      "output_evidence": "............................................                             [100%]\n44 passed in 0.47s\nexit=0",
+      "denominator": "44 passed, 0 failed, 0 errors of 44 collected across 4 files (1 new, 3 existing)",
       "status": "PASS",
-      "expect": "37 passed[\\s\\S]*exit=0"
+      "expect": "44 passed[\\s\\S]*exit=0"
     }
   ],
   "controls": {
     "mutant": {
       "description": "The one-key guard is dropped: name_match_fields matches a name two held companies share to the first sorted key. Run through the real r90_name_match.py main() by a scratch runner (.scratch/mutant_runner.py, not committed, nothing written to the tree) with name_match_fields patched in-process.",
       "expected": "N4 FAILS (a name two held companies share is matched), the script exits 1 and prints R90 NAME MATCH: NO.",
-      "observed": "FAIL N4 a name two held companies share is not matched  [{\"security_key\": \"SHR_LN_Equity\", ...}]; PASS N1, N2, N3, N5, N6, N7; arms passed 6 of 7; R90 NAME MATCH: NO; mutant_exit=1.",
+      "observed": "FAIL N4 a name two held companies share is not matched  [{\"security_key\": \"SHR_LN_Equity\", ...}]; PASS N1, N2, N3, N5, N6, N7, N8 (N8 is not touched by the mutant); arms passed 7 of 8; R90 NAME MATCH: NO; mutant_exit=1.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "Two same-input runs of r90_name_match.py (the AC1 invocation's script, PYTHONPATH at the worktree root), stdout compared byte-for-byte with cmp.",
-      "observed": "rc1=0 rc2=0; cmp reports the two outputs identical (DETERMINISTIC-SAME-BYTES).",
+      "observed": "rc1=0 rc2=0; cmp reports the two outputs identical (DETERMINISTIC-SAME-BYTES), 8 arms.",
       "status": "STABLE"
     }
   },
@@ -91,8 +107,8 @@
       "reason": "Task order section 2.4 bound."
     },
     {
-      "item": "Listing-variant served keys are not ruled: China Construction Bank Class A (country China) is served 939_HK_Equity; JD.com Class A (country Hong Kong) is served JD_US_Equity",
-      "reason": "Measured and filed as AMGT_RESAPP-D1-W371-S1 (ARMED, disarm owner 2.0.0_SA_COO~R1); the cell's rule is the company-name rule and the spec is silent on the listing."
+      "item": "Listing-variant served keys: a name carrying a Class or Series designator is now refused (N8). The unrefused listing-variant risk that remains is a plain-name row whose company has another listing (not measured as a served case)",
+      "reason": "AMENDMENT 1 refuses the designated form. AMGT_RESAPP-D1-W371-S1 stays ARMED with disarm owner 2.0.0_SA_COO~R1: the disarm is the owner's, not the worker's."
     },
     {
       "item": "The commit-time client-data check did not check the commit for client account ids",
@@ -104,30 +120,37 @@
     }
   ],
   "surprises": [
-    "AMGT_RESAPP-D1-W371-S1: the exact-name rule serves the held key of a different listing of the same company when a peer row names another listing or share class (China A-share row served 939_HK_Equity; a Hong Kong row served JD_US_Equity); ARMED, disarm owner 2.0.0_SA_COO~R1.",
-    "AMGT_RESAPP-D1-W371-S2: the 1,047 'other non-US' rows include six United States dotted-ticker rows, so the partition is not-US-alphabetic; the count of 23 stands; INERT."
+    "AMGT_RESAPP-D1-W371-S1: the exact-name rule served the held key of a different listing when a peer row named another listing or share class; AMENDMENT 1 refuses a designated name in code (N8); ARMED, disarm owner 2.0.0_SA_COO~R1, not disarmed by the worker.",
+    "AMGT_RESAPP-D1-W371-S2: the 1,047 'other non-US' rows include six United States dotted-ticker rows, so the partition is not-US-alphabetic; INERT.",
+    "AMGT_RESAPP-D1-W371-S3: the AC1 invocation 'cd \"$(git rev-parse --show-toplevel)\"' resolves to the base checkout when the agent shell starts in base (cwd resets between calls); the AC1 run here is anchored to the worktree; INERT.",
+    "AMGT_RESAPP-D1-W371-S4: the inherited star-ticker fixture 'Shopify, Inc. Class A' is refused by N8; the fixture was re-keyed to 'Shopify, Inc.' and the designated form added as a refused arm; OBSERVATION, INERT."
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "r90_name_match.py (round-90 PREP check, the AC1 script)",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round90_prep/checks/r90_name_match.py\"; echo \"exit=$?\"",
-      "result": "R90 NAME MATCH: YES, exit=0 (7 of 7 arms); base before the cut: 1 of 7, exit 1"
+      "result": "R90 NAME MATCH: YES, exit=0 (8 of 8 arms, anchored to the worktree); base checkout run: 1 of 8, exit 1 (S3)"
     },
     {
       "tool": "pytest",
       "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/peers/tests/test_name_match_non_numeric.py lib/research/peers/tests/test_numeric_tickers.py lib/research/api/tests/test_numeric_member_tickers.py lib/research/api/tests/test_peer_listed_identity.py -q",
-      "result": "37 passed in 0.26s, exit=0"
+      "result": "44 passed in 0.47s, exit=0"
     },
     {
-      "tool": "r91_matched_rows.py (scratch, read-only count; same reads as r90_measure_nonus3.py)",
-      "invocation": "PYTHONPATH=\"<worktree>\" python \"<worktree>/.scratch/r91_matched_rows.py\" --nonus-digit-control",
-      "result": "OTHER non-US rows served by the new rule: 23 of 1047; all-digit rows answered by numeric_fields unchanged: 29 of 769; dotted class-share tickers among the other non-US rows: 13 (6 United States, 7 Canada)"
+      "tool": "amended_count.py (scratch, read-only; same six universe GETs as r90_measure_nonus3.py, applies name_match_fields)",
+      "invocation": "PYTHONPATH=\"<worktree>\" python \"<worktree>/.scratch/amended_count.py\"",
+      "result": "AMENDED rule matches among the 1,047 other non-US rows: 16 of 1047; all-digit rows answered by numeric_fields unchanged (r90_measure_nonus3.py: 29 of 769)"
     },
     {
       "tool": "safe-commit.sh (commit-gate: py_compile, ds-precommit, ruff py39; surprise-row-gate; to-pipeline-gate)",
       "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~371 <0.9.0_WK_AMGT_RESAPP~371@opal.agent>\" -F .scratch/msg_code.txt -- <4 paths>",
       "result": "commit 1797ef3fd7 (LOCAL on wk-AMGT_RESAPP-371); commit-gate clean for 3 of 4 files; surprise-row-gate OK: 2 new rows; to-pipeline-gate OK; WARN client-data-check (account-id list absent on this device)"
+    },
+    {
+      "tool": "r90_measure_nonus3.py (round-90 read, unchanged; the pre-amendment token count)",
+      "invocation": "PYTHONPATH=\"<worktree>\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round90_prep/reads/r90_measure_nonus3.py\"",
+      "result": "held name index tokens 107 keys 95; non-US 1816, all-digit 769, other 1047; numeric by outcome company_name 22, japan_exchange_code 7, reason 740; OTHER rows whose name token matches exactly one held company (pre-amendment, no designator gate): 23 of 1047"
     }
   ]
 }
