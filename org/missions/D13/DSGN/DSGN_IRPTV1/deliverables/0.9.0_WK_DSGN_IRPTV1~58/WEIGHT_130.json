@@ -1,0 +1,51 @@
+{
+  "to_id": "DSGN_IRPTV1.TO-IV-e-103",
+  "reproduced": true,
+  "how": "RENDERED",
+  "how_detail": "node holdings-face-driver.mjs (the ~53 driver, unchanged) client mode against portal c3a03c24 built to .scratch/dist-w58 (same bundle hash index-BHGl-JjQ as portal/dist): Securities table SGM1 130.00% / $650,000.00 and Sample Client Fund 20.00% / $100,000.00, map 130.0% and 20.0%, card $1,000,000.00. Not committed (.scratch/client.png); the order's own screenshot is ~53/holdings-face.driver-client.png.",
+  "weight_base": {
+    "file": "portal/src/pages/InvestorReporting/contracts/adapt.ts",
+    "line": 1165,
+    "what": "pctOfTotal: node.percentages.of_total -- the served per-node fraction, read straight; SecurityList.tsx:239 `weight: n.pctOfTotal` (HoldingsTreemap.tsx:454 sums the served pctOfTotal over one security identity). The page divides by nothing: the denominator is the producer's (node.amount.denominator.value, UNIQUE_CUSTODY_TOTAL). For a client-level view the one-account fold (SecurityList.tsx foldSecurityRows, sumOrNull) adds the served weights of the same security across accounts and the served amounts alike."
+  },
+  "verdict": "FIXTURE_DEFECT",
+  "reason": "the page computes no weight; it prints the served of_total. The all-accounts body the harness served carried each ACCOUNT's own share (SGM1 0.6 and 0.7, Client Fund 0.1 and 0.1, denominator 500000) beside a card total of 1,000,000 -- inconsistent numbers a real answer would not carry. They were changed in the body after the fixture file was written: the ~53 driver's oneBody() filters ALL_BODY.data.nodes without copying the node objects and then rewrites of_total and denominator on them, so the all-accounts body it served later was already rewritten.",
+  "what_the_fixture_gets_wrong": "holdings-face.no-pick.fixture.json itself is consistent (of_total = amount / 1,000,000 on every node, SGM1 0.30 + 0.35 = 0.65). What was served is not: holdings-face-driver.mjs line 51 `body.data.nodes = nodes.filter(...)` shares node objects with ALL_BODY, and lines 56-57 set n.amount.denominator.value = account total and n.percentages.of_total = amount / account total on those shared nodes. Served all-accounts body after that: N-A-SEC 300000/500000 = 0.6, N-B-SEC 350000/500000 = 0.7 (sum 1.3), the four CLI/SMA nodes at 0.1 each (Client Fund sum 0.2). Measured: served-body-check.mjs (before 0.3/0.35 over 1000000, after-shared 0.6/0.7 over 500000, after-copied 0.3/0.35). With nodes copied (holdings-face-driver.fixed.mjs, one line) the same page reads 65.00% / $650,000.00 and 10.00% / $100,000.00 (weight-130.fixed-driver-client.png) and, picked on one account, 70% / 20% / 10% tiles. Page source at c3a03c24 rendered through parseIrEnvelope + HoldingsTab with the unmutated body (temporary probe test, deleted): 65.00% and 10.00%.",
+  "producer_fixture": {
+    "path": "infra/aws/lambda/investor-reporting/_contracts/fixtures/HoldingsSnapshot.valid.json",
+    "carries": "instance: one account A-0001, custody_totals.total_market_value 500000.0, node N-1 amount 125000.0, denominator {kind UNIQUE_CUSTODY_TOTAL, value 500000.0}, of_total 0.25 = 125000 / 500000. So a real answer's of_total is amount over the SAME UNIQUE_CUSTODY_TOTAL value the answer carries; the producer fixture has only one account, so it shows no multi-account case and says nothing about a two-account client beyond that rule."
+  },
+  "fix": null,
+  "product_files_changed": [],
+  "portal_commit": "c3a03c246a422f2235f18114e2487c0e0156713f",
+  "portal_commit_note": "the portal HEAD read, unchanged; no portal commit made by this order",
+  "evidence": {
+    "driver_fixed": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~58/holdings-face-driver.fixed.mjs",
+    "served_body_check": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~58/served-body-check.mjs",
+    "fixed_client_png": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~58/weight-130.fixed-driver-client.png",
+    "fixed_picker_png": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~58/weight-130.fixed-driver-picker.png",
+    "base_run": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/base_w103.txt",
+    "after_run": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/after_w103.txt",
+    "build": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~58/build_w103.txt"
+  },
+  "suite_before": {
+    "scope": "bun test src/pages/InvestorReporting",
+    "pass": 1161,
+    "skip": 27,
+    "fail": 0,
+    "ran": "1188 tests across 380 files",
+    "rc": 0
+  },
+  "suite_after": {
+    "scope": "bun test src/pages/InvestorReporting",
+    "pass": 1161,
+    "skip": 27,
+    "fail": 0,
+    "ran": "1188 tests across 380 files",
+    "rc": 0,
+    "new_failing_ids": []
+  },
+  "rows": [
+    "DSGN_IRPTV1-D2-W58-S8"
+  ]
+}
