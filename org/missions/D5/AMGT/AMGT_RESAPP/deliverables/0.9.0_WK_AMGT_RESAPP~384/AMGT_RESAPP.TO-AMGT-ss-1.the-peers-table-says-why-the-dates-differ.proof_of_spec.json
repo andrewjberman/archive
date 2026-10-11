@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ss-1.the-peers-table-says-why-the-dates-differ",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ss-1.the-peers-table-says-why-the-dates-differ.md",
+    "group": "OTHER",
+    "vintage_commit": "cab1577aba85fea23a3905897a07860c64d1669e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "cab1577aba85fea23a3905897a07860c64d1669e",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ss-1.the-peers-table-says-why-the-dates-differ.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~384",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/PeersTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "f4e09f2d47c548abcff44cdda2d80d91cc78f5c9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on the nested portal branch wk-AMGT_RESAPP-384-portal (portal repository, commit f4e09f2d, parent c96efe17 = portal DEV). Adds one <p data-peers-cross-vintage-caveat> after the table, rendered only when peers.subject.cross_vintage_caveat is a non-empty string; the sentence carries the subject market-cap date and the universe date through longDate, and drops the dates clause when either is absent. No deploy, no push, no PROD touch.",
+      "introduces": ["data-peers-cross-vintage-caveat", "hasCrossVintageCaveat", "crossVintageSentence"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/types.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "f4e09f2d47c548abcff44cdda2d80d91cc78f5c9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on the nested portal branch wk-AMGT_RESAPP-384-portal as f4e09f2d. PeerSubject gains two optional nullable fields, cross_vintage_caveat and market_cap_vintage; no other type moves.",
+      "introduces": ["PeerSubject.cross_vintage_caveat", "PeerSubject.market_cap_vintage"],
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "run in the PORTAL worktree, PASS C1 (one plain sentence after the table names both dates and says neither is restated, 3 of 3 pages), PASS C2, PASS C3, PASS C4; arms passed 4 of 4; R93 CAVEAT RENDERED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-384/portal && node ../org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round93_prep/checks/r93_caveat_rendered.cjs; echo \"exit=$?\"",
+      "output_evidence": "   ASML_NA_Equity: elements 1, dates [\"October 10th, 2026\",\"October 2nd, 2026\"], sentence \"Market caps are not on one date: the subject&#x27;s is as of October 10th, 2026; the peers&#x27; are as of October 2nd, 2026. The size band compares them as they are; neither is restated to the other \"\n   BA_US_Equity: elements 1, dates [\"October 10th, 2026\",\"October 2nd, 2026\"], sentence \"Market caps are not on one date: the subject&#x27;s is as of October 10th, 2026; the peers&#x27; are as of October 2nd, 2026. The size band compares them as they are; neither is restated to the other \"\n   ROG_SW_Equity: elements 1, dates [\"October 10th, 2026\",\"October 2nd, 2026\"], sentence \"Market caps are not on one date: the subject&#x27;s is as of October 10th, 2026; the peers&#x27; are as of October 2nd, 2026. The size band compares them as they are; neither is restated to the other \"\nPASS C1 one plain sentence after the table names both dates and says neither is restated (3 of 3 pages)\nPASS C2 control: without the served caveat the element is absent (3 of 3 pages)\nPASS C3 reader words: no engineering term in the sentence\nPASS C4 control: the rest of the page is byte-equal with and without the sentence\n   arms passed 4 of 4\nR93 CAVEAT RENDERED: YES\nexit=0",
+      "denominator": "4 of 4 arms PASS; 3 of 3 pages (ASML_NA_Equity, BA_US_Equity, ROG_SW_Equity) carry exactly one element after the table with both dates. The per-page sentence is cut at 200 characters by the checker's own note line, not by the page.",
+      "status": "PASS",
+      "expect": "PASS C1 one plain sentence.*PASS C2 control.*PASS C3 reader words.*PASS C4 control.*arms passed 4 of 4.*R93 CAVEAT RENDERED: YES.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the stock peers harness still reads CHECKS-OK 13 of 13 (the control: nothing else on the page moved); and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-384/portal && node src/pages/SecurityAnalysis/__harness__/peersPattern.harness.cjs; echo \"exit=$?\"",
+      "output_evidence": "CHECK panel_is_light true (expected true)\nCHECK table_columns_rendered 5 (expected 5)\nCHECK absent_columns_in_table 0 (expected 0)\nCHECK absent_disclosure_count 12 (expected 12)\nCHECK absent_reasons_listed 12 (expected 12)\nCHECK basis_chip_text derived (expected derived)\nCHECK helper_tip_carries_test_statement true (expected true)\nCHECK subject_row_bold true (expected true)\nCHECK summary_rows_sunken true (expected true)\nCHECK not_carried_em_dash true (expected true)\nCHECK counts_line_present true (expected true)\nCHECK read_failed_distinct true (expected true)\nCHECK posture_calls_subject_then_comparable true (expected true)\nCHECKS-OK 13 of 13\nexit=0",
+      "denominator": "13 of 13 harness checks pass (CHECKS-OK 13 of 13); the same 13 read CHECKS-OK 13 of 13 on the second run",
+      "status": "PASS",
+      "expect": "CHECKS-OK 13 of 13.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the portal typechecks (tsc -b) with 0 errors; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-384/portal && bun run typecheck; echo \"exit=$?\"",
+      "output_evidence": "$ tsc -b --noEmit\nexit=0",
+      "denominator": "0 errors of the whole portal project (tsc -b --noEmit reports no error line; exit 0). The bun wrapper's colour codes are stripped from this excerpt.",
+      "status": "PASS",
+      "expect": "tsc -b --noEmit.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base PeersTab.tsx and types.ts (portal DEV c96efe17, before this cell's edits) stand in as the mutant: no caveat element is rendered, so the checker must fail C1, C3 and C4.",
+      "expected": "R93 CAVEAT RENDERED: NO with exit=1 and arms passed 1 of 4, C1, C3 and C4 FAIL and C2 PASS.",
+      "observed": "Run before the edit, same checker, same fixture: '   ASML_NA_Equity: elements 0, dates [], sentence \"\"' (same for BA_US_Equity and ROG_SW_Equity); 'FAIL C1 one plain sentence after the table names both dates and says neither is restated (3 of 3 pages)'; 'PASS C2 control: without the served caveat the element is absent (3 of 3 pages)'; 'FAIL C3 reader words: no engineering term in the sentence'; 'FAIL C4 control: the rest of the page is byte-equal with and without the sentence'; '   arms passed 1 of 4'; 'R93 CAVEAT RENDERED: NO'; exit=1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 each run twice against the same committed portal bytes (f4e09f2d); the two outputs compared.",
+      "observed": "Run 1 and run 2 agree: AC1 'R93 CAVEAT RENDERED: YES', 'arms passed 4 of 4', exit=0 both times; AC2 'CHECKS-OK 13 of 13', exit=0 both times; AC3 'tsc -b --noEmit' with exit=0 and no error line both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A browser or visual render of the Peers tab, and any network call",
+      "reason": "Bounds 2 and 3 of the order forbid a deploy, a store write, an AWS call and network use; the checker renders the actual PeersTab.tsx with react-dom/server against captured fixtures, which is the instrument the order names."
+    },
+    {
+      "item": "bun install in the portal worktree",
+      "reason": "Forbidden by Bounds 3 of the order; node_modules is a link to the main tree and was used as is."
+    },
+    {
+      "item": "Push, PROD touch and deploy of the portal branch",
+      "reason": "Forbidden by Bounds 1, 3 and 4; the commit stays LOCAL on wk-AMGT_RESAPP-384-portal."
+    },
+    {
+      "item": "JSX entity form (&apos;) for the sentence apostrophes",
+      "reason": "The sentence is built as one JS string from two dates (a template literal in a const), not literal JSX text, so its apostrophes are ASCII inside the string; React escapes them on render as &#x27;, which the checker reads. Non-ASCII is absent from the product code."
+    },
+    {
+      "item": "The <status> flip of the task order",
+      "reason": "The order states the status flip is the issuer's; this worker does not flip it."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W384-S1: The product files live in the nested portal repository, so the order commit-in-the-worktree instruction lands the product commit in a second repository.",
+    "AMGT_RESAPP-D1-W384-S2: The nested portal repository has no committer identity, so safe-commit refused rc=128 until the committer was named for that one call.",
+    "AMGT_RESAPP-D1-W384-S3: The pre-commit gate and risk reflex read zero of the two .ts/.tsx files, so their clean lines carry no evidence for this frontend commit."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "r93_caveat_rendered.cjs (AC1 checker, run in the portal worktree)",
+      "invocation": "cd C:/dev/wk-resapp-384/portal && node ../org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round93_prep/checks/r93_caveat_rendered.cjs",
+      "result": "rc 0; R93 CAVEAT RENDERED: YES, arms passed 4 of 4 (run twice, identical)."
+    },
+    {
+      "tool": "peersPattern.harness.cjs (AC2 stock harness)",
+      "invocation": "cd C:/dev/wk-resapp-384/portal && node src/pages/SecurityAnalysis/__harness__/peersPattern.harness.cjs",
+      "result": "rc 0; CHECKS-OK 13 of 13 (run twice, identical)."
+    },
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit, AC3)",
+      "invocation": "cd C:/dev/wk-resapp-384/portal && bun run typecheck",
+      "result": "rc 0; no error line (run twice, identical)."
+    },
+    {
+      "tool": "safe-commit.sh (portal product commit f4e09f2d)",
+      "invocation": "bash ../.tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~384 <0.9.0_WK_AMGT_RESAPP~384@opal.agent>\" -F ../.scratch/msg_portal_ss1.txt -- src/pages/SecurityAnalysis/tabs/PeersTab.tsx src/pages/SecurityAnalysis/types.ts",
+      "result": "rc 0; 2 files changed, 21 insertions; msg-verify MATCH len=567. The first attempt refused rc=128 for committer identity and committed nothing."
+    }
+  ]
+}
