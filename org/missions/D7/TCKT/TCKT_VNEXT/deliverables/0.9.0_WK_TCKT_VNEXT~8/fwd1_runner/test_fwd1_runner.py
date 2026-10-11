@@ -1339,3 +1339,158 @@ def test_active_stream_falls_back_to_the_filter_and_a_ticket_id_control(monkeypa
     # matches == 0 and a control that finds no run ticket id: VOID with its reason
     out, w = _zero_call(monkeypatch, NONE_FOUND, NONE_FOUND)
     assert out["verdict"] == "ZERO_CALL_VOID" and out["void_reason"] == "CONTROL_FOUND_NO_RUN_TICKET"
+
+
+# ------------------------------------------------------------------ AMENDMENT 6 / AC11: an ACCEPTED submission is not a refusal
+# The fake answers follow the service's own shapes, read for J1:
+#   accepted: ycharts/generate/entry.py:130-137 returns {identity, stage, _status: status_envelope(OPERATION, "NOT_READY",
+#             state="QUEUED", ...)}; the boundary (served.py response_envelope, :403-434) wraps it as
+#             {contract_version, operation, firm_id, data: {identity, stage}, status (no internal_correlation_id),
+#             unprojected_grant}; the contract is responses/analysis-requests.response.schema.json.
+#   refused:  served.refuse() (:437-483) -> {ok: false, contract_version, operation, [firm_id], status} with
+#             status.state == REFUSAL_STATE ("UNAVAILABLE", :183) and NO `data`.
+SYN_FIRM = "fir_" + "1" * 24
+
+
+def _status(code, state):
+    return {"operation": {"operation_id": "analysis-requests", "operation_kind": "write", "revision": "v1"},
+            "state": state, "source_dates": {"source_completion_date": None},
+            "actions": [{"action": "WAIT", "safe": True, "description": "accepted work is queued for processing"}],
+            "public_reason_code": code}
+
+
+def accepted_answer(rid=REQ_A, code="NOT_READY", state="QUEUED", marker="SYN-TENANT-MARK"):
+    return res(200, {"contract_version": "v1", "operation": "analysis-requests", "firm_id": SYN_FIRM,
+                     "data": {"identity": {"tenant_id": marker, "request_id": rid, "request_revision": 1},
+                              "stage": "RECEIVED"},
+                     "status": _status(code, state),
+                     "unprojected_grant": {"count": 0, "denominator": 0, "kinds": {}}})
+
+
+def refused_answer(code, http=200):
+    return res(http, {"ok": False, "contract_version": "v1", "operation": "analysis-requests", "firm_id": SYN_FIRM,
+                      "status": _status(code, run.REFUSAL_STATE)})
+
+
+def test_queued_with_not_ready_and_an_identity_is_accepted(monkeypatch, sleeps):
+    """The live answer of 2026-10-11 08:14Z: HTTP 200, public reason NOT_READY beside state QUEUED, identity present.
+    It is an acceptance: hops (e)-(g) run as built on the id taken from data.identity."""
+    fake = install(monkeypatch, {
+        ("GET", LIST_PATH): listing(REQ_OLD),
+        SUBMIT: accepted_answer(REQ_A, "NOT_READY", "QUEUED"),
+        ("GET", rpath(REQ_A)): [refusal("NOT_FOUND"), report(REQ_A)],
+        ("POST", REPORT_PATH): [ARM_REFUSED, res(200, {"ticket": {"ticket_id": TKT}})],
+        ("GET", "/api/scoped/tickets/%s" % TKT): ticket_with(REQ_A)})
+    hops, named = trace_hops()
+    trace = {"hops": list(hops.values()), "named_failures": named}
+    run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA, SENT)
+    d = hops["d_analysis"]
+    assert d["request_id"] == REQ_A and d["request_id_source"] == "submission_answer"
+    assert d["accepted_reason"] == "NOT_READY" and d["accepted_state"] == "QUEUED"
+    assert d.get("result") is None and "refused_reason" not in d
+    assert trace.get("result") is None and named == []
+    assert hops["e_ready"].get("outcome") is None and hops["e_ready"]["polls"] == 2
+    assert hops["g_open"]["report_opened"] is True
+    assert ("GET", rpath(REQ_A)) in [(c[0], c[1]) for c in fake.calls]
+
+
+def test_request_id_is_taken_from_data_identity(monkeypatch, sleeps):
+    # decoys: a REQ id under data.request_id and at the top level, and the sent token echoed; only data.identity counts
+    ans = accepted_answer(REQ_A)
+    ans["parsed"]["request_id"] = REQ_C
+    ans["parsed"]["data"]["request_id"] = REQ_B
+    ans["parsed"]["data"]["echo"] = SENT
+    fake = install(monkeypatch, {("GET", LIST_PATH): listing(REQ_OLD), SUBMIT: ans})
+    hops, named = trace_hops()
+    rid = run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named, SENT)
+    assert rid == REQ_A and hops["d_analysis"]["request_id"] == REQ_A
+    assert hops["d_analysis"]["request_id_source"] == "submission_answer"
+    assert named == []
+    # the answer carried the id, so the only list read is the one BEFORE the POST
+    assert [c[0] + " " + c[1] for c in fake.calls] == ["GET " + LIST_PATH, "POST " + SUBMIT[1]]
+    # and the sent token is still only traced, never the id
+    assert hops["d_analysis"]["idempotency_token"] == SENT and hops["d_analysis"]["request_id"] != SENT
+
+
+def test_refusal_state_is_a_refusal_whatever_the_code(monkeypatch, sleeps):
+    # the state decides, not the code: the refusal state with the SAME public reason an acceptance carries is refused
+    for code in ("NOT_READY", "INVALID_INPUT", "CHANGED_INPUTS_SAME_REQUEST_ID", "NOT_FOUND"):
+        install(monkeypatch, {("GET", LIST_PATH): listing(REQ_OLD), SUBMIT: refused_answer(code)})
+        hops, named = trace_hops()
+        assert run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named, SENT) is None
+        d = hops["d_analysis"]
+        assert d["result"] == "BRANCH_E_SUBMISSION_REFUSED" and d["refused_reason"] == code, code
+        assert d["status_state"] == "UNAVAILABLE" and d["data_keys"] is None
+        assert [n["reason"] for n in named] == ["BRANCH_E_SUBMISSION_REFUSED"] and named[0]["code"] == code
+        assert "accepted_reason" not in d and "accepted_state" not in d
+    # the refusal state wins even when the body also carries an identity
+    ans = accepted_answer(REQ_A, "NOT_READY", "UNAVAILABLE")
+    install(monkeypatch, {("GET", LIST_PATH): listing(REQ_OLD), SUBMIT: ans})
+    hops, named = trace_hops()
+    assert run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named, SENT) is None
+    assert hops["d_analysis"]["result"] == "BRANCH_E_SUBMISSION_REFUSED"
+    # a non-2xx status is a refusal whatever the state says
+    for http in (400, 403, 500):
+        bad = accepted_answer(REQ_A, "NOT_READY", "QUEUED")
+        bad["status"] = http
+        install(monkeypatch, {("GET", LIST_PATH): listing(REQ_OLD), SUBMIT: bad})
+        hops, named = trace_hops()
+        assert run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named, SENT) is None
+        assert hops["d_analysis"]["result"] == "BRANCH_E_SUBMISSION_REFUSED", http
+        assert hops["d_analysis"]["http_status"] == http
+    # end to end: the run's top-level result is the named branch and (e)-(g) are UNREACHABLE
+    install(monkeypatch, {("GET", LIST_PATH): listing(REQ_OLD), SUBMIT: refused_answer("NOT_READY")})
+    hops, named = trace_hops()
+    trace = {"hops": list(hops.values()), "named_failures": named}
+    run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA, SENT)
+    assert trace["result"] == "BRANCH_E_SUBMISSION_REFUSED" and trace["result_reason_code"] == "NOT_READY"
+    assert all(hops[k]["outcome"] == "UNREACHABLE" for k in ("e_ready", "f_report", "g_open"))
+
+
+def test_submission_answer_keys_and_state_are_traced(monkeypatch, sleeps):
+    install(monkeypatch, {("GET", LIST_PATH): listing(REQ_OLD), SUBMIT: accepted_answer(REQ_A, "NOT_READY", "QUEUED")})
+    hops, named = trace_hops()
+    run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named, SENT)
+    d = hops["d_analysis"]
+    assert d["http_status"] == 200
+    assert d["answer_keys"] == ["contract_version", "data", "firm_id", "operation", "status", "unprojected_grant"]
+    assert d["data_keys"] == ["identity", "stage"]
+    assert d["status_keys"] == ["actions", "operation", "public_reason_code", "source_dates", "state"]
+    assert d["status_state"] == "QUEUED" and d["status_public_reason_code"] == "NOT_READY"
+    # keys and those two strings only: no value of data beyond the request id is in the hop's record
+    blob = json.dumps(d)
+    assert "SYN-TENANT-MARK" not in blob and SYN_FIRM not in blob and "RECEIVED" not in blob
+    # the keys are kept for an answer that carries no status or no data too
+    install(monkeypatch, {("GET", LIST_PATH): listing(REQ_OLD), SUBMIT: res(200, {"stray": 1})})
+    hops, named = trace_hops()
+    run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named, SENT)
+    d = hops["d_analysis"]
+    assert d["answer_keys"] == ["stray"] and d["data_keys"] is None and d["status_keys"] is None
+    assert d["status_state"] is None and d["status_public_reason_code"] is None and d["http_status"] == 200
+
+
+def test_accepted_without_a_req_id_is_a_named_failure_not_a_refusal(monkeypatch, sleeps):
+    for ident in ({"tenant_id": "SYN-TENANT-MARK"}, {"request_id": SENT}, {"request_id": "REQ-" + "A" * 24}, None):
+        ans = accepted_answer(REQ_A)
+        if ident is None:
+            del ans["parsed"]["data"]["identity"]
+        else:
+            ans["parsed"]["data"]["identity"] = ident
+        install(monkeypatch, {("GET", LIST_PATH): listing(REQ_OLD), SUBMIT: ans})   # the list yields no fresh row
+        hops, named = trace_hops()
+        trace = {"hops": list(hops.values()), "named_failures": named}
+        run.hops_d_to_g("tok", trace, hops, named, TKT, "in-1", FILE_SHA, SENT)
+        d = hops["d_analysis"]
+        assert d["request_id"] is None and d["result"] == "SUBMISSION_ANSWER_UNREADABLE", ident
+        assert trace.get("result") is None, "the run is NOT the refusal branch"
+        assert "refused_reason" not in d
+        nf = [n for n in named if n["hop"] == "d_analysis"]
+        assert [n["reason"] for n in nf] == ["SUBMISSION_ANSWER_UNREADABLE"] and nf[0]["candidates"] == 0
+        assert all(hops[k]["outcome"] == "UNREACHABLE" for k in ("e_ready", "f_report", "g_open"))
+    # the request-list fallback is tried first: one fresh row resolves it and no failure is named
+    ans = accepted_answer(REQ_A)
+    ans["parsed"]["data"]["identity"] = {"tenant_id": "SYN-TENANT-MARK"}
+    install(monkeypatch, {("GET", LIST_PATH): [listing(REQ_OLD), listing(REQ_B, REQ_OLD)], SUBMIT: ans})
+    hops, named = trace_hops()
+    assert run.hop_d_analysis("tok", TKT, "in-1", FILE_SHA, hops["d_analysis"], named, SENT) == REQ_B
+    assert hops["d_analysis"]["request_id_source"] == "request_list" and named == []
