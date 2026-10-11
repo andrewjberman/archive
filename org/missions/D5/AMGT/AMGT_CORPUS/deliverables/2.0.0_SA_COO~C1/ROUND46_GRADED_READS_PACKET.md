@@ -21,7 +21,24 @@ qq-5 redeploy), with the shared portal working copy DEV `8ed372cb` (it does not 
 - FWD-16: one PDF-only name was rendered (ADBE US); the openers were not pressed in this walk.
 - FWD-21: the 17 non-December fiscal-year names showing 2027-2029 are the CTO's "CORRECT, not a defect".
 
-## FWD-12 and FWD-20
+## FWD-12 and FWD-20 -- av-10 (the rendered census)
 
-Round 45's read stands as the base (`ROUND45_GRADED_READS_PACKET.md`: rendered rows equal the team sheet on 32 of 32; unmapped 3210 of 9233).
-The round-46 cells change what is served and rendered; this packet is extended by av-10 after they land.
+**State at 14:05Z.** av-1 and av-2 are drained; av-2 is on portal DEV (`f00c7b8ee8`); the /12 write (av-3) is read Branch A (95 of 95, ledger closed
+@444123834e); the API redeploy (av-4) is AMGT_RESAPP's `ff-4` window, earliest GO ~15:00Z. The LIVE function still serves /11, so the REAL read
+(`av_capture.py` over the live function, then `av10_rendered_census.cjs`) is NOT taken yet and nothing below is graded on it.
+
+**PRE-READ, a prediction, labelled as one.** `av10_preread_inject.py` puts each name's STORED /12 `team_sheet` (exactly what the API will return
+once it picks the /12 objects) into the live capture; `av10_rendered_census.cjs` runs the REAL `modelSheet.ts` of DEV `f00c7b8e` over it
+(`C1/evidence/r46_av10_preread_census_20261011.txt`):
+
+| read | predicted result |
+|---|---|
+| classes over the 32 own workbooks | FIGURE 3381, HEADING 316, CONTROL 62, sum 3759 = the sheets' rows; per-name sums hold |
+| FIGURE rows by source | Bloomberg 482, team's own value 2899, why 0, refused 0, **unmapped 0** (sum 3381) |
+| rendered | 316 heading rows, 0 CONTROL rows rendered, 0 why-rows with a barred word |
+| the first group | equals the sheet's non-CONTROL rows, in order and labels, on 32 of 32 names with team rows |
+| names | 63 `master_absent` render the base rows with the served reason; the master template is still not in the library |
+
+Of the 497 FIGURE rows whose label matches a row spec, 482 have a served Bloomberg figure and 15 fall to the team's value (precedence 1 needs a
+served figure). The 4,296 text cells (for example `#VALUE!`) are not rendered as values by the builder's rule (a team cell is a finite number only; av2_check arms b4 and b5 pin it); this pre-read does not re-read those 4,296 cells one by one.
+**Limit:** the sheet builder on stored fields, not a browser DOM walk and not the live payload; the post-act read replaces it.
