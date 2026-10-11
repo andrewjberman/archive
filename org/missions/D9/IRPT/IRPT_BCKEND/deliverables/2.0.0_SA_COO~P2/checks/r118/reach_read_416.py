@@ -154,6 +154,22 @@ def main():
         print("%s call sites in reached code: %d" % (label, len(sites)))
         for s in sites:
             print("    " + s)
+    # CTO half AMENDMENT 2 (section A4): a site whose family is caller-supplied (not a literal) counts. List EVERY reached
+    # put / persist / reserve call on any receiver with whether each argument is a literal, so the reader can judge.
+    wide = []
+    for (mod, q), node in sorted(reached.items()):
+        if q == "<module>":
+            continue
+        for call in calls_in(node):
+            f2 = call.func
+            if isinstance(f2, ast.Attribute) and f2.attr in ("put", "persist", "reserve"):
+                kinds = ["lit" if isinstance(a, ast.Constant) else "var" for a in call.args]
+                wide.append("%s:%d in %s: %s.%s(%s) args=%s" % (mod, call.lineno, q, src(f2.value)[:40], f2.attr,
+                                                               ", ".join(src(a)[:28] for a in call.args), "/".join(kinds)))
+    wide = sorted(set(wide))
+    print("ALL reached put/persist/reserve call sites on any receiver: %d" % len(wide))
+    for s in wide:
+        print("    " + s)
     print("reach_read routes=%d modules=%d defs=%d reached=%d put=%d reserve=%d commentary_get=%d commentary_refs=%d" % (
         len(routes), len(trees), len(all_defs), len([k for k in reached if k[1] != "<module>"]), len(put_sites),
         len(reserve_sites), len(get_sites), len(ref_sites)))

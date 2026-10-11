@@ -165,6 +165,49 @@ Criterion ids: APPLY1-AC1, APPLY1-AC2, APPLY1-AC3. Instance at `org/tier2_senior
     graded by a per-route replay plus the live-call arm, inside `2.0.0_SA_COO~P2`'s IB-pr-416. **This order stays OPEN.** Its reads 5-6 (the ticket-bound
     READY and `REQ-5e4149d2` served) are graded on that release. No further apply is cut here. Close the rev 5 ledger as Branch B. Gate limb that graded this
     amendment: `to-pipeline-gate.py` GATE (viii) on a modify.
+    **AMENDMENT 8 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~03:4xZ): a FIFTH apply, REVISION 6 -- irpt-status from ONE commit (IB-pr-416's build).**
+    Pair `release1/NEVER_WIDEN_PAIR_ANLREQ_RELEASE1_REV6_IRPT_STATUS.md` @7ce505dc5a (blob 1d38417741; COO half signed). CTO half: section A3 of
+    `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_IB_pr_416_THREE_FUNCTIONS_ONE_TREE_CTO_HALF.md` @81cba68056 (msg 3962),
+    SIGNED against that blob. Read both before any act. Conditions 1, 2, 3, 5, 6, 8 and 9 of that half bind and are placed below.
+    - **Pin** `5c35a6f9f9` (the source-map landing, TO-IB-pr-420 step 1; condition 2): `git worktree add --detach /c/dev/anl-r1g-pin 5c35a6f9f9`; build,
+      plan and apply there, never at HEAD. Step 0: `git fetch origin`, then `git merge-base --is-ancestor 5c35a6f9f9 origin/box/dell2` rc 0 (NOT on origin
+      when this amendment was cut), with `origin/CLOUD` beside it as the control. **Built** `6idtFvAmYk73wJdr5DPRIyEPrLeWgzjlqbdNr5f1wxc=` (the issuer built
+      it at the pin from the real map, BUILD_ONLY, and read this digest). **Rollback** rev 3 `t6OJTCcmOnWGVl8iglcvfGoYb3PbPJqJYqsSgJBpGdI=`, object version
+      `iDIQPfNUQM8EH4pjrG.codFMMaR071yi`: re-read both at step 0 and record the version you replace.
+    - **Start (condition 3; shared-root STOP):** do not start until `2.0.0_SA_COO~P2`'s adapter apply has read its live-call arm clean and the issuer has
+      relayed that. If ledger `irpt-bckend-ib420-adapter-narrative-20261011`, or any other entry or plan, is open on `investor-reporting/ops`, STOP and report.
+    - **Ledger** `irpt-anlreq-r1-irpt-status-rev6-20261011`, opened and committed BEFORE the first upload, stating the pin, the built sha and the rollback
+      version (condition 6). A live CodeSha256 other than `t6OJTCcm` at the precheck is a STOP and a row.
+    - **Condition 1 (digest control):** `BUILD_ONLY=1 bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting irpt-status` at the pin prints
+      `6idtFvAm...`, or ABORT. Then the same without BUILD_ONLY.
+    - **R0:** the per-member diff of the UPLOADED zip against LIVE (read via `get_function`, never the S3 key) is EXACTLY these 13: `composition.py`,
+      `data/custodian_key_seam.json`, `durable_job.py`, `entry.py`, `ids.py`, `interactive_access.py`, `loaders.py`, `owned_report.py`, `repository.py`,
+      `resident_installed.py`, `retention.py`, `served.py`, `status_installed.py`; 0 added, 0 removed. Anything else is a STOP. Record it as read "7".
+    - **R1,** on the UPLOADED zip downloaded back by version: symbol closure missing=0; `checks/r2/signature_closure.py`, IB-pr-416's
+      `signature_closure_attr.py` and `method_call_limb_416.py` each 0 mismatches (the `profile_reader` mismatch is no longer tolerated: it is closed).
+    - **Condition 8 (reach read),** on the same UPLOADED zip:
+      `python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r2/reach_read.py <zip>` ends `count=0 verdict=PROCEED` with 7 routes read.
+      The issuer's own run on its build reads that (@e1e037b14e, `release1/REV6_REACH_READ_IRPT_STATUS.json`). A count above 0 is a STOP to the CTO.
+    - **Plan:** `investor-reporting/ops`, `-target=module.irpt_status`: `s3_object_version` + `source_code_hash` only; any other line is a STOP. Commit the
+      plan text, then ONE `safe-apply`. No API, IAM, layer or environment change.
+    - **R2:** live == `6idtFvAm`, re-plan 0, the `/original` route count is 1.
+    - **R3 (live-call arm; the ledger does NOT close before it):** within a minute of the promote, one GET `/api/scoped/investor-reporting/status` for a
+      non-49F caller: a typed answer, never a 500. Then irpt-status 5xx and `TypeError` counts both 0, counted from the promote UNTIL
+      `2.0.0_SA_COO~G2`'s reads below have finished, with START lines printed PER TENANT (49financial and cottonwood). A window that closes earlier, or a
+      one-tenant denominator, is not R3.
+    - **R4 (`2.0.0_SA_COO~G2`, sr1 window):** `REQ-5e4149d2`'s owner read (status-job and analysis-report) answers with no `RetentionRefused` and no
+      `TypeError`. Record it as read "6". **R5 (same window):** one GET `.../analysis/requests/{id}/original` answers and the object count stays 1.
+    - **Condition 5 (the IB-pr-405 widening, both arms, same window):** as `svc-custody-statement`, one `analysis-request-read` of a request owned by its
+      own firm answers; one of a request owned by another firm is refused `NOT_AUTHORIZED`. If the subject cannot be driven in the window, the ledger
+      records that widening as APPLIED, UNEXERCISED, in those words.
+    - **Branch B:** R2 failing, OR any 5xx or any `TypeError` in the log group at any time inside the R3 window (a 200 beside a logged `TypeError` is
+      still Branch B), OR R5's count moving: re-promote rev 3's object version through the same Terraform path at once, then read live == `t6OJTCcm` and
+      probe BOTH tenants. R4 answering a typed refusal that is neither is recorded with its code and routed to the issuer; no rollback.
+    - **Condition 9:** the ledger close states both A1 widenings (`svc-commentary` on `reserve`; `svc-irpt-packager` reading `ANALYSIS_COMMENTARY`) as
+      APPLIED, UNEXERCISED on irpt-status.
+    - Write the same `APPLY-Y1_after_reads.json` with `revision` 6, `built_sha` `6idtFvAm...`, reads "0".."7", plus `r3` (5xx, TypeError, START per tenant,
+      window start and end), `r5_original_count`, `condition5` (both arms, or APPLIED, UNEXERCISED) and `condition9`. The checks `apply1_cells.py` are
+      amended to `6idtFvAm`. Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii) on a modify.
   </steps>
 
   <acceptance>
