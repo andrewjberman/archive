@@ -1,0 +1,116 @@
+{
+ "schema_version": "1.0",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-422",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-422.adapter-role-vendor-session-reads-ungated.md",
+  "group": "OTHER",
+  "vintage_commit": "4c71de0bc0"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "4c71de0bc0",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-422.adapter-role-vendor-session-reads-ungated.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~283",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/investor-reporting/performance/retained.tf",
+   "kind": "config_data",
+   "commit_or_etag": "d435105a39",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "count removed from the 4 session blocks (2 data sources, 2 role policies); addresses kept; variable untouched; PLAN ONLY, nothing applied",
+   "artifact_covered_by": [
+    "IB120-1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~283/IB120-1_plan_targeted.txt",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "targeted plan: 2 to add, 0 to change, 0 to destroy",
+   "artifact_covered_by": [
+    "IB120-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~283/IB120-1_plan_census.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "adds = the 2 session policies; 0 changes; 0 destroys; 2 single-secret GetSecretValue grants; naming limb PASS (rc 0); untargeted 2/1/0 with depends_on cause",
+   "artifact_covered_by": [
+    "IB120-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~283/NEVER_WIDEN_SIGNOFF_PACKET_IB-pr-422.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "IAM widening of one role by two single-secret reads; Branch A two steps, Branch B; targeted and untargeted counts; naming limb; one release with IB-pr-421; not exercised",
+   "artifact_covered_by": [
+    "IB120-1-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB120-1-AC1",
+   "criterion_verbatim": "IB120-1-AC1 -- retained.tf: neither session data source nor session policy has a count that reads performance_plan_firm or var.approved_performance_plan.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r120/p120_cells.py\" . IB120-1-AC1",
+   "expect": "IB120-1-AC1 PASS",
+   "output_evidence": "OK: 4 of 4 session blocks present, 0 gated on the plan variable | IB120-1-AC1 PASS | rc=0",
+   "denominator": "4 of 4 session blocks present with no plan-variable count",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB120-1-AC2",
+   "criterion_verbatim": "IB120-1-AC2 -- plan census: adds are exactly the two session policies, 0 changes, 0 destroys; each grant names ONE secret ARN, single action GetSecretValue; naming limb PASS.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r120/p120_cells.py\" . IB120-1-AC2",
+   "expect": "IB120-1-AC2 PASS",
+   "output_evidence": "OK: adds are exactly the 2 session policies; 0 changes, 0 destroys; 2 single-secret GetSecretValue grants; naming PASS | IB120-1-AC2 PASS | rc=0",
+   "denominator": "targeted plan 2 add / 0 change / 0 destroy; 2 of 2 grants single-secret; naming-apply-gate rc 0, 3 of 3 names graded CONFORMANT",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB120-1-AC3",
+   "criterion_verbatim": "IB120-1-AC3 -- packet names Branch A, Branch B, both policy addresses and both secret ARNs.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r120/p120_cells.py\" . IB120-1-AC3",
+   "expect": "IB120-1-AC3 PASS",
+   "output_evidence": "OK: packet names both branches, 2 policy addresses and 2 secret ARNs | IB120-1-AC3 PASS | rc=0",
+   "denominator": "6 of 6 required strings present in the packet (2 branches, 2 addresses, 2 ARNs)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative control: AC1 run against the pre-edit retained.tf (git show 0311c5f85d) in a scratch root must FAIL.",
+   "expected": "IB120-1-AC1 FAIL, 4 of 4 blocks gated",
+   "observed": "FAIL: 4 of 4 blocks still gate their count on the plan variable | IB120-1-AC1 FAIL | rc=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "targeted terraform plan run twice, compared address, actions and policy document of every non-no-op resource change",
+   "observed": "2 of 2 changes identical across the two runs (same policy JSON, same ARNs); untargeted plan separately reads 2 add / 1 change (IB120-1_plan_after_edit.txt), which is why the plan is targeted",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "IRPT_BCKEND-D2-W283-S1"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/proof-of-spec-check.py <instance>",
+   "result": "see final report"
+  }
+ ]
+}

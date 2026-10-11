@@ -1,0 +1,55 @@
+{
+  "root": "infra/aws/terraform/investor-reporting/performance/",
+  "plan_command": "terraform plan -input=false -lock=false -no-color -target=aws_iam_role_policy.performance_approved_session -target=aws_iam_role_policy.performance_approved_inf_session -out=<scratch>",
+  "adds": [
+    "aws_iam_role_policy.performance_approved_inf_session",
+    "aws_iam_role_policy.performance_approved_session"
+  ],
+  "changes": [],
+  "destroys": [],
+  "grants": [
+    {
+      "policy_address": "aws_iam_role_policy.performance_approved_inf_session",
+      "policy_name": "irpt-performance-approved-orion-session-policy",
+      "actions": [
+        "secretsmanager:GetSecretValue"
+      ],
+      "resources": [
+        "arn:aws:secretsmanager:us-east-1:313476888478:secret:orion/jwt/current-ewrBtp"
+      ]
+    },
+    {
+      "policy_address": "aws_iam_role_policy.performance_approved_session",
+      "policy_name": "irpt-performance-approved-session-policy",
+      "actions": [
+        "secretsmanager:GetSecretValue"
+      ],
+      "resources": [
+        "arn:aws:secretsmanager:us-east-1:313476888478:secret:blackdiamond/cot/session-jnzOyC"
+      ]
+    }
+  ],
+  "naming_limb": "PASS",
+  "naming_limb_invocation": "python .tools/naming-apply-gate.py --plan-json <targeted plan show -json> --root infra/aws/terraform/investor-reporting/performance (rc 0; NAMING-PLAN: PASS 3 graded; both new policy names CONFORMANT as IAM_POLICY)",
+  "live_role_policies_before": [
+    "irpt-performance-adapter-directory-read-policy",
+    "irpt-performance-adapter-logs",
+    "irpt-performance-adapter-ownership-map-read-policy",
+    "irpt-performance-adapter-selection-read-policy",
+    "irpt-performance-adapter-service-profile-read-policy",
+    "irpt-performance-render-grant-read-policy",
+    "irpt-performance-retained-policy"
+  ],
+  "live_role_policies_before_note": "aws iam list-role-policies --role-name irpt-performance-adapter-role via .tools/aws, re-read at plan time, identical to IB120-1_role_policies_before.json (7 names)",
+  "untargeted_plan": {
+    "adds": [
+      "aws_iam_role_policy.performance_approved_session",
+      "aws_iam_role_policy.performance_approved_inf_session"
+    ],
+    "changes": [
+      "module.irpt_performance_adapter.aws_lambda_function.this"
+    ],
+    "destroys": [],
+    "cause": "lambda.tf:62-65 makes the adapter module depends_on aws_iam_role_policy.performance_approved_session; a pending add defers the artifact data read, so the function prints as an update (plan-time artifact). Evidence: IB120-1_plan_after_edit.txt @d435105a39; CTO msg 4509 rules a targeted apply of the two policies first."
+  }
+}
