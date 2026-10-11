@@ -47,8 +47,28 @@ for tok in sys.argv[1:]:
                  "stated" if env.get("completeness") not in (None, "") else "absent"))
     except Exception as exc:  # noqa: BLE001
         print("READ %s verdict=SERVED Error %s" % (reader, type(exc).__name__))
-for ask, want in (("trade reconciliation", "E-30"), ("billing", "E-31")):
+for ask, want in (("trade reconciliation", "E-30"), ("billing", "E-31"),
+                  ("statement", "E-9"), ("S&P YTD", "E-19")):   # the last two: round-8 analysis E2
     ms = od.discover(ask, g.OPAL_INTERNAL).get("matches", [])
     first = ms[0] if ms else {}
     got = (first.get("need") or {}).get("id") or first.get("dataset") or "NOT_CATALOGUED"
     print("ROUTE %s first=%s want=%s" % (ask.replace(" ", "_"), got, want))
+# E2 on the SERVED host: FWD-18 from the deployed catalog, and E-13's unknown-model guidance in the deployed discover.
+import json  # noqa: E402
+import re  # noqa: E402
+import yaml  # noqa: E402
+cat = yaml.safe_load(open(os.path.join(ROOT, "app", "refs", "DATA_CATALOG.yaml"), encoding="utf-8"))
+tags = {"C%d" % i for i in range(1, 9)} | {"W%d" % i for i in range(1, 7)}
+served = set()
+c3 = 0
+for n in cat.get("needs") or []:
+    if n.get("status") == "SERVED":
+        served |= set(n.get("retires") or []) & tags
+    if n.get("id") in ("E-4", "E-5", "E-9") and "C3" in (n.get("retires") or []):
+        c3 += 1
+print("FWD18 served=%d c3=%d" % (len(served), c3))
+ms = od.discover("how did the growth model do against its benchmark last quarter", g.OPAL_INTERNAL).get("matches", [])
+first = ms[0] if ms else {}
+blob = json.dumps(first)
+codes = sum(1 for c in ("UST", "ST", "INT", "LT", "ULT") if re.search(r"\b%s\b" % c, blob))
+print("GUIDE first=%s codes=%d" % ((first.get("need") or {}).get("id"), codes))

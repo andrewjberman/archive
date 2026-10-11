@@ -16,7 +16,9 @@ from app.integrations.opal_discover import integration as od  # noqa: E402
 ASKS = [("trade reconciliation", "E-30"), ("did the custodian settle our trades", "E-30"),
         ("billing", "E-31"), ("which households have unpaid fees", "E-31"),
         ("post model update rec", "E-32"), ("high cash account alert", "E-33"),
-        ("assets transfer alert", "E-34"), ("restricted account alert", "E-35")]
+        ("assets transfer alert", "E-34"), ("restricted account alert", "E-35"),
+        # round-8 analysis E2: Alyssa's two phrasings reach their needs from catalog text, with no word fold
+        ("statement", "E-9"), ("S&P YTD", "E-19")]
 hit = 0
 for ask, want in ASKS:
     ms = od.discover(ask, g.OPAL_INTERNAL).get("matches", [])

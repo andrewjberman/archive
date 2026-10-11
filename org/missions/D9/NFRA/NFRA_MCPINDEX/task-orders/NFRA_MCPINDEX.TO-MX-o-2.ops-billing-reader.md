@@ -108,6 +108,8 @@ per 1.0.0_SA_CTO~Z's ruling @ff362e8444: round 9 issues after round 8's drain an
 - o2.AC1 FAIL as expected: census absent.
 - o2.AC2 and o2.AC3 FAIL as expected: census absent.
 
+ISSUED 2026-10-10 ~23:4xZ in round 9's ONE issuance, from `ledger/ROUND_ANALYSIS.round8.md` @d2eb6c471b. Battery re-dry-run at issuance base bf8492f48f: every check of this order FAILS there as a build check must.
+
 <status>issued</status>
 <round>9</round>
 <fabric>site-z</fabric>
