@@ -35,6 +35,10 @@ proof-of-spec-check, judgment=0, verdict MAY-CLOSE. (Before the rename in "What 
 - **F7 is a snapshot.** The producers still write `opal-data-bd`; the copy is stale from their next write. "Source
   changed 0" is the state at 05:07Z, not a promise. Nothing reads the new prefix (CTO half, condition 2).
 - **F6 is built, not deployed.** No request changes until the registry map value changes.
+- **No change-management entry names the F7 copy.** A search of `org/critical_paths/` (1,779 files scanned) finds
+  none for this project's round 2. The act's record is the never-widen pair,
+  `ledger/NEVER_WIDEN_ROUND2_F7_COPY_COO_HALF.md` and `..._CTO_HALF.md`. A WORLD cell's change-management entry is the
+  CTO's to name or waive; the copy itself reads COPY-COMPLETE, so nothing is half-landed.
 - **Coverage.** FAULT 89 of 444 classes remain, 23,977 live objects in six of them stay FAULT above a 25-child limit
   (row `D1-W4-S5`). The table, not a reading, owns them.
 
