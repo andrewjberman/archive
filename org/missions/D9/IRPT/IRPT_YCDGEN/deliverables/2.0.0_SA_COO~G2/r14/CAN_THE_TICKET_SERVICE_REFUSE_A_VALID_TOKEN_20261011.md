@@ -53,3 +53,23 @@ complete disarm for this token, not a partial one.
 
 The authorizer as DEPLOYED (this is the repo's file; its live bytes were not compared). The REST authorizer
 (`portal-rest-authorizer`), which is a different function: which of the two fronts the package route was not read.
+
+## CORRECTION 1 (2026-10-11 ~17:0xZ, this seat, on reading the mint's return @0a12106f8e)
+
+Section 3 says "the packager's token opens exactly one thing: the package door" and "the empty list is a complete disarm
+for this token". **Both sentences were read inside the ticket service only, and are true only there.** The token is
+verified by the portal authorizer, which fronts other routes than the ticket service's, and I read none of those routes.
+
+The mint's return lists the token's claim NAMES: `aud, exp, iat, iss, name, sub, tier, userType`. **It carries a `tier`
+claim, whose value did not leave the laptop.** The authorizer's `computeAllowedFirms` (`portal-authorizer/index.mjs` lines
+293-304) returns `ALL` for a token whose `tier` is `internal`, and puts that in the context every route behind it
+receives as `allowedFirmIds`. So:
+
+- if `tier` is `internal`, this token reaches any route behind that authorizer that admits a caller on `allowedFirmIds`
+  or `tier` alone, with every firm, and the firm list on the package door disarms none of that;
+- if `tier` is some other value, `allowedFirmIds` is empty for it (no `firmId` claim, no `role`), and the sentences above
+  hold as far as the authorizer goes.
+
+NOT established: the value of `tier`; the same for `svc-commentary`'s token, minted by the same method; which routes behind
+the authorizer admit on `allowedFirmIds` or `tier` without checking `userType` or the subject. The return is correct that
+there is no firm claim; a `tier` is not a firm claim and can still carry firm reach.
