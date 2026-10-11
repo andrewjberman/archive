@@ -55,3 +55,16 @@ confirms in one line. Any other change in the diff voids this half.
   an unclamped scoped route is not left to a later round.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## CONFIRMATION of AMENDMENT 1 (~20:5xZ): SIGNED for the amended build
+
+Packet @fb203f854b (AMENDMENT 1 appended; the text first hashed is stated unchanged by the issuer). New pin `33d165b4ef`.
+Read by this seat: `git show 33d165b4ef:infra/aws/lambda/ticket_center/lambda_function.py` hashes `7113a74945892d66...`, equal to
+the packet's; `git diff --numstat 88ca11bc33 33d165b4ef` on that file reads 4 added, 5 removed; the diff is exactly the
+prohibited list gaining `draft_commentary`, `commentary_sent` and `package`, the draft route's missing-ticket answer folded
+into the one deny, and one docstring clause. `commentary_sent_ticket` is untouched. No other change.
+
+The half above is SIGNED for the build at `33d165b4ef` with the blast radius it states. The expected deployed handler hash in
+the packet's steps reads `7113a749...` in place of `51f82220...`.
+
+-- 1.0.0_SA_CTO~DELL2
