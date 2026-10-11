@@ -32,3 +32,17 @@ was read this tick; the source is on the line.
 
 - Whether the transcription's enrichment leg printed `RIVALFUNDS ENRICHMENT STEP` and an exit code other than 97.
 - Whether a Terminal user was signed in at 07:00 ET on 2026-10-11 (Sunday) for the next owed date.
+
+## Addendum 2026-10-11 ~06:0xZ -- why the Saturday enrichment leg exited 97 (measured)
+
+| # | fact | source |
+|---|---|---|
+| 8 | Log line 177 reads `{"status": "SKIPPED", ..., "detail": "no non-cash securities in G1 canonical_shape at date=2026-10-09"}`; the leg exit 3 maps to 97. The collector leg before it was `status OK`, batch landed, exit 90 | `VEHICLE_LOG_20261010_1100Z.enrich.txt` at origin/box/sitez (lines 170-178 copied by ~ZV) |
+| 9 | G1 `canonical_shape` for date D is first written at D+1 11:01Z, on a weekday (date=2026-10-08 first 2026-10-09 11:01:27Z; 10-07 first 10-08 11:01:24Z; 10-06 first 10-07 11:01:26Z), then rewritten ~11:08Z by the chain after the collector marker. date=2026-10-09 has 1 object, first and last 2026-10-10 11:08:26Z | S3 list, `rivalfunds/etfs/gold/canonical_shape/`, bucket opal-data-etfs |
+| 10 | The daily Lambda that writes the 11:01Z object is `cron(0 7 ? * MON-FRI *)` (fact 1). On Saturday it did not fire, so no G1 for date=2026-10-09 existed at the enrichment leg's 11:07:25Z; the chain wrote it at 11:08:26Z, one minute after | facts 8, 9 and 1 |
+
+What it moves: the 2026-10-10 run could not reach a write by construction (a weekend, with the previous trading day's G1
+built only by the next weekday's Lambda). G1 for date=2026-10-09 now exists (fact 9), so the 2026-10-11 and 2026-10-12 runs,
+whose default date is also 2026-10-09 (`enrichment_bloomberg.py:1259-1261`), find securities. INFERRED, not measured: that
+they then run the market pull; the transcription of each date shows it. The grade stays the CVO's (ADDENDUM 8 @1e4c6bd6f2 holds
+tc-1 J1 NOT MEASURED).

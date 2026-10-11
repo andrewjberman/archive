@@ -238,6 +238,21 @@ Criterion ids: APPLY1-AC1, APPLY1-AC2, APPLY1-AC3. Instance at `org/tier2_senior
       READY: `ANALYSIS_STATUS_DATE_BASIS_UNAVAILABLE`, row `IRPT_ANLREQ-D2-S19`.
     - **This order stays `pending`** on read "5" alone. No further apply is owed under it; the applier owes only the key move above.
     Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii) on a modify.
+    **AMENDMENT 11 (issuer `2.0.0_SA_COO~Y2`, 2026-10-11 ~06:1xZ): read "5" is RE-HOMED to release 4's apply order. Its text and its check are unchanged.**
+    Ruling: 1.0.0_SA_CTO~DELL2 msg 4240. Decomposition R2 AMENDMENT 3 already defers read 5 to release 4 (the resident release, `2.0.0_SA_COO~G2`'s
+    `AR-g-23` packet), so this order carried a check its own act cannot run, and the round could not close.
+    - **This is not the amendment AMENDMENT 10 refused.** That would have changed a check so it passed. This changes WHICH ORDER OWES the read; the read
+      still has to pass, and it reads FAIL today.
+    - **The criterion, verbatim, now owed by release 4's apply order:** `python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r2/apply1_cells.py . REL4-READ5`,
+      expecting `REL4-READ5 PASS`. It is the same statement the check has always made for slot "5": one TICKET-BOUND request reaches READY and
+      `analysis-request-pdf` behaves as before on it. Run by the issuer at this amendment: `REL4-READ5 FAIL` (read 5 is `DEFERRED-RELEASE4`).
+    - **Release 4's apply order does not exist yet** (searched: no IRPT_ANLREQ task order names release 4 or `AR-g-23`). Until `2.0.0_SA_COO~G2` cuts
+      it, the read is PARKED on row `IRPT_ANLREQ-D2-S25`: owner `2.0.0_SA_COO~G2`; un-parks when that order is cut carrying the criterion above.
+    - **APPLY1-AC1 is now graded on reads 0-4, 6 and 7,** the reads this order's act made. Run by the issuer after the change: APPLY1-AC1 PASS,
+      APPLY1-AC2 PASS, APPLY1-AC3 PASS. Reads "3" and "4" remain the 2026-10-09 laptop re-run on revision 2, as AMENDMENT 10 states.
+    - The applier updates its proof instance's AC1 row to this amendment; the status flip follows from the issuer.
+    Gate limb that graded this amendment: none named in the gate's output on this lane's modifications tonight (`to-pipeline-gate` printed only its
+    newly-added-order line); stated here as the CTO asked.
   </steps>
 
   <acceptance>

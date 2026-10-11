@@ -203,3 +203,10 @@ on two thresholds that are measured (grade file `org/tier1_exec/3.0.0_SA_CVO/del
  }
 ]
 ```
+
+## Update at the rounds 63-64 compile (2026-10-11T06:12:21Z)
+
+Inputs: msg 4237 (rounds 63 and 64 drained @e4a88b23d6, @915e48125f).
+- **D2-W93-S3 does NOT graduate.** The contract lists method row 3 at 0.5.0; the row is dismissed in the rounds 63-64 adjudication.
+- UN-PARKS ON: TO-DB-b-86 terminal. The issuer reports it BLOCKED on the Cottonwood returns gold (row S43), so this file may wait
+  through the mint. The ARMED rows in it sit in the project's INVESTIGATION_v1.md with their disarm owners and do not wait.
