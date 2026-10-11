@@ -1,0 +1,1192 @@
+{
+ "reproduced_row": {
+  "before_in_family": 12,
+  "before_total": 15,
+  "same_in_family": 1,
+  "same_total": 17
+ },
+ "rule": {
+  "text": "CLOCK_UTC 2026-10-11T20:32:11Z\nRULE FOR ADVI_COTBKF.TO-CB-bv-1 (round 74), written by 0.9.0_WK_ADVI_COTBKF~127 BEFORE any count beyond step 1 (the reproduction of the reviewer's 12 of 15 and 1 of 17, which is done: 12/15 and 1/17). Nothing below was tuned to a family count. Thresholds are fixed here and are not changed after the counts; if a threshold later looks wrong, the result under this rule is reported and another rule's result is reported separately and labelled.\n\nPOPULATION AND DEFINITIONS. The 101 funds and 944 compared cells of round 73 (THREE_DATE_READ: cell = one fund and one reinvestment date; a compared cell has same/before/after bars; EQUAL = the custodian price is within 0.5 percent of the cached unadjusted Close). A fund's `winner` is the round-73 per-fund result (same, before, after, undecided; decided = same or before or after; an `after` winner counts as decided but agrees with neither side). An INFORMATIVE cell is a compared cell where exactly one of {equal on the same day, equal on the day before} is true (the cell may also be equal or not on the next day; that is ignored). SAME-ONLY = equal same and not equal before; BEFORE-ONLY = equal before and not equal same.\n\n(a) FAMILY READING (the primary reading, the reviewer's). Field: Security_Description of the transaction cache rows. Text is upper-cased, `&` and every character that is not A-Z or 0-9 is replaced by a space, spaces collapsed, and the family is the first TWO words joined by one space (a leading `The` is not stripped). Name folding is only that: case and punctuation, nothing by hand, no merging of two spellings by judgment. A CUSIP carries the most frequent first-two-words value among its rows (ties: alphabetical first); I report how many CUSIPs have more than one such value. In the output JSON a family with fewer than 5 funds (all funds, decided or not) is folded into ONE object named `other (N families)` whose convention is `not_established` and which carries a `members` list; the CSV and the .md keep every family. SPONSOR reading (a RIVAL, not the primary): family = the first ONE word, same folding; run with the same rules (b) to (d) and reported as a separate line; it never replaces the primary `reading`.\n\n(b) A FAMILY'S CONVENTION. A family is ELIGIBLE only with at least 5 decided funds (winner same or before) and at least 20 informative cells from at least 3 funds in the pooled test (d). Its convention is `same` or `before` only if ALL hold: (b1) among its decided funds (same or before or after), at least 0.80 have the same winner X (X = same or before); (b2) the pooled test (d) reads X. Otherwise `not_established` (too few funds, too few cells, the two tests disagree, or the share is under the line). A family with fewer than 5 decided funds is `not_established`, never a guess, whatever its pooled cells say (the pooled cells are still reported).\n\n(c) THE WHOLE SPLIT. `reading` = `by_family` only if ALL hold: (c1) at least 2 families have a convention (same or before) and at least one is `same` and one is `before`; (c2) the decided funds in families that have a convention are at least 0.50 of all decided funds (of 32); (c3) the funds sitting against their family (a decided fund, in a family that has a convention, whose winner is the other side, or `after`) are at most 0.20 of the decided funds in families that have a convention. Otherwise `not_established`. `against_family` lists by ticker every fund counted in (c3); a family with no convention contributes none to it, but the per-family counts still show the minority side.\n\n(d) THE POOLED TEST, per family, over ALL its funds (decided and undecided), on informative cells. Pooled direction X (X = same or before) if the informative cells number at least 20, come from at least 3 funds, at least 0.75 of them are on side X, and no single fund supplies more than 0.50 of them. Otherwise the pooled test reads `not_established` (reason named). The pooled counts reported per family: same-only, before-only, both equal, neither equal (compared cells), and the largest single fund's share of the informative cells.\n\n(e) THE HELD-OUT TEST (step 4). The large day-before family = the family with the most funds whose winner is `before` (named from step 1: American Funds). Held out = that family's UNDECIDED funds only (winner undecided), pooled: informative cells same-only against before-only, the number of funds they come from, the largest fund's share. HOLDS if at least 20 informative cells, at least 3 funds, at least 0.75 before-only and no fund over 0.50 of the cells. DOES NOT HOLD if at least 20 cells, at least 3 funds and at least 0.75 same-only. `not_confirmed` (not a refutation) if the cells and funds suffice but neither side reaches 0.75, or one fund supplies over 0.50. `too_few_cells` if under 20 informative cells or under 3 funds. Also reported (descriptive, no threshold): among the held-out funds with at least one informative cell, how many have before-only the majority, same-only the majority, a tie.\n\n(f) THE RIVAL SPLITS (step 5), stated now, counted after. Each split assigns every one of the 101 funds to a class. MEASURE of \"separates same from before as well as family does\": the leave-one-out classification accuracy over the 32 decided funds whose winner is same or before (the `after` count is zero in round 73; if any, they count as wrong everywhere): for each such fund, predict the majority winner (same or before) of the OTHER decided funds in its class; if the class has no other decided fund, or the others tie, predict the majority of all the other 31 decided funds (if that ties, count the fund as half right). A split separates AS WELL AS family if its accuracy is greater than or equal to the accuracy of the primary family reading. The no-split baseline (one class) is reported. The splits:\n  R1 share class by ticker: for a 5-letter ticker ending in X, the 4th letter (the class letter); any other ticker, `other`.\n  R2 share class by description: from the description (case-insensitive) the first that matches: `529`; `F-?[123]` as a word; `CL(ASS)? C` as words; `CL(ASS)? A` as words; `ADMIRAL`; `INSTITUTIONAL|CL(ASS)? I|CL(ASS)? Z|R6|I-2`; otherwise `none`.\n  R3 kind: `Mutual Fund` (open end) against `Mutual Fund (Closed End)` (the kind field of round 73).\n  R4 substituted (the build substitutes the price series) against left on the store (the `substituted` field of round 73).\n  R5 period: by fund, the first compared date before 2022-01-01 against 2022-01-01 or later (round 73's cut). Also by cell: the informative cells by calendar year, and those dated before 2023-01-01 against 2023-01-01 or later, same-only against before-only counts, for all funds and for the primary large family and for the rest; the period separates by cell only if both periods have at least 20 informative cells and at least 0.75 on different sides.\n  R6 sponsor (the first word), the rival reading of (a), with (b) to (d) applied.\n  R7 `large day-before family` against all other funds (a binary split built from the lead; it is reported because the lead names it, and labelled as built from the lead, so its accuracy is not independent evidence).\n  Also reported without a threshold: inside the large day-before family, the decided and informative-cell counts by the R2 share class.\n  Unit differences are named: R1-R4, R6, R7 and the family are fund-level classes with the leave-one-out measure; R5 has both a fund-level and a cell-level reading.\n\nNOT TESTED HERE (stated now): why a family's rows would be dated a day later (no ex-date, record-date or pay-date field is read); that the family string is a fair proxy for the transfer agent or the processing path.\n",
+  "written_at": "2026-10-11T20:32:11Z"
+ },
+ "funds": 101,
+ "families": [
+  {
+   "family": "AMERICAN FUNDS",
+   "funds": 30,
+   "decided_same": 1,
+   "decided_before": 12,
+   "decided_after": 0,
+   "undecided": 17,
+   "pooled": {
+    "same_only": 18,
+    "before_only": 102,
+    "both_equal": 94,
+    "neither_equal": 0,
+    "informative": 120,
+    "funds_with_informative": 25,
+    "largest_fund_share": 0.15,
+    "direction": "before",
+    "reason": ""
+   },
+   "convention": "before",
+   "convention_why": "",
+   "tickers": [
+    "ABALX",
+    "ABNFX",
+    "AGTHX",
+    "AIVSX",
+    "AMBFX",
+    "AMCFX",
+    "AMCPX",
+    "AMECX",
+    "AMRMX",
+    "ANCFX",
+    "ANEFX",
+    "ANWPX",
+    "AWSHX",
+    "BALCX",
+    "CAFAX",
+    "CAIBX",
+    "CFNAX",
+    "CGFAX",
+    "CMLAX",
+    "CNPAX",
+    "CWGIX",
+    "CWIAX",
+    "CWMAX",
+    "FINFX",
+    "GFFFX",
+    "NEWFX",
+    "NFFFX",
+    "SMCWX",
+    "WGIFX",
+    "WMFFX"
+   ]
+  },
+  {
+   "family": "other (60 families)",
+   "funds": 71,
+   "decided_same": 16,
+   "decided_before": 3,
+   "decided_after": 0,
+   "undecided": 52,
+   "pooled": {
+    "same_only": 178,
+    "before_only": 44,
+    "both_equal": 504,
+    "neither_equal": 4,
+    "informative": 222,
+    "direction": "not_established",
+    "reason": "families under 5 funds are folded and are not_established; the sum is shown for the record, not tested"
+   },
+   "convention": "not_established",
+   "convention_why": "each folded family has fewer than 5 decided funds",
+   "members": [
+    {
+     "family": "PIMCO INCOME",
+     "funds": 3,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 3,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "COHEN STEERS",
+     "funds": 2,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 2,
+     "same_only": 5,
+     "before_only": 0
+    },
+    {
+     "family": "DFA INTERNATIONAL",
+     "funds": 2,
+     "decided_same": 2,
+     "decided_before": 0,
+     "undecided": 0,
+     "same_only": 23,
+     "before_only": 0
+    },
+    {
+     "family": "DFA U",
+     "funds": 2,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 11,
+     "before_only": 0
+    },
+    {
+     "family": "DODGE COX",
+     "funds": 2,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 2,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "FIDELITY TOTAL",
+     "funds": 2,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 7,
+     "before_only": 0
+    },
+    {
+     "family": "PGIM TOTAL",
+     "funds": 2,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 2,
+     "same_only": 5,
+     "before_only": 0
+    },
+    {
+     "family": "PIMCO TOTAL",
+     "funds": 2,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 2,
+     "same_only": 2,
+     "before_only": 0
+    },
+    {
+     "family": "VANGUARD HIGH",
+     "funds": 2,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 2,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "VANGUARD INTERMEDIATE",
+     "funds": 2,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 2,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "BAIRD AGGREGATE",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "BLACKROCK STRATEGIC",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 1,
+     "before_only": 0
+    },
+    {
+     "family": "CALVERT U",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "CAUSEWAY INTERNATIONAL",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "COLUMBIA STRATEGIC",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "DFA EMERGING",
+     "funds": 1,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 0,
+     "same_only": 12,
+     "before_only": 0
+    },
+    {
+     "family": "DFA REAL",
+     "funds": 1,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 0,
+     "same_only": 9,
+     "before_only": 0
+    },
+    {
+     "family": "FIDELITY 500",
+     "funds": 1,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 0,
+     "same_only": 5,
+     "before_only": 0
+    },
+    {
+     "family": "FIDELITY BALANCED",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "FIDELITY BLUE",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "FIDELITY CONTRAFUND",
+     "funds": 1,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 0,
+     "same_only": 11,
+     "before_only": 0
+    },
+    {
+     "family": "FIDELITY EMERGING",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 3,
+     "before_only": 0
+    },
+    {
+     "family": "FIDELITY EXTENDED",
+     "funds": 1,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 0,
+     "same_only": 4,
+     "before_only": 0
+    },
+    {
+     "family": "FIDELITY INTERNATIONAL",
+     "funds": 1,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 0,
+     "same_only": 8,
+     "before_only": 0
+    },
+    {
+     "family": "FIDELITY MID",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 1,
+     "before_only": 0
+    },
+    {
+     "family": "FIDELITY OTC",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 3,
+     "before_only": 0
+    },
+    {
+     "family": "FIDELITY SMALL",
+     "funds": 1,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 0,
+     "same_only": 5,
+     "before_only": 0
+    },
+    {
+     "family": "FIRST EAGLE",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 6,
+     "before_only": 0
+    },
+    {
+     "family": "FRANKLIN GROWTH",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 1,
+     "before_only": 0
+    },
+    {
+     "family": "HARDING LOEVNER",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "INVESCO HIGH",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "INVESCO VAN",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "JPMORGAN EQUITY",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "JPMORGAN GROWTH",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 1
+    },
+    {
+     "family": "JPMORGAN LARGE",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 1
+    },
+    {
+     "family": "MFS INTERNATIONAL",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 2
+    },
+    {
+     "family": "MFS RESEARCH",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "MFS VALUE",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 1,
+     "undecided": 0,
+     "same_only": 0,
+     "before_only": 14
+    },
+    {
+     "family": "NEUBERGER GENESIS",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 1
+    },
+    {
+     "family": "NORTHERN STOCK",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "NUVEEN AMT",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 1,
+     "undecided": 0,
+     "same_only": 1,
+     "before_only": 13
+    },
+    {
+     "family": "NUVEEN HIGH",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 6
+    },
+    {
+     "family": "NUVEEN LIMITED",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "NUVEEN PREFERRED",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "NYLI MACKAY",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 1,
+     "before_only": 0
+    },
+    {
+     "family": "OPPENHEIMER DEVELOPMENT",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "PARNASSUS CORE",
+     "funds": 1,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 0,
+     "same_only": 10,
+     "before_only": 0
+    },
+    {
+     "family": "PGIM HIGH",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "PRINCIPAL MID",
+     "funds": 1,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 0,
+     "same_only": 7,
+     "before_only": 0
+    },
+    {
+     "family": "SCHWAB U",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "TCW METWEST",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "VANGUARD 500",
+     "funds": 1,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 0,
+     "same_only": 14,
+     "before_only": 0
+    },
+    {
+     "family": "VANGUARD EQUITY",
+     "funds": 1,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 0,
+     "same_only": 13,
+     "before_only": 0
+    },
+    {
+     "family": "VANGUARD EXTENDED",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "VANGUARD HEALTH",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 3,
+     "before_only": 0
+    },
+    {
+     "family": "VANGUARD MID",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "VANGUARD SHORT",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "VANGUARD TARGET",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 0,
+     "before_only": 0
+    },
+    {
+     "family": "VANGUARD TOTAL",
+     "funds": 1,
+     "decided_same": 1,
+     "decided_before": 0,
+     "undecided": 0,
+     "same_only": 7,
+     "before_only": 0
+    },
+    {
+     "family": "VICTORY TRIVALENT",
+     "funds": 1,
+     "decided_same": 0,
+     "decided_before": 1,
+     "undecided": 0,
+     "same_only": 0,
+     "before_only": 6
+    }
+   ]
+  }
+ ],
+ "reading": "not_established",
+ "against_family": [
+  "CMLAX"
+ ],
+ "held_out_in_family": {
+  "family": "AMERICAN FUNDS",
+  "undecided_funds": 17,
+  "funds_with_an_informative_cell": 12,
+  "same_only": 10,
+  "before_only": 15,
+  "informative_cells": 25,
+  "both_equal": 13,
+  "neither_equal": 0,
+  "compared_cells": 38,
+  "largest_fund_share": 0.12,
+  "verdict_under_rule": "not_confirmed",
+  "fund_majority": {
+   "before_majority": 7,
+   "same_majority": 5,
+   "tie": 0
+  },
+  "undecided_why": {
+   "too_few": 17
+  },
+  "decided_funds_for_comparison": {
+   "funds": 13,
+   "same_only": 8,
+   "before_only": 87
+  },
+  "post_hoc_by_share_class": {
+   "label": "POST HOC, not in the rule, a lead and not a result: the same held-out funds split by the share class read from the description (rule f, R2). The 529 plan funds and the A and F funds do not agree.",
+   "by_class": {
+    "529": {
+     "funds": 6,
+     "funds_with_informative": 5,
+     "same_only": 10,
+     "before_only": 0
+    },
+    "A": {
+     "funds": 9,
+     "funds_with_informative": 5,
+     "same_only": 0,
+     "before_only": 12
+    },
+    "F": {
+     "funds": 2,
+     "funds_with_informative": 2,
+     "same_only": 0,
+     "before_only": 3
+    }
+   }
+  },
+  "reading": "Under the rule the held-out test is `not_confirmed`: 25 informative cells on 12 of the 17 undecided funds, 15 before-only against 10 same-only (0.60 before-only; the line is 0.75). By fund 7 lean before and 5 lean same. The decided funds of the family give 87 before-only against 8 same-only."
+ },
+ "other_splits": {
+  "accuracy_measure": "leave-one-out accuracy over the 32 decided funds (rule f). No split (one class): 0.531 (17.0 of 32). Primary family reading (first two words): 0.875 (28.0 of 32).",
+  "R1_share_class_by_ticker": {
+   "accuracy": 0.688,
+   "right": 22.0,
+   "of": 32,
+   "classes_all_funds": 24,
+   "decided_by_class": {
+    "A": {
+     "decided": 5,
+     "same": 5,
+     "before": 0
+    },
+    "B": {
+     "decided": 1,
+     "same": 0,
+     "before": 1
+    },
+    "C": {
+     "decided": 1,
+     "same": 0,
+     "before": 1
+    },
+    "E": {
+     "decided": 3,
+     "same": 3,
+     "before": 0
+    },
+    "F": {
+     "decided": 7,
+     "same": 0,
+     "before": 7
+    },
+    "H": {
+     "decided": 1,
+     "same": 0,
+     "before": 1
+    },
+    "I": {
+     "decided": 5,
+     "same": 2,
+     "before": 3
+    },
+    "L": {
+     "decided": 1,
+     "same": 1,
+     "before": 0
+    },
+    "M": {
+     "decided": 1,
+     "same": 0,
+     "before": 1
+    },
+    "N": {
+     "decided": 1,
+     "same": 1,
+     "before": 0
+    },
+    "R": {
+     "decided": 1,
+     "same": 1,
+     "before": 0
+    },
+    "S": {
+     "decided": 1,
+     "same": 1,
+     "before": 0
+    },
+    "T": {
+     "decided": 1,
+     "same": 1,
+     "before": 0
+    },
+    "V": {
+     "decided": 2,
+     "same": 2,
+     "before": 0
+    },
+    "other": {
+     "decided": 1,
+     "same": 0,
+     "before": 1
+    }
+   },
+   "separates_as_well_as_family": false
+  },
+  "R2_share_class_by_description": {
+   "accuracy": 0.875,
+   "right": 28.0,
+   "of": 32,
+   "classes_all_funds": 7,
+   "decided_by_class": {
+    "529": {
+     "decided": 1,
+     "same": 1,
+     "before": 0
+    },
+    "A": {
+     "decided": 5,
+     "same": 0,
+     "before": 5
+    },
+    "ADMIRAL": {
+     "decided": 3,
+     "same": 3,
+     "before": 0
+    },
+    "C": {
+     "decided": 1,
+     "same": 0,
+     "before": 1
+    },
+    "F": {
+     "decided": 6,
+     "same": 0,
+     "before": 6
+    },
+    "INST": {
+     "decided": 9,
+     "same": 7,
+     "before": 2
+    },
+    "none": {
+     "decided": 7,
+     "same": 6,
+     "before": 1
+    }
+   },
+   "separates_as_well_as_family": true
+  },
+  "R3_kind": {
+   "accuracy": 0.531,
+   "right": 17.0,
+   "of": 32,
+   "classes_all_funds": 2,
+   "decided_by_class": {
+    "Mutual Fund": {
+     "decided": 31,
+     "same": 17,
+     "before": 14
+    },
+    "Mutual Fund (Closed End)": {
+     "decided": 1,
+     "same": 0,
+     "before": 1
+    }
+   },
+   "separates_as_well_as_family": false
+  },
+  "R4_substituted": {
+   "accuracy": 0.688,
+   "right": 22.0,
+   "of": 32,
+   "classes_all_funds": 2,
+   "decided_by_class": {
+    "left": {
+     "decided": 19,
+     "same": 7,
+     "before": 12
+    },
+    "substituted": {
+     "decided": 13,
+     "same": 10,
+     "before": 3
+    }
+   },
+   "separates_as_well_as_family": false
+  },
+  "R5_period_by_fund": {
+   "accuracy": 0.625,
+   "right": 20.0,
+   "of": 32,
+   "classes_all_funds": 2,
+   "decided_by_class": {
+    "2022on": {
+     "decided": 7,
+     "same": 2,
+     "before": 5
+    },
+    "before2022": {
+     "decided": 25,
+     "same": 15,
+     "before": 10
+    }
+   },
+   "separates_as_well_as_family": false
+  },
+  "R6_sponsor_first_word": {
+   "accuracy": 0.875,
+   "right": 28.0,
+   "of": 32,
+   "classes_all_funds": 29,
+   "decided_by_class": {
+    "AMERICAN": {
+     "decided": 13,
+     "same": 1,
+     "before": 12
+    },
+    "DFA": {
+     "decided": 5,
+     "same": 5,
+     "before": 0
+    },
+    "FIDELITY": {
+     "decided": 6,
+     "same": 6,
+     "before": 0
+    },
+    "MFS": {
+     "decided": 1,
+     "same": 0,
+     "before": 1
+    },
+    "NUVEEN": {
+     "decided": 1,
+     "same": 0,
+     "before": 1
+    },
+    "PARNASSUS": {
+     "decided": 1,
+     "same": 1,
+     "before": 0
+    },
+    "PRINCIPAL": {
+     "decided": 1,
+     "same": 1,
+     "before": 0
+    },
+    "VANGUARD": {
+     "decided": 3,
+     "same": 3,
+     "before": 0
+    },
+    "VICTORY": {
+     "decided": 1,
+     "same": 0,
+     "before": 1
+    }
+   },
+   "separates_as_well_as_family": true
+  },
+  "R7_large_family_vs_other": {
+   "accuracy": 0.875,
+   "right": 28.0,
+   "of": 32,
+   "classes_all_funds": 2,
+   "decided_by_class": {
+    "large": {
+     "decided": 13,
+     "same": 1,
+     "before": 12
+    },
+    "other": {
+     "decided": 19,
+     "same": 16,
+     "before": 3
+    }
+   },
+   "separates_as_well_as_family": true
+  },
+  "R5_period_by_cell": {
+   "all": {
+    "by_calendar_year": {
+     "2020": {
+      "same_only": 28,
+      "before_only": 11
+     },
+     "2021": {
+      "same_only": 37,
+      "before_only": 26
+     },
+     "2022": {
+      "same_only": 48,
+      "before_only": 38
+     },
+     "2023": {
+      "same_only": 34,
+      "before_only": 26
+     },
+     "2024": {
+      "same_only": 31,
+      "before_only": 22
+     },
+     "2025": {
+      "same_only": 15,
+      "before_only": 19
+     },
+     "2026": {
+      "same_only": 3,
+      "before_only": 4
+     }
+    },
+    "before_2023": {
+     "same_only": 113,
+     "before_only": 75
+    },
+    "from_2023": {
+     "same_only": 83,
+     "before_only": 71
+    },
+    "separates_by_cell": false
+   },
+   "large_family": {
+    "by_calendar_year": {
+     "2020": {
+      "same_only": 4,
+      "before_only": 9
+     },
+     "2021": {
+      "same_only": 5,
+      "before_only": 18
+     },
+     "2022": {
+      "same_only": 6,
+      "before_only": 30
+     },
+     "2023": {
+      "same_only": 2,
+      "before_only": 21
+     },
+     "2024": {
+      "same_only": 0,
+      "before_only": 13
+     },
+     "2025": {
+      "same_only": 1,
+      "before_only": 10
+     },
+     "2026": {
+      "same_only": 0,
+      "before_only": 1
+     }
+    },
+    "before_2023": {
+     "same_only": 15,
+     "before_only": 57
+    },
+    "from_2023": {
+     "same_only": 3,
+     "before_only": 45
+    },
+    "separates_by_cell": false
+   },
+   "rest": {
+    "by_calendar_year": {
+     "2020": {
+      "same_only": 24,
+      "before_only": 2
+     },
+     "2021": {
+      "same_only": 32,
+      "before_only": 8
+     },
+     "2022": {
+      "same_only": 42,
+      "before_only": 8
+     },
+     "2023": {
+      "same_only": 32,
+      "before_only": 5
+     },
+     "2024": {
+      "same_only": 31,
+      "before_only": 9
+     },
+     "2025": {
+      "same_only": 14,
+      "before_only": 9
+     },
+     "2026": {
+      "same_only": 3,
+      "before_only": 3
+     }
+    },
+    "before_2023": {
+     "same_only": 98,
+     "before_only": 18
+    },
+    "from_2023": {
+     "same_only": 80,
+     "before_only": 26
+    },
+    "separates_by_cell": false
+   },
+   "reading": "Informative cells by calendar year and before/after 2023-01-01. No period separates by cell under the rule: the before-only share is 0.40 before 2023 and 0.46 from 2023 (all funds); inside the large family 0.79 then 0.94; for the rest 0.16 then 0.25."
+  },
+  "R6_sponsor_reading_detail": {
+   "reading_under_rules_b_to_d": "by_family",
+   "c1_c2_c3": [
+    true,
+    true,
+    true
+   ],
+   "sponsors_with_a_convention": [
+    {
+     "sponsor": "AMERICAN",
+     "funds": 30,
+     "decided_same": 1,
+     "decided_before": 12,
+     "undecided": 17,
+     "same_only": 18,
+     "before_only": 102,
+     "funds_with_informative": 25,
+     "largest_fund_share": 0.15,
+     "convention": "before"
+    },
+    {
+     "sponsor": "DFA",
+     "funds": 6,
+     "decided_same": 5,
+     "decided_before": 0,
+     "undecided": 1,
+     "same_only": 55,
+     "before_only": 0,
+     "funds_with_informative": 5,
+     "largest_fund_share": 0.218,
+     "convention": "same"
+    },
+    {
+     "sponsor": "FIDELITY",
+     "funds": 12,
+     "decided_same": 6,
+     "decided_before": 0,
+     "undecided": 6,
+     "same_only": 47,
+     "before_only": 0,
+     "funds_with_informative": 9,
+     "largest_fund_share": 0.234,
+     "convention": "same"
+    }
+   ],
+   "decided_in_sponsors_with_a_convention": 24,
+   "against_family": [
+    "CMLAX"
+   ],
+   "sponsors": 29,
+   "note": "A pre-declared RIVAL reading (the first word), reported beside the primary and never in its place. It reads by_family because the first-two-words reading cuts Fidelity, Vanguard, DFA and Nuveen into one-fund families that are too small to read; the sponsor reading is a coarser family name, not new evidence on why."
+  },
+  "inside_large_family_by_share_class": {
+   "529": {
+    "funds": 7,
+    "decided_same": 1,
+    "decided_before": 0,
+    "undecided": 6,
+    "same_only": 18,
+    "before_only": 0
+   },
+   "A": {
+    "funds": 14,
+    "decided_same": 0,
+    "decided_before": 5,
+    "undecided": 9,
+    "same_only": 0,
+    "before_only": 52
+   },
+   "C": {
+    "funds": 1,
+    "decided_same": 0,
+    "decided_before": 1,
+    "undecided": 0,
+    "same_only": 0,
+    "before_only": 4
+   },
+   "F": {
+    "funds": 8,
+    "decided_same": 0,
+    "decided_before": 6,
+    "undecided": 2,
+    "same_only": 0,
+    "before_only": 46
+   }
+  },
+  "share_class_confound": "Among the 32 decided funds every fund whose description reads 529, A, C or F share class is in the large family (13 of 13); the non-large decided funds are all in the institutional, admiral or no-class groups (19 of 19). R2 therefore cannot be told apart from family on the decided funds, and its accuracy equal to the family is not a separate explanation.",
+  "read": {
+   "R1": "share class letter of the ticker: accuracy 0.688 against 0.875, does not separate as well as family.",
+   "R2": "share class from the description: accuracy 0.875, equal to the family; confounded with family (every A/F/C/529 decided fund is in the large family).",
+   "R3": "open or closed end: accuracy 0.531, no better than no split (one closed-end fund among the 32).",
+   "R4": "substituted or left on the store: accuracy 0.688 (substituted 10 same / 3 before; left 7 same / 12 before): a partial separation, below the family.",
+   "R5": "period: by fund accuracy 0.625; by cell no period separates (the large family holds before-only and the rest same-only in every period).",
+   "R6": "sponsor (first word): accuracy 0.875, equal to the family; reads by_family under the rule (Fidelity and DFA same, American before).",
+   "R7": "large family against all others: accuracy 0.875, equal to the family (built from the lead, so not independent)."
+  }
+ },
+ "headline": "Under the rule written first (2026-10-11T20:32:11Z) the date convention is not established by family. The reviewer row reproduces: 12 of the 15 day-before funds and 1 of the 17 same-day funds are American Funds (30 of the 101 funds; 13 of them decided: 12 before, 1 same). American Funds is the only family of the first-two-words reading with 5 decided funds; it reads `before` (12 of 13 decided, 0.92; pooled informative cells 102 before-only to 18 same-only on 25 funds, 0.85). Every other family has fewer than 5 funds, so none is read; reading = not_established (only one family has a convention; the fund sitting against it: CMLAX). Held out, on the 17 undecided American Funds funds alone, 15 before-only to 10 same-only informative cells (0.60): `not_confirmed` under the rule, neither a refutation nor a confirmation; post hoc, the 529 plan funds are 10 same-only to 0 before-only and the A and F funds 15 before-only to 0 same-only. Rival splits: the share class read from the description, the sponsor (first word) and large-against-rest each classify 0.875 of the decided funds correctly (leave-one-out), the same as the family; the share class cannot be told from the family on these funds. The sponsor reading reads `by_family` under the same rules (American before, Fidelity same, DFA same, one fund against). Kind, substituted, period and the ticker letter separate less. Why a family's rows would be dated a day later is not established.",
+ "not_established": [
+  "The convention is not established by family under the rule: only American Funds has 5 decided funds under the first-two-words reading; the other 71 funds sit in 60 families of 1 to 3 funds each, so every other family is `not_established` for too few funds, not because it was tested and found mixed.",
+  "That the convention is a property of the family is not established. The 13 decided American Funds funds are the whole of the decided funds with an A, F, C or 529 share class, so family and share class cannot be told apart; and inside the family the 529 plan funds (1 decided same, 5 more with informative cells, all same-only) lean the other way from the A and F funds. This is a post hoc lead.",
+  "Why a family's rows would be dated a day later is not established: no ex-date, record-date or pay-date field is read, and no transfer-agent or processing-path field is read.",
+  "The family is read from a description string (the first two words, or the first word), not from a sponsor field; one CUSIP carries one first-two-words value (0 of 101 carry more than one), but the string is a proxy.",
+  "The cache window starts 2020-06-29; most reinvestment dates of the older funds fall before it and are not compared (round 73: 944 compared cells of 1740), which is why 69 of 101 funds stay undecided (the held-out American Funds funds have 38 compared cells in all).",
+  "The sponsor reading by_family is a rival result under a coarser name; it classifies the decided funds as well as the first-two-words family and no better. Fidelity and DFA read `same` on 6 and 5 decided funds, the largest fund supplying 0.23 and 0.22 of the pooled cells.",
+  "No pricing rule and no correction is proposed; the convention belongs to validation only. Nothing was fetched."
+ ],
+ "details": {
+  "primary_reading_conditions": {
+   "c1_two_families_one_each_side": false,
+   "c2_conv_families_hold_half_of_decided": false,
+   "c3_against_at_most_0_20": true,
+   "decided_in_families_with_a_convention": 13,
+   "decided": 32,
+   "families_with_a_convention": {
+    "same": 0,
+    "before": 1
+   }
+  },
+  "cusips_with_more_than_one_first_two_words_value": 0,
+  "cusips_with_more_than_one_first_word_value": 0,
+  "families_total": 61
+ }
+}
