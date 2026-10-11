@@ -1,0 +1,130 @@
+{
+ "producer_rule": {
+  "can_emit_a_sleeve_leaf_with_no_security_node": true,
+  "claim": "measured",
+  "in_words": "Yes. The contract (node_kind enum) admits ACCOUNT, SLEEVE, MODEL_WRAPPER (legacy), MODEL_LEAF, SECURITY, CASH, UNRESOLVED, CATEGORY. The serving code in the holdings folder (snapshot.py) builds nothing: it keeps every node whose root account is selected and re-derives totals, so a node the gold runner emits with a value and no security beneath it is served as emitted. The gold runner emits three shapes of that kind. (1) The SmartX-overlay builder gives every account exactly one level-1 sleeve (node_kind CATEGORY since ruling msg 102475; its docstring still calls it SLEEVE): Models, SMA Tax, or Client. When the account's position rows do not tie to net_mv_positions within the tolerance, or a market value is null, the drill is WITHHELD: the sleeve is carried at the account's balance value, `continue` skips every child, and the sleeve gets a 'DRILL WITHHELD' capability fact; a test asserts the sleeve has no children. (2) A Client or SMA Tax sleeve of an account with no position rows gets one CASH child only. A Models sleeve's MODEL_LEAF holds TARGET-basis SECURITY nodes plus a CASH node; with no model positions only the CASH node. (3) In the Eclipse-overlay builder a node_kind SLEEVE (':managed') is emitted with a value and a MODEL_LEAF child only, never a security. The producer marks a hole only through the 'DRILL WITHHELD' fact; the served class_totals_remainder block is the contract's carrier for custody value with no actual position under it (a model sleeve whose holdings are not observed, a withheld drill). Securities under a Models sleeve are basis TARGET, and the aggregates exclude TARGET (snapshot.py:261).",
+  "code_lines": [
+   "docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json:222-232 (the eight node_kind members)",
+   "infra/aws/lambda/investor-reporting/holdings/snapshot.py:425-438 (project keeps every node whose root account is selected; nothing is added or dropped by sleeve)",
+   "infra/aws/lambda/investor-reporting/holdings/snapshot.py:261 (the aggregates read SECURITY nodes of basis other than TARGET only)",
+   "infra/aws/lambda/investor-reporting/holdings/snapshot.py:317-322 (custody value with no actual position under it is served as class_totals_remainder)",
+   "infra/aws/lambda/investor-reporting/holdings/tests/test_aggregates.py:126-151 (a sleeve with no observed positions: its money stays in the remainder)",
+   "infra/aws/lambda/investor-reporting/holdings/publication.py:125-127 (the three private firms the publication serves)",
+   "infra/aws/lambda/investor-reporting/holdings/publication.py:341 (the served day is the index's latest_date)",
+   "data/assets/scripts/gold/investor_reporting/holdings_49f.py:389 (the account-level sleeve node, node_kind CATEGORY, value = account value)",
+   "data/assets/scripts/gold/investor_reporting/holdings_49f.py:472-482 (non-tying or null-valued drill: DRILL WITHHELD, `continue`, no child emitted)",
+   "data/assets/scripts/gold/investor_reporting/holdings_49f.py:501-506 (a sleeve with no position rows gets one CASH child)",
+   "data/assets/scripts/gold/investor_reporting/holdings_49f.py:460-466 (a MODEL_LEAF always gets a TARGET CASH child; model positions may be empty)",
+   "data/assets/scripts/gold/investor_reporting/tests/test_holdings_49f.py:257-262 (test: the withheld sleeve has no children and carries the DRILL WITHHELD fact)",
+   "data/assets/scripts/gold/investor_reporting/tests/test_l0_categories.py:58-64 (a category with a drill withholding legitimately carries zero children)",
+   "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py:1684-1708 (node_kind SLEEVE ':managed' with a value; its only child is a MODEL_LEAF)"
+  ],
+  "node_kinds": [
+   "ACCOUNT",
+   "SLEEVE",
+   "MODEL_WRAPPER",
+   "MODEL_LEAF",
+   "SECURITY",
+   "CASH",
+   "UNRESOLVED",
+   "CATEGORY"
+  ],
+  "node_kinds_emitted_in_the_answer_read": [
+   "ACCOUNT",
+   "CATEGORY",
+   "MODEL_LEAF",
+   "SECURITY",
+   "CASH"
+  ],
+  "how_a_sleeve_becomes_a_node": "The gold runner (not the serving code) builds it: one level-1 node per account, parent = the ACCOUNT node, amount = the account's Schwab balance, node_kind CATEGORY in the SmartX-overlay builder; below it MODEL_LEAF per open SmartX allocation (Models), or SECURITY + CASH rows from custody (SMA Tax, Client).",
+  "note": "the holdings folder has no lib/ of its own; opal_naming is resolved from the repo lib (publication.py imports it)"
+ },
+ "served_answer": {
+  "object": "s3://opal-data-<firm>/irpt/<firm>/platinum/holdings/current/manifest.json (index) -> date=2026-10-07/<revision>.manifest.json -> <revision>.header.json + <revision>.part00000..part00187.json (platinum tier); address from lib/opal_naming.address(), the same builder publication.py calls; <firm> = the registry's long name for the SmartX-overlay firm",
+  "objects_read": 191,
+  "objects_read_detail": "1 index + 1 manifest (irpt-holdings-manifest-v2) + 1 header + 188 account-tree parts; the gold parquet was not read",
+  "version_or_etag": "index VersionId JtucBrlvOJGxn5bGeDxaZtxjn5bXYFW9, ETag 5639c030dd91929bdebd1a3ff58ac227 (LastModified 2026-10-08T14:20:48Z); accepted manifest VersionId rhncZNedrzimF43VGkEvYwcv8vHo6HPT; snapshot revision 61537f666d00122a08098796eadeaf1d0d7398cea987b2ab6b3e99ee2bd5f9a5; every header and part read by its manifest-pinned VersionId with byte length and sha256 matching the manifest",
+  "as_of": "business_date 2026-10-07 (custody_as_of 2026-10-07, overlay_as_of 2026-10-08, as_of_timestamp 2026-10-08T14:16:59Z); index latest_date 2026-10-07 of 8 dates held",
+  "read_by": ".tools/aws s3api get-object on the index, then the manifest/header/parts by VersionId; no served API call, no Lambda invoke, no write; objects in C:/dev/_scratch298/, deleted at the end",
+  "nodes_total": 154473,
+  "nodes_by_kind": {
+   "ACCOUNT": 7620,
+   "CASH": 9203,
+   "CATEGORY": 7620,
+   "MODEL_LEAF": 7553,
+   "SECURITY": 122477
+  },
+  "accounts": 7620,
+  "sleeve_nodes": 7620,
+  "sleeve_nodes_with_a_security_node_beneath": 6391,
+  "sleeve_nodes_with_none": 1229,
+  "accounts_holding_such_a_leaf": 1229,
+  "labels_on_the_leaves_with_none": {
+   "capability_fact 'DRILL WITHHELD' on the sleeve; the sleeve has no child at all": 8,
+   "no mark in the node; the only children are CASH (account holds cash, no position rows)": 1216,
+   "no mark in the node; the only child is a MODEL_LEAF, which holds a CASH node and no security": 5
+  },
+  "of_those_with_none_the_count_carrying_a_nonzero_amount": 333,
+  "nonzero_amount_by_label": {
+   "DRILL WITHHELD, no child": 7,
+   "only CASH children": 321,
+   "only a MODEL_LEAF with CASH": 5
+  },
+  "by_sleeve_path": {
+   "Client": {
+    "nodes": 1651,
+    "with_a_security_node_beneath": 427,
+    "with_none": 1224
+   },
+   "Models": {
+    "nodes": 5962,
+    "with_a_security_node_beneath": 5957,
+    "with_none": 5
+   },
+   "SMA > ALT Strategies > Tax-Managed SMA": {
+    "nodes": 7,
+    "with_a_security_node_beneath": 7,
+    "with_none": 0
+   }
+  },
+  "sma_tax_sleeves": {
+   "nodes": 7,
+   "with_a_security_node_beneath": 7,
+   "with_none": 0
+  },
+  "sleeves_whose_securities_are_all_basis_TARGET": 5957,
+  "model_leaves": {
+   "nodes": 7553,
+   "with_a_security_node_beneath": 7545,
+   "with_none": 8,
+   "with_none_labelled": {
+    "no mark in the node; children: CASH": 8
+   }
+  },
+  "strict_node_kind_SLEEVE_nodes_in_the_answer": 0,
+  "how_a_sleeve_node_is_recognised": "by member node_kind: 'SLEEVE' (the contract's enum member; 0 in this answer) or 'CATEGORY' whose parent_node_id is an ACCOUNT node (level 1; one per account, 7,620 here). Its kind within that is read from classification.hierarchy_path: 'Models', 'Client', or 'SMA > ALT Strategies > Tax-Managed SMA'. 'A security node beneath' is any node_kind SECURITY on the parent chain below it, at any depth, any basis.",
+  "denominator_note": "one firm, one business day, the full publication (188 of 188 parts); 7,620 of 7,620 header account ids"
+ },
+ "verdict": {
+  "the_fixture_shape_is_reachable_in_a_served_answer": true,
+  "in_one_sentence": "Yes: in the one day read for the SmartX-overlay firm, 1,229 of 7,620 account-level sleeves have no security node beneath them (7 carry a nonzero amount and no child at all, 321 carry cash only, 5 a model leaf of cash only), though none of its 7 SMA Tax sleeves is among them (one firm, one day)."
+ },
+ "control": {
+  "planted": {
+   "nodes_total": 5,
+   "sleeves": 2,
+   "sleeves_with_a_security_node_beneath": 1,
+   "sleeves_with_none": 1,
+   "accounts_holding_such_a_leaf": 1
+  },
+  "read": {
+   "nodes_total": 5,
+   "sleeves": 2,
+   "sleeves_with_a_security_node_beneath": 1,
+   "sleeves_with_none": 1,
+   "accounts_holding_such_a_leaf": 1
+  },
+  "note": "the order says four nodes; an account, a sleeve with two securities and a sleeve with none is five nodes, and five were planted"
+ },
+ "nothing_written_or_served": true
+}
