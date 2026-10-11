@@ -20,6 +20,12 @@ Copied from the round-1 SA-r-1b runner and repaired:
      only, one JSON object for this run, and writes nothing else to disk. The zero-call read's stream denominator is
      streams_active_in_window, counted from describe_log_streams (every page); the logs API field that lists the
      streams a filter searched is never read, because it comes back empty.
+  8. (AMENDMENT 5) the submission and upload tokens are unique PER RUN: <lower-case alnum prefix of --run-label>-<first 24
+     hex of sha256(run_label|iat|file_sha)> (upload: the same plus -up), never the file hash alone. A refused submission
+     at hop (d) is the run's named result BRANCH_E_SUBMISSION_REFUSED (served code recorded; (e)-(g) and both arms
+     UNREACHABLE; no retry; cleanup in the signed order). The zero-call read runs no earlier than exp + 300 s: the
+     data-refresh group's streams_in_group / streams_active_in_window / latest_event_time decide GROUP_* VOID or
+     NO_INVOCATION_IN_WINDOW; only an active stream sends it on to the filer-address filter and a ticket-id control.
 This module has NOT been run against the portal by this order; only its fake-HTTP tests have run.
 
 Original header follows.
@@ -183,7 +189,38 @@ IRPT_STATUS_FN = "irpt-status"
 TICKET_LOG_GROUP = "/aws/lambda/opal-ticket-api"   # the zero-call read's positive control
 # D5: a well-formed-looking but malformed id; the deployed report route must refuse it 400 INVALID_REPORT_REQUEST_ID
 MALFORMED_REPORT_ID = "sar1b-" + "0" * 24
+ZERO_CALL_DELAY_SECONDS = 300   # G4: the zero-call read runs no earlier than exp + this (logs can land late)
+ZERO_CALL_STEP_SECONDS = 60     # the wait for it sleeps in steps of at most this
+TOKEN_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]*$")   # AnalysisSubmissionRequest.request_id
+PREFIX_MAX = 12
 _CLIENTS = {}
+
+
+def label_prefix(run_label):
+    """G1: the lower-case letters and digits of --run-label, at most PREFIX_MAX of them ('run' when none)."""
+    return re.sub(r"[^a-z0-9]", "", str(run_label).lower())[:PREFIX_MAX] or "run"
+
+
+def submission_token(run_label, iat, file_sha):
+    """G1: the idempotency token the submission sends, unique per run:
+    <label prefix>-<first 24 hex of sha256(run_label + "|" + str(iat) + "|" + file_sha)>. Never derived from the
+    file hash alone: a later run (another iat) sends another token, so the service never sees one id with new inputs."""
+    digest = hashlib.sha256((str(run_label) + "|" + str(iat) + "|" + file_sha).encode()).hexdigest()[:24]
+    return label_prefix(run_label) + "-" + digest
+
+
+def upload_token(run_label, iat, file_sha):
+    """G2: the upload door's token, the same per-run form with its own suffix."""
+    return submission_token(run_label, iat, file_sha) + "-up"
+
+
+def _run_tokens_from(trace, file_sha):
+    """(submission token, upload token) for the run `trace` describes; refuses when the run's label or iat is unknown."""
+    label = (trace or {}).get("run_label")
+    iat = ((trace or {}).get("preconditions") or {}).get("token_iat_unix")
+    if not label or iat is None:
+        raise ValueError("the run label and the token iat are needed to build a per-run token")
+    return submission_token(label, iat, file_sha), upload_token(label, iat, file_sha)
 
 
 def _client(name):
@@ -562,7 +599,8 @@ def census(token, run_id):
 def hops(token, advisor, trace):
     raw = HOLDINGS.read_bytes()
     file_sha = hashlib.sha256(raw).hexdigest()
-    upload_token = "sar1b-" + file_sha[:16]
+    sent_token, up_token = _run_tokens_from(trace, file_sha)
+    trace["upload_idempotency_token"] = up_token
     h = {x["hop"]: x for x in trace["hops"]}
     named = trace["named_failures"]
     print("== step 5: hops (a)-(g) ==")
@@ -574,7 +612,7 @@ def hops(token, advisor, trace):
     for i in range(14):
         res = call(token, "POST", "/api/scoped/investor-reporting/analysis/inputs",
                    {"selected_tenant": FIRM, "advisor_email": advisor},
-                   {"upload_token": upload_token, "filename": "sa_r1b_template.csv",
+                   {"upload_token": up_token, "filename": "sa_r1b_template.csv",
                     "file_base64": base64.b64encode(raw).decode(), "file_type": "csv"})
         p = res["parsed"] if isinstance(res["parsed"], dict) else {}
         d = p.get("data") if isinstance(p.get("data"), dict) else p
@@ -632,7 +670,7 @@ def hops(token, advisor, trace):
         named.append({"hop": "c_claim", "status": res["status"], "reason": res["reason"]})
     save(trace)
 
-    return hops_d_to_g(token, trace, h, named, tkt, input_id, file_sha)
+    return hops_d_to_g(token, trace, h, named, tkt, input_id, file_sha, sent_token)
 
 
 # ---------------------------------------------------------------- hops (d)-(g), REPAIRED (cell R2-rn-1)
@@ -696,7 +734,7 @@ def request_id_from_answer(res):
     return None
 
 
-def hop_d_analysis(token, tkt, input_id, file_sha, d, named):
+def hop_d_analysis(token, tkt, input_id, file_sha, d, named, idem_token=None):
     """POST the submission; return the SERVICE's REQ id or None. The value SENT as request_id is an idempotency
     token: it is traced as `idempotency_token` and never polled, recorded on a ticket or written as request_id.
 
@@ -704,7 +742,9 @@ def hop_d_analysis(token, tkt, input_id, file_sha, d, named):
     identity.request_id and accepted_at, so no field ties a row to this run's ticket or input_id; the row that
     belongs to this submission is the ONE REQ id present in the list after the submission and absent from the
     list read just before it. Zero or more than one is REQUEST_ID_UNRESOLVED, never a guess."""
-    sent = "sar1b-" + file_sha[:24]
+    sent = idem_token
+    if not (isinstance(sent, str) and TOKEN_PATTERN.fullmatch(sent)):
+        raise ValueError("hop (d) needs the per-run idempotency token (submission_token), got %r" % (sent,))
     d["idempotency_token"] = sent
     base_ok, base_rows, base_why = list_requests(token)
     baseline = {r["request_id"] for r in base_rows}
@@ -716,9 +756,10 @@ def hop_d_analysis(token, tkt, input_id, file_sha, d, named):
     d["status"], d["request_id"] = res["status"], None
     why = refusal_of(res)
     if why:
-        d["refused_reason"] = why
-        named.append({"hop": "d_analysis", "status": res["status"], "reason": why,
-                      "note": "submission refused (any HTTP status); (e)-(g) depend on it"})
+        d["refused_reason"], d["result"] = why, "BRANCH_E_SUBMISSION_REFUSED"
+        named.append({"hop": "d_analysis", "status": res["status"], "reason": "BRANCH_E_SUBMISSION_REFUSED", "code": why,
+                      "note": ("the submission was refused (any HTTP status); not retried, no second submission with "
+                               "another token; (e)-(g) and both arms are UNREACHABLE; cleanup follows")})
         return None
     rid = request_id_from_answer(res)
     d["request_id_source"] = "submission_answer" if rid else None
@@ -880,8 +921,10 @@ def hop_g_open(token, tkt, g, named):
     return True
 
 
-def hops_d_to_g(token, trace, h, named, tkt, input_id, file_sha):
-    rid = hop_d_analysis(token, tkt, input_id, file_sha, h["d_analysis"], named)
+def hops_d_to_g(token, trace, h, named, tkt, input_id, file_sha, idem_token=None):
+    if idem_token is None:
+        idem_token = _run_tokens_from(trace, file_sha)[0]
+    rid = hop_d_analysis(token, tkt, input_id, file_sha, h["d_analysis"], named, idem_token)
     print("  (d) analysis http=%s request_id=%r source=%s" % (
         h["d_analysis"]["status"], rid, h["d_analysis"].get("request_id_source")))
     save(trace)
@@ -892,6 +935,16 @@ def hops_d_to_g(token, trace, h, named, tkt, input_id, file_sha):
             named.append({"hop": k, "status": None, "reason": "UNREACHABLE", "note": why})
 
     if not rid:
+        if h["d_analysis"].get("result") == "BRANCH_E_SUBMISSION_REFUSED":
+            # G3: a refused submission is the run's own named result; no retry, nothing after it is reachable
+            trace["result"] = "BRANCH_E_SUBMISSION_REFUSED"
+            trace["result_reason_code"] = h["d_analysis"].get("refused_reason")
+            unreachable(("e_ready", "f_report", "g_open"), "BRANCH_E_SUBMISSION_REFUSED: the submission at (d) was refused")
+            arms = trace.setdefault("report_route_arms", {})
+            for k in ("report_id_malformed_refused", "report_id_well_formed_stored"):
+                arms[k] = {"outcome": "UNREACHABLE", "why": "BRANCH_E_SUBMISSION_REFUSED"}
+            save(trace)
+            return trace
         unreachable(("e_ready", "f_report", "g_open"), "depends on (d), which produced no service request id")
         return trace
     outcome = hop_e_ready(token, rid, h["e_ready"], named)
@@ -1051,9 +1104,10 @@ def _count_matches(logs, group, pattern, start_unix, end_unix):
 
 
 def _stream_counts(logs, group, since_unix):
-    """describe_log_streams over the group, EVERY page -> (streams_in_group, streams_active_in_window). Active = last
-    event time at or after `since_unix` (the token's iat); a stream with no last event time is in the group, not active."""
-    total, n, tok = 0, 0, None
+    """describe_log_streams over the group, EVERY page -> (streams_in_group, streams_active_in_window,
+    latest_event_ms). Active = last event time at or after `since_unix` (the token's iat); a stream with no last event
+    time is in the group, not active. latest_event_ms is the newest last-event time across ALL streams (None if none)."""
+    total, n, tok, latest = 0, 0, None, None
     since_ms = since_unix * 1000
     while True:
         kw = {"logGroupName": group, "orderBy": "LastEventTime", "descending": True}
@@ -1063,69 +1117,103 @@ def _stream_counts(logs, group, since_unix):
         for st in r.get("logStreams", []):
             total += 1
             last = st.get("lastEventTimestamp")
-            if isinstance(last, (int, float)) and last >= since_ms:
-                n += 1
+            if isinstance(last, (int, float)):
+                latest = last if latest is None else max(latest, last)
+                if last >= since_ms:
+                    n += 1
         tok = r.get("nextToken")
         if not tok:
-            return total, n
+            return total, n, latest
 
 
-def _streams_active_in_window(logs, group, since_unix):
-    return _stream_counts(logs, group, since_unix)[1]
+def wait_until(target_unix):
+    """Sleep (SLEEP, replaceable) until NOW() has reached `target_unix`. -> seconds slept."""
+    slept = 0.0
+    while NOW() < target_unix:
+        step = max(1.0, min(float(ZERO_CALL_STEP_SECONDS), target_unix - NOW()))
+        SLEEP(step)
+        slept += step
+    return slept
 
 
-def _read_group(logs, group, pattern, start_unix, end_unix):
-    """The three numbers for one log group: streams_in_group, streams_active_in_window, matches."""
-    total, active = _stream_counts(logs, group, start_unix)
-    return {"streams_in_group": total, "streams_active_in_window": active,
-            "matches": _count_matches(logs, group, pattern, start_unix, end_unix)}
+def ticket_id_pattern(ticket_ids):
+    """A CloudWatch OR filter over the run ticket ids: ?"T1" ?"T2" ."""
+    return " ".join('?"%s"' % t for t in ticket_ids)
 
 
 def data_refresh_zero_calls(trace, start_unix, end_unix):
-    """D4 (AMENDMENT 4): prove ZERO data-refresh calls for the filer over iat..exp, from its own logs. Records three
-    numbers per group (streams_in_group, streams_active_in_window, matches). ZERO_CALL_VOID only when the data-refresh
-    group cannot be described (void_reason GROUP_NOT_DESCRIBABLE), holds 0 streams in total (GROUP_EMPTY), or the
-    positive control over the ticket API's group finds the filer fewer than 1 time (CONTROL_FOUND_NO_FILER).
-    Otherwise matches == 0 is ZERO_CALLS_PROVEN whatever the active count, and matches > 0 is NON-ZERO."""
+    """D4, FINAL rule (AMENDMENT 5 G4): prove ZERO data-refresh calls for the filer over iat..exp from its own logs.
+    The read runs NO EARLIER than exp + ZERO_CALL_DELAY_SECONDS (through SLEEP). It records, for the data-refresh
+    group, streams_in_group, streams_active_in_window (last event >= iat) and latest_event_time (the positive control:
+    the group is readable and has a history).
+      group cannot be described               -> ZERO_CALL_VOID  (GROUP_NOT_DESCRIBABLE)
+      group holds 0 streams                   -> ZERO_CALL_VOID  (GROUP_EMPTY)
+      streams_active_in_window == 0           -> ZERO_CALLS_PROVEN, proof NO_INVOCATION_IN_WINDOW; nothing else is read
+      otherwise read the filter for the filer address over iat..exp (all pages):
+        matches > 0                           -> NON-ZERO
+        matches == 0: control over the ticket API group keyed on THE RUN TICKET IDS:
+          found >= 1                          -> ZERO_CALLS_PROVEN, proof FILTER_AND_TICKET_ID_CONTROL
+          found == 0                          -> ZERO_CALL_VOID  (CONTROL_FOUND_NO_RUN_TICKET)
+    A filter read that RAISES is ZERO_CALL_VOID (FILTER_NOT_READABLE): a failed retrieval is never a zero."""
     print("== zero data-refresh calls, from the log group ==")
+    read_not_before = end_unix + ZERO_CALL_DELAY_SECONDS
+    waited = wait_until(read_not_before)
+    read_at = NOW()
     logs = _client("logs")
     pattern = '"%s"' % FILER
     out = {"claim": "measured", "log_group": DATA_REFRESH_LOG_GROUP,
            "window": {"from": iso(dt.datetime.fromtimestamp(start_unix, dt.timezone.utc)),
                       "to": iso(dt.datetime.fromtimestamp(end_unix, dt.timezone.utc))},
-           "query": "filter_log_events logGroupName=%s filterPattern=%s startTime=%d endTime=%d (all pages); "
-                    "describe_log_streams orderBy=LastEventTime (all pages), active = last event >= iat"
-                    % (DATA_REFRESH_LOG_GROUP, pattern, start_unix * 1000, end_unix * 1000)}
+           "read_not_before": iso(dt.datetime.fromtimestamp(read_not_before, dt.timezone.utc)),
+           "read_at": iso(dt.datetime.fromtimestamp(read_at, dt.timezone.utc)), "waited_seconds": waited,
+           "streams_in_group": None, "streams_active_in_window": None, "latest_event_time": None,
+           "matches": None, "match_count": None,
+           "query": "describe_log_streams orderBy=LastEventTime (all pages), active = last event >= iat; only if a "
+                    "stream was active: filter_log_events logGroupName=%s filterPattern=%s startTime=%d endTime=%d "
+                    "(all pages)" % (DATA_REFRESH_LOG_GROUP, pattern, start_unix * 1000, end_unix * 1000)}
     reason = None
     try:
-        g = _read_group(logs, DATA_REFRESH_LOG_GROUP, pattern, start_unix, end_unix)
-        out.update(g)
-        out["match_count"] = g["matches"]
+        total, active, latest = _stream_counts(logs, DATA_REFRESH_LOG_GROUP, start_unix)
+        out.update({"streams_in_group": total, "streams_active_in_window": active,
+                    "latest_event_time": (iso(dt.datetime.fromtimestamp(latest / 1000, dt.timezone.utc))
+                                          if latest is not None else None)})
     except Exception as e:  # noqa: BLE001 -- a failed retrieval returns a VALUE; say so, never read it as zero
-        out.update({"streams_in_group": None, "streams_active_in_window": None, "matches": None, "match_count": None,
-                    "error": "%s: %s" % (type(e).__name__, str(e)[:160])})
+        out["error"] = "%s: %s" % (type(e).__name__, str(e)[:160])
         reason = "GROUP_NOT_DESCRIBABLE"
-    if reason is None:
-        try:
-            c = _read_group(logs, TICKET_LOG_GROUP, pattern, start_unix, end_unix)
-            out["control"] = dict(c, log_group=TICKET_LOG_GROUP, same_filter=True, found=c["matches"])
-        except Exception as e:  # noqa: BLE001
-            out["control"] = {"log_group": TICKET_LOG_GROUP, "same_filter": True, "streams_in_group": None,
-                              "streams_active_in_window": None, "matches": None, "found": 0,
-                              "error": "%s: %s" % (type(e).__name__, str(e)[:160])}
-        if out["streams_in_group"] == 0:
-            reason = "GROUP_EMPTY"
-        elif out["matches"] == 0 and out["control"]["found"] < 1:   # a real match is evidence whatever the control says
-            reason = "CONTROL_FOUND_NO_FILER"
+    if reason is None and out["streams_in_group"] == 0:
+        reason = "GROUP_EMPTY"
     if reason:
         out["verdict"], out["void_reason"] = "ZERO_CALL_VOID", reason
-    elif out["matches"] > 0:
-        out["verdict"] = "NON-ZERO -- report it"
+    elif out["streams_active_in_window"] == 0:
+        out["verdict"], out["proof"] = "ZERO_CALLS_PROVEN", "NO_INVOCATION_IN_WINDOW"
     else:
-        out["verdict"] = "ZERO_CALLS_PROVEN"
-    print("  %s: %s match(es), %s stream(s), %s active; -> %s%s"
-          % (DATA_REFRESH_LOG_GROUP, out["matches"], out["streams_in_group"], out["streams_active_in_window"],
-             out["verdict"], (" (" + reason + ")") if reason else ""))
+        try:
+            out["matches"] = out["match_count"] = _count_matches(logs, DATA_REFRESH_LOG_GROUP, pattern, start_unix, end_unix)
+        except Exception as e:  # noqa: BLE001
+            out["error"] = "%s: %s" % (type(e).__name__, str(e)[:160])
+            out["verdict"], out["void_reason"] = "ZERO_CALL_VOID", "FILTER_NOT_READABLE"
+        if "verdict" not in out and out["matches"] > 0:
+            out["verdict"] = "NON-ZERO -- report it"
+        elif "verdict" not in out:
+            ids = [t for t in dict.fromkeys([trace.get("journey_ticket")] +
+                                            ((trace.get("census") or {}).get("tickets_created_by_the_census") or [])) if t]
+            ctl = {"log_group": TICKET_LOG_GROUP, "keyed_on": "run_ticket_ids", "run_ticket_ids": ids,
+                   "matches": 0, "found": 0}
+            if ids:
+                try:
+                    ctl["matches"] = ctl["found"] = _count_matches(logs, TICKET_LOG_GROUP, ticket_id_pattern(ids),
+                                                                   start_unix, end_unix)
+                except Exception as e:  # noqa: BLE001 -- a control that cannot be read found nothing
+                    ctl["error"] = "%s: %s" % (type(e).__name__, str(e)[:160])
+            out["control"] = ctl
+            if ctl["found"] >= 1:
+                out["verdict"], out["proof"] = "ZERO_CALLS_PROVEN", "FILTER_AND_TICKET_ID_CONTROL"
+            else:
+                out["verdict"], out["void_reason"] = "ZERO_CALL_VOID", "CONTROL_FOUND_NO_RUN_TICKET"
+    tail = out.get("void_reason") or out.get("proof") or ""
+    print("  %s: %s stream(s), %s active, latest event %s, %s match(es); -> %s %s"
+          % (DATA_REFRESH_LOG_GROUP, out["streams_in_group"], out["streams_active_in_window"], out["latest_event_time"],
+             out["matches"], out["verdict"], tail))
     trace["data_refresh_zero_calls"] = out
     save(trace)
 
@@ -1239,7 +1327,7 @@ def build_trace(a, run_id):
              "status": 0, "report_opened": False},
         ],
         "report_route_arms": {},
-        "named_failures": [], "journey_ticket": None,
+        "named_failures": [], "journey_ticket": None, "result": None,
         "cleanup": {"row_removed_read_back_absent": False, "tickets_completed": {}},
         "data_refresh_zero_calls": None,
         "no_client_figures": ("hop statuses and artifact IDs only. Census arms record status, reason, body LENGTH "
@@ -1280,6 +1368,7 @@ def main(argv):
     # iat and exp are fixed BEFORE the row exists, so every later path knows the exp it must wait for (D1, D2)
     iat = int(NOW())
     exp = iat + check_exp_minutes(a.exp_minutes) * 60
+    trace["preconditions"]["token_iat_unix"] = iat
     trace["preconditions"]["token_iat"] = iso(dt.datetime.fromtimestamp(iat, dt.timezone.utc))
     trace["preconditions"]["token_exp"] = iso(dt.datetime.fromtimestamp(exp, dt.timezone.utc))
     try:
