@@ -1,0 +1,154 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-f-8.act1-deploy-advtenant",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-8.act1-deploy-advtenant.md",
+  "group": "OTHER",
+  "vintage_commit": "2482a8c7a8"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FBL",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R3.md",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-8.act1-deploy-advtenant.md",
+  "vintage_commit": "7718c70a30"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "lambda:shared-advisor-router version 27",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-apply 08:21:33Z-08:23:57Z, 0 added 4 changed 0 destroyed; CodeSha256 equals artifact",
+   "artifact_covered_by": [
+    "AC1",
+    "AC3"
+   ],
+   "commit_or_etag": "rFzCqwaX6lC8KHZH0zPBiBpBXgPxxHLU (S3 VersionId); CodeSha256 cOG/BuFhy9xcL7EF+4u5VexRZGjDdJq3h364PAPkYsw="
+  },
+  {
+   "path_or_key": "lambda:shared-advisor-router-response version 6",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "same apply; CodeSha256 equals artifact",
+   "artifact_covered_by": [
+    "AC2",
+    "AC3"
+   ],
+   "commit_or_etag": "H8zfKrvXgbVifrAyEet4RClXGA0OSQFA (S3 VersionId); CodeSha256 YIgGtFjZwFltdXbviIx5dOQbb6FsOAUtIB96caAI0xs="
+  },
+  {
+   "path_or_key": "cloudfront:EVTSA9VEHNZVH 10 associations",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Deployed; router 27 x5, guard 6 x5",
+   "artifact_covered_by": [
+    "AC3"
+   ],
+   "commit_or_etag": "ETag ELAAK8OWYOWV1"
+  },
+  {
+   "path_or_key": "wafv2:opal-cloudfront-protection",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "rule-by-rule equal to the pre-act read, LockToken unchanged",
+   "artifact_covered_by": [
+    "AC4"
+   ],
+   "commit_or_etag": "LockToken 848a6d0b-d69f-40e0-876a-cfc0ce40b6b2"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261011T0814Z_advi-firmbkts-fb-f-8-advtenant-act1-laptop-20261011_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "entry opened before the first act, closed with the three outputs and the CTO read",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3",
+    "AC4"
+   ],
+   "commit_or_etag": "e21c700406"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "invocation": ".tools/aws lambda get-function-configuration --function-name shared-advisor-router --qualifier 27 --region us-east-1 --query CodeSha256 --output text",
+   "expect": "cOG/BuFhy9xcL7EF\\+4u5VexRZGjDdJq3h364PAPkYsw=",
+   "output_evidence": "cOG/BuFhy9xcL7EF+4u5VexRZGjDdJq3h364PAPkYsw=",
+   "denominator": "1 of 1 published version (27); 5 behaviors carry it; equals the built artifact (S3 VersionId rFzCqwaX6lC8KHZH0zPBiBpBXgPxxHLU); read 2026-10-11 ~09:17Z",
+   "status": "PASS",
+   "criterion_verbatim": ".tools/aws lambda get-function-configuration --function-name shared-advisor-router --qualifier 27 --region us-east-1 --query CodeSha256 --output text",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AC2",
+   "invocation": ".tools/aws lambda get-function-configuration --function-name shared-advisor-router-response --qualifier 6 --region us-east-1 --query CodeSha256 --output text",
+   "expect": "YIgGtFjZwFltdXbviIx5dOQbb6FsOAUtIB96caAI0xs=",
+   "output_evidence": "YIgGtFjZwFltdXbviIx5dOQbb6FsOAUtIB96caAI0xs=",
+   "denominator": "1 of 1 published version (6); 5 behaviors carry it; equals the built artifact (S3 VersionId H8zfKrvXgbVifrAyEet4RClXGA0OSQFA)",
+   "status": "PASS",
+   "criterion_verbatim": ".tools/aws lambda get-function-configuration --function-name shared-advisor-router-response --qualifier 6 --region us-east-1 --query CodeSha256 --output text",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AC3",
+   "invocation": ".tools/aws cloudfront get-distribution-config --id EVTSA9VEHNZVH --query \"DistributionConfig.CacheBehaviors.Items[*].LambdaFunctionAssociations.Items[*].LambdaFunctionARN\" --output text",
+   "expect": "shared-advisor-router:27",
+   "output_evidence": "shared-advisor-router:27 (5 of 5 router associations) and shared-advisor-router-response:6 (5 of 5 guard associations); 10 of 40 associations differ from the pre-act read, the rest identical; Deployed, ETag ELAAK8OWYOWV1",
+   "denominator": "40 associations across 29 ordered behaviors",
+   "status": "PASS",
+   "criterion_verbatim": ".tools/aws cloudfront get-distribution-config --id EVTSA9VEHNZVH --query \"DistributionConfig.CacheBehaviors.Items[*].LambdaFunctionAssociations.Items[*].LambdaFunctionARN\" --output text",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AC4",
+   "invocation": ".tools/aws wafv2 get-web-acl --name opal-cloudfront-protection --id a09833c0-4043-49fc-a92c-0dcdeaff9abd --scope CLOUDFRONT --region us-east-1 --query \"length(WebACL.Rules[?OverrideAction.Count!=`null`])\" --output text",
+   "expect": "^3$",
+   "output_evidence": "get-web-acl length(WebACL.Rules[?OverrideAction.Count!=`null`]) on opal-cloudfront-protection, read 2026-10-11 ~09:17Z, printed:\n3",
+   "denominator": "6 of 6 rules compared pre vs post: equal modulo the Version representation, LockToken 848a6d0b-d69f-40e0-876a-cfc0ce40b6b2 unchanged, default Allow; amendment 7 form (the first form returned 0: JMESPath reads {} as false)",
+   "status": "PASS",
+   "criterion_verbatim": ".tools/aws wafv2 get-web-acl --name opal-cloudfront-protection --id a09833c0-4043-49fc-a92c-0dcdeaff9abd --scope CLOUDFRONT --region us-east-1 --query \"length(WebACL.Rules[?OverrideAction.Count!=`null`])\" --output text",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant is named by the order: the act is a deploy read back against the built artifacts' own hashes. The difference control is the pre-act read (v26 and v5, the same queries) and, for AC4, the defective form of the query on the same ACL (returns 0).",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "not measured: AC1 to AC4 each ran once after the apply, and the AC4 corrected form once more at the close",
+   "observed": "AC1 to AC4 outputs identical on both reads",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "condition 4, post-apply plan reads no changes",
+   "reason": "WAIVED by the CTO ADDENDUM 3 and ruled in COO ADDENDUM 2 for the ACL's version churn only; the plan lists exactly that one resource (plan_after_apply.out)"
+  },
+  {
+   "item": "the identity named by the order as 'the laptop CloudOps identity'",
+   "reason": "the laptop's only AWS profile is user/Andrew_Berman; step 0b read it 8 of 8 allowed at function-ARN grain; the CTO ADDENDUM 3 records it"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-S12: post-apply plan lists the ACL; AC4's first form read 0 (JMESPath {} is falsy); both ruled/amended by the signers. OBSERVATION of build: bun minifier names differ from the dell1 build at identical byte lengths."
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FBL/ACT1_DEPLOYED_ORACLE_AND_RULING_REQUEST.md",
+ "compiler_tools": [
+  {
+   "tool": "terraform 1.15.8 / safe-apply",
+   "invocation": "plan -out, show -json, safe-apply of the saved plan",
+   "result": "74 changes, 70 no-op, 4 update; apply 0/4/0"
+  },
+  {
+   "tool": "aws iam simulate-principal-policy",
+   "invocation": "8 pairs, one resource per call",
+   "result": "8 of 8 allowed"
+  }
+ ]
+}
