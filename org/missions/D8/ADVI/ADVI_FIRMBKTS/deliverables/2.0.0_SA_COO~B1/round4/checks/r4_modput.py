@@ -8,7 +8,7 @@ helpers of r4_modallow.py (same directory).
 --arms put [--root <tree>] [--base <ref>]  (5 arms)
   P1 the real registry: `fence_scoped_statements` and `fence_scoped_allow_statements` are identical in the base and the tree
      for every bucket (printed).
-  P2 a fixture scoped row (actions GetObject + PutObject; prefix a `/`-ending prefix): the Deny `AnyOtherAction` statement's
+  P2 a fixture scoped row (actions GetObject + PutObject; prefix a `/`-ending prefix) PLANS CLEAN, and the Deny `AnyOtherAction` statement's
      NotAction holds BOTH actions, the `ObjectsOutsidePrefix` Deny's Action holds BOTH and its NotResource the prefix with `*`.
   P3 the same row renders an Allow `AllowScopedExemption1Objects` whose Action is EXACTLY ["s3:GetObject"] (no PutObject), and
      a row whose actions are ["s3:PutObject"] ONLY renders NO Allow statement at all.
@@ -57,7 +57,8 @@ def put(root, base):
         deny = {s.get("Sid"): s for s in (((ma._eval(m2, "local.fence_scoped_statements") or {}).get(BUCKET)) or [])}
         d_any = deny.get("DenyScopedExemption1AnyOtherAction", {})
         d_obj = deny.get("DenyScopedExemption1ObjectsOutsidePrefix", {})
-        ok2 = (sorted(_lst(d_any.get("NotAction", []))) == ["s3:GetObject", "s3:PutObject"]
+        rc2, _ = ma._plan(m2)
+        ok2 = (rc2 == 0 and sorted(_lst(d_any.get("NotAction", []))) == ["s3:GetObject", "s3:PutObject"]
                and sorted(_lst(d_obj.get("Action", []))) == ["s3:GetObject", "s3:PutObject"]
                and _lst(d_obj.get("NotResource", [])) == ["arn:aws:s3:::%s/%s*" % (BUCKET, PFX)])
         print("  P2 deny sids=%s" % sorted(deny.keys()))
@@ -67,7 +68,8 @@ def put(root, base):
         a_obj = {s.get("Sid"): s for s in al}.get("AllowScopedExemption1Objects", {})
         m3 = mir("p3", None, ma._reg(real, {"actions": ["s3:PutObject"], "prefix": PFX}))
         al3 = ((ma._eval(m3, "local.fence_scoped_allow_statements") or {}).get(BUCKET))
-        ok3 = _lst(a_obj.get("Action", [])) == ["s3:GetObject"] and al3 == [] and len(al) == 1
+        rc3, _ = ma._plan(m3)
+        ok3 = (rc3 == 0 and _lst(a_obj.get("Action", [])) == ["s3:GetObject"] and al3 == [] and len(al) == 1)
         print("  P3 allow actions=%s; put-only row allow=%s" % (a_obj.get("Action"), al3))
         res.append(("P3 no Allow is ever rendered for a write action", ok3))
 
