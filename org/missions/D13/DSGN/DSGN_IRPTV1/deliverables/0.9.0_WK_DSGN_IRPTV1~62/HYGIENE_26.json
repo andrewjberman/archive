@@ -1,0 +1,49 @@
+{
+  "to_id": "DSGN_IRPTV1.TO-IV-e-114",
+  "row": "DSGN_IRPTV1-D2-S23",
+  "worker": "0.9.0_WK_DSGN_IRPTV1~62",
+  "portal_commit": "a124694cafab094826279f55268c80cd2b348549",
+  "portal_commit_note": "NO portal commit was made by this order: the colgroup fix lies outside the grant (row DSGN_IRPTV1-D2-W62-S2) and no contrast or band edit was warranted. The hash is portal DEV's tip the order started and ended on; the portal worktree is clean.",
+  "product_files_changed": [],
+  "colgroup_warning": {
+    "present_before": true,
+    "present_after": true,
+    "fixed": false,
+    "how_measured": "Reproduced in a DEVELOPMENT build (NODE_ENV=development vite build --mode development, React dev bundle) served from disk through scripts/ui-dist.mjs routing, driven by hygiene-driver.mjs (a copy of the ~58 holdings-face driver with console capture and DOM measurement; no dev server): pick the synthetic client, open Holdings; console error 'In HTML, whitespace text nodes cannot be a child of <%s> ... This will cause a hydration error. colgroup' (measure-dev-before.json consoleAll). The PRODUCTION build's console prints no such line (measure-prod-before.json: 0 of 18 entries), so the warning is development-only. DOM read on the production build: the Securities table's colgroup has 11 child nodes, 5 of them text nodes. Cause: portal/src/components/holdings/HoldingsBreakdownTable.tsx:294-298, five lines of `<col .../> {/* comment */}` whose same-line space JSX keeps as a text child of colgroup. That file is outside this order's grant (portal/src/pages/InvestorReporting/ only), so NO fix was made and present_after is true (the warning is not gone). The caller SecurityList.tsx:429-430,607 cannot alter it. Row DSGN_IRPTV1-D2-W62-S2 (BLOCKING). No rendered fix-test was written: a test of an unfixed table would fail the suite."
+  },
+  "contrast": {
+    "failing_before": 0,
+    "failing_after": 0,
+    "how_measured": "Built page (production build, 1440x900, client-picked all-accounts Holdings tab, synthetic fixture), hygiene-driver.mjs: for each of 72 visible text nodes' parent elements (opacity under 0.05 skipped), computed color composited with element opacity against the effective background (computed background-color composited down the ancestors to the first opaque one); WCAG 2.1 relative luminance ratio. Under that computed-style-only method 27 texts read under 3:1 (26 inside the Total Assets hero: #C5B9FD, #FFFFFF and #F4F6FA against #F4F6FA; 1 an opacity-0 sidebar label), the same shape and size as the walk's 32-36. That is an artefact: the hero paints a navy gradient through background-image with a transparent background-color, so the computed backdrop falls through to the canvas. Re-measured with the backdrop SAMPLED (all text made transparent, full-page screenshot, pixels read under each gradient-backed text's own range rectangle, worse of lightest and darkest pixel kept): 72 texts, 0 under 3:1, 0 under 4.5:1, lowest 4.82 (#111827 on #3B82F6). So failing_before 0 by the sampled method (27 by the computed-style-only method, kept here as the walk-like reading). No texts sit on the light canvas or a white panel under 3:1, so no ink-token edit was made; failing_after equals failing_before. NOT measured: one-account and no-client states, hover previews, dialogs. That the walker erred the same way is inferred (row DSGN_IRPTV1-D2-W62-S4).",
+    "distinct_pairs_computed_style_only": [
+      {"fg": "#C5B9FD", "bg_read": "#F4F6FA", "n": 3, "really_on": "hero gradient"},
+      {"fg": "#FFFFFF", "bg_read": "#F4F6FA", "n": 6, "really_on": "hero gradient"},
+      {"fg": "#F4F6FA", "bg_read": "#F4F6FA", "n": 16, "really_on": "hero gradient (text-white resolving to the canvas token)"},
+      {"fg": "#A185FF", "bg_read": "#F4F6FA", "n": 1, "really_on": "hero gradient (eyebrow ALL CATEGORIES)"},
+      {"fg": "#5F3BE3", "bg_read": "#5F3BE3", "n": 1, "really_on": "opacity-0 sidebar label (invisible)"}
+    ],
+    "distinct_pairs_sampled": []
+  },
+  "bands": {
+    "count": 5,
+    "count_note": "5 full-width #0A1733 panel strips, plus the Total Assets hero (a navy gradient, the one deliberate band) = 6 dark full-width surfaces on the tab. The walk's 5 matches the 5 strips. Two td #111827 'Other' asset-class cells are cell fills, not bands.",
+    "per_design_law": "portal/DESIGN.md C3 row: 'band | palette.darkField | #0A1733 | ONE deliberate full-bleed band per page, never the default container'; and: 'Navy #163372 is text and hairline only, never a container fill. A dark card sitting on the light canvas, a panel inside a panel inside a panel, or a second band on one page violates this clause.' portal/CLAUDE.md Known divergence: 'PanelHeader, DarkCard and NestedCard are band-valued too ... A page can therefore render several bands where C3 allows one. C3 is the law and such a page is the defect.'",
+    "where": "Shared PanelHeader (portal/src/ui/components/panels/PanelHeader.tsx:62, bg-[hsl(var(--bg-header))]) x3: Identity (portal/src/pages/InvestorReporting/header/IdentityCard.tsx:532), Securities map (tabs/holdings/HoldingsTreemap.tsx:550), Securities (tabs/holdings/SecurityList.tsx:552). Shared PanelFooter (portal/src/ui/components/panels/PanelFooter.tsx:108, `!light && bg-header`, ground default 'band') x2: HoldingsTreemap.tsx:620, SecurityList.tsx:623. Each on Panel variant=nested. Hero: portal/src/components/CategoryViewTree.tsx via tabs/holdings/DrillTree.tsx.",
+    "classification": "By the written law and portal/CLAUDE.md's own divergence note the panel strips count as bands (the page is the defect), but the repair is the shared Panel family under src/ui, outside the grant; nothing was restyled. A design ruling is needed (row DSGN_IRPTV1-D2-W62-S3). PanelFooter already offers ground='light', which would remove 2 of the 5 if footers are ruled bands.",
+    "design_ruling_needed": true
+  },
+  "screenshots": ["hold-prod-before.png"],
+  "screenshots_read": ["hold-prod-before.png"],
+  "screenshot_note": "From the production build of portal a124694c (no product change, so the same bytes are the 'after'). Read with the Read tool: nothing changed visibly, because nothing was edited. It shows the Identity header strip, the Total Assets navy gradient hero with its lavender eyebrow readable on it, then Securities map and Securities each with a navy header strip and a navy footer strip.",
+  "lint_errors": 0,
+  "lint_warnings": 342,
+  "typecheck_errors": 0,
+  "suite_after": {
+    "pass": 1180,
+    "skip": 27,
+    "fail": 0,
+    "new_failing_ids": [],
+    "note": "base run at a124694c, whole scope bun test src/pages/InvestorReporting: 1180 pass, 27 skip, 0 fail (1207 tests, 384 files); no edit was made after it"
+  },
+  "rows": ["DSGN_IRPTV1-D2-W62-S2", "DSGN_IRPTV1-D2-W62-S3", "DSGN_IRPTV1-D2-W62-S4"]
+}
