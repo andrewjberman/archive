@@ -258,6 +258,11 @@ def reads(root):
         problems.append("original_read_writes: versions_before %r, versions_after %r" % (before, after))
     if not (isinstance(writes.get("keys_scope"), str) and writes["keys_scope"]):
         problems.append("original_read_writes.keys_scope (which keys were counted) is not stated")
+    census = doc.get("unreadable_compositions") or {}
+    count, total = census.get("count"), census.get("denominator")
+    if (type(count) is not int or type(total) is not int or not 0 <= count <= total or total < 1
+            or census.get("claim") != "measured"):
+        problems.append("unreadable_compositions must state count and denominator as MEASURED integers: %r" % census)
     if "http" in json.dumps(doc).lower():
         problems.append("the result file carries a URL; a signed link is never written to a file")
     print("reads %r; versions %r -> %r" % ({k: got.get(k) for k in ("3a", "3b", "3c", "4_record", "4_route")}, before, after))
