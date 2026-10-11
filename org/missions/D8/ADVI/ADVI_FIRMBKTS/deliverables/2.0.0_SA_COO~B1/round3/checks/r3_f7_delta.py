@@ -4,11 +4,14 @@ Brings the destination of the F7 copy equal to a FRESH manifest of the served cl
 r3_f7.py copy (which never overwrites), this tool OVERWRITES a destination key that differs from the manifest, so it is
 the one place an overwrite can happen, and it refuses to do that without a per-key rollback.
 
-  plan    --manifest F                    read-only. Classifies every manifest object against the destination listing:
-                                          ABSENT, EQUAL, DIFFERS (present, not equal: an overwrite), REFUSED (no class or
-                                          address() refuses the key), and reports destination versioning and the source
-                                          keys that changed since the manifest (a stale source is never copied).
-  apply   --manifest F --dir D [--execute] [--budget-seconds N] [--workers K]
+  plan    --manifest F --keep-newer-than ISO   read-only. Classifies every manifest object against the destination
+                                          listing: ABSENT, EQUAL, DIFFERS (present, not equal, last modified at or
+                                          before ISO: an overwrite), KEPT-NEWER (present, not equal, last modified AFTER
+                                          ISO: a producer's own write under `canonical`, NEVER overwritten), REFUSED (no
+                                          class or address() refuses the key); reports destination versioning and the
+                                          source keys that changed since the manifest (a stale source is never copied).
+                                          ISO is the instant the mode moved: it is required, there is no default.
+  apply   --manifest F --keep-newer-than ISO --dir D [--execute] [--budget-seconds N] [--workers K]
                                           without --execute: the plan and 'DRY RUN: no write'. With --execute: refuses
                                           unless destination versioning is Enabled (when any key DIFFERS); records every
                                           overwritten key's prior VersionId, ETag and size to D/F7_DELTA_ROLLBACK.tsv
@@ -30,9 +33,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import r3_f7 as f7  # noqa: E402
 
 
-def classify(objs, table, naming, have, s3=None):
-    """Return dict of lists: absent, equal, differs, refused. `have` maps dst -> (size, etag)."""
-    out = {"absent": [], "equal": [], "differs": [], "refused": []}
+def classify(objs, table, naming, have, s3=None, newer=None):
+    """Return dict of lists: absent, equal, differs, kept_newer, refused. `have` maps dst -> (size, etag); `newer` is the
+    set of destination keys last modified after the mode-move instant (a producer's own write: never overwritten)."""
+    newer = newer or set()
+    out = {"absent": [], "equal": [], "differs": [], "kept_newer": [], "refused": []}
     for src, size, etag in objs:
         dst, why = f7.place(src, table, naming)
         if why:
@@ -48,9 +53,9 @@ def classify(objs, table, naming, have, s3=None):
             if src_sha is not None and f7._sha(s3, f7.DST_BUCKET, dst) == src_sha:
                 out["equal"].append((src, dst, etag))
             else:
-                out["differs"].append((src, dst, etag))
+                out["kept_newer" if dst in newer else "differs"].append((src, dst, etag))
         else:
-            out["differs"].append((src, dst, etag))
+            out["kept_newer" if dst in newer else "differs"].append((src, dst, etag))
     return out
 
 
@@ -61,21 +66,37 @@ def _versioning(s3):
         return "UNREADABLE:" + type(e).__name__
 
 
-def _plan(manifest, s3, naming, table):
+def _parse_iso(s):
+    import datetime
+    return datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc)
+
+
+def _list_dest(s3, cutoff):
+    """(have, newer): destination key -> (size, etag), and the keys last modified after `cutoff`."""
+    have, newer = {}, set()
+    for page in s3.get_paginator("list_objects_v2").paginate(Bucket=f7.DST_BUCKET, Prefix=f7.DST_ROOT):
+        for o in page.get("Contents", []):
+            have[o["Key"]] = (o["Size"], o["ETag"].strip('"'))
+            if o["LastModified"] > cutoff:
+                newer.add(o["Key"])
+    return have, newer
+
+
+def _plan(manifest, s3, naming, table, cutoff):
     objs = f7._read_manifest(manifest)
-    have = {k: (s, e) for k, s, e in f7._list(s3, f7.DST_BUCKET, f7.DST_ROOT)}
+    have, newer = _list_dest(s3, cutoff)
     src_now = {}
     for lst in f7._list_many(s3, f7.SRC_BUCKET, [p for p, _ in table]).values():
         for k, s, e in lst:
             src_now[k] = (s, e)
-    c = classify(objs, table, naming, have, s3)
+    c = classify(objs, table, naming, have, s3, newer)
     stale = sum(1 for src, size, etag in objs if src_now.get(src) != (size, etag))
     return objs, c, stale
 
 
 def _print_plan(objs, c, stale, ver):
-    print("DELTA PLAN objects=%d absent=%d equal=%d differs=%d refused=%d (denominator: manifest objects)"
-          % (len(objs), len(c["absent"]), len(c["equal"]), len(c["differs"]), len(c["refused"])))
+    print("DELTA PLAN objects=%d absent=%d equal=%d differs=%d kept-newer=%d refused=%d (denominator: manifest objects)"
+          % (len(objs), len(c["absent"]), len(c["equal"]), len(c["differs"]), len(c["kept_newer"]), len(c["refused"])))
     print("  OVERWRITES=%d destination-versioning=%s source-changed-since-manifest=%d" % (len(c["differs"]), ver, stale))
     if not c["absent"] and not c["differs"] and not c["refused"]:
         print("DELTA PLAN: NOTHING TO DO (every manifest key present and equal)")
@@ -83,14 +104,14 @@ def _print_plan(objs, c, stale, ver):
 
 def cmd_plan(a):
     s3, naming, table = f7._s3(), f7._builders(), f7.classes()
-    objs, c, stale = _plan(a.manifest, s3, naming, table)
+    objs, c, stale = _plan(a.manifest, s3, naming, table, _parse_iso(a.keep_newer_than))
     _print_plan(objs, c, stale, _versioning(s3))
     return 0 if not c["refused"] else 1
 
 
 def cmd_apply(a):
     s3, naming, table = f7._s3(), f7._builders(), f7.classes()
-    objs, c, stale = _plan(a.manifest, s3, naming, table)
+    objs, c, stale = _plan(a.manifest, s3, naming, table, _parse_iso(a.keep_newer_than))
     ver = _versioning(s3)
     _print_plan(objs, c, stale, ver)
     if c["refused"]:
@@ -200,11 +221,16 @@ def cmd_selftest(a):
             ("gold/artifacts/x/c.json", 10, "e3"), ("elsewhere/z.json", 5, "e9")]
     pre = f7.DST_ROOT
     have = {pre + "artifacts/x/b.json": (10, "e2"), pre + "artifacts/x/c.json": (10, "OLD")}
-    cl = classify(objs, table, _N, have)
+    objs.append(("gold/artifacts/x/d.json", 10, "e4"))
+    have[pre + "artifacts/x/d.json"] = (10, "FRESH")
+    cl = classify(objs, table, _N, have, None, {pre + "artifacts/x/d.json"})
     checks = []
     checks.append(("absent key classified ABSENT", [o[0] for o in cl["absent"]] == ["gold/artifacts/x/a.json"]))
     checks.append(("equal key classified EQUAL and not copied", [o[0] for o in cl["equal"]] == ["gold/artifacts/x/b.json"]))
     checks.append(("differing key classified DIFFERS (an overwrite)", [o[0] for o in cl["differs"]] == ["gold/artifacts/x/c.json"]))
+    checks.append(("a differing key written after the mode move is KEPT-NEWER, never an overwrite",
+                   [o[0] for o in cl["kept_newer"]] == ["gold/artifacts/x/d.json"]
+                   and "gold/artifacts/x/d.json" not in [o[0] for o in cl["differs"]]))
     checks.append(("a key no class owns is REFUSED, not copied", [o[0] for o in cl["refused"]] == ["elsewhere/z.json"]))
     fk = _Fake({pre + "artifacts/x/c.json": (10, "OLD")}, {pre + "artifacts/x/c.json": "VER7"})
     h = fk.head_object(f7.DST_BUCKET, pre + "artifacts/x/c.json")
@@ -228,8 +254,10 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("plan")
     p.add_argument("--manifest", required=True)
+    p.add_argument("--keep-newer-than", required=True)
     q = sub.add_parser("apply")
     q.add_argument("--manifest", required=True)
+    q.add_argument("--keep-newer-than", required=True)
     q.add_argument("--dir", required=True)
     q.add_argument("--execute", action="store_true")
     q.add_argument("--budget-seconds", type=int, default=100)
