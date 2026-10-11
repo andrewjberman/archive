@@ -1,6 +1,6 @@
 {
-  "as_of": "2026-10-11T16:37:45Z",
-  "compiled_by": "0.9.0_WK_ADVI_COTBKF~111",
+  "as_of": "2026-10-11T18:00:51Z",
+  "compiled_by": "0.9.0_WK_ADVI_COTBKF~111; revised round 71 by 0.9.0_WK_ADVI_COTBKF~117",
   "served_method": "method_r28",
   "tree_default": "method_r29",
   "pin": {
@@ -15,12 +15,16 @@
   "corrections": [
     {
       "id": "withholding-flow-and-return",
-      "what": "Under method_r28 a federal or state withholding with no same-day withdrawal row stays inside the return and its flow is not counted; method_r29 moves the return on 2 account-days and the external_flow cell on 42 blank account-days.",
+      "what": "Under method_r28 a federal or state withholding with no same-day withdrawal row stays inside the return and its flow is not counted; method_r29 moves the return on 2 account-days and the external_flow cell on 42 blank account-days. The flow-count difference (47 rows over 46 dates against 44 over 43) is reconciled by the reviewer: 44 carry a real change, 3 are residue on a value of zero.",
       "state": "OPEN",
       "extent": {
         "measured_account_days": 2,
         "other_cells": 42,
-        "day_files": 43,
+        "day_files": {
+          "by_real_change": 43,
+          "by_bytes_up_to": 46,
+          "what_each_counts": "43 = day files holding a real change (REMINT_FACTS.md: 44 rows over 43 dates, after exception rows are dropped); up to 46 = dates where a byte comparison of the flow column sees a difference (reviewer: 47 rows differ in bytes over 46 dates; 44 carry a real change; 3 are residue on zero); the day-file count after the exception rows are dropped was not taken (REMEDIATION_v41.md item 5)"
+        },
         "silver_objects": 3
       },
       "evidence": [
@@ -43,14 +47,29 @@
         {
           "file": "org/missions/D8/ADVI/ADVI_COTBKF/prd/ADVI_COTBKF_PRD.md",
           "what_it_says": "ADDENDUM v0.7 (line 270): the sentence \"2 day files, and no other\" is WITHDRAWN; a re-mint under method_r29 replaces 43 day files by the worker's count; the served table is method_r28's with a known, stated defect on 2 account-days"
+        },
+        {
+          "file": "org/tier1_exec/3.0.0_SA_CVO/deliverables/ADVI_COTBKF_ROUND_70_L9_GRADE_20261011.md",
+          "what_it_says": "section 'The two flow counts, reconciled' (lines 58-64): compared exactly, the flow differs on 47 account-days over 46 dates; on 3 of them the difference is below 1e-12 on a value of zero (floating-point residue); 44 account-days carry a real change of flow and 47 rows differ in their bytes; a re-mint that compares bytes will see the larger number"
+        },
+        {
+          "file": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/remediations/REMEDIATION_v41.md",
+          "what_it_says": "item 5 (lines 14-15): the flow counts are reconciled: 47 rows differ in bytes over 46 dates; 44 carry a real change; 3 are residue on zero; a re-mint that compares bytes may see up to 46 day files, not 43; the day-file count after the exception rows are dropped was not taken"
+        },
+        {
+          "file": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+          "what_it_says": "ADVI_COTBKF-D2-W114-S1 (line 6796): exact comparison gives 47 account-days over 46 dates; 44 of the 47 change the outflow term; the 3 others: 2 zero-to-inflow, 1 inflow-to-zero"
+        },
+        {
+          "file": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_ROUND_ANALYSIS_ADVI_COTBKF_ROUND_71_20261011.md",
+          "what_it_says": "section 2 item 5: the same reconciliation as the reviewer's; a re-mint that compares bytes may replace up to 46; the re-serve's pair states both numbers and compares values at a stated tolerance, never bytes, for the flow column"
         }
       ],
       "unreconciled": [
-        "Day-file count of the flow change: REMINT_FACTS.md 44 rows over 43 dates (day file, after exception rows are dropped); the issuer's packet ISSUER-FLOW-DIFF flow_differs=47 over dates_with_a_flow_change=46 (silver table). 3 rows / 3 dates apart; PRD ADDENDUM v0.7 says the difference is attributed, not reconciled; the worker attributes it to ABSENT and HELD rows, whose flow the day file leaves null (issuer packet, not tested).",
-        "Blank rows with a changed flow: REMINT_FACTS.md 42 blank account-days on 41 other dates; issuer packet blank=45 (47 less the 2 measured). 3 apart.",
-        "Round 66/68 and the PRD before v0.7 said 2 day files (R28_VS_R29_AT_PIN.json changed_dates = 2); REMINT_FACTS.md says 43. The two count different columns (return only versus return and external_flow); v0.7 withdraws the first."
+        "Blank rows with a changed flow: REMINT_FACTS.md 42 blank account-days on 41 other dates; issuer packet blank=45 (47 less the 2 measured). 3 apart. The reviewer's record (ADVI_COTBKF_ROUND_70_L9_GRADE_20261011.md) reconciles 47 against 44 (3 residue) but does not state the blank-day figures; 45 less 3 is 42 by arithmetic, which the reviewer's record does not say.",
+        "Row ADVI_COTBKF-D2-W114-S1 describes the 3 non-real rows by sign (2 zero-to-inflow, 1 inflow-to-zero) and says 44 of the 47 change the outflow term; the reviewer's grade describes them as differences below 1e-12 on a value of zero (floating-point residue) and says 'this seat did not read those rows'. Both are records; neither is reconciled to the other here."
       ],
-      "closes_when": "The one re-serve (PRD v0.7 line 282) carries it: re-serve of the three silver objects and re-mint of the replaced day files under its own pair, naming every file, the hold list, the pin and every reader; the day-file count (43 or 46) is to be fixed by that pair.",
+      "closes_when": "The one re-serve (PRD v0.7 line 282) carries it: re-serve of the three silver objects and re-mint of the replaced day files under its own pair, naming every file, the hold list, the pin and every reader; the pair states both day-file numbers (43 by real change, up to 46 by bytes) and compares the flow column by value at a stated tolerance (CTO round-71 analysis section 2 item 5).",
       "owner": "2.0.0_SA_COO~C2"
     },
     {
@@ -88,15 +107,26 @@
     },
     {
       "id": "mis-scaled-price-series",
-      "what": "Seven price series in the build's close table differ from the custodian's traded price by a constant scale or a step, and the scan that found them is a floor.",
+      "what": "Eight close series in the build's table differ from the custodian's traded price by a constant scale or a step (round 70 widened scan: the seven of round 69 plus OIEJX), and the count is a floor: 334 compared securities are still too few to class, 44 of the thin ones still carry a pair more than 10 percent off, and 1,700 traded securities have no close in the table (1,693 held, 974,014 account-days resting on them, every one not measurable).",
       "state": "OPEN",
       "extent": {
         "measured_account_days": 470,
-        "other_cells": "NOT_MEASURED",
+        "other_cells": {
+          "series": 8,
+          "too_few_left": 334,
+          "thin_beyond_10pct_left": 44,
+          "no_close_securities": 1700,
+          "no_close_held": 1693,
+          "no_close_not_measurable_account_days": 974014
+        },
         "day_files": "NOT_MEASURED",
         "silver_objects": "NOT_MEASURED"
       },
       "evidence": [
+        {
+          "file": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~113/CLOSE_VS_TRADE_SCAN_WIDE.json",
+          "what_it_says": "mis_scaled = 8; too_few_left = 334; thin_beyond_10pct_left = 44; no_close.securities = 1700; no_close.held = 1693; no_close.not_measurable_account_days = 974014; measured_account_days_affected = 470; headline: 8 close series are mis-scaled (6 constant-scale and 2 step) and that count is a floor"
+        },
         {
           "file": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~108/CLOSE_VS_TRADE_SCAN.json",
           "what_it_says": "securities_compared = 720; pairs_compared = 7979; classes AGREES 315, CONSTANT_SCALE 5, STEP 2, ISOLATED 15, NOISY 37, TOO_FEW 346; measured_account_days_affected = 470"
@@ -115,23 +145,75 @@
         }
       ],
       "unreconciled": [
-        "The count of seven (5 CONSTANT_SCALE + 2 STEP) is a floor and is never stated without: 346 securities TOO_FEW to class, 50 of them with a pair beyond 10 percent, and 1,700 traded securities with no close (3109 traded less 1409 with any close).",
-        "The 470 measured account-days are distinct and equal the sum over the seven (SUPPLEMENT: sum 470, distinct 470); the 2022 spin-off security (entry spinoff-factor-2022-event) is one of the seven (class STEP, 28 of the 470); the two entries overlap and are not additive."
+        "The count of eight is a floor and is never stated without: 334 securities still too few to class, 44 thin ones with a pair more than 10 percent off, and 1,700 traded securities with no close (974,014 not-measurable account-days). Round 69's older companions (346 too few, 50 beyond 10 percent) are superseded by the widened scan's 334 and 44; the older record stays in the evidence.",
+        "Overlap with entry dividend-adjusted-fund-series: DIVIDEND_ADJUSTED_SERIES.json not_established/table says three of round 70's CONSTANT_SCALE funds (AMBFX, BALCX, OIEJX) also read dividend-adjusted, so the two entries count some of the same series; the overlap in account-days is NOT_MEASURED (looked in DIVIDEND_ADJUSTED_SERIES.json and CLOSE_VS_TRADE_SCAN_WIDE.json).",
+        "The 470 measured account-days are distinct (round 69 SUPPLEMENT: sum 470, distinct 470) and CLOSE_VS_TRADE_SCAN_WIDE.json prints 470 again; the entry still includes ticker T, the security of entry spinoff-factor-2022-event (class STEP, 28 of the 470); the two entries overlap and are not additive."
       ],
-      "closes_when": "The widened scan (CTO round-70 analysis section 3 item 3) reports its classes with the same three companion numbers, and a ruling on which series are corrected in the one re-serve.",
+      "closes_when": "A ruling on which series are corrected in the one re-serve, taken with the dividend-adjusted entry's price-basis ruling (the two count some of the same series).",
       "owner": "2.0.0_SA_COO~C2"
     },
     {
-      "id": "spinoff-factor-2022-event",
-      "what": "The store's 1.324 spin-off factor for the ticker T event of 2022-04-11 is unapplied, and the served closes before the event sit at about 0.757 of the traded price.",
+      "id": "dividend-adjusted-fund-series",
+      "what": "Of 270 fund series in the served table, 72 of 73 tested read DIVIDEND_ADJUSTED (the store's close is scaled down by later distributions); 73 were substituted with the as-traded close, all 73 of those reading not adjusted; 124 are untested. All nine series scanned by eye read adjusted, with an adjustment 1.0 to 2.3 times the single dividend adjustment their distributions imply, so no single factor undoes it. Graded: pending at the time of this update (the reviewer has not graded this record's judgment criterion).",
       "state": "OPEN",
       "extent": {
-        "measured_account_days": 28,
+        "measured_account_days": 3187,
+        "priced_holding_account_days": 287912,
+        "measured_days_on_a_distribution_date": 60,
+        "series_read_adjusted": 72,
+        "series_with_holdings": 48,
+        "fund_series": 270,
+        "substituted": 73,
+        "left_on_store": 197,
+        "tested": 73,
+        "reads_not_adjusted": 1,
+        "untested": 124,
         "other_cells": "NOT_MEASURED",
         "day_files": "NOT_MEASURED",
         "silver_objects": "NOT_MEASURED"
       },
       "evidence": [
+        {
+          "file": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~116/DIVIDEND_ADJUSTED_SERIES.json",
+          "what_it_says": "table: fund_series 270, substituted 73, left_on_store 197, tested 73, reads_adjusted 72, reads_not_adjusted 1, untested 124 (no_cache_file 120, close_equals_adj_close_everywhere 2, test_undecided 1, cache_marker_none 1); control: 73 substituted tested, 0 read adjusted; reach: priced_holding_account_days 287912, measured_account_days 3187, measured_days_on_a_distribution_date 60, series 72, series_with_holdings 48; ETF and Equity that read adjusted: 9 series, 327 measured account-days, within 1 percent of the cached close and not sized"
+        },
+        {
+          "file": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~116/DIVIDEND_ADJUSTED_SERIES.json",
+          "what_it_says": "headline and per_share_source: all nine scanned series read adjusted, per-share distributions taken from the custodian's own rows; not_established: no correction is sized and no return is recomputed; the direction of the return error across a distribution date is stated from the shape; the store's adjustment is larger than Yahoo's own Adj Close (slope median 1.85, range 1.0 to 4.2)"
+        },
+        {
+          "file": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/remediations/REMEDIATION_v41.md",
+          "what_it_says": "item 2: nine fund series look dividend-adjusted (row D2-W113-S1), untested at that round; CTO round-71 analysis section 2 item 2: one cell tests it, counts only, and a correction is not sized on nine found by eye"
+        }
+      ],
+      "unreconciled": [
+        "Overlap with entry mis-scaled-price-series: three of round 70's CONSTANT_SCALE funds (AMBFX, BALCX, OIEJX) also read dividend-adjusted (DIVIDEND_ADJUSTED_SERIES.json table.round70_constant_scale_funds_that_read_adjusted), so the two entries count some of the same series; the overlap in account-days is NOT_MEASURED.",
+        "For the nine scanned series the observed adjustment is larger than the single dividend adjustment their distributions imply for 8 of 9 (1.0 to 2.3 times); CPXIX is equal. The record gives no cause (the store's write history was not read).",
+        "The 124 untested series: 120 have no Yahoo cache file; no count of not adjusted is claimed for them; 119 of the 124 are on the custodian-holdings store only."
+      ],
+      "closes_when": "A ruling on the price basis for the fund series left on the store, and a measurement of the 124 untested series; until then it travels in the one re-serve's list.",
+      "owner": "1.0.0_SA_CTO~DELL2"
+    },
+    {
+      "id": "spinoff-factor-2022-event",
+      "what": "The store's 1.324 spin-off factor (store date 2022-04-11) for the ticker T event is unapplied in the served table, whose closes before the event sit at about 0.757 of the traded price. The round-70 evidence record reads APPLY: with the factor 15 of 16 before-event pairs are within 2 percent (median 1.0027), without it 0 of 16 (median 0.7573); after the event the close without the factor is within 2 percent on 26 of 26 and with it on 0 of 26. No PRD addendum applying the factor has landed as of this update (the latest is ADDENDUM v0.7, line 265).",
+      "state": "OPEN",
+      "extent": {
+        "measured_account_days": 28,
+        "priced_holding_account_days": 3434,
+        "dates": 448,
+        "measured_days_where_the_price_level_enters": "1 of 28",
+        "blank_reasons_that_move": "NOT_MEASURED",
+        "returns_that_would_move": "NOT_MEASURED",
+        "day_files": "NOT_MEASURED",
+        "silver_objects": "NOT_MEASURED",
+        "other_cells": "NOT_MEASURED"
+      },
+      "evidence": [
+        {
+          "file": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~112/SPINOFF_2022_EVIDENCE.json",
+          "what_it_says": "reads = APPLY; pairs before_event 16, on_or_after_event 26, not_comparable 107; without_factor_before within_two_percent 0 of 16, median_ratio 0.7573; with_factor_before 15 of 16, median_ratio 1.0027; without_factor_after 26 of 26, median_ratio 0.9993; with_factor_after 0 of 26, median_ratio 1.3231; factor 1.324, store_date 2022-04-11; reach dates 448, priced_holding_account_days 3434, measured_account_days 28, measured_days_where_the_price_level_enters 1; not_established: the returns that would move are not computed"
+        },
         {
           "file": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~103/SPINOFF_CLAIMS.json",
           "what_it_says": "other_candidate_prints per_event, ticker T, event_date 2022-04-11, factor 1.324: of_which_held_and_served_priced_compared 16; without_factor within_two_percent 0, median_ratio 0.7573; with_factor within_two_percent 15, median_ratio 1.0027; reading_if_admitted APPLY; events[0].claim UNAPPLIED_NO_HELD_DATE (the held-position mark has no date before the event)"
@@ -157,40 +239,10 @@
         "S118 text: \"0.757 of the traded price\" and the factor \"1.324, which is 1 over 0.755\"; SPINOFF_CLAIMS.json median_ratio without the factor is 0.7573. 1/1.324 computes to 0.7553; the two (0.7573 and 0.755) differ in the third decimal and the record gives no explanation.",
         "28 measured account-days: counted twice by different instruments (ADDED_SPLITS.json drift_account_days returns 28 for this security, a drift comparison; CLOSE_VS_TRADE_SCAN.json measured_account_days_affected 28, a reach count). They agree in number; they are not shown to be the same days.",
         "PRD ADDENDUM v0.5 line 235: the four spin-off entries \"move 30 further day files\"; ADDED_SPLITS.json counts 30 drift ACCOUNT-days (28 returns + 2 blank reasons). The number of day files is not in that record.",
-        "Three further events (the other three of the four entries) rest on 4, 4 and 1 trade dates in SPINOFF_CLAIMS.json and stay UNAPPLIED_NO_HELD_DATE; their extent on the served table is not measured."
+        "Three further events (the other three of the four entries) rest on 4, 4 and 1 trade dates in SPINOFF_CLAIMS.json and stay UNAPPLIED_NO_HELD_DATE (CTO round-71 analysis section 2 item 1); their extent on the served table is not measured.",
+        "SPINOFF_2022_EVIDENCE.json: one before-date (2021-03-19, ratio with the factor 1.0304) is outside 2 percent; no cause is asserted. The returns that would move are not computed; only the 1 of 28 measured days where the level enters is given."
       ],
-      "closes_when": "The evidence record for the event (CTO round-70 analysis section 3 item 2) is written, a PRD addendum applies or declines the factor against it with a claim on the store entry, and, if applied, the re-serve carries it.",
-      "owner": "1.0.0_SA_CTO~DELL2"
-    },
-    {
-      "id": "late-receipt-rule",
-      "what": "A rule that would blank a return when a receipt arrives after an account's assets left is measured at 410 days if adopted and is not adopted.",
-      "state": "NOT_ADOPTED",
-      "extent": {
-        "measured_account_days": 410,
-        "other_cells": "NOT_MEASURED",
-        "day_files": "NOT_MEASURED",
-        "silver_objects": "NOT_MEASURED"
-      },
-      "evidence": [
-        {
-          "file": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~109/RESIDUAL_RECEIPT_PREDICATE.json",
-          "what_it_says": "total_blanked = 410; targets_blanked = 148 (of 162 target days); non_targets_blanked = 0; account_months_touched = 299; recommended is marked a RECOMMENDATION of the measuring worker, not a ruling"
-        },
-        {
-          "file": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_ROUND_ANALYSIS_ADVI_COTBKF_ROUND_70_20261011.md",
-          "what_it_says": "section 2 item 5: the late-receipt rule is NOT entered in the PRD; one cell tests it on held-out accounts on method_r29's flows"
-        },
-        {
-          "file": "org/missions/D8/ADVI/ADVI_COTBKF/prd/ADVI_COTBKF_PRD.md",
-          "what_it_says": "ADDENDUM v0.7 (line 281) lists \"the rule for a receipt after an account's assets left\" among the corrections already open"
-        }
-      ],
-      "unreconciled": [
-        "total_blanked 410 (all measured days) against targets_blanked 148 of the 162 target days: the same rule, two denominators; the record states both.",
-        "The record's 410 is computed from the method_r28 flow column (RESIDUAL_RECEIPT_PREDICATE.json not_established: the look-back is measured from the flow column of method_r28 in the served table); the CTO analysis names a re-test on method_r29's flows, which is not measured."
-      ],
-      "closes_when": "The out-of-sample test on method_r29's flows is read and a PRD addendum adopts or declines the rule; if adopted, the re-serve carries it.",
+      "closes_when": "A PRD addendum owed by 1.0.0_SA_CTO~DELL2 applies or declines the factor against the evidence record (the CTO's round-71 analysis section 2 item 1 says it writes it next; none exists at ADDENDUM v0.7), with a claim on the store entry; then, if applied, the one re-serve carries it.",
       "owner": "1.0.0_SA_CTO~DELL2"
     },
     {
@@ -222,5 +274,27 @@
     "Build gaps, not corrections to the served table (listed here and not above): (a) the five report inputs that print NOT AVAILABLE in a clean checkout (0.9.0_WK_ADVI_COTBKF~101/CLEAN_CHAIN.json report_inputs: round-19 movers, round-20 mover causes, round-22 grades, round-24 grades and round-27 trace; clean_run.report_inputs_absent = 5) - a gap in what a clean build can render, not in the served table; (b) the as-traded basis's third local input, the price-basis census csv (0.9.0_WK_ADVI_COTBKF~106/PRICE_CACHE_PIN.json not_established[3]), a tracked file at a fixed path not named in the pin - a gap in the build's pinning; (c) the digests of the price caches are of scratch COPIES of the pinned directories (PRICE_CACHE_PIN.json not_established[1]).",
     "Not read by the compiler: whether the S3 copies of the served tables equal the local copy every comparison used (R28_VS_R29_AT_PIN.json not_established); the served build ran at code commit 728d223ddc and the comparisons at 21055cff57 (same record).",
     "The list was compiled from the records of rounds 64 to 69 as cited; nothing was re-measured and no record was re-run. Extent cells written NOT_MEASURED name the record looked in in the entry's evidence."
+  ],
+  "struck": [
+    {
+      "id": "late-receipt-rule",
+      "struck_by": "1.0.0_SA_CTO~DELL2, round-71 analysis @efaa09a585 section 2 item 3 (msg 5458)",
+      "why": "\"The late-receipt rule is NOT adopted. Out of sample its constants read 72 of 77 one way and 37 of 85 the other: it does not hold. It is withdrawn as a rule for this table.\" Verified in org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~114/RESIDUAL_RECEIPT_OUT_OF_SAMPLE.json holdout: fit half A, test half B: test_half_targets 77, test_half_targets_blanked 72; fit half B, test half A: test_half_targets 85, test_half_targets_blanked 37.",
+      "what_stands": "\"What stands is the round-69 ruling it was meant to implement, that a receipt arriving after an account's assets left is neither a return nor a contribution; how such a day is recognised is open, and no day is blanked on it.\""
+    }
+  ],
+  "revisions": [
+    {
+      "round": 71,
+      "by": "0.9.0_WK_ADVI_COTBKF~117",
+      "changed": [
+        "withholding-flow-and-return: day_files states 43 by real change and up to 46 by bytes; the flow-count item left unreconciled and cites the reviewer's grade, REMEDIATION_v41 item 5 and row D2-W114-S1; blank 42 against 45 stays unreconciled",
+        "spinoff-factor-2022-event: reads APPLY with the pair counts and reach (448 dates, 3,434 priced holding account-days, 28 measured, 1 of 28 where the level enters); no PRD addendum on it yet, owed by 1.0.0_SA_CTO~DELL2",
+        "mis-scaled-price-series: 8 series with 334, 44 and 1,700 beside it and 974,014 not-measurable account-days; overlap with the dividend entry and with ticker T recorded",
+        "dividend-adjusted-fund-series: new entry (72 of 73 tested read adjusted, 124 untested, 3,187 measured account-days); grade pending",
+        "late-receipt-rule: removed from corrections, recorded under struck (CTO round-71 analysis section 2 item 3)",
+        "unpriced-withholding-days and method-version-label: re-read against their records, unchanged"
+      ]
+    }
   ]
 }
