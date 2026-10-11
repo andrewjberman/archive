@@ -1,0 +1,164 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "The read names the running root.",
+      "denominator": "1 output file, 1 ROOT= line. The root was DERIVED inside the command from the unit's own ExecStart and never typed, so the value is re-checkable; a sweep of the saved file for /opt/irpt-resident/* yields exactly ONE distinct root. It equals the root V1 recorded at the st30 install 95 minutes earlier, which is the independent corroboration that this read hit the host the install landed on.",
+      "expect": "^ROOT=/opt/irpt-resident/",
+      "invocation": "grep -m1 '^ROOT=' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j1/RUN4_JOURNAL_20261011.txt",
+      "method": "command",
+      "output_evidence": "ROOT=/opt/irpt-resident/37210c771a-st30",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "The read states the window's counts.",
+      "denominator": "165 journal lines in the window, which IS the denominator for every count on the line and for the UNSET and SENDFAIL zeros below it. The line also carries since=, hosttz= and readat= so a reader can see that the --since window is the UTC window (host tz +0000) and when it was read (12:08:21Z) -- without those three the counts would have no stated scope in TIME. KNOWN PROPERTY, declared rather than hidden: polls= and handled= count SUBSTRING occurrences of IRPT_RESIDENT_POLL, which is the order's literal wording, so a line merely mentioning that token mid-text would be counted; the synthetic exercise below measures that behaviour.",
+      "expect": "^WINDOW lines=[0-9]+ polls=[0-9]+ handled=[0-9]+ tracebacks=[0-9]+",
+      "invocation": "grep -m1 '^WINDOW lines=' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j1/RUN4_JOURNAL_20261011.txt",
+      "method": "command",
+      "output_evidence": "WINDOW lines=165 polls=159 handled=3 tracebacks=0 since=2026-10-11 11:15:00 hosttz=+0000 readat=2026-10-11T12:08:21Z",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "The read ran to its end.",
+      "denominator": "1 output file, exactly 1 line equal to END. This is the criterion that makes a TRUNCATED read distinguishable from an empty one: every section between WINDOW and END is emitted from awk's END block, so a command killed mid-journal would print no END and the count would be 0. The header line this seat prepended carries the SSM command id and the instance id and is not equal to END, so it cannot inflate the count.",
+      "expect": "^1$",
+      "invocation": "grep -c '^END$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j1/RUN4_JOURNAL_20261011.txt",
+      "method": "command",
+      "output_evidence": "grep -c '^END$' org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j1/RUN4_JOURNAL_20261011.txt\n1\nmatched line, verbatim: END\n(the count stands alone on its own line because the criterion's expect is ^1$ under MULTILINE; the surrounding lines name the invocation and the line the count is of, so the number is not a bare value)",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deploy_evidence": "the command's full output with the SSM command id f3af9d5b-8386-48b0-a7d1-4cd31769b609 and the instance id i-0167fd745ad906a66 on its first line: ROOT and ACTIVE/RESTARTS, the WINDOW counts, 3 REQ lines, 9 NAMED lines, 0 TRACE lines, the COUNTS denominator line, UNSET, SENDFAIL and END",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j1/RUN4_JOURNAL_20261011.txt"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~YC2",
+  "compiler_tools": [
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: one read-only command on the resident host; no schedule, trigger or rule is added or read. Checked against the act as executed -- the command contains no events/rules/targets call and no write verb of any kind.",
+      "tool": "comp-schedule"
+    },
+    {
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight: no IAM change; the command runs under the applier's existing SSM grant on this one instance, the grant TO-APPLY-b8 and TO-APPLY-st30 used. Checked against the act as executed, and the grant was proved by the LIVE call (Status Success, ResponseCode 0) rather than by simulate-principal-policy, which has four false-deny modes and one false-allow mode.",
+      "tool": "comp-iam"
+    },
+    {
+      "invocation": "the order's named trap, exercised as a control against a SEEDED input before the host read",
+      "result": "PASS. The order states the trap in words: a journal line that carries a client's or a security's name, which is why the command prints only the worker's own named lines and the CLASS of an exception, never an exception's message or a traceback body. Discharged BEFORE the one host read by running the awk program against a synthetic journal carrying a planted traceback whose final line was 'ValueError: Acme Family Trust holding AAPL is not permitted' -- the program emitted 'TRACE 2026-10-11T11:19:11+0000 ValueError' and nothing else from it, so the planted client name and ticker did not reach the output. See controls.the_redaction_trap_was_exercised_on_a_seeded_input.",
+      "tool": "comp-adversary"
+    },
+    {
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "see the run recorded at close; 3 of 3 criteria PASS",
+      "tool": "proof-of-spec-check.py"
+    }
+  ],
+  "controls": {
+    "an_empty_section_is_distinguishable_from_an_unread_one": {
+      "description": "The output has four list sections (REQ, NAMED, TRACE) and two counters. A section that emitted nothing is indistinguishable from a section whose code never ran -- the same absence-versus-zero problem as a census with no denominator. Here it bites hardest on TRACE and on UNSET.",
+      "expected_landed": "a COUNTS line stating req_lines, named_lines, trace_lines and whether any traceback was left unterminated, so each list's length is asserted independently of the list itself",
+      "expected_not_landed": "a silent empty section, where 0 TRACE lines could mean no traceback, or a traceback the program failed to close",
+      "observed": "COUNTS req_lines=3 named_lines=9 trace_lines=0 unterminated_traceback=0. The 3 and the 9 equal the lines actually printed. trace_lines=0 agrees with tracebacks=0 on the WINDOW line, which is an independent substring count, and unterminated_traceback=0 says the zero is not a traceback whose last line fell outside the window. So 0 TRACE lines means the resident raised nothing in this window, which is a finding in its own right: run 4 was refused, not crashed.",
+      "status": "PASS"
+    },
+    "nothing_was_written_to_the_host": {
+      "description": "The bounds say NO WRITE TO THE HOST. The obvious implementation -- dump journalctl to a temp file and grep it several times -- writes to /tmp, which is a write, and also reads a slightly different window per grep so the counts need not agree with each other.",
+      "expected_landed": "ONE journalctl read piped into ONE awk, no temp file, no redirection to any host path, and every count derived from the same single pass",
+      "expected_not_landed": "any file created on the host, or counts computed from separate journalctl invocations",
+      "observed": "The command contains exactly one journalctl invocation, piped directly into awk; the only redirection in the whole script is the pipe. No temp path appears in it. Every number on the WINDOW, COUNTS, UNSET and SENDFAIL lines comes from the same 165-line pass, so they are mutually consistent by construction. The command also contains no write verb at all -- no systemctl start/stop/restart, no aws sqs receive/delete, no dynamodb call, no secret read, no vendor call.",
+      "status": "PASS"
+    },
+    "the_host_ran_it_rather_than_merely_accepting_it": {
+      "description": "A DELIVERY trap on a host plane: send-command returning a CommandId proves SSM ACCEPTED the request, never that the instance ran it. SENT is not EMITTED is not READ.",
+      "expected_landed": "Status Success with ResponseCode 0 and no stderr, and the stdout carrying the expected line shapes through to END",
+      "expected_not_landed": "Pending/Failed/TimedOut, a non-zero ResponseCode, or stderr content -- any of which would mean the saved stdout is not a complete reading",
+      "observed": "ssm f3af9d5b-8386-48b0-a7d1-4cd31769b609 Success rc 0. host_read.py prints no STDERR block, and it only prints a result once the invocation leaves Pending/InProgress/Delayed. The output's own readat=2026-10-11T12:08:21Z is stamped by the HOST, so the reading is dated by the machine that did it rather than by this box, and AC3's END line proves the script reached its own last statement.",
+      "status": "PASS"
+    },
+    "the_redaction_trap_was_exercised_on_a_seeded_input_not_merely_intended": {
+      "description": "THE TRAP THE ORDER NAMES, and the one failure here that could not be undone: a journal line carrying a person, a client or a security, committed to the repo. Intent is not a control, and the real host journal is a poor test because a clean run proves only that the input was clean. So the program was run against a journal built to defeat it, BEFORE the host read.",
+      "expected_landed": "a seeded traceback whose last line is 'ValueError: Acme Family Trust holding AAPL is not permitted' yields exactly 'TRACE <ts> ValueError' and no other output from that traceback; its frame lines and the source line 'raise ValueError(secret_client_name)' appear nowhere",
+      "expected_not_landed": "any part of the text after the colon, or any frame line, reaching the output -- which on a real journal would be a client name committed to git",
+      "observed": "TRACE 2026-10-11T11:19:11+0000 ValueError -- the class alone, carrying the timestamp of the traceback's LAST line as the order specifies. 0 frame lines and 0 message text emitted. Two more discriminations in the same run: a line reading 'a mid-text mention of IRPT_RESIDENT_POLL must not be NAMED' was correctly REFUSED as a NAMED line (the match is anchored on the message after the journal prefix, not on the raw line), and 'IRPT_RESIDENT_POLL handled=0' was correctly excluded while 'handled=1' and 'handled=10' were both kept -- so the handled=0 exclusion does not swallow handled=10, which a naive substring test would.",
+      "status": "PASS"
+    },
+    "the_saved_file_was_read_before_it_was_saved_and_names_nobody": {
+      "description": "The order's step 3 puts the redaction judgment on this seat: if a line about to be saved names a person, a client or a security, replace it with REDACTED <timestamp> and say so. That judgment cannot be made without reading the actual output.",
+      "expected_landed": "every REQ/NAMED/TRACE line's message body inspected, and each one found to carry only opaque request ids, verdicts, codes and counts",
+      "expected_not_landed": "a person's name, a client or firm name, or a security identifier in any saved line",
+      "observed": "12 REQ/NAMED/TRACE lines, reducing to 6 distinct message bodies after the journal prefix: IRPT_RESIDENT_ATTENTION code=SESSION_REFRESH_ALREADY_USED job=REQ-...; IRPT_RESIDENT_EVICTION verdict=SIGNED_OUT job=REQ-...; IRPT_RESIDENT_POLL handled=1; IRPT_RESIDENT_POLL retained_for_retry class=OperationRefused code=CAPTURE_FAILED:AUTH_FAILED:NO_AUTHENTICATED_PROBE; IRPT_RESIDENT_RESOLVE state=READY code=-; IRPT_RESIDENT_VENDOR_REQUESTS kept=1. The only identifier present is the opaque request id REQ-59aa6803901f371b27ffa176, which names no person, client or security. 0 lines redacted, and the saved file's header line says so.",
+      "status": "PASS"
+    },
+    "the_window_in_time_is_stated_and_the_tz_assumption_is_measured": {
+      "description": "journalctl's --since is interpreted in the host's LOCAL time while the order specifies a UTC instant, and --utc changes only the OUTPUT. If the host were not on UTC the window would be silently shifted, and a shifted window that happens to contain the request reads exactly like a correct one.",
+      "expected_landed": "the host's own offset is printed beside the window and reads +0000, so local == UTC",
+      "expected_not_landed": "any non-zero offset, which would mean the --since instant is not 11:15:00Z and the counts have a different scope in time than the sentence beside them",
+      "observed": "hosttz=+0000, printed by date +%z on the host in the same command, and every journal timestamp in the output carries +0000 independently. So the --since 2026-10-11 11:15:00 window IS the 11:15:00Z window. The run-4 submission is recorded by the issuer at 11:19:00Z, four minutes inside it, and the window's own first REQ line is at 11:19:02 -- consistent.",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "no code was read -- not the installed resident_worker.py, not any print site",
+      "reason": "the order asks for a journal read and nothing else. This is the reason row IRPT_YCDGEN-D2-S51 exists rather than a verdict on st30's S5: whether the one RESOLVE state=READY line at 11:18:44 is the READY that S5 instruments is a question about which print site emits ANALYSIS_READY_QUEUE_UNSET, and that is a code read this order does not carry."
+    },
+    {
+      "item": "no queue, table or record was read, so the request's own stored state is unknown here",
+      "reason": "the bounds forbid a queue or table read. So this instance can say what the RESIDENT did with REQ-59aa6803901f371b27ffa176 and cannot say what its request or job row now reads, whether it is still in flight, or whether it will be retried again. Row IRPT_YCDGEN-D2-S49 already records that a job can be dead-lettered while its record still reads RECEIVED, so that gap is named elsewhere and is not re-filed."
+    },
+    {
+      "item": "no exception message, no traceback body, and no journal line outside the three named shapes",
+      "reason": "the order's bounds and its comp-adversary line. The consequence is stated rather than left implicit: if the resident HAD raised, this read would give the class and the timestamp and not the reason, and a second order would be needed for the reason. In this window it raised nothing (tracebacks=0, trace_lines=0), so nothing was lost to that limit."
+    },
+    {
+      "item": "the 11:18:44 IRPT_RESIDENT_RESOLVE state=READY line is not attributed to any request",
+      "reason": "it carries no job id, and the order's output shape does not ask for one. Stating this is the point: it is the single line that would decide whether st30's S5 fired, and it cannot be attributed from this read. Carried as row IRPT_YCDGEN-D2-S51 rather than guessed."
+    },
+    {
+      "item": "no deploy-completion ledger was opened for this order",
+      "reason": "NEVER-2 binds a confirmed DEPLOY. This act's write set outside this repo is EMPTY -- one read-only command, no host write, no S3 put, no service change -- so there is nothing that could be left half-landed. The st30 install that preceded it had its own ledger, irpt-resident-st30-20261011, CLOSED 20261011T103416Z."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R11.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-j1.resident-journal-read-run4-dell2.md",
+    "vintage_commit": "54683e95a4"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "NOT REQUIRED AND NOT CLAIMED: this act widens nothing and serves nothing new. One read-only SSM command whose write set is empty -- no served output moved, no IAM or policy change, no file created or modified on the host, no queue message received or deleted. NEVER-1 binds an act that moves served output; a journal read is not such an act, which is why the order carries <risk>SERVED</risk> rather than WORLD and why no pair was issued with it. The st30 install this read follows DID carry a pair, both halves signed at packet blob f81df64584 and verified at the bytes by this seat before that install.",
+    "cto_half": "NOT REQUIRED AND NOT CLAIMED, same reason. The authority for the act is the order itself, IRPT_YCDGEN.TO-APPLY-j1 @f11b483ff9 -- verified at the bytes: the working-tree blob d72c49be8cc78d4414c2824ba08939795066f62c equals the blob at that commit -- resting on cell YCD-d-11 of IRPT_YCDGEN_DECOMP_R11.md and on st30's own section 2, which names this read as the after-read of S2 and S5."
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "SERVED",
+  "rollback": "NONE NEEDED AND NONE POSSIBLE, stated rather than left blank: the act's write set outside this repo is empty. The command reads the unit and its journal and echoes; it creates no file on the host, moves no served output, receives no queue message and changes no configuration. The only durable effects are this seat's own artifacts in the repo, which git reverts. Separately, the st30 release this read exercises remains rollback-ready and NO rollback trigger is met: SENDFAIL=0 and UNSET=0 mean no I3 send and no send failure, 0 tracebacks and ACTIVE=active with NRestarts=0 mean the resident has not stopped polling, and V1 did not fail. remove_st30_to_st27.sh (X1 + V2) stays unrun and needs a new word from 2.0.0_SA_COO~G2.",
+  "schema_version": "1.0",
+  "scope": "ONE read-only SSM command on resident host i-0167fd745ad906a66: what the irpt-analysis-resident.service journal holds for request REQ-59aa6803901f371b27ffa176 since 2026-10-11T11:15:00Z, as the worker's own named lines and exception CLASSES only. Round 11 cell YCD-d-11. This is the after-read of st30's S2 and S5 following TCKT_VNEXT's fourth run.",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j1/RUN4_JOURNAL_20261011.txt",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~YC2/task_orders/IRPT_YCDGEN.TO-APPLY-j1.resident-journal-read-run4-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "f11b483ff9"
+  },
+  "surprises": [
+    "IRPT_YCDGEN-D2-S51: st30's S5 is NOT established by UNSET=0. The window carries ONE IRPT_RESIDENT_RESOLVE state=READY line (11:18:44, no job id) and ZERO ANALYSIS_READY_QUEUE_UNSET lines over 165 lines. Three readings fit and a journal read cannot separate them: that READY is a status resolve rather than the report-completion READY S5 instruments; or it is that READY and S5 did not fire; or it belongs to another request whose UNSET line fell outside the window. INERT -- the direction is an under-emitted WARN, and SENDFAIL=0 independently shows no I3 send, so no rollback trigger is met. OBSERVATION, UNDER_INVESTIGATION, disarm_owner 2.0.0_SA_COO~G2. Carrier org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md.",
+    "IRPT_YCDGEN-D2-S52: a request HAS run through the st30 root, where rows D2-S48 and D2-S50 (3.0.0_SA_CVO, 10:53:44Z and 11:36:25Z) say none had. REQ-59aa6803901f371b27ffa176 was worked twice on the new root, 11:19:02 to 11:34:05. S50 was written 17 minutes after the first eviction, and both rows name their instrument as not being the host. THE CONCLUSION STANDS for a reason the rows do not give: run 4 came in as a service principal and st30's allow list is Andrew's sign-in alone, so producer_for routes it to YCHARTS and the Opal producer's S1 and S4 really are untouched; FWD-1 is still NOT MET. INERT, nothing re-run, no grade changed. OBSERVATION, UNDER_INVESTIGATION, disarm_owner 1.0.0_SA_CTO (the row gate's R-19: a disarm owner is never the writer of a disarm clock, and the artifact here is the CVO's own row). Same carrier."
+  ],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-j1.resident-journal-read-run4-dell2"
+}
