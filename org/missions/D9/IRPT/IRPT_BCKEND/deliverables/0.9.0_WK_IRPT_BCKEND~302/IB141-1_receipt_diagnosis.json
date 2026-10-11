@@ -1,0 +1,132 @@
+{
+  "to_id": "IRPT_BCKEND.TO-IB-pr-444",
+  "hypothesis": {
+    "stated": "The CTO's inference (msg 5524): the fifth run's sign-in was ACCEPTED (a 302 answers an accepted post), the account is not locked, and what the capture's probe meets is a web firewall's CHALLENGE (a 202 on every probe), so the capture is not passing a challenge - a different defect from a rejected or locked credential.",
+    "verdict_from_what_is_already_read": "UNDECIDED",
+    "claim": "inferred",
+    "reason": "Two halves. (A) 'accepted' is MEASURED, stronger than the 302: every step's probe_reason reads NOT_LIVE (steps[1..7].probe_reason, persisted). In ycharts_session.js probeSession a context with a page returns IDENTITY_<refusal> at :848-856 unless the identity read of the loaded document passed the five refusals (authenticated true, userId int > 0, email present, no impersonation), and returns NO_IDENTITY_COOKIE at :810-813 unless the ycsessionid cookie is in the browser context; NOT_LIVE is only written at :915 from cls.state after both passed (:594, status 202 falls to the last line of classifyResponse). So the browser held an identity cookie and the dashboard document it loaded showed a signed-in user. 'Redirected after login to a page that sets no session' and 'rejected or locked credential' are contradicted by that leaf, conditional on the host library equalling this tree (the record states st32 carries the new branch, so the same file). (B) 'what the probe meets is a firewall challenge' is NOT settled: the 202 is the status AWS WAF's Challenge action answers with and the READ path has met 202 + x-amzn-waf-action: challenge (transport.py:183-189), but the app also answers 202 on calculation polling (recipe.py:707). The leaf that separates them, probe_pair.without_token_waf_action_class (persisted, closed enum, written host_capture.py:239-243), was hashed by the host reader and not printed. Nothing printed excludes the app-202 reading; nothing printed contradicts the challenge reading. The 3 false WAF booleans read false only because the browser jar holds no aws-waf-token at all (waf_token_cookie_in_jar false), which is compatible with both. Verdict: UNDECIDED on the whole, half A measured, half B inferred."
+  },
+  "deciding_leaves": [
+    {
+      "receipt_path": "probe_pair.without_token_waf_action_class (the same key under the prefix with_token_ is the control arm; no step index: the pair is built once, on the first probe after the submission, ycharts_session.js:1034 pairControl: filled && !record.probe_pair)",
+      "closed_values": ["null", "allow", "block", "captcha", "challenge", "count", "other"],
+      "written_at": "infra/aws/lambda/investor-reporting/ycharts/session/host_capture.py:239-243 (class) from the raw header infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:904 (read at :658 only on the node-port; the context fallback at :340-341 returns no headers, so null there says nothing)",
+      "confirms_if": ["challenge", "captcha"],
+      "kills_if": ["allow", "count"],
+      "persisted_by_the_whitelist": true,
+      "note": "The one leaf that separates a firewall's 202 from the app's own 202. 'challenge' is the READ path's own test (controller.py:35, transport.py:188). 'null' and 'other' decide nothing: null is also what a header-less interstitial or the app's reply gives, and what any reply via a context fallback gives; read the arm's via first. block is not listed as confirming: a block does not answer 202."
+    },
+    {
+      "receipt_path": "steps[i].probe_reason, i = 1..7 (the array index IS part of the path; steps[0] is the sign-in form screen and carries no probe_reason)",
+      "closed_values": ["OK", "NOT_LIVE", "DISTURBED", "EVICTED_HARD", "CREATED_201", "PROBE_TRANSPORT_ERROR", "NO_IDENTITY_COOKIE", "NO_COOKIE_HEADER", "IDENTITY_USER_ABSENT", "IDENTITY_NOT_AUTHENTICATED", "IDENTITY_USER_ID_INVALID", "IDENTITY_EMAIL_ABSENT", "IDENTITY_IMPERSONATING"],
+      "written_at": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:1036 (record) from :915 (cls.state, via classifyResponse :586-594), :812, :819, :850",
+      "confirms_if": ["NOT_LIVE", "DISTURBED", "EVICTED_HARD", "CREATED_201", "PROBE_TRANSPORT_ERROR"],
+      "kills_if": ["NO_IDENTITY_COOKIE", "IDENTITY_USER_ABSENT", "IDENTITY_NOT_AUTHENTICATED", "IDENTITY_USER_ID_INVALID", "IDENTITY_EMAIL_ABSENT", "IDENTITY_IMPERSONATING"],
+      "persisted_by_the_whitelist": true,
+      "note": "Decides the ACCEPTED half only (it reaches NOT_LIVE only after the identity cookie and the document identity passed). ALREADY READ: NOT_LIVE in steps 1-7, so the accepted half is settled in favour of the hypothesis and the new SIGNED_OUT_APP_CHROME_AFTER_SUBMIT reason could never have fired. It says nothing about WHY the transport leg read 202."
+    },
+    {
+      "receipt_path": "probe_pair.without_token_content_type_class (with_token_ the control arm; no step index)",
+      "closed_values": ["null", "json", "html", "other"],
+      "written_at": "infra/aws/lambda/investor-reporting/ycharts/session/host_capture.py:233-238 from the raw header infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:905 (node-port only, :658)",
+      "confirms_if": ["html"],
+      "kills_if": ["json"],
+      "persisted_by_the_whitelist": true,
+      "note": "WEAK and conditional on the first leaf being null: a firewall interstitial is a page (html); the app's own 202 on a JSON route is JSON (recipe.py:707). When the first leaf names challenge/captcha this leaf adds nothing; when the first leaf is null, json favours the app's reply and html leaves it open (an HTML interstitial with no header is the body-marker case, next)."
+    },
+    {
+      "receipt_path": "probe_pair.without_token_body_awswaf_marker (NO SUCH MEMBER EXISTS: the READ path's second test, 'awswaf' in the body of a 202/403/405, controller.py:35-36 and transport.py:190, has no counterpart in the capture)",
+      "closed_values": ["true", "false"],
+      "written_at": "NOT WRITTEN by any line; the body is in hand at infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:862 (res.body, read by probeTemplateDocument :940-952 for JSON shape only) and the pair built at :902-911 carries no body member",
+      "confirms_if": ["true"],
+      "kills_if": [],
+      "persisted_by_the_whitelist": false,
+      "note": "The leaf that would settle the header-less case. The measured production 202 whose only signal was the header (transport.py:153-156) shows header and body are independent signals, so a null header does not exclude a body-only interstitial. Neither the probe nor the whitelist keeps it; a value is not available from any existing receipt."
+    }
+  ],
+  "what_the_probe_result_means": {
+    "status_202_in_the_code": "No branch of the capture's probe tests a 202. classifyResponse (ycharts_session.js:584-595) knows 200 (LIVE), 403 + 'concurrent sign in' (EVICTED_HARD), 403 (DISTURBED), 201 (CREATED_201); a 202 falls to the last line :594 and is NOT_LIVE, authenticated false, detail 'probe HTTP 202'. The response's x-amzn-waf-action and content-type are only COPIED into evidence (probe_headers :928, the pair :904-908); the body is never searched for a firewall marker. Nothing in the library calls a 202 a challenge, a pending calculation, or anything but 'not 200'.",
+    "not_live_in_the_code": "NOT_LIVE (cls.state, ycharts_session.js:594) is the answer for every status except 200, 201 and 403: 202, 204, 3xx, 404, 405, 5xx and any other. It is also written at :879 for a 200 whose template document is wrong (BODY_NOT_JSON, TEMPLATE_ID_MISMATCH, REPORT_TYPE_ABSENT, SECTIONS_NOT_ARRAY). As the probe REASON (:915) it is reached only after the identity cookie (:810) and the document identity (:848) have passed, so it does not mean 'signed out'. This run's NOT_LIVE came from the status path (probe_http_status 202), not the document-mismatch path.",
+    "classified_at": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:584-595 (classifyResponse; called at :877 through probeTemplateDocument :940-942, and at :900 for the control arm)",
+    "same_test_as_the_read_path": "NO - two different tests. The READ path has a challenge test: a waf-action header value in (challenge, captcha, block), checked first, then a 202/403/405 whose body holds 'awswaf' (session/controller.py:35-37 classify_pull -> WAF_CHALLENGE / BROWSER_ATTENTION; generate/transport.py:188-191 decision -> WAF_REFRESH_REQUIRED / BROWSER_CHALLENGE; generate/resident_worker.py:233-244 -> READ_BACK_PENDING:WAF_CHALLENGE; broker.py:386 consumes the same reason). The capture's probe has NO challenge test: status only, 403 body 'concurrent sign in' aside. The read path's header half could be applied to the receipt after the fact through waf_action_class (challenge/captcha); its body half cannot, the body is not kept."
+  },
+  "why_the_after_submit_reason_did_not_fire": {
+    "in_words": "The branch (ycharts_session.js:1084) fires only when ALL of: the probe did not authenticate, the probe's reason is exactly NO_IDENTITY_COOKIE, a sign-in was submitted (filled), and the screen was read by app chrome and not by the provisional 'post-submit' reading. It is the twin of the pre-submit branch at :1041 and answers 'one submission, the browser holds no identity cookie'. This run met !authenticated and filled (login_submissions 1, so fillAndSubmit :1164-1165 ran) and did not meet the reason: every probe reason was NOT_LIVE (:915), which is only reachable AFTER the identity cookie test at :810 passed. The browser DID hold ycsessionid and the loaded dashboard document passed the identity refusals, so the premise of the branch - no identity cookie after the submission - was false. The loop then went on (:1135-1136) and ran out the 8 steps (MAX_STEPS :126: step 0 the sign-in form, steps 1-7 the probe) to the generic NO_AUTHENTICATED_PROBE (:1188-1189). It also never reached the post-submit bound (:1113-1133) or the form-re-presented branch (:1152-1162), consistent with the receipt's failure_class AUTH_FAILED and the steps reading app chrome (via not post-submit on at least 5 of 7). A sibling would be needed if the hypothesis holds: a distinct reason for 'a submission was made, the identity cookie and the document identity are present (the sign-in was accepted), and the probe's transport reply is a firewall challenge' - its condition in words: filled is true, the probe reason is not NO_IDENTITY_COOKIE and not IDENTITY_*, the reply's waf-action header is challenge/captcha (or a 202/403/405 body carries the awswaf marker), the same test the read path applies at controller.py:35-37; it fails at once with no further probes and no second submission, and names the case 'accepted, then challenged', apart from a rejected credential. Nothing is built here.",
+    "code_lines": [
+      "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:1084 (the branch condition: !probe.authenticated && probe.reason === 'NO_IDENTITY_COOKIE' && filled && state.via !== 'post-submit')",
+      "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:1098 (reason SIGNED_OUT_APP_CHROME_AFTER_SUBMIT)",
+      "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:810-813 (the only writer of NO_IDENTITY_COOKIE: no ycsessionid in the context)",
+      "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:848-856 (IDENTITY_<refusal> returned before the transport leg)",
+      "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:915 (probe reason = cls.state = NOT_LIVE when both earlier legs passed)",
+      "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:594 (a 202 is NOT_LIVE)",
+      "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:1135-1136 (the loop continues)",
+      "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:1188-1189 (NO_AUTHENTICATED_PROBE after MAX_STEPS 8, :126)"
+    ],
+    "claim": "measured",
+    "a_sibling_reason_would_need": "Given the hypothesis, yes. It needs, in the same loop iteration, three facts the code already holds there: filled true; the probe's own evidence that the identity legs passed (probe.reason not NO_IDENTITY_COOKIE/IDENTITY_*, probe.evidence.identity_leg 'PASS'); and the transport reply read as a challenge by the read path's test (probe.evidence.probe_headers.waf_action in challenge/captcha/block, or a 202/403/405 with the awswaf marker in the body, which probeSession has in res.body but does not keep). It would end the acquire explicitly under its own code and carry the pair, as the SIGNED_OUT_APP_CHROME_AFTER_SUBMIT branch does at :1101."
+  },
+  "other_explanations_not_excluded": [
+    {
+      "explanation": "The route answers 202 to any client while the template or report is pending or queued (the app's own 202; recipe.py:707 measures a 202 during calculation on the portfolio route, not on this template route), so there is no firewall at all.",
+      "excluded_by_leaf": "probe_pair.without_token_waf_action_class in {challenge, captcha} (excludes it); json in probe_pair.without_token_content_type_class with a null action class favours it"
+    },
+    {
+      "explanation": "A firewall interstitial carried with no x-amzn-waf-action header (body marker only), which would read null on the action class and so look like the app's reply; supports the hypothesis but is invisible to the persisted leaves.",
+      "excluded_by_leaf": "none persisted: the body-marker leaf is not kept by the whitelist (probe_pair.without_token_body_awswaf_marker, no such member); html in content_type_class only suggests it"
+    },
+    {
+      "explanation": "The headers were not visible: the probe fell back to the browser context's APIRequestContext (ycharts_session.js:340-341), which returns no headers, so a null action class would be an artefact and the header-based test blind.",
+      "excluded_by_leaf": "probe_pair.without_token_via (node-port means the headers were read; browser-context or api-request-context means null is uninformative)"
+    },
+    {
+      "explanation": "The probe URL is not the template route: YC_PROBE_PATH is honoured from the host's secret-ids.env environment (ycharts_session.js:85), and the market-data route has a known captcha rule (:76-79); a different route would give a different answer than the one the library's comments were measured on.",
+      "excluded_by_leaf": "probe_url_path - NOT persisted (the whitelist keeps no path); the sixth-amendment comments say the template route answered 200 to the same token-less client in run 4"
+    },
+    {
+      "explanation": "A redirect after login (the 302) to a page that sets no session, or a sign-in that is not accepted. CONTRADICTED by steps[1..7].probe_reason = NOT_LIVE (identity cookie and document identity passed), subject to the deployed library equalling this tree.",
+      "excluded_by_leaf": "steps[i].probe_reason (already read: NOT_LIVE); cross-check probe_pair.sent_without_token.session_cookie_names_present holding ycsessionid"
+    },
+    {
+      "explanation": "The firewall challenged because the browser never earned an aws-waf-token (waf_token_cookie_in_jar false in both arms): the capture's Node client has no token to present and the browser, which should solve the challenge in its own navigations, did not receive one. This is inside the hypothesis' mechanism but is a different defect from 'the challenge is unpassable'; the pair cannot tell the two apart because both arms are the same token-less request (ycharts_session.js:310-319, :893).",
+      "excluded_by_leaf": "none persisted: no leaf records whether the browser navigations (warm-up, login, dashboard) were themselves challenged or which cookies the vendor set on them"
+    }
+  ],
+  "reads_asked_of_the_host_reader": [
+    {
+      "receipt_path": "probe_pair.without_token_waf_action_class",
+      "what_it_decides": "Challenge half: challenge or captcha confirms a firewall; allow or count kills it; null or other leaves it open. A closed lower-case word, printable."
+    },
+    {
+      "receipt_path": "probe_pair.without_token_via",
+      "what_it_decides": "Whether the headers were visible: node-port means a null action class is a real absence; browser-context / api-request-context means null is a blind spot (the explanation about a header-less read)."
+    },
+    {
+      "receipt_path": "probe_pair.without_token_content_type_class",
+      "what_it_decides": "Only when the first read is null: json favours the app's own 202, html leaves a header-less interstitial open."
+    },
+    {
+      "receipt_path": "probe_pair.with_token_waf_action_class",
+      "what_it_decides": "The control arm's header; it should equal the primary arm because the jar holds no token (a difference would mean a non-deterministic reply and weaken either reading)."
+    },
+    {
+      "receipt_path": "probe_pair.with_token_via",
+      "what_it_decides": "That the control arm took the same transport; with with_token_errored (boolean) it shows the control did not error, so its 202 is a real second reply."
+    },
+    {
+      "receipt_path": "probe_pair.sent_without_token.session_cookie_names_present",
+      "what_it_decides": "That ycsessionid is one of the 2 session cookie names (the cross-check of the accepted half); the list is names only, it was hashed on the host because its key contains the word cookie."
+    },
+    {
+      "receipt_path": "steps[1..7].probe_via",
+      "what_it_decides": "Whether all seven probes went over the node-port (the per-step headers are not persisted, so this is the only per-step transport leaf)."
+    },
+    {
+      "receipt_path": "steps[0..7].state and steps[0..7].via",
+      "what_it_decides": "That step 0 is CH-SIGNIN_FORM and steps 1-7 read CH-AUTHENTICATED by dom or vision, not post-submit (confirms the new branch's other conditions held and that only the reason failed it)."
+    }
+  ],
+  "vendor_requests_made": 0,
+  "sign_ins_made": 0,
+  "host_commands_run": 0,
+  "aws_calls_made": 0
+}
