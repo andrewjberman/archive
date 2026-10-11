@@ -7,6 +7,8 @@ Every subprocess is bounded (100 s) so an invocation ends inside a worker's 120 
   y31-page      AR-y-31: the named tests of portal `package-report-reader.test.tsx` exist and pass            -> Y31-PAGE-OK
   y31-keep      AR-y-31: the package tests that must not move still pass (package-r2, commentary-package)     -> Y31-KEEP-OK
   portal-tsc    AR-y-31 (AMENDMENT 1): the portal typecheck `tsc -b --noEmit` exits 0                         -> PORTAL-TSC-OK
+  y35-shots     AR-y-35 (AMENDMENT 2): the three rendered states exist as PNGs with a manifest that reads the
+                Ticket Center route and the light canvas on each                                              -> Y35-SHOTS-OK
   y35-page      AR-y-35: the named tests of portal `analysis-firm-choice.test.tsx` exist and pass             -> Y35-PAGE-OK
   y32-ref       AR-y-32: `ops/tests/test_retained_ref_served.py`, named tests exist and pass                  -> Y32-REF-OK
   y32-history   AR-y-32: `ops/tests/test_history_row_client.py`, named tests exist and pass                   -> Y32-HISTORY-OK
@@ -322,6 +324,32 @@ def main(argv):
             print("ERROR: unknown argument " + flag)
             return 2
     root = root.resolve()
+    if check == "y35-shots":
+        shots = root / "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~51/shots"
+        manifest = shots / "MANIFEST.json"
+        if not manifest.is_file():
+            return finish(check, ["no %s" % manifest.relative_to(root).as_posix()])
+        doc = json.loads(manifest.read_text(encoding="utf-8"))
+        problems = []
+        want = ("firm-choice-loaded", "firm-choice-load-failed", "package-report-opened")
+        for name in want:
+            entry = (doc.get("shots") or {}).get(name)
+            if not isinstance(entry, dict):
+                problems.append("manifest has no shot %r" % name)
+                continue
+            png = shots / str(entry.get("file", ""))
+            if not png.is_file() or png.stat().st_size < 5000:
+                problems.append("%s: PNG absent or under 5 kB: %s" % (name, entry.get("file")))
+            if "ticket" not in str(entry.get("loc", "")).lower():
+                problems.append("%s: LOC is not the Ticket Center route: %r" % (name, entry.get("loc")))
+            if entry.get("canvas") != "rgb(244, 246, 250)":
+                problems.append("%s: CANVAS reads %r, not rgb(244, 246, 250)" % (name, entry.get("canvas")))
+            if not (isinstance(entry.get("command"), str) and "ui-smoke" in entry["command"]):
+                problems.append("%s: the ui-smoke command that produced it is not recorded" % name)
+        if doc.get("portal_commit") in (None, ""):
+            problems.append("manifest does not state portal_commit (the commit the build was made from)")
+        print("shots %d of %d present" % (len(want) - sum(1 for p in problems if "manifest has no shot" in p), len(want)))
+        return finish(check, problems)
     if check == "portal-tsc":
         if portal is None:
             print("ERROR: --portal <portal worktree> is required")
