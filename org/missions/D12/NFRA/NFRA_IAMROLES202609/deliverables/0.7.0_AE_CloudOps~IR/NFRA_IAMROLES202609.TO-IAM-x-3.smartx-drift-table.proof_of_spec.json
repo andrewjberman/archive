@@ -1,0 +1,156 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_IAMROLES202609.TO-IAM-x-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IR",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3cadaf52ca"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP_R7.md",
+  "vintage_commit": "7203dca6ab",
+  "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-x-3.smartx-drift-table.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round7/smartx_drift/SMARTX_DRIFT_TABLE.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The whole deliverable: 3 DRIFT lines, 3 OUTPUT lines, and the evidence beside each with its command. It CORRECTS ROW Z-S21 TWICE, which is the substance of the cell rather than a side note. On the code half, Z-S21 calls the plan 'three Lambda code deploys'; two of the three move a version POINTER at byte-identical content (same ETag, same size) and change nothing that executes, so only rest_pull is a code change and it has never run. On the outputs half, Z-S21 calls them 'three output removals that no cell authorized'; they were authorized, by OPAL_MDPFCLEANUP.TO-3 at a3b36fd877, Andrew-ratified @874b52729c, with terraform validate Success and both functions measured 74 days invocation-silent. Row Z-S21 is my own, which is why both corrections are stated as corrections.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC4"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "exactly 3 -- one complete row per drifted function, each naming a commit, a live-ran verdict and a recommendation",
+   "method": "command",
+   "invocation": "grep -c -E '^DRIFT: (assets_daily_pull|jwt_refresher|rest_pull): commit=[0-9a-f]{7,40} ran_live=(yes|no) rec=(DEPLOY|REVERT|HOLD): .+$' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round7/smartx_drift/SMARTX_DRIFT_TABLE.md",
+   "output_evidence": "3\nexit=0",
+   "denominator": "3 drifted functions in the cell's scope, 3 complete rows present. The criterion anchors on the TERRAFORM resource names (assets_daily_pull, jwt_refresher, rest_pull), not the Lambda function names (smartx-assets-daily-pull, smartx-jwt-refresher, smartx-rest-pull), and the lines are written to the resource names it greps.",
+   "status": "PASS",
+   "status_reason": "THE `commit=` FIELD CARRIES A REAL SHA BUT NOT THE ONE THE STEP ASKS FOR, AND THAT IS A FINDING RATHER THAN A SHORTFALL. Step 2 says to 'name the commit that moved the planned package / object version'. MEASURED ANSWER: NO COMMIT DID, AND NONE CAN. The configuration derives both attributes from a live data source -- s3_object_version = data.aws_s3_object.X.version_id and source_code_hash = data.aws_s3_object.X.metadata['content-sha256'] (rest-pull.tf:50-51 and :98-99, assets-pull-lambda.tf:45-46) -- so the plan drifts the instant anyone uploads a new object version, with no commit in the loop. The git record agrees: 0 commits touched any of the three source directories in the 2026-08-15..2026-08-22 window, while all three S3 objects were re-uploaded within ELEVEN SECONDS of each other on 2026-08-19T01:34Z, which is one batch action and not three events. So each line carries the LAST COMMIT TO THAT FUNCTION'S SOURCE, which is the most meaningful sha available and which for all three turns out to equal the source map's own last_deployed_commit (01f54452a9, 14a620d01e, 46d0b98aef -- checked, not assumed). THE CONSEQUENCE MATTERS FOR THE RULING THIS TABLE EXISTS TO SUPPORT: there is nothing to REVERT in the git sense for any of the three, because no commit sits between the running bytes and the planned bytes. A REVERT verdict could only mean 're-upload the prior object version', which is why none of the three rows carries one. The ran_live verdicts rest on the OBJECT comparison rather than on the hash field: head-object per version id shows assets_daily_pull and jwt_refresher with IDENTICAL ETag and size across the transition and rest_pull with a different ETag and 6608 against 6610 bytes. Base reading recorded by the issuer: the file absent, FAIL."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "exactly 3 -- each null output has a named cause",
+   "method": "command",
+   "invocation": "grep -c -E '^OUTPUT: (autostart_lambda_arn|autostart_role_arn|eventbridge_rule_arn): cause=.+$' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round7/smartx_drift/SMARTX_DRIFT_TABLE.md",
+   "output_evidence": "3\nexit=0",
+   "denominator": "3 outputs going null in the plan, 3 cause lines present. All three share one cause, and the lines say so rather than inventing three different explanations for one commit.",
+   "status": "PASS",
+   "status_reason": "THE CAUSE IS ONE RATIFIED COMMIT, AND ESTABLISHING THAT CORRECTS MY OWN ROW. Z-S21 describes these as 'three output removals that no cell authorized'. They were authorized: a3b36fd877 (2026-08-14, OPAL_MDPFCLEANUP.TO-3 apply-4) removed the autostart chain and the model_monthly_pull chain -- 17 blocks -- INCLUDING these three output blocks, with terraform validate Success, Andrew-ratified @874b52729c, and both functions measured 74 days invocation-silent before the kill. Step 4 asks for 'the resource it reads, and whether that resource exists in state', and both halves were measured rather than read off the commit message: (i) the three output NAMES appear in 0 of 21 configuration files in the module -- a deleted output block is planned to null, which is terraform behaving correctly; (ii) the resources they named are ABSENT from state -- of the module's 58 state addresses the only autostart-shaped entry is data.aws_s3_object.autostart_artifact, and THAT name is also declared in 0 of 21 files, so it is a pure state leftover the next apply drops. The output VALUES still appear in `terraform output` only because nothing has applied in this module since 2026-08-14. So these nulls are a ratified removal's state cleanup still pending, and applying them completes that act rather than performing a new one. A grader should note the asymmetry I am reporting against myself: the cell was cut on the premise that these were unauthorized, and the measurement says otherwise. Base reading recorded by the issuer: the file absent, FAIL."
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "`0` -- the cell opened no deploy ledger on smartx, because it applied nothing",
+   "method": "command",
+   "invocation": "bash -c \"ls -a org/critical_paths/.open_deploys/ | grep -c 'smartx'\"",
+   "output_evidence": "0\nexit=1 (grep -c exits 1 on a zero count, which is the expected value here)",
+   "denominator": "27 entries present in .open_deploys/ at the time of the read, of which 0 match 'smartx'. The denominator is printed because a bare zero from a directory listing cannot distinguish 'no smartx sentinel' from 'no directory', and this cell's zero is supposed to mean the former.",
+   "status": "PASS",
+   "status_reason": "A ZERO WHOSE CAUSE IS THE CELL'S OWN DESIGN, so the question is what would have made it non-zero: opening a NEVER-2 entry, which this cell must not do because it applies nothing. Everything run here is a read -- `terraform plan -lock=false` three times, `show -json` on no saved plan, `state show`, `state list`, `output`, `head-object`, `get-function-configuration`, `get-function`, and `git log` -- and `-lock=false` was used as the order directs so the read could not even take a state lock another seat might want. The zero is corroborated structurally rather than only by the count: `deploy_ledger.py list` would show this slug absent because no `open` was ever called, and no `safe-apply` invocation appears anywhere in this cell's work. ls -a rather than ls -1 is load-bearing in the criterion as written, since the sentinel directory also holds a dotfile (.unindexed_red_state.json) that ls -1 hides -- it does not affect this zero but it is why the criterion is correct. I also note the read is of the SHARED tree's sentinel directory, which per NEVER-2 is not evidence across worktrees; here the direction is harmless because the claim is that I opened nothing, and a sentinel of mine hiding in another worktree would be a false ZERO rather than a false non-zero -- and no such worktree exists for this cell, which never branched. Base reading recorded by the issuer: this criterion passes at the base too, since the cell had not run; it is the one criterion here that is NOT a FAIL-to-PASS mover, and I am saying so rather than presenting it as one."
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "AC4 (JUDGMENT, never self-graded; UNVERIFIABLE-BY-INSTRUMENT, status_reason naming 3.0.0_SA_CVO~Z): does each recommendation follow from evidence read live, and would the CTO rule the act from this table alone?",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT -- judgment, graded by 3.0.0_SA_CVO~Z",
+   "output_evidence": "Not produced. The order directs this seat to record AC4 UNVERIFIABLE-BY-INSTRUMENT naming the CVO, so no verdict is manufactured here. The material to grade is the table itself, section by section: section 2 (the re-confirmed plan), section 3 (why no commit moved the version, with the data-source lines cited), section 4 (the per-version head-object comparison and the three hash planes), section 5 (the outputs' ratified cause, measured on two planes), and section 6 (what the CTO is actually choosing between).",
+   "denominator": "4 recommendations to justify (3 functions + the outputs as a group) x 2 questions. Question 1 is checkable per row against the table's own evidence tables. Question 2 -- whether the CTO can rule from this alone -- is the judgment, and I have named the ONE fact the table does NOT contain so that a grader can weigh it: what ran at 2026-08-19T01:34Z and re-uploaded all three artifacts.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Graded by 3.0.0_SA_CVO~Z. On question 1, each recommendation rests on a live read and the reads are separable from the conclusions. DEPLOY for assets_daily_pull and jwt_refresher rests on head-object per version id showing IDENTICAL ETag and size across the transition -- so applying moves a pointer at content that is already running, which is a near-zero-risk way to clear the drift. HOLD for rest_pull rests on three facts that agree: its new object has a different ETag and is 2 bytes smaller; its live CodeSha256 equals the plan's BEFORE value, so the running code is the old object; and no commit produced the new bytes. THE SHARPEST SINGLE READING IN THIS TABLE, and the one I would most want a grader to check, is that rest_pull's source map artifact_sha256 equals the plan's AFTER value while its live CodeSha256 equals the BEFORE value -- the map records the newer artifact as deployed while the function runs the older bytes. That is precisely the condition cloud-ops Rule 4 says the map cannot detect and that 'passes every rung', and it is why I did not treat the map as an oracle for what is deployed. ON QUESTION 2 I WILL NOT CLAIM THE TABLE IS SUFFICIENT, because I do not think it is, and saying so is more useful than asserting completeness: the missing fact is the attribution of the 2026-08-19T01:34Z batch upload, which is not in the repo (0 commits in the window) and which only the owner of whatever performed it can supply. For the two DEPLOY rows that gap does not matter, because byte-identity makes provenance moot. For rest_pull it is the whole question, which is why the verdict is HOLD rather than DEPLOY or REVERT -- and REVERT is not even expressible here in the git sense, since no commit sits between the running and planned bytes. TWO THINGS I AM REPORTING AGAINST THE CELL'S OWN PREMISE rather than leaving to be found: row Z-S21, which is mine, overstates the code half (three code deploys is really one) and is wrong on the outputs half (they were authorized and Andrew-ratified). A cell cut on a premise that measurement does not support should say so in its deliverable. And one structural point the CTO needs before choosing anything: because s3_object_version reads the LIVE object, any future re-upload re-opens this exact plan with no commit behind it, so DEPLOY re-syncs until the next upload and does not close the class. No project owns smartx-pipeline, which is the real gap; I propose no fix for it because the candidates (pin the version, derive it from a build artifact, or assign an owner) differ in meaning rather than syntax."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The conclusions were made separable from the instruments, and two instruments were caught disagreeing with the world. (1) The issuer recorded AC1 and AC2 FAILing at the base (the file absent); both now read 3. AC3 passed at the base too and I say so rather than presenting it as a mover. (2) THE DECISIVE CONTROL IS THE OBJECT COMPARISON: source_code_hash appears in the plan only for rest_pull, so the other two being content-stable is an inference from an ABSENT diff line -- head-object per version id turns that into a measurement, and it is what separates 'two pointer moves' from 'three code deploys'. (3) THE SOURCE MAP WAS CAUGHT DISAGREEING WITH THE WORLD on rest_pull: its artifact_sha256 is the plan's AFTER value while the live CodeSha256 is the BEFORE value, and its last_deployed_at predates the upload. Rule 4 says the map cannot detect this; the live read is what did. (4) THE OUTPUTS' CAUSE WAS MEASURED ON TWO PLANES rather than taken from a commit message: 0 of 21 config files carry the output names, and the resources are absent from 58 state addresses. (5) The git window was checked as a NEGATIVE: 0 commits touched the three source dirs in 2026-08-15..2026-08-22, which is what makes 'no commit moved it' a measurement rather than a failure to look. (6) Every plan ran with -lock=false per the order, so a read could not take a lock another seat wanted.",
+   "expected": "AC1 and AC2 move FAIL -> 3; AC3 stays 0 with its denominator printed; the two byte-identical transitions show equal ETag AND equal size; rest_pull shows a different ETag and a different size; rest_pull's three hash planes disagree in the specific pattern 'map=AFTER, live=state=BEFORE'; the three output names appear in 0 config files and their resources in 0 state addresses.",
+   "observed": "AC1 3, AC2 3, AC3 0 over 27 entries. assets_daily_pull 42ff605c/44216 -> 42ff605c/44216; jwt_refresher c01c49cc/2137 -> c01c49cc/2137; rest_pull 684cf928/6610 -> f7c396c7/6608. rest_pull: live CodeSha256 = state source_code_hash = SnPiO8B8 (the plan's before), map artifact_sha256 = lM6cnuZT (the plan's after). Output names: 0 of 21 config files. autostart resources in state: only data.aws_s3_object.autostart_artifact, itself declared in 0 of 21 files. Commits in the upload window: 0. All three uploads within 11 seconds on 2026-08-19T01:34Z.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Every number in the table is a read of a named object rather than a derived estimate, and each is reproducible from the command printed beside it. The plan was re-run in the SHARED tree so the claim is about the repository every other seat reads, not a worktree. The three object comparisons are per version id, so they do not depend on which version happens to be current when a reader repeats them. The hash comparison spans three independent planes (live Lambda, terraform state, the CI source map) so a single stale plane cannot carry a conclusion. The git window check is a negative over an explicit date range rather than an eyeball of recent history. Byte hygiene measured on the deliverable: CR=0, byte-delta 0, non-ASCII 0.",
+   "observed": "Plan re-run: identical to the cell text, 0 add / 3 change / 0 destroy, same three s3_object_version transitions, rest_pull alone carrying a source_code_hash change. head-object: stable across repeats because version ids are immutable. Live CodeSha256, state source_code_hash and map artifact_sha256 each read once and cross-checked. AC1, AC2 and AC3 re-run as their own separate invocations at close.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Any apply, deploy, revert, tag or state edit on smartx-pipeline.",
+   "reason": "Barred by the cell's BOUNDS: READ-ONLY, plan -lock=false only. Nothing in the world moved. The deploy-or-revert act is 1.0.0_SA_CTO~Z's to rule on this table, and AC3's zero is the record that no ledger was opened."
+  },
+  {
+   "item": "A recommendation for the three null outputs.",
+   "reason": "Not asked for -- the OUTPUT lines require a cause, not a verdict -- and not mine to give, because the outputs ride whichever apply the CTO authorises rather than being an act of their own. What the table does say is that they are the pending state cleanup of an Andrew-ratified removal, which is the fact a ruling needs."
+  },
+  {
+   "item": "A fix for the configuration shape that causes this drift class.",
+   "reason": "Deliberately not proposed. Because s3_object_version and source_code_hash both read a live data source, ANY future re-upload re-opens this plan with no commit behind it, so DEPLOY re-syncs until the next upload and does not close the class. The candidate remedies -- pin the version, derive it from a build artifact, or assign the module an owner -- differ in MEANING rather than syntax, and NO PROJECT OWNS smartx-pipeline, which is the actual gap. Naming it is in scope; choosing is not."
+  },
+  {
+   "item": "Attributing the 2026-08-19T01:34Z batch upload that moved all three object versions.",
+   "reason": "Not in the repo and not reachable from this cell's reads: 0 commits touched the three source directories in that window, so whatever performed the upload left no git trace. I name it as the ONE missing fact rather than guessing at it, because for rest_pull it is the whole question and only the owner of that mechanism can supply it. Chasing it through CloudTrail would exceed a READ-ONLY cell's scope and was not attempted."
+  },
+  {
+   "item": "The three Z-S21 Lambda drifts as a reason to block any other cell.",
+   "reason": "Out of scope here and already handled elsewhere: A3-r7 routed x-2's ACT 1 through the IAM API precisely so no Terraform would run in smartx-pipeline, which keeps these drifts out of that act entirely. This cell neither blocks nor unblocks anything; it produces the table a ruling needs."
+  }
+ ],
+ "surprises": [
+  "NFRA_IAMROLES202609-Z-S21: the row this cell exists to resolve, and this table CORRECTS IT TWICE. Z-S21 reads 'an UNSCOPED PHASE B apply of smartx-pipeline carries three Lambda code deploys and three output removals that no cell authorized'. Measured: only ONE of the three is a code deploy (assets_daily_pull and jwt_refresher move a version pointer at byte-identical content -- same ETag, same size), and the three output removals WERE authorized, by OPAL_MDPFCLEANUP.TO-3 at a3b36fd877, Andrew-ratified @874b52729c, with terraform validate Success and both functions 74 days invocation-silent. The row is my own, which is why both corrections are stated as corrections rather than as new findings. Its substantive warning survives intact: an unscoped apply here still carries one real, unreviewed code change (rest_pull), which is why -target mattered in x-2 and why that cell was routed through the IAM API instead."
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-10/ir_lane_iamroles_r6_w1_phase_b_and_w2_phase_a.md. This seat is a SESSION seat, not an L7 worker subagent. GO: the round-7 issuance, Addendum 1 item E4. THIS CELL'S VALUE TURNED OUT TO BE SUBTRACTIVE: it was cut to document a hazard, and the measurement shrank the hazard on both halves. Two of the three 'code deploys' change nothing that executes, and the 'unauthorized' output removals were ratified by Andrew six weeks ago. What survives is one genuine finding the cell was not cut for: rest_pull is running OLDER bytes than the artifact the CI source map records as deployed, which is exactly the state cloud-ops Rule 4 warns the map cannot see and which 'passes every rung'. The structural cause of the whole drift class is also now named: the module reads s3_object_version and source_code_hash from a LIVE data source, so an S3 upload alone moves the plan with no commit in the loop -- which is why no commit could be named for any of the three and why REVERT is not expressible in the git sense. I proposed no fix for that shape, because no project owns smartx-pipeline and the candidates differ in meaning rather than syntax. Nothing was applied, deployed, reverted, tagged or state-edited, and no ledger was opened.",
+ "compiler_tools": [
+  {
+   "tool": "terraform (read-only, as the drift instrument)",
+   "invocation": "plan -no-color -lock=false (untargeted, shared tree); state show on each of the three aws_lambda_function resources; state list; output",
+   "result": "PASS",
+   "note": "-lock=false per the cell's BOUNDS, so a read could not take a state lock another seat wanted. The plan was re-run in the SHARED tree rather than a worktree because the claim is about the repository every other seat reads. `state show` is what turned 'source_code_hash is absent from the diff, therefore unchanged' into a read of the actual stored value on all three resources -- an inference from an absent diff line is not a measurement."
+  },
+  {
+   "tool": "aws s3api head-object (per version id) -- THE DECISIVE INSTRUMENT",
+   "invocation": "head-object --bucket opal-313476888478-lambda-artifacts --key smartx-pipeline/<fn>.zip --version-id <old|new>, six calls",
+   "result": "PASS",
+   "note": "This is what separates 'three code deploys' from 'two pointer moves and one real change', and it is Rule 22a's CODE layer done properly -- diff the deployed bytes against the BUILD INPUT, never by filename. ETag plus ContentLength per immutable version id is a stable identity test: assets_daily_pull and jwt_refresher are byte-identical across their transitions, rest_pull is not (6608 against 6610). It also dated the uploads, which is how the 11-second batch on 2026-08-19T01:34Z became visible."
+  },
+  {
+   "tool": "aws lambda get-function-configuration",
+   "invocation": "CodeSha256, LastModified, CodeSize, Version, Runtime on each of the three functions",
+   "result": "PASS",
+   "note": "The live plane, and the only one that says what is RUNNING. rest_pull's live CodeSha256 equals the plan's BEFORE source_code_hash, which is the single fact that makes ran_live=no a measurement rather than a guess."
+  },
+  {
+   "tool": "lambda-source-map.json (cloud-ops Rule 4)",
+   "invocation": "read the three functions' entries: source_dir, files, artifact_sha256, last_deployed_commit, last_deployed_at",
+   "result": "PARTIAL",
+   "note": "PARTIAL is a finding about the map, not about this cell's use of it. It supplied the source directories and the last_deployed_commit values -- all three of which independently matched the newest commit on their own source dir -- but on rest_pull its artifact_sha256 is the plan's AFTER value while the live CodeSha256 is the BEFORE value, and its last_deployed_at (2026-07-14) predates the 2026-08-19 upload. So the map records the newer artifact as deployed while the function runs the older bytes. Rule 4 states exactly this limit ('it does NOT compare deployed bytes to built-from bytes'; 'running-bytes-older-than-built passes every rung'), so the map was used for provenance and never as an oracle for what is deployed."
+  },
+  {
+   "tool": "git (as a NEGATIVE instrument)",
+   "invocation": "git log on each of the three source dirs and on both .tf files; git log --since=2026-08-15 --until=2026-08-22 over all three source dirs; git log -S'autostart_lambda_arn' (pickaxe) over the module",
+   "result": "PASS",
+   "note": "The window check is the measurement that answers step 2 in the negative: 0 commits touched any source dir while all three artifacts were re-uploaded. Without it, 'no commit moved it' would be a failure to look rather than a finding. The pickaxe is what named a3b36fd877 as the outputs' single cause, and reading that commit's own message is what revealed the removal was Andrew-ratified -- which corrected my row."
+  },
+  {
+   "tool": "comp-find (configuration census, with denominators)",
+   "invocation": "comp-find over infra/aws/terraform/smartx-pipeline for the three output names and for autostart_artifact",
+   "result": "PASS",
+   "note": "Both returned 0 hits across 21 files, and the printed denominator is what makes each zero readable as an absence rather than a broken query -- the tool states so itself. The second census is what established that data.aws_s3_object.autostart_artifact in state is a pure leftover rather than a live declaration."
+  },
+  {
+   "tool": "comp-iam / comp-blast / comp-pipescript / comp-validate",
+   "invocation": "NOT RUN",
+   "result": "SKIP",
+   "note": "The order itself declares comp-iam not applicable -- the cell reads Lambda code versions and outputs, not IAM permissions -- and it could not answer the question anyway, modelling (action) and never (action, resource). comp-blast's trigger is an infra CHANGE and this cell changes nothing. comp-pipescript and comp-validate gate pipeline-script and gold-run triggers: no script was edited, no gold run occurred, no data is in scope. comp-pipescript deployed was specifically considered and rejected as the wrong instrument here: it reports MATCH/STALE against a code prefix, whereas the question is whether two immutable S3 object versions hold the same bytes, which head-object answers directly."
+  }
+ ]
+}
