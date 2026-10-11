@@ -1,0 +1,353 @@
+{
+ "custodian_print": {
+  "store": "cottonwood-gold-canonical-holdings (source label bd_snapshot; price = the daily holdings snapshot's reported market_value divided by units)",
+  "why": "It is the only store the build's own code names as the custodian's mark on a held position (commonwealth_price_census.py STORES comment: 'the custodian mark on a held position is a close for that security on that day'), and it is the only price store whose price is not a vendor close: B_00.canonical_holdings._build_canonical_from_snapshot sets price = BD-reported market_value / units from silver/holdings. Its source column holds one value, bd_snapshot, on all 564,563 cached rows (290,791 keyed by cusip, 273,772 by ticker). Limit: the label and the builder docstring say 'BD-reported' (Black Diamond's report of the holding), not the custodian's own file; that the number equals the custodian's own mark is the code's word, not shown here. It has NO date before any of the four events.",
+  "first_date": "2026-06-08",
+  "last_date": "2026-10-06"
+ },
+ "other_candidate_prints": [
+  {
+   "print": "custodian-delivered trade price: |Amount| / |Quantity| per Trade_Date over the by (Buy) and sl (Sell) rows of the CUSIP in the silver transactions cache (VWAP when several trades fall on one date)",
+   "source": "tx_cache/trade_year=*/*.parquet (14 files, 1,416,497 rows); the transactions are the custodian's delivered records (Transaction_Type acca/lica are its corporate-action rows); the file has no price field, so this price is DERIVED here from Amount and Quantity",
+   "taken_as_the_rulings_custodian_price": "NO -- taken as a SECOND CANDIDATE. Reasons: (a) the ruling and the code's comment speak of a mark ON A HELD POSITION, which is the gold store; (b) the price is derived by division, may carry fees or accrued interest in Amount, and is intraday (a control on 3 known share splits shows served/trade median 0.991 to 1.002 with single-date spread of about +-3.6 percent); (c) AC2 reads an event with no date to compare on as UNAPPLIED_NO_HELD_DATE, not decided from other evidence. The CTO may admit it; the reading is ready below.",
+   "tolerances": "reported at 0.5 percent and at 2 percent; 2 percent is below half the separation between the two hypotheses for every event (factors 1.054 to 1.324), the only level at which they separate for a trade price",
+   "held_note": "every by/sl trade date before each event was a date the CUSIP appears in the served account-day table (123 of 123, 29 of 29, 115 of 115, 77 of 77); only the dates inside the served price table's window (from 2020-07-01, 2020-09-10, 2020-09-04, 2020-07-23) can be compared: 16, 4, 4, 1",
+   "per_event": [
+    {
+     "cusip": "00206R102",
+     "ticker": "T",
+     "event_date": "2022-04-11",
+     "factor": 1.324,
+     "by_sl_trade_dates_before_event": 123,
+     "of_which_held_and_served_priced_compared": 16,
+     "compared_first": "2020-07-16",
+     "compared_last": "2022-01-10",
+     "trades_on_compared_dates": 20,
+     "without_factor": {
+      "within_half_percent": 0,
+      "within_two_percent": 0,
+      "median_ratio": 0.7573,
+      "worst_ratio": 0.7491
+     },
+     "with_factor": {
+      "within_half_percent": 9,
+      "within_two_percent": 15,
+      "median_ratio": 1.0027,
+      "worst_ratio": 1.0304
+     },
+     "reading_if_admitted": "APPLY"
+    },
+    {
+     "cusip": "438516106",
+     "ticker": "HON",
+     "event_date": "2025-10-30",
+     "factor": 1.061,
+     "by_sl_trade_dates_before_event": 29,
+     "of_which_held_and_served_priced_compared": 4,
+     "compared_first": "2023-04-27",
+     "compared_last": "2025-02-12",
+     "trades_on_compared_dates": 4,
+     "without_factor": {
+      "within_half_percent": 0,
+      "within_two_percent": 4,
+      "median_ratio": 0.988,
+      "worst_ratio": 0.9842
+     },
+     "with_factor": {
+      "within_half_percent": 0,
+      "within_two_percent": 0,
+      "median_ratio": 1.0483,
+      "worst_ratio": 1.0532
+     },
+     "reading_if_admitted": "DO_NOT_APPLY"
+    },
+    {
+     "cusip": "460146103",
+     "ticker": "IP",
+     "event_date": "2021-10-01",
+     "factor": 1.056,
+     "by_sl_trade_dates_before_event": 115,
+     "of_which_held_and_served_priced_compared": 4,
+     "compared_first": "2021-01-07",
+     "compared_last": "2021-05-10",
+     "trades_on_compared_dates": 5,
+     "without_factor": {
+      "within_half_percent": 0,
+      "within_two_percent": 0,
+      "median_ratio": 0.947,
+      "worst_ratio": 0.944
+     },
+     "with_factor": {
+      "within_half_percent": 4,
+      "within_two_percent": 4,
+      "median_ratio": 1.0,
+      "worst_ratio": 1.0033
+     },
+     "reading_if_admitted": "APPLY"
+    },
+    {
+     "cusip": "717081103",
+     "ticker": "PFE",
+     "event_date": "2020-11-17",
+     "factor": 1.054,
+     "by_sl_trade_dates_before_event": 77,
+     "of_which_held_and_served_priced_compared": 1,
+     "compared_first": "2020-08-03",
+     "compared_last": "2020-08-03",
+     "trades_on_compared_dates": 1,
+     "without_factor": {
+      "within_half_percent": 0,
+      "within_two_percent": 0,
+      "median_ratio": 0.9445,
+      "worst_ratio": 0.9445
+     },
+     "with_factor": {
+      "within_half_percent": 1,
+      "within_two_percent": 1,
+      "median_ratio": 0.9956,
+      "worst_ratio": 0.9956
+     },
+     "reading_if_admitted": "APPLY"
+    }
+   ],
+   "control_known_share_splits": {
+    "AAPL": {
+     "served_over_trade_median": 0.991,
+     "min": 0.9685,
+     "max": 1.0134,
+     "dates": 4,
+     "yahoo_Close_step_across_split": 1.0339,
+     "served_over_YahooClose_pre_split": 4.0,
+     "served_step_across_split": 0.2528
+    },
+    "AMZN": {
+     "served_over_trade_median": 0.9992,
+     "min": 0.9737,
+     "max": 1.036,
+     "dates": 24,
+     "yahoo_Close_step_across_split": 1.0199,
+     "served_over_YahooClose_pre_split": 20.0,
+     "served_step_across_split": 0.0503
+    },
+    "NVDA": {
+     "served_over_trade_median": 1.0022,
+     "min": 0.9922,
+     "max": 1.0089,
+     "dates": 3,
+     "yahoo_Close_step_across_split": 0.9911,
+     "served_over_YahooClose_pre_split": 39.885670097910236,
+     "served_step_across_split": 0.2478
+    }
+   }
+  },
+  {
+   "print": "cottonwood-silver-canonical-prices raw points (keyed by ticker)",
+   "source": "source column: yahoo_finance 1,386,986, linear_interpolation 749,242, transaction_observed 2,692 of 2,138,920 rows, 2020-06-30..2026-06-09; build_canonical_prices_v2.py: T1 = transaction_observed from the transactions, T2 = Yahoo Finance via ticker. For these four tickers it holds only yahoo_finance and linear_interpolation rows (0 transaction_observed)",
+   "taken_as_the_rulings_custodian_price": "NO -- a vendor series (Yahoo), not a custodian print. It is the store the served build reads. Its raw points equal Yahoo's Adj Close times one constant per ticker (1.0240, 0.9616, 1.0265, 1.0343 for T, HON, IP, PFE), so they are NOT independent of Yahoo and are on a dividend-adjusted basis, not the build's as-traded basis; the comparison below does not decide any claim.",
+   "per_event": [
+    {
+     "cusip": "00206R102",
+     "ticker": "T",
+     "first": "2020-07-01",
+     "last": "2026-06-09",
+     "sources_all_rows": {
+      "yahoo_finance": 1489,
+      "linear_interpolation": 681
+     },
+     "transaction_observed_rows_for_ticker": 0,
+     "held_dates_before_event_with_a_point": 448,
+     "served_without_over_raw_silver": {
+      "within_half_percent": 0,
+      "within_two_percent": 0,
+      "median_ratio": 1.3527,
+      "worst_ratio": 1.4843
+     },
+     "served_with_over_raw_silver": {
+      "within_half_percent": 0,
+      "within_two_percent": 0,
+      "median_ratio": 1.7909,
+      "worst_ratio": 1.9652
+     },
+     "raw_silver_over_yahoo_AdjClose_pre_event_median": 1.024,
+     "raw_silver_step_across_event": 1.0243,
+     "yahoo_Close_step_across_event": 1.0766
+    },
+    {
+     "cusip": "438516106",
+     "ticker": "HON",
+     "first": "2020-09-10",
+     "last": "2026-06-09",
+     "sources_all_rows": {
+      "yahoo_finance": 1440,
+      "linear_interpolation": 659
+     },
+     "transaction_observed_rows_for_ticker": 0,
+     "held_dates_before_event_with_a_point": 1291,
+     "served_without_over_raw_silver": {
+      "within_half_percent": 0,
+      "within_two_percent": 0,
+      "median_ratio": 1.1183,
+      "worst_ratio": 1.1726
+     },
+     "served_with_over_raw_silver": {
+      "within_half_percent": 0,
+      "within_two_percent": 0,
+      "median_ratio": 1.1866,
+      "worst_ratio": 1.2441
+     },
+     "raw_silver_over_yahoo_AdjClose_pre_event_median": 0.9616,
+     "raw_silver_step_across_event": 0.9973,
+     "yahoo_Close_step_across_event": 0.9973
+    },
+    {
+     "cusip": "460146103",
+     "ticker": "IP",
+     "first": "2020-09-04",
+     "last": "2026-06-09",
+     "sources_all_rows": {
+      "yahoo_finance": 1443,
+      "linear_interpolation": 662
+     },
+     "transaction_observed_rows_for_ticker": 0,
+     "held_dates_before_event_with_a_point": 270,
+     "served_without_over_raw_silver": {
+      "within_half_percent": 0,
+      "within_two_percent": 0,
+      "median_ratio": 1.2405,
+      "worst_ratio": 1.2674
+     },
+     "served_with_over_raw_silver": {
+      "within_half_percent": 0,
+      "within_two_percent": 0,
+      "median_ratio": 1.31,
+      "worst_ratio": 1.3383
+     },
+     "raw_silver_over_yahoo_AdjClose_pre_event_median": 1.0265,
+     "raw_silver_step_across_event": 1.0058,
+     "yahoo_Close_step_across_event": 1.0058
+    },
+    {
+     "cusip": "717081103",
+     "ticker": "PFE",
+     "first": "2020-07-23",
+     "last": "2026-06-09",
+     "sources_all_rows": {
+      "yahoo_finance": 1474,
+      "linear_interpolation": 674
+     },
+     "transaction_observed_rows_for_ticker": 0,
+     "held_dates_before_event_with_a_point": 82,
+     "served_without_over_raw_silver": {
+      "within_half_percent": 0,
+      "within_two_percent": 0,
+      "median_ratio": 1.3109,
+      "worst_ratio": 1.3238
+     },
+     "served_with_over_raw_silver": {
+      "within_half_percent": 0,
+      "within_two_percent": 0,
+      "median_ratio": 1.3817,
+      "worst_ratio": 1.3952
+     },
+     "raw_silver_over_yahoo_AdjClose_pre_event_median": 1.0343,
+     "raw_silver_step_across_event": 1.0176,
+     "yahoo_Close_step_across_event": 1.0176
+    }
+   ]
+  }
+ ],
+ "events": [
+  {
+   "cusip": "00206R102",
+   "event_date": "2022-04-11",
+   "factor": 1.324,
+   "held_dates_before_event": 2269,
+   "dates_compared": 0,
+   "with_factor": {
+    "within_half_percent": 0,
+    "median_ratio": null,
+    "worst_ratio": null
+   },
+   "without_factor": {
+    "within_half_percent": 0,
+    "median_ratio": null,
+    "worst_ratio": null
+   },
+   "claim": "UNAPPLIED_NO_HELD_DATE",
+   "evidence": "T (AT&T). Custodian print taken = gold canonical holdings (source bd_snapshot), first 2026-06-08, last 2026-10-06: dates before 2022-04-11 = 0 (rows for this CUSIP/ticker: 308, all on or after 2026-06-08), so held dates with that print before the event = 0 of 2269 held dates before it (first held 2013-04-09, last held before 2022-04-08). Rule outcome: left UNAPPLIED, named; not decided from other evidence. SECOND CANDIDATE (not decided on, see other_candidate_prints[0]): the custodian-delivered trade price on 16 by/sl dates before the event with a served price (of 123 by/sl dates before the event, all held; the served price table starts 2020-07-01): WITHOUT median 0.7573 worst 0.7491 within 0.5% 0 within 2% 0; WITH median 1.0027 worst 1.0304 within 0.5% 9 within 2% 15. If that print is admitted the reading is APPLY."
+  },
+  {
+   "cusip": "438516106",
+   "event_date": "2025-10-30",
+   "factor": 1.061,
+   "held_dates_before_event": 3162,
+   "dates_compared": 0,
+   "with_factor": {
+    "within_half_percent": 0,
+    "median_ratio": null,
+    "worst_ratio": null
+   },
+   "without_factor": {
+    "within_half_percent": 0,
+    "median_ratio": null,
+    "worst_ratio": null
+   },
+   "claim": "UNAPPLIED_NO_HELD_DATE",
+   "evidence": "HON (Honeywell). Custodian print taken = gold canonical holdings (source bd_snapshot), first 2026-06-08, last 2026-10-06: dates before 2025-10-30 = 0 (rows for this CUSIP/ticker: 148, all on or after 2026-06-08), so held dates with that print before the event = 0 of 3162 held dates before it (first held 2013-04-08, last held before 2025-10-29). Rule outcome: left UNAPPLIED, named; not decided from other evidence. SECOND CANDIDATE (not decided on, see other_candidate_prints[0]): the custodian-delivered trade price on 4 by/sl dates before the event with a served price (of 29 by/sl dates before the event, all held; the served price table starts 2020-09-10): WITHOUT median 0.988 worst 0.9842 within 0.5% 0 within 2% 4; WITH median 1.0483 worst 1.0532 within 0.5% 0 within 2% 0. If that print is admitted the reading is DO_NOT_APPLY on 4 dates only."
+  },
+  {
+   "cusip": "460146103",
+   "event_date": "2021-10-01",
+   "factor": 1.056,
+   "held_dates_before_event": 2127,
+   "dates_compared": 0,
+   "with_factor": {
+    "within_half_percent": 0,
+    "median_ratio": null,
+    "worst_ratio": null
+   },
+   "without_factor": {
+    "within_half_percent": 0,
+    "median_ratio": null,
+    "worst_ratio": null
+   },
+   "claim": "UNAPPLIED_NO_HELD_DATE",
+   "evidence": "IP (International Paper). Custodian print taken = gold canonical holdings (source bd_snapshot), first 2026-06-08, last 2026-10-06: dates before 2021-10-01 = 0 (rows for this CUSIP/ticker: 238, all on or after 2026-06-08), so held dates with that print before the event = 0 of 2127 held dates before it (first held 2013-04-23, last held before 2021-09-30). Rule outcome: left UNAPPLIED, named; not decided from other evidence. SECOND CANDIDATE (not decided on, see other_candidate_prints[0]): the custodian-delivered trade price on 4 by/sl dates before the event with a served price (of 115 by/sl dates before the event, all held; the served price table starts 2020-09-04): WITHOUT median 0.947 worst 0.944 within 0.5% 0 within 2% 0; WITH median 1.0 worst 1.0033 within 0.5% 4 within 2% 4. If that print is admitted the reading is APPLY on 4 dates only."
+  },
+  {
+   "cusip": "717081103",
+   "event_date": "2020-11-17",
+   "factor": 1.054,
+   "held_dates_before_event": 1919,
+   "dates_compared": 0,
+   "with_factor": {
+    "within_half_percent": 0,
+    "median_ratio": null,
+    "worst_ratio": null
+   },
+   "without_factor": {
+    "within_half_percent": 0,
+    "median_ratio": null,
+    "worst_ratio": null
+   },
+   "claim": "UNAPPLIED_NO_HELD_DATE",
+   "evidence": "PFE (Pfizer). Custodian print taken = gold canonical holdings (source bd_snapshot), first 2026-06-08, last 2026-10-06: dates before 2020-11-17 = 0 (rows for this CUSIP/ticker: 318, all on or after 2026-06-08), so held dates with that print before the event = 0 of 1919 held dates before it (first held 2013-04-08, last held before 2020-11-16). Rule outcome: left UNAPPLIED, named; not decided from other evidence. SECOND CANDIDATE (not decided on, see other_candidate_prints[0]): the custodian-delivered trade price on 1 by/sl dates before the event with a served price (of 77 by/sl dates before the event, all held; the served price table starts 2020-07-23): WITHOUT median 0.9445 worst 0.9445 within 0.5% 0 within 2% 0; WITH median 0.9956 worst 0.9956 within 0.5% 1 within 2% 1. If that print is admitted the reading is APPLY on ONE date and ONE trade only."
+  }
+ ],
+ "source_adjusted_for": {
+  "answer": "The served build's close (price_basis as_traded: Yahoo 'Close' substituted for the store's points on 911 tickers; commonwealth_daily_valuation.as_traded_store, read_yahoo_close) is adjusted for SHARE SPLITS and NOT for dividends; for three of the four spin-offs (T, IP, PFE) it is ALSO adjusted down for the distribution at about the store's factor; for HON it is not at that factor.",
+  "splits": "Known share splits in the universe the served run applied (repair_plan.md of r34/after_out): AAPL 4:1 2020-08-31, AMZN 20:1 2022-06-06, NVDA 4:1 2021-07-20. Yahoo Close steps across the split by 1.0339 (AAPL), 1.0199 (AMZN), 0.9911 (NVDA): continuous, so the series is split-adjusted; the served price before the split is Yahoo Close x the ratio exactly (AAPL 4.0, AMZN 20.0, NVDA 39.89 = 4 x 10 for its two splits, min=max), and the served step across the split is 0.2528, 0.0503, 0.2478 (as traded). Served/trade-price medians on dates before the split: AAPL 0.991 (4 dates), AMZN 0.9992 (24), NVDA 1.0022 (3).",
+  "dividends": "Yahoo Close is not dividend-adjusted; Adj Close is. The silver store's yahoo_finance points are Adj Close times a constant per ticker (AAPL 1.0018, AMZN 1.0000, NVDA 1.0023, T 1.0240, HON 0.9616, IP 1.0265, PFE 1.0343), i.e. dividend-adjusted as of their download; the build's as_traded step replaces them with Close on the tickers the round-33 census classed dividend_adjusted or mixed (price_basis.json: substituted_tickers 911, points_replaced 1,049,193).",
+  "spin_offs": "T, IP, PFE: served (= Yahoo Close, ratio 1.0000 on every pre-event date: 448, 270, 82 dates) over the custodian trade price is 0.7573, 0.9470, 0.9445, against 1/factor = 0.7553, 0.9470, 0.9488: Yahoo Close before the event is already scaled down by about the factor, and Yahoo Close is continuous across the day (steps 1.0766, 1.0058, 1.0176). HON: served over trade is 0.9880 (0.9842..0.9926, 4 dates in 2023-04..2025-02), not 0.9425 and not 1.0000, and Yahoo Close is continuous across 2025-10-30 (0.9973): the series is neither unadjusted nor adjusted at 1.061 on the dates that have a trade; the adjustment, if any, at HON's event is not established."
+ },
+ "not_established": [
+  "that the gold store's bd_snapshot price (Black Diamond's reported market value / units) is the custodian's own mark rather than Black Diamond's report of it; the code comment says custodian, the label and the builder docstring say BD",
+  "whether the custodian-derived trade price (|Amount|/|Quantity|) is free of fees and accrued interest in Amount; the known-split control shows a single-date spread of about +-3.6 percent",
+  "the claims rest on very few dates under the second candidate: 16 (T), 4 (HON), 4 (IP), 1 (PFE, one trade on 2020-08-03); the dates before the served price window (2020-07..2020-09) are not compared because the served price table has no point there (107 of 123 T trade dates, 25 of 29 HON, 111 of 115 IP, 76 of 77 PFE)",
+  "why HON's served close is 1.2 percent below its trade prices (0.9880) and why Yahoo Close is continuous across HON's event while not carrying the 1.061 factor on its earlier dates",
+  "Yahoo's own adjustment rule for spin-offs: the cache holds Close and Adj Close only (no dividend or split columns), so what Yahoo adjusted Close for at T, IP, PFE is inferred from the ratio to the trade price, not read",
+  "whether the round-67 'independent cottonwood step' is a measurement: 0.8132, 0.9400, 0.9524, 0.9654 equal Yahoo's step divided by the factor (1.0766/1.324, 0.9973/1.061, 1.0058/1.056, 1.0176/1.054) to four digits, i.e. the with-factor table's step; the silver cache copy used here steps 1.0243, 0.9973, 1.0058, 1.0176 across the four dates, equal to Yahoo's",
+  "the served run's own instant and the cache vintage: price_cache files carry hash 16278a1c4f6b; the silver points here end 2026-06-09; the Yahoo cache files date 2026-10-09 (last bar 2026-10-08); the WITHOUT table is the r34/after security_day_price (2,124,908 rows), checked against the pbB1 run: pbB1 / served = 1.324, 1.061, 1.056, 1.054 on every pre-event date (649, 1876, 392, 117 points) and 1.0000 on and after",
+  "the custodian's positions file (2026-06-23, quantity only) carries no price; no vendor was asked"
+ ]
+}
