@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO~V1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~ZV</issued_to>
     <date>2026-10-11</date>
-    <status>pending</status>
+    <status>superseded</status>
+    <!-- SUPERSEDED 2026-10-12 by 2.0.0_SA_COO~V1 under the CTO's ruling org/missions/D5/ETFS/ETFS_RIVALS/ledger/CTO_RULING_R28_SITEZ_CARRIERS_SUPERSEDED_20261012.md (msg 4550), which permits it and does not grade it; the CVO adjudicates the closure as JUDGMENT at its compile. SUPERSEDED BY the committed records, each cited by hash on origin/box/sitez (ls-remote read 8e77a84252) and read with git show plus a positive control (a known file reads; an absent path reads no commit): AC1 (judgment: the Terminal was reachable at the pre-flight) graded MET by the issuer @e02a08d95b from the report bytes at commit 956460aeab on origin/box/sitez (`git show 956460aeab:` this file: `STEPS 1-3 ALL PASSED` once; SPY US Equity PX_LAST 778.57 on its line 74). The executor's instance @0f2b83b9cc is VALID in the mission tree. No criterion of this order is site-Z-only: none stays pending. The executor's own proof instance was not written (site Z weekly limit, resets 2026-10-14 06:00Z). -->
     <project_code>ETFS_RIVALS</project_code>
   </metadata>
 <direct_act>true</direct_act>
