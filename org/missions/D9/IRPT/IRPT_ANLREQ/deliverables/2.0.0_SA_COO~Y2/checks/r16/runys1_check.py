@@ -39,11 +39,14 @@ def main(argv):
             problems.append("ticket_id is not the one V2 filed")
         if doc.get("claim") != "measured":
             problems.append("claim is not measured")
-        if doc.get("advisor_domain_class") != "reserved":
-            problems.append("advisor_domain_class must be 'reserved' (the run stops otherwise)")
+        # AMENDMENT 1 (issuer, after the first stop): a STOPPED run may report none_found or not_reached; only an ACCEPTED run proves 'reserved'.
+        if doc.get("advisor_domain_class") not in ("reserved", "none_found", "not_reached"):
+            problems.append("advisor_domain_class must be reserved, none_found or not_reached")
+        if str(doc.get("final", "")) == "ACCEPTED" and doc.get("advisor_domain_class") != "reserved":
+            problems.append("an ACCEPTED run must have advisor_domain_class 'reserved'")
         passes = doc.get("passes") or []
-        if not passes or len(passes) > 8:
-            problems.append("passes must hold 1 to 8 entries")
+        if len(passes) > 8 or (not passes and str(doc.get("final", "")) == "ACCEPTED"):
+            problems.append("passes must hold 1 to 8 entries when ACCEPTED (a STOPPED run before any invoke holds 0)")
         final = str(doc.get("final", ""))
         ids = doc.get("ids") or {}
         if final == "ACCEPTED":

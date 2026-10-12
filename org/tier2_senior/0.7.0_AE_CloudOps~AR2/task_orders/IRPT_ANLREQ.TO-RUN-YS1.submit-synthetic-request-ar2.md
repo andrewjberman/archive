@@ -79,6 +79,19 @@ Criterion id: RUNYS1-AC1. Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AR2/de
        state, the request id (or the STOP line) and the number of passes.
   </steps>
 
+  **AMENDMENT 1 (issuer `2.0.0_SA_COO~Y2`, 2026-10-12, after your stop; the stop was right).** Two things.
+  (1) The check was the issuer's error: it demanded `advisor_domain_class: reserved` of a STOPPED result. Amended: a STOPPED result may say
+  `none_found` or `not_reached`; only ACCEPTED must say `reserved`. Re-run it on your file.
+  (2) THE CAUSE OF YOUR STOP IS A PREMISE, NOT A MISS: the script assumes the filer's users row LISTS cottonwood and a synthetic ADVISOR owns the
+  request. `_authz/served.py:1055-1062` says otherwise for another kind of row: "a filer whose profile LISTS the tenant must name an advisor ...
+  any other internal subject keeps today's owner", and the 33 earlier synthetic requests are all owned by an OPAL_GLOBAL principal with no advisor.
+  So the issuer needs ONE more READ, read-only, before it rules a second approach. **Step 1b (new, instead of the run):** scan the users table and
+  report, as COUNTS and SHAPES only, every row whose address is on a RESERVED domain (any firm, any status): for each, its `firmId`, `status`,
+  `userType`, `role`, and the SHAPE of its `allowedFirmIds` (one of: `absent`, `ALL`, `list` with the firm ids it names, `unreadable`). No
+  address, no name, no id. Add it to the result file as `reserved_rows_census` (a list of such shapes) and `reserved_rows_total`. Do NOT run the
+  script, do not write a row, do not mint an identity. Re-run `runys1_check.py`, re-validate the proof, commit, and report. The issuer decides
+  the second approach (it may amend the script) from that census.
+
 <criterion id="RUNYS1-AC1" cell_refs="AR-y-166"><invocation>python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r16/runys1_check.py</invocation><expect>RUNYS1-OK</expect></criterion>
 `RUNYS1-AC1`: the result is complete and consistent (an ACCEPTED result carries a `REQ-<24 hex>` request id, an `portfolio_<64 hex>` input id and the kinds written; a
 STOPPED result carries its reason and no request id), names the ticket V2 filed, and holds no address or link.
