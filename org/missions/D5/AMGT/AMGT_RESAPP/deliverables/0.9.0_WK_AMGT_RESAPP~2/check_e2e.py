@@ -3,7 +3,8 @@ ticker (F2/G-24: this order's only new security).
 
 Sequence, all against the REAL deployed cloud side and this box's real Bloomberg session:
   1. `aws lambda invoke` on the deployed `opal-research-pull-enqueue` function with a direct-invoke
-     payload `{"ticker": "<TICKER>"}` -- the same code path an authenticated
+     payload `{"ticker": "<TICKER>", "requestContext": {"authorizer": {"tier": "internal"}}}` (the
+     HVST-bx-1 caller fence admits only tier 'internal') -- the same code path an authenticated
      `POST /api/private/research/pull` would run (SEAM_DESIGN.md section 1; a direct invoke
      substitutes for a real browser session because no page/JWT exists yet -- C-DESIGN-SPEC-FIRST).
      This writes packs/<security_key>/status.json state=REQUESTED and sends one SQS message.
@@ -19,6 +20,7 @@ Prints exactly one line of the shape this order's AC3 names:
 """
 from __future__ import annotations
 
+import argparse
 import json
 import subprocess
 import sys
@@ -59,7 +61,15 @@ def count_raw_objects(s3, sec_key: str, stamp: str) -> int:
     return len(resp.get("Contents", []))
 
 
-def main() -> int:
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--enqueue-only",
+        action="store_true",
+        help="stop after the ENQUEUE line; return 0 when the response is 202 (no consumer, no polling)",
+    )
+    args = parser.parse_args(argv)
+
     sec_key = security_key(TICKER)
     lam = boto3.client("lambda")
     s3 = boto3.client("s3")
@@ -69,13 +79,17 @@ def main() -> int:
     invoke_resp = lam.invoke(
         FunctionName=FUNCTION_NAME,
         InvocationType="RequestResponse",
-        Payload=json.dumps({"ticker": TICKER}).encode("utf-8"),
+        Payload=json.dumps(
+            {"ticker": TICKER, "requestContext": {"authorizer": {"tier": "internal"}}}
+        ).encode("utf-8"),
     )
     payload = json.loads(invoke_resp["Payload"].read())
     print(f"ENQUEUE: {payload}")
     if invoke_resp.get("FunctionError"):
         print(f"E2E: ticker {sec_key} status ENQUEUE_FAILED in 0 s; raw objects 0; status.json ABSENT")
         return 1
+    if args.enqueue_only:
+        return 0 if isinstance(payload, dict) and payload.get("statusCode") == 202 else 1
 
     consumer_proc = subprocess.Popen(
         [sys.executable, str(_CONSUMER), "--once"],
