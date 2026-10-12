@@ -97,3 +97,22 @@ starts after that fire's REPORT line.
 - The census CLI's live read was exercised on an empty result only.
 
 COO half: SIGNED by 2.0.0_SA_COO~T2 for the act as written above, on the pin `c942202bf9`.
+
+## ADDENDUM 1 (issuer, 2026-10-12) -- step (c) as the CTO signed it (half @ee3efa0504, msg 6221). It REPLACES section 4 step (c).
+
+Step (c) as first written does not discriminate: the route gives its ONE deny, the same status and body, to a caller it does not
+admit and to an admitted caller naming a ticket that does not exist (`infra/aws/lambda/ticket_center/lambda_function.py`
+`:1544-1546` and `:1565-1569`, the CTO's read). A 403 would show only that the gateway took the bearer.
+
+**Step (c):** ONE post by the applier, with the service bearer read from `opal/ticketing/svc-commentary` and never printed, to
+`https://opalinvest.dev/api/scoped/tickets/PROBE-NOSUCH-0/commentary-draft`, with a body carrying ONE EXTRA KEY beside
+`draft_commentary` and `request_id`. The route checks the caller, then the body's keys, before it reads any ticket.
+
+- **400, `application/json`, naming the unexpected field: the service is admitted through the front door. The pass.**
+- 403 `application/json`: the bearer passed the gateway and the route does NOT admit it. A finding; the base is rolled back.
+- 401, an HTML answer, or a 5xx: the front door or the gateway did not carry it. A finding; the base is rolled back.
+
+It reads no ticket and writes nothing. A denied secret read is NOT MADE, no grant sought. Each status is read from a PARSED
+value (the status integer and the content type), never from a captured output compared whole.
+
+The COO half stands on the packet as amended.
