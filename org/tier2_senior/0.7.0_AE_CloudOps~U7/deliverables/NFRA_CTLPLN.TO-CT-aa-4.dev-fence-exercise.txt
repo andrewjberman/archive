@@ -1,0 +1,27 @@
+NFRA_CTLPLN TO-CT-aa-4 Dev-fence exercise, 2026-10-12. Seat 0.7.0_AE_CloudOps~U7. No token, cookie or identity value appears here: status codes, hash prefixes, counts and the four non-secret claim values the fence reads.
+Pin 96c4f5f063. Function opal-portal-data-proxy. CodeSha256 before zoCWZxmn6nwzFEEIEIl4NoVP2rojFGntQaLSxy8lLSU= after q4iLGld/nR2jOOaL2JJ6frlUSNNEgJnV2I8oyIQ6z/Y=. Apply time (function LastModified) 2026-10-12T15:02:18Z. Zip members (3): lambda_function.py 9cbf41a0..., session_tracker.py 00f8c6a3..., firm_page_access.py 7365de94..., each equal to the pair.
+
+PRE-1 (opal-users-v2, 56 PROFILE rows, counts only): (a) userType Dev 6; (b) of those tier internal 3; (c) of those tier other than internal or absent 3; (d) Dev rows on a firm other than the internal firm 0. PRE-1 passes.
+
+CALLERS. Internal / Dev: the UI walker row AS IT IS (userType Dev), armed and disarmed by ui_walker_account.py, real /auth/login. Partner: ONE synthetic row, firm 49financial, tier advisor, token signed in memory, 600 s (ui_walker_account.py takes no second account id; option (a) of the first pair CTO half). Host https://opalinvest.dev. Route: GET /v1/health/data-availability (class ii).
+
+BASELINE BEFORE THE APPLY (not in the pair's table; added to learn what R3 can prove):
+2026-10-12T14:57:57Z WALKER-CLAIMS token claim values the fence reads: {"firmId": "opal-capital", "role": "admin", "tier": "internal", "userType": "Dev"}
+2026-10-12T14:58:02Z R3-baseline BEFORE the apply class-ii walker row as it is GET /v1/health/data-availability code=200 body_bytes=530 body_sha256=025ecd68c209cae1 apigw_requestid=present
+
+READS AFTER THE APPLY (UTC):
+2026-10-12T15:03:27Z R2 class-ii partner (synthetic row) GET /v1/health/data-availability code=403 body_bytes=50 body_sha256=b39d1c8c735c6beb apigw_requestid=present message='forbidden: Opal-internal readers only' keys=['error']
+2026-10-12T15:03:37Z WALKER-CLAIMS token claim values the fence reads: {"firmId": "opal-capital", "role": "admin", "tier": "internal", "userType": "Dev"}
+2026-10-12T15:03:38Z R1/R3 AFTER the apply class-ii walker row as it is GET /v1/health/data-availability code=200 body_bytes=530 body_sha256=c1126330a108a05a apigw_requestid=present
+
+WHAT R3 PROVES AND DOES NOT: the walker's login token carries tier=internal (the auth handler derives tier from firmId opal-capital), so its class-ii read is served by the tier test with or without the new Dev clause: 200 before the apply and 200 after. It is NOT a Dev login with a non-internal tier at the fence. No such token can be obtained without minting a credential or editing a user row, both forbidden here. The evidence for the clause itself is the package diff (the deployed lambda_function.py equals the pin) and the issuer's 963 Dev tests (402 failing on the pre-edit handler).
+
+LOG LINES WRITTEN AFTER THE APPLY (only events after 2026-10-12T15:02:18Z, read at 15:04:50Z):
+line-prefix census of those events: {'[INFO]\t2026-10': 6, '[WARNING]\t2026': 4, 'START RequestI': 2, 'Request': 2, 'Routing': 2, 'END RequestId': 2, 'REPORT Request': 2, 'INIT_START Run': 1}
+lines with cookie/refresh_token/device_trust/authorization words: 0
+example line (every value other than method and path redacted): Request: method=GET, path=/health/data-availability, request_id=<redacted>
+
+internal=200
+partner=403
+dev-nonint=NOT-RUN:the only Dev login obtainable (the walker row) gets tier=internal at login, so it is not a non-internal Dev token; none can be had without minting or editing a row
+POST-APPLY events=21 jwt_shaped=0 bearer=0
