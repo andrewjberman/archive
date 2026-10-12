@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-tb-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~59",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3566a85699"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "c1743ee57e",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-tb-1.teams-bearer-holders-read.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~59/TB1_READ.json",
+      "kind": "config_data",
+      "commit_or_etag": "dda0c21548",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only record of CloudTrail and IAM reads; nothing deployed or changed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~59/NEVER_WIDEN_ASK_OG-tb-1.md",
+      "kind": "doc",
+      "commit_or_etag": "dda0c21548",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The narrowing ask for 1.0.0_SA_CTO~Z and 2.0.0_SA_COO~O; nothing applied."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "dda0c21548",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row NFRA_OPLGTW-Z-W59-S1 appended."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(?s)GetSecretValue events read [1-9]\\d*; .*gateway role seen True; dell group verdict (none|found).*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r35/checks/tb1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "window 90 days; GetSecretValue events read 186; distinct principals 4; gateway role seen True; dell group verdict none\nRESULT: PASS\nexit=0",
+      "denominator": "186 of 186 events naming gateway/teams/bearer (of 129562 GetSecretValue events across all secrets, 2592 pages, full pagination); 4 of 4 principals; gateway role 22 events (positive control); 0 of 2 group members seen as readers",
+      "status": "PASS",
+      "expect": "(?s)GetSecretValue events read [1-9]\\d*; .*gateway role seen True; dell group verdict (none|found).*RESULT: PASS.*exit=0"
+    }
+  ],
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W59-S1"
+  ],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git).",
+  "compiler_tools": [
+    {
+      "tool": "cloudtrail lookup-events (boto3 paginated), secretsmanager get-resource-policy/describe-secret, iam get-group/list-*-policies/get-policy-version/list-entities-for-policy",
+      "invocation": "read-only AWS reads under the operator identity; no policy, secret or identity changed",
+      "result": "TB1_READ.json written; AC1 rc=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The absent-record arm was run by the issuer at the cut (TB1_READ.json absent reads RESULT: FAIL).",
+      "expected": "absent record reads RESULT: FAIL",
+      "observed": "issuer-recorded pre-cut; not re-run here",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 reads the committed TB1_READ.json only.",
+      "observed": "rc=0",
+      "status": "STABLE"
+    }
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-ap-9",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.7.0_AE_CloudOps~Z",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3566a85699"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "84f96b6bf3",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-9.grant-writer-apply.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/mcportal_grant_writer.tf",
+      "kind": "terraform",
+      "commit_or_etag": "ad17fa128f24b85ed84269a6c8a7ea62f7aa1dfe",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The root declaring aws_lambda_function.mcportal_grant_writer (function_name mcportal-grant-writer-lambda at line 128), read at the detached box/sitez HEAD the plan and apply ran from. Applied -target'd to that one resource via safe-apply against a SAVED plan, with -var market_update_s3_root from address(). Never aws lambda update-function-code. 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' The package is built at PLAN TIME by data.external -> build_gw_stage.py into the root's gitignored .build/ and zipped by archive_file; there is no S3 artifact.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ap9_build.json",
+      "kind": "config_data",
+      "commit_or_etag": "14d604be9a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "code_sha256 894RI63/G4h019yxAGP7E+wQzrpZIfJoMaLhzpTTyck=, which AC2 compares against the live read. THREE independent reads agree on it: the plan's intended source_code_hash, get-function-configuration on mcportal-grant-writer-lambda after the apply, and the sha256 of the package downloaded back from get-function.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ap9_parse.json",
+      "kind": "config_data",
+      "commit_or_etag": "14d604be9a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The session-free parse read-back AC2 reads: deployed_accepts_13 true, prior_accepts_13 false. It also records the isolating control, the probe's declared scaffolding, and the four load failures and two malformed-scope rounds that measured nothing and were therefore not reported as results.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "14d604be9a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Deployment rule 4: the mcportal-grant-writer-lambda entry gains artifact_sha256 894RI63/G4h..., last_deployed_commit ad17fa128f (the detached HEAD the act ran from) and last_deployed_at 2026-10-11T20:32:52Z. All three were ABSENT before -- rule 4 had no deployed build recorded for this function at all -- so the write was made as an ADD and refused up front if any were already present. A note records that this function has no S3 artifact, so a later reader is not left hunting an artifact key. Verified after: 235 function entries, parses, 0 non-ASCII.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261011T2025Z_nfra-oplgtw-grant-writer-rebuild_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "14d604be9a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NEVER-2 ledger: entry AND sentinel committed BEFORE the act, 5 legs each closed with proof (prior + captured plan, the apply, the 0/0/0 re-plan and build record, the session-free parse, the source map), CLOSED with the sentinel removed.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the act is not half-landed, and both captured plans read what the order requires at rc=0.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r34/checks/ap9.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "nfra-oplgtw-grant-writer-rebuild: entries at HEAD 1; status CLOSED=yes; sentinel at HEAD=no\nap9_plan_target.txt: rc=0 summary=(0, 1, 0) (want (0, 1, 0)) addresses 1 ['aws_lambda_function.mcportal_grant_writer']\nap9_replan.txt: rc=0 summary=(0, 0, 0) (want (0, 0, 0)) addresses 0 []\nRESULT: PASS\nexit=0",
+      "denominator": "Seven figures read at HEAD: the ledger's entry count, Status line and sentinel presence; and for each captured plan its exit code, its (add, change, destroy) summary and its planned-address list. The .rc files are read separately from the summaries, so the exit code cannot be inferred from a summary line.",
+      "status": "PASS",
+      "status_reason": "The rebuild is landed and not half-applied. The plan carried one address and, as its own text shows, one declared attribute change -- source_code_hash -- with 27 attributes and 4 blocks unchanged, so no role, env, layer, memory or timeout row rode along. The issuer recorded ap9.AC1 FAIL at base.",
+      "expect": "(?s)entries at HEAD [1-9]\\d*; status CLOSED=yes; sentinel at HEAD=no.*summary=\\(0, 1, 0\\).*summary=\\(0, 0, 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the session-free read-back -- the live CodeSha256 equals the build and differs from the prior, the deployed package accepts a 13-month rolling grant, and the prior package refuses it.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r34/checks/ap9.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "live CodeSha256 equals the build: yes; differs from the prior: yes\ndeployed package accepts calendar_months 13: True; prior package accepts it: False (want False)\nRESULT: PASS\nexit=0",
+      "denominator": "Four figures, each a separate conjunct in the script's own final test: live == built, live != prior, deployed_accepts_13 == True, prior_accepts_13 == False. The live read is guarded, so a failed read fails the criterion loudly instead of being compared.",
+      "status": "PASS",
+      "status_reason": "All four conjuncts hold against the corrected check @63a7b6620b. THIS CRITERION WAS UNSATISFIABLE WHEN FIRST RUN, and that is recorded rather than smoothed over: the script queried function name 'mcportal-grant-writer', which does not exist, and carried 2>&1 so the ResourceNotFoundException was captured INTO the compared variable and presented as an ordinary 'no'. This seat filed row Z-S93, left <status> at pending, and declined to edit the script that grades it. The issuer fixed the name and made a failed read fail loudly; the PASS above is from that corrected script.",
+      "expect": "(?s)live CodeSha256 equals the build: yes; differs from the prior: yes.*deployed package accepts calendar_months 13: True; prior package accepts it: False \\(want False\\).*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The negative arm is the heart of this order, so it was controlled rather than asserted. (1) ISOLATING CONTROL: the probe parses not only {\"mode\":\"rolling_complete_window\",\"calendar_months\":13} but the SAME scope WITHOUT calendar_months, which both packages must accept. Only if the prior accepts the plain scope and refuses the 13-month one is its refusal specific to calendar_months. That control FIRED THREE TIMES before the real read -- the first probe shaped `accounts` as a list and both packages refused on scope.accounts, the second refused on scope.columns -- and each time it correctly declined to call the negative arm satisfied, because a refusal was being produced by a malformed probe rather than by the defect. (2) The prior PACKAGE was downloaded before the act and its sha256 verified equal to the then-live CodeSha256, so the control is provably the bytes that were running. (3) A token census over each package's data_entitlement.py agrees from another direction: calendar_months appears 19 times in the deployed copy and 0 in the prior, which has no parse_rolling_window. (4) The CORRECTED AC2's own guard was controlled by running its command form against the bad name: it returns rc=0 with an EMPTY value through this device's aws shim, so the rc check alone would NOT have caught it -- the `[ -n \"$live\" ]` conjunct is what discriminates.",
+      "expected": "The deployed package accepts the 13-month scope and carries the value; the prior refuses it while accepting the same scope without calendar_months; the live hash moves off the prior and equals the build.",
+      "observed": "Deployed accepted with calendar_months=13 on the parsed Scope. Prior refused with Malformed 'a rolling_complete_window grant carries only its mode' and ACCEPTED the plain rolling scope, so refusal_is_specific_to_calendar_months is true. Live CodeSha256 moved ZyYCPPyP5CV.. -> 894RI63/G4h.., equal to the build and different from the prior. AC1 and AC2 both PASS where the issuer recorded them FAIL at base.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every world read came from an instrument independent of the act: the issuer's ap9.AC1.sh and ap9.AC2.sh for the criteria; get-function-configuration and get-function for the live state and the deployed bytes; terraform plan on both sides with each exit code captured to its own file; and the parse probe run once per package in its own process so neither package's modules could bleed into the other's import cache. The deploy's own stdout is the oracle for nothing.",
+      "observed": "Three reads agree on the deployed hash (plan intent, live config, downloaded bytes). The parse result and the token census agree on the defect from unrelated directions. A client-side count over the auto-paginated function listing (237 functions; 0 for the short name, 1 for the -lambda name) agrees with the ResourceNotFoundException, after a first count using list-functions --query length() returned 0 for BOTH names -- the page-count trap, caught by querying a name already read successfully.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any grant written, revoked or altered.",
+      "reason": "The order's bounds and COO half condition B, which REPLACES the ask's section-5 owner-session grant: the read-back is session-free precisely so that no grant is written. None was. The parse was performed on package bytes, not through the live function."
+    },
+    {
+      "item": "A live invoke of mcportal-grant-writer-lambda.",
+      "reason": "Not required and not done. The criterion is the deployed CODE's parse behaviour, which the session-free probe reads directly; an invoke would have needed a session and could have written a record."
+    },
+    {
+      "item": "Any principal, role or policy change.",
+      "reason": "The preflight declares comp-iam NOT-APPLICABLE for this cell and the targeted plan proves it: one address, one declared attribute (source_code_hash), 27 attributes and 4 blocks unchanged."
+    },
+    {
+      "item": "Whether real 13-month grants now behave correctly end to end for a caller.",
+      "reason": "This order establishes that the deployed code PARSES such a scope and that the prior refused it. What a caller experiences through the live function with a real session is a different claim and is not made here."
+    },
+    {
+      "item": "The six other stale file_checksums entries in the gateway's own manifest entry.",
+      "reason": "That is row Z-S84's subject and belongs to the opal-gateway service entry, not the grant-writer's. It was completed under OG-ap-7's step 7, not here."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-S93"
+  ],
+  "session_log": "This seat is a SESSION seat, not an L7 worker subagent. The order arrived with OG-ap-8 in msg 33384, both GO'd to run one at a time; OG-ap-8 was completed and its ledger closed first. The ask and both halves were read as binding. The act itself was clean: prior recorded and its package hash-verified, plan 0/1/0 at rc=0 with source_code_hash as the only declared change, apply through Terraform, re-plan 0/0/0 at rc=0, session-free parse showing the defect gone, source map updated. THEN AC2 FAILED, and the failure was in the CHECK, not the deploy: ap9.AC2.sh queried a Lambda name that does not exist and, carrying 2>&1, compared the AWS error text against the recorded hash, so its first limb could never report equal. This seat filed row Z-S93 as BLOCKING, left <status> at pending rather than flip an order whose criterion had not passed, and declined to edit the grading script -- it is outside this order's <paths>, and a seat fixing its own grader is self-grading however small the edit. The issuer agreed, fixed the name and made a failed live read fail loudly, at @63a7b6620b. AC2 was then re-run and PASSES, and the corrected guard was itself controlled against the bad name. Commits: 14d604be9a (ledger close, build and parse records, probe, source map), 83d39e65c4 (row Z-S93), and the flip + instance commit. Push state measured by git ls-remote at report time.",
+  "compiler_tools": [
+    {
+      "tool": "terraform",
+      "invocation": "plan -target=aws_lambda_function.mcportal_grant_writer -var market_update_s3_root=<address output> -out ; safe-apply apply <saved plan> ; plan -target again",
+      "result": "PASS",
+      "notes": "0/1/0 at rc=0 with source_code_hash as the only declared change, then 'Modifications complete', then 'No changes.' at rc=0. Each exit code captured to its own .rc file, which is what AC1 reads. The package builds at plan time via data.external, so no pre-build step and no S3 artifact."
+    },
+    {
+      "tool": "safe-apply.sh",
+      "invocation": ".tools/safe-apply.sh -chdir=C:/tmp/og-tf-ap9/... apply ap9.tfplan",
+      "result": "PASS",
+      "notes": "A SAVED plan, so the apply executed exactly the reviewed row. Never aws lambda update-function-code. The worktree cone carried the agent home, so the halt gate's premise held with no override -- the requirement OG-ap-7 taught."
+    },
+    {
+      "tool": "ap9_parse_probe.py (written for this order)",
+      "invocation": "python -I ap9_parse_probe.py <extracted package dir>, once per package",
+      "result": "PASS",
+      "notes": "The instrument that carries the criterion. Its isolating control fired three times on malformed probes before the real read, and four load failures preceded those -- a relative-import error, a missing boto3, a submodule cascade fixed with a find_spec finder rather than hand-listing, a legacy finder API silently ignored on Python 3.14, and a stub attribute that would not take keyword arguments. Every one of those failed IDENTICALLY for both packages, so each was evidence about the probe and none was reported as a result."
+    },
+    {
+      "tool": "aws lambda",
+      "invocation": "get-function-configuration and get-function (both packages), list-functions for the name census",
+      "result": "PARTIAL then PASS",
+      "notes": "The prior and deployed packages were both downloaded and hash-verified against their respective live CodeSha256 values. The first name census used list-functions --query length(), which returned 0 for BOTH names including one just read successfully -- rule 22a's page-count trap -- and was redone client-side over the auto-paginated listing with the denominator printed."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open (5 legs), close-leg x5, close",
+      "result": "PASS",
+      "notes": "Entry AND sentinel committed before the act; every leg closed with proof; CLOSED with the sentinel removed, before AC2's defect was discovered -- the deploy's completeness never depended on the grader."
+    },
+    {
+      "tool": "commit-gate.sh / ruff",
+      "invocation": "on ap9_parse_probe.py",
+      "result": "PARTIAL then PASS",
+      "notes": "ruff refused on E402 (a mid-file import). Fixed by moving the import to the top rather than suppressing the rule, and the probe was RE-RUN afterwards to confirm it still measured the same result rather than assuming the edit was inert."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "not run -- DECLARED-NOT-APPLICABLE by the preflight",
+      "result": "SKIP",
+      "notes": "The function's code only; its role and policies are unchanged, which the targeted plan proves. Recorded as not-run, never as a pass."
+    }
+  ]
+}

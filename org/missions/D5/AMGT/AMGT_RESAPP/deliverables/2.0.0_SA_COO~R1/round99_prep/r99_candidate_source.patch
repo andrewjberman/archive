@@ -1,0 +1,66 @@
+diff --git a/src/pages/SecurityAnalysis/components/CardFooter.tsx b/src/pages/SecurityAnalysis/components/CardFooter.tsx
+index 01e06d44..0e9e2688 100644
+--- a/src/pages/SecurityAnalysis/components/CardFooter.tsx
++++ b/src/pages/SecurityAnalysis/components/CardFooter.tsx
+@@ -185,11 +185,11 @@ export const footerFor = {
+     read(
+       data,
+       ['generated_at', 'model.generated_at', 'model.fiscal_year_figures[].vintage', 'model.forecast_figures[].vintage'],
+-      ['model.fiscal_year_figures[].source', 'model.forecast_figures[].source', 'fiscal_year_figures[].source'],
++      ['model.fiscal_year_figures[].source', 'model.forecast_figures[].source'],
+     ),
+   /** What changed: the later version's time (supplied by the caller from the served compare) and the figures' sources. */
+   whatChangedSources: (data: Payload): string[] =>
+-    ['header_figures[].source', 'model.forecast_figures[].source', 'fiscal_year_figures[].source'].flatMap((p) => values(data, p)),
++    ['header_figures[].source', 'model.forecast_figures[].source', 'model.fiscal_year_figures[].source'].flatMap((p) => values(data, p)),
+   posture: (data: Payload): CardFooterFields => ({
+     times: firstServed(data, ['posture.as_of', 'posture.posture_read.as_of', 'posture.generation.generated_at']),
+     sources: values(data, 'posture.marked'),
+diff --git a/src/pages/SecurityAnalysis/postureCites.ts b/src/pages/SecurityAnalysis/postureCites.ts
+index 5f93d7a9..964e821a 100644
+--- a/src/pages/SecurityAnalysis/postureCites.ts
++++ b/src/pages/SecurityAnalysis/postureCites.ts
+@@ -366,7 +366,7 @@ export function resolveCite(cite: string, posture: PostureBlock, subject: CiteSi
+   const parts = rest.split(':')
+   const mnemonic = parts[0]
+   const year = parts.length > 1 ? parts[1] : null
+-  const figures: ModelFigure[] = year === null ? thesis.header_figures ?? [] : thesis.fiscal_year_figures ?? []
++  const figures: ModelFigure[] = year === null ? thesis.header_figures ?? [] : thesis.model?.fiscal_year_figures ?? []
+   const figure = figures.find((row) => row.mnemonic === mnemonic && (year === null || String(row.fiscal_year) === year))
+   if (!figure) {
+     return miss(kind, `no ${year === null ? 'header' : `fiscal-year ${year}`} figure ${mnemonic} on ${sideWords(side)}'s served thesis (model ${(thesis.model_status ?? 'unrecorded').toLowerCase()})`)
+diff --git a/src/pages/SecurityAnalysis/tabs/ModelTab.tsx b/src/pages/SecurityAnalysis/tabs/ModelTab.tsx
+index ea17d2bd..adf8aee3 100644
+--- a/src/pages/SecurityAnalysis/tabs/ModelTab.tsx
++++ b/src/pages/SecurityAnalysis/tabs/ModelTab.tsx
+@@ -590,7 +590,7 @@ function ModelBody({ data, versions }: { data: ThesisBundle; versions: ReactNode
+   // FWD-21: the served forecasts ride the sheet's E columns; the fiscal-figure count below stays the history's own.
+   const forecasts = (data.model as (ThesisModelBlock & { forecast_figures?: ModelFigure[] | null }) | null | undefined)?.forecast_figures
+   const sheet = buildModelSheet(
+-    data.fiscal_year_figures,
++    (data.model?.fiscal_year_figures ?? []),
+     data.fiscal_years,
+     data.model?.line_names,
+     forecasts,
+@@ -599,7 +599,7 @@ function ModelBody({ data, versions }: { data: ThesisBundle; versions: ReactNode
+     data.model?.team_sheet
+   )
+   const teamSheetReason = data.model?.team_sheet?.class === 'master_absent' ? data.model.team_sheet.reason : null
+-  const historySheet = buildModelSheet(data.fiscal_year_figures, data.fiscal_years, data.model?.line_names)
++  const historySheet = buildModelSheet((data.model?.fiscal_year_figures ?? []), data.fiscal_years, data.model?.line_names)
+   const firstYear = sheet.years[0]
+   const lastYear = sheet.years[sheet.years.length - 1]
+   // CRPS-av-2: a team row that says why (source 'why') says it on its own row, so it is not repeated in the absent footnote.
+diff --git a/src/pages/SecurityAnalysis/types.ts b/src/pages/SecurityAnalysis/types.ts
+index c46b246e..cd8a555b 100644
+--- a/src/pages/SecurityAnalysis/types.ts
++++ b/src/pages/SecurityAnalysis/types.ts
+@@ -1127,6 +1127,8 @@ export interface TeamCases {
+ }
+ 
+ export interface ThesisModelBlock {
++  /** The fiscal-year figures the model block carries: the page's one reader (equal to the legacy top-level copy until the API drops it). */
++  fiscal_year_figures?: ModelFigure[] | null
+   team_cases?: TeamCases | null
+   /** The producer's ONE definition of the Model line names (Bloomberg mnemonic -> the line's name). Optional: a payload
+    * captured before it carries none, and the page then falls back to its local label map. */
