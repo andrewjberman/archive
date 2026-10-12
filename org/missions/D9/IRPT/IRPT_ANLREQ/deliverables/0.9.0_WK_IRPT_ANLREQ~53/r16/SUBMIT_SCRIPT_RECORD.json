@@ -1,0 +1,133 @@
+{
+  "schema": "IRPT_ANLREQ.AR-y-166.SUBMIT_SCRIPT_RECORD.v1",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-166",
+  "built_by": "0.9.0_WK_IRPT_ANLREQ~53",
+  "base_commit": "41f8c03511b1f92cc3e9576ea0ecd4cbca68e1b7",
+  "script": {
+    "path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~53/r16/submit_synthetic_request.py",
+    "git_blob": "326f2909559410750481fc65cdd84fe45262fc95",
+    "ascii_only": true,
+    "self_test": "SUBMIT-SELFTEST-OK, SELFTEST arms=22 of 22 passed (run twice, output identical; amendment 1 added two arms)",
+    "mutant": "tenant gate disabled (check_args returns no refusal): self-test rc=1, arms tenant-other-refused and tenant-missing-refused FAIL (20 of 22 passed, 2 caught)",
+    "mutant_amendment_1": "reserved-domain STOP disabled (run_flow line 337 becomes if False): self-test rc=1, arm advisor-real-domain-stops-before-invoke FAIL (21 of 22 passed, 1 caught; that run made 2 invokes)",
+    "boto3_surface": {
+      "used_only_in_run": ["lambda.invoke (FunctionName irpt-ycharts-generate, event i and event ii)", "dynamodb.get_item (opal-users-v2, filer row)", "dynamodb.scan (opal-users-v2, all pages, advisor by opaque label)"],
+      "client_created_in": ["--run only, after the literal word and the advisor label pass (make_clients)"],
+      "write_shaped_calls": []
+    }
+  },
+  "event_i": {
+    "name": "on-behalf template upload",
+    "route_key": "POST /api/scoped/investor-reporting/analysis/inputs",
+    "raw_path": "/api/scoped/investor-reporting/analysis/inputs",
+    "route_read": [
+      "docs/contracts/investor-reporting/v1/routes.json:183-193 (route_key, handler irpt-ycharts-generate, request_schema AnalysisUploadRequest.schema.json)",
+      "infra/aws/lambda/investor-reporting/reports/generate_installed.py:361-362 (UPLOAD_ROUTE) and :453 (routes[UPLOAD_ROUTE] = UPLOAD_OPERATION)",
+      "infra/aws/lambda/investor-reporting/intake/upload_entry.py:20-21 (OPERATION, ROUTE)"
+    ],
+    "required_members": [
+      {"member": "body.upload_token", "rule": "matches [A-Za-z0-9_-]{8,128}", "read_at": "intake/uploads.py:23 and :115-116; AnalysisUploadRequest.schema.json properties.upload_token"},
+      {"member": "body.filename", "rule": "1-128 chars, ends .csv for file_type csv, no slash, backslash or control character", "read_at": "intake/uploads.py:117-120; AnalysisUploadRequest.schema.json properties.filename"},
+      {"member": "body.file_base64", "rule": "strict base64 decoding to 1..1048576 bytes; csv decodes as utf-8-sig; no NUL byte", "read_at": "intake/uploads.py:121-130"},
+      {"member": "body.file_type", "rule": "csv or xlsx; the presence of file_base64 or file_type selects the template lane", "read_at": "intake/uploads.py:101-112; AnalysisUploadRequest.schema.json oneOf template lane"},
+      {"member": "body (no other key)", "rule": "required upload_token, filename, file_base64, file_type; optional declared_currency, price_date, reference_notional, supersedes_input_id, corrections; any other key refuses UPLOAD_FIELDS", "read_at": "intake/uploads.py:102-109"},
+      {"member": "query.selected_tenant", "rule": "the routing selector; cottonwood", "read_at": "cell step 2; _authz/served.py handle path (tenant from the selector)"},
+      {"member": "query.advisor_email", "rule": "required when the filer's allowedFirmIds lists the tenant (an on-behalf upload must name the firm advisor); names an active cottonwood user with a partner profile at cottonwood", "read_at": "_authz/served.py:1063-1067 (refusal), :1069-1098 (_advisor_owner: partner profile, user row firmId and status active)"},
+      {"member": "headers, nine trusted plus x-contract-version", "rule": "x-origin-verify cloudfront (a constant, not a claim); x-user-email; x-firm-id opal-capital (the internal predicate); x-user-type service; x-user-tier; x-user-role; x-user-name; x-contract-version v1", "read_at": "_scope/resolve.py:104-114 (TRUSTED_HEADERS, nine names); _authz/served.py:307-319 (verified_internal_subject); y75_x1_arms.py:60-73 (shape and the x-contract-version comment)"},
+      {"member": "filer allowedFirmIds", "rule": "explicit naming of cottonwood; the string ALL does not admit an internal caller (fail closed)", "read_at": "_scope/interactive_access.py:57-76; _authz/served.py:1152-1166 (internal reads); intake/uploads.py:243-255 and :265-267 (on-behalf rule, principal_class OPAL_GLOBAL, home_firm_id opal-capital)"}
+    ]
+  },
+  "event_ii": {
+    "name": "analysis submission naming the ticket",
+    "route_key": "POST /api/scoped/investor-reporting/analysis",
+    "raw_path": "/api/scoped/investor-reporting/analysis",
+    "route_read": [
+      "docs/contracts/investor-reporting/v1/routes.json:70-79 (route_key, handler irpt-ycharts-generate, operation analysis-requests)",
+      "infra/aws/lambda/investor-reporting/reports/generate_installed.py:440-441 (compute calls entry.submit_analysis with allow_prospect=True) and :462 (OWNED_INPUT for the analysis operation)"
+    ],
+    "required_members": [
+      {"member": "body.request_id", "rule": "identifier, 1-100 chars, starts alphanumeric, [A-Za-z0-9_.:-]", "read_at": "ycharts/generate/submission.py:55-56 (_identifier); CUSTODY_FIELDS at :14-15 (required set)"},
+      {"member": "body.client_id", "rule": "must be null when input_id is present (the prospect basis)", "read_at": "ycharts/generate/submission.py:84-88; AnalysisSubmissionRequest.schema.json allOf if input_id then client_id null"},
+      {"member": "body.account_ids", "rule": "must be the empty list when input_id is present", "read_at": "ycharts/generate/submission.py:84-88; schema allOf then account_ids maxItems 0"},
+      {"member": "body.snapshot_id", "rule": "must be null when input_id is present", "read_at": "ycharts/generate/submission.py:84-88; schema allOf then snapshot_id null"},
+      {"member": "body.variant", "rule": "one of auto, overview, comparison, multicomp; overview with no comparison keys", "read_at": "ycharts/generate/submission.py:21-22, :61-62, :72-74"},
+      {"member": "body.comparison_keys", "rule": "list of at most 5 identifiers, unique; empty list for overview", "read_at": "ycharts/generate/submission.py:67-71"},
+      {"member": "body.report_title", "rule": "non-empty text up to 200 characters, no control characters (or null)", "read_at": "ycharts/generate/submission.py:63-66; schema report_title pattern"},
+      {"member": "body.prepared_for", "rule": "non-empty text up to 200 characters, no Cc or Cs category characters", "read_at": "ycharts/generate/submission.py:57-60; schema prepared_for pattern"},
+      {"member": "body.input_id", "rule": "portfolio_ plus 64 lowercase hex; the NORMALIZED input of the upload", "read_at": "ycharts/generate/submission.py:84-86; intake/uploads.py:22 (INPUT_ID); schema input_id pattern"},
+      {"member": "body.ticket_id", "rule": "TCK-<8 digits>-<8 lowercase hex>; admitted only with an input_id basis", "read_at": "ycharts/generate/submission.py:18 (TICKET_ID), :78-80 (TICKET_REFERENCE); schema ticket_id pattern and description; stored by ycharts/generate/acceptance.py:120-121"},
+      {"member": "body (no other key)", "rule": "PUBLIC_FIELDS only; unknown or server-owned key refused", "read_at": "ycharts/generate/submission.py:14-16, :51-52"},
+      {"member": "body.commentary_requested", "rule": "optional; not sent by this script (absent reads as not asked)", "read_at": "ycharts/generate/submission.py:81-83; schema commentary_requested"},
+      {"member": "query.selected_tenant", "rule": "cottonwood", "read_at": "cell step 2"}
+    ],
+    "no_advisor_needed": "the prospect path reads the retained owner from the input's record (served.py _handle_prospect, OWNED_INPUT mode, guard_prospect load_owner); no advisor_email on event ii (served.py:1017-1030, _scope/prospect.py:63-102)"
+  },
+  "literal_keys_a_successful_run_would_create": [
+    {"kind": "upload original record (DynamoDB, the P index on irpt-requests)", "key": "tenant=cottonwood, request_revision=UPLOAD#<upload_id>, identity=<upload_id>", "read_at": "intake/uploads.py:3-4 (index on irpt-requests), :260-264, :277-279, :296"},
+    {"kind": "normalization record (DynamoDB, irpt-requests)", "key": "tenant=cottonwood, request_revision=NORMALIZATION#<upload_id>#<options hash>; state RESOLVING on the deferred lane", "read_at": "intake/uploads.py:305-307, :377-379 (_defer publish)"},
+    {"kind": "retained objects (S3, through the artifacts port)", "key": "ORIGINAL_HOLDINGS keyed by the upload id; NORMALIZED_PORTFOLIO keyed by the input id on NORMALIZED", "read_at": "intake/uploads.py:287-291 and :354-356; the bucket and key scheme NOT read"},
+    {"kind": "resolve_upload message (SQS, the resident queue)", "key": "one message per normalization revision on the deferred lane", "read_at": "intake/uploads.py:386-389; intake/upload_resolution.py:102-113 (deferred_upload_service); the message body NOT read"},
+    {"kind": "normalized input record (DynamoDB, irpt-requests)", "key": "tenant=cottonwood, request_revision=INPUT#<input_id>; only at NORMALIZED", "read_at": "intake/uploads.py:359-364 and :349-350; RESOLVING answer carries input_id None at :391-393"},
+    {"kind": "request record (DynamoDB, irpt-requests, transactional Put with attribute_not_exists)", "key": "tenant=cottonwood, request_revision=analysis#<request_id>#1; the record carries ticket_id", "read_at": "ycharts/generate/acceptance.py:61-62, :111, :113-124, :128-131, :133"},
+    {"kind": "job item (DynamoDB, irpt-jobs, transactional Put)", "key": "tenant=cottonwood, job=<request_id>; state RECEIVED, outbox_state PENDING", "read_at": "ycharts/generate/acceptance.py:64-65, :125-127, :128-131"},
+    {"kind": "composition object (S3, through the submission service)", "key": "composition_ref with artifact_id, sha256, version_id", "read_at": "acceptance.py:100-104 requires it; the write is in ycharts/generate/submission_service.py, NOT read"},
+    {"kind": "analysis queue message (SQS)", "key": "body with tenant, request_id and composition_ref (IDs and a digest only)", "read_at": "ycharts/generate/acceptance.py:145-177 (dispatch and queue body); whether the submission service calls dispatch inside the same request was NOT read"}
+  ],
+  "no_users_row_write": "No write to opal-users-v2 appears in the upload or submission path read (intake/uploads.py, intake/upload_entry.py, ycharts/generate/acceptance.py, ycharts/generate/prospect_submission.py). The script makes no users write.",
+  "amendment_1": {
+    "issuer": "2.0.0_SA_COO~Y2, order AMENDMENT 1 (2026-10-12): close the gap that the on-behalf upload makes the resolved advisor the request owner",
+    "rule": "the part after the last at-sign, lower-cased, equals example.com, example.org or example.net, or ends .invalid, .test or .example (the rule the order names as count_f2.py's; count_f2.py is not in this worktree, so the rule is taken from the order text); no at-sign fails closed",
+    "where": "submit_synthetic_request.py: reserved_domain at line 109; called in run_flow at line 337, after resolve_advisor (line 266) returns the address and before the first lambda.invoke",
+    "stop": "prints 'STOP: the advisor is not a synthetic address. No invoke was made.' and returns 1; the address is never printed; --run makes no invoke",
+    "self_test_arms": [
+      "advisor-real-domain-stops-before-invoke: person@firm.com in the fake users table; rc 1, zero invokes, the address absent from stdout",
+      "advisor-reserved-domain-proceeds: advisor-y166-reserved@Example.NET (mixed case); rc 0, two invokes"
+    ],
+    "addresses": "IRPT_ANLREQ-D2-W53-S13 (the on-behalf advisor could be a real person). The guard is the --run-side closure of that row; the row itself is not edited here",
+    "not_covered": "the guard reads the domain only. A real person's mailbox on a reserved domain would pass; the users row and the advisor's identity remain a live read at --run, not checked by this script"
+  },
+  "what_run_reads": [
+    "dynamodb get_item opal-users-v2, key PK=USER#<filer>, SK=PROFILE, ConsistentRead (the filer row: email, allowedFirmIds)",
+    "dynamodb scan opal-users-v2, ConsistentRead, every page (active cottonwood rows only, matched by the adv- label of the email; the email stays in memory and is never printed)"
+  ],
+  "what_run_invokes": [
+    "lambda.invoke irpt-ycharts-generate, event i, once, and only after the filer row admits cottonwood AND the resolved advisor is on a reserved domain (amendment_1)",
+    "lambda.invoke irpt-ycharts-generate, event ii, once, and only when event i answers an input_id"
+  ],
+  "what_run_prints": [
+    "filer and advisor admission lines (no address, no body)",
+    "Lambda StatusCode, FunctionError, the HTTP status of each answer, and the upload state",
+    "upload_id, input_id and request_id as the answers carry them",
+    "STOP lines naming the stop; a refusal's public reason is not printed (print rule)"
+  ],
+  "rerun_behaviour": "The upload token is fixed per ticket (ar166 plus the ticket digits and hex) and the request id is fixed per ticket (anlreq-y166- plus the ticket). A second run reads the same upload (uploads.py:277-279 prior record; :305-310 prior normalization) and the same request (acceptance.py:108-110 returns the prior record). A RESOLVING upload is polled by a later run, not by a loop in the script.",
+  "next_seat_pair": {
+    "event_i": "upload_event(ticket, advisor_email): POST analysis/inputs, query selected_tenant=cottonwood and advisor_email (resolved from --advisor-opaque), body upload_token, filename, file_base64 (Ticker,Dollars CSV with AAPL and MSFT), file_type=csv",
+    "event_ii": "submission_event(ticket, input_id): POST analysis, query selected_tenant=cottonwood, body as in event_ii.required_members, input_id from event i at NORMALIZED",
+    "bounds": "tenant cottonwood only; ticket TCK-20261012-0123abcd only (the test ticket the CTO ruled); filer the y75 synthetic filer; one upload and one request"
+  },
+  "could_not_read": [
+    "the deployed irpt-ycharts-generate bytes and configuration: whether the deployed source equals 41f8c03511 (routes.json note, see S15)",
+    "live rows: the filer's users row (allowedFirmIds) and the cottonwood advisor (partner profile at cottonwood, active user row); the script reads them only at --run",
+    "the artifacts port: bucket and key scheme, retention references",
+    "the resident (resolve_upload consumer), resolution_message body, and the provider calls that resolve AAPL and MSFT",
+    "ycharts/generate/submission_service.py: the composition write, the dispatch-in-request decision, and its refusal codes",
+    "maintained_sources.resolve_profile_fields and get_organization inputs for cottonwood (acceptance-time reads)",
+    "IAM: who may invoke irpt-ycharts-generate (a lambda:InvokeFunction grant is not in the code)",
+    "the ticket store: the door checks the id shape only (submission.py:18, :78-80); no ticket lookup was found in the path read, and TCK-20261012-0123abcd's existence was not read"
+  ],
+  "gaps_that_fail_acceptance_from_code": [
+    "the filer row does not admit cottonwood: the run stops at its admission check (S14)",
+    "the resolved advisor is not on a reserved domain (example.com/.org/.net, .invalid, .test, .example): the run stops before any invoke (amendment_1; the address is never printed)",
+    "no cottonwood advisor with a partner profile and an active user row: the on-behalf owner is refused (served.py:1077-1088)",
+    "the template lane answers RESOLVING with input_id null until the resident finishes (uploads.py:391-393, :370-382): event ii is not sent (S12)",
+    "the template lane answers NEEDS_CORRECTION when the provider cannot resolve a ticker (uploads.py:411-420, :445-447): no input_id, event ii is not sent",
+    "event ii acceptance reads the advisor and organization profiles for the input owner (prospect_submission.py:93-97); a refusal there is not read"
+  ],
+  "answers_for_the_cell_step_8": {
+    "event_ii_needs_beyond_ticket_id": "input_id from a NORMALIZED upload, client_id null, account_ids empty, snapshot_id null, request_id, variant overview, comparison_keys empty, report_title, prepared_for",
+    "users_row_readable_from_code": "only its shape: y75_x1_arms.py:45-53 writes allowedFirmIds [49financial]; whether the live row admits cottonwood is live-only",
+    "door_reachable_by_direct_invoke": "by the code path read: lambda_handler takes an HTTP API v2 event (generate_installed.py:500); y75 invoked it directly with the same nine headers. The portal is not required by the code. Who may invoke is IAM, not read.",
+    "acceptance_failures": "see gaps_that_fail_acceptance_from_code"
+  }
+}
