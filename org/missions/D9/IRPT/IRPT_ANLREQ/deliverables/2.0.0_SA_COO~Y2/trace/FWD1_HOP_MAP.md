@@ -107,4 +107,8 @@ Of those, the CTO ruled three cuts (msg 4919): the ATTACH RELEASE for hops 9, 11
   it); row `TCKT_VNEXT-D2-S48` (its read, `AR-y-163`); `commentary_sent` on the ticket page (`AR-y-164`); arm F2 (its read,
   `AR-y-165`). STILL PARKED by the PRD's own list: SUBTOTAL, SUM, ALL; the form sending `commentary_requested` (after
   `2.0.0_SA_COO~P2`'s release).
+- **PARKED 2026-10-12 ~02:3xZ for this seat's next issuance (owner `2.0.0_SA_COO~Y2`; un-parks at the next L10 analysis): a 403 on
+  the commentary-sent control is settled.** CTO msg 6369, "one follow-up, not a condition": a person who may not record the send
+  is offered the control again after the 403; add 403 to the settled set so the control goes away (`AnalysisRequestParts.tsx`,
+  `SENT_SETTLED` and the status test beside it), with a test.
 

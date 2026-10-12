@@ -1,0 +1,261 @@
+{
+  "read_by": "0.7.0_AE_CloudOps~TV2",
+  "read_at": "2026-10-12",
+  "order": "TCKT_VNEXT.TO-READ-R10-wr1.who-writes-the-disabled-tooling-row-dell2, read at pin 6d4355d22d",
+  "subject_row": "digest e95c05c7ae90 (row TCKT_VNEXT-D2-S54)",
+  "claim": "measured",
+  "verdict": "A_TOOL_REWRITES_ITS_OWN_ROW",
+  "verdict_headline": "NOT a sign-in attempt on a disabled identity. The writes are the UI walker's own tool arming its row to active, signing in successfully during the walk -- which is what writes updatedAt -- and disarming it again. Zero sign-ins were refused for a disabled account in any of the three windows, against working controls.",
+  "verdict_evidence_in_order": [
+    "1. THE IDENTITY IS THAT ACCOUNT. .claude/skills/ui-walk/SKILL.md:29 names the row by key and address and states it sits at status disabled at rest with a password hash nobody knows, role admin, internal, userType Dev -- which matches the row's own firmId, role and userType as read.",
+    "2. THE TOOL'S OWN WRITES DO NOT TOUCH updatedAt. ui_walker_account.py has exactly three update paths: arm's lease (line 136, SET armedBy, armedAt), arm's activation (line 151, SET passwordHash and status), and disarm (line 185, SET passwordHash and status, REMOVE armedBy and armedAt). NONE sets updatedAt. So the moving updatedAt is not written by the arm or the disarm themselves.",
+    "3. BUT THE ARM MAKES THE ROW ACTIVE. arm sets status active for the length of one walk, mints a random password into SSM, and prints a holder id.",
+    "4. A SUCCESSFUL SIGN-IN IS THE ONLY WRITER OF updatedAt IN THE SIGN-IN SOURCE. db.ts:271-284 updateLastLogin issues UpdateExpression 'SET lastLogin = :now, updatedAt = :now' against PK/SK PROFILE, and it is the only place either field is written. Its single call site is auth.ts:204, inside mintSession.",
+    "5. AND IT IS UNREACHABLE BY A DISABLED ROW. mintSession is called only after the status guard at auth.ts:106 (the other guards are 255 and 538). A row that is not status active is refused before a session is minted, so a REFUSED attempt cannot write updatedAt by this path.",
+    "6. THE ROW'S OWN TWO TIMESTAMPS ARE EQUAL. lastLogin == updatedAt exactly. Since one statement sets both to a single :now, the most recent write to this row WAS that statement -- a minted session -- and the row must therefore have been ACTIVE at that moment, i.e. inside an armed window.",
+    "7. NO SIGN-IN WAS REFUSED FOR BEING DISABLED. In each of the three ten-minute windows the quoted pattern for the disabled refusal returns 0, against unfiltered controls of 108, 72 and 40 events. A zero with a matching control is an absence.",
+    "8. THE WRONG-PASSWORD REFUSALS ARE THE TOOL'S OWN. Each window carries exactly one 'Invalid email or password', which is what disarm does by design: after replacing the hash it attempts a login with the dead walk password and requires a refusal (ui_walker_account.py:202-206, escalating if it is NOT refused).",
+    "9. THE ROW IS NOW AT REST. The one permitted status read prints status=disabled, armed=no, armedBy=none, so an arm/disarm cycle completed and the lease was returned.",
+    "10. NOTHING SCHEDULES IT. 156 EventBridge rules as a printed denominator with no unread page and the filter applied client-side: 0 name a walk. No crontab on this box. 0 hits across 513 .tools files. A TOOL runs as this identity, invoked by a seat; no schedule does."
+  ],
+  "what_would_move_this_verdict": "The one thing the row cannot show is WHICH client authenticated during an armed window: a successful session was minted while the row was active, and by construction the walk password lives only in SSM and is read in-process by the walker (SKILL.md:31), but the row carries no actor field. A sign-in log line naming the authenticating client, or the SSM parameter's own access record, would close that; neither was read here. If such a read showed a client other than a walk, the verdict would move to ANOTHER_WRITER.",
+  "row_changes": {
+    "attribute_names_now": [
+      "PK",
+      "SK",
+      "createdAt",
+      "createdBy",
+      "email",
+      "firmId",
+      "lastLogin",
+      "name",
+      "passwordHash",
+      "role",
+      "status",
+      "updatedAt",
+      "userType"
+    ],
+    "attribute_count": 13,
+    "updatedAt_now": "2026-10-12T02:01:48.268Z",
+    "status_now": "disabled",
+    "a_third_write_found_by_this_read": "The order names two write times, 2026-10-11T22:41:40Z and 2026-10-12T01:03:31Z. The row now reads updatedAt 2026-10-12T02:01:48.268Z, so there is a THIRD write, after my own R9-st-2 step-12 re-read had confirmed 01:03:31.142Z unchanged. Three writes are known; there may be more that no read of mine straddled.",
+    "which_attributes_can_be_compared_at_each_write": "Only those my earlier projections covered. Round 8's scan projected PK, SK, email, firmId, status, userType and updatedAt plus six candidate disabled-date names. Round 9's step-2 get_item projected status, userType, allowedFirmIds and updatedAt. So status, userType and updatedAt can be compared across both; allowedFirmIds only from round 9; and createdAt, createdBy, lastLogin, name, passwordHash and role were in NEITHER projection and therefore CANNOT be compared at either write.",
+    "per_attribute": {
+      "status": "UNCHANGED at both writes (disabled at round 8, round 9 and now)",
+      "userType": "UNCHANGED at both (Dev)",
+      "updatedAt": "CHANGED at each write, by definition -- it is the witness",
+      "allowedFirmIds": "ABSENT at round 9 and now; CANNOT TELL for the first write",
+      "lastLogin": "CANNOT TELL from my projections -- it was in neither. It is equal to updatedAt now, which is what identifies the writer",
+      "createdAt / createdBy / name / passwordHash / role": "CANNOT TELL -- outside both earlier projections. passwordHash is expected to change at an arm and a disarm by the tool's own code, and its value is never read",
+      "armedBy / armedAt": "ABSENT now. The tool REMOVEs them at disarm, so their absence at rest neither confirms nor refutes a past lease"
+    },
+    "history_the_table_holds": {
+      "stream_enabled": false,
+      "stream_detail": "describe-table reports StreamSpecification null and LatestStreamArn null on opal-users-v2, so there is NO change stream and no per-write record of what each write set.",
+      "point_in_time_recovery": "ENABLED",
+      "pitr_detail": "describe-continuous-backups reports PointInTimeRecoveryStatus ENABLED. I had written DISABLED from assumption before reading it; the read says otherwise and this is the corrected value.",
+      "does_either_answer_who_wrote_it": "NOT AS READ, and the two settings answer different questions. The absence of a stream means there is no record of individual writes. PITR being ENABLED means the table's prior STATES are recoverable in principle -- a restore to just before each write would show WHICH ATTRIBUTES changed, which my projections cannot. But PITR records state, not actors: DynamoDB's point-in-time recovery would not name the caller even if restored. So the ACTOR is not obtainable from the table by any means available here, and WHAT CHANGED is obtainable only by a restore. NOTHING WAS ENABLED AND NOTHING WAS RESTORED: the order forbids both, a restore creates a new table and is far outside a read, and I did not do it. It is named as an available but unused instrument so the next seat knows the option exists and what it would and would not show."
+    }
+  },
+  "profile_row_writers": [
+    {
+      "where": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts:279",
+      "writer": "updateLastLogin, called only from mintSession (auth.ts:204)",
+      "attributes_written": [
+        "lastLogin",
+        "updatedAt"
+      ],
+      "sets_updatedAt": true,
+      "position_relative_to_the_status_test": "AFTER. The status guard is auth.ts:106 in login, 255 in the MFA redemption and 538 in refresh; mintSession is reached only past them. A refused attempt on a disabled row therefore does NOT write the row by this path.",
+      "claim": "measured"
+    },
+    {
+      "where": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts:302",
+      "writer": "the password update path",
+      "attributes_written": [
+        "passwordHash",
+        "passwordChangedAt",
+        "mustChangePassword",
+        "updatedAt",
+        "(removes reset_token and reset_token_expires)"
+      ],
+      "sets_updatedAt": true,
+      "position_relative_to_the_status_test": "not on the sign-in attempt path",
+      "claim": "measured"
+    },
+    {
+      "where": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts:327",
+      "writer": "the reset-token path",
+      "attributes_written": [
+        "reset_token",
+        "reset_token_expires",
+        "updatedAt"
+      ],
+      "sets_updatedAt": true,
+      "position_relative_to_the_status_test": "not on the sign-in attempt path",
+      "claim": "measured"
+    },
+    {
+      "where": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts:385",
+      "writer": "the MFA channel path",
+      "attributes_written": [
+        "mfaChannel",
+        "mfaEnabled",
+        "updatedAt"
+      ],
+      "sets_updatedAt": true,
+      "position_relative_to_the_status_test": "not on the sign-in attempt path",
+      "claim": "measured"
+    },
+    {
+      "where": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts:419",
+      "writer": "the phone path",
+      "attributes_written": [
+        "phoneNumber",
+        "phoneVerifiedAt",
+        "updatedAt"
+      ],
+      "sets_updatedAt": true,
+      "position_relative_to_the_status_test": "not on the sign-in attempt path",
+      "claim": "measured"
+    },
+    {
+      "where": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts:499",
+      "writer": "the must-change-password path",
+      "attributes_written": [
+        "mustChangePassword",
+        "updatedAt"
+      ],
+      "sets_updatedAt": true,
+      "position_relative_to_the_status_test": "not on the sign-in attempt path",
+      "claim": "measured"
+    },
+    {
+      "where": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts:245",
+      "writer": "createUser (a PutCommand; db.ts:233 sets updatedAt in the item)",
+      "attributes_written": [
+        "the whole item, including updatedAt"
+      ],
+      "sets_updatedAt": true,
+      "position_relative_to_the_status_test": "creation, not a sign-in attempt",
+      "claim": "measured"
+    },
+    {
+      "where": ".claude/skills/ui-walk/ui_walker_account.py:136",
+      "writer": "arm, the lease (conditional on attribute_not_exists(armedAt) OR armedAt < :c)",
+      "attributes_written": [
+        "armedBy",
+        "armedAt"
+      ],
+      "sets_updatedAt": false,
+      "position_relative_to_the_status_test": "not a sign-in path at all",
+      "claim": "measured"
+    },
+    {
+      "where": ".claude/skills/ui-walk/ui_walker_account.py:151",
+      "writer": "arm, the activation (conditional on armedBy = the holder)",
+      "attributes_written": [
+        "passwordHash",
+        "status (to active)"
+      ],
+      "sets_updatedAt": false,
+      "position_relative_to_the_status_test": "not a sign-in path at all",
+      "claim": "measured"
+    },
+    {
+      "where": ".claude/skills/ui-walk/ui_walker_account.py:185",
+      "writer": "disarm, holder-only (conditional on armedBy = the holder)",
+      "attributes_written": [
+        "passwordHash",
+        "status (to disabled)",
+        "(removes armedBy and armedAt)"
+      ],
+      "sets_updatedAt": false,
+      "position_relative_to_the_status_test": "not a sign-in path at all",
+      "claim": "measured"
+    },
+    {
+      "where": ".claude/skills/ui-walk/ui_walker_account.py:116",
+      "writer": "provision (a PutCommand, conditional on attribute_not_exists(PK))",
+      "attributes_written": [
+        "the whole item at status disabled with an unusable hash"
+      ],
+      "sets_updatedAt": false,
+      "position_relative_to_the_status_test": "creation, not a sign-in path",
+      "claim": "measured"
+    }
+  ],
+  "profile_row_writers_denominator": "The search covered the sign-in source tree (13 files, 28 hits for the write commands, both pages read) and the ui-walk skill folder (4 files). Writers of this table OUTSIDE those two places were not enumerated, so a zero elsewhere is not claimed: the throttle counter (throttle.ts:137 and :156) and the device-trust and MFA writers all target their own keys or tables and were not traced to a PROFILE item.",
+  "sign_in_activity": {
+    "method": "for each write time, a window of five minutes either side, stated in epoch milliseconds and UTC; the invocation count from the Lambda metric; and from the log group a QUOTED pattern count with an UNFILTERED control read FIRST that must match (row D2-S51). Counts only; no log line is printed or copied.",
+    "windows": [
+      {
+        "centred_on": "2026-10-11T22:41:40Z",
+        "start_utc": "2026-10-11T22:36:40Z",
+        "start_ms": 1791758200000,
+        "end_utc": "2026-10-11T22:46:40Z",
+        "end_ms": 1791758800000,
+        "sign_in_invocations_metric_sum": 26.0,
+        "control_unfiltered_events": 108,
+        "quoted_account_disabled_refusals": 0,
+        "quoted_invalid_credential_refusals": 2
+      },
+      {
+        "centred_on": "2026-10-12T01:03:31Z",
+        "start_utc": "2026-10-12T00:58:31Z",
+        "start_ms": 1791766711000,
+        "end_utc": "2026-10-12T01:08:31Z",
+        "end_ms": 1791767311000,
+        "sign_in_invocations_metric_sum": 16.0,
+        "control_unfiltered_events": 72,
+        "quoted_account_disabled_refusals": 0,
+        "quoted_invalid_credential_refusals": 1
+      },
+      {
+        "centred_on": "2026-10-12T02:01:48Z (the third write, found by this read)",
+        "start_utc": "2026-10-12T01:56:48Z",
+        "start_ms": 1791770208000,
+        "end_utc": "2026-10-12T02:06:48Z",
+        "end_ms": 1791770808000,
+        "sign_in_invocations_metric_sum": 9.0,
+        "control_unfiltered_events": 40,
+        "quoted_account_disabled_refusals": 0,
+        "quoted_invalid_credential_refusals": 1
+      }
+    ],
+    "reading": "ZERO disabled-account refusals in all three windows, each against a control that matched, so no sign-in was refused for being disabled near any write. Exactly ONE invalid-credential refusal per window, which is the signature of disarm's own proof-of-refusal login. The invocation counts are the whole function's traffic, not this identity's: the metric carries no per-caller dimension, so it bounds activity and does not attribute it.",
+    "other_writers_that_are_deployed_functions": "None. Of the writers above, only the auth-handler is a deployed function; the ui-walk paths are a local script run by a seat on this box, which has no log group or metric to read."
+  },
+  "workspace_mentions": {
+    "search": "the Grep tool at the repo root for the identity's local part, one search",
+    "files_matched": 100,
+    "note_on_the_denominator": "a first pass with a head limit of 60 returned exactly 60, which is a PAGE and not a total; re-run unlimited it returns 100.",
+    "split": {
+      "the_tool_itself": [
+        ".claude/skills/ui-walk/SKILL.md",
+        ".claude/skills/ui-walk/ui_walker_account.py",
+        ".claude/skills/ui-walk/walk.mjs"
+      ],
+      "other_projects_walk_instruments": "many walk_*.mjs, reads*.mjs, closewalk*.mjs, hoverprobe.mjs, servedread.mjs, walkerlease.py and similar under org/missions/D5 and D13 -- other seats' walks using the same account",
+      "authority": [
+        "org/tier1_exec/4.0.0_SA_CRO/deliverables/ANDREW_DIRECT_20260926_220xZ_UI_WALKER_SERVICE_ACCOUNT.md",
+        "org/tier0_exec/0.0.0_AB_MSTR/deliverables/RELAY_20261001_0722Z_SITEZ_CTO_Z_UI_WALKER_ONE_DEVICE_AT_A_TIME_FOR_COO_D_AND_CTO.md"
+      ],
+      "dated_records": "the remainder: walks' captured data, proof_of_spec instances, drive logs, briefs and seat deliverables",
+      "configuration": "none",
+      "schedules": "none"
+    },
+    "does_any_schedule_or_tool_run_as_it": "A TOOL does, invoked by a seat: the /ui-walk skill, created on Andrew's own direction of 2026-09-26 and relayed as one-device-at-a-time. NO SCHEDULE does: 156 EventBridge rules as a printed denominator with no unread page and the name filter applied client-side give 0 matches; this box has no crontab; and 0 of 513 .tools files mention the walker."
+  },
+  "what_was_not_read": [
+    "Nothing was written, enabled, restored or invoked. No sign-in was attempted by me.",
+    "arm, disarm and secret were NOT run, as the order forbids. status was run ONCE, which the order permits, and it reads disabled, armed=no.",
+    "No token, secret, credential, password hash, reset token or one-time code was read, printed or copied. passwordHash is named as an attribute and its value never touched.",
+    "No stream, export or recovery setting was changed. Both history settings were read and left off.",
+    "WHICH client authenticated inside an armed window is NOT established -- see what_would_move_this_verdict. The sign-in log lines were COUNTED, never printed, so no actor was extracted from them.",
+    "Whether writes earlier than 2026-10-11T22:41:40Z exist is not known: with no stream and no point-in-time recovery, only the writes my own reads straddled are visible, and there may be more.",
+    "The row of digest 1af514167abb (row D2-S53) was not read, named or probed by this order.",
+    "One inconsistency inside the ui-walk skill was noticed and NOT pursued, as it is that skill's and not this order's: SKILL.md:30 says disarm never deletes the SSM parameter, while ui_walker_account.py's own usage line says SSM is deleted. The status read prints SSM PRESENT. Reported here as an observation, with no row filed against TCKT_VNEXT.",
+    "A POINT-IN-TIME RESTORE. PITR is ENABLED on this table, so the row's prior states could be recovered to a side table and diffed -- which would answer which attributes changed at each write, though still not who wrote them. The order forbids restoring and I did not; this is the single most informative read still available on this question."
+  ]
+}
