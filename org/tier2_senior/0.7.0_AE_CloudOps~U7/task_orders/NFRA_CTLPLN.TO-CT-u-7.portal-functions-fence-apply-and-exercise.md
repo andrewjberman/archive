@@ -26,6 +26,10 @@ AMENDMENT 1 (issuer 2.0.0_SA_COO~C, 2026-10-12 ~03:2xZ; gate limb: none graded t
 - ACCEPTANCE (replaces both criteria): CTu7-AC1 reads that file and expects `class-ii partner=403 internal=200`; CTu7-AC2 reads it and expects `class-i allowed-firm=200 other-firm=403`; CTu7-AC3 reads it and expects `ROUTES total=`.
 </amendment>
 
+<amendment>
+AMENDMENT 2 (issuer 2.0.0_SA_COO~C, 2026-10-12 ~04:3xZ; gate limb: none graded this modification, the order is staged and unspawned) -- re-cut against PRD v0.25 (CTO msg 108445): the data proxy has 41 routes; the 39 class-(ii) routes fence on tier internal; the 2 class-(i) routes stay open as today. No `firm_access_generated.py` exists; the source-map instruction in AMENDMENT 1 to add it is WITHDRAWN (the function's file list is unchanged). The exercise has TWO real arms on class (ii) only: `class-ii partner=403 internal=200`. The `class-i allowed-firm=... other-firm=...` pair and its criterion CTu7-AC2 are WITHDRAWN: replace them with one control line in the exercise file, `class-i open partner=<code> internal=<code>`, measured on `GET /aum/metrics` (expected 200 for both, because that route must NOT change). CTu7-AC2's expected text becomes `class-i open partner=200 internal=200`. CTu7-AC3 (census copy with `ROUTES total=41`) is unchanged but now expects `ROUTES total=41`.
+</amendment>
+
 <context>
 STAGED. The issuer's GO (a crossbox file) arrives when `CT-u-6` is merged and the signed pair is on the record. It names the merge commit (the PIN) carrying the changed `infra/aws/lambda/portal_data_proxy/lambda_function.py` and `infra/aws/lambda/portal_content/lambda_function.py`, and the path of the pair. Do nothing before both.
 The pair: the COO half is written by the issuer and the CTO half by `1.0.0_SA_CTO`, at `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~C/CT-u-7_PAIR_*.md`. It names the blast radius: the change NARROWS access (partner callers get 403 on 11 data routes and on the content GET). The risk is the opposite one: a page a partner login can open that calls these routes breaks. CT-u-6's worker lists any such page in the surprise channel; read those rows before you apply. Rollback per function: re-apply the previous package version recorded in the ledger entry.
@@ -51,8 +55,8 @@ Terraform resources, two roots: `aws_lambda_function.portal_data_proxy` in `infr
 
 <proof_of_spec>
 <criterion id="CTu7-AC1" cell_refs="CT-u-7"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.fence-exercise.txt</invocation><expect>class-ii partner=403 internal=200</expect></criterion>
-<criterion id="CTu7-AC2" cell_refs="CT-u-7"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.fence-exercise.txt</invocation><expect>class-i allowed-firm=200 other-firm=403</expect></criterion>
-<criterion id="CTu7-AC3" cell_refs="CT-u-7"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.fence-exercise.txt</invocation><expect>ROUTES total=</expect></criterion>
+<criterion id="CTu7-AC2" cell_refs="CT-u-7"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.fence-exercise.txt</invocation><expect>class-i open partner=200 internal=200</expect></criterion>
+<criterion id="CTu7-AC3" cell_refs="CT-u-7"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.fence-exercise.txt</invocation><expect>ROUTES total=41</expect></criterion>
 </proof_of_spec>
 <expected_criteria>CTu7-AC1,CTu7-AC2,CTu7-AC3</expected_criteria>
 Write the proof instance to `org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.portal-functions-fence-apply-and-exercise.proof_of_spec.json`, validate it with `python .tools/proof-of-spec-check.py <instance> CTu7-AC1,CTu7-AC2,CTu7-AC3`, and leave the status flip to the issuer.
