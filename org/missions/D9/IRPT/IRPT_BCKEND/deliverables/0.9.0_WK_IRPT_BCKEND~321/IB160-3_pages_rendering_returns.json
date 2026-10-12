@@ -1,0 +1,265 @@
+{
+  "to_id": "IRPT_BCKEND.TO-IB-pr-466",
+  "cell": "IB-pr-466",
+  "worker": "0.9.0_WK_IRPT_BCKEND~321",
+  "base_commit": "7c00a44b5ab2a1cb5259fe5bed4e9acb5cc63a40",
+  "portal_checkout": "C:/dev/ajb_workspace/portal/",
+  "portal_commit": "dbeb6764eaa688230f44cfcc1763bd73db6e1142",
+  "portal_checkout_note": "This is another checkout (the main workspace's portal submodule) at its own commit dbeb6764eaa688230f44cfcc1763bd73db6e1142; it may be ahead of or behind what is served. The portal submodule is empty in the worker worktree. The workspace git status listed the portal as modified, so its working tree may differ from that commit; files were read as they stand on disk, not from the commit.",
+  "arm": "CODE_READ_ONLY",
+  "route": {
+    "path": "GET /api/scoped/investor-reporting/performance/{accountSetId}",
+    "operation": "performance-report",
+    "declared_at": [
+      "docs/contracts/investor-reporting/v1/routes.json:61 (route_key), :66 (operation)",
+      "infra/aws/lambda/investor-reporting/performance/entry.py:39 (OPERATION), :311 (route table key)"
+    ],
+    "served_by": "infra/aws/lambda/investor-reporting/performance/entry.py:227 _performance_report; the body it returns is {**report, retained_ref?, _status} (entry.py:301); for a holdings-basis firm the report comes from holdings_gold.calculate (holdings_gold.py:212, returns at :342-343) through retained.py:292"
+  },
+  "payload_members": {
+    "figure": [
+      {"name": "returns.summary_returns[].{label,value,absent_reason}", "where": "docs/contracts/investor-reporting/v1/PerformanceReport.schema.json (returns, required at :313-318); built at infra/aws/lambda/investor-reporting/performance/normalize.py:278-289 and :316-322; holdings_gold sets node.summary at holdings_gold.py:269"},
+      {"name": "returns.period_returns[].{period,start,end,value}", "where": "normalize.py:317-322; holdings_gold.py:270"},
+      {"name": "returns.daily_cumulative_series[].{date,cumulative}", "where": "normalize.py:316; holdings_gold.py:252-257, :271"},
+      {"name": "returns.account_detail[].{account_id,level,value}", "where": "holdings_gold.py:305; schema :304-308"}
+    ],
+    "claim": {
+      "name": "optional_facts.value_facts.claim",
+      "where": "set at holdings_gold.py:291 (inferred, when a trading day has no partition) and :295 (measured); carried into the report by normalize.py:325-327 (optional_facts.value_facts = primary.value_facts); the same value is also returned as outcome['claim'] at holdings_gold.py:343, which entry.py does not put on the wire (entry.py:301)",
+      "declared_in_schema": false,
+      "schema_note": "PerformanceReport.schema.json:332-338 declares value_facts only as an object or null with no named member, so claim is not a declared member"
+    },
+    "absences": {
+      "name": "NO wire member. The list is outcome['absences'] (holdings_gold.py:308-341, returned at :342); it is not in the report and not in the body entry.py:301 returns. On the wire it exists only as a state: _status.state PARTIAL and _status.public_reason_code PERFORMANCE_PARTIAL (entry.py:279-288)",
+      "declared_in_schema": false,
+      "unconditional_entries": "holdings_gold.py:308-313 appends three absences (accrual_basis, fees_and_income, money_weighted_return) on every call, so entry.py:279 (partial = bool(outcome.get('absences') or ...)) is true for every holdings-basis answer, with or without an excluded day. This is a reading of the code, not a served response.",
+      "excluded_day_entry": "holdings_gold.py:314-317: fact excluded_rows, status PARTIAL, text '%d of %d observed days were non-OK ...' only when excluded > 0",
+      "also_in_report_rows": "normalize.py:286-288 would add a node.absences row to returns.summary_returns[] with absent_reason; holdings_gold never appends to node.absences, so none for this basis (by code)"
+    },
+    "days_excluded": {
+      "name": "optional_facts.value_facts.days_excluded",
+      "where": "holdings_gold.py:274 (value = rows - OK rows, computed at :247); beside it days_linked and days_observed in the same dict (:274)",
+      "declared_in_schema": false
+    },
+    "other_value_facts_members_written": [
+      "start_value, end_value (holdings_gold.py:273)",
+      "days_linked, days_observed (holdings_gold.py:274)",
+      "currency, period_start, period_end, basis (holdings_gold.py:275-277)",
+      "missing_trading_days (holdings_gold.py:292, only on a gap)"
+    ]
+  },
+  "searched_for": [
+    "investor-reporting/performance",
+    "/performance/\\{accountSetId\\}",
+    "performance-report",
+    "getPerformanceReport",
+    "PerformanceReportWire",
+    "adaptPerformanceReport",
+    "\\bPerformanceReport\\b",
+    "days_excluded",
+    "value_facts",
+    "optional_facts",
+    "excluded_rows",
+    "missing_trading_days"
+  ],
+  "searched_scope": "the native Grep tool, files_with_matches, over C:/dev/ajb_workspace/portal (the tool's default ignore rules apply: node_modules and other ignored paths are not in its output; Found 156 files). A second pattern set for 'absences', 'PERFORMANCE_PARTIAL' and 'daysExcluded' found 6 files: Page.tsx (a reason-code comment and list only), two AdvisorIntelligence perfrp files, one SecurityAnalysis harness, one script, one .frontend-dev json; none names this route's absences, so they are not in the 156 and are not counted.",
+  "files_naming_the_route_or_its_payload": {
+    "total": 156,
+    "render": 9,
+    "fetch_or_adapt": 12,
+    "neither": 135,
+    "render_files": [
+      "src/pages/InvestorReporting/render/PrintEntry.tsx (names performance-report in a comment at :54; mounts the print document)",
+      "src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx",
+      "src/pages/InvestorReporting/tabs/reporting/PerformanceHeadline.tsx",
+      "src/pages/InvestorReporting/tabs/reporting/ReturnsHeatmap.tsx",
+      "src/pages/InvestorReporting/tabs/reporting/AccountsTable.tsx",
+      "src/pages/InvestorReporting/tabs/reporting/MethodAndSources.tsx",
+      "src/pages/InvestorReporting/tabs/reporting/PerformanceControls.tsx (names the route in a comment at :16-17)",
+      "src/pages/InvestorReporting/tabs/SampleView.tsx (a sample constant, names the type in a comment at :80; not this route's returns)",
+      "src/pages/InvestorReporting/export/ExportModal.tsx (names the type in a comment at :70)"
+    ],
+    "fetch_or_adapt_files": [
+      "src/api/endpoints/investor-reporting.ts",
+      "src/pages/InvestorReporting/contracts/adapt.ts",
+      "src/pages/InvestorReporting/contracts/envelope.ts",
+      "src/pages/InvestorReporting/contracts/validate.ts",
+      "src/pages/InvestorReporting/contracts/index.ts",
+      "src/pages/InvestorReporting/contracts/wire/PerformanceReport.ts",
+      "src/pages/InvestorReporting/contracts/wire/responses.ts",
+      "src/pages/InvestorReporting/contracts/wire/consumed.ts",
+      "src/pages/InvestorReporting/contracts/wire/index.ts",
+      "src/pages/InvestorReporting/render/manifest.ts",
+      "src/pages/InvestorReporting/state/status.ts",
+      "src/pages/InvestorReporting/export/resolveBundle.ts"
+    ],
+    "neither_basis": "the other 135 are under __tests__/, tests/, fixtures/ (json and index.ts), src/api/__tests__/, two .html test pages, one .netlog and .frontend-dev/testing; placed by path and extension, each listed by the tool's output and none opened except where a pattern line was shown",
+    "sum_check": "9 + 12 + 135 = 156"
+  },
+  "render_files_found_by_data_flow_not_by_pattern": [
+    "src/pages/InvestorReporting/tabs/reporting/PerformanceChart.tsx",
+    "src/pages/InvestorReporting/render/performance/PerformanceDocument.tsx",
+    "src/pages/InvestorReporting/render/performance/Summary.tsx",
+    "src/pages/InvestorReporting/render/performance/PeriodResults.tsx",
+    "src/pages/InvestorReporting/render/performance/AccountDetail.tsx",
+    "src/pages/InvestorReporting/render/performance/CumulativeReturnChart.tsx",
+    "src/pages/InvestorReporting/render/performance/MethodsAndSources.tsx",
+    "src/pages/InvestorReporting/render/narrative/PeriodInContextPage.tsx",
+    "src/pages/InvestorReporting/render/Page.tsx"
+  ],
+  "data_flow_note": "These nine render the adapted view (summaryReturns, dailyCumulative, accountDetail, availability) and name none of the twelve patterns, so they are outside the 156 by construction; they were found by following the callers of getPerformanceReport (ReportingTab.tsx:350, :751; resolveBundle.ts:345) and the consumers of the adapted fields (a pattern search for summaryReturns|dailyCumulative|accountDetail|beginningValue|endingValue over src/pages/InvestorReporting without tests and fixtures).",
+  "pages": [
+    {
+      "page_or_component": "Reporting tab body (PATH A), ReportingTab",
+      "code_line": "src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx:875",
+      "what_it_renders": "the container of the figure: fetches the route (:751), and when the answer is answer-bearing mounts the headline, chart, heatmap and accounts table; this body is replaced by the dashboard (PATH B, another route) when pathBServes is true (:748, :868-874)",
+      "shows_claim": "not shown",
+      "shows_absences": "as a state only, not as a list: a PARTIAL state makes shownComplete false (:831) and the body takes an amber left border, data-presentation qualified (:877-879); which absences, or why, does not reach this component",
+      "shows_days_excluded": "not shown",
+      "which_firms_can_open_it": "route guard App.tsx:462: ProtectedRoute requireAdmin requireInternal requireDev (nav entry App.tsx:107: requiresAdmin, requiresTier internal, requiresDev); the comment at App.tsx:105 says Opal admins only, internal tier opal-capital"
+    },
+    {
+      "page_or_component": "AnswerStatus (inside the collapsed 'Report details')",
+      "code_line": "src/pages/InvestorReporting/tabs/reporting/AnswerStatus.tsx:52",
+      "what_it_renders": "the state word, the qualifier and the business date",
+      "shows_claim": "not shown",
+      "shows_absences": "the state word 'Partial' (:89-91) and, when not complete, 'Qualified answer -- not a complete report' (:92-96); reason code and partial reason are DOM data attributes only, never visible text (:63-68); the block sits inside <details> 'Report details', closed at rest (ReportingTab.tsx:884-889)",
+      "shows_days_excluded": "not shown",
+      "which_firms_can_open_it": "same guard as the Reporting tab (App.tsx:462)"
+    },
+    {
+      "page_or_component": "PerformanceHeadline",
+      "code_line": "src/pages/InvestorReporting/tabs/reporting/PerformanceHeadline.tsx:97",
+      "what_it_renders": "the period return tile (:141), 'Vs benchmark', ending and beginning value tiles (:142-145), 'Answered <start> to <end>' (:195-201), and 'Returns through <date>' when the answer ends before the page date (:204-208)",
+      "shows_claim": "not shown",
+      "shows_absences": "state word and reason code appear only in the panel header's help tip text 'State: ... | Reason: ...' (:154-155, rendered by HelperTip, PanelHeader.tsx:79-80); no list of absences",
+      "shows_days_excluded": "not shown",
+      "which_firms_can_open_it": "same guard as the Reporting tab (App.tsx:462)"
+    },
+    {
+      "page_or_component": "PerformanceChart",
+      "code_line": "src/pages/InvestorReporting/tabs/reporting/PerformanceChart.tsx:81",
+      "what_it_renders": "the cumulative return line drawn from dailyCumulative exactly as stated (file header :16-19)",
+      "shows_claim": "not shown",
+      "shows_absences": "not shown",
+      "shows_days_excluded": "not shown",
+      "which_firms_can_open_it": "same guard as the Reporting tab (App.tsx:462)"
+    },
+    {
+      "page_or_component": "ReturnsHeatmap (inside 'Monthly returns and accounts' disclosure)",
+      "code_line": "src/pages/InvestorReporting/tabs/reporting/ReturnsHeatmap.tsx:78",
+      "what_it_renders": "period returns by label from summaryReturns, plus benchmark and spread rows when supplied; notes 'not supplied for this window' for missing rows (:108-113, :167-170)",
+      "shows_claim": "not shown",
+      "shows_absences": "not shown (the 'not supplied' notes are about missing rows, not the producer's absences)",
+      "shows_days_excluded": "not shown",
+      "which_firms_can_open_it": "same guard as the Reporting tab (App.tsx:462); closed at rest (ReportingTab.tsx:903-911)"
+    },
+    {
+      "page_or_component": "AccountsTable (inside 'Monthly returns and accounts' disclosure)",
+      "code_line": "src/pages/InvestorReporting/tabs/reporting/AccountsTable.tsx:117",
+      "what_it_renders": "one row per accountDetail entry: the account's period return and ending value text, and accounts with no return as uncovered (adapt.ts:794-795, :838)",
+      "shows_claim": "not shown",
+      "shows_absences": "not shown (an account with a null return is shown as uncovered; that is the account_detail value, not the absences list)",
+      "shows_days_excluded": "not shown",
+      "which_firms_can_open_it": "same guard as the Reporting tab (App.tsx:462)"
+    },
+    {
+      "page_or_component": "MethodAndSources (Reporting tab, inside 'Report details')",
+      "code_line": "src/pages/InvestorReporting/tabs/reporting/MethodAndSources.tsx:89",
+      "what_it_renders": "the method in words and the source line in words",
+      "shows_claim": "not shown",
+      "shows_absences": "not shown on the face: the availability state is in the data-system-facts attribute only (:84, :93), never visible text (header :23-29)",
+      "shows_days_excluded": "not shown",
+      "which_firms_can_open_it": "same guard as the Reporting tab (App.tsx:462)"
+    },
+    {
+      "page_or_component": "PerformanceControls",
+      "code_line": "src/pages/InvestorReporting/tabs/reporting/PerformanceControls.tsx:72",
+      "what_it_renders": "the period picker, the requested window against the answered window, the fee basis label",
+      "shows_claim": "not shown",
+      "shows_absences": "not shown",
+      "shows_days_excluded": "not shown",
+      "which_firms_can_open_it": "same guard as the Reporting tab (App.tsx:462)"
+    },
+    {
+      "page_or_component": "Account picker year-to-date suffix (resolveAccountYtd)",
+      "code_line": "src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx:341",
+      "what_it_renders": "one account's year-to-date return from a separate getPerformanceReport call per account (:350), shown beside the account in the picker (composePickerSuffixes, :862)",
+      "shows_claim": "not shown",
+      "shows_absences": "not shown: a PARTIAL answer is answer-bearing (availability.ts:64-69) so it reads as a plain value; only a non-answer-bearing state turns into 'unavailable' words (:351-354)",
+      "shows_days_excluded": "not shown",
+      "which_firms_can_open_it": "same guard as the Reporting tab (App.tsx:462)"
+    },
+    {
+      "page_or_component": "Print/export document, report-state band on every page (ReportStateBand)",
+      "code_line": "src/pages/InvestorReporting/render/Page.tsx:313",
+      "what_it_renders": "the band on every printed page of a performance report built from this route's report (PerformanceDocument.tsx:179-289)",
+      "shows_claim": "not shown",
+      "shows_absences": "state and reason as a state only: 'Report state: Partial -- Qualified -- not a complete report | <business date> | Reason: PERFORMANCE_PARTIAL' (Page.tsx:323-324, :336-345; reasonLine :191-194); the code is printed verbatim; the absences list is not printed",
+      "shows_days_excluded": "not shown",
+      "which_firms_can_open_it": "print route App.tsx:614: requireAdmin requireInternal requireDev allowRenderClaim"
+    },
+    {
+      "page_or_component": "Print document Summary, PeriodResults, AccountDetail, CumulativeReturnChart",
+      "code_line": "src/pages/InvestorReporting/render/performance/Summary.tsx:41",
+      "what_it_renders": "the answered period, beginning and ending value, period return (Summary.tsx:41-81); period results table (PeriodResults.tsx:26), account detail (AccountDetail.tsx:17), cumulative chart (CumulativeReturnChart.tsx:36)",
+      "shows_claim": "not shown",
+      "shows_absences": "not shown",
+      "shows_days_excluded": "not shown",
+      "which_firms_can_open_it": "print route App.tsx:614: requireAdmin requireInternal requireDev allowRenderClaim"
+    },
+    {
+      "page_or_component": "Print document 'Methods and sources' page, MethodsAndSources",
+      "code_line": "src/pages/InvestorReporting/render/performance/MethodsAndSources.tsx:73",
+      "what_it_renders": "method rows, requested against answered window with a trading-day comparison (:76-78, :128-142), source attribution, and a 'Report availability' row",
+      "shows_claim": "not shown",
+      "shows_absences": "state, source-as-of, partial reason and the public reason code, printed in the 'Report availability' row (:169-190); no list of absences",
+      "shows_days_excluded": "not shown (the window note at :128-131 and the closed-days note at :132-137 compare requested and answered dates by the trading calendar, not by the producer's days_excluded)",
+      "which_firms_can_open_it": "print route App.tsx:614: requireAdmin requireInternal requireDev allowRenderClaim"
+    },
+    {
+      "page_or_component": "Print narrative page 'The period in context', PeriodInContextPage (only when the narrative toggle is on)",
+      "code_line": "src/pages/InvestorReporting/render/narrative/PeriodInContextPage.tsx:90",
+      "what_it_renders": "the narrative packet's context and the series chart from dailyCumulative (:114)",
+      "shows_claim": "not shown",
+      "shows_absences": "not shown",
+      "shows_days_excluded": "not shown",
+      "which_firms_can_open_it": "print route App.tsx:614: requireAdmin requireInternal requireDev allowRenderClaim"
+    }
+  ],
+  "adapter_drops": {
+    "adapter": "adaptPerformanceReport, src/pages/InvestorReporting/contracts/adapt.ts:767-843; the status carried onto availability by carryAvailabilityFromStatus, adapt.ts:305-337, called from envelope.ts:386; the wire type is src/pages/InvestorReporting/contracts/wire/PerformanceReport.ts (value_facts at :60 typed Record<string, unknown> | null)",
+    "members": [
+      {"member": "optional_facts.value_facts.days_excluded", "kept_or_dropped": "dropped", "line": "adapt.ts:797-799 reads value_facts only for period_start, period_end and currency, and :839-840 only for beginning_market_value and ending_market_value; the view built at :801-842 has no member for it"},
+      {"member": "optional_facts.value_facts.claim", "kept_or_dropped": "dropped", "line": "adapt.ts:797-842 (same lines); no claim member in the view"},
+      {"member": "optional_facts.value_facts.missing_trading_days (and days_linked, days_observed)", "kept_or_dropped": "dropped", "line": "adapt.ts:797-842"},
+      {"member": "absences (list)", "kept_or_dropped": "not on the wire to be kept: entry.py:301 does not return it; the adapter has nothing to drop", "line": "entry.py:301; wire/PerformanceReport.ts:12-71 has no such member"},
+      {"member": "_status.state and _status.public_reason_code (the only trace of absences)", "kept_or_dropped": "kept, as availability.state and availability.publicReasonCode", "line": "adapt.ts:305-337 (state :315, code :322), called at envelope.ts:386"},
+      {"member": "returns.summary_returns[].absent_reason", "kept_or_dropped": "kept", "line": "adapt.ts:777 (metricFromWire(..., row.absent_reason)); the holdings producer leaves it empty (normalize.py:286-288, holdings_gold never fills node.absences)"},
+      {"member": "optional_facts.value_facts.start_value / end_value (the names the producer writes)", "kept_or_dropped": "not read: the adapter reads beginning_market_value and ending_market_value", "line": "holdings_gold.py:273 against adapt.ts:839-840; the only producer writing beginning_market_value is bd_adapter.py:194-195"}
+    ]
+  },
+  "not_searched": [
+    "other front ends than C:/dev/ajb_workspace/portal (none looked for)",
+    "the reporting PDF or export path on the server side (a render service or bundle composer outside the portal); only the portal's print route PrintEntry.tsx and its documents were read",
+    "the dashboard route family GET /api/scoped/investor-reporting/reporting/{account_id}/{which} and client summary (dashboard/reportingRead.ts:4, :35) and DashboardPerformance.tsx / DashboardPerformanceDocument: a different route (PATH B), named, not read in full",
+    "generated files other than the wire type PerformanceReport.ts (consumed.ts, responses.ts and the generators were not opened beyond the match)",
+    "the 135 'neither' files: placed by path, not opened",
+    "node_modules, dist and any path the Grep tool ignores by default",
+    "portal pages outside InvestorReporting that might call the route through another client (the pattern search over the whole portal found none outside InvestorReporting and src/api)"
+  ],
+  "not_established": [
+    "what is served today: this is the checkout at portal commit dbeb6764eaa688230f44cfcc1763bd73db6e1142 on disk (the workspace status showed the portal submodule as modified), not the deployed bundle",
+    "what a signed-in firm user actually sees: no page was opened, no sign-in made; the account where PATH B (the dashboard) is served instead of this route's body is decided at run time by pathBServes (ReportingTab.tsx:748)",
+    "whether the served wire body carries value_facts.claim and days_excluded: read from the producer code at this repo's commit, no response was fetched",
+    "that every holdings-basis answer is PARTIAL: read from holdings_gold.py:308-313 and entry.py:279; not seen on a served response",
+    "whether HelperTip content (PerformanceHeadline help tip) is reachable by a reader as a hover or focus control; only the component call was read",
+    "the 'which firms' answer beyond the route guard: the data firm shown inside the page is chosen by the page's own scope (permitted firms), not read here",
+    "the contract names for the figure in a PerformanceReport.schema.json sense: the schema was read at the optional_facts block (:320-347) and the returns required list (:313-318) only"
+  ],
+  "product_files_edited": 0,
+  "sign_ins_made": 0,
+  "pages_opened_in_a_browser": 0,
+  "api_calls_made": 0,
+  "aws_calls_made": 0
+}
