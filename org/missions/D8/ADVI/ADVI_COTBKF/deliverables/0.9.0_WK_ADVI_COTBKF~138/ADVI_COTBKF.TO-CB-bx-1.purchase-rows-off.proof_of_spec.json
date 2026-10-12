@@ -1,0 +1,86 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bx-1",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bx-1.purchase-rows-off.md",
+  "group": "OTHER",
+  "vintage_commit": "ac8000c35b"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~138",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round76.md",
+  "vintage_commit": "ac8000c35b",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bx-1.purchase-rows-off.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~138/PURCHASE_ROWS_OFF.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "local measurement record on copies; nothing served, applied or written to any bucket; no product file edited; no account id or account amount in it",
+   "artifact_covered_by": [
+    "CB76bx1-AC1",
+    "CB76bx1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~138/PURCHASE_ROWS_OFF.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the cause tables under both orders and the fit after the benign causes; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB76bx1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB76bx1-AC1",
+   "criterion_verbatim": "the closed list was written first; round 75's rows are reproduced; every off row carries a cause under the stated order and under the alternative (`given` and `given_alt` equal `off`); the issuer reads how many change with the order.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~138/PURCHASE_ROWS_OFF.json',encoding='utf-8'));r=d['reproduced'];c=d['causes'];a=d['alternative'];print('PURCHASE-ROWS-OFF list_written=%s reproduced=%d/%d/%d off=%d given=%d given_alt=%d none_found=%d change_with_order=%d by_cause=%s'%(bool(d['closed_list']['written_at']),r['purchase_rows'],r['with_a_close'],r['within_1pct'],r['off'],sum(v['rows'] for v in c.values()),sum(v['rows'] for v in a.values()),c.get('none_found',{}).get('rows',0),d['rows_that_change_cause_with_the_order'],json.dumps({k:v['rows'] for k,v in c.items()},sort_keys=True)))\"",
+   "expect": "PURCHASE-ROWS-OFF list_written=True reproduced=1119/936",
+   "output_evidence": "PURCHASE-ROWS-OFF list_written=True reproduced=1119/936/690 off=246 given=246 given_alt=246 none_found=124 change_with_order=41 by_cause={\"adjusted_close\": 0, \"another_share_class\": 0, \"fee_constant_excess\": 20, \"fee_inside_amount\": 35, \"next_day_close\": 15, \"none_found\": 124, \"prior_day_close\": 31, \"reinvestment_or_exchange_recorded_as_purchase\": 21, \"settle_date_close\": 0, \"small_quantity\": 0} (rc 0)",
+   "denominator": "1,119 purchase rows, 936 with a close, 690 within 1 percent, 246 off; 246 of 246 off rows carry a cause under the stated order and 246 of 246 under the alternative; 41 of 246 change cause with the order; list written 2026-10-11T22:52:32Z (clock) before any off row was looked at",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB76bx1-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the list, its tests and both orders precede the look and were not widened after; a fee is named by a test stated beforehand and not read off the rows; `none_found` is used where no test fits; the sale rows are reported as they came out; no account id or amount appears.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read PURCHASE_ROWS_OFF.json (closed_list.text and closed_list.written_at, causes, alternative, none_found, fit_after_benign_causes, no_close_that_day, not_established) and PURCHASE_ROWS_OFF.md",
+   "output_evidence": "closed list text with clock timestamp 2026-10-11T22:52:32Z copied into the record unchanged from the scratch file (sha256 4c1980e76295231c1b4386c1fd0c587219fe6c972e3e3edd3c00566d991b1113); the rate-based fee test and a chance control (shifts of +/-0.35 points) were stated beforehand; none_found = 124 in both orders; the flat-dollar pattern is marked POST HOC and is in no count; sales reported as they came out (89.2 percent within 1 percent; all 102 off rows have the price received below the close); no account id or amount in the record",
+   "denominator": "246 off purchase rows under two orders; 942 sale rows with a close; 183 rows with no close",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~138/ADVI_COTBKF.TO-CB-bx-1.purchase-rows-off.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB76bx1-AC1)",
+   "result": "PURCHASE-ROWS-OFF list_written=True reproduced=1119/936/690 off=246 given=246 given_alt=246 none_found=124 change_with_order=41 by_cause={\"adjusted_close\": 0, \"another_share_class\": 0, \"fee_constant_excess\": 20, \"fee_inside_amount\": 35, \"next_day_close\": 15, \"none_found\": 124, \"prior_day_close\": 31, \"reinvestment_or_exchange_recorded_as_purchase\": 21, \"settle_date_close\": 0, \"small_quantity\": 0}"
+  }
+ ]
+}

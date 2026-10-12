@@ -1,0 +1,46 @@
+{
+  "question": "Where can a check that an uploaded holdings file holds no more than one account live, so the person filing is turned back before a ticket exists?",
+  "files_read": [
+    "infra/aws/lambda/investor-reporting/intake/uploads.py:100",
+    "infra/aws/lambda/investor-reporting/intake/uploads.py:209",
+    "infra/aws/lambda/investor-reporting/intake/uploads.py:320",
+    "infra/aws/lambda/investor-reporting/intake/uploads.py:412",
+    "infra/aws/lambda/investor-reporting/intake/parse.py:98",
+    "infra/aws/lambda/investor-reporting/intake/parse.py:106",
+    "infra/aws/lambda/investor-reporting/intake/parse.py:822",
+    "infra/aws/lambda/investor-reporting/intake/template_reader.py:176",
+    "infra/aws/lambda/investor-reporting/intake/portfolio.py:129",
+    "infra/aws/lambda/investor-reporting/intake/portfolio.py:158",
+    "portal/src/pages/TicketCenter/analysisRequest.ts:99"
+  ],
+  "where_an_account_is_named_in_an_uploaded_file": "The normalizer recognises no account column. The CSV/xlsx parser (parse.py) locates the header row by IDENTIFIER_HEADERS = ticker, symbol, security, identifier, cusip, isin, id (parse.py:106, :824) and reads only identifier, NAME_HEADERS (name, description, security name, holding; :107), quantity/value/weight columns from UNIT_HEADERS (:98-105) and a currency column (CURRENCY_HEADERS :108). A column headed account is not in any of these lists, so it is neither read nor kept; a header cell that merely equals one of the listed words is the only way a column is used. The template lane (template_reader.py:179-189) reads only columns A (ticker or symbol) and B (the unit). Grep of the intake folder for account found no account header in uploads.py, parse.py or template_reader.py; parse.py:1242 mentions an account number only in a comment about not leaking values. uploads.py:209 repository_owner sets account_ids=[] on a prospect upload's owner: that field is the OWNER's list of custody accounts, filled only on the custody lane (portfolio.py:129-134, :167-177 require a non-empty account_ids for CUSTODY, and a prospect owner has prospect_input_id instead, :158-169). So an empty list means this upload is a prospect input owned by a firm and principal, not tied to any account; it says nothing about how many accounts the file holds. The normalized input keeps nothing of an account.",
+  "can_the_door_count_accounts_today": "no: no code in uploads.py, parse.py or template_reader.py reads a column naming an account (header lists parse.py:98-108, template_reader.py:179-189), the normalized holdings carry none, and uploads.py:209 sets account_ids to [] for a prospect upload, so the door has no account value to count.",
+  "where_the_check_can_live": [
+    {
+      "home": "the door's normalizer (parse.py for the csv lane, template_reader.py for the template lane)",
+      "needs_that_it_lacks": "A declared list of account header names (for example an ACCOUNT_HEADERS tuple beside IDENTIFIER_HEADERS, parse.py:106), reading that column per row (parse.py row loop from :877), and a count of distinct values; the template lane reads only columns A and B so it would need a third column or a rule for where the account sits. Also a decision on what to do with a file that has no account column at all (cannot be told apart from one account).",
+      "file_that_would_change": "infra/aws/lambda/investor-reporting/intake/parse.py (and template_reader.py for the template lane)",
+      "person_filing_learns_at_once": "yes, if it emits a finding: the file is parsed inside the upload POST and the result is returned to the portal before any ticket is created; the portal files nothing on a non-NORMALIZED state (analysisRequest.ts:106-119)."
+    },
+    {
+      "home": "the door's result findings (uploads.py / template_reader finding codes)",
+      "needs_that_it_lacks": "A new finding code with a correction word in CORRECTION_WORDS (uploads.py:58) and a path that turns the state to NEEDS_CORRECTION (uploads.py:340 for csv, :411-420 for the deferred template answer). It still needs the count from the normalizer, since findings only carry the verdict; and the door's published AnalysisUploadResult is closed at top level (uploads.py:81-84), so the code rides on a finding item, not a new field.",
+      "file_that_would_change": "infra/aws/lambda/investor-reporting/intake/uploads.py plus the finding code list in template_reader.py or parse.py",
+      "person_filing_learns_at_once": "yes: the portal already turns NEEDS_CORRECTION findings into lines for the person (analysisRequest.ts:106-111, findingLines :78) and files nothing. This is the delivery channel for the normalizer's verdict, not an independent home."
+    },
+    {
+      "home": "the ticket service (infra/aws/lambda/ticket_center/lambda_function.py)",
+      "needs_that_it_lacks": "The file itself, or an account count from the door. Per the order's WHY it receives only upload_id and input_id; no fetch of the normalized input was read. It could look the input up only by being given access to the door's retained artifact.",
+      "file_that_would_change": "infra/aws/lambda/ticket_center/lambda_function.py (plus a way to read the door's retained input)",
+      "person_filing_learns_at_once": "no in the sense asked: the check would run at ticket creation, so the ticket request has been made; it could still refuse the create call, but the file has by then passed the door and is retained. Not recommended as the first home."
+    },
+    {
+      "home": "the portal form (portal/src/pages/TicketCenter/analysisRequest.ts)",
+      "needs_that_it_lacks": "The file's bytes are available in the browser before upload (the upload request wire carries the base64 file, analysisRequest.ts:101), but the form has no CSV or xlsx reader and no account header list; it would have to parse the file itself, duplicating the door's header rules, with an xlsx reader for the template lane. The door's result carries no account field to read.",
+      "file_that_would_change": "portal/src/pages/TicketCenter/analysisRequest.ts (portal is a separate repository)",
+      "person_filing_learns_at_once": "yes, earliest of all (before the door call), but it is only a browser-side convenience: a client calling the door directly bypasses it, so it cannot be the only check."
+    }
+  ],
+  "what_was_not_read": "I did not open infra/aws/lambda/ticket_center/lambda_function.py, so the ticket-service statements rest on the order's WHY text. I did not read the xlsx row loop of parse.py past the header and column location (lines 822-849 and a grep of the rest), the _csv and _xlsx readers in template_reader.py, the template lane's _freeze_template or portfolio.py beyond the owner and account_ids lines, the AnalysisRequest.schema.json contract, upload_entry.py content (grep found no account), the resolver files, or any test. I did not open any holdings file, so what a real file's headers look like is undetermined; whether a client file with an account column would parse (the column ignored) or be refused by a layout rule was not run. I could not determine how CSV rows beyond the header are mapped for non-listed columns without reading parse.py:877 onward.",
+  "claim": "inferred"
+}

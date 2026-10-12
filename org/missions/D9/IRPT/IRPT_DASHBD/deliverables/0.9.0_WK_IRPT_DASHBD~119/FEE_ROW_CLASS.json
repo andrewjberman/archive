@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-146",
+  "worker": "0.9.0_WK_IRPT_DASHBD~119",
+  "question": "The shared code table's class for the one Other Fee expense row on the one flow day the count-each-id-once rule does not reproduce, beside the method's rule.",
+  "table": {
+    "file": "the 187-row Schwab transaction code table: the file named by `classification_table` in data/assets/scripts/gold/irpt_reporting/sources.json line 98 (under org/tier1_exec/4.0.0_SA_CRO/deliverables/, a repo file, not a served table)",
+    "key": "(tran_srcde, tr_cd, sb_cd) = sources.json `transaction_key_columns`, lines 44-48; each row carries a `partition` value",
+    "how_read": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py load_classification() lines 484-507 reads the file (line 490: json.loads of the repo path) and maps each row's `partition` through FINAL_BY_PARTITION (lines 230-242; line 235 maps FEE-ADMIN to FEE-ADMIN); classify_and_sum() line 586 looks each fact_trn row up by its three-part key (`table.get(k, _MISS)`), and line 588 stores the class in `_final`. The input carrying the code is the custodian feed's fact_trn row (columns tran_srcde, tr_cd, sb_cd; sources.json lines 11 and 14 give bucket and transactions_prefix)."
+  },
+  "feed_read": {
+    "source": "the producer's own fact_trn input: sources.json transactions_prefix, one date partition, one object",
+    "scope": "one account, one day, one firm; projection of tran_srcde, tr_cd, sb_cd, debit_credit, account_id, business_date and gross_amount (gross_amount was loaded by the script but never printed or compared)",
+    "partition_objects": 1,
+    "feed_rows_for_the_account_day": 11,
+    "ledger_rows_for_the_account_day": 11,
+    "rows_by_key": [
+      {"key": "TRADE/TR/TR", "debit_credit": "DEBIT", "count": 9, "table_partition": "INTERNAL", "table_category": "Trades"},
+      {"key": "CHK/FC/FO", "debit_credit": "DEBIT", "count": 1, "table_partition": "EXTERNAL-OUT", "table_category": "Checks"},
+      {"key": "FEE/FC/FE", "debit_credit": "DEBIT", "count": 1, "table_partition": "FEE-ADMIN", "table_category": "OTHER"}
+    ],
+    "row_found_by": "the transaction source code: exactly one of the 11 feed rows has tran_srcde FEE; the ledger's Other Fee Expense row is likewise exactly 1 of its 11; no amount was read or compared to tell rows apart",
+    "code_table_row_for_the_key": {"desc": "SERVICE FEE", "rule": "service-fees", "partition": "FEE-ADMIN"}
+  },
+  "row_code": "FEE/FC/FE",
+  "row_class": "FEE-ADMIN",
+  "method_rule": {
+    "file": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+    "line": 706,
+    "quote": "#   - FEE-ADMIN -> an expense of the account, not an advisory fee: it stays inside the return.",
+    "flow_set": {
+      "lines": "713-717",
+      "quote": "crosses = ( (t[\"_final\"] == \"EXTERNAL\") | (t[\"_final\"] == \"FEE-MANAGEMENT\") | t[\"_prov\"].isin(ACCOUNT_BOUNDARY_PROV) )",
+      "reading": "a row classed FEE-ADMIN is none of EXTERNAL, FEE-MANAGEMENT or a pair-match / text-counterpart leg, so it is not in the flow set; it is a cash row counted as held out (lines 741-744)"
+    }
+  },
+  "agree": true,
+  "agree_reading": "The shared code table classes the fee row's code FEE/FC/FE as FEE-ADMIN. The method keeps a FEE-ADMIN expense inside the return and builds the flow set without it, so the served flow rightly omits the row. Read from the row's own code, not from the rule's text. No row against the table or the served number.",
+  "row": null,
+  "not_read": "nothing named by the order was unread. The ledger-side label (Other Fee, type Expense) was taken from worker 115's private table, not re-read from Black Diamond; the feed row was matched to it by the single FEE source code among 11 feed rows against 11 ledger rows, not by amount. The scheduled producer was not run.",
+  "client_figures": 0,
+  "s3_writes": 0
+}

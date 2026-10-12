@@ -1,0 +1,153 @@
+{
+  "read_by": "0.7.0_AE_CloudOps~TV2",
+  "read_at": "2026-10-12",
+  "order": "TCKT_VNEXT.TO-READ-R8-ds1.disabled-users-authorizer-and-status-values-dell2, read at pin 733c0943cd",
+  "claim": "measured",
+  "authorizer": {
+    "a_does_sign_in_refuse_a_disabled_user": {
+      "answer": "YES",
+      "attribute_read": "status",
+      "values_admitted": "EXACTLY the string 'active'. The guard is `status !== 'active'`, so every other value is refused, including an ABSENT attribute -- and the type declares it optional (`status?: string`), so absent is reachable in principle, though no live row has it.",
+      "error_raised": "Account disabled",
+      "where": [
+        "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts:106 -- login(), after the credential check and after the failure counter is cleared",
+        "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts:255 -- the MFA REDEMPTION re-check, whose own comment says an account disabled between the password check and the code submission must not get a session",
+        "infra/aws/opalinvest_dev/lambda/auth-handler/src/types.ts:25 -- `status?: string`"
+      ]
+    },
+    "b_does_refresh_refuse_a_user_disabled_since_sign_in": {
+      "answer": "YES",
+      "where": [
+        "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts:538"
+      ],
+      "note": "its own comment (lines 535-537) states the intent: a disabled or removed user must NOT mint fresh access tokens for the 7-day refresh window, and it mirrors login()'s guard with the SAME error string so the two are indistinguishable and no new enumeration signal is added. This is what bounds the exposure below."
+    },
+    "c_does_either_authorizer_read_the_users_row_status_on_a_request": {
+      "answer": "NO -- neither does",
+      "measured": "ZERO occurrences of status, disabled, enabled, getUser, GetItem, GetCommand or QueryCommand in either authorizer, against a working positive control on the same files (4 and 2 'export' hits), and checked on BOTH the HEAD source and the DEPLOYED build input.",
+      "the_only_users_table_read_the_deployed_authorizer_makes": "a ScanCommand filtered `SK = :meta AND parentFirmId = :parent` with ProjectionExpression 'firmId' (deployed build input lines 84-94), inside getAllDescendants, used by computeAllowedFirms (line 125, called at line 214). It reads META rows of the firm hierarchy and projects one attribute. It never reads the caller's own PROFILE row, so it cannot see the caller's status.",
+      "consequence": "A token issued BEFORE the disabling keeps working until it EXPIRES. Nothing in the request path re-checks the row.",
+      "access_token_lifetime": "15m",
+      "refresh_token_lifetime": "7d",
+      "lifetimes_where": [
+        "infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts:17 -- ACCESS_TOKEN_EXPIRY = '15m'",
+        "infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts:18 -- REFRESH_TOKEN_EXPIRY = '7d'"
+      ],
+      "the_window_in_practice": "At most ~15 MINUTES on the portal path, NOT 7 days: the access token is good for 15m and nothing re-checks it, but the REFRESH path IS guarded (answer b), so the 7-day window cannot be used to mint a new access token after the disabling. The 7d figure bounds the token SHAPE's life, not a disabled user's reach. Read from the code's own constants, never from a token -- no token was read, printed or copied.",
+      "what_this_does_NOT_bound": "the DIRECT-INVOKE path. Row TCKT_VNEXT-D2-S46 (ARMED, the CTO's) records that any holder of lambda:InvokeFunction on a function behind the authorizer can present any caller context without a token at all. No sign-in, no expiry and no 15 minutes apply there, and that is how this project's own R6 and R7 proofs were run."
+    },
+    "d_is_the_deployed_authorizer_this_source": {
+      "answer": "TIED TO ITS ARTIFACT, NOT TO THE SOURCE AT HEAD -- and the distinction matters here",
+      "opal_portal_authorizer": {
+        "live_code_sha256_b64": "gQp2IooAM3EgebVQeII27xcE+KuEDhyYfrlwr6Jqcsc=",
+        "live_last_modified": "2026-10-03T19:52:32Z",
+        "source_map_artifact_sha256": "gQp2IooAM3EgebVQeII27xcE+KuEDhyYfrlwr6Jqcsc=",
+        "equal": true,
+        "source_map_last_deployed_commit": "26ffa22b79",
+        "source_map_last_deployed_at": "2026-09-09T18:50:07Z",
+        "head_source_lines": 450,
+        "deployed_build_input_lines": 262,
+        "drift": "HEAD's index.mjs has 188 lines MORE than the recorded build input, and a test file gained 130. So the 450-line file the order's pointer names is NOT what is deployed. The added code is a RENDER-token path (getRenderPublicKeyPem, isRenderAudienceToken, hasForbiddenRenderClaims, assertBoundedRenderExpiry, authorizeRenderToken); the one added line mentioning DynamoDB is a comment.",
+        "why_the_answer_still_holds": "the status/users-read absence was re-measured against the DEPLOYED build input (git show 26ffa22b79:<path>) and holds there too, with its own positive control. It was not inferred from HEAD.",
+        "note_on_timestamps": "the artifact hash ties, but the function's LastModified (2026-10-03) is LATER than the map's last_deployed_at (2026-09-09). Consistent with a configuration-only update after the last code record; not established by this read."
+      },
+      "opalinvest_auth_handler_the_sign_in": {
+        "live_code_sha256_b64": "mzQH2HZl+PKF97zQ5abEjh82fkX9E/eeyLFJT2iQdLA=",
+        "live_last_modified": "2026-10-08T16:18:26Z",
+        "source_map_artifact_sha256": "mzQH2HZl+PKF97zQ5abEjh82fkX9E/eeyLFJT2iQdLA=",
+        "equal": true,
+        "source_map_last_deployed_commit": "5b066643035146491d8ceb0c1f5264db5edd5b7f",
+        "source_diff_head_vs_that_commit": "0 changed files under src/",
+        "the_three_guards_at_that_commit": "lines 106, 255 and 538 all read `if (user.status !== 'active') {` at the recorded commit, verified by git show",
+        "verdict": "TIED three ways: the live hash equals the map's artifact hash, the source has not changed since the recorded commit, and the guards are present AT that commit. So the DEPLOYED sign-in refuses a non-active user."
+      },
+      "opal_portal_rest_authorizer": {
+        "in_the_source_map": true,
+        "source_map_last_deployed_commit": null,
+        "note": "the map holds an artifact hash but NO last_deployed_commit, so it cannot be tied to a commit from the map. Its source is present (118 lines) and reads no users-row status either, with a working control. NOT TIED."
+      }
+    },
+    "files_read": [
+      "infra/aws/terraform/portal-auth/lambdas.tf:3",
+      "infra/aws/terraform/portal-auth/lambdas.tf:62",
+      "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts:106",
+      "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts:255",
+      "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts:538",
+      "infra/aws/opalinvest_dev/lambda/auth-handler/src/types.ts:25",
+      "infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts:17",
+      "infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts:18",
+      "infra/aws/users/lambda/portal-authorizer/index.mjs",
+      "infra/aws/users/lambda/portal-rest-authorizer/index.mjs",
+      "infra/aws/lambda/ci/lambda-source-map.json"
+    ]
+  },
+  "disabled_internal_rows": [
+    {
+      "digest": "04fc361f3802",
+      "firmId": "opal-capital",
+      "userType": null,
+      "email_domain_only": "whitelabelcreative.com",
+      "reads_as": "person",
+      "why": "a single given name at an EXTERNAL COMPANY domain with userType null: this reads as a PERSON at a partner or vendor, carrying the INTERNAL firm id opal-capital",
+      "disabled_date_attribute": "none -- the row carries no disabledAt, and no PROFILE row in the table carries that attribute or any equivalent",
+      "last_updated_attribute": "updatedAt",
+      "last_updated_value": "2026-07-14T18:26:00.000Z",
+      "last_ticket_event_date": "none -- never appears on any of the 27 tickets",
+      "claim": "measured"
+    },
+    {
+      "digest": "e95c05c7ae90",
+      "firmId": "opal-capital",
+      "userType": "Dev",
+      "email_domain_only": "opal.test",
+      "reads_as": "non-human tooling identity",
+      "why": "a hyphenated tool handle, userType 'Dev', and a .test domain -- all three say tooling, not a person",
+      "disabled_date_attribute": "none -- the row carries no disabledAt, and no PROFILE row in the table carries that attribute or any equivalent",
+      "last_updated_attribute": "updatedAt",
+      "last_updated_value": "2026-10-11T22:41:40.809Z",
+      "last_ticket_event_date": "none -- never appears on any of the 27 tickets",
+      "claim": "measured"
+    }
+  ],
+  "status_values": {
+    "profile_rows": 56,
+    "counts": {
+      "active": 54,
+      "disabled": 2
+    },
+    "counts_sum": 56,
+    "sum_equals_profile_rows": true,
+    "internal_only": {
+      "profile_rows": 23,
+      "counts": {
+        "active": 21,
+        "disabled": 2
+      },
+      "counts_sum": 23
+    },
+    "distinct_values_found": [
+      "active",
+      "disabled"
+    ],
+    "absent_status_rows": 0,
+    "other_attributes_with_the_same_meaning": {
+      "disabledAt": 0,
+      "enabled": 0,
+      "active": 0,
+      "deleted": 0,
+      "lastUpdated": 0,
+      "modifiedAt": 0,
+      "note": "none of these exists on any PROFILE row, so 'status' is the only attribute carrying this meaning. `updatedAt` exists on 53 of 56 PROFILE rows but is a last-touched timestamp, not a state, and 3 rows lack even that."
+    },
+    "the_two_populations_this_answers": "Sign-in admits EXACTLY the 54 rows whose status is 'active'. The ticket service's no-row rule, live since 2026-10-12T00:22:08Z, admits all 56 because it reads whether a row EXISTS. The difference is exactly the 2 disabled rows, both internal: refused at sign-in, admitted by the ticket service."
+  },
+  "what_was_not_read": [
+    "No function was invoked and no sign-in was attempted. Nothing was written to AWS.",
+    "No token, secret or key was read, printed or copied. Both lifetimes come from the code's own constants.",
+    "The DEPLOYED bytes of either authorizer were NOT downloaded or diffed -- the order says not to. The tie is by artifact hash against the source map, plus a git read of the recorded commit's source.",
+    "Whether the portal-authorizer's deployed artifact was actually BUILT from 26ffa22b79's source is NOT established: a matching map hash pairs a function with an artifact, not an artifact with a source tree.",
+    "opal-portal-rest-authorizer cannot be tied to a commit: its map entry has no last_deployed_commit.",
+    "WHO disabled either row, and when, is not recoverable from the table: no PROFILE row carries a disabledAt or any audit attribute. updatedAt is the only timestamp and it records the last touch of any kind.",
+    "Whether the person-shaped disabled row belongs to a real individual, and what should happen to it, is not this read's: I report the FORM of the address and its userType, not an identity."
+  ]
+}

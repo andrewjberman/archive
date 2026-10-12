@@ -61,6 +61,15 @@ def main():
                 fail("%s: securities and securities_with_a_repeated_run" % p[-14:])
             if not isinstance(x.get("days_in_runs"), int) or x["days_in_runs"] < x["repeated_runs"]:
                 fail("%s: days_in_runs is below the number of runs" % p[-14:])
+        s = a.get("no_prior_bar_sentence") or {}  # AMENDMENT 1 (PRD v0.41)
+        bt = s.get("by_type")
+        if not s.get("in_words") or not isinstance(s.get("overlap_all_types_security_days_ungraded"), int) or not isinstance(bt, dict) \
+                or sum(bt.values()) != s["overlap_all_types_security_days_ungraded"] or not isinstance(s.get("of_which_were_equal"), int) \
+                or not s.get("first_day_of_window_treatment"):
+            fail("no_prior_bar_sentence needs in_words, overlap_all_types_security_days_ungraded, by_type summing to it, of_which_were_equal and first_day_of_window_treatment")
+        for p in PAIRS:
+            if not isinstance(by[p].get("security_days_ungraded_by_the_no_prior_bar_sentence"), int):
+                fail("%s: security_days_ungraded_by_the_no_prior_bar_sentence is not stated" % p[-14:])
         if not a.get("run_rule_in_words") or not a.get("first_moved_day_rule_in_words"):
             fail("the run rule and the first-moved-day rule are not stated in words")
         print("OK: " + "; ".join("%s: %d run(s) %s" % (p.split(" / ")[-1], by[p]["repeated_runs"], by[p]["first_moved_day_after_a_run"]) for p in PAIRS))

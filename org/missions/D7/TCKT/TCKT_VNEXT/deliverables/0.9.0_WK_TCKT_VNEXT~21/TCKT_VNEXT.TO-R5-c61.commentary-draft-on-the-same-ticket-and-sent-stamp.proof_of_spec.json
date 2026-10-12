@@ -1,0 +1,125 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-R5-c61",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R5-c61.commentary-draft-on-the-same-ticket-and-sent-stamp.md",
+  "group": "OTHER",
+  "vintage_commit": "05c5a5e930"
+ },
+ "assignee": "0.9.0_WK_TCKT_VNEXT~21",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R5.md",
+  "vintage_commit": "05c5a5e930",
+  "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R5-c61.commentary-draft-on-the-same-ticket-and-sent-stamp.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "R5-cm-1: routes commentary-draft and commentary-sent, MATRIX rows COMMENTARY_DRAFT and COMMENTARY_SENT, _validate_draft_commentary extracted from _validate_service_fields (CREATE behaviour unchanged), commentary_sent added to DL_NOTICE_PROHIBITED; not deployed, no AWS call, terraform untouched",
+   "artifact_covered_by": [
+    "R5-c61-AC1",
+    "R5-c61-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_commentary_same_ticket.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "new file, 7 tests named by the check; in-memory table, no network, no send",
+   "artifact_covered_by": [
+    "R5-c61-AC1",
+    "R5-c61-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_authz_matrix.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "existing test updated for the two new MATRIX actions: expected action count 9 to 11, the two new routes added to ROUTES, the action regex widened to take an underscore",
+   "artifact_covered_by": [
+    "R5-c61-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_commentary_write.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "existing test updated for the two new MATRIX actions: svc-commentary's MATRIX actions now CREATE and COMMENTARY_DRAFT",
+   "artifact_covered_by": [
+    "R5-c61-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_package_route.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "existing test updated for the two new MATRIX actions: svc-commentary's MATRIX actions now CREATE and COMMENTARY_DRAFT",
+   "artifact_covered_by": [
+    "R5-c61-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R5-c61-AC1",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R5_CHECKS/r5_checks.py c6-fields expect: C6-FIELDS-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R5_CHECKS/r5_checks.py c6-fields",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: C6-FIELDS-OK passed=7 of 7",
+   "denominator": "7 of 7 named tests found by name and passed",
+   "status": "PASS",
+   "expect": "C6-FIELDS-OK"
+  },
+  {
+   "criterion_id": "R5-c61-AC2",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R5_CHECKS/r5_checks.py c6-regress expect: C6-REGRESS-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R5_CHECKS/r5_checks.py c6-regress",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: C6-REGRESS-OK passed=190 (min 190) failed=0",
+   "denominator": "190 of 190 tests in the ticket_center tests folder passed (183 at the base plus 7 new); three existing tests changed for the new action names",
+   "status": "PASS",
+   "expect": "C6-REGRESS-OK"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "in-memory table and users double, no network or clock dependence beyond the server stamp format",
+   "observed": "7 of 7 on the new file under the check; whole folder 190 passed",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "one in-place mutant of lambda_function.py (restored byte-identical, cmp against a saved copy): the requester-firm check against COMMENTARY_ALLOWED_FIRMS removed from the draft route",
+   "expected": "the off-the-list test fails",
+   "observed": "1 failed (test_draft_on_a_ticket_of_a_firm_off_the_list_is_refused), 6 passed; after the restore 7 passed",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a deployed or live run of the ticket service, the API Gateway route additions and any real mail send",
+   "reason": "the order forbids any AWS or network call, any deploy and any send; the two API routes are added at the deploy under its own pair"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~21/TCKT_VNEXT.TO-R5-c61.commentary-draft-on-the-same-ticket-and-sent-stamp.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R5_CHECKS/r5_checks.py c6-fields",
+   "result": "C6-FIELDS-OK passed=7 of 7"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R5_CHECKS/r5_checks.py c6-regress",
+   "result": "C6-REGRESS-OK passed=190 (min 190) failed=0"
+  }
+ ]
+}

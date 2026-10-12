@@ -1,0 +1,56 @@
+{
+  "to_id": "DSGN_IRPTV1.TO-IV-e-116",
+  "row": "DSGN_IRPTV1-D2-W63-S2",
+  "worker": "0.9.0_WK_DSGN_IRPTV1~64",
+  "portal_commit": "762ba2b8762408522d212c147fe0bb2259362f7d",
+  "portal_base": "d3ef4a5d885e61639b244e120985e84aac082984",
+  "label_equals_title": {
+    "printed_once": true,
+    "where": { "file": "portal/src/pages/InvestorReporting/tabs/analysis/NativeSections.tsx", "line": 117 },
+    "what_it_prints": "A vendor card whose every value's Label equals the card's title leaves the Label column out (header, line 169, and cells, line 179): the title above ('2. Key Stats') keeps the words once and the table reads Value, Unit, Currency, As of.",
+    "choice_and_why": "Dropping the column rather than blanking the cell: an empty cell under a 'Label' header would read as a missing label; with no Label header nothing is missing. The decision is one boolean (showLabel, line 117) and one conditional at each of the two places the column is drawn. A card that mixes an equal Label and a differing one keeps the column and leaves only the equal cell empty (line 179); the producer emits one value per card, so that case is not one the page receives today. No label is invented from the section id, a slug or anything else."
+  },
+  "label_differs_unchanged": true,
+  "label_differs_how": "iv-e-116.vendor-card-title-once.test.tsx arm (b): a vendor SectionBlock with title 'Key Stats' and Label 'Market cap' renders the header Label, Value, Unit, Currency, As of and the cells 'Market cap', '10', 'number'. Written and run against the base NativeSections.tsx before the change: arms (b) and (d) passed, (a) and (c) failed.",
+  "opal_unchanged": true,
+  "opal_unchanged_how": "iv-e-116 arm (d): an Opal SectionBlock (opal true) whose title and Label are both S03 still renders the Label header, the Label cell S03 and S03 twice; the code path is gated on !opal (line 117 'opal ||', line 179 '!opal &&'). iv-e-115 arm (e) (Opal adapter and rendered cards, unchanged) still passes.",
+  "field_slug_read": {
+    "product_change": false,
+    "census_fields": 72,
+    "slugs_derivable": 58,
+    "exact_matches": 58,
+    "slug_collisions": 0,
+    "denominators": "33 census sections: 17 TYPED, 10 CHART_ONLY, 6 DISCLOSURE; 72 field rows (rows holding a 'field' key); 14 of them lie in the 6 DISCLOSURE sections (including the 2 list and 2 table rows) and are never sections; 58 field rows lie in the 17 TYPED sections with a scalar unit",
+    "producer_rule": "infra/aws/lambda/investor-reporting/ycharts/extract/extract.py (verified by reading the bytes, 2026-10-11): lines 704-707 `sections.append({\"section_id\": \"%s.%s.c%d\" % (row[\"section_id\"], _slug(row[\"field\"]), cand[\"column\"]), \"section_type\": row[\"section_id\"], ...` ; lines 927-928 `def _slug(name): return re.sub(r\"[^a-z0-9]+\", \"_\", str(name).lower()).strip(\"_\")`; lines 211-228 classify_sections and 237-255 census_field_rows (only TYPED sections, only rows with a 'field' key); line 650 a row whose unit is in NON_SCALAR_UNITS (\"list\", \"table\", line 113) never becomes a section; line 714 the field name is held privately as _label. The order's 'lines 707-714 and 777' are within three lines of these: 707 is section_type (the code), 714 is _label, 777 is the chart row's units; the chart row's section_id is '<code>.chart.<_slug(section title)>' (line 772), a title slug, not a field slug.",
+    "answer": "Yes: the wire's section_id is '<census code>.<slug of the census field name>.c<column>', and section_type is the census code. The slug is a lower-casing with every run of non [a-z0-9] characters collapsed to '_' and trimmed, so it is not reversible by itself; with the code (section_type) it maps back through the census to exactly one field name for every one of the 58 derivable slugs (0 collisions inside a section). The chart rows' slug is a section title, not a field. Nothing was wired into the page; the reviewer rules whether the Label reads the census field name (and whether the page may copy the census's field names, as IV-e-115 copied the 33 titles).",
+    "method": "FIELD_SLUG_COUNT.json from field_slug_count.py (this folder, Write-tool authored; run `python -I field_slug_count.py <census> FIELD_SLUG_COUNT.json`). Input: the pinned census alone, docs/briefs/sources/YCHARTS_COMPARISON_REPORT_FIELD_SCRAPE_20260909.json (33 sections), read, not edited. census_fields = rows holding a 'field' key across all 33 sections. slugs_derivable = those rows whose section classifies TYPED by the producer's rule (extract.py:211-228) and whose unit is not list/table (extract.py:650), i.e. the rows that census_field_rows (237-255) hands to the section builder; the slug is computed with the producer's _slug (927-928). exact_matches = those whose slug, inside its own section, equals the slug of no other field row of that section (all field rows of the section counted, including non-scalar ones), so slug -> field name inside (section code, slug) has exactly one answer. collisions = sections with two field rows of equal slug (0). The column index .c<n> is a value-column of the PDF row, not in the census, and is not needed for the field name. Not measured: a served vendor answer (no live request is allowed here), so whether the deployed producer's census is this file is not established by this read."
+  },
+  "test": {
+    "id": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-116.vendor-card-title-once.test.tsx",
+    "arms": "(a) two vendor cards of one section S03: each prints 'Key Stats' once, has no Label header, Value first, unit 'USD billions' / 'ratio'; (b) differing Label unchanged; (c) mixed card keeps the column, equal cell empty; (d) Opal card unchanged",
+    "passes": true,
+    "pass_count": "4 of 4 in the new file; whole scope 1190 pass 0 fail",
+    "mutant": {
+      "what": "committed NativeSections.tsx line 117 `const showLabel = section.values.length === 0 || opal || section.values.some(...)` replaced by `const showLabel = true` (always show the Label column), run once, reverted with git checkout -- (git status clean after)",
+      "failed": true,
+      "observed": "3 pass, 1 fail: arm (a) 'two cards of one section, each prints its section name once and has no Label column' failed"
+    }
+  },
+  "other_tests_changed": "iv-e-115.vendor-section-names-units.test.tsx: helper cards() reads cells by the header present; four vendor Label expectations became '' (row DSGN_IRPTV1-D2-W64-S1)",
+  "screenshots": ["vendor-report.png"],
+  "screenshots_read": ["vendor-report.png"],
+  "screenshot_detail": "Read with the Read tool. bun run build (built in 23.93s) of portal 762ba2b8, served with --dist routing by vendor-report-driver.mjs (a copy of ~63's driver), synthetic fixture vendor-report.fixture.json (a copy of ~63's, 14 sections, every figure made up), request REQ-b0b0b0b0b0b0b0b0b0b0b0b1. The opened dialog's cards read '1. Cover', '2. Key Stats' (value 0.9, unit number), '2. Key Stats' (12, count), '5. Fundamentals' x4 (21.5 ratio, 200.5 USD billions, 5.5 years, 6.5 score, and a fifth below the fold) each with the table headed Value, Unit, Currency, As of: no Label column, each card names its title once. The PNG shows the first 8 cards in full; the rest are in vendor-report.png.txt / vendor-report.run.txt. dist removed afterwards. Visible side effect: each card's table sizes its columns on its own, so Value/Unit/Currency/As of columns do not line up from card to card (they did not line up before either, as each card is its own table); not changed.",
+  "lint_errors": 0,
+  "lint_warnings": 342,
+  "typecheck_errors": 0,
+  "suite_before": { "pass": 1186, "skip": 27, "fail": 0, "tests": 1213, "files": 386, "file": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~64/base_suite.txt", "note": "run on d3ef4a5d; a product edit to NativeSections.tsx was made while this run was in progress, and the run still shows iv-e-115 arm (c) passing, so the module it loaded was the base one" },
+  "suite_after": { "pass": 1190, "skip": 27, "fail": 0, "tests": 1217, "files": 387, "new_failing_ids": [], "file": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~64/after_suite.txt" },
+  "product_files_changed": [
+    "portal/src/pages/InvestorReporting/tabs/analysis/NativeSections.tsx"
+  ],
+  "tests_changed_or_added": [
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-116.vendor-card-title-once.test.tsx (new, 4 tests)",
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-115.vendor-section-names-units.test.tsx (helper and four vendor Label expectations)"
+  ],
+  "rows": ["DSGN_IRPTV1-D2-W64-S1", "DSGN_IRPTV1-D2-W64-S2"]
+}

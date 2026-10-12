@@ -1,0 +1,98 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bx-3",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bx-3.funds-by-trades.md",
+  "group": "OTHER",
+  "vintage_commit": "6bc3684d96"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~140",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round76.md",
+  "vintage_commit": "6bc3684d96",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bx-3.funds-by-trades.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~140/FUNDS_BY_TRADES.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only classing record from local copies; nothing fetched; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB76bx3-AC1",
+    "CB76bx3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~140/FUNDS_BY_TRADES.csv",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only per-fund table of counts, class and ratio; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB76bx3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~140/FUNDS_BY_TRADES.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only note with the cross table and the named list; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB76bx3-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB76bx3-AC1",
+   "criterion_verbatim": "the rule was written first; every fund series carries one class (sum equals 270); the failing funds are named (named equals fails); the issuer reads the changes of class and the conflicts.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~140/FUNDS_BY_TRADES.json',encoding='utf-8'));print('FUNDS-BY-TRADES rule_written=%s minimum_rows=%s share_fails=%s fund_series=%d fails=%d passes=%d mixed=%d too_few=%d no_trade_row=%d sum=%d named=%d changes_class=%d conflicts=%d'%(bool(d['rule']['written_at']),d['rule']['minimum_rows'],d['rule']['share_fails'],d['fund_series'],d['fails'],d['passes'],d['mixed'],d['too_few'],d['no_trade_row'],d['fails']+d['passes']+d['mixed']+d['too_few']+d['no_trade_row'],len(d['named']),len(d['changes_class']),len(d['conflicts'])))\"",
+   "expect": "FUNDS-BY-TRADES rule_written=True",
+   "output_evidence": "FUNDS-BY-TRADES rule_written=True minimum_rows=5 share_fails=0.5 fund_series=270 fails=15 passes=17 mixed=0 too_few=60 no_trade_row=178 sum=270 named=15 changes_class=14 conflicts=0 (rc 0)",
+   "denominator": "270 fund series -> 92 with a read unit (14,250 units, equal to PRICE_PAID.csv per fund) -> 32 classed fails or passes, 60 too_few, 178 no_trade_row; 15 named of 15 fails; 14 changes of class among 237 unreadable; 0 conflicts among 33 validated and 34 round-72 confirmed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB76bx3-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the rule's numbers precede the classing and are not chosen by their yield; a purchase in the fee band is treated as the rule says and a sale is not excused by a fee; too_few and mixed are used where they apply; every conflict with the reinvestment reading is listed; no correction is proposed.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read FUNDS_BY_TRADES.json (rule, against_earlier, conflicts, named, not_established), FUNDS_BY_TRADES.md and FUNDS_BY_TRADES.csv; the rule file with its clock timestamp is in the record as rule.text",
+   "output_evidence": "rule written 2026-10-11T23:07:58Z before any fund was classed; minimum_rows 5, share_fails 0.5 (pass line 0.10), 180-day recent-window guard; purchase up to 5.75 percent below the close is unresolved, a sale is not excused by a front load; sensitivity runs reported as not the result; 0 mixed, 60 too_few; 0 conflicts listed; no correction proposed",
+   "denominator": "270 series; 14,250 units; 15 named; 14 changes of class; 0 conflicts",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "ADVI_COTBKF-D2-W140-S1"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~140/ADVI_COTBKF.TO-CB-bx-3.funds-by-trades.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB76bx3-AC1)",
+   "result": "FUNDS-BY-TRADES rule_written=True minimum_rows=5 share_fails=0.5 fund_series=270 fails=15 passes=17 mixed=0 too_few=60 no_trade_row=178 sum=270 named=15 changes_class=14 conflicts=0"
+  }
+ ]
+}

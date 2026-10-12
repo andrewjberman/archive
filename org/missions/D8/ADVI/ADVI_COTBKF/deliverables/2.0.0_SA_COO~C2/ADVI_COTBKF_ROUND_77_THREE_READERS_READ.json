@@ -1,0 +1,66 @@
+{
+ "written_by": "2.0.0_SA_COO~C2 (the issuer, as a direct act)",
+ "written_at": "2026-10-12T00:44Z",
+ "ruled_by": "1.0.0_SA_CTO~DELL2 msg 6213: 'The three reads: yes, each that is a code read or needs no new grant, this round. One that needs a window is named and carried.'",
+ "why_the_issuer_and_not_a_cell": "to-pipeline-gate takes one issuance per round and a re-cut must modify an existing order; the one cell these reads fit (CB-by-3) was already terminal. Five single-resource reads and two code reads, read-only, this project's firm only.",
+ "readers": [
+  {
+   "reader": "C_05 client_tax_liability, feeding the D_00 tax frame and the D_02 tax panels",
+   "reads_made": [
+    "head-object s3://opal-data-cot/gold/views/client_tax_liability.parquet -> 404 Not Found",
+    "positive control beside the absent verdict: head-object s3://opal-data-cot/gold/canonical/holdings/2026-06-03.parquet -> LastModified 2026-06-09T20:58:29Z, 211263 bytes (the same call form returns an object that exists)",
+    "list-objects-v2 s3://opal-data-cot/gold/timeseries/holdings_lots/ , all pages, counted client-side -> 0 keys (the call returned null Contents, rc 0)"
+   ],
+   "established": true,
+   "serves_a_figure_from_the_price_store": false,
+   "reading": "both absent: the tax view object does not exist and no holdings-lots object exists for this firm, so the tax panels have no input here and this reader serves nothing built from the store.",
+   "limits": "the head-object says the object is absent at the time of the read (2026-10-12 ~00:4xZ); a later run of the optional step could create it."
+  },
+  {
+   "reader": "IRPT holdings-performance channel for this firm (source key blackdiamond_z09)",
+   "reads_made": [
+    "scheduler get-schedule irpt-holdings-performance-daily (group default) -> State ENABLED, cron(30 7 ? * MON-FRI *), Target.Input source = schwab_08335338, target irpt-holdings-performance-lambda",
+    "scheduler get-schedule irpt-inf-holdings-performance-daily (group default) -> State ENABLED, cron(0 14 ? * MON-FRI *), Target.Input source = orion, target irpt-inf-holdings-performance-lambda",
+    "code: infra/aws/terraform/investor-reporting/holdings-performance/schedule.tf :102-107 and :206-210 declare the same two sources",
+    "the AWS graph (built 2026-10-11 16:09:59 UTC; 2,891 nodes scanned) holds exactly two SCHEDULE nodes matching holdings.performance: these two"
+   ],
+   "established": true,
+   "serves_a_figure_from_the_price_store": false,
+   "reading": "neither live schedule names blackdiamond_z09: nothing scheduled fires the holdings-performance channel for this firm. By code its price is market value over units in any case (the census: sources.json:190-192).",
+   "limits": "a manual invocation with that source is not excluded by a schedule read; the graph's two schedule nodes are as of its build."
+  },
+  {
+   "reader": "IRPT performance route, the tenant for this firm (infra/aws/lambda/investor-reporting/performance/tenants.py:156-165)",
+   "reads_made": [
+    "lambda get-function-configuration irpt-performance-adapter -> State Active, LastModified 2026-10-11T10:03:25Z, python3.12 (configuration fields only; no environment values read)",
+    "code: tenants.py:156-165: the tenant's provider is the vendor (a pass-through to the vendor's performance API paths), with a data-plane prefix forwardfill_v2/ in the firm's bucket",
+    "code sweep of infra/aws/lambda/investor-reporting/performance/ (155 files) for the price store's names (canonical_prices, silver/prices): 0 hits; forwardfill_v2 and data_plane_prefix appear only in tenants.py, as an isolation declaration",
+    "code: portal/src/api/endpoints/investor-reporting.ts:197 and :219 declare GET /api/scoped/investor-reporting/performance/{accountSetId} with status DECLARED"
+   ],
+   "established": "partly",
+   "serves_a_figure_from_the_price_store": false,
+   "reading": "the adapter is deployed and carries a tenant for this firm; by code its figure comes from the vendor's API and it does not name the price store. So it does not serve a figure built from an affected close. NOT established: whether any portal page opens that route for this firm's logins.",
+   "limits": "NEEDS A WINDOW, named and carried as the ruling says: the API integration that invokes the adapter and the portal page binding for this firm were not read live; what forwardfill_v2/ holds was not opened."
+  }
+ ],
+ "summary": {
+  "readers": 3,
+  "established": 2,
+  "partly": 1,
+  "serving_a_figure_from_the_price_store": 0,
+  "carried": "whether a portal page opens the performance route for this firm (needs a window)"
+ },
+ "aws_reads_made": [
+  "s3api head-object x2 (one the positive control)",
+  "s3api list-objects-v2 x1 on one prefix",
+  "scheduler get-schedule x2",
+  "lambda get-function-configuration x1"
+ ],
+ "nothing_written": true,
+ "no_other_firm_data_opened": "the second schedule belongs to another firm's channel: only its state and the source key in its input were read, as the ruling's read requires; no data of that firm was opened.",
+ "not_established": [
+  "whether a portal page opens the performance route for this firm",
+  "what the forwardfill_v2/ prefix holds",
+  "deployed code against the repository copy, for all three"
+ ]
+}

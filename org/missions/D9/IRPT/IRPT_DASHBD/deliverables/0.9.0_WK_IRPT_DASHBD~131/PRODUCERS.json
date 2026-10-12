@@ -1,0 +1,49 @@
+{
+ "scripts": [
+  {
+   "file": "read131.py",
+   "sha256": "bbbdda245ce0960de6bbc2a9ff25865690eca8018d16d9b8c13abd4562c5b713",
+   "does": "read-only S3 reads of the one firm's transactions (copy or original store) for the accounts in the day list, into a private pickle; NOT re-run here (the first run's pickles were reused)"
+  },
+  {
+   "file": "days131.py",
+   "sha256": "881eb22ebfc83029c04413e2430d591f0d531d23681d5dfb6b72117cd7c54179",
+   "does": "builds the 234 flow-bearing (account, day) list from the earlier private pickles; re-run, output byte-identical to the first run's"
+  },
+  {
+   "file": "count131.py",
+   "sha256": "a86e6573e1071f90c5fe2ce0c190b039f871ab61f556165bf937bdd305e2b87b",
+   "does": "implements RULE.md: classes each flow day as deposit/withdrawal/other and each deposit day by when cash was first invested; writes counts only"
+  }
+ ],
+ "rerun": {
+  "from_tracked_copies": true,
+  "counts_equal_record": true,
+  "classes": {
+   "same_day": 4,
+   "next_trading_day": 16,
+   "later": 23,
+   "never_in_window": 45,
+   "not_determinable": 0
+  },
+  "splits": {
+   "deposit": 88,
+   "withdrawal": 127,
+   "other": 19
+  },
+  "stores_rerun": [
+   "copy",
+   "orig"
+  ],
+  "note": "private root passed by environment variable IRPT_PRIV_ROOT, output folder by IRPT_RERUN_DIR; both stores' counts equal the first run's counts files"
+ },
+ "rule_sha256": "da1321e0f943db549b9e7eb045686eb7a953e79479b672e284f38f9af3d4ab0a",
+ "client_literals": 0,
+ "formal_edits": [
+  "private root taken from env var IRPT_PRIV_ROOT (no dated folder name in the scripts); output to env var IRPT_RERUN_DIR instead of the private folder",
+  "one import per line; removed unused imports (json, collections in days131.py)",
+  "semicolon statements split onto separate lines",
+  "noqa E402 on the trading-calendar import after sys.path insert",
+  "no filter, threshold, join or date rule changed"
+ ]
+}
