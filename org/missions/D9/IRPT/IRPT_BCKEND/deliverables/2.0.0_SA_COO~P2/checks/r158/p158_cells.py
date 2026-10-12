@@ -90,6 +90,9 @@ def main():
         if not rd.is_file():
             fail("no %s" % READ)
         both = text + rd.read_text(encoding="utf-8")
+        # AMENDMENT 1 (row IRPT_BCKEND-D2-W317-S2): the four slugs end in a date; they are not account ids.
+        for s in SLUGS:
+            both = both.replace(s, "<slug>")
         if re.search(r"acc_[0-9a-f]{12,}", both) or re.search(r"(?<![0-9A-Za-z])[0-9]{8}(?![0-9A-Za-z])", both):
             fail("an account token or an eight-digit token is in the outputs")
         print("OK: nothing re-executed, applied, rolled back, invoked or edited; no account or plan value written")
