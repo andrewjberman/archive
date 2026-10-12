@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t42",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t42.tier-lag-declaration-and-lag-report.md",
+    "group": "OTHER",
+    "vintage_commit": "1eedfa615e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "1eedfa615e",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t42.tier-lag-declaration-and-lag-report.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~34",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/extend_frontier.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--lag-report is read only: one JSON line from the served index (S3 read), no write to the store, the pacer, the queue or the ledger. load_enrolment now refuses a declaration of the wrong shape, so the daily --apply in run_daily_draw.sh reads the new enrolment on the box branch only after the box carries it; that act is the issuer's",
+      "artifact_covered_by": ["DQ9-t42-AC1", "DQ9-t42-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_lag_report.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest: a local store under tmp_path, a stub enrolment folder, rank inputs replaced by empty frames, --today pinned, no network and no S3",
+      "artifact_covered_by": ["DQ9-t42-AC1"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_rolling_tiers.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "only the _enrol stub helper's json.dump changed to the DQ-t-42 shape (freshness_basis and tiers); the tests are unchanged",
+      "artifact_covered_by": ["DQ9-t42-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/requests/ENROLMENT_TIERS.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two top-level keys added: freshness_basis trading-day-frontier and tiers daily 1, rolling 5 (equal to rolling[0].cycle_trading_days); the request lists are unchanged",
+      "artifact_covered_by": ["DQ9-t42-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended: MDPF_DEMQUE-D1-W34-S1 (as_of is the max price date, not the lock window end) and MDPF_DEMQUE-D1-W34-S2 (the rolling tier measures zero names on the served store)",
+      "artifact_covered_by": ["DQ9-t42-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t42-AC1",
+      "criterion_verbatim": "the three named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t42_tests.py",
+      "output_evidence": "test_demque_lag_report.py::test_the_enrolment_declares_the_basis_and_a_cycle_per_tier_and_a_disagreeing_rolling_cycle_is_refused PASSED; test_demque_lag_report.py::test_the_lag_report_counts_every_indexed_name_in_one_tier_with_its_measured_lag PASSED; test_demque_lag_report.py::test_a_name_older_than_its_tier_cycle_is_listed_over_and_never_counted_within PASSED; 3 passed in 1.59s; LAG-OK; rc=0",
+      "denominator": "3 of 3 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "LAG-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t42-AC2",
+      "criterion_verbatim": "on the REAL served store (S3 read only): declared cycles 1 and 5, the two tiers partition the indexed names, within + over = names in each tier, every over name listed and really over; the held names the extension leaves (about 14, end 2026-06-23) are expected in over_names.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t42_real.py",
+      "output_evidence": "basis=trading-day-frontier frontier=2026-10-12 indexed=141 rolling_not_landed=782; daily: declared=1 names=141 within=127 over=14 max_lag=77; rolling: declared=5 names=0 within=0 over=0 max_lag=0; LAG-REAL-OK 141 names, 14 over their tier's declared cycle; rc=0",
+      "denominator": "141 of 141 indexed names in exactly one tier (daily 141, rolling 0); 127 within + 14 over = 141; 14 of 14 over names listed and each lag 77 > 1; the 14 are the held names with valid_to 2026-06-23",
+      "status": "PASS",
+      "expect": "LAG-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the basis refusal disabled in a scratch edit of extend_frontier.py (if raw[\"freshness_basis\"] != FRESHNESS_BASIS becomes if False): the declaration test must fail",
+      "expected": "test_the_enrolment_declares_the_basis_and_a_cycle_per_tier_and_a_disagreeing_rolling_cycle_is_refused FAILED (DID NOT RAISE SystemExit); the other two PASSED",
+      "observed": "1 failed, 2 passed: test_the_enrolment_declares_the_basis_and_a_cycle_per_tier_and_a_disagreeing_rolling_cycle_is_refused FAILED (Failed: DID NOT RAISE SystemExit); file restored byte-identical (cmp) afterwards",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the same tree run at three points: the three test files together, the AC1 check, and the whole folder once; the AC2 check run twice against the served index",
+      "observed": "3 passed at each of the test runs; the AC1 check prints LAG-OK rc=0; the folder prints 148 passed rc=0; the AC2 check prints the same line (indexed 141, daily 127 within and 14 over) at both reads",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any checker, alarm, monitor, schedule, timer or mode on the lag",
+      "reason": "order BOUNDS and the standing moratorium: the lag is DECLARED and one read-only command prints it; nothing is built on it"
+    },
+    {
+      "item": "--apply, any write to the served store, the pacer, the queue or the ledger, any Yahoo or Bloomberg call, any deploy",
+      "reason": "order BOUNDS: READ-ONLY against S3 and Yahoo"
+    },
+    {
+      "item": "the rolling-tier branch against real names",
+      "reason": "the served store has no landed rolling name (rolling_not_landed 782), so the rolling branch is exercised by the three tests on a stub store only; filed as MDPF_DEMQUE-D1-W34-S2"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W34-S1: the cell's stored max date is the index valid_to, and as_of is a different column (the max prices date); they agree on the served 141 rows (class OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W34-S2: the rolling tier measures zero names on the served store; the declared rolling cycle 5 is checked against no real name yet (class OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~34/MDPF_DEMQUE.TO-DQ-t42.tier-lag-declaration-and-lag-report.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q -p no:cacheprovider",
+      "invocation": "the whole folder once, from the worktree root",
+      "result": "148 passed (the 145 at the t-41 merge plus the three new tests), rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t42_tests.py",
+      "invocation": "AC1, from the worktree root",
+      "result": "LAG-OK, rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t42_real.py",
+      "invocation": "AC2, from the worktree root, S3 read only",
+      "result": "LAG-REAL-OK 141 names, 14 over their tier's declared cycle, rc=0"
+    },
+    {
+      "tool": "python data/mdpf/scripts/demque/extend_frontier.py --lag-report",
+      "invocation": "the tool at its own path in the worktree, S3 read only, no --today (frontier 2026-10-12)",
+      "result": "one JSON line, rc=0; daily names 141 within 127 over 14 max_lag 77; rolling names 0; rolling_not_landed 782; the line is kept at .scratch/lag_report_line.json (not committed)"
+    }
+  ]
+}
