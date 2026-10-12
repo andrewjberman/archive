@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bh-3.read-the-cold-first-overlay-on-the-live-function-with-a-fresh-snapshot",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bh-3.read-the-cold-first-overlay-on-the-live-function-with-a-fresh-snapshot.md",
+    "group": "OTHER",
+    "vintage_commit": "a22d817c76"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "a22d817c76",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bh-3.read-the-cold-first-overlay-on-the-live-function-with-a-fresh-snapshot.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~399",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~399/BH3_COLD_LIVE_OUTPUT_20261012.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Written in worktree C:/dev/wk-resapp-399 (branch wk-AMGT_RESAPP-399, base a22d817c76). Holds the verbatim output of r101_snapshot_equal.py (12:40:59Z) and r101_cold_live.py (12:41:04Z), each once, with exit codes, and the ## Reading paragraph. The commit that adds this instance carries it; its hash is reported by the worker. No deploy, no push.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "APPENDED two rows, append-only: AMGT_RESAPP-D1-W399-S1 (AC1 read NO, one differing key 'reads', detail cut by the script) and AMGT_RESAPP-D1-W399-S2 (cold-live verdict NO with one invocation counted; NOT QUIET not emitted). No existing row edited.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the last line reads `R101 SNAPSHOT EQUAL: YES` (after the Monday write the stored snapshot is current under the checkout's rule and equals the recompute) and `snapshot generated_at 2026-10-12T12:30Z` is printed above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-399 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round101_prep/checks/r101_snapshot_equal.py\" | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "snapshot generated_at 2026-10-12T12:30Z age 0.18 h | rows: snapshot 302, recompute 302 | differing: 1\n   key reads: snapshot \"{'universe': {'status': 'SERVED', 'read_completed': True, 'p\" vs recompute \"{'universe': {'status': 'SERVED', 'read_completed': True, 'p\"\nR101 SNAPSHOT EQUAL: NO\nexit=1",
+      "denominator": "302 snapshot rows vs 302 recompute rows; differing 1 (one printed key difference, 'reads'; no row difference printed); expected YES at exit 0",
+      "status": "FAIL",
+      "status_reason": "The script read NO at exit 1: the stored snapshot does not equal the live recompute on the printed comparison. The script is run once (not re-run); the invocation's pipe was not applied to a re-run, but the script prints 3 lines in full, so tail -3 shows all of them. Filed as AMGT_RESAPP-D1-W399-S1; the order stays open.",
+      "expect": "snapshot generated_at 2026-10-12T12:30Z[\\s\\S]*R101 SNAPSHOT EQUAL: YES[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "judgment criterion (no mechanical expectation in the order): after the two runs, one short paragraph ## Reading that states ONLY what the printed numbers show (the snapshot's date, the handler times, the cold flags, and what they do NOT show)",
+      "method": "manual_read_with_citation",
+      "invocation": "none -- judgment criterion; the output and the ## Reading paragraph are in org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~399/BH3_COLD_LIVE_OUTPUT_20261012.txt",
+      "output_evidence": "The ## Reading paragraph in BH3_COLD_LIVE_OUTPUT_20261012.txt, committed with this instance, states the snapshot date and age, the 302-row comparison with 1 differing key, the 1 invocation counted, the ASML_NA_Equity (20.05 s, cold) and ADBE_US_Equity (0.59 s, warm) handler times, and what the output does not show.",
+      "denominator": "N/A -- judgment criterion; the worker records no verdict",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the CVO (3.0.0_SA_CVO) grades it at L9",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant is named by the task order.",
+      "expected": "N/A: the task order names no mutant for this worker to run.",
+      "observed": "N/A: no mutant was run by this worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: each script is run exactly once by the order's rule (no same-input comparison; a second run of the cold check would be a second live invoke in the quiet window).",
+      "observed": "Not measured by this worker.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy, push, store write, S3 write or delete, schedule, SEC, vendor, model and Bloomberg calls, bun/npm/pip install",
+      "reason": "The worker face's bounds: none were run or touched. The only AWS calls are the two scripts' own (one S3 GET of the snapshot, one Logs Insights count, two overlay invokes)."
+    },
+    {
+      "item": "A second run of either script",
+      "reason": "The order says run each once; a second cold-check run would be another live invoke in the quiet window."
+    },
+    {
+      "item": "The task order <status> flip to complete",
+      "reason": "The order states the status flip is the issuer's (2.0.0_SA_COO~R1). AC1 is FAIL, so the order is not met on this run."
+    },
+    {
+      "item": "Identification of the one differing snapshot key beyond its 60-character prefix",
+      "reason": "The script truncates the printed key values; the worker did not re-run or widen the comparison, per the one-run rule. Recorded as AMGT_RESAPP-D1-W399-S1."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W399-S1: AC1 (r101_snapshot_equal.py) read 'R101 SNAPSHOT EQUAL: NO' at exit 1 (one differing key 'reads'; the script cuts its printed values to 60 characters, so the difference is not shown).",
+    "AMGT_RESAPP-D1-W399-S2: r101_cold_live.py counted 1 invocation in the preceding 15 minutes and printed 'R101 COLD LIVE: NO', not 'NOT QUIET', because NOT QUIET is emitted only when the cold pass is otherwise ok and the ASML_NA_Equity handler (20.05 s) failed the 20.0 s gate."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "r101_snapshot_equal.py",
+      "invocation": "cd C:/dev/wk-resapp-399 && PYTHONPATH=\"$(pwd)\" timeout 120 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round101_prep/checks/r101_snapshot_equal.py\"",
+      "result": "R101 SNAPSHOT EQUAL: NO, differing 1 of 302 rows (key 'reads'), exit=1, started 2026-10-12T12:40:59Z"
+    },
+    {
+      "tool": "r101_cold_live.py",
+      "invocation": "cd C:/dev/wk-resapp-399 && PYTHONPATH=\"$(pwd)\" timeout 120 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round101_prep/checks/r101_cold_live.py\"",
+      "result": "R101 COLD LIVE: NO, 1 invocation in the preceding 15 minutes, ASML_NA_Equity handler 20.05 s cold, ADBE_US_Equity handler 0.59 s warm, exit=1, started 2026-10-12T12:41:04Z"
+    }
+  ]
+}
