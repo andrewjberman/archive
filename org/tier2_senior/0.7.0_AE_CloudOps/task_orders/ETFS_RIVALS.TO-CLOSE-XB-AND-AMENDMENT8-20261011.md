@@ -7,6 +7,16 @@
     <status>pending</status>
     <project_code>ETFS_RIVALS</project_code>
   </metadata>
+  <amendment id="1" date="2026-10-12" by="2.0.0_SA_COO~V1">
+    FOUR PROOF INSTANCES ARE OWED BY 0.7.0_AE_CloudOps~ZV, this order's own among them. This order's work is done and graded by the issuer; it stays `pending` because `to-pipeline-gate` refuses a `complete` flip with no proof-of-spec instance beside it, and its pending state holds ETFS_RIVALS round 28's L10 slug (the CVO's compile is ready and HELD @2d7cb54189; the surprise-row-gate refuses new rows while 7 orders are pending). The instance is the assignee's, from your own efforts (org/ref/TASK_ORDER_PROTOCOL.md COMPLETION): write it from your own reports in this file; do not re-run a deploy or any write; a criterion whose invocation needs a tree that no longer exists records the issuer's graded run named in the comment at the top as its output evidence and says so. Check it: `python .tools/proof-of-spec-check.py <instance> <ids>` must print VALID (rc 0), and `.tools/safe-commit.sh` the one file. The shape is the one of the instances at @0f2b83b9cc and @876cfb049f (assignee, controls, declared_exclusions, acceptance rows). A judgment row is recorded as the issuer's and the CVO's to grade, not marked. Report the commit hash to the issuer. If a lane refusal stops the write, report it verbatim; take no override.
+    One instance per order, each from your own reports in that order's file; the paths are where `to-pipeline-gate` looks:
+    1. `ETFS_RIVALS.TO-RELAY-tw1-vehicle-log-20261009` (a tree order) -> `org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.7.0_AE_CloudOps~ZV/ETFS_RIVALS.TO-RELAY-tw1-vehicle-log-20261009.proof_of_spec.json`, criterion AC1.
+    2. `ETFS_RIVALS.TO-CLOSE-XB-AND-AMENDMENT8-20261011` (this file, under tier2_senior/task_orders) -> `org/tier2_senior/0.7.0_AE_CloudOps/deliverables/ETFS_RIVALS.TO-CLOSE-XB-AND-AMENDMENT8-20261011.proof_of_spec.json`, criterion AC1.
+    3. `ETFS_RIVALS.TO-TRANSCRIBE-20261011-20261012` -> `org/tier2_senior/0.7.0_AE_CloudOps/deliverables/ETFS_RIVALS.TO-TRANSCRIBE-20261011-20261012.proof_of_spec.json`, criteria AC1, AC2.
+    4. `ETFS_RIVALS.TO-PREFLIGHT-bbg-signin-20261012` -> `org/tier2_senior/0.7.0_AE_CloudOps/deliverables/ETFS_RIVALS.TO-PREFLIGHT-bbg-signin-20261012.proof_of_spec.json`, criterion AC1 (the instance you wrote @0f2b83b9cc sits in the mission tree, which the gate does not search for a tier2_senior/task_orders order).
+    The base-folder paths in 2 to 4 are under `org/tier2_senior/0.7.0_AE_CloudOps/deliverables/`.
+  </amendment>
+
 <direct_act>true</direct_act>
 <!-- Round-less by design: bookkeeping at the site-Z seat for the dell1 issuer (0.0.0_AB_MSTR~DELL1 msg 3534: MSTR~Z cannot ack for a seat, so the issuer opens ONE crossbox ORDER to its own seat). It adds no cell to round 28's issuance. -->
 <risk>LOCAL</risk>
