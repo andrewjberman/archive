@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bg-2.the-scoped-api-builds-one-s3-client-per-container-with-a-pool-that-fits-its-widest-read",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bg-2.the-scoped-api-builds-one-s3-client-per-container-with-a-pool-that-fits-its-widest-read.md",
+    "group": "OTHER",
+    "vintage_commit": "aa58e5e113"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "aa58e5e113",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bg-2.the-scoped-api-builds-one-s3-client-per-container-with-a-pool-that-fits-its-widest-read.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~397",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "54659321c959a2e6215b3bef84c04a48941f736f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Branch wk-AMGT_RESAPP-397 (worktree C:/dev/wk-resapp-397), cut from aa58e5e113. The _s3_client() seam only: one client per container under _S3_CLIENT_LOCK, max_pool_connections=32 (S3_MAX_POOL_CONNECTIONS). No deploy, no push.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_s3_client_seam.py",
+      "kind": "test",
+      "commit_or_etag": "54659321c959a2e6215b3bef84c04a48941f736f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file. Offline: boto3.client replaced; 16 threads get one client; region and pool 32 asserted. Passes in the three-file pytest run (39 passed).",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "54659321c959a2e6215b3bef84c04a48941f736f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "APPENDED one row, append-only: AMGT_RESAPP-D1-W397-S1 (AC3 control prints the corpus line only; the noise line the order expects did not print). No existing row edited.",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line reads `R100 POOL PEAK: overall per-client maximum 20 over 35 reads; reads with a client above its own pool: 0` (the maximum may read 16 to 24; the count of reads with a client above its own pool must read 0); and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-397 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round100_prep/checks/r100_pool_peak.py\" \".scratch_bg2_peak.json\" | grep \"^R100 POOL PEAK\"; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "R100 POOL PEAK: overall per-client maximum 20 over 35 reads; reads with a client above its own pool: 0\nexit=0",
+      "denominator": "35 reads; per-client maximum 20; 0 reads above their own client's pool",
+      "status": "PASS",
+      "expect": "R100 POOL PEAK: overall per-client maximum (1[6-9]|2[0-4]) over 35 reads; reads with a client above its own pool: 0[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "PASS C1 (cold and warm 200), PASS C2 (the cold request built at most 12 S3 clients: it reads about 7), PASS C3 (the same work: 150 to 400 S3 requests), PASS C4 (warm no slower than cold); arms passed 4 of 4; R100 COLD REQUEST: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-397 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round100_prep/checks/r100_cold_check.py\"; echo \"exit=$?\"",
+      "output_evidence": "   overlay ASML_NA_Equity: cold 8.72 s, 7 clients, 244 requests, peak 20 on one client; warm 1.33 s, 3 clients\nPASS C1 cold and warm both served 200  [200, 200]\nPASS C2 the cold request built at most 12 S3 clients  [7]\nPASS C3 the same work: 150 to 400 S3 requests  [244]\nPASS C4 warm no slower than cold  [1.33 vs 8.72 s]\n   arms passed 4 of 4\nR100 COLD REQUEST: YES\nexit=0",
+      "denominator": "arms passed 4 of 4; cold request 7 S3 clients (base 146); 244 S3 requests (window 150-400); cold 8.72 s (base 11.5 s per the order)",
+      "status": "PASS",
+      "expect": "PASS C1[\\s\\S]*PASS C2[\\s\\S]*PASS C3[\\s\\S]*PASS C4[\\s\\S]*arms passed 4 of 4[\\s\\S]*R100 COLD REQUEST: YES[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the control that no served byte moved: the only lines printed are `  thesis     corpus` (the /15 team_sheet, which the tree carries and the live /14 function does not yet; 663 paths at the base) and `  thesis     noise` (the generation clocks, 2 paths at the base); no `name` line and no timeline or collected row; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-397 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round94_prep/checks/r94_other_routes_table.py\" \".scratch_bg2_routes.json\" --after local | grep -E \"^  [a-z]+ +[a-z]+ +[0-9]+ path\"; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "  thesis     corpus    663 path(s)\nexit=0",
+      "denominator": "changed paths 663 (27 reads; statuses (200, 200) and (404, 404)); corpus 663 of 663; noise 0 of the 2 expected at the base; name 0; timeline and collected 0",
+      "status": "FAIL",
+      "status_reason": "The literal expectation names two printed lines, corpus and noise. Only the corpus line printed. The script emits a kind line only when its count is above zero, so the noise kind held zero changed paths this run (the base read 2; the noise count is time-dependent). The served-byte control holds in the measured sense: no name, timeline or collected line, exit 0, and every changed path is in the corpus kind. The worker did not rerun or rewrite the criterion; the issuer decides (AMGT_RESAPP-D1-W397-S1).",
+      "expect": "thesis\\s+corpus\\s+663 path[\\s\\S]*thesis\\s+noise\\s+2 path[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant is named by the task order. The order's comp-adversary preflight arms (base reads 'reads with a client above its own pool: 1' and C2 FAIL with 146 clients) were the issuer's cut-time measurement and were not re-run by this worker.",
+      "expected": "N/A: the task order names no mutant for this worker to run.",
+      "observed": "N/A: no mutant was run by this worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: each criterion is a single run of the named check; no same-input comparison was specified. The pytest run was one invocation.",
+      "observed": "Not measured by this worker.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy, push, store write, S3 write or delete, Bloomberg, SEC, model call, bun, npm, pip install",
+      "reason": "The worker face's bounds: none were run or touched. The two live-pool checks are GET only, as the order states."
+    },
+    {
+      "item": "The task order <status> flip to complete",
+      "reason": "The order states the status flip is the issuer's (2.0.0_SA_COO~R1). AC3 is FAIL on its literal expectation, so the order stays open in any case."
+    },
+    {
+      "item": "The worktree's portal submodule pointer (shown modified before the commit)",
+      "reason": "Outside the order's paths. Not staged or committed by this worker."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W397-S1: AC3 (r94_other_routes_table.py --after local) printed only the 'thesis corpus' line (663 paths); the expected 'thesis noise' line (2 clock paths at the base) did not print, because the script emits a kind line only when its count is above zero. The served-byte control holds in the measured sense."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (three files)",
+      "invocation": "cd C:/dev/wk-resapp-397 && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests/test_s3_client_seam.py lib/research/api/tests/test_drafted_sections.py lib/research/api/tests/test_filing_attempt_held_marker.py -q",
+      "result": "39 passed, 8 warnings (DeprecationWarnings in scoped_amgt.py utcnow, pre-existing), rc=0"
+    }
+  ]
+}
