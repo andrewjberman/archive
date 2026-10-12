@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-w-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round8.md",
+    "vintage_commit": "2fbb74e87d",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-w-2.data-proxy-firm-check-handler.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-w-2.data-proxy-firm-check-handler.md",
+    "group": "OTHER",
+    "vintage_commit": "ea4f6e926f"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~65",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/portal_data_proxy/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "a28bc1308c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the handler patch: imports ROUTE_FIRMS, deletes _ROUTES_OPEN_TO_VERIFIED_LOGINS, decides class (i) on firmId. No zip, no deploy, no AWS call in this order (the apply is CT-w-3). The zip-build hazard for the apply is surprise NFRA_CTLPLN-W65-S4.",
+      "artifact_covered_by": [
+        "CTw2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/portal_data_proxy/tests/test_route_firm_fence.py",
+      "kind": "test",
+      "commit_or_etag": "a28bc1308c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the rewritten fence suite (class (i) by firmId from ROUTE_FIRMS, class (ii) unchanged, T3 firm-token scan, T6 source-map entry). 965 tests, run by pytest from the worktree root.",
+      "artifact_covered_by": [
+        "CTw2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/portal_data_proxy/tests/test_route_class_fence.py",
+      "kind": "test",
+      "commit_or_etag": "ea4f6e926f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DELETED in a28bc1308c (the row pins the parent ea4f6e926f, where the file still exists), superseded by test_route_firm_fence.py. Its class-(i) cases asserted the old open-to-every-login rule. Its HEAD copy was run once as the control (see controls.mutant).",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTw2-AC1",
+      "criterion_verbatim": "CTw2-AC1 -- the rewritten fence tests pass: every route driven, class (i) by firm, class (ii) by tier, T3 and T6 included. Invocation: python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_route_firm_fence.py ; expect output containing: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_route_firm_fence.py",
+      "output_evidence": "(run under timeout 120 from the worktree root, rc=0, --color=no) output: '965 passed in 1.50s'. The same suite on the same bytes gave '965 passed in 1.54s' on the first run. The old suite run against this handler is the control (controls.mutant), not this criterion.",
+      "denominator": "965 of 965 collected tests passed (every census route driven: 41 routes, 2 class (i) and 39 class (ii); the firm-admitted, firm-refused, internal, preflight, keep-warm and prefix cases; T3 and T6)",
+      "status": "PASS",
+      "expect": "passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTw2-AC2",
+      "criterion_verbatim": "CTw2-AC2 -- the source map names the module exactly once. Invocation: grep -c \"firm_page_access.py\" infra/aws/lambda/ci/lambda-source-map.json ; expect 1",
+      "method": "command",
+      "invocation": "grep -c \"firm_page_access.py\" infra/aws/lambda/ci/lambda-source-map.json",
+      "output_evidence": "(run under timeout 120 from the worktree root) output: '1', rc=0. This is the AMENDMENT 1 control: the entry was already in the source map from CT-w-1 (e84eaff941) and this order did not add it again; the file is unchanged by this order.",
+      "denominator": "1 matching line in infra/aws/lambda/ci/lambda-source-map.json (the file's opal-portal-data-proxy files list, line 683)",
+      "status": "PASS",
+      "expect": "1",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the superseded class-(i) cases: test_route_class_fence.py at HEAD ea4f6e926f, copied to a scratch tests folder outside the repo's tests dir, run with PORTAL_PROXY_UNDER_TEST pointing at the NEW lambda_function.py (run under timeout 120; output in .scratch/ctrl/control_run.txt, not committed)",
+      "expected": "the class-(i) cases that assert the old open-to-every-login rule fail against the new handler; the internal-tier class-(i) cases still pass",
+      "observed": "12 failed, 904 passed of 916. Failing: 8 class-(i) partner-open cases (test_class_i_route_is_open_to_a_partner_and_to_internal, partner-advisor and partner-client, flat and nested, 2 routes); 2 class-(i) no-context cases (test_class_i_route_is_not_gated_by_the_handler_as_today); 1 AttributeError on the removed _ROUTES_OPEN_TO_VERIFIED_LOGINS (test_handler_open_constant_holds...); 1 partner prod-prefix case (test_prod_v1_prefix_is_stripped_before_the_open_route_match). The 4 internal class-(i) cases pass.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the new suite run twice on the same bytes of the handler and the test file",
+      "observed": "965 passed on both runs (1.54s and 1.50s); the suite uses no clock, network or randomness",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "infra/aws/lambda/portal_data_proxy/deploy.sh (copies only lambda_function.py and session_tracker.py into its zip)",
+      "reason": "outside this order's <paths>. The hazard for the apply is surprise NFRA_CTLPLN-W65-S4, owner 2.0.0_SA_COO~C. Not edited."
+    },
+    {
+      "item": "the handler's tier question: a class-(i) route admits any tier whose firmId is in the set (client, service, no tier)",
+      "reason": "the TO names tier advisor for the admitted case and the proposal's patch has no tier test. The tests pin the advisor case only. Surprise NFRA_CTLPLN-W65-S5 is for a CTO ruling. Not widened here."
+    },
+    {
+      "item": "lambda-source-map.json (no edit in this order)",
+      "reason": "AMENDMENT 1 moved the firm_page_access.py entry to CT-w-1 (e84eaff941). This order only checks it (CTw2-AC2)."
+    },
+    {
+      "item": "zip build, safe-apply, the NEVER-2 ledger entry, the artifact sha256 read-back, and the post-apply CloudWatch and live-route reads",
+      "reason": "CT-w-3 and plan of record section 7 steps 5 to 7. No terraform, no aws call, no deploy and no push in this order."
+    },
+    {
+      "item": "the portal carrier (firmAccess.ts generated block) and the portal gitlink",
+      "reason": "a later order (plan of record section 7 step 8). The portal gitlink is modified in the worktree and was not committed."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W65-S4: infra/aws/lambda/portal_data_proxy/deploy.sh copies only lambda_function.py and session_tracker.py into its zip, so a zip built by it lacks firm_page_access.py, which the patched handler imports at load. Filed OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~C. Not edited (outside <paths>).",
+    "NFRA_CTLPLN-W65-S5: the class-(i) firm check admits on firmId alone, so a client, service or untiered login with an admitted firmId reaches the two routes (probe: 4 of 5 claim cases admitted). The TO wording names tier advisor. Filed OBSERVATION, INERT, for a CTO ruling. Tests pin advisor only."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~65/NFRA_CTLPLN.TO-CT-w-2.data-proxy-firm-check-handler.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m ruff check --target-version py39",
+      "invocation": "timeout 120 python -m ruff check --target-version py39 infra/aws/lambda/portal_data_proxy/lambda_function.py infra/aws/lambda/portal_data_proxy/tests/test_route_firm_fence.py",
+      "result": "All checks passed! rc=0 (the base lambda_function.py at HEAD is also clean)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "timeout 120 bash .tools/commit-gate.sh infra/aws/lambda/portal_data_proxy/lambda_function.py infra/aws/lambda/portal_data_proxy/tests/test_route_firm_fence.py",
+      "result": "rc=0; OK: pre-commit gate clean for 2 of 2 file(s). WARN (non-ASCII, not blocking): 18 lines of lambda_function.py carry the 19 non-ASCII characters the base file already had; the patch adds none."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": ".tools/safe-commit.sh --author \"0.9.0_WK_NFRA_CTLPLN~65 <0.9.0_WK_NFRA_CTLPLN~65@opal.agent>\" -F <msgfile> -- lambda_function.py test_route_class_fence.py test_route_firm_fence.py",
+      "result": "committed a28bc1308c on wk-NFRA_CTLPLN-65 (2 files changed, 160 insertions, 52 deletions; the rename is detected). naming-gate and to-pipeline-gate ran and passed; surprise-row-gate found no rows in that commit."
+    }
+  ]
+}
