@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t40",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t40.batched-incremental-pull-and-equality-proof.md",
+    "group": "OTHER",
+    "vintage_commit": "e2e74649a2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "e2e74649a2",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t40.batched-incremental-pull-and-equality-proof.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~32",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/batch_pull.py",
+      "kind": "script",
+      "commit_or_etag": "2ead405e4a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: not wired into daily_draw or demand_queue (a later order on this report); no write to the served store, the real pacer state, the queue or the ledger",
+      "artifact_covered_by": ["DQ9-t40-AC1", "DQ9-t40-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/http_counter.py",
+      "kind": "script",
+      "commit_or_etag": "2ead405e4a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only measurement helper: wraps curl_cffi Session.request for the duration of a with-block and returns the original response",
+      "artifact_covered_by": ["DQ9-t40-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/batch_equality.py",
+      "kind": "script",
+      "commit_or_etag": "2ead405e4a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the proof run once, in the background of the worker session; reads the served store and transactions, writes only the report and a scratch pacer state",
+      "artifact_covered_by": ["DQ9-t40-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_batch_pull.py",
+      "kind": "test",
+      "commit_or_etag": "2ead405e4a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest with a stub fetch_many and no network; not deployed",
+      "artifact_covered_by": ["DQ9-t40-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~32/EQUALITY_REPORT.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the equality record: 50 symbols, 4 asset classes, zero mismatches, planted ticker isolated, HTTP counts and verdict",
+      "artifact_covered_by": ["DQ9-t40-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t40-AC1",
+      "criterion_verbatim": "the three named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t40_tests.py",
+      "output_evidence": "test_demque_batch_pull.py::test_incremental_window_starts_the_day_after_each_stored_max PASSED; test_demque_batch_pull.py::test_a_symbol_the_vendor_refuses_is_a_failure_for_that_symbol_alone_never_a_price PASSED; test_demque_batch_pull.py::test_batch_rows_equal_per_symbol_rows_on_a_universe_with_splits_and_dividends_in_the_window PASSED; 3 passed in 0.48s; BATCH-OK; rc=0",
+      "denominator": "3 of 3 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "BATCH-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t40-AC2",
+      "criterion_verbatim": "the equality report: at least 50 symbols across at least 3 classes, zero mismatches, price, dividend and split cells all compared, the planted bad ticker isolated, the two HTTP counts and a verdict stated; and a live 5-symbol spot-check equal 5 of 5.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t40_equal.py",
+      "output_evidence": "n=50 classes=['ETF', 'Equity', 'Mutual Fund', 'Mutual Fund (Closed End)'] equal=50 mismatches=0 cells={'prices': 154984, 'dividends': 1252, 'splits': 20} http={'per_symbol': 51, 'batched': 58} verdict=BATCH_DOES_NOT_REDUCE_HTTP_REQUESTS; spot: {\"equal\": 5, \"http_batched\": 5, \"http_per_symbol\": 6, \"of\": 5}; EQ-OK n=50, http per_symbol=51 batched=58, verdict=BATCH_DOES_NOT_REDUCE_HTTP_REQUESTS; rc=0",
+      "denominator": "50 of 50 symbols equal, 0 mismatches, 4 asset classes; cells compared prices 154,984 / dividends 1,252 / splits 20 (value cells, 20 symbols with a split and 50 with a dividend in window); isolated planted ticker: 0 price cells; spot 5 of 5",
+      "status": "PASS",
+      "expect": "EQ-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "scratch copy of batch_pull.py with window() changed from strict after (>) to on-or-after (>=) the stored maximum: the window test must fail",
+      "expected": "test_incremental_window_starts_the_day_after_each_stored_max FAILED; the other two PASSED",
+      "observed": "1 failed, 2 passed: test_incremental_window_starts_the_day_after_each_stored_max FAILED (AssertionError: ['2020-08-28'... '2020-09-01'] == ['2020-08-31', '20...); the other two PASSED",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the three offline tests run twice on the same tree (commit 2ead405e4a): direct pytest, then dq_t40_tests.py",
+      "observed": "both runs: 3 passed; the check prints BATCH-OK, rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "wiring into the daily draw and demand_queue (the pacer counting HTTP requests)",
+      "reason": "order BOUNDS: a later order, written on this report"
+    },
+    {
+      "item": "build item 2 (ii), the separate 10-symbol multi-ticker download, was not run; (i) is taken from the proof's per-symbol arm for 10 real symbols, and the one 51-symbol multi-ticker call (52 chart requests) answers ONE-or-n",
+      "reason": "request budget (order: at most 130 symbol-requests); the planted ticker's 404 retries cost 8 requests, which the 10-symbol probe could not absorb"
+    },
+    {
+      "item": "proof per-symbol arm paced 1.0 to 2.0 s on a scratch state file; the spot check (AC2 invocation) uses the library default pacing 8 to 12 s",
+      "reason": "order allowed 1 to 2 s for the proof only; the spot check runs the default pacer"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W32-S1: the order's 130-request cap assumes one HTTP request per symbol; measured, a nonexistent ticker costs 8 HTTP requests and each process pays one crumb request, so this order's all-HTTP total is 132 (chart-level 116), above 130 under the strict unit: the COO must rule which unit the cap counts",
+    "MDPF_DEMQUE-D1-W32-S2: yfinance download() logs a symbol's error instead of returning it, so fetch_many captures errors from the yfinance logger to classify FAILED_EMPTY versus FAILED_REFUSED",
+    "MDPF_DEMQUE-D1-W32-S3: the 10-symbol measurement of build item 2 (ii) was not run as written; the one 51-symbol multi-ticker call answers ONE-or-n (one chart request per symbol)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~32/MDPF_DEMQUE.TO-DQ-t40.batched-incremental-pull-and-equality-proof.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python data/mdpf/scripts/demque/batch_equality.py --n 50 --out org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~32/EQUALITY_REPORT.json",
+      "invocation": "run once in the background of the worker session, pacing 1.0 to 2.0 s, scratch pacer state",
+      "result": "EQUALITY n=50 equal=50 mismatches=0 cells={'prices': 154984, 'dividends': 1252, 'splits': 20} http per_symbol=51 batched=58 verdict=BATCH_DOES_NOT_REDUCE_HTTP_REQUESTS; isolated ZZNOSUCH9Q price_cells_stored=0 rest_of_batch_equal=True"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit of batch_pull.py, http_counter.py, batch_equality.py, test_demque_batch_pull.py and INVESTIGATION_v1.md",
+      "result": "commit-gate clean; surprise-row-gate OK (3 new rows of 61); to-pipeline-gate OK; msg-verify MATCH; committed 2ead405e4a"
+    },
+    {
+      "tool": "ruff 0.15.11 --target-version py39",
+      "invocation": "python -m ruff check --target-version py39 --select E,F,W --ignore E501 on the four .py files",
+      "result": "All checks passed!"
+    }
+  ]
+}
