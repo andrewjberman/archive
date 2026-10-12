@@ -411,3 +411,32 @@ condition (IB-pr-459 is running and IB-pr-461, an apply under a signed pair, is 
   told that cell to report per fund class (msg 6164).
 - By the issuer's code read, no IRPT_BCKEND surface reads that store; holdings take a price from the custodian's own market value
   over units. Not read by this seat.
+
+---
+
+## Added at rounds 157 and 158, 2026-10-12T00:49:50Z (input: msg 6222, packet @9be8315fa0)
+
+Round 157 is a RELEASE of one function under a pair signed on both halves; round 158 is a read. No judgment criterion. Held on the
+same condition (IB-pr-459 is running).
+
+- **D2-S100** (OBSERVATION, INERT, by `0.7.0_AE_CloudOps~IB2`): IB-pr-461's get_ref after-read needed one item from irpt-requests; simulate-principal-policy read dynamodb:Query, dynamodb:Scan and dynamodb:GetItem ALL ALLOWED for this principal on that table, and the live Scan was then refused with an AccessDeniedException 
+- **D2-S101** (BLOCKING, INERT, by `0.7.0_AE_CloudOps~IB2`): IB157-1-AC1 requires the record to carry the ledger's slug and IB157-1-AC3 refuses any bounded eight-digit run in the record; this seat named its ledger slug with a trailing date, so the true slug trips AC3 and the only two ways to pass are to edit the check, 
+- **D2-W317-S1** (OBSERVATION, ARMED, by `0.9.0_WK_IRPT_BCKEND~317`): IB-pr-462: all four entry ledger files are already CLOSED (every leg proven) on origin/box/sitez, but their sentinels under .open_deploys/ were left open with the open leg's proof null
+- **D2-W317-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~317`): IB-pr-462 check defect: p158_cells.py AC3 refuses any 8-digit token while AC1 and AC2 require the entries keyed by four slugs that each end in an 8-digit date, so a literal key cannot pass all three
+- **D2-W317-S3** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~317`): IB-pr-462: the dell2 agent user is refused kms:Decrypt on the irpt-requests table key and iam:SimulatePrincipalPolicy on the firm holdings roles, so the claim-row read and the role simulation were not made
+
+**This seat's own read of the release** (the draft store, at this compile): the live function's code hash begins `cwf6bUEbPvKk`,
+the digest the packet says was signed; last modified 2026-10-12T00:06:20, active; the downloaded package's hash equals the
+function's. The deployed store carries the new member: it reads the accepted record's ticket id and adds it to the first-persist
+answer only when it is a non-empty string. Of its 16 members, 10 are byte-equal to the tree at HEAD and 6 are not (two files of
+the generate folder and four registry or naming files). This seat did not resolve those six against the map's pins, so it does
+NOT say they are right; the applier's check was the build's digest against the signed one, which is the proper test.
+
+**For the slug.**
+- **The new member is UNEXERCISED on the deployed function.** No draft was persisted. It is proven at the pin and by nothing live
+  until the drafter's first persist for a ticketed request. PRD v0.45, signed by this seat with a note on the unposted draft.
+- **One after-read was not made** (a reference read for a request that has a draft): the table's key refused the scan. The CTO does
+  not pursue it. The issuer names its own error: its simulation read the table action and not the key.
+- **Round 158:** four deploy ledger entries left open on another box read CLOSED on that box's own branch; only their sentinel files
+  remain. One limb (a claim row) is the ledger's word, not a measured absence. The stale sentinels were relayed to that box:
+  SENT, not acked, so the row's disarm rests on a message nobody has confirmed reading.
