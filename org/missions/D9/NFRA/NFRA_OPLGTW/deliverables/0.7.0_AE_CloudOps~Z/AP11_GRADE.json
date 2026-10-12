@@ -1,0 +1,23 @@
+{
+ "sweep_run_id": "6379f5ee-3d60-451e-bfc8-2ee244a603ca",
+ "sweep_run_id_note": "This is the LAMBDA RequestId. run_sweep()'s own run_id is generated inside the function and returned in its result, and the function RAISED before returning, so the internal run_id is not observable. Recording the RequestId rather than inventing one.",
+ "sweep_was_scheduled": true,
+ "foreign_survived_schwab_sweep": true,
+ "foreign_absent_from_schwab_report": null,
+ "schwab_drained_and_reported": false,
+ "RESULT": "FAIL -- the deployed per-family drain cannot complete: the role lacks sqs:ChangeMessageVisibility",
+ "what_happened": "The SCHEDULED 12:15Z sweep fired at 12:15:49Z (EventBridge; this seat invoked nothing). The schwab record WAS drained -- it is gone from the queue. The foreign eclipse record SURVIVED -- it is still there. But run_sweep() then RAISED: drain_dlq calls sqs.change_message_visibility to RETURN the foreign message to the queue, and the role is not authorized. The invocation failed and Lambda retried it twice (3 invocations, ONE RequestId, ~150s each, last REPORT 12:26:32Z); the retry budget is now exhausted.",
+ "the_error_verbatim": "AccessDenied: User: arn:aws:sts::313476888478:assumed-role/opal-assets-silver-schwab-role/opal-assets-silver-schwab is not authorized to perform: sqs:changemessagevisibility on resource: arn:aws:sqs:us-east-1:313476888478:opal-assets-silver-dlq because no identity-based policy allows the sqs:changemessagevisibility action -- at schwab_runtime.py:319 in drain_dlq",
+ "why_two_fields_are_not_True": {
+  "foreign_absent_from_schwab_report": "NULL, not True. There IS NO REPORT: run_sweep raised before returning, so no run log or backfill-status report for this sweep exists to be absent FROM. Recording True here would be the classic vacuous pass -- absent from a report that does not exist. The foreign record's SURVIVAL is separately measured and is True.",
+  "schwab_drained_and_reported": "FALSE on the conjunction. DRAINED is true -- the schwab record is gone from the queue, confirmed by a non-destructive receive. REPORTED is false, for the same reason as above. The criterion asks for both."
+ },
+ "evidence": {
+  "queue_read": "Non-destructive receive (visibility-timeout 0, max 10, delete nothing) at 12:20Z returned exactly ONE distinct MessageId, 48264f89-1995-4b39-98f1-475d371c263b, the ECLIPSE synthetic. The SCHWAB synthetic f9b6edfc-423d-46e7-aed3-2809da20c740 is gone. ApproximateNumberOfMessages read 2 at the same moment and is the LAGGING approximate counter; the receive is the authoritative read.",
+  "planted": "2 synthetics at 11:44Z into a queue measured EMPTY first (0 visible / 0 in flight / 0 delayed).",
+  "scheduled_not_adhoc": "The sweep started 12:15:49Z on its own schedule. No ad-hoc invoke was issued by this seat, which the order forbids."
+ },
+ "blast_radius_bounded": "The conversion work COMPLETED on each attempt: run_sweep builds `lanes` for every declared master BEFORE calling drain_dlq, so the lanes, manifests and backfill status were written and only the drain raised. And lambda_entry routes S3 ObjectCreated events to run_event, NOT run_sweep, so per-object conversion is unaffected -- only the daily scheduled sweep path is broken. The cost is 3 duplicate lane runs and a failed invocation, not lost or corrupted data.",
+ "the_preflight_claim_that_was_false": "The order's preflight reads 'comp-iam: DECLARED-NOT-APPLICABLE -- the converter's role already holds receive/delete/change-visibility on the DLQ (opal-assets-silver-dlq-access).' The live plane says otherwise for the third of those three. The OLD code never needed it: it drained the whole queue by DELETING, and only the new per-family code returns a foreign message, so this permission became load-bearing exactly at this deploy and the gap could not surface before it.",
+ "not_done_and_why": "NO ROLLBACK AND NO IAM CHANGE WITHOUT THE ISSUER. An apply now would land inside the order's own forbidden window [12:00,12:50)Z. Granting sqs:ChangeMessageVisibility is a POLICY act, which this order excludes (comp-iam DECLARED-NOT-APPLICABLE, bounds say the schwab converter only) and which would need its own never-widen pair -- doing it unilaterally is exactly the widening this seat must not do."
+}
