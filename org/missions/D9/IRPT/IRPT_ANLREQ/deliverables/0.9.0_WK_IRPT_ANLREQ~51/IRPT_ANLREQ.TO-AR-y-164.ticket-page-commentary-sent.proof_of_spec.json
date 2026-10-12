@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-164",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-164.ticket-page-commentary-sent.md",
+    "group": "OTHER",
+    "vintage_commit": "d90edb3367"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R16_Y.md",
+    "vintage_commit": "d90edb3367",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-164.ticket-page-commentary-sent.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~51",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/api/endpoints/tickets.ts",
+      "kind": "script",
+      "commit_or_etag": "7bdc0cc9d8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree branch wk-IRPT_ANLREQ-51-portal-r16 only; not pushed, not deployed. Two additions: Ticket.commentary_sent and recordCommentarySent(ticketId), a POST of /api/scoped/tickets/{id}/commentary-sent with no body.",
+      "artifact_covered_by": ["AR164-y-AC1", "AR164-y-AC2J"]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx",
+      "kind": "script",
+      "commit_or_etag": "7bdc0cc9d8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same branch. CommentarySent: the display line, the control, the confirm step and the closed refusal list; AnalysisDraftAndPackage takes optional record and onRefresh.",
+      "artifact_covered_by": ["AR164-y-AC1", "AR164-y-AC2J"]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+      "kind": "script",
+      "commit_or_etag": "7bdc0cc9d8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same branch. One line: the board's refresh is passed to AnalysisDraftAndPackage as onRefresh.",
+      "artifact_covered_by": ["AR164-y-AC1"]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/__tests__/commentary-sent.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "7bdc0cc9d8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same branch. Five named tests, typed fakes, no any, no ts-comment; the route's function is a fake and the one test of the real client stands a fake fetch in the way. No test calls the live route.",
+      "artifact_covered_by": ["AR164-y-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR164-y-AC1",
+      "criterion_verbatim": "AR164-y-AC1: the five named tests are in the new file and the whole TicketCenter folder passes (67 at the base, plus the five).",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-51/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r16/ar16_checks.py y164-sent --root C:/dev/wk-irpt-anlreq-51 --portal C:/dev/wk-irpt-anlreq-51/portal",
+      "output_evidence": "TicketCenter folder: 72 pass, 0 fail (rc=0); Y164-SENT-OK (rc=0)",
+      "denominator": "72 of 72 tests in the TicketCenter folder pass (67 at the base plus the 5 new); 5 of 5 named tests present in the new file",
+      "status": "PASS",
+      "expect": "Y164-SENT-OK"
+    },
+    {
+      "criterion_id": "AR164-y-AC2J",
+      "criterion_verbatim": "AR164-y-AC2J (judgment, graded at L9, never by you): a person cannot record the send by one stray press, knows before pressing that it cannot be undone, and reads each refusal as a sentence that says what to do.",
+      "method": "manual_read_with_citation",
+      "invocation": "none: judgment criterion, graded at L9 by 3.0.0_SA_CVO from portal/src/pages/TicketCenter/AnalysisRequestParts.tsx (CommentarySent, SENT_CONFIRM_WORDS, SENT_REFUSAL_SENTENCES, sentRefusalSentence) at portal commit 7bdc0cc9d8, and the five named tests in commentary-sent.test.tsx",
+      "denominator": "5 of 5 named tests record the behaviours: the press alone posts 0 times and shows the confirm words ('once', 'cannot be undone'); Cancel posts 0 times; two confirm clicks in one tick are 1 post; the confirm control is disabled while the post is in flight; the answer's sender and time are shown and the control is gone; 8 of 8 refusal cases (4 codes, 404, 403, unknown code, 500, network failure) read as one sentence with no code shown; no verdict by the worker",
+      "output_evidence": "Confirm words: 'This records, once, that the final commentary for this ticket was sent, under your name and the time you confirm. It cannot be undone. Nothing is sent by this: it only records that you sent it.' Buttons: 'Record that the final commentary was sent', then 'Yes, record it (cannot be undone)' and 'Cancel'. Refusals: wrong type 'Nothing was recorded: this ticket is not an analysis request, so there is no final commentary to record on it.'; no draft 'Nothing was recorded: this ticket has no draft commentary, so there is no final commentary to have sent. Wait for the draft, then try again.'; already recorded 'Nothing more was recorded: the sending of the final commentary is already recorded on this ticket. The list is refreshing and will show who recorded it and when.'; changed 'Nothing was recorded: the ticket changed while you were looking at it. Reload the page, check the ticket, and press again only if the final commentary has been sent.'; 404 'Nothing was recorded: this ticket was not found among the tickets you may act on. Reload the page and check that you are signed in to the right firm.'; 403 'Nothing was recorded: you are not permitted to record this. Ask an Opal team member who is permitted to record it.'; fallback 'The request did not complete, so it is not known whether the sending was recorded. Reload the page and check the ticket before you press again.' git diff --stat origin/DEV HEAD (portal): 4 files changed, 336 insertions(+), 4 deletions(-).",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: the oracle is 3.0.0_SA_CVO at L9; the worker records output and gives no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Before the build the new test file was absent, so y164-sent had nothing to pass (record face: AC1 FAIL, folder 67).",
+      "expected": "FAIL before the edit; OK after",
+      "observed": "Y164-SENT-OK after the edit; folder grew 67 to 72.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the criterion check was run once after the commit; the new tests use a fake route and a fake fetch, no real timer and no network.",
+      "observed": "Y164-SENT-OK; bun run typecheck rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal typecheck and lint as criteria",
+      "reason": "Not criteria of this order; run anyway: bun run typecheck rc=0 (tsc -b --noEmit, no output); bun x eslint on the four changed files: 0 errors, 10 warnings (react-refresh/only-export-components, the pattern the two page files already carry)."
+    },
+    {
+      "item": "the live commentary-sent route",
+      "reason": "Not called, by any test or by the worker (the write is made once and cannot be undone; its first live press is the issuer's own pair). The handler was read in the workspace worktree (infra/aws/lambda/ticket_center/lambda_function.py:1597-1636) and the page built to it; the differences from the face are in row IRPT_ANLREQ-D2-W51-S9."
+    }
+  ],
+  "surprises": ["IRPT_ANLREQ-D2-W51-S9"],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test ./src/pages/TicketCenter",
+      "result": "72 pass, 0 fail"
+    }
+  ]
+}
