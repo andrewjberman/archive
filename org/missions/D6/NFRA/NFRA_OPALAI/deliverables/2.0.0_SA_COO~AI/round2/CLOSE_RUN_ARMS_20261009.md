@@ -196,3 +196,9 @@ or until 17:00 ET, whichever comes first, then drops back to the hourly tick. On
 `opal_asker_query(chat_id, <her message id>, key="json/benchmarks/etf_returns.json")`, and the raw `gateway_query_catalog`
 read of the key in the same minute (J2 reference), all three recorded in the Results table. A reply that is not a
 portal-figure question does not fire arm (a) (CVO condition); it is recorded and nothing more is sent.
+
+**Sent (2026-10-12):** message id `1791813882238`, createdDateTime `2026-10-12T14:04:42.238Z`, chat
+`19:2e21f8e5-..._ad037ea5-...` (as registered), from `Andrew Berman` (aadUser `2e21f8e5-...`), text exactly as registered
+above. Once; nothing further is sent. Pre-send reads at 12:1xZ: Alyssa's profile probe `PROFILE: PRESENT active=1`
+(1415 items); gateway whoami `Andrew@opalinvest.com`. The gateway required `confirm=true` (irreversible send); confirmed
+on Andrew's "Yes on Monday". Poll window: every 5 minutes from 10:07 ET until arm (a) fires or 17:00 ET.
