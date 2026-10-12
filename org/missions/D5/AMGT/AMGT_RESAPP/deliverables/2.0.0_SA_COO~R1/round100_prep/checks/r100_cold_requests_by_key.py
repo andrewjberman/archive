@@ -19,6 +19,7 @@ import boto3
 
 LOCK = threading.Lock()
 ROWS = []
+SPANS = []
 _real = boto3.client
 STARTS = {}
 
@@ -47,9 +48,8 @@ def _caller():
 def _wrapped(service, *a, **kw):
     c = _real(service, *a, **kw)
     if service == "s3":
-        who = _caller()
-
         def before(model=None, params=None, context=None, **_k):
+            who = _caller()  # the lib frame that ISSUED the request (the innermost one), not the one that built the client
             with LOCK:
                 STARTS[id(context)] = (time.monotonic(), model.name if model else "?", (params or {}).get("Bucket", ""), (params or {}).get("Key") or (params or {}).get("Prefix") or "", who)
 
@@ -60,6 +60,7 @@ def _wrapped(service, *a, **kw):
                 t0, op, bucket, key, w = s
                 with LOCK:
                     ROWS.append((op, bucket, _family(key), time.monotonic() - t0, w))
+                    SPANS.append((t0, time.monotonic()))
 
         c.meta.events.register("before-parameter-build.s3", before)
         c.meta.events.register("after-call.s3", after)
@@ -85,6 +86,20 @@ def main(argv):
         w[who] = w.get(who, 0) + 1
         fam[k] = (n + 1, tot + d, w)
     print("%s %s: status %s elapsed %.2f s | %d S3 requests, summed request time %.1f thread-seconds" % (route, subject, r.get("statusCode"), el, len(ROWS), sum(x[3] for x in ROWS)))
+    union, cur_s, cur_e, peak = 0.0, None, None, 0
+    for a, b in sorted(SPANS):
+        if cur_e is None or a > cur_e:
+            union += (cur_e - cur_s) if cur_e is not None else 0.0
+            cur_s, cur_e = a, b
+        else:
+            cur_e = max(cur_e, b)
+    union += (cur_e - cur_s) if cur_e is not None else 0.0
+    events = sorted([(a, 1) for a, _ in SPANS] + [(b, -1) for _, b in SPANS])
+    now = 0
+    for _t, d in events:
+        now += d
+        peak = max(peak, now)
+    print("wall time with at least one S3 request in flight: %.2f s of %.2f s elapsed (%.0f percent); peak simultaneous requests %d" % (union, el, 100 * union / el, peak))
     out = []
     for (op, bucket, family), (n, tot, w) in sorted(fam.items(), key=lambda kv: -kv[1][1])[:25]:
         top = sorted(w.items(), key=lambda kv: -kv[1])[0][0]
