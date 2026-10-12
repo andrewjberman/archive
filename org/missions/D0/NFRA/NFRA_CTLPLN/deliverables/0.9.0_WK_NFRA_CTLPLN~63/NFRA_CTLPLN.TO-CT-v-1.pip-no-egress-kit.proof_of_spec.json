@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-v-1",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-v-1.pip-no-egress-kit.md",
+    "group": "OTHER",
+    "vintage_commit": "03fca256efafd17dcf649b88d933a25a310850dd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round7.md",
+    "vintage_commit": "03fca256efafd17dcf649b88d933a25a310850dd",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-v-1.pip-no-egress-kit.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~63",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/kit_pip_no_egress.py",
+      "kind": "script",
+      "commit_or_etag": "2248f1f2f52b1306debdf4d51cbf1abbb11b1768",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a measurement and wrapper tool beside the bun kit; it changes no machine, and its only pip processes ran inside its own harness with both loopback redirects",
+      "artifact_covered_by": ["CTv1-AC2"]
+    },
+    {
+      "path_or_key": "org/devices/test_kit_pip_no_egress.py",
+      "kind": "test",
+      "commit_or_etag": "2248f1f2f52b1306debdf4d51cbf1abbb11b1768",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pure tests: no pip process and no network; they start loopback listeners and a stub only",
+      "artifact_covered_by": ["CTv1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTv1-AC1",
+      "criterion_verbatim": "the pure tests pass; the last line of the test file's output is KIT-PIP-TESTS ok=True cases=<k>/<n>",
+      "method": "test_suite",
+      "invocation": "python org/devices/test_kit_pip_no_egress.py",
+      "output_evidence": "KIT-PIP-TESTS ok=True cases=71/71",
+      "denominator": "71 of 71 cases pass: 47 classification rows of the wrapper table, the exact refusal text, the in-process refusal and allow paths, listener counting, the grader and its audit, the form decision, and source hygiene",
+      "expect": "KIT-PIP-TESTS ok=True",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTv1-AC2",
+      "criterion_verbatim": "the measurement on this machine, once, whose last line carries leaked_public=0; the exit code is not graded",
+      "method": "command",
+      "invocation": "python org/devices/kit_pip_no_egress.py measure",
+      "output_evidence": "PIP-NO-EGRESS pip=26.0.1 positive_requests=1 candidates=4 passing=3 holds_against_explicit=3 leaked_public=0 form=env:PIP_NO_INDEX ok=True",
+      "denominator": "4 candidate disarms graded plain and with the explicit loopback index (3 passing, 3 holding against the explicit index); 0 public-host lines on the proxy listener across all arms; positive arm 1 request",
+      "expect": "PIP-NO-EGRESS .* leaked_public=0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a planted regression: the grader told to pass every candidate, including the ones that made a request; the independent audit must catch it",
+      "expected": "the audit reports a PASS that made a request as a regression",
+      "observed": "test case audit-catches-planted-pass PASS in the CTv1-AC1 run (71 of 71)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the measurement is run once by the criterion; the pure tests are deterministic over fixed input and start no process",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "candidate (b) measured as the per-user config file of this box",
+      "reason": "on Windows pip finds the per-user file through the shell API, which the harness cannot redirect, and the cell forbids touching the real pip config; measured as the PIP_CONFIG_FILE file instead (surprise NFRA_CTLPLN-W63-S1)"
+    },
+    {
+      "item": "pip versions other than this box's pip 26.0.1, and the dell1 pip itself",
+      "reason": "BLIND by the cell's preflight; the same measurement on the dell fabric is CT-v-3's job"
+    },
+    {
+      "item": "a network egress policy as the real control",
+      "reason": "outside this cell; the wrapper is bypassed by any other interpreter, and the docstring states that limit"
+    },
+    {
+      "item": "the dead-loopback index candidate (c) as a passing disarm",
+      "reason": "graded FAIL by the zero-request rule because the proxy listener logs its attempt; reported, not reclassified (surprise NFRA_CTLPLN-W63-S2)"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W63-S1: pip on this Windows interpreter cannot have its per-user config redirected by environment, so candidate (b) is measured as the PIP_CONFIG_FILE config file",
+    "NFRA_CTLPLN-W63-S2: the dead-loopback index candidate (c) is graded FAIL by the zero-request rule because the proxy listener logs its attempt",
+    "NFRA_CTLPLN-W63-S3: the positive arm reaches the proxy listener, and no pip arm reaches the index listener",
+    "NFRA_CTLPLN-W63-S4: read literally, the wrapper's allowed list lets four argument shapes make requests, so the kit refuses them beyond the list",
+    "NFRA_CTLPLN-W63-S5: the verbatim wrapper refusal text names the laptop, which collides with the no-box-name rule",
+    "NFRA_CTLPLN-W63-S6: pip retries a 502 by default, so the kit appends --retries 0 --timeout 5 to every pip command it starts"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~63/NFRA_CTLPLN.TO-CT-v-1.pip-no-egress-kit.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m py_compile org/devices/kit_pip_no_egress.py org/devices/test_kit_pip_no_egress.py",
+      "result": "compiled without error"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 org/devices/kit_pip_no_egress.py org/devices/test_kit_pip_no_egress.py",
+      "result": "All checks passed!"
+    }
+  ]
+}
