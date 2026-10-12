@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_TRNSPT.TO-TR-cm24",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/decompositions/NFRA_TRNSPT_DECOMP_R24.md",
+    "vintage_commit": "adf48aa85c",
+    "to_ref": "org/missions/D9/NFRA/NFRA_TRNSPT/task-orders/NFRA_TRNSPT.TO-TR-cm24.completeness-read-refused.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/prd/NFRA_TRNSPT_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "adf48aa85c"
+  },
+  "assignee": "0.9.0_WK_NFRA_TRNSPT~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/teams/completeness.py",
+      "kind": "script",
+      "commit_or_etag": "f7dc2041ec1b826dbaa22f85a0854b5dcc3635be",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: read-only CLI run at AC2 (list and get against stored state); nothing deployed, no Lambda or Terraform touched.",
+      "artifact_covered_by": ["TR24-cm24-AC1", "TR24-cm24-AC2"]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_completeness.py",
+      "kind": "test",
+      "commit_or_etag": "f7dc2041ec1b826dbaa22f85a0854b5dcc3635be",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: test file; pure builder tests, nothing deployed.",
+      "artifact_covered_by": ["TR24-cm24-AC1"]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_live_readers_exercise.py",
+      "kind": "test",
+      "commit_or_etag": "f7dc2041ec1b826dbaa22f85a0854b5dcc3635be",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: test file on a recording fake S3; nothing deployed.",
+      "artifact_covered_by": ["TR24-cm24-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TR24-cm24-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R24_CHECKS/r24_checks.py cm24 -> R24-CM24-OK; the three named tests exist and the three completeness test files pass together",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R24_CHECKS/r24_checks.py cm24",
+      "output_evidence": "R24-CM24-OK 23 passed in 0.90s\nexit=0 (rerun: R24-CM24-OK 23 passed in 0.61s). Named tests run verbosely: test_read_refused_listed_meeting_is_refused PASSED; test_listed_without_read_refusal_still_raises PASSED; test_completeness_cli_read_refused_from_run_record PASSED; 3 passed",
+      "denominator": "23 of 23 collected tests passed across test_completeness.py, test_live_readers_exercise.py and test_listing_snapshot_expired.py; 3 of 3 named tests present and passing",
+      "expect": "R24-CM24-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TR24-cm24-AC2",
+      "criterion_verbatim": "python data/transcripts/scripts/teams/completeness.py --live --series monday_meeting --date 2026-06-01 -> monday_meeting 2026-06-01 refused (the seam against stored S3 state, read-only list and get)",
+      "method": "live_read",
+      "invocation": "python data/transcripts/scripts/teams/completeness.py --live --series monday_meeting --date 2026-06-01",
+      "output_evidence": "monday_meeting 2026-06-01 refused\nexit=0 (base before the change: ValueError: unclassifiable: listed, allowlisted, not in bronze)",
+      "denominator": "1 of 1 meeting occurrence answered from stored state (read-only list_objects_v2 and get_object; no put, copy or delete)",
+      "expect": "monday_meeting 2026-06-01 refused",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of completeness.py with the read_refused branch disabled (elif k in mr -> elif False); the refused-listed fixture is built against it.",
+      "expected": "ValueError unclassifiable: the test_read_refused_listed_meeting_is_refused assertion would fail",
+      "observed": "MUTANT-OBSERVED ValueError: unclassifiable: listed, allowlisted, not in bronze",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of r24_checks.py cm24 compared (same worktree commit f7dc2041ec)",
+      "observed": "run 1: R24-CM24-OK 23 passed in 0.90s; run 2: R24-CM24-OK 23 passed in 0.61s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "data/transcripts/scripts/teams/pull.py and every Lambda handler",
+      "reason": "outside the order's grant and out of scope by the order (the pull's own run record is the evidence; nothing writes new state)"
+    },
+    {
+      "item": "whole data/transcripts/scripts/tests directory run",
+      "reason": "not run by the order's bound: another test there rewrites a tracked fixture; only the acceptance check and the three named test files were run"
+    },
+    {
+      "item": "deploy of any kind",
+      "reason": "the order says no deploy; the change is a LOCAL CLI and test change"
+    }
+  ],
+  "surprises": [],
+  "session_log": "none",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -v -p no:cacheprovider data/transcripts/scripts/tests/test_completeness.py::test_read_refused_listed_meeting_is_refused data/transcripts/scripts/tests/test_completeness.py::test_listed_without_read_refusal_still_raises data/transcripts/scripts/tests/test_live_readers_exercise.py::test_completeness_cli_read_refused_from_run_record",
+      "result": "3 passed"
+    },
+    {
+      "tool": "r24_checks.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R24_CHECKS/r24_checks.py cm24",
+      "result": "R24-CM24-OK 23 passed in 0.90s"
+    }
+  ]
+}
