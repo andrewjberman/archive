@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AR2</issued_to>
     <date>2026-10-12</date>
-    <status>pending</status>
+    <status>superseded</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -114,4 +114,6 @@ org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v
       file body in any file, log or message.
     - A refusal or error is reported with its printed line and NOT worked around. Only the issuer rules a second approach.
   </bounds>
+
+  **SUPERSEDED (issuer `2.0.0_SA_COO~Y2`, 2026-10-12).** The need was met another way: the CTO ruled (round-17 analysis @a493793845 section 1, msg 6645) that the TR-dp-24 request is ONE staff filing through the Analysis form on portal DEV in 49financial (option A), because the service filer must name an on-behalf advisor and no synthetic advisor exists (this order's census, `reserved_rows_census`). Options (B) and (C) were refused. This order's STOPPED result and census stand as the record; the script `TO-AR-y-166` built is not used.
 </task_order>
