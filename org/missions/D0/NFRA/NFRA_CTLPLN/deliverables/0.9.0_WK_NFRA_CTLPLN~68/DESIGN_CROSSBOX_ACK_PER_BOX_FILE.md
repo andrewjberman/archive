@@ -61,9 +61,11 @@ Keys: `schema`, `id`, `to_device`, `to_serial`, `ack` null or {`at`, `by`} (`ack
 | OPEN | A.sent.at null | `state` OPEN, `sent` null |
 | SENT (status text only) | A.sent.at set, not ACKED | `status_of` `:649` "SENT, NOT ACKED" (today inside state OPEN) |
 | ACKED | A.reply set, or R.ack set | state ACKED; matrix `ack=set`; `ack.bus_message_id` = A.reply.bus_message_id |
-| HALF-CLOSED (status text only) | exactly one of A.closed, R.closed set | `status_of` `:643` (today inside state ACKED) |
+| HALF-CLOSED (status text only) | exactly one of A.closed, R.closed set | `status_of` `:643` (today inside whichever base state applies: ACKED when an ack exists, OPEN when it does not (the base state comes from the ack first)) |
 | CLOSED-BOTH | A.closed and R.closed both set | state CLOSED-BOTH (`derive_state` `:195`) |
 | CLOSED-BOTH, WITHDRAWN | A.withdrawn set (R absent) | `status_of` `:636` (today: from_by == to_by, no ack) |
+
+The HALF-CLOSED wording correction is the CVO's note C-S31 (ADJUDICATION_v10); the derivation is unchanged, since `derive_state` still takes the base state from the ack first.
 
 ACKED on A.reply keeps today's meaning: the sender's copy records the reply line, as `acked` (`:585`) does today. Withdrawn is derived from A alone, so the recipient's path is never written by the sender. DELIVERED is not in any file today. `receive` prints it (`:519`) and stores nothing, so it is not a git state (see S1, Q3).
 

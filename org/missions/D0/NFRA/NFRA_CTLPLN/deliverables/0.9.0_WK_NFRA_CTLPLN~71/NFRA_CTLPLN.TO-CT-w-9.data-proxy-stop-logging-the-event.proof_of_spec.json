@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-w-9",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-w-9.data-proxy-stop-logging-the-event.md",
+    "group": "OTHER",
+    "vintage_commit": "8c040cada9"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~71",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round8.md",
+    "vintage_commit": "8c040cada9",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-w-9.data-proxy-stop-logging-the-event.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/portal_data_proxy/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "9cdc9b0405",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "not deployed: the apply of this code is a separate order under a signed pair; this cell runs no terraform, no aws call and no deploy. The whole-event print at the head of lambda_handler is removed; one request line (HTTP method, normalised path, API Gateway request id, '-' when absent) replaces it after the path is normalised. OPTIONS and ?warm=1 answers are unchanged. No other log line changed.",
+      "artifact_covered_by": [
+        "CTw9-AC1",
+        "CTw9-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/portal_data_proxy/tests/test_no_credentials_in_logs.py",
+      "kind": "test",
+      "commit_or_etag": "9cdc9b0405",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "unit test on fake events with made-up tokens; no deploy. Drives all 41 census routes and 7 unmatched paths for internal, partner and anonymous callers on the real lambda_handler, stubs boto3 and replaces route functions with sentinels, and captures stdout, stderr and the root logging handler.",
+      "artifact_covered_by": [
+        "CTw9-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "9cdc9b0405",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "append-only rows NFRA_CTLPLN-W71-S1, NFRA_CTLPLN-W71-S2 and NFRA_CTLPLN-W71-S3 (filed in the same commit)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTw9-AC1",
+      "criterion_verbatim": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_no_credentials_in_logs.py ; expect output containing `passed`. The log-capture tests pass for all 41 routes and three callers.",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_no_credentials_in_logs.py",
+      "expect": "passed",
+      "output_evidence": "run from the worktree root under timeout 120, rc=0; output: '1012 passed in 1.73s' (second of two runs; the first run also printed '1012 passed'). Denominator decomposition: 144 route-and-caller cases (41 census routes plus 7 unmatched paths, x 3 callers: internal, partner, anonymous) x 7 assertions = 1008, plus 4 tests (census denominator, case denominator, capture positive control, static AST check on every log call) = 1012.",
+      "denominator": "1012 of 1012 collected tests passed; 144 cases = (41 routes + 7 unmatched paths) x 3 callers",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTw9-AC2",
+      "criterion_verbatim": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_route_firm_fence.py ; expect the output to contain `965 passed` (the firm fence still holds exactly as built, 965 tests, unchanged).",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_route_firm_fence.py",
+      "expect": "965 passed",
+      "output_evidence": "run from the worktree root under timeout 120, rc=0; output: '965 passed in 2.77s'. The same count was measured on the pre-edit tree (8c040cada9) before any change: '965 passed in 2.77s'.",
+      "denominator": "965 of 965 firm-fence tests passed, unchanged from the pre-edit tree",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Control: the credential-log suite run against the pre-edit handler (git show 8c040cada9 lambda_function.py, copied to .scratch/control-head beside the worktree session_tracker.py and firm_page_access.py, selected by PORTAL_PROXY_UNDER_TEST). The suite must fail where a credential reaches the log output. The order's named control commit 2fbb74e87d was tried first and cannot be collected (NFRA_CTLPLN-W71-S2).",
+      "expected": "the JWT-text (eyJ) assertion fails in every route and caller case (144 of 144)",
+      "observed": "PORTAL_PROXY_UNDER_TEST=.scratch/control-head/lambda_function.py python -m pytest -q --tb=no -rf test_no_credentials_in_logs.py: '1009 failed, 3 passed in 5.01s' (rc=1). By test: the eyJ test 144 of 144; the Bearer test 144; the Authorization value 144; the cookie value 144; the body token 144; the authorizer and query token 144; the request-line test 144; the static AST check 1. The 3 passes are the census denominator, the case denominator and the capture positive control.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: the same invocation run twice on the committed tree and compared on the pass count",
+      "observed": "run 1: '1012 passed'; run 2: '1012 passed in 1.73s'",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy of the data proxy, any terraform plan or apply, any aws call",
+      "reason": "order BOUNDS: this cell changes code and proves it with unit tests; the apply is a separate order under a signed pair"
+    },
+    {
+      "item": "the task-order status flip to complete in the order file",
+      "reason": "the order file is outside the order's <paths> grant (lambda_function.py, tests/ and INVESTIGATION_v1.md); see NFRA_CTLPLN-W71-S1. The verdict is carried by this instance: both criteria PASS and the instance is checked by .tools/proof-of-spec-check.py."
+    },
+    {
+      "item": "the control arm on git show 2fbb74e87d",
+      "reason": "that commit predates the route-class fence and has no ROUTE_FIRMS, so the suite cannot be collected against it; the pre-edit commit 8c040cada9 is the control (NFRA_CTLPLN-W71-S2)"
+    },
+    {
+      "item": "any edit to session_tracker.py",
+      "reason": "not in the order's <paths>; audited: it logs the session id from the x-session-id header or the sessionId query value, and the User-Agent header, none of which is a credential, and it never logs the Authorization or Cookie header"
+    },
+    {
+      "item": "the two pre-existing non-ASCII print lines (1032 and 1504) in lambda_function.py",
+      "reason": "neither line is a credential site, and the order changes no log line other than the credential sites; see NFRA_CTLPLN-W71-S3"
+    },
+    {
+      "item": "the cookie and refresh census that sizes the 14-day exposure",
+      "reason": "the apply order's measurement, named BLIND in the order's preflight; this cell reads no log group and calls no AWS service"
+    },
+    {
+      "item": "the portal gitlink",
+      "reason": "not committed; outside the order's <paths> grant"
+    },
+    {
+      "item": "the client account-id check on the commit",
+      "reason": "the hashed account-id list is absent on this device, so client-data-check printed WARN and did not run on the commit"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W71-S1: the order's close step flips the task-order status, which sits outside the order's <paths> grant; the flip is left to the issuing COO",
+    "NFRA_CTLPLN-W71-S2: the order's named control commit 2fbb74e87d predates the route-class fence and cannot be collected; the pre-edit commit 8c040cada9 is the control",
+    "NFRA_CTLPLN-W71-S3: lambda_function.py carries two non-ASCII production print lines (1032, 1504) that predate this cell; not changed"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~71/NFRA_CTLPLN.TO-CT-w-9.data-proxy-stop-logging-the-event.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_no_credentials_in_logs.py",
+      "result": "1012 passed in 1.73s (rc=0)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_route_firm_fence.py",
+      "result": "965 passed in 2.77s (rc=0)"
+    },
+    {
+      "tool": "pytest (control arm, pre-edit handler)",
+      "invocation": "PORTAL_PROXY_UNDER_TEST=.scratch/control-head/lambda_function.py python -m pytest -q --tb=no -rf infra/aws/lambda/portal_data_proxy/tests/test_no_credentials_in_logs.py",
+      "result": "1009 failed, 3 passed in 5.01s (rc=1)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py311 infra/aws/lambda/portal_data_proxy/lambda_function.py infra/aws/lambda/portal_data_proxy/tests/test_no_credentials_in_logs.py",
+      "result": "All checks passed! (rc=0; ruff 0.15.11)"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile infra/aws/lambda/portal_data_proxy/lambda_function.py infra/aws/lambda/portal_data_proxy/tests/test_no_credentials_in_logs.py",
+      "result": "OK (rc=0)"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/portal_data_proxy/lambda_function.py infra/aws/lambda/portal_data_proxy/tests/test_no_credentials_in_logs.py",
+      "result": "pre-commit gate clean for 2 of 2 file(s) (rc=0); WARN non-ascii 18 lines in lambda_function.py, unchanged from the pre-edit tree"
+    }
+  ]
+}
