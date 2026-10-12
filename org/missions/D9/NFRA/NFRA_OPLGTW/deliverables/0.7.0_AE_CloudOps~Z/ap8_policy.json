@@ -1,0 +1,41 @@
+{
+  "role": "opal-gateway-role",
+  "policy_name": "gateway-market-update-put-policy",
+
+  "_contract": "OG-ap-8 step 4 writes exactly role and policy_name; AC2 reads them live. The underscore-prefixed keys below are provenance for a reader and are not part of the contract.",
+  "_claim": "measured",
+
+  "_live_read_back": {
+    "command": "aws iam get-role-policy --role-name opal-gateway-role --policy-name gateway-market-update-put-policy",
+    "statements": 1,
+    "sid": "OplgtwPutMarketUpdateBronzeOnly",
+    "effect": "Allow",
+    "action": ["s3:PutObject"],
+    "resource": ["arn:aws:s3:::opal-data-transcripts/sharepoint/transcripts/bronze/market_update/*"],
+    "no_get_list_or_delete": true,
+    "no_other_prefix_or_bucket": true,
+    "inline_policy_count": "22 -> 23, so exactly one policy was added and nothing else on the role moved"
+  },
+
+  "_the_resource_name_is_not_the_policy_name": "The TF resource is aws_iam_role_policy.market_update_gateway_put; the LIVE policy name is gateway-market-update-put-policy. A get-role-policy on the resource name returns NoSuchEntity and would read as 'absent' even after a successful apply, so the before-state was established by the right predicate instead: 0 of 22 inline policy names matched 'market', with 'advi' matching 1 as a positive control that the listing can see a policy that exists.",
+
+  "_s3_root_came_from_the_BUILDER_never_typed": {
+    "command": "python -c 'from lib.opal_naming import address; a=address(\"sharepoint\",\"transcripts\",\"bronze\",\"market_update\",\"date=X\"); print(a[:-len(\"date=X\")])'",
+    "output": "s3://opal-data-transcripts/sharepoint/transcripts/bronze/market_update/",
+    "asserted": "the output ends in /bronze/market_update/ -- checked before it was passed to terraform",
+    "passed_as": "-var market_update_s3_root=<that output>",
+    "why": "The order and COO half condition B both require the variable to come from address() output, never a typed literal. Condition B further makes this permanent: the variable is on trunk since @f769ef6103, so EVERY later plan or apply of the opal-gateway root must pass it, and a plan that fails on a missing variable is a cut defect rather than a reason to add a default."
+  },
+
+  "_both_limbs_on_both_sides": {
+    "pre_apply": "W/ap8_plan_target.txt with W/ap8_plan_target.rc: 'Plan: 1 to add, 0 to change, 0 to destroy.' on the one address, at rc=0, 0 Error lines. The planned shape already matched the halves: name gateway-market-update-put-policy, s3:PutObject only, the builder prefix, role opal-gateway-role.",
+    "post_apply": "W/ap8_replan.txt with W/ap8_replan.rc: 'No changes. Your infrastructure matches the configuration.' at rc=0.",
+    "why_the_rc_is_recorded_separately": "The order says a summary at rc!=0 is not a verdict. At OG-ap-7 step 5b this seat measured an INCOMPLETE plan printing exactly 1/0/0 while exiting rc=1 after a failed data source dropped a row, so each plan's exit code is captured to its own .rc file rather than inferred from the summary line."
+  },
+
+  "_worktree": "C:/tmp/og-tf-ap8, DETACHED at box/sitez HEAD 7411ca08922668f0f70611f3f14f15430b510598. Never a release root (COO condition A, citing row Z-S81 -- this seat's own finding that a whole-root plan from a release branch would destroy live resources). The cone carries the agent home, so the halt gate's premise holds without any override; that requirement was learned at OG-ap-7, where the first deploy was blocked fail-closed for exactly its absence.",
+
+  "_rollback": "terraform destroy -target=aws_iam_role_policy.market_update_gateway_put through the same path with the same -var, then an ARMED row naming 2.0.0_SA_COO~O. The policy is its own inline statement, so it removes alone. No object was written by this order and none would be deleted by the rollback.",
+
+  "_not_done_by_this_order": "The .pptx writer itself is NOT released (COO condition C: it ships in a later gateway release cut on the live ref after this ledger closes, under its own pair naming the ADVI_MARKET_UPDATE_S3_ROOT env key). Nothing was written to the market_update prefix, and no object exists there by this act. The grant is capability only."
+}

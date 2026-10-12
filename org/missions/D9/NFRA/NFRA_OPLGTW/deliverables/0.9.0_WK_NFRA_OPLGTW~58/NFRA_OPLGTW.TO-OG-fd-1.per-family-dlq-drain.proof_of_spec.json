@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-fd-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "91bde9b54c",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-fd-1.per-family-dlq-drain.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-fd-1.per-family-dlq-drain.md",
+    "group": "OTHER",
+    "vintage_commit": "91bde9b54c"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~58",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/mirror_conversion.py",
+      "kind": "script",
+      "commit_or_etag": "12a92ffa49",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Phase A only: drain_dlq(sqs, queue_url, family, cap) keeps its own family; source copy only, the packaged Lambda copies are untouched build snapshots.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/etf_conversion.py",
+      "kind": "script",
+      "commit_or_etag": "12a92ffa49",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Caller updated to pass \"etf\"; source copy only.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_mirror_conversion.py",
+      "kind": "test",
+      "commit_or_etag": "12a92ffa49",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_fd1_ac01..03 added; full suite rc=0.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/schwab_runtime.py",
+      "kind": "script",
+      "commit_or_etag": "a11240c01c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Phase A only: schwab drain_dlq(sqs, queue_url, family, cap) keeps its own family; source copy only, the packaged schwab Lambda copy is untouched.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_schwab_runtime.py",
+      "kind": "test",
+      "commit_or_etag": "a11240c01c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_fd1_ac04 added; full suite rc=0.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~58/NEVER_WIDEN_ASK_OG-fd-1.md",
+      "kind": "doc",
+      "commit_or_etag": "a11240c01c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Ask for 1.0.0_SA_CTO~Z and 2.0.0_SA_COO~O; unsigned. Amendment 1 adds the schwab package, delta and deploy order (carried by a11240c01c)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(?s)test_mirror_conversion\\.py: pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r35/checks/fd1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "test_mirror_conversion.py: pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "named tests 3 of 3 passed (test_fd1_ac01, test_fd1_ac02, test_fd1_ac03); failed/error lines 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "(?s)test_schwab_runtime\\.py: pytest rc=0; named test passed 1 of 1; failed/error lines 0.*test_mirror_conversion\\.py: pytest rc=0.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r35/checks/fd1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "test_schwab_runtime.py: pytest rc=0; named test passed 1 of 1; failed/error lines 0\ntest_mirror_conversion.py: pytest rc=0\nRESULT: PASS\nexit=0",
+      "denominator": "named test 1 of 1 passed (test_fd1_ac04); failed/error lines 0; test_mirror_conversion.py rc=0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copies of the source with the family test patched to `if True:` (delete-everything drain, the pre-change behaviour): mirror_conversion.py for AC1, schwab_runtime.py for AC2.",
+      "expected": "test_fd1_ac01..03 and test_fd1_ac04 all FAIL",
+      "observed": "mirror copy: 3 failed (ac01 assertion, ac02 0 == 1, ac03 3 == 0); schwab copy: test_fd1_ac04 failed (3 == 1).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "fd1.AC1.sh and fd1.AC2.sh each run at least twice (before and after the commits) by the worker.",
+      "observed": "RESULT: PASS, exit=0 every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Lambda build and deploy, any SQS or AWS call, never-widen sign-off",
+      "reason": "Phase A only: the deploy is a later applier order under a signed pair; the order stays pending. Row NFRA_OPLGTW-Z-W58-S1 is covered by Amendment 1 (schwab_runtime.py) in this instance."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W58-S1",
+    "NFRA_OPLGTW-Z-W58-S2"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "cd data/assets/scripts/silver && python -m pytest tests/test_mirror_conversion.py -v",
+      "result": "all passed, rc=0 (fd1.AC1.sh)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "cd data/assets/scripts/silver && python -m pytest tests/test_schwab_runtime.py -v",
+      "result": "all passed, rc=0 (fd1.AC2.sh)"
+    }
+  ]
+}
