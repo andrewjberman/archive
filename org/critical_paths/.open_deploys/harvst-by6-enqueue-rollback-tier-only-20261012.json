@@ -1,0 +1,48 @@
+{
+  "slug": "harvst-by6-enqueue-rollback-tier-only-20261012",
+  "title": "HVST-by-6 roll back opal-research-pull-enqueue to the tier-only code",
+  "author": "0.7.0_AE_CloudOps~HV1",
+  "status": "OPEN",
+  "opened_at": "2026-10-12T15:36:09.600180+00:00",
+  "window_hours": 4.0,
+  "entry_path": "org/critical_paths/change_management/20261012T1536Z_harvst-by6-enqueue-rollback-tier-only-20261012_deploy_completion.md",
+  "legs": [
+    {
+      "id": "BUILD",
+      "kind": "verify",
+      "target": "S3 object version S9217s5ck1gZJvwSC.Ayeg4vFAkV063z (by-2's deploy) read: content-sha256 cWiraC3E..., member sha256 1778584a... equals git show 31590746f1:infra/aws/lambda/research/pull_enqueue/lambda_function.py",
+      "proof_required": "version head-object metadata plus its zip member hashed",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "UPLOAD",
+      "kind": "activation",
+      "target": "s3://opal-313476888478-lambda-artifacts/research/opal-research-pull-enqueue.zip (copy-object of that version over the key, metadata COPY)",
+      "proof_required": "new latest VersionId read back, content-sha256 cWiraC3EeuTU9WDIpc5RXzpw6+RT9WxoeqfH/eZiaxo=",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "APPLY",
+      "kind": "activation",
+      "target": "module.harvest_enqueue in infra/aws/terraform/harvest (targeted, safe-apply)",
+      "proof_required": "plan 0 add 1 change 0 destroy; CodeSha256 Q342L4Vn... -> cWiraC3E...",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "ARMS",
+      "kind": "verify",
+      "target": "opal-research-pull-enqueue deployed function: package source read back, then four no-ticker invokes",
+      "proof_required": "source sha256 equals 31590746f1, no userType clause, CodeSha256 equals by-2 deploy; dev_non_internal_tier 403, advisor_non_dev 403, no_context 403, internal_no_ticker 400",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261012T153609Z OPENED by 0.7.0_AE_CloudOps~HV1 with 4 leg(s)"
+  ],
+  "last_red_at": null,
+  "device": "dell1"
+}
