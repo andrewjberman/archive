@@ -1,22 +1,25 @@
-HVST-bz-2 REPORT (0.7.0_AE_CloudOps~HV1, 2026-10-12T16:38:03Z) -- STOPPED AT THE START CONDITION, NO ENQUEUE WAS MADE
+HVST-bz-2 REPORT (0.7.0_AE_CloudOps~HV1, 2026-10-12T16:44:50Z) -- THE ENQUEUE WAS MADE ONCE AND ANSWERED 202
 
-WHAT THE ACT CHANGED IN THE WORLD: nothing. No lambda invoke was made, no status object was written, no SQS message was sent.
-The only AWS calls were reads: get-function-configuration, get-object / head-object on status objects, get-queue-attributes,
-list-event-source-mappings, get-bucket-versioning, list-objects-v2 and list-object-versions.
+WHAT THE ACT CHANGED IN THE WORLD: exactly two things.
+  1. ONE status object was CREATED: s3://opal-data-harvest/packs/SAP_GY_Equity/status.json, state REQUESTED, requested_at 2026-10-12T16:43:40Z,
+     VersionId F8iBxqlr2MQsG3iRuhj4JUr74oPZcs3w. It did not exist before (head-object 404 at T0), so nothing was overwritten.
+  2. ONE message was sent to the queue opal-research-pull-requests (ApproximateNumberOfMessages 0 -> 1). It STAYS in the queue.
 
-WHY IT STOPPED: C-a held (live CODESHA256 cWiraC3EeuTU9WDIpc5RXzpw6+RT9WxoeqfH/eZiaxo= equals by-2's). C-b failed: step 1 requires one of
-SAP GY Equity, BA US Equity, BABA US Equity to have a prior status.json reading LANDED. All three read NoSuchKey in bucket
-opal-data-harvest (the function's own HARVEST_BUCKET). A positive control on the key grammar found the one status object in the bucket
-(packs/NVDA_US_Equity/status.json, LANDED), so the absence is real. Detail: bz2_ticker.out.
+WHAT IT DID NOT DO: no Bloomberg draw. The pull consumer was not started or run in any mode. No object or message was deleted. No code,
+IAM, route or authorizer changed. The NVDA US Equity status object (the one LANDED record) was read before and after and its VersionId is
+UNCHANGED (5tYJloxADmlaAfZX8ToUf71wMUNgxSqW).
 
-WHAT WAS NOT DONE: no Bloomberg draw, no pull consumer started or run in any mode, no delete, no ticker invented. NVDA US Equity is the
-only ticker that would satisfy C-b, but neither the order nor either signed half names it, so using it would be this seat widening the pair.
+WHAT WAS READ: the deployed function (CodeSha256 cWiraC3E..., by-2's) answered statusCode 202 to an internal authorizer context with the
+ticker SAP GY Equity; the log since T0 holds one invocation (1 START line) and one line 'OK: enqueued pull request for 'SAP GY Equity'
+(security_key=SAP_GY_Equity)'; DENIED LINES SINCE T0: 0. The same function answered 403 to an advisor, a Dev-advisor and a
+no-context caller at 15:39Z (by6_arms.out), so the 202 discriminates.
 
-WORLD READS WORTH KEEPING: the queue opal-research-pull-requests held 0 messages (0 not visible, 0 delayed) and has 0 Lambda event
-source mappings, so nothing auto-consumes it. The bucket has versioning Enabled; the NVDA status object has exactly one version.
+WHAT IT DOES NOT PROVE: this was a direct lambda invoke carrying a hand-written authorizer context. It proves the DEPLOYED FUNCTION admits
+tier internal and does the seam's two writes. It does not prove that the portal's API Gateway route and authorizer deliver
+requestContext.authorizer.lambda.tier for a real staff login: no real portal request was made.
 
-STILL UNMEASURED: the organic first internal enqueue (the negative arm) and the CTO's 'first real internal enqueue answers 2xx'.
+THE ORGANIC FIRST ENQUEUE is still unmeasured and remains the negative arm; this driven read does not replace it.
 
-WHAT THE ISSUER DECIDES (one question): re-cut this cell against a ticker that has a LANDED status object. Read on 2026-10-12, the only one
-is NVDA US Equity (state LANDED, one version, last written 2026-09-11T19:18:56Z). A re-cut needs both halves to name that ticker, because
-the act overwrites that object with state REQUESTED and adds one queue message; the prior LANDED body is preserved verbatim in bz2_ticker.out.
+RESIDUE TO KNOW ABOUT: until a person runs the pull consumer (or the message is otherwise dealt with), SAP GY Equity's status object reads
+REQUESTED and one message waits. Any page that renders the status object will show SAP GY Equity as requested. Deleting the object or the
+message is a delete and is not authorized by this order or its halves; the bucket is versioned.
