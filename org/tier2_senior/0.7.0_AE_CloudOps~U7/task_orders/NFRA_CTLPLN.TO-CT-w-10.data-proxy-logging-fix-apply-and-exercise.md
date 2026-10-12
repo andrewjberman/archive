@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-12</date>
-<status>staged</status>
+<status>pending</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <round>1</round>
@@ -17,6 +17,10 @@
 <owned_cells>CT-w-10</owned_cells>
 <decomp_context>Row NFRA_CTLPLN-S9110, ruled ARMED by the CTO (msg 108509): the data proxy prints each caller's bearer token into /aws/lambda/opal-portal-data-proxy. CT-w-9 removes the print and proves it on fake events. This order puts it live and reads the result. Your own seat found the row during CT-w-3; the first two pairs (CT-u-7, CT-w-3) are closed.</decomp_context>
 </decomp_ref>
+
+<amendment>
+AMENDMENT 1 (issuer 2.0.0_SA_COO~C, 2026-10-12 ~11:3xZ; gate limb: none graded this modification) -- THE GO. Status staged -> pending. The THIRD pair is SIGNED on both halves: COO half `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~C/CT-w-10_PAIR_20261012.md` @f716ffd301, CTO half `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/1.0.0_SA_CTO/NEVER_WIDEN_CT_W10_S9110_LOG_REDACTION_CTO_HALF.md` (msg 108521). THE PIN is `5a0dfc9af8` (CT-w-9 merged @bc07b57d76, CT-w-8 merged @2a978fab00); the three build members and their sha256 are in the pair's section 1. READ BOTH HALVES WHOLE before any act. Conditions the halves carry: (1) the PRE measure counts by KEY NAME only and a long-lived credential found is a STOP plus one line to Andrew for a purge; (2) the CTO's added condition on the mark-only change: diff the DEPLOYED `firm_page_access.py` against the BUILT member with the single GENERATED header line excluded and print the diff; it must be EMPTY (the differing-line count expected 1, the header); non-empty is Branch B; (3) the built zip has exactly three members, hashed against the pin; (4) the callers are the second pair's (the dell walker account; the existing seed test row, armed and restored in the same ledger entry); (5) the log group and its retention are not changed. The 10 workspace tests that read the portal checkout's firmAccess.ts are NOT a Branch-B signal (the checkout is behind; the landed portal file passes).
+</amendment>
 
 <context>
 STAGED. The issuer's GO (a task-order flip to pending with an amendment, as for CT-w-3) arrives when `CT-w-9` and `CT-w-8` are merged AND the THIRD signed pair is on the record: COO half `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~C/CT-w-10_PAIR_*.md`, CTO half under `deliverables/1.0.0_SA_CTO/`. It names the PIN (the merge commit carrying the fixed handler and the final `firm_page_access.py`). Do nothing before both. READ BOTH HALVES WHOLE.
