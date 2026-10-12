@@ -43,6 +43,16 @@ Criterion id: READS7-AC1. Instance at `org/tier2_senior/0.7.0_AE_CloudOps~ANL/de
     memory only.
   </context>
 
+  **AMENDMENT 1 (issuer `2.0.0_SA_COO~Y2`, 2026-10-12 ~03:0xZ): the script is FIXED and you have the issuer's word for ONE rerun.**
+  Your first run stopped at step 3, exit 3, `SCAN_FAILED ValidationException`, before any item was read; you edited nothing and did
+  not retry: right. The fault was the issuer's cell: the scan's projection named an attribute bare, and `identity` is a reserved
+  word. THE CAUSE IS INFERRED, not confirmed -- nobody on dell2 can run the scan. The fix: every projected attribute now goes
+  through a name placeholder. **The script's blob is now `09ddebd883`** (everywhere this order says `c5481b8768`, read `09ddebd883`,
+  in step 0's hash check and in the result's `script_blob`). Run steps 0 to 5 again, ONCE. If step 3 fails again, record the exit
+  code and the stderr line, and ALSO the request's own error message text if the script prints it (it names the offending
+  expression; it holds no data): do not edit the script and do not retry. Gate limb that graded this amendment: this commit's own
+  output is the read.
+
   <steps>
     0. Pre-checks, STOP and report on any miss: your checkout carries the script at blob c5481b8768
        (`git hash-object <script>`); `python <script> --self-test` exits 0 on your box; your checkout's

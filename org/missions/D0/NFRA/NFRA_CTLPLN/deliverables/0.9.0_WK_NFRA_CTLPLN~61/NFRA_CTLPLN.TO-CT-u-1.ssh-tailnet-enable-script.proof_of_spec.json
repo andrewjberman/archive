@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-u-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-u-1.ssh-tailnet-enable-script.md",
+    "group": "OTHER",
+    "vintage_commit": "edef413890"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~61",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.remote1.md",
+    "vintage_commit": "edef413890",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-u-1.ssh-tailnet-enable-script.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/ssh-tailnet-enable.ps1",
+      "kind": "script",
+      "commit_or_etag": "5f4c551",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not run elevated and not deployed to any box. Only -SelfTest (fake backend) and -Plan (unelevated, read-only, writes a receipt into a scratch folder that was then removed) were executed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTu1-AC1",
+      "criterion_verbatim": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/ssh-tailnet-enable.ps1 -SelfTest ; expect the output to contain SSH-ENABLE-SELFTEST cases= and every case passing (the line reads ok=True).",
+      "method": "test_suite",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/ssh-tailnet-enable.ps1 -SelfTest",
+      "output_evidence": "run from the worktree root under timeout 120, rc 0: SSH-ENABLE-PARSE errors=0 | CASE 1 plan-zero-mutations ok=True | CASE 2 no-key-refuses-password ok=True | CASE 3 second-run-idempotent ok=True | CASE 4 firewall-rewrites-any ok=True | CASE 5 device-unset-refuses ok=True | CASE 6 no-key-body-in-receipt ok=True | SSH-ENABLE-SELFTEST cases=6/6 ok=True",
+      "denominator": "6 of 6 self-test cases pass; 0 parse errors",
+      "status": "PASS",
+      "expect": "SSH-ENABLE-SELFTEST cases=6/6 ok=True"
+    },
+    {
+      "criterion_id": "CTu1-AC2",
+      "criterion_verbatim": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/ssh-tailnet-enable.ps1 -Plan -ReceiptDir .tmp-ssh-plan-receipts ; expect the output to contain \"mode\":\"plan\". A real -Plan on this unelevated machine prints BEFORE, lists the steps it would change, and writes a receipt; it changes nothing.",
+      "method": "command",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/ssh-tailnet-enable.ps1 -Plan -ReceiptDir $env:TEMP",
+      "output_evidence": "run from the worktree root under timeout 120 on this unelevated laptop (AGENTBUS_DEVICE=laptop), rc 0: SSH-ENABLE mode=plan kind=enable device=laptop | BEFORE sshd_status=Running sshd_start_type=Automatic tailnet_rule_remote_address=Any default_rule_enabled=False key_lines=0 password_auth=default | BEFORE sshd_capability= elevated=False default_shell_ok=False | BEFORE key_file exists=False readable=True acl_ok= key_lines=0 | WOULD B.firewall Set-NetFirewallRule \"OpenSSH Server (Tailscale only)\" -RemoteAddress 100.64.0.0/10 -Enabled True | WOULD C.default_shell set HKLM OpenSSH DefaultShell | WOULD restart sshd (Restart-Service sshd) | RECEIPT [...]\\ssh_enable_20261012T025221697Z.json | {\"mode\":\"plan\",\"device\":\"laptop\",\"utc\":\"2026-10-12T02:52:21Z\",...}. The face's variant (-ReceiptDir .tmp-ssh-plan-receipts, earlier run 02:46Z) printed the same BEFORE and WOULD lines; both receipts were removed.",
+      "denominator": "1 of 1 receipt written with mode plan; 3 of 3 WOULD steps listed; 0 machine mutations in plan mode (SelfTest case 1: Muts=0 under the plan guard)",
+      "status": "PASS",
+      "expect": "\"mode\":\"plan\""
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: no mutant control named by the order",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: the self-test runs over fixed fake state; not re-run as a separate control",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Elevated apply run, and every Add-WindowsCapability, Set-Service, Start-Service, Stop-Service, firewall cmdlet, registry write, icacls, sshd_config or administrators_authorized_keys write, on any box",
+      "reason": "order BOUNDS: a person runs the one-line apply per box in an elevated PowerShell; this cell proves -Plan and -SelfTest only"
+    },
+    {
+      "item": "bus send, push, merge",
+      "reason": "order RULES: nothing sent on the agent bus, nothing pushed; the commit stays LOCAL on wk-NFRA_CTLPLN-61"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W61-S1",
+    "NFRA_CTLPLN-W61-S2",
+    "NFRA_CTLPLN-W61-S3",
+    "NFRA_CTLPLN-W61-S4",
+    "NFRA_CTLPLN-W61-S5",
+    "NFRA_CTLPLN-W61-S6",
+    "NFRA_CTLPLN-W61-S7"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~61/NFRA_CTLPLN.TO-CT-u-1.ssh-tailnet-enable-script.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "PowerShell 5.1 parser (System.Management.Automation.Language.Parser.ParseFile, run inside -SelfTest)",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/ssh-tailnet-enable.ps1 -SelfTest",
+      "result": "SSH-ENABLE-PARSE errors=0"
+    }
+  ]
+}
