@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-READ-R10-wr1.who-writes-the-disabled-tooling-row-dell2",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-READ-R10-wr1.who-writes-the-disabled-tooling-row-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "6d4355d22d"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TV2",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R10.md",
+    "vintage_commit": "6d4355d22d",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-READ-R10-wr1.who-writes-the-disabled-tooling-row-dell2.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r10_wr1/WHO_WRITES_THE_DISABLED_TOOLING_ROW_20261012.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The read in the keys the order names: row_changes (with the per-attribute comparability of my own two earlier projections, and the two history settings), profile_row_writers (11 entries, each with an existing path:line, the attributes it writes and whether it sets updatedAt), sign_in_activity (three windows with epoch-millisecond and UTC bounds, the metric sums, and an unfiltered control beside every filtered count), workspace_mentions (100 files split by kind), verdict, what_was_not_read and claim. NO ADDRESS, no credential and no at-sign anywhere; the subject is named by 12-hex digest. AC1 reads WR1-READ-OK verdict=A_TOOL_REWRITES_ITS_OWN_ROW writers=11.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R10_CHECKS/r10_wr1_read.py expect: WR1-READ-OK",
+      "method": "command",
+      "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R10_CHECKS/r10_wr1_read.py",
+      "expect": "WR1-READ-OK",
+      "output_evidence": "WR1-READ-OK verdict=A_TOOL_REWRITES_ITS_OWN_ROW writers=11 -- the issuer's own script, against the FAIL it returned at issuance. Its three further conditions all hold: the file holds no address, the verdict is inside the closed set of four, and every writer's path exists (checked independently before writing, all 11).",
+      "status": "PASS",
+      "status_reason": "PASS decided by the issuer's own script matching its expect pattern, not by this seat's judgement.",
+      "denominator": "13 attribute names on the row; 11 writers located across 2 source trees (28 write-command hits over 13 files, both pages read, plus 4 skill files); 3 windows with controls of 108, 72 and 40 events; 100 files in the workspace search; 156 EventBridge rules; 513 .tools files"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "SEVEN controls. (1) THE UNFILTERED LOG CONTROL beside every filtered count, in all three windows, per this seat's own row D2-S51. (2) THE WORKSPACE SEARCH RE-RUN UNLIMITED after a head limit returned exactly its own limit. (3) THE EVENTBRIDGE COUNT taken client-side after auto-pagination, because a server-side filter plus length() reports per page. (4) THE DECISIVE EQUALITY TEST: lastLogin == updatedAt, which identifies the writing statement rather than merely describing it. (5) THE CALL-SITE POSITION of that statement computed against the three status guards, rather than assumed. (6) THE TOOL'S OWN WRITES enumerated from its code to see whether any sets updatedAt. (7) The two history settings READ rather than assumed.",
+      "expected": "(1) non-zero controls. (2) a true total above the limit. (3) one total, not page counts. (4) equal or unequal, decisively. (5) guards before or after. (6) sets or does not set. (7) whatever they read.",
+      "observed": "(1) 108, 72 and 40 unfiltered events, so the three zeros for a disabled-account refusal are real absences. (2) a limit of 60 returned exactly 60 -- a page -- and unlimited returned 100. (3) THE CONTROL CAUGHT ITSELF: --query length(Rules) printed 100 and then 56, which are PAGE counts, and the server-side contains() filter ran per page too, so a matching rule on page 2 could have been dropped silently; counting client-side over the auto-paginated 156 with no NextToken gives a sound zero. (4) EQUAL, exactly. (5) the only real call site is auth.ts:204 and the guard at 106 precedes it, so a disabled row cannot reach the write. (6) all three ui-walk writes set armedBy/armedAt, passwordHash and status, and NONE sets updatedAt. (7) stream null, PITR ENABLED -- and I had written DISABLED from assumption before reading it, which the read corrected.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every figure is a count, a name, a path:line citation or a timestamp comparison taken from a file on disk, one row read, two table descriptions, or a metric and log count with its window stated in epoch milliseconds. Nothing was invoked and nothing was written, so a repeat read of the same instant's data must agree with itself.",
+      "observed": "The counts reproduce. ONE ASSUMPTION OF MINE WAS WRITTEN BEFORE IT WAS READ and then corrected: I recorded point-in-time recovery as DISABLED while building the file, then read describe-continuous-backups and found it ENABLED. The correction matters rather than being cosmetic, because PITR being enabled means the row's prior STATES are recoverable in principle -- the single most informative read still available on this question -- while still not naming an actor. The file now carries the measured value, says plainly that I had assumed the other, and records the restore as forbidden by this order and not performed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "arm, disarm and secret",
+      "reason": "NOT RUN, as the order forbids. `status` was run ONCE, which it permits, and reads status=disabled, armed=no, armedBy=none -- so an arm/disarm cycle had completed and the lease was returned. Nothing was enabled."
+    },
+    {
+      "item": "A point-in-time restore",
+      "reason": "NOT PERFORMED, and the order forbids restoring. PITR is ENABLED, so a restore to just before each write would show WHICH ATTRIBUTES changed -- which my projections cannot -- but it would still not name the caller, since PITR records state rather than actors. Named as an available but unused instrument so the next seat knows the option and its limit."
+    },
+    {
+      "item": "Which client authenticated inside an armed window",
+      "reason": "NOT ESTABLISHED, and this is the honest limit of the verdict. The row carries no actor field; a successful session was minted while the row was active, and by construction the walk password lives only in SSM and is read in-process by the walker. A sign-in log line naming the client, or the SSM parameter's access record, would close it. The log lines were COUNTED and never printed, so no actor was extracted from them."
+    },
+    {
+      "item": "Any token, secret, credential, hash, reset token or one-time code",
+      "reason": "NONE read, printed or copied. passwordHash is named as an attribute of the row and its value never touched. No sign-in was attempted by me."
+    },
+    {
+      "item": "Writes earlier than 2026-10-11T22:41:40Z",
+      "reason": "NOT KNOWN. With no stream, only the writes my own reads straddled are visible, and there may be more. This read also found a THIRD write the order did not name, at 2026-10-12T02:01:48Z, after my own round-9 re-read had confirmed the second unchanged."
+    },
+    {
+      "item": "Writers of this table outside the two trees searched",
+      "reason": "NOT ENUMERATED, and no zero is claimed for them. The search covered the sign-in source (13 files, 28 write-command hits, both pages) and the ui-walk folder (4 files). The throttle, device-trust and MFA writers target their own keys or tables and were not traced to a PROFILE item."
+    },
+    {
+      "item": "The row of digest 1af514167abb (row D2-S53)",
+      "reason": "NOT read, named or probed, as the order requires."
+    },
+    {
+      "item": "An inconsistency inside the ui-walk skill",
+      "reason": "NOTICED AND NOT PURSUED, and no row filed against TCKT_VNEXT for it: SKILL.md:30 says disarm never deletes the SSM parameter while the script's own usage line says SSM is deleted, and the status read prints SSM PRESENT. It belongs to that skill's owner, not to this project's channel; it is recorded in the deliverable as an observation."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/logs/2026-10-12/tv2_r10_wr1_who_writes_the_disabled_row.md",
+  "compiler_tools": [
+    {
+      "tool": "aws dynamodb get-item (no projection) + query on email-index",
+      "invocation": "the one row, all 13 attribute names, consistent read",
+      "result": "status disabled, updatedAt 02:01:48.268Z -- a THIRD write the order did not name -- no armedBy or armedAt, and the row carries lastLogin and passwordHash"
+    },
+    {
+      "tool": "a read of the ui-walk skill and its account script",
+      "invocation": "SKILL.md lines 25-45 and every write path in ui_walker_account.py",
+      "result": "the identity IS that account; arm takes a lease then sets status active, disarm sets disabled and replaces the hash -- and NONE of the three writes sets updatedAt, which is what rules the tool out as the direct writer of the witness field"
+    },
+    {
+      "tool": "comp-find over the sign-in source",
+      "invocation": "the write commands, then updateLastLogin, both pages read",
+      "result": "28 write-command hits over 13 files; updateLastLogin at db.ts:271 writing 'SET lastLogin = :now, updatedAt = :now' with ONE call site, auth.ts:204 inside mintSession"
+    },
+    {
+      "tool": "a position computation against the status guards",
+      "invocation": "the call-site line against the guard lines 106, 255 and 538",
+      "result": "the guard at 106 precedes the call at 204, so a row that is not active cannot reach the write -- a refused attempt does not move updatedAt by this path"
+    },
+    {
+      "tool": "the equality test on the row's own timestamps",
+      "invocation": "lastLogin == updatedAt",
+      "result": "EQUAL -- so the last write was the one statement that sets both, a minted session, which requires the row to have been active at that moment"
+    },
+    {
+      "tool": "aws cloudwatch get-metric-statistics + logs filter-log-events",
+      "invocation": "three ten-minute windows, an unfiltered control FIRST, then quoted patterns",
+      "result": "26, 16 and 9 invocations; controls of 108, 72 and 40 events; ZERO disabled-account refusals in all three; exactly one invalid-credential refusal per window, the signature of disarm's own proof-of-refusal login"
+    },
+    {
+      "tool": "the Grep tool at the repo root",
+      "invocation": "one search for the identity's local part, re-run unlimited",
+      "result": "100 files (a head limit of 60 had returned exactly 60), split into the tool itself, other projects' walk instruments, two authority records including Andrew's own direction, and dated records; no configuration and no schedules"
+    },
+    {
+      "tool": "aws events list-rules, counted client-side",
+      "invocation": "auto-paginated, filtered in python",
+      "result": "156 rules, no NextToken, 0 naming a walk -- after the server-side filter plus length() had printed 100 and 56 as page counts"
+    },
+    {
+      "tool": "aws dynamodb describe-table / describe-continuous-backups",
+      "invocation": "one read each, nothing changed",
+      "result": "no stream; PITR ENABLED -- which corrected an assumption I had already written into the file"
+    }
+  ]
+}
