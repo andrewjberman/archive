@@ -2,9 +2,9 @@
   <metadata>
     <id>IRPT_DASHBD.TO-DB-b-164.r45-refresh-4-apply-dell2</id>
     <issued_by>2.0.0_SA_COO~D2</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~IB2</issued_to>
     <date>2026-10-12</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_DASHBD</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -15,6 +15,12 @@
 <decomp_doc>org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md</decomp_doc> section 88 (round 86), issuer cell `DB-b-164`, FWD-4.
 <owned_cells>DB-b-164</owned_cells>
 </decomp_ref>
+
+  <reseat>
+    RESEATED 2026-10-12 ~13:5xZ by the issuer: the order first went to 0.7.0_AE_CloudOps~DELL2 (msg 6433, offer exhausted, unread at 13:47Z; that
+    seat is not among the six relaunched on the fresh account). You are the AE seat the pair's condition 6 admits. Your own open entries
+    and orders (IB-pr-413, IB-pr-404) are untouched by this order; step 1(b) censuses every open ledger entry anyway.
+  </reseat>
 
   <objective>
     Apply R45 REFRESH 4: ONE gold Lambda release of `irpt-49f-reporting-gold-lambda` over live `oNgy4rnr` (CodeSha256
@@ -90,19 +96,19 @@
   </bounds>
 
   <write_surface>
-    org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_dashbd_r45/
+    org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_dashbd_r45/
     org/critical_paths/change_management/
     org/critical_paths/.open_deploys/
     infra/aws/lambda/ci/lambda-source-map.json
     infra/aws/lambda/investor-reporting/reporting-gold/
     org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md
-    org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/IRPT_DASHBD.TO-DB-b-164.r45-refresh-4-apply-dell2.md
+    org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_DASHBD.TO-DB-b-164.r45-refresh-4-apply-dell2.md
   </write_surface>
 
 <proof_of_spec>
   <criterion id="DB86-1-AC1" cell_refs="DB-b-164"><invocation>python "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r86/p86_round86.py" . DB86-1-AC1</invocation><expect>DB86-1-AC1 PASS</expect></criterion>
 </proof_of_spec>
-DB86-1-AC1 -- the R45 REFRESH 4 release is live over oNgy4rnr with exactly the four members at the packet's pins, plan 0/1/0, live equal to the build, a clean re-plan, and the one dry-run invoke under both 85 percent lines with 0 objects written. The record is `org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_dashbd_r45/R45_REFRESH4_APPLY_RECORD.json` with keys packet_sha256, base_codesha256_before, rollback_version_id, pins_verified, build_commit, built_codesha256, upload_member_diff, plan, live_codesha256_after, replan_no_changes, ledger_entry, dry_run, rollback. Base: FAIL (no record). The instance goes at `org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_dashbd_r45/IRPT_DASHBD.TO-DB-b-164.proof_of_spec.json`.
+DB86-1-AC1 -- the R45 REFRESH 4 release is live over oNgy4rnr with exactly the four members at the packet's pins, plan 0/1/0, live equal to the build, a clean re-plan, and the one dry-run invoke under both 85 percent lines with 0 objects written. The record is `org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_dashbd_r45/R45_REFRESH4_APPLY_RECORD.json` with keys packet_sha256, base_codesha256_before, rollback_version_id, pins_verified, build_commit, built_codesha256, upload_member_diff, plan, live_codesha256_after, replan_no_changes, ledger_entry, dry_run, rollback. Base: FAIL (no record). The instance goes at `org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_dashbd_r45/IRPT_DASHBD.TO-DB-b-164.proof_of_spec.json`.
 
 <preflight>
 comp-blast: DECLARED-NOT-APPLICABLE the pair's radius names one function and four members; the targeted plan must read 0/1/0 or the act stops
@@ -113,5 +119,5 @@ comp-cache: DECLARED-NOT-APPLICABLE no CloudFront or cache surface
 comp-adversary: DECLARED-NOT-APPLICABLE at the cut; DB86-1-AC1 base: FAIL as expected (no record), green arm PASS and over-memory arm FAIL on synthetic records
 </preflight>
 
-# pipeline-override: an APPLY order to the dell2 cloud-ops seat for one issuer cell (DB-b-164: one targeted release under a signed never-widen pair, applier named by the pair's condition 6); not a worker cell.
+# pipeline-override: an APPLY order to a dell2 cloud-ops seat for one issuer cell (DB-b-164: one targeted release under a signed never-widen pair, applier named by the pair's condition 6); not a worker cell.
 </task_order>

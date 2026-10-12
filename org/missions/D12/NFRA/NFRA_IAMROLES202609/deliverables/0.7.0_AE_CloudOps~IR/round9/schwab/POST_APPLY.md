@@ -221,6 +221,44 @@ a literal `None` line -- the CLI's empty-result marker -- counted as data. The p
 family as `--max-items` appending its pagination token as a second output line: an AWS text-output
 sentinel read as a row.
 
+## 4c. A POST-DELETE CHAIN IS RUNNING -- and the checkpoint keys are PER-DATE, so "the marker exists" grades nothing
+
+**At 12:48:10Z a chain STARTED, well after the 04:29:22Z delete floor.** That is the run the ruling asked
+for. It is still in progress, so the token stays withheld.
+
+```
+13:47Z probe, prefix gold/.checkpoints/2026-10-12/ : 29 keys total
+  written by THIS run (>= 12:48:10Z):  3   S_00 12:48:10, A_00 12:48:18, A_02 12:48:20
+  left over from the 04:03 run:       26   A_01, A_03, A_04, B_00, B_01, B_01b, B_02, B_03,
+                                           C_00..C_08, D_00, D_00b, D_00c, D_00f, D_01..D_04, E_18
+  gold/meta/ since 12:48:10Z:          1   fee_rate_history_watermark.json 12:48:17
+```
+
+> **THE CHECKPOINT KEYS ARE PER-DATE AND OVERWRITTEN PER RUN, NOT PER-RUN KEYS.** `S_00.done` now reads
+> `12:48:10Z`; the 04:03:46Z `S_00.done` I cited in section 4b **no longer exists** -- same key, new
+> object. So **`D_00f.done` EXISTING proves nothing about this run**: right now it reads **06:10:15Z**,
+> which is the *earlier* chain's success. A grader who checked "is `D_00f.done` present?" would read the
+> 04:03 run's completion as this run's and close branch A on the wrong evidence.
+>
+> **The sound test is a COMPARISON, not an existence check:** `D_00f.done.LastModified` **>** this run's
+> `S_00.done.LastModified`, and likewise for the four `gold/meta/*_incr_watermark.json`. Grade the run by
+> *which run wrote the marker*, never by the marker being there.
+
+This also means section 4b's stage split (7 pre-delete / 22 post-delete) described the keys **as they
+stood at 09:05Z**, when one run owned all 29. It was accurate then and is not re-derivable now, because
+this run has begun overwriting them. The conclusion it supported is unchanged and remains PARTIAL per the
+ruling.
+
+**Progress note, not a concern yet:** 3 stages in ~59 minutes, with nothing since `A_02` at 12:48:20Z.
+The 04:03 run showed the same shape (`A_02` 04:03:55 -> `A_03` 04:15:22, an 11m27s gap; later `B_00` ->
+`B_01` was 48m37s), and chain durations have run 2h07m to 8h33m, so a quiet hour here is inside the
+observed range. It is not evidence of a stall and I am not treating it as one.
+
+**To grade when it finishes:** `D_00f.done` and all four `gold/meta/*_incr_watermark.json` newer than
+`12:48:10Z`, no `AccessDenied` on `opal-data-schwab`, `schwab-bucket-access` still absent, 16 inline
+policies. Then the `POST-APPLY: schwab: verified` line, close the `realrun` leg and the entry, and flip
+the order.
+
 ## 5. STATE
 
 | leg | status |
