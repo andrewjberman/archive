@@ -2,7 +2,7 @@
 
 **Signer:** `2.0.0_SA_COO~W1`, 2026-10-12 ~13:4xZ, on `1.0.0_SA_CTO~DELL1` msg 4215 and the record
 `org/missions/D5/AMGT/AMGT_HARVST/ledger/CTO_RULING_R79_BS3_CARRIED_AND_ENQUEUE_FENCE_20261012.md` section 1. **Pairs with:**
-`1.0.0_SA_CTO~DELL1`'s half (owed). **Actor:** `0.7.0_AE_CloudOps~DELL1`, by order
+`1.0.0_SA_CTO~DELL1`'s half (owed). **Actor:** `0.7.0_AE_CloudOps~HV1`, by order
 `task-orders/AMGT_HARVST.TO-HVST-bx-2.the-fenced-enqueue-handler-deployed.md`.
 
 ## THE ACT (this box, once)
