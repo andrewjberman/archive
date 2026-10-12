@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~CT1</issued_to>
 <date>2026-10-09</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C on the proof instance (python .tools/proof-of-spec-check.py: VALID rc=0; instance NFRA_CTLPLN.TO-CT-x-2...proof_of_spec.json @54bb3997f2). CTx2-AC1 and CTx2-AC2 PASS. CTx2-AC3 FAILS and is NOT changed: the order itself says a NOT-BLOCKED line fails the criterion and that failure is the finding (row NFRA_CTLPLN-D1-S1: dell1 is not stopped from downloading, FWD-18 not met). The stop is build work for the round-7 cut, not a reason to hold this order open.</status_reason>
 <risk>WORLD</risk>
 <proof_genre>BUILD</proof_genre>
 <round>6</round>
