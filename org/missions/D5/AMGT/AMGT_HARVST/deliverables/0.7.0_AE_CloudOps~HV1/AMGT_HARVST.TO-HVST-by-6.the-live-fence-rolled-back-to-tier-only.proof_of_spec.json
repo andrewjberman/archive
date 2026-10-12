@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-by-6.the-live-fence-rolled-back-to-tier-only",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-by-6.the-live-fence-rolled-back-to-tier-only.md",
+    "group": "C",
+    "vintage_commit": "724e0b7eab7050b846b32b543d2034ee4b0b1b6d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "724e0b7eab7050b846b32b543d2034ee4b0b1b6d",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-by-6.the-live-fence-rolled-back-to-tier-only.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~HV1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/research/pull_enqueue/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "37e6f3cdea",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Step 0: the repo file restored from 31590746f1 by git checkout (not git revert, which would also remove append-only channel rows and the by-4 proof instance); sha256 1778584aa7309505cc3c2252dd863cd21d405f074be6b0f57d25fa96ed33f484 equal to git show 31590746f1:<file>; test_by4_dev_admitted.py removed; pytest on the directory: 22 passed. The deployed package's lambda_function.py reads back with the same sha256 (by6_package.out), so repo and live agree.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-research-pull-enqueue.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "31590746f1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "RESTORED BY VERSION, not rebuilt: s3api copy-object of VersionId S9217s5ck1gZJvwSC.Ayeg4vFAkV063z (by-2's deploy; by2_plan.out line 19 and by5_plan.out line 19 re-read) over the key with --metadata-directive COPY. The version's own member was downloaded and hashed (1778584a... equal to 31590746f1's file) BEFORE the copy. New latest VersionId pHqpZEyjzx1PPaeKAGgJUIB.1hQUU.v2, ContentLength 2690, content-sha256 cWiraC3EeuTU9WDIpc5RXzpw6+RT9WxoeqfH/eZiaxo= read back. Because the source object is the same bytes with the same metadata, the function's CodeSha256 equals by-2's exactly, which the CTO's proof (msg 4465) requires and a rebuild could not guarantee.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/api-gateway.tf",
+      "kind": "terraform",
+      "commit_or_etag": "31590746f1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NO terraform source change. ONE safe-apply of the exact saved plan (terraform plan -target=module.harvest_enqueue -out), 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' The plan, read in full, moved ONE resource, module.harvest_enqueue.aws_lambda_function.this, update in-place: last_modified (known after apply), s3_object_version kwFo21Dq... -> pHqpZEyjzx1PPaeKAGgJUIB.1hQUU.v2 and source_code_hash Q342L4Vn... -> cWiraC3E...; 28 attributes and 4 blocks unchanged. LastModified 2026-10-12T15:38:20Z, State Active, LastUpdateStatus Successful. comp-iam service read byte-identical before and after.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261012T1536Z_harvst-by6-enqueue-rollback-tier-only-20261012_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "724e0b7eab",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pinned at the commit deploy_ledger.py made when it OPENED the entry, BEFORE any AWS write (15:36Z). The four legs BUILD/UPLOAD/APPLY/ARMS were each closed with proof and the entry CLOSED ('all 4 legs proven; sentinel removed') in the worktree; the closed entry and the sentinel removal ride this seat's closing commit with this instance.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The AC2 trap the preflight names: a code hash can differ for byte-identical source because a rebuilt zip carries file times. So the source was read back from the SERVED package (not inferred from the hash) and compared to git show 31590746f1, and the hash was compared separately to by-2's recorded deploy hash. The two checks are independent: either alone could pass for a wrong reason.",
+      "expected": "Served lambda_function.py sha256 equals 31590746f1's; no 'userType' string in any .py member; CodeSha256 equals cWiraC3EeuTU9WDIpc5RXzpw6+RT9WxoeqfH/eZiaxo=.",
+      "observed": "Served package members [('lambda_function.py', 5981)]; DEPLOYED SOURCE SHA256 1778584aa7309505cc3c2252dd863cd21d405f074be6b0f57d25fa96ed33f484 == EXPECTED == REPO FILE; USERTYPE CLAUSE PRESENT: no; CODESHA256 cWiraC3E... EQUALS BY-2 DEPLOY: yes. The before-state was Q342L4Vn... (the Dev-admitting code), so the check had something to discriminate against.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "The Dev arm of AC1 is the discriminating one: under the Dev-admitting code it answered 400 (by5_arms.out); after the rollback it must answer 403. The other three arms did not move between by-5 and by-6, so they confirm nothing else changed.",
+      "expected": "dev_non_internal_tier 403 (was 400); advisor_non_dev 403; no_context 403; internal_no_ticker 400.",
+      "observed": "403, 403, 403, 400. Only the Dev arm moved relative to by-5's run of the same payload.",
+      "status": "STABLE",
+      "method": "command"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A rebuild of the zip",
+      "reason": "The order and the CTO (msg 4465) require restoring the artifact by version so CodeSha256 equals by-2's; build-and-upload.sh was not run. Had the version been gone the order said to stop and file a row; it was present."
+    },
+    {
+      "item": "A real-ticker invocation and check_e2e.py",
+      "reason": "No arm payload carries a ticker or a body (asserted in code before each invoke)."
+    },
+    {
+      "item": "Measuring how many real logins the rollback affects",
+      "reason": "The order says it is NOT measured by this seat. The only thing read: 0 invocations outside this seat's arms reached the function between 14:40:46Z and 15:39:48Z (by6_window.out), so no real caller was admitted or refused by either version in that window."
+    },
+    {
+      "item": "The step 9 carried post-act read (first real internal enqueue answers 2xx)",
+      "reason": "Not part of this order. Still UNMEASURED: 0 'OK: enqueued' lines exist since 13:50Z. Re-read owed after US close (20:00Z) from 13:50Z."
+    },
+    {
+      "item": "Pushing any commit",
+      "reason": "Shared-branch law: this lane commits LOCAL; the integrator pushes."
+    }
+  ],
+  "surprises": [],
+  "session_log": "Seat 0.7.0_AE_CloudOps~HV1, 2026-10-12 15:34Z-15:4xZ. Order of acts: authority read (ROUND_ANALYSIS.round79.md ADDENDUM 3 @b5915fba35) and the target S3 version head-read; step 0 repo revert, 22 tests, committed 37e6f3cdea; before-state (expected Q342...) and T0; ledger opened; the version's source hashed, then copy-object; plan; mail check; apply; served source read back; four arms; ledger closed; one window read. No surprise row: nothing contradicted the order. Ledger entry: org/critical_paths/change_management/20261012T1536Z_harvst-by6-enqueue-rollback-tier-only-20261012_deploy_completion.md. Commits LOCAL.",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan / safe-apply.sh (Rule 18)",
+      "invocation": "terraform plan -target=module.harvest_enqueue -out=<planfile>; .tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply -input=false <planfile>",
+      "result": "Plan: 0 to add, 1 to change, 0 to destroy. Apply complete: 0 added, 1 changed, 0 destroyed. Seat gates in WARN mode: APPLY-WHO ADMITTED; CROSSBOX-DEPLOY verdict=STOP on the same open call as the earlier acts (dell1-20261011T033643Z-e7f2, a portal PROD-promote question naming this root, not this act); WARN mode proceeds. Pre-apply mail check: get_delivery_state showed one non-READ row, msg 4466, the order itself, opened, read and acked before the apply. The HALT-gate pass is not cited."
+    },
+    {
+      "tool": "comp-iam service opal-research-pull-enqueue",
+      "invocation": "bash .tools/comp-iam service opal-research-pull-enqueue (before and after)",
+      "result": "3 statements before and after, byte-identical; a floor only (it models action, not resource)."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open|close-leg|close --slug harvst-by6-enqueue-rollback-tier-only-20261012",
+      "result": "4 legs opened before the first AWS write, each closed with proof, CLOSED."
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/research/pull_enqueue -q -p no:cacheprovider --color=no",
+      "result": "22 passed in 0.27s after the revert (15 bx-1 + 7 by-1), as the order expected."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(?s)ARM dev_non_internal_tier: statusCode 403.*ARM advisor_non_dev: statusCode 403.*ARM no_context: statusCode 403.*ARM internal_no_ticker: statusCode 400",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round81/by6_arms.out",
+      "output_evidence": "ARM dev_non_internal_tier: statusCode 403 / ARM advisor_non_dev: statusCode 403 / ARM no_context: statusCode 403 / ARM internal_no_ticker: statusCode 400. Four aws lambda invoke calls on the DEPLOYED function, each Invoke StatusCode 200 with no FunctionError, payload files by6_arm_*.payload.json (no ticker, no body). The Dev arm reads 403 where by-5's run of the same payload read 400.",
+      "denominator": "4 of 4 arms read as expected; 0 'OK: enqueued' lines, so nothing was written or enqueued.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "(?s)SOURCE SHA256 MATCHES 31590746f1: yes.*REPO FILE SHA256 MATCHES 31590746f1: yes.*USERTYPE CLAUSE PRESENT: no.*CODESHA256 EQUALS BY-2 DEPLOY .cWiraC3E[^)]*.: yes",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round81/by6_package.out",
+      "output_evidence": "DEPLOYED SOURCE SHA256 1778584aa7309505cc3c2252dd863cd21d405f074be6b0f57d25fa96ed33f484, EXPECTED SHA256 (31590746f1) the same; 'SOURCE SHA256 MATCHES 31590746f1: yes'; 'REPO FILE SHA256 MATCHES 31590746f1: yes'; 'USERTYPE CLAUSE PRESENT: no'; CODESHA256 cWiraC3EeuTU9WDIpc5RXzpw6+RT9WxoeqfH/eZiaxo=; 'CODESHA256 EQUALS BY-2 DEPLOY (cWiraC3E...=): yes'. The source was read from the served package.",
+      "denominator": "1 of 1 package read (1 member, lambda_function.py); 0 'userType' occurrences across its .py members.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "Plan: 0 to add, 1 to change, 0 to destroy",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round81/by6_plan.out",
+      "output_evidence": "'Plan: 0 to add, 1 to change, 0 to destroy.' The one change is module.harvest_enqueue.aws_lambda_function.this: s3_object_version kwFo21Dq805CaW24uAodJu5WJY.nbvVx -> pHqpZEyjzx1PPaeKAGgJUIB.1hQUU.v2 and source_code_hash Q342L4Vn... -> cWiraC3E..., last_modified known after apply. Nothing else moved.",
+      "denominator": "1 of 1 resource changed; the saved plan file was the one applied.",
+      "status": "PASS"
+    }
+  ]
+}

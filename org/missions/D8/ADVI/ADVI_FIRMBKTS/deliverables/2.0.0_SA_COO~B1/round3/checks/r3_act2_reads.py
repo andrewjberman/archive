@@ -26,13 +26,16 @@ GOLD = 'data/black_diamond/scripts/gold'
 LEGACY_BUCKET = 'opal-data-bd'
 
 
+REF = 'HEAD'   # set from --ref in main(); the repository commit the deployed objects are compared with
+
+
 def root():
     return subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True).stdout.strip()
 
 
 def classes(rt):
     ns = {}
-    src = subprocess.run(['git', 'show', 'HEAD:%s/lib/platinum_dest_view.py' % GOLD], capture_output=True, text=True,
+    src = subprocess.run(['git', 'show', '%s:%s/lib/platinum_dest_view.py' % (REF, GOLD)], capture_output=True, text=True,
                          cwd=rt).stdout
     exec(compile(src, 'view', 'exec'), ns)
     return [(p, b, t.replace('{tail}', '')) for p, b, t in ns['PLATINUM_CLASSES']]
@@ -51,7 +54,7 @@ def cmd_deployed(a):
     rt = root()
     sys.path.insert(0, os.path.join(rt, '.tools'))
     import safe_deploy_core as sdc
-    names = subprocess.run(['git', 'diff', '--name-only', a.base, 'HEAD', '--', GOLD], capture_output=True, text=True,
+    names = subprocess.run(['git', 'diff', '--name-only', a.base, REF, '--', GOLD], capture_output=True, text=True,
                            cwd=rt).stdout.split()
     files = [n for n in names if n.endswith('.py') and '/tests/' not in n]
     todo = []
@@ -65,7 +68,7 @@ def cmd_deployed(a):
     client = s3()
     ok = 0
     for n, bucket, key in todo:
-        want = hashlib.sha256(subprocess.run(['git', 'show', 'HEAD:' + n], capture_output=True, cwd=rt).stdout).hexdigest()
+        want = hashlib.sha256(subprocess.run(['git', 'show', REF + ':' + n], capture_output=True, cwd=rt).stdout).hexdigest()
         try:
             body = client.get_object(Bucket=bucket, Key=key)['Body'].read()
             got = hashlib.sha256(body).hexdigest()
@@ -75,7 +78,7 @@ def cmd_deployed(a):
             ok += 1
         else:
             print('  DIFFERS %s (%s)' % (os.path.basename(n), 'absent or unreadable' if got.startswith('UNREAD') else 'bytes'))
-    print('DEPLOY EQUAL: %d of %d objects equal the repository at HEAD' % (ok, len(todo)))
+    print('DEPLOY EQUAL: %d of %d objects equal the repository at %s' % (ok, len(todo), REF if REF != 'HEAD' else 'HEAD'))
     return 0 if ok == len(todo) else 1
 
 
@@ -134,11 +137,14 @@ def main():
     sub = ap.add_subparsers(dest='cmd', required=True)
     d = sub.add_parser('deployed-equal')
     d.add_argument('--base', default='96f3212d22')
+    d.add_argument('--ref', default='HEAD', help='the repository commit the objects are compared with (default HEAD; a pinned commit when other projects move HEAD)')
     n = sub.add_parser('new-home')
     n.add_argument('--since', required=True)
     o = sub.add_parser('old-home')
     o.add_argument('--since', required=True)
     a = ap.parse_args()
+    global REF
+    REF = getattr(a, 'ref', 'HEAD') or 'HEAD'
     return {'deployed-equal': cmd_deployed, 'new-home': cmd_new, 'old-home': cmd_old}[a.cmd](a)
 
 
