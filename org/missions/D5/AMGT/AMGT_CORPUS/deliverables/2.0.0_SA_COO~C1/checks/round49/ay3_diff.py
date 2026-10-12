@@ -164,6 +164,7 @@ def main():
         return 0
     counts = {"SAME": 0, "NEWFIELD": 0, "CHANGED": 0, "DROPPED": 0}
     n = ok_names = reader_equal = 0
+    master_names = master_clean = unread_blocks = unread_clean = 0
     outside = []
     bad = []
     split = {"own": collections.Counter(), "master": collections.Counter()}
@@ -202,6 +203,13 @@ def main():
             bad.append(key)
             print("TEAM-SHEET-WRONG %s %s" % (key, ",".join(why[:8])))
         side = "master" if t15.get("class") == "master" else "own"
+        if side == "master":
+            master_names += 1
+            master_clean += int(not any(w.startswith("master-") for w in why))
+        for blk in t15.get("blocks") or []:
+            if blk.get("kind") == "unread":
+                unread_blocks += 1
+                unread_clean += int(blk.get("columns") == [] and all(r["cells"] == [] for r in blk["rows"]))
         for k, v in kinds.items():
             split[side][k] += v
         totals["block_rows"] += nblock
@@ -224,7 +232,10 @@ def main():
         n, sum(counts.values()), counts["SAME"], counts["NEWFIELD"], counts["CHANGED"], counts["DROPPED"], len(outside),
         ",".join(sorted({"%s:%s" % o for o in outside}))[:300]))
     print("ay3 team_sheet_ok %d/%d reader_equal %d/%d" % (ok_names, n, reader_equal, n))
-    build = int(n == len(keys) and counts["DROPPED"] == 0 and not outside and ok_names == n and reader_equal == n)
+    print("ay3 master_names_without_value_in_blocks %d/%d unread_blocks_without_value %d/%d" % (
+        master_clean, master_names, unread_clean, unread_blocks))
+    build = int(n == len(keys) and counts["DROPPED"] == 0 and not outside and ok_names == n and reader_equal == n
+                and master_clean == master_names and unread_clean == unread_blocks)
     print("ay3 build %d/1" % build)
     return 0 if build else 1
 
