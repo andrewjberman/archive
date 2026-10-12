@@ -440,3 +440,34 @@ NOT say they are right; the applier's check was the build's digest against the s
 - **Round 158:** four deploy ledger entries left open on another box read CLOSED on that box's own branch; only their sentinel files
   remain. One limb (a claim row) is the ledger's word, not a measured absence. The stale sentinels were relayed to that box:
   SENT, not acked, so the row's disarm rests on a message nobody has confirmed reading.
+
+---
+
+## Added at rounds 155, 159 and 160, 2026-10-12T02:05:13Z (input: msg 6317, packet @808a28f87f)
+
+Five read-only orders, no judgment criterion, nothing built, invoked or served. This seat re-ran nothing.
+
+**The slug is still held on two orders that are `pending` by design** (this seat's count of the order files at this compile):
+IB-pr-404 and IB-pr-413, the second on a scheduled fire of 2026-10-12 14:15Z. Workstream ~P's rounds 117 to 160 are otherwise
+terminal. 101 rows of the channel are undispositioned at this count: 93 OBSERVATION and INERT, 6 BLOCKING and INERT, 2 ARMED.
+
+- **D2-W315-S1** (BLOCKING, INERT, by `0.9.0_WK_IRPT_BCKEND~315`): IB155-1-AC1 requires landed_prices_store.rows as an integer and IB155-1-AC3 fails on any eight-digit token in the outputs; the store's true row count has eight digits, so both cannot pass
+- **D2-W315-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~315`): The 878-ticker set and the grading window were rebuilt from S3 by the ~308 and ~310 scripts because the ~313 scratch cache no longer exists; the rebuild reproduces the earlier counts; and the route entry read is orion, not the 49 Financial entry
+- **D2-W315-S3** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~315`): The landed prices store was last written 2026-10-09 but its newest yahoo-labelled point is dated 2026-06-05 (newest of any label 2026-06-09), and no schedule for its writer was found
+- **D2-W315-S4** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~315`): Amendment 1: the fund-class marker is a table of the build (the census class), not a column of the store, and every one of the 23,976 compared ticker-days lies before the first graded day, so the per-class equality is read on the store's newest weeks only
+- **D2-W318-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~318`): The live authorizer package is a 4-line bun bundle, so the face's content comparison of its index.mjs to a git blob of the source cannot match any revision; the match was made by string-literal and property-name features instead
+- **D2-W318-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~318`): The four authorizer commits after the source map's last_deployed_commit 26ffa22b79 are not unreleased: two CLOSED deploy ledgers record them applied (2026-09-25 and 2026-10-03), and the live package carries them; the map's commit and date fields were not advan
+- **D2-W320-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~320`): The producer function is outside a VPC and carries no yfinance, but another function's note says the shared layer's size leaves no room for it
+- **D2-W321-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~321`): The holdings producer writes the opening and closing value as start_value and end_value; the portal adapter reads beginning_market_value and ending_market_value, so by the code the two value tiles read 'not supplied' for a holdings-basis answer
+- **D2-W321-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~321`): By the code every holdings-basis performance answer is state PARTIAL, because three absences are added unconditionally, so the only trace of absences the portal shows does not tell a window with a non-OK day from one without
+- **D2-W319-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~319`): The face says the reader skips a non-OK day and still gives the claim measured; for the 49F entry that holds in every cell, but for orion the claim is inferred for 144 of 894 (SI), 124 of 200 (YTD) and 134 of 240 (1Y) accounts with an excluded day, because of 
+- **D2-W319-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~319`): The face asks for a last_day_involved class and does not say how large it would be; the largest class for orion YTD and 1Y is the account whose last row is non-OK, not a first-day or an interior exclusion
+- **D2-W319-S3** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~319`): The face splits accounts_read into with, none and refused and names refusal codes in refusals; it does not say a second refusal exists beside 'no OK row' that depends on the account being present on the latest day
+
+**For the slug.**
+- The contract side of these rounds is signed: PRD v0.46 and v0.47 (the date-basis producer; a missing day costs two days).
+- Row D2-W313-S3 (a served reader says `measured` across a day it did not measure) is under one more read, by the CTO's ruling of
+  msg 6316: first-day exclusions stand; interior and last-row days depend on what the prior day's value was.
+- **Row D2-W317-S1 (ARMED):** the packet says the four stale sentinels were removed on the other box by that box's own statement.
+  That is the disarm's evidence; this seat has not read that branch.
+- **Row D2-S60 (ARMED, from 2026-10-09)** is the oldest armed row in this channel and is still undispositioned.

@@ -102,4 +102,9 @@ Of those, the CTO ruled three cuts (msg 4919): the ATTACH RELEASE for hops 9, 11
   for no row and for a DISABLED row (the CTO's own correction in msg 6181: the contract reads a row's existence, not that it is
   active), and every route it guards. Then the cell, if the CTO rules the reader follows the ticket service: that is IRPT's
   contract, so the rule comes from the CTO, not from this seat.
+- **UN-PARKED 2026-10-12 ~02:2xZ as round 16 (issuance @d90edb3367, on PRD v0.4 @4b1447e2cc, ratified-text half signed @60d5149e31):**
+  the re-land (cell `AR-y-162`, NOT spawned until the stored-input count of cell `AR-y-161` has been run and the CTO has ruled on
+  it); row `TCKT_VNEXT-D2-S48` (its read, `AR-y-163`); `commentary_sent` on the ticket page (`AR-y-164`); arm F2 (its read,
+  `AR-y-165`). STILL PARKED by the PRD's own list: SUBTOTAL, SUM, ALL; the form sending `commentary_requested` (after
+  `2.0.0_SA_COO~P2`'s release).
 
