@@ -1,0 +1,92 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ETFS_RIVALS.TO-RIV-xd-1.planted-render-same-page-find",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+  "vintage_commit": "0e8f628672",
+  "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-xd-1.planted-render-same-page-find.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "0e8f628672"
+ },
+ "assignee": "0.9.0_WK_ETFS_RIVALS~35",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/dramatic_move.py",
+   "kind": "script",
+   "commit_or_etag": "d9a8faec76",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code and tests only; LocalSink and injected search; no S3, no live search, no deploy; LOCAL commit on wk-ETFS_RIVALS-35 (run_for_day writes under _partition_day = as_of(day))",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_riv_xd1_same_page_find.py",
+   "kind": "test",
+   "commit_or_etag": "d9a8faec76",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "offline tests only; LocalSink; search injected",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the series the page's chart reads carries the INFERRED split on the page day it was found, continuous against its gapped control, and a second run searches nothing; the published chart object carries it too. Invocation: cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round29/checks/xd1_planted_render_check.py -- expect: 3 passed",
+   "method": "test_suite",
+   "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round29/checks/xd1_planted_render_check.py",
+   "output_evidence": "AFTER the change at d9a8faec76, run 1: '3 passed in 10.68s' rc=0; run 2 on the same input: '3 passed in 8.15s' rc=0. BASE at 0e8f628672 (before the change): '2 failed, 1 passed in 7.95s' rc=1 -- test_ac1_a_find_is_read_by_the_page_of_the_day_it_was_found: 'assert [] == [('split', 15...le.test/tkm')]'; test_ac2_the_published_chart_object_carries_the_find: 'assert [] == [('split', 15...est/planted')]'; the control test_ac2_control_the_planted_move_with_no_lookup_is_a_gap_on_the_published_chart passed at the base and passes after.",
+   "denominator": "3 of 3 check tests passed (base: 1 of 3; the control 1 of 1 at both)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the existing lookup tests green after you correct only the assertions the partition falsifies. Invocation: cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider rivalfunds/tests/test_ws2_wb1_dramatic_move.py rivalfunds/tests/test_riv_wi1_sweep_lookup.py -- expect: all passed, 0 failed",
+   "method": "test_suite",
+   "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider rivalfunds/tests/test_ws2_wb1_dramatic_move.py rivalfunds/tests/test_riv_wi1_sweep_lookup.py",
+   "output_evidence": "'30 passed in 1.71s' rc=0 (after the change, d9a8faec76). No assertion was falsified by the partition: neither existing file asserts the uri or partition of a run_for_day write; no existing test was edited. Round-close suite, face section 5: python -m pytest -q rivalfunds/tests from data/etfs/scripts -> '1028 passed, 6 skipped in 64.90s' rc=0.",
+   "denominator": "30 of 30 lookup tests passed, 0 failed; rivalfunds suite 1028 passed of 1034 collected (6 skipped), 0 failed",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "two same-input runs of the AC1 check after the change (run 1 and run 2 above), compared",
+   "observed": "3 passed both runs (10.68s and 8.15s)",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The face names no mutant. The base-box run of the same AC1 check (before the change) read 2 failed with the control passing, the negative control that the check discriminates.",
+   "expected": "n/a",
+   "observed": "2 of 3 failed at 0e8f628672, control passed; 3 of 3 passed at d9a8faec76",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Flipping the task order status to complete",
+   "reason": "The face leaves the <status> flip to the issuer (section 5)."
+  },
+  {
+   "item": "A live Bright Data search, any key read, S3 read or write",
+   "reason": "The face forbids them; the check and the new tests use a LocalSink and an injected search."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.dell1.md",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~35 <0.9.0_WK_ETFS_RIVALS~35@opal.agent>\" -F .scratch/msg_riv_xd1_code.txt -- <2 code paths>",
+   "result": "d9a8faec76"
+  }
+ ]
+}
