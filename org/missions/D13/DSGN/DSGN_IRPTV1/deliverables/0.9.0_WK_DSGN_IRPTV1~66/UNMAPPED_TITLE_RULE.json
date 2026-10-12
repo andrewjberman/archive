@@ -1,0 +1,73 @@
+{
+  "to_id": "DSGN_IRPTV1.TO-IV-e-118",
+  "worker": "0.9.0_WK_DSGN_IRPTV1~66",
+  "rule": {
+    "file": "portal/src/pages/InvestorReporting/contracts/vendorSectionNames.ts",
+    "line": 90,
+    "function": "vendorCardTitle(sectionType, sectionId)",
+    "unmapped_code_printed": false,
+    "called_from": "portal/src/pages/InvestorReporting/contracts/adapt.ts:940 (title) and :946 (Label)",
+    "resolves_from": "The row's section_type when the census names it (a scalar row: extract.py:707 sets section_type to the census code S00..S32). Otherwise the leading code of the row's section_id (text before the first dot): the producer builds a chart row's id as '<census code>.chart.<slug of the section title>' at ycharts/extract/extract.py:772 (\"%s.chart.%s\" % (s[\"id\"], _slug(s[\"title\"])), where s[\"id\"] is the census section id, extract.py:219-240 and 723-724), and the type token at :773; publication.py:71 sends the same type for a re-derived chart row with the section_id carried through unchanged (row[\"section_id\"]). That leading code is looked up in the census's 33 names. The slug is not used.",
+    "unresolvable": "A row whose type and section_id prefix both miss the census prints UNNAMED_SECTION_TITLE = 'A section the census does not name', the one constant (vendorSectionNames.ts:70). Never the token, never the code.",
+    "opal": "unchanged: the Opal adapter does not call vendorCardTitle (iv-e-115 arm (e) passes unmodified)."
+  },
+  "chart_card": {
+    "title_from": "SECTION_NAME",
+    "word_proposed": "Chart from the source report; no figures read",
+    "word_basis": "What the producer says the row is: extract.py:738-744 and :782-785 ('identified source chart: <title>, page N. NO NUMERIC VALUE IS EMITTED -- the census declares zero field rows for this region'), value null, units 'chart'; certify.py:173-178 grades it PASS only when value is null and _emitted_values is 0 ('source-chart representation, 0 numeric values emitted for the region'); publication.py:61-63 ('a source representation, not numeric extraction or a claim to have detected chart pixels'). So the row says that a chart sits on that page of the source report and that nothing was read off it. The word says both halves in plain English and uses no vendor term.",
+    "alternative_rejected": "'Chart image' / 'Chart': rejected because the card shows no picture, and the unit column already says 'chart'; the reader's actual question is why the Value is empty, which only the second half ('no figures read') answers.",
+    "where_printed": "As the card's Label cell (the Label column appears on a chart card because its Label differs from its title; a value card keeps IV-e-116's no-Label-column layout). The title above it is the section's census name, e.g. '5. Asset Allocation'.",
+    "where_it_lives": "census member row_type_words.source_chart_representation in docs/briefs/sources/YCHARTS_COMPARISON_REPORT_FIELD_SCRAPE_20260909.json; copied to VENDOR_ROW_TYPE_WORDS (vendorSectionNames.ts:65) and held equal by the IV-e-115 drift test arm (a)."
+  },
+  "census": {
+    "file": "docs/briefs/sources/YCHARTS_COMPARISON_REPORT_FIELD_SCRAPE_20260909.json",
+    "commit": "a1b500eb1f53349445dc6669672ba408cd6d49a1",
+    "entries_added": 1,
+    "member_added": "row_type_words (top level, last member): { _note (prose), source_chart_representation (the word) }",
+    "section_names_unchanged": 33,
+    "section_names_check": "python -I: [(id,title) for every section] equal before and after (33 of 33); every other top-level member equal before and after (json equality); indentation 2, LF, no final newline preserved; git diff --stat 4 insertions, 0 deletions.",
+    "sha256_before": "44853788fa6d39c8b6011c2f86fc82ea6906c2e006935df549f153378c950905",
+    "sha256_after": "053560a14bd5d5b2a95a25c641062c1bdcfeaca08d4d476075bd2e3891d7e831",
+    "page_pin_updated": "CENSUS_PIN and CENSUS_SHA256 in vendorSectionNames.ts now name the new commit and bytes",
+    "drift_test_passes": true,
+    "drift_test": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-115.vendor-section-names-units.test.tsx (a): sha256, 33 names, and now VENDOR_ROW_TYPE_WORDS equals the census's row_type_words (minus _note); 5 of 5 pass"
+  },
+  "test": {
+    "file": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-118.no-unmapped-code-title.test.tsx",
+    "arms": "(a) chart row renders section name + census word, token absent from the markup; (b) S-code row unchanged; (c) unresolvable rows print the fixed wording, no token/code; (d) all 33 census codes resolve as a chart row's leading code; (e) word equals the census member",
+    "pass": "5 of 5",
+    "mutant": "vendorCardTitle's section_id fallback and the fixed wording replaced by `return sectionType` (the old print-the-token behaviour) in committed vendorSectionNames.ts; run once: 2 pass, 3 fail; reverted with git checkout -- (git status clean); re-run 5 pass",
+    "mutant_failed": true
+  },
+  "assertions_changed": [
+    {
+      "file": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-115.vendor-section-names-units.test.tsx",
+      "test": "(c) RENDERED",
+      "old": "found['S99.zz.c1'] toEqual { heading: '20. S99', label: '', unit: 'percent' }",
+      "new": "found['S99.zz.c1'] toEqual { heading: `20. ${UNNAMED_SECTION_TITLE}`, label: '', unit: 'percent' }"
+    },
+    {
+      "file": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-115.vendor-section-names-units.test.tsx",
+      "test": "(c) RENDERED",
+      "old": "found['S17.chart.risk-reward'] toEqual { heading: '22. source_chart_representation', label: '', unit: 'chart' }",
+      "new": "found['S17.chart.risk-reward'] toEqual { heading: '22. Risk/Reward Scatter Plot (5 Years)', label: VENDOR_ROW_TYPE_WORDS.source_chart_representation, unit: 'chart' }"
+    }
+  ],
+  "assertions_added_not_changed": "iv-e-115 (a): one added expect (VENDOR_ROW_TYPE_WORDS equals the census row_type_words) plus a type member and two imports; the file's header comment and two inline comments reworded.",
+  "lint_errors": 0,
+  "lint_warnings": 342,
+  "typecheck_errors": 0,
+  "suite_base": { "pass": 1191, "skip": 27, "fail": 0, "failing_ids": [], "file": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~66/base.txt" },
+  "suite_after": { "pass": 1196, "skip": 27, "fail": 0, "new_failing_ids": [], "file": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~66/after.txt" },
+  "screenshots": ["unmapped-title-report.png"],
+  "screenshot_read": true,
+  "screenshot_detail": "Read with the Read tool. bun run build of portal ac8febb7d3, served with --dist routing by vendor-report-driver.mjs (a copy of ~64's driver), synthetic fixture vendor-report.fixture.json (a copy of ~64's; its one chart row moved up and two chart rows added: S05.chart.asset_allocation and ZZ9.chart.unknown_part, all figures made up). The PNG shows the opened dialog's first 8 cards: '5. Asset Allocation' is the chart card, a Label column reading 'Chart from the source report; no figures read', Value empty, Unit chart; the value cards ('2. Key Stats', '5. Fundamentals') are unchanged with no Label column. The chart cards of S17 ('7. Risk/Reward Scatter Plot (5 Years)') and of the unresolvable ZZ9 ('9. A section the census does not name'), and the S99 value card ('10. A section the census does not name'), lie below the PNG's fold; they are in unmapped-title-report.run.txt (visible innerText) and not in the image. The token appears nowhere in the report text. portal/dist removed afterwards.",
+  "product_files_changed": [
+    "portal/src/pages/InvestorReporting/contracts/vendorSectionNames.ts",
+    "portal/src/pages/InvestorReporting/contracts/adapt.ts",
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-115.vendor-section-names-units.test.tsx",
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-118.no-unmapped-code-title.test.tsx"
+  ],
+  "portal_commit": "ac8febb7d35537b37a367792097da54d29d0a545",
+  "rows": ["DSGN_IRPTV1-D2-W66-S1"]
+}
