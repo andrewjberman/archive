@@ -1,0 +1,100 @@
+{
+ "schema_version": "1.0",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-488",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-488.walker-firm-flag.md",
+  "group": "OTHER",
+  "vintage_commit": "410abe2d57"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "410abe2d57",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-488.walker-firm-flag.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~341",
+ "artifacts_produced": [
+  {
+   "path_or_key": ".claude/skills/ui-walk/walk.mjs",
+   "kind": "script",
+   "commit_or_etag": "d84df45bc0",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a developer-tool script in the skill folder; --firm and --first-client parse and fail loud; no walk run, no arm, no AWS call, no network call",
+   "artifact_covered_by": [
+    "IB169-1-AC1",
+    "IB169-1-AC2",
+    "IB169-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": ".claude/skills/ui-walk/SKILL.md",
+   "kind": "doc",
+   "commit_or_etag": "d84df45bc0",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "two invocation lines documenting --firm and --first-client; a doc, nothing deployed",
+   "artifact_covered_by": [
+    "IB169-1-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB169-1-AC1",
+   "criterion_verbatim": "IB169-1-AC1 (IB-pr-488): node --check on walk.mjs passes; run as python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r169/p169_cells.py\" . IB169-1-AC1; expect last line IB169-1-AC1 PASS",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r169/p169_cells.py\" . IB169-1-AC1",
+   "expect": "IB169-1-AC1 PASS",
+   "output_evidence": "OK: walk.mjs passes node --check | IB169-1-AC1 PASS | rc=0",
+   "denominator": "1 file of 1 (walk.mjs under node --check)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB169-1-AC2",
+   "criterion_verbatim": "IB169-1-AC2 (IB-pr-488): node walk.mjs --base http://example.com --firm Inflection --first-client reaches the localhost refusal instead of unknown argument, and --firm with no label does not reach it; expect IB169-1-AC2 PASS",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r169/p169_cells.py\" . IB169-1-AC2",
+   "expect": "IB169-1-AC2 PASS",
+   "output_evidence": "OK: --firm and --first-client parse; the localhost refusal follows; --firm with no label is not silently accepted | IB169-1-AC2 PASS | rc=0",
+   "denominator": "2 walker invocations (the flag pair reaches the refusal; --firm alone is refused before it) of 2",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB169-1-AC3",
+   "criterion_verbatim": "IB169-1-AC3 (IB-pr-488): SKILL.md names both flags, walk.mjs names FIRM_OPTION_ABSENT, and no file outside the grant changed; expect IB169-1-AC3 PASS",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r169/p169_cells.py\" . IB169-1-AC3",
+   "expect": "IB169-1-AC3 PASS",
+   "output_evidence": "OK: both flags documented, FIRM_OPTION_ABSENT present, nothing outside the grant changed | IB169-1-AC3 PASS | rc=0",
+   "denominator": "3 conditions of 3 (both flags in SKILL.md, FIRM_OPTION_ABSENT in walk.mjs, zero changed paths outside the grant)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Difference control: a --firm with no label, which the order says must not reach the localhost refusal.",
+   "expected": "--firm wants a label thrown while parsing; no REFUSED line",
+   "observed": "timeout 30 node walk.mjs --base http://example.com --firm -> uncaught Error '--firm wants a label' from the argument loop (rc=1); no REFUSED line printed",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "N/A: argument parsing and syntax check only; no live walk runs in this order",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "IRPT_BCKEND-D2-W341-S1: the TO's custom dropdown is a native select (PageSurfaceControl as=dropdown); --firm selects the option by value after an exact text match",
+  "IRPT_BCKEND-D2-W341-S2: a FIRM_OPTION_ABSENT throw is caught by the walk's route catch and logged; the process exits 0",
+  "IRPT_BCKEND-D2-W341-S3: the worktree portal/ is populated and node_modules is a symlink, not an empty directory joined by a junction"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~341/IRPT_BCKEND.TO-IB-pr-488.walker-firm-flag.proof_of_spec.json IB169-1-AC1,IB169-1-AC2,IB169-1-AC3",
+   "result": "see final report"
+  }
+ ]
+}
