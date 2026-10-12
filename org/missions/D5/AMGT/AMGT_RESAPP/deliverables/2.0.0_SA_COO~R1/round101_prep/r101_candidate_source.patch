@@ -1,0 +1,84 @@
+diff --git a/lib/research/api/tests/test_freshness_snapshot.py b/lib/research/api/tests/test_freshness_snapshot.py
+index 179dee2a4f..f342f380b8 100644
+--- a/lib/research/api/tests/test_freshness_snapshot.py
++++ b/lib/research/api/tests/test_freshness_snapshot.py
+@@ -47,6 +47,9 @@ class _Stub:
+ 
+ def _setup(monkeypatch, with_snapshot):
+     served_cache.clear()
++    # AMGT-bh-1: these tests state the 24-HOUR reading of "current" against the wall clock; the trading-calendar rule has its own
++    # tests (test_freshness_snapshot_calendar.py) with an injected `now`, so the calendar is held out here.
++    monkeypatch.setattr(snapshot, "latest_scheduled_write", lambda now: None)
+     stub = _Stub(_objects())
+     monkeypatch.setattr(scoped_amgt, "_pool_client", lambda: stub)
+     import lib.research.coverage.covered_universe as cu
+diff --git a/lib/research/freshness/snapshot.py b/lib/research/freshness/snapshot.py
+index f8df11bd6c..64fa354a1e 100644
+--- a/lib/research/freshness/snapshot.py
++++ b/lib/research/freshness/snapshot.py
+@@ -23,6 +23,12 @@ PARTITION = "current"
+ OBJECT = "snapshot.json"
+ # AMGT-ay-2 AMENDMENT 1: a stored snapshot older than one trading day is not served as current.
+ MAX_AGE_HOURS = 24.0
++# AMGT-bh-1: the writer is `cron(30 12 ? * MON-FRI *)` (infra/aws/terraform/harvest/freshness-snapshot-schedule.tf). A snapshot is CURRENT
++# when it was written at or after the scheduled write of the latest trading day whose write time has passed (lib.trading_calendar), so
++# Friday's snapshot covers the weekend and a holiday Monday and a weekday past its write with no new snapshot is not current. A calendar
++# that cannot answer leaves the MAX_AGE_HOURS rule above in force.
++WRITE_HOUR_UTC = 12
++WRITE_MINUTE_UTC = 30
+ 
+ 
+ def snapshot_address() -> str:
+@@ -83,11 +89,28 @@ def snapshot_age_hours(generated_at: Any, now: Optional[datetime.datetime] = Non
+     return round((now - parsed).total_seconds() / 3600.0, 2)
+ 
+ 
++def latest_scheduled_write(now: datetime.datetime) -> Optional[datetime.datetime]:
++    """12:30 UTC of the latest trading day whose 12:30 has passed at `now` (naive UTC); None when the trading calendar cannot say."""
++    try:
++        from lib import trading_calendar
++
++        day = now.date()
++        for _ in range(14):
++            at = datetime.datetime.combine(day, datetime.time(WRITE_HOUR_UTC, WRITE_MINUTE_UTC))
++            if trading_calendar.is_trading_day(day) and at <= now:
++                return at
++            day = day - datetime.timedelta(days=1)
++    except Exception:  # noqa: BLE001 -- a calendar that cannot answer leaves the 24-hour rule
++        return None
++    return None
++
++
+ def read_freshness_snapshot(client: Any, now: Optional[datetime.datetime] = None,
+                             max_age_hours: float = MAX_AGE_HOURS) -> Tuple[Optional[Dict[str, Any]], Dict[str, Any]]:
+     """`(snapshot or None, record)` with ONE get_object and no listing. Never raises: an absent, an unreadable or an
+     aged-out snapshot returns None and a plain reason, so the caller can fall back. A snapshot is served only while its
+-    `generated_at` is within `max_age_hours` (24, one trading day); `record["age_hours"]` carries its age."""
++    `generated_at` is at or after the latest trading day's scheduled write (`latest_scheduled_write`), or within `max_age_hours`
++    (24) where the calendar cannot say; `record["age_hours"]` carries its age."""
+     record: Dict[str, Any] = {"object": None, "generated_at": None, "age_hours": None, "reason": None}
+     try:
+         bucket, key = snapshot_location()
+@@ -117,6 +140,22 @@ def read_freshness_snapshot(client: Any, now: Optional[datetime.datetime] = None
+     if age is None:
+         record["reason"] = "the stored snapshot does not say when it was made, so its age is not known"
+         return None, record
++    moment = now or datetime.datetime.utcnow()
++    since = latest_scheduled_write(moment)
++    if since is not None:
++        generated = None
++        for form in ("%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%MZ"):
++            try:
++                generated = datetime.datetime.strptime(str(record["generated_at"]).strip(), form)
++                break
++            except ValueError:
++                continue
++        record["required_since"] = since.strftime("%Y-%m-%dT%H:%MZ")
++        if generated is None or generated < since:
++            record["reason"] = ("the stored snapshot ({0}) is older than the latest scheduled write ({1})".format(
++                record["generated_at"], record["required_since"]))
++            return None, record
++        return document, record
+     if age > max_age_hours:
+         record["reason"] = ("the stored snapshot is {0:.1f} hours old, past the {1:g} hour limit".format(age, max_age_hours))
+         return None, record
