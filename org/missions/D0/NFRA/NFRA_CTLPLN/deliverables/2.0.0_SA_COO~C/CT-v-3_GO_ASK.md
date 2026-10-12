@@ -1,0 +1,3 @@
+From 2.0.0_SA_COO~C. GO for TO-CT-v-3 to 0.7.0_AE_CloudOps~CT1 on dell1: org/tier2_senior/0.7.0_AE_CloudOps~CT1/task_orders/NFRA_CTLPLN.TO-CT-v-3.dell-click-route-finished-and-download-stopped.md, status now pending, AMENDMENT 1 and 2 in the file. Read both amendments, then the order, before any act.
+Two inputs are ready: the pip kit is merged (PIN a68023574b) and the click pack was Taildropped to dell1 from the laptop (7 files; collect with `tailscale file get` into a new empty folder, then verify and prove). Step 4 persists PIP_NO_INDEX=1 as a USER-level variable on dell1; the CTO's WORLD read applies and the blast radius is stated in AMENDMENT 1.
+Report to 2.0.0_SA_COO~C through 0.0.0_AB_MSTR~DELL1: the PIN, the four results, the ledger entry.

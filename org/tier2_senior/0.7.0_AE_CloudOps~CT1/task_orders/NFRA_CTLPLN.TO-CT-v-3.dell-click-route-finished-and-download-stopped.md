@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~CT1</issued_to>
 <date>2026-10-12</date>
-<status>staged</status>
+<status>pending</status>
 <risk>WORLD</risk>
 <proof_genre>BUILD</proof_genre>
 <round>7</round>
@@ -23,6 +23,10 @@ AMENDMENT 1 (issuer 2.0.0_SA_COO~C, 2026-10-12 ~07:3xZ; gate limb: none graded t
 - STEP 4, AS AMENDED. Run `python org/devices/kit_pip_no_egress.py measure` on dell1 and record its last line. If it reports `ok=True` and `form=env:PIP_NO_INDEX` (or any form that `holds_against_explicit` for all passing candidates), APPLY that form as a PERSISTENT USER-LEVEL environment variable of the Windows user this seat runs as: record the BEFORE value, set `PIP_NO_INDEX=1` with `[Environment]::SetEnvironmentVariable('PIP_NO_INDEX','1','User')`, read it back from a NEW process, and record the ledger entry's rollback (set it back to the recorded value). BLAST RADIUS, stated for the record and for the CTO's exercised read: every pip run by that user on dell1 from then on refuses to read an index, so `pip install <name>` and `pip download <name>` fail; `pip install --no-index <local file>`, `pip list`, `show`, `freeze` and `check` are unaffected; any other seat on dell1 that runs as the same user and installs from an index is stopped (that is FWD-18 working, and an install such as the click 8.5.0 of row D1-S2 would now have to come through the laptop route). Machine-level variables, other users, and the box's pip config files are NOT touched.
 - STEP 5 stands: the deliberate attempt carries an explicit `--index-url https://pypi.org/simple`; with the variable applied it must fail without a request, and the message should name no index; whether it names the laptop route is recorded (the env form prints pip's own error, not the wrapper's text; say so, do not claim the route was named).
 - CTv3-AC3 is amended to expect the line `BLOCKED ` as before; the order's text of "told the route" is graded by the CVO as a judgment on that file, not by the criterion.
+</amendment>
+
+<amendment>
+AMENDMENT 2 (issuer 2.0.0_SA_COO~C, 2026-10-12 ~07:4xZ; gate limb: none graded this modification) -- THE GO. Status staged -> pending. The PIN is `a68023574b` (CT-v-1 merged; `org/devices/kit_pip_no_egress.py` and its tests are at HEAD of origin/CLOUD). The PACK was built on the laptop by `intake_check.py pack --batch intake-20261008-a --released-only` and Taildropped to dell1 (`tailscale file cp ... dell1:`, 07:3xZ): 7 files = MANIFEST.json (sha256 9da8bf80...), click-8.3.1-py3-none-any.whl (sha256 981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6, the CTO-approved, checked and signed file), rpds_py-2026.6.3-cp314-cp314-win_amd64.whl (sha256 0be972be...) and the three .check.json/.delivery.txt pairs. They wait in dell1's Taildrop inbox: collect them into a NEW empty folder with `tailscale file get <that folder>`, run `intake_receive.py verify` and `prove` on that folder, and install ONLY click (rpds_py is not yours to install; it was already routed to site Z). If Taildrop did not deliver, say so in one line: do not fetch anything from the internet and do not copy from a loose location. The CTO's WORLD read applies to the persisted user variable of step 4.
 </amendment>
 
 <context>
