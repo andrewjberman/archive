@@ -40,15 +40,15 @@
       "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_interactive_entry.py",
       "kind": "test",
       "commit_or_etag": "82e3433ed4",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "AMENDMENT 1 fixtures only (active_internal_row fixture; usefixtures on three arms); committed on the worker branch only; offline fake of get_user; no AWS, network or invoke"
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "commit_or_etag is the last commit that carries this file (AMENDMENT 1). AMENDMENT 1 fixtures are committed at 82e3433ed4. The AMENDMENT 2 line (active_internal_row usefixtures on test_final_release_refuses_changed_actor_owner_or_service_identity) is in the worktree and NOT committed: safe-commit refused it (rc=1, owned-paths lane gate: the order is terminal at HEAD, status complete); row IRPT_ANLREQ-D2-W54-S8. Offline; no AWS, network or invoke"
     },
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_svc_custody_statement.py",
       "kind": "test",
       "commit_or_etag": "82e3433ed4",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "AMENDMENT 1 fixture only (line 147 profile row carries status active); committed on the worker branch only; offline loader; no AWS, network or invoke"
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "commit_or_etag is the last commit that carries this file (AMENDMENT 1). AMENDMENT 1 fixture is committed at 82e3433ed4. The AMENDMENT 2 stale-comment correction at line 146 is in the worktree and NOT committed (same refusal, row IRPT_ANLREQ-D2-W54-S8). Comment only; offline; no AWS, network or invoke"
     }
   ],
   "acceptance": [
@@ -57,7 +57,7 @@
       "criterion_verbatim": "the five named status tests are present and pass.",
       "method": "command",
       "invocation": "python C:/dev/wk-irpt-anlreq-54/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r17/ar17_checks.py y172-status --root C:/dev/wk-irpt-anlreq-54",
-      "output_evidence": "Y172-STATUS-OK (rc=0). Printed: 'status tests: 17 passed, 0 failed (rc=0)'",
+      "output_evidence": "Y172-STATUS-OK (rc=0). Printed: 'status tests: 17 passed, 0 failed (rc=0)' (run 2026-10-12 on the worktree after the AMENDMENT 2 edits; the status-test file is unchanged by AMENDMENT 2)",
       "denominator": "5 of 5 named test functions present in test_internal_status_active.py; 17 of 17 tests in that file pass",
       "expect": "Y172-STATUS-OK",
       "status": "PASS"
@@ -67,8 +67,8 @@
       "criterion_verbatim": "the difference control -- the whole `_authz` test folder passes (320 at the base).",
       "method": "command",
       "invocation": "python C:/dev/wk-irpt-anlreq-54/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r17/ar17_checks.py y172-keep --root C:/dev/wk-irpt-anlreq-54",
-      "output_evidence": "Y172-KEEP-OK (rc=0). Printed: '_authz tests: 337 passed, 0 failed (rc=0)' at HEAD 82e3433ed4 (the worktree working tree after the AMENDMENT 1 fixtures)",
-      "denominator": "337 passed of 337 collected in _authz/tests (base 320 + 17 new status tests; 0 failed)",
+      "output_evidence": "Y172-KEEP-OK (rc=0). Printed: '_authz tests: 337 passed, 0 failed (rc=0)' (run 2026-10-12 on the worktree working tree after the AMENDMENT 2 edits, HEAD 52cf1abb59; the two AMENDMENT 2 test edits are uncommitted, row IRPT_ANLREQ-D2-W54-S8)",
+      "denominator": "337 passed, 0 failed in _authz/tests (base 320 + 17 new status tests); the check prints passed and failed counts only",
       "expect": "Y172-KEEP-OK",
       "status": "PASS"
     },
@@ -86,10 +86,10 @@
   ],
   "controls": {
     "mutant": {
-      "description": "Spec names no mutant.",
-      "expected": "N/A",
-      "observed": "N/A",
-      "status": "N/A-SPEC-NAMES-NONE"
+      "description": "AMENDMENT 2 names one mutant per arm: disable the identity comparison the arm names. Principal comparison (owner_reads.py:38, prospect.py:92) for the actor and renderer arms; retained-owner comparison (owner_reads.py:40, prospect.py:94) for the owner arms. Run in scratch copies outside the product tree; registry read through IRPT_FIRM_REGISTRY.",
+      "expected": "each of the six arms FAILS under the mutant of the comparison it names",
+      "observed": "Retained-owner mutant: owner-read and owner-prospect FAIL (private payload returned). Principal mutant: all six arms still PASS; the actor and renderer arms are refused by a second principal comparison, interactive_access.py:110, reached through the post-compute retained() check (row IRPT_ANLREQ-D2-W54-S7). Diagnostic only (principal comparison in owner_reads.py plus interactive_access.py:110): actor-read FAILS; the other actor and renderer arms are still refused by remaining checks. The named-comparison bite is not met for the actor and renderer arms.",
+      "status": "DID-NOT-FIRE (deliverable INVALID)"
     },
     "determinism": {
       "method": "N/A -- the criteria are one check-script run each and one pytest run; the spec names no same-input comparison",
@@ -100,25 +100,32 @@
   "surprises": [
     "IRPT_ANLREQ-D2-W54-S4",
     "IRPT_ANLREQ-D2-W54-S5",
-    "IRPT_ANLREQ-D2-W54-S6"
+    "IRPT_ANLREQ-D2-W54-S6",
+    "IRPT_ANLREQ-D2-W54-S7",
+    "IRPT_ANLREQ-D2-W54-S8"
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
   "declared_exclusions": [
     {
       "item": "live AWS, network, push, deploy, upload, apply and invoke",
-      "reason": "outside the order's bounds: no live call, no push, no deploy, no upload, no apply, no invoke. Caveat (row S6): the six test_final_release arms still take the default profile reader when the _authz suite runs; whether that reader reached AWS was not measured by this worker"
+      "reason": "outside the order's bounds: no live call, no push, no deploy, no upload, no apply, no invoke. Caveat (row S6): the six test_final_release arms take the default profile reader when the _authz suite runs without the active_internal_row fixture; with AMENDMENT 2 the fixture is on them, and the scratch probes read no AWS. Whether the earlier unfixtured run reached AWS was not measured"
     }
   ],
   "compiler_tools": [
     {
       "tool": "python",
-      "invocation": "python -m pytest tests -q -p no:cacheprovider --color=no (cwd infra/aws/lambda/investor-reporting/_authz)",
-      "result": "337 passed, 0 failed of 337 collected at HEAD 82e3433ed4 (base 320 passed at 43e1e85895; before the AMENDMENT 1 fixtures, 332 passed and 5 failed)"
+      "invocation": "python -m pytest tests -q -p no:cacheprovider --color=no (cwd infra/aws/lambda/investor-reporting/_authz), via ar17_checks.py y172-keep",
+      "result": "337 passed, 0 failed at HEAD 52cf1abb59 with the AMENDMENT 2 test edits in the working tree (base 320 passed at 43e1e85895; before the AMENDMENT 1 fixtures, 332 passed and 5 failed)"
     },
     {
       "tool": "bash .tools/commit-gate.sh",
       "invocation": "bash .tools/commit-gate.sh <each of the two amended test files>",
-      "result": "pre-commit gate clean for 1 of 1 file(s) for each file (rc=0), at commit 82e3433ed4"
+      "result": "pre-commit gate clean for 1 of 1 file(s) for each file (rc=0) on the working tree, before the commit was refused by the lane gate (row IRPT_ANLREQ-D2-W54-S8)"
+    },
+    {
+      "tool": "python (scratch probe outside the product tree)",
+      "invocation": "pytest tests/test_interactive_entry.py -k test_final_release -s with a conftest-free plugin that prints each Entry.handle result and each internal refusal; mutants in a copy of the lambda folder under the scratchpad",
+      "result": "unmutated, after the fixture: six PASS, six NOT_AUTHORIZED refusals from ProspectOwnershipRefused at owner_reads.py:39/41 or prospect.py:93/95, and the renderer arms at the principal re-resolution (owner_reads.py:38, prospect.py:92); before the fixture: six FIRM_BINDING refusals at the fence"
     }
   ]
 }
