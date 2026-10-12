@@ -46,7 +46,10 @@ K6 and K7 on that object), (b) the identity differential read-back holds on ever
 no model, and (d) the round-4 close stands (every file the dispatch chain executes or reads is EQUAL; every other non-EQUAL name is listed with
 its reason).
 
-**Open items carried to the CTO with this draft (not decided here):**
+**Open items carried to the CTO with this draft.** RESOLVED 2026-10-12 ~14:45Z by the CTO, ADDENDUM 5 @25f1d760e5 (msg 4439): item 1 (flips are
+reported, never refused on; refuse on the differential and on the per-date 2-firm assertion), item 2 (assert residual_after - residual_before ==
+suppressed to the cent per date, and print the pre-existing residual with its denominator: 208 of 485), item 3 (the 10 absent core quarter cells are
+accepted into the pair) and item 5's class (WORLD, the emitter package named in the deploy order). Item 4 was not answered; it measured 0 dates.
 1. ADDENDUM 1's refusal on a non-zero flip count and ADDENDUM 3 (b) cannot both bind: on the real 2026-10-09 object each core line has 392 earlier
    dates held by fewer firms while the as-of holds >= 2, which under (b) are simply the folded dates. The cell reports flips and refuses on
    the identity and the >= 2 assertions.
