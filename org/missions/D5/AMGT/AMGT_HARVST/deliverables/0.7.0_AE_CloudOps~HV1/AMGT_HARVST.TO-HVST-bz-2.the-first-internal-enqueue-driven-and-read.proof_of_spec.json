@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-bz-2.the-first-internal-enqueue-driven-and-read",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bz-2.the-first-internal-enqueue-driven-and-read.md",
+    "group": "C",
+    "vintage_commit": "0066cc50d485481fedc12a13b7c9624a6e4c9605"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "0066cc50d485481fedc12a13b7c9624a6e4c9605",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bz-2.the-first-internal-enqueue-driven-and-read.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~HV1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-harvest/packs/SAP_GY_Equity/status.json",
+      "kind": "s3_object",
+      "commit_or_etag": "0066cc50d4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Identity carried here because commit_or_etag takes a commit-ish only: CREATED by the one enqueue, VersionId F8iBxqlr2MQsG3iRuhj4JUr74oPZcs3w, LastModified 2026-10-12T16:43:41Z, body {reason: null, requested_at 2026-10-12T16:43:40Z, security_key SAP_GY_Equity, state REQUESTED, ticker SAP GY Equity, updated_at 2026-10-12T16:43:40Z}. head-object at T0 (16:43:09Z) read 404, so nothing was overwritten; the bucket's versioning reads Enabled.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "sqs://opal-research-pull-requests (one message)",
+      "kind": "aws_resource",
+      "commit_or_etag": "0066cc50d4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Identity carried here because commit_or_etag takes a commit-ish only: ApproximateNumberOfMessages 0 at T0 and 1 about 20 s after the invoke (NotVisible 0, Delayed 0); the queue has 0 Lambda event source mappings and the pull consumer was not started, so the message stays queued. Not deleted: no delete is authorized.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The discriminating control for 'the fence admits the staff path': the SAME deployed function (CodeSha256 cWiraC3E...) was driven with non-internal contexts earlier the same day and refused them, so a 202 here is the internal branch and not a handler that admits everyone. The NVDA status object is the second control: a key that must be present before and unchanged after, so the act's writes are shown to be confined to the SAP key.",
+      "expected": "403 for advisor, Dev-advisor and no-context callers (by6_arms.out, 15:39Z); 202 for tier internal with a ticker; NVDA VersionId equal before and after.",
+      "observed": "by6_arms.out: 403, 403, 403 and internal_no_ticker 400. This act: 202 with state REQUESTED. NVDA status VersionId 5tYJloxADmlaAfZX8ToUf71wMUNgxSqW before and after, UNCHANGED: yes.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "Exactly one invocation (the order: once, never retried). The invoke code path has no loop and no retry; the log since T0 is read to count START lines.",
+      "expected": "One START line since T0, one 'OK: enqueued' line, queue count +1.",
+      "observed": "5 events since T0: INIT_START, START, OK, END, REPORT; 1 START line; 1 OK line; queue 0 -> 1. No second invocation by this seat or by a real caller in the window.",
+      "status": "STABLE",
+      "method": "command"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The portal path (API Gateway route and authorizer) for a real staff login",
+      "reason": "This was a direct lambda invoke with a hand-written internal context. It proves the deployed function admits tier internal and performs the seam's two writes; it does not prove the authorizer delivers requestContext.authorizer.lambda.tier on a real request."
+    },
+    {
+      "item": "A Bloomberg draw and the pull consumer",
+      "reason": "The consumer is a person-started poller and was not started or run in any mode (condition C-d). The message stays in the queue."
+    },
+    {
+      "item": "Any delete of the status object or the queue message",
+      "reason": "Not authorized by the order or either half (a delete needs Andrew's confirmation). The residue is stated in bz2_report.out."
+    },
+    {
+      "item": "The organic first enqueue",
+      "reason": "Still unmeasured; it remains the negative arm and this driven read does not replace it."
+    },
+    {
+      "item": "Pushing any commit",
+      "reason": "Shared-branch law: this lane commits LOCAL; the integrator pushes."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-S12: the three named tickers had no status.json (C-b failed at the first start, 16:3xZ); stopped, no write; the issuer's AMENDMENTS 2 and 3 fixed the ticker to SAP GY Equity and this act ran under them."
+  ],
+  "session_log": "Seat 0.7.0_AE_CloudOps~HV1, 2026-10-12 16:33Z-16:4xZ. First start: C-b failed, stopped, row D1-S12, commit 0d963d1244. Re-cut: read AMENDMENTS 2 and 3, the CTO's re-sign @5d747ddc80 and the COO half's amended C-b; acked 4490 and 4498; preconditions (code hash, packs/SAP_GY_Equity/ holds 1 object, status.json 404, versioning Enabled, NVDA control present LANDED); T0 16:43:09Z; ONE invoke at 16:43:38Z -> 202; reads; control. No ledger: the order has no deploy leg. Commits LOCAL.",
+  "compiler_tools": [
+    {
+      "tool": "aws lambda invoke (the one enqueue)",
+      "invocation": "bash .tools/aws lambda invoke --function-name opal-research-pull-enqueue --cli-binary-format raw-in-base64-out --payload file://bz2_enqueue.payload.json bz2_enqueue.response.json",
+      "result": "Invoke StatusCode 200, no FunctionError; response statusCode 202 {state REQUESTED, security_key SAP_GY_Equity, requested_at 2026-10-12T16:43:40Z}. Exactly one invocation."
+    },
+    {
+      "tool": "aws s3api / sqs / logs reads",
+      "invocation": "head-object, get-object, list-objects-v2, get-bucket-versioning, sqs get-queue-attributes, lambda list-event-source-mappings, logs filter-log-events",
+      "result": "All read-only. The log read is unfiltered and filtered client-side (a superset of the order's unquoted-term read; the quoted pattern is refused by the aws shim, row D1-S10)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "ENQUEUE statusCode 202",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round82/bz2_invoke.out",
+      "output_evidence": "'ENQUEUE statusCode 202'; response verbatim {statusCode 202, body {state REQUESTED, security_key SAP_GY_Equity, requested_at 2026-10-12T16:43:40Z}}; Invoke StatusCode 200, no FunctionError; payload {requestContext: {authorizer: {tier: internal}}, ticker: SAP GY Equity}; invoked once at 16:43:38Z.",
+      "denominator": "1 of 1 invocation answered 202; 0 retries.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "(?s)READ status.json state REQUESTED.*READ queue ApproximateNumberOfMessages \\d+ -> \\d+",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round82/bz2_reads.out",
+      "output_evidence": "'READ status.json state REQUESTED requested_at 2026-10-12T16:43:40Z' (at or after T0 16:43:09Z) and 'READ queue ApproximateNumberOfMessages 0 -> 1'.",
+      "denominator": "1 of 1 status object read; 1 of 1 queue read (before 0, after 1).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "(?s)OK: enqueued pull request.*DENIED LINES SINCE T0: 0",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round82/bz2_reads.out",
+      "output_evidence": "Log since T0: 'OK: enqueued pull request for 'SAP GY Equity' (security_key=SAP_GY_Equity)' then 'DENIED LINES SINCE T0: 0'; 'OK LINES SINCE T0: 1'; NVDA status VersionId before and after 5tYJloxADmlaAfZX8ToUf71wMUNgxSqW, UNCHANGED: yes.",
+      "denominator": "5 log events since T0 read, 1 OK, 0 DENIED, 1 START.",
+      "status": "PASS"
+    }
+  ]
+}
