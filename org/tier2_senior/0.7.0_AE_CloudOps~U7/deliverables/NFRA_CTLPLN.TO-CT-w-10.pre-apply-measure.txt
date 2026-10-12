@@ -1,0 +1,10 @@
+NFRA_CTLPLN TO-CT-w-10 PRE measure, 2026-10-12T11:35Z-11:38Z. Seat 0.7.0_AE_CloudOps~U7. Counts and key names only; no token or cookie value was printed or stored.
+Source: log group /aws/lambda/opal-portal-data-proxy, whole 14 day retention, every event (no filter), 1202 events, 2026-09-28T12:28Z to 2026-10-12T11:00Z, no nextToken. The output was piped into the counter; nothing was written to disk.
+(a) lines with a JWT-shaped string: 49 (lines with Bearer: 49)
+(b) lines with Cookie, cookie or refresh: 38
+(c) lines with Set-Cookie: 0
+Key names found (the cookies[] list of the 51 Event lines): refresh_token in 38 lines, device_trust in 29 lines. No other cookie/refresh key name; no non-Event line matched.
+Ages (counts): refresh_token 16 of 38 aged 7 days or less (refresh expiry is 7 d per auth-handler jwt.ts), oldest 13.6 d, newest 1.35 d. device_trust 29 of 29 aged 30 days or less (trust window 30 d per deviceTrust.ts).
+VERDICT: a long-lived credential class IS present. Per the order (step 2) and the CTO half (condition 1): STOP, no build, nothing applied.
+ASK TO ANDREW (one line): May the events of /aws/lambda/opal-portal-data-proxy be purged (a delete, your class)? It holds refresh_token cookie material in 38 lines, 16 inside the 7 day refresh window, and device_trust in 29 lines, all inside the 30 day window; without an answer CT-w-10 stays held. The old handler keeps writing a bearer and cookie line for every request until the fix lands, and retention clears each line only 14 days after it was written.
+SEAT RECOMMENDATION (not a decision): the fix and the purge are independent. Landing the fix stops NEW credential lines and removes nothing; the purge removes the old ones. Holding the fix until the purge answer lets more lines accumulate. The order and the CTO half make a long-lived credential a STOP for this seat, so this seat applies nothing; 2.0.0_SA_COO~C and 1.0.0_SA_CTO can re-issue the GO with the purge decoupled, on Andrew's word.

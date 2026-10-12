@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e98",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e98.unclassified-by-security-read.md",
+    "group": "OTHER",
+    "vintage_commit": "028fab8273"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R23.md",
+    "vintage_commit": "028fab8273",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e98.unclassified-by-security-read.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~87",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/UNLISTED_UNCLASSIFIED_20261009_BY_SECURITY_20261012.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only record: the 2026-10-09 canonical partition read through the C_06 module's own process_date (get_object and head-object only), the classifier's classify_with_identity read (DynamoDB get_item and holdings-feed get_object only), and stored gold/entities/clients JSON get_object only. No write to any bucket or table, no deploy, no invoke.",
+      "artifact_covered_by": [
+        "SC23-e98-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One surprise row appended (MDPF_SECCLASS-D1-W87-S1); no existing row edited.",
+      "artifact_covered_by": [
+        "SC23-e98-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC23-e98-AC1",
+      "criterion_verbatim": "the record exists, the securities sum to the rebuilt Unclassified within the tolerance, every security carries a declared reason code and a reason, the unplaced subset equals the sum of the unlisted securities, no relationship, account or client key appears, and a copy with one field broken fails the same check first.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_CHECKS/r23_checks.py unlisted org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/UNLISTED_UNCLASSIFIED_20261009_BY_SECURITY_20261012.json",
+      "output_evidence": "UNLISTED ok=True securities=32 total=883483.05 unplaced=210486.42 control=ok (rc=0; run twice, identical). Rebuilt class-sum Unclassified 883483.05 equals SC-e-95's rebuilt figure to the cent; position sum 883521.93 (difference 38.88, inside tolerance_usd 51.91); 22 unlisted securities sum to 210486.42 = SC-e-95 unlisted_unclassified.usd, 22 positions.",
+      "denominator": "1 criterion; 1 of 1 PASS",
+      "status": "PASS",
+      "status_reason": "checker ok=True on the record as written, with the checker's own control (one security usd +1000 refused) reading control=ok"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's own negative control: a copy of the record with 1000 added to the first security's usd must be refused by the same check; the record is graded with and without the copy.",
+      "expected": "control=ok (the broken copy is refused)",
+      "observed": "control=ok on both runs",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the criterion run twice on the committed record",
+      "observed": "UNLISTED ok=True securities=32 total=883483.05 unplaced=210486.42 control=ok, identical on each run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Relationship-level top-10 membership is not graded here as a separate figure",
+      "reason": "listed_in_stored is security-level per the order (any relationship's stored top-10 on 2026-10-09). The position-level figure (positions outside their own relationship's stored top-10) reads 210486.43 across 22 positions, the same 22 positions; it is reported in the record's comparison block, not graded."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W87-S1: the 2026-10-09 partition is now version DY7h_n97HK6oypextGdn38ietQKp16in (LastModified 2026-10-12T04:16:42Z), newer than the version SC-e-95 names; the rebuilt Unclassified and the 22 unlisted securities are unchanged to the cent."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e98.unclassified-by-security-read.md",
+  "compiler_tools": [
+    {
+      "tool": "r23_checks.py (issuer's checker, unmodified)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_CHECKS/r23_checks.py unlisted org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/UNLISTED_UNCLASSIFIED_20261009_BY_SECURITY_20261012.json",
+      "result": "UNLISTED ok=True securities=32 total=883483.05 unplaced=210486.42 control=ok (rc=0)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC23-e98-AC1",
+      "result": "see the worker report"
+    }
+  ]
+}
