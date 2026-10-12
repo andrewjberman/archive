@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e99",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e99.legg-read-instruments.md",
+    "group": "OTHER",
+    "vintage_commit": "93e1116459"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R24.md",
+    "vintage_commit": "93e1116459",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e99.legg-read-instruments.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~88",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R24_CHECKS/r24_legg_read.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only instrument: aws s3 cp to stdout, head-object and list-objects-v2 only, through .tools/aws.cmd. No write to any bucket or table, no deploy, no invoke. The script writes nothing.",
+      "artifact_covered_by": [
+        "SC24-e99-AC1",
+        "SC24-e99-AC2",
+        "SC24-e99-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Seven surprise rows appended (MDPF_SECCLASS-D1-W88-S1 to S7). The existing bytes are unchanged: the prefix was verified byte-identical before each append. No existing row edited.",
+      "artifact_covered_by": [
+        "SC24-e99-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC24-e99-AC1",
+      "criterion_verbatim": "every positive fixture grades ok and every negative fixture fails on exactly its own criterion.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R24_CHECKS/r24_legg_read.py selftest",
+      "output_evidence": "R24-FIX e91 positive (fall = half the bound on 10-08 and 10-09) ok=True failing=[]\nR24-FIX e91 --since counting fixture (2 modified of 3 C_06 keys; subdir and _composition excluded) ok=True failing=[]\nR24-FIX e91 neg in_range (10-09 fall = bound + $1) failing=['in_range'] strict=True delta_vs_positive=True\nR24-FIX e91 neg census (new class key) failing=['census'] strict=True delta_vs_positive=True\nR24-FIX e97 positive (post-act set from R23_RADIUS) ok=True failing=[]\nR24-FIX e97 neg totals_equal_aua (total off AUA by $5 on 10-02) failing=['totals_aua'] strict=True delta_vs_positive=True\nR24-FIX e97 neg w86_s5 (key gap = tolerance $250 + $1 on 10-04) failing=['w86_s5'] strict=True delta_vs_positive=True\nR24-FIX e97 neg bars (2026-Q3 structured $1,000 off) failing=['bars'] strict=True delta_vs_positive=True\nR24-FIX e97 neg advisors (one advisor key missing) failing=['advisors'] strict=True delta_vs_positive=True\nR24-FIX e97 neg added_dropped (dropped relationship still carries its date) failing=['added_dropped'] strict=True delta_vs_positive=True\nR24-FIX e97 neg restated absent (shipped=False) failing=['shipped'] strict=True delta_vs_positive=True\nR24-SELFTEST-DELTA negatives_relative_to_their_positive=8 of 8\nR24-SELFTEST ok=True positives=3 of 3 negatives=8 of 8",
+      "denominator": "1 criterion; 1 of 1 PASS. Positives 3 of 3 graded ok (e91 positive, e91 --since counting fixture, e97 positive); negatives 8 of 8 fail on exactly their own criterion (strict reading); 8 of 8 relative to their positive. Exit code 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC24-e99-AC2",
+      "criterion_verbatim": "run against the LIVE served objects as they are today (no fire has run the shipped C_06), the e91 instrument reads the baseline versions and prints the no-change state, exit 3, writing nothing.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R24_CHECKS/r24_legg_read.py e91",
+      "output_evidence": "E91-READ gold/views/mix_daily_summary.json VersionId=VrrTn2RrESHBImlLOMHQbNP6Fvzi9NZD baseline=VrrTn2RrESHBImlLOMHQbNP6Fvzi9NZD LastModified=2026-10-11T05:23:28+00:00\nE91-READ platinum/firm/mix_summary.json VersionId=_MTtBmpPHKvL3Hvt58tzeIsshH4c_lxb baseline=_MTtBmpPHKvL3Hvt58tzeIsshH4c_lxb LastModified=2026-10-12T05:44:00+00:00\nE91-READ gold/meta/client_timeseries_watermark.json VersionId=_UBm5wvtCvVNbbE6m5ry4JOns5MuqL9a baseline=_UBm5wvtCvVNbbE6m5ry4JOns5MuqL9a LastModified=2026-10-11T05:23:28+00:00\nE91-LEGG state=NO-CHANGE-SINCE-BASELINE\nE91-NOTE the mix daily summary carries the baseline VersionId: a fire that moved nothing and no fire at all look the same here; read the runner's C_06 telemetry beside this line",
+      "denominator": "1 criterion; 1 of 1 PASS. Three served objects read; three of three VersionIds equal the baseline's; exit code 3.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC24-e99-AC3",
+      "criterion_verbatim": "run against the live served objects as they are today (the ship has not happened, no restated_through), the e97 instrument prints shipped=False and ok=False, exit 3, writing nothing.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R24_CHECKS/r24_legg_read.py e97",
+      "output_evidence": "E97-READ mix_daily_summary VersionId=VrrTn2RrESHBImlLOMHQbNP6Fvzi9NZD LastModified=2026-10-11T05:23:28+00:00\nE97-ACCEPT shipped=False ok=False",
+      "denominator": "1 criterion; 1 of 1 PASS. The served mix daily summary read; no restated_through key present; exit code 3.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative fixtures built from the committed radius and e91 baseline: e91 in_range (10-09 fall = bound + $1), e91 census (new class key), e97 totals_equal_aua ($5 off AUA on 10-02), w86_s5 (key gap = the amended $250 tolerance + $1 on 10-04; a $50 gap is inside the amended tolerance, row S7), bars ($1,000 off Q3 structured), advisors (one key removed), added_dropped (a dropped relationship still carries its date), restated_through removed. Each must fail on exactly its own criterion.",
+      "expected": "each negative fails on exactly its own criterion (strict)",
+      "observed": "strict 8 of 8 in the selftest run: in_range, census, totals_aua, w86_s5, bars, advisors, added_dropped and shipped each fail exactly their own criterion against a passing positive (the e97 positive grades ok=True after AMENDMENT 1).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: selftest output diffed byte for byte; e91 and e97 each run twice against the same live objects and committed files",
+      "observed": "selftest: R24-SELFTEST ok=True positives=3 of 3 negatives=8 of 8, the two outputs identical (diff empty); e91: E91-LEGG state=NO-CHANGE-SINCE-BASELINE, rc 3 on both runs; e97: E97-ACCEPT shipped=False ok=False, rc 3 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "e97 criteria 1-7 graded against the live post-ship served objects",
+      "reason": "Not reached: the live mix_daily_summary carries no restated_through, so e97 exits at shipped=False (AC3). Only the grader is exercised, on the post-act fixture built from the committed radius."
+    },
+    {
+      "item": "e97 added_dropped read elapsed time on the live post-ship objects",
+      "reason": "Not run live. The same 64 entity reads through the same reader ran before the ship: 64 of 64 read, 12.65 s with 8 workers (the live post-ship path is not reached)."
+    },
+    {
+      "item": "e91 --since second-fire expectation (0 C_06 keys modified)",
+      "reason": "Measured once live, pre-fire: 0 of 15531 C_06 keys modified since 2026-10-12T05:00:00Z (gold/entities/clients/ 0 of 7586, gold/client_timeseries/ 0 of 7945), mds_unchanged_since=True. The 0 expectation of a second fire is not tested until a second fire runs."
+    },
+    {
+      "item": "the 'other' class in the bars",
+      "reason": "Neither bars.json nor the request's Period bars table carries an after figure for it; not graded (S4, accepted by AMENDMENT 1 item 4)."
+    },
+    {
+      "item": "the D_04 CANONICAL_MIX_CLASSES import",
+      "reason": "Read by AST from D_04.client_portal_summary.py; the module was not imported."
+    },
+    {
+      "item": "the stored Unclassified key in the post-act fixture (AMENDMENT 1 item 2 asks which)",
+      "reason": "Set equal to the would-be D_04 remainder, per the order's recipe, which names no stored key. The would-be stored key differs from the remainder by 162.29, 3.94 and 166.72 on 2026-10-03..05 (S3); all three are inside the amended $250 tolerance."
+    },
+    {
+      "item": "the w86_s5 negative magnitude",
+      "reason": "The order's $50 gap is inside the amended $250 tolerance and cannot fail; the negative is set at the tolerance plus $1 (row S7)."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W88-S1: criterion 1's typed bound 53010.45 is the maximum over the seven criterion dates; the 15-record maximum is 883483.05 (2026-10-09). The seven-date maximum is graded. Accepted as read by AMENDMENT 1 item 4.",
+    "MDPF_SECCLASS-D1-W88-S2: criterion 1's lower bound 0 is contradicted by the order's own post-act fixture (2026-10-06 remainder -42.15). Dispositioned by AMENDMENT 1 item 1: the lower bound is -250, and the e97 positive now grades ok=True.",
+    "MDPF_SECCLASS-D1-W88-S3: criterion 2 (stored key within $1.00) disagrees with the would-be snapshot's own figures (gaps 162.29, 3.94, 166.72). Dispositioned by AMENDMENT 1 item 2: the tolerance is 250; the fixture key equals the remainder.",
+    "MDPF_SECCLASS-D1-W88-S4: bars.json carries the Unclassified class only; the other five classes' after figures are read from the request's Period bars table. Accepted by AMENDMENT 1 item 4; the section is named in the script (PERIOD_BARS_SECTION).",
+    "MDPF_SECCLASS-D1-W88-S5: the e91 --since prefixes held 18230 keys including D_02 subdirectory objects. Dispositioned by AMENDMENT 1 item 3: the count is C_06 keys only, per prefix. Live: 0 of 15531 C_06 keys modified since 2026-10-12T05:00:00Z.",
+    "MDPF_SECCLASS-D1-W88-S6: the 2026-10-09 reach bound (653857.12) is below the re-derive's move on that date (962919.40). Accepted by AMENDMENT 1 item 4 as two different acts.",
+    "MDPF_SECCLASS-D1-W88-S7: the $50 w86 negative control cannot fail the amended $250 tolerance; the negative is set at tolerance plus $1."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e99.legg-read-instruments.md",
+  "compiler_tools": [
+    {
+      "tool": "r24_legg_read.py (this worker's instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R24_CHECKS/r24_legg_read.py selftest | e91 | e97 | e91 --since 2026-10-12T05:00:00Z",
+      "result": "selftest ok=True positives=3 of 3 negatives=8 of 8 (rc 0); e91 NO-CHANGE-SINCE-BASELINE (rc 3); e97 shipped=False ok=False (rc 3); e91 --since: 0 of 15531 C_06 keys modified (rc 3)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~88/MDPF_SECCLASS.TO-SC-e99.legg-read-instruments.proof_of_spec.json SC24-e99-AC1,SC24-e99-AC2,SC24-e99-AC3",
+      "result": "VALID (rc=0) on the instance as written: 3 acceptance rows, all PASS; controls.mutant FIRED-AS-EXPECTED; determinism STABLE; 7 surprises open with a row id and resolve to the channel"
+    }
+  ]
+}
