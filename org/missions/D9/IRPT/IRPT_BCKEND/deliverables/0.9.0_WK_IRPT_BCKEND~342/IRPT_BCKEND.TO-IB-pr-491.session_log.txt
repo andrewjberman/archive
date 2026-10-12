@@ -1,0 +1,10 @@
+Session log -- 0.9.0_WK_IRPT_BCKEND~342 on IRPT_BCKEND.TO-IB-pr-491 (cell IB-pr-491), worktree branch wk-IRPT_BCKEND-342, base 410abe2d57
+
+1. First act: branch wk-IRPT_BCKEND-342; TREE-OK.
+2. Extractor form read at extract.py:705-762 and _slug at extract.py:978: section_id = <census code>.<_slug(field)>.c<n>; section_type = census code; units = census unit token. The order's target form matches; no change of form.
+3. Edited, in the two fixtures only, instance.sections[0]: section_id 2.annualized_return.c1 (was S-RET-1); section_type "2" (was annualized_return); value 7.12 (was 0.0712); units pct (was DECIMAL_FRACTION). Other fields untouched.
+4. IB169-4-AC1: timeout 120 python checks/r169/p169_cells.py . IB169-4-AC1 -> stdout "FAIL: infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.valid.json still carries annualized_return or DECIMAL_FRACTION" / "IB169-4-AC1 FAIL"; rc=1. Cause: the check's raw substring test matches the section_id the order names. Row IRPT_BCKEND-D2-W342-S1.
+5. IB169-4-AC2: "OK: both fixtures validate against their schemas" / "IB169-4-AC2 PASS"; rc=0.
+6. IB169-4-AC3: "OK: nothing outside the grant changed" / "IB169-4-AC3 PASS"; rc=0.
+7. Extra read, not a criterion: timeout 120 python -m pytest infra/aws/lambda/investor-reporting/_contracts/tests -q -p no:cacheprovider -> 4 failed, 122 passed, rc=1; all 4 in test_seam_paired.py; no test asserts the old tokens. Row IRPT_BCKEND-D2-W342-S2.
+8. Order left open: IB169-4-AC1 FAIL.
