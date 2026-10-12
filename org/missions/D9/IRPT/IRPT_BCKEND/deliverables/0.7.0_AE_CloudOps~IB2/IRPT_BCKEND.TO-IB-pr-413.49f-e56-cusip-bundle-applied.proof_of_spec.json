@@ -1,0 +1,141 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-413",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-413.49f-e56-cusip-bundle-applied.md",
+  "group": "OTHER",
+  "vintage_commit": "a1f10a3824"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "a1f10a3824",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-413.49f-e56-cusip-bundle-applied.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB114-1_49f_bundle_after_reads.json",
+   "kind": "doc",
+   "commit_or_etag": "aa73530282",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The after-reads file: ledger CLOSED, rolled_back false, replay arms, and the first fire per firm read from the served records, with output_line_claim absent where the line is not retained.",
+   "artifact_covered_by": [
+    "IB114-1-AC1",
+    "IB114-1-AC2",
+    "IB114-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261011T0255Z_irpt-fwd14-49f-e56-cusip-memfix-bundle-ib413-20261011_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "aa73530282",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The deploy ledger entry, CLOSED with every leg proven and its sentinel removed (commit aa73530282).",
+   "artifact_covered_by": [
+    "IB114-1-AC1",
+    "IB114-1-AC2",
+    "IB114-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-data-49financial/irpt/49financial/code/gold/investor-reporting-holdings.tar.gz",
+   "kind": "s3_object",
+   "commit_or_etag": "8b482c8db26c2e913aeee72023bacc7e",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Landed 2026-10-11T02:56:45Z (version fMLoOI6a8ZwNFWZCJjjP90ZadyRg9nFg); head-object now reads the same ETag and members-sha256 73f33c3c...; the 2026-10-12 14:15Z fire ran on these bytes, PUBLISHED, exit code 0, 319.0 s.",
+   "artifact_covered_by": [
+    "IB114-1-AC1",
+    "IB114-1-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB114-1-AC1",
+   "criterion_verbatim": "IB114-1-AC1: the 49financial key reads (head-object, now) ETag == 8b482c8d... and members-sha256 == 73f33c3c... (IB-pr-417); after-reads A: ledger CLOSED with pin 4b008d15 and the built sha256, rolled_back false.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r114/p114_cells.py\" . IB114-1-AC1",
+   "expect": "IB114-1-AC1 PASS",
+   "output_evidence": "OK: 49F key serves the built bytes; ledger CLOSED | IB114-1-AC1 PASS | rc=0",
+   "denominator": "1 key of 1 in the grant; head-object read now: ETag 8b482c8db26c2e913aeee72023bacc7e, members-sha256 73f33c3c..., version fMLoOI6a8ZwNFWZCJjjP90ZadyRg9nFg; 4 of 4 ledger legs proven; the inflection and cottonwood keys not touched by this order.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB114-1-AC2",
+   "criterion_verbatim": "IB114-1-AC2: A.replay_on_uploaded: fwd14_gate_unchanged and smartx_class_parity identical (amended at a1f10a3824 to read fwd14_gate_vs_b410 or fwd14_gate_unchanged).",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r114/p114_cells.py\" . IB114-1-AC2",
+   "expect": "IB114-1-AC2 PASS",
+   "output_evidence": "OK: replay on the uploaded bytes holds | IB114-1-AC2 PASS | rc=0",
+   "denominator": "5 arms of 5 recorded: 3 identical (fwd14_gate_vs_b410, smartx_class_parity, real_49financial_nodes_vs_b410) and 2 negative controls expected-diff; the replay was measured 2026-10-11 on the bundle fetched back by its version id and is restated here, not re-run.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB114-1-AC3",
+   "criterion_verbatim": "IB114-1-AC3: A.first_fire: outcome PUBLISHED or REFUSED with output_line, fire_after_landing true, wall_time_s and prior_wall_time_s both numbers.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r114/p114_cells.py\" . IB114-1-AC3",
+   "expect": "IB114-1-AC3 PASS",
+   "output_evidence": "OK: first fire PUBLISHED; wall 319.0s vs prior 309.0s | IB114-1-AC3 PASS | rc=0",
+   "denominator": "1 scheduled fire of 1 after landing (2026-10-12 14:15Z, command f1460299); the prior fire (2026-10-09, command 436e2522) rc 137 at 309.0 s; output_line holds a statement of absence (row S105); e56 arm: lost 0, newly classified 8 (not comparable to the replay 32).",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "One mutant per criterion, planted in the real after-reads file (backup first, restored byte-identical after, each revert re-run): IB114-1-AC1 rolled_back set true; AC2 the fwd14 gate arm set expected-diff; AC3 wall_time_s set null.",
+   "expected": "each criterion FAILs on its own mutant and PASSes on baseline and on revert",
+   "observed": "Baseline PASS x3. AC1 mutant -> FAIL: rolled_back True. AC2 mutant -> FAIL: fwd14 gate arm reads [expected-diff]. AC3 mutant -> FAIL: wall times None / 309.0. All three reverted, cmp identical, re-run PASS.",
+   "status": "FIRED-AS-EXPECTED",
+   "provenance_of_this_observation": "MEASURED BEFORE IT WAS WRITTEN: the six mutants were run against the real after-reads files with a backup taken first, each output read, each file restored byte-identical (cmp) and the criterion re-run PASS, and only then was this block composed."
+  },
+  "determinism": {
+   "method": "Each criterion was run three times with no change between runs: once at HEAD after the issuer amendment, once as the baseline of its mutant, and once after the mutant was reverted. The head-object read the first criterion makes was repeated by that criterion on each run against the live key, and the served-record reads of the fire (index manifest versions, the refusal record) were taken once and are immutable S3 versions.",
+   "observed": "All three criterion runs read PASS for every criterion, six of six, and the live keys read the same ETags each time. The one thing that changed between the first read of these orders and the last was the criteria themselves (amended at a1f10a3824), not the evidence.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The verdict output line of the fire",
+   "reason": "NOT RETRIEVABLE: SSM keeps the first 24000 characters of stdout, all \"Classification not found\" lines, so no OK:/REFUSED: line survives for any firm (row IRPT_BCKEND-D2-S105). The outcome was read from the served index manifests and the refusal record. The criterion tests only that output_line is non-empty, so it passes on a statement of absence carried with output_line_claim absent."
+  },
+  {
+   "item": "Any IAM, route, schedule, env, Terraform or Lambda change, any monitor, alarm, SNS or SES, any vendor call",
+   "reason": "Outside the grant: 0 made. No S3 delete."
+  },
+  {
+   "item": "The e56 arm equal to the replay's 32 newly classified",
+   "reason": "NOT ESTABLISHED as equal. Served-against-served, per security, 2026-10-09 against 2026-10-07: lost 0, newly classified 8. The replay's 32 is a node-level count on 2026-10-08 against a pre-e56 candidate. The Branch B condition (a classified-to-unclassified move) reads 0."
+  }
+ ],
+ "surprises": [
+  "IRPT_BCKEND-D2-S105",
+  "IRPT_BCKEND-D2-S106"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "deploy_ledger.py (close-leg, close)",
+   "invocation": "slug paths/change_management/20261011T0255Z_irpt-fwd14-49f-e56-cusip-memfix-bundle-ib413-20261011",
+   "result": "PASS -- the last verify leg closed with measured proof and the entry CLOSED, sentinel removed."
+  },
+  {
+   "tool": "aws ssm list-commands / get-command-invocation, s3api head-object / list-object-versions, s3 cp",
+   "invocation": "the three 2026-10-12 14:15Z holdings commands, the current/ index manifests and the publish_refusal.json",
+   "result": "PASS for the outcome reads; the verdict output line is NOT retrievable (24000-char cap), row S105."
+  },
+  {
+   "tool": "p105_cells.py and p114_cells.py",
+   "invocation": "all six criteria at the repo root at HEAD a1f10a3824, then six mutants",
+   "result": "PASS -- six of six PASS after the issuer amended AC2 (413) and AC1 (404) at a1f10a3824; six of six mutants FAIL."
+  },
+  {
+   "tool": "e56 served-vs-served read (python, pyarrow, scratch outside every worktree)",
+   "invocation": "gold parquet date=2026-10-09 against date=2026-10-07, custody SECURITY nodes keyed by security id",
+   "result": "PASS for lost = 0; newly classified 8 is not claimed equal to 32. Counts only; the two parquets were deleted file by file."
+  }
+ ]
+}
