@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-aa-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aa-1.thread-trace-orders-from-git.md",
+    "group": "OTHER",
+    "vintage_commit": "6c3c63c05d"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~74",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round11.md",
+    "vintage_commit": "6c3c63c05d",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aa-1.thread-trace-orders-from-git.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/thread-trace.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local tool edit committed on wk-NFRA_CTLPLN-74; nothing deployed; the tool reads git and writes nothing in the repository"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTaa1-AC1",
+      "criterion_verbatim": "python .tools/thread-trace.py --selftest; expect THREAD-TRACE-SELFTEST cases=12/12 ok=True (the old ten and the new two pass)",
+      "method": "command",
+      "invocation": "python .tools/thread-trace.py --selftest",
+      "output_evidence": "PASS case full thread reads 5/5: THREAD project=PRJ round=1 orders=ALL orders_found=1 hops=5/5 pushed_by_working_box=False elapsed=0h18m20s\nPASS case order committed only on origin/CLOUD (HEAD lacks it) is found; --order reads its hops: THREAD project=PRJ round=1 orders=TO-1 orders_found=1 hops=4/5 pushed_by_working_box=False elapsed=- || HOP 2 WORK start=2023-11-14T22:18:20Z end=2023-11-14T22:21:40Z commit=c12902de26 by=0.9.0_WK_PRJ~1 where=origin/box/alpha\nPASS case order present only as an uncommitted working-tree file is not found: THREAD project=PRJ round=1 orders=ALL orders_found=0 hops=0/5 pushed_by_working_box=- elapsed=-\nTHREAD-TRACE-SELFTEST cases=12/12 ok=True\nrc=0",
+      "denominator": "12 of 12 selftest cases (the ten existing cases and the two new cases); cases=12/12",
+      "status": "PASS",
+      "expect": "THREAD-TRACE-SELFTEST cases=12/12 ok=True"
+    },
+    {
+      "criterion_id": "CTaa1-AC2",
+      "criterion_verbatim": "python .tools/thread-trace.py --project NFRA_CTLPLN --round 9 --order TO-CT-y-2; expect orders_found=2 (its last line carries orders=TO-CT-y-2 orders_found=2; HOP 2 still names 0.7.0_AE_CloudOps~CT1; the grade hop may read ABSENT; the exit code is not graded)",
+      "method": "command",
+      "invocation": "python .tools/thread-trace.py --project NFRA_CTLPLN --round 9 --order TO-CT-y-2",
+      "output_evidence": "HOP 1 PLAN start=2026-10-12T10:43:59Z end=2026-10-12T10:43:59Z commit=6b5465ea6c by=2.0.0_SA_COO~C where=origin/box/laptop\nHOP 2 WORK start=2026-10-12T10:55:21Z end=2026-10-12T10:55:21Z commit=1a677233f3 by=0.7.0_AE_CloudOps~CT1 where=origin/box/dell1\nHOP 3 PUBLISH start=2026-10-12T10:55:21Z end=2026-10-12T10:55:21Z commit=1a677233f3 by=0.7.0_AE_CloudOps~CT1 where=origin/box/dell1\nHOP 4 INTEGRATE start=2026-10-12T10:55:21Z end=2026-10-12T10:58:10Z commit=7a4e727f4a by=0.0.0_AB_MSTR where=origin/CLOUD\nHOP 5 GRADE ABSENT\nTHREAD project=NFRA_CTLPLN round=9 orders=TO-CT-y-2 orders_found=2 hops=4/5 pushed_by_working_box=False elapsed=-\nrc=0",
+      "denominator": "2 of 2 round-9 orders counted before the --order filter (TO-CT-y-1 and TO-CT-y-2); hops=4/5 of 5",
+      "status": "PASS",
+      "expect": "orders_found=2"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "inside CTaa1-AC1: a copy of the tool with ORDER_REFS narrowed to HEAD alone (origin/CLOUD dropped, as in a checkout that lacks the file) must fail the cloud-only case",
+      "expected": "the cloud-only case FAILS; the uncommitted-file case still PASSES; cases=11/12 ok=False",
+      "observed": "FAIL case order committed only on origin/CLOUD (HEAD lacks it) ... orders=NONE orders_found=0 hops=0/5 || HOP 2 WORK ABSENT; PASS case order present only as an uncommitted working-tree file ...; THREAD-TRACE-SELFTEST cases=11/12 ok=False; mutant rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of the same selftest on the same tree, compared: the first run during the build and a second run in the same session",
+      "observed": "both runs print THREAD-TRACE-SELFTEST cases=12/12 ok=True; the fixtures use fixed commit times, so the hop lines match",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a neither-ref-resolves run on a repository with an uncommitted order file",
+      "reason": "exercised by hand, not by a selftest case: an empty repository printed ERROR: neither HEAD nor origin/CLOUD resolves ... and exit 2, and the uncommitted file was not read; it is not one of the twelve selftest cases"
+    },
+    {
+      "item": "a shallow ref and an order file renamed between HEAD and CLOUD",
+      "reason": "BLIND per the cell's preflight: not tested; a renamed order reads as two orders, as the cell states"
+    },
+    {
+      "item": "the portal gitlink modification in the worktree",
+      "reason": "not committed: the RULES FOR THIS CELL forbid committing the portal gitlink; the commit names the tool, the order file, the proof instance and the surprise channel only"
+    },
+    {
+      "item": "the --fetch path",
+      "reason": "not exercised: no criterion names it, and the selftest and AC2 read local refs only"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W74-S1: _mission_dir (the seat-order projdir) also globbed the working tree, the W73-S2 gap in a second place; this order moved it to the git listing in the same edit, a judgment beyond the literal BUILD item for the issuer to confirm"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~74/NFRA_CTLPLN.TO-CT-aa-1.thread-trace-orders-from-git.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/thread-trace.py --selftest",
+      "result": "THREAD-TRACE-SELFTEST cases=12/12 ok=True (rc=0), run twice"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/thread-trace.py --project NFRA_CTLPLN --round 9 --order TO-CT-y-2",
+      "result": "THREAD ... orders=TO-CT-y-2 orders_found=2 hops=4/5 (rc=0)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --select E,F,W --ignore E501 .tools/thread-trace.py; ruff check --target-version py39 .tools/thread-trace.py",
+      "result": "All checks passed! (both runs)"
+    }
+  ]
+}
