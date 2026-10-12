@@ -1,0 +1,98 @@
+{
+  "to_id": "IRPT_BCKEND.TO-IB-pr-475",
+  "serial": "0.9.0_WK_IRPT_BCKEND~330",
+  "base_commit": "2d923d0564",
+  "read_at": "2026-10-12T18:10Z",
+  "commentary_ref": {
+    "verdict": "HEAD_READS_SIBLING",
+    "cites": [
+      "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:205",
+      "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:228",
+      "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py:68-71",
+      "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py:147",
+      "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py:153",
+      "infra/aws/lambda/investor-reporting/reports/resident_installed.py:334",
+      "infra/aws/lambda/investor-reporting/reports/resident_installed.py:393-394",
+      "infra/aws/lambda/investor-reporting/reports/resident_installed.py:433",
+      "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_packager.py:58-64"
+    ],
+    "in_words": "At HEAD the write and the read still disagree. The draft store sets commentary_ref by a conditional update on the request ITEM, beside the immutable record attribute (commentary_draft_store.py:205-232, update expression at :228). The packager reads record.get('commentary_ref') (opal_packager.py:153) from ports['acceptance'].get(...) (:147); in the live runtime that port is a plain DynamoAcceptance (resident_installed.py:393-394, passed to make_packager at :433, bound at :334), and DynamoAcceptance.get returns only json.loads(item['record']['S']) (acceptance.py:68-71). The word commentary_ref appears nowhere in ycharts/generate (0 hits), nowhere in resident_installed.py (0 hits), and the reading of the item attribute exists only in DynamoCommentaryRef.get in the draft store, which the packager does not use. By the code, a live packager on an item whose commentary_ref sits beside the record raises COMMENTARY_REF_ABSENT. Unmeasured live (no read of the table was made).",
+    "agreeing_commit": null,
+    "git_log_S": {
+      "acceptance.py": "git log -S commentary_ref returns 0 commits: acceptance.py has never carried the word",
+      "resident_installed.py": "git log -S commentary_ref returns 0 commits",
+      "opal_packager.py": "3 commits add or change the read: 7e66decdff, 73fb27d870 (the read of commentary_ref as I7), a9db722b83",
+      "commentary_draft_store.py": "589aee38f0 (the draft store and its sibling write), 20a62c3c6c (commentary_ref as I7); latest touch b7da10ca46 2026-10-11"
+    },
+    "test_crossing": {
+      "any_test_crosses": false,
+      "in_words": "No test at HEAD crosses the draft store's write and the packager's read. The packager tests give the packager a fake acceptance port whose get returns a record with commentary_ref INSIDE it (ycharts/research/tests/test_opal_packager.py:58-64 make_record, fake port at :86-89); the draft store tests (reports/tests/test_commentary_draft_store.py, test_commentary_ref_i7.py, test_commentary_draft_store_ticket_id.py, test_commentary_draft_store_tf.py) exercise DynamoCommentaryRef against a fake client and never hand its item to the packager. The two test families share no file: 6 test files import or name the packager, 10 test files name the draft store module, compose_ports or its port, 0 are in both lists. reports/tests/test_resident_packager_binding.py:31-33 and ycharts/research/tests/test_packager_live_ports.py:22-24 carry commentary_ref only as an attach-payload string, not as a read.",
+      "tests_named": [
+        "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_packager.py:58",
+        "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_draft_store.py:233",
+        "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_ref_i7.py:62"
+      ]
+    }
+  },
+  "prices_store": {
+    "store": "bucket opal-data-cot, key silver/prices/canonical_prices.parquet (registry row legacy_addresses.json key cottonwood-silver-canonical-prices)",
+    "writer": "data/cot/scripts/gold/build_canonical_prices_v2.py main() -> build_canonical() Step 6 (catalogued as S_00 in data/cot/scripts/gold/gold_dispatch.sh)",
+    "writer_cite": "data/cot/scripts/gold/build_canonical_prices_v2.py:907",
+    "schedule_cites": [],
+    "cites": [
+      "data/cot/scripts/gold/build_canonical_prices_v2.py:907",
+      "data/cot/scripts/gold/build_canonical_prices_v2.py:174",
+      "data/cot/scripts/gold/gold_dispatch.sh:78",
+      "data/cot/scripts/gold/gold_dispatch.sh:120",
+      "data/cot/scripts/gold/gold_dispatch.sh:1070-1081",
+      "infra/aws/terraform/cot-pipeline/eventbridge.tf:219-244",
+      "infra/aws/lambda/cot-pipeline/cot-bd-session-trigger/lambda_function.py:329",
+      "infra/aws/terraform/cot-pipeline/ssm.tf:353",
+      "infra/aws/terraform/cot-pipeline/ssm.tf:375-404",
+      "infra/aws/terraform/bd-pipeline/eventbridge.tf:384",
+      "org/critical_paths/change_management/20261009T1320Z_advi-cotbkf-cot-price-rewrite-cb-aj-2-20261009_deploy_completion.md:4"
+    ],
+    "chain_that_is_scheduled": "cot-silver-complete rule (eventbridge.tf:219-244, state ENABLED in the declaration) -> cot-bd-session-trigger mode gold-run (lambda_function.py:329) -> SSM document opal-cot-gold-run (ssm.tf:353-404): run_gold A_00 ... D_04, 18 run_gold lines, none names S_00 or build_canonical_prices_v2.py",
+    "verdict": "WRITER_UNSCHEDULED",
+    "retired_as_source": false,
+    "in_words": "The code that writes the key is data/cot/scripts/gold/build_canonical_prices_v2.py (s3.upload_file at :907 to OUTPUT_KEY, bound at :174 to the registry row for the store key in the own bucket). It is reached only through gold_dispatch.sh, which catalogues it as S_00 (:78) and runs it on --chain full before the freshness gate (:1070-1081) or on --chain silver-prep / --single S_00, all operator-started. The only SCHEDULED cot gold path found is the event chain silver sentinel -> cot-bd-session-trigger (gold-run) -> SSM document opal-cot-gold-run, whose run_gold list (ssm.tf:375-404) does not name S_00 or the writer, and nothing in infra/aws starts the cot gold_dispatch.sh (the 4 infra/aws files naming build_canonical_prices are all the other firm's bd-pipeline and bd runner; the bd-pipeline daily 04:00 UTC rule at bd-pipeline/eventbridge.tf:384 is the positive control that a schedule of this kind is findable by the same search). The row's last-write date is explained without a schedule: the key is one of the 38 keys in the 2026-10-09 never-widen price rewrite (the ledger records 38 of 38 keys written once each, closed 13:43Z; the key's prior version in the provenance file is dated 2026-06-09T20:42:16Z, the row's older version), a one-time put by an operator, not a run of the writer. The ledger's own preflight recorded 'writers=7 scheduled=0' for the silver/prices/ prefix at apply time. Since the verdict is not NO_WRITER, the key is not retired as a source by the CTO's rule; it is a store with a writer that nothing runs on a schedule, so its data does not move forward on its own.",
+    "census": {
+      "scope": "infra/aws, corpus default (tracked plus untracked-not-ignored), content search for build_canonical_prices; plus a second census of infra/aws/terraform/cot-pipeline for gold_dispatch|silver-prep|S_00|build_canonical_prices|canonical_prices",
+      "files_searched": 7343,
+      "files_with_a_hit": 4,
+      "hit_files": [
+        "infra/aws/ec2/bd-gold-layer-runner/deploy-to-ec2.sh",
+        "infra/aws/lambda/bd-pipeline/bd-price-update/lambda_function.py",
+        "infra/aws/terraform/bd-pipeline/eventbridge.tf",
+        "infra/aws/terraform/bd-pipeline/CHANGELOG.json"
+      ],
+      "binary_not_searched": 1709,
+      "second_census": {
+        "scope": "infra/aws/terraform/cot-pipeline, same five terms",
+        "files_searched": 19,
+        "files_with_a_hit": 0,
+        "positive_control": "the Grep tool on the same directory for run_gold finds infra/aws/terraform/cot-pipeline/ssm.tf (the known scheduled chain), and for the word gold finds 8 files"
+      },
+      "graph_read": "comp-find --corpus aws 'cot.*gold|gold.*cot': 2923 aws nodes scanned, 10 hits, exactly one SSM document (opal-cot-gold-run, DECLARED) and no cot rule, lambda or document named for gold_dispatch or silver-prep",
+      "positive_control": "the same comp-find over infra/aws finds the bd-pipeline schedule that runs the bd twin of this writer (eventbridge.tf:384, daily 04:00 UTC); the same census over the whole repo finds data/cot/scripts/gold/gold_dispatch.sh as the one cot file that runs the writer"
+    }
+  },
+  "not_established": [
+    "Whether the live opal-cot-gold-run document and the live cot-silver-complete rule match ssm.tf and eventbridge.tf: the graph holds the document as DECLARED and no live describe was made (no AWS read beyond comp-find --corpus aws).",
+    "Whether anyone has started gold_dispatch.sh or the writer by hand (SSM or a shell) since 2026-06-09: no run log was read; the 2026-06-09T20:42:16Z version being the writer's last run is inferred from the row's max date 2026-06-09, not read.",
+    "That the 2026-10-09T13:41:04Z version is the one-time rewrite put: inferred from the ledger window (opened 13:20Z, W1 closed 13:43Z), the provenance list naming the key among the 38, and the older version's date matching; the new VersionId was not read here.",
+    "Why the rewrite's data does not move yahoo points forward: the rewrite only removed or re-priced the other firm's override rows, so a rewrite does not add later days; this explains the row's world_is but was not measured against the object.",
+    "commentary_ref at runtime: no live read of the requests table was made, so no item is known to carry the sibling attribute with the packager failing on it; the verdict is of the code at HEAD base 2d923d0564.",
+    "Whether the deployed packager bundle is the HEAD source: the bundle was not diffed against HEAD.",
+    "The tests were not run: the test_crossing answer is by reading the test files named, with a count of 6 packager test files, 10 draft store test files and 0 in both."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "accounts_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0,
+  "aws_reads_made": [
+    "comp-find --corpus aws 'cot.*gold|gold.*cot' (the served graph; no direct describe or get)"
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "base_commit": "2d923d0564c274cc89288602d912724ec475e161",
+  "files_changed": [
+    "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js",
+    "infra/aws/ec2/investor-reporting-ycharts/README.md",
+    "infra/aws/ec2/investor-reporting-ycharts/tests/probe_challenge_and_pair.js",
+    "infra/aws/lambda/investor-reporting/ycharts/session/host_capture.py",
+    "infra/aws/lambda/investor-reporting/ycharts/session/tests/test_capture_receipt_per_step.py",
+    "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md (rows D2-W328-S1..S3)",
+    "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~328/make_persisted_receipt_sample.py",
+    "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~328/IB165-3_persisted_receipt_sample.json",
+    "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~328/IB165-3_capture_probe_record.json"
+  ],
+  "already_covered_by_head": [
+    {
+      "what": "S85: the receipt's login_submission and probe_pair are persisted as closed secret-free members to last-capture.receipt.json (0600)",
+      "cite": "infra/aws/lambda/investor-reporting/ycharts/session/host_capture.py@2d923d0564:137-199 (whitelist), :248-309 (receipt_members, persist_receipt), :333 (called from run_capture)"
+    },
+    {
+      "what": "S85: stderr is kept per run (previous run archived by rotate_runs, newest cut to 64 KiB), 16 runs kept",
+      "cite": "infra/aws/lambda/investor-reporting/ycharts/session/host_capture.py@2d923d0564:63-134"
+    },
+    {
+      "what": "S85: the signed-out diagnosis fires after a submission under its own reason SIGNED_OUT_APP_CHROME_AFTER_SUBMIT",
+      "cite": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js@2d923d0564:1084-1103"
+    },
+    {
+      "what": "S3 (part): the first probe after the submission already kept the pair's waf_action_class and content_type_class per arm, and the step list kept probe_reason, probe_via, probe_http_status and probe_state per step",
+      "cite": "host_capture.py@2d923d0564:183-198,225-245; ycharts_session.js@2d923d0564:1034-1040"
+    },
+    {
+      "what": "NOT covered, built here: per-step waf_action_class, content_type_class, body_marker, probe_path_name, identity_leg; challenge classification (S1); the pair only with a token (S2)",
+      "cite": "ycharts_session.js@2d923d0564:584-595 (classifyResponse), :310-319, :893; host_capture.py@2d923d0564:195-198 (_STEPS)"
+    }
+  ],
+  "new_closed_values": [
+    {
+      "name": "WAF_CHALLENGE",
+      "set": "capture failure reason (record.reason, matched by host_capture._REASON and forwarded as CAPTURE_FAILED:<failure_class>:<reason>), under the EXISTING failure class UNEXPECTED_CHALLENGE; also a new classifyResponse state of the same name",
+      "four_postulates": {
+        "i_mece": "Domain: why a capture failure carries a reason. The ChallengeFailure reasons so far name a SCREEN (CHALLENGE_ONE_TIME_CODE_UNSUPPORTED, _CAPTCHA_, _WAF_INTERSTITIAL, _FORCED_PASSWORD_RESET, _UNRECOGNISED_SCREEN, _ATTENDED_TIMEOUT); the AuthError reasons name where a sign-in stopped. A probe reply that is a challenge after an accepted sign-in is in neither: it is not a screen (the identity page loaded and passed) and not a rejected sign-in. By subtraction from the printed census (9 AuthError reasons, 6 screen reasons) it is the uncovered member; no existing value covers it.",
+        "ii_same_grain": "Same grain as its siblings: one closed upper-case token per failure site, set on record.reason and passing _REASON.",
+        "iii_one_intent": "It means exactly one thing: the probe reply (not the screen) met the READ path's challenge test. The name is the READ path's own (controller.py classify_pull reason WAF_CHALLENGE).",
+        "iv_state_coherence": "Remedy differs from its neighbours: CHALLENGE_WAF_INTERSTITIAL moves with a different screen or an attended hold; SIGNIN_FORM_REPRESENTED and NO_AUTHENTICATED_PROBE move with the credential or the account; WAF_CHALLENGE moves with the WAF token / client class (the pair, now sent only with a token) and does not move the credential, the account lock state or the sign-in count. It does NOT change failure_class values (UNEXPECTED_CHALLENGE is reused), the 9 AuthError sites (test_host_capture asserts 9) or the READ path's pull reason of the same spelling, which is a different field in a different process (broker.py:386 compares pull['reason'], never a capture reason)."
+      },
+      "token_census": {
+        "scope": "git grep -w (word boundary) at base 2d923d0564 over infra/aws/ec2/investor-reporting-ycharts/ and infra/aws/lambda/investor-reporting/ -- 676 tracked files scanned",
+        "counts": {
+          "WAF_CHALLENGE": {
+            "files": 4,
+            "lines": 4,
+            "where": "ycharts/generate/resident_worker.py:1, ycharts/session/broker.py:1, ycharts/session/controller.py:1, ycharts/session/tests/test_resolution_broker.py:1 -- all the READ path's pull reason, none in the capture"
+          },
+          "CHALLENGE_WAF_INTERSTITIAL": {
+            "files": 2,
+            "lines": 2
+          },
+          "UNEXPECTED_CHALLENGE": {
+            "files": 4,
+            "lines": 9
+          }
+        }
+      }
+    }
+  ],
+  "pair_rule_in_words": "The with-token/without-token probe pair is sent only when the cookie jar holds an aws-waf-token. With none, both arms would send the same request, so the pair is not sent, the receipt's probe_pair carries discriminating=false with only the without_token members of the one request that was sent, and one stderr line says so; with a token the pair runs as before and carries discriminating=true.",
+  "planted_secrets": [
+    "planted.user@example.test",
+    "Pl4nted-Passw0rd-NOT-REAL",
+    "c00kie-PLANTED-9f8e7d6c5b4a",
+    "https://vendor.example.test/login/?next=/dashboard&token=T0K3N-PLANTED-12345"
+  ],
+  "per_step_members": [
+    "waf_action_class",
+    "content_type_class",
+    "body_marker",
+    "probe_path_name",
+    "identity_leg"
+  ],
+  "hash_pins": [
+    {
+      "where": "host (resident package binding wrapper_sha256 / library_sha256), built by infra/aws/lambda/investor-reporting/reports/build_resident_package.py from argv and checked by resident_installed.py and HostCapture.capture()",
+      "what_i_did": "nothing: the pin is computed at release; ycharts_session.js sha256 moves a1c2880169c5f799... to 2c00d164fc9b7799... and host_capture.py 324865e69547... to 7fc6918d9a43a1e6...; run-ycharts-session.sh is unchanged (55ddb8f7947c...)"
+    },
+    {
+      "where": "tests that compute the hash at run time (reports/tests/test_resident_installed.py:52, ycharts/generate/tests/test_package_poll.py:172, ycharts/session/tests/test_host_capture.py:47)",
+      "what_i_did": "nothing needed: they hash the file they read"
+    },
+    {
+      "where": "14 tracked org/ records pin the base library hash a1c288..., 1 pins the base host_capture hash 324865... (git grep at base: org/tier2_senior/0.7.0_AE_CloudOps~YC2 and ~DELL2 deliverables and logs, org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/st32_release and r14, org/critical_paths/change_management/20261011T1604Z_irpt-resident-st32-20261011_deploy_completion.md, IRPT_BCKEND deliverables of ~292, ~304 and 2.0.0_SA_COO~P2); outside org: 0 files",
+      "what_i_did": "left as they are: dated release records and install scripts of the st32 release, outside this order's paths; a new resident release writes its own pin"
+    }
+  ],
+  "host_reach": "ycharts_session.js and run-ycharts-session.sh ship in the host package (/opt/investor-reporting-ycharts/), pinned by hash by HostCapture; host_capture.py ships in the resident package (ycharts/session). Nothing here reaches the host until a resident release under its own never-widen pair carries the new library bytes and the new resident package together (one contract: an old library emits no per-step members, and the new whitelist drops nothing it needs).",
+  "request_sent": false,
+  "deployed": false,
+  "suites": {
+    "offline_before": "node --require ./tests/netguard.js tests/run_offline_suite.js -> rc 0, last line RESULT-END, all_pass true (at base)",
+    "offline_after": "same command -> rc 0, last line RESULT-END, all_pass true; receipt_after_submit.js, bundle_contract.js, fence_race.js rc 0; probe_challenge_and_pair.js rc 0, 9 ARM lines PASS, netguard 0 external of 3",
+    "session_before": "127 passed, 2 skipped",
+    "session_after": "149 passed, 2 skipped"
+  }
+}
