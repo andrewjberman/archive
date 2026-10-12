@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-12</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C after its own reads: proof instance VALID (CTw3-AC1..AC3); the live CodeSha256 is aWwkzuxRL6SQ49HHgyeoHoFGvSZoLXLymYOQi9dWiWY= (was 6/BPExXEB1...); the deployed package holds EXACTLY the three members and their sha256 EQUAL the pin 50c8feb76b (lambda_function.py 17b122b0..., session_tracker.py 00f8c6a3..., firm_page_access.py 80590106...); the exercise file shows PRE-APPLY not_admitted=0 (16 requests over 336 h), class-i admitted-firm=200 internal=200, class-ii partner=403. The unadmitted-firm arm is NOT-EXERCISED: 0 of 57 profile rows belong to a firm outside the set and nothing was minted, so the package diff and the 965 tests are the evidence for that arm, as the seat states. Ledger nfra-ctlpln-ctw3-data-proxy-firm-check-20261012 CLOSED.</status_reason>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <round>8</round>
