@@ -68,6 +68,17 @@ def test_ac3_a_4xx_is_never_retried():
     assert len(plan.calls) == 1 and slept == []
 
 
+def test_ac4_a_captcha_is_left_to_the_client_and_not_retried_again():
+    """`serp.serp_brightdata_records` already retries a captcha (`brd_error_code == "captcha"`) and a 5xx itself; the lookup's
+    outer retry must not multiply those (up to 9 requests for one search): a captcha failure is raised after ONE attempt."""
+    plan = Plan(_fail("VENDOR", brd=None, code="captcha", msg="captcha"), OK)
+    slept, go = _run(plan)
+    with pytest.raises(RuntimeError) as e:
+        go()
+    assert "VENDOR" in str(e.value) and "captcha" in str(e.value) and "1 attempt" in str(e.value)
+    assert len(plan.calls) == 1 and slept == []
+
+
 def test_a_first_try_success_sleeps_and_retries_nothing():
     plan = Plan(OK)
     slept, go = _run(plan)
