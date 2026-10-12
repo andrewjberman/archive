@@ -259,6 +259,52 @@ observed range. It is not evidence of a stall and I am not treating it as one.
 policies. Then the `POST-APPLY: schwab: verified` line, close the `realrun` leg and the entry, and flip
 the order.
 
+## 4d. THE 12:48 RUN STOPPED AFTER 3 STAGES -- and post-delete coverage is now a UNION, not a chain
+
+Re-measured 21:4xZ (the 14:15Z "81-minute gap" note in 4c is stale; the run ended long before).
+
+**What the 12:48 run was.** `S_00` is the stage that builds `canonical_prices.parquet` -- the dispatcher
+runs silver-prep first (`eventbridge.tf:384`: *"gold_dispatch.sh runs silver-prep (S_00 =
+build_canonical_prices_v2.py) before the freshness gate"*). The box launched **12:45:16Z**, S_00 wrote
+`silver/prices/canonical_prices.parquet` (109,925,997 B) at **12:48:06Z** and marked `S_00.done`
+12:48:10, then `A_00` 12:48:18 and `A_02` 12:48:20, plus `gold/dimensions/fee_rate_history.parquet` +
+its watermark (12:48:17) and `gold/synthetic_positions_index.parquet` (12:50:00). **Then it stopped.**
+
+| probe | result |
+|---|---|
+| instance `i-01003b035d2988dfb` | **`stopped`**, `StateTransitionReason: User initiated`, LaunchTime 12:45:16Z |
+| further stages after 12:50:00Z | **none**, over 8h40m |
+| `gold/perf_history/` since 12:00Z | **none** (the 04:03 chain wrote one at 06:10:16Z) |
+| the 3 stages it did run | all wrote `.done` markers **and** real outputs -- they SUCCEEDED |
+
+`StateTransitionReason: User initiated` does **not** discriminate here: AWS labels every API-driven
+`StopInstances` that way, including the gold runner's own self-stop at the end of `run-gold.sh` and its
+`watchdog-shutdown.sh` backstop. So it is equally consistent with a clean end-of-run stop and with an
+external stop, and I am not reading it as either.
+
+**POST-DELETE COVERAGE IS NOW A UNION OF TWO EXECUTIONS -- 25 of 29 stage keys, but no single chain:**
+
+```
+04:03 chain : B_01 .. D_00f completed post-delete (perf_report 06:10:16Z)   -> 22 stages
+12:48 run   : S_00, A_00, A_02 post-delete, then stopped incomplete        ->  3 stages
+NEVER post-delete: A_01, A_03, A_04, B_00                                  ->  4 stages
+```
+
+Of the 7 early stages the ruling singled out as most likely to touch Schwab inputs, **3 are now covered
+post-delete** (`S_00`, `A_00`, `A_02`) and **4 are not** (`A_01`, `A_03`, `A_04`, `B_00`).
+
+**This does not satisfy branch A and I am not treating it as progress toward it.** The pair asks for ONE
+run that starts after the delete and completes; a union across two partial executions is a different
+claim, and the ruling already declined a weaker version of exactly this reasoning. The token stays
+withheld and the entry stays open.
+
+**What I am flagging independently of branch A:** a post-delete run terminated after 3 of 29 stages
+without a perf report. I have **no evidence** it is related to the delete -- its 3 stages all succeeded,
+nothing raised `AccessDenied`, and `opal-data-schwab` is not on any path those stages take -- and a
+prices-triggered dispatch may legitimately run only the prices-dependent stages. But an incomplete run on
+the role I narrowed, on the day I narrowed it, is a fact the issuer should hold rather than one I should
+quietly file. Asked.
+
 ## 5. STATE
 
 | leg | status |

@@ -202,3 +202,9 @@ portal-figure question does not fire arm (a) (CVO condition); it is recorded and
 above. Once; nothing further is sent. Pre-send reads at 12:1xZ: Alyssa's profile probe `PROFILE: PRESENT active=1`
 (1415 items); gateway whoami `Andrew@opalinvest.com`. The gateway required `confirm=true` (irreversible send); confirmed
 on Andrew's "Yes on Monday". Poll window: every 5 minutes from 10:07 ET until arm (a) fires or 17:00 ET.
+
+**Poll window closed (2026-10-12 ~21:0xZ):** arm (a) did NOT fire. This seat's polls at ~14:1xZ read 0 new messages; poll
+coverage after that is not evidenced in this record. Andrew-direct ~20:5xZ, VERBATIM: "I will handle this with Alyssa
+tomorrow." (record `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261012_205xZ_SITEZ_PORTFOLIO_SEVEN_PROJECT_RULINGS.md`
+@cdb5ff66b1, relay msg 33513). Poll cron deleted; this seat sends nothing further to Alyssa. Arm (a) now waits on Andrew's
+own handling; a fresh question from her still fires it under the registered procedure.
