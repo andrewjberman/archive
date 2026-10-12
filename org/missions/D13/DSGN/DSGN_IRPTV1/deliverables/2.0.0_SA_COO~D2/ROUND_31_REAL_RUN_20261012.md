@@ -1,0 +1,19 @@
+# DSGN_IRPTV1 round 31 -- the one real run of each outcome (issuer 2.0.0_SA_COO~D2, 2026-10-12 ~23:1xZ-23:2xZ)
+
+**Instrument.** A local build of the COMBINED candidate (portal DEV 183860bac055 plus the three worker branches merged without conflict: the integration branch
+`wk-DSGN_IRPTV1-71-portal` @cf52fdbf in the portal repository, LOCAL, not pushed), served on port 5174 from a workspace worktree, walked with the project's /ui-walk instrument
+signed in as the dormant walker account against live data (read-only; the walker armed and disarmed itself, the post-disarm login was refused). Walk folder
+`tmp/ui-walk/20261012T231326Z` (local, gitignored, client data: screenshots are not committed). The page was looked at; what follows is words only, no client name and no figure.
+
+**Drain checks on the combined candidate (once, after the merges).** `bun run typecheck` rc 0; `bun run lint` 0 errors (348 warnings); `bun test src/pages/InvestorReporting`
+1216 pass, 27 skip, 1 fail (F14-AC3, the base failure at 183860bac055 that predates the round). Base measured by the issuer before the cut: 1203 pass, 27 skip, 1 fail.
+
+| outcome | cell | what the real page showed |
+|---|---|---|
+| the Total Assets base sits inside the card | IV-e-120 | OBSERVED. On a three-account client's Holdings tab the hero card carries the line "Total Assets below: all 3 accounts" inside the card, under the "Total Assets" heading and above the figure; the caption above the card is gone. The census found two mounting pages (Model Portfolios and the Holdings tab). The Model Portfolios page was not walked here (the walker covers Investor Reporting); its before and after rests on the worker's mount-element comparison and on the prop being absent there. NOTE for the reviewer and the CTO: the word "below" now reads oddly inside the card (it made sense as a caption above it); the order said no rewording, so it was moved verbatim. |
+| an account pick starts Performance on that account | IV-e-121 | OBSERVED, and it confirms the worker's finding. A search by an account's last four digits offered the client's entry with that account's label; picking it showed the client with all three accounts and Performance's Account select on the client's LARGEST account, not the account typed. The header yields a relationship-kind entry for that search, so no account is named; an ACCOUNT row picked starts on that account (the worker's rendered proof). No product change was made. The question of whether such a pick should start on the matching account is carried to the CTO (row D2-S28). |
+| the vendor report face carries its validation and source lines | IV-e-122 | OBSERVED on a served vendor-kind report (104 cards). The report section opens with one sentence outside the closed details: the producer checked the figures against its source and confirmed them, the number of checks run and that none did not pass, and the producer's own note as given; below it, "Source: a vendor's report." The walker counted each expected string once in the dialog and zero inside a closed details. All 104 cards read a name for a title (0 codes). NOTE for the reviewer: the sentence says "confirmed them" beside a producer note that reads coverage PARTIAL; the sentence is built from the four wire members and discloses the note, but a reader could take "confirmed" for the whole report. |
+
+**Not done here.** No Opal-report render was walked on the page (the worker's six synthetic renders are byte-identical to base); no Inflection client was walked; the live producer's ranking for the last-four search was read only through this one served client.
+
+**Push state.** Workspace commits LOCAL on box/dell2; the portal candidate branches `wk-DSGN_IRPTV1-68-portal`, `-69-portal`, `-70-portal` and the combined `-71-portal` are LOCAL in the portal repository. Nothing is pushed.
