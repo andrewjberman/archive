@@ -1,0 +1,13 @@
+# IB158-1 -- four deploy ledger entries left OPEN on site Z: each open leg measured (READ ONLY)
+
+Read at origin/box/sitez @d68d9a5eda. None of the four sentinels is on this box (0 of 4). Nothing was re-executed, applied, rolled back, invoked, signed in, or edited (seven zeros in the JSON). Finding that matters first: on site Z's branch all four ledger files already read CLOSED with a proof on every leg; only the stale sentinel files remain open.
+
+**1. p-live-scope (2.0.0_SA_COO~P), leg HTTP: SUPERSEDED_OVERTAKEN, claim measured.** The portal checkout (another checkout, read only) carries tag portal-v2.1.211 and 2.1.185 is its ancestor; 2.1.185 peels to the commit the entry recorded. The smoke of 2.1.185 was never recorded and can no longer be made of that build. The ledger records Andrew's word of 2026-09-27 accepting signed-in walks on later builds instead, a substitution, not a verification.
+
+**2. performance-49f-engine (2.0.0_SA_COO~P), leg S1: SUPERSEDED_WORLD_DONE, claim inferred.** The live adapter digest (9kYL...) is not the entry's build; four later releases replaced it. The ledger S1 row records a signed-in 49F read answered with a retained OPAL_ENGINE report on 2026-09-27 plus the Black Diamond cross-check; the cited files exist on this box. Their contents were not re-read here.
+
+**3. performance-inf-one-use (2.0.0_SA_COO~P), leg S1: SUPERSEDED_WORLD_DONE (branch 2, expired unspent), claim inferred.** The plan expired 2026-09-26 00:00Z; the function environment today has no plan key (7 key names read, values never); a later ledger replaced the plan at 23:12Z on 2026-09-25 with 0 INF use rows before the later run. The claim-row read was REFUSED (KMS), so unspent rests on the owning lane's record.
+
+**4. holdings-principals-dispatch-m (2.0.0_SA_COO~M), leg N1: SUPERSEDED_WORLD_DONE, claim inferred.** The three firm roles exist with their one policy each; the Cottonwood policy names no Black Diamond bucket and the 49F policy names no Cottonwood bucket. simulate-principal-policy was REFUSED (no permission), and a simulation would not be an exercise anyway. A trunk record shows the arm exercised live over SSM as each principal on 2026-09-28 (both refusals, both own-bucket controls allowed, 4 of 4).
+
+**Close.** .tools/deploy_ledger.py has no supersede verb; 'close' needs every leg proven, then unlinks the sentinel. Run on box/sitez by the seat the issuer names: 'close-leg' with a proof naming this record, then 'close', per slug; or remove the stale sentinel. Not done here. Not established: see not_established in the JSON (claim row, simulations, report contents, PROD ref freshness, close-leg on a closed file).
