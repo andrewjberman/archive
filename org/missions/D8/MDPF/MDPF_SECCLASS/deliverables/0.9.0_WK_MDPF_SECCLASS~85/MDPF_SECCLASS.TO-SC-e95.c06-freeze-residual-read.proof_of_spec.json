@@ -16,12 +16,24 @@
   "assignee": "0.9.0_WK_MDPF_SECCLASS~85",
   "artifacts_produced": [
     {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/RESIDUAL_READ_C06_FREEZE_20261012.json",
+      "kind": "doc",
+      "commit_or_etag": "5ad172b731",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only record; measured by get_object, list_object_versions, DynamoDB get_item, CloudTrail lookup, ec2 describe and telemetry get_object; no write to any bucket, table, or deploy.",
+      "artifact_covered_by": [
+        "SC22-e95-AC1"
+      ]
+    },
+    {
       "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "d381c1635f",
+      "commit_or_etag": "5ad172b731",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Five surprise rows appended (S1-S5); read-only work, no deploy, no write to any bucket or table.",
-      "artifact_covered_by": ["SC22-e95-AC1"]
+      "deploy_evidence": "Surprise rows S1-S5 (commit d381c1635f) and S6 (commit 5ad172b731) appended.",
+      "artifact_covered_by": [
+        "SC22-e95-AC1"
+      ]
     }
   ],
   "acceptance": [
@@ -30,61 +42,50 @@
       "criterion_verbatim": "the record exists with its four dates, its control date reproducing, its three N entries, its chain window, its mover and its unlisted-unclassified section, and its arithmetic is internally consistent (a copy with one field broken fails the same check first).",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R22_CHECKS/r22_residual_read_check.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/RESIDUAL_READ_C06_FREEZE_20261012.json",
-      "output_evidence": "R22-RESIDUAL ok=False error=absent (rc=1). The record was not written: the control date 2026-09-04 did not reproduce (rebuild minus served +1,106,337.63 against the $1.00 limit; partition bytes unchanged), so the read stopped per item 2. The other fields (N-entries, chain window as bounded, mover, unlisted section) are measured and filed as rows S1-S5, not written as a record.",
-      "denominator": "1 criterion; 0 of 1 PASS",
-      "status": "FAIL",
-      "status_reason": "control date did not reproduce within $1.00; the order stays open per the stop rule"
+      "output_evidence": "R22-RESIDUAL ok=True dates=4 control_byte_drift=0.0 control_reference_drift=1106362.48 rederive=3 movers_dates=8 control=ok (rc=0; run twice, identical). Record written at 5ad172b731. Control 2026-09-04: one version, byte drift 0.0, repeat delta 0.0, reference drift +1,106,362.48 (class-sum basis; +1,106,337.63 on the total field), recorded as a result per Amendment 1 item 2.",
+      "denominator": "1 criterion; 1 of 1 PASS",
+      "status": "PASS",
+      "status_reason": "checker ok=True on the committed record, after the amended checker and the record's own consistency rule"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "No record present at the cited path: the checker must refuse, not pass.",
-      "expected": "R22-RESIDUAL ok=False error=absent, rc=1",
-      "observed": "R22-RESIDUAL ok=False error=absent, rc=1",
+      "description": "The amended checker's own negative control: a copy of the record with 1000 added to the first date's served total must be refused; the record is also graded with and without the copy.",
+      "expected": "control=ok (the broken copy is refused)",
+      "observed": "control=ok on both runs",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "two same-input runs compared: the same invocation run twice on the same (absent) record path",
-      "observed": "R22-RESIDUAL ok=False error=absent rc=1, identical on both runs",
+      "method": "two same-input runs compared: the checker run twice on the committed record (and once more before commit)",
+      "observed": "R22-RESIDUAL ok=True ... control=ok, identical on each run",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "RESIDUAL_READ_C06_FREEZE_20261012.json record (items 1-6 as written)",
-      "reason": "Not written. The control date 2026-09-04 did not reproduce within $1.00, so the order's stop rule applies; surprise MDPF_SECCLASS-D1-W85-S1 files the failure."
-    },
-    {
-      "item": "Item 3 cost read: wall time, peak memory and write set for N = 1, 3 and 5 trading days, cold and warm",
-      "reason": "Not run. The stop rule of item 2 halts the rebuild-based reads; no cost figure is presented as measured."
-    },
-    {
-      "item": "Item 3 chain window as a measured stop instant",
-      "reason": "No API records the stop (instance-initiated shutdown, no StopInstances event). Only the launch and a lower bound from telemetry are read; surprise MDPF_SECCLASS-D1-W85-S3."
-    },
-    {
-      "item": "Item 5 unlisted unclassified security list with has_name_row",
-      "reason": "Computed on the same rebuild whose control failed, so it is not validated; not written to any record. Carried in the worker report only, marked unvalidated. Security-level only, no client identifiers."
+      "item": "Chain window launch-to-stop as a measured stop instant",
+      "reason": "No API records the stop (instance-initiated shutdown, no StopInstances event). The record carries launch_to_stop_seconds 7766.689 as a LOWER BOUND (lower_bound true) from the last telemetry sample; surprise MDPF_SECCLASS-D1-W85-S3."
     }
   ],
   "surprises": [
-    "MDPF_SECCLASS-D1-W85-S1: control date 2026-09-04 does not reproduce (rebuild minus served +1,106,337.63 in total, class split moved up to 87 M on unchanged bytes); the rebuild reads live reference data and static tables, which differ from first build; the read stops.",
-    "MDPF_SECCLASS-D1-W85-S2: order line citations are stale at 4d2c87a73b (build :724, list :393-401, accumulation :901-907) and the per-relationship write is four keys, not three.",
-    "MDPF_SECCLASS-D1-W85-S3: the runner stop is an instance-initiated shutdown with no StopInstances event; launch-to-stop is bounded by the last telemetry sample (06:10:12.689Z), not measured.",
-    "MDPF_SECCLASS-D1-W85-S4: the latest C_06 run is 15.5 seconds in telemetry (16 samples); it cannot be the 3,793-JSON no-new-partition read the order cites; exit status not in telemetry.",
-    "MDPF_SECCLASS-D1-W85-S5: writer confirmed as B_00 (nightly --force-recent-days 14); content changes sit on the 04:15Z nightly fire (10 partitions each), the 23:15Z fire re-puts identical bytes; oldest content change reaches 20 trading days back (2026-09-11)."
+    "MDPF_SECCLASS-D1-W85-S1: DISPOSITIONED by Amendment 1 (issuer 2.0.0_SA_COO~M1): the 2026-09-04 control does not reproduce against the served total because the rebuild also reads the current reference inputs; the record splits served-to-first-build (reference drift, +1,106,362.48 on the class sum for 2026-09-04) from first-build-to-rebuilt (byte drift, 0.0 on that control).",
+    "MDPF_SECCLASS-D1-W85-S2: order line citations stale at 4d2c87a73b (build :724, list :393-401, accumulation :901-907) and the per-relationship write is four keys, not three; the cost run counts four.",
+    "MDPF_SECCLASS-D1-W85-S3: the runner stop is an instance-initiated shutdown with no StopInstances event; launch-to-stop is recorded as a lower bound (7766.689 s) from the last telemetry sample.",
+    "MDPF_SECCLASS-D1-W85-S4: the latest C_06 run is 15.5 seconds in telemetry (16 samples), recorded as c06_wall_seconds_last_fire, the pre-ship no-new-partition baseline per the issuer's Amendment 1.",
+    "MDPF_SECCLASS-D1-W85-S5: writer B_00 (nightly --force-recent-days 14); content changes on the 04:15Z fire (10 partitions each), the 23:15Z fire re-puts identical bytes; oldest content change 20 trading days back (2026-09-11).",
+    "MDPF_SECCLASS-D1-W85-S6: C_06's class dollars and total field disagree by up to 128.58 per firm snapshot (per-relationship 6dp mix rounding, C_06 line 686); the record takes totals as class sums and carries the total field beside them."
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e95.c06-freeze-residual-read.md",
   "compiler_tools": [
     {
-      "tool": "r22_residual_read_check.py",
+      "tool": "r22_residual_read_check.py (issuer's amended checker, unmodified)",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R22_CHECKS/r22_residual_read_check.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/RESIDUAL_READ_C06_FREEZE_20261012.json",
-      "result": "R22-RESIDUAL ok=False error=absent (rc=1)"
+      "result": "R22-RESIDUAL ok=True dates=4 control_byte_drift=0.0 control_reference_drift=1106362.48 rederive=3 movers_dates=8 control=ok (rc=0)"
     },
     {
       "tool": "proof-of-spec-check.py",
       "invocation": "python .tools/proof-of-spec-check.py <this instance> SC22-e95-AC1",
-      "result": "see the worker report; instance validated before commit"
+      "result": "see the commit message and the worker report"
     }
   ]
 }
