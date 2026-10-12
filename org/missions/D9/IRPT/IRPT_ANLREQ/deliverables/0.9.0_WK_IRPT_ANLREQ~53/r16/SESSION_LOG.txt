@@ -1,0 +1,30 @@
+SESSION LOG -- 0.9.0_WK_IRPT_ANLREQ~53 on IRPT_ANLREQ.TO-AR-y-166 (BUILD ONLY; no live call, no network, no push, no deploy, no boto3 client)
+
+1. First act (worktree C:/dev/wk-irpt-anlreq-53):
+   branch: wk-IRPT_ANLREQ-53
+   TREE-OK (test -d org and test -d .tools)
+2. Premise re-grounding (native Read/Grep, worktree-pathed):
+   reports/submission.py and reports/acceptance.py: absent (rows IRPT_ANLREQ-D2-W53-S11)
+   ycharts/generate/submission.py and acceptance.py: present
+   routes.json POST analysis/inputs note: NOT_READY stated; installed route composes the service (row S15)
+   on-behalf upload requires advisor_email (served.py:1063-1067) (row S13)
+   event ii requires input_id; the template lane answers RESOLVING first (row S12)
+   filer users row: y75 shape admits 49financial only (row S14)
+3. Script built: r16/submit_synthetic_request.py (ASCII; commit-gate: "All checks passed!", "OK: pre-commit gate clean for 1 of 1 file(s)", rc=0)
+4. Self-test (python -I submit_synthetic_request.py --self-test):
+   ARM upload-body-validates: OK ... ARM plan-prints-two-post-events: OK (20 arms)
+   SELFTEST arms=20 of 20 passed
+   SUBMIT-SELFTEST-OK (rc=0; two runs identical)
+5. Mutant (tenant gate disabled, exec at its own path):
+   ARM tenant-other-refused: FAIL accepted
+   ARM tenant-missing-refused: FAIL accepted
+   SELFTEST arms=18 of 20 passed; MUTANT rc=1
+6. Plan and refusals, credentials blanked (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN empty; shared credential and config files to /dev/null):
+   --plan --tenant cottonwood --ticket TCK-20261012-0123abcd -> two JSON lines (routeKey POST analysis/inputs; POST analysis), rc=0
+   --plan --tenant 49financial --ticket TCK-20261012-0123abcd -> REFUSED: --tenant must be cottonwood, rc=2
+   --plan --tenant cottonwood --ticket TCK-1 -> REFUSED: --ticket must match TCK-<8 digits>-<8 lowercase hex>, rc=2
+   --run --tenant cottonwood --ticket TCK-20261012-0123abcd (no word) -> REFUSED: --run needs the literal --i-have-the-ctos-word msg-6575, rc=2
+7. Checks (the cell's invocations, timeout 120):
+   ar16d_checks.py y166-self --root <worktree> -> Y166-SELF-OK, rc=0
+   ar16d_checks.py y166-plan --root <worktree> -> Y166-PLAN-OK, rc=0
+8. Not run: --run (no live call), any invoke, any users read, any upload.
