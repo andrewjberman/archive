@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-bx-2.the-fenced-enqueue-handler-deployed",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bx-2.the-fenced-enqueue-handler-deployed.md",
+    "group": "C",
+    "vintage_commit": "a644e6c70cd6b674d76cb290c433cbcce57c1758"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "a644e6c70cd6b674d76cb290c433cbcce57c1758",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bx-2.the-fenced-enqueue-handler-deployed.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~HV1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-research-pull-enqueue.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "824bdb355b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NEW VersionId bSNW5xyLGyzTAHsP2xN.9BfjDIT2SF79, 2437 bytes, content-sha256(b64) +e2doUmH+f3S3xWeqbe/XHniGRgzaD8648Pv4eqjh88= read back and matching (upload_verified.sh). The object was re-downloaded and its member lambda_function.py hashed: sha256 c1f8e725aaa6d3df946fcce6cb66e7044dba30419a2150a77cb3c007aece4ed8 EQUAL to git show 824bdb355b:infra/aws/lambda/research/pull_enqueue/lambda_function.py; positive control: the <M>~1 file hashes b64c89326da640b3... and DIFFERS. The deployed function's CodeSha256 after the apply equals the object's content-sha256, so the running bytes are the built bytes. PRIOR VersionId dIzmo_pR4wYCv3WyGtjA504TSt5NvVS9 (the s3_object_version the plan moved off) is the rollback object.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/api-gateway.tf",
+      "kind": "terraform",
+      "commit_or_etag": "824bdb355b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NO terraform source change was made: the function's code moves through the S3 object that modules/yang-lambda reads for source_code_hash. ONE safe-apply of the exact saved plan (terraform plan -target=module.harvest_enqueue -out), 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' The plan, read in full, moved ONE resource, module.harvest_enqueue.aws_lambda_function.this, update in-place: last_modified (known after apply), s3_object_version and source_code_hash only; 28 attributes and 4 blocks unchanged. LastModified 2026-10-12T13:50:11Z, State Active, LastUpdateStatus Successful. comp-iam service read byte-identical before and after.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261012T1346Z_harvst-bx2-enqueue-fence-20261012_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "0bc784cbb6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pinned at the commit deploy_ledger.py made when it OPENED the entry, BEFORE any write (13:46Z). The four legs BUILD/UPLOAD/APPLY/ARMS were each closed with proof and the entry CLOSED ('all 4 legs proven; sentinel removed') in the worktree; the closed entry and the sentinel removal ride this seat's closing commit with this instance.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The pre-change handler (git show 824bdb355b~1) was run in-process on the SAME three no-ticker payloads, with a dummy QUEUE_URL and no network call reachable (no ticker means no S3 or SQS call), so that 403 against 400 is shown to discriminate fenced from unfenced bytes rather than assumed from the order's note.",
+      "expected": "Without the fence all three arms read 400 (the order says so); with it 403, 403, 400.",
+      "observed": "PRE-CHANGE ARM non_internal: statusCode 400; ARM no_context: statusCode 400; ARM internal_no_ticker: statusCode 400. DEPLOYED: 403, 403, 400. The first two arms flip and the third does not, which is exactly the fence admitting an internal context and refusing the other two.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "C-d, the precondition of the apply: where the portal authorizer puts tier for an internal login, read from the DEPLOYED authorizer package (the repo tree holds no authorizer source) BEFORE the upload, so a failed precondition could not leave a changed artifact in S3.",
+      "expected": "The authorizer emits tier at requestContext.authorizer.lambda.tier, the path the handler reads; otherwise nothing is applied.",
+      "observed": "opal-portal-authorizer returns {isAuthorized, context:{tier:J.tier,...}} under payload format 2.0 with simple responses, which API Gateway delivers at requestContext.authorizer.lambda; the handler reads that path first. Satisfied. STATED LIMIT: no real internal JWT was decoded; 'an internal login carries tier internal' rests on the authorizer's own tier==='internal' test (recorded in bx2_authorizer.out and row AMGT_HARVST-D1-S9).",
+      "status": "STABLE",
+      "method": "command"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A real-ticker invocation and check_e2e.py",
+      "reason": "The order and the CTO half forbid them: a real ticker writes a status object and enqueues a Bloomberg pull. No arm payload carries a ticker or a body (asserted in code before the invokes)."
+    },
+    {
+      "item": "The step-9 post-act read (first real internal enqueue, 2xx)",
+      "reason": "AMENDMENT 2 says it is not one of the three criteria. State at 13:52Z: UNMEASURED, no portal enqueue yet (bx2_first_internal.out). The log cannot show a 403, so Branch B is not detectable from it (row AMGT_HARVST-D1-S8)."
+    },
+    {
+      "item": "Any IAM, route, authorizer, queue or bucket change",
+      "reason": "The order's BOUNDS; the plan moved one attribute set on one resource and comp-iam read identical before and after."
+    },
+    {
+      "item": "Pushing any commit",
+      "reason": "Shared-branch law: this lane commits LOCAL; the integrator pushes."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-S8: the handler logs only a successful enqueue and the portal API stage has no access log, so step 9 cannot see a 403 to an internal session (Branch B is undetectable from the named log).",
+    "AMGT_HARVST-D1-S9: the portal authorizer grants ALL access to userType Dev whatever its tier, while the fenced handler admits only tier internal; a Dev login with another tier is refused 403 here."
+  ],
+  "session_log": "Seat 0.7.0_AE_CloudOps~HV1, 2026-10-12 13:41Z-14:0xZ. Order of acts: start condition (M exists, is an ancestor of HEAD, file sha256 equal); both halves read; before-state; C-d authorizer read; ledger opened; build+upload; plan; apply; after-state; three arms; ledger closed; step 9 read (UNMEASURED); two surprise rows. Ledger entry: org/critical_paths/change_management/20261012T1346Z_harvst-bx2-enqueue-fence-20261012_deploy_completion.md. Commits LOCAL.",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan / safe-apply.sh (Rule 18)",
+      "invocation": "terraform plan -target=module.harvest_enqueue -out=<planfile>; .tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply -input=false <planfile>",
+      "result": "Plan: 0 to add, 1 to change, 0 to destroy. Apply complete: 0 added, 1 changed, 0 destroyed. Seat gates in WARN mode: APPLY-WHO ADMITTED; CROSSBOX-DEPLOY verdict=STOP on open call dell1-20261011T033643Z-e7f2 (a portal PROD-promote question that names this root in its scope, not this act); WARN mode proceeds. Pre-apply mail check: get_delivery_state 0 rows, Monitor armed, no [INBOX] event. The HALT-gate pass is not cited."
+    },
+    {
+      "tool": "comp-iam service opal-research-pull-enqueue",
+      "invocation": "bash .tools/comp-iam service opal-research-pull-enqueue (before and after)",
+      "result": "3 statements before and after, byte-identical; used as a floor only (it models action, not resource)."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open|close-leg|close --slug harvst-bx2-enqueue-fence-20261012",
+      "result": "4 legs opened before the first write, each closed with proof, CLOSED."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(?s)ARM non_internal: statusCode 403.*ARM no_context: statusCode 403.*ARM internal_no_ticker: statusCode 400",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round80/bx2_arms.out",
+      "output_evidence": "ARM non_internal: statusCode 403 / ARM no_context: statusCode 403 / ARM internal_no_ticker: statusCode 400. Three aws lambda invoke calls on the DEPLOYED function, each Invoke StatusCode 200 with no FunctionError, payload files arm_*.payload.json (no ticker, no body). Responses: 403 {error: forbidden}, 403 {error: forbidden}, 400 {error: missing or invalid 'ticker' in request body}. Control: the pre-change handler answers 400 on all three (see controls.mutant).",
+      "denominator": "3 of 3 arms read as expected; 3 invocations in the log stream, 0 'OK: enqueued' lines, so nothing was written or enqueued.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "Plan: 0 to add, 1 to change, 0 to destroy",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round80/bx2_plan.out",
+      "output_evidence": "Line 31: 'Plan: 0 to add, 1 to change, 0 to destroy.' The one change is module.harvest_enqueue.aws_lambda_function.this: s3_object_version dIzmo_pR4wYCv3WyGtjA504TSt5NvVS9 -> bSNW5xyLGyzTAHsP2xN.9BfjDIT2SF79 and source_code_hash THhzBXqT... -> +e2doUmH+..., last_modified known after apply. Nothing else moved.",
+      "denominator": "1 of 1 resource changed; the saved plan file was the one applied.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "CODESHA256 CHANGED: yes",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round80/bx2_after.out",
+      "output_evidence": "CODESHA256 +e2doUmH+f3S3xWeqbe/XHniGRgzaD8648Pv4eqjh88= (before THhzBXqTs1XoNok2IyKS5z+y3RE41aqUMIw4Bno53NM=), 'CODESHA256 CHANGED: yes', State Active, LastUpdateStatus Successful, LastModified 2026-10-12T13:50:11Z. The after value equals the uploaded object's content-sha256.",
+      "denominator": "1 of 1 function read before and after.",
+      "status": "PASS"
+    }
+  ]
+}
