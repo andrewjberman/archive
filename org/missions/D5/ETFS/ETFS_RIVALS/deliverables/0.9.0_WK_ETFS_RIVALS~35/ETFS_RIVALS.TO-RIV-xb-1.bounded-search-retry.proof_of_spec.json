@@ -1,0 +1,97 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ETFS_RIVALS.TO-RIV-xb-1.bounded-search-retry",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+  "vintage_commit": "8a82ac76c1",
+  "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-xb-1.bounded-search-retry.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "8a82ac76c1"
+ },
+ "assignee": "0.9.0_WK_ETFS_RIVALS~35",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/dramatic_move.py",
+   "kind": "script",
+   "commit_or_etag": "38fc1a156f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code and tests only; no search, no key read, no S3, no deploy; LOCAL commit on wk-ETFS_RIVALS-35 (build 826c496a46, amendment 1 38fc1a156f)",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_riv_xb1_search_retry.py",
+   "kind": "test",
+   "commit_or_etag": "38fc1a156f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "offline tests only; _call and _sleep injected; time.sleep monkeypatched where the default is exercised",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the check file: retry on a planted VENDOR then success, two retries at most with sleeps 1.0 and 2.0, a persistent 502 raises with the class, `3 attempts` and the vendor's words, a CONFIG (4xx) is not retried, a first-try success sleeps nothing, and `run_for_day` counts a persistent failure once; AMENDMENT 1 (issuer, 2026-10-12, 45fb319354): a VENDOR failure whose brd_error_code is captcha is NOT retried by the outer retry and raises after ONE attempt (`1 attempt`). Invocation: cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round29/checks/xb1_retry_check.py -- expect: 7 passed",
+   "method": "test_suite",
+   "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round29/checks/xb1_retry_check.py",
+   "output_evidence": "AFTER amendment 1 at 38fc1a156f, run 1: '7 passed in 0.50s' rc=0 (with --durations: slowest call 0.30s, no real sleep); run 2 on the same input: '7 passed in 3.01s' rc=0. BEFORE amendment 1 at 826c496a46 (the 6-test check): '6 passed in 0.55s' rc=0 (run 2 on the same input: '6 passed in 0.49s' rc=0). BASE at 8a82ac76c1 (before the change): '6 failed in 0.99s' rc=1, 'TypeError: serp_search() got an unexpected keyword argument '_call'' and run_for_day 'assert 0 == 3'.",
+   "denominator": "7 of 7 check tests passed (base: 0 of 6; before amendment 1: 6 of 6; the amended check has 7)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the existing lookup tests are unchanged and green (the seam with the real neighbour run_for_day). Invocation: cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider rivalfunds/tests/test_ws2_wb1_dramatic_move.py rivalfunds/tests/test_riv_wi1_sweep_lookup.py -- expect: all passed, 0 failed",
+   "method": "test_suite",
+   "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider rivalfunds/tests/test_ws2_wb1_dramatic_move.py rivalfunds/tests/test_riv_wi1_sweep_lookup.py",
+   "output_evidence": "'30 passed in 1.29s' rc=0 (after amendment 1, 38fc1a156f). Unchanged: neither commit touches test_ws2_wb1_dramatic_move.py or test_riv_wi1_sweep_lookup.py. Round-close suite, face section 5: python -m pytest -q rivalfunds/tests from data/etfs/scripts -> '1023 passed, 6 skipped in 62.59s' rc=0.",
+   "denominator": "30 of 30 lookup tests passed, 0 failed; rivalfunds suite 1023 passed of 1029 collected (6 skipped), 0 failed",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "two same-input runs of the AC1 check after amendment 1 (run 1 and run 2 above), compared",
+   "observed": "7 passed both runs (0.50s and 3.01s; the second run was under suite load, same result)",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The face names no mutant. The base-box run of the same AC1 check (before the change) read 6 failed, the negative control that the check discriminates.",
+   "expected": "n/a",
+   "observed": "6 of 6 failed at 8a82ac76c1; 6 of 6 passed at 826c496a46; 7 of 7 passed at 38fc1a156f",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Flipping the task order status to complete",
+   "reason": "The face leaves the <status> flip to the issuer (section 5)."
+  },
+  {
+   "item": "A live Bright Data search or any key read",
+   "reason": "The face forbids any vendor call; every search in the new tests is injected through _call."
+  }
+ ],
+ "surprises": [
+  "ETFS_RIVALS-D1-W35-S1",
+  "ETFS_RIVALS-D1-W35-S2",
+  "ETFS_RIVALS-D1-W35-S3"
+ ],
+ "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.dell1.md",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~35 <0.9.0_WK_ETFS_RIVALS~35@opal.agent>\" -F .scratch/msg_riv_xb1_amend1.txt -- <2 code paths>",
+   "result": "38fc1a156f"
+  }
+ ]
+}
