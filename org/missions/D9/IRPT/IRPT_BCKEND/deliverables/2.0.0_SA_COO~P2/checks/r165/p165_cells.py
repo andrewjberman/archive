@@ -92,7 +92,11 @@ def changed_outside(base, serial_n):
     rc2, out2 = run(["git", "ls-files", "--others", "--exclude-standard"])
     names = [n.strip() for n in (out + "\n" + out2).splitlines() if n.strip()]
     ok = (D % serial_n, INV, "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/")
-    return [n for n in names if not n.startswith(ok)]
+    # AMENDMENT (issuer defect, worker ~326's report): a provisioned worktree carries the nested repositories' gitlinks (portal,
+    # opal_ai, mcportal) dirty by construction, and `git diff` lists them. A gitlink (mode 160000) is not a file the worker edited.
+    rc3, out3 = run(["git", "ls-files", "-s"])
+    links = {ln.split("\t", 1)[1] for ln in out3.splitlines() if ln.startswith("160000 ") and "\t" in ln}
+    return [n for n in names if not n.startswith(ok) and n not in links]
 
 
 def one_line(s, lo=40):
