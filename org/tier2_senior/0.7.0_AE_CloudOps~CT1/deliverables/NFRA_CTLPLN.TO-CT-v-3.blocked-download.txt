@@ -1,0 +1,39 @@
+NFRA_CTLPLN.TO-CT-v-3 step 5 -- ONE DELIBERATE DOWNLOAD, THROUGH THE APPLIED FORM
+seat: 0.7.0_AE_CloudOps~CT1   device: dell1   run: 2026-10-12T07:40:56Z   risk: WORLD   proof_genre: BUILD
+
+VERDICT (the one line CTv3-AC3 reads, whole line):
+BLOCKED pip refused to consult any index: PIP_NO_INDEX=1 (User scope) held against the explicit --index-url; "from versions: none", rc=1, no file written
+
+WHAT WAS RUN, once
+  form applied : the User-scope environment variable PIP_NO_INDEX=1 of desktop-hk1uu7n\test, set 2026-10-12T07:40:12Z under
+                 ledger nfra-ctlpln-ctv3-pip-no-index-user-20261012 (the form kit_pip_no_egress.py measure reported:
+                 PIP-NO-EGRESS pip=26.2.1 positive_requests=1 candidates=4 passing=3 holds_against_explicit=3 leaked_public=0
+                 form=env:PIP_NO_INDEX ok=True).
+  command      : python -m pip download --no-deps -d <a new empty folder> six==1.16.0 --index-url https://pypi.org/simple
+  interpreter  : Python 3.14.7, pip 26.2.1 (C:\Users\Test\AppData\Local\Programs\Python\Python314)
+  environment  : the child's PIP_NO_INDEX was read back from the registry User scope at call time ('1') and placed in the
+                 child's environment. This session's own process block does not carry the variable (a child of this session
+                 inherits this session's environment, not the registry), so this is what a process started by a fresh logon
+                 receives, not an observation of one.
+
+WHAT STOPPED IT
+  stdout : (empty)
+  stderr :
+    ERROR: Could not find a version that satisfies the requirement six==1.16.0 (from versions: none)
+    ERROR: No matching distribution found for six==1.16.0
+  rc     : 1
+  folder : 0 entries before, 0 after; deleted; Test-Path on it reads False (absence control). Nothing was installed.
+
+DID THE MESSAGE NAME THE LAPTOP ROUTE (the order's text of "told the route", FWD-18)
+  No. The env form prints pip's own error, not the wrapper's refusal line, and that error names no index and no route.
+  The wrapper form (kit_pip_no_egress.py wrap) does print "REFUSED: this box does not download. Ask the laptop:
+  org/devices/intake/ ..." and was not the form applied (AMENDMENT 1: the env form passes and is the one to apply).
+  The CVO grades "told the route" as a judgment on this file.
+
+WHAT THIS RUN DOES AND DOES NOT ESTABLISH
+  - It establishes: with the variable in the environment, an explicit --index-url did not make pip look for a version.
+  - The request count of THIS run was not measured (no listener was in the path). The count comes from the kit's
+    measurement of the same form against the same explicit-index arm: index=0 proxy=0, the form passing.
+  - Not established: other interpreters, a pip started without the variable, a process whose environment predates the
+    variable (every running process keeps what it started with), or any non-pip download (curl, Invoke-WebRequest, git).
+    The kit's own LIMIT line says the same: the real control is a network egress policy, outside this cell.
