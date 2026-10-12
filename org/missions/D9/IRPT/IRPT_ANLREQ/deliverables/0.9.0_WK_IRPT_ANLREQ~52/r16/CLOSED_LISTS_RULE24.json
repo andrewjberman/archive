@@ -1,0 +1,41 @@
+{
+  "cell": "AR-y-162",
+  "claim": "measured by a scratch census (.scratch/rule24_census.py, not committed) that calls intake/template_reader.py _is_account_header over an explicit header population; the population is constructed and synthetic; no real uploaded file was read",
+  "population_note": "No real-use account header is in the repository. The r13 record (deliverables/0.9.0_WK_IRPT_ANLREQ~52/r13/ONE_ACCOUNT_CHECK_READ.json, account_recognition.where_seen) states that no example exists in the repository: none of the 10 files in intake/fixtures/holdings/ has an account column. The population is therefore constructed from three sources: the 16 named forms and 3 exclusion forms in intake/tests/test_template_account_totals.py (in-memory sheets, which hold account columns in several header forms), the 12 first-row cells of the fixture files (the AR-y-142 record, d95cf11106:org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r14/CLOSED_LISTS_RULE24.json, population_note), and 19 candidate forms written for this subtraction. The face's 'header forms in real use' cannot be met from this repository; the rule is the face's leading-word rule.",
+  "account_header_rule": {
+    "rule": "A row-1 header cell in column C or beyond IS an account header when its FIRST WORD, case-folded and stripped of leading and trailing punctuation, is 'account' or 'acct', or is 'custodian' followed by the word 'account'. The exclusions are a closed list, matched on the whole cell after the same folding.",
+    "where_in_code": "infra/aws/lambda/investor-reporting/intake/template_reader.py: _is_account_header, ACCOUNT_LEAD_WORDS, ACCOUNT_HEADER_EXCLUDED; used by _several_accounts",
+    "domain": "row-1 header cells in columns C and beyond (A and B are the ticker and unit headers); the column counts only when it holds 2 or more distinct non-empty values in the rows below it",
+    "denominator": "50 header forms = 16 named + 3 excluded + 12 fixture first-row cells + 19 candidates",
+    "matched": "21 of 50: the 16 named forms, 'Account Holder', 'Account Manager', 'Account Value', 'Account Status', 'Account Opened'",
+    "named_not_matched": [],
+    "excluded_matched": [],
+    "fixture_matched": [],
+    "uncovered_by_subtraction": {
+      "account_identifier_forms_not_matched": [
+        "Accounts", "Acc #", "Acc No", "Custodian Acct", "Sub-Account", "Account-Number", "Client Account", "Account/Number", "No. of Accounts"
+      ],
+      "why_not_added": "each names an account, and each is outside the face's rule: a plural ('Accounts'), an abbreviation before the word account ('Acc #', 'Acc No'), a custodian word not followed by the word account ('Custodian Acct'), a leading word other than account, acct or custodian ('Sub-Account', 'Client Account'), or a hyphen or slash that joins the words so that the first word is not the word account ('Account-Number', 'Account/Number'). Not added: the rule is the face's closed rule. For the L9 grader.",
+      "correctly_not_matched": ["Custodian", "Accounting", "Portfolio", "Sleeve", "Model"]
+    },
+    "matched_but_attribute_not_identifier": {
+      "forms": ["Account Holder", "Account Manager", "Account Value", "Account Status", "Account Opened"],
+      "note": "matched by the leading word. Each names an attribute of an account, not the account number. Two distinct values of one of them in a column are read as several accounts. A joint holder list or a team manager can hold two values in one account, so this can turn back a one-account file. No real-use header was seen to justify an exclusion, so none is added. For the L9 grader."
+    }
+  },
+  "exclusions": [
+    {
+      "word": "Account Type",
+      "why": "names the kind of account (taxable, IRA, trust). Two kinds are not two accounts. Not seen in any header in the repository; named as a non-account word by the r13 record and by the face."
+    },
+    {
+      "word": "Account Name",
+      "why": "a label for an account. One account can carry joint holders or a nickname written several ways, so a count of distinct names is not a count of accounts. Not seen in any header in the repository (the r14 record: not present in any fixture)."
+    }
+  ],
+  "exclusion_tests": ["test_account_header_rule_holds_over_a_population_that_holds_account_columns (passed list: 'Account Type', 'Account Name', 'account type:')", "test_account_column_with_two_values_is_turned_back_with_words (the AR-y-142 passed list: 'Account Type', 'Account Name', 'Portfolio', 'Sleeve', 'Accounting')"],
+  "total_words": {
+    "rule": "unchanged by AR-y-162: the whole-cell list in TOTAL_WORDS (total, totals, grand total, portfolio total, total portfolio), column-A labels below the header",
+    "record": "d95cf11106:org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r14/CLOSED_LISTS_RULE24.json (total_words)"
+  }
+}
