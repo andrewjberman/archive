@@ -1,0 +1,43 @@
+{
+  "cell": "AR-y-173",
+  "order": "IRPT_ANLREQ.TO-AR-y-173",
+  "built_by": "0.9.0_WK_IRPT_ANLREQ~51",
+  "script": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~51/r17/count_internal_callers.py",
+  "script_blob": "8b135a96c9dbb8e7abef23870d6c99b3243008c9",
+  "script_blob_note": "git hash-object of the file as committed; self-test CENSUS-SELFTEST-OK on this blob; commit-gate OK",
+  "run_status": "BUILT AND SELF-TESTED ONLY. Part (a) has not run against the live table; part (b) cannot run (see what_it_cannot_read).",
+  "what_it_reads": [
+    "part (a): one dynamodb SCAN (ConsistentRead true, FilterExpression SK = PROFILE, ProjectionExpression firmId, userType, status) of the users table opal-users-v2, paged by LastEvaluatedKey until no page remains",
+    "part (a) classification: a row is INTERNAL when firmId is exactly opal-capital or userType is exactly Dev or service; status is read as the string it is, 'absent' when missing, 'non-string' when the attribute is not a string, and counted active only when exactly the string active",
+    "part (b): reads nothing. The request log lines were read in the worktree at base 247a5cfe7c: _authz/served.py:81-108 and _authz/errors.py:146-201 (see LOG_EVIDENCE in the script) and the _scope/ folder, which has no log call that writes a caller identity"
+  ],
+  "what_it_cannot_read": [
+    "part (b), the distinct internal callers of the investor-reporting status, directory and export functions over 30 days: NOT_AVAILABLE. The log lines carry event, operation, public_reason_code and correlation_id (public line) and correlation_id, operation, exception_type, exception_text, component, reason, developer_detail and extra.classifier_code (internal record). None carries the caller's firmId, userType or identity field, so a caller cannot be matched to a users row from the logs. The script prints part_b NOT_AVAILABLE with this reason and prints no number for it",
+    "a row that the scan does not return (a PROFILE row outside the scan's pages, or a row the consistent scan fails on): the scan raises and nothing is counted (exit 3, the error code on stderr); a malformed attribute on a returned row is counted under unreadable_rows, never as active or as a known caller",
+    "any row whose firmId, userType or status is a token longer than 24 characters or holds a non-letter: bucketed as other-string, its value not printed",
+    "the status of a row whose status attribute is a non-string type: bucketed as non-string, never active",
+    "the live table: not read by this build. Zero live rows were read"
+  ],
+  "output_members": [
+    "cell",
+    "part_a.table",
+    "part_a.items_scanned",
+    "part_a.profile_rows",
+    "part_a.internal_rows",
+    "part_a.internal_active",
+    "part_a.internal_by_firmId_userType_status (list of firmId, userType, status, rows)",
+    "part_a.external_rows",
+    "part_a.unreadable_rows",
+    "part_a.denominator_check (internal + external + unreadable equals profile_rows)",
+    "part_b.part_b (always NOT_AVAILABLE in this build), part_b.reason, part_b.evidence"
+  ],
+  "no_address_in_output": {
+    "value": true,
+    "line": "count_internal_callers.py:102-109 -- the firmId, userType and status buckets are bucket(): the table's own short letter token (TOKEN, ASCII letters, underscore and hyphen, at most 24 characters) or the words absent, other-string, non-string; no raw value, email, PK, SK or id is copied into any output field. Self-test checks the printed part_a for the characters @ and the synthetic address words (count_internal_callers.py self_test)"
+  },
+  "residual_limit": "a single-word value in firmId, userType or status that is a person's name would print as a token; none is expected in the three fields and the cross-tab lists the distinct values of the table only",
+  "not_run": [
+    "no boto3 client is created in --self-test or in this build's proof; no live call, no network, no invoke, no upload, no deploy",
+    "the live applier's run is a separate order to an applier with the read grant on opal-users-v2"
+  ]
+}
