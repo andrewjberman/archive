@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-bx-1.the-enqueue-handler-refuses-a-non-internal-caller",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bx-1.the-enqueue-handler-refuses-a-non-internal-caller.md",
+    "group": "OTHER",
+    "vintage_commit": "7b4512b094"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "7b4512b094",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bx-1.the-enqueue-handler-refuses-a-non-internal-caller.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~134",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~134 on wk-harvst-134 (branch wk-AMGT_HARVST-134, base box/dell1 @7b4512b094). Fence and tests at 12e8e945ae; surprise row AMGT_HARVST-D1-W134-S1 at 21a9a8b230; line-ending restore of the investigation file at 3d777ea110. Local code and tests only: fake boto3 clients, no deploy, no aws call, check_e2e.py not run.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/research/pull_enqueue/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "12e8e945ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "not deployed: the cell executes no world act. The fence (_caller_tier, the 403 refusal first in lambda_handler) exists at 12e8e945ae only; the deployed opal-research-pull-enqueue function is unchanged.",
+      "introduces": [
+        "def _caller_tier("
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/research/pull_enqueue/test_bx1_tier_fence.py",
+      "kind": "test",
+      "commit_or_etag": "12e8e945ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local test file, fake boto3 clients, no network. 15 tests: internal admitted, partner, no requestContext, authorizer without tier, tier INTERNAL, API Gateway v2 shape admitted, mutant, non-string tier levels, e2e payload.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~2/check_e2e.py",
+      "kind": "script",
+      "commit_or_etag": "12e8e945ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "not run against anything real. The invoke payload now carries requestContext.authorizer.tier internal; --enqueue-only stops after the ENQUEUE line and returns 0 on statusCode 202. Without the flag the behaviour is unchanged apart from the payload.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest infra/aws/lambda/research/pull_enqueue/test_bx1_tier_fence.py -q -p no:cacheprovider --color=no -- expect: (?m)^\\d+ passed in",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/research/pull_enqueue/test_bx1_tier_fence.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc 0, run from the repo root of wk-harvst-134 under timeout 120, at HEAD 3d777ea110 (the code is unchanged since 12e8e945ae).\n15 passed in 0.29s   (run 1; runs 2 and 3: 15 passed in 0.23s, 15 passed in 0.23s, rc 0 each)",
+      "denominator": "15 of 15 tests passed (3 runs, 15 of 15 each)",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m pytest infra/aws/lambda/research/pull_enqueue/test_bx1_tier_fence.py -k e2e_check_payload -q -p no:cacheprovider --color=no -- expect: (?m)^1 passed",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/research/pull_enqueue/test_bx1_tier_fence.py -k e2e_check_payload -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc 0, at HEAD 3d777ea110.\n1 passed, 14 deselected in 0.20s",
+      "denominator": "1 of 15 tests selected by -k e2e_check_payload passed (14 deselected)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "_caller_tier monkeypatched to always return 'internal' (module.patch.object) while the partner refusal arm runs; the arm's assertions must fail.",
+      "expected": "the partner refusal arm raises AssertionError under the mutant (the 403 assertion fails), so pytest.raises(AssertionError) is satisfied",
+      "observed": "test_mutant_always_internal_fails_the_partner_arm PASSED (3 passed, 12 deselected under -k 'mutant or partner or e2e'; rc 0): the mutant admitted the partner caller and the arm's assertions failed as required",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 invocation run three times at HEAD 3d777ea110 (first criterion run plus two repeats)",
+      "observed": "15 passed in 0.29s; 15 passed in 0.23s; 15 passed in 0.23s; rc 0 each",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "order status flip to complete",
+      "reason": "the worker face forbids editing the task order; the issuer flips its status"
+    },
+    {
+      "item": "deploy of opal-research-pull-enqueue and any aws lambda invoke, including check_e2e.py against AWS",
+      "reason": "cell step 5 forbids it; the cell executes no world act (risk class WORLD is a path-floor class only)"
+    },
+    {
+      "item": "live portal authorizer context shape",
+      "reason": "not read live. The tier location is taken from the cell text (requestContext.authorizer.tier or requestContext.authorizer.lambda.tier) and matches the shape of portal_data_proxy _require_route_access at HEAD"
+    },
+    {
+      "item": "full-suite baseline of infra/aws/lambda",
+      "reason": "not run; the criteria name only the tier-fence test file, and the cell touches one handler and one check file"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W134-S1: AC1's expect (?m)^\\d+ passed in does not match a clean run of its named file as written; the handler's pre-existing utcnow() emits a DeprecationWarning, so the summary reads '15 passed, 3 warnings in'. Mitigated in the test file only (filterwarnings mark); the handler's _utc_now is unchanged."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~134 <0.9.0_WK_AMGT_HARVST~134@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "rc 0 at 12e8e945ae (fence, tests, check_e2e.py), 21a9a8b230 (surprise row), 3d777ea110 (line-ending restore of the investigation file; the row commit had rewritten 408 existing CRLF lines as LF)"
+    },
+    {
+      "tool": "python -m py_compile and ruff via commit-gate",
+      "invocation": "python -m py_compile <three .py files>; commit-gate.sh pre-commit checks",
+      "result": "COMPILE-OK; commit-gate: pre-commit gate clean for 3 of 3 file(s)"
+    }
+  ]
+}
