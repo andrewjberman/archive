@@ -193,6 +193,34 @@ about, not merely a majority of stages.
 **Standing position:** entry OPEN, `realrun` leg OPEN, `POST-APPLY: schwab: verified` withheld, order
 `<status>pending</status>`, until the 2026-10-13 ~04:00Z chain completes in full after the delete.
 
+### WHERE AND HOW LONG TO WATCH (measured 11:3xZ, so the next grader does not have to re-derive it)
+
+**The discriminating marker is a post-floor `S_00.done`** -- the chain's first stage. Probed at 11:36Z:
+**0** such object exists, so the ruling's condition is still unmet. A gold chain can also be S3-triggered
+off `silver/prices/20*.parquet` (`s3-notifications.tf`), not only by cron, so one could begin at any hour
+and this is the cheap probe for it.
+
+**The prefix is the run-START date, so tomorrow's chain writes under `gold/.checkpoints/2026-10-13/`:**
+
+| prefix | objects | written |
+|---|---|---|
+| `2026-10-09/` | 29 | 10-09T23:03:07 .. 10-10T01:12:40 |
+| `2026-10-10/` | 29 | 10-10T23:03:08 .. 10-11T01:11:29 |
+| `2026-10-11/` | 29 | 10-11T04:15:15 .. 10-11T**12:48:24** |
+| `2026-10-12/` | 29 | 10-12T04:03:46 .. 10-12T06:10:15 |
+| `2026-10-13/` | **0** | -- |
+
+**`COMPLETES` MAY LAG THE 04:00Z START BY HOURS.** Those windows are 2h07m (today), **8h33m** (10-11),
+2h09m and 2h08m. So a grader who checks shortly after 04:00Z and finds a partial chain has measured
+nothing: the terminal markers are `D_00f.done` plus the four `gold/meta/*_incr_watermark.json`. The
+schedule also moved recently -- the 10-09/10-10 chains started ~23:03Z and the 10-11/10-12 ones ~04:0xZ --
+so do not assume the start hour either; read the first `S_00` rather than predicting it.
+
+**One count trap in this very probe:** my first pass reported `2026-10-13: 1 checkpoint(s)`. That `1` was
+a literal `None` line -- the CLI's empty-result marker -- counted as data. The prefix holds **0**. Same
+family as `--max-items` appending its pagination token as a second output line: an AWS text-output
+sentinel read as a row.
+
 ## 5. STATE
 
 | leg | status |
