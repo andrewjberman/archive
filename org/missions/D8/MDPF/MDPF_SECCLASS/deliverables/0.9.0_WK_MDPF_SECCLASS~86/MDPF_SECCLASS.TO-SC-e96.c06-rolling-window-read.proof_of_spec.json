@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e96",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e96.c06-rolling-window-read.md",
+    "group": "OTHER",
+    "vintage_commit": "028fab8273"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R23.md",
+    "vintage_commit": "028fab8273",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e96.c06-rolling-window-read.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~86",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "40f687d566",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise rows MDPF_SECCLASS-D1-W86-S1 (BLOCKING) and MDPF_SECCLASS-D1-W86-S2 (OBSERVATION) appended and committed on wk-MDPF_SECCLASS-86 (LOCAL, not pushed).",
+      "artifact_covered_by": [
+        "SC23-e96-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC23-e96-AC1",
+      "criterion_verbatim": "the record exists with the rule, the window, the cost, the per-date figures and the gap, its arithmetic is internally consistent, and a copy with one field broken fails the same check first.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_CHECKS/r23_checks.py window-read org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/WINDOW_READ_C06_ROLLING_20261012.json",
+      "output_evidence": "WINDOW-READ ok=False error=absent (rc=1), run at 2026-10-12T11:43:55Z in the worktree wk-MDPF_SECCLASS-86 at HEAD 40f687d566. No record was written: the served per-date unclassified figure for 2026-09-25 through 2026-09-29 is absent as written (surprise MDPF_SECCLASS-D1-W86-S1, BLOCKING), and the stop rule forbids estimating or filling it.",
+      "denominator": "1 criterion; 0 of 1 PASS",
+      "status": "FAIL",
+      "status_reason": "The record is absent. Partial reads were made and are recorded in the surprise row and the worker report, not in the record: cold wall 735.05 s and warm wall 631.87 s over 15 window dates (fits true, 1800 s budget); served figures readable for 10 of 15 dates; the relationship JSON scan and peak memory were not reached."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's own negative control, exercised on a SYNTHETIC self-test record at .scratch/synthetic_window_selftest.json (uncommitted; labelled synthetic, no data read). The real record was not written under the stop rule, so the control was not run on the data.",
+      "expected": "control=ok (a broken copy refused)",
+      "observed": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_CHECKS/r23_checks.py window-read .scratch/synthetic_window_selftest.json -> WINDOW-READ ok=True dates=5 fits=True control=ok (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the checker run once on the absent path",
+      "observed": "WINDOW-READ ok=False error=absent",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The relationship JSON scan (relationships_rewritten, keys_written, bytes_written), peak_mb, the gap table and the per-date orphan counts",
+      "reason": "Not reached: the run stopped at the served per-date read for 2026-09-25 (surprise MDPF_SECCLASS-D1-W86-S1). The stop rule forbids completing a record around an unread figure."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W86-S1: gold/views/mix_daily_summary.json has no firm unclassified key for 2026-09-25 through 2026-09-29; the served figure cannot be read as written, so the record is not written and SC23-e96-AC1 is FAIL.",
+    "MDPF_SECCLASS-D1-W86-S2: the cost run's process_date path reads partitions from S3 per date; build() uses a bulk cube_cache preload, so the measured walls are per-date reads (labelled in the instrument field of the report)."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e96.c06-rolling-window-read.md",
+  "compiler_tools": [
+    {
+      "tool": "r23_checks.py (issuer's checker, unmodified)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_CHECKS/r23_checks.py window-read org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/WINDOW_READ_C06_ROLLING_20261012.json",
+      "result": "WINDOW-READ ok=False error=absent (rc=1)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC23-e96-AC1",
+      "result": "recorded in the worker report"
+    }
+  ]
+}
