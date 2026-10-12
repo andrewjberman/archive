@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-READ-R9-ct1.active-internal-rows-by-domain-and-the-twin-dell2",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-READ-R9-ct1.active-internal-rows-by-domain-and-the-twin-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "b7352275da"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TV2",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R9.md",
+    "vintage_commit": "b7352275da",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-READ-R9-ct1.active-internal-rows-by-domain-and-the-twin-dell2.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r9_ct1/ACTIVE_INTERNAL_ROWS_BY_DOMAIN_20261012.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The read under the keys the order names: opal_domains_used (a list, with its reason beside it), denominators, domains, totals, non_opal_rows, twin_candidates, twin_first_choice, sign_in_test, what_was_not_read and claim. THE HEADLINE IS A NON-ZERO COUNT: 1 active row carries the internal firm id opal-capital on a non-Opal domain, and it reads as a PERSON. No address and no at-sign anywhere: rows are identified by 12-hex digest, and the DOMAIN is written because the count is by domain. AC1 reads CT-COUNT-OK active_internal=21 opal=20 non_opal=1.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R9_CHECKS/r9_checks.py ct-count expect: CT-COUNT-OK",
+      "method": "command",
+      "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R9_CHECKS/r9_checks.py ct-count",
+      "expect": "CT-COUNT-OK",
+      "output_evidence": "CT-COUNT-OK active_internal=21 opal=20 non_opal=1 -- the issuer's own script. It refused my file three times first, and each refusal was a real defect of mine rather than a quibble: (1) 'the file holds an address' -- my prose carried an illustrative agent-serial address with an at-sign, and the check rejects that character outright to keep addresses out; (2) 'the two domain counts do not sum' -- I had made the reserved test domain a THIRD exclusive bucket (19 + 1 + 1) when the order requires the two domain counts to sum to the total with the reserved class counted separately AS WELL, so the reserved row belongs inside the side it was put on (20 + 1 = 21); (3) 'opal_domains_used must list the domains' -- I had written a dict where the order says a list. I read the check's source rather than guess at the shape a fourth time.",
+      "status": "PASS",
+      "status_reason": "PASS decided by the issuer's own script matching its expect pattern, not by this seat's judgement.",
+      "denominator": "86 of 86 users items returned by a complete scan; 56 PROFILE rows; 21 of 21 active internal rows classified by form and by domain, the counts summing to 21; 27 of 27 tickets scanned; 2 candidate row-counts verified by the service's own index query"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "SEVEN controls, and three of them changed the answer before it was written. (1) THE SCAN'S COMPLETENESS: projected, UNFILTERED, LastEvaluatedKey checked. (2) THE PROJECTION ITSELF CHECKED: I listed the attributes the scan actually returned before trusting any of them. (3) THE DOMAIN COUNTS SUM to the active internal denominator. (4) EVERY CLASS RE-READ BY FORM, as the order requires, because the order states my round-7 domain test was wrong. (5) THE CANDIDATE LOCAL-PARTS INSPECTED so a hyphenated HUMAN name could not be mistaken for a handle. (6) EACH CANDIDATE'S PROFILE ROW COUNT taken from the service's own email-index query, not from the scan. (7) A POSITIVE CONTROL on the ticket-actor matcher before reporting a 'never appears' date.",
+      "expected": "(1) 86, no unread page. (2) allowedFirmIds actually present. (3) 20 + 1 == 21. (4) classes from form alone. (5) no human name among the candidates. (6) exactly 1 row each. (7) a non-zero control.",
+      "observed": "(1) 86 items, LastEvaluatedKey absent. (2) THE CONTROL THAT MATTERED MOST: my first pass reused the round-8 scan, whose projection did NOT include allowedFirmIds, so all 21 firm lists rendered ABSENT -- an artefact. Listing the returned attributes exposed it; the re-scan finds four distinct classes (18 ABSENT, 1 LIST(6), 1 LIST(1), 1 STRING-OTHER) matching round 7's per-row get_item values exactly. (3) 20 + 1 == 21. (4) THE SECOND CONTROL THAT MATTERED: deciding on form alone showed my earlier userType-based marking was wrong in the OPPOSITE direction too -- five plain given names carry userType 'Dev' and are staff developers, not bots; a plain alphabetic local-part is a person whatever the userType says. (5) the two candidates are a service prefix plus a short token, and a three-word role phrase ending in 'internal'; neither is a personal name. (6) 1 PROFILE row each. (7) the matcher found 5 fields for a digest that does appear, so the 'never appears' for the non-Opal row is real.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every figure is a count, a class, a digest or a printed source line taken from a complete table scan or a file on disk, so a repeat read must agree with itself. The firm-list classes are cross-checked against round 7's independent per-row get_item reads. The sign-in lines are printed with the file's blob hash so the quote and its provenance travel together.",
+      "observed": "The counts reproduce: 86 items, 56 PROFILE, 21 active internal, domains 19 + 1 + 1. The four firm-list classes agree with round 7 row for row. The three sign-in comparisons are byte-identical at lines 106, 255 and 538 and the file's blob hash is recorded. TWO CLASSIFICATION ERRORS OF MINE WERE CAUGHT BEFORE ANYTHING WAS WRITTEN, both from the same root -- deciding a person by something other than the form of the address. The first (round 7's domain test, which this order already knew about) had hidden TWO rows, not one: the disabled person of round 8 AND this active outsider, both classed 'non-human or test identity' by it. The second was mine today in reverse: marking non-human on userType, which flagged five staff developers as non-human and would have put a person's address forward as a twin candidate -- the one thing the order forbids.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Every email address",
+      "reason": "FORBIDDEN in a tracked file and absent: the file holds no at-sign at all, including in prose, which AC1 enforces and caught once. Rows are identified by 12-hex digest. The DOMAIN is written because the count is by domain and a domain is not an address, which the order states explicitly."
+    },
+    {
+      "item": "Any allowedFirmIds VALUE",
+      "reason": "Out of bounds. Only the class is recorded -- ABSENT, EMPTY, LIST with its length, STRING-ALL or STRING-OTHER."
+    },
+    {
+      "item": "Whether the non-Opal active row SHOULD hold the internal firm id",
+      "reason": "NOT THIS READ'S QUESTION. I report the form, the domain, the userType, the firm-list class and the dates. The order says a non-zero count comes to the CTO before any pair is put, so the decision is that seat's and I put the count first in the report."
+    },
+    {
+      "item": "The identity behind any digest",
+      "reason": "Not asserted. I report the FORM of a local-part -- a plain given name, a service prefix, a role phrase -- not who anyone is. The one address I had to look at to tell a hyphenated human name from a handle was read in scratch space and never written."
+    },
+    {
+      "item": "WHO classed the non-Opal row internal, when, or why",
+      "reason": "NOT RECOVERABLE from the table: no PROFILE row carries an audit attribute, and updatedAt records the last touch of any kind. Its updatedAt is 2026-10-01."
+    },
+    {
+      "item": "The other 33 PROFILE rows",
+      "reason": "NOT examined by form or domain. The population this order defines is the ACTIVE INTERNAL one, 21 rows; the rows of other firms are a different read with a different denominator."
+    },
+    {
+      "item": "The deployed bytes of the sign-in handler",
+      "reason": "NOT downloaded or diffed -- the order asks for one configuration read. The tie is the live CodeSha256 against the source map's artifact hash plus a git read showing the src tree unchanged since the recorded commit, exactly as round 8 found it; a matching hash pairs a function with an artifact, never an artifact with a tree."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/logs/2026-10-12/tv2_r9_ct1_active_internal_by_domain.md",
+  "compiler_tools": [
+    {
+      "tool": "aws dynamodb scan with a projection, no filter",
+      "invocation": "opal-users-v2 twice: once as inherited from round 8, then RE-SCANNED with allowedFirmIds projected",
+      "result": "86 items with no unread page both times; the second scan is the one every firm-list class comes from, because the first never projected that attribute"
+    },
+    {
+      "tool": "a read of the scan's own returned attributes",
+      "invocation": "collect the key set across all returned items before trusting any field",
+      "result": "proved allowedFirmIds was absent from the round-8 projection -- the control that caught 21 false ABSENT values"
+    },
+    {
+      "tool": "aws dynamodb query on email-index",
+      "invocation": "one query per twin candidate, counting items whose SK is PROFILE",
+      "result": "exactly 1 PROFILE row each, which is the order's condition and the service's own count"
+    },
+    {
+      "tool": "aws dynamodb scan on opal-tickets with a projection",
+      "invocation": "actor fields and event actors, DATES only",
+      "result": "the non-Opal row never appears across 27 tickets, against a positive control matching 5 fields for a digest that does"
+    },
+    {
+      "tool": "git rev-parse / sed on a named file",
+      "invocation": "the auth.ts blob hash and lines 104-108, 253-257, 536-540 printed as text",
+      "result": "blob 0dbd69957da0dc8c8133a3a2d9458ee7187b87ba; the comparison reads `if (user.status !== 'active') {` at all three sites"
+    },
+    {
+      "tool": "aws lambda get-function-configuration",
+      "invocation": "one read of opalinvest-auth-handler",
+      "result": "live CodeSha256 equals the source map's artifact hash and the src tree is unchanged since the recorded commit -- still tied, as round 8 found"
+    },
+    {
+      "tool": "the issuer's own r9_checks.py ct-count",
+      "invocation": "run after each correction",
+      "result": "three refusals, each a real defect of mine (an at-sign in prose, a third exclusive bucket that broke the sum, a dict where a list was specified), then CT-COUNT-OK -- and I read the check's source rather than guess a fourth time"
+    }
+  ]
+}
