@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-aa-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aa-3.data-proxy-fence-admits-dev.md",
+    "group": "OTHER",
+    "vintage_commit": "40009ca3de"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~75",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round11.md",
+    "vintage_commit": "40009ca3de",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-aa-3.data-proxy-fence-admits-dev.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/portal_data_proxy/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "400cbdee6c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_CTLPLN-75 only. Nothing deployed: no terraform, no aws call, no push. The Lambda is unchanged in AWS until the separate signed apply order.",
+      "introduces": [
+        "if tier == 'internal' or user_type == 'Dev':"
+      ],
+      "artifact_covered_by": [
+        "CTaa3-AC1",
+        "CTaa3-AC2",
+        "CTaa3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/portal_data_proxy/tests/test_route_dev_fence.py",
+      "kind": "test",
+      "commit_or_etag": "400cbdee6c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A test file runs locally only. It is not deployed and is not part of any Lambda package.",
+      "artifact_covered_by": [
+        "CTaa3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTaa3-AC1",
+      "criterion_verbatim": "the Dev-type tests pass over all 41 routes (report the whole last line: it must read `N passed` with no `failed` and no `error`).",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_route_dev_fence.py",
+      "output_evidence": "run from the worktree root under timeout 120 on commit 400cbdee6c, rc=0; ANSI colour codes stripped; last line: 963 passed in 2.67s",
+      "denominator": "963 of 963 collected tests pass; 0 failed, 0 error, 0 skipped; the Dev cases run over all 41 census routes, flat and nested authorizer context",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "CTaa3-AC2",
+      "criterion_verbatim": "the firm fence still holds exactly as built (965 tests, unchanged; a control that PASSES at the base).",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_route_firm_fence.py",
+      "output_evidence": "run from the worktree root under timeout 120 on commit 400cbdee6c, rc=0; last line: 965 passed in 2.33s (the same 965 at the base commit 40009ca3de, measured before the edit)",
+      "denominator": "965 of 965 tests pass; 0 failed; 0 error",
+      "status": "PASS",
+      "expect": "965 passed"
+    },
+    {
+      "criterion_id": "CTaa3-AC3",
+      "criterion_verbatim": "the log-capture tests still pass (1012; a control that PASSES at the base).",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_no_credentials_in_logs.py",
+      "output_evidence": "run from the worktree root under timeout 120 on commit 400cbdee6c, rc=0; last line: 1012 passed in 2.22s (the same 1012 at the base commit 40009ca3de, measured before the edit)",
+      "denominator": "1012 of 1012 tests pass; 0 failed; 0 error",
+      "status": "PASS",
+      "expect": "1012 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Pre-edit lambda_function.py (base commit 40009ca3de copy) run via PORTAL_PROXY_UNDER_TEST against the new Dev suite: the Dev cases (a), (b) and (e) must FAIL.",
+      "expected": "(a)+(b)+(e) = 320 of 320 cases FAIL on the pre-edit handler",
+      "observed": "402 failed, 561 passed in 4.88s on the pre-edit control copy. FAILED lines: (a) test_a_dev_advisor_with_a_made_up_firm_reaches_every_route 82; (b) test_b_dev_with_tier_absent_reaches_every_route 82; (d) test_d_padded_dev_is_admitted_on_every_route 82; (e) test_e_dev_login_with_a_partner_firm_is_admitted_on_class_ii 156. (a)+(b)+(e) = 320 of 320 FAILED. The edited worktree on the same suite gave 0 failed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: python -m pytest -q on test_route_dev_fence.py run twice on the edited handler; counts compared",
+      "observed": "run1 963 passed in 2.12s; run2 963 passed in 2.16s; the counts are identical and the times differ",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Terraform, any aws call, any deploy, any push, and the portal gitlink",
+      "reason": "order RULES: no terraform, no aws, no deploy, no push; nothing is deployed by this cell. A separate order applies the change under a signed pair."
+    },
+    {
+      "item": "The status flip of NFRA_CTLPLN.TO-CT-aa-3 from pending to complete",
+      "reason": "the task-order file is not in this order's <paths>, so this worker does not edit it. The status stays pending for the issuer 2.0.0_SA_COO~C to flip."
+    },
+    {
+      "item": "Live check that the authorizer sets userType for every Dev login",
+      "reason": "order BLIND: this is measured by the separate apply order's live reads, not by this cell's in-repo tests."
+    },
+    {
+      "item": "Removal of the ?warm=1 and OPTIONS early returns from the fence",
+      "reason": "not in scope: the order changes only the Dev clause of _require_route_access; the early returns are unchanged."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~75/NFRA_CTLPLN.TO-CT-aa-3.data-proxy-fence-admits-dev.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest (test_route_dev_fence.py, the new Dev-fence suite)",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_route_dev_fence.py",
+      "result": "963 passed in 2.67s"
+    },
+    {
+      "tool": "ruff check --target-version py311 on the edited handler and the new test file",
+      "invocation": "python -m ruff check --target-version py311 infra/aws/lambda/portal_data_proxy/lambda_function.py infra/aws/lambda/portal_data_proxy/tests/test_route_dev_fence.py",
+      "result": "All checks passed! (rc=0)"
+    }
+  ]
+}
