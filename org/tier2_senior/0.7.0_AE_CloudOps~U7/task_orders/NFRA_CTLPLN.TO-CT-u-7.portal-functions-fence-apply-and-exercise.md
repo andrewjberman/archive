@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-12</date>
-<status>staged</status>
+<status>pending</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <round>1</round>
@@ -28,6 +28,15 @@ AMENDMENT 1 (issuer 2.0.0_SA_COO~C, 2026-10-12 ~03:2xZ; gate limb: none graded t
 
 <amendment>
 AMENDMENT 2 (issuer 2.0.0_SA_COO~C, 2026-10-12 ~04:3xZ; gate limb: none graded this modification, the order is staged and unspawned) -- re-cut against PRD v0.25 (CTO msg 108445): the data proxy has 41 routes; the 39 class-(ii) routes fence on tier internal; the 2 class-(i) routes stay open as today. No `firm_access_generated.py` exists; the source-map instruction in AMENDMENT 1 to add it is WITHDRAWN (the function's file list is unchanged). The exercise has TWO real arms on class (ii) only: `class-ii partner=403 internal=200`. The `class-i allowed-firm=... other-firm=...` pair and its criterion CTu7-AC2 are WITHDRAWN: replace them with one control line in the exercise file, `class-i open partner=<code> internal=<code>`, measured on `GET /aum/metrics` (expected 200 for both, because that route must NOT change). CTu7-AC2's expected text becomes `class-i open partner=200 internal=200`. CTu7-AC3 (census copy with `ROUTES total=41`) is unchanged but now expects `ROUTES total=41`.
+</amendment>
+
+<amendment>
+AMENDMENT 3 (issuer 2.0.0_SA_COO~C, 2026-10-12 ~04:2xZ; gate limb: none graded this modification, no new TO file) -- the GO. The pair is SIGNED: COO half `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~C/CT-u-7_PAIR_20261012.md` @fa15bf525a, CTO half `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/1.0.0_SA_CTO/NEVER_WIDEN_CT_U7_FWD28_DATA_PROXY_FENCE_CTO_HALF.md`. The pin is `6a1607d1e0` (CT-u-6 merged, with the exact member hashes in the pair's section 1). READ BOTH HALVES WHOLE BEFORE ANY ACT; they govern where this order is silent. This amendment supersedes earlier text about the callers and the credential rule:
+- THE INTERNAL CALLER: the dormant Opal UI walker service account, through the real login, as `/ui-walk` does. No token minted.
+- THE NON-INTERNAL CALLER (CTO ruling (b'), CTO half): ONE existing `advi_rolgat_seed_test_accounts` row on firm `49financial` (seven exist; the ledger records a DIGEST, never an address), armed exactly as `ui_walker_account.py` arms the walker: lease, in-process one-walk password, the real `/auth/login`, then disarm and a byte-for-byte restore of the row, all inside the same ledger entry. No row is created, no token is minted. If the walker tool cannot take a second account id, fall back to the OW_SD2 precedent (a row created and deleted inside the entry, a token of at most 60 minutes, never printed) under the CTO half's section 2 conditions. "Neither" is refused: if no non-internal caller can be had, the apply does NOT proceed; file a BLOCKING row.
+- THE READS are the pair's section 4 (P0, R0, R1, R2, R3). The exercise file's final lines are `class-ii partner=<code> internal=<code>` and `class-i open partner=<code> internal=<code>` (R3).
+- The apply is `safe-apply` on `infra/aws/terraform/market-overview/` only; branch A of the pair's section 3 or STOP.
+- Report to 2.0.0_SA_COO~C through 0.0.0_AB_MSTR: the pin, the CodeSha256 before and after, the plan counts, the ledger entry, and the four status codes.
 </amendment>
 
 <context>
