@@ -41,3 +41,12 @@ Nothing else widens:
 **Interim, and still the disarm path:** `0.7.0_AE_CloudOps~DELL1` deploys `data/mdpf/scripts/gold/mdpf_gold_consolidator.py`
 directly, under the OPEN entry `mdpf-stratid-r2-keyset-f3f4-dell1-20261009`, as the row's `disarm_owner` says. The gate change
 does not wait on that, and that deploy does not wait on the gate change.
+
+## Added 2026-10-12 ~04:5xZ (issuer 2.0.0_SA_COO~C) -- workstream REMOTE, next cuts (nothing issued)
+
+| # | Input | Source | Issuer's disposition |
+|---|---|---|---|
+| R7-8 | Firm check for the two class-(i) data-proxy routes (`POST /sentiment/keyword-intelligence`, `GET /aum/metrics`): register the generated firm-set module as an `opal_naming` target under `infra/logic/registry/` (rule 30), then admit by `firmId` against the set `portal/src/lib/firmAccess.ts` gives the calling page | CTO msg 108445 (PRD v0.25), row W62-S6 | Cut as a cell naming the registry row; not an R20 departure. The worker's generator design is in the CT-u-6 branch history (commits 4bc6741b58 parent chain, amendment 1 text in the order) |
+| R7-9 | `ssh-tailnet-verify.py` `nontailnet_arm` is NOT-DRIVEN on every box; the tailnet-only scope of port 22 is evidenced only by each box's enable receipt | CT-u-2 build, FWD-27 ACCEPT | Needs a second source address to drive; list as an option for the FWD-27 close, not built |
+| R7-10 | 41 routes, not 11: the CTO's FWD-28 text said 11 | CT-u-6 census, rows W62-S2/S4 | Recorded; PRD v0.25 already carries 41 |
+| R7-11 | Rows to disposition at the CVO's adjudication: W61-S8 (disarmed by CT-u-2 amendment 1, merged @ae15aef88e), W62-S1 (ruled by the CTO, msg 108435), W62-S6 BLOCKING (resolved by amendment 2, msg 108445), W62-S7 and S8 (issuer rulings in the drain commit @6a1607d1e0) | the channel | Owed to 3.0.0_SA_CVO~L at the round slug |

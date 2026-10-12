@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-12</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C after its own reads: proof instance VALID (CTu7-AC1..AC3); live CodeSha256 6/BPExXEB1KneUKzyY45cbkw2px01XEOFMV0h/5Vst8= read from get-function-configuration; the deployed package's lambda_function.py and session_tracker.py hash EQUAL to the pin 6a1607d1e0 members (5f0fad0e..., 00f8c6a3...); the exercise file shows R0 200, R1 403, R2 200, R3 200 on the control. Ledger nfra-ctlpln-ctu7-data-proxy-fence-20261012 CLOSED per the applier.</status_reason>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <round>1</round>
