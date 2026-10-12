@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U5</issued_to>
 <date>2026-10-12</date>
-<status>staged</status>
+<status>withdrawn</status>
+<status_reason>WITHDRAWN by the issuer 2.0.0_SA_COO~C as round 8's first act, per org/missions/D0/NFRA/NFRA_CTLPLN/ledger/ROUND_ANALYSIS.round7.md section 1 (1.0.0_SA_CTO msg 108494), so the row gate reads no staged order and the CVO can graduate D1-S8 and D1-S10. Nothing was done under this order. The FWD-27 per-box cell is NOT dropped: it is re-cut as an ACTIVE (pending, never staged) order in the same commit as its GO when Andrew's public keys land; the text of this order is the template. FWD-27 stays gated on Andrew's keys and his elevated line per box (a qualified essential wait, decomposition NFRA_CTLPLN_DECOMP.remote1.md).</status_reason>
 <risk>WORLD</risk>
 <proof_genre>BUILD</proof_genre>
 <round>1</round>
