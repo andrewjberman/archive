@@ -1,3 +1,4 @@
+RULED: PRD v0.25 / msg 108445 -- class (i) routes stay open; class (ii) routes fence on tier
 # DATA_PROXY_ROUTE_CLASS_CENSUS -- NFRA_CTLPLN TO-CT-u-6, AMENDMENT 1 step 1
 
 Worker: 0.9.0_WK_NFRA_CTLPLN~62 (branch wk-NFRA_CTLPLN-62, worktree ctlpln-62, base HEAD 49af906f74).
