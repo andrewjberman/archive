@@ -131,6 +131,68 @@ sound one available, and the shortcut I reached for has no coverage. (2) Nothing
 nothing broke -- it is the absence of contrary evidence from an instrument that could not have supplied
 any. The grade still waits on the 2026-10-13 ~04:00Z gold chain.
 
+## 4b. PARTIAL EVIDENCE: a chain ran 22 stages after the delete and completed -- but it STARTED 25 min BEFORE it
+
+Re-measured at 09:0xZ. The gold chain did not stop at `B_00`: it ran on through the delete and finished.
+All counts are **client-side** over an auto-paginated listing -- a `--query length()` on these prefixes
+returns PER-PAGE counts, and my first read of it printed `0 / 0 / 0 / 22` down four lines, which is the
+paginated-list trap and not a zero.
+
+```
+gold/.checkpoints/2026-10-12/ : 29 checkpoints, one chain S_00 -> D_00f, 04:03:46Z -> 06:10:15Z
+   PRE-delete  (<= 04:29:22Z):  7 stages  S_00, A_00, A_02, A_03, A_01, A_04, B_00
+   POST-delete (>  04:29:22Z): 22 stages  B_01, B_01b, E_18, B_02, C_05, B_03, C_00..C_04, C_07,
+                                          C_06, C_08, D_00, D_00c, D_03, D_01, D_00b, D_02, D_04, D_00f
+gold/meta/ : 4 terminal watermarks 06:13:46Z..06:13:54Z
+   canonical_lots / account_gains / positions_cube / holdings_lots _incr_watermark.json
+RoleLastUsed: 2026-10-12T06:14:00Z        schwab-bucket-access: still absent      inline policies: 16
+```
+
+**It is ONE chain, not two.** The stage names advance in a single dependency order
+(`S_00 -> A_* -> B_* -> C_* -> D_*`); a second dispatch would restart at `S_00`/`A_00`, not resume at
+`B_01`. The two gaps over 15 minutes (`B_00 -> B_01` 48m37s, `D_04 -> D_00f` 15m48s) sit *inside* that
+order, so they are long stages rather than run boundaries.
+
+**What this is strong evidence of:** the narrowing broke nothing. Twenty-two stages, including every
+`C_*` and `D_*`, executed under the narrowed role after `schwab-bucket-access` was gone, and the chain
+reached its terminal watermarks. Nothing raised `AccessDenied`, and `opal-data-schwab` was never needed.
+Arguably that exercises the role harder than one fresh run would.
+
+**What it is NOT:** the signed condition. Both halves and the GO say *"ONE real bd run on this role that
+**STARTS AFTER** the delete and completes successfully."* This chain started **04:03:46Z**, 25 minutes
+and 36 seconds BEFORE the delete floor. I am not going to read "starts after" as "has stages after",
+because that is adjudicating signed text wider than it was written -- which is the issuer's call, not
+mine. **Asked, entry held open.**
+
+The next chain that unambiguously starts after the delete is `cron(0 4 * * ? *)` at ~2026-10-13 04:00Z.
+
+### RULED: HOLD (issuer, msg 33461) -- and the reason corrects my framing
+
+`2.0.0_SA_COO~ZI` ruled **HOLD**; *"starts after"* is **not** widened. This evidence is recorded as
+**PARTIAL**, which is what it is.
+
+The ruling's reason is better than the one I argued against myself, and it is worth stating plainly
+because it inverts my reading:
+
+> *"The 7 stages that ran before the delete (S_00 onward) are exactly the part of the chain this run
+> never exercised against the narrowed role. They are also the stages most likely to touch Schwab
+> inputs. Branch A exists to catch what the code census misses, so it needs the whole chain post-delete."*
+
+I had written that 22 post-delete stages "arguably exercise the role harder than one fresh run would".
+That counts stages rather than weighing them. The 22 are the **late** chain (`B_01` onward, every `C_*`
+and `D_*`); the 7 that were never run against the narrowed role are `S_00` (silver-prep) and `A_00..A_04`
+-- the **early** stages, where Schwab silver inputs would be read if anything reads them. So this run
+exercised the most stages and the **least relevant** ones, and my "harder-exercised" claim pointed the
+wrong way.
+
+It also names what branch A is actually for: **catching what the code census missed.** My census found 3
+used call paths and judged all three retired -- a judgement from reading headers and a skill's step list.
+Branch A is the independent check on that judgement, so it has to cover the stages the census reasoned
+about, not merely a majority of stages.
+
+**Standing position:** entry OPEN, `realrun` leg OPEN, `POST-APPLY: schwab: verified` withheld, order
+`<status>pending</status>`, until the 2026-10-13 ~04:00Z chain completes in full after the delete.
+
 ## 5. STATE
 
 | leg | status |
