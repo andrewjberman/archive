@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e93",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cc2a7a5430e758b64f69a0cf66ca1217830c4eb1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R21.md",
+    "vintage_commit": "2f215ca75a96533785d4dba52c6d48065b319252",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e93.nan-none-ticker-count.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~82",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NAN_NONE_TICKER_COUNT_20261012.json",
+      "kind": "doc",
+      "commit_or_etag": "f3a7ad53cb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only record of the latest C_06 canonical holdings partition gold/canonical/holdings/2026-10-09.parquet: positions_total 114554, NAN 0, NONE 0, verdict NOT_EXPOSED. No AWS write; no product file edited.",
+      "artifact_covered_by": [
+        "SC21-e93-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC21-e93-AC1",
+      "criterion_verbatim": "the record exists with its denominator and its totals agree (a synthetic record with one field broken fails the same check first).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R21_CHECKS/r21_read_record_check.py w77 org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NAN_NONE_TICKER_COUNT_20261012.json",
+      "output_evidence": "W77-RECORD ok=True positions_total=114554 nan_none=0 verdict=NOT_EXPOSED control=ok",
+      "denominator": "114554 rows in partition gold/canonical/holdings/2026-10-09.parquet (positions_total); NAN 0 of 114554, NONE 0 of 114554",
+      "status": "PASS",
+      "expect": "W77-RECORD ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant; the record check carries its own synthetic-broken-record control, printed as control=ok.",
+      "expected": "N/A-SPEC-NAMES-NONE",
+      "observed": "control=ok (r21_read_record_check.py output on the record)",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: one point read of one partition; a second read would be a second live read of the same key, not a same-input rerun.",
+      "observed": "one read at 2026-10-12T09:09:20Z; partition not re-read",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Every holdings partition other than the latest (gold/canonical/holdings/ holds 2474 parquet keys); no sweep of the prefix.",
+      "reason": "The order names the LATEST partition key only; a read of one partition fully, not a sweep."
+    },
+    {
+      "item": "Tickers whose text is N/A or - (not NAN or NONE).",
+      "reason": "Outside the cell's NAN/NONE definition; BLIND per the comp-adversary note on the cell."
+    },
+    {
+      "item": "The top-ten and NAME:: row check of etf-classifications (order step 5).",
+      "reason": "Conditional on a non-zero count; the count is 0, so the step does not run."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R21_CHECKS/r21_read_record_check.py",
+  "compiler_tools": [
+    {
+      "tool": "python -I (uncommitted scaffolding .scratch/read_partition.py)",
+      "invocation": "timeout 120 python -I .scratch/read_partition.py",
+      "result": "LIST parquet_keys=2474; LAST_KEY gold/canonical/holdings/2026-10-09.parquet; ROWS 114554; DOLLARS_TOTAL 2015391646.72; TICKER_NULL_ROWS 0; LITERAL_NAN_ROWS 0; LITERAL_NONE_ROWS 0; RC=0"
+    }
+  ]
+}
