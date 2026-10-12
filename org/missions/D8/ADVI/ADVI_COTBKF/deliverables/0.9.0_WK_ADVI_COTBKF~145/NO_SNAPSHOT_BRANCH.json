@@ -1,0 +1,113 @@
+{
+ "branches": {
+  "snapshot": {
+   "file_line": "data/cot/scripts/gold/B_00.canonical_holdings.py:1115-1121 (branch and return), :127-139 (_cot_snapshot_dates lists s3://opal-data-cot/silver/holdings/, every key ending .parquet, date from the key), :142-221 (_build_canonical_from_snapshot)",
+   "price": "price = BD market_value / units (:171), source 'bd_snapshot' (:173); the price store is not loaded (load_canonical_prices is at :1145, after the return at :1121)",
+   "writes": "gold/canonical/holdings/{date}.parquet (put_object :219; key from lib/s3_layout.py:81-82) for each silver/holdings snapshot date only; it writes no other date, deletes nothing (no delete_object or remove in the file, searched), and never touches an earlier date's partition; while any snapshot exists the lower branch never runs"
+  },
+  "no_snapshot": {
+   "file_line": "data/cot/scripts/gold/B_00.canonical_holdings.py:1123-1503 (main below the return); per-date worker :776-934 and :960-1075; pricing :703-723; forward-fill :1329-1455 (not used for a no-Schwab firm, :1287-1295)",
+   "price": "units x the price store's close for that date by asset_name: prices_day = canonical_prices rows for the date (:877, :1029) joined in price_holdings (:710-722); cash and par-valued names at 1.0 (:713-720); an unpriced name is NaN; store loaded at :1145 from silver/prices/canonical_prices.parquet (:445-453)",
+   "writes": "gold/canonical/holdings/{date}.parquet (put_object :922-924 and :1066-1067) for every positions_cube date not sealed in gold/canonical/watermarks.json (:1151-1207; --force and --force-recent-days re-process sealed dates); rows carry source 'bd' (:621) or 'bd_only' / 'bd_new_acct' (:839, :864); it overwrites the same key if it re-runs a date and deletes nothing; it cannot run while a snapshot exists"
+  }
+ },
+ "first_snapshot_date": "2026-06-08",
+ "partitions_before_it": {
+  "count": 47,
+  "first": "2026-04-22",
+  "last": "2026-06-07",
+  "built_by": "no-snapshot branch (source 'bd': the one partition read, 2026-06-03, has 8164 of 8164 rows source 'bd', none 'bd_snapshot'); all 47 keys were last written 2026-06-09T20:58:26Z to 20:58:29Z, one run; the 87 snapshot-dated partitions were last written in October 2026 (listing LastModified)",
+  "still_exist": true,
+  "listing_denominator": "gold/canonical/holdings/: 134 keys seen, complete auto-paginated s3api listing, 134 of 134 match YYYY-MM-DD.parquet, 47 dated before 2026-06-08 (consecutive calendar days) and 87 from it; silver/holdings/: 87 keys seen, complete, first 2026-06-08, last 2026-10-09; the 87 gold partitions from 2026-06-08 match the 87 snapshot dates one for one"
+ },
+ "page": {
+  "accepts_a_date_before_the_first_snapshot": false,
+  "file_line": "portal/src/pages/AdvisorIntelligence/_partners/cottonwood/index.tsx:116-121 and :161,:175 (PartnerAnalytics, DistributionTab, BooksTab); portal/src/api/endpoints/advisor-intelligence.ts:379-386 (timeseries_overview.json), :392-411 (partner_analytics_{monthly|quarterly|annual}.json: the only argument is a period, no date), :418-421 (cumulative_chart.json); DistributionTab.tsx:853-924 and PartnerAnalytics.tsx:212,357,412 call these with no date argument. The page cannot be asked for a date. It does show a history: the artifacts are built from every canonical-holdings partition by C_03.account_performance.py:199-226 and :283-289 (reads all partitions, sums market_value per account and date, no filter on source) and D_00b.portal_timeseries.py:1195-1202 and :1259 (date_range start = the earliest date; reads account_performance), both live steps (infra/aws/terraform/cot-pipeline/ssm.tf:391 and :395). So the 47 earlier partitions feed the page's period series by code; the served artifact itself was not read.",
+  "request_made": false,
+  "answered": "not_applicable: no request made, because the code accepts no date"
+ },
+ "failing_funds_held_before": {
+  "funds": 7,
+  "tickers": [
+   "ABNFX",
+   "FCNTX",
+   "GFFFX",
+   "MEIIX",
+   "NFFFX",
+   "SGIIX",
+   "VEIRX"
+  ],
+  "partitions": 1
+ },
+ "one_price_read": {
+  "fund": "FCNTX",
+  "date": "2026-06-03",
+  "partition": "gold/canonical/holdings/2026-06-03.parquet (source 'bd' on 8164 of 8164 rows)",
+  "price_in_served_holdings": 26.35,
+  "price_in_the_store": 26.35,
+  "store_address": "cottonwood-silver-canonical-prices, key = ticker (local cache of the store read 2026-10-08); the same 26.35 is in the build table r34/after/security_day_price.parquet",
+  "unadjusted_close_that_day": 26.350000381469727,
+  "ratio_served_over_store": 1.0,
+  "ratio_served_over_unadjusted": 1.0,
+  "same_date_other_held_funds": {
+   "_order": "[served holdings, store close, unadjusted close]; every ratio rounds to 1.0000",
+   "VEIRX": [
+    100.800003,
+    100.800003,
+    100.8000030517578
+   ],
+   "ABNFX": [
+    11.24,
+    11.24,
+    11.239999771118164
+   ],
+   "SGIIX": [
+    87.290001,
+    87.290001,
+    87.29000091552734
+   ],
+   "GFFFX": [
+    87.559998,
+    87.559998,
+    87.55999755859375
+   ],
+   "NFFFX": [
+    108.379997,
+    108.379997,
+    108.37999725341795
+   ],
+   "MEIIX": [
+    52.099998,
+    52.099998,
+    52.09999847412109
+   ]
+  },
+  "prices_only": true
+ },
+ "served_from_an_affected_close": false,
+ "date_range_served": "none affected. The 47 partitions 2026-04-22 to 2026-06-07 are priced from the store's close and read by C_03 for the page's series, but for the 15 funds the store's close in that window equals the unadjusted close: ratio min 0.9845, median 1.0000, max 1.0061 over 480 fund-days (15 funds x 32 common days), 0 fund-days below 0.98; the dividend-adjusted level error lies before 2026-04-22 (LEVEL_ERROR.json level_by_fund: the 2026 median is 1.0 for 12 of 15 funds, DFLVX 0.996, DISVX 0.9987, VGHAX 0.9206)",
+ "readers_not_established": [
+  {
+   "reader": "C_05 client_tax_liability (data/cot/scripts/gold/C_05.client_tax_liability.py, live optional step ssm.tf:392) feeding the D_00 tax frame (D_00:333) and D_02 tax panels (D_02:473-477)",
+   "what_would_establish_it": "One head-object on s3://opal-data-cot/gold/views/client_tax_liability.parquet (lib/s3_layout.py:153) and one list of s3://opal-data-cot/gold/timeseries/holdings_lots/ (lib/s3_layout.py:49) with the count of keys: if both are absent, the tax panels are empty for this firm and the reader serves nothing; if a B_01 object exists, its price column is the question."
+  },
+  {
+   "reader": "IRPT holdings-performance channel for this firm (blackdiamond_z09; infra/aws/terraform/investor-reporting/holdings-performance/schedule.tf, lambda irpt-holdings-performance-lambda)",
+   "what_would_establish_it": "One read of the live EventBridge Scheduler state: get-schedule for the two schedules named at schedule.tf:88-91 and :192-195 (both ENABLED in code) and the source in each Target.Input; if neither names blackdiamond_z09, nothing fires the Cottonwood channel. Its price is market value over units (sources.json:190-192), so it does not use the store either way."
+  },
+  {
+   "reader": "IRPT performance route tenant for this firm (infra/aws/lambda/investor-reporting/performance/tenants.py:156-165, Black Diamond pass-through; graph node irpt-performance-adapter, drift DECLARED)",
+   "what_would_establish_it": "One live read of the lambda irpt-performance-adapter (get-function: exists, and its configuration) and of the route that invokes it (the API integration or the portal call that names it for the Cottonwood tenant): if the Cottonwood tenant is not deployed or no portal surface opens it, it serves no one; its figure comes from the vendor API, not the store."
+  }
+ ],
+ "rows_filed": [],
+ "headline": "No served figure built from an affected close was found. The 47 holdings partitions dated before the first snapshot (2026-04-22 to 2026-06-07; first snapshot 2026-06-08) still exist in opal-data-cot, were built by the no-snapshot branch (source 'bd') from the price store's close, and are read by C_03 into the Cottonwood advisor-intelligence page's period series; but on those dates the store's close for the 15 funds is the unadjusted close (ratio 1.0 on the one partition read, where 7 of 15 funds are held; ratio median 1.0000 on 480 fund-days in the window), so the close is not affected. The page accepts no date. No row was filed.",
+ "not_established": [
+  "46 of the 47 pre-snapshot partitions were not read (the grant is one partition's rows); the funds held on any other date, and the source counts of those partitions, are inferred from the key layout and the one-run write time, not read; 'held on any such date' is at least 7 of 15 and at most 15",
+  "the ticker-to-asset_name match uses the local bridge .scratch/advi_cotbkf/cache/holdings.parquet (the ticker column of the pre-snapshot partition is empty): 5 funds (BALCX, DFLVX, DISVX, PRILX, VGHAX) have no name in that bridge, so their holding on 2026-06-03 is not established; 3 (AGTHX, FOCPX, PCBIX) have a bridge name but no row on that date",
+  "the store's close in the window is the local cache of the store read 2026-10-08 (series ends 2026-06-09), not the bucket object as it stood on 2026-06-09; the served price equals it on the one date read, for 7 of 7 held funds",
+  "the portal artifacts the page opens (partner_analytics, timeseries_overview, cumulative_chart) were not read; that they show the 47 early dates is read from the building code only (C_03, D_00b)",
+  "whether the deployed gold code in s3://opal-data-cot/code/gold/ equals the HEAD of data/cot/scripts/gold (a census item, not read here)"
+ ],
+ "written_at": "2026-10-12T00:36:00Z"
+}
