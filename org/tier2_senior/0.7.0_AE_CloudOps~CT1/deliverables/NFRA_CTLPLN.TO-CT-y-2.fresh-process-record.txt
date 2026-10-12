@@ -1,0 +1,66 @@
+NFRA_CTLPLN.TO-CT-y-2 -- FRESH-PROCESS RECORD
+seat: 0.7.0_AE_CloudOps~CT1   device: dell1   run: 2026-10-12 ~10:50Z-10:52Z   risk: LOCAL   proof_genre: BUILD
+Changes made on dell1 by this order: none (no variable, config file, package or service). The only writes are this record,
+its proof instance, the session log, and a temporary download folder that was created and deleted.
+
+STEP 1 -- the variable at User scope, read from this session
+  [Environment]::GetEnvironmentVariable('PIP_NO_INDEX','User') = [1]
+  this session's own process value of PIP_NO_INDEX = []   (so a child that inherits this session would NOT carry it)
+
+STEP 2 -- ONE child started with the user's default environment as the system builds it
+  mechanism: Start-Process <shell> -UseNewEnvironment -Wait -NoNewWindow -RedirectStandardOutput <file>
+  attempt A, shell = powershell.exe (the order's named form): the child died before running anything,
+      "Internal Windows PowerShell error. Loading managed Windows PowerShell failed with error 8009001d", exit -65536.
+      Nothing in the record comes from it.
+  attempts B and C, shell = cmd.exe (the order's "nearest equivalent"; no managed PowerShell is needed).
+
+  The fresh environment, read from inside the child (diagnostic run, names of variables present):
+      carries : PIP_NO_INDEX, Path (the User Path: Python314\Scripts, Python314, ...), TEMP, TMP, windir, ComSpec,
+                AGENTBUS_DEVICE, DISABLE_AUTOUPDATER, PATHEXT, PSModulePath, OneDrive, OS, PROCESSOR_*
+      lacks   : SystemRoot, USERPROFILE; USERNAME reads SYSTEM; the Machine Path is empty, so System32 is not on PATH.
+      So this is the registry environment as built for a process, NOT a faithful logon session: two variables a logon
+      always provides are missing. That is a limit of this mechanism and is stated, not repaired silently (see attempt C).
+
+  FRESH-PROCESS PIP_NO_INDEX=1
+  (the whole line above is the value of PIP_NO_INDEX the fresh child read from its own environment, in attempts B and C)
+
+STEP 3 -- the one explicit-index download, from that same kind of fresh child
+  attempt B (withdrawn): in the fresh environment as built, pip started and CRASHED while building its session:
+      ssl.SSLError: [SSL] unknown error (0xa080024)  at truststore.SSLContext(...) in ssl.py __new__, rc=2, folder empty.
+      That is before any index setting was consulted and before any network I/O, and the cause is the missing SystemRoot,
+      not PIP_NO_INDEX. The script that ran it also printed a verdict of the stopped class, with an empty first-ERROR field;
+      this seat withdrew that verdict because a crash and a stop look the same to a folder-empty, rc-non-zero test.
+      It also printed "python NOT FOUND" because the `where` command is not on that PATH (System32 absent): a false negative;
+      python IS on the fresh PATH (attempt C ran it by name).
+  attempt C (the valid one): the same fresh child, with ONE repair made INSIDE the child only: SystemRoot=C:\WINDOWS
+      (what a logon context carries). Nothing was changed on the machine.
+      python resolved by name from the fresh PATH to: C:\Users\Test\AppData\Local\Programs\Python\Python314\python.exe
+      command: python -m pip download --no-deps -d <a new empty folder> six==1.16.0 --index-url https://pypi.org/simple
+      pip output:
+        ERROR: Could not find a version that satisfies the requirement six==1.16.0 (from versions: none)
+        ERROR: No matching distribution found for six==1.16.0
+      exit code: 1
+      folder entries before: 0   after: 0
+      discriminators: rc=1 entries=0 signature_from_versions_none=1 ssl_error=0
+      The signature "from versions: none" is the one TO-CT-v-3's blocked run printed and the kit's measurement graded
+      as the no-index form (index=0 proxy=0 with the explicit index, against a positive arm that reached the proxy once).
+
+  Count: pip's download verb ran TWICE in this order (B crashed, C is the valid arm); the order asked for one. B made no
+  request (the crash is in ssl initialisation) and wrote nothing.
+
+STEP 4 -- cleanup
+  the temporary download folder of attempt C: deleted by the child, "absence control: folder absent" printed by the child.
+  the folder of attempt B: deleted the same way (absent).
+
+VERDICT (the one line CTy2-AC2 reads, whole line):
+BLOCKED pip refused: ERROR: Could not find a version that satisfies the requirement six==1.16.0 (from versions: none) (rc=1, folder empty, no index consulted)
+
+WHAT THIS ESTABLISHES, AND WHAT IT DOES NOT
+  - Establishes: a process started with a new environment built from the registry (not this session's) receives
+    PIP_NO_INDEX=1, and an explicit --index-url did not make pip look for a version through it. This closes the caveat
+    TO-CT-v-3 stated (the variable placed in the child's environment by hand).
+  - Does not establish: an actual fresh logon session. The mechanism's environment lacks SystemRoot and USERPROFILE and
+    reports USERNAME=SYSTEM; with SystemRoot absent pip cannot even start a request (attempt B). A person's real logon
+    shell carries both, so the verdict above is for the repaired child, which is closest to it, not for an observed logon.
+  - Does not establish: the request count of attempt C (no listener in the path); another interpreter; curl,
+    Invoke-WebRequest or git; a process that predates the variable. The real control is a network egress policy.

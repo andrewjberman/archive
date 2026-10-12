@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-y-2.dell1-fresh-process-blocked-download",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/task_orders/NFRA_CTLPLN.TO-CT-y-2.dell1-fresh-process-blocked-download.md",
+    "group": "OTHER",
+    "vintage_commit": "6b5465ea6c"
+  },
+  "assignee": "0.7.0_AE_CloudOps~CT1",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round9.md",
+    "vintage_commit": "6b5465ea6c",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/task_orders/NFRA_CTLPLN.TO-CT-y-2.dell1-fresh-process-blocked-download.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "Two negative arms. (1) The inheritance arm: the parent session's own PIP_NO_INDEX reads empty while the User-scope registry value reads 1, so a child that printed 1 got it from the registry and not from this session. (2) The failure-mode arm: the first fresh-child pip run (attempt B) ended rc=2 with the folder empty, the exact signs the order's BLOCKED test reads, yet the cause was an ssl initialisation crash with SystemRoot absent, not PIP_NO_INDEX. The valid arm was therefore graded on pip's 'from versions: none' signature as well as rc and folder, and a crash is graded INCONCLUSIVE.",
+      "expected": "Parent value empty and child value 1; the crash arm must NOT be graded BLOCKED; the valid arm must print the 'from versions: none' signature with ssl_error=0.",
+      "observed": "FIRED AS EXPECTED. Parent process PIP_NO_INDEX=[] and User scope [1]; child FRESH-PROCESS PIP_NO_INDEX=1. Attempt B: ssl.SSLError 0xa080024, rc=2, folder 0, withdrawn. Attempt C: rc=1, 'from versions: none', folder 0, discriminators signature_from_versions_none=1 ssl_error=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: one read of one variable and one download attempt through one form. The two fresh-child runs differ in a stated input (SystemRoot set inside the child) and so are not repeats.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the order's named child shell (powershell.exe -UseNewEnvironment)",
+      "reason": "It does not run on this box in that mode: 'Loading managed Windows PowerShell failed with error 8009001d', exit -65536, before any statement. The order's 'nearest equivalent' was used: cmd.exe with the same -UseNewEnvironment flag. Row NFRA_CTLPLN-D1-S11."
+    },
+    {
+      "item": "an observed fresh LOGON session",
+      "reason": "NOT OBSERVED. The mechanism's environment lacks SystemRoot and USERPROFILE and reports USERNAME=SYSTEM, with an empty Machine Path (System32 absent). The variable PIP_NO_INDEX does reach it (AC1). For the download arm the child was repaired by setting SystemRoot=C:\\WINDOWS INSIDE the child (nothing on the machine changed), because without it pip crashes before it reads any index setting. The verdict is for that repaired child, the nearest stand-in available; whether a real logon shell is required is the issuer's and the CTO's call (row D1-S11)."
+    },
+    {
+      "item": "the order's 'run once'",
+      "reason": "pip's download verb ran twice: attempt B crashed in ssl initialisation (no request, nothing written) and attempt C is the valid arm. Both folders were deleted with absence controls. Attempt A (powershell child) never reached pip."
+    },
+    {
+      "item": "the request count of the valid attempt, other interpreters, other download tools, processes that predate the variable",
+      "reason": "No listener was in the path of the real attempt; the count rests on the kit's measurement of the same form with the explicit-index arm (index=0 proxy=0, the positive arm reaching the proxy once). curl, Invoke-WebRequest, git and another interpreter are not covered; the real control is a network egress policy, outside this order."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-y-2.fresh-process-record.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A RECORD, not code, and the thread's dell1 hop (committed on box/dell1; the integrator takes it). It carries STEP 1 (User scope 1, session value empty), the fresh child's FRESH-PROCESS PIP_NO_INDEX=1 line, the three attempts with the withdrawn crash arm, the valid arm's pip output and rc, the folder denominator and absence control, and one VERDICT line beginning BLOCKED. It makes no change on dell1."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTy2-AC1",
+      "criterion_verbatim": "cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-y-2.fresh-process-record.txt expect: FRESH-PROCESS PIP_NO_INDEX=1",
+      "method": "command",
+      "invocation": "cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-y-2.fresh-process-record.txt",
+      "output_evidence": "The record carries, on its own line, 'FRESH-PROCESS PIP_NO_INDEX=1', the value the fresh child read from its own environment. The parent session's own value reads empty in the same record, so the child's value is the registry's and not inherited. Limit stated in the file: the fresh environment is the system-built one (cmd.exe -UseNewEnvironment), which lacks SystemRoot and USERPROFILE; it is not an observed logon session.",
+      "denominator": "1 fresh child that read the variable (two child launches printed it, B and C); 1 parent session value for contrast",
+      "status": "PASS",
+      "expect": "FRESH-PROCESS PIP_NO_INDEX=1"
+    },
+    {
+      "criterion_id": "CTy2-AC2",
+      "criterion_verbatim": "cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-y-2.fresh-process-record.txt expect: BLOCKED <what stopped it>",
+      "method": "command",
+      "invocation": "cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-y-2.fresh-process-record.txt",
+      "output_evidence": "The record's one verdict line begins 'BLOCKED ' and names pip's own error: 'Could not find a version that satisfies the requirement six==1.16.0 (from versions: none)', rc=1, folder 0 entries before and after, deleted. It is the valid arm (attempt C, SystemRoot set inside the child). A crash arm (attempt B, ssl.SSLError, rc=2) is described in the file in words that cannot be read as a second verdict line and is withdrawn; the file states why a crash and a stop look alike to a folder-empty rc-non-zero test.",
+      "denominator": "1 valid explicit-index attempt (1 host, 1 package, 1 form); 1 crash attempt withdrawn; 0 entries in the folder before and after each",
+      "status": "PASS",
+      "expect": "BLOCKED "
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-D1-S11"
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/logs/2026-10-12/ct_y_2_fresh_process_record.md",
+  "compiler_tools": [
+    {
+      "tool": "Start-Process -UseNewEnvironment",
+      "invocation": "Start-Process cmd.exe -UseNewEnvironment -Wait -NoNewWindow -RedirectStandardOutput <file> -ArgumentList /d /c <script>",
+      "result": "the child sees PIP_NO_INDEX=1; it lacks SystemRoot and USERPROFILE (a diagnostic child listed its variables); the powershell.exe form fails with 8009001d"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> CTy2-AC1,CTy2-AC2 --governing-order <the order>",
+      "result": "see the validation output recorded in the session log"
+    }
+  ]
+}
