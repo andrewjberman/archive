@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-121",
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "6f287a927f",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-121.account-pick-starts-performance-rendered.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "6f287a927f"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~69",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-121.account-pick-rendered.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "42832dc4b4e6c90aff723fee0fb8d249ec4d1427",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal worktree branch wk-DSGN_IRPTV1-69-portal, LOCAL only (not pushed, not deployed); the wrapper runs the rendered arms in their own bun process: 1 pass 0 fail"
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-121.account-pick-rendered.domrun.tsx",
+      "kind": "test",
+      "commit_or_etag": "42832dc4b4e6c90aff723fee0fb8d249ec4d1427",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal worktree branch wk-DSGN_IRPTV1-69-portal, LOCAL only; the three rendered arms print VERDICT ACCOUNT-PICK-RENDERED-OK when run directly"
+    },
+    {
+      "path_or_key": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~69/ACCOUNT_PICK_RENDERED.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record; its criterion is the checks/r31 invocation (IV121-AC1 PASS, rc 0)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IV121-AC1",
+      "criterion_verbatim": "IV121-AC1 -- the record says what the header yields for an account search, a RENDERED page with an ACCOUNT row picked shows Performance's Account select on that account and Holdings on it, a rendered test and a mutant hold it, and a screenshot was read. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python \"org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/checks/r31/p31_round31.py\" . IV121-AC1",
+      "output_evidence": "OK: an ACCOUNT row picked in the header starts Performance's Account select on it and Holdings opens on it, rendered; header yields CLIENT_ROW; product_change False / IV121-AC1 PASS (rc 0)",
+      "denominator": "1 of 1 criterion (IV121-AC1)",
+      "status": "PASS",
+      "expect": "IV121-AC1 PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "tabs/reporting/ReportingTab.tsx preselect effect with the header's picked account dropped (preselectAccountId before headerPickedAccountId); the rendered arms must fail on arm (b)",
+      "expected": "arm (b) fails: the Performance Account select starts on the larger account, not the picked smaller one",
+      "observed": "wrapper exit 1; VERDICT ACCOUNT-PICK-RENDERED-FAIL (1 of 3 arms); 'Expected: true Received: false' on the Performance select containing the smaller account; file reverted with git checkout, tree clean",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the same rendered arms run twice on the same input: at portal 3ea373fd and at 42832dc4 (the harness changed between them, the DOM path did not); the IV121-MEASURE lines compared",
+      "observed": "byte-identical IV121-MEASURE lines (md5 4b8df19b83a8f8134fe06d7485c85bca in both)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a styled browser capture of the running dev server page",
+      "reason": "no live backend is allowed to this TO; the two screenshots are headless-Edge captures of the test's own rendered DOM under a minimal stylesheet, disclosed in the record"
+    },
+    {
+      "item": "the live producer's ranking of a last-four directory search",
+      "reason": "no live request is allowed; header_yields is grounded on the fixture and the code path (record header_basis); see surprise DSGN_IRPTV1-D2-W69-S1"
+    },
+    {
+      "item": "the Holdings focus's node-id to account-id convention against a live payload",
+      "reason": "no live payload read; see surprise DSGN_IRPTV1-D2-W69-S2"
+    },
+    {
+      "item": "the relationship-kind pick (what a last-four search of an account inside a relationship offers)",
+      "reason": "the product change is gated on the ACCOUNT-row proof failing; that proof passed at base, so no product file was edited; the relationship case is filed as a surprise for the CTO"
+    },
+    {
+      "item": "push, DEV and PROD, any AWS call, bun install",
+      "reason": "forbidden by the order; portal commits are LOCAL on wk-DSGN_IRPTV1-69-portal"
+    }
+  ],
+  "surprises": [
+    "DSGN_IRPTV1-D2-W69-S1: the header's last-four search offers a RELATIONSHIP-kind option (not an ACCOUNT row); a pick of it names no account and Performance's Account select starts on the largest account (rendered probe: value 1, ****2222)",
+    "DSGN_IRPTV1-D2-W69-S2: Holdings' account focus sends the account NODE ref as the ACCOUNT scope id; it agrees with the account id only where the server's ACCOUNT node id equals the account id (snapshot.py:441 suggests it does; not verified against a live payload)"
+  ],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~69/SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "bun test (wrapper)",
+      "invocation": "bun test ./src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-121.account-pick-rendered.test.tsx",
+      "result": "1 pass, 0 fail (the rendered arms: VERDICT ACCOUNT-PICK-RENDERED-OK)"
+    },
+    {
+      "tool": "bun run lint",
+      "invocation": "bun run lint (portal, HEAD 42832dc4)",
+      "result": "0 errors, 346 warnings"
+    },
+    {
+      "tool": "bun run typecheck",
+      "invocation": "bun run typecheck (portal, HEAD 42832dc4)",
+      "result": "0 errors"
+    },
+    {
+      "tool": "bun test (whole scope)",
+      "invocation": "bun test src/pages/InvestorReporting (portal, HEAD 42832dc4)",
+      "result": "1204 pass, 27 skip, 1 fail (F14-AC3, the known base failure); base 1203 pass, 27 skip, 1 fail"
+    },
+    {
+      "tool": "headless Edge",
+      "invocation": "msedge --headless=new --disable-gpu --screenshot=<png> file:///<test DOM snapshot>.html",
+      "result": "IV121_rendered_performance.png and IV121_rendered_holdings.png written and read"
+    },
+    {
+      "tool": "proof-of-spec criterion",
+      "invocation": "python org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/2.0.0_SA_COO~D2/checks/r31/p31_round31.py . IV121-AC1",
+      "result": "IV121-AC1 PASS (rc 0)"
+    }
+  ]
+}
