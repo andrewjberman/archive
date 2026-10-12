@@ -1,0 +1,171 @@
+{
+  "to_id": "IRPT_BCKEND.TO-IB-pr-479",
+  "base_commit": "4650422c346204e439c6d09f89b1b64880e9a895",
+  "portal_commit": "dbeb6764eaa688230f44cfcc1763bd73db6e1142",
+  "portal_dev_head": "53506d4903aeabac675d87b7fe208fc9945c8ce7",
+  "portal_dev_head_note": "git -C C:/dev/ajb_workspace/portal rev-parse origin/DEV (local remote-tracking ref, no fetch). The checkout HEAD dbeb6764ea is not origin/DEV; the local DEV branch ref equals dbeb6764ea. The checkout tip is therefore not the origin/DEV head read here.",
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "accounts_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0,
+  "backend_readers": [
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/normalize.py:325-327",
+      "reads_names": ["value_facts"],
+      "in_words": "The report builder reads the primary node's value_facts twice: it sets optional_facts.supported true when the benchmark or value_facts is not None, and it passes value_facts through unchanged as optional_facts.value_facts. It reads no member inside it. When the node carries none, supported depends on the benchmark alone and value_facts goes out as null."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/orion_selected.py:177-178",
+      "reads_names": ["value_facts"],
+      "in_words": "The selected-account reduction reads value_facts as a truthy test and, when present, copies it with period_start and period_end replaced by the actual window. It reads no start/end member. When value_facts is None or empty it leaves it alone."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/bd_adapter.py:192",
+      "reads_names": ["value_facts"],
+      "in_words": "The Black Diamond adapter reads node.value_facts is None as a guard, so it writes beginning_market_value and ending_market_value only when no earlier point already set them and the vendor point's endingMarketValue is not None. It is the writer's own guard, not a downstream reader."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/tests/test_f49_engine.py:96-97",
+      "reads_names": ["start_value", "end_value", "net_additions"],
+      "in_words": "A test reads optional_facts.value_facts and asserts start_value, end_value and net_additions for the 49F engine output. If value_facts or those members were absent the test would raise and fail."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/tests/test_performance_adapters.py:219-224",
+      "reads_names": ["value_facts", "basis"],
+      "in_words": "A test reads optional_facts.value_facts for the Orion replay and asserts its basis wording; it reads no start/end member. Absent value_facts would raise and fail the test."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold.py:388-398",
+      "reads_names": ["value_facts", "claim"],
+      "in_words": "A test helper reads optional_facts.value_facts and asserts its claim member measured or inferred; no start/end member is read. Absent value_facts would fail the test."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold_calendar_gap.py:83-138",
+      "reads_names": ["value_facts", "claim", "missing_trading_days"],
+      "in_words": "Calendar-gap tests read optional_facts.value_facts.claim and .missing_trading_days (lines 83, 95, 107, 123, 138); no start/end member is read. Absent value_facts would fail them."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/_contracts/fixtures/PerformanceReport.valid.json:68",
+      "reads_names": ["value_facts"],
+      "in_words": "The valid contract fixture carries value_facts as null, and the invalid fixture does too (PerformanceReport.invalid.json:65); the contract tests validate them against the schema, so they read the schema's value_facts type only. Both stay as they are."
+    }
+  ],
+  "backend_fixture_carriers": [
+    {
+      "cite": "infra/aws/lambda/investor-reporting/narrative/fixtures/performance_report_inf.json:442-444",
+      "carries": ["start_value", "end_value"],
+      "in_words": "A narrative fixture of a served-shape report carries value_facts with the two contract members. No narrative code under investor-reporting reads value_facts or either member (the census shows no other hit), so it is carried data, not a read."
+    }
+  ],
+  "backend_census": {
+    "pattern": "value_facts|beginning_market_value|ending_market_value|\\bstart_value\\b|\\bend_value\\b",
+    "tool": "native Grep by absolute worktree path over infra/aws/lambda/investor-reporting, plus a python re pass over the same tracked file list for the denominator",
+    "files_searched": 664,
+    "files_with_a_hit": 14,
+    "denominator_basis": "git ls-files infra/aws/lambda/investor-reporting = 664 tracked files; 14 hit (4 writers: bd_adapter, f49_engine, holdings_gold, orion_adapter; 2 pass-through or merge readers: normalize, orion_selected; 4 tests; 1 narrative fixture; 2 contract fixtures; 1 schema copy)",
+    "excluded_by_design": "normalize.py:240-245 and orion_adapter.py:97,283 use a local key named start_value on vendor cells and rows; they are not value_facts members."
+  },
+  "portal_readers": [
+    {
+      "cite": "src/pages/InvestorReporting/contracts/adapt.ts:797-800",
+      "reads_names": ["value_facts", "period_start", "period_end", "currency"],
+      "renders_value_tile": false,
+      "in_words": "The performance adapter reads wire.optional_facts.value_facts and sets hasValues true only when optional_facts.supported is true and value_facts.period_start and period_end equal the answered window and value_facts.currency equals the measurement currency. Absent or null value_facts makes hasValues false, so both value members are treated as missing."
+    },
+    {
+      "cite": "src/pages/InvestorReporting/contracts/adapt.ts:839-840",
+      "reads_names": ["beginning_market_value", "ending_market_value"],
+      "renders_value_tile": false,
+      "in_words": "The adapter reads values.beginning_market_value and values.ending_market_value only when hasValues, requires a finite number, and maps them to the view's beginningValue and endingValue through metricFromWire. It reads NEITHER start_value nor end_value, so a report from the holdings, 49F or Orion path (which write start_value and end_value) yields beginningValue and endingValue unsupported today. When a member is absent: metricFromWire(null) gives supported false, value null, unavailableReason 'unknown'."
+    },
+    {
+      "cite": "src/pages/InvestorReporting/contracts/adapt.ts:1707-1708",
+      "reads_names": ["beginning_market_value", "ending_market_value"],
+      "renders_value_tile": false,
+      "in_words": "The adapter's field-mapping table names optional_facts.value_facts.beginning_market_value and .ending_market_value as the wire source of beginningValue and endingValue. It is a declaration (coverage table), not a read; it must change with the read."
+    },
+    {
+      "cite": "src/pages/InvestorReporting/contracts/wire/PerformanceReport.ts:60",
+      "reads_names": ["value_facts"],
+      "renders_value_tile": false,
+      "in_words": "The wire type declares value_facts as an optional Record<string, unknown> or null. It names no member, so the type does not change with the contract members."
+    },
+    {
+      "cite": "src/pages/InvestorReporting/tabs/reporting/PerformanceHeadline.tsx:110-111",
+      "reads_names": ["endingValue", "beginningValue"],
+      "renders_value_tile": true,
+      "in_words": "The Reporting tab's headline reads the adapted report.endingValue and report.beginningValue (not the wire names) and prints them as the ENDING VALUE and BEGINNING VALUE tiles with two decimals. When the metric is absent, unsupported or null the tile prints the words 'not supplied'."
+    },
+    {
+      "cite": "src/pages/InvestorReporting/render/performance/Summary.tsx:57-63",
+      "reads_names": ["beginningValue", "endingValue"],
+      "renders_value_tile": true,
+      "in_words": "The performance summary (print and export render) reads report.beginningValue and report.endingValue into two metric cards through the Metric component. When the metric is not renderable it prints the unavailable word with the metric's unavailableReason in brackets."
+    },
+    {
+      "cite": "src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx:173-183",
+      "reads_names": ["beginningValue", "endingValue"],
+      "renders_value_tile": false,
+      "in_words": "The tab maps the adapted report to the render shape; where beginningValue or endingValue is missing from the object it substitutes an unsupported value with the reason 'no-household-value-fact'. The same substitution is in export/resolveBundle.ts:253-260."
+    },
+    {
+      "cite": "src/pages/InvestorReporting/__tests__/fe-s-5/performance-wire-journey.test.ts:19-20",
+      "reads_names": ["beginning_market_value", "ending_market_value", "value_facts"],
+      "renders_value_tile": false,
+      "in_words": "A portal test builds a wire report whose value_facts carries beginning_market_value and ending_market_value and asserts the adapter's output; lines 57-59 mutate a value_facts member to a string and assert beginningValue and endingValue come out unsupported. It pins the market-value spelling and breaks when step 1 changes the read."
+    },
+    {
+      "cite": "src/api/endpoints/advisor-intelligence.ts:1706-1711",
+      "reads_names": ["beginning_market_value", "ending_market_value"],
+      "renders_value_tile": false,
+      "in_words": "A DIFFERENT wire: the Advisor Intelligence performance book (perfrp) leaf type declares beginning_market_value and ending_market_value as book leaf figures. Not under optional_facts.value_facts; listed only because it carries the same two names (AdvisorBookView.tsx:268,273 and perfrp/clientTable.ts:22-51 read and tabulate them as table columns). Not changed by the contract. What a column prints for an absent leaf was not read."
+    },
+    {
+      "cite": "src/pages/InvestorReporting/render/clientreport/types.ts:222-223",
+      "reads_names": ["beginningMarketValue", "endingMarketValue", "beginningValue", "endingValue"],
+      "renders_value_tile": false,
+      "in_words": "A key list in the client-report types names these camelCase keys among others; it is a list of names, not a read of value_facts."
+    }
+  ],
+  "portal_fixtures_carrying_value_facts": {
+    "in_words": "32 portal JSON fixtures carry optional_facts.value_facts as null (smoke, __tests__ and wire fixtures); none carries a member, so they exercise the absent path only.",
+    "member_carrying_fixtures": 0
+  },
+  "portal_census": {
+    "pattern": "value_facts|valueFacts|beginning_market_value|ending_market_value|beginningMarketValue|endingMarketValue|\\bstart_value\\b|\\bend_value\\b|startValue|endValue",
+    "tool": "native Grep by absolute path over C:/dev/ajb_workspace/portal/src; denominator from a python walk of the same directory",
+    "files_searched": 1395,
+    "files_with_a_hit": 39,
+    "denominator_basis": "every file under portal/src on disk (1395). A second native Grep for beginningValue|endingValue over non-json source found the tile and render files listed above."
+  },
+  "hash_pins": [
+    {
+      "cite": "infra/aws/lambda/ci/lambda-source-map.json:3113-3116",
+      "in_words": "Pins docs/contracts/investor-reporting/v1/PerformanceReport.schema.json by a commit and sha256 (also at lines 4340-4343 and 4954-4957 for the other packaged copies). The change makes those digests stale for that file. The file is outside this order's paths, so it was NOT regenerated."
+    },
+    {
+      "cite": "infra/aws/lambda/layers/irpt-common/BUILD_MANIFEST.json:48-51",
+      "in_words": "Pins the lambda _contracts copy by a commit and sha256 in the layer build manifest. Stale after the change; outside the paths; NOT regenerated."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/PATH_MANIFEST.json:5726-5730",
+      "in_words": "Lists the docs copy and says it is IMMUTABLE once IB-rt-1 flips complete; it carries no digest. Not changed (outside the paths). See the surprise row."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/_contracts/tests/test_analysisreport_v2.py:103",
+      "in_words": "The only sha256 assertion found under _contracts/tests is for the AnalysisReport v1 schema, not PerformanceReport; unaffected."
+    }
+  ],
+  "schema_change": "Both PerformanceReport.schema.json copies now declare optional_facts.properties.value_facts.properties.start_value and .end_value as [number, null] with descriptions naming the window's opening and closing value; value_facts stays object-or-null and the other members stay open (no additionalProperties false).",
+  "not_established": [
+    "the served response: no performance answer was fetched, so which members a live report carries was not read",
+    "the portal checkout is at dbeb6764ea, not at origin/DEV 53506d4903; the DEV head's adapt.ts and tile code were not read, so whether DEV differs from the checkout in these files is unknown",
+    "infra/aws/lambda/opal-assets/opal-assets-silver-smartx/silver.py and infra/aws/lambda/smartx_assets_pull/silver.py contain the token 'value_facts' or a market-value name outside the investor-reporting tree (7 hits each); they were not opened, so whether they read a value_facts member is not established",
+    "infra/aws/ec2/investor-reporting-ycharts and any other tree outside investor-reporting and portal/src were not searched for readers",
+    "the portal's compiled or deployed bundle: only source was read",
+    "the build manifests' digests: the stale digests were identified by reading, not recomputed",
+    "whether answers from the holdings, 49F or Orion path reach the portal with period_start, period_end and currency equal to the window, which the adapter requires before it reads either value"
+  ]
+}
