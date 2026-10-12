@@ -1,0 +1,48 @@
+{
+  "slug": "healgap-r3-act-ht15-retire-0700z-rule-20261012",
+  "title": "MDPF_HEALGAP R3 HG-t-15: retire the 07:00Z cot-satellites-registry-producer-daily rule, its target and its permission (3 destroys) via safe-apply -target. CTO half SIGNED @44e8559bca (ADDENDUM 6, msg 4366). Rollback: restore the three resource blocks from f3afa83d59 and apply the same targets; the rollback of HG-t-5 (rule back to cron(0 6)) now INCLUDES re-applying this rule from its prior tf.",
+  "author": "2.0.0_SA_COO~G1",
+  "status": "OPEN",
+  "opened_at": "2026-10-12T13:41:43.265136+00:00",
+  "window_hours": 48.0,
+  "entry_path": "org/critical_paths/change_management/20261012T1341Z_healgap-r3-act-ht15-retire-0700z-rule-20261012_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "verify",
+      "target": "rollback state read live: rules on the function, the 07:00Z rule's schedule/target, the lambda policy statements",
+      "proof_required": "values printed from list-rule-names-by-target, describe-rule, list-targets-by-rule, get-policy",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "activation",
+      "target": "Terraform cot-pipeline safe-apply -target the rule, target and permission of the daily rule, saved plan",
+      "proof_required": "plan reads exactly 0 add 0 change 3 destroy on those three addresses; apply result",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "verify",
+      "target": "list-rule-names-by-target reads the stamp-gated rule only; describe-rule on the daily rule reads ResourceNotFound; lambda policy carries only the StampGated statement",
+      "proof_required": "values printed from live reads",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "verify",
+      "target": "first 07:00Z after the apply (2026-10-13 07:00Z): zero invocations in the log group; the 13:15Z fire unchanged (as_of that date, rc 0)",
+      "proof_required": "CloudWatch excerpt and head-object",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261012T134143Z OPENED by 2.0.0_SA_COO~G1 with 4 leg(s)"
+  ],
+  "last_red_at": null,
+  "device": "dell1"
+}
