@@ -1,0 +1,51 @@
+{
+  "to_id": "IRPT_BCKEND.TO-IB-pr-480",
+  "base_commit": "4650422c34",
+  "store_key": "s3://opal-data-cot/silver/prices/canonical_prices.parquet (registry key cottonwood-silver-canonical-prices)",
+  "readers": [],
+  "census": {
+    "pattern": "canonical_prices | cottonwood-silver-canonical | silver/prices | silver_prices (all file types, case-insensitive); then opal-data-cot | legacy_addresses | prices/canonical | canonical.?price (all but PATH_MANIFEST.json); then price|prices|bar(s)|data_plane|witness|landed|parquet in performance/ and across the service, each hit read; plus resolve_prices bindings",
+    "files_searched": 664,
+    "files_with_a_hit": 0,
+    "positive_control": "the same native Grep method on data/cot/scripts/gold/build_canonical_prices_v2.py with pattern canonical_prices|silver/prices returns the writer's own lines (21, 30, 39, 40, 898 of that file); the broad pattern opal-data-cot returned hits under investor-reporting (directory tests, performance/tenants.py:22 and :164, and the substring of opal-data-cottonwood in other tests), so a hit on the bucket name is visible to the method, and none of them addresses the prices key"
+  },
+  "verdict": "NO_READER",
+  "in_words": "No file under infra/aws/lambda/investor-reporting/ names or addresses the landed prices store: the key, canonical_prices, the registry key and silver/prices have 0 hits in 664 tracked files, no address() call builds that row, and no code path reads a daily price bar from it. The performance adapters read the per-firm holdings gold and the 49F engine gold instead, and the upload price port is not composed.",
+  "dependent_figures": [],
+  "near_misses": [
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/tenants.py:164",
+      "what": "Cottonwood's route names data_plane_bucket opal-data-cot with prefix forwardfill_v2/; a separation label used by describe, route_key and separation_report (tenants.py:122-133, :208-209). No S3 read is bound to it in the service, and the prefix is not silver/prices.",
+      "is_reader": false
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/holdings_gold.py:109-146",
+      "what": "HoldingsGoldSource lists and reads holdings_performance_daily partitions at a builder address (installed.py:76-92); its status PRICE_MISSING is the producer's own rule. It reads the gold, not the prices store.",
+      "is_reader": false
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/intake/upload_resolution.py:112",
+      "what": "resolve_prices is bound to _not_composed(SHARES_PRICE_SOURCE_NOT_COMPOSED) (also :133); no price source is composed on the upload lane. The other resolve_prices bindings are in tests.",
+      "is_reader": false
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/holdings-performance/handler.py:61",
+      "what": "Packages the gold producer data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py (outside the investor-reporting tree); its folder has 0 hits for canonical_prices and silver/prices (its sources.json hit is the substring opal-data-cot inside opal-data-cottonwood).",
+      "is_reader": false
+    }
+  ],
+  "not_established": [
+    "Whether the packaged gold producer (data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py, outside the investor-reporting tree) or its silver inputs derive from the prices store: only grepped by name for the store terms (0 hits), not read whole; the holdings gold's PRICE_MISSING rule has an upstream price source this read did not trace.",
+    "Whether the f49_engine gold (canonical/twr_daily) or the holdings gold is built upstream from the prices store: out of the investor-reporting tree and not traced.",
+    "An address assembled at runtime from parts (for example a prefix plus a table name from configuration or an environment variable) cannot be excluded by a text search; no such assembly naming prices was seen.",
+    "The layers (/opt/python, irpt-common) and the portal are outside the searched tree; the live deployed bundles were not compared with HEAD.",
+    "ycharts/research/layout_overview.py with pricing=True reads price history from the vendor path (YCharts), not a landed store; its vendor reads were not traced to the end.",
+    "No test was run and no live state was read; a read of the store by an AWS principal outside this code (IAM, another service) is not a reader under this tree and was not looked for."
+  ],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "accounts_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
