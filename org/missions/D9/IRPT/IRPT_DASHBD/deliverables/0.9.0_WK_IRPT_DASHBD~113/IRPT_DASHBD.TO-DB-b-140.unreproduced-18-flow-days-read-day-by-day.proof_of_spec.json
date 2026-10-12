@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-140",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "0f9c842829",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-140.unreproduced-18-flow-days-read-day-by-day.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~113",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~113/UNREPRODUCED_18.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~113/UNREPRODUCED_18.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only counts-only record: denominator 18, 50 differing flow days of 130, one cause (the ledger copy repeats a transaction per portfolio group) reproducing 50 of 50 to the cent, none under no_cause, tie-out 185 classed / 51 contested / 8 unclassed of 244, not closed; one read-only re-read of the same Black Diamond transactions prefix, no S3 write, no code change",
+      "artifact_covered_by": [
+        "DB74-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB74-1-AC1",
+      "criterion_verbatim": "DB74-1-AC1 -- each of the 18 segments is read flow day by flow day and placed under a cause with a rule or under no cause with why, and the tie-out's state is restated and not called closed. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r74/p74_round74.py\" . DB74-1-AC1",
+      "output_evidence": "OK: 18 segments, 50 differing flow day(s): 1 cause(s) holding 18 segment(s), 0 with no cause; tie-out not closed\nDB74-1-AC1 PASS",
+      "denominator": "18 of 18 segments placed (18 + 0 under no cause); 50 differing flow days of 130, 50 of 50 reproduced to the cent by the one cause; tie-out 185 + 51 + 8 = 244; exit code 0",
+      "status": "PASS",
+      "expect": "DB74-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record from the worktree root; the cause was tested by scripts over private pickles and one private re-read",
+      "observed": "the checker printed the same last line on every run; the scripts a3_dedupe.py, b3_loc.py, b5_txnid.py gave the same counts when re-run (50 of 50, 17 of 18 segments with all 130 days to the cent, the 18th differing by a within-tolerance row)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB74-1-AC1 FAIL",
+      "observed": "FAIL: no record; DB74-1-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "why a transaction is attached to some portfolio groups and not to others on other days, and the class of one small fee-expense row on one flow day outside the 50",
+      "reason": "Not shown by the rows read; the cause needs only the transaction id; the fact_trn row and its class were not read. Recorded NOT_ESTABLISHED, not guessed."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W113-S1",
+    "IRPT_DASHBD-D2-W113-S2",
+    "IRPT_DASHBD-D2-W113-S3"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p74_round74.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r74/p74_round74.py\" . DB74-1-AC1",
+      "result": "DB74-1-AC1 PASS (rc 0); against an empty root it prints DB74-1-AC1 FAIL (rc 1)"
+    }
+  ]
+}

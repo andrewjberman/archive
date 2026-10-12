@@ -1,0 +1,1299 @@
+{
+ "population": {
+  "funds": 101,
+  "of_the_197": 50,
+  "of_the_73": 51,
+  "of_the_nine": 9,
+  "reinvestment_only": 97,
+  "cache_only": 48,
+  "fund_series_in_build_table": 270,
+  "with_a_cached_close": 149,
+  "with_a_reinvestment_row_at_the_guard": 198,
+  "of_the_197_with_a_cached_close": 76,
+  "of_the_197_with_a_row": 147,
+  "of_the_73_with_a_cached_close": 73,
+  "of_the_73_with_a_row": 51,
+  "the_nine_are_inside_the_76_of_the_197": true,
+  "note": "The 'plus the nine' of the ruling adds none: the nine are among the 76 of the 197 that have a cached Close. Population = 50 of the 197 (9 of them the nine) + 51 of the 73 = 101. 97 funds have a row and no cached close; 48 have a cached close and no row (guard 0.05 shares)."
+ },
+ "rule": {
+  "text": "CLOCK_UTC 2026-10-11T19:24:25Z\nRULE FOR THE THREE-DATE READ AND THE SIZING (0.9.0_WK_ADVI_COTBKF~123, TO ADVI_COTBKF.TO-CB-bu-1). Written before any comparison of a custodian price with a cached close over the population; kept as written.\nState at writing: the population was built (existence of a reinvestment row at the guard, existence of a cache file with a Close) and its denominators printed: 270 fund series, 149 with a usable cache, 198 with a row, 101 with both (50 of the 197 left on the store, 51 of the 73 substituted, the nine all in it), 97 row only, 48 cache only. No custodian price has been set beside any close. The nine's round-72 result (45 of 93 same, 88 of 93 previous day, 32 of 93 next day) is known to me and the thresholds below are NOT chosen from it; they are not tuned to make the rest agree with it.\n\nINSTRUMENT. Reinvestment row = Transaction_Type 'dvr' with Amount > 0 and Quantity >= 0.05 shares. Row price = Amount / Quantity. Cell = (fund, Trade_Date); cell price = MEDIAN of the row prices of the cell (pooled across accounts); spread = (max - min) / median of the row prices (cells of 2 or more rows). A cell with spread > 0.05 is dropped and counted. Cache = the fund's file in yahoo_census, the column Close (unadjusted), bars with Close > 0, read as it sits on disk (nothing fetched).\nA cell is COMPARED only if the cache holds a bar on the cell's own date (same) AND a previous bar AND a next bar, the previous and the next within 5 calendar days of the date (the previous/next trading day = the neighbouring bars of the fund's own cache; a gap wider than 5 days is not a trading day). A cell lacking any of the three is not compared and is counted by reason; every compared cell has all three closes, so the three readings share one denominator.\n\n(a) EQUAL: the cache Close is equal to the cell price when | Close / cell price - 1 | <= 0.005 (0.5 percent), on each of the three dates separately: same (the cell's date), before (the previous bar), after (the next bar).\n\n(b) A FUND'S WINNER among same / before / after: n = the fund's compared cells; e_s, e_b, e_a = its equal counts. n < 5 -> undecided (too_few). Otherwise the date with the highest equal count wins if (i) its equal share e/n >= 0.60 AND (ii) it exceeds the second-highest equal share by at least 0.20 (20 percentage points of n). Otherwise undecided (no_margin; includes a tie, a flat-price fund where all three dates match, and a fund where no date reaches 0.60).\n\n(c) THE OVERALL CONVENTION is read from the DECIDED funds only (winner not undecided), D = their number, and from nothing else:\n  - D < 20, or D < one third of the population's funds -> `undetermined`.\n  - Else, if one winner holds >= 0.80 of the D funds (at most 20 percent of decided funds may disagree) -> that winner, `same`, `before` or `after`.\n  - Else `by_fund`, but only if a split of the decided funds by ONE of these pre-named attributes -- (1) kind (Mutual Fund vs Mutual Fund (Closed End)); (2) build group (the 197 left on the store vs the 73 substituted); (3) the fund's first compared date before vs on/after 2022-01-01 (a change of posting practice over time) -- gives at least two classes with >= 10 decided funds each in which each class's top winner holds >= 0.80 of that class's decided funds AND the classes' top winners differ. Fund family / sponsor is NOT in the data on disk and is not tested; a family effect would be recognised only through such a split by sponsor, which cannot be run here.\n  - Else `no_single_convention`.\n  Reported beside, not part of the convention: the nine apart from the rest (cells, equal counts under each date, funds by winner), the same three counts for the rest, and per-calendar-year equal shares.\n\n(d) SIZING. VALIDATED yardstick for a fund: n >= 5 compared cells AND on its best date (the highest of e_s, e_b, e_a) the equal share >= 0.80 with at least 5 equal cells. (A fund whose winner is undecided may still validate -- e.g. a flat-price fund the cache matches on every date; the winner and the validation are different questions.) A fund not validated is `not_validated` and is not sized.\n  For a validated fund: ratio_t = build close_t / cache Close_t on every date t both hold (the same date: both are closes of the fund). N = number of shared dates; below = ratio < 0.98 (\"below by more than 2 percent\"); at1 = 0.98 <= ratio <= 1.02; early / late = the median ratio of the first / last third (N//3 dates each) by date.\n  `adjusted`      : N >= 20 AND share(below) >= 0.25 AND late median > early median (the ratio rises toward the present).\n  `not_adjusted`  : N >= 20 AND share(at1) >= 0.90.\n  `undecided`     : validated, and neither of the above, or N < 20.\n  The four sizing counts (adjusted, not_adjusted, undecided, not_validated) sum to the population's funds. The substituted funds (the 73) are the control: their build close is the as-traded store and must read `not_adjusted`; any that read `adjusted` will be reported loudly. An adjustment under 2 percent over the whole shared window would read not_adjusted by this rule; that is stated, not corrected.\n  REACH (floor): on the `adjusted` funds, the priced holding rows (account, date, security, value not null) on the shared dates where the ratio < 0.98, summed over funds, and the MEASURED account-days among them (distinct (account, date) with a non-null return); bands at ratio < 0.9, < 0.75, < 0.5. Held dates with no cached close, funds with no cached close (the 121) and funds not validated are NOT in it: the number is a floor.\n  AGAINST EARLIER: a series differs only if both readings are definite and opposite: here adjusted vs round 72 confirmed_not or round 71 not adjusted (substituted funds count as round-71 not adjusted); here not_adjusted vs round 72 confirmed_adjusted or round 71 adjusted. A series unreadable in one round and read in the other is not a difference and is counted separately.\n\nIf the result under this rule looks wrong, the result under the rule is reported, and what another rule gives is reported separately as a sensitivity (never substituted).\n",
+  "written_at": "2026-10-11T19:24:25Z"
+ },
+ "three_date": {
+  "cells": 944,
+  "equal_same": 794,
+  "equal_before": 744,
+  "equal_after": 579,
+  "funds_by_winner": {
+   "same": 17,
+   "before": 15,
+   "after": 0,
+   "undecided": 69
+  },
+  "convention": "undetermined",
+  "the_nine": {
+   "funds": 9,
+   "cells": 93,
+   "equal_same": 45,
+   "equal_before": 88,
+   "equal_after": 32,
+   "funds_by_winner": {
+    "same": 0,
+    "before": 6,
+    "after": 0,
+    "undecided": 3
+   },
+   "funds_with_fewer_than_5_compared_cells": 2
+  },
+  "the_rest": {
+   "funds": 92,
+   "cells": 851,
+   "equal_same": 749,
+   "equal_before": 656,
+   "equal_after": 547,
+   "funds_by_winner": {
+    "same": 17,
+    "before": 9,
+    "after": 0,
+    "undecided": 66
+   },
+   "funds_with_fewer_than_5_compared_cells": 57
+  },
+  "convention_detail": {
+   "decided_funds": 32,
+   "population_funds": 101,
+   "one_third_of_population": 33.67,
+   "top_winner": "same",
+   "top_winner_share_of_decided": 0.531,
+   "reading": "Under the rule as written the decided funds (32) are fewer than one third of the population (33.67), so the convention is `undetermined`. The same funds with that clause removed: no winner holds 0.80 of the decided funds (same 17, before 15) and no pre-named split gives two classes of 10 or more decided funds that each hold 0.80 on different winners, so `no_single_convention`.",
+   "convention_if_the_decided_floor_were_removed": "no_single_convention",
+   "by_fund_splits": {
+    "kind": {
+     "classes": {
+      "Mutual Fund": {
+       "decided": 31,
+       "by_winner": {
+        "same": 17,
+        "before": 14
+       },
+       "top": "same",
+       "top_share": 0.548
+      },
+      "Mutual Fund (Closed End)": {
+       "decided": 1,
+       "by_winner": {
+        "before": 1
+       },
+       "top": "before",
+       "top_share": 1.0
+      }
+     },
+     "classes_meeting_the_rule": [],
+     "passes": false
+    },
+    "group": {
+     "classes": {
+      "left_197": {
+       "decided": 19,
+       "by_winner": {
+        "before": 12,
+        "same": 7
+       },
+       "top": "before",
+       "top_share": 0.632
+      },
+      "substituted_73": {
+       "decided": 13,
+       "by_winner": {
+        "same": 10,
+        "before": 3
+       },
+       "top": "same",
+       "top_share": 0.769
+      }
+     },
+     "classes_meeting_the_rule": [],
+     "passes": false
+    },
+    "early": {
+     "classes": {
+      "first_compared_2022_on": {
+       "decided": 7,
+       "by_winner": {
+        "before": 5,
+        "same": 2
+       },
+       "top": "before",
+       "top_share": 0.714
+      },
+      "first_compared_before_2022": {
+       "decided": 25,
+       "by_winner": {
+        "same": 15,
+        "before": 10
+       },
+       "top": "same",
+       "top_share": 0.6
+      }
+     },
+     "classes_meeting_the_rule": [],
+     "passes": false
+    }
+   }
+  },
+  "cells_by_status": {
+   "compared": 944,
+   "outside_cache_window": 791,
+   "no_prev_or_next_bar": 5,
+   "wide_spread": 0,
+   "no_same_date_bar": 0,
+   "gap_gt_5_days": 0,
+   "all_cells": 1740
+  },
+  "undecided_breakdown": {
+   "too_few_cells": 59,
+   "of_which_zero_compared_cells": 23,
+   "no_margin": 10
+  },
+  "positive_control_nine_vs_round_72": {
+   "round_72": {
+    "cells": 93,
+    "same": 45,
+    "before": 88,
+    "after": 32
+   },
+   "here": {
+    "cells": 93,
+    "same": 45,
+    "before": 88,
+    "after": 32
+   }
+  },
+  "informative_cells_only_one_date_equal": {
+   "all": {
+    "informative_cells": 221,
+    "on_same_only": 105,
+    "on_before_only": 116,
+    "on_after_only": 0
+   },
+   "the_nine": {
+    "informative_cells": 39,
+    "on_same_only": 0,
+    "on_before_only": 39,
+    "on_after_only": 0
+   },
+   "the_rest": {
+    "informative_cells": 182,
+    "on_same_only": 105,
+    "on_before_only": 77,
+    "on_after_only": 0
+   },
+   "cells_equal_on_all_three_dates": 458,
+   "cells_equal_on_none": 4,
+   "note": "Descriptive, post hoc, not part of the rule: a cell where only one of the three dates is within 0.5 percent."
+  },
+  "per_calendar_year_equal_share": {
+   "2020": {
+    "cells": 107,
+    "equal_same": 0.897,
+    "equal_before": 0.738,
+    "equal_after": 0.692
+   },
+   "2021": {
+    "cells": 188,
+    "equal_same": 0.862,
+    "equal_before": 0.803,
+    "equal_after": 0.66
+   },
+   "2022": {
+    "cells": 178,
+    "equal_same": 0.781,
+    "equal_before": 0.725,
+    "equal_after": 0.461
+   },
+   "2023": {
+    "cells": 163,
+    "equal_same": 0.84,
+    "equal_before": 0.791,
+    "equal_after": 0.626
+   },
+   "2024": {
+    "cells": 149,
+    "equal_same": 0.839,
+    "equal_before": 0.779,
+    "equal_after": 0.644
+   },
+   "2025": {
+    "cells": 120,
+    "equal_same": 0.842,
+    "equal_before": 0.875,
+    "equal_after": 0.642
+   },
+   "2026": {
+    "cells": 39,
+    "equal_same": 0.872,
+    "equal_before": 0.897,
+    "equal_after": 0.615
+   }
+  },
+  "sensitivities": {
+   "note": "Each is a separate rule, run after the result under the rule; none replaces it.",
+   "winner_minimum_3_cells": {
+    "funds_by_winner": {
+     "same": 23,
+     "before": 22,
+     "undecided": 56
+    },
+    "decided": 45,
+    "top_share": 0.511,
+    "note": "decided floor met; top share below 0.80, so no_single_convention unless a split passes (not re-run)"
+   },
+   "equal_within_1_percent": {
+    "cells": 944,
+    "equal_same": 882,
+    "equal_before": 818,
+    "equal_after": 768,
+    "funds_by_winner": {
+     "same": 12,
+     "before": 9,
+     "undecided": 80
+    }
+   },
+   "equal_within_0_2_percent": {
+    "equal_same": 694,
+    "equal_before": 615,
+    "equal_after": 355,
+    "funds_by_winner": {
+     "same": 21,
+     "before": 15,
+     "undecided": 65
+    }
+   },
+   "shares_at_least_1": {
+    "cells": 878,
+    "equal_same": 728,
+    "equal_before": 714,
+    "equal_after": 552,
+    "funds_by_winner": {
+     "before": 15,
+     "same": 13,
+     "undecided": 73
+    }
+   },
+   "pooled_by_sum_amount_over_sum_shares": {
+    "equal_same": 793,
+    "equal_before": 747,
+    "equal_after": 581,
+    "funds_by_winner": {
+     "same": 17,
+     "before": 15,
+     "undecided": 69
+    }
+   },
+   "informative_cells_funds": {
+    "rule": "a fund with at least 3 informative cells and 0.80 of them on one date",
+    "funds_by_winner": {
+     "before": 17,
+     "same": 17,
+     "undecided": 18
+    },
+    "the_nine": {
+     "before": 7,
+     "undecided": 1
+    },
+    "the_rest": {
+     "same": 17,
+     "before": 10,
+     "undecided": 17
+    },
+    "funds_with_an_informative_cell": 52
+   }
+  }
+ },
+ "sizing": {
+  "validated": 42,
+  "adjusted": 21,
+  "not_adjusted": 21,
+  "undecided": 0,
+  "not_validated": 59,
+  "adjusted_tickers": [
+   "ABNFX",
+   "AMRMX",
+   "ANCFX",
+   "AWSHX",
+   "BALCX",
+   "CAIBX",
+   "CPXIX",
+   "CWGIX",
+   "DFLVX",
+   "DFREX",
+   "DISVX",
+   "FCNTX",
+   "FINFX",
+   "MEIIX",
+   "NFFFX",
+   "PCBIX",
+   "PRILX",
+   "SGIIX",
+   "VEIRX",
+   "WGIFX",
+   "WMFFX"
+  ],
+  "not_adjusted_tickers": [
+   "ACTDX",
+   "AMCFX",
+   "CMLAX",
+   "DFCEX",
+   "DFIEX",
+   "FLTRX",
+   "FSKAX",
+   "FSMAX",
+   "FSPSX",
+   "FSSNX",
+   "FXAIX",
+   "MAMTX",
+   "MISIX",
+   "NEA",
+   "NHMRX",
+   "PDBZX",
+   "PTTAX",
+   "VBIRX",
+   "VFIAX",
+   "VTSAX",
+   "VWIUX"
+  ],
+  "not_validated_reason": {
+   "fewer_than_5_compared_cells": 59,
+   "n_ge_5_but_cache_matches_on_no_date_at_0_80": 0,
+   "of_which_zero_compared_cells": 23
+  },
+  "control_substituted_73": {
+   "in_population": 51,
+   "validated": 20,
+   "read_not_adjusted": 20,
+   "read_adjusted": 0,
+   "read_undecided": 0,
+   "not_validated": 31,
+   "lowest_min_ratio_among_the_validated": 0.9867,
+   "verdict": "Every substituted fund the cache can validate reads not_adjusted; none reads adjusted."
+  },
+  "left_on_the_store": {
+   "in_population": 50,
+   "validated": 22,
+   "adjusted": 21,
+   "not_adjusted": 1,
+   "not_validated": 28
+  },
+  "the_nine": {
+   "adjusted": 7,
+   "not_validated": [
+    "AMCPX",
+    "NEWFX"
+   ]
+  },
+  "thresholds": "see rule (d): validated = n>=5 compared cells and best-date equal share >=0.80 with >=5 equal; adjusted = N>=20, share ratio<0.98 >=0.25, late-third median > early-third median; not_adjusted = N>=20, share within 2 percent of 1 >=0.90",
+  "per_series": [
+   {
+    "ticker": "ABNFX",
+    "reading": "adjusted",
+    "shared_dates": 1520,
+    "min_ratio": 0.7656,
+    "median_ratio": 0.8921,
+    "share_below_0_98": 0.847
+   },
+   {
+    "ticker": "AMRMX",
+    "reading": "adjusted",
+    "shared_dates": 1406,
+    "min_ratio": 0.6314,
+    "median_ratio": 0.7481,
+    "share_below_0_98": 0.915
+   },
+   {
+    "ticker": "ANCFX",
+    "reading": "adjusted",
+    "shared_dates": 1481,
+    "min_ratio": 0.475,
+    "median_ratio": 0.6605,
+    "share_below_0_98": 0.92
+   },
+   {
+    "ticker": "AWSHX",
+    "reading": "adjusted",
+    "shared_dates": 1481,
+    "min_ratio": 0.47,
+    "median_ratio": 0.6442,
+    "share_below_0_98": 0.92
+   },
+   {
+    "ticker": "BALCX",
+    "reading": "adjusted",
+    "shared_dates": 1036,
+    "min_ratio": 0.7471,
+    "median_ratio": 0.7766,
+    "share_below_0_98": 0.883
+   },
+   {
+    "ticker": "CAIBX",
+    "reading": "adjusted",
+    "shared_dates": 1481,
+    "min_ratio": 0.7162,
+    "median_ratio": 0.7901,
+    "share_below_0_98": 0.92
+   },
+   {
+    "ticker": "CPXIX",
+    "reading": "adjusted",
+    "shared_dates": 1392,
+    "min_ratio": 0.7348,
+    "median_ratio": 0.8585,
+    "share_below_0_98": 0.905
+   },
+   {
+    "ticker": "CWGIX",
+    "reading": "adjusted",
+    "shared_dates": 1563,
+    "min_ratio": 0.5847,
+    "median_ratio": 0.6857,
+    "share_below_0_98": 0.871
+   },
+   {
+    "ticker": "DFLVX",
+    "reading": "adjusted",
+    "shared_dates": 1407,
+    "min_ratio": 0.7859,
+    "median_ratio": 0.9179,
+    "share_below_0_98": 0.786
+   },
+   {
+    "ticker": "DFREX",
+    "reading": "adjusted",
+    "shared_dates": 1344,
+    "min_ratio": 0.7893,
+    "median_ratio": 0.9136,
+    "share_below_0_98": 0.908
+   },
+   {
+    "ticker": "DISVX",
+    "reading": "adjusted",
+    "shared_dates": 1242,
+    "min_ratio": 0.7622,
+    "median_ratio": 0.8489,
+    "share_below_0_98": 0.9
+   },
+   {
+    "ticker": "FCNTX",
+    "reading": "adjusted",
+    "shared_dates": 1528,
+    "min_ratio": 0.4191,
+    "median_ratio": 0.7788,
+    "share_below_0_98": 0.887
+   },
+   {
+    "ticker": "FINFX",
+    "reading": "adjusted",
+    "shared_dates": 1568,
+    "min_ratio": 0.4691,
+    "median_ratio": 0.6567,
+    "share_below_0_98": 0.872
+   },
+   {
+    "ticker": "MEIIX",
+    "reading": "adjusted",
+    "shared_dates": 1568,
+    "min_ratio": 0.4931,
+    "median_ratio": 0.6152,
+    "share_below_0_98": 0.869
+   },
+   {
+    "ticker": "NFFFX",
+    "reading": "adjusted",
+    "shared_dates": 1227,
+    "min_ratio": 0.6917,
+    "median_ratio": 0.8381,
+    "share_below_0_98": 0.837
+   },
+   {
+    "ticker": "PCBIX",
+    "reading": "adjusted",
+    "shared_dates": 1283,
+    "min_ratio": 0.6358,
+    "median_ratio": 0.8381,
+    "share_below_0_98": 0.84
+   },
+   {
+    "ticker": "PRILX",
+    "reading": "adjusted",
+    "shared_dates": 1121,
+    "min_ratio": 0.4079,
+    "median_ratio": 0.5647,
+    "share_below_0_98": 0.887
+   },
+   {
+    "ticker": "SGIIX",
+    "reading": "adjusted",
+    "shared_dates": 1535,
+    "min_ratio": 0.5851,
+    "median_ratio": 0.7422,
+    "share_below_0_98": 0.887
+   },
+   {
+    "ticker": "VEIRX",
+    "reading": "adjusted",
+    "shared_dates": 1177,
+    "min_ratio": 0.5264,
+    "median_ratio": 0.6969,
+    "share_below_0_98": 0.831
+   },
+   {
+    "ticker": "WGIFX",
+    "reading": "adjusted",
+    "shared_dates": 1520,
+    "min_ratio": 0.5791,
+    "median_ratio": 0.684,
+    "share_below_0_98": 0.867
+   },
+   {
+    "ticker": "WMFFX",
+    "reading": "adjusted",
+    "shared_dates": 1414,
+    "min_ratio": 0.4819,
+    "median_ratio": 0.6431,
+    "share_below_0_98": 0.859
+   },
+   {
+    "ticker": "ACTDX",
+    "reading": "not_adjusted",
+    "shared_dates": 70,
+    "min_ratio": 0.9988,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "AMCFX",
+    "reading": "not_adjusted",
+    "shared_dates": 526,
+    "min_ratio": 0.9957,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "CMLAX",
+    "reading": "not_adjusted",
+    "shared_dates": 503,
+    "min_ratio": 0.9979,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "DFCEX",
+    "reading": "not_adjusted",
+    "shared_dates": 1405,
+    "min_ratio": 0.9974,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "DFIEX",
+    "reading": "not_adjusted",
+    "shared_dates": 1523,
+    "min_ratio": 0.9867,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "FLTRX",
+    "reading": "not_adjusted",
+    "shared_dates": 1575,
+    "min_ratio": 0.9991,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "FSKAX",
+    "reading": "not_adjusted",
+    "shared_dates": 1562,
+    "min_ratio": 0.998,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "FSMAX",
+    "reading": "not_adjusted",
+    "shared_dates": 1438,
+    "min_ratio": 0.9965,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "FSPSX",
+    "reading": "not_adjusted",
+    "shared_dates": 1467,
+    "min_ratio": 0.9959,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "FSSNX",
+    "reading": "not_adjusted",
+    "shared_dates": 1282,
+    "min_ratio": 0.995,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "FXAIX",
+    "reading": "not_adjusted",
+    "shared_dates": 1480,
+    "min_ratio": 0.9982,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "MAMTX",
+    "reading": "not_adjusted",
+    "shared_dates": 1491,
+    "min_ratio": 0.999,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "MISIX",
+    "reading": "not_adjusted",
+    "shared_dates": 719,
+    "min_ratio": 0.9895,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "NEA",
+    "reading": "not_adjusted",
+    "shared_dates": 277,
+    "min_ratio": 0.9879,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "NHMRX",
+    "reading": "not_adjusted",
+    "shared_dates": 1575,
+    "min_ratio": 0.9993,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "PDBZX",
+    "reading": "not_adjusted",
+    "shared_dates": 1538,
+    "min_ratio": 0.9979,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "PTTAX",
+    "reading": "not_adjusted",
+    "shared_dates": 1444,
+    "min_ratio": 0.9977,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "VBIRX",
+    "reading": "not_adjusted",
+    "shared_dates": 982,
+    "min_ratio": 0.9985,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "VFIAX",
+    "reading": "not_adjusted",
+    "shared_dates": 1570,
+    "min_ratio": 0.9982,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "VTSAX",
+    "reading": "not_adjusted",
+    "shared_dates": 1471,
+    "min_ratio": 0.9998,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "VWIUX",
+    "reading": "not_adjusted",
+    "shared_dates": 1489,
+    "min_ratio": 0.9996,
+    "median_ratio": 1.0,
+    "share_below_0_98": 0.0
+   },
+   {
+    "ticker": "ABALX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "AGTHX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "AIVSX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "AMBFX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "AMCPX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "AMECX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "ANEFX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "ANWPX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "BAGIX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "CAFAX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "CFNAX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "CGFAX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "CISIX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "CIVIX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "CNPAX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "COSIX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "CSRIX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "CWIAX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "CWMAX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "DFSTX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "DODFX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "DODIX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "FBALX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "FBGRX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "FEMKX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "FKGRX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "FOCPX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "FSMDX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "FTBFX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "GFFFX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "HLMEX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "JGVVX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "JLGMX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "MHYIX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "MIEKX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "MRSIX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "MWTIX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "NEWFX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "NOSIX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "NPSRX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "NRGSX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "ODMAX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "OIEJX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "PHYQX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "PIMIX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "PONAX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "PONPX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "PTRQX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "PTTRX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "SMCWX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "SWAGX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "VAFAX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "VEXAX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "VFIDX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "VGHAX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "VIMAX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "VTIVX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "VWAHX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   },
+   {
+    "ticker": "VWEHX",
+    "reading": "not_validated",
+    "shared_dates": null,
+    "min_ratio": null,
+    "median_ratio": null,
+    "share_below_0_98": null
+   }
+  ]
+ },
+ "against_earlier": {
+  "differs": [],
+  "round_72": {
+   "series_read_in_72_in_the_population": 34,
+   "confirmed_adjusted_in_72": 19,
+   "confirmed_not_in_72": 15,
+   "read_here_the_same": 34,
+   "read_in_72_unreadable_here": 0,
+   "unreadable_in_72_read_here": 8,
+   "unreadable_in_72_read_here_adjusted": [
+    "BALCX",
+    "NFFFX"
+   ],
+   "unreadable_in_72_read_here_not_adjusted": [
+    "ACTDX",
+    "AMCFX",
+    "CMLAX",
+    "FXAIX",
+    "MISIX",
+    "NEA"
+   ]
+  },
+  "round_71": {
+   "adjusted_in_71_in_the_population": 49,
+   "not_adjusted_in_71_in_the_population": 52,
+   "round_71_adjusted_read_adjusted_here": 21,
+   "round_71_adjusted_not_validated_here": 28,
+   "round_71_not_adjusted_read_not_adjusted_here": 21,
+   "round_71_not_adjusted_not_validated_here": 31
+  },
+  "note": "differs is empty: no series read here contradicts round 72 or round 71. Series unreadable in one round and read in the other are not differences and are counted in round_72 / round_71."
+ },
+ "reach": {
+  "priced_holding_account_days": 267011,
+  "measured_account_days": 1874,
+  "ratio_bands": {
+   "basis": "ratio = build close / cached Close on the same date, per holding row; counts only; the adjusted funds; dates with ratio < 0.98",
+   "priced_holding_rows": {
+    "n": 267011,
+    "lt_0_9": 264374,
+    "lt_0_75": 233799,
+    "lt_0_5": 1698
+   },
+   "measured_rows": {
+    "n": 2235,
+    "lt_0_9": 1586,
+    "lt_0_75": 880,
+    "lt_0_5": 0
+   },
+   "measured_distinct_account_days_min_ratio_per_day": {
+    "n": 1874,
+    "lt_0_9": 1225,
+    "lt_0_75": 568,
+    "lt_0_5": 0
+   }
+  },
+  "detail": {
+   "adjusted_funds": 21,
+   "priced_rows_all_dates": 269728,
+   "priced_rows_on_a_date_with_a_ratio": 269728,
+   "priced_distinct_account_days_lt_0_98": 254481,
+   "measured_rows_lt_0_98": 2235,
+   "measured_rows_all_dates_of_these_funds": 2682,
+   "holding_rows_of_these_funds_with_no_value_not_counted": 294846,
+   "of_which_dated_before_2020_06_29": 213803,
+   "round_71_for_comparison": {
+    "priced_holding_account_days": 287912,
+    "measured_account_days": 3187
+   },
+   "definition": "priced_holding_account_days = (account, date, security) rows with a value, on a date where the ratio < 0.98, summed over the adjusted funds; measured_account_days = distinct (account, date) among them with a non-null return in the served daily returns (107316 account-days are measured in the whole serve)."
+  },
+  "floor": "A FLOOR: only the funds read adjusted here; the funds with no cached close (121), the 59 not validated, and holding rows with no value are not in it."
+ },
+ "unsized": {
+  "no_cached_close": 121,
+  "no_cached_close_of_which_with_a_reinvestment_row": 97,
+  "no_cached_close_by_reason": {
+   "no_file": 120,
+   "marker_without_bars": 1
+  },
+  "not_validated": 59,
+  "note": "Funds with no cached close are not in the population or the reach; the 59 not validated (every one has fewer than 5 compared cells, because the cache window starts 2020-06-29 and most of the fund's row dates precede it) are in the population and unsized."
+ },
+ "headline": "Over 101 funds (944 compared reinvestment dates) the custodian's price equals the cached unadjusted close within 0.5 percent on the row's own date for 794, on the previous trading day for 744, on the next for 579; by fund 17 follow the same date, 15 the previous day, 69 are undecided (59 of them for fewer than 5 compared dates). The nine reproduce round 72 (93 cells: 45 / 88 / 32; 6 of 9 funds `before`, 3 undecided) but the other 92 funds do not behave as the nine: 17 same, 9 before, 66 undecided, and on the cells where only one date matches the nine are 39 of 39 `before` while the rest are 105 same and 77 before. Convention under the rule written first: `undetermined` (the 32 decided funds are under one third of the 101); with that clause removed it is `no_single_convention` (same 17, before 15; no kind, build-group or period split gives a class convention). Sizing: the cached close is validated for 42 funds; 21 read adjusted, 21 not adjusted, 0 undecided, 59 not validated (unsized); the 20 validated substituted funds all read not adjusted (control holds); 0 series differ from round 72 or round 71. Reach, a floor: 267011 priced holding account-days and 1874 measured account-days sit on dates where an adjusted fund's build close is below 0.98 of the cached close.",
+ "not_established": [
+  "The posting convention is not established: the funds are split (same 17, before 15 among 32 decided) and 69 of 101 funds are undecided; 59 have fewer than 5 compared dates because the cache starts 2020-06-29 and most reinvestment rows precede it (791 of 1740 cells are outside the cache window). A fund-family or sponsor effect could not be tested: no sponsor field is on disk.",
+  "Equal on all three dates for 458 of 944 cells: a fund's close often moves less than 0.5 percent over a day, so most cells cannot tell the dates apart; the winner rests on the minority of cells where they differ.",
+  "The cached close validates a fund by matching the custodian price on at least one of the three dates on reinvestment dates (2020-06-29 on); that it is unadjusted for the fund's whole shared history is inferred from that match, not read date by date.",
+  "The 59 unsized funds and the 121 with no cached close stay untested here: their round 71 reading (28 of the 59 read adjusted, 31 not adjusted) is neither confirmed nor refuted. The reach counts holdings that rest on a close below the cached close by more than 2 percent; it is not a return error and not a count of served wrong returns.",
+  "An adjustment of under 2 percent over the whole shared window would read not_adjusted; ACTDX (the one non-substituted fund read not adjusted) has 70 shared dates only.",
+  "Why the custodian row date relates to the vendor's bars as it does (ex-date, record date, pay date) is not read from any custodian field; the build close, the cache and the served files are the round 34 / 2026-10-09 vintages on disk; nothing was fetched."
+ ]
+}

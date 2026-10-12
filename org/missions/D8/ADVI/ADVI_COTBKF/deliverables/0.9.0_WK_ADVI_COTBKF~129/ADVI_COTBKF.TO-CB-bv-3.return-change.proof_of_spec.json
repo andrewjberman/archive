@@ -1,0 +1,98 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bv-3",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bv-3.return-change.md",
+  "group": "OTHER",
+  "vintage_commit": "2f22badbbf"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~129",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round74.md",
+  "vintage_commit": "2f22badbbf",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bv-3.return-change.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~129/RETURN_CHANGE.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "local measurement record on copies; nothing served, applied or written to any bucket; no product file edited",
+   "artifact_covered_by": [
+    "CB74bv3-AC1",
+    "CB74bv3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~129/RETURN_CHANGE.csv",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "per-fund counts of the 19 moved validated funds; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB74bv3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~129/RETURN_CHANGE.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "how the two builds were made, the census diff and the tables; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB74bv3-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB74bv3-AC1",
+   "criterion_verbatim": "the baseline reproduces the served returns exactly, the variant moved the validated funds, and the changed account-days are counted in three bands (`band_sum` equals `changed`). The issuer reads `other_securities_moved`.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~129/RETURN_CHANGE.json',encoding='utf-8'));b=d['baseline'];v=d['variant'];c=d['changed'];print('RETURN-CHANGE baseline_reproduces=%s baseline_differing=%d validated_funds=%d securities_moved=%d other_securities_moved=%d account_days_compared=%d changed=%d under_1bp=%d bp_1_to_10=%d over_10bp=%d band_sum=%d measured_to_blank=%d blank_to_measured=%d'%(b['reproduces'],b['differing'],d['validated_funds'],v['securities_moved'],v['other_securities_moved'],d['account_days_compared'],c['total'],c['under_1bp'],c['bp_1_to_10'],c['over_10bp'],c['under_1bp']+c['bp_1_to_10']+c['over_10bp'],d['measured_to_blank'],d['blank_to_measured']))\"",
+   "expect": "RETURN-CHANGE baseline_reproduces=True baseline_differing=0",
+   "output_evidence": "RETURN-CHANGE baseline_reproduces=True baseline_differing=0 validated_funds=33 securities_moved=19 other_securities_moved=0 account_days_compared=107316 changed=1575 under_1bp=1054 bp_1_to_10=425 over_10bp=96 band_sum=1575 measured_to_blank=0 blank_to_measured=8 (rc 0)",
+   "denominator": "baseline 1,691,729 of 1,691,729 rows equal the served table, 107,316 of 107,316 measured rows equal, 0 differ beyond 1e-12; 19 of 19 left-on-store validated funds moved, 0 of 14 control funds moved; 1,575 of 107,316 account-days measured in both builds change beyond the 1e-9 floor",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB74bv3-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the baseline is shown equal to the served table before any variant number is read; the variant changes the validated funds' price and nothing else, by a copy and not a code edit; a difference below the stated floor is not counted as a change; the number is stated as counts in bands for the validated funds only and is not offered as the size of the whole defect; nothing was served.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read RETURN_CHANGE.json (baseline, variant, changed, not_established, headline), RETURN_CHANGE.md and RETURN_CHANGE.csv",
+   "output_evidence": "baseline equals served (0 of 1,691,729 differ; 107,316 measured both) and equals w104's, checked before the variant analysis ran (the analysis script stops if it does not); variant = a copy of the census csv with 19 class cells changed (line diff: 19 lines), run through a scratch wrapper that sets the module constant, no product file edited; 19 securities moved, 0 others, 0 of 14 control; floor 1e-9 stated, 109 non-zero differences at or below it not counted; stated for the validated funds only, 237 of 270 fund series not validated; no S3 write, serve or vendor call",
+   "denominator": "107,316 account-days compared; 1,575 changed; 19 moved funds of which 5 carry measured exposure",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "ADVI_COTBKF-D2-W129-S1"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~129/ADVI_COTBKF.TO-CB-bv-3.return-change.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB74bv3-AC1)",
+   "result": "RETURN-CHANGE baseline_reproduces=True baseline_differing=0 validated_funds=33 securities_moved=19 other_securities_moved=0 account_days_compared=107316 changed=1575 under_1bp=1054 bp_1_to_10=425 over_10bp=96 band_sum=1575 measured_to_blank=0 blank_to_measured=8"
+  }
+ ]
+}

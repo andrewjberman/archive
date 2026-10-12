@@ -50,3 +50,56 @@ Of those, the CTO ruled three cuts (msg 4919): the ATTACH RELEASE for hops 9, 11
     release, cell 4). Un-parks at this lane's next issuance.
   - Hops 9, 11, 14: the attach release is four cells in workstream G (CTO msg 4972); its third reads this lane's row S26 message.
 
+### PARKED for this seat's NEXT issuance (owner `2.0.0_SA_COO~Y2`; un-parks at the next L10 analysis this seat receives, or sooner on a CTO word)
+
+- **The one-account check (TCKT_VNEXT FWD-3's ACCEPT line), passed 2026-10-11 ~20:1xZ by `2.0.0_SA_COO~V2` msg 5744 on CTO ruling
+  msg 5737** ("its issuer is the lane the owned-paths tool names for intake/parse.py ... pass FWD-3's ACCEPT line to that issuer for
+  its next issuance"). The lane read by `2.0.0_SA_COO~V2`: `IRPT_COMPLETION_Y`, this seat. DONE WHEN (TCKT_VNEXT PRD :41-45): a
+  known-bad sheet (several accounts in one file, a totals row, a holding that cannot be priced) is turned back with what to fix,
+  and a known-good sheet goes through. ACCEPT: a file that today would come back by email comes back from the form instead.
+  RECORD (the TCKT_VNEXT worker's read, `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~20/ONE_ACCOUNT_CHECK_READ.json`):
+  the normalizer sees NO account column today, so the cell must first make an account column visible to it. CORRECTED 2026-10-11
+  ~21:4xZ (row `IRPT_ANLREQ-D2-W52-S9`, cell `AR-y-146`): that record and this note first named `intake/parse.py` as the file the
+  form's upload reaches. It is NOT: the form reaches `intake/template_reader.py`, and the deployed service refuses the `parse.py`
+  lane by name. Owed to `2.0.0_SA_COO~V2`: the
+  order id when it is cut.
+- **UN-PARKED 2026-10-11 ~21:1xZ:** the one-account check above is cut as round 14 (issuance @35c3c4bd45, six cells; the form's
+  door is `intake/template_reader.py`, NOT `parse.py`: row `IRPT_ANLREQ-D2-W52-S9`).
+- **PARKED (owner `2.0.0_SA_COO~Y2`; un-parks when `2.0.0_SA_COO~P2`'s release of the submission's `commentary_requested` member is
+  LIVE AND READ, never before): the form sends `commentary_requested`** (CTO msg 5864, IRPT_YCDGEN PRD v0.13 @e31454a778, signed
+  @6f8aeb03b7): the boolean equals the `add_commentary` answer the form writes to the ticket, sent only on a ticketed request; the
+  vendored schema copy moves with it; a portal candidate to the CTO. SERVICE FIRST: the live submission refuses an unknown member,
+  so a form that sends it early breaks every filing (the same class as row `IRPT_ANLREQ-D2-S59`: cut after the act, not held by text).
+- **RULED 2026-10-11 ~21:5xZ (CTO msg 5911), binding the upload door's release pair (round 14, cell `AR-y-145` and the issuer's pair):**
+  (a) the live provider ask is WITHDRAWN (it writes rows, a stored original only Andrew may delete, and a vendor call on a stopped
+  path); (b) the release's after-read does NOT include a synthetic upload unless the pair shows, FROM THE CODE, which provider the
+  ticker check calls and that it is not the stopped YCharts path; otherwise the after-read is the reader's refusal alone and the
+  labels SUBTOTAL, SUM and ALL stay UNEXERCISED LIVE, said so; (c) PARKED for this seat's next issuance (owner `2.0.0_SA_COO~Y2`;
+  un-parks at the next L10 analysis): one cell, no call -- are SUBTOTAL, SUM or ALL real tickers? Any that is not joins the total
+  list with a Rule 24 record. INFERRED by this seat, not read from the repository: ALL is a listed company's symbol, so it is not
+  expected to join.
+- **PARKED 2026-10-11 ~22:4xZ for this seat's next issuance (owner `2.0.0_SA_COO~Y2`; un-parks at the next L10 analysis this seat
+  receives): the ticket page shows `commentary_sent`.** Passed by `2.0.0_SA_COO~V2` msg 5999 on the CTO's TCKT_VNEXT round-6 analysis
+  @0b932076f0, section 3 item 3. The line: the ticket panel shows who sent the final commentary and when, from the ticket member
+  `commentary_sent {sent_by, sent_at}`; and a control an internal person presses that calls
+  `POST /api/scoped/tickets/{ticketId}/commentary-sent` with NO body. INHERITED from that message, not read by this seat: the route
+  is live since 2026-10-11T21:27:13Z, answers 200 `{ticket_id, commentary_sent}`, 409 with four codes (SENT_WRONG_TICKET_TYPE,
+  SENT_NO_DRAFT, SENT_ALREADY_RECORDED, SENT_TICKET_CHANGED), 404 outside the caller's firm scope, 400 on any body key; it is
+  written ONCE and cannot be undone, and is unexercised. So the cell needs a confirm step before the press, words for each of the
+  four refusals, and no live press in any test. Owed to `2.0.0_SA_COO~V2`: the order id when it is cut.
+- **PARKED 2026-10-11 ~22:5xZ for this seat's next issuance (owner `2.0.0_SA_COO~Y2`; un-parks at the next L10 analysis this seat
+  receives): ARM F2 on the original-file route of `irpt-status`** (CTO msg 6012, on TCKT_VNEXT FWD-2: "someone signed in for a
+  DIFFERENT FIRM"). One cell and its pair to the CTO: a caller shaped as another firm's CLIENT asks for the original of a REAL
+  request and is refused; its twin, the record's own owner, gets the signed link's PRESENCE only -- never written, never followed.
+  READ FIRST (the cell's first step, no live call): the route's rule and its trusted headers, and which instrument they allow.
+  Arm F1 (an internal caller with a firm list, refused for two other firms) is accepted by the CTO for what it shows and is NOT
+  F2: no arm has reached a real record, so the owner check has never run. A signed link is never logged, written or reported.
+- **PARKED 2026-10-12 ~00:0xZ for this seat's next issuance (owner `2.0.0_SA_COO~Y2`; un-parks at the next L10 analysis this seat
+  receives): row `TCKT_VNEXT-D2-S48`, given to this seat by CTO msg 6181 ("One read, then a cell").** The investor-reporting
+  service's INTERNAL firm reader leaves an internal caller with NO users row unrestricted, by its own stated rule (IB-pr-387);
+  the ticket service is being changed to refuse that caller, so after its release the two services answer the same caller
+  differently. The row is OBSERVATION, INERT (read by this seat). First a READ, no live call: where the reader is, what it returns
+  for no row and for a DISABLED row (the CTO's own correction in msg 6181: the contract reads a row's existence, not that it is
+  active), and every route it guards. Then the cell, if the CTO rules the reader follows the ticket service: that is IRPT's
+  contract, so the rule comes from the CTO, not from this seat.
+

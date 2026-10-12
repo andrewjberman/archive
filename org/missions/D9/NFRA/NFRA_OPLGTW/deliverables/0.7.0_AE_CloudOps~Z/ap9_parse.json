@@ -1,0 +1,68 @@
+{
+  "deployed_accepts_13": true,
+  "prior_accepts_13": false,
+
+  "_contract": "OG-ap-9 step 5 writes exactly deployed_accepts_13 and prior_accepts_13. The underscore keys are provenance and are not part of the contract.",
+  "_claim": "measured",
+  "_method": "SESSION-FREE (COO half condition B): each package's OWN app/data_entitlement.py was imported and its OWN parse_scope called. No session, no live Lambda invoke, no AWS call, and NO GRANT WRITTEN OR REVOKED. Probe: ap9_parse_probe.py, run once per package in its own process so neither package's modules could bleed into the other's import cache.",
+
+  "_packages": {
+    "deployed": {
+      "zip": "ap9_deployed.zip",
+      "sha256_b64": "894RI63/G4h019yxAGP7E+wQzrpZIfJoMaLhzpTTyck=",
+      "equals_live_CodeSha256": true
+    },
+    "prior": {
+      "zip": "ap9_prior.zip",
+      "sha256_b64": "ZyYCPPyP5CV53eZP+UJHIgAjq834J4OsvePgmS6k8rI=",
+      "equals_the_prior_live_CodeSha256": true,
+      "note": "Downloaded from get-function BEFORE the apply and hash-verified against the then-live CodeSha256, so it is provably the bytes the function was running -- not merely some older build."
+    }
+  },
+
+  "_the_scope_parsed": {
+    "masters": ["08242234"],
+    "datasets": ["dim_position"],
+    "accounts": {"08242234": ["ACC1"]},
+    "columns": {"dim_position": ["col1"]},
+    "operations": ["list"],
+    "dates": {"mode": "rolling_complete_window", "calendar_months": 13}
+  },
+
+  "_results": {
+    "deployed": {
+      "accepted": true,
+      "calendar_months_on_result": 13,
+      "reading": "Not merely tolerated: the parsed Scope carries calendar_months = 13, so the value was read through, not ignored."
+    },
+    "prior": {
+      "accepted": false,
+      "error_type": "Malformed",
+      "error": "a rolling_complete_window grant carries only its mode",
+      "reading": "The prior REFUSES, and its message names the cause: its copy admits only `mode` on a rolling grant. This is row W42-S1's defect reproduced directly on the deployed-then bytes."
+    }
+  },
+
+  "_THE_ISOLATING_CONTROL_AND_WHY_IT_MATTERED": {
+    "control": "The SAME scope with dates = {\"mode\": \"rolling_complete_window\"} and NO calendar_months was parsed by both packages.",
+    "deployed_accepts_plain_rolling": true,
+    "prior_accepts_plain_rolling": true,
+    "refusal_is_specific_to_calendar_months": true,
+    "why": "parse_scope refuses a scope for many reasons -- a master outside the contract, a wrongly shaped accounts or columns map, a disabled operation. A refusal of the 13-month scope ALONE would therefore not show that calendar_months is the cause. Because the prior ACCEPTS the plain rolling scope and refuses only the 13-month one, the refusal is isolated to calendar_months.",
+    "it_actually_fired": "Three times. The first probe passed accounts as a list and both packages refused on scope.accounts; the second shaped accounts correctly and both refused on scope.columns. In each round accepts_plain_rolling was ALSO false, so refusal_is_specific_to_calendar_months read false and the probe correctly declined to call the negative arm satisfied. Without that control, the prior's refusal in those rounds would have looked exactly like the wanted result while proving nothing."
+  },
+
+  "_corroboration_from_source_independent_of_the_parse": {
+    "deployed_mentions_calendar_months": true,
+    "deployed_has_parse_rolling_window": true,
+    "prior_mentions_calendar_months": false,
+    "prior_has_parse_rolling_window": false,
+    "reading": "A plain token census over each package's data_entitlement.py agrees with the parse result from a different direction: the deployed copy mentions calendar_months 19 times and defines parse_rolling_window; the prior mentions it 0 times and has no such function."
+  },
+
+  "_probe_scaffolding_declared": {
+    "stub": "boto3 and botocore are not installed in the probe's interpreter, and the module imports them at module scope, so a meta_path find_spec finder fabricates any boto3.*/botocore.* module on demand.",
+    "why_it_cannot_change_the_verdict": "parse_scope is pure dict validation -- it reads the scope's own keys and the module's own constants and makes no AWS call -- and the identical stub is applied to BOTH packages, so the comparison stays symmetric.",
+    "failures_that_measured_nothing_and_were_not_reported_as_results": "Four load failures preceded the real read, each identical for both packages and therefore evidence about the probe rather than the packages: a relative-import error (the module must load as app.data_entitlement), a missing boto3, a cascade of boto3 submodules (fixed by a finder rather than by hand-listing), a legacy finder API silently ignored on Python 3.14, and a stub attribute that would not accept keyword arguments."
+  }
+}

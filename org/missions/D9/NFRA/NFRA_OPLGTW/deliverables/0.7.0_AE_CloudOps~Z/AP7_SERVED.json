@@ -1,0 +1,58 @@
+{
+  "to_id": "NFRA_OPLGTW.TO-OG-ap-7",
+  "cell": "OG-ap-7",
+  "criterion": "laptop CTO ruling @de13ed0e00 term 3 -- a GET on /hx/teams/teams returns 200 where it returns 404 today",
+
+  "status_before": 404,
+  "status_after": 200,
+  "method": "host-side HTTP request through the installed app on the gateway instance (i-07dccb1615503ac99), carrying the one static TEAMS_BEARER the route accepts, read from the service's own .env on the host. Run by one SSM command; the bearer was held in a local variable and never printed, logged or returned.",
+  "ssm_command_id": "8eac2939-dc33-41b1-84b6-424604468b15",
+  "_ssm_note": "status=Success. Program ap7_served_read.py, output ap7_served_read.out. The pre-deploy route census that establishes status_before is a different command, 11bbeef3-e868-44d7-8242-419aabde530a.",
+  "_claim": "measured",
+
+  "_status_after_evidence": {
+    "path": "/hx/teams/teams",
+    "status": 200,
+    "bytes": 485,
+    "json": true,
+    "note": "A 200 with a 485-byte JSON body, not an empty 200: the Graph call behind the route succeeded, so the token carried the needed scopes in practice."
+  },
+
+  "_status_before_IS_AN_INFERENCE_NOT_A_DIRECT_READ": {
+    "value": 404,
+    "why_not_measured_directly": "This seat did not take a paired pre-deploy HTTP read of this path. That is a gap in my own method and is recorded rather than papered over: the before-state capture read the route TABLE, not the route's HTTP status.",
+    "why_404_is_nonetheless_sound": "The pre-deploy route census (ap7_verify.py before, ssm 11bbeef3-e868-44d7-8242-419aabde530a) enumerated the live Starlette app's routes and found all three new paths ABSENT: '/hx/teams/teams present BEFORE: False'. A path absent from a Starlette app's route table cannot return 200 -- an unmatched path returns 404 -- so 404 follows deductively from a measured absence rather than from an assumption.",
+    "corroborating_record": "COMM_ASSIST row Z-S11 records the live gateway answering 404 on these paths, and the laptop CTO's ruling term 3 states it 'returns 404 today'. Two independent records agree with the inference.",
+    "honest_summary": "status_after is MEASURED. status_before is INFERRED from a measured route absence plus two records, and is labelled so."
+  },
+
+  "_all_three_new_routes_probed": {
+    "note": "Term 3 names the first route; the ask's blast radius covers all three, so all three were probed, with and without the bearer.",
+    "/hx/teams/teams": {
+      "with_bearer": {"status": 200, "bytes": 485, "json": true},
+      "no_bearer": {"status": 401, "error": "unauthorized"}
+    },
+    "/hx/teams/teams/x/channels": {
+      "with_bearer": {"status": 400, "error": "invalid_team_id"},
+      "no_bearer": {"status": 401, "error": "unauthorized"},
+      "reading": "400 rather than 404 proves the route is LIVE and validating; 'x' is not a valid team id. This is the REFUSED branch of the ask's section 4 working as signed."
+    },
+    "/hx/teams/channels/x/y/messages": {
+      "with_bearer": {"status": 400, "error": "invalid_team_id"},
+      "no_bearer": {"status": 401, "error": "unauthorized"},
+      "reading": "Same: live and validating, not absent."
+    }
+  },
+
+  "_both_branches_exercised_live": {
+    "admitted": "/hx/teams/teams with the bearer -> 200 with a JSON body.",
+    "refused": "every one of the three without the bearer -> 401 'unauthorized', and two of them with the bearer but a bad id -> 400 'invalid_team_id'. So the bearer gate and the id validation are both live, which is the ask's section 4 'both branches' read on the served plane rather than from the source.",
+    "not_exercised": "No valid team id or channel id was supplied, so no real channel content was fetched and nothing was written. All three routes are GET."
+  },
+
+  "_the_two_risks_I_named_in_the_ask_did_not_materialise": {
+    "403_tenant_consent": "NOT seen. A 200 with a real body means the tenant has consented the Teams scopes for the app registration.",
+    "409_stale_cached_token": "NOT seen. The cached refresh token for MS_INGEST_IDENTITY was evidently minted with the needed scopes.",
+    "per_COO_half_condition_B": "Either would have been a FINDING and an ARMED row, never a rollback. Neither occurred, so no row is owed on that account."
+  }
+}

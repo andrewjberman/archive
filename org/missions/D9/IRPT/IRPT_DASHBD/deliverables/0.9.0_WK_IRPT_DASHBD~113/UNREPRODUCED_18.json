@@ -1,0 +1,67 @@
+{
+  "to": "IRPT_DASHBD.TO-DB-b-140",
+  "worker": "0.9.0_WK_IRPT_DASHBD~113",
+  "denominator": 18,
+  "taking_the_18": "Re-ran worker ~111's own test on its inputs (worker ~108's private pickles): for each of the 51 flow-timing segments, the custodian-ledger (Black Diamond transactions tree, rows tagged Contribution or Withdrawal, by return date) segment total against the served account_return_daily external_flow segment total, tolerance max(1.00, 0.1 percent) as in ~111. 33 of 51 agree, 18 of 51 differ. Then day by day inside the 18, same tolerance: 50 flow days differ. Both counts reproduced; no STOP.",
+  "flow_days": {
+    "total": 130,
+    "differing": 50,
+    "basis": "total = served flow days (external_flow nonzero) inside the 18 segment windows, 130; each of the 130 also has custodian ledger rows on the same day (date sets equal, as ~111 found); differing = the days where the ledger day total differs from the served day flow, 50"
+  },
+  "how_the_served_flow_is_built": {
+    "read": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+    "facts": [
+      "lines 536-552 and 713-732: served external_flow comes from the custodian transaction feed fact_trn (one partition day at a time), classified by the 187-row code table and summed per account over cash legs whose class is EXTERNAL, FEE-MANAGEMENT or an inter-account leg; it does not read the Black Diamond transactions tree at all",
+      "line 706 and lines 702-705: advisory (management) fees are in the flow; administrative fee expense is classed as staying inside the return",
+      "lines 1305-1323: flow of a trading day is the sum over every custodian partition day after the prior trading day up to and including the day (carried days)",
+      "lines 746-794: in-kind legs valued at price times quantity enter only when external and valued"
+    ],
+    "consequence": "the two sides are independent sources: the served number is the custodian feed counted once per cash leg; the Black Diamond ledger is a separately landed copy"
+  },
+  "reads": {
+    "new_aws_reads": "yes, one: a re-read of the same Black Diamond transactions prefix worker ~108 read (49 Financial's own tree, GETs and LISTs only, 1878 date objects, rows kept for the 17 accounts of the 18 segments), because ~108's download kept 12 columns and dropped the transaction id, the portfolio group and the object each row sat in, which the cause turned on (row IRPT_DASHBD-D2-W113-S1)",
+    "reused_downloads": "worker ~108's served-gold partitions and per-segment tables; worker ~111's scripts",
+    "read_denied": [],
+    "no_other_prefix": true,
+    "bloomberg_calls": 0
+  },
+  "causes": [
+    {
+      "cause": "BD_LEDGER_ROW_REPEATED_PER_PORTFOLIO_GROUP",
+      "segments": 18,
+      "flow_days": 50,
+      "rule": "The Black Diamond transactions copy holds one row per (transaction id, portfolio group): a transaction attached to k portfolio groups of the account is landed k times, identical in every column except portfolio_group, in the one date object, from one source file and one ingest stamp. Summing the ledger rows by return date therefore counts a transaction k times. Count each transaction id once and the ledger day total (Contribution positive, Withdrawal negative, management fee rows included) equals the served day flow to the cent. Re-applied to the 50 differing flow days: 50 of 50 reproduce to the cent (tolerance 0.005), k running from 2 to 9 per day and constant within a segment, equal to the number of portfolio groups of the account in 18 of 18 segments. Re-applied to all 130 flow days of the 18 segments: 129 of 130 reproduce to the cent; the one that does not is outside the 50 (see notes). Control that the key is the transaction id and not row identity: a transaction id maps to one amount, one direction and one return date in 398 of 398 ids read, and the 79 days that already agreed (several genuinely separate rows of the same amount on one day, each its own id) still agree under the rule, which a 'drop identical rows' rule would have broken. The rows on the differing days are WITHDRAWN (see withdrawn_figures)."
+    }
+  ],
+  "no_cause": {
+    "segments": 0,
+    "flow_days": 0,
+    "why": ""
+  },
+  "does_it_matter_to_the_tieout": {
+    "cause_BD_LEDGER_ROW_REPEATED_PER_PORTFOLIO_GROUP": "Neither a difference in what external flow means nor a defect in the served flow: the served number counts each cash leg once and agrees with the ledger counted once on 129 of 130 flow days; the difference is the ledger copy's own repetition of a transaction across portfolio groups, so no defect row is opened against the served flow. It does mean that once the ledger is read by transaction id, the dollars of all 18 segments reproduce the served dollars day by day; the flow-timing question itself is not touched and stays contested."
+  },
+  "notes": [
+    "One flow day of the 18 (in one segment) is not among the 50 because it differs by less than the 0.1 percent tolerance worker ~111 counted at; at the cent the ledger carries one small 'Other Fee' expense row, tagged Withdrawal by Black Diamond, that the served flow does not carry. That is a definition difference of the kind line 706 of the producer describes (administrative fee expense left inside the return); the fact_trn row and its class were not read here, so the class is NOT_ESTABLISHED. The segment keeps its place under the cause above, which explains all of the segment's days in the 50 (row IRPT_DASHBD-D2-W113-S3).",
+    "Excluding fee rows could not reconcile the 50 days (~111) because the fee rows were repeated with the rest of the day, not because they were wrong.",
+    "Not established: why a transaction is attached to some portfolio groups and not others on other days (79 of 80 agreeing days show one copy). The rule needs only the transaction id."
+  ],
+  "tieout_state": {
+    "total": 244,
+    "classed": 185,
+    "contested": 51,
+    "unclassed": 8,
+    "unreproduced_within_contested": 0,
+    "called_closed": false,
+    "composition": "unchanged from DB-b-138: classed 154 + 31, contested 51 (the 18 are a subset of the 51), unclassed 8. No segment is moved to classed by this order; the flow-timing question is not ruled on."
+  },
+  "client_figures": 0,
+  "s3_writes": 0,
+  "withdrawn_figures": [
+    {
+      "figure": "In causes[0].rule (the rule text of cause BD_LEDGER_ROW_REPEATED_PER_PORTFOLIO_GROUP), the sentence that began 'The rows on the differing days are' gave the tally of the 50 differing flow days by row type: cash deposits 22 days, cash withdrawals 13, management fee rows 11, a mixed cash deposit and management fee day 1, a transfer-in journal 1, a mixed cash withdrawal and transfer-out journal day 1, a transfer of assets in 1 (22, 13, 11 and 4 single mixed or transfer days).",
+      "why": "No tracked script computes it. It came from a console command that was never saved as a file. The tracked scripts reproduce the 50 differing days and the count-each-transaction-id-once rule (50 of 50 to the cent) but do not classify the rows of those days by type, so the tally cannot be re-run from the record.",
+      "withdrawn_by": "1.0.0_SA_CTO~DELL2 ROUND-78 ANALYSIS item 4; row IRPT_DASHBD-D2-W118-S1"
+    }
+  ]
+}

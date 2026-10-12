@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-READ-R5-dr1.data-refresh-deployed-vs-build-input-dell2",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-READ-R5-dr1.data-refresh-deployed-vs-build-input-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "c4374e733d"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TV2",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R5.md",
+    "vintage_commit": "c4374e733d",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-READ-R5-dr1.data-refresh-deployed-vs-build-input-dell2.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r5_dr1/members.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The member table as a list of objects, each carrying member, deployed_size, deployed_sha256, recorded_commit_sha256, recorded_commit_size, head_sha256, head_size, verdict, planes_agreeing and claim: measured. Named members.json as the order requires so its own check finds it; AC1 reads DR1-MEMBERS-OK against the FAIL it returned at issuance when the file did not exist.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r5_dr1/DATA_REFRESH_DEPLOYED_VS_BUILD_INPUT_20261011.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The read's result: the live configuration, the source-map entry read now rather than carried, the download's proof that it IS the deployed artifact, the member table over three planes, the deployed text of is_opal_internal and validate_user_type with their deployed line numbers, the three sentences the order asks for, and a section separating what the read settles from what it does not.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -c \"import json;d=json.load(open('org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r5_dr1/members.json',encoding='utf-8'));print('DR1-MEMBERS-OK' if isinstance(d,list) and d and all({'member','deployed_sha256','recorded_commit_sha256','verdict'}<=set(m) for m in d) else 'DR1-MEMBERS-FAIL')\" expect: DR1-MEMBERS-OK",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r5_dr1/members.json',encoding='utf-8'));print('DR1-MEMBERS-OK' if isinstance(d,list) and d and all({'member','deployed_sha256','recorded_commit_sha256','verdict'}<=set(m) for m in d) else 'DR1-MEMBERS-FAIL')\"",
+      "expect": "DR1-MEMBERS-OK",
+      "output_evidence": "DR1-MEMBERS-OK, run as the order words it. The criterion is a SHAPE check on the table, not a check of the finding: it asserts the file is a non-empty list whose every row carries member, deployed_sha256, recorded_commit_sha256 and verdict. The finding itself is the MEMBERS line in the deliverable -- MEMBERS 2 EQUAL 2 DIFFERENT 0 NOT_IN_SOURCE_DIR 0 -- and AC1 would read OK for a table of DIFFERENT rows too, so it is not quoted here as evidence that the bytes matched.",
+      "status": "PASS",
+      "status_reason": "PASS decided by the instrument's printed output matching the criterion's expect pattern, not by this seat's judgement.",
+      "denominator": "2 of 2 package members in the table; 4 of 4 required keys present on each row"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "FOUR controls, and one of them changed the answer. (1) THE DOWNLOAD IS THE DEPLOYED ARTIFACT: the zip's sha256 was base64-encoded and compared with the live CodeSha256, so every hash below is a statement about running bytes rather than about a file that happens to sit somewhere. (2) THE POSITIVE CONTROL BESIDE AN ABSENT ANSWER, which CLAUDE.md requires: git ls-tree of the source dir at the recorded commit. (3) A NEGATIVE control: git show of a path that genuinely does not exist at that commit, to prove the instrument can still say no. (4) The member set was checked against the source map's own files list, so NOT_IN_SOURCE_DIR could be distinguished from a vendored dependency or a build stamp.",
+      "expected": "(1) base64 digest == CodeSha256. (2) both members listed at the commit. (3) rc != 0. (4) members == the map's files list.",
+      "observed": "(1) qHMjXkK1/1NhmBmkK/6Q+q+WdXMRoTOprNfTixBIxaM= both ways, identical. (2) BOTH MEMBERS LISTED -- and this is the control that caught a false negative of mine: my first pass read both members ABSENT at the recorded commit (git show rc 128) because the names came from a Windows python print and each carried a trailing CR, which git reported back as 'check_triggered_by.py?'. The control contradicted the ABSENT, I stripped the CR, and both files resolved at rc 0 with byte counts matching the deployed members exactly. (3) rc != 0, so an ABSENT from this instrument is meaningful once the argument is clean. (4) the 2 members are exactly the map's 2 files, so there is no vendored dependency or build stamp in this package and NOT_IN_SOURCE_DIR is 0 by measurement rather than by assumption.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every comparison is a sha256 over bytes with NOTHING normalised -- no newline translation, no whitespace stripping, no decoding before hashing -- so a repeat read of the same artifact and the same commit must return the same digests. The three planes (deployed package, recorded commit, tree HEAD) were fetched by three independent routes: an AWS package download, git show at a pinned commit, and git show at HEAD.",
+      "observed": "check_triggered_by.py reads 7e813322799f4f7a on all three planes at 1825 bytes; lambda_function.py reads ead1011f45b91912 on all three at 83888 bytes. The sizes agree with the zip's own member sizes independently of the hashes. The one non-determinism encountered was in my argument handling, not in the artifacts: a trailing CR made the same git show return rc 128 and then rc 0 for what is textually the same path, which is why the corruption oracle is to echo the argument back.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The disposition of row TCKT_VNEXT-D2-W6-S2",
+      "reason": "NOT MINE. The order says so plainly: no change to the row, its disposition is the CTO's. This read supplies the bytes and the verdicts the CTO's round-5 analysis item 7 named as the closing condition (equal closes it) and nothing more."
+    },
+    {
+      "item": "Whether tier 'internal' or firmId 'opal-capital' is reachable by a caller that should not hold it",
+      "reason": "OUT OF THIS READ'S PLANE and stated as such in the deliverable. Those context fields are minted by the portal authorizer, not by this function; the deployed comment records that the authorizer treats tier === 'internal' as all-access itself. This read examined ONE function's bytes, so it cannot speak to what the authorizer admits."
+    },
+    {
+      "item": "Any live exercise of the refusal",
+      "reason": "FORBIDDEN by the bounds and not done: no route was called, no token was minted or used, nothing was invoked. The rule is READ FROM CODE. ABSENT of a live refusal is not evidence of one, and this function's 9 routes are a write path the FWD-1 runner is itself forbidden to probe."
+    },
+    {
+      "item": "A deploy ledger entry",
+      "reason": "DELIBERATELY NOT OPENED. The order states this is a read and not a deploy and says to open none. Two read calls and a download write nothing to AWS."
+    },
+    {
+      "item": "A surprise row for the trailing-CR git show trap",
+      "reason": "NOT FILED, deliberately. CLAUDE.md already names this hazard twice -- the corruption oracle (echo the argument back) and the instruction never to 2>/dev/null a git show because the mangle returns clean-empty, with a positive control required beside any ABSENT verdict. The trap behaved exactly as documented and the documented control caught it, so there is no spec-versus-world gap to file. It is recorded in the deliverable and the session log as an instrument failure of mine."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/logs/2026-10-11/tv2_r5_dr1_data_refresh_deployed_vs_build.md",
+  "compiler_tools": [
+    {
+      "tool": "aws lambda get-function-configuration / get-function",
+      "invocation": "on opal-data-refresh-api, read-only",
+      "result": "CodeSha256 qHMjXkK1/1NhmBmkK/6Q+q+WdXMRoTOprNfTixBIxaM=, LastModified 2026-10-09T07:59:39Z, python3.11 -- the issuer's prefix matched, so no re-read of the map was owed"
+    },
+    {
+      "tool": "curl + python zipfile + hashlib",
+      "invocation": "download Code.Location into a NEW EMPTY folder outside the repository, then hash the zip and each member",
+      "result": "20716 bytes, 2 members; the zip's sha256 in base64 equals the live CodeSha256 exactly, which is what makes the member hashes statements about running bytes"
+    },
+    {
+      "tool": "git show (run from bash with MSYS_NO_PATHCONV=1, never from python argv)",
+      "invocation": "<recorded commit>:<source_dir>/<member> and HEAD:<source_dir>/<member>, output to files",
+      "result": "both members resolve at rc 0 and 1825 / 83888 bytes -- after a trailing CR in my member names made the first pass read rc 128 ABSENT for both"
+    },
+    {
+      "tool": "git ls-tree (THE POSITIVE CONTROL)",
+      "invocation": "--name-only <recorded commit> <source_dir>/",
+      "result": "10 paths listed including BOTH members, which contradicted the false ABSENT and is the only reason this read did not report MEMBERS 2 EQUAL 0 NOT_IN_SOURCE_DIR 2"
+    },
+    {
+      "tool": "the source map",
+      "invocation": "read the opal-data-refresh-api entry live rather than taking the issuer's quoted values",
+      "result": "source_dir, files (2), artifact_sha256 == live, last_deployed_commit d9539cc0b76dd07758ba0d8e4f4d1fcc759b472d -- and the note that a matching hash pairs a function with an artifact and says nothing about content, which is what this order exists to read"
+    }
+  ]
+}

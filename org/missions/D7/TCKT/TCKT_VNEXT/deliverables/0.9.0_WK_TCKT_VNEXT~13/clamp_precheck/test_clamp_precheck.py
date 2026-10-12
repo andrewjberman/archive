@@ -24,6 +24,9 @@ def {name}(event, *rest):
     return refused
 '''
 
+ROUTE_LINE = "    if event.get('route') == '{name}':\n        return {name}(event)\n"
+ROUTER_TEMPLATE = "def lambda_handler(event, context):\n{routes}    return _resp(404, {{}})\n"
+
 
 def ticket_source(drop_helper=None, uncall=None):
     """A small stand-in for the ticket handler: three helpers, two wrappers, seven handlers."""
@@ -36,6 +39,7 @@ def ticket_source(drop_helper=None, uncall=None):
     for h in cp.HANDLERS:
         call = "_unrelated" if h == uncall else ("_create_firm_allowed" if h == "create_ticket" else "_resolve_scope")
         parts.append(HANDLER_TEMPLATE.format(name=h, call=call))
+    parts.append(ROUTER_TEMPLATE.format(routes="".join(ROUTE_LINE.format(name=h) for h in cp.HANDLERS)))  # TO-R5-pc2: a router
     return "\n".join(parts).encode("utf-8")
 
 
@@ -277,3 +281,123 @@ def test_out_is_required(tmp_path):
     with pytest.raises(SystemExit) as e:
         cp.main([])
     assert e.value.code == 2
+
+
+# ---- TO-R5-pc2: the second read -- every handler lambda_handler dispatches to, each with a class -----------------------------
+
+REAL_HANDLER_FILE = Path(__file__).resolve().parents[8] / SRC_DIR / "lambda_function.py"
+
+
+def _with_extra_handler(body):
+    """ticket_source() plus one more dispatched handler, `extra_ticket`, whose body is `body`."""
+    extra = "\ndef extra_ticket(event, *rest):\n%s\n" % body
+    # a later lambda_handler wins, so this router dispatches to the seven and to the extra one
+    router = ROUTER_TEMPLATE.format(routes="".join(ROUTE_LINE.format(name=h) for h in cp.HANDLERS + ("extra_ticket",)))
+    return ticket_source() + extra.encode("utf-8") + router.encode("utf-8")
+
+
+def _fake_ticket_world(tmp_path, monkeypatch, src):
+    payload = release_payload()
+    monkeypatch.setattr(cp, "SERVED_RELEASES", {hexsha(payload): "FAKE-RELEASE"})
+    census, smap = fake_world(tmp_path, monkeypatch, payload)
+    cfg = {"CodeSha256": "LIVE-SHA", "LastModified": "2026-10-11T01:02:03.000+0000"}
+    real = cp.read_function
+    monkeypatch.setattr(cp, "read_function",
+                        lambda name: (cfg, zip_of({"lambda_function.py": src})) if name == TICKET else real(name))
+    monkeypatch.setattr(cp, "read_git_file", lambda commit, path: src)
+    return census, smap
+
+
+def test_every_dispatched_ticket_handler_is_listed_with_a_class(tmp_path, monkeypatch, capsys):
+    src = ("def _resolve_scope(a, pc):\n    return None\n"
+           "def _helper_not_dispatched(x):\n    return x\n"
+           "def alpha(event):\n    return _resolve_scope(event, 'x')\n"
+           "def beta(event, tid):\n    return _resolve_scope(event, tid)\n"
+           "def gamma(event):\n    return _resolve_scope(event, 'g')\n"
+           "def delta(event):\n    return _resolve_scope(event, 'd')\n"
+           "def lambda_handler(event, context):\n"
+           "    if event.get('a'):\n        return alpha(event)\n"
+           "    elif event.get('b'):\n        return beta(event, 'T')\n"
+           "    if event.get('c'):\n        return gamma(event)\n"
+           "    if event.get('d'):\n        return delta(event)\n"
+           "    return _resp(404, {})\n").encode("utf-8")
+    rows, why = cp.ticket_handler_rows(src)
+    assert why == ""
+    assert [r["handler"] for r in rows] == ["alpha", "beta", "gamma", "delta"]   # N dispatched -> N rows; _resp and the helper are not
+    assert all(r["class"] == "PROFILE_SCOPE" for r in rows)
+    # the same through main: the old lines first, then one line per handler and the totals line
+    census, smap = _fake_ticket_world(tmp_path, monkeypatch, ticket_source())
+    rc = cp.main(["--out", str(tmp_path / "t.json"), "--census", str(census), "--source-map", str(smap)])
+    lines = capsys.readouterr().out.splitlines()
+    k = lines.index("READ27 7/7")
+    assert lines[k + 1:] == ["handler %s PROFILE_SCOPE" % h for h in cp.HANDLERS] + ["TICKET_HANDLERS 7/7"]
+    assert rc == 0
+    side = json.loads((tmp_path / "t_ticket_handlers.json").read_text(encoding="utf-8"))
+    assert side["dispatched"] == 7 and side["classed"] == 7 and len(side["ticket_handlers"]) == 7
+    # no lambda_handler (or one that dispatches nothing) is never an empty pass
+    assert cp.ticket_handler_rows(b"def f(event):\n    return 1\n")[0] is None
+    assert cp.ticket_handler_rows(b"def lambda_handler(event, context):\n    return _resp(404, {})\n")[0] is None
+    assert cp.ticket_handler_rows(None)[0] is None
+
+
+def test_a_handler_that_calls_a_clamp_helper_is_classed_profile_scope():
+    src = ("def _in_profile_scope(a, f):\n    return True\n"
+           "def _firm_allowed(a, f):\n    return True\n"
+           "def via_helper(event):\n    return _in_profile_scope(event, 'x')\n"
+           "def via_wrapper(event):\n    return _firm_allowed(event, 'x')\n"
+           "def both(event):\n    return _in_profile_scope(event, 'x') and ('x' not in COMMENTARY_ALLOWED_FIRMS)\n"
+           "def lambda_handler(event, context):\n"
+           "    if event.get('a'):\n        return via_helper(event)\n"
+           "    if event.get('b'):\n        return via_wrapper(event)\n"
+           "    if event.get('c'):\n        return both(event)\n").encode("utf-8")
+    rows, _why = cp.ticket_handler_rows(src)
+    by = {r["handler"]: r for r in rows}
+    assert by["via_helper"]["class"] == "PROFILE_SCOPE"
+    assert by["via_wrapper"]["class"] == "PROFILE_SCOPE"
+    # more than one rule holds: the FIRST in the order is the class and the others are listed in the row
+    assert by["both"]["class"] == "PROFILE_SCOPE" and by["both"]["also"] == ["ENV_FIRM_LIST"]
+
+
+def test_the_two_commentary_handlers_are_listed_and_classed():
+    if not REAL_HANDLER_FILE.exists():
+        pytest.skip("handler file not present in this checkout")
+    rows, why = cp.ticket_handler_rows(REAL_HANDLER_FILE.read_bytes())
+    assert rows, why
+    for r in rows:
+        print("handler %-26s %-20s also=%s  %s" % (r["handler"], r["class"], r["also"], r["basis"]))
+    by = {r["handler"]: r["class"] for r in rows}
+    assert "commentary_draft_ticket" in by and "commentary_sent_ticket" in by
+    assert by["commentary_draft_ticket"] != "UNCLASSED"
+    assert by["commentary_sent_ticket"] != "UNCLASSED"
+
+
+def test_a_dispatched_handler_with_no_class_makes_the_exit_nonzero(tmp_path, monkeypatch, capsys):
+    census, smap = _fake_ticket_world(tmp_path, monkeypatch, _with_extra_handler("    return _resp(200, {})"))
+    rc = cp.main(["--out", str(tmp_path / "u.json"), "--census", str(census), "--source-map", str(smap)])
+    text = capsys.readouterr().out
+    assert "READ27 7/7" in text            # the first read is full ...
+    assert "handler extra_ticket UNCLASSED" in text
+    assert "TICKET_HANDLERS 7/8 UNCLASSED extra_ticket" in text.splitlines()   # ... and the line says which handler
+    assert rc != 0                         # ... and the exit is still non-zero
+    # the control: the same extra handler once it is classed leaves the exit at zero
+    census, smap = _fake_ticket_world(tmp_path, monkeypatch, _with_extra_handler("    return _resolve_scope(event, 'x')"))
+    rc = cp.main(["--out", str(tmp_path / "v.json"), "--census", str(census), "--source-map", str(smap)])
+    text = capsys.readouterr().out
+    assert rc == 0 and "TICKET_HANDLERS 8/8" in text.splitlines()
+
+
+def test_the_read27_line_and_its_table_rows_are_unchanged(tmp_path, monkeypatch, capsys):
+    census, smap = _fake_ticket_world(tmp_path, monkeypatch, ticket_source())
+    # the pre-pc2 call shape still works and gives the rows the old main wrote
+    expected_table = cp.build_table(cp.census_routes(str(census)), str(smap))
+    rc = cp.main(["--out", str(tmp_path / "w.json"), "--census", str(census), "--source-map", str(smap)])
+    lines = capsys.readouterr().out.splitlines()
+    assert rc == 0
+    assert (tmp_path / "w.json").read_text(encoding="utf-8") == json.dumps(expected_table, indent=1) + "\n"
+    assert isinstance(expected_table, list) and all(t["function"] for t in expected_table)
+    old = ["%-26s %d %s %s %s%s" % (t["function"], t["n_routes"], (t["last_modified"] or "-")[:19],
+                                    (t["member_sha256"] or "ABSENT")[:8], t["verdict"],
+                                    (" " + t["detail"]) if t["verdict"] != "CLAMPED" and t["detail"] else "")
+           for t in expected_table]
+    assert lines[:len(old) + 1] == old + ["READ27 7/7"]          # the old lines, byte for byte, are first
+    assert all(ln.startswith(("handler ", "TICKET_HANDLERS ")) for ln in lines[len(old) + 1:])   # everything new comes after

@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-448",
+  "firm": "49F",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-448.intake-poller-live-package-rollback-artifact.md",
+    "group": "OTHER",
+    "vintage_commit": "2ac2e80f55"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "2ac2e80f55",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-448.intake-poller-live-package-rollback-artifact.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~IB2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB144-2_poller_rollback_artifact.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The record the order specifies: the live CodeSha256 with its read time; the artifact address with WHERE it was read (the source-map entry, not typed); bucket versioning Enabled; both versions of the exact key with size, last-modified, is-latest, full ETag and a content digest computed from the DOWNLOADED bytes; the count; outcome FOUND with the matching version re-read by head-object; the noncurrent-expiry reading; writes_made 0 with its evidence; the nine commands; and two corrections the record makes against itself before commit.",
+      "artifact_covered_by": ["IB144-2-AC1", "IB144-2-AC2", "IB144-2-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB144-2-AC1",
+      "criterion_verbatim": "IB144-2-AC1: the live CodeSha256 is recorded with its read time, and every version of the artifact key is listed with its content digest (count stated).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r144/p144_cells.py\" . IB144-2-AC1",
+      "expect": "IB144-2-AC1 PASS",
+      "output_evidence": "OK: live YpE2MyUw...; 2 version(s) of the artifact key listed | IB144-2-AC1 PASS | rc=0",
+      "denominator": "2 of 2 versions of the exact key listed, each with its version_id and a content_sha256 computed locally from the bytes fetched by get-object --version-id; 0 delete markers, so no version carries a null digest. The prefix read returned 2 Versions and 0 DeleteMarkers and was filtered CLIENT-SIDE to Key equal to the exact artifact key, with IsTruncated absent; list-object-versions was auto-paginated and --no-paginate was never used.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB144-2-AC2",
+      "criterion_verbatim": "IB144-2-AC2: exactly one outcome: FOUND (one version id whose digest equals the live digest, re-read by head-object) with 0 writes, or NOT_FOUND with 0 writes and the stop stated. No other outcome exists.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r144/p144_cells.py\" . IB144-2-AC2",
+      "expect": "IB144-2-AC2 PASS",
+      "output_evidence": "OK: outcome FOUND; 0 writes | IB144-2-AC2 PASS | rc=0",
+      "denominator": "FOUND, on exactly 1 of the 2 versions: DICktwYaCg5b.R8.Ab6oHhI82db0d9Ls carries content digest YpE2MyUwdGzMfLaUGXi8cClxoVHFFmOz5LT1BYmoTa8=, equal to the live CodeSha256; the other version differs. One match means no tie-break was needed for 'the newest such'. Re-read by head-object at 2026-10-11T19:10:08Z, which agreed on ContentLength, ETag and the object's own content-sha256 metadata -- corroboration only, since the digest that decided FOUND came from the downloaded bytes. writes_made 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB144-2-AC3",
+      "criterion_verbatim": "IB144-2-AC3: the bounds held by the record's own command list: reads only (no put, copy, delete, update or apply).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r144/p144_cells.py\" . IB144-2-AC3",
+      "expect": "IB144-2-AC3 PASS",
+      "output_evidence": "OK: 9 command(s) recorded, all reads | IB144-2-AC3 PASS | rc=0",
+      "denominator": "9 recorded commands, 0 matching any of the 12 write patterns. Seven are AWS calls, all get/head/list; two are local python reads with no AWS at all. The local creation and removal of the download folder is disclosed in a separate `local_housekeeping` field rather than inside `commands`, so the graded list is exactly the set of acts the criterion is about and a local cleanup cannot be mistaken for an AWS act -- the folder itself sat outside every worktree and was removed file by file.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A mutant root outside every worktree holding copies of the record and the check, with the BASELINE run there first and reading PASS on all three. Three mutants, one per criterion: (1) artifact_versions_count set to 3 while the list holds 2; (2) outcome left FOUND while rollback_artifact.content_sha256 was swapped to the OTHER version's digest, so the claimed rollback artifact no longer matches the live function; (3) a genuine write appended to commands, s3api copy-object.",
+      "expected": "AC1 FAIL on (1), AC2 FAIL on (2), AC3 FAIL on (3)",
+      "observed": "(1) FAIL: artifact_versions must list every version with its version_id and content_sha256, and state the count | AC1 FAIL rc=1. (2) FAIL: FOUND needs a version id whose content digest equals the live digest, re-read by head-object | AC2 FAIL rc=1. (3) FAIL: a recorded command matches the write pattern \\\\bcopy-object\\\\b | AC3 FAIL rc=1. Each was reverted and all three re-read PASS. Mutant (2) is the one that matters: it is the exact way this record could be wrong and still look complete -- a plausible digest in the rollback field that belongs to the wrong version.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The deciding digest was taken from CONTENT, not from metadata: each version was downloaded with get-object --version-id into a new empty folder outside the repository and hashed locally to base64 sha256, the CodeSha256 form. The object's own content-sha256 metadata and its ETag were then read separately with head-object and used only as corroboration. The artifact address was read from the source map rather than typed, and the version list was filtered and counted client-side.",
+      "observed": "Three independent agreements on the found version: the locally computed digest of its bytes, the object metadata's content-sha256, and the source-map entry's artifact_sha256 and deployed_code_sha256 -- all four values equal YpE2MyUwdGzMfLaUGXi8cClxoVHFFmOz5LT1BYmoTa8=, which is also the live function's CodeSha256. The non-matching version's digest differs in both the computed and the metadata reading, consistently. Its LastModified also sits 3 m 24 s before the function's, the shape expected of the upload that made it live.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any second copy of the live package, and any choice of address for one",
+      "reason": "The order forbids it and says why: an address is a naming-canon question for lib/opal_naming.py address(), not this seat's to type. None was needed -- an existing version of the artifact key already holds the exact live bytes, so recording its version id IS the CTO's 'saved once'."
+    },
+    {
+      "item": "Any put, copy, delete, update, publish, invoke, terraform or apply, and any ledger entry",
+      "reason": "Forbidden by the order's bounds, and no ledger is owed because nothing is deployed and nothing moves. writes_made is 0 with its evidence, and the recorded command list is graded for exactly this by AC3."
+    },
+    {
+      "item": "Executing the downloaded packages",
+      "reason": "The order states the downloaded bytes are data. They were hashed and never run, and the folder holding them was outside every worktree and removed file by file when the hashing was done."
+    },
+    {
+      "item": "Restoring the poller's reproducibility from the tree",
+      "reason": "Out of scope and explicitly not settled by this record. Row IRPT_ANLREQ-D2-W53-S3 is that 21 of the 28 live members have no blob in git; this cell gives a rollback TARGET, not a rebuild path. Stated in the record so the finding cannot be read as more than it is."
+    },
+    {
+      "item": "A row for the noncurrent-expiry reading",
+      "reason": "The order says a lifecycle rule that would expire the found version is a row. There is none: the bucket's only rule aborts incomplete multipart uploads after 7 days and carries no NoncurrentVersionExpiration or Expiration action, so no row is owed. The MPU rule is recorded anyway so the reading is not mistaken for 'no lifecycle configuration at all'."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "aws lambda get-function-configuration",
+      "invocation": "--function-name irpt-intake-poller",
+      "result": "PASS -- live CodeSha256 and its read time, the figure every comparison in this record is against"
+    },
+    {
+      "tool": "aws s3api list-object-versions",
+      "invocation": "--prefix <the exact key>, auto-paginated, filtered and counted client-side",
+      "result": "PASS -- 2 versions, 0 delete markers, IsTruncated absent; --no-paginate was never used"
+    },
+    {
+      "tool": "aws s3api get-object --version-id",
+      "invocation": "once per version, into a new empty folder outside the repository",
+      "result": "PASS -- the deciding digests came from these bytes, not from metadata"
+    },
+    {
+      "tool": "aws s3api head-object --version-id",
+      "invocation": "the found version, then both versions for their full ETags",
+      "result": "PASS -- and it caught my own defect: the second version's ETag had been recorded as a 12-character display prefix, replaced with the full value"
+    },
+    {
+      "tool": "aws s3api get-bucket-versioning and get-bucket-lifecycle-configuration",
+      "invocation": "on opal-313476888478-lambda-artifacts",
+      "result": "PASS -- Enabled; one lifecycle rule, MPU-abort only, so no noncurrent expiry threatens the found version"
+    },
+    {
+      "tool": "p144_cells.py",
+      "invocation": "the three criteria at the repo root; baseline and three mutants in a mutant root",
+      "result": "PASS -- 3 of 3 at the root on the first run; baseline PASS then 3 of 3 mutants FAIL as expected"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "--author ... -F <msgfile>, message file written by the Write tool outside the worktree",
+      "result": "PASS"
+    }
+  ]
+}

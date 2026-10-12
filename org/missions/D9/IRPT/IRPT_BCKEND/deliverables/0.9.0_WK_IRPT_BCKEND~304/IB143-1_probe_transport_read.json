@@ -1,0 +1,566 @@
+{
+ "task_order": "IRPT_BCKEND.TO-IB-pr-446",
+ "worker": "0.9.0_WK_IRPT_BCKEND~304",
+ "read_of": "tree HEAD 64b6870ced; a code and record read, git log and git show only",
+ "node_port": {
+  "what_it_is": "node-port is the capture library's own bare HTTP client: Node's built-in https module (defaultHttpPort, ycharts_session.js:645-669), wired as the 'http' port at :729 and called first by residentClient.get at :329-330. It runs in the same Node process that drives the browser (node ycharts_session.js, run-ycharts-session.sh:55, started by host_capture.py:320), but it is not the browser: the page loads and the sign-in go through the browser's own network stack (Playwright chromium, :1002-1005), while node-port makes one plain GET per call, runs no script, has no redirect handling in the code and solves no challenge. 'node-port' is the label stamped on a reply at :330 and on a failure at :337. Claim measured: read from the code, whose sha256 the order states equals the host's.",
+  "sends": "GET only. Headers: User-Agent = the constant UA string (Chrome/148 on Windows, :143-144, the same string the browser context is created with, :154); Cookie = name=value for every cookie returned by context.cookies() at :800 (a one-time snapshot of the browser context's jar, not the live jar; no domain or path filter, :312-313), with the aws-waf-token cookie REMOVED by default (:311-312); Accept 'application/json, text/plain, */*', X-Requested-With 'XMLHttpRequest', Referer = base + '/indices' (:833). The aws-waf-token cookie and an X-AWS-WAF-Token header are added only on the control arm (withWafToken true, :893) and only if the jar holds a token (:314). Node adds Host and Connection by itself, and the code sets no Accept-Language or Accept-Encoding (inferred from the code's silence and from Node's defaults, which are not in the repository). Of the reply it keeps status, body and three headers (location, x-amzn-waf-action, content-type, :658); Set-Cookie is not kept (:655-656), so the jar is never updated by a probe. In the fifth run the jar held 10 cookies with values, 2 of them session names (ycsessionid, csrftoken) and no aws-waf-token, in both arms, so the two arms were the same request (FIFTH_RUN_HOST_SIDE_READ_20261011.md section 2 and ADDENDUM 1 read 6; claim measured on the receipt).",
+  "code_lines": [
+   "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:645-669",
+   "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:729",
+   "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:302-344",
+   "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:329-330",
+   "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:800",
+   "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:833",
+   "infra/aws/ec2/investor-reporting-ycharts/run-ycharts-session.sh:55"
+  ],
+  "claim": "measured"
+ },
+ "transports": [
+  {
+   "name": "node-port",
+   "chosen_at": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:329-330 (primary in residentClient.get); used by the probe's transport leg :862, the pair control :896, the stored-bundle probe :1521 and the closing probe :1540",
+   "carries_the_browsers_cookies": true,
+   "falls_back_to": "api-request-context, at :340-341, only when p.http.get throws or returns no status (:327-334) AND the caller passed a context (:315); with no context (the pair's control arm passes null, :893; a bundle-only probe passes none) the failure is thrown with via node-port (:335-339) and the probe returns PROBE_TRANSPORT_ERROR (:865-869). Carries a one-time copy of the browser context's cookie VALUES, minus aws-waf-token by default; not the live jar.",
+   "claim": "measured"
+  },
+  {
+   "name": "api-request-context",
+   "chosen_at": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:340-341 (fallback of the probe); also contextGet :278-283, reached by readIdentity :368-370 and used at :1066 only when the probe carried no identity",
+   "carries_the_browsers_cookies": true,
+   "falls_back_to": "nothing: contextGet throws IdentityFailure CONTEXT_GET_UNAVAILABLE when the context offers no GET (:284). Playwright's APIRequestContext shares the browser context's cookies (comment :276-277), including an aws-waf-token if the context holds one.",
+   "claim": "measured"
+  },
+  {
+   "name": "browser-context (requestGet)",
+   "chosen_at": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:279 and :341 (label); the only definition of requestGet in the directory is the offline replay stand-in infra/aws/ec2/investor-reporting-ycharts/tests/replay_browser.js:230",
+   "carries_the_browsers_cookies": null,
+   "falls_back_to": "not a production transport; a real Playwright context has no requestGet, so production takes api-request-context (:322, :341).",
+   "claim": "measured"
+  },
+  {
+   "name": "page-document",
+   "chosen_at": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:836 (chosen when the caller passes a page); documentIdentity :381-431",
+   "carries_the_browsers_cookies": true,
+   "falls_back_to": "primary page.content() through identityFromHtml (:392-399), then page.evaluate(window.USER) (:400-406), then ONE browser navigation page.goto to /dashboard/ only when the page is not already on that route (:409-413); zero network on the primary read; it is the browser itself.",
+   "claim": "measured"
+  },
+  {
+   "name": "bundle-identity",
+   "chosen_at": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:836 (chosen when no page is passed: bundleIdentity(src.bundle)); bundleIdentity :434-441",
+   "carries_the_browsers_cookies": null,
+   "falls_back_to": "cookie-presence (:837-840) when the bundle carries no identity. Makes no request.",
+   "claim": "measured"
+  },
+  {
+   "name": "cookie-presence",
+   "chosen_at": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:837-840",
+   "carries_the_browsers_cookies": null,
+   "falls_back_to": "nothing. Makes no request; passes the identity leg on the presence of the ycsessionid cookie.",
+   "claim": "measured"
+  },
+  {
+   "name": "browser navigation (sign-in)",
+   "chosen_at": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:1016 (warm-up goto), :1021 (login goto), fillAndSubmit :1164",
+   "carries_the_browsers_cookies": true,
+   "falls_back_to": "nothing: the sign-in and every page load are the browser's own requests.",
+   "claim": "measured"
+  },
+  {
+   "name": "in-page fetch (RETIRED)",
+   "chosen_at": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:287-289 (comment: retired; no code path remains)",
+   "carries_the_browsers_cookies": true,
+   "falls_back_to": "not selectable. The comment records that the browser's non-navigation fetch is the class the WAF challenged (405 + captcha, run 6ade1f06).",
+   "claim": "measured"
+  },
+  {
+   "name": "python-urllib (the resident's Transport, outside the library)",
+   "chosen_at": "infra/aws/lambda/investor-reporting/ycharts/generate/transport.py:468-469 (opener) and :487-494 (request); run in a child process by session/deadline_transport.py:59 and :110, invoked from session/operation_lease.py:253",
+   "carries_the_browsers_cookies": false,
+   "falls_back_to": "nothing. A cookie jar rebuilt from the stored bundle (:399-411) WITHOUT aws-waf-token (NEVER_SENT_COOKIES :397), User-Agent = the bundle's captured one, headers :473-485. This is the transport of the later replay; it is not the browser's jar.",
+   "claim": "measured"
+  }
+ ],
+ "why_the_probe_uses_it": {
+  "in_words": "The code states the reason. At ycharts_session.js:291-297: 'THE RESIDENT'S OWN CLIENT CLASS (CTO word, fourth amendment, 2026-09-24; D1 run 6ade1f06 measured it): the bare Node port carrying the FULL context jar ... On the template route this client read 200 application/json with waf_action null while the in-page fetch read 405 + a captcha action -- the in-page fetch is the class the WAF challenges for a non-navigation request, and it is NOT the class the resident (transport.py headers_for + the stored jar) is.' And at :298-300: 'So the probe's legs go through THIS client first ... no in-page fetch anywhere on the probe path.' And at :824-826: 'the WAF rule is per ROUTE and per CLIENT: the JSON template route admits the Node client with the full jar (run 4: 200 application/json), the HTML route /dashboard/ challenges it (run 5: 405 seven times)'. At :1537-1539 the closing probe 'proves liveness with the tokenless template GET through the resident's client -- the reads the resident makes -- and never reads the page'. The Python side repeats it (generate/recipe.py:373-379). The page is still used for the identity leg (documentIdentity, zero network). Is it deliberately the transport the replay uses? The code states the INTENT: node-port is built to stand in for the resident's client class, and the PRD requires a session to be verified 'from the transport that will use it' (IRPT_BCKEND_PRD.md:51; the mechanism is browserless REST replay, :52). But it is not the same program: the resident is Python urllib (transport.py:468-494), the probe is Node https. They differ in at least the Referer (/dashboard/ in transport.py:477, /indices in :833), in how cookies are chosen (a domain and path matched jar against every cookie in the context) and in the HTTP library that sends them. That the two look the same to the vendor on the wire has no record (absent). The literal replay transport is verified separately after a capture: broker.verify runs step_identity and step_template over the Python transport (session/broker.py:198, :210; host_capture.py:411-412 says so). In the fifth run the Node probe failed first, so that Python verification was never reached. Claim: the stated reasons are measured (quoted from the code); that the two transports are equivalent on the wire is not established.",
+  "stated_in_code_or_inferred": "stated",
+  "code_lines": [
+   "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:291-301",
+   "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:287-289",
+   "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:824-834",
+   "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:1536-1540",
+   "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:373-379",
+   "infra/aws/lambda/investor-reporting/ycharts/session/broker.py:198-210",
+   "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md:51-52"
+  ],
+  "claim": "measured",
+  "inferred_parts": [
+   "that the Node port and the Python urllib client differ on the wire in anything beyond the headers and cookie selection listed (TLS handshake, header order, HTTP/1.1 defaults): inferred from their being two different libraries; no record compares them",
+   "that Node adds Host and Connection and no Accept-Language or Accept-Encoding: inferred from Node's defaults and the code's silence"
+  ]
+ },
+ "job_calls_after_a_capture": {
+  "scope": "One generation by the resident (generate/resident_worker.py:357-397) plus the session's own check and the sessionless lookup. step_identity (recipe.py:372-390) sends NO request: it grades the identity stored in the bundle. The capture itself (a sign-in by node ycharts_session.js) is the act that gives the job a session, so it is not counted as a call after it.",
+  "calls": [
+   {
+    "call": "template read GET /custom_pdf_reports/generate/<template id> (the same route the probe reads)",
+    "transport": "python-urllib-with-stored-cookies",
+    "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:394"
+   },
+   {
+    "call": "comparison identity read GET /securities/securities_info?securities=... (only when ETF comparisons are requested)",
+    "transport": "python-urllib-with-stored-cookies",
+    "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:430"
+   },
+   {
+    "call": "holdings upload POST /model_portfolios/fixed/holdings_upload/client",
+    "transport": "python-urllib-with-stored-cookies",
+    "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:505"
+   },
+   {
+    "call": "portfolio create POST /model_portfolios/fixed/",
+    "transport": "python-urllib-with-stored-cookies",
+    "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:630"
+   },
+   {
+    "call": "read-back status poll GET /model_portfolios/<id>/status (repeated while calculating)",
+    "transport": "python-urllib-with-stored-cookies",
+    "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:729"
+   },
+   {
+    "call": "read-back saved portfolio GET /model_portfolios/fixed/<id>",
+    "transport": "python-urllib-with-stored-cookies",
+    "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:747"
+   },
+   {
+    "call": "validate POST /custom_pdf_reports/validate_report_securities/<template id>",
+    "transport": "python-urllib-with-stored-cookies",
+    "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:802"
+   },
+   {
+    "call": "generate POST /custom_pdf_reports/<template id>",
+    "transport": "python-urllib-with-stored-cookies",
+    "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py:965"
+   },
+   {
+    "call": "restart-path reconcile read GET /model_portfolios/fixed/ (the older job path)",
+    "transport": "python-urllib-with-stored-cookies",
+    "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/job.py:412"
+   },
+   {
+    "call": "the session's own check after a refresh: broker.verify reads the template again (its identity step sends nothing)",
+    "transport": "python-urllib-with-stored-cookies",
+    "code_line": "infra/aws/lambda/investor-reporting/ycharts/session/broker.py:210"
+   },
+   {
+    "call": "PDF download GET of the signed media URL on ycharts-media.s3.amazonaws.com (a different host; no cookie, no credential header)",
+    "transport": "python-urllib-no-cookies",
+    "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/transport.py:363"
+   },
+   {
+    "call": "sessionless ticker lookup GET /securities/securities_info?securities=... (the upload flow's check; no cookie, no session)",
+    "transport": "python-urllib-no-cookies",
+    "code_line": "infra/aws/lambda/investor-reporting/intake/resolution_broker.py:102 (client built at infra/aws/lambda/investor-reporting/ycharts/session/resident_session.py:128-131)"
+   }
+  ],
+  "by_transport": {
+   "python-urllib-with-stored-cookies": 10,
+   "python-urllib-no-cookies": 2,
+   "node-port": 0,
+   "browser": 0
+  },
+  "how_the_python_calls_are_sent": "Every call above except the PDF download and the lookup goes through OperationTransport.request (session/operation_lease.py:242-253), which hands the request to a child Python process (session/deadline_transport.py:26, :59, :110) that builds Transport.from_bundle and calls urllib (generate/transport.py:468-494). The PDF download is the same child in mode 'download' (deadline_transport.py:113-114; resident_worker.py:397). No call after a capture is made by node-port or by the browser. The resident worker runs on the same EC2 host as the capture (journal host ip-172-31-87-2 in IB129-1_journal_capture_attempts.txt), so the two clients leave from the same address (claim measured by the journal; that it is the same egress address to the vendor is inferred).",
+  "would_meet_the_same_refusal": null,
+  "claim": "absent",
+  "reason": "It cannot be told from code and records. MEASURED on the trunk: (a) the Python path has been answered with the same KIND of reply (a 202 carrying x-amzn-waf-action) before: three research runs on the host stopped WAF_REFRESH_REQUIRED at their 7th call (YCD-R1-20261004T1924Z, YCD-R1-20261004T1944Z, YCD-R3-20261005T0219Z host runs), and the resident journal names READ_BACK_PENDING:WAF_CHALLENGE 14 times on five days, 2026-09-29 to 2026-10-05 (6, 4, 1, 1, 2; IB129-1_journal_capture_attempts.txt lines 59-83); (b) on 2026-10-03T16:35Z the resident runtime read the template route with 200 application/json and no waf action (change_management/20261003T1631Z_irpt-signin-har-20261003_deploy_completion.md, leg V1), on a session seeded from a person's browser. NOT MEASURED: any reply of the Python path to a session captured by the automation after 2026-10-05. No capture has succeeded since, so no job has held such a session; the one Python call the fifth run's job made (17:09:45Z) used the old stored session and was read as SIGNED_OUT, which is a different reply from a challenge (controller.py:40-42 versus :35-37). So whether the post-capture calls of a job would be challenged exactly as the probe was is not told; the first of them (the template read, recipe.py:394) is on the same route as the probe. The journal lines READ_BACK_PENDING:WAF_CHALLENGE show that the Python read path can be challenged on the status route, on days when the stored session was otherwise usable (jobs reached READY on the same days, undivided count), and that the challenge cleared on redelivery. They do not show: a challenge on the template route, on a mutation, or on any day after 2026-10-05; whether the evidence was the header or the body marker (the extract does not say); what the vendor's rule is (the code comments record a firewall window between 122 s and 373 s measured on 2026-10-05, recipe.py comment from 5d3eed8904, resident_worker.py 9e68929699); or anything about a fresh sign-in."
+ },
+ "changes_since_2026_10_05": {
+  "paths_searched": [
+   "infra/aws/ec2/investor-reporting-ycharts/",
+   "infra/aws/lambda/investor-reporting/ycharts/"
+  ],
+  "command": "git log --since=2026-10-04 --format='%h %ad %an %s' --date=iso-strict -- infra/aws/ec2/investor-reporting-ycharts/ infra/aws/lambda/investor-reporting/ycharts/",
+  "tree_read_at": "HEAD 64b6870ced (2026-10-11T14:40-04:00); 72 commits in the window, 42 test files, the production files listed below",
+  "nothing_changed_in_the_repo": false,
+  "files": [
+   {
+    "path": "infra/aws/ec2/investor-reporting-ycharts/README.md",
+    "commits": [
+     "5d2b94f71d"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Documentation of the new persisted receipt and the new failure reason; no code path. Does not bear on the probe, its transport, the request's headers or cookies, or the classification of a reply."
+   },
+   {
+    "path": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js",
+    "commits": [
+     "5d2b94f71d"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "5d2b94f71d (hunk read) adds one failure branch AFTER the probe, for one case: probe reason NO_IDENTITY_COOKIE after one submitted sign-in (ycharts_session.js:1084-1103), and a helper that drops page text from the evidence. It does not touch the probe or its transport: the text of residentClient, defaultHttpPort, probeSession, classifyResponse, probeTemplateDocument, documentIdentity, contextGet, the UA constant and ports() hashes identically (sha256 prefixes 57420e48, 5251e46f, ff5d4079, f6c1cc35, f5f40f8e, 54bb7be4, 44ca52e0, 39692013, df1d08fd) at b9d36bc34e (2026-09-24), 4467f36184, 25c32c3b58, 8e385c08b2, 5d2b94f71d and HEAD. So it bears on how a capture ENDS in that one case; it does not bear on the probe, its transport, the headers or cookies, or how a reply is classified. It reached the host at st32 (2026-10-11T16:09Z), after the 11:19Z failure and before the 17:10Z fifth run, and its branch did not fire."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py",
+    "commits": [
+     "2f7cc7be42",
+     "1eed34a8c0"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Intake, custody or publication side of the resident (ticket id, acting principal, registry probe, ready-send marker, Opal PDF persist, commentary poll). A scan of every added or removed line for waf, challenge, cookie, user-agent, urllib, referer, classify and x-amzn found no vendor request, header, cookie or reply-classification line. Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/generate/custody_submission.py",
+    "commits": [
+     "128b6f7db1"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Intake, custody or publication side of the resident (ticket id, acting principal, registry probe, ready-send marker, Opal PDF persist, commentary poll). A scan of every added or removed line for waf, challenge, cookie, user-agent, urllib, referer, classify and x-amzn found no vendor request, header, cookie or reply-classification line. Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/generate/durable_job.py",
+    "commits": [
+     "3acafb3f45"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Intake, custody or publication side of the resident (ticket id, acting principal, registry probe, ready-send marker, Opal PDF persist, commentary poll). A scan of every added or removed line for waf, challenge, cookie, user-agent, urllib, referer, classify and x-amzn found no vendor request, header, cookie or reply-classification line. Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/generate/publication_worker.py",
+    "commits": [
+     "e923e0f463",
+     "bfed18a189"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Intake, custody or publication side of the resident (ticket id, acting principal, registry probe, ready-send marker, Opal PDF persist, commentary poll). A scan of every added or removed line for waf, challenge, cookie, user-agent, urllib, referer, classify and x-amzn found no vendor request, header, cookie or reply-classification line. Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/generate/publisher.py",
+    "commits": [
+     "f60e6f1d2a",
+     "e923e0f463",
+     "bfed18a189"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Intake, custody or publication side of the resident (ticket id, acting principal, registry probe, ready-send marker, Opal PDF persist, commentary poll). A scan of every added or removed line for waf, challenge, cookie, user-agent, urllib, referer, classify and x-amzn found no vendor request, header, cookie or reply-classification line. Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py",
+    "commits": [
+     "5d3eed8904"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "5d3eed8904 (hunk read): three comment lines replaced above the read-back constants (the 390 s release window); no code line changes. Does not bear."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_main.py",
+    "commits": [
+     "f9daebcb8e"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Intake, custody or publication side of the resident (ticket id, acting principal, registry probe, ready-send marker, Opal PDF persist, commentary poll). A scan of every added or removed line for waf, challenge, cookie, user-agent, urllib, referer, classify and x-amzn found no vendor request, header, cookie or reply-classification line. Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+    "commits": [
+     "066e7277f9",
+     "9e68929699",
+     "affe26c69f",
+     "3acafb3f45",
+     "f9daebcb8e",
+     "909e41cb45",
+     "035443efaa",
+     "2c721e21f2",
+     "8ec25b2a33"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Nine commits, hunks read: 035443efaa (Opal-producer allow-list string), 066e7277f9 (cause_claim 'measured' on the dead-letter record), 2c721e21f2 (Opal PDF retained by the producer), 3acafb3f45 and 909e41cb45 (analysis_ready send), 8ec25b2a33 (producer switch by principal), 9e68929699 (a 390 s message visibility after a read-back pending: a constant and one change_message_visibility call), affe26c69f (dead-letter record on the fifth receive), f9daebcb8e (commentary poll). Only 9e68929699 touches vendor-facing behaviour, and only the delay before a redelivered job makes its next calls. None changes a request's headers or cookies or how a reply is classified (classify_pull and decision() live in controller.py and transport.py, both last changed before 2026-10-04)."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py",
+    "commits": [
+     "1eed34a8c0"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Intake, custody or publication side of the resident (ticket id, acting principal, registry probe, ready-send marker, Opal PDF persist, commentary poll). A scan of every added or removed line for waf, challenge, cookie, user-agent, urllib, referer, classify and x-amzn found no vendor request, header, cookie or reply-classification line. Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/generate/submission_service.py",
+    "commits": [
+     "2f7cc7be42"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Intake, custody or publication side of the resident (ticket id, acting principal, registry probe, ready-send marker, Opal PDF persist, commentary poll). A scan of every added or removed line for waf, challenge, cookie, user-agent, urllib, referer, classify and x-amzn found no vendor request, header, cookie or reply-classification line. Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/research/brand/Opal-Capital-Logo-Full-Color.svg",
+    "commits": [
+     "6d71a05c62"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "A logo asset. Does not bear."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/research/brand/brand.json",
+    "commits": [
+     "730e5cabf9"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "A brand spec. Does not bear."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/research/file_stop_row.py",
+    "commits": [
+     "bae95cac7c",
+     "fd43467321"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Keeper, lookup, layout, map, packager or producer code for the Opal report (reads kept answers, renders, packages). A scan of every added or removed line for waf, challenge, cookie, user-agent, referer, classify and x-amzn found no capture, probe, header or cookie line (the one urllib hit, in opal_packager.py, is a path-quote helper for the ticket API). Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/research/held_data.py",
+    "commits": [
+     "1e9bb2bd9d",
+     "a2df1b5d80"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Keeper, lookup, layout, map, packager or producer code for the Opal report (reads kept answers, renders, packages). A scan of every added or removed line for waf, challenge, cookie, user-agent, referer, classify and x-amzn found no capture, probe, header or cookie line (the one urllib hit, in opal_packager.py, is a path-quote helper for the ticket API). Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/research/keeper.py",
+    "commits": [
+     "beb0e52cfb",
+     "7f0d395090",
+     "5a982069a6"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Keeper, lookup, layout, map, packager or producer code for the Opal report (reads kept answers, renders, packages). A scan of every added or removed line for waf, challenge, cookie, user-agent, referer, classify and x-amzn found no capture, probe, header or cookie line (the one urllib hit, in opal_packager.py, is a path-quote helper for the ticket API). Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+    "commits": [
+     "d284413eae",
+     "1e9bb2bd9d",
+     "7e66decdff",
+     "730e5cabf9",
+     "98f0a7bfb2",
+     "fc018ca6c7",
+     "ef6c379f52",
+     "c6dd878b32",
+     "c89be80b44",
+     "529db3db38",
+     "1044735175",
+     "b3ba844560",
+     "2eda34c580"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Keeper, lookup, layout, map, packager or producer code for the Opal report (reads kept answers, renders, packages). A scan of every added or removed line for waf, challenge, cookie, user-agent, referer, classify and x-amzn found no capture, probe, header or cookie line (the one urllib hit, in opal_packager.py, is a path-quote helper for the ticket API). Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/research/lookup.py",
+    "commits": [
+     "beb0e52cfb"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Keeper, lookup, layout, map, packager or producer code for the Opal report (reads kept answers, renders, packages). A scan of every added or removed line for waf, challenge, cookie, user-agent, referer, classify and x-amzn found no capture, probe, header or cookie line (the one urllib hit, in opal_packager.py, is a path-quote helper for the ticket API). Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/research/map_pdf.py",
+    "commits": [
+     "3951983575",
+     "c73a8fae30",
+     "2d19b24f0b"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Keeper, lookup, layout, map, packager or producer code for the Opal report (reads kept answers, renders, packages). A scan of every added or removed line for waf, challenge, cookie, user-agent, referer, classify and x-amzn found no capture, probe, header or cookie line (the one urllib hit, in opal_packager.py, is a path-quote helper for the ticket API). Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py",
+    "commits": [
+     "3f5321ad36",
+     "a9db722b83",
+     "5acdefb7cc",
+     "73fb27d870",
+     "7e66decdff"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Keeper, lookup, layout, map, packager or producer code for the Opal report (reads kept answers, renders, packages). A scan of every added or removed line for waf, challenge, cookie, user-agent, referer, classify and x-amzn found no capture, probe, header or cookie line (the one urllib hit, in opal_packager.py, is a path-quote helper for the ticket API). Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+    "commits": [
+     "a9db722b83",
+     "1e9bb2bd9d",
+     "73fb27d870",
+     "7e66decdff",
+     "f60e6f1d2a",
+     "e923e0f463",
+     "6ce099aee3"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Keeper, lookup, layout, map, packager or producer code for the Opal report (reads kept answers, renders, packages). A scan of every added or removed line for waf, challenge, cookie, user-agent, referer, classify and x-amzn found no capture, probe, header or cookie line (the one urllib hit, in opal_packager.py, is a path-quote helper for the ticket API). Does not bear on the probe or its transport."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py",
+    "commits": [
+     "05fc7afa6f",
+     "beb0e52cfb",
+     "7f0d395090",
+     "3248eb5f35",
+     "5a982069a6",
+     "fd43467321",
+     "f9f0d95cad"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Research runner (the host's Python path, run as a tool): 7f0d395090 (per-window call budget, MAX_REQUESTS_PER_WINDOW = 6 because 'the firewall challenges the 7th request of a lease window'), f9f0d95cad (--min-gap-s wait between calls), beb0e52cfb and 5a982069a6 (12-request plan, expand calls), 9a01678592, fd43467321, 3248eb5f35, 05fc7afa6f. It changes HOW OFTEN the host's Python path calls the vendor; it still calls transport.request and tx.decision unchanged. It does not bear on the capture probe or its headers/cookies; it bears on vendor traffic from the same host and account."
+   },
+   {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/session/host_capture.py",
+    "commits": [
+     "5d2b94f71d"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "5d2b94f71d (hunk read) adds archiving of each run's stderr (rotate_runs) and a whitelisted, secret-free persisted receipt (_clean, _derive_pair, persist_receipt). It changes what the host KEEPS about a capture, not what is sent to the vendor. Does not bear on the probe, its transport, headers, cookies or the classification of a reply. Reached the host at st32."
+   },
+   {
+    "path": "(42 test files under tests/ directories of the two paths, listed by the git log)",
+    "commits": [
+     "024d840606",
+     "035443efaa",
+     "05fc7afa6f",
+     "066e7277f9",
+     "1044735175",
+     "128b6f7db1",
+     "1e9bb2bd9d",
+     "1eed34a8c0",
+     "2c721e21f2",
+     "2d0f7dc389",
+     "2d19b24f0b",
+     "2eda34c580",
+     "2f7cc7be42",
+     "3248eb5f35",
+     "35ff7e890f",
+     "3951983575",
+     "3acafb3f45",
+     "3f5321ad36",
+     "5086feca6b",
+     "529db3db38",
+     "5a982069a6",
+     "5acdefb7cc",
+     "5d2b94f71d",
+     "6ce099aee3",
+     "730e5cabf9",
+     "73fb27d870",
+     "7e66decdff",
+     "7f0d395090",
+     "81a453e9c1",
+     "8ec25b2a33",
+     "98f0a7bfb2",
+     "9e68929699",
+     "9e6d041f93",
+     "a2df1b5d80",
+     "a9db722b83",
+     "affe26c69f",
+     "b3ba844560",
+     "bae95cac7c",
+     "beb0e52cfb",
+     "bfed18a189",
+     "c6dd878b32",
+     "c73a8fae30",
+     "c89be80b44",
+     "d284413eae",
+     "e923e0f463",
+     "eab13e88d3",
+     "ef6c379f52",
+     "f60e6f1d2a",
+     "f9daebcb8e",
+     "f9f0d95cad",
+     "fc018ca6c7",
+     "fd43467321"
+    ],
+    "bears_on_the_probe_or_its_transport_in_words": "Test files only; they run offline and send nothing to the vendor. Two of them (tests/receipt_after_submit.js and session/tests/test_capture_receipt_persisted.py, from 5d2b94f71d) exercise the new branch and receipt. Not part of the code that ran on the host."
+   }
+  ],
+  "files_note": "The command is --since=2026-10-04 as the order states, so it also lists 2026-10-04 and 2026-10-05 commits. Of the production files, only two bear on the capture at all, ycharts_session.js and host_capture.py, both by 5d2b94f71d (committed 2026-10-11T10:12-04:00), and neither changes the probe, its transport, the headers or cookies it sends or how a reply is classified. The probe's own text is byte-identical from b9d36bc34e (2026-09-24) to HEAD for the nine segments named in the ycharts_session.js entry (measured by hashing each segment at six revisions). The files on the Python replay path that send requests and classify replies (generate/transport.py, session/controller.py, session/broker.py, session/deadline_transport.py, session/operation_lease.py, session/resident_session.py, generate/job.py) do not appear in the window: their last changes are 9718ac5c87 (2026-10-02), b3fc529601 (2026-09-23), 7122afefc1 (2026-10-01), b3fc529601, 9718ac5c87, 8f408b4e14 (2026-10-02) and b21aacec70 (2026-09-30).",
+  "what_the_host_runs": {
+   "releases_since": [
+    {
+     "release": "st21 (root 3f29017cfc)",
+     "date": "2026-10-04T02:01Z",
+     "moved": "before the window: the root running at the last bundle write (2026-10-05T10:04Z) and at the first failure after it (2026-10-05T14:41Z); library 857d90b81960d69a, wrapper 55ddb8f7"
+    },
+    {
+     "release": "st22 (3d705e700f)",
+     "date": "2026-10-06T01:08Z",
+     "moved": "worker tree; capture library NOT moved (857d90b8 read on the host before and after)"
+    },
+    {
+     "release": "st23 (09139ee34d)",
+     "date": "2026-10-06T02:48Z",
+     "moved": "worker tree; capture library NOT moved (857d90b8)"
+    },
+    {
+     "release": "st24 (409e3066d1)",
+     "date": "2026-10-06T03:40Z",
+     "moved": "worker tree; capture library NOT moved (857d90b8)"
+    },
+    {
+     "release": "st26 (26df2c7622)",
+     "date": "2026-10-09T01:07Z",
+     "moved": "worker tree; library NOT moved (857d90b8, wrapper 55ddb8f7 per P1); st25 is not found in any record read"
+    },
+    {
+     "release": "st27 (e606008994)",
+     "date": "2026-10-09T02:59Z",
+     "moved": "adds the Opal brand asset; library and wrapper NOT moved"
+    },
+    {
+     "release": "st28 (b7ad601c58)",
+     "date": "2026-10-09T08:41Z",
+     "moved": "svc on the allow list; library and wrapper NOT moved"
+    },
+    {
+     "release": "st29 (f0ff4f1653)",
+     "date": "2026-10-09T11:57Z",
+     "moved": "research row firms; library file NOT moved (857d90b8 read on the host); the install note says it moves 'the capture library pin' in the bindings, not the file"
+    },
+    {
+     "release": "st30 (37210c771a)",
+     "date": "2026-10-11T10:32Z",
+     "moved": "the whole tree at that pin; library and wrapper byte-equal to st27's (NEVER_WIDEN_PACKET_ST30.md section 3); ran at the 11:19Z failure"
+    },
+    {
+     "release": "st31 (19b02b2971)",
+     "date": "2026-10-11T13:43Z",
+     "moved": "dead-letter record; library and wrapper byte-equal to st30's (NEVER_WIDEN_PACKET_ST31.md)"
+    },
+    {
+     "release": "st32 (0485393f3a)",
+     "date": "2026-10-11T16:09Z",
+     "moved": "THE LIBRARY MOVED: 857d90b81960d69a -> a1c2880169c5f799 (the 5d2b94f71d change), wrapper 55ddb8f7 unchanged; ran at the 17:09Z-17:10Z fifth run"
+    }
+   ],
+   "read_from": [
+    "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/Y5D/INSTALL_OUTPUT_Y5D_20261004.txt",
+    "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round6/act/D2_INSTALL_HOST_OUTPUT_20261006.txt (and D2B, D2C)",
+    "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st26/ to _st29/ (D2_V1_INSTALL_20261009.txt, P1_PRE_READ_20261009.txt)",
+    "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_st30/, _st31/, _st32/ (D2_V1_INSTALL_20261011.txt, P1_PRE_READ_20261011.txt)",
+    "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/st30_release/NEVER_WIDEN_PACKET_ST30.md, st31_release/NEVER_WIDEN_PACKET_ST31.md, st32_release/NEVER_WIDEN_PACKET_ST32.md",
+    "org/tier2_senior/0.7.0_AE_CloudOps~YC2/deliverables/irpt_ycdgen_j4/SIGNIN_BASELINE_BEFORE_FIFTH_RUN_20261011.txt"
+   ],
+   "claim": "measured",
+   "library_identity": "The host library 857d90b8 is the content of ycharts_session.js at commit 8e385c08b2 (2026-10-02): git show 8e385c08b2:<file> hashes to 857d90b81960d69a; git show 5d2b94f71d:<file> and HEAD hash to a1c2880169c5f799 (measured here). The host showed 857d90b8 at every install record read, from the st15 root (read at the st16 install, 2026-10-03T02:03Z) to st31.",
+   "gap_between_the_last_good_bundle_and_the_first_failure_after_it": "No resident install is recorded between st21 (2026-10-04T02:01Z) and st22 (2026-10-06T01:08Z), so the root and library that wrote the bundle at 2026-10-05T10:04Z were the ones that failed the capture at 2026-10-05T14:41Z (claim: measured for the install records, absent for any change made by hand outside a release, which no record would show)."
+  },
+  "ours_or_the_vendors": {
+   "answer": "The records cannot say which side moved. Measured on our side: the probe, its transport and the Python replay client did not change in the window (identical text from 2026-09-24 for the probe; transport.py, controller.py, broker.py unchanged since 2026-10-02 or earlier); the host's library and wrapper bytes did not change between 2026-10-03 and 2026-10-11T16:09Z, so every NO_AUTHENTICATED_PROBE failure before the fifth run ran the same library. What did change on our side in the period, outside the capture code: from 2026-10-04T18:42Z to 2026-10-05T13:01Z the host's Python path made research calls on the same account and stored session (host runs YCD-R1 to YCD-R4 and the WAF probe W330, at least 56 calls by the RUN lines read, three runs stopped by a 202 with a waf action at the 7th call), the first research-runner traffic on that path in the records. Whether that, a displacement of the shared seat, the host's environment or a vendor-side change produced the challenge, no record shows. Nothing in the repository records the vendor's rule or any change to it. The timeline also does not support the premise that captures worked until 2026-10-05: see not_established items 1 and 2.",
+   "claim": "absent"
+  },
+  "capture_timeline_from_records": {
+   "claim": "measured for each dated item; the gaps between them are absent",
+   "items": [
+    "2026-09-27 to 2026-10-02T06:26Z: capture refusals LEASE_NOT_HELD (09-27), UNEXPECTED_CHALLENGE (09-27, 09-29 captcha, 10-02 captcha), AUTH_FAILED with no reason token (09-29 x2, 09-30, 10-01) (IB129-1_journal_capture_attempts.txt lines 12-21)",
+    "2026-10-01 ~08:21Z: scripted sign-in on the host, node-port probe 200, LEG_S_VERDICT=AUTHENTICATED (IRPT_MVP_Y/HOP7B/LEG_S_OUTPUT_20261001.txt)",
+    "2026-10-02 ~09:45Z: scripted sign-in 'met no challenge', probe 200, fence 23 persisted (IRPT_MVP_Y/SIGNIN_C/OUTCOME_SIGNIN_C_20261002.md)",
+    "2026-10-03T00:31Z: CAPTURE_FAILED:AUTH_FAILED:NO_AUTHENTICATED_PROBE (the same code as the fifth run), BEFORE the 2026-10-05T10:04Z bundle write",
+    "2026-10-03T16:33Z: a seed-only capture from a person's browser cookies (no sign-in by the automation): node-port probe 200 LIVE, then the resident read the template route 200 (change_management/20261003T1631Z_irpt-signin-har-20261003_deploy_completion.md)",
+    "2026-10-04T18:42Z to 2026-10-05T13:01Z: research runs on the Python path (three stopped by 202 + waf action at the 7th call); WAF window probe W330 completed 12 calls at 410 s spacing",
+    "2026-10-05T10:04Z: ycharts/session/current last changed (IB129-1_capture_failure_read.json stored_state); not stated whether by a capture, a seed or a cookie-rotation write-back",
+    "2026-10-05T14:41Z, 2026-10-11T11:19Z, 2026-10-11T17:10Z: CAPTURE_FAILED:AUTH_FAILED:NO_AUTHENTICATED_PROBE; only the last has a surviving receipt"
+   ]
+  }
+ },
+ "not_established": [
+  "That captures worked until 2026-10-05. The 2026-10-05T10:04Z time is the last CHANGE of the secret ycharts/session/current (IB129-1), and since st12 (9718ac5c87, installed 2026-10-02; operation_lease.py:257-292) the resident also rewrites that secret whenever the vendor rotates a cookie (IRPT_SESSION_ROTATION lines, e.g. in the 2026-10-05 research host runs). So that time may be a capture, a seed or a rotation write; the records do not say which. The last scripted sign-in success in the records is 2026-10-02 ~09:45Z (and 2026-10-01 ~08:21Z).",
+  "That the first failure of the NO_AUTHENTICATED_PROBE kind came after 2026-10-05: it is already in the journal on 2026-10-03T00:31Z. Earlier AUTH_FAILED lines (09-29 to 10-01) carry no reason token; the tokens were added by 25c32c3b58 on 2026-10-01 and the host carried them in library 857d90b8 by 2026-10-03T02:03Z (that the earlier lines predate their install is inferred).",
+  "Whether any probe before 2026-10-11T17:10Z was challenged. The receipt of every earlier attempt was truncated by the next run (IB129-1 not_established 1); only the fifth run's receipt survives.",
+  "Whether the successes and failures are a successes-and-failures count: a successful capture writes NO journal line (host_capture.py:413 returns {captured: True} with no print), so the journal extract of 11 failures cannot show how many captures succeeded.",
+  "Whether the Python urllib client and the Node https client look the same to the vendor on the wire.",
+  "Whether the job's post-capture calls would be challenged (job_calls_after_a_capture.would_meet_the_same_refusal is null).",
+  "What the vendor's rule is, and whether it changed. Nothing in the repository records it; the code comments hold only measured windows (122 to 373 s on reads, 2026-10-05).",
+  "The host's environment: YC_UA, YC_PROBE_PATH, YC_PROBE_TEMPLATE_ID and YC_BASE_URL are read from the host's environment (:72, :85, :143), and secret-ids.env sits on the host; none is readable from the trunk. The Chromium build the host's Playwright launches (the UA string says Chrome/148) is not recorded.",
+  "Any change made by hand on the host outside a numbered release (no record would show one).",
+  "The egress address the vendor sees for the host, and whether it is the same for the Node and Python clients.",
+  "Whether a person signed in to the shared seat in the hours around the failures (a concurrent sign-in evicts the stored session; the 2026-10-02 outcome measured one)."
+ ],
+ "vendor_requests_made": 0,
+ "sign_ins_made": 0,
+ "host_commands_run": 0,
+ "aws_calls_made": 0,
+ "changes_proposed_to_how_the_vendor_is_reached": 0
+}

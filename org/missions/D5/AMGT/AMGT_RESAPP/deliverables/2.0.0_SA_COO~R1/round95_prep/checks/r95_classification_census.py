@@ -23,6 +23,8 @@ SAN_FP_Equity and CSL_AU_Equity). Then, over the live function (`--where deploye
        `name` that is not the table row's (CSL_AU_Equity is a measured subject outside the covered universe: its series read 'Carlisle Cos Inc' and 'US Large Cap' there).
 The table rows of the D tickers are printed whole (name, asset_class, sub_asset_class, classified_by, last_updated, updated_by) beside the registered name, so a reader
 can see which fields of a disagreeing row were the security's own (SAN's 'Health Care' is a legacy classification under another company's cleaned name).
+ROUND 96 (`AMGT-bc-2`): the arms K1-K3 and K6 read "no field of the TABLE row is served", which a withheld listing satisfies by a null classification with the reason OR by its own
+model-block sector (null asset_class and sub_asset_class, the source named); `r96_sector_serve_census.py` asserts the latter.
 Verdict: R95 CLASSIFICATION CENSUS: YES|NO (exit 0|1). At the base (2026-10-11): K1, K2, K3, K6 FAIL, K4 and K5 PASS (no per-security route carries a subject classification today: a guard).
 """
 import argparse
@@ -73,6 +75,15 @@ def reason_ok(text):
     return PLAIN in str(text or "").lower()
 
 
+def no_table_field(cls, reason):
+    """No field of the TABLE row is served: the classification is null with the plain reason, OR (round 96 `AMGT-bc-2`) it is the listing's own model-block sector with
+    `asset_class` and `sub_asset_class` null and no reason; the table's sub-asset class or sector never appears."""
+    if cls is None:
+        return reason_ok(reason)
+    return (isinstance(cls, dict) and cls.get("asset_class") is None and cls.get("sub_asset_class") is None
+            and "model_block" in str(cls.get("sector_source") or "") and not reason)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--where", default="deployed", choices=["deployed", "local"])
@@ -113,7 +124,10 @@ def main():
                 tkr = row.get("ticker")
                 key = row.get("security_key") or index.get(tkr)
                 if tkr in d_tickers or key in disagree:
-                    if row.get("classification") is None and row.get("sector") is None and reason_ok(row.get("sector_reason")):
+                    # round 97 (`AMGT-bd-1`): the row's own LISTING sector may ride beside the withheld classification (`sector_source` 'Bloomberg, listing', `sector_reason` null);
+                    # what must never appear is the TABLE row's: a classification object from the table, or a sector with no listing source.
+                    from_listing = row.get("sector_source") == "Bloomberg, listing" and row.get("sector") and row.get("sector_reason") is None
+                    if row.get("classification") is None and (from_listing or (row.get("sector") is None and reason_ok(row.get("sector_reason")))):
                         ok_rows += 1
                     else:
                         bad_rows.append((movement + "/" + subject, tkr, (row.get("classification") or {}).get("sub_asset_class"), row.get("sector_reason")))
@@ -128,7 +142,7 @@ def main():
                 for s in ts.get("series") or []:
                     tkr = s.get("ticker")
                     if tkr in d_tickers:
-                        if s.get("classification") is None and reason_ok(s.get("classification_reason")):
+                        if no_table_field(s.get("classification"), s.get("classification_reason")):
                             ok_series += 1
                         else:
                             bad_series.append((movement + "/" + subject, tkr, (s.get("classification") or {}).get("sub_asset_class")))
@@ -148,7 +162,7 @@ def main():
         for row in body.get("rows") or []:
             tkr = row.get("ticker")
             if tkr in d_tickers:
-                if row.get("classification") is None and reason_ok(row.get("classification_reason")):
+                if no_table_field(row.get("classification"), row.get("classification_reason")):
                     chat_ok += 1
                 else:
                     chat_bad.append((days, tkr, (row.get("classification") or {}).get("sub_asset_class")))
@@ -169,7 +183,7 @@ def main():
         body = serve(where, "/lead-panel/timeseries/TRENDING/PRICE", {"tickers": t})
         series = next((x for x in (body.get("series") or []) if x.get("ticker") == t), None)
         table_name = (rows_by_key.get(k) or (t, {}))[1].get("name")
-        if (series is None or series.get("classification") is not None or not reason_ok(series.get("classification_reason"))
+        if (series is None or not no_table_field(series.get("classification"), series.get("classification_reason"))
                 or str(series.get("name")) == str(table_name)):
             asked_bad.append((k, t, (series or {}).get("name"), ((series or {}).get("classification") or {}).get("sub_asset_class")))
     res.append(say(not asked_bad and bool(disagree), "K6 every disagreeing ticker asked for by ticker serves no table row's name or classification",

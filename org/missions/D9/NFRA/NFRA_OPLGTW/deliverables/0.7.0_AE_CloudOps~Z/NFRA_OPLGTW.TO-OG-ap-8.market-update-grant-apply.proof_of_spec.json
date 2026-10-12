@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-ap-8",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.7.0_AE_CloudOps~Z",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3566a85699"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "84f96b6bf3",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-8.market-update-grant-apply.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/advi_billing_gateway_iam.tf",
+      "kind": "iam",
+      "commit_or_etag": "7411ca08922668f0f70611f3f14f15430b510598",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The file declaring aws_iam_role_policy.market_update_gateway_put, read at the detached box/sitez HEAD the plan and apply ran from. Applied -target'd to that one resource via safe-apply against a SAVED plan, with -var market_update_s3_root taken from address() output and never typed. 'Apply complete! Resources: 1 added, 0 changed, 0 destroyed.' LIVE read-back: policy gateway-market-update-put-policy on opal-gateway-role, ONE statement, Sid OplgtwPutMarketUpdateBronzeOnly, Action exactly ['s3:PutObject'], Resource exactly ['arn:aws:s3:::opal-data-transcripts/sharepoint/transcripts/bronze/market_update/*']. Inline count 22 -> 23.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ap8_policy.json",
+      "kind": "config_data",
+      "commit_or_etag": "fd624ad9b7",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The step-4 record AC2 reads live: role opal-gateway-role, policy_name gateway-market-update-put-policy. It also records why the before-state could not be taken from the resource name, the builder command that produced the S3 root, and both plans with their separately captured exit codes.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261011T1952Z_nfra-oplgtw-mu1-put-policy_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "fd624ad9b7",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NEVER-2 ledger: entry AND sentinel committed BEFORE the act, 4 legs each closed with proof (the captured plan, the apply, the 0/0/0 re-plan, the live read-back), CLOSED with the sentinel removed.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the act is not half-landed, and both captured plans read what the order requires at rc=0.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r34/checks/ap8.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "nfra-oplgtw-mu1-put-policy: entries at HEAD 1; status CLOSED=yes; sentinel at HEAD=no\nap8_plan_target.txt: rc=0 summary=(1, 0, 0) (want (1, 0, 0)) addresses 1 ['aws_iam_role_policy.market_update_gateway_put']\nap8_replan.txt: rc=0 summary=(0, 0, 0) (want (0, 0, 0)) addresses 0 []\nRESULT: PASS\nexit=0",
+      "denominator": "Seven figures read at HEAD: the ledger's entry count, Status line and sentinel presence; and for each of the two captured plans its exit code, its (add, change, destroy) summary and its planned-address list. The issuer's script reads the .rc files separately from the summaries, so the rc limb cannot be inferred from a summary line.",
+      "status": "PASS",
+      "status_reason": "The grant is landed and not half-applied, and both plans read exactly what the order requires with their exit codes verified independently. The issuer recorded ap8.AC1 FAIL at base, so the instrument moved FAIL -> PASS across the act.",
+      "expect": "(?s)entries at HEAD [1-9]\\d*; status CLOSED=yes; sentinel at HEAD=no.*summary=\\(1, 0, 0\\).*summary=\\(0, 0, 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the live statement is the one the halves signed and nothing wider.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r34/checks/ap8.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "live read rc=0; statements 1; actions ['s3:PutObject']; resources ['arn:aws:s3:::opal-data-transcripts/sharepoint/transcripts/bronze/market_update/*']\nRESULT: PASS\nexit=0",
+      "denominator": "Four figures read from the LIVE policy via get-role-policy using the name ap8_policy.json records: the read's own exit code, the statement count, the full action list and the full resource list. A single statement with a single action and a single resource is the whole grant, so the enumeration is complete rather than sampled.",
+      "status": "PASS",
+      "status_reason": "The live grant is exactly the halves' statement: s3:PutObject only, on the market_update bronze prefix only, with no Get, List or Delete and no other prefix or bucket. Read live rather than from the plan, and the role's inline count moved 22 -> 23 so nothing else on the role changed.",
+      "expect": "(?s)live read rc=0; statements 1; actions \\['s3:PutObject'\\]; resources \\['arn:aws:s3:::opal-data-transcripts/sharepoint/transcripts/bronze/market_update/\\*'\\].*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The before-state was established by a predicate that can actually discriminate, after noticing one that could not. The TF resource name is market_update_gateway_put but the LIVE policy name is gateway-market-update-put-policy, so get-role-policy on the resource name returns NoSuchEntity even AFTER a successful apply -- it would have read as 'absent' on both sides and proved nothing. The before-state was therefore taken as a name census over the role's inline policies: 0 of 22 matched 'market', with 'advi' matching 1 as a positive control that the listing can see a policy that does exist. Separately, each plan's exit code was captured to its own .rc file rather than read off its summary line, because at OG-ap-7 step 5b this seat measured an INCOMPLETE plan printing exactly 1/0/0 while exiting rc=1.",
+      "expected": "The role's inline count moves 22 -> 23; a name census for 'market' moves 0 -> 1; the live statement reads exactly one action on exactly one prefix; and the re-plan falls to 0/0/0 at rc=0.",
+      "observed": "Count 22 -> 23. The live policy gateway-market-update-put-policy exists with one statement, one action, one resource. Pre-apply plan 1/0/0 at rc=0 on one address; post-apply 'No changes.' at rc=0. AC1 and AC2 both PASS where the issuer recorded them FAIL at base.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every world read came from an instrument independent of the act: the issuer's ap8.AC1.sh and ap8.AC2.sh for the criteria; aws iam get-role-policy and list-role-policies for the live grant; terraform plan on both sides of the apply, each with its exit code captured separately. The S3 root was produced by lib.opal_naming.address() rather than typed, and its output was asserted to end in /bronze/market_update/ before use, so the resource ARN in the live statement traces to the builder and not to a hand-written string.",
+      "observed": "The plan's intended statement and the live get-role-policy agree on name, action and resource. The builder output and the live Resource ARN agree on the prefix. Two independent reads of the role (get-role-policy and list-role-policies) agree that exactly one policy was added.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The .pptx writer itself, and any object under the market_update prefix.",
+      "reason": "COO half condition C: the code ships only in a later gateway release cut on the live ref after this ledger closes, under its own pair naming the ADVI_MARKET_UPDATE_S3_ROOT env key. This order lands capability only -- nothing was written to the prefix and no object exists there by this act."
+    },
+    {
+      "item": "Any exercise of the grant (an actual PutObject).",
+      "reason": "Out of the order's bounds ('no object written') and impossible to exercise usefully before the writer is released. The grant's SHAPE was read from get-role-policy; that is a different claim from the grant being exercised, and only the former is made."
+    },
+    {
+      "item": "The KMS leg (GatewayWritesTranscripts).",
+      "reason": "The preflight records it as already live, read by the CTO @e0ca80f880. Not re-read here and not claimed."
+    },
+    {
+      "item": "Any Get, List or Delete; any other prefix or bucket; deleting written objects.",
+      "reason": "Both halves' 'Not covered'. The live statement was enumerated in full and carries none of them."
+    },
+    {
+      "item": "The cross-day duplicate residual, and the two-writer key rule.",
+      "reason": "Named by the COO half as a signed residual of OG-mu-1's design (N = 2 writers, same key rule, conditional put refusing same-bytes-same-date). It is a property of the writer, not of this grant, and nothing here changes it."
+    }
+  ],
+  "surprises": [],
+  "session_log": "This seat is a SESSION seat, not an L7 worker subagent. The order arrived with OG-ap-9 in msg 33384, both GO'd to run one at a time after OG-ap-7's ledger closed; that ledger closed at 834a298560 before this act began. The ask and both halves were read first as the order says they bind. COO condition A was honoured by planning and applying from a DETACHED box/sitez-HEAD worktree (C:/tmp/og-tf-ap8 at 7411ca0892), never a release root -- the condition cites row Z-S81, which is this seat's own OG-ap-6 finding that a whole-root plan from a release branch would destroy three live resources. The worktree's cone carried the agent home up front, so the halt gate's premise held with no override; that requirement was learned at OG-ap-7, where the first deploy was blocked fail-closed for exactly its absence. COO condition B is noted as standing beyond this order: the market_update_s3_root variable is on trunk since @f769ef6103, so every later plan or apply of the opal-gateway root must pass it from address(), and a plan failing on a missing variable is a cut defect rather than grounds for a default. Commits: fd624ad9b7 (ledger close + ap8_policy.json + both plans with their .rc files). Push state measured by git ls-remote at report time.",
+  "compiler_tools": [
+    {
+      "tool": "lib.opal_naming.address()",
+      "invocation": "python -c 'from lib.opal_naming import address; a=address(\"sharepoint\",\"transcripts\",\"bronze\",\"market_update\",\"date=X\"); print(a[:-len(\"date=X\")])'",
+      "result": "PASS",
+      "notes": "s3://opal-data-transcripts/sharepoint/transcripts/bronze/market_update/, asserted to end in /bronze/market_update/ before being passed as -var. Rule 30 and COO condition B both forbid a typed address."
+    },
+    {
+      "tool": "terraform",
+      "invocation": "plan -target=aws_iam_role_policy.market_update_gateway_put -var market_update_s3_root=<address output> -out ; safe-apply apply <saved plan> ; plan -target again",
+      "result": "PASS",
+      "notes": "1/0/0 at rc=0 on one address, then 1 added, then 'No changes.' at rc=0. Each exit code captured to its own .rc file, which is what the issuer's AC1 reads."
+    },
+    {
+      "tool": "safe-apply.sh",
+      "invocation": ".tools/safe-apply.sh -chdir=C:/tmp/og-tf-ap8/infra/aws/terraform/opal-gateway apply ap8.tfplan",
+      "result": "PASS",
+      "notes": "Applied a SAVED plan, which encodes the same -target and -var and so executes exactly the reviewed row. No HALT_OVERRIDE; the gate's silent pass is not cited as evidence."
+    },
+    {
+      "tool": "aws iam",
+      "invocation": "list-role-policies (name census, before and after) and get-role-policy (the live statement)",
+      "result": "PASS",
+      "notes": "Before: 0 of 22 names matched 'market', control 'advi' matched 1. After: count 23 and the policy reads one statement, one action, one resource. The resource-name probe was discarded as undiscriminating."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open (4 legs), close-leg x4, close",
+      "result": "PASS",
+      "notes": "Entry AND sentinel committed before the act; every leg closed with proof; CLOSED with the sentinel removed."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "not run -- RUN-BY-ISSUER per the preflight",
+      "result": "SKIP",
+      "notes": "The issuer read the role live at signing (21+ inline policies, no market_update put) and this seat reproduced the absence by its own census. Recorded as not-run rather than as a pass; cloud-ops also warns comp-iam models (action) and never (action, resource), so it could not have graded this statement anyway."
+    }
+  ]
+}

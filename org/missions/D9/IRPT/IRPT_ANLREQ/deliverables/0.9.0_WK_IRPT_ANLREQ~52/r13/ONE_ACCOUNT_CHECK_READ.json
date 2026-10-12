@@ -1,0 +1,182 @@
+{
+  "read_at": "2026-10-11T20:46:39Z",
+  "tree_head": "2f22badbbf4941eea394455967efeccbfb9ed268",
+  "headline": "The door the form reaches is the TEMPLATE lane (template_reader.py + portfolio.freeze_template_portfolio), not parse.py. parse.py's csv lane is wired to refuse (CSV_LANE_NOT_COMPOSED, upload_resolution.py:110-111) and prepareUpload never sends csv_base64. Run today, in process: a two-account sheet with an Account column is ACCEPTED (NORMALIZED, the two accounts' AAA rows merged to 150); a sheet ending in a 'Total' row is ACCEPTED under the offline provider stub with the total counted as a holding (600 on a 300 sheet) -- whether the live provider refuses the symbol TOTAL was NOT run; a SHARES sheet is always turned back (no price source composed) but without words; a good dollars sheet is accepted. The door never reads a column beyond A and B and ignores every worksheet but one, and a test pins that.",
+  "account_recognition": [
+    {
+      "signal": "A column whose row-1 header names an account. Header words I would treat as one: account, acct, account number, account no, account id, acct #, custodian account (each says 'which account owns this row'). NOT portfolio, sleeve, model, strategy, household, group: those name a split INSIDE one account or a client, and a one-account sheet may carry them.",
+      "where_seen": "no example in the repository (none of the 10 files in intake/fixtures/holdings/ and none of the intake/tests files that build sheets has an account column; a case-insensitive search of intake/tests/test_template_reader.py and test_parse.py for 'account' finds only 'accounted for' at test_parse.py:46-52)",
+      "how_the_parser_would_see_it": "Template lane (the live one): column C and beyond are never read - xlsx cells outside A/B are skipped at template_reader.py:95, a csv row is cut to its first two values at template_reader.py:129; test_template_reader.py:63-70 PINS 'other sheets and columns ignored'. Measured: Ticker,Dollars,Account with ACCT-A / ACCT-B rows -> NORMALIZED, no finding about the column. parse.py (not composed in prod): header words are IDENTIFIER_HEADERS/NAME_HEADERS/UNIT_HEADERS/CURRENCY_HEADERS only (parse.py:98-108), an Account column is not read; measured needs_correction=False.",
+      "false_positive_risk": "A one-account custodian export that repeats the same account number on every row trips a 'column exists' test. Only 'more than one DISTINCT non-blank value in the column' is a safe form; that needs the column's values read, which neither reader does today. A column named 'Account Type' (taxable / IRA) also contains the word and has several values in one account: match the header as a whole phrase, never by substring.",
+      "claim": "inferred"
+    },
+    {
+      "signal": "A second header row: a cell in column A after row 1 that equals the header word (ticker / symbol) - two stacked blocks, one per account.",
+      "where_seen": "no example in the repository (no fixture repeats its header)",
+      "how_the_parser_would_see_it": "Template lane measured: Ticker,Dollars / AAA,100 / BBB,200 / Ticker,Dollars / CCC,50 / DDD,70 -> NEEDS_CORRECTION, two AMOUNT_NOT_A_NUMBER findings at row 4 (one with value 'Dollars', one with no value), and the symbol TICKER is sent to the provider as if it were a holding; no words, so the form shows the bare code. parse.py measured: UNPARSEABLE_QUANTITY, needs_correction=True (parse.py:1019). Turned back today by accident of the amount cell, not by recognising a repeat.",
+      "false_positive_risk": "Low: a real holding named TICKER or SYMBOL does not appear in the fixtures; a pasted duplicate header in a one-account sheet is a defect worth turning back anyway. But a repeated header does not prove two ACCOUNTS (a copy-paste can repeat it in one), so it should be worded 'repeated header row', not 'several accounts'.",
+      "claim": "inferred"
+    },
+    {
+      "signal": "The same identifier on several rows.",
+      "where_seen": "infra/aws/lambda/investor-reporting/intake/tests/test_template_reader.py:84-90 (Cash, $CASH, AAPL, aapl -> two DUPLICATE_SYMBOL_MERGED); infra/aws/lambda/investor-reporting/intake/template_reader.py:235-238",
+      "how_the_parser_would_see_it": "Template lane: DUPLICATE_SYMBOL_MERGED, severity NOTICE, never refuses; the rows are summed. Measured: AAA,100 / BBB,200 / AAA,50 -> NORMALIZED, total 350.",
+      "false_positive_risk": "HIGH and disqualifying as a signal: one account holding the same ticker in several tax lots, or listing a ticker once as shares and once as cash-in-lieu, trips it. The repository's own test treats it as a normal merge. Not offered as a recognition rule.",
+      "claim": "measured"
+    },
+    {
+      "signal": "More than one worksheet in a workbook.",
+      "where_seen": "infra/aws/lambda/investor-reporting/intake/fixtures/holdings/holdings_multi_sheet.xlsx (sheets 'Holdings' and 'Sleeve B'; described at infra/aws/lambda/investor-reporting/intake/fixtures/holdings/FIXTURE_MANIFEST.json:21)",
+      "how_the_parser_would_see_it": "Template lane: the sheet named holdings_template is read, otherwise the FIRST sheet, and the rest are not looked at (template_reader.py:71); test_template_reader.py:63 pins this. Measured: two sheets AcctA (AAA 100) and AcctB (CCC 50), neither named holdings_template -> NORMALIZED with total 100; the second sheet is dropped with no finding. parse.py has the finding MULTI_SHEET_WORKBOOK (parse.py:857) but that lane is not composed.",
+      "false_positive_risk": "Medium: a one-account workbook with a Notes / Instructions / Summary sheet beside the holdings sheet trips a bare sheet count. A narrower rule is to count sheets other than the chosen one whose row 1 holds a ticker/symbol header; that needs a read of every sheet, which neither reader does.",
+      "claim": "measured"
+    },
+    {
+      "signal": "Subtotal or total rows between blocks whose label is an account label (for example 'Account A Total').",
+      "where_seen": "infra/aws/lambda/investor-reporting/intake/fixtures/holdings/holdings_subtotals.csv:5,8 ('Equity Subtotal', 'Fixed Income Subtotal') - these are ASSET-CLASS subtotals of one account, the only subtotal shape in the repository",
+      "how_the_parser_would_see_it": "parse.py (not composed): label test _is_subtotal_label (parse.py:387-398) then SUBTOTAL_ROW_PRESENT at parse.py:900-922; measured needs_correction=True for an account-labelled block sheet. Template lane measured: 'Account A Total,300' is not sent to the provider (the spaces fail the SYMBOL pattern) and is turned back as TICKER_CHECK_UNAVAILABLE at its row, with AMOUNT_MISSING on the label-only rows; no words.",
+      "false_positive_risk": "HIGH for any 'subtotal' rule used to mean 'several accounts': the repository's only subtotal example is one account split by asset class. A subtotal is evidence of a totals row, not of several accounts; only a label containing an account word is account evidence, and that is the account-word problem of the first signal.",
+      "claim": "measured"
+    },
+    {
+      "signal": "A label-only line naming an account above a block (a row with one filled cell and no number, such as 'Account A').",
+      "where_seen": "infra/aws/lambda/investor-reporting/intake/fixtures/holdings/holdings_clean.csv:2,5,7 ('Equity', 'Fixed Income', 'Cash' group headers of one account)",
+      "how_the_parser_would_see_it": "parse.py (not composed): a one-cell row with no number is a GROUP_HEADER and is skipped (parse.py:888-895). Template lane measured: 'Account A,' becomes AMOUNT_MISSING at its row plus TICKER_CHECK_UNAVAILABLE for the symbol ACCOUNT A, so such a sheet is turned back but with raw codes.",
+      "false_positive_risk": "HIGH: the repository's own group headers (Equity / Fixed Income / Cash) have the same shape in a one-account sheet. Only a label with an account word differs.",
+      "claim": "measured"
+    },
+    {
+      "signal": "An account identifier written ABOVE the header (a metadata block such as 'Account: ...').",
+      "where_seen": "no example in the repository",
+      "how_the_parser_would_see_it": "Template lane: row 1 must be the header or the sheet is turned back as SYMBOL_HEADER_MISSING (template_reader.py:184-185), so any block above the header already fails. parse.py searches down for the first row with an identifier header and ignores everything above it (parse.py:821-826).",
+      "false_positive_risk": "Not a multi-account signal for the live door: such a sheet is refused for another reason before account matters.",
+      "claim": "inferred"
+    }
+  ],
+  "door_today": [
+    {
+      "kind": "SEVERAL_ACCOUNTS",
+      "input_built": "csv, 4 rows: header Ticker,Dollars,Account; AAA 100 ACCT-A; BBB 200 ACCT-A; AAA 50 ACCT-B; CCC 70 ACCT-B (made-up tickers and account labels). Also built and run as variants: repeated header block; label-and-subtotal rows; same ticker twice; two-worksheet xlsx (results in account_recognition).",
+      "invocation": "UploadService.create (uploads.py:240) as the DEFERRED door the portal reaches: build_upload_entry(service).handle POST of a file_base64/file_type body -> RESOLVING; resident_upload_service(...).resolve_deferred (uploads.py:423) with the offline resolver of tests/test_deferred_resolution.py (classify_batch over a stubbed securities_info receipt; SHARES price source = the production _not_composed refusal, upload_resolution.py:95,133); POST again -> the answer. Harness copied from tests/test_deferred_resolution.py fixture 'case'; script .scratch/run_door.py (not committed). Sheet written to a temp folder outside the worktree and deleted.",
+      "result": "POST answered RESOLVING; after the resident step the answer is NORMALIZED, input_id portfolio_6c6416ff0647..., total_dollars 420 (AAA 100+50 merged, BBB 200, CCC 70), one NOTICE DUPLICATE_SYMBOL_MERGED. The Account column is dropped without a word. Variants: repeated header -> NEEDS_CORRECTION AMOUNT_NOT_A_NUMBER x2; label/subtotal rows -> NEEDS_CORRECTION AMOUNT_MISSING x2 + TICKER_CHECK_UNAVAILABLE x4; same ticker twice -> NORMALIZED 350; two worksheets -> NORMALIZED 100.",
+      "turned_back": false,
+      "says_what_to_fix": false,
+      "claim": "measured"
+    },
+    {
+      "kind": "TOTALS_ROW",
+      "input_built": "csv, 3 rows under Ticker,Dollars: AAA 100; BBB 200; Total 300. Variant: last row 'Grand Total'.",
+      "invocation": "UploadService.create (uploads.py:240) as the DEFERRED door the portal reaches: build_upload_entry(service).handle POST of a file_base64/file_type body -> RESOLVING; resident_upload_service(...).resolve_deferred (uploads.py:423) with the offline resolver of tests/test_deferred_resolution.py (classify_batch over a stubbed securities_info receipt; SHARES price source = the production _not_composed refusal, upload_resolution.py:95,133); POST again -> the answer. Harness copied from tests/test_deferred_resolution.py fixture 'case'; script .scratch/run_door.py (not committed). Sheet written to a temp folder outside the worktree and deleted.",
+      "result": "'Total': NORMALIZED, total_dollars 600 (the row counted as a holding with the symbol TOTAL, double the sheet's own 300). Caveat that bounds this result: the offline resolver stub finds ANY symbol that matches the SYMBOL pattern (security_resolution.py:17); whether the LIVE provider answers TICKER_NOT_FOUND for TOTAL was not run, and no code in template_reader.py or portfolio.py looks for a totals label. 'Grand Total': NEEDS_CORRECTION TICKER_CHECK_UNAVAILABLE at row 4 only because the space keeps it from the provider; raw code, no words. For contrast parse.py (not composed) turns a wrong total back as TOTAL_MISMATCH and reads a right one as ROW_SKIPPED_NOT_A_HOLDING (measured).",
+      "turned_back": false,
+      "says_what_to_fix": false,
+      "claim": "measured"
+    },
+    {
+      "kind": "UNPRICEABLE_HOLDING",
+      "input_built": "csv, header Ticker,Shares: AAA 10; BBB 5, price_date 2026-10-09 (shares need a dated price). Variant: Ticker,Dollars with a symbol the stub provider does not know (MISSING).",
+      "invocation": "UploadService.create (uploads.py:240) as the DEFERRED door the portal reaches: build_upload_entry(service).handle POST of a file_base64/file_type body -> RESOLVING; resident_upload_service(...).resolve_deferred (uploads.py:423) with the offline resolver of tests/test_deferred_resolution.py (classify_batch over a stubbed securities_info receipt; SHARES price source = the production _not_composed refusal, upload_resolution.py:95,133); POST again -> the answer. Harness copied from tests/test_deferred_resolution.py fixture 'case'; script .scratch/run_door.py (not committed). Sheet written to a temp folder outside the worktree and deleted.",
+      "result": "Shares: NEEDS_CORRECTION, reason SHARES_PRICE_SOURCE_NOT_COMPOSED, one finding with no row and no description (the refusal is UploadLaneNotComposed from upload_resolution.py:133, caught at uploads.py:445 and turned into a finding) - EVERY shares sheet, good or bad, is turned back today. Unknown ticker (dollars): NEEDS_CORRECTION TICKER_NOT_FOUND at row 3, actions REPLACE_FILE and NAME_PROXY, WITH words (CORRECTION_WORDS, uploads.py:58-67). The provider answer for the unknown ticker is the offline stub's, not a live one.",
+      "turned_back": true,
+      "says_what_to_fix": false,
+      "claim": "measured",
+      "says_what_to_fix_detail": "true for the unknown-ticker variant (TICKER_NOT_FOUND has words); false for the shares sheet the row was built on (SHARES_PRICE_SOURCE_NOT_COMPOSED has none), so the flag carries the shares case.",
+      "where_pricing_happens": "Not in the POST. A dollars or weight sheet needs no price (the amount is the value; portfolio.py freeze_template_portfolio, dollars and weight branches). A SHARES sheet is priced inside UploadService._freeze_template (uploads.py:488 calls self.resolve_prices), which runs only in the resident's resolve_deferred (uploads.py:423); in the deployed composition resolve_prices is _not_composed('SHARES_PRICE_SOURCE_NOT_COMPOSED') (upload_resolution.py:112,133) and the resident docstring says so (upload_resolution.py:126). 'Cannot be priced' for a dollars sheet therefore means 'the provider does not recognise the ticker', also decided only in the resident (live securities_info read)."
+    },
+    {
+      "kind": "KNOWN_GOOD",
+      "input_built": "csv, header Ticker,Dollars: AAA 100; BBB 200.",
+      "invocation": "UploadService.create (uploads.py:240) as the DEFERRED door the portal reaches: build_upload_entry(service).handle POST of a file_base64/file_type body -> RESOLVING; resident_upload_service(...).resolve_deferred (uploads.py:423) with the offline resolver of tests/test_deferred_resolution.py (classify_batch over a stubbed securities_info receipt; SHARES price source = the production _not_composed refusal, upload_resolution.py:95,133); POST again -> the answer. Harness copied from tests/test_deferred_resolution.py fixture 'case'; script .scratch/run_door.py (not committed). Sheet written to a temp folder outside the worktree and deleted.",
+      "result": "POST answered RESOLVING, then NORMALIZED with total_dollars 300 and no findings.",
+      "turned_back": false,
+      "says_what_to_fix": false,
+      "claim": "measured"
+    }
+  ],
+  "door": {
+    "file_function": "infra/aws/lambda/investor-reporting/intake/uploads.py UploadService.create (uploads.py:240) with validate_upload (uploads.py:100) for payload refusals; _defer (uploads.py:370) publishes RESOLVING on the POST; resolve_deferred (uploads.py:423) in the resident runs _freeze_template (uploads.py:471) and flips the row to NORMALIZED or NEEDS_CORRECTION. The content findings come from infra/aws/lambda/investor-reporting/intake/template_reader.py read_template (:146) and infra/aws/lambda/investor-reporting/intake/portfolio.py freeze_template_portfolio (:496 returns NEEDS_CORRECTION when any finding has severity ERROR).",
+    "refusal_carrier": "TWO carriers. (a) A malformed request is RAISED as UploadRefused(code) (public_reason_code INVALID_INPUT, uploads.py:27-29), or UploadLaneNotComposed (NOT_READY), or PermissionError subclasses (NOT_AUTHORIZED / NOT_FOUND); the caller gets the closed error envelope {ok:false, public_reason_code, correlation_id} (_authz/errors.py:92) - the code text goes only to the internal record. (b) A file the door could read but not accept is an ANSWER, not an error: {upload_id, input_id:null, state:'NEEDS_CORRECTION', reason, findings:[{code, severity, row, column, sheet, value, actions, description?}], findings_total, template} (uploads.py:411-419); the published AnalysisUploadResult is closed at top level and state is one of NORMALIZED / NEEDS_CORRECTION / RESOLVING (docs/contracts/investor-reporting/v1/AnalysisUploadResult.schema.json:17-24). Content problems use (b). Today the first answer to a template upload is always RESOLVING (all 10 runs), so findings arrive on the second POST.",
+    "existing_refusal_codes": [
+      "payload (UploadRefused): UPLOAD_FIELDS, FILE_TYPE_UNSUPPORTED, UPLOAD_TOKEN, CSV_FILENAME, CSV_SIZE, CSV_ENCODING, CSV_SIZE_OR_CONTENT, SUPERSEDES_INPUT_REFERENCE, CORRECTIONS_INVALID, UNSUPPORTED_CURRENCY, VALUATION_OPTION, TEMPLATE_RESOLVER_REQUIRED, CHANGED_UPLOAD_SAME_TOKEN, INPUT_REFERENCE, DUPLICATE_BODY_FIELD, UPLOAD_BODY_SIZE, UPLOAD_BODY_ENCODING, UPLOAD_BODY_JSON",
+      "template findings: FILE_TOO_LARGE, FILE_TYPE_UNSUPPORTED, FILE_UNREADABLE, FILE_EXPANSION_LIMIT, FORMULA_VALUE_UNVERIFIED, SYMBOL_HEADER_MISSING, UNIT_MISSING, UNIT_UNRECOGNIZED, HOLDING_LIMIT, SYMBOL_MISSING, AMOUNT_MISSING, AMOUNT_NOT_POSITIVE, AMOUNT_NOT_A_NUMBER, NO_HOLDINGS, WEIGHTS_LOOK_LIKE_PERCENT, WEIGHTS_DO_NOT_SUM_TO_ONE (NOTICE only: CASH_SYMBOL_NORMALIZED, DUPLICATE_SYMBOL_MERGED, WEIGHT_RESIDUAL_NORMALIZED)",
+      "freeze findings: TICKER_NOT_FOUND, TICKER_DATA_NOT_ENTITLED, TICKER_AMBIGUOUS, TICKER_CHECK_UNAVAILABLE, SHARES_PRICE_UNAVAILABLE, REFERENCE_NOTIONAL_REQUIRED, CORRECTION_UNMATCHED, SHARES_PRICE_SOURCE_NOT_COMPOSED, CSV_LANE_NOT_COMPOSED",
+      "codes that carry words the person sees (CORRECTION_WORDS, uploads.py:58): RESOLVE_RETRY_EXHAUSTED, RESOLVE_PROVIDER_BUSY, TICKER_DATA_NOT_ENTITLED, TICKER_NOT_FOUND - 4 words, 2 of them for codes listed above"
+    ],
+    "where_a_new_refusal_would_go": "A new ERROR-severity finding code emitted in template_reader.read_template (pure, no provider): it then reaches the person through the path every other content finding takes (freeze returns NEEDS_CORRECTION on any ERROR, portfolio.py:496; resolve_deferred stores up to 500 findings, upload_resolution.py MAX_STORED_FINDINGS; the form prints them). Its words go in CORRECTION_WORDS (uploads.py:58) AND in ops/status.py::CORRECTION_WORDS, which tests/test_correction_words.py locks word for word. The reader must first be given sight past columns A/B and past the chosen sheet (template_reader.py:95, :129, :71), and test_template_reader.py:63 pins the opposite, so that test changes with it. To turn a file back in the FIRST answer instead of after the resident, the check would sit in _defer (uploads.py:375), which already runs the pure read_template before publishing RESOLVING and currently discards its result; that is a design choice a ruling should make, because it adds a second answer shape for a first POST."
+  },
+  "form": {
+    "file_function": "portal origin/DEV c2c6a8aedd: src/pages/TicketCenter/analysisRequest.ts fileAnalysisRequest (:99-128) called by TicketCenter.tsx handleCreateAnalysis (:288-332); the body is built by src/pages/InvestorReporting/tabs/analysis/prospect.ts prepareUpload (:97-126), which ALWAYS sends file_base64 + file_type (csv or xlsx) - the template lane - and never csv_base64; the call is ir.uploadAnalysisInput (src/api/endpoints/investor-reporting.ts:1210).",
+    "how_a_refusal_is_shown": "NEEDS_CORRECTION files nothing and returns the message 'Review required: <reason> Nothing was filed.' (analysisRequest.ts:106-111) plus one bullet per finding, at most 50 (findingLines, analysisRequest.ts:78-89): 'Row N: <description>' when the door sent a description, otherwise the raw code and the row, e.g. 'AMOUNT_NOT_A_NUMBER, row 4'; rendered by UploadFindings (AnalysisRequestParts.tsx:150-161) under the file input (TicketCenter.tsx:500). RESOLVING: 'The file is still being checked. Nothing was filed; submit again in a moment.' (analysisRequest.ts:113-118) - the person must press the button again, and the door's first answer was RESOLVING in every run. A raised refusal (error envelope) surfaces as a thrown IrRequestError 'investor-reporting analysis-input-upload refused' (investor-reporting.ts:1004,1012) caught at TicketCenter.tsx:327-328 into setError(e.message); the exact words shown there were not traced.",
+    "shows_what_to_fix": false
+  },
+  "proposed_cells": [
+    {
+      "what": "Give template_reader.read_template sight of the whole header row and of every worksheet (a header census: all row-1 header cells, the sheet names, and for an Account-phrase column its distinct non-blank values), keeping the A/B reading of holdings unchanged. Pure, no finding emitted yet. Update the test that pins 'other sheets and columns ignored'.",
+      "write_set": [
+        "infra/aws/lambda/investor-reporting/intake/template_reader.py",
+        "infra/aws/lambda/investor-reporting/intake/tests/test_template_reader.py"
+      ],
+      "risk": "LOCAL",
+      "depends_on": "a ruling on the open question",
+      "open_question": "What counts as 'several accounts'? Offer: a row-1 header that, as a whole phrase, is one of {account, acct, account number, account no, account id, acct #, custodian account} AND holds 2 or more distinct non-blank values; a second header row in column A; a second worksheet whose row 1 carries a ticker/symbol header. A file with no such signal cannot be told apart from one account. Does the CTO accept that residual?"
+    },
+    {
+      "what": "Turn the census into ERROR findings, each with a code, row/column and words: ACCOUNT_COLUMN_SEVERAL_VALUES, HEADER_ROW_REPEATED, EXTRA_HOLDINGS_SHEET; and a TOTALS_ROW_PRESENT finding for a column-A label in the parse.py total labels (total, totals, grand total, portfolio total, total portfolio; parse.py:376) or containing 'subtotal'. Findings are ERROR, so freeze already returns NEEDS_CORRECTION.",
+      "write_set": [
+        "infra/aws/lambda/investor-reporting/intake/template_reader.py",
+        "infra/aws/lambda/investor-reporting/intake/tests/test_template_reader.py",
+        "infra/aws/lambda/investor-reporting/intake/tests/test_template_uploads.py"
+      ],
+      "risk": "LOCAL",
+      "depends_on": "cell 1 (same file)",
+      "open_question": "Turn a totals row back, or drop it and compare it with the sum (parse.py's TOTAL_MISMATCH way)? FWD-3 says 'turned back'; the sum-check way would also catch an unlabelled total whose amount equals the sum of the rest (inferred, not run)."
+    },
+    {
+      "what": "Words for the person: add CORRECTION_WORDS entries for the new codes and for the codes that today show raw (AMOUNT_NOT_A_NUMBER, AMOUNT_MISSING, SYMBOL_HEADER_MISSING, TICKER_CHECK_UNAVAILABLE, SHARES_PRICE_SOURCE_NOT_COMPOSED saying 'send amounts in dollars'), in the door and in the status envelope, keeping the locked copy equal.",
+      "write_set": [
+        "infra/aws/lambda/investor-reporting/intake/uploads.py",
+        "infra/aws/lambda/investor-reporting/ops/status.py",
+        "infra/aws/lambda/investor-reporting/intake/tests/test_correction_words.py"
+      ],
+      "risk": "LOCAL",
+      "depends_on": "cell 2 for the new codes (the existing-code words can go first)",
+      "open_question": "ops/status.py is outside the intake folder (the lock test ties the two copies); is a words-only edit there inside this project's write grant? Who writes the words?"
+    },
+    {
+      "what": "Carry the changed reader and words to the runtimes that run them (the POST function that publishes RESOLVING and the resident that freezes), as the project already releases intake code.",
+      "write_set": [
+        "the project's lambda-source-map and Terraform entries for the POST function and the resident (not read; the staging is named only by the comment at uploads.py:53-57)"
+      ],
+      "risk": "SERVED",
+      "depends_on": "cells 1-3 accepted",
+      "open_question": "Which runtime(s) execute read_template and in which order they release; not read."
+    },
+    {
+      "what": "Optional, only if 'comes back from the form' must mean one press: have the form re-POST the same upload token until the answer leaves RESOLVING, then show the findings.",
+      "write_set": [
+        "portal/src/pages/TicketCenter/analysisRequest.ts",
+        "portal/src/pages/TicketCenter/TicketCenter.tsx",
+        "portal/src/pages/TicketCenter/__tests__/analysis-request.test.tsx"
+      ],
+      "risk": "SERVED",
+      "depends_on": "none; independent of cells 1-4",
+      "open_question": "Is a two-press refusal acceptable for FWD-3? A portal product-file change needs the CTO read and a client-facing-page check."
+    }
+  ],
+  "cannot_be_turned_back_at_the_door": [
+    "SEVERAL_ACCOUNTS: partly. A sheet that shows none of the signals above - the accounts' holdings stacked or merged into one table with no account column, no repeated header, no label rows and one worksheet - looks to the door exactly like one account (the same-ticker-twice sheet, measured NORMALIZED 350). The door cannot turn that back at any cost; only the person's own marking (an account column) is detectable. Nothing in the door supplies a 'number of accounts the person meant'.",
+    "TOTALS_ROW: an unlabelled or oddly labelled total (blank label, 'Sum', 'All') cannot be found by label. For a dollars sheet an amount-equals-sum-of-the-other-rows test could find it (inferred, not run); for weight sheets the existing WEIGHTS_DO_NOT_SUM_TO_ONE sees a doubled total.",
+    "UNPRICEABLE_HOLDING: not at the POST. 'Ticker not known to the provider' is decided only in the resident by a live read (stub only here), and 'no price' for shares is decided by a price source that is not composed, so every shares sheet is turned back today whether or not its holdings could be priced."
+  ],
+  "not_read": [
+    "any live provider or resident answer: the securities_info read, the resolution broker/lease/session (ycharts/session, intake/resolution_broker.py, security_resolution.classify_batch internals beyond its use by the offline stub); so whether TOTAL, a fund, or a delisted ticker is found, not found or not entitled live was NOT run",
+    "any real uploaded sheet (none may be used)",
+    "which deployed function runs which of POST / resident, and the Terraform and lambda-source-map entries that stage intake code (the SERVED cell is therefore sketched, not specified)",
+    "the portal transport: how investor-reporting.ts send() turns a raised error envelope into the words in the form, and any rendered page",
+    "docs/contracts/investor-reporting/v1/CONTRACT.md upload section and responses/analysis-input-upload.response.schema.json (AnalysisUploadResult.schema.json read to line ~80 only)",
+    "ops/status.py CORRECTION_WORDS (named by the comment at uploads.py:53-57 and the lock test; not opened)",
+    "poller.py / graph_client.py (the mail intake), custody_*.py, corrections.py, upload_suggestions.py (Y-4 ticker suggestions) and resolution_kimi.py",
+    "whether the form keeps the same upload token on a second press (read only chooseAnalysisFile, TicketCenter.tsx:220-233, which mints the token once per file choice)",
+    "xlsx number-format and shared-string paths of the template reader beyond the measured sheets"
+  ]
+}
