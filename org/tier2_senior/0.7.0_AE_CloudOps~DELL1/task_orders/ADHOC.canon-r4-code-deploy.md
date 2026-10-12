@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~D1</issued_by>
 <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
 <date>2026-10-11</date>
-<status>pending</status>
+<status>complete</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P2 (round 4 of MDPF_CANON; BEHIND MDPF_STRATID.TO-APPLY-R2 -- see PRECONDITIONS)</priority>
@@ -57,10 +57,17 @@ Cell CN-d-5 (merged `0468b6c8ba`) landed the read-only tool `.tools/mdpf-code-eq
       targeted plan must show only the function's code change; any other attribute moving: STOP, report, do not apply. Read the deployed
       package's manifest back: the sha256 of the three files must equal the pin's.
    d. **The one real run.** Invoke the gold lambda ONCE, in the exact event shape its EventBridge schedule sends (read the schedule's input;
-      do not type one). Read the run's manifest. Then read the same objects as in (a): the global account-distribution object differs from
-      the baseline by exactly `meta.cottonwood_fold.value_date` and `meta.cottonwood_fold.age_trading_days` (parse both, ignore `generated_at`
-      and provenance write stamps); every other object of every scope and type for that date is value-equal (DELTA=0, objects compared
-      printed). If the run raises `GLOBAL SERVED IDENTITY REFUSED`: do NOT retry or loosen; the run's manifest carries it under
+      do not type one). Read the run's manifest. Then read the same objects as in (a).
+      (AMENDMENT 3, 2026-10-12 ~17:5xZ, issuer defect in the criterion as first written: the A4 writer never overwrites an existing dated key, and
+      the 13:30Z fire had already written the global account-distribution for the latest date, so no on-demand run can land the two keys on it;
+      the first draft of this leg asked for a served-object change that the writer's write-once rule makes unobservable. Source: this order's
+      ledger leg L6 and row MDPF_CANON-D1-S17, read by the issuer against the run manifest `_manifests/2026-10-09/20261012T173257Z.json`.)
+      The leg is met when: invoke 200 with no FunctionError, manifest `errors` empty, every A4 object built (16 of 16); every object
+      read in (a) is byte-equal to its baseline (the run changed nothing served: 18 of 18); and the manifest's write row for the global
+      account-distribution carries `business_diff_paths` equal to exactly `_provenance.process_time`, `meta.cottonwood_fold.age_trading_days`
+      and `meta.cottonwood_fold.value_date` (the built object, not the served one). The served-key clause, the global account-distribution of
+      a NEW as-of date gaining those two keys with every other key and object value-equal, is read by the ISSUER on the first scheduled fire
+      after D2 that mints a new date (2026-10-13 13:30Z); it is not a leg of this order and no seat waits on it here. If the run raises `GLOBAL SERVED IDENTITY REFUSED`: do NOT retry or loosen; the run's manifest carries it under
       `errors.global`, the firm scopes wrote as before, and you file a BLOCKING row with the dates the message names and report.
    e. **The classification (CN-d-5's step; read only).** From the after-print, classify EVERY non-EQUAL name as RUNNER MEMBER (the dispatch
       chain executes or reads it, from `infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh` and the imports of what it runs) or NOT A
@@ -96,7 +103,7 @@ org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1
 </criterion>
 <criterion id="C4" judgment="false">
   <invocation>the one invocation of mdpf-gold-lambda in its schedule's own event shape, then the before and after reads of the latest date's global account-distribution and every firm scope's four artifact objects</invocation>
-  <expect>the global account-distribution gains exactly meta.cottonwood_fold.value_date and .age_trading_days; every other object value-equal (objects compared, printed); the run's manifest errors empty</expect>
+  <expect>(AMENDMENT 3) invoke 200, manifest errors empty, 16 of 16 A4 objects built; every baseline object byte-equal after the run (objects compared, printed); the manifest's global account-distribution write row has business_diff_paths exactly _provenance.process_time, meta.cottonwood_fold.age_trading_days and meta.cottonwood_fold.value_date</expect>
 </criterion>
 <criterion id="C5" judgment="false">
   <invocation>the whole-tree print before and after, the classification table, then python .tools/deploy_ledger.py check</invocation>
