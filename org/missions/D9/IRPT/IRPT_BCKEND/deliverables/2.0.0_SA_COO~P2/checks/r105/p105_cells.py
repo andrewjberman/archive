@@ -24,6 +24,10 @@ BUILT = {
     "cottonwood": ("3f2e738f83aa415a2b56cf506d54368f9d2f86f7ded8f19202fc373ef6a28901", "01387cef54b9e15e10023f05029e357d",
                    "f3247ea2964f9daae8d8439431cbbfae99108d39c50774b234821462c1d5d036"),
 }
+# AMENDMENT (row D2-S107): IB-pr-413 landed IB-pr-417's 49F bundle on this key on purpose after 404 landed its own (ledger pin
+# 6f7ca4840e, read from the after-reads file below). The 49F key may read 404's pair OR this later pair; cottonwood and inflection
+# keep the single built pair. 404's landing stays graded by the CLOSED ledger and its three built sha256.
+LATER_49F = ("8b482c8db26c2e913aeee72023bacc7e", "73f33c3c59b77528c6eaaa56799e9c55f570a7adac23a0c6bcd12e66fe343a81")
 
 
 def head(root, firm):
@@ -53,7 +57,9 @@ def main():
     if cid == "IB105-1-AC1":
         for firm, (sha, md5, msha) in BUILT.items():
             h = head(root, firm)
-            if h.get("ETag", "").strip('"') != md5 or (h.get("Metadata") or {}).get("members-sha256") != msha:
+            ok = [(md5, msha)] + ([LATER_49F] if firm == "49financial" else [])
+            got = (h.get("ETag", "").strip('"'), (h.get("Metadata") or {}).get("members-sha256"))
+            if got not in ok:
                 fail("%s ETag %r metadata %r" % (firm, h.get("ETag"), h.get("Metadata")))
         led = load().get("ledger") or {}
         shas = set(led.get("sha256") or [])
