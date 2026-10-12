@@ -7,7 +7,7 @@ ticket id, address or link; otherwise one FAIL line per problem and READS8-FAIL.
 logic; it cannot see the function or the table.
 
 The rule (CTO msg 6541): the control (a caller the rule admits for the record's firm) gets the signed link's PRESENCE; arm (b) is
-refused NOT_AUTHORIZED. Control present and (b) NOT_AUTHORIZED = OWNER_SCOPED_REFUSAL. Control refused = UNEXERCISED_LIVE. Anything
+refused NOT_AUTHORIZED. Control present (the link's presence; AMENDMENT 1: not an `ok` member) and (b) NOT_AUTHORIZED = OWNER_SCOPED_REFUSAL. Control refused = UNEXERCISED_LIVE. Anything
 else = ANOMALY, which is a finding, not a pass.
 """
 import json
@@ -21,9 +21,16 @@ FORBIDDEN = (r"REQ-[0-9a-f]{24}", r"TCK-\d{8}-[0-9a-f]{8}", r"@", r"https?://", 
 VERDICTS = ("OWNER_SCOPED_REFUSAL", "UNEXERCISED_LIVE", "ANOMALY")
 
 
+def control_served(control):
+    """AMENDMENT 1 (issuer, after the first run): the control is SERVED when the signed link is PRESENT and no refusal code came back --
+    the CTO's rule (msg 6541) is the link's presence. A served envelope carries no `ok` member (the first run read `ok` as absent while
+    the link, expiry, hash and length were all present), so `ok` is not the test; an explicit `ok: false` still means refused."""
+    return control.get("url_present") is True and control.get("public_reason_code") is None and control.get("ok") is not False
+
+
 def expected_verdict(arms):
     control, arm_b = arms["control"], arms["b"]
-    if not control.get("ok") or not control.get("url_present"):
+    if not control_served(control):
         return "UNEXERCISED_LIVE"
     if arm_b.get("ok") is False and arm_b.get("public_reason_code") == "NOT_AUTHORIZED":
         return "OWNER_SCOPED_REFUSAL"
