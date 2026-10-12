@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-u-6",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-u-6.portal-functions-caller-tier-fence.md",
+    "group": "OTHER",
+    "vintage_commit": "edef413890"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~62",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.remote1.md",
+    "vintage_commit": "edef413890",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-u-6.portal-functions-caller-tier-fence.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/portal_data_proxy/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "1048c86508",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "not deployed: the apply of this code is CT-u-7 (WORLD); this cell calls no AWS service",
+      "artifact_covered_by": ["CTu6-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/portal_content/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "1048c86508",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "not deployed: the apply of this code is CT-u-7 (WORLD); this cell calls no AWS service",
+      "artifact_covered_by": ["CTu6-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/portal_data_proxy/tests/test_internal_only.py",
+      "kind": "test",
+      "commit_or_etag": "1048c86508",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "unit tests on fake events; not packaged (absent from lambda-source-map.json files)"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/portal_content/tests/test_internal_only.py",
+      "kind": "test",
+      "commit_or_etag": "1048c86508",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "unit tests on fake events; not packaged (absent from lambda-source-map.json files)"
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "297133e507",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one appended row NFRA_CTLPLN-W62-S1 (append-only channel)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTu6-AC1",
+      "criterion_verbatim": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_internal_only.py ; expect the output to contain `passed` (the data-proxy tests pass, including the ten-route partner-403 arm).",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_internal_only.py",
+      "expect": "passed",
+      "output_evidence": "run from the worktree root under timeout 120: 50 passed in 0.73s (rc=0). The ten-route arm: test_partner_gets_403_on_each_of_ten_representative_routes, 10 routes x flat/nested = 20 cases, all passed. Negative control on base edef413890 source: 41 failed, 9 passed.",
+      "denominator": "50 of 50 collected passed; ten-route partner-403 arm 20 of 20",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTu6-AC2",
+      "criterion_verbatim": "python -m pytest -q infra/aws/lambda/portal_content/tests/test_internal_only.py ; expect the output to contain `passed` (the content-api tests pass, including GET 403 for a partner, and PUT/DELETE unchanged).",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_content/tests/test_internal_only.py",
+      "expect": "passed",
+      "output_evidence": "run from the worktree root under timeout 120: 27 passed in 0.09s (rc=0). Includes GET 403 for a partner with the table never scanned, and PUT/DELETE by a non-internal firm 403 with no table write, and by the internal firm unchanged. Negative control on base edef413890 source: 18 failed, 9 passed (the nine passing are the unchanged PUT/DELETE and internal-GET arms).",
+      "denominator": "27 of 27 collected passed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base-commit source (edef413890: no tier gate on either function) run against the same two test files: content api 18 failed / 9 passed; data proxy 41 failed / 9 passed. Discriminates on the fenced arms and leaves the unchanged arms passing.",
+      "expected": "the fenced-arm tests fail on the base source",
+      "observed": "content 18 failed / 9 passed; data proxy 41 failed / 9 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two independent runs of each suite with the same invocation",
+      "observed": "data proxy 50 passed (run 1 1.49s, run 2 0.73s); content api 27 passed (run 1 0.10s, run 2 0.09s)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy of either Lambda function and any terraform plan or apply",
+      "reason": "order BOUNDS: CT-u-7 applies the code; this cell runs no terraform, no aws call and no deploy"
+    },
+    {
+      "item": "live check that the deployed authorizer puts tier in the request context for every token type",
+      "reason": "the BLIND arm named in the order's preflight; CT-u-7 exercises it live after apply"
+    },
+    {
+      "item": "edits to the portal frontend, lambda-source-map.json, any .tf file, and the authorizer",
+      "reason": "outside the write grant (the order's paths); the partner-page consequence is recorded as NFRA_CTLPLN-W62-S1 for the issuer and CTO"
+    },
+    {
+      "item": "rendering a partner-firm page in a live browser session",
+      "reason": "not in the battery; partner access is read from FIRM_ALLOWED_PATHS in the surprise row, not measured by a live login"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W62-S1: partner-openable portal pages read the content-api GET (App.tsx:243, every page) and data-proxy routes (/market, /portfolios, /positioning, /valuations, /macro, /philosophy); the CT-u-6 fence answers those reads 403 for a partner, and the content read falls back to baseline"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~62/NFRA_CTLPLN.TO-CT-u-6.portal-functions-caller-tier-fence.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_data_proxy/tests/test_internal_only.py",
+      "result": "50 passed in 0.73s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q infra/aws/lambda/portal_content/tests/test_internal_only.py",
+      "result": "27 passed in 0.09s"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check infra/aws/lambda/portal_data_proxy/lambda_function.py infra/aws/lambda/portal_content/lambda_function.py infra/aws/lambda/portal_data_proxy/tests/test_internal_only.py infra/aws/lambda/portal_content/tests/test_internal_only.py",
+      "result": "All checks passed!"
+    }
+  ]
+}
