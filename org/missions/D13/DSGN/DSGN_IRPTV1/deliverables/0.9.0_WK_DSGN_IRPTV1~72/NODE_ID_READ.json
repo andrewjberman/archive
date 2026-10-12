@@ -53,10 +53,11 @@
     "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py:2431 (COT; external_id vs fact_allocations.AccountID)",
     "data/assets/scripts/gold/investor_reporting/holdings_membership.py:83 (COT membership key)"
   ],
-  "verdict_basis": "ids_equal_on_all is false. Two enumerated paths do not build the ACCOUNT node id as the account id by rule: the live 49F builder mints from a different key space than the directory (row 1 against rows 9-10; directory_runner.py:37-56 names the two spaces), and the valid contract fixture models node N-1 against ref A-0001 (row 22). The 49F defect is fail-closed at serve (snapshot.py:442-443) and at resolve (resolve.py:512): an unequal account is refused or withheld, never served under a wrong id. INF is equal by rule (rows 2, 5, 6, 11); COT is declared-equal (rows 3, 8, 12).",
-  "product_change": true,
+  "verdict_basis": "ids_equal_on_all is false. Two enumerated paths do not build the ACCOUNT node id as the account id by rule: the live 49F builder mints from a different key space than the directory (row 1 against rows 9-10; directory_runner.py:37-56 names the two spaces), and the valid contract fixture models node N-1 against ref A-0001 (row 22). The 49F defect is fail-closed at serve (snapshot.py:442-443) and at resolve (resolve.py:512): an unequal account is refused or withheld, never served under a wrong id. INF is equal by rule (rows 2, 5, 6, 11); COT is declared-equal (rows 3, 8, 12). On a live served 49 Financial client the one-account Holdings view loaded and showed that account's own value (the issuer's real run on portal DEV, recorded by the issuer and not re-run by this worker; no client named), and the producer refuses or withholds an unequal account (holdings/snapshot.py:442-443, holdings/resolve.py:512) rather than serving it under a wrong id.",
+  "product_change": false,
   "page_maps_node_ref": false,
   "page_map_blocker": "The step-3 map needs an account id per ACCOUNT node that the page can read. None exists on the wire: adapt.ts:1219 reads drill_refs[0].ref_id, and every producer sets that ref_id to the node's own minted id (holdings_49f.py:349; holdings_inf.py:357; holdings_snapshot.py:1377, 1448, 1542, 1658, 1749, 2464). The directory account id (adapt.ts:680) is paired to no node. A map built in tabs/holdings/ would have no source. The producer would need to carry the directory account id, and that file sits outside this grant (infra/ and data/assets/ are read-only here). Blocking row: DSGN_IRPTV1-D2-W72-S1.",
+  "blocking_row": "DSGN_IRPTV1-D2-W72-S1",
   "product_files_changed": [],
   "portal_commit": null,
   "test": null,
