@@ -23,8 +23,8 @@ Source: the four scopes' latest served `aggregate-aua-timeseries` (as-of 2026-10
 
 "Headline sums unchanged" and "suppress the line on that date" cannot both leave the date's identity intact. On each of the 55 dates the other-models
 dollars leave `by_model` while `model_aua` and `opal_aggregate_aua` stay. The sum of the global `by_model` model-class lines then falls short of
-`model_aua` by that date's dollars (the shortfall equals the suppressed line's value, 26.1M to 58.6M). Before the fold that identity held on 479 of 485
-valued dates (`FOLD_DESIGN.md` section 1). The W-7 `account_count_total` sums `by_model`, so it falls short of the headline count on the same 55 dates, or
+`model_aua` by that date's dollars (the shortfall equals the suppressed line's value, 26.1M to 58.6M). Before the fold that identity held to the cent on 277 of 485
+valued dates and within $0.02 on the other 208 (corrected from "479 of 485"; `FOLD_DESIGN.md` section 1). The W-7 `account_count_total` sums `by_model`, so it falls short of the headline count on the same 55 dates, or
 the build holds the count by a second rule.
 
 Under D1(a) the same date-set question returns for the fold line: its own multi-firm epoch is later than the core lines' (2026-09-10 on this read), so the
