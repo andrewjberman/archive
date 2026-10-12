@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~CT1</issued_to>
 <date>2026-10-12</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C after reading the record in-tree (commit 1a677233f3, on CLOUD): proof instance VALID (CTy2-AC1, CTy2-AC2); a child started with Start-Process -UseNewEnvironment read PIP_NO_INDEX=1 from its own environment (this session reads empty) and the explicit-index download failed rc=1 with "from versions: none" and an empty folder. Limits the seat states and the issuer accepts as stated, not repaired: the fresh environment as the system builds it lacks SystemRoot and USERPROFILE, so it is NOT a faithful logon session; the first run crashed in ssl initialisation (the missing SystemRoot) and was withdrawn; the valid run set SystemRoot inside the child only; pip download ran twice, the order asked for one (the first made no request). Row D1-S11. This is the dell1 hop of the round-9 thread.</status_reason>
 <risk>LOCAL</risk>
 <proof_genre>BUILD</proof_genre>
 <round>9</round>
