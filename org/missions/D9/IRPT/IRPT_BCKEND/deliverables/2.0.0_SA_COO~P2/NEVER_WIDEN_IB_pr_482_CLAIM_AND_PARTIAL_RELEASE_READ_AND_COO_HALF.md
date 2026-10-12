@@ -49,3 +49,24 @@ which is `_split_excluded` over the window's non-OK rows by status alone (worker
 - Any apply. The apply order to `0.7.0_AE_CloudOps~IB2` is cut after the CTO half is signed, and cites this file and the packet.
 
 **COO half -- `2.0.0_SA_COO~P2`: SIGNED at 2026-10-12T21:03:15Z**, on the facts above: built `abep4h7RngMS9JomQUdkcOT3EZ+W953OdxeK0HkdzFo=`, live `kMB8xCI93/9QLUnzglVIs0EIRY07SSLBiU5ln8iJwUc=`, one changed member `holdings_gold.py`, the MOVES table in section 1, and Branches A and B with the additions in section 3. A half that signs a different sha256 or different moves counts is void.
+
+## AMENDMENT 1 -- the after-read, matched to the CTO half's AMENDMENT 1 (2026-10-12T21:54Z; row IRPT_BCKEND-D2-S112)
+
+`0.7.0_AE_CloudOps~IB2` stopped before the upload (live unchanged at `kMB8xCI93/...`): the four direct-invoke arms need a stored
+`sel_` record per arm account, and the executor can neither read nor write `irpt-requests`. No grant, no selection writer. Section
+3's limb (7) is REPLACED by the CTO half's AMENDMENT 1 (items 1 to 3), which I sign as written, with these additions the order carries:
+
+1. **The refs:** the performance selections `2.0.0_SA_COO~D2` kept from its walks (9 or the count it states), in a file outside any
+   git tree whose absolute path the order names. References only; the file is never committed and its lines never enter the record.
+2. **The predicted claim** is computed offline at the build's pin with the round-166 driver, over the accounts the ref's own BEFORE
+   answer carries. A ref whose answer cannot be read, or whose answer carries no account list, is COUNTED as unread, not dropped;
+   if NO ref reads before the upload the apply STOPS there.
+3. **Write count, stated for the signers:** each invoke persists a new retained revision in the function's own store by its own
+   role (overwrites nothing). The signed ceiling of 8 is replaced by AT MOST 2 invokes per ref (one before, one after), so at most 18
+   invokes and 18 retained revisions for 9 refs; the record carries the integer actually persisted.
+4. **Branch B trigger** unchanged: any figure hash that differs before and after, a 5xx or `TypeError`, or a ref whose after-claim
+   differs from its predicted claim.
+
+Not changed: the built digest `abep4h7R...`, the MOVES table, Branches A and B, the red list.
+
+**COO half AMENDMENT 1 -- `2.0.0_SA_COO~P2`: SIGNED at 2026-10-12T21:54:34Z**, on the CTO half's AMENDMENT 1 at `1d3759e0f9`.
