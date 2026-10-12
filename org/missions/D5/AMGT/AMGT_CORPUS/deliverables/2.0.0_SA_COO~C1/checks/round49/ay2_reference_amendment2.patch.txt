@@ -1,0 +1,126 @@
+diff --git a/src/pages/SecurityAnalysis/modelSheet.ts b/src/pages/SecurityAnalysis/modelSheet.ts
+index 7f25d9cb..5a1257e3 100644
+--- a/src/pages/SecurityAnalysis/modelSheet.ts
++++ b/src/pages/SecurityAnalysis/modelSheet.ts
+@@ -553,7 +553,7 @@ export interface ModelSheet {
+ 
+ /** AMGT_CORPUS round 49 (CRPS-ay-2, C-S64): a block of the team's sheet as its own small table. `period` and `case` blocks print the
+  * verbatim grid under the sheet's own header cells; an `unread` block prints NO value (its label rows carry `why`). */
+-export type BlockCell = { text: string } | { value: number; format: string | null; display: string } | null
++export type BlockCell = { text: string; textKind: 'error' | 'word' } | { value: number; format: string | null; display: string } | null
+ export interface SheetBlockRow {
+   rowNumber: number
+   kind: 'title' | 'years' | 'body'
+@@ -600,6 +600,10 @@ export interface TeamCensus {
+     case: { blocks: number; rows: number }
+     unread: { blocks: number; rows: number }
+     withheld: number
++    /** AMGT_CORPUS round 49 (CRPS-ay-2 ADDENDUM 2): own-class block cells with `textKind` error; and cells printed from master
++     * blocks (0: a master block builds no cell). */
++    errorCells: number
++    masterCells: number
+   }
+ }
+ 
+@@ -959,6 +963,7 @@ export function buildModelSheet(
+ 
+   // AMGT_CORPUS round 49 (CRPS-ay-2, C-S64): each served block as its own small table (the sheet's own header rows ride in it).
+   const sheetBlocks: SheetBlock[] = []
++  const masterSheet = !!teamSheet && teamSheet.class === 'master'
+   if (teamSheet && Array.isArray(teamSheet.blocks)) {
+     for (const raw of teamSheet.blocks) {
+       if (!raw || !Array.isArray(raw.rows) || typeof raw.first_row !== 'number') continue
+@@ -967,8 +972,9 @@ export function buildModelSheet(
+       for (const rr of raw.rows) {
+         if (!rr || typeof rr.row_number !== 'number') continue
+         const rowKind: 'title' | 'years' | 'body' = rr.kind === 'title' || rr.kind === 'years' ? rr.kind : 'body'
+-        // An unread block prints no value, whatever the payload carries.
+-        const served = kind !== 'unread' && Array.isArray(rr.cells) ? rr.cells : []
++        // An unread block prints no value, whatever the payload carries; nor does a block of a MASTER-class sheet (the template's
++        // cells are one sample company's: no cell content is built).
++        const served = kind !== 'unread' && !masterSheet && Array.isArray(rr.cells) ? rr.cells : []
+         const cells = served.map((cell): BlockCell => {
+           if (!cell || cell.v === null || cell.v === undefined) return null
+           if (typeof cell.v === 'number' && Number.isFinite(cell.v)) {
+@@ -976,7 +982,10 @@ export function buildModelSheet(
+             const format = typeof cell.f === 'string' ? cell.f : null
+             return { value: cell.v, format, display: plainYear ? String(cell.v) : formatTeamValue(cell.v, format) }
+           }
+-          if (typeof cell.v === 'string' && cell.v.trim()) return { text: cell.v.trim() }
++          if (typeof cell.v === 'string' && cell.v.trim()) {
++            const text = cell.v.trim()
++            return { text, textKind: text.startsWith('#') ? 'error' : 'word' }
++          }
+           return null
+         })
+         rows.push({ rowNumber: rr.row_number, kind: rowKind, blockRow: rr.block_row === true, cells })
+@@ -993,11 +1002,17 @@ export function buildModelSheet(
+     }
+   }
+   if (teamCensus && sheetBlocks.length > 0) {
+-    const tally = { period: { blocks: 0, rows: 0 }, case: { blocks: 0, rows: 0 }, unread: { blocks: 0, rows: 0 }, withheld: 0 }
++    const tally = { period: { blocks: 0, rows: 0 }, case: { blocks: 0, rows: 0 }, unread: { blocks: 0, rows: 0 }, withheld: 0, errorCells: 0, masterCells: 0 }
+     for (const block of sheetBlocks) {
+       tally[block.kind].blocks += 1
+       tally[block.kind].rows += block.rows.filter((row) => row.blockRow).length
+       tally.withheld += block.withheld
++      for (const row of block.rows) {
++        for (const cell of row.cells) {
++          if (masterSheet) tally.masterCells += 1
++          else if (cell !== null && 'textKind' in cell && cell.textKind === 'error') tally.errorCells += 1
++        }
++      }
+     }
+     teamCensus.blocks = tally
+   }
+diff --git a/src/pages/SecurityAnalysis/tabs/ModelTab.tsx b/src/pages/SecurityAnalysis/tabs/ModelTab.tsx
+index 13a2b942..0addcb46 100644
+--- a/src/pages/SecurityAnalysis/tabs/ModelTab.tsx
++++ b/src/pages/SecurityAnalysis/tabs/ModelTab.tsx
+@@ -58,7 +58,7 @@ import { CardFooter, footerFor } from '../components/CardFooter'
+ import { WhatChangedPanel } from '../components/model/WhatChangedPanel'
+ import { checkFor } from '../figureIdentity'
+ import { displayValue, isRefusal } from '../refusalPresentation'
+-import { buildModelSheet, figureCurrency, formatSheetValue, formatTeamValue, isMoneyUnit, isTeamCell, MODEL_SHEET_TITLE, summarizeSheet, V3_LINES_TITLE } from '../modelSheet'
++import { buildModelSheet, figureCurrency, formatSheetValue, formatTeamValue, isMoneyUnit, isTeamCell, MASTER_TEAM_ROW_WHY, MODEL_SHEET_TITLE, summarizeSheet, V3_LINES_TITLE } from '../modelSheet'
+ import type { ModelSheet, ModelSheetGroup, ModelSheetRow, SheetCell, SheetRowType, TeamCell, TeamCite, V3Fact } from '../modelSheet'
+ import type {
+   CheckFaceEntry,
+@@ -757,7 +757,7 @@ function ModelBody({ data, versions }: { data: ThesisBundle; versions: ReactNode
+           </tbody>
+         </table>
+       </div>
+-      {(sheet.sheetBlocks ?? []).map((block) => block.kind === 'unread' ? (
++      {(sheet.sheetBlocks ?? []).map((block) => block.kind === 'unread' || data.model?.team_sheet?.class === 'master' ? (
+         <ul key={`sheet-block-${block.firstRow}`} data-sheet-block={block.firstRow} data-sheet-block-kind="unread" className={`space-y-0.5 text-[14px] font-normal ${INK_NAVY}`}>
+           {block.rows.filter((row) => row.blockRow).map((row) => {
+             const numbers = data.model?.team_sheet?.row_numbers ?? []
+@@ -765,7 +765,7 @@ function ModelBody({ data, versions }: { data: ThesisBundle; versions: ReactNode
+             const label = at >= 0 ? data.model?.team_sheet?.rows?.[at] : null
+             return (
+               <li key={`sheet-block-${block.firstRow}-${row.rowNumber}`}>
+-                {label || `Row ${row.rowNumber}`}: {block.why}
++                {label || `Row ${row.rowNumber}`}: {data.model?.team_sheet?.class === 'master' ? MASTER_TEAM_ROW_WHY : block.why}
+               </li>
+             )
+           })}
+@@ -778,13 +778,16 @@ function ModelBody({ data, versions }: { data: ThesisBundle; versions: ReactNode
+                 <tr key={`sheet-block-${block.firstRow}-${row.rowNumber}`} data-sheet-block-row={row.rowNumber} data-sheet-row-kind={row.kind} className={`border-t ${BORDER_HAIRLINE}`}>
+                   {row.cells.map((cell, index) => {
+                     const key = `${block.columns[index] ?? index}`
+-                    const text = cell === null ? '' : 'text' in cell ? cell.text : cell.display
++                    // ADDENDUM 2: an error cell of the team's sheet prints in words, never the raw token.
++                    const isError = cell !== null && 'text' in cell && cell.textKind === 'error'
++                    const text = cell === null ? '' : isError ? 'error in team sheet' : 'text' in cell ? cell.text : cell.display
++                    const title = isError && cell !== null && 'text' in cell ? `The research team's own sheet shows an error ("${cell.text}") here, so no value is shown.` : undefined
+                     return row.kind === 'body' ? (
+-                      <td key={key} className={`${cell !== null && 'value' in cell ? 'text-right tabular-nums' : 'text-left'} text-[14px] font-normal px-1 ${INK_NAVY}`}>
++                      <td key={key} title={title} className={`${cell !== null && 'value' in cell ? 'text-right tabular-nums' : 'text-left'} text-[14px] font-normal px-1 ${INK_NAVY}`}>
+                         {text}
+                       </td>
+                     ) : (
+-                      <th key={key} scope="col" className={`text-left text-[13px] font-bold px-1 ${INK_NAVY}`}>
++                      <th key={key} scope="col" title={title} className={`text-left text-[13px] font-bold px-1 ${INK_NAVY}`}>
+                         {text}
+                       </th>
+                     )
