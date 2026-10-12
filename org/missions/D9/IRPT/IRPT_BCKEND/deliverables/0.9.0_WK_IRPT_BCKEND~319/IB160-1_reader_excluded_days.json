@@ -1,0 +1,766 @@
+{
+ "base_commit": "7c00a44b5a",
+ "arm": "READER_CODE_OVER_SERVED_GOLD",
+ "arm_in_words": "NOT the deployed route. This is the route reader's OWN code at the base commit (holdings_gold.calculate and map_account, with the source the route composes at installed.py:75 for each of its two firms) run locally over the SERVED holdings gold read from S3 (list and get only; no Lambda invoked, no sign-in, no Secrets Manager read, nothing written to AWS). Every partition was read ONCE from S3 into a local cache outside the worktree; the reader's calculate() was then run once per account per window, with the account's rows served from memory by a stand-in for HoldingsGoldSource's transport (partition_dates, account_keys, frame, _read). What the reader computes from the rows (the account mapping, the filter at holdings_gold.py:246, the chain at :253-258, days_excluded at :274, the claim at :291/:295, the absences at :308-341) is the reader's own code. Two things are not the reader's: the stand-in transport, and ids.opaque_account memoised with functools.lru_cache (same function, same outputs; map_account calls it once per account per call). Checked on a sample of 50 accounts: the result with the stand-in equals the result with the reader's OWN HoldingsGoldSource class (partition_dates, frame and account_keys real; only the S3 get and parquet parse of _read replaced by the cached frame); see transport_check. The position classes, the distribution and the status tallies are counted by this driver from the same cached rows (classify() in ib160_measure.py), and the reader's days_excluded was compared with the driver's own count of non-OK rows for every account that got a figure (field reader_days_excluded_differs_from_status_count_of_rows). What could differ from the deployed function: its packaged bytes and dependencies, its mapping loader, the route's authorization and scope resolution (the scope is built in memory, one permitted account), and its response envelope; the reader's answer dict is read, not the route's HTTP body.",
+ "windows_from_code": [
+  "SI",
+  "YTD",
+  "QTD",
+  "1Y"
+ ],
+ "windows_code_line": "infra/aws/lambda/investor-reporting/performance/holdings_gold.py:98-106 (_period_for: SI when start is 1970-01-01, else f49_engine.ruled_period_for) with infra/aws/lambda/investor-reporting/performance/f49_engine.py:44 (RULED_WINDOWS = YTD, QTD, 1Y); any other window refuses (holdings_gold.py:105-106). Each ruled window is taken at the latest landed day by parity_period_returns.period_window; SI is 1970-01-01 to the latest landed day.",
+ "entries_composed": [
+  "the 49F entry",
+  "orion"
+ ],
+ "entries_code_line": "infra/aws/lambda/investor-reporting/performance/installed.py:68 (for canonical_firm in (tenants._CANONICAL_49F, tenants._CANONICAL_INF))",
+ "partitions_landed": {
+  "the 49F entry": {
+   "count": 566,
+   "first": "2024-07-09",
+   "last": "2026-10-08"
+  },
+  "orion": {
+   "count": 1619,
+   "first": "2020-04-27",
+   "last": "2026-10-08"
+  }
+ },
+ "partitions_read": "every landed partition of both entries was read once (list and get): the 49F entry 566 of 566, orion 1619 of 1619; no window was shortened",
+ "per_entry_and_window": [
+  {
+   "absences_named": {
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + money_weighted_return:UNSUPPORTED": 3736
+   },
+   "absences_named_accounts_with_none": {
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + money_weighted_return:UNSUPPORTED": 3160
+   },
+   "accounts_read": 8916,
+   "accounts_the_reader_refuses": 2020,
+   "accounts_with_an_excluded_day": 3736,
+   "accounts_with_none": 3160,
+   "claim_the_reader_gives": {
+    "measured": 3736
+   },
+   "claim_the_reader_gives_accounts_with_none": {
+    "measured": 3160
+   },
+   "control": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "end": "2026-10-08",
+   "entry": "the 49F entry",
+   "excluded_days_per_account_distribution": {
+    "1": 102,
+    "2": 178,
+    "3-5": 1083,
+    "6-20": 1242,
+    "more": 1131
+   },
+   "partitions_in_window": 566,
+   "partitions_landed": 566,
+   "partitions_read_for_this_cell": 566,
+   "position_of_the_excluded_days": {
+    "first_and_interior": 125,
+    "first_day_only": 3336,
+    "interior_only": 97,
+    "last_day_involved": 178
+   },
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "refusals": {
+    "holdings account mapping missing or duplicate": 1296,
+    "holdings gold carries no OK row inside the window": 724
+   },
+   "seconds": 385.5,
+   "start": "1970-01-01",
+   "window": "SI",
+   "non_ok_rows_in_window_by_status": {
+    "ALL-HOLDINGS-EXCLUDED": 467,
+    "FOLLOWS-DISCONTINUITY": 2,
+    "IMPLAUSIBLE-RETURN": 2,
+    "NO-PRIOR-HOLDINGS": 413118,
+    "NON-POSITIVE-BASE": 1596
+   }
+  },
+  {
+   "absences_named": {
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + money_weighted_return:UNSUPPORTED": 1592
+   },
+   "absences_named_accounts_with_none": {
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + money_weighted_return:UNSUPPORTED": 5240
+   },
+   "accounts_read": 8126,
+   "accounts_the_reader_refuses": 1294,
+   "accounts_with_an_excluded_day": 1592,
+   "accounts_with_none": 5240,
+   "claim_the_reader_gives": {
+    "measured": 1592
+   },
+   "claim_the_reader_gives_accounts_with_none": {
+    "measured": 5240
+   },
+   "control": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "end": "2026-10-08",
+   "entry": "the 49F entry",
+   "excluded_days_per_account_distribution": {
+    "1": 39,
+    "2": 99,
+    "3-5": 460,
+    "6-20": 519,
+    "more": 475
+   },
+   "partitions_in_window": 193,
+   "partitions_landed": 566,
+   "partitions_read_for_this_cell": 193,
+   "position_of_the_excluded_days": {
+    "first_and_interior": 44,
+    "first_day_only": 1380,
+    "interior_only": 54,
+    "last_day_involved": 114
+   },
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "refusals": {
+    "holdings account mapping missing or duplicate": 506,
+    "holdings gold carries no OK row inside the window": 788
+   },
+   "seconds": 265.3,
+   "start": "2026-01-01",
+   "window": "YTD",
+   "non_ok_rows_in_window_by_status": {
+    "ALL-HOLDINGS-EXCLUDED": 155,
+    "NO-PRIOR-HOLDINGS": 161386,
+    "NON-POSITIVE-BASE": 1042
+   }
+  },
+  {
+   "absences_named": {
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + money_weighted_return:UNSUPPORTED": 47
+   },
+   "absences_named_accounts_with_none": {
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + money_weighted_return:UNSUPPORTED": 6675
+   },
+   "accounts_read": 7621,
+   "accounts_the_reader_refuses": 899,
+   "accounts_with_an_excluded_day": 47,
+   "accounts_with_none": 6675,
+   "claim_the_reader_gives": {
+    "measured": 47
+   },
+   "claim_the_reader_gives_accounts_with_none": {
+    "measured": 6675
+   },
+   "control": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "end": "2026-10-08",
+   "entry": "the 49F entry",
+   "excluded_days_per_account_distribution": {
+    "1": 13,
+    "2": 5,
+    "3-5": 29,
+    "6-20": 0,
+    "more": 0
+   },
+   "partitions_in_window": 6,
+   "partitions_landed": 566,
+   "partitions_read_for_this_cell": 6,
+   "position_of_the_excluded_days": {
+    "first_and_interior": 0,
+    "first_day_only": 42,
+    "interior_only": 1,
+    "last_day_involved": 4
+   },
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "refusals": {
+    "holdings account mapping missing or duplicate": 1,
+    "holdings gold carries no OK row inside the window": 898
+   },
+   "seconds": 75.3,
+   "start": "2026-10-01",
+   "window": "QTD",
+   "non_ok_rows_in_window_by_status": {
+    "ALL-HOLDINGS-EXCLUDED": 12,
+    "NO-PRIOR-HOLDINGS": 5320,
+    "NON-POSITIVE-BASE": 36
+   }
+  },
+  {
+   "absences_named": {
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + money_weighted_return:UNSUPPORTED": 2056
+   },
+   "absences_named_accounts_with_none": {
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + money_weighted_return:UNSUPPORTED": 4784
+   },
+   "accounts_read": 8334,
+   "accounts_the_reader_refuses": 1494,
+   "accounts_with_an_excluded_day": 2056,
+   "accounts_with_none": 4784,
+   "claim_the_reader_gives": {
+    "measured": 2056
+   },
+   "claim_the_reader_gives_accounts_with_none": {
+    "measured": 4784
+   },
+   "control": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "end": "2026-10-08",
+   "entry": "the 49F entry",
+   "excluded_days_per_account_distribution": {
+    "1": 55,
+    "2": 124,
+    "3-5": 612,
+    "6-20": 655,
+    "more": 610
+   },
+   "partitions_in_window": 252,
+   "partitions_landed": 566,
+   "partitions_read_for_this_cell": 252,
+   "position_of_the_excluded_days": {
+    "first_and_interior": 61,
+    "first_day_only": 1809,
+    "interior_only": 64,
+    "last_day_involved": 122
+   },
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "refusals": {
+    "holdings account mapping missing or duplicate": 714,
+    "holdings gold carries no OK row inside the window": 780
+   },
+   "seconds": 252.8,
+   "start": "2025-10-08",
+   "window": "1Y",
+   "non_ok_rows_in_window_by_status": {
+    "ALL-HOLDINGS-EXCLUDED": 190,
+    "FOLLOWS-DISCONTINUITY": 2,
+    "IMPLAUSIBLE-RETURN": 2,
+    "NO-PRIOR-HOLDINGS": 208155,
+    "NON-POSITIVE-BASE": 1191
+   }
+  },
+  {
+   "absences_named": {
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + linked_days:PARTIAL + linked_days:PARTIAL + money_weighted_return:UNSUPPORTED": 750,
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + linked_days:PARTIAL + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 21,
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 51,
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 72
+   },
+   "absences_named_accounts_with_none": {
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + linked_days:PARTIAL + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 16,
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 7,
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 9
+   },
+   "accounts_read": 979,
+   "accounts_the_reader_refuses": 53,
+   "accounts_with_an_excluded_day": 894,
+   "accounts_with_none": 32,
+   "claim_the_reader_gives": {
+    "inferred": 144,
+    "measured": 750
+   },
+   "claim_the_reader_gives_accounts_with_none": {
+    "inferred": 32
+   },
+   "control": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "inferred",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "inferred",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "end": "2026-10-08",
+   "entry": "orion",
+   "excluded_days_per_account_distribution": {
+    "1": 1,
+    "2": 4,
+    "3-5": 12,
+    "6-20": 9,
+    "more": 868
+   },
+   "partitions_in_window": 1619,
+   "partitions_landed": 1619,
+   "partitions_read_for_this_cell": 1619,
+   "position_of_the_excluded_days": {
+    "first_and_interior": 53,
+    "first_day_only": 716,
+    "interior_only": 0,
+    "last_day_involved": 125
+   },
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "refusals": {
+    "holdings gold carries no OK row inside the window": 53
+   },
+   "seconds": 158.3,
+   "start": "1970-01-01",
+   "window": "SI",
+   "non_ok_rows_in_window_by_status": {
+    "NON-POSITIVE-BASE": 575039
+   }
+  },
+  {
+   "absences_named": {
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + linked_days:PARTIAL + linked_days:PARTIAL + money_weighted_return:UNSUPPORTED": 76,
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + linked_days:PARTIAL + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 21,
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 51,
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 52
+   },
+   "absences_named_accounts_with_none": {
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + linked_days:PARTIAL + linked_days:PARTIAL + money_weighted_return:UNSUPPORTED": 674,
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + linked_days:PARTIAL + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 16,
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 7,
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 9
+   },
+   "accounts_read": 979,
+   "accounts_the_reader_refuses": 73,
+   "accounts_with_an_excluded_day": 200,
+   "accounts_with_none": 706,
+   "claim_the_reader_gives": {
+    "inferred": 124,
+    "measured": 76
+   },
+   "claim_the_reader_gives_accounts_with_none": {
+    "inferred": 32,
+    "measured": 674
+   },
+   "control": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "end": "2026-10-08",
+   "entry": "orion",
+   "excluded_days_per_account_distribution": {
+    "1": 3,
+    "2": 4,
+    "3-5": 13,
+    "6-20": 23,
+    "more": 157
+   },
+   "partitions_in_window": 190,
+   "partitions_landed": 1619,
+   "partitions_read_for_this_cell": 190,
+   "position_of_the_excluded_days": {
+    "first_and_interior": 7,
+    "first_day_only": 84,
+    "interior_only": 4,
+    "last_day_involved": 105
+   },
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "refusals": {
+    "holdings gold carries no OK row inside the window": 73
+   },
+   "seconds": 28.1,
+   "start": "2026-01-01",
+   "window": "YTD",
+   "non_ok_rows_in_window_by_status": {
+    "NON-POSITIVE-BASE": 23775
+   }
+  },
+  {
+   "absences_named": {
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + money_weighted_return:UNSUPPORTED": 7
+   },
+   "absences_named_accounts_with_none": {
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + money_weighted_return:UNSUPPORTED": 798
+   },
+   "accounts_read": 979,
+   "accounts_the_reader_refuses": 174,
+   "accounts_with_an_excluded_day": 7,
+   "accounts_with_none": 798,
+   "claim_the_reader_gives": {
+    "measured": 7
+   },
+   "claim_the_reader_gives_accounts_with_none": {
+    "measured": 798
+   },
+   "control": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "end": "2026-10-08",
+   "entry": "orion",
+   "excluded_days_per_account_distribution": {
+    "1": 1,
+    "2": 0,
+    "3-5": 6,
+    "6-20": 0,
+    "more": 0
+   },
+   "partitions_in_window": 6,
+   "partitions_landed": 1619,
+   "partitions_read_for_this_cell": 6,
+   "position_of_the_excluded_days": {
+    "first_and_interior": 0,
+    "first_day_only": 3,
+    "interior_only": 0,
+    "last_day_involved": 4
+   },
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "refusals": {
+    "holdings gold carries no OK row inside the window": 174
+   },
+   "seconds": 9.2,
+   "start": "2026-10-01",
+   "window": "QTD",
+   "non_ok_rows_in_window_by_status": {
+    "NON-POSITIVE-BASE": 1057
+   }
+  },
+  {
+   "absences_named": {
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + linked_days:PARTIAL + linked_days:PARTIAL + money_weighted_return:UNSUPPORTED": 106,
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + linked_days:PARTIAL + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 21,
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 51,
+    "accrual_basis:UNSUPPORTED + excluded_rows:PARTIAL + fees_and_income:UNSUPPORTED + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 62
+   },
+   "absences_named_accounts_with_none": {
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + linked_days:PARTIAL + linked_days:PARTIAL + money_weighted_return:UNSUPPORTED": 644,
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + linked_days:PARTIAL + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 16,
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + linked_days:PARTIAL + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 7,
+    "accrual_basis:UNSUPPORTED + fees_and_income:UNSUPPORTED + missing_trading_days:PARTIAL + money_weighted_return:UNSUPPORTED": 9
+   },
+   "accounts_read": 979,
+   "accounts_the_reader_refuses": 63,
+   "accounts_with_an_excluded_day": 240,
+   "accounts_with_none": 676,
+   "claim_the_reader_gives": {
+    "inferred": 134,
+    "measured": 106
+   },
+   "claim_the_reader_gives_accounts_with_none": {
+    "inferred": 32,
+    "measured": 644
+   },
+   "control": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "end": "2026-10-08",
+   "entry": "orion",
+   "excluded_days_per_account_distribution": {
+    "1": 2,
+    "2": 4,
+    "3-5": 12,
+    "6-20": 20,
+    "more": 202
+   },
+   "partitions_in_window": 249,
+   "partitions_landed": 1619,
+   "partitions_read_for_this_cell": 249,
+   "position_of_the_excluded_days": {
+    "first_and_interior": 10,
+    "first_day_only": 110,
+    "interior_only": 5,
+    "last_day_involved": 115
+   },
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "refusals": {
+    "holdings gold carries no OK row inside the window": 63
+   },
+   "seconds": 34.1,
+   "start": "2025-10-08",
+   "window": "1Y",
+   "non_ok_rows_in_window_by_status": {
+    "NON-POSITIVE-BASE": 32180
+   }
+  }
+ ],
+ "position_rule_in_words": "Per account, take its rows inside the window in date order and call a row OK or non-OK by its status (the reader's own test, holdings_gold.py:246). The account has an excluded day when the reader returns a figure and days_excluded is 1 or more. last_day_involved: the account's LAST row in the window is non-OK (whatever else). Otherwise, with its first OK row as the dividing point: first_day_only: every non-OK row comes before the first OK row (a leading run of one or more days, e.g. an account not yet funded); interior_only: every non-OK row lies after the first OK row and before the last row (a day between OK days, chained across); first_and_interior: non-OK rows both before the first OK row and between OK days. The four classes are exclusive and cover the accounts with an excluded day. A refused account (no OK row at all, or an account the reader cannot map) is not placed.",
+ "status_values": {
+  "the 49F entry": {
+   "ALL-HOLDINGS-EXCLUDED": 467,
+   "FOLLOWS-DISCONTINUITY": 2,
+   "IMPLAUSIBLE-RETURN": 2,
+   "NO-PRIOR-HOLDINGS": 413118,
+   "NON-POSITIVE-BASE": 1596,
+   "OK": 2841381
+  },
+  "orion": {
+   "NON-POSITIVE-BASE": 575039,
+   "OK": 855536
+  }
+ },
+ "status_values_basis": "row counts over every landed partition of the entry",
+ "what_a_non_ok_row_means": {
+  "producer": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+  "the 49F entry": "One function writes both entries' status (holdings_performance.py:869-874, np.select over three conditions; the vocabulary and its reasons at :171-242). The 49F entry's gold holds six tokens (status_values). NO-PRIOR-HOLDINGS (first condition :869, assigned :873: held_count == 0 and cash_value == 0) is a day with no return BY CONSTRUCTION: the account held no position and no cash on the prior trading day, so there is no base (the account's first day, or a day after it held nothing); it is the commonest non-OK token by far. ALL-HOLDINGS-EXCLUDED (:870-871, :873) and NON-POSITIVE-BASE (:872, :874) are days whose return COULD NOT BE COMPUTED (every prior-day holding lacked an identifier or a price, or the basket was zero or below). IMPLAUSIBLE-RETURN (:881-884) is a day whose return WAS computed and then withheld because it fell outside -100% to +100%, and FOLLOWS-DISCONTINUITY (:949-953) is the day after one, withheld although its own arithmetic may be ordinary. daily_return is null on every non-OK row (:876-877, :884, :953).",
+  "orion": "Same function and lines. Orion's gold holds only OK and NON-POSITIVE-BASE (status_values): its non-OK row is the third np.select condition at holdings_performance.py:872 (account_value <= 0, assigned :874): the basket (non-negative holding value plus positive cash) at t-1 was zero or below, so the return over it is undefined and the producer writes no return (:876-877). It is a day whose return could not be computed over a zero or negative base; orion's gold holds no NO-PRIOR-HOLDINGS row, so no non-OK row in this entry is a first day with no base, and none is a withheld computed return.",
+  "daily_return_is_null_on_every_non_ok_row": true,
+  "vocabulary_at": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:171-242 (the six tokens, STATUS_REASONS at :228-242)"
+ },
+ "census_by_window": {
+  "49F": {
+   "1Y": {
+    "non_ok_rows_by_status": {
+     "ALL-HOLDINGS-EXCLUDED": 190,
+     "FOLLOWS-DISCONTINUITY": 2,
+     "IMPLAUSIBLE-RETURN": 2,
+     "NO-PRIOR-HOLDINGS": 208155,
+     "NON-POSITIVE-BASE": 1191
+    },
+    "rows": 1701718
+   },
+   "QTD": {
+    "non_ok_rows_by_status": {
+     "ALL-HOLDINGS-EXCLUDED": 12,
+     "NO-PRIOR-HOLDINGS": 5320,
+     "NON-POSITIVE-BASE": 36
+    },
+    "rows": 45555
+   },
+   "SI": {
+    "non_ok_rows_by_status": {
+     "ALL-HOLDINGS-EXCLUDED": 467,
+     "FOLLOWS-DISCONTINUITY": 2,
+     "IMPLAUSIBLE-RETURN": 2,
+     "NO-PRIOR-HOLDINGS": 413118,
+     "NON-POSITIVE-BASE": 1596
+    },
+    "rows": 3256566
+   },
+   "YTD": {
+    "non_ok_rows_by_status": {
+     "ALL-HOLDINGS-EXCLUDED": 155,
+     "NO-PRIOR-HOLDINGS": 161386,
+     "NON-POSITIVE-BASE": 1042
+    },
+    "rows": 1342613
+   }
+  },
+  "orion": {
+   "1Y": {
+    "non_ok_rows_by_status": {
+     "NON-POSITIVE-BASE": 32180
+    },
+    "rows": 224815
+   },
+   "QTD": {
+    "non_ok_rows_by_status": {
+     "NON-POSITIVE-BASE": 1057
+    },
+    "rows": 5844
+   },
+   "SI": {
+    "non_ok_rows_by_status": {
+     "NON-POSITIVE-BASE": 575039
+    },
+    "rows": 1430575
+   },
+   "YTD": {
+    "non_ok_rows_by_status": {
+     "NON-POSITIVE-BASE": 23775
+    },
+    "rows": 172895
+   }
+  }
+ },
+ "control": {
+  "what": "For each cell the driver reads one account whose every row in the window is OK (the first such account holding the window's fullest set of rows) through the reader's calculate(), and the same account again with ONE of its in-window rows set to NON-POSITIVE-BASE in memory only (the cache is never written back; nothing is written to AWS).",
+  "reading": "see `control.per_cell` in the JSON: the unmodified account returns a figure with days_excluded 0 and the claim every account with no excluded day in that cell gets (claim_the_reader_gives_accounts_with_none); the mutated copy returns days_excluded 1 and the same claim value, which is the finding itself.",
+  "per_cell": {
+   "the 49F entry/SI": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "the 49F entry/YTD": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "the 49F entry/QTD": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "the 49F entry/1Y": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "orion/SI": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "inferred",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "inferred",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "orion/YTD": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "orion/QTD": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   },
+   "orion/1Y": {
+    "same_account_with_one_in_memory_day_set_non_OK": {
+     "claim": "measured",
+     "days_excluded": 1,
+     "outcome": "figure"
+    },
+    "unmodified_account_with_no_excluded_day": {
+     "claim": "measured",
+     "days_excluded": 0,
+     "outcome": "figure"
+    }
+   }
+  }
+ },
+ "transport_check": {
+  "what": "50 accounts (a fixed shuffle of the accounts on the latest partition, seed 160) read twice for the same window: (1) the stand-in transport, (2) the reader's own HoldingsGoldSource class with only the S3 get and parquet parse of _read replaced by the cached frame; compared: outcome, days_excluded, claim and the absences named",
+  "results": [
+   {
+    "entry": "49F",
+    "window": "SI",
+    "sampled": 50,
+    "identical": 50
+   },
+   {
+    "entry": "49F",
+    "window": "YTD",
+    "sampled": 50,
+    "identical": 50
+   },
+   {
+    "entry": "orion",
+    "window": "SI",
+    "sampled": 50,
+    "identical": 50
+   },
+   {
+    "entry": "orion",
+    "window": "YTD",
+    "sampled": 50,
+    "identical": 50
+   }
+  ]
+ },
+ "not_established": [
+  "the deployed route's own answer: the deployed package's bytes, dependencies, mapping loader, authorization and response envelope were not exercised (no Lambda invoked, no sign-in)",
+  "the gold was read once, at the time of this run; a later partition may land and move the windows",
+  "why a given account's day is non-OK beyond the status token: the producer's inputs (prices, identifiers) were not read",
+  "the transport check covers a sample of 50 accounts on the windows listed in transport_check, not every account and window",
+  "whether the accounts the reader refuses (no OK row in the window, or absent from the latest partition so not mappable) are ones the route would serve at all: the route's own scope and permitted set were not applied",
+  "the account-level meaning of last_day_involved (an account that exited, or a late data fault) was not separated"
+ ],
+ "functions_invoked": 0,
+ "sign_ins_made": 0,
+ "aws_writes_made": 0,
+ "accounts_written": 0
+}
