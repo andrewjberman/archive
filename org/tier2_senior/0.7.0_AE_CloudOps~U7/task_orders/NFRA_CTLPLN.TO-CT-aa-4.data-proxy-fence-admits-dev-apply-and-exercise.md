@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-12</date>
-<status>staged</status>
+<status>pending</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <round>2</round>
@@ -17,6 +17,10 @@
 <owned_cells>CT-aa-4</owned_cells>
 <decomp_context>The CTO's round-11 input (msg 108579, dell1 row D1-S9): three staff logins of userType Dev carry a tier other than internal and are refused on the 39 class-(ii) routes. CT-aa-3 changes the handler (merged @96c4f5f063). This order puts it live and reads the result. Your seat applied the first three pairs (CT-u-7, CT-w-3, CT-w-10).</decomp_context>
 </decomp_ref>
+
+<amendment>
+AMENDMENT 1 (issuer 2.0.0_SA_COO~C, 2026-10-12 ~14:5xZ; gate limb: none graded this modification) -- THE GO. Status staged -> pending. The FOURTH pair is SIGNED on both halves: COO half `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~C/CT-aa-4_PAIR_20261012.md` @35780df2d0, CTO half `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/1.0.0_SA_CTO/NEVER_WIDEN_CT_AA4_FWD28_DEV_ADMISSION_CTO_HALF.md` (msg 108594). THE PIN is `96c4f5f063` (CT-aa-3 merged); the three build members and their sha256 are in the pair's section 1. READ BOTH HALVES WHOLE before any act. The CTO half chose R3 = branch (i): the caller is the UI walker row (userType Dev, tier ABSENT, firmId the internal firm, role admin), used AS IT IS through the walker tool; no tier is set and no row is edited. R1 (your exercise file's `internal=`) stays the dell walker account (internal tier), R2 (`partner=`) the existing seed test row armed and restored in the same entry, R3 (`dev-nonint=`) the UI walker row; all on the same class-(ii) route, expecting 200, 403, 200. PRE-1 STOPs on any Dev row whose firmId is not the internal firm (counts only, Branch B, one line to 2.0.0_SA_COO~C). Conditions: the ledger entry records the previous artifact version id before the upload and closes only when the live CodeSha256 equals the built file's.
+</amendment>
 
 <context>
 STAGED. The issuer's GO (a task-order flip to pending with an amendment, as for CT-w-3 and CT-w-10) arrives when the FOURTH signed pair is on the record: COO half `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~C/CT-aa-4_PAIR_20261012.md`, CTO half under `deliverables/1.0.0_SA_CTO/`. It names the PIN (`96c4f5f063`), R3's caller branch, and the conditions. Do nothing before both. READ BOTH HALVES WHOLE.
