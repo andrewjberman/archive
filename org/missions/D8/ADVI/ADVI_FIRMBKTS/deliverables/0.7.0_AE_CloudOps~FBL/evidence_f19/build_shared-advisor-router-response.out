@@ -1,0 +1,137 @@
+
+Node.js Lambda Build-and-Upload (ESM)
+  Pipeline:  portal-auth
+  Function:  shared-advisor-router-response
+  Bucket:    s3://opal-313476888478-lambda-artifacts/portal-auth/
+
+  Source:    infra/aws/lambda-edge/shared-advisor-router-response
+  Type:      ESM (index.mjs -> index.mjs)
+
+  Installing dependencies...
+
+Checked 123 installs across 124 packages (no changes) [24.01s]
+
+  Running unit tests...
+    $ bun test test/
+    bun test v1.3.9 (cf6cdbbb)
+    
+    test\firm-isolation-guard.spec.mjs:
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"49financial","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-bd","uri":"/gold/views/firm_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    57 | 
+    58 | describe("ADVI_FIRMSEP firm-isolation guard (origin-response defense-in-depth)", () => {
+    59 |   // --- MATCH: served bucket == authorized firm -> guard passes through ---------
+    60 |   it("49financial served from opal-data-bd passes through (success path keeps CDNCOHT cache-control)", async () => {
+    61 |     const r = await handler(makeEvent({ firmId: "49financial", servedBucket: "opal-data-bd", status: 200 }));
+    62 |     assert.notEqual(r.status, "502", "matching firm/bucket must NOT trip the guard");
+                    ^
+    AssertionError: matching firm/bucket must NOT trip the guard
+     generatedMessage: false,
+         actual: "502",
+       expected: "502",
+       operator: "notStrictEqual",
+           code: "ERR_ASSERTION"
+    
+          at C:\Users\AndrewBerman\Desktop\ajb_workspace\infra\aws\lambda-edge\shared-advisor-router-response\test\firm-isolation-guard.spec.mjs:62:12
+          at processTicksAndRejections (native:7:39)
+    FAIL: ADVI_FIRMSEP firm-isolation guard (origin-response defense-in-depth) > 49financial served from opal-data-bd passes through (success path keeps CDNCOHT cache-control) [15.00ms]
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"49financial","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-inf","uri":"/gold/views/firm_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"49financial","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-inf","uri":"/gold/views/firm_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"49financial","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/inflection/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"49financial","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/not-a-firm/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"49financial","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-portal-v2","uri":"/platinum/firm/header_metrics.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"49financial","expectedBucket":"opal-data-portal-v2","servedBucket":"opal-data-inf","uri":"/platinum/advi/49financial/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"opal-capital","expectedBucket":"opal-data-bd","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/49financial/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    148 |   it("P4R-3: opal-capital staff with ?firm=bd reading advi/49financial from portal-v2 passes", async () => {
+    149 |     const r = await handler(makeEvent({
+    150 |       firmId: "opal-capital", querystring: "firm=bd", servedBucket: "opal-data-portal-v2",
+    151 |       status: 200, uri: ADVI_49F,
+    152 |     }));
+    153 |     assert.notEqual(r.status, "502", "staff proxy resolves to the same tenant, so the tier is correct");
+                     ^
+    AssertionError: staff proxy resolves to the same tenant, so the tier is correct
+     generatedMessage: false,
+         actual: "502",
+       expected: "502",
+       operator: "notStrictEqual",
+           code: "ERR_ASSERTION"
+    
+          at C:\Users\AndrewBerman\Desktop\ajb_workspace\infra\aws\lambda-edge\shared-advisor-router-response\test\firm-isolation-guard.spec.mjs:153:12
+          at processTicksAndRejections (native:7:39)
+    FAIL: ADVI_FIRMSEP firm-isolation guard (origin-response defense-in-depth) > P4R-3: opal-capital staff with ?firm=bd reading advi/49financial from portal-v2 passes
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"49financial","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-bd","uri":"/gold/views/firm_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    153 |     assert.notEqual(r.status, "502", "staff proxy resolves to the same tenant, so the tier is correct");
+    154 |   });
+    155 | 
+    156 |   it("does NOT publish an alert when firm/bucket match (no false pages)", async () => {
+    157 |     await handler(makeEvent({ firmId: "49financial", servedBucket: "opal-data-bd", status: 200 }));
+    158 |     assert.ok(snsSend.notCalled, "normal traffic must never page");
+                     ^
+    AssertionError: normal traffic must never page
+     generatedMessage: false,
+         actual: false,
+       expected: true,
+       operator: "==",
+           code: "ERR_ASSERTION"
+    
+          at C:\Users\AndrewBerman\Desktop\ajb_workspace\infra\aws\lambda-edge\shared-advisor-router-response\test\firm-isolation-guard.spec.mjs:158:12
+          at processTicksAndRejections (native:7:39)
+    FAIL: ADVI_FIRMSEP firm-isolation guard (origin-response defense-in-depth) > does NOT publish an alert when firm/bucket match (no false pages)
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"inflection","expectedBucket":"opal-data-inf","servedBucket":"opal-data-bd","uri":"/gold/views/firm_summary.json","originStatus":403,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"opal-capital","expectedBucket":"opal-data-inf","servedBucket":"opal-data-bd","uri":"/gold/views/firm_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    
+    test\tenant-grain.spec.mjs:
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"inflection","expectedBucket":"opal-data-inf","servedBucket":"opal-data-cot","uri":"/gold/views/firm_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"49financial","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/inflection/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"inflection","expectedBucket":"opal-data-inf","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/cottonwood/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"49financial","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/inflection/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"49financial","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/cottonwood/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"49financial","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/demo/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"mockadv","expectedBucket":"opal-data-mockadv","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/inflection/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"mockadv","expectedBucket":"opal-data-mockadv","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/cottonwood/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"mockadv","expectedBucket":"opal-data-mockadv","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/demo/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"opal-capital","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/inflection/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"opal-capital","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/cottonwood/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    {"event":"firm_isolation_guard_triggered","severity":"CRITICAL","firmId":"opal-capital","expectedBucket":"opal-data-49financial","servedBucket":"opal-data-portal-v2","uri":"/platinum/advi/demo/mix_summary.json","originStatus":200,"request_id":"test-cf-id"}
+    
+     43 pass
+     3 fail
+    Ran 46 tests across 3 files. [241.00ms]
+    error: script "test" exited with code 1
+    Tests: PASS
+  External:  2 @aws-sdk/* packages marked external
+
+  Bundling with bun build --format=esm...
+    Entry:  index.mjs
+    Output: index.mjs
+    Bundled 2 modules in 16ms
+    
+      index.mjs  3.77 KB  (entry point)
+    
+    Bundle size: 4.0K
+
+  Validating handler export...
+    handler export: OK (export statement found in bundle)
+
+  Creating zip...
+    SHA256: 3ewTlF5dMkcQXUfdA/Vhgo7fbeVVzH+zbXpfF9pogrU=
+    Size:   4.0K
+
+  Uploading to s3://opal-313476888478-lambda-artifacts/portal-auth/shared-advisor-router-response.zip ...
+    OK s3://opal-313476888478-lambda-artifacts/portal-auth/shared-advisor-router-response.zip
+
+  Updating lambda-source-map.json...
+    Updated: artifact_s3_key, artifact_sha256, files -> [index.mjs]
+
+================================================
+Complete -- shared-advisor-router-response built and uploaded
+
+Next steps:
+  git add infra/aws/lambda/ci/lambda-source-map.json
+  git commit --author='...' -m 'ci: upload shared-advisor-router-response artifact [skip ci]'
+  export MSYS_NO_PATHCONV=1 && export AWS_EC2_METADATA_DISABLED=true
+  .tools/terraform.exe -chdir=infra/aws/terraform/portal-auth plan
+  .tools/terraform.exe -chdir=infra/aws/terraform/portal-auth apply
+  .tools/terraform.exe -chdir=infra/aws/terraform/portal-auth plan   # 0-diff
+  bash infra/aws/lambda/ci/record-terraform-deploy.sh portal-auth
+  git tag -a portal-auth-vX.Y.Z -m 'description' && git push --follow-tags
+
