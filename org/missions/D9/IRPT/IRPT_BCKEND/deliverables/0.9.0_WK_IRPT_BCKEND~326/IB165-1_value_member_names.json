@@ -1,0 +1,86 @@
+{
+  "to_id": "IRPT_BCKEND.TO-IB-pr-471",
+  "base_commit": "a7e7a53715662c963b22ee5d0825ad7eb50ab032",
+  "decision": "CONTRACT_NAMES_NONE",
+  "wire_contract": {
+    "names_declared": [],
+    "cites": [
+      "docs/contracts/investor-reporting/v1/PerformanceReport.schema.json:332-337",
+      "infra/aws/lambda/investor-reporting/_contracts/PerformanceReport.schema.json:328-334",
+      "infra/aws/lambda/investor-reporting/_contracts/fixtures/PerformanceReport.valid.json:68",
+      "infra/aws/lambda/investor-reporting/_contracts/fixtures/PerformanceReport.invalid.json:65"
+    ],
+    "in_words": "Neither copy of PerformanceReport.schema.json (the v1 docs copy and the lambda _contracts copy) enumerates the members of optional_facts.value_facts: it is typed object-or-null with no properties, and its description says only 'start and end values only when supported'. Both fixtures carry value_facts as null. No other contract file under docs/contracts/investor-reporting/ or _contracts/ (CONTRACT.md, REQUEST_COMPOSITION.md, the other schemas, examples, responses, fixtures) contains any of the six names or any beginning/ending/opening/closing wording for the value. The contract is open on the two names."
+  },
+  "emitters": [
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/holdings_gold.py:273",
+      "names": ["start_value", "end_value"],
+      "in_words": "The holdings-basis producer writes the first and last status-OK account value of the window into value_facts as start_value and end_value."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/f49_engine.py:229",
+      "names": ["start_value", "end_value"],
+      "in_words": "The 49F engine writes the first linked day's beginning value and the last linked day's ending value into value_facts as start_value and end_value (with net_additions)."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/orion_adapter.py:169-170",
+      "names": ["start_value", "end_value"],
+      "in_words": "The Orion adapter writes the vendor calculated-activity startValue and endValue into value_facts as start_value and end_value."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/bd_adapter.py:194-195",
+      "names": ["beginning_market_value", "ending_market_value"],
+      "in_words": "The Black Diamond adapter is the only emitter writing the beginning/ending market value names into value_facts, from the vendor point's beginningMarketValue and endingMarketValue."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/narrative/fixtures/performance_report_inf.json:443-444",
+      "names": ["start_value", "end_value"],
+      "in_words": "A narrative fixture of a served-shape report carries value_facts with start_value and end_value; a fixture, not a live emitter."
+    }
+  ],
+  "emitter_census": {
+    "pattern": "\\b(start_value|end_value|beginning_market_value|ending_market_value|startValue|endValue)\\b",
+    "tool": "native Grep, path infra/aws/lambda/investor-reporting, output_mode count, then content over *.py",
+    "files_searched": 661,
+    "files_with_a_hit": 13,
+    "denominator_note": "661 = tracked files under infra/aws/lambda/investor-reporting (git ls-files), 477 of them .py. 13 files hit, 314 occurrences, all inside that folder. Of the 13, 4 .py files write the members into value_facts (holdings_gold, f49_engine, orion_adapter, bd_adapter) and 1 fixture json carries them; the others are normalize.py and 3 tests (readers, listed in consumers_in_repo), orion_selected.py (request activity ids), 2 captured vendor fixtures (orion_daily.json, orion_captured_scope.json: raw vendor point keys, 285 of the 314 occurrences) and the _contracts schema description (prose). Names split 3 producers + 1 fixture on start_value/end_value against 1 producer on beginning_market_value/ending_market_value. The docs/contracts tree (separate scan, value_facts and the six names) hits 1 file, the v1 PerformanceReport schema description."
+  },
+  "consumers_in_repo": [
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/tests/test_f49_engine.py:97",
+      "reads": ["start_value", "end_value"],
+      "in_words": "The 49F engine test asserts the facts keys start_value, end_value and net_additions."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/tests/test_performance_adapters.py:223",
+      "reads": ["basis"],
+      "in_words": "Reads the basis prose of the Orion facts only; does not read the value members."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/normalize.py:245",
+      "reads": ["start_value"],
+      "in_words": "The value-shortcut refusal reads start_value from its own cells dicts (built by orion_adapter.py:283), not from value_facts."
+    },
+    {
+      "cite": "infra/aws/lambda/investor-reporting/performance/orion_adapter.py:97",
+      "reads": ["start_value"],
+      "in_words": "A series working key on the factor point dict (not value_facts); same for orion_selected.py:99-100, which names the vendor activity ids startValue and endValue in a request."
+    }
+  ],
+  "hash_pins": [
+    "infra/aws/lambda/ci/lambda-source-map.json and infra/aws/lambda/investor-reporting/PATH_MANIFEST.json list holdings_gold.py; no product file was changed, so no pin moved and none was regenerated"
+  ],
+  "not_established": [
+    "The portal adapter (adapt.ts) was not read: the row's portal cites are the issuer's, not established here.",
+    "Whether the wire contract SHOULD name the members, and which pair, is the CTO's call; this read shows only that no contract file does.",
+    "Whether a v2 report schema exists elsewhere naming the members: only the two PerformanceReport.schema.json copies and AnalysisReport.v2.schema.json were found under the two contract folders, and the last carries none of the names."
+  ],
+  "files_changed": [],
+  "functions_invoked": 0,
+  "sign_ins_made": 0,
+  "aws_writes_made": 0,
+  "accounts_written": 0,
+  "figures_written": 0,
+  "vendor_requests_sent": 0
+}
