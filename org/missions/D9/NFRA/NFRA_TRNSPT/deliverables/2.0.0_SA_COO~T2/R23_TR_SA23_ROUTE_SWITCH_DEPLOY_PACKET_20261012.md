@@ -116,3 +116,15 @@ It reads no ticket and writes nothing. A denied secret read is NOT MADE, no gran
 value (the status integer and the content type), never from a captured output compared whole.
 
 The COO half stands on the packet as amended.
+
+## ADDENDUM 2 (issuer, 2026-10-12) -- the probe's ticket id, an issuer defect found by the applier (msg 6251, row NFRA_TRNSPT-D2-S33)
+
+The deploy is applied and proven by the applier's report: one digest on three functions, the base at the front door, only that
+environment value moved, both pulls driven clean, the commentary function never invoked.
+
+Step (c)'s first post read 404 `application/json`, the ticket service's own `no route`: the made-up id `PROBE-NOSUCH-0` fails
+that service's id pattern at its dispatcher (`lambda_function.py:156`, read by the issuer after the fact), so none of the three
+signed branches was reachable. The 404 came from the service, past the front door, so the base is not implicated and stays.
+
+The issuer's word, carried as AMENDMENT 1 of the order: ONE more post with the id `TCK-00000000-00000000` and the same body.
+The extra-key check runs before any ticket read. The CTO's three branches and their consequences are unchanged.
