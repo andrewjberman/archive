@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-v-2",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-v-2.firm-access-registry-row-proposal.md",
+    "group": "OTHER",
+    "vintage_commit": "b0670f7e29"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~64",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round7.md",
+    "vintage_commit": "b0670f7e29",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-v-2.firm-access-registry-row-proposal.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~64/PROPOSAL_FIRM_ACCESS_REGISTRY_ROW.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a proposal document. Nothing is applied: no registry edit, no generator run into the repo, no Lambda or portal change, no terraform, no AWS call. The apply is a later order.",
+      "artifact_covered_by": ["CTv2-AC1", "CTv2-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one appended surprise row, NFRA_CTLPLN-W64-S1, in the fenced json array's section form. Append-only; no existing row edited.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTv2-AC1",
+      "criterion_verbatim": "grep -c \"PROPOSAL-FIRM-ACCESS rows=\" org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~64/PROPOSAL_FIRM_ACCESS_REGISTRY_ROW.md ; expect 1",
+      "method": "command",
+      "invocation": "grep -c \"PROPOSAL-FIRM-ACCESS rows=\" org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~64/PROPOSAL_FIRM_ACCESS_REGISTRY_ROW.md",
+      "output_evidence": "run from the worktree root under timeout 120 (timeout 120 is the run bound, not part of the invocation): stdout '1', rc=0. The deciding line is the counts line, LAST line of the proposal: 'PROPOSAL-FIRM-ACCESS rows=6 targets=2 questions=5'.",
+      "denominator": "1 of 1 counts line in the proposal (rows=6, targets=2, questions=5)",
+      "status": "PASS",
+      "expect": "1",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTv2-AC2",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO: the recommendation in section 1 is the right single source, and the handler patch in section 4 would pass the naming gate. It is a judgment row with NO verdict from the worker.",
+      "method": "manual_read_with_citation",
+      "invocation": "none: judgment row. The CVO reads PROPOSAL_FIRM_ACCESS_REGISTRY_ROW.md section 1 (recommendation (a), with the one-writer consequence) and section 4 (the handler patch).",
+      "output_evidence": "recorded output, no verdict: section 1 recommends (a), a new registry file read by the generator, and rejects (b) and (c) with cited lines. Section 4's six added lines were scanned read-only, in memory, against the 19 firm and alias spellings of the scopes.json class-FIRM rows, after removing system keys: 0 hits. The one new literal, 'null', is not a firm spelling. The firm set is imported from a generated module.",
+      "denominator": "N/A -- judgment row, no count. Scan denominator: 6 added lines against 19 spellings.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the grade is the CVO's at L9 (3.0.0_SA_CVO), not the worker's. No PASS or FAIL is recorded here.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the counts grep run on a copy of the proposal with its counts line removed (.scratch/mutant_no_counts.md)",
+      "expected": "0 matches, so the criterion fails on a proposal without its counts line",
+      "observed": "0 (grep rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the CTv2-AC1 invocation on the proposal, compared",
+      "observed": "run 1: 1 (rc=0); run 2: 1 (rc=0)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the apply of any part of the proposal (registry edit, generator run into the repo, lib/opal_naming.py edit, handler edit, source-map edit, tests)",
+      "reason": "the order says a later order applies it; this cell is a proposal only"
+    },
+    {
+      "item": "the portal checkout (portal/ gitlink, firmAccess.ts)",
+      "reason": "the order changes nothing under portal/; the portal carrier is proposed as a later order (section 3)"
+    },
+    {
+      "item": "live pre-apply read of the data proxy's caller firmIds (CloudWatch logs, Cognito or partner roster)",
+      "reason": "the order forbids AWS calls in this cell; the proposal states the read as step 5 for the apply order"
+    },
+    {
+      "item": "the generator's output rendered into the repo",
+      "reason": "the order allows lib/opal_naming.py read-only verbs only; no generate run was written to the tree"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W64-S1: the registry's served-tenant set (_tenants) holds five ids and the portal's firm matrix admits four, so a firm set derived from the registry would admit a test-kind tenant that the portal refuses today; the proposal states admission as explicit rows."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~64/NFRA_CTLPLN.TO-CT-v-2.firm-access-registry-row-proposal.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "lib/opal_naming.py validate (read-only)",
+      "invocation": "python -I lib/opal_naming.py validate",
+      "result": "VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s) at registry@fc840fdf5eeae8fd over all 15 registry file(s); rc=0"
+    },
+    {
+      "tool": "lib/opal_naming.py targets (read-only)",
+      "invocation": "python -I lib/opal_naming.py targets",
+      "result": "TARGETS: 17; PLANE portal: 2; rc=0 (portal generated carriers listed as SHIP portal, portal CI)"
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~64/NFRA_CTLPLN.TO-CT-v-2.firm-access-registry-row-proposal.proof_of_spec.json CTv2-AC1,CTv2-AC2",
+      "result": "VALID (rc=0); surprises limb: 1 entry, 1 open row id resolves to a channel row; invocation-alignment clean after the AC1 invocation was restated verbatim"
+    }
+  ]
+}
