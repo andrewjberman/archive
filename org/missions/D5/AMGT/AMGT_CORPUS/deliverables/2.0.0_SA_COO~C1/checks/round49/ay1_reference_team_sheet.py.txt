@@ -1,0 +1,781 @@
+"""AMGT_CORPUS round 44, CRPS-at-1 (FWD-12, PRD v0.9 ADDENDUM D) -- each served name's OWN research-team sheet rows.
+
+The Model tab shows the rows of the research team's own model sheet, in its order and labels, not one fixed list.
+This module READS the stored workbooks (bronze research-report objects, S3 reads only; nothing is written) and
+returns the rows. `rows_for(security_key)` answers one name; `census()` answers every served name.
+
+THE RULES (round 40's measured instruments, followed exactly):
+  * over rows 1-400 and columns 1-60 of a sheet, a row's LABEL is the first non-empty string in its first 4 cells,
+    and the row COUNTS when it also holds two or more numbers (a bool is not a number);
+  * a sheet CARRIES FIGURES when >= 10 rows count;
+  * a workbook (.xlsx / .xlsm) is figure-carrying when `Model NEW VERSION` or `Model` carries figures; the team
+    sheet is `Model NEW VERSION` when it carries figures, else `Model`; `rows` are that sheet's counted labels in
+    sheet order, as written (whitespace collapsed); when BOTH sheets carry figures `model_rows_beside` holds the
+    `Model` sheet's labels, else None;
+  * of two or more figure-carrying workbooks in one name's partition the one with the newest stored modified date
+    is read (object metadata `source-mtime` or `mtime` when present, else the S3 LastModified);
+  * a name with no figure-carrying workbook takes the master template (found by exact file name anywhere in
+    bronze) by the same rule; when the store holds none the class is `master_absent`, rows [] and a reason a PM
+    reads. Rows are never invented.
+
+THE ROW CLASSES (AMGT_CORPUS round 46, CRPS-av-1, FWD-12 / FWD-20): every counted row is classed FROM THE SHEET.
+  * the PERIOD HEADER is the first counted row that is a YEAR ROW and not a named CONTROL row (round 47, CRPS-aw-2
+    amendment 1: a year row has at least three integer years 1990..2100, strictly increasing by column, making up at
+    least 80% of its numeric cells; a non-year number elsewhere on the row does not disqualify it); its YEAR cells'
+    columns are the PERIOD COLUMNS and its years the period labels;
+  * a counted row ABOVE the header is CONTROL when its label has the identifier form (`^[A-Z][A-Z0-9]*(_[A-Z0-9]+)+$`),
+    else HEADING;
+  * the header row itself, and any later YEAR ROW, is HEADING (a named CONTROL row stays CONTROL);
+  * a counted row BELOW the header is FIGURE when it holds a numeric value in a period column; else CONTROL when the
+    label has the identifier form, else HEADING. Numbers outside the period columns never make a row FIGURE;
+  * `row_values[i]` is None unless row i is FIGURE, then the row's period-column cells VERBATIM as saved (a number as
+    the number, text as text, a blank as None, a date as ISO text, a non-finite float as None). With no header every
+    counted row is FIGURE, `periods` is [] and every `row_values` entry is None.
+
+THE LABELS AND FORMATS (AMGT_CORPUS round 47, CRPS-aw-1, FWD-20):
+  * a counted row whose label is `*_OVERRIDE` or `EQY_FUND_YEAR` is CONTROL by name, wherever it sits and whatever its
+    cells hold; it is never the period header (the header search skips it);
+  * `row_labels[i]` (aligned with `rows`) is None unless the label is an identifier; an identifier is described from the
+    estate's own metadata, cited and held (the Bloomberg field map's definition AS STORED; a FactSet description from
+    `factset_descriptions.json` when one is held), else the answer says plainly that no description was found;
+  * `row_formats[i]` (FIGURE rows only, aligned with `row_values[i]`) is each period cell's Excel number format, 'General'
+    where the workbook says General, None where the sheet carries no cell at all.
+
+AMENDMENT 2 (AMGT_CORPUS round 47, CRPS-aw-9, CTO round-46 ADDENDA 2 and 3):
+  * the master template is read from its own table, `research_template` (`template.py` stores it); the master arm lists
+    that table only, and nothing under research-report is taken for the master. AMENDMENT 3: a master answer carries
+    its template's rows, classes, labels and counts, but no team values: `row_values` and `row_formats` are None per row
+    and `periods` is [] (the template is one sample company's workbook);
+  * THE PRECEDENCE of a counted row's label (AMGT_CORPUS round 48, CRPS-ax-5, CTO round-47 ADDENDUM 1, which reverses the
+    entries file's old place above the own sheet): (1) the Bloomberg field map's definition, held; (2) the team's OWN
+    sheet MEASURED from the workbook (data_only=False): column B of the code row holds a metric name (cite
+    `<sheet>!B<row>`), or exactly one label references the code through a period cell `=<col><code row>` (cite
+    `<sheet>!<cell>`); (3) the entries file, held, for a FactSet code the own sheet does not measure (`text` and `cite` as
+    stored, `source` "factset", `claim` "held"); (4) otherwise the fallback line. `row_measure` records which rule
+    answered for each row ("held" for (1) and (3)).
+
+Imports are light on purpose (openpyxl and the harvest store only): `lib.research.corpus.extract` pulls PDF
+libraries this module does not need. Where it runs (AMENDMENT 1): `dossier.build` calls `rows_for` ONCE at dossier
+build time and stores the result in the gold dossier's `team_sheet` field; the serving API reads only that served
+field and never calls this module.
+
+CLI:  python -m lib.research.corpus.team_sheet --census
+"""
+from __future__ import annotations
+
+import argparse
+import datetime
+import io
+import json
+import math
+import re
+import sys
+import time
+from pathlib import Path
+
+from lib.research.harvest import store
+from lib.research.identity import crosswalk
+
+SOURCE = "amgt"                      # == lib.research.corpus.extract.SOURCE (a test pins the equality)
+BRONZE_REQUEST = "research-report"   # == lib.research.corpus.extract.BRONZE_REQUEST
+TEMPLATE_TABLE = "research_template"  # == lib.research.corpus.template.TABLE (a test pins the equality); AMENDMENT 2
+SHEETS = ("Model NEW VERSION", "Model")
+MIN_FIGURE_ROWS = 10
+MAX_ROW = 400
+MAX_COL = 60
+MASTER_NAME = "FactSet Based ONE PAGER TEMPLATE 2026 03 09_v2.xlsx"
+WORKBOOK_SUFFIXES = (".xlsx", ".xlsm")
+MASTER_ABSENT_REASON = ("The research team's model template is not in the stored library, so this name's rows "
+                        "cannot be read from it.")
+CLASS_OWN_NEW = "own_new"
+CLASS_OWN_MODEL = "own_model"
+CLASS_MASTER = "master"
+CLASS_MASTER_ABSENT = "master_absent"
+ROW_FIGURE = "FIGURE"
+ROW_HEADING = "HEADING"
+ROW_CONTROL = "CONTROL"
+ROW_BLOCK = "BLOCK"
+ROW_CLASSES = (ROW_FIGURE, ROW_HEADING, ROW_CONTROL)
+_TEXT_TOKEN = re.compile(r"^(#|na$|n/a$|nm$)", re.I)
+_RANGE_TEXT = re.compile(r"^[0-9.,%x -]+$")
+_PERIOD_FORMS = (re.compile(r"^(?:FY|CY)(\d{2}|\d{4})[EAF]?$"), re.compile(r"^((?:19|20)\d{2})[EAF]?$"),
+                  re.compile(r"^([1-4])Q(\d{2}|\d{4})[EA]?$"), re.compile(r"^Q([1-4])(\d{2}|\d{4})[EA]?$"),
+                  re.compile(r"^(\d{4})Q([1-4])[EA]?$"), re.compile(r"^([12])H(\d{2}|\d{4})[EA]?$"),
+                  re.compile(r"^H([12])(\d{2}|\d{4})[EA]?$"))
+BLOCK_UNREAD_WHY = ("The sheet gives these values no column header the reader can read, so they are not shown.")
+PERIOD_MIN = 1990
+PERIOD_MAX = 2100
+_IDENTIFIER = re.compile(r"^[A-Z][A-Z0-9]*(_[A-Z0-9]+)+$")
+_OVERRIDE = re.compile(r"^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*_OVERRIDE$")
+CONTROL_BY_NAME = "EQY_FUND_YEAR"
+FACTSET_PREFIXES = ("FF_", "FFI_", "FG_", "FE_", "P_")
+FIELD_MAP_CITE = "integrations/bloomberg/research/field_map.json"
+FACTSET_WHY = ("FactSet data item; no published FactSet description was found; the meaning is not inferred from the "
+               "name.")
+BLOOMBERG_WHY = "Bloomberg field name; the estate's field metadata does not describe it."
+# The repository root is three levels above this module (lib/research/corpus/team_sheet.py); never a typed drive path.
+_FIELD_MAP_PATH = Path(__file__).resolve().parents[3] / "integrations" / "bloomberg" / "research" / "field_map.json"
+_FACTSET_PATH = Path(__file__).resolve().parent / "factset_descriptions.json"
+# The label sources, read once per process: {"bloomberg": {mnemonic: definition}, "factset": {code: entry}}.
+_LABEL_CACHE = {}
+
+# The served /thesis path asks for the same name on every page view; the read lists a partition and downloads
+# workbooks, so the default-client answer is held briefly in-process. A test or the census passes its own client
+# and is never cached.
+_CACHE_SECONDS = 600
+_CACHE = {}
+
+
+def _collapse(text):
+    return re.sub(r"\s+", " ", str(text)).strip()
+
+
+def _is_number(v):
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def _is_year(v):
+    """An integer in 1990..2100 (an int, or a finite float that is whole)."""
+    if not _is_number(v):
+        return False
+    if isinstance(v, float) and not (math.isfinite(v) and v.is_integer()):
+        return False
+    return PERIOD_MIN <= v <= PERIOD_MAX
+
+
+def _year_row(cells):
+    """True for a YEAR ROW (AMGT_CORPUS round 47, CRPS-aw-1 amendment 1): its integer-year cells (1990..2100) number at
+    least three, are strictly increasing in column order, and make up at least 80% of its numeric cells. A non-year
+    number elsewhere on the row does not disqualify it (a side-panel figure far right of the years)."""
+    nums = [v for v in cells if _is_number(v)]
+    years = [v for v in cells if _is_year(v)]
+    return (len(years) >= 3 and all(a < b for a, b in zip(years, years[1:]))
+            and 5 * len(years) >= 4 * len(nums))
+
+
+def _cell(cells, index):
+    return cells[index] if index < len(cells) else None
+
+
+def _verbatim(v):
+    """A period cell as the workbook saved it: a number as the number, text as text, a blank as None, a date as
+    ISO text, a non-finite float as None. Never rounded, never re-derived."""
+    if v is None or (isinstance(v, str) and not v.strip()):
+        return None
+    if isinstance(v, float) and not math.isfinite(v):
+        return None
+    if isinstance(v, (datetime.date, datetime.time)):
+        return v.isoformat()
+    if isinstance(v, (bool, int, float, str)):
+        return v
+    return str(v)
+
+
+def _raw_rows(ws):
+    """Every raw row with a non-empty cell, in sheet order: [(1-based row, cells, formats)] (rows 1-MAX_ROW, columns 1-MAX_COL)."""
+    out = []
+    for number, row in enumerate(ws.iter_rows(min_row=1, max_row=MAX_ROW, max_col=MAX_COL), start=1):
+        cells = tuple(c.value for c in row)
+        if any(v is not None and not (isinstance(v, str) and not v.strip()) for v in cells):
+            out.append((number, cells, tuple(c.number_format for c in row)))
+    return out
+
+
+def _counted_from_raw(raw):
+    out = []
+    for number, cells, formats in raw:
+        label = next((v for v in cells[:4] if isinstance(v, str) and v.strip()), None)
+        nums = sum(1 for v in cells if _is_number(v))
+        if label is not None and nums >= 2:
+            out.append((number, _collapse(label), cells, formats))
+    return out
+
+
+def _counted_rows(ws):
+    """The rows that count on one sheet, in sheet order: [(1-based sheet row, label, cells, formats)]. A row counts when
+    its label (the first non-empty string in its first four cells, whitespace collapsed) is present and it holds two or
+    more numbers. `cells` is the row's values in column order (column A first); `formats` is each cell's number format
+    in the same order (None where the sheet carries no cell). The values are read from the same cells the counting
+    rule reads, so the count, the labels and the values are the ones `values_only` read."""
+    out = []
+    for number, row in enumerate(ws.iter_rows(min_row=1, max_row=MAX_ROW, max_col=MAX_COL), start=1):
+        cells = tuple(c.value for c in row)
+        label = next((v for v in cells[:4] if isinstance(v, str) and v.strip()), None)
+        nums = sum(1 for v in cells if _is_number(v))
+        if label is not None and nums >= 2:
+            out.append((number, _collapse(label), cells, tuple(c.number_format for c in row)))
+    return out
+
+
+def _counted_labels(ws):
+    """The labels of the rows that count on one sheet, in sheet order, whitespace collapsed."""
+    return [label for _number, label, _cells, _formats in _counted_rows(ws)]
+
+
+def _figure_sheets_raw(body):
+    """{sheet name: (counted rows, raw rows)} for the figure-carrying team sheets of one workbook's bytes."""
+    import openpyxl
+
+    try:
+        wb = openpyxl.load_workbook(io.BytesIO(body), read_only=True, data_only=True)
+    except Exception:  # noqa: BLE001 -- an unreadable workbook is not figure-carrying
+        return {}
+    try:
+        per = {}
+        for s in SHEETS:
+            if s in wb.sheetnames:
+                raw = _raw_rows(wb[s])
+                per[s] = (_counted_from_raw(raw), raw)
+    finally:
+        wb.close()
+    return {s: v for s, v in per.items() if len(v[0]) >= MIN_FIGURE_ROWS}
+
+
+def _figure_sheets(body):
+    """{sheet name: counted rows} for the figure-carrying team sheets of one workbook's bytes, or {} when the
+    workbook cannot be opened or carries none."""
+    return {s: v[0] for s, v in _figure_sheets_raw(body).items()}
+
+
+def sheet_labels(body):
+    """{sheet name: counted labels} for the figure-carrying team sheets of one workbook's bytes, or {} when the
+    workbook cannot be opened or carries none."""
+    return {s: [label for _number, label, _cells, _formats in rows] for s, rows in _figure_sheets(body).items()}
+
+
+def _control_by_name(label):
+    """True for a label CONTROL by name whatever its cells hold: `*_OVERRIDE` or `EQY_FUND_YEAR` (round 47)."""
+    return label == CONTROL_BY_NAME or _OVERRIDE.match(label) is not None
+
+
+def _field_definitions():
+    """{mnemonic: the field's basis definition AS STORED} from the Bloomberg field map. Read once per process. A missing
+    or unparsable map RAISES: an absent dictionary must never read as "no label"."""
+    if "bloomberg" not in _LABEL_CACHE:
+        with open(_FIELD_MAP_PATH, encoding="utf-8") as fh:
+            fields = json.load(fh)["fields"]
+        if not isinstance(fields, list):
+            raise ValueError("field map key 'fields' is not a list: %s" % _FIELD_MAP_PATH)
+        definitions = {}
+        for field in fields:
+            definitions.setdefault(field["mnemonic"], field["basis"]["definition"])
+        _LABEL_CACHE["bloomberg"] = definitions
+    return _LABEL_CACHE["bloomberg"]
+
+
+def _factset_entries():
+    """{code: {"text", "cite"}} from factset_descriptions.json. Read once per process; a missing or unparsable file
+    RAISES for the same reason as the field map."""
+    if "factset" not in _LABEL_CACHE:
+        with open(_FACTSET_PATH, encoding="utf-8") as fh:
+            entries = json.load(fh)["entries"]
+        if not isinstance(entries, dict):
+            raise ValueError("factset descriptions key 'entries' is not an object: %s" % _FACTSET_PATH)
+        _LABEL_CACHE["factset"] = entries
+    return _LABEL_CACHE["factset"]
+
+
+def _text(v):
+    """A string cell, whitespace collapsed; a formula, a non-string or a blank is None."""
+    if not isinstance(v, str) or v.startswith("="):
+        return None
+    return _collapse(v) or None
+
+
+def _metric_name(grid, code_row):
+    """Column B of the code row: a non-identifier string there is the row's metric name (round 47, AMENDMENT 2)."""
+    cells = grid[code_row - 1] if code_row <= len(grid) else ()
+    text = _text(cells[1]) if len(cells) > 1 else None
+    return text if text is not None and not _IDENTIFIER.match(text) else None
+
+
+def _label_of_row(cells):
+    """The first non-identifier string in a row's first four cells (a formula is not a label)."""
+    for v in cells[:4]:
+        text = _text(v)
+        if text is not None and not _IDENTIFIER.match(text):
+            return text
+    return None
+
+
+def _pass_through(grid, sheet, code_row, period_cols):
+    """(distinct labels, first cite) of the rows whose PERIOD cell is exactly `=<col><code row>` (the same column letter,
+    optional $ and spaces), scanned column by column, top to bottom."""
+    from openpyxl.utils import get_column_letter
+
+    labels, first = set(), None
+    for j in period_cols:
+        letter = get_column_letter(j + 1)
+        pattern = re.compile(r"^=\s*\$?%s\$?%d\s*$" % (letter, code_row))
+        for r, cells in enumerate(grid, start=1):
+            if r == code_row or j >= len(cells) or not isinstance(cells[j], str) or not pattern.match(cells[j]):
+                continue
+            label = _label_of_row(cells)
+            if label is None:
+                continue
+            labels.add(label)
+            if first is None:
+                first = "%s!%s%d" % (sheet, letter, r)
+    return labels, first
+
+
+def _measure(grid, sheet, code_row, period_cols):
+    """(kind, text, cite) for an undescribed code row: kind "metric_name" (column B), "pass_through" (exactly one label
+    references the code), "two_label" (two or more do) or "none"."""
+    name = _metric_name(grid, code_row)
+    if name is not None:
+        return "metric_name", name, "%s!B%d" % (sheet, code_row)
+    labels, first = _pass_through(grid, sheet, code_row, period_cols)
+    if len(labels) == 1:
+        return "pass_through", next(iter(labels)), first
+    return ("two_label" if len(labels) >= 2 else "none"), None, None
+
+
+def _row_label(label, definitions, factset, number, measure):
+    """(label dict, measure kind) for one counted row, or (None, None) when the label is not an identifier. Precedence
+    (AMGT_CORPUS round 48, CRPS-ax-5): the field map, held; the team's own sheet MEASURED from the workbook (column B
+    metric name, single-row pass-through); the entries file, held (FactSet codes the own sheet does not measure);
+    the fallback line. The measure runs for a FactSet code that has an entry, so the own sheet's label wins over it."""
+    if not _IDENTIFIER.match(label):
+        return None, None
+    if label in definitions:
+        return {"text": definitions[label], "source": "bloomberg", "claim": "held", "cite": FIELD_MAP_CITE,
+                "code": label, "why": None}, "held"
+    factset_code = label.startswith(FACTSET_PREFIXES)
+    kind, text, cite = measure(number, label)
+    if kind in ("metric_name", "pass_through"):
+        return {"text": text, "source": "factset" if factset_code else "bloomberg", "claim": "measured", "cite": cite,
+                "code": label, "why": None}, kind
+    if factset_code and label in factset:
+        entry = factset[label]
+        return {"text": entry["text"], "source": "factset", "claim": "held", "cite": entry["cite"],
+                "code": label, "why": None}, "held"
+    if factset_code:
+        return {"text": "FactSet line", "source": "factset", "claim": "absent", "cite": None, "code": label,
+                "why": FACTSET_WHY}, kind
+    return {"text": "Bloomberg line", "source": "bloomberg", "claim": "absent", "cite": None, "code": label,
+            "why": BLOOMBERG_WHY}, kind
+
+
+def _full_year(text):
+    n = int(text)
+    return n if n >= 100 else (2000 + n if n < 70 else 1900 + n)
+
+
+def _period_key(v):
+    """A period label as a key: an integer year or a text year / quarter / half form (`2026E`, `FY26`, `1Q26`, `Q1 2026`, `1H26`), else None."""
+    if _is_year(v):
+        return ("Y", int(v))
+    if not isinstance(v, str):
+        return None
+    t = re.sub(r"\s+", "", v.strip().upper())
+    for k, form in enumerate(_PERIOD_FORMS):
+        m = form.match(t)
+        if m is None:
+            continue
+        if k in (0, 1):
+            return ("Y", _full_year(m.group(1)))
+        if k in (2, 3):
+            return ("Q", _full_year(m.group(2)), int(m.group(1)))
+        if k == 4:
+            return ("Q", _full_year(m.group(1)), int(m.group(2)))
+        return ("H", _full_year(m.group(2)), int(m.group(1)))
+    return None
+
+
+def _header_runs(cells):
+    """[(start index, [period keys])] for each run of three or more ADJACENT period labels; integer years must rise by exactly one."""
+    out, i, n = [], 0, len(cells)
+    while i < n:
+        if _period_key(cells[i]) is None:
+            i += 1
+            continue
+        j = i
+        while j + 1 < n and _period_key(cells[j + 1]) is not None:
+            if _is_year(cells[j]) and _is_year(cells[j + 1]) and int(cells[j + 1]) != int(cells[j]) + 1:
+                break
+            j += 1
+        if j - i + 1 >= 3:
+            out.append((i, [_period_key(c) for c in cells[i:j + 1]]))
+        i = j + 1
+    return out
+
+
+def _alpha_text(v):
+    return (isinstance(v, str) and bool(v.strip()) and any(ch.isalpha() for ch in v)
+            and not _TEXT_TOKEN.match(v.strip()) and not _RANGE_TEXT.match(v.strip()))
+
+
+def _blank(v):
+    return v is None or (isinstance(v, str) and not v.strip())
+
+
+def _block_rows(raw, counted, classes, header_number, cols, period_year):
+    """The sheet rows (numbers) of the counted FIGURE rows that sit in another block than the period grid: (a) a value cell in a
+    period column under another header's year, (b) an alphabetic text cell in a period column."""
+    gov = {j: ("Y", period_year[j]) for j in cols}
+    by_number = {number: i for i, (number, _l, _c, _f) in enumerate(counted)}
+    out = set()
+    for number, cells, _formats in raw:
+        if number <= header_number:
+            continue
+        i = by_number.get(number)
+        if i is not None and classes[i] == ROW_FIGURE:
+            under_other = any(_is_number(_cell(cells, j)) and gov[j] != ("Y", period_year[j]) for j in cols)
+            has_label = any(_alpha_text(_cell(cells, j)) for j in cols)
+            if under_other or has_label:
+                out.add(number)
+        for start, keys in _header_runs(cells):
+            for k, key in enumerate(keys):
+                if start + k in gov:
+                    gov[start + k] = key
+    return out
+
+
+def _row_kind(cells):
+    """years: a run of three period labels; title: every non-empty cell is text; else body."""
+    nonempty = [v for v in cells if not _blank(v)]
+    if _header_runs(cells):
+        return "years"
+    if nonempty and all(isinstance(v, str) for v in nonempty):
+        return "title"
+    return "body"
+
+
+def _is_title_header(cells):
+    """A TITLE row that heads columns with non-period words: at least two non-empty cells, every one alphabetic text (a word, not an
+    error token, NA or a range), none a period label."""
+    nonempty = [v for v in cells if not _blank(v)]
+    return (len(nonempty) >= 2 and all(_alpha_text(v) for v in nonempty)
+            and not any(_period_key(v) is not None for v in nonempty))
+
+
+def _blocks(raw, counted, block_numbers, master):
+    from openpyxl.utils import get_column_letter
+
+    counted_numbers = {number for number, _l, _c, _f in counted}
+    rows = {number: (cells, formats) for number, cells, formats in raw}
+    order = sorted(rows)
+    spans = []
+    for number in sorted(block_numbers):
+        if spans and number <= spans[-1][1]:
+            continue
+        start = number
+        while (start - 1) in rows and (start - 1) not in counted_numbers and _row_kind(rows[start - 1][0]) in ("title", "years"):
+            start -= 1
+        end = number
+        while (end + 1) in rows and ((end + 1) in block_numbers or (end + 1) not in counted_numbers):
+            end += 1
+        # a block row with no header-like row above it joins the block before it when no counted row lies between them
+        if start == number and spans and spans[-1][1] < number and not any(spans[-1][1] < c < number for c in counted_numbers):
+            start = spans[-1][0]
+            spans.pop()
+        spans.append((start, end))
+    blocks = []
+    for start, end in spans:
+        span = [n for n in order if start <= n <= end]
+        kinds = {n: _row_kind(rows[n][0]) for n in span}
+        titled = any(n not in counted_numbers and _is_title_header(rows[n][0]) for n in span)
+        dated = any(kinds[n] == "years" for n in span)
+        kind = "case" if titled else ("period" if dated else "unread")
+        if kind == "unread":
+            blocks.append({"first_row": start, "last_row": end, "kind": kind, "why": BLOCK_UNREAD_WHY, "columns": [], "withheld": 0,
+                           "rows": [{"row_number": n, "kind": kinds[n], "block_row": n in block_numbers, "cells": []} for n in span]})
+            continue
+        used = [j for n in span for j, v in enumerate(rows[n][0]) if not _blank(v)]
+        lo, hi = min(used), max(used)
+        headed = set()          # columns that carry a header-like cell above (so far) in this block
+        withheld = 0
+        block_rows = []
+        for n in span:
+            cells, formats = rows[n]
+            runs = {st + k for st, ys in _header_runs(cells) for k in range(len(ys))}
+            is_header = kinds[n] in ("title", "years")
+            out_cells = []
+            for j in range(lo, hi + 1):
+                v = _verbatim(_cell(cells, j))
+                if v is None:
+                    out_cells.append(None)
+                    continue
+                if _is_number(v) and not is_header and j not in headed:
+                    withheld += 1
+                    out_cells.append(None)
+                    continue
+                if master and _is_number(v) and j not in runs:
+                    out_cells.append(None)
+                    continue
+                cell = {"v": v}
+                if _is_number(v):
+                    cell["f"] = _cell(formats, j)
+                out_cells.append(cell)
+            if is_header:
+                headed.update(j for j in range(lo, hi + 1) if not _blank(_cell(cells, j)))
+            block_rows.append({"row_number": n, "kind": kinds[n], "block_row": n in block_numbers, "cells": out_cells})
+        blocks.append({"first_row": start, "last_row": end, "kind": kind, "why": None, "withheld": withheld,
+                       "columns": [get_column_letter(j + 1) for j in range(lo, hi + 1)], "rows": block_rows})
+    return blocks
+
+
+def _reading(counted, sheet, formula_grid, raw=None):
+    """One sheet's reading from its counted rows (the row classes are in the module doc). `formula_grid()` returns the
+    sheet as written (formulas kept); it is called at most once, and only when a code row needs a measured label."""
+    from openpyxl.utils import get_column_letter
+
+    definitions, factset = _field_definitions(), _factset_entries()
+    grid = []
+
+    def measure(number, code):
+        if not grid:
+            grid.append(formula_grid())
+        return _measure(grid[0], sheet, number, cols)   # `cols` is bound by the time the loop calls this
+
+    header = next((i for i, (_n, lab, cells, _f) in enumerate(counted)
+                   if not _control_by_name(lab) and _year_row(cells)), None)
+    cols, periods = [], []
+    if header is not None:
+        for j, v in enumerate(counted[header][2]):
+            if _is_year(v):
+                cols.append(j)
+                periods.append({"label": str(int(v)), "column": get_column_letter(j + 1)})
+    numbers, labels, classes, values, row_labels, formats, kinds = [], [], [], [], [], [], []
+    for i, (number, label, cells, cell_formats) in enumerate(counted):
+        if _control_by_name(label):
+            klass = ROW_CONTROL
+        elif header is None:
+            klass = ROW_FIGURE
+        elif i < header:
+            klass = ROW_CONTROL if _IDENTIFIER.match(label) else ROW_HEADING
+        elif i == header or _year_row(cells):
+            klass = ROW_HEADING
+        elif any(_is_number(_cell(cells, j)) for j in cols):
+            klass = ROW_FIGURE
+        else:
+            klass = ROW_CONTROL if _IDENTIFIER.match(label) else ROW_HEADING
+        is_figure = klass == ROW_FIGURE and header is not None
+        numbers.append(number)
+        labels.append(label)
+        classes.append(klass)
+        values.append([_verbatim(_cell(cells, j)) for j in cols] if is_figure else None)
+        formats.append([_cell(cell_formats, j) for j in cols] if is_figure else None)
+        entry, kind = _row_label(label, definitions, factset, number, measure)
+        row_labels.append(entry)
+        kinds.append(kind)
+    out = {"rows": labels, "row_numbers": numbers, "row_classes": classes, "periods": periods, "row_values": values,
+           "row_labels": row_labels, "row_formats": formats, "row_measure": kinds}
+    if raw is not None and header is not None:
+        year_by_col = {j: int(counted[header][2][j]) for j in cols}
+        block_numbers = _block_rows(raw, counted, classes, counted[header][0], cols, year_by_col)
+        if block_numbers:
+            for i, number in enumerate(numbers):
+                if number in block_numbers:
+                    classes[i] = ROW_BLOCK
+                    values[i] = None
+                    formats[i] = None
+            out["block_inputs"] = (raw, counted, block_numbers)
+    return out
+
+
+def sheet_reading(body):
+    """{sheet name: reading} for each figure-carrying team sheet of one workbook's bytes (the sheets `sheet_labels`
+    returns). A reading is {"rows", "row_numbers", "row_classes", "periods", "row_values", "row_labels", "row_formats",
+    "row_measure"}, aligned with the counted rows; "row_measure" is the label's source kind (None for a non-identifier
+    row; "held", "metric_name", "pass_through", "two_label", "none"). See the module doc."""
+    return {s: _reading(v[0], s, lambda s=s: _formula_grid(body, s), raw=v[1]) for s, v in _figure_sheets_raw(body).items()}
+
+
+def _formula_grid(body, sheet):
+    """The sheet as written, formulas kept (data_only=False): rows 1-400 and columns 1-60, a list of value tuples. Read
+    only when a code row needs a measured label (AMGT_CORPUS round 47, AMENDMENT 2)."""
+    import openpyxl
+
+    wb = openpyxl.load_workbook(io.BytesIO(body), read_only=True, data_only=False)
+    try:
+        return [tuple(row) for row in wb[sheet].iter_rows(min_row=1, max_row=MAX_ROW, max_col=MAX_COL,
+                                                          values_only=True)]
+    finally:
+        wb.close()
+
+
+def _prefix():
+    return store.table_prefix(SOURCE, "bronze", BRONZE_REQUEST)
+
+
+def _template_prefix():
+    """The master template's own table (AMENDMENT 2, CTO round-46 ADDENDUM 2): the master arm reads only this table."""
+    return store.table_prefix(SOURCE, "bronze", TEMPLATE_TABLE)
+
+
+def _list_keys(client, prefix):
+    keys = []
+    paginator = client.get_paginator("list_objects_v2")
+    for page in paginator.paginate(Bucket=store.HARVEST_BUCKET, Prefix=prefix):
+        for obj in page.get("Contents", []) or []:
+            keys.append(obj["Key"])
+    return keys
+
+
+def _is_workbook(key):
+    return key.lower().endswith(WORKBOOK_SUFFIXES)
+
+
+def _newest_reading(client, keys):
+    """The newest figure-carrying workbook among `keys`: (stamp, key, sheet, reading, beside) or None."""
+    best = None
+    for key in keys:
+        head = client.head_object(Bucket=store.HARVEST_BUCKET, Key=key)
+        meta = head.get("Metadata") or {}
+        stamp = meta.get("source-mtime") or meta.get("mtime") or head["LastModified"].isoformat()
+        if best is not None and not stamp > best[0]:
+            continue  # older or equal to the held one: it cannot replace it, so its bytes are not fetched
+        body = client.get_object(Bucket=store.HARVEST_BUCKET, Key=key)["Body"].read()
+        carrying = sheet_reading(body)
+        if not carrying:
+            continue
+        sheet = "Model NEW VERSION" if "Model NEW VERSION" in carrying else "Model"
+        beside = carrying["Model"]["rows"] if len(carrying) == 2 else None
+        best = (stamp, key, sheet, carrying[sheet], beside)
+    return best
+
+
+def _row_fields(classes, numbers, values, periods, labels, formats):
+    """The class fields every answer carries, aligned with `rows` (round 46, CRPS-av-1; round 47 adds the labels and
+    the formats, CRPS-aw-1)."""
+    return {
+        "row_classes": list(classes),
+        "row_numbers": list(numbers),
+        "row_values": [None if v is None else list(v) for v in values],
+        "periods": [dict(p) for p in periods],
+        "row_counts": {c: sum(1 for k in classes if k == c) for c in ROW_CLASSES + ((ROW_BLOCK,) if ROW_BLOCK in classes else ())},
+        "row_labels": [None if lab is None else dict(lab) for lab in labels],
+        "row_formats": [None if f is None else list(f) for f in formats],
+    }
+
+
+def _answer(klass, reading, reason=None):
+    if reading is None:
+        out = {"class": klass, "workbook_key": None, "sheet": None, "rows": [],
+               "model_rows_beside": None, "reason": reason}
+        out.update(_row_fields([], [], [], [], [], []))
+        return out
+    _stamp, key, sheet, detail, beside = reading
+    out = {"class": klass, "workbook_key": key, "sheet": sheet, "rows": list(detail["rows"]),
+           "model_rows_beside": list(beside) if beside else None, "reason": reason}
+    values, formats, periods = detail["row_values"], detail["row_formats"], detail["periods"]
+    if klass == CLASS_MASTER:
+        # AMENDMENT 3 (AMGT_CORPUS round 47, CRPS-aw-1): the master template is ONE sample company's workbook; its figures
+        # are that company's, never the team's figures for another name. The template's rows, classes and labels stand.
+        values = [None] * len(detail["rows"])
+        formats = [None] * len(detail["rows"])
+        periods = []
+    out.update(_row_fields(detail["row_classes"], detail["row_numbers"], values, periods,
+                           detail["row_labels"], formats))
+    opened = detail.get("block_inputs")
+    if opened is not None:
+        raw, counted, block_numbers = opened
+        out["blocks"] = _blocks(raw, counted, block_numbers, klass == CLASS_MASTER)
+    return out
+
+
+def _master_reading(client, template_keys):
+    """The newest template workbook named MASTER_NAME among `template_keys` (keys of the research_template table only)."""
+    masters = [k for k in template_keys if k.rsplit("/", 1)[-1] == MASTER_NAME]
+    return _newest_reading(client, masters) if masters else None
+
+
+def _read_name(client, own_keys, master_loader):
+    own = _newest_reading(client, [k for k in own_keys if _is_workbook(k)])
+    if own is not None:
+        return _answer(CLASS_OWN_NEW if own[2] == "Model NEW VERSION" else CLASS_OWN_MODEL, own)
+    master = master_loader()
+    if master is not None:
+        return _answer(CLASS_MASTER, master)
+    return _answer(CLASS_MASTER_ABSENT, None, MASTER_ABSENT_REASON)
+
+
+def rows_for(security_key, client=None):
+    """{"class", "workbook_key", "sheet", "rows", "model_rows_beside", "reason", "row_classes", "row_numbers",
+    "row_values", "periods", "row_counts", "row_labels", "row_formats"} for one name (see module doc)."""
+    cacheable = client is None
+    if cacheable:
+        held = _CACHE.get(security_key)
+        if held is not None and time.monotonic() - held[0] < _CACHE_SECONDS:
+            return held[1]
+        client = store._default_client()
+    prefix = _prefix()
+    own_keys = _list_keys(client, prefix + crosswalk.security_key_partition(security_key) + "/")
+    answer = _read_name(client, own_keys, lambda: _master_reading(client, _list_keys(client, _template_prefix())))
+    if cacheable:
+        _CACHE[security_key] = (time.monotonic(), answer)
+    return answer
+
+
+def census(client=None):
+    """{security_key: rows_for(...)} over the served names. The bronze prefix is listed ONCE and the master
+    template is searched for once."""
+    from lib.research.corpus import continuation
+
+    client = client or store._default_client()
+    prefix = _prefix()
+    all_keys = _list_keys(client, prefix)
+    by_partition = {}
+    for key in all_keys:
+        by_partition.setdefault(key[len(prefix):].split("/")[0], []).append(key)
+    master = []
+    template_keys = _list_keys(client, _template_prefix())
+
+    def _master():
+        if not master:
+            master.append(_master_reading(client, template_keys))
+        return master[0]
+
+    out = {}
+    for key in continuation._resolved_security_keys(client=client):
+        out[key] = _read_name(client, by_partition.get(crosswalk.security_key_partition(key), []), _master)
+    return out
+
+
+def _label_bucket(label):
+    """The census bucket of one row label: bloomberg_held, factset_held, measured, factset_line, bloomberg_line, or none."""
+    if label is None:
+        return "none"
+    if label["claim"] == "measured":
+        return "measured"
+    return "%s_%s" % (label["source"], "held" if label["claim"] == "held" else "line")
+
+
+def _main(argv=None):
+    parser = argparse.ArgumentParser(description="Team-sheet rows served per name (AMGT_CORPUS CRPS-at-1).")
+    parser.add_argument("--census", action="store_true", help="print per-name class/workbook/sheet and the class line")
+    args = parser.parse_args(argv)
+    if not args.census:
+        parser.print_help()
+        return 2
+    got = census()
+    counts = {CLASS_OWN_NEW: 0, CLASS_OWN_MODEL: 0, CLASS_MASTER: 0, CLASS_MASTER_ABSENT: 0}
+    for key in sorted(got):
+        entry = got[key]
+        counts[entry["class"]] += 1
+        print("%s class=%s workbook=%s sheet=%s rows=%d" % (
+            key, entry["class"], entry["workbook_key"], entry["sheet"], len(entry["rows"])))
+    print("team_sheet classes own_new %d own_model %d master %d master_absent %d sum %d served %d" % (
+        counts[CLASS_OWN_NEW], counts[CLASS_OWN_MODEL], counts[CLASS_MASTER], counts[CLASS_MASTER_ABSENT],
+        sum(counts.values()), len(got)))
+    row_totals = {c: sum(entry["row_counts"][c] for entry in got.values()) for c in ROW_CLASSES}
+    print("team_sheet row classes FIGURE %d HEADING %d CONTROL %d sum %d rows %d" % (
+        row_totals[ROW_FIGURE], row_totals[ROW_HEADING], row_totals[ROW_CONTROL], sum(row_totals.values()),
+        sum(len(entry["rows"]) for entry in got.values())))
+    label_counts = {"bloomberg_held": 0, "factset_held": 0, "measured": 0, "factset_line": 0, "bloomberg_line": 0,
+                    "none": 0}
+    for entry in got.values():
+        for label in entry["row_labels"]:
+            label_counts[_label_bucket(label)] += 1
+    print("team_sheet labels bloomberg_held %d factset_held %d measured %d factset_line %d bloomberg_line %d none %d "
+          "sum %d rows %d" % (
+              label_counts["bloomberg_held"], label_counts["factset_held"], label_counts["measured"],
+              label_counts["factset_line"], label_counts["bloomberg_line"], label_counts["none"],
+              sum(label_counts.values()), sum(len(entry["rows"]) for entry in got.values())))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(_main())

@@ -22,8 +22,13 @@
  *       prints `label` = its `text`; its `labelTitle` carries the code, the word `measured` and the `cite`; a `factset` source keeps
  *       `sourceLabel: 'FactSet, via team model'`; `teamCensus.labels` gains `measured` (the rendered rows whose entry is measured), and the
  *       measured rows are NOT counted in `held`, `factset_line` or `bloomberg_line`; `raw` stays 0.
+ *   d6  (AMENDMENT 2, CTO round-47 ruling msg 4086 point 1: a master answer is the template's rows as LABELS only) a teamSheet whose `class` is
+ *       'master' carries no value for any row; each FIGURE row takes the name's own Bloomberg figure when the label matches a row spec and the
+ *       block carries it (`source: 'bloomberg'`), else `source: 'why'` with `absentReason` exactly
+ *       "The research team keeps no workbook for this company; this row is from the team's template." (not the own-workbook sentence);
+ *       the same rows under an own class keep the own-workbook sentence. HEADING rows stay headings; CONTROL rows stay out.
  * control c1: a classed teamSheet WITHOUT row_labels / row_formats builds exactly as the base does (snapshot);
- * control c2: no teamSheet builds exactly as the base does (snapshot). Prints `aw2 build <b>/5 control <c>/2`.
+ * control c2: no teamSheet builds exactly as the base does (snapshot). Prints `aw2 build <b>/6 control <c>/2`.
  */
 const fs = require('fs')
 const path = require('path')
@@ -125,6 +130,21 @@ const TEAM_MEASURED = {
   row_formats: [null, ['#,##0', '#,##0', '#,##0', '#,##0', '#,##0'], ['General', 'General', 'General', 'General', 'General']],
 }
 
+const MASTER_WHY = 'The research team keeps no workbook for this company; this row is from the team\'s template.'
+const TEAM_MASTER = {
+  class: 'master',
+  workbook_key: 'amgt/harvest/bronze/research_template/template=01L6/00bb/FactSet Based ONE PAGER TEMPLATE 2026 03 09_v2.xlsx',
+  sheet: 'Model NEW VERSION',
+  reason: null,
+  rows: ['Financial Summary', epsSpec.label, 'Tobocco Volume', 'FF_SALES', 'Year'],
+  row_classes: ['HEADING', 'FIGURE', 'FIGURE', 'FIGURE', 'HEADING'],
+  row_numbers: [9, 11, 12, 13, 14],
+  periods: [],
+  row_values: [null, null, null, null, null],
+  row_formats: [null, null, null, null, null],
+  row_labels: [null, null, null, { text: 'Revenue', source: 'factset', claim: 'measured', cite: 'Model NEW VERSION!D4', code: 'FF_SALES', why: null }, null],
+}
+
 function build(team) {
   return m.buildModelSheet(FIGURES, YEARS, null, FC, null, null, team)
 }
@@ -143,6 +163,7 @@ let d2 = 0
 let d3 = 0
 let d4 = 0
 let d5 = 0
+let d6 = 0
 try {
   const built = build(TEAM_NEW)
   const rows = ((built.groups || [])[0] || {}).rows || []
@@ -200,6 +221,21 @@ try {
     && rev.sourceLabel === 'FactSet, via team model'
     && mc.measured === 2 && mc.held === 0 && mc.factset_line === 0 && mc.bloomberg_line === 0 && mc.raw === 0 ? 1 : 0
   console.log(`aw2 d5 measured labels ${JSON.stringify(mlabels)}; title "${String(rev.labelTitle || '')}"; census ${JSON.stringify(mc)}; ok ${d5 === 1}`)
+  const bmas = build(TEAM_MASTER)
+  const brow = ((bmas.groups || [])[0] || {}).rows || []
+  const eps6 = brow.find((r) => r.label === epsSpec.label) || {}
+  const tob = brow.find((r) => r.label === 'Tobocco Volume') || {}
+  const rev6 = brow.find((r) => r.label === 'Revenue') || {}
+  const heads6 = brow.filter((r) => r.rowKind === 'heading')
+  const own = build({ ...TEAM_MASTER, class: 'own_new', workbook_key: TEAM_CLASSED.workbook_key })
+  const ownTob = (((own.groups || [])[0] || {}).rows || []).find((r) => r.label === 'Tobocco Volume') || {}
+  d6 = eps6.source === 'bloomberg' && (eps6.cells || [])[0] && eps6.cells[0].value === 5
+    && tob.source === 'why' && tob.absentReason === MASTER_WHY
+    && rev6.source === 'why' && rev6.absentReason === MASTER_WHY && rev6.label === 'Revenue'
+    && heads6.length === 2
+    && (brow.flatMap((r) => r.cells || [])).every((c) => c === null || c === undefined || c.mnemonic !== null)
+    && ownTob.source === 'why' && ownTob.absentReason !== MASTER_WHY ? 1 : 0
+  console.log(`aw2 d6 master rows: EPS ${eps6.source}, Tobocco ${tob.source} "${String(tob.absentReason || '').slice(0, 60)}", FF_SALES ${rev6.source}; own class keeps its sentence ${ownTob.absentReason !== MASTER_WHY}; ok ${d6 === 1}`)
 } catch (e) {
   console.log('aw2 build threw: ' + String(e && e.message).slice(0, 160))
 }
@@ -210,5 +246,5 @@ if (fs.existsSync(snap)) {
   c1 = JSON.stringify(JSON.parse(JSON.stringify(build(TEAM_CLASSED)))) === JSON.stringify(base.classedOld) ? 1 : 0
   c2 = JSON.stringify(JSON.parse(JSON.stringify(build(undefined)))) === JSON.stringify(base.noTeam) ? 1 : 0
 }
-console.log(`aw2 build ${d1 + d2 + d3 + d4 + d5}/5 control ${c1 + c2}/2`)
-process.exit(d1 + d2 + d3 + d4 + d5 === 5 && c1 + c2 === 2 ? 0 : 1)
+console.log(`aw2 build ${d1 + d2 + d3 + d4 + d5 + d6}/6 control ${c1 + c2}/2`)
+process.exit(d1 + d2 + d3 + d4 + d5 + d6 === 6 && c1 + c2 === 2 ? 0 : 1)
