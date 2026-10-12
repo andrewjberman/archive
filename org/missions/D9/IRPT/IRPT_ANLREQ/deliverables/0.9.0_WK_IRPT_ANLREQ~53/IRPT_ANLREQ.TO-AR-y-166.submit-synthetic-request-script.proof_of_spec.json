@@ -17,9 +17,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~53/r16/submit_synthetic_request.py",
       "kind": "script",
-      "commit_or_etag": "78d9b089f2a42341b0592f5feeec72b76f7b441f",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "BUILD ONLY (cell): committed on wk-IRPT_ANLREQ-53; not deployed, uploaded, applied or invoked by this order. Git blob b5b842e4c7174251f28093b24d67d67a94d6c0ac."
+      "deploy_evidence": "BUILD ONLY (cell): committed on wk-IRPT_ANLREQ-53; not deployed, uploaded, applied or invoked by this order. Git blob b5b842e4c7174251f28093b24d67d67a94d6c0ac at the build commit; git blob 326f2909559410750481fc65cdd84fe45262fc95 after amendment 1 (reserved-domain STOP before any invoke)."
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~53/r16/SUBMIT_SCRIPT_RECORD.json",
@@ -42,8 +42,8 @@
       "criterion_verbatim": "the script exists, is ASCII, holds no write-shaped call, and its --self-test prints SUBMIT-SELFTEST-OK",
       "method": "command",
       "invocation": "python C:/dev/wk-irpt-anlreq-53/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r16/ar16d_checks.py y166-self --root C:/dev/wk-irpt-anlreq-53",
-      "output_evidence": "Y166-SELF-OK (rc=0). The checker's self-test leg ran the script's --self-test with python -I and found SUBMIT-SELFTEST-OK; the script's own output: SELFTEST arms=20 of 20 passed.",
-      "denominator": "1 of 1 checker verdicts OK (ASCII scan, write-shaped-call scan, self-test rc 0 with SUBMIT-SELFTEST-OK, 20 of 20 self-test arms)",
+      "output_evidence": "Y166-SELF-OK (rc=0). The checker's self-test leg ran the script's --self-test with python -I and found SUBMIT-SELFTEST-OK; the script's own output: SELFTEST arms=22 of 22 passed (amendment 1 added two arms).",
+      "denominator": "1 of 1 checker verdicts OK (ASCII scan, write-shaped-call scan, self-test rc 0 with SUBMIT-SELFTEST-OK, 22 of 22 self-test arms)",
       "status": "PASS",
       "expect": "Y166-SELF-OK"
     },
@@ -62,7 +62,7 @@
       "criterion_verbatim": "the two events are what the deployed door will accept, read against uploads.py, submission.py, acceptance.py and the schema, and --run can create nothing beyond the literal kinds the record lists",
       "method": "manual_read_with_citation",
       "invocation": "python C:/dev/wk-irpt-anlreq-53/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~53/r16/submit_synthetic_request.py --plan --tenant cottonwood --ticket TCK-20261012-0123abcd (credentials blanked), with the read citations in r16/SUBMIT_SCRIPT_RECORD.json",
-      "output_evidence": "The two plan events: event i POST /api/scoped/investor-reporting/analysis/inputs with query selected_tenant=cottonwood and advisor_email (placeholder), body upload_token, filename, file_base64 (Ticker,Dollars CSV), file_type=csv; event ii POST /api/scoped/investor-reporting/analysis with query selected_tenant=cottonwood and body request_id, client_id null, account_ids [], snapshot_id null, variant overview, comparison_keys [], report_title, prepared_for, input_id (placeholder), ticket_id TCK-20261012-0123abcd. The record lists the read site of each required member and the literal kinds a run would create. Open at the door: the deferred template lane answers RESOLVING first (surprise S12); the advisor is named by --advisor-opaque (S13); the filer row is live-only (S14).",
+      "output_evidence": "The two plan events: event i POST /api/scoped/investor-reporting/analysis/inputs with query selected_tenant=cottonwood and advisor_email (placeholder), body upload_token, filename, file_base64 (Ticker,Dollars CSV), file_type=csv; event ii POST /api/scoped/investor-reporting/analysis with query selected_tenant=cottonwood and body request_id, client_id null, account_ids [], snapshot_id null, variant overview, comparison_keys [], report_title, prepared_for, input_id (placeholder), ticket_id TCK-20261012-0123abcd. The record lists the read site of each required member and the literal kinds a run would create. Open at the door: the deferred template lane answers RESOLVING first (surprise S12); the advisor is named by --advisor-opaque, and --run now stops before any invoke unless the resolved advisor is on a reserved domain (amendment 1; S13 closed by that guard); the filer row is live-only (S14).",
       "denominator": "2 of 2 events printed; 9 literal kinds listed in the record; 5 surprise rows (S11-S15) filed against the reads",
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
       "status_reason": "Judgment criterion: graded at L9 by 3.0.0_SA_CVO, the oracle, against the door sources. The worker records the output and makes no verdict.",
@@ -71,14 +71,14 @@
   ],
   "controls": {
     "mutant": {
-      "description": "tenant gate disabled (check_args no longer refuses a tenant other than cottonwood); the self-test must catch it",
-      "expected": "self-test rc=1 with the tenant arms reporting FAIL",
-      "observed": "ARM tenant-other-refused: FAIL accepted; ARM tenant-missing-refused: FAIL accepted; SELFTEST arms=18 of 20 passed; MUTANT rc=1",
+      "description": "two mutants, each must be caught by the self-test: (a) tenant gate disabled (check_args no longer refuses a tenant other than cottonwood); (b) amendment-1 reserved-domain STOP disabled (run_flow line 337 becomes if False)",
+      "expected": "self-test rc=1 with the tenant arms FAIL for (a) and arm advisor-real-domain-stops-before-invoke FAIL for (b)",
+      "observed": "(a) ARM tenant-other-refused: FAIL accepted; ARM tenant-missing-refused: FAIL accepted; SELFTEST arms=20 of 22 passed; MUTANT rc=1. (b) ARM advisor-real-domain-stops-before-invoke: FAIL rc=0 invokes=2; SELFTEST arms=21 of 22 passed; MUTANT rc=1",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "two same-input runs of python -I submit_synthetic_request.py --self-test, output compared with diff",
-      "observed": "identical output, 22 lines, both runs",
+      "method": "two same-input runs of python -I submit_synthetic_request.py --self-test, output compared with cmp",
+      "observed": "identical output, 24 lines, both runs",
       "status": "STABLE"
     }
   },
@@ -126,12 +126,17 @@
     {
       "tool": "submit_synthetic_request.py --self-test",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~53/r16/submit_synthetic_request.py --self-test",
-      "result": "SELFTEST arms=20 of 20 passed; SUBMIT-SELFTEST-OK; rc=0"
+      "result": "SELFTEST arms=22 of 22 passed; SUBMIT-SELFTEST-OK; rc=0"
     },
     {
       "tool": "mutant run (tenant gate disabled, exec at its own path)",
       "invocation": "python -I -c <exec of the mutated source with __file__ set to the script path>, then self_test()",
-      "result": "2 FAIL arms; SELFTEST arms=18 of 20 passed; MUTANT rc=1"
+      "result": "2 FAIL arms; SELFTEST arms=20 of 22 passed; MUTANT rc=1"
+    },
+    {
+      "tool": "mutant run (amendment-1 reserved-domain STOP disabled, exec at its own path)",
+      "invocation": "python -I -c <exec of the source with the line 'if not reserved_domain(advisor):' replaced by 'if False:', __file__ set to the script path>, then self_test()",
+      "result": "1 FAIL arm (advisor-real-domain-stops-before-invoke); SELFTEST arms=21 of 22 passed; MUTANT rc=1"
     },
     {
       "tool": "submit_synthetic_request.py --plan and refusals (credentials blanked)",

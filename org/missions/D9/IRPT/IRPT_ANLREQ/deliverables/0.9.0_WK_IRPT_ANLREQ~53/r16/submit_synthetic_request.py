@@ -7,8 +7,9 @@ Modes (exactly one):
   --self-test   in-memory fakes of the door and of the users table. Prints SUBMIT-SELFTEST-OK on success.
                 No boto3 client.
   --run         the ONLY mode that creates a boto3 client. Needs the literal
-                --i-have-the-ctos-word msg-6575 and --advisor-opaque adv-<12 hex>. Never run by the order
-                that built it; a later executor runs it.
+                --i-have-the-ctos-word msg-6575 and --advisor-opaque adv-<12 hex>. Stops before any invoke
+                unless the resolved advisor address is on a reserved domain (amendment 1). Never run by the
+                order that built it; a later executor runs it.
 
 --plan and --run need --tenant cottonwood and --ticket TCK-<8 digits>-<8 lowercase hex>. Anything else exits
 non-zero before any other work.
@@ -103,6 +104,15 @@ def submission_event(ticket, input_id):
 
 def adv_label(email):
     return "adv-" + hashlib.sha256(email.strip().lower().encode("utf-8")).hexdigest()[:12]
+
+
+def reserved_domain(email):
+    """Amendment 1 (the rule count_f2.py used): the part after the last at-sign, lower-cased, is example.com,
+    example.org or example.net, or ends .invalid, .test or .example. Anything else, or no at-sign, fails closed."""
+    if not isinstance(email, str) or "@" not in email:
+        return False
+    domain = email.rsplit("@", 1)[1].lower()
+    return domain in ("example.com", "example.org", "example.net") or domain.endswith((".invalid", ".test", ".example"))
 
 
 def check_args(tenant, ticket):
@@ -324,7 +334,10 @@ def run_flow(args, clients):
     if advisor is None:
         print("STOP: no active cottonwood user carries the advisor opaque label. No invoke was made.")
         return 1
-    print("ADVISOR: resolved from the opaque label (address not printed)")
+    if not reserved_domain(advisor):
+        print("STOP: the advisor is not a synthetic address. No invoke was made.")
+        return 1
+    print("ADVISOR: resolved from the opaque label, on a reserved domain (address not printed)")
     ls, fe, http, inner = invoke(lam, upload_event(args.ticket, advisor))
     upload_id = find_key(inner, "upload_id")
     input_id = find_key(inner, "input_id")
@@ -388,10 +401,10 @@ class FakeLambda(object):
 
 
 class FakeDDB(object):
-    def __init__(self, allowed, advisor_status="active"):
+    def __init__(self, allowed, advisor_email=SELF_ADVISOR, advisor_status="active"):
         self.filer = {"PK": {"S": "USER#" + FILER}, "SK": {"S": "PROFILE"}, "email": {"S": FILER},
                       "allowedFirmIds": {"L": [{"S": x} for x in allowed]}} if allowed is not None else None
-        self.users = [{"email": {"S": SELF_ADVISOR}, "firmId": {"S": TENANT},
+        self.users = [{"email": {"S": advisor_email}, "firmId": {"S": TENANT},
                        "status": {"S": advisor_status}}]
 
     def get_item(self, TableName, Key, ConsistentRead):
@@ -467,6 +480,24 @@ def self_test():
          "event (ii) body wrong", results)
     _arm("run-prints-no-address", SELF_ADVISOR not in buf.getvalue() and FILER not in buf.getvalue(),
          "an address reached stdout", results)
+    # 6a. amendment 1: an advisor on a real-looking domain stops before any invoke, and no address is printed
+    real = "person@firm.com"
+    lam = FakeLambda(["NORMALIZED"])
+    ns = argparse.Namespace(i_have_the_ctos_word=WORD, advisor_opaque=adv_label(real), ticket=SELF_TICKET)
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = run_flow(ns, {"ddb": FakeDDB(["49financial", TENANT], advisor_email=real), "lam": lam})
+    _arm("advisor-real-domain-stops-before-invoke",
+         rc == 1 and not lam.calls and real not in buf.getvalue() and "STOP: the advisor is not a synthetic address."
+         in buf.getvalue(), "rc=%s invokes=%d" % (rc, len(lam.calls)), results)
+    # 6b. amendment 1: a reserved-domain advisor (mixed case, example.net) proceeds to both events
+    reserved = "advisor-y166-reserved@Example.NET"
+    lam = FakeLambda(["NORMALIZED"])
+    ns = argparse.Namespace(i_have_the_ctos_word=WORD, advisor_opaque=adv_label(reserved), ticket=SELF_TICKET)
+    with contextlib.redirect_stdout(io.StringIO()):
+        rc = run_flow(ns, {"ddb": FakeDDB(["49financial", TENANT], advisor_email=reserved), "lam": lam})
+    _arm("advisor-reserved-domain-proceeds", rc == 0 and len(lam.calls) == 2,
+         "rc=%s invokes=%d" % (rc, len(lam.calls)), results)
     # 7. plan events: two POST lines, ticket in the submission, filer on the reserved domain
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):

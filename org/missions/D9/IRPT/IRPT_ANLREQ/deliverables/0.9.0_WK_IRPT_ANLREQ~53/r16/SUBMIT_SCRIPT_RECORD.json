@@ -5,10 +5,11 @@
   "base_commit": "41f8c03511b1f92cc3e9576ea0ecd4cbca68e1b7",
   "script": {
     "path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~53/r16/submit_synthetic_request.py",
-    "git_blob": "b5b842e4c7174251f28093b24d67d67a94d6c0ac",
+    "git_blob": "326f2909559410750481fc65cdd84fe45262fc95",
     "ascii_only": true,
-    "self_test": "SUBMIT-SELFTEST-OK, SELFTEST arms=20 of 20 passed (run twice, output identical)",
-    "mutant": "tenant gate disabled (check_args returns no refusal): self-test rc=1, arms tenant-other-refused and tenant-missing-refused FAIL (2 of 20 caught)",
+    "self_test": "SUBMIT-SELFTEST-OK, SELFTEST arms=22 of 22 passed (run twice, output identical; amendment 1 added two arms)",
+    "mutant": "tenant gate disabled (check_args returns no refusal): self-test rc=1, arms tenant-other-refused and tenant-missing-refused FAIL (20 of 22 passed, 2 caught)",
+    "mutant_amendment_1": "reserved-domain STOP disabled (run_flow line 337 becomes if False): self-test rc=1, arm advisor-real-domain-stops-before-invoke FAIL (21 of 22 passed, 1 caught; that run made 2 invokes)",
     "boto3_surface": {
       "used_only_in_run": ["lambda.invoke (FunctionName irpt-ycharts-generate, event i and event ii)", "dynamodb.get_item (opal-users-v2, filer row)", "dynamodb.scan (opal-users-v2, all pages, advisor by opaque label)"],
       "client_created_in": ["--run only, after the literal word and the advisor label pass (make_clients)"],
@@ -73,12 +74,24 @@
     {"kind": "analysis queue message (SQS)", "key": "body with tenant, request_id and composition_ref (IDs and a digest only)", "read_at": "ycharts/generate/acceptance.py:145-177 (dispatch and queue body); whether the submission service calls dispatch inside the same request was NOT read"}
   ],
   "no_users_row_write": "No write to opal-users-v2 appears in the upload or submission path read (intake/uploads.py, intake/upload_entry.py, ycharts/generate/acceptance.py, ycharts/generate/prospect_submission.py). The script makes no users write.",
+  "amendment_1": {
+    "issuer": "2.0.0_SA_COO~Y2, order AMENDMENT 1 (2026-10-12): close the gap that the on-behalf upload makes the resolved advisor the request owner",
+    "rule": "the part after the last at-sign, lower-cased, equals example.com, example.org or example.net, or ends .invalid, .test or .example (the rule the order names as count_f2.py's; count_f2.py is not in this worktree, so the rule is taken from the order text); no at-sign fails closed",
+    "where": "submit_synthetic_request.py: reserved_domain at line 109; called in run_flow at line 337, after resolve_advisor (line 266) returns the address and before the first lambda.invoke",
+    "stop": "prints 'STOP: the advisor is not a synthetic address. No invoke was made.' and returns 1; the address is never printed; --run makes no invoke",
+    "self_test_arms": [
+      "advisor-real-domain-stops-before-invoke: person@firm.com in the fake users table; rc 1, zero invokes, the address absent from stdout",
+      "advisor-reserved-domain-proceeds: advisor-y166-reserved@Example.NET (mixed case); rc 0, two invokes"
+    ],
+    "addresses": "IRPT_ANLREQ-D2-W53-S13 (the on-behalf advisor could be a real person). The guard is the --run-side closure of that row; the row itself is not edited here",
+    "not_covered": "the guard reads the domain only. A real person's mailbox on a reserved domain would pass; the users row and the advisor's identity remain a live read at --run, not checked by this script"
+  },
   "what_run_reads": [
     "dynamodb get_item opal-users-v2, key PK=USER#<filer>, SK=PROFILE, ConsistentRead (the filer row: email, allowedFirmIds)",
     "dynamodb scan opal-users-v2, ConsistentRead, every page (active cottonwood rows only, matched by the adv- label of the email; the email stays in memory and is never printed)"
   ],
   "what_run_invokes": [
-    "lambda.invoke irpt-ycharts-generate, event i, once",
+    "lambda.invoke irpt-ycharts-generate, event i, once, and only after the filer row admits cottonwood AND the resolved advisor is on a reserved domain (amendment_1)",
     "lambda.invoke irpt-ycharts-generate, event ii, once, and only when event i answers an input_id"
   ],
   "what_run_prints": [
@@ -105,6 +118,7 @@
   ],
   "gaps_that_fail_acceptance_from_code": [
     "the filer row does not admit cottonwood: the run stops at its admission check (S14)",
+    "the resolved advisor is not on a reserved domain (example.com/.org/.net, .invalid, .test, .example): the run stops before any invoke (amendment_1; the address is never printed)",
     "no cottonwood advisor with a partner profile and an active user row: the on-behalf owner is refused (served.py:1077-1088)",
     "the template lane answers RESOLVING with input_id null until the resident finishes (uploads.py:391-393, :370-382): event ii is not sent (S12)",
     "the template lane answers NEEDS_CORRECTION when the provider cannot resolve a ticker (uploads.py:411-420, :445-447): no input_id, event ii is not sent",
