@@ -1,0 +1,48 @@
+NFRA_CTLPLN.TO-CT-x-1 AMENDMENT 2 (crossbox XB-20261012T055135Z-6c76) -- seat 0.7.0_AE_CloudOps~CT1, dell1, 2026-10-12 ~06:0xZ
+
+RESULT: HELD BEFORE ANY ACT. No commit named, no ledger entry opened, no S3 put. One try is NOT spent.
+The object exists (two candidates measured byte-equal). What does not exist is a route to ok=True that keeps the
+amendment's two bounds "you do NOT push it" and "run the read-back before the next scheduled box-sync".
+
+1. CANDIDATES, measured at HEAD 2b46c900c5 (sha256 of `git show HEAD:<repo path>` against `s3api get-object`)
+   KEPT  data/mdpf/scripts/bronze/pull_orion_model_composition.py = s3://opal-data-mdpf/code/scripts/bronze/pull_orion_model_composition.py
+         sha256 40bdb218e94d3ff9c26f2920bb106720c63d0ab8bed06ec1fe5feaa1a4c4a8a9, 9292 B, both sides, equal=True.
+         Live VersionId knZ1fVt_6weNcIIalL9EUYzC7sUlp0W5 (2026-10-11T05:00:23Z); its previous version HDdC0.EbCm8OEwh5kgCid1O92DgeZrkm.
+   SPARE data/mdpf/scripts/gold/build_mdpf_wsc_inflection_feeder.py = s3://opal-data-mdpf/code/scripts/gold/build_mdpf_wsc_inflection_feeder.py
+         sha256 2e44062f213ad43aa8c167933aa9f5a93f43b4172d8ed302a43f5ef23bffb206, 31622 B, equal=True.
+   REJECTED data/mdpf/config/bronze_homes.json: repo 0bea24c0... (464 B) vs live 2af434e6... (464 B), equal=False. The only
+         difference is the `_generated` header's registry hash (bd1619b411e1330c -> a919c86bbdf925a3), from the 2026-10-11
+         regeneration commits 6c962b0a52 / e2021e6a5d / 3a5e564561; the feeds block is unchanged. Not deployed over.
+   REJECTED data/black_diamond/scripts/gold/gold_dispatch.sh -> s3://opal-data-bd/code/gold/gold_dispatch.sh: 75897 B vs 74731 B.
+   Origin of the candidates: both KEPT/SPARE objects were put by dell1's own deploy, ledger
+   20261011T0439Z_mdpf-canon-r3-bronze-intake-dell1-20261011 (legs L4, L5, CLOSED), so they are "dell1's deploy path".
+
+2. THE BOUND "an address in the registry, which the principal may put to" -- what the registry's own output says
+   - scopes.json row `mdpf`: bucket opal-data-mdpf, bucket_provisioned true, class PRODUCT.
+   - The `code/scripts/...` KEY is not an address() output: address() builds {source}/{scope}/{tier}/{table}/{partition} data
+     keys only, and resources.json holds 0 rows naming opal-data-mdpf/code or this script. So the bucket is registered; the
+     key is registered only as a ledgered dell1 deploy of 2026-10-11. The issuer should read that as met or not.
+   - iam simulate-principal-policy, cloudops-dell1-agent-user, s3:PutObject on that exact key: `allowed`. Existence is read
+     (head-object returned the object), so the simulation's allow-for-a-nonexistent-resource trap does not apply.
+   - Bucket opal-data-mdpf `get-bucket-versioning` read Status=Enabled (this seat, 2026-10-12 ~06:0xZ), so a re-put moves
+     only the VersionId; the rollback is the previous VersionId above.
+
+3. WHY ok=True IS NOT REACHABLE UNDER THE AMENDMENT AS WRITTEN (both measured, neither is a judgment)
+   a. dell1's role in org/devices/DEVICES.json is `execution`. .tools/named_commit_check.py (_published_branch, line ~75-93)
+      admits an OFF-TRUNK commit only when `git branch -r --contains <commit>` finds a remote branch. A commit only on
+      box/dell1 locally returns `NAMED-COMMIT REFUSED ... not published`, so deploy_readback_check.py step 1 does not admit,
+      steps 2-4 are SKIPPED and the last line reads admitted=False on_trunk=Unknown. "Do not push" and "ADMITTED" cannot both hold.
+   b. The window between publish and trunk is about 100 seconds. Measured on this seat's own commit 54236c83f0: committed
+      2026-10-12T01:48:28-04:00; the integrator's `integrate(0.0.0_AB_MSTR): box/dell1 @7da642c1ff into CLOUD` landed
+      01:50:17-04:00 and contains it (`merge-base --is-ancestor 54236c83f0 origin/CLOUD` = true at 05:59Z). The push and the
+      integrate are one box-sync run, so waiting for the scheduled push and then running the read-back is a race measured in seconds.
+
+4. WHAT WOULD MAKE IT REACHABLE WITHOUT WIDENING ANYTHING (a call for the issuer, not taken by this seat)
+   Name the commit on a SCRATCH ref that box-sync does not integrate: a one-file note commit authored by this seat on a branch
+   cut from HEAD, NOT on box/dell1, published as origin/dell1/readback-<stamp> (the check prefers a branch containing
+   "/dell1/"; box/dell1/<x> cannot exist beside the box/dell1 ref). Then: open the ledger, re-put the same bytes, run the
+   read-back. The commit is published (ADMITTED) and stays off CLOUD (on_trunk=False) with no race. One push of one scratch
+   ref by this seat, which CLAUDE.md's push law admits and which the amendment's "do not push" names, hence the ask.
+
+NOT DONE, BY DESIGN: no push, no put, no ledger entry, no commit named. The seat did not pick the race (3b) and did not
+reinterpret "do not push" (3a).
