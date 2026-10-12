@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-by-1.a-refusal-is-logged-with-the-tier-it-saw",
+  "genre": "BUILD",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-by-1.a-refusal-is-logged-with-the-tier-it-saw.md",
+    "group": "OTHER",
+    "vintage_commit": "49b5ed47f3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "49b5ed47f3",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-by-1.a-refusal-is-logged-with-the-tier-it-saw.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~136",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~136 on wk-AMGT_HARVST-136 (worktree C:/Dev/wk-harvst-136, branch wk-AMGT_HARVST-136, base box/dell1 @49b5ed47f3). Build at 62797b8bc3. Local code and tests only: a fake boto3 client and capsys. No deploy, no invoke, no S3, SQS or CloudWatch call, no Terraform, no AWS call of any kind. The surprise channel was not edited: no premise failed.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/research/pull_enqueue/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "62797b8bc3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "lambda_handler reads the tier once; on any value other than internal it prints one line 'DENIED: tier=<tier>' (tier is NONE when the fence read none; characters outside printable ASCII, including CR and LF, become '?'; cut to 32) inside a try/except Exception, then returns the unchanged 403 {\"error\": \"forbidden\"}. The success path, the 400 and the OK: line are unchanged. _denied_tier_text is the one new helper.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/research/pull_enqueue/test_by1_refusal_logged.py",
+      "kind": "test",
+      "commit_or_etag": "62797b8bc3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 tests: partner refusal logs exactly 'DENIED: tier=partner'; no requestContext logs 'DENIED: tier=NONE'; a 100-character tier is cut to 32; an embedded newline yields one line 'DENIED: tier=partner?OK: forged'; a refused body with a ticker and a cookie logs neither; an internal context is admitted with one OK: line and no DENIED line; a mutant with the print line removed (replacement asserted to hit exactly one line) fails the partner arm's log assertion",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest infra/aws/lambda/research/pull_enqueue/test_by1_refusal_logged.py -q -p no:cacheprovider --color=no -- expect: (?m)^\\d+ passed in",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/research/pull_enqueue/test_by1_refusal_logged.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc 0 (run under timeout 120) at 62797b8bc3.\n7 passed in 0.22s (at 62797b8bc3); 7 passed in 0.32s (pre-commit run of the same file)",
+      "denominator": "7 of 7 tests passed",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m pytest infra/aws/lambda/research/pull_enqueue/test_bx1_tier_fence.py -q -p no:cacheprovider --color=no -- expect: (?m)^\\d+ passed in",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/research/pull_enqueue/test_bx1_tier_fence.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc 0 (run under timeout 120) at 62797b8bc3.\n15 passed in 0.23s (at 62797b8bc3); 15 passed in 0.34s (pre-commit run, unchanged test file)",
+      "denominator": "15 of 15 tests passed, unchanged",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the print line in lambda_handler's refusal branch is replaced with 'pass' in a source copy (the replacement is asserted to match exactly one line, so the mutant cannot be a silent no-op); the partner arm's log assertion then runs",
+      "expected": "the partner arm's assertion that stdout is exactly 'DENIED: tier=partner' raises AssertionError",
+      "observed": "test_mutant_without_the_print_fails_the_partner_arm passed at 62797b8bc3: the AssertionError was raised inside pytest.raises (7 passed in 0.22s)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run at 62797b8bc3 and once before the commit",
+      "observed": "AC1 7 passed in each run; AC2 15 passed in each run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "order status flip",
+      "reason": "the issuer flips the order; the order forbids the worker editing it and the order file is outside this worker's <paths>"
+    },
+    {
+      "item": "deploy and live read of the refusal log",
+      "reason": "the order is LOCAL: no deploy, invoke or AWS call. The post-deploy read belongs to AMGT_HARVST-by-2 under its own WORLD pair"
+    },
+    {
+      "item": "adversary lens and full-suite baseline",
+      "reason": "the worker face runs no adversary lens; the criteria are the two named file runs, not the whole Lambda test tree"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~136 <0.9.0_WK_AMGT_HARVST~136@opal.agent>\" -F .scratch/msg_hvst_by1_code.txt -- <2 paths>",
+      "result": "rc 0 at 62797b8bc3: pre-commit gate clean for 2 of 2 file(s); surprise-row gate and to-pipeline gate OK (no rows, no task order in the commit)"
+    }
+  ]
+}

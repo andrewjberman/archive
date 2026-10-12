@@ -1,0 +1,15 @@
+BX2 STEP 9 -- first real INTERNAL enqueue after the deploy (post-act read)  [AMENDMENT 2; not one of AC1-AC3]
+
+READ AT: 2026-10-12T13:52:35Z (apply landed 13:50:11Z; LastModified of the function)
+LOG GROUP: /aws/lambda/opal-research-pull-enqueue, filter-log-events --start-time 2026-10-12T13:50:00Z
+LOG STREAM: 2026/10/12/[$LATEST]3bb4cba559244512b779c8d601a487cd -- 3 invocations (START/END/REPORT x3), 0 lines 'OK: enqueued pull request'
+THE 3 INVOCATIONS ARE THIS SEAT'S OWN ARM CALLS (13:51:5xZ), not portal traffic.
+
+STATUS: UNMEASURED. No real enqueue through the portal had occurred by 13:52Z. This is not a pass.
+
+INSTRUMENT LIMIT (row AMGT_HARVST-D1-S8): the handler writes a log line only on a successful enqueue (print at
+lambda_function.py:140). A 403 (any caller) and a 400 write nothing but START/END/REPORT, and the portal API stage
+$default has no access log (AccessLogSettings null). So this log can show a 2xx and cannot show Branch B.
+  - 2xx evidence = an 'OK: enqueued pull request for <ticker>' line.
+  - refusals/errors, WITHOUT tier = (START lines) - ('OK:' lines) in the window.
+RE-READ OWED: end of the first trading day (US close 20:00Z), same filter from 13:50Z; subtract this seat's 3 arm invocations.
