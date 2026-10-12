@@ -1,0 +1,116 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-486",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-486.live-host-resident-bindings-read.md",
+  "group": "OTHER",
+  "vintage_commit": "193a3e10ed"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "193a3e10ed",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-486.live-host-resident-bindings-read.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB167-6_host_bindings_read.json",
+   "kind": "doc",
+   "commit_or_etag": "0916fbbaa1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The read record: commentary_ready_queue_url_bound false, claim measured, read 2026-10-12T20:14:28Z on instance i-0167fd745ad906a66 at /opt/irpt-resident/0485393f3a-st32/reports/resident_bindings.json; two host commands listed verbatim from the SSM read-back; sign_in_attempted false, secret_values_read 0, host_writes 0; no queue URL recorded.",
+   "artifact_covered_by": [
+    "IB167-6-AC1",
+    "IB167-6-AC2",
+    "IB167-6-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB167-6-AC1",
+   "criterion_verbatim": "IB167-6-AC1: the bound flag is true, false or NOT_ESTABLISHED with a claim (measured when the file was read), the instance, path and read time are stated, and no queue URL appears in the record (amended at 193a3e10ed: the substring test rejects a url, an SQS host or a 12-digit account segment, not the key name).",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r167/p167_cells.py\" . IB167-6-AC1",
+   "expect": "IB167-6-AC1 PASS",
+   "output_evidence": "OK: bound=False (measured) | IB167-6-AC1 PASS | rc=0",
+   "denominator": "1 file read on 1 host; 1 optional key tested (present and non-empty) over the file's keys; 0 occurrences of https://sqs. and 0 account segments in the record; 2 host commands, 2 Success rc 0.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB167-6-AC2",
+   "criterion_verbatim": "IB167-6-AC2: every host command is listed verbatim with an SSM command id and a terminal status, none matching a forbidden pattern.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r167/p167_cells.py\" . IB167-6-AC2",
+   "expect": "IB167-6-AC2 PASS",
+   "output_evidence": "OK: 2 host command(s), none matching a forbidden pattern | IB167-6-AC2 PASS | rc=0",
+   "denominator": "2 commands of 2 sent, each read back from ssm list-commands Parameters.commands (what SSM received); 14 forbidden patterns tested against each script.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB167-6-AC3",
+   "criterion_verbatim": "IB167-6-AC3: sign_in_attempted false, secret_values_read 0, host_writes 0 and not_established a list.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r167/p167_cells.py\" . IB167-6-AC3",
+   "expect": "IB167-6-AC3 PASS",
+   "output_evidence": "OK: bounds hold: no sign-in, 0 secret values, 0 host writes | IB167-6-AC3 PASS | rc=0",
+   "denominator": "0 sign-ins, 0 secret reads, 0 host writes over 2 read-only commands; not_established lists 3 items.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Four mutants planted in the real record (backup first, restored byte-identical after, each revert re-run): AC1 the bound flag set to \"maybe\"; AC1 an SQS url appended to in_words; AC2 a unit-restart command added to host_commands; AC3 host_writes set to 1.",
+   "expected": "each criterion FAILs on its own mutant and PASSes on baseline and on revert",
+   "observed": "Baseline PASS x4. AC1/maybe -> FAIL bound must be true, false or NOT_ESTABLISHED. AC1/url -> FAIL the queue URL itself must not be recorded. AC2/restart -> FAIL forbidden pattern systemctl restart. AC3/host_writes 1 -> FAIL bounds required. All four reverted, cmp identical, re-run PASS.",
+   "status": "FIRED-AS-EXPECTED",
+   "provenance_of_this_observation": "MEASURED BEFORE IT WAS WRITTEN: the mutants were run and their output read, and only then was this block composed."
+  },
+  "determinism": {
+   "method": "The key-presence read is a pure read of one file; the bound flag was read once by command 80aa78ba and its context (root, unit state, the file's existence) by command 414252c4 minutes earlier. The three criteria were run three times without changing the record: at the amended check, as the mutant baselines, and after each revert.",
+   "observed": "UNBOUND in the single key read; the root named by the unit's WorkingDirectory and ExecStart equals the root the file was read under; every criterion read PASS on every run. The file was read once, so repeatability of the host state across time is not claimed.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Repeat reads of the host file over time",
+   "reason": "One read at 2026-10-12T20:14:28Z. The next resident release writes the file; this record says what the installed file held at that minute and nothing about later ones."
+  },
+  {
+   "item": "The import-error count",
+   "reason": "Not taken: the order counts ImportError only when the key is bound, and it is not."
+  },
+  {
+   "item": "The bindings file's modification time as an install date",
+   "reason": "The package extraction zeroes mtimes (reads 1970-01-01); the install is dated by the root name 0485393f3a-st32 and the unit start, 2026-10-11 16:09:55 UTC."
+  },
+  {
+   "item": "Any sign-in, secret value, queue message, unit change, host write or vendor call",
+   "reason": "Outside the order: 0 made."
+  }
+ ],
+ "surprises": [
+  "IRPT_BCKEND-D2-S110"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "aws ssm send-command (AWS-RunShellScript) and get-command-invocation, list-commands read-back",
+   "invocation": "two read-only commands on i-0167fd745ad906a66",
+   "result": "PASS -- both Success rc 0; scripts recorded as SSM received them."
+  },
+  {
+   "tool": "p167_cells.py",
+   "invocation": "IB167-6-AC1..AC3 at the repo root, then four mutants",
+   "result": "PASS -- three of three PASS at the amended check 193a3e10ed; four of four mutants FAIL on their own property."
+  },
+  {
+   "tool": "safe-commit.sh",
+   "invocation": "--author ... -F <msgfile> written by the Write tool",
+   "result": "PASS at 0916fbbaa1; the first attempt was BLOCKED by the surprise-row gate on the order's row-id form, fixed by using the grammar-valid id, no override."
+  }
+ ]
+}

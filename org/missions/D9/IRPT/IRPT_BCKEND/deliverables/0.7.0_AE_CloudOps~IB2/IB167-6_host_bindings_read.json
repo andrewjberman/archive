@@ -1,0 +1,54 @@
+{
+ "instance": "i-0167fd745ad906a66",
+ "unit": "irpt-analysis-resident.service",
+ "root": "/opt/irpt-resident/0485393f3a-st32",
+ "root_confirmed_from": "systemctl show WorkingDirectory and ExecStart of the unit at 2026-10-12T20:13:56Z (command 414252c4); the newest of 4 roots by ls -dt",
+ "bindings_path": "/opt/irpt-resident/0485393f3a-st32/reports/resident_bindings.json",
+ "bindings_path_basis": "resident_installed.py load_bindings() default is _HERE / resident_bindings.json; the unit starts resident_installed:build_resident_runtime with no bindings path; resident_installed.py sits in <root>/reports/ on the host (command 80aa78ba listed it)",
+ "read_at_utc": "2026-10-12T20:14:28Z",
+ "host_time_zone": "+0000",
+ "commentary_ready_queue_url_bound": false,
+ "queue_name_when_bound": null,
+ "bindings_file_mtime": "1970-01-01 00:00:00.000000000 +0000 (the package extraction zeroes mtimes; size 1973 bytes, mode 644, so the mtime does not date the install; the root name 0485393f3a-st32 does)",
+ "unit_active": true,
+ "unit_state": "active (running), started 2026-10-11 16:09:55 UTC",
+ "import_error_count_24h": null,
+ "import_error_count_24h_note": "not counted: the order counts ImportError only when the key is bound, and it is not",
+ "claim": "measured",
+ "in_words": "The installed resident_bindings.json on the live host does NOT carry the optional commentary-ready queue binding: the file exists (1973 bytes) and the key is absent, so the live resident has no reason to import the packager and nothing is broken live. Of the optional bindings only opal_map is present, next to the required queue binding; the second optional queue binding and the packager block are absent.",
+ "keys_present_by_name": [
+  "opal_map",
+  "the required main queue binding"
+ ],
+ "keys_present_note": "names only, filtered to keys ending in _url plus packager and opal_map; no value was printed",
+ "host_commands": [
+  {
+   "ssm_command_id": "414252c4-7db0-45be-b586-d62ad1208f5d",
+   "status": "Success",
+   "response_code": 0,
+   "read_at_utc": "2026-10-12T20:13:56Z",
+   "script": "echo \"READAT $(date -u +%FT%TZ) HOSTTZ $(date +%z)\"\necho '--- unit (a read; starts nothing) ---'\nsystemctl show irpt-analysis-resident.service -p ActiveState -p SubState -p WorkingDirectory -p ExecStart -p FragmentPath 2>&1 | cut -c1-400 | head -8\necho '--- environment: VARIABLE NAMES only ---'\nsystemctl show irpt-analysis-resident.service -p Environment -p EnvironmentFiles 2>&1 | grep -oE '[A-Z_][A-Z0-9_]*=' | sort -u | head -20\necho '--- resident roots, newest first ---'\nls -1dt /opt/irpt-resident/*/ 2>/dev/null | head -4\n",
+   "script_source": "read back from ssm list-commands Parameters.commands -- what SSM received"
+  },
+  {
+   "ssm_command_id": "80aa78ba-6c6c-47a0-9f75-4226dd362df6",
+   "status": "Success",
+   "response_code": 0,
+   "read_at_utc": "2026-10-12T20:14:28Z",
+   "script": "R=/opt/irpt-resident/0485393f3a-st32\nB=$R/reports/resident_bindings.json\necho \"READAT $(date -u +%FT%TZ) HOSTTZ $(date +%z)\"\necho '--- where resident_installed.py sits in this root ---'\nls -1 $R/reports/resident_installed.py 2>&1\necho '--- bindings file: exists and mtime ---'\ntest -f $B && echo EXISTS || echo MISSING\nstat -c 'mtime=%y size=%s mode=%a' $B 2>&1\necho '--- commentary_ready_queue_url: present and non-empty? (name only when bound) ---'\npython3 -c 'import json,sys; d=json.load(open(sys.argv[1])); v=d.get(\"commentary_ready_queue_url\"); print(\"BOUND queue_name=\" + v.rstrip(\"/\").split(\"/\")[-1] if isinstance(v,str) and v.strip() else \"UNBOUND\"); print(\"keys_present=\" + \",\".join(sorted(k for k in d if k.endswith(\"_url\") or k in (\"packager\",\"opal_map\"))))' $B 2>&1\necho '--- unit state and installed root ---'\nsystemctl is-active irpt-analysis-resident.service 2>&1\nls -1dt /opt/irpt-resident/*/ 2>/dev/null | head -1\n",
+   "script_source": "read back from ssm list-commands Parameters.commands -- what SSM received"
+  }
+ ],
+ "sign_in_attempted": false,
+ "secret_values_read": 0,
+ "host_writes": 0,
+ "vendor_calls_made": 0,
+ "output_files": [
+  "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB167-6_host_bindings_read.json"
+ ],
+ "not_established": [
+  "whether the next resident release will write the key: the release writes it from the second ready queue, not read here",
+  "the packager block and the second optional queue binding are absent by the file read; their intended state is not read",
+  "the file content beyond the listed key names was not read, and no queue URL was printed or recorded"
+ ]
+}
