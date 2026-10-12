@@ -1,0 +1,51 @@
+{
+  "window_days": 90,
+  "window_start": "2026-07-13T23:27:53Z",
+  "window_end": "2026-10-11T23:27:53Z",
+  "window_note": "The secret was created 2026-10-02T05:41:52Z, so the 90-day window covers its whole life; the earliest read is 2026-10-02T05:43:19Z, the latest 2026-10-11T23:11:19Z.",
+  "method": "cloudtrail lookup-events EventName=GetSecretValue, us-east-1, fully paginated (2592 pages, 129562 GetSecretValue events across ALL secrets in the window), client-side filter on the CloudTrail event body naming gateway/teams/bearer; requestParameters.secretId was exactly 'gateway/teams/bearer' on all 186. Management events only; no secret value read.",
+  "events_scanned_all_secrets": 129562,
+  "events_read": 186,
+  "principals": [
+    {
+      "arn": "arn:aws:sts::313476888478:assumed-role/teams-global-chat-assist-role/teams-global-chat-assist-ingress-lambda",
+      "role": "arn:aws:iam::313476888478:role/teams-global-chat-assist-role",
+      "count": 138,
+      "note": "137 ok + 1 ResourceNotFoundException"
+    },
+    {
+      "arn": "arn:aws:sts::313476888478:assumed-role/opal-gateway-role/i-07dccb1615503ac99",
+      "role": "arn:aws:iam::313476888478:role/opal-gateway-role",
+      "count": 22
+    },
+    {
+      "arn": "arn:aws:iam::313476888478:user/[IAM-USER-NAME-REDACTED-ADMIN]",
+      "count": 14,
+      "note": "the account admin IAM user (a person-named ARN, redacted per the order's bound); NOT a member of cloudops-dell-agents-group"
+    },
+    {
+      "arn": "arn:aws:sts::313476888478:assumed-role/teams-global-chat-assist-role/teams-global-chat-assist-handler-lambda",
+      "role": "arn:aws:iam::313476888478:role/teams-global-chat-assist-role",
+      "count": 12
+    }
+  ],
+  "positive_control": {
+    "gateway_role_seen": true,
+    "gateway_role_arn": "arn:aws:iam::313476888478:role/opal-gateway-role",
+    "gateway_role_events": 22
+  },
+  "dell_group": {
+    "group_arn": "arn:aws:iam::313476888478:group/cloudops-dell-agents-group",
+    "members": [
+      "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+      "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user"
+    ],
+    "member_inline_policies": 0,
+    "members_seen_as_principals": 0,
+    "member_role_sessions_seen": 0
+  },
+  "dell_group_verdict": "none",
+  "dell_group_verdict_basis": "None of the 4 reading principals is a group member (the two members are IAM users; neither appears, and no reader is a role session of either). Limit: a read through a role the members assume would appear as that role; the only roles seen are the gateway role and the COMM_ASSIST role.",
+  "resource_policy": "none (secretsmanager get-resource-policy returned ResourcePolicy None)",
+  "grant_statement": "Managed policy arn:aws:iam::313476888478:policy/cloudops-dell-agent-platform-secrets-policy (default version v4, created 2026-10-09T12:21Z), Statement Sid 'ReadPlatformKeys', Effect Allow, Action secretsmanager:GetSecretValue, Resource list of 31 exact ARNs including arn:aws:secretsmanager:us-east-1:313476888478:secret:gateway/teams/bearer-93ZHiU. The policy is attached ONLY to cloudops-dell-agents-group (list-entities-for-policy: 1 group, 0 users, 0 roles). No other group policy names the secret (the other 8 attached policies carry no GetSecretValue on it; the 'create' policy has only DescribeSecret/GetResourcePolicy/List on '*'). Terraform source: infra/aws/terraform/nfra-ctlpln-identity/iam.tf aws_iam_policy.dell_agent_platform_secrets, whose document is built by module.routes_policy from the secrets census."
+}
