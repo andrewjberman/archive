@@ -1,7 +1,7 @@
 # NEVER-WIDEN ASK -- OG-fd-1 (round-35 E1): each silver sweep drains only its own family's DLQ messages
 
 To: `1.0.0_SA_CTO~Z` and `2.0.0_SA_COO~O`. From: `0.9.0_WK_NFRA_OPLGTW~58`. Phase A (source, offline tests, this ask). No build, deploy
-or SQS call has been made. Rows: `NFRA_OPLGTW-Z-W58-S1` (schwab keeps its own drain), `NFRA_OPLGTW-Z-W58-S2` (record shape unread live).
+or SQS call has been made. Rows: `NFRA_OPLGTW-Z-W58-S1` (schwab keeps its own drain; covered by Amendment 1), `NFRA_OPLGTW-Z-W58-S2` (record shape unread live).
 
 ## 1. The behaviour change
 
@@ -29,9 +29,10 @@ page of only already-seen foreign messages and at 50 receive calls (`scan_trunca
    growing to its 14-day retention, and every sweep report says `unattributed: N`. No data is lost; the drain is simply idle. The live
    grade below detects this at the first sweep. Rollback is section 5.
 
-Not covered, row `NFRA_OPLGTW-Z-W58-S1`: the schwab Lambda's own `schwab_runtime.drain_dlq` (`:247`) is outside this order's paths and still
-deletes every message, including other families'. After this deploy a schwab sweep can still eat a mirror family's failure. A schwab edit
-is a separate cell; the issuer decides.
+Amendment 1 (row `NFRA_OPLGTW-Z-W58-S1`, issuer ruling @1e9b1106d0): the schwab Lambda's own `schwab_runtime.drain_dlq` is changed by
+the SAME rule with family `schwab` (a parallel copy: `mirror_conversion` is not vendored into the schwab package), so every one of the five
+sweeping families (etf, blackdiamond, orion, eclipse, schwab) is per-family. Until the schwab package is also deployed, a schwab sweep still
+eats other families' failures, so the schwab deploy is part of the roll-out, not optional. smartx and bd49finsurance hold no DLQ read.
 
 ## 3. Per-family PACKAGE delta the deploy would ship
 
@@ -54,7 +55,7 @@ rebuild carries IN ADDITION to this order's own change (+68 / -9 lines in `mirro
 | blackdiamond | opal_strategy_matcher.py | absent from snapshot | 90 | +90 (new file in package) |
 | etf | mirror_conversion.py | 1134 | 1149 | +16 / -1 |
 | etf | silver_registry.py | 245 | 245 | +1 / -1 |
-| schwab | (all 11 vendored files equal source) | | | 0; the change does not reach this package (S1) |
+| schwab | schwab_runtime.py | 405 | 405 at the cut base (this change: +78 / -14) | 0 beyond this change: all 11 vendored files equal source at the cut base, so the schwab rebuild ships ONLY the drain change |
 | smartx | (2 vendored files equal source) | | | 0; no DLQ read in the package |
 
 Files not listed are byte-equal. The bd49finsurance package (silver_registry.py +1 / -1) has no DLQ reference and needs no rebuild for
@@ -63,8 +64,9 @@ this change. The etf package must ship `etf_conversion.py` and `mirror_conversio
 
 ## 4. Order of deploys
 
-One family at a time, each followed by its live grade (section 6) before the next: 1. etf (smallest drift), 2. blackdiamond, 3. orion,
-4. eclipse (largest drift, +358 / -14 in one module, deployed last so the first three have already shown the drain behaviour).
+One family at a time, each followed by its live grade (section 6) before the next: 1. schwab (zero drift beyond this change: the cleanest
+first deploy, and it stops the one drainer that spans the most traffic), 2. etf, 3. blackdiamond, 4. orion,
+5. eclipse (largest drift, +358 / -14 in one module, deployed last so the first four have already shown the drain behaviour).
 Reason: each package is self-contained and carries the same change; a failure in one family does not touch another, and the sooner a
 family is changed, the sooner it stops eating foreign messages.
 
@@ -72,8 +74,8 @@ family is changed, the sooner it stops eating foreign messages.
 
 Re-deploy the family's previous artifact (the zip it ran before, by CodeSha256 recorded in the deploy ledger entry opened at start).
 The change touches no queue, role or schedule, so rollback restores the delete-everything drain and nothing else. A message left in the
-queue by branch 2 stays there (14-day retention) and is read by the restored or the next working sweep. Per family: etf, blackdiamond,
-orion, eclipse each roll back independently by that family's prior artifact.
+queue by branch 2 stays there (14-day retention) and is read by the restored or the next working sweep. Per family: schwab, etf,
+blackdiamond, orion, eclipse each roll back independently by that family's prior artifact.
 
 ## 6. The live grade the applier runs
 
@@ -82,7 +84,7 @@ Plant ONE synthetic family-A message shaped like a destination record on `opal-a
 `requestPayload`. Run family B's sweep (e.g. the freshly deployed `opal-assets-silver-orion`). Read, in B's returned/manifest `dlq` block,
 that the planted marker is absent from `messages`, `other_family_returned >= 1`, and the message is still on the queue
 (`get-queue-attributes` ApproximateNumberOfMessages counts it). Then run A's sweep and read that A's `dlq.messages` carries the marker and
-the queue no longer holds it. Because the schwab sweep still drains everything (S1), use a mirror family as A for the second half
-(e.g. plant `opal-assets-silver-eclipse` and run eclipse's sweep once eclipse is deployed), or accept that the schwab arm reads as the
-old behaviour. Also read any pre-existing real messages: a sweep that reports `unattributed > 0` on real traffic means branch 2 and
+the queue no longer holds it. Run it once with A = schwab and B = a mirror family, and once with A = a mirror family and B = schwab, so
+both copies of `drain_dlq` are graded; a family not yet deployed still drains everything, so grade a pair only when both are deployed.
+Also read any pre-existing real messages: a sweep that reports `unattributed > 0` on real traffic means branch 2 and
 stops the roll-out.
