@@ -1,0 +1,239 @@
+{
+  "basis_written_at": [
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:211",
+      "value": "constants BASIS_AS_TRADED_CLOSE = \"as_traded_close\", BASIS_STORE_POINT = \"store\"",
+      "condition": "definition only"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:252",
+      "value": "store (df[\"basis\"] = BASIS_STORE_POINT)",
+      "condition": "every row of the one store frame as_traded_store is given, before any test; as_traded_store is called only for the first store (pc.STORES[0], the silver canonical prices; :300, :308-319) and only when price_basis is as_traded with a Yahoo cache (:303-304, :1038-1039); a row no later line changes keeps \"store\""
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:271",
+      "value": "as_traded_close (new_yf[\"basis\"] = BASIS_AS_TRADED_CLOSE)",
+      "condition": "the yahoo_finance rows (YF_LABEL, :206) of a ticker-kind key (:253) whose round-33 census class is dividend_adjusted or mixed (SUBSTITUTE_CLASSES :205, load_basis_classes :214-221), that has a cached Yahoo file (:258-262), on the dates where Yahoo holds a positive Close (:266-270); the price is replaced by that Close. No test on the security type, the kind of the held security, or any split"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:283",
+      "value": "as_traded_close (new_li[\"basis\"] = BASIS_AS_TRADED_CLOSE)",
+      "condition": "the linear_interpolation rows (LI_LABEL) of the same ticker that lie between two replaced points (:277-282); re-derived linearly in the date"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:265+:286",
+      "value": "store (unchanged from :252)",
+      "condition": "the ticker's rows of any other source label (transaction_observed, scoped_override ...), every ticker of another census class, every ticker with no cached Yahoo bar (:259-262), every CUSIP-kind row (:253), every row of every other store"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:288+:321",
+      "value": "the basis column is returned in info[\"input\"] (:320) and STRIPPED from what the chain prices with",
+      "condition": "as_traded_store returns PRICE_COLS + basis (:288); apply_price_basis keeps that frame only in info[\"input\"] and passes new[PRICE_COLS] on (:321), so security_day_prices (:979), the split scaling (:984) and security_day_price.parquet (cusip, date, price, store; :896-900) never see a basis"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:325-347+:976-978",
+      "value": "the basis column is written to the price input file",
+      "condition": "run() writes the price input (ticker, date, price, source, basis) at :976-978, BEFORE security_day_prices (:979) and before split_plan / apply_splits (:983-984); only when price_input_out is given (the regrade passes it for the as_traded arm, commonwealth_sweep_regrade.py:1609, :1615)"
+    }
+  ],
+  "split_scaling_at": [
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:1048-1051",
+      "what_it_scales": "nothing: main() reads the price stores (load_price_store :133-143) before any basis or scaling"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:1062-1066 -> :525-551",
+      "what_it_scales": "nothing yet: load_store_splits reads dell1's split history, per CUSIP partition, at the pinned instant --split-store-as-of (version current at that instant, :529-533); only for cash legs in ROUND28_REPAIR_LEGS (commonwealth_sweeps.py:102: method_r28, method_r29; default method_r29, :103)"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:1067 -> :973 -> :291-322 -> :319 -> :246-288",
+      "what_it_scales": "call 1 in run(): apply_price_basis -> as_traded_store writes the basis value (substitution); no scaling has happened"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:976-978 -> :338-347",
+      "what_it_scales": "call 2: the price input file is written WITH its basis column; still no scaling"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:979 -> :388-421",
+      "what_it_scales": "call 3: security_day_prices joins the stores (basis already stripped, :321) to CUSIPs: a (cusip, day, price, store) frame"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:980-983 -> :601-660",
+      "what_it_scales": "call 4: split_plan decides the splits to apply, only if r28 = cash_leg in ROUND28_REPAIR_LEGS and rule == RULE_LIST (:980): for a CUSIP the split store holds, the store's splits dated after the CUSIP's first transaction (:612) that the close confirms as continuous (diff_trace.py:433-446, band 0.7..1.4); for a CUSIP the store does not hold, the account rows' QA events (diff_trace.py:393-419: integer ratio 2..50 or 1/k, same k in every account) confirmed the same way; every unconfirmed or disagreeing split is NOT APPLIED and its CUSIP is named suspect (:635, :649, :659)"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:984 -> :663-677",
+      "what_it_scales": "call 5: apply_splits multiplies every close dated BEFORE a split day by the split ratio, for every CUSIP in `applied`, every point of that CUSIP whatever its store label, source label or kind of security; it reads and writes only cusip, day, price (the frame has no basis column), adds no column, and records nothing per point"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:990",
+      "what_it_scales": "call 6: value_days values the holdings with the scaled prices"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:995+:1013",
+      "what_it_scales": "records, per CUSIP and not per point: write_repair puts SUSPECT_BEFORE rows (CUSIP, date) in repair_days.parquet (:750-760); repair_plan.md lists each split with source and APPLIED or NOT APPLIED (:775-792)"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:1007 -> :875-903",
+      "what_it_scales": "call 7: write_prices writes security_day_price.parquet from the scaled prices (cusip, date, price, store); cash rows at par are added here, after the scaling, and are not scaled (:884-889)"
+    },
+    {
+      "file_line": "data/assets/scripts/silver/commonwealth_split_level_probe.py:1-5",
+      "what_it_scales": "support: states Yahoo Close is split-ADJUSTED and the as-traded price is that Close times every later split ratio, so the substituted point is the adjusted close until the scaling multiplies it"
+    }
+  ],
+  "order": "value_before_scaling",
+  "scaling_is_recorded_per_point": false,
+  "paths_marked_and_unscaled": [
+    {
+      "path": "(vi-a) BY CONSTRUCTION: the price input file. Every as_traded_close point in it was written before the scaling ran, in a frame the scaling never touches, so no point in that file passes the scaling; the file keeps the Yahoo (split-adjusted) Close",
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:976-978 vs :983-984; :321",
+      "reachable": true,
+      "reason": "the order of the calls in run(); the basis exists only in info[\"input\"]; apply_splits works on the separate cusip-keyed frame. This is the path the signed sentence says cannot happen."
+    },
+    {
+      "path": "(vi-b) the price table the chain values with and writes (security_day_price.parquet) carries no basis column, so after the scaling no point is marked at all, scaled or not",
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:896-900, :321",
+      "reachable": true,
+      "reason": "the marker does not travel past :321; \"marked as_traded_close and scaled\" and \"marked and unscaled\" cannot be told apart downstream"
+    },
+    {
+      "path": "(i) a security with a later split that the split store does not hold AND whose account rows show no QA split event (or one outside integer 2..50 or 1/k, such as 3-for-2, or whose k differs across accounts)",
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:623-659 (only CUSIPs in rows_ev or the store enter the loop); data/assets/scripts/silver/commonwealth_diff_trace.py:92,393-430",
+      "reachable": true,
+      "reason": "the code has no other source of splits and raises no flag for a split it never hears of (not even a SUSPECT row); whether any held security takes this path is not established from code"
+    },
+    {
+      "path": "(i-b) a split in one source and not the other: the store holds the CUSIP but not the rows' split (NOT APPLIED, suspect), or the rows show it and the store does not",
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:645-649",
+      "reachable": true,
+      "reason": "the code leaves earlier days as they are and names the CUSIP suspect; the points stay unscaled"
+    },
+    {
+      "path": "(i-c) a split whose day the close does not confirm: no price row on the split day, or the close is not within 0.7..1.4 of the day before (series already as traded, or a day Yahoo holds no Close for, which the substitution drops, :273)",
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:629-635, :656-659; data/assets/scripts/silver/commonwealth_diff_trace.py:433-446",
+      "reachable": true,
+      "reason": "confirm_splits needs the split day in the price index; the confirmation runs on the substituted prices, so a split day the substitution dropped cannot be confirmed"
+    },
+    {
+      "path": "(ii) a split dated outside what the store covers or what the build prices: a store split dated on or before the CUSIP's first transaction in this firm's rows is dropped; a split dated after the last price day cannot be confirmed",
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:612, :629",
+      "reachable": true,
+      "reason": "the first is harmless to the valued days (the days before the first transaction are not held and not valued) but the points stay in the table and the price input unscaled; the second leaves later-dated splits unscaled"
+    },
+    {
+      "path": "(iii) the pinned instant --split-store-as-of leaves out a split recorded after it; a partition whose first version is later than the instant is not listed",
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:529-533, :541-542, :1037, :1063",
+      "reachable": true,
+      "reason": "load_store_splits reads the version current at the instant (served build: 2026-10-09T11:52:52Z, 32 partitions; a later copy held 141, per the order face, not re-read here); a CUSIP not listed takes its splits from the account rows only (:623-659)"
+    },
+    {
+      "path": "(iv) a security kind the scaling skips",
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:663-677, :884-889",
+      "reachable": false,
+      "reason": "apply_splits has no filter on kind, type, store label, source label or basis: every point of a CUSIP in `applied` is scaled. The one thing outside it is cash: cash at par is added after the scaling and is not scaled, and the valuation never marks it as_traded_close (the substitution is keyed to the silver store's tickers and the cash rows are added at :887). The scaling skips no non-cash kind"
+    },
+    {
+      "path": "(v) a point after its last split",
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:674-675 (days < d only)",
+      "reachable": true,
+      "reason": "needs no scaling: UNSCALED AND RIGHT, not a defect; the code gives it factor 1 and cannot tell it from a point that should have been scaled"
+    },
+    {
+      "path": "(vii) a run on a cash leg outside ROUND28_REPAIR_LEGS (method_r26 and earlier) or on RULE_PREFIX: price_basis still defaults to as_traded but split_plan and apply_splits are skipped (r28 is False)",
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:980-984; commonwealth_sweeps.py:102-103; commonwealth_daily_valuation.py:1025-1026 (--cash-leg choices)",
+      "reachable": true,
+      "reason": "all substituted points are then unscaled in the price table as well; the default leg (method_r29) scales, and the served r34 build ran method_r28 (fwd3_manifest.json cash_leg)"
+    },
+    {
+      "path": "(vi) the substitution is keyed by ticker (a ticker-kind key of the first store) and the split store and the rows' events by CUSIP: a ticker that resolves to a CUSIP other than the one the split store keys the split under (a fund whose CUSIP changed, a reused ticker)",
+      "file_line": "data/assets/scripts/silver/commonwealth_daily_valuation.py:253, :368-385 (ticker -> CUSIP, claims <= 1), :535-546 (split store keyed cusip=<C>)",
+      "reachable": "not_established",
+      "reason": "the code joins both through the same held CUSIP for the held security, so a mismatch needs a split filed under another CUSIP; the code does not show whether any held security has one"
+    }
+  ],
+  "can_leave_marked_and_unscaled": true,
+  "by_security_type": [
+    {
+      "type": "Mutual Fund",
+      "substituted": "by the TICKER's census class, not by type: yes if its first-store ticker is class dividend_adjusted or mixed with a cached Yahoo file (:253-271); otherwise no",
+      "scaled": "by the CUSIP's split source, not by type: yes where split_plan applies a split to the CUSIP (:983-984; no filter on type in apply_splits :663-677); otherwise no",
+      "note": "the build does not read the type: universe_from_tx sets asset_type to the empty string (data/assets/scripts/silver/commonwealth_daily_valuation.py:96)"
+    },
+    {
+      "type": "Mutual Fund (Closed End)",
+      "substituted": "by the TICKER's census class, not by type: yes if its first-store ticker is class dividend_adjusted or mixed with a cached Yahoo file (:253-271); otherwise no",
+      "scaled": "by the CUSIP's split source, not by type: yes where split_plan applies a split to the CUSIP (:983-984; no filter on type in apply_splits :663-677); otherwise no",
+      "note": "the build does not read the type: universe_from_tx sets asset_type to the empty string (data/assets/scripts/silver/commonwealth_daily_valuation.py:96)"
+    },
+    {
+      "type": "ETF",
+      "substituted": "by the TICKER's census class, not by type: yes if its first-store ticker is class dividend_adjusted or mixed with a cached Yahoo file (:253-271); otherwise no",
+      "scaled": "by the CUSIP's split source, not by type: yes where split_plan applies a split to the CUSIP (:983-984; no filter on type in apply_splits :663-677); otherwise no",
+      "note": "the build does not read the type: universe_from_tx sets asset_type to the empty string (data/assets/scripts/silver/commonwealth_daily_valuation.py:96)"
+    },
+    {
+      "type": "Equity",
+      "substituted": "by the TICKER's census class, not by type: yes if its first-store ticker is class dividend_adjusted or mixed with a cached Yahoo file (:253-271); otherwise no",
+      "scaled": "by the CUSIP's split source, not by type: yes where split_plan applies a split to the CUSIP (:983-984; no filter on type in apply_splits :663-677); otherwise no",
+      "note": "the build does not read the type: universe_from_tx sets asset_type to the empty string (data/assets/scripts/silver/commonwealth_daily_valuation.py:96)"
+    },
+    {
+      "type": "Fixed Income",
+      "substituted": "by the TICKER's census class, not by type: yes if its first-store ticker is class dividend_adjusted or mixed with a cached Yahoo file (:253-271); otherwise no",
+      "scaled": "by the CUSIP's split source, not by type: yes where split_plan applies a split to the CUSIP (:983-984; no filter on type in apply_splits :663-677); otherwise no",
+      "note": "the build does not read the type: universe_from_tx sets asset_type to the empty string (data/assets/scripts/silver/commonwealth_daily_valuation.py:96)"
+    },
+    {
+      "type": "Alternative Investment",
+      "substituted": "by the TICKER's census class, not by type: yes if its first-store ticker is class dividend_adjusted or mixed with a cached Yahoo file (:253-271); otherwise no",
+      "scaled": "by the CUSIP's split source, not by type: yes where split_plan applies a split to the CUSIP (:983-984; no filter on type in apply_splits :663-677); otherwise no",
+      "note": "the build does not read the type: universe_from_tx sets asset_type to the empty string (data/assets/scripts/silver/commonwealth_daily_valuation.py:96)"
+    },
+    {
+      "type": "Annuity / Unit Investment Trust / Cash Equivalent (other custodian types)",
+      "substituted": "by the TICKER's census class, not by type: yes if its first-store ticker is class dividend_adjusted or mixed with a cached Yahoo file (:253-271); otherwise no",
+      "scaled": "by the CUSIP's split source, not by type: yes where split_plan applies a split to the CUSIP (:983-984; no filter on type in apply_splits :663-677); otherwise no",
+      "note": "same: not distinguished by type"
+    },
+    {
+      "type": "Cash (declared sweep list and CFNCASH, is_cash :71-73)",
+      "substituted": "no: priced at 1.0 with store label cash-at-par, added at :884-889, never marked as_traded_close by the substitution",
+      "scaled": "no: added after apply_splits (:984 then :1007); split_events excludes cash (commonwealth_diff_trace.py:401)",
+      "note": "one CFNCASH-type CUSIP also has silver-store points in the table (not scaled as cash)"
+    },
+    {
+      "type": "series keyed by CUSIP, or from any store after the first (gold holdings, bbg, rivalfunds, sechist)",
+      "substituted": "no: as_traded_store runs on the first store only and on ticker-kind keys (:253, :300)",
+      "scaled": "yes where a split is applied to the CUSIP (same apply_splits)",
+      "note": "these points carry basis \"store\" in the price input only if they were in the first store; others are never in it"
+    }
+  ],
+  "output_check": {
+    "folder": "C:/dev/ajb_workspace/.scratch/advi_cotbkf/r34/after/ (read-only)",
+    "files_on_disk": [
+      "account_day_value.parquet (account, date, value, holdings, priced_holdings, complete)",
+      "price_basis.json",
+      "repair_days.parquet (kind, account, cusip, date; 1,091 rows; NOT read)",
+      "security_day_price.parquet (cusip, date, price, store; 2,124,908 rows)"
+    ],
+    "basis_column_on_disk": false,
+    "price_input_parquet_on_disk": false,
+    "split_store_pin_json_on_disk": false,
+    "points_by_basis": {
+      "as_traded_close": 1527173,
+      "basis_store": "not in the sidecar (it counts only the replaced points)"
+    },
+    "points_by_basis_how": "price_basis.json: points_replaced 1,049,193 (the yahoo_finance points marked as_traded_close, :271-272) + days_rederived 477,980 (the interpolated days marked as_traded_close, :283-284) = 1,527,173; substituted_tickers 911; points_dropped_no_close 0; days_dropped_unbracketed 3,962. These are counts of the ticker-keyed price input over the whole store, not of held securities.",
+    "securities_marked_as_traded_close_with_a_split_in_their_held_range": "not made: no pinned split entries are on disk in r34/after (no split_store_pin.json, no split-store cache; the pin sidecar would list only (cusip, version_id) pairs, not the splits), and the price table has no basis column to tell which securities are marked",
+    "other_reads_made": "none beyond the folder listing, the column names and row counts of the three parquet files, and price_basis.json"
+  },
+  "the_sentence_holds_for": "no type: the value is written before the scaling runs, for every type",
+  "headline": "as_traded_close is written BEFORE the split scaling runs (order value_before_scaling): the substitution writes it at :271 and :283 inside run() call 1 (:973), the price input carrying it is written at :976-978, and the scaling (split_plan :983, apply_splits :984) comes after, on a separate cusip-keyed frame that has no basis column (:321). Nothing records per point that a point was scaled or needed no scaling (apply_splits adds no column; only a per-CUSIP plan and SUSPECT_BEFORE rows are kept). So a point DOES leave the build marked as_traded_close and unscaled: by construction in the price input file (every marked point there), and the price table the chain values with carries no marker at all; further paths are data-dependent (a split in neither source, an unconfirmed split, a split after the pinned instant, a run on a cash leg without the repairs). The signed sentence (\"means the traded price only AFTER the split scaling; a point that has not passed it is not written with this value\") holds for no security type, funds included: the code does not read the type, and the value is the vendor's split-adjusted close until the scaling multiplies it.",
+  "not_established": [
+    "Whether any held security takes a data-dependent path (a split in neither source, an unconfirmed split, a split dated after the pinned instant): the split entries and the repair plan of the served build are not read here (r34/after holds no split pin sidecar and its repair_days.parquet was not opened).",
+    "Whether a consumer reads the price input file as if its as_traded_close points were scaled: the grep over data/assets/scripts found no reader of the basis column other than the tests and the regrade that writes it; consumers outside that folder were not searched.",
+    "Reachability of path (vi) (CUSIP-keyed split store against ticker-keyed substitution for a fund whose CUSIP changed).",
+    "The security-type table is from the code, which does not read the type; how many held securities of each custodian type are substituted or scaled was not counted."
+  ]
+}
