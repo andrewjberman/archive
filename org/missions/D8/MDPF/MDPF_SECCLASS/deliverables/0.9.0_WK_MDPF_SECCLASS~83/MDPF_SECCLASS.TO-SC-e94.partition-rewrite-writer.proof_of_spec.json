@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e94",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e94.partition-rewrite-writer.md",
+    "group": "OTHER",
+    "vintage_commit": "2f215ca75a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R21.md",
+    "vintage_commit": "2f215ca75a",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e94.partition-rewrite-writer.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~83",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/W78_PARTITION_REWRITE_WRITER_20261012.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only record of the partition read. No deploy, no AWS write, no product file edited. Carries the writer, the partitions, the writer count and the C_06 re-serve answer; ruling_on_correction_or_drift is null.",
+      "artifact_covered_by": [
+        "SC21-e94-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC21-e94-AC1",
+      "criterion_verbatim": "the record exists, names the writer and the partitions, counts the writers and answers the re-serve question (a synthetic record with one field broken fails the same check first). Invocation: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R21_CHECKS/r21_read_record_check.py w78 org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/W78_PARTITION_REWRITE_WRITER_20261012.json -- expect: W78-RECORD ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R21_CHECKS/r21_read_record_check.py w78 org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/W78_PARTITION_REWRITE_WRITER_20261012.json",
+      "output_evidence": "W78-RECORD ok=True partitions=3 writer=bd-gold-layer-runner group B_00, run 608de09d26a6 (IAM principal NOT resolved) writer_count=1 reserves=False control=ok (rc=0)",
+      "denominator": "1 of 1 record check; 3 of 3 partitions read (2026-10-06, 2026-10-07, 2026-10-08) named with key, last_modified and version_count; 1 writer named; writer_count 1 (>=1); re-serve answer false; 1 synthetic break (writer_count=0) refused inside the checker",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of the record with the 2026-10-07 partition dropped from partitions (.scratch only, not committed); the checker must refuse it.",
+      "expected": "W78-RECORD ok=False (rc=1)",
+      "observed": "W78-RECORD ok=False partitions=2 writer=bd-gold-layer-runner group B_00, run 608de09d26a6 (IAM principal NOT resolved) writer_count=1 reserves=False control=BROKEN (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The record check run twice on the same committed bytes",
+      "observed": "run1 and run2 identical: W78-RECORD ok=True partitions=3 writer_count=1 reserves=False control=ok (rc=0 both)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "CloudTrail management events for the Lambda and the EC2 instance of the BD gold runner",
+      "reason": "Not queried. The writes are direct put_object calls from the B_00 script, so no Lambda is in the write path. The S3 management lookup for the window returned 0 events."
+    },
+    {
+      "item": "IAM principal of the 2026-10-10T23:15Z writes",
+      "reason": "Not resolved. S3 PutObject is a data event, outside CloudTrail lookup-events, and the object carries no writer metadata. The principal field names the runner group and run id instead."
+    },
+    {
+      "item": "bd-gold-trigger launch record for the 2026-10-10 23:00Z fire",
+      "reason": "Not read. The writer identification rests on the code and on run-time containment of the writes in run 608de09d26a6, not on the trigger record."
+    },
+    {
+      "item": "ruling_on_correction_or_drift",
+      "reason": "Null by design: the ruling follows the read (order step 5). Surprise MDPF_SECCLASS-D1-W83-S5 is ARMED and disarms through the issuer's ruling."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W83-S1: the order's premise that the three partitions were last written 2026-10-10T23:15Z is stale; the current versions carry LastModified 2026-10-12T04:16:42Z, and 2026-10-10T23:15:02Z is a prior version.",
+    "MDPF_SECCLASS-D1-W83-S2: the 2026-10-10T23:15Z writes re-put identical bytes (15 of 15 window versions share the ETag of their prior version); the content change sits at 2026-10-11T04:16:35Z and 2026-10-12T00:33:48Z.",
+    "MDPF_SECCLASS-D1-W83-S3: BD gold runner telemetry carries resource samples keyed by runner group and no write target; the writer was named by code plus run-time containment, and S3 PutObject is absent from CloudTrail lookup.",
+    "MDPF_SECCLASS-D1-W83-S4: comp-pipescript io lists B_02 as an implicit writer of CANONICAL_HOLDINGS_PREFIX, but the code shows B_02 writes only canonical_lots keys; the distinct writer count is 1.",
+    "MDPF_SECCLASS-D1-W83-S5: C_06 incremental fires never re-derive a retained date while B_00 moves its canonical bytes, so the next default fire leaves the served totals for 2026-10-06, 07 and 08 on their snapshot (ARMED; disarm owner 2.0.0_SA_COO~M).",
+    "MDPF_SECCLASS-D1-W83-S6: the C_06 holdings listing reads S3_BUCKET directly rather than platinum_source; in the default legacy mode both resolve to the same bucket and key.",
+    "MDPF_SECCLASS-D1-W83-S7: the order names row ids MDPF_SECCLASS-W83-S<k>, but the surprise-row gate refuses a dell1 row id without the D1 coordinate; the rows are filed as MDPF_SECCLASS-D1-W83-S<k>."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e94.partition-rewrite-writer.md",
+  "compiler_tools": [
+    {
+      "tool": "r21_read_record_check.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R21_CHECKS/r21_read_record_check.py w78 <record>",
+      "result": "W78-RECORD ok=True partitions=3 writer_count=1 reserves=False control=ok (rc=0), identical on two runs; the scratch mutant with 2026-10-07 dropped returns ok=False control=BROKEN (rc=1)"
+    },
+    {
+      "tool": "aws s3api list-object-versions / head-object / list-objects-v2 / cloudtrail lookup-events (read-only)",
+      "invocation": "aws s3api list-object-versions --bucket opal-data-bd --prefix gold/canonical/holdings/ ; aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventSource,AttributeValue=s3.amazonaws.com",
+      "result": "2969 versions over 2474 keys, no truncation; 15 versions in 2026-10-10T23:15:01-03Z, all ETag-identical to their prior version; CloudTrail s3 events in the window: 0"
+    }
+  ]
+}
