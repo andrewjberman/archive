@@ -22,7 +22,7 @@ can be any caller. That is the instrument, and it is the fact this pair states.
 
 | arm | constructed caller | expected | what it shows |
 |---|---|---|---|
-| `control` (FIRST) | INTERNAL (`x-firm-id opal-capital`), `selected_tenant` = the record's firm T | `ok: true`; the signed link's PRESENCE only | the record is reachable and the instrument can tell served from refused. It is NOT a proof of the owner check |
+| `control` (FIRST) | INTERNAL (`x-firm-id opal-capital`), `selected_tenant` = the record's firm T | served: the signed link's PRESENCE only, no refusal code (AMENDMENT 1: a served envelope has no `ok` member; the first run showed it) | the record is reachable and the instrument can tell served from refused. It is NOT a proof of the owner check |
 | `b` (the proof) | FIRM_ADVISOR of firm T (`x-advisor-id` synthetic), a DIFFERENT principal than the owner, no selector | `NOT_AUTHORIZED` | the comparison at owner_reads.py:29-31 fired, IF the control was served |
 | `a` (companion) | FIRM_ADVISOR of a firm F other than T, `selected_tenant` T | `FIRM_BINDING` | the firm fence (served.py:1207-1209), which runs BEFORE any record is read. It is the fence, not the owner check |
 | `b_absent_id` | the `b` caller, a well-formed id naming no record | `NOT_AUTHORIZED` | the same code as `b`: shows why `b` alone proves nothing |
