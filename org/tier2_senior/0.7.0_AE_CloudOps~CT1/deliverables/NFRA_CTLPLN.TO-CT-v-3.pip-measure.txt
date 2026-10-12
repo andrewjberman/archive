@@ -1,0 +1,24 @@
+STEP 0 pip --version                                                          index=0 proxy=0 rc=0 any request here is a finding
+STEP 1 positive arm: explicit loopback index, both redirects, no disarm       index=0 proxy=1 rc=1 
+STEP 2 control: a malformed config file is read by pip                        index=0 proxy=0 rc=2 read=True (a config error proves PIP_CONFIG_FILE was read)
+STEP 3 candidate env:PIP_NO_INDEX: plain                                      index=0 proxy=0 rc=1 
+STEP 3 candidate env:PIP_NO_INDEX: explicit index after the disarm            index=0 proxy=0 rc=1 
+STEP 3 candidate config:no-index: plain                                       index=0 proxy=0 rc=1 
+STEP 3 candidate config:no-index: explicit index after the disarm             index=0 proxy=0 rc=1 
+STEP 3 candidate config:index-url-dead-loopback: plain                        index=0 proxy=1 rc=1 
+STEP 3 candidate config:index-url-dead-loopback: explicit index after the dis index=0 proxy=1 rc=1 
+STEP 3 candidate wrapper: plain                                               index=0 proxy=0 rc=3 
+STEP 3 candidate wrapper: explicit index after the disarm                     index=0 proxy=0 rc=3 
+ARM version                                  role=version    index=0 proxy=0 rc=0 named=False verdict=- | pip 26.2.1 from C:\Users\Test\AppData\Local\Programs\Python\Python314\Lib\site-packages\pip (python 3.14)
+ARM positive                                 role=positive   index=0 proxy=1 rc=1 named=True verdict=- | ERROR: Could not find a version that satisfies the requirement opal-no-such-pkg-385400009a2383b6 (from version
+ARM control:config-file-is-read              role=control    index=0 proxy=0 rc=2 named=False verdict=- | Configuration file could not be loaded.
+ARM env:PIP_NO_INDEX                         role=candidate  index=0 proxy=0 rc=1 named=True verdict=PASS | ERROR: Could not find a version that satisfies the requirement opal-no-such-pkg-385400009a2383b6 (from version
+ARM env:PIP_NO_INDEX +explicit-index         role=explicit   index=0 proxy=0 rc=1 named=True verdict=PASS | ERROR: Could not find a version that satisfies the requirement opal-no-such-pkg-385400009a2383b6 (from version
+ARM config:no-index                          role=candidate  index=0 proxy=0 rc=1 named=True verdict=PASS | ERROR: Could not find a version that satisfies the requirement opal-no-such-pkg-385400009a2383b6 (from version
+ARM config:no-index +explicit-index          role=explicit   index=0 proxy=0 rc=1 named=True verdict=PASS | ERROR: Could not find a version that satisfies the requirement opal-no-such-pkg-385400009a2383b6 (from version
+ARM config:index-url-dead-loopback           role=candidate  index=0 proxy=1 rc=1 named=True verdict=FAIL | ERROR: Could not find a version that satisfies the requirement opal-no-such-pkg-385400009a2383b6 (from version
+ARM config:index-url-dead-loopback +explicit role=explicit   index=0 proxy=1 rc=1 named=True verdict=FAIL | ERROR: Could not find a version that satisfies the requirement opal-no-such-pkg-385400009a2383b6 (from version
+ARM wrapper                                  role=candidate  index=0 proxy=0 rc=3 named=True verdict=PASS | REFUSED: this box does not download. Ask the laptop: org/devices/intake/ (request, check, Taildrop). No reques
+ARM wrapper +explicit-index                  role=explicit   index=0 proxy=0 rc=3 named=True verdict=PASS | REFUSED: this box does not download. Ask the laptop: org/devices/intake/ (request, check, Taildrop). No reques
+NOTE: candidate (b) is measured as the config file pip reads from PIP_CONFIG_FILE; the per-user file is located by the shell on this platform, is not redirected, and was not written. Both paths use one option parser.
+PIP-NO-EGRESS pip=26.2.1 positive_requests=1 candidates=4 passing=3 holds_against_explicit=3 leaked_public=0 form=env:PIP_NO_INDEX ok=True
