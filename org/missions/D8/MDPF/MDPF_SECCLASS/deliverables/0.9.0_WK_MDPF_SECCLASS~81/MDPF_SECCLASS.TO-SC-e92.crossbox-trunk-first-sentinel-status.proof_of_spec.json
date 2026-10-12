@@ -18,13 +18,14 @@
     {
       "path_or_key": ".tools/crossbox-deploy-check.py",
       "kind": "script",
-      "commit_or_etag": "2cbf819176",
+      "commit_or_etag": "3315ce76ab",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Read-only cross-box check; no deploy, no AWS call, no worktree removed or pruned. measure_open_deploy: stale_at trunk-first limb (git log -m --raw per path absent at trunk HEAD; a reading is stale only when its blob is one trunk carried at that path), VANISHED for a registered worktree whose directory is absent (isdir before ls-tree), stale= on the denominator line. Commit 4b769fab09 carries the surprise rows only.",
+      "deploy_evidence": "Read-only cross-box check; no deploy, no AWS call, no worktree removed or pruned. measure_open_deploy: stale_at trunk-first limb (git log -m --raw per path absent at trunk HEAD; a reading is stale only when its blob is one trunk carried at that path); limb e (isdir before ls-tree: a vanished registration counts in vanished=); AMENDMENT 1 limb e (a vanished registration is read through its branch ref, else its detached HEAD sha, from git worktree list --porcelain; clear only when the ref was read); stale= on the denominator line. Commit 4b769fab09 carries the surprise rows; b7f0d0802e the first proof and flip; D1-W81-S2 is ruled and built here.",
       "artifact_covered_by": [
         "SC21-e92-AC1",
         "SC21-e92-AC2",
-        "SC21-e92-AC3"
+        "SC21-e92-AC3",
+        "SC21-e92-AC4"
       ]
     }
   ],
@@ -58,25 +59,35 @@
       "output_evidence": "TRUNK-FIRST ok=True case=planted trunk_hits=1 branch_only_hits=1 rc=0 (base 2f215ca75a: identical)",
       "denominator": "2 of 2 control sentinels still drawn: live at trunk HEAD 1 hit, branch-only 1 hit",
       "status": "PASS"
+    },
+    {
+      "criterion_id": "SC21-e92-AC4",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R21_CHECKS/sc_r21_trunk_first.py branch -- expect: TRUNK-FIRST ok=True case=branch",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R21_CHECKS/sc_r21_trunk_first.py branch",
+      "expect": "TRUNK-FIRST ok=True case=branch",
+      "output_evidence": "TRUNK-FIRST ok=True case=branch hits=1 rc=0 (base 2f215ca75a: ok=True case=branch hits=1, rc=0; the issuer baseline for the base tool is PASS; the first build hits=0 was the issuer measured FAIL)",
+      "denominator": "1 of 1 vanished worktree whose branch carries an open deploy: 1 hit, read through refs/heads/worker",
+      "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Base 2f215ca75a, before the change: lagging and vanished reproduce the defects; the planted control holds.",
-      "expected": "lagging ok=False hits=1; vanished ok=False hits=1 vanished=0; planted ok=True",
-      "observed": "TRUNK-FIRST ok=False case=lagging hits=1; TRUNK-FIRST ok=False case=vanished hits=1 vanished=0; TRUNK-FIRST ok=True case=planted trunk_hits=1 branch_only_hits=1",
+      "description": "Base 2f215ca75a, before the change: lagging, vanished and the branch arm reproduce the defects or the base reading.",
+      "expected": "lagging ok=False hits=1; vanished ok=False hits=1 vanished=0; planted ok=True; branch ok=True hits=1 (base reading)",
+      "observed": "TRUNK-FIRST ok=False case=lagging hits=1; TRUNK-FIRST ok=False case=vanished hits=1 vanished=0; TRUNK-FIRST ok=True case=planted trunk_hits=1 branch_only_hits=1; TRUNK-FIRST ok=True case=branch hits=1",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "The three checks run at 2cbf819176 and again at HEAD 4b769fab09",
-      "observed": "identical both runs: lagging ok=True hits=0; vanished ok=True hits=0 vanished=1; planted ok=True trunk_hits=1 branch_only_hits=1",
+      "method": "The four arms run at 2cbf819176 and again at HEAD 3315ce76ab; the amended tool also run pre-commit",
+      "observed": "identical each run: lagging ok=True hits=0; vanished ok=True hits=0 vanished=1; planted ok=True trunk_hits=1 branch_only_hits=1; branch ok=True hits=1",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [],
   "surprises": [
     "MDPF_SECCLASS-D1-W81-S1: A trunk-deleted sentinel re-opened under the same name on a worker branch would read STALE by history alone and draw no hit; the tool also requires the stale blob to be one trunk carried at that path (OBSERVATION, INERT).",
-    "MDPF_SECCLASS-D1-W81-S2: A deploy open on the branch of a registered worktree whose directory is gone reads OPEN-DEPLOY clear, because VANISHED never draws a hit and branch refs are not read (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~M1).",
+    "MDPF_SECCLASS-D1-W81-S2: A deploy open on the branch of a registered worktree whose directory is gone reads OPEN-DEPLOY clear, because VANISHED never draws a hit and branch refs are not read (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~M1); ruled by AMENDMENT 1 and built as limb e in 3315ce76ab.",
     "MDPF_SECCLASS-D1-W81-S3: The worker face names rows MDPF_SECCLASS-W81-S<k>; the surprise-row gate requires the dell1 coordinate, so rows are minted MDPF_SECCLASS-D1-W81-S<k> (OBSERVATION, INERT)."
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e92.crossbox-trunk-first-sentinel-status.md",
@@ -84,7 +95,7 @@
     {
       "tool": "sc_r21_trunk_first.py",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R21_CHECKS/sc_r21_trunk_first.py <lagging|vanished|planted>",
-      "result": "lagging ok=True hits=0; vanished ok=True hits=0 vanished=1; planted ok=True trunk_hits=1 branch_only_hits=1 (rc=0 each)"
+      "result": "lagging ok=True hits=0; vanished ok=True hits=0 vanished=1; planted ok=True trunk_hits=1 branch_only_hits=1; branch ok=True hits=1 (rc=0 each)"
     },
     {
       "tool": "commit-gate.sh",
@@ -98,13 +109,18 @@
     },
     {
       "tool": "crossbox-deploy-check.py (live run)",
-      "invocation": "python .tools/crossbox-deploy-check.py --root data/black_diamond --repo-root /c/dev/wk-secclass-81 --serial 0.9.0_WK_MDPF_SECCLASS~81 --files data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py (read-only, timeout 120; output saved to .scratch/live_run.txt)",
-      "result": "OPEN-DEPLOY: clear; denominator: 64 worktree(s), 1163 sentinel read(s), 88 distinct (path, blob), 18 distinct slug(s), vanished=0, stale=57; the run's OPEN-CALL hit is an open_calls row of MDPF_SECCLASS, outside this cell"
+      "invocation": "python .tools/crossbox-deploy-check.py --root data/black_diamond --repo-root /c/dev/wk-secclass-81 --serial 0.9.0_WK_MDPF_SECCLASS~81 --files data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py (read-only, timeout 120; .scratch/live_run2.txt)",
+      "result": "OPEN-DEPLOY: clear; denominator: 62 worktree(s), 1127 sentinel read(s), 88 distinct (path, blob), 18 distinct slug(s), vanished=0, stale=57; rc=1 from the unrelated OPEN-CALL hit (an MDPF_SECCLASS open_calls row)"
     },
     {
       "tool": "control_vanished_branch.py",
       "invocation": "python .scratch/control_vanished_branch.py (scratch, throwaway temp repo)",
       "result": "VANISHED-BRANCH-CONTROL hits=0; denominator vanished=1 stale=0, 0 sentinel reads. Surfaced as MDPF_SECCLASS-D1-W81-S2, not implemented."
+    },
+    {
+      "tool": "control_vanished_edges.py / control_vanished_stale.py (scratch, throwaway temp repos)",
+      "invocation": "python .scratch/control_vanished_edges.py; python .scratch/control_vanished_stale.py",
+      "result": "detached-with-sentinel hits=1; branch-ref-deleted hits=1 (not clear); clean-vanished hits=0; vanished-branch closed at trunk hits=0 stale=1"
     }
   ]
 }
