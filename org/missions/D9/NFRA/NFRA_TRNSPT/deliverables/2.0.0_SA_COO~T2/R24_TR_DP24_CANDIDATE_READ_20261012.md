@@ -37,3 +37,11 @@ service subject, a ticket of `COMMENTARY_ALLOWED_FIRMS` (`49financial,cottonwood
 Owner: this issuer. Un-parks on EITHER (a) `2.0.0_SA_COO~V2` or `2.0.0_SA_COO~Y2` answers msgs 6469 / 6470 with a tenant and request id whose
 ticket records it (both seats are dark at 18:3xZ, queued, not delivered), OR (b) the CTO names the pair. Then: the issuer's packet, the CTO half, the
 COO half, the applier order by amendment (decomposition R24, issuer ruling 1). Nothing in this record cuts, invokes or writes.
+
+## 5. Parked item, updated (2026-10-12 ~22:3xZ)
+
+Owner: this issuer. The park now rests on ONE human act: an Opal staff member files one test Analysis request on portal DEV in tenant 49financial, with a synthetic
+holdings file, naming the 49financial test ticket that `2.0.0_SA_COO~V2` files first (CTO msgs 6640 and 6646; `CTO_ROUND_ANALYSIS_IRPT_ANLREQ_Y_ROUND_17_20261012.md`
+section 1). Un-parks when that request's id is on the ticket's `report_ref` (V2 records it). Then the packet `R24_TR_DP24_DRIVEN_DRAFT_PACKET_20261012.md` goes to the
+CTO for its half, and the applier order is cut by amendment. What the candidates showed: the cottonwood record `REQ-01c9...` has no `ticket_id` member, so a post on it
+cannot happen; TV2's control ticket `test-f10-20261009-one` is not a request. Nothing in this round cuts, invokes or writes for TR-dp-24 before then.

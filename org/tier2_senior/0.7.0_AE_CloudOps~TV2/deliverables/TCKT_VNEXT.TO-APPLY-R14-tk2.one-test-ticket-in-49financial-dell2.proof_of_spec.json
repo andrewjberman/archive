@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-APPLY-R14-tk2.one-test-ticket-in-49financial-dell2",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-APPLY-R14-tk2.one-test-ticket-in-49financial-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "4c2743ed2f"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TV2",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R14.md",
+    "vintage_commit": "4c2743ed2f",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-APPLY-R14-tk2.one-test-ticket-in-49financial-dell2.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "opal-tickets item TCK-20261012-c546fead (DynamoDB, us-east-1)",
+      "kind": "aws_resource",
+      "commit_or_etag": "created by one POST /api/scoped/tickets, HTTP 201",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "One get-item after the write reads tenant 49financial, type analysis_request, status open, created_by svc-commentary, title prefix '[TEST TCKT_VNEXT R14] ', no draft_commentary, no report_ref. The issuer's AC1 re-reads the same item independently and agrees.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r14_tk2/R14_TEST_TICKET_20261012.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Keys ticket_id, http_status 201, write_set of exactly one entry (ticket:<id>), deleted false, token_printed false, claim measured, plus the pre-read and read-back values. No at-sign in the file.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r14_tk2/r14_tk2_create.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one-shot script that made the single create. It holds no token; it reads the secret into memory and sends it as a Bearer header only.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R14_CHECKS/r14_tk2_ticket.py expect: TK2-OK",
+      "method": "command",
+      "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R14_CHECKS/r14_tk2_ticket.py",
+      "expect": "TK2-OK",
+      "output_evidence": "TK2-OK TCK-20261012-c546fead firm=49financial status=open created_by=svc-commentary. The issuer's check reads the result file, then re-reads the ticket live by id and compares type, status, creator, tenant and title prefix.",
+      "status": "PASS",
+      "status_reason": "PASS decided by the issuer's own script matching its expect pattern, not by this seat's judgement.",
+      "denominator": "1 of 1 write; 1 of 1 ticket re-read live; write_set has exactly 1 ticket entry"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THREE controls. (1) The earlier ticket TCK-20261009-a1052909 read before the write as a positive control that the read path and the principal work. (2) The function configuration read before the write, so a refusal for the firm would have been attributable. (3) A --dry run of the body (pre-read live and printed) before the secret was read, asserting no draft_commentary and no report_request_id.",
+      "expected": "(1) status open. (2) COMMENTARY_ALLOWED_FIRMS contains 49financial. (3) body keys ticket_type, title, source, answers, attachment only.",
+      "observed": "(1) open, analysis_request, svc-commentary, cottonwood (the earlier ticket's own tenant). (2) 49financial,cottonwood,inflection. (3) exactly those five keys.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "One POST, no retry. The ticket id was read from the response and never typed; the read-back and the issuer's check each used a separate live get-item.",
+      "observed": "201 once; three independent reads of the ticket agree.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Closing or deleting the ticket",
+      "reason": "NOT DONE. A ticket has no delete route, the ruling forbids a delete here, and CLAIM/COMPLETE are internal-human only. It stays open as a labelled test; closing is a human act on the board."
+    },
+    {
+      "item": "The distribution-list notice",
+      "reason": "FIRES on any create (notify_dl_isolated) and is not observed by this seat. It carries no draft text. Nothing in this order adds to it."
+    },
+    {
+      "item": "A second create, a retry, or any other route",
+      "reason": "Out of bounds and not made. One create call in total."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/logs/2026-10-12/tv2_r14_tk2_one_test_ticket.md",
+  "compiler_tools": [
+    {
+      "tool": "aws dynamodb get-item",
+      "invocation": "the earlier ticket (positive control), then the new ticket",
+      "result": "open as expected; new ticket read back in tenant 49financial, open, created_by svc-commentary"
+    },
+    {
+      "tool": "aws lambda get-function-configuration",
+      "invocation": "opal-ticket-api, COMMENTARY_ALLOWED_FIRMS",
+      "result": "49financial,cottonwood,inflection"
+    },
+    {
+      "tool": "r14_tk2_create.py",
+      "invocation": "--dry, then the one write",
+      "result": "HTTP 201, TCK-20261012-c546fead, result file written with no at-sign"
+    },
+    {
+      "tool": "r14_tk2_ticket.py (AC1)",
+      "invocation": "as written in the order",
+      "result": "TK2-OK TCK-20261012-c546fead firm=49financial status=open created_by=svc-commentary"
+    }
+  ]
+}

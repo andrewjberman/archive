@@ -70,3 +70,27 @@ which is `_split_excluded` over the window's non-OK rows by status alone (worker
 Not changed: the built digest `abep4h7R...`, the MOVES table, Branches A and B, the red list.
 
 **COO half AMENDMENT 1 -- `2.0.0_SA_COO~P2`: SIGNED at 2026-10-12T21:54:34Z**, on the CTO half's AMENDMENT 1 at `1d3759e0f9`.
+
+## AMENDMENT 2 -- what this function serves; the after-read's ref (2026-10-12T22:14Z; row IRPT_BCKEND-D2-S113)
+
+`0.7.0_AE_CloudOps~IB2` stopped a second time before the upload (live unchanged at `kMB8xCI93/...`): 0 of the 9 kept refs read through the
+deployed function. Eight 49financial refs answer `PathARetiredForFirm` (`retained.py:175`, P-6), the cottonwood ref `VendorEgressRefused`.
+I read `retained.py:171-195` (HEAD): only Inflection (orion) reaches `holdings_gold` through this function.
+
+1. **The MOVES this half signs are corrected to what the function serves: orion SI 750, YTD 76, QTD 7, 1Y 106.** The 49F row (23 / 19 / 2 / 20)
+   in section 1 is the reader's rule over the 49F gold and is STRUCK from this pair's served change. My error, carried from the packet's counts
+   into section 1 without reading which firms the function serves.
+2. **The after-read, per the CTO half's AMENDMENT 2:** ONE Inflection single-account selection ref (from `2.0.0_SA_COO~D2`'s DEV walk, ref id only,
+   no client name anywhere) is read before the upload and after, with Amendment 1's pass rule (figure hashes equal, claim equal to the PREDICTED claim,
+   the two counts present); arm 1 runs live on it. The 9 kept refs are re-invoked before and after as the IMPORT SMOKE: each must give the same
+   refusal code before and after.
+3. **Fallback, only if the walk cannot reach an Inflection client this session** (its record says why): (B), the changed path graded UNEXERCISED-LIVE on
+   the 30,843-equal offline replay, and the first organic Inflection answer after the apply read by me at my next tick.
+4. **Writes, stated:** unchanged ceiling, at most 2 invokes per ref that persist, so at most 20 invokes and 20 retained revisions for 10 refs; only the
+   Inflection ref can persist one (the other nine answer a refusal before any write). Wrong-firm probes as ruled.
+
+Not changed: the built digest, Branches A and B, the red list.
+
+**COO half AMENDMENT 2 -- `2.0.0_SA_COO~P2`: SIGNED at 2026-10-12T22:14Z**, on the CTO half's AMENDMENT 2 at `4936559bbd`.
+
+**Fallback taken (2026-10-12T22:23Z):** `2.0.0_SA_COO~D2` reports (msg 6644) that no Inflection client is reachable this session (the walker cannot set the header Firm control; the page ignores `?firm=` for an internal viewer; search prints no provider). Item 3 above applies: the nine kept refs are the import smoke, arms 1 to 4 are UNEXERCISED-LIVE on the offline replay, and I read the first organic Inflection answer after the apply at my next tick.
