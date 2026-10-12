@@ -32,6 +32,7 @@ def main():
     kf = {(r["function"], r["case"]): r for r in f}
     keys = sorted(set(kb) | set(kf))
     equal = 0
+    content_level = []
     bad = []
     canon = 0
     for k in keys:
@@ -41,6 +42,12 @@ def main():
             print("DIFFERENT %s %s: absent in %s" % (k[0], k[1], "before" if rb is None else "after"))
             continue
         same = rb.get("status") == rf.get("status") and rb.get("body_sha256") == rf.get("body_sha256")
+        # a gzip body carries a header timestamp, so its compressed hash varies per call (ADVI_FIRMBKTS-D1-S36): a case whose
+        # status is equal and whose DECOMPRESSED content hash is recorded on both sides and equal reads EQUAL, and is counted
+        if (not same and rb.get("status") == rf.get("status") and rb.get("content_sha256")
+                and rb.get("content_sha256") == rf.get("content_sha256")):
+            same = True
+            content_level.append((k, rb.get("content_claim", "recorded")))
         if rf.get("ownership_read"):
             if rf["ownership_read"] == CANON:
                 canon += 1
@@ -59,6 +66,8 @@ def main():
     r = sum(1 for k in keys if k[1] == "refused")
     print("SAMPLE EQUAL: %d of %d cases; granted cases %d, refused cases %d; ownership reads at the canonical key %d"
           % (equal, len(keys), g, r, canon))
+    for k, claim in content_level:
+        print("NOTE: %s %s read EQUAL by decompressed content hash (claim: %s), not by the compressed body hash" % (k[0], k[1], claim))
     if not cover:
         print("NOTE: a function lacks a granted or a refused case (the performance adapter and the validator are read apart)")
     return 0 if (equal == len(keys) and not bad and keys) else 1
