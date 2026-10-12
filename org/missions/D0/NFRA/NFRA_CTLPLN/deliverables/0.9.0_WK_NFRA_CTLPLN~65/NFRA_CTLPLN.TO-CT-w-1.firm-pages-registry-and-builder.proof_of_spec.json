@@ -22,15 +22,16 @@
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "a registry file, read only by lib/opal_naming.py. No deploy: no Lambda, portal, terraform or AWS call in this order.",
       "artifact_covered_by": [
-        "CTw1-AC1"
+        "CTw1-AC1",
+        "CTw1-AC2"
       ]
     },
     {
       "path_or_key": "lib/opal_naming.py",
       "kind": "script",
-      "commit_or_etag": "a99d7e584c",
+      "commit_or_etag": "22169e24fb",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the generator, run from the repo and never deployed. Its own commit, so a rollback is one revert. Two existing selftests in lib/tests/test_opal_naming.py fail on it: surprise NFRA_CTLPLN-W65-S1.",
+      "deploy_evidence": "the generator and its classifier, run from the repo and never deployed. The builder edit is a99d7e584c; the AMENDMENT 1 classifier edit (lambda_plane_consumers claims a VIEWS target inside a function's own source dir when that function's build lists it) is 22169e24fb, its own commit so a rollback is one revert. lib/tests/test_opal_naming.py is unchanged (0 diff lines against 2fbb74e87d) and passes 96 of 96.",
       "artifact_covered_by": [
         "CTw1-AC1",
         "CTw1-AC2"
@@ -41,7 +42,7 @@
       "kind": "script",
       "commit_or_etag": "005a093bfa",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the generated ROUTE_FIRMS module, not yet in lambda-source-map.json and not yet imported by lambda_function.py (CT-w-2 patches the handler; the apply is a later order). Named but UNCLASSIFIED by targets: surprise NFRA_CTLPLN-W65-S1.",
+      "deploy_evidence": "the generated ROUTE_FIRMS module. Classified SHIP lambda by targets, consumer opal-portal-data-proxy (source map commit e84eaff941). Not imported by lambda_function.py yet: CT-w-2 patches the handler and the apply is a later order.",
       "artifact_covered_by": [
         "CTw1-AC1",
         "CTw1-AC2"
@@ -50,19 +51,29 @@
     {
       "path_or_key": "lib/tests/test_opal_naming_firm_pages.py",
       "kind": "test",
-      "commit_or_etag": "926c0be442",
+      "commit_or_etag": "22169e24fb",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the test file for the registry rows and the generated module (T1-T8), run by pytest from the worktree root.",
+      "deploy_evidence": "the test file for the registry rows, the generated module and the classifier: T1-T8 from 926c0be442, T9 (the own-directory classifier case with its negative arm) from 22169e24fb. Run by pytest from the worktree root.",
       "artifact_covered_by": [
         "CTw1-AC1"
       ]
     },
     {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "e84eaff941",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one line: opal-portal-data-proxy files gains firm_page_access.py after session_tracker.py (moved here from CT-w-2 by AMENDMENT 1). Nothing else in the file changes. Read by the classifier; no deploy.",
+      "artifact_covered_by": [
+        "CTw1-AC2"
+      ]
+    },
+    {
       "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "c981e7b243",
+      "commit_or_etag": "709be15a10",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "two surprise rows appended, NFRA_CTLPLN-W65-S1 and NFRA_CTLPLN-W65-S2, through the surprise-row gate. Append-only."
+      "deploy_evidence": "rows NFRA_CTLPLN-W65-S1 and NFRA_CTLPLN-W65-S2 (c981e7b243) and NFRA_CTLPLN-W65-S3 (709be15a10), appended through the surprise-row gate. Append-only."
     }
   ],
   "acceptance": [
@@ -71,35 +82,34 @@
       "criterion_verbatim": "CTw1-AC1 -- the new tests pass (T1-T6), including the drift check and the validate() refusals. Invocation: python -m pytest -q lib/tests/test_opal_naming_firm_pages.py ; expect output containing: passed",
       "method": "test_suite",
       "invocation": "python -m pytest -q lib/tests/test_opal_naming_firm_pages.py",
-      "output_evidence": "(run under timeout 120 from the worktree root, rc=0) 15 passed in 1.64s. Tests: T1 committed module reproduces under generate; T2 mark names firm_pages.json,scopes.json and the h16; T3 no firm token outside the generated module; T4 unmutated base validates clean and seven refusal cases (unserved firm, null, the word null, unlisted route, unlisted page, ALL wildcard, class ii); T5 aum row names the ten pages and no ALL token; T6 targets lists the module once; T7 ROUTE_FIRMS holds the two routes; T8 the test tenant is in no admitted set.",
-      "denominator": "15 of 15 tests passed (1 reproduce, 1 mark, 1 token scan, 1 unmutated base, 7 refusal cases, 1 aum row, 1 targets listing, 1 route check, 1 test-tenant check)",
+      "output_evidence": "(run under timeout 120 from the worktree root, rc=0) output: '16 passed in 1.63s'. Tests: T1 committed module reproduces under generate; T2 mark names firm_pages.json,scopes.json and the h16; T3 no firm token outside the generated module; T4 unmutated base validates clean and seven refusal cases (unserved firm, null, the word null, unlisted route, unlisted page, ALL wildcard, class ii); T5 aum row names the ten pages and no ALL token; T6 targets lists the module once; T7 ROUTE_FIRMS holds the two routes; T8 the test tenant is in no admitted set; T9 a VIEWS target inside a function's own source dir is claimed only when its build lists the basename (positive and negative arm, temp source map).",
+      "denominator": "16 of 16 tests passed (1 reproduce, 1 mark, 1 token scan, 1 unmutated base, 7 refusal cases, 1 aum row, 1 targets listing, 1 route check, 1 test-tenant check, 1 own-directory classifier case)",
       "status": "PASS",
       "expect": "passed",
       "judgment": false
     },
     {
       "criterion_id": "CTw1-AC2",
-      "criterion_verbatim": "CTw1-AC2 -- the target list names the new module (SHIP lambda); validate also exits 0 (report its line). Invocation: python -I lib/opal_naming.py targets ; expect output containing: firm_page_access.py",
+      "criterion_verbatim": "CTw1-AC2 -- the target list names the new module as SHIP lambda (AMENDMENT 1); the command exits 0 (report its exit code) and validate exits 0 (report its line). Invocation: python -I lib/opal_naming.py targets ; expect output containing: SHIP lambda infra/aws/lambda/portal_data_proxy/firm_page_access.py",
       "method": "command",
       "invocation": "python -I lib/opal_naming.py targets",
-      "output_evidence": "(run under timeout 120 from the worktree root; the verb's rc=1 because the module is UNCLASSIFIED). Header: 'TARGETS: 18'. Line: 'UNCLASSIFIED - infra/aws/lambda/portal_data_proxy/firm_page_access.py measured: no plane claims it'. The validate line, from 'python -I lib/opal_naming.py validate' (rc=0): 'VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s) at registry@2d205808a20cac56 over all 16 registry file(s)'.",
-      "denominator": "1 of 18 targets named the module; 0 of 1 classified SHIP lambda; validate rc=0 over 16 registry file(s)",
-      "status": "FAIL",
-      "status_reason": "the expect text firm_page_access.py is present, but the criterion's stated bar (SHIP lambda) is not met: lambda_plane_consumers (lib/opal_naming.py) skips a function's own source directory, and the module sits in opal-portal-data-proxy's own source directory, so no plane claims it. The targets verb exits 1 and two existing selftests in lib/tests/test_opal_naming.py fail. Surprise row NFRA_CTLPLN-W65-S1 carries it to the CTO; the order stays open on this row.",
-      "expect": "firm_page_access.py",
+      "output_evidence": "(run under timeout 120 from the worktree root) targets rc=0. Line 16 of the output: 'SHIP lambda infra/aws/lambda/portal_data_proxy/firm_page_access.py measured: lambda-source-map.json (1 consumer(s): opal-portal-data-proxy)'. The validate verb, 'python -I lib/opal_naming.py validate', rc=0, line: 'VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s) at registry@2d205808a20cac56 over all 16 registry file(s)'.",
+      "denominator": "1 of 1 new target classified SHIP lambda, consumer opal-portal-data-proxy; targets header 'TARGETS: 18'; validate rc=0 over 16 registry file(s)",
+      "status": "PASS",
+      "expect": "SHIP lambda infra/aws/lambda/portal_data_proxy/firm_page_access.py",
       "judgment": false
     }
   ],
   "controls": {
     "mutant": {
-      "description": "a planted invalid firm_pages row (unserved firm, null, the word null, unlisted route, unlisted page, ALL wildcard, class ii) is refused by validate()",
-      "expected": "each planted row is refused with a firm_pages.json refusal naming the field it breaks",
-      "observed": "7 of 7 planted rows refused: test_validate_refuses_each_row_kind[*] in lib/tests/test_opal_naming_firm_pages.py, within the 15 passed",
+      "description": "a planted invalid firm_pages row (unserved firm, null, the word null, unlisted route, unlisted page, ALL wildcard, class ii) is refused by validate(); and the classifier's held-but-unlisted function is not claimed",
+      "expected": "each planted row is refused with a firm_pages.json refusal naming the field it breaks; the unlisted function gets no consumer",
+      "observed": "7 of 7 planted rows refused: test_validate_refuses_each_row_kind[*] in lib/tests/test_opal_naming_firm_pages.py; the negative arm of T9 asserts [] for the held-but-unlisted function. All within the 16 passed.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "two same-input regenerations of infra/aws/lambda/portal_data_proxy/firm_page_access.py, sha256 of the bytes compared",
-      "observed": "sha256 80590106282c2d44271a5e8d66b30d0a79f6693ddd891155b51b72f37508f33c on both runs",
+      "observed": "sha256 80590106282c2d44271a5e8d66b30d0a79f6693ddd891155b51b72f37508f33c on the committed file and on the regeneration (rerun this session, rc=0)",
       "status": "STABLE"
     }
   },
@@ -109,20 +119,16 @@
       "reason": "CT-w-2's cell. This order's write surface excludes the handler."
     },
     {
-      "item": "lambda-source-map.json entry for firm_page_access.py in opal-portal-data-proxy files",
-      "reason": "outside this order's paths. It would not change the classification, because the own-directory skip fires first (surprise NFRA_CTLPLN-W65-S1)."
-    },
-    {
       "item": "the portal carrier (firmAccess.ts FIRM_ALLOWED_PATHS block generated from firm_pages.json)",
       "reason": "a later order (plan of record section 7 step 8; CTO ruling point 4). The portal is a gitlink and sits outside this order's paths."
     },
     {
-      "item": "the SHIP lambda classification of the module (CTw1-AC2 prose clause and TO T6 wording)",
-      "reason": "not reachable under the classifier as written. T6 asserts presence only. Surprise NFRA_CTLPLN-W65-S1 carries the decision to the CTO."
+      "item": "regeneration or repair of the portal's firmDisplayNames.generated.ts and vendorDisplayNames.generated.ts",
+      "reason": "outside this order (AMENDMENT 1 names them pre-existing drift). Under generate, one differs in its mark and one in CRLF bytes (surprise NFRA_CTLPLN-W65-S2, owner the CTO)."
     },
     {
-      "item": "regeneration of the portal's firmDisplayNames.generated.ts and vendorDisplayNames.generated.ts",
-      "reason": "outside this order. Under generate, one differs in its mark and one in CRLF bytes (surprise NFRA_CTLPLN-W65-S2)."
+      "item": "T6 asserts presence only (one target row for the module), not the SHIP lambda classification",
+      "reason": "the TO's T6 wording says SHIP lambda; AMENDMENT 1 did not name T6 among its conditions, and tightening it is a test edit outside the amendment. The SHIP lambda clause is graded by CTw1-AC2 from the verb's output."
     },
     {
       "item": "terraform, AWS calls, deploy and push",
@@ -130,8 +136,9 @@
     }
   ],
   "surprises": [
-    "NFRA_CTLPLN-W65-S1: the new data-proxy module is UNCLASSIFIED in targets (lambda_plane_consumers skips the owning source directory); targets exits 1 and two existing selftests fail; BLOCKING, ARMED, disarm owner 1.0.0_SA_CTO.",
-    "NFRA_CTLPLN-W65-S2: two portal carriers do not reproduce byte for byte under generate (one stale mark hash, one CRLF on disk); OBSERVATION, ARMED, disarm owner 1.0.0_SA_CTO."
+    "NFRA_CTLPLN-W65-S1: the new data-proxy module was UNCLASSIFIED in targets (lambda_plane_consumers skipped the owning source directory). Fixed per CTO ruling msg 108498 in commit 22169e24fb; the row is not edited and its disarm owner is 1.0.0_SA_CTO. Filed BLOCKING, ARMED.",
+    "NFRA_CTLPLN-W65-S2: two portal carriers do not reproduce byte for byte under generate (one stale mark hash, one CRLF on disk); the base builder shows the same drift. OBSERVATION, ARMED, disarm owner 1.0.0_SA_CTO. Not touched.",
+    "NFRA_CTLPLN-W65-S3: the classifier edit also adds a self-consumer to two pre-existing platinum_dest_view.py targets (classification unchanged, all SHIP lambda). OBSERVATION, ARMED, disarm owner 1.0.0_SA_CTO."
   ],
   "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~65/NFRA_CTLPLN.TO-CT-w-1.firm-pages-registry-and-builder.proof_of_spec.json",
   "compiler_tools": [
@@ -141,14 +148,24 @@
       "result": "VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s) at registry@2d205808a20cac56 over all 16 registry file(s); rc=0"
     },
     {
-      "tool": "lib/opal_naming.py generate (all targets, into .scratch/gen_all2)",
-      "invocation": "timeout 120 python -I lib/opal_naming.py generate --out .scratch/gen_all2",
-      "result": "18 targets written; 16 byte-identical to the repo, 1 CRLF-only (vendorDisplayNames.generated.ts), 1 mark-only (firmDisplayNames.generated.ts); rc=0"
+      "tool": "lib/opal_naming.py targets",
+      "invocation": "timeout 120 python -I lib/opal_naming.py targets",
+      "result": "TARGETS: 18; line 16 'SHIP lambda infra/aws/lambda/portal_data_proxy/firm_page_access.py measured: lambda-source-map.json (1 consumer(s): opal-portal-data-proxy)'; PLANE lambda: 5; rc=0"
     },
     {
-      "tool": "lib/opal_naming.py generate (one target, into the repo, run twice)",
-      "invocation": "python -I lib/opal_naming.py generate --out . --target infra/aws/lambda/portal_data_proxy/firm_page_access.py",
-      "result": "WROTE, sha256 80590106282c2d44271a5e8d66b30d0a79f6693ddd891155b51b72f37508f33c on both runs; rc=0"
+      "tool": "lib/tests/test_opal_naming.py (the existing file; lines 352 and 408 unchanged)",
+      "invocation": "timeout 120 python -m pytest -q lib/tests/test_opal_naming.py",
+      "result": "96 passed in 8.67s; rc=0; the file has 0 diff lines against 2fbb74e87d"
+    },
+    {
+      "tool": "lib/opal_naming.py generate (all targets, into .scratch/regen) with a byte-exact compare against the committed files",
+      "invocation": "timeout 120 python -I lib/opal_naming.py generate --out .scratch/regen ; compare each WROTE file against its committed counterpart",
+      "result": "18 written; 16 byte-identical (the new module is among them); 2 differ: the portal carriers firmDisplayNames (mark-hash drift, bytes beyond CRLF) and vendorDisplayNames (CRLF-only), pre-existing, S2. Of the 17 pre-existing targets, 15 are byte-identical. The base builder at 2fbb74e87d shows the same two differences. rc=0"
+    },
+    {
+      "tool": "classifier consumer-list measurement, old lambda_plane_consumers (a99d7e584c) against new, over all 18 targets",
+      "invocation": "timeout 120 python -I .scratch/consumer_diff.py <worktree>",
+      "result": "CONSUMER-LIST CHANGED: 3 of 18 targets. firm_page_access.py [] -> [opal-portal-data-proxy] (intended); the two platinum_dest_view.py copies each gain a self-entry (S3). All 18 still SHIP lambda. rc=0"
     }
   ]
 }
