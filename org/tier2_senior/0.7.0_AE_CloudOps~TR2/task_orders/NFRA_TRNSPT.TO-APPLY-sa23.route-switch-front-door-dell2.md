@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~T2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TR2</issued_to>
     <date>2026-10-12</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_TRNSPT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -94,6 +94,14 @@
            PASS = 400 `application/json` naming the field. 403, 401, HTML or 5xx = a finding: report it and ROLL BACK THE BASE.
            The secret read denied = step (c) NOT MADE, no grant sought; say so, and do not roll back on that alone.
        (d) NO invoke of `outlook-global-commentary-draft-lambda`, with any event.
+    7(c)-AMENDMENT 1 (issuer, 2026-10-12, on the applier's finding msg 6251 and row NFRA_TRNSPT-D2-S33): the made-up id
+       `PROBE-NOSUCH-0` fails the ticket service's own id pattern (`infra/aws/lambda/ticket_center/lambda_function.py:156`,
+       `^TCK-\d{8}-[0-9a-f]{8}$`) at its dispatcher, so the first post read the service's 404 `no route` and none of the three
+       signed branches was reachable. An issuer defect in the packet. The base is not implicated and is NOT rolled back.
+       ONE more post, and no third: the same call with the id `TCK-00000000-00000000`, the same body with the extra key. The
+       extra-key check (`:1550`) runs before any ticket read, so nothing is read or written whatever that id names. Grade it on
+       the CTO's three signed branches, by parsed status and content type. 400 `application/json` naming the field = the pass:
+       close the ledger. Anything else = report before acting.
     8. Close the ledger. If step 6, 7(b) or 7(c) fails: ROLL BACK in session -- the fetched deployed zip back at the root's zip path,
        the line-72 token reverted, the same three targets re-applied, all three reading `auyn4Ivl...` and the base reading the
        runner config's `api_base` -- and say so.
@@ -103,7 +111,7 @@
     - Exactly the three function resources: code, plus the one environment value. No IAM, schedule, queue, mapping, reader or secret.
     - Never `aws lambda update-function-code`; never a bare `terraform apply`.
     - No transcript text, mail content, prompt text, bearer or address in any file or message.
-    - No S3 delete. No second invoke of either pull, and no second probe post, without the issuer's word.
+    - No S3 delete. No second invoke of either pull without the issuer's word. Probe posts: the first, and the ONE of 7(c)-AMENDMENT 1; no third.
     - No invoke of the commentary function.
   </bounds>
 

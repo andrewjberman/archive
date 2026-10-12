@@ -1,0 +1,97 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-ca-1",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ca-1.sechist-as-it-stands.md",
+  "group": "OTHER",
+  "vintage_commit": "6d45ff6178"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~151",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round79.md",
+  "vintage_commit": "6d45ff6178",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ca-1.sechist-as-it-stands.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~151/SECHIST_AS_IT_STANDS.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "tree-only read record; no AWS, network or vendor call; nothing written to any bucket; no account id",
+   "artifact_covered_by": [
+    "CB79ca1-AC1",
+    "CB79ca1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~151/SECHIST_AS_IT_STANDS.csv",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "15 rows; CUSIPs only in the column cusip; unknown cells not_read",
+   "artifact_covered_by": [
+    "CB79ca1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~151/SECHIST_AS_IT_STANDS.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "short statement of the tree read",
+   "artifact_covered_by": [
+    "CB79ca1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB79ca1-AC1",
+   "criterion_verbatim": "the project's owner and fabric are read; the read scope is stated; the history's existence, fields and basis are stated; every held trading day of the 15 funds is covered or unpriced (`sum` equals `held_trading_days`).",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~151/SECHIST_AS_IT_STANDS.json',encoding='utf-8'));p=d['project'];print('SECHIST-AS-IT-STANDS funds=%d listed=%d owner=%s fabric=%s read_scope=%s history_exists=%s fields=%d carries_a_basis=%s funds_in_history=%d held_trading_days=%d covered=%d unpriced_under_c_basis=%d sum=%d ask_through_mstr=%s'%(d['funds'],len(d['by_fund']),str(p['owner'])[:30],str(p['fabric'])[:20],d['read_scope'],d['history_exists'],len(d['fields']),d['carries_a_basis'],d['funds_in_history'],d['held_trading_days'],d['held_trading_days_covered'],d['unpriced_under_c_basis'],d['held_trading_days_covered']+d['unpriced_under_c_basis'],bool(d['ask_through_mstr'])))\"",
+   "output_evidence": "SECHIST-AS-IT-STANDS funds=15 listed=15 owner=2.0.0_SA_COO~H1 (coo_lane; cto fabric=dell1 (placement DEL read_scope=tree_only history_exists=not_established fields=5 carries_a_basis=True funds_in_history=0 held_trading_days=20718 covered=0 unpriced_under_c_basis=20718 sum=20718 ask_through_mstr=True (rc 0)",
+   "denominator": "15 of 15 funds listed; 20,718 held trading days = 0 covered + 20,718 unpriced (not shown covered; unpriced_is_not_read=true); tree_only read of 24 SECHIST task orders",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB79ca1-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the fabric rule was applied before any data was read, and another fabric's data was not read; the history's existence is read from what is built and populated, not from a contract's wording; \"carries a basis\" is true only where a field states it; coverage is counted against the held trading days with the denominator; `not_established` is used where the tree does not say.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read SECHIST_AS_IT_STANDS.json (project, read_scope, ask_through_mstr, history_exists, where, carries_a_basis, by_fund, headline, not_established) and SECHIST_AS_IT_STANDS.md",
+   "output_evidence": "project.json read first: fabric dell1, so read_scope tree_only before anything else; no AWS, network or vendor call; history_exists not_established (writer built, switched off, no landing record); carries_a_basis true by the column definition at security_series_writer.py:4,9 with the split scaling shown upstream at yahoo_pull.py:130-136; coverage 0 of 20,718 stated as NOT READ",
+   "denominator": "15 funds; 20,718 held trading days; 24 task orders (18 complete, 3 carried, 3 issued)",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "ADVI_COTBKF-D2-W151-S1"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~151/ADVI_COTBKF.TO-CB-ca-1.sechist-as-it-stands.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB79ca1-AC1)",
+   "result": "SECHIST-AS-IT-STANDS funds=15 listed=15 owner=2.0.0_SA_COO~H1 (coo_lane; cto fabric=dell1 (placement DEL read_scope=tree_only history_exists=not_established fields=5 carries_a_basis=True funds_in_history=0 held_trading_days=20718 covered=0 unpriced_under_c_basis=20718 sum=20718 ask_through_mstr=True"
+  }
+ ]
+}
