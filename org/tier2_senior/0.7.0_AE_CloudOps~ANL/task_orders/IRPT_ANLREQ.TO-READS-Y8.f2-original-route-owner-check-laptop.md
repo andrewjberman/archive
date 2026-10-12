@@ -53,6 +53,17 @@ Criterion id: READS8-AC1. Instance at `org/tier2_senior/0.7.0_AE_CloudOps~ANL/de
     owner's; the same code NOT_AUTHORIZED answers an absent record and a record owned by someone else.
   </context>
 
+  **AMENDMENT 1 (issuer `2.0.0_SA_COO~Y2`, 2026-10-12, after the first run).** Your run was right and the order was wrong: the order
+  said the control would answer `ok: true`, and a SERVED envelope carries no `ok` member (you read it absent or null, with the link,
+  expiry, hash and length all present and the log check CLEAN). The CTO's rule (msg 6541) is the link's PRESENCE, not an `ok` member.
+  **The control is SERVED when `url_present` is true and no refusal code came back; an explicit `ok: false` still means refused.**
+  Everywhere this order says "control `ok`" or "`ok: true`" for the control, read that. Nothing else changes; arms `b`, `a` and
+  `b_absent_id` are unchanged. NO SECOND INVOKE: the arms on file are the evidence. Your one act under this amendment: restate the
+  `verdict` member of `F2_original_route_owner_check.json` from the arms already in it (they give `OWNER_SCOPED_REFUSAL`), add the
+  member `amended_by: "TO-READS-Y8 AMENDMENT 1"`, re-run `reads8_check.py` (it now carries the amended rule) and
+  `proof-of-spec-check.py`, and commit with push state. Gate limb that graded this amendment: none (the issuer amends its own
+  criterion); the CTO reads it at the round-17 analysis.
+
   <steps>
     0. Pre-checks, STOP and report on any miss: (i) `F2_one_request_id.json` exists at HEAD of your checkout; (ii) you hold
        `lambda:InvokeFunction` on `irpt-status` (state how you know: `iam simulate-principal-policy` on your own identity and the
@@ -69,7 +80,7 @@ Criterion id: READS8-AC1. Instance at `org/tier2_senior/0.7.0_AE_CloudOps~ANL/de
        record's id, headers `X-Contract-Version: v1`, `x-origin-verify: cloudfront`, `x-user-name: f2-probe`, and an `x-user-email`
        on the reserved domain `opal.invalid` (a different local part per arm). No body. The record's TENANT (firm) is `T`.
          - `control`: `x-firm-id: opal-capital`, `x-user-role: user`, query `selected_tenant: T`. (An INTERNAL caller the rule admits
-           for firm T: `ops` reads it as OPAL_GLOBAL.) Expect `ok: true` and a download route in `data`.
+           for firm T: `ops` reads it as OPAL_GLOBAL.) Expect a download route in `data` with no refusal code (AMENDMENT 1: not an `ok: true`).
          - `b` (the proof arm): `x-firm-id: T`, `x-advisor-id: f2-advisor-b` (a synthetic value, so the class is FIRM_ADVISOR),
            `x-user-role: user`, NO selector. A different advisor of the record's own firm. Expect `ok: false`,
            `status.public_reason_code` = `NOT_AUTHORIZED`.
@@ -95,7 +106,7 @@ Criterion id: READS8-AC1. Instance at `org/tier2_senior/0.7.0_AE_CloudOps~ANL/de
        <bool>, "sha256_present": <bool>, "byte_length_present": <bool>}, "b": {"ok": ..., "public_reason_code": ..., "url_present":
        <bool>}, "a": {...as b...}, "b_absent_id": {...as b...}}, "control_log_check": "CLEAN" | "NOT_READ" | "LINK_IN_LOG", "verdict": "OWNER_SCOPED_REFUSAL" | "UNEXERCISED_LIVE" | "ANOMALY",
        "ledger_open_entries_naming_irpt_status": <n>, "identity_arn_tail": "<the role or user name only>", "writes_made": [],
-       "claim": "measured", "not_read": [...]}`. The verdict is: control `ok` with `url_present` and `b` NOT_AUTHORIZED =
+       "claim": "measured", "not_read": [...]}`. The verdict is: control SERVED (link present, no refusal code) and `b` NOT_AUTHORIZED =
        OWNER_SCOPED_REFUSAL (comparison at owner_reads.py:29-31 or the second check at owned_requests.py:176-184, NOT SEPARATED; never write "the owner check fired"); control refused = UNEXERCISED_LIVE; anything else = ANOMALY. The check refuses a verdict that does not
        follow. Before you commit, READ the file: no request id, ticket id, address, link or query string.
     5. Delete any scratch you made outside the checkout. Commit the result and the proof instance; report to the issuer citing this
