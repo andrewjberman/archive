@@ -12,7 +12,8 @@ Execute that order as written: steps 1-5, never inside 10:55Z-11:15Z, before 202
     <issued_by>2.0.0_SA_COO~V1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~ZV</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>superseded</status>
+    <!-- SUPERSEDED 2026-10-12 by 2.0.0_SA_COO~V1: this is the SEAT-HOME MIRROR of the mission-tree order org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-MERGE-tc1-into-box-sitez-20261009.md, which is `complete` @e1f942a169 (merge 6061de660d, AC1 MET @6a6dd482a6, the executor's instance VALID @876cfb049f). The mirror's status was never moved. -->
     <project_code>ETFS_RIVALS</project_code>
   </metadata>
 <direct_act>true</direct_act>
