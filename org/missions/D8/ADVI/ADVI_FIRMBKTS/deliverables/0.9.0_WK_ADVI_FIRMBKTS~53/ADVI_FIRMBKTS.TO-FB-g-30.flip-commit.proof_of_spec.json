@@ -1,0 +1,102 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-g-30",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-30.flip-commit.md",
+  "group": "OTHER",
+  "vintage_commit": "1a8d882931"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~53",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "vintage_commit": "1a8d882931",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-30.flip-commit.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/logic/registry/scopes.json",
+   "kind": "config_data",
+   "commit_or_etag": "69679b90e3",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed in 69679b90e3 on wk-ADVI_FIRMBKTS-53 (LOCAL): the 49financial alias opal-data-bd routed marker true to false, one line; the 15 generated targets (2 value-changing: infra/aws/lambda-edge/_shared/firm-config.mjs and infra/aws/lambda/investor-reporting/_authz/loaders.py; 13 mark-line only) are in the same commit; nothing deployed or applied",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 reads the committed flip against the base: the registry differs by exactly the one routed line, the value-changing set is exactly the two targets, validate exits 0 and every changed target equals the builder's output. The invocation terminates inside its bound.",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-53 && timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_flipcommit.py --root /c/dev/wk-firmbkts-53 --verify --base HEAD~1; echo \"exit=$?\"",
+   "expect": "ROUND 4 FLIP COMMIT: 4 of 4 arms",
+   "output_evidence": "  V1 registry diff lines=['-          \"routed\": true,', '+          \"routed\": false,']\n  V2 changed files=16: value-changing ['infra/aws/lambda-edge/_shared/firm-config.mjs', 'infra/aws/lambda/investor-reporting/_authz/loaders.py']; mark-line only 13\n  V4 generate rc=0; changed targets not equal to the builder's output: []\nPASS V1 the registry differs by exactly the one routed line (true to false)\nPASS V2 the value-changing targets are exactly the pair's two; the others differ by their mark line only\nPASS V3 `validate` exits 0\nPASS V4 every changed generated target equals the builder's output at the committed registry\nROUND 4 FLIP COMMIT: 4 of 4 arms\nexit=0",
+   "denominator": "4 of 4 arms PASS; 16 changed files at 69679b90e3 (1 registry, 2 value-changing, 13 mark-line only); 0 targets differ from the builder output",
+   "status": "PASS",
+   "status_reason": "Run immediately after the flip commit 69679b90e3 and before any other commit, as the order requires (base HEAD~1 = 1a8d882931). The verifier must re-run it with HEAD~1 meaning the flip's parent; run at a later HEAD it reads against the wrong base."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 is the write-surface bound. Each invocation terminates inside its bound.",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-53 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-53 --allow infra/logic/registry/scopes.json --allow .tools/ds-precommit-check.py --allow data/assets/scripts/gold/investor_reporting/directory_runner.py --allow data/assets/scripts/gold/investor_reporting/holdings_snapshot.py --allow data/assets/scripts/gold/runners_49f/perfrp_firm_pin.py --allow data/black_diamond/scripts/bronze/_asset_dim_rest_pin.py --allow data/black_diamond/scripts/gold/lib/platinum_dest_view.py --allow data/firm_registry.json --allow data/mdpf/config/bronze_homes.json --allow infra/aws/lambda-edge/_shared/firm-config.mjs --allow infra/aws/lambda/exec-summary-generator/platinum_dest_view.py --allow infra/aws/lambda/investor-reporting/_authz/loaders.py --allow infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/platinum_dest_view.py --allow infra/aws/terraform/modules/opal_name/generated_locals.tf --allow infra/aws/terraform/modules/opal_name/tests/opal_name.tftest.hcl --allow infra/aws/terraform/modules/opal_name/tests/vectors.json --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~53/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/logic/registry/scopes.json --require infra/aws/lambda-edge/_shared/firm-config.mjs --require infra/aws/lambda/investor-reporting/_authz/loaders.py; echo \"exit=$?\"",
+   "expect": "ROUND 4 SCOPE: OK",
+   "output_evidence": "  CHANGED .tools/ds-precommit-check.py\n  CHANGED infra/logic/registry/scopes.json\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md\nROUND 4 SCOPE: OK 17 changed, 0 outside, 0 required missing\nexit=0",
+   "denominator": "17 changed files against the merge-base with the primary checkout (16 flip files, 1 surprise-row file), 0 outside the allow list, 0 of 3 required missing",
+   "status": "PASS",
+   "status_reason": "Run verbatim at the worktree HEAD fadefda4d3 (flip commit plus the surprise-row commit). Determinism: two verbatim runs, identical output md5 48745896c2c5a30273da098e6bca303a. Mutant (loaders.py allow removed, invocation otherwise verbatim) reads FAIL 17 changed, 1 outside, exit 1."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC2 invocation verbatim with the --allow for infra/aws/lambda/investor-reporting/_authz/loaders.py removed, so the changed loaders.py is outside the write surface",
+   "expected": "FAIL with one file outside; exit 1",
+   "observed": "ROUND 4 SCOPE: FAIL 17 changed, 1 outside, 0 required missing; mutant exit=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the verbatim AC2 invocation run twice; md5 of the full output compared",
+   "observed": "48745896c2c5a30273da098e6bca303a on both runs; exit 0 on both",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the nested portal/ submodule's firmDisplayNames.generated.ts (and vendorDisplayNames.generated.ts listed modified) is NOT committed",
+   "reason": "order section 1c rule 2: nothing under portal/ is edited or committed; the apply's generate run rewrote the portal mark line in the nested working copy, recorded as ADVI_FIRMBKTS-D1-W53-S1"
+  },
+  {
+   "item": "no deploy, apply, push or other registry value; the 15 generated targets are not deployed",
+   "reason": "order section 2 bound 1: one commit, no deploy, no apply, no push"
+  },
+  {
+   "item": "the client-data check did not check the flip commit for client account ids",
+   "reason": "the hashed account-id list is absent on this box; the WARN is recorded as ADVI_FIRMBKTS-D1-W53-S2"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W53-S1: the flip tool's --apply generate step rewrote the mark line of the nested portal/ firmDisplayNames.generated.ts in the working copy (uncommitted), though the order said to touch nothing under portal/",
+  "ADVI_FIRMBKTS-D1-W53-S2: the safe-commit client-data check could not run for the flip commit because the hashed account-id list is absent on this box (WARN, commit not checked for client account ids)"
+ ],
+ "session_log": "no session log is committed; the record is the flip commit 69679b90e3dc52b670d33fddd96d06be1deaac90 (LOCAL on wk-ADVI_FIRMBKTS-53), the rows commit fadefda4d3 (LOCAL) and the two surprise rows",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_flipcommit.py --root /c/dev/wk-firmbkts-53 --apply",
+   "result": "rc 0; ROUND 4 FLIP COMMIT: 4 of 4 arms (P1 PASS, P2 PASS, P3 PASS, P4 PASS); changed files 17 counting the portal target outside the index, 16 committed"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_flipcommit.py --root /c/dev/wk-firmbkts-53 --verify --base HEAD (pre-apply)",
+   "result": "2 of 4 arms, exit 1: V1 and V2 FAIL as expected at base (no flip), V3 and V4 PASS as controls"
+  },
+  {
+   "tool": "bash",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~53 <0.9.0_WK_ADVI_FIRMBKTS~53@opal.agent>\" -F <msgfile> -- <16 paths>",
+   "result": "commit rc 0, 69679b90e3 (16 files, 24 insertions, 24 deletions); commit-gate and to-pipeline gate OK; client-data-check WARN absent list"
+  }
+ ]
+}
