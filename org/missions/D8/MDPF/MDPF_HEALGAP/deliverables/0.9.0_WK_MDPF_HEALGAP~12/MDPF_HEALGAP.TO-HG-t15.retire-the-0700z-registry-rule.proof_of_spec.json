@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-t15",
+  "firm": "MDPF",
+  "genre": "BUILD",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t15.retire-the-0700z-registry-rule.md",
+    "group": "OTHER",
+    "vintage_commit": "0d488da900"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "0d488da900",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t15.retire-the-0700z-registry-rule.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_HEALGAP~12",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/cot-pipeline/satellites-registry-producer.tf",
+      "kind": "terraform",
+      "commit_or_etag": "0ef23bcaf5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TO BOUNDS: no terraform init, plan, validate, apply or safe-apply by this worker; no AWS write; no Lambda invoke. The apply is the issuer's under its never-widen pair. The HCL is checked by the static read of HG3-t15-AC1 only.",
+      "artifact_covered_by": [
+        "HG3-t15-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG3-t15-AC1",
+      "criterion_verbatim": "the 07:00Z rule, its target and its permission are gone; the stamp-gated rule (cron(15 13 * * ? *), input require_stamp), its permission, the function module and the role policy are kept; against the base pin only lines were removed (nothing added or altered).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t15_retire.py",
+      "output_evidence": "T15-OK 07:00Z rule, target and permission gone; stamp-gated rule cron(15 13), target and permission, module and role policy kept; scope=ok(10 line(s) removed, 0 added)  (rc=0). Negative control, HG_T15_TF pointing at worktree copy .scratch/neg_control_daily_in_place.tf (the base file, daily rule in place): T15-BAD GONE: aws_cloudwatch_event_rule.cot_satellites_registry_producer_daily is still declared; GONE: aws_cloudwatch_event_target.cot_satellites_registry_producer_daily is still declared; GONE: aws_lambda_permission.events_cot_satellites_registry_producer (the daily rule's permission) is still declared; GONE: a cron(0 7 * * ? *) schedule_expression is still in the file; NOREF: a reference to a removed address remains: aws_cloudwatch_event_rule.cot_satellites_registry_producer_daily  (rc=1). Base-pin read: the check's AC1 FAILS at the base 0d488da900 (daily rule still declared), as the order states.",
+      "denominator": "1 criterion; the check grades 3 removals (rule, target, permission) and 3 keep-groups (stamp-gated rule; its target and permission; module and role policy), plus a scope of 10 removed non-comment lines and 0 added non-comment lines",
+      "status": "PASS",
+      "status_reason": "PASS by the named output: T15-OK rc=0 on the edited file; the negative control prints T15-BAD on the daily-rule-in-place copy with rc=1, so the check discriminates. Note: Build step 2 adds a 7-line ASCII comment, which the check's scope excludes (it grades non-comment lines, 0 added); the criterion's 'nothing added' is read as no added code.",
+      "expect": "T15-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Copy of the base tf (git show 0d488da900:infra/aws/terraform/cot-pipeline/satellites-registry-producer.tf) with the daily rule, target and permission left in place, under .scratch/ (uncommitted); run through HG_T15_TF.",
+      "expected": "T15-BAD",
+      "observed": "T15-BAD GONE: aws_cloudwatch_event_rule.cot_satellites_registry_producer_daily is still declared; GONE: aws_cloudwatch_event_target.cot_satellites_registry_producer_daily is still declared; GONE: aws_lambda_permission.events_cot_satellites_registry_producer (the daily rule's permission) is still declared; GONE: a cron(0 7 * * ? *) schedule_expression is still in the file; NOREF: a reference to a removed address remains (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of hg_t15_retire.py from the worktree root on commit 0ef23bcaf5",
+      "observed": "T15-OK 07:00Z rule, target and permission gone; stamp-gated rule cron(15 13), target and permission, module and role policy kept; scope=ok(10 line(s) removed, 0 added) rc=0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform fmt, init, plan, validate, apply, safe-apply; any AWS write; any Lambda invoke; any vendor call",
+      "reason": "TO BOUNDS and the order's own statement: no fmt criterion (the sibling file already fails fmt for unrelated lines; a whole-block removal cannot change alignment of what remains). No apply by this worker."
+    },
+    {
+      "item": "the top-of-file WHY block of satellites-characteristics-producer.tf (line 35 names the retired registry daily anchor)",
+      "reason": "Outside the grant (<paths> names only the registry tf and the investigation file). Already filed as MDPF_HEALGAP-D1-W11-S1; not edited."
+    },
+    {
+      "item": "the stamp-gated registry rule, its target and permission, module stamp_gated_rule_name, the function module and the role policy",
+      "reason": "TO CELL: these STAY. Not edited; the check grades them as kept."
+    },
+    {
+      "item": "alarm, SNS topic, SES send, freshness checker or monitor",
+      "reason": "TO BOUNDS: standing moratorium. None added."
+    },
+    {
+      "item": "the LGIC root map row for cot-satellites-registry-producer-daily (infra/logic/registry/root_map.json:264)",
+      "reason": "Outside the grant. Recorded as surprise MDPF_HEALGAP-D1-W12-S1 (OBSERVATION); not edited."
+    }
+  ],
+  "surprises": [
+    "MDPF_HEALGAP-D1-W12-S1: the LGIC root map still registers cot-satellites-registry-producer-daily as an EVENT_RULE name (infra/logic/registry/root_map.json:264) after the rule is removed from the tf; no tf declares it after HG-t-15; recorded only, outside the grant"
+  ],
+  "session_log": "0.9.0_WK_MDPF_HEALGAP~12 on HG-t-15 (HG3-t15-AC1), worktree C:/dev/wk_healgap_r3_12, branch wk-MDPF_HEALGAP-12, base HEAD 0d488da900. Code commit 0ef23bcaf5 (the tf line deletion, the 7-line retirement comment, and surprise row W12-S1 in INVESTIGATION_v1.md); this instance and the order status flip to complete are committed after it.",
+  "compiler_tools": [
+    {
+      "tool": "hg_t15_retire.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t15_retire.py",
+      "result": "T15-OK 07:00Z rule, target and permission gone; stamp-gated rule cron(15 13), target and permission, module and role policy kept; scope=ok(10 line(s) removed, 0 added); rc=0"
+    },
+    {
+      "tool": "hg_t15_retire.py (negative control, HG_T15_TF on a .scratch copy)",
+      "invocation": "HG_T15_TF=C:/dev/wk_healgap_r3_12/.scratch/neg_control_daily_in_place.tf python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R3_CHECKS/hg_t15_retire.py",
+      "result": "T15-BAD GONE: aws_cloudwatch_event_rule.cot_satellites_registry_producer_daily is still declared; ... NOREF: a reference to a removed address remains: aws_cloudwatch_event_rule.cot_satellites_registry_producer_daily; rc=1"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> HG3-t15-AC1 --governing-order org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t15.retire-the-0700z-registry-rule.md",
+      "result": "recorded in the flip commit's message and the worker report"
+    }
+  ]
+}
