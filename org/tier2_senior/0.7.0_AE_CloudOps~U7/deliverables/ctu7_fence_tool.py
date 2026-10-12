@@ -34,6 +34,8 @@ EMAIL = "ctlpln-ctu7-fence-20261012@opal.invalid"
 PK = "USER#" + EMAIL
 NAME = "NFRA_CTLPLN CT-u-7 synthetic partner caller"
 NAME_PREFIX = "NFRA_CTLPLN CT-u-7 synthetic"
+CENSUS_TOKEN = "ctlpln-ctu7"
+CREATED_BY = "0.7.0_AE_CloudOps~U7 NFRA_CTLPLN CT-u-7 (CTO half section 2 option a)"
 FIRM = "49financial"
 KEY_SECRET = "opal/auth/jwt-private-key"
 TOKEN_TTL_S = 600
@@ -59,7 +61,7 @@ def _census():
     matches = scanned = pages = 0
     for page in _ddb().get_paginator("scan").paginate(
             TableName=TABLE, FilterExpression="contains(PK, :p)",
-            ExpressionAttributeValues={":p": {"S": "ctlpln-ctu7"}}, ConsistentRead=True):
+            ExpressionAttributeValues={":p": {"S": CENSUS_TOKEN}}, ConsistentRead=True):
         matches += page["Count"]
         scanned += page["ScannedCount"]
         pages += 1
@@ -73,7 +75,7 @@ def row_create():
         "userType": {"S": "test-reader"}, "status": {"S": "active"},
         "allowedFirmIds": {"L": [{"S": FIRM}]},
         "createdAt": {"S": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())},
-        "createdBy": {"S": "0.7.0_AE_CloudOps~U7 NFRA_CTLPLN CT-u-7 (CTO half section 2 option a)"},
+        "createdBy": {"S": CREATED_BY},
     }
     _ddb().put_item(TableName=TABLE, Item=item, ConditionExpression="attribute_not_exists(PK)")
     got = _ddb().get_item(TableName=TABLE, Key={"PK": {"S": PK}, "SK": {"S": "PROFILE"}}, ConsistentRead=True).get("Item")
@@ -212,7 +214,7 @@ def row_delete():
                        ExpressionAttributeNames={"#n": "name"}, ExpressionAttributeValues={":p": {"S": NAME_PREFIX}})
     _stamp("ROW-DELETE", "PK=%s deleted %d s after the last exp" % (PK, now - last))
     gone = _ddb().get_item(TableName=TABLE, Key=key, ConsistentRead=True).get("Item")
-    ctl = _ddb().get_item(TableName=TABLE, Key={"PK": {"S": "USER#ctlpln-ctu7-control-never-written@opal.invalid"},
+    ctl = _ddb().get_item(TableName=TABLE, Key={"PK": {"S": "USER#" + CENSUS_TOKEN + "-control-never-written@opal.invalid"},
                                                 "SK": {"S": "PROFILE"}}, ConsistentRead=True).get("Item")
     m, sc, pg = _census()
     _stamp("ROW-ABSENT", "row_item_after_delete=%s never_written_control_item=%s census_matches=%d of %d scanned over %d pages"
