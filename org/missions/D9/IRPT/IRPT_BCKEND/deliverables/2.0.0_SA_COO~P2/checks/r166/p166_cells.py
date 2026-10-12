@@ -139,8 +139,19 @@ def main():
         elif arm == "AC3":
             rec = load(D % n + "IB166-1_reader_record.json")
             base_ok(rec)
-            if rec.get("claim_move_counts") != EXPECT_COUNTS:
-                fail("claim_move_counts %r != the CTO's v0.49 counts %r (read at the cap day 2026-10-08)" % (rec.get("claim_move_counts"), EXPECT_COUNTS))
+            # AMENDMENT (issuer defect, worker ~331's row D2-W331-S2): the CTO's v0.49 counts are the accounts the RULE REACHES. The accounts whose
+            # claim actually MOVES from measured to inferred are fewer where an account was already inferred at base for a missing trading day
+            # (row D2-W319-S1). Both are required, and they must agree by arithmetic: fires - already_inferred = moves, per cell.
+            if rec.get("rule_fires_counts") != EXPECT_COUNTS:
+                fail("rule_fires_counts %r != the CTO's v0.49 counts %r (read at the cap day 2026-10-08)" % (rec.get("rule_fires_counts"), EXPECT_COUNTS))
+            fires, already, moves = rec.get("rule_fires_counts") or {}, rec.get("rule_fires_on_accounts_already_inferred_at_base") or {}, rec.get("claim_move_counts") or {}
+            for e in EXPECT_COUNTS:
+                for w in EXPECT_COUNTS[e]:
+                    try:
+                        if fires[e][w] - already[e][w] != moves[e][w] or already[e][w] < 0:
+                            fail("%s %s: fires %s - already inferred %s != claim_move_counts %s" % (e, w, fires[e][w], already[e][w], moves[e][w]))
+                    except (KeyError, TypeError):
+                        fail("claim_move_counts, rule_fires_counts and rule_fires_on_accounts_already_inferred_at_base must each hold {49F, orion} x {SI, YTD, QTD, 1Y}")
             cons = rec.get("consumers_of_claim_and_state") or []
             need_cites([c.get("cite") for c in cons], "consumers_of_claim_and_state")
             ab = rec.get("absences") or []
@@ -155,7 +166,7 @@ def main():
             bad = changed_outside(rec["base_commit"], n, (PERF + "/",))
             if bad:
                 fail("changed outside the grant: %s" % bad[:3])
-            print("OK: 8 claim-move counts equal the CTO's; %d consumer(s); %d absence(s) judged" % (len(cons), len(ab)))
+            print("OK: the rule reaches the CTO's 8 counts and the literal moves agree by arithmetic; %d consumer(s); %d absence(s) judged" % (len(cons), len(ab)))
         else:
             fail("unknown arm")
     elif cell == "IB166-2":
