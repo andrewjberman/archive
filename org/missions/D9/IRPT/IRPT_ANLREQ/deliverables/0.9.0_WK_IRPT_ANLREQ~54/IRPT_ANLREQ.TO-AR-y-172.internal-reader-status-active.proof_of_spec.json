@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-172",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-172.internal-reader-status-active.md",
+    "group": "OTHER",
+    "vintage_commit": "43e1e85895"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R17_Y.md",
+    "vintage_commit": "43e1e85895",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-172.internal-reader-status-active.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~54",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "kind": "script",
+      "commit_or_etag": "9b9c573ce7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on the worker branch wk-IRPT_ANLREQ-54 only; not bundled and not released (the narrative bundle pin in infra/aws/lambda/ci/lambda-source-map.json still names 361c44fa9d; the release is cell AR-y-173); no deploy, upload, apply or invoke"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_internal_status_active.py",
+      "kind": "test",
+      "commit_or_etag": "9b9c573ce7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on the worker branch only; offline fakes; no AWS, network or invoke"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_allowed_firm_ids.py",
+      "kind": "test",
+      "commit_or_etag": "9b9c573ce7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on the worker branch only; offline fakes; no AWS, network or invoke"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR172-y-AC1",
+      "criterion_verbatim": "the five named status tests are present and pass.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-54/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r17/ar17_checks.py y172-status --root C:/dev/wk-irpt-anlreq-54",
+      "output_evidence": "Y172-STATUS-OK (rc=0). Printed: 'status tests: 17 passed, 0 failed (rc=0)'",
+      "denominator": "5 of 5 named test functions present in test_internal_status_active.py; 17 of 17 tests in that file pass",
+      "expect": "Y172-STATUS-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR172-y-AC2",
+      "criterion_verbatim": "the difference control -- the whole `_authz` test folder passes (320 at the base).",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-54/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r17/ar17_checks.py y172-keep --root C:/dev/wk-irpt-anlreq-54",
+      "output_evidence": "Y172-KEEP-FAIL (rc=1). Printed: '_authz tests: 332 passed, 5 failed (rc=1)' and 'FAIL: the _authz folder must pass with at least 320 (the base count)'",
+      "denominator": "332 passed of 337 collected in _authz/tests (base 320 passed; 17 new tests; 5 failed)",
+      "expect": "Y172-KEEP-OK",
+      "status": "FAIL",
+      "status_reason": "Five earlier tests outside the order's <paths> change expectation under the rule: four in test_interactive_entry.py (default profile read, no users row with status active) and one in test_svc_custody_statement.py (fixture _ALL_ROW carries no status). Not edited, because both files are outside the write grant. Recorded as BLOCKING surprise row IRPT_ANLREQ-D2-W54-S4. The order stays open."
+    },
+    {
+      "criterion_id": "AR172-y-AC3J",
+      "criterion_verbatim": "the rule is exactly the ticket service's (status exactly `active`, no row refused) and changes nothing for service or client callers or for a caller that selects no other firm.",
+      "method": "manual_read_with_citation",
+      "invocation": "none; judgment criterion, not run by the worker. The rule as committed: infra/aws/lambda/investor-reporting/_authz/served.py lines 1157-1162 at 9b9c573ce7",
+      "output_evidence": "The committed rule (served.py:1157-1162 at 9b9c573ce7): a row that is None raises; row.get('status') != 'active' raises before the allowedFirmIds read; the rest of the reader is unchanged. The ticket service comparison cited in INTERNAL_READER_NO_ROW_READ.json is lambda_function.py:384-386 (round 9). Recorded without a verdict.",
+      "denominator": "1 rule read against 1 comparator (the ticket service status rule as cited in the AR-y-163 read) and 3 caller classes (internal selecting another firm; service; client or own-firm selection)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion graded at L9 by 3.0.0_SA_CVO, never by the worker. Output recorded; no PASS or FAIL.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Spec names no mutant.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- the criteria are one check-script run each and one pytest run; the spec names no same-input comparison",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W54-S4",
+    "IRPT_ANLREQ-D2-W54-S5"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "live AWS, network, push, deploy, upload, apply and invoke",
+      "reason": "outside the order's bounds: no live call, no push, no deploy, no upload, no apply, no invoke"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest tests -q -p no:cacheprovider --color=no (cwd infra/aws/lambda/investor-reporting/_authz)",
+      "result": "332 passed, 5 failed of 337 collected (rc=1) at the 9b9c573ce7 working tree; base 320 passed (rc=0) before the change"
+    },
+    {
+      "tool": "bash .tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <each of the three .py files>",
+      "result": "pre-commit gate clean for 1 of 1 file(s) for each file (rc=0)"
+    }
+  ]
+}
