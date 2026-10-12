@@ -32,7 +32,9 @@ Cell CN-d-5 (merged `0468b6c8ba`) landed the read-only tool `.tools/mdpf-code-eq
 1. Edit no source file. Open a deploy ledger (NEVER-2) BEFORE the first act; name in it the three keys, the lambda `mdpf-gold-lambda`, and every
    consumer that reads the global account-distribution object.
 2. **PRECONDITIONS, read first; any false means do nothing and report which:**
-   a. `MDPF_STRATID.TO-APPLY-R2` reads `complete` and its ledger `mdpf-stratid-r2-global-fold` reads CLOSED (it names `mdpf_gold_consolidator.py`
+   a. (AMENDMENT 2, 2026-10-12 ~14:0xZ: the gate is the LEDGER. `mdpf-stratid-r2-global-fold` CLOSED 13:44:42Z with L4 PASS on the 13:30Z fire, read by
+      2.0.0_SA_COO~S1 @8ca310cb7a; that is the substantive condition and it holds. The `<status>` flip of the TO file is S1's record act, no longer a
+      gate of this order: waived in writing here, msg 4378.) Original text: `MDPF_STRATID.TO-APPLY-R2` reads `complete` and its ledger `mdpf-stratid-r2-global-fold` reads CLOSED (it names `mdpf_gold_consolidator.py`
       too; two acts never copy one key in one window). While it is open, this order WAITS: do not start D1.
    b. The pin `0d39789fdf` (or a later commit that carries the three files unchanged) is an ancestor of origin's `box/dell1`
       (`git ls-remote` then `git merge-base --is-ancestor`). Measured at issue: yes.

@@ -13,7 +13,7 @@ import json
 import sys
 from pathlib import Path
 
-REC = "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_dashbd_r45/R45_REFRESH4_APPLY_RECORD.json"
+REC = "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_dashbd_r45/R45_REFRESH4_APPLY_RECORD.json"
 PACKET_SHA = "04cf16cd48161a931f5e5da740e60562ec9505d58c154a467375d12c6415ad72"
 BASE = "oNgy4rnrduvN9N2axhsHBfe9izZKd8dZGeFGXAIh+cM="
 PINS = {
