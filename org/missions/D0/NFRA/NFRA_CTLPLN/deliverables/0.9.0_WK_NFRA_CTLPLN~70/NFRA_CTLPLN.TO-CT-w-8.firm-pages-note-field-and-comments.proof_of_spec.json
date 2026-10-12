@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-w-8",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round8.md",
+    "vintage_commit": "6be7ede50d",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-w-8.firm-pages-note-field-and-comments.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-w-8.firm-pages-note-field-and-comments.md",
+    "group": "OTHER",
+    "vintage_commit": "6be7ede50d"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~70",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_naming.py",
+      "kind": "script",
+      "commit_or_etag": "6ae365f583",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "generator edit on branch wk-NFRA_CTLPLN-70 (11 insertions, 5 deletions): validate() accepts an optional non-empty string note on a firm row and refuses any other type; _blk_firm_allowed_paths renders each note as // lines above its entry. Passed commit-gate.sh. No deploy, no AWS call.",
+      "artifact_covered_by": [
+        "CTw8-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/logic/registry/firm_pages.json",
+      "kind": "config_data",
+      "commit_or_etag": "e76206bdcb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three note fields (the three firm rows whose set held comment lines at 2ed4373d: inflection 4 lines, cottonwood 11, demo 23; 38 in all, verbatim, non-ASCII as JSON escapes); 49financial carries no note because its set held no comment at 2ed4373d. The four evidence strings name the generated block's lines 46-55, 56-68, 69-91 and 92-126 in the regenerated portal file. grep -c of the note key reads 3, as AMENDMENT 1 expects.",
+      "artifact_covered_by": [
+        "CTw8-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/portal_data_proxy/firm_page_access.py",
+      "kind": "script",
+      "commit_or_etag": "e76206bdcb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "regenerated: line 1 (the mark, registry hash b1073ac7da0e400a to 01302199385a1de5) is the only difference from 6be7ede50d; lines 2 onward are byte-identical (diff: 0 lines beyond line 1). The module is deployed live since CT-w-3 and was NOT redeployed by this order.",
+      "artifact_covered_by": [
+        "CTw8-AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_firm_notes.py",
+      "kind": "test",
+      "commit_or_etag": "e76206bdcb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "T1 generated block equals a fresh render; T2 comment multisets equal (38); T2b per-firm verbatim order; T3 set equality, 4 firms, 35 pairs; T4 outside-block bytes; T5 validate refusals and admission; T6 Lambda module first line only. Twelve tests. Mutant-checked in memory (controls below).",
+      "artifact_covered_by": [
+        "CTw8-AC1"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/lib/firmAccess.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "1df22d9666",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal repository commit on the nested branch wk-NFRA_CTLPLN-70-portal, based on portal DEV 2ed4373d: 35 insertions, 33 deletions, one file (git -C portal diff --stat 2ed4373d 1df22d9666). It is the only commit above 2ed4373d (git -C portal rev-list --count 2ed4373d..HEAD reads 1). Not pushed, not on DEV, not on PROD; the workspace gitlink is not moved. Read with git -C portal show 1df22d9666:src/lib/firmAccess.ts.",
+      "artifact_covered_by": [
+        "CTw8-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTw8-AC1",
+      "criterion_verbatim": "CTw8-AC1 -- T1-T6 pass. Invocation: python -m pytest -q lib/tests/test_opal_naming_firm_notes.py ; expect output containing: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q lib/tests/test_opal_naming_firm_notes.py",
+      "output_evidence": "re-run from the worktree root (AMENDMENT 1 re-run, no timeout prefix), rc=0: '12 passed in 0.45s' (earlier run: '12 passed in 0.75s', rc=0)",
+      "denominator": "12 of 12 collected tests passed: T1 fresh render (1), T2 comment multisets (1), T2b per-firm verbatim order (1), T3 set equality 4 firms 35 pairs (1), T4 outside-block bytes (1), T5 unmutated validates clean plus 4 refused cases plus 1 admitted case (6), T6 Lambda first line only (1)",
+      "status": "PASS",
+      "expect": "passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTw8-AC2",
+      "criterion_verbatim": "CTw8-AC2 -- the three firm rows that had comments carry a note (AMENDMENT 1: the issuer wrote 4; 49financial had no comment). Invocation: grep -c '\"note\"' infra/logic/registry/firm_pages.json ; expect output: 3",
+      "method": "command",
+      "invocation": "grep -c '\"note\"' infra/logic/registry/firm_pages.json",
+      "output_evidence": "re-run from the worktree root (AMENDMENT 1 re-run, no timeout prefix), rc=0: output '3'. Base check at 2ed4373d: git -C portal show 2ed4373d:src/lib/firmAccess.ts, lines 45-54 are the 49financial entry ('49financial': new Set([ ... ]),) with no comment line; the first comment line after it is line 63, inside the inflection entry; comment-line count from line 45 to line 62 is 0. The registry's firms list carries note for inflection (4 lines), cottonwood (11) and demo (23), and none for 49financial.",
+      "denominator": "3 of 3 firm rows that carry a comment at 2ed4373d carry a note (4 firm rows in the registry; 49financial, which had no comment, carries none)",
+      "status": "PASS",
+      "expect": "3",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "in-memory mutants of the committed portal block, nothing written: (A) one note word reworded in the demo note; (B) one note line dropped; (C) one page dropped from the inflection entry. Run from .scratch/mutant_notes.py.",
+      "expected": "T2b per-firm equality returns False for A and for B; the T2 multiset equality returns False for A; T3 set equality returns False for C, with 34 pairs against 35",
+      "observed": "baseline T2b equal to the old notes: True; A T2b equal: False, A T2 multiset equal: False; B T2b equal: False; C T3 set-equal: False, pairs 34",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "generate() run twice into two separate scratch directories, bytes compared to each other and to the portal file",
+      "observed": "runA equals runB: True; runA equals the portal file: True; 8388 bytes",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "landing the portal commit 1df22d9666 on portal DEV or PROD, and moving the workspace gitlink",
+      "reason": "the cell lands nothing on DEV or PROD and pushes nothing; the issuer lands the reviewed commit after these proofs. The gitlink is not committed."
+    },
+    {
+      "item": "a fourth firm note (for 49financial)",
+      "reason": "49financial's set held no comment line at 2ed4373d, so there is nothing to move; an empty note is refused by validate() and a placeholder would break T2. AMENDMENT 1 sets CTw8-AC2 to 3. Surprise NFRA_CTLPLN-W70-S1 records the premise."
+    },
+    {
+      "item": "portal typecheck, unit tests and build of firmAccess.ts",
+      "reason": "BLIND: the cell forbids a portal build, and node_modules is absent. The block's shape is checked by T1 to T4 and T2b in Python only."
+    },
+    {
+      "item": "the portal-side drift test (a hand edit inside the generated block fails the portal's CI)",
+      "reason": "the portal repository's test tooling needs node_modules; the CTO rules that test."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W70-S1: CTw8-AC2 expected four firm rows with a note; the portal base 2ed4373d holds comment lines in three firm sets (49financial holds none), so the grep reads 3. RESOLVED by the issuer's AMENDMENT 1 (2026-10-12): CTw8-AC2 now expects 3, and this instance grades it PASS on that expectation.",
+    "NFRA_CTLPLN-W70-S2: the cell says the old comments are ASCII; five of the 38 comment lines inside the literal carry non-ASCII characters (an em dash, a right arrow, a section sign). Moved verbatim; the registry stores them as JSON escapes. Ruled by the issuer (VERBATIM stands, the registry is read as UTF-8). OBSERVATION, INERT.",
+    "NFRA_CTLPLN-W70-S3: before this order the existing access suite read 5 failed on this worktree, because portal base 2ed4373d holds no generated block (the CT-w-4 block is commit ef65ad67 on another portal branch). Portal commit 1df22d9666 regenerates the block on 2ed4373d; the pair reads 21 passed. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~70/NFRA_CTLPLN.TO-CT-w-8.firm-pages-note-field-and-comments.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -I lib/opal_naming.py validate",
+      "invocation": "timeout 120 python -I lib/opal_naming.py validate",
+      "result": "VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s) at registry@05e038529cd48413 over all 16 registry file(s); rc=0"
+    },
+    {
+      "tool": "python -I lib/opal_naming.py generate --out . --target portal/src/lib/firmAccess.ts",
+      "invocation": "timeout 120 python -I lib/opal_naming.py generate --out . --target portal/src/lib/firmAccess.ts",
+      "result": "WROTE portal/src/lib/firmAccess.ts (8388 bytes); GENERATE: 1 written, 0 skipped; rc=0"
+    },
+    {
+      "tool": "python -I lib/opal_naming.py generate --out . --target infra/aws/lambda/portal_data_proxy/firm_page_access.py",
+      "invocation": "timeout 120 python -I lib/opal_naming.py generate --out . --target infra/aws/lambda/portal_data_proxy/firm_page_access.py",
+      "result": "WROTE infra/aws/lambda/portal_data_proxy/firm_page_access.py (522 bytes); GENERATE: 1 written, 0 skipped; rc=0"
+    },
+    {
+      "tool": "python -m pytest -q lib/tests/test_opal_naming.py lib/tests/test_opal_naming_firm_pages.py lib/tests/test_opal_naming_firm_access_ts.py lib/tests/test_opal_naming_firm_notes.py",
+      "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider lib/tests/test_opal_naming.py lib/tests/test_opal_naming_firm_pages.py lib/tests/test_opal_naming_firm_access_ts.py",
+      "result": "117 passed (96 + 16 + 5), rc=0; the new suite alone: 12 passed, rc=0. Before the portal commit, the access_ts pair read 5 failed (see surprise NFRA_CTLPLN-W70-S3)."
+    },
+    {
+      "tool": "AMENDMENT 1 re-run (no timeout prefix): suites and criteria",
+      "invocation": "python -m pytest -q lib/tests/test_opal_naming.py ; python -m pytest -q lib/tests/test_opal_naming_firm_pages.py ; python -m pytest -q lib/tests/test_opal_naming_firm_access_ts.py ; python -m pytest -q lib/tests/test_opal_naming_firm_notes.py ; grep -c '\"note\"' infra/logic/registry/firm_pages.json",
+      "result": "test_opal_naming.py 96 passed; test_opal_naming_firm_pages.py 16 passed; test_opal_naming_firm_access_ts.py 5 passed; test_opal_naming_firm_notes.py 12 passed; grep -c reads 3; each rc=0. Portal: git -C portal log 2ed4373d..HEAD lists 1df22d96 alone."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "timeout 120 bash .tools/commit-gate.sh lib/opal_naming.py ; timeout 120 bash .tools/commit-gate.sh lib/tests/test_opal_naming_firm_notes.py ; timeout 120 bash .tools/commit-gate.sh infra/aws/lambda/portal_data_proxy/firm_page_access.py",
+      "result": "All checks passed! and pre-commit gate clean for 1 of 1 file(s) on each; rc=0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "timeout 120 bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_CTLPLN~70 <0.9.0_WK_NFRA_CTLPLN~70@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "committed 6ae365f583 (lib/opal_naming.py) and e76206bdcb (registry, Lambda module, test file); naming-gate, to-pipeline-gate and surprise-row-gate ran and passed on each"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py (instance, CTw8-AC1,CTw8-AC2)",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> CTw8-AC1,CTw8-AC2",
+      "result": "INVALID rc=1: VIOLATION surprises[1] NFRA_CTLPLN-W70-S2 resolves to NO row; VIOLATION surprises[2] NFRA_CTLPLN-W70-S3 resolves to NO row (both damaged at HEAD, see W70-S4); 2 of 2 acceptance rows PASS by output; order not flipped"
+    }
+  ]
+}
