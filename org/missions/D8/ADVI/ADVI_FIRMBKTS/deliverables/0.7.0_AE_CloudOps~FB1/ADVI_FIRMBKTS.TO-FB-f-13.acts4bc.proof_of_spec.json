@@ -1,0 +1,157 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-f-13.lambda-seams",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-13.lambda-seams.md",
+  "group": "OTHER",
+  "vintage_commit": "0c1879d253"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FB1",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-f-13.lambda-seams.md",
+  "vintage_commit": "8658d57df1"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "lambda:exec-summary-generator (code + env BD_PLATINUM_MODE=canonical)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-apply 07:43:38Z-07:44:15Z, 0 added 1 changed 0 destroyed; CodeSha256 equals the artifact; r4_execeq EQUAL before the value",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "CodeSha256 fdPwodukz88dtRfm0bGw8T5lmUxwrmJ3LFnqmvccKe4="
+  },
+  {
+   "path_or_key": "lambda:opal-partners-data (code + env BD_PLATINUM_MODE=canonical)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-apply 07:48:53Z-07:49:29Z, 0 added 1 changed 0 destroyed; CodeSha256 equals the artifact; content equal before and after by replay",
+   "artifact_covered_by": [
+    "AC2",
+    "AC3"
+   ],
+   "commit_or_etag": "CodeSha256 c9FXD84szSBD5oSukUi8sCA6szY/LYiHpRYBWXnOBv4="
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/PARTNERS_BEFORE.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the BEFORE sample, 8 records",
+   "artifact_covered_by": [
+    "AC3"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/PARTNERS_AFTER.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the AFTER sample, 8 records",
+   "artifact_covered_by": [
+    "AC3"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/ACT4BC_EXPECT.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the two artifact hashes and priors",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ],
+   "commit_or_etag": "959760132c"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management\\20261012T0741Z_advi-firmbkts-fb-f-13-acts4bc-20261012_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "entry opened before the first write, closed with the outputs",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "invocation": "timeout 60 aws lambda get-function-configuration --function-name exec-summary-generator --region us-east-1 --query \"[CodeSha256,Environment.Variables.BD_PLATINUM_MODE]\" --output text",
+   "expect": "^\\S+\\s+canonical$",
+   "output_evidence": "get-function-configuration of exec-summary-generator (run as .tools/aws), read 2026-10-12T07:49:52Z, printed:\nfdPwodukz88dtRfm0bGw8T5lmUxwrmJ3LFnqmvccKe4=\tcanonical",
+   "denominator": "1 of 1 function; CodeSha256 equals ACT4BC_EXPECT.json",
+   "status": "PASS",
+   "criterion_verbatim": "timeout 60 aws lambda get-function-configuration --function-name exec-summary-generator --region us-east-1 --query \"[CodeSha256,Environment.Variables.BD_PLATINUM_MODE]\" --output text",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AC2",
+   "invocation": "timeout 60 aws lambda get-function-configuration --function-name opal-partners-data --region us-east-1 --query \"[CodeSha256,Environment.Variables.BD_PLATINUM_MODE]\" --output text",
+   "expect": "^\\S+\\s+canonical$",
+   "output_evidence": "get-function-configuration of opal-partners-data (run as .tools/aws), read 2026-10-12T07:49:52Z, printed:\nc9FXD84szSBD5oSukUi8sCA6szY/LYiHpRYBWXnOBv4=\tcanonical",
+   "denominator": "1 of 1 function; CodeSha256 equals ACT4BC_EXPECT.json",
+   "status": "PASS",
+   "criterion_verbatim": "timeout 60 aws lambda get-function-configuration --function-name opal-partners-data --region us-east-1 --query \"[CodeSha256,Environment.Variables.BD_PLATINUM_MODE]\" --output text",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AC3",
+   "invocation": "timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_sample_eq.py --before org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/PARTNERS_BEFORE.json --after org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/PARTNERS_AFTER.json; echo \"exit=$?\"",
+   "expect": "SAMPLE EQUAL: (\\d+) of \\1 cases",
+   "output_evidence": "r4_sample_eq.py from the tool amended in 0c1879d253 (AMENDMENT 4 of the order), read 2026-10-12T08:00:11Z, printed:\nEQUAL     gold/artifacts/                    partner  status 200 -> 200\nEQUAL     gold/entities/accounts/            partner  status 200 -> 200\nEQUAL     gold/entities/advisors/            partner  status 200 -> 200\nEQUAL     gold/entities/clients/             partner  status 404 -> 404\nEQUAL     gold/views/                        partner  status 200 -> 200\nEQUAL     platinum/advisors/                 partner  status 200 -> 200\nEQUAL     platinum/clients/                  partner  status 200 -> 200\nEQUAL     platinum/firm/                     partner  status 200 -> 200\nSAMPLE EQUAL: 8 of 8 cases; granted cases 0, refused cases 0; ownership reads at the canonical key 0\nNOTE: platinum/clients/ partner read EQUAL by decompressed content hash (claim: replayed-prior-artifact), not by the compressed body hash\nNOTE: a function lacks a granted or a refused case (the performance adapter and the validator are read apart)\nexit=0\nplatinum/clients/ reads EQUAL on the decompressed content hash recorded on both sides (67ac42f423e34b66..., 4,931,112 bytes); BEFORE claim replayed-prior-artifact, AFTER claim live-function-read.",
+   "denominator": "8 of 8 cases EQUAL (7 by the compressed body hash, 1 by the decompressed content hash); 7 of 8 events read status 200 before and after, gold/entities/clients/ reads 404 in both",
+   "status": "PASS",
+   "criterion_verbatim": "timeout 118 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_sample_eq.py --before org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/PARTNERS_BEFORE.json --after org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/PARTNERS_AFTER.json; echo \"exit=$?\"",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant is named by the order. The difference control is the prior artifact replayed locally in legacy mode against the live canonical function.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the platinum/clients/ event invoked 4, 8 and 6 times at the new version; the other classes 4 times",
+   "observed": "compressed hash 3 of 4 and 5 of 8 distinct (gzip MTIME); decompressed content 1 distinct of 6; other classes 1 distinct of 4",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the BEFORE reference by content",
+   "reason": "taken by a local replay of the prior artifact in legacy mode, not a live read: the live function is already on the new code"
+  },
+  {
+   "item": "the exec-summary function's put",
+   "reason": "not invoked (the order); read at its 04:30Z run on 2026-10-13 (runbook step 9)"
+  },
+  {
+   "item": "AC3 by content for one case",
+   "reason": "platinum/clients/ answers a gzip body whose header carries a timestamp; the case reads EQUAL on a recorded decompressed content hash per the issuer's AMENDMENT 4 (row ADVI_FIRMBKTS-D1-S36); the BEFORE content is a replay of the prior artifact, not a live read, because the live function is already on the new code"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-S36: AC3 reads SAMPLE EQUAL 7 of 8 because the sample hashes the compressed (gzip, base64) body of platinum/clients/, whose header carries a timestamp; the decompressed content is identical across the prior artifact, the new artifact in both modes and the live function"
+ ],
+ "session_log": "org/critical_paths/change_management\\20261012T0741Z_advi-firmbkts-fb-f-13-acts4bc-20261012_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "terraform 1.15.8 / safe-apply",
+   "invocation": "scoped plan with -var platinum_mode=canonical, show -json attribute check, --dry-seat-gates, safe-apply of the saved plan (twice)",
+   "result": "each: Plan 0/1/0, Apply complete 0/1/0, seat gates CLEAR, env change exactly one key"
+  },
+  {
+   "tool": "r4_execeq.py / r4_sample_eq.py",
+   "invocation": "--zip before the value; --before/--after at AC3",
+   "result": "EXEC READS EQUAL 194/194, 2/2, 4/4; SAMPLE EQUAL 7 of 8 (exit 1)"
+  }
+ ]
+}
