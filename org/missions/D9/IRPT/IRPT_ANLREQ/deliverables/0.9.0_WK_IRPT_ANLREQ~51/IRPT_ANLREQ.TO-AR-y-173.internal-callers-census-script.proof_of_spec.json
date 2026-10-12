@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-173",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-173.internal-callers-census-script.md",
+    "group": "OTHER",
+    "vintage_commit": "247a5cfe7c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R17_Y.md",
+    "vintage_commit": "247a5cfe7c",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-173.internal-callers-census-script.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~51",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~51/r17/count_internal_callers.py",
+      "kind": "script",
+      "commit_or_etag": "67ac9498f7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit 67ac9498f7 on wk-IRPT_ANLREQ-51 only; not pushed, not invoked, no live read, no boto3 client in --self-test. The one live run is a separate order to an applier with the read grant on opal-users-v2.",
+      "artifact_covered_by": ["AR173-y-AC1", "AR173-y-AC2J"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~51/r17/CENSUS_SCRIPT_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "67ac9498f7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same commit. Members script_blob, what_it_reads, what_it_cannot_read, output_members, no_address_in_output (the line that guarantees it), and a residual limit.",
+      "artifact_covered_by": ["AR173-y-AC1", "AR173-y-AC2J"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR173-y-AC1",
+      "criterion_verbatim": "AR173-y-AC1: the script exists, is ASCII, holds no write-shaped or invoke call, its --self-test prints CENSUS-SELFTEST-OK, and its record is complete.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-51/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r17/ar17_checks.py y173-census --root C:/dev/wk-irpt-anlreq-51",
+      "output_evidence": "Y173-CENSUS-OK (rc=0). The check runs `python -I count_internal_callers.py --self-test` on the committed file and it prints CENSUS-SELFTEST-OK; the check finds the script ASCII, the forbidden-call pattern absent, and the record's five members present. Self-test stdout (run directly, rc=0): CENSUS-SELFTEST-OK. Pre-check the check against an empty root: FAIL x2 then Y173-CENSUS-FAIL (rc=1).",
+      "denominator": "5 of 5 record members present (script_blob, what_it_reads, what_it_cannot_read, output_members, no_address_in_output); 0 of 1 forbidden write-shaped or invoke call patterns found in the script; 9 of 9 synthetic rows and 3 of 3 failure or refusal cases asserted in the self-test",
+      "status": "PASS",
+      "expect": "Y173-CENSUS-OK"
+    },
+    {
+      "criterion_id": "AR173-y-AC2J",
+      "criterion_verbatim": "AR173-y-AC2J (judgment, graded at L9, never by you): the script's output can carry no address, name or id, and a row or log it cannot read is never counted as active or as a known caller.",
+      "method": "manual_read_with_citation",
+      "invocation": "none: judgment criterion, graded at L9 by 3.0.0_SA_CVO from count_internal_callers.py (bucket at lines 102-109; census at lines 111-136; part_b at 139-141; self_test at 230-273) and CENSUS_SCRIPT_RECORD.json at commit 67ac9498f7",
+      "output_evidence": "Recorded for the L9 reader, no verdict: the printed JSON carries counts and the table's own short tokens for firmId, userType and status (any other value is printed as other-string or non-string); the row ids and attribute values are not printed; the self-test asserts that no @ and no synthetic address word appears in the printed part_a. An unreadable row (malformed attribute, non-dict item) is counted under unreadable_rows and excluded from internal and active counts; a scan error exits 3 with its code and counts nothing; part (b) prints NOT_AVAILABLE with a reason, never a number.",
+      "denominator": "9 synthetic rows: 8 PROFILE, 1 non-PROFILE filtered out server-side; 1 unreadable row excluded from every count; 0 live rows read",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: the oracle is 3.0.0_SA_CVO at L9; the worker records output and gives no verdict. Only synthetic rows were exercised; the live table was not read.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Before the script existed the check had nothing to pass: run against an empty root it reports the missing script and the missing record.",
+      "expected": "FAIL with no script; OK after the commit",
+      "observed": "FAIL: no CENSUS_SCRIPT_RECORD.json; FAIL: no count_internal_callers.py; Y173-CENSUS-FAIL (rc=1). After 67ac9498f7: Y173-CENSUS-OK (rc=0).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the self-test was run twice on the committed file and its stdout hashed; the fakes hold no clock, no random value and no network.",
+      "observed": "identical stdout hash both runs (21c06f76c5876f31a12e06b16a78d7cb); the final check run printed Y173-CENSUS-OK (rc=0).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "part (b): the 30-day count of distinct internal callers of the investor-reporting status, directory and export functions",
+      "reason": "NOT_AVAILABLE by the cell's own condition: the request log lines carry an event, an operation, a public reason code and a correlation id, and the internal record carries no caller field (served.py:81-108, errors.py:146-201; _scope/ writes no caller identity). The script prints part_b NOT_AVAILABLE with this reason and no number."
+    },
+    {
+      "item": "part (a) against the live opal-users-v2 table",
+      "reason": "Not run. No live call is in this order (the order says no live AWS call). The script's one live run is a separate order to an applier that holds the read grant. Only synthetic rows were exercised."
+    },
+    {
+      "item": "the AR-y-163 read and the r16 count script as read-first",
+      "reason": "Absent from this worktree; read from the shared tree at their paths (INTERNAL_READER_NO_ROW_READ.json, count_stored_inputs.py) as the order allows. Their facts used: the status values active and disabled on the live table (committed record r8_ds1), and the stored-input script's shape (argparse, --self-test on fakes, read-only calls, the error code reporting)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "count_internal_callers.py --self-test",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~51/r17/count_internal_callers.py --self-test",
+      "result": "CENSUS-SELFTEST-OK (stdout), rc=0; stderr: self-test: 9 synthetic rows (8 PROFILE), 6 status shapes, scan pages 3, denied scan -> AccessDeniedException, reply shape -> SCAN_REPLY_SHAPE"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~51/r17/count_internal_callers.py",
+      "result": "All checks passed! / OK: pre-commit gate clean for 1 of 1 file(s); rc=0"
+    }
+  ]
+}
