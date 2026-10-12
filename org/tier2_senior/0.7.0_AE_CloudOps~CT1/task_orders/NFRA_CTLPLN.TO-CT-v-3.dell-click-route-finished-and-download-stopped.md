@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~CT1</issued_to>
 <date>2026-10-12</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C after its own reads at origin/CLOUD (commit 5c44e10a63): proof instance VALID in-tree (CTv3-AC1..AC3); the receive file carries the 7-of-7 hash table (mismatches: 0), verify and prove ok=True, CLICK 8.3.1 from the fresh venv, DOWNLOADS-TODAY requests=0; the blocked-download file carries the one BLOCKED line (PIP_NO_INDEX=1 at User scope held against an explicit --index-url, rc=1, no file). Limits as the seat states them: the message names no route (graded by the CVO as a judgment), the run itself was not request-counted (the kit measurement of the same form was, index=0 proxy=0), processes that predate the variable keep their old environment, intake_receive.py install was not used because it runs pip install --user into the box interpreter (row D1-S10, a round-8 input). Ledger nfra-ctlpln-ctv3-pip-no-index-user-20261012 CLOSED; the CTO WORLD read applies.</status_reason>
 <risk>WORLD</risk>
 <proof_genre>BUILD</proof_genre>
 <round>7</round>
