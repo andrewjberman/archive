@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-468",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-468.demand-queue-request-878-as-traded-closes.md",
+    "group": "OTHER",
+    "vintage_commit": "9813ef1852"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "9813ef1852",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-468.demand-queue-request-878-as-traded-closes.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~323",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~323/IRPT_BCKEND-AS-TRADED-CLOSES-878.json",
+      "kind": "config_data",
+      "commit_or_etag": "4e2bf8bf85",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the request file for the demand queue: 878 distinct symbols each with a cusip, 2026-04-14 to 2026-10-09, fields close, daily enrolment asked; kept in the worker folder, not filed with any queue",
+      "artifact_covered_by": [
+        "IB162-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~323/IB162-1_request_derivation.json",
+      "kind": "config_data",
+      "commit_or_etag": "4e2bf8bf85",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the derivation record: 878 derived, 303 / 894 / 878 reproduced, seven zeros, base_commit 9813ef1852",
+      "artifact_covered_by": [
+        "IB162-1-AC1",
+        "IB162-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~323/ib162_derive.py",
+      "kind": "config_data",
+      "commit_or_etag": "4e2bf8bf85",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the driver; passes .tools/commit-gate.sh; runs the earlier cells' drivers unchanged (S3 list and get only) and writes both json files",
+      "artifact_covered_by": [
+        "IB162-1-AC1",
+        "IB162-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB162-1-AC1",
+      "criterion_verbatim": "IB162-1-AC1 (IB-pr-468) -- see the worker face of IRPT_BCKEND.TO-IB-pr-468",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r162/p162_cells.py\" . IB162-1-AC1",
+      "expect": "IB162-1-AC1 PASS",
+      "output_evidence": "OK: 878 securities, 878 with a cusip; 2026-04-14 to 2026-10-09; daily enrolment asked | IB162-1-AC1 PASS | rc=0",
+      "denominator": "878 of 878 securities carry a symbol and a cusip (0 cusip_claim absent); 878 distinct symbols; 125 trading days 2026-04-14 to 2026-10-09 inclusive",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB162-1-AC2",
+      "criterion_verbatim": "IB162-1-AC2 (IB-pr-468) -- see the worker face of IRPT_BCKEND.TO-IB-pr-468",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r162/p162_cells.py\" . IB162-1-AC2",
+      "expect": "IB162-1-AC2 PASS",
+      "output_evidence": "OK: the list reproduces 878; no price fetched, nothing invoked, no account written | IB162-1-AC2 PASS | rc=0",
+      "denominator": "partitions read: holdings 91 and anchor 86 present of the calendar days 2026-06-09..2026-10-09 (85 graded days); transactions 121 of 121 partitions; list 303 (IB-pr-452) -> 894 overlap -> 878 distinct tickers; seven zeros all 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control: the check run (the original p162_cells.py at its own path, root = a scratch directory outside the worktree) against mutated copies of the two json files: (1) the last security dropped from the request (877), (2) prices_fetched set to 1 in the derivation record.",
+      "expected": "IB162-1-AC1 FAIL, IB162-1-AC2 FAIL",
+      "observed": "FAIL: securities must be 878 entries with 878 distinct symbols (got 877) | IB162-1-AC1 FAIL ; FAIL: prices_fetched must be 0 | IB162-1-AC2 FAIL",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "ib162_derive.py rerun over the same cache and transactions pickle (steps 3 to 6 and the writer); sha1 of both json files compared before and after",
+      "observed": "IDENTICAL",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_BCKEND-D2-W323-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance>",
+      "result": "see final report"
+    }
+  ]
+}
