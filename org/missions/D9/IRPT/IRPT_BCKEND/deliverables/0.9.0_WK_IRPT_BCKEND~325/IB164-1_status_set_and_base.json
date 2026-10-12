@@ -1,0 +1,629 @@
+{
+ "base_commit": "13e1d6d3fb",
+ "arm": "READER_CODE_OVER_SERVED_GOLD",
+ "arm_in_words": "NOT the deployed route. IB-pr-467's arm, unchanged: the route reader's own code at the base commit (holdings_gold.calculate, with the source the route composes at installed.py:75 for each of its two firms) run locally over the SERVED holdings gold read from S3 (list and get only; no Lambda invoked, no sign-in, nothing written to AWS). Every partition at or before 2026-10-08 was read once into a local cache outside the worktree; the reader's calculate() was run once per account per window with the rows served from memory by IB-pr-464's stand-in for the source's transport (copied). The status census, the day placement and the claim counter are this driver's, over the same cached rows.",
+ "latest_landed_day": "2026-10-08",
+ "latest_landed_day_note": "Partitions listed: the 49F entry 567 (last 2026-10-09), orion 1619 (last 2026-10-08); used (<= 2026-10-08): 566 and 1619.",
+ "status_tokens_in_code": [
+  {
+   "token": "OK",
+   "defined_at": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:219",
+   "assigned_at": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:873",
+   "condition_in_words": "np.select default (:874): none of the three conditions is true, i.e. the basket (included holdings plus positive cash) is above zero or the account is pure cash; the return is computed (:875-878). It can later be overwritten by IMPLAUSIBLE-RETURN (:883) or FOLLOWS-DISCONTINUITY (:952)."
+  },
+  {
+   "token": "NO-PRIOR-HOLDINGS",
+   "defined_at": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:220",
+   "assigned_at": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:873",
+   "condition_in_words": "np.select choice 1, condition at :869: held_count == 0 and cash_value == 0.0 -- no position row (included, excluded or negative) and exactly zero cash on the prior trading day."
+  },
+  {
+   "token": "ALL-HOLDINGS-EXCLUDED",
+   "defined_at": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:222",
+   "assigned_at": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:873",
+   "condition_in_words": "np.select choice 2, conditions at :870-871: held_count > 0, included_count == 0, negative_count == 0 and cash_value <= 0.0 -- the account held positions, none reached the basket (no identifier, or no price on both days), none was negative, and there is no positive cash."
+  },
+  {
+   "token": "NON-POSITIVE-BASE",
+   "defined_at": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:221",
+   "assigned_at": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:873",
+   "condition_in_words": "np.select choice 3, condition at :872: account_value <= 0.0 (account_value = included_value + positive cash, :856), reached only when neither earlier condition is true. By the first two conditions that means: (a) no position row and non-zero cash that is negative (a debit; positive cash would make the basket positive); (b) at least one negative position row, no included row, cash <= 0; (c) at least one included row of total value exactly 0 (included rows are value >= 0) and cash <= 0."
+  },
+  {
+   "token": "IMPLAUSIBLE-RETURN",
+   "defined_at": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:223",
+   "assigned_at": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:883",
+   "condition_in_words": "after the grade, a row that is status OK whose computed daily_return is <= -1.0 or >= 1.0 (_IMPLAUSIBLE_LO/_HI, :169; mask :881-882) is overwritten (:883) and its return nulled (:884)."
+  },
+  {
+   "token": "FOLLOWS-DISCONTINUITY",
+   "defined_at": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:224",
+   "assigned_at": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:952",
+   "condition_in_words": "apply_follow_day_rule (:939-955): a row that is still OK whose account was IMPLAUSIBLE-RETURN on the previous trading day (ImplausibleIndex, :907-936) is overwritten; does not cascade."
+  }
+ ],
+ "can_a_token_outside_the_constants_be_written": {
+  "answer": "NO",
+  "in_words": "The column is written at three places in the whole producer package (data/assets/scripts/gold/irpt_holdings_performance/, two modules): np.select (data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:873-874) whose choices are three constants and whose default is STATUS_OK; the implausible overwrite (:883, STATUS_IMPLAUSIBLE); the follow-day overwrite (:952, STATUS_FOLLOWS_DISCONTINUITY). holdings_comparison.py only reads the column (:223). A grep of the package for assignments to the status column finds no other writer. The gold's tokens are checked in status_counts_over_the_served_gold.",
+  "line": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:873"
+ },
+ "status_counts_over_the_served_gold": {
+  "the 49F entry": {
+   "partitions_read": 566,
+   "rows_read": 3256566,
+   "by_token": {
+    "ALL-HOLDINGS-EXCLUDED": 467,
+    "FOLLOWS-DISCONTINUITY": 2,
+    "IMPLAUSIBLE-RETURN": 2,
+    "NO-PRIOR-HOLDINGS": 413118,
+    "NON-POSITIVE-BASE": 1596,
+    "OK": 2841381
+   },
+   "tokens_in_the_gold_not_in_the_code": [],
+   "first_partition": "2024-07-09",
+   "last_partition": "2026-10-08",
+   "partitions_lacking_any_held_column": 0,
+   "partitions_with_zero_rows": 0
+  },
+  "orion": {
+   "partitions_read": 1619,
+   "rows_read": 1430575,
+   "by_token": {
+    "NON-POSITIVE-BASE": 575039,
+    "OK": 855536
+   },
+   "tokens_in_the_gold_not_in_the_code": [],
+   "first_partition": "2020-04-27",
+   "last_partition": "2026-10-08",
+   "partitions_lacking_any_held_column": 0,
+   "partitions_with_zero_rows": 0
+  }
+ },
+ "per_entry_and_window": [
+  {
+   "accounts_read": 8916,
+   "accounts_the_reader_refuses": 2020,
+   "accounts_whose_claim_moves": {
+    "accounts_with_a_figure_saying_measured": 6896,
+    "if_non_positive_base_with_a_prior_position_also_moves": 23,
+    "under_the_contract_as_written": 18
+   },
+   "accounts_with_a_figure": 6896,
+   "accounts_with_a_figure_and_a_non_positive_base_day": 28,
+   "end": "2026-10-08",
+   "entry": "the 49F entry",
+   "excluded_days_in_accounts_with_a_figure_by_status": {
+    "ALL-HOLDINGS-EXCLUDED": 157,
+    "FOLLOWS-DISCONTINUITY": 2,
+    "IMPLAUSIBLE-RETURN": 2,
+    "NO-PRIOR-HOLDINGS": 129207,
+    "NON-POSITIVE-BASE": 1223
+   },
+   "non_positive_base_all_positions_by_position_in_window": {
+    "after_last_ok": 496,
+    "before_first_ok": 90,
+    "interior": 637,
+    "of_which_the_last_row": 6
+   },
+   "non_positive_base_all_positions_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 4,
+    "held_none": 1218,
+    "held_only_excluded": 0,
+    "held_only_negative": 1,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "non_positive_base_all_positions_with_nonzero_cash": 1219,
+   "non_positive_base_days": {
+    "all_positions": 1223,
+    "interior": 637
+   },
+   "non_positive_base_days_in_accounts_without_a_figure_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 3,
+    "held_none": 367,
+    "held_only_excluded": 0,
+    "held_only_negative": 3,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "non_positive_base_interior_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 3,
+    "held_none": 634,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "partitions_in_window": 566,
+   "partitions_landed_used": 566,
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "seconds": 398.7,
+   "start": "1970-01-01",
+   "window": "SI",
+   "interior_reproduces_ib_pr_467": true,
+   "ib_pr_467_interior_non_positive_base_days": 637
+  },
+  {
+   "accounts_read": 8126,
+   "accounts_the_reader_refuses": 1294,
+   "accounts_whose_claim_moves": {
+    "accounts_with_a_figure_saying_measured": 6832,
+    "if_non_positive_base_with_a_prior_position_also_moves": 19,
+    "under_the_contract_as_written": 16
+   },
+   "accounts_with_a_figure": 6832,
+   "accounts_with_a_figure_and_a_non_positive_base_day": 17,
+   "end": "2026-10-08",
+   "entry": "the 49F entry",
+   "excluded_days_in_accounts_with_a_figure_by_status": {
+    "ALL-HOLDINGS-EXCLUDED": 144,
+    "NO-PRIOR-HOLDINGS": 36702,
+    "NON-POSITIVE-BASE": 1007
+   },
+   "non_positive_base_all_positions_by_position_in_window": {
+    "after_last_ok": 495,
+    "before_first_ok": 148,
+    "interior": 364,
+    "of_which_the_last_row": 6
+   },
+   "non_positive_base_all_positions_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 2,
+    "held_none": 1004,
+    "held_only_excluded": 0,
+    "held_only_negative": 1,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "non_positive_base_all_positions_with_nonzero_cash": 1005,
+   "non_positive_base_days": {
+    "all_positions": 1007,
+    "interior": 364
+   },
+   "non_positive_base_days_in_accounts_without_a_figure_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 0,
+    "held_none": 35,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "non_positive_base_interior_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 1,
+    "held_none": 363,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "partitions_in_window": 193,
+   "partitions_landed_used": 566,
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "seconds": 215.9,
+   "start": "2026-01-01",
+   "window": "YTD",
+   "interior_reproduces_ib_pr_467": true,
+   "ib_pr_467_interior_non_positive_base_days": 364
+  },
+  {
+   "accounts_read": 7621,
+   "accounts_the_reader_refuses": 899,
+   "accounts_whose_claim_moves": {
+    "accounts_with_a_figure_saying_measured": 6722,
+    "if_non_positive_base_with_a_prior_position_also_moves": 2,
+    "under_the_contract_as_written": 2
+   },
+   "accounts_with_a_figure": 6722,
+   "accounts_with_a_figure_and_a_non_positive_base_day": 0,
+   "end": "2026-10-08",
+   "entry": "the 49F entry",
+   "excluded_days_in_accounts_with_a_figure_by_status": {
+    "ALL-HOLDINGS-EXCLUDED": 6,
+    "NO-PRIOR-HOLDINGS": 124
+   },
+   "non_positive_base_all_positions_by_position_in_window": {
+    "after_last_ok": 0,
+    "before_first_ok": 0,
+    "interior": 0,
+    "of_which_the_last_row": 0
+   },
+   "non_positive_base_all_positions_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 0,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "non_positive_base_all_positions_with_nonzero_cash": 0,
+   "non_positive_base_days": {
+    "all_positions": 0,
+    "interior": 0
+   },
+   "non_positive_base_days_in_accounts_without_a_figure_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 0,
+    "held_none": 36,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "non_positive_base_interior_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 0,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "partitions_in_window": 6,
+   "partitions_landed_used": 566,
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "seconds": 53.4,
+   "start": "2026-10-01",
+   "window": "QTD",
+   "interior_reproduces_ib_pr_467": true,
+   "ib_pr_467_interior_non_positive_base_days": 0
+  },
+  {
+   "accounts_read": 8334,
+   "accounts_the_reader_refuses": 1494,
+   "accounts_whose_claim_moves": {
+    "accounts_with_a_figure_saying_measured": 6840,
+    "if_non_positive_base_with_a_prior_position_also_moves": 20,
+    "under_the_contract_as_written": 17
+   },
+   "accounts_with_a_figure": 6840,
+   "accounts_with_a_figure_and_a_non_positive_base_day": 21,
+   "end": "2026-10-08",
+   "entry": "the 49F entry",
+   "excluded_days_in_accounts_with_a_figure_by_status": {
+    "ALL-HOLDINGS-EXCLUDED": 151,
+    "FOLLOWS-DISCONTINUITY": 2,
+    "IMPLAUSIBLE-RETURN": 2,
+    "NO-PRIOR-HOLDINGS": 50971,
+    "NON-POSITIVE-BASE": 1089
+   },
+   "non_positive_base_all_positions_by_position_in_window": {
+    "after_last_ok": 496,
+    "before_first_ok": 30,
+    "interior": 563,
+    "of_which_the_last_row": 6
+   },
+   "non_positive_base_all_positions_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 2,
+    "held_none": 1086,
+    "held_only_excluded": 0,
+    "held_only_negative": 1,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "non_positive_base_all_positions_with_nonzero_cash": 1087,
+   "non_positive_base_days": {
+    "all_positions": 1089,
+    "interior": 563
+   },
+   "non_positive_base_days_in_accounts_without_a_figure_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 0,
+    "held_none": 102,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "non_positive_base_interior_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 1,
+    "held_none": 562,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "partitions_in_window": 252,
+   "partitions_landed_used": 566,
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "seconds": 194.6,
+   "start": "2025-10-08",
+   "window": "1Y",
+   "interior_reproduces_ib_pr_467": true,
+   "ib_pr_467_interior_non_positive_base_days": 563
+  },
+  {
+   "accounts_read": 979,
+   "accounts_the_reader_refuses": 53,
+   "accounts_whose_claim_moves": {
+    "accounts_with_a_figure_saying_measured": 926,
+    "if_non_positive_base_with_a_prior_position_also_moves": 894,
+    "under_the_contract_as_written": 0
+   },
+   "accounts_with_a_figure": 926,
+   "accounts_with_a_figure_and_a_non_positive_base_day": 894,
+   "end": "2026-10-08",
+   "entry": "orion",
+   "excluded_days_in_accounts_with_a_figure_by_status": {
+    "NON-POSITIVE-BASE": 539402
+   },
+   "non_positive_base_all_positions_by_position_in_window": {
+    "after_last_ok": 13881,
+    "before_first_ok": 522241,
+    "interior": 3280,
+    "of_which_the_last_row": 125
+   },
+   "non_positive_base_all_positions_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 539338,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 64,
+    "not_determinable": 0
+   },
+   "non_positive_base_all_positions_with_nonzero_cash": 0,
+   "non_positive_base_days": {
+    "all_positions": 539402,
+    "interior": 3280
+   },
+   "non_positive_base_days_in_accounts_without_a_figure_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 35637,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "non_positive_base_interior_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 3268,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 12,
+    "not_determinable": 0
+   },
+   "partitions_in_window": 1619,
+   "partitions_landed_used": 1619,
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "seconds": 96.7,
+   "start": "1970-01-01",
+   "window": "SI",
+   "interior_reproduces_ib_pr_467": true,
+   "ib_pr_467_interior_non_positive_base_days": 3280
+  },
+  {
+   "accounts_read": 979,
+   "accounts_the_reader_refuses": 73,
+   "accounts_whose_claim_moves": {
+    "accounts_with_a_figure_saying_measured": 906,
+    "if_non_positive_base_with_a_prior_position_also_moves": 200,
+    "under_the_contract_as_written": 0
+   },
+   "accounts_with_a_figure": 906,
+   "accounts_with_a_figure_and_a_non_positive_base_day": 200,
+   "end": "2026-10-08",
+   "entry": "orion",
+   "excluded_days_in_accounts_with_a_figure_by_status": {
+    "NON-POSITIVE-BASE": 14385
+   },
+   "non_positive_base_all_positions_by_position_in_window": {
+    "after_last_ok": 8737,
+    "before_first_ok": 4849,
+    "interior": 799,
+    "of_which_the_last_row": 105
+   },
+   "non_positive_base_all_positions_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 14327,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 58,
+    "not_determinable": 0
+   },
+   "non_positive_base_all_positions_with_nonzero_cash": 0,
+   "non_positive_base_days": {
+    "all_positions": 14385,
+    "interior": 799
+   },
+   "non_positive_base_days_in_accounts_without_a_figure_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 9390,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "non_positive_base_interior_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 792,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 7,
+    "not_determinable": 0
+   },
+   "partitions_in_window": 190,
+   "partitions_landed_used": 1619,
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "seconds": 20.4,
+   "start": "2026-01-01",
+   "window": "YTD",
+   "interior_reproduces_ib_pr_467": true,
+   "ib_pr_467_interior_non_positive_base_days": 799
+  },
+  {
+   "accounts_read": 979,
+   "accounts_the_reader_refuses": 174,
+   "accounts_whose_claim_moves": {
+    "accounts_with_a_figure_saying_measured": 805,
+    "if_non_positive_base_with_a_prior_position_also_moves": 7,
+    "under_the_contract_as_written": 0
+   },
+   "accounts_with_a_figure": 805,
+   "accounts_with_a_figure_and_a_non_positive_base_day": 7,
+   "end": "2026-10-08",
+   "entry": "orion",
+   "excluded_days_in_accounts_with_a_figure_by_status": {
+    "NON-POSITIVE-BASE": 28
+   },
+   "non_positive_base_all_positions_by_position_in_window": {
+    "after_last_ok": 19,
+    "before_first_ok": 9,
+    "interior": 0,
+    "of_which_the_last_row": 4
+   },
+   "non_positive_base_all_positions_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 28,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "non_positive_base_all_positions_with_nonzero_cash": 0,
+   "non_positive_base_days": {
+    "all_positions": 28,
+    "interior": 0
+   },
+   "non_positive_base_days_in_accounts_without_a_figure_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 1029,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "non_positive_base_interior_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 0,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "partitions_in_window": 6,
+   "partitions_landed_used": 1619,
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "seconds": 5.4,
+   "start": "2026-10-01",
+   "window": "QTD",
+   "interior_reproduces_ib_pr_467": true,
+   "ib_pr_467_interior_non_positive_base_days": 0
+  },
+  {
+   "accounts_read": 979,
+   "accounts_the_reader_refuses": 63,
+   "accounts_whose_claim_moves": {
+    "accounts_with_a_figure_saying_measured": 916,
+    "if_non_positive_base_with_a_prior_position_also_moves": 240,
+    "under_the_contract_as_written": 0
+   },
+   "accounts_with_a_figure": 916,
+   "accounts_with_a_figure_and_a_non_positive_base_day": 240,
+   "end": "2026-10-08",
+   "entry": "orion",
+   "excluded_days_in_accounts_with_a_figure_by_status": {
+    "NON-POSITIVE-BASE": 22861
+   },
+   "non_positive_base_all_positions_by_position_in_window": {
+    "after_last_ok": 11012,
+    "before_first_ok": 10588,
+    "interior": 1261,
+    "of_which_the_last_row": 115
+   },
+   "non_positive_base_all_positions_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 22802,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 59,
+    "not_determinable": 0
+   },
+   "non_positive_base_all_positions_with_nonzero_cash": 0,
+   "non_positive_base_days": {
+    "all_positions": 22861,
+    "interior": 1261
+   },
+   "non_positive_base_days_in_accounts_without_a_figure_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 9319,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 0,
+    "not_determinable": 0
+   },
+   "non_positive_base_interior_by_prior_day_holdings": {
+    "held_included_only_or_mixed": 1254,
+    "held_none": 0,
+    "held_only_excluded": 0,
+    "held_only_negative": 0,
+    "held_other": 7,
+    "not_determinable": 0
+   },
+   "partitions_in_window": 249,
+   "partitions_landed_used": 1619,
+   "reader_days_excluded_differs_from_status_count_of_rows": 0,
+   "seconds": 24.8,
+   "start": "2025-10-08",
+   "window": "1Y",
+   "interior_reproduces_ib_pr_467": true,
+   "ib_pr_467_interior_non_positive_base_days": 1261
+  }
+ ],
+ "prior_day_holdings_rule_in_words": "The gold carries the four count columns the face names, under these served names: held_count, included_count, negative_count, cash_value (plus excluded_count, which was already read). They describe the account's positions on the BASE day, the prior trading day (or the last close that exists when the row links across a gap): holdings_return(p0, p1, cash, ..., prev_day=base_day) is called with the base-day positions p0 and the base-day cash (data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:1065; counts at :843-847; the call reads prev_positions at :758). A 'position row' is a key (identifier, lots summed): held_count = included + excluded + negative keys. The six classes, from the NON-POSITIVE-BASE row's own columns: held_none = held_count 0; held_included_only_or_mixed = included_count >= 1; held_only_negative = every key negative (negative_count == held_count > 0); held_only_excluded = held_count > 0 with included_count 0 and negative_count 0; held_other = held_count > 0, included_count 0, negative_count > 0 and excluded_count > 0; not_determinable = any of the four counts null, or held_count != included + excluded + negative. non_positive_base_all_positions_with_nonzero_cash counts the days (all positions) whose cash_value is not zero.",
+ "assignment_order": {
+  "order_in_words": "np.select takes the FIRST true condition (data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:873-874): NO-PRIOR-HOLDINGS (:869), then ALL-HOLDINGS-EXCLUDED (:870-871), then NON-POSITIVE-BASE (:872), default OK. The code comment at :861-868 states that ALL-HOLDINGS-EXCLUDED is evaluated first so a full exit does not read NON-POSITIVE-BASE.",
+  "cites": [
+   "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:869",
+   "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:870",
+   "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:872",
+   "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:873",
+   "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:861"
+  ],
+  "only_excluded_holdings_can_be_stamped_non_positive_base": "NO",
+  "in_words": "An account holding only excluded, non-negative positions (held_count > 0, included_count 0, negative_count 0) has cash_value either <= 0, which meets the ALL-HOLDINGS-EXCLUDED condition (:870-871) first, or > 0, which makes account_value > 0 (:856, the OK default), so NON-POSITIVE-BASE is unreachable for it. The cases that DO receive NON-POSITIVE-BASE are exactly: (a) no position row and negative cash (a debit); (b) one or more negative position rows, no included row, cash <= 0 (any excluded rows beside them); (c) one or more included rows all valued exactly 0, with cash <= 0 (any excluded or negative rows beside them). Measured cross-check: NON-POSITIVE-BASE days placed held_only_excluded in all cells, all positions, with or without a figure: 0.",
+  "measured_non_positive_base_days_placed_held_only_excluded": 0
+ },
+ "control": {
+  "what": "In memory only: plant account A with one ALL-HOLDINGS-EXCLUDED day and account B with one NO-PRIOR-HOLDINGS day (each between two OK days) and run the step-5 counter (moves()) on each; plant C and D, each with one NON-POSITIVE-BASE day (C with a prior included position, D with no prior position), to run the second reading; and run the six-class function on seven planted count rows.",
+  "reading": {
+   "moves_as_written_and_if_npb_prior_position_also": {
+    "A_single_ALL-HOLDINGS-EXCLUDED": [
+     true,
+     true
+    ],
+    "B_single_NO-PRIOR-HOLDINGS": [
+     false,
+     false
+    ],
+    "C_single_NON-POSITIVE-BASE_prior_included_position": [
+     false,
+     true
+    ],
+    "D_single_NON-POSITIVE-BASE_held_none": [
+     false,
+     false
+    ]
+   },
+   "six_classes_of_the_planted_rows": [
+    "held_none",
+    "held_included_only_or_mixed",
+    "held_only_negative",
+    "held_only_excluded",
+    "held_other",
+    "not_determinable",
+    "not_determinable"
+   ],
+   "expected": "A moves as written (True, True); B does not (False, False); C moves only under the second reading (False, True); D does not (False, False); classes held_none, held_included_only_or_mixed, held_only_negative, held_only_excluded, held_other, not_determinable, not_determinable: HELD"
+  }
+ },
+ "not_established": [
+  "the deployed route's own answer: no Lambda invoked, no sign-in; the deployed package, mapping loader, authorization and envelope were not exercised",
+  "the C-CHAINCLAIM contract's own definition of 'excluded day' and of the claim: only the face's description was used; the PRD addendum text was not graded here",
+  "whether a NON-POSITIVE-BASE day in an account that held a position left a return out in the account's real history: the gold carries the base-day counts and cash, not prices or cash flows, so a zero-valued included position or a negative key is seen, its cause is not",
+  "accounts the reader refuses (no OK row in the window) are not part of 'accounts with a figure'; their NON-POSITIVE-BASE days are reported separately by class and are in no claim-move count",
+  "the producer's status grade was read from the code at the base commit; the gold's partitions were not regenerated, and the silver (prices, identifiers, balances) was not read",
+  "the gold was read once, at the time of this run, capped at 2026-10-08; a later partition may have landed",
+  "the transport check of IB-pr-464 (stand-in versus the reader's own HoldingsGoldSource class) was not repeated: the same stand-in is used; the reproduction of IB-pr-467's interior NON-POSITIVE-BASE counts is the check"
+ ],
+ "functions_invoked": 0,
+ "sign_ins_made": 0,
+ "aws_writes_made": 0,
+ "accounts_written": 0,
+ "values_written": 0,
+ "product_files_edited": 0
+}
