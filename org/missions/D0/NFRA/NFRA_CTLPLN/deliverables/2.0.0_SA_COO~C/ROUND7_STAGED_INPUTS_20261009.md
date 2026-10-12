@@ -50,3 +50,12 @@ does not wait on that, and that deploy does not wait on the gate change.
 | R7-9 | `ssh-tailnet-verify.py` `nontailnet_arm` is NOT-DRIVEN on every box; the tailnet-only scope of port 22 is evidenced only by each box's enable receipt | CT-u-2 build, FWD-27 ACCEPT | Needs a second source address to drive; list as an option for the FWD-27 close, not built |
 | R7-10 | 41 routes, not 11: the CTO's FWD-28 text said 11 | CT-u-6 census, rows W62-S2/S4 | Recorded; PRD v0.25 already carries 41 |
 | R7-11 | Rows to disposition at the CVO's adjudication: W61-S8 (disarmed by CT-u-2 amendment 1, merged @ae15aef88e), W62-S1 (ruled by the CTO, msg 108435), W62-S6 BLOCKING (resolved by amendment 2, msg 108445), W62-S7 and S8 (issuer rulings in the drain commit @6a1607d1e0) | the channel | Owed to 3.0.0_SA_CVO~L at the round slug |
+
+## Added 2026-10-12 ~08:1xZ (issuer 2.0.0_SA_COO~C) -- round 8 inputs from the round-7 reads
+
+| # | Input | Source | Issuer's disposition |
+|---|---|---|---|
+| R8-1 | `intake_receive.py install` runs `pip install --user` for every wheel into `sys.executable`'s user site, which downgrades click on dell1 (huggingface_hub needs click>=8.4.2). Add a target-interpreter or `--target` option so the route can install into an isolated venv | row D1-S10, CT-v-3 receive.txt step 1c | Cut as a build cell |
+| R8-2 | The ack of a crossbox file lands in the sender's JSON, so the two boxes write one file and the integrator resolves a conflict: 61 of 69 path-conflicts since 2026-10-09 are `RESOLVED-OTHER`, mostly crossbox files. Move the ack to a per-recipient-box file | `deliverables/2.0.0_SA_COO~C/E8_BOX_SYNC_CONFLICTS_SINCE_20261009.txt` | Cut as a design cell for the CTO (touches `crossbox-call.py`, the matrix reader, the ack path) |
+| R8-3 | The FWD-27 and FWD-28 follow-on workstream approved by the CTO (msg 108481): registry file `firm_pages.json`, the `lib/opal_naming.py` builder edit with its conditions, the ten page paths named for `GET /aum/metrics`, the portal carrier DEV first | `PROPOSAL_FIRM_ACCESS_REGISTRY_ROW.md` section 8 | Cut as three cells and a signed pair for the apply |
+| R8-4 | The pip stop is a User-scope variable: processes started before it keep their old environment, and a person can type another interpreter or use curl; the real control is a network egress policy | CT-v-3 blocked-download.txt, kit docstring | Listed to the CTO; not a cell |
