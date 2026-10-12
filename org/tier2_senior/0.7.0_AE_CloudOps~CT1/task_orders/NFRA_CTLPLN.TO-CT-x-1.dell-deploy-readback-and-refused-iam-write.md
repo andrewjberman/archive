@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~CT1</issued_to>
 <date>2026-10-09</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C after its own reads: (1) deploy_readback_check.py re-run on the laptop against commit d5cd8a81c4 (published only on scratch ref origin/dell1/readback-20261012T0608Z, ls-remote read) prints admitted=True on_trunk=False objects_equal=1/1 ledger=closed-named ok=True failed=none, the deployed and repo sha256 both 40bdb218...; (2) proof instance VALID in-tree (CTx1-AC1, CTx1-AC2); (3) the refused IAM write is the real call of 2026-10-09 (AccessDenied, explicitDeny simulation, no key minted). Amendments 1-3 drove the read-back on purpose after the organic window closed at 05:37Z (CLOUD 873f3ef98f).</status_reason>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <round>6</round>
