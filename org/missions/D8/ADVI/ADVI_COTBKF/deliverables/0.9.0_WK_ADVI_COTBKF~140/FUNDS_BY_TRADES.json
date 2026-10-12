@@ -1,0 +1,837 @@
+{
+ "rule": {
+  "text": "RULE written_at=2026-10-11T23:07:58Z (read from the clock, before any fund is classed; only record totals and not_established were read)\n\nUNIT. A read unit is record A's: the by/sl rows of one account, one effective day, one fund, one kind (purchase/sale), summed, with a served close on that day (guard |Quantity|>=0.05 per row). ratio = |Quantity| x served close / |Amount| (served close over price paid), dev = |ratio-1|. gap = |Amount| - |Quantity| x close (dollars; positive on a purchase = paid above the close; negative on a sale = received below the close).\n\nUNIT STATUS (every read unit has exactly one):\n PASS: dev <= 0.01.\n UNRESOLVED (counts as neither pass nor fail): (a) 0.01 < dev <= 0.05 for either kind and either direction, because a neighbouring day's close or a flat charge puts a unit there with a right close (record B: 46 of 246 off purchase rows have a prior/next-day close within 1 percent; record B section 6 post hoc flat dollar charge); (b) a PURCHASE with ratio < 1 and dev <= 0.0575 (the largest front load, record A not_established: up to 5.75 percent); (c) CHARGE-SIZED: dev > 0.01, the gap in the charge direction (purchase: Amount > shares x close; sale: Amount < shares x close) and gap <= 34.15 dollars (the largest constant, 34, of record B section 6 plus its 0.15 tolerance; that list was read off the rows, post hoc, a description not a test; it is used here ONLY to take units OUT of the failing count, never to pass a fund).\n FAIL: every other unit with dev > 0.01, i.e. dev > 0.05 not charge-sized (a sale is NEVER excused by a front load: rule (b) is purchase only), and a purchase with ratio >= 1 or a sale of any direction with dev > 0.05 and not charge-sized. Over-20 percent units fail outright in either direction unless charge-sized. 5-to-20 percent units fail unless a purchase within 5.75 percent below the close, or charge-sized. 1-to-5 percent units never fail.\n DECISIVE units = PASS + FAIL units.\n\nfailing_band: \"dev>5% fails (purchase below the close: dev>5.75%) unless charge-sized (gap<=34.15 USD in the charge direction); 1-5% never fails and never passes; a sale is not excused by a front load\"\n\nCLASS (per fund series, in this order):\n 1. no_trade_row: zero read units. (Two reason codes kept inside the class, in the JSON: no purchase/sale row at all; purchase/sale rows all before the series' first stored close. The five classes sum to 270.)\n 2. too_few: at least one read unit but fewer than minimum_rows=5 decisive units, or decisive units on fewer than 3 distinct effective days.\n 3. fails: fail share = FAIL / DECISIVE > share_fails = 0.50.\n 4. passes: fail share <= 0.10 AND the guard below is met.\n 5. mixed: fail share > 0.10 and <= 0.50; and a fund with share <= 0.10 whose guard is not met is too_few (see guard).\n\nminimum_rows = 5 (decisive units) and at least 3 distinct effective days. Why: one trade can be a bad print or a flat charge on a small amount, and all accounts that trade on one day see the same close, so units on one day are one piece of evidence; with 5 decisive units one unit is 20 percent of the evidence, below the 50 percent fail line, so a single odd unit can move a fund to mixed but never to fails; 3 days so a single day's close cannot class a fund by itself.\n\nshare_fails = 0.50. Why: fails means the served close misses the price paid on a majority of the fund's decisive trades; a series wrong on most of its trades is not the unadjusted close, a series wrong on a minority is a partial defect and is mixed. The pass line 0.10 is twenty times the rate at which the substituted control misses (record A totals: 6 over-20 plus 45 in 5-to-20 of 10636 units, 0.5 percent), leaving room for a small fund's bad prints. Neither line was chosen by how many funds it moves; both were fixed before any per-fund count was read.\n\nGUARD (d), recent window: an adjusted series converges to the traded price near the present, so units near the present cannot show that a series is unadjusted. Window = effective day within 180 calendar days of the latest served-close date in the 270-series table (180 days: a half-year of distributions is about 1-2 percent for a 2-4 percent yielding fund, the size of the 1 percent band). A fund can be classed passes only if it has at least 5 decisive units on at least 3 distinct effective days that are BEFORE the window start; otherwise a fund with fail share <= 0.10 is too_few. The guard never restricts fails or mixed (a failure in the window is stronger evidence, not weaker).\n\nVBTLX: classed by this rule like every fund and carried in the csv like every fund; excluded from every count by the CTO until its cause has a name: the five counts include it where the rule puts it (so they sum to 270); if it is a fail it is in named with excluded=true (len(named)==fails); flagged in the JSON key excluded and in the md.\n\nSENSITIVITY (marked not the result, reported only after the classing): (1) charge-sized excuse off; (2) pass line 0.05 and 0.20; (3) fail line 0.40 and 0.60; (4) minimum_rows 3 and 10; (5) guard window 365 days and off.\n",
+  "written_at": "2026-10-11T23:07:58Z",
+  "minimum_rows": 5,
+  "failing_band": "dev>5% fails (purchase below the close: dev>5.75%) unless charge-sized (gap<=34.15 USD in the charge direction); 1-5% never fails and never passes; a sale is not excused by a front load",
+  "share_fails": 0.5
+ },
+ "fund_series": 270,
+ "fails": 15,
+ "passes": 17,
+ "mixed": 0,
+ "too_few": 60,
+ "no_trade_row": 178,
+ "against_earlier": {
+  "by_group": {
+   "moved_19": {
+    "series": 19,
+    "fails": 8,
+    "passes": 0,
+    "mixed": 0,
+    "too_few": 10,
+    "no_trade_row": 1
+   },
+   "validated_33": {
+    "series": 33,
+    "fails": 8,
+    "passes": 10,
+    "mixed": 0,
+    "too_few": 14,
+    "no_trade_row": 1
+   },
+   "validated_33_left_on_store": {
+    "series": 19,
+    "fails": 8,
+    "passes": 0,
+    "mixed": 0,
+    "too_few": 10,
+    "no_trade_row": 1
+   },
+   "validated_33_substituted": {
+    "series": 14,
+    "fails": 0,
+    "passes": 10,
+    "mixed": 0,
+    "too_few": 4,
+    "no_trade_row": 0
+   },
+   "unreadable_237": {
+    "series": 237,
+    "fails": 7,
+    "passes": 7,
+    "mixed": 0,
+    "too_few": 46,
+    "no_trade_row": 177
+   },
+   "unreadable_237_left_on_store": {
+    "series": 178,
+    "fails": 7,
+    "passes": 2,
+    "mixed": 0,
+    "too_few": 34,
+    "no_trade_row": 135
+   },
+   "unreadable_237_substituted": {
+    "series": 59,
+    "fails": 0,
+    "passes": 5,
+    "mixed": 0,
+    "too_few": 12,
+    "no_trade_row": 42
+   },
+   "substituted_73": {
+    "series": 73,
+    "fails": 0,
+    "passes": 15,
+    "mixed": 0,
+    "too_few": 16,
+    "no_trade_row": 42
+   },
+   "left_on_store_197": {
+    "series": 197,
+    "fails": 15,
+    "passes": 2,
+    "mixed": 0,
+    "too_few": 44,
+    "no_trade_row": 136
+   }
+  },
+  "by_group_units": {
+   "moved_19": {
+    "read_units": 1878,
+    "decisive_units": 1863,
+    "failing_units": 1852,
+    "unresolved_units": 15
+   },
+   "validated_33": {
+    "read_units": 6904,
+    "decisive_units": 6710,
+    "failing_units": 1853,
+    "unresolved_units": 194
+   },
+   "validated_33_left_on_store": {
+    "read_units": 1878,
+    "decisive_units": 1863,
+    "failing_units": 1852,
+    "unresolved_units": 15
+   },
+   "validated_33_substituted": {
+    "read_units": 5026,
+    "decisive_units": 4847,
+    "failing_units": 1,
+    "unresolved_units": 179
+   },
+   "unreadable_237": {
+    "read_units": 7346,
+    "decisive_units": 7247,
+    "failing_units": 1581,
+    "unresolved_units": 99
+   },
+   "unreadable_237_left_on_store": {
+    "read_units": 1736,
+    "decisive_units": 1681,
+    "failing_units": 1580,
+    "unresolved_units": 55
+   },
+   "unreadable_237_substituted": {
+    "read_units": 5610,
+    "decisive_units": 5566,
+    "failing_units": 1,
+    "unresolved_units": 44
+   },
+   "substituted_73": {
+    "read_units": 10636,
+    "decisive_units": 10413,
+    "failing_units": 2,
+    "unresolved_units": 223
+   },
+   "left_on_store_197": {
+    "read_units": 3614,
+    "decisive_units": 3544,
+    "failing_units": 3432,
+    "unresolved_units": 70
+   }
+  },
+  "by_round_72_reading": {
+   "confirmed_adjusted": {
+    "fails": 9,
+    "passes": 0,
+    "mixed": 0,
+    "too_few": 10,
+    "no_trade_row": 0
+   },
+   "confirmed_not": {
+    "fails": 0,
+    "passes": 12,
+    "mixed": 0,
+    "too_few": 2,
+    "no_trade_row": 1
+   },
+   "nothing_to_test_on": {
+    "fails": 6,
+    "passes": 5,
+    "mixed": 0,
+    "too_few": 48,
+    "no_trade_row": 177
+   }
+  },
+  "by_round_71_reading": {
+   "adjusted": {
+    "fails": 15,
+    "passes": 0,
+    "mixed": 0,
+    "too_few": 28,
+    "no_trade_row": 29
+   },
+   "not_adjusted": {
+    "fails": 0,
+    "passes": 0,
+    "mixed": 0,
+    "too_few": 0,
+    "no_trade_row": 1
+   },
+   "not_adjusted (substituted)": {
+    "fails": 0,
+    "passes": 15,
+    "mixed": 0,
+    "too_few": 16,
+    "no_trade_row": 42
+   },
+   "untested": {
+    "fails": 0,
+    "passes": 2,
+    "mixed": 0,
+    "too_few": 16,
+    "no_trade_row": 106
+   }
+  },
+  "excluded_tickers": [
+   "VBTLX"
+  ],
+  "excluded_note": "VBTLX classed by the rule (too_few: 1 decisive unit, 0 failing) and counted where the rule puts it so the five counts sum to 270; it is not in named.",
+  "round_71_adjusted_that_pass_by_trades": [],
+  "round_71_not_adjusted_that_fail_by_trades": [],
+  "substituted_funds_with_a_failing_unit": [
+   {
+    "ticker": "SWPPX",
+    "failing_units": 1,
+    "decisive_units": 1,
+    "class_by_trades": "too_few"
+   },
+   {
+    "ticker": "VFIAX",
+    "failing_units": 1,
+    "decisive_units": 99,
+    "class_by_trades": "passes"
+   }
+  ],
+  "no_trade_row_reasons": {
+   "no_purchase_or_sale_row": 23,
+   "rows_all_before_first_stored_close": 155
+  }
+ },
+ "changes_class": [
+  {
+   "ticker": "PCBIX",
+   "class_by_trades": "fails",
+   "trade_units_read": 1453,
+   "decisive_units": 1426,
+   "failing_units": 1426,
+   "unresolved_units": 27,
+   "distinct_decisive_days": 187,
+   "median_ratio": 0.748864,
+   "median_ratio_failing_units": 0.748864,
+   "first_failing_date": "2021-08-27",
+   "last_failing_date": "2024-11-27",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "confirmed_adjusted",
+    "round_71": "adjusted"
+   }
+  },
+  {
+   "ticker": "SGIIX",
+   "class_by_trades": "fails",
+   "trade_units_read": 46,
+   "decisive_units": 43,
+   "failing_units": 40,
+   "unresolved_units": 3,
+   "distinct_decisive_days": 29,
+   "median_ratio": 0.742176,
+   "median_ratio_failing_units": 0.683119,
+   "first_failing_date": "2020-07-10",
+   "last_failing_date": "2025-08-15",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "confirmed_adjusted",
+    "round_71": "adjusted"
+   }
+  },
+  {
+   "ticker": "GFFFX",
+   "class_by_trades": "fails",
+   "trade_units_read": 35,
+   "decisive_units": 35,
+   "failing_units": 34,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 32,
+   "median_ratio": 0.67923,
+   "median_ratio_failing_units": 0.679222,
+   "first_failing_date": "2020-07-13",
+   "last_failing_date": "2025-10-15",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "adjusted"
+   }
+  },
+  {
+   "ticker": "FOCPX",
+   "class_by_trades": "fails",
+   "trade_units_read": 25,
+   "decisive_units": 25,
+   "failing_units": 25,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 25,
+   "median_ratio": 0.639107,
+   "median_ratio_failing_units": 0.639107,
+   "first_failing_date": "2021-10-22",
+   "last_failing_date": "2024-10-17",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "adjusted"
+   }
+  },
+  {
+   "ticker": "AGTHX",
+   "class_by_trades": "fails",
+   "trade_units_read": 10,
+   "decisive_units": 10,
+   "failing_units": 10,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 10,
+   "median_ratio": 0.464906,
+   "median_ratio_failing_units": 0.464906,
+   "first_failing_date": "2020-08-31",
+   "last_failing_date": "2025-03-12",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "adjusted"
+   }
+  },
+  {
+   "ticker": "NFFFX",
+   "class_by_trades": "fails",
+   "trade_units_read": 6,
+   "decisive_units": 6,
+   "failing_units": 6,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 5,
+   "median_ratio": 0.804542,
+   "median_ratio_failing_units": 0.804542,
+   "first_failing_date": "2022-01-25",
+   "last_failing_date": "2025-07-08",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "adjusted"
+   }
+  },
+  {
+   "ticker": "VGHAX",
+   "class_by_trades": "fails",
+   "trade_units_read": 5,
+   "decisive_units": 5,
+   "failing_units": 5,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 5,
+   "median_ratio": 0.661119,
+   "median_ratio_failing_units": 0.661119,
+   "first_failing_date": "2024-01-26",
+   "last_failing_date": "2025-03-20",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "adjusted"
+   }
+  },
+  {
+   "ticker": "FSMAX",
+   "class_by_trades": "passes",
+   "trade_units_read": 2281,
+   "decisive_units": 2281,
+   "failing_units": 0,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 329,
+   "median_ratio": 1.0,
+   "median_ratio_failing_units": null,
+   "first_failing_date": null,
+   "last_failing_date": null,
+   "group": "substituted",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "confirmed_not",
+    "round_71": "not_adjusted (substituted)"
+   }
+  },
+  {
+   "ticker": "MIEKX",
+   "class_by_trades": "passes",
+   "trade_units_read": 2153,
+   "decisive_units": 2153,
+   "failing_units": 0,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 340,
+   "median_ratio": 1.0,
+   "median_ratio_failing_units": null,
+   "first_failing_date": null,
+   "last_failing_date": null,
+   "group": "substituted",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "not_adjusted (substituted)"
+   }
+  },
+  {
+   "ticker": "MISIX",
+   "class_by_trades": "passes",
+   "trade_units_read": 1129,
+   "decisive_units": 1085,
+   "failing_units": 0,
+   "unresolved_units": 44,
+   "distinct_decisive_days": 133,
+   "median_ratio": 1.0,
+   "median_ratio_failing_units": null,
+   "first_failing_date": null,
+   "last_failing_date": null,
+   "group": "substituted",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "not_adjusted (substituted)"
+   }
+  },
+  {
+   "ticker": "PSLV",
+   "class_by_trades": "passes",
+   "trade_units_read": 54,
+   "decisive_units": 36,
+   "failing_units": 3,
+   "unresolved_units": 18,
+   "distinct_decisive_days": 25,
+   "median_ratio": 1.00122,
+   "median_ratio_failing_units": 1.071146,
+   "first_failing_date": "2026-02-02",
+   "last_failing_date": "2026-03-19",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "untested"
+   }
+  },
+  {
+   "ticker": "PHYS",
+   "class_by_trades": "passes",
+   "trade_units_read": 51,
+   "decisive_units": 45,
+   "failing_units": 0,
+   "unresolved_units": 6,
+   "distinct_decisive_days": 30,
+   "median_ratio": 0.999764,
+   "median_ratio_failing_units": null,
+   "first_failing_date": null,
+   "last_failing_date": null,
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "untested"
+   }
+  },
+  {
+   "ticker": "FSPSX",
+   "class_by_trades": "passes",
+   "trade_units_read": 28,
+   "decisive_units": 28,
+   "failing_units": 0,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 28,
+   "median_ratio": 1.000001,
+   "median_ratio_failing_units": null,
+   "first_failing_date": null,
+   "last_failing_date": null,
+   "group": "substituted",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "confirmed_not",
+    "round_71": "not_adjusted (substituted)"
+   }
+  },
+  {
+   "ticker": "FXAIX",
+   "class_by_trades": "passes",
+   "trade_units_read": 7,
+   "decisive_units": 7,
+   "failing_units": 0,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 5,
+   "median_ratio": 1.0,
+   "median_ratio_failing_units": null,
+   "first_failing_date": null,
+   "last_failing_date": null,
+   "group": "substituted",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "not_adjusted (substituted)"
+   }
+  }
+ ],
+ "conflicts": [],
+ "named": [
+  {
+   "ticker": "VEIRX",
+   "class_by_trades": "fails",
+   "trade_units_read": 1596,
+   "decisive_units": 1596,
+   "failing_units": 1596,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 169,
+   "median_ratio": 0.626575,
+   "median_ratio_failing_units": 0.626575,
+   "first_failing_date": "2023-02-17",
+   "last_failing_date": "2024-11-20",
+   "group": "left_on_store",
+   "moved_in_round_74": true,
+   "reinvestment_reading": {
+    "round_74": "validated",
+    "round_72": "confirmed_adjusted",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "PCBIX",
+   "class_by_trades": "fails",
+   "trade_units_read": 1453,
+   "decisive_units": 1426,
+   "failing_units": 1426,
+   "unresolved_units": 27,
+   "distinct_decisive_days": 187,
+   "median_ratio": 0.748864,
+   "median_ratio_failing_units": 0.748864,
+   "first_failing_date": "2021-08-27",
+   "last_failing_date": "2024-11-27",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "confirmed_adjusted",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "ABNFX",
+   "class_by_trades": "fails",
+   "trade_units_read": 195,
+   "decisive_units": 181,
+   "failing_units": 177,
+   "unresolved_units": 14,
+   "distinct_decisive_days": 36,
+   "median_ratio": 0.856716,
+   "median_ratio_failing_units": 0.856716,
+   "first_failing_date": "2022-05-16",
+   "last_failing_date": "2025-01-13",
+   "group": "left_on_store",
+   "moved_in_round_74": true,
+   "reinvestment_reading": {
+    "round_74": "validated",
+    "round_72": "confirmed_adjusted",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "SGIIX",
+   "class_by_trades": "fails",
+   "trade_units_read": 46,
+   "decisive_units": 43,
+   "failing_units": 40,
+   "unresolved_units": 3,
+   "distinct_decisive_days": 29,
+   "median_ratio": 0.742176,
+   "median_ratio_failing_units": 0.683119,
+   "first_failing_date": "2020-07-10",
+   "last_failing_date": "2025-08-15",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "confirmed_adjusted",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "GFFFX",
+   "class_by_trades": "fails",
+   "trade_units_read": 35,
+   "decisive_units": 35,
+   "failing_units": 34,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 32,
+   "median_ratio": 0.67923,
+   "median_ratio_failing_units": 0.679222,
+   "first_failing_date": "2020-07-13",
+   "last_failing_date": "2025-10-15",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "FOCPX",
+   "class_by_trades": "fails",
+   "trade_units_read": 25,
+   "decisive_units": 25,
+   "failing_units": 25,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 25,
+   "median_ratio": 0.639107,
+   "median_ratio_failing_units": 0.639107,
+   "first_failing_date": "2021-10-22",
+   "last_failing_date": "2024-10-17",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "FCNTX",
+   "class_by_trades": "fails",
+   "trade_units_read": 21,
+   "decisive_units": 21,
+   "failing_units": 15,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 15,
+   "median_ratio": 0.909629,
+   "median_ratio_failing_units": 0.909629,
+   "first_failing_date": "2023-11-21",
+   "last_failing_date": "2025-10-24",
+   "group": "left_on_store",
+   "moved_in_round_74": true,
+   "reinvestment_reading": {
+    "round_74": "validated",
+    "round_72": "confirmed_adjusted",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "PRILX",
+   "class_by_trades": "fails",
+   "trade_units_read": 13,
+   "decisive_units": 13,
+   "failing_units": 13,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 7,
+   "median_ratio": 0.415777,
+   "median_ratio_failing_units": 0.415777,
+   "first_failing_date": "2022-01-06",
+   "last_failing_date": "2023-02-21",
+   "group": "left_on_store",
+   "moved_in_round_74": true,
+   "reinvestment_reading": {
+    "round_74": "validated",
+    "round_72": "confirmed_adjusted",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "BALCX",
+   "class_by_trades": "fails",
+   "trade_units_read": 12,
+   "decisive_units": 12,
+   "failing_units": 12,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 11,
+   "median_ratio": 0.75864,
+   "median_ratio_failing_units": 0.75864,
+   "first_failing_date": "2022-05-09",
+   "last_failing_date": "2023-03-01",
+   "group": "left_on_store",
+   "moved_in_round_74": true,
+   "reinvestment_reading": {
+    "round_74": "validated",
+    "round_72": "nothing_to_test_on",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "AGTHX",
+   "class_by_trades": "fails",
+   "trade_units_read": 10,
+   "decisive_units": 10,
+   "failing_units": 10,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 10,
+   "median_ratio": 0.464906,
+   "median_ratio_failing_units": 0.464906,
+   "first_failing_date": "2020-08-31",
+   "last_failing_date": "2025-03-12",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "DISVX",
+   "class_by_trades": "fails",
+   "trade_units_read": 6,
+   "decisive_units": 6,
+   "failing_units": 6,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 6,
+   "median_ratio": 0.810315,
+   "median_ratio_failing_units": 0.810315,
+   "first_failing_date": "2022-02-28",
+   "last_failing_date": "2024-08-20",
+   "group": "left_on_store",
+   "moved_in_round_74": true,
+   "reinvestment_reading": {
+    "round_74": "validated",
+    "round_72": "confirmed_adjusted",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "DFLVX",
+   "class_by_trades": "fails",
+   "trade_units_read": 7,
+   "decisive_units": 6,
+   "failing_units": 6,
+   "unresolved_units": 1,
+   "distinct_decisive_days": 6,
+   "median_ratio": 0.860662,
+   "median_ratio_failing_units": 0.855621,
+   "first_failing_date": "2021-01-25",
+   "last_failing_date": "2023-06-27",
+   "group": "left_on_store",
+   "moved_in_round_74": true,
+   "reinvestment_reading": {
+    "round_74": "validated",
+    "round_72": "confirmed_adjusted",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "NFFFX",
+   "class_by_trades": "fails",
+   "trade_units_read": 6,
+   "decisive_units": 6,
+   "failing_units": 6,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 5,
+   "median_ratio": 0.804542,
+   "median_ratio_failing_units": 0.804542,
+   "first_failing_date": "2022-01-25",
+   "last_failing_date": "2025-07-08",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "MEIIX",
+   "class_by_trades": "fails",
+   "trade_units_read": 6,
+   "decisive_units": 6,
+   "failing_units": 5,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 6,
+   "median_ratio": 0.576683,
+   "median_ratio_failing_units": 0.53817,
+   "first_failing_date": "2021-04-26",
+   "last_failing_date": "2024-10-30",
+   "group": "left_on_store",
+   "moved_in_round_74": true,
+   "reinvestment_reading": {
+    "round_74": "validated",
+    "round_72": "confirmed_adjusted",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  },
+  {
+   "ticker": "VGHAX",
+   "class_by_trades": "fails",
+   "trade_units_read": 5,
+   "decisive_units": 5,
+   "failing_units": 5,
+   "unresolved_units": 0,
+   "distinct_decisive_days": 5,
+   "median_ratio": 0.661119,
+   "median_ratio_failing_units": 0.661119,
+   "first_failing_date": "2024-01-26",
+   "last_failing_date": "2025-03-20",
+   "group": "left_on_store",
+   "moved_in_round_74": false,
+   "reinvestment_reading": {
+    "round_74": "unreadable",
+    "round_72": "nothing_to_test_on",
+    "round_71": "adjusted"
+   },
+   "excluded": false
+  }
+ ],
+ "headline": "Of 270 fund series under the rule written at 2026-10-11T23:07:58Z: 15 fails, 17 passes, 0 mixed, 60 too_few, 178 no_trade_row (sum 270). The 15 failing funds are ALL left on the store; the 17 passing funds are 15 substituted funds plus the commodity trusts PHYS and PSLV; no substituted fund fails. The 19 moved: 8 fail (ABNFX, BALCX, DFLVX, DISVX, FCNTX, MEIIX, PRILX, VEIRX), 10 are too_few (1 to 4 decisive units) and ACTDX has no trade row; none passes. 14 unreadable-by-reinvestment funds change class (7 fail: PCBIX, SGIIX, GFFFX, FOCPX, AGTHX, NFFFX, VGHAX; 7 pass: FSMAX, MIEKX, MISIX, PSLV, PHYS, FSPSX, FXAIX). Conflicts with the reinvestment reading: 0. VEIRX and PCBIX carry 3022 of the 3432 failing units of all funds. 178 series have no read unit and 60 are too_few, so 238 of 270 series are not classed by trades.",
+ "not_established": [
+  "WHY a failing fund fails: the instrument compares the served close with Amount over Quantity; it does not say adjusted, a charge or a mis-scale. A fails class says the served close does not reproduce the price paid on most decisive trades; the named list is where a named correction would start, nothing more.",
+  "The 178 no_trade_row series (23 with no purchase/sale row, 155 with rows all before the first stored close) and the 60 too_few series are not classed by trades; 238 of 270. 76790 of 91040 units pre-date a first stored close and are not read.",
+  "Mixed is empty: under the rule every fund with enough decisive units was either at or below a 10 percent failing share or above 50 percent. Whether that is the data or the width of the unresolved band is not tested.",
+  "Unresolved units (1-to-5 percent off; purchases up to 5.75 percent below the close; charge-sized gaps up to 34.15 dollars) are neither pass nor fail. A pass can rest on a minority of a fund's units: VBIRX has more unresolved than decisive units. The charge-sized constants come from record B section 6 (post hoc, read off the 19 funds, not a test).",
+  "SENSITIVITY (marked NOT the result; classed under the rule as written): charge excuse off: {\"VBIRX\": \"passes->fails\"}; pass line 0.05: {\"PSLV\": \"passes->mixed\"}; minimum_rows 3: {\"AMBFX\": \"too_few->fails\", \"CAIBX\": \"too_few->fails\", \"DFREX\": \"too_few->fails\", \"ANCFX\": \"too_few->fails\", \"ANWPX\": \"too_few->fails\"}; minimum_rows 10: {\"DFIEX\": \"passes->too_few\", \"DFCEX\": \"passes->too_few\", \"DISVX\": \"fails->too_few\", \"DFLVX\": \"fails->too_few\", \"FXAIX\": \"passes->too_few\", \"MEIIX\": \"fails->too_few\", \"NFFFX\": \"fails->too_few\", \"VGHAX\": \"fails->too_few\"}; guard off: {\"NEA\": \"too_few->passes\"}; fail line 0.40 and 0.60, pass line 0.20 and guard window 365 days: no fund changes.",
+  "VBIRX (a substituted fund, whose served close is the vendor unadjusted close) passes only through the charge-sized excuse: 16 of its 60 read units are within 1 percent and 44 are unresolved; with the excuse off it would fail. PHYS and PSLV pass but record A notes that a within-1-percent left-on-store reading does not show an unadjusted series: a non-distributing trust has the same adjusted and unadjusted close.",
+  "A fund's units are not independent: accounts trading one day share the close, so the failing share is a share of units, not of trades or accounts. The recent-window guard (180 days before the latest served date) was fixed in advance and its length is a judgment.",
+  "VBTLX is excluded by the CTO from every count until its cause has a name. The rule class for it is too_few (1 decisive unit, 0 failing); it is one of the 60 too_few so the five counts sum to 270, and it is not in named. The csv schema has exactly the nine columns the order lists and no column to flag it excluded; the flag is in against_earlier.excluded_tickers and this note.",
+  "The round 71, 72, 73 and 74 readings are read from their records as filed; none was rerun. The round-71 funds read adjusted that pass by trades: none; the round-71 funds read not adjusted that fail by trades: none.",
+  "Recomputed here: the read units (account, effective day, fund, kind) by the recipe of record A (same data, same guard, same day convention) with the dollar gap per unit added; per-fund unit totals equal PRICE_PAID.csv trade_rows for all 270 funds (14250 in all, 92 funds, 91040 units before the close filter). No account id, amount or quantity is written."
+ ]
+}

@@ -1,0 +1,139 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-R7-nr1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R7-nr1.internal-caller-with-no-users-row-is-refused.md",
+  "group": "OTHER",
+  "vintage_commit": "f48336439a"
+ },
+ "assignee": "0.9.0_WK_TCKT_VNEXT~25",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R7.md",
+  "vintage_commit": "f48336439a",
+  "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-R7-nr1.internal-caller-with-no-users-row-is-refused.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "_profile_scope: no PROFILE row prints FIRM-SCOPE-NO-ROW (no email) and returns the failed-lookup 403; docstring updated; not deployed, no AWS call",
+   "artifact_covered_by": [
+    "R7-nr1-AC1",
+    "R7-nr1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_no_row_refuses.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "five new tests",
+   "artifact_covered_by": [
+    "R7-nr1-AC1",
+    "R7-nr1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_authz_matrix.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "shared _EmptyUsers double now answers one bare PROFILE row (no allowedFirmIds) for every email",
+   "artifact_covered_by": [
+    "R7-nr1-AC1",
+    "R7-nr1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_commentary_same_ticket.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "_Users double: every other email gets a bare PROFILE row",
+   "artifact_covered_by": [
+    "R7-nr1-AC1",
+    "R7-nr1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_package_route.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "_PackagerUsers double: every other email gets a bare PROFILE row",
+   "artifact_covered_by": [
+    "R7-nr1-AC1",
+    "R7-nr1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_profile_firm_scope.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Users double bare=True default; test_no_row_keeps_today renamed test_no_row_is_refused and asserts 403 (setup bare=False)",
+   "artifact_covered_by": [
+    "R7-nr1-AC1",
+    "R7-nr1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R7-nr1-AC1",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R7_CHECKS/r7_checks.py nr-refuse expect: NR-REFUSE-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R7_CHECKS/r7_checks.py nr-refuse",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: NR-REFUSE-OK passed=5 of 5",
+   "denominator": "5 of 5 named tests found and passed",
+   "status": "PASS",
+   "expect": "NR-REFUSE-OK"
+  },
+  {
+   "criterion_id": "R7-nr1-AC2",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R7_CHECKS/r7_checks.py nr-regress expect: NR-REGRESS-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R7_CHECKS/r7_checks.py nr-regress",
+   "output_evidence": "under timeout 120 from the worktree root, rc=0: NR-REGRESS-OK passed=201 (min 201) failed=0",
+   "denominator": "201 of 201 tests in the ticket_center tests folder passed (196 at the base plus 5 new)",
+   "status": "PASS",
+   "expect": "NR-REGRESS-OK"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "in-memory table, no network",
+   "observed": "5 of 5 new tests and folder 201 passed",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "in-place mutant of lambda_function.py: the no-row branch returns (None, None) again; restored byte-identical (cmp against a saved copy)",
+   "expected": "the refusal tests fail",
+   "observed": "nr-refuse: passed=3 of 5 failed=2; after restore cmp clean and NR-REFUSE-OK passed=5 of 5",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a deployed or live run, any real mail send",
+   "reason": "the order forbids any AWS or network call, deploy and send"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~25/TCKT_VNEXT.TO-R7-nr1.internal-caller-with-no-users-row-is-refused.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R7_CHECKS/r7_checks.py nr-refuse",
+   "result": "NR-REFUSE-OK passed=5 of 5"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R7_CHECKS/r7_checks.py nr-regress",
+   "result": "NR-REGRESS-OK passed=201 (min 201) failed=0"
+  }
+ ]
+}

@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSWKF.TO-READ-S3.four-direct-invokes-dell2",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.7.0_AE_CloudOps~DELL2",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/NFRA_OPSWKF.TO-READ-S3.four-direct-invokes-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "47a8bd507a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPSWKF/decompositions/NFRA_OPSWKF_DECOMP.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/NFRA_OPSWKF.TO-READ-S3.four-direct-invokes-dell2.md",
+    "vintage_commit": "db7affd0048835818f31ef2866cf2929d9630c5a"
+  },
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/S3_FINAL_REPORT_FOUR_DIRECT_INVOKES.md",
+  "acceptance": [
+    {
+      "criterion_id": "OW-sr2-AC2",
+      "criterion_verbatim": "I2 refused with the new message, I1 and I3 answered 400, no row",
+      "denominator": "3 invokes of trade-submission-handler, each with its invoke StatusCode, FunctionError, handler statusCode and message; plus 3 by-initiator Count reads, one per synthetic address, and one non-zero control",
+      "invocation": "aws lambda invoke --function-name trade-submission-handler --payload fileb://event_{i2,i1,i3}.json <outfile>, each event {rawPath /api/general/trades/submit, requestContext.http.method POST, requestContext.authorizer.lambda {email, tier, firmId}, body the unstorable string}; then aws dynamodb query on opal-trade-submissions index by-initiator --select COUNT per address",
+      "judgment": true,
+      "method": "manual_read_with_citation",
+      "output_evidence": "I2 FIRST, 2026-10-11T22:30:19Z -- email opswkf-s3-i2@opal.invalid, tier advisor, firmId fwd9-synthetic-nofirm: invoke StatusCode 200, FunctionError ABSENT, handler statusCode 403, message EXACTLY 'Forbidden: trade submission answers Opal staff only'. I1, 22:31:47Z -- email opswkf-s3-i1@opal.invalid, tier advisor, firmId opal-capital: StatusCode 200, FunctionError ABSENT, handler statusCode 400, message 'ticket_id is malformed'. I3, 22:32:55Z -- email opswkf-s3-i3@opal.invalid, tier internal, firmId fwd9-synthetic-nofirm: StatusCode 200, FunctionError ABSENT, handler statusCode 400, message 'ticket_id is malformed'. So the firmId branch AND the tier branch both admit to the body check, and the caller who fails both is refused with the new message. NO ROW, at 22:34:48Z: the by-initiator Count for each of the three addresses reads 0 with ScannedCount 0 and NO LastEvaluatedKey and no --limit passed, so each zero is the WHOLE partition; and one control beside them, the same query shape against an initiator known to have submissions, returns Count 18. Each response file was deleted in the act and its absence printed. Each email is a DIFFERENT synthetic @opal.invalid address and the claims are exactly the three the table names -- no extra claim was added.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "A judgment criterion: the CVO grades it at L9 and this seat does not self-grade it. Three things a grader should have. First, the ORDER of the invokes is load-bearing and was the CTO half's condition 2: I2 ran first, so a 403 was read from this instrument BEFORE any 400 was taken as an admission -- without it, a 400 could as easily mean the check never ran. Second, 'nothing stored' rests on three independent things, not on the handler's word: P0 re-read both digests before any invoke; the deployed bytes were parsed (every call inside lambda_handler below the 400 at line 202 is a dict/JSON/datetime/uuid/isinstance/regex operation, put_item at 309); and the Count reads confirmed it from the table with a discriminating control. Third, CONDITION 4, CONFIRMED AGAINST THE DEPLOYED BYTES IN ONE LINE: the submit handler holds exactly 9 print() calls, at lines 339, 343, 349, 368, 371, 380, 382, 385 and 396 -- the same nine the issuer stated -- none of whose arguments reference event or body, and all after the ticket_id check at 202, so on these three answers the handler returns at 191 or 202 and writes NO log line of its own; the constructed context therefore reaches no CloudWatch stream."
+    },
+    {
+      "criterion_id": "OW-sr1-AC2",
+      "criterion_verbatim": "I4 answered 200",
+      "denominator": "1 invoke of trade-dashboard-api with its invoke StatusCode, FunctionError, handler statusCode and the body's count",
+      "invocation": "aws lambda invoke --function-name trade-dashboard-api --payload fileb://event_i4.json <outfile>, the event {rawPath /api/general/trades/submissions/pending, requestContext.http.method GET, requestContext.authorizer.lambda {email, tier internal, firmId fwd9-synthetic-nofirm}} and NO body key",
+      "judgment": true,
+      "method": "manual_read_with_citation",
+      "output_evidence": "I4, 2026-10-11T22:33:53Z -- email opswkf-s3-i4@opal.invalid, tier internal, firmId fwd9-synthetic-nofirm, no body key: invoke StatusCode 200, FunctionError ABSENT, handler statusCode 200, count = 12. Only the status and the count were recorded; no submission, client name or figure from the body was printed here, in the report or in any message. This is FWD-8's TIER arm, which went unread at this morning's release because the CTO half refused caller IN-T and R2 was never made -- the record then read 'tier arm UNEXERCISED on the deployed service'. It is now exercised on the deployed bytes, and the count of 12 matches what the firmId branch read live through the real door at 19:35:56Z, so both branches of the dashboard function's check serve the same blotter.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "A judgment criterion graded by the CVO at L9; this seat does not self-grade it. The limit of what it proves is stated rather than left implied, in the words the CTO half fixes: FWD-9's admitted arm and FWD-8's tier arm are EXERCISED ON THE DEPLOYED BYTES BY DIRECT INVOKE. Neither is exercised through the portal's authorizer; the tier shape has been shown through no door. The first real staff session closes each. A direct invoke shows what the FUNCTION does with a context; it does not show that the portal's authorizer would ever hand it that context. For the dashboard function the firmId branch WAS read through the real door this morning (R3, 200 with count 12 at 19:35:56Z), so only the tier branch rests on the invoke alone."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/S3_FINAL_REPORT_FOUR_DIRECT_INVOKES.md",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the step-9 report: steps 1 and 2, the four invokes in the order made with their times, step 7's three Count reads and their control, and the words the CTO half fixes. No deploy ledger exists for this order because nothing was deployed or written, which step 0 required and which .open_deploys/ shows (0 entries for this order).",
+      "artifact_covered_by": [
+        "OW-sr2-AC2",
+        "OW-sr1-AC2"
+      ]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "aws lambda invoke (DryRun)",
+      "invocation": "--invocation-type DryRun on trade-submission-handler and trade-dashboard-api, with an explicit outfile",
+      "result": "204 on BOTH, which is the CTO half's condition 5. RECORDED BECAUSE THE FIRST ATTEMPT READ EMPTY AND AN EMPTY READ IS NOT A 204: the first invocation omitted the outfile positional argument, so the command failed and --query printed nothing. An empty value was not taken as a pass -- the call was re-run with an outfile and the full response and rc read instead, giving {\"StatusCode\": 204} and rc=0 for each."
+    },
+    {
+      "tool": "aws lambda get-function-configuration",
+      "invocation": "CodeSha256 on both functions, before any invoke (P0)",
+      "result": "trade-submission-handler vxyXQ0TDbGG1YEvnIjNsXjDG6bfcPCoMRrdtyg00mW8= and trade-dashboard-api lAZbT48kxrNOnfYdO5D/gXxg+4W7xECEczneZx+YoCc=, both exactly the digests the amendment requires -- the same two whose packages were diffed member by member earlier today under TO-APPLY-S1 and TO-APPLY-S2."
+    },
+    {
+      "tool": "python ast over the DEPLOYED package",
+      "invocation": "parse submission_handler.py out of the package downloaded from Lambda under TO-APPLY-S2 and enumerate its print() calls and their argument names",
+      "result": "exactly 9 prints at lines 339, 343, 349, 368, 371, 380, 382, 385, 396 -- identical to the nine the issuer stated -- none referencing event or body, all after the ticket_id check at 202. The package read is the one P0 confirmed live, its own sha256 equalling the live CodeSha256."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "There is no mutant to inject into a read of deployed behaviour, so the mutant's JOB -- a read whose value differs between the check being live and the check being absent -- is carried by invoke I2, deliberately run FIRST as the CTO half's condition 2 requires. I2 sends the SAME function, route and body as I1 and I3 and differs only in the authorizer context: a firmId no data is filed under and a tier that is not internal. If the FWD-9 check were absent, inert or reading the wrong context keys, I2 would have fallen through to the same ticket_id validation as the other two and read 400 -- the pre-release answer, which R0 measured through the real door at 21:15:37Z. The two outcomes are therefore distinguishable by a single field.",
+      "expected": "403 with message EXACTLY 'Forbidden: trade submission answers Opal staff only' if the check is live; 400 with 'ticket_id is malformed' if it is absent or inert",
+      "observed": "403 with message EXACTLY 'Forbidden: trade submission answers Opal staff only', at 2026-10-11T22:30:19Z, invoke StatusCode 200 and FunctionError ABSENT -- and read BEFORE either 400, so the instrument was shown able to read a refusal before any admission was taken as one. The two 400s that followed (I1 at 22:31:47Z by firmId, I3 at 22:32:55Z by tier) are therefore admissions by a working check, not the silence of a check that never ran.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each of the four invokes was run exactly ONCE -- the order allows one retry per invoke on an invoke-level error and none occurred (every invoke returned StatusCode 200 with FunctionError absent), so no same-input pair exists from a repeat. The same-input comparison available is stronger than a repeat and is used instead: the SAME bytes were exercised by TWO INDEPENDENT PATHS hours apart -- the real door through CloudFront and the portal authorizer under TO-APPLY-S2, and a direct invoke with a constructed context here.",
+      "observed": "STABLE across both paths and both arms. The refusal: R1 through the real door at 21:33:04Z read 403 with message 'Forbidden: trade submission answers Opal staff only'; I2 by direct invoke at 22:30:19Z read the same status and the same message character for character, on bytes P0 re-confirmed unchanged (vxyXQ0TDbGG1YEvnIjNsXjDG6bfcPCoMRrdtyg00mW8= at both times). The admission: R0 through the real door at 21:15:37Z read 400 'ticket_id is malformed' before the release, and I1 and I3 read the identical status and message after it, for the two contexts that pass the check. And FWD-8's blotter count is 12 both through the real door at 19:35:56Z (firmId branch) and by invoke at 22:33:53Z (tier branch).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The signed pair this act runs under, recorded here because the else-branch schema has no never_widen_pair key",
+      "reason": "AMENDMENT AND COO HALF: org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/2.0.0_SA_COO~O2/S_DEPLOY/OW_SD2_FWD9_RELEASE_PAIR_AMENDMENT_1_DIRECT_INVOKES_20261011.md @201b464dcd, 8578 bytes, 102 lines, READ WHOLE BEFORE THE FIRST ACT -- the file, not the order's restatement. Its sha256 was computed on the blob at the cited commit and begins d5abdc06839318bd, equal to the order's prefix and to the full d5abdc06839318bd977c63e11ea7554e4325be44a75e11a7fe7381692b599514 the CTO half carries. Section 1 is the table of four invokes, section 2 covers every answer of each, section 3 is who may invoke each function directly (3 of 3 resource-policy statements per function, all principal apigateway.amazonaws.com on a source ARN; this box's principal measured by DryRun; the rest of IAM expressly NOT enumerated), section 4 is the second door and section 5 records that there is nothing to roll back. CTO HALF: org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/1.0.0_SA_CTO~DELL2/CTO_HALF_OW_SD2_AMENDMENT_1_DIRECT_INVOKES_20261011.md @1c81d207ce, 3084 bytes, 42 lines, READ WHOLE before the first act. Its SIX conditions govern and all six were met: (1) P0 on both functions before I1 -- both digests read exactly the required values; (2) I2 FIRST, so the refusing twin was read before either admitted arm and the instrument was shown able to read a refusal before a 400 was taken as an admission; (3) each response file deleted in the act and the record holding status, message or count and nothing else of any payload; (4) the submit handler's log statements read before I1 -- confirmed against the DEPLOYED bytes, reported in one line below; (5) no grant, and the principal's DryRun read 204 on both at the act; (6) no I1/I3 403 arose, so nothing was reported under that limb and nothing was rolled back -- as the half requires, nothing would have been rolled back without its word."
+    },
+    {
+      "item": "The scope of the act, recorded here because the else-branch schema has no scope key",
+      "reason": "FOUR direct invokes of two DEPLOYED functions with constructed HTTP-API-payload-2.0 events, to exercise the two arms the releases left unread: FWD-9's admitted arm (an Opal-internal caller still reaches the submit handler's body check) and FWD-8's tier arm (a tier-internal caller is served by the dashboard function). In the order the CTO half fixes -- I2, I1, I3, I4 -- with the refusing twin first. No deploy ledger was opened because nothing is deployed or written, and nothing was placed in .open_deploys/. The constructed event is not a credential: it works only for a principal already permitted to invoke, which is why section 3's reads and the DryRun stand in place of a token. WHAT A DIRECT INVOKE DOES NOT SHOW, and the record says it: that the portal's authorizer hands either function that context. The tier shape has been shown through no door."
+    },
+    {
+      "item": "Rollback, recorded here because the else-branch schema has no rollback key",
+      "reason": "NOTHING TO ROLL BACK, and nothing was: four reads of deployed functions with constructed events, no write of any kind -- no user row, no token, no signing-key read, no HTTP call, no apply, no grant. The amendment's section 5 says so in those terms. Each response file was deleted in the act and its absence printed. Had I1 or I3 answered 200 a submission would have been stored and the approvers mailed; it would have been reported at once with its id and NOT deleted by this seat. That branch did not arise: both answered 400 at the ticket_id check. Had I1 or I3 answered 403 the rollback target would have been s3_object_version UfDVwCjbt.EJrkTBv9.Ei2_2b4Eg2VNR, but only on the CTO's word, since one instrument's answer is not yet a staff refusal and no real person has been refused."
+    },
+    {
+      "item": "The three named controls the else branch cannot carry, kept so none is lost",
+      "reason": "The schema's else branch allows exactly mutant and determinism, so the remaining three discriminating reads are recorded here with their observations. (1) NOTHING STORED AND NO MAIL SENT: P0 re-read both digests before any invoke. The DEPLOYED bytes were parsed: every call inside lambda_handler below the 400 at line 202 is a dict, JSON, datetime, uuid, isinstance or regex operation, and put_item is at line 309. All three handlers answered 400 at that check. The by-initiator Count for EACH of the three synthetic addresses reads 0, whole partition, against a control of 18. Mail is claimed from the handler's order of operations and the count, not from the mail service's log, which is the CTO's own standard for this claim. (2) THE THREE ZEROS ARE ABSENCES: Each of the three subject reads returned Count 0, ScannedCount 0, no LastEvaluatedKey, with no --limit passed, so each is a whole partition and not a page. The control, the same index and key condition against a known initiator, returns 18. The control's address belongs to a real person and was never printed -- only its length and its count. (3) THE CONSTRUCTED CONTEXT REACHES NO LOG: Read from the DEPLOYED package (the one P0 confirmed live), by AST rather than grep: exactly 9 print() calls at lines 339, 343, 349, 368, 371, 380, 382, 385 and 396 -- the same nine the issuer stated, matched element by element -- none of whose argument names include event or body, and every one after the ticket_id check at 202. On the answers these three invokes produced the handler returns at 191 (the 403) or 202 (the 400), before the first print at 339, so none of them wrote a log line of its own and no synthetic address, tier or firm id reached a log through this act. A fourth is folded into compiler_tools: an empty DryRun was not read as a 204."
+    },
+    {
+      "item": "That the portal's authorizer would hand either function these contexts",
+      "reason": "A direct invoke shows what the FUNCTION does with a context, never that any door supplies it. In the CTO half's words: FWD-9's admitted arm and FWD-8's tier arm are EXERCISED ON THE DEPLOYED BYTES BY DIRECT INVOKE. Neither is exercised through the portal's authorizer; the tier shape has been shown through no door. The first real staff session closes each. For the dashboard function the firmId branch was separately read through the real door this morning (R3, 200 with count 12), so only the tier branch rests on an invoke alone."
+    },
+    {
+      "item": "Who else may invoke these two functions directly",
+      "reason": "The amendment's section 3 answers it for the RESOURCE policy, read whole -- 3 of 3 statements on each function, every principal apigateway.amazonaws.com on a source ARN, no account, role or user principal and no wildcard -- and for THIS box's principal, measured by a 204 DryRun. It states expressly that every other IAM principal carrying lambda:InvokeFunction on these functions or on * was NOT enumerated. This act added no grant and enumerated no IAM."
+    },
+    {
+      "item": "The second door, trade-submission-api (w8jnzvs21g)",
+      "reason": "Row NFRA_OPSWKF-D2-S11. No call was made to it under this order and none is permitted: the bounds name it explicitly. The CTO half rules a read-only investigation of it in its own message, which is the next order in this sequence (TO-READ-S4), and that order also forbids calling the API."
+    },
+    {
+      "item": "Whether the stored-submission branch is reachable at all",
+      "reason": "It was not exercised and could not be on this body: the ticket_id is malformed, so the handler returns at 202. Nothing here establishes what a well-formed ticket_id would do, and no such body was ever constructed."
+    }
+  ],
+  "surprises": []
+}

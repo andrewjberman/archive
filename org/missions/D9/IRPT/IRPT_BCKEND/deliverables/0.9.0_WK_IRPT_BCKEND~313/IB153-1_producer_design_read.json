@@ -1,0 +1,423 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-457",
+  "assignee": "0.9.0_WK_IRPT_BCKEND~313",
+  "base_commit": "1bce31df72",
+  "read_state": "A READ, NOT A BUILD. Counts only; no account id, balance or holding of an account; a sources.json entry is named by its key, a registry row by its file and line.",
+  "product_files_edited": 0,
+  "builds_proposed_as_orders": 0,
+  "served_changes": 0,
+  "other_sources_asked": 0,
+  "claims_regraded_in_product": 0,
+  "what_is_served_today_for_the_date_basis": {
+    "in_words": "Nothing. No served artifact, route or schema carries a date-basis claim for the holdings gold of the entry blackdiamond_z09. The names the contract uses (date_basis_claim, date_basis_witnesses, PER_ACCOUNT_DAY, ungradeable_kinds) have 0 hits under data/assets/scripts, infra/ and docs/contracts, and 0 hits in the portal checkout, except the PRD itself and the module's own test file name. The one date_basis token that exists is a DIFFERENT member: StatusEnvelope source_dates.date_basis (values PER_SECTION or UNDATED_INPUT, about the dates of a prospect analysis), written at infra/aws/lambda/investor-reporting/ops/prospect_dates.py:339 and declared in docs/contracts/investor-reporting/v1/StatusEnvelope.schema.json:102; the contract's member is date_basis_claim, so the two do not collide by name. The entry blackdiamond_z09 in data/assets/scripts/gold/irpt_holdings_performance/sources.json declares partition_close OWN_DATE with basis inferred (one close per partition) and declares no PER_ACCOUNT_DAY basis. The holdings gold holdings_performance_daily has 20 columns (holdings_performance.py:248) and none is a claim; the manifest.json beside each partition carries partitions_read.day_close.holds and .basis (holdings_performance.py:1157), the declared partition-level close, written by the same producer. The record of the first landing of this entry's gold (the proof of TO-IB-er-401) names 75 daily partitions over 2026-06-10 to 2026-09-25 in the entry's registry bucket, landed by a one-off run, not a schedule; it was not re-listed in this read.",
+    "writer_of_the_gold": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:1164 (emit_day, address built at :1129)",
+    "writer_of_a_date_basis_member": "none found",
+    "route_serves_this_entry_today": "Not through installed.py: installed.py:68 composes a holdings source for two firms only (the 49 Financial and Inflection canonical ids); the entry's firm has no source composed there, although holdings_gold.py:178-182 already maps its route id. retained.py (the retained composition) was not read.",
+    "claim": "measured",
+    "code_line": "data/assets/scripts/gold/irpt_holdings_performance/sources.json:168"
+  },
+  "candidate_call_sites": [
+    {
+      "site": "holdings_performance.py _frame_for / holdings_return: the per-day producer of the holdings gold (source-generic; --source selects the entry)",
+      "code_line": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:1065",
+      "schedule_or_trigger": "For the entry blackdiamond_z09: none found. The only scheduler inputs that name a source are the 07:30 America/New_York Mon-Fri fire for the first-witness entry (infra/aws/terraform/investor-reporting/holdings-performance/schedule.tf:92 and :107; described live: State ENABLED, cron(30 7 ? * MON-FRI *), America/New_York, input source = the entry beginning schwab_) and the 14:00 UTC Mon-Fri fire for the Inflection entry (same file, :193). infra/aws/terraform/investor-reporting/holdings-performance/iam.tf:137 says in a comment that this channel is not touched. Run time vs the landings: 07:30 America/New_York is 11:30Z while daylight time holds (to 2026-11-01) and 12:30Z after; the z09 partition for day t lands at 11:46Z on t+1 (19 of 22 partitions since 2026-09-10), so that existing fire would run 16 minutes BEFORE the partition in daylight time and 44 minutes after in standard time; the anchor lands at 09:46Z on t+1 (21 of 22).",
+      "inputs_in_hand": [
+        "p0 and p1: the entry's holdings partitions that hold day t-1's and day t's close, as frames with the declared columns (AccountID, CUSIP, Symbol, Asset Name, Market Value, Units, Cash Equivalent) (:994-1048)",
+        "the partition_close declaration (OWN_DATE, inferred) and the partitions each close was read from (frame.attrs partitions_read, :1070)",
+        "lib/trading_calendar (tc) for t and the prior trading day (:983-987)",
+        "the account-day's rows in the module's (cusip, market_value, units, cash_flag) shape, derivable from p1; the prior day's priced rows for the cash rule, derivable from p0"
+      ],
+      "inputs_the_module_needs_and_the_site_lacks": [
+        "the first witness's closes for t and t-1: the anchor partition belongs to a different entry (the one beginning schwab_) and this producer reads one entry's silver only",
+        "the second witness's bars over the 40-day window (no landed source a scheduled producer reads)",
+        "the security types: the transactions table (fact_transactions beside the entry's fact_holdings) is read by no producer",
+        "the claim of the prior graded day (the serving rule needs today's and the prior day's claim; the claim of t-1 needs the partition of t-2 and the anchors of t-1 and t-2)",
+        "knowledge that the anchor for t has landed (a day graded before its anchor lands is UNGRADEABLE, v0.34); the site only checks that its own partitions exist",
+        "the module and second_witness_guard.py in the Lambda package (the package lists holdings_performance.py and sources.json, lambda-source-map.json:5777)"
+      ],
+      "serves_today": "holdings_performance_daily/date=D/data.parquet and holdings_performance_manifest/date=D/{data.parquet,manifest.json} at opal_naming.address('irpt', <registry-derived firm of the entry>, 'gold', table, 'date=D') (holdings_performance.py:1129-1130, :1164, :1184); 20 columns, no date-basis member",
+      "after_both_landings": "not applicable for this entry (no schedule); landings measured from S3 LastModified of the partitions the earlier cells read: anchor next day 09:46Z, entry partition next day 11:46Z",
+      "claim": "measured"
+    },
+    {
+      "site": "holdings-performance Lambda handler: the scheduled entrypoint that calls the producer day by day with catch-up",
+      "code_line": "infra/aws/lambda/investor-reporting/holdings-performance/handler.py:149",
+      "schedule_or_trigger": "Invoked by the two EventBridge Scheduler schedules above (the first-witness entry and the Inflection entry); the event's source field selects the entry (handler.py:146). None names blackdiamond_z09.",
+      "inputs_in_hand": [
+        "now, the trading-calendar frontier and the target day T-1 (handler.py:110-124)",
+        "the list of landed gold days read from the producer's own gold address (handler.py:87-98)",
+        "the producer's return code per day (hp.main, :149)"
+      ],
+      "inputs_the_module_needs_and_the_site_lacks": [
+        "every module input (it passes argv to the producer and reads none of its frames)",
+        "a way to re-visit a landed day: the catch-up computes days with no landed partition only, each write a NEW key (handler.py:105-107, row S297), so a claim graded the day AFTER a partition is written has no write path here",
+        "the 40-day bars fetch, with its egress and failure mode"
+      ],
+      "serves_today": "the same gold and manifest as the producer; returns {date, rc, ok, days, planned}",
+      "after_both_landings": "n/a for this entry; for the entry that has a schedule see the first site",
+      "claim": "measured"
+    },
+    {
+      "site": "account_return_daily.py holdings_price_returns: the reporting-gold producer's READ of the holdings gold (a neighbour guard); it holds no account-day rows",
+      "code_line": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py:993",
+      "schedule_or_trigger": "The reporting-gold Lambda, 07:41 America/New_York Mon-Fri (infra/aws/terraform/investor-reporting/reporting-gold/schedule.tf:6-16 states chosen_cron cron(41 7 ? * MON-FRI *); the schedule was not described live). That is 11:41Z in daylight time: before the 11:46Z partition landing of the z09 entry.",
+      "inputs_in_hand": ["the holdings gold's columns account_id, daily_return, status, excluded_weight, negative_value, leveraged, prior_business_date for one day (:996-998)"],
+      "inputs_the_module_needs_and_the_site_lacks": ["rows (cusip, market_value, units, cash_flag) of the account-day", "both witnesses' closes", "security types", "the second witness's bars"],
+      "serves_today": "account_return_daily (custodian-value returns) under irpt/<firm>/gold/; it reads the holdings gold, it does not write it. NOT a candidate to produce the claim; it is a consumer of the result.",
+      "after_both_landings": "no: 07:41 America/New_York is 11:41Z in daylight time",
+      "claim": "measured"
+    },
+    {
+      "site": "account_class_daily.py and account_activity_lots.py (imported by the reporting-gold handler): the other reporting-gold producers",
+      "code_line": "data/assets/scripts/gold/irpt_reporting/account_class_daily.py:1",
+      "schedule_or_trigger": "The same reporting-gold Lambda fire, 07:41 America/New_York Mon-Fri. data/assets/scripts/gold/irpt_reporting/sources.json declares the first-witness entry and a delivery entry only (keys: schwab_ and _commonwealth_delivery); it declares no blackdiamond_z09.",
+      "inputs_in_hand": ["the first-witness custodian's dim_position market values by class and its balances/transactions (not the z09 entry's holdings)"],
+      "inputs_the_module_needs_and_the_site_lacks": ["every input for the z09 entry: these producers read no z09 partition at all"],
+      "serves_today": "account_class_daily and the activity and lot tables for the first-witness entry only",
+      "after_both_landings": "n/a (a different entry)",
+      "claim": "measured"
+    },
+    {
+      "site": "any other producer that writes the holdings gold or the returns for the entry blackdiamond_z09",
+      "code_line": "data/assets/scripts/gold/irpt_holdings_performance/sources.json:159",
+      "schedule_or_trigger": "none found. comp-find for the entry key returns 95 hits in 71889 files: the sources.json entry, one IAM comment, and measurement scripts and records under org/ (no producer, no schedule, no handler).",
+      "inputs_in_hand": [],
+      "inputs_the_module_needs_and_the_site_lacks": ["a producer: none exists other than the first site, which has no schedule for the entry"],
+      "serves_today": "nothing beyond the 75 partitions the one-off run landed (record, not re-listed)",
+      "after_both_landings": "n/a",
+      "claim": "absent"
+    }
+  ],
+  "module_inputs": [
+    {
+      "input": "the account-day's rows [(cusip, market_value, units, cash_flag)] and the prior day's priced rows of the same account and CUSIP (the cash rule)",
+      "where_it_lives_today": "the entry's silver holdings partitions, opal-data-assets {monolith}/{scope}/silver/fact_holdings/date=D/ (sources.json:165, template resolved by firm_scope); columns CUSIP, Market Value, Units, AccountID, Cash Equivalent (sources.json:180-195). The producer already reads the two partitions it needs (holdings_performance.py:1015, :1045). Landing: next calendar day 11:46Z for the steady state (19 of 22 partitions from 2026-09-10; the other 3 landed 3 to 5 days after the date).",
+      "claim": "measured"
+    },
+    {
+      "input": "the first witness's closes for day t and the prior trading day {cusip: close}",
+      "where_it_lives_today": "the first-witness entry's silver positions partitions (the key beginning schwab_ in the same sources.json; positions_prefix schwab/<master>/silver/dim_position/date=D/, columns cusip and closing_price). A scheduled producer reads it for that entry's own gold; no z09 producer reads it. Landing: next calendar day 09:46Z (21 of 22 since 2026-09-10; 1 at 21:46Z). S3 LastModified is the last write, not proven first landing: 23 of 64 anchor partitions before 2026-09-10 show a later rewrite.",
+      "claim": "measured"
+    },
+    {
+      "input": "the second witness's bars over the 40-day window (an unadjusted daily Close per ticker)",
+      "where_it_lives_today": "NOWHERE a scheduled producer can read. The bars used by every measurement were fetched from Yahoo Finance at measurement time by fetch_yahoo (data/assets/scripts/silver/commonwealth_price_basis_census.py:200, yfinance, at most 50 tickers a call, paced) into a local csv directory, and read by read_yahoo_close (data/assets/scripts/silver/commonwealth_daily_valuation.py:229), which reads that local directory only ('no Yahoo call'). No scheduled producer lands them. This cell's own pass: 878 tickers counted before fetching (under the 1,500 stop), 18 calls (17 of 50 and 1 of 28), each ticker asked once, 871 with bars, 7 with none, 0 rate-limited, paced 8 seconds, none parallel, Yahoo only. A landed store of yahoo-labelled prices does exist (one parquet, the legacy_addresses.json row at line 11, template silver/prices/canonical_prices.parquet, read by commonwealth_price_basis_census.py:159), but the census that reads it classes some tickers dividend_adjusted or mixed and carries linear_interpolation fills (commonwealth_price_basis_census.py:22-45), so it is not shown to hold the unadjusted Close the second witness is graded on, and its refresh schedule was not read. A producer that fetched at run time would be a design fact for the CTO: egress from a Lambda to Yahoo (this read only measured egress from a workstation), a rate-limit stops a pass (fetch_yahoo's docstring), and a ticker with no bars gives the security no grade, so its account-days stay blank (7 of 878 here).",
+      "claim": "measured"
+    },
+    {
+      "input": "the security types by CUSIP (the one (SEC Asset Type, Share Class Type) pair over a security's transaction rows)",
+      "where_it_lives_today": "the entry's silver fact_transactions table beside fact_holdings (read by ib441_fetch_tx.py: 121 partitions, 1,042,552 rows, 99,723 distinct TransactionIDs in this pass). Read by measurement scripts only; no producer reads it and no type table is landed.",
+      "claim": "measured"
+    },
+    {
+      "input": "the trading calendar",
+      "where_it_lives_today": "lib/trading_calendar.py, already packaged in the holdings-performance Lambda (handler.py:16) and imported by the module (date_basis_grading.py:35)",
+      "claim": "measured"
+    },
+    {
+      "input": "the reader's per-security verdict for t (reader_graded) and the reader's closes for t and the prior day (reader_closes)",
+      "where_it_lives_today": "computed by the module from the bars (second_witness_grades_security_day, date_basis_grading.py:204); no stored form exists",
+      "claim": "measured"
+    },
+    {
+      "input": "the module and the guard in the deployable package",
+      "where_it_lives_today": "data/assets/scripts/gold/irpt_reporting/date_basis_grading.py and second_witness_guard.py: no importer and not in any lambda-source-map.json package (the holdings-performance package lists holdings_performance.py and sources.json at :5777-5778)",
+      "claim": "measured"
+    }
+  ],
+  "consumers": {
+    "files_naming_the_member_or_the_gold": {
+      "total": 38,
+      "consumers": 14,
+      "writers": 8,
+      "neither": 16,
+      "placed": {
+        "consumers": [
+          "infra/aws/lambda/investor-reporting/performance/holdings_gold.py",
+          "infra/aws/lambda/investor-reporting/performance/installed.py",
+          "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+          "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+          "data/assets/scripts/gold/irpt_holdings_performance/holdings_comparison.py",
+          "infra/aws/terraform/investor-reporting/performance/retained.tf",
+          "infra/aws/terraform/investor-reporting/reporting-gold/iam.tf",
+          "infra/aws/terraform/investor-reporting/reporting-gold/locals.tf",
+          "infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold.py",
+          "infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold_fee_basis.py",
+          "infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold_calendar_gap.py",
+          "infra/aws/lambda/investor-reporting/performance/tests/test_retained_performance.py",
+          "infra/aws/lambda/investor-reporting/performance/tests/test_path_a_retired_49f.py",
+          "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_population_account_set.py"
+        ],
+        "writers": [
+          "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+          "infra/aws/lambda/investor-reporting/holdings-performance/handler.py",
+          "infra/aws/lambda/investor-reporting/holdings-performance/tests/test_catch_up.py",
+          "infra/aws/terraform/investor-reporting/holdings-performance/schedule.tf",
+          "infra/aws/terraform/investor-reporting/holdings-performance/main.tf",
+          "infra/aws/terraform/investor-reporting/holdings-performance/locals.tf",
+          "infra/aws/terraform/investor-reporting/holdings-performance/lambda.tf",
+          "infra/aws/terraform/investor-reporting/holdings-performance/iam.tf"
+        ],
+        "neither": [
+          "data/assets/scripts/silver/commonwealth_account_return_daily.py (a docstring line only)",
+          "data/assets/scripts/gold/runners_49f/c02_twr_engine.py (a different table of the same name TABLE_DAILY, canonical/twr_daily)",
+          "infra/aws/lambda/investor-reporting/performance/f49_engine.py (reads canonical/twr_daily)",
+          "infra/aws/lambda/investor-reporting/performance/tests/test_f49_engine.py",
+          "infra/logic/registry/root_map.json",
+          "infra/logic/registry/exemptions.json",
+          "infra/aws/terraform/shared-infra/s3-49financial.tf",
+          "infra/aws/terraform/shared-infra/tests/dell_fence_census.json",
+          "infra/aws/terraform/nfra-ctlpln-identity/tests/reached_roles_census.json",
+          "infra/aws/terraform/nfra-ctlpln-identity/tests/protected_functions_listing.json",
+          "infra/aws/terraform/nfra-ctlpln-identity/tests/plan_reads_census.json",
+          "infra/aws/terraform/investor-reporting/reporting-publish/schedule.tf (a timing comment)",
+          "infra/aws/terraform/investor-reporting/reporting-gold/schedule.tf (a timing comment and the fire-time read)",
+          "infra/aws/terraform/investor-reporting/CHANGELOG.json",
+          "infra/aws/lambda/ci/lambda-source-map.json",
+          "infra/aws/lambda/ci/source-map-reconcile-audit.jsonl"
+        ]
+      },
+      "claim": "measured"
+    },
+    "list": [
+      {
+        "consumer": "performance route reader HoldingsGoldSource._read and calculate (the returns the portal's performance views come through)",
+        "code_line": "infra/aws/lambda/investor-reporting/performance/holdings_gold.py:153",
+        "kind": "lambda_reader",
+        "on_absent": "A member the reader does not name is not read: it needs only account_id, business_date, daily_return, account_value and status to be a subset of the columns (:76, :153), so an added column leaves it unchanged; an absent partition is a named refusal (:233, :237).",
+        "on_unknown_value": "Not read, so an unknown claim value changes nothing here: the reader would still chain the row if status is OK.",
+        "on_blank": "Depends on how the producer writes the blank. A row whose status is not OK is skipped from the chain and the figure is still served with a PARTIAL 'excluded_rows' absence (:246-247, :314-317), not refused: a blank day written as a non-OK status would be chained OVER. An OK row with a null daily_return raises (:259, 'finite holdings return required'). A day with no partition is linked over and the claim becomes inferred (:288-292).",
+        "read_a_release_makes_through_it": "Call the performance route for ONE permitted account of the entry's firm over a window holding one blank account-day and read report.value_facts: days_excluded, claim and missing_trading_days, and the absences list (excluded_rows), against the gold's row for that day",
+        "claim": "measured"
+      },
+      {
+        "consumer": "performance route composition of holdings sources (which firms have a holdings source)",
+        "code_line": "infra/aws/lambda/investor-reporting/performance/installed.py:68",
+        "kind": "lambda_wiring",
+        "on_absent": "Composes the 49 Financial and Inflection canonical ids only; the entry's firm has no source and the route answers UNSUPPORTED_OPERATION by name for it (installed.py:61-63).",
+        "on_unknown_value": "Not applicable: it reads no gold value.",
+        "on_blank": "Not applicable: it reads no gold value.",
+        "read_a_release_makes_through_it": "Read the sources dict _holdings_sources returns at cold start and confirm the entry's canonical firm id is a key before the route is asked for that firm",
+        "claim": "measured"
+      },
+      {
+        "consumer": "reporting-gold population_accounts: the declared population is the account_id values of the newest landed holdings gold partition",
+        "code_line": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py:194",
+        "kind": "lambda_reader",
+        "on_absent": "Projects account_id only, so an added column changes nothing; a missing partition returns an empty list (:195).",
+        "on_unknown_value": "Not read.",
+        "on_blank": "A blank account-day still contributes its account_id to the population if the row is written; a blank written as an absent row would drop the account from the population.",
+        "read_a_release_makes_through_it": "Read population_accounts(s3, firm) for the newest landed day and compare its length with the number of distinct account_id values in that partition, including the blank ones",
+        "claim": "measured"
+      },
+      {
+        "consumer": "holdings_price_returns: the reporting-gold producer's guard read of the holdings gold",
+        "code_line": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py:996",
+        "kind": "producer",
+        "on_absent": "Reads seven projected columns (:997); an added column is ignored; a missing partition returns {} (:1000).",
+        "on_unknown_value": "Not read.",
+        "on_blank": "A row whose status is not OK, or an OK row with a null daily_return, becomes (None, HPR_NOT_OK, coverage) (:1016-1019): a named reason, never a zero.",
+        "read_a_release_makes_through_it": "Read holdings_price_returns(s3, firm, day) for one landed day and confirm a blank account-day maps to HPR_NOT_OK with its status",
+        "claim": "measured"
+      },
+      {
+        "consumer": "holdings_comparison: the bounded comparison of the gold with the vendor's pulls (composite by account_value)",
+        "code_line": "data/assets/scripts/gold/irpt_holdings_performance/holdings_comparison.py:219",
+        "kind": "producer",
+        "on_absent": "Reads four projected columns (:220); an added column is ignored; an empty set of objects for a day skips the day (:217-218), and an empty gold refuses (:230).",
+        "on_unknown_value": "Not read.",
+        "on_blank": "Keeps only status OK rows (:223): a blank written as non-OK leaves the composite without that account-day (the partial_days count), a blank written as an OK row would be composed.",
+        "read_a_release_makes_through_it": "Run the comparison for one day with the blank account-day present and read partial_days against the number of blank account-days",
+        "claim": "measured"
+      },
+      {
+        "consumer": "IAM read grant of the performance role on the holdings gold prefix",
+        "code_line": "infra/aws/terraform/investor-reporting/performance/retained.tf:48",
+        "kind": "iam_grant",
+        "on_absent": "A grant by prefix: a new column or partition inside the prefix is covered; a gold for a firm outside the prefix is not.",
+        "on_unknown_value": "Not applicable.",
+        "on_blank": "Not applicable.",
+        "read_a_release_makes_through_it": "Describe the performance role's S3 read statement and confirm the prefix of the entry's firm is listed (the prefix at :48 is built for the 49 Financial firm and :62 for Inflection; none is built for the entry's firm)",
+        "claim": "measured"
+      },
+      {
+        "consumer": "reporting-gold role read grant and gold table names",
+        "code_line": "infra/aws/terraform/investor-reporting/reporting-gold/locals.tf:55",
+        "kind": "iam_grant",
+        "on_absent": "Names the table; grants read on the holdings prefix (locals.tf:79).",
+        "on_unknown_value": "Not applicable.",
+        "on_blank": "Not applicable.",
+        "read_a_release_makes_through_it": "Describe the reporting-gold role's read statement and confirm the entry's firm prefix is granted",
+        "claim": "inferred"
+      },
+      {
+        "consumer": "reporting-gold role policy (the gold prefixes the role reads and writes)",
+        "code_line": "infra/aws/terraform/investor-reporting/reporting-gold/iam.tf:3",
+        "kind": "iam_grant",
+        "on_absent": "As above.",
+        "on_unknown_value": "Not applicable.",
+        "on_blank": "Not applicable.",
+        "read_a_release_makes_through_it": "The same describe-role read as the row above",
+        "claim": "inferred"
+      },
+      {
+        "consumer": "tests of the performance route's holdings reader (five files)",
+        "code_line": "infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold.py:1",
+        "kind": "test",
+        "on_absent": "They build frames of the reader's columns; a test that asserts the 'schema changed' refusal on a missing column stays true; none was read for an extra column.",
+        "on_unknown_value": "Not applicable.",
+        "on_blank": "test_holdings_gold_calendar_gap.py covers the missing-partition link; none was read for a blank claim.",
+        "read_a_release_makes_through_it": "Run the five test files unchanged against the release and read the pass count",
+        "claim": "inferred"
+      },
+      {
+        "consumer": "test of the reporting-gold population read",
+        "code_line": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_population_account_set.py:57",
+        "kind": "test",
+        "on_absent": "Asserts the prefix the population read lists (:57).",
+        "on_unknown_value": "Not applicable.",
+        "on_blank": "Not read for a blank.",
+        "read_a_release_makes_through_it": "Run the file unchanged against the release and read the pass count",
+        "claim": "inferred"
+      },
+      {
+        "consumer": "the holdings-gold PRODUCER (a writer: where the claim would be added)",
+        "code_line": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py:1164",
+        "kind": "producer",
+        "on_absent": "ARROW_SCHEMA is a fixed list of 20 columns (:248-253) and the parquet is built from COLUMNS: a member is added by editing both; the gold's SCHEMA_VERSION is 1.2 (:129).",
+        "on_unknown_value": "The producer refuses a declaration with an unknown partition_close vocabulary (:476-481); a basis vocabulary for PER_ACCOUNT_DAY does not exist in the declaration yet.",
+        "on_blank": "A day it cannot compute is not written and the catch-up stops there (handler.py:151-153); a non-computable account carries a named non-OK status (manifest_counts, :1086).",
+        "read_a_release_makes_through_it": "Read one landed partition's schema and one manifest.json after the release: the new member present on every row and the status census unchanged",
+        "claim": "measured"
+      },
+      {
+        "consumer": "holdings-performance Lambda handler: the writer's catch-up and landed-day listing",
+        "code_line": "infra/aws/lambda/investor-reporting/holdings-performance/handler.py:87",
+        "kind": "lambda_trigger",
+        "on_absent": "Reads only the key names under the gold prefix (date=YYYY-MM-DD/data.parquet), no column: unchanged by an added member.",
+        "on_unknown_value": "Not applicable.",
+        "on_blank": "A landed day is never revisited (new keys only, :105-107): a claim graded the day after would need a different write path.",
+        "read_a_release_makes_through_it": "Invoke the handler with dry_run for the entry and read the planned days against the landed days",
+        "claim": "measured"
+      },
+      {
+        "consumer": "the portal pages that read the performance route's payload",
+        "code_line": "portal/src/pages/InvestorReporting/tabs/reporting/PerformanceHeadline.tsx:1",
+        "kind": "page",
+        "on_absent": "NOT READ. The portal checkout at dbeb6764 (another checkout, at its own commit) was searched for the gold's and the member's names: 0 files name them; the 8 files that name date_basis are the prospect-analysis envelope. The pages that render the route's returns were not classified.",
+        "on_unknown_value": "NOT READ",
+        "on_blank": "NOT READ",
+        "read_a_release_makes_through_it": "Open the investor-reporting performance headline for an account of the entry's firm with a blank day in the window and read what it renders",
+        "claim": "absent"
+      },
+      {
+        "consumer": "the contract: no schema file for the holdings gold",
+        "code_line": "docs/contracts/investor-reporting/v1/StatusEnvelope.schema.json:102",
+        "kind": "schema",
+        "on_absent": "docs/contracts has 0 files naming holdings_performance_daily or date_basis_claim: the gold has no contract file to change, so the addendum's CONTRACTS half binds nothing here. The only date_basis in docs/contracts is the prospect envelope's (:102).",
+        "on_unknown_value": "Not applicable.",
+        "on_blank": "Not applicable.",
+        "read_a_release_makes_through_it": "Name the file that holds the gold's column list: the producer's ARROW_SCHEMA is the only one found",
+        "claim": "measured"
+      }
+    ],
+    "by_kind": {
+      "lambda_reader": 2,
+      "lambda_wiring": 1,
+      "lambda_trigger": 1,
+      "producer": 3,
+      "iam_grant": 3,
+      "test": 2,
+      "page": 1,
+      "schema": 1
+    },
+    "searched_for": "In the worktree (data/, infra/, lib/, docs/contracts/, .tools/): the strings holdings_performance_daily, holdings_performance_manifest, holdings-performance, date_basis_claim (34 files), then the names that reach the gold without the table string: 'import holdings_performance', 'from holdings_performance', 'holdings_performance as', TABLE_DAILY (4 more files: the first search missed holdings_comparison.py, which reaches the table as hp.TABLE_DAILY, so a name search is not a census of readers); and date_basis, PER_ACCOUNT_DAY, price_basis for the member (the namesakes are the prospect envelope's). Placement by the matching line and, for the 14 consumers and 8 writers, by reading the lines around it. In the portal checkout at C:/dev/ajb_workspace/portal (commit dbeb6764, another checkout, read with native tools, not written): holdings_performance, holdings-performance, date_basis, PER_ACCOUNT_DAY, performance_daily: 8 files, all the prospect envelope's date_basis; 0 name the gold.",
+    "not_searched": [
+      "the portal pages that render the performance route's payload (a broad route-name search returned 84 files; none was opened or classified); a page reading returns is NOT counted as zero",
+      "AWS: no Lambda environment, no live IAM policy and no live schedule beyond the one named schedule was described",
+      "org/ and the records under it (measurement scripts and deliverables name the entry and the gold; they are not served code)",
+      "readers that build the gold's address from a variable not named in the patterns above (an address built from table names held in a config)",
+      "the neither-placed files were placed from the matching line, not read whole"
+    ]
+  },
+  "short_history_count": {
+    "computed_by": "the product module",
+    "module": "data/assets/scripts/gold/irpt_reporting/date_basis_grading.py",
+    "driver": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~313/ib153_count.py (set-up copied from ~310's ib150_run.py; every grade and the freed count come from the module's functions); output: IB153-1_short_history_count_driver_output.json",
+    "over": "the same 85 graded days (2026-06-10 to 2026-10-09) and the same 300 securities (the nine admitted pairs, outside the first witness, with a reader bar) as IB-pr-454; the set-up reproduced its record before this count: graded days 85, the rule-off sizing blank 33291 of 75796 eligible, never served 247, freed 12482, 14 securities taken at the window of 40, 272 security-days, 54 for short history, 8 changing verdict",
+    "window": 40,
+    "floor_days_compared": 20,
+    "security_days_not_graded_by_the_rule": 272,
+    "of_which_short_history_only": 54,
+    "of_which_repeat_rule_with_a_full_or_sufficient_window": 218,
+    "of_which_repeat_rule_with_the_full_window_of_comparisons": 218,
+    "what_the_272_are": "security-days on which the guard alone would grade the security (a bar for t and for the prior trading day, differing) and the rule with the window of 40 and the floor of 20 does not; of the 300 securities x 85 days",
+    "securities_ever_short_of_history": 4,
+    "securities_ever_short_of_history_how": "securities with fewer than 20 compared days in their window on one or more of the 85 graded days; the same 4 are the securities with a security-day ungraded for short history only",
+    "newly_held_securities_blank_for_their_first_window": 2,
+    "newly_held_securities_in_the_population": 70,
+    "newly_held_securities_with_the_floor_met_on_the_day_first_held": 68,
+    "newly_held_securities_blank_of_which_began_trading_inside_the_run": 2,
+    "account_days_blank_only_for_short_history": 26,
+    "account_days_blank_only_for_short_history_how": "account-days freed (every outside row graded at the day's close, no other kind) when a security-day the guard grades and ONLY the floor takes is given the guard's grade, less the account-days freed with the floor in force: 12221 less 12195; the serving rule's blank count moves from 33340 to 33325 of 75796 eligible, never served stays 249",
+    "securities_that_began_trading_inside_the_run": 3,
+    "began_trading_inside_the_run_days_ungraded_for_short_history_only": [16, 17, 19],
+    "began_trading_inside_the_run_how_long": "each of the 3 stays ungraded for short history for 16, 17 and 19 graded days after its first bar: the floor of 20 compared days is met on the 20th trading day after the first bar, so at most 19 days (the 1st to the 19th after it) can be ungraded for short history, and a day on which the bar repeats is not graded by the guard either; a 4th security has bars from before the run but fewer than 20 compared days on the first graded day (its bars begin after the fetch's first day)",
+    "newly_held_rule_in_words": "The floor reads the security's bars, not the firm's holdings: repeated_share and second_witness_grades_security_day take only the bars and the day (date_basis_grading.py:189-215), and a day is compared when the security has a bar on it and on its prior trading day inside the 40-day window. A security first held by any account inside the run is therefore blank for its first window only if its bars are short, never because it is newly held. 70 securities of the 300 were first held after the first listed partition; 68 met the floor on the day first held (their bars pre-date the holding), and the 2 that did not are securities that began trading inside the run. Zero securities are blank for want of holdings history.",
+    "claim": "measured"
+  },
+  "open_design_questions": [
+    {
+      "question": "Where do the second witness's bars come from for a scheduled producer: a landed store filled on a schedule by its own producer, or a fetch at run time from the producer?",
+      "what_would_settle_it": "A CTO ruling; and one measurement: whether the landed prices store's yahoo-labelled points equal the unadjusted Close for the 878 tickers (the census classes some tickers dividend_adjusted or mixed), and the refresh schedule of that store. A run-time fetch also needs egress from the Lambda, a rate-limit failure mode (a pass stops at a rate limit) and a rule for a ticker with no bars (7 of 878 here: no grade, account-days stay blank)."
+    },
+    {
+      "question": "Which producer writes the claim: the holdings-gold producer itself, or a second pass that grades day t the day after and rewrites or adds to the partition? The handler's catch-up writes new keys only and never revisits a landed day.",
+      "what_would_settle_it": "A ruling on write-once versus rewrite for the partition (and the manifest), and on whether the claim lives in the same data.parquet or in its own table keyed by (account, day)."
+    },
+    {
+      "question": "How is a blank account-day written so that the existing readers do not serve it? The performance route's reader skips a non-OK row and chains the remaining days with a PARTIAL absence instead of refusing, the reporting-gold guard maps it to a named reason, and the comparison keeps OK rows only.",
+      "what_would_settle_it": "A ruling on the representation (status value, null return, or no row), and the one read through the route for an account whose window holds a blank day (the reader's days_excluded, claim and absences)."
+    },
+    {
+      "question": "What run time is after both landings, and what happens when the partition lands late? The anchor lands next day 09:46Z and the entry's partition next day 11:46Z in the steady state, 3 of 22 partitions since 2026-09-10 landed 3 to 5 days after the date, and 07:30 America/New_York is 11:30Z in daylight time.",
+      "what_would_settle_it": "A fire time read from the landing record (as the reporting-gold schedule's was), and a rule for a day whose anchor or partition has not landed (v0.34 says UNGRADEABLE, never OWN_DATE: is that written and then re-graded, or left unwritten?)."
+    },
+    {
+      "question": "Where does the prior graded day's claim come from for the serving rule: the landed claim of t-1, or a recompute from t-1's own partitions and anchors? And what is the first day of a backfill or of a new entry, where days[0] has no graded prior?",
+      "what_would_settle_it": "A ruling that names the source of t-1's claim; a dry read of the first day of the entry's history."
+    },
+    {
+      "question": "Where do the security types live for a scheduled run? The transactions table was read in full (121 partitions, 1,042,552 rows) by measurement scripts; no producer reads it and no type table is landed.",
+      "what_would_settle_it": "A ruling on a read per run or a landed type table, with a measured read time and cost of the first."
+    },
+    {
+      "question": "Is the sources.json declaration of PER_ACCOUNT_DAY a new vocabulary beside partition_close (OWN_DATE, PRIOR_TRADING_DAY, NO_SINGLE_CLOSE), and how does a source-generic producer branch on it without a firm branch? The gold has no contract file; the producer's ARROW_SCHEMA is the only column list found, and its SCHEMA_VERSION is 1.2.",
+      "what_would_settle_it": "The addendum's text for the declaration shape and a named schema file (or a ruling that ARROW_SCHEMA is the contract)."
+    },
+    {
+      "question": "Which members does the gold carry: date_basis_claim only, or also ungradeable_kinds and date_basis_witnesses (addenda v0.35 and v0.38)? Each is a column on every row for a 984-account firm.",
+      "what_would_settle_it": "A ruling listing the members, with the closed value sets."
+    },
+    {
+      "question": "Does the performance route compose a source for this entry's firm before the first release, and do the performance and reporting-gold roles hold a read grant on its prefix? installed.py:68 composes two firms only; retained.tf builds two prefixes.",
+      "what_would_settle_it": "A release that names both changes in its pair, with the describe-role read and the sources dict at cold start."
+    },
+    {
+      "question": "Packaging: the module imports trading_calendar and second_witness_guard and has no importer; the holdings-performance package lists two product files. Is the module packaged beside the producer or called from a separate function?",
+      "what_would_settle_it": "A packaging plan in the addendum and the lambda-source-map row for it."
+    }
+  ],
+  "not_established": [
+    "Whether the 75 partitions the one-off run landed are the current extent of the entry's gold: the bucket was not listed in this read.",
+    "Whether any schedule outside Terraform calls the holdings producer for blackdiamond_z09: only Terraform and one named schedule were read; 'none found' is a statement about the Terraform root and the code, not about AWS.",
+    "Which portal pages render the performance route's returns and what each does on an absent, unknown or blank value.",
+    "Whether the landed prices store's points are the unadjusted Close; its refresh schedule; whether a Lambda can reach Yahoo Finance (egress was measured from a workstation).",
+    "Whether S3 LastModified is the first landing time: 46 of 69 entry partitions and 23 of 64 anchor partitions dated before 2026-09-10 show a last write more than a day after their date (rewrites or backfills), so the 11:46Z and 09:46Z landings are a steady-state reading from 22 partitions, not a history.",
+    "That the count holds for any run but the 85 days: the 4 securities short of history are the ones whose bars began inside or just before this run.",
+    "The bars of this cell's pass were fetched on 2026-10-11 and may differ from IB-pr-454's pass in a late revision; the set-up reproduced that record exactly (graded days, rule-off sizing, 14 securities, 272 security-days, 54 short, 8 changing verdict), which is the evidence they did not on these counts.",
+    "Whether the producers irpt-holdings and irpt-holdings-refresh (a holdings snapshot artifact) write anything that rides on the gold: not read.",
+    "The 'one read through each consumer' lines name the read; none was run: nothing is served."
+  ]
+}

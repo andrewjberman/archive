@@ -1,0 +1,123 @@
+{
+  "read_at": "2026-10-11T21:33:00Z",
+  "cell": "AR-y-141",
+  "live_call_made": false,
+  "headline": "The only function that asks the live provider whether a ticker exists is BrokerSecurityCheck._lookup (resolution_broker.py:91), which issues ONE GET /securities/securities_info?securities=<sym,sym,...> (resolution_broker.py:102). It runs in the RESIDENT process on the runner host (EC2 i-0167fd745ad906a66, role irpt-ycharts-runner-role), NOT in a Lambda: no lambda-source-map entry packages resolution_broker.py or resident_session.py. The Lambda irpt-ycharts-generate runs only the POST half, which sends no vendor call and queues one resolve_upload message. The labels Total, Totals, Subtotal, Sum (and All) reach the provider as the one-word symbols TOTAL, TOTALS, SUBTOTAL, SUM, ALL; every label with a space (Grand Total, Portfolio Total, Total Portfolio, Net Total, Equity Subtotal, Fixed Income Subtotal) never reaches it. The only way found to get a live answer without a new grant is to make ONE upload through a direct invoke of irpt-ycharts-generate, as TO-APPLY-Y75 read 4 did; that is NOT a read: it writes an upload record set, a stored original, a queue message and a lease update.",
+  "provider": {
+    "file_function": "infra/aws/lambda/investor-reporting/intake/resolution_broker.py BrokerSecurityCheck._lookup (:91-134), reached through BrokerSecurityCheck.__call__ (:78) and UploadTemplateResolver.__call__ (:144)",
+    "what_it_calls": "The vendor (YCharts) route GET /securities/securities_info?securities=<comma list of up to 200 upper-cased symbols>: ROUTE = '/securities/securities_info' (resolution_broker.py:15); the request is transport.request(ROUTE + '?' + urlencode({'securities': ','.join(symbols)})) at resolution_broker.py:102, on a SESSIONLESS fenced transport (resident_session.py:120-131 acquire_sessionless: no secret read, no cookie, a fixed browser user agent LOOKUP_USER_AGENT at resident_session.py:18; its docstring says the lookup answers a caller with no cookie, 'measured 2026-10-01, 200 JSON'). The provider provider-lease row on irpt-jobs (tenant _opal, job ycharts-session) is taken for the call (resident_session.py:100-101 OperationLease; iam.tf YChartsSessionLease). The answer is classified by security_resolution.classify_batch (security_resolution.py:64): a symbol with no row in the answer is NOT_FOUND (reason EXACT_IDENTIFIER_ABSENT_IN_PROVIDER_READ, :140-141), one row FOUND, several AMBIGUOUS, a row with features_needed PROVIDER_ENTITLEMENT_UNVERIFIED, a refused or partial read UNAVAILABLE (:78-79).",
+    "call_chain": [
+      "uploads.py:476-478 _freeze_template builds the symbol list: each template row whose symbol fullmatches SYMBOL (security_resolution.py:17) and whose A cell is not a formula, de-duplicated",
+      "uploads.py:480 self.resolve_template(principal, owner, symbols), only when 0 < len(symbols) <= 200",
+      "resolution_broker.py:144-146 UploadTemplateResolver.__call__ -> SecurityResolver.check (security_resolution.py:178), which calls provider_check(pending) at :218",
+      "resolution_broker.py:78-102 BrokerSecurityCheck -> _lookup -> transport.request (the GET)",
+      "wired by resident_session.py:139-146 template_resolver, composed at ycharts/generate/resident_worker.py:619 and handed to resident_upload_service (upload_resolution.py:122-134) whose service.resolve_deferred (uploads.py:423) runs _freeze_template (:443)"
+    ],
+    "refusals_that_are_not_answers": "A failed read (lease busy, WAF, login page, status not 200, body not the expected list) is UNAVAILABLE, never NOT_FOUND (security_resolution.py:5-6, :78-79); with transient_refuses the RESOLVING row stays and the message retries (uploads.py:482-487), so a failed read gives NO answer about a label.",
+    "where_it_runs": {
+      "answer": "The RESIDENT supervised process on the runner host EC2 i-0167fd745ad906a66 (resident.tf header: 'ONE supervised process on i-0167fd745ad906a66'), under the instance role irpt-ycharts-runner-role (iam.tf: aws_iam_role.runner). It long-polls the irpt-generation queue and acts on the closed message kind resolve_upload (upload_resolution.py:20; resident_worker.py:619 area, execute() routes the kind).",
+      "lambda_source_map_entry": "infra/aws/lambda/ci/lambda-source-map.json functions.irpt-ycharts-generate (source_dir infra/aws/lambda/investor-reporting/ycharts/generate, iam_role irpt-ycharts-generate-role, tf infra/aws/terraform/investor-reporting/ycharts/generate.tf, 104 files). It is the ONLY entry that lists any of these files: it packages uploads.py (files[92]), upload_resolution.py (files[93]), upload_entry.py (files[91]), template_reader.py (files[95]), security_resolution.py (files[96]), portfolio.py (files[28]), resident_worker.py (files[74]). It does NOT list resolution_broker.py, resident_session.py or operation_lease.py (membership test run: False for all three). No other entry in the map lists any of the 9 files searched (resolution_broker.py, resident_session.py, uploads.py, upload_resolution.py, security_resolution.py, template_reader.py, portfolio.py, upload_entry.py, resident_worker.py): 1 of the map's functions holds any.",
+      "what_the_lambda_does": "irpt-ycharts-generate (served handler reports/generate_installed.py:500) is the POST door: deferred_upload_service (upload_resolution.py:102-113) is built with resolve_security and resolve_prices as _not_composed refusals and NO resolve_template; _defer (uploads.py:370-384) runs the pure read_template, publishes NORMALIZATION# in RESOLVING and sends one resolve_upload message (the generate role holds sqs:SendMessage on irpt-generation, generate.tf:136-140). It never contacts the vendor.",
+      "claim": "measured"
+    }
+  },
+  "labels_to_ask": [
+    {"label": "Total", "where": "the ask's own list; also fixtures holdings_clean.csv:9, holdings_ambiguous_total.csv:5, holdings_non_usd.csv:5, holdings_unmatched.csv:5, holdings_subtotals.csv:10, holdings_share_class.csv:6"},
+    {"label": "Totals", "where": "the ask's own list; parse.py:376 _TOTAL_LABELS"},
+    {"label": "Grand Total", "where": "the ask's own list; parse.py:376"},
+    {"label": "Subtotal", "where": "the ask's own list (the fixtures carry only 'Equity Subtotal' and 'Fixed Income Subtotal', holdings_subtotals.csv:5 and :8)"},
+    {"label": "Sum", "where": "the ask's own list"},
+    {"label": "Portfolio Total", "where": "the ask's own list; fixture holdings_ambiguous_total.csv:6; parse.py:376"},
+    {"label": "Total Portfolio", "where": "parse.py:376 _TOTAL_LABELS"},
+    {"label": "Equity Subtotal", "where": "fixture holdings_subtotals.csv:5"},
+    {"label": "Fixed Income Subtotal", "where": "fixture holdings_subtotals.csv:8"},
+    {"label": "All", "where": "the round-13 record names it as an oddly labelled total (ONE_ACCOUNT_CHECK_READ.json cannot_be_turned_back_at_the_door); no fixture"},
+    {"label": "Net Total", "where": "a plausible shape added by this worker; no fixture"}
+  ],
+  "symbol_each_label_becomes": {
+    "rule": "template_reader.read_template strips the A cell and upper-cases it (template_reader.py:198 and :212-213; only Cash/$CASH/$:CASH become $:CASH); uploads.py:476-478 then keeps the symbol only if it fullmatches SYMBOL = [A-Za-z0-9$^][A-Za-z0-9$^:._/-]{0,99} (security_resolution.py:17), which has no space in its character set.",
+    "in_process_run": "13 synthetic csv sheets (Ticker,Dollars; AAA 100; BBB 200; <label> 300), each run through read_template and UploadService._freeze_template (uploads.py:471) with a recording stub as resolve_template; the sheet and the script were written outside the worktree and are not committed. The stub recorded the symbol list handed to the provider port.",
+    "results": [
+      {"label": "Total", "reader_symbol": "TOTAL", "reaches_provider": true, "symbols_sent": ["AAA", "BBB", "TOTAL"]},
+      {"label": "total / TOTAL (case)", "reader_symbol": "TOTAL", "reaches_provider": true, "symbols_sent": ["AAA", "BBB", "TOTAL"]},
+      {"label": "Totals", "reader_symbol": "TOTALS", "reaches_provider": true, "symbols_sent": ["AAA", "BBB", "TOTALS"]},
+      {"label": "Subtotal", "reader_symbol": "SUBTOTAL", "reaches_provider": true, "symbols_sent": ["AAA", "BBB", "SUBTOTAL"]},
+      {"label": "Sum", "reader_symbol": "SUM", "reaches_provider": true, "symbols_sent": ["AAA", "BBB", "SUM"]},
+      {"label": "All", "reader_symbol": "ALL", "reaches_provider": true, "symbols_sent": ["AAA", "BBB", "ALL"]},
+      {"label": "Grand Total", "reader_symbol": "GRAND TOTAL", "reaches_provider": false, "symbols_sent": ["AAA", "BBB"], "why": "the space fails SYMBOL; the row is left out of the provider list and freeze_template_portfolio gives it TICKER_CHECK_UNAVAILABLE (portfolio.py:443-445), as round 13 measured"},
+      {"label": "Portfolio Total", "reader_symbol": "PORTFOLIO TOTAL", "reaches_provider": false, "symbols_sent": ["AAA", "BBB"], "why": "space"},
+      {"label": "Total Portfolio", "reader_symbol": "TOTAL PORTFOLIO", "reaches_provider": false, "symbols_sent": ["AAA", "BBB"], "why": "space"},
+      {"label": "Net Total", "reader_symbol": "NET TOTAL", "reaches_provider": false, "symbols_sent": ["AAA", "BBB"], "why": "space"},
+      {"label": "Equity Subtotal", "reader_symbol": "EQUITY SUBTOTAL", "reaches_provider": false, "symbols_sent": ["AAA", "BBB"], "why": "space"},
+      {"label": "Fixed Income Subtotal", "reader_symbol": "FIXED INCOME SUBTOTAL", "reaches_provider": false, "symbols_sent": ["AAA", "BBB"], "why": "space"}
+    ],
+    "run_note": "After the stub was called, _freeze_template went on into freeze_template_portfolio and raised PortfolioRefused EXACT_PROSPECT_OWNER_REQUIRED, because the worker's synthetic owner is not a full owner record. That is after the provider port and does not affect what the stub recorded.",
+    "denominator": "12 distinct labels (13 sheets; Total and total share one symbol): 6 reach the provider (TOTAL, TOTALS, SUBTOTAL, SUM, ALL, and Total in either case), 6 do not (every label with a space).",
+    "fixture_note": "The fixtures that carry total labels (holdings_*.csv) are parse.py-shaped sheets with a name column; the label sits in column A and the amount in column C, so under the template reader (A and B only) their amount cell would be the name text. They show the labels people write, not a template-lane sheet.",
+    "claim": "measured"
+  },
+  "who_can_ask": [
+    {
+      "identity": "0.7.0_AE_CloudOps~DELL2 (the dell2 Tier-2 operator seat, with the AWS credentials it already used)",
+      "how": "ONE direct invoke of the Lambda irpt-ycharts-generate (aws lambda invoke / boto3 lam.invoke(FunctionName='irpt-ycharts-generate', Payload=<API Gateway v2 event>)), the event being a POST to /api/scoped/investor-reporting/analysis/inputs with headers for a synthetic OPAL_GLOBAL filer and a body {upload_token, filename, file_base64, file_type}; the Lambda queues resolve_upload, the resident asks the provider, and the same token re-POSTed reads the answer. Shape: org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_y75/y75_x1_arms.py (event() :60-84, invoke() :87-88).",
+      "new_grant_needed": false,
+      "evidence": "irpt_y75/y75_x1_arms.py:35 (boto3 lambda client), :87-88 (lam.invoke FunctionName=FUNCTION, FUNCTION='irpt-ycharts-generate' at :26) and irpt_y75/Y75-1_release5b_after_reads.json read_detail.4 (ONE on-behalf template upload; first answer RESOLVING; the re-POST of the same token read NORMALIZED, input_id portfolio_3bd61083...; that transition is made only by the resident after a live securities_info read, uploads.py:423-469). The same seat needed the filer row put on opal-users-v2 (y75_x1_arms.py:54) and could not decrypt irpt-requests (Y75-1_release5b_after_reads.json limits.ddb_keys_derived: 'this seat cannot decrypt irpt-requests'; Y72 deliverable: AccessDenied kms:Decrypt). The Y75 order authorised the act by name and by Andrew's word (IRPT_BCKEND.TO-APPLY-Y75 bounds, 'Andrew-direct ~21:1xZ'); a new run needs its own order. There is no lambda:Invoke grant in infra/aws/terraform/investor-reporting/ycharts (comp-find 'lambda:Invoke': 0 hits across 8 files scanned), so the right is the operator credentials', not a Terraform-declared role: what exact IAM identity holds it was not read.",
+      "claim": "measured (the call worked on 2026-10-09); the exact IAM identity is held, not read"
+    },
+    {
+      "identity": "irpt-ycharts-runner-role (the resident host's instance role, EC2 i-0167fd745ad906a66)",
+      "how": "Not a seat. It is the identity that makes the call: the resident long-polls irpt-generation (resident.tf ConsumeTheGenerationQueue) and reads securities_info on the sessionless transport. It holds the lease grants on irpt-jobs (iam.tf YChartsSessionLease: GetItem, UpdateItem) and the irpt-requests / reporting-bucket grants that retain the result (resident.tf).",
+      "new_grant_needed": false,
+      "evidence": "infra/aws/terraform/investor-reporting/ycharts/iam.tf (aws_iam_role.runner, the YChartsSessionLease statement), resident.tf lines 1-20 and runner_resident policy, instance.tf:139-148 (host held RUNNING since 2026-09-24; whether it is running NOW was not read)",
+      "claim": "measured (Terraform text)"
+    },
+    {
+      "identity": "any seat with internet egress and no AWS identity",
+      "how": "A direct GET https://ycharts.com/securities/securities_info?securities=TOTAL,TOTALS,SUBTOTAL,SUM,AAPL with the resident's user agent (LOOKUP_USER_AGENT, resident_session.py:18), no cookie. Writes nothing in AWS; it BYPASSES the provider lease that spaces the resident's calls.",
+      "new_grant_needed": false,
+      "evidence": "resident_session.py:120-127 (docstring: the lookup answers a caller with no cookie, measured 2026-10-01, 200 JSON). No record was found of a seat doing it from outside the host; whether the vendor answers a non-EC2 address the same way, and the repository's rule for a live vendor call without the lease, were not read. CLAUDE.md says other vendor APIs need no per-use word but ssm.tf says a run of this session IS a live vendor call needing Andrew's per-use word, so a seat must ask the issuer before using this route.",
+      "claim": "inferred; not run"
+    }
+  ],
+  "not_usable": [
+    {"identity": "SSM document irpt-ycharts-run", "why": "its Task parameter allows only 'probe' (ssm.tf allowedValues), and it signs in to the vendor; run-ycharts-session.sh was not read. It does not take a symbol list."}
+  ],
+  "what_an_invoke_writes": {
+    "is_it_a_read": false,
+    "writes": [
+      "opal-users-v2: one synthetic filer row (PK USER#<filer>, SK PROFILE) put before and deleted after, by the seat (y75_x1_arms.py:54; the seat deletes it and confirms with a consistent get-item)",
+      "irpt-requests (tenant = the firm): UPLOAD#<upload_id>, NORMALIZATION#<upload_id>#<revision>, RETENTION#..., ARTIFACT#... rows (Y75-1_release5b_after_reads.json admit_keys); on NORMALIZED also an INPUT# row",
+      "the reporting bucket: the stored ORIGINAL_HOLDINGS object (named by its sha256; Y75 says 37 bytes) and, only on NORMALIZED, a NORMALIZED_PORTFOLIO object (resident.tf resident_write_families). S3 deletes are Andrew's act (Y75 packet), so these stay",
+      "irpt-generation: one resolve_upload message (and a delayed copy if the lease is busy, up to 3600 s after first dispatch, resident.tf ConsumeTheGenerationQueue comment)",
+      "irpt-jobs: the provider lease row (tenant _opal) is updated for the call (iam.tf YChartsSessionLease)",
+      "the resident host's journal / log line for the fund read (resident_worker.py _fund_line)"
+    ],
+    "re_post_writes": "A re-POST of the same token reads the row and does not queue a second message, except that a row still RESOLVING 960 s after dispatch is re-sent once by the next poll (uploads.py:403-410, upload_resolution.py:24 REDRIVE_SECONDS)."
+  },
+  "exact_invocation": {
+    "sequence": [
+      "1. Order to a Tier-2 seat that holds the invoke (the Y75 seat), cut by the issuer; the order names these writes. Use 49financial as the firm and an advisor of it, as Y75 did.",
+      "2. Copy org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_y75/y75_x1_arms.py and y75_x1_poll.py to a scratch folder and change two things: CSV = b'Ticker,Dollars\\nAAPL,10000\\nTOTAL,10000\\nTOTALS,10000\\nSUBTOTAL,10000\\nSUM,10000\\nALL,10000\\nZQXJV9,10000\\n' and a new token (RUN prefix). AAPL is the known-found control; ZQXJV9 is the made-up control that must come back not found. (The rows are 2..8; the row number in a finding is the sheet row, header = row 1.)",
+      "3. python -c: X.put_filer(); then X.invoke(X.event(advisor_email=<A>, token=<T>)) once; the first answer is RESOLVING with an upload_id.",
+      "4. python y75_x1_poll.py (re-POST the same token every 30 s, up to 15 minutes) until the state is NORMALIZED or NEEDS_CORRECTION.",
+      "5. Delete the filer row and confirm NOT FOUND with ConsistentRead (as Y75 step 8)."
+    ],
+    "what_in_the_output_answers_the_question": "In the terminal answer (data.state and data.findings): a finding TICKER_NOT_FOUND with value=TOTAL (or TOTALS, SUBTOTAL, SUM, ALL) at its row means the live provider answered NOT FOUND for that symbol; a symbol that is in NO finding on a NEEDS_CORRECTION answer (or any symbol on a NORMALIZED answer, where the portfolio lists it as a holding) was FOUND; TICKER_DATA_NOT_ENTITLED = a real security the account may not price; TICKER_AMBIGUOUS = several matches; TICKER_CHECK_UNAVAILABLE on one of these symbols, a state still RESOLVING at 15 minutes, or a reason RESOLVE_RETRY_EXHAUSTED / RESOLVE_PROVIDER_BUSY = the provider was NOT read and there is NO answer. The read is valid only if AAPL is not in the findings and ZQXJV9 is TICKER_NOT_FOUND; otherwise record it as void. Spaced labels (Grand Total, Portfolio Total) are not asked by this sheet because they never reach the provider (see symbol_each_label_becomes).",
+    "in_process_stub_answer": "Under the offline stub of round 13 (classify_batch over a receipt that returns a row for every symbol-shaped word) TOTAL, TOTALS, SUBTOTAL, SUM and ALL are all FOUND and the sheet is NORMALIZED with the total counted as a holding (round 13: 600 on a 300 sheet); the recording stub of this cell answered NOT_FOUND by construction and so says nothing about the provider. Grand Total / Portfolio Total never reach the stub and are turned back as TICKER_CHECK_UNAVAILABLE. Neither says what the live provider answers.",
+    "writes_anything": true,
+    "live_call_made": false
+  },
+  "in_process_stub_answer": "see exact_invocation.in_process_stub_answer",
+  "live_call_made": false,
+  "not_read": [
+    "any live provider answer: no securities_info call, no invoke, no AWS call, no network call was made by this worker",
+    "the exact IAM identity (user or role) behind the dell2 Tier-2 seat's lambda:Invoke; no policy for it was found in the Terraform read (no lambda:Invoke statement in infra/aws/terraform/investor-reporting/ycharts), so its source was not traced",
+    "operation_lease.py (SessionlessTransport and the lease behaviour), resident_worker.py execute() beyond line ~640 and the resident's poll loop, the generate_installed.py handler body beyond the import lines",
+    "whether the resident host is running now, and whether the resident's installed package equals the repository bytes (lambda-source-map records 'not reproducible' for the intake poller; the resident's own package was not checked)",
+    "ycharts/generate/resident_main.py's installed factory and how the host is deployed (ssm.tf irpt-ycharts-deploy), and run-ycharts-session.sh",
+    "the vendor's real answer for any total word, and any evidence about how the vendor treats a request from outside the host",
+    "the portal and the form (this cell is below them)",
+    "y75_x1_arms.py lines 100-177 and resolve_by_opaque's body; the other earlier Tier-2 records (Y70, Y72 stopped before their upload; Y77 not read)",
+    "whether the security_resolution cache (SECURITY_CHECK#) is wired for the resident's template_resolver: resident_worker.py:619 passes no cache, so none is expected, but the resident_session default was not traced to the end"
+  ]
+}

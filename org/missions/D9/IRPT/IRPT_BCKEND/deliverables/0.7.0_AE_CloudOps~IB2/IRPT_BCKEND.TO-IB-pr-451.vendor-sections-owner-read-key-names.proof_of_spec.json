@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-451",
+  "firm": "49F",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-451.vendor-sections-owner-read-key-names.md",
+    "group": "OTHER",
+    "vintage_commit": "02647942d4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "02647942d4",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-451.vendor-sections-owner-read-key-names.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~IB2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB147-1_vendor_sections_owner_read.json",
+      "kind": "doc",
+      "commit_or_etag": "e277f87ddc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The record, outcome REFUSED: public_reason_code ACCESS_DENIED, login_refusal_class ClientError, submitted 0, values_written 0, calls empty and history_reads absent because the refusal landed on the credential read BEFORE any HTTP call. stopped_because states that no API call was made, no history was read, and the principal was not widened.",
+      "artifact_covered_by": [
+        "IB147-1-AC1",
+        "IB147-1-AC2",
+        "IB147-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/ib451_read.py",
+      "kind": "script",
+      "commit_or_etag": "e277f87ddc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The read instrument this cell adds, importing w6_reads.login and f1_svc_run (call, scrub, say, stamp, API, BASE) BY PATH and editing neither, as the order requires. GET only, at most two history reads and two sections reads, key names and tokens only, the raw answer held in memory. py_compile clean and ruff 0.15.11 --target-version py39 clean, the version the commit gate pins. It is committed even though the read was refused, because it is the artifact that would run unchanged from a seat whose principal is admitted.",
+      "artifact_covered_by": [
+        "IB147-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB147-1-AC1",
+      "criterion_verbatim": "IB147-1-AC1: history_reads must list each history GET with its http, requests_listed and by_provider_and_state; how_the_vendor_request_was_chosen is stated; READ needs sections_http 200 and the request id; REFUSED needs the public_reason_code.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r147/p147_cells.py\" . IB147-1-AC1",
+      "expect": "IB147-1-AC1 PASS",
+      "output_evidence": "FAIL: history_reads must list each history GET with its http, requests_listed and by_provider_and_state | IB147-1-AC1 FAIL | rc=1",
+      "denominator": "0 history GETs were possible of the 2 the order budgets, because the refusal landed on the credential read before the first HTTP call. how_the_vendor_request_was_chosen IS stated in the record, and public_reason_code IS ACCESS_DENIED; the criterion refuses on the empty history_reads before it reaches its own REFUSED limb.",
+      "status": "FAIL",
+      "status_reason": "CANNOT BE MET AS WRITTEN on this outcome, and not weakened to make it pass. AC1's first check requires history_reads to be a non-empty list, which a REFUSED at the credential read cannot produce; its REFUSED limb, which this record would satisfy, is never reached. Inventing a history_reads entry would be manufacturing evidence of a read that never happened. Row IRPT_BCKEND-D2-S97 carries the demonstration and a narrow fix for 2.0.0_SA_COO~P2, whose criteria these are; row IRPT_BCKEND-D2-S96 carries why the login was refused at all."
+    },
+    {
+      "criterion_id": "IB147-1-AC2",
+      "criterion_verbatim": "IB147-1-AC2: on READ, the section key names, counts, tokens and the title-or-label finding must be stated and internally consistent; on any other outcome there is nothing to grade on the sections.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r147/p147_cells.py\" . IB147-1-AC2",
+      "expect": "IB147-1-AC2 PASS",
+      "output_evidence": "OK: outcome REFUSED; nothing to grade on the sections | IB147-1-AC2 PASS | rc=0",
+      "denominator": "0 sections were read of the 1 the order budgets, so the criterion's READ branch does not apply; it passes on the outcome. This is a pass by non-application, NOT evidence about any served vendor answer, and the record says so: the substantive questions the cell exists to answer stay unanswered by a served read.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB147-1-AC3",
+      "criterion_verbatim": "IB147-1-AC3: the bounds held by the record's own call log: only the login and at most four GETs, no other method, submitted and values_written 0, and no eight-digit token or numeric value member in the record.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r147/p147_cells.py\" . IB147-1-AC3",
+      "expect": "IB147-1-AC3 PASS",
+      "output_evidence": "FAIL: calls is empty | IB147-1-AC3 FAIL | rc=1",
+      "denominator": "0 calls of the 5 the order permits (one login plus at most four GETs). The bounds the criterion exists to protect were all held in the strongest possible way -- nothing was submitted, nothing was requested, no value was written, and no call reached the vendor or the API at all -- yet the criterion refuses because its instrument is a non-empty call log. submitted 0 and values_written 0 are both recorded.",
+      "status": "FAIL",
+      "status_reason": "CANNOT BE MET AS WRITTEN on this outcome, and not weakened. AC3 requires a non-empty `calls` list; the refusal landed before f1.call posted /auth/login, so f1.log stayed empty. Fabricating a call entry would assert an HTTP request that was never made. Row IRPT_BCKEND-D2-S97 carries it with the narrow fix: on REFUSED, require the public_reason_code and a stated stop instead of a non-empty call log."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No planted mutant is offered for AC1 or AC3, and the reason is stated rather than left as an omission: both already FAIL on the real record, so the world has demonstrated their discrimination more strongly than a copy could. For AC2 a mutant WAS planted in a root outside every worktree holding copies of the record and the check, with the baseline read first: the outcome was changed from REFUSED to READ, which makes AC2's READ branch apply to a record that carries none of the section members.",
+      "expected": "AC2 FAIL once the outcome claims READ without any section evidence",
+      "observed": "FAIL: answer_data_keys is not a list of key names | IB147-1-AC2 FAIL rc=1. Reverted, and AC2 re-read PASS. So AC2's pass on this record is a pass by non-application and not a blind one: it does refuse a record that claims to have read sections without having read them.",
+      "status": "FIRED-AS-EXPECTED",
+      "provenance_of_this_observation": "Stated because it nearly became a defect of exactly the kind this instance is otherwise about. The observed line was DRAFTED BEFORE the mutant was run, and the run was then made and agreed with it verbatim: baseline PASS, mutant FAIL with the message answer_data_keys is not a list of key names, revert, PASS again. The agreement is luck, not method -- had the mutant behaved differently the instance would have shipped a fabricated observation. It was caught on re-reading before the commit and the run was performed. Same lesson as this lane recorded earlier today against its own commit message: evidence written before the instrument has spoken is a claim about the future, and the only safe order is measure, then write."
+    },
+    "determinism": {
+      "method": "The refusal was reproduced rather than assumed from one traceback: the script was run twice against the same secret id, the second time after the credential failure was made catchable, and both runs were refused identically. The error text was quoted verbatim rather than summarised, because the distinction it draws -- an EXPLICIT DENY in a RESOURCE-BASED policy, not an absent identity grant -- is the whole finding.",
+      "observed": "Both runs: AccessDeniedException on GetSecretValue for irpt/svc-irpt-analysis/password against arn:aws:iam::313476888478:user/cloudops-dell2-agent-user, 'with an explicit deny in a resource-based policy'. No grant was sought, no policy was read beyond the error text, and no alternative route to the secret was attempted.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any widening of the principal, any grant of secretsmanager:GetSecretValue, and any second route to the service password",
+      "reason": "The order's refusal clause says 'Do not widen the principal'. The deny is a resource-based guardrail and is very likely correct: a service principal's password should not be readable by a general cloudops user. Reported for an assignment or policy decision above this lane, never acted on."
+    },
+    {
+      "item": "The served vendor answer itself -- the section key names, the title-or-label finding and the units tokens",
+      "reason": "NOT OBTAINED. This is the substance the cell exists to produce and it remains unproduced: no history was read and no sections answer was read. 2.0.0_SA_COO~D2's code read and its predictions stand untouched and unconfirmed by a served answer, which is exactly the gap row DSGN_IRPTV1-D2-S21 names."
+    },
+    {
+      "item": "Item (g) of the code read's named exact read -- the census sha256 against the deployed resident bindings",
+      "reason": "Not in this order's recorded members. The code read at DSGN_IRPTV1~62 names it as part of closing the same question, but this order's step list and output members stop at the sections census, so it is out of scope here rather than skipped."
+    },
+    {
+      "item": "Editing w6_reads.py, f1_svc_run.py or p147_cells.py",
+      "reason": "The order forbids all three: the two instruments are imported by path and unmodified, and the check was left alone even though two of its criteria cannot be met on this outcome."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-S96",
+    "IRPT_BCKEND-D2-S97"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "py_compile and ruff 0.15.11 --target-version py39",
+      "invocation": "on ib451_read.py, before it was ever pointed at the API",
+      "result": "PASS -- and the pre-run lint pass caught a real defect: get_plain caught urllib.error.HTTPError while only urllib.request was imported, which works by accident in CPython and should not be shipped. Made explicit."
+    },
+    {
+      "tool": "ib451_read.py (this cell's instrument)",
+      "invocation": "run twice; w6_reads.login() refused both times at the credential read",
+      "result": "REFUSED -- outcome recorded, 0 calls, 0 submitted, 0 values written. Two further defects of mine were found and fixed before the second run: by_provider_and_state was built as a list where the criterion requires a dict, and a credential refusal raised instead of writing the record."
+    },
+    {
+      "tool": "p147_cells.py",
+      "invocation": "the three criteria at the repo root; one mutant for AC2 in a mutant root",
+      "result": "PARTIAL -- AC2 PASS, AC1 and AC3 FAIL as cannot-be-met-as-written on a pre-HTTP refusal; the AC2 mutant fired after a passing baseline"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "--author ... -F <msgfile>, message file written by the Write tool outside the worktree",
+      "result": "PASS -- ib451_read.py passes the commit gate's py_compile, ruff and ds-precommit limbs"
+    }
+  ]
+}

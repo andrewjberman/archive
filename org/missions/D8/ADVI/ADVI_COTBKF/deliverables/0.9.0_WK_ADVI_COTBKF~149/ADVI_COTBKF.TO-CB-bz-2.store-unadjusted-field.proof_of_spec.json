@@ -1,0 +1,99 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bz-2",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bz-2.store-unadjusted-field.md",
+  "group": "OTHER",
+  "vintage_commit": "c187a85a58"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~149",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round78.md",
+  "vintage_commit": "c187a85a58",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bz-2.store-unadjusted-field.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~149/STORE_UNADJUSTED_FIELD.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only record; no code changed, one head-object and one get-object of the firm's store object, no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB78bz2-AC1",
+    "CB78bz2-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~149/STORE_UNADJUSTED_FIELD.csv",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only record: 15 rows, CUSIPs only in the cusip column; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB78bz2-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~149/STORE_UNADJUSTED_FIELD.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only note; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB78bz2-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB78bz2-AC1",
+   "criterion_verbatim": "the store's schema is read and each of the 15 funds carries its store field (or none), its held dates and what covers them. The issuer reads whether the store holds an unadjusted close at all.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~149/STORE_UNADJUSTED_FIELD.json',encoding='utf-8'));print('STORE-FIELD funds=%d listed=%d store_holds_an_unadjusted_close=%s with_a_store_field=%d schema_columns=%d read_from=%s held_dates_total=%d covered_by_store_total=%d covered_by_cache_total=%d uncovered_trading_days_total=%d the_fifteenth=%s'%(d['funds'],len(d['by_fund']),d['store_holds_an_unadjusted_close'],d['with_a_store_field'],len(d['store']['schema']),str(d['store']['read_from'])[:40],d['held_dates_total'],d['covered_by_store_total'],d['covered_by_cache_total'],d['uncovered_trading_days_total'],str(d['the_fifteenth'])[:60]))\"",
+   "expect": "STORE-FIELD funds=15 listed=15",
+   "output_evidence": "STORE-FIELD funds=15 listed=15 store_holds_an_unadjusted_close=False with_a_store_field=0 schema_columns=5 read_from=one get of the store object s3://opal-da held_dates_total=29834 covered_by_store_total=0 covered_by_cache_total=20718 uncovered_trading_days_total=0 the_fifteenth=VGHAX lacks trades to test on, not a field and not dates: 5 (rc 0)",
+   "denominator": "15 of 15 funds listed; schema read from the store object (5 columns); 0 of 15 funds with a store field holding the unadjusted close; 29,834 held dates, 0 covered by an unadjusted store field, 20,718 covered by the local cache bar (all 20,718 of 20,718 held trading days); 0 uncovered trading days",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB78bz2-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the store's fields are read from the store and its writer, not inferred from the cache; \"present\" is counted against the dates the back-fill reads, with the denominator; a field that exists and does not match the unadjusted series is said to be that; the cache is not called the store; no account id appears and no other firm's data is opened.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read STORE_UNADJUSTED_FIELD.json (store.schema, store.read_from, writer, by_fund, not_established), STORE_UNADJUSTED_FIELD.csv and STORE_UNADJUSTED_FIELD.md",
+   "output_evidence": "schema read from one get of the store object (LastModified 2026-10-09T13:41:04Z), writer lines cited from build_canonical_prices_v2.py; the store's one price column is said to be an adjusted series that equals the cache Close on 3.2 to 10.2 percent of dates, not the unadjusted series; coverage counted per fund against the build's held dates (29,834) and held trading days (20,718); the cache is named as a local file, not the store; prices, dates, tickers and counts only; no account id; only opal-data-cot (this firm) was read",
+   "denominator": "15 funds; 29,834 held dates; 20,718 held trading days; 1 head-object and 1 get-object",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "ADVI_COTBKF-D2-W149-S1",
+  "ADVI_COTBKF-D2-W149-S2"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~149/ADVI_COTBKF.TO-CB-bz-2.store-unadjusted-field.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB78bz2-AC1)",
+   "result": "STORE-FIELD funds=15 listed=15 store_holds_an_unadjusted_close=False with_a_store_field=0 schema_columns=5 read_from=one get of the store object s3://opal-da held_dates_total=29834 covered_by_store_total=0 covered_by_cache_total=20718 uncovered_trading_days_total=0 the_fifteenth=VGHAX lacks trades to test on, not a field and not dates: 5"
+  }
+ ]
+}

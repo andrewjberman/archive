@@ -319,3 +319,124 @@ Two read-only orders (IB-pr-443, IB-pr-444), no judgment criterion, nothing buil
   capture has no challenge test while the read path has one (row D2-W302-S1). To graduate with W302-S2 and S3.
 - D2-W301-S1 and S3 are wording and window notes; to dismiss at the compile. D2-W301-S2 (the last-day question unanswered) stays
   open as a question the round did not answer.
+
+---
+
+## Added at rounds 142 to 144, 2026-10-11T19:35:44Z (input: msg 5668, packet @a3fea932da)
+
+Four read-only orders (IB-pr-445 to 448), no judgment criterion, nothing built, served or written. Held on the same condition
+(IB-pr-449 and IB-pr-450 are running). This seat read round 142's record whole at its review of PRD v0.40 and re-ran nothing.
+
+- **D2-W303-S1** (OBSERVATION, INERT): An 'equal to the cent' reading of the guard is not the stricter one the face assumes: in the overlap table it un-grades 192 FEWER security-days than relative 1e-4 (943 against 1,135), in the seven types outside the first witness 80 more security-days but 200 fewer row-days.
+- **D2-W303-S2** (OBSERVATION, INERT): Under the guard all 12 types of the overlap table have an empty one-day-off column with equal above 0, so the listed 'types with an empty one-day-off column' is every type, including one with zero days equal on which the close moved (Cash and Cash Equivalents / Not Available); th
+- **D2-W304-S1** (OBSERVATION, INERT): The time ycharts/session/current was last changed (2026-10-05T10:04Z) is not the time of the last capture: since st12 the resident rewrites that secret on every cookie rotation, so the read 'no capture has written a bundle in six days' does not follow from it.
+- **D2-W304-S2** (OBSERVATION, INERT): A successful capture writes no journal line, so the extract of 11 capture failures in 14 days cannot show how many captures succeeded, and 'failures before 2026-10-05 exist' cannot be set against a success count from that extract.
+- **D2-W304-S3** (OBSERVATION, INERT): The probe's transport is stated in code to be 'the resident's own client class' but is a different program from the resident's client (Node https against Python urllib), with a different Referer and a different cookie selection; whether they look alike to the vendor has no record
+- **D2-W304-S4** (OBSERVATION, INERT): A change on our side since 2026-10-04 that is not in the capture code: the host's Python path made research-runner calls on the same account and stored session from 2026-10-04T18:42Z to 2026-10-05T13:01Z, three runs stopped by a 202 with a waf action at the 7th call.
+- **D2-W305-S1** (OBSERVATION, INERT): The task order's premise that dropping firm_registry.json from the poller's package is an outage does not hold for the live bytes: the handler returns before any registry read, because LiveTransport raises unconditionally.
+- **D2-W305-S2** (OBSERVATION, INERT): The served firm_registry.json has the same parsed content as the tree's generated view data/firm_registry.json, differing only by the view's _generated key (5229 vs 5326 bytes), so the 'no true source' note is true of the bytes but not of the content.
+
+**For the slug.**
+- Round 142 is in the contract already: PRD v0.40 (the guard) and v0.41 (no prior bar, no grade), both signed by this seat.
+- Round 143: the capture's probe is sent by a different program from the one a generation uses, and whether the vendor treats the
+  two alike has no record. The issuer corrected its own statement that captures worked until 2026-10-05: the last recorded automated
+  sign-in success is 2026-10-02. The vendor path stays stopped; the question is with Andrew.
+- Round 144: the live intake poller's registry read is not reached at run time, by a read of the call path with nothing exercised;
+  the handler returns before it because its transport refuses on every path. A release that drops the file has no effect only while
+  that refusal stands. This bears on IRPT_ANLREQ row D2-W53-S2.
+
+---
+
+## Added at rounds 145 to 149, 2026-10-11T21:05:27Z (input: msg 5842, packet @71b61b6aa6)
+
+Five orders terminal (four complete, IB-pr-451 superseded with 0 calls), no judgment criterion, nothing served. Held on the same
+condition (the packet names one order issued and running). This seat read the records of rounds 145 and 148 at its reviews of PRD
+v0.42 and v0.43, and re-ran nothing.
+
+- **D2-S95** (OBSERVATION, INERT, by `2.0.0_SA_COO~P2`): The record the CTO ordered for rows IRPT_ANLREQ-D2-W53-S2 and -S3 (msg 5666): the rollback target of irpt-intake-poller is ON RECORD -- version DICktwYaCg5b.R8.Ab6oHhI82db0d9Ls of the function's artifact key holds the live bytes; no release of the poller is or
+- **D2-W306-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~306`): JSOSX, one of the six the face calls outside the first witness with no anchor, is carried by the anchor on 75 of the 87 axis days (the same security is in the overlap table); the anchor_carries_it answer is true for it and false for the other five.
+- **D2-S96** (BLOCKING, INERT, by `0.7.0_AE_CloudOps~IB2`): IB-pr-451 asks this seat to sign in as svc-irpt-analysis using the instrument's login(), which reads the password by name from Secrets Manager; the call is refused by an EXPLICIT DENY in a resource-based policy against arn:aws:iam::313476888478:user/cloudops-d
+- **D2-S97** (BLOCKING, INERT, by `0.7.0_AE_CloudOps~IB2`): The order states all three outcomes pass the checks, but IB147-1-AC1 requires history_reads to be a non-empty list and IB147-1-AC3 requires calls to be non-empty, and a REFUSED at the credential read -- before any HTTP -- produces neither, so AC1 and AC3 FAIL 
+- **D2-W308-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~308`): The second guard sentence (no grade where the reader has no bar for the calendar's prior trading day) frees exactly as many account-days as sentence (1) alone in the nine-pair sizing: its cost is 0, because the sizing's row grade already returned no_bar_for_th
+- **D2-S98** (OBSERVATION, INERT, by `2.0.0_SA_COO~P2`): Noted for the vendor producer's NEXT release (CTO msgs 5665 and 5784): a vendor section on the wire carries no title member and no field name for a value; the page now supplies both from a pinned copy of the census. PARKED: the producer cannot be released whil
+- **D2-W309-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~309`): The order's why-paragraph says the resident worker sends analysis_ready 'when the job is bound to a ticket id', but the code sends it on every READY job whatever the record carries, and the commentary receiver reads no ticket id either.
+- **D2-W309-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~309`): commentary_ref is set as a sibling attribute of the request item, not inside the immutable record, yet the packager reads record.get('commentary_ref') from DynamoAcceptance.get, which returns only the record attribute.
+- **D2-W309-S3** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~309`): The order asks for a search of portal/ for readers of the accepted record; the worktree's portal directory is empty (gitlink c96efe1714 not checked out), so no page could be searched.
+- **D2-S99** (OBSERVATION, INERT, by `2.0.0_SA_COO~P2`): Row IRPT_BCKEND-D2-W309-S1 (the worker signals on every READY job, ticket or not) is a VINTAGE artifact, and this seat relayed it to the CTO as a finding without reading HEAD: IB-pr-453's worktree was cut at 0bdd920114, which does not contain 2.0.0_SA_COO~G2's
+
+**For the slug.**
+- Rounds 145 and 148 are in the contract: PRD v0.42 (two more types admitted) and v0.43 (a mostly-repeated security is not graded),
+  both signed by this seat with notes. The open note: the exclusion's window is not fixed; the running order builds it on a trailing
+  window with nothing served.
+- Round 146: the guard is built as one pure function with 21 tests (the issuer's count); nothing served.
+- Round 149: the read behind IRPT_YCDGEN PRD v0.13. The issuer names its own defect in relaying a worker row whose base lacked a gate.
+- The issuer names three defects of its own in the packet; they are rows above.
+
+---
+
+## Added at rounds 150 and 151, 2026-10-11T21:54:43Z (input: msg 5927, packet @61319e7cad)
+
+Two build orders (IB-pr-454, IB-pr-455), no judgment criterion, nothing released. Held on the same condition (IB-pr-456, the release
+read, is running). This seat ran the grading module's tests at its review of PRD v0.44 (54 passed) and re-ran nothing else.
+
+- **D2-W310-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~310`): PRD v0.43's sentence and IB-pr-452's script count a 'repeat' differently; the product form follows the sentence and the face, and the seven of IB-pr-452 are the same seven over the whole run
+- **D2-W310-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~310`): The v0.37 kind NEITHER_CLOSE for a row the second witness places at neither close differs from the sizing script, which kept the row's kind OUTSIDE_ANCHOR; the claim is the same
+- **D2-W310-S3** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~310`): Seven of the 878 tickers asked returned no bar, three of them class-share tickers written with a dot (BF.B, BRK.A, BRK.B); the dash spelling was not tried because nothing is re-asked
+
+**For the slug.**
+- Round 150: the grading instrument's product form is in the tree and nothing imports it. Its window is in the contract (PRD v0.44,
+  signed): 40 trading days, a floor of 20 compared days.
+- Round 151: a submission may carry `commentary_requested`, in the tree only; not released. This is the service half of IRPT_YCDGEN
+  PRD v0.13.
+
+---
+
+## Added at rounds 152, 153, 154 and 156, 2026-10-11T23:50:01Z (input: msg 6165, packet @f70b0e0c45)
+
+Two release reads with their pairs and two code reads; nothing applied by these four; no judgment criterion. Held on the same
+condition (IB-pr-459 is running and IB-pr-461, an apply under a signed pair, is with the applier). This seat re-ran nothing.
+
+- **D2-W313-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~313`): A search of the repo by the gold's table name finds 34 files; the readers that reach the gold by the producer's table constant are 4 more, one of them a reader the name search missed
+- **D2-W313-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~313`): The existing 07:30 and 07:41 America/New_York fires are before the entry's partition usually lands (11:46Z) while daylight time holds; a producer for the entry that reused those times would grade a day before its partition exists
+- **D2-W313-S3** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~313`): The performance route's holdings reader skips a non-OK day and chains the remaining days (a partial absence, not a refusal), so a blank account-day written as a non-OK status would be chained over
+- **D2-W312-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~312`): The source map's artifact_sha256 for irpt-commentary-draft-store-lambda is not the live CodeSha256 and its _build_note still says DESIRED, not built; the other three entries' digests equal live
+- **D2-W312-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~312`): For irpt-ycharts-generate two of the three changed members are NATIVE to its source_dir, so no map row pins them: a minimal candidate re-pins only the schema row, and two riders move that no row can hold back
+- **D2-W312-S3** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~312`): The resident_worker.py inside the irpt-ycharts-generate zip, live and built, has neither producer_for nor send_ready_if_ticketed, so the Opal-producer branch and the I3 gate AMENDMENT 1 leans on are not in this package; the host's installed package was not rea
+- **D2-W316-S1** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~316`): No staged_from row pins commentary_draft_store.py in the irpt-commentary-draft-store-lambda map entry: the member is native to source_dir, so the minimal candidate re-pins 0 rows and equals the real map byte for byte
+
+**For the slug.**
+- IB-pr-459 asks whether the landed price store holds the unadjusted close, to make it the second witness. ADVI_COTBKF measured that
+  store today against the price paid on trades: funds whose price was not replaced are over 20 percent off on 3,205 of 3,614 read
+  trades; replaced funds are within 1 percent on 10,411 of 10,636 (this seat's own re-derivation, grade @d299fd357a). The CTO has
+  told that cell to report per fund class (msg 6164).
+- By the issuer's code read, no IRPT_BCKEND surface reads that store; holdings take a price from the custodian's own market value
+  over units. Not read by this seat.
+
+---
+
+## Added at rounds 157 and 158, 2026-10-12T00:49:50Z (input: msg 6222, packet @9be8315fa0)
+
+Round 157 is a RELEASE of one function under a pair signed on both halves; round 158 is a read. No judgment criterion. Held on the
+same condition (IB-pr-459 is running).
+
+- **D2-S100** (OBSERVATION, INERT, by `0.7.0_AE_CloudOps~IB2`): IB-pr-461's get_ref after-read needed one item from irpt-requests; simulate-principal-policy read dynamodb:Query, dynamodb:Scan and dynamodb:GetItem ALL ALLOWED for this principal on that table, and the live Scan was then refused with an AccessDeniedException 
+- **D2-S101** (BLOCKING, INERT, by `0.7.0_AE_CloudOps~IB2`): IB157-1-AC1 requires the record to carry the ledger's slug and IB157-1-AC3 refuses any bounded eight-digit run in the record; this seat named its ledger slug with a trailing date, so the true slug trips AC3 and the only two ways to pass are to edit the check, 
+- **D2-W317-S1** (OBSERVATION, ARMED, by `0.9.0_WK_IRPT_BCKEND~317`): IB-pr-462: all four entry ledger files are already CLOSED (every leg proven) on origin/box/sitez, but their sentinels under .open_deploys/ were left open with the open leg's proof null
+- **D2-W317-S2** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~317`): IB-pr-462 check defect: p158_cells.py AC3 refuses any 8-digit token while AC1 and AC2 require the entries keyed by four slugs that each end in an 8-digit date, so a literal key cannot pass all three
+- **D2-W317-S3** (OBSERVATION, INERT, by `0.9.0_WK_IRPT_BCKEND~317`): IB-pr-462: the dell2 agent user is refused kms:Decrypt on the irpt-requests table key and iam:SimulatePrincipalPolicy on the firm holdings roles, so the claim-row read and the role simulation were not made
+
+**This seat's own read of the release** (the draft store, at this compile): the live function's code hash begins `cwf6bUEbPvKk`,
+the digest the packet says was signed; last modified 2026-10-12T00:06:20, active; the downloaded package's hash equals the
+function's. The deployed store carries the new member: it reads the accepted record's ticket id and adds it to the first-persist
+answer only when it is a non-empty string. Of its 16 members, 10 are byte-equal to the tree at HEAD and 6 are not (two files of
+the generate folder and four registry or naming files). This seat did not resolve those six against the map's pins, so it does
+NOT say they are right; the applier's check was the build's digest against the signed one, which is the proper test.
+
+**For the slug.**
+- **The new member is UNEXERCISED on the deployed function.** No draft was persisted. It is proven at the pin and by nothing live
+  until the drafter's first persist for a ticketed request. PRD v0.45, signed by this seat with a note on the unposted draft.
+- **One after-read was not made** (a reference read for a request that has a draft): the table's key refused the scan. The CTO does
+  not pursue it. The issuer names its own error: its simulation read the table action and not the key.
+- **Round 158:** four deploy ledger entries left open on another box read CLOSED on that box's own branch; only their sentinel files
+  remain. One limb (a claim row) is the ledger's word, not a measured absence. The stale sentinels were relayed to that box:
+  SENT, not acked, so the row's disarm rests on a message nobody has confirmed reading.

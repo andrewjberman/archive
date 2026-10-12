@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-162",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "06a610f1c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "788081793d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-162.flow-days-by-when-cash-was-first-invested.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~131",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~131/FLOW_DAYS_FIRST_INVESTED.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~131/RULE.md",
+      "kind": "config_data",
+      "commit_or_etag": "469d1fc868",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the counting rule, committed alone before any transaction row of the accounts was read",
+      "artifact_covered_by": [
+        "DB84-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~131/FLOW_DAYS_FIRST_INVESTED.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a counts-only record; read-only S3 reads of one firm's transaction stores into a private copy; no write",
+      "artifact_covered_by": [
+        "DB84-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB84-1-AC1",
+      "criterion_verbatim": "DB84-1-AC1 -- the rule is written and committed before the count and its bytes are unchanged, the flow-bearing days are split into deposit, withdrawal and other days, and every deposit day is placed in one of five classes. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r84/p84_round84.py\" . DB84-1-AC1",
+      "output_evidence": "OK: 234 flow-bearing day(s) over 49 account(s); 88 deposit day(s): same day 4, next trading day 16, later 23, never in the window 45, not determinable 0\nDB84-1-AC1 PASS",
+      "denominator": "234 flow-bearing days; 49 accounts; 88 deposit days placed in 5 classes (4+16+23+45+0); exit code 0",
+      "status": "PASS",
+      "expect": "DB84-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record from the worktree root",
+      "observed": "same last line on two runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB84-1-AC1 FAIL",
+      "observed": "no record; DB84-1-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "p84_round84.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r84/p84_round84.py\" . DB84-1-AC1",
+      "result": "DB84-1-AC1 PASS (rc 0); empty root FAIL (rc 1)"
+    }
+  ]
+}

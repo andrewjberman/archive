@@ -1,0 +1,462 @@
+{
+  "to_id": "IRPT_BCKEND.TO-IB-pr-453",
+  "serial": "0.9.0_WK_IRPT_BCKEND~309",
+  "read_at_commit": "0bdd920114 (worktree branch wk-IRPT_BCKEND-309)",
+  "what_starts_a_draft_today": {
+    "in_words": "The resident worker sends the closed message analysis_ready{tenant, request_id} to the queue named by env IRPT_ANALYSIS_READY_QUEUE_URL once, right after it has written the job state READY (mark_ready -> signal_ready -> send_ready), and again on a redelivery of an already-READY job that has no i3_sent_at marker. THE CONDITION IS NOT 'the job is bound to a ticket id': mark_ready copies ticket_id into the READY receipt when the accepted record carries one, but it calls signal_ready on every path; the only guard inside send_ready is that the queue-url env var is non-empty (empty -> one WARN and no send). A job with no ticket_id sends too (test_ready_signal.py test_b, run offline here: 2 passed). RECEIVER: the commentary Lambda admits only the byte-exact closed message (admit_ready_message), builds a READY item from tenant + request_id alone, reads the composition through the svc-commentary reader (which refuses unless the job row reads READY), and, when a model is configured and no draft is stored yet, drafts, stores the draft and sends commentary_ready. It reads no ticket_id and no commentary member anywhere on that path.",
+    "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:319-332 (mark_ready/signal_ready), :163-186 (send_ready), :672-673 (READY redelivery re-send)",
+    "receiver_code_line": "data/transcripts/scripts/commentary/lambda_handler.py:178-204 (admit), :285-295 (item from tenant+request_id), :308-327 (model gate, draft_exists, draft, store, send commentary_ready); data/transcripts/scripts/commentary/entry.py:264-268; infra/aws/lambda/investor-reporting/reports/commentary_composition.py:146",
+    "claim": "measured",
+    "premise_check": "The order's why-paragraph says the worker sends it 'when the job is bound to a ticket id'. The code does not: see row IRPT_BCKEND-D2-W309-S1."
+  },
+  "submission": {
+    "members_that_say_commentary_is_asked": [],
+    "told_today": "NOT_TOLD",
+    "claim": "measured",
+    "in_words": "No member of a submission says commentary is asked for. The browser body is a CLOSED set: validate_public_request refuses any key outside PUBLIC_FIELDS = {request_id, client_id, account_ids, snapshot_id, variant, comparison_keys, report_title, prepared_for, input_id, ticket_id} (UNKNOWN_OR_SERVER_OWNED_FIELD) and the published schema is additionalProperties false. The nearest member is ticket_id, which says only that the request was filed under a ticket (it must come with input_id and match TCK-yyyymmdd-xxxxxxxx); from it commentary could only be INFERRED, and no code on the send path makes that inference. The intake stores the validated browser in the retained composition (document.browser) and its hash as record.browser_sha256, so a stored copy carries the same closed set. Nothing here is a member; all of it is a statement about absence.",
+    "searched_for": "members named commentary / add_commentary / needs_commentary / draft / report_only / deliverable in the submission validator and schema; the closed set PUBLIC_FIELDS and CUSTODY_FIELDS; AnalysisSubmissionRequest.schema.json properties and additionalProperties; every caller-supplied key reaching DynamoAcceptance.accept; native Grep of 'commentary' (case-insensitive) over ycharts/generate/*.py: hits only the commentary_ready queue / poll names (resident_worker.py:923-961, resident_main.py:5) and tests of that poll, no request member.",
+    "closed_set_code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py:14-16,51-52",
+    "schema": "docs/contracts/investor-reporting/v1/AnalysisSubmissionRequest.schema.json:8 (additionalProperties false), :84-88 (ticket_id)",
+    "inference_available": "ticket_id present (submission.py:78-80): filed from a ticket. Not used by the worker's send, the receiver or the acceptance writer to decide anything about commentary."
+  },
+  "ticket": {
+    "members_that_say_commentary_is_asked": [
+      {
+        "member": "answers.add_commentary (ticket_type analysis_request; boolean)",
+        "written_at": "infra/aws/lambda/ticket_center/lambda_function.py:711-716 (validated and stored by _validate_answers; accepted into the ticket at create, :1150-1160); declared at :108",
+        "read_at": [
+          "data/transcripts/scripts/commentary/ticket_client.py:104-105 (the commentary drafter's OWN ticket write refuses if its add_commentary is not True)",
+          "no read of it in infra/aws/lambda/investor-reporting (zero hits for add_commentary there)",
+          "no read of it elsewhere in the ticket service code (:108 is its only non-validation mention)"
+        ],
+        "values": "true or false (isinstance bool, :712); not sent -> the key is simply omitted from the stored answers (:683-686 continue); the declared default False at :108 is metadata only: nothing in lambda_function.py applies it.",
+        "declared_at": "infra/aws/lambda/ticket_center/lambda_function.py:108 (TYPE_DEFINITIONS['analysis_request']['questions'])",
+        "tests": "infra/aws/lambda/ticket_center/tests/test_analysis_request.py:73,139-144,152,161,201"
+      }
+    ],
+    "told_today": "TOLD_BY_A_MEMBER",
+    "claim": "measured",
+    "in_words": "The ticket DOES have a field for it: answers.add_commentary, a boolean on an analysis_request ticket (true = a commentary asked for; false or omitted = a report only). It is declared in the ticket service's TYPE_DEFINITIONS (the ticket project's contract is that code; no separate schema file or TCKT PRD text names it) and validated at create. NO code in the IRPT tree reads it: the submission carries only ticket_id, the worker, the acceptance writer and the commentary receiver never fetch a ticket, and the only reader anywhere in this repo is the drafter's own ticket_client self-check on a ticket it writes. Whether the portal's ticket form sets it is not established (the portal submodule is not checked out here).",
+    "searched_for": "add_commentary over the whole repo outside org/ and workflows/ (declaration, validator, ticket_client, tests); commentary / report_only / deliverable in ticket_center/lambda_function.py; add_commentary in org/missions/D7/TCKT/TCKT_VNEXT/prd (no hit)."
+  },
+  "accepted_record": {
+    "in_words": "The ACCEPTED record is the immutable JSON attribute `record` on the item {tenant, request_revision = 'analysis#<request_id>#1'} of the irpt-requests table, written exactly once by DynamoAcceptance.accept in one transact_write together with the job row (condition attribute_not_exists). A replayed submit returns the prior record exactly as stored (accept :108-110, :135-139), so a member added to the writer later is absent on every record accepted before it, permanently. SIBLING, NOT MEMBER: commentary_ref is set later by the draft store as a separate attribute of the same item ('SET commentary_ref', conditional update), and DynamoAcceptance.get returns only the `record` attribute.",
+    "written_at": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py:113-122 (record built), :126-131 (transact_write)",
+    "members_today": [
+      "identity {tenant_firm_id, request_id, revision, immutable, ingestion_gate_revision, destination_policy_revision}",
+      "owner",
+      "browser_sha256",
+      "composition_ref",
+      "accepted_at",
+      "acting_principal_id",
+      "ticket_id (only when the submission carried one: acceptance.py:120-121)"
+    ],
+    "sibling_item_attribute_not_in_record": "commentary_ref (infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:213-219; read by opal_packager.py:153 as record.get('commentary_ref'))",
+    "contract_file": "NONE: no file declares the stored `record` (searched docs/contracts/investor-reporting/v1, infra/aws/lambda/investor-reporting/_contracts and org/missions/D9/IRPT/*/prd/*.md for acting_principal_id, browser_sha256, 'acceptance record', 'accepted record': no hit). Nearest, and NOT the same object: docs/contracts/investor-reporting/v1/OwnedAnalysisRequest.schema.json (the public READ projection {identity, accepted_at, comparisons, composition, persist_inputs}, additionalProperties false) and the code-level closed set IDENTITY_FIELDS at infra/aws/lambda/investor-reporting/ops/owned_requests.py:19 (applies to the identity sub-object only).",
+    "additional_members_forbidden": null,
+    "additional_members_forbidden_detail": "null for the stored record: no declaring contract. In code: no reader found refuses an unknown TOP-LEVEL member; the identity sub-object is closed (owned_requests.py:186), so a new member inside identity would be refused by every _validate caller; the public projection is closed (OwnedAnalysisRequest additionalProperties false) but does not serve other record members.",
+    "stored_at": "DynamoDB table irpt-requests (env IRPT_REQUESTS_TABLE / bindings requests_table; default 'irpt-requests'), key {tenant: firm, request_revision: 'analysis#<request_id>#1'}, attribute `record` = canonical JSON string (infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py:62,122)",
+    "claim": "measured"
+  },
+  "acceptance_could_read_it": {
+    "answer": false,
+    "claim": "measured",
+    "from_what": "Nothing in hand at the writing line says it. DynamoAcceptance.accept receives owner, browser, composition_ref, ingestion_revision, destination_revision and acting_principal_id. `browser` is the validated submission, whose closed member set has no commentary member and whose only related member is ticket_id (an id, not a ticket body). acceptance.py imports no ticket client, takes no ticket port and makes no ticket call. The only place the asked-for fact exists today is the ticket's answers.add_commentary, so reading it at acceptance would be a ticket read, which the CTO has ruled out for the worker and the drafter.",
+    "in_hand_at_acceptance": [
+      "owner (verified owner dict)",
+      "browser: request_id, client_id, account_ids, snapshot_id, variant, comparison_keys, report_title, prepared_for, and optionally input_id and ticket_id (id string only)",
+      "composition_ref (artifact_id, sha256, version_id, family, immutable, retention_ref)",
+      "ingestion_revision, destination_revision",
+      "acting_principal_id (the verified submitter)",
+      "NOT in hand: a ticket body, any ticket field, any ticket port or client"
+    ],
+    "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py:90-121 (signature :90-91; record built :113-121; ticket_id copied :120-121)"
+  },
+  "readers_of_the_accepted_record": [
+    {
+      "reader": "ResidentAssembly.execute reads the record",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:635",
+      "kind": "worker",
+      "on_an_unknown_or_absent_member": "Unknown member: ignored (the record is only handed on to principal/_materialize/producer_for). Absent new member: nothing here reads it."
+    },
+    {
+      "reader": "ResidentGenerationWorker.guard",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:208-216",
+      "kind": "worker",
+      "on_an_unknown_or_absent_member": "Reads record['composition_ref']['sha256'] only; unknown member ignored; the new member absent changes nothing here."
+    },
+    {
+      "reader": "ResidentGenerationWorker.mark_ready (the ONE member read today: ticket_id)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:324-326",
+      "kind": "worker",
+      "on_an_unknown_or_absent_member": "Reads record.get('ticket_id'): absent or non-string or empty -> the receipt carries no ticket_id and READY is still written; any other member ignored. The send that follows (signal_ready :328) does not look at the record at all."
+    },
+    {
+      "reader": "producer_for (the producer chosen from owner.principal_id)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:129-133",
+      "kind": "worker",
+      "on_an_unknown_or_absent_member": "Reads owner.principal_id only. A flag member added to the record changes nothing (test_resident_worker.py:794-799 proves it for producer/opal/provider); a non-dict record or missing owner gives YCHARTS."
+    },
+    {
+      "reader": "ResidentGenerationWorker.run / run_opal read identity.revision, owner, composition_ref",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:345,458-461,482-484",
+      "kind": "worker",
+      "on_an_unknown_or_absent_member": "Subscripts record['identity']['revision'], ['owner'], ['composition_ref'] (KeyError if one of those three is missing); every other member ignored."
+    },
+    {
+      "reader": "FrozenCompositionWorker.prepare",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/frozen_worker.py:36-55",
+      "kind": "publication",
+      "on_an_unknown_or_absent_member": "Copies the whole record through canonical_bytes (any JSON member serialises) then reads composition_ref, owner, browser_sha256; a member it does not name is ignored, a missing named one raises RequestReadRefused/KeyError."
+    },
+    {
+      "reader": "CertifiedReportPublisher.retain_document / read_document / publish",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/publisher.py:141,152,216-220",
+      "kind": "publication",
+      "on_an_unknown_or_absent_member": "Reads owner, composition_ref (retention_ref, sha256), identity; stores composition_ref in the report provenance (:201), never the whole record. Unknown member ignored."
+    },
+    {
+      "reader": "PublicationWorker._accepted",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/publication_worker.py:46-53",
+      "kind": "publication",
+      "on_an_unknown_or_absent_member": "Reads composition_ref.sha256 and re-checks via OwnedRequestReader._final; unknown member ignored."
+    },
+    {
+      "reader": "current_authority.decide",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/current_authority.py:91-105,128",
+      "kind": "authority",
+      "on_an_unknown_or_absent_member": "Reads owner and accepted_at (int) only; a record without them is refused; every other member ignored."
+    },
+    {
+      "reader": "make_principal_for.principal_for",
+      "code_line": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:241-251",
+      "kind": "authority",
+      "on_an_unknown_or_absent_member": "Reads owner.principal_id, identity.tenant_firm_id, owner.firm_id/principal_class/advisor_id; missing owner.principal_id raises PermissionError ACCEPTED_ACTOR_LOCATOR_REQUIRED; unknown member ignored."
+    },
+    {
+      "reader": "make_opal_stores.opal_stores",
+      "code_line": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:272-282",
+      "kind": "authority",
+      "on_an_unknown_or_absent_member": "Reads identity.tenant_firm_id/request_id and composition_ref.retention_ref; missing identity ids raises ValueError OPAL_REQUEST_IDENTITY_REQUIRED; unknown member ignored."
+    },
+    {
+      "reader": "OwnedRequestReader._validate",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/owned_requests.py:171-198",
+      "kind": "request_api",
+      "on_an_unknown_or_absent_member": "Top-level unknown member IGNORED (reads owner, identity, accepted_at, composition_ref by name). STRICT on the identity sub-object only: set(identity) != IDENTITY_FIELDS (:19,:186) refuses ACCEPTED_IDENTITY_BINDING, so a member added INSIDE identity would refuse every reader that calls _validate."
+    },
+    {
+      "reader": "OwnedRequestReader._final (two reads compared for equality)",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/owned_requests.py:233-234",
+      "kind": "request_api",
+      "on_an_unknown_or_absent_member": "Compares acceptance.get(...) of a fresh read with the record already held, whole-dict equality: an unknown member is harmless while both reads carry the same bytes; a change between reads refuses ACCEPTED_RECORD_CHANGED."
+    },
+    {
+      "reader": "OwnedRequestReader.read / _public (the response)",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/owned_requests.py:243,248-254",
+      "kind": "request_api",
+      "on_an_unknown_or_absent_member": "Serves only {identity, accepted_at} (OwnedAnalysisRequest.schema.json, additionalProperties false); any other member of the record, including a new one, never reaches a response."
+    },
+    {
+      "reader": "OwnedRequestReader._history_rows",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/owned_requests.py:305-313",
+      "kind": "request_api",
+      "on_an_unknown_or_absent_member": "json.loads(item['record']) then reads accepted_at (int) only; non-int accepted_at refuses HISTORY_RECORD_TIME; unknown member ignored."
+    },
+    {
+      "reader": "OwnedJobStatusReader.read",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/owned_status.py:33-37",
+      "kind": "status_api",
+      "on_an_unknown_or_absent_member": "Reads composition_ref.sha256 and identity.revision; unknown member ignored."
+    },
+    {
+      "reader": "OwnedAnalysisReader.read -> _require_ticket (reads ticket_id)",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/owned_report.py:169-172,76",
+      "kind": "status_api",
+      "on_an_unknown_or_absent_member": "Reads 'ticket_id' in record only when the caller sent ticket_id: record without it -> nothing happens (no refusal); a different stored id refuses REPORT_TICKET_MISMATCH; unknown member ignored."
+    },
+    {
+      "reader": "OwnedAnalysisReader.persist_inputs",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/owned_report.py:273-280",
+      "kind": "status_api",
+      "on_an_unknown_or_absent_member": "Reads composition_ref artifact_id/sha256/retention_ref.policy_revision; unknown member ignored."
+    },
+    {
+      "reader": "OwnedAnalysisReader.original",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/owned_report.py:337-340",
+      "kind": "status_api",
+      "on_an_unknown_or_absent_member": "Hands the record to RetainedProspectDates (below); unknown member ignored."
+    },
+    {
+      "reader": "RetainedProspectDates (record held from owned_status / owned_report.original)",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/prospect_dates.py:260-282,331",
+      "kind": "status_api",
+      "on_an_unknown_or_absent_member": "Reads owner, composition_ref, identity.request_id; unknown member ignored. (Reached through a caller, not named by the file census.)"
+    },
+    {
+      "reader": "Entry owner() lookup",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/entry.py:233-234",
+      "kind": "status_api",
+      "on_an_unknown_or_absent_member": "Returns copy.deepcopy(record.get('owner')) when the record is a dict, else None; unknown member ignored."
+    },
+    {
+      "reader": "commentary_composition.read_composition (svc-commentary composition read)",
+      "code_line": "infra/aws/lambda/investor-reporting/reports/commentary_composition.py:137-145",
+      "kind": "drafter",
+      "on_an_unknown_or_absent_member": "Reads identity.tenant_firm_id/request_id and composition_ref (family, immutable, artifact_id, sha256); anything else refused/ignored: missing or wrong identity or ref -> UNAVAILABLE; unknown member ignored. Does NOT read ticket_id."
+    },
+    {
+      "reader": "commentary_draft_store.resolve_request (svc-commentary draft write)",
+      "code_line": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:115-123",
+      "kind": "drafter",
+      "on_an_unknown_or_absent_member": "Reads identity.request_id/tenant_firm_id and owner; missing or mismatched -> UNAVAILABLE; unknown member ignored. The commentary_ref it writes is a SIBLING attribute of the item, not a member of `record` (:213-219)."
+    },
+    {
+      "reader": "opal_packager.handle_commentary_ready",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py:147-170",
+      "kind": "packager",
+      "on_an_unknown_or_absent_member": "Reads ticket_id (absent/blank -> PackagerRefused TICKET_ID_ABSENT), commentary_ref (absent -> COMMENTARY_REF_ABSENT; not exactly {artifact_id,sha256,version_id} -> COMMENTARY_REF_MALFORMED), composition_ref.sha256, owner.prospect_input_id/schema_version/account_ids, identity.revision; unknown member ignored."
+    },
+    {
+      "reader": "make_packager.stores",
+      "code_line": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:331-333",
+      "kind": "packager",
+      "on_an_unknown_or_absent_member": "Subscripts record['owner'] and hands the record to principal_for/opal_stores; unknown member ignored."
+    },
+    {
+      "reader": "research.runner holdings read (raw get_item of analysis#<REQ>#<rev>, not through DynamoAcceptance)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/research/runner.py:460-461",
+      "kind": "research",
+      "on_an_unknown_or_absent_member": "json.loads(row['record']) then subscripts record['composition_ref']; a missing composition_ref raises KeyError which is returned as HoldingsUnreadable(<class name>); unknown member ignored."
+    },
+    {
+      "reader": "DynamoAcceptance.get (returns the whole parsed record, no member filter)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py:68-71",
+      "kind": "acceptance_store",
+      "on_an_unknown_or_absent_member": "Returns json.loads(item['record']['S']) whole; it is the one read every reader above goes through (except runner.py); it does not return item-level sibling attributes such as commentary_ref."
+    },
+    {
+      "reader": "DynamoAcceptance.lookup (idempotent retry)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py:78-81,108-110",
+      "kind": "acceptance_store",
+      "on_an_unknown_or_absent_member": "Reads prior['browser_sha256'] (KeyError if a stored record lacked it); returns the prior record exactly as stored, so a record accepted before any later change never gains a later member."
+    },
+    {
+      "reader": "DynamoAcceptance.dispatch",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py:147-165",
+      "kind": "acceptance_store",
+      "on_an_unknown_or_absent_member": "Reads request['composition_ref'] (KeyError if missing) to rebuild the queue body; unknown member ignored."
+    },
+    {
+      "reader": "SubmissionService.submit (the prior / just-accepted record)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/submission_service.py:149-167",
+      "kind": "acceptance_store",
+      "on_an_unknown_or_absent_member": "Reads prior['owner'], prior['identity'] and (via _verify_retained_composition :93-101) composition_ref; returns only {identity, stage, dispatch_pending}; unknown member ignored."
+    },
+    {
+      "reader": "test_ready_signal.py (stamps ticket_id on the record read; asserts a no-ticket job still signals once)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_ready_signal.py:55,91-97",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Proves the worker's behaviour with ticket_id present and absent; has no assertion about any other member."
+    },
+    {
+      "reader": "test_resident_worker.py profile() reads owner/accepted_at; flagged members test",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py:69-73,794-799",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Unknown members (producer/opal/provider) added to the accepted record are ignored by the whole execute flow (asserts state READY and no Opal run)."
+    },
+    {
+      "reader": "test_ticket_binding.py (stored record carries ticket_id; absent on another firm / replay)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_ticket_binding.py:74-79,98-105",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Asserts record['ticket_id'] equals the ticket when sent, absent when not sent, and a replay returns the first record unchanged."
+    },
+    {
+      "reader": "test_report_ticket_binding.py (writes ticket_id onto the stored record, reads the report)",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/tests/test_report_ticket_binding.py:25-28,37-68",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Asserts a record without ticket_id answers as before and a different stored id refuses; other members not asserted."
+    },
+    {
+      "reader": "test_acceptance_actor.py (self.read() of the stored record)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_acceptance_actor.py:68",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Asserts acting_principal_id is recorded on a new record and not on a prior one; other members not asserted."
+    },
+    {
+      "reader": "test_submission.py (self.read() of the stored record, replay and change cases)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_submission.py:127",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Asserts the replay / changed-input behaviour of lookup/accept; unknown member not exercised."
+    },
+    {
+      "reader": "test_custody_retained.py",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_custody_retained.py:186",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Reads r.acceptance.get(...) and asserts its owner/composition binding; unknown member not exercised."
+    },
+    {
+      "reader": "test_prospect_submission.py",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_prospect_submission.py:156",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Reads r.acceptance.get(...) and asserts its binding; unknown member not exercised."
+    },
+    {
+      "reader": "test_frozen_worker.py (accepts then reads through OwnedRequestReader)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_frozen_worker.py:51-54",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Drives FrozenCompositionWorker.prepare on a real accepted record; unknown member not exercised."
+    },
+    {
+      "reader": "test_producer_actor.py (builds a record with acting_principal_id, calls producer_for)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_producer_actor.py:34-55",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Asserts producer_for reads owner (and the actor key where present); unknown members ignored. Its module docstring (:5-8) still says no record carries the actor key, which acceptance.py:119 now writes."
+    },
+    {
+      "reader": "test_owned_requests.py (read/history/fixtures)",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/tests/test_owned_requests.py:68-74,103-109,252-258",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Asserts the served read is exactly {identity, accepted_at} (+ comparisons/composition on request); unknown record members never served."
+    },
+    {
+      "reader": "test_owned_status.py",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/tests/test_owned_status.py:63",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Reads r.requests.acceptance.get(...) and mutates a copy to prove status refusals; unknown member not exercised."
+    },
+    {
+      "reader": "test_opal_consumers.py (Mock acceptance returning a record)",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/tests/test_opal_consumers.py:59-66",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Drives OwnedRequestReader on a fake record; unknown member not exercised."
+    },
+    {
+      "reader": "test_original_reader.py (record from support.setup)",
+      "code_line": "infra/aws/lambda/investor-reporting/ops/tests/test_original_reader.py:61-67",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Drives the original reader on an accepted record; unknown member not exercised."
+    },
+    {
+      "reader": "test_opal_packager.py (make_record puts ticket_id and commentary_ref INSIDE the record)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_packager.py:58-64,89-90,211-217",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Asserts the refusal names for absent/blank ticket_id, absent/malformed commentary_ref; the fake acceptance port returns commentary_ref inside the record (the live DynamoAcceptance.get does not; see row W309-S2)."
+    },
+    {
+      "reader": "test_commentary_draft_store.py (fake Requests.get of analysis#<id>#1)",
+      "code_line": "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_draft_store.py:33-39",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Drives resolve_request on a fake record; asserts commentary_ref is set once on the item; unknown member not exercised."
+    },
+    {
+      "reader": "test_svc_commentary.py (fake Requests.get of analysis#<id>#1)",
+      "code_line": "infra/aws/lambda/investor-reporting/reports/tests/test_svc_commentary.py:60-67",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Drives read_composition on a fake record; asserts UNAVAILABLE for absent/other-tenant; unknown member not exercised."
+    },
+    {
+      "reader": "test_runner.py (fake dynamodb row analysis#REQ-src#1)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_runner.py:620-635",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Drives the runner's holdings read on a fake row; asserts the two keys read; unknown member not exercised."
+    },
+    {
+      "reader": "test_opal_producer.py (fake dynamodb rows analysis#<id>#1)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer.py:69,165",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Asserts the producer's holdings read touches analysis#REQ-PROD01#1 then ARTIFACT#art-1; unknown member not exercised."
+    },
+    {
+      "reader": "test_opal_thread_integration.py (fake dynamodb rows analysis#<id>#1)",
+      "code_line": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_opal_thread_integration.py:111,190",
+      "kind": "test",
+      "on_an_unknown_or_absent_member": "Asserts the same two-key read in the end-to-end Opal thread; unknown member not exercised."
+    }
+  ],
+  "reader_kinds": [
+    "worker",
+    "publication",
+    "authority",
+    "request_api",
+    "status_api",
+    "drafter",
+    "packager",
+    "research",
+    "acceptance_store",
+    "test"
+  ],
+  "readers_by_kind": {
+    "worker": 5,
+    "publication": 3,
+    "authority": 3,
+    "request_api": 4,
+    "status_api": 6,
+    "drafter": 2,
+    "packager": 2,
+    "research": 1,
+    "acceptance_store": 4,
+    "test": 20
+  },
+  "readers_searched_for": "Subtraction from a printed denominator. Universe: every file outside org/, .scratch, workflows and docs/briefs naming DynamoAcceptance | 'analysis#' | acceptance.(get|accept|lookup) | .acceptance | 'acceptance record' | 'accepted record' (native Grep over the worktree root, 45 files). Each placed below by READING its lines. Then widened by the storage key: irpt-requests | requests_table | IRPT_REQUESTS_TABLE over *.py/*.ts/*.tsx/*.js/*.mjs (92 files, 44 under org/ are deliverable scripts, not product code), no further product reader of analysis#<id>#1 found beyond ycharts/research/runner.py (already in the 45). One reader reached by a caller and not by the census regex: ops/prospect_dates.py (listed). portal/ searched: the submodule directory is empty in this worktree (see not_established).",
+  "files_naming_the_record": {
+    "universe": 45,
+    "readers": 35,
+    "writers": 1,
+    "neither": 9,
+    "writer_files": [
+      "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py"
+    ],
+    "reader_files_production": [
+      "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+      "infra/aws/lambda/investor-reporting/ycharts/generate/frozen_worker.py",
+      "infra/aws/lambda/investor-reporting/ycharts/generate/publisher.py",
+      "infra/aws/lambda/investor-reporting/ycharts/generate/publication_worker.py",
+      "infra/aws/lambda/investor-reporting/ycharts/generate/current_authority.py",
+      "infra/aws/lambda/investor-reporting/ycharts/generate/submission_service.py",
+      "infra/aws/lambda/investor-reporting/ops/owned_requests.py",
+      "infra/aws/lambda/investor-reporting/ops/owned_status.py",
+      "infra/aws/lambda/investor-reporting/ops/owned_report.py",
+      "infra/aws/lambda/investor-reporting/ops/entry.py",
+      "infra/aws/lambda/investor-reporting/reports/resident_installed.py",
+      "infra/aws/lambda/investor-reporting/reports/commentary_composition.py",
+      "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py",
+      "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py",
+      "infra/aws/lambda/investor-reporting/ycharts/research/runner.py"
+    ],
+    "reader_files_test": 20,
+    "neither_files": [
+      "infra/aws/terraform/investor-reporting/ycharts/resident.tf (comment only)",
+      "infra/aws/lambda/investor-reporting/ycharts/generate/durable_job.py (docstring only)",
+      "infra/aws/lambda/investor-reporting/ycharts/generate/prospect_submission.py (passes the store through)",
+      "infra/aws/lambda/investor-reporting/ycharts/generate/custody_submission.py (constructs DynamoAcceptance)",
+      "infra/aws/lambda/investor-reporting/reports/status_installed.py (constructs it)",
+      "infra/aws/lambda/investor-reporting/reports/generate_installed.py (constructs it)",
+      "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_custody_submission_revision.py (fakes DynamoAcceptance as an empty namespace)",
+      "infra/aws/lambda/investor-reporting/reports/tests/test_status_installed.py (asserts the table name only)",
+      "infra/aws/lambda/investor-reporting/ops/tests/fixtures/owned_request_history.json (public projections)"
+    ],
+    "rule": "primary placement: a file that CREATES the record in production code is a writer; else a reader if it reads any member (production) or exercises/asserts a reading path (test); else neither. 35 + 1 + 9 = 45. The reader LIST has 50 entries because a production file can hold several reading functions and prospect_dates.py is reached by a caller; the file counts above are files."
+  },
+  "not_established": [
+    "Whether the deployed environment has IRPT_ANALYSIS_READY_QUEUE_URL bound (the send is a no-op without it); no AWS call was made, so live bindings and the live commentary Lambda's configuration (model gate KIMI_STANDING_WORD_REF, event-source mapping) are unread.",
+    "Whether the portal (or any client) sets ticket_id or reads anything off the accepted record: the portal submodule is empty in this worktree (gitlink c96efe1714 not checked out), so portal/ could not be searched. The served response is {identity, accepted_at} only (owned_requests.py:243), so a page cannot see other record members through that route.",
+    "Whether real analysis_request tickets carry answers.add_commentary: no live ticket was read; the form that files a ticket (portal) is unread.",
+    "Whether live DynamoAcceptance.get really omits the sibling commentary_ref for the packager (row W309-S2 is INFERRED from code; no test crosses the draft store's write and the packager's read, and no live read was made).",
+    "How the downstream (packager, I5 ticket attach) behaves for a request that has commentary but whose ticket asked for none, or the converse: not in this read's scope and not run.",
+    "Org-tree deliverable scripts (44 files under org/ that name irpt-requests) read the same table; they are not product code and were not placed.",
+    "ycharts/generate/tests/test_producer_actor.py module docstring (:5-8) says no record carries an actor key, while acceptance.py:119 writes acting_principal_id; whether the xfail(strict) there still holds was not run."
+  ],
+  "contract_changes_proposed": 0,
+  "vendor_requests_made": 0,
+  "aws_calls_made": 0,
+  "product_files_edited": 0,
+  "offline_tests_run": [
+    "ycharts/generate/tests/test_ready_signal.py -k test_b_no_ticket: 2 passed (opal and vendor builds): a no-ticket job still sends analysis_ready once"
+  ],
+  "rows_filed": [
+    "IRPT_BCKEND-D2-W309-S1",
+    "IRPT_BCKEND-D2-W309-S2",
+    "IRPT_BCKEND-D2-W309-S3"
+  ]
+}

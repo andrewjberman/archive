@@ -1,0 +1,314 @@
+{
+ "reproduced": {
+  "over_10bp": 96,
+  "with_a_row": 22,
+  "without": 74
+ },
+ "closed_list": {
+  "text": "CLOSED LIST OF CAUSES, ROUND 75 CB-bw-2 (worker 0.9.0_WK_ADVI_COTBKF~133). WRITTEN BEFORE ANY OF THE 74 DAYS WAS LOOKED AT.\nOnly step 1 had run: the 96 / 22 / 74 count by the trade-row test (types by, sl, dvr of the five funds FCNTX BALCX CWGIX ANCFX CAIBX, same account, same date): 96 / 22 / 74.\n\nNOTATION. t = the change day (account, date). s = the account's previous row date in daily_returns (the base day of the return). The five exposed funds = the five CUSIPs above.\nheld(F,d) = the account has a row in account_day_value with cusip F and quantity > 0 on date d. Ratio k_F(d) = variant security-day price / baseline security-day price of F on d (security_day_price.parquet of the two builds).\nReturn formula (commonwealth_daily_returns.py): ret = (V_t - flow_t + adj_t) / V_s - 1. V = account value, flow = external flows of the day, adj = the fee drag taken off the numerator.\nA day takes the FIRST test that fits, in the order below. Every test is applied to every day; a day that fits several is also recorded in an overlap table (it does not change which cause the day takes).\n\n1. reinvestment   : a dvr row (custodian type dvr) of any of the five funds, same account, Trade_Date within 3 calendar days of t on either side, EXCLUDING t itself (a same-day dvr is the trade-row test of step 1).\n2. transfer       : the day's external flow is not zero in either build (daily_returns flow column, baseline or variant; this covers every type the flow rule counts as an external flow: li, LISU, lo, LIX, LOX, trfi, TRFIR, trci, TRCISU, trfo, trco, si, so, ci, and the charges the method rule counts as flows), OR a custodian row of type li, LISU, lo, LIX, LOX, trfi, TRFIR, trci, TRCISU, trfo, trco, si, so or ci for the account dated t (any security).\n3. distribution_date: a custodian row of type dv, dvlt or dvst (cash distribution) of an exposed fund held at s or at t, same account, Trade_Date between s and t inclusive (that is: posted that day or after the previous row day).\n4. price_step     : an exposed fund held at BOTH s and t whose ratio changes between s and t by more than 10 basis points: |k_F(t)/k_F(s) - 1| > 0.001. (Threshold reason: a fund cannot move an account's return by more than its own step; a step under 10 bp cannot make a change over 10 bp.) Ratio undefined (price absent in either build on s or t) = does not fit here.\n5. days_dropped   : an exposed fund held at s or t has its (cusip, date) price present in one build's security-day price table on s or on t and absent from the other build's.\n6. weight_effect  : (ADDED before the look; mechanism from the formula) with the ratio flat the fund's own return is unchanged, but the fund's weight in the account at s differs because its value is scaled by k, so the account return moves by about weight_change x (fund return - rest-of-account return). Exact test by counterfactual: ret_C = (V_t^b + sum over exposed F of value^b_{F,t} x (k_F(s) - 1) - flow^v_t + a) / V_s^v - 1, where V^b, V^v are the baseline and variant account values in daily_returns, value^b_{F,t} is the baseline account_day_value of F at t (0 if not held), k_F(s) = 1 where the price is absent, a = (1 + ret^b) x V_s^b - V_t^b + flow^b_t (the implied adj of the baseline day). weight_part = ret_C - ret^b. The day fits when weight_part has the SAME SIGN as the change (ret^v - ret^b) and |weight_part| >= 0.5 x |change|. (ret_C is the variant with the day-t price ratio held at its day-s value: the part of the change that no price step can explain.)\n7. trade_in_another_security: a custodian row of type by or sl dated t, same account, in a CUSIP that is not one of the five exposed funds.\n8. prior_day_trade: a custodian row of type by, sl or dvr of an exposed fund, same account, dated s (the previous row day).\n9. small_base     : the baseline value at s (V_s^b) is under 10 percent of the account's median baseline daily value (median over the account's days with a positive value).\n10. none_found    : none of the above fits.\n\nSTEP 4 (the 22 with the trade row IGNORED): the same ten tests, with the same order, applied to the 22 days; test 1 excludes only the same-day dvr row exactly as above (so the 8 reinvestment days read what the other nine tests say). No test is added or changed for the 22.\n\nREPORTING RULES FIXED NOW. For price_step: steps up (k_t/k_s > 1) vs down; \"step date is a distribution date of the fund\" = a dv, dvlt, dvst or dvr row of that fund (any account) with Trade_Date within 3 calendar days of t either side (the ex-date and the posting date can differ). Per cause: days, higher (ret^v > ret^b), lower, median |change| in basis points. Share of the 74 and share of the total |change| per cause. No cause is added, re-ordered or re-thresholded after the look; whatever the list does not fit is none_found, and any better list is reported separately as POST HOC.\n",
+  "written_at": "2026-10-11T22:04:50Z",
+  "causes": [
+   "reinvestment",
+   "transfer",
+   "distribution_date",
+   "price_step",
+   "days_dropped",
+   "weight_effect",
+   "trade_in_another_security",
+   "prior_day_trade",
+   "small_base",
+   "none_found"
+  ]
+ },
+ "causes": {
+  "reinvestment": {
+   "days": 9,
+   "higher": 0,
+   "lower": 9,
+   "median_bp": 44.9,
+   "share_of_days": 0.1216,
+   "share_of_abs_change": 0.4249,
+   "max_bp": 216.24
+  },
+  "transfer": {
+   "days": 1,
+   "higher": 1,
+   "lower": 0,
+   "median_bp": 10.24,
+   "share_of_days": 0.0135,
+   "share_of_abs_change": 0.0057,
+   "max_bp": 10.24
+  },
+  "distribution_date": {
+   "days": 0,
+   "higher": 0,
+   "lower": 0,
+   "median_bp": null,
+   "share_of_days": 0.0,
+   "share_of_abs_change": 0.0,
+   "max_bp": null
+  },
+  "price_step": {
+   "days": 1,
+   "higher": 1,
+   "lower": 0,
+   "median_bp": 42.5,
+   "share_of_days": 0.0135,
+   "share_of_abs_change": 0.0238,
+   "max_bp": 42.5
+  },
+  "days_dropped": {
+   "days": 0,
+   "higher": 0,
+   "lower": 0,
+   "median_bp": null,
+   "share_of_days": 0.0,
+   "share_of_abs_change": 0.0,
+   "max_bp": null
+  },
+  "weight_effect": {
+   "days": 63,
+   "higher": 29,
+   "lower": 34,
+   "median_bp": 12.88,
+   "share_of_days": 0.8514,
+   "share_of_abs_change": 0.5456,
+   "max_bp": 46.65
+  },
+  "trade_in_another_security": {
+   "days": 0,
+   "higher": 0,
+   "lower": 0,
+   "median_bp": null,
+   "share_of_days": 0.0,
+   "share_of_abs_change": 0.0,
+   "max_bp": null
+  },
+  "prior_day_trade": {
+   "days": 0,
+   "higher": 0,
+   "lower": 0,
+   "median_bp": null,
+   "share_of_days": 0.0,
+   "share_of_abs_change": 0.0,
+   "max_bp": null
+  },
+  "small_base": {
+   "days": 0,
+   "higher": 0,
+   "lower": 0,
+   "median_bp": null,
+   "share_of_days": 0.0,
+   "share_of_abs_change": 0.0,
+   "max_bp": null
+  },
+  "none_found": {
+   "days": 0,
+   "higher": 0,
+   "lower": 0,
+   "median_bp": null,
+   "share_of_days": 0.0,
+   "share_of_abs_change": 0.0,
+   "max_bp": null
+  }
+ },
+ "none_found": {
+  "days": 0,
+  "largest_bp": null,
+  "looked_at": "All ten tests of the closed list on each of the 74 days (custodian rows of the five exposed funds within 3 days, any external flow in either build, cash distributions of held exposed funds, price-ratio steps of held exposed funds, price days present in one build only, the counterfactual with the ratio held at its previous-day value, trades outside the five funds, previous-day trades, account base against its median). Each day fit at least one; the first-fit labels are in causes. The largest change among the 74 is 216.2 bp and sits under reinvestment."
+ },
+ "price_step_detail": {
+  "days_that_fit_price_step": 9,
+  "days_taking_price_step_by_first_fit": 1,
+  "steps_up_of_the_ratio": 1,
+  "steps_down_of_the_ratio": 8,
+  "steps_on_a_distribution_date_of_the_fund": 8,
+  "steps_not_on_a_distribution_date": 1,
+  "by_fund_direction_distribution": {
+   "ANCFX down on_distribution_date": 3,
+   "BALCX down on_distribution_date": 5,
+   "FCNTX up not_on_distribution_date": 1
+  },
+  "first_fit_cause_of_the_days_that_fit_price_step": {
+   "reinvestment": 8,
+   "price_step": 1
+  },
+  "step_taken_by_first_fit": "FCNTX, up, 2026-06-08, no distribution row of FCNTX within 3 days of that date",
+  "distribution_date_rule": "a dv, dvlt, dvst or dvr row of the fund (any account) with Trade_Date within 3 calendar days of the change day",
+  "note": "eight of the nine price-step days are taken by reinvestment because test 1 comes first; the order, fixed before the look, decides the label",
+  "overlap_fits_of_the_74": {
+   "reinvestment": 9,
+   "transfer": 2,
+   "distribution_date": 2,
+   "price_step": 9,
+   "days_dropped": 0,
+   "weight_effect": 65,
+   "trade_in_another_security": 3,
+   "prior_day_trade": 2,
+   "small_base": 0,
+   "none_found": 0
+  }
+ },
+ "check_on_the_22": {
+  "days": 22,
+  "trade_rows": "12 purchases (by), 2 sales (sl), 8 reinvestments (dvr), same day, one of the five exposed funds",
+  "first_fit_with_the_trade_row_ignored": {
+   "reinvestment": 3,
+   "transfer": 0,
+   "distribution_date": 5,
+   "price_step": 0,
+   "days_dropped": 0,
+   "weight_effect": 14,
+   "trade_in_another_security": 0,
+   "prior_day_trade": 0,
+   "small_base": 0,
+   "none_found": 0
+  },
+  "first_fit_by_trade_type": {
+   "dvr": {
+    "reinvestment": 3,
+    "distribution_date": 5
+   },
+   "by": {
+    "weight_effect": 12
+   },
+   "sl": {
+    "weight_effect": 2
+   }
+  },
+  "days_fitting_each_test_overlap": {
+   "reinvestment": 3,
+   "transfer": 0,
+   "distribution_date": 8,
+   "price_step": 4,
+   "days_dropped": 0,
+   "weight_effect": 18,
+   "trade_in_another_security": 1,
+   "prior_day_trade": 0,
+   "small_base": 0,
+   "none_found": 0
+  },
+  "days_fitting_each_test_by_trade_type": {
+   "by": {
+    "weight_effect": 12,
+    "trade_in_another_security": 1
+   },
+   "sl": {
+    "weight_effect": 2
+   },
+   "dvr": {
+    "reinvestment": 3,
+    "distribution_date": 8,
+    "price_step": 4,
+    "weight_effect": 4
+   }
+  },
+  "causes": {
+   "reinvestment": {
+    "days": 3,
+    "higher": 1,
+    "lower": 2,
+    "median_bp": 16.86,
+    "share_of_days": 0.1364,
+    "share_of_abs_change": 0.0201,
+    "max_bp": 21.98
+   },
+   "transfer": {
+    "days": 0,
+    "higher": 0,
+    "lower": 0,
+    "median_bp": null,
+    "share_of_days": 0.0,
+    "share_of_abs_change": 0.0,
+    "max_bp": null
+   },
+   "distribution_date": {
+    "days": 5,
+    "higher": 0,
+    "lower": 5,
+    "median_bp": 34.98,
+    "share_of_days": 0.2273,
+    "share_of_abs_change": 0.0629,
+    "max_bp": 35.32
+   },
+   "price_step": {
+    "days": 0,
+    "higher": 0,
+    "lower": 0,
+    "median_bp": null,
+    "share_of_days": 0.0,
+    "share_of_abs_change": 0.0,
+    "max_bp": null
+   },
+   "days_dropped": {
+    "days": 0,
+    "higher": 0,
+    "lower": 0,
+    "median_bp": null,
+    "share_of_days": 0.0,
+    "share_of_abs_change": 0.0,
+    "max_bp": null
+   },
+   "weight_effect": {
+    "days": 14,
+    "higher": 12,
+    "lower": 2,
+    "median_bp": 47.46,
+    "share_of_days": 0.6364,
+    "share_of_abs_change": 0.9169,
+    "max_bp": 882.02
+   },
+   "trade_in_another_security": {
+    "days": 0,
+    "higher": 0,
+    "lower": 0,
+    "median_bp": null,
+    "share_of_days": 0.0,
+    "share_of_abs_change": 0.0,
+    "max_bp": null
+   },
+   "prior_day_trade": {
+    "days": 0,
+    "higher": 0,
+    "lower": 0,
+    "median_bp": null,
+    "share_of_days": 0.0,
+    "share_of_abs_change": 0.0,
+    "max_bp": null
+   },
+   "small_base": {
+    "days": 0,
+    "higher": 0,
+    "lower": 0,
+    "median_bp": null,
+    "share_of_days": 0.0,
+    "share_of_abs_change": 0.0,
+    "max_bp": null
+   },
+   "none_found": {
+    "days": 0,
+    "higher": 0,
+    "lower": 0,
+    "median_bp": null,
+    "share_of_days": 0.0,
+    "share_of_abs_change": 0.0,
+    "max_bp": null
+   }
+  },
+  "purchase_days_reading_price_step": 0,
+  "sale_days_reading_price_step": 0,
+  "reinvestment_days_reading_price_step": 4,
+  "total_abs_change_bp": 2466.6,
+  "reading": "The 12 purchase days and 2 sale days read weight_effect first-fit and none reads price_step. Of the 8 reinvestment days, 5 read distribution_date, 3 read reinvestment (a dvr row on another day within 3 days), and 4 also fit price_step (FCNTX stepping down on a distribution date), so a reinvestment day can read price_step; the order puts distribution_date and reinvestment before it. Total absolute change of the 22: 2466.6 basis points."
+ },
+ "headline": "All 74 changes take a cause from the closed list written before the look; none_found is 0 of 74. One cause carries most of the days: weight_effect holds 63 of 74 days (85.1%) and 54.6% of their total absolute change (974 bp); on those days the counterfactual with each exposed fund price ratio held at its previous-day value reproduces the whole change (weight part at least 99.99% of it): the fund is valued on a different price level, so its weight in the account differs, and the account return differs with no trade and no price step. Reinvestment (a dvr row 1 to 3 days off) takes 9 days and 42.5% of the total absolute change, all lower, median 44.9 bp, and 8 of the 9 also fit a down step of the fund ratio over 10 bp on a distribution date (BALCX 5, ANCFX 3); transfer takes 1, price_step 1 (FCNTX up, 2026-06-08); distribution_date, days_dropped, trade_in_another_security, prior_day_trade and small_base take 0 by first fit. By year: 2022 69, 2023 4, 2026 1.",
+ "not_established": [
+  "Whether the 63 weight_effect days are an error of the variant, of the baseline, or neither: the test shows that a flat price ratio different from 1 changes the weights and so the return, not which price level is the right one to weight by.",
+  "The order decides the label where tests overlap: 8 of the 9 reinvestment days also fit price_step (and 2 also distribution_date); tried first, price_step would hold 9 days. The overlap counts per test are in price_step_detail.overlap_fits_of_the_74.",
+  "The thresholds (3 calendar days, 10 bp ratio step, 50 percent counterfactual share, 10 percent of the median base) were fixed before the look; no sensitivity to them was run. small_base fit 0 of 74 and days_dropped 0 of 74.",
+  "Custodian rows were matched on Trade_Date as the step 1 trade-row test does; a row dated on a non-trading day (which the return build moves to the next trading day) is not moved to that day in tests 1, 3, 7 and 8 (the transfer test also reads the build flow column, which is moved).",
+  "Only the five funds with measured exposure; the other 14 moved funds have no measured-in-both account-day (round 74). No search for a cause outside the closed list was run, because no day read none_found.",
+  "trade_in_another_security fits 3 of 74 days but takes none by first fit; by the return formula a trade at the end of day t changes no weight at the base of the return of day t, so no mechanism is claimed for it.",
+  "Total absolute change of the 74: 1785.9 bp; median 13.24 bp; largest 216.24 bp."
+ ]
+}

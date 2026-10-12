@@ -1,0 +1,1053 @@
+{
+ "store": {
+  "address_as_named_in_code": "bucket opal-data-cot, key silver/prices/canonical_prices.parquet (data/cot/scripts/gold/build_canonical_prices_v2.py:115 S3_BUCKET default 'opal-data-cot'; data/cot/scripts/gold/build_canonical_prices_v2.py:174 OUTPUT_KEY = _legacy_key('silver-canonical-prices'); infra/logic/registry/legacy_addresses.json:11-15, the row cottonwood-silver-canonical-prices, template silver/prices/canonical_prices.parquet)",
+  "schema": [
+   {
+    "name": "date",
+    "type": "timestamp[ns]"
+   },
+   {
+    "name": "asset_name",
+    "type": "string"
+   },
+   {
+    "name": "ticker",
+    "type": "string"
+   },
+   {
+    "name": "price",
+    "type": "double"
+   },
+   {
+    "name": "source",
+    "type": "string"
+   }
+  ],
+  "read_from": "one get of the store object s3://opal-data-cot/silver/prices/canonical_prices.parquet (97,443,387 bytes, 11,289,398 rows, 11 row groups; one head-object and one get-object through the .tools/aws shim, 2 calls, read-only); the local copy (fwd3/price_cache) is a flattened copy with columns kind, key, day, price, source and does not show the store's own columns",
+  "last_modified": "2026-10-09T13:41:04+00:00 (s3api head-object and get-object, UTC)"
+ },
+ "writer": {
+  "file_line": "data/cot/scripts/gold/build_canonical_prices_v2.py: :566-574 load_historical_prices reads the Tier-2 input silver/historical_prices.parquet; :822 yahoo_join = yahoo[['ticker','date','close']].rename(close -> t2_price) is the only vendor column read; :703-707 a ticker with a Yahoo price takes t2_price as the price, source 'yahoo_finance'; :709-713 T1 (transaction_observed, median of min(market_value/units, price) per asset-day, :418-528) fills only the dates Yahoo lacks; :739-744 linear_interpolation; :751-755 carry_forward; :873 the written columns",
+  "vendor_field_for_a_fund": "the column named `close` of the Tier-2 input silver/historical_prices.parquet (data/cot/scripts/gold/build_canonical_prices_v2.py:822), joined on ticker + date. The writer reads no Adj Close, no NAV and no second price column by name; whether that `close` is adjusted or not is set where historical_prices is written, not in the writer. By the store's data it is an adjusted series (see headline).",
+  "fields_written": [
+   "date",
+   "asset_name",
+   "ticker",
+   "price",
+   "source",
+   "source_firm (HEAD code :873 and parquet metadata opal_input_resolution :902; the live object does NOT carry source_firm)"
+  ]
+ },
+ "store_holds_an_unadjusted_close": false,
+ "funds": 15,
+ "with_a_store_field": 0,
+ "by_fund": [
+  {
+   "ticker": "VEIRX",
+   "store_field": "none",
+   "store_dates": 1595,
+   "store_first": "2022-01-27",
+   "store_last": "2026-06-09",
+   "held_dates": 1677,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1177,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 1595,
+   "store_price_distinct_dates": 1595,
+   "store_rows_by_source": {
+    "yahoo_finance": 1092,
+    "linear_interpolation": 503
+   },
+   "store_asset_names": [
+    "VANGUARD EQUITY-INCOME ADM"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1095,
+    "share_equal_to_close_0p1pct": 0.0502,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.2301,
+    "the_constant_median_ratio": 0.86075,
+    "distinct_ratio_values_to_adj_close_3dp": 7,
+    "share_of_dates_store_le_close": 1.0,
+    "store_equals_close_on_every_common_date_from": "2026-06-10",
+    "median_ratio_to_close": 0.6969,
+    "min_ratio_to_close": 0.5264
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1092,
+    "share_equal_to_close_0p1pct": 0.0485,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.2308,
+    "store_equals_close_on_every_vendor_date_from": "2026-03-20"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 1595,
+    "cottonwood-gold-canonical-holdings": 82
+   },
+   "held_dates_with_a_store_price_row": 1595,
+   "held_trading_days": 1177,
+   "held_nontrading_days_interpolated_by_build": 500,
+   "held_covered_by_cache_trading_days": 1177,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 500,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2022-01-27",
+   "held_last": "2026-10-06",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 1603,
+    "held_trading_days": 1103,
+    "held_dates_with_a_store_price_row": 1595,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "PCBIX",
+   "store_field": "none",
+   "store_dates": 1749,
+   "store_first": "2021-08-26",
+   "store_last": "2026-06-09",
+   "held_dates": 1831,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1283,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 1749,
+   "store_price_distinct_dates": 1749,
+   "store_rows_by_source": {
+    "yahoo_finance": 1198,
+    "linear_interpolation": 551
+   },
+   "store_asset_names": [
+    "PRINCIPAL MIDCAP INSTITUTIONAL"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1201,
+    "share_equal_to_close_0p1pct": 0.0999,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.209,
+    "the_constant_median_ratio": 0.91412,
+    "distinct_ratio_values_to_adj_close_3dp": 10,
+    "share_of_dates_store_le_close": 0.9992,
+    "store_equals_close_on_every_common_date_from": "2026-06-10",
+    "median_ratio_to_close": 0.8381,
+    "min_ratio_to_close": 0.6358
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1198,
+    "share_equal_to_close_0p1pct": 0.1002,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.2095,
+    "store_equals_close_on_every_vendor_date_from": "2025-12-11"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 1749,
+    "cottonwood-gold-canonical-holdings": 82
+   },
+   "held_dates_with_a_store_price_row": 1749,
+   "held_trading_days": 1283,
+   "held_nontrading_days_interpolated_by_build": 548,
+   "held_covered_by_cache_trading_days": 1283,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 548,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2021-08-26",
+   "held_last": "2026-10-06",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 1757,
+    "held_trading_days": 1209,
+    "held_dates_with_a_store_price_row": 1749,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "ABNFX",
+   "store_field": "none",
+   "store_dates": 2092,
+   "store_first": "2020-09-17",
+   "store_last": "2026-06-09",
+   "held_dates": 2174,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1520,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 2092,
+   "store_price_distinct_dates": 2092,
+   "store_rows_by_source": {
+    "yahoo_finance": 1435,
+    "linear_interpolation": 657
+   },
+   "store_asset_names": [
+    "AMERICAN FUNDS BOND FUND OF AMER F2"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1438,
+    "share_equal_to_close_0p1pct": 0.0334,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.6676,
+    "the_constant_median_ratio": 1.02258,
+    "distinct_ratio_values_to_adj_close_3dp": 9,
+    "share_of_dates_store_le_close": 1.0,
+    "store_equals_close_on_every_common_date_from": "2026-04-15",
+    "median_ratio_to_close": 0.8859,
+    "min_ratio_to_close": 0.7656
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1435,
+    "share_equal_to_close_0p1pct": 0.0321,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.669,
+    "store_equals_close_on_every_vendor_date_from": "2026-03-31"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 2092,
+    "cottonwood-gold-canonical-holdings": 82
+   },
+   "held_dates_with_a_store_price_row": 2092,
+   "held_trading_days": 1520,
+   "held_nontrading_days_interpolated_by_build": 654,
+   "held_covered_by_cache_trading_days": 1520,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 654,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2020-09-17",
+   "held_last": "2026-10-06",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 2100,
+    "held_trading_days": 1446,
+    "held_dates_with_a_store_price_row": 2092,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "SGIIX",
+   "store_field": "none",
+   "store_dates": 2165,
+   "store_first": "2020-07-06",
+   "store_last": "2026-06-09",
+   "held_dates": 2210,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1535,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 2165,
+   "store_price_distinct_dates": 2165,
+   "store_rows_by_source": {
+    "yahoo_finance": 1487,
+    "linear_interpolation": 678
+   },
+   "store_asset_names": [
+    "FIRST EAGLE GLOBAL I"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1490,
+    "share_equal_to_close_0p1pct": 0.0846,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1698,
+    "the_constant_median_ratio": 0.89223,
+    "distinct_ratio_values_to_adj_close_3dp": 11,
+    "share_of_dates_store_le_close": 0.9993,
+    "store_equals_close_on_every_common_date_from": "2026-05-05",
+    "median_ratio_to_close": 0.7422,
+    "min_ratio_to_close": 0.5851
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1487,
+    "share_equal_to_close_0p1pct": 0.0834,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1701,
+    "store_equals_close_on_every_vendor_date_from": "2026-05-05"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 2165,
+    "cottonwood-gold-canonical-holdings": 45
+   },
+   "held_dates_with_a_store_price_row": 2165,
+   "held_trading_days": 1535,
+   "held_nontrading_days_interpolated_by_build": 675,
+   "held_covered_by_cache_trading_days": 1535,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 675,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2020-07-06",
+   "held_last": "2026-09-24",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 2173,
+    "held_trading_days": 1498,
+    "held_dates_with_a_store_price_row": 2165,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "GFFFX",
+   "store_field": "none",
+   "store_dates": 2164,
+   "store_first": "2020-07-07",
+   "store_last": "2026-06-09",
+   "held_dates": 2246,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1571,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 2164,
+   "store_price_distinct_dates": 2164,
+   "store_rows_by_source": {
+    "yahoo_finance": 1486,
+    "linear_interpolation": 678
+   },
+   "store_asset_names": [
+    "AMERICAN FUNDS GROWTH FUND OF AMER F2"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1489,
+    "share_equal_to_close_0p1pct": 0.0779,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1679,
+    "the_constant_median_ratio": 0.76389,
+    "distinct_ratio_values_to_adj_close_3dp": 9,
+    "share_of_dates_store_le_close": 1.0,
+    "store_equals_close_on_every_common_date_from": "2026-06-10",
+    "median_ratio_to_close": 0.5865,
+    "min_ratio_to_close": 0.419
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1486,
+    "share_equal_to_close_0p1pct": 0.0781,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1682,
+    "store_equals_close_on_every_vendor_date_from": "2025-12-17"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 2164,
+    "cottonwood-gold-canonical-holdings": 82
+   },
+   "held_dates_with_a_store_price_row": 2164,
+   "held_trading_days": 1571,
+   "held_nontrading_days_interpolated_by_build": 675,
+   "held_covered_by_cache_trading_days": 1571,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 675,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2020-07-07",
+   "held_last": "2026-10-06",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 2172,
+    "held_trading_days": 1497,
+    "held_dates_with_a_store_price_row": 2164,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "FOCPX",
+   "store_field": "none",
+   "store_dates": 2156,
+   "store_first": "2020-07-15",
+   "store_last": "2026-06-09",
+   "held_dates": 2172,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1499,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 2156,
+   "store_price_distinct_dates": 2156,
+   "store_rows_by_source": {
+    "yahoo_finance": 1480,
+    "linear_interpolation": 676
+   },
+   "store_asset_names": [
+    "FIDELITY OTC"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1483,
+    "share_equal_to_close_0p1pct": 0.0802,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.3405,
+    "the_constant_median_ratio": 0.9195,
+    "distinct_ratio_values_to_adj_close_3dp": 13,
+    "share_of_dates_store_le_close": 1.0,
+    "store_equals_close_on_every_common_date_from": "2026-06-10",
+    "median_ratio_to_close": 0.6391,
+    "min_ratio_to_close": 0.409
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1480,
+    "share_equal_to_close_0p1pct": 0.0804,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.3412,
+    "store_equals_close_on_every_vendor_date_from": "2025-12-12"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 2156,
+    "cottonwood-gold-canonical-holdings": 16
+   },
+   "held_dates_with_a_store_price_row": 2156,
+   "held_trading_days": 1499,
+   "held_nontrading_days_interpolated_by_build": 673,
+   "held_covered_by_cache_trading_days": 1499,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 673,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2020-07-15",
+   "held_last": "2026-09-30",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 2156,
+    "held_trading_days": 1483,
+    "held_dates_with_a_store_price_row": 2156,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "FCNTX",
+   "store_field": "none",
+   "store_dates": 2156,
+   "store_first": "2020-07-15",
+   "store_last": "2026-06-09",
+   "held_dates": 2201,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1528,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 2156,
+   "store_price_distinct_dates": 2156,
+   "store_rows_by_source": {
+    "yahoo_finance": 1480,
+    "linear_interpolation": 676
+   },
+   "store_asset_names": [
+    "FIDELITY CONTRAFUND"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1483,
+    "share_equal_to_close_0p1pct": 0.0553,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1403,
+    "the_constant_median_ratio": 0.88302,
+    "distinct_ratio_values_to_adj_close_3dp": 14,
+    "share_of_dates_store_le_close": 1.0,
+    "store_equals_close_on_every_common_date_from": "2026-06-10",
+    "median_ratio_to_close": 0.7788,
+    "min_ratio_to_close": 0.4191
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1480,
+    "share_equal_to_close_0p1pct": 0.0554,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1405,
+    "store_equals_close_on_every_vendor_date_from": "2026-02-06"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 2156,
+    "cottonwood-gold-canonical-holdings": 45
+   },
+   "held_dates_with_a_store_price_row": 2156,
+   "held_trading_days": 1528,
+   "held_nontrading_days_interpolated_by_build": 673,
+   "held_covered_by_cache_trading_days": 1528,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 673,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2020-07-15",
+   "held_last": "2026-09-25",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 2164,
+    "held_trading_days": 1491,
+    "held_dates_with_a_store_price_row": 2156,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "PRILX",
+   "store_field": "none",
+   "store_dates": 1633,
+   "store_first": "2021-12-20",
+   "store_last": "2026-06-09",
+   "held_dates": 1633,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1121,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 1633,
+   "store_price_distinct_dates": 1633,
+   "store_rows_by_source": {
+    "yahoo_finance": 1118,
+    "linear_interpolation": 515
+   },
+   "store_asset_names": [
+    "PARNASSUS CORE EQUITY INSTITUTIONAL"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1121,
+    "share_equal_to_close_0p1pct": 0.1017,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.2364,
+    "the_constant_median_ratio": 0.74006,
+    "distinct_ratio_values_to_adj_close_3dp": 9,
+    "share_of_dates_store_le_close": 1.0,
+    "store_equals_close_on_every_common_date_from": "2026-06-10",
+    "median_ratio_to_close": 0.5647,
+    "min_ratio_to_close": 0.4079
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1118,
+    "share_equal_to_close_0p1pct": 0.102,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.237,
+    "store_equals_close_on_every_vendor_date_from": "2025-12-19"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 1633
+   },
+   "held_dates_with_a_store_price_row": 1633,
+   "held_trading_days": 1121,
+   "held_nontrading_days_interpolated_by_build": 512,
+   "held_covered_by_cache_trading_days": 1121,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 512,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2021-12-20",
+   "held_last": "2026-06-09",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 1633,
+    "held_trading_days": 1121,
+    "held_dates_with_a_store_price_row": 1633,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "BALCX",
+   "store_field": "none",
+   "store_dates": 1510,
+   "store_first": "2022-04-22",
+   "store_last": "2026-06-09",
+   "held_dates": 1510,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1036,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 1510,
+   "store_price_distinct_dates": 1510,
+   "store_rows_by_source": {
+    "yahoo_finance": 1033,
+    "linear_interpolation": 477
+   },
+   "store_asset_names": [
+    "AMERICAN FUNDS AMERICAN BALANCED C"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1036,
+    "share_equal_to_close_0p1pct": 0.055,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.6091,
+    "the_constant_median_ratio": 0.89152,
+    "distinct_ratio_values_to_adj_close_3dp": 8,
+    "share_of_dates_store_le_close": 1.0,
+    "store_equals_close_on_every_common_date_from": "2026-06-10",
+    "median_ratio_to_close": 0.7766,
+    "min_ratio_to_close": 0.7471
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1033,
+    "share_equal_to_close_0p1pct": 0.0552,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.6108,
+    "store_equals_close_on_every_vendor_date_from": "2026-03-14"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 1510
+   },
+   "held_dates_with_a_store_price_row": 1510,
+   "held_trading_days": 1036,
+   "held_nontrading_days_interpolated_by_build": 474,
+   "held_covered_by_cache_trading_days": 1036,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 474,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2022-04-22",
+   "held_last": "2026-06-09",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 1510,
+    "held_trading_days": 1036,
+    "held_dates_with_a_store_price_row": 1510,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "AGTHX",
+   "store_field": "none",
+   "store_dates": 2154,
+   "store_first": "2020-07-17",
+   "store_last": "2026-06-09",
+   "held_dates": 2236,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1563,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 2154,
+   "store_price_distinct_dates": 2154,
+   "store_rows_by_source": {
+    "yahoo_finance": 1478,
+    "linear_interpolation": 676
+   },
+   "store_asset_names": [
+    "AMERICAN FUNDS GROWTH FUND OF AMER A"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1481,
+    "share_equal_to_close_0p1pct": 0.0783,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1688,
+    "the_constant_median_ratio": 0.76477,
+    "distinct_ratio_values_to_adj_close_3dp": 9,
+    "share_of_dates_store_le_close": 1.0,
+    "store_equals_close_on_every_common_date_from": "2026-06-10",
+    "median_ratio_to_close": 0.5912,
+    "min_ratio_to_close": 0.4255
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1478,
+    "share_equal_to_close_0p1pct": 0.0785,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1691,
+    "store_equals_close_on_every_vendor_date_from": "2025-12-17"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 2154,
+    "cottonwood-gold-canonical-holdings": 82
+   },
+   "held_dates_with_a_store_price_row": 2154,
+   "held_trading_days": 1563,
+   "held_nontrading_days_interpolated_by_build": 673,
+   "held_covered_by_cache_trading_days": 1563,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 673,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2020-07-17",
+   "held_last": "2026-10-06",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 2162,
+    "held_trading_days": 1489,
+    "held_dates_with_a_store_price_row": 2154,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "DISVX",
+   "store_field": "none",
+   "store_dates": 1807,
+   "store_first": "2021-06-29",
+   "store_last": "2026-06-09",
+   "held_dates": 1807,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1242,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 1807,
+   "store_price_distinct_dates": 1807,
+   "store_rows_by_source": {
+    "yahoo_finance": 1239,
+    "linear_interpolation": 568
+   },
+   "store_asset_names": [
+    "DFA INTERNATIONAL SMALL CAP VALUE I"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1242,
+    "share_equal_to_close_0p1pct": 0.0386,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.2021,
+    "the_constant_median_ratio": 0.97724,
+    "distinct_ratio_values_to_adj_close_3dp": 8,
+    "share_of_dates_store_le_close": 1.0,
+    "store_equals_close_on_every_common_date_from": "2026-06-09",
+    "median_ratio_to_close": 0.8489,
+    "min_ratio_to_close": 0.7622
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1239,
+    "share_equal_to_close_0p1pct": 0.0379,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.2026,
+    "store_equals_close_on_every_vendor_date_from": "2026-03-28"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 1807
+   },
+   "held_dates_with_a_store_price_row": 1807,
+   "held_trading_days": 1242,
+   "held_nontrading_days_interpolated_by_build": 565,
+   "held_covered_by_cache_trading_days": 1242,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 565,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2021-06-29",
+   "held_last": "2026-06-09",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 1807,
+    "held_trading_days": 1242,
+    "held_dates_with_a_store_price_row": 1807,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "DFLVX",
+   "store_field": "none",
+   "store_dates": 2049,
+   "store_first": "2020-10-30",
+   "store_last": "2026-06-09",
+   "held_dates": 2049,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1407,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 2049,
+   "store_price_distinct_dates": 2049,
+   "store_rows_by_source": {
+    "yahoo_finance": 1404,
+    "linear_interpolation": 644,
+    "transaction_observed": 1
+   },
+   "store_asset_names": [
+    "DFA US LARGE CAP VALUE I"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1407,
+    "share_equal_to_close_0p1pct": 0.0341,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1777,
+    "the_constant_median_ratio": 0.99069,
+    "distinct_ratio_values_to_adj_close_3dp": 7,
+    "share_of_dates_store_le_close": 1.0,
+    "store_equals_close_on_every_common_date_from": "2026-06-10",
+    "median_ratio_to_close": 0.9179,
+    "min_ratio_to_close": 0.7859
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1404,
+    "share_equal_to_close_0p1pct": 0.0335,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1781,
+    "store_equals_close_on_every_vendor_date_from": "2026-03-28"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 2,
+   "of_which_held": 2,
+   "transaction_observed_rows_in_store": 1,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 2049
+   },
+   "held_dates_with_a_store_price_row": 2049,
+   "held_trading_days": 1407,
+   "held_nontrading_days_interpolated_by_build": 642,
+   "held_covered_by_cache_trading_days": 1407,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 642,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2020-10-30",
+   "held_last": "2026-06-09",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 2049,
+    "held_trading_days": 1407,
+    "held_dates_with_a_store_price_row": 2049,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "NFFFX",
+   "store_field": "none",
+   "store_dates": 1668,
+   "store_first": "2021-11-15",
+   "store_last": "2026-06-09",
+   "held_dates": 1750,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1227,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 1668,
+   "store_price_distinct_dates": 1668,
+   "store_rows_by_source": {
+    "yahoo_finance": 1142,
+    "linear_interpolation": 526
+   },
+   "store_asset_names": [
+    "AMERICAN FUNDS NEW WORLD F2"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1145,
+    "share_equal_to_close_0p1pct": 0.1004,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.2227,
+    "the_constant_median_ratio": 0.92568,
+    "distinct_ratio_values_to_adj_close_3dp": 8,
+    "share_of_dates_store_le_close": 0.9991,
+    "store_equals_close_on_every_common_date_from": "2026-06-10",
+    "median_ratio_to_close": 0.8381,
+    "min_ratio_to_close": 0.6917
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1142,
+    "share_equal_to_close_0p1pct": 0.1007,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.2233,
+    "store_equals_close_on_every_vendor_date_from": "2025-12-18"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 1668,
+    "cottonwood-gold-canonical-holdings": 82
+   },
+   "held_dates_with_a_store_price_row": 1668,
+   "held_trading_days": 1227,
+   "held_nontrading_days_interpolated_by_build": 523,
+   "held_covered_by_cache_trading_days": 1227,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 523,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2021-11-15",
+   "held_last": "2026-10-06",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 1676,
+    "held_trading_days": 1153,
+    "held_dates_with_a_store_price_row": 1668,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "MEIIX",
+   "store_field": "none",
+   "store_dates": 2161,
+   "store_first": "2020-07-10",
+   "store_last": "2026-06-09",
+   "held_dates": 2243,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1568,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 2161,
+   "store_price_distinct_dates": 2161,
+   "store_rows_by_source": {
+    "yahoo_finance": 1483,
+    "linear_interpolation": 678
+   },
+   "store_asset_names": [
+    "MFS VALUE I"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1486,
+    "share_equal_to_close_0p1pct": 0.033,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1682,
+    "the_constant_median_ratio": 0.80377,
+    "distinct_ratio_values_to_adj_close_3dp": 10,
+    "share_of_dates_store_le_close": 0.9993,
+    "store_equals_close_on_every_common_date_from": "2026-06-10",
+    "median_ratio_to_close": 0.6152,
+    "min_ratio_to_close": 0.4931
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1483,
+    "share_equal_to_close_0p1pct": 0.0324,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1686,
+    "store_equals_close_on_every_vendor_date_from": "2026-06-05"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 2161,
+    "cottonwood-gold-canonical-holdings": 82
+   },
+   "held_dates_with_a_store_price_row": 2161,
+   "held_trading_days": 1568,
+   "held_nontrading_days_interpolated_by_build": 675,
+   "held_covered_by_cache_trading_days": 1568,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 675,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2020-07-10",
+   "held_last": "2026-10-06",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 2169,
+    "held_trading_days": 1494,
+    "held_dates_with_a_store_price_row": 2161,
+    "held_trading_days_without_cache_bar": 0
+   }
+  },
+  {
+   "ticker": "VGHAX",
+   "store_field": "none",
+   "store_dates": 2095,
+   "store_first": "2020-09-14",
+   "store_last": "2026-06-09",
+   "held_dates": 2095,
+   "held_covered_by_store": 0,
+   "held_covered_by_cache": 1441,
+   "uncovered_trading_days": 0,
+   "first_uncovered": "",
+   "last_uncovered": "",
+   "store_price_column": "price (adjusted: see store_price_vs_cache)",
+   "store_unadjusted_dates": 0,
+   "store_price_rows": 4926,
+   "store_price_distinct_dates": 2095,
+   "store_rows_by_source": {
+    "yahoo_finance": 3374,
+    "linear_interpolation": 1552
+   },
+   "store_asset_names": [
+    "INVESCO HEALTH CARE INVSTOR",
+    "VANGUARD HEALTH CARE ADM",
+    "VANGUARD HEALTH CARE INV"
+   ],
+   "store_price_vs_cache": {
+    "common_dates": 1441,
+    "share_equal_to_close_0p1pct": 0.0326,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1312,
+    "the_constant_median_ratio": 0.79446,
+    "distinct_ratio_values_to_adj_close_3dp": 16,
+    "share_of_dates_store_le_close": 0.9993,
+    "store_equals_close_on_every_common_date_from": "2026-06-10",
+    "median_ratio_to_close": 0.6201,
+    "min_ratio_to_close": 0.4018
+   },
+   "store_vs_cache_yahoo_rows_only": {
+    "common_dates": 1438,
+    "share_equal_to_close_0p1pct": 0.0327,
+    "share_equal_to_adj_close_times_one_constant_0p1pct": 0.1314,
+    "store_equals_close_on_every_vendor_date_from": "2026-03-28"
+   },
+   "store_last_vendor_date": "2026-06-05",
+   "store_trading_days_with_no_vendor_row_interpolated_or_carried": 3,
+   "of_which_held": 3,
+   "transaction_observed_rows_in_store": 0,
+   "held_dates_by_build_store": {
+    "cottonwood-silver-canonical-prices": 2095
+   },
+   "held_dates_with_a_store_price_row": 2095,
+   "held_trading_days": 1441,
+   "held_nontrading_days_interpolated_by_build": 654,
+   "held_covered_by_cache_trading_days": 1441,
+   "held_covered_by_cache_nontrading_days": 0,
+   "held_nontrading_days_without_cache_bar": 654,
+   "held_trading_days_before_2020_06_29": 0,
+   "held_trading_days_after_cache_end_2026_10_08": 0,
+   "held_first": "2020-09-14",
+   "held_last": "2026-06-09",
+   "uncovered_trading_days_on_a_build_row_not_from_the_silver_store": 0,
+   "backfill_window_to_2026_06_22": {
+    "held_dates": 2095,
+    "held_trading_days": 1441,
+    "held_dates_with_a_store_price_row": 2095,
+    "held_trading_days_without_cache_bar": 0
+   }
+  }
+ ],
+ "held_dates_total": 29834,
+ "covered_by_store_total": 0,
+ "covered_by_cache_total": 20718,
+ "uncovered_trading_days_total": 0,
+ "the_fifteenth": "VGHAX lacks trades to test on, not a field and not dates: 5 trade units (1 within 1 percent of the cache Close, 2 in 1-5 percent, 2 in 5-20 percent; class too_few; median ratio 0.9592 to the cache Close), against 6 to 1,596 for the other 14. The cache Close covers all 1,441 of its held trading days and the store holds no unadjusted field for it, as for the other 14. Beside that, the store's key VGHAX is not one security: it carries 3 asset_names (VANGUARD HEALTH CARE INV from 2020-09-14, INVESCO HEALTH CARE INVSTOR from 2021-12-17, VANGUARD HEALTH CARE ADM from 2023-03-03) with the same Yahoo series under all three (4,926 rows on 2,095 dates), so the 2,095 held dates from 2020-09-14 rest on a ticker-keyed series that three names share; which of the three the held CUSIP is was not read.",
+ "upstream_landing": {
+  "file_line": "data/mdpf/scripts/demque/land_cot.py: :1-5 docstring (lands into s3://opal-data-cot/silver/historical_prices.parquet, columns ticker, date, close); :23 HIST_COLS = [ticker, date, close]; :79 HIST_KEY = the row cottonwood-silver-historical-prices; :150 close = pd.to_numeric(px['as_traded_close']); :144-145 a ticker already present is never rewritten. Writer side: data/cot/scripts/gold/build_canonical_prices_v2.py:169-170 (INPUT_ADDRESSES['historical_prices'], registry row cottonwood-silver-historical-prices, infra/logic/registry/legacy_addresses.json:117-119) and :566-574.",
+  "keeps_an_unadjusted_field_the_store_drops": "no, by code: the landing declares ONE price column (close) and no second price field, so it keeps nothing the store drops. For a NEW ticker that one column is the as-traded close (land_cot.py:150); for a ticker already present it writes nothing (:144-145), and the 15 funds' rows are existing rows whose loader this cell did not read.",
+  "opened": "code only; no landing data opened"
+ },
+ "headline": "The store does not hold an unadjusted close for any of the 15 funds: its one price column (`price`, from the writer's `close`) equals the cache's unadjusted Close on only 3.2 to 10.2 percent of the dates each fund has a Yahoo row (within 0.1 percent), is at or below it on 99.9 to 100 percent of dates, and equals it only on the last dates before the store's last vendor row; it is not the cache's Adj Close times one constant either (5 to 16 distinct ratios per fund), which fits a dividend-adjusted series as of an earlier pull. The unadjusted close exists on disk only in the local vendor cache, and it covers every one of the 20718 held trading days of the 15 funds (0 uncovered, 0 before 2020-06-29); the store covers 0 of 29834 held dates with an unadjusted field, the cache covers 20718 of 29834 (the other 9116 are non-trading days the build interpolates).",
+ "not_established": [
+  "What the `close` column of silver/historical_prices.parquet is in the vendor's own terms, and who wrote the 15 funds' rows into it: land_cot.py only appends NEW tickers (:144-145); the original loader of existing rows was not read. 'Dividend-adjusted as of an earlier pull' is inferred from the ratios to the cache (price <= Close on 99.9 to 100 percent of common dates; ratio to Close rises to 1.0 on the last dates; ratio to the later-pulled Adj Close is a step function of 5 to 16 values), not read from a field.",
+  "Held dates after the store's last date (2026-06-09): 680 fund-days for 10 funds are valued from the gold holdings snapshot (build `store` = cottonwood-gold-canonical-holdings), not from the store; the store has no row for them and this cell did not read the snapshot's price basis (bd_snapshot, market value over units, per the round-77 records).",
+  "The store's own last vendor row for all 15 is 2026-06-05; the 2026-06-06..2026-06-09 rows are flat at the 2026-06-05 price and labelled linear_interpolation (2 to 3 trading days per fund, 0 carry_forward rows exist in the object).",
+  "The cache is a file on one box, not a store a build reads; 'covered by the cache' is the existence of a cache bar, not a statement that a build can read it. Whether the cache Close is as-traded for every date (not only where it reproduces the price paid, 14 of 15 funds) is the round-77 test, not re-run here.",
+  "Trading day = a NYSE session by lib/trading_calendar.is_trading_day (calendar_source: NYSE/hardcoded-fallback-2010-2027, covering all years read); cross-checked against the SPY bars in the same cache: 1,639 of 1,639 weekdays from 2020-06-29 to 2026-10-08 agree. No other local price copy was searched for an unadjusted close; the count of uncovered days is against the store and the cache only.",
+  "The object was loaded whole (97 MB) to read the 15 tickers; two aggregate counts over all rows were printed (source value counts; tickers with more than one asset_name). No price of another ticker was printed or written."
+ ]
+}

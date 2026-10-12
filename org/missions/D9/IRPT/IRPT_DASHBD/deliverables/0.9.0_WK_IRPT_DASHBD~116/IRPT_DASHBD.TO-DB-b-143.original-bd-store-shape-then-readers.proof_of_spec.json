@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-143",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "06a610f1c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "16759ff883",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-143.original-bd-store-shape-then-readers.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~116",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~116/ORIGINAL_STORE_SHAPE.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~116/ORIGINAL_STORE_SHAPE.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only counts-only record: one day object of the original Black Diamond transactions store read with a ten-column projection (no money, no account column): 119973 rows, 23371 distinct ids, 22573 ids with more than one row, up to 34 rows per id, repeats true; 33 readers classed over workspace (71602 files), portal (2069), opal_ai (36); mcportal not searched (empty directory); 0 readers sum without the id and serve something; no S3 write, no code change",
+      "artifact_covered_by": [
+        "DB76-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB76-1-AC1",
+      "criterion_verbatim": "DB76-1-AC1 -- the original store's shape is counted on one day, and if it repeats a transaction every reader in the four trees is listed with whether it sums, whether it keys on the id, what it serves and who owns it. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r76/p76_round76.py\" . DB76-1-AC1",
+      "output_evidence": "OK: the original store repeats a transaction per portfolio group: True; 33 reader(s) over the trees searched; 0 sum without the id and serve something\nDB76-1-AC1 PASS",
+      "denominator": "one day (2026-10-06): 119973 rows, 23371 distinct ids, 22573 ids with more than one row; 33 readers over 3 of 4 trees searched (workspace 71602 files, portal 2069, opal_ai 36; mcportal not searched: empty directory); exit code 0",
+      "status": "PASS",
+      "expect": "DB76-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record from the worktree root and holds no clock or network call",
+      "observed": "the checker printed the same last line on every run; the counts come from shape116.py over one ranged read of the day object (not re-run for the full set of counts)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB76-1-AC1 FAIL",
+      "observed": "FAIL: no record 0.9.0_WK_IRPT_DASHBD~116/ORIGINAL_STORE_SHAPE.json; DB76-1-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "whether the copies of a repeated id are identical on the money columns and the account columns",
+      "reason": "The order forbids reading a money or an account column; the repeat is established on the id, the portfolio group and eight descriptive columns only. Recorded NOT_ESTABLISHED, not guessed."
+    },
+    {
+      "item": "mcportal",
+      "reason": "The directory at the shared checkout is empty, so it was not searched. Recorded searched false with its reason."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W116-S1",
+    "IRPT_DASHBD-D2-W116-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p76_round76.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r76/p76_round76.py\" . DB76-1-AC1",
+      "result": "DB76-1-AC1 PASS (rc 0); against an empty root it prints DB76-1-AC1 FAIL (rc 1)"
+    }
+  ]
+}

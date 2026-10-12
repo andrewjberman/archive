@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-160",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "942f1c7bf9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "942f1c7bf9",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-160.guard-flags-under-each-convention.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~129",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~129/GUARD_INTERPLAY.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~129/GUARD_INTERPLAY.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a counts-only record of how the guard flags FLOW_UNRECONCILED and LARGE_FLOW would move under START and MID, computed on the previous cell's private copy of the one firm's served daily returns (2659140 account-days); no S3 read or write; the control reproduces all but 6 served days per flag (explained by the skipped-day chain); four producer scripts tracked in producers/ (no account id, amount or return literal)",
+      "artifact_covered_by": [
+        "DB83-3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB83-3-AC1",
+      "criterion_verbatim": "DB83-3-AC1 -- the guard's rule is cited, and for each of the two flags the days flagged under END, START and MID and the days that move each way are counted so the moves carry one count to the other. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r83/p83_round83.py\" . DB83-3-AC1",
+      "output_evidence": "OK: guard at data/assets/scripts/gold/irpt_reporting/account_return_daily.py:1498; FLOW_UNRECONCILED END 6096 START 8617 MID 7314; LARGE_FLOW END 42458 START 39940 MID 41246; depends on the convention: True\nDB83-3-AC1 PASS",
+      "denominator": "2659140 account-days; 6096 served FLOW_UNRECONCILED and 42458 served LARGE_FLOW days; control differs on 6 of 6096 and 6 of 42458; exit code 0",
+      "status": "PASS",
+      "expect": "DB83-3-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record from the worktree root",
+      "observed": "the checker printed the same last line on three runs; the producer scripts rerun to byte-identical counts",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB83-3-AC1 FAIL",
+      "observed": "FAIL: no record 0.9.0_WK_IRPT_DASHBD~129/GUARD_INTERPLAY.json; DB83-3-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_DASHBD-D2-W129-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p83_round83.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r83/p83_round83.py\" . DB83-3-AC1",
+      "result": "DB83-3-AC1 PASS (rc 0); against an empty root it prints DB83-3-AC1 FAIL (rc 1)"
+    }
+  ]
+}
