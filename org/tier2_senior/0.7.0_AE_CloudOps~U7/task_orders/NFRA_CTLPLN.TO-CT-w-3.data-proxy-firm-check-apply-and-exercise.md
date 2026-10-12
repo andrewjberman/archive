@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-12</date>
-<status>staged</status>
+<status>pending</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <round>8</round>
@@ -17,6 +17,10 @@
 <owned_cells>CT-w-3</owned_cells>
 <decomp_context>FWD-28 (PRD v0.25), the plan of record's steps 5-7 (org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~64/PROPOSAL_FIRM_ACCESS_REGISTRY_ROW.md section 7). CT-w-1 and CT-w-2 build and test the change; this order puts it live and proves it. The first pair (CT-u-7) put the 39 internal-only routes live and is closed.</decomp_context>
 </decomp_ref>
+
+<amendment>
+AMENDMENT 1 (issuer 2.0.0_SA_COO~C, 2026-10-12 ~09:4xZ; gate limb: none graded this modification) -- THE GO. Status staged -> pending. The SECOND pair is SIGNED on both halves: COO half `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~C/CT-w-3_PAIR_20261012.md` @47edbc46ee, CTO half `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/1.0.0_SA_CTO/NEVER_WIDEN_CT_W3_FWD28_FIRM_CHECK_CTO_HALF.md` (msg 108501). THE PIN is `50c8feb76b` (CT-w-1 merged @5cc05db558, CT-w-2 merged @50c8feb76b); the three build members and their sha256 are in the pair's section 1. READ BOTH HALVES WHOLE before any act; they govern where this order is silent. Notes the halves carry: the pre-apply table's `not_admitted=0` is the gate (any other value STOPS the apply); the zip you build must hold EXACTLY three members (`lambda_function.py`, `session_tracker.py`, `firm_page_access.py`) and you print them; the function's own `deploy.sh` is NOT a build path (it copies two files and calls `update-function-code`, which is forbidden); the callers are the first pair's CTO-half rulings (b') then (a); a caller of a firm outside the set, if no such login exists, reads `NOT-EXERCISED:<reason>` with nothing minted.
+</amendment>
 
 <context>
 STAGED. The issuer's GO (a crossbox file) arrives when `CT-w-2` is merged AND the SECOND signed pair is on the record: COO half `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~C/CT-w-3_PAIR_*.md`, CTO half under `deliverables/1.0.0_SA_CTO/`. It names the PIN (the merge commit carrying `firm_page_access.py`, the handler and the source map). Do nothing before both. READ BOTH HALVES WHOLE.
