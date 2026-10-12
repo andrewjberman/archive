@@ -1,0 +1,92 @@
+{
+  "criterion": "IV120-AC1",
+  "cell": "IV-e-120",
+  "base_in_card": true,
+  "caption_above_removed": true,
+  "prop": {
+    "file": "portal/src/components/CategoryViewTree.tsx",
+    "name": "totalBase",
+    "where_the_base_prints": "CategoryOverview, inside the hero card (GraphicPanel), on a line directly under the 'Total Assets' heading (data-slot holdings-total-base); text 'Total Assets below: <base>'; ink and size from the card's own subStyle and subText classes"
+  },
+  "census": {
+    "mounts_found": 2,
+    "mounts": [
+      {
+        "page": "ModelPortfolios (route /portfolios, App.tsx:452-459)",
+        "mount": "portal/src/pages/ModelPortfolios.tsx:1306 (CategoryViewTree with result, source, explainOnHover; no totalBase)",
+        "render_before_after": "model_portfolios_mount.html, byte-identical before and after (cmp); also pinned by iv-e-120.golden/model_portfolios_mount.before.html in the test",
+        "change_outside_holdings": "none"
+      },
+      {
+        "page": "Investor Reporting, Holdings tab (route /investor-reporting, App.tsx:462)",
+        "mount": "portal/src/pages/InvestorReporting/tabs/holdings/DrillTree.tsx:899, reached from HoldingsTab.tsx:477 (totalBase={scopeWords?.base})",
+        "render_before_after": "holdings_tab.html before and after: the diff is exactly two lines, the caption removed above the card and the same words added under the Total Assets heading inside the card",
+        "change_outside_holdings": "none"
+      }
+    ],
+    "pages_rendered_before_after": 2,
+    "unchanged_outside_holdings": true,
+    "partner_login_pages": [
+      "/portfolios (ModelPortfolios, mount at ModelPortfolios.tsx:1306): read from portal/src/lib/firmAccess.ts FIRM_ALLOWED_PATHS, where 49financial, inflection, cottonwood and demo each carry '/portfolios'; App.tsx:452-459 wraps it in a plain ProtectedRoute with no role gate, so a partner-firm login opens it. Its mount has no totalBase and renders byte-identical."
+    ],
+    "partner_login_pages_not_mounting": "/investor-reporting is absent from every FIRM_ALLOWED_PATHS set and carries requireInternal, requireAdmin and requireDev (App.tsx:462), so a partner-firm login cannot open the Holdings tab.",
+    "denominator_source": "bun build --metafile of portal/src/main.tsx at portal e42e1dc1 (2116 bundled modules, .scratch/census/meta.json, gitignored). Reverse import edges to src/components/CategoryViewTree.tsx: 2 direct importers (DrillTree.tsx, ModelPortfolios.tsx), both mounting the tree in JSX (non-test grep: 2 mount sites). 26 transitive modules reach it, 21 under pages/; none renders the tree in JSX. The issuer's other named files (VariantCards.tsx, api/endpoints/aum.ts, lib/chartColors.ts) name it in comments only; Positioning/tabs/HoldingsTab.tsx does not mention it. Renders: ModelPortfolios' mount element with the page's own props and the Holdings tab through the real HoldingsTab, both over one synthetic fixture (renderToStaticMarkup, iv-e-120.total-base-in-the-card.test.tsx)."
+  },
+  "test": {
+    "file": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-120.total-base-in-the-card.test.tsx",
+    "arms": [
+      "(a) Holdings: one holdings-total-base, text 'Total Assets below: all 2 accounts', after the 'Total Assets' heading and before category-peers; the holdings-scope face no longer carries it",
+      "(b) ModelPortfolios mount without the prop: byte-for-byte equal to the pre-edit golden",
+      "(c) with the prop, removing the base element leaves the prop-less output byte for byte",
+      "(d) the base line carries the card's own ink, not palette-navy"
+    ],
+    "result_at_commit_e42e1dc1": "5 pass, 0 fail",
+    "mutant": "temporary: in CategoryViewTree.tsx the in-card base line disabled (false &&) and the caption re-added above the section (the base outside the card, the pre-edit shape)",
+    "mutant_result": "3 pass, 2 fail; arms (a) and (d) fail; rc 1",
+    "mutant_failed": true,
+    "mutant_reverted": "git checkout -- portal/src/components/CategoryViewTree.tsx; portal tree clean at e42e1dc1"
+  },
+  "iv_e_108": {
+    "file": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-108.holdings-names-account-labels-totals.test.tsx",
+    "re_golden": "none needed",
+    "reason": "its assertions read the holdings-total-base element's text ('Total Assets below: all 2 accounts' / 'Total Assets below: this account') and its navy ink on the holdings-scope face; the text is unchanged and no assertion reads the caption's position. It passes unchanged in the whole-scope run."
+  },
+  "lint_errors": 0,
+  "lint_note": "bun run lint at portal e42e1dc1: 0 errors, 345 warnings (react-refresh/only-export-components class, pre-existing in these files)",
+  "typecheck_errors": 0,
+  "typecheck_note": "bun run typecheck at portal e42e1dc1: rc 0",
+  "suite_base": {
+    "pass": 1202,
+    "skip": 27,
+    "fail": 2,
+    "fail_ids": ["F14-AC3", "F45-AC9"],
+    "output": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~68/suite_base.txt"
+  },
+  "suite_after": {
+    "pass": 1207,
+    "skip": 27,
+    "fail": 2,
+    "fail_ids": ["F14-AC3", "F45-AC9"],
+    "new_failing_ids": [],
+    "output": "C:/dev/_irpt_private_evidence_20261009/DSGN_IRPTV1/0.9.0_WK_DSGN_IRPTV1~68/suite_after_final.txt"
+  },
+  "screenshots": [
+    "screenshots/holdings_after_total_base_in_card.png"
+  ],
+  "screenshot_read": true,
+  "screenshot_what_it_shows": "The Holdings tab over the synthetic two-account fixture: 'All 2 accounts' on the face, then the card: 'ALL CATEGORIES' eyebrow, 'Total Assets below: all 2 accounts' on the line under the heading, then the description. Limitation: the static capture does not paint the card's dark GraphicPanel fill, so the heading and figure render white on white; the position is read, the card's ink is not (surprise DSGN_IRPTV1-D2-W68-S4).",
+  "product_files_changed": [
+    "portal/src/components/CategoryViewTree.tsx",
+    "portal/src/pages/InvestorReporting/tabs/holdings/DrillTree.tsx",
+    "portal/src/pages/InvestorReporting/tabs/holdings/HoldingsTab.tsx",
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-120.total-base-in-the-card.test.tsx",
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-120.golden/model_portfolios_mount.before.html"
+  ],
+  "portal_commit": "e42e1dc1ab6fd19a777dc20113ecb9bbd82c3d21",
+  "portal_commits": [
+    "f9fb4df620d6ef4f759d4392f62eb3f2c894fb84 feat(InvestorReporting): IV-e-120 Total Assets base prints inside the card (LOCAL, wk-DSGN_IRPTV1-68-portal)",
+    "e42e1dc1ab6fd19a777dc20113ecb9bbd82c3d21 fix(InvestorReporting): IV-e-120 census test reads its output folder without process.env (LOCAL, wk-DSGN_IRPTV1-68-portal)"
+  ],
+  "rows": ["DSGN_IRPTV1-D2-W68-S1", "DSGN_IRPTV1-D2-W68-S2", "DSGN_IRPTV1-D2-W68-S3", "DSGN_IRPTV1-D2-W68-S4", "DSGN_IRPTV1-D2-W68-S5"],
+  "push_state": "LOCAL only; nothing pushed; portal gitlink not committed in the workspace"
+}
