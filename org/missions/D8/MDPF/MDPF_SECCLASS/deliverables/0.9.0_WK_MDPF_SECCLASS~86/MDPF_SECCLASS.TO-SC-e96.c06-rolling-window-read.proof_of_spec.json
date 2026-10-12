@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e96",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e96.c06-rolling-window-read.md",
+    "group": "OTHER",
+    "vintage_commit": "028fab8273"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R23.md",
+    "vintage_commit": "028fab8273",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e96.c06-rolling-window-read.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~86",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/WINDOW_READ_C06_ROLLING_20261012.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only record; partition versions read by head-object and the 11:19Z measurement process; no write to any bucket, table, or deploy. Rides the commit that carries this proof.",
+      "artifact_covered_by": [
+        "SC23-e96-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "40f687d566",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise rows MDPF_SECCLASS-D1-W86-S1 (BLOCKING) and MDPF_SECCLASS-D1-W86-S2 (OBSERVATION) appended and committed on wk-MDPF_SECCLASS-86 (LOCAL, not pushed); S1 dispositioned by Amendment 1 (85664b5801).",
+      "artifact_covered_by": [
+        "SC23-e96-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC23-e96-AC1",
+      "criterion_verbatim": "the record exists with the rule, the window, the cost, the per-date figures and the gap, its arithmetic is internally consistent, and a copy with one field broken fails the same check first.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_CHECKS/r23_checks.py window-read org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/WINDOW_READ_C06_ROLLING_20261012.json",
+      "output_evidence": "WINDOW-READ ok=True dates=15 fits=True control=ok (rc=0; run three times at 2026-10-12 11:53Z, identical). Record WINDOW_READ_C06_ROLLING_20261012.json written in the worktree wk-MDPF_SECCLASS-86 after Amendment 1 (85664b5801). Served per-date figure = D_04 _firm_top_level_mix rule; key cross-check on the 10 dates that carry firm[date].unclassified: agree to the cent on 0 dates.",
+      "denominator": "1 criterion; 1 of 1 PASS",
+      "status": "PASS",
+      "status_reason": "The checker reads the record ok=True with the control ok. Cold 735.05 s and warm 631.87 s over 15 window dates (fits true, 1800 s budget, largest_n_that_fits 15); peak_mb 635.6 (scan process); relationships_rewritten 3274 of 3793 stored JSONs; keys_written 13096; bytes_written 8870708106."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's own negative control on the real record: a copy with 1000 added to the first date's delta must be refused (r23_checks.py window_read mutant).",
+      "expected": "control=ok (a broken copy refused)",
+      "observed": "WINDOW-READ ok=True dates=15 fits=True control=ok (rc=0), run three times identical",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the checker run three times on the committed record path",
+      "observed": "WINDOW-READ ok=True dates=15 fits=True control=ok, identical on each run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Wall times of the relationship scan and of the cold and warm passes are not a build-path measurement",
+      "reason": "Per-date S3 reads from this seat, not the EC2 runner in us-east-1 and not the build's bulk cube_cache preload (surprise MDPF_SECCLASS-D1-W86-S2, accepted by Amendment 1 item 3, stated in the record's instrument field)."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W86-S1: gold/views/mix_daily_summary.json firm[date] has no unclassified key for 2026-09-25 through 2026-09-29; DISPOSITIONED by Amendment 1 (85664b5801): served_unclassified is D_04's rule, and the key is a printed cross-check (agrees to the cent on 0 of the 10 dates that carry it).",
+    "MDPF_SECCLASS-D1-W86-S2: the cost run's process_date path reads partitions from S3 per date; build() uses a bulk cube_cache preload; ACCEPTED by Amendment 1 item 3 and stated in the instrument field."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e96.c06-rolling-window-read.md",
+  "compiler_tools": [
+    {
+      "tool": "r23_checks.py (issuer's checker, unmodified)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_CHECKS/r23_checks.py window-read org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/WINDOW_READ_C06_ROLLING_20261012.json",
+      "result": "WINDOW-READ ok=True dates=15 fits=True control=ok (rc=0)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC23-e96-AC1",
+      "result": "recorded in the worker report"
+    }
+  ]
+}
