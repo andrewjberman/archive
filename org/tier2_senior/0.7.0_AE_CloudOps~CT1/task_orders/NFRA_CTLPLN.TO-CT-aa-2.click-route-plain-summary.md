@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~CT1</issued_to>
 <date>2026-10-12</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C after reading the record in-tree and on origin (commit 98e48fcbb2, integrated at 4899c05b9a): proof instance VALID (CTaa2-AC1 WORDS-OK, 220 words, no margin; CTaa2-AC2 judgment, recorded UNVERIFIABLE-BY-INSTRUMENT for 3.0.0_SA_CVO~L, ask sent 14:08Z). The text has three parts and states every limit of row D1-S11. The seat left two small facts out for the word bound (the receiving tool's install step was not used; the pack was read from Downloads under TO-CT-v-3 Amendment 3). This is the dell1 hop of the round-11 thread; HOP 5 GRADE reads ABSENT until the CVO's adjudication row lands.</status_reason>
 <risk>LOCAL</risk>
 <proof_genre>BUILD</proof_genre>
 <round>11</round>
