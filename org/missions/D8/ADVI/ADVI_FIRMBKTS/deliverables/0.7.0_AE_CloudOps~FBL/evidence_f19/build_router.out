@@ -1,0 +1,306 @@
+
+Node.js Lambda Build-and-Upload (ESM)
+  Pipeline:  portal-auth
+  Function:  shared-advisor-router
+  Bucket:    s3://opal-313476888478-lambda-artifacts/portal-auth/
+
+  Source:    infra/aws/lambda-edge/shared-advisor-router
+  Type:      ESM (index.mjs -> index.mjs)
+
+  Installing dependencies...
+
+Checked 83 installs across 84 packages (no changes) [11.70s]
+
+  Running unit tests...
+    $ bun test test/
+    bun test v1.3.9 (cf6cdbbb)
+    
+    test\canonical-platinum.spec.mjs:
+    21 |       actual: value,
+    22 |       expected: !0,
+    23 |       message,
+    24 |       operator: "==",
+    25 |       stackStartFn: fn
+    26 |     throw err.generatedMessage = generatedMessage, err;
+                                                               ^
+    AssertionError: {"FIRM":"inflection","OTHER":"cottonwood"}
+          at innerOk (internal:assert/utils:26:55)
+          at ok (node:assert:79:10)
+          at <anonymous> (C:\Users\AndrewBerman\Desktop\ajb_workspace\infra\aws\lambda-edge\shared-advisor-router\test\canonical-platinum.spec.mjs:41:12)
+    FAIL: ADVI_FIRMBKTS FB-e-6 -- canonical platinum key path (dormant) > the fixture finds a legacy firm, its alias and another firm in the registry's own view
+    56 |   it("a listed bucket: platinum passes to advi/{firm}/platinum/, the alias resolves to the same scope", async () => {
+    57 |     const r = await quiet(() => handleWithMap(ev({ firmId: FIRM, suffix: PLAT + "accounts/z1/s.json" }), MAP, CANON));
+    58 |     assert.equal(r.uri, CANON_ROOT(FIRM) + "accounts/z1/s.json");
+    59 |     assert.equal(r.origin.s3.domainName, domain(ownBucket(FIRM)));
+    60 |     const a = await quiet(() => handleWithMap(ev({ firmId: ALIAS, suffix: PLAT + "firm/x.json" }), MAP, CANON));
+    61 |     assert.equal(a.uri, CANON_ROOT(FIRM) + "firm/x.json");
+                    ^
+    AssertionError: Expected values to be strictly equal:
+    + actual - expected
+    
+    + undefined
+    - '/advi/inflection/platinum/firm/x.json'
+    
+     generatedMessage: true,
+         actual: undefined,
+       expected: "/advi/inflection/platinum/firm/x.json",
+       operator: "strictEqual",
+           code: "ERR_ASSERTION"
+    
+          at C:\Users\AndrewBerman\Desktop\ajb_workspace\infra\aws\lambda-edge\shared-advisor-router\test\canonical-platinum.spec.mjs:61:12
+          at processTicksAndRejections (native:7:39)
+    FAIL: ADVI_FIRMBKTS FB-e-6 -- canonical platinum key path (dormant) > a listed bucket: platinum passes to advi/{firm}/platinum/, the alias resolves to the same scope
+    
+    test\firm-routing.spec.mjs:
+    Partner bucket map: firmId=49financial -> bucket=opal-data-49financial
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/views/firm_summary.json -> /gold/views/firm_summary.json
+    Firm routing: firmId=49financial bucket=opal-data-49financial uri=/advi/49financial/platinum/views/firm_summary.json
+    52 |   // ---------------------------------------------------------------------
+    53 |   // Active firm routes ? failure here = cross-tenant data leak risk
+    54 |   // ---------------------------------------------------------------------
+    55 |   it("X-Firm-Id '49financial' routes to opal-data-bd", async () => {
+    56 |     const result = await handler(makeEvent({ firmId: "49financial" }));
+    57 |     assert.equal(result.origin.s3.domainName, "opal-data-bd.s3.us-east-1.amazonaws.com",
+                    ^
+    AssertionError: FIRM_BUCKET_MAP['49financial'] must resolve to bucket slug 'bd'
+    actual expected
+    
+    'opal-data-49financialbd.s3.us-east-1.amazonaws.com'
+    
+     generatedMessage: false,
+         actual: "opal-data-49financial.s3.us-east-1.amazonaws.com",
+       expected: "opal-data-bd.s3.us-east-1.amazonaws.com",
+       operator: "strictEqual",
+           code: "ERR_ASSERTION"
+    
+          at C:\Users\AndrewBerman\Desktop\ajb_workspace\infra\aws\lambda-edge\shared-advisor-router\test\firm-routing.spec.mjs:57:12
+          at processTicksAndRejections (native:7:39)
+    FAIL: ADVI_FIRMSEP.04 ? shared-advisor-router firm-routing > X-Firm-Id '49financial' routes to opal-data-bd
+    Partner bucket map: firmId=inflection -> bucket=opal-data-inf
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/views/firm_summary.json -> /gold/views/firm_summary.json
+    Firm routing: firmId=inflection bucket=opal-data-inf uri=/gold/views/firm_summary.json
+    Partner bucket map: firmId=mockadv -> bucket=opal-data-49financial
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/views/firm_summary.json -> /gold/views/firm_summary.json
+    Firm routing: firmId=mockadv bucket=opal-data-49financial uri=/advi/49financial/platinum/views/firm_summary.json
+    64 |       "FIRM_BUCKET_MAP['inflection'] must resolve to bucket slug 'inf'");
+    65 |   });
+    66 | 
+    67 |   it("X-Firm-Id 'mockadv' routes to opal-data-bd (test-account passthrough)", async () => {
+    68 |     const result = await handler(makeEvent({ firmId: "mockadv" }));
+    69 |     assert.equal(result.origin.s3.domainName, "opal-data-bd.s3.us-east-1.amazonaws.com",
+                    ^
+    AssertionError: FIRM_BUCKET_MAP['mockadv'] is the test-account alias for the bd bucket
+    actual expected
+    
+    'opal-data-49financialbd.s3.us-east-1.amazonaws.com'
+    
+     generatedMessage: false,
+         actual: "opal-data-49financial.s3.us-east-1.amazonaws.com",
+       expected: "opal-data-bd.s3.us-east-1.amazonaws.com",
+       operator: "strictEqual",
+           code: "ERR_ASSERTION"
+    
+          at C:\Users\AndrewBerman\Desktop\ajb_workspace\infra\aws\lambda-edge\shared-advisor-router\test\firm-routing.spec.mjs:69:12
+          at processTicksAndRejections (native:7:39)
+    FAIL: ADVI_FIRMSEP.04 ? shared-advisor-router firm-routing > X-Firm-Id 'mockadv' routes to opal-data-bd (test-account passthrough)
+    Partner bucket map: firmId=demo -> bucket=opal-data-demo
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/views/firm_summary.json -> /gold/views/firm_summary.json
+    Firm routing: firmId=demo bucket=opal-data-demo uri=/gold/views/firm_summary.json
+    Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/views/firm_summary.json -> /gold/views/firm_summary.json
+    Firm routing: firmId=cottonwood bucket=opal-data-cot uri=/gold/views/firm_summary.json
+    Opal Capital proxy: firmId=opal-capital firm=inf bucket=opal-data-inf
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/views/firm_summary.json -> /gold/views/firm_summary.json
+    Firm routing: firmId=opal-capital bucket=opal-data-inf uri=/gold/views/firm_summary.json
+    Partner bucket map: firmId=49financial -> bucket=opal-data-49financial
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/platinum/advi/49financial/mix_summary.json -> /platinum/advi/49financial/mix_summary.json
+    Platinum advi canonical routing: firm=49financial bucket=opal-data-portal-v2 uri=/platinum/advi/49financial/mix_summary.json
+    Firm routing: firmId=49financial bucket=opal-data-portal-v2 uri=/platinum/advi/49financial/mix_summary.json
+    Partner bucket map: firmId=49financial -> bucket=opal-data-49financial
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/platinum/advi/inflection/mix_summary.json -> /platinum/advi/inflection/mix_summary.json
+    {"event":"scope_denied","rule":"p4r3_tenant_assert","requestedFirm":"inflection","callerFirmId":"49financial","callerBucket":"opal-data-49financial","path":"/platinum/advi/inflection/mix_summary.json"}
+    Partner bucket map: firmId=49financial -> bucket=opal-data-49financial
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/platinum/advi/not-a-firm/mix_summary.json -> /platinum/advi/not-a-firm/mix_summary.json
+    {"event":"scope_denied","rule":"p4r3_tenant_assert","requestedFirm":"not-a-firm","callerFirmId":"49financial","callerBucket":"opal-data-49financial","path":"/platinum/advi/not-a-firm/mix_summary.json"}
+    Partner bucket map: firmId=49financial -> bucket=opal-data-49financial
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/platinum/firm/header_metrics.json -> /platinum/firm/header_metrics.json
+    Firm routing: firmId=49financial bucket=opal-data-49financial uri=/advi/49financial/platinum/firm/header_metrics.json
+    164 |   it("PATH-CLASS SCOPING: platinum/firm/ still routes to the FIRM_CONFIG bucket", async () => {
+    165 |     const result = await handler(makeEvent({
+    166 |       firmId: "49financial",
+    167 |       uri: ADVI + "platinum/firm/header_metrics.json",
+    168 |     }));
+    169 |     assert.equal(result.origin.s3.domainName, "opal-data-bd.s3.us-east-1.amazonaws.com",
+                     ^
+    AssertionError: the override is PATH-CLASS scoped -- the 4 HELD keys and every legacy platinum/firm/ key must keep resolving to opal-data-bd. This is the never-widen guard for P4R-3.
+    actual expected
+    
+    'opal-data-49financialbd.s3.us-east-1.amazonaws.com'
+    
+     generatedMessage: false,
+         actual: "opal-data-49financial.s3.us-east-1.amazonaws.com",
+       expected: "opal-data-bd.s3.us-east-1.amazonaws.com",
+       operator: "strictEqual",
+           code: "ERR_ASSERTION"
+    
+          at C:\Users\AndrewBerman\Desktop\ajb_workspace\infra\aws\lambda-edge\shared-advisor-router\test\firm-routing.spec.mjs:169:12
+          at processTicksAndRejections (native:7:39)
+    FAIL: ADVI_FIRMSEP.04 ? shared-advisor-router firm-routing > PATH-CLASS SCOPING: platinum/firm/ still routes to the FIRM_CONFIG bucket
+    Partner bucket map: firmId=49financial -> bucket=opal-data-49financial
+    Partner bucket map: firmId=49financial -> bucket=opal-data-49financial
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/platinum/advisors/adv123/book.json -> /platinum/advisors/adv123/book.json
+    Firm routing: firmId=49financial bucket=opal-data-49financial uri=/advi/49financial/platinum/advisors/adv123/book.json
+    194 |       firmId: "49financial",
+    195 |       uri: ADVI + "platinum/advisors/adv123/book.json",
+    196 |     }));
+    197 |     assert.equal(result.status, undefined,
+    198 |       "must not be refused -- platinum/advisors/ is a different path class entirely.");
+    199 |     assert.equal(result.origin.s3.domainName, "opal-data-bd.s3.us-east-1.amazonaws.com",
+                     ^
+    AssertionError: and it must keep its FIRM_CONFIG bucket, untouched by the P4R-3 override.
+    actual expected
+    
+    'opal-data-49financialbd.s3.us-east-1.amazonaws.com'
+    
+     generatedMessage: false,
+         actual: "opal-data-49financial.s3.us-east-1.amazonaws.com",
+       expected: "opal-data-bd.s3.us-east-1.amazonaws.com",
+       operator: "strictEqual",
+           code: "ERR_ASSERTION"
+    
+          at C:\Users\AndrewBerman\Desktop\ajb_workspace\infra\aws\lambda-edge\shared-advisor-router\test\firm-routing.spec.mjs:199:12
+          at processTicksAndRejections (native:7:39)
+    FAIL: ADVI_FIRMSEP.04 ? shared-advisor-router firm-routing > TRAILING-SLASH CONTROL: platinum/advisors/{id}/book.json is NOT captured by the advi path class
+    Opal Capital proxy: firmId=opal-capital firm=bd bucket=opal-data-bd
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/platinum/advi/49financial/mix_summary.json -> /platinum/advi/49financial/mix_summary.json
+    {"event":"scope_denied","rule":"p4r3_tenant_assert","requestedFirm":"49financial","callerFirmId":"opal-capital","callerBucket":"opal-data-bd","path":"/platinum/advi/49financial/mix_summary.json"}
+    204 |     const result = await handler(makeEvent({
+    205 |       firmId: "opal-capital",
+    206 |       querystring: "firm=bd",
+    207 |       uri: ADVI + "platinum/advi/49financial/mix_summary.json",
+    208 |     }));
+    209 |     assert.equal(result.origin.s3.domainName, "opal-data-portal-v2.s3.us-east-1.amazonaws.com",
+                                  ^
+    TypeError: undefined is not an object (evaluating 'result.origin.s3')
+          at <anonymous> (C:\Users\AndrewBerman\Desktop\ajb_workspace\infra\aws\lambda-edge\shared-advisor-router\test\firm-routing.spec.mjs:209:25)
+    FAIL: ADVI_FIRMSEP.04 ? shared-advisor-router firm-routing > opal-capital staff with ?firm=bd may read platinum/advi/49financial/
+    Opal Capital proxy: firmId=opal-capital firm=inf bucket=opal-data-inf
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/platinum/advi/49financial/mix_summary.json -> /platinum/advi/49financial/mix_summary.json
+    {"event":"scope_denied","rule":"p4r3_tenant_assert","requestedFirm":"49financial","callerFirmId":"opal-capital","callerBucket":"opal-data-inf","path":"/platinum/advi/49financial/mix_summary.json"}
+    Partner bucket map: firmId=49financial -> bucket=opal-data-49financial
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/platinum/advi/inflection/mix_summary.json -> /platinum/advi/inflection/mix_summary.json
+    {"event":"scope_denied","rule":"p4r3_tenant_assert","requestedFirm":"inflection","callerFirmId":"49financial","callerBucket":"opal-data-49financial","path":"/platinum/advi/inflection/mix_summary.json"}
+    
+    test\satellites-registry.spec.mjs:
+    Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+    Satellites rewrite: /api/scoped/satellites/registry.json -> /platinum/satellites/registry.json bucket=opal-data-cot
+    Firm routing: firmId=cottonwood bucket=opal-data-cot uri=/platinum/satellites/registry.json
+    Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+    Satellites rewrite: /api/scoped/satellites/registry.json -> /platinum/satellites/registry.json bucket=opal-data-cot
+    Firm routing: firmId=cottonwood bucket=opal-data-cot uri=/platinum/satellites/registry.json
+    Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+    Satellites rewrite: /api/scoped/satellites/registry.json -> /platinum/satellites/registry.json bucket=opal-data-cot
+    Firm routing: firmId=cottonwood bucket=opal-data-cot uri=/platinum/satellites/registry.json
+    Partner bucket map: firmId=49financial -> bucket=opal-data-49financial
+    Satellites rewrite: /api/scoped/satellites/registry.json -> /platinum/satellites/registry.json bucket=opal-data-49financial
+    Firm routing: firmId=49financial bucket=opal-data-49financial uri=/platinum/satellites/registry.json
+    73 |     expect(out.origin.s3.domainName).toBe("opal-data-cot.s3.us-east-1.amazonaws.com");
+    74 |   });
+    75 | 
+    76 |   it("routes 49financial to ITS bucket ? same path, DIFFERENT origin", async () => {
+    77 |     const out = await handler(makeEvent({ firmId: "49financial", uri: SAT_URI }));
+    78 |     expect(out.origin.s3.domainName).toBe("opal-data-bd.s3.us-east-1.amazonaws.com");
+                                              ^
+    error: expect(received).toBe(expected)
+    
+    Expected: "opal-data-bd.s3.us-east-1.amazonaws.com"
+    Received: "opal-data-49financial.s3.us-east-1.amazonaws.com"
+    
+          at <anonymous> (C:\Users\AndrewBerman\Desktop\ajb_workspace\infra\aws\lambda-edge\shared-advisor-router\test\satellites-registry.spec.mjs:78:38)
+    FAIL: POSN_TENANCY.TO-4-AE ? satellites registry routing > routes 49financial to ITS bucket ? same path, DIFFERENT origin
+    Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+    Satellites rewrite: /api/scoped/satellites/registry.json -> /platinum/satellites/registry.json bucket=opal-data-cot
+    Firm routing: firmId=cottonwood bucket=opal-data-cot uri=/platinum/satellites/registry.json
+    Partner bucket map: firmId=49financial -> bucket=opal-data-49financial
+    Satellites rewrite: /api/scoped/satellites/registry.json -> /platinum/satellites/registry.json bucket=opal-data-49financial
+    Firm routing: firmId=49financial bucket=opal-data-49financial uri=/platinum/satellites/registry.json
+    Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+    {"event":"scope_denied","rule":"satellites_unknown_leaf","callerFirmId":"cottonwood","path":"/api/scoped/satellites/not-a-real-thing.json"}
+    Partner bucket map: firmId=49financial -> bucket=opal-data-49financial
+    Scoped advisor rewrite: /api/scoped/advisor-intelligence/views/firm_summary.json -> /gold/views/firm_summary.json
+    Firm routing: firmId=49financial bucket=opal-data-49financial uri=/advi/49financial/platinum/views/firm_summary.json
+    105 |   });
+    106 | 
+    107 |   // --- THE ADDITIVE PROOF, AT THE SOURCE RUNG ----------------------------
+    108 |   it("ADDITIVE: the advisor-intelligence rewrite is untouched", async () => {
+    109 |     const out = await handler(makeEvent({ firmId: "49financial", uri: ADVI_URI }));
+    110 |     expect(out.uri).toBe("/gold/views/firm_summary.json");
+                              ^
+    error: expect(received).toBe(expected)
+    
+    Expected: "/gold/views/firm_summary.json"
+    Received: "/advi/49financial/platinum/views/firm_summary.json"
+    
+          at <anonymous> (C:\Users\AndrewBerman\Desktop\ajb_workspace\infra\aws\lambda-edge\shared-advisor-router\test\satellites-registry.spec.mjs:110:21)
+    FAIL: POSN_TENANCY.TO-4-AE ? satellites registry routing > ADDITIVE: the advisor-intelligence rewrite is untouched
+    Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+    Satellites rewrite: /api/scoped/satellites/registry.json -> /platinum/satellites/registry.json bucket=opal-data-cot
+    Firm routing: firmId=cottonwood bucket=opal-data-cot uri=/platinum/satellites/registry.json
+    Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+    Satellites rewrite: /api/scoped/satellites/holdings.json -> /platinum/satellites/holdings.json bucket=opal-data-cot
+    Firm routing: firmId=cottonwood bucket=opal-data-cot uri=/platinum/satellites/holdings.json
+    Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+    Satellites rewrite: /api/scoped/satellites/characteristics.json -> /platinum/satellites/characteristics.json bucket=opal-data-cot
+    Firm routing: firmId=cottonwood bucket=opal-data-cot uri=/platinum/satellites/characteristics.json
+    Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+    {"event":"scope_denied","rule":"satellites_unknown_leaf","callerFirmId":"cottonwood","path":"/api/scoped/satellites/holdings.json.bak"}
+    Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+    {"event":"scope_denied","rule":"satellites_unknown_leaf","callerFirmId":"cottonwood","path":"/api/scoped/satellites/holdings.json/extra"}
+    Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+    {"event":"scope_denied","rule":"satellites_unknown_leaf","callerFirmId":"cottonwood","path":"/api/scoped/satellites/Holdings.json"}
+    Partner bucket map: firmId=cottonwood -> bucket=opal-data-cot
+    {"event":"scope_denied","rule":"satellites_unknown_leaf","callerFirmId":"cottonwood","path":"/api/scoped/satellites/../../gold/views/firm_composition.json"}
+    
+     42 pass
+     9 fail
+     28 expect() calls
+    Ran 51 tests across 4 files. [124.00ms]
+    error: script "test" exited with code 1
+    Tests: PASS
+  External:  (no @aws-sdk/* deps ? bundling everything)
+
+  Bundling with bun build --format=esm...
+    Entry:  index.mjs
+    Output: index.mjs
+    Bundled 3 modules in 25ms
+    
+      index.mjs  7.72 KB  (entry point)
+    
+    Bundle size: 8.0K
+
+  Validating handler export...
+    handler export: OK (export statement found in bundle)
+
+  Creating zip...
+    SHA256: +gJJpRe/HkZTEfKwBKfy7YJ2f9uSFV7iSh4lhHMlxCY=
+    Size:   4.0K
+
+  Uploading to s3://opal-313476888478-lambda-artifacts/portal-auth/shared-advisor-router.zip ...
+    OK s3://opal-313476888478-lambda-artifacts/portal-auth/shared-advisor-router.zip
+
+  Updating lambda-source-map.json...
+    Updated: artifact_s3_key, artifact_sha256, files -> [index.mjs]
+
+================================================
+Complete -- shared-advisor-router built and uploaded
+
+Next steps:
+  git add infra/aws/lambda/ci/lambda-source-map.json
+  git commit --author='...' -m 'ci: upload shared-advisor-router artifact [skip ci]'
+  export MSYS_NO_PATHCONV=1 && export AWS_EC2_METADATA_DISABLED=true
+  .tools/terraform.exe -chdir=infra/aws/terraform/portal-auth plan
+  .tools/terraform.exe -chdir=infra/aws/terraform/portal-auth apply
+  .tools/terraform.exe -chdir=infra/aws/terraform/portal-auth plan   # 0-diff
+  bash infra/aws/lambda/ci/record-terraform-deploy.sh portal-auth
+  git tag -a portal-auth-vX.Y.Z -m 'description' && git push --follow-tags
+
