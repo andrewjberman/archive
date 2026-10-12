@@ -39,16 +39,16 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_interactive_entry.py",
       "kind": "test",
-      "commit_or_etag": "82e3433ed4",
-      "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "commit_or_etag is the last commit that carries this file (AMENDMENT 1). AMENDMENT 1 fixtures are committed at 82e3433ed4. The AMENDMENT 2 line (active_internal_row usefixtures on test_final_release_refuses_changed_actor_owner_or_service_identity) is in the worktree and NOT committed: safe-commit refused it (rc=1, owned-paths lane gate: the order is terminal at HEAD, status complete); row IRPT_ANLREQ-D2-W54-S8. Offline; no AWS, network or invoke"
+      "commit_or_etag": "c557f59211",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on the worker branch wk-IRPT_ANLREQ-54 at c557f59211 (AMENDMENT 3 point 1, the AMENDMENT 2 fixture line: active_internal_row usefixtures on test_final_release_refuses_changed_actor_owner_or_service_identity). Offline; no AWS, network, push, deploy or invoke"
     },
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_svc_custody_statement.py",
       "kind": "test",
-      "commit_or_etag": "82e3433ed4",
-      "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "commit_or_etag is the last commit that carries this file (AMENDMENT 1). AMENDMENT 1 fixture is committed at 82e3433ed4. The AMENDMENT 2 stale-comment correction at line 146 is in the worktree and NOT committed (same refusal, row IRPT_ANLREQ-D2-W54-S8). Comment only; offline; no AWS, network or invoke"
+      "commit_or_etag": "c557f59211",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on the worker branch wk-IRPT_ANLREQ-54 at c557f59211 (AMENDMENT 3 point 1, the AMENDMENT 2 stale-comment correction at line 146). Comment only; offline; no AWS, network, push, deploy or invoke"
     }
   ],
   "acceptance": [
@@ -57,7 +57,7 @@
       "criterion_verbatim": "the five named status tests are present and pass.",
       "method": "command",
       "invocation": "python C:/dev/wk-irpt-anlreq-54/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r17/ar17_checks.py y172-status --root C:/dev/wk-irpt-anlreq-54",
-      "output_evidence": "Y172-STATUS-OK (rc=0). Printed: 'status tests: 17 passed, 0 failed (rc=0)' (run 2026-10-12 on the worktree after the AMENDMENT 2 edits; the status-test file is unchanged by AMENDMENT 2)",
+      "output_evidence": "Y172-STATUS-OK (rc=0). Printed: 'status tests: 17 passed, 0 failed (rc=0)'. Re-run for AMENDMENT 3 on the worktree at HEAD c557f59211 with the invocation above (timeout 120, exit 0): the token line is Y172-STATUS-OK.",
       "denominator": "5 of 5 named test functions present in test_internal_status_active.py; 17 of 17 tests in that file pass",
       "expect": "Y172-STATUS-OK",
       "status": "PASS"
@@ -67,7 +67,7 @@
       "criterion_verbatim": "the difference control -- the whole `_authz` test folder passes (320 at the base).",
       "method": "command",
       "invocation": "python C:/dev/wk-irpt-anlreq-54/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r17/ar17_checks.py y172-keep --root C:/dev/wk-irpt-anlreq-54",
-      "output_evidence": "Y172-KEEP-OK (rc=0). Printed: '_authz tests: 337 passed, 0 failed (rc=0)' (run 2026-10-12 on the worktree working tree after the AMENDMENT 2 edits, HEAD 52cf1abb59; the two AMENDMENT 2 test edits are uncommitted, row IRPT_ANLREQ-D2-W54-S8)",
+      "output_evidence": "Y172-KEEP-OK (rc=0). Printed: '_authz tests: 337 passed, 0 failed (rc=0)'. Re-run for AMENDMENT 3 on the worktree at HEAD c557f59211 (the fixture commit; the two AMENDMENT 2 fixture edits are now committed) with the invocation above (timeout 120, exit 0): the token line is Y172-KEEP-OK.",
       "denominator": "337 passed, 0 failed in _authz/tests (base 320 + 17 new status tests); the check prints passed and failed counts only",
       "expect": "Y172-KEEP-OK",
       "status": "PASS"
@@ -86,10 +86,10 @@
   ],
   "controls": {
     "mutant": {
-      "description": "AMENDMENT 2 names one mutant per arm: disable the identity comparison the arm names. Principal comparison (owner_reads.py:38, prospect.py:92) for the actor and renderer arms; retained-owner comparison (owner_reads.py:40, prospect.py:94) for the owner arms. Run in scratch copies outside the product tree; registry read through IRPT_FIRM_REGISTRY.",
-      "expected": "each of the six arms FAILS under the mutant of the comparison it names",
-      "observed": "Retained-owner mutant: owner-read and owner-prospect FAIL (private payload returned). Principal mutant: all six arms still PASS; the actor and renderer arms are refused by a second principal comparison, interactive_access.py:110, reached through the post-compute retained() check (row IRPT_ANLREQ-D2-W54-S7). Diagnostic only (principal comparison in owner_reads.py plus interactive_access.py:110): actor-read FAILS; the other actor and renderer arms are still refused by remaining checks. The named-comparison bite is not met for the actor and renderer arms.",
-      "status": "DID-NOT-FIRE (deliverable INVALID)"
+      "description": "AMENDMENT 3 RULE-REVERT mutant (this control): in a scratch copy outside the product tree (.scratch/mutant_y172, a copy of the investor-reporting folder at HEAD c557f59211), served.py lines 1157-1161 of _internal_allowed_firms are replaced by the pre-AR-y-172 single line `if row is None or \"allowedFirmIds\" not in row: return None` (no row returns None; no status check). Run: python -m pytest tests/test_internal_status_active.py in the copy's _authz folder. The unmutated copy is the positive control (17 passed, rc=0).",
+      "expected": "the three refusal tests FAIL under the revert (the disabled-row test, the row-and-no-status test, the no-row test), and the two arms that assert behaviour the revert does not change PASS (the active-row test; the service-and-client test). This corrects AMENDMENT 3's 'five FAIL' wording: a revert cannot fail an arm that asserts unchanged behaviour (row IRPT_ANLREQ-D2-W54-S9).",
+      "observed": "FIRED: the mutated copy gives 15 failed, 2 passed (rc=1). FAIL: the disabled-row test (8 parameters), the row-and-no-status test (6 parameters), the no-row test. PASS: test_internal_caller_with_an_active_row_is_admitted and test_service_and_client_callers_are_unchanged. Positive control, unmutated copy: 17 passed (rc=0). NOTE, not the control (the AMENDMENT 2 evidence, row IRPT_ANLREQ-D2-W54-S7): the principal-comparison mutant (owner_reads.py:38 and prospect.py:92 disabled) leaves the actor and renderer arms of test_final_release_refuses_changed_actor_owner_or_service_identity PASSING, because interactive_access.py:110 refuses them after compute; the retained-owner mutant (owner_reads.py:40 and prospect.py:94) FAILS the owner arms. Row S7 stays: a finding about the old arms, not a defect of this cell.",
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "N/A -- the criteria are one check-script run each and one pytest run; the spec names no same-input comparison",
@@ -102,7 +102,8 @@
     "IRPT_ANLREQ-D2-W54-S5",
     "IRPT_ANLREQ-D2-W54-S6",
     "IRPT_ANLREQ-D2-W54-S7",
-    "IRPT_ANLREQ-D2-W54-S8"
+    "IRPT_ANLREQ-D2-W54-S8",
+    "IRPT_ANLREQ-D2-W54-S9"
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
   "declared_exclusions": [
@@ -120,7 +121,7 @@
     {
       "tool": "bash .tools/commit-gate.sh",
       "invocation": "bash .tools/commit-gate.sh <each of the two amended test files>",
-      "result": "pre-commit gate clean for 1 of 1 file(s) for each file (rc=0) on the working tree, before the commit was refused by the lane gate (row IRPT_ANLREQ-D2-W54-S8)"
+      "result": "pre-commit gate clean for 1 of 1 file(s) for each file (rc=0) on the working tree; both files then committed at c557f59211 through safe-commit (AMENDMENT 3 point 1; row IRPT_ANLREQ-D2-W54-S8 answered by the reopen)"
     },
     {
       "tool": "python (scratch probe outside the product tree)",
