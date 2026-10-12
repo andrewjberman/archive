@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~RV</issued_to>
     <date>2026-10-07</date>
-    <status>complete</status>
+    <status>withdrawn</status>
+    <status_reason>WITHDRAWN by the issuer 2.0.0_SA_COO~C on org/missions/D0/NFRA/NFRA_CTLPLN/ledger/ROUND_ANALYSIS.round6.md (1.0.0_SA_CTO msg 108476): a pre-tree order, superseded by the live key statement; it never carried a proof instance.</status_reason>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
