@@ -295,12 +295,24 @@ def contract(root: str) -> int:
     if fn is not None:
         try:
             a2 = _synthetic(cottonwood_blend=True)
+            # ADDENDUM 6: with the fixed-income line left to cottonwood alone the as-of pool would be one firm's and Global would be
+            # refused; give inflection a holding of it too, so BOTH lines a second firm holds are kept and only the null line folds
+            a2["inflection"]["by_model"]["opal_fixed_income"] = {"model_value": [N, N, N, N, N, 3.0],
+                                                                 "account_count": [N, N, N, N, N, 1], "cohort_class": "model"}
+            g2 = a2["global"]
+            g2["by_model"]["opal_fixed_income"]["model_value"][5] = 10.0
+            g2["by_model"]["opal_fixed_income"]["account_count"][5] = 4
+            g2["model_aua"][5] = round(g2["model_aua"][5] + 3.0, 2)
+            g2["opal_aggregate_aua"][5] = round(g2["opal_aggregate_aua"][5] + 3.0, 2)
             o2, r2 = _run(gc, a2)
             ok = ("opal_blend_5050_st_int" not in (r2.get("fold_keys") or [])
+                  and "opal_fixed_income" not in (r2.get("fold_keys") or [])
                   and "opal_blend_5050_st_int" in o2["global"]["by_model"]
                   and o2["global"]["by_model"]["opal_blend_5050_st_int"]["model_value"][5] == 25.0
-                  and "opal_fixed_income" in (r2.get("fold_keys") or []))
-            detail = "blend held by 2 firms at the as-of -> kept with its value; fold_keys=%s" % r2.get("fold_keys")
+                  and o2["global"]["by_model"]["opal_fixed_income"]["model_value"][5] == 10.0
+                  and "opal_income" in (r2.get("fold_keys") or []))
+            detail = ("blend and fixed income held by 2 firms at the as-of -> kept with their values; fold_keys=%s"
+                      % r2.get("fold_keys"))
         except BaseException as exc:                          # noqa: BLE001
             detail = "%s: %s" % (type(exc).__name__, str(exc)[:160])
     arm("C6", ok, detail)
@@ -390,9 +402,107 @@ def contract(root: str) -> int:
             detail = "pytest timed out at 100 s"
     arm("C10", ok, detail)
 
+    # ---- ADDENDUM 6 (CTO msg 4534): a day whose as-of pool is held by fewer than 2 firms refuses Global WHOLE (views and aum-metrics
+    # together, never partially); the firm scopes build; nothing is published for Global, so the prior object keeps its own as_of.
+    def _one_firm_as_of() -> dict:
+        w = _synthetic()
+        w["inflection"]["by_model"]["opal_blend_5050_st_int"]["model_value"][5] = N     # inflection stops holding the blend at the as-of
+        gg = w["global"]
+        gg["by_model"]["opal_blend_5050_st_int"]["model_value"][5] = N
+        gg["by_model"]["opal_blend_5050_st_int"]["account_count"][5] = N
+        gg["model_aua"][5] = round(gg["model_aua"][5] - 20.0, 2)
+        gg["opal_aggregate_aua"][5] = round(gg["opal_aggregate_aua"][5] - 20.0, 2)
+        return w                                    # the pool at the as-of is opal_fixed_income 7.0, held by cottonwood alone
+
+    def _no_pool_as_of() -> dict:
+        w = _one_firm_as_of()
+        w["cottonwood"]["by_model"]["opal_fixed_income"]["model_value"][5] = N
+        gg = w["global"]
+        gg["by_model"]["opal_fixed_income"]["model_value"][5] = N
+        gg["by_model"]["opal_fixed_income"]["account_count"][5] = N
+        gg["model_aua"][5] = round(gg["model_aua"][5] - 7.0, 2)
+        gg["opal_aggregate_aua"][5] = round(gg["opal_aggregate_aua"][5] - 7.0, 2)
+        return w                                    # nothing pooled has a value at the as-of: no dollars to withhold
+
+    errors6 = {}
+
+    def _iso6(scope, f):
+        try:
+            return f()
+        except BaseException as e:                    # noqa: BLE001 -- mirrors build_all._isolated
+            if isinstance(e, KeyboardInterrupt):
+                raise
+            errors6[scope] = str(e)
+            return None
+
+    # C11 one-firm as-of: Global refused whole (the function raises the prefix; the guard returns global None and no report), the three
+    # firm scopes ride through as the SAME objects, and the refusal names the as-of date and a count, never a dollar level
+    ok = False
+    detail = "no function"
+    if fn is not None and gfn is not None:
+        try:
+            raised = ""
+            try:
+                fn(_one_firm_as_of())
+            except SystemExit as e:
+                raised = str(e)
+            planted = _one_firm_as_of()
+            errors6.clear()
+            op, rp = gfn(planted, _iso6)
+            msg = errors6.get("global", "")
+            sib = all(op.get(k2) is planted[k2] for k2 in ("49financial", "inflection", "cottonwood"))
+            ok = (raised.startswith(REFUSE_PREFIX) and op.get("global") is None and rp is None and sib
+                  and msg.startswith(REFUSE_PREFIX) and D[-1] in msg and "7.0" not in msg and "170" not in msg)
+            detail = ("function raised=%s; guard -> global %s, report %s, firm scopes same objects=%s, message names the as-of=%s, "
+                      "no level in it=%s" % (bool(raised), "None" if op.get("global") is None else "kept", rp, sib, D[-1] in msg,
+                                             "7.0" not in msg and "170" not in msg))
+        except BaseException as exc:                  # noqa: BLE001
+            detail = "%s: %s" % (type(exc).__name__, str(exc)[:160])
+    arm("C11", ok, detail)
+
+    # C12 a two-firm as-of builds (both variants), and an as-of whose pool has no value is not a refusal
+    ok = False
+    detail = "no function"
+    if fn is not None and gfn is not None:
+        try:
+            errors6.clear()
+            o2, r2 = gfn(_synthetic(), _iso6)          # the pool at the as-of is the blend (inflection) + fixed income (cottonwood)
+            twofirm = (o2.get("global") is not None and isinstance(r2, dict) and r2.get("other_models_emitted_as_of") is True
+                       and "global" not in errors6)
+            errors6.clear()
+            o3, r3 = gfn(_no_pool_as_of(), _iso6)
+            nopool = o3.get("global") is not None and "global" not in errors6 and isinstance(r3, dict)
+            ok = twofirm and nopool
+            detail = "two-firm as-of builds and emits the fold line=%s; no-pool as-of builds=%s" % (twofirm, nopool)
+        except BaseException as exc:                  # noqa: BLE001
+            detail = "%s: %s" % (type(exc).__name__, str(exc)[:160])
+    arm("C12", ok, detail)
+
+    # C13 nothing is published for a refused Global: the guard hands back no global document at all (nothing to write, so the prior
+    # object and its VersionId are untouched), the input global is not mutated, and the control day still returns a new document
+    ok = False
+    detail = "no function"
+    if gfn is not None:
+        try:
+            planted = _one_firm_as_of()
+            snap = copy.deepcopy(planted["global"])
+            errors6.clear()
+            op, rp = gfn(planted, _iso6)
+            untouched = planted["global"] == snap
+            ctl = _synthetic()
+            oc, rc = gfn(ctl, _iso6)
+            ok = (op.get("global") is None and untouched and oc.get("global") is not None
+                  and oc.get("global") is not ctl["global"])
+            detail = ("refused day: global %s, input global unmutated=%s; control day returns a new global document=%s"
+                      % ("None" if op.get("global") is None else "kept", untouched,
+                         oc.get("global") is not None and oc.get("global") is not ctl["global"]))
+        except BaseException as exc:                  # noqa: BLE001
+            detail = "%s: %s" % (type(exc).__name__, str(exc)[:160])
+    arm("C13", ok, detail)
+
     k = sum(1 for a in arms if a)
     print("ROUND 6 CONTRACT: %d of %d arms" % (k, len(arms)))
-    return 0 if k == len(arms) and len(arms) == 10 else 1
+    return 0 if k == len(arms) and len(arms) == 13 else 1
 
 
 # ---------------------------------------------------------------- static arms
