@@ -1,0 +1,32 @@
+{
+ "irpt-ycharts-generate": {
+  "submission.py": {"is_one_of_the_three": true, "class": "served",
+   "one_line": "validate_public_request's closed set PUBLIC_FIELDS admits commentary_requested; exactly a JSON boolean, or the submission is refused COMMENTARY_REQUESTED (today it is refused UNKNOWN_OR_SERVER_OWNED_FIELD). The only owning commit is IB-pr-455's (74bbdbb322); no earlier unreleased commit. Called on the route itself (entry.py:118), custody_submission.py:72, prospect_submission.py:46, recipe_snapshot.py:87,118."},
+  "acceptance.py": {"is_one_of_the_three": true, "class": "served",
+   "one_line": "accept copies commentary_requested into a NEW record only when sent (74bbdbb322, IB-pr-455) AND carries an EARLIER unreleased commit that is NOT IB-pr-455's: 2f7cc7be42 (IRPT_ANLREQ AR-y-37) makes acting_principal_id a REQUIRED keyword, records it on a new record and refuses ACTING_PRINCIPAL_REQUIRED without it. Its only packaged caller is submission_service.py, which must move with it."},
+  "contracts/AnalysisSubmissionRequest.schema.json": {"is_one_of_the_three": true, "class": "served",
+   "one_line": "declares the optional boolean commentary_requested (74bbdbb322, IB-pr-455; the only owning commit). The packaged contracts directory is what generate_installed.ingestion_revision_for digests (generate_installed.py:94-101), so the ingestion_gate_revision stamped on every request accepted after the release moves."},
+  "durable_job.py": {"is_one_of_the_three": false, "class": "served",
+   "one_line": "RIDER, not IB-pr-455's: 3acafb3f45 (IRPT_ANLREQ TO-AR-g-21) adds mark_i3_sent and makes get_state return i3_sent_at when the job row carries it. Nothing in this zip calls mark_i3_sent (definition only, durable_job.py:141), so the answer changes only for a job row some other process marked; classed served because get_state is the job-state source and unsure is served."},
+  "submission_service.py": {"is_one_of_the_three": false, "class": "served",
+   "one_line": "RIDER, not IB-pr-455's: 2f7cc7be42 (IRPT_ANLREQ AR-y-37) passes acting_principal_id=principal['principal_id'] to accept (submission_service.py:145-148). The built acceptance.py requires it, so it cannot be left behind: replay controls show a TypeError and 0 writes on every new submission when the two are split either way."}
+ },
+ "irpt-status": {
+  "submission.py": {"is_one_of_the_three": true, "class": "inert",
+   "one_line": "PUBLIC_FIELDS and validate_public_request gain the member (74bbdbb322; the only owning commit). INERT here because nothing this zip packages calls validate_public_request except acceptance.py's accept and lookup, and no packaged module calls either (the census of production callers of DynamoAcceptance.accept finds only submission_service.py, which this zip does not package); the names this zip imports from submission.py (input_repository_owner, TICKET_ID, digest, canonical_bytes) are unchanged. If a caller were added, served."},
+  "acceptance.py": {"is_one_of_the_three": true, "class": "inert",
+   "one_line": "accept gains the member copy (74bbdbb322, IB-pr-455) AND carries 2f7cc7be42 (AR-y-37, not IB-pr-455's: acting_principal_id required keyword). INERT here because no packaged module calls accept or lookup (the one production caller of accept is submission_service.py, not packaged); get is byte-identical in behaviour. If a caller were added, served."}
+ },
+ "irpt-commentary-draft-store-lambda": {
+  "submission.py": {"is_one_of_the_three": true, "class": "inert",
+   "one_line": "PUBLIC_FIELDS and validate_public_request gain the member (74bbdbb322; the only owning commit). INERT here because only acceptance.py's accept and lookup call validate_public_request and nothing this zip packages calls them; commentary_draft_store.py reads the record through requests.get only. If a caller were added, served."},
+  "acceptance.py": {"is_one_of_the_three": true, "class": "inert",
+   "one_line": "accept gains the member copy (74bbdbb322, IB-pr-455) AND carries 2f7cc7be42 (AR-y-37, not IB-pr-455's). INERT here because commentary_draft_store.py calls get (unchanged) and no packaged module calls accept or lookup. If a caller were added, served."}
+ },
+ "irpt-commentary-composition-read-lambda": {
+  "submission.py": {"is_one_of_the_three": true, "class": "inert",
+   "one_line": "PUBLIC_FIELDS and validate_public_request gain the member (74bbdbb322, IB-pr-455) AND this entry's live pin (03ea5980cc) predates 1eed34a8c0 (IRPT_ANLREQ TO-AR-y-11, ticket_id admitted), so ticket_id support is also released here (1eed34a8c0 is NOT IB-pr-455's; 74bbdbb322 is). INERT here because nothing packaged calls validate_public_request except acceptance.py's accept and lookup, which nothing packaged calls. If a caller were added, served."},
+  "acceptance.py": {"is_one_of_the_three": true, "class": "inert",
+   "one_line": "accept gains the member copy (74bbdbb322, IB-pr-455) AND carries TWO earlier unreleased commits that are NOT IB-pr-455's: 2f7cc7be42 (AR-y-37, acting_principal_id) and 1eed34a8c0 (AR-y-11, ticket_id on the record; this entry's live pin 090c819803 predates it). INERT here because commentary_composition.py reads the record through requests.get only and nothing packaged calls accept or lookup. If a caller were added, served."}
+ }
+}

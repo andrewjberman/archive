@@ -1,0 +1,317 @@
+diff --git a/src/pages/SecurityAnalysis/modelSheet.ts b/src/pages/SecurityAnalysis/modelSheet.ts
+index 42ee1b5b..7f25d9cb 100644
+--- a/src/pages/SecurityAnalysis/modelSheet.ts
++++ b/src/pages/SecurityAnalysis/modelSheet.ts
+@@ -416,6 +416,10 @@ export interface TeamCell {
+   /** AMGT_CORPUS round 47 (CRPS-aw-2): the period cell's Excel number format. Set ONLY when the served `row_formats[i]` is an
+    * array (then the entry for this cell's period, else null). The cell's `value` stays the saved value. */
+   format?: string | null
++  /** AMGT_CORPUS round 49 (CRPS-ay-2, C-S65): a TEXT cell of the team's sheet, carried verbatim. `textKind` is `error` for a string
++   * starting with `#`, else `word`. A text cell has no number: `value` is NaN and is never printed. */
++  text?: string
++  textKind?: 'error' | 'word'
+ }
+ 
+ /** AMGT_CORPUS round 47 (CRPS-aw-2): a team sheet row's served label in words, and its claim. */
+@@ -543,12 +547,43 @@ export interface ModelSheet {
+   v3Facts: V3Fact[]
+   /** CRPS-av-2: present only when the served team sheet carries row classes. */
+   teamCensus?: TeamCensus
++  /** AMGT_CORPUS round 49 (CRPS-ay-2, C-S64): present ONLY when the served team sheet carries a non-empty `blocks`. */
++  sheetBlocks?: SheetBlock[]
++}
++
++/** AMGT_CORPUS round 49 (CRPS-ay-2, C-S64): a block of the team's sheet as its own small table. `period` and `case` blocks print the
++ * verbatim grid under the sheet's own header cells; an `unread` block prints NO value (its label rows carry `why`). */
++export type BlockCell = { text: string } | { value: number; format: string | null; display: string } | null
++export interface SheetBlockRow {
++  rowNumber: number
++  kind: 'title' | 'years' | 'body'
++  blockRow: boolean
++  cells: BlockCell[]
++}
++export interface SheetBlock {
++  firstRow: number
++  lastRow: number
++  kind: 'period' | 'case' | 'unread'
++  why: string | null
++  withheld: number
++  columns: string[]
++  rows: SheetBlockRow[]
++}
++
++interface RawSheetBlock {
++  first_row?: number | null
++  last_row?: number | null
++  kind?: string | null
++  why?: string | null
++  withheld?: number | null
++  columns?: string[] | null
++  rows?: { row_number?: number | null; kind?: string | null; block_row?: boolean | null; cells?: ({ v?: number | string | null; f?: string | null } | null)[] | null }[] | null
+ }
+ 
+ /** CRPS-av-2: the census of the team sheet's rows. `classes` sum to the sheet's row count; `bySource` sums to `classes.FIGURE`;
+  * `unmapped` counts FIGURE rows with no source (0 by construction). */
+ export interface TeamCensus {
+-  classes: { FIGURE: number; HEADING: number; CONTROL: number }
++  classes: { FIGURE: number; HEADING: number; CONTROL: number; BLOCK?: number }
+   bySource: { bloomberg: number; team: number; why: number }
+   unmapped: number
+   /** AMGT_CORPUS round 47 (CRPS-aw-2): present ONLY when the payload carries `row_labels`. Over the rendered rows: `held` the
+@@ -556,6 +591,16 @@ export interface TeamCensus {
+    * the rows whose entry is measured (none of the three above); `raw` the rendered rows whose final label is still a field
+    * code (0 on a complete payload). */
+   labels?: { held: number; factset_line: number; bloomberg_line: number; measured: number; raw: number }
++  /** AMGT_CORPUS round 49 (CRPS-ay-2, C-S65): over the cells, for the displayed years, of the rendered team FIGURE rows. `unclassed`
++   * counts cells that print `--` although they hold a non-empty string (0 by construction). */
++  text?: { error: number; word: number; empty: number; unclassed: number }
++  /** AMGT_CORPUS round 49 (CRPS-ay-2, C-S64): present ONLY when the payload carries `blocks`. `rows` counts the rows with `blockRow`. */
++  blocks?: {
++    period: { blocks: number; rows: number }
++    case: { blocks: number; rows: number }
++    unread: { blocks: number; rows: number }
++    withheld: number
++  }
+ }
+ 
+ /** SAW-22: the lines the Model tab's summary prints, in order, picked from the served sheet by the sheet row's line name (its
+@@ -622,6 +667,7 @@ export function buildModelSheet(
+     row_labels?: (TeamRowLabel | null)[] | null
+     row_formats?: ((string | null)[] | null)[] | null
+     class?: string | null
++    blocks?: RawSheetBlock[] | null
+   } | null
+ ): ModelSheet {
+   void servedLineNames
+@@ -760,11 +806,17 @@ export function buildModelSheet(
+     const known = new Map<string, ModelSheetRow>()
+     for (const row of [...summary, ...history, ...v3]) if (!known.has(sameLabel(row.label))) known.set(sameLabel(row.label), row)
+     const census: TeamCensus = { classes: { FIGURE: 0, HEADING: 0, CONTROL: 0 }, bySource: { bloomberg: 0, team: 0, why: 0 }, unmapped: 0 }
++    const textCounts = { error: 0, word: 0, empty: 0, unclassed: 0 }
+     const teamRows: ModelSheetRow[] = []
+     // The period header position of a sheet year: a period label YYYY fills the sheet year 'YYYY' and the forecast column 'YYYYE'.
+     const periodAt = (year: string) => periods.findIndex((period) => period && String(period.label).trim() === (year.endsWith('E') ? year.slice(0, -1) : year))
+     for (let i = 0; i < rawRows.length; i += 1) {
+       const served = classes[i]
++      // AMGT_CORPUS round 49 (CRPS-ay-2, C-S64): a BLOCK row prints in its block, never in the period grid; counted only when served.
++      if (served === 'BLOCK') {
++        census.classes.BLOCK = (census.classes.BLOCK ?? 0) + 1
++        continue
++      }
+       const cls: 'FIGURE' | 'HEADING' | 'CONTROL' = served === 'FIGURE' || served === 'HEADING' ? served : 'CONTROL'
+       census.classes[cls] += 1
+       if (cls === 'CONTROL') continue
+@@ -790,16 +842,35 @@ export function buildModelSheet(
+           const raw = values[i]
+           const rawValues: unknown[] = Array.isArray(raw) ? raw : []
+           const named = servedRowLabel(labelRows[i])
++          const hasNumber = years.some((year) => {
++            const at = periodAt(year)
++            const value = at >= 0 ? rawValues[at] : undefined
++            return typeof value === 'number' && Number.isFinite(value)
++          })
++          const pending = { error: 0, word: 0, empty: 0, unclassed: 0 }
+           const cells = years.map((year): TeamCell | null => {
+             const at = periodAt(year)
+             const value = at >= 0 ? rawValues[at] : undefined
+-            if (typeof value !== 'number' || !Number.isFinite(value)) return null
++            if (hasNumber && typeof value === 'string' && value.trim()) {
++              // C-S65: a text cell of a figure row is carried by what it is: an error token, or the team's own word.
++              const text = value.trim()
++              const kind: 'error' | 'word' = text.startsWith('#') ? 'error' : 'word'
++              pending[kind] += 1
++              return { mnemonic: null, fiscal_year: Number(year.endsWith('E') ? year.slice(0, -1) : year), value: Number.NaN, unit: null, column: periods[at].column ?? null, text, textKind: kind }
++            }
++            if (typeof value !== 'number' || !Number.isFinite(value)) {
++              if (hasNumber) pending.empty += 1
++              return null
++            }
+             const cell: TeamCell = { mnemonic: null, fiscal_year: Number(year.endsWith('E') ? year.slice(0, -1) : year), value, unit: null, column: periods[at].column ?? null }
+             const formats = formatRows[i]
+             if (Array.isArray(formats)) cell.format = typeof formats[at] === 'string' ? formats[at] : null
+             return cell
+           })
+           if (cells.some((cell) => cell !== null)) {
++            textCounts.error += pending.error
++            textCounts.word += pending.word
++            textCounts.empty += pending.empty
+             row = {
+               label: named ? named.text : label,
+               mnemonic: null,
+@@ -860,6 +931,7 @@ export function buildModelSheet(
+     // Amendment 1 (kept): every other group the base builds stays below the team rows, unchanged and in order.
+     groups = [{ title: MODEL_SHEET_TITLE, rows: teamRows }, ...groups.slice(1)]
+     if (hasLabels) census.labels = labelCounts
++    census.text = textCounts
+     teamCensus = census
+   }
+   if (!classed && teamLabels.length > 0) {
+@@ -885,6 +957,51 @@ export function buildModelSheet(
+     groups = [{ title: MODEL_SHEET_TITLE, rows: teamRows }, ...groups.slice(1)]
+   }
+ 
++  // AMGT_CORPUS round 49 (CRPS-ay-2, C-S64): each served block as its own small table (the sheet's own header rows ride in it).
++  const sheetBlocks: SheetBlock[] = []
++  if (teamSheet && Array.isArray(teamSheet.blocks)) {
++    for (const raw of teamSheet.blocks) {
++      if (!raw || !Array.isArray(raw.rows) || typeof raw.first_row !== 'number') continue
++      const kind: 'period' | 'case' | 'unread' = raw.kind === 'period' || raw.kind === 'case' ? raw.kind : 'unread'
++      const rows: SheetBlockRow[] = []
++      for (const rr of raw.rows) {
++        if (!rr || typeof rr.row_number !== 'number') continue
++        const rowKind: 'title' | 'years' | 'body' = rr.kind === 'title' || rr.kind === 'years' ? rr.kind : 'body'
++        // An unread block prints no value, whatever the payload carries.
++        const served = kind !== 'unread' && Array.isArray(rr.cells) ? rr.cells : []
++        const cells = served.map((cell): BlockCell => {
++          if (!cell || cell.v === null || cell.v === undefined) return null
++          if (typeof cell.v === 'number' && Number.isFinite(cell.v)) {
++            const plainYear = rowKind !== 'body' && Number.isInteger(cell.v) && cell.v >= 1990 && cell.v <= 2100
++            const format = typeof cell.f === 'string' ? cell.f : null
++            return { value: cell.v, format, display: plainYear ? String(cell.v) : formatTeamValue(cell.v, format) }
++          }
++          if (typeof cell.v === 'string' && cell.v.trim()) return { text: cell.v.trim() }
++          return null
++        })
++        rows.push({ rowNumber: rr.row_number, kind: rowKind, blockRow: rr.block_row === true, cells })
++      }
++      sheetBlocks.push({
++        firstRow: raw.first_row,
++        lastRow: typeof raw.last_row === 'number' ? raw.last_row : raw.first_row,
++        kind,
++        why: typeof raw.why === 'string' && raw.why.trim() ? raw.why : null,
++        withheld: typeof raw.withheld === 'number' && Number.isFinite(raw.withheld) ? raw.withheld : 0,
++        columns: kind !== 'unread' && Array.isArray(raw.columns) ? raw.columns.map(String) : [],
++        rows,
++      })
++    }
++  }
++  if (teamCensus && sheetBlocks.length > 0) {
++    const tally = { period: { blocks: 0, rows: 0 }, case: { blocks: 0, rows: 0 }, unread: { blocks: 0, rows: 0 }, withheld: 0 }
++    for (const block of sheetBlocks) {
++      tally[block.kind].blocks += 1
++      tally[block.kind].rows += block.rows.filter((row) => row.blockRow).length
++      tally.withheld += block.withheld
++    }
++    teamCensus.blocks = tally
++  }
++
+   const headers = Array.isArray(headerFigures) ? headerFigures : []
+   const v3Facts: V3Fact[] = []
+   for (const mnemonic of Object.keys(V3_HEADER_LABELS)) {
+@@ -896,7 +1013,7 @@ export function buildModelSheet(
+   let absentRowCount = 0
+   for (const group of groups) {
+     for (const row of group.rows) {
+-      renderedFigureCount += row.cells.filter((cell) => cell !== null).length
++      renderedFigureCount += row.cells.filter((cell) => cell !== null && !(isTeamCell(cell) && cell.text !== undefined)).length
+       if (row.absentReason) absentRowCount += 1
+     }
+   }
+@@ -919,5 +1036,6 @@ export function buildModelSheet(
+     estimateYearsAbsent,
+     v3Facts,
+     ...(teamCensus ? { teamCensus } : {}),
++    ...(sheetBlocks.length > 0 ? { sheetBlocks } : {}),
+   }
+ }
+diff --git a/src/pages/SecurityAnalysis/tabs/ModelTab.tsx b/src/pages/SecurityAnalysis/tabs/ModelTab.tsx
+index ea17d2bd..79e66498 100644
+--- a/src/pages/SecurityAnalysis/tabs/ModelTab.tsx
++++ b/src/pages/SecurityAnalysis/tabs/ModelTab.tsx
+@@ -163,6 +163,20 @@ function teamCellTitle(cite: TeamCite | null | undefined, column: string | null)
+ /** CRPS-av-2: one team value; its cite rides the title. AMGT_CORPUS round 47 (CRPS-aw-2): printed by the cell's own Excel number
+  * format (formatTeamValue); the full saved value rides the title and the data attribute. */
+ function TeamModelCell({ figure, cite }: { figure: TeamCell; cite: TeamCite | null | undefined }) {
++  // AMGT_CORPUS round 49 (CRPS-ay-2, C-S65): a text cell prints by what it is -- an error token in words, the team's word verbatim.
++  if (figure.text !== undefined) {
++    const isError = figure.textKind === 'error'
++    return (
++      <td
++        data-model-text={figure.textKind}
++        data-model-year={figure.fiscal_year}
++        data-model-source="team"
++        title={isError ? `The research team's own sheet shows an error ("${figure.text}") here, so no value is shown.` : teamCellTitle(cite, figure.column)}
++        className={`text-right text-[14px] font-normal px-1 ${INK_NAVY}`}>
++        {isError ? 'error in team sheet' : figure.text}
++      </td>
++    )
++  }
+   return (
+     <td
+       data-model-cell={String(figure.value)}
+@@ -743,6 +757,44 @@ function ModelBody({ data, versions }: { data: ThesisBundle; versions: ReactNode
+           </tbody>
+         </table>
+       </div>
++      {(sheet.sheetBlocks ?? []).map((block) => block.kind === 'unread' ? (
++        <ul key={`sheet-block-${block.firstRow}`} data-sheet-block={block.firstRow} data-sheet-block-kind="unread" className={`space-y-0.5 text-[14px] font-normal ${INK_NAVY}`}>
++          {block.rows.filter((row) => row.blockRow).map((row) => {
++            const numbers = data.model?.team_sheet?.row_numbers ?? []
++            const at = numbers.indexOf(row.rowNumber)
++            const label = at >= 0 ? data.model?.team_sheet?.rows?.[at] : null
++            return (
++              <li key={`sheet-block-${block.firstRow}-${row.rowNumber}`}>
++                {label || `Row ${row.rowNumber}`}: {block.why}
++              </li>
++            )
++          })}
++        </ul>
++      ) : (
++        <div key={`sheet-block-${block.firstRow}`} className="overflow-x-auto">
++          <table data-sheet-block={block.firstRow} data-sheet-block-kind={block.kind} className="w-full">
++            <tbody>
++              {block.rows.map((row) => (
++                <tr key={`sheet-block-${block.firstRow}-${row.rowNumber}`} data-sheet-block-row={row.rowNumber} data-sheet-row-kind={row.kind} className={`border-t ${BORDER_HAIRLINE}`}>
++                  {row.cells.map((cell, index) => {
++                    const key = `${block.columns[index] ?? index}`
++                    const text = cell === null ? '' : 'text' in cell ? cell.text : cell.display
++                    return row.kind === 'body' ? (
++                      <td key={key} className={`${cell !== null && 'value' in cell ? 'text-right tabular-nums' : 'text-left'} text-[14px] font-normal px-1 ${INK_NAVY}`}>
++                        {text}
++                      </td>
++                    ) : (
++                      <th key={key} scope="col" className={`text-left text-[13px] font-bold px-1 ${INK_NAVY}`}>
++                        {text}
++                      </th>
++                    )
++                  })}
++                </tr>
++              ))}
++            </tbody>
++          </table>
++        </div>
++      ))}
+       {anyMarked && (
+         <p data-model-currency-footnote="" className={`text-[11px] font-normal ${INK_MUTED}`}>
+           * currency not stated by the source for marked rows
+diff --git a/src/pages/SecurityAnalysis/types.ts b/src/pages/SecurityAnalysis/types.ts
+index c46b246e..6bd9119b 100644
+--- a/src/pages/SecurityAnalysis/types.ts
++++ b/src/pages/SecurityAnalysis/types.ts
+@@ -1145,7 +1145,7 @@ export interface ThesisModelBlock {
+     reason?: string | null
+     /** AMGT_CORPUS round 46 (CRPS-av-2): the served row class, sheet row number, team period values and period header, all
+      * aligned with `rows` (periods is the header, not aligned). Optional: a payload captured before them carries none. */
+-    row_classes?: ('FIGURE' | 'HEADING' | 'CONTROL')[] | null
++    row_classes?: ('FIGURE' | 'HEADING' | 'CONTROL' | 'BLOCK')[] | null
+     row_numbers?: number[] | null
+     row_values?: ((number | string | null)[] | null)[] | null
+     periods?: { label: string; column: string }[] | null
+@@ -1153,6 +1153,17 @@ export interface ThesisModelBlock {
+      * FIGURE row the period cells' Excel number formats. Optional: a payload captured before them carries neither. */
+     row_labels?: ({ text: string; source: 'bloomberg' | 'factset'; claim: 'held' | 'absent' | 'measured'; cite: string | null; code: string; why: string | null } | null)[] | null
+     row_formats?: ((string | null)[] | null)[] | null
++    /** AMGT_CORPUS round 49 (CRPS-ay-2): the team's blocks (present only when the sheet has BLOCK rows). An `unread` block has
++     * `columns` [] and every row's `cells` []. */
++    blocks?: {
++      first_row: number
++      last_row: number
++      kind: 'period' | 'case' | 'unread'
++      why: string | null
++      withheld: number
++      columns: string[]
++      rows: { row_number: number; kind: 'title' | 'years' | 'body'; block_row: boolean; cells: ({ v: number | string | null; f?: string | null } | null)[] }[]
++    }[] | null
+   } | null
+ }
+ 

@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-144",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "06a610f1c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "103bfd0691",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-144.tie-59-of-90-rederived-id-once.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~117",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~117/TIE_59_OF_90_REDERIVED.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~117/TIE_59_OF_90_REDERIVED.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only counts-only record: of 90 segments the naive sum ties 59 (reproduced exactly) and 31 do not; with each transaction id counted once 89 tie and 1 does not; 30 segments change side, all to tie, none to not-tie; one read-only pass over the Black Diamond transactions prefix (1878 objects), no S3 write, no code change",
+      "artifact_covered_by": [
+        "DB76-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB76-2-AC1",
+      "criterion_verbatim": "DB76-2-AC1 -- the count of the 90 segments whose ledger contributions and withdrawals tie the custodian's net additions is re-derived with each transaction id counted once, beside the naive count. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r76/p76_round76.py\" . DB76-2-AC1",
+      "output_evidence": "OK: of 90, the naive sum ties 59; each id counted once ties 89; 30 segment(s) change side\nDB76-2-AC1 PASS",
+      "denominator": "90 of 90 segments; naive 59 + 31 = 90; id_once 89 + 1 = 90; moved 30 = 30 to tie + 0 to not-tie; exit code 0",
+      "status": "PASS",
+      "expect": "DB76-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads the committed record from the worktree root; the counts come from private scripts s1_repro.py, s2_read.py, s3_compare.py",
+      "observed": "the checker printed the same last line on two runs; the naive count from the fresh read matches ~108 on all 90 segments",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The checker against an empty scratch root (no record).",
+      "expected": "DB76-2-AC1 FAIL",
+      "observed": "FAIL: no record; DB76-2-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "p76_round76.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r76/p76_round76.py\" . DB76-2-AC1",
+      "result": "DB76-2-AC1 PASS (rc 0); against an empty root it prints DB76-2-AC1 FAIL (rc 1)"
+    }
+  ]
+}

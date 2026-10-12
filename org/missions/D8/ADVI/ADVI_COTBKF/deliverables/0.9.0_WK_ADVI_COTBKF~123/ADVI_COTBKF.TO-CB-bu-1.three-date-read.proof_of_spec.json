@@ -1,0 +1,96 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-bu-1",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bu-1.three-date-read.md",
+  "group": "OTHER",
+  "vintage_commit": "402428f630"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~123",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round73.md",
+  "vintage_commit": "402428f630",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-bu-1.three-date-read.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~123/THREE_DATE_READ.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement record; nothing fetched; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB73bu1-AC1",
+    "CB73bu1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~123/THREE_DATE_READ.csv",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only per-fund table of the 101-fund population; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB73bu1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~123/THREE_DATE_READ.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement note; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB73bu1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB73bu1-AC1",
+   "criterion_verbatim": "the rule was written first; every fund of the population is read on three dates and carries one sizing reading (sizing_sum equals funds); the issuer reads the convention and the counts.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~123/THREE_DATE_READ.json',encoding='utf-8'));p=d['population'];t=d['three_date'];s=d['sizing'];print('THREE-DATE-READ rule_written=%s funds=%d of_the_197=%d of_the_nine=%d cells=%d equal_same=%d equal_before=%d equal_after=%d convention=%s validated=%d adjusted=%d not_adjusted=%d undecided=%d not_validated=%d sizing_sum=%d measured_account_days=%d differs=%d'%(bool(d['rule']['written_at']),p['funds'],p['of_the_197'],p['of_the_nine'],t['cells'],t['equal_same'],t['equal_before'],t['equal_after'],t['convention'],s['validated'],s['adjusted'],s['not_adjusted'],s['undecided'],s['not_validated'],s['adjusted']+s['not_adjusted']+s['undecided']+s['not_validated'],d['reach']['measured_account_days'],len(d['against_earlier']['differs'])))\"",
+   "expect": "THREE-DATE-READ rule_written=True",
+   "output_evidence": "THREE-DATE-READ rule_written=True funds=101 of_the_197=50 of_the_nine=9 cells=944 equal_same=794 equal_before=744 equal_after=579 convention=undetermined validated=42 adjusted=21 not_adjusted=21 undecided=0 not_validated=59 sizing_sum=101 measured_account_days=1874 differs=0 (rc 0)",
+   "denominator": "101 of 101 population funds carry one sizing reading (21 adjusted + 21 not adjusted + 0 undecided + 59 not validated); 944 compared cells; 50 of the 197, 51 of the 73, 9 of the nine; rule written 2026-10-11T19:24:25Z",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB73bu1-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the rule precedes the run and was kept; the convention rests on the funds beyond the nine and is `no single convention` if they disagree; a cached close sizes a fund only where the custodian's price validates it; the reach is stated as a floor with what is unsized beside it; nothing was fetched.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read THREE_DATE_READ.json (rule, population, three_date, sizing, against_earlier, reach, unsized, not_established), THREE_DATE_READ.md and THREE_DATE_READ.csv",
+   "output_evidence": "rule file clock stamp 2026-10-11T19:24:25Z written after the population denominators and before any custodian price was set beside a close; kept unchanged, sensitivities reported beside; convention under the rule `undetermined` (32 decided funds under one third of 101), `no_single_convention` without that clause; sizing only for the 42 validated funds, 59 not validated unsized; reach counted on the 21 adjusted funds as a floor with 121 no-cache funds and 59 not validated unsized; no network call made",
+   "denominator": "101 funds; 944 compared cells; 32 decided funds; 42 validated; 21 / 21 / 0 / 59",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~123/ADVI_COTBKF.TO-CB-bu-1.three-date-read.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB73bu1-AC1)",
+   "result": "THREE-DATE-READ rule_written=True funds=101 of_the_197=50 of_the_nine=9 cells=944 equal_same=794 equal_before=744 equal_after=579 convention=undetermined validated=42 adjusted=21 not_adjusted=21 undecided=0 not_validated=59 sizing_sum=101 measured_account_days=1874 differs=0"
+  }
+ ]
+}

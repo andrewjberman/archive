@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-READ-R8-ds1.disabled-users-authorizer-and-status-values-dell2",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-READ-R8-ds1.disabled-users-authorizer-and-status-values-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "733c0943cd"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TV2",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R8.md",
+    "vintage_commit": "733c0943cd",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-READ-R8-ds1.disabled-users-authorizer-and-status-values-dell2.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r8_ds1/DISABLED_USERS_READ_20261012.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The read in three parts under the top-level keys the order names: `authorizer` (answers a to d with path:line citations and `files_read`, all 11 of which were checked to exist), `disabled_internal_rows`, `status_values` (profile_rows 56 and counts summing to it, plus the internal split), `what_was_not_read` and `claim`. NO ADDRESS and no at-sign at all: the two disabled rows are identified by 12-hex digest with their email DOMAIN only, since the domain is itself the evidence for one of them. AC1 reads DS1-READ-OK profile_rows=56 status_values=2 disabled_internal=2 files_read=11.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R8_CHECKS/r8_ds1_read.py expect: DS1-READ-OK",
+      "method": "command",
+      "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R8_CHECKS/r8_ds1_read.py",
+      "expect": "DS1-READ-OK",
+      "output_evidence": "DS1-READ-OK profile_rows=56 status_values=2 disabled_internal=2 files_read=11 -- the issuer's own script reading my file, against the FAIL it returned at issuance when the file did not exist. The check fails on three further conditions and none fired: the file holds no address, the status counts sum to profile_rows (54 + 2 = 56), and every cited path exists (verified independently before writing, all 11).",
+      "status": "PASS",
+      "status_reason": "PASS decided by the issuer's own script matching its expect pattern, not by this seat's judgement.",
+      "denominator": "86 of 86 users items returned by a complete scan; 56 PROFILE rows with 56 status values counted; 27 of 27 tickets scanned; 3 source trees and 11 cited paths read"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "SIX controls, and two of them changed what I would have reported. (1) THE SCAN'S COMPLETENESS: projected, UNFILTERED, with LastEvaluatedKey checked, so the denominator is the table rather than a page. (2) THE STATUS COUNTS SUM to the PROFILE total -- the order's own stated control. (3) A POSITIVE CONTROL BESIDE EVERY ZERO in a source search, per the bound this order carries from my own row D2-S51: both authorizers returned 0 hits for status/disabled/users-reads, and each file was re-grepped for a token it certainly contains (4 and 2 'export' hits). (4) THE DEPLOYED BUILD INPUT, not the file at HEAD: the absence was re-measured against git show 26ffa22b79:<path>. (5) The three sign-in guards verified AT the recorded deploy commit, not only at HEAD. (6) Every cited path checked to exist before writing, because AC1 fails on a dead citation.",
+      "expected": "(1) 86 returned, no unread page. (2) 54 + 2 == 56. (3) zeros with non-zero controls. (4) the absence holds on the deployed input. (5) the guards present at that commit. (6) no dead path.",
+      "observed": "(1) 86 items, LastEvaluatedKey absent. (2) 56 == 56, and the internal split 21 + 2 == 23. (3) both authorizers: 0 status/users-read hits with controls of 4 and 2, so the zeros are real. (4) THE CONTROL THAT MATTERED: HEAD's portal-authorizer index.mjs is 450 lines while the DEPLOYED build input is 262 -- 188 lines apart -- so the file the order's pointer names is not what runs. The absence holds on BOTH, re-measured, and the added code is a render-token path. (5) lines 106, 255 and 538 all read the status guard at commit 5b06664303, and the src tree has 0 changed files since it. (6) all 11 cited paths exist.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every value is a count, a class, a digest or a path:line citation taken from a file on disk or a complete table scan, so a repeat read must agree with itself. The two lifetimes are read from named constants in source, never from a token. The deployed-versus-source question is answered with hashes and git reads, with no download.",
+      "observed": "The counts reproduce: 86 items, 56 PROFILE, 54 active and 2 disabled summing to 56. The two authorizer searches reproduce on both HEAD and the recorded build input. ONE CLASSIFICATION ERROR OF MINE WAS CAUGHT AND CORRECTED BEFORE ANYTHING WAS WRITTEN, and it was the single most consequential judgement in this read: my first person-versus-non-human heuristic tested whether the domain equals opalinvest.com, which would class EVERY EXTERNAL PERSON as non-human -- a person at a partner firm or vendor has an external domain by definition. It had rendered a single given name at an external company domain, userType null, as 'looks like a service/tool handle'. Re-read on the FORM of the local-part instead, that row READS AS A PERSON, which is the one thing the order says to report FIRST OF ALL. The first heuristic would have buried it.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Every email address",
+      "reason": "FORBIDDEN in a tracked file by the order and absent from this one, which holds no at-sign at all. The two disabled rows carry a 12-hex digest and their email DOMAIN only -- the domain is kept because for one of them it is the evidence that the row reads as a person at an external company."
+    },
+    {
+      "item": "Any token, secret or key",
+      "reason": "NONE was read, printed or copied, and no sign-in was attempted. Both lifetimes come from named constants in jwt.ts, which is what the order requires: a lifetime read from CODE, never from a token."
+    },
+    {
+      "item": "The deployed bytes of either authorizer",
+      "reason": "NOT DOWNLOADED OR DIFFED -- the order says not to. The tie is by artifact hash against the source map plus git reads of the recorded commits, and where that is not enough I say NOT TIED rather than guessing."
+    },
+    {
+      "item": "Whether the portal-authorizer artifact was BUILT from the source at its recorded commit",
+      "reason": "NOT ESTABLISHED, and said in the file. A matching source-map hash pairs a function with an artifact; it does not pair an artifact with a source tree. This is the same limit my R5-dr-1 read recorded for a different function."
+    },
+    {
+      "item": "opal-portal-rest-authorizer's commit",
+      "reason": "NOT TIED. Its map entry carries an artifact hash but no last_deployed_commit, so it cannot be tied to a commit from the map. Its source is present and reads no users-row status either, with a working control."
+    },
+    {
+      "item": "WHO disabled either row, and when",
+      "reason": "NOT RECOVERABLE from the table. No PROFILE row carries a disabledAt or any audit attribute -- I checked six candidate attribute names and all six are absent on all 56 rows. updatedAt is the only timestamp and records the last touch of any kind, and 3 rows lack even that."
+    },
+    {
+      "item": "Whether the person-shaped disabled row belongs to a real individual, and what should be done about it",
+      "reason": "NOT THIS READ'S and not asserted. I report the FORM of the address, its domain and its userType; the identity behind it and the decision are the CTO's. The order asks only that I say first of all if a row reads as a person, which I do."
+    },
+    {
+      "item": "The direct-invoke path's exposure",
+      "reason": "Named but not bounded by this read. The 15-minute figure is the PORTAL path only. Row TCKT_VNEXT-D2-S46 (ARMED, the CTO's) records that a holder of lambda:InvokeFunction presents any caller context with no token at all, so no expiry applies there -- which is how this project's own R6 and R7 proofs were run."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/logs/2026-10-12/tv2_r8_ds1_disabled_users_read.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "'status|disabled|enabled|isActive|deleted' over the sign-in source, both pages read",
+      "result": "44 hits across 13 files as the printed denominator; the three decisive guards in auth.ts and the optional `status?: string` in types.ts, which page 2 held -- so not stopping at page 1 mattered"
+    },
+    {
+      "tool": "grep on NAMED files, each with a positive control",
+      "invocation": "the two authorizers for status/disabled/users-reads, then the same files for a token they certainly contain",
+      "result": "0 hits in both against controls of 4 and 2 'export' hits, so the absence is a measurement and not a dead search -- the bound this order carries from my own row D2-S51"
+    },
+    {
+      "tool": "git show / git diff --numstat",
+      "invocation": "the recorded deploy commits' source against HEAD, and the three guard lines at the recorded commit",
+      "result": "sign-in src unchanged since 5b06664303 with all three guards present there; portal-authorizer 188 lines apart from its build input, which is why the absence was re-measured on the deployed version"
+    },
+    {
+      "tool": "aws lambda get-function-configuration",
+      "invocation": "one read per function, three functions",
+      "result": "both live hashes equal their source-map artifact hashes; the authorizer's LastModified is later than its recorded deploy, consistent with a configuration-only update"
+    },
+    {
+      "tool": "aws dynamodb scan with a projection, no filter",
+      "invocation": "opal-users-v2 for status and six candidate equivalent attributes; opal-tickets for actor dates",
+      "result": "86 items with no unread page, 56 PROFILE, status active 54 and disabled 2 summing to 56; zero rows carry disabledAt, enabled, active, deleted, lastUpdated or modifiedAt; neither disabled row appears on any of the 27 tickets"
+    }
+  ]
+}

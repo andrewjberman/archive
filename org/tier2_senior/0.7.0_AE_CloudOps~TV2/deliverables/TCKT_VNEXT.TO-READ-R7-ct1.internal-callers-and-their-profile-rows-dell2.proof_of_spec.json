@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-READ-R7-ct1.internal-callers-and-their-profile-rows-dell2",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-READ-R7-ct1.internal-callers-and-their-profile-rows-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "f48336439a"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TV2",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R7.md",
+    "vintage_commit": "f48336439a",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-READ-R7-ct1.internal-callers-and-their-profile-rows-dell2.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r7_ct1/INTERNAL_CALLERS_AND_PROFILE_ROWS_20261011.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The census: both denominators, one object per address carrying its 12-hex digest, source (a, b or both), PROFILE row count, firmId, status, userType, firm-list CLASS (never its value), the refusal paths that apply to it, and claim: measured -- plus the five totals under a top-level `totals` key as the criterion requires. NO ADDRESS IS IN IT and no at-sign at all: the criterion rejects the character outright to keep addresses out, so even the order's own commit pin is written without one, and the file says why. The addresses live only in my message to the issuer.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ONE row, TCKT_VNEXT-D2-S49, binary append with the file's CRLF endings kept (1662 CRLF of 2088 LF measured at write time) and the id computed at write time from BOTH the headings AND the JSON id fields: 82 occurrences of 48 distinct ids where the headings alone showed 19. The channel had grown from S45 to S48 since my own last append, so a heading-only read would have collided. The row carries digests only, no address, and no at-sign.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -c \"...INTERNAL_CALLERS_AND_PROFILE_ROWS_20261011.json...;print('CT1-TOTALS-OK' if k<=set(t) and t['internal_addresses']==t['with_exactly_one_row']+t['with_no_row']+t['with_more_than_one_row'] and '@' not in json.dumps(d) else 'CT1-TOTALS-FAIL')\" expect: CT1-TOTALS-OK",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r7_ct1/INTERNAL_CALLERS_AND_PROFILE_ROWS_20261011.json',encoding='utf-8'));t=d.get('totals',{});k={'internal_addresses','with_exactly_one_row','with_no_row','with_more_than_one_row','stored_case_differs'};print('CT1-TOTALS-OK' if k<=set(t) and t['internal_addresses']==t['with_exactly_one_row']+t['with_no_row']+t['with_more_than_one_row'] and '@' not in json.dumps(d) else 'CT1-TOTALS-FAIL')\"",
+      "expect": "CT1-TOTALS-OK",
+      "output_evidence": "CT1-TOTALS-OK, run as the order words it, against the FAIL it returned at issuance when the file did not exist. The criterion checks three things and all three hold: the five total keys are present; 30 == 23 + 7 + 0; and the file contains no at-sign. The totals are internal_addresses 30, with_exactly_one_row 23, with_no_row 7, with_more_than_one_row 0, stored_case_differs 0.",
+      "status": "PASS",
+      "status_reason": "PASS decided by the instrument's printed output matching the criterion's expect pattern, not by this seat's judgement.",
+      "denominator": "86 of 86 users items returned by a complete scan; 56 PROFILE rows, 23 with firmId opal-capital; 27 of 27 tickets scanned; 30 addresses looked up, each with BOTH limbs of the service's lookup"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "SEVEN controls. (1) THE SCAN'S COMPLETENESS: run with a projection and NO filter, so the denominator is the whole table, and LastEvaluatedKey checked rather than assumed -- a filtered scan's Count is per page and would have been the wrong denominator. (2) A CROSS-CHECK OF THE INDEX AGAINST THE TABLE: PROFILE items counted from the scan versus the email index's own ItemCount. (3) THE LOOKUP RUN IN BOTH LIMBS, as the service runs it, after the first pass proved the index is KEYS_ONLY. (4) EVERY ATTRIBUTE READ TWICE on independent paths -- the get_item and the full projected scan -- and compared. (5) The totals' sum checked against the population. (6) The finished file scanned for an at-sign. (7) The handler's rule read at HEAD rather than taken from the order's summary, including which boto3 layer it uses.",
+      "expected": "(1) 86 returned, no unread page. (2) PROFILE count == index ItemCount. (3) attributes present in limb 2. (4) 0 mismatches. (5) 30 == 23+7+0. (6) none. (7) the order's summary confirmed.",
+      "observed": "(1) 86 items returned, LastEvaluatedKey absent, so the scan was complete and the denominator is the table. (2) 56 PROFILE items and the email index reports 56 -- they agree, which also says only PROFILE rows carry the email attribute. (3) limb 2 returns allowedFirmIds, email, firmId, status and userType; limb 1 returns ONLY PK, SK and email. (4) 0 mismatches across 23 rows on firmId, status and the firm-list class. (5) 30 == 23 + 7 + 0. (6) no at-sign in the finished file. (7) confirmed, and more precisely than the summary: the actor's email is stripped and LOWER-CASED at line 305 before the index query, which is why the stored-case count in step 4 matters at all.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every value in the tracked file is a count, a class or a digest derived from two independent reads of the same rows -- a full projected scan of the table and a per-address get_item -- so a repeat read must agree with itself. The digests are sha256 of the stripped, lower-cased address truncated to 12 hex, which is reproducible from the address alone.",
+      "observed": "The two reads agree on every attribute of all 23 rows with a PROFILE row: 0 mismatches on firmId, status and the firm-list class. The index's own item count agrees with the scan's PROFILE count. ONE INSTRUMENT ERROR OF MINE WAS CAUGHT AND CORRECTED BEFORE ANYTHING WAS WRITTEN, and it would have been a materially false finding: my first pass ran only limb 1 of the lookup, and because email-index is KEYS_ONLY the attributes came back empty, so all 23 rows rendered as allowedFirmIds ABSENT. In the service's own logic an absent allowedFirmIds returns (None, None) -- no firm scope -- so that file would have told a seat building a release on this very lookup that 23 internal staff are unscoped. The service does two steps; I had done one.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Every email address",
+      "reason": "FORBIDDEN in a tracked file by the order, and absent from both tracked files. People's addresses are not client data but they are people's. The tracked census carries 12-hex digests; the addresses go only in the message to 2.0.0_SA_COO~V2, who names them to the CTO. The criterion's blunt at-sign check is honoured to the letter, including by writing the order's own commit pin without one."
+    },
+    {
+      "item": "Any allowedFirmIds VALUE",
+      "reason": "Out of bounds. The file records the CLASS only -- ABSENT, EMPTY-LIST, LIST with a length, STRING-ALL, STRING-OTHER -- and for the one non-list value it records the type and the length (a string of length 10) without the value, which is all the finding needs."
+    },
+    {
+      "item": "Any ticket content",
+      "reason": "Out of bounds. The ticket scan projected only ticket_id, created_by, assignee, claimed_by and events, and nothing but ACTOR addresses and principal classes was derived from it. No title, description, requester, answers or attachment was read."
+    },
+    {
+      "item": "A caller who has never touched a ticket AND has no users row",
+      "reason": "NOT VISIBLE TO THIS READ, stated in the order and repeated in the file. Such a caller is in neither table: a constructed authorizer context, or a non-human identity carrying an Opal firm id that was never written to opal-users-v2. The authorizer mints firmId, so for an address with no PROFILE row the class is recorded as null -- not determinable from here -- and never as false."
+    },
+    {
+      "item": "Whether the one non-list allowedFirmIds actually fires its refusal",
+      "reason": "NOT DETERMINABLE from these two tables and said so in row S49. That same row carries userType 'service' with a local-part the handler does not know, which would make it UNRESOLVABLE before the scope lookup is reached. Which of the two refusal paths fires depends on the userType the authorizer mints. Either way it is refused."
+    },
+    {
+      "item": "Whether a PROFILE row of a firm other than opal-capital carries a non-list allowedFirmIds",
+      "reason": "NOT SWEPT. The population this order defines is the internal one, 30 addresses; the other 33 PROFILE rows were not examined for that attribute's type. Named in row S49 as a different read with a different denominator rather than left implied."
+    },
+    {
+      "item": "Whether the release should key on a row's PRESENCE or on its STATUS",
+      "reason": "The CTO's call, not mine. I report that the two populations differ -- 23 rows exist but 21 are active -- because the PRD's ADDENDUM 3 says ACTIVE, and leave the decision there."
+    }
+  ],
+  "surprises": ["TCKT_VNEXT-D2-S49"],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/logs/2026-10-11/tv2_r7_ct1_internal_callers_and_profile_rows.md",
+  "compiler_tools": [
+    {
+      "tool": "aws dynamodb describe-table",
+      "invocation": "on opal-users-v2, for the item count and the index projections",
+      "result": "86 items; email-index ACTIVE with 56 items and projection KEYS_ONLY -- the read that explained why my first pass saw no attributes"
+    },
+    {
+      "tool": "aws dynamodb scan with a projection and NO filter",
+      "invocation": "PK, SK, email, firmId, status, userType, allowedFirmIds over opal-users-v2",
+      "result": "86 items returned with no LastEvaluatedKey, so the denominator is the whole table rather than a page; 56 PROFILE, 23 of them firmId opal-capital"
+    },
+    {
+      "tool": "aws dynamodb scan with a projection",
+      "invocation": "ticket_id, created_by, assignee, claimed_by, events over opal-tickets",
+      "result": "27 tickets, 12 distinct actor addresses: 3 service subjects dropped and counted, 9 non-service callers who have actually used the service"
+    },
+    {
+      "tool": "aws dynamodb query on email-index (limb 1) + get-item (limb 2)",
+      "invocation": "30 queries of the lower-cased address keeping SK PROFILE, then 23 get_items on PK with SK PROFILE",
+      "result": "the service's own two-step lookup: 23 addresses with exactly one row, 7 with none, 0 with more than one. Limb 2 is required because limb 1's index is KEYS_ONLY"
+    },
+    {
+      "tool": "a native read of the handler at HEAD",
+      "invocation": "principal_class (312-330), _profile_scope (360-391) and the boto3 layer (line 71)",
+      "result": "INTERNAL is firmId opal-capital and not a service subject; the email is lower-cased at line 305; and _profile_scope has THREE refusal paths, only one of which is a row count -- the basis of row S49"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-144",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-144.form-bounded-repost-and-closed-details.md",
+    "group": "OTHER",
+    "vintage_commit": "1549efce5d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R14_Y.md",
+    "vintage_commit": "1549efce5d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-144.form-bounded-repost-and-closed-details.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~51",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/analysisRequest.ts",
+      "kind": "script",
+      "commit_or_etag": "e1dd6ef918",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree branch wk-IRPT_ANLREQ-51-portal-r14 only; not pushed, not deployed. Exports UPLOAD_MAX_TRIES=5 and UPLOAD_WAIT_MS=3000; fileAnalysisRequest re-posts the identical request (same upload_token) while the answer is RESOLVING, with an injectable wait in deps.",
+      "artifact_covered_by": ["AR144-y-AC1", "AR144-y-AC2J"]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx",
+      "kind": "script",
+      "commit_or_etag": "e1dd6ef918",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same branch. UploadFindings takes optional details and shows them only inside a closed details element.",
+      "artifact_covered_by": ["AR144-y-AC1", "AR144-y-AC2J"]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/TicketCenter.tsx",
+      "kind": "script",
+      "commit_or_etag": "e1dd6ef918",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same branch. Passes onWaiting so the result area says the file is being checked while the form waits; passes details to UploadFindings.",
+      "artifact_covered_by": ["AR144-y-AC1", "AR144-y-AC2J"]
+    },
+    {
+      "path_or_key": "portal/src/pages/TicketCenter/__tests__/analysis-request-repost.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "e1dd6ef918",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same branch. Four named tests, typed fakes, an injected wait that records milliseconds and never sleeps.",
+      "artifact_covered_by": ["AR144-y-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR144-y-AC1",
+      "criterion_verbatim": "AR144-y-AC1: the four named tests are in the new file, no test waits on a real timer, and the whole TicketCenter folder passes (62 at the base, plus the four).",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-51/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r14/ar14_checks.py y144-form --root C:/dev/wk-irpt-anlreq-51 --portal C:/dev/wk-irpt-anlreq-51/portal",
+      "output_evidence": "TicketCenter folder: 66 pass, 0 fail (rc=0); Y144-FORM-OK (rc=0)",
+      "denominator": "66 of 66 tests in the TicketCenter folder pass (62 at the base plus the 4 new); 4 of 4 named tests present in the new file",
+      "status": "PASS",
+      "expect": "Y144-FORM-OK"
+    },
+    {
+      "criterion_id": "AR144-y-AC2J",
+      "criterion_verbatim": "AR144-y-AC2J (judgment, graded at L9, never by you): a person who attaches a bad sheet learns what to fix without pressing twice and without reading a code; a person whose sheet is still being priced is told so plainly and nothing is filed.",
+      "method": "manual_read_with_citation",
+      "invocation": "none: judgment criterion, graded at L9 by 3.0.0_SA_CVO from portal/src/pages/TicketCenter/analysisRequest.ts (fileAnalysisRequest, findingParts, STILL_CHECKING_MESSAGE) and AnalysisRequestParts.tsx (UploadFindings) at portal commit e1dd6ef918, and the four named tests in analysis-request-repost.test.tsx",
+      "denominator": "4 of 4 named tests record the behaviours: first-answer finding (1 post, 0 waits), bounded re-post (5 tries, 4 waits of 3000 ms, same upload_token on every post), after the bound (message names 'still being checked', 'nothing was filed', 'submit it again later'; 0 tickets created), raw code only in a closed details (the code sits after the details element opens; the details element has no open attribute); no verdict by the worker",
+      "output_evidence": "Sentence after the bound: 'The file is still being checked after several tries; nothing was filed, and you can submit it again later.' A finding with no words shows 'One row could not be read; see details'; its raw code and row (for example 'ROW_NOT_READABLE, row 7') are in the closed details element only. A raw-code reason on a NEEDS_CORRECTION answer is likewise moved into the details and the message reads 'Review required: the file needs a correction. Nothing was filed.' git diff --stat origin/DEV HEAD (portal): 4 files changed, 237 insertions(+), 27 deletions(-).",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: the oracle is 3.0.0_SA_CVO at L9; the worker records output and gives no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Before the build the new test file was absent, so y144-form had nothing to pass (record face: AC1 FAIL, folder 62).",
+      "expected": "FAIL before the edit; OK after",
+      "observed": "Y144-FORM-OK after the edit; folder grew 62 to 66.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the criterion check was run once after the edit; every wait in the new file is an injected fake that records milliseconds, no real timer.",
+      "observed": "Y144-FORM-OK; bun run typecheck rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal typecheck and lint as criteria",
+      "reason": "Not criteria of this order; run anyway: bun run typecheck rc=0 (tsc -b --noEmit, no output); bun x eslint on the four changed files: 0 errors, 7 warnings (react-refresh/only-export-components, all on lines that existed at the base)."
+    },
+    {
+      "item": "the service's behaviour on a repeated POST of the same upload",
+      "reason": "Not run live (LOCAL order). The portal code states it: the upload request carries upload_token, one per chosen file, and prospect.ts and ProspectComposer.tsx re-POST the IDENTICAL body as the poll for a RESOLVING answer (3 s, the server re-sends to the resident at most once per 16 minutes). The form re-posts the same input.upload object, so every try carries the same upload_token. No portal-code gap, so no surprise row."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test ./src/pages/TicketCenter",
+      "result": "66 pass, 0 fail"
+    }
+  ]
+}

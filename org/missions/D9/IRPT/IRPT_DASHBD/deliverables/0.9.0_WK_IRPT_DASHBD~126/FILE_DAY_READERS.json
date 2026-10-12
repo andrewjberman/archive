@@ -1,0 +1,449 @@
+{
+ "to": "IRPT_DASHBD.TO-DB-b-156",
+ "worker": "0.9.0_WK_IRPT_DASHBD~126",
+ "claim": "measured",
+ "firm": "49 Financial (original bucket bound to the firm by the naming registry; the same bucket and key form row W124-S1 and record 0.9.0_WK_IRPT_DASHBD~124/COPY_VS_ORIGINAL.json name)",
+ "readers_considered": 32,
+ "readers_from_each_population": {
+  "served_dashboard": 17,
+  "tie_out": 15
+ },
+ "how_the_list_was_made": "Served: the 33 entries of 0.9.0_WK_IRPT_DASHBD~116/ORIGINAL_STORE_SHAPE.json readers, kept where served is true (17 entries over 15 distinct files; two files appear twice at different lines and are classed per line). Tie-out: the distinct producing scripts of the 0.9.0_WK_IRPT_DASHBD~124/COPY_VS_ORIGINAL.json figure_sources entries whose store is COPY (15 scripts; entries whose store is DERIVED, SERVED_GOLD, CUSTODIAN_PULL or WITHDRAWN, and COPY listed only under 'also', are not in it). Each reader was classed from its code at the line where it selects rows by day, read in this worktree; not from its name or another worker's summary.",
+ "readers": [
+  {
+   "file": "data/black_diamond/scripts/gold/A_00.accounts_dimension.py",
+   "line": 152,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "BOTH",
+   "date_column": "trade_date",
+   "basis": "File day: _list_txn_keys drops every object whose key date is not after the stored watermark (lines 128-157), and only those objects are loaded on an incremental run (line 694); no restatement check, so an old-day object rewritten later is not re-read. Row date: latest row and first-seen date per account come from trade_date (lines 236-246, 291-303)."
+  },
+  {
+   "file": "data/black_diamond/scripts/gold/A_01.advisor_assignments.py",
+   "line": 657,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "trade_date",
+   "basis": "Rows are placed by trade_date (lines 255, 361-374). The key date only bounds a cache: files after a window floor are re-read (line 657) and a changed or vanished object older than the floor forces a full rebuild (lines 649-655); the key date (_file_date) also breaks ties between duplicate transaction ids (line 245), it does not place a row on a day."
+  },
+  {
+   "file": "data/black_diamond/scripts/gold/A_03.positions_cube.py",
+   "line": 890,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "trade_date",
+   "basis": "load_transactions reads every object (lines 862-868) and places units by trade_date (lines 890, 1012); no file day is used except the key order that decides which duplicate row survives (line 905)."
+  },
+  {
+   "file": "data/black_diamond/scripts/gold/A_04.client_dimension.py",
+   "line": 136,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "trade_date",
+   "basis": "Reads every object; first-seen and activity use trade_date (lines 140, 268, 278-282). The key date (_file_date, line 118) is only the sort key that picks the surviving row of a duplicated transaction id (line 136)."
+  },
+  {
+   "file": "data/black_diamond/scripts/gold/B_01.holdings_lots.py",
+   "line": 2514,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "trade_date",
+   "basis": "Reads every object (lines 239-258); lots and snapshots are cut on trade_date (txn['trade_date'] <= snapshot_date at line 2514; acquisition_date from trade_date at line 2126). No file day used."
+  },
+  {
+   "file": "data/black_diamond/scripts/gold/B_03.account_gains.py",
+   "line": 327,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "FILE_DAY",
+   "date_column": "none",
+   "basis": "For day D it loads the object silver/transactions/D.parquet (line 327; the batch path loads the same object per day at lines 888-893 and reads it at line 536) and sums every income-type row in it as day D income (lines 339-364, 543-550) with no filter on any row date column. The day is the object's key."
+  },
+  {
+   "file": "data/black_diamond/scripts/gold/lib/nna_flows.py",
+   "line": 385,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "trade_date",
+   "basis": "Daily flows are grouped on trade_date (lines 385-389, dates parsed at lines 213-231). The key date only decides incremental versus full scan: a new object dated at or before the stored maximum, a changed LastModified or a vanished object forces a full scan (lines 570-583), so the output does not depend on which object a row sat in."
+  },
+  {
+   "file": "data/black_diamond/scripts/gold/C_01.canonical_nna.py",
+   "line": 783,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "trade_date",
+   "basis": "Own code selects no day from the store; it calls lib/nna_flows.py load_flows_from_transactions (lines 783, 861), whose rows are placed by trade_date (see the nna_flows entry)."
+  },
+  {
+   "file": "data/black_diamond/scripts/gold/build_canonical_prices_v2.py",
+   "line": 127,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "trade_date",
+   "basis": "Reads every object (line 125); prices are grouped on (asset_name, trade_date) (line 238) and the spine from trade_date (lines 348-359). No file day used."
+  },
+  {
+   "file": "data/black_diamond/scripts/silver/bd_price_update.py",
+   "line": 214,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "BOTH",
+   "date_column": "trade_date",
+   "basis": "File day: new-asset backfill scans object keys newest first and stops a fixed number of objects after the assets are found (lines 212-249), so which objects enter depends on key order. Row date: the rows are then grouped by (asset_name, trade_date) in backfill_new_assets (line 515)."
+  },
+  {
+   "file": "data/black_diamond/scripts/silver/bd_price_update.py",
+   "line": 265,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "FILE_DAY",
+   "date_column": "none",
+   "basis": "load_transactions_for_date(target_date) loads the one object whose key is the target date (line 265) and extract_t1_prices (lines 327-344, called at line 821 on that frame) takes the median price of every row in it as the target date's observed price, with no filter on trade_date."
+  },
+  {
+   "file": "infra/aws/lambda/bd-pipeline/bd-price-update/lambda_function.py",
+   "line": 92,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "BOTH",
+   "date_column": "trade_date",
+   "basis": "File day: the deployed twin of bd_price_update.py scans object keys newest first (lines 89-120) and stops after a fixed margin. Row date: grouped by (asset_name, trade_date) (line 348). The same file's job 2 (lines 703-733) also selects objects by key date >= a 30-day floor and then filters rows on trade_date (line 512)."
+  },
+  {
+   "file": "infra/aws/lambda/bd-pipeline/bd-price-update/lambda_function.py",
+   "line": 143,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "FILE_DAY",
+   "date_column": "none",
+   "basis": "load_transactions_for_date loads the one object keyed by the target date (line 143) and extract_t1_prices (lines 185-200, applied to that frame as t1_today in the handler, before line 654) treats every row in it as the target date's, with no row-date filter."
+  },
+  {
+   "file": "data/black_diamond/scripts/bronze/build_schwab_bd_account_xref.py",
+   "line": 105,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "BOTH",
+   "date_column": "trade_date",
+   "basis": "File day: bd_partitions_last_n keeps only objects whose key date is on or after a cutoff (lines 91-108), so rows enter or not by the object's key date. Row date: the latest row per account and the first and last seen dates use trade_date (lines 168-181)."
+  },
+  {
+   "file": "data/black_diamond/scripts/silver/merge-daily-incremental.py",
+   "line": 492,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "BOTH",
+   "date_column": "trade_date",
+   "basis": "File day: the writer's 30-day id filter selects prior objects by key date in [cutoff, data date) (lines 481-500) and drops from the new file every id found there (lines 501-507); the new object is named by the data date and holds rows of all trade_dates (lines 513-519). Row date: rows keep their own trade_date (lines 445-450). Not read in a figure; this is the mechanism row W124-S1 names for the re-attribution."
+  },
+  {
+   "file": "data/black_diamond/scripts/silver/backfill_cusip_in_transactions.py",
+   "line": 72,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "NEITHER",
+   "date_column": "none",
+   "basis": "enrich_partition re-emits each object whole after joining a cusip (lines 71-100); it uses no row date and takes no day from the object. The key date is read only to honour the operator's --since selection (line 64)."
+  },
+  {
+   "file": "data/black_diamond/scripts/bronze/slice_backfill_to_daily.py",
+   "line": 135,
+   "used_by": "SERVED_DASHBOARD",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "trade_date",
+   "basis": "Reads the backfill monolith, not a day object (line 65), and cuts it into day objects by trade_date (lines 134-135); the key list at lines 49-59 only decides which days are skipped as already present."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~108/read90.py",
+   "line": 127,
+   "used_by": "TIE_OUT",
+   "keys_on": "NEITHER",
+   "date_column": "none",
+   "basis": "Reads every day partition of the copy (lines 113-135) and keeps rows of the wanted accounts; the partition name is not kept and no day is used to select."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~108/class90.py",
+   "line": 89,
+   "used_by": "TIE_OUT",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "return_date",
+   "basis": "No selection in this file: the ledger flow it ties comes from table90.pkl, built by table90.py line 44 which keeps rows whose return_date lies in the segment; read90 carries no partition day (TXN_COLS, read90.py line 27), so a file day is not available to it."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~111/s6_record.py",
+   "line": 56,
+   "used_by": "TIE_OUT",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "return_date",
+   "basis": "Ledger day totals are keyed on str(return_date)[:10] and kept when the date lies in the segment (lines 55-57)."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~113/a1_days.py",
+   "line": 37,
+   "used_by": "TIE_OUT",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "return_date",
+   "basis": "Flow rows are kept on return_date in the segment and grouped by that date (lines 37-38)."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~113/b2_read.py",
+   "line": 38,
+   "used_by": "TIE_OUT",
+   "keys_on": "BOTH",
+   "date_column": "return_date",
+   "basis": "Reads every day partition of the copy and stores the partition name of each row as _part (line 38) beside its own return_date and trade_date columns (lines 22-23). Diagnostic read: it selects no row by day."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~113/b3_loc.py",
+   "line": 26,
+   "used_by": "TIE_OUT",
+   "keys_on": "BOTH",
+   "date_column": "return_date",
+   "basis": "Groups rows by (account, return_date) (line 10) and compares the stored partition name with the return_date (lines 26-28). A diagnostic of file day against row date; no figure is placed by the partition."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~113/b5_txnid.py",
+   "line": 41,
+   "used_by": "TIE_OUT",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "return_date",
+   "basis": "Flow rows kept on return_date in the segment and grouped by that date (lines 41-42)."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~113/b6_odd.py",
+   "line": 34,
+   "used_by": "TIE_OUT",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "return_date",
+   "basis": "Flow rows kept on return_date in the segment and grouped by that date (lines 34-35)."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~115/c1_read.py",
+   "line": 36,
+   "used_by": "TIE_OUT",
+   "keys_on": "NEITHER",
+   "date_column": "none",
+   "basis": "Reads every day partition of the copy and keeps rows of the wanted accounts; no day is used to select and the partition name is not kept."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~115/c2_compare.py",
+   "line": 57,
+   "used_by": "TIE_OUT",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "return_date",
+   "basis": "Flow rows kept on return_date in the segment and grouped by that date (lines 57-58)."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~115/c3_fee.py",
+   "line": 16,
+   "used_by": "TIE_OUT",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "return_date",
+   "basis": "Ledger rows selected by str(return_date)[:10] == day (line 16)."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~115/c4_types.py",
+   "line": 42,
+   "used_by": "TIE_OUT",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "return_date",
+   "basis": "Flow rows kept on return_date in the segment and grouped by that date (lines 42-43)."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~117/s1_repro.py",
+   "line": 12,
+   "used_by": "TIE_OUT",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "return_date",
+   "basis": "No selection in this file: it ties the flow sums of table90.pkl (table90.py line 44 keeps rows on return_date); no partition day is available to it."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~117/s2_read.py",
+   "line": 33,
+   "used_by": "TIE_OUT",
+   "keys_on": "NEITHER",
+   "date_column": "none",
+   "basis": "Reads every day partition of the copy and keeps rows of the wanted accounts; no day is used to select and the partition name is not kept."
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~118/producers/0.9.0_WK_IRPT_DASHBD~117/s3_compare.py",
+   "line": 32,
+   "used_by": "TIE_OUT",
+   "keys_on": "TRANSACTION_DATE",
+   "date_column": "return_date",
+   "basis": "Ledger rows kept on return_date in the segment (line 32)."
+  }
+ ],
+ "file_day_keyed": 10,
+ "file_day_keyed_split": {
+  "FILE_DAY": 3,
+  "BOTH": 7,
+  "FILE_DAY_readers_and_their_user": [
+   {
+    "file": "data/black_diamond/scripts/gold/B_03.account_gains.py",
+    "line": 327,
+    "used_by": "SERVED_DASHBOARD"
+   },
+   {
+    "file": "data/black_diamond/scripts/silver/bd_price_update.py",
+    "line": 265,
+    "used_by": "SERVED_DASHBOARD"
+   },
+   {
+    "file": "infra/aws/lambda/bd-pipeline/bd-price-update/lambda_function.py",
+    "line": 143,
+    "used_by": "SERVED_DASHBOARD"
+   }
+  ],
+  "of_the_BOTH_readers_that_only_record_the_file_day_for_a_diagnostic": 2
+ },
+ "tie_out_uses_a_file_day_reader_for_a_figure": false,
+ "classing_rule": "FILE_DAY: the day comes from the object key, or the object for day D is loaded and every row in it is treated as day D. TRANSACTION_DATE: rows are placed by a date column of the row; a key date that only bounds a cache with a full-rebuild fallback on any changed object, or only breaks ties between duplicate ids, does not place a row and is stated in the basis. BOTH: the key date decides which objects' rows enter the output (no such fallback) AND the row date places them, or the code reads both and says so. NEITHER: reads every object, uses no day.",
+ "schema": {
+  "date_columns_of_the_row": [
+   "return_date",
+   "trade_date",
+   "entry_date",
+   "settle_date",
+   "relationship_termination_date",
+   "relationship_inception_date",
+   "history_start_date",
+   "history_start_date_1",
+   "closed_date",
+   "performance_start_date",
+   "start_date",
+   "account_create_date",
+   "as_of_date"
+  ],
+  "read_from": "the footer of the oldest version of each of the two day objects (74 columns; date columns by name or by timestamp/date type)",
+  "transaction_level_date_columns": [
+   "return_date",
+   "trade_date",
+   "entry_date",
+   "settle_date"
+  ],
+  "columns_projected_in_the_read": "transaction_id plus the 13 date columns above; no money column, no account column"
+ },
+ "days": [
+  {
+   "day": "2026-08-22",
+   "ids_then": 4545,
+   "rows_then": 23229,
+   "ids_found_now": 4545,
+   "files_now": 1,
+   "files_now_days": [
+    "2026-08-20"
+   ],
+   "own_date_equals_then_file_day": 0,
+   "own_date_equals_now_file_day": 4505,
+   "date_column_used": "trade_date (the transaction's own trade date; the date column the row-date readers group on). An id counts when every one of its rows carries that date.",
+   "other_date_columns": {
+    "return_date": {
+     "ids_whose_rows_all_carry_the_file_day_then": 0,
+     "ids_whose_rows_all_carry_the_file_day_now": 4545
+    },
+    "settle_date": {
+     "ids_whose_rows_all_carry_the_file_day_then": 0,
+     "ids_whose_rows_all_carry_the_file_day_now": 3852
+    },
+    "entry_date": {
+     "ids_whose_rows_all_carry_the_file_day_then": 0,
+     "ids_whose_rows_all_carry_the_file_day_now": 50
+    },
+    "start_date": {
+     "ids_whose_rows_all_carry_the_file_day_then": 0,
+     "ids_whose_rows_all_carry_the_file_day_now": 20
+    },
+    "as_of_date": {
+     "ids_whose_rows_all_carry_the_file_day_then": 0,
+     "ids_whose_rows_all_carry_the_file_day_now": 36
+    }
+   },
+   "date_columns_all_zero_then_and_now": [
+    "relationship_termination_date",
+    "relationship_inception_date",
+    "history_start_date",
+    "history_start_date_1",
+    "closed_date",
+    "performance_start_date",
+    "account_create_date"
+   ],
+   "ids_with_no_current_file_on_the_old_day": 4545,
+   "ids_in_more_than_one_current_file": 0,
+   "current_file_day_minus_old_file_day_in_days": {
+    "-2": 4545
+   }
+  },
+  {
+   "day": "2026-08-23",
+   "ids_then": 1035,
+   "rows_then": 4990,
+   "ids_found_now": 1035,
+   "files_now": 1,
+   "files_now_days": [
+    "2026-08-21"
+   ],
+   "own_date_equals_then_file_day": 0,
+   "own_date_equals_now_file_day": 1030,
+   "date_column_used": "trade_date (the transaction's own trade date; the date column the row-date readers group on). An id counts when every one of its rows carries that date.",
+   "other_date_columns": {
+    "return_date": {
+     "ids_whose_rows_all_carry_the_file_day_then": 0,
+     "ids_whose_rows_all_carry_the_file_day_now": 1035
+    },
+    "settle_date": {
+     "ids_whose_rows_all_carry_the_file_day_then": 0,
+     "ids_whose_rows_all_carry_the_file_day_now": 129
+    },
+    "entry_date": {
+     "ids_whose_rows_all_carry_the_file_day_then": 0,
+     "ids_whose_rows_all_carry_the_file_day_now": 3
+    },
+    "start_date": {
+     "ids_whose_rows_all_carry_the_file_day_then": 0,
+     "ids_whose_rows_all_carry_the_file_day_now": 32
+    },
+    "as_of_date": {
+     "ids_whose_rows_all_carry_the_file_day_then": 0,
+     "ids_whose_rows_all_carry_the_file_day_now": 2
+    }
+   },
+   "date_columns_all_zero_then_and_now": [
+    "relationship_termination_date",
+    "relationship_inception_date",
+    "history_start_date",
+    "history_start_date_1",
+    "closed_date",
+    "performance_start_date",
+    "account_create_date"
+   ],
+   "ids_with_no_current_file_on_the_old_day": 1035,
+   "ids_in_more_than_one_current_file": 0,
+   "current_file_day_minus_old_file_day_in_days": {
+    "-2": 1035
+   }
+  }
+ ],
+ "reads": {
+  "oldest_versions_read": 2,
+  "current_objects_read": 84,
+  "current_objects_range": [
+   "2026-07-20",
+   "2026-10-11"
+  ],
+  "day_named_objects_in_prefix": 1925,
+  "rows_scanned_in_current_objects": 1893485,
+  "read_errors": 0,
+  "note": "The owner's read was 83 objects dated 2026-07-20 to 2026-10-10; this read adds the 2026-10-11 object (84). Ranged parquet reads of the projected columns only."
+ },
+ "answer": {
+  "any_reader_keys_on_file_day": true,
+  "basis": "10 of 32 readers are classed FILE_DAY or BOTH (3 FILE_DAY, 7 BOTH): 8 on the served side and 2 on the tie-out side. The 2 on the tie-out side are the two diagnostics that record the copy's partition name beside the row's return_date (b2_read.py, b3_loc.py); no tie-out figure is placed by the partition, the other 13 tie-out producers key on the row's own return_date or read every object.",
+  "what_it_means": "For the two days, 5580 ids (4545 + 1035, every id the two day files held then) sit now in a file of a different day (the files two days earlier), and none sits in the old day's file. A reader that places an id by its file's day (B_03.account_gains.py line 327; bd_price_update.py line 265 and its lambda twin line 143) would place all 5580 on a different day than before. At the object's own dates the ids never matched the old file day (trade_date and return_date equal to the old file day for 0 ids then) and match the new file day for return_date on every id and for trade_date on 4505 + 1030. No served figure is recomputed here.",
+  "row_date_readers": "Readers that place by trade_date or return_date are unaffected in placement by the move: each id's own date values are unchanged from the old version to the current objects (every one of the 5580 ids, for every date column but the ingest stamp as_of_date)."
+ },
+ "limits": [
+  "Which served gold or silver figures changed because of the move is not established; no served figure was recomputed and no gold partition was read.",
+  "Whether the three FILE_DAY readers have run since the 2026-08-26 to 2026-09-02 rewrites, and what their incremental or fingerprint logic rebuilt, is not established (no run log read).",
+  "Row-level equality of the re-attributed rows beyond the transaction id and the date columns was not tested (the owner's record did not either).",
+  "A_01 and nna_flows are classed TRANSACTION_DATE because a changed object triggers their full rebuild; that guard was read in code, not exercised.",
+  "The deployed lambda was read from the repo copy infra/aws/lambda/bd-pipeline/bd-price-update/lambda_function.py, not from the deployed function.",
+  "merge-daily-incremental.py and slice_backfill_to_daily.py are classed from the read at the named lines; they write the store, they are listed because DB-b-143 listed them as served readers.",
+  "Of the other reads of the store on DB-b-143's list, the 16 entries with served false are outside the served population by that record's own flag and are not classed."
+ ],
+ "s3_writes": 0,
+ "client_figures": 0
+}

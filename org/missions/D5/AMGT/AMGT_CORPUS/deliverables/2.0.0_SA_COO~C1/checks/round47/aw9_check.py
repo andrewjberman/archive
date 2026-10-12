@@ -10,6 +10,8 @@ The rules under test (CTO round-46 ADDENDUM 2 msg 3994 and ADDENDUM 3 msg 4001):
     result dict (`key`, `put_performed`, `existed`, ...). A second put of the same bytes is a no-op (`existed` True).
   * the master arm of `team_sheet` (`rows_for`, `census`) reads that table: an object under `research_template/` whose basename is
     `team_sheet.MASTER_NAME` is the master; with none stored the answer is `master_absent` as today.
+    A `master` answer carries NO team values: `row_values` and `row_formats` are all None (as long as `rows`) and `periods` is `[]`;
+    the template's rows, row_classes, row_numbers, row_counts and row_labels are kept (AMENDMENT 3).
   * the team's own labels are MEASURED from the workbook being read, for a code row (identifier-form label) that no Bloomberg field-map
     description covers:
       - COLUMN-B METRIC NAME: when the code's row has a non-identifier string in column B (e.g. FE_ESTIMATE | "Sales"), the label is that
@@ -107,6 +109,10 @@ def workbook_bytes():
 
 
 def main():
+    # Round 48 (CRPS-ax-5): the shipped factset_descriptions.json now holds nine cross-workbook entries, one of which (FF_COM_SHS_OUT_EPS_DIL) names a code this
+    # fixture uses as its "two labels reference it" case. This check tests the MEASURED-label rules and the master arm, not the shipped data, so the entries
+    # cache is emptied here (the entries' own precedence is ax5_check.py's).
+    team_sheet._LABEL_CACHE["factset"] = {}
     body = workbook_bytes()
     client = FakeS3()
     b1 = b2 = b3 = b4 = 0
@@ -131,9 +137,21 @@ def main():
         if template is not None:
             template.put_template(body, "01ITEMIDTEST", client=client2, file_name=team_sheet.MASTER_NAME)
         got = team_sheet.rows_for("NOBODY_US_Equity", client=client2)
+        # AMENDMENT 3 (issuer, 2026-10-11 ~19:4xZ): the master template's cells are ANOTHER company's figures (the template is filled with
+        # one sample company's numbers); a master answer therefore carries NO values, formats or periods, only the template's rows, classes
+        # and labels. Read on the live store: 63 names x 126 FIGURE rows would have shown that company's numbers as "team model".
+        rv = got.get("row_values") or []
+        rf = got.get("row_formats") or []
+        nvals = sum(1 for v in rv if v is not None)
+        nfmts = sum(1 for v in rf if v is not None)
         b2 = 1 if (got.get("class") == "master" and "research_template" in str(got.get("workbook_key"))
-                   and "FF_SALES" in (got.get("rows") or [])) else 0
-        print("aw9 b2 master arm class %s workbook_key %s; ok %s" % (got.get("class"), got.get("workbook_key"), b2 == 1))
+                   and "FF_SALES" in (got.get("rows") or [])
+                   and len(rv) == len(got.get("rows") or []) and nvals == 0
+                   and len(rf) == len(got.get("rows") or []) and nfmts == 0
+                   and got.get("periods") == []
+                   and "FIGURE" in (got.get("row_classes") or [])) else 0
+        print("aw9 b2 master arm class %s workbook_key %s; values %d formats %d periods %s; ok %s"
+              % (got.get("class"), got.get("workbook_key"), nvals, nfmts, got.get("periods"), b2 == 1))
     except Exception as exc:  # noqa: BLE001
         print("aw9 b2 threw: %s" % str(exc)[:200])
     # b3: measured labels from the own workbook being read

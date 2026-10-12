@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSWKF.TO-READ-S4.second-door-authorizer-bytes-and-traffic-dell2",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.7.0_AE_CloudOps~DELL2",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/NFRA_OPSWKF.TO-READ-S4.second-door-authorizer-bytes-and-traffic-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "47a8bd507a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPSWKF/decompositions/NFRA_OPSWKF_DECOMP.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/NFRA_OPSWKF.TO-READ-S4.second-door-authorizer-bytes-and-traffic-dell2.md",
+    "vintage_commit": "db7affd0048835818f31ef2866cf2929d9630c5a"
+  },
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/NFRA_OPSWKF_SECOND_DOOR_AUTHORIZER_BYTES_AND_TRAFFIC_20261011.md",
+  "acceptance": [
+    {
+      "criterion_id": "OW-s5-AC1",
+      "criterion_verbatim": "the record exists, is ASCII, carries its five named sections, a context_keys: line, a requests_30d: line with a number or the words NO-METRIC, and its control line control_portal_api_30d: with a number above zero",
+      "denominator": "5 of 5 required sections, 3 line-anchored fields, and 1 ASCII sweep over the whole record",
+      "expect": "OW-S5-RECORD-OK",
+      "invocation": "python org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/2.0.0_SA_COO~O2/S_CHECKS/ow_s_checks.py s5-record",
+      "method": "command",
+      "output_evidence": "OW-S5-RECORD-OK 5 of 5 sections, requests_30d=NO-METRIC, control=54824",
+      "status": "PASS",
+      "status_reason": "IT FAILED FIRST AND THE FAILURE IS WORTH MORE THAN THE PASS, so it is recorded rather than smoothed away. The first run answered OW-S5-RECORD-FAIL no 'context_keys:' line, while this seat's own grep for the substring had reported it PRESENT. Both were right: the record carried the three fields wrapped in Markdown backticks, and the checker's patterns are LINE-ANCHORED (^context_keys: \\S, ^requests_30d: (\\d+|NO-METRIC)\\b, ^control_portal_api_30d: (\\d+)\\b), so a line beginning with a backtick satisfies none of them. A substring search and a line-anchored search are different instruments and the looser one agreed with what I wanted to be true. The three lines were unwrapped to column 0, each pattern was then matched directly before re-running the check, and the check passes: 5 of 5 sections, requests_30d=NO-METRIC, control=54824. The ASCII sweep is the checker's own (any ord > 127 fails it) and the record carries 0 non-ASCII characters."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/NFRA_OPSWKF_SECOND_DOOR_AUTHORIZER_BYTES_AND_TRAFFIC_20261011.md",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the one read-only record the order asks for, 10238 bytes, ASCII only: the two deployed packages read member by member with sizes and sha256, the authorizer's and the /auth handler's behaviour answered clause by clause with member and line citations, one sentence each for what the three trade functions answer through this API today, the 30-day traffic with its list-metrics denominator and its portal control, and a not_established section of eight items. No secret, key, token, password hash or stored user value appears in it: env keys, tables and fields are named, never their values. Verified by OW-s5-AC1's own check.",
+      "artifact_covered_by": [
+        "OW-s5-AC1"
+      ]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "aws lambda get-function (code location) + curl",
+      "invocation": "download the DEPLOYED package of trade-authorizer and of trade-auth-handler into separate scratch folders OUTSIDE the repository",
+      "result": "trade-authorizer 1218 bytes, 1 member (authorizer.py, 2964 bytes, sha256 6f52eb550481c2d2a07831bd33c38154). trade-auth-handler 280997 bytes, 13 members over 3 top-level names: its OWN code is one root file (auth_handler.py, 5936 bytes, sha256 0fc11a1b91b8d39d0406dcaaafdfcac3) and the other 12 members are vendored bcrypt 5.0.0 (bcrypt 5 members, bcrypt-5.0.0.dist-info 7), which were NOT read. Both packages were read as TEXT and never executed -- they are third-party bytes whose source is marked EXTERNAL with no files in the source map, so the deployed package is the only text there is. Both were DELETED at the end of the act and their absence printed."
+    },
+    {
+      "tool": "aws cloudwatch list-metrics",
+      "invocation": "AWS/ApiGateway Count for ApiId w8jnzvs21g, and the same for the portal API 7k3ed8px20, run BEFORE any get-metric-statistics",
+      "result": "0 metric rows for w8jnzvs21g; 2 for the portal API (ApiId alone, and ApiId+Stage=$default). Running it first is what lets the record say NO-METRIC rather than 0: an absent metric and a metric reading zero are different findings, and get-metric-statistics alone cannot tell them apart."
+    },
+    {
+      "tool": "aws cloudwatch get-metric-statistics",
+      "invocation": "daily Sum over 2026-09-11T22:53:39Z to 2026-10-11T22:53:39Z: AWS/ApiGateway Count for w8jnzvs21g with ApiId alone and with ApiId+Stage=prod, the same for the portal API as control, then AWS/Lambda Invocations for trade-authorizer, trade-auth-handler and trade-submission-handler as control",
+      "result": "w8jnzvs21g: 0 datapoints on both dimension sets. Portal control: 31 datapoints, total 54824. trade-authorizer 0 and trade-auth-handler 0, both with 0 datapoints; control trade-submission-handler 7 over 2 datapoints. Three independent measures agree that nothing called this door in 30 days, each with a control that would have shown traffic."
+    },
+    {
+      "tool": "aws apigatewayv2 get-stage",
+      "invocation": "api-id w8jnzvs21g, stage prod",
+      "result": "AccessLogSettings null, so access logging is NOT enabled and there is no access log to point at; AutoDeploy true, created 2026-01-06T20:33:04Z. NO log line was read, as the order requires."
+    },
+    {
+      "tool": "aws lambda get-function-configuration",
+      "invocation": "Environment.Variables key NAMES only, for both functions",
+      "result": "trade-authorizer: JWT_SECRET. trade-auth-handler: JWT_SECRET, USERS_TABLE. Names only; no value was read or written. This is what establishes that the authorizer's hardcoded fallback literal is not in effect at this reading, and that the handler's TOKEN_EXPIRY_HOURS is unset so its 24-hour default stands."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Nothing can be mutated in a read-only act, so the mutant's JOB -- a read whose value differs between the world being one way and the other -- is carried by the PORTAL API CONTROL on the traffic question, which is the one finding here that is an ABSENCE. A zero from CloudWatch can mean no traffic, or a wrong namespace, a wrong dimension name, a wrong window or a denied read. The control is the same namespace, metric, dimension shape, period, statistic and window, pointed at an API that is certainly busy.",
+      "expected": "a non-zero total for the portal API 7k3ed8px20 if the query shape and window can see traffic at all; a zero or an error if the instrument is blind, in which case the second API's zero would prove nothing",
+      "observed": "the portal API returned 31 datapoints totalling 54824 requests over the same 30 days, and a second control in the Lambda namespace (trade-submission-handler, 7 invocations over 2 datapoints) confirmed the Invocations shape too. So both query shapes see traffic where traffic exists, and the second API's 0 datapoints -- together with list-metrics returning 0 metric rows for it -- is an absence of requests rather than an absence of instrument.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "No act was repeated, because nothing was called or changed and a second identical read of a metric window returns the same stored aggregate rather than an independent sample. The comparison used instead is CORROBORATION ACROSS INDEPENDENT INSTRUMENTS: the traffic question was asked three ways that would fail differently -- the existence of the API's Count metric (list-metrics), the metric's datapoints over the window on two different dimension sets, and the Invocations of the two functions that door's routes must pass through -- plus whether the stage keeps an access log that could disagree.",
+      "observed": "STABLE: all four agree. list-metrics finds no Count metric for w8jnzvs21g at all; get-metric-statistics returns 0 datapoints with ApiId alone AND with ApiId+Stage=prod; trade-authorizer and trade-auth-handler each show 0 invocations over the same 30 days, which is the stronger reading of the two because every CUSTOM route of that API must invoke the authorizer; and the stage has no access log, so no fourth record exists to contradict them. The code reading corroborates the same conclusion from the other side: the authorizer returns a context of exactly email, name and role, so the two functions released today refuse every caller of this door, which is consistent with a door nothing uses.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No call to the API and no invoke of either function",
+      "reason": "The order's bounds forbid both outright, and the CTO half of the previous order ruled a read first. Every answer in the record comes from a DEPLOYED package read as text, a configuration read, or a CloudWatch metric. In particular POST /auth was never exercised, so nothing here shows what it would actually issue -- only what its bytes say it issues."
+    },
+    {
+      "item": "No credential, item or stored value was read from any table",
+      "reason": "The bounds permit a table's key schema and attribute names if step 2 needed them; it did not, because auth_handler.py names its own index (email-index), key fields (PK, SK) and the fields it reads (status, passwordHash, role, name, tier, firmId, userId) in its source. No item of opal-users-v2 was queried, so the record cannot say how many identities POST /auth would accept."
+    },
+    {
+      "item": "No rating and no proposed fix",
+      "reason": "The order says the outcome is the CTO's to write, so the record states what the bytes do and what the metrics show and stops there. Two facts a reader may be tempted to treat as verdicts are stated as findings only: the authorizer carries a hardcoded fallback literal for JWT_SECRET at authorizer.py:12 (not in effect, since the env key is set at this reading), and POST /auth has no rate limit, lockout or origin check with CORS open to '*'. Neither is scored here."
+    },
+    {
+      "item": "The vendored library members were not read",
+      "reason": "12 of the auth handler's 13 members are bcrypt 5.0.0 and its dist-info. The order asks for its OWN code read whole, which is the single root file auth_handler.py. Nothing here verifies the vendored bcrypt's integrity or version provenance beyond the dist-info name."
+    },
+    {
+      "item": "The eight not_established items in the record itself",
+      "reason": "Carried in the record's own final section rather than duplicated here: whether the API was ever called before the metric window, who holds an acceptable credential, whether the two JWT_SECRET values are the same (neither was read), whether the fallback literal is ever reachable, trade-workflow-handler's own rule, authorizer result caching, anything outside this account's CloudWatch, and the absence of any committed source to compare these deployed bytes against."
+    }
+  ],
+  "surprises": []
+}

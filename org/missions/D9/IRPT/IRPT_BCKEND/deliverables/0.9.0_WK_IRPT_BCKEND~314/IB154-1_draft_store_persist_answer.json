@@ -1,0 +1,250 @@
+{
+  "to_id": "IRPT_BCKEND.TO-IB-pr-458",
+  "cell": "IB-pr-458",
+  "worker": "0.9.0_WK_IRPT_BCKEND~314",
+  "base_commit": "c2843cad7dea147130d5606188859b123d27d74a",
+  "contract_changes_proposed": 0,
+  "aws_calls_made": 0,
+  "vendor_requests_made": 0,
+  "product_files_edited": 0,
+  "method_note": "Code and contract read at base. The only execution was the repo's own offline pytest of test_commentary_draft_store.py and test_commentary_ref_i7.py (13 passed) and one in-process probe (scratch, not committed) that fed the store's own fakes a record with and without ticket_id. Paths are relative to the worktree root; S = infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py, H = data/transcripts/scripts/commentary/lambda_handler.py.",
+  "persist_answer": {
+    "entry_point": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:274 (lambda_handler -> handle at :178 -> store at :146; the persist operation is op \"put\", admitted by KEYS_BY_OP at :67 and executed at :155-171)",
+    "how_it_is_called": "A direct, synchronous Lambda invoke (InvocationType RequestResponse) of function irpt-commentary-draft-store-lambda by the commentary drafter, payload {op, tenant, request_id, draft} built at H:135 and sent at H:114-115. The function is invoke-only: no schedule, no event source, no route (infra/aws/terraform/investor-reporting/export/commentary_draft_store.tf:16). Caller identity: the drafter's execution role outlook-global-commentary-draft-role. Claim: measured (code and Terraform text).",
+    "claim": "measured",
+    "outcomes": [
+      {
+        "outcome": "first persist: draft written and commentary_ref set (op put)",
+        "members": ["status", "commentary_ref", "commentary_ref.artifact_id", "commentary_ref.sha256", "commentary_ref.version_id"],
+        "built_at": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:171",
+        "note": "status is the string OK. The three ref members are non-empty strings (_shape at :127-131, REF_FIELDS at :72). No member is read from the accepted record except through tenant and owner (see accepted_record_at_persist). Pinned by test_commentary_draft_store.py:96-98 as an exact key set. Claim: measured (also watched by the probe)."
+      },
+      {
+        "outcome": "first persist after a crash between the two writes: the artifact exists, commentary_ref was never set; the first artifact's own ref is set and returned",
+        "members": ["status", "commentary_ref", "commentary_ref.artifact_id", "commentary_ref.sha256", "commentary_ref.version_id"],
+        "built_at": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:171",
+        "note": "Same return line as the first persist; the branch is :161-166 (ArtifactAlreadyWritten caught, ref taken from the index row). Pinned for commentary_ref equality only, by test_commentary_draft_store.py:163-164; that test does not assert the top-level key set. Claim: measured."
+      },
+      {
+        "outcome": "replay: a draft is already stored for the request (commentary_ref already set) -> REFUSED ALREADY_WRITTEN; the answer carries no commentary_ref",
+        "members": ["status", "reason"],
+        "built_at": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:175 (raised at :156, caught at :182-183)",
+        "note": "status is the string REFUSED, reason the string ALREADY_WRITTEN. Pinned as an exact dict by test_commentary_draft_store.py:145. The existing ref is only obtainable by op get_ref. Claim: measured."
+      },
+      {
+        "outcome": "replay race: the conditional update loses (commentary_ref set between the read at :152 and the update) -> REFUSED ALREADY_WRITTEN",
+        "members": ["status", "reason"],
+        "built_at": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:175 (raised at :223, caught at :182-183)",
+        "note": "Same body as the replay. Claim: measured by code; the conditional-failure branch is exercised offline by test_commentary_draft_store.py:241-243 against DynamoCommentaryRef.set_once."
+      },
+      {
+        "outcome": "refusal INVALID_REQUEST: not a dict, op not put or get_ref, key set not exactly the op's set, tenant or request_id malformed, draft not a non-empty dict, draft unserialisable or over 256 KiB",
+        "members": ["status", "reason"],
+        "built_at": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:175 (raised at :91, :94, :98, :102, :106, :108)",
+        "note": "Nothing is read or written before this refusal. Pinned by test_commentary_draft_store.py:174, :186-189, :210-215. Claim: measured."
+      },
+      {
+        "outcome": "refusal UNAVAILABLE: the request record is absent, is another firm's, names a different request_id, or its owner is missing or names another firm; or the repository raised ReportDenied",
+        "members": ["status", "reason"],
+        "built_at": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:175 (raised at :120 and :123; ReportDenied mapped at :184-185)",
+        "note": "Pinned by test_commentary_draft_store.py:171, :177, :180. Claim: measured."
+      },
+      {
+        "outcome": "refusal INTEGRITY: the stored ref is not exactly the three string fields, or the first artifact's index row is missing, another tenant's, or another family",
+        "members": ["status", "reason"],
+        "built_at": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:175 (raised at :166 and :168; commentary_ref_i7 raises the same code at :139 and :142)",
+        "note": "No test in test_commentary_draft_store.py asserts the INTEGRITY body through handle; test_commentary_ref_i7.py:31-33 asserts commentary_ref_i7 raises DraftStoreRefused. Claim: measured by code for the lines, absent for a handle-level pin."
+      },
+      {
+        "outcome": "refusal REFUSED: the repository raised ReportRefused (for example a logical id the repository will not accept)",
+        "members": ["status", "reason"],
+        "built_at": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:175 (ReportRefused mapped at :186-187; reason string REFUSED)",
+        "note": "Pinned only through repository-level pytest.raises in test_commentary_draft_store.py:131, :205, not as a handle body. Claim: measured by code."
+      },
+      {
+        "outcome": "no answer body: an exception that handle does not catch (a DynamoDB or S3 client error, or ReportRefused while composing the ports at :276) leaves the handler",
+        "members": [],
+        "built_at": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:276-277 (compose_ports and handle are called outside any try; the error body is built by the Lambda runtime, not by this repo)",
+        "note": "The drafter sees resp[FunctionError] and raises DRAFT_STORE_FUNCTION_ERROR (H:116-117). The runtime's error document is not in the repo, so its members are not listed. Claim: inferred."
+      }
+    ],
+    "other_op_in_the_same_handler": {
+      "operation": "get_ref (not the persist operation)",
+      "members": ["status", "commentary_ref", "commentary_ref.artifact_id", "commentary_ref.sha256", "commentary_ref.version_id"],
+      "built_at": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:154",
+      "note": "commentary_ref is null when none is stored, else the three fields. Pinned by test_commentary_draft_store.py:94 and :100. Listed so the senior seat sees both shapes the same handler returns."
+    },
+    "shape_declared": {
+      "declared": false,
+      "where": null,
+      "additional_members_forbidden": null,
+      "claim": "measured",
+      "in_words": "No schema or contract file names this answer. A search of infra/aws/lambda/investor-reporting/_contracts/ (14 schemas and 8 test files, no match for commentary in any) and docs/contracts/investor-reporting/v1/ (the only file naming commentary is AnalysisSubmissionRequest.schema.json, the submission input, not this answer) found no ALREADY_WRITTEN, get_ref, commentary_ref, draft store or svc-commentary. The shape is described in prose only in the module docstring (commentary_draft_store.py:11-14, which lists the OK bodies and the refusal body) and is held by the code (:154, :171, :175) and its tests. The CTO ruling file CTO_RULING_IRPT_ANLREQ_SVC_COMMENTARY_ONE_NAMED_WRITER_20261009.md has no match for commentary_ref, status OK or REFUSED. Because no schema exists, additional_members_forbidden is null (nothing declares it either way); the code builds a closed literal, so no extra member is ever added today.",
+      "tests_that_pin_it": [
+        "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_draft_store.py:96 asserts set(got) == {status, commentary_ref} for the first persist (the EXACT top-level key set)",
+        "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_draft_store.py:98 asserts set(ref) == {artifact_id, sha256, version_id} (the EXACT ref key set)",
+        "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_draft_store.py:94 and :100 assert whole-dict equality for the get_ref bodies",
+        "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_draft_store.py:145 asserts whole-dict equality for the ALREADY_WRITTEN replay; :171, :174, :177, :180, :186-188 do the same for UNAVAILABLE and INVALID_REQUEST",
+        "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_draft_store.py:107 asserts the words owner and advisor are not in the first-persist body",
+        "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_ref_i7.py:65 pins out[commentary_ref] equal to the I7 sample only (not the top-level key set)"
+      ],
+      "any_test_pins_exact_key_set": true,
+      "exact_key_set_pins_in_words": "Yes for the first-persist and get_ref answers and every coded refusal, by dict equality or set equality in test_commentary_draft_store.py. Not pinned: the crash-recovery answer's top-level key set (:163-164), and the INTEGRITY and REFUSED bodies through handle."
+    }
+  },
+  "who_invokes_persist": [
+    {
+      "caller": "the commentary drafter's live persist_draft port (make_draft_store.persist_draft), called from lambda_handler at H:321",
+      "code_line": "data/transcripts/scripts/commentary/lambda_handler.py:131-138 (invoke of op put at :135, lambda_client.invoke at :114-115; DRAFT_STORE_FUNCTION wired at :256 and set at infra/aws/terraform/transcripts/commentary.tf:301)",
+      "identity": "role outlook-global-commentary-draft-role (data/transcripts/scripts/commentary/NAMES.json:17; infra/aws/terraform/transcripts/commentary.tf:186-187, the role of aws_lambda_function.commentary at :276). Invoke permission: the managed policy irpt-commentary-draft-store-invoke-policy, attached to that role at infra/aws/terraform/transcripts/commentary.tf:256-259 and defined at infra/aws/terraform/investor-reporting/export/commentary_draft_store.tf:121-131 (Action lambda:InvokeFunction at :129, Resource that one function at :130). The recorded IAM census workflows/legacy_transform/mdpf/20261011T181700Z-98fc86e/live-iam-census.json:30111 shows that managed policy attached to outlook-global-commentary-draft-role and the string appears at no other line of that file.",
+      "claim": "measured"
+    },
+    {
+      "caller": "offline test: World.put in the draft store's own test calling cds.handle in-process",
+      "code_line": "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_draft_store.py:78-82",
+      "identity": "none (in-process call on fakes; no AWS principal)",
+      "claim": "measured"
+    },
+    {
+      "caller": "offline test: test_stored_and_returned_ref_are_equal calling cds.store in-process",
+      "code_line": "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_ref_i7.py:63",
+      "identity": "none (in-process call on fakes; no AWS principal)",
+      "claim": "measured"
+    },
+    {
+      "caller": "offline test: a FakeLambda standing in for the drafter's lambda client, exercising persist_draft",
+      "code_line": "data/transcripts/scripts/tests/test_commentary_composition_port.py:168-189",
+      "identity": "none (fake client; the store is not run)",
+      "claim": "measured"
+    }
+  ],
+  "consumers_of_the_answer": {
+    "files_naming_the_persist_operation": {
+      "total": 81,
+      "consumers": 4,
+      "producers": 1,
+      "neither": 76,
+      "placement": {
+        "producers": ["infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py"],
+        "consumers": [
+          "data/transcripts/scripts/commentary/lambda_handler.py",
+          "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_draft_store.py",
+          "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_ref_i7.py",
+          "data/transcripts/scripts/tests/test_commentary_composition_port.py"
+        ],
+        "neither_by_group": {
+          "infrastructure and naming that name the function but read no answer (commentary.tf, commentary_draft_store.tf, lambda-source-map.json, NAMES.json)": 4,
+          "tests that read Terraform or NAMES.json text or stub the drafter's persist_draft port without ever seeing the store's answer (test_commentary_draft_store_tf.py, test_commentary_live_ports.py, test_commentary_ready_queue.py, test_commentary_ready_gate.py)": 4,
+          "check, replay and census scripts under org/ that run tests or build the zip or read source-map text (ar1_t2_checks.py, ar3_checks.py, run_replay_426.py, r78_read_drafting_step.py which matched only the words draft_stored, p154_cells.py)": 5,
+          "task orders, proofs, investigation rows, deliverables, drive logs, change-management records and other org/ documents that name the function": 55,
+          "derived artifacts under workflows/legacy_transform/ (IAM census, flow and contract files) that name the role or the function": 6,
+          "READY_GATE_DESIGN.json (a design record that names the persist_draft port)": 1,
+          "the worker face task order of this cell": 1
+        }
+      },
+      "claim": "measured",
+      "arithmetic": "81 = 4 + 1 + 76; 76 = 4 + 4 + 5 + 55 + 6 + 1 + 1",
+      "how_the_total_was_made": "Union of two native Grep runs over the worktree root, each with no head limit: (a) commentary-draft-store | commentary_draft_store | draft_store | draft-store returned 79 files; (b) DRAFT_STORE_FUNCTION | make_draft_store | persist_draft | op put returned 11 files, of which 9 were already in (a) and 2 were new (test_commentary_ready_gate.py, READY_GATE_DESIGN.json); 79 + 2 = 81. Counted at base before this cell's own deliverables were written. Group sizes by path class of the 79: workflows/ 6, infra/ 7 (1 producer, 2 consumer tests, 4 neither), data/ 5 (1 consumer, 1 consumer test, 3 neither), org/ 61 (5 scripts, this order, 55 documents); plus the 2 new files from (b) as neither. Only the files in the consumers and producers lists were read line by line; the rest were placed by path and by the matched line shown by Grep."
+    },
+    "list": [
+      {
+        "consumer": "make_draft_store.invoke, the transport helper under both drafter ports",
+        "code_line": "data/transcripts/scripts/commentary/lambda_handler.py:116-125",
+        "kind": "drafter",
+        "members_read": ["status", "reason", "commentary_ref"],
+        "on_an_unknown_member": "ignores: the body is read by doc.get(status) at :122, doc.get(reason) at :123 and doc.get(commentary_ref) at :125; no other key of doc is touched, so an extra top-level member is dropped at :125 with no error. A FunctionError, an unparseable body, a non-dict body, status other than OK all raise RuntimeError (:116-124).",
+        "claim": "measured"
+      },
+      {
+        "consumer": "make_draft_store.persist_draft (the put port)",
+        "code_line": "data/transcripts/scripts/commentary/lambda_handler.py:135-138",
+        "kind": "drafter",
+        "members_read": ["commentary_ref.artifact_id", "commentary_ref.sha256", "commentary_ref.version_id"],
+        "on_an_unknown_member": "ignores: :136 refuses only when one of the three is missing or empty (RuntimeError DRAFT_STORE_UNSHAPED_REF) and :138 returns a dict of exactly those three keys, so an extra member inside commentary_ref is dropped. A new top-level member never reaches this function because invoke returns only commentary_ref (:125).",
+        "claim": "measured"
+      },
+      {
+        "consumer": "lambda_handler's per-record loop, on the value persist_draft returned",
+        "code_line": "data/transcripts/scripts/commentary/lambda_handler.py:321-324",
+        "kind": "drafter",
+        "members_read": ["artifact_id", "sha256", "version_id"],
+        "on_an_unknown_member": "ignores: :322 refuses only a missing or empty one of the three (RuntimeError PERSIST_RESULT_UNSHAPED at :323). It sees the narrowed dict from :138, not the store's body, so it could not see a new member even if one were sent.",
+        "claim": "measured"
+      },
+      {
+        "consumer": "make_draft_store.existing_draft (the get_ref port; same helper, other op, listed because it reads the same handler's answer)",
+        "code_line": "data/transcripts/scripts/commentary/lambda_handler.py:127-129",
+        "kind": "drafter",
+        "members_read": ["commentary_ref.artifact_id", "commentary_ref.sha256", "commentary_ref.version_id"],
+        "on_an_unknown_member": "ignores: :129 returns the ref dict as-is when the three are truthy, else None; it does not enumerate keys.",
+        "claim": "measured"
+      },
+      {
+        "consumer": "test_put_then_get_ref_happy_path, second_put, crash, tenant and shape tests",
+        "code_line": "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_draft_store.py:96-100",
+        "kind": "test",
+        "members_read": ["status", "reason", "commentary_ref", "commentary_ref.artifact_id", "commentary_ref.sha256", "commentary_ref.version_id"],
+        "on_an_unknown_member": "refuses: :96 asserts set(got) == {status, commentary_ref} and :98 asserts set(ref) == {artifact_id, sha256, version_id}, and :145, :171, :177, :180, :186-188 compare whole refusal dicts, so any extra member in those answers fails the test. The crash-recovery test (:163-164) reads only status and commentary_ref and would ignore one.",
+        "claim": "measured"
+      },
+      {
+        "consumer": "test_stored_and_returned_ref_are_equal",
+        "code_line": "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_ref_i7.py:63-65",
+        "kind": "test",
+        "members_read": ["commentary_ref"],
+        "on_an_unknown_member": "ignores: :65 reads only out[commentary_ref] and compares it to the written ref and the I7 sample.",
+        "claim": "measured"
+      },
+      {
+        "consumer": "test_live_store_ports_invoke_the_irpt_draft_store and test_live_store_refusal_raises_with_the_closed_reason (the drafter's ports driven by a FakeLambda that returns hand-made bodies)",
+        "code_line": "data/transcripts/scripts/tests/test_commentary_composition_port.py:179-189",
+        "kind": "test",
+        "members_read": ["status", "reason", "commentary_ref"],
+        "on_an_unknown_member": "ignores: the fake returns only status, reason and commentary_ref bodies; no case sends an extra member, so the behaviour on one is the drafter code's (ignores, see the first three entries) and is not pinned here.",
+        "claim": "measured"
+      }
+    ],
+    "by_kind": {"drafter": 4, "test": 3},
+    "searched_for": "In the whole worktree at base (native Grep, no head limit): the store's names (commentary-draft-store, commentary_draft_store, draft_store, draft-store) -> 79 files; the drafter's port and env names (DRAFT_STORE_FUNCTION, make_draft_store, persist_draft, the literal op put) -> 11 files; commentary_ref -> 38 files in code and data types (py, tf, json, ts, tsx, js, html), none of which invokes the store; submission.py and acceptance.py for ticket_id. Also in the drafter's tree data/transcripts/scripts/commentary/ for ticket_id and ticket_context (entry.py, ticket_client.py, lambda_handler.py). Read the portal checkout at C:/dev/ajb_workspace/portal (commit dbeb6764eaa688230f44cfcc1763bd73db6e1142, 34 top-level entries) for commentary-draft-store, commentary_draft_store, draft-store, DRAFT_STORE_FUNCTION and persist_draft: 0 files. Control for the contracts search: the two contract directories are non-empty (14 schemas under _contracts, 34 files under docs/contracts/investor-reporting/v1) and the word commentary matched in exactly one of them, so a zero is a zero.",
+    "not_searched": [
+      "the worktree's portal/ submodule (empty here); the checkout at C:/dev/ajb_workspace/portal was read instead, commit dbeb6764eaa688230f44cfcc1763bd73db6e1142",
+      "the worktree's opal_ai/ submodule (0 entries here) and any mcportal checkout (absent here): not read",
+      "files ignored by .gitignore (the native Grep skips them), untracked scratch of other workers, other boxes' checkouts, and git history before the base commit",
+      "binary files and the built Lambda zips (irpt-commentary-draft-store-lambda.zip and the drafter's zip): not unpacked, so the deployed bytes were not compared with the source",
+      "the live AWS plane and CloudWatch logs (no AWS call is allowed in this cell): so who else holds lambda:InvokeFunction on the store live, any resource-based Lambda policy, and any caller in the logs are not known; the census file read is a recorded artifact dated 2026-10-11, not a live read",
+      "any consumer outside this repository (vendor, other accounts, other firms' stacks)"
+    ],
+    "no_consumer_found_explained": "not applicable: consumers were found (4 files, 7 entries)"
+  },
+  "accepted_record_at_persist": {
+    "read_at_persist": true,
+    "claim": "measured",
+    "in_words": "Yes. The persist path reads the accepted record on every put, before anything is written. store() calls resolve_request (:151), which calls requests.get(tenant_hint, request_id) at :115. In the live composition that port is DynamoAcceptance (compose_ports :265-267), whose get() at ycharts/generate/acceptance.py:68-71 does a consistent GetItem of analysis#<request_id>#1 and returns json.loads of the record attribute (the immutable record). The store then takes only identity and owner from that dict and drops everything else, including a ticket_id member. A SEPARATE read of the same item follows at :152 (refs.get -> DynamoCommentaryRef.get, :205-211), which takes only the commentary_ref attribute. So a put does two GetItem calls on the one request item: one for the record attribute, one for the commentary_ref attribute.",
+    "code_line": "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:115",
+    "members_taken": [
+      "identity: read at :116; identity.request_id compared with the requested id at :118; identity.tenant_firm_id compared with the tenant hint at :119 and taken as the tenant at :121",
+      "owner: read at :117, required to be a dict at :119, owner.firm_id required equal to the tenant at :122, and the whole owner dict returned at :124 and handed to artifacts.put at :160 as the owner of the stored artifact",
+      "no other member is accessed by this module (browser_sha256, composition_ref, accepted_at, acting_principal_id, ticket_id, commentary_requested and the remaining identity members are never read here)"
+    ],
+    "ticket_id_reachable_without_a_new_read": true,
+    "ticket_id_reachable_in_words": "Yes by code reading. A ticket_id, when the record has one, is a top-level member of the same dict that resolve_request already holds in its local variable record at :115 (acceptance.py:120-121 writes it onto the record when the public request carried one; the submission admits it only with an input_id and in the form TCK-8digits-8hex, submission.py:78-79 and AnalysisSubmissionRequest.schema.json:84-87). resolve_request returns only (tenant, owner) at :124, so it does not reach store() today; the value is in hand at :115, not behind a new read. This does not say any live record carries one.",
+    "ticket_id_reachable_claim": "measured",
+    "probe": "In-process probe on the store's own fakes (scratch, not committed): the request record handed to requests.get was given ticket_id TCK-20261011-abcd1234 in one run and none in the other; requests.get was called once per put in both; the answer was identical in both runs and held no ticket member."
+  },
+  "ticket_id_in_the_answer_today": {
+    "when_the_record_carries_one": "The answer carries nothing about the ticket. The record, with its ticket_id, is read at commentary_draft_store.py:115 and discarded at :124 (only tenant and owner leave resolve_request); the success body is the closed literal {status: OK, commentary_ref: ref} built at :171, so the first-persist answer has the same two top-level members as without a ticket id. A replay answers {status: REFUSED, reason: ALREADY_WRITTEN} at :175 and has no commentary_ref at all, so any ticket member added only to the success body would not reach a replaying caller.",
+    "when_the_record_carries_none": "The same: the answer carries nothing about the ticket. The same line builds the same body (:171); the store never tests for ticket_id, so there is no branch on it, no null member, and no refusal for its absence. Measured by the probe: the two answers were identical.",
+    "claim": "measured",
+    "drafter_next_step_today": "Identical in both cases, because the drafter never sees a ticket id. persist_draft returns only the three ref fields (H:138). The handler then sends one commentary_ready queue message carrying {tenant, request_id} (H:324). If the run came from the analysis_ready queue (from_queue, H:296 and :325) it records stage draft_stored and stops, posting no ticket (H:325-328; module docstring H:23-26: the draft reaches the ticket only as commentary_ref). Otherwise it goes on to ticket_client.write_draft_ticket(draft, item[ticket_context]) at H:329, which POSTs a NEW ticket to /api/scoped/tickets (ticket_client.py:9, :70) with report_request_id from the composition (entry.py:210), not a ticket id: ticket_context holds no ticket_id key (entry.py:209-220) and no file under data/transcripts/scripts/commentary reads one (ticket_id there appears only in the response handling at ticket_client.py:72 and the output at H:333; the docstring at entry.py:266 says a consumer reads ticket_id from the records, but no code does). On a replay the persist call raises DRAFT_STORE_ALREADY_WRITTEN (H:124) and the record lands in failed (H:334-336)."
+  },
+  "not_established": [
+    "Whether any live accepted record carries a ticket_id: no AWS read is allowed. The code admits one only when the public request carried it with an input_id (acceptance.py:120-121, submission.py:78-79).",
+    "What the Lambda runtime returns when the store raises something handle does not catch (the 'no answer body' outcome is inferred, not read; the runtime's error document is not in the repo).",
+    "Which exception reasons the repository's put (repository.py ArtifactRepository.put) can raise beyond ArtifactAlreadyWritten, ReportDenied and ReportRefused: handle maps the last two to UNAVAILABLE and REFUSED without distinguishing causes, and the causes were not enumerated.",
+    "What artifacts.put does with the members of the owner dict it is handed (only that the whole dict is passed at :160 was read).",
+    "Whether the deployed store Lambda and drafter Lambda run the base source: the zips were not unpacked and no AWS call was made; lambda-source-map.json:6694 still calls the store DESIRED and not built while change-management records and the recorded IAM census show the role and invoke policy exist. Not reconciled here.",
+    "Who else, live, holds lambda:InvokeFunction on the store or a resource-based policy on it: no aws_lambda_permission appears in the export Terraform root (searched), the recorded census shows one role with the invoke policy, but neither is a live read.",
+    "How the ticket route matches a request id and what it does with a draft whose pointer does not match: not read (the face places it outside this cell).",
+    "Which readers consume the stored commentary_ref attribute (38 files name commentary_ref; the packager and Ticket Center ones read the stored attribute, not the persist answer) - not classified, outside the face."
+  ]
+}

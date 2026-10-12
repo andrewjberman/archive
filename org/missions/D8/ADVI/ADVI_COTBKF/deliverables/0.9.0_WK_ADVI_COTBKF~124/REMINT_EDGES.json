@@ -1,0 +1,177 @@
+{
+ "edges": [
+  {
+   "edge": "1. The 'before' state of a key was the capture's ids, so a second writer changing a key between the capture check and this run's put would have read as this run's write.",
+   "how": "Every put of a PLANNED key now carries IfMatch=<the ETag the capture holds for that key> (a conditional write; the bucket refuses with 412 PreconditionFailed and stores nothing when the key changed). The client handed to emit_day, emit_method_row and the mode's own sidecar put is a thin wrapper that adds the condition to put_object and records each put that RETURNED with the version id and ETag the bucket gave it. After a stop, _remint_state reads a key as WRITTEN only if a put of this run returned the version now served; a key whose version moved with no put of this run returned prints CHANGED-BY-ANOTHER-WRITER; a key this run wrote and that has moved again prints WRITTEN-THEN-CHANGED. A refused put stops the run through the normal failure path (exit 1, an ERROR line naming the key and saying the served object changed after the capture check). A pair with a CHANGED-BY-ANOTHER-WRITER side prints PAIR-OTHER-WRITER and never a HALF-PAIR.",
+   "where": "data/assets/scripts/silver/commonwealth_account_return_daily.py:1224 class _ConditionalClient (put_object :1249, the IfMatch added at :1253); :1214 _is_precondition; :1271 _remint_state; :1307 _remint_report (PAIR-OTHER-WRITER :1332, the two NOTE lines); :1476 cs3 = _ConditionalClient(s3, before); :1486 why(exc) (the refusal's ERROR text); :1500 emit_day(cs3, ...), :1520 cs3.put_object (sidecar), :1530 emit_method_row(cs3, ...) -- at commit 933ad24673",
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_edge1_a_second_writer_in_the_gap_is_refused_and_never_read_as_this_runs_write[7 cases: d1-data, d1-manifest, d2-data, d2-manifest, sidecar, method-row-data, method-row-manifest]; test_edge1_the_refusal_of_a_manifest_after_its_data_landed_prints_the_pair_line_it_prints; test_edge1_a_key_another_writer_changed_after_this_run_wrote_it_prints_written_then_changed; test_edge1_a_clean_run_carries_the_captured_etag_on_every_put_and_reports_nothing; test_edge1_the_captured_etag_in_either_quoting_makes_the_same_passing_condition[2]; test_edge1_the_wrapper_conditions_only_planned_keys_forwards_the_rest_and_records_only_returned_puts; test_edge1_an_identical_bytes_rewrite_in_the_gap_keeps_the_etag_so_the_put_passes; test_edge1_an_identical_bytes_rewrite_whose_run_put_never_returned_is_still_not_this_runs_write; test_edge1_the_state_of_a_moved_key_is_this_runs_write_only_if_this_runs_put_returned; test_edge1_the_pair_lines_count_only_this_runs_files; test_edge1_only_remint_days_builds_the_wrapper_so_apply_build_and_verify_keep_the_bare_client"
+  },
+  {
+   "edge": "2. The record said F8 was described while a hard kill is not, and the mode's text did not say so in one voice.",
+   "how": "The hard kill is its own failure point F8k, described=false; F8 (an uncaught exception, which the outer handler reports per key and re-raises) stays described=true. The help text, the remint_days docstring and the block comment above REMINT_DATE each say, in the same words, 'A HARD KILL is NOT DESCRIBED': it runs no handler and prints nothing; REMINT-BEGIN and the WILL-WRITE lines printed before the first put, and the capture, are what the operator has.",
+   "where": "data/assets/scripts/silver/commonwealth_account_return_daily.py:1108 block comment '(2) A HARD KILL is NOT DESCRIBED'; :1113 REMINT_HELP; :1382 remint_days docstring -- at commit 933ad24673",
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_edge2_a_hard_kill_is_not_described_in_the_help_the_docstring_or_the_comment; data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_edge2_what_a_hard_kill_leaves_the_operator_is_the_will_write_block_and_the_capture[n=2,5]"
+  }
+ ],
+ "conditional_write": {
+  "mechanism": "Wrapper class _ConditionalClient in the adapter. The producer's put path is put_object(Bucket=, Key=, Body=) for every object: stream_parquet's ChunkedParquetWriter.finalize puts data.parquet with one put_object (data/assets/scripts/lib/stream_parquet.py:136), and emit_day (account_return_daily.py:1888) and emit_method_row (:2073) put manifest.json with put_object; no upload_fileobj and no multipart. So the condition rides the producer's own call: the wrapper adds IfMatch=\"<captured ETag>\" (quoted, as a HEAD returns it; the capture is stored unquoted) to a put of a planned key, and the producer was not edited. A put the bucket refuses (412, 409 ConditionalRequestConflict, or NoSuchKey on the condition) is noted in refused and re-raised. Tested ONLY against the faked bucket.",
+  "refuses_before_the_put": true,
+  "detects_after": true,
+  "covers": [
+   "a second writer who changes a PLANNED key (day data.parquet, day manifest.json, the sidecar, the method row's data.parquet or manifest.json) between the capture check and this run's put with DIFFERENT bytes: the put is refused, nothing is stored under it, the run stops non-zero, the key prints CHANGED-BY-ANOTHER-WRITER",
+   "a key whose version moved with no put of this run returned for it (the refused put, a put never issued): never printed WRITTEN",
+   "a key this run wrote and another writer changed afterwards, WHEN a stop triggers the report: WRITTEN-THEN-CHANGED, with the note that restoring from the capture would also discard that writer's object",
+   "a pair with one side changed by another writer: PAIR-OTHER-WRITER with both states, never a HALF-PAIR"
+  ],
+  "does_not_cover": [
+   "an identical-bytes rewrite in the gap (same bytes, same ETag, new version id): the condition passes, the run's put lands and is this run's write; the content is the same either way (test_edge1_an_identical_bytes_rewrite_in_the_gap_keeps_the_etag_so_the_put_passes). If this run's own put for that key never returns, the version-id comparison still prints CHANGED-BY-ANOTHER-WRITER",
+   "a writer AFTER this run's put on a run that finishes cleanly: a clean run makes no report and no check after its puts, so that change is not seen (the existing test forbidding any head after the first put on a clean run was kept, not weakened); a final check would cost one HEAD per planned key, at most seven, and was not added",
+   "a put of this run that landed in the bucket but whose reply was lost: it reads as CHANGED-BY-ANOTHER-WRITER (no put returned, version moved); the printed NOTE says so",
+   "a hard kill (F8k): no handler runs, nothing prints",
+   "the reads of the capture check and the other refusals: they still precede any put and are unchanged"
+  ]
+ },
+ "failure_points_now": [
+  {
+   "id": "F1",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F1_day_data_put_raises_and_nothing_lands"
+  },
+  {
+   "id": "F2",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F2_day_manifest_put_raises_leaves_half_a_pair"
+  },
+  {
+   "id": "F3",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F3_day_data_read_back_hash_differs"
+  },
+  {
+   "id": "F4",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F4_day_manifest_read_back_check_fails"
+  },
+  {
+   "id": "F4b",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F4b_day_manifest_read_back_finds_nothing"
+  },
+  {
+   "id": "F5a",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F5a_second_day_data_put_raises_after_the_first_day_is_whole"
+  },
+  {
+   "id": "F5b",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F5b_second_day_manifest_put_raises_leaves_the_table_half_reminted_and_a_half_pair"
+  },
+  {
+   "id": "F5c",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F5c_second_day_read_back_mismatch_after_the_first_day_is_whole"
+  },
+  {
+   "id": "F6a",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F6a_sidecar_put_raises_after_all_days_landed"
+  },
+  {
+   "id": "F6b",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F6b_sidecar_read_back_mismatch"
+  },
+  {
+   "id": "F7a",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F7a_method_row_data_put_raises_after_the_days_and_the_sidecar_landed"
+  },
+  {
+   "id": "F7b",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F7b_method_row_manifest_put_raises_leaves_the_method_row_half_a_pair"
+  },
+  {
+   "id": "F7c",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F7c_method_row_read_back_mismatch"
+  },
+  {
+   "id": "F7d",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F7d_a_method_row_manifest_that_is_stored_wrong_is_refused[3 cases]"
+  },
+  {
+   "id": "F8",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F8_an_interruption_before_the_nth_put_prints_the_keys_written_and_propagates[n=1..7] (an UNCAUGHT BaseException: reported per key and re-raised, so described); test_edge2_a_hard_kill_is_not_described_in_the_help_the_docstring_or_the_comment (the _Killed arm)"
+  },
+  {
+   "id": "F10",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F10_data_put_lands_but_its_etag_does_not_verify_leaves_half_a_pair"
+  },
+  {
+   "id": "F11",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F11_read_back_get_raises_after_the_day_landed_whole"
+  },
+  {
+   "id": "F12",
+   "described": true,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_failure_F12_emit_day_returning_landed_false_stops_with_the_day_written (and F12_b)"
+  },
+  {
+   "id": "F8k",
+   "described": false,
+   "test": "data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_edge2_what_a_hard_kill_leaves_the_operator_is_the_will_write_block_and_the_capture[n=2,5] (what the operator HAS: the REMINT-BEGIN / WILL-WRITE block printed before the first put, and the capture; nothing is printed for the hard kill itself); data/assets/scripts/silver/tests/test_commonwealth_ard_remint.py::test_the_plan_is_printed_before_the_first_put_and_lists_exactly_the_keys_later_put"
+  }
+ ],
+ "hard_kill": {
+  "described": false,
+  "what_the_operator_has": "The REMINT-BEGIN keys=<n> line and one WILL-WRITE s3://bucket/key line per key in write order, printed before the first put, and the capture file (the ETag and version id each listed key had before the run). Nothing is printed about WRITTEN, NOT-WRITTEN or CHANGED-BY-ANOTHER-WRITER: with those two things and a HEAD of each listed key a person can compare each key's version with the capture by hand. A key whose version moved cannot be attributed to this run from that alone (no put-returned record survives a kill)."
+ },
+ "tests_added": [
+  "test_edge1_a_second_writer_in_the_gap_is_refused_and_never_read_as_this_runs_write[d1-data,d1-manifest,d2-data,d2-manifest,sidecar,method-row-data,method-row-manifest] (7)",
+  "test_edge1_the_refusal_of_a_manifest_after_its_data_landed_prints_the_pair_line_it_prints",
+  "test_edge1_a_key_another_writer_changed_after_this_run_wrote_it_prints_written_then_changed",
+  "test_edge1_a_clean_run_carries_the_captured_etag_on_every_put_and_reports_nothing",
+  "test_edge1_the_captured_etag_in_either_quoting_makes_the_same_passing_condition[etag-quoted-as-head-returns-it,etag-unquoted] (2)",
+  "test_edge1_the_wrapper_conditions_only_planned_keys_forwards_the_rest_and_records_only_returned_puts",
+  "test_edge1_an_identical_bytes_rewrite_in_the_gap_keeps_the_etag_so_the_put_passes",
+  "test_edge1_an_identical_bytes_rewrite_whose_run_put_never_returned_is_still_not_this_runs_write",
+  "test_edge1_the_state_of_a_moved_key_is_this_runs_write_only_if_this_runs_put_returned",
+  "test_edge1_the_pair_lines_count_only_this_runs_files",
+  "test_edge1_only_remint_days_builds_the_wrapper_so_apply_build_and_verify_keep_the_bare_client",
+  "test_edge2_a_hard_kill_is_not_described_in_the_help_the_docstring_or_the_comment",
+  "test_edge2_what_a_hard_kill_leaves_the_operator_is_the_will_write_block_and_the_capture[n=2,n=5] (2)"
+ ],
+ "tests_changed": [
+  {
+   "test": "test_repair2_the_helper_flags_a_manifest_that_is_new_and_a_data_file_that_is_not",
+   "before": "called _remint_report(s3, attempted, pairs, before, 2) with the manifest's version moved and expected WRITTEN for it (HALF-PAIR new=manifest)",
+   "after": "the report now takes the record of the puts that returned; the test passes landed={manifest: the version now served} (this run's put returned it) and expects the same lines: NOT-WRITTEN data, WRITTEN manifest, HALF-PAIR new=manifest. Without that record the same key now reads CHANGED-BY-ANOTHER-WRITER (test_edge1_the_state_of_a_moved_key_is_this_runs_write_only_if_this_runs_put_returned)"
+  },
+  {
+   "test": "test_a_head_that_finds_the_key_absent_during_the_report_is_unknown",
+   "before": "_remint_report(s3, [dk], [], before, 1)",
+   "after": "_remint_report(s3, [dk], [], before, 1, {}) -- the new landed argument (no put returned); the expectation (UNKNOWN) is unchanged"
+  },
+  {
+   "test": "the faked bucket VersionedS3, the world fixture, the _report_lines helper and the module docstring (test support, no test body)",
+   "before": "no IfMatch; no record of what each put carried; no way to plant a writer between the capture check and a put; _report_lines knew WRITTEN / NOT-WRITTEN / UNKNOWN and HALF-PAIR / PAIR-UNKNOWN",
+   "after": "put_object honours IfMatch (a different or absent current ETag raises ClientError PreconditionFailed, HTTP 412, and stores nothing); if_match logs the condition each put carried; refused_puts; a before_put hook list runs a callable at the start of the n-th put attempt (the other writer's own put never faults); seed() pops its if_match entry; the world fixture clears if_match; _report_lines gains other / then / pair_other with defaults, and the count line names the two new states only when present, so every existing call builds the same expected lines as before; the module docstring gains a CB-bu-2 paragraph"
+  }
+ ],
+ "not_run_against_the_bucket": true,
+ "not_established": [
+  "Only a faked bucket exercised the condition. Whether the real bucket accepts IfMatch on a PutObject of these objects, how it evaluates the condition on a VERSIONED bucket, which error code and status it returns for a mismatch, for a conflicting concurrent write, and for a key that is absent (the fake returns 412 for an absent key, as the order says; the adapter treats PreconditionFailed, ConditionalRequestConflict and NoSuchKey, and HTTP 412 and 409, as the bucket refusing the condition), and whether the role that would run the mode may send it, were NOT tested. No AWS call and no network call was made.",
+  "What the installed botocore says (read from its local package files, no network call): botocore 1.43.0 at the site-packages of this box, s3/2006-03-01/service-2.json.gz, shape of PutObject's input has the member IfMatch (string, header If-Match). Its documentation reads: 'Uploads the object only if the ETag (entity tag) value provided during the WRITE operation matches the ETag of the object in S3. If the ETag values do not match, the operation returns a 412 Precondition Failed error. If a conflicting operation occurs during the upload S3 returns a 409 ConditionalRequestConflict response. ... Expects the ETag value as a string.' boto3 reports 1.42.54 beside it on this box. That is the client's model of the call, not a test that the service honors it, and the host that would run the mode was not examined.",
+  "The wire form of the ETag: the wrapper sends it in double quotes, as a HEAD returns it; the model says only 'a string'. Both capture forms (quoted and unquoted) produce the same quoted string in the faked bucket; whether the service takes the quoted form as sent was not tested.",
+  "A writer after this run's put on a run that finishes cleanly is not seen (no report, no final check; see conditional_write.does_not_cover).",
+  "A put whose reply is lost after it landed reads as CHANGED-BY-ANOTHER-WRITER; the mode cannot tell it from a second writer, and the printed note says so.",
+  "That a HEAD immediately after a put shows the new version (read-after-write), a stale head reading NOT-WRITTEN for a key that landed, a hard kill or a kill during a put, local temp files after an interruption, the order in which a person restores the keys of a half pair, and the method-row manifest comparison against a changed producer serialisation: carried unchanged from round 72's not_established (REMINT_REPAIR.json), not re-examined here.",
+  "The producer's emit_day, emit_method_row and lib/stream_parquet.py were read and not edited; the wrapper depends on their landing every object by put_object with keyword arguments, which is true at this commit and is checked by the tests only through the faked bucket."
+ ]
+}

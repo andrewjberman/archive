@@ -1,0 +1,686 @@
+{
+ "schema": "IB155-1 two measurements (IB-pr-459)",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-459",
+ "assignee": "0.9.0_WK_IRPT_BCKEND~315",
+ "base_commit": "9f5ecc2f80",
+ "read_only": true,
+ "counts_only": "no account id, balance or holding of an account; no security is named",
+ "landed_prices_store": {
+  "address_built_by": "data/assets/scripts/silver/commonwealth_price_basis_census.py:161 (pc.legacy_uri(SPEC['legacy'])), through data/assets/scripts/analysis/commonwealth_price_census.py:282-286 -> lib/opal_naming.py:2339 legacy_address, row infra/logic/registry/legacy_addresses.json:11",
+  "address_resolved_by_the_builder": "s3://opal-data-cot/silver/prices/canonical_prices.parquet",
+  "last_modified_utc": "2026-10-09T13:41:04Z",
+  "rows": 11289398,
+  "columns": [
+   "date",
+   "asset_name",
+   "ticker",
+   "price",
+   "source"
+  ],
+  "content_length_mb": 92.9,
+  "how_a_point_is_labelled_yahoo": "column `source` == 'yahoo_finance' (YAHOO_LABEL, commonwealth_price_basis_census.py:78); the store's other labels and their row counts are in source_label_row_counts",
+  "source_label_row_counts": {
+   "linear_interpolation": 7831140,
+   "yahoo_finance": 3396067,
+   "transaction_observed": 50143,
+   "scoped_override": 12042,
+   "transaction_observed_capped": 6
+  },
+  "distinct_tickers_in_store": 4001,
+  "newest_day_any_label": "2026-06-09",
+  "newest_yahoo_labelled_day": "2026-06-05",
+  "refresh": {
+   "schedule_found": false,
+   "writer": "data/cot/scripts/gold/build_canonical_prices_v2.py (silver-prep S_00 of the cot gold chain): upload_file at :907, output key from OUTPUT_KEY :174 (_legacy_key of the same registry row), bucket :115 (BD_S3_BUCKET default). By the file's own header (:21, :30) and the dispatcher's chain table (gold_dispatch.sh:78) it is the script that writes this object.",
+   "schedule_or_trigger": "none found. The cot chain's daily anchor (schedule-et.tf:78-91, cron(30 7) America/New_York, then session -> bronze -> silver -> gold events, eventbridge.tf:219-245) ends in the SSM document opal-cot-gold-run (ssm.tf:303-), whose run_gold list (ssm.tf:375-) never names build_canonical_prices_v2.py / S_00; gold_dispatch.sh runs S_00 before its freshness gate only for `--chain full` (:1069-1083), and no cot trigger of gold_dispatch.sh was found. The bd twin has a daily 04:00 UTC rule (bd-pipeline/eventbridge.tf:374-384) for ITS OWN object.",
+   "searched": [
+    "infra/aws/terraform/cot-pipeline (all .tf; search for build_canonical_prices, S_00, silver-prep, canonical_prices: 0 hits)",
+    "infra/aws/terraform/cot-pipeline/eventbridge.tf, schedule-et.tf, ssm.tf (read at the lines cited)",
+    "infra/aws (search gold_dispatch|gold-dispatch: 40 files shown, none under cot-pipeline or a cot EC2 dir; bd, inf and 49f dispatchers)",
+    "data/cot/scripts/gold/gold_dispatch.sh, gold_pipeline_deps.yaml, build_canonical_prices_v2.py (read)",
+    "data/mdpf/scripts/demque/land_cot.py (the lander of the writer's Tier 2 inputs, not a writer of this object)",
+    "comp-pipescript io on the writer: out of the curated graph (AST answer only, 9 call sites, 0 resolved)"
+   ],
+   "last_modified_history": [
+    "2026-10-09T13:41:04Z",
+    "2026-06-09T20:42:16Z"
+   ],
+   "versions_kept": 2,
+   "bucket_versioning": "Enabled",
+   "history_note": "2 version(s) of the key are held; the bucket keeps versions (Enabled) but a lifecycle rule on non-current versions was not read, so the count is a floor, not the write count",
+   "claim": "inferred"
+  }
+ },
+ "tickers": {
+  "asked": 878,
+  "outcomes": {
+   "every_compared_day_equal": 618,
+   "some_days_not_equal": 30,
+   "no_yahoo_labelled_point_in_the_store": 9,
+   "not_in_the_store": 214,
+   "no_bar_from_the_reader": 7
+  },
+  "with_a_bar_from_the_reader": 871,
+  "outcome_definitions": {
+   "no_bar_from_the_reader": "the reader returned no bar for the ticker (checked first)",
+   "not_in_the_store": "the ticker has a reader bar and no row of any label in the store",
+   "no_yahoo_labelled_point_in_the_store": "has a reader bar and store rows, but no yahoo_finance-labelled point on a date where the reader has a bar inside the window (9 of these hold yahoo-labelled points outside the window or on no reader day)",
+   "every_compared_day_equal / some_days_not_equal": "one or more compared ticker-days, all equal / at least one not equal"
+  }
+ },
+ "ticker_days": {
+  "compared": 23976,
+  "equal": 23596,
+  "not_equal": 380,
+  "equality_rule": "abs(store_price / reader_Close - 1) <= 1e-4 (relative; the module's EQ_TOL, commonwealth_price_basis_census.py:73); store price = median of the ticker's yahoo_finance-labelled rows for the date; reader Close = Yahoo Close with auto_adjust=False; compared only on dates in the window (85 graded days plus the 40 trading days before the first) where both exist"
+ },
+ "not_equal_by_cause": {
+  "constant_ratio_store_over_Close_whole_number_or_its_reciprocal (a different share basis: split-like)": 174,
+  "store_equals_close_of_an_adjacent_reader_day (a different day)": 7,
+  "within_half_percent_of_close_not_equal (rounding or small drift)": 18,
+  "constant_ratio_store_over_Close_not_a_whole_number (a different basis or unit)": 162,
+  "other (beyond half a percent, not a constant ratio, not Adj Close, not an adjacent day)": 19
+ },
+ "store_coverage": {
+  "window": {
+   "graded_days": 85,
+   "trading_days_before_them": 40,
+   "days": 125,
+   "first": "2026-04-14",
+   "last": "2026-10-09"
+  },
+  "needed_day_definition": "a window day on which the reader returned a bar for the ticker",
+  "tickers_with_every_needed_day_in_the_store": 0,
+  "tickers_with_gaps": 648,
+  "tickers_in_store_with_yahoo_points_but_none_on_a_needed_day": 9,
+  "needed_ticker_days": 81936,
+  "covered_ticker_days": 23976,
+  "newest_day_the_store_holds_yahoo_labelled": "2026-06-05",
+  "newest_day_the_reader_returns": "2026-10-09",
+  "tickers_whose_newest_store_day_is_before_their_newest_reader_day": 657
+ },
+ "the_store_holds_the_unadjusted_close": "FOR_SOME",
+ "route_read": {
+  "arm": "READER_CODE_OVER_SERVED_GOLD",
+  "arm_in_words": "NOT the deployed route. This is the route reader's OWN code at the base commit (holdings_gold.HoldingsGoldSource and holdings_gold.calculate, the source composed by installed._holdings_source_for) run locally over the SERVED holdings gold read from S3 (get/list only; no Lambda invoked, no sign-in, no call to the API). What could differ from the deployed function: the deployed package's bytes (the packaged copy, the dependencies, the mapping loader), the route's authorization, scope resolution and response envelope (the scope here is built in memory, one permitted account), and the ruled period set it offers a caller; the reader's answer dict is read, not the route's HTTP body.",
+  "entry": "orion",
+  "entry_basis": "the sources.json key whose monolith is orion (sources.json:66-68), the Inflection holdings entry; the route composes this firm's gold at installed.py:68 (tenants._CANONICAL_INF). The 49 Financial entry's key carries an eight-digit master number and is not written here (the check refuses such a token); not read.",
+  "reader_code_line": "infra/aws/lambda/investor-reporting/performance/holdings_gold.py:246 (non-OK rows dropped), :254 (the chain over the remaining rows), :314-317 (the PARTIAL excluded_rows absence)",
+  "windows_tried": [
+   {
+    "window": "SI",
+    "start": "1970-01-01",
+    "end": "2026-10-08",
+    "partitions": 1619,
+    "accounts": 979,
+    "max_rows_for_an_account": 1619,
+    "accounts_with_all_ok_and_a_full_window": 0,
+    "accounts_with_1_to_5_non_ok_inside": 0
+   },
+   {
+    "window": "1Y",
+    "start": "2025-10-08",
+    "end": "2026-10-08",
+    "partitions": 249,
+    "accounts": 979,
+    "max_rows_for_an_account": 249,
+    "accounts_with_all_ok_and_a_full_window": 641,
+    "accounts_with_1_to_5_non_ok_inside": 1
+   },
+   {
+    "window": "YTD",
+    "start": "2026-01-01",
+    "end": "2026-10-08",
+    "partitions": 190,
+    "accounts": 979,
+    "max_rows_for_an_account": 190,
+    "accounts_with_all_ok_and_a_full_window": 671,
+    "accounts_with_1_to_5_non_ok_inside": 1
+   }
+  ],
+  "status_values_in_the_served_gold_all_partitions": {
+   "NON-POSITIVE-BASE": 575039,
+   "OK": 855536
+  },
+  "with_a_non_ok_day": {
+   "window": "1Y: 2025-10-08 to 2026-10-08 (a ruled period at the latest landed day; the route has no default window. The longest window the code offers is SI, which holds 0 accounts with every row OK across all its partitions, so no control: this is the longest window with both kinds of account)",
+   "days_in_window": 249,
+   "partitions_in_window": 249,
+   "non_ok_days": 1,
+   "non_ok_status_values": [
+    "NON-POSITIVE-BASE"
+   ],
+   "days_excluded": 1,
+   "days_observed": 249,
+   "days_linked": 248,
+   "claim": "measured",
+   "value_facts_claim": "measured",
+   "claim_basis": "measured (the reader's own return; a figure was returned)",
+   "absences": [
+    {
+     "fact": "accrual_basis",
+     "status": "UNSUPPORTED"
+    },
+    {
+     "fact": "fees_and_income",
+     "status": "UNSUPPORTED"
+    },
+    {
+     "fact": "money_weighted_return",
+     "status": "UNSUPPORTED"
+    },
+    {
+     "fact": "excluded_rows",
+     "status": "PARTIAL"
+    },
+    {
+     "fact": "linked_days",
+     "status": "PARTIAL"
+    },
+    {
+     "fact": "linked_days",
+     "status": "PARTIAL"
+    },
+    {
+     "fact": "linked_days",
+     "status": "PARTIAL"
+    }
+   ],
+   "excluded_rows_absence_text": "1 of 249 observed days were non-OK (price-missing or excluded, ruling 4) and skipped from the chain",
+   "answer_keys": [
+    "absences",
+    "claim",
+    "contract_validated",
+    "evidence",
+    "refusals",
+    "report"
+   ],
+   "report_keys": [
+    "dates",
+    "lineage",
+    "measurement_basis",
+    "optional_facts",
+    "returns"
+   ],
+   "refusals": [],
+   "a_figure_was_returned": true
+  },
+  "control_all_ok": {
+   "window": "1Y: 2025-10-08 to 2026-10-08 (a ruled period at the latest landed day; the route has no default window. The longest window the code offers is SI, which holds 0 accounts with every row OK across all its partitions, so no control: this is the longest window with both kinds of account)",
+   "days_in_window": 249,
+   "partitions_in_window": 249,
+   "non_ok_days": 0,
+   "non_ok_status_values": [],
+   "days_excluded": 0,
+   "days_observed": 249,
+   "days_linked": 249,
+   "claim": "measured",
+   "value_facts_claim": "measured",
+   "claim_basis": "measured (the reader's own return; a figure was returned)",
+   "absences": [
+    {
+     "fact": "accrual_basis",
+     "status": "UNSUPPORTED"
+    },
+    {
+     "fact": "fees_and_income",
+     "status": "UNSUPPORTED"
+    },
+    {
+     "fact": "money_weighted_return",
+     "status": "UNSUPPORTED"
+    },
+    {
+     "fact": "linked_days",
+     "status": "PARTIAL"
+    },
+    {
+     "fact": "linked_days",
+     "status": "PARTIAL"
+    },
+    {
+     "fact": "linked_days",
+     "status": "PARTIAL"
+    }
+   ],
+   "excluded_rows_absence_text": null,
+   "answer_keys": [
+    "absences",
+    "claim",
+    "contract_validated",
+    "evidence",
+    "refusals",
+    "report"
+   ],
+   "report_keys": [
+    "dates",
+    "lineage",
+    "measurement_basis",
+    "optional_facts",
+    "returns"
+   ],
+   "refusals": [],
+   "a_figure_was_returned": true
+  },
+  "chained_over_the_non_ok_day": true,
+  "planted": false
+ },
+ "fetch": {
+  "call_count": 18,
+  "distinct_tickers_asked": 878,
+  "tickers_asked_more_than_once": 0,
+  "counted_before_fetching": true,
+  "source": "Yahoo Finance through fetch_yahoo (commonwealth_price_basis_census.py:200), driver ib150_fetch_yahoo.py of ~310 run unchanged; start 2026-01-30, end exclusive 2026-10-14; 50 a call, 8 s pause, none parallel",
+  "calls": [
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 49,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 48,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 49,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 49,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 49,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 49,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 50,
+    "with_bars": 50,
+    "rate_limited": 0
+   },
+   {
+    "tickers": 28,
+    "with_bars": 28,
+    "rate_limited": 0
+   }
+  ],
+  "passes": 1,
+  "second_pass_made": false,
+  "amendment_1_note": "AMENDMENT 1 was computed from the cache of the one pass (no Yahoo call); the store was read again by S3 get"
+ },
+ "not_established": [
+  "whether the constant store/Close ratios (whole-number multiples or reciprocals) are the store holding a pre-split price while the reader's Close is split-adjusted: not tested against a split calendar",
+  "the ticker-days whose constant ratio is not a whole number: their basis (unit, share class, a different security under the ticker) was not identified",
+  "why the store's yahoo-labelled points end 2026-06-05 and every point ends 2026-06-09 although the object was last written 2026-10-09: the writer's inputs were not read for that run",
+  "the tickers not in the store: whether they are other firms' securities or tickers the store spells differently (a ticker was matched by exact string)",
+  "any write or run history of the writer outside the object's own retained versions (a lifecycle rule on non-current versions, an EC2 cron, a manual run log): not read; schedule_found false is an absence in the places searched",
+  "the tickers with no reader bar: the reason (delisted, renamed, a ticker Yahoo does not carry) was not classified",
+  "the deployed route's answer: only the reader's code over served data was run; the deployed package's bytes, authorization and envelope were not read",
+  "a second account with a different non-OK status: the served gold of this entry holds two status tokens (OK, NON-POSITIVE-BASE) and the reader's filter (holdings_gold.py:246) is status-agnostic by code, not tested per token",
+  "the other entry the route composes (49 Financial's): not read; its sources.json key carries an eight-digit master number that the order's check refuses in the outputs"
+ ],
+ "aws_writes_made": 0,
+ "sign_ins_made": 0,
+ "functions_invoked": 0,
+ "product_files_edited": 0,
+ "builds_proposed": 0,
+ "other_sources_asked": 0,
+ "how_a_fund_is_marked_replaced": {
+  "the_flag": "the `class` column of the build's price-basis census (price_basis_census.csv, one row per ticker, 3,580 tickers): a ticker whose class is `dividend_adjusted` or `mixed` is REPLACED; every other class (`indistinguishable`, `other`, `as_traded`, `no_yahoo`), and a ticker the census does not list, stays on the store's points",
+  "where_it_lives": "a table of the build, not a column of the store: the store (canonical_prices.parquet) holds no such column (its columns are date, asset_name, ticker, price, source)",
+  "cited": [
+   "data/assets/scripts/silver/commonwealth_daily_valuation.py:200-201 (BASIS_CENSUS = ADVI_COTBKF deliverables 0.9.0_WK_ADVI_COTBKF~60/price_basis_census.csv)",
+   "data/assets/scripts/silver/commonwealth_daily_valuation.py:205 (SUBSTITUTE_CLASSES = dividend_adjusted, mixed)",
+   "data/assets/scripts/silver/commonwealth_daily_valuation.py:214-221 (load_basis_classes: the census rows of those classes)",
+   "data/assets/scripts/silver/commonwealth_daily_valuation.py:246-288 (as_traded_store: the yahoo-labelled points of a flagged ticker are replaced by the cached Yahoo Close; :258-262 a flagged ticker with no cached Yahoo series keeps the store's points)",
+   "the round-76 records name the same thing as `substituted`: org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~139/PRICE_PAID.json population.served_close (substituted = the series differ between r34/before and r34/after on some date; 73; equal to the 73 of VALIDATED_UNADJUSTED.csv group substituted) and .../0.9.0_WK_ADVI_COTBKF~128/VALIDATED_UNADJUSTED.csv column `group` (substituted 73, left_on_store 197)"
+  ],
+  "checked_against_the_record": "of the 270 fund series in VALIDATED_UNADJUSTED.csv, the 73 `substituted` are all census class dividend_adjusted (60) or mixed (13), and none of the 197 `left_on_store` is (120 are not in the census, 73 `other`, 2 `indistinguishable`, 1 `as_traded`, 1 `no_yahoo`): the census class predicts the record's flag for 270 of 270 (read here from the two csv files)",
+  "classes_formed_here": {
+   "replaced": "census class dividend_adjusted or mixed",
+   "not_replaced": "listed in the census with any other class",
+   "not_a_fund_or_unmarked": "not listed in the census (the census lists tickers that carry yahoo_finance rows in the store; a fund absent from it is also left on the store by the build, so this class holds funds as well as non-funds: see its type split in by_fund_class)"
+  },
+  "caveat": "the build replaces a flagged ticker only when a cached Yahoo series exists for it (:258-262); that cache is the build's input, not read here, so `replaced` here is `flagged to be replaced`. For the 270 fund series the record shows the flagged and the actually-replaced sets are equal (73 and 73).",
+  "claim": "measured"
+ },
+ "by_fund_class": {
+  "population": "the same 878 tickers as the whole; every ticker in exactly one class",
+  "equality_rule": "abs(store_price / reader_Close - 1) <= 1e-4 (relative; the module's EQ_TOL, commonwealth_price_basis_census.py:73); store price = median of the ticker's yahoo_finance-labelled rows for the date; reader Close = Yahoo Close with auto_adjust=False; compared only on dates in the window (85 graded days plus the 40 trading days before the first) where both exist",
+  "median_ratio_note": "pooled median over the class's unequal ticker-days of (store point / reader unadjusted Close); 1.0 would be equal",
+  "classes": {
+   "replaced": {
+    "tickers": 517,
+    "ticker_outcomes": {
+     "every_compared_day_equal": 488,
+     "some_days_not_equal": 22,
+     "no_yahoo_labelled_point_in_the_store": 7,
+     "not_in_the_store": 0,
+     "no_bar_from_the_reader": 0
+    },
+    "ticker_days": {
+     "compared": 18870,
+     "equal": 18537,
+     "not_equal": 333
+    },
+    "unequal_ticker_days_used_for_the_median": 333,
+    "median_ratio_store_point_over_reader_unadjusted_close_on_unequal_ticker_days": 1.241,
+    "unequal_ratio_quartiles_25_75": [
+     1.0033,
+     5.0
+    ],
+    "ticker_days_on_which_adj_close_differs_from_close_by_more_than_1e-4": {
+     "days": 17988,
+     "store_equals_close": 17655,
+     "store_equals_adj_close": 0,
+     "store_equals_neither": 333
+    },
+    "by_type_family": {
+     "exchange_traded_equity_type": 357,
+     "registered_investment_company_type": 160
+    }
+   },
+   "not_replaced": {
+    "tickers": 141,
+    "ticker_outcomes": {
+     "every_compared_day_equal": 130,
+     "some_days_not_equal": 8,
+     "no_yahoo_labelled_point_in_the_store": 2,
+     "not_in_the_store": 0,
+     "no_bar_from_the_reader": 1
+    },
+    "ticker_days": {
+     "compared": 5106,
+     "equal": 5059,
+     "not_equal": 47
+    },
+    "unequal_ticker_days_used_for_the_median": 47,
+    "median_ratio_store_point_over_reader_unadjusted_close_on_unequal_ticker_days": 4.0,
+    "unequal_ratio_quartiles_25_75": [
+     4.0,
+     4.0
+    ],
+    "ticker_days_on_which_adj_close_differs_from_close_by_more_than_1e-4": {
+     "days": 1133,
+     "store_equals_close": 1127,
+     "store_equals_adj_close": 0,
+     "store_equals_neither": 6
+    },
+    "by_type_family": {
+     "exchange_traded_equity_type": 102,
+     "registered_investment_company_type": 39
+    }
+   },
+   "not_a_fund_or_unmarked": {
+    "tickers": 220,
+    "ticker_outcomes": {
+     "every_compared_day_equal": 0,
+     "some_days_not_equal": 0,
+     "no_yahoo_labelled_point_in_the_store": 0,
+     "not_in_the_store": 214,
+     "no_bar_from_the_reader": 6
+    },
+    "ticker_days": {
+     "compared": 0,
+     "equal": 0,
+     "not_equal": 0
+    },
+    "unequal_ticker_days_used_for_the_median": 0,
+    "median_ratio_store_point_over_reader_unadjusted_close_on_unequal_ticker_days": null,
+    "unequal_ratio_quartiles_25_75": null,
+    "ticker_days_on_which_adj_close_differs_from_close_by_more_than_1e-4": {
+     "days": 0,
+     "store_equals_close": 0,
+     "store_equals_adj_close": 0,
+     "store_equals_neither": 0
+    },
+    "by_type_family": {
+     "exchange_traded_equity_type": 65,
+     "registered_investment_company_type": 155
+    }
+   }
+  },
+  "reading_limit": "every compared ticker-day lies in the store's newest 37 yahoo-labelled days (2026-04-15 to 2026-06-05), the days closest to its build, where an adjusted and an unadjusted close differ least; the days an adjusted close would set apart (Adj Close differs from Close by more than 1e-4) are counted per class beside the classes. Nothing here is read of the store's older points or of any day after its last: an adjusted close dates nothing, and an equal near the end of the store does not show the store holds the unadjusted close for earlier years",
+  "sums_to_the_whole": {
+   "tickers": 878,
+   "ticker_outcomes": {
+    "every_compared_day_equal": 618,
+    "not_in_the_store": 214,
+    "some_days_not_equal": 30,
+    "no_bar_from_the_reader": 7,
+    "no_yahoo_labelled_point_in_the_store": 9
+   },
+   "ticker_days": {
+    "compared": 23976,
+    "equal": 23596,
+    "not_equal": 380
+   },
+   "remainder": 0
+  }
+ },
+ "admitted_types_holding_not_replaced_funds": {
+  "the_nine_pairs_from": "data/assets/scripts/gold/irpt_reporting/date_basis_grading.py:49-53 (ADMITTED_PAIRS)",
+  "securities_definition": "a security id (its internal id or CUSIP) whose one (SEC Asset Type, Share Class Type) pair is that pair and whose ticker is among the 878; ids from the earlier reads' maps (prep and overlap); one ticker can hold more than one id",
+  "types": [
+   {
+    "type_pair": "Exchange-Traded Equity Securities / Not Available",
+    "securities_among_the_878": 529,
+    "replaced": 360,
+    "not_replaced": 102,
+    "not_a_fund_or_unmarked": 67,
+    "not_replaced_with_unequal_ticker_days": 1,
+    "all_classes_with_unequal_ticker_days": 12
+   },
+   {
+    "type_pair": "Securities Issued by Registered Investment Companies or Business Development Companies / ETF",
+    "securities_among_the_878": 30,
+    "replaced": 29,
+    "not_replaced": 0,
+    "not_a_fund_or_unmarked": 1,
+    "not_replaced_with_unequal_ticker_days": 0,
+    "all_classes_with_unequal_ticker_days": 4
+   },
+   {
+    "type_pair": "Securities Issued by Registered Investment Companies or Business Development Companies / A",
+    "securities_among_the_878": 11,
+    "replaced": 0,
+    "not_replaced": 5,
+    "not_a_fund_or_unmarked": 6,
+    "not_replaced_with_unequal_ticker_days": 1,
+    "all_classes_with_unequal_ticker_days": 1
+   },
+   {
+    "type_pair": "Securities Issued by Registered Investment Companies or Business Development Companies / No Load",
+    "securities_among_the_878": 12,
+    "replaced": 4,
+    "not_replaced": 3,
+    "not_a_fund_or_unmarked": 5,
+    "not_replaced_with_unequal_ticker_days": 0,
+    "all_classes_with_unequal_ticker_days": 0
+   },
+   {
+    "type_pair": "Securities Issued by Registered Investment Companies or Business Development Companies / Other",
+    "securities_among_the_878": 32,
+    "replaced": 2,
+    "not_replaced": 8,
+    "not_a_fund_or_unmarked": 22,
+    "not_replaced_with_unequal_ticker_days": 0,
+    "all_classes_with_unequal_ticker_days": 0
+   },
+   {
+    "type_pair": "Securities Issued by Registered Investment Companies or Business Development Companies / Retirement",
+    "securities_among_the_878": 11,
+    "replaced": 0,
+    "not_replaced": 2,
+    "not_a_fund_or_unmarked": 9,
+    "not_replaced_with_unequal_ticker_days": 2,
+    "all_classes_with_unequal_ticker_days": 2
+   },
+   {
+    "type_pair": "Securities Issued by Registered Investment Companies or Business Development Companies / Inv",
+    "securities_among_the_878": 2,
+    "replaced": 0,
+    "not_replaced": 2,
+    "not_a_fund_or_unmarked": 0,
+    "not_replaced_with_unequal_ticker_days": 0,
+    "all_classes_with_unequal_ticker_days": 0
+   },
+   {
+    "type_pair": "Securities Issued by Registered Investment Companies or Business Development Companies / Inst",
+    "securities_among_the_878": 84,
+    "replaced": 16,
+    "not_replaced": 7,
+    "not_a_fund_or_unmarked": 61,
+    "not_replaced_with_unequal_ticker_days": 4,
+    "all_classes_with_unequal_ticker_days": 11
+   },
+   {
+    "type_pair": "Securities Issued by Registered Investment Companies or Business Development Companies / Not Available",
+    "securities_among_the_878": 173,
+    "replaced": 109,
+    "not_replaced": 12,
+    "not_a_fund_or_unmarked": 52,
+    "not_replaced_with_unequal_ticker_days": 0,
+    "all_classes_with_unequal_ticker_days": 1
+   }
+  ],
+  "typed_securities_among_the_878_with_a_pair_outside_the_nine_or_no_single_pair": 0,
+  "securities_with_a_ticker_among_the_878": 884,
+  "id_pair_conflicts_between_the_maps": 8
+ },
+ "the_store_holds_the_unadjusted_close_by_class": {
+  "replaced": "FOR_SOME",
+  "not_replaced": "FOR_SOME",
+  "not_a_fund_or_unmarked": "CANNOT_BE_TOLD"
+ },
+ "store_date_coverage": {
+  "compared_ticker_days": 23976,
+  "compared_ticker_days_fall_on_distinct_dates": 37,
+  "compared_dates_first": "2026-04-15",
+  "compared_dates_last": "2026-06-05",
+  "compared_ticker_days_by_month": {
+   "2026-04": 7776,
+   "2026-05": 12960,
+   "2026-06": 3240
+  },
+  "compared_ticker_days_by_date": {
+   "2026-04-15": 648,
+   "2026-04-16": 648,
+   "2026-04-17": 648,
+   "2026-04-20": 648,
+   "2026-04-21": 648,
+   "2026-04-22": 648,
+   "2026-04-23": 648,
+   "2026-04-24": 648,
+   "2026-04-27": 648,
+   "2026-04-28": 648,
+   "2026-04-29": 648,
+   "2026-04-30": 648,
+   "2026-05-01": 648,
+   "2026-05-04": 648,
+   "2026-05-05": 648,
+   "2026-05-06": 648,
+   "2026-05-07": 648,
+   "2026-05-08": 648,
+   "2026-05-11": 648,
+   "2026-05-12": 648,
+   "2026-05-13": 648,
+   "2026-05-14": 648,
+   "2026-05-15": 648,
+   "2026-05-18": 648,
+   "2026-05-19": 648,
+   "2026-05-20": 648,
+   "2026-05-21": 648,
+   "2026-05-22": 648,
+   "2026-05-26": 648,
+   "2026-05-27": 648,
+   "2026-05-28": 648,
+   "2026-05-29": 648,
+   "2026-06-01": 648,
+   "2026-06-02": 648,
+   "2026-06-03": 648,
+   "2026-06-04": 648,
+   "2026-06-05": 648
+  },
+  "compared_ticker_days_on_a_graded_day": 0,
+  "compared_ticker_days_on_a_day_before_the_first_graded_day": 23976,
+  "graded_days": {
+   "count": 85,
+   "first": "2026-06-10",
+   "last": "2026-10-09",
+   "covered_by_a_yahoo_labelled_point_of_any_ticker_in_the_store": 0,
+   "covered_by_a_yahoo_labelled_point_of_any_of_the_878": 0,
+   "covered_by_a_point_of_any_label_of_any_ticker": 0
+  },
+  "the_40_days_before_the_first_graded_day": {
+   "count": 40,
+   "first": "2026-04-14",
+   "last": "2026-06-09",
+   "covered_by_a_yahoo_labelled_point_of_any_ticker_in_the_store": 37,
+   "covered_by_a_yahoo_labelled_point_of_any_of_the_878": 37
+  },
+  "newest_date_the_store_holds_a_yahoo_labelled_point": "2026-06-05",
+  "newest_date_the_store_holds_a_point_of_any_label": "2026-06-09",
+  "store_distinct_dates_yahoo_labelled": 1531,
+  "reading": "every one of the compared ticker-days falls on a day BEFORE the first graded day; none falls on a graded day. The store holds no yahoo-labelled point on any of the graded days, for any ticker, so it cannot be the second witness's source for them as it stands."
+ }
+}

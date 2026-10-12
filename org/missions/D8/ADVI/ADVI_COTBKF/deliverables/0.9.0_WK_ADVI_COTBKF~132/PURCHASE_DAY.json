@@ -1,0 +1,437 @@
+{
+ "set": {
+  "changed_floor_1e9": 1575,
+  "changed_floor_1e12": 1577,
+  "trade_days": 37,
+  "trade_days_floor_1e9": 37,
+  "by_kind": {
+   "purchase": 12,
+   "sale": 3,
+   "reinvestment": 20,
+   "transfer": 2,
+   "corporate_action": 0
+  },
+  "kinds_counted": {
+   "purchase": "by (BYX cancel: none)",
+   "sale": "sl",
+   "reinvestment": "dvr (DVRX cancel: 1 row, not on a changed day)",
+   "transfer": "trfi TRFIR trci TRCISU trfo trco, and in-kind li LISU lo LIX LOX ci",
+   "corporate_action": "lica licar LICASU loca QA CAF CAE"
+  },
+  "moved_funds": 19,
+  "moved_funds_on_a_trade_day": 4,
+  "day_convention": "Trade_Date moved to the next NYSE trading day (the build rule); identical to the Trade_Date on all 37 days"
+ },
+ "reproduced_reviewer": {
+  "over_10bp": 96,
+  "with_a_row": 22,
+  "purchases": 12,
+  "sales": 2,
+  "reinvestments": 8,
+  "without_a_row": 74,
+  "purchases_higher": 12,
+  "sales_lower": 2,
+  "reinvestments_lower": 7
+ },
+ "rule": {
+  "text": "RULE_WRITTEN_AT=2026-10-11T22:04:03Z\nRULE (CB-bw-1, round 75). Written BEFORE any return was recomputed and before any predicted-vs-observed comparison on any day.\nSeen before writing (step 1 only): the changed set at both floors (1575 at 1e-9, 1577 at 1e-12), the 19 moved funds, the custodian\ntypes in them, and the counts / signs of the over-10bp days by kind of row that the reviewer already reports (12 purchases higher,\n2 sales lower, 8 reinvestments 7 lower). Nothing else.\n\n(a) THE BUILD'S FORMULA (commonwealth_daily_returns.daily_returns, flow timing \"end\", flow rule method_r28):\n    ret_t = (V_t - F_t + A_t) / V_s - 1\n    V_t = the account's value on day t, the sum over holdings of shares x close (cash at par); s = the account's previous row of\n    the table; F_t = the day's external flows (a purchase, a sale and a reinvestment are INTERNAL, never a flow: cash becomes shares);\n    A_t = the owed-elsewhere fees (ManAltT, ManCheck Amount) added to the numerator. A day is blank when V_t or V_s is null, V_s <= 0,\n    the account's first day, a flow is unvalued, etc.\n    A fund held h_s shares at s: its value is h_s x close_s at s, and (h_s + q_t) x close_t on day t, q_t = signed shares moved by the\n    day's rows (purchase +, sale -, reinvestment dvr +, transfer in +, out -). Day convention: the row's effective day = Trade_Date,\n    moved to the next trading day when NYSE is closed (the build's own rule).\n\n(b) THE PREDICTION of the purchase-day reading. Let p0 = baseline close (dividend-adjusted), p1 = variant close (unadjusted);\n    dp_t = p1_t - p0_t, dp_s = p1_s - p0_s per moved fund. The purchase is internal, so only the price of shares moves V:\n    V1_t = V0_t + sum_f (h_s^f + q_t^f) dp_t^f ;  V1_s = V0_s + sum_f h_s^f dp_s^f   (sum over the moved funds the account holds).\n    PREDICTED variant return  P1 = (V0_t + dV_t - F1_t + A_t) / (V0_s + dV_s) - 1  with dV_t, dV_s as above (h_s from the baseline\n    account_day_value quantity at s; q_t from the custodian Quantity, sign by commonwealth_signs; F1_t the variant table's flow, which\n    equals the baseline's unless a flow is valued from the day's price).\n    PREDICTED CHANGE  Pred = P1 - ret0_t  (ret0_t the baseline return as recomputed from the baseline table's columns).\n    HOLDING-ONLY prediction Pred_h: the same with q_t = 0 (only the carried holding moves with the price).\n    The reading's part is the q term: Pred - Pred_h.  When p1/p0 = k is one constant around the day (k_t = k_s = k) the holding's\n    own return is unchanged (Pred_h = 0 apart from the flow) and Pred = q p0_t (k-1) / V0_s approximately, positive for a purchase when\n    k > 1 (unadjusted close above adjusted), negative for a sale, positive for a reinvestment that day. For a reinvestment on a\n    distribution day k_t != k_s, so the holding term (h_s (dp_t - dp_s) / V_s, negative when the adjusted series steps down across the\n    ex-date) is also present; the formula predicts both terms and the sum, and the test is whether the sum holds.\n\n(c) PER TRADE DAY (every changed account-day at the 1e-12 floor with a share-moving row of a moved fund; kinds below):\n    obs = ret1 - ret0 (the builds' own returns). TOLERANCE: tol = max(5 percent of |Pred|, 0.1 bp = 1e-5 absolute). Justification: the\n    recomputation reproduces each build to 1e-9, so any gap above tol is not rounding; 5 percent allows the custodian quantity to be\n    rounded and the close to carry its source rounding; 0.1 bp is a tenth of the smallest band edge (1 bp) and 10^4 times the floor.\n    confirmed : |obs - Pred| <= tol, all inputs complete.\n    refuted   : |obs - Pred| >  tol, all inputs complete.\n    undecided : reason codes NOT_REPRODUCED (either build's own return is not reproduced within 1e-9 from its table's value/flow\n    columns [plus A from the custodian rows]), PRIOR_BLANK (prior-day value or either return blank), NO_CLOSE (a held or traded moved\n    fund has no close in either build at t or s), MULTI_ROW (rows on the day in more than one fund or of more than one kind),\n    QTY_MISMATCH (the build's own change in the fund's shares from s to t differs from the custodian q_t by more than 1e-6 relative),\n    FLOW_DIFFERS_UNEXPLAINED (the two builds' flows differ and the difference is not a price-valued flow).\n    KINDS (custodian Transaction_Type counted): purchase = by (and BYX, its cancel); sale = sl; reinvestment = dvr (and DVRX, its\n    cancel); transfer = trfi, TRFIR, trci, TRCISU, trfo, trco and the in-kind li, LISU, lo, LIX, LOX and ci of a fund; a corporate-action\n    exchange (lica, licar, LICASU, loca, QA, CAF, CAE) is a share-moving row counted under \"corporate_action\" (none expected in the set).\n    BANDS by |obs|: under 1 bp (< 1e-4), 1 to 10 bp (1e-4 to 1e-3), over 10 bp (> 1e-3). Trade-day floor: 1e-12 (the 1,577).\n\n(d) WHAT WOULD SHOW THE READING WRONG (run on the purchase days; D = purchase days with complete inputs (not undecided)):\n    F = share of D confirmed under Pred;  H = share of D on which the HOLDING-ONLY prediction Pred_h is within\n    max(5 percent of |obs|, 1e-5) of obs, i.e. explains the change with no q term.\n    CONTROL C = the same holding-only agreement on the changed NON-trade days with |obs| > 10 bp (74 or so, matched on size band), and\n    on all changed non-trade days; on those days q = 0 so Pred = Pred_h and C tells whether the formula reproduces a change at all.\n    reading = confirmed   iff D >= 9 of the 12 purchase days AND F >= 0.75 AND H <= 0.25 AND C(over 10 bp) >= 0.75.\n    reading = refuted     iff D >= 9 AND (H >= 0.50 OR F < 0.25), the holding-only prediction explaining purchase days as well as the q term\n                          or the q-term prediction failing.\n    reading = not_established otherwise (including C below 0.75: the formula is then not reproducing the build, so no day says anything).\n    The reading is about PURCHASE days; sales, reinvestments, transfers are reported with the same prediction but do not set the reading.\n    If I later think this wrong, I report under it and separately what another choice gives.\n",
+  "written_at": "2026-10-11T22:04:03Z"
+ },
+ "recomputation": {
+  "days": 1577,
+  "reproduced": 1577,
+  "not_reproduced": 0
+ },
+ "confirmed": 37,
+ "refuted": 0,
+ "undecided": 0,
+ "by_kind_and_band": {
+  "purchase": {
+   "days": 12,
+   "by_band": {
+    "under_1bp": {
+     "days": 0,
+     "confirmed": 0,
+     "refuted": 0,
+     "undecided": 0,
+     "higher": 0,
+     "lower": 0
+    },
+    "1_to_10bp": {
+     "days": 0,
+     "confirmed": 0,
+     "refuted": 0,
+     "undecided": 0,
+     "higher": 0,
+     "lower": 0
+    },
+    "over_10bp": {
+     "days": 12,
+     "confirmed": 12,
+     "refuted": 0,
+     "undecided": 0,
+     "higher": 12,
+     "lower": 0
+    }
+   },
+   "sign": {
+    "higher": 12,
+    "lower": 0
+   },
+   "status": {
+    "confirmed": 12,
+    "refuted": 0,
+    "undecided": 0
+   },
+   "holding_only_explains": 0,
+   "terms_bp": {
+    "q_term_min": 31.622,
+    "q_term_median": 36.712,
+    "q_term_max": 882.021,
+    "holding_term_min": 0.0,
+    "holding_term_median": 11.394,
+    "holding_term_max": 12.816
+   },
+   "q_term_sign": {
+    "positive": 12,
+    "negative": 0,
+    "zero": 0
+   },
+   "holding_term_sign": {
+    "positive": 10,
+    "negative": 0,
+    "zero": 2
+   },
+   "max_abs_gap_observed_minus_predicted_bp": 2.22e-12,
+   "share_of_total_abs_change": 0.357508
+  },
+  "sale": {
+   "days": 3,
+   "by_band": {
+    "under_1bp": {
+     "days": 0,
+     "confirmed": 0,
+     "refuted": 0,
+     "undecided": 0,
+     "higher": 0,
+     "lower": 0
+    },
+    "1_to_10bp": {
+     "days": 1,
+     "confirmed": 1,
+     "refuted": 0,
+     "undecided": 0,
+     "higher": 0,
+     "lower": 1
+    },
+    "over_10bp": {
+     "days": 2,
+     "confirmed": 2,
+     "refuted": 0,
+     "undecided": 0,
+     "higher": 0,
+     "lower": 2
+    }
+   },
+   "sign": {
+    "higher": 0,
+    "lower": 3
+   },
+   "status": {
+    "confirmed": 3,
+    "refuted": 0,
+    "undecided": 0
+   },
+   "holding_only_explains": 0,
+   "terms_bp": {
+    "q_term_min": -12.579,
+    "q_term_median": -12.236,
+    "q_term_max": -3.806,
+    "holding_term_min": -1.26,
+    "holding_term_median": -1.25,
+    "holding_term_max": -0.458
+   },
+   "q_term_sign": {
+    "positive": 0,
+    "negative": 3,
+    "zero": 0
+   },
+   "holding_term_sign": {
+    "positive": 0,
+    "negative": 3,
+    "zero": 0
+   },
+   "max_abs_gap_observed_minus_predicted_bp": 2.22e-12,
+   "share_of_total_abs_change": 0.005054
+  },
+  "reinvestment": {
+   "days": 20,
+   "by_band": {
+    "under_1bp": {
+     "days": 4,
+     "confirmed": 4,
+     "refuted": 0,
+     "undecided": 0,
+     "higher": 2,
+     "lower": 2
+    },
+    "1_to_10bp": {
+     "days": 8,
+     "confirmed": 8,
+     "refuted": 0,
+     "undecided": 0,
+     "higher": 6,
+     "lower": 2
+    },
+    "over_10bp": {
+     "days": 8,
+     "confirmed": 8,
+     "refuted": 0,
+     "undecided": 0,
+     "higher": 1,
+     "lower": 7
+    }
+   },
+   "sign": {
+    "higher": 9,
+    "lower": 11
+   },
+   "status": {
+    "confirmed": 20,
+    "refuted": 0,
+    "undecided": 0
+   },
+   "holding_only_explains": 4,
+   "terms_bp": {
+    "q_term_min": 0.0,
+    "q_term_median": 3.838,
+    "q_term_max": 43.029,
+    "holding_term_min": -35.32,
+    "holding_term_median": -14.832,
+    "holding_term_max": 5.644
+   },
+   "q_term_sign": {
+    "positive": 16,
+    "negative": 0,
+    "zero": 4
+   },
+   "holding_term_sign": {
+    "positive": 3,
+    "negative": 17,
+    "zero": 0
+   },
+   "max_abs_gap_observed_minus_predicted_bp": 2.22e-12,
+   "share_of_total_abs_change": 0.039388
+  },
+  "transfer": {
+   "days": 2,
+   "by_band": {
+    "under_1bp": {
+     "days": 2,
+     "confirmed": 2,
+     "refuted": 0,
+     "undecided": 0,
+     "higher": 0,
+     "lower": 2
+    },
+    "1_to_10bp": {
+     "days": 0,
+     "confirmed": 0,
+     "refuted": 0,
+     "undecided": 0,
+     "higher": 0,
+     "lower": 0
+    },
+    "over_10bp": {
+     "days": 0,
+     "confirmed": 0,
+     "refuted": 0,
+     "undecided": 0,
+     "higher": 0,
+     "lower": 0
+    }
+   },
+   "sign": {
+    "higher": 0,
+    "lower": 2
+   },
+   "status": {
+    "confirmed": 2,
+    "refuted": 0,
+    "undecided": 0
+   },
+   "holding_only_explains": 0,
+   "terms_bp": {
+    "q_term_min": -896.101,
+    "q_term_median": -557.631,
+    "q_term_max": -219.161,
+    "holding_term_min": 219.157,
+    "holding_term_median": 557.624,
+    "holding_term_max": 896.091
+   },
+   "q_term_sign": {
+    "positive": 0,
+    "negative": 2,
+    "zero": 0
+   },
+   "holding_term_sign": {
+    "positive": 2,
+    "negative": 0,
+    "zero": 0
+   },
+   "max_abs_gap_observed_minus_predicted_bp": 2.22e-12,
+   "share_of_total_abs_change": 2e-06
+  },
+  "corporate_action": {
+   "days": 0,
+   "note": "no changed account-day carries a corporate-action exchange row of a moved fund"
+  },
+  "reading_test": {
+   "purchase_days": 12,
+   "D_complete_inputs": 12,
+   "F_confirmed_share": 1.0,
+   "H_holding_only_share": 0.0,
+   "C_control_over_10bp": {
+    "non_trade_days": 74,
+    "holding_only_explains": 74
+   },
+   "C_control_all_non_trade": {
+    "non_trade_days": 1540,
+    "holding_only_explains": 1540,
+    "by_band": {
+     "under_1bp": {
+      "days": 1050,
+      "explained": 1050
+     },
+     "1_to_10bp": {
+      "days": 416,
+      "explained": 416
+     },
+     "over_10bp": {
+      "days": 74,
+      "explained": 74
+     }
+    }
+   },
+   "purchase_q_term_share_of_change": {
+    "min": 0.7491,
+    "median": 0.7587,
+    "max": 1.0
+   },
+   "purchase_days_with_no_prior_holding_of_the_fund_in_the_account": 2,
+   "largest_gap_any_changed_day_bp": 4.44e-12,
+   "trade_days_by_ticker": {
+    "BALCX": 16,
+    "FCNTX": 11,
+    "CWGIX": 5,
+    "ANCFX": 5
+   },
+   "trade_days_by_year": {
+    "2022": 22,
+    "2023": 4,
+    "2025": 7,
+    "2026": 4
+   },
+   "flow_differs_between_builds": {
+    "days": 2,
+    "kinds": [
+     "transfer"
+    ],
+    "note": "in-kind withdrawals (lo) of fund shares valued from the day price; the prediction uses the variant table flow"
+   },
+   "implementation_choices_after_the_rule": [
+    "reason codes are applied in the order PRIOR_BLANK, NOT_REPRODUCED, NO_CLOSE, MULTI_ROW, QTY_MISMATCH, FLOW_DIFFERS_UNEXPLAINED (first that applies); none applied",
+    "holding-only agreement H and control C use tolerance max(5 percent of |obs|, 1e-5) around the observed change, as the rule says",
+    "the control for non-trade days is every changed non-trade day and, matched on size, the 74 of them over 10 bp"
+   ]
+  }
+ },
+ "share_of_total_change_on_trade_days": 0.401953,
+ "cash_against_shares": {
+  "baseline_close": {
+   "day_convention": "close of the row effective day (Trade_Date, next trading day when closed); ratio = |Quantity| x close / |Amount|, rows of one account, day and fund summed",
+   "set_purchase_days": {
+    "n": 12,
+    "median": 0.75864,
+    "share_within_1pct": 0.0,
+    "one_day_shift": {
+     "previous_trading_day_close": {
+      "median": 0.758025,
+      "share_within_1pct": 0.0
+     },
+     "next_trading_day_close": {
+      "median": 0.755875,
+      "share_within_1pct": 0.0
+     }
+    }
+   },
+   "all_purchase_rows_of_the_19_funds_all_accounts": {
+    "rows": 1119,
+    "with_a_close_in_both_builds": 936,
+    "rows_without_a_close_on_the_day": 183,
+    "median": 0.649063,
+    "share_within_1pct": 0.0032,
+    "p10": 0.6063,
+    "p90": 0.8149,
+    "one_day_shift": {
+     "previous_trading_day_close": {
+      "median": 0.650056,
+      "share_within_1pct": 0.0032
+     },
+     "next_trading_day_close": {
+      "median": 0.648758,
+      "share_within_1pct": 0.0011
+     }
+    }
+   }
+  },
+  "unadjusted_close": {
+   "day_convention": "close of the row effective day (Trade_Date, next trading day when closed); ratio = |Quantity| x close / |Amount|, rows of one account, day and fund summed",
+   "set_purchase_days": {
+    "n": 12,
+    "median": 0.999999,
+    "share_within_1pct": 1.0,
+    "one_day_shift": {
+     "previous_trading_day_close": {
+      "median": 0.999943,
+      "share_within_1pct": 0.9167
+     },
+     "next_trading_day_close": {
+      "median": 0.996432,
+      "share_within_1pct": 0.75
+     }
+    }
+   },
+   "all_purchase_rows_of_the_19_funds_all_accounts": {
+    "rows": 1119,
+    "with_a_close_in_both_builds": 936,
+    "rows_without_a_close_on_the_day": 183,
+    "median": 0.997191,
+    "share_within_1pct": 0.7372,
+    "p10": 0.9738,
+    "p90": 1.0,
+    "one_day_shift": {
+     "previous_trading_day_close": {
+      "median": 0.99875,
+      "share_within_1pct": 0.7265
+     },
+     "next_trading_day_close": {
+      "median": 0.994289,
+      "share_within_1pct": 0.703
+     }
+    }
+   }
+  }
+ },
+ "reading": "confirmed",
+ "headline": "Under the rule written at 2026-10-11T22:04:03Z, the purchase-day reading is confirmed on 12 of 12 purchase days: the observed change in the day's return equals the formula's prediction (largest gap 4.4e-12 basis points over all 1,577 changed days) and the holding-only prediction explains 0 of 12 (it explains 74 of 74 changed days over 10 bp that have no trade row). On a purchase day the q term, the new shares valued at the variant close instead of the baseline close, is 100 percent of the change on the 2 first purchases of a fund in the account and about 75 percent on the other 10 (the rest is the carried holding's weight in the account). The shares bought are worth the cash paid at the unadjusted close (median ratio 1.0000, 12 of 12 within 1 percent) and not at the baseline close (median 0.76, 0 of 12 within 1 percent). The 37 trade days (12 purchases, 20 reinvestments, 3 sales, 2 transfers) hold 40.2 percent of the total absolute change over the 1,577 days (58.0 percent of the part over 10 bp); the other 59.8 percent sits on 1,540 days with no share-moving row, all of which the holding-only formula reproduces. Reinvestments: the formula predicts a positive q term (16 of 20) and a negative carried-holding term (17 of 20); the sum matches the observed change on 20 of 20, 11 lower and 9 higher.",
+ "not_established": [
+  "The agreement of prediction and observation is to rounding on all 1,577 changed days, trade days and non-trade days alike, because the build's return is arithmetic on value and flow and the value is shares times close: the test shows the change on a purchase day is carried by the new shares' close difference (the holding-only prediction explains 0 of 12), not that the unadjusted close is the correct price for every fund and day.",
+  "Which close is right is shown by the cash against the shares, not by the return: on the 12 set purchase days the unadjusted close matches the cash paid (12 of 12 within 1 percent); over the 936 purchase rows of the 19 funds (all accounts) with a close in both builds it is 73.7 percent, 26.3 percent fall below 0.99 (10th percentile 0.974) and why is not examined (a sales charge inside the Amount is one possibility, not tested). 183 of the 1,119 purchase rows have no close on the row day in the tables read.",
+  "A one-day shift of the close changes the cash-against-shares answer for the unadjusted close (12 of 12 within 1 percent on the row day, 11 of 12 on the previous day's close, 9 of 12 on the next day's); the row day is the best fit and the baseline close fails on all three.",
+  "Only the 19 validated funds that moved are in this test; 237 of 270 fund series are not validated and the defect elsewhere is not measured. Trade days fall on 4 of the 19 funds, in 9 accounts.",
+  "The 2 transfer days are in-kind withdrawals (lo) whose flow the build values from the day's price, so the flow differs between the builds and offsets the share effect; they are under 1 bp and say nothing about the reading.",
+  "The reading covers purchases; reinvestments are explained by the formula with a carried-holding term of the opposite sign and a positive q term, so the lower direction on 11 of 20 reinvestment days is not the purchase mechanism. Whether the adjusted close steps across the ex-date on those days was not separately measured here.",
+  "The rule's thresholds (D, F, H, C) were met with large margins (12 of 12, 0 of 12, 74 of 74); no choice of tolerance from 1e-9 absolute to 5 percent changes any day's status, since the largest gap is 4.4e-16 of a return."
+ ]
+}

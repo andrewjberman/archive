@@ -1,0 +1,93 @@
+{
+  "to_id": "IRPT_BCKEND.TO-IB-pr-447",
+  "read_by": "0.9.0_WK_IRPT_BCKEND~305",
+  "live_package": {
+    "function": "irpt-intake-poller",
+    "region": "us-east-1",
+    "handler": "poller.lambda_handler",
+    "runtime": "python3.12",
+    "last_modified": "2026-09-11T12:55:52.000+0000",
+    "code_sha256": "YpE2MyUwdGzMfLaUGXi8cClxoVHFFmOz5LT1BYmoTa8=",
+    "read_at_utc": "2026-10-11T19:04:26Z",
+    "downloaded_bytes": 52312,
+    "downloaded_bytes_hash_equals_code_sha256": true,
+    "members": 28,
+    "py_members": ["checkpoint.py", "gate.py", "graph_client.py", "keys.py", "outbox.py", "poller.py"],
+    "file_in_package": true,
+    "registry_entry_count": 6,
+    "registry_shape": "top-level keys _meta (6 keys), firms (list of 5 entries), pseudo (list of 1 entry); 3 of the 5 firms are enabled clients",
+    "registry_entry_fields": ["aliases", "aua_source", "bucket", "delivery_cadence", "display_name", "email_domain", "enabled", "fee_scope", "firm_id", "kind", "model_source", "scopes", "series_start", "tree_token"],
+    "claim": "measured"
+  },
+  "env_var_points_at_it": true,
+  "env_var_name": "IRPT_FIRM_REGISTRY",
+  "env_var_value": "/var/task/firm_registry.json",
+  "environment_variable_names_seen": ["IRPT_MAX_THROTTLE_RETRIES", "IRPT_FORWARDER_ADDRESS", "IRPT_OUTBOX_TABLE", "IRPT_INTAKE_QUEUE_URL", "IRPT_CATCH_UP_MAX_PAGES", "IRPT_INITIAL_CUTOFF", "IRPT_CHECKPOINT_TABLE", "IRPT_JOBS_TABLE", "IRPT_MAX_RETRY_AFTER_S", "IRPT_FIRM_REGISTRY", "IRPT_FIRM_DESTINATION_POLICY", "IRPT_GRAPH_SECRET_ID", "IRPT_EVIDENCE_BUCKET", "IRPT_INTAKE_MAILBOX"],
+  "searched_for": [
+    "firm_registry (case-insensitive)",
+    "IRPT_FIRM_REGISTRY / FIRM_REGISTRY",
+    "registry (case-insensitive)",
+    "load_firm / firm_ids",
+    "every caller of the loaders found: _load_registry, load_firm_ids, firm_tokens, _check_tenant, TenantBinding, bind_firm, queue_message, quarantine_key, s3_evidence_key, cache_key, verify_against_layout",
+    "module-level (import-time) statements of keys.py, gate.py, poller.py, outbox.py, checkpoint.py, graph_client.py"
+  ],
+  "registry_reads_in_live_members": [
+    {"member": "keys.py", "line": 122, "what_is_read": "constant REGISTRY_ENV = IRPT_FIRM_REGISTRY (the name only; module level, no file opened)"},
+    {"member": "keys.py", "line": 136, "what_is_read": "_find_registry: the value of environment variable IRPT_FIRM_REGISTRY, returned as the path with no existence check"},
+    {"member": "keys.py", "line": 143, "what_is_read": "_find_registry fallback: exists-check of data/firm_registry.json in each ancestor directory of the module (up to 10); returns it if present"},
+    {"member": "keys.py", "line": 151, "what_is_read": "_find_registry fallback: exists-check of firm_registry.json beside the module; line 155 raises KeyComponentRefused REGISTRY_UNREADABLE if none found"},
+    {"member": "keys.py", "line": 293, "what_is_read": "_load_registry: open(path) and json.load of the whole registry file (the one place the file is opened)"},
+    {"member": "keys.py", "line": 303, "what_is_read": "load_firm_ids: firms[].firm_id of every entry with enabled true and kind client"},
+    {"member": "keys.py", "line": 319, "what_is_read": "firm_tokens: firms[].firm_id, tree_token, aliases and the first label of email_domain, for every firm"},
+    {"member": "keys.py", "line": 359, "what_is_read": "TenantBinding.__init__ calls load_firm_ids (refuses a firm id not enabled-client)"},
+    {"member": "keys.py", "line": 392, "what_is_read": "_check_tenant calls load_firm_ids (called from s3_evidence_key 516, cache_key 469, queue_message 570)"},
+    {"member": "keys.py", "line": 546, "what_is_read": "quarantine_key calls firm_tokens (every quarantine key is checked against the firm tokens)"},
+    {"member": "keys.py", "line": 560, "what_is_read": "queue_message calls firm_tokens, and _check_tenant at 570 when the message carries a tenant"},
+    {"member": "keys.py", "line": 600, "what_is_read": "verify_against_layout calls load_firm_ids (a battery comparison; no caller in the live members)"},
+    {"member": "gate.py", "line": 148, "what_is_read": "BoundRequest.__init__ builds keys.TenantBinding, so reads the registry through load_firm_ids (registry_path passed through at line 258)"},
+    {"member": "gate.py", "line": 202, "what_is_read": "bind_firm reaches the BoundRequest at line 255 only for a sender domain the destination POLICY (firm_destination_policy.json, not the registry) resolves; the registry read is the BoundRequest construction"},
+    {"member": "poller.py", "line": 358, "what_is_read": "_process_message calls gate.bind_firm (registry read via TenantBinding when a firm is bound)"},
+    {"member": "poller.py", "line": 369, "what_is_read": "_process_message calls keys.quarantine_key (registry read via firm_tokens) for a quarantined or unresolved message"},
+    {"member": "outbox.py", "line": 99, "what_is_read": "Outbox.record calls keys.queue_message (registry read via firm_tokens, and via _check_tenant for a bound firm), reached from poller.py line 443 for every message"}
+  ],
+  "reached_at_run_time": {
+    "answer": false,
+    "claim": "measured",
+    "path_in_words": "Read by call path in the live bytes, nothing exercised. Import time: keys.py, gate.py, poller.py, outbox.py, checkpoint.py and graph_client.py hold no registry read at module level (keys.py line 122 is a name constant only), so importing opens nothing. Handler: poller.lambda_handler (poller.py line 479) calls gc.auth_state() (line 487, a secret-presence read, no registry) and then gc.LiveTransport(...) (line 489). LiveTransport.__init__ (graph_client.py lines 223-244) raises LiveCallRefused on every path: line 226 when IRPT_LIVE_MAILBOX_READ is not the consent sentence (that variable is not among the function's environment variable names), line 230 when the call site passes no word, line 235 when no app secret exists, and unconditionally at line 240 ('NOT IMPLEMENTED'). The handler catches it and returns at poller.py line 492 before run_scan (line 503) is called. Every registry read above sits below run_scan (run_scan -> _process_message -> gate.bind_firm / keys.quarantine_key / outbox.record -> keys). So no scheduled poll or request reaches a registry read; the reads are reachable only from an offline battery that calls run_scan directly, and from a future code change that makes LiveTransport construct."
+  },
+  "fields_taken_from_the_file": ["firm_id", "enabled", "kind", "tree_token", "aliases", "email_domain"],
+  "under_the_canon": {
+    "registry_files": ["event_rules.json", "exemptions.json", "feeds.json", "key_rulings.json", "legacy_addresses.json", "mail_parties.json", "name_rulings.json", "platinum_destinations.json", "remediations.json", "reporting_policies.json", "resources.json", "root_map.json", "scopes.json", "systems.json", "tiers.json"],
+    "per_field": [
+      {"field": "firm_id", "canon_holds_it": true, "read_by": "lib/opal_naming.py:_firm_registry_rows (tenant id of each served tenant, from scopes.json rows via _tenants)"},
+      {"field": "enabled", "canon_holds_it": true, "read_by": "lib/opal_naming.py:_firm_registry_rows (scopes.json tenant block, key enabled; closed by validate/_check_tenant)"},
+      {"field": "kind", "canon_holds_it": true, "read_by": "lib/opal_naming.py:_firm_registry_rows (scopes.json tenant block, key kind, one of scopes.json tenant_kinds)"},
+      {"field": "tree_token", "canon_holds_it": true, "read_by": "lib/opal_naming.py:_firm_registry_rows (the scopes.json alias spelling carrying plane tree-token)"},
+      {"field": "aliases", "canon_holds_it": true, "read_by": "lib/opal_naming.py:_firm_registry_rows (the scopes.json alias spellings carrying plane catalog)"},
+      {"field": "email_domain", "canon_holds_it": true, "read_by": "lib/opal_naming.py:_firm_registry_rows (scopes.json tenant block, key email_domain)"}
+    ],
+    "canon_note": "The canon holds all six fields in infra/logic/registry/scopes.json. data/firm_registry.json in the tree is itself one of the canon's GENERATED views (lib/opal_naming.py VIEWS line 98, rows built by _firm_registry_rows line 982), so the file the Lambdas open is the canon's output, not a second source. The poller never calls opal_naming at run time; it reads the generated view file. Compared by parsing: the live package's firm_registry.json equals the tree view data/firm_registry.json in firms, pseudo and _meta (same 5 + 1 entries, every field equal); the bytes differ (5229 live vs 5326 tree) because the tree view carries a top-level _generated key the live copy lacks. The role of the aua_source, bucket, delivery_cadence, fee_scope, model_source, scopes, series_start and display_name fields is unread by the poller's live code.",
+    "how_the_other_functions_get_firms": "The tree's other investor-reporting functions (irpt-holdings, irpt-narrative, irpt-status, irpt-export-render and the others) package the same _keys/keys.py plus a firm_registry.json whose staged_from source is data/firm_registry.json in lambda-source-map.json, and their terraform sets IRPT_FIRM_REGISTRY to that packaged file (/var/task/firm_registry.json; /opt/python/firm_registry.json for export), so load_firm_ids opens the generated view file; the poller's source-map entry alone declares the file with no staged_from."
+  },
+  "a_release_that_drops_the_file": {
+    "effect": "NO_EFFECT",
+    "claim": "inferred",
+    "reason": "The live code never reaches a registry read from the handler (reached_at_run_time false, poller.py 479-502 returning before run_scan, graph_client.py line 240 raising unconditionally), and the six live .py members are byte-equal to the tree's poller.py, graph_client.py, checkpoint.py, outbox.py, _gate/gate.py and _keys/keys.py, so a release from the tree carries the same handler and the same refusal. Absence would otherwise raise: with IRPT_FIRM_REGISTRY set, keys.py line 137 returns the path unchecked and line 293 open() raises FileNotFoundError; without it keys.py line 155 raises KeyComponentRefused REGISTRY_UNREADABLE; neither path falls back. Inferred, not measured, because nothing was exercised and the verdict holds only while LiveTransport stays unconstructible; any change that makes it construct turns the same drop into an outage on the first message."
+  },
+  "not_established": [
+    "Nothing was exercised: the handler was not invoked, so 'never reached' rests on reading graph_client.py line 240 and poller.py 487-502, not on a run.",
+    "Whether any caller outside the function's handler (a console test, another function importing these modules, an offline battery run inside the Lambda) reaches run_scan: no such caller appears in the package, and callers elsewhere were not searched.",
+    "Whether the live package's other 22 non-.py members (fixtures, firm_destination_policy.json) matter to a release; firm_destination_policy.json is read by gate.py (a separate file from the registry) at bind_firm line 202 and was not compared to the tree.",
+    "Whether the bytes of the live firm_registry.json are recoverable exactly from git: the parsed content equals the tree view, the bytes do not (no _generated key, 97 bytes shorter); no historical blob search was repeated.",
+    "Whether the function's schedule is enabled or disabled now, and whether the source-map note that the schedule is applied DISABLED holds: only get-function and get-function-configuration were read.",
+    "The effect of the release on IAM, event source, layers or environment (the variable IRPT_FIRM_REGISTRY would still point at a path that no longer exists): outside this read.",
+    "Whether any test or battery in the tree asserts the file's presence in the poller package."
+  ],
+  "aws_commands": [
+    "lambda get-function-configuration --function-name irpt-intake-poller --region us-east-1 (two reads: a projection and the one variable)",
+    "lambda get-function --function-name irpt-intake-poller --region us-east-1",
+    "one HTTPS download of the Code.Location package (python urllib; the link was not recorded)"
+  ],
+  "aws_writes_made": 0,
+  "functions_invoked": 0
+}
