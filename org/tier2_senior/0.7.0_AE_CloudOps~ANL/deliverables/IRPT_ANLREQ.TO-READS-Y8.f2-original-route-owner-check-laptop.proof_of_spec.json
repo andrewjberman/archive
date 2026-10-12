@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "IRPT_ANLREQ.TO-READS-Y8.f2-original-route-owner-check-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/task_orders/IRPT_ANLREQ.TO-READS-Y8.f2-original-route-owner-check-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "84e9aa3108"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R16_Y.md",
+    "vintage_commit": "84e9aa3108",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/task_orders/IRPT_ANLREQ.TO-READS-Y8.f2-original-route-owner-check-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~ANL",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/F2_original_route_owner_check.json",
+      "kind": "doc",
+      "commit_or_etag": "f8d6b0b9e8",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Nothing was deployed; the artifact is a measurement made by four direct invokes of irpt-status in one run; the checker reads the file at the committed bytes.",
+      "artifact_covered_by": [
+        "READS8-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "READS8-AC1",
+      "criterion_verbatim": "READS8-AC1: the result is complete, its verdict follows from its arms by the rule of step 4, the tie is stated (a digest and a source or UNTIED), the write list is empty, and it holds no id, address or link.",
+      "method": "live_read",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r16/reads8_check.py",
+      "expect": "READS8-OK",
+      "output_evidence": "verdict ANOMALY: control ok=None url_present=True; b=NOT_AUTHORIZED; a=FIRM_BINDING; b_absent_id=NOT_AUTHORIZED / FAIL: verdict ANOMALY does not follow from the arms (the rule gives UNEXERCISED_LIVE) / READS8-FAIL",
+      "denominator": "4 arms invoked once each of 4 ordered; control log lines read for the control invoke (CLEAN); 0 open ledger entries naming irpt-status of 36 across 2 worktrees",
+      "status": "FAIL"
+    }
+  ],
+  "controls": {
+    "read_can_see_a_row": {
+      "description": "The control arm on the same record was served a download route (link, expiry, sha256 and byte_length present), so the record is reachable and the b refusal is not the absent-record answer; b_absent_id gave the same code as b, which is why b alone proves nothing.",
+      "expected_landed": "control served with a download route",
+      "expected_not_landed": "control refused",
+      "observed": "control served (url present); b NOT_AUTHORIZED; b_absent_id NOT_AUTHORIZED",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "NOT APPLICABLE -- read-only",
+    "cto_half": "NOT APPLICABLE -- read-only"
+  },
+  "risk_class": "WORLD",
+  "rollback": "None needed: read-only.",
+  "scope": "READ-ONLY against AWS: four lambda:InvokeFunction calls on irpt-status, get-function-configuration, iam simulate-principal-policy on own identity, CloudWatch Logs filter on the control invoke. No write, grant or identity made.",
+  "declared_exclusions": [
+    {
+      "item": "Arm (c), the owner twin",
+      "reason": "Not run by the order: it needs the owner's address, which nobody is asked for."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/logs/2026-10-12/anl_lane_y8_original_route_owner_check.md",
+  "compiler_tools": [
+    {
+      "tool": "reads8_check",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r16/reads8_check.py",
+      "result": "READS8-FAIL"
+    }
+  ]
+}
