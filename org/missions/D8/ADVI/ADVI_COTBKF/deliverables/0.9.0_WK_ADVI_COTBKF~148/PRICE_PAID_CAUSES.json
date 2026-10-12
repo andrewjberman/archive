@@ -1,0 +1,1781 @@
+{
+ "test": {
+  "text": "TEST_WRITTEN_AT=2026-10-12T01:06:59Z\nTEST (CB-bz-1, round 78, worker 0.9.0_WK_ADVI_COTBKF~148). Written BEFORE any custodian row, unit, gap or ratio was looked at this round.\nSEEN BEFORE WRITING (and nothing else): the task order, the round-76/75 records' counts and notes, and the CODE of round 76/77's scripts (w138, w139, w140). No row-level table of this round has been opened.\n\nHYPOTHESIS H (constants FIXED as round 76's POST HOC note states them, never changed after): the seven dollar figures F = {0, 3, 10, 15, 19, 30, 34}, window 0.15 dollars.\n  For a PURCHASE row: gap = |Amount| - |Quantity| x close.  For a SALE row: gap = |Quantity| x close - |Amount|.  The row FITS if |gap - f| <= 0.15 for some f in F.\n  close = the UNADJUSTED close on the effective day (effective day = Trade_Date, moved to the next NYSE trading day when it is not one; round 75/77 convention).\n  A UNIT = account, effective day, fund, kind (purchase/sale) (round 77's definition, rows with |Quantity| >= 0.05, units with nonzero summed Quantity and Amount).\n  HOW A MULTI-ROW UNIT IS TESTED (decided now): PER ROW. The custodian rows of the unit can be told apart and each has its own gap against the unit's close. A unit FITS iff EVERY one of its rows fits some figure.\n  No combination of figures across rows is searched, so a unit of k rows gets no extra chance to hit by luck (it is harder, p^k). A secondary count, labelled secondary and NOT in any verdict: multi-row units whose summed gap fits one figure.\n  Two classes of unit: ZERO-GAP unit (every row |gap| <= 0.15, i.e. fits the figure 0; no charge shown) and OFF-ZERO unit (at least one row with |gap| > 0.15). The figure 0 absorbs every clean unit, so a fit that rests on 0 is no evidence about the six charges;\n  the real test of H is therefore on the off-zero units: they must fit one of the SIX nonzero figures {3,10,15,19,30,34} on every off-zero row.\n\nPOPULATIONS (none used to read the constants):\n  P1 = purchase and sale units of the 73 SUBSTITUTED funds (served close = the unadjusted vendor close; the 73 = series whose r34 'after' differs from 'before' on some date, round 77's definition), units with a served close.\n       CROSS-CHECK: where a yahoo_census ticker file exists for a P1 fund, served close vs Yahoo Close on the same date, agree if |difference| <= 0.01 dollars; the count of dates agreeing / compared is reported.\n  P2 = purchase and sale units, against the cache's (yahoo_census) UNADJUSTED Close on the effective day, of the failing funds OUTSIDE round 76's nineteen: PCBIX, SGIIX, GFFFX, FOCPX, AGTHX, NFFFX, VGHAX. A fund also in the 73 is counted in P1 only (the overlap count is reported); units with no Yahoo Close on the effective day are not read (count reported).\n  HELD_OUT = P1 + P2 (disjoint by construction).\n  P3 = SALE units of round 76's nineteen funds (served close). Round 76 said sales 'show the same set' after looking, so P3 is NOT clean held-out: reported apart, labelled 'seen in round 76'.\n  IN_SAMPLE = round 76's 936 purchase units of the nineteen (the rows that suggested the constants), reported apart.\n\nINFORMATIVE unit: |Amount| of the unit > 100 dollars (so that 1 percent of the amount exceeds 1 dollar, well over the 0.30-dollar total width of a figure's window). Everything is reported for all units AND for informative units; the VERDICT uses informative units only.\nSIZE BANDS (by unit |Amount|): under 100; 100 to 1,000; 1,000 to 10,000; over 10,000.\n\nCHANCE CONTROL (declared now):\n  (i) the identical per-row test with F shifted together by +1.50, -1.50, +0.75, -0.75 (four wrong seven-sets). C7 = the best (largest) fit among the four, on the same units.\n  (ii) the identical test on OFF-ZERO units with the SIX nonzero figures shifted by the same four amounts (four wrong six-sets). C6 = the best fit among the four. (Shifted sets carry no figure near 0, so for (ii) the zero-gap units are set aside before comparing: same units for real and shifted.)\n  (iii) ANALYTIC: a gap spread uniformly over a range R much wider than 0.30 falls in one of k windows of width 0.30 with probability about 0.30 k / R (k = 7 for the seven-set, 6 for the six-set); reported with R = the 5th to 95th percentile spread of the off-zero gaps of the population. Small trades have small gaps, hence the fit by size band and the informative-unit restriction.\n  Shifted sets are all at least 0.45 dollars from every real window, so a unit cannot fit both a real and a shifted figure.\n\nSTATISTICS: S7 = share of informative units that FIT (zero-gap units count as fitting through 0). S6 = share of informative OFF-ZERO units whose every off-zero row fits one of the six nonzero figures.\n\nVERDICT RULE (X and Y fixed now): X = 90 percent, Y = 20 percent. Justification: a wrong set scores about 0.30 k / R, which for charges whose gaps span 30 or more dollars is under 10 percent, so 20 percent is a generous ceiling for 'chance'; a true flat-charge rule should leave few units unexplained, so 90 percent is a demanding share; and below 50 percent most off-zero units are NOT explained by the set (chance level is far below it), so H cannot be the account of the charge.\n  For each of P1 and P2, taken SEPARATELY, on informative units:\n    needs: at least 200 informative units and at least 30 informative off-zero units, else that population is `not_established` (too thin to test).\n    HOLDS if S7 >= 90 AND S6 >= 90 AND max(C7, C6) <= 20.\n    FAILS if S7 < 50 OR S6 < 50.\n    otherwise NOT_ESTABLISHED (this includes S in [50,90), or a chance figure above 20).\n  held_out verdict = holds iff BOTH hold; fails iff EITHER fails; else not_established. The same rule is applied to P3 and to the 936 for the in_sample and 'seen' reporting; neither enters held_out.\n  A nonzero constant is `not seen held out` if fewer than 10 informative held-out units have a row fitting it; the verdict then says it rests on the constants that were seen (>= 10 units).\n\nTHE CLOSED LIST for units STILL MORE THAN 1 PERCENT OFF (|r - 1| > 0.01, r = |Quantity| x close / |Amount| for the unit) and with a close:\n  The eight causes; tests = round 76's CLOSED_LIST.txt tests VERBATIM for the old ones (its C1, C2, C3, C5, C6, C7, C10); the new one is H's charge:\n   small_quantity (round 76 C1): |Quantity| < 0.05 shares OR |Amount| < 0.50 dollars.\n   prior_day_close (C2): |Quantity| x unadjusted close of the previous trading day of that fund's own price series / |Amount| within 1 percent of 1.\n   next_day_close (C3): the same with the next trading day.\n   adjusted_close (C5): |Quantity| x Yahoo Adj Close (same effective day) / |Amount| within 1 percent of 1 (funds with a yahoo_census file).\n   another_share_class (C6): |Quantity| x Yahoo Close of a sibling class on the same effective day / |Amount| within 1 percent of 1, using round 76's sibling table (the nineteen funds only; for any other fund there is no table and the cause cannot fit, which is stated).\n   reinvestment_or_exchange_recorded_as_purchase (C7): (a) [purchase units only] a dividend/reinvestment row (types dv, dvlt, dvst, DVX, dvr, DVRX) of the same account in the same fund (or a sibling class of the table), Trade_Date within +/-5 calendar days, |Amount| within 1 percent of the unit's |Amount|; or (b) a row of the opposite kind (for a purchase unit a sale row `sl` of any fund; for a sale unit a purchase row `by` of any fund) of the same account within +/-1 calendar day with |Amount| within 1 percent of the unit's.\n   flat_dollar_charge (H itself): at least one row of the unit fits a NONZERO figure, every row fits some figure of F, and after removing the fitting figure from each row (purchase: |Amount| - f ; sale: |Amount| + f) the unit's ratio r' is within 1 percent of 1.\n   none_found: none of the above fits.\n  Round 76's settle_date_close, rate-based fee_inside_amount and fee_constant_excess are not on this order's list and are not run (the rate test fit at chance in round 76; the constant-excess idea is what H states).\n  ORDER A (least to most coincidence-prone; flat_dollar_charge, with seven windows, after the measured prices): small_quantity, prior_day_close, next_day_close, adjusted_close, another_share_class, reinvestment_or_exchange_recorded_as_purchase, flat_dollar_charge, none_found.\n  ORDER B (alternative; H early): small_quantity, flat_dollar_charge, prior_day_close, next_day_close, adjusted_close, another_share_class, reinvestment_or_exchange_recorded_as_purchase, none_found.\n  Every still-off unit gets the FIRST cause that fits in the order run; units sum to still_off.units under each order; change_with_the_order = units whose cause differs between A and B.\n  none_found is reported by fund and year with what was looked at (all of the above).\n\nSTEP 5 (if H holds): 'set aside' = for a unit whose every row fits a figure, remove the fitting figures (purchase: |Amount| - f; sale: |Amount| + f) and take r'; other units keep r. Share of units with |r' - 1| <= 0.01, for the nineteen funds, the 15 failing funds' held series (Yahoo Close), and the 73 substituted funds, purchases and sales apart. If H does not hold: the plain shares (|r - 1| <= 0.01), and the sentence that the rule still has that share against it.\n\nSTEP 3 (describe, not a test): per nonzero figure, over informative units: units, funds, accounts, years, purchases vs sales, median trade size as a BAND; fund/size/year/kind dependence; account-days with 2+ units, same figure on all vs not; named_on_disk: the distinct row type codes, notes containing fee/charge/commission/ticket as counts (generic words only), other-type rows in the same account on the same day as a count. The charge is not named unless a row says so.\n\nNO constant, window, threshold or order is changed after this file is kept. If the test is ill-posed it is reported under this text, and what I would change is stated separately, marked POST HOC.\n",
+  "written_at": "2026-10-12T01:06:59Z",
+  "constants": [
+   0,
+   3,
+   10,
+   15,
+   19,
+   30,
+   34
+  ],
+  "window": 0.15,
+  "verdict_rule": {
+   "X_percent": 90.0,
+   "Y_percent": 20.0,
+   "fails_below_percent": 50,
+   "min_informative_units": 200,
+   "min_informative_offzero_units": 30
+  }
+ },
+ "held_out": {
+  "units": 13009,
+  "fits": 12629,
+  "fits_none": 380,
+  "chance": "0.03% (best of four shifted seven-sets, informative units); 0.41% (best of four shifted six-sets, off-zero units); analytic uniform 6.7% (P1) and 23.3% (P2) for the seven windows",
+  "verdict": "fails",
+  "basis": "informative units (unit |Amount| > 100 dollars) of P1 + P2",
+  "S7_percent_fit_seven": 97.08,
+  "S6_percent_offzero_fit_a_nonzero_figure": 61.38,
+  "offzero_units": 984,
+  "offzero_fit_nonzero_figure": 604,
+  "best_shifted_seven_percent": 0.03,
+  "best_shifted_six_percent": 0.41,
+  "verdict_by_population": {
+   "P1": "not_established",
+   "P2": "fails"
+  },
+  "all_units_incl_small": 13120,
+  "constants_seen_held_out_with_units_fitting": {
+   "3": 99,
+   "10": 59,
+   "15": 13,
+   "19": 214,
+   "30": 158,
+   "34": 61
+  },
+  "verdict_rests_on_constants": [
+   "3",
+   "10",
+   "15",
+   "19",
+   "30",
+   "34"
+  ],
+  "constants_not_seen_held_out": [],
+  "rule_applied": "X=90, Y=20, fails below 50; min 200 informative units and 30 informative off-zero units per population; each of P1 and P2 judged separately"
+ },
+ "in_sample": {
+  "units": 935,
+  "fits": 935,
+  "fits_none": 0,
+  "chance": "0.00% (best shifted seven-set); 0.00% (best shifted six-set)",
+  "verdict": "holds",
+  "basis": "informative units of round 76 936 purchase units (935 informative)",
+  "units_all": 936,
+  "fits_all": 936,
+  "note": "in sample: these rows suggested the constants; the same counts as round 76 (112, 34, 3, 60, 24, 502, 201) reproduce, so this is a check on the implementation, not evidence"
+ },
+ "by_population": [
+  {
+   "population": "P1: purchase and sale units of the 73 substituted funds (served close = unadjusted vendor close); 31 of the 73 have a read unit",
+   "note": "held out",
+   "units_all": 10636,
+   "units": 10541,
+   "purchases": 5797,
+   "sales": 4744,
+   "zero_gap_units": 9898,
+   "offzero_units": 643,
+   "fits": 10355,
+   "fits_none": 186,
+   "fits_each_constant": {
+    "0": 9898,
+    "3": 98,
+    "10": 31,
+    "15": 13,
+    "19": 101,
+    "30": 158,
+    "34": 56
+   },
+   "shifted_seven_set_fits": {
+    "1.5": 3,
+    "-1.5": 0,
+    "0.75": 0,
+    "-0.75": 1
+   },
+   "shifted_six_set_fits_on_offzero_units": {
+    "1.5": 3,
+    "-1.5": 0,
+    "0.75": 0,
+    "-0.75": 1
+   },
+   "S7_percent_fit_seven": 98.24,
+   "C7_best_shifted_seven_percent": 0.03,
+   "S6_percent_offzero_fit_a_nonzero_figure": 71.07,
+   "C6_best_shifted_six_percent": 0.47,
+   "offzero_fit_nonzero_figure": 457,
+   "analytic_uniform_chance_percent": {
+    "R_p5_to_p95_dollars": 31.21,
+    "seven_windows": 6.73,
+    "six_windows": 5.77
+   },
+   "all_units_incl_small_S7": 98.25,
+   "all_units_fits": 10450,
+   "multi_row_units": 0,
+   "by_size_band": {
+    "lt100": {
+     "units": 41,
+     "zero_gap": 41,
+     "offzero": 0,
+     "fits": 41,
+     "S7": 100.0,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 0,
+     "S6": null,
+     "best_shifted6": null
+    },
+    "100_1k": {
+     "units": 3468,
+     "zero_gap": 3198,
+     "offzero": 270,
+     "fits": 3381,
+     "S7": 97.49,
+     "best_shifted7": 0.03,
+     "offzero_fit_nonzero": 183,
+     "S6": 67.78,
+     "best_shifted6": 0.37
+    },
+    "1k_10k": {
+     "units": 5478,
+     "zero_gap": 5261,
+     "offzero": 217,
+     "fits": 5415,
+     "S7": 98.85,
+     "best_shifted7": 0.05,
+     "offzero_fit_nonzero": 154,
+     "S6": 70.97,
+     "best_shifted6": 1.38
+    },
+    "gt10k": {
+     "units": 1649,
+     "zero_gap": 1493,
+     "offzero": 156,
+     "fits": 1613,
+     "S7": 97.82,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 120,
+     "S6": 76.92,
+     "best_shifted6": 0.0
+    }
+   },
+   "by_kind": {
+    "purchase": {
+     "units": 5797,
+     "zero_gap": 5490,
+     "offzero": 307,
+     "fits": 5724,
+     "S7": 98.74,
+     "S6": 76.22
+    },
+    "sale": {
+     "units": 4744,
+     "zero_gap": 4408,
+     "offzero": 336,
+     "fits": 4631,
+     "S7": 97.62,
+     "S6": 66.37
+    }
+   },
+   "verdict": "not_established"
+  },
+  {
+   "population": "P2: purchase and sale units of PCBIX, SGIIX, GFFFX, FOCPX, AGTHX, NFFFX, VGHAX against the cache unadjusted Close",
+   "note": "held out",
+   "units_all": 2484,
+   "units": 2468,
+   "purchases": 959,
+   "sales": 1509,
+   "zero_gap_units": 2127,
+   "offzero_units": 341,
+   "fits": 2274,
+   "fits_none": 194,
+   "fits_each_constant": {
+    "0": 2127,
+    "3": 1,
+    "10": 28,
+    "15": 0,
+    "19": 113,
+    "30": 0,
+    "34": 5
+   },
+   "shifted_seven_set_fits": {
+    "1.5": 1,
+    "-1.5": 0,
+    "0.75": 0,
+    "-0.75": 0
+   },
+   "shifted_six_set_fits_on_offzero_units": {
+    "1.5": 1,
+    "-1.5": 0,
+    "0.75": 0,
+    "-0.75": 0
+   },
+   "S7_percent_fit_seven": 92.14,
+   "C7_best_shifted_seven_percent": 0.04,
+   "S6_percent_offzero_fit_a_nonzero_figure": 43.11,
+   "C6_best_shifted_six_percent": 0.29,
+   "offzero_fit_nonzero_figure": 147,
+   "analytic_uniform_chance_percent": {
+    "R_p5_to_p95_dollars": 9.02,
+    "seven_windows": 23.28,
+    "six_windows": 19.96
+   },
+   "all_units_incl_small_S7": 92.15,
+   "all_units_fits": 2289,
+   "multi_row_units": 0,
+   "by_size_band": {
+    "lt100": {
+     "units": 9,
+     "zero_gap": 8,
+     "offzero": 1,
+     "fits": 8,
+     "S7": 88.89,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 0,
+     "S6": 0.0,
+     "best_shifted6": 0.0
+    },
+    "100_1k": {
+     "units": 1017,
+     "zero_gap": 902,
+     "offzero": 115,
+     "fits": 950,
+     "S7": 93.41,
+     "best_shifted7": 0.1,
+     "offzero_fit_nonzero": 48,
+     "S6": 41.74,
+     "best_shifted6": 0.87
+    },
+    "1k_10k": {
+     "units": 1161,
+     "zero_gap": 986,
+     "offzero": 175,
+     "fits": 1063,
+     "S7": 91.56,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 77,
+     "S6": 44.0,
+     "best_shifted6": 0.0
+    },
+    "gt10k": {
+     "units": 297,
+     "zero_gap": 246,
+     "offzero": 51,
+     "fits": 268,
+     "S7": 90.24,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 22,
+     "S6": 43.14,
+     "best_shifted6": 0.0
+    }
+   },
+   "by_kind": {
+    "purchase": {
+     "units": 959,
+     "zero_gap": 949,
+     "offzero": 10,
+     "fits": 954,
+     "S7": 99.48,
+     "S6": 50.0
+    },
+    "sale": {
+     "units": 1509,
+     "zero_gap": 1178,
+     "offzero": 331,
+     "fits": 1320,
+     "S7": 87.48,
+     "S6": 42.9
+    }
+   },
+   "verdict": "fails"
+  },
+  {
+   "population": "HELD_OUT = P1 + P2",
+   "note": "held out",
+   "units_all": 13120,
+   "units": 13009,
+   "purchases": 6756,
+   "sales": 6253,
+   "zero_gap_units": 12025,
+   "offzero_units": 984,
+   "fits": 12629,
+   "fits_none": 380,
+   "fits_each_constant": {
+    "0": 12025,
+    "3": 99,
+    "10": 59,
+    "15": 13,
+    "19": 214,
+    "30": 158,
+    "34": 61
+   },
+   "shifted_seven_set_fits": {
+    "1.5": 4,
+    "-1.5": 0,
+    "0.75": 0,
+    "-0.75": 1
+   },
+   "shifted_six_set_fits_on_offzero_units": {
+    "1.5": 4,
+    "-1.5": 0,
+    "0.75": 0,
+    "-0.75": 1
+   },
+   "S7_percent_fit_seven": 97.08,
+   "C7_best_shifted_seven_percent": 0.03,
+   "S6_percent_offzero_fit_a_nonzero_figure": 61.38,
+   "C6_best_shifted_six_percent": 0.41,
+   "offzero_fit_nonzero_figure": 604,
+   "analytic_uniform_chance_percent": {
+    "R_p5_to_p95_dollars": 31.14,
+    "seven_windows": 6.74,
+    "six_windows": 5.78
+   },
+   "all_units_incl_small_S7": 97.1,
+   "all_units_fits": 12739,
+   "multi_row_units": 0,
+   "by_size_band": {
+    "lt100": {
+     "units": 50,
+     "zero_gap": 49,
+     "offzero": 1,
+     "fits": 49,
+     "S7": 98.0,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 0,
+     "S6": 0.0,
+     "best_shifted6": 0.0
+    },
+    "100_1k": {
+     "units": 4485,
+     "zero_gap": 4100,
+     "offzero": 385,
+     "fits": 4331,
+     "S7": 96.57,
+     "best_shifted7": 0.02,
+     "offzero_fit_nonzero": 231,
+     "S6": 60.0,
+     "best_shifted6": 0.26
+    },
+    "1k_10k": {
+     "units": 6639,
+     "zero_gap": 6247,
+     "offzero": 392,
+     "fits": 6478,
+     "S7": 97.57,
+     "best_shifted7": 0.05,
+     "offzero_fit_nonzero": 231,
+     "S6": 58.93,
+     "best_shifted6": 0.77
+    },
+    "gt10k": {
+     "units": 1946,
+     "zero_gap": 1739,
+     "offzero": 207,
+     "fits": 1881,
+     "S7": 96.66,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 142,
+     "S6": 68.6,
+     "best_shifted6": 0.0
+    }
+   },
+   "by_kind": {
+    "purchase": {
+     "units": 6756,
+     "zero_gap": 6439,
+     "offzero": 317,
+     "fits": 6678,
+     "S7": 98.85,
+     "S6": 75.39
+    },
+    "sale": {
+     "units": 6253,
+     "zero_gap": 5586,
+     "offzero": 667,
+     "fits": 5951,
+     "S7": 95.17,
+     "S6": 54.72
+    }
+   },
+   "verdict": "fails"
+  },
+  {
+   "population": "P3: SALE units of round 76 nineteen funds",
+   "note": "SEEN in round 76 (its sale note), not clean held-out; reported apart",
+   "units_all": 942,
+   "units": 940,
+   "purchases": 0,
+   "sales": 940,
+   "zero_gap_units": 155,
+   "offzero_units": 785,
+   "fits": 929,
+   "fits_none": 11,
+   "fits_each_constant": {
+    "0": 155,
+    "3": 0,
+    "10": 10,
+    "15": 72,
+    "19": 17,
+    "30": 485,
+    "34": 190
+   },
+   "shifted_seven_set_fits": {
+    "1.5": 0,
+    "-1.5": 0,
+    "0.75": 0,
+    "-0.75": 0
+   },
+   "shifted_six_set_fits_on_offzero_units": {
+    "1.5": 0,
+    "-1.5": 0,
+    "0.75": 0,
+    "-0.75": 0
+   },
+   "S7_percent_fit_seven": 98.83,
+   "C7_best_shifted_seven_percent": 0.0,
+   "S6_percent_offzero_fit_a_nonzero_figure": 98.6,
+   "C6_best_shifted_six_percent": 0.0,
+   "offzero_fit_nonzero_figure": 774,
+   "analytic_uniform_chance_percent": {
+    "R_p5_to_p95_dollars": 19.02,
+    "seven_windows": 11.04,
+    "six_windows": 9.46
+   },
+   "all_units_incl_small_S7": 98.83,
+   "all_units_fits": 931,
+   "multi_row_units": 0,
+   "by_size_band": {
+    "lt100": {
+     "units": 1,
+     "zero_gap": 1,
+     "offzero": 0,
+     "fits": 1,
+     "S7": 100.0,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 0,
+     "S6": null,
+     "best_shifted6": null
+    },
+    "100_1k": {
+     "units": 77,
+     "zero_gap": 39,
+     "offzero": 38,
+     "fits": 77,
+     "S7": 100.0,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 38,
+     "S6": 100.0,
+     "best_shifted6": 0.0
+    },
+    "1k_10k": {
+     "units": 311,
+     "zero_gap": 39,
+     "offzero": 272,
+     "fits": 305,
+     "S7": 98.07,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 266,
+     "S6": 97.79,
+     "best_shifted6": 0.0
+    },
+    "gt10k": {
+     "units": 553,
+     "zero_gap": 78,
+     "offzero": 475,
+     "fits": 548,
+     "S7": 99.1,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 470,
+     "S6": 98.95,
+     "best_shifted6": 0.0
+    }
+   },
+   "by_kind": {
+    "sale": {
+     "units": 940,
+     "zero_gap": 155,
+     "offzero": 785,
+     "fits": 929,
+     "S7": 98.83,
+     "S6": 98.6
+    }
+   },
+   "verdict": "holds"
+  },
+  {
+   "population": "IN_SAMPLE: round 76 936 purchase units of the nineteen funds",
+   "note": "in sample: the rows that suggested the constants",
+   "units_all": 936,
+   "units": 935,
+   "purchases": 935,
+   "sales": 0,
+   "zero_gap_units": 112,
+   "offzero_units": 823,
+   "fits": 935,
+   "fits_none": 0,
+   "fits_each_constant": {
+    "0": 112,
+    "3": 34,
+    "10": 2,
+    "15": 60,
+    "19": 24,
+    "30": 502,
+    "34": 201
+   },
+   "shifted_seven_set_fits": {
+    "1.5": 0,
+    "-1.5": 0,
+    "0.75": 0,
+    "-0.75": 0
+   },
+   "shifted_six_set_fits_on_offzero_units": {
+    "1.5": 0,
+    "-1.5": 0,
+    "0.75": 0,
+    "-0.75": 0
+   },
+   "S7_percent_fit_seven": 100.0,
+   "C7_best_shifted_seven_percent": 0.0,
+   "S6_percent_offzero_fit_a_nonzero_figure": 100.0,
+   "C6_best_shifted_six_percent": 0.0,
+   "offzero_fit_nonzero_figure": 823,
+   "analytic_uniform_chance_percent": {
+    "R_p5_to_p95_dollars": 19.06,
+    "seven_windows": 11.02,
+    "six_windows": 9.44
+   },
+   "all_units_incl_small_S7": 100.0,
+   "all_units_fits": 936,
+   "multi_row_units": 0,
+   "by_size_band": {
+    "lt100": {
+     "units": 1,
+     "zero_gap": 0,
+     "offzero": 1,
+     "fits": 1,
+     "S7": 100.0,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 1,
+     "S6": 100.0,
+     "best_shifted6": 0.0
+    },
+    "100_1k": {
+     "units": 127,
+     "zero_gap": 6,
+     "offzero": 121,
+     "fits": 127,
+     "S7": 100.0,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 121,
+     "S6": 100.0,
+     "best_shifted6": 0.0
+    },
+    "1k_10k": {
+     "units": 378,
+     "zero_gap": 33,
+     "offzero": 345,
+     "fits": 378,
+     "S7": 100.0,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 345,
+     "S6": 100.0,
+     "best_shifted6": 0.0
+    },
+    "gt10k": {
+     "units": 430,
+     "zero_gap": 73,
+     "offzero": 357,
+     "fits": 430,
+     "S7": 100.0,
+     "best_shifted7": 0.0,
+     "offzero_fit_nonzero": 357,
+     "S6": 100.0,
+     "best_shifted6": 0.0
+    }
+   },
+   "by_kind": {
+    "purchase": {
+     "units": 935,
+     "zero_gap": 112,
+     "offzero": 823,
+     "fits": 935,
+     "S7": 100.0,
+     "S6": 100.0
+    }
+   },
+   "verdict": "holds"
+  }
+ ],
+ "the_charge": {
+  "by_constant": {
+   "3": {
+    "units": 133,
+    "by_population": {
+     "P1": 98,
+     "IN": 34,
+     "P2": 1
+    },
+    "funds": 5,
+    "accounts": 9,
+    "years": {
+     "2021": 1,
+     "2022": 6,
+     "2023": 44,
+     "2024": 48,
+     "2025": 23,
+     "2026": 11
+    },
+    "distinct_years": 6,
+    "purchases": 122,
+    "sales": 11,
+    "median_trade_size_band": "100_1k",
+    "size_band_shares": {
+     "lt100": 0.0,
+     "100_1k": 0.947,
+     "1k_10k": 0.053,
+     "gt10k": 0.0
+    },
+    "funds_tickers": {
+     "VFIAX": 87,
+     "VEIRX": 34,
+     "VBIRX": 10,
+     "PCBIX": 1,
+     "PDBZX": 1
+    }
+   },
+   "10": {
+    "units": 71,
+    "by_population": {
+     "P1": 31,
+     "P2": 28,
+     "P3": 10,
+     "IN": 2
+    },
+    "funds": 4,
+    "accounts": 15,
+    "years": {
+     "2020": 7,
+     "2021": 11,
+     "2022": 23,
+     "2023": 10,
+     "2024": 14,
+     "2025": 6
+    },
+    "distinct_years": 6,
+    "purchases": 2,
+    "sales": 69,
+    "median_trade_size_band": "1k_10k",
+    "size_band_shares": {
+     "lt100": 0.0,
+     "100_1k": 0.394,
+     "1k_10k": 0.493,
+     "gt10k": 0.113
+    },
+    "funds_tickers": {
+     "PCBIX": 28,
+     "MISIX": 18,
+     "PDBZX": 13,
+     "PRILX": 12
+    }
+   },
+   "15": {
+    "units": 145,
+    "by_population": {
+     "P3": 72,
+     "IN": 60,
+     "P1": 13
+    },
+    "funds": 3,
+    "accounts": 37,
+    "years": {
+     "2022": 5,
+     "2023": 69,
+     "2024": 68,
+     "2025": 2,
+     "2026": 1
+    },
+    "distinct_years": 5,
+    "purchases": 68,
+    "sales": 77,
+    "median_trade_size_band": "1k_10k",
+    "size_band_shares": {
+     "lt100": 0.0,
+     "100_1k": 0.145,
+     "1k_10k": 0.434,
+     "gt10k": 0.421
+    },
+    "funds_tickers": {
+     "VEIRX": 132,
+     "VBIRX": 8,
+     "VWIUX": 5
+    }
+   },
+   "19": {
+    "units": 255,
+    "by_population": {
+     "P2": 113,
+     "P1": 101,
+     "IN": 24,
+     "P3": 17
+    },
+    "funds": 11,
+    "accounts": 67,
+    "years": {
+     "2020": 32,
+     "2021": 48,
+     "2022": 72,
+     "2023": 47,
+     "2024": 46,
+     "2025": 9,
+     "2026": 1
+    },
+    "distinct_years": 7,
+    "purchases": 33,
+    "sales": 222,
+    "median_trade_size_band": "1k_10k",
+    "size_band_shares": {
+     "lt100": 0.0,
+     "100_1k": 0.247,
+     "1k_10k": 0.498,
+     "gt10k": 0.255
+    },
+    "funds_tickers": {
+     "PCBIX": 108,
+     "PDBZX": 56,
+     "VEIRX": 40,
+     "MISIX": 26,
+     "FLTRX": 6,
+     "VWIUX": 6,
+     "AGTHX": 5,
+     "NHMRX": 5
+    }
+   },
+   "30": {
+    "units": 1145,
+    "by_population": {
+     "IN": 502,
+     "P3": 485,
+     "P1": 158
+    },
+    "funds": 5,
+    "accounts": 242,
+    "years": {
+     "2021": 10,
+     "2022": 43,
+     "2023": 540,
+     "2024": 491,
+     "2025": 44,
+     "2026": 17
+    },
+    "distinct_years": 6,
+    "purchases": 598,
+    "sales": 547,
+    "median_trade_size_band": "gt10k",
+    "size_band_shares": {
+     "lt100": 0.0,
+     "100_1k": 0.093,
+     "1k_10k": 0.387,
+     "gt10k": 0.52
+    },
+    "funds_tickers": {
+     "VEIRX": 987,
+     "VWIUX": 126,
+     "VBIRX": 27,
+     "VFIAX": 4,
+     "DODIX": 1
+    }
+   },
+   "34": {
+    "units": 452,
+    "by_population": {
+     "IN": 201,
+     "P3": 190,
+     "P1": 56,
+     "P2": 5
+    },
+    "funds": 7,
+    "accounts": 128,
+    "years": {
+     "2020": 1,
+     "2021": 4,
+     "2022": 15,
+     "2023": 226,
+     "2024": 186,
+     "2025": 13,
+     "2026": 7
+    },
+    "distinct_years": 7,
+    "purchases": 239,
+    "sales": 213,
+    "median_trade_size_band": "gt10k",
+    "size_band_shares": {
+     "lt100": 0.0,
+     "100_1k": 0.1,
+     "1k_10k": 0.369,
+     "gt10k": 0.531
+    },
+    "funds_tickers": {
+     "VEIRX": 391,
+     "VWIUX": 31,
+     "VBIRX": 15,
+     "VFIAX": 8,
+     "VGHAX": 5,
+     "VTSAX": 1,
+     "VWEHX": 1
+    }
+   }
+  },
+  "dependence": {
+   "by_fund_ticker_units_per_figure": {
+    "MISIX": {
+     "10": 18,
+     "19": 26
+    },
+    "PCBIX": {
+     "3": 1,
+     "10": 28,
+     "19": 108
+    },
+    "PDBZX": {
+     "3": 1,
+     "10": 13,
+     "19": 56
+    },
+    "VBIRX": {
+     "3": 10,
+     "15": 8,
+     "30": 27,
+     "34": 15
+    },
+    "VEIRX": {
+     "3": 34,
+     "15": 132,
+     "19": 40,
+     "30": 987,
+     "34": 391
+    },
+    "VFIAX": {
+     "3": 87,
+     "30": 4,
+     "34": 8
+    },
+    "VWIUX": {
+     "15": 5,
+     "19": 6,
+     "30": 126,
+     "34": 31
+    }
+   },
+   "by_family_first_word_units_per_figure": {
+    "American": {
+     "19": 6
+    },
+    "BlackRock": {
+     "19": 1
+    },
+    "Dodge": {
+     "30": 1
+    },
+    "Lord": {
+     "19": 1
+    },
+    "Nuveen": {
+     "19": 11
+    },
+    "PGIM": {
+     "3": 1,
+     "10": 13,
+     "19": 56
+    },
+    "Parnassus": {
+     "10": 12
+    },
+    "Principal": {
+     "3": 1,
+     "10": 28,
+     "19": 108
+    },
+    "Vanguard": {
+     "3": 131,
+     "15": 145,
+     "19": 46,
+     "30": 1144,
+     "34": 452
+    },
+    "Victory": {
+     "10": 18,
+     "19": 26
+    }
+   },
+   "by_year_units_per_figure": {
+    "2020": {
+     "10": 7,
+     "19": 32,
+     "34": 1
+    },
+    "2021": {
+     "3": 1,
+     "10": 11,
+     "19": 48,
+     "30": 10,
+     "34": 4
+    },
+    "2022": {
+     "3": 6,
+     "10": 23,
+     "15": 5,
+     "19": 72,
+     "30": 43,
+     "34": 15
+    },
+    "2023": {
+     "3": 44,
+     "10": 10,
+     "15": 69,
+     "19": 47,
+     "30": 540,
+     "34": 226
+    },
+    "2024": {
+     "3": 48,
+     "10": 14,
+     "15": 68,
+     "19": 46,
+     "30": 491,
+     "34": 186
+    },
+    "2025": {
+     "3": 23,
+     "10": 6,
+     "15": 2,
+     "19": 9,
+     "30": 44,
+     "34": 13
+    },
+    "2026": {
+     "3": 11,
+     "15": 1,
+     "19": 1,
+     "30": 17,
+     "34": 7
+    }
+   },
+   "by_kind_units_per_figure": {
+    "purchase": {
+     "3": 122,
+     "10": 2,
+     "15": 68,
+     "19": 33,
+     "30": 598,
+     "34": 239
+    },
+    "sale": {
+     "3": 11,
+     "10": 69,
+     "15": 77,
+     "19": 222,
+     "30": 547,
+     "34": 213
+    }
+   },
+   "by_size_band_units_per_figure": {
+    "100_1k": {
+     "3": 126,
+     "10": 28,
+     "15": 21,
+     "19": 63,
+     "30": 107,
+     "34": 45
+    },
+    "1k_10k": {
+     "3": 7,
+     "10": 35,
+     "15": 63,
+     "19": 127,
+     "30": 443,
+     "34": 167
+    },
+    "gt10k": {
+     "10": 8,
+     "15": 61,
+     "19": 65,
+     "30": 595,
+     "34": 240
+    }
+   },
+   "spearman_figure_vs_log_amount": 0.324,
+   "charged_units_informative": 2201,
+   "charged_funds": 18,
+   "charged_accounts": 404,
+   "accounts_with_charged_units_by_distinct_figures": {
+    "1": 312,
+    "2": 90,
+    "3+": 2
+   },
+   "share_of_each_fund_units_charged": {
+    "VEIRX": {
+     "units": 1596,
+     "charged_nonzero": 1584,
+     "zero_gap": 12,
+     "fit_none": 0
+    },
+    "PCBIX": {
+     "units": 2343,
+     "charged_nonzero": 137,
+     "zero_gap": 2023,
+     "fit_none": 183
+    },
+    "PDBZX": {
+     "units": 4333,
+     "charged_nonzero": 70,
+     "zero_gap": 4183,
+     "fit_none": 80
+    },
+    "VFIAX": {
+     "units": 156,
+     "charged_nonzero": 99,
+     "zero_gap": 0,
+     "fit_none": 57
+    },
+    "MISIX": {
+     "units": 1127,
+     "charged_nonzero": 44,
+     "zero_gap": 1057,
+     "fit_none": 26
+    },
+    "VWIUX": {
+     "units": 168,
+     "charged_nonzero": 168,
+     "zero_gap": 0,
+     "fit_none": 0
+    },
+    "VBIRX": {
+     "units": 60,
+     "charged_nonzero": 60,
+     "zero_gap": 0,
+     "fit_none": 0
+    }
+   },
+   "reading": "A figure goes with the fund family and the kind of row, and with the size of the trade: 3 is on Vanguard index/bond funds mostly as a purchase on trades of 100 to 1,000 dollars; 10 and 19 are on the Principal, PGIM, Victory and Parnassus funds, almost all SALES; 30 and 34 are on Vanguard funds in both kinds, on trades over 1,000 dollars, nearly all in 2023 and 2024; 15 is on Vanguard in 2022-2024. In the funds that carry a charge at all it is on nearly every unit (VEIRX: all but 12 of 1,596). It does not go with an account day: see account_day."
+  },
+  "account_day": {
+   "account_days_with_2plus_units": 4848,
+   "one_nonzero_figure_plus_zero_gap_units": 1611,
+   "all_units_zero_gap": 2917,
+   "different_nonzero_figures": 69,
+   "one_or_more_unit_fits_no_figure": 226,
+   "same_nonzero_figure_on_all_units": 25,
+   "account_days_all_informative": 6336,
+   "reading": "the figure is per unit, not per account day: in 1611 account days a unit carries a nonzero figure beside a zero-gap unit, and where every unit of an account day is charged the same figure is on all in 25 and different figures in 69"
+  },
+  "named_on_disk": {
+   "distinct_row_type_codes_in_the_cache": 61,
+   "cache_rows": 1416497,
+   "fee_or_expense_type_codes_by_description": [
+    "12b1 (12(b)-1 Expense)",
+    "ManAltF / ManAltT / ManCheck / man (Management Fee ...)",
+    "bcf (Bounced Check Fee)",
+    "cbf (Checkbook Fee)",
+    "csltfee (Consulting Fee Expense)",
+    "fch / fco / fee (IRA expenses)",
+    "genmain (General Maintenance Fee)",
+    "misc (Miscellaneous Expenses)",
+    "pcf (PCF Expenses)",
+    "stp (Stop Payment Expense)",
+    "term (Termination Fee)"
+   ],
+   "notes_containing_counts_all_cache_rows": {
+    "fee": 27931,
+    "charge": 2282,
+    "commission": 112,
+    "ticket": 15
+   },
+   "notes_containing_counts_in_the_14998_unit_rows": {
+    "fee": 4,
+    "charge": 0,
+    "commission": 0,
+    "ticket": 0
+   },
+   "unit_rows_note_fee_hits_detail": "4 rows where the three letters sit inside the order-type or reference text of a purchase or sale note; none reads as a fee",
+   "ticket_notes": {
+    "rows": 15,
+    "type": "misc (Miscellaneous Expenses)",
+    "generic_words": "COMMISSION ADJ TICKET CHG",
+    "on_an_informative_unit_account_day": 0,
+    "distinct_amounts": 10
+   },
+   "commission_notes_on_sale_rows": "rows of type sl in other funds carry generic words such as CORR COMMISSION COR(RECTION); none of the 14,998 unit rows does",
+   "other_type_rows_on_the_same_account_day": {
+    "charged_nonzero_figure": {
+     "units": 2201,
+     "with_any_other_type_row_same_account_same_day": 215,
+     "with_a_fee_or_expense_type_row_same_account_same_day": 13,
+     "with_a_misc_type_row_same_account_same_day": 1
+    },
+    "zero_gap": {
+     "units": 12292,
+     "with_any_other_type_row_same_account_same_day": 1577,
+     "with_a_fee_or_expense_type_row_same_account_same_day": 66,
+     "with_a_misc_type_row_same_account_same_day": 0
+    },
+    "fits_none": {
+     "units": 391,
+     "with_any_other_type_row_same_account_same_day": 41,
+     "with_a_fee_or_expense_type_row_same_account_same_day": 2,
+     "with_a_misc_type_row_same_account_same_day": 0
+    }
+   },
+   "reading": "Nothing on the unit rows names the charge: no fee column, no note word (fee, charge, commission, ticket) on any of the 14,998 unit rows that reads as a charge, and no fee- or expense-type row dated the same day in the same account for more charged units (13 of 2201, 0.59%) than for zero-gap units (66 of 12292, 0.54%). The only row text that names a ticket charge is the misc row \"COMMISSION ADJ TICKET CHG\" (15 rows); none of them sits on an account day of any unit tested. So the charge is not named on disk; what it is is not established."
+  },
+  "basis": "informative units (|Amount| > 100) of P1, P2, P3 and the 936 pooled (14884 units); a figure label is the figure the unit gap fits; no unit has more than one row"
+ },
+ "still_off": {
+  "units": 727,
+  "causes": {
+   "flat_dollar_charge": {
+    "units": 431,
+    "by_population": {
+     "IN": 179,
+     "P1": 124,
+     "P3": 66,
+     "P2": 62
+    },
+    "funds": 13
+   },
+   "prior_day_close": {
+    "units": 87,
+    "by_population": {
+     "P1": 32,
+     "IN": 31,
+     "P3": 17,
+     "P2": 7
+    },
+    "funds": 9
+   },
+   "next_day_close": {
+    "units": 78,
+    "by_population": {
+     "P2": 24,
+     "P1": 21,
+     "P3": 18,
+     "IN": 15
+    },
+    "funds": 7
+   },
+   "reinvestment_or_exchange_recorded_as_purchase": {
+    "units": 33,
+    "by_population": {
+     "IN": 21,
+     "P1": 8,
+     "P2": 3,
+     "P3": 1
+    },
+    "funds": 6
+   },
+   "adjusted_close": {
+    "units": 6,
+    "by_population": {
+     "P1": 5,
+     "P2": 1
+    },
+    "funds": 4
+   },
+   "another_share_class": {
+    "units": 0,
+    "by_population": {},
+    "funds": 0
+   },
+   "small_quantity": {
+    "units": 0,
+    "by_population": {},
+    "funds": 0
+   },
+   "none_found": {
+    "units": 92,
+    "by_population": {
+     "P2": 57,
+     "P1": 35
+    },
+    "funds": 8
+   }
+  },
+  "alternative": {
+   "flat_dollar_charge": {
+    "units": 592,
+    "by_population": {
+     "IN": 246,
+     "P1": 172,
+     "P3": 102,
+     "P2": 72
+    },
+    "funds": 13
+   },
+   "prior_day_close": {
+    "units": 19,
+    "by_population": {
+     "P1": 13,
+     "P2": 6
+    },
+    "funds": 5
+   },
+   "next_day_close": {
+    "units": 20,
+    "by_population": {
+     "P2": 16,
+     "P1": 4
+    },
+    "funds": 4
+   },
+   "reinvestment_or_exchange_recorded_as_purchase": {
+    "units": 4,
+    "by_population": {
+     "P2": 3,
+     "P1": 1
+    },
+    "funds": 3
+   },
+   "adjusted_close": {
+    "units": 0,
+    "by_population": {},
+    "funds": 0
+   },
+   "another_share_class": {
+    "units": 0,
+    "by_population": {},
+    "funds": 0
+   },
+   "small_quantity": {
+    "units": 0,
+    "by_population": {},
+    "funds": 0
+   },
+   "none_found": {
+    "units": 92,
+    "by_population": {
+     "P2": 57,
+     "P1": 35
+    },
+    "funds": 8
+   }
+  },
+  "change_with_the_order": 161,
+  "order_A": "small_quantity, prior_day_close, next_day_close, adjusted_close, another_share_class, reinvestment_or_exchange_recorded_as_purchase, flat_dollar_charge, none_found",
+  "order_B": "small_quantity, flat_dollar_charge, prior_day_close, next_day_close, adjusted_close, another_share_class, reinvestment_or_exchange_recorded_as_purchase, none_found",
+  "definition": "a unit (account, effective day, fund, kind) with a close on its effective day and |ratio - 1| > 0.01, in P1, P2, P3 or the 936; every one is given the FIRST cause that fits in the order run",
+  "change_detail": {
+   "adjusted_close -> flat_dollar_charge": 6,
+   "next_day_close -> flat_dollar_charge": 58,
+   "prior_day_close -> flat_dollar_charge": 68,
+   "reinvestment_or_exchange_recorded_as_purchase -> flat_dollar_charge": 29
+  },
+  "by_population": {
+   "P1": {
+    "still_off_units": 225,
+    "units_with_a_close": 10636,
+    "A": {
+     "flat_dollar_charge": 124,
+     "prior_day_close": 32,
+     "next_day_close": 21,
+     "reinvestment_or_exchange_recorded_as_purchase": 8,
+     "adjusted_close": 5,
+     "another_share_class": 0,
+     "small_quantity": 0,
+     "none_found": 35
+    },
+    "B": {
+     "flat_dollar_charge": 172,
+     "prior_day_close": 13,
+     "next_day_close": 4,
+     "reinvestment_or_exchange_recorded_as_purchase": 1,
+     "adjusted_close": 0,
+     "another_share_class": 0,
+     "small_quantity": 0,
+     "none_found": 35
+    },
+    "change_with_the_order": 48
+   },
+   "P2": {
+    "still_off_units": 154,
+    "units_with_a_close": 2484,
+    "A": {
+     "flat_dollar_charge": 62,
+     "prior_day_close": 7,
+     "next_day_close": 24,
+     "reinvestment_or_exchange_recorded_as_purchase": 3,
+     "adjusted_close": 1,
+     "another_share_class": 0,
+     "small_quantity": 0,
+     "none_found": 57
+    },
+    "B": {
+     "flat_dollar_charge": 72,
+     "prior_day_close": 6,
+     "next_day_close": 16,
+     "reinvestment_or_exchange_recorded_as_purchase": 3,
+     "adjusted_close": 0,
+     "another_share_class": 0,
+     "small_quantity": 0,
+     "none_found": 57
+    },
+    "change_with_the_order": 10
+   },
+   "P3": {
+    "still_off_units": 102,
+    "units_with_a_close": 942,
+    "A": {
+     "flat_dollar_charge": 66,
+     "prior_day_close": 17,
+     "next_day_close": 18,
+     "reinvestment_or_exchange_recorded_as_purchase": 1,
+     "adjusted_close": 0,
+     "another_share_class": 0,
+     "small_quantity": 0,
+     "none_found": 0
+    },
+    "B": {
+     "flat_dollar_charge": 102,
+     "prior_day_close": 0,
+     "next_day_close": 0,
+     "reinvestment_or_exchange_recorded_as_purchase": 0,
+     "adjusted_close": 0,
+     "another_share_class": 0,
+     "small_quantity": 0,
+     "none_found": 0
+    },
+    "change_with_the_order": 36
+   },
+   "IN": {
+    "still_off_units": 246,
+    "units_with_a_close": 936,
+    "A": {
+     "flat_dollar_charge": 179,
+     "prior_day_close": 31,
+     "next_day_close": 15,
+     "reinvestment_or_exchange_recorded_as_purchase": 21,
+     "adjusted_close": 0,
+     "another_share_class": 0,
+     "small_quantity": 0,
+     "none_found": 0
+    },
+    "B": {
+     "flat_dollar_charge": 246,
+     "prior_day_close": 0,
+     "next_day_close": 0,
+     "reinvestment_or_exchange_recorded_as_purchase": 0,
+     "adjusted_close": 0,
+     "another_share_class": 0,
+     "small_quantity": 0,
+     "none_found": 0
+    },
+    "change_with_the_order": 67
+   }
+  },
+  "units_fitting_each_cause_regardless_of_order": {
+   "flat_dollar_charge": 592,
+   "prior_day_close": 87,
+   "next_day_close": 95,
+   "reinvestment_or_exchange_recorded_as_purchase": 43,
+   "adjusted_close": 6,
+   "another_share_class": 0,
+   "small_quantity": 0
+  },
+  "units_by_number_of_causes_that_fit": {
+   "0": 92,
+   "1": 461,
+   "2": 160,
+   "3": 14
+  },
+  "flat_dollar_charge_test_on_the_same_units_with_the_figure_sets_shifted": {
+   "real_set": 592,
+   "plus_1.50": 0,
+   "minus_1.50": 0,
+   "plus_0.75": 0,
+   "minus_0.75": 0
+  },
+  "round_76_comparison": "the 246 off purchase units of the nineteen: round 76 left 124 none_found; with flat_dollar_charge on the list all 246 are explained under either order (none_found 0); under order A 67 of them (31 prior-day close, 15 next-day close, 21 reinvestment or exchange) take that cause first, and 179 take the flat charge",
+  "dropped_from_round_76": "settle_date_close, fee_inside_amount (rate), fee_constant_excess are not on this order closed list and were not run",
+  "none_found": {
+   "units": 92,
+   "by_fund": {
+    "AGTHX": {
+     "units": 1,
+     "by_year": {
+      "2021": 1
+     },
+     "by_population": {
+      "P2": 1
+     },
+     "purchases": 0,
+     "sales": 1,
+     "median_ratio": 1.0217,
+     "min_ratio": 1.0217,
+     "max_ratio": 1.0217
+    },
+    "MISIX": {
+     "units": 11,
+     "by_year": {
+      "2024": 10,
+      "2025": 1
+     },
+     "by_population": {
+      "P1": 11
+     },
+     "purchases": 0,
+     "sales": 11,
+     "median_ratio": 1.0172,
+     "min_ratio": 1.011,
+     "max_ratio": 1.0526
+    },
+    "PCBIX": {
+     "units": 55,
+     "by_year": {
+      "2020": 24,
+      "2021": 22,
+      "2022": 8,
+      "2023": 1
+     },
+     "by_population": {
+      "P2": 55
+     },
+     "purchases": 0,
+     "sales": 55,
+     "median_ratio": 1.0281,
+     "min_ratio": 1.0106,
+     "max_ratio": 1.111
+    },
+    "PDBZX": {
+     "units": 13,
+     "by_year": {
+      "2021": 2,
+      "2022": 8,
+      "2023": 2,
+      "2025": 1
+     },
+     "by_population": {
+      "P1": 13
+     },
+     "purchases": 0,
+     "sales": 13,
+     "median_ratio": 1.0219,
+     "min_ratio": 1.0112,
+     "max_ratio": 1.0638
+    },
+    "SGIIX": {
+     "units": 1,
+     "by_year": {
+      "2023": 1
+     },
+     "by_population": {
+      "P2": 1
+     },
+     "purchases": 0,
+     "sales": 1,
+     "median_ratio": 5.0117,
+     "min_ratio": 5.0117,
+     "max_ratio": 5.0117
+    },
+    "SWPPX": {
+     "units": 1,
+     "by_year": {
+      "2024": 1
+     },
+     "by_population": {
+      "P1": 1
+     },
+     "purchases": 0,
+     "sales": 1,
+     "median_ratio": 0.1672,
+     "min_ratio": 0.1672,
+     "max_ratio": 0.1672
+    },
+    "VFIAX": {
+     "units": 9,
+     "by_year": {
+      "2024": 2,
+      "2025": 7
+     },
+     "by_population": {
+      "P1": 9
+     },
+     "purchases": 9,
+     "sales": 0,
+     "median_ratio": 0.9892,
+     "min_ratio": 0.9358,
+     "max_ratio": 0.9894
+    },
+    "VTSAX": {
+     "units": 1,
+     "by_year": {
+      "2022": 1
+     },
+     "by_population": {
+      "P1": 1
+     },
+     "purchases": 1,
+     "sales": 0,
+     "median_ratio": 0.9534,
+     "min_ratio": 0.9534,
+     "max_ratio": 0.9534
+    }
+   },
+   "by_year": {
+    "2020": 24,
+    "2021": 25,
+    "2022": 17,
+    "2023": 4,
+    "2024": 13,
+    "2025": 9
+   },
+   "looked_at": "small_quantity (units under 0.05 shares or 0.50 dollars: none), the previous and next day close of the fund own series, the Yahoo Adj Close (funds with a cache file: all of them have one), a sibling class (round 76 table: the nineteen only; none of the none_found funds is in it), a dividend/reinvestment row (+/-5 days, amount within 1 percent) and an opposite-kind row (+/-1 day, amount within 1 percent) of the same account, and the flat-dollar figures (the gap fits no figure, or fits one and leaves the unit outside 1 percent).",
+   "gap_dollars_rounded_to_a_dollar_top": {
+    "12": 75,
+    "3": 6,
+    "14": 5,
+    "4": 2,
+    "8": 1,
+    "35": 1,
+    "34": 1,
+    "-3187": 1
+   },
+   "ratio_direction": {
+    "ratio_below_1_price_paid_above_close": 11,
+    "ratio_above_1": 81
+   }
+  }
+ },
+ "fit_once_set_aside": {
+  "purchases": {
+   "rule_still_has_this_share_against_it_note": "plain share: units whose price per share (amount over quantity) is within 1 percent of the unadjusted close",
+   "nineteen_funds": {
+    "units": 936,
+    "within_1pct": 690,
+    "share": 73.72
+   },
+   "failing_fifteen_held_series": {
+    "units": 1933,
+    "within_1pct": 1683,
+    "share": 87.07
+   },
+   "substituted_seventy_three": {
+    "units": 5864,
+    "within_1pct": 5750,
+    "share": 98.06
+   },
+   "charge_set_aside_DESCRIPTIVE_ONLY_NOT_CLAIMED": {
+    "nineteen_funds": {
+     "units": 936,
+     "within_1pct": 936,
+     "share": 100.0
+    },
+    "failing_fifteen_held_series": {
+     "units": 1933,
+     "within_1pct": 1933,
+     "share": 100.0
+    },
+    "substituted_seventy_three": {
+     "units": 5864,
+     "within_1pct": 5840,
+     "share": 99.59
+    }
+   },
+   "failing_fifteen_note": "4378 units of the 15 failing funds with a cache Close on the effective day (of 6377 units of those funds); 8 of the 15 are in the nineteen"
+  },
+  "sales": {
+   "rule_still_has_this_share_against_it_note": "plain share: units whose price per share (amount over quantity) is within 1 percent of the unadjusted close",
+   "nineteen_funds": {
+    "units": 942,
+    "within_1pct": 840,
+    "share": 89.17
+   },
+   "failing_fifteen_held_series": {
+    "units": 2445,
+    "within_1pct": 2190,
+    "share": 89.57
+   },
+   "substituted_seventy_three": {
+    "units": 4772,
+    "within_1pct": 4661,
+    "share": 97.67
+   },
+   "charge_set_aside_DESCRIPTIVE_ONLY_NOT_CLAIMED": {
+    "nineteen_funds": {
+     "units": 942,
+     "within_1pct": 942,
+     "share": 100.0
+    },
+    "failing_fifteen_held_series": {
+     "units": 2445,
+     "within_1pct": 2363,
+     "share": 96.65
+    },
+    "substituted_seventy_three": {
+     "units": 4772,
+     "within_1pct": 4743,
+     "share": 99.39
+    }
+   },
+   "failing_fifteen_note": "4378 units of the 15 failing funds with a cache Close on the effective day (of 6377 units of those funds); 8 of the 15 are in the nineteen"
+  },
+  "h_holds": false,
+  "sentence": "H does not hold, so the plain shares stand: the rule (price paid = unadjusted close) reproduces 73.72% of purchase units of the nineteen funds, 87.07% for the 15 failing funds, 98.06% for the 73 substituted funds, and 89.17% / 89.57% / 97.67% of the sales; the rule still has the remainder (the units outside 1 percent) against it."
+ },
+ "reading": "fails",
+ "headline": "Reading: fails. On the 13,009 informative held-out units (P1 10,541, P2 2,468) 97.1% fit one of the seven figures, but 92.4% of the units are zero-gap (they fit 0 and carry no charge); on the 984 informative off-zero units, which are the real test, 604 (61.4%) fit one of the six nonzero figures against 0.41% for the best shifted set (P1 71.1% against 0.47%, P2 43.1% against 0.29%). The pre-registered bar (90 percent on each of P1 and P2, chance at most 20, below 50 is a fail) is missed: P1 not_established, P2 fails. The figures are not chance, they are an incomplete description: the left-over held-out units cluster near 12 dollars (post hoc). In sample the same figures fit 936 of 936 units, as round 76 read them off. Of 727 units still off, 592 are explained by the flat charge (order B) and 92 have no cause under either order; 161 change cause with the order.",
+ "not_established": [
+  "What the charge is and who takes it: no row says so. The only row text that names a ticket charge sits on no account day of any unit tested.",
+  "Why the figures differ by fund family and kind (3 on Vanguard purchases, 10 and 19 on sales of Principal, PGIM, Victory and Parnassus funds, 30 and 34 on Vanguard in both kinds): a fee schedule is not on disk.",
+  "The 380 informative held-out units that fit no figure: P2 is PCBIX (183 of 194; 171 of the 194 have a gap within 0.15 of 12 dollars), P1 is PDBZX 80, VFIAX 57 and MISIX 26 of 186 (101 within 0.15 of 12); 12 dollars is a post hoc candidate only.",
+  "The 92 none_found units (PCBIX 55, PDBZX 13, MISIX 11, VFIAX 9, 4 others) have no cause on the list: the closed list holds no entry for them.",
+  "Whether the unadjusted close the nineteen funds are tested against (round 76 w129 variant) is the vendor close for every date: it agrees with the cache Close on 25,236 of 25,311 series dates, not all.",
+  "Only 31 of the 73 substituted funds have a unit in the custodian rows; 42 are not tested. Units with no Yahoo Close (before 2020-06-29) are not read in P2 (1,923 of 4,407).",
+  "The 0.15 window, the seven figures, X=90, Y=20 and the per-row rule are fixed by the test as written; a different window or a unit-sum rule was not run. Every unit has one row, so the per-row rule and the sum rule agree on this data.",
+  "The informative-unit cut (|Amount| over 100 dollars) removes 114 of 14998 units; the fit by size band is in by_population.",
+  "The sale rows (P3) were looked at by round 76; the P1 sale units are held out. A sale carries the same figure set only as shown here, not as a cause."
+ ],
+ "veirx": {
+  "units_all": 1596,
+  "purchases": 827,
+  "sales": 769,
+  "off_units": 343,
+  "off_purchases": 243,
+  "off_purchases_share_of_round_76_246": "243 of 246",
+  "every_unit_carries_a_charge": {
+   "units_with_a_nonzero_figure": 1584,
+   "zero_gap": 12,
+   "fit_none": 0
+  },
+  "other_18_of_the_nineteen": {
+   "units": 282,
+   "zero_gap": 257,
+   "off": 5
+  },
+  "off_is_exactly_charge_over_amount_above_1_percent": {
+   "charge_share_gt_1pct_and_off": 343,
+   "charge_share_gt_1pct_not_off": 0,
+   "charge_share_le_1pct_and_off": 0,
+   "charge_share_le_1pct_not_off": 1253
+  },
+  "purchase_size_bands_units_and_off": {
+   "100_1k": [
+    120,
+    119
+   ],
+   "1k_10k": [
+    348,
+    124
+   ],
+   "gt10k": [
+    359,
+    0
+   ]
+  },
+  "figures_on_the_off_purchases": {
+   "30": 139,
+   "34": 53,
+   "3": 34,
+   "15": 15,
+   "19": 2
+  },
+  "2024_02_16": {
+   "purchases": 299,
+   "off": 141,
+   "accounts": 299,
+   "size_bands": {
+    "100_1k": 60,
+    "1k_10k": 185,
+    "gt10k": 54
+   },
+   "median_size_band_that_day": "1k_10k",
+   "median_size_band_other_days": "gt10k",
+   "figures_that_day": {
+    "30": 183,
+    "34": 77,
+    "15": 26,
+    "19": 10,
+    "0": 3
+   },
+   "note": "one purchase per account on a day of 299 accounts, most of 1,000 to 10,000 dollars: the charge of 30 or 34 dollars is above 1 percent for those under about 3,000 and 3,400 dollars"
+  },
+  "off_purchases_by_year": {
+   "2023": 65,
+   "2024": 178
+  },
+  "all_purchases_by_year": {
+   "2023": 450,
+   "2024": 377
+  },
+  "off_purchase_ratio": {
+   "median": 0.9805,
+   "min": 0.8696
+  },
+  "reading": "VEIRX carries a flat-dollar gap on 1,584 of its 1,596 units (purchases and sales), so a unit is off by more than 1 percent exactly when the gap exceeds 1 percent of the amount: 243 of its 827 purchases, none of them over 10,000 dollars. The other 18 funds of the nineteen carry a zero gap on 257 of 282 units. Of the 299 purchases on 2024-02-16 (one per account) 245 are under 10,000 dollars (the median band that day is 1,000 to 10,000, against over 10,000 on other days) and 141 are off: the same charge-over-1-percent condition, on a day of many small buys."
+ },
+ "post_hoc": {
+  "P1": {
+   "fit_none_informative_units": 186,
+   "within_0.15_of_12": 101,
+   "within_0.15_of_14": 2,
+   "within_0.15_of_3": 0,
+   "by_fund": {
+    "PDBZX": 80,
+    "VFIAX": 57,
+    "MISIX": 26,
+    "FSMAX": 6,
+    "NHMRX": 4,
+    "NEA": 2
+   }
+  },
+  "P2": {
+   "fit_none_informative_units": 194,
+   "within_0.15_of_12": 171,
+   "within_0.15_of_14": 16,
+   "within_0.15_of_3": 0,
+   "by_fund": {
+    "PCBIX": 183,
+    "AGTHX": 6,
+    "SGIIX": 5
+   }
+  },
+  "P3": {
+   "fit_none_informative_units": 11,
+   "within_0.15_of_12": 10,
+   "within_0.15_of_14": 0,
+   "within_0.15_of_3": 0,
+   "by_fund": {
+    "CAIBX": 3,
+    "BALCX": 2,
+    "ANCFX": 2,
+    "CWGIX": 2,
+    "AWSHX": 1,
+    "AMRMX": 1
+   }
+  },
+  "sentence": "POST HOC, in no count: a gap near 12 dollars is the most common value among the units that fit no figure (round 76 sale note also listed 10 units at 12 outside the seven); a better set would add it, and 14. It is read off the same units, so it is a description, not a test."
+ },
+ "cross_check_substituted_vs_cache": {
+  "P1_funds_with_a_read_unit": 31,
+  "with_a_cache_file": 31,
+  "units_compared": 10636,
+  "units_agree_within_1_cent": 10633,
+  "series_dates_compared": 37748,
+  "series_dates_agree": 37677,
+  "funds_fully_agreeing_on_every_date": 4,
+  "funds_compared": 31
+ },
+ "close_source_for_the_nineteen": {
+  "served_r34_after_vs_cache_close_for_the_nineteen": "6 of 1,878 units agree: the r34 after series for the nineteen is the stored (not unadjusted) series (round 77 left them on the store)",
+  "round_76_unadjusted_close_w129_variant_vs_cache_close": "25,236 of 25,311 series dates agree",
+  "used": "w129 variant security_day_price (round 76 close) for the nineteen, the served r34 after for the 73, the cache Close for P2"
+ },
+ "populations_counts": {
+  "P1_units_with_served_close": 10636,
+  "P2_units_all": 4407,
+  "P2_units_no_cache_close_not_read": 1923,
+  "P2_funds_also_in_P1": [],
+  "nineteen_units_with_close": 1878,
+  "units_in_the_four_populations": 14998
+ }
+}
