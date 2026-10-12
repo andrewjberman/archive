@@ -175,9 +175,43 @@ HELD" -- so the commit landed first. Working as designed.)
 - Two **pre-existing** `terraform fmt` findings on this root (line 51, and the block at line 59): measured to
   predate the edit, left alone -- the order's scope is one token.
 
-## THE ONE ASK
+## THE ONE ASK -- ANSWERED, see ADDENDUM 1
 
 **The word on step 7(c): one more probe post with a conforming id (shape `TCK-<8 digits>-<8 lowercase hex>`, e.g.
 `TCK-20261012-deadbeef`, which reaches `:1725` and then the body-key 400) -- or the word to roll the base back.**
 The order's bounds forbid a second post without the issuer's word, and the ledger's hold ends on that word together
 with the CTO's ruling.
+
+## ADDENDUM 1 (2026-10-12 01:32Z) -- the word came, the second post read the signed PASS, the ledger is CLOSED
+
+`7(c)-AMENDMENT 1` @`f7e4865885` (issuer msg 6253, on msg 6251) gave the word: the first id is the issuer's own
+defect, both reads in this report are agreed, the base is not implicated and is not rolled back, and **one** more
+post is permitted with the id `TCK-00000000-00000000` -- no third.
+
+**Checked before posting, since no retry is permitted:** that id PASSES the deployed dispatcher guard
+`^TCK-\d{8}-[0-9a-f]{8}$`, and `PROBE-NOSUCH-0` re-tested beside it FAILS -- the discriminating control.
+
+**POST 2, 01:31:04Z, base again read from the live function's `TICKET_API_BASE`:**
+
+```
+PROBE-PATH-TICKET-ID: TCK-00000000-00000000
+PROBE-STATUS-INT: 400
+PROBE-CONTENT-TYPE: application/json
+PROBE-BODY-NAMES-PROBE_EXTRA_KEY: True
+PROBE-BODY: {"error": "unexpected field(s) on the commentary-draft path: ['probe_extra_key'] -- only draft_commentary and request_id are accepted"}
+PROBE-VERDICT: PASS
+```
+
+That is the CTO's signed pass: **400 `application/json` naming the unexpected field, so the service IS admitted
+through the front door with the new base live.** Status read as `int(status)`, content type from a parsed header
+(condition 3). The body was byte-for-byte the order's own with only the path's ticket id changed; immaterial to the
+graded branch either way, since the extra-key check at `:1548-1550` runs before any `request_id` validation. The
+bearer was never printed, logged or written to a file, and the probe script lives outside the repo. Nothing was read
+or written on either post.
+
+**Ledger CLOSED** at 01:32Z, all **10** legs proven, sentinel removed. It was `HELD-SOVEREIGN-GATED` between 01:26Z
+and 01:32Z and never RED, never rolled back.
+
+**Two posts in total, no third**, as the amended bounds permit. Row `NFRA_TRNSPT-D2-S33` stands as the record of the
+first; its disposition is not the applier's act. The diagnosis held: the base a status-only reading would have
+rolled back was correct all along.
