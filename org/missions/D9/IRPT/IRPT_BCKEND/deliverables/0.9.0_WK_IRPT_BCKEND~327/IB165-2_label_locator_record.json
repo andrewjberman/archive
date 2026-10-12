@@ -1,0 +1,78 @@
+{
+  "to_id": "IRPT_BCKEND.TO-IB-pr-472",
+  "worker": "0.9.0_WK_IRPT_BCKEND~327",
+  "base_commit": "2d923d0564c274cc89288602d912724ec475e161",
+  "files_changed": [
+    "infra/aws/lambda/investor-reporting/ycharts/extract/extract.py",
+    "infra/aws/lambda/investor-reporting/ycharts/extract/tests/both_labels_fixture.py",
+    "infra/aws/lambda/investor-reporting/ycharts/extract/tests/test_label_locator_sections.py"
+  ],
+  "section_bounds_rule": "A census row's label is accepted on a page only if its top lies between the top of its OWN section's heading (the census section title found on that page as a contiguous word run, the same exact-word matching _find_label uses, topmost occurrence, less ROW_TOL) and the top (less ROW_TOL) of the nearest OTHER census section's heading that sits below it on that page, or the page bottom when none does; a heading on the same text row as this one does not close the bounds. If the section's own heading is not on the page, that (row, page) search is the unchanged whole-page search and is counted in heading_fallbacks. The switch is the module flag extract.SECTION_BOUNDS (default True; False restores the old whole-page search). The page order, _row_values, the date rules and the section id format are untouched.",
+  "how_counted": "extract.extract(..., stats=<dict>) fills stats['heading_fallbacks'] (one per (row, page) search whose section heading is not on the page) and stats['bounded_searches'] (one per (row, page) search inside bounds). stats is not part of the result, so the result is byte-identical.",
+  "heading_fallbacks": 2509,
+  "heading_fallbacks_detail": {
+    "unit": "(census row, page) searches made while extracting the 4 existing fixtures, whole-page search used because the row's section heading is not on that page",
+    "per_fixture": {
+      "synthetic_pdf/overview.pdf": 799,
+      "synthetic_pdf/comparison.pdf": 799,
+      "synthetic_pdf/multicomp.pdf": 799,
+      "unmapped_glyph/unmapped_glyph.pdf": 112
+    },
+    "bounded_searches_per_fixture": {
+      "synthetic_pdf/overview.pdf": 53,
+      "synthetic_pdf/comparison.pdf": 53,
+      "synthetic_pdf/multicomp.pdf": 53,
+      "unmapped_glyph/unmapped_glyph.pdf": 0
+    }
+  },
+  "both_labels_fixture": "infra/aws/lambda/investor-reporting/ycharts/extract/tests/both_labels_fixture.py",
+  "tests": {
+    "file": "infra/aws/lambda/investor-reporting/ycharts/extract/tests/test_label_locator_sections.py",
+    "arm_1_two_sections_share_a_label": "test_two_sections_sharing_a_label_each_land_on_their_own_printed_row (S15 -> 10.1, S16 -> 20.2, distinct rows)",
+    "arm_2_heading_missing_falls_back_and_is_counted": "test_a_section_whose_heading_is_not_on_the_page_falls_back_to_the_whole_page_and_is_counted (heading_fallbacks == 1)",
+    "arm_3_difference_control": "test_difference_control_without_the_bounds_both_rows_land_on_the_same_printed_row (SECTION_BOUNDS False: both rows land on one bbox, both 10.1)",
+    "extra": ["test_section_bounds_run_from_the_heading_to_the_next_heading_or_the_page_bottom", "test_a_label_above_its_sections_heading_is_not_its_label"],
+    "extract_suite_before": "39 passed in 6.39s",
+    "extract_suite_after": "44 passed in 6.55s"
+  },
+  "before_after": {
+    "method": "sha256 of json.dumps(extract.extract(pdf, census, specimen_label='synthetic', specimen_id=<name>), sort_keys=True, default=str) over each existing fixture PDF against docs/briefs/sources/YCHARTS_COMPARISON_REPORT_FIELD_SCRAPE_20260909.json; before at base_commit, after at the change; the run was repeated and is deterministic",
+    "fixtures": ["synthetic_pdf/overview.pdf", "synthetic_pdf/comparison.pdf", "synthetic_pdf/multicomp.pdf", "unmapped_glyph/unmapped_glyph.pdf"],
+    "fixtures_compared": 4,
+    "before_sha256": [
+      "eb26f0073fc2c29003d409667ec79f119c08266f58edef41501bb53f2100b21a",
+      "146677edaa17208363cf003390a01bf69b38cafa7f9ac94288922e812739ea5e",
+      "9cdc9a05b2cd652002de09b331868825a81ebfc65f8495ec730cfee138729ab5",
+      "c62797d8bd7a13792e1c75f965aa44b99b3f7307e09e3fd72f84ba76065a6134"
+    ],
+    "after_sha256": [
+      "eb26f0073fc2c29003d409667ec79f119c08266f58edef41501bb53f2100b21a",
+      "146677edaa17208363cf003390a01bf69b38cafa7f9ac94288922e812739ea5e",
+      "9cdc9a05b2cd652002de09b331868825a81ebfc65f8495ec730cfee138729ab5",
+      "c62797d8bd7a13792e1c75f965aa44b99b3f7307e09e3fd72f84ba76065a6134"
+    ],
+    "located_unlocated_counts": {
+      "overview": [24, 34],
+      "comparison": [47, 47],
+      "multicomp": [70, 60],
+      "unmapped_glyph": [5, 53]
+    }
+  },
+  "hash_pins": [
+    {
+      "where": "infra/aws/lambda/ci/lambda-source-map.json, functions.irpt-ycharts-generate.staged_from[71]: repo_path .../ycharts/extract/extract.py, pin 3f29017cfcd28c6be36841c61f1b9b313c1f8d29, sha256 c4c4908338fdce62972fe7dc0f6250030ad213c88e6d7c6636639430b3dc0bc3",
+      "what_i_did": "Nothing. The pin names a COMMITTED blob (build-and-upload.sh materializes it with git show <pin>:<path> and verifies the sha); that blob (equal to the base HEAD blob) is unchanged by this edit, so the pin still verifies. The map is outside this order's grant and nothing is built here. A build that should carry this change needs the map re-pinned to the commit of this change with the new sha256 of extract.py (the sha256 of extract.py after this change, as the worktree file, is 65547bf1daf0c1af727711b0a3dd12501db94b8e069b31f2ae71598e489dceac)."
+    },
+    {
+      "where": "frozen deliverable records quoting the base blob sha (org/missions/D9/IRPT/IRPT_BCKEND/deliverables/ ~127, ~201, ~285, 2.0.0_SA_COO~P r54/r57 census; org/missions/D9/IRPT/IRPT_YCDGEN round6 PACKAGE_CENSUS x3; org/tier1_exec install and census records excluded from the count): outside org/tier1_exec 9 files carry the base blob sha: 1 live (lambda-source-map.json, above) and 8 frozen records",
+      "what_i_did": "Nothing: they record what a past build packaged and are not read by any check; editing a record would falsify it."
+    },
+    {
+      "where": "fixtures MANIFEST.json (synthetic_pdf, unmapped_glyph) pin the sha256 of the PDF fixtures and the census",
+      "what_i_did": "Nothing: no fixture and no census file changed."
+    }
+  ],
+  "host_reach": "extract.py ships in the Lambda package irpt-ycharts-generate (infra/aws/lambda/ci/lambda-source-map.json, functions.irpt-ycharts-generate.staged_from, packaged_as extract.py, pinned to commit 3f29017cfc), and ycharts/extract is also one of build_resident_package.py's DIRS for the resident package. Neither is rebuilt or deployed by this order; the change reaches a package only when a later build re-pins the map to a commit that carries it.",
+  "request_sent": false,
+  "deployed": false
+}
