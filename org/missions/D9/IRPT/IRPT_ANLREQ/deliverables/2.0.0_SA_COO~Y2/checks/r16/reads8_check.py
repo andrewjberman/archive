@@ -7,7 +7,7 @@ ticket id, address or link; otherwise one FAIL line per problem and READS8-FAIL.
 logic; it cannot see the function or the table.
 
 The rule (CTO msg 6541): the control (a caller the rule admits for the record's firm) gets the signed link's PRESENCE; arm (b) is
-refused NOT_AUTHORIZED. Control present and (b) NOT_AUTHORIZED = OWNER_CHECK_FIRED. Control refused = UNEXERCISED_LIVE. Anything
+refused NOT_AUTHORIZED. Control present and (b) NOT_AUTHORIZED = OWNER_SCOPED_REFUSAL. Control refused = UNEXERCISED_LIVE. Anything
 else = ANOMALY, which is a finding, not a pass.
 """
 import json
@@ -18,7 +18,7 @@ from pathlib import Path
 RESULT = "org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/F2_original_route_owner_check.json"
 ARMS = ("control", "b", "a", "b_absent_id")
 FORBIDDEN = (r"REQ-[0-9a-f]{24}", r"TCK-\d{8}-[0-9a-f]{8}", r"@", r"https?://", r"X-Amz", r"[0-9a-f]{40,}")
-VERDICTS = ("OWNER_CHECK_FIRED", "UNEXERCISED_LIVE", "ANOMALY")
+VERDICTS = ("OWNER_SCOPED_REFUSAL", "UNEXERCISED_LIVE", "ANOMALY")
 
 
 def expected_verdict(arms):
@@ -26,7 +26,7 @@ def expected_verdict(arms):
     if not control.get("ok") or not control.get("url_present"):
         return "UNEXERCISED_LIVE"
     if arm_b.get("ok") is False and arm_b.get("public_reason_code") == "NOT_AUTHORIZED":
-        return "OWNER_CHECK_FIRED"
+        return "OWNER_SCOPED_REFUSAL"
     return "ANOMALY"
 
 
@@ -41,11 +41,18 @@ def main(argv):
     else:
         doc = json.loads(path.read_text(encoding="utf-8"))
         arms = doc.get("arms") or {}
-        for arm in ARMS:
+        if doc.get("control_log_check") not in ("CLEAN", "NOT_READ", "LINK_IN_LOG"):
+            problems.append("control_log_check must be CLEAN, NOT_READ or LINK_IN_LOG")
+        if doc.get("control_log_check") == "LINK_IN_LOG":
+            # the run ended at the control: no other arm ran, and the verdict is ANOMALY
+            if doc.get("verdict") != "ANOMALY" or set(arms) - {"control"}:
+                problems.append("LINK_IN_LOG ends the run at the control: verdict ANOMALY and no other arm")
+            arms = {}
+        for arm in ARMS if arms else ():
             if arm not in arms:
                 problems.append("arms lacks %r" % arm)
-        if all(arm in arms for arm in ARMS):
-            if arms["a"].get("public_reason_code") != "FIRM_BINDING" and doc.get("verdict") == "OWNER_CHECK_FIRED":
+        if arms and all(arm in arms for arm in ARMS):
+            if arms["a"].get("public_reason_code") != "FIRM_BINDING" and doc.get("verdict") == "OWNER_SCOPED_REFUSAL":
                 problems.append("arm a was not refused FIRM_BINDING; the fence arm must be explained, not passed over")
             if doc.get("verdict") not in VERDICTS:
                 problems.append("verdict %r is not one of %s" % (doc.get("verdict"), VERDICTS))
@@ -60,7 +67,7 @@ def main(argv):
         tie = doc.get("tie") or {}
         if not tie.get("code_sha256") or tie.get("tied_to") in (None, ""):
             problems.append("tie lacks code_sha256 or tied_to (write UNTIED if no source ties it; never leave it blank)")
-        for key in ("read_at", "tenant", "identity_arn_tail", "ledger_open_entries_naming_irpt_status"):
+        for key in ("read_at", "tenant", "identity_arn_tail", "ledger_open_entries_naming_irpt_status", "control_log_check"):
             if key not in doc:
                 problems.append("the result lacks %r" % key)
         if doc.get("claim") != "measured":

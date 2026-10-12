@@ -27,7 +27,7 @@ can be any caller. That is the instrument, and it is the fact this pair states.
 | `a` (companion) | FIRM_ADVISOR of a firm F other than T, `selected_tenant` T | `FIRM_BINDING` | the firm fence (served.py:1207-1209), which runs BEFORE any record is read. It is the fence, not the owner check |
 | `b_absent_id` | the `b` caller, a well-formed id naming no record | `NOT_AUTHORIZED` | the same code as `b`: shows why `b` alone proves nothing |
 
-**The verdict** (mechanical, graded by `checks/r16/reads8_check.py`): control served + `b` NOT_AUTHORIZED = **OWNER_CHECK_FIRED**; control
+**The verdict** (mechanical, graded by `checks/r16/reads8_check.py`): control served + `b` NOT_AUTHORIZED = **OWNER_SCOPED_REFUSAL** (the comparison at owner_reads.py:29-31 or the second check at owned_requests.py:176-184, NOT SEPARATED; CTO condition 1); control
 refused = **UNEXERCISED_LIVE** (the record is unreachable, nothing is claimed for the owner check); anything else = **ANOMALY** (a finding).
 
 **What this run CANNOT show, said before it runs:**
@@ -54,6 +54,12 @@ No deploy-ledger entry is opened (nothing is deployed); an open entry naming `ir
 | CloudWatch logs of `irpt-status` | up to three refusal lines carrying a made-up `.invalid` address and a correlation id; the control logs none that holds the link | none (append-only logs); they hold no real person's address |
 | the signed link | exists in one response in memory, never stored | none needed |
 | users table, tokens, grants | NOTHING: no identity is minted, no row written | none needed |
+
+## 4a. The CTO's two conditions (CTO half, msg 6544), as carried by the order
+
+1. The verdict reads OWNER_SCOPED_REFUSAL with its limit beside it, never "the owner check fired" (order step 4; `reads8_check.py`).
+2. A signed link in the control's log lines is a STOP (order step 3a): read after the control and before `b`; a link ends the run, is
+   recorded REDACTED, and no further arm runs. `control_log_check` is `CLEAN`, `NOT_READ` or `LINK_IN_LOG` in the result.
 
 ## 5. Signatures
 

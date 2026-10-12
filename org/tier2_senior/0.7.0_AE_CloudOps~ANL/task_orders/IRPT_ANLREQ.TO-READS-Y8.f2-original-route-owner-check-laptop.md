@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~ANL</issued_to>
     <date>2026-10-12</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -84,14 +84,19 @@ Criterion id: READS8-AC1. Instance at `org/tier2_senior/0.7.0_AE_CloudOps~ANL/de
        written, printed, logged or followed: parse it into a variable, take the four booleans, drop it. For the other three record
        `ok` and `status.public_reason_code`, and the booleans (they must be false). If an arm answers anything outside its
        expectation, record what it answered (code only) and go on to the next arm; do not retry.
+    3a. A LINK IN A LOG IS A STOP (CTO half, condition 2). Right after the `control` invoke and BEFORE the `b` invoke, read the
+       control invoke's own CloudWatch log lines for `irpt-status` (filter on the invoke's request id). Any line carrying the signed
+       link's host and a signature query (`X-Amz-` members) ENDS the run there: record `control_log_check: LINK_IN_LOG` as a finding
+       with the link REDACTED (never copy it), run NO further arm, set the verdict ANOMALY, and report. If the log lines cannot be
+       read, record `control_log_check: NOT_READ` with the error's code and go on. Otherwise record `CLEAN`.
     4. Write `org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/F2_original_route_owner_check.json`:
        `{"read_at": "<UTC>", "tenant": "<T, the firm code>", "tie": {"code_sha256": "...", "last_modified": "...", "tied_to": "<commit
        or UNTIED>"}, "arms": {"control": {"ok": <bool>, "public_reason_code": <str or null>, "url_present": <bool>, "expires_present":
        <bool>, "sha256_present": <bool>, "byte_length_present": <bool>}, "b": {"ok": ..., "public_reason_code": ..., "url_present":
-       <bool>}, "a": {...as b...}, "b_absent_id": {...as b...}}, "verdict": "OWNER_CHECK_FIRED" | "UNEXERCISED_LIVE" | "ANOMALY",
+       <bool>}, "a": {...as b...}, "b_absent_id": {...as b...}}, "control_log_check": "CLEAN" | "NOT_READ" | "LINK_IN_LOG", "verdict": "OWNER_SCOPED_REFUSAL" | "UNEXERCISED_LIVE" | "ANOMALY",
        "ledger_open_entries_naming_irpt_status": <n>, "identity_arn_tail": "<the role or user name only>", "writes_made": [],
        "claim": "measured", "not_read": [...]}`. The verdict is: control `ok` with `url_present` and `b` NOT_AUTHORIZED =
-       OWNER_CHECK_FIRED; control refused = UNEXERCISED_LIVE; anything else = ANOMALY. The check refuses a verdict that does not
+       OWNER_SCOPED_REFUSAL (comparison at owner_reads.py:29-31 or the second check at owned_requests.py:176-184, NOT SEPARATED; never write "the owner check fired"); control refused = UNEXERCISED_LIVE; anything else = ANOMALY. The check refuses a verdict that does not
        follow. Before you commit, READ the file: no request id, ticket id, address, link or query string.
     5. Delete any scratch you made outside the checkout. Commit the result and the proof instance; report to the issuer citing this
        order's path, with push state. One line first as soon as step 3 ends: the verdict and the four statuses.
@@ -117,6 +122,6 @@ org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v
     - No request id, address, ticket id, file content or link in any file, log or message. The control's signed link is never
       followed, printed or stored.
     - One run. A second run needs the issuer's word.
-    - STAGED: this order is not to be started until the issuer flips it to `pending` after the CTO's half of the pair is signed.
+    - Flipped to `pending` by the issuer 2026-10-12 after the CTO half was signed (msg 6544, @ca36fd9c65) and its condition 1 was in place. Step 0 (i) still STOPS the run until `F2_one_request_id.json` exists.
   </bounds>
 </task_order>
