@@ -11,7 +11,9 @@ Global's last date:
          Client equals the pre-deploy Client when --pre-client is given.
 Prints R2-RUN-READ PASS or FAIL with the failed item named.
 
-usage: python r2_run_read.py [--pre-client <float>]
+usage: python r2_run_read.py [--pre-client <float> --pre-client-date YYYY-MM-DD]
+  Client is graded only where the served as_of equals --pre-client-date (packet section 5, "where the date is unchanged"); on a
+  different as_of it prints CLIENT NOT-GRADED and does not fail (amended 2026-10-12 after the first Global emit moved the date).
 """
 from __future__ import annotations
 
@@ -40,6 +42,7 @@ def get(s3, key):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pre-client", type=float, default=None)
+    ap.add_argument("--pre-client-date", default=None, help="the as_of date --pre-client was read on (YYYY-MM-DD)")
     a = ap.parse_args()
     s3 = boto3.client("s3")
     gk = latest(s3, "portal/gold/mdpf/global/aggregate-aua-timeseries/")
@@ -96,10 +99,17 @@ def main():
     if abs(t - sum(parts)) > 0.01:
         fails.append("TOTAL %.2f != base + tax + sma %.2f" % (t, sum(parts)))
     client = cv["nodes"]["Client"]["aum"]
-    if a.pre_client is not None and abs(client - a.pre_client) > 0.02:
+    cv_asof = cv.get("as_of")
+    if a.pre_client is not None and not a.pre_client_date:
+        fails.append("--pre-client needs --pre-client-date (the as_of the figure was read on)")
+    elif a.pre_client is not None and cv_asof != a.pre_client_date:
+        # Packet section 5: "Client equals 268,516,586.73 where the date is unchanged". A different as_of is a different day's figure.
+        print("  CLIENT NOT-GRADED: served as_of %s != pre-client as_of %s (no same-date pre-deploy Client exists to compare)"
+              % (cv_asof, a.pre_client_date))
+    elif a.pre_client is not None and abs(client - a.pre_client) > 0.02:
         fails.append("Client %.2f moved from %.2f" % (client, a.pre_client))
-    print("day %s total %.2f = base %.2f + tax %.2f + sma %.2f | SMA %.2f | Client %.2f"
-          % (day, t, parts[0], parts[1], parts[2], cv["nodes"]["SMA"]["aum"], client))
+    print("day %s total %.2f = base %.2f + tax %.2f + sma %.2f | SMA %.2f | Client %.2f (as_of %s)"
+          % (day, t, parts[0], parts[1], parts[2], cv["nodes"]["SMA"]["aum"], client, cv_asof))
     print("R2-RUN-READ %s%s" % ("PASS" if not fails else "FAIL", "" if not fails else " -- " + "; ".join(fails)))
     return 0 if not fails else 1
 
