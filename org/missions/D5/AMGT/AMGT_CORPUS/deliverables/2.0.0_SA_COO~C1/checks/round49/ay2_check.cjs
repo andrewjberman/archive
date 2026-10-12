@@ -34,9 +34,17 @@
  *       [], no value printed (not even when a payload wrongly carries cells on it), the row is in no group, `census.blocks.unread.rows` 1.
  *   d8  a block headed by TEXT period labels (1Q26..4Q26) is kind 'period' and is carried aligned to its own labels (the label cell and
  *       the figure of one column sit at one index; the label text is not turned into a number).
+ *   d9  (ADDENDUM 2, msg 4255, rule 1) in a block of an OWN-class sheet (own_new / own_model) a text cell is `{text, textKind}`: a string
+ *       starting with `#` -> `textKind:'error'` (the token kept in `text`), every other text cell `textKind:'word'`; a number cell is
+ *       unchanged (`{value, format, display}`, no `textKind`); `teamCensus.blocks.errorCells` counts the error cells; ModelTab.tsx's block
+ *       render branches on `textKind` error and prints the words `error in team sheet` with the grid error cell's title.
+ *   d10 (rule 2) in a block of a MASTER-class sheet (`class` 'master') NO cell content is built: every block row carries `cells: []`
+ *       (kind, columns, rowNumber, blockRow kept), nothing of the template's numbers or tokens appears in `sheetBlocks` or the groups,
+ *       `teamCensus.blocks.masterCells` and `errorCells` are 0, `MASTER_TEAM_ROW_WHY` is exported, and ModelTab.tsx's block render
+ *       carries `MASTER_TEAM_ROW_WHY` (a label and that sentence per BLOCK row).
  * control c1: the classed round-47 payload builds as the base does (snapshot) except the added `teamCensus.text`;
  * control c2: no teamSheet builds exactly as the base does (snapshot).
- * Prints `ay2 build <b>/8 control <c>/2`.
+ * Prints `ay2 build <b>/10 control <c>/2`.
  */
 const fs = require('fs')
 const path = require('path')
@@ -201,6 +209,57 @@ const TEAM_PERIOD = {
   blocks: [BLOCK_P],
 }
 
+// ---- d9: an own-class block with error tokens, a word and a number ----
+const BLOCK_E = {
+  first_row: 90,
+  last_row: 91,
+  kind: 'case',
+  why: null,
+  withheld: 0,
+  columns: ['B', 'C', 'D', 'E'],
+  rows: [
+    { row_number: 90, kind: 'title', block_row: false, cells: [t('Case'), t('#REF!'), t('Base'), t('#N/A N/A')] },
+    { row_number: 91, kind: 'body', block_row: true, cells: [t('Own blk'), n(12.5, '0.0'), t('NM'), t('#DIV/0!')] },
+  ],
+}
+const TEAM_OWN_BLOCK = {
+  ...TEAM_BASE,
+  rows: ['Financial Summary', 'Own blk'],
+  row_classes: ['HEADING', 'BLOCK'],
+  row_numbers: [9, 91],
+  periods: PERIODS,
+  row_values: [null, null],
+  row_formats: [null, null],
+  blocks: [BLOCK_E],
+}
+
+// ---- d10: a master-class sheet whose blocks carry the template's numbers and tokens (one sample company's) ----
+const BLOCK_M2 = {
+  first_row: 85,
+  last_row: 86,
+  kind: 'case',
+  why: null,
+  withheld: 0,
+  columns: ['B', 'C'],
+  rows: [
+    { row_number: 85, kind: 'title', block_row: false, cells: [t('Case'), t('#N/A')] },
+    { row_number: 86, kind: 'body', block_row: true, cells: [t('Tmpl Err'), n(9999.5, '0.0')] },
+  ],
+}
+const TEAM_MASTER_BLOCK = {
+  class: 'master',
+  workbook_key: 'amgt/harvest/bronze/research_template/template=01L6/00bb/FactSet Based ONE PAGER TEMPLATE 2026 03 09_v2.xlsx',
+  sheet: 'Model NEW VERSION',
+  reason: null,
+  rows: ['Financial Summary', 'Tmpl Qtr Rev', 'Tmpl Qtr Margin', 'Tmpl Err'],
+  row_classes: ['HEADING', 'BLOCK', 'BLOCK', 'BLOCK'],
+  row_numbers: [9, 81, 82, 86],
+  periods: [],
+  row_values: [null, null, null, null],
+  row_formats: [null, null, null, null],
+  blocks: [BLOCK_P, BLOCK_M2],
+}
+
 // ---- d2 / d3: text cells ----
 const TEAM_TEXT = {
   ...TEAM_BASE,
@@ -245,6 +304,8 @@ let d5 = 0
 let d6 = 0
 let d7 = 0
 let d8 = 0
+let d9 = 0
+let d10 = 0
 try {
   const built = build(TEAM_BLOCK)
   const cb = built.sheetBlocks || []
@@ -281,7 +342,7 @@ try {
   const bl = (built.teamCensus || {}).blocks || {}
   const censusOk = cl.BLOCK === 5 && cl.FIGURE === 2 && cl.HEADING === 1 && cl.CONTROL === 0
     && cl.BLOCK + cl.FIGURE + cl.HEADING + cl.CONTROL === TEAM_BLOCK.rows.length
-    && JSON.stringify(bl) === JSON.stringify({ period: { blocks: 0, rows: 0 }, case: { blocks: 2, rows: 5 }, unread: { blocks: 0, rows: 0 }, withheld: 0 })
+    && JSON.stringify([bl.period, bl.case, bl.unread, bl.withheld]) === JSON.stringify([{ blocks: 0, rows: 0 }, { blocks: 2, rows: 5 }, { blocks: 0, rows: 0 }, 0])
   d1 = shapeOk && cellsOk && outOfGridOk && censusOk ? 1 : 0
   console.log(`ay2 d1 sheetBlocks ${cb.length} shape ${shapeOk} cells ${cellsOk} outOfGrid ${outOfGridOk} census ${JSON.stringify(cl)} blocks ${JSON.stringify(bl)} ok ${censusOk}; d1 ${d1 === 1}`)
 
@@ -368,6 +429,48 @@ try {
     && (pb.groups || []).flatMap((g) => g.rows || []).every((r) => r.label !== 'Qtr Revenue' && r.label !== 'Qtr Margin')
     && pbl.period && pbl.period.blocks === 1 && pbl.period.rows === 2 && pbl.case.blocks === 0 && pbl.unread.blocks === 0 ? 1 : 0
   console.log(`ay2 d8 period block: kind ${ps.kind}; labels ${JSON.stringify(labelRow.map((c) => (c ? c.text : null)))}; D column "${labelRow[idxD] && labelRow[idxD].text}" over "${revRow[idxD] && revRow[idxD].display}" and "${marRow[idxD] && marRow[idxD].display}"; census ${JSON.stringify(pbl)}; ok ${d8 === 1}`)
+
+  // ModelTab.tsx's block render region (from the first read of `sheet.sheetBlocks`)
+  let tabSrc = ''
+  try { tabSrc = fs.readFileSync(path.join(portalRoot, 'src', 'pages', 'SecurityAnalysis', 'tabs', 'ModelTab.tsx'), 'utf8') } catch (e2) { /* d9/d10 fail below */ }
+  const at0 = tabSrc.indexOf('sheet.sheetBlocks')
+  const region = at0 >= 0 ? tabSrc.slice(at0, at0 + 6000) : ''
+
+  // d9: an own-class block
+  const ob = build(TEAM_OWN_BLOCK)
+  const os = (ob.sheetBlocks || [])[0] || {}
+  const orow = (rn) => (os.rows || []).find((r) => r.rowNumber === rn) || { cells: [] }
+  const head90 = orow(90).cells
+  const body91 = orow(91).cells
+  const obl = (ob.teamCensus || {}).blocks || {}
+  const cellsKinds = head90.length === 4 && head90[0] && head90[0].text === 'Case' && head90[0].textKind === 'word'
+    && head90[1] && head90[1].text === '#REF!' && head90[1].textKind === 'error'
+    && head90[2] && head90[2].text === 'Base' && head90[2].textKind === 'word'
+    && head90[3] && head90[3].text === '#N/A N/A' && head90[3].textKind === 'error'
+    && body91.length === 4 && body91[0] && body91[0].text === 'Own blk' && body91[0].textKind === 'word'
+    && body91[1] && body91[1].value === 12.5 && body91[1].display === '12.5' && body91[1].textKind === undefined && body91[1].text === undefined
+    && body91[2] && body91[2].text === 'NM' && body91[2].textKind === 'word'
+    && body91[3] && body91[3].text === '#DIV/0!' && body91[3].textKind === 'error'
+  const tabErr = /textKind\s*[!=]==?\s*'error'/.test(region) && region.includes('error in team sheet') && region.includes('here, so no value is shown')
+  d9 = cellsKinds && obl.errorCells === 3 && obl.masterCells === 0 && tabErr ? 1 : 0
+  console.log(`ay2 d9 own block: kinds ${cellsKinds}; errorCells ${obl.errorCells}; masterCells ${obl.masterCells}; ModelTab block render branches on error ${tabErr}; ok ${d9 === 1}`)
+
+  // d10: a master-class sheet builds no block cell
+  const mb = build(TEAM_MASTER_BLOCK)
+  const msb = mb.sheetBlocks || []
+  const mbl = (mb.teamCensus || {}).blocks || {}
+  const printedM = JSON.stringify(msb) + JSON.stringify(mb.groups || [])
+  const keptShape = msb.length === 2 && msb[0].kind === 'period' && (msb[0].columns || []).join('') === 'BCDEF' && (msb[0].rows || []).length === 3
+    && msb[1].kind === 'case' && (msb[1].columns || []).join('') === 'BC' && (msb[1].rows || []).length === 2
+    && msb.every((blk) => (blk.rows || []).every((r) => Array.isArray(r.cells) && r.cells.length === 0))
+    && (msb[1].rows || []).map((r) => r.rowNumber + ':' + r.blockRow).join(',') === '85:false,86:true'
+  const nothingPrinted = ['1250.5', '9999.5', '#N/A', '1Q26', 'Quarterly', 'Case'].every((x) => !printedM.includes(x))
+  const masterWhyTab = region.includes('MASTER_TEAM_ROW_WHY')
+  d10 = keptShape && nothingPrinted && mbl.masterCells === 0 && mbl.errorCells === 0
+    && JSON.stringify([mbl.period, mbl.case, mbl.unread]) === JSON.stringify([{ blocks: 1, rows: 2 }, { blocks: 1, rows: 1 }, { blocks: 0, rows: 0 }])
+    && ((mb.teamCensus || {}).classes || {}).BLOCK === 3
+    && typeof m.MASTER_TEAM_ROW_WHY === 'string' && m.MASTER_TEAM_ROW_WHY.startsWith('The research team keeps no workbook') && masterWhyTab ? 1 : 0
+  console.log(`ay2 d10 master blocks: shape kept ${keptShape}; nothing printed ${nothingPrinted}; census ${JSON.stringify(mbl)}; MASTER_TEAM_ROW_WHY exported ${typeof m.MASTER_TEAM_ROW_WHY}; in block render ${masterWhyTab}; ok ${d10 === 1}`)
 } catch (e) {
   console.log('ay2 build threw: ' + String(e && e.stack).slice(0, 300))
 }
@@ -387,5 +490,6 @@ if (fs.existsSync(snap)) {
   c1 = JSON.stringify(got) === JSON.stringify(base.classedOld) ? 1 : 0
   c2 = JSON.stringify(clone(build(undefined))) === JSON.stringify(base.noTeam) ? 1 : 0
 }
-console.log(`ay2 build ${d1 + d2 + d3 + d4 + d5 + d6 + d7 + d8}/8 control ${c1 + c2}/2`)
-process.exit(d1 + d2 + d3 + d4 + d5 + d6 + d7 + d8 === 8 && c1 + c2 === 2 ? 0 : 1)
+const built10 = d1 + d2 + d3 + d4 + d5 + d6 + d7 + d8 + d9 + d10
+console.log(`ay2 build ${built10}/10 control ${c1 + c2}/2`)
+process.exit(built10 === 10 && c1 + c2 === 2 ? 0 : 1)
