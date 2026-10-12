@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "IRPT_ANLREQ.TO-READS-Y7.stored-input-count-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/task_orders/IRPT_ANLREQ.TO-READS-Y7.stored-input-count-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "49af906f74"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R16_Y.md",
+    "vintage_commit": "49af906f74",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/task_orders/IRPT_ANLREQ.TO-READS-Y7.stored-input-count-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~ANL",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/Y7_stored_input_count.json",
+      "kind": "doc",
+      "commit_or_etag": "49af906f74",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Nothing was deployed; the artifact is a measurement made by one run of count_stored_inputs.py (blob 09ddebd883); the checker reads the file at the committed bytes.",
+      "artifact_covered_by": [
+        "READS7-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "READS7-AC1",
+      "criterion_verbatim": "READS7-AC1: the result holds the script's twelve members, its counts add up (template inputs = same + differently + unreadable; turned back = with + without a report), names the script blob, both reader hashes, how the bucket was resolved and an empty write list, and holds no id, file name or address.",
+      "method": "live_read",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r16/reads7_check.py",
+      "expect": "READS7-OK",
+      "output_evidence": "template inputs 56: same 56, differently 0, unreadable 0; turned back 0 (with a report 0) / READS7-OK",
+      "denominator": "1914 irpt-requests items scanned; 56 INPUT# rows, all TEMPLATE_UPLOAD (49financial 10, cottonwood 45, inflection 1); 0 unreadable; 0 turned back, so 0 requests queried",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "read_can_see_a_row": {
+      "description": "The same get-item/get-object path read all 56 stored originals and normalized documents with their digests verified; a denied or missing read would have counted unreadable under its error code, none did. The first run's rejected scan (exit 3) shows the script reports a failed read and does not count it.",
+      "expected_landed": "56 inputs classified as same or differently",
+      "expected_not_landed": "unreadable under an error code",
+      "observed": "56 of 56 read the same, 0 unreadable",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "NOT APPLICABLE -- read-only",
+    "cto_half": "NOT APPLICABLE -- read-only"
+  },
+  "risk_class": "WORLD",
+  "rollback": "None needed: read-only.",
+  "scope": "READ-ONLY against AWS: DynamoDB scan, get_item and query on irpt-requests, S3 GetObject on retained artifacts. No put, delete, invoke or apply.",
+  "declared_exclusions": [
+    {
+      "item": "Run 1 on script blob c5481b8768",
+      "reason": "Exit 3, ValidationException before any item was read (reserved word in the scan projection); the issuer re-released blob 09ddebd883 and gave word for one rerun; the result is from the rerun only."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/logs/2026-10-12/anl_lane_y7_stored_input_count.md",
+  "compiler_tools": [
+    {
+      "tool": "reads7_check",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r16/reads7_check.py",
+      "result": "READS7-OK"
+    }
+  ]
+}

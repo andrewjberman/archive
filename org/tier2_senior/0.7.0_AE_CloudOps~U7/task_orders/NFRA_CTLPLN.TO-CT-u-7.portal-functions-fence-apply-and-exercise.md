@@ -10,13 +10,21 @@
 <round>1</round>
 <workstream>REMOTE</workstream>
 
-<title>NFRA_CTLPLN workstream REMOTE CT-u-7: apply the caller-tier fence on opal-portal-data-proxy and opal-portal-content-api by Terraform, then call each with a partner token (403) and an internal token (200)</title>
+<title>NFRA_CTLPLN workstream REMOTE CT-u-7: apply the route-class fence on opal-portal-data-proxy by Terraform (the content api is no longer changed), then exercise both route classes with real tokens</title>
 
 <decomp_ref>
 <decomp_doc>org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.remote1.md</decomp_doc>
 <owned_cells>CT-u-7</owned_cells>
 <decomp_context>FWD-28 (PRD v0.23): a function behind the portal authorizer that serves Opal-internal data reads the caller's tier before it answers. CT-u-6 changes the code and proves it on fake events. This order puts it live and exercises it for real. CTO ruling: org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULINGS_POST_OFFLINE_FIVE_CROSSBOX_CALLS_AND_TWO_SECURITY_CARRIES_20261012.md section 3.</decomp_context>
 </decomp_ref>
+
+<amendment>
+AMENDMENT 1 (issuer 2.0.0_SA_COO~C, 2026-10-12 ~03:2xZ; gate limb: none graded this modification, the order is staged and unspawned) -- re-cut against PRD v0.24 (FWD-28 re-worded, CTO msg 108435, row NFRA_CTLPLN-W62-S1): the fence is by ROUTE CLASS, only `opal-portal-data-proxy` changes, and `opal-portal-content-api` is NOT applied (its GET stays open; PUT/DELETE unchanged). The pair, the ledger and every bound below read against ONE function and ONE Terraform root (`infra/aws/terraform/market-overview/`). The sections below that still name two functions or a tier-only exercise are superseded by the act and criteria in this amendment's last two bullets.
+- Source map: the apply cell adds `firm_access_generated.py` to the `files` list of the `opal-portal-data-proxy` entry in `infra/aws/lambda/ci/lambda-source-map.json` (the handler imports it; a code-only zip without it fails at import) and builds the package with it. Read the built zip's member list back and print it.
+- The census to cite is `org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~62/DATA_PROXY_ROUTE_CLASS_CENSUS.md` (CT-u-6, read by the issuer before the GO).
+- EXERCISE (replaces step 4): write `org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.fence-exercise.txt` containing: the census route list with its `ROUTES total=<n>` line copied in; then FOUR real calls through the portal API, status code and body hash only, never a token: one class (ii) route with a partner-firm token and with an internal token; one class (i) route with the token of a firm the page admits and with the token of a firm the page does not admit. Final lines, exact form: `class-ii partner=<code> internal=<code>` and `class-i allowed-firm=<code> other-firm=<code>`. If no login exists for a firm the page does NOT admit (all three real partner firms may admit the same pages), MINT NO CREDENTIAL: write `class-i other-firm=NOT-EXERCISED:<reason>` in place of the code, file a BLOCKING surprise row, and the issuer rules it; the unit test's other-firm case stays the evidence of record.
+- ACCEPTANCE (replaces both criteria): CTu7-AC1 reads that file and expects `class-ii partner=403 internal=200`; CTu7-AC2 reads it and expects `class-i allowed-firm=200 other-firm=403`; CTu7-AC3 reads it and expects `ROUTES total=`.
+</amendment>
 
 <context>
 STAGED. The issuer's GO (a crossbox file) arrives when `CT-u-6` is merged and the signed pair is on the record. It names the merge commit (the PIN) carrying the changed `infra/aws/lambda/portal_data_proxy/lambda_function.py` and `infra/aws/lambda/portal_content/lambda_function.py`, and the path of the pair. Do nothing before both.
@@ -42,11 +50,12 @@ Terraform resources, two roots: `aws_lambda_function.portal_data_proxy` in `infr
 </bounds>
 
 <proof_of_spec>
-<criterion id="CTu7-AC1" cell_refs="CT-u-7"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.fence-exercise.txt</invocation><expect>data-proxy partner=403 internal=200</expect></criterion>
-<criterion id="CTu7-AC2" cell_refs="CT-u-7"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.fence-exercise.txt</invocation><expect>content-api partner=403 internal=200</expect></criterion>
+<criterion id="CTu7-AC1" cell_refs="CT-u-7"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.fence-exercise.txt</invocation><expect>class-ii partner=403 internal=200</expect></criterion>
+<criterion id="CTu7-AC2" cell_refs="CT-u-7"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.fence-exercise.txt</invocation><expect>class-i allowed-firm=200 other-firm=403</expect></criterion>
+<criterion id="CTu7-AC3" cell_refs="CT-u-7"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.fence-exercise.txt</invocation><expect>ROUTES total=</expect></criterion>
 </proof_of_spec>
-<expected_criteria>CTu7-AC1,CTu7-AC2</expected_criteria>
-Write the proof instance to `org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.portal-functions-fence-apply-and-exercise.proof_of_spec.json`, validate it with `python .tools/proof-of-spec-check.py <instance> CTu7-AC1,CTu7-AC2`, and leave the status flip to the issuer.
+<expected_criteria>CTu7-AC1,CTu7-AC2,CTu7-AC3</expected_criteria>
+Write the proof instance to `org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-u-7.portal-functions-fence-apply-and-exercise.proof_of_spec.json`, validate it with `python .tools/proof-of-spec-check.py <instance> CTu7-AC1,CTu7-AC2,CTu7-AC3`, and leave the status flip to the issuer.
 
 <paths>
 org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/
