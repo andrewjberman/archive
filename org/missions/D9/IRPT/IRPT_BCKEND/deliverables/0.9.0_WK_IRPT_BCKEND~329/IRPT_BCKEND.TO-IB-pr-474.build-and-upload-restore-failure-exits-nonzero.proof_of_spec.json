@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-474",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-474.build-and-upload-restore-failure-exits-nonzero.md",
+    "group": "OTHER",
+    "vintage_commit": "2d923d0564"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "2d923d0564",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-474.build-and-upload-restore-failure-exits-nonzero.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~329",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/build-and-upload.sh",
+      "kind": "script",
+      "commit_or_etag": "e6067ab123",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD only; no AWS call, nothing uploaded, no source map written. A failed restore from HEAD now exits non-zero and names the files.",
+      "artifact_covered_by": [
+        "IB165-4-AC1",
+        "IB165-4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/tests/test_build_restore_fails_loud.sh",
+      "kind": "test",
+      "commit_or_etag": "e6067ab123",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 ARM lines in throwaway repos with a stubbed aws; arms a and d fail against the base script.",
+      "artifact_covered_by": [
+        "IB165-4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~329/IB165-4_restore_fails_loud_record.json",
+      "kind": "config_data",
+      "commit_or_etag": "e6067ab123",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The record: base_commit, rule in words, the ERROR sample, retry choice, hash pins (none found), suites before and after.",
+      "artifact_covered_by": [
+        "IB165-4-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB165-4-AC1",
+      "criterion_verbatim": "IB165-4-AC1 (IB-pr-474) -- see the worker face of IRPT_BCKEND.TO-IB-pr-474",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r165/p165_cells.py\" . IB165-4-AC1",
+      "expect": "IB165-4-AC1 PASS",
+      "output_evidence": "OK: 5 arms PASS | IB165-4-AC1 PASS | rc=0 | check script p165_cells.py was amended at 04e6040b0c and 12f42e5e2a and delivered to this branch at 64d6ae536f and 9258c8e3dc; run from the worktree root at HEAD 9258c8e3dc",
+      "denominator": "5 of 5 ARM lines PASS (need >= 3)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB165-4-AC2",
+      "criterion_verbatim": "IB165-4-AC2 (IB-pr-474) -- see the worker face of IRPT_BCKEND.TO-IB-pr-474",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r165/p165_cells.py\" . IB165-4-AC2",
+      "expect": "IB165-4-AC2 PASS",
+      "output_evidence": "OK: staging test 5 passed; test_build_only.sh exits 0 | IB165-4-AC2 PASS | rc=0 | check script p165_cells.py was amended at 04e6040b0c and 12f42e5e2a and delivered to this branch at 64d6ae536f and 9258c8e3dc; run from the worktree root at HEAD 9258c8e3dc",
+      "denominator": "staging test 5 passed of 5 (base 5); test_build_only.sh rc 0 (base rc 0)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB165-4-AC3",
+      "criterion_verbatim": "IB165-4-AC3 (IB-pr-474) -- see the worker face of IRPT_BCKEND.TO-IB-pr-474",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r165/p165_cells.py\" . IB165-4-AC3",
+      "expect": "IB165-4-AC3 PASS",
+      "output_evidence": "OK: record complete; the change stays inside infra/aws/lambda/ci | IB165-4-AC3 PASS | rc=0 | check script p165_cells.py was amended at 04e6040b0c and 12f42e5e2a and delivered to this branch at 64d6ae536f and 9258c8e3dc; run from the worktree root at HEAD 9258c8e3dc",
+      "denominator": "record fields: base_commit, exit_code_rule, failure_message_sample, deployed false, aws_calls_made 0; 0 of 2 changed paths outside infra/aws/lambda/ci/",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control: the same test run beside the BASE build-and-upload.sh (git show 2d923d0564 copy in a scratch dir).",
+      "expected": "arm a FAIL and arm d FAIL, test rc 1",
+      "observed": "ARM a FAIL (rc=0, no ERROR line); ARM b PASS; ARM c PASS; ARM d FAIL (rc=0); ARM e PASS; test rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_build_restore_fails_loud.sh run twice on the committed script (before and after the commit)",
+      "observed": "IDENTICAL: 5 of 5 ARM lines PASS both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_BCKEND-D2-W329-S1",
+    "IRPT_BCKEND-D2-W329-S2",
+    "IRPT_BCKEND-D2-W329-S3"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance>",
+      "result": "VALID (rc 0)"
+    }
+  ]
+}
