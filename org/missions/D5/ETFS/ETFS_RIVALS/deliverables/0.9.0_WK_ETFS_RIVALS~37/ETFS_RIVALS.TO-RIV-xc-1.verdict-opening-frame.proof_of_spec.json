@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-xc-1.verdict-opening-frame",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "d3f4ab68b5",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-xc-1.verdict-opening-frame.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "a0db38c8ae"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~37",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/ai_accounts.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code change in the dell1 repo; no deploy, gateway, Terraform or S3 act; the page's next sweep is the judgment J1",
+      "introduces": ["def frame_of(", "seen_frames"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_riv_xc1_verdict_frame.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test file in the dell1 repo; no deploy act"
+    },
+    {
+      "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~37/ETFS_RIVALS.TO-RIV-xc-1.session_log.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "session log of this worker's commands and outputs; no deploy act"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- the check file: `frame_of` examples; a colliding opening is corrected once and the reply stands; a distinct frame or an absent dict draws no correction; `run_day` shares one dict.",
+      "method": "command",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/round29/checks/xc1_frame_check.py",
+      "output_evidence": "4 passed in 0.80s (rc=0); determinism repeat: 4 passed in 0.76s and 4 passed in 0.77s. Pre-edit run at base d51a290175: 4 failed in 1.30s (rc=1).",
+      "denominator": "4 of 4 tests in xc1_frame_check.py",
+      "status": "PASS",
+      "expect": "4 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- the existing AI tests are unchanged and green (test_r28wg1_direction_opening.py, test_r28aw1_words_and_figures.py, test_r8gc1_attach_uncited.py).",
+      "method": "command",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider rivalfunds/tests/test_r28wg1_direction_opening.py rivalfunds/tests/test_r28aw1_words_and_figures.py rivalfunds/tests/test_r8gc1_attach_uncited.py",
+      "output_evidence": "23 passed in 1.03s (rc=0)",
+      "denominator": "23 of 23 tests across the 3 named files (base d51a290175: 23 passed)",
+      "status": "PASS",
+      "expect": "23 passed"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "J1 -- the CVO's read of the next sweep page, not the worker's: on the next sweep page no two Direction Verdict openings share a frame by the CVO's own measure, or a correction is on the record for each that did.",
+      "method": "manual_read_with_citation",
+      "invocation": "none: judgment criterion, graded at L9 by 3.0.0_SA_CVO on the next sweep page",
+      "output_evidence": "NO VERDICT (judgment). Worker output: frame_of and the one-correction path are in place (AC1 4 passed; AC2 23 passed); no sweep page is available in this worktree.",
+      "denominator": "N/A -- judgment criterion; the population is the Direction Verdict openings of the next sweep page (13 on the 2026-10-12 page)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment (J1): graded at L9 by 3.0.0_SA_CVO on the next sweep page; the worker records output and no verdict",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the base commit d51a290175 (no frame_of, no seen_frames) run against the round-29 check file",
+      "expected": "the check fires on the absent behaviour: 4 failed",
+      "observed": "4 failed in 1.30s (rc=1): frame_of AttributeError, run_chain TypeError on seen_frames, run_day source lacks seen_frames",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the check file after the edits, compared",
+      "observed": "4 passed in 0.76s; 4 passed in 0.77s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "J1 (the next sweep page's no-shared-frame read)",
+      "reason": "judgment criterion, graded at L9 by 3.0.0_SA_CVO; not measurable in a worktree with a stub client"
+    },
+    {
+      "item": "vendor-side effect of the frame correction on the page",
+      "reason": "bounds allow a stub client only; whether the vendor's replies then differ is read on the next sweep page"
+    },
+    {
+      "item": "PROMPT_VERSION and every prompt constant",
+      "reason": "out of bounds by the cell; unchanged (a1-chain/8)"
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-D1-W37-S1: frame_of matches the sentence-initial word list case-insensitively and a capitalised verb is not on it, so 'AT & T rose.' gives 'at & <name> rose' and 'Holds 2 and 3 names.' gives '<name> <n> and <n> names'; a shape collision can draw one extra correction, no grade changes."
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~37/ETFS_RIVALS.TO-RIV-xc-1.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider --color=no rivalfunds/tests",
+      "result": "1016 passed, 6 skipped in 75.89s (rc=0)"
+    }
+  ]
+}
