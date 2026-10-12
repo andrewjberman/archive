@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-w-6",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-w-6.crossbox-ack-per-box-file-design.md",
+    "group": "OTHER",
+    "vintage_commit": "2fbb74e87d"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~68",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round8.md",
+    "vintage_commit": "2fbb74e87d",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-w-6.crossbox-ack-per-box-file-design.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~68/DESIGN_CROSSBOX_ACK_PER_BOX_FILE.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local design document; nothing deployed, no tool or lane edited"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTw6-AC1",
+      "criterion_verbatim": "grep -c \"DESIGN-CROSSBOX-ACK fields=\" org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~68/DESIGN_CROSSBOX_ACK_PER_BOX_FILE.md expect: 1 (the design exists and ends with its counts line)",
+      "method": "command",
+      "invocation": "grep -c \"DESIGN-CROSSBOX-ACK fields=\" org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~68/DESIGN_CROSSBOX_ACK_PER_BOX_FILE.md",
+      "output_evidence": "1\nrc=0\n(grep -n companion: 136:DESIGN-CROSSBOX-ACK fields=24 verbs=13 files_to_change=9 questions=5)",
+      "denominator": "1 of 1 counts line in the design file; the file's LAST line is the counts line",
+      "status": "PASS",
+      "expect": "^1"
+    },
+    {
+      "criterion_id": "CTw6-AC2",
+      "criterion_verbatim": "JUDGMENT -- the split leaves every path with one writing box, and the states computed from the two files equal today's (graded by 3.0.0_SA_CVO)",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~68/DESIGN_CROSSBOX_ACK_PER_BOX_FILE.md section 2 (split, derived-state table) and section 5 (T8, T9); the baseline was run: timeout 120 python .tools/crossbox-matrix.py (rc 0) and timeout 120 python .tools/crossbox-call.py list --open (rc 0)",
+      "output_evidence": "Section 2 writer split: sender box writes org/devices/crossbox/XB-<id>.json (open, sent, acked reply only, close from, withdraw); recipient box writes org/devices/crossbox/ack/<to_device>/XB-<id>.json (ack, close to). Derived rule for ACKED: A.reply set or R.ack set; CLOSED-BOTH: A.closed and R.closed, or A.withdrawn. Today's live baseline: CROSSBOX-MATRIX pairs=12 with_file=12 acked=9 closed_both=5 none=0; CROSSBOX-LIST files=140 shown=42 (5 OPEN, 37 ACKED, 98 CLOSED-BOTH). T8 (projection of the 140 files) and T9 (matrix equality) are planned, not run.",
+      "denominator": "2 writing paths per call; 6 derived states of section 2 (OPEN, SENT, ACKED, HALF-CLOSED, CLOSED-BOTH, CLOSED-BOTH+WITHDRAWN) against today's stored states; 140 existing files, 12 matrix pairs",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT row: no verdict is given by the worker. The oracle is 3.0.0_SA_CVO at L9, who grades whether the split leaves every path with one writing box and whether the states computed from the two files equal today's. The projection test T8 that would instrument the second half is planned, not run.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "inside CTw6-AC1: a design without the counts line, or a doubled counts line, would read 0 or 2",
+      "expected": "1",
+      "observed": "1",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: the grep reads one committed file; the matrix and list baselines are functions of the fetched refs and the clock (age only)",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "building the crossbox/2 shape, its readers, its lane entries and tests T1 to T15",
+      "reason": "out of this order: a design only (<paths> is the channel file; the deliverable is the design document)"
+    },
+    {
+      "item": "flipping the order's <status> from pending to complete",
+      "reason": "the order file NFRA_CTLPLN.TO-CT-w-6 is outside the order's <paths> grant; a BLOCKING row (NFRA_CTLPLN-W68-S7) carries the flip to the COO"
+    },
+    {
+      "item": "the contents of the four crossbox test files (test_crossbox_call, test_crossbox_deliver, test_open_calls, test_apply_who_and_crossbox)",
+      "reason": "named by grep for crossbox use only; not read, so the design does not claim what they pin"
+    },
+    {
+      "item": "a raw-git simulation with the real verbs (T2)",
+      "reason": "the scratch simulation (.scratch/xb_sim.py) uses raw git, not crossbox-call.py; the verb-level two-box test is planned"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W68-S1: receive writes no crossbox file; DELIVERED is printed and stored nowhere",
+    "NFRA_CTLPLN-W68-S2: the lane NFRA_CTLPLN_FAST_C admits no manager; the crossbox manager lane is DEVICES_CROSSBOX",
+    "NFRA_CTLPLN-W68-S3: the one-writer check has no rule for crossbox files; the only per-box admission is GS-f-4",
+    "NFRA_CTLPLN-W68-S4: box-sync's conflict classes: the resolver header says two, its body enumerates four",
+    "NFRA_CTLPLN-W68-S5: the census header counts two investigation files and says RESOLVED-OTHER includes them; the body shows three files, none RESOLVED-OTHER",
+    "NFRA_CTLPLN-W68-S6: the crossbox selftest proves the two-copy exchange with the tool's own fold, never with git merge",
+    "NFRA_CTLPLN-W68-S7: the order's status flip to complete edits a file outside the order's <paths> grant"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~68/NFRA_CTLPLN.TO-CT-w-6.crossbox-ack-per-box-file-design.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/crossbox-call.py --selftest",
+      "result": "CROSSBOX-SELFTEST cases=28/28 ok=True (rc 0; temporary git repositories, no crossbox file written)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/crossbox-matrix.py --selftest",
+      "result": "CROSSBOX-MATRIX-SELFTEST cases=7/7 ok=True (rc 0)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/crossbox-matrix.py",
+      "result": "CROSSBOX-MATRIX pairs=12 with_file=12 acked=9 closed_both=5 none=0 (rc 0; read-only, no --fetch)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/crossbox-call.py list --open",
+      "result": "CROSSBOX-LIST files=140 shown=42 (rc 0; read-only)"
+    }
+  ]
+}
