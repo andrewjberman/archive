@@ -1,0 +1,618 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-174",
+  "cell": "AR-y-174",
+  "method": "in-process runs of the four writer/reader pairs over seven synthetic sheets; the version switch is sys.modules['template_reader'] for the writer's acceptance and for the reader's re-open and re-POST",
+  "versions": {
+    "old": {
+      "reader_version": "irpt-template-reader.r16.1",
+      "source": "git show aaf156e8eb:infra/aws/lambda/investor-reporting/intake/template_reader.py",
+      "blob_sha256_of_file": "6809eccdd1e1a1a3475e8491e2fbbc0334006cd4f0301cd646e2a3f29b9096ea"
+    },
+    "new": {
+      "reader_version": "irpt-template-reader.r17.1",
+      "source": "worktree infra/aws/lambda/investor-reporting/intake/template_reader.py (HEAD ccbed3339b, the AR-y-171 commit; the same blob as drain b09e84971f)",
+      "blob_sha256_of_file": "90f21dd1818ae7d9195d05561b9bda884096cd5cf10a0252d94de593f0a522c4"
+    }
+  },
+  "consumers": [
+    "intake/template_reader.py:34 READER_VERSION (the one member reader_version is written at :277 by read_template)",
+    "intake/template_reader.py:37 READER_PINS (pin test: intake/tests/test_stored_input_contract.py:180-189)",
+    "intake/uploads.py:159 from template_reader import WORDS (inside _with_correction_words)",
+    "intake/uploads.py:460-465 _defer: read_template is the door's FIRST answer when request_resolution is wired (ERROR sheets stop here)",
+    "intake/uploads.py:515-516 _answer NEEDS_CORRECTION: re-reads the template with the RUNNING reader (answer shown on re-POST)",
+    "intake/uploads.py:523 resolve_deferred: TemplateRefused, finding (the resident's resolve path)",
+    "intake/uploads.py:570-572 _freeze_template: read_template (the synchronous door and the resident's resolve)",
+    "intake/uploads.py:362 create with supersedes_input_id -> read_input (re-read under the running reader)",
+    "intake/uploads.py:599 _normalized_response -> read_input (every NORMALIZED answer and every re-POST)",
+    "intake/uploads.py:633-641 read_input: imports READER_VERSION and read_template; stored_version = document template reader_version (absent = before-C-STOREDINPUT); the full re-read is compared ONLY when stored_version == READER_VERSION",
+    "intake/portfolio.py:357 from template_reader import finding, _number (freeze_template_portfolio)",
+    "intake/upload_suggestions.py:27 docstring mention only (no import)",
+    "ycharts/generate/resident_worker.py:1008, :1015, :1024 from template_reader import finding (the RESIDENT: its own installed copy, not this worktree file)",
+    "ycharts/generate/prospect_submission.py:68, :79 uploads.read_input (submit of an analysis request on a held input, in irpt-ycharts-generate)",
+    "_scope/retained_input_authorizer.py:47, :63 read_input (CSV lane only; a template-lane input is not served through it, census row :67)",
+    "ops/prospect_dates.py:102 comment; :141, :143 read the STORED document['template'] (no read_template call)",
+    "tests only: intake/tests/test_stored_input_contract.py:49, :94, :106, :137-141; intake/tests/test_template_reader.py:14; intake/tests/test_correction_words.py:18, :114, :126, :138; intake/tests/test_template_uploads.py; intake/tests/test_template_account_totals.py; intake/tests/test_deferred_resolution.py:214; ops/tests/test_prospect_dates.py:368-369; ycharts/generate/tests/test_resolution_retry.py:16, :23",
+    "PACKAGING lambda-source-map.json (infra/aws/lambda/ci): irpt-ycharts-generate entry at line 3988 packages uploads.py (pin f09b802cdc, sha256 47f89e0b...) at lines 4542-4546 and template_reader.py (pin 3f29017cfc, sha256 76795b75...) at lines 4559-4564, and also upload_resolution.py, portfolio.py, security_resolution.py; irpt-status (entry line 5293) packages ops/status.py (line 5582) and NO reader module; irpt-intake-poller (entry line 3875) names no template_reader.py in its files[] (text search of the map)",
+    "PACKAGING reports/build_resident_package.py (DIRS include intake and ycharts/generate; ONE backend pin via git show): the RESIDENT carries template_reader.py at its build pin; installed by ycharts/generate/install-resident.sh. The resident's installed pin was NOT read"
+  ],
+  "cases": [
+    {
+      "writer_version": "old",
+      "reader_version": "old",
+      "input": "two_sheet_workbook",
+      "file_type": "xlsx",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [
+        "SHEETS_NOT_READ:NOTICE"
+      ],
+      "stored_reader_version": "irpt-template-reader.r16.1",
+      "compare_runs_on_reopen": true,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [
+        "SHEETS_NOT_READ:NOTICE"
+      ],
+      "outcome": "STORED by the old writer; RE-OPEN under the old reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: YES; same-token RE-POST under the old reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet two_sheet_workbook (xlsx); writer old = irpt-template-reader.r16.1; reader old = irpt-template-reader.r16.1; writer door NORMALIZED; writer codes ['SHEETS_NOT_READ:NOTICE']; stored reader_version irpt-template-reader.r16.1; compare on re-open True; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes ['SHEETS_NOT_READ:NOTICE']"
+    },
+    {
+      "writer_version": "old",
+      "reader_version": "old",
+      "input": "total_row_sheet",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NEEDS_CORRECTION",
+      "writer_codes": [
+        "TOTAL_ROW_PRESENT:ERROR"
+      ],
+      "stored_reader_version": null,
+      "compare_runs_on_reopen": null,
+      "reread_under_reader_equals_stored_ignoring_version": null,
+      "reopen": "not run: the writer stored nothing",
+      "repost_same_token_under_reader": "NEEDS_CORRECTION",
+      "repost_codes": [
+        "TOTAL_ROW_PRESENT:ERROR"
+      ],
+      "outcome": "NOT STORED: the old writer's door answered NEEDS_CORRECTION; no re-open; same-token RE-POST under the old reader: NEEDS_CORRECTION",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet total_row_sheet (csv); writer old = irpt-template-reader.r16.1; reader old = irpt-template-reader.r16.1; writer door NEEDS_CORRECTION; writer codes ['TOTAL_ROW_PRESENT:ERROR']; stored reader_version None; compare on re-open None; re-read under reader equals stored ignoring version None; re-open not run: the writer stored nothing; re-POST NEEDS_CORRECTION; repost codes ['TOTAL_ROW_PRESENT:ERROR']"
+    },
+    {
+      "writer_version": "old",
+      "reader_version": "old",
+      "input": "two_value_account_sheet",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NEEDS_CORRECTION",
+      "writer_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "stored_reader_version": null,
+      "compare_runs_on_reopen": null,
+      "reread_under_reader_equals_stored_ignoring_version": null,
+      "reopen": "not run: the writer stored nothing",
+      "repost_same_token_under_reader": "NEEDS_CORRECTION",
+      "repost_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "outcome": "NOT STORED: the old writer's door answered NEEDS_CORRECTION; no re-open; same-token RE-POST under the old reader: NEEDS_CORRECTION",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet two_value_account_sheet (csv); writer old = irpt-template-reader.r16.1; reader old = irpt-template-reader.r16.1; writer door NEEDS_CORRECTION; writer codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']; stored reader_version None; compare on re-open None; re-read under reader equals stored ignoring version None; re-open not run: the writer stored nothing; re-POST NEEDS_CORRECTION; repost codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']"
+    },
+    {
+      "writer_version": "old",
+      "reader_version": "old",
+      "input": "one_account_sheet",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [],
+      "stored_reader_version": "irpt-template-reader.r16.1",
+      "compare_runs_on_reopen": true,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "STORED by the old writer; RE-OPEN under the old reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: YES; same-token RE-POST under the old reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet one_account_sheet (csv); writer old = irpt-template-reader.r16.1; reader old = irpt-template-reader.r16.1; writer door NORMALIZED; writer codes []; stored reader_version irpt-template-reader.r16.1; compare on re-open True; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes []"
+    },
+    {
+      "writer_version": "old",
+      "reader_version": "old",
+      "input": "repair_header_two_values",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [],
+      "stored_reader_version": "irpt-template-reader.r16.1",
+      "compare_runs_on_reopen": true,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "STORED by the old writer; RE-OPEN under the old reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: YES; same-token RE-POST under the old reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet repair_header_two_values (csv); writer old = irpt-template-reader.r16.1; reader old = irpt-template-reader.r16.1; writer door NORMALIZED; writer codes []; stored reader_version irpt-template-reader.r16.1; compare on re-open True; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes []"
+    },
+    {
+      "writer_version": "old",
+      "reader_version": "old",
+      "input": "repair_header_one_value",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [],
+      "stored_reader_version": "irpt-template-reader.r16.1",
+      "compare_runs_on_reopen": true,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "STORED by the old writer; RE-OPEN under the old reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: YES; same-token RE-POST under the old reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet repair_header_one_value (csv); writer old = irpt-template-reader.r16.1; reader old = irpt-template-reader.r16.1; writer door NORMALIZED; writer codes []; stored reader_version irpt-template-reader.r16.1; compare on re-open True; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes []"
+    },
+    {
+      "writer_version": "old",
+      "reader_version": "old",
+      "input": "attribute_header_one_account",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NEEDS_CORRECTION",
+      "writer_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "stored_reader_version": null,
+      "compare_runs_on_reopen": null,
+      "reread_under_reader_equals_stored_ignoring_version": null,
+      "reopen": "not run: the writer stored nothing",
+      "repost_same_token_under_reader": "NEEDS_CORRECTION",
+      "repost_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "outcome": "NOT STORED: the old writer's door answered NEEDS_CORRECTION; no re-open; same-token RE-POST under the old reader: NEEDS_CORRECTION",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet attribute_header_one_account (csv); writer old = irpt-template-reader.r16.1; reader old = irpt-template-reader.r16.1; writer door NEEDS_CORRECTION; writer codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']; stored reader_version None; compare on re-open None; re-read under reader equals stored ignoring version None; re-open not run: the writer stored nothing; re-POST NEEDS_CORRECTION; repost codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "new",
+      "input": "two_sheet_workbook",
+      "file_type": "xlsx",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [
+        "SHEETS_NOT_READ:NOTICE"
+      ],
+      "stored_reader_version": "irpt-template-reader.r17.1",
+      "compare_runs_on_reopen": true,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [
+        "SHEETS_NOT_READ:NOTICE"
+      ],
+      "outcome": "STORED by the new writer; RE-OPEN under the new reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: YES; same-token RE-POST under the new reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet two_sheet_workbook (xlsx); writer new = irpt-template-reader.r17.1; reader new = irpt-template-reader.r17.1; writer door NORMALIZED; writer codes ['SHEETS_NOT_READ:NOTICE']; stored reader_version irpt-template-reader.r17.1; compare on re-open True; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes ['SHEETS_NOT_READ:NOTICE']"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "new",
+      "input": "total_row_sheet",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NEEDS_CORRECTION",
+      "writer_codes": [
+        "TOTAL_ROW_PRESENT:ERROR"
+      ],
+      "stored_reader_version": null,
+      "compare_runs_on_reopen": null,
+      "reread_under_reader_equals_stored_ignoring_version": null,
+      "reopen": "not run: the writer stored nothing",
+      "repost_same_token_under_reader": "NEEDS_CORRECTION",
+      "repost_codes": [
+        "TOTAL_ROW_PRESENT:ERROR"
+      ],
+      "outcome": "NOT STORED: the new writer's door answered NEEDS_CORRECTION; no re-open; same-token RE-POST under the new reader: NEEDS_CORRECTION",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet total_row_sheet (csv); writer new = irpt-template-reader.r17.1; reader new = irpt-template-reader.r17.1; writer door NEEDS_CORRECTION; writer codes ['TOTAL_ROW_PRESENT:ERROR']; stored reader_version None; compare on re-open None; re-read under reader equals stored ignoring version None; re-open not run: the writer stored nothing; re-POST NEEDS_CORRECTION; repost codes ['TOTAL_ROW_PRESENT:ERROR']"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "new",
+      "input": "two_value_account_sheet",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NEEDS_CORRECTION",
+      "writer_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "stored_reader_version": null,
+      "compare_runs_on_reopen": null,
+      "reread_under_reader_equals_stored_ignoring_version": null,
+      "reopen": "not run: the writer stored nothing",
+      "repost_same_token_under_reader": "NEEDS_CORRECTION",
+      "repost_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "outcome": "NOT STORED: the new writer's door answered NEEDS_CORRECTION; no re-open; same-token RE-POST under the new reader: NEEDS_CORRECTION",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet two_value_account_sheet (csv); writer new = irpt-template-reader.r17.1; reader new = irpt-template-reader.r17.1; writer door NEEDS_CORRECTION; writer codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']; stored reader_version None; compare on re-open None; re-read under reader equals stored ignoring version None; re-open not run: the writer stored nothing; re-POST NEEDS_CORRECTION; repost codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "new",
+      "input": "one_account_sheet",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [],
+      "stored_reader_version": "irpt-template-reader.r17.1",
+      "compare_runs_on_reopen": true,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "STORED by the new writer; RE-OPEN under the new reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: YES; same-token RE-POST under the new reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet one_account_sheet (csv); writer new = irpt-template-reader.r17.1; reader new = irpt-template-reader.r17.1; writer door NORMALIZED; writer codes []; stored reader_version irpt-template-reader.r17.1; compare on re-open True; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes []"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "new",
+      "input": "repair_header_two_values",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NEEDS_CORRECTION",
+      "writer_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "stored_reader_version": null,
+      "compare_runs_on_reopen": null,
+      "reread_under_reader_equals_stored_ignoring_version": null,
+      "reopen": "not run: the writer stored nothing",
+      "repost_same_token_under_reader": "NEEDS_CORRECTION",
+      "repost_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "outcome": "NOT STORED: the new writer's door answered NEEDS_CORRECTION; no re-open; same-token RE-POST under the new reader: NEEDS_CORRECTION",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet repair_header_two_values (csv); writer new = irpt-template-reader.r17.1; reader new = irpt-template-reader.r17.1; writer door NEEDS_CORRECTION; writer codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']; stored reader_version None; compare on re-open None; re-read under reader equals stored ignoring version None; re-open not run: the writer stored nothing; re-POST NEEDS_CORRECTION; repost codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "new",
+      "input": "repair_header_one_value",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [],
+      "stored_reader_version": "irpt-template-reader.r17.1",
+      "compare_runs_on_reopen": true,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "STORED by the new writer; RE-OPEN under the new reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: YES; same-token RE-POST under the new reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet repair_header_one_value (csv); writer new = irpt-template-reader.r17.1; reader new = irpt-template-reader.r17.1; writer door NORMALIZED; writer codes []; stored reader_version irpt-template-reader.r17.1; compare on re-open True; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes []"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "new",
+      "input": "attribute_header_one_account",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [],
+      "stored_reader_version": "irpt-template-reader.r17.1",
+      "compare_runs_on_reopen": true,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "STORED by the new writer; RE-OPEN under the new reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: YES; same-token RE-POST under the new reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet attribute_header_one_account (csv); writer new = irpt-template-reader.r17.1; reader new = irpt-template-reader.r17.1; writer door NORMALIZED; writer codes []; stored reader_version irpt-template-reader.r17.1; compare on re-open True; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes []"
+    },
+    {
+      "writer_version": "old",
+      "reader_version": "new",
+      "input": "two_sheet_workbook",
+      "file_type": "xlsx",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [
+        "SHEETS_NOT_READ:NOTICE"
+      ],
+      "stored_reader_version": "irpt-template-reader.r16.1",
+      "compare_runs_on_reopen": false,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [
+        "SHEETS_NOT_READ:NOTICE"
+      ],
+      "outcome": "STORED by the old writer; RE-OPEN under the new reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: NO; same-token RE-POST under the new reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet two_sheet_workbook (xlsx); writer old = irpt-template-reader.r16.1; reader new = irpt-template-reader.r17.1; writer door NORMALIZED; writer codes ['SHEETS_NOT_READ:NOTICE']; stored reader_version irpt-template-reader.r16.1; compare on re-open False; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes ['SHEETS_NOT_READ:NOTICE']"
+    },
+    {
+      "writer_version": "old",
+      "reader_version": "new",
+      "input": "total_row_sheet",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NEEDS_CORRECTION",
+      "writer_codes": [
+        "TOTAL_ROW_PRESENT:ERROR"
+      ],
+      "stored_reader_version": null,
+      "compare_runs_on_reopen": null,
+      "reread_under_reader_equals_stored_ignoring_version": null,
+      "reopen": "not run: the writer stored nothing",
+      "repost_same_token_under_reader": "NEEDS_CORRECTION",
+      "repost_codes": [
+        "TOTAL_ROW_PRESENT:ERROR"
+      ],
+      "outcome": "NOT STORED: the old writer's door answered NEEDS_CORRECTION; no re-open; same-token RE-POST under the new reader: NEEDS_CORRECTION",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet total_row_sheet (csv); writer old = irpt-template-reader.r16.1; reader new = irpt-template-reader.r17.1; writer door NEEDS_CORRECTION; writer codes ['TOTAL_ROW_PRESENT:ERROR']; stored reader_version None; compare on re-open None; re-read under reader equals stored ignoring version None; re-open not run: the writer stored nothing; re-POST NEEDS_CORRECTION; repost codes ['TOTAL_ROW_PRESENT:ERROR']"
+    },
+    {
+      "writer_version": "old",
+      "reader_version": "new",
+      "input": "two_value_account_sheet",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NEEDS_CORRECTION",
+      "writer_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "stored_reader_version": null,
+      "compare_runs_on_reopen": null,
+      "reread_under_reader_equals_stored_ignoring_version": null,
+      "reopen": "not run: the writer stored nothing",
+      "repost_same_token_under_reader": "NEEDS_CORRECTION",
+      "repost_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "outcome": "NOT STORED: the old writer's door answered NEEDS_CORRECTION; no re-open; same-token RE-POST under the new reader: NEEDS_CORRECTION",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet two_value_account_sheet (csv); writer old = irpt-template-reader.r16.1; reader new = irpt-template-reader.r17.1; writer door NEEDS_CORRECTION; writer codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']; stored reader_version None; compare on re-open None; re-read under reader equals stored ignoring version None; re-open not run: the writer stored nothing; re-POST NEEDS_CORRECTION; repost codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']"
+    },
+    {
+      "writer_version": "old",
+      "reader_version": "new",
+      "input": "one_account_sheet",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [],
+      "stored_reader_version": "irpt-template-reader.r16.1",
+      "compare_runs_on_reopen": false,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "STORED by the old writer; RE-OPEN under the new reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: NO; same-token RE-POST under the new reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet one_account_sheet (csv); writer old = irpt-template-reader.r16.1; reader new = irpt-template-reader.r17.1; writer door NORMALIZED; writer codes []; stored reader_version irpt-template-reader.r16.1; compare on re-open False; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes []"
+    },
+    {
+      "writer_version": "old",
+      "reader_version": "new",
+      "input": "repair_header_two_values",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [],
+      "stored_reader_version": "irpt-template-reader.r16.1",
+      "compare_runs_on_reopen": false,
+      "reread_under_reader_equals_stored_ignoring_version": false,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "STORED by the old writer; RE-OPEN under the new reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: NO; same-token RE-POST under the new reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet repair_header_two_values (csv); writer old = irpt-template-reader.r16.1; reader new = irpt-template-reader.r17.1; writer door NORMALIZED; writer codes []; stored reader_version irpt-template-reader.r16.1; compare on re-open False; re-read under reader equals stored ignoring version False; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes []"
+    },
+    {
+      "writer_version": "old",
+      "reader_version": "new",
+      "input": "repair_header_one_value",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [],
+      "stored_reader_version": "irpt-template-reader.r16.1",
+      "compare_runs_on_reopen": false,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "STORED by the old writer; RE-OPEN under the new reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: NO; same-token RE-POST under the new reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet repair_header_one_value (csv); writer old = irpt-template-reader.r16.1; reader new = irpt-template-reader.r17.1; writer door NORMALIZED; writer codes []; stored reader_version irpt-template-reader.r16.1; compare on re-open False; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes []"
+    },
+    {
+      "writer_version": "old",
+      "reader_version": "new",
+      "input": "attribute_header_one_account",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r16.1",
+      "reader_reader_version_string": "irpt-template-reader.r17.1",
+      "writer_door": "NEEDS_CORRECTION",
+      "writer_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "stored_reader_version": null,
+      "compare_runs_on_reopen": null,
+      "reread_under_reader_equals_stored_ignoring_version": null,
+      "reopen": "not run: the writer stored nothing",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "NOT STORED: the old writer's door answered NEEDS_CORRECTION; no re-open; same-token RE-POST under the new reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet attribute_header_one_account (csv); writer old = irpt-template-reader.r16.1; reader new = irpt-template-reader.r17.1; writer door NEEDS_CORRECTION; writer codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']; stored reader_version None; compare on re-open None; re-read under reader equals stored ignoring version None; re-open not run: the writer stored nothing; re-POST NORMALIZED; repost codes []"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "old",
+      "input": "two_sheet_workbook",
+      "file_type": "xlsx",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [
+        "SHEETS_NOT_READ:NOTICE"
+      ],
+      "stored_reader_version": "irpt-template-reader.r17.1",
+      "compare_runs_on_reopen": false,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [
+        "SHEETS_NOT_READ:NOTICE"
+      ],
+      "outcome": "STORED by the new writer; RE-OPEN under the old reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: NO; same-token RE-POST under the old reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet two_sheet_workbook (xlsx); writer new = irpt-template-reader.r17.1; reader old = irpt-template-reader.r16.1; writer door NORMALIZED; writer codes ['SHEETS_NOT_READ:NOTICE']; stored reader_version irpt-template-reader.r17.1; compare on re-open False; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes ['SHEETS_NOT_READ:NOTICE']"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "old",
+      "input": "total_row_sheet",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NEEDS_CORRECTION",
+      "writer_codes": [
+        "TOTAL_ROW_PRESENT:ERROR"
+      ],
+      "stored_reader_version": null,
+      "compare_runs_on_reopen": null,
+      "reread_under_reader_equals_stored_ignoring_version": null,
+      "reopen": "not run: the writer stored nothing",
+      "repost_same_token_under_reader": "NEEDS_CORRECTION",
+      "repost_codes": [
+        "TOTAL_ROW_PRESENT:ERROR"
+      ],
+      "outcome": "NOT STORED: the new writer's door answered NEEDS_CORRECTION; no re-open; same-token RE-POST under the old reader: NEEDS_CORRECTION",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet total_row_sheet (csv); writer new = irpt-template-reader.r17.1; reader old = irpt-template-reader.r16.1; writer door NEEDS_CORRECTION; writer codes ['TOTAL_ROW_PRESENT:ERROR']; stored reader_version None; compare on re-open None; re-read under reader equals stored ignoring version None; re-open not run: the writer stored nothing; re-POST NEEDS_CORRECTION; repost codes ['TOTAL_ROW_PRESENT:ERROR']"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "old",
+      "input": "two_value_account_sheet",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NEEDS_CORRECTION",
+      "writer_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "stored_reader_version": null,
+      "compare_runs_on_reopen": null,
+      "reread_under_reader_equals_stored_ignoring_version": null,
+      "reopen": "not run: the writer stored nothing",
+      "repost_same_token_under_reader": "NEEDS_CORRECTION",
+      "repost_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "outcome": "NOT STORED: the new writer's door answered NEEDS_CORRECTION; no re-open; same-token RE-POST under the old reader: NEEDS_CORRECTION",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet two_value_account_sheet (csv); writer new = irpt-template-reader.r17.1; reader old = irpt-template-reader.r16.1; writer door NEEDS_CORRECTION; writer codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']; stored reader_version None; compare on re-open None; re-read under reader equals stored ignoring version None; re-open not run: the writer stored nothing; re-POST NEEDS_CORRECTION; repost codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "old",
+      "input": "one_account_sheet",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [],
+      "stored_reader_version": "irpt-template-reader.r17.1",
+      "compare_runs_on_reopen": false,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "STORED by the new writer; RE-OPEN under the old reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: NO; same-token RE-POST under the old reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet one_account_sheet (csv); writer new = irpt-template-reader.r17.1; reader old = irpt-template-reader.r16.1; writer door NORMALIZED; writer codes []; stored reader_version irpt-template-reader.r17.1; compare on re-open False; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes []"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "old",
+      "input": "repair_header_two_values",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NEEDS_CORRECTION",
+      "writer_codes": [
+        "ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR"
+      ],
+      "stored_reader_version": null,
+      "compare_runs_on_reopen": null,
+      "reread_under_reader_equals_stored_ignoring_version": null,
+      "reopen": "not run: the writer stored nothing",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "NOT STORED: the new writer's door answered NEEDS_CORRECTION; no re-open; same-token RE-POST under the old reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet repair_header_two_values (csv); writer new = irpt-template-reader.r17.1; reader old = irpt-template-reader.r16.1; writer door NEEDS_CORRECTION; writer codes ['ACCOUNT_COLUMN_SEVERAL_VALUES:ERROR']; stored reader_version None; compare on re-open None; re-read under reader equals stored ignoring version None; re-open not run: the writer stored nothing; re-POST NORMALIZED; repost codes []"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "old",
+      "input": "repair_header_one_value",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [],
+      "stored_reader_version": "irpt-template-reader.r17.1",
+      "compare_runs_on_reopen": false,
+      "reread_under_reader_equals_stored_ignoring_version": true,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "STORED by the new writer; RE-OPEN under the old reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: NO; same-token RE-POST under the old reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet repair_header_one_value (csv); writer new = irpt-template-reader.r17.1; reader old = irpt-template-reader.r16.1; writer door NORMALIZED; writer codes []; stored reader_version irpt-template-reader.r17.1; compare on re-open False; re-read under reader equals stored ignoring version True; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes []"
+    },
+    {
+      "writer_version": "new",
+      "reader_version": "old",
+      "input": "attribute_header_one_account",
+      "file_type": "csv",
+      "writer_reader_version_string": "irpt-template-reader.r17.1",
+      "reader_reader_version_string": "irpt-template-reader.r16.1",
+      "writer_door": "NORMALIZED",
+      "writer_codes": [],
+      "stored_reader_version": "irpt-template-reader.r17.1",
+      "compare_runs_on_reopen": false,
+      "reread_under_reader_equals_stored_ignoring_version": false,
+      "reopen": "ACCEPTED (document equal to stored portfolio: True)",
+      "repost_same_token_under_reader": "NORMALIZED",
+      "repost_codes": [],
+      "outcome": "STORED by the new writer; RE-OPEN under the old reader: ACCEPTED (document equal to stored portfolio: True); full re-read compared: NO; same-token RE-POST under the old reader: NORMALIZED",
+      "evidence": "in process, tests/test_template_uploads.py offline world, synthetic sheet attribute_header_one_account (csv); writer new = irpt-template-reader.r17.1; reader old = irpt-template-reader.r16.1; writer door NORMALIZED; writer codes []; stored reader_version irpt-template-reader.r17.1; compare on re-open False; re-read under reader equals stored ignoring version False; re-open ACCEPTED (document equal to stored portfolio: True); re-POST NORMALIZED; repost codes []"
+    }
+  ],
+  "claim": "In process, on the repository's offline upload world with seven synthetic sheets (28 writer/reader cases), every template that was stored was re-opened by read_input and re-POSTed under the reader that ran the re-open: 16 of 16 ACCEPTED (8 same-version, 8 mixed). The 8 mixed re-opens ran no full re-read comparison (compare_runs_on_reopen false in 8 of 8), which is the only reason none of them refused; the 8 same-version re-opens ran it and passed. So in this set no input accepted under one version was refused by the other at re-open. The versions differ at the upload DOOR, not at re-open: the same bytes can be stored by one version and turned back by the other. Two valid one-account files were checked: the repaired reader accepts both, and the round-16 reader turns back the one with an 'Account Value' column (a false refusal). The two inputs the repaired reader turns back (a total row, a two-value Account column) are turned back by the round-16 reader too, except the hyphenated 'Account-Number' two-value sheet, which the round-16 reader stores. NOT shown: the deployed Lambda's own bytes, the resident's installed package, the resolve path with request_resolution wired, and the queue between the two runtimes.",
+  "not_read": [
+    "the resident's INSTALLED package: its pin, its bytes and whether it runs now (no host call; install-resident.sh and build_resident_package.py were read as code only)",
+    "the resident path with request_resolution wired (uploads.py:400-402 _defer and resolve_deferred:521-567): NOT run; the harness uses the synchronous door (uploads.py:402-407) and the same read_input",
+    "the queue between the Lambda and the resident (the resolution message and its replay): not run, not read",
+    "the reader the deployed irpt-ycharts-generate actually carries: the map pins template_reader.py at 3f29017cfc (before the AR-y-142 and AR-y-162 changes; it writes no reader_version member). That third version is NOT one of the four pairs and was not run",
+    "the pinned neighbours of uploads.py (f09b802cdc) and upload_resolution.py (3f29017cfc): the harness runs HEAD's uploads.py for both sides; only the reader module is swapped",
+    "the reverse half-release on the resident (resident new, Lambda old) as a separate process: inferred from the code, not run",
+    "the live provider: resolve_template is mocked (every symbol FOUND); no securities_info call, no network",
+    "any real upload, stored artifact or live row: none read",
+    "the portal's reading of the envelope (census rows): not re-read here",
+    "other Lambdas that might import the changed modules without listing them (the map's import-closure gate covers the listed ones)"
+  ],
+  "what_a_person_sees": "Upload door, mixed state. The answer depends on which reader answers the POST, not on the file alone. A total-row sheet and a two-value 'Account' column are turned back by both versions. A two-value 'Account-Number' sheet is turned back by the repaired reader only: the round-16 reader stores it as NORMALIZED, so a person uploading it through an old runtime sees a success for a file with two accounts. A one-account file with an 'Account Value' column is turned back by the round-16 reader (ACCOUNT_COLUMN_SEVERAL_VALUES on a column that is not an account number) and accepted by the repaired reader. Same-token re-POST: when the first answer was NORMALIZED, the re-POST returns the stored NORMALIZED under either reader, because the normalization row is not judged again; when the first answer was a turn-back, the re-POST is judged afresh by the reader that answers it. So one two-account file can read NORMALIZED on a same-token re-POST and NEEDS_CORRECTION on a fresh-token POST under the repaired reader (measured: writer round-16, repaired reader, repair_header_two_values). Re-open (portfolio, submit, refresh): a person sees no refusal caused by a version change; an input stored under either version opens under the other, and it is shown as the version that stored it decided it. The SHEETS_NOT_READ notice is stored by both versions on a two-sheet workbook. Not measured here: the words a portal shows for each code (only the state, reason and codes were recorded)."
+}

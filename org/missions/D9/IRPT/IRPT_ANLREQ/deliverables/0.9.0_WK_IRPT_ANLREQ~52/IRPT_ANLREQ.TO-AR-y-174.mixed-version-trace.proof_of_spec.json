@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-174",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R17_Y.md",
+    "vintage_commit": "dec1c4624b",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-174.mixed-version-trace.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-174.mixed-version-trace.md",
+    "group": "OTHER",
+    "vintage_commit": "dec1c4624b"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~52",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r17/mixed_version_trace_run.py",
+      "kind": "test",
+      "commit_or_etag": "89d4275c91",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "an offline in-process harness (scratch, not a product test) that runs the four writer/reader pairs through the repository's offline upload world over seven synthetic sheets. No deploy, no AWS call, no network, no invoke.",
+      "artifact_covered_by": ["AR174-y-AC1", "AR174-y-AC2J"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r17/MIXED_VERSION_TRACE.json",
+      "kind": "doc",
+      "commit_or_etag": "89d4275c91",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the trace record the order names: consumers (19 entries), cases (28: four pairs x seven sheets, each with outcome and evidence), claim, not_read (10 entries), what_a_person_sees. Written by the harness above; read by ar17_checks.py y174-trace.",
+      "artifact_covered_by": ["AR174-y-AC1", "AR174-y-AC2J"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR174-y-AC1",
+      "criterion_verbatim": "the trace record covers all four writer/reader pairs, each with an outcome and its evidence, and names the consumers and what was not read.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-52/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r17/ar17_checks.py y174-trace --root C:/dev/wk-irpt-anlreq-52",
+      "output_evidence": "cases: 28 / Y174-TRACE-OK (run at HEAD 89d4275c91, rc=0). The check prints one FAIL line per problem; none printed. The four pairs present: (old,old), (new,new), (old,new), (new,old); each of the 28 cases carries outcome and evidence (measured by a python read of the record: all True).",
+      "denominator": "28 cases = 4 writer/reader pairs x 7 synthetic sheets; 4 of 4 pairs present; 28 of 28 cases with outcome and evidence; 19 consumer entries named; 10 not_read entries named",
+      "status": "PASS",
+      "expect": "Y174-TRACE-OK"
+    },
+    {
+      "criterion_id": "AR174-y-AC2J",
+      "criterion_verbatim": "each case was RUN where it could be, an inferred case says why, and no valid input is claimed safe that the runs do not show safe.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r17/MIXED_VERSION_TRACE.json (cases, claim, not_read) and the harness org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r17/mixed_version_trace_run.py at 89d4275c91; run by: cd infra/aws/lambda/investor-reporting/intake && python -m pytest <the harness> -q -p no:cacheprovider",
+      "output_evidence": "harness output at HEAD: 'cases written: 28 -> MIXED_VERSION_TRACE.json' and '1 passed in 1.62s' (rc=0). Measured from the record: stored templates 16, re-opened ACCEPTED 16; mixed-version stored 8, full comparison run on re-open 0 of 8; same-version stored 8, comparison run 8 of 8 and passed. Every case was run in process; none is INFERRED. Not run, and named in not_read: the resident's installed package, the resident resolve path with request_resolution wired, the queue, the deployed Lambda's bytes (pinned 3f29017cfc), the reverse half-release process, and the live provider (mocked).",
+      "denominator": "28 of 28 cases RUN in process; 0 INFERRED; 10 not_read entries; 8 mixed-version stored templates, 0 of 8 compared on re-open",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; graded at L9 by 3.0.0_SA_CVO, never by the worker",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Spec names no mutant.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- the trace runs a fixed set of seven synthetic sheets in process, with the stored and running versions swapped in sys.modules. The reader's own pin test (intake/tests/test_stored_input_contract.py, 5 tests) was run at HEAD dec1c4624b as a baseline and passed (5 passed).",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W52-S26: the Read-first reader and tests are under infra/aws/lambda/investor-reporting, not at the worktree root the order names; read at the investor-reporting path, nothing moved.",
+    "IRPT_ANLREQ-D2-W52-S27: the AR-y-171 drain b09e84971f is not an ancestor of this HEAD; the repaired reader is here as ccbed3339b with the same blob (42037c84f452).",
+    "IRPT_ANLREQ-D2-W52-S28: the deployed Lambda's reader is pinned at 3f29017cfc, a third version with no reader_version member, outside the round-16 and repaired pair the four pairs cover.",
+    "IRPT_ANLREQ-D2-W52-S29: a two-account sheet stored by the round-16 door reads NORMALIZED on a same-token re-POST under the repaired reader, while a fresh token is turned back (ARMED at the release pair; disarm owner 2.0.0_SA_COO~Y2).",
+    "IRPT_ANLREQ-D2-W52-S30: the round-14 census's refusal on re-open was measured before the stored-input contract; in mixed-version re-opens under the contract nothing is refused."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "The resident's installed package: its pin, its bytes and whether it runs now",
+      "reason": "no host call under the order; install-resident.sh and build_resident_package.py were read as code only."
+    },
+    {
+      "item": "The resident resolve path with request_resolution wired (uploads.py _defer and resolve_deferred), and the queue between the Lambda and the resident",
+      "reason": "not in the four pairs the order names; the harness uses the synchronous door and the same read_input. Named in not_read."
+    },
+    {
+      "item": "The deployed irpt-ycharts-generate bytes (reader pinned at 3f29017cfc)",
+      "reason": "a third version outside the four pairs; no live read under the order. Filed as S28."
+    },
+    {
+      "item": "The live provider and any real upload, stored artifact or live row",
+      "reason": "resolve_template is mocked to FOUND for every symbol; the order forbids live calls and none was made."
+    },
+    {
+      "item": "Any AWS call, package, upload, apply, invoke, push or deploy",
+      "reason": "the order forbids them; none was made."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python C:/dev/wk-irpt-anlreq-52/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r17/ar17_checks.py y174-trace --root C:/dev/wk-irpt-anlreq-52",
+      "result": "cases: 28 / Y174-TRACE-OK (rc=0)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -m pytest <worktree>/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r17/mixed_version_trace_run.py -q -p no:cacheprovider (cwd infra/aws/lambda/investor-reporting/intake)",
+      "result": "1 passed in 1.62s; the harness printed 28 cases"
+    }
+  ]
+}
