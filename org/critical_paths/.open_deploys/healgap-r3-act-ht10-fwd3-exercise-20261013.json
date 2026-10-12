@@ -1,0 +1,72 @@
+{
+  "slug": "healgap-r3-act-ht10-fwd3-exercise-20261013",
+  "title": "MDPF_HEALGAP R3 HG-t-10: the FWD-3 exercise on 2026-10-13. Induce {mode:pull, induce:drop-feed:rebalancer_accounts} on target cot-rebalancer-runner-reattempt of rule cot-bronze-complete ONLY (the 12:45Z target stays un-induced), restore to {mode:pull} ~11:37Z, repair.py ~11:38Z. CTO half SIGNED @923099fc24 (ADDENDUM 7, msg 4371). RESTORE ACTOR 0.7.0_AE_CloudOps~FBL (laptop CloudOps lane), via 0.0.0_AB_MSTR~DELL1 and the laptop manager: read the target (events list-targets-by-rule --rule cot-bronze-complete) at 12:30Z 2026-10-13; if 'induce' is present restore Input to {\"mode\":\"pull\"} by 13:30Z; HARD BACKSTOP 10:30Z 2026-10-14 (before the next sentinel ~11:31Z). Original input to restore: {\"mode\":\"pull\"}. No PutTargets until FBL's ack is on record. Armed mechanisms: the induce only.",
+  "author": "2.0.0_SA_COO~G1",
+  "status": "OPEN",
+  "opened_at": "2026-10-12T13:53:44.913436+00:00",
+  "window_hours": 48.0,
+  "entry_path": "org/critical_paths/change_management/20261012T1353Z_healgap-r3-act-ht10-fwd3-exercise-20261013_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "verify",
+      "target": "restore actor 0.7.0_AE_CloudOps~FBL ack on record before the induce (an agent-side ack, not a delivery receipt)",
+      "proof_required": "the ack message id and read time",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "activation",
+      "target": "induce set on target cot-rebalancer-runner-reattempt only, by PutTargets, read back",
+      "proof_required": "list-targets-by-rule input carries induce; hg_t10_exercise.py target prints TARGET-INDUCED; the 12:45Z target input still {mode:pull}",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "verify",
+      "target": "the induced hole read: result PARTIAL, accounts missing, no stamp, no accounts keys, no silver REPORT",
+      "proof_required": "hg_t10_exercise.py partial --date 2026-10-13 prints PARTIAL-OK",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "activation",
+      "target": "the sentinel target restored to {mode:pull}, read back",
+      "proof_required": "hg_t10_exercise.py target prints TARGET-CLEAR; terraform plan -target on the target reads no change",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L5",
+      "kind": "activation",
+      "target": "repair.py --date 2026-10-13 MANIFEST names exactly rebalancer_accounts BEFORE --execute, then --execute",
+      "proof_required": "the MANIFEST line printed before the invoke; INVOKED line",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L6",
+      "kind": "verify",
+      "target": "exactly the named feed landed and nothing else changed",
+      "proof_required": "hg_t10_exercise.py healed prints HEALED-OK against the pre-repair snapshot; silver REPORT; 12:45Z fire SKIP-IDEMPOTENT",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L7",
+      "kind": "verify",
+      "target": "the restore actor's deadline passed with the target clear (13:30Z) and the armed induce named and read at close",
+      "proof_required": "target read clear at 13:30Z",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261012T135344Z OPENED by 2.0.0_SA_COO~G1 with 7 leg(s)"
+  ],
+  "last_red_at": null,
+  "device": "dell1"
+}
