@@ -251,10 +251,14 @@ def classify(reads, row, old, new):
 def scan_inputs(ddb, table):
     rows, scanned, start = [], 0, None
     while True:
+        # Every projected attribute goes through a name placeholder: a bare attribute that is a DynamoDB reserved word
+        # (identity is one) is refused with ValidationException before any item is read (the first live run, 2026-10-12).
+        names = {"#t": "tenant", "#r": "request_revision", "#i": "identity", "#u": "upload_id", "#a": "artifact_ref",
+                 "#c": "content_sha256"}
         args = {"TableName": table, "ConsistentRead": True, "FilterExpression": "begins_with(#r, :p)",
-                "ExpressionAttributeNames": {"#r": "request_revision", "#t": "tenant"},
+                "ExpressionAttributeNames": names,
                 "ExpressionAttributeValues": {":p": {"S": "INPUT#"}},
-                "ProjectionExpression": "#t, #r, identity, upload_id, artifact_ref, content_sha256"}
+                "ProjectionExpression": ", ".join(sorted(names))}
         if start:
             args["ExclusiveStartKey"] = start
         try:
