@@ -111,6 +111,9 @@ let unreadBlocks = 0
 let unreadValues = 0
 const text = { error: 0, word: 0, empty: 0, unclassed: 0 }
 let blockRowsInGroup = 0
+let rawTokens = 0
+let errorWords = 0
+let masterCellContent = 0
 console.log('capture function CodeSha256 ' + cap.function.CodeSha256 + ' LastModified ' + cap.function.LastModified + '; modelSheet.ts at ' + portalRoot)
 for (const key of names) {
   const d = cap.keys[key]
@@ -148,6 +151,13 @@ for (const key of names) {
       kinds[block.kind] += nrows
       side[isMaster ? 'master' : 'own'][block.kind] += nrows
       foreign += foreignValues(block)
+      for (const brow of block.rows || []) {
+        for (const bcell of brow.cells || []) {
+          if (!bcell) continue
+          if (isMaster) masterCellContent += 1
+          if ('text' in bcell && /^#/.test(String(bcell.text).trim())) { if (bcell.textKind === 'error') errorWords += 1; else rawTokens += 1 }
+        }
+      }
       if (block.kind === 'unread') {
         unreadBlocks += 1
         unreadValues += (block.rows || []).reduce((a, r) => a + (r.cells || []).filter((x) => x && 'value' in x).length, 0)
@@ -194,6 +204,7 @@ console.log('ay5 classes FIGURE ' + cls.FIGURE + ' HEADING ' + cls.HEADING + ' C
 console.log('ay5 BLOCK rows split period ' + kinds.period + ' + case ' + kinds.case + ' + unread ' + kinds.unread + ' = ' + bsum + ' (served BLOCK ' + cls.BLOCK + ') ; own ' +
   JSON.stringify(side.own) + ' master ' + JSON.stringify(side.master) + ' over ' + rowsTotal + ' rows, ' + blocksTotal + ' blocks, withheld ' + withheld)
 console.log('ay5 values rendered under a header that is not their block\'s own: ' + foreign + ' (must be 0)')
+console.log('ay5 block cells: raw error tokens printed ' + rawTokens + ' (must be 0); error tokens in words ' + errorWords + '; master block cells with content ' + masterCellContent + ' (must be 0)')
 console.log('ay5 unread blocks ' + unreadBlocks + ', values printed ' + unreadValues + ' (must be 0); BLOCK rows found in the period grid ' + blockRowsInGroup + ' (must be 0)')
 console.log('ay5 FIGURE by source bloomberg ' + src.bloomberg + ' team ' + src.team + ' why ' + src.why + ' refused ' + src.refused + ' unmapped ' + src.unmapped + ' of ' + f +
   ' (sum ' + (src.bloomberg + src.team + src.why + src.refused + src.unmapped) + ')')
