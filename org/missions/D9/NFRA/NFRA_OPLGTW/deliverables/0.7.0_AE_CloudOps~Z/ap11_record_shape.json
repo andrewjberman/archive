@@ -1,0 +1,25 @@
+{
+ "functionArn_present": true,
+ "read_nondestructive": true,
+ "sample_function": "opal-assets-silver-eclipse",
+ "claim": "held",
+ "claim_basis": "RULED by NFRA_OPLGTW.TO-OG-ap-11 A1 (2.0.0_SA_COO~O, msg 33435): condition C is met by a REAL non-destructive read already on file, not by a read this seat performed. This seat's own read of opal-assets-silver-dlq at 2026-10-12T01:05Z found the queue EMPTY and could not re-measure.",
+ "source": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~57/DQ1_READ.json (cell OG-dq-1)",
+ "source_verified_by_reading_it": true,
+ "what_the_source_SHOWS": "current_messages.count = 12 distinct MessageIds; count_basis = '156 receive-message calls, visibility-timeout 0, 1-10 per call, at about 2026-10-11T15:55Z-15:58Z; get-queue-attributes read ApproximateNumberOfMessages=12 beside it. Nothing deleted by this worker.' -- so the read was real, live and non-destructive. bodies = 'each body is a Lambda async-invoke on-failure record: functionArn opal-assets-silver-eclipse, condition RetriesExhausted, responsePayload errorType RuntimeError.'",
+ "what_the_source_DOES_NOT_SHOW": "It names the FIELD functionArn but never the PATH requestContext.functionArn -- the string 'requestContext' appears 0 times in the whole 27796-byte file -- and it retained NO record body: it says verbatim 'Only the key is recorded.' So the exact path the drain parses is NOT evidenced by this artifact; it is corroborated by it.",
+ "why_this_seat_PROCEEDED_anyway": [
+  "The three fields the source does name -- functionArn, condition RetriesExhausted, responsePayload errorType -- are all siblings of ONE documented shape, the Lambda async-invoke on-failure destination record, in which condition and functionArn both sit under requestContext. Three names, one schema.",
+  "TWO INDEPENDENT IMPLEMENTATIONS parse that exact path: schwab_runtime.py:261 and mirror_conversion.py:934, both doc['requestContext']['functionArn'], written as parallel code.",
+  "THE FAILURE MODE IS CONSERVATIVE, which is what bounds the risk: both parsers catch ValueError/KeyError/IndexError/TypeError and return None, and None is NEVER a family -- the caller LEAVES THE MESSAGE ALONE. A wrong path therefore drains NOTHING; it cannot delete a foreign family's message and cannot lose data.",
+  "AC2 on the real scheduled 12:15Z sweep is the actual oracle: if the path were wrong, schwab_drained_and_reported would read False and the rollback is the prior code and prior pin."
+ ],
+ "queue_state_at_this_seats_own_read": {
+  "read_at": "2026-10-12T01:05Z",
+  "approximate_number_of_messages": 0,
+  "approximate_number_of_messages_not_visible": 0,
+  "long_poll_receive_returned_messages": false,
+  "nothing_consumed": true,
+  "note": "Two independent APIs agree on empty. OG-dq-1 records why: an UNNAMED consumer deletes the whole queue at about 16:00Z daily and it refills 12 at 13:07Z. The 12:15Z grade sweep therefore runs BEFORE the refill, so at grade time the queue holds only the two synthetics."
+ }
+}
