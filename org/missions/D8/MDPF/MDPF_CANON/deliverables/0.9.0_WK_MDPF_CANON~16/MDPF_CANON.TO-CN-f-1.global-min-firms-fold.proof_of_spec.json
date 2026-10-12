@@ -1,0 +1,209 @@
+{
+  "schema_version": "1.0",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "64def41849"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "64def41849",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-f-1.global-min-firms-fold.md"
+  },
+  "to_id": "MDPF_CANON.TO-CN-f-1",
+  "assignee": "0.9.0_WK_MDPF_CANON~16",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_gold_consolidator.py",
+      "kind": "script",
+      "commit_or_etag": "c14752be67",
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-16 (commit c14752be67; first built at 94ff221642). apply_global_min_firms_fold carries the step 6a one-firm as-of refusal (AMENDMENT 1); guard_global_min_firms_fold isolates it; build_all runs the guard directly after the served-identity guard. Nothing is deployed and no served object is written by this commit; the deploy is CloudOps's, in its own window."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/dim_mdpf_account_distribution.py",
+      "kind": "script",
+      "commit_or_etag": "94ff221642",
+      "artifact_covered_by": ["AC1", "AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-16 (commit 94ff221642; unchanged by AMENDMENT 1). build_firm_distribution gains fold_keys=None and fold_emit=True; every other caller is unchanged. The staged frontier object gold/mdpf_revamp/global/account_distribution.json is written only by this module's own CLI upload, which passes no fold, so it stays unfolded."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/dim_mdpf_aum_metrics.py",
+      "kind": "script",
+      "commit_or_etag": "94ff221642",
+      "artifact_covered_by": ["AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-16 (commit 94ff221642; unchanged by AMENDMENT 1). other_models appended to MODEL_ORDER and named in SERVED_MODEL_NAME. calc_metric and quarter_ends are not edited. The current-value fallback at lines 551-556 is pre-existing and is recorded as surprise MDPF_CANON-D1-W16-S4."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_revamp_model_crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "94ff221642",
+      "artifact_covered_by": ["AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-16 (commit 94ff221642; unchanged by AMENDMENT 1). The other_models ModelEntry row (id-less, not served) and its GLOBAL_ACCOUNT_DIST_DISPLAY entry. Self-test PASS at HEAD."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-daily-emitter/mdpf_revamp_model_crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "94ff221642",
+      "artifact_covered_by": ["AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-16 (commit 94ff221642; unchanged by AMENDMENT 1). The second home, byte-equal to the first (cmp at HEAD). The emitter lambda package is NOT re-packaged by this commit; repo parity only."
+    },
+    {
+      "path_or_key": "data/mdpf/tests/canon/test_global_min_firms_fold.py",
+      "kind": "test",
+      "commit_or_etag": "c14752be67",
+      "artifact_covered_by": ["AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-16 (commit c14752be67). 10 synthetic tests, 10 passed at HEAD, including test item (g): the one-firm as-of refusal, the two-firm day and the no-pool day."
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c14752be67",
+      "artifact_covered_by": [],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-16 (commit c14752be67). Rows W16-S4 (BLOCKING, ARMED) and -S5 (OBSERVATION, ARMED) appended after the three rows of the first commit; no existing row edited. surprise-row-gate OK: 2 new rows."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (CN-f-1): run r6_cn_f_1.py contract -- expect: ROUND 6 CONTRACT: 13 of 13 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round6/checks/r6_cn_f_1.py\" contract; echo \"exit=$?\"",
+      "output_evidence": "  C1 PASS: apply_global_min_firms_fold and guard_global_min_firms_fold present in mdpf_gold_consolidator\n  C2 PASS: fold_keys=['opal_blend_5050_st_int', 'opal_fixed_income', 'opal_income'] removed=True other_models.value=[None, None, None, None, None, 27.0] count=[None, None, None, None, None, 5] kept intermediate=[None, None, 140.0, 140.0, 170.0, 170.0]\n  C3 PASS: suppressed=[100.0, 100.0, 4.0, 20.0, 20.0, 0.0] differential=[100.0, 100.0, 4.0, 20.0, 20.0, 0.0] gap_dates=0 checked=6 suppressed_dates=5 emitted=1 (pre-fold residual on d3=0.01 tolerated)\n  C4 PASS: every emitted model-class value held by >= 2 firms\n  C5 PASS: top-level keys equal=True headline arrays equal=True SMA line equal=True input unmutated=True siblings same objects=True meta otherwise equal=True in-band statement carries first per-model date=True\n  C6 PASS: blend and fixed income held by 2 firms at the as-of -> kept with their values; fold_keys=['opal_income']\n  C7 PASS: short array refused; unclassified refused\n  C8 PASS: control folded=True; planted -> global None, report None, firm scopes same objects=True, error recorded=True\n  C9 PASS: null_lines={'opal_income': {'last_value': 4.0, 'last_value_date': '2026-10-05'}}\n  C10 PASS: pytest rc=0: 10 passed\n  C11 PASS: function raised=True; guard -> global None, report None, firm scopes same objects=True, message names the as-of=True, no level in it=True\n  C12 PASS: two-firm as-of builds and emits the fold line=True; no-pool as-of builds=True\n  C13 PASS: refused day: global None, input global unmutated=True; control day returns a new global document=True\nROUND 6 CONTRACT: 13 of 13 arms\nexit=0",
+      "denominator": "13 of 13 arms",
+      "status": "PASS",
+      "expect": "ROUND 6 CONTRACT: 13 of 13 arms.*exit=0",
+      "status_reason": "Run as the order's invocation under timeout 120 (the bound applied at the shell: timeout 120 python ...) at HEAD c14752be67. Offline, synthetic arts; arm C10 runs the worker's own test file (10 passed)."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 (CN-f-1): run r6_cn_f_1_comparator.py -- expect: ROUND 6 COMPARATOR: 11 of 11 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round6/checks/r6_cn_f_1_comparator.py\"; echo \"exit=$?\"",
+      "output_evidence": "  read: 4 scopes at 2026-10-09 (dated objects per scope {'global': 43, '49financial': 52, 'inflection': 51, 'cottonwood': 43})\n  K0 PASS: valued dates 485 of 494; pre-fold residual max 0.02; 208 date(s) off by a rounding cent or two\n  K1 PASS: returned (arts_out, report): fold_keys=11 suppressed dates=438\n  K2 PASS: top-level key set equal=True; fields differing=[]; meta otherwise equal=True; in-band statement present=True (begins 2026-05-15)\n  K3 PASS: kept lines 5, removed lines 11, lines with a wrong date []\n  K4 PASS: emitted on 47 date(s); wrong sums []; suppressed though held by >= 2 firms []\n  K5 PASS: valued dates 485; dates where the gap moved 438 (each equal to its suppressed dollars, no level printed); mismatches []\n  K6 PASS: every emitted model-class value held by >= 2 firms; violations []\n  K7 PASS: 11 removed line(s); keys surviving []; display names surviving []\n  K8 PASS: firm scopes same objects=True; deep-equal to pre-fold copies=True\n  K9 PASS: 4 non-model-class line(s) (SMA, tax) deep-equal; differing []\n  K10 PASS: null lines 2: reported {'opal_income': (1188397.34, '2026-08-19'), 'opal_moderate_income_portfolio_tax_efficient': (1117136.69, '2026-09-25')}\nROUND 6 COMPARATOR: 11 of 11 arms\nexit=0",
+      "denominator": "11 of 11 arms",
+      "status": "PASS",
+      "expect": "ROUND 6 COMPARATOR: 11 of 11 arms.*exit=0",
+      "status_reason": "Run as the order's invocation under timeout 120 at HEAD c14752be67. Read-only: four list calls and four gets of the newest aggregate-aua-timeseries object per scope (common date 2026-10-09). No write. The K10 dollars are the null lines' last values, printed by ruling. The as-of pool is emitted on 2026-10-09, so no refusal fires on the live objects."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 (CN-f-1): run r6_cn_f_1.py seams -- expect: ROUND 6 SEAMS: 6 of 6 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round6/checks/r6_cn_f_1.py\" seams; echo \"exit=$?\"",
+      "output_evidence": "  S1 PASS: identity guard @2942, fold guard @2943 (tuple-unpacked=True), first global aum-metrics build @2983\n  S2 PASS: global build_firm_distribution keywords=['fold_emit', 'fold_keys']\n  S3 PASS: params=['firm_id', 'firm_name', 'fold_keys', 'fold_emit'] defaults={'fold_keys': None, 'fold_emit': True}\n  S4 PASS: MODEL_ORDER has other_models=True; SERVED_MODEL_NAME has it=True\n  S5 PASS: crosswalk row id-less/model/not-served=True; in SERVED/CORE/BLEND/GLOBAL_MODEL_KEYS=[False, False, False, False]; display row in both homes=True; registry view_path=Models > Custom\n  S6 PASS: firm scopes same objects=True; global key set equal=True\nROUND 6 SEAMS: 6 of 6 arms\nexit=0",
+      "denominator": "6 of 6 arms",
+      "status": "PASS",
+      "expect": "ROUND 6 SEAMS: 6 of 6 arms.*exit=0",
+      "status_reason": "Run as the order's invocation under timeout 120 at HEAD c14752be67. Static (ast) arms over the four edited files and the crosswalk's two homes. Output identical across two runs (see controls.determinism)."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 (CN-f-1, judgment=\"true\"): /seams on the fold-to-served seam, grounded on the objects after the first scheduled run that carries the code -- MECHANICAL (the four global objects read back hold no model line held by fewer than two firms on any date they carry), DECLARATIVE (the in-band statement says why per-model detail begins when it does, and names no model), SEMANTIC (the only client-visible deltas are the ones the never-widen pair names: the two inflection blends leaving the Model Portfolios roll-up and the Total Holdings count, and per-model history starting where Global first combined two firms).",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; graded at the round-6 close by the CVO on /seams (L9), never self-graded by the worker",
+      "output_evidence": "NOT GRADED BY THE WORKER. Measured facts only, read-only, 2026-10-12, served objects at 2026-10-09: (1) K4/K6 in the AC2 comparator: no emitted fold value on a date held by fewer than two firms; (2) read-only probe: other_models_emitted_as_of True; 11 fold keys, 9 held by one firm and 2 by none on the as-of; 5 of 5 kept lines carried on the as-of; (3) K5: the gap moved on 438 of 485 valued dates, each equal to its suppressed dollars; (4) K2: headline arrays and every top-level key unchanged; (5) in-band statement begins 2026-05-15, the first date a kept line is shown. Surprise rows MDPF_CANON-D1-W16-S1 and -S2 (raised before AMENDMENT 1), -S3 (the AC4 roll-up premise), -S4 and -S5 are the L9 inputs.",
+      "denominator": "N/A -- judgment criterion (no verdict by the worker)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round-6 close",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AMENDMENT 1 planted one-firm as-of (C11; tests/canon/test_global_min_firms_fold.py test_one_firm_as_of_refuses_global_whole_and_names_the_date_not_a_level): inflection stops holding the blend on the last date, so the as-of pool is the fixed-income line held by cottonwood alone",
+      "expected": "the function raises SystemExit with the prefix naming the as-of date and the firm count, with no level; the guard returns global None, report None, the firm scopes the same objects",
+      "observed": "C11 PASS: function raised=True; guard -> global None, report None, firm scopes same objects=True, message names the as-of=True, no level in it=True; test_one_firm_as_of_refuses_global_whole_and_names_the_date_not_a_level PASS",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC3 seams invocation run twice at HEAD c14752be67, each stdout captured to .scratch/det1.txt and .scratch/det2.txt and compared with cmp",
+      "observed": "IDENTICAL-OUTPUTS: both runs exit 0 with the same 7-line output ending ROUND 6 SEAMS: 6 of 6 arms",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No AWS write of any kind: no put, copy, delete, invoke, apply or deploy. The comparator's four list calls and four gets are the only S3 calls; the offline probes make none.",
+      "reason": "Order bound 1; read-only get and list are permitted."
+    },
+    {
+      "item": "AC4 judgment was not graded by the worker",
+      "reason": "AC4 is judgment, graded at the round-6 close on /seams (L9); the worker records measured facts only."
+    },
+    {
+      "item": "The category registry (mdpf_category_registry.py), the aggregate builder, the test idiom file and every existing test are not edited. The category-views gold-plane consumer (S1) is disarmed by step 6a and is not otherwise changed.",
+      "reason": "Order bound 2 (read-only surfaces)."
+    },
+    {
+      "item": "The aum-metrics current-value fallback (_frontier on a null as-of) is not changed. It is still reachable on a no-pool as-of and is recorded as surprise S4, not fixed.",
+      "reason": "Pre-existing behaviour; the order does not name aum-metrics' current value, and changing it is a decision for the issuer."
+    },
+    {
+      "item": "The pre-guard global staging write (dim consolidator stage_put of global/aggregate_aua_timeseries.json) is not moved. It is recorded as surprise S5.",
+      "reason": "Moving it changes staged content on every run; outside this amendment; the reader question is open."
+    },
+    {
+      "item": "The worktree's portal submodule pointer differs from HEAD and is not part of any commit",
+      "reason": "Outside the order's paths; each commit names its paths explicitly."
+    },
+    {
+      "item": "The hashed client account-id list was ABSENT on this box, so the commit-time client-data check did not check the commits for account ids",
+      "reason": "Recorded as measured by safe-commit (WARN: client-data-check). No account id was printed by any probe or check."
+    }
+  ],
+  "surprises": [
+    "MDPF_CANON-D1-W16-S1",
+    "MDPF_CANON-D1-W16-S2",
+    "MDPF_CANON-D1-W16-S3",
+    "MDPF_CANON-D1-W16-S4",
+    "MDPF_CANON-D1-W16-S5"
+  ],
+  "session_log": "Worker 0.9.0_WK_MDPF_CANON~16 on DELL1, worktree C:/dev/wk-MDPF_CANON-16, branch wk-MDPF_CANON-16. Round-6 build at 94ff221642; proof at 2e85c2fc88; AMENDMENT 1 (ADDENDUM 6, step 6a, test item (g)) at c14752be67 on top of the issuer's amendment commits 2047c6c550 and d2849f4221. The three mechanical criteria were re-run at c14752be67 under timeout 120 and read back; this instance and the status flip are the following commit. The probes at .scratch/ (as_of_probe.py, dist_fold_probe.py) are not committed.",
+  "compiler_tools": [
+    {
+      "tool": "r6_cn_f_1.py (issuer check, contract arms, offline; 13 arms)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round6/checks/r6_cn_f_1.py\" contract; echo \"exit=$?\"",
+      "result": "ROUND 6 CONTRACT: 13 of 13 arms, exit=0"
+    },
+    {
+      "tool": "r6_cn_f_1_comparator.py (issuer check, read-only S3; 11 arms)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round6/checks/r6_cn_f_1_comparator.py\"; echo \"exit=$?\"",
+      "result": "ROUND 6 COMPARATOR: 11 of 11 arms, exit=0"
+    },
+    {
+      "tool": "r6_cn_f_1.py (issuer check, seams arms, static; 6 arms)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round6/checks/r6_cn_f_1.py\" seams; echo \"exit=$?\"",
+      "result": "ROUND 6 SEAMS: 6 of 6 arms, exit=0"
+    },
+    {
+      "tool": "python -m pytest -q -p no:cacheprovider data/mdpf/tests/canon/test_global_min_firms_fold.py",
+      "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider data/mdpf/tests/canon/test_global_min_firms_fold.py",
+      "result": "10 passed, rc=0"
+    },
+    {
+      "tool": "python data/mdpf/scripts/gold/mdpf_revamp_model_crosswalk.py (self-test, unchanged since round 6 build)",
+      "invocation": "timeout 120 python data/mdpf/scripts/gold/mdpf_revamp_model_crosswalk.py",
+      "result": "OK: mdpf_revamp_model_crosswalk self-test PASS (20 models: 7 served, 5 core, 2 sma, 2 blend), rc=0"
+    },
+    {
+      "tool": "ruff (py39 target) on the changed Python files",
+      "invocation": "timeout 120 python -m ruff check --target-version py39 data/mdpf/scripts/gold/mdpf_gold_consolidator.py data/mdpf/tests/canon/test_global_min_firms_fold.py",
+      "result": "All checks passed!, rc=0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh commit gates (amendment commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_CANON~16 <0.9.0_WK_MDPF_CANON~16@opal.agent>\" -F .scratch/msg_cn_f_1_amend1.txt -- <three paths>",
+      "result": "surprise-row-gate OK (2 new rows); pre-commit gate clean; committed c14752be67"
+    }
+  ]
+}
