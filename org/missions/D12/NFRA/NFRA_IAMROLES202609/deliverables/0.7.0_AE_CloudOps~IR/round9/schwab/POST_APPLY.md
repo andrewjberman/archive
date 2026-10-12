@@ -95,6 +95,42 @@ If the 2026-10-13 04:00Z chain completes normally, branch A closes. If it fails 
 (the rollback is in restorable document shape -- it was one of the two this round found wrapped and
 re-captured), then file a row naming the run and the call path.
 
+## 4a. A BRANCH-B SHORTCUT I TRIED, AND WHY ITS ZERO MEANS NOTHING
+
+Rather than wait ~22h, I tried to watch branch B directly: look for `AccessDenied` on `opal-data-schwab`
+in CloudTrail since the delete floor. It returned **0**, and that zero is **uninformative** -- recorded
+here so no one reads it as "branch A confirmed", and so no one repeats the attempt.
+
+```
+cloudtrail lookup-events --start-time 2026-10-12T04:29:00Z (EventSource s3.amazonaws.com, 50-item page)
+  events parsed: 38      with an errorCode: 0
+  naming opal-data-schwab: 0      from bd-exporter-ec2-role: 0
+  distinct eventNames in the page: ['GetBucketAcl', 'GetBucketVersioning']
+  page window: 2026-10-12T04:51:35Z .. 06:00:26Z
+```
+
+The two event names were the tell -- 90 minutes of S3 activity on this estate and not one object-level
+call -- so I checked the instrument's coverage instead of accepting the zero:
+
+```
+describe-trails -> opal-organization-trail (multi-region), opal-served-key-write-trail
+get-event-selectors opal-organization-trail:
+  { ReadWriteType: All,      IncludeManagementEvents: true,  DataResources: [] }
+  { ReadWriteType: ReadOnly, IncludeManagementEvents: false, DataResources: [
+      AWS::S3::Object -> arn:aws:s3:::opal-data-49financial/ , opal-data-bd/ , opal-data-cot/ , opal-data-inf/ ] }
+```
+
+**`opal-data-schwab` is not among the four prefixes with S3 data events, and the selector is `ReadOnly`
+anyway.** So CloudTrail **structurally cannot** record a `GetObject` / `ListObjectsV2` / `PutObject`
+against that bucket by any principal: the plane cannot produce a hit, so its zero is not a measurement of
+the world. This is ABSENT, not EXERCISED-AGAINST -- a failure mode indistinguishable from a genuine
+negative, which is exactly the thing a coverage denominator exists to expose.
+
+**Two consequences.** (1) The pair chose the right oracle: the run's own completion record is the only
+sound one available, and the shortcut I reached for has no coverage. (2) Nothing here is evidence that
+nothing broke -- it is the absence of contrary evidence from an instrument that could not have supplied
+any. The grade still waits on the 2026-10-13 ~04:00Z gold chain.
+
 ## 5. STATE
 
 | leg | status |
