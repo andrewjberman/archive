@@ -1,0 +1,18 @@
+BX2 C-d / STEP 4a -- where the portal authorizer puts `tier` (read 2026-10-12 by 0.7.0_AE_CloudOps~HV1, BEFORE any write)
+
+AUTHORIZER (live): api 7k3ed8px20, authorizer naqxlm, Name portal-jwt-authorizer, Type REQUEST,
+  AuthorizerPayloadFormatVersion 2.0, EnableSimpleResponses true, IdentitySource $request.header.Authorization
+  AuthorizerUri -> function opal-portal-authorizer (nodejs22.x, index.handler, CodeSha256 gQp2IooAM3EgebVQeII27xcE+KuEDhyYfrlwr6Jqcsc=, LastModified 2026-10-03T19:52:32Z)
+SOURCE READ: the DEPLOYED package (index.mjs, 65333 bytes), not the repo tree (no authorizer source under infra/aws/lambda matched).
+  success return: `return h(!0,W)` with `function h(q,Z={}){return{isAuthorized:q,context:Z}}` and
+  W = {email, name, tier:J.tier, role, advisorId, firmId, officeId, regionId, userType, allowedFirmIds, ...}
+  (J = the verified RS256 JWT, issuer opal-portal-auth, audience opal-portal-api)
+  the authorizer itself treats `q.tier==="internal"` as the internal tier (function q2: "User is internal tier - granting ALL access").
+
+FIELD PATH AS READ: requestContext.authorizer.lambda.tier   (HTTP API v2 + simple response: the returned `context` object is delivered under `authorizer.lambda`)
+HANDLER READS:      requestContext.authorizer.lambda.tier when `lambda` is present, else requestContext.authorizer.tier (lambda_function.py:_caller_tier, sha256 c1f8e725aaa6d3df946fcce6cb66e7044dba30419a2150a77cb3c007aece4ed8 = <M>=824bdb355b)
+VERDICT: path matches; `tier` is emitted for every verified login; an internal login carries tier "internal". C-d SATISFIED. Apply not blocked.
+
+NOT PROVEN BY THIS READ (stated so it is not read as proven):
+  1. This is the authorizer's code and the handler's code. No real INTERNAL session's JWT was decoded here, so "an internal login's JWT carries tier=internal" rests on the authorizer's own `tier==="internal"` test. The step-9 post-act read is what measures it.
+  2. The authorizer also grants ALL access to `userType==="Dev"` whatever its `tier` (q2). A Dev-type login whose tier is not exactly "internal" would be admitted by the authorizer and refused (403) by the fenced handler. Not a blocker for this order (the ruling fences on tier==internal exactly); filed as surprise row AMGT_HARVST-D1-S9 for the issuer.
