@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-w-4",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round8.md",
+    "vintage_commit": "2fbb74e87d",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-w-4.portal-carrier-firm-access-block.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-w-4.portal-carrier-firm-access-block.md",
+    "group": "OTHER",
+    "vintage_commit": "1529d9bae0"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~65",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_naming.py",
+      "kind": "script",
+      "commit_or_etag": "c5d1415676",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "builder edit on branch wk-NFRA_CTLPLN-65 (34 insertions): VIEWS entry (portal/src/lib/firmAccess.ts, mjs, FIRM_ALLOWED_PATHS), FIRM_ACCESS_TS_PATH, MJS_BRACE_CLOSE_TAGS, TARGET_REGISTRY_KEYS entry reading firm_pages only, BLOCKS entry, _blk_firm_allowed_paths, and a brace-close branch in _mjs_span. No deploy, no AWS call.",
+      "artifact_covered_by": [
+        "CTw4-AC1",
+        "CTw4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_firm_access_ts.py",
+      "kind": "test",
+      "commit_or_etag": "c1a1c6e5ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "T1 generated block equals a fresh render, T2 outside-block lines equal the portal base 2ed4373d, T3 firm-to-pages set equality and firm order, T4 the mark names firm_pages.json. Five tests, run from the worktree root.",
+      "artifact_covered_by": [
+        "CTw4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/lib/firmAccess.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "ef65ad67",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal repository commit on the nested portal worktree branch wk-NFRA_CTLPLN-65-portal, based on portal DEV 2ed4373d. Not pushed, not on DEV, not on PROD, and the workspace gitlink is not moved. The commit is in the portal repository's object store, so read it with git -C portal show ef65ad67:src/lib/firmAccess.ts. Only FIRM_ALLOWED_PATHS changed: 2 insertions, 38 deletions.",
+      "artifact_covered_by": [
+        "CTw4-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTw4-AC1",
+      "criterion_verbatim": "CTw4-AC1 -- T1-T4 pass, set equality included. Invocation: python -m pytest -q lib/tests/test_opal_naming_firm_access_ts.py ; expect output containing: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q lib/tests/test_opal_naming_firm_access_ts.py",
+      "output_evidence": "(run from the worktree root under timeout 120, rc=0) output: '.....                                                                    [100%]' then '5 passed in 0.19s'. An earlier run of the same file gave '5 passed in 0.26s'.",
+      "denominator": "5 of 5 collected tests passed: T1 reproduce under generate, T1 block equals fresh render, T2 outside-block lines equal the base, T3 set equality and firm order, T4 mark names firm_pages.json and its hash",
+      "status": "PASS",
+      "expect": "passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "CTw4-AC2",
+      "criterion_verbatim": "CTw4-AC2 -- the target list names the portal file (the line says it ships through portal CI). Invocation: python -I lib/opal_naming.py targets ; expect output containing: firmAccess.ts",
+      "method": "command",
+      "invocation": "python -I lib/opal_naming.py targets",
+      "output_evidence": "(run from the worktree root under timeout 120, rc=0) output line 1: 'TARGETS: 19'; deciding line 17: 'SHIP portal portal/src/lib/firmAccess.ts measured: portal CI (portal/.github/workflows: ci.yml on DEV, deploy.yml on push to PROD)'",
+      "denominator": "1 matching line of 19 targets (TARGETS: 19; the baseline before the builder edit was TARGETS: 18)",
+      "status": "PASS",
+      "expect": "firmAccess.ts",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "in-memory mutants of the committed bytes, nothing written: (a) the first '/macro' page line inside the generated block removed; (b) the INTERNAL_FIRM_ID line edited outside the block. Run from .scratch/mutant_det.py.",
+      "expected": "T3 set equality returns False for (a), with 34 pairs against the base's 35; T2 outside-block equality returns False for (b)",
+      "observed": "(a) T3 equal to base: False, pairs 34. (b) T2 equal to base: False. Both mutants were detected.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "generate() run twice into two separate scratch directories, bytes compared to each other and to the portal file",
+      "observed": "runA equals runB: True; runA equals the portal file (CRLF folded): True; 5624 bytes",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "landing the portal carrier on portal DEV or PROD, and the workspace gitlink",
+      "reason": "CT-w-4 prepares the carrier on the worktree branch only. DEV landing is the CTO's call. The firmAccess.ts PROD push is a client-facing page change and waits on Andrew's word. The gitlink is not moved."
+    },
+    {
+      "item": "the portal-side drift test (a hand edit inside the generated block fails the portal's CI)",
+      "reason": "the portal repository's test tooling needs node_modules, which this worktree does not have. The spec is in the worker report; the CTO rules the portal-side test."
+    },
+    {
+      "item": "portal typecheck, unit tests and build of firmAccess.ts",
+      "reason": "BLIND: no portal build is in this order's rules, and node_modules is absent. The block's shape is checked by T1 to T4 in Python only."
+    },
+    {
+      "item": "the rationale comments that sat inside the old FIRM_ALLOWED_PATHS literal",
+      "reason": "not carried into the generated block; they remain in git history at 2ed4373d. Surprise NFRA_CTLPLN-W65-S6 for the CTO to place them."
+    },
+    {
+      "item": "the evidence line citations in infra/logic/registry/firm_pages.json",
+      "reason": "outside this order's paths; the citations no longer name the moved rows. Surprise NFRA_CTLPLN-W65-S7."
+    },
+    {
+      "item": "the registry's internal tier and the firm admission for the portal (the tier question of surprise NFRA_CTLPLN-W65-S5)",
+      "reason": "the matrix content is unchanged by this order. S5 is the CTO's ruling and is not reopened here."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W65-S6: the generated FIRM_ALLOWED_PATHS block drops the rationale comments that sat inside the hand-kept literal (38 deleted lines, portal ef65ad67). The sets are equal. Filed OBSERVATION, INERT, for the CTO to place the reasons.",
+    "NFRA_CTLPLN-W65-S7: the firm_pages.json evidence line ranges for firmAccess.ts (45-54, 55-67, 68-90, 114-125) no longer name the rows after the block landed. The values are equal. Filed OBSERVATION, INERT; the registry owner re-cites."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~65/NFRA_CTLPLN.TO-CT-w-4.portal-carrier-firm-access-block.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -I lib/opal_naming.py validate",
+      "invocation": "timeout 120 python -I lib/opal_naming.py validate",
+      "result": "VALIDATE: OK 54 system row(s), 14 scope row(s), 0 warning(s) at registry@2d205808a20cac56 over all 16 registry file(s); rc=0"
+    },
+    {
+      "tool": "python -I lib/opal_naming.py generate --out . --target portal/src/lib/firmAccess.ts",
+      "invocation": "python -I lib/opal_naming.py generate --out . --target portal/src/lib/firmAccess.ts",
+      "result": "WROTE portal/src/lib/firmAccess.ts (5624 bytes); GENERATE: 1 written, 0 skipped; rc=0"
+    },
+    {
+      "tool": "python -m pytest -q lib/tests/test_opal_naming.py lib/tests/test_opal_naming_firm_pages.py",
+      "invocation": "timeout 120 python -m pytest -q lib/tests/test_opal_naming.py lib/tests/test_opal_naming_firm_pages.py",
+      "result": "112 passed; rc=0, before and after the builder edit (the builder edit added no test)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "timeout 120 bash .tools/commit-gate.sh lib/opal_naming.py ; timeout 120 bash .tools/commit-gate.sh lib/tests/test_opal_naming_firm_access_ts.py",
+      "result": "All checks passed! and pre-commit gate clean for 1 of 1 file(s) on each; rc=0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": ".tools/safe-commit.sh --author \"0.9.0_WK_NFRA_CTLPLN~65 <0.9.0_WK_NFRA_CTLPLN~65@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "committed c5d1415676 (lib/opal_naming.py), c1a1c6e5ea (test file), c98d850c05 (surprise rows); naming-gate, to-pipeline-gate and surprise-row-gate ran and passed on each"
+    }
+  ]
+}
