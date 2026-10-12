@@ -345,7 +345,10 @@ def main():
             for k in ("instance", "bindings_path", "read_at_utc"):
                 if not rec.get(k):
                     fail("%s is missing" % k)
-            if "queue_url" in json.dumps(rec) or re.search(r"https://sqs\.", json.dumps(rec)):
+            # AMENDMENT (issuer defect, IB2 msg 6519, row S110): the first form rejected any record containing the substring "queue_url", which the
+            # required key `commentary_ready_queue_url_bound` itself contains. The queue URL VALUE is what must not be recorded: a url, an SQS host, or a
+            # 12-digit account segment.
+            if re.search(r"https?://|sqs\.[a-z0-9-]+\.amazonaws\.com|/\d{12}/", json.dumps(rec)):
                 fail("the queue URL itself must not be recorded (a boolean and at most the queue NAME)")
             one_line(rec.get("in_words"))
             print("OK: bound=%s (%s)" % (b, rec["claim"]))
