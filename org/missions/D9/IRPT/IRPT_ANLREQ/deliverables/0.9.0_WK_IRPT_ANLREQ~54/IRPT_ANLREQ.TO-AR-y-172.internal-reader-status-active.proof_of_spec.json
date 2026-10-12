@@ -35,6 +35,20 @@
       "commit_or_etag": "9b9c573ce7",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "committed on the worker branch only; offline fakes; no AWS, network or invoke"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_interactive_entry.py",
+      "kind": "test",
+      "commit_or_etag": "82e3433ed4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1 fixtures only (active_internal_row fixture; usefixtures on three arms); committed on the worker branch only; offline fake of get_user; no AWS, network or invoke"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_svc_custody_statement.py",
+      "kind": "test",
+      "commit_or_etag": "82e3433ed4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1 fixture only (line 147 profile row carries status active); committed on the worker branch only; offline loader; no AWS, network or invoke"
     }
   ],
   "acceptance": [
@@ -53,11 +67,10 @@
       "criterion_verbatim": "the difference control -- the whole `_authz` test folder passes (320 at the base).",
       "method": "command",
       "invocation": "python C:/dev/wk-irpt-anlreq-54/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r17/ar17_checks.py y172-keep --root C:/dev/wk-irpt-anlreq-54",
-      "output_evidence": "Y172-KEEP-FAIL (rc=1). Printed: '_authz tests: 332 passed, 5 failed (rc=1)' and 'FAIL: the _authz folder must pass with at least 320 (the base count)'",
-      "denominator": "332 passed of 337 collected in _authz/tests (base 320 passed; 17 new tests; 5 failed)",
+      "output_evidence": "Y172-KEEP-OK (rc=0). Printed: '_authz tests: 337 passed, 0 failed (rc=0)' at HEAD 82e3433ed4 (the worktree working tree after the AMENDMENT 1 fixtures)",
+      "denominator": "337 passed of 337 collected in _authz/tests (base 320 + 17 new status tests; 0 failed)",
       "expect": "Y172-KEEP-OK",
-      "status": "FAIL",
-      "status_reason": "Five earlier tests outside the order's <paths> change expectation under the rule: four in test_interactive_entry.py (default profile read, no users row with status active) and one in test_svc_custody_statement.py (fixture _ALL_ROW carries no status). Not edited, because both files are outside the write grant. Recorded as BLOCKING surprise row IRPT_ANLREQ-D2-W54-S4. The order stays open."
+      "status": "PASS"
     },
     {
       "criterion_id": "AR172-y-AC3J",
@@ -86,25 +99,26 @@
   },
   "surprises": [
     "IRPT_ANLREQ-D2-W54-S4",
-    "IRPT_ANLREQ-D2-W54-S5"
+    "IRPT_ANLREQ-D2-W54-S5",
+    "IRPT_ANLREQ-D2-W54-S6"
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
   "declared_exclusions": [
     {
       "item": "live AWS, network, push, deploy, upload, apply and invoke",
-      "reason": "outside the order's bounds: no live call, no push, no deploy, no upload, no apply, no invoke"
+      "reason": "outside the order's bounds: no live call, no push, no deploy, no upload, no apply, no invoke. Caveat (row S6): the six test_final_release arms still take the default profile reader when the _authz suite runs; whether that reader reached AWS was not measured by this worker"
     }
   ],
   "compiler_tools": [
     {
       "tool": "python",
       "invocation": "python -m pytest tests -q -p no:cacheprovider --color=no (cwd infra/aws/lambda/investor-reporting/_authz)",
-      "result": "332 passed, 5 failed of 337 collected (rc=1) at the 9b9c573ce7 working tree; base 320 passed (rc=0) before the change"
+      "result": "337 passed, 0 failed of 337 collected at HEAD 82e3433ed4 (base 320 passed at 43e1e85895; before the AMENDMENT 1 fixtures, 332 passed and 5 failed)"
     },
     {
       "tool": "bash .tools/commit-gate.sh",
-      "invocation": "bash .tools/commit-gate.sh <each of the three .py files>",
-      "result": "pre-commit gate clean for 1 of 1 file(s) for each file (rc=0)"
+      "invocation": "bash .tools/commit-gate.sh <each of the two amended test files>",
+      "result": "pre-commit gate clean for 1 of 1 file(s) for each file (rc=0), at commit 82e3433ed4"
     }
   ]
 }
