@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-by-2.the-refusal-logging-handler-deployed",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-by-2.the-refusal-logging-handler-deployed.md",
+    "group": "C",
+    "vintage_commit": "af69f5e1d4c5941a04e751829251cae2a94a2694"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "af69f5e1d4c5941a04e751829251cae2a94a2694",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-by-2.the-refusal-logging-handler-deployed.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~HV1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-research-pull-enqueue.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "31590746f1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NEW VersionId S9217s5ck1gZJvwSC.Ayeg4vFAkV063z, 2690 bytes, content-sha256(b64) cWiraC3EeuTU9WDIpc5RXzpw6+RT9WxoeqfH/eZiaxo= read back and matching (upload_verified.sh). The object was re-downloaded and its member lambda_function.py hashed: sha256 1778584aa7309505cc3c2252dd863cd21d405f074be6b0f57d25fa96ed33f484 EQUAL to git show 31590746f1:infra/aws/lambda/research/pull_enqueue/lambda_function.py and to the working file; positive control: the <M>~1 file hashes c1f8e725aaa6d3df... and DIFFERS. The deployed function's CodeSha256 after the apply equals the object's content-sha256, so the running bytes are the built bytes. PRIOR VersionId bSNW5xyLGyzTAHsP2xN.9BfjDIT2SF79 (the bx-2 deploy) is the rollback object.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/api-gateway.tf",
+      "kind": "terraform",
+      "commit_or_etag": "31590746f1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NO terraform source change was made: the function's code moves through the S3 object that modules/yang-lambda reads for source_code_hash. ONE safe-apply of the exact saved plan (terraform plan -target=module.harvest_enqueue -out), 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' The plan, read in full, moved ONE resource, module.harvest_enqueue.aws_lambda_function.this, update in-place: last_modified (known after apply), s3_object_version and source_code_hash only; 28 attributes and 4 blocks unchanged. LastModified 2026-10-12T14:22:19Z, State Active, LastUpdateStatus Successful. comp-iam service read byte-identical before and after.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261012T1419Z_harvst-by2-enqueue-refusal-log-20261012_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "3fc5b25b7a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pinned at the commit deploy_ledger.py made when it OPENED the entry, BEFORE the upload (14:19Z). The four legs BUILD/UPLOAD/APPLY/ARMS were each closed with proof and the entry CLOSED ('all 4 legs proven; sentinel removed') in the worktree; the closed entry and the sentinel removal ride this seat's closing commit with this instance.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The pre-change handler (git show 31590746f1~1, the bx-2 bytes) and the merged handler (31590746f1) were run in-process on the SAME three no-ticker payloads with stdout captured, a dummy QUEUE_URL and no network call reachable (no ticker means no S3 or SQS call), so that the DENIED line is shown to come from the new bytes and the response is shown unchanged, rather than assumed.",
+      "expected": "Both versions answer 403, 403, 400. Only the merged version prints, and exactly 'DENIED: tier=partner' and 'DENIED: tier=NONE', none for the internal arm.",
+      "observed": "PRE-CHANGE: 403 [], 403 [], 400 []. MERGED: 403 ['DENIED: tier=partner'], 403 ['DENIED: tier=NONE'], 400 []. Statuses identical across versions; the log line is the only difference.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "The log read separates this seat's arms from any real caller by the window of the arms' own invocations and the tier strings, and prints every event instead of filtering a real caller out (the half's C-d).",
+      "expected": "Exactly two DENIED events, both inside the seat's arm window, none for internal.",
+      "observed": "2 events returned since T0=14:19:03Z: DENIED: tier=partner at 14:23:16.254Z and DENIED: tier=NONE at 14:23:17.712Z, both SEAT-ARM; 0 REAL-CALLER; DENIED LINES FOR internal: 0. STATED LIMIT: the window is the response files' mtimes -2s/+5s, so a real caller's refusal inside that 15-second window would be labelled SEAT-ARM; none appears, since only two events exist and the two arms that refuse account for both.",
+      "status": "STABLE",
+      "method": "command"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A real-ticker invocation and check_e2e.py",
+      "reason": "The order and both halves forbid them: a real ticker writes a status object and enqueues a Bloomberg pull. No arm payload carries a ticker or a body (asserted in code before the invokes)."
+    },
+    {
+      "item": "The step-9 post-act read (first real internal enqueue answers 2xx)",
+      "reason": "The order says it is not one of the three criteria. State at 14:24Z: UNMEASURED, 0 'OK: enqueued' lines and 0 DENIED lines outside this seat's arms (by2_first_real.out). Three invocations at 14:07:53Z are unattributed and, under the bx-2 version, unreadable."
+    },
+    {
+      "item": "The order's quoted filter-pattern form",
+      "reason": "'\"DENIED\"' is refused by the .tools/aws shim; the single term DENIED was used and the substitution is stated in by2_log.out's header and in row AMGT_HARVST-D1-S10."
+    },
+    {
+      "item": "Any IAM, route, authorizer, queue or bucket change",
+      "reason": "The order's BOUNDS; the plan moved one attribute set on one resource and comp-iam read identical before and after."
+    },
+    {
+      "item": "Pushing any commit",
+      "reason": "Shared-branch law: this lane commits LOCAL; the integrator pushes."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-S10: the order's literal quoted filter-pattern invocation is refused by the aws shim (InvalidParameterException); the single term DENIED returns the same events and was used."
+  ],
+  "session_log": "Seat 0.7.0_AE_CloudOps~HV1, 2026-10-12 14:18Z-14:3xZ. Order of acts: start condition (M exists, is an ancestor of HEAD, file sha256 equal to the working file); both halves read; the handler diff read against the half; before-state and T0; ledger opened; build+upload; plan; mail check; apply; after-state; three arms; log read; ledger closed; step 9 read (UNMEASURED); one surprise row. Ledger entry: org/critical_paths/change_management/20261012T1419Z_harvst-by2-enqueue-refusal-log-20261012_deploy_completion.md. Commits LOCAL.",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan / safe-apply.sh (Rule 18)",
+      "invocation": "terraform plan -target=module.harvest_enqueue -out=<planfile>; .tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply -input=false <planfile>",
+      "result": "Plan: 0 to add, 1 to change, 0 to destroy. Apply complete: 0 added, 1 changed, 0 destroyed. Seat gates in WARN mode: APPLY-WHO ADMITTED; CROSSBOX-DEPLOY verdict=STOP on the same open call as round 80 (dell1-20261011T033643Z-e7f2, a portal PROD-promote question naming this root in its scope, not this act); WARN mode proceeds. Pre-apply mail check: get_delivery_state showed one non-READ row, msg 4404, the order itself, opened, read and acked before the apply. The HALT-gate pass is not cited."
+    },
+    {
+      "tool": "comp-iam service opal-research-pull-enqueue",
+      "invocation": "bash .tools/comp-iam service opal-research-pull-enqueue (before and after)",
+      "result": "3 statements before and after, byte-identical; used as a floor only (it models action, not resource)."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open|close-leg|close --slug harvst-by2-enqueue-refusal-log-20261012",
+      "result": "4 legs opened before the first write, each closed with proof, CLOSED."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(?s)ARM non_internal: statusCode 403.*ARM no_context: statusCode 403.*ARM internal_no_ticker: statusCode 400",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round81/by2_arms.out",
+      "output_evidence": "ARM non_internal: statusCode 403 / ARM no_context: statusCode 403 / ARM internal_no_ticker: statusCode 400. Three aws lambda invoke calls on the DEPLOYED function, each Invoke StatusCode 200 with no FunctionError, payload files arm_*.payload.json (no ticker, no body). Responses unchanged from the bx-2 version: 403 {error: forbidden}, 403 {error: forbidden}, 400 {error: missing or invalid 'ticker' in request body}.",
+      "denominator": "3 of 3 arms read as expected; 0 'OK: enqueued' lines in the log, so nothing was written or enqueued.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "Plan: 0 to add, 1 to change, 0 to destroy",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round81/by2_plan.out",
+      "output_evidence": "'Plan: 0 to add, 1 to change, 0 to destroy.' The one change is module.harvest_enqueue.aws_lambda_function.this: s3_object_version bSNW5xyLGyzTAHsP2xN.9BfjDIT2SF79 -> S9217s5ck1gZJvwSC.Ayeg4vFAkV063z and source_code_hash +e2doUmH+... -> cWiraC3E..., last_modified known after apply. Nothing else moved.",
+      "denominator": "1 of 1 resource changed; the saved plan file was the one applied.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "(?s)DENIED: tier=partner.*DENIED: tier=NONE.*DENIED LINES FOR internal: 0",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round81/by2_log.out",
+      "output_evidence": "Log read of /aws/lambda/opal-research-pull-enqueue since T0 14:19:03Z, filter DENIED: exactly two events, 14:23:16.254Z 'DENIED: tier=partner' then 14:23:17.712Z 'DENIED: tier=NONE', both inside this seat's arm window; 'DENIED LINES FOR internal: 0'. The 400 arm (internal) wrote no DENIED line. CODESHA256 +e2doUmH+... -> cWiraC3E..., 'CODESHA256 CHANGED: yes' (by2_after.out).",
+      "denominator": "2 of 2 expected DENIED lines present; 0 real-caller DENIED lines; 0 of 3 arms mislabelled (2 refused arms, 1 admitted arm with no line).",
+      "status": "PASS"
+    }
+  ]
+}
