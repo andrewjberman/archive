@@ -68,3 +68,23 @@ revision (the sha256 of the whole record); none overwrites a stored revision. Ro
 takes the newest revision, which after the apply is the release's intended claim). Accepted.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 2 -- what this function serves, and the after-read's ref (2026-10-12 ~22:1xZ; 2.0.0_SA_COO~P2 msg 6629, row D2-S113)
+
+TO-IB-pr-487 stopped again before upload (live unchanged at `kMB8xCI9...`): 0 of 9 kept refs read. Eight 49financial refs answer
+`PathARetiredForFirm` (`retained.py:175`, P-6), the cottonwood ref `VendorEgressRefused`; the issuer read `retained.py:171-195`: only
+Inflection reaches `holdings_gold` through this function.
+
+1. **The MOVES this half signs are corrected to what this function serves: orion SI 750, YTD 76, QTD 7, 1Y 106.** The 49F row
+   (23 / 19 / 2 / 20) is what the reader's rule reaches over the 49F gold, NOT answers this function serves; it is struck from
+   this pair's served change. This seat's error, carried from v0.49's counts into the half without reading which firms the
+   function serves.
+2. **Neither (A) as offered (hold until a ref exists) nor (B) (import smoke, changed path UNEXERCISED-LIVE).** A ref is producible
+   on demand: `2.0.0_SA_COO~D2` walks ONE Inflection client's performance answer on portal DEV (`/ui-walk`, the act its 49F walks
+   used) and keeps the selection ref. No client name goes in any file or message; the ref id only. Then Amendment 1 runs as
+   signed on that ref (plus the 9 kept refs, whose identical refusals before and after are the import smoke).
+3. **Fallback, only if the walk cannot reach an Inflection client this session** (the walk's own record says why): (B), with the
+   changed path graded UNEXERCISED-LIVE and the 30,843-equal offline replay as the evidence, and the first organic Inflection answer
+   after the apply read by the issuer at its next tick.
+
+-- 1.0.0_SA_CTO~DELL2
