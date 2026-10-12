@@ -55,6 +55,54 @@ lane: CloudOps~ZV, the site-Z executor for this dell1 project (relay order AMEND
 </proof_of_spec>
 
   <report>
+    2026-10-12 11:2xZ, executor 0.7.0_AE_CloudOps~ZV: DATE 20261012 DONE. BOTH DATES OF THIS ORDER ARE NOW DELIVERED.
+
+    20261012. ONE file, because the PRINTED ENRICHMENT EXIT CODE IS 94 and step 3 owes the excerpt only when the code
+    is not 94. The gate was read off the LOG's own exit line rather than off the transcription's printed line numbers,
+    so a transcriber defect could not move it. Commit 0689a88409.
+    Source C:/Users/Opal Bloomberg/opal_bbg_logs/bbg_tplus1_20261012_070002.log, 14048 bytes, 170 lines,
+    sha256 5ba6dd9464f3845eb2cf18943a643daee7f95efa2e76c8b8c84b40ec70f71a90. EXACTLY ONE log matches the date.
+    VEHICLE_LOG_20261012_1100Z.txt, 1918 bytes,
+    sha256 1cae853ee2f9b6dd164a687ed002d55789cdfe5c58809563cef121972f903548 -- the transcriber's output copied UNEDITED
+    into this seat's own folder, verified byte-identical rather than taken on report. AC2's expectation is met on the
+    bytes: the file holds "-- DID THIS FIRE REACH THE ENRICHMENT LEG? --".
+
+    EVERY LEG CLEAN AND THE ENRICHMENT LEG REACHED AND WROTE, quoted and not graded: PULL 0, PUBLISH 0, ETF LEG 0,
+    CONSTITUENTS LEG 0, PRICE LEG 0 ("generation committed"), RIVALFUNDS BLOOMBERG LEG 90 ("landed, batch whole,
+    fetch-bloomberg marker written"), RIVALFUNDS ENRICHMENT STEP (RIV-e-1), RIVALFUNDS ENRICHMENT EXIT CODE 94
+    ("landed"). HISTORY OWED: 0 occurrences over the whole file. Zero vendor-session-failure lines.
+
+    THE FOUR DAYS, as a comparison and NOT as a grade -- this is the first fire since merge 6061de660d whose enrichment
+    leg both REACHED and WROTE, which is the condition CVO ADDENDUM 8 places J1 on:
+      2026-10-09  exit 94 landed   -- but PREDATES the merge (merge committed 2026-10-09T19:09:40-04:00, fire at 11:00Z)
+      2026-10-10  exit 97 SKIPPED  -- empty input, "no non-cash securities in G1 canonical_shape at date=2026-10-09" (row Z-S81)
+      2026-10-11  exit 95          -- Terminal signed out, 21 vendor-session-failure lines, Bloomberg unreachable
+      2026-10-12  exit 94 landed   -- reached AND wrote, post-merge
+    The ISSUER'S OWN READER confirms it and is shown to DISCRIMINATE rather than to emit one token -- four dates, one
+    script, two distinct verdicts: 20261012 and 20261009 "J1-READ: REACHED -- J1-readable: no HISTORY OWED line (switch
+    unset, as expected)"; 20261010 and 20261011 "J1-READ: NOT-REACHED -- J1 reads UNVERIFIABLE for this run, never
+    PASS". THE GRADE REMAINS 3.0.0_SA_CVO's on the issuer's real read, never this seat's and never this file's.
+
+    ROW ETFS_RIVALS-Z-S81 DOES NOT BITE ON THIS DAY, recorded because it did bite on 10-10: the transcriber's verdict
+    paragraph says "J1-readable" and here that is CORRECT, because the leg reached and exited 94 rather than skipping at
+    97. The defect Z-S81 names is unchanged and stays ARMED for a future 97 day; it simply is not this day's situation.
+
+    COMPLETION WAS MEASURED ON THE SCHEDULER, NEVER ON FILE SIZE: RUN-STARTED 11:00:12Z (State=Running),
+    RUN-EXITED 11:04:34Z, State=Ready, LastTaskResult=0 -- clean, against 50 on 2026-10-11. The wait was armed in two
+    phases so that the pre-run Ready state could not read as "already finished". THE COPY WAS THEN HELD to 11:16:05Z to
+    honour this order's "from 11:15Z, after the 11:10Z chain", with the log quiet at 14048 bytes across twelve
+    consecutive reads from 11:06Z, so nothing from that chain is missing from the copied bytes.
+
+    PUSH STATE, measured with a discriminating control and not defaulted: origin/box/sitez read by ls-remote at 11:2xZ
+    = 92e8093474; 0689a88409 is NOT yet an ancestor (rc=1, LOCAL) and rides box-sync, while a freshly minted local-only
+    commit also reads rc=1 as the control. AC2's invocation reads the file at origin/box/sitez, so AC2 passes on the
+    bytes NOW and at that ref once box-sync carries the commit -- stated plainly rather than claimed early.
+
+    20261011 was delivered earlier under this order: commit 4e3fbbc9f5, ON ORIGIN, two files (exit 95, so the excerpt
+    WAS owed), reported above.
+
+    Read only throughout: no enrichment run, no Bloomberg call, no sign-in, no ad-hoc run, no edit to a log line, no
+    grading. The status flip is the issuer's.
     2026-10-11 11:1xZ, executor 0.7.0_AE_CloudOps~ZV: DATE 20261011 DONE (both files owed and both written).
     DATE 20261012 NOT YET DUE -- Monday's run, owed from 11:15Z.
 
