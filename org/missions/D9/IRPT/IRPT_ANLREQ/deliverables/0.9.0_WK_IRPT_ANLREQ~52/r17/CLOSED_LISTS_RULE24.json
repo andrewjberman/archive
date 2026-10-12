@@ -1,0 +1,71 @@
+{
+  "cell": "AR-y-171",
+  "rule_commit": "ccbed3339b (template_reader.py rule, READER_VERSION irpt-template-reader.r17.1, READER_PINS digest 4cf027e0...)",
+  "rule": "A row-1 header cell in column C or beyond IS an account header when its words -- case-folded, split on whitespace, hyphen and slash, each stripped of punctuation -- are an optional modifier (custodian, client or sub, or 'no. of'), then an account word (account, accounts, acct, accts, acc), then nothing or identifier words only (number, numb, num, nbr, no, id, ref, reference, code, key, identifier); a whole-cell exclusion list (the seven forms below) is applied first.",
+  "where_in_code": "infra/aws/lambda/investor-reporting/intake/template_reader.py: _header_words, _is_account_header, ACCOUNT_WORDS, ACCOUNT_MODIFIERS, ACCOUNT_TAIL_WORDS, ACCOUNT_HEADER_EXCLUDED; used by _several_accounts",
+  "domain": "row-1 header cells in columns C and beyond (A and B are the ticker and unit headers); the column counts only when it holds 2 or more distinct non-empty values in the rows below it",
+  "population": "constructed and synthetic (no real-use account header is in the repository, as the r13 and r16 records state). The population is ACCOUNT_HEADER_POPULATION.json in this folder: 21 identifier forms (the 14 seeds plus 7 tested), 9 attribute forms, 7 non-account forms, and the two new forms named before the change. The round-16 population of 50 (r16/CLOSED_LISTS_RULE24.json) is not reproduced whole in this folder; its 9 unmatched identifier forms and its 5 turned-back attribute forms are all in this population, so its failures are re-tested here.",
+  "subtraction": {
+    "candidates_tested": 44,
+    "matched": 22,
+    "unmatched": 22,
+    "scratch_run": "scratch script .scratch/subtract_r17.py (not committed), run with python -I against the committed rule at ccbed3339b",
+    "identifier_like_not_matched": [
+      "Account Seq", "Account Sequence", "Subaccount", "Brokerage Account"
+    ],
+    "identifier_like_not_matched_why": "outside the rule: a sequence word is not in the identifier vocabulary; 'Subaccount' is one token, not the modifier 'Sub' plus 'Account'; 'Brokerage' is not a custodian, client or sub word. Each names an account and each is a RESIDUAL MISS of the costly direction, filed as a surprise row (IRPT_ANLREQ-D2-W52-S24). Not added here: the modifier and identifier vocabularies are the cell's closed rule, and widening them is a ruling.",
+    "judged_not_identifier": ["Account Count", "Account Holder ID"],
+    "judged_not_identifier_why": "a count of accounts, or an attribute of the holder, is not an account number; each is left unmatched by the rule's tail test.",
+    "correctly_not_matched": ["Custodian", "Accounting", "Portfolio", "Sleeve", "Model", "No. of Holdings", "Custodian Name", "Account Holder", "Account Manager", "Account Value", "Account Status", "Account Opened", "Account Type", "Account Name", "Account Balance", "Account Currency"],
+    "identifier_forms_unmatched_in_the_population": 0,
+    "attribute_or_non_account_forms_turned_back_in_the_population": 0
+  },
+  "exclusions": [
+    {
+      "word": "Account Type",
+      "why": "names the kind of account (taxable, IRA, trust). Two kinds are not two accounts. Not seen in any header in the repository; named as a non-account word by the r13 record and by the face.",
+      "census_line": "r14 record: not present in any fixture; r16 record exclusions list"
+    },
+    {
+      "word": "Account Name",
+      "why": "a label for an account. One account can carry joint holders or a nickname written several ways, so a count of distinct names is not a count of accounts.",
+      "census_line": "r14 record: not present in any fixture"
+    },
+    {
+      "word": "Account Holder",
+      "why": "names who holds the account; a joint holder list can name several people in one account.",
+      "census_line": "r16 record, matched_but_attribute_not_identifier.forms; CVO L9 grade of AR162-y-AC3J clause 1 (IRPT_ANLREQ_ROUND_16_L9_GRADE_20261012.md)"
+    },
+    {
+      "word": "Account Manager",
+      "why": "names who manages the account; a team can hold several names in one account.",
+      "census_line": "r16 record, matched_but_attribute_not_identifier.forms; CVO L9 grade clause 1"
+    },
+    {
+      "word": "Account Value",
+      "why": "a money value of the account or of a holding; it differs on almost every row, so every such file is turned back as several accounts. Not an account number.",
+      "census_line": "r16 record, matched_but_attribute_not_identifier.forms; CVO L9 grade clause 1 ('the sharpest')"
+    },
+    {
+      "word": "Account Status",
+      "why": "whether the account is open or closed; a state, not an account number.",
+      "census_line": "r16 record, matched_but_attribute_not_identifier.forms; CVO L9 grade clause 1"
+    },
+    {
+      "word": "Account Opened",
+      "why": "the date the account was opened; a date, not an account number.",
+      "census_line": "r16 record, matched_but_attribute_not_identifier.forms; CVO L9 grade clause 1"
+    }
+  ],
+  "exclusion_note": "The five attribute forms are whole-cell exclusions as the cell requires. They are ALSO not identifiers by the tail test, so the rule would not match them without the list. The tail test is what handles an attribute form the list does not name (the negative control Account Balance).",
+  "last_word_match": {
+    "members": ["Client Account", "Sub-Account", "Custodian Acct", "Client Acct No."],
+    "admitted": true,
+    "sentence": "A last-word match is admitted: a header with a custodian, client or sub word, or no. of, before its account word is an account header, so a multi-account file under Client Account, Sub-Account or Custodian Acct is turned back with ACCOUNT_COLUMN_SEVERAL_VALUES, the same finding as a leading-word header, and a one-account file under such a header passes."
+  },
+  "total_words": {
+    "rule": "unchanged by AR-y-171: the whole-cell list in TOTAL_WORDS, column-A labels below the header",
+    "record": "r14/CLOSED_LISTS_RULE24.json (total_words)"
+  },
+  "readers_gate_note": "Stored inputs written under irpt-template-reader.r16.1 are not compared under irpt-template-reader.r17.1 (CONTRACT C-STOREDINPUT, PRD v0.4 point 3). The reader is built, not released."
+}
