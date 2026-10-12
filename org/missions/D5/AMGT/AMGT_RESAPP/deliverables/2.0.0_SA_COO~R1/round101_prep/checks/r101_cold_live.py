@@ -64,7 +64,9 @@ def main(argv):
         print("%-16s status %s handler %s s (wall %.2f s) cold container %s" % (sj, status, "%.2f" % handler_s if handler_s is not None else "?", wall, "YES init %s ms" % init.group(1) if init else "no"))
         ok = ok and status == 200 and handler_s is not None and handler_s < 20.0
     verdict = "YES" if ok else "NO"
-    if ok and n_recent not in (0, None):
+    held = n_recent == 0
+    print("QUIET WINDOW: %s (%s invocations in the preceding %d minutes)" % ("HELD" if held else "NOT HELD", n_recent, quiet))
+    if ok and not held:
         verdict = "NOT QUIET"
     print("R101 COLD LIVE: %s" % verdict)
     return 0 if verdict == "YES" else 1
