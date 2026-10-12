@@ -1,0 +1,50 @@
+diff --git a/src/pages/SecurityAnalysis/modelSheet.ts b/src/pages/SecurityAnalysis/modelSheet.ts
+index 5a1257e3..1d55d5dd 100644
+--- a/src/pages/SecurityAnalysis/modelSheet.ts
++++ b/src/pages/SecurityAnalysis/modelSheet.ts
+@@ -650,6 +650,18 @@ export function summarizeSheet(sheet: ModelSheet): ModelSummary {
+  * template's row has no Bloomberg figure for the name. */
+ export const MASTER_TEAM_ROW_WHY = "The research team keeps no workbook for this company; this row is from the team's template."
+ 
++/** AMGT_CORPUS round 49 (CRPS-ay-2 ADDENDUM 3, CTO msg 4257): the CLOSED set of spreadsheet error tokens. A string is an error token iff,
++ * trimmed and compared case-insensitively, it equals one of these; a team word that merely starts with `#` ("#1", "#Top") is a word. */
++const SPREADSHEET_ERRORS: ReadonlySet<string> = new Set([
++  '#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A', '#N/A N/A', '#GETTING_DATA', '#SPILL!', '#CALC!', '#FIELD!',
++  '#BLOCKED!', '#CONNECT!', '#UNKNOWN!',
++])
++
++/** The one error-vs-word test of the Model tab's team sheet: a grid text cell, a block cell and an all-text row's why all use it. */
++export function isSpreadsheetError(text: string): boolean {
++  return typeof text === 'string' && SPREADSHEET_ERRORS.has(text.trim().toUpperCase())
++}
++
+ /** CRPS-at-2: said on a team-sheet row the page holds no figure for. */
+ export const TEAM_ROW_NO_FIGURE = "The research team's sheet carries this line; no figure for it is pulled yet."
+ 
+@@ -858,7 +870,7 @@ export function buildModelSheet(
+             if (hasNumber && typeof value === 'string' && value.trim()) {
+               // C-S65: a text cell of a figure row is carried by what it is: an error token, or the team's own word.
+               const text = value.trim()
+-              const kind: 'error' | 'word' = text.startsWith('#') ? 'error' : 'word'
++              const kind: 'error' | 'word' = isSpreadsheetError(text) ? 'error' : 'word'
+               pending[kind] += 1
+               return { mnemonic: null, fiscal_year: Number(year.endsWith('E') ? year.slice(0, -1) : year), value: Number.NaN, unit: null, column: periods[at].column ?? null, text, textKind: kind }
+             }
+@@ -901,7 +913,7 @@ export function buildModelSheet(
+               ? MASTER_TEAM_ROW_WHY
+               : text === null
+               ? "The research team's sheet holds no value for this line in the years shown."
+-              : text.startsWith('#')
++              : isSpreadsheetError(text)
+                 ? `The research team's own sheet shows an error ("${text}") for this line, so no value is shown.`
+                 : `The research team's own sheet shows "${text}" for this line, so no value is shown.`
+             row = {
+@@ -984,7 +996,7 @@ export function buildModelSheet(
+           }
+           if (typeof cell.v === 'string' && cell.v.trim()) {
+             const text = cell.v.trim()
+-            return { text, textKind: text.startsWith('#') ? 'error' : 'word' }
++            return { text, textKind: isSpreadsheetError(text) ? 'error' : 'word' }
+           }
+           return null
+         })

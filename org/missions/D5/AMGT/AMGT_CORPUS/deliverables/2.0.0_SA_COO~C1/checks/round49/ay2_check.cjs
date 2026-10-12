@@ -42,9 +42,13 @@
  *       (kind, columns, rowNumber, blockRow kept), nothing of the template's numbers or tokens appears in `sheetBlocks` or the groups,
  *       `teamCensus.blocks.masterCells` and `errorCells` are 0, `MASTER_TEAM_ROW_WHY` is exported, and ModelTab.tsx's block render
  *       carries `MASTER_TEAM_ROW_WHY` (a label and that sentence per BLOCK row).
+ *   d11 (ADDENDUM 3, msg 4257) an error token is a member of the CLOSED spreadsheet error set (trimmed, case-insensitive), never a string
+ *       that merely starts with '#': `isSpreadsheetError` is exported; a team word such as "#1" or "#Top" is a WORD (textKind word, printed
+ *       verbatim) in a grid text cell, in an own-class block cell and in an all-text row's why; "#N/A", "#N/A N/A", "#VALUE!", "#DIV/0!"
+ *       and "#REF!" are errors in all three places; modelSheet.ts and ModelTab.tsx hold no startsWith('#') or /^#/ test of cell text.
  * control c1: the classed round-47 payload builds as the base does (snapshot) except the added `teamCensus.text`;
  * control c2: no teamSheet builds exactly as the base does (snapshot).
- * Prints `ay2 build <b>/10 control <c>/2`.
+ * Prints `ay2 build <b>/11 control <c>/2`.
  */
 const fs = require('fs')
 const path = require('path')
@@ -246,6 +250,38 @@ const BLOCK_M2 = {
     { row_number: 86, kind: 'body', block_row: true, cells: [t('Tmpl Err'), n(9999.5, '0.0')] },
   ],
 }
+// ---- d11: '#1' / '#Top' are words, the closed error set are errors, in the grid, in a block cell and in an all-text row ----
+const BLOCK_W = {
+  first_row: 94,
+  last_row: 95,
+  kind: 'case',
+  why: null,
+  withheld: 0,
+  columns: ['B', 'C', 'D', 'E'],
+  rows: [
+    { row_number: 94, kind: 'title', block_row: false, cells: [t('#1'), t('#Top'), t('#N/A'), t('#N/A N/A')] },
+    { row_number: 95, kind: 'body', block_row: true, cells: [t('Blk'), t('#VALUE!'), t('#DIV/0!'), t('#REF!')] },
+  ],
+}
+const TEAM_ERRSET = {
+  ...TEAM_BASE,
+  rows: ['Financial Summary', 'Grid A', 'Grid B', 'Txt one', 'Txt top', 'Txt na', 'Txt val', 'Blk'],
+  row_classes: ['HEADING', 'FIGURE', 'FIGURE', 'FIGURE', 'FIGURE', 'FIGURE', 'FIGURE', 'BLOCK'],
+  row_numbers: [9, 12, 13, 14, 15, 16, 17, 95],
+  periods: PERIODS,
+  row_values: [
+    null,
+    [1, '#1', '#Top', '#N/A', '#N/A N/A'],
+    [2, '#VALUE!', '#DIV/0!', '#REF!', ' #n/a '],
+    ['#1', null, null, null, null],
+    ['#Top', null, null, null, null],
+    ['#N/A', null, null, null, null],
+    ['#VALUE!', null, null, null, null],
+    null,
+  ],
+  row_formats: [null, null, null, null, null, null, null, null],
+  blocks: [BLOCK_W],
+}
 const TEAM_MASTER_BLOCK = {
   class: 'master',
   workbook_key: 'amgt/harvest/bronze/research_template/template=01L6/00bb/FactSet Based ONE PAGER TEMPLATE 2026 03 09_v2.xlsx',
@@ -306,6 +342,7 @@ let d7 = 0
 let d8 = 0
 let d9 = 0
 let d10 = 0
+let d11 = 0
 try {
   const built = build(TEAM_BLOCK)
   const cb = built.sheetBlocks || []
@@ -471,6 +508,37 @@ try {
     && ((mb.teamCensus || {}).classes || {}).BLOCK === 3
     && typeof m.MASTER_TEAM_ROW_WHY === 'string' && m.MASTER_TEAM_ROW_WHY.startsWith('The research team keeps no workbook') && masterWhyTab ? 1 : 0
   console.log(`ay2 d10 master blocks: shape kept ${keptShape}; nothing printed ${nothingPrinted}; census ${JSON.stringify(mbl)}; MASTER_TEAM_ROW_WHY exported ${typeof m.MASTER_TEAM_ROW_WHY}; in block render ${masterWhyTab}; ok ${d10 === 1}`)
+
+  // d11: the closed error set
+  const es = build(TEAM_ERRSET)
+  const erows = firstGroupRows(es)
+  const grid = (rn) => ((erows.find((r) => r.teamCite && r.teamCite.row === rn) || {}).cells || [])
+  const kindsOf = (cells) => cells.map((c) => (c ? (c.text !== undefined ? c.text + ':' + c.textKind : c.value) : null))
+  const gridA = kindsOf(grid(12))
+  const gridB = kindsOf(grid(13))
+  const whyOf = (label) => String((erows.find((r) => r.label === label) || {}).absentReason || '')
+  const eblock = ((es.sheetBlocks || [])[0] || { rows: [] })
+  const bt = (rn) => kindsOf(((eblock.rows || []).find((r) => r.rowNumber === rn) || { cells: [] }).cells)
+  const gridOk = JSON.stringify(gridA) === JSON.stringify([1, '#1:word', '#Top:word', '#N/A:error', '#N/A N/A:error'])
+    && JSON.stringify(gridB) === JSON.stringify([2, '#VALUE!:error', '#DIV/0!:error', '#REF!:error', '#n/a:error'])
+  const whyOk = whyOf('Txt one').includes('shows "#1" for this line') && !whyOf('Txt one').includes('an error')
+    && whyOf('Txt top').includes('shows "#Top" for this line') && !whyOf('Txt top').includes('an error')
+    && whyOf('Txt na').includes('shows an error ("#N/A")') && whyOf('Txt val').includes('shows an error ("#VALUE!")')
+  const blockOk = JSON.stringify(bt(94)) === JSON.stringify(['#1:word', '#Top:word', '#N/A:error', '#N/A N/A:error'])
+    && JSON.stringify(bt(95)) === JSON.stringify(['Blk:word', '#VALUE!:error', '#DIV/0!:error', '#REF!:error'])
+  const fn = m.isSpreadsheetError
+  const truth = typeof fn === 'function'
+    && ['#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A', '#N/A N/A', '#GETTING_DATA', '#SPILL!', '#CALC!', '#FIELD!', '#BLOCKED!', '#CONNECT!', '#UNKNOWN!', ' #n/a ', '#value!'].every((x) => fn(x) === true)
+    && ['#1', '#Top', '#', '#N/A!', 'N/A', 'NA', '', '#REF', '#N/A N/A N/A'].every((x) => fn(x) === false)
+  let srcClean = true
+  const files = ['modelSheet.ts', path.join('tabs', 'ModelTab.tsx')]
+  for (const f of files) {
+    let src = ''
+    try { src = fs.readFileSync(path.join(portalRoot, 'src', 'pages', 'SecurityAnalysis', f), 'utf8') } catch (e2) { srcClean = false }
+    if (/startsWith\(\s*['"]#['"]\s*\)|\/\^#\/|\[0\]\s*===?\s*['"]#['"]|charAt\(0\)\s*===?\s*['"]#['"]/.test(src)) srcClean = false
+  }
+  d11 = gridOk && whyOk && blockOk && truth && srcClean ? 1 : 0
+  console.log(`ay2 d11 error set: grid ${gridOk} ${JSON.stringify(gridA)}; all-text why ${whyOk}; block ${blockOk}; isSpreadsheetError ${typeof fn} truth ${truth}; no startsWith('#') ${srcClean}; ok ${d11 === 1}`)
 } catch (e) {
   console.log('ay2 build threw: ' + String(e && e.stack).slice(0, 300))
 }
@@ -490,6 +558,6 @@ if (fs.existsSync(snap)) {
   c1 = JSON.stringify(got) === JSON.stringify(base.classedOld) ? 1 : 0
   c2 = JSON.stringify(clone(build(undefined))) === JSON.stringify(base.noTeam) ? 1 : 0
 }
-const built10 = d1 + d2 + d3 + d4 + d5 + d6 + d7 + d8 + d9 + d10
-console.log(`ay2 build ${built10}/10 control ${c1 + c2}/2`)
-process.exit(built10 === 10 && c1 + c2 === 2 ? 0 : 1)
+const builtAll = d1 + d2 + d3 + d4 + d5 + d6 + d7 + d8 + d9 + d10 + d11
+console.log(`ay2 build ${builtAll}/11 control ${c1 + c2}/2`)
+process.exit(builtAll === 11 && c1 + c2 === 2 ? 0 : 1)
