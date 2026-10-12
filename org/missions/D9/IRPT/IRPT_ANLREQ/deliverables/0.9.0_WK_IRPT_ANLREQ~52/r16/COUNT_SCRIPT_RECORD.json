@@ -1,0 +1,200 @@
+{
+ "cell": "AR-y-161",
+ "to_id": "IRPT_ANLREQ.TO-AR-y-161",
+ "script": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r16/count_stored_inputs.py",
+ "how_stored_and_keyed": {
+  "table": "One DynamoDB table (default name irpt-requests, ycharts/generate/acceptance.py:50-53; the table name is an ARGUMENT of the script) with partition key `tenant` (the owner's firm code) and sort key `request_revision`. Every row below is a request_revision prefix.",
+  "UPLOAD#<upload_id>": "infra/aws/lambda/investor-reporting/intake/uploads.py:262-270 (row built), :296 (published): upload_id = 'UP-'+hash(firm, principal, token) (:260); members filename, content_sha256 (sha256 of the original bytes, :261), artifact_ref (the retained original), and for a template upload file_type and source_lane='TEMPLATE_UPLOAD' (:268-270). A CSV upload carries NO source_lane member: that absence is its lane marker (read_input derives CSV_UPLOAD from it, :526).",
+  "original_bytes": "infra/aws/lambda/investor-reporting/intake/uploads.py:287-291: artifacts.put(family ORIGINAL_HOLDINGS for a template, ORIGINAL_CSV for csv). reports/repository.py:397-441: the put writes the object to S3 and publishes an ARTIFACT#<artifact_id> row (artifact_id = 'ART-'+digest of owner, family, logical id: :419 and _binding) holding ref{artifact_id,family,sha256,version_id,byte_length,...} and blob{bucket,key,version_id}. reports/repository.py:551-558: the bytes are read by GetObject(Bucket,Key,VersionId) from the blob member. The digest is the sha256 of the bytes, in ref.sha256 and in the UPLOAD# row's content_sha256.",
+  "NORMALIZATION#<upload_id>#<hash(options)>": "infra/aws/lambda/investor-reporting/intake/uploads.py:305-307 and :349 (input_id member added on acceptance); deferred form :377 and :423-469 (state RESOLVING / NEEDS_CORRECTION / NORMALIZED). The script does not read these rows.",
+  "INPUT#<input_id>": "infra/aws/lambda/investor-reporting/intake/uploads.py:352-366 (_publish_frozen; row at :359-362): input_id 'portfolio_'+sha256, members identity, owner, upload_id, artifact_ref (the NORMALIZED_PORTFOLIO artifact, :354-356) and content_sha256. Only uploads.py publishes INPUT# rows (one writer in the product tree).",
+  "template_stored_at_acceptance": "infra/aws/lambda/investor-reporting/intake/portfolio.py:498-499: the normalized document (schema irpt-normalized-portfolio.v2) holds `template` = the reader's output at acceptance; the document is the bytes of the NORMALIZED_PORTFOLIO artifact (uploads.py:354-356). read_input compares read_template(original) to document['template'] at uploads.py:538.",
+  "lane": "INPUT# rows exist for two lanes only, TEMPLATE_UPLOAD and CSV_UPLOAD (the only INPUT# writer is uploads.py:359; custody inputs are frozen from a custody snapshot, intake/custody_portfolio.py:229-239, and no INPUT# row is written for them in the product tree). The script reads the lane from the UPLOAD# row (source_lane). Custody and mail inputs are NOT in the table scan and are not counted.",
+  "ARTIFACT#": "infra/aws/lambda/investor-reporting/reports/repository.py:419, :438-441: key 'ARTIFACT#'+artifact_id in the same table.",
+  "RETENTION#": "rows of the retention index (reports/retention.py); the script does not read them."
+ },
+ "how_a_report_is_tied_to_an_input": "Through the accepted request's composition, not the request row. ycharts/generate/acceptance.py:62 keys an accepted request as request_revision 'analysis#REQ-<24 hex>#1'; its record (acceptance.py:115-120, a JSON string in member `record`) holds accepted_at (epoch seconds), composition_ref (the REQUEST_COMPOSITION artifact: ycharts/generate/submission_service.py:137-139) and browser_sha256 (a digest only, so the record alone does not name the input). The composition document (ycharts/generate/submission.py:191-193, retained as artifact bytes) holds browser.input_id (public field, submission.py:16) and resolved.input_ref.input_id (submission.py:175-183 binds the two equal for an owned input). The script reads that document for each accepted request of a tenant that holds a turned-back input and joins on input_id. The table query for analysis# rows is the product's own (ops/owned_requests.py:290-299). CAVEAT: an accepted request is the acceptance of a request, not proof a report was delivered; the job state (irpt-jobs) and REPORT# rows were not read, so 'with a report' means 'an accepted analysis request names it' (the face's own wording).",
+ "reads": [
+  "table <TABLE>: Scan, FilterExpression begins_with(request_revision,'INPUT#'), projection tenant/request_revision/identity/upload_id/artifact_ref/content_sha256 -- the INPUT# key shape defined at uploads.py:359",
+  "table <TABLE>: GetItem tenant+'UPLOAD#'+upload_id, once per input -- the shape at uploads.py:262-264",
+  "table <TABLE>: GetItem tenant+'ARTIFACT#'+artifact_id, for the original and the normalized document of each TEMPLATE input and for each composition read -- the shape at reports/repository.py:419",
+  "table <TABLE>: Query tenant=:t AND begins_with(request_revision,'analysis#'), once per tenant that holds a turned-back input -- the shape at ops/owned_requests.py:296-298 and acceptance.py:62",
+  "bucket <BUCKET>: GetObject with the Key and VersionId the ARTIFACT# row records (reports/repository.py:551-558), for: each template input's retained original, each template input's normalized document, each composition of an accepted request of a tenant with a turned-back input. A blob whose bucket member is not the --bucket argument is counted unreadable (BUCKET_NOT_THE_ARGUMENT), never read."
+ ],
+ "writes": [],
+ "new_reader_source": "git show d95cf11106:infra/aws/lambda/investor-reporting/intake/template_reader.py, sha256 b41f8c4ef6521735bd4d49501825f5971af187b6ee8ba30fc757f40d8ec9df31",
+ "old_reader": "The trunk's infra/aws/lambda/investor-reporting/intake/template_reader.py at the checkout the script runs in (--old-reader overrides); sha256 at this checkout 76795b75313b076488d6c2f0ed7a8480be92b999efb6886a3ede92b11e916409. Each reader is loaded from a path under its own module name; the trunk module is never imported as the new reader.",
+ "method": "Per TEMPLATE input: read the original (digest checked against UPLOAD#.content_sha256 and ARTIFACT#.ref.sha256), read the stored template from the normalized document, run the OLD reader (control: equals the stored template, else old_reader_differs), run the NEW reader; if it differs from the stored template, causes = finding codes in the new output not in the stored template (the four named codes, else OTHER:<code>), plus OTHER:NON_FINDING_DIFFERENCE if anything but findings differs; an input is counted once per cause and once in read_differently; turned back = the new output holds an ERROR finding. Any input that cannot be read is counted under unreadable[<code>] and is in none of read_the_same, read_differently, by_cause, turned_back.",
+ "output_fields": [
+  "inputs_by_lane",
+  "template_inputs",
+  "old_reader_differs",
+  "read_the_same",
+  "read_differently",
+  "by_cause",
+  "turned_back",
+  "turned_back_with_a_report{with,without,requests,requests_unreadable,latest_report_day,latest_report_day_by_month}",
+  "unreadable",
+  "items_scanned",
+  "by_tenant{tenant: the same members except items_scanned and read_at}",
+  "read_at"
+ ],
+ "self_test": {
+  "inputs": 11,
+  "synthetic_content": "made-up tickers and numbers; tenants firm-a and firm-b; 11 inputs: clean csv; csv with a Total row (2 accepted requests on 2 days); csv with a repeated header (no request); csv with a two-value account column (1 request); a two-sheet workbook; one csv-lane input; one input with both a Total row and a repeated header; one input whose stored template was altered (old reader differs); one with a missing object; one with a denied read; one with an altered object (digest mismatch); plus 6 accepted requests, one of whose composition object is missing, and requests naming a clean input and a not-turned-back input that must not be counted; the fake table pages its scan at 7 rows and its query at 2.",
+  "expected": {
+   "inputs_by_lane": {
+    "CSV_UPLOAD": 1,
+    "TEMPLATE_UPLOAD": 10
+   },
+   "template_inputs": 10,
+   "old_reader_differs": 1,
+   "read_the_same": 1,
+   "read_differently": 6,
+   "by_cause": {
+    "ACCOUNT_COLUMN_SEVERAL_VALUES": 1,
+    "HEADER_ROW_REPEATED": 2,
+    "OTHER:NON_FINDING_DIFFERENCE": 1,
+    "SHEETS_NOT_READ": 1,
+    "TOTAL_ROW_PRESENT": 2
+   },
+   "turned_back": 4,
+   "turned_back_with_a_report": {
+    "latest_report_day": "2026-10-02",
+    "latest_report_day_by_month": {
+     "2026-08": 1,
+     "2026-10": 1
+    },
+    "requests": 3,
+    "requests_unreadable": {
+     "NoSuchKey": 1
+    },
+    "with": 2,
+    "without": 2
+   },
+   "unreadable": {
+    "AccessDenied": 1,
+    "DIGEST_MISMATCH": 1,
+    "NoSuchKey": 1
+   },
+   "items_scanned": 56
+  },
+  "printed": {
+   "by_cause": {
+    "ACCOUNT_COLUMN_SEVERAL_VALUES": 1,
+    "HEADER_ROW_REPEATED": 2,
+    "OTHER:NON_FINDING_DIFFERENCE": 1,
+    "SHEETS_NOT_READ": 1,
+    "TOTAL_ROW_PRESENT": 2
+   },
+   "by_tenant": {
+    "firm-a": {
+     "by_cause": {
+      "HEADER_ROW_REPEATED": 2,
+      "OTHER:NON_FINDING_DIFFERENCE": 1,
+      "TOTAL_ROW_PRESENT": 2
+     },
+     "inputs_by_lane": {
+      "CSV_UPLOAD": 1,
+      "TEMPLATE_UPLOAD": 5
+     },
+     "old_reader_differs": 1,
+     "read_differently": 4,
+     "read_the_same": 1,
+     "template_inputs": 5,
+     "turned_back": 3,
+     "turned_back_with_a_report": {
+      "latest_report_day": "2026-10-02",
+      "latest_report_day_by_month": {
+       "2026-10": 1
+      },
+      "requests": 2,
+      "requests_unreadable": {},
+      "with": 1,
+      "without": 2
+     },
+     "unreadable": {}
+    },
+    "firm-b": {
+     "by_cause": {
+      "ACCOUNT_COLUMN_SEVERAL_VALUES": 1,
+      "SHEETS_NOT_READ": 1
+     },
+     "inputs_by_lane": {
+      "TEMPLATE_UPLOAD": 5
+     },
+     "old_reader_differs": 0,
+     "read_differently": 2,
+     "read_the_same": 0,
+     "template_inputs": 5,
+     "turned_back": 1,
+     "turned_back_with_a_report": {
+      "latest_report_day": "2026-08-15",
+      "latest_report_day_by_month": {
+       "2026-08": 1
+      },
+      "requests": 1,
+      "requests_unreadable": {
+       "NoSuchKey": 1
+      },
+      "with": 1,
+      "without": 0
+     },
+     "unreadable": {
+      "AccessDenied": 1,
+      "DIGEST_MISMATCH": 1,
+      "NoSuchKey": 1
+     }
+    }
+   },
+   "inputs_by_lane": {
+    "CSV_UPLOAD": 1,
+    "TEMPLATE_UPLOAD": 10
+   },
+   "items_scanned": 56,
+   "old_reader_differs": 1,
+   "read_at": "2026-10-12T02:14:36Z",
+   "read_differently": 6,
+   "read_the_same": 1,
+   "template_inputs": 10,
+   "turned_back": 4,
+   "turned_back_with_a_report": {
+    "latest_report_day": "2026-10-02",
+    "latest_report_day_by_month": {
+     "2026-08": 1,
+     "2026-10": 1
+    },
+    "requests": 3,
+    "requests_unreadable": {
+     "NoSuchKey": 1
+    },
+    "with": 2,
+    "without": 2
+   },
+   "unreadable": {
+    "AccessDenied": 1,
+    "DIGEST_MISMATCH": 1,
+    "NoSuchKey": 1
+   }
+  },
+  "also_asserted": [
+   "the output holds no 'portfolio_', 'UP-', 'REQ-', 'ART-', '.csv', '.xlsx', synthetic ticker or account text",
+   "template_inputs = read_the_same + read_differently + unreadable",
+   "only get-item, scan, query and get-object reached the fakes",
+   "a denied scan stops the count with code AccessDeniedException (the CLI exits 3 and prints SCAN_FAILED <code>)"
+  ],
+  "negative_control": "the same world read with the new reader replaced by the old one gives read_differently 1 (the altered template only) and turned_back 0: the assertions do not hold on a reader that changes nothing."
+ },
+ "invocation_for_the_reader_seat": "cd <a checkout at the trunk head that carries the OLD reader>; git show d95cf11106:infra/aws/lambda/investor-reporting/intake/template_reader.py > <a path outside the checkout>/new_reader.py; python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r16/count_stored_inputs.py --table <TABLE> --bucket <BUCKET> --region <REGION> --new-reader <that path>/new_reader.py --out <output file>   (the last stdout line is the one JSON object; stderr carries the two reader sha256 values to compare with this record)",
+ "what_the_seat_must_hold": "dynamodb:Scan, dynamodb:Query, dynamodb:GetItem on the requests table (read-only); s3:GetObject and s3:GetObjectVersion on the keys of the retained artifacts (the key is written per artifact by the destination policy, reports/composition.py:51-52, and is read from each ARTIFACT# row, not typed); kms:Decrypt on the IRPT key (table and bucket encryption; denied to dell2 per TO-APPLY-Y6 step 0). No write, no list.",
+ "not_read": [
+  "the real table and bucket (no live call was made by this order)",
+  "the destination policy that places artifact keys (reporting_destination) and the bucket's real key prefix",
+  "job state (irpt-jobs) and REPORT# rows: 'with a report' is an accepted request naming the input, not a delivered report",
+  "RETENTION# rows and the retention check (_check_retention) the product applies on every artifact read",
+  "NORMALIZATION# rows; CSV-lane originals (counted by lane only); custody and mail inputs (no INPUT# row, not in the scan)",
+  "the resident runtime's copy of the reader",
+  "the product's authorization on read (the script reads as the seat's identity, not through UploadService)",
+  "a request whose composition cannot be read is counted in requests_unreadable, so 'without' may be an undercount by that number"
+ ]
+}
