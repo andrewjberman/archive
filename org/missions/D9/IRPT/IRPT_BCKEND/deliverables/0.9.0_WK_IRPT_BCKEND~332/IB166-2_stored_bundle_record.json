@@ -1,0 +1,67 @@
+{
+ "base_commit": "4650422c346204e439c6d09f89b1b64880e9a895",
+ "build_commit": "2e6885ef22",
+ "files_changed": [
+  "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js",
+  "infra/aws/ec2/investor-reporting-ycharts/README.md",
+  "infra/aws/ec2/investor-reporting-ycharts/tests/stored_bundle_challenge_and_pair_gate.js"
+ ],
+ "files_in_grant_not_changed": [
+  "run-ycharts-session.sh",
+  "host_capture.py (already forwards class+reason as CAPTURE_FAILED:<class>:<reason>; a thrown ChallengeFailure with record.reason WAF_CHALLENGE yields CAPTURE_FAILED:UNEXPECTED_CHALLENGE:WAF_CHALLENGE, pinned by session/tests/test_capture_receipt_per_step.py)",
+  "session/tests/"
+ ],
+ "refresh_calls_on_challenge": 0,
+ "refresh_spy_reading": "arm a: reads of the sign-in credentials secret 0, sign-in POSTs served by the replay 0, session-secret writes 0, template probes 1 (arm b, a different unauthenticated reason: 1, 1, 1)",
+ "challenge_ending_in_words": "In withAuthenticatedPage, a stored bundle whose probe reason is WAF_CHALLENGE throws the same ChallengeFailure acquireSession uses (failure class UNEXPECTED_CHALLENGE, record.reason WAF_CHALLENGE, retried false), which the resident forwards as CAPTURE_FAILED:UNEXPECTED_CHALLENGE:WAF_CHALLENGE; refreshSession is never called, so no sign-in, no retry and no wait. Any other unauthenticated reason on a stored bundle (for example NO_IDENTITY_COOKIE) still refreshes as before.",
+ "pair_gate_rule_in_words": "In acquireSession the pair is requested on a probe after the submission whenever no DISCRIMINATING pair has yet run (record.probe_pair is absent or its discriminating is not true); a token-less first probe (pair not sent, discriminating false) therefore no longer forecloses a later probe whose jar holds an aws-waf-token, and once one pair with discriminating true has run no further pair is requested. probe_pair.discriminating keeps its meaning: true only for a pair that ran with a token.",
+ "difference_control": {
+  "arm_a_on_base": "FAIL",
+  "command": "STORED_BUNDLE_LIB=<git show 4650422c34:ycharts_session.js copy> node --require ./tests/netguard.js tests/stored_bundle_challenge_and_pair_gate.js",
+  "base_readings": "arm a FAIL (credential_reads=1 login_posts=1 probes=3: the base signs in again); arm c FAIL (discriminating=false, template_gets=2, pair_control_gets=0); arms b and d PASS at base by design (regression guards)"
+ },
+ "arms": [
+  "a_stored_bundle_challenged_ends_without_signin PASS",
+  "b_stored_bundle_other_reason_still_refreshes PASS",
+  "c_pair_runs_on_a_later_probe_that_holds_a_token PASS",
+  "d_no_second_pair_after_a_discriminating_pair PASS"
+ ],
+ "hash_pins": [
+  {
+   "where": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py (argv LIBRARY_SHA -> resident_bindings.json capture.library_sha256)",
+   "what": "the package build takes the library hash as an argument at build time; no literal hash of the current file",
+   "done": "nothing to edit; a resident release will compute the new hash (library sha256 of the changed file is db43e9f9744e697098120e11dd862a1348ffea05c6307f980dc24e7ea530a216, base 2c00d164fc9b77999d65cc65d973c2fe20ff9964dcd7ceaa88d4a8943a1eeb1e)"
+  },
+  {
+   "where": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_installed.py and ycharts/session/tests/test_host_capture.py",
+   "what": "compute the hash of the library file at run time",
+   "done": "nothing to edit; test_resident_installed.py 19 passed after the change"
+  },
+  {
+   "where": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/st32_release/install_st32.sh line 57-59",
+   "what": "a historical release script echoing a want hash (a1c28801...) for an earlier release's library",
+   "done": "not touched (outside the grant, historical, not a pin of the current file)"
+  },
+  {
+   "where": "org/**/PACKAGE_CENSUS_*.json, *.census.json, IB132-1_capture_receipt_record.json, IB165-3_capture_probe_record.json",
+   "what": "immutable per-release records of the library hash at that release",
+   "done": "not touched (history)"
+  },
+  {
+   "where": "comp-find for the base file's sha256 2c00d164... over the repo",
+   "what": "0 hits across 75468 file(s) scanned",
+   "done": "no live literal pin of the base hash exists in the repo"
+  }
+ ],
+ "host_reach": "ycharts_session.js is carried by the resident package as /opt/investor-reporting-ycharts/ycharts_session.js (build_resident_package.py library_path) and is pinned by hash on the host (resident_installed.py checks library sha256 against resident_bindings.json capture.library_sha256), so this change reaches the host only in a resident release under its own never-widen pair; the README and the new test do not travel. host_capture.py, which this change did not edit, is carried by the same package.",
+ "request_sent": false,
+ "deployed": false,
+ "suites": {
+  "offline_before": "node --require ./tests/netguard.js tests/run_offline_suite.js: RESULT-END, all_pass true, rc=0",
+  "offline_after": "same command: RESULT-END, all_pass true, rc=0",
+  "probe_round165_before": "tests/probe_challenge_and_pair.js: 9 ARM lines PASS",
+  "probe_round165_after": "tests/probe_challenge_and_pair.js: 9 ARM lines PASS",
+  "session_before": "149 passed, 2 skipped in 3.23s",
+  "session_after": "149 passed, 2 skipped in 2.81s"
+ }
+}
