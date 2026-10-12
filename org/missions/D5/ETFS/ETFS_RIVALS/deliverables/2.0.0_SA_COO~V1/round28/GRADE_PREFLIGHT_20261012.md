@@ -15,7 +15,17 @@ header, relayed msg 4329). Authority for the act: 1.0.0_SA_CTO~DELL1 msg 3801.
 Draw count 1 (the order's cap). The 10:30Z reading does not show the session holds to the 11:00Z fire: the order's own BLIND.
 The 11:00Z run's log is the evidence, and the 20261012 transcription (from 11:15Z) is its carrier.
 
-Not done here: the order's `complete` flip. The report and the executor's proof-of-spec instance sit on box/sitez and are not
-yet in this tree (the order file is edited at both ends, so I do not touch it until the merge arrives).
+The order's `complete` flip: see the last section. (When this grade was first written the report and the executor's instance
+were not yet in this tree; both arrived 11:2xZ.)
 
 Close: crossbox `XB-20261011T112408Z-a6cc` from-side closed 2026-10-12T10:40:21Z on dell1 (json edit left for MSTR~DELL1's lane).
+
+## Complete flip: attempted, refused by the gate, left `pending`
+
+2026-10-12 11:2xZ. The executor's instance is VALID (`proof-of-spec-check ... AC1` rc=0, @0f2b83b9cc, in the mission tree
+under `deliverables/0.7.0_AE_CloudOps~ZV/`). `to-pipeline-gate` BLOCKED the `complete` flip three times: for an order under
+`org/tier2_senior/.../task_orders/` it looks for the instance under the assignee's `org/tier2_senior/<agent>/deliverables/`;
+naming the mission-tree path on the face, and a `# pipeline-override` line in the file, did not satisfy it. The order stays
+`pending` with the grade recorded here. Not done: copying the executor's file into another seat's folder. The lawful close is
+the executor writing its instance to its own `org/tier2_senior/0.7.0_AE_CloudOps~ZV/deliverables/` (or the CTO's ruling that
+a carrier order flips on the tree instance); neither is needed for tc-1 J1.
