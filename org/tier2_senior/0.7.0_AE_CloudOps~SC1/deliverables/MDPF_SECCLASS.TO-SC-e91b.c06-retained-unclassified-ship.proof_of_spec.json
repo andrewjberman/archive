@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e91b.c06-retained-unclassified-ship",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cc2a7a5430"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R21.md",
+    "vintage_commit": "0b947eb07f",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/task_orders/MDPF_SECCLASS.TO-SC-e91b.c06-retained-unclassified-ship.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~SC1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-bd/code/gold/C_06.client_mix_timeseries.py",
+      "kind": "s3_object",
+      "commit_or_etag": "2e35d043163cc18b135d7698cf11dc56",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ONE safe-deploy run on box/dell1 at 2026-10-12T09:55Z (object LastModified 09:55:03Z): `bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py`, rc=0 at 09:55:10Z. Lines: '1 path(s) to deploy (1 script, 0 bundle-member)', 'DEPLOYED [bd] data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py', 'VERIFY OK comp-pipescript deployed ...', terminal 'OK: safe-deploy gate PASS -- all 1 file(s) deployed and verified', three explicit '[not shipped]' lines for the _shared modules. Pre-act ETag 8e1b350fc55607bddd1ac84329cb1a98 at VersionId 5xAeM.OWYUSxd7gHYSF6SKmR.ZTmo.PP (the rollback handle, unused); post-act VersionId zjQmOYVVYTSGOWLFQ0P33vVeWkwp4_eT, 55,078 B. Output at org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/e91b_safe_deploy.out.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R21_CHECKS/e91_shipped_check.py -- expect 'E91-SHIPPED ok=True'",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R21_CHECKS/e91_shipped_check.py",
+      "expect": "E91-SHIPPED ok=True",
+      "output_evidence": "E91-SHIPPED ok=True c06=2e35d043|2e35d043|MATCH control=MATCH d04=same d03=same (rc=0), read immediately after the ship. Preserved at org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/e91b_ac1_post_ship.txt.",
+      "denominator": "1 of 1 moving key at the signed md5, with the check's control reading MATCH and D_04 and D_03 unchanged. The discriminator MOVED: the same check read at the cut by this seat (e91b_ac1_pre_ship.txt) was 'E91-SHIPPED ok=False c06=8e1b350f|2e35d043|DIFF control=MATCH d04=same d03=same', equal to the order's recorded base. WATCH SET measured by this seat: every key under code/gold/ in opal-data-bd, one list_objects_v2 page, pre=190 post=190 MOVED=1 ADDED=0 GONE=0, and the moved key IS C_06; D_04 9d083669, D_03 bd9bbe4b and lib/etf_classifier.py e714dc50 unmoved. Compared by script, not by eye. STOPS=0.",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "safe-deploy.sh",
+      "invocation": "bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py",
+      "result": "OK -- gate PASS, 1 of 1 deployed and verified; one DEPLOYED line and three '[not shipped]' lines; seat-gates CROSSBOX-DEPLOY verdict CLEAR (open_call, overlap, upset, open_deploy all clear)."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": ".tools/deploy_ledger.py open --leg V|P|D|G ; close-leg V|P|D ; hold",
+      "result": "Entry secclass-e91-c06-retained-unclassified-sc1-20261012 opened with 4 legs before the act; V and P closed before the ship, D closed after AC1, entry HELD on the issuer's leg G."
+    },
+    {
+      "tool": "boto3 list_object_versions paginator",
+      "invocation": "leg P: paginate gold/entities/clients/ and gold/client_timeseries/ to exhaustion, IsLatest only, plus head_object on the three single keys",
+      "result": "COO condition 2 satisfied: 29,547 keys (3 singles + 18,230 clients + 11,314 legacy) over 449 + 206 pages, 0 keys without a VersionId. Page counts printed beside key counts."
+    },
+    {
+      "tool": "e91_shipped_check.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R21_CHECKS/e91_shipped_check.py",
+      "result": "Run twice: at the cut ok=False (DIFF), after the ship ok=True (MATCH), control=MATCH both times."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Arms that could STOP the act or invalidate its evidence. (a) STEP-0 BASE: the served C_06 must read ETag 8e1b350f at VersionId 5xAeM.OWYUSxd7gHYSF6SKmR.ZTmo.PP; any other value means another ship moved it and the delta is not this cell. (b) DIGEST: repo md5 2e35d043 with an empty git status on the path. (c) WINDOW, re-read in the SAME shell as the deploy and aborting it (exit 9): runner stopped and gold/trigger-pending.json absent. (d) NAMED-SHIP SET: the member list safe-deploy prints; any member other than the one key is a STOP with a same-session restore. (e) WATCH SET: every key under code/gold/ pre and post, where any key but C_06 moving is a STOP with a same-session restore by VersionId.",
+      "expected": "(a) 8e1b350f / 5xAeM.OWYUSxd7gHYSF6SKmR.ZTmo.PP. (b) 2e35d043163cc18b135d7698cf11dc56, status empty. (c) runner stopped, sentinel absent. (d) exactly one DEPLOYED member. (e) MOVED=1 and it is C_06; D_04, D_03 and the lib unmoved.",
+      "observed": "(a) exact, on the 09:50:30Z read and the in-shell re-read at 09:54:18Z. (b) exact, status empty. (c) runner stopped (last launched 04:00:46Z), trigger-pending head rc=254 absent: the guard read OPEN and was not exercised against a closed window in this act. (d) one DEPLOYED member, three '[not shipped]' lines. (e) pre=190 post=190 MOVED=1 ADDED=0 GONE=0. WHAT FIRED: AC1's served-equals-repo AND differs-from-rollback test with control=MATCH read ok=False at the cut and ok=True after the ship, so a no-op ship would have read ok=False.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The shipped bytes were read at three independent places: the repo file's md5 locally in the same shell as the ship; the served object's head-object ETag and ContentLength after the ship; and AC1's own repo-vs-served comparison with its built-in control.",
+      "observed": "2e35d043163cc18b135d7698cf11dc56 at all of them. The pre-act ETag 8e1b350f differs, so the move is real and not a re-upload of the same bytes.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Leg G and both reads of COO condition 5, and CTO condition 1's Reach-range outcome (D_04 firm Unclassified falls by $0 to $653,857.12 at 2026-10-09 and $0 to $629,530.89 at 2026-10-08; the idempotence read of the SECOND fire).",
+      "reason": "Assigned to the ISSUER by the order: 'after the first scheduled BD fire, the issuer's reads (2.0.0_SA_COO~M1 closes G)'. This seat does not grade it. The entry is HELD on that named event with the apply legs proven."
+    },
+    {
+      "item": "The serving effect of the shipped code, and the cost STOP rule of the order's step 5 (chain more than 30 minutes over the 04:00:46Z fire's launch-to-stop, about 2h19m).",
+      "reason": "Not measurable until a scheduled BD gold fire runs it. The order's report asks this seat to report the first fire's C_06 wall time and chain launch-to-stop when that fire ends; that is a later act, not a leg of this proof. BLIND per the order's preflight: the first fire's wall time."
+    },
+    {
+      "item": "comp-adversary on the named-ship set.",
+      "reason": "The order's preflight declares it RUN by the issuer. This seat did not run it; the equivalent evidence here is safe-deploy's printed member list (one DEPLOYED, three [not shipped]) and the 190-key watch set."
+    },
+    {
+      "item": "Flipping this order's <status> to complete.",
+      "reason": "The order instructs only pending -> in_progress (done). Leg G is the issuer's, so completion is the issuer's call. Left at in_progress."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/logs/session_e91b_c06_retained_ship_0950-1000Z.md"
+}
