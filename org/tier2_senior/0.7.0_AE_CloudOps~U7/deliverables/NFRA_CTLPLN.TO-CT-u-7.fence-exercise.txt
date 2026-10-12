@@ -1,0 +1,60 @@
+NFRA_CTLPLN TO-CT-u-7 fence exercise, 2026-10-12. Seat 0.7.0_AE_CloudOps~U7. No token and no password appears here: status codes, hash prefixes and the error field only.
+Pin 6a1607d1e0. Function opal-portal-data-proxy. CodeSha256 before LpodJICuU9XTUklcvNeZA8WEKBDmQF2fU72YzwkD2cI= after 6/BPExXEB1KneUKzyY45cbkw2px01XEOFMV0h/5Vst8=.
+
+CENSUS ROUTE LIST (copied from org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~62/DATA_PROXY_ROUTE_CLASS_CENSUS.md, table section 3)
+ROUTES total=41
+class (i), open to a verified login: 2
+   1 POST /sentiment/keyword-intelligence
+   2 GET /aum/metrics
+class (ii), tier internal only: 39
+   3 GET /news/articles/*
+   4 GET /returns/etf-periods
+   5 GET /aum/summary
+   6 GET /health/data-availability
+   7 GET /market/metrics
+   8 GET /market/metrics/full
+   9 GET /market/rsi
+  10 GET /market/rsi/details
+  11 GET /market/all
+  12 GET /market/ticker/*
+  13 GET /market/entity-type/*
+  14 GET /aum/flows
+  15 GET /aum/timeseries
+  16 GET /aum/account-distribution
+  17 GET /aum/non-model
+  18 GET /peers/performance
+  19 GET /benchmarks/returns
+  20 GET /positioning/data
+  21 GET /positioning/attribution
+  22 GET /positioning/allocation-summary
+  23 GET /metadata/yang
+  24 GET /positioning/model
+  25 GET /valuation/data
+  26 GET /valuation/risk-premium
+  27 GET /correlations/data
+  28 GET /macro/data
+  29 GET /macro/volatility
+  30 GET /macro/vix
+  31 GET /macro/timeseries/*
+  32 GET /factor-tilts/data
+  33 GET /cma/assumptions
+  34 GET /cma/views
+  35 GET /benchmarks/etf-returns
+  36 GET /trending/latest
+  37 GET /trending/topics/*
+  38 GET /sentiment/fear-greed
+  39 GET /sentiment/fear-greed/details
+  40 GET /sentiment/keywords
+  41 GET /sentiment/keyword-history/*
+
+CALLERS. Internal: the dormant Opal UI walker service account through the real /auth/login (armed and disarmed by ui_walker_account.py; tier internal because its firm is opal-capital). Non-internal: ONE synthetic row, firm 49financial, tier advisor, role user, token signed in memory (CTO half section 2 option a; ui_walker_account.py cannot take a second account id). Host https://opalinvest.dev.
+
+READS (UTC; route class (ii) = GET /v1/health/data-availability, class (i) = GET /v1/aum/metrics)
+2026-10-12T04:31:44Z R1 class-ii partner (AFTER the apply) GET /v1/health/data-availability code=403 body_bytes=50 body_sha256=b39d1c8c735c6beb apigw_requestid=present message='forbidden: Opal-internal readers only' keys=['error']
+2026-10-12T04:31:45Z R3 class-i partner (AFTER the apply) GET /v1/aum/metrics code=200 body_bytes=2970 body_sha256=353256f35aa12109 apigw_requestid=present
+2026-10-12T04:32:37Z R2 class-ii internal (AFTER the apply) GET /v1/health/data-availability code=200 body_bytes=530 body_sha256=a93d67e252f16686 apigw_requestid=present
+2026-10-12T04:32:39Z R3b class-i internal (AFTER the apply) GET /v1/aum/metrics code=200 body_bytes=2970 body_sha256=353256f35aa12109 apigw_requestid=present
+2026-10-12T04:26:18Z R0 class-ii partner (BEFORE the apply) GET /v1/health/data-availability code=200 body_bytes=530 body_sha256=eb3ab40278eddf52 apigw_requestid=present
+
+class-ii partner=403 internal=200
+class-i open partner=200 internal=200
