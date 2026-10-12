@@ -95,7 +95,25 @@ def main():
         rd = root / READ
         if not rd.is_file():
             fail("no %s" % READ)
-        if re.search(r"(?<![0-9A-Za-z])[0-9]{8}(?![0-9A-Za-z])", text + rd.read_text(encoding="utf-8")):
+        # AMENDMENT 2 (row IRPT_BCKEND-D2-W315-S1): AC1 requires the store's row count as an integer and the count has eight
+        # digits; a count is not an account id. The json's integer VALUES are scrubbed before the test, and so is the same
+        # count where the read file writes it; an eight-digit token inside any STRING of the json still fails.
+        def strings(o):
+            if isinstance(o, dict):
+                return " ".join(strings(k) + " " + strings(v) for k, v in o.items())
+            if isinstance(o, list):
+                return " ".join(strings(v) for v in o)
+            return o if isinstance(o, str) else ""
+        def ints(o):
+            if isinstance(o, dict):
+                return [i for v in o.values() for i in ints(v)]
+            if isinstance(o, list):
+                return [i for v in o for i in ints(v)]
+            return [o] if isinstance(o, int) and not isinstance(o, bool) else []
+        md = rd.read_text(encoding="utf-8")
+        for n in sorted({str(i) for i in ints(a) if len(str(abs(i))) == 8}):
+            md = md.replace(n, "<count>")
+        if re.search(r"(?<![0-9A-Za-z])[0-9]{8}(?![0-9A-Za-z])", strings(a) + " " + md):
             fail("an eight-digit token is in the outputs: an account id may not be written")
         print("OK: %d call(s), each ticker once; no AWS write, no sign-in, no invoke; nothing built or proposed" % fe["call_count"])
     else:
