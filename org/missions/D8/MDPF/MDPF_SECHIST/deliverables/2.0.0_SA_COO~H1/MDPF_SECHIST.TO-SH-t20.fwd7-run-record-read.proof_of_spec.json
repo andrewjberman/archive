@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECHIST.TO-SH-t20",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECHIST/task-orders/MDPF_SECHIST.TO-SH-t20.fwd7-run-record-read.md",
+    "group": "OTHER",
+    "vintage_commit": "c56bbf0fb0"
+  },
+  "assignee": "2.0.0_SA_COO~H1",
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECHIST/decompositions/MDPF_SECHIST_DECOMP_R5.md",
+    "vintage_commit": "c56bbf0fb0",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECHIST/task-orders/MDPF_SECHIST.TO-SH-t20.fwd7-run-record-read.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-etfs/bbg/2026-10-09/run_manifest.json",
+      "kind": "s3_object",
+      "commit_or_etag": "LastModified 2026-10-12T11:03:03Z, 6553 B, unversioned bucket (VersionId null)",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ ONLY, not produced or written by this order; the manifest of the 2026-10-12 07:00 ET (11:00Z) scheduled pull, which overwrote the same as_of key the 2026-10-10 pull wrote (4994 B at 2026-10-10T11:06:48Z)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SH5-t20-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R3_CHECKS/r3_fwd7_read.py expect: FWD7-READ-OK",
+      "method": "live_read",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R3_CHECKS/r3_fwd7_read.py",
+      "output_evidence": "Run once at 2026-10-12T11:34Z by the issuer as a direct act (the order is a read, direct_act true; worker slot ~19 was not spawned). exit code 0. stdout: 'bbg/ date prefixes >= 2026-10-09: 1' / 'manifest bbg/2026-10-09 budget={\"estimate\": 412, \"limit\": 120000, \"recorded\": 17, \"remainder\": 119983, \"spent_after\": 17, \"spent_before\": 0}' / 'FWD7-READ-OK as_of=2026-10-09 recorded=17 spent_after=17 remainder=119983'. Attribution to the 10-12 pull is MEASURED, not assumed: head-object on s3://opal-data-etfs/bbg/2026-10-09/run_manifest.json reads LastModified 2026-10-12T11:03:03Z, after the 11:00Z fire, and the 10-10 object was 4994 B. Same read of the manifest: run_class 'scheduled', history_backfill_error null, objects_failed [], history_backfill_exhausted {PFDE, PFOE: 2026-10-09}.",
+      "denominator": "1 of 1 bbg/ date prefixes at or after 2026-10-09 (the as_of key the Monday pull writes is the Friday 2026-10-09 trading-day frontier); budget keys spent_after and remainder both non-null, remainder 119983 == max(120000 - 17, 0)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant; a read-only run of an existing check against a live S3 object.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: the order says run the check once, after the 11:00Z pull; a single read of an already-landed manifest",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The ETF leg's exit code for the 2026-10-12 scheduled run (ledger mdpf-sechist-sh-t4-sitez-run-record-20261009 leg L3 names 'leg exit 0' beside the budget keys and run_class)",
+      "reason": "Not measurable from dell1: it is a line in a site-Z log and the manifest carries no exit_code key (24 top-level keys read). The budget keys and run_class are measured here; L3 stays OPEN on the exit element until a site-Z read lands."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECHIST/deliverables/2.0.0_SA_COO~H1/MDPF_SECHIST.TO-SH-t20.fwd7-run-record-read.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "r3_fwd7_read.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R3_CHECKS/r3_fwd7_read.py",
+      "result": "rc 0; last line FWD7-READ-OK as_of=2026-10-09 recorded=17 spent_after=17 remainder=119983"
+    }
+  ]
+}
