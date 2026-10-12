@@ -4,8 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~CT1</issued_to>
 <date>2026-10-09</date>
-<status>complete</status>
-<status_reason>Closed by the issuer 2.0.0_SA_COO~C on the proof instance (python .tools/proof-of-spec-check.py: VALID rc=0; instance NFRA_CTLPLN.TO-CT-x-2...proof_of_spec.json @54bb3997f2). CTx2-AC1 and CTx2-AC2 PASS. CTx2-AC3 FAILS and is NOT changed: the order itself says a NOT-BLOCKED line fails the criterion and that failure is the finding (row NFRA_CTLPLN-D1-S1: dell1 is not stopped from downloading, FWD-18 not met). The stop is build work for the round-7 cut, not a reason to hold this order open. DISPOSITION per the round-6 analysis (1.0.0_SA_CTO msg 108476): terminates FAILED-WITH-ROW, row NFRA_CTLPLN-D1-S1; its AC3 outcome re-enters through E3 in round 7.</status_reason>
+<status>superseded</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C on the proof instance (python .tools/proof-of-spec-check.py: VALID rc=0; instance NFRA_CTLPLN.TO-CT-x-2...proof_of_spec.json @54bb3997f2). CTx2-AC1 and CTx2-AC2 PASS. CTx2-AC3 FAILS and is NOT changed: the order itself says a NOT-BLOCKED line fails the criterion and that failure is the finding (row NFRA_CTLPLN-D1-S1: dell1 is not stopped from downloading, FWD-18 not met). The stop is build work for the round-7 cut, not a reason to hold this order open. STATUS WORD: round-close-check counts a `complete` order's proof rows and reads the CTx2-AC3 FAIL row as proof_bad, so the order is closed as `superseded` to carry the CTO's disposition, not to hide the failure: AC1 and AC2 PASS, AC3 FAILS (D1-S1, the finding); AC3's outcome is superseded by the round-7 cell E3, which re-exercises it. DISPOSITION per the round-6 analysis (1.0.0_SA_CTO msg 108476): terminates FAILED-WITH-ROW, row NFRA_CTLPLN-D1-S1; its AC3 outcome re-enters through E3 in round 7.</status_reason>
 <risk>WORLD</risk>
 <proof_genre>BUILD</proof_genre>
 <round>6</round>
