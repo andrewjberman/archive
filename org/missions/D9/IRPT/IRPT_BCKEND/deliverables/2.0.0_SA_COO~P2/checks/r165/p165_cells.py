@@ -91,7 +91,9 @@ def changed_outside(base, serial_n):
         fail("git diff against %r: %s" % (base, out[:120]))
     rc2, out2 = run(["git", "ls-files", "--others", "--exclude-standard"])
     names = [n.strip() for n in (out + "\n" + out2).splitlines() if n.strip()]
-    ok = (D % serial_n, INV, "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/")
+    # AMENDMENT 2: the issuer's own check folder is not the worker's edit either (the issuer delivered the amended script to a branch as a commit).
+    ok = (D % serial_n, INV, "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/",
+          "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/")
     # AMENDMENT (issuer defect, worker ~326's report): a provisioned worktree carries the nested repositories' gitlinks (portal,
     # opal_ai, mcportal) dirty by construction, and `git diff` lists them. A gitlink (mode 160000) is not a file the worker edited.
     rc3, out3 = run(["git", "ls-files", "-s"])
