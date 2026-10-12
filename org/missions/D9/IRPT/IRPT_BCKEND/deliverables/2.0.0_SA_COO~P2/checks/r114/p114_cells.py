@@ -56,9 +56,13 @@ def main():
         print("OK: 49F key serves the built bytes; ledger CLOSED")
     elif cid == "IB114-1-AC2":
         arms = {x.get("name"): x.get("verdict") for x in load().get("replay_on_uploaded") or []}
-        for name in ("fwd14_gate_unchanged", "smartx_class_parity"):
-            if arms.get(name) != "identical":
-                fail("%s reads %r" % (name, arms.get(name)))
+        # AMENDMENT 6 (row D2-S106): the replay on the uploaded bytes names the gate comparison fwd14_gate_vs_b410 (gate against
+        # IB-pr-410's base); the same comparison, same verdict required. Either name is read; one must read identical.
+        gate = [arms.get(n) for n in ("fwd14_gate_unchanged", "fwd14_gate_vs_b410") if n in arms]
+        if not gate or any(v != "identical" for v in gate):
+            fail("fwd14 gate arm reads %r" % (gate,))
+        if arms.get("smartx_class_parity") != "identical":
+            fail("smartx_class_parity reads %r" % arms.get("smartx_class_parity"))
         print("OK: replay on the uploaded bytes holds")
     elif cid == "IB114-1-AC3":
         ff = load().get("first_fire") or {}
