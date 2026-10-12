@@ -5,55 +5,55 @@
   "spec_ref": {
     "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-u-2.ssh-tailnet-verify-tool.md",
     "group": "OTHER",
-    "vintage_commit": "1927e82e9b"
+    "vintage_commit": "4acd08cadd"
   },
   "assignee": "0.9.0_WK_NFRA_CTLPLN~61",
   "decomp_ref": {
     "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.remote1.md",
-    "vintage_commit": "1927e82e9b",
+    "vintage_commit": "4acd08cadd",
     "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-u-2.ssh-tailnet-verify-tool.md"
   },
   "artifacts_produced": [
     {
       "path_or_key": ".tools/ssh-tailnet-verify.py",
       "kind": "script",
-      "commit_or_etag": "8451465ee4",
+      "commit_or_etag": "a3b1fac422",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "A one-shot read. Run only as --selftest (loopback listener and stub ssh) and once against the real register for AC2 (--user probe-only --timeout 3). Not deployed, not scheduled, not run elevated, no box changed."
+      "deploy_evidence": "A one-shot read. AMENDMENT 1 (password_arm reads the server's advertised methods, never sends a password) committed at a3b1fac422 on wk-NFRA_CTLPLN-61; earlier commits 8451465ee4 and da1752d066 are the inherited build. Run only as --selftest (loopback listener and stub ssh) and once against the real register for AC2 (--user probe-only --timeout 3). Not deployed, not scheduled, not run elevated, no box changed."
     }
   ],
   "acceptance": [
     {
       "criterion_id": "CTu2-AC1",
-      "criterion_verbatim": "CTu2-AC1 -- invocation `python .tools/ssh-tailnet-verify.py --selftest` ; expect output containing `SSH-VERIFY-SELFTEST cases=` (every case passing; `ok=True`).",
+      "criterion_verbatim": "CTu2-AC1 -- invocation `python .tools/ssh-tailnet-verify.py --selftest` ; expect output containing `SSH-VERIFY-SELFTEST cases=8/8 ok=True`.",
       "method": "test_suite",
       "invocation": "python .tools/ssh-tailnet-verify.py --selftest",
-      "output_evidence": "run from the worktree root under timeout 120, rc 0: DETAIL key arm: probe could not start ([WinError 2] ...) | CASE 1 own-name-key-is-done ok=True port22=OPEN key=ANSWERED:fake-box-one password_arm=REFUSED done=True alias=ANSWERED:FBONE-ALIAS argv_ok=True | CASE 2 closed-port-is-closed ok=True port22=CLOSED key=NOT-RUN done=False | CASE 3 probe-cannot-start-is-probe-error ok=True ssh-missing: port22=OPEN key=PROBE-ERROR | connect-raises: port22=PROBE-ERROR key=NOT-RUN | CASE 4 hostname-mismatch-not-done ok=True key=MISMATCH:someone-else done=False | CASE 5 password-login-logged-in-not-done ok=True key=ANSWERED:fake-box-one password_arm=LOGGED-IN done=False | CASE 6 no-login-refuses ok=True rc=2 first=REFUSED: no login name (give --user or set OPAL_SSH_USER) | SSH-VERIFY-SELFTEST cases=6/6 ok=True",
-      "denominator": "6 of 6 selftest cases pass; the stub ssh and the loopback listener are the only network surface",
+      "output_evidence": "run from the worktree root under timeout 120, rc 0. Deciding line: SSH-VERIFY-SELFTEST cases=8/8 ok=True. Cases: CASE 1 own-name-key-is-done ok=True (password_arm=REFUSED done=True, alias ANSWERED:FBONE-ALIAS, argv_ok=True) | CASE 2 closed-port-is-closed ok=True | CASE 3 probe-cannot-start-is-probe-error ok=True | CASE 4 hostname-mismatch-not-done ok=True | CASE 5 password-login-logged-in-not-done ok=True password_arm=LOGGED-IN done=False | CASE 6 no-login-refuses ok=True rc=2 | CASE 7 password-advertised-not-done ok=True key=ANSWERED:fake-box-one password_arm=ADVERTISED:publickey,password done=False | CASE 8 publickey-only-refused-is-done ok=True key=ANSWERED:fake-box-one password_arm=REFUSED done=True",
+      "denominator": "8 of 8 selftest cases pass; the stub ssh and the loopback listener are the only network surface. The password arm's PROBE-ERROR branch has no selftest case (surprise NFRA_CTLPLN-W61-S10); it was checked by a direct call, see controls.mutant.",
       "status": "PASS",
-      "expect": "SSH-VERIFY-SELFTEST cases="
+      "expect": "SSH-VERIFY-SELFTEST cases=8/8 ok=True"
     },
     {
       "criterion_id": "CTu2-AC2",
       "criterion_verbatim": "CTu2-AC2 -- invocation `python .tools/ssh-tailnet-verify.py --user probe-only --timeout 3` ; expect output containing `SSH-VERIFY boxes=4` (the tool run once against the real register, reading all four boxes; done may be any number today; the exit code is not graded).",
       "method": "live_read",
       "invocation": "python .tools/ssh-tailnet-verify.py --user probe-only --timeout 3",
-      "output_evidence": "run once from the worktree root under timeout 120 (not timed out, rc 1, exit not graded): BOX laptop 100.96.167.100 port22=OPEN key=DENIED password_arm=REFUSED nontailnet_arm=NOT-DRIVEN (this tool cannot source a non-tailnet connection; the firewall remote scope is read from the box's enable receipt) | BOX sitez 100.99.180.19 port22=CLOSED key=NOT-RUN password_arm=NOT-RUN nontailnet_arm=NOT-DRIVEN (...) | BOX dell1 100.79.95.44 port22=CLOSED key=NOT-RUN password_arm=NOT-RUN nontailnet_arm=NOT-DRIVEN (...) | BOX dell2 100.104.84.87 port22=CLOSED key=NOT-RUN password_arm=NOT-RUN nontailnet_arm=NOT-DRIVEN (...) | SSH-VERIFY boxes=4 done=0 not_done=laptop,sitez,dell1,dell2",
-      "denominator": "4 of 4 register boxes read (boxes=4); done=0 of 4. The laptop's password_arm=REFUSED is read under BatchMode and does not prove sshd refuses password logins (surprise NFRA_CTLPLN-W61-S8); it is not counted as a password pass.",
+      "output_evidence": "run once from the worktree root under timeout 120, after commit a3b1fac422 (same bytes), not timed out, rc 1 (exit not graded). BOX laptop 100.96.167.100 port22=OPEN key=DENIED password_arm=ADVERTISED:publickey,password,keyboard-interactive nontailnet_arm=NOT-DRIVEN (...) | BOX sitez 100.99.180.19 port22=CLOSED key=NOT-RUN password_arm=NOT-RUN nontailnet_arm=NOT-DRIVEN (...) | BOX dell1 100.79.95.44 port22=CLOSED key=NOT-RUN password_arm=NOT-RUN nontailnet_arm=NOT-DRIVEN (...) | BOX dell2 100.104.84.87 port22=CLOSED key=NOT-RUN password_arm=NOT-RUN nontailnet_arm=NOT-DRIVEN (...) | SSH-VERIFY boxes=4 done=0 not_done=laptop,sitez,dell1,dell2",
+      "denominator": "4 of 4 register boxes read (boxes=4); done=0 of 4. The laptop control: password_arm=ADVERTISED (the laptop's sshd advertises password and keyboard-interactive; it is NOT REFUSED and NOT PROBE-ERROR, as the amendment expected). The three other boxes are CLOSED on port 22, so no password arm ran on them.",
       "status": "PASS",
       "expect": "SSH-VERIFY boxes=4"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "the selftest's negative arms: a closed port (case 2) must read CLOSED, a probe that cannot start (case 3) must read PROBE-ERROR, a differing hostname (case 4) must read MISMATCH, a password login that succeeds (case 5) must read LOGGED-IN; each must read not-done",
-      "expected": "CLOSED, PROBE-ERROR, MISMATCH:someone-else, LOGGED-IN, all done=False",
-      "observed": "CLOSED, PROBE-ERROR (ssh missing and connect raising), MISMATCH:someone-else, LOGGED-IN; all done=False in the first run and the re-run",
+      "description": "the selftest's negative arms: a closed port (case 2) must read CLOSED, a probe that cannot start (case 3) must read PROBE-ERROR, a differing hostname (case 4) must read MISMATCH, a password login that succeeds (case 5) must read LOGGED-IN, a password-advertising denial (case 7) must read ADVERTISED and not done; each must read not-done. Plus a direct call of password_verdict (outside the selftest): a denial with no parenthesised list reads PROBE-ERROR, a publickey-only list reads REFUSED, a publickey,password list reads ADVERTISED.",
+      "expected": "CLOSED, PROBE-ERROR, MISMATCH:someone-else, LOGGED-IN, ADVERTISED:publickey,password, all done=False; direct call PROBE-ERROR / REFUSED / ADVERTISED:publickey,password",
+      "observed": "selftest CLOSED, PROBE-ERROR (ssh missing and connect raising), MISMATCH:someone-else, LOGGED-IN, ADVERTISED:publickey,password, all done=False; direct call 'Permission denied, please try again.' -> PROBE-ERROR, 'Permission denied (publickey).' -> REFUSED, 'Permission denied (publickey,password).' -> ADVERTISED:publickey,password, 'Permission denied (publickey,keyboard-interactive).' -> ADVERTISED:publickey,keyboard-interactive, rc 0 with no output -> LOGGED-IN",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "selftest re-run on the same tree at commit 8451465ee4",
-      "observed": "second run SSH-VERIFY-SELFTEST cases=6/6 ok=True, identical to the first run",
+      "method": "selftest re-run on the same tree at commit a3b1fac422",
+      "observed": "second run SSH-VERIFY-SELFTEST cases=8/8 ok=True, CASE 7 and CASE 8 identical to the first run",
       "status": "STABLE"
     }
   },
@@ -64,7 +64,7 @@
     },
     {
       "item": "A password sent or typed, and any login with a real account",
-      "reason": "order RULES: BatchMode; AC2 uses the nonexistent login probe-only"
+      "reason": "order RULES and AMENDMENT 1: the password arm offers only the none method and never sends a password; AC2 uses the nonexistent login probe-only"
     },
     {
       "item": "Driving the non-tailnet arm",
@@ -75,20 +75,21 @@
       "reason": "order RULES: the real register is read once; the boxes mostly answer CLOSED"
     },
     {
-      "item": "A discriminating password arm (ssh -v authentication methods or sshd_config read)",
-      "reason": "not in the order's invocation; recorded as surprise NFRA_CTLPLN-W61-S8 for the issuer's ruling"
+      "item": "A discriminating read of sshd_config or ssh -v on the laptop, to confirm PasswordAuthentication",
+      "reason": "not in the order's invocation; the advertised-method list answers FWD-27's question without it; the ruling on S8 is the issuer's"
     }
   ],
   "surprises": [
-    "NFRA_CTLPLN-W61-S8: the password arm reads REFUSED under BatchMode whether or not sshd allows password logins, so a box can read done while password login is still on (ARMED; disarm owner 2.0.0_SA_COO~C).",
-    "NFRA_CTLPLN-W61-S9: the order's key invocation sets StrictHostKeyChecking=accept-new, so a first contact with an open port 22 writes that host key into the laptop user's known_hosts outside the worktree (INERT, OBSERVATION)."
+    "NFRA_CTLPLN-W61-S8: the password arm read REFUSED under BatchMode whether or not sshd allowed password logins. This commit changes password_arm to read the advertised methods (AMENDMENT 1); the row stays ARMED until the issuer disarms it (disarm owner 2.0.0_SA_COO~C).",
+    "NFRA_CTLPLN-W61-S9: the order's key invocation sets StrictHostKeyChecking=accept-new, so a first contact with an open port 22 writes that host key into the laptop user's known_hosts outside the worktree (INERT, OBSERVATION; the issuer accepted it under AMENDMENT 1).",
+    "NFRA_CTLPLN-W61-S10: no selftest case covers the password arm's PROBE-ERROR verdict, so that verdict is checked only by a direct call (INERT, OBSERVATION; the amendment fixes the count at 8)."
   ],
   "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~61/NFRA_CTLPLN.TO-CT-u-2.ssh-tailnet-verify-tool.proof_of_spec.json",
   "compiler_tools": [
     {
       "tool": "ruff 0.15.11, target py39; Python 3.9 grammar via ast.parse(feature_version=(3,9))",
       "invocation": "ruff check --target-version py39 .tools/ssh-tailnet-verify.py",
-      "result": "All checks passed! ; py39 grammar OK ; 0 non-ASCII characters"
+      "result": "All checks passed! ; py39 grammar OK ; 0 non-ASCII characters ; py_compile OK"
     }
   ]
 }
