@@ -1,0 +1,41 @@
+{
+  "to_id": "IRPT_BCKEND.TO-IB-pr-474",
+  "cell": "IB-pr-474",
+  "row": "IRPT_BCKEND-D2-S72",
+  "base_commit": "2d923d0564c274cc89288602d912724ec475e161",
+  "files_changed": [
+    "infra/aws/lambda/ci/build-and-upload.sh",
+    "infra/aws/lambda/ci/tests/test_build_restore_fails_loud.sh"
+  ],
+  "exit_code_rule": "A restore of a staged tracked member from HEAD that still fails after 3 tries makes cleanup_staged print ONE ERROR line naming every tracked file left carrying staged content and return 1; the in-loop call then does `exit 1` before any further member is staged, and the EXIT trap (cleanup) remembers the failure in RESTORE_FAILED_FILES and, whatever else happened (including a script that otherwise succeeded and was exiting 0), ends the script with the status it already had if that was non-zero, otherwise 1; a restore that succeeds, and a build that stages nothing tracked, take none of these branches and keep their exit codes and output lines unchanged.",
+  "failure_message_sample": "  ERROR: could not restore from HEAD (3 tries); tracked file(s) left carrying staged content: fn1/src/mod1.py",
+  "retry_choice": "RETRY ADDED: up to 3 tries of the git checkout HEAD restore with a 1 second sleep between tries (2 seconds in total), because the observed cause is a transient .git/index.lock held by another seat's commit; a failed third try ends exactly as the no-retry rule says (ERROR line naming the files, non-zero exit). Arm (a) holds the lock for the whole run, so it exercises the full three tries.",
+  "arms": [
+    "a-restore-blocked-exits-nonzero-and-names-file: tracked member, pin != HEAD, .git/index.lock held: rc non-zero, exactly one ERROR line naming fn1/src/mod1.py, the tracked file still carries the pinned bytes",
+    "b-restore-ok-exits-zero-tracked-equals-head: same member, no lock: rc 0, no ERROR, file equals HEAD, git status clean",
+    "c-stages-nothing-tracked-exits-zero: no staged_from (lock held anyway): rc 0, BUILD_ONLY line, Complete (BUILD_ONLY), no ERROR",
+    "d-no-further-member-staged-after-failed-restore: two functions, lock held: rc non-zero, the second function's member is never staged",
+    "e-no-aws-call-made: the stub aws log is empty after every arm"
+  ],
+  "negative_control": "The same test run against the base build-and-upload.sh (git show 2d923d0564:infra/aws/lambda/ci/build-and-upload.sh copied beside the test in a scratch dir): arm a FAIL (rc=0, no ERROR line), arm d FAIL (rc=0), arms b, c, e PASS, test rc 1.",
+  "hash_pins": [
+    {
+      "searched": "a regex for build-and-upload.sh within 60 characters of a 40-to-64 hex string, over the whole repo excluding org/tier*/ and org/missions/ (historical records), plus every reference to build-and-upload under .tools/, org/ref/ and infra/ read by name",
+      "found": "none: no manifest, gate or ledger in those trees pins a sha256 or blob hash of infra/aws/lambda/ci/build-and-upload.sh; the only hits are prose mentions, terraform comments and tests",
+      "action": "nothing to re-pin; lambda-source-map.json not touched"
+    },
+    {
+      "searched": "tests that extract text from the script: test_sha_handoff.sh (SHA-HANDOFF block markers) and test_staged_cleanup_record.sh (line-order checks)",
+      "found": "both read the script by markers and order, not by hash",
+      "action": "re-ran both after the change: both print only PASS lines, rc 0; not edited"
+    }
+  ],
+  "deployed": false,
+  "aws_calls_made": 0,
+  "suites": {
+    "staging_before": "5 passed in 2.25s (test_build_staging_keeps_tracked.py, rc 0)",
+    "staging_after": "5 passed in 1.83s (test_build_staging_keeps_tracked.py, rc 0)",
+    "build_only_before": "PASS real-lambda-source-map-byte-identical (tests/test_build_only.sh, rc 0)",
+    "build_only_after": "PASS real-lambda-source-map-byte-identical (tests/test_build_only.sh, rc 0)"
+  }
+}
