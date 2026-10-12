@@ -94,4 +94,12 @@ Of those, the CTO ruled three cuts (msg 4919): the ATTACH RELEASE for hops 9, 11
   READ FIRST (the cell's first step, no live call): the route's rule and its trusted headers, and which instrument they allow.
   Arm F1 (an internal caller with a firm list, refused for two other firms) is accepted by the CTO for what it shows and is NOT
   F2: no arm has reached a real record, so the owner check has never run. A signed link is never logged, written or reported.
+- **PARKED 2026-10-12 ~00:0xZ for this seat's next issuance (owner `2.0.0_SA_COO~Y2`; un-parks at the next L10 analysis this seat
+  receives): row `TCKT_VNEXT-D2-S48`, given to this seat by CTO msg 6181 ("One read, then a cell").** The investor-reporting
+  service's INTERNAL firm reader leaves an internal caller with NO users row unrestricted, by its own stated rule (IB-pr-387);
+  the ticket service is being changed to refuse that caller, so after its release the two services answer the same caller
+  differently. The row is OBSERVATION, INERT (read by this seat). First a READ, no live call: where the reader is, what it returns
+  for no row and for a DISABLED row (the CTO's own correction in msg 6181: the contract reads a row's existence, not that it is
+  active), and every route it guards. Then the cell, if the CTO rules the reader follows the ticket service: that is IRPT's
+  contract, so the rule comes from the CTO, not from this seat.
 
