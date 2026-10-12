@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-CT-w-3.data-proxy-firm-check-apply-and-exercise",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "risk_class": "WORLD",
+  "assignee": "0.7.0_AE_CloudOps~U7",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~U7/task_orders/NFRA_CTLPLN.TO-CT-w-3.data-proxy-firm-check-apply-and-exercise.md",
+    "group": "OTHER",
+    "vintage_commit": "d0cb62d9f2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round8.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~U7/task_orders/NFRA_CTLPLN.TO-CT-w-3.data-proxy-firm-check-apply-and-exercise.md",
+    "vintage_commit": "d0cb62d9f2"
+  },
+  "scope": "the firm-check code of opal-portal-data-proxy at pin 50c8feb76b, ONE safe-apply in infra/aws/terraform/market-overview, CODE ONLY (three zip members). Applied 2026-10-12T09:53:54Z to 09:54:35Z; reads 09:57Z to 09:59Z; ledger entry nfra-ctlpln-ctw3-data-proxy-firm-check-20261012.",
+  "session_log": "org/critical_paths/change_management/20261012T0943Z_nfra-ctlpln-ctw3-data-proxy-firm-check-20261012_deploy_completion.md",
+  "never_widen_pair": {
+    "coo_half": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~C/CT-w-3_PAIR_20261012.md (@47edbc46ee), read whole before the ledger was opened",
+    "cto_half": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/1.0.0_SA_CTO/NEVER_WIDEN_CT_W3_FWD28_FIRM_CHECK_CTO_HALF.md (msg 108501), SIGNED, read whole before the ledger was opened; callers per the first pair CTO half section 2, option (a) because ui_walker_account.py takes no second account id"
+  },
+  "rollback": "re-point s3_object_version to 5Xgupv5fa4W1mFULZco6ByEPzs9HRK2C (content-sha256 6/BPExXEB1KneUKzyY45cbkw2px01XEOFMV0h/5Vst8=, the CT-u-7 release, so the 39 internal-only routes stay fenced) by one safe-apply of infra/aws/terraform/market-overview, then the internal-caller read; not needed, every required read passed",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-w-3.firm-check-exercise.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the pre-apply table (16 requests, 336 h, not_admitted=0), the five reads and the three exact final lines",
+      "artifact_covered_by": ["CTw3-AC1", "CTw3-AC2", "CTw3-AC3"]
+    },
+    {
+      "path_or_key": "lambda:opal-portal-data-proxy CodeSha256 aWwkzuxRL6SQ49HHgyeoHoFGvSZoLXLymYOQi9dWiWY=",
+      "kind": "aws_resource",
+      "commit_or_etag": "s3 version iuIjViflW5mz8ggUo9w.jxijqwIEKE8p",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "live CodeSha256 equals the built zip; the deployed package was downloaded and its three members diffed against the pin blobs both directions (3 of 3 EQUAL, none missing, none extra); replan terraform plan -detailed-exitcode 0",
+      "artifact_covered_by": ["CTw3-AC1", "CTw3-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTw3-AC1",
+      "criterion_verbatim": "cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-w-3.firm-check-exercise.txt expects class-i admitted-firm=200 internal=200",
+      "method": "command",
+      "invocation": "cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-w-3.firm-check-exercise.txt",
+      "expect": "class-i admitted-firm=200 internal=200",
+      "output_evidence": "class-i admitted-firm=200 internal=200",
+      "denominator": "two real GET /v1/aum/metrics calls through https://opalinvest.dev after the apply (the 49financial synthetic caller and the internal walker); the internal caller also read POST /v1/sentiment/keyword-intelligence, 200. The admitted-firm read also answered 200 BEFORE the release, so it does not discriminate the new check; the unadmitted-firm arm is NOT-EXERCISED (no such login exists, 0 of 57 profile rows) and is declared below",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTw3-AC2",
+      "criterion_verbatim": "cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-w-3.firm-check-exercise.txt expects class-ii partner=403",
+      "method": "command",
+      "invocation": "cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-w-3.firm-check-exercise.txt",
+      "expect": "class-ii partner=403",
+      "output_evidence": "class-ii partner=403",
+      "denominator": "one real GET /v1/health/data-availability call by the partner caller after the apply, with the error field forbidden: Opal-internal readers only and an apigw-requestid present",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTw3-AC3",
+      "criterion_verbatim": "cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-w-3.firm-check-exercise.txt expects PRE-APPLY not_admitted=0",
+      "method": "command",
+      "invocation": "cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-w-3.firm-check-exercise.txt",
+      "expect": "PRE-APPLY not_admitted=0",
+      "output_evidence": "PRE-APPLY not_admitted=0 (and the order's own format line: PRE-APPLY window=336h requests=16 not_admitted=0)",
+      "denominator": "47 handler Event lines read over the whole 14-day retention (319.1 h of data), 16 of them on the two open routes, 0 null/empty/unlisted firmId, 0 not admitted against the pin's ROUTE_FIRMS. The criterion text and the order's line format differ (the format puts window= and requests= between the words), so the file carries both lines",
+      "status": "PASS"
+    }
+  ],
+  "compiler_tools": [
+    {"tool": "comp-iam", "invocation": "comp-iam service opal-portal-data-proxy", "result": "35 calls across 30 statements, 18 GRANTED, 17 UNRESOLVABLE-RESOURCE; unchanged"},
+    {"tool": "deploy_ledger.py", "invocation": "open/close-leg --slug nfra-ctlpln-ctw3-data-proxy-firm-check-20261012", "result": "6 legs; L1 to L5 closed, L6 at cleanup"},
+    {"tool": "ctw3_firm_check_tool.py", "invocation": "row-create, after, row-delete", "result": "reads recorded in the exercise file; row created and deleted inside the entry"}
+  ],
+  "controls": {
+    "pre_apply_gate_is_a_measurement": {
+      "description": "the table is built from every handler Event line, with its denominator and the pin's own ROUTE_FIRMS, before any build",
+      "expected_landed": "not_admitted=0 over 16 requests with 0 named exceptions",
+      "expected_not_landed": "a first run printed requests=0 because the method sat under requestContext.http.method; a zero was read as a broken instrument, not as clean, and the script was fixed before the figure was used",
+      "observed": "requests=16 not_admitted=0 after the fix; the earlier all-route census read the same 16",
+      "status": "PASS"
+    },
+    "p0_deployed_bytes_were_the_first_pair": {
+      "description": "the deployed package was downloaded and hashed before the build",
+      "expected_landed": "lambda_function.py 5f0fad0e... and session_tracker.py 00f8c6a3..., no third member",
+      "expected_not_landed": "any other hash or a firm_page_access.py member would STOP the act",
+      "observed": "5f0fad0e7631a44816f1c56c3af7f0837f6735ba73ecb2e95f6a84e972d87427 and 00f8c6a31aab295973a9c573f6f8eec83a4e68dbb1eb0cf5c531f4e50873ef40, 2 members",
+      "status": "PASS"
+    },
+    "zip_member_list_read_back": {
+      "description": "the function deploy.sh copies only two files; the built zip's member list is read back before upload and again from the deployed package",
+      "expected_landed": "exactly 3 members, each equal to the pin",
+      "expected_not_landed": "2 members or any hash difference is Branch B",
+      "observed": "3 of 3 equal in the built zip, in the uploaded version and in the deployed package",
+      "status": "PASS"
+    },
+    "no_standing_credential": {
+      "description": "the walker is disarmed and the synthetic row is gone",
+      "expected_landed": "walker status disabled, armed no; synthetic row ABSENT with a never-written control also ABSENT and a paginated census of 0",
+      "expected_not_landed": "an armed walker or a leftover row is a BLOCKING row",
+      "observed": "see ledger leg L6",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the unadmitted-firm arm (R4) is NOT-EXERCISED",
+      "reason": "no login of a firm outside the four admitted firms exists (57 profile rows: 34 in the set, 23 opal-capital, 0 other) and the order says mint nothing; the issuer's 965-test suite at the pin is the evidence of record for that arm"
+    },
+    {
+      "item": "no live read on the deployed service discriminates the new firm check from the old open rule",
+      "reason": "the admitted-firm read answered 200 before the release as well; what shows the new check runs is the package diff (3 of 3 equal to the pin) and the suite"
+    },
+    {
+      "item": "callers outside the authorizer path (direct invokes, opal_ai, mcportal, scheduled jobs) and any caller of the two routes outside the 14-day window were not searched",
+      "reason": "named in the pair section 2 as NOT searched"
+    }
+  ],
+  "surprises": ["NFRA_CTLPLN-S9110", "NFRA_CTLPLN-S9111"]
+}
