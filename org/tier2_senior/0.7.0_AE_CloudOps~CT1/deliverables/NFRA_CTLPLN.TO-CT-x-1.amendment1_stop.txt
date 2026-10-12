@@ -1,0 +1,29 @@
+NFRA_CTLPLN.TO-CT-x-1 AMENDMENT 1 (crossbox XB-20261012T054136Z-c411) -- seat 0.7.0_AE_CloudOps~CT1, dell1, 2026-10-12 ~05:5xZ
+
+RESULT: STOP at amendment step 2, first bound. No deploy was made. No S3 put, no commit of a receipt, no ledger entry opened.
+
+STEP 1 (first look) -- NO CANDIDATE
+  After `git fetch origin` (rc=0), `comp-find "named_commit=" --files --all` read 28 hit(s) across 85551 file(s)
+  scanned (corpus=all). None of the 28 is under org/critical_paths/change_management/: the hits are the checker
+  (.tools/named_commit_check.py), its test, deploy_readback_check.py, this project's task orders, proof instances and
+  investigation channel, and device-local logs. Zero CLOSED dell1 ledger entries carry named_commit=<hash>, so there
+  is no commit to run deploy_readback_check.py against.
+
+STEP 2 first bound -- NO ADDRESS EXISTS IN THE REGISTRY
+  The bound: the object's address must come from lib/opal_naming.py address() for a receipt of NFRA_CTLPLN, and if
+  none exists the seat stops and hand-types nothing.
+  Read of infra/logic/registry/systems.json: 54 system keys, none for NFRA_CTLPLN or ctlpln (the nearest, `cloudops`,
+  is the platform subsystem and is not this project). scopes.json: 14 scopes (49financial, inflection, cottonwood,
+  demo, global, 08242234, 08335338, z09, 4698, mdpf, etfs, irpt, harvest, transcripts), none for it.
+  Exercised, not only read: address("ctlpln","global","bronze","receipt","20261012","r.txt") and the same with source
+  "nfra_ctlpln" and scope "ctlpln" each raise ValueError: source '<x>' is not a systems.json key.
+
+WHAT THE ISSUER CUTS NEXT (the amendment's own words: "I will cut a registry cell instead")
+  A systems.json row for the NFRA_CTLPLN source (and a receipt table/tier row), added by the registry owner, with the
+  PUT grant for cloudops-dell1-agent-user on the resulting prefix confirmed. Until then CTx1-AC1 cannot be met by this
+  seat. CTx1-AC2 is unaffected (evidence on disk: NFRA_CTLPLN.TO-CT-x-1.refused-iam-write.txt).
+  The seat did not read the amendment's "already granted to put" bound as met either: with no address there is no
+  object whose grant to read.
+
+NOT DONE, BY DESIGN: no hand-typed address, no use of the `cloudops` source as a stand-in, no new registry row (the
+registry is not this lane's write surface and the amendment names the issuer's cut).
