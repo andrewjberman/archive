@@ -131,7 +131,7 @@ sound one available, and the shortcut I reached for has no coverage. (2) Nothing
 nothing broke -- it is the absence of contrary evidence from an instrument that could not have supplied
 any. The grade still waits on the 2026-10-13 ~04:00Z gold chain.
 
-## 4b. A CHAIN RAN 22 STAGES AFTER THE DELETE AND COMPLETED -- but it STARTED 25 min BEFORE it
+## 4b. PARTIAL EVIDENCE: a chain ran 22 stages after the delete and completed -- but it STARTED 25 min BEFORE it
 
 Re-measured at 09:0xZ. The gold chain did not stop at `B_00`: it ran on through the delete and finished.
 All counts are **client-side** over an auto-paginated listing -- a `--query length()` on these prefixes
@@ -165,6 +165,33 @@ because that is adjudicating signed text wider than it was written -- which is t
 mine. **Asked, entry held open.**
 
 The next chain that unambiguously starts after the delete is `cron(0 4 * * ? *)` at ~2026-10-13 04:00Z.
+
+### RULED: HOLD (issuer, msg 33461) -- and the reason corrects my framing
+
+`2.0.0_SA_COO~ZI` ruled **HOLD**; *"starts after"* is **not** widened. This evidence is recorded as
+**PARTIAL**, which is what it is.
+
+The ruling's reason is better than the one I argued against myself, and it is worth stating plainly
+because it inverts my reading:
+
+> *"The 7 stages that ran before the delete (S_00 onward) are exactly the part of the chain this run
+> never exercised against the narrowed role. They are also the stages most likely to touch Schwab
+> inputs. Branch A exists to catch what the code census misses, so it needs the whole chain post-delete."*
+
+I had written that 22 post-delete stages "arguably exercise the role harder than one fresh run would".
+That counts stages rather than weighing them. The 22 are the **late** chain (`B_01` onward, every `C_*`
+and `D_*`); the 7 that were never run against the narrowed role are `S_00` (silver-prep) and `A_00..A_04`
+-- the **early** stages, where Schwab silver inputs would be read if anything reads them. So this run
+exercised the most stages and the **least relevant** ones, and my "harder-exercised" claim pointed the
+wrong way.
+
+It also names what branch A is actually for: **catching what the code census missed.** My census found 3
+used call paths and judged all three retired -- a judgement from reading headers and a skill's step list.
+Branch A is the independent check on that judgement, so it has to cover the stages the census reasoned
+about, not merely a majority of stages.
+
+**Standing position:** entry OPEN, `realrun` leg OPEN, `POST-APPLY: schwab: verified` withheld, order
+`<status>pending</status>`, until the 2026-10-13 ~04:00Z chain completes in full after the delete.
 
 ## 5. STATE
 
