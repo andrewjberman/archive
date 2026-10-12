@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-12</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C after its own reads: proof instance VALID (CTw10-AC1, CTw10-AC2); live CodeSha256 zoCWZxmn6nwzFEEIEIl4NoVP2rojFGntQaLSxy8lLSU= (was aWwkzuxR...), last modified 2026-10-12T11:58:21Z; the deployed package holds exactly three members and their sha256 EQUAL the pin 5a0dfc9af8 (lambda_function.py a9c7a403..., session_tracker.py 00f8c6a3..., firm_page_access.py 7365de94...); the issuer read the 27 log events written after the apply: Bearer 0, eyJ 0, cookie or refresh 0, and three Request lines carrying method, path and request id only. Ledger nfra-ctlpln-ctw10-data-proxy-logging-fix-20261012 CLOSED. The STOP of step 2 was recorded MET and lifted for the apply only by the CTO (msg 108528). NOT done and NOT this order's: the PURGE of the group's 14 days of events and the INVALIDATION of the refresh tokens in the 16 recent lines (two identities by digest, both internal staff, one active and one disabled) are Andrew's; row S9112 stays ARMED on those two until he answers.</status_reason>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <round>1</round>
