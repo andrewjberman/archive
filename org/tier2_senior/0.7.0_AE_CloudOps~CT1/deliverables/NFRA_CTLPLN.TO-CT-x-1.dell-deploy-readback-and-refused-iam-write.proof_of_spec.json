@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-x-1.dell-deploy-readback-and-refused-iam-write",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/task_orders/NFRA_CTLPLN.TO-CT-x-1.dell-deploy-readback-and-refused-iam-write.md",
+    "group": "OTHER",
+    "vintage_commit": "fcbd1dc88d"
+  },
+  "assignee": "0.7.0_AE_CloudOps~CT1",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.thread6.md",
+    "vintage_commit": "fcbd1dc88d",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/task_orders/NFRA_CTLPLN.TO-CT-x-1.dell-deploy-readback-and-refused-iam-write.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "Two negative arms run against the SAME read-back tool and the SAME ledger entry, each changing exactly one input so the field that must fail is the only one that can. ARM A (the object arm): the repo path pull_orion_model_composition.py compared against a DIFFERENT live key, s3://opal-data-mdpf/code/scripts/gold/build_mdpf_wsc_inflection_feeder.py, must read objects_equal=0/1 and ok=False. ARM B (the trunk arm): the SAME object and the SAME ledger entry with an ON-TRUNK commit (origin/CLOUD tip 545b5f56e7) must read on_trunk=True and ledger=other-commit, ok=False. Without them, objects_equal=1/1 and on_trunk=False could be fields that print those values whatever they are given.",
+      "expected": "ARM A: objects_equal=0/1 ok=False failed=objects_equal. ARM B: on_trunk=True ledger=other-commit ok=False failed=on_trunk,ledger.",
+      "observed": "FIRED AS EXPECTED. ARM A: DEPLOY-READBACK commit=d5cd8a81c4 admitted=True on_trunk=False objects_equal=0/1 ledger=closed-named ok=False failed=objects_equal. ARM B: DEPLOY-READBACK commit=545b5f56e7 admitted=True on_trunk=True objects_equal=1/1 ledger=other-commit ok=False failed=on_trunk,ledger.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A for the read-back's verdict: it reads two byte strings and one ref relation. The repeated measurement the act does contain is the object's sha256, read four times (before the put from the repo blob and from the live object, after the put from the live object, and inside the read-back's own step 3).",
+      "observed": "sha256 40bdb218e94d3ff9c26f2920bb106720c63d0ab8bed06ec1fe5feaa1a4c4a8a9, 9292 B, identical on every read, before and after the re-put.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the genre DEPLOY claim the governing order's <proof_genre>DEPLOY</proof_genre> would permit",
+      "reason": "DELIBERATELY NOT CLAIMED, as on TO-CT-x-2. The DEPLOY branch requires a never_widen_pair (coo_half and cto_half, each path@commit). This act moved NO served output: it re-put an object with the SAME bytes (DELTA=0, sha256 equal before and after, ETag unchanged), so no never-widen sign-off was asked for or given. Writing a pair would fabricate a sign-off. The genre is BUILD, whose mutant and determinism controls the evidence fits. If the issuer wants DEPLOY recorded, the order's proof_genre or the schema's DEPLOY requirement needs to meet, as AMENDMENT 2 did for CT-x-2; that is the issuer's and the schema owner's call."
+    },
+    {
+      "item": "'an address that already exists in the registry' for the re-put object (AMENDMENT 2 bound)",
+      "reason": "Met for the BUCKET and NOT for the key, by the registry's own output. scopes.json row `mdpf` names bucket opal-data-mdpf (provisioned). The key code/scripts/bronze/pull_orion_model_composition.py is not an address() output (address() builds {source}/{scope}/{tier}/{table}/{partition} data keys) and resources.json holds 0 rows naming it. The key is registered only as dell1's own ledgered deploy of 2026-10-11 (leg L4 of 20261011T0439Z_mdpf-canon-r3-bronze-intake-dell1-20261011). Stated in the hold record at @1ecafbdd2b and carried forward by AMENDMENT 3, which accepted the object."
+    },
+    {
+      "item": "what the object's consumers do with the new VersionId",
+      "reason": "The put moved only the VersionId and LastModified; ETag, ContentType, SSE and length are unchanged. The Stage-0 pull on the MDPF runner fetches this key at run time; no run was observed against the new version. The order's comp-adversary line declares what the deployed code does once live BLIND, and this act does not narrow that."
+    },
+    {
+      "item": "the ordinary-deploy exercise FWD-10 asked for ('dell1's next own deploy')",
+      "reason": "The exercise was DRIVEN, not organic: no ordinary dell1 off-trunk deploy was in the window, so AMENDMENTS 1-3 replaced it with one deliberate idempotent re-put under a named commit carried on a scratch ref. The read-back proves the tool's four limbs on a real object; it is not evidence that an organic deploy would have produced the same."
+    },
+    {
+      "item": "the ledger's leg order versus the read-back's CLOSED requirement",
+      "reason": "deploy_readback_check.py step 4 requires the entry CLOSED, while the entry carries a leg for the read-back itself. Read-back #1 therefore ran with the entry OPEN (ledger=open, the other three limbs True) and was used as leg L5's proof; the entry then closed and read-back #2, with ledger=closed-named and ok=True, is the filed last line. Both are in the ledger entry and the readback file."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-1.readback.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A RECORD, not code. The whole output of read-back #2: STEP 1 NAMED-COMMIT ADMITTED (role=execution, OFF-TRUNK, branch=dell1/readback-20261012T0608Z), STEP 2 on_trunk=False, STEP 3 git_sha256 equals deployed_sha256 (40bdb218..., 9292 B), STEP 4 ledger closed-named, and the last line ok=True failed=none."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261012T0609Z_nfra-ctlpln-ctx1-readback-reput-20261012_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The NEVER-2 ledger entry, opened at the start and CLOSED with all 5 legs proven, carrying named_commit=d5cd8a81c45fee2f154d8541f2002495a836d1ed."
+    },
+    {
+      "path_or_key": "s3://opal-data-mdpf/code/scripts/bronze/pull_orion_model_composition.py",
+      "kind": "s3_object",
+      "commit_or_etag": "e64b70fe47621d5df4f87c0fa93efa70",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": ["CTx1-AC1"],
+      "deploy_evidence": "Re-put 2026-10-12T06:10:05Z, new VersionId 0DSxbmDeumKfz1pZMD2LFZVOu4UejpYu; the object's ETag, ContentType (binary/octet-stream), SSE (AES256) and length (9292) are unchanged, and get-object sha256 equals the repo blob at HEAD 1b1f7c76a5. Pre-image knZ1fVt_6weNcIIalL9EUYzC7sUlp0W5 holds identical bytes."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-1.readback_receipt_20261012T0608Z.txt",
+      "kind": "doc",
+      "commit_or_etag": "d5cd8a81c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one-line receipt note, the NAMED COMMIT d5cd8a81c45fee2f154d8541f2002495a836d1ed. It is not deployed. It is carried on the ONE scratch ref origin/dell1/readback-20261012T0608Z (AMENDMENT 3), pushed from a sparse worktree whose HEAD is that branch with no override; ls-remote read the ref at d5cd8a81c4, and origin/box/dell1 (2b46c900c5) and origin/CLOUD do not contain it. The ref is kept as the record."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTx1-AC1",
+      "criterion_verbatim": "tail -n 1 org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-1.readback.txt expect: on_trunk=False objects_equal=",
+      "method": "command",
+      "invocation": "tail -n 1 org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-1.readback.txt",
+      "output_evidence": "DEPLOY-READBACK commit=d5cd8a81c45fee2f154d8541f2002495a836d1ed device=dell1 admitted=True on_trunk=False objects_equal=1/1 ledger=closed-named ok=True failed=none. The order's rider (the line must also read ok=True) holds. The mutant arms show each field discriminates: a wrong key reads objects_equal=0/1 and an on-trunk commit reads on_trunk=True.",
+      "denominator": "1 object compared (n=1, 1 equal), 1 commit, 1 ledger entry; 2 negative controls run against the same tool",
+      "status": "PASS",
+      "expect": "on_trunk=False objects_equal="
+    },
+    {
+      "criterion_id": "CTx1-AC2",
+      "criterion_verbatim": "cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-1.refused-iam-write.txt expect: AccessDenied",
+      "method": "command",
+      "invocation": "cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-1.refused-iam-write.txt",
+      "output_evidence": "The file carries the live error from the one real call: 'aws: [ERROR]: An error occurred (AccessDenied) when calling the CreateAccessKey operation: User: ...', gated on a simulation reading explicitDeny for iam:CreateAccessKey on cloudops-dell1-agent-user itself. Written 2026-10-09 and unchanged by AMENDMENTS 1-3, which touched step 1 only.",
+      "denominator": "1 user, 1 action (iam:CreateAccessKey) on itself, 1 real call; blind to every other IAM action (the order's comp-iam line)",
+      "status": "PASS",
+      "expect": "AccessDenied"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/logs/2026-10-12/amendments_1_to_3_hold_then_scratch_ref_readback.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find \"named_commit=\" --files --all",
+      "result": "28 hit(s) across 85551 files, none under org/critical_paths/change_management/ -- no CLOSED dell1 ledger entry carried named_commit= before this act"
+    },
+    {
+      "tool": "named_commit_check.py",
+      "invocation": "AGENTBUS_DEVICE=dell1 python .tools/named_commit_check.py check --commit <h> --record",
+      "result": "ADMITTED OFF-TRUNK only once published; a local-only commit on this execution box is REFUSED (read from source), which is why AMENDMENT 3 admitted one scratch ref"
+    },
+    {
+      "tool": "deploy_readback_check.py",
+      "invocation": "AGENTBUS_DEVICE=dell1 python org/devices/deploy_readback_check.py --commit <h> --object <repo path>=s3://<bucket>/<key> --ledger <entry>",
+      "result": "run #1 (entry open): ledger=open ok=False, other limbs True; run #2 (entry closed): ok=True failed=none; two negative arms fired as expected"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> CTx1-AC1,CTx1-AC2",
+      "result": "see the validation output recorded in the session log"
+    }
+  ]
+}
