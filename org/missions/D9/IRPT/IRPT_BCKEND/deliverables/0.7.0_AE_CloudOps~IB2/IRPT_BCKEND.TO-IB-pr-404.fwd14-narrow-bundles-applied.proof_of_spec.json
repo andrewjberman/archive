@@ -1,0 +1,152 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-404",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-404.fwd14-narrow-bundles-applied.md",
+  "group": "OTHER",
+  "vintage_commit": "a1f10a3824"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "a1f10a3824",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-404.fwd14-narrow-bundles-applied.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~IB2/IB105-1_narrow_bundles_after_reads.json",
+   "kind": "doc",
+   "commit_or_etag": "aa73530282",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The after-reads file: ledger CLOSED, rolled_back false, replay arms, and the first fire per firm read from the served records, with output_line_claim absent where the line is not retained.",
+   "artifact_covered_by": [
+    "IB105-1-AC1",
+    "IB105-1-AC2",
+    "IB105-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261009T1025Z_irpt-fwd14-narrow-holdings-bundles-20261009_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "aa73530282",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The deploy ledger entry, CLOSED with every leg proven and its sentinel removed (commit aa73530282).",
+   "artifact_covered_by": [
+    "IB105-1-AC1",
+    "IB105-1-AC2",
+    "IB105-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-data-inflection/irpt/inflection/code/gold/investor-reporting-holdings.tar.gz",
+   "kind": "s3_object",
+   "commit_or_etag": "5daec38f0fbd604c65a770ce08029c67",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Landed 2026-10-09T10:28:52Z (version qR5sZza4EjUT_cbGA5hLo0ar6zu2NfpI); head-object now reads the built ETag and members-sha256 0b1a3bf7...; the 2026-10-12 fire PUBLISHED it.",
+   "artifact_covered_by": [
+    "IB105-1-AC1",
+    "IB105-1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-data-cottonwood/irpt/cottonwood/code/gold/investor-reporting-holdings.tar.gz",
+   "kind": "s3_object",
+   "commit_or_etag": "01387cef54b9e15e10023f05029e357d",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Landed 2026-10-09T10:29:07Z (version oyIYMVdh_l2zCg5ZWvn3ISPPS6_9Q82_); head-object now reads the built ETag and members-sha256 f3247ea2...; the 2026-10-12 fire REFUSED it at the gate (account_lost 9), which keeps its last good publication.",
+   "artifact_covered_by": [
+    "IB105-1-AC1",
+    "IB105-1-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB105-1-AC1",
+   "criterion_verbatim": "IB105-1-AC1: each firm's key reads (head-object, now) ETag == the built md5 and members-sha256 == the packet's; ledger CLOSED stating pin and the three built sha256, rolled_back false (amended at a1f10a3824: the 49F key may read 404's pair or IB-pr-417's pair).",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r105/p105_cells.py\" . IB105-1-AC1",
+   "expect": "IB105-1-AC1 PASS",
+   "output_evidence": "OK: 3 keys serve the built bytes; ledger CLOSED | IB105-1-AC1 PASS | rc=0",
+   "denominator": "3 keys of 3 head-read now: inflection 5daec38f and cottonwood 01387cef equal the built table; 49financial reads IB-pr-417's pair 8b482c8d / 73f33c3c, moved forward by order IB-pr-413; ledger 6 of 6 legs proven.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB105-1-AC2",
+   "criterion_verbatim": "IB105-1-AC2: A.replay_on_uploaded: per firm real_<firm>_live_vs_built identical and fx_<firm>_worse_restored expected-diff, run on the uploaded bytes before the first fire.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r105/p105_cells.py\" . IB105-1-AC2",
+   "expect": "IB105-1-AC2 PASS",
+   "output_evidence": "OK: replay on the uploaded bytes holds at 3 firms | IB105-1-AC2 PASS | rc=0",
+   "denominator": "18 arms of 18 recorded with the packet's names and verdicts; ledger leg L5 (closed 2026-10-09T11:13:54Z) records the re-run on the uploaded bytes matching the packet 18 of 18 with 9 negative controls; restated here, not re-run on 2026-10-12.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB105-1-AC3",
+   "criterion_verbatim": "IB105-1-AC3: A.first_fire: per firm outcome PUBLISHED or REFUSED, with the output line and (REFUSED) the refusal record's refused_at; fire_after_landing true.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r105/p105_cells.py\" . IB105-1-AC3",
+   "expect": "IB105-1-AC3 PASS",
+   "output_evidence": "OK: first fire read at 3 firms: 49financial=PUBLISHED, inflection=PUBLISHED, cottonwood=REFUSED | IB105-1-AC3 PASS | rc=0",
+   "denominator": "3 firms of 3 read at the 2026-10-12 14:15Z fire: 49financial and inflection new index versions, no refusal record; cottonwood publish_refusal.json refused_at 2026-10-12T14:17:38Z, account_lost 9, served index unchanged; output_line holds a statement of absence (row S105).",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "One mutant per criterion, planted in the real after-reads file (backup first, restored byte-identical after, each revert re-run): IB105-1-AC1 ledger state set OPEN; AC2 the inflection live_vs_built arm set expected-diff; AC3 the cottonwood refusal's refused_at set null.",
+   "expected": "each criterion FAILs on its own mutant and PASSes on baseline and on revert",
+   "observed": "Baseline PASS x3. AC1 mutant -> FAIL: ledger state OPEN. AC2 mutant -> FAIL: inflection arms expected-diff. AC3 mutant -> FAIL: cottonwood REFUSED without a refusal record. All three reverted, cmp identical, re-run PASS.",
+   "status": "FIRED-AS-EXPECTED",
+   "provenance_of_this_observation": "MEASURED BEFORE IT WAS WRITTEN: the six mutants were run against the real after-reads files with a backup taken first, each output read, each file restored byte-identical (cmp) and the criterion re-run PASS, and only then was this block composed."
+  },
+  "determinism": {
+   "method": "Each criterion was run three times with no change between runs: once at HEAD after the issuer amendment, once as the baseline of its mutant, and once after the mutant was reverted. The head-object read the first criterion makes was repeated by that criterion on each run against the live key, and the served-record reads of the fire (index manifest versions, the refusal record) were taken once and are immutable S3 versions.",
+   "observed": "All three criterion runs read PASS for every criterion, six of six, and the live keys read the same ETags each time. The one thing that changed between the first read of these orders and the last was the criteria themselves (amended at a1f10a3824), not the evidence.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The verdict output line of the fire",
+   "reason": "NOT RETRIEVABLE: SSM keeps the first 24000 characters of stdout, all \"Classification not found\" lines, so no OK:/REFUSED: line survives for any firm (row IRPT_BCKEND-D2-S105). The outcome was read from the served index manifests and the refusal record. The criterion tests only that output_line is non-empty, so it passes on a statement of absence carried with output_line_claim absent."
+  },
+  {
+   "item": "Any IAM, route, schedule, env, Terraform or Lambda change, any monitor, alarm, SNS or SES, any vendor call",
+   "reason": "Outside the grant: 0 made. No S3 delete."
+  },
+  {
+   "item": "The 2026-10-09 first fire for inflection and cottonwood, and the 49financial key after 413",
+   "reason": "The 2026-10-09 outcomes are the issuer's relayed reading (AMENDMENT 2), not re-measured; this lane read Monday 2026-10-12 for all three firms. The 49financial key now holds IB-pr-417's bytes under order IB-pr-413, so its post-fire read is of 417's bytes, not of the 404 bytes."
+  },
+  {
+   "item": "Cottonwood's refusal cause",
+   "reason": "The record names 9 lost account ids and 8 closed accounts listed as not refused; why 9 were lost is not read here (row IRPT_BCKEND-D2-S104). No rollback: a refusal record newer than the last index move means the firm stays."
+  }
+ ],
+ "surprises": [
+  "IRPT_BCKEND-D2-S104",
+  "IRPT_BCKEND-D2-S105",
+  "IRPT_BCKEND-D2-S107"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "deploy_ledger.py (close-leg, close)",
+   "invocation": "slug paths/change_management/20261009T1025Z_irpt-fwd14-narrow-holdings-bundles-20261009",
+   "result": "PASS -- the last verify leg closed with measured proof and the entry CLOSED, sentinel removed."
+  },
+  {
+   "tool": "aws ssm list-commands / get-command-invocation, s3api head-object / list-object-versions, s3 cp",
+   "invocation": "the three 2026-10-12 14:15Z holdings commands, the current/ index manifests and the publish_refusal.json",
+   "result": "PASS for the outcome reads; the verdict output line is NOT retrievable (24000-char cap), row S105."
+  },
+  {
+   "tool": "p105_cells.py and p114_cells.py",
+   "invocation": "all six criteria at the repo root at HEAD a1f10a3824, then six mutants",
+   "result": "PASS -- six of six PASS after the issuer amended AC2 (413) and AC1 (404) at a1f10a3824; six of six mutants FAIL."
+  }
+ ]
+}
