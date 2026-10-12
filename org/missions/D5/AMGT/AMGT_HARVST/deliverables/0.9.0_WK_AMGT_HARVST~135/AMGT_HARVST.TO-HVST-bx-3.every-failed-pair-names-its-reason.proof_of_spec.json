@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-bx-3.every-failed-pair-names-its-reason",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bx-3.every-failed-pair-names-its-reason.md",
+    "group": "OTHER",
+    "vintage_commit": "39a0942bc7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "7b4512b094",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bx-3.every-failed-pair-names-its-reason.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~135",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~135 on wk-AMGT_HARVST-135 (the worktree the spawn names; the order's record face says wk-AMGT_HARVST-135-r80). Build at 48ff285b05; surprise rows at cd505416c0. Local code and tests only: a fake collector and a planted transport. No publisher, S3 or site Z contact, no schedule or config change.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/transport.py",
+      "kind": "script",
+      "commit_or_etag": "48ff285b05",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "exception_detail (HTTP status form or ExceptionClassName form), reason_text (redact, flatten, cut to 300 with ...), redact_reason (Authorization, Cookie, Set-Cookie, token, password, secret, api_key, Bearer, URL userinfo); Throttled carries status 429; vendor message only from a JSON error body",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/worker.py",
+      "kind": "script",
+      "commit_or_etag": "48ff285b05",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "every failure branch and the generic job exception store exception_detail(exc); cooldown names its end; the run-record jobs[] entry gains detail only for a result that carries one",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/backfill_driver.py",
+      "kind": "script",
+      "commit_or_etag": "48ff285b05",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Collector.run_job returns the job's detail when a run record exists (it returned none before); no-run-record reason keeps the redacted stderr tail (260 chars); running, empty-run and no-status jobs name their reason; job timeout unchanged",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_bx3_failure_reason_kept.py",
+      "kind": "test",
+      "commit_or_etag": "48ff285b05",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "11 tests: real worker over the recorded wsj fixture with planted failures (fetch exception, vendor 403 with body), real Collector.run_job and cycle runner with a fake spawn (no run record with secret tail, job timeout, running/empty/no-status), the reason helpers (cut, redaction, vendor message), a success cycle, and a mutant with the bare status",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_bx3_failure_reason_kept.py -q -p no:cacheprovider --color=no -- expect: (?m)^\\d+ passed in",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_bx3_failure_reason_kept.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc 0 (run under timeout 120) at 48ff285b05.\n11 passed in 0.75s (first run); 11 passed in 0.82s, 11 passed in 0.90s, 11 passed in 2.13s (three runs at cd505416c0)",
+      "denominator": "11 of 11 tests passed",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_bv1_cycle_continues_past_pair_errors.py lib/opal_data_harvest/test_ae4_backfill_driver.py lib/opal_data_harvest/test_ba1_stopped_pair_is_retried.py lib/opal_data_harvest/test_br2_cycle_runner.py -q -p no:cacheprovider --color=no -- expect: (?m)^\\d+ passed in",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_bv1_cycle_continues_past_pair_errors.py lib/opal_data_harvest/test_ae4_backfill_driver.py lib/opal_data_harvest/test_ba1_stopped_pair_is_retried.py lib/opal_data_harvest/test_br2_cycle_runner.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc 0 (run under timeout 120) at cd505416c0.\n63 passed in 17.60s",
+      "denominator": "63 of 63 tests passed across the four files, unchanged",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "worker.exception_detail monkeypatched to return the bare status 'error' (the reason-keeping line reverted) while the planted fetch-exception job runs; the exact-text expectation for the exception kind is then asserted to fail",
+      "expected": "the exception-kind expectation fails (AssertionError) with the bare status in place",
+      "observed": "test_bx3_mutant_bare_status_fails_the_exception_kind_test passed: the job detail is 'error' under the mutant and the exact expected 'RuntimeError: upstream proxy refused Cookie: [REDACTED]' assertion raises AssertionError",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times at cd505416c0",
+      "observed": "11 passed in each of the three runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "order status flip",
+      "reason": "the issuer flips the order; the order forbids the worker editing it and the order file is outside this worker's <paths>"
+    },
+    {
+      "item": "full-suite baseline",
+      "reason": "lib/opal_data_harvest at 7b4512b094 (before the build): 4 failed, 781 passed, 3 skipped (test_ah1_fixture_solve[bbg], three in test_aw1_origin_load_wait.py); after the build: 4 failed, 792 passed, 3 skipped, the same four failures. The order's count of 5 includes test_bn1_names_made_whole.py, which passes at base here (row AMGT_HARVST-D1-W135-S1)"
+    },
+    {
+      "item": "cycle_runner.py",
+      "reason": "listed in the order's paths but unchanged: its record copies the checkpoint detail, which the driver now fills; the loss was upstream of it"
+    },
+    {
+      "item": "live read at site Z",
+      "reason": "the order names it a WORLD act after the merge and a re-pin of the runner; not in this order"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W135-S1",
+    "AMGT_HARVST-D1-W135-S2",
+    "AMGT_HARVST-D1-W135-S3"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "rc 0 at 48ff285b05 (code and tests), cd505416c0 (three surprise rows, override line in the body)"
+    },
+    {
+      "tool": "success-row invariance diff (scratch script, not committed)",
+      "invocation": "one clean wsj worker job plus a cycle of three successes through the real Collector.run_job, drive() and cycle runner, run once on base 7b4512b094 (git archive extract) and once on 48ff285b05, timestamps and ids normalised, diffed",
+      "result": "IDENTICAL: cycle record, checkpoint and run-record job-entry keys match base; no detail field in any success entry"
+    }
+  ]
+}
