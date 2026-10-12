@@ -29,6 +29,20 @@ def main():
     live = scoped_amgt.read_coverage_freshness()
     skip = {"generated_at", "snapshot", "snapshot_fallback", "rows"}
     diffs = []
+    # The snapshot is written BY the function (a Lambda: packaged files at /var/task/...); this recompute runs in the checkout (the same files at the checkout's own path). The
+    # `object_key` of a PACKAGED list read is the deployed artifact's path, an environment fact and not a value: it is blanked on both sides and the note printed.
+    env_notes = []
+
+    def _blank_packaged_paths(view):
+        lists = ((view.get("reads") or {}).get("lists") or {}) if isinstance(view.get("reads"), dict) else {}
+        for name, entry in lists.items():
+            if isinstance(entry, dict) and entry.get("source") == "packaged" and "object_key" in entry:
+                env_notes.append("reads.lists.%s.object_key (packaged: %s)" % (name, str(entry["object_key"])[:50]))
+                entry["object_key"] = "<packaged path>"
+        return view
+
+    doc = _blank_packaged_paths(dict(doc))
+    live = _blank_packaged_paths(dict(live))
     for k in sorted(set(doc) | set(live)):
         if k in skip:
             continue
@@ -41,6 +55,8 @@ def main():
             ra, rb = a.get(name) or {}, b.get(name) or {}
             cols = sorted(c for c in set(ra) | set(rb) if ra.get(c) != rb.get(c))
             diffs.append("row %s: %s differ" % (name, ",".join(str(c) for c in cols)[:80]))
+    for note in sorted(set(env_notes)):
+        print("   environment path blanked on both sides: " + note)
     print("snapshot generated_at %s age %s h | rows: snapshot %d, recompute %d | differing: %d" % (rec.get("generated_at"), rec.get("age_hours"), len(a), len(b), len(diffs)))
     for d in diffs[:10]:
         print("   " + d)
