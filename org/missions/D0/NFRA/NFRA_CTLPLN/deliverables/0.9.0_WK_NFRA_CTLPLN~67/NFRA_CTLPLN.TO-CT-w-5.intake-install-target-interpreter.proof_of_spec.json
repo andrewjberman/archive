@@ -1,0 +1,112 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_CTLPLN.TO-CT-w-5",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-w-5.intake-install-target-interpreter.md",
+  "group": "OTHER",
+  "vintage_commit": "2fbb74e87d"
+ },
+ "assignee": "0.9.0_WK_NFRA_CTLPLN~67",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round8.md",
+  "vintage_commit": "2fbb74e87d",
+  "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-w-5.intake-install-target-interpreter.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/devices/intake/intake_receive.py",
+   "kind": "script",
+   "commit_or_etag": "a8857f3ca9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "install needs exactly one target (--python, --target or --user); --python builds the command with the given interpreter and no --user, refused for this interpreter unless --user is also given; --target installs into a new or empty folder; the old --user default is gone; each real install writes receipts/<wheel>.install.<device>.json with install.target_form and the interpreter; committed on the worker branch, nothing deployed"
+  },
+  {
+   "path_or_key": "org/devices/intake/test_intake_receive.py",
+   "kind": "test",
+   "commit_or_etag": "a8857f3ca9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "30 cases: the 25 existing ones adjusted to pass an explicit target, plus five new: no target refused; a venv --python install leaves the box site untouched; the box interpreter refused without --user; --target into a new folder; --user dry run only. Every pip command goes to a local wheel with --no-index --no-deps"
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "a8857f3ca9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "two rows appended: NFRA_CTLPLN-W67-S1 and NFRA_CTLPLN-W67-S2"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CTw5-AC1",
+   "criterion_verbatim": "python org/devices/intake/test_intake_receive.py expect: INTAKE-RECEIVE-TEST cases=30/30 ok=True",
+   "method": "test_suite",
+   "invocation": "python org/devices/intake/test_intake_receive.py",
+   "output_evidence": "Run under timeout 120 from the worktree root, rc 0 on the committed tree a8857f3ca9. LAST LINE: INTAKE-RECEIVE-TEST cases=30/30 ok=True",
+   "denominator": "30 of 30 cases passed (Python 3.12.10): 25 existing adjusted plus 5 new",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CTw5-AC2",
+   "criterion_verbatim": "python org/devices/intake/intake_receive.py install --help expect: --python",
+   "method": "test_suite",
+   "invocation": "python org/devices/intake/intake_receive.py install --help",
+   "output_evidence": "Run under timeout 120 from the worktree root, rc 0. Usage line: usage: intake_receive.py install [-h] --from PACK [--dry-run] [--python EXE] [--target NEW_DIR] [--user]; option line: --python EXE      install with this interpreter's own site and no --user (a",
+   "denominator": "1 of 1 help output; --python, --target and --user all named; the docstring block states the old default is gone",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the old default invocation, install with no target, which used to run a --user install into the box interpreter, is now refused before any pip command",
+   "expected": "rc 1, the REFUSED message naming the three targets, no DRY-RUN, FAILED or RECEIPT-OK line, and the box pip list unchanged",
+   "observed": "case_install_without_target_is_refused_and_installs_nothing PASS: rc 1, message present, pip list equal before and after; case_python_box_interpreter_refused_without_user PASS: --python sys.executable refused without --user",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the test file run before the commit and again on the committed tree",
+   "observed": "cases=30/30 ok=True on the pre-commit run and again at a8857f3ca9; install --help names --python on both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "no run on Python 3.9 (no 3.9 interpreter run on this machine); ruff with target-version py39 passes and both files compile on 3.12.10",
+   "reason": "order: Python 3.9-compatible is a constraint on the code; the only interpreter run here is 3.12.10"
+  },
+  {
+   "item": "the real --user install was not run; the --user form is exercised as a dry run only",
+   "reason": "order: --user is dry-run only in the test; no real user site is touched"
+  },
+  {
+   "item": "no real install on dell1 or on any Dell; the installed state of a Dell venv after a real run is BLIND",
+   "reason": "order: the next dell1 exercise measures it; this order runs no terraform, no aws, and pushes nothing"
+  },
+  {
+   "item": "the test's venv is made from this box's Python 3.12.10 inside the temporary folder; no request leaves the machine",
+   "reason": "order: every pip command goes to a local wheel with --no-index --no-deps; the box site is compared by pip list before and after"
+  }
+ ],
+ "surprises": [
+  "NFRA_CTLPLN-W67-S1: a real install is refused by the receipt gate unless a prove receipt exists for the device, so the order's install cases were run after a prove step",
+  "NFRA_CTLPLN-W67-S2: install wrote no per-wheel record of its target form before this order; the worker added install.target_form to the prove receipt and a separate install record file"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~67/NFRA_CTLPLN.TO-CT-w-5.intake-install-target-interpreter.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/devices/intake/test_intake_receive.py",
+   "result": "INTAKE-RECEIVE-TEST cases=30/30 ok=True"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/devices/intake/intake_receive.py install --help",
+   "result": "help names --python, --target and --user; rc 0"
+  },
+  {
+   "tool": "ruff",
+   "invocation": "python -m ruff check --target-version py39 org/devices/intake/intake_receive.py org/devices/intake/test_intake_receive.py",
+   "result": "All checks passed!"
+  }
+ ]
+}
