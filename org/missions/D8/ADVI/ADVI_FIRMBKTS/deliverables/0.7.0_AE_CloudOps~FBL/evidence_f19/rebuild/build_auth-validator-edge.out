@@ -1,0 +1,49 @@
+
+Node.js Lambda Build-and-Upload (ESM)
+  Pipeline:  portal-auth
+  Function:  auth-validator-edge
+  Bucket:    s3://opal-313476888478-lambda-artifacts/portal-auth/
+
+  Source:    infra/aws/lambda-edge/auth-validator-edge
+  Type:      ESM (index.mjs -> index.mjs)
+
+  Installing dependencies...
+
+Checked 121 installs across 116 packages (no changes) [5.95s]
+  External:  4 @aws-sdk/* packages marked external
+
+  Bundling with bun build --format=esm...
+    Entry:  index.mjs
+    Output: index.mjs
+    Bundled 82 modules in 84ms
+    
+      index.mjs  71.0 KB  (entry point)
+    
+    Bundle size: 72K
+
+  Validating handler export...
+    handler export: OK (export statement found in bundle)
+
+  Creating zip...
+    SHA256: sCxEV3p6ucK1iewCWQeqJaf0SHVURqOlj52dnE58WHo=
+    Size:   24K
+
+  Uploading to s3://opal-313476888478-lambda-artifacts/portal-auth/auth-validator-edge.zip ...
+    OK s3://opal-313476888478-lambda-artifacts/portal-auth/auth-validator-edge.zip
+
+  Updating lambda-source-map.json...
+    Updated: artifact_s3_key, artifact_sha256, files -> [index.mjs]
+
+================================================
+Complete -- auth-validator-edge built and uploaded
+
+Next steps:
+  git add infra/aws/lambda/ci/lambda-source-map.json
+  git commit --author='...' -m 'ci: upload auth-validator-edge artifact [skip ci]'
+  export MSYS_NO_PATHCONV=1 && export AWS_EC2_METADATA_DISABLED=true
+  .tools/terraform.exe -chdir=infra/aws/terraform/portal-auth plan
+  .tools/terraform.exe -chdir=infra/aws/terraform/portal-auth apply
+  .tools/terraform.exe -chdir=infra/aws/terraform/portal-auth plan   # 0-diff
+  bash infra/aws/lambda/ci/record-terraform-deploy.sh portal-auth
+  git tag -a portal-auth-vX.Y.Z -m 'description' && git push --follow-tags
+
