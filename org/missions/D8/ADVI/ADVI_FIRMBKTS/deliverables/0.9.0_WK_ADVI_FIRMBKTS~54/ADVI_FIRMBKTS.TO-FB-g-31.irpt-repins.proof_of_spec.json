@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-31",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-31.irpt-repins.md",
+    "group": "OTHER",
+    "vintage_commit": "ccada80665"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~54",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "ccada80665",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-31.irpt-repins.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "e274a0e60c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in e274a0e60c on wk-ADVI_FIRMBKTS-54 (LOCAL): the eight IRPT staged_from rows whose repo_path is _authz/loaders.py re-pinned to 69679b90e3dc52b670d33fddd96d06be1deaac90, two fields each (pin, sha256); nothing deployed, uploaded or pushed",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 runs after the re-pin commit (HEAD~1 is the base): the source map differs only by the eight rows' two fields to the flip commit, all eight builds pass, and each artifact's loaders.py equals the flip commit's blob and carries the canonical bucket. The invocation terminates inside its bound.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-54 && timeout 280 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_repin.py --arms repin --flip 69679b90e3dc52b670d33fddd96d06be1deaac90 --root /c/dev/wk-firmbkts-54 --base HEAD~1; echo \"exit=$?\"",
+      "output_evidence": "  R1 re-pinned rows: 8 of 8; violations: []\n  irpt-49f-reporting-read-lambda     IhlTVtU9yYVskJ3PUOcoOKp1HnE2WAW5V8X31IwKkTc=\n  irpt-directory-search              TefVhmGStCRorgQFrQFCS0lVUC+pXrWJYfdUCEExqe4=\n  irpt-export-render                 dCzMEt04dtBAlvkj+2rZMGZaU30kY+7leZxN00dbxH8=\n  irpt-holdings                      SWRfUfHdJarO2Rhbxw/KQK88DeDNorQujkaR1jUuZc0=\n  irpt-narrative                     0+/PHOb/xGvYNBrz/j4Ltk5k85clmAo96BOJzi9n3ZY=\n  irpt-performance-adapter           kMB8xCI93/9QLUnzglVIs0EIRY07SSLBiU5ln8iJwUc=\n  irpt-status                        JmOhV/ep4mR1mt2NKKqyUlohgO3mlDw1GEM4eAWYKdw=\n  irpt-ycharts-generate              p+17dqD9luDDeXGWiXcQvtZqh+bPmD0k9PBXFfLl/Ro=\nPASS R1 the source map differs only by the eight loaders rows' pin and sha256, to the flip commit\nPASS R2 all eight builds exit 0 and print a hash\nPASS R3 each artifact's loaders.py equals the flip commit's blob and carries the canonical bucket\nROUND 4 REPIN: 3 of 3 arms\nexit=0",
+      "denominator": "3 of 3 arms PASS; 8 of 8 re-pinned rows, 0 violations; 8 of 8 BUILD_ONLY builds exit 0 and print a hash",
+      "status": "PASS",
+      "status_reason": "Run immediately after the re-pin commit e274a0e60c and before any other commit, as the order requires (base HEAD~1 = ccada80665). BUILD_ONLY=1 is set inside the check for each of the eight builds; nothing is uploaded."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the write-surface bound. Each invocation terminates inside its bound.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-54 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-54 --allow infra/aws/lambda/ci/lambda-source-map.json --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~54/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/lambda/ci/lambda-source-map.json; echo \"exit=$?\"",
+      "output_evidence": "  CHANGED infra/aws/lambda/ci/lambda-source-map.json\nROUND 4 SCOPE: OK 1 changed, 0 outside, 0 required missing\nexit=0",
+      "denominator": "1 changed file, 0 outside the allow list, 1 of 1 required present",
+      "status": "PASS",
+      "status_reason": "Run immediately after the re-pin commit e274a0e60c and before any other commit. The surprise-channel and deliverables paths are allowed surfaces; the rows and this instance are committed after the run."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2 invocation verbatim with the --allow for infra/aws/lambda/ci/lambda-source-map.json removed, so the changed source map is outside the write surface",
+      "expected": "FAIL with one file outside; exit 1",
+      "observed": "ROUND 4 SCOPE: FAIL 1 changed, 1 outside, 0 required missing; mutant exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the verbatim AC2 invocation run twice; md5 of the full output compared (output kept in .scratch, not committed)",
+      "observed": "f36a73a9ba03af0dc0f18988ea445388 on both runs; exit 0 on both",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "no deploy, apply, upload or push of the eight re-pinned artifacts",
+      "reason": "order section 2 bound 1: one commit, one file, BUILD_ONLY only; the deploy is a separate order under the act 4 pair"
+    },
+    {
+      "item": "the order's <status> is not flipped",
+      "reason": "order section 5: do not flip this order's status; the instance is filed and the status is the issuer's"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W54-S1: the safe-commit client-data check could not run for the re-pin commit e274a0e60c because the hashed account-id list is absent on this box (WARN, commit not checked for client account ids); the commit still committed rc 0. OBSERVATION, INERT.",
+    "ADVI_FIRMBKTS-D1-W54-S2: the pre-commit risk reflex put HOLD on the source map and cited a memory file not readable on this box; the commit proceeded rc 0. OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~B1."
+  ],
+  "session_log": "no session log is committed; the record is commit e274a0e60c (LOCAL on wk-ADVI_FIRMBKTS-54), the rows and instance commit that follows it, and the two surprise rows in the channel",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .scratch/repin.py (text edit of two values in each of eight rows; asserts one loaders.py row per key and a known old pin)",
+      "result": "rc 0; EDIT x8 (4 from d8d8e7d868bc, 3 from 361c44fa9d40, 1 from 0642c9d00454); diff 16 insertions, 16 deletions"
+    },
+    {
+      "tool": "bash",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~54 <0.9.0_WK_ADVI_FIRMBKTS~54@opal.agent>\" -F .scratch/msg_fbg31.txt -- infra/aws/lambda/ci/lambda-source-map.json",
+      "result": "rc 0; committed e274a0e60c, 1 file changed; client-data-check WARN (surprise row W54-S1); risk-reflex HOLD (surprise row W54-S2)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_repin.py --arms repin --flip 69679b90e3dc52b670d33fddd96d06be1deaac90 --root /c/dev/wk-firmbkts-54 --base HEAD~1",
+      "result": "ROUND 4 REPIN: 3 of 3 arms; exit 0"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-54 --allow ... --require infra/aws/lambda/ci/lambda-source-map.json",
+      "result": "ROUND 4 SCOPE: OK 1 changed, 0 outside, 0 required missing; exit 0"
+    }
+  ]
+}
