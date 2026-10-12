@@ -1,0 +1,72 @@
+{
+  "read_at": "2026-10-12T23:35:00Z",
+  "count": {
+    "cell": "AR-y-173",
+    "part_a": {
+      "denominator_check": true,
+      "external_rows": 33,
+      "internal_active": 21,
+      "internal_by_firmId_userType_status": [
+        {
+          "firmId": "opal-capital",
+          "rows": 5,
+          "status": "active",
+          "userType": "Dev"
+        },
+        {
+          "firmId": "opal-capital",
+          "rows": 1,
+          "status": "disabled",
+          "userType": "Dev"
+        },
+        {
+          "firmId": "opal-capital",
+          "rows": 14,
+          "status": "active",
+          "userType": "absent"
+        },
+        {
+          "firmId": "opal-capital",
+          "rows": 1,
+          "status": "disabled",
+          "userType": "absent"
+        },
+        {
+          "firmId": "opal-capital",
+          "rows": 2,
+          "status": "active",
+          "userType": "service"
+        }
+      ],
+      "internal_rows": 23,
+      "items_scanned": 86,
+      "profile_rows": 56,
+      "table": "opal-users-v2",
+      "unreadable_rows": 0
+    },
+    "part_b": {
+      "evidence": [
+        "infra/aws/lambda/investor-reporting/_authz/served.py:81-86 (_internal_sink prints the internal record: correlation_id, operation, exception_type, exception_text, component, reason, developer_detail, extra)",
+        "infra/aws/lambda/investor-reporting/_authz/served.py:89-108 (_record prints the public line)",
+        "infra/aws/lambda/investor-reporting/_authz/errors.py:146-167 (public_line writes event, operation, public_reason_code and correlation_id only)",
+        "infra/aws/lambda/investor-reporting/_scope/ has no print or log call that writes a caller's email, firmId or userType"
+      ],
+      "part_b": "NOT_AVAILABLE",
+      "reason": "the request log lines carry a correlation id and an operation, not the caller's identity (no email, firmId or userType is written); a count of distinct internal callers cannot be made from them, so no part (b) number is printed"
+    }
+  },
+  "script_blob": "8b135a96c9dbb8e7abef23870d6c99b3243008c9",
+  "identity_arn_tail": "cloudops-dell2-agent-user",
+  "writes_made": [],
+  "claim": "measured",
+  "step0": {
+    "self_test": "rc 0, CENSUS-SELFTEST-OK",
+    "iam_simulate_dynamodb_Scan_on_opal-users-v2": "allowed (pattern match only; the scan itself then succeeded, rc 0)"
+  },
+  "not_read": [
+    "part (b), callers with no users row: NOT_AVAILABLE as the script prints it; no log line carries the caller",
+    "no address, name or id was projected or written; the scan projected firmId, userType and status only",
+    "the live table was read once, at the time above; later changes are not seen",
+    "userType 'absent' rows are counted as internal by the script's rule (firmId opal-capital); the script's definition of internal is taken as printed, not re-derived here"
+  ]
+}

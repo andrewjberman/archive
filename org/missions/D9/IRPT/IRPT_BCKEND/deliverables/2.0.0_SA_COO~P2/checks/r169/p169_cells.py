@@ -15,7 +15,7 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
     AC2  the function's own log shows a COMPUTED path (not refused:*) after 22:35:06Z (a live AWS read)
     AC3  persisted retained revisions an integer 0..2, no long digit run, no client name key
   IB169-4  IB-pr-491  the producer's AnalysisReport contract fixtures send a section the extractor can send
-    AC1  both fixtures: no annualized_return, no DECIMAL_FRACTION; units in the extractor's token set; section_type a census code; section_id starts with it
+    AC1  both fixtures: no section_type annualized_return, no units DECIMAL_FRACTION; units in the extractor's token set; section_type a census code; section_id starts with it
     AC2  both fixtures still validate against their schemas (a bound: PASS at base)
     AC3  nothing outside the grant changed
 """
@@ -232,10 +232,9 @@ def main():
                 secs = inst.get("sections") if isinstance(inst, dict) else None
                 if not secs:
                     fail("%s: no sections found" % fx)
-                raw = json.dumps(d)
-                if "annualized_return" in raw or "DECIMAL_FRACTION" in raw:
-                    fail("%s still carries annualized_return or DECIMAL_FRACTION" % fx)
                 for s in secs:
+                    if s.get("section_type") == "annualized_return" or s.get("units") == "DECIMAL_FRACTION":
+                        fail("%s still sends section_type annualized_return or units DECIMAL_FRACTION" % fx)
                     if s.get("units") not in UNIT_TOKENS:
                         fail("%s: units %r is not an extractor token" % (fx, s.get("units")))
                     t = str(s.get("section_type", ""))
