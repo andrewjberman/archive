@@ -1,0 +1,30 @@
+NFRA_CTLPLN TO-CT-w-3 firm-check exercise, 2026-10-12. Seat 0.7.0_AE_CloudOps~U7. No token and no password appears here: status codes, hash prefixes and the error field only.
+Pin 50c8feb76b. Function opal-portal-data-proxy. CodeSha256 before 6/BPExXEB1KneUKzyY45cbkw2px01XEOFMV0h/5Vst8= after aWwkzuxRL6SQ49HHgyeoHoFGvSZoLXLymYOQi9dWiWY=. Zip members (3): lambda_function.py, session_tracker.py, firm_page_access.py, each equal to the pin.
+
+PRE-APPLY table (CloudWatch /aws/lambda/opal-portal-data-proxy, filter pattern "Event:", whole 14 day retention)
+window requested: 336 h; data span 2026-09-28T21:29Z to 2026-10-12T04:32Z = 319.1 h; read at 2026-10-12T09:44Z
+ROUTE_FIRMS at the pin 50c8feb76b: GET /aum/metrics and POST /sentiment/keyword-intelligence each = 49financial, cottonwood, demo, inflection
+events read (every handler Event line, all routes): 47, parsed 47, unparsed 0, nextToken none
+requests to the two open routes: 16
+by route | firmId | tier | verdict:
+   1  GET /aum/metrics | firmId=49financial | tier=advisor | firmId in ROUTE_FIRMS
+   1  GET /aum/metrics | firmId=opal-capital | tier=internal | internal tier
+  14  POST /sentiment/keyword-intelligence | firmId=opal-capital | tier=internal | internal tier
+named exceptions (null, empty or unlisted firmId): 0
+authorizer context carries firmId under requestContext.authorizer.lambda: 47 of 47 events (key names include firmId, tier, role, userType, allowedFirmIds)
+NOTE: the 1 non-internal row is this seat's own CT-u-7 synthetic partner read at 2026-10-12T04:31:45Z; every other request is tier internal (opal-capital). No real partner login has called either route in the window.
+PRE-APPLY window=336h requests=16 not_admitted=0
+PRE-APPLY not_admitted=0
+
+CALLERS. Internal: the dormant Opal UI walker service account through the real /auth/login (armed and disarmed by ui_walker_account.py). Partner (admitted firm): ONE synthetic row, firm 49financial, tier advisor, role user, token signed in memory, 600 s (first pair CTO half section 2 option a; ui_walker_account.py takes no second account id). Host https://opalinvest.dev.
+READS (UTC). class (i) = GET /v1/aum/metrics and POST /v1/sentiment/keyword-intelligence (body: one fixed keyword). class (ii) = GET /v1/health/data-availability.
+NOTE: the tool printed GET for the POST read; the label is corrected on that line. The partner read of GET /aum/metrics also answered 200 BEFORE this release, so R1 shows the admitted firm is still served, not that the check discriminates.
+2026-10-12T09:57:21Z R1 class-i partner admitted-firm (AFTER) GET /v1/aum/metrics code=200 body_bytes=2970 body_sha256=353256f35aa12109 apigw_requestid=present
+2026-10-12T09:57:21Z R3 class-ii partner (AFTER) GET /v1/health/data-availability code=403 body_bytes=50 body_sha256=b39d1c8c735c6beb apigw_requestid=present message='forbidden: Opal-internal readers only' keys=['error']
+2026-10-12T09:57:34Z R2a class-i internal GET (AFTER) GET /v1/aum/metrics code=200 body_bytes=2970 body_sha256=353256f35aa12109 apigw_requestid=present
+2026-10-12T09:57:35Z R2b class-i internal POST (AFTER) POST /v1/sentiment/keyword-intelligence code=200 body_bytes=12458 body_sha256=ebdddede95e478fe apigw_requestid=present
+R4 caller of a firm NOT in the set: not made. Measured 2026-10-12T10:0xZ on opal-users-v2: 57 PROFILE rows = 34 in the four admitted firms (49financial 14, cottonwood 9, demo 3, inflection 8, the 49financial count includes this seat's synthetic row) + 23 opal-capital + 0 of any other firm. No login of an unadmitted firm exists, and none was minted. The evidence of record for that arm is the issuer's suite (965 passed) at the pin.
+
+class-i admitted-firm=200 internal=200
+class-i unadmitted-firm=NOT-EXERCISED:no login of a firm outside the set exists (0 of 57 profile rows) and none was minted
+class-ii partner=403
