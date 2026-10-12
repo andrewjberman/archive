@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-by-5.the-dev-admitting-fence-deployed",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-by-5.the-dev-admitting-fence-deployed.md",
+    "group": "C",
+    "vintage_commit": "f026d6b7661a59cdeccae149091f73e95f3b8c56"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "f026d6b7661a59cdeccae149091f73e95f3b8c56",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-by-5.the-dev-admitting-fence-deployed.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~HV1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-research-pull-enqueue.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "f94560218c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NEW VersionId kwFo21Dq805CaW24uAodJu5WJY.nbvVx, 2829 bytes, content-sha256(b64) Q342L4VnpBkMJfFt/ughTj2AhS3gIa1n+pmjVqrslu0= read back and matching (upload_verified.sh). The object was re-downloaded and its member lambda_function.py hashed: sha256 0f2cdd910d9b68a2af64cb313f974833b18184b5bfda0f828a4d9e37ac47a2f1 EQUAL to git show f94560218c:infra/aws/lambda/research/pull_enqueue/lambda_function.py and to the working file; positive control: the <M>~1 file hashes 1778584aa7309505... and DIFFERS. The deployed function's CodeSha256 after the apply equals the object's content-sha256, so the running bytes are the built bytes. PRIOR VersionId S9217s5ck1gZJvwSC.Ayeg4vFAkV063z (the by-2 deploy) is the rollback object.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/api-gateway.tf",
+      "kind": "terraform",
+      "commit_or_etag": "f94560218c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NO terraform source change was made: the function's code moves through the S3 object that modules/yang-lambda reads for source_code_hash. ONE safe-apply of the exact saved plan (terraform plan -target=module.harvest_enqueue -out), 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' The plan, read in full, moved ONE resource, module.harvest_enqueue.aws_lambda_function.this, update in-place: last_modified (known after apply), s3_object_version and source_code_hash only; 28 attributes and 4 blocks unchanged. LastModified 2026-10-12T14:40:46Z, State Active, LastUpdateStatus Successful. comp-iam service read byte-identical before and after.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261012T1438Z_harvst-by5-enqueue-dev-admit-20261012_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "b62562da56",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pinned at the commit deploy_ledger.py made when it OPENED the entry, BEFORE the upload (14:38Z). The four legs BUILD/UPLOAD/APPLY/ARMS were each closed with proof and the entry CLOSED ('all 4 legs proven; sentinel removed') in the worktree; the closed entry and the sentinel removal ride this seat's closing commit with this instance.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The pre-change handler (git show f94560218c~1, the by-2 bytes) and the merged handler (f94560218c) were run in-process on the order's four payloads, plus two extra payloads (userType carried in the request BODY, and the case variant 'dev'), with stdout captured, a dummy QUEUE_URL and no network call reachable (no ticker means no S3 or SQS call). The point is that the Dev arm's 400 comes from the new fence rather than from a handler that already admitted it, and that the admit does not widen past exact 'Dev' in the authorizer context.",
+      "expected": "By-2 bytes: 403, 403, 403, 400 on the four arms. By-4 bytes: 400, 403, 403, 400, so only the Dev arm flips. Both extra arms stay 403 on both versions.",
+      "observed": "PRE-CHANGE: dev_non_internal_tier 403 ['DENIED: tier=advisor'], advisor_non_dev 403, no_context 403, internal_no_ticker 400; body_usertype_dev 403; case_variant dev 403. MERGED: dev_non_internal_tier 400 [], advisor_non_dev 403 ['DENIED: tier=advisor'], no_context 403 ['DENIED: tier=NONE'], internal_no_ticker 400 []; body_usertype_dev 403; case_variant dev 403. Exactly one arm flips (403 to 400), and the refusal line stays tier-only.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "The Dev arm's evidence is a 400 and never a 202 (C-c of the COO half): the payload carries no ticker and no body, asserted in code before each invoke, so a wrongly admitted caller could write nothing and enqueue nothing even if the fence were broken the other way.",
+      "expected": "dev_non_internal_tier answers 400 with the missing-ticker error body; zero 'OK: enqueued' lines in the function log.",
+      "observed": "400 {error: missing or invalid 'ticker' in request body}; the log read since 13:50Z holds 0 'OK: enqueued' lines (by5_first_real.out). The two extra arms run on the deployed function answered 403 and 403 (by5_extra_arms.out).",
+      "status": "STABLE",
+      "method": "command"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A real-ticker invocation and check_e2e.py",
+      "reason": "The order and both halves forbid them: a real ticker would write a status object and enqueue a Bloomberg pull for an admitted caller. No arm payload carries a ticker."
+    },
+    {
+      "item": "The step 8 post-act read (first real Dev enqueue answers 2xx)",
+      "reason": "The order says it is not one of the three criteria. State at 14:42Z: UNMEASURED, 0 'OK: enqueued' and 0 DENIED lines outside this seat's arms (by5_first_real.out). The refusal line is tier-only, so a refused Dev admin is not attributable from it."
+    },
+    {
+      "item": "The two extra arms (body-carried userType, case variant)",
+      "reason": "Not in the order's four; the CTO half names the body arm as required. Run on the deployed function, recorded in by5_extra_arms.out, and kept OUT of AC1 so the criterion reads as the order wrote it (row AMGT_HARVST-D1-S11)."
+    },
+    {
+      "item": "Any IAM, route, authorizer, queue or bucket change",
+      "reason": "The order's BOUNDS; the plan moved one attribute set on one resource and comp-iam read identical before and after."
+    },
+    {
+      "item": "Pushing any commit",
+      "reason": "Shared-branch law: this lane commits LOCAL; the integrator pushes."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-S11: the order's four arms omit the body-carried userType arm its CTO half calls required; run as an extra arm on the deployed function, 403."
+  ],
+  "session_log": "Seat 0.7.0_AE_CloudOps~HV1, 2026-10-12 14:36Z-14:4xZ. Order of acts: start conditions (M exists, is an ancestor of HEAD, file sha256 equal to the working file; by-2 flipped complete; deployed hash equals by-2's); both halves read; the handler diff read against them; before-state and T0; ledger opened; build+upload; plan; mail check; apply; after-state; four arms; ledger closed; local control; two extra arms; step 8 read (UNMEASURED); one surprise row. Ledger entry: org/critical_paths/change_management/20261012T1438Z_harvst-by5-enqueue-dev-admit-20261012_deploy_completion.md. Commits LOCAL.",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan / safe-apply.sh (Rule 18)",
+      "invocation": "terraform plan -target=module.harvest_enqueue -out=<planfile>; .tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply -input=false <planfile>",
+      "result": "Plan: 0 to add, 1 to change, 0 to destroy. Apply complete: 0 added, 1 changed, 0 destroyed. Seat gates in WARN mode: APPLY-WHO ADMITTED; CROSSBOX-DEPLOY verdict=STOP on the same open call as the earlier acts (dell1-20261011T033643Z-e7f2, a portal PROD-promote question naming this root in its scope, not this act); WARN mode proceeds. Pre-apply mail check: get_delivery_state showed one non-READ row, msg 4427, the order itself, opened, read and acked before the apply. The HALT-gate pass is not cited."
+    },
+    {
+      "tool": "comp-iam service opal-research-pull-enqueue",
+      "invocation": "bash .tools/comp-iam service opal-research-pull-enqueue (before and after)",
+      "result": "3 statements before and after, byte-identical; used as a floor only (it models action, not resource)."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open|close-leg|close --slug harvst-by5-enqueue-dev-admit-20261012",
+      "result": "4 legs opened before the first write, each closed with proof, CLOSED."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(?s)ARM dev_non_internal_tier: statusCode 400.*ARM advisor_non_dev: statusCode 403.*ARM no_context: statusCode 403.*ARM internal_no_ticker: statusCode 400",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round81/by5_arms.out",
+      "output_evidence": "ARM dev_non_internal_tier: statusCode 400 / ARM advisor_non_dev: statusCode 403 / ARM no_context: statusCode 403 / ARM internal_no_ticker: statusCode 400. Four aws lambda invoke calls on the DEPLOYED function, each Invoke StatusCode 200 with no FunctionError, payload files by5_arm_*.payload.json (no ticker, no body). The Dev arm's body is the missing-ticker error, so it was admitted past the fence and wrote nothing.",
+      "denominator": "4 of 4 arms read as expected; 0 'OK: enqueued' lines in the log, so nothing was written or enqueued.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "Plan: 0 to add, 1 to change, 0 to destroy",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round81/by5_plan.out",
+      "output_evidence": "'Plan: 0 to add, 1 to change, 0 to destroy.' The one change is module.harvest_enqueue.aws_lambda_function.this: s3_object_version S9217s5ck1gZJvwSC.Ayeg4vFAkV063z -> kwFo21Dq805CaW24uAodJu5WJY.nbvVx and source_code_hash cWiraC3E... -> Q342L4Vn..., last_modified known after apply. Nothing else moved.",
+      "denominator": "1 of 1 resource changed; the saved plan file was the one applied.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "CODESHA256 CHANGED: yes",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~HV1/round81/by5_after.out",
+      "output_evidence": "CODESHA256 Q342L4VnpBkMJfFt/ughTj2AhS3gIa1n+pmjVqrslu0= (before cWiraC3EeuTU9WDIpc5RXzpw6+RT9WxoeqfH/eZiaxo=), 'CODESHA256 CHANGED: yes', State Active, LastUpdateStatus Successful, LastModified 2026-10-12T14:40:46Z. The after value equals the uploaded object's content-sha256.",
+      "denominator": "1 of 1 function read before and after.",
+      "status": "PASS"
+    }
+  ]
+}

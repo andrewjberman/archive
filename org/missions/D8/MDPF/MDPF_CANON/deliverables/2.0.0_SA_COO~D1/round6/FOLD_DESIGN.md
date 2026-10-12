@@ -47,8 +47,9 @@ SMA class (3 lines; OUTSIDE `model_aua`; sum $21,532,921.91): `opal_div_sma` 17,
 
 Six lines stay: the five core models and `tax` (49financial + cottonwood). `tax` is held by two firms at the as-of and on every date it carries a value.
 
-Identity checked: the sum of the global model-class lines equals `model_aua` on 479 of 485 valued dates to the cent, and on the other 6 by at most $0.02
-(rounding). So a model-class fold that keeps the sum keeps `model_aua`; an SMA-class dollar added to it breaks that by $21.5M. The two classes cannot share a line.
+Identity checked (CORRECTED 2026-10-12 by the issuer's re-read of the served 2026-10-09 object; the first text here read "479 of 485 ... the other 6", which was
+wrong): the sum of the global model-class lines equals `model_aua` to the cent on 277 of 485 valued dates, and differs by $0.01 or $0.02 (rounding) on the
+other 208. So a model-class fold that keeps the sum keeps `model_aua`; an SMA-class dollar added to it breaks that by $21.5M. The two classes cannot share a line.
 
 ## 2. Writers of a global per-model leaf (N), counted at HEAD
 
@@ -115,6 +116,11 @@ copy. The Custom node total stays $68,083,780.15 (it sums `by_model`); the 11 me
 
 Gold parquet follows the shaped documents with no code change. The wide ts partition's column set changes (folded `by_model.<key>.*` columns leave,
 `by_model.other_models.*` arrives), so the first fold partition has a different column set from its predecessor.
+
+> CORRECTION (2026-10-12, from `draft/DECOMP_V6_DRAFT.md`): section 3's "registers `other_models` as a `CategoryMember` ... OUTSIDE `CANONICAL_MODELS`"
+> is wrong. `mdpf_category_registry.py:773-804` (`_check_crosswalk_keyspace`) raises at import on a model-class member the crosswalk does not hold. The
+> fold line is a crosswalk row in both homes (`data/mdpf/scripts/gold/mdpf_revamp_model_crosswalk.py` and the emitter lambda's copy), which makes the
+> cell WORLD-class and adds a deployed package to the deploy order. The draft carries the corrected owned-file set.
 
 ## 4. D2 -- why the SMA-class lines are held out of the cell
 
