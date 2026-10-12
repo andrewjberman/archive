@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bh-1.the-freshness-snapshot-is-current-by-the-trading-calendar",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bh-1.the-freshness-snapshot-is-current-by-the-trading-calendar.md",
+    "group": "OTHER",
+    "vintage_commit": "78d59f3ae4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "78d59f3ae4",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bh-1.the-freshness-snapshot-is-current-by-the-trading-calendar.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~398",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/freshness/snapshot.py",
+      "kind": "script",
+      "commit_or_etag": "6617bfa5725ffcfe8803d2ea2979514d1375ca9a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Branch wk-AMGT_RESAPP-398 (worktree C:/dev/wk-resapp-398), cut from 78d59f3ae4. Adds WRITE_HOUR_UTC/WRITE_MINUTE_UTC, latest_scheduled_write(), and the calendar branch in read_freshness_snapshot (the 24-hour rule stays where the calendar cannot answer). No deploy, no push.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_freshness_snapshot.py",
+      "kind": "test",
+      "commit_or_etag": "6617bfa5725ffcfe8803d2ea2979514d1375ca9a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Branch wk-AMGT_RESAPP-398, commit 6617bfa572. One monkeypatch line in _setup holds the calendar out of the 24-hour tests. Nothing else of the file moved. No deploy, no push.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_freshness_snapshot_calendar.py",
+      "kind": "test",
+      "commit_or_etag": "6617bfa5725ffcfe8803d2ea2979514d1375ca9a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Branch wk-AMGT_RESAPP-398, commit 6617bfa572 (new file, 6 offline tests with an injected now and a stub client). No deploy, no push.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the last two lines read `   arms passed 11 of 11` and `R101 SNAPSHOT RULE: YES`; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-398 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round101_prep/checks/r101_snapshot_rule_check.py\" | tail -2; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "   arms passed 11 of 11\nR101 SNAPSHOT RULE: YES\nexit=0",
+      "denominator": "11 arms; 11 passed (the base, before the edit, read 7 of 11 and NO, exit 1)",
+      "status": "PASS",
+      "expect": "arms passed 11 of 11[\\s\\S]*R101 SNAPSHOT RULE: YES[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the last line reads `24 passed` (the 18 existing tests and the 6 new, ANSI colour codes and a warnings count aside); and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-398 && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests/test_freshness_snapshot.py lib/research/api/tests/test_freshness_snapshot_calendar.py -q | tail -1; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "24 passed, 56 warnings in 1.05s\nexit=0 (ANSI colour codes removed from the recorded line)",
+      "denominator": "24 tests: 18 existing in test_freshness_snapshot.py and 6 new in test_freshness_snapshot_calendar.py; 24 passed, 0 failed",
+      "status": "PASS",
+      "expect": "24 passed[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant is named by the task order. The same rule check was run by this worker before the edit: it read 'arms passed 7 of 11' and 'R101 SNAPSHOT RULE: NO' with exit 1, and after the edit 'arms passed 11 of 11' and 'YES' with exit 0.",
+      "expected": "N/A: the task order names no mutant for this worker to run.",
+      "observed": "N/A: no mutant was run by this worker. The before and after runs of the same check are the discrimination evidence.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: each criterion is a single run of the named check; no same-input comparison was specified. The pytest run was one invocation.",
+      "observed": "Not measured by this worker.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy, push, store write, S3 write or delete, schedule change, Bloomberg, SEC, model call, bun, npm, pip install",
+      "reason": "The worker face's bounds: none were run or touched. The checks are offline."
+    },
+    {
+      "item": "The task order <status> flip to complete",
+      "reason": "The order states the status flip is the issuer's (2.0.0_SA_COO~R1)."
+    },
+    {
+      "item": "A separate scratch candidate worktree for the adversary arms",
+      "reason": "The order's preflight names a throwaway candidate built from the edit. The edit was made in this worktree, so the candidate is branch wk-AMGT_RESAPP-398 at 6617bfa572 and the AC1 run above is the post-edit read of that candidate."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "r101_snapshot_rule_check.py",
+      "invocation": "cd C:/dev/wk-resapp-398 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round101_prep/checks/r101_snapshot_rule_check.py\" | tail -2; echo \"exit=${PIPESTATUS[0]}\"",
+      "result": "Before the edit: 'arms passed 7 of 11' and 'R101 SNAPSHOT RULE: NO', exit=1. After the edit: 'arms passed 11 of 11' and 'R101 SNAPSHOT RULE: YES', exit=0."
+    },
+    {
+      "tool": "pytest (two files)",
+      "invocation": "cd C:/dev/wk-resapp-398 && PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests/test_freshness_snapshot.py lib/research/api/tests/test_freshness_snapshot_calendar.py -q",
+      "result": "24 passed, 56 warnings, exit=0"
+    }
+  ]
+}
