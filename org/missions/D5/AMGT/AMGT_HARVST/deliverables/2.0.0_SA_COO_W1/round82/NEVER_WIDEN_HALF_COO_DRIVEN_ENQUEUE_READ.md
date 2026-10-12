@@ -6,12 +6,12 @@
 
 ## THE ACT (this box, once)
 
-One `aws lambda invoke` of `opal-research-pull-enqueue` with an internal authorizer context and ONE in-universe ticker, then read-only
+One `aws lambda invoke` of `opal-research-pull-enqueue` with an internal authorizer context and ONE ticker, **`SAP GY Equity`** (a covered name; amended 2026-10-12 ~16:4xZ), then read-only
 reads of the status object, the queue's message count and the function's log.
 
 ## BLAST RADIUS
 
-- **Written, once:** `packs/<security_key>/status.json` (the seam's own documented overwrite, state `REQUESTED`), and ONE message in
+- **Written, once:** `packs/SAP_GY_Equity/status.json` (CREATED; the seam's own documented write, state `REQUESTED`; no existing object is overwritten), and ONE message in
   `opal-research-pull-requests`.
 - **Not done:** no pull consumer is started (it is a person-started poller; no Bloomberg draw is made); no code, IAM, route or
   authorizer changes; the function, bucket and queue are not otherwise touched.
@@ -20,7 +20,7 @@ reads of the status object, the queue's message count and the function's log.
 ## CONDITIONS (each checked at the act)
 
 - **C-a.** The live `CODESHA256` equals by-2's (`cWiraC3E...`) before the invoke; else STOP.
-- **C-b.** The ticker's prior `status.json` reads `LANDED` (membership proved by a read); else STOP.
+- **C-b.** `packs/SAP_GY_Equity/` holds objects and `packs/SAP_GY_Equity/status.json` is ABSENT (the act creates it and overwrites nothing); else STOP.
 - **C-c.** Exactly one invoke, never retried.
 - **C-d.** The consumer is not run in any mode.
 
