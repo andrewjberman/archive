@@ -1,0 +1,89 @@
+{
+ "to_id": "IRPT_BCKEND.TO-IB-pr-465",
+ "base_commit": "7c00a44b5a",
+ "read_at_utc": "2026-10-12T01:27:13Z",
+ "function": "irpt-holdings-performance-lambda",
+ "function_note": "the 49 Financial entry's function; its twin irpt-inf-holdings-performance-lambda is Inflection's, same artifact, same configuration",
+ "terraform_file": "infra/aws/terraform/investor-reporting/holdings-performance/lambda.tf:19",
+ "terraform_file_twin": "infra/aws/terraform/investor-reporting/holdings-performance/lambda.tf:67",
+ "source_map_entry": "infra/aws/lambda/ci/lambda-source-map.json functions.irpt-holdings-performance-lambda (tf_file infra/aws/terraform/investor-reporting/holdings-performance/lambda.tf, tf_resource module.irpt_holdings_performance.aws_lambda_function.this, last_deployed_at 2026-10-05T10:14:15Z)",
+ "live_configuration": {
+  "runtime": "python3.12",
+  "timeout_s": 300,
+  "memory_mb": 1536,
+  "layers": [
+   "irpt-performance-native-layer:1"
+  ],
+  "environment_key_names": [],
+  "environment_note": "the live Environment block is absent (null), so no key names exist to list; no value was read",
+  "vpc_config": null
+ },
+ "network": {
+  "in_a_vpc": false,
+  "subnets": [],
+  "security_group_egress": [],
+  "vpc_endpoints": [],
+  "nat_exists_and_available": null,
+  "nat_note": "not applicable: the function has no VPC, so no NAT, subnet, route table, security group or endpoint was read (the order allows those reads only if the function is in a VPC)",
+  "configuration_reading": "live lambda get-function-configuration VpcConfig is null for this function; infra/aws/terraform/investor-reporting/holdings-performance/lambda.tf lines 19-43 pass no vpc_config to the yang-lambda module (whose vpc_config variable is optional, modules/yang-lambda/main.tf:53-57); 0 vpc_config matches in infra/aws/terraform/investor-reporting (all roots under it)",
+  "platform_rule": "a Lambda function outside a VPC runs on the service's own network and has outbound access to the public internet; no security group or route table of this account applies to it"
+ },
+ "reach": "REACHES",
+ "claim": "inferred",
+ "reason": "The function is not in a VPC (measured: live VpcConfig null, confirmed by Terraform with no vpc_config in any investor-reporting root). That a function outside a VPC has public outbound access is the platform's rule, not something read from this account, so the word is inferred from a measured configuration. Nothing was called, so whether the vendor answers it was not tested.",
+ "a_call_was_made_from_the_function": false,
+ "other_candidate_functions": [
+  {
+   "function": "irpt-inf-holdings-performance-lambda",
+   "role": "Inflection's holdings-performance producer, same zip",
+   "terraform_file": "infra/aws/terraform/investor-reporting/holdings-performance/lambda.tf:67",
+   "in_a_vpc": false,
+   "read": "live VpcConfig null"
+  },
+  {
+   "function": "irpt-49f-reporting-gold-lambda",
+   "role": "the reporting-gold producer (account_return_daily and kin)",
+   "terraform_file": "infra/aws/terraform/investor-reporting/reporting-gold/lambda.tf",
+   "in_a_vpc": false,
+   "read": "live VpcConfig null; timeout 900 s, memory 3008 MB, same layer"
+  },
+  {
+   "function": "irpt-49f-reporting-publish-lambda",
+   "role": "the reporting publisher",
+   "terraform_file": "infra/aws/terraform/investor-reporting/reporting-publish/lambda.tf",
+   "in_a_vpc": false,
+   "read": "live VpcConfig null"
+  }
+ ],
+ "a_run_time_fetch_would_use": {
+  "library": "yfinance",
+  "call": "yf.download(batch, start, end, auto_adjust=False, group_by='ticker', progress=False, threads=False, actions=False)",
+  "code_line": "data/assets/scripts/silver/commonwealth_price_basis_census.py:234",
+  "import_line": "data/assets/scripts/silver/commonwealth_price_basis_census.py:202",
+  "hosts": [
+   "query2.finance.yahoo.com",
+   "query1.finance.yahoo.com",
+   "fc.yahoo.com",
+   "guce.yahoo.com",
+   "consent.yahoo.com"
+  ],
+  "hosts_read_from": "the installed yfinance 1.2.0 on this box, C:/Users/Test/AppData/Roaming/Python/Python314/site-packages/yfinance (read as text, not imported): const.py:1-2 (query1, query2), history.py:196 (bars from _BASE_URL_ = query2.finance.yahoo.com /v8/finance/chart/{ticker}), data.py:200 (fc.yahoo.com), :221 and :330 (getcrumb on query1 and query2), :262 and :299 (guce.yahoo.com), :296 (consent.yahoo.com)",
+  "ports_and_scheme": "https (443), from the URLs read",
+  "version_caveat": "this box's yfinance (1.2.0, Python 3.14) is not the version a python3.12 Lambda would install; the reader's code pins no version; the bars host is stated for 1.2.0 only"
+ },
+ "package_carries_the_library": false,
+ "package_reason": "The map entry's 14 files (handler, producer, sources.json, stream_parquet, naming and registry files) include no yfinance and the entry names no requirements file; the one layer is irpt-performance-native-layer:1, described as 'pandas/numpy/pyarrow mapping dependencies' (live get-layer-version, 69,899,991 bytes), whose lock (performance/dependency_lock.json) shows no yfinance; 0 hits for yfinance or yahoo in the producer's folder and 0 in infra/aws/lambda/investor-reporting except one ycharts test file. The layer zip itself was not downloaded or opened, so this is the declared contents, not a listing.",
+ "not_established": [
+  "whether Yahoo answers a request from an AWS datacentre address at all (blocking or throttling by source address was not tested; no call was made)",
+  "the rate limit from a fixed or shared Lambda egress address (the reader's own code stops a pass at a rate limit, :244, and its run was from this box)",
+  "the contents of irpt-performance-native-layer:1 beyond its description and lock (the zip was not opened)",
+  "whether yfinance and its dependencies (curl_cffi, pandas, numpy, protobuf, websockets among them in 1.2.0) fit in a package beside the existing layer: the unzipped 250 MB limit was not measured; infra/aws/lambda/bd-pipeline/bd-price-update/lambda_function.py:29-34 says pandas, pyarrow, numpy and boto3 already take about 230 MB of it (held, another function's note)",
+  "account-level egress controls other than a VPC (a service control policy or an IAM condition on outbound calls); none was read",
+  "whether any later change to the function adds a VPC (the reading is of 2026-10-12T01:27:13Z)",
+  "that the vendor's terms or the host list stay as read"
+ ],
+ "functions_invoked": 0,
+ "aws_writes_made": 0,
+ "vendor_calls_made": 0,
+ "sign_ins_made": 0
+}
