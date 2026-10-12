@@ -7,8 +7,9 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
                artifact_sha256 equals the built digest; the after-reads file names the source-map commit, which touched only that file.
   IB168-1-AC2  the LIVE CodeSha256 of irpt-performance-adapter, read now, equals the built digest (so the apply landed and was not rolled back).
   IB168-1-AC3  the after-reads record: ledger CLOSED; the rollback S3 version named BEFORE the upload; BUILD_ONLY digest matched; plan 1 change 0 destroy; re-plan 0;
-               not rolled back; 0 TypeError lines; the four direct-invoke arms with each figure's sha256 unchanged and the claim as stated, arm 4 allowed UNEXERCISED with its
-               reason; the persisted retained revisions COUNTED; no account id in the record.
+               not rolled back; 0 TypeError lines; (CTO half AMENDMENT 1, row S112) the kept selection refs read before and after: every readable ref's figure sha256
+               equal and its claim equal to the PREDICTED claim, the two counts present, an unread ref counted with its reason, at least one readable; arm 1 live on a
+               readable ref, arms 2-4 graded UNEXERCISED-LIVE with reasons; the persisted retained revisions COUNTED (0..2 x refs); no account id in the record.
 """
 import json
 import re
@@ -105,38 +106,47 @@ def main():
         lg = a.get("log") or {}
         if lg.get("typeerror_lines") != 0 or not lg.get("window_start"):
             fail("log.typeerror_lines must be 0 over a stated window_start")
-        arms = a.get("direct_invoke_arms") or []
-        names = {x.get("arm") for x in arms}
-        if names != {1, 2, 3, 4}:
-            fail("direct_invoke_arms must hold arms 1, 2, 3 and 4, holds %s" % sorted(map(str, names)))
-        want = {1: "measured", 2: "inferred", 3: "inferred", 4: "inferred"}
-        for x in arms:
-            n = x["arm"]
-            if x.get("exercised") is False:
-                if n != 4 or not x.get("unexercised_reason"):
-                    fail("only arm 4 may be UNEXERCISED, and with its reason")
+        refs = a.get("refs") or {}
+        reads = a.get("ref_reads") or []
+        if not isinstance(refs.get("count"), int) or refs["count"] < 1 or len(reads) != refs["count"]:
+            fail("refs.count must be an integer >= 1 and equal the number of ref_reads rows")
+        readable = [x for x in reads if x.get("readable") is True]
+        if not readable:
+            fail("no kept selection read before the upload: the apply should have stopped")
+        for x in reads:
+            if x.get("readable") is not True:
+                if not x.get("unread_reason"):
+                    fail("an unread ref needs its unread_reason (counted, not dropped)")
                 continue
-            if x.get("figure_sha256_before") != x.get("figure_sha256_after") or not re.fullmatch(r"[0-9a-f]{64}", str(x.get("figure_sha256_after", ""))):
-                fail("arm %s: the figure's sha256 must be equal before and after" % n)
-            if x.get("claim_after") != want[n]:
-                fail("arm %s: claim_after %r != %s" % (n, x.get("claim_after"), want[n]))
-        if n_arms_ex(arms) < 3:
-            fail("at least arms 1, 2 and 3 must be exercised")
-        if not isinstance(a.get("persisted_retained_revisions"), int):
-            fail("persisted_retained_revisions (the count of retained reports the invokes wrote) must be an integer")
+            hb, ha = x.get("figure_sha256_before"), x.get("figure_sha256_after")
+            if hb != ha or not re.fullmatch(r"[0-9a-f]{64}", str(ha or "")):
+                fail("ref %s: the figure's sha256 must be equal before and after" % x.get("n"))
+            if x.get("claim_predicted") is None or x.get("claim_after") != x.get("claim_predicted"):
+                fail("ref %s: claim_after %r != predicted %r" % (x.get("n"), x.get("claim_after"), x.get("claim_predicted")))
+            if x.get("counts_present_after") is not True:
+                fail("ref %s: the two counts must appear after the apply" % x.get("n"))
+        arms = a.get("direct_invoke_arms") or []
+        by = {x.get("arm"): x for x in arms}
+        if set(by) != {1, 2, 3, 4}:
+            fail("direct_invoke_arms must hold arms 1, 2, 3 and 4, holds %s" % sorted(map(str, by)))
+        a1 = by[1]
+        if a1.get("exercised") is not True or a1.get("ref_n") not in [x.get("n") for x in readable]:
+            fail("arm 1 must be exercised live on one of the readable refs (ref_n)")
+        for n in (2, 3, 4):
+            if by[n].get("exercised") is not False or by[n].get("grade") != "UNEXERCISED-LIVE" or not by[n].get("unexercised_reason"):
+                fail("arm %s must read exercised false, grade UNEXERCISED-LIVE, with its reason (the packet's offline replay)" % n)
+        pr = a.get("persisted_retained_revisions")
+        if not isinstance(pr, int) or isinstance(pr, bool) or pr < 0 or pr > 2 * refs["count"]:
+            fail("persisted_retained_revisions must be an integer in 0..2 x refs.count (one invoke before, one after, per ref)")
         if not a.get("read_operation") or a.get("read_operation") != "performance-report":
             fail("read_operation must name performance-report, the function's one operation")
         raw = json.dumps(a)
         if re.search(r"(?<![0-9a-fA-F])\d{10,}(?![0-9a-fA-F])", raw):
             fail("the record carries a long digit run (an account id or a figure?)")
-        print("OK: ledger CLOSED, rollback version named before upload, digest matched, plan 1/0, re-plan 0, %d arms, %d retained revision(s) counted" % (len(arms), a["persisted_retained_revisions"]))
+        print("OK: ledger CLOSED, rollback version named before upload, digest matched, plan 1/0, re-plan 0, %d of %d refs read with equal figures and predicted claims, %d retained revision(s) counted" % (len(readable), refs["count"], a["persisted_retained_revisions"]))
     else:
         fail("unknown criterion %r" % CID)
     print("%s PASS" % CID)
-
-
-def n_arms_ex(arms):
-    return sum(1 for x in arms if x.get("exercised") is not False)
 
 
 if __name__ == "__main__":

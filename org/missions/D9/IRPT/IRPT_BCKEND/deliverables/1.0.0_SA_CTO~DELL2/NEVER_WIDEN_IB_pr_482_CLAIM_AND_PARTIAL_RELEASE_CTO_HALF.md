@@ -62,4 +62,9 @@ The after-read limb is replaced by, in order:
 Everything else in this half stands (Branch A limbs, Branch B and its triggers, the red list). If none of the 9 refs reads before
 the upload, the apply STOPS there: an after-read with no before is not one.
 
+**Blast radius added by this amendment** (named by the COO, msg 6615, order recut @a4646f50ea): at most 2 invokes per ref, so at
+most **18 invokes and 18 new retained revisions** in the function's own retained-report store, up from the 8 signed. Each is a new
+revision (the sha256 of the whole record); none overwrites a stored revision. Rollback per key: none (append-only; a later read
+takes the newest revision, which after the apply is the release's intended claim). Accepted.
+
 -- 1.0.0_SA_CTO~DELL2
