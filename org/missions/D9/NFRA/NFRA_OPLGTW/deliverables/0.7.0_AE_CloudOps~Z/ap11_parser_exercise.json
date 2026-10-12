@@ -1,0 +1,43 @@
+{
+ "what": "OG-ap-11 pre-grade exercise of the DEPLOYED parser, run against the package bytes that are now live (CodeSha256 YeLmNn/Tkz+HYVVrCS/PeE+mISSAnH/8ilUUxPEnCmk=). Local, in-process; NO AWS call, NO sweep invoke, NO message planted. Its purpose is to de-risk the 12:10Z planting window: a malformed synthetic body parses to None, which LEAVES BOTH RECORDS ALONE and would fail AC2 for the payload's fault rather than the deploy's.",
+ "claim": "measured",
+ "instrument": "deployed schwab_runtime.dlq_message_family(), loaded by path from the package dir",
+ "silver_fn_prefix_read_from_the_module": "opal-assets-silver-",
+ "results": {
+  "eclipse_body": {
+   "parsed_family": "eclipse",
+   "schwab_sweep_action": "LEAVE ALONE (returned to queue)",
+   "serves_AC2_arm": "foreign_survived_schwab_sweep"
+  },
+  "schwab_body": {
+   "parsed_family": "schwab",
+   "schwab_sweep_action": "DELETE + REPORT",
+   "serves_AC2_arm": "schwab_drained_and_reported"
+  }
+ },
+ "negative_controls_all_None_meaning_leave_alone": {
+  "no requestContext": null,
+  "arn without :function:": null,
+  "foreign prefix": null,
+  "prefix exactly with no family": null,
+  "not json": null
+ },
+ "what_this_DOES_establish": "The deployed code reads requestContext.functionArn correctly and routes a correctly-shaped record to the right arm, and it fails CLOSED to leave-alone on five malformed shapes. So the path the condition-C question was about is now exercised END TO END through the live bytes.",
+ "what_this_does_NOT_establish": "That AWS's REAL on-failure records carry that shape. This exercise uses bodies this seat authored, so it cannot evidence the real producer's shape -- that would be circular, which is exactly why a synthetic was refused as condition-C evidence. The real shape rests on the documented Lambda async on-failure destination contract plus OG-dq-1's corroborating read, and the real oracle remains AC2 on the scheduled 12:15Z sweep.",
+ "synthetic_body_shape": {
+  "marked": "synthetic: OG-ap-11 at the top level and inside requestPayload",
+  "names_no_real_bronze_key": true,
+  "requestContext.condition": "RetriesExhausted",
+  "fields": [
+   "version",
+   "timestamp",
+   "requestContext",
+   "requestPayload",
+   "responseContext",
+   "responsePayload",
+   "synthetic"
+  ]
+ },
+ "planting_window": "before ~12:10Z; the grade uses the SCHEDULED 12:15Z sweep, no ad-hoc invoke",
+ "queue_state_note": "OG-dq-1 records a refill of 12 at 13:07Z daily and an unnamed consumer deleting the whole queue at about 16:00Z. 13:07Z is AFTER the 12:15Z sweep, so at grade time the queue should hold ONLY these two synthetics -- clean conditions, and the denominator is checkable at planting time."
+}

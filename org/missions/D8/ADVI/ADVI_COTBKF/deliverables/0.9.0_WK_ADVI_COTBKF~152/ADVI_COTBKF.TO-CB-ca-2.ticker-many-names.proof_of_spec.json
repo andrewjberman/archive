@@ -1,0 +1,124 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-ca-2",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ca-2.ticker-many-names.md",
+  "group": "OTHER",
+  "vintage_commit": "1a27c8cc13"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~152",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round79.md",
+  "vintage_commit": "1a27c8cc13",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ca-2.ticker-many-names.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~152/TICKER_MANY_NAMES.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only record; local files only, no S3 read, no network call",
+   "artifact_covered_by": [
+    "CB79ca2-AC1",
+    "CB79ca2-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~152/TICKER_MANY_NAMES.csv",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only record; local files only",
+   "artifact_covered_by": [
+    "CB79ca2-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~152/BASIS_VALUE_AGAINST_SPLIT_SCALING.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only code-read record; no code changed, no S3 read",
+   "artifact_covered_by": [
+    "CB79ca2-AC2",
+    "CB79ca2-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~152/TICKER_MANY_NAMES.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only note for both records",
+   "artifact_covered_by": [
+    "CB79ca2-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB79ca2-AC1",
+   "criterion_verbatim": "the store-wide control reproduces; the test was written first; every held security whose ticker carries more than one name is classed (`classed` equals `ticker_many_names`); the issuer reads how many are not priced from their own rows.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~152/TICKER_MANY_NAMES.json',encoding='utf-8'));c=d['classes'];n=d['not_own_rows'];print('TICKER-MANY-NAMES control=%d/%d test_written=%s held_securities=%d priced_by_ticker=%d ticker_many_names=%d classed=%d not_own_rows=%d measured_account_days=%d the_15_listed=%d classes=%s'%(d['control']['with_more_than_one_name'],d['control']['tickers'],bool(d['test']['written_at']),d['held_securities'],d['priced_from_the_store_by_ticker'],d['ticker_with_more_than_one_name'],sum(c.values()),n['securities'],n['measured_account_days'],len(d['the_15']),json.dumps(c,sort_keys=True)))\"",
+   "expect": "TICKER-MANY-NAMES control=308/4000 test_written=True",
+   "output_evidence": "TICKER-MANY-NAMES control=308/4000 test_written=True held_securities=1720 priced_by_ticker=769 ticker_many_names=133 classed=133 not_own_rows=4 measured_account_days=26 the_15_listed=15 classes={\"another_names_rows\": 3, \"mixed\": 1, \"names_identical_so_indistinguishable\": 111, \"own_name_not_identified\": 8, \"own_rows\": 10} (rc 0)",
+   "denominator": "133 of 133 held securities with a many-name ticker classed (769 priced from the silver store by ticker on a held day, 1,720 held, 1,722 in the build's table); control 308 of 4,000 tickers; 4 of 133 not priced from their own rows; 15 of 15 funds listed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CB79ca2-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the denominators run from every held security down; the rule for a security's own name and for \"its own rows\" was written before any was classed; names that carry the same series are said to be indistinguishable and not counted as wrong; a security whose own name cannot be identified is that class and not `own_rows`; no account id or amount appears. AMENDMENT 1 adds to this judgment: the order of the basis value and the split scaling is read from the calls in the build's main path, with file and line, not from a comment; \"can a point leave marked and unscaled\" is answered path by path, with `not_established` where the code does not settle it; a point after its last split is said to be unscaled and right.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read TICKER_MANY_NAMES.json, TICKER_MANY_NAMES.csv, BASIS_VALUE_AGAINST_SPLIT_SCALING.json and TICKER_MANY_NAMES.md",
+   "output_evidence": "test written at 2026-10-12T02:04:42Z before any class; 1,720 held -> 769 silver-priced -> 133 many-name -> 111 identical, 10 own_rows, 8 own_name_not_identified, 3 another_names_rows, 1 mixed; order value_before_scaling read from run() calls :973, :976-978, :979, :983, :984; 11 paths, 9 reachable, 1 not reachable, 1 not_established; point after last split listed as unscaled and right; counts, tickers and fund names only",
+   "denominator": "133 of 133 classed; 11 of 11 paths read",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded"
+  },
+  {
+   "criterion_id": "CB79ca2-AC3",
+   "criterion_verbatim": "(AMENDMENT 1) -- where the basis value is written and where the split scaling runs are read with file and line; the order is stated; every path by which a point could leave marked and unscaled carries a reading. The issuer reads the answer the CTO amends its sentence on.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~152/BASIS_VALUE_AGAINST_SPLIT_SCALING.json',encoding='utf-8'));p=d['paths_marked_and_unscaled'];print('BASIS-VS-SCALING basis_written_at=%d split_scaling_at=%d order=%s scaling_is_recorded_per_point=%s paths=%d reachable=%d not_established=%d can_leave_marked_and_unscaled=%s security_types=%d the_sentence_holds_for=%s'%(len(d['basis_written_at']),len(d['split_scaling_at']),d['order'],d['scaling_is_recorded_per_point'],len(p),sum(1 for x in p if x['reachable'] is True),sum(1 for x in p if x['reachable'] not in (True,False)),d['can_leave_marked_and_unscaled'],len(d['by_security_type']),str(d['the_sentence_holds_for'])[:60]))\"",
+   "expect": "BASIS-VS-SCALING basis_written_at=",
+   "output_evidence": "BASIS-VS-SCALING basis_written_at=7 split_scaling_at=11 order=value_before_scaling scaling_is_recorded_per_point=False paths=11 reachable=9 not_established=1 can_leave_marked_and_unscaled=True security_types=9 the_sentence_holds_for=no type: the value is written before the scaling runs, for e (rc 0)",
+   "denominator": "7 basis writes and 11 scaling steps read with file and line; 11 of 11 paths carry a reading (9 reachable, 1 not reachable, 1 not_established); 9 security-type rows",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "ADVI_COTBKF-D2-W152-S1"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~152/ADVI_COTBKF.TO-CB-ca-2.ticker-many-names.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB79ca2-AC1)",
+   "result": "TICKER-MANY-NAMES control=308/4000 test_written=True held_securities=1720 priced_by_ticker=769 ticker_many_names=133 classed=133 not_own_rows=4 measured_account_days=26 the_15_listed=15 classes={\"another_names_rows\": 3, \"mixed\": 1, \"names_identical_so_indistinguishable\": 111, \"own_name_not_identified\": 8, \"own_rows\": 10}"
+  },
+  {
+   "tool": "python",
+   "invocation": "python -c (CB79ca2-AC3)",
+   "result": "BASIS-VS-SCALING basis_written_at=7 split_scaling_at=11 order=value_before_scaling scaling_is_recorded_per_point=False paths=11 reachable=9 not_established=1 can_leave_marked_and_unscaled=True security_types=9 the_sentence_holds_for=no type: the value is written before the scaling runs, for e"
+  }
+ ]
+}

@@ -1,0 +1,139 @@
+{
+  "control": {
+    "tickers": 4000,
+    "with_more_than_one_name": 308
+  },
+  "test": {
+    "text": "TEST FOR \"PRICED FROM ITS OWN ROWS\" -- worker 0.9.0_WK_ADVI_COTBKF~152, TO ADVI_COTBKF.TO-CB-ca-2\nwritten_at: 2026-10-12T02:04:42Z   (clock, date -u; written BEFORE any held security is classed; kept unchanged)\n\nPOPULATION. A held security = a CUSIP in the build's price table (r34/after/security_day_price.parquet) with at least one row in the served\naccount_day_value (a held day = a date on which at least one account holds it). The ticker of a held security = the build's own key,\nre-derived by the build's rule (resolve_series / match_security): the CUSIP's Symbols from the custodian rows, most common first; the first\none the silver price store holds as a ticker (key = strip + upper-case) and that no other CUSIP lists. \"Priced from the silver price store by\nticker\" = at least one held day of the security carries the build's store label cottonwood-silver-canonical-prices (that store is keyed by\nticker only). \"Ticker carries more than one name\" = more than one distinct asset_name among the store's rows with that key, over the whole store.\n\nORDER OF THE STEPS FOR A SECURITY WITH SUCH A TICKER: (b) first, then (a), then (c).\n(b) SAME SERIES. Per name, per date, the price is the median of that name's rows on the date. On every date on which two or more names have a\n    row, max/min - 1 <= 0.001 (0.1 percent). If this holds for every common date over the whole store history of the ticker, the names carry the\n    same series and the class is names_identical_so_indistinguishable (not counted as wrong; the own name is not needed).\n(a) OWN NAME. Custodian description of the CUSIP = its most common non-blank Security_Description (ties: alphabetical first). norm1(x) = upper-case,\n    '&' -> ' AND ', every non-alphanumeric character -> space, whitespace collapsed. EXACT: exactly one name under the ticker has\n    norm1(name) == norm1(description) -> that is the own name. FUZZY (only if no exact match): drop from both sides the tokens in STOP =\n    {FUND, FUNDS, FD, FDS, INC, TRUST, TR, SERIES, CLASS, CL, SHARES, SHARE, SHS, THE, OF, AND, CO, CORP, COMPANY, PORTFOLIO, PTF, ETF,\n    ADMIRAL, ADM, INSTITUTIONAL, INSTL, INST, INVESTOR, INV, RETAIL, and single letters A-Z, and R1..R6, F1..F3}; Jaccard of the two token sets;\n    the own name is the one name whose Jaccard is >= 0.6 and exceeds every other name's Jaccard by >= 0.1. No exact match and no such name (none\n    >= 0.6, or a tie within 0.1, or two names with the same norm1) -> class own_name_not_identified (never own_rows).\n(c) DAY BY DAY, over the held days of the security priced from the silver store (dates in the build's table with that store label and held).\n    On day d, P(d) = the names with a store row for the ticker on d (value = the name's median that day). The build's price b(d) is as traded\n    (split scaling, and Yahoo Close for a substituted ticker), the store's rows are split-adjusted, so b is compared with a row through a SCALE\n    F(d) held constant between splits: f(d') = b(d') / row_own(d') on the days d' where own is in P(d') and every other name in P(d') is within\n    0.1 percent of own's row (the \"agreeing days\"); F(d) for another day = f at the nearest agreeing held day before and after d, taken as the\n    mean if the two are within 0.1 percent of each other, the one that exists if only one side has an agreeing day, undetermined otherwise.\n    Day outcome:\n      agreeing day (own in P(d), all others in P(d) within 0.1 percent of own) ........ OWN   (the price is own's row; others' rows equal it)\n      own not in P(d) (only other names have a row that day) ......................... ANOTHER\n      own in P(d) and some other name differs from own by > 0.1 percent: with F(d) determined, own matches if |b/(F*row_own) - 1| <= 0.001,\n         another matches if some other n has |b/(F*row_n) - 1| <= 0.001. Only own matches -> OWN; only another matches -> ANOTHER;\n         both -> OWN (the price equals own's row); neither, or F undetermined -> NEITHER.\n(d) CLASS. share_own = OWN days / held days priced from the silver store; share_another = ANOTHER days / the same.\n      own_rows ........... share_own >= 0.99\n      another_names_rows . share_another >= 0.50 (and not own_rows)\n      mixed .............. every other security that passed (b) and (a)\n    Reading stated: a day on which another name's row equals own's row is an OWN day (the price is own's row); the stricter reading (OWN only\n    where no other name present equals it) is counted as a sensitivity in the .md and does not change the record's classes.\n    days_not_own_rows (csv) = ANOTHER + NEITHER days. The priced holding account-days and measured account-days on those days are counted from\n    the served account_day_value (rows with a close) and daily_returns (non-null return) -- counts only.\nThresholds: tolerance 0.001 (0.1 percent) in (b),(c); 0.99 for own_rows; 0.50 for another_names_rows; Jaccard 0.6 and margin 0.1 in (a).\n",
+    "written_at": "2026-10-12T02:04:42Z"
+  },
+  "held_securities": 1720,
+  "priced_from_the_store_by_ticker": 769,
+  "ticker_with_more_than_one_name": 133,
+  "classes": {
+    "own_rows": 10,
+    "another_names_rows": 3,
+    "mixed": 1,
+    "names_identical_so_indistinguishable": 111,
+    "own_name_not_identified": 8
+  },
+  "not_own_rows": {
+    "securities": 4,
+    "held_days": 1563,
+    "priced_holding_account_days": 7816,
+    "measured_account_days": 26
+  },
+  "the_15": [
+    {
+      "ticker": "VEIRX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "PCBIX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "ABNFX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "SGIIX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "GFFFX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "FOCPX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "FCNTX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "PRILX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "BALCX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "AGTHX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "DISVX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "DFLVX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "NFFFX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "MEIIX",
+      "names_under_ticker": 1,
+      "class": "single_name"
+    },
+    {
+      "ticker": "VGHAX",
+      "names_under_ticker": 3,
+      "class": "names_identical_so_indistinguishable"
+    }
+  ],
+  "no_ticker": {
+    "held_securities": 457,
+    "how_priced": {
+      "by_store_label_securities_with_a_priced_held_day": {
+        "cottonwood-gold-canonical-holdings": 49,
+        "etfs-bbg-testpull-ticker-history": 3
+      },
+      "securities_with_no_priced_held_day": 405,
+      "held_days_by_label": {
+        "cottonwood-gold-canonical-holdings": 275,
+        "etfs-bbg-testpull-ticker-history": 794,
+        "unpriced": 431932
+      },
+      "key_each_store_is_read_by": {
+        "cottonwood-gold-canonical-holdings": "CUSIP first, else ticker (key_cols cusip and ticker; commonwealth_price_census.py:63-65, match_security :197-216)",
+        "etfs-bbg-testpull-ticker-history": "ticker (commonwealth_price_census.py:69-70)",
+        "cottonwood-silver-canonical-prices": "ticker only (commonwealth_price_census.py:57-58)",
+        "rivalfunds-etfs-gold-security-market": "CUSIP (security_id; commonwealth_price_census.py:66-68)"
+      },
+      "why_no_store_ticker": {
+        "no_symbol_in_custodian_rows": 227,
+        "symbol_not_in_the_silver_store": 192,
+        "symbol_in_the_store_but_listed_by_other_cusips_so_not_credited": 38
+      }
+    }
+  },
+  "headline": "Of 1720 held securities (the build's table holds 1722 CUSIPs), 769 are priced from the silver price store by ticker on at least one held day; 133 of those carry a ticker with more than one asset name (171 of the 1263 securities the table prices from that store on any day). Classed by the test written at 2026-10-12T02:04:42Z: 111 names_identical_so_indistinguishable, 10 own_rows, 8 own_name_not_identified, 3 another_names_rows (VOE, WFC, APH), 1 mixed (IGSB). The 4 not priced from their own rows carry 1563 held days, 7816 priced holding account-days and 26 measured account-days on those days. The build keeps no name: it reads every row of a ticker as one series per (ticker, day) and blanks a day whose rows disagree beyond 1e-6, so a name's rows can price a security only where the other names' rows equal them or its own name has no row that day. The control reproduced: 308 of 4000.",
+  "not_established": [
+    "The store is the 2026-10-11 download; the build read the store at its own cache date (about 2026-10-09). Not established that the rows are the same: for the single-name tickers every build silver security-day has a row in today's store, but a row's value at the build's date was not seen.",
+    "On every one of the 14 securities that reached step (c) the scale branch of the test was never needed (no held day had its own row present and another name differing by more than 0.1 percent), so the outcome rests on which names have a row that day and on the agreement of the present rows. The build tracking the own name's rows up to a scale was checked separately: the day-to-day change of build/row is within 0.1 percent on 21,814 of 22,162 steps.",
+    "A ticker's name variants can be one company under an old and a new label (WELLS FARGO & CO COM and WELLS FARGO CO NEW COM; AMPHENOL CORP CL A and AMPHENOL CORP NEW CL A; ISHARES 0-5 YEAR ... and ISHARES 1-5 YEAR ...). The test counts a price from the other label's rows as another_names_rows, as written. Whether the labels are one security was not established.",
+    "own_name_not_identified (8: NVDA, WRK, DHR, PAA, WBA, VXF, AAPL, TSLA) is the rule's result: for example the description 'Nvidia Corp' against 'NVIDIA CORPORATION COM' has Jaccard 0.25 because the stop list does not map CORP to CORPORATION. The rule was kept as written; the price series of these 8 were not examined.",
+    "For a ticker the build substitutes with the Yahoo Close (census class dividend_adjusted or mixed) the points are the vendor's close for the TICKER and do not depend on the asset_name at all; whether that is the right close for the held security was not tested here.",
+    "Held-day pricing is taken from the r34/after price table and the served account_day_value. The one cash CUSIP the served table prices at par has silver points for 852 days in the r34/after table (it is in the names_identical class); no other served close differs from the table.",
+    "The 494 held securities that have a silver ticker by the build's rule but no held day priced from the silver store (priced by another store or unpriced on their held days) are outside the 769 and were not classed; 38 of them carry a ticker with more than one name (171 minus 133)."
+  ]
+}
