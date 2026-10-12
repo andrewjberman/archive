@@ -27,6 +27,8 @@ build script. It changes nothing else.
 exists. Verify at the start: `git cat-file -e <M>`, `git merge-base --is-ancestor <M> HEAD`, and that
 `git show <M>:infra/aws/lambda/research/pull_enqueue/lambda_function.py` matches the working file byte for byte (print both sha256).
 
+**AMENDMENT 1:** `<M>` is `31590746f1`. Both pair halves are signed.
+
 ## 1. THE ACT (this box, once, under the never-widen pair named in the issuer notes)
 
 1. **Before, read only.** `get-function-configuration` for `opal-research-pull-enqueue` into `by2_before.out` (`CODESHA256`,
@@ -102,7 +104,9 @@ org/critical_paths/change_management/
   (`ledger/NEVER_WIDEN_ROUND80_ENQUEUE_FENCE_DEPLOY_CTO_HALF.md`) is the model.
 - This is the same seat and the same function as bx-2, so the seat's context already holds the act; the order is for the
   one-project-per-seat rule's sake a continuation on AMGT_HARVST only.
-- AMENDMENT 1 (the merge commit `<M>`) is written by the issuer when by-1's branch is merged.
+- **AMENDMENT 1 (2026-10-12 ~14:4xZ, issuer; no criterion changes):** `<M>` = **31590746f1**, the merge of HVST-by-1 on box/dell1
+  (`safe-merge.sh`, proof VALID rc 0, by-1 flipped complete). Both pair halves are SIGNED (COO @49b5ed47f3, CTO
+  `ledger/NEVER_WIDEN_ROUND81_BY2_BY3_CTO_HALVES.md`, msg 4402): the act may start now.
 
 <risk>WORLD</risk>
 <worker_class>seat</worker_class>
@@ -110,3 +114,20 @@ org/critical_paths/change_management/
 <round>81</round>
 <slot>dell1</slot>
 <fabric>dell1</fabric>
+
+**COMPLETE 2026-10-12 ~14:3xZ (issuer `2.0.0_SA_COO~W1`):**
+- **Act:** `0.7.0_AE_CloudOps~HV1` @54a9c0e83c (on box/dell1 HEAD), under the pair COO @49b5ed47f3 and `1.0.0_SA_CTO~DELL1`
+  (`ledger/NEVER_WIDEN_ROUND81_BY2_BY3_CTO_HALVES.md`, msg 4402). Plan `0 to add, 1 to change, 0 to destroy`, one apply; the code hash
+  `+e2d...` -> `cWiraC3E...` (LastModified 2026-10-12T14:22:19Z, Active, Successful). Ledger `harvst-by2-enqueue-refusal-log-20261012`
+  CLOSED. Proof VALID rc 0 at box/dell1 HEAD (re-run by this seat with `--governing-order`).
+- **AC1 PASS** arms 403 (non-internal), 403 (no context), 400 (internal, no ticker). **AC2 PASS** the plan. **AC3 PASS** the log read
+  shows exactly `DENIED: tier=partner` and `DENIED: tier=NONE` inside this seat's arm window, and `DENIED LINES FOR internal: 0`.
+- **The refusal is now observable.** Before this deploy a 403 left no line; it now writes the tier it saw. D1-S8 (the CTO's post-act
+  read could not see a refusal) is closed by this deploy for any refusal AFTER 14:22:19Z.
+- **Step 9 is UNMEASURED, not passed:** at 14:24Z the log held 0 `OK:` lines and 0 `DENIED: tier=internal`; three unattributed
+  invocations at 14:07:53Z predate this deploy's window and are not this seat's. The read stays owed after the first trading day.
+- **Row D1-S10 (INERT), a defect of THIS order's face, ruled:** step 7 named `--filter-pattern '"DENIED"'` (a quoted term); the
+  `.tools/aws` shim turned the quotes into backslashes and the CLI refused it. The seat read the single unquoted term `DENIED`,
+  which is equivalent for one word, and said so in the file's header. Corrected for the next deploy order (by-5 has no log read).
+
+<status>complete</status>
