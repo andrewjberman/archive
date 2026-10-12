@@ -248,8 +248,12 @@ def main():
             except ImportError:
                 fail("jsonschema is not importable")
             paths = [IR + "/_contracts/PerformanceReport.schema.json", "docs/contracts/investor-reporting/v1/PerformanceReport.schema.json"]
+            # AMENDMENT (issuer defect, worker ~334's report): a contract fixture is a wrapper {_fixture, _source, _expect, instance};
+            # the schema validates its `instance` member, as the contract tests do.
             valid = load(IR + "/_contracts/fixtures/PerformanceReport.valid.json")
             invalid = load(IR + "/_contracts/fixtures/PerformanceReport.invalid.json")
+            valid = valid.get("instance", valid)
+            invalid = invalid.get("instance", invalid)
             for sp in paths:
                 sch = load(sp)
                 vf = (((sch.get("properties") or {}).get("optional_facts") or {}).get("properties") or {}).get("value_facts") or {}

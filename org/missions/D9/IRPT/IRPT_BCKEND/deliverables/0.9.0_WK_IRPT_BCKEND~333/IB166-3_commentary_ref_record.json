@@ -1,0 +1,60 @@
+{
+  "base_commit": "4650422c346204e439c6d09f89b1b64880e9a895",
+  "files_changed": [
+    "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py",
+    "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_commentary_ref_round_trip.py",
+    "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md"
+  ],
+  "files_not_changed_on_purpose": [
+    "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py (the writer stays)",
+    "infra/aws/lambda/investor-reporting/reports/resident_installed.py (its port is already a DynamoAcceptance, which now carries the accessor; no wiring was needed)"
+  ],
+  "accessor_shape": "a NEW method DynamoAcceptance.get_commentary_ref(tenant, request_id) returning the item's sibling attribute (map -> dict of its string members, string -> that string, absent -> None); get() and its record are untouched",
+  "cites": [
+    "infra/aws/lambda/investor-reporting/reports/commentary_draft_store.py:205-234",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py:73-87",
+    "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py:156-160"
+  ],
+  "reader_rule_in_words": "handle_commentary_ready reads commentary_ref through the acceptance port's get_commentary_ref (the item's sibling attribute) when the port has it, and from the record only for a port without it (a test fake); a None or blank value refuses COMMENTARY_REF_ABSENT and a value that is not exactly {artifact_id, sha256, version_id} refuses COMMENTARY_REF_MALFORMED; nothing is ever written into the record.",
+  "record_immutable_test": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_commentary_ref_round_trip.py::test_record_immutable_test_the_record_bytes_are_identical_before_and_after_the_write",
+  "round_trip_tests": [
+    "test_round_trip_writer_to_packager_through_the_real_dynamo_acceptance",
+    "test_record_immutable_test_the_record_bytes_are_identical_before_and_after_the_write",
+    "test_an_item_with_no_commentary_ref_refuses_absent_and_a_malformed_one_refuses_malformed",
+    "test_a_ref_inside_the_record_is_not_what_the_live_packager_reads"
+  ],
+  "deployed_where": {
+    "function_family": "NONE for opal_packager.py: no function in lambda-source-map.json and no DIRS entry of build_resident_package.py carries ycharts/research. acceptance.py is carried by the Lambdas irpt-ycharts-generate (native to source_dir), irpt-status, irpt-commentary-draft-store-lambda, irpt-commentary-composition-read-lambda (the last three pinned to older commits) and by the resident package (ycharts/generate dir); resident_installed.py by the resident package (reports dir) and irpt-status (pinned 361c44fa9d).",
+    "cite": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py:37-38",
+    "also_cites": [
+      "infra/aws/lambda/ci/lambda-source-map.json:3990",
+      "infra/aws/lambda/ci/lambda-source-map.json:5458-5486",
+      "infra/aws/lambda/investor-reporting/reports/resident_installed.py:423-428"
+    ],
+    "row": "IRPT_BCKEND-D2-W333-S1"
+  },
+  "hash_pins": [
+    {
+      "where": "infra/aws/lambda/ci/lambda-source-map.json staged_from rows for ycharts/generate/acceptance.py in irpt-status (pin 361c44fa9d), irpt-commentary-draft-store-lambda (pin 283f7e7700), irpt-commentary-composition-read-lambda (pin 090c819803)",
+      "what_i_did": "nothing: each pins an older commit and the sha256 of that commit's blob, so the bytes built are unchanged; the map is outside my paths"
+    },
+    {
+      "where": "infra/aws/lambda/ci/lambda-source-map.json irpt-ycharts-generate files[] acceptance.py",
+      "what_i_did": "nothing: no staged_from pin, so the next build of that function takes the HEAD bytes (a release cell's act); its artifact_sha256 is the live CodeSha256, not a pin of this file"
+    },
+    {
+      "where": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~312/IB152-1_release_read.json built_sha abbdab49... (4 hits) and IRPT_ANLREQ ~53 UPLOAD_DOOR_RELEASE_CENSUS.json",
+      "what_i_did": "nothing: historical readings of the pre-change acceptance.py (HEAD blob sha256 abbdab4935097ea5), not pins that gate; opal_packager.py (sha256 5605e640...) and resident_installed.py are pinned nowhere (comp-find, 75472 files scanned)"
+    }
+  ],
+  "suites": {
+    "research_before": "302 passed in 11.87s",
+    "research_after": "306 passed in 11.61s",
+    "reports_before": "202 passed in 6.31s",
+    "reports_after": "202 passed in 5.61s",
+    "generate_after": "544 passed, 30 skipped, 1 xfailed, 68 subtests passed in 101.86s"
+  },
+  "request_sent": false,
+  "deployed": false
+}
