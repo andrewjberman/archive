@@ -1,0 +1,13 @@
+NFRA_CTLPLN TO-CT-w-10 step 6: the identities behind the recent refresh_token lines, BY DIGEST ONLY. Seat 0.7.0_AE_CloudOps~U7, read 2026-10-12T12:01Z. No identity, cookie or token value is in this file or was stored anywhere.
+Source: log group /aws/lambda/opal-portal-data-proxy, the 'Event:' lines of the 14 day retention whose cookies list carries the NAME refresh_token and which are aged 7 days or less (the 7 day refresh expiry per auth-handler jwt.ts).
+refresh_token lines aged 7 days or less: 16
+distinct identity digests (sha256 of the lower-cased email): 2
+Digest = sha256 of the account email, lower-cased and trimmed, UTF-8, hex. The identity is the authorizer context's email field of that request.
+Mapped against the users table at read time (57 PROFILE rows hashed the same way): both digests map to exactly one account, none to several, none to none.
+Category of the two accounts (category only): digest 7b1bca22c953247e... = internal (firmId opal-capital), status active, userType Dev. Digest e95c05c7ae90f7ee... = internal (firmId opal-capital), status disabled, userType Dev. No partner-firm identity is among them.
+The digests:
+7b1bca22c953247eca62f981fb02c02f3389e5e4933eb68ff4ea54ae81cddaaa
+e95c05c7ae90f7eee9fce2822220a163bdc4318da67408e7ce54db774ee0d8a9
+
+HOW AN OPERATOR MAPS A DIGEST BACK TO AN ACCOUNT WITHOUT THE LOG: read-only scan of opal-users-v2 for items with SK = PROFILE, projecting email (and status); for each email compute sha256(email.strip().lower().encode('utf-8')).hexdigest(); the account whose hash equals the digest is the identity. This seat did exactly that and printed only the match counts above. The mapping tool is ctw10_logging_fix_tool.py, subcommand identities (same directory).
+WHAT ANDREW'S YES WOULD COVER (his, not this seat's): invalidating the refresh tokens of the ACTIVE account above (a disabled account's refresh is refused by the auth handler per status, as the UI walker design relies on); and the purge of the log group's events. The 29 device_trust lines are a separate class (a 30 day trusted-device token) whose identities this step did not list.
