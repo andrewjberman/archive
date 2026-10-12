@@ -8,7 +8,7 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
   IB168-1-AC2  the LIVE CodeSha256 of irpt-performance-adapter, read now, equals the built digest (so the apply landed and was not rolled back).
   IB168-1-AC3  the after-reads record: ledger CLOSED; the rollback S3 version named BEFORE the upload; BUILD_ONLY digest matched; plan 1 change 0 destroy; re-plan 0;
                not rolled back; 0 TypeError lines; (CTO half AMENDMENT 1, row S112) the kept selection refs read before and after: every readable ref's figure sha256
-               equal and its claim equal to the PREDICTED claim, the two counts present, an unread ref counted with its reason, at least one readable; arm 1 live on a
+               equal and its claim equal to the PREDICTED claim, the two counts present, an unread ref counted with its reason and the SAME refusal code before and after (the import smoke), at least one readable; arm 1 live on a
                readable ref, arms 2-4 graded UNEXERCISED-LIVE with reasons; the persisted retained revisions COUNTED (0..2 x refs); no account id in the record.
 """
 import json
@@ -111,12 +111,16 @@ def main():
         if not isinstance(refs.get("count"), int) or refs["count"] < 1 or len(reads) != refs["count"]:
             fail("refs.count must be an integer >= 1 and equal the number of ref_reads rows")
         readable = [x for x in reads if x.get("readable") is True]
-        if not readable:
-            fail("no kept selection read before the upload: the apply should have stopped")
+        fallback = a.get("fallback") == "CTO-AMENDMENT-2-B"
+        if not readable and not fallback:
+            fail("no kept selection read before the upload and no fallback named: the apply should have stopped")
         for x in reads:
             if x.get("readable") is not True:
                 if not x.get("unread_reason"):
                     fail("an unread ref needs its unread_reason (counted, not dropped)")
+                rb, ra = x.get("refusal_code_before"), x.get("refusal_code_after")
+                if not rb or rb != ra:
+                    fail("ref %s: an unread ref is the import smoke, its refusal code must be the same before and after (got %r / %r)" % (x.get("n"), rb, ra))
                 continue
             hb, ha = x.get("figure_sha256_before"), x.get("figure_sha256_after")
             if hb != ha or not re.fullmatch(r"[0-9a-f]{64}", str(ha or "")):
@@ -130,8 +134,10 @@ def main():
         if set(by) != {1, 2, 3, 4}:
             fail("direct_invoke_arms must hold arms 1, 2, 3 and 4, holds %s" % sorted(map(str, by)))
         a1 = by[1]
-        if a1.get("exercised") is not True or a1.get("ref_n") not in [x.get("n") for x in readable]:
+        if readable and (a1.get("exercised") is not True or a1.get("ref_n") not in [x.get("n") for x in readable]):
             fail("arm 1 must be exercised live on one of the readable refs (ref_n)")
+        if not readable and (a1.get("exercised") is not False or a1.get("grade") != "UNEXERCISED-LIVE" or not a1.get("unexercised_reason")):
+            fail("fallback: arm 1 must read exercised false, grade UNEXERCISED-LIVE, with its reason")
         for n in (2, 3, 4):
             if by[n].get("exercised") is not False or by[n].get("grade") != "UNEXERCISED-LIVE" or not by[n].get("unexercised_reason"):
                 fail("arm %s must read exercised false, grade UNEXERCISED-LIVE, with its reason (the packet's offline replay)" % n)
