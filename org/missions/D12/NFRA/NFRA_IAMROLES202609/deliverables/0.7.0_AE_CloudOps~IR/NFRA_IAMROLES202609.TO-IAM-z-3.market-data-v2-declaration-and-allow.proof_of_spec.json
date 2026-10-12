@@ -1,0 +1,211 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_IAMROLES202609.TO-IAM-z-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IR",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3cadaf52ca"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP_R9.md",
+  "vintage_commit": "ef498be99f",
+  "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-z-3.market-data-v2-declaration-and-allow.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/market-overview/s3.tf",
+   "kind": "terraform",
+   "commit_or_etag": "96c735a39c",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Removal (1): the four market_data_v2 resource blocks (aws_s3_bucket, aws_s3_bucket_versioning, aws_s3_bucket_server_side_encryption_configuration, aws_s3_bucket_public_access_block) are gone, replaced by a 5-line comment recording the ruling, the tombstone and why keeping the declaration was itself the hazard. grep -c 'market_data_v2' on this file reads 0 -- the comment names the bucket in its hyphenated S3 form, not the resource form. No executable line is added.",
+   "artifact_covered_by": ["AC1", "AC4"]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/market-overview/iam_legacy.tf",
+   "kind": "terraform",
+   "commit_or_etag": "96c735a39c",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Removal (2): arn:aws:s3:::opal-market-data-v2/* out of Sid S3MarketDataWrite and arn:aws:s3:::opal-market-data-v2 out of Sid S3MarketDataList. Applied untargeted: 0 added, 1 changed, 0 destroyed. The live document afterwards is the rollback minus exactly those two ARNs: 5 statements unchanged, 11 -> 9 ARNs, 0 added, Sid set identical, every statement action-identical, and the five opal-data-portal-v2 references kept.",
+   "artifact_covered_by": ["AC2", "AC4"]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/tombstones.json",
+   "kind": "config_data",
+   "commit_or_etag": "64fc0b7370",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The opal-market-data-v2 entry's declaration_removed moves from 'NOT YET -- TF-debt A7, OPEN' to '2026-10-12 @96c735a39c (...applied untargeted 0 add / 1 change / 0 destroy)'. 7 tombstones intact, JSON valid, 0 CR, 0 non-ASCII. A7 was found by THIS seat in July and disowned as NOT-AUTHORIZED because it read as an obvious continuation of a thread Andrew had opened but sat outside his approval (RULINGS_LEDGER line 115); the CTO's E3 ruling is what authorises the line to move now.",
+   "artifact_covered_by": ["AC4"]
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round9/market_data_v2/MDV2_SURVEY.md",
+   "kind": "doc",
+   "commit_or_etag": "768b30250a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "PHASE A. The state read, both plans graded per attribute, and the answer to the cell's pivotal question derived from prior_state / configuration / resource_changes / resource_drift rather than reasoned. Also carries two defects of my own found and fixed that turn (a terraform fmt write, and two non-restorable rollbacks) and the market_update_lambda_role omission-rule near-miss. Both halves were signed against this document.",
+   "artifact_covered_by": ["AC4"]
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round9/market_data_v2/POST_APPLY.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "PHASE B. The POST-APPLY-PLAN line, the baseline re-read, the plan-vs-pair table, the four signed outcomes each measured, and the AC1 criterion-vs-tool mismatch stated openly.",
+   "artifact_covered_by": ["AC1", "AC3", "AC4"]
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round9/market_data_v2/ROLLBACK_market-data-generator-permissions.json",
+   "kind": "config_data",
+   "commit_or_etag": "768b30250a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The restorable rollback: 5 statements, 11 ARNs, 2 naming opal-market-data-v2. Captured with --query PolicyDocument behind a shape guard that refuses a wrapped {RoleName,PolicyName,PolicyDocument} response and refuses zero statements in a live policy. A sibling file at the same pin carries the same document under the older role-prefixed name, re-captured in document shape after the audit found it wrapped.",
+   "artifact_covered_by": ["AC2", "AC4"]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261012T0322Z_iamroles-r9-market-data-v2_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The NEVER-2 entry, opened 03:22Z before the first world act and closed after verification, both legs proven, sentinel removed. Status reads CLOSED.",
+   "artifact_covered_by": ["AC3"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "`decl=0 plan=1` -- the declaration is gone and the module plans clean after the drain (no resurrection pending)",
+   "method": "command",
+   "invocation": "bash -c \"f=org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~IR/round9/market_data_v2/POST_APPLY.md; test -f \\$f || { echo MISSING:\\$f; exit 2; }; echo decl=\\$(grep -c 'market_data_v2' infra/aws/terraform/market-overview/s3.tf) plan=\\$(grep -c -E '^POST-APPLY-PLAN: market-overview: .*0 to add, 0 to change, 0 to destroy' \\$f)\"",
+   "output_evidence": "decl=0 plan=1\nexit=0",
+   "denominator": "4 resource blocks declared the bucket before the act and 0 do now; 1 POST-APPLY-PLAN line. The 5-line replacement comment names the bucket as 'opal-market-data-v2' (hyphens, the S3 name), so it does not match the resource-form token the criterion greps for -- decl=0 is a real zero and not an artifact of wording I chose.",
+   "status": "PASS",
+   "status_reason": "Both halves hold, and ONE OF THEM REQUIRED ME TO HANDLE A CRITERION-VS-TOOL MISMATCH RATHER THAN QUIETLY SATISFY IT. The regex demands the line contain '0 to add, 0 to change, 0 to destroy', but terraform plan NEVER prints that phrase when a module is clean: it prints 'No changes. Your infrastructure matches the configuration.' and emits no Plan: line at all. The phrase exists only when there is something to do. I could have typed the phrase and called it the plan summary; instead the line carries the tool's verbatim sentence followed by the same fact in brackets, ATTRIBUTED to the instrument that does produce it -- 'show -json: 43 resource_changes, all no-op -- 0 to add, 0 to change, 0 to destroy'. Nothing is attributed to the human output that it did not say, and POST_APPLY.md states the mismatch in full so a grader is not left to discover it. THE SUBSTANCE BEHIND BOTH NUMBERS: decl=0 means the resurrection pressure is gone at the source, and the clean plan means it is gone in effect -- round 7 read '4 to add' here, which was Terraform intending to recreate a bucket Andrew ruled deleted on 2026-07-30."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "`opal-market-data-v2=0`, and `opal-data-portal-v2=` 30 or more beside a `DENOMINATOR:` line (a failed read exits 2, never a zero)",
+   "method": "command",
+   "invocation": "bash -c \".tools/aws iam get-account-authorization-details --output json > /c/tmp/z3_auth.json && python 'org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/2.0.0_SA_COO~ZI/checks/round9/allow_names.py' /c/tmp/z3_auth.json opal-market-data-v2 opal-data-portal-v2\"",
+   "output_evidence": "opal-market-data-v2=0\nopal-data-portal-v2=38 Role/FredIngestionLambdaRole,...\nDENOMINATOR: principals=357 documents=652\nexit=0",
+   "denominator": "357 principals and 652 policy documents -- the whole account, from a 35,743,663-byte auto-paginated get-account-authorization-details. The denominator reproduces both the issuer's cut-time read and this seat's own z-1 run an hour earlier, which is the corroboration that this is a population rather than a page.",
+   "status": "PASS",
+   "status_reason": "ZERO GRANTS ON THE NAME ANYWHERE IN THE ACCOUNT, where the base held 1 (market-data-generator-lambda-role, 2 ARNs across two Sids). The control carries the weight: opal-data-portal-v2 reads 38 on the same parse of the same 652 documents, and the output names market-data-generator-lambda-role among those 38 -- so the parser is demonstrably reading the very document this act edited and still finds no opal-market-data-v2 in it. A zero from a parser that could not see that document would prove nothing. The checker exits 2 and prints ERROR on a failed read rather than returning a zero, so a broken read cannot pass as a clean one. WORTH NAMING: this criterion is account-wide, so it would also have caught a grant on some other principal that nobody had enumerated. There was none -- the single grant the project had found was the only one."
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "`open=0` and `closed=1`",
+   "method": "command",
+   "invocation": "bash -c \"echo open=\\$(ls -a org/critical_paths/.open_deploys/ | grep -c 'iamroles-r9-market-data-v2') closed=\\$(grep -l '^\\*\\*Status:\\*\\* CLOSED' org/critical_paths/change_management/*iamroles-r9-market-data-v2* 2>&1 | grep -c '\\.md\\$')\"",
+   "output_evidence": "open=0 closed=1\nexit=0",
+   "denominator": "1 NEVER-2 entry, 2 legs, 2 proven. The pre-open sentinel census was unioned across every live worktree plus the shared untracked directory read with ls -a: 0 market-data-v2 sentinels anywhere, so this act did not ride an entry left open elsewhere.",
+   "status": "PASS",
+   "status_reason": "Opened 03:22Z, before the first world act, and closed after the four signed outcomes were measured. open=0 is not discriminating on its own -- it is equally true before the entry exists -- so the pass rests on the conjunction with closed=1 against the issuer's recorded base reading of open=0 closed=0. The intermediate leg closures were committed rather than left on disk, because deploy_ledger.py does not commit a close-leg and this project has already measured four entries that read CLOSED on disk while HEAD still said OPEN."
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "AC4 (JUDGMENT, never self-graded; UNVERIFIABLE-BY-INSTRUMENT, status_reason naming 3.0.0_SA_CVO~Z): is the ruled deletion now fully recorded in code, state and the tombstone, with nothing re-created?",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT -- judgment, graded by 3.0.0_SA_CVO~Z",
+   "output_evidence": "Not produced. The order marks AC4 judgment=true. Material to grade: MDV2_SURVEY.md sections 1, 2 and 4; POST_APPLY.md's four signed outcomes; the tombstone entry; row Z-S43.",
+   "denominator": "FOUR surfaces the ruled deletion has to be recorded on: the configuration (4 blocks -> 0), the state (4 addresses -> 0, 55 -> 51), the tombstone (declaration_removed now citing the commit), and the live IAM grant (2 ARNs -> 0). All four measured. Plus one negative that matters more than any of them: 1 bucket that must still not exist.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Graded by 3.0.0_SA_CVO~Z. ON THE FOUR POSITIVE SURFACES THE ANSWER IS YES AND EACH IS MEASURED: config, grep -c market_data_v2 in s3.tf = 0; state, terraform state list 55 -> 51 with 0 market_data_v2 addresses; tombstone, declaration_removed cites @96c735a39c; grant, the live document is the rollback minus exactly 2 ARNs with 0 added, Sids and actions identical. ON THE NEGATIVE -- NOTHING RE-CREATED -- THE ANSWER IS ALSO YES, AND THIS IS THE ONE I WOULD PUT IN FRONT OF A GRADER FIRST, because it is the whole reason the act needed a pair: get-bucket-location opal-market-data-v2 still reads rc=254 NoSuchBucket after the apply, with a live control returning rc=0 in the same run, and safe-apply's own tombstone-gate printed 'checked 0 create(s) in this plan against 7 tombstone(s) / CLEAN'. Two independent nets, one of which I did not have to rely on. THE MECHANISM IS WORTH THE GRADER'S ATTENTION BECAUSE IT INVERTS THE CELL'S OWN WORRY: the cell asked what the plan would do with four state entries for an absent bucket, expecting a DESTROY. It plans none. The refresh records them in resource_drift as actions=['delete'], after=None; the configuration no longer declares them; so they appear in resource_changes 0 times and the apply prunes stale state with no API call. resource_drift fell 5 -> 1 afterwards, which is the state prune showing up as the disappearance of the drift rows that described it. WHAT I WOULD FLAG AS THE RESIDUAL RISK, and it is not in this act's scope: the surviving drift entry is aws_iam_role.market_update_lambda_role, which has LOST AmazonS3FullAccess and AmazonDynamoDBFullAccess in the world while state listed them. Its resource_change read no-op throughout -- because its declaration OMITS inline_policy and managed_policy_arns -- so this untargeted apply reconciled state to the live narrowing instead of re-attaching two full-access policies to a production role. That is THE OMISSION RULE doing its job inside an apply whose summary line ('0 to add, 1 to change, 0 to destroy') would not have hinted at the alternative. NO CONSUMER RUN EXISTS: market-data-generator-lambda-role reads RoleLastUsed null and has no LAMBDA node in the served graph, so there is nothing to invoke and I am not substituting a weaker check for one."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Five controls, three of which could have stopped the act. (1) THE BASELINE RE-READ, the pair's stop condition: the live policy compared canonically against BOTH rollback files immediately before the act, plus a live read of the bucket. (2) THE PLAN EQUALITY CHECK against the pair's stated shape, graded from show -json per attribute, per Sid and per ARN, with resource_changes, prior_state, configuration and resource_drift each read separately so that 'no destroy' is explained rather than observed. (3) SAFE-APPLY'S TOMBSTONE-GATE, an independent net: it checks every planned create against tombstones.json and would refuse a re-create of this exact bucket. (4) A LIVE NEGATIVE READ AFTER the apply -- the bucket must still be absent -- paired with a live control bucket that must still be present. (5) THE ACCOUNT-WIDE AC2 PARSE with a 38-hit positive control that names the edited role.",
+   "expected": "baseline EQUAL on both rollbacks and the bucket absent; plan 0/1/0 with 43 changes = 42 no-op + 1, market_data_v2 in resource_changes 0, resource_drift 5 of which 4 are market_data_v2; tombstone-gate CLEAN with 0 creates; after the apply the policy is the rollback minus exactly 2 ARNs with 0 added, the bucket still NoSuchBucket, state 51, the plan clean, and the name 0 account-wide with the control 30+.",
+   "observed": "Baseline EQUAL to both rollbacks (5 stmt, 11 ARNs); bucket rc=254 NoSuchBucket. Plan: 0 to add / 1 to change / 0 to destroy; 43 changes = 42 no-op + 1 update; market_data_v2 in resource_changes 0; resource_drift 5 with 4 market_data_v2 (actions delete, after None). tombstone-gate: 'checked 0 create(s) in this plan against 7 tombstone(s)', CLEAN. Apply complete: 0 added, 1 changed, 0 destroyed. After: 5 stmt, 11 -> 9 ARNs, 2 gone (both opal-market-data-v2), 0 added, Sid set identical, actions identical, portal-v2 kept 5; bucket STILL rc=254 NoSuchBucket with control rc=0; state list 51 with 0 market_data_v2; untargeted plan 43 all no-op; resource_drift 5 -> 1. AC2: name=0, control=38, denominator 357/652.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The SAVED untargeted plan file from the graded run is what safe-apply applied, so the graded bytes are the landed bytes. Every figure comes from show -json rather than parsed human output; the one place the human output is quoted (the POST-APPLY-PLAN line) is labelled as such and its machine equivalent is attributed separately. The plan was re-run after an unrelated whitespace revert in PHASE A and returned the identical verdict, so the grade does not rest on formatting. The rollback was read behind a shape guard refusing a wrapped response.",
+   "observed": "PHASE A and PHASE B plans agree: 0/1/0, 43 changes, 42 no-op, market_data_v2 absent from resource_changes, 4 in resource_drift -- across three separate planning runs, two of them in PHASE A before and after the fmt revert. Post-apply the same module plans 43/43 no-op in both the worktree and the shared tree. state list moved 55 -> 51 exactly, the predicted figure.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "aws_iam_role.market_data_generator (the role object itself), whose RoleLastUsed is null and which has no Lambda node in the served graph.",
+   "reason": "BOUNDS: the role stays; its orphan status is row Z-S43's, not this act's. Only the four declarations and the two dead ARNs leave."
+  },
+  {
+   "item": "aws_iam_role.market_update_lambda_role in the world.",
+   "reason": "State reconcile only, explicitly permitted by the COO half. Its resource_change read no-op throughout, so the live role was never modified. Its drift -- AmazonS3FullAccess and AmazonDynamoDBFullAccess detached live while state listed them -- is somebody else's least-privilege work, and the reason this apply did not undo it is that the declaration omits managed_policy_arns. Recorded in both the survey and POST_APPLY rather than acted on."
+  },
+  {
+   "item": "Re-creating opal-market-data-v2, in any form.",
+   "reason": "Forbidden by BOUNDS and by the ruling of 2026-07-30. Verified NOT done by a live read after the apply (rc=254 NoSuchBucket, live control rc=0) and independently by safe-apply's tombstone-gate reporting 0 planned creates against 7 tombstones. The rollback path for the declaration is explicitly 'never re-applied'."
+  },
+  {
+   "item": "Every other address in market-overview (43 resource_changes, 42 of them no-op before the act).",
+   "reason": "Out of the permitted set. The untargeted plan is what makes that auditable: 42 no-op entries are 42 resources demonstrably not being touched, which a -target run would simply not have reported on."
+  },
+  {
+   "item": "The pre-existing terraform fmt deviation in market-overview/iam_legacy.tf (and two sibling files).",
+   "reason": "Not mine. Established by running fmt -check at HEAD in the shared tree and getting the same file list, and by comparing the flagged HUNK on both sides -- identical content, shifted one line by my ARN removal above it. I had briefly introduced the fix by accident (terraform fmt -diff writes unless -check is passed) and reverted it in both trees; an unsigned whitespace change inside a never-widen act is exactly what a pair should not have to adjudicate."
+  },
+  {
+   "item": "Any alert, monitor, schedule or Access Analyzer call (G-21, G-25).",
+   "reason": "None performed or proposed."
+  }
+ ],
+ "surprises": [
+  "NFRA_IAMROLES202609-Z-S43 (prior, mine): the row this act executes. market_data_v2 was NOT 'deleted out of band' -- Andrew ruled it, it is tombstoned, and safe-apply's tombstone-gate would already have refused the recreate; two committed artifacts of this project, one of them my own round-7 survey, stated the premise backwards. This act closes the TF-debt (A7) that row identified, and the tombstone-gate line printed during this very apply ('checked 0 create(s) against 7 tombstone(s)') is the gate that row said nobody had named.",
+  "NFRA_IAMROLES202609-Z-S50 (mine, filed with z-6): the served yield curve's data_as_of is the generation date rather than the data's as-of date. Unrelated to this act's surface but filed in the same round and cited here because it is the other place this round found a value that does not carry its claim."
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-10/ir_lane_iamroles_r6_w1_phase_b_and_w2_phase_a.md, round-9 section. This seat is a SESSION seat, not an L7 worker subagent. GO: msg 33443, both halves SIGNED (COO @04146e0808, CTO @e03d903463). THE RESULT: a bucket Andrew ruled deleted on 2026-07-30 is now absent from the configuration, the state, and every IAM grant in the account, with its tombstone citing the commit -- and it was NOT re-created, proved by a live read and independently by the tombstone-gate. THE ONE IDEA I WOULD CARRY FORWARD is the shape of the answer to the cell's own question. The cell asked what a plan does with four state entries for a bucket that does not exist, and expected a DESTROY -- reasonably, because that is what 'remove the declaration of something in state' normally means. It plans none: the refresh writes them into resource_drift as deletes, the configuration no longer declares them, and so they vanish from resource_changes entirely. I did not want to reason my way to that, so I read prior_state, configuration, resource_changes and resource_drift as four separate numbers, which is what turned 'the plan shows no destroy' from a hopeful observation into an explained mechanism. SECOND, SMALLER: this is the second time tonight a sparse worktree's cone blocked an apply at safe-apply's HALT-gate and the LGIC naming limb, and the second time was avoidable -- a sparse worktree that will run an apply needs `lib` and its own agent home folder in the cone, and I now know that without discovering it again.",
+ "compiler_tools": [
+  {
+   "tool": "terraform state list (the cell's step 1, and the post-apply count)",
+   "invocation": "before and after the apply",
+   "result": "PASS",
+   "note": "Before: 55 addresses, all four market_data_v2 present -- which is what made the cell's question live. After: 51, zero market_data_v2. The 4-address delta is the half of the act that only an UNTARGETED apply performs, and it is why the signed shape was untargeted; a -target run would have changed the policy and left four stale rows describing a bucket Andrew deleted."
+  },
+  {
+   "tool": "terraform plan -out + show -json, reading four fields rather than one",
+   "invocation": "three planning runs across both phases; prior_state, configuration, resource_changes and resource_drift each read separately",
+   "result": "PASS",
+   "note": "This is where the act's central fact came from. prior_state holds 0 of the four (the refresh found them gone), configuration holds 0 (my edit), resource_changes holds 0 (so no create and no destroy), and resource_drift holds 4 with actions=['delete'], after=None. Reading only the Plan: line would have given the right answer with no mechanism behind it. resource_drift also surfaced the market_update_lambda_role omission-rule near-miss, which no part of this cell asked about."
+  },
+  {
+   "tool": "safe-apply.sh tombstone-gate",
+   "invocation": "fired during the apply",
+   "result": "PASS",
+   "note": "'checked 0 create(s) in this plan against 7 tombstone(s)' / 'CLEAN: no planned create matches a tombstoned resource.' An INDEPENDENT net under the act's one irreversible risk -- re-creating a bucket a human ruled deleted -- and the gate row Z-S43 pointed out that three of my own round-7 records had leaned on without naming. Here it is named and quoted."
+  },
+  {
+   "tool": "aws s3api get-bucket-location (the negative read) with a live control",
+   "invocation": "before and after the apply, each beside opal-data-portal-v2",
+   "result": "PASS",
+   "note": "rc=254 NoSuchBucket both times, with the control returning rc=0 in the same run -- so the 254 is the world and not a broken credential or a mangled argument. The error CODE is the oracle here, not an HTTP status: head-bucket would have been the wrong instrument, as x-2 established earlier in this project."
+  },
+  {
+   "tool": "aws iam get-role-policy + the issuer's allow_names.py",
+   "invocation": "per-document read-backs, then one account-wide 35,743,663-byte parse",
+   "result": "PASS",
+   "note": "The document compare is per (Sid, ARN) pair against the rollback, so '2 gone, 0 added' is a set difference rather than a count. The account-wide parse is the wider claim: 0 grants on the name across 357 principals and 652 documents, with a 38-hit control that NAMES the edited role, so the parser is provably reading the document in question. Every rollback was read behind a shape guard refusing the wrapped get-role-policy envelope -- a shape that, earlier tonight, produced a correct-sounding verdict from a vacuous read."
+  },
+  {
+   "tool": "deploy_ledger.py (NEVER-2) + the cross-worktree sentinel union",
+   "invocation": "open/close-leg/close; the pre-open census across every live worktree",
+   "result": "PASS",
+   "note": "Opened before the first world act, closed after the four outcomes were measured, both legs proven. The pre-open union printed a per-tree denominator rather than trusting the shared tree, and used ls -a rather than ls -1 because ls -1 hides .unindexed_red_state.json."
+  },
+  {
+   "tool": "terraform fmt",
+   "invocation": "-check (read-only) after one accidental writing run",
+   "result": "PASS",
+   "note": "Recorded because it bit me: terraform fmt WRITES by default, and -diff without -check rewrote the file in both the worktree and the shared tree while I was only trying to inspect it. Reverted in both; the plan re-run afterwards returned the identical verdict. The deviation itself is pre-existing, proved by the flagged hunk being identical at HEAD."
+  },
+  {
+   "tool": "comp-iam",
+   "invocation": "NOT RUN as an oracle",
+   "result": "SKIP",
+   "note": "It models (action) and never (action, resource), so it cannot tell a grant on a live bucket from one on a deleted bucket -- which is this act's subject. The per-document read-backs plus the account-wide parse answer it; the HUD advised comp-iam mid-session for a TF-vs-live reconcile, which is a different question."
+  }
+ ]
+}
