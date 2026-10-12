@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-12</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C after its own reads: proof instance VALID (CTaa4-AC1, CTaa4-AC2); live CodeSha256 q4iLGld/nR2jOOaL2JJ6frlUSNNEgJnV2I8oyIQ6z/Y= (was zoCWZxmn...), last modified 2026-10-12T15:02:18Z; the deployed package holds exactly three members and their sha256 EQUAL the pin 96c4f5f063 (lambda_function.py 9cbf41a0..., session_tracker.py 00f8c6a3..., firm_page_access.py 7365de94...); plan 0/1/0; PRE-1: 6 Dev rows, 0 off the internal firm; internal=200, partner=403, post-apply events=21 jwt_shaped=0 bearer=0; ledger nfra-ctlpln-ctaa4-data-proxy-fence-admits-dev-20261012 CLOSED. NOT PROVEN LIVE: R3 (a Dev login whose token tier is not internal answers 200): NOT-RUN, because the auth handler derives the token tier from firmId opal-capital, so the walker row is served by the tier test with or without the clause (row NFRA_CTLPLN-S9115). The clause is deployed and unit-proven (963 tests, 402 fail on the pre-edit handler); whether any real login needs it is the CTO's call on S9115.</status_reason>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <round>2</round>
