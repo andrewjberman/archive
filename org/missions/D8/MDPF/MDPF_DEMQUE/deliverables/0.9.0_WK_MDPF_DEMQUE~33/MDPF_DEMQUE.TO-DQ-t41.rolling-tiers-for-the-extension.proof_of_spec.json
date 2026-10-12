@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t41",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t41.rolling-tiers-for-the-extension.md",
+    "group": "OTHER",
+    "vintage_commit": "347c6585ca"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "347c6585ca",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t41.rolling-tiers-for-the-extension.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~33",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/extend_frontier.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--apply was never run against the real home; plan() and --plan-week read the store only and write nothing. The daily --apply in run_daily_draw.sh reads this code and the enrolment once the box branch carries them; that act is the issuer's under its own never-widen pair",
+      "artifact_covered_by": ["DQ9-t41-AC1", "DQ9-t41-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_rolling_tiers.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest: a local store under tmp_path, a stub enrolment folder, rank inputs replaced by empty frames, no network and no S3",
+      "artifact_covered_by": ["DQ9-t41-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/requests/ENROLMENT_TIERS.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the enrolment: one daily_extra request and one rolling request (cycle 5, FWD-9); rolling[0].stored_at_enrolment holds the 96 CUSIPs that were in the index at this build (see surprise row MDPF_DEMQUE-D1-W33-S2)",
+      "artifact_covered_by": ["DQ9-t41-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four rows appended: MDPF_DEMQUE-D1-W33-S1 to S4 (the ordinal, the snapshot key, the freshness item stopped, the ADVI and IRPT overlap)",
+      "artifact_covered_by": ["DQ9-t41-AC1", "DQ9-t41-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t41-AC1",
+      "criterion_verbatim": "the three named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t41_tests.py",
+      "output_evidence": "test_demque_rolling_tiers.py::test_daily_tier_is_the_stored_names_plus_the_advi_funds_every_trading_day PASSED; test_demque_rolling_tiers.py::test_rolling_names_are_visited_in_rank_blocks_each_within_five_trading_days PASSED; test_demque_rolling_tiers.py::test_a_day_never_exceeds_the_cap_and_names_not_yet_landed_are_excluded_and_counted PASSED; 3 passed in 3.41s; TIER-OK; rc=0",
+      "denominator": "3 of 3 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "TIER-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t41-AC2",
+      "criterion_verbatim": "on the REAL served store (S3 read only), a 7-trading-day plan with the 782 assumed landed: every day at most 400 requests, the daily tier at least 141, 782 rolling names, every one visited within 5 trading days.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t41_week.py",
+      "output_evidence": "days=7 max_requests=306 max_lag=5 rolling_names=782 assumed=IRPT_BCKEND-AS-TRADED-CLOSES-878; 2026-10-12 daily=149 rolling=156 requests=305; 2026-10-13 daily=149 rolling=157 requests=306; 2026-10-14 daily=149 rolling=156 requests=299; 2026-10-15 daily=149 rolling=156 requests=304; 2026-10-16 daily=149 rolling=157 requests=305; 2026-10-19 daily=149 rolling=156 requests=305; 2026-10-20 daily=149 rolling=157 requests=306; TIER-REAL-OK 7 trading days, max 306 requests a day, every rolling name within 5 trading days; rc=0",
+      "denominator": "7 of 7 trading days at or under 400 requests (max 306); daily 149 of at least 141 on 7 of 7 days; 782 of 782 rolling names; max lag 5 of 5 trading days",
+      "status": "PASS",
+      "expect": "TIER-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the day's cap refusal disabled in a scratch edit of extend_frontier.py (if len(reqs) > cap becomes if False and len(reqs) > cap): the cap test must fail",
+      "expected": "test_a_day_never_exceeds_the_cap_and_names_not_yet_landed_are_excluded_and_counted FAILED (DID NOT RAISE SystemExit); the other two PASSED",
+      "observed": "1 failed, 2 passed: test_a_day_never_exceeds_the_cap_and_names_not_yet_landed_are_excluded_and_counted FAILED (Failed: DID NOT RAISE SystemExit); file restored byte-identical (cmp) and the three tests pass again: 3 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the same tree (commit 347c6585ca plus this order's edits) run at three points: the test file alone, the whole folder, and the test file again after the mutant restore; plus the AC1 check",
+      "observed": "3 passed at each of the three runs; the AC1 check prints TIER-OK, rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "build item 6, the freshness entry for the Yahoo price_history store",
+      "reason": "no existing config fits a cusip-partitioned parquet store with a per-name as-of (comp-freshness modes read date-keys in object names or a JSON content field); stopped and filed as MDPF_DEMQUE-D1-W33-S3; nothing added to data/served_freshness_config.yaml or .tools/freshness_manifest_gen.py"
+    },
+    {
+      "item": "build item 3 ordinal from lib/trading_calendar",
+      "reason": "the module has no ordinal function; defined locally in extend_frontier.py from 2020-01-01 and filed as MDPF_DEMQUE-D1-W33-S1; lib/ is outside this order's grant"
+    },
+    {
+      "item": "--apply against the real home, any write to the served store, the real pacer state, the queue or the ledger, any Yahoo or Bloomberg call, any timer or deploy",
+      "reason": "order BOUNDS: READ-ONLY against S3 and Yahoo; the apply is the issuer's act under its own pair"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W33-S1: trading_day_ordinal is not in lib/trading_calendar.py; defined locally in extend_frontier.py from 2020-01-01 (class OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W33-S2: the rolling rule needs an enrolment-time snapshot; ENROLMENT_TIERS.json carries rolling[0].stored_at_enrolment (96 CUSIPs), a key the cell's JSON does not name (class OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W33-S3: build item 6 stopped; no existing freshness config fits the cusip-partitioned parquet store (class OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W33-S4: ten ADVI_COTBKF funds are also IRPT_BCKEND names; daily precedence applied and not stated in the cell (class OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~33/MDPF_DEMQUE.TO-DQ-t41.rolling-tiers-for-the-extension.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q -p no:cacheprovider",
+      "invocation": "the whole folder once, from the worktree root",
+      "result": "145 passed (the 142 at the base plus the three new tests), rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t41_tests.py",
+      "invocation": "AC1, from the worktree root",
+      "result": "TIER-OK, rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t41_week.py",
+      "invocation": "AC2, from the worktree root, S3 read only (about 29 s)",
+      "result": "TIER-REAL-OK, rc=0; the same plan-week in full: tiers daily 149, daily_extra_not_landed 5, rolling 782, rolling_not_landed 0; order FWD-9 rank (the rank inputs read, no fallback)"
+    },
+    {
+      "tool": "python data/mdpf/scripts/demque/extend_frontier.py --plan-week --from 2026-10-12 --days 7 --assume-landed IRPT_BCKEND-AS-TRADED-CLOSES-878",
+      "invocation": "the tool at its own path in the worktree",
+      "result": "one JSON line, rc=0, stderr empty; the seven-day table as in AC2"
+    }
+  ]
+}
