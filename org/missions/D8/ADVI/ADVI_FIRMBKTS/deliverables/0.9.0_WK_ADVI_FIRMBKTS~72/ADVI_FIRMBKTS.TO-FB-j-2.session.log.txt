@@ -1,0 +1,51 @@
+SESSION LOG -- 0.9.0_WK_ADVI_FIRMBKTS~72 on ADVI_FIRMBKTS.TO-FB-j-2 (worktree /c/dev/wk-firmbkts-72, branch wk-ADVI_FIRMBKTS-72)
+
+[1] first act: git rev-parse --abbrev-ref HEAD -> wk-ADVI_FIRMBKTS-72 ; test -d org && test -d .tools -> TREE-OK
+[2] premise check: emit_chain_complete at gold_dispatch.sh:836; the edit from e33708f50b (commit f313505d5c in this branch) present; the capture line was the plain assignment out=$(...); rc=$?  -> matches the order, no BLOCKING row.
+
+[3] AC1 BEFORE the edit (timeout 60, issuer checker at round7/checks):
+PASS E1 a failing call prints the first 300 characters of the CLI text, no more
+PASS E2 a successful call prints the emitted line and no WARN
+PASS E3 a multi-line error text is one WARN line and the function still returns 0
+FAIL E4 under set -e a failed put-events prints the WARN and the shell carries on (rc 0)
+EMIT TEST: 3 of 4 arms
+rc=1
+
+[4] the one-line edit (section 1a.1):
+-    out=$(aws events put-events --entries "file://$entries_file" 2>&1); rc=$?
++    out=$(aws events put-events --entries "file://$entries_file" 2>&1) && rc=0 || rc=$?
+git diff --stat: 1 file changed, 1 insertion(+), 1 deletion(-)
+
+[5] bash -n data/black_diamond/scripts/gold/gold_dispatch.sh -> rc=0
+
+[6] AC1 AFTER the edit:
+PASS E1 a failing call prints the first 300 characters of the CLI text, no more
+PASS E2 a successful call prints the emitted line and no WARN
+PASS E3 a multi-line error text is one WARN line and the function still returns 0
+PASS E4 under set -e a failed put-events prints the WARN and the shell carries on (rc 0)
+EMIT TEST: 4 of 4 arms
+AC1 rc=0
+
+[7] AC2 run BEFORE the commit (the checker reads committed HEAD; uncommitted edit invisible):
+  aws lines other than the pattern unchanged: True; changed hunks 0; changed lines outside the function and the variable: []
+AWSDIFF: FAIL
+AC2 rc=1
+  (surprise row ADVI_FIRMBKTS-D1-W72-S1)
+
+[8] commit of the script ALONE via safe-commit (-F message file .scratch/msg_fbj2.txt):
+[wk-ADVI_FIRMBKTS-72 e024089cc9] fix(ADVI_FIRMBKTS round 7 FB-j-2, 0.9.0_WK_ADVI_FIRMBKTS~72): put-events capture is a command list, so set -e no longer exits on a failed put-events
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+commit-gate OK: pre-commit gate clean for 1 of 1 file(s); surprise-row-gate OK; to-pipeline-gate OK
+risk-reflex printed HOLD for the basename match (surprise row ADVI_FIRMBKTS-D1-W72-S2); the cited claim is the COT freshness row, not this function.
+
+[9] AC2 AFTER the commit:
+  aws lines other than the pattern unchanged: True; changed hunks 1; changed lines outside the function and the variable: []
+AWSDIFF: OK
+AC2 rc=0
+
+[10] AC3 AFTER the commit:
+  CHANGED data/black_diamond/scripts/gold/gold_dispatch.sh
+ROUND 4 SCOPE: OK 1 changed, 0 outside, 0 required missing
+AC3 rc=0
+
+[11] no deploy, no push, no AWS call, no network egress in this session.
