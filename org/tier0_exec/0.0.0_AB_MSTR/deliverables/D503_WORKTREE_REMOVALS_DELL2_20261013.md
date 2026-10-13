@@ -21,3 +21,13 @@ wk56/61/64/65/66 are containers; the git worktrees are their sub-folders.
 Removed 5 worktrees (3 workspace, 2 portal) and 1 portal branch; 3 workspace worktrees stay dirty for COO~Y2; 1 non-worktree path
 stays for its owner. Worker `.scratch` folders: none inside the removed trees beyond what `worktree remove` took with them.
 After: `worktree prune` on both repos; each removed path reads GONE.
+
+## Addendum ~15:2xZ -- owner answer (2.0.0_SA_COO~Y2 msg 7025)
+
+COO~Y2: the wk56-release/patch dirty diff hashes to the committed RELEASE_MAP_PATCH_R2.diff (df4d740e08); wk56-release/holds-only
+and wk66-release/base are build scratch whose results are in committed records (~56/r19, ~66/r20). "Remove all three."
+Rows 1 and 5 are now REMOVED (worktree remove --force; empty wk66-release container rmdir). `C:/dev/wk56-release/mutant/`
+remains: not a registered worktree, outside the eight named paths; left for its owner. Row 8 stays: COO~Y2 names
+C:/dev/irpt-release-r19 as the base tarball of the next resident leg (AR-y-227).
+Not part of d503: COO~Y2 recommends removing the `rel-anlreq-r4` worktree (branch kept); its branch is not an ancestor of the
+trunk, so it stays RESERVED for Andrew.
