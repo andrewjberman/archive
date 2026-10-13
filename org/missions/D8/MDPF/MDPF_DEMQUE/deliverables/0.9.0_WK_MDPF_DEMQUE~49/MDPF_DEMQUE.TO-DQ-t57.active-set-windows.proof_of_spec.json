@@ -6,7 +6,7 @@
   "spec_ref": {
     "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t57.active-set-windows.md",
     "group": "OTHER",
-    "vintage_commit": "21f3d7bac9"
+    "vintage_commit": "e7655e1a1e"
   },
   "decomp_ref": {
     "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
@@ -18,9 +18,9 @@
     {
       "path_or_key": "data/mdpf/scripts/demque/active_set.py",
       "kind": "script",
-      "commit_or_etag": "be745e7fa2",
+      "commit_or_etag": "593c4d3455",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "order BOUNDS: no deploy, no timer; reads the working-tree CSV (or ec617572b8 by git show) only; --census run on the real file, rc 0, counts only",
+      "deploy_evidence": "order BOUNDS: no deploy, no timer; reads the working-tree CSV (or ec617572b8 by git show) only; --census run on the real file, rc 0, counts only; load_with_tickers added at 593c4d3455 (22:0xZ ticker match)",
       "artifact_covered_by": [
         "DQ9-t57-AC1",
         "DQ9-t57-AC2"
@@ -29,9 +29,9 @@
     {
       "path_or_key": "data/mdpf/scripts/demque/b1_request.py",
       "kind": "script",
-      "commit_or_etag": "be745e7fa2",
+      "commit_or_etag": "593c4d3455",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "--build is S3 read only (no vendor call, no write outside --out); the request is not written to any committed path",
+      "deploy_evidence": "--build is S3 read only (no vendor call, no write outside --out); the request was written to .scratch/ only; OUTSIDE_REASON hold-back and emptied drop at 593c4d3455",
       "artifact_covered_by": [
         "DQ9-t57-AC1",
         "DQ9-t57-AC2"
@@ -40,7 +40,7 @@
     {
       "path_or_key": "data/mdpf/scripts/demque/test_demque_active_windows.py",
       "kind": "test",
-      "commit_or_etag": "be745e7fa2",
+      "commit_or_etag": "593c4d3455",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "offline pytest on a stub CSV with made-up keys and stub frames; no network, no S3",
       "artifact_covered_by": [
@@ -48,20 +48,30 @@
       ]
     },
     {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_b1_request.py",
+      "kind": "test",
+      "commit_or_etag": "593c4d3455",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest; the one build call passes an active window that clips nothing; no assertion changed",
+      "artifact_covered_by": [
+        "DQ9-t57-AC1"
+      ]
+    },
+    {
       "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "593c4d3455",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "five rows MDPF_DEMQUE-D1-W49-S1..S5 appended, append-only (no existing row edited)"
+      "deploy_evidence": "rows MDPF_DEMQUE-D1-W49-S6 and S7 appended at 593c4d3455, append-only (no existing row edited); S1-S5 from the first pass stand"
     }
   ],
   "acceptance": [
     {
       "criterion_id": "DQ9-t57-AC1",
-      "criterion_verbatim": "DQ9-t57-AC1 -- the three named tests (test_the_active_set_is_refused_when_its_sha256_differs_and_is_never_printed_by_account; test_a_security_window_is_the_union_of_its_active_accounts_held_dates_floored_at_2012_and_open_when_any_account_still_holds_it; test_the_b1_request_is_clipped_to_the_active_window_leaves_a_name_outside_the_set_unclipped_and_holds_back_a_p2_name), expect WIN-OK.",
+      "criterion_verbatim": "DQ9-t57-AC1 -- the three named tests (test_the_active_set_is_refused_when_its_sha256_differs_and_is_never_printed_by_account; test_a_security_window_is_the_union_of_its_active_accounts_held_dates_floored_at_2012_and_open_when_any_account_still_holds_it; test_the_b1_request_is_clipped_to_the_active_window_leaves_a_name_outside_the_set_unclipped_and_holds_back_a_p2_name), expect WIN-OK. Test 3 keeps its name; its body asserts the hold-back of an outside-the-set name and the dropped emptied name (22:0xZ).",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t57_tests.py",
-      "output_evidence": "============================== 3 passed in 2.00s ==============================\nWIN-OK   (rc=0, run at be745e7fa2)",
+      "output_evidence": "============================== 3 passed in 2.78s ==============================\nWIN-OK   (rc=0, run on the code at 593c4d3455)",
       "denominator": "3 of 3 named tests PASSED by name",
       "status": "PASS",
       "expect": "WIN-OK",
@@ -69,21 +79,21 @@
     },
     {
       "criterion_id": "DQ9-t57-AC2",
-      "criterion_verbatim": "DQ9-t57-AC2 -- on the REAL published set: sha256 verified, 769 accounts and 3,357 securities counted, the B1 line clipped (613 CUSIPs, at least 90 clipped, a match-open name held back, 33,000 to 35,500 cells against 37,439 filed), deterministic, valid, nothing earlier than 2012-01-01, no account key; expect WIN-REAL-OK.",
+      "criterion_verbatim": "DQ9-t57-AC2 -- on the REAL published set: sha256 verified, 769 accounts and 3,357 securities counted, the B1 line clipped, deterministic, valid, nothing earlier than 2012-01-01, no account key; expect WIN-REAL-OK. The amended check (22:0xZ, 22:4xZ) expects securities 608, emptied_cusips 1, held_back at least 5, clipped_cusips at least 90, cells 33,000 to 35,000 and below 37,439, each build call allowed 110 seconds.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t57_real.py",
-      "output_evidence": "arm1 {\"accounts\": 769, \"open_held\": 1337, \"securities\": 3357, \"sha256_ok\": true, \"skipped\": 472, \"windows\": 3357}\narm2 {\"cells\": 34341, \"claim\": \"measured\", \"clipped_cusips\": 99, \"days_to_finish\": 13, \"emptied_cusips\": 1, \"finish_date\": \"2026-11-01\", \"funds_joined\": 7, \"held_back\": 1, \"priced_names\": 606, \"securities\": 612, \"skipped_one_dollar\": 0, \"total_return_names\": 10, \"unclipped_cusips\": 4, \"unread_pulled\": 194, \"window_start\": \"2013-04-09\"}\nWIN-REAL-BAD arm2 B1 line does not show the active-window clip   (rc=1, run at be745e7fa2)",
-      "denominator": "arm1: 5 of 5 census clauses (sha256_ok, 769 accounts, 3357 securities, windows >= 3300, open_held >= 1) PASS; arm2: 4 of 5 clauses PASS (clipped 99 >= 90, held_back 1 >= 1, cells 34341 in 33000..35500 and < 37439) and securities 612 != 613 FAIL",
+      "output_evidence": "arm1 {\"accounts\": 769, \"open_held\": 1337, \"securities\": 3357, \"sha256_ok\": true, \"skipped\": 472, \"windows\": 3357}\narm2 {\"cells\": 34223, \"claim\": \"measured\", \"clipped_cusips\": 99, \"days_to_finish\": 13, \"emptied_cusips\": 1, \"finish_date\": \"2026-11-01\", \"funds_joined\": 7, \"held_back\": 5, \"priced_names\": 606, \"securities\": 608, \"skipped_one_dollar\": 0, \"total_return_names\": 10, \"unread_pulled\": 191, \"window_start\": \"2013-04-09\"}\nWIN-REAL-BAD arm3 no_account_key   (rc=1, run on the code at 593c4d3455, 1m10s wall)",
+      "denominator": "arm1: 5 of 5 census clauses PASS; arm2: 6 of 6 clauses PASS (securities 608, emptied 1, held_back 5, clipped 99, cells 34,223 in range and below 37,439); arm3: 3 of 4 clauses PASS (deterministic, valid, floor) and no_account_key FAIL",
       "status": "FAIL",
-      "status_reason": "arm2 asserts securities == 613; the --build line reads 612. One in-set CUSIP (9128334Y3) is emptied by its active window (opens 2026-09-22, after all of its B1 history) and dropped under Build item 3; 613 is the pre-clip count less the held-back fund. Not weakened: the expectation is left as written. Surprise MDPF_DEMQUE-D1-W49-S1 (BLOCKING) carries the CTO's ruling. The check stops at arm2, so arm3 (determinism, validity, floor, no account key) was run by hand at be745e7fa2 and is not graded here.",
+      "status_reason": "arm3 no_account_key tests the substring \"account\" in the request text. The ruled hold-back reason (CTO msg 5227) contains that word in the four outside-set entries (verified on the scratch request: 4 occurrences, all inside held_back reasons, 0 in any securities key; no key names an account and no account number is in the request). The check is the issuer's file and the reason text is ruled verbatim, so the clause cannot be met as written. Not weakened and not edited: surprise MDPF_DEMQUE-D1-W49-S7 (BLOCKING) carries it. Order stays open.",
       "expect": "WIN-REAL-OK",
       "judgment": false
     }
   ],
   "controls": {
     "determinism": {
-      "method": "two --build runs to two scratch files at be745e7fa2, compared with cmp (the arm3 determinism clause, run by hand because the check stops at arm2)",
-      "observed": "byte-identical (cmp rc=0; sha256 prefix 07dbbcf0f81a3aeb76b0, same for both runs); the request validates under bbg_quote._validate; no entry starts or dates before 2012-01-01; no key naming an account",
+      "method": "the check's own arm3 runs two --build calls to two scratch files and compares their bytes (sha256); the deterministic clause is not in the check's failing list",
+      "observed": "deterministic arm not in WIN-REAL-BAD list (the only failing clause is no_account_key); valid and floor clauses also not in the list",
       "status": "STABLE"
     },
     "mutant": {
@@ -103,37 +113,43 @@
       "reason": "order BOUNDS: READ-ONLY, no vendor call; the request sits in .scratch/ only"
     },
     {
-      "item": "the 613 expectation of AC2 arm2",
-      "reason": "not weakened and not met: the build yields 612 under the rule as written; surprise MDPF_DEMQUE-D1-W49-S1 (BLOCKING)"
+      "item": "the AC2 arm3 no_account_key clause as written",
+      "reason": "not weakened and not edited (the check is the issuer's file); cannot be met with the ruled reason text; surprise MDPF_DEMQUE-D1-W49-S7 (BLOCKING)"
+    },
+    {
+      "item": "the ticker-only match path on the real set",
+      "reason": "measured zero matches: 7 of 8 fund rows match by CUSIP and the eighth (the P2 fund) is held back by the gate; the path is exercised by the unit assertion in test 3"
     },
     {
       "item": "the commit-fallback read of the CSV (git show ec617572b8:<path>) as a graded criterion",
-      "reason": "the working-tree file is present in this worktree, so the check reads it; the fallback was exercised by hand (blob bytes equal the working tree, sha256 verified) and is not graded"
+      "reason": "the working-tree file is present in this worktree, so the check reads it; the fallback is not graded"
     }
   ],
   "surprises": [
-    "MDPF_DEMQUE-D1-W49-S1: AC2 arm2 asks for securities 613; the rule yields 612 (one in-set name emptied by its active window)",
-    "MDPF_DEMQUE-D1-W49-S2: AC2 cites 37,439 filed cells; the unchanged base code measures 37,514 on this date",
-    "MDPF_DEMQUE-D1-W49-S3: the unchanged --build took about 51 s against the check's 55 s timeout; speed-only changes bring it to about 45 s",
-    "MDPF_DEMQUE-D1-W49-S4: 'accounts' counts every row's key (769), skipped rows included; 639 without them",
-    "MDPF_DEMQUE-D1-W49-S5: the P2/P3 gate runs priority_gate.excluded on the frames main already read, not excluded_for() (no second S3 read)"
+    "MDPF_DEMQUE-D1-W49-S1: AC2 arm2 asked for securities 613; the rule now yields 608 (one in-set name emptied by its window, dropped under the 22:4xZ ruling)",
+    "MDPF_DEMQUE-D1-W49-S2: AC2 cites 37,439 filed cells; the unchanged base code measured 37,514; the P2 fund is held back by the builder itself",
+    "MDPF_DEMQUE-D1-W49-S3: the unchanged --build took about 51 s against the check's timeout; the amended check allows 110 s per build",
+    "MDPF_DEMQUE-D1-W49-S4: 'accounts' counts every row's key (769), skipped rows included, as the published set states",
+    "MDPF_DEMQUE-D1-W49-S5: the P2/P3 gate runs priority_gate.excluded on the frames main already read, not excluded_for() (no second S3 read)",
+    "MDPF_DEMQUE-D1-W49-S6: the order's premise for test_demque_b1_request.py (an empty active set leaves windows unclipped) is superseded by the 22:0xZ ruling; that one build call now passes an active window that clips nothing",
+    "MDPF_DEMQUE-D1-W49-S7: AC2 arm3 no_account_key (substring 'account') cannot pass with the ruled hold-back reason text; BLOCKING, the criterion is FAIL"
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~49/MDPF_DEMQUE.TO-DQ-t57.active-set-windows.proof_of_spec.json",
   "compiler_tools": [
     {
       "tool": "bash .tools/safe-commit.sh",
-      "invocation": "safe-commit of active_set.py, b1_request.py, test_demque_active_windows.py",
-      "result": "commit-gate clean for 3 of 3 file(s); naming-gate PASS 0 graded; to-pipeline-gate OK; surprise-row-gate OK (no rows in that commit); committed be745e7fa2"
+      "invocation": "safe-commit of active_set.py, b1_request.py, the two test files and the investigation file",
+      "result": "commit-gate clean for 4 of 5 file(s); naming-gate PASS 0 graded; to-pipeline-gate OK; surprise-row-gate OK (2 new rows); missions-tree-check OK; committed 593c4d3455"
     },
     {
       "tool": "python -m ruff check --select F,E9 --target-version py39",
-      "invocation": "lint of active_set.py, b1_request.py, test_demque_active_windows.py",
-      "result": "All checks passed!"
+      "invocation": "lint of active_set.py, b1_request.py, test_demque_active_windows.py, test_demque_b1_request.py",
+      "result": "All checks passed! (rc=0)"
     },
     {
       "tool": "python -m pytest data/mdpf/scripts/demque -q",
       "invocation": "the whole demque folder, run once from the worktree root after the last code change",
-      "result": "196 passed in 22.34s (rc=0; 0 failed)"
+      "result": "196 passed in 14.67s (rc=0; 0 failed)"
     }
   ]
 }
