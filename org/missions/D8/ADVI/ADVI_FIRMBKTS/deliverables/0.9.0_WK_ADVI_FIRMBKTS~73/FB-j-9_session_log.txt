@@ -1,0 +1,38 @@
+Session log, 0.9.0_WK_ADVI_FIRMBKTS~73, TO ADVI_FIRMBKTS.TO-FB-j-9 (cell FB-j-9)
+Worktree C:/dev/wk-firmbkts-73, branch wk-ADVI_FIRMBKTS-73. Base HEAD at start 78a9c61182.
+Commit 1 (handler + test): 2deaa9165ec896a47f42bddd1ff334ab4a9a8de1
+Verbatim outputs, in the order run. Times are UTC from date -u.
+
+[start] git rev-parse --abbrev-ref HEAD -> wk-ADVI_FIRMBKTS-73 ; test -d org && test -d .tools -> TREE-OK
+
+[pre-edit read] lambda_function.py: betas=['prompt-caching-2024-07-31'] at line 211 in _call_llm;
+  _build_slot drop sites at lines 248-250 (retry inner except) and 251-253 (outer except), each metrics.emit_slot_dropped(); return None.
+  SDK check: inspect.signature(anthropic.resources.messages.Messages.create) -> 17 parameters incl. self
+  (max_tokens, messages, model, metadata, stop_sequences, stream, system, temperature, tool_choice, tools,
+  top_k, top_p, extra_headers, extra_query, extra_body, timeout); 'betas' in signature -> False; no **kwargs.
+  anthropic.__version__ -> 0.45.0.
+
+[mutant I] helper call removed from the generic except (temporary; restored; cmp against the good copy equal)
+  pytest tests/test_slot_drop_log.py -q | tail -1 ->
+  FAILED tests\test_slot_drop_log.py::test_drop_logs_class_and_clipped_message - assert 0 == 1
+  FAILED tests\test_slot_drop_log.py::test_pii_schema_url_classes_are_redacted - AssertionError: <class 'validator.PIIDetectedError'>
+  2 failed, 2 passed in 0.68s
+
+[mutant II] betas=['prompt-caching-2024-07-31'] restored (temporary; restored; cmp against the good copy equal)
+  FAILED tests\test_slot_drop_log.py::test_model_call_uses_only_sdk_parameters - AssertionError: assert ['betas'] == []
+  1 failed, 3 passed in 0.70s
+
+[non-ASCII] python count of chars > 127 in both edited files -> lambda_function.py 0 ; test_slot_drop_log.py 0
+
+[commit 1] bash .tools/safe-commit.sh ... -F .scratch/msg_fbj9.txt -- <handler> <test>
+  [commit-gate] All checks passed! ; [commit-gate] OK: pre-commit gate clean for 2 of 2 file(s)
+  [wk-ADVI_FIRMBKTS-73 2deaa9165e] fix(ADVI_FIRMBKTS FB-j-9, ...): 2 files changed, 158 insertions(+), 3 deletions(-)
+
+[AC1 run 1] cd infra/aws/lambda/exec-summary-generator && timeout 110 python -m pytest tests/test_slot_drop_log.py -q 2>&1 | sed ... | tail -1
+  4 passed in 0.49s   rc=0
+[AC1 run 2, determinism] same command
+  4 passed in 0.49s   rc=0
+[AC2] git diff --stat $(git merge-base HEAD box/dell1) HEAD -- infra/aws/lambda/exec-summary-generator | tail -1
+  2 files changed, 158 insertions(+), 3 deletions(-)   rc=0
+[AC3] python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-73 --allow ... (four surfaces)
+  ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing   rc=0
