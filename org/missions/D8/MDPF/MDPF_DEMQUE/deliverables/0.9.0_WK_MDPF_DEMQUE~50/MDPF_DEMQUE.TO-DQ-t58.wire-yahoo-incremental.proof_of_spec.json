@@ -19,9 +19,9 @@
     {
       "path_or_key": "data/mdpf/scripts/demque/daily_draw.py",
       "kind": "script",
-      "commit_or_etag": "2472fdb13b",
+      "commit_or_etag": "342308b1d3",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "combined_relock(...) as in 9449d5f48e: lock.check on the stored as_traded_close with the appended rows, the same trades and trades_through, range [stored valid_from, frontier]. hold() registers a name in locks ONLY when the combined relock is an identity rejection (state in unresolved.STATES), with that real combined lock row (commit 2472fdb13b); every other hold is not registered, so the unresolved fold never raises on a held name. The appended-window lock.check of the amended order is NOT in this file: surprise MDPF_DEMQUE-D1-W50-S6. No S3 write, no queue, ledger or shared pacer write by this change.",
+      "deploy_evidence": "both identity checks run before any write (S6 ruling, commit 342308b1d3): window_relock = lock.check over the appended rows with the trades dated inside the window (after the stored max, up to the frontier), valid_from the window's first in-window trade (surprise MDPF_DEMQUE-D1-W50-S7); combined_relock = lock.check over stored as_traded_close plus the appended rows, the same trades and trades_through, range [stored valid_from, frontier] (S2 ruling). A non-LOCKED state from either holds the name: reason 'relock: <state> on the appended window' or '... on the combined history'. hold() registers a name in locks ONLY for an identity rejection (state in unresolved.STATES), with the real lock row. No S3 write, no queue, ledger or shared pacer write.",
       "artifact_covered_by": [
         "DQ9-t58-AC1",
         "DQ9-t58-AC2"
@@ -62,9 +62,9 @@
     {
       "path_or_key": "data/mdpf/scripts/demque/test_demque_incremental_wiring.py",
       "kind": "test",
-      "commit_or_etag": "2472fdb13b",
+      "commit_or_etag": "342308b1d3",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the six named tests PASS: '6 passed in 2.49s' (dq_t58_tests.py WIRE-OK) and 6 passed in the wiring file. The sixth, test_a_held_name_never_breaks_the_unresolved_fold_and_only_a_rejected_relock_opens_a_row, runs daily_draw.run with unresolved_path set: a gained-split name leaves the list as it was, a relock-rejected name opens one REJECTED:LOW_TRADE_AGREEMENT row, and the run returns.",
+      "deploy_evidence": "seven named tests PASS in the wiring file (7 passed). The seventh, test_a_window_only_trade_mismatch_holds_the_name_even_when_the_combined_relock_passes: 20 agreeing stored trades, one 1.5x trade in the window; the combined check reads LOCKED (20 of 21), the window check REJECTED:PRICE_MISMATCH (0 of 1), the draw holds the name and its four files are byte-identical.",
       "artifact_covered_by": [
         "DQ9-t58-AC1"
       ]
@@ -72,9 +72,9 @@
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "2472fdb13b",
+      "commit_or_etag": "a3699210a9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "rows MDPF_DEMQUE-D1-W50-S1 to S4 (commit 0b279b80bc), S5 (commit 9449d5f48e) and S6 (commit 2472fdb13b: the appended-window check dropped at 9449d5f48e; BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~Q1), each appended at the end of the array.",
+      "deploy_evidence": "rows MDPF_DEMQUE-D1-W50-S1 to S7 appended at the end of the array. S6 is left as filed (ARMED, disarm owner 2.0.0_SA_COO~Q1; the issuer disarms after the merge). S7 (OBSERVATION, INERT) records the valid_from choice of window_relock.",
       "artifact_covered_by": [
         "DQ9-t58-AC2"
       ]
@@ -86,8 +86,8 @@
       "criterion_verbatim": "DQ9-t58-AC1: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_tests.py -> WIRE-OK",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_tests.py",
-      "output_evidence": "test_a_stored_name_takes_the_five_day_window_and_appends_only_new_rows_with_tr_columns_and_an_extended_lock PASSED; test_a_gained_split_or_a_restated_overlap_bar_is_held_restatement_and_the_name_keeps_its_files PASSED; test_a_gap_beyond_five_days_pulls_from_the_stored_max_and_appends_only PASSED; test_the_receipt_lists_names_appended_without_a_relock_and_a_failed_lock_check_makes_the_name_held PASSED; test_a_name_whose_combined_history_relock_is_rejected_is_held_even_when_the_appended_window_passes PASSED; test_a_held_name_never_breaks_the_unresolved_fold_and_only_a_rejected_relock_opens_a_row PASSED; '6 passed in 2.49s'; verbatim last line: WIRE-OK; rc=0 (run from the worktree root after commit 2472fdb13b)",
-      "denominator": "6 of 6 named tests PASSED by name; 6 of 6 tests in test_demque_incremental_wiring.py PASSED; folder pytest data/mdpf/scripts/demque: 204 passed, 0 failed",
+      "output_evidence": "test_a_stored_name_takes_the_five_day_window_and_appends_only_new_rows_with_tr_columns_and_an_extended_lock PASSED; test_a_gained_split_or_a_restated_overlap_bar_is_held_restatement_and_the_name_keeps_its_files PASSED; test_a_gap_beyond_five_days_pulls_from_the_stored_max_and_appends_only PASSED; test_the_receipt_lists_names_appended_without_a_relock_and_a_failed_lock_check_makes_the_name_held PASSED; test_a_name_whose_combined_history_relock_is_rejected_is_held_even_when_the_appended_window_passes PASSED; test_a_held_name_never_breaks_the_unresolved_fold_and_only_a_rejected_relock_opens_a_row PASSED; test_a_window_only_trade_mismatch_holds_the_name_even_when_the_combined_relock_passes PASSED; '7 passed in 1.94s'; WIRE-OK; rc=0",
+      "denominator": "7 of 7 named tests PASSED by name (the seventh added this pass); 7 of 7 tests in test_demque_incremental_wiring.py PASSED; folder pytest data/mdpf/scripts/demque: 205 passed, 0 failed (rc=0)",
       "status": "PASS",
       "expect": "WIRE-OK",
       "judgment": false
@@ -97,8 +97,8 @@
       "criterion_verbatim": "DQ9-t58-AC2: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_equal.py -> WIREEQ-OK",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_equal.py",
-      "output_evidence": "no_split n=50 equal=50 mismatches=0 | split n=1 held=True unchanged=True | cells={'dividends': 5441, 'prices': 571352, 'splits': 50, 'tr': 924} http=60 | relock_held: ['FTHSX', 'LCEYX'] | spot: {\"equal\": 5, \"of\": 5, \"tr_cells\": 88} | verbatim last line: WIREEQ-OK 50 symbols equal on a no-split day including 924 TR cells; 1 gained-split name(s) HELD, files unchanged; http 60; rc=0 | re-run after commit 2472fdb13b: identical output (the report is unchanged; the live spot re-ran)",
-      "denominator": "50 of 50 no-split names equal, INCLUDING 924 TR cells (cash, total_return, tr_source, flags); split arm 1 of 1 held with files unchanged and refilled false; relock_held names LCEYX and FTHSX (both required); live spot 5 of 5 equal with 88 TR cells; http_requests 60 <= 120",
+      "output_evidence": "no_split n=50 equal=50 mismatches=0 | split n=1 held=True unchanged=True | cells={'dividends': 5441, 'prices': 571352, 'splits': 50, 'tr': 924} http=60; relock_held: ['FTHSX', 'LCEYX']; spot: {\"equal\": 5, \"of\": 5, \"tr_cells\": 88}; WIREEQ-OK 50 symbols equal on a no-split day including 924 TR cells; 1 gained-split name(s) HELD, files unchanged; http 60; rc=0. The 50-name report is the inherited one (no re-pull; the order says so); the live spot ran once, this pass.",
+      "denominator": "50 of 50 no-split names equal, 924 TR cells compared; split arm 1 of 1 held with files unchanged; relock_held names 2 (FTHSX, LCEYX); live spot 5 of 5 with 88 TR cells",
       "status": "PASS",
       "expect": "WIREEQ-OK",
       "judgment": false
@@ -106,30 +106,34 @@
   ],
   "controls": {
     "mutant": {
-      "description": "one mutant this round, patched in-process by a scratch pytest plugin (.scratch/mutant_relock.py; no file edit): no_relock -- daily_draw.combined_relock returns None for every name (no relock on any appended name). Run against test_demque_incremental_wiring.py. The 2026-10-13 mutants of the first pass (no_tr, no_relock on lock.check) are superseded by this one.",
-      "expected": "the fifth named test and every test that appends a name with trades fail",
-      "observed": "4 failed, 2 passed (re-measured in the final pass on the six-test file): failed test_a_stored_name_takes_the_five_day_window_and_appends_only_new_rows_with_tr_columns_and_an_extended_lock, test_the_receipt_lists_names_appended_without_a_relock_and_a_failed_lock_check_makes_the_name_held, test_a_name_whose_combined_history_relock_is_rejected_is_held_even_when_the_appended_window_passes, test_a_held_name_never_breaks_the_unresolved_fold_and_only_a_rejected_relock_opens_a_row; passed: the gained-split and the gap tests",
+      "description": "one mutant this pass, patched in-process by a scratch pytest plugin (.scratch/mutant_window.py; no file edit): window_relock returns None for every name, so only the combined check runs. Run against test_demque_incremental_wiring.py.",
+      "expected": "the seventh named test fails: the window check is what holds a window-only mismatch",
+      "observed": "1 failed, 6 passed: test_a_window_only_trade_mismatch_holds_the_name_even_when_the_combined_relock_passes (TypeError at the direct window_relock assertion, the mutant's None)",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "two runs of the stub night, outputs byte-compared",
+      "observed": "NOT RE-MEASURED THIS PASS: the stub night ran once (.scratch/stub_night.py over a temporary store, unresolved_path set; receipt in STUB_NIGHT_RECEIPT.txt beside this instance). The stub night is local (stub fetch, no Yahoo request).",
       "status": "N/A-WITH-REASON",
-      "expected": "two identical runs (the determinism control of this round is not measured)",
-      "observed": "NOT RE-MEASURED THIS ROUND: the stub night ran once on the amended code (three symbol requests); a second run would have spent three more Yahoo requests against the order's budget. The 2026-10-13 first-pass determinism result applied to the prior code and is not claimed for this one."
+      "expected": "two identical runs (the determinism control of this round is not measured)"
     }
   },
   "declared_exclusions": [
     {
       "item": "any S3 write, the real store, the queue, the ledger, the actuals, the shared pacer (~/.opal/demque/pacer.json), any AWS write, any deploy, any timer; daily_draw.py against the real store or --s3; extend_frontier.py --apply; standing_drawer.py --apply",
-      "reason": "order BOUNDS. Every run of this round wrote only .scratch/ (the scratch pacer, the local split-arm and stub-night stores and queues) and the deliverables. The served lock.json of all 50 names (ps._Store.get), the served index, the stored Bloomberg TR and the client transactions were READ ONLY."
+      "reason": "order BOUNDS. This pass wrote only the two code files, the investigation file, the instance and the deliverables folder; the stub night ran over a temporary store under .scratch with a stub fetch. The served lock.json, index and stored Bloomberg TR were not written."
     },
     {
-      "item": "Yahoo symbol requests: 115 spent in total against the order's 120 (107 before the final pass; 8 in it: the stub night re-run with unresolved_path, 3 (LCEYX, FTHSX, ACTSX); the AC2 live spot re-run, up to 5. The 50-name report was not re-pulled.)",
-      "reason": "order BOUNDS: at most 120 symbol-requests in the whole order. The re-run was limited to the held names and the held split arm: the other 48 no-split names were not re-pulled (see relock_scope in the report)."
+      "item": "Yahoo symbol requests: 120 spent in total against the order's 120 cap: 115 before this pass (the order's count) and 5 in the AC2 live spot run of this pass (dq_t58_equal.py, run ONCE). The stub night, the folder and the mutant made no vendor request.",
+      "reason": "order BOUNDS: at most 120 symbol-requests in the whole order. The 50-name report was not re-pulled."
+    },
+    {
+      "item": "the 50-name report was produced BEFORE the appended-window check (window_relock). Its relock_held (FTHSX, LCEYX) and the 48 LOCKED states are measured against the combined check only. The window check's effect on the 48 no-split names is NOT MEASURED this pass.",
+      "reason": "the order says the 50-name report needs no re-pull, and a window check over those names needs their window pulls (Yahoo). Recorded so the issuer can decide whether the next round re-measures it. The cell equality of the 50 names is unaffected: the window check reads the appended rows and the trades, it writes nothing."
     },
     {
       "item": "the 48 no-split names not re-pulled this round: their combined-history state is read from the 2026-10-13 run's lock_record and the served lock.json",
-      "reason": "the 2026-10-13 run compared, for all 50 names, the full-history relock state (lock.check over the same trades, range [valid_from, frontier]) with the served state: the state field differs on LCEYX and FTHSX only. The served lock.json of all 50 names reads LOCKED (read this round). So the combined-history state of the other 48 is LOCKED. Recorded in the report's relock_scope.read_against_served_state; not a new measurement."
+      "reason": "the 2026-10-13 run compared, for all 50 names, the full-history relock state with the served state; the state differs on LCEYX and FTHSX only. Recorded in the report's relock_scope.read_against_served_state; not a new measurement."
     },
     {
       "item": "the 50-name proof run as --n 50 --tr --piece I/K for I = 1..5, not as --n 10 pieces",
@@ -141,7 +145,7 @@
     },
     {
       "item": "the commit trailer: this worker's commits carry Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>, not the Sonnet 5.5 trailer the re-seating message names",
-      "reason": "the worker runs as claude-haiku-5-5; the session attribution rule names Haiku 5.5. Recorded as surprise MDPF_DEMQUE-D1-W50-S5."
+      "reason": "the worker runs as claude-haiku-5-5; the session attribution rule names Haiku 5.5. Recorded as surprise MDPF_DEMQUE-D1-W50-S5 (UNDER_INVESTIGATION)."
     },
     {
       "item": "Bloomberg: no Bloomberg pull; the stored Bloomberg TR is read from S3 by tr_compare.load_bloomberg (read only), as the nightly draw reads it",
@@ -150,93 +154,54 @@
   ],
   "surprises": [
     "MDPF_DEMQUE-D1-W50-S1: the order's proof call 'incremental_equal.py --n 10 --tr' cannot select 10 names (the stratified sampler is cut for n=50); the 50-name proof ran as five --piece chunks of one selection (OBSERVATION, INERT)",
-    "MDPF_DEMQUE-D1-W50-S2: two names whose served lock reads LOCKED (claim held) are REJECTED by a relock over the combined history (LCEYX, FTHSX); the amended order's fix is in 9449d5f48e (relock over the combined history, held when not LOCKED); the disarm is the issuer's (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~Q1)",
+    "MDPF_DEMQUE-D1-W50-S2: two names whose served lock reads LOCKED (claim held) are REJECTED by a relock over the combined history (LCEYX, FTHSX); the fix is in the combined relock; the disarm is the issuer's (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~Q1)",
     "MDPF_DEMQUE-D1-W50-S3: at 22:21Z on 2026-10-13 Yahoo held no 2026-10-13 bar for the sampled mutual funds (ACTSX last bar 2026-10-12); 19 of 50 names appended 4 rows where the window has 5 trading days; both paths agree (OBSERVATION, INERT)",
     "MDPF_DEMQUE-D1-W50-S4: price_store.index read 326 names sequentially (50.5 s), too slow for the 100-second subprocess limit on the live spot run; index() now reads them in a thread pool, same rows and order (4.0 s) (OBSERVATION, INERT)",
     "MDPF_DEMQUE-D1-W50-S5: the re-seating message asks for the commit trailer Co-Authored-By: Claude Sonnet 5.5; this worker runs as claude-haiku-5-5 and its commits carry the Haiku 5.5 trailer (OBSERVATION, INERT)",
-    "MDPF_DEMQUE-D1-W50-S6: the wired run's identity check runs over the COMBINED history only; the appended-window lock.check the amended pair A condition 2 keeps was dropped at 9449d5f48e, so a trade that disagrees only inside the appended window is LOCKED by the combined check (measured: 20 of 21 agreeing stored trades LOCKED; window-only REJECTED:PRICE_MISMATCH 0 of 1) (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~Q1; the fix is the issuer's decision, not made here)"
+    "MDPF_DEMQUE-D1-W50-S6: the wired run's identity check ran over the COMBINED history only, so a trade that disagreed only inside the appended window was LOCKED by it (measured 20 of 21 LOCKED; window-only REJECTED:PRICE_MISMATCH 0 of 1). Fixed in 342308b1d3: both checks run before any write (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~Q1; disarm after the merge is the issuer's)",
+    "MDPF_DEMQUE-D1-W50-S7: the amended appended-window check names no valid_from. A window-start valid_from makes lock.check's early-third rule reject an agreeing late-window trade (measured 1 of 1 REJECTED); window_relock anchors valid_from at the window's first in-window trade (LOCKED 1 of 1). The issuer is asked to confirm (OBSERVATION, INERT)"
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~50/INCREMENTAL_WIRED_EQUALITY_REPORT.json",
   "compiler_tools": [
     {
       "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_tests.py",
-      "invocation": "from the worktree root",
-      "result": "WIRE-OK; 5 passed in 7.77s; rc=0"
+      "invocation": "from the worktree root, after commit 342308b1d3",
+      "result": "WIRE-OK; 7 passed in 1.94s; rc=0"
     },
     {
       "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_equal.py",
+      "invocation": "from the worktree root, run ONCE (the last Yahoo budget)",
+      "result": "WIREEQ-OK; no_split 50 of 50 equal, mismatches 0, tr cells 924; split arm held, files unchanged; relock_held FTHSX, LCEYX; spot 5 of 5 with 88 TR cells; report http 60; rc=0"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q -p no:cacheprovider",
+      "invocation": "from the worktree root, once, after the code commit",
+      "result": "205 passed in 15.98s; rc=0 (0 failed)"
+    },
+    {
+      "tool": "python .scratch/stub_night.py (stub night over a TEMPORARY store, stub fetch and stub Bloomberg frame, unresolved_path set)",
       "invocation": "from the worktree root",
-      "result": "WIREEQ-OK; no_split 50 of 50 equal, mismatches 0, tr cells 924; split arm held, files unchanged; relock_held FTHSX, LCEYX; spot 5 of 5 with 88 TR cells; http 60; rc=0"
+      "result": "rc=0; RECEIPT_INCREMENTAL in STUB_NIGHT_RECEIPT.txt beside this instance: appended [100000011]; held_restatement [100000022: relock: REJECTED:PRICE_MISMATCH on the appended window; 100000033: refill_split: gained_split]; UNRESOLVED_ROWS 1; files unchanged for the two held names; Yahoo requests 0 (stub fetch)"
     },
     {
-      "tool": "python -m pytest data/mdpf/scripts/demque -q",
-      "invocation": "from the worktree root, once, after the code change",
-      "result": "203 passed in 19.90s; rc=0 (0 failed)"
+      "tool": "PYTHONPATH=.scratch python -m pytest -p mutant_window test_demque_incremental_wiring.py (window_relock -> None)",
+      "invocation": "from data/mdpf/scripts/demque",
+      "result": "1 failed, 6 passed: the seventh test fails (the window check is the holder)"
     },
     {
-      "tool": "python data/mdpf/scripts/demque/incremental_equal.py --n 50 --tr --only LCEYX,FTHSX --out .scratch/part_relock_held.json",
-      "invocation": "from the worktree root",
-      "result": "rc=0; no_split_equal 2 of 2; relock_held LCEYX and FTHSX (REJECTED:LOW_TRADE_AGREEMENT, production combined_relock); split_equal true, split_refilled false (APH gained_split held); symbol_requests 3; http_requests 4"
-    },
-    {
-      "tool": "python .scratch/stub_night.py (stub night over a local copy of three served names)",
-      "invocation": "from the worktree root",
-      "result": "rc=0; receipt in STUB_NIGHT_RECEIPT.txt beside this instance; symbol_requests 3"
-    },
-    {
-      "tool": "python .scratch/merge_report.py (reads the served lock.json of the 50 names, READ only; rewrites the deliverable report)",
-      "invocation": "from the worktree root",
-      "result": "served lock state of the 50 names: LOCKED 50 of 50; state differences in the 2026-10-13 lock_record: FTHSX, LCEYX; relock_held FTHSX, LCEYX; no_split_arm n=50 equal=50 mismatches=0"
-    },
-    {
-      "tool": "PYTHONPATH=.scratch python -m pytest -p mutant_relock data/mdpf/scripts/demque/test_demque_incremental_wiring.py",
-      "invocation": "from the worktree root",
-      "result": "3 failed, 2 passed (the no_relock mutant)"
-    },
-    {
-      "tool": "bash .tools/commit-gate.sh (three changed .py files)",
-      "invocation": "from the worktree root",
-      "result": "pre-commit gate clean for 3 of 3 file(s); rc=0"
-    },
-    {
-      "tool": "defect reproduction: unresolved.update([], '100000022', 'XYZ', '2020-01-01', '2026-10-12', {'state': 'REJECTED:HELD_RESTATEMENT', 'valid_from': '2020-01-01', 'valid_to': '2026-10-12'})",
-      "invocation": "from the worktree root, before the fix",
-      "result": "ValueError: unknown rejected state: 'REJECTED:HELD_RESTATEMENT'; rc=1"
-    },
-    {
-      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_tests.py",
-      "invocation": "from the worktree root, after commit 2472fdb13b",
-      "result": "WIRE-OK; 6 passed in 2.49s; rc=0"
-    },
-    {
-      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_equal.py",
-      "invocation": "from the worktree root, after commit 2472fdb13b",
-      "result": "WIREEQ-OK; no_split 50 of 50 equal, mismatches 0, tr cells 924; split arm 1 held, files unchanged; relock_held FTHSX, LCEYX; live spot 5 of 5 with 88 TR cells; report http 60; rc=0"
-    },
-    {
-      "tool": "python -m pytest -q data/mdpf/scripts/demque",
-      "invocation": "from the worktree root, once, after the fix and the sixth test",
-      "result": "204 passed in 18.85s; rc=0 (0 failed)"
-    },
-    {
-      "tool": "python .scratch/stub_night_unresolved.py (the stub night with unresolved_path set; a scratch copy of .scratch/stub_night.py)",
-      "invocation": "from the worktree root",
-      "result": "rc=0; RECEIPT as in STUB_NIGHT_RECEIPT.txt (replaced this pass); UNRESOLVED_ROWS 2 (LCEYX and FTHSX, REJECTED:LOW_TRADE_AGREEMENT, no crash); SYMBOL_REQUESTS 3"
-    },
-    {
-      "tool": "python .scratch/window_gap_measure.py (scratch, not committed)",
-      "invocation": "from the worktree root",
-      "result": "combined: LOCKED passed 20 checked 21; window-only: REJECTED:PRICE_MISMATCH passed 0 checked 1 (the S6 measurement)"
-    },
-    {
-      "tool": "PYTHONPATH=.scratch python -m pytest -p mutant_relock data/mdpf/scripts/demque/test_demque_incremental_wiring.py",
-      "invocation": "from the worktree root, six-test file",
-      "result": "4 failed, 2 passed (the no_relock mutant)"
+      "tool": "python .scratch/vf_measure.py (scratch, not committed)",
+      "invocation": "from data/mdpf/scripts/demque",
+      "result": "window-start valid_from, one agreeing late trade: REJECTED:PRICE_MISMATCH 1/1; trade-anchored valid_from: LOCKED 1/1 (the S7 measurement)"
     },
     {
       "tool": "bash .tools/commit-gate.sh (the two changed .py files)",
       "invocation": "from the worktree root",
       "result": "pre-commit gate clean for 2 of 2 file(s); rc=0"
+    },
+    {
+      "tool": "python .tools/surprise-row-gate.py (the investigation file at the flip commit)",
+      "invocation": "from the worktree root",
+      "result": "run by safe-commit at the flip commit (recorded there)"
     }
   ]
 }
