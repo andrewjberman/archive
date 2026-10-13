@@ -10,6 +10,8 @@ Usage:  python ar20_checks.py <check> --root <worker worktree root>
                                                                                                                            -> Y212-REBASE-OK
   y213-rebase   AR-y-213: the same for pin group B (directory-search, ycharts-generate, export-render, holdings, 49f-reporting-read-lambda)
                                                                                                                            -> Y213-REBASE-OK
+  y216-expect   AR-y-216 (workstream YR): the expectations of the three function suites (narrative, directory-search, export-render) that encode the
+                pre-rule binding moved to the status rule, test files only, no test removed                              -> Y216-EXPECT-OK
   y214-portal   AR-y-214: the portal candidate that shows the SHEETS_NOT_READ notice on the upload answer's face              -> Y214-PORTAL-OK
 
 --root is REQUIRED. Each check prints its token last, or the token with -FAIL after one FAIL line per problem. Writes nothing.
@@ -25,9 +27,9 @@ IR = "infra/aws/lambda/investor-reporting"
 INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r20/"
 ROUND19_VERSION = "irpt-template-reader.r19.1"
-TOKENS = {"y211-repair": "Y211-REPAIR", "y211-keep": "Y211-KEEP", "y212-rebase": "Y212-REBASE", "y213-rebase": "Y213-REBASE", "y214-portal": "Y214-PORTAL"}
+TOKENS = {"y211-repair": "Y211-REPAIR", "y211-keep": "Y211-KEEP", "y212-rebase": "Y212-REBASE", "y213-rebase": "Y213-REBASE", "y214-portal": "Y214-PORTAL", "y216-expect": "Y216-EXPECT"}
 GROUPS = {"y212-rebase": ("61", "STATUS_RULE_REBASE_GROUP_A.json", ("irpt-performance-adapter", "irpt-narrative", "irpt-status")),
-          "y213-rebase": ("62", "STATUS_RULE_REBASE_GROUP_B.json",
+          "y213-rebase": ("64", "STATUS_RULE_REBASE_GROUP_B.json",
                           ("irpt-directory-search", "irpt-ycharts-generate", "irpt-export-render", "irpt-holdings", "irpt-49f-reporting-read-lambda"))}
 NEGATIVES = (
     ("Acct Market Value", ("25000000", "31000000")),
@@ -161,8 +163,14 @@ def main(argv):
                 if f.get("carries_status_rule") is not True:
                     problems.append("%s: the release's served.py must carry the status rule" % fn)
                 tests = f.get("tests") or {}
-                if tests.get("failed") not in (0, "0") or not tests.get("passed"):
-                    problems.append("%s: the function's own tests must pass against the release (passed %r failed %r)" % (fn, tests.get("passed"), tests.get("failed")))
+                if tests.get("failed") not in (0, "0"):
+                    # AMENDMENT 1 (issuer): a failure that ALSO fails with the original bytes is pre-existing and does not count against the release;
+                    # it must be named (failed_names) and shown failing in the control run (control_failed_names).
+                    names, control = set(tests.get("failed_names") or []), set(tests.get("control_failed_names") or [])
+                    if not names or not names <= control or tests.get("failed") != len(names):
+                        problems.append("%s: the function's own tests must pass against the release except failures that also fail with the original bytes (passed %r failed %r)" % (fn, tests.get("passed"), tests.get("failed")))
+                elif not tests.get("passed"):
+                    problems.append("%s: the function's own tests ran no passing test (%r)" % (fn, tests))
             print("functions in the record %d of %d" % (len([fn for fn in functions if fn in rows]), len(functions)))
     elif check == "y214-portal":
         rec = load(root, D % "63" + "PORTAL_NOTICE_CANDIDATE.json", problems)
@@ -187,6 +195,41 @@ def main(argv):
             if (rec.get("before_arm") or {}).get("failed") in (None, 0, "0"):
                 problems.append("before_arm: the new test must FAIL on the DEV tip without the change")
             print("files %d, tests %s" % (len(files), tests))
+    elif check == "y216-expect":
+        rec = load(root, D % "65" + "RULE_EXPECTATIONS.json", problems)
+        if rec:
+            for member in ("suites", "authz_tests", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            want = {"narrative": "narrative/tests", "directory-search": "directory/tests", "export-render": "export/tests"}
+            rows = {s.get("suite"): s for s in rec.get("suites") or []}
+            for name, folder in want.items():
+                s = rows.get(name)
+                if not s:
+                    problems.append("no row for the suite %s" % name)
+                    continue
+                for member in ("files_changed", "tests_edited", "before", "after", "control_failed_names", "collected_before", "collected_after"):
+                    if member not in s:
+                        problems.append("%s lacks %r" % (name, member))
+                for path in s.get("files_changed") or []:
+                    if not str(path).startswith(IR + "/" + folder + "/"):
+                        problems.append("%s: %s is outside the suite's tests folder" % (name, path))
+                if not s.get("files_changed") or not s.get("tests_edited"):
+                    problems.append("%s: no test file or no edited test is named" % name)
+                for e in s.get("tests_edited") or []:
+                    if e.get("how") not in ("expectation", "fixture") or not e.get("why"):
+                        problems.append("%s: an edited test lacks how (expectation or fixture) or why: %r" % (name, e.get("name")))
+                after = s.get("after") or {}
+                if not set(after.get("failed_names") or []) <= set(s.get("control_failed_names") or []):
+                    problems.append("%s: after the edit a test fails that does not also fail with the original bytes" % name)
+                if after.get("errors") not in (0, "0", None):
+                    problems.append("%s: collection or setup errors remain (%r)" % (name, after.get("errors")))
+                if (s.get("collected_after") or 0) < (s.get("collected_before") or 1):
+                    problems.append("%s: fewer tests are collected after the edit (%r against %r): none may be removed" % (name, s.get("collected_after"), s.get("collected_before")))
+            az = rec.get("authz_tests") or {}
+            if az.get("failed") not in (0, "0") or not az.get("passed"):
+                problems.append("the two _authz status tests must pass unchanged (%r)" % az)
+            print("suites in the record %d of 3" % len([n for n in want if n in rows]))
     return finish(check, problems)
 
 
