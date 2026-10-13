@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-272",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R23_Y.md",
+    "vintage_commit": "4b1e07dabc",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-272.j5-packager-principal-named-after-commentary.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/prd/IRPT_ANLREQ_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "68115f2d84"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~93",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~93/r23/J5_PACKAGER.json",
+      "kind": "doc",
+      "commit_or_etag": "2c8c0b506c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the J5 record; a document, not a deploy. Nothing deployed, released, pushed or invoked.",
+      "artifact_covered_by": ["AR272-y-AC1", "AR272-y-AC2J"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~93/session_log_0.9.0_WK_IRPT_ANLREQ~93.txt",
+      "kind": "doc",
+      "commit_or_etag": "2c8c0b506c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the session log of the commands run and their outputs; a document, not a deploy.",
+      "artifact_covered_by": ["AR272-y-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "82c5278573",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "five rows IRPT_ANLREQ-D2-W93-S1..S5 appended; no existing row edited. A channel file, not a deploy.",
+      "artifact_covered_by": ["AR272-y-AC1", "AR272-y-AC2J"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR272-y-AC1",
+      "criterion_verbatim": "the record traces who calls PACKAGE today with file:line, names the principal and the order rule, states the authorization change, and the new tests pass with the before-arm failing at HEAD and the existing ticket service tests still passing.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-93/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y272-j5 --root C:/dev/wk-irpt-anlreq-93",
+      "output_evidence": "J5: built=False\nY272-J5-OK",
+      "denominator": "invocation rc 0 (1 of 1 check). Criterion clauses: 4 of 5 met (record traces callers; names principal and order rule; states authorization change; existing ticket tests pass 206 of 206 by count). The 5th clause, new tests pass with the before-arm failing at HEAD, is NOT met: 0 new tests, 0 before-arm failures.",
+      "expect": "Y272-J5-OK",
+      "status": "FAIL",
+      "status_reason": "The invocation prints Y272-J5-OK at rc 0, but the criterion's clause 'the new tests pass with the before-arm failing at HEAD' is unmet. The premise of the before-arm, that package_principal is empty at HEAD, is false: lambda_function.py:120 names svc-irpt-packager (surprise IRPT_ANLREQ-D2-W93-S1, BLOCKING). The check passes trivially because the record sets built=false, which skips its before-arm test. No new test was invented to fill the clause. The order stays open for the issuer's decision."
+    },
+    {
+      "criterion_id": "AR272-y-AC2J",
+      "criterion_verbatim": "the packager principal is an existing service subject (no new identity, no ALL), firm-bound, the order after the commentary is stated from the code that would enforce it, anything in the resident or Terraform stopped the cell with a row, and nothing was released.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~93/r23/J5_PACKAGER.json (trace, chosen_principal, order_rule, authorization_change, not_read) and the surprise rows IRPT_ANLREQ-D2-W93-S1..S5 at commit 82c5278573",
+      "output_evidence": "chosen_principal: svc-irpt-packager, existing subject (lambda_function.py:120; opal_packager.py:63); no new identity, no ALL; firm-bound by PACKAGE_ALLOWED_FIRMS (lambda_function.py:86, :1491-1492; main.tf:266), not by a PROFILE row (surprise S2). order_rule: the existing commentary_ready message, sent at lambda_handler.py:344 after persist at :341; enforced by resident_installed.py:341 and opal_packager.py:144-212; order relative to the ticket post is S5. Resident and Terraform: no change made (grant is ticket_center only); resident and drafter files and the ticket function's Terraform are outside the grant and stopped nothing. Released: nothing (built=false; no push, deploy, upload, apply, invoke or live call).",
+      "denominator": "5 judgment sub-clauses read (existing subject; firm-bound; order from code; resident or Terraform stopped by row; nothing released). Output recorded; no verdict.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion: graded at L9 by 3.0.0_SA_CVO, never by the worker. Output recorded above with no verdict."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy .scratch/mut93/ticket_center with the principal equality removed from package_ticket (the 'and actor[\"email\"] == principal' term deleted), so any service subject with the marker may package.",
+      "expected": "at least one test in test_package_principal.py or test_package_route.py fails (the principal gate fires)",
+      "observed": "3 failed, 13 passed, rc 1: test_other_principals_still_refused, test_package_refused_for_humans_and_svc_commentary, test_package_principal_read_from_type_definition. Unmodified tree: 16 passed, rc 0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of infra/aws/lambda/ticket_center/tests compared (python -m pytest -q, AWS env set to invalid, no network)",
+      "observed": "run 1: 206 passed, 43 subtests passed, rc 0; run 2: 206 passed, 43 subtests passed, rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AR-y-272 before-arm (package_principal empty at HEAD)",
+      "reason": "premise false at HEAD 4b1e07dabc: lambda_function.py:120 names svc-irpt-packager. Surprise IRPT_ANLREQ-D2-W93-S1 (BLOCKING) asks the issuer to amend or re-cut."
+    },
+    {
+      "item": "new tests for pointer kinds, principal admission and refusals",
+      "reason": "already in the suite and passing at HEAD (test_package_principal.py, test_package_route.py, test_package_409_codes.py, test_package_i5p_i7.py); adding duplicates would be manufactured coverage."
+    },
+    {
+      "item": "PROFILE-row firm binding for the packager",
+      "reason": "the code binds by env list PACKAGE_ALLOWED_FIRMS, no users row is read (R4-pk-1). A PROFILE binding would be a widening decision for the issuer; surprise S2."
+    },
+    {
+      "item": "resident (ycharts/generate, reports), drafter (data/transcripts/scripts/commentary) and Terraform changes",
+      "reason": "outside the grant; none was needed (the order is enforced by the existing commentary_ready message). Surprise S5 notes the ticket-post ordering for the issuer."
+    },
+    {
+      "item": "portal change",
+      "reason": "no portal file needed; the portal path is unpopulated in this worktree (surprise S3); the portal's pinned tickets.ts has no PACKAGE caller."
+    },
+    {
+      "item": "live reads, deploy, release, push, upload, apply, invoke",
+      "reason": "out of scope for a read-and-record order; none performed."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W93-S1: AR-y-272 premise void: package_principal already names svc-irpt-packager at HEAD (lambda_function.py:120), so the before-arm cannot fail (BLOCKING, UNDER_INVESTIGATION).",
+    "IRPT_ANLREQ-D2-W93-S2: the packager firm binding is the env list PACKAGE_ALLOWED_FIRMS, not a PROFILE row; the comment at lambda_function.py:117-119 is stale.",
+    "IRPT_ANLREQ-D2-W93-S3: portal/src/api/endpoints/tickets.ts is absent from this worktree (unpopulated submodule); the pinned read shows no PACKAGE caller.",
+    "IRPT_ANLREQ-D2-W93-S4: the W66-S1 packager GET blocker is not present at HEAD; the packager reads no ticket (opal_packager.py:14, :252).",
+    "IRPT_ANLREQ-D2-W93-S5: commentary_ready is sent after the draft is persisted and before the draft is posted to the ticket (lambda_handler.py:341, :344, :353); the PACKAGE route checks no draft_commentary."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~93/session_log_0.9.0_WK_IRPT_ANLREQ~93.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest (ticket_center suite)",
+      "invocation": "AWS_ACCESS_KEY_ID=AKIAINVALID AWS_SECRET_ACCESS_KEY=invalid python -m pytest -q infra/aws/lambda/ticket_center/tests",
+      "result": "206 passed, 43 subtests passed, rc 0"
+    },
+    {
+      "tool": "ar21_checks.py y272-j5",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y272-j5 --root <worktree>",
+      "result": "J5: built=False / Y272-J5-OK, rc 0"
+    },
+    {
+      "tool": "surprise-row-gate.py (via safe-commit)",
+      "invocation": "bash .tools/safe-commit.sh ... -- INVESTIGATION_v1.md (commit 82c5278573)",
+      "result": "OK: 1 file(s), 5 new row(s) carry their step-7/step-10 fields"
+    }
+  ]
+}
