@@ -25,6 +25,8 @@ def get_item(table, key):
                          capture_output=True, text=True, timeout=120)
     if out.returncode != 0:
         raise RuntimeError("get-item rc=%d" % out.returncode)
+    if not out.stdout.strip():
+        return None
     return json.loads(out.stdout).get("Item")
 
 
