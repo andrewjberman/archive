@@ -75,7 +75,7 @@ def main():
             print("OK: post-build counts %s; the build is named" % c2)
         elif arm == "AC2":
             cmd = str(r2.get("command_run", ""))
-            if not re.search(r"find", cmd) or "wc -l" not in cmd or re.search(r"(rm|mv|cp|tee|shred|dd|truncate|xargs)|-delete|-exec", cmd):
+            if not re.search(r"\bfind\b", cmd) or "wc -l" not in cmd or re.search(r"\b(rm|mv|cp|tee|shred|dd|truncate|xargs)\b|-delete|-exec", cmd):
                 fail("command_run must be a read-only find piped to wc -l")
             if re.search(r"(?<![0-9a-fA-F-])\d{9,}(?![0-9a-fA-F])", json.dumps(r2.get("temp_file_counts"))) or re.search(r"/tmp/\S", json.dumps(r2.get("temp_file_counts"))):
                 fail("the counts carry a path or a long digit run")
