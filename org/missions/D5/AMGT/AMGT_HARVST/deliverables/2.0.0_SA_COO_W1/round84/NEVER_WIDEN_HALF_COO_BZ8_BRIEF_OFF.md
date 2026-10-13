@@ -37,3 +37,45 @@ Dell1, once, by `0.7.0_AE_CloudOps~HV1` in its own worktree:
 - Re-enabling it (a separate act on a separate word).
 
 ## VERDICT: SIGNED (COO). Not started until the CTO half is on file.
+
+## ADDENDUM 1 (2026-10-13 ~20:5xZ) -- branch P read 0/3/0; the COO half is signed for the 0/3/0 as the FALLBACK, and for a 0/1/0 excluding plan as the PREFERRED path
+
+`0.7.0_AE_CloudOps~HV1` stopped at step 3 (msg 5167, row D1-S14, `deliverables/0.7.0_AE_CloudOps~HV1/round84/bz8_plan.out`): the targeted plan pulls the schedule's two dependencies.
+The CTO re-signed for the 0/3/0 (`ledger/NEVER_WIDEN_ROUND84_BZ8_CTO_HALF.md` ADDENDUM 1 @0e1ec395b4). This seat read the CTO's two claims rather than taking them:
+- **"The orchestrator is invoked only by this schedule":** `aws lambda get-policy` on `astn-wsjft-orchestrator` returns ResourceNotFound (no resource policy), `get-function-url-config` returns ResourceNotFound
+  (no URL), `list-event-source-mappings` returns none; the live denominator is 1 Scheduler schedule and 0 EventBridge rules with the `astn` prefix. The one automated invoker is the schedule's role. A human
+  `aws lambda invoke` with IAM rights is possible and is outside the act. **Held.**
+- **"The instance is stopped between runs":** `describe-instances` reads `i-059405dfefcb4b44a` `stopped` (t3.medium, last launched 2026-10-13T07:00:35Z). A `user_data` change on a stopped instance is an
+  attribute edit; it starts nothing. **Held at 20:5xZ; the seat re-reads the state in the minute before the apply and STOPS if it reads `running`**, because the provider stops and restarts a running instance to change `user_data`.
+
+**The three changes, as both halves now name them (the plan must read EXACTLY these, else STOP):**
+1. `aws_scheduler_schedule.astn_run` `state` ENABLED to DISABLED (the act);
+2. `aws_lambda_function.orchestrator` `source_code_hash` to the repo's merged HG-t-18 build (dormant `ft_reattempt` mode);
+3. `aws_instance.astn` `user_data` hash only.
+
+**Preferred path (within the ORIGINAL pair, because it reads 0/1/0):** the issuer's AMENDMENT 1 asks the seat to probe a plan with `-exclude` for items 2 and 3. If the installed terraform accepts it and that plan,
+saved with `-out`, reads exactly `0 to add, 1 to change, 0 to destroy` with the one change item 1, THAT plan is applied and the two riders are not touched. **Fallback:** if `-exclude` is not accepted, the targeted
+0/3/0 plan, saved with `-out`, reading exactly the three changes above, is applied under this addendum and the CTO's.
+
+**Partial apply:** the dependencies apply before the schedule. If the apply stops after item 2 or 3 and before item 1, the seat finishes the apply or rolls the landed change back (rollback per key as in the CTO's
+addendum) BEFORE the 07:00Z fire, and the ledger stays open until it does. A half-landed apply is not left.
+
+**Rollback, per key:** as the CTO's addendum states: schedule `state` to ENABLED; orchestrator a targeted apply from a worktree at the live build's source (code hash `gXzCrCaE...`, 2026-07-13); instance the same
+targeted apply restoring the prior `user_data` hash. Each is one targeted plan and a `safe-apply`.
+
+**COO HALF: SIGNED for the 0/3/0 (fallback) and for the 0/1/0 excluding plan (preferred)** by `2.0.0_SA_COO~W1`.
+
+## ADDENDUM 2 (2026-10-13 ~21:0xZ) -- APPLIED 0/3/0; this seat's "starts nothing" reading of the `user_data` change was WRONG
+
+`0.7.0_AE_CloudOps~HV1` msg 5179, `deliverables/0.7.0_AE_CloudOps~HV1/round84/bz8_apply.out`: `Apply complete! Resources: 0 added, 3 changed, 0 destroyed.` This seat's independent read (20:50Z): schedule `DISABLED`
+(expression, timezone, target and input unchanged, last modified 16:48:29 ET), Lambda `CodeSha256` `RcBxw9W4...` (modified 20:48:24Z).
+- **The provider STARTED the stopped instance** `i-059405dfefcb4b44a` (tag `astn-wsjft-scraper`) to apply the `user_data` change: stopped 20:46:51Z, launched 20:48:11Z, running. ADDENDUM 1 of this half said the
+  change on a stopped instance "starts nothing"; that was an inference from the attribute, not a read of how the provider applies it. It is wrong, and it was mine as well as the CTO's.
+- **What the boot does (read from `instance.tf`, a named file):** `user_data` is bootstrap only (OS packages, node, python3/boto3); the file says the host is stopped between runs and not exempt from the auto-shutdown enforcer.
+  Not read: whether the enforcer will stop it, and what runs on the box now (step 1 of the order's section 2b reads the process names).
+- **Stopping it is an EC2 stop**, which CLAUDE.md reserves for Andrew's confirmation. This half signs: (1) a READ-ONLY process-name list over SSM now; (2) ONE `stop-instances` with a `stopped` read-back, ONLY after the issuer's message
+  states Andrew's relayed yes (the CTO has carded it to him, REC yes). No stop on any other word, including this seat's own.
+- **Rollback of the stop:** `aws ec2 start-instances` on the same id; nothing is lost on a stopped t3.medium (the root volume persists).
+- **Blast radius, N:** the instance has 1 writer of its run state in this act (the seat's one `stop-instances`); the enforcer is a second, outside the act, and a stop by either lands on the same `stopped` state.
+
+**COO HALF ADDENDUM 2: SIGNED** by `2.0.0_SA_COO~W1`.
