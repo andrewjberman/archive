@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-13</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C after its own reads: proof instance VALID (CTaa6-AC1, CTaa6-AC2); exercise record final lines internal=200 partner=403 walker=200 POST-APPLY events=21 jwt_shaped=0 bearer=0; CodeSha256 q4iLGld/... -> lpxgJxwrpdy7vsEbw5/dt4xtoclkUMe7F+ODnLa3Lok=, plan 0/1/0, re-plan No changes, deployed members matched the fourth pair's pin before the build; PRE-1 6 Dev rows, 0 off the internal firm; ledger closed. DEVIATION recorded: R2 used a synthetic partner row (created, read, deleted, ABSENT) instead of the existing seed row, because the walker tool takes no second account id (CT-aa-4 precedent); the order's bounds named the seed row only.</status_reason>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <round>3</round>
