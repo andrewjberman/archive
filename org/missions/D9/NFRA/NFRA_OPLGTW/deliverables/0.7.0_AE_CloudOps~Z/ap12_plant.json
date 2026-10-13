@@ -1,0 +1,27 @@
+{
+ "planted_at": "2026-10-13T11:47:23Z",
+ "queue": "opal-assets-silver-dlq",
+ "marked": "synthetic: OG-ap-12, at top level and inside requestPayload; names no real bronze key",
+ "records": [
+  {
+   "family_named": "opal-assets-silver-eclipse",
+   "role": "FOREIGN -- must SURVIVE the schwab sweep",
+   "message_id": "f9a08314-5c82-408c-add9-103339f5718c"
+  },
+  {
+   "family_named": "opal-assets-silver-schwab",
+   "role": "OWN -- must be DRAINED and REPORTED",
+   "message_id": "44ee0375-7478-490b-a71a-9e0dc96af071"
+  }
+ ],
+ "depth_before_plant": {
+  "visible": 0,
+  "not_visible": 0,
+  "note": "Clean. The ap-11 eclipse synthetic 48264f89, deliberately left in the queue, was GONE by 11:43Z. I did not remove it by receipt handle, so it was removed by whatever empties this queue around 16:00Z. The order's step 4 called that 'the 16:00Z eclipse sweep (old code)', but OG-dq-1 could NOT name the deleter (actor.verdict: unnamed) and explicitly ruled out the 12:15Z sweep and OG-bh-1. So the honest record is: removed by the unnamed ~16:00Z consumer, not by this seat."
+ },
+ "both_present_after_plant": true,
+ "how_presence_WAS_established": "Two send-message calls each returned rc=0 with a MessageId, and get-queue-attributes then read ApproximateNumberOfMessages=2.",
+ "A_METHOD_CORRECTION_THAT_MATTERS_AT_GRADE_TIME": "An SQS receive-message is a SAMPLE, not a census: it polls a subset of servers, so it can omit a message that is present. Measured here -- a receive with max-number-of-messages 10 and 15s long polling returned only the SCHWAB record while the depth read 2 and both sends were acked. Earlier, in the OG-ap-11 grade, the same call returned the SAME eclipse message ten times. So: a receive that RETURNS a message proves PRESENCE; a receive that OMITS one proves NOTHING about absence. This corrects a claim I made during the ap-11 grade, that 'the receive is authoritative and the counter lags' -- neither is a census. ap-11's verdict is unaffected (it FAILED on the report half, and its depth independently fell 2 -> 1), but the stated basis for 'schwab was drained' was an absence inferred from a sample, which is not sound. At THIS grade, absence is read from the depth falling plus the sweep's own report, never from a message failing to appear in one receive.",
+ "sweep": "the SCHEDULED 12:15Z schwab sweep; no ad-hoc invoke",
+ "hold_state": "1.0.0_SA_CTO~Z's opal-assets terraform hold (dell1 HG-t-10) was LIFTED at 11:46Z, msg 33608: cot-bronze-complete restored 11:37:21Z and read back. So the grade and any rollback proceed as the order states, without the msg-33604 condition."
+}
