@@ -29,7 +29,8 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y226-effect": "Y226-EFFECT", "y227-resident": "Y227-RESIDENT", "y228-lambda": "Y228-LAMBDA", "y229-stderr": "Y229-STDERR",
           "y242-portal": "Y242-PORTAL", "y243-portal": "Y243-PORTAL", "y244-read": "Y244-READ", "y245-server": "Y245-SERVER",
           "y246-qa": "Y246-QA", "y247-swap": "Y247-SWAP", "y248-portal": "Y248-PORTAL",
-          "y249-swap": "Y249-SWAP", "y250-qa": "Y250-QA", "y251-swap": "Y251-SWAP", "y252-portal": "Y252-PORTAL"}
+          "y249-swap": "Y249-SWAP", "y250-qa": "Y250-QA", "y251-swap": "Y251-SWAP", "y252-portal": "Y252-PORTAL",
+          "y261-read": "Y261-READ", "y262-portal": "Y262-PORTAL", "y263-portal": "Y263-PORTAL", "y264-portal": "Y264-PORTAL", "y265-portal": "Y265-PORTAL"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -439,6 +440,39 @@ def main(argv):
             problems.append("the intake folder must pass with at least 365")
     elif check == "y252-portal":
         portal_candidate(root, D22 % "85" + "PORTAL_PROXY_PLACEHOLDER_CANDIDATE.json", problems)
+    elif check == "y261-read":
+        rec = load(root, D22 % "86" + "ULTRA_SHORT_TERM_READ.json", problems)
+        if rec:
+            for member in ("server", "models_in_the_estate", "why_missing", "canonical_order", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            why = rec.get("why_missing") or {}
+            for member in ("verdict", "evidence", "fix", "risk"):
+                if not why.get(member):
+                    problems.append("why_missing.%s must be stated" % member)
+            if not (rec.get("server") or {}).get("catalogue_source"):
+                problems.append("server.catalogue_source must name where the catalogue is sourced")
+            print("verdict: %s" % str(why.get("verdict"))[:80])
+    elif check == "y262-portal":
+        rec = portal_candidate(root, D22 % "87" + "PORTAL_FORM_ORDER_COLOR_CANDIDATE.json", problems)
+        if rec and not (rec.get("reuse") or {}).get("color_function"):
+            problems.append("reuse.color_function must name the estate's color function (file:line)")
+    elif check == "y263-portal":
+        rec = portal_candidate(root, D22 % "88" + "PORTAL_FORM_NO_FEE_CANDIDATE.json", problems)
+        if rec and not (rec.get("server_reads") or {}).get("default_when_absent"):
+            problems.append("server_reads.default_when_absent must say what the ticket service does without a fee")
+    elif check == "y264-portal":
+        rec = portal_candidate(root, D22 % "89" + "PORTAL_FORM_COMMENTARY_CANDIDATE.json", problems)
+        if rec and not (rec.get("trace") or {}).get("where_it_breaks"):
+            problems.append("trace.where_it_breaks must name the first hop where a checked box stops reaching commentary_requested")
+    elif check == "y265-portal":
+        rec = portal_candidate(root, D22 % "90" + "PORTAL_SUBMIT_SILENCE_CANDIDATE.json", problems)
+        if rec:
+            trace = rec.get("trace") or {}
+            if not trace.get("silent_exits") or not trace.get("where_it_stops"):
+                problems.append("trace must list every silent exit (file:line) and where the submit stops")
+            if not rec.get("reproduction"):
+                problems.append("reproduction must say which hops end with no message on screen (RUN, with test names)")
     return finish(check, problems)
 
 
