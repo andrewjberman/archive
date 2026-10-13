@@ -289,8 +289,15 @@ def main(argv):
             for member in ("named_tests", "passed", "failed", "denominator"):
                 if member not in tests:
                     problems.append("tests lacks %r" % member)
+            accepted = ("test_the_readers_output_on_the_fixtures_is_pinned_to_its_version",
+                        "test_correction_words_are_the_envelopes_words")
+            explained = [str(x) for x in tests.get("failures_explained") or []]
             if tests.get("failed") not in (0, "0"):
-                problems.append("the reader's tests must pass on the build (failed=%r)" % tests.get("failed"))
+                # AMENDMENT 1 (issuer, after CTO msg 6778): S25 and S26 are accepted named limits; any OTHER failure, or an unexplained one, still fails.
+                ok_explained = (isinstance(tests.get("failed"), int) and tests.get("failed") == len(explained)
+                                and all(any(e.find(name) >= 0 for name in accepted) for e in explained))
+                if not ok_explained:
+                    problems.append("the reader's tests must pass on the build except the two CTO-accepted, explained failures (failed=%r)" % tests.get("failed"))
             print("differing %s; tests passed %s failed %s" % (names, tests.get("passed"), tests.get("failed")))
     elif check == "y201-live":
         rec = load(root, D % "56" + "LAMBDA_LEG_LIVE_REBASE.json", problems)
