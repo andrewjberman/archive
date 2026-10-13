@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-z-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "37192ad0fc38f5c942bb0985c8f5288865cc6b57",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-z-1.gateway-breakdown-handler.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-z-1.gateway-breakdown-handler.md",
+    "group": "OTHER",
+    "vintage_commit": "37192ad0fc38f5c942bb0985c8f5288865cc6b57"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~13",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_gateway_breakdown.py",
+      "kind": "script",
+      "commit_or_etag": "0de6cfb834",
+      "introduces": [
+        "breakdown",
+        "_compute",
+        "_admits"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "owner_only handler breakdown and _compute(scan_client, store); channels from the unfiltered tool manager plus registry._ACTIVE_BY_TOOL; holders by calling the gateway's own chain in _admits; grant store by pk/sk Scan plus current_access; no write, no AWS call, no other app module edited. The route line is NOT added here (app/admin_api.py is the release cell's).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_admin_gateway_breakdown.py",
+      "kind": "test",
+      "commit_or_etag": "0de6cfb834",
+      "introduces": [
+        "test_holders_match_the_dispatch_chain",
+        "test_real_server_tool_inventory"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the nine named tests; the seam drives tools._run and run_integration_tool as the chokepoints with only the token fetch and tool body stubbed, plus a blocklist difference control; 28a7ff1904 then removed a debug print so the AC2 grep reads PASSED on the test line",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "0de6cfb834",
+      "introduces": [
+        "NFRA_MCPORTAL-Z-W13-S1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one OBSERVATION/INERT row appended: the email rosters do not raise a person's tier",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "breakdown tests: 0 failed; named tests PASSED 7 of 7 -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/fwd20/checks/z1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "breakdown tests: ======================== 9 passed, 1 warning in 2.19s =========================; named tests PASSED 7 of 7\nRESULT: PASS\nexit=0",
+      "denominator": "7 of 7 named tests PASSED; 9 passed, 0 failed in the file",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "breakdown seam: 0 failed; named tests PASSED 2 of 2 -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/fwd20/checks/z1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "breakdown seam: ======================== 9 passed, 1 warning in 1.78s =========================; named tests PASSED 2 of 2\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 named tests PASSED; 9 passed, 0 failed in the file",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "On disk only, in app/admin_gateway_breakdown.py _admits: removed identity_scope.check, then data_entitlement.tool_denial, then blocklist.enforce (one at a time, via sed on a saved copy), re-ran the test file, restored from the copy.",
+      "expected": "test_holders_match_the_dispatch_chain fails each time: the breakdown no longer equals the chokepoints.",
+      "observed": "each mutation: 1 failed, 8 passed (the seam test). Restored bytes: 9 passed. (A fourth mutation, removing the write-class entitlement gate, failed 2 tests; removing enforce_min_tier failed the seam test.)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test file run 5 times (3 mutation-loop restores, AC1 and AC2 twice each)",
+      "observed": "every run on the final bytes: 9 passed, 0 failed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the route line in app/admin_api.py and any live read of the grant store",
+      "reason": "BOUNDS 1 and 2: the release cell adds Route(\"/gateway/breakdown\", admin_gateway_breakdown.breakdown, methods=[\"GET\"]) with its import; the Scan needs MP-z-4's grant; every store read here is a fake client."
+    },
+    {
+      "item": "client-qualified identity_scope rows (a row admitting a tool only from a registered OAuth client)",
+      "reason": "the verified client of a future request is unknowable here; the chain is called with client_id empty and holders_basis says so."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W13-S1"
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~13/session_log.md",
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPORTAL~13 <0.9.0_WK_NFRA_MCPORTAL~13@opal.agent>\" -F .scratch/msg1.txt -- <paths>",
+      "result": "0de6cfb834 (after two commit-gate refusals fixed: unused import, a strict-utf8 log-read naming heuristic); 28a7ff1904"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "z1.AC1.sh and z1.AC2.sh",
+      "result": "9 passed 0 failed each; named 7 of 7 and 2 of 2"
+    }
+  ]
+}
