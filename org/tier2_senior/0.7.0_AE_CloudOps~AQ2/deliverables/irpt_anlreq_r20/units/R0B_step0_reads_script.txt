@@ -1,0 +1,25 @@
+import subprocess,hashlib,base64,json,re,sys
+S=sys.argv[1]
+T=[("irpt-directory-search","TefVhmGStCRorgQFrQFCS0lVUC+pXrWJYfdUCEExqe4=","sk08zsHKMXATPSxY1lGWOPBHDA3mUZLa"),
+("irpt-narrative","0+/PHOb/xGvYNBrz/j4Ltk5k85clmAo96BOJzi9n3ZY=","vfMfQUz1j8R1ke05lBe2jNX6yAjWbIOz"),
+("irpt-export-render","dCzMEt04dtBAlvkj+2rZMGZaU30kY+7leZxN00dbxH8=","kxJxKiFuGVIu8UpXBif2tzRxZY_cwNcS"),
+("irpt-holdings","SWRfUfHdJarO2Rhbxw/KQK88DeDNorQujkaR1jUuZc0=","hfQkgY1LcwrlvQCRQrJJlUJ2TLeah6op"),
+("irpt-49f-reporting-read-lambda","IhlTVtU9yYVskJ3PUOcoOKp1HnE2WAW5V8X31IwKkTc=","2iKVUY7CiWJvX2WaCmY8hd7OTf48Uupy"),
+("irpt-performance-adapter","abep4h7RngMS9JomQUdkcOT3EZ+W953OdxeK0HkdzFo=","oI.PAFCtZLh1MQJR6sh1UZY0O0A.YAfe"),
+("irpt-status","JmOhV/ep4mR1mt2NKKqyUlohgO3mlDw1GEM4eAWYKdw=","c7FKfNVu49nUZj6tEQbKx43ZGNg_gyGU"),
+("irpt-ycharts-generate","bNPCG2Oe1oQM/ztjggmrdDbdl83CAmUEcPnBFxlj2Rk=","hgfB7ucwFdyO.uwz4GiwtC24IDlOmN7n")]
+B="opal-313476888478-lambda-artifacts"
+def aws(*a):
+    r=subprocess.run(["bash",".tools/aws",*a],capture_output=True,text=True); 
+    if r.returncode: raise SystemExit("aws fail "+" ".join(a)+" "+r.stderr[:300])
+    return r.stdout.strip()
+for fn,sha,ver in T:
+    live=aws("lambda","get-function-configuration","--function-name",fn,"--query","[CodeSha256,LastUpdateStatus]","--output","text").split()
+    vs=json.loads(aws("s3api","list-object-versions","--bucket",B,"--prefix",f"investor-reporting/{fn}.zip","--output","json"))
+    lat=[v for v in vs.get("Versions",[]) if v["Key"]==f"investor-reporting/{fn}.zip" and v["IsLatest"]]
+    latv=lat[0]["VersionId"] if lat else None
+    p=f"{S}/r0b/{fn}.zip"
+    aws("s3api","get-object","--bucket",B,"--key",f"investor-reporting/{fn}.zip","--version-id",latv,p)
+    h=base64.b64encode(hashlib.sha256(open(p,"rb").read()).digest()).decode()
+    ok=(live[0]==sha, latv==ver, h==sha)
+    print(f"{fn}: live={live[0]==sha} status={live[1]} latest_ver={latv==ver} ({latv}) obj_hash_eq_live={h==sha} n_versions={len([v for v in vs.get('Versions',[]) if v['Key']==f'investor-reporting/{fn}.zip'])} -> {'OK' if all(ok) else 'STOP'}")

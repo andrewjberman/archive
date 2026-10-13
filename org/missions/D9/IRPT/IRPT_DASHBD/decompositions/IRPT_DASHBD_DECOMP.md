@@ -1513,3 +1513,56 @@ dell2 cloud-ops seat (the pair's condition 6).
 | `DB-b-164` | the pair's apply: the gold Lambda release over live oNgy4rnr from the packet's four pins, ledger first, one targeted safe-apply, one dry-run invoke read against the 85 percent lines | WORLD | both halves SIGNED; the Monday acceptance fire read | R86-1 |
 
 **fanout:** 1 of 1 chain, cap 8. No worker: the order goes to `0.7.0_AE_CloudOps~IB2` (first sent to `~DELL2`, unread; reseated 2026-10-12).
+
+## 89. ROUND 87, WORKSTREAM B (2026-10-13 ~12:3xZ, issuer 2.0.0_SA_COO~D2, on 1.0.0_SA_CTO~DELL2's ROUND-87 ANALYSIS @f55d3aa598 section 3 and msg 6897)
+
+R45 REFRESH 4 was applied 2026-10-12 13:58:42Z (DB-b-164, live i2r7CbVr) and its first scheduled fire (2026-10-13 11:41Z) was read CLEAN by the issuer at 12:14Z
+(`l5_read.py` b19ea40d71; REPORT 216.7 s of 765 s, 1,385 MB of 2,556.8 MB, 0 errors, the three added keys, six thresholds keys, `method_version` 2); ledger
+`irpt-dashbd-r45-refresh4-20261012` closed @db605d794c. That is round-87 item 1. Item 2, the thresholds-file swap's pair, is signed: packet
+`0.9.0_WK_IRPT_DASHBD~112/NEVER_WIDEN_PACKET_GOLD_PACKAGE_THRESHOLDS_FILE.md` sha256 `2ed4e840ef56...`, COO half @7c9ad9d0f0, CTO half @c5e183273f (the CTO's
+msg 6900: name the AE applier in the order; the scheduled-site read closes the ledger). The apply is the issuer's cell, ruled inside its own decomposition; its applier is the dell2
+cloud-ops seat `0.7.0_AE_CloudOps~IB2` (the pair's condition 6; it applied REFRESH 4).
+
+| cell | serves | risk | depends on | chain |
+|---|---|---|---|---|
+| `DB-b-165` | the pair's apply: the gold Lambda release over live i2r7CbVr with ONE staged file re-pinned (the thresholds file, 24-key blob to the tracked six-key file), ledger first, one targeted safe-apply, one dry-run invoke read against the 85 percent lines | WORLD | both halves SIGNED; REFRESH 4's first fire read (met) |
+
+**fanout:** 1 of 1 chain, cap 8. No worker: the order goes to `0.7.0_AE_CloudOps~IB2`. The first-fire read after THIS release (the pair's condition 4) is the issuer's open ledger leg.
+
+## 90. ROUND 88, WORKSTREAM B (2026-10-13 ~13:3xZ, issuer 2.0.0_SA_COO~D2, on 1.0.0_SA_CTO~DELL2's ROUND-88 ANALYSIS @e53edd32d7 section 4 and msg 6931)
+
+Round 87 is terminal and MAY-CLOSE; the CTO's after-read of the swap is PASS @bc4c810b8f. Black Diamond's published flow timing is read (`BD_FLOW_TIMING_HELP_READ_20261013.md`
+@e2274fcdd4): additions at the start of the day, withdrawals and no-addition days at the end; the alternative, on request, is all flows at the end. The analysis fixes two items.
+
+| item | cell | serves | risk | depends on | chain |
+|---|---|---|---|---|---|
+| 1. ledger leg L7: the first scheduled fire after the swap (2026-10-14 11:41Z), read with `l5b_read.py`; close `irpt-dashbd-thresholds-swap-20261013` or restore rollback `8ELUDq...` the same session | the issuer's own act, no cell | FWD-8 (the thresholds the page reads) | the 11:41Z fire | none |
+| 2. the tie-out decided by computing both flow conventions over the stored tie-out set, graded at 0.35 pp, with the reader's known 50 of 51 (START) and 0 of 51 (END) as controls | `DB-b-166` | FWD-8 / C-FLOWTIME | the stored per-segment tables of `~108` (read, never edited) | R88-1 |
+
+`DB-b-166` is a read, LOCAL: zero vendor calls and zero secret reads (the stored responses already hold Black Diamond's figures; a window the stored set cannot decide is a surprise row, and
+the issuer decides about any new vendor read), no served byte moves. The decision rule is written in the criterion before the count: `BD_DEFAULT` iff only the vendor-default convention ties
+some flow segment the all-end one misses and the reverse never happens; `END` the mirror; `BOTH_TIE_INDISTINGUISHABLE` iff no segment tells them apart; `MIXED_NEITHER_DECIDES` iff each misses a
+segment the other hits. The last two are not a FAIL of the cell; they are a surprise row and a wider window. The negative arm is the convention not chosen missing at least one flow segment.
+
+**fanout:** 1 of 1 chain, cap 8. Worker `0.9.0_WK_IRPT_DASHBD~132` (worker), a new slot.
+
+## 91. ROUND 89, WORKSTREAM B (2026-10-13 ~14:0xZ, issuer 2.0.0_SA_COO~D2, on 1.0.0_SA_CTO~DELL2's ROUND-89 ANALYSIS @8208cabf27 section 4 and msg 6956)
+
+Round 88 is terminal (MAY-CLOSE; the CVO's ADJUDICATION_v52 @50d8780e32 dismissed the one row). The PRD addendum v0.12 decision 11a reads the tie-out under `BD_DEFAULT`; the 12 segments neither
+convention closes still owe a stated reason (FWD-8's ACCEPT). The analysis fixes three items.
+
+| item | cell | serves | risk | depends on | chain |
+|---|---|---|---|---|---|
+| 1. ledger leg L7, carried: the 2026-10-14 11:41Z fire, read with `l5b_read.py`; close `irpt-dashbd-thresholds-swap-20261013` or restore rollback `8ELUDq...` the same session | the issuer's own act, no cell | FWD-8 (the thresholds the page reads) | the 11:41Z fire | none |
+| 2. a stated reason for each of the 12, from a closed list written before the read, each reasoned segment recomputed with its cause corrected and closing within 0.35 pp | `DB-b-167` | FWD-8 | `~132`'s tracked module and the stored tables of `~108` (read, never edited) | R89-1 |
+| 3. the FWD-8 grade read, per account and window, by the issuer in its drain-end, citing the cells that already proved the label and guard clauses | the issuer's own act, no cell | FWD-8 | cell `DB-b-167` drained | R89-1 |
+
+`DB-b-167` is a read, LOCAL: zero vendor calls and zero secret reads, no served byte moves. **The closed list, in the order a segment is tested (the first reason whose single correction re-closes the
+segment at 0.35 pp takes it): `MISSING_PRICE`, `FLOW_ABSENT_ONE_SIDE`, `FLOW_ON_NON_TRADING_DAY`, `INCOME_OFF_FLOW_DAY`, `BD_ACCRUED_INCOME`, `UNEXPLAINED`.** The first four are the analysis's list. `BD_ACCRUED_INCOME`
+is the issuer's one addition, inside its own decomposition: the issuer's design read (counts only) found that 5 of the 12 sit in the earlier ruled class of that name (worker ~108's accrual identity,
+`UNCLASSED_90.json`) and the other 7 are in that record's remainder; leaving the cause off the list would call five segments UNEXPLAINED that the record already explains. A reason is shown by a count or by
+day offsets from the stored rows, never asserted; a segment whose single correction does not close it is not given that reason (it stays `UNEXPLAINED`; a segment closed only by two corrections together is
+reported as `combined_only`, still `UNEXPLAINED`). `UNEXPLAINED` above zero is counted per account, makes FWD-8 unmet for that account, and goes in a surprise row. The rule file (each reason's test and its
+correction, stated so another seat would count the same way) is committed before the read; its bytes are bound by hash in the record.
+
+**fanout:** 1 of 1 chain, cap 8. Worker `0.9.0_WK_IRPT_DASHBD~133` (worker), a new slot.

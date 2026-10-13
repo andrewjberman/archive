@@ -14,6 +14,8 @@ Usage:  python ar20_checks.py <check> --root <worker worktree root>
                 pre-rule binding moved to the status rule, test files only, no test removed                              -> Y216-EXPECT-OK
   y217-status   AR-y-217 (workstream YR): irpt-status released with served.py AND the current ops/status.py (the 24 correction words), on the live package,
                 the status.py difference being words only                                                              -> Y217-STATUS-OK
+  y218-apply    AR-y-218 (workstream YR): the applier's after-read file holds, for each of the eight functions, a line `A1 <function> live CodeSha256 <b64>`
+                equal to the EXPECTED value of the release records                                                  -> Y218-APPLY-OK
   y214-portal   AR-y-214: the portal candidate that shows the SHEETS_NOT_READ notice on the upload answer's face              -> Y214-PORTAL-OK
 
 --root is REQUIRED. Each check prints its token last, or the token with -FAIL after one FAIL line per problem. Writes nothing.
@@ -29,7 +31,7 @@ IR = "infra/aws/lambda/investor-reporting"
 INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r20/"
 ROUND19_VERSION = "irpt-template-reader.r19.1"
-TOKENS = {"y211-repair": "Y211-REPAIR", "y211-keep": "Y211-KEEP", "y212-rebase": "Y212-REBASE", "y213-rebase": "Y213-REBASE", "y214-portal": "Y214-PORTAL", "y216-expect": "Y216-EXPECT", "y217-status": "Y217-STATUS"}
+TOKENS = {"y211-repair": "Y211-REPAIR", "y211-keep": "Y211-KEEP", "y212-rebase": "Y212-REBASE", "y213-rebase": "Y213-REBASE", "y214-portal": "Y214-PORTAL", "y216-expect": "Y216-EXPECT", "y217-status": "Y217-STATUS", "y218-apply": "Y218-APPLY"}
 GROUPS = {"y212-rebase": ("61", "STATUS_RULE_REBASE_GROUP_A.json", ("irpt-performance-adapter", "irpt-narrative", "irpt-status")),
           "y213-rebase": ("64", "STATUS_RULE_REBASE_GROUP_B.json",
                           ("irpt-directory-search", "irpt-ycharts-generate", "irpt-export-render", "irpt-holdings", "irpt-49f-reporting-read-lambda"))}
@@ -141,6 +143,14 @@ def main(argv):
             if not re.fullmatch(r"[0-9a-f]{40}", str(rec.get("served_pin", ""))):
                 problems.append("served_pin must be a full commit sha")
             rows = {f.get("function"): f for f in rec.get("functions") or []}
+            # AMENDMENT 3 (issuer): a suite the rule made fail is SUPERSEDED when AR-y-216's record shows it repaired (errors 0, every remaining failure also failing with the original bytes)
+            sup = {}
+            rr = root / (D % "65" + "RULE_EXPECTATIONS.json")
+            if rr.is_file():
+                for s in json.loads(rr.read_text(encoding="utf-8")).get("suites") or []:
+                    after = s.get("after") or {}
+                    if set(after.get("failed_names") or []) <= set(s.get("control_failed_names") or []) and after.get("errors") in (0, "0", None):
+                        sup["irpt-" + str(s.get("suite"))] = True
             for fn in functions:
                 f = rows.get(fn)
                 if not f:
@@ -165,6 +175,10 @@ def main(argv):
                 if f.get("carries_status_rule") is not True:
                     problems.append("%s: the release's served.py must carry the status rule" % fn)
                 tests = f.get("tests") or {}
+                if sup.get(fn):
+                    continue
+                if tests.get("failed") not in (0, "0") and tests.get("pre_existing_control") and tests.get("failed") == len(tests.get("failing_tests") or []):
+                    continue
                 if tests.get("failed") not in (0, "0"):
                     # AMENDMENT 1 (issuer): a failure that ALSO fails with the original bytes is pre-existing and does not count against the release;
                     # it must be named (failed_names) and shown failing in the control run (control_failed_names).
@@ -270,6 +284,27 @@ def main(argv):
             if (rec.get("parity") or {}).get("passed") is not True:
                 problems.append("the correction-words parity test (uploads against status) must pass against the release members")
             print("differs from live: %s" % (differ if len(live) >= 5 and len(rel) >= 5 else "?"))
+    elif check == "y218-apply":
+        base = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~"
+        expected = {}
+        for slot, name in (("61", "STATUS_RULE_REBASE_GROUP_A.json"), ("64", "STATUS_RULE_REBASE_GROUP_B.json")):
+            rec = load(root, base + slot + "/r20/" + name, problems)
+            for f in (rec or {}).get("functions") or []:
+                expected[f["function"]] = f["release"]["code_sha256_b64"]
+        rec = load(root, base + "66/r20/IRPT_STATUS_STATUS_PY_RELEASE.json", problems)
+        if rec:
+            expected["irpt-status"] = rec["release"]["code_sha256_b64"]
+        path = root / "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r20/L8_AFTER_R20.txt"
+        if not path.is_file():
+            problems.append("no %s" % path.name)
+        else:
+            text = path.read_text(encoding="utf-8")
+            if len(expected) != 8:
+                problems.append("the release records name %d functions, not 8" % len(expected))
+            for fn, want in sorted(expected.items()):
+                if ("A1 %s live CodeSha256 %s" % (fn, want)) not in text:
+                    problems.append("no line 'A1 %s live CodeSha256 %s'" % (fn, want))
+            print("A1 lines expected %d" % len(expected))
     return finish(check, problems)
 
 

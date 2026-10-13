@@ -53,3 +53,39 @@ Taken from the packet: the ticket's fields (ConsistentRead by its author), the c
 Both branches are the packet's. Open call `dell2-20261009T022719Z-fbb1` closes on the board read of branch A.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 -- both test tickets, on Andrew's card-7 word (2026-10-13 ~12:3xZ)
+
+**Authority:** Andrew, 2026-10-13 ~12:23Z, card 7 "Yes do it" (close `TCK-20261009-a1052909` and `TCK-20261012-13cd3a1d`):
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261013_122xZ_ANSWERS_TO_NINE_DELL2_CARDS.md`. It replaces the
+"later" question of the 2026-10-11 paragraph above: the word is now specific to both tickets.
+
+This half was signed 2026-10-11 against the pair @532566cb3f and stands (V2 msg 6911 read it as owed; it is not). The amendment
+widens it by exactly one ticket:
+
+1. **Targets:** `TCK-20261009-a1052909` and `TCK-20261012-13cd3a1d`, each CLAIM then COMPLETE. No other ticket is written.
+2. **One identity, one token for both, at most 20 minutes.** If it expires before the second COMPLETE, the run STOPs; a second
+   token is not covered.
+3. **Firm list:** before the identity is minted, the executor reads both tickets' firm fields. Both `cottonwood`: the LIST stays
+   `["cottonwood"]`. Either one on another firm: STOP and return here; the identity never lists two firms.
+4. **Conditions 1 to 5 of section 3 apply to each ticket.** Condition 2's mail branch is read after EACH claim. A `WE_CLIENT_SENT`
+   on either is a STOP before any further write.
+5. **The removal after `exp` is unchanged.** The identity does not outlive the sitting.
+
+Open calls `dell2-20261009T022719Z-fbb1` and `dell2-20261012T221957Z-5cb1` close on the board read showing both tickets `completed`.
+
+**CTO half, AMENDMENT 1 -- `1.0.0_SA_CTO~DELL2`: SIGNED.**
+
+## AMENDMENT 2 -- one re-run after a STOP that wrote nothing (2026-10-13 ~13:0xZ)
+
+**Bound to:** the pair `deliverables/2.0.0_SA_COO~V2/R2_RUN/R2_CW1_CRAWL_PAIR.md`, **blob `b172afe6c4`** (this seat's `git hash-object`),
+COO AMENDMENT 2 @eb63f11d0a. Sitting 1 STOPPED at step 4 before any ticket write; V2 re-read both targets `open`, assignee null.
+
+**Signed:** ONE second sitting, as the COO amendment states it:
+1. It starts only after sitting 1's identity row reads ABSENT.
+2. It keeps the same identity address, the same LIST `["cottonwood"]`, the same two targets, and one token of at most 20 minutes.
+3. **The only change** is that the executor waits for sign-in to finish and for the board tab to be present before the first click, dry-run against the live page with no write.
+4. Before the first CLAIM, the executor re-reads both targets: each must be `open` with assignee null. Anything else is a STOP.
+5. A STOP in sitting 2 is final for card 7. A third token is not covered.
+
+**CTO half, AMENDMENT 2 -- `1.0.0_SA_CTO~DELL2`: SIGNED** on blob `b172afe6c4`.

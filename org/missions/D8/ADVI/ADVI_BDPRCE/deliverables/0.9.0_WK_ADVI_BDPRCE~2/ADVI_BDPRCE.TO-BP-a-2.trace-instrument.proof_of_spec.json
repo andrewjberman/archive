@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_BDPRCE.TO-BP-a-2.trace-instrument",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-a-2.trace-instrument.md",
+    "group": "OTHER",
+    "vintage_commit": "f75da01777"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/decompositions/ADVI_BDPRCE_DECOMP.md",
+    "vintage_commit": "f75da01777",
+    "to_ref": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-a-2.trace-instrument.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_BDPRCE~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~2/trace_price.py",
+      "kind": "script",
+      "commit_or_etag": "a92c09ba8f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only instrument in the worker deliverables folder, committed LOCAL on wk-ADVI_BDPRCE-2; nothing deployed, scheduled or wired into the pipeline",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~2/TRACE_SAMPLE.json",
+      "kind": "doc",
+      "commit_or_etag": "a92c09ba8f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the seam-probe record from the real bucket (--date latest --first-transaction-observed); a sample, not a served object",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~2/TRACE_README.md",
+      "kind": "doc",
+      "commit_or_etag": "a92c09ba8f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "how to run the instrument and what it does not do; committed LOCAL on wk-ADVI_BDPRCE-2"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 is the built behaviour (four planted arms): ^TRACE SELFTEST: OK [0-9]+ arms$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r1-2 && timeout 100 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~2/trace_price.py --self-test",
+      "expect": "^TRACE SELFTEST: OK [0-9]+ arms$",
+      "output_evidence": "TRACE SELFTEST: OK 7 arms",
+      "denominator": "7 of 7 planted arms ok (arms 1-4 are the four the task order requires; arms 5-7 are the tie, filter and override arms); rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the seam probe against the real served objects (a transaction_observed row traced to at least one trade id): ^TRACE record ok source=transaction_observed trades=[1-9][0-9]* match=(true|false)$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r1-2 && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round1/checks/r1_checks.py trace --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~2/TRACE_SAMPLE.json",
+      "expect": "^TRACE record ok source=transaction_observed trades=[1-9][0-9]* match=(true|false)$",
+      "output_evidence": "TRACE record ok source=transaction_observed trades=4 match=true",
+      "denominator": "1 record; 4 trade rows used, 1 distinct transaction_id; sample ABBOTT LABORATORIES COM 2026-10-11 served 99.6 from silver/prices/2026-10-11.parquet, recomputed 99.6; newest 2 daily files hold 0 transaction_observed rows (files_scanned 3, rows_scanned 1); rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound (its printed label says ROUND 4 because the checker is reused unchanged): ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r1-2 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r1-2 --allow org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~2/ --allow org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "output_evidence": "ROUND 4 SCOPE: OK 5 changed, 0 outside, 0 required missing",
+      "denominator": "5 changed paths (trace_price.py, TRACE_SAMPLE.json, TRACE_README.md, the proof instance, INVESTIGATION_v1.md), all inside the two granted surfaces; 0 outside; 0 required missing; rc=0 at HEAD 93547e4abc",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the recompute switched from the median to the mean in a scratch copy of trace_price.py, then the self-test run against it",
+      "expected": "TRACE SELFTEST: FAIL on arm 1 (the three-trade median arm)",
+      "observed": "arm 1 FAIL: three trades, known median -- recomputed=18.333333333333332 ids=['T1', 'T2', 'T3'] match=False; TRACE SELFTEST: FAIL arm 1: three trades (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: the self-test run twice (both OK 7 arms) and the live --asset ABBOTT LABORATORIES COM --date 2026-10-11 run against the sample record, comparing served_price, price_source, trade_ids, recomputed_price, match, served_from, tie, rows_used, distinct_trade_ids",
+      "observed": "all nine measured keys equal between the sample and the asset-mode re-run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the client-data check on the commit was not run against a hashed account-id list (the commit gate printed WARN: client-data-check: hashed account-id list ABSENT)",
+      "reason": "the sample and the instrument output carry asset names, transaction_id values, prices and object keys only; no account, client or advisor field is written or printed; checked by reading the output keys, not by the list"
+    },
+    {
+      "item": "the sample's recompute is not independently re-derived from raw rows by a second reader",
+      "reason": "the issuer re-reads the cited objects per the task order preflight; AC1 proves the recompute arithmetic against planted trades"
+    }
+  ],
+  "surprises": [
+    "ADVI_BDPRCE-D1-W2-S1: the newest daily price file (2026-10-13) and the one before it hold no transaction_observed row, so --date latest --first-transaction-observed walked back to 2026-10-11",
+    "ADVI_BDPRCE-D1-W2-S2: silver/transactions/2026-10-11.parquet repeats transaction_id on 6210 of 6278 rows, so rows_used and distinct_trade_ids diverge and the transaction_observed median is over repeats",
+    "ADVI_BDPRCE-D1-W2-S3: the daily and canonical objects disagree on source for ABBOTT LABORATORIES COM on 2026-10-11 (transaction_observed vs linear_interpolation), and canonical stores that price at float32 precision",
+    "ADVI_BDPRCE-D1-W2-S4: backfill_new_assets de-duplicates transaction_id and the daily path does not, so one transaction_observed rule has two recomputes the instrument cannot tell apart",
+    "ADVI_BDPRCE-D1-W2-S5: the task order names bare row ids ADVI_BDPRCE-W2-S<k>, but the dell1 gate requires the D1 coordinate, so the rows are filed with it"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "trace_price.py",
+      "invocation": "cd /c/dev/wk-bdprce-r1-2 && timeout 120 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~2/trace_price.py --date latest --first-transaction-observed --out org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~2/TRACE_SAMPLE.json",
+      "result": "TRACE WROTE ... asset=\"ABBOTT LABORATORIES COM\" date=2026-10-11 source=transaction_observed trades=4 match=true (rc=0, 9 s, live read of opal-data-bd)"
+    },
+    {
+      "tool": "r1_checks.py",
+      "invocation": "cd /c/dev/wk-bdprce-r1-2 && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round1/checks/r1_checks.py trace --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~2/TRACE_SAMPLE.json",
+      "result": "TRACE record ok source=transaction_observed trades=4 match=true (rc=0)"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md (run at commit through safe-commit.sh, which grades the staged blob)",
+      "result": "gate graded at commit; see the commit record for the verdict"
+    }
+  ]
+}

@@ -6960,3 +6960,61 @@
   }
 }
 ```
+
+### IRPT_ANLREQ-D2-S71 -- build-and-upload.sh reports "UPLOAD NOT VERIFIED" (rc 1) after an upload that landed byte-correct, so an applier reading rc or the ERROR line sees a failed upload when the object is good
+
+```json
+{
+  "id": "IRPT_ANLREQ-D2-S71",
+  "project": "IRPT_ANLREQ",
+  "fabric": "dell2",
+  "surfaced_by": "0.7.0_AE_CloudOps~AQ2",
+  "surfaced_at": "2026-10-13T13:35:00Z",
+  "one_line": "At bases e274a0e60c, 5d8b0390ed and 4067c2dd5b, `build-and-upload.sh` (without BUILD_ONLY) prints `ERROR: UPLOAD NOT VERIFIED` and exits 1 for all eight R20 packagers on this box although each new object version is in S3 with the right size and content-sha256 metadata: its own `aws s3api head-object --query` verify call dies with `'int' object has no attribute 'items'` (the CLI on its PATH), the script reads that error text as the head-object result, and the source map is not updated.",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "grounding": {
+    "status": "GROUNDED",
+    "evidence": [
+      "TO-APPLY-R20 units, 8 of 8: upload rc=1 with ERROR: UPLOAD NOT VERIFIED; the new latest version of each key listed by list-object-versions and downloaded by VersionId: size and sha256 equal the BUILD_ONLY digest (units/upload_*.txt under org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r20/)",
+      "the same head-object --query '[ContentLength, Metadata.\"content-sha256\"]' run by hand through the .tools/aws shim fails: aws: [ERROR]: 'int' object has no attribute 'items'",
+      "infra/aws/lambda/ci/build-and-upload.sh:693-706 @e274a0e60c (the verify block; the ERROR branch does `continue`, so the source-map write at :710 is skipped)"
+    ]
+  },
+  "disposition": "UNDER_INVESTIGATION",
+  "spec_asserts": "TO-APPLY-R20 step 4: the same build WITHOUT BUILD_ONLY uploads one new object version, then read the object back. The script's rc is the natural oracle for an upload.",
+  "world_is": "On this box the script's rc=1 does not mean the upload failed: the object landed. An applier who trusts rc alone retries the upload (a second wrong or duplicate version) or stops a good unit. This seat read each upload back by VersionId and sha256 and did not rely on rc. INFERRED, not read: the workers of D2-S69 ran the same script and would have met the same verify block.",
+  "notes": "owner of any fix: the lane that owns infra/aws/lambda/ci/build-and-upload.sh (a verify via s3api list-object-versions or a head-object without the --query would not hit the CLI error). Not fixed here: outside this order's write surface."
+}
+```
+
+- **owner:** `2.0.0_SA_COO~Y2` (issuer; routes the script fix)
+- **disarm_owner:** n/a -- INERT
+- **state:** OBSERVATION / INERT
+
+
+## IRPT_ANLREQ-D2-S72 -- (disarm row; this seat's own) the status rule runs in all eight packagers' bytes, read back; not yet exercised live
+
+```json
+{
+  "id": "IRPT_ANLREQ-D2-S72",
+  "project": "IRPT_ANLREQ",
+  "fabric": "dell2",
+  "surfaced_by": "2.0.0_SA_COO~Y2",
+  "surfaced_at": "2026-10-13T14:14:17Z",
+  "disposition": "UNDER_INVESTIGATION",
+  "one_line": "DISARMS rows IRPT_ANLREQ-D2-W54-S5 (the status rule shipped to none of the eight packagers' bytes) and IRPT_ANLREQ-D2-W61-S3 (narrative's suite red with the rule): all eight functions run the rule's bytes, read back; the rule itself is not yet EXERCISED live.",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "spec_asserts": "W54-S5: the AR-y-172 status rule was in the trunk's served.py and in none of the eight packagers' shipped bytes, while seven suites tested the head. W61-S3: narrative's suite failed 13 of 69 once the rule was in force.",
+  "world_is": "MEASURED by this seat 2026-10-13: get-function on all eight functions read the pair's EXPECTED CodeSha256 values (performance-adapter NdwQsZ4Y..., narrative vBzPCvn9..., status vlGh380Q..., directory-search tvrsQ+w8..., ycharts-generate hpNfkhLt..., export-render K74JEIjw..., holdings d1HwIxeA..., 49f-reporting-read WjnDxvu2...); ar20_checks y218-apply prints Y218-APPLY-OK on the applier's after-read file; the applier's proof instance VALID (rc 0, my run) and ledger irpt-status-rule-all-eight-20261013 CLOSED 9 of 9 (map record 8aebb08499, final a177c5a84c). A2 (applier, per member): each live zip differs from the previous package in served.py only, and irpt-status also in status.py. W61-S3: AR-y-216 (drained @61dd7a08f5) moved the three suites' expectations to the rule: narrative 69 of 69, export-render 313 of 313, directory-search 216 passed with the 4 pre-existing test_read_once failures. NOT covered: the rule has not been EXERCISED live -- A4 counted 0 INTERNAL-CALLER-CLASS lines in the first hour (8 of 8 groups, 60 to 93 minutes; 57 invocations of irpt-directory-search none reached the line, the other seven had none), so callers with no users row are still uncounted; A3 (the before/after sample) is ABSENT because the sampler reads identities. W55-S25 and W55-S1 are the CTO's rows and are not touched here.",
+  "grounding": {
+    "status": "GROUNDED",
+    "evidence": [
+      "aws lambda get-function on the eight functions, read by this seat",
+      "ar20_checks.py y218-apply and the applier's proof instance, run by this seat",
+      "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r20/ (L8_AFTER_R20.txt, A4_FIRST_HOUR_R20.txt) and the ledger"
+    ]
+  }
+}
+```
