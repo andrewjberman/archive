@@ -1,20 +1,32 @@
 ADVI_BDPRCE.TO-BP-a-4 -- worker 0.9.0_WK_ADVI_BDPRCE~4 -- session log (read verbs only)
-worktree C:/dev/wk-bdprce-r1-4, branch wk-ADVI_BDPRCE-4, cut 368aeb5029
+worktree C:/dev/wk-bdprce-r1-4, branch wk-ADVI_BDPRCE-4, cut 368aeb5029. Re-seated on amendment 2 of the order (2026-10-13 ~15:00Z).
 
+PART A -- inherited run (commits 0f9fe341c4, db1185b30f, 113b57dae1; first candidate, rejected by the issuer)
+  Candidate: client object 0 (catch-all), VANGUARD MORNINGSTAR GROWTH ETF, 2026-10-09, direct, 91.983333, 123 rows / 23 distinct ids.
+  Rejected on conditions c (catch-all entity) and d (two served prices for the asset in that object). Kept in THREAD_TRACE.md and TRACE_2026-10-09.json.
+  Surprise rows S1..S4 from that run stand unedited.
+
+PART B -- amendment 2 run (this re-seat)
 1. Tree check: rev-parse --abbrev-ref HEAD = wk-ADVI_BDPRCE-4; org and .tools present (TREE-OK).
-2. Producer chain read (repo, named files): B_01.holdings_lots.py (lot price :1333, :2627), D_02.advisor_client_detail.py (open_lots :2578, client_detail_key :2971), lib/s3_layout.py:239-240, lib/platinum_dest_view.py (gold/entities/clients/ -> advi/49financial/platinum/entities/clients/), portal advisor-intelligence.ts:1156-1160.
-3. Served listing, opal-data-49financial, prefixes advi/49financial/platinum/entities/clients/ (18,230 objects; 3,510 detail.json), advi/49financial/platinum/accounts/ (7,586), gold/advi/ (26,454), advi/49financial/gold/ (2). Auto-paginated list-objects-v2, counted client-side. No raw listing was denied.
-4. Served object read: advi/49financial/platinum/entities/clients/0/detail.json (VersionId VzILgp.KR2G8UFNcDbZLo3GcSkNmFnPC), data_as_of 2026-10-09, tax.open_lots 3,052 lots.
-5. Range reads (bytes 0-300) of 26 detail objects sampled every 140th key: data_as_of 2026-10-09 in 24, 2026-07-13 in 1, 2026-06-24 in 1.
-6. Full read (26 objects, 4.45 MB max) into the data directory outside the checkout; untickered non-cash lots: 586 across 138 assets; lot prices matched against canonical_prices.parquet (V7JNX.GmPYQcEVMywtMRnjk.fSdQl1WA, 12,649,131 rows, filtered read) and the 10-09 daily file (LhM3NuODjCiM_VUkEQiojppZtVu4Jf7y).
-   Shape a (direct): 69 lots price-match a transaction_observed row on the as-of date; 64 EQUAL in GAP_ROWS.csv, 5 not EQUAL.
-   Shape b (chain): 448 lots price-match a carry-forward/linear row on the as-of date; anchor price equal in all 448; anchor EQUAL in GAP_ROWS.csv for 63.
-   Neither: 61 lots (row on as-of date, price mismatch); 8 lots (asset absent from canonical).
-7. Candidate chosen: first fitting lot in file order (client object 0, lot 1, account ref 3c0cf325f23f), VANGUARD MORNINGSTAR GROWTH ETF, ticker null in the object, not in config/ticker_lookup.json (opal-data-bd, 10,206 entries).
-8. trace_price.py --self-test: 7 arms OK. trace_price.py --asset "VANGUARD MORNINGSTAR GROWTH ETF" --date 2026-10-09 --out .../TRACE_2026-10-09.json: rc=0, trades=123 (23 distinct), match=false (stable pick is the daily row 92.216667; canonical 91.983333 is what the served lot carries and what the median reproduces).
-9. Writer: WRITERS.json rows 2 and 3 (S_00 build_canonical_prices_v2.py + inject_scoped_overrides.py, run b09cfe1b7fe6) for canonical version V7JNX; claim inferred per the BP-a-1 census.
-10. THREAD_TRACE.json assembled from the trace output by a python writer; account identity carried only as the 12-hex digest 3c0cf325f23f. No account id, client name or advisor name written.
-11. AC1: r1_checks.py thread --file THREAD_TRACE.json -> "THREAD record ok rule=... trades=123 equal=true", rc=0.
-12. AC2: r4_scope.py --root ... --allow <record folder>/ --allow <channel file> -> "ROUND 4 SCOPE: OK 4 changed, 0 outside, 0 required missing", rc=0 (run before commit 3; four changed paths).
-13. Controls: mutant with an account_id key -> FAIL "a raw account id or a name is present" rc=1; mutant with empty trade_ids -> FAIL "trade_ids empty" rc=1; determinism: two runs of AC1 md5 0e58279bfe27415e2d79fa26c355faf4 both.
-14. Surprise rows ADVI_BDPRCE-D1-W4-S1..S4 appended to INVESTIGATION_v1.md (commit db1185b30f).
+2. Served listing re-read: advi/49financial/platinum/entities/clients/ in opal-data-49financial, 18,230 objects (auto-paginated list-objects-v2, saved to the data directory outside the checkout, counted client-side). detail.json objects 3,510: entity key class 0 = 1, acct_z = 138, z0 = 3,371. Normal population (not 0) = 3,509.
+3. Canonical version check: head-object silver/prices/canonical_prices.parquet = V7JNX.GmPYQcEVMywtMRnjk.fSdQl1WA (12:48:05Z), the version read by trace_price.py.
+4. Sample: 120 normal detail objects at stride positions over the sorted normal keys (round(i*(N-1)/119)), fetched with boto3 get_object (8 threads, VersionId recorded for all 120). Holdings extracted per asset (ticker null, empty or UNKNOWN on every lot), account ids hashed to 12 hex. data_as_of: 111 at 2026-10-09, 6 at 2026-04-02, one each at 2026-06-24, 2026-07-20, 2026-10-07.
+5. Classification against canonical_prices.parquet (12.6M rows, filtered to the sampled asset names) and GAP_ROWS.csv (EQUAL class), with anchors from transaction_observed rows earlier than the as-of date:
+   objects tried 120; objects with an untickered holding 33 (all 2026-10-09); untickered (object, asset) pairs 91; pairs failing condition d 0.
+   canonical source at the as-of date: transaction_observed 12, linear_interpolation 55, carry_forward 0; no canonical row 2; lot price matches canonical 67 of 91 (22 mismatches on the as-of date are not candidates).
+   shape a (direct, transaction_observed, EQUAL): 12 pairs.
+   shape b (chain, linear, anchor EQUAL and equal price): 22 pairs; failures 33 (no anchor 25; anchor EXPLAINED_OTHER 5; anchor UNEXPLAINED 2; anchor EXPLAINED_BY_MULTIDAY_WINDOW 1).
+   Shape a exists, so shape a is used. First fitting pair in sample order: sample position 58, EXXONMOBIL HOLDINGS CORP COM SHS (ticker null, not in ticker_lookup by exact name), two lots at 168.94.
+   Fitting pairs at shape a, in sample order: positions 58, 74, 81, 82, 83, 84, 88, 89, 90, 91, 93, 116.
+6. Trace, served date, default instrument: trace_price.py --asset "EXXONMOBIL HOLDINGS CORP COM SHS" --date 2026-10-09 --out TRACE_2026-10-09_thread.json -> rc=0, source=carry_forward (daily row 162.155 is the stable pick), trades=0, match=false, tie true. Carry input named as 2026-10-08 at 168.2864, but 162.155 equals the 2026-09-28 canonical row (GAP_ROWS.csv line 872). Surprise rows S5 and S6.
+7. Trace, canonical row, instrument core: trace_canonical_only.py (loads trace_price.py from its own path and calls trace_asset_date with the canonical object only; no code copied) -> rc=0, source transaction_observed, trades=4 (1 distinct id), recompute 168.94, match=true. Surprise rows S7 (duplicate trade rows).
+8. Lot identity check: in the same object, all 110 open lots read live: 103 satisfy quantity x current_price = market_value within 1 percent; 7 do not (the two Exxon lots and five other lots). Surprise row S8 (ARMED, disarm 2.0.0_SA_COO~K1).
+9. Ticker premise: config/ticker_lookup.json of opal-data-bd (VersionId PD_UeAZIKoYt0z0Rj9NIQyjqRGMKXYPq, 10,206 entries) read live; exact-name match for the asset returns no entry. Surprise row S9.
+10. Stale objects: 9 of 120 sampled normal objects carry data_as_of before 2026-10-09; none holds an untickered holding. Surprise row S10.
+11. Two-price condition: 0 of 91 untickered pairs in the normal sample show more than one served price (the two-price case of the issuer's first candidate sits in the catch-all entity, which is excluded). No two-price row is filed for the normal sample.
+12. Writer: WRITERS.json rows 2 and 3 (S_00 build_canonical_prices_v2.py and inject_scoped_overrides.py, run b09cfe1b7fe6) for canonical version V7JNX; claim inferred; the per-row history of the 2026-10-09 Exxon row was not traced.
+13. THREAD_TRACE.json assembled from the canonical-only trace by a python writer (build_record scratch script, outside the deliverables). Account identity carried only as the 12-hex digest 420deb1a5526. No raw account id, client name or advisor name written.
+14. AC1: r1_checks.py thread --file THREAD_TRACE.json -> "THREAD record ok rule=... trades=4 equal=true", rc=0.
+15. Controls: mutant with an account_id key -> FAIL "a raw account id or a name is present" rc=1; mutant with empty trade_ids -> FAIL "trade_ids empty" rc=1; determinism: two runs of AC1 both md5 b34f2a902e155d836f94a66cb6ab8c83.
+16. AC2: r4_scope.py --root ... --allow <record folder>/ --allow <channel file> run at commit time (see the instance).
+17. Scratch: all downloaded objects and the trace stdout live in C:/dev/wk-bdprce-r1-4-data/ (outside the checkout). No write verb on AWS; no producer run; no product file edited.
