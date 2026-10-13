@@ -81,6 +81,30 @@ refusal is recorded with its status and reason.
 `2.0.0_SA_COO~V2`, 2026-10-11, for the blast radius in section 4 and both branches. No run is staged until the CTO half matches this
 text and a run order cites both pins.
 
-## CTO half -- OWED
+## CTO half -- SIGNED 2026-10-11 (correction 2026-10-13)
 
-`1.0.0_SA_CTO~DELL2` (msg 3990: "I sign or refuse the same turn").
+`1.0.0_SA_CTO~DELL2`: `deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_R2_CW1_ONE_TICKET_CRAWL_CTO_HALF.md`, conditions in its section 3.
+This file read "OWED" until 2026-10-13; the CTO's half had been signed on 2026-10-11 and this seat did not re-read it.
+
+## COO half -- AMENDMENT 1 (2026-10-13 ~08:4x ET): both test tickets, on Andrew's card-7 word
+
+**Authority:** Andrew, 2026-10-13 ~12:23Z, card 7 "Yes do it" (record
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261013_122xZ_ANSWERS_TO_NINE_DELL2_CARDS.md`); CTO half AMENDMENT 1 @4fea908a37.
+This amendment adopts that CTO amendment as written and changes only what follows.
+
+1. **Targets:** `TCK-20261009-a1052909` (section 1 above) and `TCK-20261012-13cd3a1d` (cottonwood, `created_by svc-commentary`, title
+   `[TEST TCKT_VNEXT R12] ...`, `status open`, no assignee, no draft, no `report_ref`; read by this seat 2026-10-12 ~17:4x ET).
+   Each CLAIM then COMPLETE, by the board's own controls. Never `TCK-20261012-c546fead`; card 1 still needs it.
+2. **One identity, one token for both, at most 20 minutes.** If the token expires before the second COMPLETE the run STOPs.
+3. **Firm list.** Before minting, the executor reads both tickets' `requester.firm`. Both `cottonwood`: the LIST stays
+   `["cottonwood"]`. Either on another firm: STOP and return to this seat.
+4. **The identity's address carries the sitting's date:** `tckt-r2-crawler-20261013@opal.invalid` (section 2 named the 2026-10-11
+   stamp; the row was never written). Before the write, a ConsistentRead of that key must read ABSENT; present is a STOP.
+5. **Both branches (A) and (B) of section 4 apply per ticket.** Condition 2 of the CTO half (the mail branch) is read after EACH
+   claim; `WE_CLIENT_SENT` on either is a STOP before any further write. The ledger entry named in step 0 stays open until the
+   identity row reads ABSENT.
+6. **Blast radius adds exactly:** `opal-tickets` item `TCK-20261012-13cd3a1d` (`status open -> in_progress -> completed`, `assignee`
+   null -> the identity's address, two `events` rows). Rollback is the first row of section 4's table: none by the executor; a claim
+   that lands and a refused complete leaves `in_progress`, accepted for a test ticket, reset only by a separate pair.
+
+**COO half, AMENDMENT 1 -- `2.0.0_SA_COO~V2`: SIGNED**, for the text above.
