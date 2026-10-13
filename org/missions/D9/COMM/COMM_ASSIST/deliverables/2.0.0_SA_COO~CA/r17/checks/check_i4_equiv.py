@@ -1,8 +1,8 @@
-"""CA-i-4 AC1: the package built at the pin is the assistant that ships -- and it forms the SAME S3 addresses as the package now live.
+"""CA-i-4 AC1: the package built at the pin is the assistant that ships -- and it forms the SAME S3 addresses, and considers the SAME mail parties, as the package now live.
 
 The packaged-path diff from the live build (2fd32e12c2) to the pin carries other projects' changes (lib/opal_naming.py, infra/logic/registry/*.json). A plan cannot see
 them, because source_code_hash moves identically either way (row COMM_ASSIST-Z-S3). This check reads them where they act: it imports the assistant from the BUILT
-package and from the zip the live function serves, and compares every key it forms for a fixed battery of chats.
+package and from the zip the live function serves, and compares every key it forms for a fixed battery of chats and the mail parties (firm -> email domains) each package reads from its own registry.
 
 Prints:  I4-EQUIV ok=<True|False> files=<n> probes=<n> same=<n> reason=<text>
 Needs: a detached worktree at PIN with `bash infra/aws/lambda/teams-chat-assist/build.sh` run in it (dist/pkg), and read access to the live function. Read-only.
@@ -25,8 +25,12 @@ ROUND17_FILES = ["data/transcripts/scripts/teams_chat/tenant.py", "data/transcri
 PROBE = r'''
 import json, sys
 sys.path.insert(0, sys.argv[1])
-from data.transcripts.scripts.teams_chat import assist as a
+from data.transcripts.scripts.teams_chat import assist as a, mail_requests as mr
 out = {"BUCKET": a.BUCKET}
+try:
+    out["firms"] = json.dumps({k: sorted(v) if isinstance(v, (list, set, tuple)) else v for k, v in mr.firm_domains().items()}, sort_keys=True, default=str)
+except Exception as exc:
+    out["firms"] = "ERR %s" % type(exc).__name__
 for i, cid in enumerate(["19:abc@unq.gbl.spaces", "19:meeting_XYZ@thread.v2", "eod:2026-10-13", "job:J290", "mail:owner"]):
     out["state_%d" % i] = a.state_key("x_%d.json" % i)
     out["silver_%d" % i] = a.silver_key(cid, "context.md")
