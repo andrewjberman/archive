@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_BDPRCE.TO-BP-b-1.rule-module",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/decompositions/ADVI_BDPRCE_DECOMP_R2.md",
+    "vintage_commit": "73a2b77c3c",
+    "to_ref": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-b-1.rule-module.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-b-1.rule-module.md",
+    "group": "OTHER",
+    "vintage_commit": "73a2b77c3c"
+  },
+  "assignee": "0.9.0_WK_ADVI_BDPRCE~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/silver/bd_price_rule.py",
+      "kind": "script",
+      "commit_or_etag": "b8b710c884",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in b8b710c884 on wk-ADVI_BDPRCE-5 (LOCAL); no writer imports it, nothing deployed or served",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/silver/tests/test_bd_price_rule.py",
+      "kind": "test",
+      "commit_or_etag": "b8b710c884",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in b8b710c884 on wk-ADVI_BDPRCE-5 (LOCAL); 15 planted arms, no AWS",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~5/RULE_PROBE.json",
+      "kind": "doc",
+      "commit_or_etag": "b8b710c884",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in b8b710c884 on wk-ADVI_BDPRCE-5 (LOCAL); probe record over four real partitions, md5 9f139dfd1ec5936e899902472dda4069 on both runs",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~5/RULE_PROBE.md",
+      "kind": "doc",
+      "commit_or_etag": "b8b710c884",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in b8b710c884 on wk-ADVI_BDPRCE-5 (LOCAL); one-page summary of the probe record",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "five rows ADVI_BDPRCE-D1-W5-S1..S5 appended in the fenced json array; rows only, nothing edited",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~5/ADVI_BDPRCE.TO-BP-b-1.session.log.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the session log named in session_log below; the reads, the test and probe runs, the mutant control",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 is the built behaviour (R1's clauses against planted trades, with the determinism arm)",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r2-5 && timeout 100 python data/black_diamond/scripts/silver/tests/test_bd_price_rule.py",
+      "output_evidence": "BD PRICE RULE TEST: OK 15 arms (rc=0)",
+      "denominator": "15 planted arms: clauses 1 to 6 of R1 plus resolve_source, carry_forward and the exclusion census; arm 9 is the two-run byte-equality arm",
+      "status": "PASS",
+      "status_reason": "the planted-frame arms run at the worktree path; the mutant control (dedup removed) fails arm_01 with rc=1, so the arm discriminates"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the seam probe against the real partitions",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r2-5 && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round2/checks/r2_checks.py ruleprobe --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~5/RULE_PROBE.json",
+      "output_evidence": "RULEPROBE record ok assets=716 deterministic=true excluded_types=11 (rc=0)",
+      "denominator": "716 asset rows over 4 target dates and 4 partitions (143,603 union rows): 687 priced under A, 28 priced under B only, 1 absent under both; 11 excluded types; 2 variants",
+      "status": "PASS",
+      "status_reason": "the grader proves shape, read-only discipline and determinism of the record; the measurement is re-readable from the cited partitions (ETag equals local MD5 for all four), and its premise failures are rows S1 and S2"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound (its printed label says ROUND 4 because the checker is reused unchanged)",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r2-5 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r2-5 --allow data/black_diamond/scripts/silver/bd_price_rule.py --allow data/black_diamond/scripts/silver/tests/test_bd_price_rule.py --allow org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~5/ --allow org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "output_evidence": "ROUND 4 SCOPE: OK 7 changed, 0 outside, 0 required missing (rc=0)",
+      "denominator": "7 changed files against base 73a2b77c3c: 2 repo modules, 4 under the deliverables folder (RULE_PROBE.json, RULE_PROBE.md, the session log, this instance), 1 channel file; 0 outside the four --allow paths",
+      "status": "PASS",
+      "status_reason": "the write surface is the four named paths only; .scratch/ holds the downloaded copies and the probe script and is outside the tracked surface"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "scratch copy of bd_price_rule.py with the distinct-id dedup removed (median over every kept row); the unchanged test is run against it",
+      "expected": "FAIL arm_01_repeated_id_counted_once with rc=1",
+      "observed": "BD PRICE RULE TEST: FAIL arm_01_repeated_id_counted_once (AssertionError: price 10.0 rows_used 4) rc=1; the real module run the same way: OK 15 arms rc=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the whole probe run in two separate processes over the same four local partitions; md5 of each RULE_PROBE output compared; deterministic flag in the record is the in-process comparison of two body computations",
+      "observed": "9f139dfd1ec5936e899902472dda4069 on both runs (probe_run1 and probe_run2, and a third run after the final module bytes)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "replay of the served rows under R1 (the served 1,073.16 and 168.94 figures are not reproduced here)",
+      "reason": "BP-b-2 owns the served replay; this cell reads the rule against the real partitions only"
+    },
+    {
+      "item": "partitions outside 2026-09-22, 2026-10-08, 2026-10-09, 2026-10-12",
+      "reason": "the order names the dates; DEC-6 is applied across the four partitions read, not across the full history"
+    },
+    {
+      "item": "the choice between variant A and variant B",
+      "reason": "a CTO call; both variants are computed and reported side by side, and the module defaults to A"
+    },
+    {
+      "item": "the cause of the empty 2026-10-12 partition",
+      "reason": "BP-b-5 owns the cause of missing or lagging daily files; recorded as row S3 only"
+    },
+    {
+      "item": "the five null-asset Buy rows on 2026-09-22 are not priced to any asset",
+      "reason": "no asset name, so no asset can take the price; counted under no_asset_excluded and recorded as row S4"
+    }
+  ],
+  "surprises": [
+    "ADVI_BDPRCE-D1-W5-S1: R1 reads no price for EXXON 2026-10-09 (only Transfer In rows; the expected 168.94 is a non-trade row)",
+    "ADVI_BDPRCE-D1-W5-S2: R1 variant A reads no price for BLACKROCK 2026-09-22 (no Buy or Sale that day); only sensitivity variant B reads 1074.9259",
+    "ADVI_BDPRCE-D1-W5-S3: the silver transactions partition for 2026-10-12 exists with zero rows",
+    "ADVI_BDPRCE-D1-W5-S4: five Buy rows on 2026-09-22 carry no asset_name and are counted, not priced",
+    "ADVI_BDPRCE-D1-W5-S5: the 2026-10-09 partition carries 10 rows dated 2026-10-08; the probe reads the partition union and trade_date decides"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~5/ADVI_BDPRCE.TO-BP-b-1.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": ".tools/aws shim (READ only)",
+      "invocation": "aws s3api get-object --bucket opal-data-bd --key silver/transactions/<date>.parquet <local path>",
+      "result": "rc=0 for 2026-09-22, 2026-10-08, 2026-10-09, 2026-10-12; local MD5 equals the S3 ETag for each"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_BDPRCE~5 <0.9.0_WK_ADVI_BDPRCE~5@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "record commit b8b710c884 (4 files, rc=0 after the commit-gate fixes); this instance and the rows are committed as the second commit"
+    }
+  ]
+}
