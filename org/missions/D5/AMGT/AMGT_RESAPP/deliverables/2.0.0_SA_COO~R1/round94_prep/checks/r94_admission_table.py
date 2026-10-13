@@ -2,7 +2,7 @@
 
   python r94_admission_table.py [<ref>] [--pin 6a6c5c49d0]
 
-The live package was built at `--pin` (round 92 qq-5, CodeSha256 SOzAz9/gfKE..). For every non-test file under `lib/` and the two registry files the function
+The live package was built at `--pin` (round 92 qq-5, CodeSha256 SOzAz9/gfKE..). For every non-test file under `lib/` and every registry file (`infra/logic/registry/*.json`) the function
 packages, print its blob at the pin, its blob at `<ref>` (default HEAD) and the added and removed line counts. A member absent at the pin prints ABSENT. This is
 the table the pair's blast-radius section is written from: any member the pair does not admit, or a blob that differs from the table's column, is a STOP at the GO.
 Read-only (git plumbing only).
@@ -32,13 +32,14 @@ def main():
     ref = args[0] if args else "HEAD"
     names = git("diff", "--name-only", pin, ref, "--", "lib/").split()
     names = [n for n in names if "/tests/" not in n and not n.endswith("_test.py")]
-    reg = [p for p in git("ls-files").split("\n") if p.endswith("/scopes.json") or p.endswith("/systems.json")]
+    # round 102 (row AMGT_RESAPP-D1-S27, RA1): EVERY registry file the builder loads is a package member, not only scopes.json and systems.json (exemptions.json was the twelfth member)
+    reg = [p for p in git("ls-files", "infra/logic/registry/").split("\n") if p.endswith(".json")]
     for p in reg:
         if blob(pin, p) != blob(ref, p):
             names.append(p)
     print("pin %s ref %s (%s) | members whose bytes differ: %d" % (pin, ref, git("rev-parse", "--short=10", ref).strip(), len(names)))
     stat = {}
-    for line in git("diff", "--numstat", pin, ref, "--", "lib/").splitlines():
+    for line in git("diff", "--numstat", pin, ref, "--", "lib/", "infra/logic/registry/").splitlines():
         parts = line.split("\t")
         if len(parts) == 3:
             stat[parts[2]] = (parts[0], parts[1])
