@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ac-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ac-2.kill-agent-stops-at-a-descendant-seat.md",
+    "group": "OTHER",
+    "vintage_commit": "b122c649e9"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~88",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round13.md",
+    "vintage_commit": "b122c649e9",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ac-2.kill-agent-stops-at-a-descendant-seat.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/seat-boundary.ps1",
+      "kind": "script",
+      "commit_or_etag": "9e85064881",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local tool; nothing run against a live process, nothing deployed",
+      "artifact_covered_by": ["CTac2-AC1", "CTac2-AC2"]
+    },
+    {
+      "path_or_key": ".tools/kill-agent.ps1",
+      "kind": "script",
+      "commit_or_etag": "9e85064881",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local tool; parsed and AST-inspected only, never executed against a process",
+      "artifact_covered_by": ["CTac2-AC1"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_stop_at_descendant.ps1",
+      "kind": "test",
+      "commit_or_etag": "9e85064881",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local test; fake process lists only",
+      "artifact_covered_by": ["CTac2-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTac2-AC1",
+      "criterion_verbatim": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_stop_at_descendant.ps1 -- expect ok=True (every case passes, the floor case (c) included)",
+      "method": "command",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_stop_at_descendant.ps1",
+      "output_evidence": "rc=0; last line: STOP-AT-DESCENDANT cases=27/27 ok=True. Floor case (c) PASS: 'Unclassified is non-empty and names the unreadable seat pid 301'; (c3) PASS: kill-agent.ps1 has the floor branch",
+      "denominator": "27 of 27 cases",
+      "status": "PASS",
+      "expect": "ok=True"
+    },
+    {
+      "criterion_id": "CTac2-AC2",
+      "criterion_verbatim": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_seat_boundary.ps1 -- expect wired=both ok=True",
+      "method": "command",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_seat_boundary.ps1",
+      "output_evidence": "rc=0; last line: SEAT-BOUNDARY-TEST cases=39/39 wired=both ok=True (base at b122c649e9 also 39/39). No case changed: test_seat_boundary.ps1 is not in the commit",
+      "denominator": "39 of 39 cases",
+      "status": "PASS",
+      "expect": "wired=both ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the floor and the skip are each a control: (c) a seat whose command line is unreadable makes Unclassified non-empty, and (c3) kill-agent.ps1 carries the refusal branch keyed on Unclassified; (a) the foreign seat B (pid 102) and its subtree (pid 104) are outside Kill, and the target pid 101 is Kill's last entry. A base control: test_seat_boundary.ps1 measured 39/39 wired=both ok=True at b122c649e9 before any edit. Nothing was killed, so no mutant reached a live process.",
+      "expected": "Unclassified non-empty for the unreadable seat (c); floor branch present (c3); foreign seat B and pid 104 outside Kill (a)",
+      "observed": "(c) PASS Unclassified count 1 pid 301; (c3) PASS floor branch count 1; (a) PASS neither 102 nor 104 in Kill, Kill ends with 101. Full run: cases=27/27 ok=True",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_stop_at_descendant.ps1 run twice, outputs compared with cmp",
+      "observed": "two runs identical (cmp: IDENTICAL), sha256 prefix fa85c4cc384d47d4 on the captured output; both rc=0, 27/27 ok=True",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a live run of kill-agent.ps1 against any process",
+      "reason": "the order forbids it; the stop-at-descendant behaviour is proven by the fake-list plan and the AST of the script, not by a kill"
+    },
+    {
+      "item": "kill-maint.ps1 (unchanged)",
+      "reason": "the order leaves its taskkill /T refusal as it is"
+    },
+    {
+      "item": "reading of Unclassified's second limb (a readable serial-less seat-named process)",
+      "reason": "built to the existing native-helper rule; the literal reading is filed as NFRA_CTLPLN-W88-S1 for the COO to rule"
+    }
+  ],
+  "surprises": ["NFRA_CTLPLN-W88-S1"],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~88/NFRA_CTLPLN.TO-CT-ac-2.kill-agent-stops-at-a-descendant-seat.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "powershell",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_stop_at_descendant.ps1",
+      "result": "STOP-AT-DESCENDANT cases=27/27 ok=True (rc=0)"
+    },
+    {
+      "tool": "powershell",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_seat_boundary.ps1",
+      "result": "SEAT-BOUNDARY-TEST cases=39/39 wired=both ok=True (rc=0)"
+    }
+  ]
+}

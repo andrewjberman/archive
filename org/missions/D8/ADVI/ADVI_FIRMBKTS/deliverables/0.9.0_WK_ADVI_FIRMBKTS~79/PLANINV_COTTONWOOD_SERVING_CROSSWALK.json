@@ -1,0 +1,1011 @@
+{
+ "order": "FB-k-4",
+ "read_at": "2026-10-13T22:06:36Z",
+ "firm": "cottonwood",
+ "scope": "Everything that serves, generates or notifies for Cottonwood and touches the legacy home opal-data-cot or the Cottonwood scope of the shared buckets (Lambdas, Lambda@Edge, the CloudFront origin, IAM grants, EventBridge triggers, S3 notifications, SNS, SES, portal and router readers), and every repository consumer of the Cottonwood crosswalk input; read-only, nothing written, no producer run.",
+ "calls": [
+  "timeout 100 .tools/aws lambda list-functions --query 'Functions[].{n:FunctionName,r:Runtime,role:Role}' --output json",
+  "timeout 100 .tools/aws lambda get-function-configuration --function-name <fn> --output json (8 COT functions: opal-cot-value-parity, opal-cot-served-guard, bd-cot-keepalive, cot-rebalancer-runner, cot-bd-session-trigger, cot-satellites-registry-producer, cot-satellites-characteristics-producer, cot-etf-ownership-daily)",
+  "timeout 100 .tools/aws lambda get-function-configuration --function-name <edge fn> (shared-advisor-router, shared-advisor-router-response, auth-validator-edge)",
+  "timeout 100 .tools/aws cloudfront get-distribution-config --id EVTSA9VEHNZVH --output json",
+  "timeout 100 .tools/aws s3api get-bucket-policy --bucket opal-data-cot --output json",
+  "timeout 100 .tools/aws s3api get-bucket-notification-configuration --bucket opal-data-cot --output json",
+  "timeout 100 .tools/aws s3api head-object --bucket opal-data-cot --key platinum/firm/header_metrics.json --output json",
+  "timeout 100 .tools/aws s3api head-object --bucket opal-data-assets --key commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/crosswalk.parquet --output json",
+  "timeout 100 .tools/aws iam list-role-policies --role-name <role> (18 roles: 10 COT roles, 8 IRPT roles)",
+  "timeout 100 .tools/aws iam get-role-policy --role-name <role> --policy-name <policy> (38 inline policy documents)",
+  "timeout 100 .tools/aws iam list-attached-role-policies --role-name irpt-core-firm-cottonwood --output json",
+  "timeout 100 .tools/aws iam list-policy-versions --policy-arn arn:aws:iam::313476888478:policy/irpt-core-firm-cottonwood-prefix --output json ; timeout 100 .tools/aws iam get-policy-version --policy-arn <same> --version-id v1 --output json",
+  "timeout 100 .tools/aws events list-rules --query 'Rules[].Name' --output json",
+  "timeout 100 .tools/aws events list-targets-by-rule --rule <name> --output json (8 rules)",
+  "timeout 100 .tools/aws events describe-rule --name <name> --output json (2 rules)",
+  "timeout 100 .tools/aws sns list-topics --output json",
+  "timeout 100 .tools/aws ses list-identities --output json",
+  "timeout 100 .tools/aws ses list-templates --output json",
+  "python -I planinv_fb_k4_lambda_summary.py <saved cfg json> (local parse of the saved configurations; prints env variable names and bucket, region, table or queue values only)",
+  "python -I planinv_fb_k4_iam_summary.py <saved policy json> (local parse of the saved policy documents; prints statements only)",
+  "comp-find --corpus aws 'crosswalk' ; comp-find --corpus aws 'crosswalk|cot-value|opal-data-cot|cottonwood' (pages 1 and 2) ; comp-find --corpus aws 'opal-data-assets|commonwealth'",
+  "comp-estate --resource 'commonwealth/cottonwood/silver/crosswalk'",
+  "comp-pipescript io commonwealth_crosswalk.py",
+  "comp-find 'silver/crosswalk|commonwealth_crosswalk|crosswalk\\.parquet|crosswalk\\.csv' (repository, corpus all)",
+  "Grep tool over C:/dev/wk-firmbkts-79/infra, portal/src and data for opal-data-cot, opal-data-cottonwood, cottonwood and the crosswalk key tokens; Read of the cited lines"
+ ],
+ "denominators": {
+  "lambda_functions_listed_live": 237,
+  "lambda_function_configs_read_live": 11,
+  "lambda_distinct_roles_listed": 149,
+  "iam_roles_listed": 18,
+  "iam_inline_policy_documents_read": 38,
+  "iam_managed_policy_versions_read": 1,
+  "s3_bucket_policies_read": 1,
+  "s3_bucket_notification_configs_read": 1,
+  "eventbridge_rules_listed": 156,
+  "eventbridge_rules_name_matched_cot_or_cottonwood": 11,
+  "eventbridge_targets_read": 8,
+  "eventbridge_rules_described": 2,
+  "sns_topics_listed": 17,
+  "sns_topics_name_matched": 2,
+  "ses_identities_listed": 26,
+  "ses_templates_listed": 0,
+  "cloudfront_distributions_read": 1,
+  "cloudfront_origins_read": 7,
+  "cloudfront_cache_behaviors_read": 30,
+  "edge_function_configs_read": 3,
+  "repo_files_matched_opal_data_cot_infra": 128,
+  "repo_files_matched_opal_data_cot_portal_src": 4,
+  "repo_files_matched_opal_data_cot_data": 67,
+  "repo_files_matched_crosswalk_key_data": 32,
+  "repo_files_matched_crosswalk_key_infra": 2,
+  "repo_files_matched_crosswalk_key_portal_src": 0,
+  "repo_script_files_non_test_scanned_for_crosswalk_calls": 200,
+  "aws_graph_nodes_scanned": 2926
+ },
+ "functions": [
+  {
+   "id": "fn-opal-cot-value-parity",
+   "kind": "lambda",
+   "name": "opal-cot-value-parity",
+   "trigger": "EventBridge rule opal-cot-value-parity-hourly (target measured; rule state and schedule expression not read)",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "platinum/firm/header_metrics.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "silver/holdings/<date>.parquet (anchor, date-keyed)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "publishes its parity result to SNS opal-critical-surface-alerts (env VP_PUBLISH and VP_SNS_TOPIC set); no Cottonwood reader of the parity result found beyond that topic",
+   "evidence": "live: get-function-configuration (runtime python3.12, role opal-cot-value-parity, env names 9, VP_SERVED_BUCKET=opal-data-cot); IAM role policy CotServedAndSourceRead stmt CotServedAndAnchorRead (GetObject only); repo infra/aws/terraform/cot-value-parity/cot_value_parity.tf:31,59-91,111-121",
+   "claim": "measured"
+  },
+  {
+   "id": "fn-opal-cot-served-guard",
+   "kind": "lambda",
+   "name": "opal-cot-served-guard",
+   "trigger": "EventBridge rule opal-cot-served-guard-on-write: S3 Object Created on opal-data-cot platinum/firm/header_metrics.json (rule ENABLED, measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "platinum/firm/header_metrics.json (GetObject, GetObjectVersion)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "version list of the served key (ListBucketVersions)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "platinum/firm/header_metrics.json (PutObject, restore of the served key)",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "_quarantine/served-guard/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "guards the served Cottonwood header-metrics key; alerts SNS opal-critical-surface-alerts; rechecks through SQS opal-cot-served-guard-recheck",
+   "evidence": "live: get-function-configuration (env names 9, SERVED_BUCKET=opal-data-cot, RECHECK_QUEUE_URL set); IAM statements ServedKeyGuardS3 stmt0-2, RecheckQueue, PublishSurfaceAlerts (topic opal-critical-surface-alerts); describe-rule opal-cot-served-guard-on-write",
+   "claim": "measured"
+  },
+  {
+   "id": "fn-cot-bd-session-trigger",
+   "kind": "lambda",
+   "name": "cot-bd-session-trigger",
+   "trigger": "EventBridge rules cot-bronze-complete and cot-silver-complete (targets measured)",
+   "reads": [],
+   "writes": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "blackdiamond/cot/session-trigger-mode.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "writes the mode marker of the Cottonwood Black Diamond session chain; starts the EC2 exporter and sends SSM commands to the opal-cot-bd-session-fetch, bronze-run, silver-run and gold-run documents",
+   "evidence": "live: env COT_DATA_BUCKET=opal-data-cot; IAM cot-bd-session-trigger-policy stmt WriteModeMarker (PutObject) and SendCotPipelineCommands; repo infra/aws/lambda/cot-pipeline/cot-bd-session-trigger/lambda_function.py:37-38,69-74",
+   "claim": "measured"
+  },
+  {
+   "id": "fn-cot-rebalancer-runner",
+   "kind": "lambda",
+   "name": "cot-rebalancer-runner",
+   "trigger": "EventBridge rule cot-bronze-complete (target measured); rule cot-rebalancer-runner-daily named but its target not read",
+   "reads": [],
+   "writes": [
+    {
+     "bucket": "opal-data-assets",
+     "prefix": "blackdiamond/cottonwood/bronze/* and meta/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": false,
+   "consumer_note": "writes the Cottonwood rebalancer bronze that cot-satellites-registry-producer reads; the Cottonwood scope sits in opal-data-assets, not in a legacy home (see surprise ADVI_FIRMBKTS-D1-W79-S1)",
+   "evidence": "live: env BD_S3_BUCKET=opal-data-assets; IAM cot-rebalancer-runner-write-cot stmt0-3 (stmt3 denies blackdiamond/49f/*); session secret read only (not an S3 read)",
+   "claim": "measured"
+  },
+  {
+   "id": "fn-cot-satellites-registry-producer",
+   "kind": "lambda",
+   "name": "cot-satellites-registry-producer",
+   "trigger": "EventBridge rule etfs-cot-satellites-registry-producer-stamp-gated-daily (target measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-assets",
+     "prefix": "blackdiamond/cottonwood/bronze/rebalancer_models/* and rebalancer_model_detail/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-assets",
+     "prefix": "stamp prefix (ListBucket)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "platinum/satellites/registry.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "platinum/satellites/holdings.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "produces the Opal Satellite registry and holdings that the portal reads through the Cottonwood edge router (satellites branch)",
+   "evidence": "IAM s3-read-cot-bronze-write-cot-platinum stmt1-3; repo infra/aws/lambda/cot-pipeline/cot-satellites-registry-producer/lambda_function.py:35; data/assets/scripts/gold/build_satellites_registry.py:119-127 (REGISTRY_BUCKET=opal-data-cot)",
+   "claim": "measured"
+  },
+  {
+   "id": "fn-cot-satellites-characteristics-producer",
+   "kind": "lambda",
+   "name": "cot-satellites-characteristics-producer",
+   "trigger": "EventBridge rules cot-satellites-characteristics-producer-daily and etfs-cot-satellites-characteristics-producer-reattempt-hourly (targets measured)",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "platinum/satellites/holdings.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-portal-v2",
+     "prefix": "json/positioning/positioning_data.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-etfs",
+     "prefix": "bbg/*/characteristics.parquet, bbg/*/run_manifest.json, bbg/*/history_topup.parquet, bbg-testpull/tickers/*/history.csv",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "platinum/satellites/characteristics.json",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "produces the satellite characteristics artifact that the portal satellite endpoint serves from the Cottonwood home; config last modified 2026-10-13T15:19:35Z",
+   "evidence": "IAM s3-read-three-inputs-write-satellites-characteristics stmt0-7; live get-function-configuration (runtime python3.11, role cot-satellites-characteristics-producer-role, env names 0)",
+   "claim": "measured"
+  },
+  {
+   "id": "fn-cot-etf-ownership-daily",
+   "kind": "lambda",
+   "name": "cot-etf-ownership-daily",
+   "trigger": "EventBridge rule cot-etf-ownership-daily-schedule (target measured; schedule expression not read)",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "gold/canonical/holdings/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-assets",
+     "prefix": "blackdiamond/cottonwood/silver/fact_holdings/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-etfs",
+     "prefix": "config/* and platinum/reports/*/etf_ownership.pdf",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-etfs",
+     "prefix": "daily/cottonwood/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "writes the Cottonwood ETF-ownership daily slice to opal-data-etfs; consumers of that slice not traced",
+   "evidence": "live env SRC_BUCKET=opal-data-cot, ASSETS_BUCKET=opal-data-assets, ETFS_BUCKET=opal-data-etfs; IAM s3-etf-ownership stmt0-7; repo infra/aws/lambda/cot-pipeline/cot-etf-ownership-daily/lambda_function.py:5,98",
+   "claim": "measured"
+  },
+  {
+   "id": "fn-bd-cot-keepalive",
+   "kind": "lambda",
+   "name": "bd-cot-keepalive",
+   "trigger": "EventBridge rule bd-cot-keepalive-sched (rule name only; target not read)",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "sends the Cottonwood Black Diamond cookie alert to SNS opal-bd-cot-cookie-alerts; reads the session secret (value not read); touches no bucket",
+   "evidence": "IAM bd-cot-keepalive-policy stmt0-3 (stmt3 denies opal-data-bd); repo infra/aws/lambda/cot-pipeline/bd-cot-keepalive/lambda_function.py:19",
+   "claim": "measured"
+  },
+  {
+   "id": "fn-bd-cot-freshness-probe",
+   "kind": "lambda",
+   "name": "infra/aws/lambda/cot-pipeline/bd-cot-freshness-probe/lambda_function.py (repository only; no live function of this name)",
+   "trigger": "not determined: no live function to read a trigger from",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "platinum/firm/timeseries_overview.json (repository default SERVED_AUA_KEY) and a LIST of opal-data-cot",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "freshness probe of the served Cottonwood AUA timeseries; present in the repository, absent from the live function list (237 functions)",
+   "evidence": "repo infra/aws/lambda/cot-pipeline/bd-cot-freshness-probe/lambda_function.py:26,44-46,56; live list-functions: no function named bd-cot-freshness-probe (surprise ADVI_FIRMBKTS-D1-W79-S3)",
+   "claim": "measured"
+  },
+  {
+   "id": "fn-irpt-directory-refresh",
+   "kind": "lambda",
+   "name": "irpt-directory-refresh (role irpt-directory-refresh-role)",
+   "trigger": "not determined: the invoking rule was not identified; the role grants are measured",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    }
+   ],
+   "writes": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "investor-reporting/directory/_refresh/*",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": true,
+   "consumer_note": "builds the IRPT investor-reporting directory for each firm; the same grant also reaches opal-data-inf and opal-data-bd; dispatches the build to one EC2 runner through SSM",
+   "evidence": "IAM irpt-directory-refresh-policy stmt0-5 (ReadFirmDirectoryPrefixOnly, WriteRefreshManifestsOnly, ListExactlyWhatItMayAlreadyRead, SendCommand to one instance)",
+   "claim": "measured"
+  },
+  {
+   "id": "fn-irpt-directory-search",
+   "kind": "lambda",
+   "name": "irpt-directory-search (role irpt-directory-role)",
+   "trigger": "not determined (invocation path not read)",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "platinum/cottonwood/ownership_map.json",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "IRPT directory search reads the Cottonwood directory and ownership map from opal-data-cot",
+   "evidence": "IAM irpt-directory-policy stmt0 and irpt-directory-ownership-map-read-policy stmt0",
+   "claim": "measured"
+  },
+  {
+   "id": "fn-irpt-holdings",
+   "kind": "lambda",
+   "name": "irpt-holdings (role irpt-holdings-role)",
+   "trigger": "not determined (invocation path not read)",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "investor-reporting/directory/* and platinum/cottonwood/ownership_map.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-cottonwood",
+     "prefix": "irpt/cottonwood/platinum/holdings/current/manifest.json and date=*/ versions",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "the IRPT Cottonwood holdings reader: holdings come from opal-data-cottonwood, the directory and ownership map from opal-data-cot (see surprise ADVI_FIRMBKTS-D1-W79-S2)",
+   "evidence": "IAM irpt-holdings-firm-read stmt0-2 (GetObject, GetObjectVersion)",
+   "claim": "measured"
+  },
+  {
+   "id": "fn-irpt-performance-adapter",
+   "kind": "lambda",
+   "name": "irpt-performance-adapter (role irpt-performance-adapter-role)",
+   "trigger": "not determined (invocation path not read)",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "investor-reporting/directory/*",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "platinum/cottonwood/ownership_map.json",
+     "claim": "measured"
+    },
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "forwardfill_v2/ (repository tenant config only; no role grant found among the 7 inline policies)",
+     "claim": "inferred"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "Black Diamond performance adapter on the Cottonwood tenant route (tenants.py names opal-data-cot as the Cottonwood data plane)",
+   "evidence": "IAM irpt-performance-adapter-directory-read-policy stmt0 and irpt-performance-adapter-ownership-map-read-policy stmt0; repo infra/aws/lambda/investor-reporting/performance/tenants.py:157-164",
+   "claim": "measured"
+  },
+  {
+   "id": "edge-shared-advisor-router",
+   "kind": "edge",
+   "name": "shared-advisor-router (Lambda@Edge, origin-request)",
+   "trigger": "CloudFront origin-request on 5 behaviors of distribution EVTSA9VEHNZVH: /api/scoped/advisor-intelligence/artifacts/* and */*, entities/*/*, advisor-intelligence/*.json, /api/scoped/satellites/*",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "platinum/advi/* (advisor-intelligence artifacts) and platinum/satellites/* (satellites branch rewrite)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "resolves cottonwood to opal-data-cot through FIRM_CONFIG and rewrites the request into the firm bucket; consumers are the portal Advisor Intelligence and Positioning clients",
+   "evidence": "live get-function-configuration (nodejs20.x, role lambda-edge-execution-role, modified 2026-10-12, env names 0); repo infra/aws/lambda-edge/_shared/firm-config.mjs:77-80 (cottonwood bucket opal-data-cot); infra/aws/lambda-edge/shared-advisor-router/index.mjs:97,105,123,319,391-422; test firm-routing.spec.mjs:91-94",
+   "claim": "measured"
+  },
+  {
+   "id": "edge-shared-advisor-router-response",
+   "kind": "edge",
+   "name": "shared-advisor-router-response (Lambda@Edge, origin-response)",
+   "trigger": "CloudFront origin-response on the same five behaviors",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "response-side handling for the same path set; reads no bucket",
+   "evidence": "live get-function-configuration (nodejs20.x, env names 0); cloudfront get-distribution-config LambdaFunctionAssociations",
+   "claim": "measured"
+  },
+  {
+   "id": "edge-auth-validator-edge",
+   "kind": "edge",
+   "name": "auth-validator-edge (Lambda@Edge, viewer-request)",
+   "trigger": "CloudFront viewer-request on the /api/* behaviors that front the advisor-intelligence and satellites paths",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "validates the token whose firm identity the router trusts; touches no bucket",
+   "evidence": "live get-function-configuration (nodejs20.x, env names 0); cloudfront get-distribution-config behaviors",
+   "claim": "measured"
+  },
+  {
+   "id": "edge-cf-EVTSA9VEHNZVH-origin-cot",
+   "kind": "edge",
+   "name": "CloudFront EVTSA9VEHNZVH origin S3-opal-data-cot (opal-data-cot.s3.us-east-1.amazonaws.com, no OAC)",
+   "trigger": "reached only through the origin-request rewrite: none of the 30 cache behaviors targets S3-opal-data-cot directly",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "all keys, via the scoped advisor OAI in the bucket policy",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "the origin through which Cottonwood served keys reach CloudFront clients; the distribution has 7 origins in total",
+   "evidence": "cloudfront get-distribution-config (origins 7, behaviors 30)",
+   "claim": "measured"
+  },
+  {
+   "id": "grant-opal-data-cot-bucket-policy",
+   "kind": "other",
+   "name": "opal-data-cot bucket policy (resource grants)",
+   "trigger": "invocation by CloudFront (service principal and the scoped advisor origin access identity)",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "gold/* (cloudfront service principal, GetObject) and /* (origin access identity E139998VWH0PD, GetObject)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "the grant that lets the CloudFront origin read opal-data-cot",
+   "evidence": "s3api get-bucket-policy opal-data-cot: sid AllowCloudFrontOACReadGold and sid AllowScopedAdvisorOAI",
+   "claim": "measured"
+  },
+  {
+   "id": "role-irpt-core-firm-cottonwood",
+   "kind": "role",
+   "name": "irpt-core-firm-cottonwood (role; attached policy irpt-core-firm-cottonwood-prefix v1)",
+   "trigger": "none: no live function among the 237 uses this role",
+   "reads": [
+    {
+     "bucket": "opal-data-ycharts",
+     "prefix": "firms/cottonwood/* (GetObject, PutObject) and a conditioned ListBucket",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "execution-role stub for Cottonwood IRPT; it grants no opal-data-cot access and has no consumer",
+   "evidence": "iam list-attached-role-policies, get-policy-version v1 (2 statements); repo infra/aws/lambda/investor-reporting/PATH_MANIFEST.json:3266,3342",
+   "claim": "measured"
+  },
+  {
+   "id": "role-firmsep-cot-bucket-recovery-role",
+   "kind": "role",
+   "name": "firmsep-cot-bucket-recovery-role (inline cottonwood-recovery-policy)",
+   "trigger": "none: no live function among the 237 uses this role",
+   "reads": [],
+   "writes": [
+    {
+     "bucket": "opal-data-cottonwood",
+     "prefix": "bucket policy (GetBucketPolicy and PutBucketPolicy)",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": false,
+   "consumer_note": "a bucket-policy recovery grant on the destination bucket opal-data-cottonwood; it does not touch opal-data-cot",
+   "evidence": "iam get-role-policy cottonwood-recovery-policy stmt0",
+   "claim": "measured"
+  },
+  {
+   "id": "reader-portal-satelliteRegistry",
+   "kind": "reader",
+   "name": "portal/src/api/endpoints/satelliteRegistry.ts",
+   "trigger": "portal request to /api/scoped/satellites/registry.json, holdings.json and characteristics.json, resolved through the edge router",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "platinum/satellites/registry.json, holdings.json, characteristics.json (through the router; the file says the firm bucket is opal-data-cot for cottonwood)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "the portal Positioning satellite set reads the Cottonwood satellite artifacts through this endpoint",
+   "evidence": "portal/src/api/endpoints/satelliteRegistry.ts:31,37,82,92,95,100,103,108",
+   "claim": "measured"
+  },
+  {
+   "id": "reader-portal-advisor-intelligence-endpoint",
+   "kind": "reader",
+   "name": "portal/src/api/endpoints/advisor-intelligence.ts (firm bucket suffix map)",
+   "trigger": "portal request, including the ?firm= internal view",
+   "reads": [
+    {
+     "bucket": "opal-data-cot",
+     "prefix": "advisor-intelligence artifacts in the firm bucket (key classes not enumerated in the file)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": true,
+   "consumer_note": "the Advisor Intelligence endpoint maps cottonwood to the bucket suffix cot, so the internal Cottonwood view reads opal-data-cot",
+   "evidence": "portal/src/api/endpoints/advisor-intelligence.ts:80-84 and :1621-1622",
+   "claim": "measured"
+  },
+  {
+   "id": "reader-portal-cottonwood-layout",
+   "kind": "reader",
+   "name": "portal/src/pages/AdvisorIntelligence/_partners/cottonwood/layout.ts",
+   "trigger": "none: tenant layout configuration, no read",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "names opal-data-cot only in a comment (line 57); performs no read",
+   "evidence": "portal/src/pages/AdvisorIntelligence/_partners/cottonwood/layout.ts:57",
+   "claim": "measured"
+  },
+  {
+   "id": "reader-portal-firmAccess",
+   "kind": "reader",
+   "name": "portal/src/lib/firmAccess.ts",
+   "trigger": "none: comment only",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "names the cottonwood to opal-data-cot mapping in a comment (line 73); performs no read",
+   "evidence": "portal/src/lib/firmAccess.ts:73",
+   "claim": "measured"
+  },
+  {
+   "id": "topic-opal-critical-surface-alerts",
+   "kind": "topic",
+   "name": "SNS opal-critical-surface-alerts",
+   "trigger": "publish by opal-cot-value-parity and opal-cot-served-guard",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "critical-surface alert topic for the served Cottonwood keys; its subscribers were not read",
+   "evidence": "IAM PublishSurfaceAlerts on both roles (sns:Publish on arn:aws:sns:us-east-1:313476888478:opal-critical-surface-alerts); sns list-topics",
+   "claim": "measured"
+  },
+  {
+   "id": "topic-opal-bd-cot-cookie-alerts",
+   "kind": "topic",
+   "name": "SNS opal-bd-cot-cookie-alerts",
+   "trigger": "publish by bd-cot-keepalive",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "Cottonwood Black Diamond cookie alert; its subscribers were not read",
+   "evidence": "IAM bd-cot-keepalive-policy stmt1; sns list-topics",
+   "claim": "measured"
+  },
+  {
+   "id": "email-ses-account-identities",
+   "kind": "email",
+   "name": "SES account identities (us-east-1)",
+   "trigger": "none found: no Cottonwood-flow Lambda sends by SES in the repository",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "26 identities and 0 templates; 3 identities sit on a Cottonwood client mail domain (addresses not printed); the repository grep for SES send calls matched 20 infra/aws/lambda files, none in cot-pipeline or investor-reporting",
+   "evidence": "ses list-identities (26); ses list-templates (0); Grep infra/aws/lambda for send_email, sesv2 and SendEmail",
+   "claim": "measured"
+  },
+  {
+   "id": "rule-opal-cot-served-guard-on-write",
+   "kind": "rule",
+   "name": "opal-cot-served-guard-on-write",
+   "trigger": "S3 Object Created on opal-data-cot platinum/firm/header_metrics.json (ENABLED)",
+   "legacy_touch": false,
+   "claim": "measured",
+   "reads": [],
+   "writes": [],
+   "consumer_note": "fires target: opal-cot-served-guard (legacy_touch false: a rule reads and writes no object; its event source is the legacy key named in trigger)",
+   "evidence": "events list-rules and list-targets-by-rule (live, measured); events describe-rule (live)"
+  },
+  {
+   "id": "rule-opal-cot-value-parity-hourly",
+   "kind": "rule",
+   "name": "opal-cot-value-parity-hourly",
+   "trigger": "schedule by rule name (expression not read)",
+   "legacy_touch": false,
+   "claim": "measured",
+   "reads": [],
+   "writes": [],
+   "consumer_note": "fires target: opal-cot-value-parity (legacy_touch false: a rule reads and writes no object; its event source is the legacy key named in trigger)",
+   "evidence": "events list-rules and list-targets-by-rule (live, measured); rule state not read"
+  },
+  {
+   "id": "rule-cot-bronze-complete",
+   "kind": "rule",
+   "name": "cot-bronze-complete",
+   "trigger": "S3 Object Created on opal-data-cot keys ending _BRONZE_COMPLETE.json",
+   "legacy_touch": false,
+   "claim": "measured",
+   "reads": [],
+   "writes": [],
+   "consumer_note": "fires target: cot-bd-session-trigger, cot-rebalancer-runner (legacy_touch false: a rule reads and writes no object; its event source is the legacy key named in trigger)",
+   "evidence": "events list-rules and list-targets-by-rule (live, measured); events describe-rule (live)"
+  },
+  {
+   "id": "rule-cot-silver-complete",
+   "kind": "rule",
+   "name": "cot-silver-complete",
+   "trigger": "S3 Object Created on opal-data-cot keys ending silver_complete.json",
+   "legacy_touch": false,
+   "claim": "measured",
+   "reads": [],
+   "writes": [],
+   "consumer_note": "fires target: cot-bd-session-trigger (legacy_touch false: a rule reads and writes no object; its event source is the legacy key named in trigger)",
+   "evidence": "events list-rules and list-targets-by-rule (live, measured); rule state not read"
+  },
+  {
+   "id": "rule-etfs-cot-satellites-registry-producer-stamp-gated-daily",
+   "kind": "rule",
+   "name": "etfs-cot-satellites-registry-producer-stamp-gated-daily",
+   "trigger": "schedule by rule name (expression not read)",
+   "legacy_touch": false,
+   "claim": "measured",
+   "reads": [],
+   "writes": [],
+   "consumer_note": "fires target: cot-satellites-registry-producer (legacy_touch false: a rule reads and writes no object; its event source is the legacy key named in trigger)",
+   "evidence": "events list-rules and list-targets-by-rule (live, measured); rule state not read"
+  },
+  {
+   "id": "rule-cot-satellites-characteristics-producer-daily",
+   "kind": "rule",
+   "name": "cot-satellites-characteristics-producer-daily",
+   "trigger": "schedule by rule name (expression not read)",
+   "legacy_touch": false,
+   "claim": "measured",
+   "reads": [],
+   "writes": [],
+   "consumer_note": "fires target: cot-satellites-characteristics-producer (legacy_touch false: a rule reads and writes no object; its event source is the legacy key named in trigger)",
+   "evidence": "events list-rules and list-targets-by-rule (live, measured); rule state not read"
+  },
+  {
+   "id": "rule-etfs-cot-satellites-characteristics-producer-reattempt-hourly",
+   "kind": "rule",
+   "name": "etfs-cot-satellites-characteristics-producer-reattempt-hourly",
+   "trigger": "schedule by rule name (expression not read)",
+   "legacy_touch": false,
+   "claim": "measured",
+   "reads": [],
+   "writes": [],
+   "consumer_note": "fires target: cot-satellites-characteristics-producer (legacy_touch false: a rule reads and writes no object; its event source is the legacy key named in trigger)",
+   "evidence": "events list-rules and list-targets-by-rule (live, measured); rule state not read"
+  },
+  {
+   "id": "rule-cot-etf-ownership-daily-schedule",
+   "kind": "rule",
+   "name": "cot-etf-ownership-daily-schedule",
+   "trigger": "schedule by rule name (expression not read)",
+   "legacy_touch": false,
+   "claim": "measured",
+   "reads": [],
+   "writes": [],
+   "consumer_note": "fires target: cot-etf-ownership-daily (legacy_touch false: a rule reads and writes no object; its event source is the legacy key named in trigger)",
+   "evidence": "events list-rules and list-targets-by-rule (live, measured); rule state not read"
+  },
+  {
+   "id": "notif-opal-data-cot-s3-config",
+   "kind": "other",
+   "name": "S3 notification configuration of opal-data-cot",
+   "trigger": "0 Lambda, 0 queue and 0 topic configurations; EventBridge delivery enabled, so the rules above fire on Object Created",
+   "legacy_touch": false,
+   "claim": "measured",
+   "reads": [],
+   "writes": [],
+   "consumer_note": "fires target: - (legacy_touch false: a rule reads and writes no object; its event source is the legacy key named in trigger)",
+   "evidence": "events list-rules and list-targets-by-rule (live, measured); rule state not read"
+  },
+  {
+   "id": "xw-input-commonwealth-crosswalk",
+   "kind": "other",
+   "name": "THE COTTONWOOD CROSSWALK INPUT: s3://opal-data-assets/commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/crosswalk.parquet (and crosswalk.csv)",
+   "trigger": "written by the builder on --apply (manual)",
+   "reads": [],
+   "writes": [
+    {
+     "bucket": "opal-data-assets",
+     "prefix": "commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": false,
+   "consumer_note": "the Cottonwood crosswalk input (Commonwealth account to current Cottonwood account, FWD-8). It lives in opal-data-assets, not in opal-data-cot. head-object: 148093 bytes, LastModified 2026-10-07T15:57:47Z, VersionId present. Every consumer below reads this key.",
+   "evidence": "s3api head-object opal-data-assets commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/crosswalk.parquet; data/assets/scripts/silver/commonwealth_crosswalk.py:71,527-538; comp-find (repository) 179 hits / 77807 files; ADVI_COTBKF REMEDIATION_v8.md:18",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-builder-commonwealth-crosswalk-py",
+   "kind": "script",
+   "name": "data/assets/scripts/silver/commonwealth_crosswalk.py (crosswalk builder)",
+   "trigger": "manual CLI (--apply); no schedule found: the repository grep of infra/ for the script name matched 0 files",
+   "reads": [],
+   "writes": [
+    {
+     "bucket": "opal-data-assets",
+     "prefix": "commonwealth/cottonwood/silver/crosswalk/date=<d>/crosswalk.parquet and crosswalk.csv",
+     "claim": "measured"
+    }
+   ],
+   "legacy_touch": false,
+   "consumer_note": "the crosswalk builder that produces the crosswalk input; its rules are imported by the silver scripts listed below; comp-pipescript io reports the writes as dynamic (not detected)",
+   "evidence": "commonwealth_crosswalk.py:71,527-528,538,642; comp-pipescript io commonwealth_crosswalk.py (UNRESOLVED-PREFIX, WRITES none detected)",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-consumer-commonwealth-fwd8-read",
+   "kind": "script",
+   "name": "data/assets/scripts/analysis/commonwealth_fwd8_read.py (crosswalk consumer: FWD-8 read)",
+   "trigger": "manual CLI",
+   "reads": [
+    {
+     "bucket": "opal-data-assets",
+     "prefix": "commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/crosswalk.parquet",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer: reports matched and lined-up counts from the applied crosswalk (the FWD8-READ line)",
+   "evidence": "commonwealth_fwd8_read.py:104-107,127,157-159; ADVI_COTBKF ENDPOINT_READ_20261009.md:14 (measured run)",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-consumer-commonwealth-coverage-statement",
+   "kind": "script",
+   "name": "data/assets/scripts/analysis/commonwealth_coverage_statement.py (crosswalk consumer: coverage statement)",
+   "trigger": "manual CLI",
+   "reads": [
+    {
+     "bucket": "opal-data-assets",
+     "prefix": "commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/crosswalk.parquet",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer: the coverage statement reads crosswalk.parquet and lists the crosswalk as a silver table",
+   "evidence": "commonwealth_coverage_statement.py:42,170,276",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-consumer-commonwealth-near-match-page",
+   "kind": "script",
+   "name": "data/assets/scripts/analysis/commonwealth_near_match_page.py (crosswalk consumer: near-match page)",
+   "trigger": "manual CLI",
+   "reads": [
+    {
+     "bucket": "opal-data-assets",
+     "prefix": "commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/crosswalk.parquet (VersionId recorded by head_object)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer: the near-match page reads the served crosswalk rows in the score band between the near and match thresholds",
+   "evidence": "commonwealth_near_match_page.py:4-5,27,72,86,104-105",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-consumer-commonwealth-price-need",
+   "kind": "script",
+   "name": "data/assets/scripts/silver/commonwealth_price_need.py (crosswalk consumer: price-need ranking)",
+   "trigger": "manual CLI",
+   "reads": [
+    {
+     "bucket": "opal-data-assets",
+     "prefix": "commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/crosswalk.parquet (crosswalk_uri default)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer: the price-need ranking takes holder status from the crosswalk (--crosswalk default)",
+   "evidence": "commonwealth_price_need.py:44,64,288",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-consumer-mdpf-demque-rank",
+   "kind": "script",
+   "name": "data/mdpf/scripts/demque/rank.py (crosswalk consumer: MDPF demque ranking)",
+   "trigger": "manual CLI (main at rank.py:174)",
+   "reads": [
+    {
+     "bucket": "opal-data-assets",
+     "prefix": "commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/crosswalk.parquet (columns commonwealth_account, status, reason_code)",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer: the MDPF demque ranking sets the P1, P2 and P3 priority from the crosswalk status and reason_code",
+   "evidence": "data/mdpf/scripts/demque/rank.py:49,80-85,135-143,180",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-consumer-amlp-read-2026-10-09",
+   "kind": "reader",
+   "name": "AMLP consumer read, ADVI_COTBKF 2026-10-09 (crosswalk consumer: one-off read)",
+   "trigger": "one-off manual read",
+   "reads": [
+    {
+     "bucket": "opal-data-assets",
+     "prefix": "commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/crosswalk.parquet",
+     "claim": "measured"
+    }
+   ],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer: a read-only check of one client holding against the MDPF demque price store",
+   "evidence": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/AMLP_CONSUMER_READ_MDPF_DEMQUE_20261009.md:9-10",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-consumer-commonwealth-rule-change-diff",
+   "kind": "script",
+   "name": "data/assets/scripts/analysis/commonwealth_rule_change_diff.py (crosswalk consumer: before and after diff)",
+   "trigger": "manual CLI",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer: diffs a before and an after crosswalk run; it runs commonwealth_crosswalk.py --out into a local scratch directory and reads no S3 key",
+   "evidence": "commonwealth_rule_change_diff.py:5-7,37-40,124,215",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-module-import-commonwealth-asf-source",
+   "kind": "script",
+   "name": "data/assets/scripts/silver/commonwealth_asf_source.py (crosswalk consumer: imports the builder module)",
+   "trigger": "manual CLI",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer through the module import (rules and silver prefix, not the parquet): import commonwealth_crosswalk as cw inside a function",
+   "evidence": "commonwealth_asf_source.py:178-179",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-module-import-commonwealth-base-close-trace",
+   "kind": "script",
+   "name": "data/assets/scripts/silver/commonwealth_base_close_trace.py (crosswalk consumer: imports the builder module)",
+   "trigger": "manual CLI",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer through the module import (rules, not the parquet)",
+   "evidence": "commonwealth_base_close_trace.py:40",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-module-import-commonwealth-bond-custodian-price",
+   "kind": "script",
+   "name": "data/assets/scripts/silver/commonwealth_bond_custodian_price.py (crosswalk consumer: imports the builder module)",
+   "trigger": "manual CLI",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer through the module import (silver prefix helper, not the parquet)",
+   "evidence": "commonwealth_bond_custodian_price.py:34,104,184,189",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-module-import-commonwealth-daily-holdings",
+   "kind": "script",
+   "name": "data/assets/scripts/silver/commonwealth_daily_holdings.py (crosswalk consumer: imports the builder module)",
+   "trigger": "manual CLI",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer through the module import: rebuild_holdings, position_holdings and is_cash from the crosswalk module",
+   "evidence": "commonwealth_daily_holdings.py:31,121-161",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-module-import-commonwealth-daily-returns",
+   "kind": "script",
+   "name": "data/assets/scripts/silver/commonwealth_daily_returns.py (crosswalk consumer: imports the builder module)",
+   "trigger": "manual CLI",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer through the module import (silver prefix helper)",
+   "evidence": "commonwealth_daily_returns.py:49,368",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-module-import-commonwealth-daily-valuation",
+   "kind": "script",
+   "name": "data/assets/scripts/silver/commonwealth_daily_valuation.py (crosswalk consumer: imports the builder module)",
+   "trigger": "manual CLI",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer through the module import (the signed-quantity rule)",
+   "evidence": "commonwealth_daily_valuation.py:44,916",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-module-import-commonwealth-mover-classes",
+   "kind": "script",
+   "name": "data/assets/scripts/silver/commonwealth_mover_classes.py (crosswalk consumer: imports the builder module)",
+   "trigger": "manual CLI",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer through the module import (silver prefix helper)",
+   "evidence": "commonwealth_mover_classes.py:32,156",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-module-import-commonwealth-mover-causes",
+   "kind": "script",
+   "name": "data/assets/scripts/silver/commonwealth_mover_causes.py (crosswalk consumer: imports the builder module)",
+   "trigger": "manual CLI",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer through the module import",
+   "evidence": "commonwealth_mover_causes.py:61",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-module-import-commonwealth-non-positive-base",
+   "kind": "script",
+   "name": "data/assets/scripts/silver/commonwealth_non_positive_base.py (crosswalk consumer: imports the builder module)",
+   "trigger": "manual CLI",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer through the module import",
+   "evidence": "commonwealth_non_positive_base.py:23",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-module-import-commonwealth-split-level-probe",
+   "kind": "script",
+   "name": "data/assets/scripts/silver/commonwealth_split_level_probe.py (crosswalk consumer: imports the builder module)",
+   "trigger": "manual CLI",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer through the module import",
+   "evidence": "commonwealth_split_level_probe.py:29",
+   "claim": "measured"
+  },
+  {
+   "id": "xw-module-import-commonwealth-residuals-explain",
+   "kind": "script",
+   "name": "data/assets/scripts/analysis/commonwealth_residuals_explain.py (crosswalk consumer: imports the builder module)",
+   "trigger": "manual CLI",
+   "reads": [],
+   "writes": [],
+   "legacy_touch": false,
+   "consumer_note": "crosswalk consumer through the module import",
+   "evidence": "commonwealth_residuals_explain.py:36",
+   "claim": "measured"
+  }
+ ],
+ "not_read": [
+  "the environment values of the other 226 live functions: only 11 configurations were read; their source was searched in the repository (infra/aws/lambda, 128 files for opal-data-cot), not their live environments",
+  "invocation triggers of the IRPT functions (irpt-directory-refresh, irpt-directory-search, irpt-holdings, irpt-performance-adapter): the rules and callers were not identified; trigger fields say not determined",
+  "EventBridge state and schedule expressions of opal-cot-value-parity-hourly and the schedule rules other than the two described; targets of cot-rebalancer-runner-daily not read",
+  "SNS subscriptions of opal-critical-surface-alerts and opal-bd-cot-cookie-alerts (subscribers unknown)",
+  "SES sending statistics and the 26 identities' use: only the identity and template listings were read; the addresses were not printed",
+  "the forwardfill_v2 Cottonwood data-plane read in tenants.py: no role grant found among the inline policies of irpt-performance-adapter-role; whether any other role reads it was not checked",
+  "the aws comp-find DEFAULT band enumeration for the crosswalk key timed out at 100 seconds (rc 124) and was not retried; the repository was read with the native Grep tool instead",
+  "dim_identity_crosswalk (data/assets/scripts/gold/investor_reporting/directory_runner.py:339) is a different crosswalk (the investor-reporting identity dimension); its bucket was not traced and it is excluded from the Cottonwood crosswalk consumer list",
+  "commonwealth_sweeps.py and commonwealth_signs.py name the crosswalk module in a docstring only (no import found); commonwealth_sweep_regrade.py reaches the module through dv.cw; neither is listed as a consumer",
+  "consumers of the ADVI_COTBKF deliverables that cite the crosswalk (ACTIVE_SET_RECORD.json, REVERSE_MATCH.csv, RULE_CHANGE_DIFF.md, the signing tables): records, not code; not traced further",
+  "CloudFront access logs, Lambda invocation metrics and any traffic to the origin: not read",
+  "the opal-data-cot managed customer policy named in the graph (opal-data-cot#policy): not read live",
+  "the ajb_workspace household_crosswalk builders (data/assets/scripts/gold/advi_billing/household_crosswalk.py and the 49financial household_crosswalk key): a different firm and a different crosswalk; excluded by scope",
+  "PLANINV egress: none; no portal, Terraform or producer command was run"
+ ],
+ "claim": "measured"
+}
