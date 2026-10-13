@@ -53,22 +53,40 @@ def main(argv):
     hours = int(opt("--hours", "48"))
     cw = boto3.client("logs", region_name="us-east-1")
     end = int(time.time())
-    qid = cw.start_query(logGroupName=LG, startTime=end - hours * 3600, endTime=end + 60,
-                         queryString='filter @requestId = "%s" | fields @timestamp, @message | sort @timestamp asc | limit 300' % rid, limit=300)["queryId"]
-    res = {}
-    for _ in range(90):
-        time.sleep(2)
-        res = cw.get_query_results(queryId=qid)
-        if res["status"] in ("Complete", "Failed", "Cancelled", "Timeout"):
-            break
-    print("request id %s | query status %s | lines %d" % (rid, res.get("status"), len(res.get("results", []))))
-    if res.get("status") != "Complete":
-        print("R102 PHASE TABLE: NO (the query did not complete)")
+
+    def run_query(text, start, stop):
+        qid = cw.start_query(logGroupName=LG, startTime=start, endTime=stop, queryString=text, limit=1000)["queryId"]
+        out = {}
+        for _ in range(90):
+            time.sleep(2)
+            out = cw.get_query_results(queryId=qid)
+            if out["status"] in ("Complete", "Failed", "Cancelled", "Timeout"):
+                break
+        rows = [{c["field"]: c["value"] for c in row if c["field"] != "@ptr"} for row in out.get("results", [])]
+        return out.get("status"), rows
+
+    # 1. the request's own tagged lines (START, END, REPORT): they carry the request id; they give the log stream and the time bounds.
+    status, tagged = run_query('filter @requestId = "%s" | fields @timestamp, @logStream, @message | sort @timestamp asc | limit 50' % rid, end - hours * 3600, end + 60)
+    print("request id %s | query status %s | tagged lines %d" % (rid, status, len(tagged)))
+    if status != "Complete" or not tagged:
+        print("R102 PHASE TABLE: NO (the request's own lines were not found)")
         return 1
-    messages = []
-    for row in res["results"]:
-        d = {c["field"]: c["value"] for c in row if c["field"] != "@ptr"}
-        messages.append(d.get("@message", ""))
+    # `print` lines carry no request id in the text log format: they are the lines of the SAME log stream between START and REPORT.
+    import datetime as dt
+
+    def ts(row):
+        return dt.datetime.strptime(row["@timestamp"][:23], "%Y-%m-%d %H:%M:%S.%f").replace(tzinfo=dt.timezone.utc)
+
+    stamps = [ts(r) for r in tagged]
+    t0 = int((min(stamps) - dt.timedelta(seconds=2)).timestamp())
+    t1 = int((max(stamps) + dt.timedelta(seconds=2)).timestamp())
+    stream = tagged[0]["@logStream"]
+    status, rows = run_query('filter @logStream = "%s" | fields @timestamp, @message | sort @timestamp asc | limit 500' % stream, t0, t1)
+    print("log stream %s | window %s to %s | status %s | lines %d" % (stream[-20:], min(stamps).strftime("%H:%M:%S"), max(stamps).strftime("%H:%M:%S"), status, len(rows)))
+    if status != "Complete":
+        print("R102 PHASE TABLE: NO (the stream query did not complete)")
+        return 1
+    messages = [r.get("@message", "") for r in rows]
     return report(messages, rid)
 
 
