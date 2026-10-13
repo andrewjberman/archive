@@ -568,6 +568,8 @@ def main(argv):
     elif check in ("y280-submit", "y281-list"):
         worker, rel, testfile, floor = (("101", "SUBMIT_ANALYSIS_REQUEST.json", "tests/test_submit_analysis_request.py", 12) if check == "y280-submit"
                                         else ("102", "LIST_SCOPED.json", "tests/test_list_scoped_firm.py", 10))
+        if check == "y281-list" and (root / (D24 % "108" + rel)).is_file():
+            worker = "108"  # the continuation worker's record (AMENDMENT 1); the first worker (102) stopped at the build gate
         rec = load(root, D24 % worker + rel, problems)
         if rec:
             for member in ("read", "authorization_change", "tests", "before_arm", "claim", "not_read"):
