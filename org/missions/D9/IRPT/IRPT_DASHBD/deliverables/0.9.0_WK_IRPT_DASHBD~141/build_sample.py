@@ -274,6 +274,29 @@ def is_absent_form(v):
     return isinstance(v, dict) and set(v.keys()) == {"absent"}
 
 
+def measured_leaves(v):
+    """The leaves of a member that carry a figure or a text: absent forms and the series 'date' keys are not measured."""
+    if is_absent_form(v):
+        return
+    if isinstance(v, dict):
+        for k, x in v.items():
+            if k != "date":
+                for y in measured_leaves(x):
+                    yield y
+    elif isinstance(v, list):
+        for x in v:
+            for y in measured_leaves(x):
+                yield y
+    else:
+        yield v
+
+
+def fully_absent(v):
+    """True when no figure of the member is measured: every term is an absent form (a member with some accounts
+    measured is not fully absent)."""
+    return not any(True for _ in measured_leaves(v))
+
+
 RET_COLS = ["account_id", "business_date", "market_value_eod", "external_flow", "total_return_daily", "day_quality",
             "guard_state"]
 
@@ -614,7 +637,7 @@ def main(repo, out):
     if missing:
         raise SystemExit("ERROR: %d member ids were not assigned a value (first: %s)" % (len(missing), missing[0]))
     form = to_form(values)
-    filled = sum(1 for mid in member_ids if not is_absent_form(form[mid]))
+    filled = sum(1 for mid in member_ids if not fully_absent(form[mid]))
     total = len(member_ids)
     absent = total - filled
     contract_absent = sum(1 for m in members if m["source"] == "ABSENT")
