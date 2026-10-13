@@ -1,0 +1,151 @@
+{
+ "schema_version": "1.0",
+ "genre": "BUILD",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-j-11",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-11.slot-switch-and-name-guard.md",
+  "group": "OTHER",
+  "vintage_commit": "89f2099f0a"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~74",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R7.md",
+  "vintage_commit": "89f2099f0a",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-11.slot-switch-and-name-guard.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/exec-summary-generator/lambda_function.py",
+   "kind": "script",
+   "commit_or_etag": "2090965f2216da8e3edced1886b1ec410afbd898",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on wk-ADVI_FIRMBKTS-74 at 2090965f22; not deployed (order section 2: no deploy, no AWS call, no model call). Part A _disabled_slots and the six process_advisor switch arms; Part B _guard_client_id_before_call, _client_name_values and _guard_client_names_after_reply in _build_slot.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/exec-summary-generator/tests/test_slot_switch_guard.py",
+   "kind": "test",
+   "commit_or_etag": "2090965f2216da8e3edced1886b1ec410afbd898",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on wk-ADVI_FIRMBKTS-74 at 2090965f22; six stub-only named tests, no network, no AWS call, no model call.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/exec-summary/variables.tf",
+   "kind": "terraform",
+   "commit_or_etag": "2090965f2216da8e3edced1886b1ec410afbd898",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on wk-ADVI_FIRMBKTS-74 at 2090965f22; variable disabled_slots (default empty, validated against the six slot names). No terraform apply.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/exec-summary/main.tf",
+   "kind": "terraform",
+   "commit_or_etag": "2090965f2216da8e3edced1886b1ec410afbd898",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on wk-ADVI_FIRMBKTS-74 at 2090965f22; one merge term for EXEC_SUMMARY_DISABLED_SLOTS, absent at the default. terraform fmt -check rc=0 (offline). No terraform apply.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "pytest tests/test_slot_switch_guard.py -q expect ^6 passed (the six named arms of FB-j-11 section 1d)",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-74/infra/aws/lambda/exec-summary-generator && timeout 110 python -m pytest tests/test_slot_switch_guard.py -q 2>&1 | sed \"s/\\x1b\\[[0-9;]*m//g\" | tail -1",
+   "expect": "^6 passed",
+   "output_evidence": "6 passed in 0.24s\npytest pipeline rc=0",
+   "denominator": "6 of 6 named arms pass in tests/test_slot_switch_guard.py (0 failed); the whole tests directory reads 13 passed = the 6 new plus the 7 existing arms of test_dry_run.py and test_slot_drop_log.py",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "r7_checks.py tfslots expect ^TFSLOTS: 3 of 3 arms$ (the Terraform carrier mirrors platinum_mode)",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-74 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py tfslots --root /c/dev/wk-firmbkts-74",
+   "expect": "^TFSLOTS: 3 of 3 arms$",
+   "output_evidence": "PASS T1 variable disabled_slots exists with default empty and a validation\nPASS T2 the environment adds EXEC_SUMMARY_DISABLED_SLOTS only when the variable is non-empty\nPASS T3 the six existing environment keys and the platinum_mode term are untouched\nTFSLOTS: 3 of 3 arms\nrc=0",
+   "denominator": "3 of 3 Terraform text arms PASS (T1 variable, T2 environment term, T3 existing keys unchanged against the merge-base with box/dell1)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "r4_scope.py write-surface bound: expect ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$ over the four code paths and the deliverables and surprise-channel allow-list",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-74 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-74 --allow infra/aws/lambda/exec-summary-generator/lambda_function.py --allow infra/aws/lambda/exec-summary-generator/tests/test_slot_switch_guard.py --allow infra/aws/terraform/exec-summary/variables.tf --allow infra/aws/terraform/exec-summary/main.tf --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~74/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+   "output_evidence": "  CHANGED infra/aws/lambda/exec-summary-generator/lambda_function.py\n  CHANGED infra/aws/lambda/exec-summary-generator/tests/test_slot_switch_guard.py\n  CHANGED infra/aws/terraform/exec-summary/main.tf\n  CHANGED infra/aws/terraform/exec-summary/variables.tf\nROUND 4 SCOPE: OK 4 changed, 0 outside, 0 required missing\nAC3 rc=0",
+   "denominator": "4 of 4 changed paths inside the allow-list (0 outside); 0 of 0 required paths missing (none required)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two temporary mutants on lambda_function.py, each restored from a saved copy with a byte comparison: (i) the switch ignores EXEC_SUMMARY_DISABLED_SLOTS (raw = ''); (ii) the post-reply name check is removed from the first reply path. Never committed.",
+   "expected": "(i) test_disabled_slot_is_skipped_entirely FAILS (test_unknown_name_ignored also reads the same switch); (ii) test_name_in_reply_is_dropped FAILS",
+   "observed": "(i) 2 failed, 4 passed: FAILED test_disabled_slot_is_skipped_entirely and FAILED test_unknown_name_ignored; (ii) 1 failed, 5 passed: FAILED test_name_in_reply_is_dropped; restore cmp OK after each",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs of the AC1 command on the same tree (the second run after both mutants were restored)",
+   "observed": "run 1: 6 passed in 0.24s; run 2: 6 passed in 0.22s; both rc=0, same count, no failures",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the section 5 flip of this order's <status> to complete",
+   "reason": "the order's section 5 does not ask the worker to flip it; this instance is filed for the issuer to read"
+  },
+  {
+   "item": "a deploy, a terraform plan or apply, a live invocation of the Lambda, and any AWS or model call",
+   "reason": "out of the order's bounds (section 2); the stubs prove the branch logic and the Terraform text, not the deployed function, a real model reply or a plan"
+  },
+  {
+   "item": "terraform validate and terraform plan",
+   "reason": "not run: both need provider initialisation; terraform fmt -check (offline) returned rc=0"
+  },
+  {
+   "item": "the client account-id check of the commit gate (client-data-check)",
+   "reason": "the gate printed WARN: the hashed account-id list is ABSENT on this device, so the commit was not checked for client account ids; recorded as a measured fact, not a pass"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~74/ADVI_FIRMBKTS.TO-FB-j-11.slot-switch-and-name-guard.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "python -m pytest tests/test_slot_switch_guard.py -q (in infra/aws/lambda/exec-summary-generator)",
+   "result": "6 passed in 0.24s; re-run 6 passed in 0.22s; tests directory 13 passed"
+  },
+  {
+   "tool": "r7_checks.py tfslots",
+   "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py tfslots --root /c/dev/wk-firmbkts-74",
+   "result": "TFSLOTS: 3 of 3 arms, rc=0"
+  },
+  {
+   "tool": "r4_scope.py",
+   "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-74 (with the four allow entries)",
+   "result": "ROUND 4 SCOPE: OK 4 changed, 0 outside, 0 required missing, rc=0"
+  },
+  {
+   "tool": "terraform fmt",
+   "invocation": "terraform fmt -check -diff -no-color variables.tf main.tf (in infra/aws/terraform/exec-summary)",
+   "result": "rc=0, no diff"
+  },
+  {
+   "tool": "commit-gate.sh (via safe-commit.sh)",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~74 <0.9.0_WK_ADVI_FIRMBKTS~74@opal.agent>\" -F .scratch/msg_fb_j_11_code.txt -- <four code paths>",
+   "result": "pre-commit gate clean for 4 of 4 file(s); committed 2090965f22; WARN client-data-check (account-id list absent on this device)"
+  }
+ ]
+}
