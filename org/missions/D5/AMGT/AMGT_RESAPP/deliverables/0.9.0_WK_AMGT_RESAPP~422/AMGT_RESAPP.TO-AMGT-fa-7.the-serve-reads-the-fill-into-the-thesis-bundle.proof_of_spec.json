@@ -19,7 +19,7 @@
       "kind": "script",
       "commit_or_etag": "0b89670d1a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on branch wk-AMGT_RESAPP-422 (LOCAL). No deploy: the order's bounds grant no deploy, no apply, no Lambda update and no S3 write. The new region and the one wiring line in read_thesis_bundle are the only change (3 files, 748 insertions, 0 deletions in the commit)."
+      "deploy_evidence": "Committed on branch wk-AMGT_RESAPP-422 (LOCAL). No deploy: the order's bounds grant no deploy, no apply, no Lambda update and no S3 write. The new region and the one wiring line in read_thesis_bundle are the only change."
     },
     {
       "path_or_key": "lib/research/api/tests/test_ai_fill_serve.py",
@@ -27,6 +27,13 @@
       "commit_or_etag": "0b89670d1a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Committed on branch wk-AMGT_RESAPP-422 (LOCAL). 39 test functions, offline: local root, fake S3 at the _s3_client seam, no model call, no network."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/conftest.py",
+      "kind": "test",
+      "commit_or_etag": "505cc189de",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1 (issuer 2.0.0_SA_COO~R2, row AMGT_RESAPP-D1-W422-S1): one line in the autouse fixture empty_pool_roots points AMGT_AIFILL_ROOT at an empty directory. Committed on branch wk-AMGT_RESAPP-422 (LOCAL), 1 insertion."
     }
   ],
   "acceptance": [
@@ -36,7 +43,7 @@
       "method": "command",
       "invocation": "cd C:/dev/wk-resapp-422 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa7_serve.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
       "output_evidence": "ARM scoped_amgt.py imports neither lib.opal_naming nor harvest.store (Lambda-safe) PASS []\nARM ENV_AIFILL_ROOT == 'AMGT_AIFILL_ROOT'                PASS AMGT_AIFILL_ROOT\nARM serving does not alter the stored document           PASS \nAIFILL FA-7 ARMS: YES (18 of 18)\nexit=0",
-      "denominator": "18 of 18 arms (the verdict line's N, N at least 18); no arm line reads FAIL; exit=0. Run twice on the same bytes, identical (see ac_run.txt).",
+      "denominator": "18 of 18 arms (the verdict line's N, N at least 18); no arm line reads FAIL; exit=0 at commit 505cc189de. Run twice on the committed bytes, identical (ac1_run_505cc189de.txt and ac1_run2_505cc189de.txt). Predecessor runs at 0b89670d1a in ac_run.txt.",
       "status": "PASS",
       "expect": "AIFILL FA-7 ARMS: YES \\(18 of 18\\).*exit=0"
     },
@@ -46,7 +53,7 @@
       "method": "command",
       "invocation": "cd C:/dev/wk-resapp-422 && PYTHONPATH=\"$(pwd)\" timeout 500 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_api_suite_no_new_failures.py\" | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
       "output_evidence": "AIFILL API SUITE: YES (base 4 failing, now 4 failing, new 0, passed 1008)\nexit=0",
-      "denominator": "passed 1008 = 969 floor + 39 test functions added in test_ai_fill_serve.py; base 4 failing, now 4 failing, new 0.",
+      "denominator": "passed 1008 = 969 floor + 39 test functions added in test_ai_fill_serve.py; base 4 failing, now 4 failing, new 0. At commit 505cc189de (ac2_run_505cc189de.txt).",
       "status": "PASS",
       "expect": "AIFILL API SUITE: YES \\(base 4 failing, now 4 failing, new 0, passed 1008\\).*exit=0"
     }
@@ -59,8 +66,8 @@
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "check_fa7_serve.py run twice on the same bytes; both runs print AIFILL FA-7 ARMS: YES (18 of 18) and exit=0 (ac_run.txt).",
-      "observed": "two runs, identical verdict line and exit code",
+      "method": "check_fa7_serve.py run on the committed bytes at 505cc189de, twice; plus the predecessor's two runs at 0b89670d1a (ac_run.txt).",
+      "observed": "Both runs at 505cc189de print AIFILL FA-7 ARMS: YES (18 of 18) and exit=0 with 18 PASS arm lines and 0 FAIL arm lines.",
       "status": "STABLE"
     }
   },
@@ -70,12 +77,8 @@
       "reason": "Out of this cell by the order's bounds; a later pair carries the apply. The IAM note in the order's preflight is for that deploy leg."
     },
     {
-      "item": "Empty AMGT_AIFILL_ROOT default in lib/research/api/tests/conftest.py",
-      "reason": "conftest.py is outside this order's write paths. Filed as AMGT_RESAPP-D1-W422-S1 with disarm owner 2.0.0_SA_COO~R2; measured 29 live-key GET lines across 44 passing tests."
-    },
-    {
       "item": "Flip of the task order status to complete",
-      "reason": "The face's section 5 leaves the <status> flip to the issuer (2.0.0_SA_COO~R2)."
+      "reason": "The face's section 5 leaves the <status> flip to the issuer (2.0.0_SA_COO~R2); the task order file is outside this order's write paths."
     },
     {
       "item": "Push of wk-AMGT_RESAPP-422 to any remote",
@@ -83,26 +86,32 @@
     }
   ],
   "surprises": [
-    "AMGT_RESAPP-D1-W422-S1: conftest.py sets AMGT_POOL_ROOT and AMGT_DRAFTING_ROOT to empty roots but no AMGT_AIFILL_ROOT, so existing thesis-bundle tests reach the fill key through _s3_client().",
+    "AMGT_RESAPP-D1-W422-S1: conftest.py sets AMGT_POOL_ROOT and AMGT_DRAFTING_ROOT to empty roots but no AMGT_AIFILL_ROOT, so existing thesis-bundle tests reach the fill key through _s3_client(). Ruled by the issuer as AMENDMENT 1; resolved at 505cc189de.",
     "AMGT_RESAPP-D1-W422-S2: read_ai_fill's validator enforces the aifill/v1 block rules beyond the face's enumerated validator list (citation mix, text length and ASCII, model_call search count, opal ref charset).",
-    "AMGT_RESAPP-D1-W422-S3: the naming gate reads the display literal s3://{0}/{1} in the fill reader's reason text as an address and returns WARN on the commit."
+    "AMGT_RESAPP-D1-W422-S3: the naming gate reads the display literal s3://{0}/{1} in the fill reader's reason text as an address and returns WARN on the commit.",
+    "AMGT_RESAPP-D1-W422-S4: the measured premise of the conftest amendment (29 live fill-key GETs across 44 passing thesis tests) does not reproduce under the probe's counting; the probe measures 42 GET attempts across 37 tests with the variable unset and 0 with the line."
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~422/ac_run.txt",
   "compiler_tools": [
     {
       "tool": "pytest",
       "invocation": "python -m pytest -q -p no:warnings lib/research/api/tests/test_ai_fill_serve.py",
-      "result": "39 passed in 0.81s (after the escape and unused-import fixes; the earlier failing run was one mutant with a non-ASCII literal that the fix removed)"
+      "result": "39 passed in 0.81s (predecessor, at 0b89670d1a)"
     },
     {
       "tool": "commit-gate.sh",
-      "invocation": "bash .tools/commit-gate.sh lib/research/api/scoped_amgt.py lib/research/api/tests/test_ai_fill_serve.py",
-      "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+      "invocation": "bash .tools/commit-gate.sh lib/research/api/tests/conftest.py",
+      "result": "All checks passed!; OK: pre-commit gate clean for 1 of 1 file(s) (at 505cc189de)"
     },
     {
       "tool": "safe-commit.sh",
-      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~422 <0.9.0_WK_AMGT_RESAPP~422@opal.agent>\" -F .scratch/msg_code.txt -- lib/research/api/scoped_amgt.py lib/research/api/tests/test_ai_fill_serve.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
-      "result": "commit 0b89670d1a; commit-gate clean; surprise-row-gate OK (2 new rows); msg-verify MATCH"
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~422 <0.9.0_WK_AMGT_RESAPP~422@opal.agent>\" -F .scratch/msg_fa7_amend1.txt -- lib/research/api/tests/conftest.py",
+      "result": "commit 505cc189de; commit-gate clean; surprise-row-gate OK; msg-verify MATCH"
+    },
+    {
+      "tool": "probe (AMGT_AIFILL_ROOT fill-key GET count, existing suite)",
+      "invocation": "PYTHONPATH=<worktree>:<worktree>/.scratch/probe_aifill python -m pytest -p probe_aifill_gets lib/research/api/tests --ignore=lib/research/api/tests/test_ai_fill_serve.py -q -p no:cacheprovider (with PROBE_UNSET=1 for the negative control); script at deliverables/0.9.0_WK_AMGT_RESAPP~422/probe_aifill/probe_aifill_gets.py",
+      "result": "with the line (505cc189de): 0 ai_fill GET attempts across 0 tests, 969 passed, 4 failed (the base 4). Negative control, variable unset per test body: 42 GET attempts across 37 tests, 969 passed, 4 failed. Denominator 973 tests. Outputs: probe_aifill/probe_out_with_line.json, probe_aifill/probe_out_unset.json."
     }
   ]
 }
