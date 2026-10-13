@@ -104,10 +104,9 @@
       "criterion_verbatim": "DQ9-t45-AC2: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_real.py -> YCLASS-REAL-OK; on the REAL repo requests and the device queue no Yahoo request is refused, and the standing extension's plan declares client from a window start on or after 2012-01-01",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_real.py",
-      "output_evidence": "arm1 requests checked=2 accepted=2 refused=[]; arm1 queue checked=7 accepted=7 refused=[] (the issuer's declaration of Z-STANDING-T1-EXTEND.json cleared surprise S1); then arm2 did not complete: subprocess.TimeoutExpired, extend_frontier.py --plan, timed out after 58 seconds, on the first run and on the one retry; no YCLASS-REAL line, rc=1 both runs. Direct measurement of the same plan, timeout 120 python data/mdpf/scripts/demque/extend_frontier.py --plan at 82fc16c19d: rc=0, elapsed 77s, need_class client, window_start 2013-04-08, start 2013-04-08, frontier 2026-10-13, symbols 183. The direct run is diagnostic only and is not the criterion's verdict.",
-      "denominator": "arm 1 requests: 2 of 2 accepted; arm 1 queue: 7 of 7 accepted; arm 2: 0 of 1 completed inside the check's 58-second budget (plan measured at 77 seconds)",
-      "status": "FAIL",
-      "status_reason": "arm 2 of the check cannot complete inside its own 58-second subprocess budget: the plan takes about 77 seconds on dell1 (the S3 index read). The plan's content satisfies the criterion (client, window_start 2013-04-08 on or after the floor), but the check gives no verdict line, so the criterion is not met as written. The check was not edited and its budget not raised (outside the grant; the bound forbids weakening a check). Surprise MDPF_DEMQUE-D1-W38-S4 (BLOCKING). The order stays open.",
+      "output_evidence": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_real.py at f49ec99f1b (box/dell1 merged, check budget 105 s), rc=0:\narm1 requests checked=2 accepted=2 refused=[]\narm1 queue checked=7 accepted=7 refused=[]\narm2 need_class=client window_start=2013-04-08 frontier=2026-10-13 symbols=183\nYCLASS-REAL-OK Yahoo requests declared and accepted; the standing extension declares client from 2013-04-08",
+      "denominator": "arm 1 requests: 2 of 2 accepted; arm 1 queue: 7 of 7 accepted; arm 2: 1 of 1 plan completed inside the 105-second budget (plan declares need_class client, window_start 2013-04-08 >= 2012-01-01 floor)",
+      "status": "PASS",
       "expect": "YCLASS-REAL-OK",
       "judgment": false
     }
@@ -135,8 +134,8 @@
       "reason": "order BOUNDS: READ-ONLY. Only the --plan read of the S3 price-store index and the pytest and check runs were executed; no pacer, queue, ledger or S3 write."
     },
     {
-      "item": "the check's 58-second budget",
-      "reason": "owned by the issuer's R9_CHECKS script, outside the grant; not raised or edited. Surprise MDPF_DEMQUE-D1-W38-S4."
+      "item": "the check's plan-arm budget",
+      "reason": "owned by the issuer's R9_CHECKS script, outside the grant; not edited by the worker. The issuer amended it 58 -> 105 seconds at 9bc8fff69f (the plan measured 77 s). Surprise MDPF_DEMQUE-D1-W38-S4, closed by that amendment."
     },
     {
       "item": "extend_frontier.apply empty-plan branch",
@@ -151,7 +150,7 @@
     "MDPF_DEMQUE-D1-W38-S1: the device-queue standing copy STANDING-T1-EXTEND-2026-10-12 was undeclared; the issuer declared it, arm 1 now reads 7 of 7 (cleared by the issuer, ruling 2026-10-13)",
     "MDPF_DEMQUE-D1-W38-S2: redraw_stale.enqueue built an undeclared Yahoo request and main reset the pacer before the refusal; fixed in code at 82fc16c19d, disarm owner 2.0.0_SA_COO~Q1 (BLOCKING, ARMED)",
     "MDPF_DEMQUE-D1-W38-S3: extend_frontier.apply's empty-plan branch can leave a stale undeclared standing file (OBSERVATION, INERT; issuer ruled no change)",
-    "MDPF_DEMQUE-D1-W38-S4: DQ9-t45-AC2 arm 2 runs extend_frontier --plan under a 58-second budget and the plan takes about 77 seconds, so the check gives no verdict (BLOCKING, INERT)"
+    "MDPF_DEMQUE-D1-W38-S4: DQ9-t45-AC2 arm 2 runs extend_frontier --plan under a 58-second budget and the plan takes about 77 seconds, so the check gives no verdict (BLOCKING, INERT) -- RESOLVED: closed by the issuer's check amendment @9bc8fff69f (plan budget 58 -> 105 s); AC2 re-run PASS at f49ec99f1b. The channel row is not edited (append-only) and still reads UNDER_INVESTIGATION."
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~38/MDPF_DEMQUE.TO-DQ-t45.yahoo-side-need-class-refusal.proof_of_spec.json",
   "compiler_tools": [
@@ -179,6 +178,21 @@
       "tool": "timeout 120 python data/mdpf/scripts/demque/extend_frontier.py --plan",
       "invocation": "read only (S3 price-store index read), diagnostic",
       "result": "rc=0, elapsed 77s, need_class client, window_start 2013-04-08, frontier 2026-10-13, symbols 183"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_tests.py",
+      "invocation": "DQ9-t45-AC1, at f49ec99f1b",
+      "result": "YCLASS-OK, rc=0 (3 of 3 named tests PASSED)"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_real.py",
+      "invocation": "DQ9-t45-AC2, timeout 120, at f49ec99f1b",
+      "result": "YCLASS-REAL-OK, rc=0; arm1 requests 2 of 2, arm1 queue 7 of 7 accepted; arm2 completed"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "whole folder, from the worktree root, at f49ec99f1b",
+      "result": "164 passed, rc=0 (0 failed)"
     }
   ]
 }
