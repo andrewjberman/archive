@@ -1,0 +1,102 @@
+{
+  "order": "IRPT_ANLREQ.TO-AR-y-291",
+  "cell": "AR-y-291",
+  "scope": "CODE AND TESTS ONLY. Read-only registry lookup behind the resolver's identity port, offline tests on fakes. Nothing deployed, uploaded, applied, invoked or released; no live DynamoDB, S3, YCharts or Yahoo call; no IAM or Terraform edited.",
+  "worktree": "C:/dev/wk-irpt-anlreq-105 (branch wk-IRPT_ANLREQ-105)",
+  "premises_regrounded": [
+    "the read record (r23/C_SWAP_STEPS_1_2_READ.json, drained @de81ce19c1) said the identity port is a None stub at resident_worker.py:619-620: TRUE at HEAD d2c68580a1",
+    "the read record said the resident's IAM for the table is NOT READ: now READ (declared grant, see read.resident_iam_for_the_table); the APPLIED state is not read",
+    "the read record said MDPF_SECHIST's index is not located: confirmed the series key is CUSIP-only (read.sechist_index); left out"
+  ],
+  "read": {
+    "identity_port_contract": "intake/security_resolution.py:(HEAD) 205-212: identity(symbol, 'TICKER') is called and must return a dict whose state is AVAILABLE, ABSENT, AMBIGUOUS or UNAVAILABLE (with candidates and provenance); any other value or an exception becomes the default REFERENCE_PORT_UNAVAILABLE. The comment at :204 says a reference is evidence and never promotes identity to FOUND. At HEAD the call happens BEFORE the provider read, for every pending symbol (security_resolution.py:206). The stub is ycharts/generate/resident_worker.py:619-620 (HEAD), identity=lambda symbol, namespace: None.",
+    "table_read_shape": "etf-classifications (infra/aws/terraform/yang-pipeline/etf-classifications.tf:22-30): hash key ticker (S); attributes asset_class, sub_asset_class (S); GSIs asset-class-index and sub-asset-class-index (:44-55); header schema :6-20 names name, management_style, sector, maturity, geography, override_* and updated_by. The table's own reader is infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py get_item at :56 (table default 'etf-classifications'). The resident reads the table name from the estate constant ycharts/generate/comparison_catalogue.py:61 (CLASSIFICATIONS_TABLE = 'etf-classifications'); CUSIP-keyed rows (identifier_namespace == 'CUSIP') are not ticker classifications (the classifications_reader docstring in comparison_catalogue.py, and the table's own rule _drop_cusip_rows in etf_classifications_dynamodb.py).",
+    "resident_iam_for_the_table": "YES, DECLARED, applied state NOT READ. infra/aws/terraform/investor-reporting/ycharts/resident.tf:61-65 (aws_iam_role_policy.runner_resident on aws_iam_role.runner) carries Sid ReadTheCanonicalClassificationTable at :127-133: Action [dynamodb:GetItem], Resource arn:...:table/etf-classifications. The resident holds NO BatchGetItem, Query or Scan on that table in this policy. The X10 inert note at resident.tf:14-18 concerns the reporting grants, not this statement.",
+    "sechist_index": "NOT READ FOR A LOOKUP; LEFT OUT. data/mdpf/scripts/silver/security_series_writer.py:48-54: check_cusip refuses any key that is not a 9-character alphanumeric CUSIP, and series_key = 'cusip=<CUSIP9>/series.parquet'. A ticker-keyed read is therefore not possible from this cell. The S3 statements read in resident.tf (:136-150) name no MDPF_SECHIST series prefix, so the resident has no read path to it. The MDPF_SECHIST writer itself is switched off (its own docstring) and is not touched here."
+  },
+  "port": {
+    "files": [
+      {"path": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py", "lines": "28 (import CLASSIFICATIONS_TABLE); 37-41 (_registry_text); 44-72 (registry_identity_port(client): one GetItem per call, upper-case ticker, Key {'ticker': {'S': ticker}}); 75-77 (_no_registry_port, the unwired form); 665-667 (the wiring in resolve_upload: the port over self.client when it has get_item, else the unwired form)"},
+      {"path": "infra/aws/lambda/investor-reporting/intake/security_resolution.py", "lines": "32-33 (REFERENCE_NOT_CONSULTED, the default, byte-identical to HEAD's default dict); 36-47 (_registry_row: the KNOWN key {ticker, asset_class, sub_asset_class} from a single AVAILABLE candidate); 194-207 (SecurityResolver._reference: asked ONLY for a provider NOT_FOUND symbol without a colon, after the provider read); 245-251 (the loop: reference set per fresh result; registry key set only on NOT_FOUND with a registry row)"}
+    ],
+    "contract": {
+      "input": "a symbol (upper-cased by the port) and namespace; the resolver passes 'TICKER' only",
+      "output": "AVAILABLE with candidates [{ticker, asset_class, sub_asset_class}] and provenance {table, key, read: GetItem} on a row; ABSENT for no row or a CUSIP-keyed row; UNAVAILABLE with reason_code REGISTRY_UNAVAILABLE on any read error, a non-mapping Item, or a non-TICKER namespace",
+      "effect_on_state": "NONE. A registry AVAILABLE on a provider NOT_FOUND symbol adds the registry key and leaves state NOT_FOUND and reason EXACT_IDENTIFIER_ABSENT_IN_PROVIDER_READ. A FOUND symbol is never asked and never carries the key.",
+      "writes": "none: the only client method used is get_item; a spy refuses every other attribute (test_no_write_method_is_ever_called_on_the_client)",
+      "batching": "NOT BATCHED. One GetItem per symbol. The resident's grant has GetItem only (resident.tf:130); BatchGetItem would need a new IAM action. Recorded as surprise IRPT_ANLREQ-D2-W105-S1."
+    },
+    "not_consulted_default": "A row the port is not asked about (a provider FOUND row, a colon-keyed symbol, or the unwired form) carries REFERENCE_PORT_UNAVAILABLE as today. Under a live port that label reads 'unavailable' on a FOUND row though the port was not consulted for it: recorded as surprise IRPT_ANLREQ-D2-W105-S2.",
+    "token_spelling": "The read-error token is REGISTRY_UNAVAILABLE (the uppercase form the file uses for every reason_code), for the order's 'registry_unavailable'."
+  },
+  "tests": {
+    "files": [
+      {"path": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_registry_identity_port.py", "count": 11, "result": "11 passed"},
+      {"path": "infra/aws/lambda/investor-reporting/intake/tests/test_registry_known.py", "count": 11, "result": "11 passed"}
+    ],
+    "covers": [
+      "hit is evidence and never FOUND; state NOT_FOUND, registry key present",
+      "miss returns ABSENT and adds no key",
+      "read error (exception, non-mapping Item) returns REGISTRY_UNAVAILABLE and the result equals today's apart from the reference",
+      "lookup by upper-case ticker, one key per call",
+      "no write method ever called (spy refuses all but get_item)",
+      "port used only for provider NOT_FOUND symbols (FOUND and colon symbols never asked)",
+      "no port (unwired form) is today's output: default reference, no key",
+      "table name is the estate constant, not a literal in the port (source check)",
+      "CUSIP-keyed row is ABSENT",
+      "client without get_item refused; non-TICKER namespace UNAVAILABLE",
+      "intake: the identity port is asked after the provider read and only for NOT_FOUND symbols; a raising port keeps the default; only a single AVAILABLE row becomes the key; the key survives the cache; a stub port is today's output"
+    ],
+    "suites": {
+      "intake_folder": "381 passed, 1 skipped (floor 370); HEAD baseline 370 passed, 1 skipped",
+      "ycharts_generate_folder": "555 passed, 4 failed, 30 skipped, 1 xfailed; HEAD baseline 544 passed, 4 failed. The 4 failures are the same known custody tests (test_custody_entry.py x2, test_custody_retained.py x2)."
+    }
+  },
+  "before_arm": {
+    "method": "HEAD copy: git archive HEAD infra/aws/lambda/investor-reporting into .scratch/head (worktree scratch, outside the product tree); the two new test files copied in unchanged; pytest run in each folder.",
+    "failed": 15,
+    "breakdown": {
+      "intake/tests/test_registry_known.py": "4 failed of 11 at HEAD, including the evidence test test_a_registry_row_on_a_provider_not_found_symbol_is_the_known_key_and_stays_not_found (no registry key at HEAD)",
+      "ycharts/generate/tests/test_registry_identity_port.py": "11 failed of 11 at HEAD (AttributeError: module 'resident_worker' has no attribute 'registry_identity_port')"
+    }
+  },
+  "release_needs": [
+    "IAM: none for the read as declared (resident.tf:127-133 already grants GetItem on etf-classifications). Confirm the statement is APPLIED before the port is live: the applied state was not read.",
+    "Terraform: none in this cell.",
+    "Package member: none new. resident_worker.py now imports comparison_catalogue.py (same directory, already shipped with the resident).",
+    "Deploy: an investor-reporting resident deploy is required for the port to run. Nothing was deployed.",
+    "Cell C (KNOWN state, freeze branch, words) consumes result['registry']; this cell changes no state and no finding."
+  ],
+  "claim": {
+    "measured": [
+      "intake folder: 381 passed, 1 skipped at this worktree, against 370 at HEAD",
+      "ycharts/generate folder: same 4 known failures before and after",
+      "new tests: 11 of 11 pass with the change; 4 of 11 intake and 11 of 11 ycharts fail at HEAD",
+      "commit gate rc=0 on security_resolution.py, resident_worker.py, both new test files"
+    ],
+    "inferred": [
+      "that the resident's applied IAM equals the declared IAM (not read)",
+      "that the resident process's dynamo client has region and credentials for GetItem (not run; no live call)"
+    ],
+    "absent": [
+      "any live registry row read (no live call in scope)",
+      "a batched lookup (not built; see port.contract.batching)"
+    ]
+  },
+  "not_read": [
+    "the applied state of the resident IAM policy (declared grant read only)",
+    "lib/opal_naming.py for a table-name builder (the estate constant comparison_catalogue.CLASSIFICATIONS_TABLE was used instead; it is the constant the catalogue already reads)",
+    "the MDPF_SECHIST per-security index beyond security_series_writer.py:48-54 (left out)",
+    "resident_session.py template_resolver beyond :139-146 (not edited; the identity argument flows through unchanged)",
+    "the upload page renderer under portal/ (not in grant)"
+  ],
+  "surprise_rows": ["IRPT_ANLREQ-D2-W105-S1", "IRPT_ANLREQ-D2-W105-S2", "IRPT_ANLREQ-D2-W105-S3"],
+  "judgment_inputs_for_L9": {
+    "evidence_never_found": "intake/security_resolution.py:245-251 and test_registry_known.py test 1",
+    "read_only": "test_registry_identity_port.py test_no_write_method_is_ever_called_on_the_client",
+    "read_error_never_guess": "test_registry_identity_port.py test_a_read_error_is_registry_unavailable_and_the_result_is_todays_result",
+    "no_iam_or_terraform_edited": "git diff of this branch touches no infra/aws/terraform path",
+    "table_name_not_literal": "test_the_table_name_is_the_estate_constant_and_not_a_literal_in_the_port",
+    "nothing_released": "no deploy, upload, apply or invoke; commits are on branch wk-IRPT_ANLREQ-105 only"
+  }
+}
