@@ -41,3 +41,37 @@ The standing request `ETFS_RIVALS-HISTORY-OWED-DAILY` is re-declared NON-CLIENT 
 next draw); a request that asks beyond its class window is refused at the queue. The producer already asks 365 days back from the page day
 (`history_owed.owed(s, day, window_days=365)`, `enrichment_bloomberg.py` reads it through `_history_owed`), so this cell changes no window. Its checks
 carry one arm: the owed set's earliest date is not before `page_day - 365` (the 2012-01-01 floor binds both classes).
+
+## ADDED 2026-10-13 ~17:3xZ: three more site-Z changes from the DEMQUE form (still STAGED, not issued; round 29 still EXECUTING)
+
+Source: CTO msgs 4932 and 4969 (Andrew-direct 2026-10-13), form `org/tier1_exec/1.0.0_SA_CTO/deliverables/DEMQUE_QUEUE_FORM_ANDREW_20261013.md` A3
+and rows Z3, Z4 of its "FOR SITE Z" table. The CTO's word is "cut beside"; the cut waits for the round-30 issuance (one issuer, one issuance, spec
+frozen mid-round). Chains, by write surface:
+
+| id (proposed) | change | files | chain |
+|---|---|---|---|
+| RIV-xe-1 | the gate and the queue-state reader (above) | `enrichment_bloomberg.py` | A |
+| RIV-xe-2 | Z3 dividends incremental + TWR on the owed request | `enrichment_bloomberg.py` (`DEFAULT_WINDOW_DAYS`, `build_plan`, `BACKFILL_FIELDS`, `_history_owed`), `history_owed.py` summary only | A, after xe-1 (same file) |
+| RIV-xf-1 | Z4 ACWI and IWM removed from the holdings pull and the universe | `universe.py`, `collector_bloomberg.py`, and the tests that name them (`test_r5l1_leg_inert.py`, `test_r8lg1_leg.py`, `test_r9cb1_bbg_budget.py`) | B (disjoint) |
+
+**xe-2, Z3.** `DEFAULT_WINDOW_DAYS = 730` (`enrichment_bloomberg.py:110`) is what `build_plan` applies to every security every day. The cell: a security
+with no stored `corporate_actions` row of any kind (a `NO_RECORDS` status row counts as pulled) gets ONE 365-day `DVD_HIST_ALL` pull; every other
+security gets the window from the 5th trading day back (`lib/trading_calendar.py`, never a typed date list). NOT read here: how G3 readers treat a
+date partition (the object each day lands is the window it asked: a 5-day object under a reader that takes only the newest partition would MOVE
+SERVED OUTPUT). The issuance reads the consumers first and carries a never-widen pair (CLAUDE.md section 5) or a stated reason it needs none.
+
+**xe-2, TWR.** `BACKFILL_FIELDS = ["PX_LAST"]` (`enrichment_bloomberg.py:720`) is what the owed request asks, so the owed set is close only: the GAP the
+form's census names. Add `DAY_TO_DAY_TOT_RETURN_GROSS_DVDS`, 365 days before need. Cells = units x fields. The form caps a run at 20,000
+CELLS, but `HISTORY_OWED_CAP = 20000` (`enrichment_bloomberg.py:901`) counts UNITS (security x date), so with two fields the code would ask 40,000
+cells: the cell makes the cap count cells (10,000 units at two fields) or sets the constant to 10,000, and its check asserts the cells asked. Price it from the live owed set, not from this
+file: the 2026-10-08 read was 184,600 units over 251 dates for 742 securities (round 27 status), which at two fields is 369,200 cells, about 18.5 runs
+at the cap against about 9.2 for the close alone. That figure PREDATES the removal of ACWI and IWM and the 365-day class, so the issuance re-reads
+`history_owed.summary(owed(s, day))` first and states the runs. The queue request `ETFS_RIVALS-HISTORY-OWED-DAILY` (Q1's file in
+`org/missions/D8/MDPF/MDPF_DEMQUE/requests/`) carries the field list, so Q1 re-files it; that is one ask to `2.0.0_SA_COO~Q1` at the cut.
+
+**xf-1, Z4.** `universe.py:25` marks ACWI and IWM `"leg": "pending"` behind `RIVALFUNDS_LEG_D13`, `collector_bloomberg.py:350` sizes them
+(`CONTROL_ROW_CAP`). Removal is the entries, their cap and the three tests. Check arm: after the change no `ACWI` or `IWM` in `universe.funds()`
+with the flag on or off, and the holdings plan's fund list equals the prior list minus those two (printed before and after).
+
+**Deploy.** All three are producer changes under `data/etfs/scripts/rivalfunds/`, deployed at site Z by the same crossbox order as the staged cell,
+one pair covering the set. Window: site Z un-park 2026-10-14 06:00Z.
