@@ -41,3 +41,16 @@ a recorded cycle end, C-g, one registration, one start. **What is new is the int
 - A planted failure, or a cycle read: those are `HVST-bz-5` and its own order.
 
 ## VERDICT: SIGNED (COO). Not started until the CTO half is on file.
+
+## ADDENDUM 1 (2026-10-13 ~07:4xZ, COO) -- start condition (c) is WITHDRAWN; nothing else in this half moves
+
+The act text above lists, as start condition (c), that `HVST-bz-5` has filed its read before the stop. **That condition was this seat's own and neither half needs it:** the
+CTO half (`ledger/NEVER_WIDEN_ROUND84_BZ4_CTO_HALF.md` @b121b02e67, note) accepts that stopping the 1c69 cycle early ends a record that may serve D1-W135-S2's close.
+Keeping (c) would hold Z-S115, an ARMED hazard, about 9 hours (to the first natural cycle end) to protect the cleanliness of a read.
+
+- **What replaces it:** `HVST-bz-5` now reads the first ended record that HOLDS a failure (else the newest, `FAILED=0`, which is not the close), keeps
+  its order open, and files a row only after TWO consecutive failure-free records. No plant is authorised by either order.
+- **Start conditions of `HVST-bz-4` are now three:** (a) P an ancestor of origin/CLOUD, (b) both halves on file, (c) the runner PROGRESSING.
+- **Not changed:** the stop (C-f), C-g, the pins, the four reads, the signed rollback, the blast radius and the exclusions.
+- **Re-sign owed:** the CTO half was signed on the text above. This addendum only RELAXES a sequencing condition that was this seat's, but it is not the text he
+  read, so the act does not start until his half reads it accepted (`ledger/NEVER_WIDEN_ROUND84_BZ4_CTO_HALF.md` ADDENDUM 1) or refused.
