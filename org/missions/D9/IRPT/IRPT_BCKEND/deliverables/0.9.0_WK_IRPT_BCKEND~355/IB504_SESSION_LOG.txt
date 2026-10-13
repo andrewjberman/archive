@@ -1,0 +1,16 @@
+IB-pr-504 worker session log -- 0.9.0_WK_IRPT_BCKEND~355 (round 173, workstream ~P, issuer 2.0.0_SA_COO~P2)
+
+Worktree: C:\dev\wk-IRPT_BCKEND-355 (branch wk-IRPT_BCKEND-355); portal repo branch wk-IRPT_BCKEND-355-portal.
+Premise checks: TREE-OK; portal HEAD cf52fdbf was an ancestor of e1cd356e2f; `git -C portal merge --ff-only e1cd356e2f` fast-forwarded (cf52fdbf -> e1cd356e).
+
+Steps:
+1. gen-fixtures.ts exportEnvelope() keeps the wire's facts.covered_account_ids (delete line removed; CRLF kept).
+2. `bun run src/pages/InvestorReporting/__tests__/fe-s-18/gen-fixtures.ts` from portal/ (rc 0). Output diff: fixtures/smoke/fe-s-18-frozen.json gained the one five-line covered_account_ids hunk. The same hunk was also written to three other committed maps (fixtures/smoke/fe-s-18-holdings-observed.json, fe-s-18-holdings-target.json, fe-s-18-holdings-missing-attribution.json) and to __tests__/fe-s-32/holdings-no-answer.json. Those four are outside the grant and were NOT committed; they were restored to their committed bytes (CRLF kept).
+3. Schema check, python -I with jsonschema, Draft 2020-12, ExportReceipt.schema.json, data of the frozen export envelope: 0 errors. covered_account_ids = ["ACCT-1"], equal to fe-s-13-wire.json (synthetic, not invented).
+4. Test scan: no test in __tests__ asserts the member absent or counts facts of the frozen export envelope (native Grep for covered_account_ids and facts).
+5. Portal commit cdffa5dd41 (gen-fixtures.ts, fe-s-18-frozen.json only), author and committer 0.9.0_WK_IRPT_BCKEND~355.
+6. Criteria: IB173-2-AC1 FAIL (rc 1; the generator's four out-of-grant outputs). IB173-2-AC2 PASS (rc 0; six-file bun test 28 pass, 8 skip, 0 fail). IB173-2-AC3 PASS (rc 0).
+7. Full run `bun test src/pages/InvestorReporting`: 1212 pass, 27 skip, 5 fail (base 1213/27/4). The five failing names fail with the base frozen bytes too (isolated run); see row IRPT_BCKEND-D2-W355-S2.
+8. Rows filed: IRPT_BCKEND-D2-W355-S1 (BLOCKING, ARMED, the four-file grant conflict), IRPT_BCKEND-D2-W355-S2 (OBSERVATION, INERT, the suite count).
+
+No push. The TO <status> is left pending because IB173-2-AC1 is FAIL under the grant.
