@@ -1,0 +1,38 @@
+# HVST-bz-4 C-f and C-g -- the live 1c69 cycle ended BY ITS OWN STOP FILE. Nothing was killed.
+# 0.7.0_AE_CloudOps~ZW, site Z box.
+
+## (i) the stop file, created from the task's OWN --stop-file argument
+path   : C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-1c69fa35a3\.runtime\harvest-cycle\STOP
+BEFORE : Test-Path False; its parent directory did not exist and needed mkdir
+CREATED: 2026-10-13T07:56:19Z    (deadline for (ii) was therefore 08:11:19Z)
+BASELINE THAT MATTERS: the log ALREADY carried 2 'STOP-FILE' lines, from the 05:46Z stop of the
+previous cycle. A presence test (grep -c > 0) would have read TRUE instantly and proved nothing;
+the test used was a COUNT ABOVE 2.
+
+## (ii) the cycle record, 2 min 44 s later -- well inside the 15-minute deadline
+The runner's own log:
+  2026-10-13T07:59:03Z SUMMARY: ...\cycles\bbg\20261013T055243Z.checkpoint.run_summary.json
+  2026-10-13T07:59:03Z CYCLE bbg 20261013T055243Z floor 2026-10-12 asked 242 new 0 held 0 failed 0 stopped stopped_by_operator completed false
+  2026-10-13T07:59:03Z STOP-FILE ...\wk-harvest-runner-pin-1c69fa35a3\.runtime\harvest-cycle\STOP present: no further cycle
+STOP-FILE lines: 2 before, 4 after.
+RECORD : state/cycles/bbg/20261013T055243Z.cycle.json
+  stopped   = stopped_by_operator
+  ended_at  = 2026-10-13T07:59:03Z   (started 2026-10-13T05:52:43Z)
+  asked 242, new 0, already_held 0, FAILED 0
+PID 27560 and its conhost exited with it. No key was sent, no process was ended by name or PID, and
+Stop-ScheduledTask was not used to end the cycle.
+
+**THE FAILED=0 MATTERS FOR bz-5, SO IT IS SAID HERE:** this record holds NO failure, so it does NOT
+serve row D1-W135-S2's close. Per the CTO half's note that falls to the first windowless cycle, and
+per his ADDENDUM 1 this is the FIRST of the two consecutive failure-free records that would turn
+bz-5 into a planted arm.
+
+## (iii) C-g -- the stop file deleted AFTER the record and BEFORE Start-ScheduledTask
+BEFORE : Test-Path True
+deleted: 2026-10-13T08:06:50Z
+AFTER  : Test-Path False
+Then step 4's Stop-ScheduledTask ran against an already-Ready task (LastTaskResult 0, a clean exit
+of its own), and only after that was the new task registered and started.
+NOTE: the installer derives --stop-file from -RepoRoot, so the NEW task's stop file sits under the
+995adcaeaa pin. The deleted file could not have ended the new runner; C-g was performed because the
+order requires it and because leaving a stale stop marker behind is its own hazard.

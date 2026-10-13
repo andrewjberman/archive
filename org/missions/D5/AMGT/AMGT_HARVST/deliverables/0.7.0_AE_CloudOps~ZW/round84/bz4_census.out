@@ -1,0 +1,22 @@
+# HVST-bz-4 step 4 and C-c -- the census reads NONE, over ALL processes of ANY exe
+# 0.7.0_AE_CloudOps~ZW, site Z box. 2026-10-13T08:06:5xZ.
+
+## step 4 -- Stop-ScheduledTask
+State before: Ready     (the runner had already ended itself on its stop file at 07:59:03Z)
+State after : Ready
+LastTaskResult: 0       (a clean exit, not a termination)
+
+## C-c -- the census, widened as this order requires: ALL processes, ANY exe
+$ Get-CimInstance Win32_Process | where CommandLine match 'cycle_runner|backfill_driver'
+  matching rows: 0        <- NONE, as C-c requires
+(bz-1's census filtered Name='python.exe'; this one does not, because the windowless runner is
+pythonw.exe and a python-only filter would have been blind to exactly the process this order creates.)
+
+## POSITIVE CONTROL -- the same all-exe sweep with a pattern that DOES match
+$ Get-CimInstance Win32_Process | where CommandLine match 'agent-poller|server\.py'
+  control rows: 47
+  total processes scanned: 568
+So the all-exe CommandLine sweep works and the 0 above is a real zero, not instrument silence.
+
+## the old runner
+PID 27560: GONE -- it exited on its own stop file, not by any act of this seat.

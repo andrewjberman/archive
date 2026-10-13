@@ -1,0 +1,30 @@
+# HVST-bz-4 step 5a -- the installer -Plan -Windowless, READ before anything was registered
+# 0.7.0_AE_CloudOps~ZW, site Z box. exit code 0. REGISTERED NOTHING.
+
+Precondition the installer enforces, checked first:
+  pythonw.exe present beside python.exe -> True
+  (without it the installer REFUSES: "REFUSED: -Windowless takes the pythonw.exe beside python.exe")
+
+$ powershell -NoProfile -ExecutionPolicy Bypass -File "<new>\lib\opal_data_harvest\install-cycle-schedule.ps1" \
+    -RepoRoot "<new>" -Publishers bbg,wsj,barrons \
+    -StateDir "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state" \
+    -RuntimeRoot "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/runtime" \
+    -Windowless -Plan
+
+TASK Opal Data Harvest - Continuous Cycle
+TRIGGER AtLogOn Opal_Bloomberg\Opal Bloomberg
+ACTION C:\Program Files\Python314\pythonw.exe -m lib.opal_data_harvest.cycle_runner --state-dir "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state" --runtime-root "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/runtime" --stop-file "C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-995adcaeaa\.runtime\harvest-cycle\STOP" --publishers bbg wsj barrons
+WORKDIR C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-995adcaeaa
+TIMELIMIT PT0S
+MULTIPLE IgnoreNew
+RESTART 3 PT5M
+REGISTERED NOTHING (plan)
+
+## GRADED on that text, clause by clause
+  the ACTION interpreter ends pythonw.exe                            YES
+  --state-dir is <state>, the c1be67f53c pin, UNCHANGED              YES
+  --runtime-root is <runtime>, the c1be67f53c pin, UNCHANGED         YES
+  WORKDIR is <new>, wk-harvest-runner-pin-995adcaeaa                 YES
+  publishers are bbg wsj barrons                                     YES
+  nothing registered by the plan run                                 YES
+=> read and accepted before the registration. The only things that move are the interpreter and the pin.
