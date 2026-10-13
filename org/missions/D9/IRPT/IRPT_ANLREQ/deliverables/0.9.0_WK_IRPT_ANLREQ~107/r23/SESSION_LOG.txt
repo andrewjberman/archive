@@ -1,0 +1,24 @@
+SESSION LOG -- 0.9.0_WK_IRPT_ANLREQ~107 on IRPT_ANLREQ.TO-AR-y-293 (AR-y-293, KEPT state)
+worktree: C:/dev/wk-irpt-anlreq-107  branch: wk-IRPT_ANLREQ-107  base: d2c68580a1
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-107; test -d org && test -d .tools -> TREE-OK.
+2. Read: the AR-y-278 read record (r23/C_SWAP_STEPS_1_2_READ.json, drained @de81ce19c1); security_resolution.py (STATES, classify_batch,
+   SecurityResolver.check, cache TTL 900 NOT_FOUND / 86400 FOUND); portfolio.py 380-560 (FOUND gate 464-471, TICKER_NOT_FOUND 477-478,
+   SHARES branch 510-527); uploads.py (CORRECTION_WORDS, _words_for, _with_correction_words, _freeze_template 572-600);
+   tests/test_correction_words.py; template_reader.finding (149).
+3. Baseline: intake tests at HEAD d2c68580a1 -> 370 passed, 1 skipped, rc=0.
+4. Edits (uncommitted at this point, held as r23/KEPT_STATE_SOURCE.patch): security_resolution.py (checker port, KEPT and
+   CHECK_FAILED / NOT_CHECKED states, cache handling, _check_unknown); portfolio.py (_kept_by_history, FOUND gate guard, the three
+   new findings, KEPT row fields); uploads.py (three words entries, SYMBOL_WORDS_CODES in _words_for); tests/test_correction_words.py
+   (count 30 -> 33, one line).
+5. Intake tests after the edits -> 369 passed, 1 skipped, 1 FAILED: test_correction_words_are_the_envelopes_words
+   (uploads.CORRECTION_WORDS == ops/status.py CORRECTION_WORDS; ops/status.py is outside the grant).
+   STOP: BLOCKING row IRPT_ANLREQ-D2-W107-S1 filed. Source not committed (branch kept green).
+6. Probes on fakes (scratch, not committed): probe_kept.py (checker batch, counts, freeze findings, determinism, mutant, cap spy),
+   probe_kept2.py (USD, weights, SHARES), probe_notchecked.py (not-checked and check-failed words),
+   probe_nochecker.py on HEAD (git archive d2c68580a1) and on the worktree: cmp identical, 7968 bytes.
+7. Surprise rows: investigation v1, IRPT_ANLREQ-D2-W107-S1..S5, committed 5d14e9acd0 (safe-commit, gates OK).
+8. Record and proof: r23/KEPT_STATE.json, r23/KEPT_STATE_SOURCE.patch, proof instance; committed 8d381b4440.
+9. Checks: ar21_checks.py y293-kept -> Y293-KEPT-FAIL rc=1 (before_arm; no test file; intake 369 < 370).
+   proof-of-spec-check (first run) -> one violation: session_log must be a string; fixed by this log file.
+10. No live call, no deploy, no push, no upload, no apply, no invoke. The yfinance checker module (AR-y-292) is not in this worktree.

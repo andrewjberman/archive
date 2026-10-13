@@ -572,6 +572,8 @@ def main(argv):
                                         else ("102", "LIST_SCOPED.json", "tests/test_list_scoped_firm.py", 10))
         if check == "y281-list" and (root / (D24 % "108" + rel)).is_file():
             worker = "108"  # the continuation worker's record (AMENDMENT 1); the first worker (102) stopped at the build gate
+        if check == "y281-list" and (root / (D24 % "112" + rel)).is_file():
+            worker = "112"  # AMENDMENT 3: the third worker, on a branch cut from the trunk (the ~108 branch could not merge: row-id collision)
         rec = load(root, D24 % worker + rel, problems)
         if rec:
             for member in ("read", "authorization_change", "tests", "before_arm", "claim", "not_read"):

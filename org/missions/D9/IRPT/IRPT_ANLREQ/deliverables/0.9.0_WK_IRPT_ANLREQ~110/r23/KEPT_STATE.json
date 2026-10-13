@@ -1,0 +1,93 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-293",
+  "cell": "AR-y-293",
+  "continues": "0.9.0_WK_IRPT_ANLREQ~107 (first worker stopped at AC1; amendment 1 applied its held patch; amendment 2 set issued_to to ~110)",
+  "worktree": "C:/dev/wk-irpt-anlreq-107",
+  "branch": "wk-IRPT_ANLREQ-107",
+  "merges": ["4abb3fe9e0 (amendment 1, merged as 5af9243b49)", "461a5fa3df (amendment 2, merged after 5af9243b49)"],
+  "read": {
+    "states_today": "security_resolution.py STATES = {FOUND, NOT_FOUND, AMBIGUOUS, UNAVAILABLE} (line 16 before the merge; the KEPT state is added by this cell and counted only when present, so the no-checker counts are unchanged). The provider's NOT_FOUND is the only state a symbol reaches for a missing identifier.",
+    "found_gate": "portfolio.py:487 (before this cell, the FOUND gate was the 'if (not isinstance(check, dict) or check.get(\"state\") != \"FOUND\" ...' test at the same place); now 'kept = _kept_by_history(check, symbol)' then 'if not kept and (...)'. TICKER_NOT_FOUND is emitted at portfolio.py:501.",
+    "how_notices_reach_the_page": "uploads.py:163 _words_for(item): a finding's code is looked up in SYMBOL_WORDS_CODES (uploads.py:160) first, so the finding's own description wins for the three codes; otherwise uploads.CORRECTION_WORDS (uploads.py:58) then template_reader.WORDS. The page shows the server's NOTICE words as written (order step 4; the portal renderer was NOT read, see not_read).",
+    "words_lock": "intake/tests/test_correction_words.py:44 test_correction_words_are_the_envelopes_words asserts uploads.CORRECTION_WORDS == ops/status.py CORRECTION_WORDS (ops/status.py:86). test_every_finding_code_the_reader_can_emit_has_words (line ~131) counts the finding codes in template_reader.py and portfolio.py; its count is 33 after this cell (was 30).",
+    "price_for_a_kept_holding": "A dollar holding needs no price: analysis_dollars is the client's amount. A weight holding needs the reference notional and the weight reconciliation, both already in the template. A SHARES holding needs an exact-date USD quote with a canonical key (portfolio.py SHARES branch, prices from uploads.resolve_prices, from MDPF_SECHIST's price path). A KEPT symbol has no canonical key, so the freeze refuses it as SHARES_PRICE_UNAVAILABLE. Per the order, SHARES is a BLOCKING-scoped gap (see shares_status), and the dollar and weight bases are built."
+  },
+  "state": {
+    "name": "KEPT (resolution state) with reason YFINANCE_HISTORY, price_source yfinance, provider_receipt None, checker {rows, last_close}, method KEPT_BY_HISTORY at the freeze",
+    "where": "security_resolution.py: KEPT_TTL=900 (line 85), _valid_kept_checker (88), _checker_verdict (95), SecurityResolver.__init__ takes checker=None (204; a non-callable checker raises CHECKER_PORT_INVALID, 211), check(): cached-KEPT branch (254), cached-NOT_FOUND branch (264), the unknown step (303), _check_unknown (315).",
+    "verdicts": "KEPT (verified: rows > 0 and a finite positive last close) -> KEPT state, cached for min(900 s, nothing longer than the NOT_FOUND TTL). NOT_KEPT -> the NOT_FOUND result, unchanged. CHECK_FAILED with reason EXCEPTION, TIMEOUT, PUSHBACK or ERROR_FRAME -> UNAVAILABLE reason YFINANCE_CHECK_FAILED with check_failed=reason, never NOT_FOUND. NOT_CHECKED (beyond the cap) -> UNAVAILABLE reason YFINANCE_NOT_CHECKED with not_checked=UPLOAD_LIMIT. A missing, malformed or unproven entry reads CHECK_FAILED ERROR_FRAME. A raised checker reads CHECK_FAILED EXCEPTION for every unknown symbol.",
+    "cache": "A fresh provider NOT_FOUND is cached 900 s, as before. A cached NOT_FOUND is still served as a provider answer but does NOT end the lookup when a checker is present: the unknown step asks the checker about it, so it cannot hide a later KEPT (test_a_cached_not_found_does_not_hide_a_later_kept). A cached KEPT is served only when the resolver has a checker (test_a_cached_kept_is_never_served_without_the_checker). A KEPT is cached with expires_at = now + KEPT_TTL (900), so never longer than the NOT_FOUND it replaces (test_a_kept_is_cached_no_longer_than_the_not_found_ttl_and_served_inside_it).",
+    "batch": "ONE checker.check call per resolver.check, with the distinct unknown symbols, so the cap of 10 is per upload (the cap itself is YfinanceChecker's, cap=10, pace 1.0 s, from yfinance_check.py of cell AR-y-292)."
+  },
+  "freeze_branch": {
+    "where": "portfolio.py: _kept_by_history (376); the CHECK_FAILED and NOT_CHECKED words (502-510); the KEPT row (565-573); the FOUND gate with 'not kept and' (487).",
+    "kept_holding": "passes the gate; security_id is the client's own symbol as given (corrected by the user's correction if one applies); provider_receipt_sha256 None; method KEPT_BY_HISTORY; price_source yfinance; history {rows, last_close}; one NOTICE finding TICKER_KEPT_BY_HISTORY with actions [REVIEW] and no ERROR, so a NORMALIZED result is possible.",
+    "everything_else": "FOUND, NOT_FOUND, AMBIGUOUS, UNAVAILABLE holdings take the same path as before; the existing portfolio and template tests pass unedited."
+  },
+  "words": {
+    "three_sentences_a_person_sees": [
+      "TIMXX is not in our data provider but has price history, so it is used as it is.",
+      "XYZQ could not be checked just now (the price history service did not answer in time); name a proxy, or upload again in a few minutes.",
+      "ZZ11 was not checked in this upload (the limit is 10 unknown tickers per upload); name a proxy."
+    ],
+    "codes": {
+      "TICKER_KEPT_BY_HISTORY": "This ticker is not in our data provider but has price history, so it is used as it is.",
+      "TICKER_CHECK_FAILED": "We could not check this ticker with our price history service just now. Name a similar ticker to stand in for it (a proxy), or submit the request again in a few minutes.",
+      "TICKER_NOT_CHECKED": "This ticker was not checked in this upload, because only a limited number of unknown tickers are checked at once. Name a similar ticker to stand in for it (a proxy), or submit the request again."
+    },
+    "reason_words": {
+      "EXCEPTION": "the price history service returned an error",
+      "TIMEOUT": "the price history service did not answer in time",
+      "PUSHBACK": "the price history service refused the request for now",
+      "ERROR_FRAME": "the price history service returned no usable answer"
+    },
+    "where_the_table_words_are_used": "The three sentences above are the findings' own descriptions, filled with the ticker and the reason (portfolio.py). The table entries in uploads.py:58 and ops/status.py:86 are the fallback and the words-table lock copy, byte-equal (AST proof below)."
+  },
+  "tests": {
+    "file": "infra/aws/lambda/investor-reporting/intake/tests/test_kept_holding.py",
+    "count": 19,
+    "result": "19 passed in the worktree (python -m pytest tests/test_kept_holding.py)",
+    "intake_folder": "429 passed, 1 skipped, 28 subtests passed, rc=0 on the merged tree with these edits (python -m pytest tests -q from intake)",
+    "floor": "410 passed, 1 skipped on the merged HEAD before these edits (test file absent); 410 + 19 = 429",
+    "lock_edit": "intake/tests/test_correction_words.py: the single line 'len(codes) == 30' becomes 'len(codes) == 33' with the comment. No other edit. The lock test function itself is unchanged and now passes because ops/status.py carries the same three entries.",
+    "covers": "dollar KEPT passes the freeze and replays through verify_frozen_portfolio; weights KEPT passes; shares KEPT refuses as SHARES_PRICE_UNAVAILABLE; NOTICE words exact; no TICKER_NOT_FOUND for KEPT; NOT_KEPT equals the no-checker result and freezes as TICKER_NOT_FOUND; CHECK_FAILED stays unknown with words; raised checker -> EXCEPTION for all; malformed -> ERROR_FRAME; 12 unknown symbols with the real YfinanceChecker: history called for the first 10 only, 9 pacing sleeps of 1.0 s, cap 10 and pace 1.0 pinned; no checker: counts without KEPT and no checker keys; cache cases (cached KEPT not served without checker, cached NOT_FOUND does not hide KEPT, KEPT TTL 900); client ticker kept and FOUND path unchanged; the three words in both tables. All on fakes; no network; no yfinance import."
+  },
+  "before_arm": {
+    "method": "git archive HEAD (the merged HEAD before these edits, with docs/contracts and lib) into .scratch/head_arm, plus a copy of test_kept_holding.py, then python -m pytest",
+    "failed": 19,
+    "passed_in_file": 0,
+    "of": 19,
+    "detail": "all 19 fail at HEAD. Several fail because the port kwarg (checker=) and the KEPT state do not exist there (TypeError or missing state), and the freeze tests fail on the missing KEPT branch. The no-checker test (test_no_checker_is_today_resolver_byte_for_byte) fails at HEAD only because make_resolver passes checker=None into a constructor that has no such kwarg; the behaviour it asserts was not separately measured at HEAD. The rest of the intake suite at HEAD: 410 passed, 1 skipped, 0 failed (the test_correction_words lock passes at HEAD, unedited there).",
+    "mutant": "scratch copy with portfolio.py 'kept = _kept_by_history(check, symbol)' replaced by 'kept = False': 7 failed, 12 passed in test_kept_holding.py (the gate-off mutant FIRES)."
+  },
+  "shares_status": {
+    "status": "NOT COVERED by this cell. A KEPT SHARES holding refuses as SHARES_PRICE_UNAVAILABLE (asserted by test_a_kept_shares_holding_is_still_refused_as_shares_price_unavailable). Reason: a SHARES row needs an exact-date USD quote with a canonical key, and a KEPT symbol has neither.",
+    "dollar_and_weight": "covered (tests above).",
+    "later_cell": "pricing a KEPT shares holding from the checker's dated closes is a later cell and a CTO question (issuer, per amendment 1). Surprise row IRPT_ANLREQ-D2-W107-S3 (filed by the first worker) stays the record of the gap."
+  },
+  "claim": "With a checker injected, a symbol the provider answers NOT_FOUND and the checker KEEPS (rows > 0, finite positive last close) passes the freeze for dollar and weight bases, carries the client's ticker, has no provider receipt, and reads a NOTICE in words. CHECK_FAILED and NOT_CHECKED stay unknown with their words and never read as not-found. Without a checker, the resolver and the freeze answer as before. Nothing is released, deployed, pushed, uploaded, applied, invoked or called live; every test runs on fakes.",
+  "release_needs": [
+    "intake (the investor-reporting Lambda) leg: security_resolution.py, portfolio.py, uploads.py. The resolver's checker port is default absent, so this leg changes nothing until the resident wires a checker.",
+    "irpt-status leg for the words: ops/status.py CORRECTION_WORDS gains the three entries (words-only, byte-equal to uploads.py, proved by the AST comparison). Amendment 1 names this leg.",
+    "resident leg: the resident (ycharts/generate) must pass checker=YfinanceChecker() to SecurityResolver. Not in this cell's grant; not done.",
+    "Lambda dependency decision for yfinance (cell AR-y-292's measurement recorded yfinance is not in the repo-visible dependency sets): a release of the default checker needs that decision; this cell does not add it.",
+    "registry row and price landing for a KEPT symbol are MDPF_SECCLASS's and MDPF_SECHIST's (dell1), not this cell's."
+  ],
+  "ast_proof": {
+    "file": "infra/aws/lambda/investor-reporting/ops/status.py",
+    "before": "the HEAD copy saved to .scratch/status_before.py before the insert",
+    "output_verbatim": "TOP-LEVEL STATEMENTS before/now: 38 38 | CHANGED STATEMENT INDEXES: [18] | changed node type: Assign targets: ['CORRECTION_WORDS'] | KEYS before: 28  now: 31 | ADDED KEYS: ['TICKER_CHECK_FAILED', 'TICKER_KEPT_BY_HISTORY', 'TICKER_NOT_CHECKED'] | REMOVED KEYS: [] | DUPLICATE KEYS now: 0 | EXISTING KEYS WITH A CHANGED VALUE: [] | BYTE-EQUAL to uploads.py: TICKER_CHECK_FAILED True 169 | BYTE-EQUAL to uploads.py: TICKER_KEPT_BY_HISTORY True 86 | BYTE-EQUAL to uploads.py: TICKER_NOT_CHECKED True 194 | uploads.CORRECTION_WORDS count: 31  status.CORRECTION_WORDS count: 31 | LOCK keys-equal: True  values-equal: True",
+    "script": "C:/dev/wk-irpt-anlreq-107/.scratch/ast_proof_status.py (run at its own path)",
+    "only_the_dict_literal_changed": true
+  },
+  "not_read": [
+    "the portal renderer for NOTICE words and whether it renders the action token REVIEW (the order says the portal shows server words as written; not read)",
+    "the downstream consumers of a frozen row with provider_receipt_sha256 None (the publish recipe and the YCharts upload echo); verify_frozen_portfolio replay passes, the recipe was not read",
+    "the resident's wiring of the checker (not in grant)",
+    "the live PROD and DEV bundles and Andrew's screenshots",
+    "the template projection's name: none is carried (surprise IRPT_ANLREQ-D2-W110-S1)"
+  ],
+  "surprises_filed": ["IRPT_ANLREQ-D2-W110-S1", "IRPT_ANLREQ-D2-W110-S2"],
+  "shares_surprise_existing": "IRPT_ANLREQ-D2-W107-S3",
+  "no_live_call": "no live call, no push, no deploy, no upload, no apply, no invoke; no GIT_COMMIT_AUTHOR_OVERRIDE; no stash (blocked by the shared-worktree rule)."
+}
