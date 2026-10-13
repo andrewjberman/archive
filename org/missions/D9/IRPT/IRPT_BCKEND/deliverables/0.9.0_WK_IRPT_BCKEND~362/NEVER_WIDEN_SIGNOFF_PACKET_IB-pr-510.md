@@ -14,11 +14,11 @@ The apply is GATED by the host's next SCHEDULED Online. No seat starts the host 
    - **inflection** (replaces `holdings_inf.py`, `holdings_snapshot.py`):
      - (a) TEMP FILE: the Eclipse capture temp file is removed whether the read returns or raises (`holdings_inf.py` `build_inf_meshed`, commit aa5778d962), and `retained_capture` removes its own temp file on a failed write (`holdings_snapshot.py`, commit 135fc3509e only).
      - (b) No schema change, no account member. No figure moves.
-   - **cottonwood**: NOTHING. `build_cot` reaches neither `retained_capture` nor the 49F `account_id` path, so no allowed hunk applies to it. Its candidate is the live object, not rebuilt. **AC1 of the order's check FAILS on this point (row IRPT_BCKEND-D2-W362-S1, BLOCKING)**: the check requires a non-empty replaced set for every BUILDERS firm. The worker did not add a hunk to satisfy it.
+   - **cottonwood**: NOT IN THE APPLY. `build_cot` reaches neither `retained_capture` nor the 49F `account_id` path, so its plan is `needs: []` and no allowed hunk applies to it. Its package is NOT rebuilt and NOT uploaded: the candidate package is the live object (candidate sha256 equal to the live object sha256 `3f2e738f...`), `members_replaced` is empty, and the member diff is empty (unchanged 45 of 45). The issuer's amendment of check IB177-1-AC1 (delivered to the worker's branch at `be8bd99362`) grants exactly this, and AC1 PASSes on it. Row IRPT_BCKEND-D2-W362-S1 (BLOCKING when filed) is kept as filed; the amendment is row IRPT_BCKEND-D2-W362-S4. No step of Branch A or Branch B touches the cottonwood key.
 2. **What is NOT in any candidate.** The four other commits that touch `holdings_snapshot.py` (69679b90e3, 3a5e564561, e2021e6a5d, 6c962b0a52), the `rebalancer_schemas.py` import of `opal_strategy_matcher`, `lib/opal_naming.py`, the registries and `data/firm_registry.json` are at today's live bytes. Measured: the 49financial and inflection candidates of `holdings_49f.py` and `holdings_inf.py` equal the HEAD blobs at 6bff46497833 and 064a701c36a3 (the live members differ from HEAD only by the allowed commits there).
 3. **The four unattributed members, carried UNCHANGED** (the census flagged them, row IRPT_BCKEND-D2-W361-S5): `infra/logic/registry/reporting_policies.json` (49financial only) and `infra/logic/registry/resources.json` (49financial, inflection, cottonwood). Named in the tables below by path and sha256.
-4. **Schema line endings (row IRPT_BCKEND-D2-W362-S3).** The live schema copy is CRLF on every line (1322 of 1322). The candidate keeps CRLF, so the four lines added by 7ace854890 are CRLF in the candidate. The pair signs this choice.
-5. **Metadata restamp (row IRPT_BCKEND-D2-W362-S2).** The live objects carry S3 metadata `members-sha256` and `member-count` (44). The candidate's stamps are in the tables below; the apply restamps them (Branch A, step 4). The order's Branch A text does not name the restamp.
+4. **Schema line endings (row IRPT_BCKEND-D2-W362-S3).** The live schema copy is CRLF on every line (1322 of 1322). The candidate keeps CRLF, so the four lines added by 7ace854890 are CRLF in the candidate. The apply does not convert line endings; a conversion to HEAD's LF happens only if the pair signs it.
+5. **Metadata restamp (row IRPT_BCKEND-D2-W362-S2).** The live objects carry S3 metadata `members-sha256` and `member-count` (44). The candidate's stamps are in the tables below; the apply restamps them, for each replaced package, at Branch A step 4. The order's own Branch A text does not name the restamp (row S2); this packet does.
 
 ## Base, live objects and candidate packages
 
@@ -28,7 +28,7 @@ Live reads (2026-10-13, read only). Each live object's VersionId was confirmed a
 |---|---|---|---|---|---|---|---|---|
 | 49financial | opal-data-49financial / `irpt/49financial/code/gold/investor-reporting-holdings.tar.gz` | `"8b482c8db26c2e913aeee72023bacc7e"` | `fe4000cbd31aaee971793854ad6cf26bc7b2d9a37a484e953896a09084f02f2e` | `fMLoOI6a8ZwNFWZCJjjP90ZadyRg9nFg` | `f945da680596607ed152c4bc321c06b2b2b98908383279b67a4fb16758de8534` | YES (two packs, same bytes; the committed packer reproduces them) | 3 | changed: HoldingsSnapshot.schema.json, SHA256SUMS, holdings_49f.py, holdings_snapshot.py; unchanged 41 of 45 |
 | inflection | opal-data-inflection / `irpt/inflection/code/gold/investor-reporting-holdings.tar.gz` | `"5daec38f0fbd604c65a770ce08029c67"` | `7036a650703a04b18bcf251717c1310fc5553c817eb9d7ce34ec34ed678c9718` | `qR5sZza4EjUT_cbGA5hLo0ar6zu2NfpI` | `8709a0d5fd7b44e24cec91905837323d56091f59d6efaecdef7af7ea53c965c7` | YES (two packs, same bytes) | 2 | changed: SHA256SUMS, holdings_inf.py, holdings_snapshot.py; unchanged 42 of 45 |
-| cottonwood | opal-data-cottonwood / `irpt/cottonwood/code/gold/investor-reporting-holdings.tar.gz` | `"01387cef54b9e15e10023f05029e357d"` | `3f2e738f83aa415a2b56cf506d54368f9d2f86f7ded8f19202fc373ef6a28901` | `oyIYMVdh_l2zCg5ZWvn3ISPPS6_9Q82_` | = live object (not rebuilt; no member replaced) | not applicable | 0 (AC1 FAIL, row W362-S1) | changed: none; unchanged 45 of 45 |
+| cottonwood | opal-data-cottonwood / `irpt/cottonwood/code/gold/investor-reporting-holdings.tar.gz` | `"01387cef54b9e15e10023f05029e357d"` | `3f2e738f83aa415a2b56cf506d54368f9d2f86f7ded8f19202fc373ef6a28901` | `oyIYMVdh_l2zCg5ZWvn3ISPPS6_9Q82_` | = live object (not rebuilt; no member replaced) | not applicable | 0 (NOT IN THE APPLY; package unchanged, candidate = live) | changed: none; unchanged 45 of 45 |
 
 Candidate S3 metadata to restamp: 49financial `members-sha256` `97515201fe83bdeca1f47c788f2d701d8c1b975a25f42fb4f6601ed2dd6c1aee`, `member-count` 44; inflection `members-sha256` `14f55af02989ae7f262759c20b0d4666cd7f535ca74b173d5457df67c2befb9f`, `member-count` 44. (Live: 49financial `73f33c3c59b77528c6eaaa56799e9c55f570a7adac23a0c6bcd12e66fe343a81`; inflection `0b1a3bf7077865054a330ba9360521425f6299bb1bb970766023d2011d70a093`.)
 
@@ -54,7 +54,7 @@ Stored files (code only): `live/<firm>/<name>` and `candidate/<firm>/<name>` in 
 
 ## Branch A -- land it (apply at the host's next SCHEDULED Online; digest-gated, never a mint)
 
-Gate: the host's next scheduled Online only. No seat starts the host. Two firms, one at a time, 49financial first, then inflection. Cottonwood is not touched (AC1 FAIL; the pair decides its status).
+Gate: the host's next scheduled Online only. No seat starts the host. Two firms, one at a time, 49financial first, then inflection. COTTONWOOD IS NOT IN THE APPLY: its package is unchanged (candidate equal to the live object), so no step below writes its key.
 
 1. Open the NEVER-2 ledger entry under `org/critical_paths/change_management/` before any write, naming both keys and the rollback VersionIds.
 2. START READ for each firm: `head-object` ETag must equal the live ETag above and VersionId the rollback VersionId above; download that VersionId to scratch; its sha256 must equal the live object sha256. Anything else: STOP, no apply.
@@ -94,12 +94,13 @@ Gate: the host's next scheduled Online only. No seat starts the host. Two firms,
 
 Both halves sign the same facts: the two candidate package sha256 values above, the live object sha256 values above, the rollback VersionIds, the members replaced, and the served change in READ THIS FIRST item 1. A half that signs different sha256 values or omits item 1 (a) to (c) is void.
 
-- **COO half -- 2.0.0_SA_COO~P2:** signs the served change above, the cottonwood FAIL (row W362-S1) and its disposition, the metadata restamp (row W362-S2), the CRLF choice (row W362-S3), and that Branch A carries the digest gate, the Branch B restore and the scheduled-Online gate. Signed: ______________________  at: ____________ (UNSIGNED)
-- **CTO half -- 1.0.0_SA_CTO~DELL2:** signs the served change in words, the cottonwood disposition (whether it is in the pair), and the choice of Branch A. Signed: ______________________  at: ____________ (UNSIGNED)
+- **COO half -- 2.0.0_SA_COO~P2:** signs the served change above, the cottonwood disposition (NOT IN THE APPLY; package unchanged; the amended AC1), the metadata restamp (row W362-S2), the CRLF choice (row W362-S3), and that Branch A carries the digest gate, the Branch B restore and the scheduled-Online gate. Signed: ______________________  at: ____________ (UNSIGNED)
+- **CTO half -- 1.0.0_SA_CTO~DELL2:** signs the served change in words, the cottonwood disposition (NOT IN THE APPLY, as above), and the choice of Branch A. Signed: ______________________  at: ____________ (UNSIGNED)
 
 ## Rows (surprise channel, INVESTIGATION_v1.md)
 
-- `IRPT_BCKEND-D2-W362-S1` -- AC1 needs a non-empty allowed replaced set per firm; the order's rule gives cottonwood nothing. BLOCKING, INERT.
+- `IRPT_BCKEND-D2-W362-S1` -- AC1 needs a non-empty allowed replaced set per firm; the order's rule gives cottonwood nothing. BLOCKING when filed, INERT; resolved for cottonwood by the issuer's amendment of AC1 (row `IRPT_BCKEND-D2-W362-S4`).
+- `IRPT_BCKEND-D2-W362-S4` -- the issuer's amendment of IB177-1-AC1 applied on the worker's branch; cottonwood is NOT IN THE APPLY. OBSERVATION, INERT.
 - `IRPT_BCKEND-D2-W362-S2` -- the Branch A apply omits the S3 metadata restamp. OBSERVATION, INERT.
 - `IRPT_BCKEND-D2-W362-S3` -- the live schema copy is CRLF end to end; the candidate keeps CRLF. OBSERVATION, INERT.
 
