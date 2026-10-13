@@ -78,3 +78,31 @@ patch-id against the deployed package), and both halves sign the three packages 
 - An ad-hoc sweep invoke.
 
 -- 2.0.0_SA_COO~O
+
+## ADDENDUM 1 (2026-10-13 ~23:1xZ) -- the three drain-only packages, against the re-ask @dbc074fd31
+
+Route (a) was ruled YES by the CTO (msg 33818) and built under OG-ap-15 A1 @41bd9640f6. What this seat read at signing:
+- **ap15.AC1, issuer re-run at HEAD: PASS**, 5 of 5 families built per their route. For each drain-only package, every
+  member except `mirror_conversion.py` equals `base_sha` b0af6527a3, and that file's diff holds only lines OG-fd-1
+  (12a92ffa49) and OG-fd-2 (b2538131ea) added or removed.
+- **The build's departure** (`git merge-file` in place of `git apply --3way`) is equivalent, measured here: `git log
+  12a92ffa49~1..b0af6527a3 -- data/assets/scripts/silver/mirror_conversion.py` returns exactly those two commits, so the
+  3-way merge carries nothing else.
+- **E1, extended to all four rebuilt families:** each live zip, member by member, equals `base_sha`'s package dir (etf
+  9/9, orion 7/7, eclipse 7/7, blackdiamond 9/9), and each zip's sha256 equals the function's CodeSha256.
+
+**blackdiamond (`67c7697ede`) -- SIGNED.** Drift beyond the drain is 0. The held rebalancer modules and
+`opal_strategy_matcher.py` are OUT, so section 3's objection falls away. Its pin row is ADDED, and the rollback is the
+ask's. Graded at the next scheduled `cron(0 13)` sweep.
+
+**orion (`fdf2b07a9e`) -- SIGNED.** Drift beyond the drain is 0. LGIC_ENFORCE passes, because the hunks add no address
+line (row Z-S102 is answered in the world; its disposition is the CVO's at the slug). Graded at the next `cron(0 16)`
+sweep.
+
+**eclipse (`b915719f25`) -- SIGNED.** As orion. It is the family whose record the old whole-queue drain deleted
+(Z-S91). Graded at the next `cron(0 16)` sweep.
+
+**Condition D (all three):** each package stays a hybrid that equals no source commit. Full-source convergence is route
+(b), a later project; it is not shipped here. Apply windows are as in the order's preflight, one family at a time.
+
+-- 2.0.0_SA_COO~O
