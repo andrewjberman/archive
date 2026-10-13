@@ -1,0 +1,42 @@
+{
+  "cell": "AR-y-194",
+  "rule_commit": "920cdf69ca (template_reader.py: the widened header rule and the value backstop; READER_VERSION irpt-template-reader.r19.1; READER_PINS digest 2008162b98d7b6d642fe62dc5e5be55eba912cf0372423b3fbdaa1e51a404b87). template_reader.py blob at that commit: 03d76f888b5619f364bcf4a9b0b2285c7ddc26d2.",
+  "negative_controls_commit": "8170278635 (ACCOUNT_HEADER_POPULATION.json committed ALONE, before the rule changed). Blob bbb7d77abc86bf93ee7237ff66590758ff144d58; file sha256 cde29f2e2b9eb640e90fa7d8139849282f87c2cb8d27ddfa264876eeffe2d7f9. The ten new word negative controls and the six r18 controls were named in that commit.",
+  "rule": "A row-1 header cell in column C or beyond IS an account header when its words (case-folded, split on whitespace, hyphen and slash, each stripped of punctuation) are: (a) either 'no. of' then a NON-plural account word, or the two-word modifier 'roth ira', or one modifier (custodian, client, sub, brokerage, ira, joint, trust); then (b) an account word (account, accounts, acct, accts, acc, accnt, subaccount, subaccounts); then nothing, or identifier words only (number, numb, num, nbr, no, id, ref, reference, code, key, identifier, seq, sequence, numbers, nos, seqno, serial). A whole-cell exclusion list (r17 attribute forms; the COUNT exclusion no. of + plural account word) is applied first.",
+  "backstop": "AR-y-194 VALUE BACKSTOP. A non-matched header that carries an account ROOT word (acc, acct, accnt, subacc), or is the count header 'No. of Accounts' (no. of + plural), is read as an account column when its column holds TWO OR MORE DISTINCT identifier-like values in the rows below it. The finding keeps the code ACCOUNT_COLUMN_SEVERAL_VALUES and its words (ACCOUNT_VALUE_BACKSTOP) say what is seen and ask; they never say split.",
+  "identifier_like_definition": "A value is identifier-like when (1) it is one token of 4 to 40 characters drawn from ASCII letters, digits, hyphen and underscore (no space, no other punctuation); (2) it is not a date (ISO YYYY-MM-DD, compact YYYYMMDD, day-month-year with a three-letter or full month name, year-month name day); and (3) it holds a letter AND a digit together, or it is a run of 8 or more digits. Excluded by the definition: a name (no digit), a status word (no digit), a money value (a dollar sign, a comma or a point), a date, and a run of fewer than 8 digits (a quantity or a count).",
+  "count_header_rule": "'No. of Accounts' stays excluded from the header rule (AR-y-181). The backstop reads it as an account column only when its values are identifier-like; counts (one small integer per row) are not identifier-like and it is not turned back. Values that are neither counts nor identifiers (names) are also not turned back, so the r18 test test_no_of_accounts_is_a_count_not_an_account_column (names ACCT-ONE, ACCT-TWO) holds unchanged.",
+  "where_in_code": "infra/aws/lambda/investor-reporting/intake/template_reader.py: ACCOUNT_WORDS, ACCOUNT_MODIFIERS, ACCOUNT_TWO_WORD_MODIFIERS, ACCOUNT_TAIL_WORDS, ACCOUNT_ROOTS, IDENTIFIER_TOKEN, DATE_FORMATS, _is_account_header, _has_account_root, _is_count_header, _is_date, _identifier_like, _several_accounts, WORDS['ACCOUNT_VALUE_BACKSTOP'].",
+  "widened_additions": {
+    "trust (modifier)": "Trust Account names the account a trust holds, the same as Brokerage Account.",
+    "roth ira (two-word modifier)": "Roth IRA Account names the account; ira alone already matches IRA Account, so the pair is the same account with its wrapper word in front.",
+    "numbers, nos, seqno, serial (identifier tails)": "Account Numbers, Account Nos, Account Seqno, Account Serial number the account within the file, as number and no already do.",
+    "accnt (account word)": "the spelling of acct; Accnt names an account.",
+    "subaccounts (account word)": "the plural of subaccount; the same account as Subaccount. r18 declined it (no census form carried it); the r19 population carries it."
+  },
+  "census": {
+    "grid": "The r18 grid (prefixes x account spellings x tail words), extended with the prefix roth ira: 11 prefixes x 10 spellings x 22 tails = 2420 headers; 2420 distinct. Scratch script .scratch/census_r19.py (uncommitted), run with python -I against the committed file before the rule (HEAD 8170278635) and after (920cdf69ca).",
+    "denominator": 2420,
+    "matched_before_rule": 658,
+    "matched_after_rule": 1422,
+    "newly_matched": 764,
+    "dropped": 0,
+    "per_addition_headers_containing_the_word_newly_matched": {
+      "roth ira": 144,
+      "trust": 144,
+      "numbers": 79,
+      "nos": 79,
+      "seqno": 79,
+      "serial": 79,
+      "accnt": 180,
+      "subaccounts": 180
+    },
+    "per_addition_note": "Counts overlap: one header can carry several new words (for example 'accnt numbers' counts under accnt and under numbers), so the per-addition counts do not sum to 764. 658 matches before the rule reproduce the round-18 measurement exactly (658 of 2200 on the r18 grid; the r19 grid adds the roth ira prefix and matches none more before the rule)."
+  },
+  "population": "constructed and synthetic (no real-use account header is in the repository, as the r13 to r18 records state). ACCOUNT_HEADER_POPULATION.json in this folder: 36 identifier forms (the r18 forms plus the eight S31 forms), 2 count forms, 10 attribute forms, 7 non-account forms, 16 word negative controls (the six r18 controls plus ten new). The y194-rule check reads identifier, attribute, non-account and negative-control forms: 36 identifier matched; 10 + 7 + 16 unmatched.",
+  "backstop_tests": "intake/tests/test_account_value_backstop.py: the five named tests plus test_an_account_root_header_with_names_is_not_read_as_an_account_column, test_an_account_root_header_with_money_values_is_not_read_as_an_account_column and test_identifier_like_definition_holds_on_its_examples. Eight widened-form tests were added to tests/test_template_account_totals.py (trust, roth ira, numbers, nos, seqno, serial, accnt, subaccounts).",
+  "existing_test_expectations_changed": "none. The only edit to an existing expectation is the READER_PINS digest (test_stored_input_contract.py reads the pin; the test body is unchanged).",
+  "suite": "intake folder: 331 passed, 1 skipped at the base (HEAD 129737fde9); after the rule 347 passed, 0 failed (the 16 new tests; the one skip is unchanged).",
+  "residual_for_judgment": "A root header (acc, acct, accnt, subacc) that is not an account header by the header rule and holds per-row identifier-like values that are NOT account numbers (for example a lot identifier under 'Acc Lot ID') is read as several accounts by the backstop, as the CTO's value rule specifies. Not in the population (constructed); flagged for the L9 judgment AR194-y-AC4J.",
+  "identifier_like_for_money": "A money column under a root header is not identifier-like while it holds a dollar sign, a comma or a point; a plain integer balance of fewer than 8 digits is not identifier-like; an integer balance of 8 or more digits would be (the test test_an_account_root_header_with_money_values_is_not_read_as_an_account_column covers the formatted case only)."
+}
