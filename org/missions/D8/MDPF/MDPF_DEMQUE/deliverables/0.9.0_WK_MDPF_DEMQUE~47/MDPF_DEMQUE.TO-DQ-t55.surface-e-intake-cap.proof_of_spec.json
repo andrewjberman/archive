@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t55",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t55.surface-e-intake-cap.md",
+    "group": "OTHER",
+    "vintage_commit": "1cd9c6f1ab"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "1cd9c6f1ab",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t55.surface-e-intake-cap.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~47",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/surface_e_intake.py",
+      "kind": "script",
+      "commit_or_etag": "b079e76bd6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: READ-ONLY, no deploy; reads bbg_allowance.json only, no vendor call, writes nothing",
+      "artifact_covered_by": [
+        "DQ9-t55-AC1",
+        "DQ9-t55-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_surface_e_cap.py",
+      "kind": "test",
+      "commit_or_etag": "b079e76bd6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest on a stub allowance in memory and tmp_path, no network; 3 of 3 named tests PASSED",
+      "artifact_covered_by": [
+        "DQ9-t55-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t55-AC1",
+      "criterion_verbatim": "the three named tests (test_the_cap_is_ten_percent_of_the_days_history_allowance_and_a_request_above_it_is_refused_naming_the_cap, test_a_request_at_or_below_the_cap_is_accepted_and_the_remaining_reserve_is_printed, test_a_refused_request_is_never_split_and_writes_nothing).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t55_tests.py",
+      "output_evidence": "3 passed in 0.17s, each named test PASSED; CAP-OK, rc=0 (run from the worktree root under timeout 120).",
+      "denominator": "3 of 3 required tests passed by name",
+      "status": "PASS",
+      "expect": "CAP-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t55-AC2",
+      "criterion_verbatim": "against the real allowance file: the cap is 10 percent of the measured history ceiling (585 of 5,858), the cost of a one-security one-year (252 trading days) two-field request is 504 cells and is ACCEPTed under it, 100 cells is accepted, cap + 1 cells is refused naming the cap.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t55_real.py",
+      "output_evidence": "check 100 cells: ACCEPT | check 586 cells: REFUSE; CAP-REAL-OK cap 585 cells of a 5858-cell day; a one-security one-year two-field request (504 cells) is ACCEPT; rc=0. The --cost line: {\"cap\": 585, \"cells\": 504, \"claim\": \"measured\", \"day\": \"2026-10-14\", \"history_allowance\": 5858, \"verdict\": \"ACCEPT\", \"remaining_reserve\": 81}.",
+      "denominator": "3 of 3 required claims (cap = 585 of the measured 5858; 504-cell ACCEPT; 100-cell ACCEPT and 586-cell REFUSE naming the cap)",
+      "status": "PASS",
+      "expect": "CAP-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "surface_e_intake.py --cost --securities 1 --trading-days 252 --fields 2 --day 2026-10-14 run twice, outputs compared with cmp",
+      "observed": "byte-identical single JSON line in both runs (cells 504, cap 585, verdict ACCEPT)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the gateway enforcement at NFRA_OPLGTW, any vendor call, any write to S3, any ledger, queue or pacer state, any alarm or notification",
+      "reason": "order BOUNDS: the gateway side is not in this cell; the cell is READ-ONLY"
+    },
+    {
+      "item": "the full demque folder count of 190 passed is a folder-wide run (python -m pytest data/mdpf/scripts/demque -q), not a criterion",
+      "reason": "order REPORT step: report the whole folder once; 190 passed, 0 failed, rc=0 under timeout 120"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W47-S1: the CLI key set the order names is {day, history_allowance, cap, cells, verdict, message}; the built line also carries claim and remaining_reserve (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~47/MDPF_DEMQUE.TO-DQ-t55.surface-e-intake-cap.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit of surface_e_intake.py and test_demque_surface_e_cap.py (commit b079e76bd6), then of the investigation row, this instance and the order flip",
+      "result": "commit-gate, naming-gate, to-pipeline-gate and surprise-row-gate passed on the code commit; msg-verify MATCH"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest data/mdpf/scripts/demque -q -p no:cacheprovider",
+      "result": "190 passed, 0 failed, rc=0 in 15.73s"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> DQ9-t55-AC1,DQ9-t55-AC2",
+      "result": "VALID rc=0, violations=0, acceptance rows=2, checker-vintage 732412e179 (structural=jsonschema)"
+    }
+  ]
+}
