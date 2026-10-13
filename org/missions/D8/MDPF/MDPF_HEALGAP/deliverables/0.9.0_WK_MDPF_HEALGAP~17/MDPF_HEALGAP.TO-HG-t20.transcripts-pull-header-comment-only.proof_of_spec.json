@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-t20",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t20.transcripts-pull-header-comment-only.md",
+    "group": "OTHER",
+    "vintage_commit": "fe216d8d06"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "fe216d8d06",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t20.transcripts-pull-header-comment-only.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_HEALGAP~17",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/transcripts/pull.tf",
+      "kind": "terraform",
+      "commit_or_etag": "7fa4a301512bff23a89cbde117aa7c6176e12dda",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: comment-only edit to lines 1-3; no terraform init, plan or apply run by this worker; the issuer's plan at the drain is the no-change proof. commit_or_etag is the git blob hash of the file as written (git hash-object), the same bytes as the commit that carries it. The check's base blob is ebabe8dad470cfb6a4ed0e865c13172bef05e12a (HEAD:pull.tf at the cut).",
+      "artifact_covered_by": [
+        "HG5-t20-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG5-t20-AC1",
+      "criterion_verbatim": "every non-comment, non-blank line of pull.tf is identical, in order, to its base blob; the first 30 lines name both live rules, say they are live (the word live or ENABLED), carry 2026-10-13, and no longer say DESIRED ONLY or never applied; the file is ASCII only.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R5_CHECKS/hg_t20_comment_only.py",
+      "output_evidence": "COMMENT-OK 108 non-comment line(s) identical to the base; header names both live rules, read 2026-10-13 (rc=0, run from the worktree root, after the edit). Base (HEAD pull.tf, before the edit): COMMENT-BAD the header does not name outlook-global-transcripts-pull-daily; the header does not say the rules are live; the header carries no read date 2026-10-13; the header still says DESIRED ONLY / never applied (rc=1). Mutant (.scratch/mutant_pull.tf, uncommitted, pull_rule_name value changed on one code line): COMMENT-BAD non-comment lines differ (base 108, new 108; first difference at code line 6) (rc=1). Diff of the commit: 3 lines changed, 3 insertions and 3 deletions, all in lines 1-3 (git diff --numstat: 3 3 infra/aws/terraform/transcripts/pull.tf).",
+      "denominator": "108 of 108 non-comment non-blank code lines of pull.tf identical to the base blob (blob ebabe8dad470cfb6a4ed0e865c13172bef05e12a); 2 of 2 live rules named in the first 30 lines; 3 of 3 header lines changed, 0 code lines changed.",
+      "status": "PASS",
+      "expect": "COMMENT-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the check was run twice on the committed working-tree file from the worktree root, with no edit between runs",
+      "observed": "COMMENT-OK 108 non-comment line(s) identical to the base; header names both live rules, read 2026-10-13 (rc=0) on both runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "scratch copy of pull.tf (.scratch/mutant_pull.tf, uncommitted) with one code line changed (pull_rule_name value suffixed -X), checked via the FILE argument",
+      "expected": "COMMENT-BAD naming the differing non-comment line",
+      "observed": "COMMENT-BAD non-comment lines differ (base 108, new 108; first difference at code line 6) (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan and apply in the transcripts root",
+      "reason": "order BOUNDS: comments only; the plan reading no change is the issuer's proof at the drain. This worker runs no terraform command."
+    },
+    {
+      "item": "mail_pull.tf and every other file",
+      "reason": "order BOUNDS and <paths>: the write grant is pull.tf, the order's deliverables folder and the investigation file; mail_pull.tf is read only."
+    },
+    {
+      "item": "AWS calls",
+      "reason": "order BOUNDS: read-only only. Calls made: aws events describe-rule for teams-global-transcripts-pull-hourly (ENABLED, cron(0 13-22 ? * MON-FRI *)) and for outlook-global-transcripts-pull-daily (ENABLED, cron(30 23 * * ? *)), both re-read at the start of this order and matching the header's premise. No write, no invoke, no secret read."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~17/MDPF_HEALGAP.TO-HG-t20.transcripts-pull-header-comment-only.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "aws CLI read-only via .tools/aws",
+      "invocation": "timeout 120 bash .tools/aws events describe-rule --name teams-global-transcripts-pull-hourly --query '{Name:Name,State:State,Schedule:ScheduleExpression}' --output json ; timeout 120 bash .tools/aws events describe-rule --name outlook-global-transcripts-pull-daily --query '{Name:Name,State:State,Schedule:ScheduleExpression}' --output json",
+      "result": "teams-global-transcripts-pull-hourly ENABLED cron(0 13-22 ? * MON-FRI *); outlook-global-transcripts-pull-daily ENABLED cron(30 23 * * ? *); both rc=0"
+    },
+    {
+      "tool": "comment-only header check",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R5_CHECKS/hg_t20_comment_only.py",
+      "result": "COMMENT-OK 108 non-comment line(s) identical to the base; header names both live rules, read 2026-10-13 (rc=0)"
+    }
+  ]
+}
