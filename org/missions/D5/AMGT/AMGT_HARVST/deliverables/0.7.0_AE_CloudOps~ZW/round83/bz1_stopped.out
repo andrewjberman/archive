@@ -1,0 +1,62 @@
+# HVST-bz-1 -- C-f / C-g: THE STOP IS NOT REACHED. The runner is WEDGED.
+# 0.7.0_AE_CloudOps~ZW, site Z box. Written 2026-10-13T04:1xZ.
+
+## 1(i) -- the stop file was created from the task's OWN arguments
+
+Stop-file path read from (Get-ScheduledTask 'Opal Data Harvest - Continuous Cycle').Actions.Arguments:
+  --stop-file "C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-b5a7a3a4b6\.runtime\harvest-cycle\STOP"
+
+BEFORE (the exact key about to be written): ABSENT -- and so was its PARENT DIRECTORY
+  .runtime/harvest-cycle/ under the old pin did not exist; the runner writes its runtime under
+  --runtime-root (the c1be67f53c pin), never under the stop file's own directory. mkdir -p was required.
+AFTER:  -rw-r--r-- 0 bytes, created 2026-10-13T03:57:25Z
+
+## 1(ii) -- THE CYCLE RECORD NEVER ARRIVES, BECAUSE THE RUNNER IS NOT RUNNING ITS LOOP
+
+Open cycle: 20261012T191641Z (bbg), started 2026-10-12T19:16:42Z. There is NO
+  state/cycles/bbg/20261012T191641Z.cycle.json -- the cycle has not ended.
+  Its checkpoint 20261012T191641Z.checkpoint.json reads stopped_by_operator = False, stopped = {}.
+
+The runner process is ALIVE and NOT PROGRESSING:
+  PID 21512, started 2026-10-10T22:15:26Z (task LastTaskResult 267009 = "currently running").
+  THREE CPU samples, ~30 minutes apart end to end:
+    03:46Z  CPU 26.984375 s   1 thread   WS 4.3 MB
+    03:47Z  CPU 26.984375 s   1 thread   WS 4.3 MB
+    04:16Z  CPU 26.984375 s   1 thread   WS 4.3 MB
+  Identical to the 1/64 s tick across the window: ZERO CPU accrued.
+  The single thread (id 1888) reads ThreadState=Wait, WaitReason=Executive in every sample.
+
+  Last write of ANY kind by the runner: 2026-10-12T20:22:35Z (runtime/last-run.json,
+  events.jsonl, progress.sqlite3). cycle_runner.log last line 2026-10-12T20:19:44Z.
+  At the read above that is 7 h 57 m of silence against a measured job cadence of ~2.5 min
+  (24 consecutive JOB lines 19:19:27Z-20:19:44Z). The last event is "run_record_persisted"
+  at 20:22:35.117Z -- a completed job. It wedged AT a job boundary, not mid-fetch.
+
+  THE STOP FILE HAS BEEN PRESENT 19 MINUTES AND THE RUNNER HAS NOT READ IT:
+    "STOP-FILE" lines in cycle_runner.log: 0   (the runner's own stop message, cycle_runner.py:320/329)
+    cycle_runner.log last write still 2026-10-12T20:19:44Z, unchanged after the create.
+
+## WHY THE SIGNED PATH CANNOT COMPLETE AS WRITTEN
+
+In the RUNNING bytes (<old>/lib/opal_data_harvest/cycle_runner.py):
+  :294  stop_requested(args) -> bool(args.stop_file and Path(args.stop_file).exists())
+  :320  checked between PUBLISHERS inside a pass
+  :329  checked between PASSES
+A plain existence check -- it works, but only when control reaches it. A process parked in an
+Executive wait with no CPU accrual reaches neither line. C-f ("the runner finishes its current
+pair, writes the cycle record and exits") presumes a progressing runner; this one is not.
+
+Consequently C-c ("No other runner or backfill_driver process is alive after the stop, positive
+control printed") cannot read NONE while PID 21512 lives, and step 2.4's census would read 1.
+
+## WHAT THIS SEAT DID NOT DO, AND WHY
+
+It did NOT kill PID 21512. "The running cycle is NOT killed: it ends by its own stop file (C-f)"
+is a SIGNED condition on BOTH never-widen halves (COO half C-f; CTO half by-3 bullet 2). Stop-ScheduledTask
+would terminate the task's tree, which is the kill the halves forbid by name. Substituting this seat's
+judgement for a signed condition is the widening the pair exists to prevent, so the call goes back to the
+signers with the measurement. Row AMGT_HARVST-Z-S114 carries it.
+
+STATE LEFT ON THE BOX: stop file PRESENT (not deleted -- C-g deletes it only immediately before
+Start-ScheduledTask, which has not run). The scheduled task is UNTOUCHED, still armed at <old>.
+Nothing served moved. The new pin exists and is locked; so are <old> and the state pin.
