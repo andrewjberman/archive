@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-h-6",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-h-6.exec-summary-diagnosis.md",
+    "group": "OTHER",
+    "vintage_commit": "ecfb64dcf4"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~65",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R5.md",
+    "vintage_commit": "ecfb64dcf4",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-h-6.exec-summary-diagnosis.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~65/EXEC_SUMMARY_DIAGNOSIS.json",
+      "kind": "doc",
+      "commit_or_etag": "c9fc7f9ec0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in c9fc7f9ec0 on wk-ADVI_FIRMBKTS-65 (LOCAL): the diagnosis record, 51 recorded AWS read calls, verdict INDETERMINATE; nothing emitted, nothing written to AWS",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~65/EXEC_SUMMARY_DIAGNOSIS.md",
+      "kind": "doc",
+      "commit_or_etag": "c9fc7f9ec0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in c9fc7f9ec0 on wk-ADVI_FIRMBKTS-65 (LOCAL): the one-page prose form of the same facts, with the exact error text (none exists)",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "58ddac4d3b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows ADVI_FIRMBKTS-D1-W65-S1..S3 appended in 58ddac4d3b on wk-ADVI_FIRMBKTS-65 (LOCAL); append-only, no existing row edited",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 grades the record's shape and the read-only discipline of its calls: the diag check reads EXEC_SUMMARY_DIAGNOSIS.json and prints DIAG keys ok calls=N verdict=<closed set>. Expect: ^DIAG keys ok calls=[0-9]+ verdict=(EMITTED_NOT_MATCHED|NOT_EMITTED_SCRIPT_TEST|DENIED|BUS_OR_RULE_ABSENT|INDETERMINATE)$",
+      "method": "command",
+      "invocation": "timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round5/checks/r5_checks.py diag --file C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~65/EXEC_SUMMARY_DIAGNOSIS.json",
+      "expect": "^DIAG keys ok calls=[0-9]+ verdict=(EMITTED_NOT_MATCHED|NOT_EMITTED_SCRIPT_TEST|DENIED|BUS_OR_RULE_ABSENT|INDETERMINATE)$",
+      "output_evidence": "DIAG keys ok calls=51 verdict=INDETERMINATE",
+      "denominator": "51 recorded AWS calls, all read verbs (0 write verbs); record keys complete; 1 denied read (organizations list-policies) recorded in denied_reads; 17 of 17 enabled regions swept for PutEvents",
+      "status": "PASS",
+      "status_reason": "Shape and read-only discipline graded by the issuer's check. The truth of the findings is not graded here: the issuer re-reads the cited calls."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the write-surface bound: the round-4 scope check over the worktree, allowing only this deliverables folder and the investigation file. Expect: ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-65 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-65 --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~65/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "output_evidence": "ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing",
+      "denominator": "3 changed paths of the worktree (2 record files, 1 investigation file), 0 outside the allowed set, 0 required missing",
+      "status": "PASS",
+      "status_reason": "The write surface is the two deliverable files and the channel file; no product file, gold_dispatch.sh, or any AWS write."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant: this order is a read-only diagnosis that changes no product file and no assertion, so there is no tested code path to mutate.",
+      "expected": "N/A",
+      "observed": "N/A: the spec names no assertion to fire.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the AWS state is a live read over a 90-day window and changes between runs; a repeat run would not be a determinism check of the record.",
+      "observed": "N/A: the record was read once at 2026-10-13T06:51Z; the AC1 check was run twice (draft, then final), both DIAG keys ok calls=51 verdict=INDETERMINATE.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the runner's own configuration: CLI default region, default output format, CLI version, credential identity",
+      "reason": "reaching it is an act, not a read, per the order's section 1a.4; marked absent in the record"
+    },
+    {
+      "item": "the runner's run logs and the chain's WARN lines",
+      "reason": "not on the order's read list; the WARN is cited from D1-S40 (held), not re-read"
+    },
+    {
+      "item": "organizations SCP read",
+      "reason": "AccessDenied to this identity; recorded as a denied read and filed as ADVI_FIRMBKTS-D1-W65-S3"
+    },
+    {
+      "item": "any emit, invoke, put, start, update or send-command",
+      "reason": "read-only bound, order section 2 bound 1; none issued"
+    },
+    {
+      "item": "the fix for the emit failure",
+      "reason": "out of scope; the fix is a later cell under its own pair, the proposal in the record names the owner"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W65-S1: OBSERVATION, ARMED (disarm owner 2.0.0_SA_COO~B1) -- zero CloudTrail PutEvents in 17 of 17 enabled regions over 90 days, so the chain-complete WARN never reached the events API; the failure is upstream of EventBridge",
+    "ADVI_FIRMBKTS-D1-W65-S2: OBSERVATION, INERT -- the order's CloudTrail read was us-east-1 only, but the emit names no --region; the sweep over 17 regions was extended by this worker and found none",
+    "ADVI_FIRMBKTS-D1-W65-S3: OBSERVATION, INERT -- organizations list-policies (SERVICE_CONTROL_POLICY) is AccessDenied to cloudops-dell1-agent-user; any SCP deny on events:PutEvents is unreadable"
+  ],
+  "session_log": "no session log is committed; the record is c9fc7f9ec0 (diagnosis record) and 58ddac4d3b (surprise rows), both LOCAL on wk-ADVI_FIRMBKTS-65",
+  "compiler_tools": [
+    {
+      "tool": "aws cli (via .tools/aws)",
+      "invocation": "aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventName,AttributeValue=PutEvents over 1784073600..1791935999, us-east-1 and 16 other enabled regions; aws events describe-event-bus / describe-rule / list-targets-by-rule; aws lambda get-policy; aws iam get-role / list-* / get-role-policy / get-policy / get-policy-version; aws ec2 describe-instances; aws organizations list-policies (denied)",
+      "result": "PutEvents 0 events in 17 of 17 regions; rule ENABLED with a matching pattern; role events-emit allows events:PutEvents; SCP read AccessDeniedException; positive control events.amazonaws.com returns 20 events in us-east-1"
+    },
+    {
+      "tool": "python",
+      "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round5/checks/r5_checks.py diag --file <record>",
+      "result": "DIAG keys ok calls=51 verdict=INDETERMINATE"
+    },
+    {
+      "tool": "python",
+      "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-65 --allow <folder> --allow <channel>",
+      "result": "ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing"
+    }
+  ]
+}
