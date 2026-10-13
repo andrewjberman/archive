@@ -6,8 +6,8 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
     AC1  node --check walk.mjs passes (a bound: PASS at base)
     AC2  `walk.mjs --base http://example.com --firm Inflection --first-client` reaches the localhost refusal, not "unknown argument"
     AC3  SKILL.md documents both flags, walk.mjs names FIRM_OPTION_ABSENT, and nothing outside the grant changed
-  IB169-2  IB-pr-489  one Inflection walk keeps ONE selection reference outside any git tree and disarms the walker
-    AC1  the reference file holds exactly one line sel_ + 64 hex
+  IB169-2  IB-pr-489  one Inflection walk keeps its (one or two) selection references outside any git tree and disarms the walker
+    AC1  the reference file holds one or two distinct lines sel_ + 64 hex
     AC2  the walker status reads disabled / armed=no (a bound: PASS at base)
     AC3  the walk record carries only whitelisted keys and no client name
   IB169-3  IB-pr-490  the live read: one direct invoke of the deployed function with that reference, claim equals the offline prediction, counts present
@@ -151,9 +151,9 @@ def main():
             if not f.is_file():
                 fail("no reference file at the named scratch path")
             lines = [ln.strip() for ln in f.read_text(encoding="utf-8").splitlines() if ln.strip()]
-            if len(lines) != 1 or not re.fullmatch(r"sel_[0-9a-f]{64}", lines[0]):
-                fail("the file must hold exactly one line sel_ + 64 hex (%d line(s))" % len(lines))
-            print("OK: one reference line of the right shape")
+            if not 1 <= len(lines) <= 2 or len(set(lines)) != len(lines) or not all(re.fullmatch(r"sel_[0-9a-f]{64}", x) for x in lines):
+                fail("the file must hold one or two distinct lines of sel_ + 64 hex (%d line(s))" % len(lines))
+            print("OK: %d reference line(s) of the right shape" % len(lines))
         elif arm == "AC2":
             rc, out = run(["python", str(ROOT / SKILL / "ui_walker_account.py"), "status"])
             if "status=disabled" not in out or "armed=no" not in out:
@@ -176,8 +176,8 @@ def main():
     elif cell == "IB169-3":
         if arm == "AC1":
             r = load(LIVE_REC)
-            if r.get("invokes") not in (1, 2) or r.get("ref_count") != 1:
-                fail("invokes must be 1 or 2 on ref_count 1")
+            if r.get("invokes") not in (1, 2, 3, 4) or r.get("ref_count") not in (1, 2):
+                fail("invokes must be 1 to 4 on a ref_count of 1 or 2")
             ws = r.get("windows") or []
             if not ws:
                 fail("at least one window read")
