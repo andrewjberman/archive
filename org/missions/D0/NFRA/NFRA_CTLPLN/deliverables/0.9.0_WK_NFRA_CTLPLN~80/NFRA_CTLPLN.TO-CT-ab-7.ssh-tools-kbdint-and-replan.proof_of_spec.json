@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ab-7",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-7.ssh-tools-kbdint-and-replan.md",
+    "group": "OTHER",
+    "vintage_commit": "3477d67af5"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~80",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round12.md",
+    "vintage_commit": "3477d67af5",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-7.ssh-tools-kbdint-and-replan.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/ssh-tailnet-verify.py",
+      "kind": "script",
+      "commit_or_etag": "aa235a132c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed at aa235a132c on wk-NFRA_CTLPLN-80 (LOCAL, not pushed). Keyboard-interactive arm graded by the server's prompt, --identity, --user-for, methods= on each box line; 12 selftest cases. Not run against the real register, no real ssh login."
+    },
+    {
+      "path_or_key": ".tools/ssh-tailnet-enable.ps1",
+      "kind": "script",
+      "commit_or_etag": "aa235a132c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed at aa235a132c on wk-NFRA_CTLPLN-80 (LOCAL, not pushed). Apply re-plans after A.service so step B disables the install's default rule; self-test fake install creates that rule enabled; 7 selftest cases. Never run for real: no elevation, no box changed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTab7-AC1",
+      "criterion_verbatim": "CTab7-AC1 -- invocation `python .tools/ssh-tailnet-verify.py --selftest` ; expect output containing `SSH-VERIFY-SELFTEST cases=12/12 ok=True` (the old 8 cases and exactly the four new cases of BUILD 4 pass; base cases=8/8).",
+      "method": "test_suite",
+      "invocation": "python .tools/ssh-tailnet-verify.py --selftest",
+      "output_evidence": "Run from the worktree root under timeout 120 on commit aa235a132c, rc 0, twice (same output both runs). Deciding line: SSH-VERIFY-SELFTEST cases=12/12 ok=True. Base at 3477d67af5: SSH-VERIFY-SELFTEST cases=8/8 ok=True. New cases: CASE 9 kbdint-no-prompt-refused ok=True (password_arm=KBDINT-NO-PROMPT:publickey,keyboard-interactive methods=['publickey', 'keyboard-interactive'] done=True) | CASE 10 kbdint-prompt-advertised ok=True (password_arm=ADVERTISED:publickey,keyboard-interactive done=False) | CASE 11 identity-reaches-argv ok=True (-i-reaches-argv=True) | CASE 12 user-for-space-reaches-l ok=True (-l-reaches-argv=True done=True). The DETAIL lines on stderr are the expected notes of the ssh-missing and connect-raises cases.",
+      "denominator": "12 of 12 selftest cases ok=True (8 old + 4 new); the stub ssh and the loopback listener are the only network surface.",
+      "status": "PASS",
+      "expect": "SSH-VERIFY-SELFTEST cases=12/12 ok=True"
+    },
+    {
+      "criterion_id": "CTab7-AC2",
+      "criterion_verbatim": "CTab7-AC2 -- invocation `powershell -NoProfile -ExecutionPolicy Bypass -File .tools/ssh-tailnet-enable.ps1 -SelfTest` ; expect output containing `SSH-ENABLE-SELFTEST cases=7/7 ok=True` (the old 6 cases and exactly the one new fresh-install case of BUILD 3 pass; base cases=6/6).",
+      "method": "test_suite",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/ssh-tailnet-enable.ps1 -SelfTest",
+      "output_evidence": "Run from the worktree root under timeout 120 on commit aa235a132c, rc 0, twice (same output both runs). Deciding line: SSH-ENABLE-SELFTEST cases=7/7 ok=True. Parse line: SSH-ENABLE-PARSE errors=0. New case: CASE 7 fresh-install-default-rule-disabled ok=True (MutLog holds Do.AddCapability and Do.DisableRule; the default rule created by the install ends Enabled=False; the tailnet rule ends Enabled=True). Base at 3477d67af5, last line: SSH-ENABLE-SELFTEST cases=6/6 ok=True.",
+      "denominator": "7 of 7 selftest cases ok=True (6 old + 1 new); fake backend only, no elevation, no machine change.",
+      "status": "PASS",
+      "expect": "SSH-ENABLE-SELFTEST cases=7/7 ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the new fresh-install case must FAIL when the apply re-plan is removed: a scratch copy with the re-read replaced by the BEFORE read (sed of the single line $obsR = Get-Observed) is run under the same self-test. Only .scratch/ holds the copy.",
+      "expected": "CASE 7 ok=False and cases=6/7 ok=False with the re-plan removed; CASE 7 ok=True and cases=7/7 with it present",
+      "observed": "with the re-plan: CASE 7 fresh-install-default-rule-disabled ok=True, SSH-ENABLE-SELFTEST cases=7/7 ok=True. Negative copy: CASE 7 fresh-install-default-rule-disabled ok=False, SSH-ENABLE-SELFTEST cases=6/7 ok=False, rc 1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "both self-tests re-run on the committed tree at aa235a132c",
+      "observed": "verify: cases=12/12 on both runs; enable: cases=7/7 on both runs; enable rc 0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any real run of ssh-tailnet-enable.ps1 (apply, -Plan against a box, -Rollback)",
+      "reason": "order RULES: self-test only; the script needs elevation and changes a box"
+    },
+    {
+      "item": "Any real ssh login attempt, including the keyboard-interactive probe against a real box",
+      "reason": "order RULES: no real SSH login attempt beyond what the self-tests stub; the live --user-for read is the COO's, after the round"
+    },
+    {
+      "item": "A live verify read of the real register",
+      "reason": "not in the criteria; the selftest reads no register"
+    },
+    {
+      "item": "The task-order status flip to complete",
+      "reason": "the task order file is outside the <paths> grant (write surface = the two tool files and the investigation file); left pending for the issuer to flip"
+    },
+    {
+      "item": "Any aws call, any push, the portal gitlink",
+      "reason": "order RULES: no aws, no push; the portal gitlink is not committed"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~80/NFRA_CTLPLN.TO-CT-ab-7.ssh-tools-kbdint-and-replan.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "ruff 0.15.11, target py39; Python 3.9 grammar via ast.parse(feature_version=(3,9))",
+      "invocation": "python -m ruff check --target-version py39 .tools/ssh-tailnet-verify.py",
+      "result": "All checks passed! ; py39 grammar OK ; py_compile OK ; 0 non-ASCII characters in both tool files"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh .tools/ssh-tailnet-verify.py",
+      "result": "All checks passed! ; OK: pre-commit gate clean for 1 of 1 file(s)"
+    }
+  ]
+}
