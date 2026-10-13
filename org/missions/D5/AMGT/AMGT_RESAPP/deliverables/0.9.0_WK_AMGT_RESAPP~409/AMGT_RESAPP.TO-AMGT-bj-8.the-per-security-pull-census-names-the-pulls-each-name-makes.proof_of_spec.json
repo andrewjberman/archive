@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bj-8.the-per-security-pull-census-names-the-pulls-each-name-makes",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bj-8.the-per-security-pull-census-names-the-pulls-each-name-makes.md",
+    "group": "OTHER",
+    "vintage_commit": "6aef447b7dfbb2c1b367fcade9d6b5bdf9932514"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "e20bb3c73fd8c0fe96a67062d3f8e093a7f0b8ff",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bj-8.the-per-security-pull-census-names-the-pulls-each-name-makes.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~409",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~409/run/pull_census.json",
+      "kind": "config_data",
+      "commit_or_etag": "d244ea3cccfcda5900bf542374f3c946c9386d41",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Merged census over 95 names, 6915 calls: the AC2 output, read by AC3. Read-only measurement output; no deploy. sha256 73166908461cb02d33714eda7862685634f32e773ad79980e38152158b0bdd3a."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~409/run/pull_census.txt",
+      "kind": "doc",
+      "commit_or_etag": "d244ea3cccfcda5900bf542374f3c946c9386d41",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "PULLS table, UNCLASSED line and the AC2 verdict line, printed by the merge step of the driver. sha256 d8982cf858139adced4cbff09acdb0ef066a72649f3bc2f5f2e7e475229eefa9."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~409/run/deployed_phases.txt",
+      "kind": "doc",
+      "commit_or_etag": "d244ea3cccfcda5900bf542374f3c946c9386d41",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Full stdout of the AC3 deployed arm: LAMBDA OVERLAY table, over-3,000 ms line and the AC3 verdict line. One overlay per name, sequential, once. sha256 db327f0a58bbd71dd613ff8ef90d96c9ad01dd5a8c3fb60f26975074bec691e4."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (offline self-test): r103_pull_census.py --selftest prints `arms passed 4 of 4` and `R103 PULL CENSUS ARMS: YES`; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-409 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_pull_census.py\" --selftest | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "   PASS A4 a log tail parses to its phases, handler time and Init (None when warm)\narms passed 4 of 4\nR103 PULL CENSUS ARMS: YES\nexit=0",
+      "denominator": "4 of 4 arms passed",
+      "status": "PASS",
+      "expect": "arms passed 4 of 4.*R103 PULL CENSUS ARMS: YES.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the driver runs the census over every resolved name in parallel shards and merges; the last line is `R103 PULL CENSUS: RAN N of N names, C calls, U unclassed` with both N equal (95 at the cut); and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-409 && timeout 590 bash \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_pull_census_run.sh\" \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~409/run\"; echo \"exit=$?\"",
+      "output_evidence": "  other          444 calls      16241030 bytes       26276 ms\nUNCLASSED prefixes (135): [('opal-data-harvest/sec/harvest/silver/filing_source/date=2026-10-09', 72), ('opal-data-harvest/sec/harvest/silver/filing_source', 8), ... 20 entries printed of 135 ...]\nR103 PULL CENSUS: RAN 95 of 95 names, 6915 calls, 444 unclassed\nexit=0",
+      "denominator": "95 of 95 resolved names; 6915 calls (class sums 3786+269+126+585+387+527+256+380+128+12+15+444 = 6915); 444 unclassed",
+      "status": "PASS",
+      "expect": "R103 PULL CENSUS: RAN (\\d+) of \\1 names, \\d+ calls, \\d+ unclassed.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the deployed arm over the same names, from the merged file; the line `R103 PULL CENSUS DEPLOYED: RAN N of N names` with both N equal; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-409 && PYTHONPATH=\"$(pwd)\" timeout 590 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_pull_census.py\" --from-file \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~409/run/pull_census.json\" --deployed-phases | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "  handler_ms             n  95  median     682  p95     974  max    2422 ms\n  handler at or above 3,000 ms: 0 names []\nR103 PULL CENSUS DEPLOYED: RAN 95 of 95 names\nR103 PULL CENSUS: RAN 95 of 95 names, 6915 calls, 444 unclassed\nexit=0",
+      "denominator": "95 of 95 names; one overlay per name, sequential, run once",
+      "status": "PASS",
+      "expect": "R103 PULL CENSUS DEPLOYED: RAN (\\d+) of \\1 names.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant: the census is a read-only measurement that grades nothing, so no assertion is seeded to fire.",
+      "expected": "N/A: nothing to mutate",
+      "observed": "No mutant run. The instrument's own AC1 selftest (4 of 4 arms, PASS) is the only assertion-level check, and it passed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: two same-input runs compared is not applicable here, by bound.",
+      "observed": "AC2 ran once and AC3 ran once. AC3 drives one overlay per name, sequentially, once, so no repeat was made.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC1 timeout prefix",
+      "reason": "AC1 was executed with the bar's `timeout 120` prefix on the python call (ran 4 of 4 arms, rc 0). The recorded invocation is the TO's text, which carries no timeout, so the checker's alignment reads the same command."
+    },
+    {
+      "item": "Repeat runs for determinism",
+      "reason": "Bound: AC3 drives one overlay per name, sequentially, once. AC2 and AC3 each ran once."
+    },
+    {
+      "item": "AC3 output as piped into tail -4",
+      "reason": "The AC3 stdout was redirected to run/deployed_phases.txt and the criterion's tail -4 was taken from that file (same bytes). The invocation was not re-run to pipe it."
+    },
+    {
+      "item": "Preflight per-class counts for ASML_NA_Equity (134 calls, price 16)",
+      "reason": "Not reproduced by the merged census (116 classed, price 2). Recorded as AMGT_RESAPP-D1-W409-S1; not explained here."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W409-S1: the preflight's ASML_NA_Equity figures (134 calls, price 16) do not reproduce in the merged census (116 classed calls, price 2); recorded, not explained.",
+    "AMGT_RESAPP-D1-W409-S2: five silver filing_source prefixes (104 calls in the printed top 20) and 15 exec_officers prefixes fall to other, because the filings rule matches the /filings/v1 key shape only.",
+    "AMGT_RESAPP-D1-W409-S3: an Edit call on the append-only channel rewrote its 75 CRLF line endings to LF in d244ea3ccc; the fix commit restores them byte for byte and appends the row as LF."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~409/run/session.log",
+  "compiler_tools": [
+    {
+      "tool": "r103_pull_census.py --selftest",
+      "invocation": "PYTHONPATH=<worktree> timeout 120 python r103_pull_census.py --selftest",
+      "result": "arms passed 4 of 4; R103 PULL CENSUS ARMS: YES; rc 0"
+    },
+    {
+      "tool": "r103_pull_census_run.sh (8 shards, then merge)",
+      "invocation": "timeout 590 bash r103_pull_census_run.sh run/",
+      "result": "R103 PULL CENSUS: RAN 95 of 95 names, 6915 calls, 444 unclassed; rc 0"
+    },
+    {
+      "tool": "r103_pull_census.py --from-file --deployed-phases",
+      "invocation": "PYTHONPATH=<worktree> timeout 590 python r103_pull_census.py --from-file run/pull_census.json --deployed-phases",
+      "result": "R103 PULL CENSUS DEPLOYED: RAN 95 of 95 names; rc 0"
+    }
+  ]
+}
