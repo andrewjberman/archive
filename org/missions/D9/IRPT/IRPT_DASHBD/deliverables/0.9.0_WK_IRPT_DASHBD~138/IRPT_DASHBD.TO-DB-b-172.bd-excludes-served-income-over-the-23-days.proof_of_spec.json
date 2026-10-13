@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-172",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "983ff0292d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "983ff0292d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-172.bd-excludes-served-income-over-the-23-days.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~138",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~138/EXCLUDES_INCOME_23_DAYS.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~138/RULE_EXCL.md",
+      "kind": "config_data",
+      "commit_or_etag": "d8a3f1fa58",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the round-92 rule, committed alone before any computation on the 23 differing days (commit d8a3f1fa58 holds only this file); its bytes are the record's rule.sha256; reads before the commit were code, schemas and the earlier rule files only",
+      "artifact_covered_by": ["DB92-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~138/excl_income.py",
+      "kind": "script",
+      "commit_or_etag": "46c09941ef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "implements RULE_EXCL.md as written; imports ledger_rows.py (worker ~137) and the two tieout modules by path and edits none of them; FRESH S3 GET and LIST reads only; no vendor call, no credential read, no S3 write; run under python -I with paths as arguments; commit-gate clean",
+      "artifact_covered_by": ["DB92-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~138/EXCLUDES_INCOME_23_DAYS.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "counts, multiples, offsets and sizes only, written by excl_income.py with the surprise row id IRPT_DASHBD-D2-W138-S1; population 7 accounts, 7 windows, 23 differing days; 925 BD rows and 261 served rows read; 4 of 7 accounts closed with reasons, 3 with UNEXPLAINED days; 13 days taken by the new reason; round91_pattern_8_days_confirmed false; no account id, no date, no run of eight or more digits",
+      "artifact_covered_by": ["DB92-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_DASHBD-D2-W138-S1 appended as raw bytes (no existing byte changed); the surprise-row gate reported no defect",
+      "artifact_covered_by": ["DB92-1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB92-1-AC1",
+      "criterion_verbatim": "`DB92-1-AC1` -- the rule was committed before the read and its bytes are unchanged; the six-name list is exact; the code file is tracked; the population and per-account differing-day counts equal round 90's committed record; `test_held_days` is an integer and the days taken by the new reason do not exceed it; both sides' rows read for the re-test are counted; every account lists a six-way reason count summing to its differing days, evidence as a count, a multiple or day offsets, the UNEXPLAINED days by offset and size, the negative arm true, and a window that is closed exactly when no day is UNEXPLAINED; the summary matches; a surprise row exactly when an account stays UNEXPLAINED; zero vendor calls, secret reads and S3 writes; no served value changed; no run of 8 or more digits. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r92/p92_round92.py\" . DB92-1-AC1",
+      "output_evidence": "OK: 23 differing days over 7 accounts read against 925 BD rows and 261 served rows: 4 account(s) closed with reasons, 3 with UNEXPLAINED days\nDB92-1-AC1 PASS",
+      "denominator": "1 of 1 criterion; rc 0 from the worktree root; 7 of 7 accounts; 23 of 23 differing days; 4 of 7 windows closed after correction; 13 days taken by BD_EXCLUDES_SERVED_INCOME of 13 on which its test held; 10 UNEXPLAINED days in 3 accounts; 925 BD rows and 261 served rows read; 0 vendor calls, 0 secret reads, 0 S3 writes",
+      "status": "PASS",
+      "status_reason": "PASS as written. The rule (d8a3f1fa58) was committed alone before any computation on the 23 days; its bytes are unchanged (sha256 in the record). The code file is tracked and its sha256 matches. The population (7 accounts, 7 windows, 23 differing days) and the per-account counts (9, 2, 1, 1, 7, 1, 2) equal round 90's committed record. The six-name list is exact and in order. test_held_days is 13 and the days taken by the new reason are 13, not above it. Every account carries a six-way reason count summing to its differing days; evidence is a multiple for the new reason; the UNEXPLAINED days are listed by offset and size; the negative arm holds on 7 of 7 windows; window_closed_after_correction is true exactly for the 4 accounts with no UNEXPLAINED day. A surprise row (IRPT_DASHBD-D2-W138-S1) exists because 3 accounts stay UNEXPLAINED. The criterion is met as written; the 3 open windows are measured, not repaired, and the CTO rules on the endpoint.",
+      "expect": "DB92-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker run against an empty scratch root with no record at the stated path.",
+      "expected": "DB92-1-AC1 FAIL",
+      "observed": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~138/EXCLUDES_INCOME_23_DAYS.json; DB92-1-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the official checker run twice from the worktree root and compared",
+      "observed": "run 1 and run 2 each print the same OK line and DB92-1-AC1 PASS with rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Reading A of the per-lot reason (distinct transaction ids) is not used in the record; Reading B (the addendum, with the ~137 code's I != 0 clause kept) is the reason's TEST.",
+      "reason": "the order's closed list names Reading B as the reading of record (RULE_LEDGER_ADDENDUM.md, adopted by the CTO)"
+    },
+    {
+      "item": "The served classification of the producer was not re-derived; the served rows are taken whole, and the counterpart tests use absolute gross amounts.",
+      "reason": "RULE_LEDGER.md section 0 and section 5 state this limit, carried into RULE_EXCL.md section 9"
+    },
+    {
+      "item": "A correction does not change the next day's prior value, and the adjacent-day move is not applied to the second day.",
+      "reason": "day-grain simplification, stated in RULE_EXCL.md section 9 and RULE_LEDGER.md section 5"
+    },
+    {
+      "item": "The test_held_days figure (13) differs from the 8 round 91 measured, and was not decomposed here.",
+      "reason": "a finding, not a failure: the order asks for the comparison and its statement; round 91's 8 was counted over the 12 whole-multiple days, this count over all 23 differing days"
+    },
+    {
+      "item": "No vendor call, no credential read, no session, no S3 write; the pull was not run.",
+      "reason": "the bounds of the order: S3 GET and LIST of the two stores only"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W138-S1: under RULE_EXCL.md as committed, BD_EXCLUDES_SERVED_INCOME takes 13 of the 23 differing days and every day its test holds re-corrects within 0.01 pp; the other five reasons take 0 days; 4 of 7 windows re-close at 0.35 pp and 3 stay open with 10 UNEXPLAINED days (BLOCKING, INERT; disposition UNDER_INVESTIGATION)"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "excl_income.py",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~138/excl_income.py <repo_root> <record_path> <private_detail_path> IRPT_DASHBD-D2-W138-S1",
+      "result": "rc 0 on the second run (the first run exited rc 2 without a record, because an account stays UNEXPLAINED and no row id was given); 7 accounts; 23 of 23 differing days; 925 BD rows and 261 served rows read; 13 of 13 test-held days taken; 4 of 7 windows closed; 122 of 122 stored-control window days match"
+    },
+    {
+      "tool": "p92_round92.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r92/p92_round92.py\" . DB92-1-AC1",
+      "result": "rc 0; DB92-1-AC1 PASS"
+    }
+  ]
+}
