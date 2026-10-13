@@ -1,0 +1,26 @@
+ADVI_FIRMBKTS.TO-FB-j-5 -- session log, 0.9.0_WK_ADVI_FIRMBKTS~70, worktree /c/dev/wk-firmbkts-70 (branch wk-ADVI_FIRMBKTS-70)
+
+Premise re-ground: branch wk-ADVI_FIRMBKTS-70, TREE-OK. lambda_handler at line 426 of lambda_function.py; upload=True hard-coded at the loop call (base line 442); process_advisor(upload=...) supports upload=False (base line 274). tests/ did not exist; created.
+
+Commit 1 (handler + test): 220ea75078  "ADVI_FIRMBKTS FB-j-5 ... dry-run sample path"  2 files changed, 189 insertions(+)
+
+AC1 (invocation: cd infra/aws/lambda/exec-summary-generator && timeout 110 python -m pytest tests/test_dry_run.py -q 2>&1 | tail -1)
+  raw tail line, rc=0 (pytest):  '\x1b[32m\x1b[32m\x1b[1m3 passed\x1b[0m\x1b[32m in 0.22s\x1b[0m\x1b[0m\r\n'
+  same command with FORCE_COLOR unset (env -u FORCE_COLOR):  '3 passed in 0.21s'
+  host env FORCE_COLOR=3 injects the ANSI prefix; the literal ^3 passed expectation does not match the host line.
+
+Mutant control: put_object(Bucket='MUTANT') inserted in the dry branch
+  FAILED tests\test_dry_run.py::test_dry_run_writes_nothing - AssertionError: 0 objects written
+  1 failed, 2 passed
+  restored from .scratch copy; cmp byte-identical; 3 passed; MUTANT count in file 0.
+
+Determinism: AC1 invocation run twice, tail line md5 a13fcb2e9e72fb81a074ab4d89aa599b on both runs.
+
+AC2 (invocation: git diff --stat $(git merge-base HEAD box/dell1) HEAD -- infra/aws/lambda/exec-summary-generator | tail -1)
+  ' 2 files changed, 189 insertions(+)' rc=0
+
+AC3: see the instance (r4_scope.py final line recorded there).
+
+Surprise rows filed: ADVI_FIRMBKTS-D1-W70-S1 (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~B1: dry path emits metrics through _call_llm and _build_slot); ADVI_FIRMBKTS-D1-W70-S2 (OBSERVATION, INERT: FORCE_COLOR=3 host colour prefix on the AC1 line).
+
+No deploy, no Terraform, no AWS call, no model call. Order status not flipped.
