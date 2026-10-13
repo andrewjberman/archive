@@ -1,0 +1,14 @@
+SESSION LOG -- 0.9.0_WK_IRPT_BCKEND~344 on IRPT_BCKEND.TO-IB-pr-493 (worktree branch wk-IRPT_BCKEND-344)
+Commands run, in order, with the rc and the deciding line. Build commit 7ace854890.
+
+1. git rev-parse --abbrev-ref HEAD -> wk-IRPT_BCKEND-344 ; test -d org && test -d .tools -> TREE-OK
+2. python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_49f_account_id.py -q -> rc 0, 7 passed
+3. python .../p170_cells.py . IB170-2-AC1 -> rc 0, "IB170-2-AC1 PASS"
+4. python .../p170_cells.py . IB170-2-AC2 -> rc 0, "IB170-2-AC2 PASS"
+5. python .../p170_cells.py . IB170-2-AC3 -> rc 0, "IB170-2-AC3 PASS"
+6. mutant run (in-process monkeypatch of holdings_49f._directory_account_member to return no member) -> rc 1, 3 failed, 4 passed
+7. python -m pytest infra/aws/lambda/investor-reporting/_contracts/tests -> rc 1, 4 failed, 122 passed (failures named in IRPT_BCKEND-D2-W344-S6)
+8. python -m pytest data/assets/scripts/gold/investor_reporting/tests -> rc 1, 1 failed, 400 passed. The run executed test_holdings_rearm_trigger.py::test_rearm_trigger_live, which makes read-only AWS calls. That run was outside the order's no-AWS bound (IRPT_BCKEND-D2-W344-S5). Not re-run.
+9. bash .tools/safe-commit.sh ... -> rc 0, commit 7ace854890 (9 files)
+
+No deploy, no lambda-source-map.json edit, no run of the live builder, no edit of HoldingsSnapshot.invalid.json or any existing test.
