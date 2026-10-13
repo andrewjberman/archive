@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-169",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "7e571758b1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "7e571758b1",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-169.day-grain-reasons-for-the-seven.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~136",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~136/DAY_READ_7.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~136/RULE_DAY.md",
+      "kind": "config_data",
+      "commit_or_etag": "cc529b9e3d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the day rule, committed alone before any pulled response or the issuer's daily table was opened; sha256 of the committed bytes d6a2847b9791ecf66702de4e355685884efe2cc99ab149ff2e64c1a441c18935",
+      "artifact_covered_by": ["DB90-2-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~136/day_reasons.py",
+      "kind": "script",
+      "commit_or_etag": "a16f3debc5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "implements RULE_DAY.md; reads the issuer's pull and the stored copy read only; imports tieout_day_read.py and tieout_neither_reasons.py by path and edits neither; no vendor call, no credential read, no S3 access; sha256 of the committed bytes dc998b45d0d27f6496939ff00b4bfd50a43a87c2ea6956b7e1b8f258f001b636",
+      "artifact_covered_by": ["DB90-2-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~136/DAY_READ_7.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "counts, offsets and sizes only, written by day_reasons.py with the surprise row id IRPT_DASHBD-D2-W136-S1; no account id, no date, no run of eight or more digits",
+      "artifact_covered_by": ["DB90-2-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "386bce3c32",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_DASHBD-D2-W136-S1 appended as raw bytes; the surprise-row gate reported 1 new row, OK",
+      "artifact_covered_by": ["DB90-2-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB90-2-AC1",
+      "criterion_verbatim": "`DB90-2-AC1` -- the day rule was committed before the read and its bytes are unchanged; the six-name list is exact; the code file is tracked; 7 accounts, 7 requests, ok plus failed equal 7; every account lists days, differing days, a six-way reason count summing to the differing days, the UNEXPLAINED days by offset and size, the negative arm true, the series control as a bool, and a window that is closed exactly when no day is UNEXPLAINED; the summary matches; a surprise row exactly when an account stays UNEXPLAINED; zero worker vendor calls, secret reads and S3 writes; no served value changed; no run of 8 or more digits. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r90/p90_round90.py\" . DB90-2-AC1",
+      "output_evidence": "OK: 7 accounts read at day grain: 0 closed with reasons, 7 with UNEXPLAINED days\nDB90-2-AC1 PASS",
+      "denominator": "1 of 1 criterion; rc 0 on two consecutive runs from the worktree root; 7 of 7 accounts; 7 of 7 requests, 7 http_ok, 0 failed; 103 compared days, 23 differing, 0 reasoned, 23 UNEXPLAINED; 7 of 7 series controls true; 7 of 7 uncorrected windows miss",
+      "status": "PASS",
+      "status_reason": "PASS as written. The record is structurally consistent: the day rule was committed before the read (cc529b9e3d, then a16f3debc5, then the record); the six-name list is exact; the code file is tracked and its sha256 matches; every account carries six reason counts summing to its differing days; a window is closed only when no day is UNEXPLAINED; a surprise row exists exactly because all 7 accounts stay UNEXPLAINED (IRPT_DASHBD-D2-W136-S1). The outcome is measured, not repaired: no day takes a reason, so FWD-8 is not realized for any account and the CTO rules.",
+      "expect": "DB90-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker run against an empty scratch root with no record at the stated path.",
+      "expected": "DB90-2-AC1 FAIL",
+      "observed": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~136/DAY_READ_7.json; DB90-2-AC1 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the official checker run twice from the worktree root and compared",
+      "observed": "run 1 and run 2 each print 'OK: 7 accounts read at day grain: 0 closed with reasons, 7 with UNEXPLAINED days' then 'DB90-2-AC1 PASS' with rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The issuer's daily table DAY_TABLE_7.json was not opened by this worker.",
+      "reason": "the rule-first order; the daily comparison and the reasons were derived independently from the raw series files, the stored tables and the module's own columns"
+    },
+    {
+      "item": "No pull was run and no vendor call, credential read, session load or S3 access was made.",
+      "reason": "the bounds of the order; the pull record and the 7 raw responses were read as the issuer's artifacts only"
+    },
+    {
+      "item": "tieout_day_read.py was not edited; no defect was found in its analyze mode.",
+      "reason": "the day rule and its reasons live in day_reasons.py, a new module in the worker's folder; the analyze mode builds the daily table only"
+    },
+    {
+      "item": "The fee add-back is not spread over days.",
+      "reason": "RULE_DAY.md section 1: the add-back enters the window test only; the fee add-back measured zero for all 7 segments, so the choice changes no count"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W136-S1: under RULE_DAY.md, all 23 differing days of the 7 segments stay UNEXPLAINED and no account re-closes; 0 of 7 accounts closed with reasons; FWD-8 not realized for any account (BLOCKING, INERT; disposition UNDER_INVESTIGATION)"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~136/DAY_READ_7.json",
+  "compiler_tools": [
+    {
+      "tool": "day_reasons.py",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~136/day_reasons.py <repo_root> <record_path> <private_detail_path> IRPT_DASHBD-D2-W136-S1",
+      "result": "rc 0; 7 accounts; 23 of 103 compared days differ; reason counts 0 0 0 0 0 23; 7 of 7 series controls true; 7 of 7 uncorrected windows miss; accounts_closed_with_reasons 0, accounts_unexplained 7; code tracked true"
+    },
+    {
+      "tool": "p90_round90.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r90/p90_round90.py\" . DB90-2-AC1",
+      "result": "rc 0; DB90-2-AC1 PASS on both runs"
+    }
+  ]
+}
