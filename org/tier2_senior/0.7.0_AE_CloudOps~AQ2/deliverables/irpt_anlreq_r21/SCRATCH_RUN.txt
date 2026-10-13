@@ -1,0 +1,18 @@
+SCRATCH RUN, TO-SCRATCH-R21, 0.7.0_AE_CloudOps~AQ2, started 2026-10-13T15:12:42Z
+command: BAU_SOURCE_MAP_OVERRIDE=<temp map> bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting irpt-status   (no BUILD_ONLY), cwd = detached worktree f970b40f11 (sparse cone: infra lib org/standards data/assets/scripts/gold/irpt_reporting)
+scratch key: investor-reporting/_ar222_scratch/ar222-20261013T151208.zip
+exit_code=1
+--- stdout (filtered to the lines the order records)
+  SHA256:  vlGh380QUKvBMOhJn0GJGgDi1/WLI9qTaSP2uETmdP4=
+zip size printed by the script (expected: line in stderr): 363594
+--- stderr, exact
+WARN: aws.cmd: the caller toplevel C:/dev/aq2-r21-scratch carries no .tools\aws.cmd -- CALLING THE BAKED PATH C:\dev\ajb_workspace\.tools\aws.cmd instead (run: aws --which) 
+  ERROR: UPLOAD NOT VERIFIED — s3://opal-313476888478-lambda-artifacts/investor-reporting/_ar222_scratch/ar222-20261013T151208.zip
+         head-object ContentLength (rc=0) returned: WARN: aws: no caller-toplevel .tools/aws (git rc=0) -- PREPENDING THE BAKED C:/dev/ajb_workspace/.tools instead (run: aws --which)
+363594
+         head-object content-sha256 (rc=0) returned: WARN: aws: no caller-toplevel .tools/aws (git rc=0) -- PREPENDING THE BAKED C:/dev/ajb_workspace/.tools instead (run: aws --which)
+vlGh380QUKvBMOhJn0GJGgDi1/WLI9qTaSP2uETmdP4=
+         expected: size=363594 content-sha256=vlGh380QUKvBMOhJn0GJGgDi1/WLI9qTaSP2uETmdP4=
+         zip KEPT at /tmp/lambda-artifact-irpt-status.zip for retry; source map NOT updated.
+--- reading
+The script exited 1 and printed UPLOAD NOT VERIFIED. In its own text both scalar head-object reads returned the right values (size 363594, content-sha256 equal to the SHA256 line) but each value is preceded by a WARN line from the .tools/aws shim ('no caller-toplevel .tools/aws ... PREPENDING THE BAKED ... .tools instead'), because the throwaway worktree's sparse cone carries no .tools directory. The script captures the call with stderr merged (2>&1), so the WARN line becomes part of the compared value and the compare fails. The fix of lines 723-739 therefore did not make the verify pass in this worktree; whether it passes where the shim resolves (a worktree whose cone includes .tools) was NOT run (the order says: no retry with changes). The source map (temp copy) was NOT updated by the script.
