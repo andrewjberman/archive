@@ -1,0 +1,97 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-c-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-c-1.dev-approval-read.md",
+  "group": "OTHER",
+  "vintage_commit": "5b69a3c295"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~1",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round2.md",
+  "vintage_commit": "5b69a3c295",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-c-1.dev-approval-read.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/portal-dev-approval-read.py",
+   "kind": "script",
+   "commit_or_etag": "698f9f9b6c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A read-only local tool a seat runs against the portal repo; it writes nothing and no cluster copy is made by any criterion here."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPc1-AC1",
+   "criterion_verbatim": "python .tools/portal-dev-approval-read.py --selftest expect: ok=True",
+   "method": "test_suite",
+   "invocation": "python .tools/portal-dev-approval-read.py --selftest",
+   "output_evidence": "timeout 120 rc=0. LAST line: DEV-APPROVAL-SELFTEST cases=7/7 ok=True. Cases: the both-trailer merge reads APPROVED feature=f1 by=1.0.0_SA_CTO row=selftest-row-1; the Feature-only merge reads UNAPPROVED; plain commit one and plain commit two read UNAPPROVED; the merge whose body quotes Approved-By: mid-sentence reads UNAPPROVED; the summary reads first_parent_commits=5 approved=1 unapproved=4 and exits 0 (the side-branch commits are not counted); a --since that is not an ancestor of --ref is REFUSED rc=3.",
+   "denominator": "7 of 7 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPc1-AC2",
+   "criterion_verbatim": "python .tools/portal-dev-approval-read.py --portal portal expect: DEV-APPROVAL since=63c4f9e3",
+   "method": "live_read",
+   "invocation": "python .tools/portal-dev-approval-read.py --portal portal",
+   "output_evidence": "timeout 120 rc=0. OUTPUT: DEV-COMMIT 73d8d3a4 UNAPPROVED author=0.0.0_AB_MSTR~DELL2 ...; DEV-COMMIT 0101dd66 UNAPPROVED author=0.0.0_AB_MSTR~DELL2 ...; DEV-COMMIT a577cba5 UNAPPROVED author=0.0.0_AB_MSTR~DELL2 ...; DEV-COMMIT 24877b67 APPROVED feature=cand/laptop/contributing-boxes by=1.0.0_SA_CTO row=laptop-20261013T200117Z-9e8a; DEV-APPROVAL since=63c4f9e3 ref=origin/DEV first_parent_commits=4 approved=1 unapproved=3. The three dell2 merges are the UNAPPROVED lines; the tip is the APPROVED line. Run twice against the same refs: byte-identical.",
+   "denominator": "4 first-parent commits = 1 approved + 3 unapproved",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPc1-AC3",
+   "criterion_verbatim": "bash org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/2.0.0_SA_COO~DV/checks/check_devpln_devread.sh portal expect: DEVREAD-COUNTS-MATCH",
+   "method": "command",
+   "invocation": "bash org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/2.0.0_SA_COO~DV/checks/check_devpln_devread.sh portal",
+   "output_evidence": "timeout 120 rc=0. OUTPUT: DEVREAD-COUNTS-MATCH t=4 a=1 u=3. The issuer's script was run unedited.",
+   "denominator": "t=4 equals the rev-list --first-parent --count read; a + u = 1 + 3 = 4",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Planted wrong-trailer commits: a merge with only the Feature: trailer (no approval) and a merge that quotes Approved-By: mid-sentence with no trailer line. Each must read UNAPPROVED; a reader that matched substrings would read them APPROVED.",
+   "expected": "the Feature-only merge and the mid-sentence quote merge both read UNAPPROVED; the both-trailer merge reads APPROVED",
+   "observed": "selftest cases 'feature-only merge read UNAPPROVED' and 'mid-sentence Approved-By quote read UNAPPROVED' PASS in the AC1 run; the live read's three trailer-less dell2 merges read UNAPPROVED in AC2",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The live read of portal origin/DEV was run twice against the same refs and the two stdout files were byte-compared.",
+   "observed": "cmp reports IDENTICAL; 5 lines each (4 DEV-COMMIT lines and the summary)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a live --since other than the settlement commit",
+   "reason": "the live read runs on the default; the refusal path is exercised by the self-test fixture, not against the real portal"
+  },
+  {
+   "item": "checking that the Approved-By row id names a real approval row in the open-calls store",
+   "reason": "the cell asks the read to report the trailer, not to verify it against the approval store; that check belongs to the gate, not this read"
+  },
+  {
+   "item": "any fetch of portal origin",
+   "reason": "the cell forbids fetch; the read uses the refs present in the worktree"
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W1-S11 -- DP-c-1 asks for ruff clean on the tool and its test, but its paths grant only the tool file; the test is the tool's own --selftest and ruff ran on the tool alone"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~1/NFRA_DEVPLN.TO-DP-c-1.dev-approval-read.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 .tools/portal-dev-approval-read.py",
+   "result": "All checks passed!"
+  },
+  {
+   "tool": "py_compile",
+   "invocation": "python -m py_compile .tools/portal-dev-approval-read.py",
+   "result": "COMPILE-OK (rc 0)"
+  }
+ ]
+}
