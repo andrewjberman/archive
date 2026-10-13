@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-168",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {"doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md", "group": "OTHER", "vintage_commit": "7e571758b1"},
+  "decomp_ref": {"doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md", "vintage_commit": "7e571758b1", "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-168.day-grain-read-of-the-seven-built-offline.md"},
+  "assignee": "0.9.0_WK_IRPT_DASHBD~134",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "b8b77c00ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_DASHBD-D2-W134-S1 appended as raw bytes (2850 bytes, 27 lines) by the first seat; the surprise-row gate reported 1 new row of 281, OK; no other row edited",
+      "artifact_covered_by": ["DB90-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/tieout/tieout_day_read.py",
+      "kind": "script",
+      "commit_or_etag": "9f2d9ee3f6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "tracked; sha256 ac140ddb778df0207ab16af048b857cbc385fcde07c714b30e9cfb791619af8e equals the record's code.sha256; commit-gate clean; selftest prints SELFTEST PASS; plan run once offline (7 requests, 0 vendor calls); pull without --go refuses with rc 2; the live pull has NOT been run by this seat",
+      "artifact_covered_by": ["DB90-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~134/DAY_READ_BUILD.json",
+      "kind": "config_data",
+      "commit_or_etag": "159f224b78",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record with the order's keys; counts only, no account identifier, no run of eight or more digits; the official checker reads it and prints DB90-1-AC1 PASS",
+      "artifact_covered_by": ["DB90-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "159f224b78",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_DASHBD-D2-W134-S2 appended as raw bytes (27 lines, file 649082 bytes); the surprise-row gate reported 1 new row of 283, OK; no other row edited",
+      "artifact_covered_by": ["DB90-1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB90-1-AC1",
+      "criterion_verbatim": "`DB90-1-AC1` -- the record exists with the keys above; the module is tracked and hashes to the stated sha256; the plan is 7 requests over 7 daily ranges with zero vendor calls; the module's `pull` without `--go` refuses; its `selftest` prints `SELFTEST PASS`; no credential logged, no S3 write; no run of 8 or more digits. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r90/p90_round90.py\" . DB90-1-AC1",
+      "output_evidence": "OK: day-read module tracked; plan of 7 request(s) over 7 daily range(s), 0 vendor calls by the worker; `pull` refuses without --go; selftest passes\nDB90-1-AC1 PASS",
+      "denominator": "1 of 1 criterion; the checker's limbs: record keys, module sha256 against the record, plan 7 requests over 7 daily ranges, 0 vendor calls, pull without --go rc 2, selftest SELFTEST PASS, no long digit run; run from the worktree root C:/dev/wk-irpt-dashbd-134 at HEAD 159f224b78",
+      "status": "PASS",
+      "status_reason": "The checker prints DB90-1-AC1 PASS with rc 0 on two consecutive runs; the first ran on the uncommitted record and the second after commit 159f224b78. The plan run printed requests 7, daily_ranges 7, vendor_calls 0, and the reproduced round-89 reasons match that round's committed record (7 UNEXPLAINED in 7 accounts). The series-body parity test asserts equality with bd_selected.requests_for on one synthetic Cottonwood-shaped mapping used only inside the test.",
+      "expect": "DB90-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The module's pull run without --go from the worktree root: its refusal is the negative arm of the criterion's pull limb. The pull mode was never run with --go.",
+      "expected": "a non-zero exit whose message names --go, with no session, no network call and no file written beyond the plan",
+      "observed": "rc 2: 'ERROR: pull is LIVE and needs --go; without --go this mode refuses and makes no call'; the private folder holds only DAY_READ_PLAN.json",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the official checker run twice from the worktree root, same criterion, each run bounded by timeout 120",
+      "observed": "two runs on 2026-10-13: the first on the uncommitted record, the second after commit 159f224b78; each printed 'DB90-1-AC1 PASS' with rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "Running pull --go (the live Black Diamond series pull for the 7 accounts)", "reason": "the issuer's act by the order; the worker wrote the mode and proved only its refusal without --go; no session was loaded, no secret read, no vendor call"},
+    {"item": "Running analyze", "reason": "analyze reads the issuer's pull/ responses, which do not exist until the issuer runs pull --go; analyze refuses on a missing pull record and was not run to completion"},
+    {"item": "Assigning reasons to the day-level differences", "reason": "the next cell DB-b-169 (~136) owns the reason assignment under its own rule file; this cell builds the instrument only"},
+    {"item": "Contents of the private folder (DAY_READ_PLAN.json: request bodies and account identifiers)", "reason": "kept private by the order; the repo carries counts and hashes only; the plan was not copied or printed"}
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W134-S1: (first seat) TO-DB-b-168 step 1 had no firm-neutral performanceSeries body for 49F. Resolved by the issuer's ruling in commit 7167440733, which this seat implemented: series_body() re-derives the body from bd_adapter.build_period_request by the series transformation, and selftest proves parity with bd_selected.requests_for. The row itself is unedited (disposition UNDER_INVESTIGATION in the channel)",
+    "IRPT_DASHBD-D2-W134-S2: the client-data-check for account identifiers printed WARN on commit 9f2d9ee3f6 because the hashed account-id list is absent at the default path and OPAL_ACCOUNT_ID_HASHES is unset; the committed module and record carry no account identifier by reading, and the gate did not check them (ARMED, disarm owner 2.0.0_SA_COO~D2)"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "p90_round90.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r90/p90_round90.py\" . DB90-1-AC1",
+      "result": "HISTORY 2026-10-13 (first seat ~134, before the issuer's amendment 7167440733 and before the module existed; stop at step 1 on row IRPT_DASHBD-D2-W134-S1, surfaced 2026-10-13T14:42:05Z): 'FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~134/DAY_READ_BUILD.json', 'DB90-1-AC1 FAIL', rc 1. Superseded by the PASS entries below."
+    },
+    {
+      "tool": "p90_round90.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r90/p90_round90.py\" . DB90-1-AC1",
+      "result": "2026-10-13, re-seat ~134 on the uncommitted record: 'OK: day-read module tracked; plan of 7 request(s) over 7 daily range(s), 0 vendor calls by the worker; `pull` refuses without --go; selftest passes', 'DB90-1-AC1 PASS', rc 0"
+    },
+    {
+      "tool": "p90_round90.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r90/p90_round90.py\" . DB90-1-AC1",
+      "result": "2026-10-13, after record commit 159f224b78, same worktree: the same two lines, 'DB90-1-AC1 PASS', rc 0 (second run, determinism control)"
+    },
+    {
+      "tool": "tieout_day_read.py selftest",
+      "invocation": "python -I \"C:/dev/wk-irpt-dashbd-134/org/missions/D9/IRPT/IRPT_DASHBD/tieout/tieout_day_read.py\" \"C:/dev/wk-irpt-dashbd-134\" selftest",
+      "result": "rc 0: 'parity true; daily differing [2, 4]; uncorrected misses true; named correction closes true; negative arm open true', then 'SELFTEST PASS'"
+    },
+    {
+      "tool": "tieout_day_read.py plan",
+      "invocation": "python -I \"C:/dev/wk-irpt-dashbd-134/org/missions/D9/IRPT/IRPT_DASHBD/tieout/tieout_day_read.py\" \"C:/dev/wk-irpt-dashbd-134\" plan",
+      "result": "rc 0: 'requests 7 daily_ranges 7 vendor_calls 0 dry_run 1'; 'unexplained segments 7 in accounts 7; reproduced reasons match round 89 record; round-89 copy equals stored: true'; the only S3 path read is the cross-reference prefix (list and get); counts printed, no identifier printed"
+    },
+    {
+      "tool": "tieout_day_read.py pull",
+      "invocation": "python -I \"C:/dev/wk-irpt-dashbd-134/org/missions/D9/IRPT/IRPT_DASHBD/tieout/tieout_day_read.py\" \"C:/dev/wk-irpt-dashbd-134\" pull",
+      "result": "rc 2: 'ERROR: pull is LIVE and needs --go; without --go this mode refuses and makes no call'; no session, no network call, no S3 write"
+    }
+  ]
+}

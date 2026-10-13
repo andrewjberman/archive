@@ -24,7 +24,10 @@ IR = "infra/aws/lambda/investor-reporting"
 INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r21/"
 ROUND192_VERSION = "irpt-template-reader.r19.2"
-TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-verify": "Y222-VERIFY", "y223-design": "Y223-DESIGN"}
+TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-verify": "Y222-VERIFY", "y223-design": "Y223-DESIGN",
+          "y226-effect": "Y226-EFFECT", "y227-resident": "Y227-RESIDENT", "y228-lambda": "Y228-LAMBDA", "y229-stderr": "Y229-STDERR"}
+READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
+UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
     ("Acct Market Value", ("25000000", "31000000")), ("Acct CUSIP", ("912828ZT6", "38141G104")), ("Acct Lot", ("LOT1234", "LOT5678")),
     ("Accnt Value", ("12000000", "15000000")), ("Acct Status", ("AX1234", "BX5678")), ("Acct Type", ("IRA1234", "ROTH5678")),
@@ -167,6 +170,105 @@ def main(argv):
             if not (rec.get("removal") or {}).get("method"):
                 problems.append("removal.method must say how the rows are removed and read ABSENT")
             print("identities %d, offline results %d" % (len(ids), len(runs)))
+    elif check == "y226-effect":
+        rec = load(root, D % "70" + "REOPEN_AND_EFFECT.json", problems)
+        if rec:
+            for member in ("pinned", "moved", "reopen_matrix", "effect_table", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if (rec.get("pinned") or {}).get("template_reader_sha256") != READER_R181_SHA:
+                problems.append("pinned.template_reader_sha256 must be the live r18.1 reader (%s)" % READER_R181_SHA[:12])
+            if (rec.get("pinned") or {}).get("uploads_sha256") != UPLOADS_SHA or (rec.get("moved") or {}).get("uploads_sha256") != UPLOADS_SHA:
+                problems.append("uploads.py must be the same bytes on both sides (%s)" % UPLOADS_SHA[:12])
+            moved_version = (rec.get("moved") or {}).get("reader_version")
+            if moved_version != "irpt-template-reader.r19.3":
+                problems.append("moved.reader_version must read irpt-template-reader.r19.3 (got %r)" % moved_version)
+            cells = {(c.get("stored_by"), c.get("reopened_by")): c for c in rec.get("reopen_matrix") or []}
+            for key in (("pinned", "pinned"), ("pinned", "moved"), ("moved", "pinned"), ("moved", "moved")):
+                c = cells.get(key)
+                if not c or not isinstance(c.get("cases"), int) or c.get("cases") < 1 or c.get("accepted", -1) + c.get("refused", -1) != c.get("cases"):
+                    problems.append("reopen_matrix cell %s must give cases = accepted + refused (%r)" % (key, c))
+            if cells.get(("pinned", "moved")) and cells[("pinned", "moved")].get("refused") != 0:
+                problems.append("an input the PINNED pair stored must be accepted by the MOVED pair (the order of the legs rests on it)")
+            rows = {str(r.get("header")): r for r in rec.get("effect_table") or []}
+            for header, _values in NEGATIVES:
+                r = rows.get(header)
+                if not r or "NORMALIZED" not in str(r.get("after")):
+                    problems.append("one-account header %r must read NORMALIZED after the move (%r)" % (header, r and r.get("after")))
+            for header, _values in POSITIVES:
+                r = rows.get(header)
+                if not r or "ACCOUNT_COLUMN_SEVERAL_VALUES" not in str(r.get("after")):
+                    problems.append("two-account header %r must read ACCOUNT_COLUMN_SEVERAL_VALUES after the move (%r)" % (header, r and r.get("after")))
+            print("matrix cells %d, effect rows %d" % (len(cells), len(rows)))
+    elif check == "y227-resident":
+        rec = load(root, D % "71" + "RESIDENT_ONE_MEMBER_RELEASE.json", problems)
+        if rec:
+            for member in ("base_tarball", "delta_vs_r19_tarball", "tarball", "root_naming", "host_script", "tests", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if (rec.get("base_tarball") or {}).get("sha256") != "84df6479655c07ae6000af40404e53eb056b4c403aa9134bbe9c1521317d497a":
+                problems.append("base_tarball.sha256 must be the release-19 tarball (84df6479...)")
+            delta = rec.get("delta_vs_r19_tarball") or {}
+            names = sorted(str(r.get("member") if isinstance(r, dict) else r).rsplit("/", 1)[-1] for r in delta.get("differing") or [])
+            if names != ["SHA256SUMS", "resident_bindings.json", "template_reader.py"]:
+                problems.append("the release must differ from the release-19 tarball in exactly template_reader.py, resident_bindings.json and SHA256SUMS (differs in %s)" % names)
+            if delta.get("only_in_old") or delta.get("only_in_new"):
+                problems.append("the release must add and remove no member (only_in_old %r, only_in_new %r)" % (delta.get("only_in_old"), delta.get("only_in_new")))
+            tar = rec.get("tarball") or {}
+            if not re.fullmatch(r"[0-9a-f]{64}", str(tar.get("sha256", ""))):
+                problems.append("tarball.sha256 must be a 64-hex digest")
+            if not (rec.get("host_script") or {}).get("sha256"):
+                problems.append("host_script must carry its sha256")
+            tests = rec.get("tests") or {}
+            accepted = ("test_the_readers_output_on_the_fixtures_is_pinned_to_its_version", "test_correction_words_are_the_envelopes_words")
+            explained = [str(x) for x in tests.get("failures_explained") or []]
+            if tests.get("failed") not in (0, "0"):
+                ok = (isinstance(tests.get("failed"), int) and tests.get("failed") == len(explained)
+                      and all(any(e.find(name) >= 0 for name in accepted) for e in explained))
+                if not ok:
+                    problems.append("the reader's tests must pass on the build except the two CTO-accepted, explained failures (failed=%r)" % tests.get("failed"))
+            print("differing %s; tests passed %s failed %s" % (names, tests.get("passed"), tests.get("failed")))
+    elif check == "y228-lambda":
+        rec = load(root, D % "72" + "LAMBDA_LEG_R193.json", problems)
+        if rec:
+            for member in ("live_read", "release_build", "differ_from_live", "holds_only_control", "patch", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            live = rec.get("live_read") or {}
+            if not live.get("code_sha256") or not live.get("read_at") or not live.get("member_manifest"):
+                problems.append("live_read needs code_sha256, read_at and member_manifest (read from AWS in the run)")
+            lman = live.get("member_manifest") or {}
+            rman = (rec.get("release_build") or {}).get("member_manifest") or {}
+            if len(lman) < 20 or len(rman) < 20:
+                problems.append("both manifests must map at least 20 members to their sha256 (live %d, release %d)" % (len(lman), len(rman)))
+            else:
+                differ = sorted(k for k in set(lman) | set(rman) if lman.get(k) != rman.get(k))
+                if differ != ["template_reader.py"]:
+                    problems.append("the release package must differ from the live package in exactly template_reader.py (differs in %s)" % differ)
+                if sorted(rec.get("differ_from_live") or []) != differ:
+                    problems.append("differ_from_live does not equal the manifests' difference")
+            ctl = rec.get("holds_only_control") or {}
+            if ctl.get("code_sha256") != live.get("code_sha256") or ctl.get("differs_from_live") != []:
+                problems.append("the control build (no reader move) must reproduce the live CodeSha256 and differ in no member (%r)" % ctl)
+            if not (rec.get("release_build") or {}).get("code_sha256_base64"):
+                problems.append("release_build.code_sha256_base64 must carry the expected CodeSha256")
+            print("live members %d, release members %d" % (len(lman), len(rman)))
+    elif check == "y229-stderr":
+        script = root / "infra/aws/lambda/ci/build-and-upload.sh"
+        text = script.read_text(encoding="utf-8") if script.is_file() else ""
+        merged = [ln.strip() for ln in text.splitlines() if "head-object" in ln and "2>&1" in ln]
+        merged += [ln.strip() for ln in text.splitlines() if re.search(r"--query\s+'(ContentLength|Metadata\.\"content-sha256\")'.*2>&1", ln)]
+        if merged:
+            problems.append("a head-object value still merges stderr into stdout: %r" % merged[:3])
+        got = subprocess.run(["bash", "infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh"], cwd=str(root),
+                             capture_output=True, text=True, encoding="utf-8", errors="replace")
+        out = (got.stdout or "") + (got.stderr or "")
+        print("verify tests rc=%d" % got.returncode)
+        for arm in ("landed_upload_verifies", "head_object_fails", "stderr_warning_ignored", "mutant"):
+            if not re.search(r"^PASS %s" % arm, out, re.M):
+                problems.append("the test arm %s did not print PASS" % arm)
+        if got.returncode != 0 or "ALL PASS" not in out:
+            problems.append("the verify tests must exit 0 and print ALL PASS")
     return finish(check, problems)
 
 

@@ -1,0 +1,89 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-SCRATCH-R21.ci-script-upload-arm-aq2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-SCRATCH-R21.ci-script-upload-arm-aq2.md",
+  "group": "OTHER",
+  "vintage_commit": "a9a080fc4f"
+ },
+ "assignee": "0.7.0_AE_CloudOps~AQ2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R21A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/task_orders/IRPT_ANLREQ.TO-SCRATCH-R21.ci-script-upload-arm-aq2.md",
+  "vintage_commit": "a9a080fc4f"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/investor-reporting/_ar222_scratch/ar222-20261013T151208.zip VersionId RIwe3hOhnyjcUI5puqXSDq32sZ8ES9YB",
+   "kind": "s3_object",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "one scratch object, 363594 bytes, content-sha256 vlGh380QUKvBMOhJn0GJGgDi1/WLI9qTaSP2uETmdP4= equal to the script's SHA256 line; no function key, Lambda, Terraform or repository map touched; not deleted",
+   "artifact_covered_by": [
+    "R21S-AC2"
+   ],
+   "commit_or_etag": "vlGh380QUKvBMOhJn0GJGgDi1/WLI9qTaSP2uETmdP4="
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R21S-AC1",
+   "invocation": "grep -cE '^(exit_code=0|write VERIFIED)' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r21/SCRATCH_RUN.txt",
+   "expect": "^2$",
+   "output_evidence": "0\nexit=1 (grep -c found no line)",
+   "denominator": "SCRATCH_RUN.txt records exit_code=1 and no 'write VERIFIED' line: the script exited 1 with UPLOAD NOT VERIFIED; the object landed",
+   "status": "FAIL",
+   "criterion_verbatim": "grep -cE '^(exit_code=0|write VERIFIED)' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r21/SCRATCH_RUN.txt",
+   "method": "command",
+   "status_reason": "The real run exited 1 and printed UPLOAD NOT VERIFIED, so the criterion's two lines (exit_code=0, write VERIFIED) are absent: the fix did not pass in this worktree. The object landed and read back equal (AC2 PASS). The script's own text shows both scalar reads returned the right values, each preceded by a .tools/aws shim WARN line merged in by the script's 2>&1 (this worktree's sparse cone had no .tools). The order forbids a retry with changes, so no second run was made."
+  },
+  {
+   "criterion_id": "R21S-AC2",
+   "invocation": "grep -cE '^(readback size_equal=true|readback sha_equal=true|function_key_unchanged=true)' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r21/SCRATCH_READBACK.txt",
+   "expect": "^3$",
+   "output_evidence": "3\nexit=0",
+   "denominator": "size_equal, sha_equal and function_key_unchanged all true: scratch object 363594 bytes, sha256 equal; irpt-status key/map/CodeSha256 equal BEFORE",
+   "status": "PASS",
+   "criterion_verbatim": "grep -cE '^(readback size_equal=true|readback sha_equal=true|function_key_unchanged=true)' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r21/SCRATCH_READBACK.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "R21S-AC3",
+   "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-ci-script-scratch-arm-20261013_deploy_completion.md",
+   "expect": "^\\*\\*Status:\\*\\* CLOSED",
+   "output_evidence": "**Status:** CLOSED\nexit=0",
+   "denominator": "3 of 3 ledger legs S1-S3 carried proof at close",
+   "status": "PASS",
+   "criterion_verbatim": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-ci-script-scratch-arm-20261013_deploy_completion.md",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "a single real run; the order says no retry with changes",
+   "observed": "one run, exit 1",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "re-run with .tools in the worktree cone",
+   "reason": "the order says: if the script exits non-zero that IS the finding, do not retry with changes; the WARN line came from this worktree's sparse cone lacking .tools/aws"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261013T1510Z_irpt-ci-script-scratch-arm-20261013_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "build-and-upload.sh @9ffca59db9 (blob 372c3240fb)",
+   "invocation": "BAU_SOURCE_MAP_OVERRIDE=<temp map> ... investor-reporting irpt-status, no BUILD_ONLY",
+   "result": "exit 1, UPLOAD NOT VERIFIED; object landed and read back equal"
+  }
+ ]
+}
