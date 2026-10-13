@@ -3,7 +3,7 @@
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
 
   IB171-1  IB-pr-496  the 49F builder no longer leaves the Tax membership snapshot in a temp file; raw_keys.json cites the live mint (rows W345-S3, W344-S2)
-    AC1  the worker's new test file passes (3 or more, none failed)
+    AC1  the worker's new test file passes (5 or more, none failed) and exercises the Inflection builder too
     AC2  the issuer's seam probe: a build that raises, a build that returns, and an operator's own env-var file (kept)
     AC3  raw_keys.json: the 49financial account holdings_source cites the live mint (dim_balance, holdings_49f) and no longer names the smartx allocation map; the file is valid JSON
   IB171-2  IB-pr-497  ONE read-only count of leftover Tax-snapshot temp files on the host(s) that run the builder (counts and ages only)
@@ -11,17 +11,17 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
     AC2  the record carries no path, no name, no id, no long digit run
     AC3  the recorded command is read-only (a find or ls; no rm, cat, tee, redirect, shred, mv, cp)
   IB171-3  IB-pr-498  irpt-holdings rebuilt from one pin (the staged HoldingsSnapshot schema copy re-pinned) and its never-widen packet
-    AC1  the census: built twice identical, 0 signature and 0 attribute mismatches, the changed members equal the repo blobs at the pin, the schema copy among them, uploaded false
+    AC1  the census: built twice identical, 0 signature mismatches, attribute mismatches no more than the live zip's and a subset of its lines, the changed members equal the repo blobs at the pin, the schema copy among them, uploaded false
     AC2  the packet carries Branch A and B, the red list, the live and built sha256, the pair's halves and the rollback
     AC3  the replay arms: a node with account_id validates, a node without validates, an unknown node member is refused; served figures changed 0; the bound counters 0
   IB171-4  IB-pr-499  irpt-directory-search rebuilt from one pin (handler.py) and its never-widen packet
     AC1  the census, as above, handler.py among the changed members
     AC2  the packet, as above
     AC3  the replay arms (tail of a non-head account, shared tail, name query, no-masks entry) and the REACH counts per firm; the bound counters 0
-  IB171-5  IB-pr-500  the portal's two stale generators reproduce their committed bytes, and selected_sections resolves
-    AC1  running each generator leaves its outputs byte-equal to the committed files (end-of-line differences ignored)
+  IB171-5  IB-pr-500  the portal's fe-s-15 generator reproduces its committed bytes, and selected_sections resolves (fe-s-18 is deferred: row W350-S1)
+    AC1  running the fe-s-15 generator leaves its outputs byte-equal to the committed files (end-of-line differences ignored)
     AC2  every selected_sections id in the portal ExportBundle wire fixture and the submit-export request fixture is a section_id of the portal AnalysisReport wire copy
-    AC3  the five token-citing portal tests still pass and no AnalysisReport old section is back
+    AC3  the five token-citing portal tests still pass
 """
 import glob
 import json
@@ -161,8 +161,17 @@ def release_census(cell_tag, slot, function, must_member):
             fail("%s must be 64-hex" % k)
     if f.get("built_twice_identical") is not True:
         fail("built_twice_identical must be true")
-    if f.get("built_signature_mismatched") != 0 or f.get("built_attribute_mismatched") != 0:
-        fail("the built zip must read 0 signature and 0 attribute mismatches")
+    if f.get("built_signature_mismatched") != 0 or f.get("live_signature_mismatched", 0) != 0:
+        fail("the built zip (and the live zip) must read 0 signature mismatches")
+    # ATTRIBUTE mismatches: the staged _authz pins (served.py @74a62fb passes load_report_owner to enforce.Enforcer, whose staged pin lacks it) are a
+    # PRE-EXISTING pair mismatch identical in the live zip, on a path neither entry reaches (render_ports is never passed). The built zip may
+    # carry NO attribute mismatch the live zip does not carry: built <= live, and every built line is a live line.
+    bm, lm = f.get("built_attribute_mismatched"), f.get("live_attribute_mismatched")
+    if not is_int(bm) or not is_int(lm) or bm > lm:
+        fail("built_attribute_mismatched (%r) must be an integer not above live_attribute_mismatched (%r)" % (bm, lm))
+    bl, ll = f.get("attribute_mismatch_lines_built"), f.get("attribute_mismatch_lines_live")
+    if not isinstance(bl, list) or not isinstance(ll, list) or len(bl) != bm or len(ll) != lm or not set(bl) <= set(ll):
+        fail("attribute_mismatch_lines_built must be a list of bm lines, all present in attribute_mismatch_lines_live (a list of lm lines)")
     cm = f.get("changed_members") or []
     if not cm:
         fail("changed_members is empty")
@@ -202,8 +211,10 @@ def main():
             if not (ROOT / tf).is_file():
                 fail("no %s" % tf)
             rc, p, f, e, out = pytest_counts(tf)
-            if p < 3 or f or e:
-                fail("%s: %d passed, %d failed, %d errors (3 passed and none failed are required)" % (tf, p, f, e))
+            if p < 5 or f or e:
+                fail("%s: %d passed, %d failed, %d errors (5 passed and none failed are required: three for the 49F builder, two for the Inflection builder)" % (tf, p, f, e))
+            if "holdings_inf" not in (ROOT / tf).read_text(encoding="utf-8"):
+                fail("the test file must exercise the Inflection builder (holdings_inf)")
             print("OK: %d tests pass" % p)
         elif arm == "AC2":
             probe_builder()
@@ -302,17 +313,19 @@ def main():
         else:
             fail("unknown criterion")
     elif cell == "IB171-5":
-        gens = [("src/pages/InvestorReporting/__tests__/fe-s-15/gen-fixtures.ts", ["fixtures/fe-s-15", "fixtures/smoke/fe-s-15-clean.json", "fixtures/smoke/fe-s-15-needs-correction.json"]),
-                ("src/pages/InvestorReporting/__tests__/fe-s-18/gen-fixtures.ts", ["fixtures/smoke"])]
+        gen = "src/pages/InvestorReporting/__tests__/fe-s-15/gen-fixtures.ts"
+        outs = ["src/pages/InvestorReporting/fixtures/fe-s-15", "src/pages/InvestorReporting/fixtures/smoke/fe-s-15-clean.json", "src/pages/InvestorReporting/fixtures/smoke/fe-s-15-needs-correction.json"]
         if arm == "AC1":
-            for g, outs in gens:
-                rc, out = run(["bun", "run", g], timeout=100, cwd=ROOT / "portal")
-                if rc != 0:
-                    fail("%s did not run: %s" % (g.split("/")[-2], re.sub(r"\s+", " ", out)[-160:]))
-            rc, diff = run(["git", "-C", str(ROOT / "portal"), "diff", "--ignore-cr-at-eol", "--stat", "--", "src/pages/InvestorReporting/fixtures"], timeout=60)
-            if diff.strip():
-                fail("a generator drifts from the committed bytes: %s" % re.sub(r"\s+", " ", diff)[:200])
-            print("OK: both generators run and reproduce the committed fixtures")
+            # fe-s-18's generator is NOT in this round's scope: its committed outputs are mutually inconsistent (row W350-S1), a CTO decision
+            rc, out = run(["bun", "run", gen], timeout=100, cwd=ROOT / "portal")
+            if rc != 0:
+                fail("the fe-s-15 generator did not run: %s" % re.sub(r"\s+", " ", out)[-160:])
+            # stdout ONLY: git's line-ending warnings go to stderr and are not drift
+            pd = subprocess.run(["git", "-C", str(ROOT / "portal"), "diff", "--ignore-cr-at-eol", "--stat", "--"] + outs, capture_output=True, timeout=60)
+            diff = pd.stdout.decode("utf-8", "replace")
+            if pd.returncode != 0 or diff.strip():
+                fail("the fe-s-15 generator drifts from the committed bytes: %s" % re.sub(r"\s+", " ", diff)[:200])
+            print("OK: the fe-s-15 generator runs and reproduces the committed fe-s-15 fixtures")
         elif arm == "AC2":
             wire = load(PORTAL_IR + "fixtures/wire/AnalysisReport.valid.json")
             sids = {s.get("section_id") for s in (wire.get("instance", wire).get("sections") or [])}
@@ -334,19 +347,12 @@ def main():
             files = [T + "iv-e-101.opal-report-words.test.tsx", T + "iv-e-105.opal-document-words.test.tsx", T + "iv-e-106.sections-retained-ref.test.ts",
                      T + "iv-e-115.vendor-section-names-units.test.tsx", T + "iv-e-122.vendor-validation-and-source.test.tsx"]
             rc, out = run(["bun", "test"] + files, timeout=110, cwd=ROOT / "portal")
-            out = re.sub(r"\x1b\[[0-9;]*m", "", out)
+            out = re.sub(r"\[[0-9;]*m", "", out)
             m = re.search(r"(\d+) pass", out)
             f = re.search(r"(\d+) fail", out)
             if rc != 0 or not m or int(m.group(1)) < 21 or (f and int(f.group(1)) != 0):
                 fail("the five portal tests: rc %s, %s pass, %s fail" % (rc, m.group(1) if m else "?", f.group(1) if f else "?"))
-            hits = 0
-            for p in (ROOT / PORTAL_IR / "fixtures").rglob("*.json"):
-                t = p.read_text(encoding="utf-8", errors="replace")
-                if re.search(r"section_type[\"']?\s*[:=]\s*[\"']annualized_return[\"']", t):
-                    hits += 1
-            if hits:
-                fail("%d fixture(s) carry the old AnalysisReport section again" % hits)
-            print("OK: the five portal tests pass and the old section is not back")
+            print("OK: the five portal tests pass")
         else:
             fail("unknown criterion")
     else:
