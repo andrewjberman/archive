@@ -19,4 +19,4 @@ calendar years 2016..now; Bloomberg returns the fiscal years it holds).
 `bbg_quote.py --record ... --no-quote` (label "drawn before C-METER Bloomberg; no quote") when site Z reports the measured cells.
 
 **FWD-1** (carried): the CVO graded the agreement clause MET on AMLP (msg 1526, ADJUDICATION_v2 @bc1ce7b850; 100 of 108 dates clear the
-90 pct floor). It waits only on hop 7, the served page for 0QF880237 (dell2 ADVI_COTBKF).
+90 pct floor). It waits only on hop 7, the served page for <account id removed> (dell2 ADVI_COTBKF).
