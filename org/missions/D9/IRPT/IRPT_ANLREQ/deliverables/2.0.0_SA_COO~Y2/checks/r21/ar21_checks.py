@@ -25,6 +25,7 @@ INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r21/"
 D22 = D.replace("/r21/", "/r22/")
 D23 = D.replace("/r21/", "/r23/")
+D24 = D23
 ROUND192_VERSION = "irpt-template-reader.r19.2"
 TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-verify": "Y222-VERIFY", "y223-design": "Y223-DESIGN",
           "y226-effect": "Y226-EFFECT", "y227-resident": "Y227-RESIDENT", "y228-lambda": "Y228-LAMBDA", "y229-stderr": "Y229-STDERR",
@@ -33,7 +34,8 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y249-swap": "Y249-SWAP", "y250-qa": "Y250-QA", "y251-swap": "Y251-SWAP", "y252-portal": "Y252-PORTAL",
           "y261-read": "Y261-READ", "y262-portal": "Y262-PORTAL", "y263-portal": "Y263-PORTAL", "y264-portal": "Y264-PORTAL", "y265-portal": "Y265-PORTAL", "y266-live": "Y266-LIVE",
           "y271-j2": "Y271-J2", "y272-j5": "Y272-J5", "y273-portal": "Y273-PORTAL", "y274-portal": "Y274-PORTAL", "y275-portal": "Y275-PORTAL",
-          "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ"}
+          "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ",
+          "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -560,6 +562,40 @@ def main(argv):
                 problems.append("door.where_ticker_not_found_is_made must name file:line")
             if not rec.get("cells"):
                 problems.append("cells must list the cells the design splits into")
+    elif check == "y279-portal":
+        portal_candidate(root, D23 % "100" + "PORTAL_COMMENTARY_ONLY_WHEN_TRUE_CANDIDATE.json", problems)
+    elif check in ("y280-submit", "y281-list"):
+        worker, rel, testfile, floor = (("101", "SUBMIT_ANALYSIS_REQUEST.json", "tests/test_submit_analysis_request.py", 12) if check == "y280-submit"
+                                        else ("102", "LIST_SCOPED.json", "tests/test_list_scoped_firm.py", 10))
+        rec = load(root, D24 % worker + rel, problems)
+        if rec:
+            for member in ("read", "authorization_change", "tests", "before_arm", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if not (rec.get("authorization_change") or "").strip():
+                problems.append("authorization_change must state in a paragraph who may now do what")
+            if (rec.get("before_arm") or {}).get("failed") in (None, 0, "0"):
+                problems.append("before_arm: the new tests must FAIL at HEAD without the change")
+        tc = "infra/aws/lambda/ticket_center"
+        if not (root / tc / testfile).is_file():
+            problems.append("no %s/%s" % (tc, testfile))
+        else:
+            rc, passed, failed = pytest(root, testfile, tc)
+            print("%s: %d passed, %d failed (rc=%d)" % (testfile, passed, failed, rc))
+            if rc != 0 or failed or passed < floor:
+                problems.append("%s must pass with at least %d tests" % (testfile, floor))
+        rc, passed, failed = pytest(root, "tests", tc)
+        print("ticket service folder: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+        if rc != 0 or failed or passed < 206:
+            problems.append("the ticket service folder must pass with at least 206 tests")
+    elif check == "y282-portal":
+        rec = portal_candidate(root, D24 % "103" + "PORTAL_PARTNER_REACH_CANDIDATE.json", problems)
+        if rec and not (rec.get("read") or {}).get("requiresDev_pattern"):
+            problems.append("read.requiresDev_pattern must name the estate's existing DEV-only pattern")
+    elif check == "y283-portal":
+        rec = portal_candidate(root, D24 % "104" + "PORTAL_PARTNER_VIEW_CANDIDATE.json", problems)
+        if rec and not (rec.get("read") or {}).get("how_filing_is_sent"):
+            problems.append("read.how_filing_is_sent must name file:line")
     return finish(check, problems)
 
 
