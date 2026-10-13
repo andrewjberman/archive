@@ -1,0 +1,20 @@
+ADVI_BDPRCE.TO-BP-a-3 -- worker session log (0.9.0_WK_ADVI_BDPRCE~3, fabric dell1, read-only)
+
+1. First act: branch wk-ADVI_BDPRCE-3; tree check test -d org && test -d .tools -> TREE-OK. HEAD f75da01777 at start.
+2. Premises re-grounded: window end = newest silver/prices/<date>.parquet = 2026-10-13 (list-objects-v2). Window =
+   20 weekdays 2026-09-16..2026-10-13 (as named). Served count is 1,657 on the current canonical object, not 1,610.
+3. Listings (S3 list verbs only): list-object-versions of silver/prices/, silver/transactions/ and the canonical object.
+4. Downloads (get-object --version-id) into C:/dev/wk-bdprce-r1-3-data/v/, outside the checkout: 114 manifest objects
+   (gap_fetch.sh) plus 2 canonical probe versions by hand. One select-object-content attempt was rejected by the CLI
+   (no --version-id); no data read.
+5. Measurement: gap_measure.py (local files only). Ladder: EQUAL, version-at-write (superset over 74 versions),
+   multi-day windows over 40 weekday partitions, other causes (c1-c4), NOT_RECOMPUTABLE, UNEXPLAINED.
+   Sum of classes = served_rows = 1,657.
+6. A rail denial on a Python heredoc (comp-rail R3, misread as a repo search) ran nothing; re-run as a file. No S3
+   listing was denied.
+7. Record files committed first (b23d34ec5f): gap_manifest.py, gap_fetch.sh, gap_measure.py, GAP.json, GAP.md, GAP_ROWS.csv.
+8. AC1: r1_checks.py gap -> "GAP record ok served=1657 equal=1148 explained=429 unexplained=64" rc=0.
+   Mutant (UNEXPLAINED 63): "GAP record FAIL classes sum 1656 != served_rows 1657" rc=1. Determinism: two runs, same md5.
+9. AC2: r4_scope.py -> "ROUND 4 SCOPE: OK 7 changed, 0 outside, 0 required missing" rc=0 (before the channel commit).
+10. The surprise channel file was absent at f75da01777; opened in this worktree as worker ~3's section (rows
+    ADVI_BDPRCE-D1-W3-S1..S5), id form D1 per the channel header.
