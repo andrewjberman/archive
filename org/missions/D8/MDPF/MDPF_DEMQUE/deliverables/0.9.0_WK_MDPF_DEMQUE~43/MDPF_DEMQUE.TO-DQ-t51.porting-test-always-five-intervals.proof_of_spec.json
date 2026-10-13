@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t51",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t51.porting-test-always-five-intervals.md",
+    "group": "OTHER",
+    "vintage_commit": "57e446ce0b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "57e446ce0b",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t51.porting-test-always-five-intervals.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~43",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/porting_test.py",
+      "kind": "script",
+      "commit_or_etag": "a8710f8b4a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--build --out PATH reads the store index (S3 read only, no vendor call) and writes the porting-test request. draw_intervals: exactly 5 intervals for a window of 10 trading days or more; k 0..2 fixed lengths (1 month, 1 quarter, 1 year) that do not fit are replaced by a salted sha256 drawn length of 5 to N-1 trading days; k 3..4 draw 5 to min(250, N-1); a window under 10 trading days is UNTESTABLE ([] from draw_intervals, listed in the request's untestable list with the reason 'window under 10 trading days'). build_request: one single-day entry per endpoint, at most 10 a security, validated by bbg_quote._validate before any write; the --build line is securities, testable, untestable, intervals_total, cells, max_cells_per_security, need_class, window_start. compare: PASS | FAIL | NO_BLOOMBERG | UNTESTABLE (no interval), pure. Real index: 326 securities, 326 testable, 0 UNTESTABLE, 1630 intervals, 3195 cells, max 10 a security; two runs byte-identical.",
+      "artifact_covered_by": [
+        "DQ9-t51-AC1",
+        "DQ9-t51-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_porting_intervals.py",
+      "kind": "test",
+      "commit_or_etag": "a8710f8b4a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the three named tests PASSED (synthetic windows, no network, no S3): 3 passed on the check's run.",
+      "artifact_covered_by": [
+        "DQ9-t51-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_porting_test.py",
+      "kind": "test",
+      "commit_or_etag": "a8710f8b4a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one assertion updated to the new rule only: the 14 April to 9 October 2026 window now carries 5 intervals with the 1-year interval replaced by a drawn length (it was dropped, 4 intervals). The other two DQ-t-49 tests are unchanged and PASS.",
+      "artifact_covered_by": [
+        "DQ9-t51-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "faf3f0617b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows MDPF_DEMQUE-D1-W43-S1 (the UNTESTABLE arm is vacuous on the real index: minimum window 125 trading days, 0 UNTESTABLE) and MDPF_DEMQUE-D1-W43-S2 (the salt, the word order and the fit test were not stated in the order) appended, OBSERVATION, INERT. Existing rows not edited. The box/dell1 merge (a29818172c) was carried in first.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t51-AC1",
+      "criterion_verbatim": "DQ9-t51-AC1 -- the three named tests. python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t51_tests.py -> INT-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t51_tests.py",
+      "output_evidence": "test_demque_porting_intervals.py::test_a_fixed_length_that_does_not_fit_is_replaced_by_a_sha256_drawn_length_that_fits_so_every_testable_security_has_five_intervals PASSED; test_a_window_under_ten_trading_days_is_untestable_with_a_reason_and_never_a_fail PASSED; test_every_interval_is_at_least_five_trading_days_and_overlap_is_allowed PASSED; 3 passed in 3.01s. Verbatim last line: INT-OK ; rc=0.",
+      "denominator": "3 of 3 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "INT-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t51-AC2",
+      "criterion_verbatim": "DQ9-t51-AC2 -- on the REAL index: every testable security has exactly 5 intervals, the cells stay within 10 a security, the UNTESTABLE ones are listed with the reason, the file is deterministic and valid. python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t51_real.py -> INT-REAL-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t51_real.py",
+      "output_evidence": "{\"cells\": 3195, \"intervals_total\": 1630, \"max_cells_per_security\": 10, \"need_class\": \"client\", \"securities\": 326, \"testable\": 326, \"untestable\": 0, \"window_start\": \"2013-05-10\"} then INT-REAL-OK 326 testable with exactly 5 intervals each, 0 UNTESTABLE, 3195 cells ; rc=0; 40.958 s wall (timeout 120).",
+      "denominator": "326 of 326 index securities testable with exactly 5 intervals each (1630 = 5 x 326); 0 UNTESTABLE; 3195 cells against a cap of 3260 (10 a security); max 10 a security",
+      "status": "PASS",
+      "expect": "INT-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the --build line run twice to .scratch files on the real index; cmp of the two request files",
+      "observed": "IDENTICAL bytes (265500 bytes, 3195 entries); the request is not committed",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "two in-process mutants (monkeypatched in .scratch/t51_mutant.py, no file edit) run against the three named tests: MIN_WINDOW_DAYS lowered to 5 (an 8-day window becomes testable); TD_MIN lowered to 1 (intervals may be one trading day long)",
+      "expected": "mutant A fails the UNTESTABLE test (and the replacement and minimum tests through the empty replacement range); mutant B fails the minimum-length test and the replacement test; the baseline passes all three",
+      "observed": "baseline PASS x3; mutant A: UNTESTABLE test FAIL (AssertionError), replacement test FAIL and minimum test FAIL (ZeroDivisionError on a 5-day window); mutant B: UNTESTABLE test PASS, replacement test FAIL and minimum test FAIL (AssertionError); restored PASS x3",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any Yahoo call, any Bloomberg call, any draw from the queue, any write to S3, the ledger, the queue or pacer state, any AWS write",
+      "reason": "order BOUNDS: READ-ONLY; the index is read (S3 read) and the request is written to a scratch path only"
+    },
+    {
+      "item": "the UNTESTABLE arm of the real request",
+      "reason": "no held window on the real index is under 10 trading days (minimum 125): the real run lists 0 UNTESTABLE; the arm is exercised by the synthetic test. Surprise MDPF_DEMQUE-D1-W43-S1"
+    },
+    {
+      "item": "any account number or account key in a committed file",
+      "reason": "order BOUNDS; the request carries CUSIP and date only"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W43-S1: on the real index the UNTESTABLE arm of DQ9-t51-AC2 is vacuous (0 windows under 10 trading days; minimum 125); the real check passes with 0 UNTESTABLE (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W43-S2: the order does not state the salt, the word order or the fit test of the replacement draw; the worker chose them and recorded them in porting_test.py (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~43/MDPF_DEMQUE.TO-DQ-t51.porting-test-always-five-intervals.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "the whole folder, from the worktree root, once, timeout 120",
+      "result": "177 passed in 15.98s, rc=0 (0 failed); was 174 at DQ-t-49, plus the three new named tests"
+    },
+    {
+      "tool": "python data/mdpf/scripts/demque/porting_test.py --build --out <scratch>/t51_a.json",
+      "invocation": "read only over the real index, timeout 120, run twice",
+      "result": "rc=0; {\"securities\": 326, \"testable\": 326, \"untestable\": 0, \"intervals_total\": 1630, \"cells\": 3195, \"max_cells_per_security\": 10, \"need_class\": \"client\", \"window_start\": \"2013-05-10\"}; second run byte-identical"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque/test_demque_porting_intervals.py data/mdpf/scripts/demque/test_demque_porting_test.py -v",
+      "invocation": "the new file and the updated file, timeout 120",
+      "result": "6 passed in 3.90s, rc=0"
+    }
+  ]
+}

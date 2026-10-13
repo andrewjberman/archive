@@ -5,7 +5,7 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
   IB182-1  IB-pr-516  the APPLY of the signed irpt-directory-search pair (IB-pr-515): the one function moved by its digest-gated Terraform path, then one synthetic tail search
     AC1  the gates: both halves signed at the packet sha256, step 0 MATCH, no open marker on any live worktree, the start read equals the signed live digest, the ledger entry, the Branch B version named
     AC2  the apply: the rebuilt digest equals the signed one, the plan is 1 change and 0 destroy, the live function after equals the built digest, the re-plan is 0 changes, handler.py is the only changed member
-    AC3  the direct proof (one synthetic tail search and its resolve, both reads) and the bound counters
+    AC3  (amended, AMENDMENT 1) the health proof: the deployed handler.py member equals the built member, a log-group read since the apply shows no 5xx or TypeError, the one refused fixture invoke, and the bound counters
 """
 import json
 import re
@@ -20,6 +20,7 @@ COO_HALF = D + "2.0.0_SA_COO~P2/NEVER_WIDEN_IB_pr_515_DIRECTORY_SEARCH_REFRESHED
 CTO_HALF = D + "1.0.0_SA_CTO~DELL2/NEVER_WIDEN_IB_pr_515_DIRECTORY_SEARCH_REFRESHED_CTO_HALF.md"
 PACKET_SHA = "3c369b9086b3453fdb40efcc94655eb17933d2c65c35f248dd6255cb21db6888"
 LIVE_B64 = "tvrsQ+w820jp1pxiUoYrhiKCZGVnViUTbBsDUbJEG3w="
+HANDLER_SHA = "d73af1c77aa3cd1d09ecaeb20ace35d776c98c88e15519236786a06725ad1387"
 BUILT_B64 = "rXHDDz/ZhY2pZFuLDcrPisAs69IuTd6p8Rwflxhvwyw="
 ROOT = Path(".")
 CID = ""
@@ -98,17 +99,17 @@ def main():
             fail("rollback_performed must be false for a landed apply (a Branch B restore is reported, not graded as a pass)")
         print("OK: the function moved to the signed digest; re-plan 0")
     else:
-        p = r.get("direct_proof") or {}
-        if p.get("operation") != "search" or p.get("directory") != "synthetic" or p.get("persisted") is not False:
-            fail("direct_proof must be a synthetic-directory search that persisted nothing")
-        if not (p.get("account_entries") == 1 and p.get("kind") == "ACCOUNT" and p.get("permitted_account_count") == 1):
-            fail("direct_proof must read one ACCOUNT entry with permitted_account_count 1")
-        if p.get("resolve_account_count") != 1:
-            fail("the resolve of that entry must return exactly one account")
-        if not re.fullmatch(r"[0-9a-f]{64}", str(p.get("response_sha256", ""))):
-            fail("direct_proof.response_sha256 must be a 64-hex digest (the response itself is not recorded)")
+        h = r.get("health_proof") or {}
+        if not re.fullmatch(r"[0-9a-f]{64}", str(h.get("deployed_handler_py_sha256", ""))) or h.get("deployed_handler_py_sha256") != HANDLER_SHA:
+            fail("health_proof.deployed_handler_py_sha256 must equal the built handler.py member %s" % HANDLER_SHA)
+        if not (str(h.get("window_start_utc", "")).strip() and str(h.get("window_end_utc", "")).strip() and str(h["window_end_utc"]) > str(h["window_start_utc"])):
+            fail("health_proof needs a window with window_end_utc later than window_start_utc")
+        if not (is_int(h.get("invocations_in_window")) and h["invocations_in_window"] >= 0 and h.get("errors_5xx_or_typeerror") == 0):
+            fail("health_proof.invocations_in_window must be an integer and errors_5xx_or_typeerror must be 0")
+        if h.get("fixture_invoke_refused_at") != "CONTRACT_VERSION" or h.get("persisted") is not False:
+            fail("the one spent fixture invoke must be recorded as refused at CONTRACT_VERSION, and persisted false")
         c = r.get("counters") or {}
-        want = {"function_updates": 1, "lambda_invokes": 2, "iam_changes": 0, "route_changes": 0, "env_changes": 0,
+        want = {"function_updates": 1, "lambda_invokes": 1, "iam_changes": 0, "route_changes": 0, "env_changes": 0,
                 "table_writes": 0, "figures_written": 0, "files_deleted": 0, "sibling_functions_moved": 0}
         for k, v in want.items():
             if c.get(k) != v:
@@ -116,7 +117,7 @@ def main():
         blob = json.dumps(r)
         if re.search(r"\d{12,}", re.sub(r"[0-9a-f]{64}", "", blob)):
             fail("the record carries a long digit run (an account or client number)")
-        print("OK: direct proof and counters")
+        print("OK: health proof and counters")
     print("%s PASS" % CID)
 
 
