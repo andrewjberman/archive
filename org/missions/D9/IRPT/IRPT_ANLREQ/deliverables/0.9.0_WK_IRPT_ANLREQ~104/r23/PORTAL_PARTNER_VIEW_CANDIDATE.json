@@ -1,0 +1,100 @@
+{
+  "cell": "AR-y-283",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-283",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~104",
+  "status": "CANDIDATE, LOCAL, NOT LANDED, NOT PUSHED, NOT DEPLOYED",
+  "dev_tip": "a577cba5644192bf1f62b10dc03dd3657e12b59f",
+  "dev_tip_source": "git -C C:/dev/ajb_workspace/portal fetch origin DEV, then rev-parse origin/DEV (read this run)",
+  "branch": "wk-IRPT_ANLREQ-104-portal",
+  "worktree": "C:/dev/wk-portal-104",
+  "commit": "e82daf4c98755c18446c318060d63e0223bc473d",
+  "commit_subject": "IRPT_ANLREQ AR-y-283 (0.9.0_WK_IRPT_ANLREQ~104, candidate on wk-IRPT_ANLREQ-104-portal, not landed, not pushed): the partner-firm Ticket Center shows the Analysis Request form and the caller's own firm's request list; filing goes to POST /api/scoped/tickets/submit with no firm member and never calls the report-record route; refusals, the failed SUBMIT and a failed list read say so in words; an internal caller's page is unchanged",
+  "files_changed": [
+    "src/api/endpoints/tickets.ts",
+    "src/pages/TicketCenter/TicketCenter.tsx",
+    "src/pages/TicketCenter/analysisRequest.ts",
+    "src/pages/TicketCenter/__tests__/partner-view.test.tsx"
+  ],
+  "read": {
+    "sections_by_caller": {
+      "internal_or_dev": "TicketCenter.tsx before the change: PageHeaderCleanBadge, the create form (every ticket type, New Ticket toggle), TabNavigation, the Ticket Board (Open, In Progress, Completed tabs, Claim, Complete, Request report, Open report, Retry analysis), OpenedReportPanel, Response Metrics, PageEnd. Unchanged after the change (the internal branch is the old return, byte-for-byte).",
+      "partner_firm_before": "the same page as the internal caller, with the firm-caller form (loadAllowedFirms with internal false, permittedFirms only). DEV a577cba5 TicketCenter.tsx:188 (internal = isInternal() or isDev()).",
+      "partner_firm_after": "the partner branch (TicketCenter.tsx:206 partner = !internal; :536 if (partner) return): PageHeaderCleanBadge, the Analysis Request form in the page's one band (Panel variant chart, DESIGN.md C3), and 'Your firm's requests' on a white panel (Panel variant nested, C3). No other ticket-type form, metric, board, claim, complete, report or retry control."
+    },
+    "how_filing_is_sent": "BEFORE (DEV a577cba5 numbering): TicketCenter.tsx:297-347 (handleCreateAnalysis) calls fileAndRequestAnalysis with tickets { createTicket, recordTicketReport } (DEV TicketCenter.tsx:320-322); analysisRequest.ts (DEV) fileAnalysisRequest creates the ticket at :243-249 via deps.tickets.createTicket, i.e. tickets.ts:142-144 POST /api/scoped/tickets with answers.firm in the body; then fileAndRequestAnalysis (DEV :364-378) runs sendAnalysisStep (IRPT submitAnalysisRequest) and recordStep (DEV :400-410 -> tickets.ts:165-173 POST /api/scoped/tickets/{id}/report). AFTER: TicketCenter.tsx:389-428 (handlePartnerFile) calls fileAnalysisRequest with submitPartner: submitAnalysisTicket (TicketCenter.tsx:409-411); analysisRequest.ts:273-278 sends the partner body through deps.submitPartner (the upload step is unchanged, :238-272); tickets.ts:180-181 POST /api/scoped/tickets/submit with ticket_type, title, answers (no firm, no source) and attachment only.",
+    "how_the_board_lists": "BEFORE: TicketCenter.tsx refresh (DEV :239-256) calls listTickets({ status: tab }) (tickets.ts:129-140, GET /api/scoped/tickets?status=...) and getTicketMetrics (tickets.ts:160-161) for every caller. AFTER: partner branch only: refreshPartner (TicketCenter.tsx:280-292) calls listPartnerRequests (tickets.ts:199-200, GET /api/scoped/tickets?ticket_type=analysis_request, server-scoped to the caller's firm per the cell). The internal board path is unchanged; listTickets and getTicketMetrics are not called for a partner caller (test a asserts 0 calls).",
+    "calls_made_after_filing": {
+      "before_for_firm_caller": "IRPT submitAnalysisRequest (the analysis POST, analysisRequest.ts sendAnalysisStep) and tickets.recordTicketReport POST /api/scoped/tickets/{id}/report (tickets.ts:165-173). The report-record call is refused for a client-human by the ticket service (REPORT refuses a client-human, lambda_function.py:1391-1392, per the cell; not re-read here), so a partner token would be refused on it.",
+      "after_for_partner": "listPartnerRequests only (GET the list). No recordTicketReport, no submitAnalysisRequest, no getOwnedAnalysisReport. The packager records the report id (the cell's decision A)."
+    },
+    "upload_step": "unchanged: prepareUpload and uploadAnalysisInput(upload, firm) run before the SUBMIT, as the order says; the firm is sent to the upload door as the selectedTenant only, never in the SUBMIT body."
+  },
+  "dev_tip_measured": "origin/DEV a577cba5 in a detached scratch worktree C:/dev/wk-portal-104-before (removed after the run)",
+  "tests": {
+    "added": 11,
+    "file": "src/pages/TicketCenter/__tests__/partner-view.test.tsx",
+    "passed": 11,
+    "failed": 0,
+    "cases": [
+      "a. a partner caller sees the form and its own firm list and none of the internal sections (no New Ticket, Claim, Complete, Ticket Board, Response Metrics; one select; 0 listTickets, 0 getTicketMetrics)",
+      "b. filing sends the SUBMIT body with exactly ticket_type, title, answers (no firm key), attachment; 0 createTicket, 0 recordTicketReport, 0 IRPT submitAnalysisRequest",
+      "c. success shows the ticket id and the own-firm list refreshes (one more listPartnerRequests call)",
+      "d1. an upload refusal shows its words on the form and files nothing",
+      "d2. a SUBMIT refusal shows a plain sentence and not the raw body",
+      "d3. a missing advisor is named on the form before anything is sent",
+      "d4. a held submit with no title says why",
+      "e1. the scoped list renders served items in words with the package word",
+      "e2. a failed list read says so in words and shows no empty list",
+      "e3. a stated empty list is not the failure",
+      "f. an internal caller keeps the full board and makes no partner list call"
+    ],
+    "folder_counts": {
+      "TicketCenter_before_DEV_tip": "89 pass, 0 fail of 89 (18 files)",
+      "TicketCenter_after": "90 pass, 10 fail of 100 (19 files); the 10 are all in __tests__/analysis-submit-silence.test.tsx (AR-y-265), each failing with 'no button New Ticket on the page' because that suite mounts useAuth isInternal false (a firm caller), which the partner view replaces. Not edited here; surprise row IRPT_ANLREQ-D2-W104-S1.",
+      "partner_view_file_after": "11 pass, 0 fail"
+    },
+    "typecheck": "bun run typecheck (tsc -b --noEmit) rc=0 after the change; a deliberate-error mutant in a temporary file gave rc=2 (TS2322), so the clean pass is not the bare-tsc empty-file-set kind; the mutant file was removed",
+    "dsgn_irptv1": {
+      "before": "371 pass, 10 fail, 2 errors of 381 (240 files)",
+      "after": "371 pass, 10 fail, 2 errors of 381 (240 files)"
+    },
+    "commit_gate": "safe-commit ran the commit-gate, which reports 'checked 0 of 4 file(s): NOTHING WAS CHECKED' for .ts and .tsx; that line is not evidence. The checks above (bun test, tsc -b) are the instruments for this diff."
+  },
+  "before_arm": {
+    "failed": 10,
+    "passed": 1,
+    "method": "the new test file run against origin/DEV a577cba5 sources in a detached scratch worktree (C:/dev/wk-portal-104-before) with the new file copied in. A git stash was attempted in the candidate worktree and blocked by the shared-worktree hook, so it was not used.",
+    "failing": "a, b, c, d1, d2, d3, d4, e1, e2, e3 (the partner view is absent on DEV, so the internal board renders for a non-internal caller)",
+    "passing": "f (the internal caller's page is unchanged)"
+  },
+  "what_a_person_sees": {
+    "partner_before_change": "the full ticket board: New Ticket, the type select with every type, the board tabs, Claim and Complete buttons, metrics; a firm caller's form with the firm-caller path.",
+    "partner_after_change": {
+      "form": "one band with 'New Analysis Request': a title field, Advisor, Firm, Household, Other ETFs, the comparable checkboxes, Needed by, Add commentary, the holdings file, and a 'File Analysis Request' button. The button is held with a sentence on the form when the title, firm or file is missing.",
+      "list": "a white panel, 'Your firm's requests', with a Refresh button; columns Ticket, Title, Report, Household, Created, Status, Package. No controls on a row.",
+      "after_filing": "a white block on the form that says 'Analysis request TCK-... filed.' with the ticket id; the form is cleared and the list is read again.",
+      "on_refusal": "words on the form: 'Nothing was filed' for an upload refusal; 'Nothing is known to be filed: the request could not be submitted. Check Your firm's requests below ...' for a failed SUBMIT; the service's refusal text is not shown; the validation sentences ('Advisor is required.' etc.) are shown.",
+      "on_failed_list": "a status icon beside navy text: 'Your firm's requests could not be loaded. Press Refresh to try again.' with a retry; no empty list is shown in its place.",
+      "on_empty_list": "'No analysis requests for your firm yet.'"
+    }
+  },
+  "design_clauses": {
+    "band_for_the_form": "C3: the form sits in the page's one band (Panel variant chart) because AnalysisRequestFields carries light-on-dark idioms (text-white on bg-black/30), which C3 and the portal CLAUDE.md forbid on a white panel.",
+    "white_panel_for_the_list": "C3: Panel variant nested is the surface (white with a hairline); the table header is the sunken palette.lightGray #E8EBF0 (C3 sunken row); row text is navy (C3 ink, C9).",
+    "navy_ink": "C3 / C9: the list heading, the list text and the Refresh button use hsl(var(--palette-navy)) #163372 on white; no light text on the white panel.",
+    "no_shadow_no_radius_beyond_C11": "C11: the Refresh button uses rounded-[3px]; the panel uses the Panel component's 4px radius; no shadow.",
+    "states_C12": "ERROR: PanelError (status.danger icon beside navy text, with retry), inside the white panel. EMPTY: one navy sentence. LOADING: one navy sentence, no spinner.",
+    "page_end_C10": "PageEnd kept at the bottom of the partner view.",
+    "primary_action_C8_NOT_CHANGED": "the 'File Analysis Request' button keeps the internal form's existing emerald classes (bg-emerald-600/80). C8 names indigo #5F3BE3 as the one primary action per view. This candidate did not restyle the button; the render review (C8) is the reviewer's to decide. Flagged, not hidden.",
+    "rendered_screenshot": "NOT RUN: the portal verification law (CLAUDE.md, the /frontend-dev screenshot) was not executed in this candidate; no visual claim above is a render"
+  },
+  "claim": "On the partner-firm caller's page the only ticket surfaces are the Analysis Request form and the caller's own firm's list; filing sends the upload step and then POST /api/scoped/tickets/submit with no firm member, source or requester and never calls the report-record route; every refusal, the failed submit and a failed list read show words on the page; an internal caller's page is the unchanged internal return. Proven by 11 mounted-page tests (10 fail on origin/DEV, 11 pass here), a clean tsc -b, and the dsgn-irptv1 counts unchanged. Not proven: the server routes (SUBMIT, scoped LIST, the report-record refusal) and the rendered page; the route gate that keeps a partner off /ticket-center (App.tsx requireInternal) is the door cell AR-y-282's and is NOT changed here.",
+  "not_read": [
+    "server routes: the SUBMIT and scoped LIST handlers in infra/aws/lambda/ticket_center (AR-y-281 / AR-y-282 cells); the package_state vocabulary is not defined in this tree (surprise IRPT_ANLREQ-D2-W104-S2)",
+    "portal src/App.tsx requireInternal wrapper on /ticket-center and firmAccess.ts (the door, AR-y-282): not changed here",
+    "the rendered page (no headless screenshot run; C8 button colour not restyled)",
+    "the analysis-submit-silence suite's disposition (surprise IRPT_ANLREQ-D2-W104-S1): not edited",
+    "nothing pushed, nothing landed on DEV, nothing deployed; origin/DEV was fetched only",
+    "the commit-gate result for .ts and .tsx (it checked 0 of 4 files)"
+  ]
+}
