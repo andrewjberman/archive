@@ -1,0 +1,67 @@
+{
+  "cell": "AR-y-285",
+  "order": "IRPT_ANLREQ.TO-AR-y-285",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~109",
+  "branch": "wk-IRPT_ANLREQ-109",
+  "base": "844d025f4a",
+  "scope": "code and tests only; nothing released, deployed, pushed, applied, invoked or uploaded",
+  "read": {
+    "payload_today": "opal_packager.py@844d025f4a:208-209 -- payload = {report_ref, pdf_ref, original_ref, commentary_ref, firm} (FIVE members); report_ref is the READY job receipt's report_id (HEAD :168)",
+    "request_id_available_at": "opal_packager.py@844d025f4a:146 -- tenant, request_id = _closed_message(body); the closed check is keys.queue_message byte equality (:76-94); the request id shape the closed check admits is keys.py:62 OPAQUE_ID_RE ^[A-Z][A-Z0-9]{0,7}-[A-Za-z0-9_]{1,64}$ (the request id key component's registry row was not read)",
+    "revision_available_at": "opal_packager.py@844d025f4a:182 -- revision = record['identity']['revision'], read only on the RENDER path after the commentary bytes; the RETAINED path (:177 at HEAD) attached without reading it",
+    "tests_found": [
+      "ycharts/research/tests/test_opal_packager.py (test_d pins the five-member payload at :155)",
+      "ycharts/research/tests/test_packager_own_store.py (test_a pins the five-member payload at :70)",
+      "ycharts/research/tests/test_packager_i7.py, test_packager_live_ports.py, test_commentary_ref_round_trip.py (import opal_packager; no pinned five-member payload found in the run: all green after the change)",
+      "ycharts/generate/tests/test_package_poll.py (imports opal_packager; green after the change)"
+    ],
+    "packaged_in": "NOT listed in infra/aws/lambda/ci/lambda-source-map.json: zero entries name opal_packager.py or ycharts/research. In-process wiring: infra/aws/lambda/investor-reporting/reports/resident_installed.py :326-329 (make_packager appends ycharts/research to sys.path and imports opal_packager), :335-341 (ports and the handler), :425-433 (live_ticket_ports and make_packager in build_resident_runtime). The resident's own map entries are resident_main.py (map :4593) and resident_worker.py (map :4599) of the irpt-ycharts-generate function. One module changes: ycharts/research/opal_packager.py. The map and the recipe were NOT edited."
+  },
+  "built": {
+    "payload_after": "opal_packager.py:219-220 -- payload = {report_ref, pdf_ref, original_ref, commentary_ref, firm, request_id, request_revision} (SEVEN members). request_id = the closed message's request id; request_revision = record['identity']['revision'] as an integer.",
+    "revision_read": "opal_packager.py:177 revision = _revision(record), read ONCE before the retained check so both attach call sites carry it (:180 retained path, :199 render path). _revision (:202-208) refuses REVISION_ABSENT when identity.revision is not an int (a bool is refused too). Behaviour change, named: a record with no integer identity revision is now refused before any render or attach; it was a KeyError on the render path and was attached on the retained path.",
+    "idempotence": "IDENTITY_POINTERS unchanged (opal_packager.py:71): the four pointers only. live_ticket_ports conflict() unchanged (:319-325): PACKAGE_ALREADY_ATTACHED is read by the four pointers only, so a retry after a partial first attempt stays already_attached whatever the stored package holds for request_id.",
+    "conflict_refusal": "REPORT_REF_ALREADY_RECORDED_OTHER: the existing generic branch of conflict() (:325, any closed code other than PACKAGE_ALREADY_ATTACHED) already raises PackagerRefused('ATTACH_CONFLICT:' + code). No branch was added; test (d) pins the named refusal.",
+    "docstring": "module docstring step 6 updated to the seven members (opal_packager.py:1-30 region)",
+    "unchanged": "live_attach (:227-228 in the worktree, still PACKAGER_PRINCIPAL_UNSET), IDENTITY_POINTERS, the closed-message check, every other refusal name, the ports dict, the map, the recipe, every test file except the new one",
+    "members_changed_per_package": 1,
+    "queue_or_env_changed": "none"
+  },
+  "tests": {
+    "new_file": "ycharts/research/tests/test_opal_packager_request_id.py -- 13 test cases: (a) request id and revision present; (b) five members byte-equal to today and the payload exactly seven; (c) 409 already-attached on the same four pointers with no request id in the stored package is already_attached, and a different pdf_ref on 409 is refused ATTACH_CONFLICT:PACKAGE_ALREADY_ATTACHED_OTHER; (d) 409 REPORT_REF_ALREADY_RECORDED_OTHER is ATTACH_CONFLICT:REPORT_REF_ALREADY_RECORDED_OTHER; (e) three malformed request ids refused CLOSED_QUEUE_MESSAGE_REQUIRED before any read or call; (f) retained path sends request id and revision with no render; (g) revision absent, a string or a bool refused REVISION_ABSENT; (h) the request id and revision are not identity pointers",
+    "new_file_result": "13 passed in 0.47s (changed module); 13 passed in 0.62s (second run, determinism)",
+    "research_folder_head": "306 passed, 0 failed (HEAD module, new file excluded)",
+    "research_folder_changed": "317 passed, 2 failed (= 306 + 13 new, minus 2 pinned failures); the 2 failures are OUTSIDE the grant and are recorded as BLOCKING row IRPT_ANLREQ-D2-W109-S1",
+    "research_failures_outside_grant": [
+      "ycharts/research/tests/test_opal_packager.py::test_d_one_message_one_render_to_package_pdf_then_one_attach (assertion at :155 pins the five-member payload)",
+      "ycharts/research/tests/test_packager_own_store.py::test_a_a_retained_package_makes_no_commentary_read_no_render_no_produce_and_posts_the_retained_ref (assertion at :70 pins the five-member payload; the extra members are request_id and request_revision)"
+    ],
+    "existing_edits_made": "NONE. Both pinned assertions are in files outside the <paths> grant; the order says to STOP and file a BLOCKING row, and the issuer amends the grant. The edit each needs is the same: add request_id and request_revision to the expected dict.",
+    "generate_folder": "ycharts/generate/tests: 544 passed, 30 skipped, 1 xfailed, 4 failed at HEAD and 544 passed, 30 skipped, 1 xfailed, 4 failed with the change. The 4 failures are the known custody baseline (test_custody_entry.py x2, test_custody_retained.py x2); no change",
+    "commit_gate": "bash .tools/commit-gate.sh on opal_packager.py: rc=0; on the new test file: rc=0 after one unused-import fix (keys)"
+  },
+  "before_arm": {
+    "procedure": "the HEAD opal_packager.py (git show 844d025f4a:<path>) swapped into the worktree, the new test file run, the changed module restored from .scratch/opal_packager.mine.py and sha256-verified (e874f26e...)",
+    "failed": 8,
+    "passed": 5,
+    "case_a": "FAILED at HEAD (test_a_the_payload_carries_the_message_request_id_and_the_records_revision)",
+    "failing_at_head": ["test_a", "test_b", "test_c (already-attached, same pointers)", "test_d", "test_f", "test_g[absent]", "test_g[2]", "test_g[True]"],
+    "passing_at_head": ["test_c (different pdf_ref refused OTHER: unchanged behaviour)", "test_e[3 malformed ids]", "test_h (identity pointers unchanged)"],
+    "mutant": "request_id removed from the payload dict (opal_packager.py:220, sed in the worktree, restored by sha256): 5 failed, 8 passed. The mutant fires."
+  },
+  "release_needs": {
+    "order": "the SERVER half (AR-y-284, infra/aws/lambda/ticket_center) must ship BEFORE this packager change. At HEAD package_ticket refuses any body field outside PACKAGE_ALLOWED_FIELDS with 400 'unexpected field(s) on the package path' (ticket_center/lambda_function.py:1497-1501 at 844d025f4a). Released alone, this packager sends request_id and request_revision and every package attach would be refused 400.",
+    "members_changed": "one module, ycharts/research/opal_packager.py, inside the resident's in-process tree (resident_installed.py wires it). No Lambda map entry names it; the map and the recipe were not edited.",
+    "queue_or_env": "none",
+    "tests_to_amend_before_release": "ycharts/research/tests/test_opal_packager.py:155 and ycharts/research/tests/test_packager_own_store.py:70 (five-member pins; outside this grant; BLOCKING row IRPT_ANLREQ-D2-W109-S1)"
+  },
+  "claim": "The packager sends the request id and the record's integer revision on the PACKAGE body, once per attach; the idempotence still reads the four pointers only; a conflicting request id is the named refusal ATTACH_CONFLICT:REPORT_REF_ALREADY_RECORDED_OTHER. Nothing released; the two pinned existing tests are red until the issuer amends the grant.",
+  "not_read": [
+    "the server half (AR-y-284): ticket_center is not edited and the server's request id validation was read only at the refusal of unknown members (:1497-1501)",
+    "the keys registry row for the request id key component (only keys.py:62 OPAQUE_ID_RE was read)",
+    "how ycharts/research reaches the resident's package at release (the map has no entry for it)",
+    "the decomposition DECOMP_R23D_Y (the cell was taken from the worker face)",
+    "the investor-reporting submission.py and acceptance.py request id pattern (the face asked for the same pattern; the packager admits only what keys.queue_message admits)"
+  ],
+  "path_note": "the face names r26/PACKAGER_REQUEST_ID.json; the checker (checks/r21/ar21_checks.py:29 D26 = D23, :655-656) reads r23/. Written to r23/. Row IRPT_ANLREQ-D2-W109-S3."
+}
