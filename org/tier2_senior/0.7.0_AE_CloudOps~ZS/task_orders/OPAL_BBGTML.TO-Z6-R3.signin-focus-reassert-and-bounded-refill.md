@@ -5,6 +5,7 @@
     <issued_to>0.7.0_AE_CloudOps~ZS</issued_to>
     <date>2026-10-13</date>
     <status>pending -- issued 2026-10-13 ~20:5xZ, Z6 repairs issuance (CTO ruling @61e3067f5c disposition 3); queue position 2 of 2 on this lane, starts only after TO-Z6-R2 is landed and its AC1 reads PASS</status>
+    <status>held -- 2026-10-13 ~21:4xZ by 2.0.0_SA_COO~ZB on row OPAL_BBGTML-Z-S17: Andrew's no-modify order is recorded as standing for "the vehicle and the sign-in scripts", and the Z6 ruling does not address it. Whether the Z6 memo lifts it is Andrew's reading; the card is with 0.0.0_AB_MSTR~Z and 1.0.0_SA_CTO~Z. DO NOTHING UNDER THIS ORDER until a later status line names that reading. AMENDMENT 1 (issuer, inside its own decomposition; graded by no gate limb, a flat order): if the reading releases R3, step 1b also guards bbg_fallback.ps1's trailing "P0 gate: transport sustained-down, network OK -> sign-in warranted." line as `if ($absent -eq 3) { ... }` (row Z-S15), so the $absent -eq 0 path prints only its own classification; AC1's expect is unchanged and the AC3 re-run must show no "transport sustained-down" line.</status>
     <project_code>OPAL_BBGTML</project_code>
   </metadata>
 <risk>WORLD</risk>
