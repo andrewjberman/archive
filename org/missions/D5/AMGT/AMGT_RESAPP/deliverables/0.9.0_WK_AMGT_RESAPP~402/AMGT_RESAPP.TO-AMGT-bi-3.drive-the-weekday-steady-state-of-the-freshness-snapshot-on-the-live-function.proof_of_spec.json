@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bi-3.drive-the-weekday-steady-state-of-the-freshness-snapshot-on-the-live-function",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "30eabaab86",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bi-3.drive-the-weekday-steady-state-of-the-freshness-snapshot-on-the-live-function.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bi-3.drive-the-weekday-steady-state-of-the-freshness-snapshot-on-the-live-function.md",
+    "group": "OTHER",
+    "vintage_commit": "30eabaab86"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~402",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~402/BI4_STEADY_STATE_OUTPUT_RUN2_20261013.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A reading, not a deploy: the output of the second run of r102_steady_state_live.py (AC1 invocation, run alone, after the first run's file was written). Nothing deployed, stored, scheduled or written to the function. The first run's output BI4_STEADY_STATE_OUTPUT_20261013.txt is kept unchanged. Committed LOCAL on wk-AMGT_RESAPP-402 with this instance; not pushed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the four request lines q0 to q3 (each with status, handler time and cold or warm), PASS S1, PASS S2 and PASS S3, the lines for S4 and S5 whichever way they read, and one verdict line R102 STEADY STATE LIVE: YES, NOT WARM or NO (exit 0 or 1 is not graded)",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-402 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round102_prep/checks/r102_steady_state_live.py\" > \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~402/BI4_STEADY_STATE_OUTPUT_RUN2_20261013.txt\" 2>&1; echo \"exit=$?\"; grep -E \"^(q[0-3] |   (PASS|FAIL) S[1-5]|R102 STEADY STATE LIVE)\" \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~402/BI4_STEADY_STATE_OUTPUT_RUN2_20261013.txt\"",
+      "output_evidence": "exit=0\nq0   /security/ASML_NA_Equity/overlay               status 200 handler 20.53 s (wall 22.53 s) COLD init 666.07 ms\nq1   /freshness                                     status 200 handler 0.21 s (wall 0.29 s) warm\nq2   /security/ASML_NA_Equity/overlay               status 200 handler 0.84 s (wall 0.92 s) warm\nq3   /security/ADBE_US_Equity/overlay               status 200 handler 0.80 s (wall 0.86 s) warm\nq1 served from the snapshot: True | snapshot.generated_at 2026-10-13T12:30Z | stored generated_at 2026-10-13T12:30Z | snapshot_fallback False\n   PASS S1 the rule counts the stored snapshot current NOW\n   PASS S2 q1 served from the snapshot, generated_at equal to the stored object's\n   PASS S3 q1, q2, q3 each 200\n   PASS S4 q1, q2, q3 each a warm container\n   PASS S5 q1, q2, q3 each under 3.0 s of handler time\nR102 STEADY STATE LIVE: YES",
+      "denominator": "5 of 5 arms PASS (S1 to S5); 4 requests printed (q0 to q3), q0 warmed a container and is not graded; graded requests q1, q2, q3 with handler times 0.21 s, 0.84 s, 0.80 s (median 0.80 s); q0 handler 20.53 s, cold (Init 666.07 ms)",
+      "expect": "q0 [\\s\\S]*q1 [\\s\\S]*q2 [\\s\\S]*q3 [\\s\\S]*PASS S1[\\s\\S]*PASS S2[\\s\\S]*PASS S3[\\s\\S]*S4 [\\s\\S]*S5 [\\s\\S]*R102 STEADY STATE LIVE: (YES|NOT WARM|NO)",
+      "status": "PASS",
+      "status_reason": "Mechanical: output matches expect. Four request lines q0 to q3 printed with status, handler time and cold or warm; PASS S1, PASS S2, PASS S3 printed; S4 and S5 printed (both PASS in this run); one verdict line R102 STEADY STATE LIVE: YES. The verdict is printed as the instrument reads it; grading of the reading is the CVO's at L9."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "snapshot generated_at line with the row counts (snapshot and recompute equal) and differing count, one key line per differing key (each denominators or reads), then R101 SNAPSHOT EQUAL: YES or R101 SNAPSHOT EQUAL: NO, then done",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-402 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round101_prep/checks/r101_snapshot_equal.py\" | grep -E \"^(snapshot generated_at|   key |R101 SNAPSHOT EQUAL)\"; echo \"done\"",
+      "output_evidence": "snapshot generated_at 2026-10-13T12:30Z age 2.74 h | rows: snapshot 302, recompute 302 | differing: 2\n   key denominators: snapshot \"{'names': 302, 'covered_names': 95, 'covered_names_added': 0\" vs recompute \"{'names': 302, 'covered_names': 95, 'covered_names_added': 0\"\n   key reads: snapshot \"{'universe': {'status': 'SERVED', 'read_completed': True, 'p\" vs recompute \"{'universe': {'status': 'SERVED', 'read_completed': True, 'p\"\nR101 SNAPSHOT EQUAL: NO\ndone",
+      "denominator": "302 snapshot rows and 302 recompute rows (equal); 2 differing keys printed, both in the set denominators, reads; 2 key lines printed, cut at 60 characters per side by the instrument",
+      "expect": "rows: snapshot (\\d+), recompute \\1 \\| differing: \\d+[\\s\\S]*R101 SNAPSHOT EQUAL: (YES|NO)[\\s\\S]*done",
+      "status": "PASS",
+      "status_reason": "Mechanical: output matches expect. Row counts equal (302 and 302); differing: 2; the two key lines are denominators and reads; verdict R101 SNAPSHOT EQUAL: NO, which the expectation admits as one of its two verdict forms; done printed. The cause of the two differing keys is not read further (order: nothing deeper)."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "judgment criterion (judgment=\"true\"): the served path's latency and bytes on Lambda, weekday, read against section 1 of the order; graded by the CVO at L9, never self-graded",
+      "method": "manual_read_with_citation",
+      "invocation": "none -- a judgment criterion carries no <invocation>; the CVO reads the figures in output_evidence against the order's section 1 act and the two BI4 output files",
+      "output_evidence": "RUN 2 (BI4_STEADY_STATE_OUTPUT_RUN2_20261013.txt, AC1 run): function opal-amgt-scoped-api, CodeSha256 j+j1k5r7IY1ZCh9NijT8GSLaqEL3FhamwT8V3tYofCk=, LastModified 2026-10-13T13:17:52.000+0000, Active/Successful. snapshot generated_at 2026-10-13T12:30Z, age 2.68 h, current True. q0 /security/ASML_NA_Equity/overlay 200 handler 20.53 s COLD init 666.07 ms (wall 22.53 s). q1 /freshness 200 handler 0.21 s warm (wall 0.29 s). q2 /security/ASML_NA_Equity/overlay 200 handler 0.84 s warm (wall 0.92 s). q3 /security/ADBE_US_Equity/overlay 200 handler 0.80 s warm (wall 0.86 s). Handler times of graded requests: 0.21, 0.80, 0.84 s. q1 served from the snapshot: True, snapshot_fallback False, snapshot.generated_at equal to the stored object's. AC2 run (same snapshot): age 2.74 h, rows 302 and 302, differing 2 (denominators, reads). RUN 1 (BI4_STEADY_STATE_OUTPUT_20261013.txt, kept unchanged, for comparison): snapshot age 2.4 h; q0 19.81 s COLD init 678.27 ms; q1 0.27 s COLD init 692.30 ms; q2 20.08 s warm; q3 0.76 s warm; same CodeSha256 and LastModified. Figures recorded; no verdict given.",
+      "denominator": "n=1 judgment criterion; 4 requests (q0 to q3) in each of 2 runs of the AC1 instrument (8 requests total); 1 stored snapshot object of 302 rows, generated_at 2026-10-13T12:30Z",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the CVO (3.0.0_SA_CVO) grades it at L9 (spine v3). The seat records the figures and does not self-grade. Substitute oracle: the CVO's adjudication row, read against the two BI4 output files named in output_evidence."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant: a read-only reading has no build behaviour to mutate; the order names none.",
+      "expected": "N/A -- the order names no mutant",
+      "observed": "N/A -- no mutant run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Two runs of the AC1 instrument on the same function and the same stored snapshot, one after the other, each run alone. Not a determinism control in the order's sense: the order bounds the instrument to one run per invocation; the second run is the order's own amendment.",
+      "observed": "Run 1 verdict NO (S4 and S5 FAIL); run 2 verdict YES (all five arms PASS). The differences are container state: q1 cold in run 1, warm in run 2; q2 ASML overlay 20.08 s warm in run 1, 0.84 s warm in run 2. AC2 identical across the two runs: rows 302 and 302, differing 2, keys denominators and reads.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A retry of any request or of AC1 or AC2",
+      "reason": "Not run: order bound 5 says a request over 3.0 s, a cold container or a refused snapshot is a printed finding, never a reason to retry silently. Each instrument ran once in this run."
+    },
+    {
+      "item": "Reading the two differing AC2 keys beyond the 60 characters the instrument prints",
+      "reason": "Not read: the order says nothing deeper and no re-measure; the cause is left to the issuer."
+    },
+    {
+      "item": "Any invoke of another function, any AWS call beyond the instruments, any Bloomberg, SEC, vendor or model call",
+      "reason": "Out of the order (BOUNDS 1 and the closing line of section 1). Nothing of the kind was made."
+    },
+    {
+      "item": "The order's status flip",
+      "reason": "The issuer flips the status (order section 5). This worker does not flip it."
+    },
+    {
+      "item": "Push",
+      "reason": "Out of the order (BOUNDS 3). Commit is LOCAL on wk-AMGT_RESAPP-402 only."
+    },
+    {
+      "item": "A surprise row for the second run's container states",
+      "reason": "Not filed: the order anticipates container variation (it asks for each request's container state to be recorded, which the output prints), so the run-2 container states are a printed reading, not a premise failure. The first seat's rows S1 to S3 are left as they are and are not listed here because this worker filed none."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~402/BI4_STEADY_STATE_OUTPUT_RUN2_20261013.txt",
+  "compiler_tools": [
+    {
+      "tool": "r102_steady_state_live.py (AC1 instrument, checkout's own reader)",
+      "invocation": "the AC1 invocation, run 2, alone, against opal-amgt-scoped-api (GET-shaped direct invokes, LogType Tail; one get_function_configuration; one S3 GET of the stored snapshot)",
+      "result": "YES, exit=0. Arms S1 to S5 all PASS. q0 cold (Init 666.07 ms); q1, q2, q3 warm. CodeSha256 j+j1k5r7IY1ZCh9NijT8GSLaqEL3FhamwT8V3tYofCk=. Read only; nothing written except the BI4 run-2 output file."
+    },
+    {
+      "tool": "r101_snapshot_equal.py (AC2 instrument, checkout's own reader)",
+      "invocation": "the AC2 invocation, run alone, after AC1 finished",
+      "result": "NO (permitted verdict form), rows snapshot 302, recompute 302, differing 2 (denominators, reads). Reads only: object-storage GETs of the stored snapshot and of the list inputs, and one recompute in the checkout. No invoke."
+    }
+  ]
+}
