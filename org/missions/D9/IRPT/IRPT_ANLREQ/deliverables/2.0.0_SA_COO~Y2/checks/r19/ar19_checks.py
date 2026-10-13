@@ -150,7 +150,7 @@ def main(argv):
                 problems.append("member_manifest must map at least 20 package members to their sha256")
             print("manifest members %d" % len(rec.get("member_manifest", {})))
     elif check == "y194-rule":
-        pop = load(root, D % "56" + "ACCOUNT_HEADER_POPULATION.json", problems)
+        pop = load(root, D % "59" + "ACCOUNT_HEADER_POPULATION.json", problems)
         if pop:
             reader = reader_module(root)
             ident, attr, other = pop.get("identifier_forms", []), pop.get("attribute_forms", []), pop.get("not_account_forms", [])
