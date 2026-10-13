@@ -1,0 +1,31 @@
+{
+ "sweep_run_id": "37fe3466-a8d4-4909-8fcc-4cd56c547779",
+ "sweep_run_id_note": "The LAMBDA RequestId. run_sweep()'s own run_id is minted by new_run_id() and returned in the function's result dict, which an EventBridge invocation discards, so the internal run_id is not observable. Recording the RequestId rather than inventing one.",
+ "sweep_was_scheduled": true,
+ "foreign_survived_schwab_sweep": true,
+ "foreign_absent_from_schwab_report": "UNREADABLE-NO-REPORT-EXISTS",
+ "schwab_drained_and_reported": "DRAINED-YES-REPORTED-UNREADABLE",
+ "RESULT": "FAIL as written, and NOT because the deploy is wrong: the per-family drain did exactly what it should and that is proven below. AC2's two REPORT fields cannot be read for a scheduled sweep, because the sweep's DLQ report is produced and then discarded.",
+ "THE_BEHAVIOUR_IS_CORRECT_AND_PROVEN": {
+  "sweep_ran_clean": "One invocation, RequestId 37fe3466, 12:15:49Z -> 12:18:19Z, NO error, NO traceback, NO retries. Contrast OG-ap-11's same sweep: three invocations on one RequestId, each ending AccessDenied. The grant is what changed.",
+  "foreign_survived": "The eclipse synthetic f9a08314-5c82-408c-add9-103339f5718c was RETURNED by a post-sweep non-destructive receive, which is positive proof of presence.",
+  "schwab_drained": "Proven from the COUNT plus the identity of what remains, not from a sample's omission: depth was 2 at plant and reads 1 after the sweep, and the single remaining message is proven to be the eclipse one. Two planted, one left, and it is eclipse, therefore the schwab record 44ee0375-7478-490b-a71a-9e0dc96af071 is gone."
+ },
+ "WHY_THE_TWO_REPORT_FIELDS_ARE_UNREADABLE": "The order asks for the foreign record to be absent from, and the schwab record present in, 'the schwab sweep's report (its run log or backfill-status)'. No such artifact exists for a scheduled sweep. MEASURED, not inferred: (1) drain_dlq's report is the dict it RETURNS, and run_sweep returns it to the caller -- an EventBridge invocation, which discards the return value. (2) The module never prints: 0 occurrences of print( in schwab_runtime.py, which is why CloudWatch holds only INIT_START/START/END/REPORT for this run and no application output. (3) The module makes exactly ONE S3 write, bs.write_layer_status at line 423, and the section it passes is built purely from the LANE's conversion results -- frontier_date, backfill_complete, counts, holes, guard_* -- with no dlq field. (4) A search for a run-log writer across data/assets/scripts read 0 hits over 425 files scanned. So the report is generated and thrown away.",
+ "THIS_IS_A_DIFFERENT_FAILURE_FROM_OG-ap-11": "ap-11 had no report because the function RAISED before returning -- the code could not run. Here the code ran perfectly and there is STILL no readable report, because the report is a return value nobody persists. Same two fields, two unrelated causes. Recording that distinction so the fix is aimed at the right thing.",
+ "NO_ROLLBACK_AND_WHY": "The order's rollback trigger is 'if any read-back disagrees'. Every read-back AGREES: AC1 PASSED, the live CodeSha256 is the intended build, the sweep completed clean, and the drain's own behaviour is correct on both arms. Rolling back would undo working code over a clause that no deployment of this code could satisfy. The CTO's opal-assets hold was lifted at 11:46Z (msg 33608), so a rollback was available and was deliberately not taken.",
+ "WHAT_WOULD_FIX_IT": "Two candidates, both the issuer's call, and they are not equivalent. (a) AMEND AC2's report clause to read the behaviour from the queue, which is provable today and is what the criterion is really about -- the foreign record present after the sweep and the own record gone. (b) PERSIST the report in the code: have run_sweep write its dlq dict into the backfill-status section or a run-log object, which is a new build order and would make the criterion readable as written for every family, not just schwab.",
+ "evidence": {
+  "depth_at_plant": 2,
+  "depth_after_sweep": 1,
+  "planted": {
+   "eclipse": "f9a08314-5c82-408c-add9-103339f5718c",
+   "schwab": "44ee0375-7478-490b-a71a-9e0dc96af071"
+  },
+  "cloudwatch_events_for_the_run": 4,
+  "cloudwatch_application_output_lines": 0,
+  "print_calls_in_module": 0,
+  "s3_writes_in_module": 1,
+  "run_log_writers_found": "0 of 425 files scanned"
+ }
+}
