@@ -34,3 +34,10 @@ crossbox ORDER; the manager commits the record, MSTR lane). Not under Andrew's n
 ## Also staged for the same window
 
 C-S85's clock advance (the CVO's compile carries it; it needs site Z's file, one writer).
+
+## Window class (Andrew-direct 2026-10-13, CTO msg 4886, ADDENDUM 1 to `ANDREW_DIRECT_20261013_141xZ_BACKFILL_FLOOR_2012_AND_EARLIEST_CLIENT_RECORD.md`)
+
+The standing request `ETFS_RIVALS-HISTORY-OWED-DAILY` is re-declared NON-CLIENT with a 365-day window by the CTO and Q1 (re-priced at the queue before its
+next draw); a request that asks beyond its class window is refused at the queue. The producer already asks 365 days back from the page day
+(`history_owed.owed(s, day, window_days=365)`, `enrichment_bloomberg.py` reads it through `_history_owed`), so this cell changes no window. Its checks
+carry one arm: the owed set's earliest date is not before `page_day - 365` (the 2012-01-01 floor binds both classes).
