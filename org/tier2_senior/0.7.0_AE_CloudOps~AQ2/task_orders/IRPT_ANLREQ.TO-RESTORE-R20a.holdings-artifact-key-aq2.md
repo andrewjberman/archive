@@ -1,8 +1,8 @@
 <task_order>
   <metadata>
-    <id>IRPT_ANLREQ.TO-RESTORE-R20a.holdings-artifact-key-ib2</id>
+    <id>IRPT_ANLREQ.TO-RESTORE-R20a.holdings-artifact-key-aq2</id>
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~IB2</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-13</date>
     <status>pending</status>
     <project_code>IRPT_ANLREQ</project_code>
@@ -13,7 +13,7 @@
 <preflight>
 comp-blast: RUN -- by reading the incident and the live state: ONE S3 key (investor-reporting/irpt-holdings.zip in opal-313476888478-lambda-artifacts) gets one new version whose bytes are the live package's; the Lambda irpt-holdings is not updated; no Terraform apply; DELTA on served output = 0 (the function keeps running SWRfUfHd...). NOT seen: which Terraform root reads this key at its next plan (the restore removes the question).
 comp-routes: DECLARED-NOT-APPLICABLE -- no route is added or changed. comp-cache: DECLARED-NOT-APPLICABLE. comp-schedule: DECLARED-NOT-APPLICABLE -- no schedule or trigger.
-comp-iam: DECLARED-NOT-APPLICABLE -- no IAM change; the copy uses the s3 rights this applier already holds on the artifact bucket (the same it used for the release-19 Lambda leg).
+comp-iam: DECLARED-NOT-APPLICABLE -- no IAM change; the copy uses the s3 rights this applier already holds on the artifact bucket (the rights an AE_CloudOps applier holds on the artifact bucket (IB2 used them for the release-19 Lambda leg)).
 comp-adversary: RUN -- by reading the incident (three wrong versions, latest is wrong) against the cell; the lens: restoring the wrong version, or deleting evidence. The order proves the source version's bytes equal the live CodeSha256 before the copy, keeps the three wrong versions, and reads the new latest back. NOT seen: any consumer of the key other than the Lambda module.
 </preflight>
 <decomp_ref>
@@ -43,9 +43,9 @@ comp-adversary: RUN -- by reading the incident (three wrong versions, latest is 
   </bounds>
 
   <proof_of_spec>
-Instance at `org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r20/IRPT_ANLREQ.TO-RESTORE-R20a.holdings-artifact-key-ib2.proof_of_spec.json`.
-    <criterion id="R20a-AC1" cell_refs="AR-y-215">The source version hashed to the live CodeSha256 before the copy.<invocation>grep -c 'source version sha256 SWRfUfHdJarO2Rhbxw/KQK88DeDNorQujkaR1jUuZc0=' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r20/R1_VERIFY_R20.txt</invocation><expect>^[1-9]</expect></criterion>
-    <criterion id="R20a-AC2" cell_refs="AR-y-215">The new latest version reads back byte-identical to the live package.<invocation>grep -m1 'new latest sha256 SWRfUfHdJarO2Rhbxw/KQK88DeDNorQujkaR1jUuZc0=' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r20/R3_READBACK_R20.txt</invocation><expect>new latest sha256 SWRfUfHd</expect></criterion>
+Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r20/IRPT_ANLREQ.TO-RESTORE-R20a.holdings-artifact-key-aq2.proof_of_spec.json`.
+    <criterion id="R20a-AC1" cell_refs="AR-y-215">The source version hashed to the live CodeSha256 before the copy.<invocation>grep -c 'source version sha256 SWRfUfHdJarO2Rhbxw/KQK88DeDNorQujkaR1jUuZc0=' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r20/R1_VERIFY_R20.txt</invocation><expect>^[1-9]</expect></criterion>
+    <criterion id="R20a-AC2" cell_refs="AR-y-215">The new latest version reads back byte-identical to the live package.<invocation>grep -m1 'new latest sha256 SWRfUfHdJarO2Rhbxw/KQK88DeDNorQujkaR1jUuZc0=' org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r20/R3_READBACK_R20.txt</invocation><expect>new latest sha256 SWRfUfHd</expect></criterion>
     <criterion id="R20a-AC3" cell_refs="AR-y-215">The ledger irpt-holdings-key-restore-20261013 is CLOSED.<invocation>grep -m1 '^\*\*Status' org/critical_paths/change_management/*irpt-holdings-key-restore-20261013_deploy_completion.md</invocation><expect>^\*\*Status:\*\* CLOSED</expect></criterion>
   </proof_of_spec>
 </task_order>
