@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-503",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-503.irpt-holdings-passes-account-id-through-offline-replay.md",
+    "group": "OTHER",
+    "vintage_commit": "ca2f4a6d3a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "ca2f4a6d3a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-503.irpt-holdings-passes-account-id-through-offline-replay.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~354",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~354/replay_503.py",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "self-contained offline replay script; assembles the packaged irpt-holdings tree from git show of the source-map pins in a temp folder outside the repository; run with python -I from the repository root; no AWS client, no invocation, no write",
+      "artifact_covered_by": ["IB173-1-AC1", "IB173-1-AC2", "IB173-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~354/IB173-1_holdings_passthrough_replay.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the replay record: three arms (node_with_account_id passed_through, node_without_account_id unchanged, node_with_unknown_member passed_through); 36 packaged members (35 staged at their pins with sha256 re-hashed, 1 WORKTREE); counters functions_invoked, sign_ins_made, aws_writes_made, accounts_written, figures_written, vendor_requests_sent all 0",
+      "artifact_covered_by": ["IB173-1-AC1", "IB173-1-AC2", "IB173-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended (IRPT_BCKEND-D2-W354-S1, IRPT_BCKEND-D2-W354-S2), append-only; no existing row edited; no deploy",
+      "artifact_covered_by": ["IB173-1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB173-1-AC1",
+      "criterion_verbatim": "exactly the three arms, each verdict from the closed set (passed_through, dropped, refused, unchanged), the node without the member reading unchanged, and entry_used and reading present",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r173/p173_cells.py\" . IB173-1-AC1",
+      "output_evidence": "OK: three arms recorded: {'node_with_account_id': 'passed_through', 'node_without_account_id': 'unchanged', 'node_with_unknown_member': 'passed_through'}\nIB173-1-AC1 PASS\nrc=0",
+      "denominator": "3 of 3 arms present with a verdict in the closed set; the node without the member reads unchanged; entry_used and reading present",
+      "expect": "^IB173-1-AC1 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB173-1-AC2",
+      "criterion_verbatim": "every member listed is a staged member of irpt-holdings at the source map's pin and sha256 (re-hashed from git show), or a source_dir file with pin WORKTREE whose sha256 matches the working tree",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r173/p173_cells.py\" . IB173-1-AC2",
+      "output_evidence": "OK: 36 packaged member(s) match the source map\nIB173-1-AC2 PASS\nrc=0",
+      "denominator": "36 of 36 listed members match: 35 staged members at their source-map pin and sha256, 1 source_dir file (holdings_publication_port.py) at WORKTREE",
+      "expect": "^IB173-1-AC2 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB173-1-AC3",
+      "criterion_verbatim": "the six bound counters read 0, and the check runs the replay script and its arms equal the record's arms",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r173/p173_cells.py\" . IB173-1-AC3",
+      "output_evidence": "OK: the replay script reproduces the recorded arms\nIB173-1-AC3 PASS\nrc=0",
+      "denominator": "6 of 6 bound counters read 0; the replay script run by the check reproduces 3 of 3 recorded arms",
+      "expect": "^IB173-1-AC3 PASS$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control; none was run.",
+      "expected": "N/A",
+      "observed": "not run: the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the replay script was run three times: once to build the record, once after the synthetic holdouts block and the error census were corrected, and once more inside the IB173-1-AC3 check; the arms were compared across the three runs",
+      "observed": "arms identical on every run: passed_through, unchanged, passed_through; each run wrote a fresh temp folder, which is the only varying field and is outside the three arm verdicts",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "entry.holdings_snapshot (the packaged entry point) was not run",
+      "reason": "it needs AWS: loaders.deps reads the directory and ownership from S3 and selection_store.configured_store() reads DynamoDB get_item; the order's conditional ('if it runs offline without AWS') is not met, so the replay runs the lower serve path snapshot.load_snapshot then snapshot.project"
+    },
+    {
+      "item": "the worktree holdings/snapshot.py, which differs from the staged pin b26847ea0422",
+      "reason": "the order states the worktree file is not the code the live function runs; the replay reads the packaged pin and does not read the worktree snapshot.py"
+    },
+    {
+      "item": "the research question of whether the 49 Financial builder's account_id should be admitted to the v1 schema",
+      "reason": "out of this order's grant; the replay records what the serve path does and what the schema would say, and makes no contract ruling"
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W354-S1: the order's invocation snapshot.project(snapshot, scope, include=()) does not exist at the packaged pin; project takes (snapshot, scope), and the replay called it that way",
+    "IRPT_BCKEND-D2-W354-S2: the packaged serve path runs no schema check, so an ACCOUNT node carrying account_id or unknown_member is served, though the v1 HoldingsSnapshot schema (additionalProperties false) refuses both"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~354/IB173-1_holdings_passthrough_replay.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~354/replay_503.py (run from the worktree root, timeout 120)",
+      "result": "rc=0; prints the record object to stdout and writes IB173-1_holdings_passthrough_replay.json"
+    },
+    {
+      "tool": "python",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r173/p173_cells.py\" . IB173-1-AC1 / IB173-1-AC2 / IB173-1-AC3 (each under timeout 120 from the worktree root)",
+      "result": "AC1 rc=0 PASS; AC2 rc=0 PASS; AC3 rc=0 PASS"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~354/IRPT_BCKEND.TO-IB-pr-503.irpt-holdings-passes-account-id-through-offline-replay.proof_of_spec.json IB173-1-AC1,IB173-1-AC2,IB173-1-AC3",
+      "result": "run after this write; the rc is in the worker report"
+    }
+  ]
+}
