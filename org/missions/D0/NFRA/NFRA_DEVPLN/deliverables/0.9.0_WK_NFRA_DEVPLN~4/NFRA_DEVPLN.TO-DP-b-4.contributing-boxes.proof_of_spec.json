@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_DEVPLN.TO-DP-b-4",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round1.md",
+    "vintage_commit": "2cab0f0536",
+    "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-b-4.contributing-boxes.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-b-4.contributing-boxes.md",
+    "group": "OTHER",
+    "vintage_commit": "2cab0f0536"
+  },
+  "assignee": "0.9.0_WK_NFRA_DEVPLN~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/CONTRIBUTING-BOXES.md",
+      "kind": "doc",
+      "commit_or_etag": "c576bb1b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal repo commit c576bb1b on branch wk-NFRA_DEVPLN-4-portal (LOCAL, not pushed). One new file, 57 lines, plain ASCII. Not on DEV, not on PROD. Read with git -C portal show c576bb1b:CONTRIBUTING-BOXES.md.",
+      "artifact_covered_by": ["DPb4-AC1"]
+    },
+    {
+      "path_or_key": ".claude/agents/worker.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "workspace worktree edit: one subsection of four added lines titled Portal changes, placed after the Surprise paragraph and before Proof. Diff is 4 insertions, 0 deletions; frontmatter untouched.",
+      "artifact_covered_by": ["DPb4-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DPb4-AC1",
+      "criterion_verbatim": "DPb4-AC1 -- the page exists, is at most 90 lines, plain ASCII, and carries the named anchors (the check script is the issuer's; run it, do not edit it). Invocation: bash org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/2.0.0_SA_COO~DV/checks/check_devpln_contributing.sh doc ; expect: CONTRIBUTING-CHECK doc ok=True",
+      "method": "command",
+      "invocation": "bash org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/2.0.0_SA_COO~DV/checks/check_devpln_contributing.sh doc",
+      "output_evidence": "run from the worktree root under timeout 120; CONTRIBUTING-CHECK doc ok=True missing=- (rc=0). wc -l portal/CONTRIBUTING-BOXES.md reads 57.",
+      "denominator": "11 of 11 checks clear: 9 named anchors present, 57 lines <= 90, 0 non-ASCII lines",
+      "status": "PASS",
+      "expect": "CONTRIBUTING-CHECK doc ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DPb4-AC2",
+      "criterion_verbatim": "DPb4-AC2 -- the worker definition points at the page and the branch name. Invocation: bash org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/2.0.0_SA_COO~DV/checks/check_devpln_contributing.sh worker ; expect: CONTRIBUTING-CHECK worker ok=True",
+      "method": "command",
+      "invocation": "bash org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/2.0.0_SA_COO~DV/checks/check_devpln_contributing.sh worker",
+      "output_evidence": "run from the worktree root under timeout 120; CONTRIBUTING-CHECK worker ok=True missing=- (rc=0). git diff --stat of .claude/agents/worker.md: 4 insertions, 0 deletions.",
+      "denominator": "2 of 2 needles present in .claude/agents/worker.md: CONTRIBUTING-BOXES.md and cand/<box>/<slug>",
+      "status": "PASS",
+      "expect": "CONTRIBUTING-CHECK worker ok=True",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "in-scratch copy of the page with every client-facing replaced by CLIENTX, the doc check run from that copy's directory (.scratch/mutant), nothing in the worktree changed",
+      "expected": "CONTRIBUTING-CHECK doc ok=False missing=client-facing",
+      "observed": "CONTRIBUTING-CHECK doc ok=False missing=client-facing (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the doc check from the worktree root, outputs compared",
+      "observed": "run A and run B both print CONTRIBUTING-CHECK doc ok=True missing=-; equal: True",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "registering cand/<box>/<slug> through python .tools/open-calls.py add --kind approval ...",
+      "reason": "not run: the tool at 2cab0f0536 has no approval kind and no feature options (surprise NFRA_DEVPLN-W4-S1). The page carries the command as the TO states it; no row was registered."
+    },
+    {
+      "item": "pushing any branch to origin, and any push to DEV or PROD",
+      "reason": "the TO says no push anywhere; the portal branch wk-NFRA_DEVPLN-4-portal is a worker branch, not a cand/ feature, and carries 201 commits above origin/PROD (15c975497520) because it was cut from DEV"
+    },
+    {
+      "item": "running bash .tools/portal-merge-forward.sh and bash .tools/portal-release-build.sh --features",
+      "reason": "neither script exists in the tree at 2cab0f0536 (surprise NFRA_DEVPLN-W4-S2); no feature was merged or promoted"
+    },
+    {
+      "item": "moving the workspace gitlink for portal/",
+      "reason": "the portal commit is recorded on the portal branch only; the issuer decides the workspace pointer"
+    }
+  ],
+  "surprises": [
+    "NFRA_DEVPLN-W4-S1: open-calls.py add accepts --kind {fork,act} and no --box, --branch, --purpose, --pages, --class, --how or --portal, so TO step 4 cannot run as written; the page states the command as the TO gives it.",
+    "NFRA_DEVPLN-W4-S2: .tools/portal-merge-forward.sh and .tools/portal-release-build.sh are absent at 2cab0f0536; TO steps 6 and 7 name them and have no executable behind them yet."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~4/NFRA_DEVPLN.TO-DP-b-4.contributing-boxes.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash check_devpln_contributing.sh doc / worker (issuer check)",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/2.0.0_SA_COO~DV/checks/check_devpln_contributing.sh doc",
+      "result": "CONTRIBUTING-CHECK doc ok=True missing=- (rc=0); worker mode CONTRIBUTING-CHECK worker ok=True missing=- (rc=0)"
+    },
+    {
+      "tool": "python .tools/surprise-row-gate.py",
+      "invocation": "timeout 120 python .tools/surprise-row-gate.py --help",
+      "result": "run with --help it printed [surprise-row-gate] OK: no surprise-channel rows in this commit (denominator: 0 dispatched path(s)); the gate validates the investigation rows when safe-commit stages the file"
+    }
+  ]
+}
