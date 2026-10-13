@@ -17,6 +17,8 @@ Usage:  python ar19_checks.py <check> --root <worker worktree root>
   y197-four      AR-y-197: the four members the issuer reads (served.py, name_rulings.json, ops/status.py, resident_worker.py) each with old/new blob,
                  the resident's use of it, and the change in behaviour                                                       -> Y197-FOUR-OK
   y198-equal     AR-y-198: the five cross-box members each compared to the owner-released version                              -> Y198-EQUAL-OK
+  y200-two       AR-y-200: the st32 build with ONLY the reader members (and what must move with them) swapped: the delta against the st32 rebuild is
+                 exactly the allowed set, and the reader's named tests pass on that build                                  -> Y200-TWO-OK
   y199-recipe    AR-y-199: st32's full assembly recipe recovered, rebuilt at st32's pin (326 members by name and content) before the
                  release pin is built with it, and the delta redone                                                           -> Y199-RECIPE-OK
 
@@ -34,7 +36,7 @@ INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r19/"
 ROUND18_VERSION = "irpt-template-reader.r18.1"
 TOKENS = {"y191-scratch": "Y191-SCRATCH", "y192-census": "Y192-CENSUS", "y193-build": "Y193-BUILD", "y194-rule": "Y194-RULE",
-          "y194-backstop": "Y194-BACKSTOP", "y194-keep": "Y194-KEEP", "y195-delta": "Y195-DELTA", "y196-install": "Y196-INSTALL", "y197-four": "Y197-FOUR", "y198-equal": "Y198-EQUAL", "y199-recipe": "Y199-RECIPE"}
+          "y194-backstop": "Y194-BACKSTOP", "y194-keep": "Y194-KEEP", "y195-delta": "Y195-DELTA", "y196-install": "Y196-INSTALL", "y197-four": "Y197-FOUR", "y198-equal": "Y198-EQUAL", "y199-recipe": "Y199-RECIPE", "y200-two": "Y200-TWO"}
 SHEETS = ("two_value_account_sheet", "total_row_sheet", "one_account_sheet", "two_sheet_workbook")
 NATIVE_UNPINNED = ("acceptance.py", "submission.py", "submission_service.py", "durable_job.py")
 S31_FORMS = ("Account Numbers", "Subaccounts", "Accnt", "Account Nos", "Account Seqno", "Account Serial", "Roth IRA Account", "Trust Account")
@@ -258,6 +260,31 @@ def main(argv):
                 if member not in delta:
                     problems.append("delta lacks %r" % member)
             print("st32 rebuild: total %s, by name %s, by content %s, host-origin %s" % (rb.get("members_total"), rb.get("matched_by_name"), rb.get("matched_by_content"), len(rb.get("host_origin_names") or [])))
+    elif check == "y200-two":
+        rec = load(root, D % "55" + "RESIDENT_TWO_MEMBER_RELEASE.json", problems)
+        if rec:
+            for member in ("base_pin", "scratch_commit", "recipe_args_source", "minimal_import_set", "delta_vs_st32_rebuild", "tests", "tarball", "root_naming", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            allowed = {"uploads.py", "template_reader.py", "resident_bindings.json", "SHA256SUMS"}
+            extra_ok = {str(x.get("member") if isinstance(x, dict) else x).rsplit("/", 1)[-1] for x in rec.get("minimal_import_set", [])}
+            diff = rec.get("delta_vs_st32_rebuild") or {}
+            names = [str(r.get("member") if isinstance(r, dict) else r).rsplit("/", 1)[-1] for r in diff.get("differing", [])]
+            for name in names:
+                if name not in allowed and name not in extra_ok:
+                    problems.append("the build differs from st32 in %s, which is neither a reader member, the bindings, SHA256SUMS nor in minimal_import_set" % name)
+            for name in ("uploads.py", "template_reader.py"):
+                if name not in names:
+                    problems.append("the delta lacks the reader member %s" % name)
+            if diff.get("removed_members_count") not in (0, "0"):
+                problems.append("the build must remove no member relative to st32")
+            tests = rec.get("tests") or {}
+            for member in ("named_tests", "passed", "failed", "denominator"):
+                if member not in tests:
+                    problems.append("tests lacks %r" % member)
+            if tests.get("failed") not in (0, "0"):
+                problems.append("the reader's tests must pass on the build (failed=%r)" % tests.get("failed"))
+            print("differing %s; tests passed %s failed %s" % (names, tests.get("passed"), tests.get("failed")))
     return finish(check, problems)
 
 
