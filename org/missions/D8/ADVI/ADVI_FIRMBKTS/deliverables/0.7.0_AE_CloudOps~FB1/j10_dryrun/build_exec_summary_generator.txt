@@ -1,0 +1,35 @@
+
+Lambda Build-and-Upload
+  Pipeline:  exec-summary
+  Bucket:    s3://opal-313476888478-lambda-artifacts/exec-summary/
+  JSON tool: node
+  Function:  exec-summary-generator (single-function mode)
+
+Found 1 function(s) to build
+
+-> exec-summary-generator
+  Source:  infra/aws/lambda/exec-summary-generator
+  Files:   config.py lambda_function.py metrics.py platinum_dest_view.py platinum_reader.py served_seam.py validator.py prompts/concentration_risk.txt prompts/leaderboard_rank_delta.txt prompts/system.txt prompts/tax_loss_candidate.txt prompts/top_gainer.txt prompts/top_loser.txt prompts/top_nna_mover.txt exec_summary/__init__.py exec_summary/template_library.py exec_summary/trigger_eval.py
+  OK: import-closure -- 10 packaged .py file(s), every top-level import satisfied by package/stdlib/runtime/layer. (Nested lazy imports exempt by design.)
+  SHA256:  8gbyCaYi896QYTm7MRxbLob7FCHWF5B9DKscxCgRPHY=
+  Size:    24K
+  ??? s3://opal-313476888478-lambda-artifacts/exec-summary/exec-summary-generator.zip (write VERIFIED: size=20833, sha256 metadata match)
+
+================================================
+Complete ??? 1 function(s) built and uploaded
+
+Source map updated with artifact_s3_key + artifact_sha256.
+
+Next steps:
+  git add infra/aws/lambda/ci/lambda-source-map.json
+  git commit -m 'ci: upload artifacts for exec-summary'
+  cd infra/aws/terraform/exec-summary
+  .tools/terraform.exe plan    # should show Lambda updates
+  .tools/terraform.exe apply
+  .tools/terraform.exe plan    # must show No changes
+  bash infra/aws/lambda/ci/record-terraform-deploy.sh exec-summary --version exec-summary-vX.Y.Z \
+       --author "{your-serial} <{your-serial}@opal.agent>"
+  # --author is REQUIRED for correct attribution: record-terraform-deploy
+  # commits, and its commit must be authored by a permitted agent serial.
+  # Omitting it derives the serial from .comp-graph/.agent_context (shared,
+  # best-effort) -- pass it explicitly to be sure.
