@@ -38,7 +38,7 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ",
           "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL",
           "y291-known": "Y291-KNOWN", "y292-checker": "Y292-CHECKER", "y293-kept": "Y293-KEPT",
-          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER"}
+          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -670,6 +670,49 @@ def main(argv):
             print("packager request id tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
             if rc != 0 or failed or passed < 6:
                 problems.append("tests/test_opal_packager_request_id.py must pass with at least 6 tests")
+    elif check == "y294-stack":
+        rec = load(root, D26 % "111" + "PORTAL_PARTNER_STACK.json", problems)
+        if rec:
+            for member in ("prod_tip", "branch", "head", "merges", "after_each", "conflicts", "test_edits", "final_counts", "typecheck",
+                           "what_a_person_sees", "route_gate", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            portal = "C:/dev/ajb_workspace/portal"
+
+            def git(*args):
+                return subprocess.run(["git", "-C", portal] + list(args), capture_output=True, text=True).stdout.strip()
+
+            for key in ("prod_tip", "head"):
+                if not re.fullmatch(r"[0-9a-f]{40}", str(rec.get(key, ""))):
+                    problems.append("%s is not a full commit sha" % key)
+            if rec.get("branch") != "cand/dell2/partner-firm-stack":
+                problems.append("branch must be cand/dell2/partner-firm-stack")
+            merges = rec.get("merges") or []
+            want = ["794b7df4", "9ef6a359b8", "62d455f5", "6d117bfe85", "80d7c70a7d", "ab6ede6989", "e82daf4c98", "46a49e57e3"]
+            if len(merges) != len(want):
+                problems.append("merges must list the eight in order (got %d)" % len(merges))
+            else:
+                for m, w in zip(merges, want):
+                    if not str(m.get("branch_tip", m.get("branch", ""))).startswith(w) and w not in json.dumps(m):
+                        problems.append("merge order: expected %s at this position, got %r" % (w, m))
+            if rec.get("head") and git("cat-file", "-t", rec["head"]) != "commit":
+                problems.append("the head commit is not in the portal repository")
+            elif rec.get("head"):
+                if git("rev-parse", "cand/dell2/partner-firm-stack") != rec["head"]:
+                    problems.append("the branch cand/dell2/partner-firm-stack is not at the recorded head")
+                if rec.get("prod_tip") and subprocess.run(["git", "-C", portal, "merge-base", "--is-ancestor", rec["prod_tip"], rec["head"]]).returncode != 0:
+                    problems.append("prod_tip is not an ancestor of head")
+                if subprocess.run(["git", "-C", portal, "merge-base", "--is-ancestor", "9892130cfd", rec["head"]]).returncode == 0:
+                    problems.append("the held commentary candidate (AR-y-279, 9892130cfd) must NOT be in the stack")
+                if subprocess.run(["git", "-C", portal, "merge-base", "--is-ancestor", "46a49e57e3", rec["head"]]).returncode != 0:
+                    problems.append("the route gate (AR-y-282, 46a49e57e3) must be in the stack")
+            ae = rec.get("after_each") or []
+            if len(ae) < len(want):
+                problems.append("after_each must carry at least one row per merge (got %d)" % len(ae))
+            for row in ae:
+                if str(row.get("failed", "x")) not in ("0",) or str(row.get("typecheck_rc", row.get("typecheck", "x"))) not in ("0",):
+                    problems.append("after_each row not clean (failed 0, typecheck_rc 0): %r" % row)
+                    break
     return finish(check, problems)
 
 

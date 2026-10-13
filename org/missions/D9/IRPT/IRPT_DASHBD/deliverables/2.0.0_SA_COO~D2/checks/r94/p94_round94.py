@@ -129,12 +129,64 @@ def contract_members(root):
             sp = root / s["contract"]
             need(sp.is_file(), "member %s names a source contract that does not exist: %s" % (i, s["contract"]))
             need(s["field"] in sp.read_bytes().decode("utf-8"), "member %s: field %r is not in %s" % (i, s["field"], s["contract"]))
-    return c, by, hashlib.sha256(raw).hexdigest()
+    sha = hashlib.sha256(raw).hexdigest()
+    lin = c.get("lineage")
+    accepted = {sha}
+    if lin is not None:
+        need(isinstance(lin, list) and all(isinstance(x, dict) and HEX64.fullmatch(str(x.get("sha256") or "")) and str(x.get("contract_version") or "").strip() for x in lin),
+             "lineage must be a list of {contract_version, sha256}")
+        accepted |= {x["sha256"] for x in lin}
+    CONTRACT_ACCEPTED[:] = sorted(accepted)
+    return c, by, sha
+
+
+CONTRACT_ACCEPTED = []
+RETURN_CONTRACT = "org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json"
+V010_SHA = "53fce40546882c90b634decb91ec5176a54ddf3c3b4622270bfc5cc35f66991b"
+WINDOWS = ("qtd", "ytd", "last_12_months", "since_inception")
+RESOURCED_ROWS = ("beginning_value", "ending_value", "net_additions", "net_gain")
+
+
+def resourced_ids():
+    ids = ["%s.%s.%s" % (t, w, r) for t in ("pvs", "avs") for w in WINDOWS for r in RESOURCED_ROWS]
+    ids += ["avs.%s.return_cumulative" % w for w in WINDOWS]
+    return ids
+
+
+def check_resource(root):
+    """DB94-6: the contract is re-sourced to account_return_daily for every window figure that table can derive (CTO msg 7289)."""
+    c, by, sha = contract_members(root)
+    ver = str(c.get("contract_version") or "")
+    need(ver != "0.1.0" and ver.count(".") == 2 and tuple(int(x) for x in ver.split(".")) > (0, 1, 0), "contract_version %r must be above 0.1.0" % ver)
+    need(V010_SHA in {x["sha256"] for x in (c.get("lineage") or [])}, "lineage must list the 0.1.0 contract's sha256 (%s...)" % V010_SHA[:12])
+    n = 0
+    for i in resourced_ids():
+        m = by[i]
+        s = m["source"]
+        need(isinstance(s, dict) and s.get("contract") == RETURN_CONTRACT and str(s.get("fold") or "").strip() != "", "member %s must be sourced from the account return table, with a fold text" % i)
+        n += 1
+    contrib = [i for i in by if i.startswith("act.") and by[i]["source"] != "ABSENT" and by[i]["source"]["contract"] != "org/standards/IRPT_DASHBD_ACCOUNT_ACTIVITY_DAILY_CONTRACT.json"]
+    need(not contrib, "activity-summary members %s must keep their own source or ABSENT" % contrib[:3])
+    folder = D + "0.9.0_WK_IRPT_DASHBD~145"
+    g = load(root, folder + "/GAP_TABLE.json")
+    absent = sum(1 for m in by.values() if m["source"] == "ABSENT")
+    t = g.get("totals") or {}
+    need(g.get("contract_sha256") == sha and t.get("members") == len(by) and t.get("absent") == absent and t.get("sourced") == len(by) - absent, "the regenerated gap table must be bound to the contract's bytes and equal its totals")
+    need(is_int(g.get("resourced_members")) and g["resourced_members"] == n, "gap table resourced_members %r must equal %d" % (g.get("resourced_members"), n))
+    need(isinstance(g.get("identity_by_window_sketch"), str) and g["identity_by_window_sketch"].strip() != "", "gap table needs identity_by_window_sketch (how net gain follows from the three other rows)")
+    rd = g.get("reads") or {}
+    need(rd.get("vendor_calls") == 0 and rd.get("s3_reads") == 0 and rd.get("s3_writes") == 0 and rd.get("secret_reads") == 0 and g.get("served_values_changed") is False, "reads %r" % rd)
+    hits = long_digit_runs(g)
+    need(not hits, "the gap table holds a run of 8 or more digits at %s" % hits[:3])
+    print("OK: contract %s re-sourced: %d window members now read the account return table; %d of %d members sourced, %d ABSENT" % (ver, n, len(by) - absent, len(by), absent))
 
 
 def check_contract(root):
     folder = D + "0.9.0_WK_IRPT_DASHBD~140"
     c, by, sha = contract_members(root)
+    # a re-sourced contract (DB-b-179) carries the newest gap table in the later folder, bound to the current bytes
+    if (root / (D + "0.9.0_WK_IRPT_DASHBD~145/GAP_TABLE.json")).is_file():
+        folder = D + "0.9.0_WK_IRPT_DASHBD~145"
     g = load(root, folder + "/GAP_TABLE.json")
     n = len(by)
     absent = sum(1 for m in by.values() if m["source"] == "ABSENT")
@@ -162,7 +214,7 @@ def check_sample(root):
     _c, by, sha = contract_members(root)
     r = load(root, folder + "/HOUSEHOLD_SAMPLE_BUILD.json")
     code_ok(root, r.get("code"))
-    need(r.get("contract_sha256") == sha, "the record is not bound to the contract's bytes")
+    need(r.get("contract_sha256") in CONTRACT_ACCEPTED, "the record is not bound to the contract's bytes or to one of its lineage versions")
     hh = r.get("household") or {}
     need(is_int(hh.get("accounts")) and hh["accounts"] >= 2 and HEX64.fullmatch(str(hh.get("household_ref_sha256") or "")), "household %r needs 2 or more accounts and a hashed reference" % hh)
     m = r.get("members") or {}
@@ -205,7 +257,7 @@ def check_render(root, which):
     folder = root / (D + w)
     r = load(root, D + w + "/" + name)
     _c, by, sha = contract_members(root)
-    need(r.get("contract_sha256") == sha, "the record is not bound to the contract's bytes")
+    need(r.get("contract_sha256") in CONTRACT_ACCEPTED, "the record is not bound to the contract's bytes or to one of its lineage versions")
     need(tuple(r.get("sections_rendered_in_order") or ()) == SECTIONS, "sections_rendered_in_order must be %r" % (SECTIONS,))
     for k in ("absent_rendered_in_words", "fee_basis_label_present", "no_blank_figure", "same_layout_for_every_firm"):
         need(r.get(k) is True, "%s must be true" % k)
@@ -253,7 +305,7 @@ def main():
             print(i)
         return
     fns = {"DB94-1-AC1": check_contract, "DB94-2-AC1": check_sample, "DB94-3-AC1": lambda r: check_render(r, "tab"),
-           "DB94-4-AC1": lambda r: check_render(r, "export"), "DB94-5-AC1": check_smoke}
+           "DB94-4-AC1": lambda r: check_render(r, "export"), "DB94-5-AC1": check_smoke, "DB94-6-AC1": check_resource}
     try:
         need(cid in fns, "unknown criterion %r" % cid)
         fns[cid](root)
