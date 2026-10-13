@@ -80,4 +80,4 @@ Kinds: rule 13, lambda 13, script 9, task 4, schedule 2, other 1. Legacy touch: 
 
 ## Surprises filed (INVESTIGATION_v1.md)
 
-S1 the Cottonwood scope of opal-data-bd is empty; S2 characteristics.json header says zero writers, object modified today; S3 graph lists a registry daily rule that is absent live; S4 stale SRC_BUCKET env on cot-etf-ownership-daily; S5 AC2 scope check and the portal gitlink (see the proof instance).
+S1 the Cottonwood scope of opal-data-bd is empty; S2 characteristics.json header says zero writers, object modified today; S3 graph lists a registry daily rule that is absent live; S4 stale SRC_BUCKET env on cot-etf-ownership-daily. Rows: ADVI_FIRMBKTS-D1-W78-S1 to S4 (OBSERVATION, INERT).
