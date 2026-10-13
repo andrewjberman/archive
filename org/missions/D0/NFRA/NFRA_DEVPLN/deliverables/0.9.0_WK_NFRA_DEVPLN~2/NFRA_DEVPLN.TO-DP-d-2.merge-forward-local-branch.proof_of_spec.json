@@ -1,0 +1,85 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-d-2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-d-2.merge-forward-local-branch.md",
+  "group": "OTHER",
+  "vintage_commit": "f3cc33dddc"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~2",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round3.md",
+  "vintage_commit": "f3cc33dddc",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-d-2.merge-forward-local-branch.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/portal-merge-forward.sh",
+   "kind": "script",
+   "commit_or_etag": "bea03363ab",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local script. The self-test runs in mktemp repositories. Nothing was pushed; the real portal DEV, PROD and main were not changed (origin/DEV read at 24877b67b7 before and after the AC2 call)."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPd2-AC1",
+   "criterion_verbatim": "bash .tools/portal-merge-forward.sh --selftest -- every case, old and new, passing (expect: ok=True)",
+   "method": "test_suite",
+   "invocation": "bash .tools/portal-merge-forward.sh --selftest",
+   "output_evidence": "Run under timeout 120; rc=0. Last line: MERGE-FORWARD-SELFTEST cases=26/26 ok=True (run at bea03363ab, twice, same last line). Before the change the same selftest printed cases=22/22 ok=True. New checks: 13a and 13b (a local-only branch with an approved row merges under the default fetch, NOTE on stderr, parents checked), 14 (absent on origin and locally refuses branch-not-found), 15 (a broken remote refuses fetch-failed). The case count is computed in the script, not hardcoded.",
+   "denominator": "26 of 26 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPd2-AC2",
+   "criterion_verbatim": "bash .tools/portal-merge-forward.sh cand/laptop/local-only-probe --repo portal -- result=REFUSED reason=no-approval-row (the seam against the real portal and the real local-only branch; nothing merged, pushed or left behind)",
+   "method": "command",
+   "invocation": "bash .tools/portal-merge-forward.sh cand/laptop/local-only-probe --repo portal",
+   "output_evidence": "Run under timeout 120; rc=1. stderr: NOTE: cand/laptop/local-only-probe is not on origin; using the local branch. Last line: MERGE-FORWARD branch=cand/laptop/local-only-probe result=REFUSED reason=no-approval-row dev_before=24877b67b7a175bcfe73c779f69c0bf7c3c639c8 dev_after=24877b67b7a175bcfe73c779f69c0bf7c3c639c8 pushed=no merge=-. The run passes the fetch and refuses at step 2, before any ephemeral worktree is created, so nothing is merged or pushed. The only change is the DEV fetch, which updates the remote-tracking ref (the order allows this). Leftovers: no mf/ branch was created by this run; the one mf/ branch in the portal repo, mf/cand-laptop-contributing-boxes-20261013T204428Z-710437, predates the run.",
+   "denominator": "1 of 1 result lines",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Difference control on the fetch step: the same AC2 call on the same real portal repo and branch, run before the change (at f3cc33dddc) and after the change (at bea03363ab).",
+   "expected": "before the change the call refuses fetch-failed; after the change it passes the fetch and refuses no-approval-row",
+   "observed": "before: MERGE-FORWARD branch=cand/laptop/local-only-probe result=REFUSED reason=fetch-failed (git: fatal: couldn't find remote ref refs/heads/cand/laptop/local-only-probe), rc=1. after: result=REFUSED reason=no-approval-row, rc=1.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2 each ran twice at the committed bytes (bea03363ab), once after the edit and once in the final check.",
+   "observed": "MERGE-FORWARD-SELFTEST cases=26/26 ok=True both times; AC2 result=REFUSED reason=no-approval-row both times with dev_before equal to dev_after.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a merge of the real local-only branch onto the real portal DEV",
+   "reason": "the order refuses it: the branch touches a non-test file, so no approval row exists and the run stops at step 2 by design. The approved-row path is covered only in the self-test's temporary origin and clone (case 13)."
+  },
+  {
+   "item": "a stale remote-tracking ref for a branch deleted on origin",
+   "reason": "not measured in the portal repo (the probe branch has no origin ref) and not exercised by the self-test; the local fallback skips the stale ref by design. See NFRA_DEVPLN-W2-S9."
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W2-S9: the absent-on-origin fallback reads refs/heads/<branch> even when a stale refs/remotes/origin/<branch> remains, where --no-fetch would read that ref (class OBSERVATION, INERT)",
+  "NFRA_DEVPLN-W2-S10: the AC2 call prints git's multiple-merge-bases warning from the three-dot diff; the verdict is unchanged and the reach of the warning is not measured (class OBSERVATION, INERT)"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~2/NFRA_DEVPLN.TO-DP-d-2.merge-forward-local-branch.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "bash -n",
+   "invocation": "bash -n .tools/portal-merge-forward.sh",
+   "result": "SYNTAX-OK"
+  },
+  {
+   "tool": "safe-commit.sh gates",
+   "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/commit-msg-1.txt -- .tools/portal-merge-forward.sh <investigation file>",
+   "result": "commit-gate OK for the script; surprise-row-gate OK: 2 new row(s) of 30 checked; committed bea03363ab"
+  }
+ ]
+}
