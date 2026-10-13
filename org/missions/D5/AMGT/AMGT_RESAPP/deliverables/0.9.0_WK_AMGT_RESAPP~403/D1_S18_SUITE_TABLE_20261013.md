@@ -1,40 +1,39 @@
 # D1-S18 suite table
 
 SUITE-BEFORE: files 462 | pass 1386 | fail 6 | skip 27
-SUITE-AFTER: files 462 | pass 1389 | fail 3 | skip 27
+SUITE-AFTER: files 462 | pass 1392 | fail 0 | skip 27
 
-Measured with `bun test` from the portal root at DEV 0a06280a (before) and at portal commit 4477deca (after). Each run took about 190 s and reported 1,419 tests across 462 files.
+Measured with `bun test` from the portal root. BEFORE: DEV 0a06280a, the run taken by the first seat of this slot (6 fail). AFTER: portal commit c26e0c68 (the five edits), run by this seat (`Ran 1419 tests across 462 files`, 0 fail). The AC1 seven-file run reads 23 pass, 0 fail.
 
 ### iv-e-46.class-readers.test.ts
-CAUSE: measured two NAMED citations pointing at lines that no longer contain the word alternatives: _shared/perfrp/PerfrpAllocation.tsx:44 (the word is at :46) and _shared/types.ts:1561 (the word is at :1565); the reason-text cite :1608 moved to :1612. Edited to match; the file passes after the edit (the AC1 targeted run reads 13 pass, 0 fail across the three files).
+CAUSE: measured the two NAMED citations at DEV 0a06280a: _shared/perfrp/PerfrpAllocation.tsx line 44 and _shared/types.ts line 1561 no longer carry the word alternatives (it sits at :46 and :1565); the reason-text cite :1608 had moved to :1612. Edited to match; the file passes after the edit.
 CLASS: STALE-CITATION
 
 ### iv-e-115.vendor-section-names-units.test.tsx
-CAUSE: measured the pinned census docs/briefs/sources/YCHARTS_COMPARISON_REPORT_FIELD_SCRAPE_20260909.json, hashed at test time against CENSUS_SHA256 and pinned by CENSUS_PIN in contracts/vendorSectionNames.ts; both constants still held the pre-a1b500eb1f values. Set CENSUS_PIN to a1b500eb1f53349445dc6669672ba408cd6d49a1 and CENSUS_SHA256 to 053560a14bd5d5b2a95a25c641062c1bdcfeaca08d4d476075bd2e3891d7e831; the test passes after.
+CAUSE: measured the pinned census docs/briefs/sources/YCHARTS_COMPARISON_REPORT_FIELD_SCRAPE_20260909.json, which changed at commit a1b500eb1f (TO-IV-e-118), while CENSUS_PIN and CENSUS_SHA256 in contracts/vendorSectionNames.ts still held the old values. Both moved to the a1b500eb1f census; the test passes after.
 CLASS: PIN-DRIFT
 
 ### producer-fixtures.test.ts
-CAUSE: measured the portal copy fixtures/wire/HoldingsSnapshot.valid.json at DEV 0a06280a (2608 bytes) lacked one line, an account_id on a node, that the infra source carries (2662 bytes). Copied the source over byte-identical (cmp returned identical); the test passes after.
+CAUSE: measured the portal copy fixtures/wire/HoldingsSnapshot.valid.json at DEV 0a06280a lacked the account_id line that the infra source carries on a consumed node field. Copied the source over byte-identical; the test passes after.
 CLASS: GENERATED-DRIFT
 
 ### iv-e-26.wire-regen.test.ts
-CAUSE: measured the gen-wire.ts regeneration is not byte-identical to the committed HoldingsSnapshot (test diff Expected -1 / Received +3). The committed wire TypeScript has no multi_asset, while the frozen v1 schema docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json carries it at 5 lines. Not re-run here: the generators were not executed.
+CAUSE: measured the committed wire folder was not gen-wire.ts output: the regeneration differed from the committed HoldingsSnapshot.ts by 7 lines added and 6 removed, because the frozen v1 schema carries multi_asset. Regenerated with gen-all.ts (commit c26e0c68); the test passes after.
 CLASS: CONTRACT-ENUM
 
 ### iv-e-48.new-classes.test.tsx
-CAUSE: measured VERDICT NEW-CLASSES-FAIL: wire union [alternatives,cash,commodities,equity,fixed_income,other,structured,unclassified] != contract enum [alternatives,cash,commodities,equity,fixed_income,multi_asset,other,structured,unclassified]; the committed wire union lacks multi_asset.
+CAUSE: measured at DEV 0a06280a the wire union lacked multi_asset, which the contract enum carries (VERDICT NEW-CLASSES-FAIL). The regenerated HoldingsSnapshot.ts adds multi_asset to the wire union; the test passes after.
 CLASS: CONTRACT-ENUM
 
 ### iv-e-98.generators-drift.test.ts
-CAUSE: measured the wire folder is not pure generator output: regeneration is not byte-identical for HoldingsSnapshot.ts, the only file the test names (the same drift as iv-e-26). Still red after this cell, as the order requires.
+CAUSE: measured the same one-file generator drift at DEV 0a06280a (HoldingsSnapshot.ts, 1 of 28 files). Regenerating the wire folder with gen-all.ts removes it; the test passes after.
 CLASS: GENERATED-DRIFT
 
 ## DECISION
-Regenerating the wire folder (bun src/pages/InvestorReporting/__tests__/fe-s-13/gen-all.ts) is the CTO's decision, and this cell did not run it.
-Per the order's analysis (not re-measured here): it turns GREEN iv-e-26.wire-regen, iv-e-48.new-classes and iv-e-98.generators-drift, the three current reds.
-It turns RED dsgn-irptv1/iv-e-148.multi-asset-class-readers.test.ts arm (d), which passes today: the wire type must admit no retired token.
-Both cannot hold while the frozen v1 HoldingsSnapshot schema carries multi_asset (measured at 5 lines).
-Left UNTOUCHED: the wire folder, gen-wire.ts, gen-consumed.ts, and the iv-e-26, iv-e-48, iv-e-98 and iv-e-148 test files.
-Still failing after this cell: iv-e-26 (IVE26-AC3), iv-e-48 (IVE48-AC1), iv-e-98 (IVE98); 3 fail.
-Input to the decision: Andrew's 2026-10-07 "there should be no multi-asset class".
-Decision owner: the CTO.
+RULED by CTO~DELL1 msg 4899 (2026-10-13): regenerate the wire folder, and relax arm (d) of iv-e-148.
+Regenerating turned green iv-e-26, iv-e-48 and iv-e-98 (the three wire-contract reds).
+Unrelaxed, it would have turned iv-e-148 arm (d) red, because the frozen v1 wire type carries multi_asset (MDPF_SECCLASS restored it at 506096fc9a).
+Relaxed arm (d), now titled "the frozen v1 wire type may carry the retired token only inside a class enum": the token may appear only inside a class enum, so it is counted against the enum lines, not required to be absent.
+Every reader still maps the token to unclassified (arm a); the colour registry and the lists stay six (arms b, c, e); SECCLASS's producer test proves no row emits it.
+Andrew's 2026-10-07 word ("no multi-asset class, 6 classes") is about classes and is kept by arms (a), (b), (c), (e).
+Relaxed arm (d) is in commit c26e0c68; gen-wire.ts, gen-consumed.ts and the iv-e-26, iv-e-48, iv-e-98 tests are untouched.
