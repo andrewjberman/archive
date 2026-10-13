@@ -1,0 +1,170 @@
+{
+  "order": "IRPT_ANLREQ.TO-AR-y-278",
+  "cell": "AR-y-278",
+  "scope": "READ AND DESIGN ONLY. Nothing built, called or written, except four read-only yfinance history calls (measurement). No live provider call, no DynamoDB or S3 call, no push, no deploy.",
+  "worktree": "C:/dev/wk-irpt-anlreq-99 (branch wk-IRPT_ANLREQ-99)",
+  "read_at": "2026-10-13T19:34Z to 19:58Z",
+  "prd_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/prd/IRPT_ANLREQ_PRD.md (C-SWAP row at line 104 of the file as read at this worktree HEAD; FWD-2 at lines 42-46)",
+
+  "door": {
+    "where_ticker_not_found_is_made": "infra/aws/lambda/investor-reporting/intake/portfolio.py:477-478 (inside freeze_template_portfolio, portfolio.py:388; the finding is emitted by emit() at portfolio.py:419-421 when state == NOT_FOUND; the FOUND gate it falls through is portfolio.py:464-471)",
+    "claim": "measured (read in the code at this HEAD)",
+    "call_chain": [
+      "intake/uploads.py:581  checks = self.resolve_template(principal, owner, symbols)   (in _freeze_template, uploads.py:572)",
+      "intake/resolution_broker.py:144-146  UploadTemplateResolver.__call__ -> self.resolver.check(symbols)",
+      "intake/security_resolution.py:178  SecurityResolver.check (cache read, then identity read at :206, then provider read at :218)",
+      "intake/security_resolution.py:64  classify_batch; :141 result NOT_FOUND, reason EXACT_IDENTIFIER_ABSENT_IN_PROVIDER_READ",
+      "intake/resolution_broker.py:91-130  BrokerSecurityCheck._lookup; :102 transport.request('/securities/securities_info?securities=...')",
+      "intake/uploads.py:597  freeze_template_portfolio(template, owner, source, checks, ...)",
+      "intake/portfolio.py:477-478  NOT_FOUND -> emit TICKER_NOT_FOUND, column A, actions [REPLACE_FILE, NAME_PROXY], value = the file's own symbol"
+    ],
+    "which_provider_it_asks": "YCharts, through the resident's lease-fenced securities_info GET (route /securities/securities_info; resident_session.py:139-146 template_resolver builds BrokerSecurityCheck over acquire_sessionless). Not yfinance. Not the etf-classifications registry: the identity port is a stub (ycharts/generate/resident_worker.py:619-620, identity=lambda symbol, namespace: None), so the reference is always UNAVAILABLE (security_resolution.py:209-212).",
+    "what_it_returns_for_a_mutual_fund_like_TIMXX": {
+      "live_answer_recorded_by_the_cell": "TICKER_NOT_FOUND (the upload door refused TIMXX as absent; recorded by 2.0.0_SA_COO~Y2 and the PRD premise, NOT re-measured here: no live provider call is in this order's scope)",
+      "code_path_for_a_fund": "security_resolution.py:19-21 (a fund is keyed M:<ticker> with display_security_id <ticker>); classify_batch :139-149 accepts a fund row only when its own display id and fields verify (_fund_row_cause :52-59); an unverified fund row -> PROVIDER_FUND_ROW_UNVERIFIED (:139); a verified row with features_needed -> PROVIDER_ENTITLEMENT_UNVERIFIED -> TICKER_DATA_NOT_ENTITLED (portfolio.py:479-482); no matching row at all -> NOT_FOUND -> TICKER_NOT_FOUND (portfolio.py:477-478)",
+      "conflict_noted": "the offline test world models TIMXX as a GATED fund row (intake/tests/test_resolve_upload.py:315; ycharts/generate/tests/test_y5_proxy_corrections.py:15-16, 39), which answers TICKER_DATA_NOT_ENTITLED, not TICKER_NOT_FOUND. Filed as a surprise row (IRPT_ANLREQ-D2-W99-S4)."
+    },
+    "what_the_person_sees": {
+      "finding_code": "TICKER_NOT_FOUND",
+      "words": "Our data provider does not recognize this ticker. Check it for a typo, or name a similar ticker to stand in for it (a proxy); the report will use that ticker and say that it did.",
+      "words_at": "intake/uploads.py:69-71 (CORRECTION_WORDS, a literal copy locked by intake/tests/test_correction_words.py)",
+      "actions": ["REPLACE_FILE", "NAME_PROXY"],
+      "proxy_codes_at": "intake/uploads.py:143 PROXY_CODES",
+      "suggestions_lane": "intake/upload_suggestions.py (only TICKER_NOT_FOUND rows; advisory; verified by security_resolution.py:242-249 verified_suggestions, which calls resolver.check, i.e. YCharts, not the registry or yfinance)",
+      "page_render_not_read": "the upload page renderer in portal/ was not read"
+    }
+  },
+
+  "estate": {
+    "registry": {
+      "what": "the etf-classifications DynamoDB table (MDPF_SECCLASS's table, C-TABLE in MDPF_SECHIST PRD)",
+      "location": "infra/aws/terraform/yang-pipeline/etf-classifications.tf:22-23 (aws_dynamodb_table.etf_classifications, name etf-classifications, hash_key ticker, PAY_PER_REQUEST, PITR on)",
+      "row_shape": "hash key ticker (S). Header schema at etf-classifications.tf:6-20: asset_class, sub_asset_class, management_style, sector, maturity, geography, name, override_sub_asset_class, override_reason, last_updated, updated_by. GSIs asset-class-index and sub-asset-class-index (:45-52).",
+      "source_module": "infra/aws/lambda/v2_portal/_shared/etf_classification.py (ETF_CLASSIFICATIONS at :44; 1542 lines; copied into other lambda directories, see its note near :1296-1300)",
+      "readers": [
+        "infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py (ETFClassifier.get_classification, table default etf-classifications)",
+        "data/mdpf/scripts/demque/secclass_sync.py:49 TABLE = etf-classifications; READ ONLY (get_item, batch_get_item) per its docstring"
+      ],
+      "writers": [
+        "infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-classifications.py:281-284 batch_writer.put_item, seeded from the canonical source module; merge_item :92-144 collects value conflicts; seed_table :183 refuses to write on a conflict unless accept_module_truth is set. A human runs it from source. It is not a per-security write API."
+      ],
+      "resident_read": "NONE. No investor-reporting caller reads the table (grep of infra/aws/lambda/investor-reporting found no etf-classifications reader; the only registry seam is the identity port at resident_worker.py:619-620, stubbed to None)."
+    },
+    "sechist_writer": {
+      "what": "MDPF_SECHIST's per-security series, the one series writer by ruling @8a625fa88a (MDPF_SECHIST PRD ADDENDUM v0.3, line 181)",
+      "module": "data/mdpf/scripts/silver/security_series_writer.py",
+      "write_entry": "write_series(root, cusip, rows, *, switch=False, gap_days=None, put=...) at :119; refuses to write unless switch is exactly True (:124-125)",
+      "key": "CUSIP ONLY: check_cusip (:48-52) refuses any key that is not a 9-character alphanumeric CUSIP; series_key (:54) = cusip=<CUSIP9>/series.parquet. A ticker key is refused. A TIMXX series therefore needs its CUSIP first (C-IDENTITY, MDPF_SECHIST PRD).",
+      "s3_touch": "only inside a switched-on write (_default_put :100-108, boto3 put_object)",
+      "live_writer_today": "data/mdpf/scripts/demque/price_store.py (write at :127, index at :161) -- its docstring says price_store stays the only live writer and the SECHIST module is KEEP-THEN-PORT with switch off",
+      "may_a_dell_or_lambda_caller_write": "Not admitted by the PRD as read. C-PULL (MDPF_SECHIST PRD, line 101) puts pulls at site Z and Yahoo is admitted from dell1 for ONE file (ADDENDUM v0.2, lines 168-171: ADVI_COTBKF price-need file, 3,226 securities). 'Any other use of Yahoo is surfaced to Andrew, not assumed.' A resident or Lambda writer is outside that grant and needs Andrew's word and a pair."
+    },
+    "yfinance_callers": [
+      {"file": "data/mdpf/scripts/demque/yahoo_pull.py", "lines": "62-67 _default_fetch: yfinance.Ticker(symbol).history(period='max', auto_adjust=False, actions=True); 33 _PUSHBACK_CODES (401, 403, 429); 141-144 class Pacer min_gap 8.0, max_gap 12.0, daily_cap 400", "pacing": "random gap 8-12 s x factor (doubles after a push-back day); daily cap 400; stop on 401/403/429 (STOPPED_PUSHBACK)", "lane": "dell1, MDPF_DEMQUE; admitted (ADDENDUM v0.2)"},
+      {"file": "data/black_diamond/scripts/silver/backfill_yahoo_prices_safe.py", "lines": "244-245 batch_size 20, sleep_sec 5.0; 315-317 batches; 371 time.sleep(sleep_sec)", "pacing": "20 tickers per yfinance.download call, 5 s sleep between batches", "lane": "Black Diamond (prior art named by yahoo_pull.py)"},
+      {"file": "infra/aws/lambda/bd-pipeline/bd-price-update/lambda_function_v2.py", "lines": "26 import yfinance as yf; 45-46 BATCH_SIZE 50, BATCH_DELAY 2 s; 173 time.sleep(BATCH_DELAY)", "pacing": "50 tickers per batch, 2 s between batches", "lane": "Lambda (bd-pipeline); lambda_function.py:29-31 says the Lambda does NOT call yfinance directly"},
+      {"file": "infra/aws/lambda/v2_portal/07_macroeconomics/lambdas/opal-portal-volatility-fetcher/lambda_function.py", "lines": "27 import yfinance as yf; 147-148 yf.Ticker('^MOVE').history(period=...)", "pacing": "one call per run; no pacing read", "lane": "Lambda (volatility fetcher)"},
+      {"file": "infra/aws/lambda/historical-prices-scheduler/lambda_function.py", "lines": "54 pip install yfinance; 60 runs fetch_historical_prices_yfinance.py", "pacing": "not read", "lane": "ephemeral EC2 spawned daily"},
+      {"file": "data/black_diamond/scripts/silver/fetch_historical_prices_yfinance.py, bd_price_update.py, merge-daily-incremental.py; data/cot/scripts/gold/build_canonical_prices_v2.py; data/assets/scripts/analysis/commonwealth_marketdata_prices.py; data/mdpf/scripts/demque/http_counter.py", "lines": "listed by comp-find --files / Grep of data/ only; not opened", "pacing": "not read", "lane": "not read"}
+    ],
+    "investor_reporting_yfinance_callers": "NONE. Grep of infra/aws/lambda/investor-reporting and lib/ for yfinance returned no match.",
+    "proxy_table": {
+      "claim": "ABSENT in this worktree",
+      "where_looked": "Grep (case-insensitive) for proxy_for|PROXY_TABLE|designated_proxy|designated proxy over data/mdpf (one hit only, data/mdpf/tests/taxsma/expected_cases.json:15140, an unrelated 'designated email' string); over infra/aws/lambda/v2_portal/_shared (no hit); over org/missions/D8/MDPF/MDPF_SECCLASS (no file matches designated|proxy_for|PROXY_TABLE); MDPF_SECCLASS_PRD.md has no 'proxy' at all.",
+      "spec_says": "MDPF_SECHIST PRD names it as MDPF_SECCLASS's (dell1), a pre-arranged input (IRPT_ANLREQ PRD C-SWAP step 4). Not located. Possibly dell1-local or ungitted: not measured further. Filed as IRPT_ANLREQ-D2-W99-S1."
+    },
+    "etf_classifications_row_for_timxx": "not read (no live read in scope)"
+  },
+
+  "design": {
+    "principle": "A KEPT holding is a holding the provider could not confirm and yfinance can price. Steps (1) and (2) run inside the resident, in the resolver, before the finding is made; the door writes nothing.",
+    "step_1_known": {
+      "where": "SecurityResolver.check, security_resolution.py:204-212: the identity port (currently the None stub at resident_worker.py:619-620) is wired to a read-only lookup of etf-classifications by ticker and of MDPF_SECHIST's per-security index by ticker or CUSIP. A registry hit is evidence (reference), not FOUND, exactly as the file's own comment requires (security_resolution.py:204).",
+      "order": "provider read first (as today); for each symbol the provider answers NOT_FOUND, the registry check runs; a known symbol with no provider row is KNOWN, and step 2 is skipped for it."
+    },
+    "step_2_yfinance_check": {
+      "where": "the same resolver, after step 1, for NOT_FOUND symbols only (never for FOUND or the entitlement/fund-unverified reasons).",
+      "call": "yf.Ticker(symbol).history(period='1mo', auto_adjust=False) -- the same read measured in section measurement. Rows > 0 and a last close that is finite and positive -> KEPT. Zero rows -> NOT_FOUND unchanged.",
+      "error_discrimination": "yfinance hides exceptions by default and returns an empty frame (measured: ALPPL, BREIT and CCCQ each returned 0 rows with no exception; ALPPL printed 'HTTP Error 404 ... Quote not found'). The checker must set yf.config.debug.hide_exceptions = False (or the raise_errors argument, deprecated in yfinance 1.2.0) so that an outage raises and is NOT read as absence.",
+      "pacing": "one history call per unknown symbol, sequential. Proposed bounds for CTO ruling: a gap of 8 to 12 s (the yahoo_pull.py Pacer rule, data/mdpf/scripts/demque/yahoo_pull.py:141-144) is too slow for an interactive upload with many unknowns, so the design needs a per-upload cap K (the CTO sets K) and the rest stay NOT_FOUND with the finding unchanged. A 401, 403 or 429 stops the step for the rest of the upload (yahoo_pull.py:33 _PUSHBACK_CODES).",
+      "egress_gate": "Yahoo from the resident is NOT admitted by the grant as read (MDPF_SECHIST PRD ADDENDUM v0.2, lines 168-171). It needs Andrew's word before any build. Surfaced, not assumed (see surprise IRPT_ANLREQ-D2-W99-S5)."
+    },
+    "kept_holding_to_the_rest_of_the_upload": {
+      "shape": "a new resolver state (for example KEPT, never FOUND), with reason EXACT_YFINANCE_HISTORY_KEEP and a receipt carrying source yfinance, the as-of date of the last close and the row count. portfolio.py:464-471 (the FOUND gate) is unchanged, so a KEPT row does not pass as FOUND; a new branch beside it in freeze_template_portfolio carries the KEPT row into the holdings.",
+      "pricing": "USD basis: no price needed; the dollars stand. SHARES basis: price from MDPF_SECHIST's series when it has one (not composed in the resident today: uploads.py:592 resolve_prices, resident_upload_service sets SHARES_PRICE_SOURCE_NOT_COMPOSED), else the yfinance last close for THIS request only. Nothing is landed.",
+      "why_not_land_here": "The registry row is MDPF_SECCLASS's table (C-TABLE: this project never writes classification; the only writer is the seed run from source). The price series is MDPF_SECHIST's CUSIP-keyed writer, switched off, and a ticker key is refused (security_series_writer.py:48-52). So for this request the price comes from the read, and the registry row and the series are other projects' writes that need their own pair."
+    },
+    "what_is_written_where_by_whom": [
+      {"what": "registry row for a KEPT symbol", "where": "etf-classifications (DynamoDB)", "owner": "MDPF_SECCLASS (dell1); its detector or a seed under its PRD", "interface": "a request the owner's detector consumes; the candidate existing route is the dell1 request/queue convention (data/mdpf/scripts/demque/p1_coverage.py REQUESTS_GLOB and QUEUE_GLOB, read by secclass_sync.py)", "pair_needed": "yes: MDPF_SECCLASS PRD addendum (C-TABLE: a new table field is its addendum) and CTO ruling"},
+      {"what": "price series for a KEPT symbol", "where": "MDPF_SECHIST per-CUSIP series (S3, via the store root)", "owner": "MDPF_SECHIST (dell1); the writer is security_series_writer.py, switched off", "interface": "write_series(root, cusip, rows, switch=True) with a CUSIP key; a ticker is refused", "pair_needed": "yes: a switch-on window under its own pair (the module says so at its docstring lines 21-23)"},
+      {"what": "the door's own record of the KEEP", "where": "the upload's retained NORMALIZED_PORTFOLIO and findings (uploads.py), a receipt on the holding", "owner": "IRPT_ANLREQ Analysis lane (C-ABSORB a)", "interface": "in-process", "pair_needed": "no"}
+    ],
+    "page_words_for_a_kept_holding": {
+      "code": "TICKER_KEPT_PRICE_HISTORY (proposed; an info finding with no action)",
+      "words": "TIMXX was found with price history and is used as is. Nothing needs fixing; check that it is the holding you meant.",
+      "where_words_live": "uploads.py CORRECTION_WORDS (a literal copy, locked by intake/tests/test_correction_words.py; the new code is added to both)",
+      "style_precedent": "CASH_SYMBOL_NORMALIZED words (uploads.py ~line 81-82: 'This row was read as cash. Nothing needs fixing; check that it is the cash balance you meant.')"
+    },
+    "failure_behaviour": {
+      "rule": "a failed or unverifiable check leaves the holding UNKNOWN: the state stays NOT_FOUND and the TICKER_NOT_FOUND finding is unchanged. Never a guessed keep.",
+      "cases": [
+        {"case": "yfinance raises (outage, 5xx, timeout)", "result": "UNKNOWN. Recommended finding: TICKER_CHECK_UNAVAILABLE (uploads.py:122-124, 'submit again in a few minutes') rather than TICKER_NOT_FOUND, because the provider did not answer. The resolver's existing UNAVAILABLE path (security_resolution.py) is the model."},
+        {"case": "yfinance returns zero rows, no exception", "result": "UNKNOWN, TICKER_NOT_FOUND unchanged"},
+        {"case": "yfinance returns rows whose last close is missing, zero or not finite", "result": "UNKNOWN, TICKER_NOT_FOUND unchanged"},
+        {"case": "HTTP 401, 403 or 429", "result": "UNKNOWN for this symbol; the step stops for the rest of the upload"},
+        {"case": "per-upload cap K reached", "result": "UNKNOWN for the rest; TICKER_NOT_FOUND unchanged"},
+        {"case": "registry read fails", "result": "step 1 is UNKNOWN and step 2 still runs; the registry alone never keeps a holding"}
+      ]
+    },
+    "typo_suggestions": "C-SWAP step 1 says a typo suggestion is verified against the registry and yfinance, never YCharts. Today verified_suggestions (security_resolution.py:242-249) verifies against resolver.check, which is YCharts. Changing it is one cell (F below), depends on A and B."
+  },
+
+  "cells": [
+    {"id": "A (proposed)", "what": "step 1: wire the identity port to a read-only registry lookup; KNOWN result as evidence", "paths": ["infra/aws/lambda/investor-reporting/intake/security_resolution.py", "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py (identity argument, :619-620)", "infra/aws/lambda/investor-reporting/ycharts/session/resident_session.py (template_resolver, :139-146)", "tests under intake/tests and ycharts/generate/tests"], "lane": "IRPT_ANLREQ Analysis lane (C-ABSORB a)", "grant": "a new order naming those paths", "risk_class": "SERVED (the upload page path); the read is GetItem on etf-classifications, and the resident role's IAM for it is NOT read here", "precondition": "none beyond the grant"},
+    {"id": "B (proposed)", "what": "step 2: the yfinance history checker port: one paced read per unknown symbol, error discrimination, per-upload cap; no write", "paths": ["a new module in the investor-reporting intake or session tree (named by its order)"], "lane": "IRPT_ANLREQ Analysis lane", "grant": "a new order naming the new module and its tests", "risk_class": "WORLD (vendor egress from the resident)", "precondition": "Andrew's word: Yahoo from the resident is outside MDPF_SECHIST ADDENDUM v0.2 (dell1, one file)"},
+    {"id": "C (proposed)", "what": "KEPT state, reason, freeze branch, page words and the words-table lock", "paths": ["intake/security_resolution.py", "intake/portfolio.py (a branch beside the FOUND gate, :464-471)", "intake/uploads.py (CORRECTION_WORDS, :69-71 neighbourhood)", "intake/tests/test_correction_words.py", "intake/tests/ (freeze tests)"], "lane": "IRPT_ANLREQ Analysis lane", "grant": "a new order naming those paths", "risk_class": "SERVED (the upload page shows KEPT holdings)", "precondition": "A and B for live behaviour; the branch itself is offline-testable with a fake checker"},
+    {"id": "D (proposed, not IRPT)", "what": "registry row for a KEPT symbol", "paths": ["MDPF_SECCLASS's detector or seed (dell1), not in this grant"], "lane": "MDPF_SECCLASS (dell1)", "grant": "MDPF_SECCLASS order", "risk_class": "SERVED (feeds Positioning and Investor Reporting)", "precondition": "MDPF_SECCLASS PRD addendum and CTO ruling"},
+    {"id": "E (proposed, not IRPT)", "what": "price landing for a KEPT symbol into MDPF_SECHIST's series", "paths": ["data/mdpf/scripts/silver/security_series_writer.py (switch)", "data/mdpf/scripts/demque/price_store.py (the only live writer today)"], "lane": "MDPF_SECHIST (dell1)", "grant": "MDPF_SECHIST order with its own switch-on pair", "risk_class": "WORLD (S3 write, served by SECHIST)", "precondition": "CUSIP for the symbol (C-IDENTITY); a switch-on pair"},
+    {"id": "F (proposed)", "what": "typo suggestions verified against the registry and yfinance, not YCharts", "paths": ["intake/security_resolution.py:242-249 verified_suggestions", "intake/upload_suggestions.py"], "lane": "IRPT_ANLREQ Analysis lane", "grant": "a new order", "risk_class": "SERVED", "precondition": "A and B"}
+  ],
+
+  "measurement": {
+    "what": "one read-only yfinance history call per symbol, period 1mo, auto_adjust False. Nothing written, nothing landed.",
+    "where_run": "dell2 box, this worktree's python (Python 3.14.7, yfinance 1.2.0). Not the resident; not dell1 (dell1 has yfinance 1.7.0 per MDPF_SECHIST ADDENDUM v0.2).",
+    "when_utc": "2026-10-13T19:48:56Z to 19:49:35Z",
+    "symbols_and_source": {
+      "TIMXX": "the cell's premise; also in intake test fixtures (test_y5_proxy_corrections.py:15)",
+      "ALPPL": "intake/tests/test_security_resolution.py:35 (the pinned capture, NOT_FOUND in the 2026-09-23 securities_info capture)",
+      "BREIT": "intake/tests/test_security_resolution.py:35 (NOT_FOUND as a bare ticker in the same capture; the M:BREIT.S fund keying is at security_resolution.py:19-21)",
+      "CCCQ": "ycharts/generate/tests/test_kimi_search_qa.py:112 (a fake NOT_FOUND symbol in a test)"
+    },
+    "rows": [
+      {"symbol": "TIMXX", "rows": 20, "last_close": 1.0, "last_date": "2026-10-09", "elapsed_s": 1.36, "error": null},
+      {"symbol": "ALPPL", "rows": 0, "last_close": null, "last_date": null, "elapsed_s": 1.09, "error": "none raised; stderr printed HTTP Error 404 Quote not found, then '$ALPPL: possibly delisted; no price data found'"},
+      {"symbol": "BREIT", "rows": 0, "last_close": null, "last_date": null, "elapsed_s": 1.21, "error": "none raised; stderr printed HTTP Error 404 Quote not found"},
+      {"symbol": "CCCQ", "rows": 0, "last_close": null, "last_date": null, "elapsed_s": 0.53, "error": "none raised; stderr printed 'possibly delisted; no price data found'"}
+    ],
+    "denominator": "4 symbols; 1 with history (TIMXX, 20 of 20 rows read), 3 with zero rows",
+    "reachable": "yes: yfinance answered from this box",
+    "reading": "TIMXX has history and a flat 1.0 close, as the cell measured at ~19:12Z (a money-market-style NAV). Zero rows and an empty frame are the same return value, and the 404 text is only on stderr: see design.failure_behaviour and surprise S2.",
+    "retries": "none"
+  },
+
+  "claim": {
+    "measured": ["door call chain and line numbers (read in code at this HEAD)", "etf-classifications table definition and writers (read)", "security_series_writer key and switch (read)", "yfinance default empty-on-error and the four-symbol measurement (run)", "absence of a designated-proxy table in the searched folders (Grep, negative)"],
+    "inferred": ["the live TICKER_NOT_FOUND for TIMXX is taken from the cell's premise (not re-measured; no live call in scope)", "the per-upload cap K and the 8-12 s gap are proposals for CTO ruling, not measured limits for the resident"],
+    "absent": ["the designated-proxy table: absent from the worktree; present elsewhere not checked", "a resident IAM grant on etf-classifications: not read"]
+  },
+
+  "not_read": [
+    "the upload page renderer under portal/ (what the person sees beyond the finding words)",
+    "the designated-proxy table (not located in the worktree; dell1 not reachable from this box)",
+    "the resident role's IAM policy (whether it may GetItem on etf-classifications)",
+    "MDPF_DEMQUE price_store PRICE_STORE_CONTRACT.md and the p1_coverage request conventions beyond their names",
+    "resolution_kimi.py beyond :255-256 (KIMI_WEB_SEARCH_UNVERIFIED), retired by C-SWAP and by AR-y-277",
+    "the historical-prices-scheduler and data/ yfinance scripts beyond their names (listed in estate.yfinance_callers, pacing not read)",
+    "no live securities_info call and no live DynamoDB call were made (out of this order's scope)"
+  ],
+
+  "surprise_rows": ["IRPT_ANLREQ-D2-W99-S1", "IRPT_ANLREQ-D2-W99-S2", "IRPT_ANLREQ-D2-W99-S3", "IRPT_ANLREQ-D2-W99-S4", "IRPT_ANLREQ-D2-W99-S5"]
+}
