@@ -1,0 +1,22 @@
+norow REFUSED FIRM_BINDING class=row_absent lines=1
+disabled REFUSED FIRM_BINDING class=row_non_active lines=4
+active ADMITTED status=200 class=row_present lines=1
+
+EXERCISE_RESULT, TO-EXERCISE-R21, 0.7.0_AE_CloudOps~AQ2, composed 2026-10-13T15:4xZ from EXERCISE_TRACE.txt (phase 1) and EXERCISE_PHASE2_TRACE.txt (phase 2)
+Route: GET https://d2n2nzpeqf34ge.cloudfront.net/api/scoped/investor-reporting/directory/search?selected_tenant=cottonwood (the portal distribution, same edge host as opalinvest.dev); irpt-directory-search CodeSha256 tvrsQ+w8... (release 20) read before the sitting.
+
+Per request (UTC start, HTTP status, refusal code, sha256 of the body; no body kept):
+  norow    start 2026-10-13T15:27:04Z status 200  body_sha256 cd0365b1773da665b1a731b5abff2a12cc1a938ffcf27cb731a2e53a8c9f5e73
+  disabled start 2026-10-13T15:28:45Z status 200  refusal_code FIRM_BINDING (parsed from the answer envelope)  body_sha256 cd0365b1773da665b1a731b5abff2a12cc1a938ffcf27cb731a2e53a8c9f5e73
+  active   start 2026-10-13T15:29:50Z status 200  (no refusal envelope)  body_sha256 e704b99c3d8fa242f3b775b2cdf3020e25cc8763fb705a2aa285577f81220640
+Spacing between requests: 101 s and 65 s (at least 60 s).
+
+CLAIMS AND DEVIATIONS (read these with the lines above):
+1. A refusal travels as an HTTP 200 answer envelope, not a 4xx. Phase 1's classifier read only a 4xx as REFUSED, so it recorded norow as ADMITTED and stopped the sitting before the disabled arm. The function's own log line for that window says class=row_absent outcome=refused (1 line, 1 invocation), so the rule REFUSED. The sitting was continued as phase 2 on the same rows with a corrected classifier; phase 2 minted the disabled and active tokens (life 300 s each, exp before the removal) and read the signing key a second time.
+2. norow's refusal code FIRM_BINDING is INFERRED, not parsed: phase 1 did not parse a 200 body, and the body was not kept. Its body sha256 equals the disabled arm's, whose envelope names FIRM_BINDING.
+3. Class lines per sub-window (counted client side, auto-paginated, pattern "INTERNAL-CALLER-CLASS class="):
+   norow    [15:27:04Z, 15:28:45Z): 1 line row_absent/refused; invocations 1; streams 1.   MATCHES.
+   disabled [15:28:45Z, 15:29:50Z): 4 lines = 1 row_non_active/refused + 3 row_present/admitted; invocations 2; streams 1.   DOES NOT MATCH the expected one line: the 3 row_present/admitted lines come from the second invocation in that window, which this seat did not make; per the pair they are not reassigned (FAIL on the count, surprise row IRPT_ANLREQ-D2-S74).
+   active   [15:29:50Z, 15:34:50Z): 1 line row_present/admitted; invocations 4 (3 others without a class line); streams 3.   MATCHES.
+4. Streams-searched denominator: phase 1 and phase 2 printed 0 (their describe-log-streams read relies on lastEventTimestamp, which CloudWatch does not keep current) and that reading is VOID. Replaced by a filter read of ALL events in the sitting window [15:27:04Z, 15:34:50Z]: 30 events in 3 log streams; per sub-window all events 4 / 10 / 16 in 1 / 1 / 3 streams.
+5. The rule decided as designed for all three identities; the only count that fails the pair's one-line expectation is the disabled sub-window.

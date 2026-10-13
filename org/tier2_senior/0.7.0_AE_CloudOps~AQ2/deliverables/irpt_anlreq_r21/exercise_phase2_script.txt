@@ -1,0 +1,116 @@
+"""TO-EXERCISE-R21 phase 2 (0.7.0_AE_CloudOps~AQ2): the disabled and active arms of the SAME sitting, on the rows phase 1 wrote.
+Phase 1 (exercise_r21.py) stopped after the norow arm because its classifier read only a 4xx as a refusal; the refusal arrived as an
+HTTP 200 answer envelope (the function's own log line says class=row_absent outcome=refused). Phase 1 removes the rows after the
+later exp; the tokens here are short (exp before that removal). No row is written here, no body is kept, tokens are never written."""
+import importlib.util
+import re
+import sys
+import time
+
+spec = importlib.util.spec_from_file_location("ex", sys.argv[1])
+ex = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(ex)
+OUT = sys.argv[2]
+NOROW_START = float(sys.argv[3])      # epoch of the norow request
+LIFE2 = 300
+events, results, starts = [], {}, {}
+
+
+def say(m):
+    line = "%s %s" % (ex.iso(), m)
+    print(line, flush=True)
+    events.append(line)
+
+
+def classify_any(st, body):
+    import hashlib
+    sha = hashlib.sha256(body).hexdigest()
+    m = re.search(rb'"public_reason_code"\s*:\s*"([A-Z_]+)"', body)
+    code = m.group(1).decode() if m else None
+    if code == "FIRM_BINDING":
+        return "REFUSED", code, sha
+    if st == 200:
+        return "ADMITTED", None, sha
+    return "OTHER", code, sha
+
+
+def mint2(pem, sub):
+    import jwt as pyjwt
+    iat = int(time.time())
+    claims = {"sub": sub, "iss": "opal-portal-auth", "aud": "opal-portal-api", "firmId": "opal-capital", "tier": "internal",
+              "role": "user", "userType": "test-filer", "name": "IRPT_ANLREQ R21 synthetic status exercise", "iat": iat, "exp": iat + LIFE2}
+    return pyjwt.encode(claims, pem, algorithm="RS256"), iat, iat + LIFE2
+
+
+def main():
+    stop = None
+    try:
+        for n in ("disabled", "active"):
+            r = ex.cread(n)
+            say("row %s ConsistentRead PRESENT: %s" % (n, r is not None and r["status"]["S"] == n))
+            if r is None:
+                raise ex.Stop("row %s missing" % n)
+        if ex.cread("norow") is not None:
+            raise ex.Stop("norow has a row")
+        import boto3
+        pem = boto3.client("secretsmanager", region_name=ex.REGION).get_secret_value(SecretId=ex.KEY_SECRET)["SecretString"]
+        if "BEGIN" not in pem[:40]:
+            raise ex.Stop("signing secret shape")
+        say("signing key read again for phase 2 (value never printed or written)")
+        prev = NOROW_START
+        for n in ("disabled", "active"):
+            if n == "active" and results["disabled"][0] != "REFUSED":
+                break
+            wait = prev + ex.SPACING - time.time()
+            if wait > 0:
+                time.sleep(wait)
+            token, iat, exp = mint2(pem, ex.ADDR[n])
+            say("token for %s minted (memory only) iat=%s exp=%s life=%ds" % (n, ex.iso(iat), ex.iso(exp), LIFE2))
+            start, st, body = ex.request(token)
+            del token
+            outcome, code, sha = classify_any(st, body)
+            del body
+            starts[n] = start
+            prev = start
+            results[n] = (outcome, st, code, sha)
+            say("%s request started %s: %s status=%s refusal_code=%s body_sha256=%s" % (n, ex.iso(start), outcome, st, code, sha))
+            if n == "disabled" and outcome != "REFUSED":
+                stop = "disabled arm did not REFUSE FIRM_BINDING (outcome %s status %s code %s)" % (outcome, st, code)
+                break
+        del pem
+        last = max(starts.values())
+        wait = last + 300 + 75 - time.time()
+        if wait > 0:
+            say("waiting %ds for the last sub-window (+5 min) and log ingestion" % int(wait))
+            time.sleep(wait)
+        windows = [("norow", NOROW_START, starts["disabled"])]
+        names = [n for n in ("disabled", "active") if n in starts]
+        for i, n in enumerate(names):
+            windows.append((n, starts[n], starts[names[i + 1]] if i + 1 < len(names) else starts[n] + 300))
+        counts = {}
+        for n, lo, hi in windows:
+            tot, ns, by = ex.class_lines(lo, hi)
+            counts[n] = (lo, hi, tot, ns, by)
+            say("sub-window %s [%s, %s): class lines total=%d distinct logStreamName=%d by=%s" % (n, ex.iso(lo), ex.iso(hi), tot, ns, by))
+        searched = ex.streams_searched(NOROW_START, last + 300)
+        say("streams searched in the sitting window [%s, %s]: %d" % (ex.iso(NOROW_START), ex.iso(last + 300), searched))
+        if searched == 0:
+            stop = stop or "zero streams searched: VOID"
+        with open(OUT + "/EXERCISE_PHASE2_COUNTS.txt", "w", encoding="utf-8") as f:
+            for n, (lo, hi, tot, ns, by) in counts.items():
+                f.write("%s [%s, %s) total=%s streams=%s by=%s\n" % (n, ex.iso(lo), ex.iso(hi), tot, ns, by))
+            f.write("streams searched in the sitting window: %s\n" % searched)
+            for n, (o, st, c, sha) in results.items():
+                f.write("%s start=%s %s status=%s refusal_code=%s body_sha256=%s\n" % (n, ex.iso(starts[n]), o, st, c, sha))
+            if stop:
+                f.write("STOP/FAIL: %s\n" % stop)
+    except Exception as e:  # noqa: BLE001
+        stop = "STOP (%s): %s" % (type(e).__name__, str(e)[:300])
+        say(stop)
+    with open(OUT + "/EXERCISE_PHASE2_TRACE.txt", "w", encoding="utf-8") as f:
+        f.write("\n".join(events) + "\n")
+    return 0 if not stop else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
