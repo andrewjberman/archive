@@ -1,0 +1,198 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t45",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t45.yahoo-side-need-class-refusal.md",
+    "group": "OTHER",
+    "vintage_commit": "48445922d6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "48445922d6",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t45.yahoo-side-need-class-refusal.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~38",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/demand_queue.py",
+      "kind": "script",
+      "commit_or_etag": "82da168490",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "validate refuses an undeclared or over-window Yahoo request (need_class, window_start, need_date; 2012-01-01 floor; security starts; 365 days for non_client) reusing bbg_quote's constants and wording, and never trims; --check-declared DIR prints one read-only JSON line. Not called by a new scheduled task.",
+      "artifact_covered_by": [
+        "DQ9-t45-AC1",
+        "DQ9-t45-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/extend_frontier.py",
+      "kind": "script",
+      "commit_or_etag": "82da168490",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_request declares need_class client and window_start (the earliest start, never before the floor); --plan prints need_class and window_start beside frontier. Measured at 82fc16c19d: rc=0 in 77 seconds, need_class client, window_start 2013-04-08, frontier 2026-10-13. --apply never run.",
+      "artifact_covered_by": [
+        "DQ9-t45-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/redraw_stale.py",
+      "kind": "script",
+      "commit_or_etag": "82fc16c19d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "request() declares need_class client and window_start (earliest start, never before the floor) and validates before any write; main calls request() before reset_pacer, so a refusal leaves the pacer untouched. Surprise MDPF_DEMQUE-D1-W38-S2 (its disarm is the issuer's). --apply never run.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_redraw_stale.py",
+      "kind": "test",
+      "commit_or_etag": "82fc16c19d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the two failing enqueue tests pass by the redraw_stale change alone (no assertion changed); one new test test_a_refused_request_resets_no_pacer_entry pins that a pre-floor file is refused with the pacer unchanged and no queue written. 4 passed.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_yahoo_need_class.py",
+      "kind": "test",
+      "commit_or_etag": "82da168490",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the three named tests, stubs and tmp_path, no network, no S3 write: 3 passed at 82fc16c19d.",
+      "artifact_covered_by": [
+        "DQ9-t45-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_queue.py",
+      "kind": "test",
+      "commit_or_etag": "82da168490",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stub declaration only (need_class client, window_start = the stub's start) in _req; no assertion changed.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_rank.py",
+      "kind": "test",
+      "commit_or_etag": "82da168490",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stub declaration only (need_class client, window_start 2026-10-05) in _qreq; no assertion changed.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "68f2b1e20f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows MDPF_DEMQUE-D1-W38-S1..S3 appended in 68f2b1e20f; row MDPF_DEMQUE-D1-W38-S4 (BLOCKING, AC2 arm 2 budget) appended in the proof commit. Existing rows not edited.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t45-AC1",
+      "criterion_verbatim": "DQ9-t45-AC1: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_tests.py -> YCLASS-OK (the three named tests in test_demque_yahoo_need_class.py)",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_tests.py",
+      "output_evidence": "test_demque_yahoo_need_class.py: 3 passed (test_a_yahoo_request_without_a_declared_need_class_or_window_start_is_refused_at_validate PASSED; test_a_yahoo_window_before_2012_or_a_security_start_before_the_declared_window_start_is_refused_never_trimmed PASSED; test_the_standing_extension_request_declares_client_and_a_window_start_on_or_after_the_floor PASSED). Verbatim last line: YCLASS-OK ; rc=0 at 82fc16c19d.",
+      "denominator": "3 of 3 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "YCLASS-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t45-AC2",
+      "criterion_verbatim": "DQ9-t45-AC2: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_real.py -> YCLASS-REAL-OK; on the REAL repo requests and the device queue no Yahoo request is refused, and the standing extension's plan declares client from a window start on or after 2012-01-01",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_real.py",
+      "output_evidence": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_real.py at f49ec99f1b (box/dell1 merged, check budget 105 s), rc=0:\narm1 requests checked=2 accepted=2 refused=[]\narm1 queue checked=7 accepted=7 refused=[]\narm2 need_class=client window_start=2013-04-08 frontier=2026-10-13 symbols=183\nYCLASS-REAL-OK Yahoo requests declared and accepted; the standing extension declares client from 2013-04-08",
+      "denominator": "arm 1 requests: 2 of 2 accepted; arm 1 queue: 7 of 7 accepted; arm 2: 1 of 1 plan completed inside the 105-second budget (plan declares need_class client, window_start 2013-04-08 >= 2012-01-01 floor)",
+      "status": "PASS",
+      "expect": "YCLASS-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "validate's need-class check (_check_need_class) disabled in-process by monkeypatch (.scratch/mutant_t45.py), no file edit; the three named tests must fail under it",
+      "expected": "all three named tests FAIL (the check fires)",
+      "observed": "3 failed in test_demque_yahoo_need_class.py, each DID NOT RAISE ValueError; MUTANT_PYTEST_RC 1 at 82fc16c19d",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of demand_queue.py --check-declared over org/missions/D8/MDPF/MDPF_DEMQUE/requests, output compared byte for byte",
+      "observed": "both runs rc=0, byte-identical: {\"accepted\": 2, \"checked\": 2, \"refused\": []}",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the device-queue standing copy and its declaration",
+      "reason": "the issuer declared ~/.opal/demque/queue/Z-STANDING-T1-EXTEND.json (need_class client, window_start 2013-04-08); arm 1 reads 7 of 7 accepted now. The worker did not write it."
+    },
+    {
+      "item": "redraw_stale --apply, extend_frontier --apply, daily_draw.py, run_daily_draw.sh",
+      "reason": "order BOUNDS: READ-ONLY. Only the --plan read of the S3 price-store index and the pytest and check runs were executed; no pacer, queue, ledger or S3 write."
+    },
+    {
+      "item": "the check's plan-arm budget",
+      "reason": "owned by the issuer's R9_CHECKS script, outside the grant; not edited by the worker. The issuer amended it 58 -> 105 seconds at 9bc8fff69f (the plan measured 77 s). Surprise MDPF_DEMQUE-D1-W38-S4, closed by that amendment."
+    },
+    {
+      "item": "extend_frontier.apply empty-plan branch",
+      "reason": "the issuer ruled S3 no change (transitional). Surprise MDPF_DEMQUE-D1-W38-S3 (OBSERVATION, INERT)."
+    },
+    {
+      "item": "account ids",
+      "reason": "none enter a committed file."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W38-S1: the device-queue standing copy STANDING-T1-EXTEND-2026-10-12 was undeclared; the issuer declared it, arm 1 now reads 7 of 7 (cleared by the issuer, ruling 2026-10-13)",
+    "MDPF_DEMQUE-D1-W38-S2: redraw_stale.enqueue built an undeclared Yahoo request and main reset the pacer before the refusal; fixed in code at 82fc16c19d, disarm owner 2.0.0_SA_COO~Q1 (BLOCKING, ARMED)",
+    "MDPF_DEMQUE-D1-W38-S3: extend_frontier.apply's empty-plan branch can leave a stale undeclared standing file (OBSERVATION, INERT; issuer ruled no change)",
+    "MDPF_DEMQUE-D1-W38-S4: DQ9-t45-AC2 arm 2 runs extend_frontier --plan under a 58-second budget and the plan takes about 77 seconds, so the check gives no verdict (BLOCKING, INERT) -- RESOLVED: closed by the issuer's check amendment @9bc8fff69f (plan budget 58 -> 105 s); AC2 re-run PASS at f49ec99f1b. The channel row is not edited (append-only) and still reads UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~38/MDPF_DEMQUE.TO-DQ-t45.yahoo-side-need-class-refusal.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q -p no:cacheprovider",
+      "invocation": "the whole folder, from the worktree root, at 82fc16c19d",
+      "result": "164 passed, 0 failed, rc=0"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque/test_demque_redraw_stale.py -q -p no:cacheprovider",
+      "invocation": "the redraw file, from the worktree root",
+      "result": "4 passed, rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_tests.py",
+      "invocation": "DQ9-t45-AC1",
+      "result": "YCLASS-OK, rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_real.py",
+      "invocation": "DQ9-t45-AC2, two runs",
+      "result": "arm 1 requests 2 of 2 and arm 1 queue 7 of 7 accepted; arm 2 TimeoutExpired after 58 seconds in both runs; rc=1 both runs; no YCLASS-REAL-OK line"
+    },
+    {
+      "tool": "timeout 120 python data/mdpf/scripts/demque/extend_frontier.py --plan",
+      "invocation": "read only (S3 price-store index read), diagnostic",
+      "result": "rc=0, elapsed 77s, need_class client, window_start 2013-04-08, frontier 2026-10-13, symbols 183"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_tests.py",
+      "invocation": "DQ9-t45-AC1, at f49ec99f1b",
+      "result": "YCLASS-OK, rc=0 (3 of 3 named tests PASSED)"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t45_real.py",
+      "invocation": "DQ9-t45-AC2, timeout 120, at f49ec99f1b",
+      "result": "YCLASS-REAL-OK, rc=0; arm1 requests 2 of 2, arm1 queue 7 of 7 accepted; arm2 completed"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "whole folder, from the worktree root, at f49ec99f1b",
+      "result": "164 passed, rc=0 (0 failed)"
+    }
+  ]
+}
