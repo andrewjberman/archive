@@ -171,6 +171,9 @@ def main(argv):
                         problems.append("%s: the function's own tests must pass against the release except failures that also fail with the original bytes (passed %r failed %r)" % (fn, tests.get("passed"), tests.get("failed")))
                 elif not tests.get("passed"):
                     problems.append("%s: the function's own tests ran no passing test (%r)" % (fn, tests))
+                # AMENDMENT 2 (issuer, row W64-S6): collection or setup ERRORS count like failures; they pass only when the control run shows the same number
+                if tests.get("errors") not in (0, "0", None) and tests.get("errors") != tests.get("control_errors"):
+                    problems.append("%s: the function's own tests report %r errors against the release and %r with the original bytes" % (fn, tests.get("errors"), tests.get("control_errors")))
             print("functions in the record %d of %d" % (len([fn for fn in functions if fn in rows]), len(functions)))
     elif check == "y214-portal":
         rec = load(root, D % "63" + "PORTAL_NOTICE_CANDIDATE.json", problems)

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # MP-z-4 AC2 (the never-widen pair before the act, and NEVER-2 after it): at HEAD,
-#   - the ASK deliverables/0.7.0_AE_CloudOps~MP/NEVER_WIDEN_ASK_MP-z-4.md exists;
+#   - the ASK deliverables/0.7.0_AE_CloudOps~MQ/NEVER_WIDEN_ASK_MP-z-4.md exists;
 #   - BOTH halves exist and each cites the ASK by path: deliverables/1.0.0_SA_CTO~Z/NEVER_WIDEN_HALF_CTO_MP-z-4_*.md and
 #     deliverables/2.0.0_SA_COO~MP/NEVER_WIDEN_HALF_COO_MP-z-4_*.md;
 #   - the ledger entry for slug nfra-mcportal-gw-principal-scan-grant is committed, its sentinel is gone, and
 #     deploy_ledger.py list does not show it.
 . "$(dirname "$0")/_root.sh"
 PD=org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables; SLUG=nfra-mcportal-gw-principal-scan-grant
-ask=no; git cat-file -e "HEAD:$PD/0.7.0_AE_CloudOps~MP/NEVER_WIDEN_ASK_MP-z-4.md" 2>/dev/null && ask=yes
+ask=no; git cat-file -e "HEAD:$PD/0.7.0_AE_CloudOps~MQ/NEVER_WIDEN_ASK_MP-z-4.md" 2>/dev/null && ask=yes
 h=0; for f in $(git ls-tree -r --name-only HEAD "$PD/1.0.0_SA_CTO~Z/" "$PD/2.0.0_SA_COO~MP/" | grep -E "NEVER_WIDEN_HALF_(CTO|COO)_MP-z-4_[^/]*\.md$"); do
   git show "HEAD:$f" | grep -qF "NEVER_WIDEN_ASK_MP-z-4.md" && h=$((h+1)); done
 entry=$(git ls-tree -r --name-only HEAD org/critical_paths/change_management/ | grep -c "_${SLUG}_deploy_completion\.md$")
