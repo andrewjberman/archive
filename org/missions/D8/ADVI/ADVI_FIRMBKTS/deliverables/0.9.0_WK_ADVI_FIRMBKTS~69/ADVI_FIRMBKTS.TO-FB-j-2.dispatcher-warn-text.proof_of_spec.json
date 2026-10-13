@@ -1,0 +1,115 @@
+{
+ "schema_version": "1.0",
+ "genre": "BUILD",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-j-2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-2.dispatcher-warn-text.md",
+  "group": "OTHER",
+  "vintage_commit": "6d35421d8d"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~69",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R7.md",
+  "vintage_commit": "6d35421d8d",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-2.dispatcher-warn-text.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/black_diamond/scripts/gold/gold_dispatch.sh",
+   "kind": "script",
+   "commit_or_etag": "f313505d5cfbaa696d83dcc87f560d4858583aa1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "one commit inside emit_chain_complete only (5 insertions, 2 deletions): the put-events output and rc are captured, the success predicate is unchanged, and the WARN prints rc and the CLI text with non-printable characters replaced by spaces, cut to 300 characters. No deploy, no push and no AWS call are made by this order (the order's bounds, section 2.1). bash -n clean; 0 non-ASCII lines; 0 CR bytes.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "The function test against a stubbed aws: bash r7_emit_test.sh <gold_dispatch.sh> reads 3 of 3 arms (the issuer's check, run on the committed script)",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-69 && timeout 60 bash C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_emit_test.sh data/black_diamond/scripts/gold/gold_dispatch.sh",
+   "expect": "^EMIT TEST: 3 of 3 arms$",
+   "output_evidence": "EMIT TEST: 3 of 3 arms",
+   "denominator": "3 of 3 arms PASS (E1 long error text cut to 300 characters; E2 success line with no WARN; E3 multi-line error text as one WARN line, return 0)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "The diff bound: every other aws line of the script is byte-unchanged and the hunks lie inside the emit_chain_complete function only (issuer awsdiff, expect AWSDIFF: OK)",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-69 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py awsdiff --root /c/dev/wk-firmbkts-69 --file data/black_diamond/scripts/gold/gold_dispatch.sh",
+   "expect": "^AWSDIFF: OK$",
+   "output_evidence": "AWSDIFF: OK",
+   "denominator": "2 changed hunks of the script between the merge-base 6d35421d8d and HEAD f313505d5c; 0 of 2 hunks outside emit_chain_complete; aws lines other than the events put-events line unchanged (True)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "The write-surface bound: every changed file lies inside the three allowed paths (issuer r4_scope, expect ROUND 4 SCOPE: OK with 0 outside and 0 required missing)",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-firmbkts-69 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-69 --allow data/black_diamond/scripts/gold/gold_dispatch.sh --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~69/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+   "output_evidence": "ROUND 4 SCOPE: OK 2 changed, 0 outside, 0 required missing",
+   "denominator": "2 changed files (the script and the investigation channel) of the worktree against the base; 0 outside the three allowed paths; 0 required missing",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC1 difference control: the same issuer check run on the base script at 6d35421d8d (before the edit), which must read fewer than 3 of 3 arms because the base WARN carries no CLI text",
+   "expected": "EMIT TEST: 1 of 3 arms (E1 and E3 FAIL on the base); AC1 fails on the unedited function",
+   "observed": "FAIL E1 a failing call prints the first 300 characters of the CLI text, no more | PASS E2 a successful call prints the emitted line and no WARN | FAIL E3 a multi-line error text is one WARN line and the function still returns 0 | EMIT TEST: 1 of 3 arms | MUTANT_RC=1 (base file read with git show 6d35421d8d into .scratch/base_gold_dispatch.sh)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs of r7_emit_test.sh on the committed script (AC1 run before and after the commit)",
+   "observed": "run 1: EMIT TEST: 3 of 3 arms, rc=0; run 2: EMIT TEST: 3 of 3 arms, rc=0; both printed E1, E2 and E3 PASS",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the region change (no --region and no AWS_DEFAULT_REGION in the emit call)",
+   "reason": "the order (section 1a.4) defers the region change to a later cell; this cell is the measurement step with no region change"
+  },
+  {
+   "item": "the deploy of the edited script and the next chain's printed error",
+   "reason": "the order (section 2.1) allows no deploy, no push and no AWS call; the deploy is the next step outside this worker's grant"
+  },
+  {
+   "item": "the flip of this order's status to complete",
+   "reason": "the order (section 5) says do not flip the status; the issuer owns the flip"
+  },
+  {
+   "item": "a live run of emit_chain_complete against EventBridge",
+   "reason": "the order (section 2.3) says no AWS call; the stubbed aws is the only instrument used"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W69-S1: the commit gate on this device reports the hashed account-id list ABSENT, so the FB-j-2 commit was not checked for client account ids; the order names no such check",
+  "ADVI_FIRMBKTS-D1-W69-S2: the pre-commit risk reflex printed HOLD on gold_dispatch.sh against a COT freshness claim; the cited row concerns the COT script, not emit_chain_complete"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~69/ADVI_FIRMBKTS.TO-FB-j-2.dispatcher-warn-text.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "bash",
+   "invocation": "bash -n data/black_diamond/scripts/gold/gold_dispatch.sh",
+   "result": "BASHN_RC=0 (syntax clean)"
+  },
+  {
+   "tool": "issuer emit test",
+   "invocation": "bash C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_emit_test.sh data/black_diamond/scripts/gold/gold_dispatch.sh",
+   "result": "EMIT TEST: 3 of 3 arms on the committed script; EMIT TEST: 1 of 3 arms on the base 6d35421d8d"
+  },
+  {
+   "tool": "git",
+   "invocation": "git show 6d35421d8d:data/black_diamond/scripts/gold/gold_dispatch.sh > .scratch/base_gold_dispatch.sh",
+   "result": "SHOW_RC=0; base copy used as the mutant control"
+  }
+ ]
+}
