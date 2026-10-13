@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-507",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-507.host-bundle-census-live-versus-head.md",
+    "group": "OTHER",
+    "vintage_commit": "7c04ead6e3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "7c04ead6e3",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-507.host-bundle-census-live-versus-head.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~359",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~359/IB175-1_host_bundle_census.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the census record: the live object's head-object fields, sha256 of the object and of its 12 members, each member against git show HEAD:<repo_path>, the five differing members with commits since the live object, and the host-read sites; read only, no upload, no SSM command, no host start, no deploy",
+      "artifact_covered_by": ["IB175-1-AC1", "IB175-1-AC2", "IB175-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended (IRPT_BCKEND-D2-W359-S1, IRPT_BCKEND-D2-W359-S2), append-only; no existing row edited; no deploy",
+      "artifact_covered_by": ["IB175-1-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB175-1-AC1",
+      "criterion_verbatim": "the record's arithmetic: the denominator equals the member rows and the differing rows; every hash is 64-hex; each equal flag agrees with its two hashes; the live object fields are present",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r175/p175_cells.py\" . IB175-1-AC1",
+      "output_evidence": "OK: 12 members, 5 differing\nIB175-1-AC1 PASS\nrc=0",
+      "denominator": "12 of 12 member rows counted by denominator.members_in_live_bundle; 5 of 5 rows with equal false counted by denominator.members_differing; 12 of 12 hash pairs 64-hex with the equal flag agreeing",
+      "expect": "^IB175-1-AC1 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB175-1-AC2",
+      "criterion_verbatim": "every member's head_member_sha256 is the blob at HEAD (re-hashed by the check from git show HEAD:<repo_path>); all twelve guard-declared members appear; every differing member carries commits_since_live",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r175/p175_cells.py\" . IB175-1-AC2",
+      "output_evidence": "OK: the head hashes are the blobs at HEAD and all 12 declared members appear\nIB175-1-AC2 PASS\nrc=0",
+      "denominator": "12 of 12 members with a repo_path re-hashed against HEAD and matched; 12 of 12 guard-declared members present; 5 of 5 differing members carry commits_since_live",
+      "expect": "^IB175-1-AC2 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB175-1-AC3",
+      "criterion_verbatim": "at least one cited host-read site resolves (file exists, quote within 3 lines of the line); the seven bound counters read 0; etag_after equals the live ETag; the record carries no long digit run",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r175/p175_cells.py\" . IB175-1-AC3",
+      "output_evidence": "OK: the host's read is cited; the bound counters read 0; the ETag is unchanged\nIB175-1-AC3 PASS\nrc=0",
+      "denominator": "9 of 9 cited host-read sites resolve; 7 of 7 bound counters read 0; etag_after equals the live ETag",
+      "expect": "^IB175-1-AC3 PASS$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control; none was run.",
+      "expected": "N/A",
+      "observed": "not run: the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "head-object of the live object was read before the download and again after the last check; the ETag was read at both points",
+      "observed": "the ETag is unchanged between the first read and etag_after in the record (the check AC3 compares them)",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the per-firm holdings packages (investor-reporting-holdings.tar.gz) were not downloaded or censused",
+      "reason": "the order grants one object, the directory investor-reporting.tar.gz; the holdings packages are the object through which holdings_49f.py and holdings_inf.py reach the host, recorded as IRPT_BCKEND-D2-W359-S1"
+    },
+    {
+      "item": "no ec2 describe-instances or ssm describe-instance-information call was made",
+      "reason": "the host identity was read from infra/aws/ec2/EC2_MANIFEST.json (services mdpf-daily-runner); the order allowed the describe calls only if needed, and the record does not depend on the host's state"
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W359-S1: the order's premise fails: holdings_49f.py and holdings_inf.py are not among the twelve members of investor-reporting.tar.gz; they reach the host inside the per-firm package investor-reporting-holdings.tar.gz, which this census did not read",
+    "IRPT_BCKEND-D2-W359-S2: the directory refresh's docstring says the bundle has NINE members; the guard declares and the live object carries TWELVE"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~359/IB175-1_host_bundle_census.json",
+  "compiler_tools": [
+    {
+      "tool": "aws",
+      "invocation": ".tools/aws s3api head-object --bucket opal-data-mdpf --key code/scripts/assets_gold/investor_reporting/investor-reporting.tar.gz --output json (run three times: before the download, after the checks, and once more for the record's etag_after)",
+      "result": "rc=0 each; ETag 5547fa5e6601c042beef7146c0064def, LastModified 2026-10-09T04:16:44+00:00, ContentLength 112861, VersionId present"
+    },
+    {
+      "tool": "aws",
+      "invocation": ".tools/aws s3 cp s3://opal-data-mdpf/code/scripts/assets_gold/investor_reporting/investor-reporting.tar.gz <session scratch folder, outside the repository>",
+      "result": "rc=0; 112861 bytes; the copy was listed in memory with python -I and then deleted"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -I <scratch>/ib175_359_list.py <scratch>/investor-reporting.tar.gz, then python -I <scratch>/ib175_359_head.py (git show HEAD:<repo_path> per member)",
+      "result": "rc=0; 12 members listed; 5 hashes differ from HEAD"
+    },
+    {
+      "tool": "python",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r175/p175_cells.py\" . IB175-1-AC1 / IB175-1-AC2 / IB175-1-AC3 (each under timeout 120 from the worktree root)",
+      "result": "AC1 rc=0 PASS; AC2 rc=0 PASS; AC3 rc=0 PASS"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~359/IRPT_BCKEND.TO-IB-pr-507.host-bundle-census-live-versus-head.proof_of_spec.json IB175-1-AC1,IB175-1-AC2,IB175-1-AC3",
+      "result": "rc=0; VALID; structural=jsonschema; acceptance rows=3; violations=0"
+    }
+  ]
+}
