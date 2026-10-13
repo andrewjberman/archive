@@ -1,0 +1,16 @@
+AR-y-284 session log -- 0.9.0_WK_IRPT_ANLREQ~108 -- worktree C:/dev/wk-irpt-anlreq-108 -- branch wk-IRPT_ANLREQ-108 -- premise HEAD 844d025f4a
+
+1. Tree check: git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-108; test -d org && test -d .tools -> TREE-OK.
+2. Baseline: python -m pytest infra/aws/lambda/ticket_center/tests -q -> 221 passed, 43 subtests passed, rc=0.
+3. Read: package_ticket (lambda_function.py, HEAD lines 1488-1560), report_ticket (1407-1485), commentary_draft_ticket (1563-1620), REPORT_REQUEST_ID (line 157), the harness (test_package_route.py, test_analysis_request.py, test_authz_matrix.py), investor-reporting acceptance.py:36, recipe.py:363, durable_job.py:48.
+4. New test file written first: infra/aws/lambda/ticket_center/tests/test_package_request_id.py.
+5. Before-arm: python -m pytest infra/aws/lambda/ticket_center/tests/test_package_request_id.py -q -> 11 failed, 22 passed (rc=1), against HEAD lambda_function.py. Case (a) among the 11.
+6. Change: package_ticket only (request_id, request_revision, the top-level report_ref write in the same UpdateItem, 409 REPORT_REF_ALREADY_RECORDED_OTHER, 400 INVALID_REPORT_REQUEST_ID, 400 request_revision).
+7. Harness fix: the test's own Table subclass gained the commentary-draft write (the base fake does not model it). No existing test file touched.
+8. After-change: new file 33 passed rc=0; folder 254 passed, 43 subtests passed, rc=0 (221 existing + 33).
+9. Mutant (scratch copy .scratch/mut284/ticket_center, untracked, never committed): different-id 409 guard disabled -> 2 failed, 31 passed.
+10. Commit gate: bash .tools/commit-gate.sh on lambda_function.py and the new test file -> All checks passed, rc=0.
+11. Commits (LOCAL on wk-IRPT_ANLREQ-108): 8151b5626f (code and tests); 39e5e81cf0 (five surprise rows W108-S1..S5).
+12. Record: r26/PACKAGE_REQUEST_ID_SERVER.json, copied byte-identical to r23/ (the checker's folder).
+13. Checker: python C:/dev/wk-irpt-anlreq-108/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y284-pkg-server --root C:/dev/wk-irpt-anlreq-108 -> package request id tests: 33 passed, 0 failed (rc=0); ticket service folder: 254 passed, 0 failed (rc=0); Y284-PKG-SERVER-OK (rc=0). The order expects Y284-PKG-OK: surprise S2.
+14. No deploy, no push, no apply, no invoke, no live call. The portal submodule is an empty checkout in this worktree and was not read.

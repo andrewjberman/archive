@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t56",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "genre": "BUILD",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t56.drawer-cusip-entries-and-reference-channel.md",
+    "group": "OTHER",
+    "vintage_commit": "2ab896a6d3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "2ab896a6d3",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t56.drawer-cusip-entries-and-reference-channel.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~48",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/standing_drawer.py",
+      "kind": "script",
+      "commit_or_etag": "5a4d19500f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bloomberg_id (ticker, else /cusip/<CUSIP>); _probe_history and _probe_reference (one-row, one-field probe of the first /cusip/ draw per channel per run, cached in the run, refusal of the request on UNVERIFIED); undrawn_runs with dates entries (maximal consecutive trading-day runs by identity); per-entry fields through _fields_for; _draw_reference (reference_data per chunk of CHUNK_ROWS, identity (security, field)); _excluded_for_request (priority_gate.load_inputs and excluded, read lazily for a client request being drawn, GateUnreadable refuses the request); _undrawable_reason (DQ-t-56 S1: a non-empty draw_hold string makes the request not drawable, reason 'draw_hold: ' plus the first 80 characters; survey, open_requests and run all read it); survey, --open (one JSON line {open, not_drawable}); plan (DQ-t-44 shape, unchanged) and plan_detail (DQ-t-56 shape, the --plan CLI line). The DQ-t-54 carry-over code is unchanged. No Bloomberg, Yahoo or S3 write; standing_drawer.py --apply not run.",
+      "artifact_covered_by": [
+        "DQ9-t56-AC1",
+        "DQ9-t56-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_drawer_cusip_entries.py",
+      "kind": "test",
+      "commit_or_etag": "5a4d19500f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the four named tests and the S1 draw-hold test PASS: '5 passed in 3.53s' (dq_t56_tests.py DRAWER-OK). Stub vendor and stub gate only; tmp_path; no network, no S3 read. The S1 test is test_a_request_carrying_a_draw_hold_is_not_drawable_and_is_listed_with_its_reason (added at 5a4d19500f, 30 insertions across the two files).",
+      "artifact_covered_by": [
+        "DQ9-t56-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t56-AC1",
+      "criterion_verbatim": "DQ9-t56-AC1: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t56_tests.py -> DRAWER-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t56_tests.py",
+      "output_evidence": "test_demque_drawer_cusip_entries.py::test_a_cusip_entry_resolves_to_a_bloomberg_identifier_and_the_first_draw_of_an_unverified_form_is_a_one_row_probe PASSED; test_a_dates_entry_draws_only_its_undrawn_trading_days_by_identity_one_request_per_consecutive_run PASSED; test_a_per_entry_fields_override_draws_that_entrys_fields_and_a_reference_request_draws_securities_by_fields PASSED; test_the_drawer_skips_a_client_request_security_the_priority_gate_excludes_and_fails_closed PASSED; test_a_request_carrying_a_draw_hold_is_not_drawable_and_is_listed_with_its_reason PASSED (the fifth test, extra to the check's list); '5 passed in 3.53s'; verbatim last line: DRAWER-OK; rc=0",
+      "denominator": "4 of 4 named tests PASSED by name (the check's TESTS list); 5 of 5 tests in test_demque_drawer_cusip_entries.py PASSED",
+      "status": "PASS",
+      "expect": "DRAWER-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t56-AC2",
+      "criterion_verbatim": "DQ9-t56-AC2: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t56_real.py -> DRAWER-REAL-OK (real request files, read only; each command under 40 s)",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t56_real.py",
+      "output_evidence": "arm1 open=['MDPF_SECHIST-CARD-A-B1-FUND-TYPE', 'MDPF_SECHIST-CARD-A-B1-OPTION-C', 'MDPF_SECHIST-CARD-A-PORTING-TEST', 'AMGT_RESAPP-S14-CRNCY-SCANNER-US-SLICE1', 'DEMQUE-TR-COMPARISON-DIVIDEND-PAYERS'] not_drawable=11 | arm2 B1 remaining=37439 quote=37439 securities=803 forms={'/cusip/': 803} | arm3 fund-type remaining=227 channel=reference | porting remaining=3195 quote=3195 | DRAWER-REAL-OK the drawer plans B1 (37439 cells), the porting test (3195) and the fund-type check (227) and orders them before the TR comparison; rc=0. The real --open line now lists AMGT_RESAPP-S14-CRNCY-SCANNER-US under not_drawable with the reason 'draw_hold: Draws ONLY if AMGT_RESAPP-S14-CRNCY-SCANNER-US-SLICE1 reads a non-USD currency ('; its slice 1 stays open.",
+      "denominator": "3 arms of 3 PASS; the open list names 5 requests, B1 and porting before the TR comparison; 11 not_drawable requests, each with a reason; B1 plan 37439 cells over 803 entries equals its quote; porting 3195 equals its quote; fund-type 227 cells, channel reference",
+      "status": "PASS",
+      "expect": "DRAWER-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "three mutants, each patched in-process by a scratch plugin (no file edit) and run against test_demque_drawer_cusip_entries.py. (1) no probe: _probe_history and _probe_reference return VERIFIED with no vendor call. (2) no gate: _excluded_for_request returns {}. (3) no hold (added at 5a4d19500f): _undrawable_reason ignores draw_hold.",
+      "expected": "each mutant fails at least one named test",
+      "observed": "(1) no probe: 3 failed, 1 passed (measured at b5a231fb73; the probe test, the dates test and the per-entry/reference test fail). (2) no gate: 1 failed, 3 passed (measured at b5a231fb73; the gate test fails at its gate-read assertion, gate.loads 0). (3) no hold: 1 failed, 4 passed (measured at 5a4d19500f; the S1 test fails at 'AAA-HELD not in the open entries').",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of python data/mdpf/scripts/demque/standing_drawer.py --open at 5a4d19500f, byte-compared with cmp",
+      "status": "STABLE",
+      "expected": "two identical runs",
+      "observed": "identical (cmp rc=0, 1505 bytes each)"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any Bloomberg call, Yahoo call, S3 write, write to the real budget ledger, the actuals ledger, the queue or any pacer state; standing_drawer.py --apply",
+      "reason": "order BOUNDS: READ-ONLY. The drawer tests use a stub vendor, a stub gate and temp directories; the real checks read the request files and never draw."
+    },
+    {
+      "item": "data/mdpf/scripts/demque/blp_client.py, bbg_quote.py, priority_gate.py, bbg_ledger_upload.py, bbg_allowance.json and every other site Z file",
+      "reason": "order BOUNDS: a change to blp_client.py or any site Z file is a surprise row, not an edit. None was edited."
+    },
+    {
+      "item": "data/mdpf/scripts/demque/test_demque_need_class.py",
+      "reason": "in the amended grant (S4). It pins plan()'s shape and passes unchanged at 5a4d19500f ('4 passed'), so the pin is left untouched; plan() keeps that shape and the DQ-t-56 shape is plan_detail(), which the --plan CLI prints (surprise S4)."
+    },
+    {
+      "item": "the R9 checks dq_t56_tests.py and dq_t56_real.py",
+      "reason": "the acceptance instruments, run unedited"
+    },
+    {
+      "item": "the merge of box/dell1",
+      "reason": "order: do NOT merge box/dell1 (blocked by a foreign row); the branch wk-MDPF_DEMQUE-48 is the worker's record"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W48-S1: under the drawability rule the order states, the AMGT_RESAPP S14 CRNCY requests (1,038 and 50 securities, reference, tier 4) are open at the standing drawer, though the full request's securities_note says it is drawn only if the slice reads a non-USD currency; the first fire on 2026-10-17 would draw them (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~Q1). Fixed in the drawer at 5a4d19500f (the draw_hold rule and its test); the arming is disarmed by the issuer per the amended order, not by this instance",
+    "MDPF_DEMQUE-D1-W48-S2: the three existing drawer test files' site fixtures stub the priority gate (two monkeypatch lines each); no assertion changed (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W48-S3: the order names no room for the reference channel; the drawer uses the held reference ceiling (52 cells) less the reference cells drawn today (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W48-S4: plan() keeps the DQ-t-44 shape pinned by test_demque_need_class.py, and the --plan CLI prints plan_detail() with securities as a count; the pin still holds, so the test is unchanged (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W48-S5: the probe row is discarded and its day drawn again, so the probe costs one extra cell (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~48/MDPF_DEMQUE.TO-DQ-t56.drawer-cusip-entries-and-reference-channel.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t56_tests.py",
+      "invocation": "from the worktree root, timeout 200",
+      "result": "DRAWER-OK; 5 passed in 3.53s; rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t56_real.py",
+      "invocation": "from the worktree root, timeout 200",
+      "result": "DRAWER-REAL-OK; arm1, arm2 and arm3 PASS; rc=0"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "from the worktree root, timeout 300",
+      "result": "198 passed in 19.27s; rc=0 (0 failed)"
+    },
+    {
+      "tool": "bash .tools/commit-gate.sh data/mdpf/scripts/demque/standing_drawer.py data/mdpf/scripts/demque/test_demque_drawer_cusip_entries.py",
+      "invocation": "from the worktree root, timeout 300",
+      "result": "pre-commit gate clean for 2 of 2 file(s); rc=0"
+    }
+  ]
+}

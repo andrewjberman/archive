@@ -422,6 +422,100 @@ def trailsel(a):
     return 0
 
 
+PLANINV_CLAIMS = ("measured", "inferred", "held", "absent")
+PLANINV_KINDS = ("rule", "schedule", "task", "service", "lambda", "edge", "topic", "email", "script", "role", "reader", "other")
+PLANINV_WRITE_VERBS = re.compile(
+    r"(\s(put|delete|create|update|modify|attach|detach|start|stop|run|terminate|enable|disable|register|deregister|tag|untag|send|publish|invoke)-[a-z-]+)"
+    r"|(\ss3(api)?\s+(cp|mv|rm|sync|put-object|delete-object)\b)|(\sterraform\s+(apply|destroy|import)\b)")
+PLANINV_ID_TOKEN = re.compile(r"(?<![0-9A-Za-z])[A-Za-z]?[0-9]{9,}(?![0-9A-Za-z])")
+PLANINV_OK_TOKENS = ("313476888478",)
+
+
+def _planinv_text_problems(raw):
+    out = []
+    bad = [m for m in PLANINV_ID_TOKEN.findall(raw) if m not in PLANINV_OK_TOKENS]
+    if bad:
+        out.append("%d id-shaped token(s) of nine or more digits (replace with <id>)" % len(bad))
+    return out
+
+
+def planinv(a):
+    """FB-k-1..5: the read-only plan inventories (shape and read-only discipline; completeness is read by the issuer)."""
+    try:
+        raw = open(a.file, encoding="utf-8").read()
+        d = json.loads(raw)
+    except (OSError, ValueError) as e:
+        print("PLANINV: FAIL cannot read %s: %s" % (a.file, type(e).__name__))
+        return 1
+    p = _planinv_text_problems(raw)
+    for k in ("order", "read_at", "calls", "denominators", "not_read", "claim"):
+        if k not in d:
+            p.append("missing %s" % k)
+    if p and any(x.startswith("missing") for x in p):
+        print("PLANINV: FAIL " + "; ".join(p))
+        return 1
+    if d["claim"] not in PLANINV_CLAIMS:
+        p.append("claim outside the four")
+    if not isinstance(d["calls"], list) or not d["calls"] or not all(isinstance(c, str) for c in d["calls"]):
+        p.append("calls must be a non-empty list of strings")
+    else:
+        for c in d["calls"]:
+            if PLANINV_WRITE_VERBS.search(" " + c):
+                p.append("a call carries a write verb")
+                break
+    den = d["denominators"]
+    if not isinstance(den, dict) or not den or not all(isinstance(v, int) and v >= 0 for v in den.values()) or not any(v > 0 for v in den.values()):
+        p.append("denominators must be integers with at least one above zero")
+    if not isinstance(d["not_read"], list):
+        p.append("not_read must be a list")
+    rows = d.get("candidates" if a.shape == "retire" else "functions")
+    if not isinstance(rows, list) or len(rows) < a.min:
+        p.append("%s must be a list of at least %d" % ("candidates" if a.shape == "retire" else "functions", a.min))
+        rows = []
+    legacy = 0
+    for i, r in enumerate(rows):
+        if not isinstance(r, dict):
+            p.append("row %d is not an object" % i)
+            continue
+        need = ["id", "kind", "name", "evidence", "claim"]
+        need += ["legacy_reason", "replaced_by", "replaced_by_claim", "decision_owner"] if a.shape == "retire" else ["trigger", "reads", "writes", "legacy_touch"]
+        miss = [k for k in need if k not in r]
+        if miss:
+            p.append("row %d missing %s" % (i, ",".join(miss)))
+            continue
+        if r["kind"] not in PLANINV_KINDS or r["claim"] not in PLANINV_CLAIMS or not str(r["evidence"]).strip():
+            p.append("row %d has a kind or claim outside the closed sets, or no evidence" % i)
+        if a.shape == "retire":
+            if r["replaced_by_claim"] not in PLANINV_CLAIMS or r["decision_owner"] not in ("Andrew", "CTO", "COO", "none") or not str(r["replaced_by"]).strip():
+                p.append("row %d replaced_by / decision_owner outside the closed sets" % i)
+        else:
+            if not isinstance(r["reads"], list) or not isinstance(r["writes"], list) or not isinstance(r["legacy_touch"], bool):
+                p.append("row %d reads, writes or legacy_touch has the wrong type" % i)
+                continue
+            for acc in r["reads"] + r["writes"]:
+                if not isinstance(acc, dict) or "bucket" not in acc or acc.get("claim") not in PLANINV_CLAIMS:
+                    p.append("row %d has an access without bucket or claim" % i)
+                    break
+            if r["legacy_touch"]:
+                legacy += 1
+                if not (r["reads"] or r["writes"]):
+                    p.append("row %d is legacy_touch with no read or write" % i)
+    if a.shape == "inventory" and a.firm and d.get("firm") != a.firm:
+        p.append("firm is %s, want %s" % (d.get("firm"), a.firm))
+    blob = json.dumps(rows).lower()
+    for need in a.require_text or []:
+        if need.lower() not in blob:
+            p.append("no row names %s" % need)
+    if p:
+        print("PLANINV: FAIL " + "; ".join(p[:6]))
+        return 1
+    if a.shape == "retire":
+        print("PLANINV: OK shape=retire rows=%d" % len(rows))
+    else:
+        print("PLANINV: OK firm=%s rows=%d legacy=%d" % (d.get("firm"), len(rows), legacy))
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -449,11 +543,17 @@ def main():
     tf = sub.add_parser("tfslots")
     tf.add_argument("--root", required=True)
     sub.add_parser("trailsel")
+    pi = sub.add_parser("planinv")
+    pi.add_argument("--file", required=True)
+    pi.add_argument("--shape", choices=("inventory", "retire"), default="inventory")
+    pi.add_argument("--firm", default="")
+    pi.add_argument("--min", type=int, default=5)
+    pi.add_argument("--require-text", nargs="*", default=[])
     sc = sub.add_parser("scrub")
     sc.add_argument("--files", nargs="+", required=True)
     a = ap.parse_args()
     return {"awsdiff": awsdiff, "agree2": agree2, "emiterr": emiterr, "firstchain": firstchain, "dryrun": dryrun, "prescreen": prescreen, "slotcause": slotcause,
-            "tfslots": tfslots, "iqlt": iqlt, "switchsample": switchsample, "scrub": scrub, "trailsel": trailsel}[a.cmd](a)
+            "tfslots": tfslots, "iqlt": iqlt, "switchsample": switchsample, "scrub": scrub, "trailsel": trailsel, "planinv": planinv}[a.cmd](a)
 
 
 if __name__ == "__main__":
