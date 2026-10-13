@@ -12,6 +12,8 @@ Usage:  python ar20_checks.py <check> --root <worker worktree root>
                                                                                                                            -> Y213-REBASE-OK
   y216-expect   AR-y-216 (workstream YR): the expectations of the three function suites (narrative, directory-search, export-render) that encode the
                 pre-rule binding moved to the status rule, test files only, no test removed                              -> Y216-EXPECT-OK
+  y217-status   AR-y-217 (workstream YR): irpt-status released with served.py AND the current ops/status.py (the 24 correction words), on the live package,
+                the status.py difference being words only                                                              -> Y217-STATUS-OK
   y214-portal   AR-y-214: the portal candidate that shows the SHEETS_NOT_READ notice on the upload answer's face              -> Y214-PORTAL-OK
 
 --root is REQUIRED. Each check prints its token last, or the token with -FAIL after one FAIL line per problem. Writes nothing.
@@ -27,7 +29,7 @@ IR = "infra/aws/lambda/investor-reporting"
 INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r20/"
 ROUND19_VERSION = "irpt-template-reader.r19.1"
-TOKENS = {"y211-repair": "Y211-REPAIR", "y211-keep": "Y211-KEEP", "y212-rebase": "Y212-REBASE", "y213-rebase": "Y213-REBASE", "y214-portal": "Y214-PORTAL", "y216-expect": "Y216-EXPECT"}
+TOKENS = {"y211-repair": "Y211-REPAIR", "y211-keep": "Y211-KEEP", "y212-rebase": "Y212-REBASE", "y213-rebase": "Y213-REBASE", "y214-portal": "Y214-PORTAL", "y216-expect": "Y216-EXPECT", "y217-status": "Y217-STATUS"}
 GROUPS = {"y212-rebase": ("61", "STATUS_RULE_REBASE_GROUP_A.json", ("irpt-performance-adapter", "irpt-narrative", "irpt-status")),
           "y213-rebase": ("64", "STATUS_RULE_REBASE_GROUP_B.json",
                           ("irpt-directory-search", "irpt-ycharts-generate", "irpt-export-render", "irpt-holdings", "irpt-49f-reporting-read-lambda"))}
@@ -233,6 +235,41 @@ def main(argv):
             if az.get("failed") not in (0, "0") or not az.get("passed"):
                 problems.append("the two _authz status tests must pass unchanged (%r)" % az)
             print("suites in the record %d of 3" % len([n for n in want if n in rows]))
+    elif check == "y217-status":
+        rec = load(root, D % "66" + "IRPT_STATUS_STATUS_PY_RELEASE.json", problems)
+        if rec:
+            for member in ("live_code_sha256", "live_member_manifest", "base_commit", "holds_only_control", "release", "status_py_pin",
+                           "status_py_diff_words_only", "correction_words", "tests", "parity", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if (rec.get("holds_only_control") or {}).get("code_sha256") != rec.get("live_code_sha256"):
+                problems.append("the holds-only control does not reproduce the live CodeSha256")
+            live, rel = rec.get("live_member_manifest") or {}, (rec.get("release") or {}).get("member_manifest") or {}
+            if len(live) < 5 or len(rel) < 5:
+                problems.append("both manifests must map the package members to sha256")
+            else:
+                differ = sorted(k for k in set(live) | set(rel) if live.get(k) != rel.get(k))
+                moved = {m.get("member"): m for m in rec.get("must_move_with") or []}
+                extra = [k for k in differ if k not in ("served.py", "status.py") and not (moved.get(k) or {}).get("reason")]
+                if "served.py" not in differ or "status.py" not in differ or extra:
+                    problems.append("the release must differ from the live package in served.py and status.py (and members named in must_move_with with a reason); differs in %s" % differ)
+            if not re.fullmatch(r"[0-9a-f]{40}", str(rec.get("status_py_pin", ""))):
+                problems.append("status_py_pin must be a full commit sha")
+            if rec.get("status_py_diff_words_only") is not True:
+                problems.append("status_py_diff_words_only must be true: the pinned and the released status.py differ in the CORRECTION_WORDS literal only")
+            cw = rec.get("correction_words") or {}
+            if not (isinstance(cw.get("after"), int) and isinstance(cw.get("before"), int) and cw["after"] - cw["before"] >= 24):
+                problems.append("correction_words must show at least 24 more words after than before (%r)" % cw)
+            tests = rec.get("tests") or {}
+            if tests.get("failed") not in (0, "0"):
+                names, control = set(tests.get("failed_names") or []), set(tests.get("control_failed_names") or [])
+                if not names or not names <= control or tests.get("failed") != len(names):
+                    problems.append("the ops tests must pass against the release except failures that also fail with the original bytes (%r)" % tests)
+            elif not tests.get("passed"):
+                problems.append("the ops tests ran no passing test")
+            if (rec.get("parity") or {}).get("passed") is not True:
+                problems.append("the correction-words parity test (uploads against status) must pass against the release members")
+            print("differs from live: %s" % (differ if len(live) >= 5 and len(rel) >= 5 else "?"))
     return finish(check, problems)
 
 
