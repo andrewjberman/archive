@@ -33,9 +33,23 @@ def main():
         block = B.build_block(L.ctx(L.served_inputs(), L.StubModel(L.result(BIO_TEXT))))
         cites = block["citations"]
         return (cites and all(c["source_kind"] == "opal" for c in cites) and all(L.plain_ref_ok(c["ref"]) for c in cites)
-                and any("research team" in c["ref"].lower() for c in cites) and any("officer" in c["ref"].lower() for c in cites)
+                and any("research team" in c["ref"].lower() for c in cites)
                 and block["opal_inputs"] and block["model_call"] and block["model_call"]["web_search_requests"] == 0), [c["ref"] for c in cites]
-    arms.run("OPAL citations are plain-words source labels (team pack, officer list)", opal_citations)
+    arms.run("OPAL citation is a plain-words source label (the research team's pack: ASML's CEO row has no role start, so no officer fact)", opal_citations)
+
+    def opal_officer_fact():
+        inputs = L.served_inputs()
+        inputs["thesis"]["dossier_fields"]["management"] = {"status": "ABSENT", "reason": "none"}
+        for officer in inputs["thesis"]["management"]["officers"]:
+            if "CEO" in (officer.get("role") or ""):
+                officer["role_start"] = "March 2023"
+                officer["tenure_years"] = 3.5
+        m = L.StubModel(L.result("Christophe Fouquet became CEO in March 2023."))
+        block = B.build_block(L.ctx(inputs, m))
+        refs = [c["ref"] for c in block["citations"]]
+        return (block["source_class"] == "OPAL_SOURCE" and m.calls[0]["web_search_max_uses"] == 0 and "March 2023" in m.calls[0]["prompt"]
+                and any("officer" in r.lower() for r in refs) and all(L.plain_ref_ok(r) for r in refs)), (block["source_class"], block.get("reason"), refs)
+    arms.run("a CEO row with a role start is an Opal officer fact (plain 'officer list' citation)", opal_officer_fact)
 
     def numeric_guard():
         m = L.StubModel(L.result("Christophe Fouquet joined ASML in 1987 and is CEO."))

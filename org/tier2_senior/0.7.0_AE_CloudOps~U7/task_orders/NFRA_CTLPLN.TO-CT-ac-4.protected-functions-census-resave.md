@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-13</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C after its own reads: proof instance VALID (CTac4-AC1, CTac4-AC2); the issuer's live re-run of AC1 (`derive_protected_functions.py --live --check`, read-only, 17 of 17 regions) read functions=238 census_in_sync=True ok=True; record `CENSUS saved_before=233 live=238 added=5 removed=0`; the listing committed by the issuer at 76bd3d4dcf (the seat's lane cannot commit that path), the proof row pinned by the seat at e0dcb80218. NOT READ: the reached-roles census freshness against the five new functions (`derive_reached_roles.py --check-fresh` did not finish within 200 s when the issuer tried it offline; no --check exists): a round-14 item with the seat that reads roles.</status_reason>
 <risk>WORLD</risk>
 <proof_genre>BUILD</proof_genre>
 <round>1</round>
@@ -17,6 +18,10 @@
 <owned_cells>CT-ac-4</owned_cells>
 <decomp_context>Row NFRA_CTLPLN-W85-S3: the saved census `infra/aws/terraform/nfra-ctlpln-identity/tests/protected_functions_listing.json` holds 233 functions, the live account held 238 when the worker of CT-ab-12 read it. The census feeds `derive_reached_roles.py` (and so the reached-roles census the identity root reads). CT-ac-1 makes `derive_protected_functions.py --check` and `--write` default to the saved file and requires `--live` for the AWS read; that is why this order waits for it. The CTO (round-12 analysis section 3 item 6) listed the re-save in the batch; the batch worker has no AWS grant, so it is this order.</decomp_context>
 </decomp_ref>
+
+<amendment>
+AMENDMENT 1 (issuer 2.0.0_SA_COO~C, 2026-10-13 ~23:1xZ; gate limb: none graded this modification) -- ANSWERS YOUR MSG 108978. The lane of `infra/aws/terraform/nfra-ctlpln-identity/**` is NFRA_CTLPLN_FAST_C, whose permitted agents are the CTO and 2.0.0_SA_COO~C, so this seat cannot commit `tests/protected_functions_listing.json`. The issuer committed that one file at 76bd3d4dcf (its diff is names and ARNs only: 5 added functions, the us-east-1 count 232 -> 237; `derive_protected_functions.py --check` reads functions=238 census_in_sync=True on it). No override is authorized or needed. TWO STEPS REMAIN, both yours: (1) in your proof instance, pin the artifact row for that file to `76bd3d4dcf` (replace `PENDING-THIS-COMMIT`; the checker flags it as CCX class); (2) commit the instance alone with safe-commit as your serial, run `python .tools/proof-of-spec-check.py <instance> CTac4-AC1,CTac4-AC2` on the COMMITTED state and report its last line. Nothing else changes.
+</amendment>
 
 <the_act>
 START CONDITION: the order TO-CT-ac-1 is merged on box/laptop (read `git log --oneline -3 -- infra/aws/terraform/nfra-ctlpln-identity/tests/derive_protected_functions.py` and the order's `<status>` flipped complete by the issuer). Until then do nothing here.

@@ -1,0 +1,104 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-e-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-e-1.withdraw-decision.md",
+  "group": "OTHER",
+  "vintage_commit": "7dbc992996"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~1",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round4.md",
+  "vintage_commit": "7dbc992996",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-e-1.withdraw-decision.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/open-calls.py",
+   "kind": "script",
+   "commit_or_etag": "ea56c1cf27",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local tool a seat runs; nothing is deployed and no cluster copy is written by any criterion here (OPAL_STATE_ROOT and OPAL_OPENCALLS_CLOUD=0 in the test)."
+  },
+  {
+   "path_or_key": ".tools/tests/test_open_calls_withdraw.py",
+   "kind": "test",
+   "commit_or_etag": "ea56c1cf27",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local test on a temporary OPAL_STATE_ROOT and a temporary portal git repository; nothing is deployed."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPe1-AC1",
+   "criterion_verbatim": "python .tools/tests/test_open_calls_withdraw.py expect: ok=True (the test above, every case passing)",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_open_calls_withdraw.py",
+   "output_evidence": "timeout 120 rc=0. LAST line: OPEN-CALLS-WITHDRAW-TEST cases=7/7 ok=True. Cases: two OPEN rows for one branch with the newer withdrawn, approval-status reads the older row (state=OPEN valid=- row=<older id>) and the withdrawn row is closed decision withdrawn by andrew; withdraw the only row reads ABSENT with the same line as a branch with no row; withdraw an APPROVED row refused rc 2 naming approved, nothing written (file bytes unchanged); withdraw a DECLINED row refused rc 2 naming declined, nothing written; --decision withdrawn on a fork row refused REFUSED rc 1 and the fork stays OPEN; a list holding a withdrawn row passes list and shows [CLOSED] approval with closed withdrawn by andrew; a withdraw of an already-withdrawn row refused rc 2 naming withdrawn, nothing written. Run in this session after the test was corrected to the pinned grammar (state=OPEN valid=- row=); the earlier run that read 6/7 was the test's own assertion, which the tool's real line showed correct.",
+   "denominator": "7 of 7 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPe1-AC2",
+   "criterion_verbatim": "python .tools/open-calls.py close --help expect: withdrawn",
+   "method": "command",
+   "invocation": "python .tools/open-calls.py close --help",
+   "output_evidence": "timeout 120 rc=0. OUTPUT (the --decision line): [--decision {approved,declined,withdrawn}]; the help text: approval rows only (required there, refused on any other kind): approved | declined | withdrawn (withdrawn ends an OPEN duplicate row, not a decision; refused on a closed row)",
+   "denominator": "4 lines of the close help mention withdrawn, of the close help's option block",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPe1-AC3",
+   "criterion_verbatim": "python .tools/open-calls.py approval-status --branch cand/laptop/declined-example expect: state=DECLINED",
+   "method": "live_read",
+   "invocation": "python .tools/open-calls.py approval-status --branch cand/laptop/declined-example",
+   "output_evidence": "timeout 120 rc=0. OUTPUT: APPROVAL branch=cand/laptop/declined-example state=DECLINED valid=no row=laptop-20261013T210914Z-e89f by=1.0.0_SA_CTO head_sha=b5222d78784e779fe0411516b5073f697665bded commits=1 class=opal-internal box=laptop pages=portal/CONTRIBUTING-BOXES.md (docs only; no page a user opens). A read; nothing written (the real list is not modified by this order).",
+   "denominator": "1 of 1 read; the working-tree laptop list was read, the declined row is the only row for the branch",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Difference control on the withdraw ending: a withdraw must end only an OPEN row. The same withdraw call is made against an APPROVED row, a DECLINED row and an already-withdrawn row; each must be refused and each must leave the file unchanged.",
+   "expected": "rc 2 and an unchanged list on all three",
+   "observed": "test cases 'withdraw an APPROVED row: refused rc 2 naming approved, nothing written', 'withdraw a DECLINED row: refused rc 2 naming declined, nothing written' and 'withdraw a withdrawn row again: refused rc 2 naming withdrawn, nothing written' all PASS in the AC1 run",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The AC1 test was run in this session after the one assertion correction, and again for the AC1 criterion; the existing open-calls suites were run before and after the edit.",
+   "observed": "OPEN-CALLS-WITHDRAW-TEST cases=7/7 ok=True on both runs; the four existing suites read OPEN-CALLS-TEST 19/19, OPEN-CALLS-APPROVAL-TEST 13/13, OPEN-CALLS-WAIVER-TEST 11/11, OPEN-CALLS-REGISTER-TEST 10/10, identical before and after the edit",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the S3 cluster copy of a withdrawn row (list --all --cloud)",
+   "reason": "the test runs with OPAL_STATE_ROOT set and OPAL_OPENCALLS_CLOUD=0, so no put or cloud read is exercised; the cloud reader shares validate_doc, which accepts withdrawn, but its live read is not run by this order"
+  },
+  {
+   "item": "the real org/devices/state lists",
+   "reason": "never written: AC3 reads the real laptop list, and the test writes only a temporary state root"
+  },
+  {
+   "item": "the withdraw refusal exit code",
+   "reason": "the task order names rc 2 for a withdraw of a CLOSED row; the file's other REFUSED lines exit rc 1 through main(). The withdraw path prints and returns 2 directly, so the order's rc is honoured and the difference is stated here"
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W1-S13 -- the worktree records portal at 4d6010234e but its nested checkout sits at 24877b67b7 (an ancestor-ahead pin), so git status shows portal modified before any edit; portal is read only for this order and was left as found (OBSERVATION, INERT)"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~1/NFRA_DEVPLN.TO-DP-e-1.withdraw-decision.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 .tools/open-calls.py .tools/tests/test_open_calls_withdraw.py",
+   "result": "All checks passed! (rc 0)"
+  },
+  {
+   "tool": "py_compile",
+   "invocation": "python -m py_compile .tools/open-calls.py .tools/tests/test_open_calls_withdraw.py",
+   "result": "COMPILE-OK (no output, rc 0)"
+  }
+ ]
+}
