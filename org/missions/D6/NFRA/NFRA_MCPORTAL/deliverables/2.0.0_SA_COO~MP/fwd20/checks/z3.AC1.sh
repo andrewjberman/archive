@@ -7,5 +7,7 @@
 #   test_missing_routes_file_serves_root_only        no or unreadable routes.json -> "/" serves, "/control-plane" 404s
 #   test_existing_routes_keep_their_endpoint         /health, /assets/x, /api/admin/whoami, /mcp, /sprint resolve to
 #                                                    the same endpoint as before the change (the app's route table)
+#   test_bare_mcp_post_still_redirects               AMENDMENT 1: POST /mcp and DELETE /mcp -> 307 to /mcp/, never 405
+#   test_unknown_path_any_method_404                 AMENDMENT 1: POST / PUT /no-such-page -> 404, never 405
 . "$(dirname "$0")/_root.sh"
-named_pytest "deep-link tests" tests/test_dashboard_deep_links.py test_each_listed_route_serves_index_to_owner test_listed_route_refuses_non_owner test_unknown_path_still_404 test_missing_routes_file_serves_root_only test_existing_routes_keep_their_endpoint
+named_pytest "deep-link tests" tests/test_dashboard_deep_links.py test_each_listed_route_serves_index_to_owner test_listed_route_refuses_non_owner test_unknown_path_still_404 test_missing_routes_file_serves_root_only test_existing_routes_keep_their_endpoint test_bare_mcp_post_still_redirects test_unknown_path_any_method_404
