@@ -1,0 +1,96 @@
+{
+  "cell": "AR-y-284",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-284",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~108",
+  "premise_head": "844d025f4a",
+  "built_head": "8151b5626f",
+  "read": {
+    "package_writes_today": "infra/aws/lambda/ticket_center/lambda_function.py@844d025f4a:1538 builds pkg = {report_ref, pdf_ref, original_ref, commentary_ref} plus attached_at and attached_by; :1545-1549 SET #p = :pkg writes only the 'package' member. PACKAGE never writes the top-level report_ref.",
+    "report_ref_readers": [
+      "lambda_function.py@844d025f4a:1442 report_ticket, creator branch: 'if cur.get(\"report_ref\")' refuses REPORT_ALREADY_RECORDED (presence only, no request_id read)",
+      "lambda_function.py@844d025f4a:1467 report_ticket, creator condition: attribute_not_exists(report_ref) (presence only)",
+      "lambda_function.py@844d025f4a:1595-1596 commentary_draft_ticket: ref = cur.get('report_ref'); recorded = ref.get('request_id') -- the drafter reads the top-level request_id here",
+      "lambda_function.py@844d025f4a:1613 commentary_draft_ticket, conditional write: Attr('report_ref.request_id').eq(request_id)",
+      "portal: NOT READ -- portal/ is an empty submodule checkout in this worktree (see not_read)"
+    ],
+    "report_ref_writers_today": [
+      "lambda_function.py:655 CREATE with report_request_id (svc-commentary): {'request_id': rid} only",
+      "lambda_function.py@844d025f4a:1471 report_ticket SET report_ref = :ref, ref = {request_id, revision (string or null), recorded_by, recorded_at}; assignee branch unconditional, creator branch guarded by attribute_not_exists"
+    ],
+    "request_id_pattern": "lambda_function.py@844d025f4a:157 REPORT_REQUEST_ID = re.compile(r'REQ-[0-9a-f]{24}'), used with fullmatch (:1457 REPORT, :1591 DRAFT at HEAD). The investor-reporting writer is the same shape: ycharts/generate/acceptance.py:36 'REQ-' + sha256 hexdigest[:24]; ycharts/generate/recipe.py:363 and durable_job.py:48 re.fullmatch(r'REQ-[0-9a-f]{24}'). The new PACKAGE member uses REPORT_REQUEST_ID with fullmatch and no stripping.",
+    "packager_payload": "ycharts/research/opal_packager.py:208-209 (_attach payload = report_ref, pdf_ref, original_ref, commentary_ref, firm; no request id). That sender is AR-y-285, not this cell."
+  },
+  "built": {
+    "files": [
+      "infra/aws/lambda/ticket_center/lambda_function.py (package_ticket only; no other route changed)",
+      "infra/aws/lambda/ticket_center/tests/test_package_request_id.py (new)"
+    ],
+    "commit": "8151b5626f",
+    "interface": {
+      "request_id": "optional string; fullmatch REQ- plus exactly 24 lower-case hex digits; no stripping; anything else 400 INVALID_REPORT_REQUEST_ID and nothing written",
+      "request_revision": "optional integer 0..1000000 (bool, float, string and null refused, 400); default 0; admitted only beside request_id -- alone it is the unexpected-field 400 it is today",
+      "write_when_absent_on_ticket": "the top-level report_ref = {request_id, revision, recorded_by, recorded_at} is set IN THE SAME UpdateItem as the package, guarded by attribute_not_exists(report_ref); an event report_recorded is appended",
+      "write_when_same_id_on_ticket": "report_ref is not written (guard report_ref.request_id = id); the package is written exactly as today",
+      "write_when_other_id_on_ticket": "409 REPORT_REF_ALREADY_RECORDED_OTHER, decided after the package-attached check and the firm checks and before any write; nothing changes",
+      "race": "a report_ref that appears between the read and the write makes the guarded write fail: 409 PACKAGE_TICKET_CHANGED, nothing written",
+      "absent_request_id": "the code path is unchanged: no report_ref write, no report_recorded event, the same extra-field refusal for request_revision"
+    }
+  },
+  "authorization_change": "Before this change the named package principal svc-irpt-packager (the only caller PACKAGE admits: the principal check, and the body firm bound to PACKAGE_ALLOWED_FIRMS, infra/aws/terraform/ticket-center/main.tf:266) could write the package member only -- the four pointers, the firm and the attach stamps -- on an open analysis_request whose requester firm equals the body firm. After this change the same principal, on the same tickets, may ALSO write the ticket's top-level report_ref = {request_id, revision, recorded_by, recorded_at} once, in the same write as the package, and only when the ticket holds no report_ref; it may re-send the same request_id (no write to report_ref) and may not replace a different one (409 REPORT_REF_ALREADY_RECORDED_OTHER). Not changed: the principal check, the firm checks, PACKAGE_ALREADY_ATTACHED, the pointer validation, every other route, the MATRIX, the authorizer, IAM and Terraform -- no Terraform or authorizer file is edited and none is required by this code (main.tf:258 and :266 carry the same firm lists and no new environment variable is read). Keys touched: the ticket item's top-level report_ref (a new write path; before this change only REPORT and CREATE-with-report_request_id wrote it) and events (one report_recorded row). Rollback: redeploy the previous ticket_center Lambda package version. The request_id and request_revision members are additive and absent from every current sender; a report_ref written by this path afterwards is an ordinary REPORT-shaped ref that the drafter reads, and no route removes it.",
+  "tests": {
+    "new_file": "infra/aws/lambda/ticket_center/tests/test_package_request_id.py",
+    "new_file_at_built_head": "33 passed, 0 failed (python -m pytest infra/aws/lambda/ticket_center/tests/test_package_request_id.py -q)",
+    "folder_at_built_head": "254 passed, 0 failed, 43 subtests passed, rc=0 (python -m pytest infra/aws/lambda/ticket_center/tests -q); 221 existing + 33 new",
+    "existing_tests_at_head": 221,
+    "existing_assertions_edited": 0,
+    "existing_test_files_edited": 0,
+    "cases": {
+      "a": "test_a_valid_request_id_lands_the_top_level_report_ref_with_its_four_members (+ revision default and bounds)",
+      "b": "test_the_same_package_twice_is_idempotent_and_the_report_ref_is_unchanged",
+      "c": "test_a_different_request_id_on_a_ticket_that_holds_one_is_409_and_nothing_changes; test_a_report_recorded_by_the_report_route_with_another_id_refuses_the_package_request_id; test_a_report_recorded_by_the_report_route_with_the_same_id_is_kept_as_it_is",
+      "d": "test_an_invalid_request_id_is_400_and_writes_nothing (12 parametrised values); test_an_invalid_request_revision_is_400_and_writes_nothing (6 values)",
+      "e": "test_an_absent_request_id_behaves_exactly_as_today; test_without_a_request_id_a_report_ref_already_on_the_ticket_is_untouched; test_a_request_revision_without_a_request_id_is_the_unexpected_field_refusal_it_is_today",
+      "f": "test_any_other_principal_is_refused_with_the_request_id_as_today",
+      "g": "test_a_firm_outside_the_package_list_or_not_the_requester_firm_is_refused",
+      "h": "test_the_package_report_ref_has_the_keys_the_report_route_stores_and_the_drafter_reads (same four keys as REPORT; commentary-draft then accepts the request id)",
+      "i": "test_a_ticket_of_another_type_is_refused_with_the_request_id",
+      "k": "test_a_report_ref_written_between_the_read_and_the_write_is_not_overwritten"
+    },
+    "mutant": {
+      "change": "in a scratch copy at .scratch/mut284/ticket_center (inside the worktree, untracked, never committed): the different-id 409 guard 'elif not (isinstance(top, dict) and top.get(\"request_id\") == rid):' replaced by 'elif False:'",
+      "observed": "2 failed, 31 passed: test_a_different_request_id_on_a_ticket_that_holds_one_is_409_and_nothing_changes; test_a_report_recorded_by_the_report_route_with_another_id_refuses_the_package_request_id",
+      "status": "FIRED"
+    }
+  },
+  "before_arm": {
+    "method": "the new test file run against lambda_function.py at 844d025f4a (the worktree before the change; the file itself unchanged)",
+    "failed": 11,
+    "passed": 22,
+    "case_a_failed": true,
+    "failed_names": [
+      "test_a_valid_request_id_lands_the_top_level_report_ref_with_its_four_members",
+      "test_an_absent_request_revision_records_revision_zero",
+      "test_the_request_revision_bounds_zero_and_one_million_are_admitted",
+      "test_the_same_package_twice_is_idempotent_and_the_report_ref_is_unchanged",
+      "test_a_different_request_id_on_a_ticket_that_holds_one_is_409_and_nothing_changes",
+      "test_a_report_recorded_by_the_report_route_with_another_id_refuses_the_package_request_id",
+      "test_a_report_recorded_by_the_report_route_with_the_same_id_is_kept_as_it_is",
+      "test_a_firm_outside_the_package_list_or_not_the_requester_firm_is_refused",
+      "test_a_ticket_of_another_type_is_refused_with_the_request_id",
+      "test_the_package_report_ref_has_the_keys_the_report_route_stores_and_the_drafter_reads",
+      "test_a_report_ref_written_between_the_read_and_the_write_is_not_overwritten"
+    ],
+    "note": "The 22 that pass at HEAD include the invalid-id and invalid-revision refusals, which pass at HEAD for the wrong reason: HEAD refuses every request_id as an unexpected field (400). They are kept because they pin the refusal after the change."
+  },
+  "commit_gate": "bash .tools/commit-gate.sh on lambda_function.py and tests/test_package_request_id.py: All checks passed; pre-commit gate clean for 1 of 1 file(s) each",
+  "claim": "Measured at 8151b5626f in this worktree with the fake table of the existing harness: the request id is written once, by the named principal only, in the same write as the package; a different id on a ticket holding one is refused and not written; the id shape is the receiver's REPORT_REQUEST_ID; an absent request_id leaves the path and the existing assertions unchanged; nothing was released, deployed, pushed, applied or invoked. Not verified here: a live DynamoDB conditional write (the fake table evaluates the report_ref guard in Python only), the sender AR-y-285, the deployed Lambda, the Lambda role's permission to update report_ref (not read), the portal. Knock-on effects are surfaced as rows S4 and S5, not changed.",
+  "not_read": [
+    "portal/ (an empty submodule checkout in this worktree; the portal readers of report_ref are not read)",
+    "infra/aws/terraform/ticket-center/main.tf beyond lines 258-266 (the env lists; the IAM and the authorizer are not read)",
+    "the Lambda execution role's DynamoDB permissions (not read; the update uses the same table as REPORT)",
+    "ycharts/research/opal_packager.py beyond :168, :197-209 (AR-y-285 owns the sender)",
+    "the live table and the deployed Lambda (no live call was made)"
+  ],
+  "surprise_rows": ["IRPT_ANLREQ-D2-W108-S1", "IRPT_ANLREQ-D2-W108-S2", "IRPT_ANLREQ-D2-W108-S3", "IRPT_ANLREQ-D2-W108-S4", "IRPT_ANLREQ-D2-W108-S5"],
+  "copies": "the same bytes are at .../~108/r23/PACKAGE_REQUEST_ID_SERVER.json (the folder the checker reads; surprise row S1)"
+}

@@ -16,11 +16,21 @@
   "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~141/IRPT_DASHBD.TO-DB-b-175.one-household-sample-built-from-gold.proof_of_spec.json",
   "artifacts_produced": [
     {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~141/build_sample.py",
+      "kind": "script",
+      "commit_or_etag": "8df8e76f09",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "tracked module, committed on wk-IRPT_DASHBD-141 at 8df8e76f09; passes commit-gate; run once under python -I against gold (GET and LIST only): outcome NO_ELIGIBLE_HOUSEHOLD, no sample written; no put, copy, delete, vendor call or secret read",
+      "artifact_covered_by": [
+        "DB94-2-AC1"
+      ]
+    },
+    {
       "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "47aeb346b1",
+      "commit_or_etag": "431b515c74",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "two rows appended as bytes (IRPT_DASHBD-D2-W141-S1 BLOCKING, IRPT_DASHBD-D2-W141-S2 OBSERVATION); both parse as JSON inside their fences; no client data",
+      "deploy_evidence": "rows IRPT_DASHBD-D2-W141-S3 to S6 appended as bytes at 431b515c74 (S1 and S2 untouched); all four parse as JSON inside their fences; counts and dates only, no client data",
       "artifact_covered_by": [
         "DB94-2-AC1"
       ]
@@ -32,10 +42,10 @@
       "criterion_verbatim": "`DB94-2-AC1` -- the record exists with the keys above; the builder is tracked and hashes to the stated sha256; the record is bound to the contract's bytes; the household has two or more accounts and is referenced by hash; the member counts sum to the contract's total with at least the contract's ABSENT members absent; no absent figure is zero and the sample validates against the contract; at least 4 identity checks were made and all passed within a dollar; S3 was read and never written; no vendor call, no secret read; no served value changed; no run of 8 or more digits. Base: FAIL.",
       "method": "command",
       "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r94/p94_round94.py\" . DB94-2-AC1",
-      "output_evidence": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~141/HOUSEHOLD_SAMPLE_BUILD.json\nDB94-2-AC1 FAIL",
-      "denominator": "1 of 1 criterion; 0 of 1 record present (HOUSEHOLD_SAMPLE_BUILD.json absent); 0 of 1 builder tracked (build_sample.py not written: no household grouping exists in the stores the order may read); 0 household accounts grouped; 0 of 117 members filled; 0 of 4 identity checks possible; 0 S3 writes; 0 vendor calls; 0 secret reads",
+      "output_evidence": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~141/HOUSEHOLD_SAMPLE_BUILD.json\nDB94-2-AC1 FAIL\nrc=1 (run twice with identical output)",
+      "denominator": "1 of 1 criterion FAIL; 0 of 1 record present (HOUSEHOLD_SAMPLE_BUILD.json not written); 0 of 1 household chosen (the rule graded 596 households with at least three gold accounts and 0 eligible); 0 household accounts; 0 of 117 members written; 0 identity checks made, and 0 of 4 possible on the standard windows, because gold account_activity_daily holds 4 trading days and every standard window opens before them; 0 S3 writes; 0 vendor calls; 0 secret reads",
       "status": "FAIL",
-      "status_reason": "FAIL as written. The checker's first required artifact is absent because the builder was never written: step 2 of the order required one household grouped from the stores the order may read, and the measured read found none (surprise IRPT_DASHBD-D2-W141-S1, BLOCKING). The run was made twice with identical output and rc 1. The order is left open; no repair or widening was attempted.",
+      "status_reason": "FAIL as written. The builder ran once under python -I and graded the household rule: no household is eligible, and the rule text itself names the newest return partition, which holds one trading day (surprise IRPT_DASHBD-D2-W141-S4). The deeper blocker is that the gold account_activity_daily table holds four trading days (2026-10-07, 10-08, 10-09 and 10-12), so no QTD, YTD, last-12-months or since-inception window opens inside the table for any household; the four-check floor of TO DB-b-175 step 3 cannot be met by any household (surprise IRPT_DASHBD-D2-W141-S3, BLOCKING). The builder stopped without writing a sample, and the household rule was not changed after its outcome was seen. The order stays open; no repair, widening or alternate route was taken.",
       "expect": "DB94-2-AC1 PASS"
     }
   ],
@@ -54,27 +64,41 @@
   },
   "declared_exclusions": [
     {
-      "item": "The builder build_sample.py, the household record HOUSEHOLD_SAMPLE_BUILD.json, the identity proof read and the PROOF_READ.txt in the private folder.",
-      "reason": "not built: the order's step 2 requires one household grouped from the gold and platinum stores the order names, and the measured read found no grouping key in those stores (surprise IRPT_DASHBD-D2-W141-S1). The order says to file the row and stop."
+      "item": "The household record HOUSEHOLD_SAMPLE_BUILD.json, the filled sample and the identity proof read.",
+      "reason": "not written: the household rule graded zero eligible households, and the standard windows cannot be opened by any household in the gold activity table (surprises IRPT_DASHBD-D2-W141-S3 and S4). The order says to file the row and stop."
     },
     {
-      "item": "The ADVI household crosswalk as a grouping source.",
-      "reason": "it sits in the ADVI_BILLING scope, which the IRPT sibling contracts do not name and this order does not grant; not read (surprise IRPT_DASHBD-D2-W141-S2)."
+      "item": "The client summary and the investor-reporting directory.",
+      "reason": "not read: the issuer's ruling (amendment 1) grants only the ADVI household crosswalk prefix for GET and LIST, and keeps both out of scope."
     },
     {
-      "item": "The investor-reporting directory as a grouping source.",
-      "reason": "its address is not given by any named sibling contract and it is under no gold or platinum prefix of the firm; not read (surprise IRPT_DASHBD-D2-W141-S1, world_is item e)."
+      "item": "Any window opening before 2026-10-07, and any substitute source for account activity history.",
+      "reason": "not built: no sibling carries that history in gold, and the order does not name another source (surprise IRPT_DASHBD-D2-W141-S3)."
     }
   ],
   "surprises": [
-    "IRPT_DASHBD-D2-W141-S1: BLOCKING, no gold or platinum store the order names groups the accounts of one 49 Financial client: the client summary keys accounts by issued id, the gold account tables by custodian id, and no named store maps one to the other; the household was not built and DB94-2-AC1 cannot pass (UNDER_INVESTIGATION)",
-    "IRPT_DASHBD-D2-W141-S2: OBSERVATION, the ADVI household crosswalk documents a custodian-keyed household table in the ADVI_BILLING gold scope, not named by the IRPT siblings or granted by the order; not read, the issuer decides (UNDER_INVESTIGATION)"
+    "IRPT_DASHBD-D2-W141-S1: BLOCKING, no gold or platinum store the order names groups the accounts of one 49 Financial client: the client summary keys accounts by issued id, the gold account tables by custodian id, and no named store maps one to the other; the first seat's row, resolved by the issuer's amendment 1 ruling (grant of the ADVI household crosswalk prefix) (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W141-S2: OBSERVATION, the ADVI household crosswalk documents a custodian-keyed household table in the ADVI_BILLING gold scope; resolved by the issuer's amendment 1 ruling, the crosswalk prefix is granted for GET and LIST (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W141-S3: BLOCKING, the gold account_activity_daily table holds four trading days (2026-10-07, 10-08, 10-09 and 10-12), one per date partition, so no standard window (QTD, YTD, last 12 months, since inception) opens inside the table for any household and no household can make four identity checks (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W141-S4: OBSERVATION, the household rule in the builder docstring (R4) names the newest account_return_daily partition, which holds one trading day, for the twelve-month history test; applied as written it yields zero eligible households of 596 with at least three gold accounts; the rule text was not changed after the outcome (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W141-S5: OBSERVATION, the account_class_daily sibling contract states that no object of its table exists in any bucket, and gold holds four date partitions of it (UNDER_INVESTIGATION)",
+    "IRPT_DASHBD-D2-W141-S6: OBSERVATION, the activity rows carry method_version 3 and gold dim_return_method holds versions 1 and 2 only, so the fee-basis member has no landed row for the version the figures were produced under (UNDER_INVESTIGATION)"
   ],
   "compiler_tools": [
     {
       "tool": "p94_round94.py",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r94/p94_round94.py . DB94-2-AC1",
-      "result": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~141/HOUSEHOLD_SAMPLE_BUILD.json; DB94-2-AC1 FAIL (rc 1)"
+      "result": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~141/HOUSEHOLD_SAMPLE_BUILD.json; DB94-2-AC1 FAIL (rc 1), run by 0.9.0_WK_IRPT_DASHBD~141 at 431b515c74"
+    },
+    {
+      "tool": "span probe (LIST and GET of the irpt gold tables; counts and date range only; script at the worktree .scratch, untracked)",
+      "invocation": "python -I .scratch/probe_coverage.py <worktree_root>",
+      "result": "account_activity_daily: 4 partitions, 2026-10-07 to 2026-10-12, one distinct business_date per partition, rows 6897, 6901, 6914, 6914; account_return_daily: 569 partitions, 2024-07-08 to 2026-10-12, one distinct business_date per partition; account_lot_realized, account_lot_unrealized_daily and account_class_daily: 4 partitions each, 2026-10-07 to 2026-10-12"
+    },
+    {
+      "tool": "p94_round94.py (DATED ENTRY, first seat, prior run, kept as history)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r94/p94_round94.py . DB94-2-AC1",
+      "result": "FAIL: no HOUSEHOLD_SAMPLE_BUILD.json; DB94-2-AC1 FAIL (rc 1), first seat of this slot, before the issuer's amendment 1; the first seat's rows S1 and S2 are kept as filed"
     }
   ]
 }
