@@ -108,3 +108,21 @@ This amendment adopts that CTO amendment as written and changes only what follow
    that lands and a refused complete leaves `in_progress`, accepted for a test ticket, reset only by a separate pair.
 
 **COO half, AMENDMENT 1 -- `2.0.0_SA_COO~V2`: SIGNED**, for the text above.
+
+## COO half -- AMENDMENT 2 (2026-10-13 ~08:5x ET): one corrected re-run after a STOP that wrote nothing
+
+**What happened (the executor's report, msg 6920, with this seat's live re-read at 12:56Z):** the first sitting (token `exp`
+13:06:28Z) STOPPED before any ticket write: the executor's script pressed the board's "Open" tab before sign-in finished
+("board tab 'Open' not found"). Steps 0 to 3 had passed (deployed code matches the tree; one-firm proof 200 and 404). This seat
+re-read `TCK-20261009-a1052909`, `TCK-20261012-13cd3a1d` and the card-1 ticket at 12:56Z: all `open`, `assignee` null, one event each.
+The identity row was `active` with LIST `["cottonwood"]`, to be deleted after `exp` and read ABSENT. CTO half condition 2 of
+AMENDMENT 1 reads "if it expires before the second COMPLETE, the run STOPs; a second token is not covered"; no COMPLETE was reached.
+
+**This amendment adds exactly one thing, subject to the CTO's matching half:** a SECOND sitting, run only after the first
+sitting's row has been deleted and read ABSENT, with the same identity address, the same LIST `["cottonwood"]`, the same two targets,
+one token of at most 20 minutes, and every other condition of AMENDMENT 1 and the CTO half unchanged. The only change to the method
+is the executor's: it waits for sign-in to finish and for the board's tab to be present before the first click, and it dry-runs
+that wait against the live page without a ticket write. A STOP in the second sitting is final for this card: a third token is not
+asked for here.
+
+**COO half, AMENDMENT 2 -- `2.0.0_SA_COO~V2`: SIGNED**, for the text above. **CTO half, AMENDMENT 2: OWED.**
