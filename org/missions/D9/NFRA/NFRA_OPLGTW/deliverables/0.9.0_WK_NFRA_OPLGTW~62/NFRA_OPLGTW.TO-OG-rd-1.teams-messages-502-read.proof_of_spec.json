@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-rd-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~62",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3566a85699"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "c1743ee57e",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rd-1.teams-messages-502-read.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~62/RD1_502.json",
+      "kind": "config_data",
+      "commit_or_etag": "74c5a8ab8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only record of ALB access logs and audit-lake reads; nothing deployed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "74c5a8ab8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row NFRA_OPLGTW-Z-W62-S1 appended."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(?s)count_502 (\\d+); items \\1; items with a closed-set cause \\1; verdict (gateway|upstream|mixed); positive control 200s [1-9]\\d*.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r36/checks/rd1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "window 2026-10-11T18:48:27Z/2026-10-13T16:40:38Z; count_502 6; items 6; items with a closed-set cause 6; verdict gateway; positive control 200s 4159\nRESULT: PASS\nexit=0",
+      "denominator": "6 of 6 ALB 502s on the route read (all classed unreadable: no gateway line exists); 28776 ALB log lines, 4165 on the route; 4145 audit-lake route records (0 error); positive control 4159 ALB 200s",
+      "status": "PASS",
+      "expect": "(?s)count_502 (\\d+); items \\1; items with a closed-set cause \\1; verdict (gateway|upstream|mixed); positive control 200s [1-9]\\d*.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W62-S1"
+  ],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git).",
+  "compiler_tools": [
+    {
+      "tool": "boto3 s3 reads of ALB access logs and the audit lake",
+      "invocation": "read-only under the operator identity",
+      "result": "RD1_502.json written; AC1 rc=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The absent-record arm is in the check script (RD1_502.json absent reads RESULT: FAIL).",
+      "expected": "absent record reads RESULT: FAIL",
+      "observed": "issuer-recorded pre-cut; not re-run here",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 reads the committed RD1_502.json only.",
+      "observed": "rc=0",
+      "status": "STABLE"
+    }
+  }
+}
