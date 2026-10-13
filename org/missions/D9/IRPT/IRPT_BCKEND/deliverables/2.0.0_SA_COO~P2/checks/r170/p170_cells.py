@@ -15,7 +15,7 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
     AC2  the record carries no id, no long digit run and no name key
     AC3  the worker's script is read-only (no write verb in it)
   IB170-4  IB-pr-495  the portal's AnalysisReport wire copy and its generated fixtures carry the extractor's section form
-    AC1  no annualized_return / DECIMAL_FRACTION in the portal fixtures folder or in the two test fixture files
+    AC1  no AnalysisReport section_type annualized_return and no section units DECIMAL_FRACTION in the portal fixtures folder or in the two test fixture files
     AC2  the five token-citing portal tests pass (a bound: PASS at base)
     AC3  the portal wire copy's section equals the producer fixture's section
 """
@@ -281,12 +281,15 @@ def main():
                         continue
                     seen += 1
                     t = p.read_text(encoding="utf-8", errors="replace")
-                    if "annualized_return" in t or "DECIMAL_FRACTION" in t:
+                    # the OLD AnalysisReport section is a section_type of annualized_return or a section units of DECIMAL_FRACTION. The extractor-form
+                    # section_id "2.annualized_return.c1" contains the field slug, and PerformanceReport return_units DECIMAL_FRACTION is a legitimate
+                    # producer value, so neither bare word is the test: only a section_type value and a `units` key (not return_units).
+                    if re.search(r"section_type[\"']?\s*[:=]\s*[\"']annualized_return[\"']", t) or re.search(r"(?<![A-Za-z_])units[\"']?\s*[:=]\s*[\"']DECIMAL_FRACTION[\"']", t):
                         hits.append(p.name)
             if seen < 20:
                 fail("only %d files scanned; the portal worktree looks empty" % seen)
             if hits:
-                fail("%d file(s) still carry annualized_return or DECIMAL_FRACTION: %s" % (len(hits), hits[:4]))
+                fail("%d file(s) still carry the old section (section_type annualized_return or units DECIMAL_FRACTION): %s" % (len(hits), hits[:4]))
             print("OK: 0 of %d files carry the old tokens" % seen)
         elif arm == "AC2":
             T = "src/pages/InvestorReporting/__tests__/dsgn-irptv1/"
