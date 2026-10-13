@@ -1,0 +1,73 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-273",
+  "cell": "AR-y-273",
+  "read": {
+    "kinds_today": "report, pdf, commentary, original -- portal/src/pages/TicketCenter/AnalysisRequestParts.tsx:236-242 (PackageFileKind and the PACKAGE_FILES list, at dev_tip 4d6010234e)",
+    "where_answers_are_shown": "NONE on the ticket page at dev_tip. The only read of ticket.answers is AnalysisRequestParts.tsx:266 (ticket.answers?.firm, passed to the owned reader). TicketCenter.tsx renders the package block only at :634-635 when the ticket carries a draft or a package.",
+    "how_a_pointer_opens": "AnalysisRequestParts.tsx:258-283 openPackageFile: report via readTicketReport (:267-278) into showReport; pdf and original via a signed link (:279-281) into sinks.openUrl, which PackageFiles opens in a new tab (:338). A ref without a reader is named as text, never linked (:363-367).",
+    "server_kinds_accepted": "infra/aws/lambda/ticket_center/lambda_function.py:137 PACKAGE_REF_FIELDS = (report_ref, pdf_ref, original_ref, commentary_ref); package_ticket :1462-1534 takes no kind field and writes exactly those four refs plus attached_at and attached_by. No 'form' kind exists. The answers are stored at create (_validate_answers :689, stored at _new_item :624-625)."
+  },
+  "chosen": "The fourth item is the FORM AS FILLED read from the ticket's own answers (ticket.answers, stored and validated at create). It is rendered by a FormAsFilled component inside the Report package list, with no package pointer, no stored form document and no server kind. Reason: the answers already sit on the ticket and are validated by the service at create, so a form pointer would copy the same data into a second place and would need a new PACKAGE field plus a packager change outside this cell. This is the smaller of the two options in step 3; no S3 key is needed, so no naming call was made.",
+  "dev_tip": "4d6010234ed2eb1d0a1c1782b4bf782b7e019993",
+  "branch": "wk-IRPT_ANLREQ-94-portal",
+  "commit": "ab6ede6989acb177bff077344689c6381e01aa9f",
+  "push_state": "LOCAL only: not pushed, not landed on DEV, not deployed",
+  "worktree": "C:/dev/wk-portal-94",
+  "files_changed": [
+    "src/pages/TicketCenter/AnalysisRequestParts.tsx",
+    "src/pages/TicketCenter/__tests__/commentary-package.test.tsx",
+    "src/pages/TicketCenter/__tests__/package-open.test.tsx",
+    "src/pages/TicketCenter/__tests__/package-r2.test.tsx",
+    "src/pages/TicketCenter/__tests__/package-form-item.test.tsx"
+  ],
+  "server_built": {
+    "files": [],
+    "tests": [],
+    "reason": "none: the chosen design needs no server kind, so infra/aws/lambda/ticket_center/lambda_function.py and tests/test_package_form_kind.py are unchanged"
+  },
+  "tests": {
+    "added": 5,
+    "file": "src/pages/TicketCenter/__tests__/package-form-item.test.tsx (5 tests: (a) four items in order and no Branded PDF; (b) the form as labelled fields; (b2) the catalogue split of Opal models and other ETFs; (c) absent form and absent original file said in words; (d) non-analysis ticket renders nothing)",
+    "modified_existing_assertions": "6 existing tests in 3 files pinned the removed Branded PDF item and were updated to the four-item list: package-open.test.tsx (3 tests), commentary-package.test.tsx (1 test), package-r2.test.tsx (2 tests). The reader behind the PDF (openPackageFile 'pdf') is still tested as callable.",
+    "folder": "bun test src/pages/TicketCenter: 77 pass, 0 fail, 77 tests across 16 files",
+    "passed": 77,
+    "failed": 0,
+    "dsgn_irptv1_folder_with_change": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1: 371 pass, 10 fail, 2 errors (381 tests)",
+    "dsgn_irptv1_folder_on_dev": "370 pass, 11 fail, 2 errors (same run on the DEV versions of the four changed files; one run-to-run difference, IVE17-AC2, which runs the portal typecheck itself)",
+    "dsgn_irptv1_failures_cause": "ENOENT on workspace-root paths such as C:/dev/org/standards and C:/dev/docs/contracts, which do not exist from a worktree at C:/dev/wk-portal-94; the folder does not reference TicketCenter",
+    "typecheck": "bun run typecheck (tsc -b --noEmit) rc=0 on the candidate; a deliberate-error probe in src/ returned rc=2 and was removed"
+  },
+  "before_arm": {
+    "failed": 4,
+    "of": 5,
+    "on": "origin/DEV 4d6010234e with the new test file and without the source change",
+    "failing": ["(a)", "(b)", "(b2)", "(c)"],
+    "control_passing": "(d) non-analysis ticket renders nothing: passes on DEV, as it must"
+  },
+  "mutant": {
+    "change": "the FormAsFilled line removed from PackageFiles",
+    "observed": "bun test package-form-item.test.tsx: 3 pass, 2 fail; (b) and (c) fail; file restored and cmp-verified"
+  },
+  "determinism": "two runs of package-form-item.test.tsx on the committed bytes: 5 pass 0 fail each run",
+  "what_a_person_sees": {
+    "ticket_with_a_package": "The Report package panel lists four rows in this order. Original file: an Open Original file button when a reader exists, the text 'No original file: this report was built from custody data.' for a custody request, else the ref with '(no reader yet)'. Form as filled: labelled rows Advisor, Firm, Household, Variant (the report type), Opal models and Other ETFs (names from the served catalogue; before it loads, one Comparison row with the keys and '(names not loaded)'; 'none (an overview)' when there is no comparison), Advisory fee (the number, or 'not given (the standard default applies)'), Needed by, Add commentary (Yes or No). Absent answers read 'No form: this ticket carries no answers.' Report: an Open Report button when a request id is recorded, else the ref with '(no reader yet)'. Commentary: the ref with '(no reader yet)'. The Branded PDF row is no longer listed.",
+    "ticket_without_a_package_or_draft": "No package block, as before (TicketCenter.tsx:634 and the AnalysisDraftAndPackage gate are unchanged, and a committed test pins it). The form item therefore appears on the ticket page only once the ticket carries a draft or a package. Stated, not changed.",
+    "not_seen": "The rendered page was not screenshotted; the portal CLAUDE.md /frontend-dev render law was not run in this cell."
+  },
+  "design_clauses": {
+    "C1": "Lato at 400 and 700 only: the new markup sets no weight; the existing WHITE_BLOCK paragraph weight is untouched.",
+    "C2": "Every value cell in the form carries tabular-nums (Advisory fee included), and values right-align nowhere because they are text rows.",
+    "C3": "The form sits inside the existing white panel (WHITE_BLOCK, bg-white with a C4CBDB hairline); no dark container and no band are added.",
+    "C9": "Labels and values are navy ink (INK via WHITE_BLOCK) on the white panel; no secondary grey text is added.",
+    "C12": "The absent form is one navy sentence inside the panel that says what is missing ('No form: this ticket carries no answers.'), the EMPTY state form of the panel rules.",
+    "C5.8": "No opacity is added in the new markup; the existing opacity-70 Attached line is unchanged."
+  },
+  "claim": "Portal candidate ab6ede6989 on wk-IRPT_ANLREQ-94-portal (LOCAL, cut from origin/DEV 4d6010234e), src/ only: the analysis-request ticket page lists four attachments in the PRD order (Original file, Form as filled, Report, Commentary), the form item reads the ticket's own answers as labelled fields, and an absent answer set and an absent original file are said in words. The Branded PDF is no longer listed; its reader is kept. No server change, no stored object, no S3 key, nothing landed, pushed or released.",
+  "not_read": [
+    "The packager (submission.py and the ticket packager path) was not read: the form needs no packager change in this design.",
+    "The rest of lambda_function.py beyond the PACKAGE route and the answers validation was not read.",
+    "portal/CONTRIBUTING-BOXES.md is not present at the portal repository root or at the workspace portal folder at dev_tip; the rule it names could not be read. The sibling candidate wk-IRPT_ANLREQ-63-portal named by the order does not exist; the message style of wk-IRPT_ANLREQ-85-portal and -74-portal was followed instead.",
+    "The PRD (IRPT_ANLREQ_PRD.md) and the direction document were not re-read; the cell text in the task order was taken as the spec.",
+    "No rendered screenshot (the portal visual-verification law) and no live call."
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "cell": "AR-y-274",
+  "order": "IRPT_ANLREQ.TO-AR-y-274",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~95",
+  "dev_tip": "4d6010234ed2eb1d0a1c1782b4bf782b7e019993",
+  "branch": "wk-IRPT_ANLREQ-95-portal",
+  "worktree": "C:/dev/wk-portal-95",
+  "commit": "6d117bfe858024808aeb1a768cf72ac0f8145f1f",
+  "push_state": "LOCAL only: not pushed, not landed on DEV, not deployed (no push, no fetch beyond origin DEV)",
+  "files_changed": [
+    "src/pages/TicketCenter/AnalysisRequestParts.tsx",
+    "src/pages/TicketCenter/TicketCenter.tsx",
+    "src/pages/TicketCenter/__tests__/analysis-firm-c-firm.test.tsx",
+    "src/pages/TicketCenter/__tests__/analysis-firm-choice.test.tsx"
+  ],
+  "read": {
+    "firm_source": "src/contexts/AuthContext.context.ts:25 and :32 (Claims.firmId, the JWT firm claim: 'Company scoping'); src/contexts/AuthContext.tsx:139 (parsed from /auth/me by parseClaims) and :818-824 (canAccessFirm reads it). The candidate's TicketCenter.tsx ownFirm reads auth.claims?.firmId; filingFirm (AnalysisRequestParts.tsx) accepts it only when it is on the allowed list. The served directory context was also read: src/pages/InvestorReporting/contracts/index.ts:427-441 names verifiedRequestFirm (the firm the SERVER verified for the request); the loader src/pages/TicketCenter/TicketCenter.tsx:89-106 discards it. See surprise IRPT_ANLREQ-D2-W95-S1 for the choice of field.",
+    "allowed_list_source": "src/pages/TicketCenter/TicketCenter.tsx:89-106 (loadAllowedFirms: firm caller = resolveDirectoryContext with no selectedTenant, permittedFirms filtered to selectable; Opal-internal = selectedTenant global, READY firms only). src/pages/InvestorReporting/contracts/adapt.ts:708-712 and :720-721 (firmFromWire sets selectable true; the catalogue is permitted_firm_catalogue).",
+    "what_a_partner_caller_gets": "BEFORE (DEV tip 4d601023): a select with the allowed firms; one allowed firm = that firm, disabled; more than one = a picker with an empty 'Firm (required)' prompt and the user chooses (AnalysisRequestParts.tsx:95-101, chosenFirm :67-71). AFTER: no select and no picker. A read-only line reads 'Firm: <label>' where the label is the one allowed firm, or else the caller's own firm (claims.firmId) when that firm is on the allowed list. A partner whose own firm is not on the list reads 'Your profile names no firm you may file for' and the submit stays off (filingForm.firm is ''). While the list is loading or failed: 'Loading firms...' or 'Firms not loaded'. An empty list: 'No firm is available to you'.",
+    "what_a_staff_caller_gets": "Opal-internal (auth.isInternal() or auth.isDev(), the test the page already made): no firm list is read (the firms effect is gated on internal, TicketCenter.tsx effect), no firm line is rendered, the one sentence STAFF_NOT_FILING_SENTENCE is shown above the fields, and the File Analysis Request submit is disabled because the filing form's firm is ''.",
+    "multi_firm_partner_case": "NOT READ. The estate's user records (opal-users-v2 PROFILE allowedFirmIds lists) and the live directory were not read: this order makes no live call. No repo fixture of a multi-firm partner was checked. The server accepts any member of the caller's allowedFirmIds as answers.firm on an analysis request (infra/aws/lambda/ticket_center/lambda_function.py:344-349, :352-357, :1168-1188), so the case is possible by construction; whether it exists in data is NOT READ.",
+    "server_side_firm_rule": "infra/aws/lambda/ticket_center/lambda_function.py:1121 (submit_form firm = actor firmId; body firm refused at :1113). The analysis path (:1168-1188) takes answers.firm and checks membership in allowedFirmIds only. Read only; the ticket service is outside this order's grant. See surprise IRPT_ANLREQ-D2-W95-S2."
+  },
+  "tests": {
+    "added": 5,
+    "added_file": "src/pages/TicketCenter/__tests__/analysis-firm-c-firm.test.tsx",
+    "added_cases": "(a) one-firm partner sees text, not a select; (b) multi-firm partner sees own firm as text and the request body carries only that firm; (c) a request never carries a firm outside the allowed list (constructed state attempt refused); (d) Opal-internal sees the staff sentence and cannot file; page-wiring check (the page derives the filing firm from the signed-in caller and disables the submit while it is empty).",
+    "edited_existing": "src/pages/TicketCenter/__tests__/analysis-firm-choice.test.tsx: edited only where it pinned the removed picker or chosenFirm: the first test (multi-firm options), the one-firm test (select, disabled, selected option), the 'outside the allowed list' test (chosenFirm calls renamed to filingFirm/filingFormOf and the chosenFirm('fir_beta', TWO) line, which pinned a user choice), the page-loader test's control lines (options replaced by the text line), the internal-caller test's control lines (options replaced by the staff sentence), and the failed-load test (option counts replaced by text). The loader assertions (the loadAllowedFirms calls, the one-call count, the Global-context refusals, the page source checks) and the request-selection test are unchanged; in the page-loader and internal-caller tests only the picker-control lines were replaced.",
+    "passed": 12,
+    "failed": 0,
+    "passed_by_file": "analysis-firm-c-firm.test.tsx 5 of 5; analysis-firm-choice.test.tsx 7 of 7 (bun test, rc=0, output in r23/bun_after_firm_tests.txt)",
+    "folder": "src/pages/TicketCenter: 77 pass, 0 fail across 16 files (DEV tip 72 pass across 15 files; the +5 are the new cases) (r23/bun_after_TicketCenter_folder.txt)",
+    "dsgn_irptv1": "src/pages/InvestorReporting/__tests__/dsgn-irptv1: 381 tests across 240 files, 371 pass, 10 fail, 2 errors at BOTH the DEV tip and the candidate, the same 15 failure signature lines (ENOENT of workspace-relative fixture paths; the worktree depth, see IRPT_ANLREQ-D2-W95-S3). r23/dsgn_irptv1_failure_signatures_*.txt",
+    "typecheck": "bun run typecheck (tsc -b --noEmit) rc=0 on the candidate. Control: a deliberate type error in a scratch file gave rc=2 (TS2322), then the file was removed. r23/typecheck_*.txt",
+    "eslint": "bun eslint on the four changed files: 0 errors, 11 warnings (react-refresh only-export-components, the same pattern these files already carry). r23/eslint_changed_files.txt"
+  },
+  "before_arm": {
+    "dev_tip": "4d6010234ed2eb1d0a1c1782b4bf782b7e019993",
+    "method": "the DEV tip's AnalysisRequestParts.tsx and TicketCenter.tsx were put in place temporarily (git show origin/DEV), the new test file was run, and the candidate's bytes were restored (cmp verified)",
+    "file": "src/pages/TicketCenter/__tests__/analysis-firm-c-firm.test.tsx",
+    "passed": 0,
+    "failed": 5,
+    "deciding_lines": "(a) expect(html).not.toContain('<select') FAILS; (b) expect(html).not.toContain('<select') FAILS; (c) parts.filingFormOf is not a function (FAILS); (d) expect(html).toContain(STAFF) FAILS; page wiring FAILS. (r23/bun_before_arm_DEV_TIP_c_firm.txt)",
+    "result": "(b) and (d) FAIL on origin/DEV without the change, as the order requires; all five new cases fail there"
+  },
+  "what_a_person_sees": {
+    "partner_one_firm": "The Analysis Request form shows 'Firm: <the one allowed firm>' as read-only text in the field where the select was. No picker.",
+    "partner_multi_firm": "The form shows 'Firm: <own firm label>' as read-only text (the own firm is claims.firmId when it is on the allowed list). No picker and no other firm is offered. A request body carries only that firm. Own firm off the list: 'Your profile names no firm you may file for' and the submit is off.",
+    "staff": "The form shows, above the fields, one sentence: 'Opal staff open requests from the queue rather than file them, so this form cannot be submitted from here.' No firm line and no picker. The File Analysis Request button is disabled.",
+    "rendering": "Not rendered on a screen: the candidate's markup was checked by renderToStaticMarkup in the tests; no ui-smoke screenshot was taken (see not_read)."
+  },
+  "design_clauses": {
+    "firm_line_on_band": "The firm line uses the form's existing FIELD class (bg-black/30, border-white/10, text-white) and sits in the page's Panel variant chart, which resolves to the band. C3: white ink is legal on the band only, and the candidate adds no ink on a white panel.",
+    "staff_sentence_on_band": "text-white/80 on the band, the same ink the form's legends use. C3.",
+    "submit": "No primary action is added. The File Analysis Request button keeps its existing class and is disabled while the filing firm is empty. C8 (one primary action per view): unchanged.",
+    "states": "Loading, failed, none and not-on-list lines are words inside a field, not a panel. C12's four panel states govern panels; this line is a field, so it is not claimed as a designed panel state. Stated, not papered over."
+  },
+  "claim": "A partner caller never chooses the firm: the Firm control is gone and the filing firm is derived (one allowed firm, else the caller's own firm when it is on the allowed list, else none). The request never carries a firm outside the caller's allowed list: filingFormOf replaces any firm the state holds with the derived one before anything is posted. The staff picker is gone from the Analysis Request path; staff are told in one sentence and the submit is off; staff read no firm list. Nothing is landed, pushed or deployed. The server does not yet pin an analysis request to the caller's own firm (surprise IRPT_ANLREQ-D2-W95-S2): that is the one part of the own-domain rule this candidate does not carry.",
+  "not_read": [
+    "The live directory context and the users table (no live call in this order); whether any partner user holds more than one allowedFirmIds member (multi_firm_partner_case).",
+    "The ticket service's enforcement beyond the lines cited (read only; outside the grant).",
+    "A rendered screenshot with ui-smoke (the portal CLAUDE.md asks for one on a visual change): not run in this order, so the fit of 'Firm: <label>' in the field is not measured.",
+    "portal/CONTRIBUTING-BOXES.md: absent from the portal tree at origin/DEV (surprise IRPT_ANLREQ-D2-W95-S4); the cand/<box>/<slug> branch rule was not applied, the order's branch name was used.",
+    "The three visual choices above are read from DESIGN.md at origin/DEV, not from a rendered page.",
+    "PROD: not read and not changed."
+  ]
+}
