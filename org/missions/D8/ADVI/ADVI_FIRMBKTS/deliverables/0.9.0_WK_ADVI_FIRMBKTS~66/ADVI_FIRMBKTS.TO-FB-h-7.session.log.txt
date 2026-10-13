@@ -1,0 +1,10 @@
+FB-h-7 session log -- 0.9.0_WK_ADVI_FIRMBKTS~66 (issued by 2.0.0_SA_COO~B1), worktree /c/dev/wk-firmbkts-66, branch wk-ADVI_FIRMBKTS-66
+
+1. Tree check: branch wk-ADVI_FIRMBKTS-66, org/ and .tools/ present, HEAD ecfb64dcf4 at start.
+2. Premises: bd_price_update.py found at data/black_diamond/scripts/silver/ (not gold/); Lambda twin at infra/aws/lambda/bd-pipeline/bd-price-update/lambda_function.py (line 143 confirmed).
+3. Reads (AWS, get and list verbs only): bucket versioning; silver/transactions and silver/prices listings; 20 weekday transaction partitions (latest); 174 silver price objects (latest); gold/timeseries/holdings_lots/2026-10-09.parquet; list-object-versions and 165 version-pinned gets for 12 trade-date objects; CloudWatch Invocations for bd-price-update; list-objects-v2 of gold/canonical/account_gains/; Lambda logs filter (Step 1a and sample).
+4. Failed attempts: 58 get-object calls for transaction keys returned rc=254 because a CRLF from a Windows text file was appended to the key; no data was read; corrected in a rerun with tr -d CR. 3 log calls: 1 path-mangled (rc=254), 2 returned.
+5. Scripts (in this folder): fetch_versions.sh, pricing_quant_s32_s33.py (S32 and S33; modes s32, s33, s33asof), pricing_quant_s34.py, write_record.py. Outputs were written under C:/dev/wk-firmbkts-66-data/ (outside the checkout).
+6. Record: PRICING_QUANT.json (composed by write_record.py) and PRICING_QUANT.md.
+7. Controls: planted NOT_MATERIAL mutant on the record -> r5_checks quant FAIL rc=1 (fired as expected); determinism: two runs of the AC1 grader on the record, identical md5 78509f16897b28e5207d4bbe756dc1ee.
+8. Commit 1 (scripts, record, md): b5a8b92654. Commit 2: surprise rows and this instance.
