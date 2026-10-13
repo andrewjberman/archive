@@ -1,0 +1,54 @@
+# HVST-bz-1 -- the issuer's INTERIM RULE for running cycle PID 27560, and how it is being kept
+# 0.7.0_AE_CloudOps~ZW, site Z box. Authority: 2.0.0_SA_COO~W1 msg 4672, relayed by
+# 1.0.0_SA_CTO~Z msg 33577 (acked). Row Z-S115 graduated ARMED, CTO @bcb24fcac3,
+# ROUND_ANALYSIS.round83.md section 2; the DISARM is COO~W1's and the prevention is round 84's
+# first cut. Nothing in this file is a prevention and nothing here disarms anything.
+
+## RULE (1) -- the console window stays MINIMIZED and UNTOUCHED, and nobody clicks in it
+
+Done 2026-10-13T06:5xZ, and the mechanism matters:
+  runner PID 27560, MainWindowHandle 2359526
+  BEFORE: IsIconic = False   (the window was open on the desktop -- one stray click away from the
+                              exact state that stalled its predecessor for nine hours)
+  ACT   : ShowWindow(2359526, SW_MINIMIZE=6)  rc=True
+  AFTER : IsIconic = True
+
+WHY THIS CALL AND NOT A CLICK: ShowWindow sets a WINDOW STATE. It injects no input, so unlike a
+click or a keypress in the window it CANNOT create a mark/QuickEdit selection. The hazard and the
+remedy run through the same window, so the remedy had to be the one that cannot cause the hazard.
+
+CONTROL, because minimizing a console must not be the thing that stops it:
+  title after : 'C:\Program Files\Python314\python.exe'  -- no 'Select ' prefix
+  CPU 1.09375 before the minimize -> 1.125 after, and 3 threads throughout. Still accruing, so the
+  minimize did not block the process.
+This seat sends NO further input to that window. The only remaining way in is a human at the box,
+which is what the rule's "let nobody click in it" addresses and this seat cannot enforce.
+
+## RULE (2) -- read cycle_runner.log's last write once an hour; on >15 min while Running, file a row and do nothing else
+
+Kept by a MONITOR, not a cron (launch arming is zero crons; a Monitor is not a loop). It polls every
+300 s -- more often than hourly, which is strictly safer and costs nothing because it emits ONLY on a
+condition that would change what this seat does:
+
+  TRIP               log last write > 15 min old WHILE the task reads Running
+                     -> the issuer's row-and-nothing-else case. NO key, NO kill.
+  WINDOW-SELECT      the title begins 'Select ' again -- the wedge itself, recurred
+  TASK-NOT-RUNNING   state != Running (the cycle may have ended, or the task stopped)
+  CYCLE-RECORD       a .cycle.json newer than the 05:52:43Z start -> the CYCLE ledger leg's gate;
+                     the watch then ENDS, which is its known terminal condition
+  Each emits once per transition, with a CLEARED message if it recovers, so a persistent state does
+  not spam and a recovery is not silent.
+
+EVERY LIMB WAS EXERCISED BEFORE ARMING, because a watch that reads wrong is worse than no watch:
+  log age            0 min against mtime 1791874986 -- the stat read works
+  state|title parse  'Running|C:\Program Files\Python314\python.exe' split correctly on the pipe
+  cycle records      0 newer than START, with TWO controls: the glob matches 7 .cycle.json files
+                     (so the 0 is a real zero, not a glob miss), and the stopped cycle's own record
+                     20261012T191641Z.cycle.json reads mtime 1791870360 against START 1791870763 --
+                     it EXISTS and is correctly EXCLUDED, 403 s before the new runner began.
+  The epoch comparison is deliberate: `find -newermt` takes LOCAL time on this device and would have
+  mis-bucketed every record by four hours.
+
+## WHAT THIS SEAT WILL NOT DO UNDER THIS RULE
+No key to any window. No kill by name, PID or Stop-ScheduledTask. No prevention change (windowless
+or QuickEdit-off launch) -- that is round 84's first cut, not this order's, and not this file's.
