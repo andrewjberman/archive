@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-j-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-2.dispatcher-warn-text.md",
+    "group": "OTHER",
+    "vintage_commit": "6d35421d8d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R7.md",
+    "vintage_commit": "6d35421d8d",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-2.dispatcher-warn-text.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~72",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "kind": "script",
+      "commit_or_etag": "e024089cc9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in e024089cc9 on wk-ADVI_FIRMBKTS-72 (LOCAL); one line inside emit_chain_complete; not deployed; no push, no AWS call, no network egress",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "the deploy of gold_dispatch.sh and the measurement of the next chain's real CLI error",
+      "reason": "order section 2 bounds: one commit of the script only, no deploy, no push, no AWS call; the deploy is the next step of the round"
+    },
+    {
+      "item": "any --region, AWS_DEFAULT_REGION or new variable outside the function",
+      "reason": "order section 1a.3 and section 1a.2: nothing else changes; the region question is not in this cell"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd /c/dev/wk-firmbkts-72 && timeout 60 bash C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_emit_test.sh data/black_diamond/scripts/gold/gold_dispatch.sh   expect ^EMIT TEST: 4 of 4 arms$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-72 && timeout 60 bash C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_emit_test.sh data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "expect": "^EMIT TEST: 4 of 4 arms$",
+      "output_evidence": "PASS E1 a failing call prints the first 300 characters of the CLI text, no more\nPASS E2 a successful call prints the emitted line and no WARN\nPASS E3 a multi-line error text is one WARN line and the function still returns 0\nPASS E4 under set -e a failed put-events prints the WARN and the shell carries on (rc 0)\nEMIT TEST: 4 of 4 arms\n(rc=0; before the edit the same command printed EMIT TEST: 3 of 4 arms with E4 FAIL, rc=1)",
+      "denominator": "4 of 4 arms (E1-E4) under the stubbed aws; E4 is the set -e arm",
+      "status": "PASS",
+      "status_reason": "the decisive line EMIT TEST: 4 of 4 arms matches the expect regex; the pre-edit run read 3 of 4 with E4 FAIL, as the order predicted"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd /c/dev/wk-firmbkts-72 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py awsdiff --root /c/dev/wk-firmbkts-72 --file data/black_diamond/scripts/gold/gold_dispatch.sh   expect ^AWSDIFF: OK$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-72 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py awsdiff --root /c/dev/wk-firmbkts-72 --file data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "expect": "^AWSDIFF: OK$",
+      "output_evidence": "  aws lines other than the pattern unchanged: True; changed hunks 1; changed lines outside the function and the variable: []\nAWSDIFF: OK\n(rc=0; run before the commit it read changed hunks 0 and AWSDIFF: FAIL, because the checker reads committed HEAD; surprise ADVI_FIRMBKTS-D1-W72-S1)",
+      "denominator": "1 changed hunk, 0 changed lines outside emit_chain_complete (the EVENTS_REGION exemption unused); the aws lines other than the events put-events pattern are unchanged (True)",
+      "status": "PASS",
+      "status_reason": "AWSDIFF: OK on the committed HEAD e024089cc9, rc=0; the pre-commit FAIL is recorded in the session log and filed as a surprise row"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd /c/dev/wk-firmbkts-72 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-72 --allow data/black_diamond/scripts/gold/gold_dispatch.sh --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~72/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md   expect ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-72 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-72 --allow data/black_diamond/scripts/gold/gold_dispatch.sh --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~72/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "output_evidence": "  CHANGED data/black_diamond/scripts/gold/gold_dispatch.sh\nROUND 4 SCOPE: OK 1 changed, 0 outside, 0 required missing\n(rc=0)",
+      "denominator": "1 changed path against 3 allowed write surfaces (the script, this deliverables folder, the investigation file); 0 outside the allow list; 0 required missing",
+      "status": "PASS",
+      "status_reason": "the decisive line matches the expect regex; the scope read was taken at the script commit, before this instance and the rows were committed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1 run once before the edit, per order section 1b.2, against the function as it stood at f313505d5c: the plain assignment out=$(...); rc=$? (the set -e defect) restored in place of the command-list form",
+      "expected": "3 of 4 arms with E4 FAIL, the set -e defect reproduced",
+      "observed": "PASS E1, PASS E2, PASS E3, FAIL E4; EMIT TEST: 3 of 4 arms; rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 invocation run twice on the edited script at e024089cc9",
+      "observed": "EMIT TEST: 4 of 4 arms on both runs; PASS E1-E4 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W72-S1: the AC2 awsdiff check reads FAIL on the uncommitted edit and passes only after the commit, because it compares committed HEAD with the merge-base (OBSERVATION, INERT)",
+    "ADVI_FIRMBKTS-D1-W72-S2: the commit-time risk reflex printed HOLD for the script by file basename against a COT freshness-gate claim in data/cot/scripts/gold/gold_dispatch.sh; the cited claim does not describe this function (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~72/ADVI_FIRMBKTS.TO-FB-j-2.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "bash",
+      "invocation": "bash -n data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "result": "rc=0 after the edit"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~72 <0.9.0_WK_ADVI_FIRMBKTS~72@opal.agent>\" -F .scratch/msg_fbj2.txt -- data/black_diamond/scripts/gold/gold_dispatch.sh",
+      "result": "commit e024089cc9; commit-gate OK 1 of 1; surprise-row-gate OK; to-pipeline-gate OK; msg-verify MATCH"
+    }
+  ]
+}
