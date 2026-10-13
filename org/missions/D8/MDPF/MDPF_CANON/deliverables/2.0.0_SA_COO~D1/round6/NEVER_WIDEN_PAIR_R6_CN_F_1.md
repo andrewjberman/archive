@@ -109,6 +109,11 @@ writer-by-leaf pairs of the pre-fold tree; this count is distinct functions at H
   prelude (`_taxsma`, `:2884-2909`), whose four durable stores are S3 conditional creates or a CAS append keyed by knowledge date
   (`taxsma_snapshot.py:166`, `taxsma_workbook.py:184`, `taxsma_membership.py:626`, `taxsma_assets.py:707`). Run after the same day's fire, each store
   already holds that date, so the writes are no-ops; the order reads each store's VersionId before and after and stops on any change.
+  **CORRECTION (2026-10-13, issuer, after the dry run):** "each store already holds that date, so the writes are no-ops" was wrong for the workbook
+  snapshot. Its object key carries the response sha256, so each acquisition writes a NEW bronze and silver object under
+  `gateway/global/{bronze,silver}/taxsma_workbook/date=<d>/`; the dry run created two at 2026-10-13T13:58:14Z (row D1-S20), as the fire (13:31:42Z)
+  and CN-d-1's real run (2026-10-12 17:32:49Z, on the code before this order) did. They are additive, write-once and nothing served reads them
+  differently; the existing objects, the dispositions, the gold assets and the control key kept their VersionIds. The blast radius is unchanged.
 - **STATE WRITES OF A GOLD RUN, named per the CTO's C-S65 ruling** (every pair that authorizes an on-demand run names them; this is the first and closes
   C-S65). A scheduled or non-dry-run gold run writes these; D4 does not, except where marked:
   | key class | writer | write rule | rollback |
