@@ -18,7 +18,7 @@
     {
       "path_or_key": "docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "506096fc9a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Repo edit only: the reverse patch of 01e843ce2e^..01e843ce2e inserted the 5 member lines \"multi_asset\", between commodities and cash. git diff 6b6c2c51bd55 -- this path shows 5 insertions and 0 deletions. Not served, not deployed.",
       "artifact_covered_by": [
@@ -28,7 +28,7 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/_contracts/HoldingsSnapshot.schema.json",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "506096fc9a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Repo edit only: the same 5 member lines inserted (reverse patch). git diff 6b6c2c51bd55 -- this path shows 5 insertions and 0 deletions. The lambda package is not built or deployed; IRPT_BCKEND owns that act.",
       "artifact_covered_by": [
@@ -38,7 +38,7 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/holdings/contracts/HoldingsSnapshot.schema.json",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "506096fc9a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Repo edit only: the same 5 member lines inserted (reverse patch). git diff 6b6c2c51bd55 -- this path shows 5 insertions and 0 deletions. Not built or deployed.",
       "artifact_covered_by": [
@@ -48,11 +48,31 @@
     {
       "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_holdings_multi_asset_v1_enum.py",
       "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "506096fc9a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "New test file, 8 tests, no AWS call. Run: 8 passed. Negative control: against the base schema (members removed) 3 failed, 5 passed.",
       "artifact_covered_by": [
         "SC24-e100-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_holdings_snapshot.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1 item 1: only test_every_published_asset_class_enum_is_the_producers_list changed (equality replaced by subset plus the single extra member multi_asset). Four-file run: 70 passed.",
+      "artifact_covered_by": [
+        "SC24-e100-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_holdings_publish_gate.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1 item 2: only the _contract_admits_multi_asset docstring changed. Four-file run: 70 passed.",
+      "artifact_covered_by": [
+        "SC24-e100-AC3"
       ]
     }
   ],
@@ -82,10 +102,9 @@
       "criterion_verbatim": "the four sibling holdings test files pass as at the base (or with only the helper change item 3 allows), and report no failed.",
       "method": "test_suite",
       "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_publish_gate.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_narrowed.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_snapshot.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_cusip_fallback.py -q",
-      "output_evidence": "FAILED data/assets/scripts/gold/investor_reporting/tests/test_holdings_snapshot.py::test_every_published_asset_class_enum_is_the_producers_list ... 1 failed, 69 passed in 2.91s",
-      "denominator": "69 passed of 70 collected; at the base 70 passed of 70 (measured before the edit)",
-      "status": "FAIL",
-      "status_reason": "BLOCKING: the restored contract makes one sibling assertion false (test_holdings_snapshot.py asserts each contract asset_class enum equals the producer's six-class list). That file is outside this order's write grant and item 3 names only the publish-gate helper, so the criterion cannot be met as written. Filed as MDPF_SECCLASS-D1-W90-S1; the order stays pending for the issuer.",
+      "output_evidence": "70 passed in 2.82s",
+      "denominator": "70 passed of 70 collected (base 4bad100483: 70 passed of 70, measured before the edit)",
+      "status": "PASS",
       "expect": "passed"
     }
   ],
@@ -104,12 +123,8 @@
   },
   "declared_exclusions": [
     {
-      "item": "test_holdings_snapshot.py::test_every_published_asset_class_enum_is_the_producers_list (fails after the restore)",
-      "reason": "outside the <paths> grant; item 3 names only the publish-gate helper; filed as MDPF_SECCLASS-D1-W90-S1 (BLOCKING on AC3). Not edited by this worker."
-    },
-    {
-      "item": "_contract_admits_multi_asset helper docstring in test_holdings_publish_gate.py",
-      "reason": "item 3's change condition not met (no arm breaks); the docstring's premise is now stale; filed as MDPF_SECCLASS-D1-W90-S2. Not edited."
+      "item": "_contract_admits_multi_asset stub in test_holdings_publish_gate.py (kept, not removed)",
+      "reason": "AMENDMENT 1 item 2: docstring made true, nothing else changed. Measured: validate_snapshot without the stub admits a multi_asset candidate (ok=True, 0 errors), so the stub is a no-op for that fixture; left in place as not this cell's to remove."
     },
     {
       "item": "test_holdings_rearm_trigger.py",
@@ -121,8 +136,8 @@
     }
   ],
   "surprises": [
-    "MDPF_SECCLASS-D1-W90-S1: the restored contract breaks test_holdings_snapshot.py::test_every_published_asset_class_enum_is_the_producers_list (1 failed, 69 passed); the file is outside the write grant, so AC3 is FAIL and the order stays pending.",
-    "MDPF_SECCLASS-D1-W90-S2: the publish-gate helper docstring says the v1 enum already rejects multi_asset, which the restore makes false; no arm breaks, so item 3 did not apply and the helper is unchanged."
+    "MDPF_SECCLASS-D1-W90-S1: the restored contract breaks test_holdings_snapshot.py::test_every_published_asset_class_enum_is_the_producers_list (1 failed, 69 passed); the file was outside the write grant. Dispositioned by AMENDMENT 1 items 1 and 3 (grant grown, equality replaced by subset plus multi_asset); AC3 now 70 passed.",
+    "MDPF_SECCLASS-D1-W90-S2: the publish-gate helper docstring said the v1 enum already rejects multi_asset, which the restore made false; no arm broke. Dispositioned by AMENDMENT 1 item 2 (docstring made true, nothing else changed)."
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e100.holdings-schema-v1-restore-multi-asset.md",
   "compiler_tools": [
@@ -134,7 +149,7 @@
     {
       "tool": "python -m pytest (four sibling files, base then after)",
       "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_publish_gate.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_narrowed.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_snapshot.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_cusip_fallback.py -q",
-      "result": "base 4bad100483: 70 passed; after the restore: 1 failed, 69 passed"
+      "result": "base 4bad100483: 70 passed; after the restore: 1 failed, 69 passed; after AMENDMENT 1 edits: 70 passed in 2.82s"
     }
   ]
 }
