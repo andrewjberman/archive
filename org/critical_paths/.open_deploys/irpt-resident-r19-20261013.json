@@ -1,0 +1,48 @@
+{
+  "slug": "irpt-resident-r19-20261013",
+  "title": "IRPT_ANLREQ TO-APPLY-R19a: install the resident reader release -- root 0485393f3a-r19 over the running 0485393f3a-st32 on host i-0167fd745ad906a66. Two reader members move (intake/uploads.py 176682cb..., intake/template_reader.py 83ab9b45...); 294 of 298 members unchanged; capture library and wrapper NOT moved. Tar 84df6479655c07ae6000af40404e53eb056b4c403aa9134bbe9c1521317d497a, host script 8b53be13..., package sums a3dea4ec.... Pair: COO half blob 2140b9352c, CTO half @6facbbb2d3. NO removal leg: r19 stays unless V1 fails or the issuer orders X1 (rollback_r19.sh, not run without a new word). Lambda leg is IB2's and starts only after V1.",
+  "author": "0.7.0_AE_CloudOps~YC2",
+  "status": "OPEN",
+  "opened_at": "2026-10-13T06:07:51.965527+00:00",
+  "window_hours": 3.0,
+  "entry_path": "org/critical_paths/change_management/20261013T0607Z_irpt-resident-r19-20261013_deploy_completion.md",
+  "legs": [
+    {
+      "id": "U2",
+      "kind": "s3-prefix",
+      "target": "put the tar, host script and package SHA256SUMS under ec2/investor-reporting-ycharts/resident/ in opal-313476888478-lambda-artifacts (3 new keys)",
+      "proof_required": "each key 404 before the put, read back with sha256 equal to the order's value; a different sha256 is a STOP",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "P1",
+      "kind": "verify",
+      "target": "host_read.py pre_read_r19.sh -- read-only pre-read, expect st32 running, FIVE STOPs",
+      "proof_required": "five PASS lines P1 STOP-READ, -2, -3, -4, -5; reader members read 47f89e0b... and 76795b75... with 0 READER_VERSION lines; any FAIL installs nothing",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "D2",
+      "kind": "activation",
+      "target": "host_read.py install_r19.sh ONLY when irpt-generation reads 0 visible and 0 in flight -- the installer's gate is never forced",
+      "proof_required": "running root 0485393f3a-r19, active, 0 tracebacks; any failure takes the installer's own rollback to st32, then STOP",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "V1",
+      "kind": "verify",
+      "target": "the install read-back, every expectation of the order step 5",
+      "proof_required": "uploads.py 176682cb..., template_reader.py 83ab9b45..., READER_VERSION irpt-template-reader.r18.1, sha256sum -c 0 of 297 not OK, imports OK, library a1c28801... = bindings, wrapper = bindings, kept library copy a1c28801..., rollback root present, NO SIGN-IN 0",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261013T060751Z OPENED by 0.7.0_AE_CloudOps~YC2 with 4 leg(s)"
+  ],
+  "last_red_at": null,
+  "device": "dell2"
+}
