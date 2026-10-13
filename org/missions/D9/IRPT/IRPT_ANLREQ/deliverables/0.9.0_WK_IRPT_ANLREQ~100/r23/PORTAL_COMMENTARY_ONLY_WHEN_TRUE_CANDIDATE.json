@@ -1,0 +1,98 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-279",
+  "cell": "AR-y-279",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~100",
+  "dev_tip": "a577cba5644192bf1f62b10dc03dd3657e12b59f",
+  "dev_tip_source": "git -C C:/dev/ajb_workspace/portal fetch origin DEV (rc=0), then rev-parse origin/DEV",
+  "base_candidate": "972c7dabc320ac4ee2e5a4e18459ff61a3bdba51",
+  "branch": "wk-IRPT_ANLREQ-100-portal",
+  "worktree": "C:/dev/wk-portal-100 (outside the product tree; added on top of base_candidate)",
+  "commit": "9892130cfd8bb63c1eb90653ecac46fbbaf367e3",
+  "push_state": "LOCAL on wk-IRPT_ANLREQ-100-portal; not pushed, not landed on DEV, not deployed",
+  "author": "0.9.0_WK_IRPT_ANLREQ~100 <0.9.0_WK_IRPT_ANLREQ~100@opal.agent>",
+  "files_changed": [
+    "src/pages/TicketCenter/analysisRequest.ts",
+    "src/pages/TicketCenter/__tests__/analysis-commentary-requested.test.ts"
+  ],
+  "server_code_edited": false,
+  "change": {
+    "helper": "commentaryMember(addCommentary) in src/pages/TicketCenter/analysisRequest.ts returns { commentary_requested: true } when the box is checked and {} otherwise; analysisBody and submissionBody spread it in place of the held unconditional member.",
+    "ticket_answer": "add_commentary is unchanged in the ticket answers (true or false), as the ticket service reads it.",
+    "step_3_rename_not_done": "The cell's step 2 says the ticket answer keeps add_commentary as it is; no rename was made."
+  },
+  "tests": {
+    "added": 2,
+    "edited_assertions": [
+      "(b) unchecked: commentary_requested === false replaced by 'commentary_requested' absent, on analysisFor(false) and submissionBody(ticketWith(false))",
+      "(c) the POST: off.commentary_requested === false replaced by 'commentary_requested' absent in the captured off body"
+    ],
+    "not_edited": "the reader test (d) keeps its explicit commentary_requested: false input, which is a reader check, not an unchecked box",
+    "added_names": [
+      "(f) commentary_requested is sent only when true, so a filing without commentary is accepted before IB-pr-456 is live; a filing WITH commentary needs IB-pr-456 live first",
+      "(g) the ticket POST body differs between a checked and an unchecked box only in add_commentary"
+    ],
+    "passed": 7,
+    "failed": 0,
+    "file_run": "timeout 240 bun test src/pages/TicketCenter/__tests__/analysis-commentary-requested.test.ts",
+    "folders": {
+      "TicketCenter": "timeout 240 bun test src/pages/TicketCenter/__tests__ -> 79 pass, 0 fail, 79 tests across 16 files (rc=0)",
+      "neighbours": "src/pages/InvestorReporting/__tests__/submission-request.test.ts + src/pages/InvestorReporting/tabs/analysis/tests -> 27 pass, 0 fail (rc=0)",
+      "dsgn_irptv1_held_source": "371 pass, 10 fail, 2 errors (381 tests, 240 files) -- rc=1 on held source",
+      "dsgn_irptv1_with_change": "371 pass, 10 fail, 2 errors (381 tests, 240 files) -- rc=1 with the change; failure names identical to the held source run",
+      "note": "the recorded 370 pass / 11 fail of the earlier candidate was measured on another checkout path; see surprise row IRPT_ANLREQ-D2-W100-S3"
+    },
+    "typecheck": "bun run typecheck (= tsc -b --noEmit) -> rc=0 on the change; the same command rc=2 with one deliberate TS2322 injected (proof that the form can fail)"
+  },
+  "before_arm": {
+    "ref": "the held source 972c7dab analysisRequest.ts (git show) swapped into the worktree, with the new test file; then the change restored from a scratch copy (cmp verified)",
+    "failed": 3,
+    "passed": 4,
+    "failing": [
+      "(b)",
+      "(c)",
+      "(f)"
+    ],
+    "passing": [
+      "(a)",
+      "(d)",
+      "(e)",
+      "(g)"
+    ],
+    "passing_note": "(a), (d), (e) and (g) are guards that the held source also satisfies; (g) pins the ticket POST, which the held source did not change",
+    "output_tail": "78 |     expect(analysisFor(true).commentary_requested).toBe(true)\n79 |     expect(submissionBody(ticketWith(true)).commentary_requested).toBe(true)\n80 |     expect((await capturedSubmission(analysisFor(true))).commentary_requested).toBe(true)\n81 |     expect('commentary_requested' in analysisFor(false)).toBe(false)\n                                                              ^\nerror: expect(received).toBe(expected)\nExpected: false\nReceived: true\n      at <anonymous> (C:\\dev\\wk-portal-100\\src\\pages\\TicketCenter\\__tests__\\analysis-commentary-requested.test.ts:81:58)\n\u2717 the Add commentary box reaches the analysis submission as commentary_requested > (f) commentary_requested is sent only when true, so a filing without commentary is accepted before IB-pr-456 is live; a filing WITH commentary needs IB-pr-456 live first [0.45ms]\n 4 pass\n 3 fail\n 24 expect() calls\nRan 7 tests across 1 file. [909.00ms]"
+  },
+  "mutant": {
+    "change": "the helper restored to return { commentary_requested: addCommentary === true } (the always-present held behaviour)",
+    "result": "4 pass, 3 fail: (b), (c) and (f) fail",
+    "fires": true,
+    "restored": "cmp verified against the scratch copy of the change"
+  },
+  "what_a_person_sees": {
+    "unchecked": "The analysis submission body has the same keys as before except commentary_requested, which is ABSENT. The ticket is filed with add_commentary false. The filing is accepted before IB-pr-456 is live.",
+    "checked": "The analysis submission body carries \"commentary_requested\": true alongside the same keys. The ticket is filed with add_commentary true. This filing needs IB-pr-456 live to be accepted.",
+    "on_screen": "The checkbox, its label and placement are unchanged. No confirmation text is added here."
+  },
+  "design_clauses": [
+    {
+      "visual_choice": "none",
+      "clause": "no visual change: the checkbox, label, placement and classes are untouched"
+    }
+  ],
+  "claim": "On branch wk-IRPT_ANLREQ-100-portal at 9892130c, built on the held AR-y-264 candidate 972c7dab: an unchecked Add commentary box leaves commentary_requested ABSENT from the analysis submission body, a checked box sends true, and the ticket answer keeps add_commentary. Shown by offline tests (fake transport and fake ticket deps) and typecheck only. Not landed, not pushed, not deployed, not exercised against a live acceptance, the packager or DEV.",
+  "not_read": [
+    "the live acceptance (ticket and packager side) and whether IB-pr-456 is released: not called",
+    "IB-pr-456's release state on the acceptance side: not read by this seat; the landing order stays the CTO's",
+    "the drafter's body beyond the analysis_ready gate, as in the held candidate record",
+    "the Ticket Center screen: no render, no screenshot (no visual change made)",
+    "live DEV, live tickets and the live packager: none called",
+    "portal/CONTRIBUTING-BOXES.md: absent at HEAD and origin/DEV (surprise row IRPT_ANLREQ-D2-W100-S1); the portal CLAUDE.md law was applied instead",
+    "the portal worktree's node_modules is a junction to C:/dev/wk-portal-89/node_modules (surprise row IRPT_ANLREQ-D2-W100-S2); not removed",
+    "one read-only git ls-remote origin wk-IRPT_ANLREQ-100-portal ran in the commit command; it returned no ref and changed nothing (not in the permitted fetch list)"
+  ],
+  "surprise_rows": [
+    "IRPT_ANLREQ-D2-W100-S1",
+    "IRPT_ANLREQ-D2-W100-S2",
+    "IRPT_ANLREQ-D2-W100-S3",
+    "IRPT_ANLREQ-D2-W100-S4"
+  ]
+}
