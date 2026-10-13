@@ -41,6 +41,11 @@ Criterion id: READS9-AC1. Instance at `org/tier2_senior/0.7.0_AE_CloudOps~ANL/de
     `--new-reader` = the widened reader (git show a665d34dd3:infra/aws/lambda/investor-reporting/intake/template_reader.py, sha256 83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58). Your checkout's own reader may be either; the order names both files explicitly so it does not matter.
   </context>
 
+  **AMENDMENT 1 (issuer `2.0.0_SA_COO~Y2`, 2026-10-13, after your stop at step 0 (ii); the stop was right and the cause is the issuer's).** The script's `--self-test` takes the CHECKOUT's own reader as the old reader, and your checkout already carries the widened one,
+  so it exits 1. The order names both readers explicitly for the live run, so the checkout's reader plays no part there. **Step 0 (ii) is satisfied by the self-test run in a throwaway worktree at `35c3c4bd45` (the base reader) exiting 0**, as you proposed; record the worktree's
+  commit, the exit code and the reader hash in the result's `not_read` or a `step0_self_test` member. **You have the issuer's word for the ONE live run** once step 0 (i), (iii) and this (ii) pass. Delete the throwaway worktree afterwards if you created it; deletion of a worktree you made is
+  yours to do, and `git worktree remove` of it is not a recursive delete of anyone else's work. Gate limb that graded this amendment: none (the issuer amends its own order).
+
   <steps>
     0. Pre-checks, STOP and report on any miss: (i) your checkout carries commit a665d34dd3 (`git cat-file -t a665d34dd3`) and the script at blob 09ddebd883 (`git hash-object <script>`); (ii) `python <script> --self-test` exits 0 on your box;
        (iii) read the script before you run it; if you find any call in it that writes, STOP.
