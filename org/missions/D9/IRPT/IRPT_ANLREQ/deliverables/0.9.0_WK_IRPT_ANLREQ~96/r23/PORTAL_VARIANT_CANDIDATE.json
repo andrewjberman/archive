@@ -1,0 +1,70 @@
+{
+  "cell": "AR-y-275",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~96",
+  "read": {
+    "where_variant_is_inferred": [
+      "portal/src/pages/TicketCenter/analysisRequest.ts (origin/DEV 4d601023) :251-253 reportTypeForKeys, derived from keys.length (0 Overview, 1 Comparison, else Multi-Comp); it was read at :264 by analysisBody as variantFor(reportTypeForKeys(input.keys)) (the one-step path)",
+      "portal/src/pages/TicketCenter/AnalysisRequestParts.tsx (origin/DEV 4d601023) :45-58 answersFromForm sets report_type from reportTypeForKeys(keys) and comparison_model only when not Overview"
+    ],
+    "select_exists_in_the_form": "no -- origin/DEV 4d601023 AnalysisRequestFields (AnalysisRequestParts.tsx :74-147) has no report-type control; the only related controls are the Opal model checkboxes and Other ETFs",
+    "receiver_member": "variant, in the submission body. infra/aws/lambda/investor-reporting/ycharts/generate/submission.py :61-62 (must be one of auto, overview, comparison, multicomp) and :72-74 (must be auto or the variant the comparison count derives; otherwise VARIANT_CARDINALITY_MISMATCH). The template is then derived from the count, not from the member: recipe_snapshot.py :90-91 (variant_for_comparison_count(len(comparison_keys))) and recipe.py :126-163 (recipe_for). acceptance.py names no variant (read, nothing found there).",
+    "consistency_rules": "The receiver refuses, it never switches: a body whose variant is neither auto nor the count's variant is refused VARIANT_CARDINALITY_MISMATCH (public reason INVALID_INPUT, submission.py :26, :74). The candidate makes the same refusal earlier, in the page, before any upload: fileAndRequestAnalysis returns the sentence from variantRefusal and nothing is uploaded, ticketed or posted. The receiver's member is read here, not assumed."
+  },
+  "dev_tip": "4d6010234ed2eb1d0a1c1782b4bf782b7e019993",
+  "dev_tip_note": "measured at 2026-10-13T20:0xZ (git merge-base --is-ancestor): origin/DEV now reads 63c4f9e3, 34 commits past dev_tip, and dev_tip is its ancestor; the candidate is cut from dev_tip and is not rebased here",
+  "branch": "wk-IRPT_ANLREQ-96-portal",
+  "commit": "80d7c70a7debf4504925c90bec1161db10c43979",
+  "worktree": "C:/dev/wk-portal-96 (outside the product tree; based on origin/DEV, never pushed)",
+  "files_changed": [
+    "src/pages/TicketCenter/analysisRequest.ts",
+    "src/pages/TicketCenter/AnalysisRequestParts.tsx",
+    "src/pages/TicketCenter/__tests__/analysis-form-i1.test.tsx",
+    "src/pages/TicketCenter/__tests__/analysis-variant-select.test.tsx"
+  ],
+  "tests": {
+    "added": 5,
+    "added_file": "src/pages/TicketCenter/__tests__/analysis-variant-select.test.tsx",
+    "added_names": [
+      "(a) the form has a report-type select with the three names, after the household",
+      "(b) Overview with one model checked blocks the filing with a sentence and sends nothing",
+      "(c) Comparison with one model sends the Comparison variant; with two it blocks with a sentence",
+      "(d) Multi-Comp with three models sends the Multi-Comp variant in order; with one it blocks with a sentence",
+      "(e) across every selection and count, the sent variant is the selected one and matches the receiver derivation"
+    ],
+    "new_file_alone_after_change": "5 pass, 0 fail, 84 expect() calls",
+    "passed": 77,
+    "failed": 0,
+    "folder": "bun test src/pages/TicketCenter: 77 pass, 0 fail, 16 files (DEV tip: 72 pass, 0 fail, 15 files)",
+    "typecheck": "bun run typecheck (tsc -b --noEmit) rc=0; the typecheck was first shown to fail on a deliberate error (rc=2, TS2322), and the probe file was removed",
+    "dsgn_irptv1": "DEV tip 371 pass, 10 fail, 2 errors; candidate 371 pass, 10 fail, 2 errors; the same failing names both ways (environmental: they read C:\\dev\\org and C:\\dev\\docs, outside this worktree)",
+    "existing_tests_edited": [
+      "analysis-form-i1.test.tsx 'offers the Opal model checkboxes': the assertion that the form carried no report-type control now asserts the select exists (aria-label Report type)",
+      "analysis-form-i1.test.tsx 'takes other ETFs as typed keys': the form input gains report_type Multi-Comp (assertion unchanged)",
+      "analysis-form-i1.test.tsx 'files upload then ticket then analysis with ticket_id': the form input gains report_type Multi-Comp (assertions unchanged)",
+      "analysis-form-i1.test.tsx 'sends at most five comparison keys': the form input gains report_type Multi-Comp (assertions unchanged)",
+      "analysis-form-i1.test.tsx 'retries the analysis step without refiling': the form input gains report_type Multi-Comp (assertions unchanged)"
+    ]
+  },
+  "before_arm": {
+    "ref": "origin/DEV 4d6010234ed2eb1d0a1c1782b4bf782b7e019993, the source without the change, with the new test file",
+    "passed": 0,
+    "failed": 5,
+    "detail": "(a) no aria-label Report type in the form; (b) Overview with one model files (filed true) as a silent comparison; (c) Comparison with two files as Multi-Comp; (d) Multi-Comp with one files as a silent comparison; (e) an Overview sent for a selected Comparison (overview vs comparison)"
+  },
+  "what_a_person_sees": "On the Ticket Center's new Analysis Request form, directly below the Advisor, Firm and Household row, a Report type select reads Overview (the default), Comparison or Multi-Comp. The Opal model checkboxes and Other ETFs are unchanged. If the comparables do not fit the chosen type, pressing File Analysis Request shows one sentence in the page's existing white findings block (navy ink) and uploads nothing, for example: 'Overview takes no comparison, but you chose 1 comparison. Uncheck them, or choose Comparison or Multi-Comp. Nothing was filed.' A fitting choice files as before, and the report the receiver builds has the variant the advisor selected.",
+  "design_clauses": {
+    "C3": "the form sits inside Panel variant=chart (TicketCenter.tsx :459-460), the page's one band, where the white-ink FIELD idiom is legal; the refusal block is the existing WHITE_BLOCK (white panel, hairline, navy ink), not light-on-light",
+    "C9": "navy ink (text-[hsl(var(--palette-navy))]) on the white block; no contrast ratio measured here",
+    "C12": "NOT MET by the refusal block: the page's existing UploadFindings block carries no status.danger icon for its ERROR-state sentence. It is the page's pre-existing refusal block, used by every refusal of this form; the candidate does not change it",
+    "C5.8": "no translucent fill added to the new select (FIELD, the same idiom as the firm select beside it)"
+  },
+  "claim": "The variant sent is the variant the advisor selected: the submission body's variant and the ticket's answers.report_type come from the select, and a comparables count that does not fit the selection is refused before upload with a visible sentence, never switched. The receiver reads the variant member in the submission body and derives the template from the count; the candidate's refusal agrees with the receiver's rule (submission.py :72-74). Nothing was landed or pushed.",
+  "not_read": [
+    "the receiver's acceptance.py in full (read for a variant member: none found; not re-read beyond that)",
+    "the wire contract docs/contracts/investor-reporting/v1/AnalysisSubmissionRequest.schema.json (the portal wire type cites it; not opened)",
+    "a rendered screenshot of the form (the /frontend-dev headless check was not run; the native option list colours were not seen)",
+    "contrast ratios (C9) were not measured",
+    "the ticket service's create route (the answers member report_type is stored as sent; the service side was not read)",
+    "the other portal candidates on origin/DEV beyond the TicketCenter folder"
+  ]
+}
