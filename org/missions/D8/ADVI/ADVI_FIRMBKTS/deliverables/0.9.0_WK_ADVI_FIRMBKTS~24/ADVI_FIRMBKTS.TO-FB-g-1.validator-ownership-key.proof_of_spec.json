@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-g-1.validator-ownership-key",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-1.validator-ownership-key.md",
+    "group": "OTHER",
+    "vintage_commit": "f33c93ce43"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~24",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R4.md",
+    "vintage_commit": "f33c93ce43",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-g-1.validator-ownership-key.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "one-line mutations of the helper in scratch copies (not the committed file): m3 replaces the firm-and-bucket condition with if (false) and m4 replaces it with a bucket-blind condition canonical.length > 0 and firms.includes(firmId)",
+      "expected": "m3: test (iii) fails; m4: test (iv) fails; each run reads 4 pass and 1 fail",
+      "observed": "m3 if (false): '(fail) ... (iii) a registered firm on a named bucket reads the canonical key', 4 pass, 1 fail. m4 canonical.length > 0: '(fail) ... (iv) the same firm on a bucket that is not named reads the legacy key', 4 pass, 1 fail",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "not re-run: the order's invocations were run once each; the spec is a fixed case table with no clock or random input",
+      "observed": "N/A -- no second run was made by this worker",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Committing the three code paths (ownership_key.mjs, index.mjs, test/ownership_key.spec.mjs)",
+      "reason": "BLOCKED by the commit-time naming limb (LGIC_ENFORCE, ENFORCE): 18 graded refusals on the hand-typed ownership-map key templates and the firm and bucket literals; surprise ADVI_FIRMBKTS-D1-W24-S3. The three files stay uncommitted in the worktree; AC1 to AC3 were measured on that worktree state."
+    },
+    {
+      "item": "Populating CANONICAL_PLATINUM_BUCKETS, any deploy, any AWS call, any package.json or dependency change, and any edit to tier_policy.mjs, aggregate_gate.mjs, the router, the guard or _shared/firm-config.mjs",
+      "reason": "Order section 2 bounds 1 and 2: the engaging edit is the act's, in the same deploy as the registry value flip; the cell is dormant and names no other file."
+    },
+    {
+      "item": "The portal submodule pointer drift shown as ' M portal' in the worktree",
+      "reason": "Pre-existing before the first edit of this worker and outside the write grant; left as found. Its effect is the AC3 failure, recorded as surprise ADVI_FIRMBKTS-D1-W24-S1."
+    },
+    {
+      "item": "The pre-existing non-ASCII em dash in the comment of index.mjs",
+      "reason": "Outside the cell's one-import and one-key-line change; left as found and recorded as surprise ADVI_FIRMBKTS-D1-W24-S2."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/ownership_key.mjs",
+      "kind": "script",
+      "commit_or_etag": "UNCOMMITTED-worktree",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "not committed: the naming limb refused the code commit (ADVI_FIRMBKTS-D1-W24-S3). Nothing deployed; no AWS call; the dormant helper is measured in the worktree by AC1 and AC2.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/index.mjs",
+      "kind": "script",
+      "commit_or_etag": "UNCOMMITTED-worktree",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "not committed: the naming limb refused the code commit (ADVI_FIRMBKTS-D1-W24-S3). Nothing deployed; the call site is read by text in AC1 (K4); it is not run.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/test/ownership_key.spec.mjs",
+      "kind": "test",
+      "commit_or_etag": "UNCOMMITTED-worktree",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "not committed: the naming limb refused the code commit (ADVI_FIRMBKTS-D1-W24-S3). Nothing deployed.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 expects ROUND 4 VALIDATOR KEY: 4 of 4 arms: K1 the helper exports a frozen empty CANONICAL_PLATINUM_BUCKETS and ownershipMapKey; K2 the shipped list keeps the legacy key; K3 the engaged key equals the seam's canonical destination; K4 index.mjs builds the key through the helper.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-24 && timeout 110 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_validator.py --arms key --root /c/dev/wk-firmbkts-24; echo \"exit=$?\"",
+      "output_evidence": "PASS K1 ownership_key.mjs exports a frozen empty CANONICAL_PLATINUM_BUCKETS and ownershipMapKey\nPASS K2 dormant: the shipped list keeps the legacy key for every firm and bucket\nPASS K3 engaged: a named bucket reads the seam's canonical key and an unnamed one stays legacy\nPASS K4 index.mjs builds the key through the helper, with no key literal left in code\nROUND 4 VALIDATOR KEY: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms",
+      "status": "PASS",
+      "expect": "ROUND 4 VALIDATOR KEY: 4 of 4 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the worker's spec test/ownership_key.spec.mjs: bun test prints 0 fail, five arms (i) frozen empty list, (ii) legacy keys on the shipped list, (iii) canonical key for 49financial on its named bucket, (iv) legacy key on an unnamed bucket, (v) legacy key for an unregistered firm.",
+      "method": "command",
+      "invocation": "export PATH=\"$PATH:$HOME/.bun/bin\" && cd /c/dev/wk-firmbkts-24/infra/aws/lambda-edge/auth-validator-edge && timeout 110 env -u FORCE_COLOR bun test test/ownership_key.spec.mjs 2>&1 | tail -n 6",
+      "output_evidence": "bun test v1.4.2 (744846f84)\n\n 5 pass\n 0 fail\n 11 expect() calls\nRan 5 tests across 1 file. [15.00ms]",
+      "denominator": "5 of 5 tests pass (0 fail)",
+      "status": "PASS",
+      "expect": "^\\s*0 fail$"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound (the control): ROUND 4 SCOPE: OK, which passes only for a change confined to the five allowed paths; it fails for any change outside them.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-24 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-24 --allow infra/aws/lambda-edge/auth-validator-edge/index.mjs --allow infra/aws/lambda-edge/auth-validator-edge/ownership_key.mjs --allow infra/aws/lambda-edge/auth-validator-edge/test/ownership_key.spec.mjs --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~24/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md --require infra/aws/lambda-edge/auth-validator-edge/index.mjs --require infra/aws/lambda-edge/auth-validator-edge/ownership_key.mjs; echo \"exit=$?\"",
+      "output_evidence": "  CHANGED infra/aws/lambda-edge/auth-validator-edge/index.mjs\n  CHANGED infra/aws/lambda-edge/auth-validator-edge/ownership_key.mjs\n  CHANGED infra/aws/lambda-edge/auth-validator-edge/test/ownership_key.spec.mjs\n  CHANGED portal   <-- OUTSIDE\nROUND 4 SCOPE: FAIL 4 changed, 1 outside, 0 required missing\nexit=1",
+      "denominator": "1 outside of 4 changed; 0 of 2 required paths missing",
+      "status": "FAIL",
+      "status_reason": "The one outside change is the pre-existing portal submodule pointer drift (surprise ADVI_FIRMBKTS-D1-W24-S1), not a change this worker made. The three cell files and the channel are the only other changes and all are allowed. The control reads the drift as OUTSIDE, so the order stays open.",
+      "expect": "ROUND 4 SCOPE: OK"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W24-S1: The worktree carries a pre-existing portal submodule pointer drift, so the round-4 write-surface check AC3 reads portal as OUTSIDE the five allowed paths and FAILs.",
+    "ADVI_FIRMBKTS-D1-W24-S2: The order's bound 3 says ASCII only, but index.mjs already carries one non-ASCII em dash in a comment at base, outside the cell's edit.",
+    "ADVI_FIRMBKTS-D1-W24-S3: The commit-time naming gate refuses the cell's hand-typed ownership-map key templates and firm and bucket literals, and its suggested key form differs from the key the producers' seam writes. The code commit is BLOCKED."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~24/ADVI_FIRMBKTS.TO-FB-g-1.validator-ownership-key.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python r4_validator.py --arms key",
+      "invocation": "timeout 110 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_validator.py --arms key --root /c/dev/wk-firmbkts-24",
+      "result": "ROUND 4 VALIDATOR KEY: 4 of 4 arms; exit=0"
+    },
+    {
+      "tool": "bun test (spec)",
+      "invocation": "bun test test/ownership_key.spec.mjs in infra/aws/lambda-edge/auth-validator-edge",
+      "result": "5 pass, 0 fail; exit=0"
+    },
+    {
+      "tool": "python r4_scope.py",
+      "invocation": "timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-24 (with the four --allow and two --require paths)",
+      "result": "ROUND 4 SCOPE: FAIL 4 changed, 1 outside, 0 required missing; exit=1 (portal, surprise S1)"
+    },
+    {
+      "tool": "safe-commit.sh (naming limb, code paths)",
+      "invocation": "bash .tools/safe-commit.sh --author 0.9.0_WK_ADVI_FIRMBKTS~24 -F .scratch/msg_fbg1_code.txt -- the three code paths and the channel",
+      "result": "rc=1; ERROR: BLOCKED -- the naming limb refused; NAMING-GATE: REFUSE 18 graded; no commit"
+    },
+    {
+      "tool": "safe-commit.sh (channel rows)",
+      "invocation": "bash .tools/safe-commit.sh --author 0.9.0_WK_ADVI_FIRMBKTS~24 -F .scratch/msg_fbg1_channel.txt -- org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc=0; commit d5f87460cf; surprise-row gate OK (3 new rows); msg-verify MATCH"
+    }
+  ]
+}
