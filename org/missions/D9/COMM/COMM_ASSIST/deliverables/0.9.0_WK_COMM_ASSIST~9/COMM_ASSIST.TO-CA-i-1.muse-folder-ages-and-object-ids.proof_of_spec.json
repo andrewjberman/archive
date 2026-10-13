@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-i-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-1.muse-folder-ages-and-object-ids.md",
+    "group": "OTHER",
+    "vintage_commit": "b48dd24864"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round17.md",
+    "vintage_commit": "b48dd24864",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-1.muse-folder-ages-and-object-ids.md"
+  },
+  "assignee": "0.9.0_WK_COMM_ASSIST~9",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/muse_reader/refresh.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit on the worker branch wk-COMM_ASSIST-9; nothing deployed or scheduled on dell2 (the cell is a repository change only)",
+      "artifact_covered_by": ["CAi1-AC1", "CAi1-AC2", "CAi1-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAi1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i1_ages.py\" expect: I1-AGES ok=True arms=5 of 5",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i1_ages.py\"",
+      "output_evidence": "(timeout 120, rc 0) I1-AGES ok=True arms=5 of 5 failed=none reason=none",
+      "denominator": "5 of 5 arms: basic; first-key-wins; unparsable-kept-as-none; future-zero-and-offset (includes the +00:00 form); inputs-not-mutated",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CAi1-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i1_live.py\" expect: I1-LIVE ok=True",
+      "method": "live_read",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i1_live.py\"",
+      "output_evidence": "(timeout 120, rc 0, 24 s) I1-LIVE ok=True items=30 aged=30 object_ids=7 of 7 answers_untouched=True readme_answers=True reason=none",
+      "denominator": "sources unreadable 0 of 4 (open_calls ok 20 open rows across 4 box copies, 0 absent copies, all 20 aged from opened_at; drafts ok 7 pending rows from 602 scanned table rows, all 7 aged from texted_at; eod_today ok 0 items, row eod:2026-10-13 present with pending=no; sprint_today ok 3 objects, all 3 aged from last_modified); items 30 of 30 carry both age keys and a whole-number age (threshold 80 percent); draft rows with object_id 7 of 7",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CAi1-AC3",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r16/checks/check_h1_census.py\" expect: hits=0 ok=True",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r16/checks/check_h1_census.py\"",
+      "output_evidence": "(timeout 120, rc 0) H1-CENSUS files=6 hits=0 ok=True patterns=6",
+      "denominator": "6 files written by the live run (drafts.json, eod_today.json, open_calls.json, sprint_today.json, INDEX.json, README.txt) x 6 patterns (AWS key, PEM, bearer, JWT, email, secret assignment): 0 hits of 36 file-pattern tests",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CAi1-AC1 base arm, measured here: the check run with the base refresh.py (the issuance commit b48dd24864, git show to a scratch tree, no with_age present)",
+      "expected": "I1-AGES ok=False",
+      "observed": "I1-AGES ok=False arms=0 of 5 failed=basic(AttributeError ...);first-key-wins(AttributeError ...);unparsable-kept-as-none(AttributeError ...);future-zero-and-offset(AttributeError ...);inputs-not-mutated(AttributeError ...) (rc 0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "CAi1-AC1 run twice: once after the first build (fraction not yet accepted) and once after the fraction fix; ok=True arms=5 of 5 both times, since the fix touches only the time parser. CAi1-AC2 and CAi1-AC3 read live AWS state (the drafts table scan read 602 rows in this worker's scratch run; the table is live), so no same-input determinism is claimed for them.",
+      "observed": "CAi1-AC1 identical on both runs (ok=True arms=5 of 5); AC2 and AC3 live, N/A for same-input determinism",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "scheduling, installing or running the refresh on dell2",
+      "reason": "outside this cell; the dell2 launch and schedule belong to a later cell"
+    },
+    {
+      "item": "AWS write calls (put, update, delete, deploy, apply)",
+      "reason": "the cell's rule is read calls only; the readers make scan, get-item, list-objects-v2 and get-object calls, and nothing else was called"
+    },
+    {
+      "item": "CAi1-AC2 base arm (the live check against the issuance commit)",
+      "reason": "not re-run: the base refresh.py cannot find lib/devices.py from a scratch tree; the issuer recorded it at base in the TO RECORD FACE (items=23 aged=0)"
+    },
+    {
+      "item": "portal submodule",
+      "reason": "the worktree shows portal as modified before this worker started; it is not in the cell's <paths> and is not committed here"
+    }
+  ],
+  "surprises": [
+    "COMM_ASSIST-W9-S1: the S3 listing's LastModified carries a millisecond fraction (2026-10-13T20:13:51.000Z) that the cell's two example forms do not name; the parser now accepts an optional fraction and still only Z and +00:00",
+    "COMM_ASSIST-W9-S2: the eod_today draft row carries object_id (its pk eod:<day>) because one row builder serves both draft readers; the cell named the drafts reader only"
+  ],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~9/COMM_ASSIST.TO-CA-i-1.muse-folder-ages-and-object-ids.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m py_compile data/transcripts/scripts/muse_reader/refresh.py",
+      "result": "rc 0 (compiles)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python data/transcripts/scripts/muse_reader/refresh.py --root .scratch/muse_i1",
+      "result": "READ open_calls boxes=4 copies_read=4 copies_absent=0 open_rows=20; READ drafts table=teams-global-chat-assist-table rows_scanned=602 pages=2 pending_rows=7; READ eod_today row=eod:2026-10-13 pending=no; READ sprint_today prefix=s3://opal-data-portal-v2/daily-reports/2026-10-13/ objects=3 truncated=no; OK open_calls items=20; OK drafts items=7; OK eod_today items=0; OK sprint_today items=3; MUSE-REFRESH ok=4 absent=0 unreadable=0; rc 0; every item carries age_minutes and age_from; 30 of 30 whole-number ages"
+    },
+    {
+      "tool": "aws",
+      "invocation": "shutil.which('aws') from Python on this laptop -> C:\\Users\\AndrewBerman\\bin\\aws.CMD; refresh.py's aws_bin() resolves MUSE_AWS_BIN default aws through shutil.which",
+      "result": "the working launch form on this laptop is the bare name aws resolved by shutil.which to aws.CMD; every AWS call in the run returned rc 0; no call was denied, so no source was unreadable"
+    }
+  ]
+}

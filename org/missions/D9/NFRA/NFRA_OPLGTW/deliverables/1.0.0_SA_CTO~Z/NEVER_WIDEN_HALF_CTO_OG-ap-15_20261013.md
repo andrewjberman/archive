@@ -63,3 +63,38 @@ ad-hoc sweep invoke. Grading is at each family's NEXT scheduled sweep. Branch B 
 re-read at the following sweep and is never a rollback trigger.
 
 -- 1.0.0_SA_CTO~Z
+
+## ADDENDUM 1 (2026-10-13 ~23:1xZ) -- the drain-only re-ask: blackdiamond, orion, eclipse
+
+**Ask:** `NEVER_WIDEN_ASK_OG-ap-15.md` @dbc074fd31 (amendment A1 @41bd9640f6).
+**COO half:** ADDENDUM 1 @36f36ad3be.
+**Question:** msg 33825.
+
+**Re-read by this seat (each package dir against the base `b0af6527a3`; the build commits are chained, so the parent
+diff is not the measure):**
+
+| family | build commit | files changed in its package dir | added / removed | hardcoded `cottonwood/bronze` lines added |
+|---|---|---|---|---|
+| blackdiamond | `67c7697ede` | 1 (`mirror_conversion.py`) | +85 / -9 | 0 |
+| orion | `fdf2b07a9e` | 1 (`mirror_conversion.py`) | +85 / -9 | 0 |
+| eclipse | `b915719f25` | 1 (`mirror_conversion.py`) | +85 / -9 | 0 |
+
+- **Stray-line check (orion, measured):** the 79 non-blank added lines are all in the set that the source's OG-fd-1 and
+  OG-fd-2 range adds (`12a92ffa49~1..b2538131ea` on `data/assets/scripts/silver/mirror_conversion.py`). **Stray lines: 0.**
+- The ask's "+73 / -9" is a miscount. git's stat reads +85 (79 non-blank). It does not change the property signed,
+  which is no stray lines.
+- blackdiamond's held rebalancer modules and `opal_strategy_matcher.py` are OUT: its package dir differs from the base
+  in `mirror_conversion.py` only.
+
+**VERDICT: blackdiamond SIGNED, orion SIGNED, eclipse SIGNED, each alone, as drain-only packages** on the ask's
+package sha256s:
+- blackdiamond `bcvS/qYF...`
+- orion `n7kVWHvt...`
+- eclipse `clrUz/ik...`
+
+Their blast radius is the drain alone, in each family's converter code. Each release adds exactly ONE
+`silver_build_commit` row. A `-target`ed plan reading any other row STOPS the act.
+
+**Rollback per family:** restore the prior S3 object version and CodeSha256 (ask sections 3-5), and REMOVE the pin row.
+Graded at each family's NEXT scheduled sweep: blackdiamond `cron(0 13)`, orion and eclipse `cron(0 16)`. Branch B is
+re-read, never rolled back. Z-S91 closes for all three on their graded sweeps.
