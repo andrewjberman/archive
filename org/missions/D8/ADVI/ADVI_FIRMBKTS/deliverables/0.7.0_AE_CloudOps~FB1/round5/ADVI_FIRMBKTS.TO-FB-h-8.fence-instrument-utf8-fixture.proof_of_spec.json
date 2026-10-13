@@ -1,0 +1,88 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-h-8",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-h-8.fence-instrument-utf8-fixture.md",
+  "group": "OTHER",
+  "vintage_commit": "b39d4a70f6"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FB1",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R5.md",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-h-8.fence-instrument-utf8-fixture.md",
+  "vintage_commit": "b39d4a70f6"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py",
+   "kind": "code",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "out() prints ASCII only; the git ls-tree reads decode utf-8; commit-gate clean",
+   "artifact_covered_by": [
+    "AC2"
+   ],
+   "commit_or_etag": "38f8179f10"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "invocation": "cd C:/dev/ajb_workspace && env -u PYTHONIOENCODING -u PYTHONUTF8 timeout 118 python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py 2>&1 | tail -1",
+   "expect": "^FENCE-SCOPED rows_today=[0-9]+ unchanged_today=True scoped_rendered=[0-9]+/[0-9]+ sim_ok=[0-9]+/[0-9]+ refusals_ok=7/7 unknown_key_refused_by=validator\\+module ok=True$",
+   "output_evidence": "run 2026-10-13T06:54:01Z, printed:\nFENCE-SCOPED rows_today=42 unchanged_today=False scoped_rendered=0/0 sim_ok=0/0 refusals_ok=0/7 unknown_key_refused_by=none ok=False",
+   "denominator": "ok=False; refusals_ok 0/7 (init failure) before the third and fourth reasons; sim_ok 0/0 at HEAD",
+   "status": "FAIL",
+   "criterion_verbatim": "cd C:/dev/ajb_workspace && env -u PYTHONIOENCODING -u PYTHONUTF8 timeout 118 python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py 2>&1 | tail -1",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AC2",
+   "invocation": "cd C:/dev/ajb_workspace && timeout 60 python -c \"import sys,glob;bad=[p for p in glob.glob('infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py')+glob.glob('infra/aws/terraform/shared-infra/tests/derive_fence_row_shape.py') if any(ord(c)>127 for c in open(p,encoding='utf-8').read())];print('NONASCII-FILES',len(bad))\"",
+   "expect": "^NONASCII-FILES 0$",
+   "output_evidence": "run 2026-10-13T06:54:01Z, printed:\nNONASCII-FILES 0",
+   "denominator": "0 of 2 files carry a byte above 127",
+   "status": "PASS",
+   "criterion_verbatim": "cd C:/dev/ajb_workspace && timeout 60 python -c \"import sys,glob;bad=[p for p in glob.glob('infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py')+glob.glob('infra/aws/terraform/shared-infra/tests/derive_fence_row_shape.py') if any(ord(c)>127 for c in open(p,encoding='utf-8').read())];print('NONASCII-FILES',len(bad))\"",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "not applicable",
+   "observed": "N/A",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the before_strip init fix of section 1a.2",
+   "reason": "the named cause is not the cause; the pinned selector needs a ruling on what the arm asserts (row ADVI_FIRMBKTS-D1-S43); not edited"
+  },
+  {
+   "item": "the simulator arms",
+   "reason": "iam:SimulateCustomPolicy AccessDenied to this identity; reported, not stubbed (rule 2); routed by the issuer to the laptop lane"
+  },
+  {
+   "item": "refusal arms 3 and 4, unchanged_today and scoped_rendered",
+   "reason": "stale against the validator and the registry's grants field; an arm's assertion is the issuer's to change"
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-S43: the fence-scoped check cannot read ok=True: simulator denied, the pinned CRM selector fails over today's registry, two refusal arms and unchanged_today stale against the validator and the grants field"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "check_fence_scoped_rows.py",
+   "invocation": "as quoted (AC1)",
+   "result": "FENCE-SCOPED rows_today=42 unchanged_today=False scoped_rendered=0/0 sim_ok=0/0 refusals_ok=0/7 unknown_key_refused_by=none ok=False"
+  }
+ ]
+}
