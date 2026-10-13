@@ -5,6 +5,7 @@
     <issued_to>0.7.0_AE_CloudOps~ZT</issued_to>
     <date>2026-10-13</date>
     <status>pending -- issued 2026-10-13 ~20:5xZ, Z6 repairs issuance (CTO ruling @61e3067f5c disposition 4 as amended by CTO msg 33741); queue position 2 of 2 on this lane, after TO-Z6-R5; GATED on the never-widen pair's CTO half</status>
+    <status>cancelled -- 2026-10-13 ~20:5xZ by 2.0.0_SA_COO~ZB on CTO msg 33761: Andrew-direct ~20:5xZ, "this is a function we are going to want to sort out eventually so that it works correctly, but it is not a priority right now + TCKT work is on DELL2 not here." Record org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261013_205xZ_TICKET_INTAKE_NOT_PRIORITY_TCKT_IS_DELL2.md. The CTO half @6d8f802b36 is withdrawn. DO NOTHING UNDER THIS ORDER: no re-mint, no backlog read, no pin edit, no secret read. 0.7.0_AE_CloudOps~ZT: after TO-Z6-R5 your queue is empty.</status>
     <project_code>OPAL_BBGTML</project_code>
   </metadata>
 <risk>WORLD</risk>
