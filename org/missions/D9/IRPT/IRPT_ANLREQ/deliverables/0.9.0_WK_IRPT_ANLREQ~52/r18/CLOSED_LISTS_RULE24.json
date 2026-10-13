@@ -1,0 +1,127 @@
+{
+  "cell": "AR-y-181",
+  "rule_commit": "da7b3b10bc (template_reader.py rule, READER_VERSION irpt-template-reader.r18.1, READER_PINS digest 0c9326f4d3ba6dea9aee6f813328b865768ec6f872171adae0e78c01a4a8da75). The negative controls were committed alone at 015af53b8f, before the rule.",
+  "rule": "A row-1 header cell in column C or beyond IS an account header when its words -- case-folded, split on whitespace, hyphen and slash, each stripped of punctuation -- are: (a) either the words 'no. of' followed by an account word that is NOT plural, or an optional modifier (custodian, client, sub, brokerage, ira, joint); then (b) an account word (account, accounts, acct, accts, acc, subaccount); then nothing, or identifier words only (number, numb, num, nbr, no, id, ref, reference, code, key, identifier, seq, sequence). A whole-cell exclusion list is applied first: the six attribute forms of the r17 record and the new COUNT exclusion (no. of + plural account word).",
+  "where_in_code": "infra/aws/lambda/investor-reporting/intake/template_reader.py: _header_words, _is_account_header, ACCOUNT_WORDS, ACCOUNT_MODIFIERS, ACCOUNT_TAIL_WORDS, COUNT_PLURAL_WORDS, ACCOUNT_HEADER_EXCLUDED; used by _several_accounts",
+  "domain": "row-1 header cells in columns C and beyond (A and B are the ticker and unit headers); the column counts only when it holds 2 or more distinct non-empty values in the rows below it. Declared grid for the subtraction below: 10 prefixes (none, custodian, client, sub, brokerage, ira, joint, no. of, trust, fund) x 10 account spellings (account, accounts, acct, accts, acc, accnt, subaccount, subaccounts, sub-account, accounting) x 22 tail words (none, number, numbers, no, num, nbr, numb, id, ref, reference, code, key, identifier, seq, sequence, serial, seqno, nos, holder, count, type, value), each joined with single spaces: 2200 distinct headers.",
+  "population": "constructed and synthetic (no real-use account header is in the repository, as the r13, r16 and r17 records state). The population is ACCOUNT_HEADER_POPULATION.json in this folder: 28 identifier forms (the r17 seeds, the six new forms and the round-16 forms), 2 count forms, 10 attribute forms, 7 non-account forms, and 6 word negative controls committed before the change. Denominator 53 forms.",
+  "subtraction": {
+    "scratch_run": "scratch script .scratch/subtract_r18.py (uncommitted), run with python -I against the committed rule at da7b3b10bc",
+    "grid_denominator": 2200,
+    "matched": 658,
+    "unmatched": 1542,
+    "uncovered_members_by_subtraction": {
+      "plural tail numbers": "Account Numbers, Subaccount Numbers and every account spelling with 'numbers' is unmatched",
+      "plural account word subaccounts": "Subaccounts, Subaccounts Number is unmatched; not added, because no census form carries it (the cell admits it only if justified)",
+      "spelling accnt": "Accnt, Accnt Number is unmatched; not added, no census form carries it",
+      "tails nos, seqno, serial": "Account Nos, Account Seqno, Account Serial are unmatched; not added, no census form carries them"
+    },
+    "uncovered_members_filed": "IRPT_ANLREQ-D2-W52-S31 (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~Y2): the residual misses of the costly direction, measured here and not widened, because widening beyond the ruled vocabulary is a ruling.",
+    "matched_with_an_attribute_tail": 0,
+    "attribute_tail_note": "the attribute-tail test reads 'count' as a substring and so flags every account-word form; read as a whole word the count is 0",
+    "no_of_plural_forms_in_grid": 44,
+    "no_of_plural_forms_matched": 0,
+    "attribute_or_non_account_forms_turned_back_in_the_population": 0,
+    "identifier_forms_unmatched_in_the_population": 0
+  },
+  "differential": {
+    "against": "irpt-template-reader.r17.1 rule as it stood at worktree HEAD bb89fd5c0d, before da7b3b10bc (the file read with git show HEAD:<template_reader.py>)",
+    "forms": 59,
+    "changed_to_matched": ["Account Seq", "Account Sequence", "Brokerage Account", "IRA Account", "Joint Account", "Subaccount"],
+    "changed_to_unmatched": ["No. of Accounts", "No. of accts"],
+    "unchanged": 51
+  },
+  "additions": [
+    {
+      "word": "brokerage",
+      "kind": "modifier",
+      "form_admitted": "Brokerage Account, Brokerage-Account, Brokerage Acct No.",
+      "why_it_names_an_account": "Brokerage Account names the account a holder owns, as Custodian Account and Client Account do; the word names whose account it is, not an attribute of it."
+    },
+    {
+      "word": "ira",
+      "kind": "modifier",
+      "form_admitted": "IRA Account, IRA-Account, IRA Account No",
+      "why_it_names_an_account": "IRA Account names the registered account a holder owns, as Brokerage Account does; the account word carries the identity and the modifier names the registration. IRA alone, or IRA Account Type, stays unmatched: the account TYPE header is on the exclusion list."
+    },
+    {
+      "word": "joint",
+      "kind": "modifier",
+      "form_admitted": "Joint Account, Joint Acct No, Joint/Account",
+      "why_it_names_an_account": "Joint Account names the one account held by several holders, as a custodian or client account is one account; the word names the holding, not who holds it (Joint Holder Name stays unmatched: holder is not an account word)."
+    },
+    {
+      "word": "subaccount",
+      "kind": "account word",
+      "form_admitted": "Subaccount, Subaccount Number, Subaccount ID",
+      "why_it_names_an_account": "one word for the account a sub-account is; Sub-Account already matches through the sub modifier, so the one-word spelling names the same account. subaccounts (plural) is NOT added: no census form carries it, and the cell admits it only if justified."
+    },
+    {
+      "word": "seq",
+      "kind": "identifier tail word",
+      "form_admitted": "Account Seq, Account Seq No, Client Account Seq",
+      "why_it_names_an_account": "Account Seq numbers the account within the file, as num and number already do for Account Num and Account Number; a sequence number is an identifier tail, not an attribute of the account."
+    },
+    {
+      "word": "sequence",
+      "kind": "identifier tail word",
+      "form_admitted": "Account Sequence, Account Sequence No, Client Account Sequence",
+      "why_it_names_an_account": "the spelled-out form of seq, the same identifier tail."
+    },
+    {
+      "word": "No. of Accounts (and any no. of + plural account word)",
+      "kind": "whole-cell COUNT exclusion",
+      "form_excluded": "No. of Accounts, NO. OF ACCOUNTS, no of accts",
+      "why_excluded": "the header names a count of the accounts a file holds (one number for the file), not an identifier of which account a row belongs to. A distinct-value check over it would turn back a column that names no account. Keyed on the words alone; see S32 for the residual where a real identifier column carries this header.",
+      "singular_control": "No. of Account still matches (not in the plural exclusion): 'No. of Account' is in identifier_forms and is turned back"
+    }
+  ],
+  "exclusions": [
+    {
+      "word": "Account Type",
+      "why": "names the kind of account (taxable, IRA, trust). Two kinds are not two accounts. Carried from r17 unchanged."
+    },
+    {
+      "word": "Account Name",
+      "why": "a label for an account; joint holders or a nickname can be written several ways in one account. Carried from r17 unchanged."
+    },
+    {
+      "word": "Account Holder",
+      "why": "names who holds the account; a joint holder list can name several people in one account. Carried from r17 unchanged."
+    },
+    {
+      "word": "Account Manager",
+      "why": "names who manages the account; a team can hold several names in one account. Carried from r17 unchanged."
+    },
+    {
+      "word": "Account Value",
+      "why": "a money value; it differs on almost every row. Carried from r17 unchanged."
+    },
+    {
+      "word": "Account Status",
+      "why": "whether the account is open or closed; a state, not an account number. Carried from r17 unchanged."
+    },
+    {
+      "word": "Account Opened",
+      "why": "the date the account was opened; a date, not an account number. Carried from r17 unchanged."
+    },
+    {
+      "word": "No. of Accounts (COUNT)",
+      "why": "see the COUNT exclusion above. New in AR-y-181."
+    }
+  ],
+  "negative_controls": {
+    "committed_alone_at": "015af53b8f",
+    "forms": ["Brokerage Fee", "IRA Contribution", "Joint Holder Name", "Trade Seq", "Trade Sequence", "Subaccount Fee"],
+    "one_per_new_word": {
+      "brokerage": "Brokerage Fee",
+      "ira": "IRA Contribution",
+      "joint": "Joint Holder Name",
+      "seq": "Trade Seq",
+      "sequence": "Trade Sequence",
+      "subaccount": "Subaccount Fee"
+    },
+    "why_each_is_not_an_account_column": "a fee, a contribution, a holder name, a trade sequence number and a fee on a subaccount name a column that is not the account a row belongs to; each carries the new word and fails the rule on its head word (the first word after any modifier is not an account word) or on a non-identifier tail word."
+  },
+  "readers_gate_note": "Stored inputs written under irpt-template-reader.r17.1 are not compared under irpt-template-reader.r18.1 (CONTRACT C-STOREDINPUT, PRD v0.4 point 3). The reader is built, not released. How many round-16 and round-17 stored inputs read NORMALIZED under the new rule is the S29 count (the round-18 enrichment item 2), not this record."
+}

@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-181",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-181.account-header-vocabulary-widening.md",
+    "group": "OTHER",
+    "vintage_commit": "bb89fd5c0d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R18_Y.md",
+    "vintage_commit": "bb89fd5c0d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-181.account-header-vocabulary-widening.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~52",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/template_reader.py",
+      "kind": "script",
+      "commit_or_etag": "da7b3b10bc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on the worker branch wk-IRPT_ANLREQ-52 only; the reader is built and not released (the release pair is cut after AR-y-182 merges); nothing uploaded, applied, invoked or pushed",
+      "artifact_covered_by": [
+        "AR181-y-AC1",
+        "AR181-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_template_account_totals.py",
+      "kind": "test",
+      "commit_or_etag": "da7b3b10bc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on the worker branch only; one test per addition and one per negative control, the one changed expectation (No. of Accounts) named in its comment"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r18/ACCOUNT_HEADER_POPULATION.json",
+      "kind": "doc",
+      "commit_or_etag": "4ab77eeb6a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a record file committed on the worker branch only; word_negative_controls committed alone at 015af53b8f before the rule changed"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r18/CLOSED_LISTS_RULE24.json",
+      "kind": "doc",
+      "commit_or_etag": "4ab77eeb6a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a record file committed on the worker branch only; the subtraction script is uncommitted scratch at .scratch/subtract_r18.py"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR181-y-AC1",
+      "criterion_verbatim": "over the stored population, every identifier form is matched, `No. of Accounts` is not (and `No. of Account` is), every attribute and non-account form is unmatched, and each of at least five negative controls is unmatched.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-52/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r18/ar18_checks.py y181-rule --root C:/dev/wk-irpt-anlreq-52",
+      "output_evidence": "population: 28 identifier, 2 count, 10 attribute, 7 non-account, 6 negative controls\nY181-RULE-OK\n(rc=0)",
+      "denominator": "53 of 53 population forms: 28 of 28 identifier forms matched, 2 of 2 count forms unmatched (No. of Accounts, No. of accts), 10 of 10 attribute forms unmatched, 7 of 7 non-account forms unmatched, 6 of 6 negative controls unmatched (at least 5 required)",
+      "expect": "Y181-RULE-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR181-y-AC2",
+      "criterion_verbatim": "the difference control -- the whole intake test folder passes (317 at the base) and `READER_VERSION` differs from the round-17 value.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-52/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r18/ar18_checks.py y181-keep --root C:/dev/wk-irpt-anlreq-52",
+      "output_evidence": "intake tests: 331 passed, 0 failed (rc=0)\nREADER_VERSION = irpt-template-reader.r18.1\nY181-KEEP-OK\n(rc=0)",
+      "denominator": "331 passed of 331 run in the intake tests folder (0 failed; 1 skipped is not counted as a pass); floor 317; READER_VERSION irpt-template-reader.r18.1 differs from irpt-template-reader.r17.1",
+      "expect": "Y181-KEEP-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR181-y-AC3J",
+      "criterion_verbatim": "each addition names an account and not an attribute, each negative control is a header whose new word is NOT an account column and was named before the rule changed, and the COUNT exclusion cannot hide a real account column.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~52/r18/CLOSED_LISTS_RULE24.json (additions, exclusions, negative_controls); git show --stat 015af53b8f; git show --stat da7b3b10bc",
+      "output_evidence": "word_negative_controls committed alone at 015af53b8f before the rule commit da7b3b10bc: Brokerage Fee, IRA Contribution, Joint Holder Name, Trade Seq, Trade Sequence, Subaccount Fee. Additions with census lines: brokerage, ira, joint (modifiers), subaccount (account word), seq and sequence (identifier tails). COUNT exclusion for no. of plus a plural account word, with the singular control No. of Account still matched. Differential over 59 forms against r17.1: 6 changed to matched (Account Seq, Account Sequence, Brokerage Account, IRA Account, Joint Account, Subaccount), 2 changed to unmatched (No. of Accounts, No. of accts), 51 unchanged. The COUNT exclusion's residual (a real column headed No. of Accounts that carries identifiers) is filed as IRPT_ANLREQ-D2-W52-S32 and is not decided here.",
+      "denominator": "6 of 6 additions carry a census line; 6 of 6 negative controls were committed before the rule changed; 8 of 59 differential forms changed, all 8 as intended",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; graded at L9 by 3.0.0_SA_CVO, never by the worker"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "COUNT exclusion disabled in a scratch copy (the line 'if len(words) > 2 and words[2] in COUNT_PLURAL_WORDS:' replaced by 'if False:') under .scratch/mutant_root, with the r18 population copied beside it; the y181-rule check run against that root",
+      "expected": "Y181-RULE-FAIL (rc=1) with a FAIL line naming a COUNT form matched as an account header",
+      "observed": "FAIL: a COUNT form is matched as an account header: 'No. of Accounts' / FAIL: a COUNT form is matched as an account header: 'No. of accts' / Y181-RULE-FAIL (mutant rc=1); the real tree printed Y181-RULE-OK (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the y181-rule check against the real worktree, output redirected to two files and compared with cmp",
+      "observed": "run 1 and run 2 byte-identical (cmp printed IDENTICAL); both rc=0; both Y181-RULE-OK",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W52-S31: identifier spellings outside the ruled vocabulary are still unmatched after the widening (Account Numbers, Subaccounts, Accnt, Account Nos, Account Seqno, Account Serial); OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~Y2",
+    "IRPT_ANLREQ-D2-W52-S32: the No. of Accounts COUNT exclusion keys on header words alone, so a real account column headed that way is not turned back; OBSERVATION, ARMED, disarm owner 1.0.0_SA_CTO"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "subaccounts (plural) as an account word",
+      "reason": "not added: no census form carries it, and the cell admits it only if justified"
+    },
+    {
+      "item": "the residual spellings Account Numbers, Accnt, Account Nos, Account Seqno, Account Serial",
+      "reason": "outside the ruled vocabulary; measured by subtraction and filed as IRPT_ANLREQ-D2-W52-S31, not widened by the worker"
+    },
+    {
+      "item": "stored inputs written under irpt-template-reader.r17.1, and the count of round-16 NORMALIZED inputs (S29)",
+      "reason": "CONTRACT C-STOREDINPUT: a stored r17.1 input is not compared under r18.1; the S29 count is the round-18 enrichment item 2, not this order"
+    },
+    {
+      "item": "the release pair of the reader, and the count of AR-y-182",
+      "reason": "not in this cell; the reader stays built and not released until AR-y-182 merges"
+    },
+    {
+      "item": "the judgment criterion AR181-y-AC3J",
+      "reason": "graded at L9 by 3.0.0_SA_CVO; the worker records the output and gives no verdict"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python C:/dev/wk-irpt-anlreq-52/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r18/ar18_checks.py y181-rule --root C:/dev/wk-irpt-anlreq-52",
+      "result": "population: 28 identifier, 2 count, 10 attribute, 7 non-account, 6 negative controls; Y181-RULE-OK (rc=0)"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python C:/dev/wk-irpt-anlreq-52/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r18/ar18_checks.py y181-keep --root C:/dev/wk-irpt-anlreq-52",
+      "result": "intake tests: 331 passed, 0 failed (rc=0); READER_VERSION = irpt-template-reader.r18.1; Y181-KEEP-OK (rc=0)"
+    }
+  ]
+}
