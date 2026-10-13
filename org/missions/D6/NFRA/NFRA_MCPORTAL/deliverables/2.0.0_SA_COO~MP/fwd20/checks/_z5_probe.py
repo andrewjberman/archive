@@ -4,6 +4,9 @@ import json
 import sys
 
 PROBE = (
+    # Amendment 3 (row Z-S48): server.py registers the enabled integrations at import (register_enabled, :90), so the
+    # probe reads the channel set the served app holds only after importing it.
+    "import app.server\n"
     "import time\n"
     "from app import admin_gateway_breakdown as b\n"
     "t = time.time(); d = b._compute(); s = time.time() - t\n"

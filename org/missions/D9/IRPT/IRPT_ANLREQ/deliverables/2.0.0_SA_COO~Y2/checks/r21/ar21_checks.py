@@ -608,6 +608,8 @@ def main(argv):
                                  (("intake", "tests/test_yfinance_check.py", 12),)),
                 "y293-kept": ("107", "KEPT_STATE.json", ("read", "state", "freeze_branch", "words", "tests", "before_arm", "shares_status", "claim", "not_read"),
                               (("intake", "tests/test_kept_holding.py", 14),))}[check]
+        if check == "y293-kept" and (root / (D24 % "110" + spec[1])).is_file():
+            spec = ("110",) + spec[1:]  # the continuation worker's record (AMENDMENT 1)
         rec = load(root, D24 % spec[0] + spec[1], problems)
         if rec:
             for member in spec[2]:
