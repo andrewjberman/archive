@@ -1,0 +1,115 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_CTLPLN.TO-CT-ab-13",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-13.merge-tree-check-runs-the-merged-checker.md",
+  "group": "OTHER",
+  "vintage_commit": "39a80ae385"
+ },
+ "assignee": "0.9.0_WK_NFRA_CTLPLN~86",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round12.md",
+  "vintage_commit": "39a80ae385",
+  "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-13.merge-tree-check-runs-the-merged-checker.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/merged-checker.sh",
+   "kind": "script",
+   "commit_or_etag": "0a938c6911",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "new file; defines merged_checker_path <git-dir> <fallback-root>; copies the merge's missions-tree-index.py from the private index into <git-dir>/merged-checker.XXXXXX/.tools/ and prints the copy; FALLBACK line on stderr when the merge does not carry the file"
+  },
+  {
+   "path_or_key": ".tools/box-sync.sh",
+   "kind": "script",
+   "commit_or_etag": "0a938c6911",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "sources the helper; grade_merge tree check (was about :143) and _standing_run tree pass (was about :177) call the merged copy; nothing else changed"
+  },
+  {
+   "path_or_key": ".tools/safe-merge.sh",
+   "kind": "script",
+   "commit_or_etag": "0a938c6911",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "sources the helper beside the script; fast-lane tree check (was about :618) calls the merged copy; the self-test arm that greps that call now greps the helper call and the --staged check"
+  },
+  {
+   "path_or_key": ".tools/tests/test_merged_checker.sh",
+   "kind": "test",
+   "commit_or_etag": "0a938c6911",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "four arms in temporary git repositories built from the real contract, schema, registers and merged gate, the CURRENT checker staged and the OLD checker (a71a0b4f68) on disk; final line MERGED-CHECKER-TEST cases=4/4 ok=True"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CTab13-AC1",
+   "criterion_verbatim": "bash .tools/tests/test_merged_checker.sh expect: ok=True -- every case passes, the control arm included (report the whole last line with its denominator)",
+   "method": "command",
+   "invocation": "bash .tools/tests/test_merged_checker.sh",
+   "output_evidence": "MERGED-CHECKER-TEST cases=4/4 ok=True (rc=0; run under timeout 120 from the worktree root; two runs gave identical PASS/FAIL lines). Arm 1: PASS arm 1: the merge's own checker passes the project-tree check (rc=0, RESULT: 0 violation(s)). Arm 2 (control): PASS arm 2 (control): the working-tree OLD checker is REFUSED on the merge (rc=1, ValueError). Arm 4: PASS arm 4: the helper's copy existed during the grade and is gone after the private git dir is removed. Arm 3: PASS arm 3: a merge without the file falls back to the working-tree checker and says FALLBACK.",
+   "denominator": "4 of 4 cases pass (arms 1 to 4; arm 2 is the control and passes by being refused with ValueError)",
+   "status": "PASS",
+   "expect": "ok=True",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CTab13-AC2",
+   "criterion_verbatim": "bash .tools/safe-merge.sh --self-test expect: PASS -- the merge refuser's own self-test still passes (a control that PASSES at the base; report its last line)",
+   "method": "command",
+   "invocation": "bash .tools/safe-merge.sh --self-test",
+   "output_evidence": "DENOMINATOR: 30 of 30 arm(s) passed; last line: PASS (rc=0; run under timeout 120 from the worktree root; second run gave the same denominator)",
+   "denominator": "30 of 30 self-test arms passed (the fast-lane tree-check arm was edited to grep the helper call and the --staged check; it passes)",
+   "status": "PASS",
+   "expect": "PASS",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the same merge checked with the WORKING-TREE OLD checker (a71a0b4f68), the way the call sites ran before this change; this is arm 2 of the test",
+   "expected": "rc != 0 and a ValueError from ast.literal_eval on the gate's FABRIC_ENUM = tuple(_fabric_values())",
+   "observed": "rc=1; ValueError: malformed node or string on line 113: <ast.Call object ...> (the gate's FABRIC_ENUM line)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the test run twice from the worktree root; PASS/FAIL lines and the final line compared with diff",
+   "observed": "identical verdict lines on both runs (cases=4/4 ok=True both); self-test denominator 30 of 30 on both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": ".tools/box-sync.sh run against the real repository (grade or box modes)",
+   "reason": "not run: the order forbids it; the two call sites were verified by dry read of the diff and by the helper run on the real worktree's private git dir (HEAD tree; copy byte-identical to HEAD's checker; copy removed afterwards)"
+  },
+  {
+   "item": ".tools/safe-merge.sh on a real branch",
+   "reason": "not run: the order allows only --self-test; the fast-lane call site is exercised by arm 1 through the same helper and the same command shape, not by a real merge"
+  },
+  {
+   "item": "box-sync.sh self-test",
+   "reason": "does not exist: box-sync.sh carries no --self-test; its call sites are covered by the helper arms and the dry read"
+  },
+  {
+   "item": "the portal gitlink and any push",
+   "reason": "not committed and not pushed; commit is LOCAL on wk-NFRA_CTLPLN-86"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~86/NFRA_CTLPLN.TO-CT-ab-13.merge-tree-check-runs-the-merged-checker.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~86, 2026-10-13; code commit 0a938c6911 on wk-NFRA_CTLPLN-86)",
+ "compiler_tools": [
+  {
+   "tool": "bash",
+   "invocation": "bash .tools/tests/test_merged_checker.sh",
+   "result": "MERGED-CHECKER-TEST cases=4/4 ok=True"
+  },
+  {
+   "tool": "bash",
+   "invocation": "bash .tools/safe-merge.sh --self-test",
+   "result": "DENOMINATOR: 30 of 30 arm(s) passed; PASS"
+  }
+ ]
+}
