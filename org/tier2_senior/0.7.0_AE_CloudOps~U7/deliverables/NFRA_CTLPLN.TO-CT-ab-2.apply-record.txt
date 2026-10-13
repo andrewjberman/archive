@@ -1,0 +1,26 @@
+NFRA_CTLPLN TO-CT-ab-2 -- Dell admin-group apply record
+by 0.7.0_AE_CloudOps~U7, 2026-10-13 20:30Z to 20:50Z, laptop. Counts, group names and policy-simulation verdicts only; no secret value read, no data-plane call.
+
+START CONDITION: both halves of pair 6 SIGNED at pin 738bbc654f (COO half CT-ab-2_PAIR_20261013.md @024c2fd428; CTO half NEVER_WIDEN_CT_AB2_DELL_ADMIN_GROUP_CTO_HALF.md, conditions read whole).
+LEDGER: org/critical_paths/change_management/20261013T2039Z_nfra-ctlpln-ab2-dell-admin-group-apply-20261013_deploy_completion.md (opened before the apply; 3 legs, CLOSED).
+PIN CHECK: tree of infra/aws/terraform/nfra-ctlpln-identity at 738bbc654f = 355c1c13bb926c7f22d358c191a7a5ceaffe7aaa (equals HEAD 14a0501ee5 at the read); sha256 of iam.tf, routes.tf and the four policy documents recomputed from git show: all equal the pair. Plan and apply were built from a clean detached worktree at the pin.
+PREVIOUS TREE (rollback): b2b7307c28ddb4eaf4bc81238da8933cd066691a (a71a0b4f68 identity root); one re-apply of it reverses all six keys and RESTORES the Denies the ruling removed. Not needed.
+
+PRE-1: iam get-group AdministratorAccessOpalCapital exists; attached policies exactly AWS AdministratorAccess, no inline policy (CTO condition 2); both Dell users in cloudops-dell-agents-group only.
+PRE-2: terraform plan -detailed-exitcode (rc 2) 'Plan: 2 to add, 3 to change, 2 to destroy.' on exactly K1-K6 = Branch A; text in org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-ab-2.plan.txt.
+
+APPLY: ONE .tools/safe-apply.sh apply of the saved planfile, rc 0, 2026-10-13T20:41:08Z to 20:41:23Z. 'Apply complete! Resources: 2 added, 3 changed, 2 destroyed.'
+  K1 aws_iam_user_group_membership.dell1_admin created; K2 .dell2_admin created;
+  K3 aws_iam_policy.dell_agent_deploy, K4 .dell_agent_iam_roles, K5 .dell2_ssm updated in place;
+  K6 aws_iam_policy.dell_agent_routes_fn[0] and its group attachment destroyed (get-policy now NoSuchEntity).
+RE-PLAN: -detailed-exitcode rc 0, 'No changes'.
+
+POST-2 (simulate-principal-policy, one resource per call): kms:Decrypt on the IRPT key, s3:GetObject on an opal-data-bd object, lambda:UpdateFunctionCode on protected auth-validator-edge, ssm:StartSession on an instance, iam:CreateUser = allowed for both users.
+POST-3 (the gate): cloudtrail:DeleteTrail, dynamodb:DeleteTable, s3:DeleteObject on an opal-data-bd object = explicitDeny (cloudops-dell-agent-deploy-policy); s3:PutBucketVersioning on the audit-trail bucket = explicitDeny (cloudops-dell-agent-create-policy); for both users.
+  Control: the same four actions simulated for Andrew_Berman (no such Deny) read allowed 4/4, so the denies come from the policies.
+BLIND (declared): a Deny attached to the users outside this root; the Dell managers' own read-backs (dell2 IRPT decrypt, dell1 simulation and edge-function admit) run after this report and stand down ~ANL and ~FBL.
+
+APPLY pin=738bbc654f added=2 changed=3 destroyed=2
+POST-1 dell1=AdministratorAccessOpalCapital,cloudops-dell-agents-group dell2=AdministratorAccessOpalCapital,cloudops-dell-agents-group
+POST-2 allowed=5/5 per user
+POST-3 explicit_deny=4/4 per user

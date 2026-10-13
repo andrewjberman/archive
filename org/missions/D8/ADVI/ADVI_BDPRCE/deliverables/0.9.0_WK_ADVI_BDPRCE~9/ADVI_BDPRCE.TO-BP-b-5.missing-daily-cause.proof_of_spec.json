@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_BDPRCE.TO-BP-b-5.missing-daily-cause",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-b-5.missing-daily-cause.md",
+    "group": "OTHER",
+    "vintage_commit": "6f20fe54c6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/decompositions/ADVI_BDPRCE_DECOMP_R2.md",
+    "vintage_commit": "e48e036784",
+    "to_ref": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-b-5.missing-daily-cause.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_BDPRCE~9",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~9/CAUSE.json",
+      "kind": "doc",
+      "commit_or_etag": "cb2dc71a97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in cb2dc71a97 on wk-ADVI_BDPRCE-9 (LOCAL); the read-only cause record, nothing deployed",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~9/CAUSE.md",
+      "kind": "doc",
+      "commit_or_etag": "cb2dc71a97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in cb2dc71a97 on wk-ADVI_BDPRCE-9 (LOCAL); one-page companion to the record",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "7fdab5628e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four surprise rows ADVI_BDPRCE-D1-W9-S1..S4 appended in 7fdab5628e on wk-ADVI_BDPRCE-9 (LOCAL)",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~9/ADVI_BDPRCE.TO-BP-b-5.session.log.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the session log, committed with this instance on wk-ADVI_BDPRCE-9 (LOCAL)",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 grades the record's shape, closed set and read-only discipline. The cause's truth is read by the issuer from one cited log or version per class.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r2-9 && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round2/checks/r2_checks.py cause --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~9/CAUSE.json",
+      "output_evidence": "CAUSE record ok dates=6 determined=2 undetermined=4 producer=data/black_diamond/scripts/gold/D_02.adv (rc=0)",
+      "denominator": "6 date rows; 2 determined (NO_RUN) and 4 NOT_DETERMINED; closed set of 5 classes; 0 write verbs in calls; rerun false",
+      "status": "PASS",
+      "status_reason": "the grader's own bar, run at the worktree path. The grader proves shape, the closed set and read-only discipline; the classes are graded by the issuer from one cited log or version per class (CAUSE.json evidence fields)."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the write-surface bound (its printed label says ROUND 4 because the checker is reused unchanged).",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-bdprce-r2-9 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r2-9 --allow org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~9/ --allow org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "output_evidence": "ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing (rc=0); the three changed files were CAUSE.json, CAUSE.md and INVESTIGATION_v1.md, all inside the two allowed paths",
+      "denominator": "3 changed files, 0 outside the allowed paths, 0 required missing",
+      "status": "PASS",
+      "status_reason": "the grader's own bar, run at the worktree path. Read-only on AWS and no product file edited; the scope check covers the committed diff against the base."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "two copies of CAUSE.json run through r2_checks.py cause: one with an aws s3api put-object line appended to calls, one with rerun set to true",
+      "expected": "both FAIL with rc=1: 'write verb in calls' and 'rerun must be false'",
+      "observed": "CAUSE record FAIL write verb in calls: aws s3api put-object (rc=1); CAUSE record FAIL rerun must be false (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 grader run twice on the same CAUSE.json, outputs compared byte for byte",
+      "observed": "two runs byte-equal: CAUSE record ok dates=6 determined=2 undetermined=4 producer=data/black_diamond/scripts/gold/D_02.adv",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "the IAM principal behind each run and each write in the six dates", "reason": "logs and version records were read for the event and time only; principal binding needs CloudTrail lookup-events per event, which this cell did not run"},
+    {"item": "2026-09-21, 09-22, 09-28 and 09-29 as NO_RUN or RUN_FAILED", "reason": "the 14-day log retention ended on 2026-09-30 (oldest readable event); the class is NOT_DETERMINED with that reason, never a guess"},
+    {"item": "why the C_03 ledger (account_performance) stops at 2026-10-09", "reason": "the upstream of account_performance was not traced; the cell names it as the next read"},
+    {"item": "the EC2 dispatch link from bd-gold-trigger to the gold runner, and the 09:4x and 12:4x runner trigger", "reason": "outside the two lags; the round-1 census already names it as open"},
+    {"item": "closed or inactive status of the 243 stale client objects", "reason": "the bodies carry no termination, closed or inactive field; the status is not determined from the bodies, and no other source was read"},
+    {"item": "the fix for the six gaps and the served lag", "reason": "the order names the fix as a later cell; no write, invoke or re-run was made"}
+  ],
+  "surprises": [
+    "ADVI_BDPRCE-D1-W9-S1: the round-1 premise that an EventBridge rule and cron drive bd-price-update does not hold; the Lambda is invoked by bd-silver-merge on the bronze sentinel S3 event, and no rule targets it",
+    "ADVI_BDPRCE-D1-W9-S2: the pre-2026-10-07 bd-49f-runner printed OK bronze sentinel emitted after the shared module withheld the sentinel; S3 holds no sentinel for 2026-10-05 or 2026-10-06",
+    "ADVI_BDPRCE-D1-W9-S3: served client detail data_as_of equals the newest date of account_performance (2026-10-09) with no T-1 rule in the producer, so the one-day lag is not by design",
+    "ADVI_BDPRCE-D1-W9-S4: a repo grep denied by the comp-rail hook blocked the whole Bash call, and a get-object to /dev/stdout returned empty bodies with no error"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~9/ADVI_BDPRCE.TO-BP-b-5.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round2/checks/r2_checks.py cause --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~9/CAUSE.json",
+      "result": "CAUSE record ok dates=6 determined=2 undetermined=4 producer=data/black_diamond/scripts/gold/D_02.adv (rc=0)"
+    }
+  ]
+}

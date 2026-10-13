@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cd-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cd-1.active-set-and-reverse-match.md",
+    "group": "OTHER",
+    "vintage_commit": "04b9a0bbed"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~161",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round82.md",
+    "vintage_commit": "04b9a0bbed",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cd-1.active-set-and-reverse-match.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~161/ACTIVE_SET_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "94da79ee00",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only record of the active set and reverse match; nothing deployed, no S3 write",
+      "artifact_covered_by": [
+        "CB82cd1-AC1",
+        "CB82cd1-AC2",
+        "CB82cd1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~161/ACTIVE_SET_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "94da79ee00",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "short record of the definition, counts and file checksums; no account value",
+      "artifact_covered_by": [
+        "CB82cd1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB82cd1-AC1",
+      "criterion_verbatim": "the set and the reverse match are counted; the reverse match's four classes are printed with the rows in its file. The issuer reads that the classes sum to the current accounts.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~161/ACTIVE_SET_RECORD.json',encoding='utf-8'));r=d['reverse_match'];print('ACTIVE-SET active_accounts=%d securities_active=%d window_rows=%d earliest=%s current_accounts=%d matched=%d linked=%d near=%d none=%d rows_in_file=%d former=%d'%(d['active_accounts'],d['securities_active'],d['window_rows'],d['earliest_window_start'],r['current_accounts'],r['crosswalk_matched'],r['account_links'],r['near_match_waiting_on_a_person'],r['none'],r['rows_in_file'],d['former_client_accounts']))\"",
+      "expect": "ACTIVE-SET active_accounts=",
+      "output_evidence": "ACTIVE-SET active_accounts=769 securities_active=3357 window_rows=42319 earliest=2013-04-08 current_accounts=769 matched=457 linked=0 near=12 none=300 rows_in_file=769 former=986 (rc 0). Classes 457+0+12+300 = 769 = current_accounts = rows_in_file.",
+      "denominator": "769 of 769 current accounts classed; 769 rows in REVERSE_MATCH.csv",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB82cd1-AC2",
+      "criterion_verbatim": "the two files exist at the recorded paths with the recorded checksum and size, outside the repository. The issuer reads the row counts against the record.",
+      "method": "command",
+      "invocation": "python -c \"import json,hashlib;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~161/ACTIVE_SET_RECORD.json',encoding='utf-8'));f=d['files'];ok=all(hashlib.sha256(open(x['path'],'rb').read()).hexdigest()==x['sha256'] and len(open(x['path'],'rb').read())==x['bytes'] for x in f);n=[sum(1 for _ in open(x['path'],encoding='utf-8'))-1 for x in f];print('ACTIVE-SET-FILES files=%d sha256_match=%s rows=%s outside_repo=%s'%(len(f),ok,n,all(not x['path'].startswith('org/') for x in f)))\"",
+      "expect": "ACTIVE-SET-FILES files=2 sha256_match=True",
+      "output_evidence": "ACTIVE-SET-FILES files=2 sha256_match=True rows=[42319, 769] outside_repo=True (rc 0). Record rows: 42319 and 769.",
+      "denominator": "2 of 2 files match their recorded sha256 and bytes; row counts 42319 and 769 match the record",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB82cd1-AC3",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: \"currently active\" is defined before it is counted and the alternatives are shown; no window starts before 2012-01-01 or before the account's earliest record; the reverse match drops no current account and says why an account is none; the former-client counts are counts, not a list; no account number, name or value appears in the repository, in a message or in the record; not_established stands wherever a source could not be read.",
+      "method": "manual_read_with_citation",
+      "invocation": "read ACTIVE_SET_RECORD.md and ACTIVE_SET_RECORD.json definition, reverse_match, not_established; count checks: validate.py over the two files (SET earliest held_from 2013-04-08, rows before 2012-01-01 = 0; REV reason none-basis: none 273, AMBIGUOUS 27)",
+      "expect": "judgment, graded by 3.0.0_SA_CVO at L9",
+      "output_evidence": "Definition written before the count: primary = non-cash units > 0 in the 2026-10-12 snapshot, 769 of 999 listed accounts; alt_90d_snapshots 875 (differs by 106); alt_90d_transactions 0 (differs by 769; Commonwealth transactions end 2026-06-22). Rows before 2012-01-01: 0. Reverse match drops none: 769 in, 769 classed; none-class reasons: none 273, AMBIGUOUS 27. Former clients: 986 accounts and 1,699 securities, counts only. not_established: 11 items in the record, each with its surprise row or its stated reason.",
+      "denominator": "3 criterion clauses checked against 769 current accounts, 42,319 window rows and 986 former-client accounts",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment=\"true\" criterion, graded by 3.0.0_SA_CVO at L9 and never self-graded; the worker records output only, no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC2 sha256 and byte-length check of both files run twice on the same files",
+      "observed": "DETERMINISM run1=True run2=True",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "AC2 check run on a copy of ACTIVE_COTTONWOOD_SET.csv with its last two lines dropped, against the recorded sha256 and bytes",
+      "expected": "sha256_match=False",
+      "observed": "MUTANT check_on_dropped_row=False",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "silver positions (2026-06-23) and the Commonwealth daily valuation",
+      "reason": "not needed for the primary definition or the windows; the cell read transactions, crosswalk, account_links and the holdings snapshots only"
+    },
+    {
+      "item": "restricted CRM prefix and any Black Diamond or vendor API call",
+      "reason": "barred by the order; the snapshots on S3 are what was read"
+    },
+    {
+      "item": "account_number, bd_units and schwab_units columns of the holdings tables",
+      "reason": "not projected; the BD side is read on the columns the windows need, and BD-only per row is not established (surprise ADVI_COTBKF-D2-W161-S5)"
+    },
+    {
+      "item": "the near_matches.csv list of the FWD-8 reader",
+      "reason": "absent from both trees; the near class is the crosswalk's 22 AWAITING_PERSON rows (surprise ADVI_COTBKF-D2-W161-S1)"
+    },
+    {
+      "item": "the two data files C:/dev/_cotbkf_active_set_20261013/ACTIVE_COTTONWOOD_SET.csv and REVERSE_MATCH.csv as artifacts",
+      "reason": "outside the repository by design (account keys must not enter the tree), so not a git ref the checker can resolve; their sha256 and byte size are recorded in ACTIVE_SET_RECORD.json files and read back by CB82cd1-AC2 (42,319 and 769 rows)"
+    },
+    {
+      "item": "the account-id scan of the repository (pytest test_cotbkf_no_account_ids.py)",
+      "reason": "run after this commit, as the order directs; its DENOMINATOR line is reported in the worker report, not in this instance"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W161-S1: near_matches.csv absent from both trees; the near class is the crosswalk's 22 AWAITING_PERSON rows, not the 21 named in FWD-8",
+    "ADVI_COTBKF-D2-W161-S2: Commonwealth-side identifiers are raw, not acct# tokens; the Commonwealth keys are salted SHA-256 tokens",
+    "ADVI_COTBKF-D2-W161-S3: account_links joins Commonwealth accounts only; the account_links match class is empty by construction",
+    "ADVI_COTBKF-D2-W161-S4: the Commonwealth transactions end 2026-06-22, so the 90-day transaction alternative holds 0 accounts",
+    "ADVI_COTBKF-D2-W161-S5: the gold canonical schema carries other custodians' unit columns; BD-only per row is not established"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~161/ADVI_COTBKF.TO-CB-cd-1.active-set-and-reverse-match.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -c AC1 json read of ACTIVE_SET_RECORD.json reverse_match and counts",
+      "result": "ACTIVE-SET active_accounts=769 ... rows_in_file=769 former=986"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -c AC2 sha256 and byte check of the two external files",
+      "result": "ACTIVE-SET-FILES files=2 sha256_match=True rows=[42319, 769] outside_repo=True"
+    }
+  ]
+}
