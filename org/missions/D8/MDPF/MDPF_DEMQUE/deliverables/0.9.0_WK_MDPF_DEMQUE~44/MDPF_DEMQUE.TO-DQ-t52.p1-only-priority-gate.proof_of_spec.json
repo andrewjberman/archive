@@ -18,9 +18,9 @@
     {
       "path_or_key": "data/mdpf/scripts/demque/priority_gate.py",
       "kind": "script",
-      "commit_or_etag": "3535c1b9e7",
+      "commit_or_etag": "0a0cff9101",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "classify, excluded (P2 match open, P3 former client, P1 absent; a no-CUSIP security is P2 by rank's no-holder rule), load_inputs (S3 read once per process; GateUnreadable on an unreadable or empty input), excluded_for, census. --census prints one JSON line (read only): index names 326, P1 246, P2 72, P3 8; excluded_from_extension 80; 18 request files; rule names former client and 2026-10-13. Output carries counts and file names only, no account id.",
+      "deploy_evidence": "census rows carry need_class and requested; a non_client row counts securities 0 with null classes (n/a); RULE names the client-only gate. Census run from the worktree: rc 0, index names 326 (P1 246, P2 72, P3 8), excluded_from_extension 80, 18 request rows, 8 of them non_client.",
       "artifact_covered_by": [
         "DQ9-t52-AC1",
         "DQ9-t52-AC2"
@@ -49,9 +49,9 @@
     {
       "path_or_key": "data/mdpf/scripts/demque/demand_queue.py",
       "kind": "script",
-      "commit_or_etag": "3535c1b9e7",
+      "commit_or_etag": "0a0cff9101",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "draw takes excluded and skipped (both default None: an existing caller is unchanged). An excluded security is skipped before any vendor call and uses no pacer entry; each skip is appended to skipped. A request with no drawable security writes no ledger row.",
+      "deploy_evidence": "is_gated(req) = need_class != non_client; cusip_of; gated(req, excl) keeps every security of a non_client request; draw applies the exclusion per request. A client security with no cusip stays P2 (excluded, counted).",
       "artifact_covered_by": [
         "DQ9-t52-AC1"
       ]
@@ -59,9 +59,9 @@
     {
       "path_or_key": "data/mdpf/scripts/demque/daily_draw.py",
       "kind": "script",
-      "commit_or_etag": "3535c1b9e7",
+      "commit_or_etag": "0a0cff9101",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "run takes gate (default priority_gate.excluded_for) and calls it before any pull; the excluded names leave the window; the result carries skipped_excluded. A gate that cannot read refuses the draw (main returns rc 2 with REFUSED on stderr; the test shows no pull and no ledger row). The nightly run_daily_draw.sh runs this code after extend_frontier --apply; neither was run here.",
+      "deploy_evidence": "run reads the cusips of client-class requests only (_gated_cusips), fails closed on an unclassed client no-cusip security, builds windows per request (_windows); a non_client no-cusip security is drawn and counted in unstored_no_cusip (no store key); the result carries skipped_excluded and unstored_no_cusip.",
       "artifact_covered_by": [
         "DQ9-t52-AC1"
       ]
@@ -69,9 +69,9 @@
     {
       "path_or_key": "data/mdpf/scripts/demque/test_demque_priority_gate.py",
       "kind": "test",
-      "commit_or_etag": "3535c1b9e7",
+      "commit_or_etag": "0a0cff9101",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the three named tests PASSED (stub frames, local stores under tmp_path, no network, no S3): 3 passed in 1.88s; the check's last line GATE-OK, rc=0.",
+      "deploy_evidence": "the three named tests PASS, plus one added test test_a_non_client_request_is_never_gated_and_its_security_with_no_cusip_is_not_skipped (PASS): 4 passed in 2.10s; GATE-OK rc=0.",
       "artifact_covered_by": [
         "DQ9-t52-AC1"
       ]
@@ -109,10 +109,50 @@
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "3535c1b9e7",
+      "commit_or_etag": "0a0cff9101",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "rows MDPF_DEMQUE-D1-W44-S1 (the builders do not read pursued), S2 (BLOCKING: five tests outside the grant fail on the new rule), S3 (rank.py root formula), S4 (device queue carries 4 P2 names), S5 (no-CUSIP securities classed P2) appended, OBSERVATION or BLOCKING, INERT. Existing rows not edited. box/dell1 was merged first (fast-forward to e7a7beca52).",
+      "deploy_evidence": "rows MDPF_DEMQUE-D1-W44-S6 (census n/a form and securities 0 on non_client rows) and S7 (a non_client no-CUSIP security drawn, not stored) appended at the end; existing rows not edited.",
       "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_extend_future.py",
+      "kind": "test",
+      "commit_or_etag": "0a0cff9101",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one autouse classification stub (xf._excluded_for returns {}); no assertion changed; file passes.",
+      "artifact_covered_by": [
+        "DQ9-t52-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_extend_guard.py",
+      "kind": "test",
+      "commit_or_etag": "0a0cff9101",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one autouse classification stub (xf._excluded_for returns {}); no assertion changed; file passes.",
+      "artifact_covered_by": [
+        "DQ9-t52-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_lag_report.py",
+      "kind": "test",
+      "commit_or_etag": "0a0cff9101",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one autouse classification stub (xf._excluded_for returns {}) beside the existing _no_s3 fixture; no assertion changed; both its tests pass.",
+      "artifact_covered_by": [
+        "DQ9-t52-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_yahoo_need_class.py",
+      "kind": "test",
+      "commit_or_etag": "0a0cff9101",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one autouse classification stub (xf._excluded_for returns {}); no assertion changed; file passes.",
+      "artifact_covered_by": [
+        "DQ9-t52-AC1"
+      ]
     }
   ],
   "acceptance": [
@@ -121,8 +161,8 @@
       "criterion_verbatim": "DQ9-t52-AC1 -- the three named tests. python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t52_tests.py -> GATE-OK",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t52_tests.py",
-      "output_evidence": "test_demque_priority_gate.py::test_a_p3_name_is_never_pursued_and_a_p2_name_waits_on_its_match_while_p1_is_unchanged PASSED; test_the_standing_extension_tiers_leave_out_p2_and_p3_names_and_count_them PASSED; test_the_daily_draw_skips_an_excluded_request_security_and_counts_the_skip PASSED; 3 passed in 1.88s. Verbatim last line: GATE-OK ; rc=0.",
-      "denominator": "3 of 3 named tests PASSED by name",
+      "output_evidence": "test_demque_priority_gate.py::test_a_p3_name_is_never_pursued_and_a_p2_name_waits_on_its_match_while_p1_is_unchanged PASSED; test_the_standing_extension_tiers_leave_out_p2_and_p3_names_and_count_them PASSED; test_the_daily_draw_skips_an_excluded_request_security_and_counts_the_skip PASSED; 4 passed in 2.10s (the fourth is the non_client test, not named by AC1). Verbatim last line: GATE-OK ; rc=0.",
+      "denominator": "3 of 3 named tests PASSED by name (the check's TESTS list)",
       "status": "PASS",
       "expect": "GATE-OK",
       "judgment": false
@@ -132,8 +172,8 @@
       "criterion_verbatim": "DQ9-t52-AC2 -- on the REAL inputs (crosswalk, silver transactions, price index, request files, device queue; S3 read only). python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t52_real.py -> GATE-REAL-OK",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t52_real.py",
-      "output_evidence": "index {'P1': 246, 'P2': 72, 'P3': 8, 'names': 326} excluded_from_extension=80 files=18; device queue queue/IRPT_BCKEND-AS-TRADED-CLOSES-878.json securities 630, P1 630, P2 0, P3 0. Verbatim last line: GATE-REAL-OK index 326 names (P1 246, P2 72, P3 8): 80 left out of the extension ; rc=0. Run time about 60 s.",
-      "denominator": "index 326 names = P1 246 + P2 72 + P3 8 (P3 >= 1; names >= 300); 18 of 18 request-file rows: securities = P1 + P2 + P3; IRPT device queue copy: 0 P2, 0 P3 of 630",
+      "output_evidence": "index {'P1': 246, 'P2': 72, 'P3': 8, 'names': 326} excluded_from_extension=80 files=18; device queue queue/IRPT_BCKEND-AS-TRADED-CLOSES-878.json securities 630, P1 630, P2 0, P3 0; non_client rows: securities 0, classes null (n/a), requested in the census line. Verbatim last line: GATE-REAL-OK index 326 names (P1 246, P2 72, P3 8): 80 left out of the extension ; rc=0. Run time about 62 s (timeout 170 from the worktree).",
+      "denominator": "index 326 names = P1 246 + P2 72 + P3 8 (P3 >= 1; names >= 300); 18 of 18 request-file rows: securities = P1 + P2 + P3 (non_client rows: 0 = 0); IRPT device queue copy: 0 P2, 0 P3 of 630",
       "status": "PASS",
       "expect": "GATE-REAL-OK",
       "judgment": false
@@ -141,14 +181,14 @@
   ],
   "controls": {
     "mutant": {
-      "description": "in-process monkeypatches only (.scratch/t52_mutant.py, no file edit) run against the named tests: A, P3 dropped from the exclusion map (rank.NOT_PURSUED_REASON without P3); B, the daily draw ignores the gate (dq.draw called with excluded None); C, P2 dropped from the exclusion map",
-      "expected": "each mutant fails at least one named test; the baseline passes all three",
-      "observed": "baseline T1 PASS, T2 PASS, T3 PASS; mutant A: T1 FAIL (KeyError), T2 FAIL (KeyError); mutant B: T3 FAIL (AssertionError); mutant C: T1 FAIL (KeyError), T2 FAIL (KeyError); restored T1 PASS. The A and C failures are KeyErrors from the incomplete map, not clean assertions.",
+      "description": "gate applies to every request (demand_queue.is_gated patched to True in-process, via a pytest plugin in .scratch; no file edit) run against test_demque_priority_gate.py",
+      "expected": "the non_client test fails (the gate must not reach a non_client request)",
+      "observed": "1 failed, 3 passed: test_a_non_client_request_is_never_gated_and_its_security_with_no_cusip_is_not_skipped FAILED (assert [['100000002', None]] == []); the three named tests PASS under the mutant",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "priority_gate.py --census run twice on the real inputs, outputs compared byte for byte",
-      "observed": "CENSUS-IDENTICAL, 2157 bytes, both runs rc=0",
+      "method": "two runs of python data/mdpf/scripts/demque/priority_gate.py --census (worktree, S3 read only), outputs compared byte for byte (cmp)",
+      "observed": "IDENTICAL: 3101 bytes each run; rc 0 both runs",
       "status": "STABLE"
     }
   },
@@ -168,6 +208,10 @@
     {
       "item": "account ids",
       "reason": "order BOUNDS: the census and the check print counts and file names only; no account id is written to a committed file or to output"
+    },
+    {
+      "item": "the merge of box/dell1 into this branch",
+      "reason": "the re-seat instruction says do NOT merge box/dell1 (a foreign row blocks it); the issuer unions the investigation file at the drain"
     }
   ],
   "surprises": [
@@ -175,39 +219,26 @@
     "MDPF_DEMQUE-D1-W44-S2: five existing tests outside the grant fail on the new rule (fake CUSIPs classed P2 by the real crosswalk); the grant that clears them is the one-line stub, not an edit (BLOCKING, INERT)",
     "MDPF_DEMQUE-D1-W44-S3: rank.py's two S3 loaders compute the repo root with four dirnames; a plain python run needs PYTHONPATH, which run_daily_draw.sh sets (OBSERVATION, INERT)",
     "MDPF_DEMQUE-D1-W44-S4: the device queue is not P1-only: ADVI_COTBKF-TIER2-15 carries 3 P2 names and R2-SCHED-SLICE-1 carries 1; the IRPT copy is P1 630 of 630 (OBSERVATION, INERT)",
-    "MDPF_DEMQUE-D1-W44-S5: 1,093 securities in the repo request files have no CUSIP and are classed P2 by rank's no-holder rule; the class is a choice for the CTO to confirm (OBSERVATION, INERT)"
+    "MDPF_DEMQUE-D1-W44-S5: 1,093 securities in the repo request files have no CUSIP and are classed P2 by rank's no-holder rule; the class is a choice for the CTO to confirm (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W44-S6: the census gives each non_client row securities 0 and null classes, with the count in requested; the AC2 check reads null as zero and a string n/a would raise TypeError (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W44-S7: a non_client security with no CUSIP, once its request is queued, is drawn but not stored (the store is keyed by CUSIP); no such request is queued today (OBSERVATION, INERT)"
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~44/MDPF_DEMQUE.TO-DQ-t52.p1-only-priority-gate.proof_of_spec.json",
   "compiler_tools": [
     {
+      "tool": "python data/mdpf/scripts/demque/priority_gate.py --census",
+      "invocation": "from the worktree root, timeout 170",
+      "result": "rc=0; index 326; excluded_from_extension 80; 18 files; the JSON line is in the worktree scratch, not committed"
+    },
+    {
       "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t52_tests.py",
-      "invocation": "from the worktree root, under timeout 120",
-      "result": "3 passed in 1.88s; GATE-OK; rc=0"
+      "invocation": "from the worktree root, timeout 120",
+      "result": "4 passed; GATE-OK; rc=0"
     },
     {
       "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t52_real.py",
       "invocation": "from the worktree root, timeout 170 (the check's own subprocess bound is 115 s)",
-      "result": "GATE-REAL-OK index 326 names (P1 246, P2 72, P3 8): 80 left out of the extension; rc=0; about 60 s"
-    },
-    {
-      "tool": "python data/mdpf/scripts/demque/priority_gate.py --census",
-      "invocation": "the tool at its own path in the worktree, twice, timeout 170 each",
-      "result": "rc=0 both runs; {\"excluded_from_extension\": 80, \"files\": [18 rows], \"index\": {\"P1\": 246, \"P2\": 72, \"P3\": 8, \"names\": 326}, \"rule\": \"Andrew-direct 2026-10-13: former clients (P3) are never drawn on any vendor; a match-open name (P2) draws only after its match resolves; only P1 (a living client) draws\"}; the two outputs are byte-identical (2157 bytes)"
-    },
-    {
-      "tool": "python -m pytest data/mdpf/scripts/demque -q",
-      "invocation": "the whole folder, from the worktree root, once, timeout 900",
-      "result": "5 failed, 178 passed in 51.55s, rc=1. Baseline before this change: 180 passed in 16.03s. The 5 failures are in test files outside the grant (see declared_exclusions and S2): test_demque_extend_future.py::test_today_equal_to_the_local_date_still_plans; test_demque_extend_guard.py::test_a_frontier_on_or_after_the_latest_valid_to_still_plans; test_demque_lag_report.py::test_the_lag_report_counts_every_indexed_name_in_one_tier_with_its_measured_lag; test_demque_lag_report.py::test_a_name_older_than_its_tier_cycle_is_listed_over_and_never_counted_within; test_demque_yahoo_need_class.py::test_the_standing_extension_request_declares_client_and_a_window_start_on_or_after_the_floor"
-    },
-    {
-      "tool": "bash .tools/commit-gate.sh <9 changed .py files>",
-      "invocation": "from the worktree root, before the code commit",
-      "result": "pre-commit gate clean for 9 of 9 file(s); rc=0"
-    },
-    {
-      "tool": "python .scratch/t52_mutant.py (scratch mutant harness over the three named tests)",
-      "invocation": "in-process, scratch only, no file edit",
-      "result": "baseline PASS x3; mutant A T1 and T2 FAIL (KeyError); mutant B T3 FAIL (AssertionError); mutant C T1 and T2 FAIL (KeyError); restored PASS"
+      "result": "GATE-REAL-OK index 326 names (P1 246, P2 72, P3 8): 80 left out of the extension; rc=0"
     }
   ]
 }
