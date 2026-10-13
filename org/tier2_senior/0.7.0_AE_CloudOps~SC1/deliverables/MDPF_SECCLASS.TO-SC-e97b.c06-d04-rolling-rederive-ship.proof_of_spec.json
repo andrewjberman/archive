@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e97b.c06-d04-rolling-rederive-ship",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cc2a7a5430"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R23.md",
+    "vintage_commit": "cd11d5c125",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/task_orders/MDPF_SECCLASS.TO-SC-e97b.c06-d04-rolling-rederive-ship.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~SC1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-bd/code/gold/C_06.client_mix_timeseries.py",
+      "kind": "s3_object",
+      "commit_or_etag": "f847d8d105025ffbee94b1aa5092faf6",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-deploy run 1 of 2 on box/dell1 at 2026-10-13T06:22Z (object LastModified 06:22:23Z): `bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py`, rc=0 at 06:22:32Z. Lines: '1 path(s) to deploy (1 script, 0 bundle-member)', 'DEPLOYED [bd] ...C_06.client_mix_timeseries.py', 'VERIFY OK comp-pipescript deployed ...', terminal 'OK: safe-deploy gate PASS -- all 1 file(s) deployed and verified', three '[not shipped]' lines for the _shared modules. Pre-act ETag 2e35d043163cc18b135d7698cf11dc56 at VersionId zjQmOYVVYTSGOWLFQ0P33vVeWkwp4_eT (the rollback handle, unused); post-act VersionId jGO15I3AZTATLbGxE3_36dKm86wuggDK, 66,473 B. Output at org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/e97b_safe_deploy_c06.out.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "s3://opal-data-bd/code/gold/D_04.client_portal_summary.py",
+      "kind": "s3_object",
+      "commit_or_etag": "43a5d613ca9292329278573038f14158",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-deploy run 2 of 2, back to back with the first under the same window read (object LastModified 06:23:17Z): `bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/D_04.client_portal_summary.py`, rc=0 at 06:23:24Z, same line shapes. Pre-act ETag 9d083669159ee8875b6489dea4fb2e37 at VersionId ap.CyBT8aJijz5kWFsSNjEFU99itbXED (rollback handle, unused); post-act VersionId WoxKGtCNIE0S.GYl2rFy5LvcFYjfpNIw, 166,255 B. Output at org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/e97b_safe_deploy_d04.out.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_CHECKS/e97_shipped_check.py -- expect 'E97-SHIPPED ok=True'",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_CHECKS/e97_shipped_check.py",
+      "expect": "E97-SHIPPED ok=True",
+      "output_evidence": "E97-SHIPPED ok=True c06=f847d8d1|f847d8d1|MATCH d04=43a5d613|43a5d613|MATCH control=MATCH dispatch=same d03=same (rc=0), read immediately after the second deploy. Preserved at org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/e97b_ac1_post_ship.txt.",
+      "denominator": "2 of 2 moving keys at their signed md5s, with the check's control reading MATCH, gold_dispatch.sh and D_03 unchanged. The discriminator MOVED: the same check read at the cut by this seat (e97b_ac1_pre_ship.txt) was 'E97-SHIPPED ok=False c06=2e35d043|f847d8d1|DIFF d04=9d083669|43a5d613|DIFF control=MATCH dispatch=same d03=same', equal to the order's recorded base. WATCH SET measured by this seat: every key under code/gold/ in opal-data-bd, one list_objects_v2 page, pre=190 post=190 MOVED=2 ADDED=0 GONE=0, and the two moved keys ARE C_06 and D_04; gold_dispatch.sh f568d11b, D_03 bd9bbe4b and lib/etf_classifier.py e714dc50 unmoved. Compared by script, not by eye. STOPS=0.",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "safe-deploy.sh",
+      "invocation": "bash .tools/safe-deploy.sh <C_06 path>; bash .tools/safe-deploy.sh <D_04 path>",
+      "result": "OK -- two runs, each gate PASS, 1 of 1 deployed and verified, one DEPLOYED line and three '[not shipped]' lines each; seat-gates CROSSBOX-DEPLOY verdict CLEAR on both."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": ".tools/deploy_ledger.py open --leg V|P|D|G ; close-leg V|P|D ; hold",
+      "result": "Entry secclass-e97-c06-d04-rolling-rederive-sc1-20261012 opened with 4 legs before the act; V and P closed before the ship, D closed after AC1, entry HELD on the issuer's leg G."
+    },
+    {
+      "tool": "lib/platinum_dest.py source() and list_target() with boto3 list_object_versions",
+      "invocation": "leg P: destinations DERIVED in canonical mode for 5 singles and 2 prefixes, plus the legacy prefix and watermark; IsLatest only; live bodies of three canonical singles saved with the VersionId read",
+      "result": "Amendment 1 satisfied: 30,329 keys (canonical clients 18,230 over 57 pages, canonical advisors 779 over 4 pages, legacy client_timeseries 11,314 over 202 pages, 6 singles), 0 keys without a VersionId."
+    },
+    {
+      "tool": "e97_shipped_check.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R23_CHECKS/e97_shipped_check.py",
+      "result": "Run twice: at the cut ok=False (both DIFF), after the ship ok=True (both MATCH), control=MATCH both times."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Arms that could STOP the act or invalidate its evidence. (a) STEP-0 BASE: C_06 2e35d043 at zjQmOYVV..., D_04 9d083669 at ap.CyBT8aJi..., gold_dispatch.sh f568d11b at JTxOlFbq...; anything else means another ship moved a key and the delta is not this cell. (b) DIGEST: repo md5s f847d8d1 and 43a5d613 with an empty git status on both paths. (c) 49F READ PROOF: a head-object of one canonical key, a refusal being a STOP. (d) WINDOW, re-read in the SAME shell as both deploys and aborting them (exit 9), including that the runner LaunchTime equals the one read at leg P: runner stopped, gold/trigger-pending.json absent, no fire since leg P. (e) NAMED-SHIP SET: each deploy's member list must be exactly one DEPLOYED line. (f) WATCH SET: every key under code/gold/ pre and post, where any key but the two moving is a STOP with a same-session restore by VersionId.",
+      "expected": "(a) exact. (b) exact, status empty. (c) readable. (d) stopped, absent, launch 2026-10-13T04:00:47Z unchanged. (e) one DEPLOYED per run. (f) MOVED=2 and they are C_06 and D_04; gold_dispatch.sh, D_03 and the lib unmoved.",
+      "observed": "(a) exact on the 05:48Z read and the in-shell re-read at 06:21:31Z. (b) exact, status empty. (c) readable: ETag ba79215f, VersionId pxTHVZmE..., 25,128 B. (d) runner stopped (launch 04:00:47Z, stop observed 06:19:15Z), trigger-pending head rc=254 absent, launch unchanged: the guard read OPEN and was not exercised against a closed window in this act. (e) deployed_lines=1 on each run. (f) pre=190 post=190 MOVED=2 ADDED=0 GONE=0. WHAT FIRED: AC1's served-equals-repo AND differs-from-rollback test with control=MATCH read ok=False at the cut and ok=True after the ship for both keys, so a no-op ship would have read ok=False.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The shipped bytes were read at three independent places: the repo files' md5 locally in the same shell as the ship; each served object's head-object ETag and ContentLength after the ship; and AC1's own repo-vs-served comparison with its built-in control.",
+      "observed": "f847d8d105025ffbee94b1aa5092faf6 and 43a5d613ca9292329278573038f14158 at all of them. The pre-act ETags 2e35d043 and 9d083669 differ, so each move is real and not a re-upload of the same bytes.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Leg G and every read of COO conditions 5, 6, 9 and 10 and the CTO conditions (per-date totals equal the AUA within $1.00 on the 15 window dates, the bars' totals and classes, the advisor table within $250 with 56 keys, restated_through 2026-09-25, a date outside the window byte-equal to leg P, the second fire's idempotence).",
+      "reason": "Assigned to the ISSUER by the order: 'after the first scheduled BD fire that RUNS C_06, the issuer's reads (2.0.0_SA_COO~M1 closes G)'. This seat does not grade it. The entry is HELD on that named event with the apply legs proven."
+    },
+    {
+      "item": "The serving effect of the shipped code, the order's step-5 cost STOP rule and the C06-ROLLING-RULE-UNREADABLE finding.",
+      "reason": "Not measurable until a scheduled BD gold fire runs C_06. The order's report asks this seat for that fire's C_06 wall time, chain launch-to-stop and C06-ROLLING-REDERIVE line; that is a later act, not a leg of this proof. BLIND per the order's preflight: the first fire's wall time on the runner, and whether the runner has gold_dispatch.sh beside C_06."
+    },
+    {
+      "item": "comp-adversary on the named-ship set.",
+      "reason": "The order's preflight declares it RUN by the issuer. This seat did not run it; the equivalent evidence here is each safe-deploy's printed member list (one DEPLOYED, three [not shipped]) and the 190-key watch set."
+    },
+    {
+      "item": "Flipping this order's <status> to complete.",
+      "reason": "The order instructs only pending -> in_progress after the GO (done). Leg G is the issuer's, so completion is the issuer's call. Left at in_progress."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/logs/session_e97b_rolling_rederive_ship_0547-0630Z.md"
+}
