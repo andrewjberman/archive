@@ -1,0 +1,168 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-k-1.inflection-pipeline",
+  "firm": "INF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-k-1.inflection-pipeline.md",
+    "group": "OTHER",
+    "vintage_commit": "3fc6879679"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~76",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_PLANINV.md",
+    "vintage_commit": "3fc6879679",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-k-1.inflection-pipeline.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; the record's shape is graded by r7_checks.py planinv and its read-only discipline by the write-verb rule in the same grader",
+      "expected": "N/A -- the order names none",
+      "observed": "N/A -- the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "not re-run: AC1 reads the committed record file and AC2 reads git state; each sweep ran once as the order states",
+      "observed": "N/A -- no second sweep was made by this worker",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Every AWS write, producer run, deploy and terraform command",
+      "reason": "Bound (order section 2, item 1): read verbs only. The AWS calls were list, get, describe and head reads, each bounded by timeout."
+    },
+    {
+      "item": "The contents of the live credential object opal-data-inf orion/jwt/current.json and every Secrets Manager value named in the code",
+      "reason": "Never read or printed (order section 1, facts). Named only; the record lists the key path as a read by inf-api-eclipse and the bronze orchestrator, never its contents."
+    },
+    {
+      "item": "An object-level listing of opal-data-inf prefixes (counts, sizes, dates)",
+      "reason": "The sweep is bounded to rule-wired and notification-wired prefixes. Object counts were not enumerated; the not_read list says so."
+    },
+    {
+      "item": "The targets of 104 of the 156 EventBridge rules, and the source of 31 of the 34 schedules' targets",
+      "reason": "Outside the Inflection slice by the measured name, pattern and description filter (no rule EventPattern in the 104 names opal-data-inf). The 3 Inflection-facing schedules are rows L01 to L03."
+    },
+    {
+      "item": "Repository scripts beyond the 7 row-read scripts (data/inf/scripts/gold 72 files, data/inf/manual_api 44, data/inf/scripts/silver 14, the infra/aws/lambda/inf-pipeline tree 54, infra/ match capped at 200)",
+      "reason": "Rows are bounded to the scripts wired to a rule, schedule, notification or the gold dispatch chain. The remainder is listed in not_read with denominators for the issuer's sample re-read."
+    },
+    {
+      "item": "A comp-find repository sweep with --files for opal-data-inf",
+      "reason": "Timed out at the 120 s bound (rc 124). Not retried; the repository sweep was done with native Grep, and no comp-find repository denominator is claimed."
+    },
+    {
+      "item": "The order's status flip",
+      "reason": "Not flipped: order section 5 says do not flip this order's status. The order stays as it is."
+    },
+    {
+      "item": "The portal submodule: git status shows it modified (checked-out HEAD 0a06280a403f against index gitlink 4d6010234ed2)",
+      "reason": "Outside the write surface. The worker did not checkout, reset, edit or commit it. The scope checker does not count it: AC2 reads 3 changed, 0 outside."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~76/PLANINV_INFLECTION_PIPELINE.json",
+      "kind": "doc",
+      "commit_or_etag": "a26151c2be82bb3a91e5ae4292c9c007f762d56c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The read-only inventory record. Nothing deployed; no AWS write; no product file touched.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~76/PLANINV_INFLECTION_PIPELINE.md",
+      "kind": "doc",
+      "commit_or_etag": "a26151c2be82bb3a91e5ae4292c9c007f762d56c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one-page companion to the record: table of 54 rows, totals, not_read list. Nothing deployed.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One appended row ADVI_FIRMBKTS-D1-W76-S1 (OBSERVATION, INERT) in a fenced json block, the form the file already uses.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 grades the record's shape and read-only discipline; the inventory's completeness is read by the issuer from the denominators. Expect: ^PLANINV: OK firm=inflection rows=[0-9]+ legacy=[0-9]+$",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-firmbkts-76 && timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py planinv --file C:/dev/wk-firmbkts-76/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~76/PLANINV_INFLECTION_PIPELINE.json --firm inflection",
+      "output_evidence": "PLANINV: OK firm=inflection rows=54 legacy=34",
+      "denominator": "rows=54 of 54 functions; legacy=34; rc=0; the grader's write-verb rule found 0 in the 15 call strings; 0 id-shaped tokens of nine or more digits",
+      "status": "PASS",
+      "expect": "^PLANINV: OK firm=inflection rows=[0-9]+ legacy=[0-9]+$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the write-surface bound: r4_scope.py with the two allowed paths reads the changed set inside the write surface. Expect: ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-firmbkts-76 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root C:/dev/wk-firmbkts-76 --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~76/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "output_evidence": "  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~76/PLANINV_INFLECTION_PIPELINE.json\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~76/PLANINV_INFLECTION_PIPELINE.md\n  CHANGED org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md\nROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing\nexit=0",
+      "denominator": "3 changed paths; 0 outside the write surface; 0 required paths missing; rc=0",
+      "status": "PASS",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; the record's shape is graded by r7_checks.py planinv and its read-only discipline by the write-verb rule in the same grader",
+      "expected": "N/A -- the order names none",
+      "observed": "N/A -- the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "not re-run: AC1 reads the committed record file and AC2 reads git state; each sweep ran once as the order states",
+      "observed": "N/A -- no second sweep was made by this worker",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W76-S1: the order names the Inflection scope inside opal-data-bd as a legacy home to inventory; the census (0 tokens in opal-data-bd) and the mapping table (0 of 247 bd rows) hold no Inflection-scope object there, so the bd leg of the slice is empty by measurement; OBSERVATION, INERT, disposition UNDER_INVESTIGATION"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~76/ADVI_FIRMBKTS.TO-FB-k-1.inflection-pipeline.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "comp-find --corpus aws",
+      "invocation": "timeout 100 comp-find --corpus aws 'opal-data-inf'",
+      "result": "86 hits across 2926 aws node(s) scanned; vintage 2026-10-13 21:02:47 UTC"
+    },
+    {
+      "tool": "comp-find --corpus aws (EVENT_RULE band)",
+      "invocation": "timeout 100 comp-find --corpus aws 'opal-data-(inf|bd|inflection)|inflection|inf-' EVENT_RULE",
+      "result": "31 hits across 157 EVENT_RULE node(s) scanned"
+    },
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "timeout 100 comp-pipescript io <script path> (INF_D_00, INF_C_01, INF_run_c_chain, INF_build_canonical_prices, bronze/orchestrator, build_mdpf_wsc_inflection_feeder, inf-etf-ownership-daily Lambda)",
+      "result": "I/O manifests read for 7 scripts; 3 are out-of-graph (AST-derived), 1 has an unresolved dynamic prefix set"
+    },
+    {
+      "tool": "r7_checks.py planinv",
+      "invocation": "timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py planinv --file <record> --firm inflection",
+      "result": "PLANINV: OK firm=inflection rows=54 legacy=34"
+    },
+    {
+      "tool": "r4_scope.py",
+      "invocation": "timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root C:/dev/wk-firmbkts-76 --allow ... --allow ...",
+      "result": "ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing"
+    },
+    {
+      "tool": ".tools/aws (read verbs only)",
+      "invocation": "timeout 100 .tools/aws events list-rules | list-targets-by-rule | lambda get-function-configuration | s3api get-bucket-notification-configuration | scheduler list-schedules | get-schedule | stepfunctions describe-state-machine | ecs describe-task-definition | cloudfront get-distribution-config",
+      "result": "every aws call returned rc=0; the comp-find repository timeout (rc 124) is a comp-find call and is noted in declared_exclusions; denominators in the record"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~76 <0.9.0_WK_ADVI_FIRMBKTS~76@opal.agent>\" -F .scratch/msg_fb_k1_record.txt -- <record JSON and MD>",
+      "result": "commit a26151c2be82bb3a91e5ae4292c9c007f762d56c; surprise-row-gate OK (0 rows in that commit); to-pipeline-gate OK"
+    }
+  ]
+}
