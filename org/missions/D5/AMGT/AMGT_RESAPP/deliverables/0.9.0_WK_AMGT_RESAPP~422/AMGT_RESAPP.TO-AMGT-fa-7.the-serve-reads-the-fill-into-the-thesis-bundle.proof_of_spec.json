@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-fa-7.the-serve-reads-the-fill-into-the-thesis-bundle",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-fa-7.the-serve-reads-the-fill-into-the-thesis-bundle.md",
+    "group": "OTHER",
+    "vintage_commit": "e8d65751f4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "e8d65751f4",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-fa-7.the-serve-reads-the-fill-into-the-thesis-bundle.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~422",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "0b89670d1a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-AMGT_RESAPP-422 (LOCAL). No deploy: the order's bounds grant no deploy, no apply, no Lambda update and no S3 write. The new region and the one wiring line in read_thesis_bundle are the only change (3 files, 748 insertions, 0 deletions in the commit)."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_ai_fill_serve.py",
+      "kind": "test",
+      "commit_or_etag": "0b89670d1a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-AMGT_RESAPP-422 (LOCAL). 39 test functions, offline: local root, fake S3 at the _s3_client seam, no model call, no network."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `AIFILL FA-7 ARMS: YES (N of N)` with N equal to the count printed and N at least 18, no `FAIL` arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-422 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa7_serve.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM scoped_amgt.py imports neither lib.opal_naming nor harvest.store (Lambda-safe) PASS []\nARM ENV_AIFILL_ROOT == 'AMGT_AIFILL_ROOT'                PASS AMGT_AIFILL_ROOT\nARM serving does not alter the stored document           PASS \nAIFILL FA-7 ARMS: YES (18 of 18)\nexit=0",
+      "denominator": "18 of 18 arms (the verdict line's N, N at least 18); no arm line reads FAIL; exit=0. Run twice on the same bytes, identical (see ac_run.txt).",
+      "status": "PASS",
+      "expect": "AIFILL FA-7 ARMS: YES \\(18 of 18\\).*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the line `AIFILL API SUITE: YES (base 4 failing, now 4 failing, new 0, passed P)` with P at least 969 plus the test functions you added; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-422 && PYTHONPATH=\"$(pwd)\" timeout 500 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_api_suite_no_new_failures.py\" | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "AIFILL API SUITE: YES (base 4 failing, now 4 failing, new 0, passed 1008)\nexit=0",
+      "denominator": "passed 1008 = 969 floor + 39 test functions added in test_ai_fill_serve.py; base 4 failing, now 4 failing, new 0.",
+      "status": "PASS",
+      "expect": "AIFILL API SUITE: YES \\(base 4 failing, now 4 failing, new 0, passed 1008\\).*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Each broken aifill/v1 document (23 mutants: schema, key, block set, block id, class, machine_written, NONE text and reason, text rules, citation rules, model_call) must read INVALID with blocks empty.",
+      "expected": "23 of 23 mutants INVALID with blocks {} and read_completed True",
+      "observed": "pytest lib/research/api/tests/test_ai_fill_serve.py: 39 passed in 0.81s, including the 23 parametrized test_a_broken_document_is_invalid_and_serves_no_blocks cases.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "check_fa7_serve.py run twice on the same bytes; both runs print AIFILL FA-7 ARMS: YES (18 of 18) and exit=0 (ac_run.txt).",
+      "observed": "two runs, identical verdict line and exit code",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy of lib/research/api/scoped_amgt.py and the function role's read of amgt/harvest/gold/ai_fill/",
+      "reason": "Out of this cell by the order's bounds; a later pair carries the apply. The IAM note in the order's preflight is for that deploy leg."
+    },
+    {
+      "item": "Empty AMGT_AIFILL_ROOT default in lib/research/api/tests/conftest.py",
+      "reason": "conftest.py is outside this order's write paths. Filed as AMGT_RESAPP-D1-W422-S1 with disarm owner 2.0.0_SA_COO~R2; measured 29 live-key GET lines across 44 passing tests."
+    },
+    {
+      "item": "Flip of the task order status to complete",
+      "reason": "The face's section 5 leaves the <status> flip to the issuer (2.0.0_SA_COO~R2)."
+    },
+    {
+      "item": "Push of wk-AMGT_RESAPP-422 to any remote",
+      "reason": "Out of bounds: local commits only on the worktree branch."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W422-S1: conftest.py sets AMGT_POOL_ROOT and AMGT_DRAFTING_ROOT to empty roots but no AMGT_AIFILL_ROOT, so existing thesis-bundle tests reach the fill key through _s3_client().",
+    "AMGT_RESAPP-D1-W422-S2: read_ai_fill's validator enforces the aifill/v1 block rules beyond the face's enumerated validator list (citation mix, text length and ASCII, model_call search count, opal ref charset).",
+    "AMGT_RESAPP-D1-W422-S3: the naming gate reads the display literal s3://{0}/{1} in the fill reader's reason text as an address and returns WARN on the commit."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~422/ac_run.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:warnings lib/research/api/tests/test_ai_fill_serve.py",
+      "result": "39 passed in 0.81s (after the escape and unused-import fixes; the earlier failing run was one mutant with a non-ASCII literal that the fix removed)"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/api/scoped_amgt.py lib/research/api/tests/test_ai_fill_serve.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~422 <0.9.0_WK_AMGT_RESAPP~422@opal.agent>\" -F .scratch/msg_code.txt -- lib/research/api/scoped_amgt.py lib/research/api/tests/test_ai_fill_serve.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit 0b89670d1a; commit-gate clean; surprise-row-gate OK (2 new rows); msg-verify MATCH"
+    }
+  ]
+}
