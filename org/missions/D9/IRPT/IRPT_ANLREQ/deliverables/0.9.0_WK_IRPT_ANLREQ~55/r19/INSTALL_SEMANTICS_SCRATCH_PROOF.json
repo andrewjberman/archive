@@ -1,0 +1,395 @@
+{
+ "install_mode": "NEW_ROOT_COPY",
+ "mode_fit": {
+  "verdict": "NEW_ROOT_COPY is the nearest of the three; its second clause is NOT met",
+  "met": "a new directory per pin: the release is extracted into /opt/irpt-resident/<new pin>-st32 (host script line 9 ROOT=$R/$NEW, line 20 rm -rf and mkdir of that directory only, line 23 tar -xzf -C that directory); the old root 19b02b2971-st31 / 0485393f3a-st32 is never an argument, never removed, and is re-installed on rollback (host script line 112 install_root $OLD)",
+  "not_met": "live members copied or linked in from the OLD root: NONE. The only copy from a non-tarball source is line 44 cp -a $H/pydeps/. (the host shared directory /opt/investor-reporting-ycharts/pydeps, not the old root). ycharts-host/, docs/contracts, _contracts, intake, _gate, data and SHA256SUMS are carried only if the release tarball carries them",
+  "not_OVERLAY": "the installer and the host script never write into the live root; E2 (the release tar extracted in place over a copy of the old root) is a CONTROL, not the host procedure",
+  "not_REPLACE": "no step removes the live root; the only rm -rf targets the new pin's directory (host line 20) and the unbuilt bin folder of the new root (line 45)"
+ },
+ "installer_lines_read": [
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 1,
+   "quote": "#!/usr/bin/env bash (header; line 4-5 comments: 'Rollback: systemctl disable --now irpt-analysis-resident.service' / 'Rollback preserves the always-on instance, queue, accepted inputs and intents.')"
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 8,
+   "quote": "package_root=\"$(realpath -e -- \"$1\")\""
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 17,
+   "quote": "[[ -x \"$python_bin\" && -f \"$package_root/SHA256SUMS\" ]] || exit 2"
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 18,
+   "quote": "entry=\"$package_root/ycharts/generate/resident_main.py\""
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 39,
+   "quote": "(cd \"$package_root\" && sha256sum --check --strict SHA256SUMS >/dev/null)"
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 40,
+   "quote": "\"$python_bin\" \"$entry\" --help >/dev/null"
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 41,
+   "quote": "if systemctl is-active --quiet irpt-analysis-resident.service; then"
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 42,
+   "quote": "echo 'resident already active; use controlled drain/stop before replacement' >&2"
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 46,
+   "quote": "trap 'rm -f -- \"$unit_file\"' EXIT   (the ONLY rm in the installer: its own temp unit file)"
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 56,
+   "quote": "WorkingDirectory=$package_root"
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 57,
+   "quote": "Environment=PYTHONPATH=$package_root"
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 59,
+   "quote": "ExecStart=$python_bin $entry --factory $factory"
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 68,
+   "quote": "install -m 0644 \"$unit_file\" /etc/systemd/system/irpt-analysis-resident.service"
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/ycharts/generate/install-resident.sh",
+   "line": 70,
+   "quote": "systemctl enable --now irpt-analysis-resident.service"
+  },
+  {
+   "file": "C:/dev/irpt-release-st32/resident_host_install_0485393f3a-st32.sh (sha256 05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf; = WANT in install_st32.sh line 7)",
+   "line": 6,
+   "quote": "OLD=19b02b2971-st31"
+  },
+  {
+   "file": "C:/dev/irpt-release-st32/resident_host_install_0485393f3a-st32.sh (sha256 05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf; = WANT in install_st32.sh line 7)",
+   "line": 9,
+   "quote": "ROOT=$R/$NEW"
+  },
+  {
+   "file": "C:/dev/irpt-release-st32/resident_host_install_0485393f3a-st32.sh (sha256 05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf; = WANT in install_st32.sh line 7)",
+   "line": 20,
+   "quote": "rm -rf \"$ROOT\"; mkdir -p \"$ROOT\""
+  },
+  {
+   "file": "C:/dev/irpt-release-st32/resident_host_install_0485393f3a-st32.sh (sha256 05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf; = WANT in install_st32.sh line 7)",
+   "line": 23,
+   "quote": "tar -xzf /tmp/irpt-resident-$NEW.tar.gz -C \"$ROOT\" || exit 12"
+  },
+  {
+   "file": "C:/dev/irpt-release-st32/resident_host_install_0485393f3a-st32.sh (sha256 05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf; = WANT in install_st32.sh line 7)",
+   "line": 42,
+   "quote": "check ycharts-host/ycharts_session.js $WANT_LIBRARY"
+  },
+  {
+   "file": "C:/dev/irpt-release-st32/resident_host_install_0485393f3a-st32.sh (sha256 05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf; = WANT in install_st32.sh line 7)",
+   "line": 44,
+   "quote": "cp -a $H/pydeps/. \"$ROOT/\""
+  },
+  {
+   "file": "C:/dev/irpt-release-st32/resident_host_install_0485393f3a-st32.sh (sha256 05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf; = WANT in install_st32.sh line 7)",
+   "line": 45,
+   "quote": "rm -rf \"$ROOT/bin\""
+  },
+  {
+   "file": "C:/dev/irpt-release-st32/resident_host_install_0485393f3a-st32.sh (sha256 05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf; = WANT in install_st32.sh line 7)",
+   "line": 57,
+   "quote": "open('SHA256SUMS', 'w').write('\\n'.join(rows) + '\\n')   (lines 47-58: SHA256SUMS over every file under ROOT except itself, generated on the host)"
+  },
+  {
+   "file": "C:/dev/irpt-release-st32/resident_host_install_0485393f3a-st32.sh (sha256 05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf; = WANT in install_st32.sh line 7)",
+   "line": 95,
+   "quote": "systemctl stop $UNIT"
+  },
+  {
+   "file": "C:/dev/irpt-release-st32/resident_host_install_0485393f3a-st32.sh (sha256 05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf; = WANT in install_st32.sh line 7)",
+   "line": 96,
+   "quote": "install_root() {"
+  },
+  {
+   "file": "C:/dev/irpt-release-st32/resident_host_install_0485393f3a-st32.sh (sha256 05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf; = WANT in install_st32.sh line 7)",
+   "line": 97,
+   "quote": "PYTHONPATH=\"$R/$1\" bash \"$R/$1/ycharts/generate/install-resident.sh\" \"$R/$1\" /usr/bin/python3.12 resident_installed:build_resident_runtime ec2-user $R/cutover_receipt.json"
+  },
+  {
+   "file": "C:/dev/irpt-release-st32/resident_host_install_0485393f3a-st32.sh (sha256 05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf; = WANT in install_st32.sh line 7)",
+   "line": 112,
+   "quote": "install_root $OLD"
+  },
+  {
+   "file": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/st32_release/install_st32.sh",
+   "line": 7,
+   "quote": "WANT=05b0cfba8b8948a6573ef9e4b3a1d538939ebf4d54a3761af797c77712878adf   (the host script it fetches by key and runs at line 15: bash $T)"
+  }
+ ],
+ "installer_read_finding": "install-resident.sh (blob 0b72f58ff9 at 8ee48892bf and in this worktree) contains NO tar, cp, mv, ln, mkdir, unzip or copy and no rm of the package root. It takes the package root as an argument that must already exist (line 8 realpath -e; line 17 SHA256SUMS must exist). The extraction, the pydeps copy, the SHA256SUMS generation and the root's removal are all in the host script (HOST lines 20, 23, 44-45, 47-58), not in the installer. The task order's premise that the installer extracts the tarball does not hold (surprise row IRPT_ANLREQ-D2-W55-S9).",
+ "scratch": {
+  "path": "C:/dev/ar196-55-scratch/ (outside the product tree; left in place)",
+  "how_made": "OLD live-shaped root = opt/irpt-resident/0485393f3a-st32: the live-pin builder tarball C:/dev/ar195-55-tarballs/live_0485393f3a_A1.tar.gz (sha256 9298dc65..., 182 members) extracted, PLUS 144 dummy files (one line of ASCII each) at the names of the 298-member st32 release tar that the A1 tar lacks (bin/unbuilt_st32_only.names, from `tar -tzf C:/dev/irpt-release-st32/0485393f3a-st32.tar.gz` minus A1; st32 tar sha256 e59596e4...). The order's 116 is 298-182; the name-level count is 144 because 28 builder names are not live (27 schemas/*, 1 ycharts/extract/.gitattributes), see IRPT_ANLREQ-D2-W55-S4 and surprise IRPT_ANLREQ-D2-W55-S10. NEW root = opt/irpt-resident/069b8f797e-scratch: the release tarball C:/dev/ar195-55-tarballs/release_069b8f797e_B1.tar.gz (sha256 2942cf9d..., 183 members) extracted by the host-script steps. Host paths replaced: /opt/irpt-resident -> C:/dev/ar196-55-scratch/opt/irpt-resident; /opt/investor-reporting-ycharts -> C:/dev/ar196-55-scratch/opt/investor-reporting-ycharts (its pydeps/ is an EMPTY scratch directory: the host pydeps were not read).",
+  "replay_script": "C:/dev/ar196-55-scratch/bin/install_steps.sh (copied to the r19/scratch_evidence folder)",
+  "replay_adaptations": [
+   "SHA256SUMS generator: os.path.join on Windows yields backslash paths; the separator is normalised to '/' and the file is written with newline='\\n' (Linux LF). No other change.",
+   "chown (host line 46) and systemctl, sudo, curl, aws, /usr/bin/python3.12 and the --help run (installer line 40) were NOT run: they are host operations (declared in not_read)."
+  ],
+  "rerun": "the replay was run twice; census_before, census_after_E1, census_after_E2 and both compare files are byte-identical across the two runs"
+ },
+ "commands_run": [
+  "tar -xzf C:/dev/ar195-55-tarballs/live_0485393f3a_A1.tar.gz -C <scratch>/opt/irpt-resident/0485393f3a-st32",
+  "144 x (mkdir -p dir; printf one line > name)  [dummies at bin/unbuilt_st32_only.names]",
+  "census.py <scratch OLD root> -> census_before.json   [members 326, unbuilt present 144 of 144]",
+  "rm -rf <scratch>/opt/irpt-resident/069b8f797e-scratch ; mkdir -p <same>        [host script line 20]",
+  "tar -xzf C:/dev/ar195-55-tarballs/release_069b8f797e_B1.tar.gz -C <scratch NEW root>        [host script line 23]",
+  "cd <scratch NEW root>",
+  "cp -a <scratch>/opt/investor-reporting-ycharts/pydeps/. <scratch NEW root>/        [host script line 44; empty source]",
+  "rm -rf <scratch NEW root>/bin        [host script line 45]",
+  "python -I gen_sha256sums.py  (host script lines 47-58 with the separator adaptation) -> SHA256SUMS of 183 host members",
+  "realpath -e <scratch NEW root> ; test -f SHA256SUMS ; test -f ycharts/generate/resident_main.py        [installer lines 8, 17, 18-20]",
+  "sha256sum --check --strict SHA256SUMS  -> rc 0, 183 lines (installer line 39)",
+  "census.py <scratch NEW root> -> census_after_E1.json ; compare.py -> compare_E1.json",
+  "CONTROL E2 (not the host procedure): cp -a <scratch OLD root> <scratch>/opt/irpt-resident/overlay-control-0485393f3a-st32 ; tar -xzf B1 -C that copy ; census.py ; compare.py -> compare_E2.json"
+ ],
+ "not_run": [
+  "install-resident.sh lines 23-26 (IMDSv2 curl) and 30-38 (cutover receipt assertions): host and AWS calls",
+  "line 40 (--help) and 41-44 (systemctl is-active), 47-70 (unit file install, daemon-reload, enable --now), line 46 trap: host operations",
+  "host host-script lines 26-43 member checks: they name ycharts-host and the library, and they were not run against the scratch root because they are host-library checks (the one that matters is line 42, see surprise S13)",
+  "host script line 46 chown; lines 61-70 cutover receipt; lines 79-82 library install; lines 83-94 factory and queue; 95-99 stop and install_root; 107-118 rollback"
+ ],
+ "before_member_count": 326,
+ "after_member_count": 184,
+ "unbuilt_members_before": 144,
+ "unbuilt_members_after": 1,
+ "unbuilt_members_after_names": [
+  "SHA256SUMS"
+ ],
+ "members_added": [
+  "infra/logic/registry/firm_pages.json"
+ ],
+ "members_removed": [
+  "_contracts/fixtures/AnalysisReport.invalid.json",
+  "_contracts/fixtures/AnalysisReport.v2.opal.invalid_not_available_no_reason.json",
+  "_contracts/fixtures/AnalysisReport.v2.opal.invalid_vendor_member.json",
+  "_contracts/fixtures/AnalysisReport.v2.opal.valid.json",
+  "_contracts/fixtures/AnalysisReport.v2.ycharts.valid.json",
+  "_contracts/fixtures/AnalysisReport.valid.json",
+  "_contracts/fixtures/AnalysisRequest.invalid.json",
+  "_contracts/fixtures/AnalysisRequest.valid.json",
+  "_contracts/fixtures/AnalysisRequestPdf.invalid.json",
+  "_contracts/fixtures/AnalysisRequestPdf.valid.json",
+  "_contracts/fixtures/AnalysisUploadResult.invalid.json",
+  "_contracts/fixtures/AnalysisUploadResult.valid.json",
+  "_contracts/fixtures/ComparisonCatalogue.invalid.json",
+  "_contracts/fixtures/ComparisonCatalogue.valid.json",
+  "_contracts/fixtures/DirectoryContext.invalid.json",
+  "_contracts/fixtures/DirectoryContext.valid.json",
+  "_contracts/fixtures/DirectoryEntry.invalid.json",
+  "_contracts/fixtures/DirectoryEntry.pre_amendment.schema.json",
+  "_contracts/fixtures/DirectoryEntry.valid.json",
+  "_contracts/fixtures/DirectoryPage.invalid.json",
+  "_contracts/fixtures/DirectoryPage.valid.json",
+  "_contracts/fixtures/ExportBundle.invalid.json",
+  "_contracts/fixtures/ExportBundle.valid.json",
+  "_contracts/fixtures/ExportReceipt.invalid.json",
+  "_contracts/fixtures/ExportReceipt.valid.json",
+  "_contracts/fixtures/HoldingsSnapshot.invalid.json",
+  "_contracts/fixtures/HoldingsSnapshot.valid.json",
+  "_contracts/fixtures/NarrativePacket.invalid.json",
+  "_contracts/fixtures/NarrativePacket.valid.json",
+  "_contracts/fixtures/OwnedAnalysisRequest.invalid.json",
+  "_contracts/fixtures/OwnedAnalysisRequest.persist_inputs.extra_member.invalid.json",
+  "_contracts/fixtures/OwnedAnalysisRequest.persist_inputs.missing_member.invalid.json",
+  "_contracts/fixtures/OwnedAnalysisRequest.persist_inputs.no_sha256.invalid.json",
+  "_contracts/fixtures/OwnedAnalysisRequest.persist_inputs.null_index.valid.json",
+  "_contracts/fixtures/OwnedAnalysisRequest.persist_inputs.valid.json",
+  "_contracts/fixtures/OwnedAnalysisRequest.valid.json",
+  "_contracts/fixtures/OwnedAnalysisRequestHistory.invalid.json",
+  "_contracts/fixtures/OwnedAnalysisRequestHistory.valid.json",
+  "_contracts/fixtures/PerformanceReport.invalid.json",
+  "_contracts/fixtures/PerformanceReport.valid.json",
+  "_contracts/fixtures/PublicStatusEnvelope.invalid.json",
+  "_contracts/fixtures/PublicStatusEnvelope.valid.json",
+  "_contracts/fixtures/RenderPackage.invalid.json",
+  "_contracts/fixtures/RenderPackage.valid.json",
+  "_contracts/fixtures/ResolvedScope.invalid.json",
+  "_contracts/fixtures/ResolvedScope.valid.json",
+  "_contracts/fixtures/SelectedAccounts.invalid.json",
+  "_contracts/fixtures/SelectedAccounts.valid.json",
+  "_contracts/fixtures/StatusEnvelope.invalid.json",
+  "_contracts/fixtures/StatusEnvelope.valid.json",
+  "_contracts/fixtures/analysis-report.sections.opal.invalid.json",
+  "_contracts/fixtures/analysis-report.sections.opal.valid.json",
+  "_contracts/fixtures/analysis-report.sections.vendor.valid.json",
+  "_contracts/fixtures/custody-report-persist.response.invalid.json",
+  "_contracts/fixtures/custody-report-persist.response.valid.json",
+  "_contracts/fixtures/custody-report-read.response.invalid.json",
+  "_contracts/fixtures/custody-report-read.response.valid.json",
+  "_gate/gate.py",
+  "data/firm_registry.json",
+  "docs/contracts/investor-reporting/v1/AnalysisReport.schema.json",
+  "docs/contracts/investor-reporting/v1/AnalysisRequest.schema.json",
+  "docs/contracts/investor-reporting/v1/AnalysisRequestPdf.schema.json",
+  "docs/contracts/investor-reporting/v1/AnalysisSubmissionRequest.schema.json",
+  "docs/contracts/investor-reporting/v1/AnalysisUploadRequest.schema.json",
+  "docs/contracts/investor-reporting/v1/AnalysisUploadResult.schema.json",
+  "docs/contracts/investor-reporting/v1/BoundaryRefusal.schema.json",
+  "docs/contracts/investor-reporting/v1/ComparisonCatalogue.schema.json",
+  "docs/contracts/investor-reporting/v1/CurrencyAuthorities.json",
+  "docs/contracts/investor-reporting/v1/DirectoryContext.schema.json",
+  "docs/contracts/investor-reporting/v1/DirectoryEntry.schema.json",
+  "docs/contracts/investor-reporting/v1/DirectoryPage.schema.json",
+  "docs/contracts/investor-reporting/v1/ExportBundle.schema.json",
+  "docs/contracts/investor-reporting/v1/ExportReceipt.schema.json",
+  "docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json",
+  "docs/contracts/investor-reporting/v1/NarrativePacket.schema.json",
+  "docs/contracts/investor-reporting/v1/OwnedAnalysisRequest.schema.json",
+  "docs/contracts/investor-reporting/v1/OwnedAnalysisRequestHistory.schema.json",
+  "docs/contracts/investor-reporting/v1/PerformanceReport.schema.json",
+  "docs/contracts/investor-reporting/v1/PublicStatusEnvelope.schema.json",
+  "docs/contracts/investor-reporting/v1/RenderPackage.schema.json",
+  "docs/contracts/investor-reporting/v1/RequestComposition.schema.json",
+  "docs/contracts/investor-reporting/v1/ResolvedScope.schema.json",
+  "docs/contracts/investor-reporting/v1/SelectedAccounts.schema.json",
+  "docs/contracts/investor-reporting/v1/SelectionRequest.schema.json",
+  "docs/contracts/investor-reporting/v1/StatusEnvelope.schema.json",
+  "docs/contracts/investor-reporting/v1/examples/RequestComposition.synthetic.json",
+  "docs/contracts/investor-reporting/v1/responses/analysis-input-upload.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/analysis-report.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/analysis-request-history.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/analysis-request-pdf.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/analysis-request-read.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/analysis-requests.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/comparison-catalogue.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/custody-report-persist.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/custody-report-read.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/directory-browse.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/directory-search.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/export-download.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/export-receipt.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/holdings-snapshot.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/narrative-packet.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/performance-report.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/resolve-scope.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/selection-create.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/status-job.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/status-summary.response.schema.json",
+  "docs/contracts/investor-reporting/v1/responses/submit-export.response.schema.json",
+  "docs/contracts/investor-reporting/v1/routes.json",
+  "intake/fixtures/graph/FIXTURE_MANIFEST.json",
+  "intake/fixtures/graph/attachments/list_AAMk-49f-0001.json",
+  "intake/fixtures/graph/attachments/list_AAMk-49f-0005.json",
+  "intake/fixtures/graph/attachments/list_AAMk-cot-0003.json",
+  "intake/fixtures/graph/attachments/list_AAMk-opal-0004.json",
+  "intake/fixtures/graph/attachments/list_AAMk-spoof-0002.json",
+  "intake/fixtures/graph/delta_final1.json",
+  "intake/fixtures/graph/delta_final2.json",
+  "intake/fixtures/graph/delta_page1.json",
+  "intake/fixtures/graph/delta_page2.json",
+  "intake/fixtures/graph/delta_page3.json",
+  "intake/fixtures/holdings/FIXTURE_MANIFEST.json",
+  "intake/fixtures/holdings/generate_rt11_specimens.py",
+  "intake/fixtures/holdings/security_mapping.json",
+  "ycharts-host/run-ycharts-session.sh",
+  "ycharts-host/ycharts_session.js",
+  "ycharts/extract/fixtures/synthetic_pdf/MANIFEST.json",
+  "ycharts/extract/fixtures/synthetic_pdf/generate.py",
+  "ycharts/extract/fixtures/unmapped_glyph/MANIFEST.json",
+  "ycharts/extract/fixtures/unmapped_glyph/generate.py",
+  "ycharts/generate/fixtures/har/FIXTURE_MANIFEST.json",
+  "ycharts/generate/fixtures/har/collection.json",
+  "ycharts/generate/fixtures/har/create_201.json",
+  "ycharts/generate/fixtures/har/create_422_fee.json",
+  "ycharts/generate/fixtures/har/dashboard.json",
+  "ycharts/generate/fixtures/har/decision_branches.json",
+  "ycharts/generate/fixtures/har/generate_201.json",
+  "ycharts/generate/fixtures/har/generate_404_minimal.json",
+  "ycharts/generate/fixtures/har/status_drifted.json",
+  "ycharts/generate/fixtures/har/status_ok.json",
+  "ycharts/generate/fixtures/har/templates.json",
+  "ycharts/generate/fixtures/har/upload_ok.json",
+  "ycharts/generate/fixtures/har/validate_200.json",
+  "ycharts/research/etf_classifications_dynamodb.py",
+  "ycharts/research/overview_map.json"
+ ],
+ "members_removed_count": 143,
+ "members_removed_of_which_unbuilt": 143,
+ "members_changed": [
+  "SHA256SUMS",
+  "_authz/loaders.py",
+  "_authz/served.py",
+  "census/YCHARTS_COMPARISON_REPORT_FIELD_SCRAPE_20260909.json",
+  "infra/logic/registry/exemptions.json",
+  "infra/logic/registry/name_rulings.json",
+  "infra/logic/registry/scopes.json",
+  "intake/template_reader.py",
+  "intake/uploads.py",
+  "lib/opal_naming.py",
+  "ops/status.py",
+  "reports/build_resident_package.py",
+  "reports/commentary_draft_store.py",
+  "reports/resident_bindings.json",
+  "schemas/AnalysisSubmissionRequest.schema.json",
+  "ycharts/extract/extract.py",
+  "ycharts/generate/acceptance.py",
+  "ycharts/generate/resident_worker.py",
+  "ycharts/generate/submission.py",
+  "ycharts/research/opal_packager.py",
+  "ycharts/session/host_capture.py"
+ ],
+ "members_changed_count": 21,
+ "members_unchanged_count": 162,
+ "control_E2_in_place_overlay": {
+  "before_member_count": 326,
+  "after_member_count": 327,
+  "unbuilt_members_before": 144,
+  "unbuilt_members_after": 144,
+  "members_added": [
+   "infra/logic/registry/firm_pages.json"
+  ],
+  "members_removed": [],
+  "members_changed_count": 20
+ },
+ "denominators": {
+  "live_resident_release_tar_st32": 298,
+  "builder_live_pin_A1": 182,
+  "builder_release_pin_B1": 183,
+  "A1_and_st32_common_names": 154,
+  "st32_only_names": 144,
+  "A1_only_names": 28,
+  "B1_only_names": 1,
+  "B1_changed_vs_A1_builder_members": 20,
+  "note": "E1 changed = 21 because SHA256SUMS (a dummy in the old root) is regenerated; the 20 builder members match RESIDENT_PACKAGE_DELTA.json differing (20)"
+ },
+ "claim": "Mode: the release is a NEW directory per pin (NEW_ROOT_COPY is the nearest of the three enum values; its copy clause is not met, see mode_fit). The installer itself performs no extraction, copy or removal. Replayed on a live-shaped scratch root with the host-script file operations, the old root's 326 members (182 builder + 144 placeholders) are untouched, while the new root carries 184 members: 183 from the release tarball plus a host-generated SHA256SUMS. Of the 144 names the old root carries that the builder tarball does not, 143 are absent from the new root (1 is the regenerated SHA256SUMS): the procedure copies none of them from the old root. The in-place control E2 keeps all 326 and adds 1. Consequence stated as measured: a release cut from the 8-argument builder and installed by this procedure would have a root without docs/, _contracts/, intake/ (14 names), ycharts/ (19), ycharts-host/ (2), _gate/, data/; the old root would remain on the host for rollback. No member is deleted from the live root by these steps. Unbuilt members lost from the NEW root: 143 of 144 (see members_removed). This record does not decide whether that release may ship (CTO, section 4).",
+ "not_read": [
+  "the host itself: nothing about the live host's state beyond the recorded install (no SSM, no sign-in, no ls, no sha256sum of /opt on the host)",
+  "the contents of the live host's pydeps directory: the replay used an EMPTY scratch pydeps, so the pydeps merge contributes 0 members in the scratch",
+  "the bytes of the 144 unbuilt live members: the scratch uses one-line placeholders; only their NAMES are read, from the local st32 release tar listing (the record gives counts by folder only)",
+  "the live root's SHA256SUMS (297 lines host-generated) and whether the host's SHA256SUMS would list the same 184 names",
+  "ycharts-host/ycharts_session.js and the library the release installs: not read (the blob db43e9f9... is named in the delta record only)",
+  "whether 0485393f3a-st32 (live) and a 069b8f797e root would coexist under the same unit name with the cutover receipt as the host script writes it",
+  "the installer's behaviour under systemctl and with a real python: not run"
+ ],
+ "evidence_folder": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~55/r19/scratch_evidence/",
+ "source_of_the_claim": "scratch replay C:/dev/ar196-55-scratch/bin/install_steps.sh; census.py; compare.py; gen_sha256sums.py; build_record.py (all outside the product tree)"
+}
