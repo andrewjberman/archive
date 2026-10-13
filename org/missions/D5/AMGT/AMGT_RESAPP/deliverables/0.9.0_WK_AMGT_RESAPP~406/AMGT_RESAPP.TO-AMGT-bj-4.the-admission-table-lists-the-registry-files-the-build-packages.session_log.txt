@@ -1,0 +1,32 @@
+SESSION LOG -- 0.9.0_WK_AMGT_RESAPP~406 on AMGT_RESAPP.TO-AMGT-bj-4 (round 103)
+branch wk-AMGT_RESAPP-406, worktree C:/dev/wk-resapp-406
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-AMGT_RESAPP-406; test -d org && test -d .tools -> TREE-OK.
+2. Premise re-ground: HEAD 57e446ce0b; issuance a0278ca28a is an ancestor (rev-list count 81531 vs 81530). Surprise row AMGT_RESAPP-D1-W406-S1.
+3. git apply --check --whitespace=nowarn round103_prep/r103_admission_table.patch -> APPLY-CHECK-OK; git apply -> APPLIED.
+   Committed the one changed file as b5c16e920a (safe-commit, 1 file, 19 insertions, 5 deletions).
+4. AC1 (exact invocation, timeout 600), output tail:
+     PASS A1 exemptions.json changed: listed
+     PASS A2 only a NON-packaged registry file changed: none listed
+     PASS A3 no registry file changed: none listed
+     PASS A4 the rule is read from the build script: feeds.json listed once the script packages it
+     PASS A5 a lib module change is still listed
+     arms passed 5 of 5
+     R103 ADMISSION ARMS: YES
+     exit=0
+   Second run identical in verdict (5 of 5, YES, exit 0).
+5. Negative control: the same arms script against the PRE-PATCH tool (git show 57e446ce0b:<path>, copied to .scratch/):
+     FAIL A2 ... none listed ... pin 8083a70e... ref fd79f4a7d...
+     arms passed 4 of 5
+     R103 ADMISSION ARMS: NO
+     exit=1
+   Confirms the patch is what turns A2 green.
+6. Patched tool on the real pin: python r94_admission_table.py 6ecb5bc567 --pin 7da642c1ff, rc=0, 13 output lines:
+     header 'pin 7da642c1ff ref 6ecb5bc567 (6ecb5bc567) | members whose bytes differ: 12'
+     12 member rows, including infra/logic/registry/exemptions.json (bc909dc105ff -> ccaf6c9f3481, +8 -0)
+     and infra/logic/registry/scopes.json (cb297c4faed9 -> b53fb599f250, +1 -1); no firm_pages.json row.
+7. Surprise rows filed (appended to INVESTIGATION_v1.md, one fenced block each):
+     AMGT_RESAPP-D1-W406-S1 (premise: HEAD one commit past the issuance), OBSERVATION, INERT
+     AMGT_RESAPP-D1-W406-S2 (lib/ filter lists test_*.py modules), OBSERVATION, INERT
+     AMGT_RESAPP-D1-W406-S3 (AC2 literal output includes the channel file), BLOCKING, INERT
+8. AC2 measured after the row commit (see the instance for the recorded output).

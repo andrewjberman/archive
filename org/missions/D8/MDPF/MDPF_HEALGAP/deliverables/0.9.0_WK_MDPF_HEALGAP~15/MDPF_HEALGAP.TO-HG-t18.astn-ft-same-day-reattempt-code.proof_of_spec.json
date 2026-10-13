@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-t18",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t18.astn-ft-same-day-reattempt-code.md",
+    "group": "OTHER",
+    "vintage_commit": "fe216d8d06"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "fe216d8d06",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t18.astn-ft-same-day-reattempt-code.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_HEALGAP~15",
+  "artifacts_produced": [
+    {
+      "path_or_key": "tools/astn_wsjft/scripts/run.py",
+      "kind": "script",
+      "commit_or_etag": "1eaea051c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no S3 upload, no Lambda invoke, no EC2 start; the code reaches the box only by the issuer's drain act under its own never-widen pair. run() is byte-identical to base.",
+      "introduces": [
+        "def ft_reattempt"
+      ],
+      "artifact_covered_by": [
+        "HG5-t18-AC1"
+      ]
+    },
+    {
+      "path_or_key": "tools/astn_wsjft/scripts/store.py",
+      "kind": "script",
+      "commit_or_etag": "1eaea051c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no S3 upload; reaches the box only by the issuer's drain act. Also drops the unused import re (surprise row MDPF_HEALGAP-D1-W15-S1).",
+      "introduces": [
+        "def try_load_digest"
+      ],
+      "artifact_covered_by": [
+        "HG5-t18-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/astn-wsjft-orchestrator/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "1eaea051c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no Lambda invoke and no Lambda deploy; the Lambda deploy is the issuer's act at the drain. The run command line is byte-identical to base.",
+      "introduces": [
+        "ft_reattempt"
+      ],
+      "artifact_covered_by": [
+        "HG5-t18-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG5-t18-AC1",
+      "criterion_verbatim": "thirteen stub arms on `run.py`: the default run is unchanged (one send, no subject, digest under the date, the warning text intact); a sent supplement, an absent or empty digest and a day without an FT failure are no-ops; the FT-failed day fetches once, windows since the last ok day (28 h, 12 h default, the newest ok day not an FT-failed one), de-duplicates by article id, persists `-ftsup` and sends one `FT supplement`; an all-duplicate fetch and a 0-survivor analysis send nothing; a fetch that raises and an unreadable digest raise; a dry run writes and sends nothing.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R5_CHECKS/hg_t18_run_gate.py",
+      "output_evidence": "GATE-OK arms A(default run unchanged) B(supplement sent) C(no digest) D(empty digest) E(no FT failure) F(window 28h, dedup by id, one supplement) G(12h default) H(newest ok day) I(all dup) J(fetch raises) K(dry run) L(0 survive) M(unreadable digest raises) -- rc=0 on three runs (first, re-run under timeout, and after the import-re lint fix); 0 GATE-BAD lines in any run. Mutant control: dedupe removed from a scratch copy gives GATE-BAD F and rc=1.",
+      "denominator": "13 of 13 stub arms (A-M) GATE-OK",
+      "status": "PASS",
+      "expect": "GATE-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "HG5-t18-AC2",
+      "criterion_verbatim": "the orchestrator's `run` command line is byte-identical; `ft_reattempt` runs `... python3 run.py --ft-reattempt` (`--dry-run` with the event key), makes no digest-guard read, alerts on a failed run, always stops the box, and leaves it running on budget expiry as `run` does; `absence_check` makes no SSM call.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R5_CHECKS/hg_t18_orch_gate.py",
+      "output_evidence": "GATE-OK arms A(run unchanged) A2(explicit run) B(ft_reattempt: command, no s3 guard, stop) C(dry run) D(failed -> alert + stop) G(budget expiry leaves running, both modes) H(absence_check unchanged) -- rc=0 on two runs; 0 GATE-BAD lines in any run.",
+      "denominator": "7 of 7 arm labels GATE-OK (arms A, A2, B, C, D, G, H as printed by the gate)",
+      "status": "PASS",
+      "expect": "GATE-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Dedupe removed from ft_reattempt in a scratch copy (.scratch/run_mutant_nodedupe.py, graded via HG_T18_RUN): new = [a for a in fresh ] instead of filtering on sent_ids; the run gate must fail",
+      "expected": "GATE-BAD F (analyze_all receives the duplicate article) and rc=1",
+      "observed": "GATE-BAD F: analyze_all got ['https://ft.com/dup-bbb222', 'https://ft.com/new-ccc333'], want only the new article (old dropped by the window, dup by its id) -- rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "hg_t18_run_gate.py run three times and hg_t18_orch_gate.py run twice, same worktree, before and after the store.py import-re removal",
+      "observed": "GATE-OK on every run, same arm labels each time, rc=0 each time",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "schedule resource that invokes ft_reattempt (no Terraform in this cell)",
+      "reason": "order: the schedule's name waits on a registry row the CTO has routed; no Terraform file in this cell"
+    },
+    {
+      "item": "upload of the code to S3, the Lambda deploy, any Lambda invoke, any EC2 start, any SES send",
+      "reason": "order BOUNDS: no AWS write, no Lambda invoke, no SES send, no EC2 start; the code reaches the box and the Lambda only by the issuer's drain act"
+    },
+    {
+      "item": "analyze.py, compile_email.py, config.py, fetch_ft.js, send_ses.py, infra/aws/ec2/astn-wsjft/, infra/aws/terraform/",
+      "reason": "order BOUNDS: do not edit"
+    },
+    {
+      "item": "live run of ft_reattempt against the real FT source or S3 digests",
+      "reason": "order BOUNDS: no vendor call, no S3 write; the gates exercise run.py through stub modules only"
+    }
+  ],
+  "surprises": [
+    "MDPF_HEALGAP-D1-W15-S1: store.py at base carries an unused import re that ruff F401 refuses, so the commit gate blocked the reference patch until the one-line removal in 1eaea051c4"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~15/MDPF_HEALGAP.TO-HG-t18.astn-ft-same-day-reattempt-code.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "git apply --check and git apply",
+      "invocation": "git apply org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R5_PATCHES/t18_tools.patch && git apply org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R5_PATCHES/t18_orchestrator.patch",
+      "result": "both patches applied cleanly on fe216d8d06; diffstat 3 files, 140 insertions, 4 deletions before the lint fix"
+    },
+    {
+      "tool": "ruff check (commit-gate, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_HEALGAP~15 <0.9.0_WK_MDPF_HEALGAP~15@opal.agent>\" -F .scratch/msg_code.txt -- tools/astn_wsjft/scripts/run.py tools/astn_wsjft/scripts/store.py infra/aws/lambda/astn-wsjft-orchestrator/lambda_function.py",
+      "result": "first attempt BLOCKED on F401 re imported but unused at store.py:9 (base defect); second attempt after removing the import: commit-gate clean for 3 of 3 file(s), committed 1eaea051c4"
+    }
+  ]
+}

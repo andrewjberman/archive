@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bj-4.the-admission-table-lists-the-registry-files-the-build-packages",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9bac67f9d0028064629cba97b38e3a077f9f6996"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "a0278ca28a03409731fd4e9a750287ccf9bafb0a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bj-4.the-admission-table-lists-the-registry-files-the-build-packages.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~406",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round94_prep/checks/r94_admission_table.py",
+      "kind": "script",
+      "commit_or_etag": "b5c16e920a16c5868e40c0a242caf268fb104af6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ONE FILE changed by the prepared round103_prep/r103_admission_table.patch (git apply, unchanged): adds packaged_registry(ref), which reads NAMING_REGISTRY_FILES from infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh at the given ref (plus org/standards/NAMING_SCHEMA.json when the script names it); the registry members of the table are the packaged files whose blob differs at the pin or the ref, replacing every file in infra/logic/registry/. Read-only (git plumbing only). No AWS call, no deploy, no store write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "five PASS rows (A1 to A5), `arms passed 5 of 5`, `R103 ADMISSION ARMS: YES`; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-406 && python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/checks/r103_admission_arms.py\" --instrument \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round94_prep/checks/r94_admission_table.py\" | tail -7; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "   PASS A1 exemptions.json changed: listed\n   PASS A2 only a NON-packaged registry file changed: none listed pin 522dbb468e0e5aff87da642c9e025e2bfcc9e595 ref dce9053917744b4b9d2cb58d118d2e8e92816786\n   PASS A3 no registry file changed: none listed pin 790c5aaa5b6fbff2a7a380b625dc9ddcf63c5573 ref 4d25159e9468e07263460225e2a7d99b5eeba9a5\n   PASS A4 the rule is read from the build script: feeds.json listed once the script packages it\n   PASS A5 a lib module change is still listed\n   arms passed 5 of 5\nR103 ADMISSION ARMS: YES\nexit=0",
+      "denominator": "5 of 5 arms (A1 to A5) PASS; 5 of 5 arms passed; second run with the same invocation also 5 of 5 and YES",
+      "status": "PASS",
+      "expect": "PASS A1 [\\s\\S]*PASS A5 [\\s\\S]*arms passed 5 of 5[\\s\\S]*R103 ADMISSION ARMS: YES[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "exactly one line, `org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round94_prep/checks/r94_admission_table.py`, and no other line",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-406 && git diff --name-only \"$(git merge-base HEAD box/dell1)\" HEAD -- . \":(exclude)org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~406\" \":(exclude)org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel\" | sort",
+      "output_evidence": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round94_prep/checks/r94_admission_table.py",
+      "denominator": "1 line printed, 1 expected (rc=0; the AMENDED invocation, re-run by the issuer 2026-10-13 on the worker's tree)",
+      "status": "PASS",
+      "status_reason": "Re-graded by the issuer under AMENDMENT 1 of the order: the pathspec now also excludes the surprise channel (the order's own write surface), so the worker's filed rows no longer put INVESTIGATION_v1.md in the diff. The worker reported the earlier invocation literally (2 lines, FAIL).",
+      "expect": "^org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2\\.0\\.0_SA_COO~R1/round94_prep/checks/r94_admission_table\\.py$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The pre-patch tool (git show 57e446ce0b:<the r94 path>, copied to the worker's .scratch) run through the same r103_admission_arms.py, which is the instrument AC1 uses.",
+      "expected": "A2 FAILS (the tool lists a registry file the build does not package); arms passed 4 of 5; R103 ADMISSION ARMS: NO",
+      "observed": "FAIL A2 ... none listed; arms passed 4 of 5; R103 ADMISSION ARMS: NO; exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The AC1 invocation run twice in this session, each through the pipe with exit status.",
+      "observed": "Both runs: five PASS rows, arms passed 5 of 5, R103 ADMISSION ARMS: YES, exit=0; the pin and ref SHAs in the A2 and A3 lines differ between runs because the arms script builds fresh temporary repositories, and the verdicts do not.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The <status> flip of the task order to complete",
+      "reason": "The order states the flip is the issuer's. The worker does not flip it."
+    },
+    {
+      "item": "The lib/ filter that lists test_*.py modules (surprise row AMGT_RESAPP-D1-W406-S2)",
+      "reason": "Outside the cell: the order bounds the change to the packaged-registry rule. Recorded as a row, left unchanged."
+    },
+    {
+      "item": "AC2 as a literal one-line check",
+      "reason": "Not met as written: the channel file that the order's surfaces name is committed in this order's rows. Carried as FAIL with row AMGT_RESAPP-D1-W406-S3, not waived."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W406-S1: the worktree HEAD is 57e446ce0b, one commit after the issuance a0278ca28a the order names; the prepared patch applied cleanly and AC2's merge-base is unaffected.",
+    "AMGT_RESAPP-D1-W406-S2: r94_admission_table.py documents its lib/ population as every non-test file, but its filter drops only /tests/ paths and _test.py suffixes, so test_*.py modules are listed.",
+    "AMGT_RESAPP-D1-W406-S3: BLOCKING on AC2 -- AC2's exactly-one-line expectation cannot pass while the channel file the order's surfaces name carries this order's rows."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~406/AMGT_RESAPP.TO-AMGT-bj-4.the-admission-table-lists-the-registry-files-the-build-packages.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "git apply",
+      "invocation": "git apply --whitespace=nowarn org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round103_prep/r103_admission_table.patch",
+      "result": "APPLIED (--check passed first)"
+    },
+    {
+      "tool": "r94_admission_table.py (patched, at its own path in the worktree)",
+      "invocation": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round94_prep/checks/r94_admission_table.py 6ecb5bc567 --pin 7da642c1ff",
+      "result": "rc=0; header 'pin 7da642c1ff ref 6ecb5bc567 (6ecb5bc567) | members whose bytes differ: 12'; 12 member rows including infra/logic/registry/exemptions.json (bc909dc105ff -> ccaf6c9f3481, +8 -0) and infra/logic/registry/scopes.json (cb297c4faed9 -> b53fb599f250, +1 -1); no firm_pages.json row"
+    }
+  ]
+}
