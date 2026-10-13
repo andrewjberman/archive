@@ -1,15 +1,18 @@
 {
   "to_id": "IRPT_ANLREQ.TO-AR-y-221",
   "cell": "AR-y-221",
-  "build_status": "BUILT, NOT RELEASED. AC1 and AC2 FAIL as built (surprise row IRPT_ANLREQ-D2-W67-S1, BLOCKING).",
+  "build_status": "BUILT, NOT RELEASED. After AMENDMENT 1 (the three named tests take the header Client Primary Acct; one new negative-control test for Acct Ref Ext) AR221-y-AC1 and AR221-y-AC2 PASS by their checks. The first run failed on the three tests (surprise row IRPT_ANLREQ-D2-W67-S1, BLOCKING); that history is kept in amendment_1.first_run.",
   "commits": {
     "controls_named_first": "3f9a884a98 (this file's first version, the sixteen negatives and five positives, committed ALONE before the rule changed)",
     "rule_and_version_and_pin": "55d1755d39 (template_reader.py alone: the allowlist, READER_VERSION r19.3, READER_PINS r19.3)",
-    "surprise_rows": "373f79dd7d (INVESTIGATION_v1.md: IRPT_ANLREQ-D2-W67-S1 BLOCKING, IRPT_ANLREQ-D2-W67-S2 OBSERVATION)",
-    "this_completion": "the commit that carries this file's completion, the proof instance and the status flip"
+    "surprise_rows_first_run": "373f79dd7d (INVESTIGATION_v1.md: IRPT_ANLREQ-D2-W67-S1 BLOCKING, IRPT_ANLREQ-D2-W67-S2 OBSERVATION)",
+    "tests_amendment_1": "2ccad1f84f (test_account_value_backstop.py alone: three headers changed, one negative-control test added; the rule is not touched)",
+    "surprise_row_S3": "the commit that appends IRPT_ANLREQ-D2-W67-S3 to INVESTIGATION_v1.md (named in the SESSION_LOG, section 11)",
+    "this_completion": "the commit that carries this file's amendment-1 record, the proof instance and the SESSION_LOG (named in the SESSION_LOG, section 12); the order's status flip is a later commit"
   },
   "rule": {
-    "in_words": "A header that carries an account root (acc, acct, accnt, subacc) enters the AR-y-194 value backstop ONLY when every other word of it stands in its allowed place: a word BEFORE the root must be an ACCOUNT_MODIFIERS word, a word AFTER the root must be an ACCOUNT_TAIL_WORDS word. The attribute-word blocklist (ACCOUNT_ATTRIBUTE_WORDS, _has_account_root, _has_attribute_word) is removed, because nothing else used it. Repair (b) of r19.2 (a digit run of 8 or more is an identifier only when no value in its column carries a number separator) is kept. The whole-cell exclusions ACCOUNT_HEADER_EXCLUDED and the header rule are unchanged apart from the two words below.",
+    "in_words": "A header that carries an account root (acc, acct, accnt, subacc) enters the AR-y-194 value backstop ONLY when every other word of it stands in its allowed place: a word BEFORE the root must be an ACCOUNT_MODIFIERS word, a word AFTER the root must be an ACCOUNT_TAIL_WORDS word (or another root). The attribute-word blocklist (ACCOUNT_ATTRIBUTE_WORDS, _has_account_root, _has_attribute_word) is removed, because nothing else used it. Repair (b) of r19.2 (a digit run of 8 or more is an identifier only when no value in its column carries a number separator) is kept. The whole-cell exclusions ACCOUNT_HEADER_EXCLUDED and the header rule are unchanged apart from the two words below.",
+    "consequence_for_unlisted_words": "An unknown word keeps a header OUT of the backstop (CTO round-21 ruling). A header whose other words are not all in the allowed places is not read as an account column by the backstop, whatever its values. 'Acct Ref Ext' is the worked case: 'ext' is in neither list, so the header is not admitted and two identifier-like values are NOT turned back. This is the allowlist's price and it is pinned by test_an_account_root_header_with_an_unlisted_word_is_not_read_as_an_account_column.",
     "why_by_position": "The ruling reads 'every other word is an identifier-tail word, with alias added to the tails and primary to the modifiers'. Read as a word set over tails and modifiers together, 'Acct Custodian' is admitted, because custodian is an ACCOUNT_MODIFIERS word, and its values SCHWAB01 and FIDELITY1 are turned back, against a named control. The header rule's own grammar places a modifier before the account word and a tail after it, so the test uses that position (surprise row W67-S2).",
     "why_by_position_detail": "_root_header_admitted(text): words = _header_words(text); the first root index r; before = words[:r] must all be in ACCOUNT_MODIFIERS; after = words[r+1:] must all be in ACCOUNT_TAIL_WORDS or ACCOUNT_ROOTS. 'Acct' alone is admitted (both lists empty)."
   },
@@ -21,41 +24,60 @@
     "ACCOUNT_TAIL_WORDS_added_by_AR_y_221": ["alias"],
     "ACCOUNT_ROOTS": ["acc", "acct", "accnt", "subacc"],
     "ACCOUNT_WORDS": ["account", "accounts", "acct", "accts", "acc", "subaccount", "subaccounts", "accnt"],
-    "removed": "ACCOUNT_ATTRIBUTE_WORDS (17 words), _has_account_root, _has_attribute_word"
+    "removed": "ACCOUNT_ATTRIBUTE_WORDS (17 words), _has_account_root, _has_attribute_word",
+    "header_rule_effect_of_added_words": "'Account Alias' and 'Primary Account' (and 'Primary Acct', 'Primary Acct No') now match the header-word rule through _is_account_header, because primary is a modifier and alias a tail word. ACCOUNT_HEADER_EXCLUDED is unchanged."
   },
   "reader": {
     "READER_VERSION_before": "irpt-template-reader.r19.2",
     "READER_VERSION_after": "irpt-template-reader.r19.3",
     "READER_PINS_r19_3_digest": "858b1282115b7a3c9ad77fab50bf69e45042a21bc1231b0632506a512c168f3a",
     "READER_PINS_r19_2_digest_kept": "59cb3c8bc95d90968f67a244be9549dfd7ccaa807f817a067d1083ff226cd87d",
-    "digest_computed_by": "test_stored_input_contract.reader_digest() run in the worktree after the rule change"
+    "digest_change_in_amendment_1": "none. The rule is untouched by amendment 1, so the digest is unchanged; the y221-keep run (365 passed, 0 failed, READER_VERSION irpt-template-reader.r19.3) includes the pin test and passes.",
+    "digest_computed_by": "test_stored_input_contract.reader_digest() run in the worktree after the rule change (first worker, determinism control)"
   },
   "controls": {
-    "negatives": "16 (the ten r19.2 negatives and the CVO's six neighbours), in negative_controls above",
-    "positives": "5 (Acct, Account Number, Accnt, Acct Alias, Primary Acct), in positive_controls above",
-    "function_level_run": "y221-allowlist: 'negatives 16, positives 5' and NO FAIL line for any negative or positive control (.scratch/ac1_final.txt)"
+    "negatives": "16 (the ten r19.2 negatives and the CVO's six neighbours), in negative_controls of ar21_checks.py",
+    "positives": "5 (Acct, Account Number, Accnt, Acct Alias, Primary Acct), in positive_controls of ar21_checks.py",
+    "function_level_run_after_amendment_1": "y221-allowlist: 'negatives 16, positives 5; backstop tests: 26 passed, 0 failed (rc=0)' and Y221-ALLOWLIST-OK, with no FAIL line for any negative or positive control.",
+    "mutant_after_amendment_1": "scratch copy .scratch/mutant (the after-root clause widened to ACCOUNT_MODIFIERS as well): y221-allowlist prints 'FAIL: a one-account file is turned back: header Acct Custodian values (SCHWAB01, FIDELITY1) -> [(C, VALUES, 2)]' and Y221-ALLOWLIST-FAIL (rc=1). The mutant fires."
   },
   "tests": {
     "intake_folder_before": "364 passed, 1 skipped, 25 subtests passed (baseline, base b4943b79ce, .scratch/baseline_intake.txt)",
-    "intake_folder_after": "361 passed, 1 skipped, 25 subtests passed, 3 FAILED (rc 1) (.scratch/after_intake.txt)",
-    "failing": [
-      "tests/test_account_value_backstop.py::test_an_account_root_header_with_two_identifier_values_is_read_as_an_account_column (NAMED; header 'Acct Ref Ext')",
-      "tests/test_account_value_backstop.py::test_the_backstop_words_say_what_is_seen_and_ask (NAMED; header 'Acct Ref Ext')",
-      "tests/test_account_value_backstop.py::test_a_digit_run_column_with_no_separator_under_a_root_is_read_as_an_account_column (earlier; header 'Acct Ref Ext')"
+    "intake_folder_after_amendment_1": "365 passed, 0 failed (y221-keep; rc=0). 365 = the 364 of the base plus the one new negative-control test. Skipped count: see the base line (1).",
+    "first_run_failing": [
+      "tests/test_account_value_backstop.py::test_an_account_root_header_with_two_identifier_values_is_read_as_an_account_column (NAMED; header 'Acct Ref Ext' in the first run)",
+      "tests/test_account_value_backstop.py::test_the_backstop_words_say_what_is_seen_and_ask (NAMED; header 'Acct Ref Ext' in the first run)",
+      "tests/test_account_value_backstop.py::test_a_digit_run_column_with_no_separator_under_a_root_is_read_as_an_account_column (earlier; header 'Acct Ref Ext' in the first run)"
     ],
-    "expectations_changed": "exactly those three tests, all for one reason: 'ext' is neither a tail word nor a modifier. No test expectation was edited, and no test file was changed.",
-    "named_backstop_tests_passing": "3 of 5 at the committed rule (test_an_account_root_header_with_one_value_is_not_several_accounts, test_no_of_accounts_holding_counts_is_excluded, test_no_of_accounts_holding_identifiers_is_read_as_an_account_column pass; the two named ones with 'Acct Ref Ext' fail)"
+    "expectations_changed": "No assertion changed. Headers only: (1) test_an_account_root_header_with_two_identifier_values_is_read_as_an_account_column: 'Acct Ref Ext' -> 'Client Primary Acct' (the comment follows the header); (2) test_the_backstop_words_say_what_is_seen_and_ask: the loop tuple's first header 'Acct Ref Ext' -> 'Client Primary Acct' (its finding text names no header, so its assertions are unchanged); (3) test_a_digit_run_column_with_no_separator_under_a_root_is_read_as_an_account_column: 'Acct Ref Ext' -> 'Client Primary Acct'. One test added: test_an_account_root_header_with_an_unlisted_word_is_not_read_as_an_account_column (Acct Ref Ext with two identifier-like values is NOT turned back; named as the allowlist's price).",
+    "not_changed_but_observed": "The two money-column tests test_a_digit_run_column_holding_a_decimal_is_a_money_column_under_a_root and test_a_digit_run_column_holding_a_comma_or_a_dollar_is_a_money_column_under_a_root still use the header 'Acct Ref Ext'. They pass (their assertion is 'not several accounts'), but only because the reader never reaches the VALUES path under that header. Not changed (outside the three named tests); surprise row IRPT_ANLREQ-D2-W67-S3 (OBSERVATION).",
+    "named_backstop_tests_passing": "5 of 5 (y221-allowlist: 26 passed, 0 failed in test_account_value_backstop.py)"
+  },
+  "amendment_1": {
+    "issued_by": "2.0.0_SA_COO~Y2 (order AMENDMENT 1, 2026-10-13)",
+    "ruling_applied": "CTO allowlist: an unknown word keeps a header out of the backstop; 'ext' is NOT added to the tail words. The three tests take the header Client Primary Acct; the rule is not touched.",
+    "first_run": {
+      "record": "r21/SESSION_LOG.txt sections 2, 3, 5, 6 and 7 of the first session (commits 12e312507d and the first-session completion)",
+      "y221-allowlist": "negatives 16, positives 5; backstop tests: 22 passed, 3 failed (rc=1); Y221-ALLOWLIST-FAIL",
+      "y221-keep": "intake tests: 361 passed, 3 failed (rc=1); READER_VERSION = irpt-template-reader.r19.3; Y221-KEEP-FAIL"
+    },
+    "after_amendment_1": {
+      "y221-allowlist": "negatives 16, positives 5; backstop tests: 26 passed, 0 failed (rc=0); Y221-ALLOWLIST-OK",
+      "y221-keep": "intake tests: 365 passed, 0 failed (rc=0); READER_VERSION = irpt-template-reader.r19.3; Y221-KEEP-OK"
+    }
   },
   "residual_seen": [
     "A backstop-only header whose other words are ALL identifier-tail words but whose VALUES are not account numbers is still turned back, because the value test (_identifier_like) is unchanged. Shape: 'Subacc Code' (subacc is not in ACCOUNT_WORDS, so the header rule does not match it; code is a tail) with two holding-identifier values would be read as an account column. Headers with acc, acct or accnt and tail words only are header-rule matches and are not in the backstop at all. This is the residual the ruling names; not closed here.",
     "A backstop-only header with a word before the root that is not a modifier (for example 'No. of Acct Ref Ext') no longer enters the backstop. No test or fixture carries one. The header-rule matches 'No. of Acct' and 'Roth IRA Acct No.' are unaffected (they never reached the backstop).",
-    "'Acct Ref Ext' is the open item: 'ext' is neither a tail word nor a modifier, so the ruled allowlist does not admit it (surprise row IRPT_ANLREQ-D2-W67-S1). Two ways to close it are a ruling on 'ext' or a change of the test header; neither was taken here."
+    "'Acct Ref Ext' is now a known non-admission, not a pass: the allowlist does not admit it by ruling, and two identifier-like values under that header are not turned back. Whether 'ext' belongs in the tail set is a CTO question, not read from the corpus (surprise row IRPT_ANLREQ-D2-W67-S1 stays as filed).",
+    "The two money-column tests that still use 'Acct Ref Ext' pass without reaching the VALUES path (surprise row IRPT_ANLREQ-D2-W67-S3)."
   ],
-  "claim": "At function level the rule as built does not turn back any of the 16 one-account negative controls and does turn back all 5 positive controls (y221-allowlist output: 'negatives 16, positives 5' with no control FAIL line). It does NOT close AR221-y-AC1 or AR221-y-AC2 as a whole: three intake tests that read the header 'Acct Ref Ext' fail, so the named backstop tests are 3 of 5 passing and the intake folder is 361 passed, 3 failed, against a floor of 364.",
+  "claim": "After amendment 1: the rule as built does not turn back any of the 16 one-account negative controls, and does turn back all 5 positive controls (y221-allowlist: 'negatives 16, positives 5', no control FAIL line). The five named backstop tests pass (26 of 26 in test_account_value_backstop.py). The intake folder passes at 365 with 0 failed, against the floor of 364, and READER_VERSION is irpt-template-reader.r19.3 (not r19.2). Both checks print OK. Nothing is released, deployed, uploaded or invoked.",
   "not_read": [
     "The live reader: nothing is deployed, released, uploaded or invoked (the cell's bounds). build-and-upload.sh was not run.",
-    "The stored-input contract tests beyond the pin test (test_stored_input_contract.py passed in the full run, not individually re-read).",
+    "The stored-input contract tests beyond the pin test (test_stored_input_contract.py passed inside the 365-test run, not individually re-read).",
     "Any fixture outside intake/tests: run_offline_suite.py was not run.",
+    "Real client headers: none read (the population is constructed, as the preflight states).",
     "Whether 'ext' belongs in the tail set: that is a ruling, not read from the corpus."
   ]
 }
