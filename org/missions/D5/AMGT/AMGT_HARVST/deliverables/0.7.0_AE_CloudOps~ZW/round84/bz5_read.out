@@ -1,0 +1,60 @@
+# HVST-bz-5 -- the read. READ ONLY: nothing was planted, re-queued, stopped, started or re-registered.
+# 0.7.0_AE_CloudOps~ZW, site Z box. 2026-10-13T09:0xZ.
+
+## START CONDITION, read by FIELDS and not by file existence alone
+DENOMINATOR: 8 bbg .cycle.json records scanned.
+Qualifying (started_at >= 2026-10-13T05:52:43Z AND an ended_at present): 1
+  20261013T055243Z.cycle.json  started=2026-10-13T05:52:43Z  ended=2026-10-13T07:59:03Z
+                               failed=0  stopped=stopped_by_operator
+=> TRUE. The act ran. (It read false at 07:13Z, when nothing was written; the record that satisfies
+it is the one HVST-bz-4's own C-f stop produced at 07:59:03Z.)
+
+## THE SCRIPT, read before it was run and never written
+org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_W1/round84/bz5_cycle_read.py, 2138 bytes.
+Read in full: it globs <state>/cycles/<publisher>/*.cycle.json, keeps records with
+started_at >= --since that have an ended_at, takes the FIRST that holds a failure (else the NEWEST),
+counts a failure as NAMED when `detail` is present, differs from `status`, and contains ':'. It
+opens nothing for writing and makes no network call.
+
+## THE LINE (AC1's literal invocation)
+$ python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_W1/round84/bz5_cycle_read.py \
+    --state-dir "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state" \
+    --since 2026-10-13T05:52:43Z
+
+CYCLE=20261013T055243Z STOPPED=stopped_by_operator FAILED=0 NAMED=0
+
+rc=0 (a record WAS read; rc 1 would mean none ended since --since).
+
+## AC1: FAIL, and that is the honest and anticipated reading
+expect (?m)^CYCLE=\S+ STOPPED=\S+ FAILED=([1-9]\d*) NAMED=\1$
+The regex requires FAILED >= 1 and NAMED == FAILED. This record holds NO failure, so there is no
+detail for anything to name. AC1 cannot pass on it and nothing was done to make it pass.
+CONTROLS on the regex itself, so the FAIL is the record's and not the pattern's:
+  'CYCLE=X STOPPED=none FAILED=8 NAMED=8' -> MATCHES      (it can pass)
+  'CYCLE=X STOPPED=none FAILED=8 NAMED=0' -> no match     (it really tests NAMED == FAILED)
+
+## THE RECORD (step 2)
+copied byte for byte to round84/bz5_cycle_record.json
+  source : 320 bytes  SHA-256 52E0451BAD833DB2DC687FB961D0F30492E3A377E002BDD9982EC9D73FC6E6BF
+  copy   : 320 bytes  SHA-256 52E0451BAD833DB2DC687FB961D0F30492E3A377E002BDD9982EC9D73FC6E6BF
+  identical: True
+failures rows (key, status, detail): NONE -- `failed` is 0 and `failures` is the empty list, so
+there is no row to print. Saying "none" is the whole content of that read.
+stopped = stopped_by_operator, completed = false.
+
+## WHAT THIS MEANS UNDER THE AMENDMENT (@cea877dfc9, which is in this checkout and byte-identical)
+- FAILED=0, so this is NOT the close of row D1-W135-S2, and the order STAYS OPEN. Read again at the
+  next ended record. No plant, no re-queue, no touch of the state dir -- the order forbids all three
+  by name and a planted pair is a separate order under its own pair.
+- This record is TRUNCATED (STOPPED=stopped_by_operator), so it does NOT count toward "failure-free".
+  **Consecutive COMPLETED records with FAILED=0 is therefore 0, not 1,** and the two-record trigger
+  that would end in a row is nowhere near. That is the amendment this seat's row Z-S117 asked for and
+  the issuer accepted: the stop was this programme's own act, so a cycle it cut cannot be evidence
+  about the failure rate.
+- The honest test is the first cycle to END ON ITS OWN under the windowless pin 995adcaeaa, which
+  started 2026-10-13T08:09:08Z. A bbg cycle measures about 11 hours, so that is roughly 19:00Z.
+  For reference, all three records that ran to completion carried failures: 2, 4 and 8.
+
+## NO PROOF INSTANCE IS WRITTEN
+AC1 FAILS and the order is explicitly still OPEN, so there is nothing to certify. Writing an
+instance now would assert a completion the read does not support. The issuer flips the status.
