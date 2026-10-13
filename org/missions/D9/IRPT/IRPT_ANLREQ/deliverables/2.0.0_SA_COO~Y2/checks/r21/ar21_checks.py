@@ -23,10 +23,11 @@ from pathlib import Path
 IR = "infra/aws/lambda/investor-reporting"
 INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r21/"
+D22 = D.replace("/r21/", "/r22/")
 ROUND192_VERSION = "irpt-template-reader.r19.2"
 TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-verify": "Y222-VERIFY", "y223-design": "Y223-DESIGN",
           "y226-effect": "Y226-EFFECT", "y227-resident": "Y227-RESIDENT", "y228-lambda": "Y228-LAMBDA", "y229-stderr": "Y229-STDERR",
-          "y242-portal": "Y242-PORTAL", "y243-portal": "Y243-PORTAL", "y244-read": "Y244-READ"}
+          "y242-portal": "Y242-PORTAL", "y243-portal": "Y243-PORTAL", "y244-read": "Y244-READ", "y245-server": "Y245-SERVER"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -298,13 +299,13 @@ def main(argv):
         if got.returncode != 0 or "ALL PASS" not in out:
             problems.append("the verify tests must exit 0 and print ALL PASS")
     elif check == "y242-portal":
-        portal_candidate(root, D % "74" + "PORTAL_FILE_NAME_CANDIDATE.json", problems)
+        portal_candidate(root, D22 % "74" + "PORTAL_FILE_NAME_CANDIDATE.json", problems)
     elif check == "y243-portal":
-        rec = portal_candidate(root, D % "75" + "PORTAL_PRICE_DATE_CANDIDATE.json", problems)
+        rec = portal_candidate(root, D22 % "75" + "PORTAL_PRICE_DATE_CANDIDATE.json", problems)
         if rec and not (rec.get("server_reads") or {}).get("what_the_server_does_without_a_price_date"):
             problems.append("server_reads.what_the_server_does_without_a_price_date must say what the serving path does when no date is sent")
     elif check == "y244-read":
-        rec = load(root, D % "76" + "PROXY_SUGGESTION_READ.json", problems)
+        rec = load(root, D22 % "76" + "PROXY_SUGGESTION_READ.json", problems)
         if rec:
             for member in ("where_suggestion_comes_from", "why_timxx_got_none", "options", "claim", "not_read"):
                 if member not in rec:
@@ -313,6 +314,28 @@ def main(argv):
             if len(opts) < 2 or any(not o.get("source") or not o.get("cost") for o in opts):
                 problems.append("options needs at least two sources of a similar security, each with its source and cost")
             print("options %d" % len(opts))
+    elif check == "y245-server":
+        rec = load(root, D22 % "77" + "PRICE_DATE_DEFAULT.json", problems)
+        if rec:
+            for member in ("trading_day_source", "packaging", "behaviour", "tests", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            pack = rec.get("packaging") or {}
+            for where in ("ycharts_generate", "resident"):
+                if where not in pack:
+                    problems.append("packaging must say whether %s can carry the calendar source" % where)
+        test = root / INTAKE / "tests" / "test_price_date_default.py"
+        if not test.is_file():
+            problems.append("no intake/tests/test_price_date_default.py")
+        else:
+            rc, passed, failed = pytest(root, "tests/test_price_date_default.py", INTAKE)
+            print("new test file: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+            if rc != 0 or failed or passed < 3:
+                problems.append("the new test file must pass with at least 3 tests")
+        rc, passed, failed = pytest(root, "tests", INTAKE)
+        print("intake tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+        if rc != 0 or failed or passed < 365:
+            problems.append("the intake folder must pass with at least 365 (the r19.3 count)")
     return finish(check, problems)
 
 
