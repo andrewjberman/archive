@@ -1,0 +1,107 @@
+{
+  "cell": "AR-y-251",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-251",
+  "worktree": "C:/dev/wk-irpt-anlreq-84",
+  "worktree_branch": "wk-IRPT_ANLREQ-84",
+  "base_head_at_read": "c53686ba6dcb2ad92de4a9784400386ee8819daa",
+  "state": "BUILT IN GRANT, NOT COMMITTED AT WRITE TIME. Gates (2) and (3) are in code and tested offline. The capability file is absent, so swap is refused exactly as today. Two wiring points cross the grant or the sibling cell: see where_wired.not_granted and the surprise rows IRPT_ANLREQ-D2-W84-S1 to S3.",
+  "where_wired": {
+    "advisory_built_at_head": "ycharts/session/resident_session.py:133-137 kimi_advisory(): KimiAdvisory(send=kimi_send(secret_reader(self.secrets_client)), telemetry=journal_telemetry). The granted path ycharts/generate/resident_session.py does not exist at base c53686ba6d.",
+    "not_granted": "The session factory (ycharts/session/resident_session.py) is outside <paths>. The swap advisory is therefore built in ycharts/generate/resident_worker.py _swap_advisory (line 784), a second construction over the same secret reader. Surprise row IRPT_ANLREQ-D2-W84-S1 (BLOCKING, INERT): the issuer rules whether the session factory should own it.",
+    "caller_built": "ycharts/generate/resident_worker.py _check_gate suggest() (line 804). With SEARCH_CAPABILITY None it runs exactly as at HEAD: make(), suggest_for with deadline None, no swap call, no swap print.",
+    "caller_swap_lane": "intake/upload_suggestions.py suggest_swaps (line 117), called from suggest() after suggest_for on the SAME deadline (advisory.clock() + TOTAL_SUGGEST_SECONDS, TOTAL_SUGGEST_SECONDS = 240 at intake/upload_suggestions.py:23).",
+    "advisory_class_at_head": "intake/resolution_kimi.py:140-141: KimiAdvisory.__init__(*, send, telemetry, clock=time.monotonic, search_capability=None). It has NO search parameter at base c53686ba6d; the AR-y-249 cell adds it, with kimi_port.kimi_search. Until that lands, _swap_advisory raises, suggest() prints IRPT_RESIDENT_SWAP unavailable and the check lane runs alone (surprise row IRPT_ANLREQ-D2-W84-S2).",
+    "verifier_fit": "The swap lane restates the check lane's exact test (_exact_provider_match, upload_suggestions.py:103): FOUND, EXACT_PROVIDER_MATCH, candidate id equal to the proposal, no features_needed, a provider_receipt dict with a str sha256. The existing verified_suggestions (intake/security_resolution.py:242-250) is not reused: it checks FOUND only and does not match the verify port."
+  },
+  "capability_carrier": {
+    "member": "ycharts/generate/kimi_search_capability.json (SEARCH_CAPABILITY_FILE in resident_worker.py:758). NOT SHIPPED by this order.",
+    "how_the_resident_reads_it": "resident_worker.py load_search_capability(directory=_HERE) (lines 762-779) reads the file beside the module, the way comparison_catalogue.py reads templates.json from os.path.dirname(__file__). It is read once at import (SEARCH_CAPABILITY = load_search_capability(), line 781), which is resident start. Absent, unreadable, non-JSON, not a dict, or not exactly the capability keys means None. An accepted file must carry exactly model (== resolution_kimi.MODEL), verified (is True), qa_receipt_sha256 (64 lowercase hex) and search_limit (int, 1..10, not a bool).",
+    "what_a_release_pair_must_add": "A tracked file ycharts/generate/kimi_search_capability.json whose content is the QA receipt output of AR-y-246 (the qa_receipt_sha256 it carries), committed in the signed release pair. reports/build_resident_package.py copies every tracked file under ycharts/generate (tests, fixtures, __pycache__ and .pyc excluded), and the host verifies SHA256SUMS, so no builder change is needed (surprise row IRPT_ANLREQ-D2-W84-S3). AR-y-249 must land first: without kimi_search and the KimiAdvisory search parameter the file is refused at construction, not at upload.",
+    "what_this_order_ships": "Nothing. No capability file, no secret, no environment variable. The secret read is the existing read-by-name of astn/kimi/api-key through kimi_port.secret_reader."
+  },
+  "behaviour": {
+    "without_capability": "suggest() calls make() (the session factory), passes deadline None to suggest_for, and runs no swap code. The journal lines are the same as at HEAD. TIMXX keeps no match; no finding changes.",
+    "with_capability_and_port_present": "after suggest_for, for each TICKER_NOT_FOUND row with no suggestion member (at most MAX_SUGGESTED_ROWS = 6, one ask per symbol): advisory('swap', symbol, context_symbols=<other file symbols>, deadline=<the upload's deadline>). A refused, failing or non-list answer leaves the finding as it was. A candidates list longer than 3 is refused (SUGGESTIONS_INVALID rule) and the finding is untouched. Candidates whose symbol equals the typo symbol or is not a string are skipped. All remaining proposals go to ONE verify(sorted symbols) read. Kept: exact FOUND (_exact_provider_match). Attached as the finding's suggestions member, at most 3, each {symbol, source: KIMI_SWAP_PROVIDER_VERIFIED, provider_receipt_sha256, reason (plain text, first 200 characters)}.",
+    "never": "No action is added (actions is never touched). No symbol is written into the row. The suggestion member and ACCEPT_SUGGESTION stay the typo lane's alone. A swap lane raise (in suggest_swaps or in building the swap advisory) leaves the check lane's result and never fails the upload.",
+    "budget": "One deadline per upload: suggest() computes deadline = advisory.clock() + TOTAL_SUGGEST_SECONDS and passes it to suggest_for and suggest_swaps. A row the total does not reach counts as unasked for the swap lane and keeps its finding.",
+    "journal": "IRPT_RESIDENT_SWAP asked=N candidates=N verified=N unasked=N (counts only, no symbol). IRPT_RESIDENT_SWAP unavailable when the swap advisory cannot be built."
+  },
+  "wire_shape": {
+    "member": "suggestions",
+    "present_when": "only when at least one candidate verified for that finding; absent otherwise, so a finding with no swap result is byte-identical to today.",
+    "type": "list of 1 to 3 items",
+    "item": {
+      "symbol": "string, the provider-verified ticker (equal to the candidate id)",
+      "source": "the literal KIMI_SWAP_PROVIDER_VERIFIED",
+      "provider_receipt_sha256": "string, from the check's provider_receipt.sha256",
+      "reason": "string, the candidate's own reason, plain text, at most 200 characters; a non-string reason becomes an empty string"
+    },
+    "constructed_example": {
+      "code": "TICKER_NOT_FOUND",
+      "row": 7,
+      "column": "A",
+      "severity": "ERROR",
+      "actions": ["REPLACE_FILE", "NAME_PROXY"],
+      "suggestions": [
+        {"symbol": "EXAMPLE1", "source": "KIMI_SWAP_PROVIDER_VERIFIED", "provider_receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000001", "reason": "illustrative reason text"},
+        {"symbol": "EXAMPLE2", "source": "KIMI_SWAP_PROVIDER_VERIFIED", "provider_receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000002", "reason": "illustrative reason text"}
+      ]
+    },
+    "note": "The example symbols and receipts are constructed for illustration. The test file asserts the shape with receipts derived from the symbol (hashlib.sha256)."
+  },
+  "tests": {
+    "file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_swap_suggestions.py (new, 12 test functions, 17 collected cases, offline, fake ports)",
+    "run": "python -m pytest tests/test_swap_suggestions.py from ycharts/generate: 17 passed, rc 0",
+    "cases": {
+      "a_no_capability": "test_a_row_with_no_capability_gets_no_suggestions_and_no_swap_or_search_is_called (TIMXX still no match; advisory and verify never called)",
+      "b_two_of_three": "test_two_of_three_candidates_the_provider_finds_exactly_ride_the_finding_with_source_and_receipt",
+      "c_provider_drops": "test_a_candidate_the_provider_does_not_find_exactly_is_dropped (6 cases: fuzzy reason, features_needed, id mismatch, no receipt, NOT_FOUND, absent from the answer)",
+      "d_four_refused": "test_four_candidates_are_refused_and_the_finding_is_untouched",
+      "e_budget_shared": "test_the_swap_lane_shares_the_check_lane_budget_and_asks_nothing_once_the_total_is_spent",
+      "e2_one_deadline": "test_the_swap_asks_carry_the_uploads_one_deadline",
+      "f_byte_equal": "test_the_finding_actions_and_suggestion_stay_byte_equal_to_today",
+      "reason_bound": "test_the_reason_is_plain_text_bounded_to_two_hundred_characters",
+      "g_loader_refuses": "test_the_loader_refuses_absent_unreadable_and_wrong_shaped_capability_files (12 shapes: absent, not JSON, list, extra key, request_fields shape, wrong model, verified false, verified string, short digest, search_limit 0, 11, True)",
+      "g_loader_accepts": "test_the_loader_gives_the_dict_for_the_exact_capability_file",
+      "gate_refused_build": "test_a_swap_advisory_that_cannot_be_built_never_fails_the_upload",
+      "gate_swap_raises": "test_a_swap_lane_that_raises_leaves_the_check_lane_result"
+    },
+    "intake_folder": "python -m pytest tests from intake/: 370 passed, 1 skipped, rc 0 (floor 365)",
+    "neighbours": "ycharts/generate: test_y4_check_gate.py + test_resident_worker.py + test_resolve_upload.py + test_swap_suggestions.py: 106 passed, 8 skipped, rc 0 (the 8 skips were not examined). The whole ycharts/generate folder was NOT run (the known baseline of custody failures and fitz collection errors is outside this cell)."
+  },
+  "before_arm": {
+    "case": "(b) test_two_of_three_candidates_the_provider_finds_exactly_ride_the_finding_with_source_and_receipt",
+    "method": "scratch runner .scratch/before_arm_run.py: the same test file, with the module it calls replaced by base c53686ba6d's upload_suggestions.py (extracted by git show to .scratch/head_upload_suggestions.py)",
+    "ran": true,
+    "failed": 14,
+    "passed": 3,
+    "case_b_result": "FAILED (AttributeError: module 'head_upload_suggestions' has no attribute 'suggest_swaps')",
+    "caveat": "The 3 passing cases are the two loader tests (resident_worker is the worktree's, unchanged by the before arm) and one gate test that imports suggest_swaps through resident_worker. Only case (b) is the before-arm criterion."
+  },
+  "mutant_control": {
+    "mutant": "scratch copy of upload_suggestions.py with the provider check removed from the keep rule (if proposal in verified and proposal not in seen -> if proposal not in seen)",
+    "result": "7 failed, 10 passed, rc 1 (test_two_of_three and the 6 provider-drop cases fail): the mutant FIRES"
+  },
+  "files_changed": [
+    "infra/aws/lambda/investor-reporting/intake/upload_suggestions.py (suggest_for gains deadline=None; new SWAP_SOURCE, MAX_SWAP_CANDIDATES, MAX_SWAP_REASON, _exact_provider_match, suggest_swaps)",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py (new _HERE, SEARCH_CAPABILITY_FILE, SEARCH_CAPABILITY_KEYS, load_search_capability, SEARCH_CAPABILITY, _swap_advisory; _check_gate suggest() runs the swap lane when a verified capability is present)",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_swap_suggestions.py (new)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md (three rows appended: W84-S1, W84-S2, W84-S3)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~84/ (this record and the proof instance)"
+  ],
+  "release_size": {
+    "resident_leg": "2 members changed (intake/upload_suggestions.py, ycharts/generate/resident_worker.py) and 1 member added at release (ycharts/generate/kimi_search_capability.json, NOT shipped here). Both changed members are in the resident package by the builder's DIRS (intake, ycharts/generate).",
+    "lambda_leg": "Not read. reports/build_resident_package.py is the resident builder; no Lambda builder map was read for upload_suggestions.py, so the Lambda leg is not claimed as untouched or touched.",
+    "dependency": "The release pair needs AR-y-249 (KimiAdvisory search parameter, kimi_port.kimi_search) to be useful; without it the swap advisory refuses at construction and the check lane runs alone."
+  },
+  "claim": "Gates (2) and (3) are built in the granted paths and proven offline with fake ports: 17 cases pass; case (b) fails at base; the mutant that drops the provider check fires; the intake folder passes 370 of 370 with 1 skip. No capability file, secret or environment variable is shipped. The session-side construction (resident_session.py) is not in the grant and is surfaced as W84-S1. The judgment criterion AR251-y-AC2J is graded at L9 by 3.0.0_SA_CVO.",
+  "not_read": [
+    "ycharts/session/resident_session.py beyond :95-160 (the factory and its neighbours)",
+    "intake/resolution_kimi.py beyond :1-30 and :140-170 (the parse, the swap prompt and the AR-y-249 cell's diff were not read)",
+    "ycharts/generate/kimi_port.py beyond the whole-file read (no change read at AR-y-249)",
+    "the AR-y-246 QA receipt (KIMI_QA_HARNESS.json) and the AR-y-249 / AR-y-250 records: no receipt exists, so no qa_receipt_sha256 was read",
+    "the Lambda leg's builder (only the resident builder was read)",
+    "the full ycharts/generate tests folder (only the three neighbours and the new file were run)",
+    "the live AWS and provider plane: no call, no upload, no push, no deploy, no apply, no invoke"
+  ]
+}
