@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-509",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-509.per-firm-holdings-packages-census.md",
+    "group": "OTHER",
+    "vintage_commit": "69047b4bd6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "69047b4bd6",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-509.per-firm-holdings-packages-census.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~361",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~361/IB176-1_holdings_packages_census.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the census record: for each of the three BUILDERS firms the head-object fields (etag, etag_after, version, last_modified, content_length), the sha256 of the package object, the 45 member rows each with live and HEAD sha256, the since-live commits of each differing member, the bundle-map check against the guard's keys and the two fix locations; read only, no upload, no copy, no SSM command, no host start, no deploy, no Lambda invoke",
+      "artifact_covered_by": ["IB176-1-AC1", "IB176-1-AC2", "IB176-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four rows appended (IRPT_BCKEND-D2-W361-S1 to S4), append-only; 106 insertions and 0 deletions measured by git diff --stat; no existing row edited; no deploy",
+      "artifact_covered_by": ["IB176-1-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB176-1-AC1",
+      "criterion_verbatim": "the packages are exactly the firms in BUILDERS; the denominators agree; every member row's equal flag agrees with its two hashes; members_differing equals the rows with equal false",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r176/p176_cells.py\" . IB176-1-AC1",
+      "output_evidence": "OK: 3 firm package(s), [('49financial', 45, 25), ('inflection', 45, 25), ('cottonwood', 45, 25)]\nIB176-1-AC1 PASS\nrc=0",
+      "denominator": "3 of 3 packages equal the BUILDERS firms (49financial, cottonwood, inflection); 45 member rows per package; 25 of 45 rows with equal false per package equal members_differing",
+      "expect": "^IB176-1-AC1 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB176-1-AC2",
+      "criterion_verbatim": "the check re-hashes git show HEAD:<repo_path> for every member with a repo_path and compares; requires the guard's whole closure in each package's rows; requires commits_since_live on every differing member",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r176/p176_cells.py\" . IB176-1-AC2",
+      "output_evidence": "FAIL: 49financial/data/assets/scripts/gold/build_cottonwood_mdpf_slice.py differs and carries no commits_since_live\nIB176-1-AC2 FAIL\nrc=1",
+      "denominator": "the check stops at its first failing member: 0 of 22 differing rows with no commit since the package's last_modified carry commits_since_live (10 in 49financial, 6 in inflection, 6 in cottonwood); the closure check (the 45-member closure present in each package) is NOT reached in this run and also fails: opal_strategy_matcher.py is absent from all three packages (44 of 45 closure members present per package)",
+      "expect": "^IB176-1-AC2 PASS$",
+      "status": "FAIL",
+      "status_reason": "the check requires commits_since_live on every differing member; 22 differing rows across the three packages have no commit since the package's last_modified, and the closure member opal_strategy_matcher.py is absent from all three packages. The record is not edited to pass. Filed as IRPT_BCKEND-D2-W361-S1 and IRPT_BCKEND-D2-W361-S3; the order stays open."
+    },
+    {
+      "criterion_id": "IB176-1-AC3",
+      "criterion_verbatim": "fix_locations names exactly temp_file_fix and account_id_builder with a repo path, a commit, in_closure and differs_in_firms; the bundle map agrees with the guard's keys; the seven bound counters read 0; every package's etag_after equals its etag; the record carries no long digit run",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r176/p176_cells.py\" . IB176-1-AC3",
+      "output_evidence": "OK: fix locations cited; bundle map agrees; bound counters 0; ETags unchanged\nIB176-1-AC3 PASS\nrc=0",
+      "denominator": "2 of 2 fix_locations entries named (temp_file_fix, account_id_builder); 3 of 3 bundle-map entries agree with the guard's computed keys; 7 of 7 bound counters read 0; 3 of 3 packages have etag_after equal to etag",
+      "expect": "^IB176-1-AC3 PASS$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control; none was run.",
+      "expected": "N/A",
+      "observed": "not run: the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "head-object of each package was read before the download and again at the end; the ETag, VersionId and LastModified were read at both points",
+      "observed": "etag_after equals etag for all three packages; VersionId and LastModified are unchanged between the two reads",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the closure member opal_strategy_matcher.py has no row in any package",
+      "reason": "it is absent from the live object, so no live hash exists to compare; it is recorded as closure_absent_from_package and filed as IRPT_BCKEND-D2-W361-S1"
+    },
+    {
+      "item": "the host was not started, contacted through SSM or invoked",
+      "reason": "the order allows describe calls only to say what the host is; the runner instance is in state stopped and SSM registers no instance for it; the order's bounds forbid starting it"
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W361-S1: the guard's closure member data/assets/scripts/silver/opal_strategy_matcher.py is in none of the three live per-firm packages (44 of 45 closure members present in each); the closure entry was added by 82e0a49ed2 and the inflection and cottonwood packages were uploaded after it",
+    "IRPT_BCKEND-D2-W361-S2: the order's premise that commit 135fc3509e touches holdings_inf.py is wrong; the commit touches holdings_49f.py and holdings_snapshot.py; holdings_inf.py differs in all three packages and its since-live commit is aa5778d962",
+    "IRPT_BCKEND-D2-W361-S3: the packages are not built from HEAD: 22 differing rows across the three packages have no commit since the upload, some match an older HEAD-history blob, and lib/opal_naming.py differs in all three",
+    "IRPT_BCKEND-D2-W361-S4: the guard declares a manifest stamp for each bundle, but no package holds a manifest member; the live stamp is SHA256SUMS and S3 metadata members-sha256 and member-count, with no source commit"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~361/IB176-1_holdings_packages_census.json",
+  "compiler_tools": [
+    {
+      "tool": "aws",
+      "invocation": ".tools/aws lambda get-function-configuration --function-name irpt-holdings-refresh-lambda --query 'Environment.Variables.IRPT_HOLDINGS_BUNDLE_MAP' --output text (only this variable's value was read and kept in the scratch folder; the variable names of the function were listed once, names only)",
+      "result": "rc=0; three entries, firm names 49financial, cottonwood, inflection, each an S3 URI"
+    },
+    {
+      "tool": "aws",
+      "invocation": ".tools/aws s3api head-object --bucket <bucket> --key <key> --output json (per firm, before the download, and again at the end for etag_after)",
+      "result": "rc=0 for all six calls; ETags, VersionIds and LastModified equal between the two reads"
+    },
+    {
+      "tool": "aws",
+      "invocation": ".tools/aws s3api get-object --bucket <bucket> --key <key> --version-id <VersionId> <scratch folder outside the repository>/pkg_<firm>/package.tar.gz",
+      "result": "rc=0 for each firm; byte counts equal ContentLength (470165, 468435, 468666)"
+    },
+    {
+      "tool": "aws",
+      "invocation": ".tools/aws lambda get-function-configuration --function-name irpt-holdings-refresh-lambda --query 'Environment.Variables.IRPT_HOLDINGS_RUNNER_INSTANCE_ID' --output text, then ec2 describe-instances and ssm describe-instance-information for that id (state only; the id was not written to any file)",
+      "result": "rc=0; instance state stopped, instance type t3.medium; SSM returned no registered instance"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -I <scratch>/step_a_guard.py <worktree> <scratch> (imports .tools/safe_deploy_core.py read-only; calls _irpt_holdings_bundles() at HEAD 69047b4bd6)",
+      "result": "rc=0; BUILDERS = 3 firms; the guard computes 3 keys, each equal to the bundle-map entry (bucket and key); closure 45 unique members"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -I <scratch>/step_b_members.py and step_c_compare.py and step_d_sums.py (tarfile in memory, read only; git show HEAD:<path> per member)",
+      "result": "rc=0; 45 member rows per package; SHA256SUMS agrees with the 44 member hashes in all three and its sha256 equals the members-sha256 metadata"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -I <scratch>/step_e_record.py and step_f_history.py (writes the record; git log --since per differing member, git rev-parse per history commit)",
+      "result": "rc=0; record written; 25 differing rows per package; 22 differing rows with no since-live commit"
+    },
+    {
+      "tool": "python",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r176/p176_cells.py\" . IB176-1-AC1 / IB176-1-AC2 / IB176-1-AC3 (each under timeout 120 from the worktree root)",
+      "result": "AC1 rc=0 PASS; AC2 rc=1 FAIL; AC3 rc=0 PASS"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~361/IRPT_BCKEND.TO-IB-pr-509.per-firm-holdings-packages-census.proof_of_spec.json IB176-1-AC1,IB176-1-AC2,IB176-1-AC3",
+      "result": "rc=0 VALID; structural=jsonschema; acceptance rows=3; violations=0 (after adding status_reason to the FAIL row, the first run was rc=1 on that single violation)"
+    }
+  ]
+}
