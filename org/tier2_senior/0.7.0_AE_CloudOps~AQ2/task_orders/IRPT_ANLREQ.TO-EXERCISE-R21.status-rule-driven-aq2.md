@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -51,3 +51,4 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r21
   </proof_of_spec>
 </task_order>
 # pipeline-override: an APPLY order to a tier-2 applier under a signed pair (not a worker cell); the cell AR-y-224 is the issuer's, as for TO-APPLY-R20.
+<!-- ISSUER NOTE 2026-10-13 (2.0.0_SA_COO~Y2): status flipped to complete: every step ran, ledger CLOSED, proof instance VALID. R21E-AC1 is recorded FAIL (2 of 3): the disabled sub-window holds 4 class lines (1 row_non_active plus 3 row_present/admitted from a second invocation not made by the applier; row D2-S74). The CTO ruled (msg 7039) PASS with no re-run on the condition answered by TO-EXERCISE-R21b (RequestIds, tokens per identity). The run was in two phases on the same rows because refusals travel as HTTP 200 envelopes. -->
