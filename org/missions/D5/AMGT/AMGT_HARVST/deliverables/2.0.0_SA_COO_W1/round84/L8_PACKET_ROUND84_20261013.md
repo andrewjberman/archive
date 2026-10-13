@@ -1,7 +1,7 @@
 # AMGT_HARVST round 84 -- the drain-end packet to the CVO (`2.0.0_SA_COO~W1`, 2026-10-13 ~21:1xZ)
 
 Round 84 has six orders, all terminal. `round-close-check.py --project AMGT_HARVST --round 84` reads `orders=6 ... 5 complete, 0 not complete and outside the verdict ... verdict=MAY-CLOSE`
-(six orders: bz-3, bz-4, bz-5, bz-6, bz-7, bz-8; the five complete are all but bz-7, which is CANCELLED). No order of the round is open. One residual ledger is open (below).
+(six orders: bz-3, bz-4, bz-5, bz-6, bz-7, bz-8; the five complete are all but bz-7, which is CANCELLED). No order of the round is open. No ledger of the round is open.
 
 ## Orders and what each one's own criteria read
 
@@ -20,8 +20,8 @@ Round 84 has six orders, all terminal. `round-close-check.py --project AMGT_HARV
   per publisher per cycle through the existing `SessionManager`, Barron's refusal class printed first. My word: the row is carried by that cell, not answered.
 - `AMGT_HARVST-D1-S14` (BLOCKING / INERT, my disarm_owner, filed by `~HV1`): bz-8's targeted plan read 0/3/0, not 0/1/0 (a `-target` plan pulls the schedule's dependencies and their pending diffs). The seat stopped; nothing was applied. Answered
   by the re-signed pair. My word: the plan-reading defect was in the blast radius I signed (N=1 writers of the property, not the dependency pull).
-- `AMGT_HARVST-D1-S15` (OBSERVATION / INERT, my disarm_owner, filed by `~HV1`): the signed apply STARTED the stopped instance `i-059405dfefcb4b44a`; both halves had said it would not. Names-only process read: no python, node, chrome, Xvfb or run.py. The stop is carried
-  on Andrew's word (CTO ADDENDUM 3, dfecbbe7d4) and is under way by `~HV1`; ledger `astn-instance-started-20261013` stays OPEN until the stopped read-back.
+- `AMGT_HARVST-D1-S15` (OBSERVATION / INERT, my disarm_owner, filed by `~HV1`): the signed apply STARTED the stopped instance `i-059405dfefcb4b44a`; both halves had said it would not. Names-only process read: no python, node, chrome, Xvfb or run.py. UPDATE ~21:1xZ: stopped on
+  Andrew's word (CTO ADDENDUM 3, dfecbbe7d4) by `~HV1`: one `stop-instances` at 21:04:03Z, `describe-instances` read `stopped` at 21:04:28Z, and I re-read it `stopped` (user initiated) after; both bz-8 ledgers CLOSED; drain `af4002d649`.
 - Earlier rows already read: `Z-S118` dismissed by you (v78); `D1-W135-S2` disarmed (f1cbe20bb6); `Z-S115` disarmed; `Z-S116`, `Z-S117` answered. `D1-S13` (07:30Z, a CRLF on one tracked file in the shared tree) is listed in case v76 to v78 did not read it.
 
 ## What I did NOT verify

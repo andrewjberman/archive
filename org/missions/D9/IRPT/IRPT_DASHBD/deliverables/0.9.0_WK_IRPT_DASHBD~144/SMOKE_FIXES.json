@@ -1,0 +1,112 @@
+{
+  "to_id": "IRPT_DASHBD.TO-DB-b-178",
+  "worker": "0.9.0_WK_IRPT_DASHBD~144",
+  "portal_base": "ea59dfcdec (workspace base; portal worktree branch wk-IRPT_DASHBD-144-portal)",
+  "export": {
+    "failing_call": {
+      "file": "portal/src/api/endpoints/investor-reporting.ts",
+      "line": 1092,
+      "what": "send() throws IrRequestError carrying publicReasonCode when the export-receipt envelope is refused (boundary ok false); the status read answers UNEXPECTED"
+    },
+    "chain": [
+      "1 ExportButton.tsx handleSubmit (231-290): submitUnderGate issues submit-export",
+      "2 submit-export ack QUEUED or RUNNING with no receipt yet: pollExportReceipt started (ExportButton.tsx 263)",
+      "3 submit.ts pollExportReceipt (299-327) reads api.getExportReceipt (submit.ts 312)",
+      "4 investor-reporting.ts getExportReceipt (1456-1463) calls send() for export-receipt",
+      "5 send() (1053-1125): parseIrEnvelope; a refused envelope throws at 1091-1092",
+      "6 envelope.ts 338 boundaryRefusal = body.ok false; 359 refused; UNEXPECTED is not a refusal code (161), so only the boundary refusal reaches 1092 with UNEXPECTED",
+      "7 ExportButton.tsx 275-278 .catch names the failure through submit.ts exportReceiptFailureWords (377-382)",
+      "8 the words shown: The export's status could not be read (UNEXPECTED). It may still finish"
+    ],
+    "portal_side": false,
+    "fixed": false,
+    "blocking_row": "IRPT_DASHBD-D2-W144-S1",
+    "measured_producer_body": "not observed: no live request was made; the producer body is INFERRED from the branch that prints the words",
+    "modal": {
+      "width_px_before": 672,
+      "width_px_after": 1200,
+      "horizontal_scroll_after": false,
+      "tested": true,
+      "class_before": "sm:max-w-2xl (Dialog size 2xl, 42 rem)",
+      "class_after": "sm:max-w-[75rem]!",
+      "measurement_harness": {
+        "method": "headless Edge on a scratch dev server (port 5175, stopped), the real ExportModal with a synthetic 1056 px page",
+        "at_70_rem": {"preview_client_px": 994, "preview_scroll_px": 1056, "horizontal_scroll": true},
+        "at_75_rem": {"preview_client_px": 1074, "preview_scroll_px": 1074, "page_px": 1056, "horizontal_scroll": false}
+      },
+      "test": {
+        "file": "portal/src/pages/InvestorReporting/__tests__/irpt-dashbd/smoke-export.test.tsx",
+        "mutant_failed": true,
+        "mutant": "modal width restored to 42 rem: 2 of 3 arms fail"
+      }
+    }
+  },
+  "ytd": {
+    "label_example": "YTD (from June 3rd, 2026)",
+    "never_blank": true,
+    "no_day_stays_not_measured": true,
+    "decided_at": "tabs/reporting/pickerSuffix.ts dashboardYtdSuffix (picker) and dashboard/DashboardPerformance.tsx windowStatus (body); the label is view.label",
+    "test": {
+      "file": "portal/src/pages/InvestorReporting/__tests__/irpt-dashbd/smoke-ytd.test.tsx",
+      "mutant_failed": true,
+      "mutant": "the old rule restored (any window opening before the first data date is NOT_SPANNED): 2 of 3 arms fail"
+    }
+  },
+  "fdrxx": {
+    "assignment_site_in_portal": false,
+    "money_market_maps_to_cash": false,
+    "assignment_site": {
+      "file": "data/black_diamond/scripts/gold/lib/etf_classifier.py",
+      "line": 144,
+      "what": "classify() returns the canonical table row's asset_class verbatim for the ticker; the FDRXX row serves fixed_income (the same read at line 229 in classify_with_identity)"
+    },
+    "blocking_row": "IRPT_DASHBD-D2-W144-S2",
+    "portal_read": "tabs/holdings/assetClass.ts assetClassOf (84-86) reads the served asset_class; no portal rule maps a money-market symbol to Cash (CASH_ROW_SYMBOLS is CASH and FCASH only)",
+    "characterization_test": "portal/src/pages/InvestorReporting/__tests__/irpt-dashbd/smoke-fdrxx.test.tsx"
+  },
+  "test": {
+    "file": "portal/src/pages/InvestorReporting/__tests__/irpt-dashbd/smoke-export.test.tsx",
+    "mutant_failed": true
+  },
+  "regolden": [
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-125.dashboard-performance.test.tsx: ARM(c) and ARM(d) asserted a window opening before the history with a measured day is NOT_SPANNED and Not measured; now measured from the first day and labelled (BREAK arms unchanged)",
+    "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-157.one-window-one-answer.test.tsx: arm (a) asserted NOT_SPANNED for a YTD opening before the history; now a labelled figure in the picker and the body (BREAK arm unchanged)"
+  ],
+  "lint_errors": 0,
+  "typecheck_errors": 0,
+  "lint_note": "bun run lint: 0 errors, 348 warnings (warnings are pre-existing react-refresh and unused-directive findings; 3 on touched files, all react-refresh exports)",
+  "suite_base": {
+    "pass": 1212,
+    "skip": 27,
+    "fail": 5,
+    "new_failing_ids": [],
+    "failing": ["IVE26-AC3", "IVE48-AC1", "IVE98", "producer fixtures CONSUMED CONTENT", "F14-AC3"]
+  },
+  "suite_after": {
+    "pass": 1220,
+    "skip": 27,
+    "fail": 5,
+    "new_failing_ids": [],
+    "failing": ["IVE26-AC3", "IVE48-AC1", "IVE98", "producer fixtures CONSUMED CONTENT", "F14-AC3"],
+    "note": "whole scope bun test src/pages/InvestorReporting: 1252 tests (8 added by this order); the same five fail at base and after"
+  },
+  "product_files_changed": [
+    "portal/src/pages/InvestorReporting/dashboard/DashboardPerformance.tsx",
+    "portal/src/pages/InvestorReporting/tabs/reporting/pickerSuffix.ts",
+    "portal/src/pages/InvestorReporting/render/performance/PerformanceDocument.tsx",
+    "portal/src/pages/InvestorReporting/export/ExportModal.tsx"
+  ],
+  "portal_commit": "f1893eb40d6f21af2e9fa912e1371955868adaa7",
+  "portal_commits": ["21706de1 tests", "51e2d7bb fdrxx test import", "351a2ba4 fix ytd and modal 70 rem and re-golden", "f1893eb4 modal 75 rem"],
+  "synthetic_fixture_only": true,
+  "pushed": false,
+  "screenshots": [
+    "SHOT_YTD_LABEL.png",
+    "SHOT_EXPORT_MODAL_75REM.png"
+  ],
+  "screenshot_read": true,
+  "screenshot_notes": {
+    "SHOT_YTD_LABEL.png": "the real DashboardPerformance on a synthetic series starting 2026-06-03: the headline reads YTD (from June 3rd, 2026) and 2.94 percent; the coverage note says the window was shortened to the first day",
+    "SHOT_EXPORT_MODAL_75REM.png": "the real ExportModal at 75 rem with a synthetic 1056 px page: no clipping, no side scroll"
+  }
+}
