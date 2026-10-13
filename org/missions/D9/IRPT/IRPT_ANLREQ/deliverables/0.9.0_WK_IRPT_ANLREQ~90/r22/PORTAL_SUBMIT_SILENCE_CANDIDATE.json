@@ -1,0 +1,218 @@
+{
+  "cell": "AR-y-265",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-265",
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~90",
+  "status_of_candidate": "LOCAL candidate in the portal repository on branch wk-IRPT_ANLREQ-90-portal; NOT landed on DEV, NOT pushed, NOT deployed",
+  "dev_tip": "f6ef1d2548cf6f619f80662d3082d66ea0a3fcf4",
+  "dev_tip_read": "git -C C:/dev/ajb_workspace/portal fetch origin DEV, then origin/DEV = f6ef1d25 (the base of this candidate)",
+  "dev_tip_moved_after_fetch": "origin/DEV now reads 4d601023 (see surprise IRPT_ANLREQ-D2-W90-S5); the candidate merges onto it with no conflict (git merge-tree rc=0, read only); not rebased, not landed",
+  "branch": "wk-IRPT_ANLREQ-90-portal",
+  "worktree": "C:/dev/wk-portal-90",
+  "commit": "794b7df495d2baa3d2f887f148f4389e729ca07d",
+  "commits": [
+    "923f7d6928d47b6e419e9b46fe2c4e07c3f218fc (the change and its tests)",
+    "794b7df495d2baa3d2f887f148f4389e729ca07d (the held-reason block takes the 4px radius of DESIGN.md C11)"
+  ],
+  "files_changed": [
+    "src/pages/TicketCenter/AnalysisRequestParts.tsx",
+    "src/pages/TicketCenter/TicketCenter.tsx",
+    "src/pages/TicketCenter/analysisRequest.ts",
+    "src/pages/TicketCenter/__tests__/analysis-submit-silence.test.tsx"
+  ],
+  "tests": {
+    "added": 10,
+    "file": "src/pages/TicketCenter/__tests__/analysis-submit-silence.test.tsx",
+    "passed": 10,
+    "failed": 0,
+    "invocation": "bun test src/pages/TicketCenter/__tests__/analysis-submit-silence.test.tsx (cwd C:/dev/wk-portal-90)",
+    "folder": {"invocation": "bun test src/pages/TicketCenter/__tests__ (cwd C:/dev/wk-portal-90)", "passed": 82, "failed": 0, "of": 82, "base_before_change": {"passed": 72, "failed": 0, "of": 72}},
+    "typecheck": {"invocation": "bun run typecheck (tsc -b --noEmit)", "rc": 0, "probe": "a deliberate type error in a probe file returned rc=2 and the probe was removed"},
+    "lint": {"invocation": "npx eslint on the four changed files", "rc": 0},
+    "dsgn_irptv1": {"invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1", "passed": 371, "failed": 10, "errors": 2, "of": 381, "note": "identical on the base f6ef1d25 (before arm) and with the change; the after run was taken before the radius-only commit, which touches no test-visible text of this folder"}
+  },
+  "before_arm": {
+    "invocation": "the three changed source files replaced by git show f6ef1d2548cf6f619f80662d3082d66ea0a3fcf4:<path>, then bun test of analysis-submit-silence.test.tsx; then the files restored byte-equal (cmp)",
+    "passed": 2,
+    "failed": 8,
+    "of": 10,
+    "failing_tests": [
+      "1. a submit held for the missing title says why, on the form",
+      "2. two firms and none chosen: the held submit says the firm is missing",
+      "3. no holdings file: the submit is held and the reason names the file",
+      "4. the upload door refuses: a plain sentence on the form, nothing filed",
+      "5. the CREATE is refused by the service: a plain sentence on the form, the raw body is not shown",
+      "6. a thrown network error during the upload: a plain sentence on the form",
+      "7. an Error whose message is empty is not a silent end: a sentence on the form",
+      "10. a service-request ticket with no title: the held create says why"
+    ],
+    "passing_before_and_after": [
+      "8. the validation guard: a missing advisor is named on the form",
+      "9. the success shows the ticket id on the page and the Open list carries it"
+    ],
+    "folder_before": {"passed": 74, "failed": 8, "of": 82},
+    "dsgn_irptv1_before": {"passed": 371, "failed": 10, "errors": 2, "of": 381}
+  },
+  "trace": {
+    "method": "READ of the DEV tip f6ef1d25 hop by hop, then RUN of the same path in the mounted page (reproduction below)",
+    "hops": [
+      {
+        "hop": 1,
+        "file_line": "src/pages/TicketCenter/TicketCenter.tsx:459-521",
+        "what_happens": "The New Ticket panel (Panel variant chart) shows the type select (467-475); for analysis_request it renders AnalysisRequestFields (491-500), then UploadFindings (501), then the submit button (512-518).",
+        "what_the_person_sees": "A navy-ink form on the band panel: a type select, a Title box (placeholder only), the Advisor, Firm, Household, Other ETFs, Advisory fee, Needed by, Add commentary and Holdings file fields, then the File Analysis Request button."
+      },
+      {
+        "hop": 2,
+        "file_line": "src/pages/TicketCenter/AnalysisRequestParts.tsx:95-101",
+        "what_happens": "The Firm select is disabled when firms are not loaded or when one firm is allowed; it shows Loading firms... or Firms not loaded while the firms are read, No firm is available to you when none, and Firm (required) when more than one is allowed.",
+        "what_the_person_sees": "The firm control's words, and nothing else about why the submit is off."
+      },
+      {
+        "hop": 3,
+        "file_line": "src/pages/TicketCenter/TicketCenter.tsx:514",
+        "what_happens": "The submit is disabled when creating, or when the title is empty, or when the firm is ''. The holdings file is not part of the disabled condition.",
+        "what_the_person_sees": "A faded button (disabled:opacity-40) with no sentence saying the title or the firm is missing. This is the first hop that stops with no words for a press. No sentence names a missing file: the press reaches hop 5."
+      },
+      {
+        "hop": 4,
+        "file_line": "src/pages/TicketCenter/TicketCenter.tsx:289-300 (DEV 290 guard, then the start of the try)",
+        "what_happens": "On a press the handler returns at line 290 when the title is empty or the firm is '' (unreachable by click, since 514 disables the same states); otherwise it clears the error and the report, and sets creating.",
+        "what_the_person_sees": "While the press runs the button reads Uploading..."
+      },
+      {
+        "hop": 5,
+        "file_line": "src/pages/TicketCenter/TicketCenter.tsx:297 then 328-329 and 449-451",
+        "what_happens": "With no holdings file it throws 'Choose the holdings file to upload.', which the catch at 328-329 turns into setError; the page error renders at 449-451.",
+        "what_the_person_sees": "A message in the page's error panel at the top of the page, directly above the create panel, not beside the submit."
+      },
+      {
+        "hop": 6,
+        "file_line": "src/pages/InvestorReporting/tabs/analysis/prospect.ts:112-141 via TicketCenter.tsx:303-306",
+        "what_happens": "prepareUpload throws on a bad filename, a size over 1 MB, a non-UTF-8 CSV, a bad upload token; the catch at 328-329 sets the page error.",
+        "what_the_person_sees": "The sentence the check threw (for example Choose a CSV or Excel (.xlsx) file with a simple filename.) in the page's error panel at the top."
+      },
+      {
+        "hop": 7,
+        "file_line": "src/pages/TicketCenter/TicketCenter.tsx:298-302",
+        "what_happens": "A comparison-keys refusal (an unknown ETF, more than five comparables) sets the upload report.",
+        "what_the_person_sees": "The refusal words in the form's findings block (501), above the submit."
+      },
+      {
+        "hop": 8,
+        "file_line": "src/pages/TicketCenter/analysisRequest.ts:153-154 (answersRefusal at 67-75)",
+        "what_happens": "A missing advisor, firm or household, a missing report type, a bad fee: REFUSED before any upload call; TicketCenter 311-314 sets the upload report.",
+        "what_the_person_sees": "Advisor is required. (or the other refusal) in the form's findings block, above the submit. Visible, not silent."
+      },
+      {
+        "hop": 9,
+        "file_line": "src/pages/TicketCenter/analysisRequest.ts:156 and 162 (uploadAnalysisInput) -> src/api/endpoints/investor-reporting.ts:1210-1213 -> send() at 1053-1125",
+        "what_happens": "The upload door answers. A refused envelope throws IrRequestError('investor-reporting analysis-input-upload refused') at line 1092; a non-envelope HTTP failure throws IrRequestError('... failed') at 1123; a transport error is converted to the same 'failed' error. fileAnalysisRequest does not catch these: they propagate to the catch at TicketCenter 328-329.",
+        "what_the_person_sees": "On the DEV tip: the raw operation name in the page's error panel at the top (for example investor-reporting analysis-input-upload refused). Technical words, shown, not silent."
+      },
+      {
+        "hop": 10,
+        "file_line": "src/pages/TicketCenter/analysisRequest.ts:157-182",
+        "what_happens": "NEEDS_CORRECTION and RESOLVING (after five tries) file nothing and hand the findings back; a state other than NORMALIZED, or NORMALIZED without an input_id, is refused in words.",
+        "what_the_person_sees": "Review required: ... Nothing was filed. / The file is still being checked ... / The file was accepted but no input was recorded ... in the form's findings block."
+      },
+      {
+        "hop": 11,
+        "file_line": "src/pages/TicketCenter/analysisRequest.ts:183-190 -> src/api/endpoints/tickets.ts:142-144 -> src/api/api-client.ts:178-181",
+        "what_happens": "The CREATE is posted. A non-2xx answer throws 'API request failed: <status> <statusText> - <body>' with the service's JSON body; the error propagates to TicketCenter 328-329.",
+        "what_the_person_sees": "On the DEV tip: the raw status line and the service's JSON body in the page's error panel at the top, for example ... - {\"error\":\"answer 'advisory_fee' must be a non-negative number\"}. The service's CREATE refusals carry no code (surprise IRPT_ANLREQ-D2-W90-S2)."
+      },
+      {
+        "hop": 12,
+        "file_line": "src/pages/TicketCenter/analysisRequest.ts:304-318 (sendAnalysisStep 321-334, recordStep 340-350)",
+        "what_happens": "On a filed ticket the analysis POST and the report record run; neither throws (each returns ok false or failed).",
+        "what_the_person_sees": "The steps panel (453-456): Upload: done. / Ticket: TCK-... filed. / Analysis: requested (...) or Analysis: FAILED - ... / Record: report saved on the ticket. or Record: FAILED - ..."
+      },
+      {
+        "hop": 13,
+        "file_line": "src/pages/TicketCenter/TicketCenter.tsx:315-327 and 592",
+        "what_happens": "On success the form resets and closes, the steps and the board notice are set, the tab goes to Open, and the Open list is refreshed (refresh('open')).",
+        "what_the_person_sees": "The steps panel and the Ticket Board notice both name the ticket id, and the Open table carries the ticket row."
+      },
+      {
+        "hop": 14,
+        "file_line": "src/pages/TicketCenter/TicketCenter.tsx:232",
+        "what_happens": "A failed file read (chooseAnalysisFile) sets the page error.",
+        "what_the_person_sees": "The file could not be read. Choose it again. in the page's error panel at the top."
+      }
+    ],
+    "silent_exits": [
+      {
+        "file_line": "src/pages/TicketCenter/TicketCenter.tsx:514",
+        "condition": "the submit is disabled when the title is empty, or the firm is '' (more than one firm allowed and none chosen), or no firm is allowed",
+        "what_the_person_sees": "a faded button and no sentence naming what is missing",
+        "run": "before-arm tests 1 and 2 FAIL (no reason on screen); test 10 (the service-request form) FAIL (no reason on screen)"
+      },
+      {
+        "file_line": "src/pages/TicketCenter/TicketCenter.tsx:290",
+        "condition": "handleCreateAnalysis returns with no message when the title is empty or the firm is ''",
+        "what_the_person_sees": "nothing; the button is disabled on the same states, so no click reaches this line (silent in code, unreachable by click)",
+        "run": "not reachable through the page; the held-state tests cover the disabled button"
+      },
+      {
+        "file_line": "src/pages/TicketCenter/TicketCenter.tsx:329",
+        "condition": "the caught value is an Error whose message is the empty string: setError('') leaves error falsy and the page error at 449 renders nothing",
+        "what_the_person_sees": "nothing, when the condition holds",
+        "run": "before-arm test 7 FAILS (nothing on the form); observed traffic: not seen; the condition is what the code does"
+      },
+      {
+        "file_line": "src/pages/TicketCenter/TicketCenter.tsx:385 and 401",
+        "condition": "the service-request branch (handleCreate): an empty title returns silently (unreachable by click); an empty error message renders nothing",
+        "what_the_person_sees": "nothing, on the service-request path",
+        "run": "not fixed here: a neighbouring path (surprise IRPT_ANLREQ-D2-W90-S4)"
+      }
+    ],
+    "where_it_stops": "READ: for the form Andrew describes, the first hop that stops with no words is the disabled submit at src/pages/TicketCenter/TicketCenter.tsx:514, when the title is empty or no firm is chosen while more than one firm is allowed; the disabled state gives no sentence. Once title and firm are set, the path reaches the upload at analysisRequest.ts:156, and every later failure shows words (the form's findings block or the page's error panel), so no later hop is silent in the code as it stands. The CTO's measurement (no analysis_request ticket created) is consistent with a held submit, which this seat did not observe on the live page. RUN support: before-arm tests 1, 2 and 10 show a disabled submit with no reason, and test 3 shows the submit enabled with no file. Label: READ for the path; RUN for the held states."
+  },
+  "reproduction": {
+    "method": "RUN: the page mounted with react-dom/client over happy-dom (this file only), the two API modules, the auth hook and the catalogue replaced by call-logging fakes; the controls filled and pressed by native events; no server, no ticket written. Test file src/pages/TicketCenter/__tests__/analysis-submit-silence.test.tsx.",
+    "tests": [
+      {"name": "1. a submit held for the missing title says why, on the form", "dev_tip": "FAIL (no reason on screen)", "candidate": "PASS"},
+      {"name": "2. two firms and none chosen: the held submit says the firm is missing", "dev_tip": "FAIL (no reason on screen)", "candidate": "PASS"},
+      {"name": "3. no holdings file: the submit is held and the reason names the file", "dev_tip": "FAIL (the submit is enabled; the file's message only appears after a press)", "candidate": "PASS"},
+      {"name": "4. the upload door refuses: a plain sentence on the form, nothing filed", "dev_tip": "FAIL (the technical line is in the top panel, not the form)", "candidate": "PASS"},
+      {"name": "5. the CREATE is refused by the service: a plain sentence on the form, the raw body is not shown", "dev_tip": "FAIL (the raw body is in the top panel)", "candidate": "PASS"},
+      {"name": "6. a thrown network error during the upload: a plain sentence on the form", "dev_tip": "FAIL (the error text is in the top panel)", "candidate": "PASS"},
+      {"name": "7. an Error whose message is empty is not a silent end: a sentence on the form", "dev_tip": "FAIL (nothing on screen: silent)", "candidate": "PASS"},
+      {"name": "8. the validation guard: a missing advisor is named on the form", "dev_tip": "PASS (already visible)", "candidate": "PASS"},
+      {"name": "9. the success shows the ticket id on the page and the Open list carries it", "dev_tip": "PASS (already shown)", "candidate": "PASS"},
+      {"name": "10. a service-request ticket with no title: the held create says why", "dev_tip": "FAIL (no reason on screen)", "candidate": "PASS"}
+    ],
+    "silent_hops_run": ["1 (title empty)", "2 (firm not chosen)", "7 (empty-message error)"],
+    "hops_visible_but_technical_run": ["4 (upload refused: operation name)", "5 (CREATE refused: raw body)", "6 (network error: raw message)"],
+    "counts": "before (DEV tip sources): 2 pass, 8 fail of 10; with the change: 10 pass of 10"
+  },
+  "what_a_person_sees": {
+    "held_submit": "With no title, or no firm while several are allowed: the submit is faded and, with the change, one white line above it names what is missing (Add a title for the request to submit it. / Choose the firm this request is filed under. / Choose the holdings file to upload.). On the DEV tip: the faded button and no line.",
+    "upload_refused_or_failed": "With the change: a white block above the submit reads Nothing was filed: the holdings file could not be sent to the upload service. Your entries are kept. Press File Analysis Request again to send it once more. On the DEV tip: the technical operation name in the top panel.",
+    "create_refused_or_failed": "With the change: a white block above the submit reads Nothing is known to be filed: the ticket could not be created. Check the Open tickets list before you press File Analysis Request again, so the request is not filed twice. On the DEV tip: the raw status line and the service body in the top panel.",
+    "empty_error": "With the change: the generic sentence Nothing was filed: the request could not be completed. Your entries are kept. Press File Analysis Request again to try once more. On the DEV tip: nothing.",
+    "validation": "Unchanged: Advisor is required. (or the other refusal) in the form's findings block.",
+    "success": "Unchanged and tested: the steps panel names Ticket: TCK-... filed., the board notice names the ticket id, the form closes, and the Open table carries the row."
+  },
+  "design_clauses": {
+    "read": ["portal/CLAUDE.md (color law, typecheck law, verification law)", "portal/DESIGN.md C1, C3, C5, C8, C9, C11, C12"],
+    "choices": [
+      {"choice": "SubmitHeldReason: a white hairline panel (#FFFFFF, 1px #C4CBDB) with navy ink, text-xs", "clauses": "C3 (panel white with hairline; navy ink on the panel; navy is text and hairline only), C9 (navy on #FFFFFF 12.00:1, the C3 table)"},
+      {"choice": "SubmitHeldReason radius rounded-[4px]", "clauses": "C11 (radii 2, 3, 4 px or a pill; rounded.md for panels)"},
+      {"choice": "no new colour, no shadow, no outline change, no purple", "clauses": "C8, C11 (the focus ring unchanged)"},
+      {"choice": "filing failures use the existing UploadFindings block (navy ink on a white panel), with no icon added", "clauses": "C12 ERROR (a status.danger icon beside navy text, and a retry where a retry can succeed): the candidate carries navy words and the press-again instruction; NO icon was added. Judgment left to L9."},
+      {"choice": "the form's text stays on the band-valued create panel; the new text is a white block so it is legible there", "clauses": "C3 (the known divergence stated in portal/CLAUDE.md: Panel variant chart resolves to the band; a white block with navy ink is the legal idiom on both grounds)"}
+    ],
+    "inherited_not_changed": "WHITE_BLOCK (used by UploadFindings and FilingSteps) carries rounded-lg (8px), which C11 does not allow. The filing-failure block reuses UploadFindings and inherits it. Not changed here (outside the cell); stated for L9."
+  },
+  "claim": "On origin/DEV f6ef1d25 the Analysis Request submit can end with nothing on screen in three ways: a disabled submit with no reason (title empty; firm not chosen while several are allowed), an unreachable handler guard, and an empty-message error. Filing failures show raw technical text at the top of the page. The candidate (two commits on f6ef1d25, src/ only) gives one held reason for every disabled submit, one plain sentence per failed filing step inside the form above the submit, and keeps the success path's ticket id. Measured: before 2 of 10 tests pass, with the change 10 of 10; the TicketCenter folder 82 of 82; typecheck rc 0; dsgn-irptv1 371 / 10 / 2 of 381 both ways. Nothing was landed, pushed or deployed.",
+  "not_read": [
+    "the live DEV bundle at localhost:5174 and Andrew's browser: no page was rendered for a screenshot, so the portal verification law (look at the page, reject by clause) is NOT satisfied for the new block",
+    "the service logs and the opal-tickets table: no live call was made",
+    "the ticket service's create handler above the validators and the conditional put (put_item) and any 500 path",
+    "the api-client refreshAndRetry path on a 401 (a redirect there would be a silent end); not traced",
+    "the full send() error mapping in investor-reporting.ts beyond lines 1053-1125"
+  ],
+  "surprises": ["IRPT_ANLREQ-D2-W90-S1", "IRPT_ANLREQ-D2-W90-S2", "IRPT_ANLREQ-D2-W90-S3", "IRPT_ANLREQ-D2-W90-S4", "IRPT_ANLREQ-D2-W90-S5"],
+  "investigation_file": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md"
+}
