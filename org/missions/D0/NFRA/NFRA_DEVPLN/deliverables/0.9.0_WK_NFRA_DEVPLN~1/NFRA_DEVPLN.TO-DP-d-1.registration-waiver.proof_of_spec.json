@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_DEVPLN.TO-DP-d-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-d-1.registration-waiver.md",
+    "group": "OTHER",
+    "vintage_commit": "f3cc33dddc"
+  },
+  "assignee": "0.9.0_WK_NFRA_DEVPLN~1",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round3.md",
+    "vintage_commit": "f3cc33dddc",
+    "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-d-1.registration-waiver.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/open-calls.py",
+      "kind": "script",
+      "commit_or_etag": "9ac47796ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local tool a seat runs; nothing is deployed. Every criterion runs check-only or in a temporary repository; no list and no cluster copy is written."
+    },
+    {
+      "path_or_key": ".tools/tests/test_open_calls_waiver.py",
+      "kind": "test",
+      "commit_or_etag": "9ac47796ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local test on temporary git repositories and a temporary OPAL_STATE_ROOT with OPAL_OPENCALLS_CLOUD=0; nothing is deployed."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_DEVPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "9ac47796ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One appended surprise row, NFRA_DEVPLN-W1-S12; a document, nothing is deployed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DPd1-AC1",
+      "criterion_verbatim": "python .tools/tests/test_open_calls_waiver.py -- ok=True (every case passing)",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_open_calls_waiver.py",
+      "output_evidence": "timeout 120 rc=0. LAST line: OPEN-CALLS-WAIVER-TEST cases=11/11 ok=True. Cases: refused dev-overlap overlap=2 without a waiver and wrote nothing; a waiver naming both registers waived=2 and the row stores approval.waiver; the waived row is read back by list; --check-only takes a bare sha with abbreviated waiver shas and writes nothing; a waiver naming one overlap commit is refused unwaived=1; a waiver naming a DEV-only sha is refused waiver-sha-not-in-overlap; a waiver on a branch with no overlap is refused waiver-sha-not-in-overlap; a waiver without --waiver-ref and a missing --waiver-ref are each refused waiver-ref-missing; a count, a range, a wildcard and HEAD~1 are each refused waiver-sha-invalid; approval-lease with the waiver registers the row CLOSED with waived=2. Existing suites run after the change: test_open_calls_register 10/10 ok=True, test_open_calls_approval 13/13 ok=True, test_open_calls 19/19 ok=True.",
+      "denominator": "11 of 11 cases pass",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DPd1-AC2",
+      "criterion_verbatim": "python .tools/open-calls.py add --kind approval --check-only --project NFRA_DEVPLN --box dell2 --branch 794b7df4 --purpose x --pages x --class client-facing --how x --portal portal --waive-overlap 923f7d69,794b7df4 --waiver-ref org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_20261013_213xZ_LAPTOP_E846_7D95_BB8B.md -- expect: APPROVAL-REGISTER result=OK row=- head_sha=794b7df4",
+      "method": "command",
+      "invocation": "python .tools/open-calls.py add --kind approval --check-only --project NFRA_DEVPLN --box dell2 --branch 794b7df4 --purpose x --pages x --class client-facing --how x --portal portal --waive-overlap 923f7d69,794b7df4 --waiver-ref org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_20261013_213xZ_LAPTOP_E846_7D95_BB8B.md",
+      "output_evidence": "timeout 120 rc=0 (run twice, byte-identical). Output: APPROVAL-REGISTER result=OK row=- head_sha=794b7df495d2baa3d2f887f148f4389e729ca07d commits=2 check-only=yes waived=2. Real portal repo at the worktree portal/ (origin/PROD 24877b67b7, origin/DEV 10e7664d6c), refs read, nothing fetched; check-only writes nothing.",
+      "denominator": "1 of 1 invocation; 2 of 2 overlap commits of the branch named (923f7d69, 794b7df4)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DPd1-AC3",
+      "criterion_verbatim": "python .tools/open-calls.py add --kind approval --check-only --project NFRA_DEVPLN --box dell2 --branch 794b7df4 --purpose x --pages x --class client-facing --how x --portal portal -- expect: APPROVAL-REGISTER result=REFUSED reason=dev-overlap overlap=2",
+      "method": "command",
+      "invocation": "python .tools/open-calls.py add --kind approval --check-only --project NFRA_DEVPLN --box dell2 --branch 794b7df4 --purpose x --pages x --class client-facing --how x --portal portal",
+      "output_evidence": "timeout 120 rc=3 (run twice, byte-identical). Output: APPROVAL-REGISTER result=REFUSED reason=dev-overlap overlap=2 commits=2. Difference control against AC2: the same commit without the waiver is refused for its 2 overlapping commits.",
+      "denominator": "1 of 1 invocation; overlap=2 of 2 own commits",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A planted blanket waiver: a waiver naming only one of the two overlap commits, or naming a DEV-only sha outside the overlap. Each must be refused; a waiver that counted or matched a range would pass.",
+      "expected": "the one-commit waiver refused dev-overlap unwaived=1; the outside-overlap waiver refused waiver-sha-not-in-overlap; neither registers",
+      "observed": "test cases 'a waiver naming only one overlap commit is refused dev-overlap unwaived=1' and 'a waiver naming a sha outside the overlap set' PASS in the AC1 run (11/11)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 and AC3 were each run twice against the same refs and the two stdout files were byte-compared.",
+      "observed": "cmp reports IDENTICAL for AC2 and for AC3",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a real registration of 794b7df4, 9ef6a359 or 62d455f5 into the live approval list",
+      "reason": "the cell is the tool and its check-only seam; no live row is written here, and the ruling-to-branch registration is the issuer's next act"
+    },
+    {
+      "item": "checking that the cited ruling file names the waived shas",
+      "reason": "the tool checks that the --waiver-ref file exists, as the order specifies; the content gap is filed as NFRA_DEVPLN-W1-S12, not graded here"
+    },
+    {
+      "item": "any fetch of portal origin",
+      "reason": "the cell forbids fetch; the portal refs present in the worktree are read"
+    }
+  ],
+  "surprises": [
+    "NFRA_DEVPLN-W1-S12 -- the cited CTO ruling names three merges (62d455f5 through a577cba5), not the four waived commits; the waiver ref is checked for existence only"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~1/NFRA_DEVPLN.TO-DP-d-1.registration-waiver.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "ruff check .tools/open-calls.py .tools/tests/test_open_calls_waiver.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile .tools/open-calls.py",
+      "result": "COMPILE-OK (rc 0)"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh .tools/open-calls.py .tools/tests/test_open_calls_waiver.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s) (rc 0)"
+    }
+  ]
+}
