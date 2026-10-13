@@ -5,6 +5,7 @@
     <issued_to>0.7.0_AE_CloudOps~ZS</issued_to>
     <date>2026-10-13</date>
     <status>pending -- issued 2026-10-13 ~20:5xZ, Z6 repairs issuance (CTO ruling @61e3067f5c disposition 2); queue position 1 of 2 on this lane (R3 follows)</status>
+    <status>complete -- drained 2026-10-13 ~21:4xZ by 2.0.0_SA_COO~ZB: AC1/AC2/AC3 PASS (report org/tier2_senior/0.7.0_AE_CloudOps~ZS/deliverables/z6_r2_p0_gate_listener_up_not_entitled.md), deploy f6cc68d6bf on origin box/sitez, ledger opal-bbgtml-z6-r2-p0-gate-20261013 CLOSED. Evidence limit stated by the seat: the new branch is exercised only under -ForceDown (row Z-S16). CONTINGENT on row Z-S17: if Andrew reads his no-modify order as standing, or has not answered by 2026-10-14 10:30Z, the issuer reverts bbg_fallback.ps1 to f6cc68d6bf~1 before the 11:00Z pull (CTO msg 33803).</status>
     <project_code>OPAL_BBGTML</project_code>
   </metadata>
 <risk>WORLD</risk>
