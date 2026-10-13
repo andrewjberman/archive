@@ -91,6 +91,7 @@ CLS_CONTRACT = "org/standards/IRPT_DASHBD_ACCOUNT_CLASS_DAILY_CONTRACT.json"
 XWALK_PREFIX = "advi/49financial/gold/household_crosswalk/"
 TOL = 1.0
 MIN_ACCOUNTS = 3
+HIST_MIN_DAYS = 252
 CLASS_ENUM = ["cash", "fixed_income", "equity", "structured", "alternatives", "commodities", "unclassified"]
 CS_MARK = "CLIENT_SUMMARY"
 DATE_PART = re.compile(r"date=(\d{4}-\d{2}-\d{2})/$")
@@ -273,6 +274,110 @@ def is_absent_form(v):
     return isinstance(v, dict) and set(v.keys()) == {"absent"}
 
 
+RET_COLS = ["account_id", "business_date", "market_value_eod", "external_flow", "total_return_daily", "day_quality",
+            "guard_state"]
+
+
+def date_partitions(reader, bucket, prefix, rx):
+    """{date: partition prefix} for the date= partitions under one prefix (LIST only)."""
+    out = {}
+    for p in reader.list_prefixes(bucket, prefix):
+        m = rx.search(p)
+        if m:
+            out[m.group(1)] = p
+    return out
+
+
+def trading_days_list(tc, first, last):
+    """Every trading day d with first <= d <= last (lib/trading_calendar.py)."""
+    out = []
+    d = first
+    while d <= last:
+        if tc.is_trading_day(d):
+            out.append(d)
+        d += dt.timedelta(days=1)
+    return out
+
+
+NOT_SPANNED = ("NOT_SPANNED: the account has no account_return_daily row on its opening anchor day, so it did not hold "
+               "a value at the window's start (the not-held dash)")
+
+
+def hist_reason(table, n):
+    return "history not yet built: gold %s holds %d trading days" % (table, n)
+
+
+def absent_terms(reason):
+    """The activity-sourced terms of a window the activity table cannot open: each carries the reason in words."""
+    keys = ("beginning_value", "net_additions", "net_gain", "ending_value", "contributions", "withdrawals", "income")
+    t = {k: Absent(reason) for k in keys}
+    t["days"] = 0
+    return t
+
+
+def ret_window_terms(rows, anchor, days, R):
+    """rows: {business_date: (market_value_eod, external_flow, total_return_daily, day_quality, guard_state)} for one
+    account; anchor: the window's opening anchor day; days: the window's trading days, anchor < d <= R. Returns the
+    account's terms by the contract's folds (version 0.2.0): each is a number or an Absent with its reason, never zero."""
+    ad, rd = anchor.isoformat(), R.isoformat()
+    a = rows.get(ad)
+    t = {"days": len(days)}
+    if a is None:
+        t["beginning_value"] = Absent(NOT_SPANNED)
+    elif a[3] == "SOURCE_LAG":
+        t["beginning_value"] = Absent("the opening anchor day is SOURCE_LAG, so its value is unknown and the beginning "
+                                      "value is not read")
+    else:
+        t["beginning_value"] = float(a[0])
+    e = rows.get(rd)
+    if e is None:
+        t["ending_value"] = Absent("no account_return_daily row on as_of, so the ending value is not read")
+    elif e[3] == "SOURCE_LAG":
+        t["ending_value"] = Absent("as_of is SOURCE_LAG, so the ending value is unknown and is not read")
+    else:
+        t["ending_value"] = float(e[0])
+    flows = []
+    for d in days:
+        r = rows.get(d.isoformat())
+        if r is None or r[3] == "SOURCE_LAG":
+            flows = None
+            break
+        flows.append(float(r[1]))
+    if flows is None:
+        t["net_additions"] = Absent("a window day has no account_return_daily row or a SOURCE_LAG flow, so the net "
+                                    "additions are not read")
+    else:
+        t["net_additions"] = sum(flows)
+    bv, ev, na = t["beginning_value"], t["ending_value"], t["net_additions"]
+    if any(isinstance(x, Absent) for x in (bv, ev, na)):
+        t["net_gain"] = Absent("a term of the residual (beginning value, net additions or ending value) is absent, so "
+                               "the net gain is not read")
+    else:
+        t["net_gain"] = ev - bv - na
+    why = None
+    if a is None:
+        why = NOT_SPANNED
+    elif a[3] == "SOURCE_LAG":
+        why = "the opening anchor day is SOURCE_LAG, so the return link has no measured start"
+    prod = 1.0
+    if why is None:
+        for d in days:
+            r = rows.get(d.isoformat())
+            if r is None:
+                why = "a window day has no row, so the geometric link breaks and the window is not bridged"
+                break
+            if r[2] is None:
+                why = ("a window day has a null total_return_daily (NOT_MEASURABLE or SOURCE_LAG), so the link breaks "
+                       "and the window is not bridged")
+                break
+            if r[4] == "GRADED_DISAGREED":
+                why = "a window day is GRADED_DISAGREED, which serves no number"
+                break
+            prod *= 1.0 + float(r[2])
+    t["return_cumulative"] = Absent(why) if why else round((prod - 1.0) * 100.0, 1)
+    return t
+
+
 def main(repo, out):
     sys.path.insert(0, repo)
     import lib.opal_naming as naming
@@ -296,8 +401,7 @@ def main(repo, out):
         if isinstance(src, dict) and "contract" in src and CS_MARK not in src["contract"]:
             siblings.append(src["contract"])
     for rel in siblings:
-        p = os.path.join(repo, rel)
-        with open(p, "rb") as fh:
+        with open(os.path.join(repo, rel), "rb") as fh:
             sib = json.loads(fh.read().decode("utf-8"))
         sibling_tables[rel] = sib["table"]
         cols = sib["columns"]
@@ -309,13 +413,13 @@ def main(repo, out):
     for m in members:
         src = m.get("source")
         if isinstance(src, dict) and "contract" in src and CS_MARK not in src["contract"]:
-            cols = sibling_columns[src["contract"]]
-            if src["field"] not in cols:
-                raise SystemExit("ERROR: member %s names field %s absent from its sibling contract" % (m["id"], src["field"]))
+            if src["field"] not in sibling_columns[src["contract"]]:
+                raise SystemExit("ERROR: member %s names field %s absent from its sibling contract"
+                                 % (m["id"], src["field"]))
             fields_checked += 1
 
     reader = Reader()
-    # newest crosswalk partition, LIST of the granted prefix only
+    # R1-R2 input: the newest ADVI household crosswalk partition (the one granted prefix)
     xw_bucket = naming.address("advi", FIRM, "gold", "household_crosswalk", "date=2000-01-01", "x").split("/")[2]
     xw_date, xw_parts = newest_partition(reader, xw_bucket, XWALK_PREFIX, DATE_PART, "household crosswalk")
     xw_addr = naming.address("advi", FIRM, "gold", "household_crosswalk", "date=%s" % xw_date,
@@ -323,39 +427,21 @@ def main(repo, out):
     b, k = split_s3(xw_addr)
     xw_rows = read_table(reader.get(b, k), ["schwab_account_number", "opal_relationship_id"])
 
-    def gold_table(table):
-        probe = naming.address("irpt", FIRM, "gold", table, "date=2000-01-01")
-        bucket = split_s3(probe)[0]
-        prefix = "irpt/%s/gold/%s/" % (FIRM, table)
-        newest, n = newest_partition(reader, bucket, prefix, DATE_PART, table)
-        addr = naming.address("irpt", FIRM, "gold", table, "date=%s" % newest, "data.parquet")
-        return newest, n, split_s3(addr)
+    # R2-R3: every account_return_daily partition is listed; the newest one gives R and the present accounts
+    ret_table = sibling_tables[RET_CONTRACT]
+    ret_bucket = split_s3(naming.address("irpt", FIRM, "gold", ret_table, "date=2000-01-01"))[0]
+    ret_parts = date_partitions(reader, ret_bucket, "irpt/%s/gold/%s/" % (FIRM, ret_table), DATE_PART)
+    if not ret_parts:
+        raise SystemExit("ERROR: no account_return_daily date= partition under the granted prefix")
 
-    act_table = sibling_tables[ACT_CONTRACT]
-    act_date, act_parts, act_loc = gold_table(act_table)
-    act_rows_all = read_table(reader.get(*act_loc), None)
-    act_accounts = set()
-    act_by_acct = {}
-    R = None
-    for r in act_rows_all:
-        a = r["account_id"]
-        act_accounts.add(a)
-        d = r["business_date"]
-        if R is None or d > R:
-            R = d
-    R = dt.date.fromisoformat(R)
+    def ret_addr(d):
+        return naming.address("irpt", FIRM, "gold", ret_table, "date=%s" % d, "data.parquet")
 
-    ret_date, ret_parts, ret_loc = gold_table(sibling_tables[RET_CONTRACT])
-    ret_rows = read_table(reader.get(*ret_loc), ["account_id", "business_date"])
-    ret_first = {}
-    for r in ret_rows:
-        a = r["account_id"]
-        d = r["business_date"]
-        if a not in ret_first or d < ret_first[a]:
-            ret_first[a] = d
-    cutoff = one_year_before(R).isoformat()
+    b, k = split_s3(ret_addr(max(ret_parts)))
+    newest = read_table(reader.get(b, k), ["account_id", "business_date"])
+    R = dt.date.fromisoformat(max(r["business_date"] for r in newest))
+    present = {r["account_id"] for r in newest}
 
-    # R1 and R2: crosswalk groups
     groups = {}
     for r in xw_rows:
         opal = clean(r.get("opal_relationship_id"))
@@ -363,26 +449,45 @@ def main(repo, out):
         if not opal or not acct:
             continue
         groups.setdefault(opal, set()).add(acct)
-    n_groups_3 = 0
-    eligible = []
+    households = []
     for opal, accts in groups.items():
-        present = sorted(a for a in accts if a in act_accounts)
-        if len(present) < MIN_ACCOUNTS:
-            continue
-        n_groups_3 += 1
-        # R4
-        if all(a in ret_first and ret_first[a] <= cutoff for a in present):
-            eligible.append((hashlib.sha256(opal.encode("utf-8")).hexdigest(), opal, present))
+        pres = sorted(a for a in accts if a in present)
+        if len(pres) >= MIN_ACCOUNTS:
+            households.append((opal, pres))
+    cand = {a for _o, pres in households for a in pres}
+
+    # R4: the history count is the number of date= partitions each candidate account appears in; the rows of the
+    # candidate accounts are kept for the windows and the identity checks (a filter, never a sum)
+    RET = {a: {} for a in cand}
+    hist = {a: 0 for a in cand}
+    for d in sorted(ret_parts):
+        b, k = split_s3(ret_addr(d))
+        seen = set()
+        for r in read_table(reader.get(b, k), RET_COLS):
+            a = r["account_id"]
+            if a in RET:
+                RET[a][r["business_date"]] = (float(r["market_value_eod"]), float(r["external_flow"]),
+                                             clean(r["total_return_daily"]), r["day_quality"], r["guard_state"])
+                seen.add(a)
+        for a in seen:
+            hist[a] += 1
+
+    # R5-R6: eligible households and the lowest sha256 of the relationship id
+    eligible = []
+    for opal, pres in households:
+        if all(hist[a] >= HIST_MIN_DAYS for a in pres):
+            eligible.append((hashlib.sha256(opal.encode("utf-8")).hexdigest(), opal, pres))
     eligible.sort()
     counts = {
         "crosswalk_partitions_listed": xw_parts,
-        "households_with_opal_id": len(groups),
-        "households_with_3_or_more_gold_accounts": n_groups_3,
-        "households_eligible_R4": len(eligible),
-        "activity_partitions_listed": act_parts,
-        "return_partitions_listed": ret_parts,
-        "activity_rows_all_accounts": len(act_rows_all),
-        "activity_accounts_all": len(act_accounts),
+        "return_partitions_listed": len(ret_parts),
+        "return_partitions_read": len(ret_parts),
+        "crosswalk_households_with_opal_id": len(groups),
+        "households_with_3_or_more_accounts_R2": len(households),
+        "accounts_present_R2": len(cand),
+        "accounts_passing_R4": sum(1 for a in cand if hist[a] >= HIST_MIN_DAYS),
+        "households_eligible_R5": len(eligible),
+        "reference_R": R.isoformat(),
     }
     if not eligible:
         counts["outcome"] = "NO_ELIGIBLE_HOUSEHOLD"
@@ -391,102 +496,129 @@ def main(repo, out):
     accounts = sorted(hh_accts)
     counts["household_ref_sha256"] = hh_hash
     counts["accounts"] = len(accounts)
-    counts["reference_R"] = R.isoformat()
 
-    # activity rows of the chosen household only
-    acct_set = set(accounts)
-    for r in act_rows_all:
-        if r["account_id"] in acct_set:
-            act_by_acct.setdefault(r["account_id"], {})[r["business_date"]] = r
-    method_versions = sorted({int(r["method_version"]) for r in act_rows_all if r["account_id"] in acct_set})
-    counts["activity_method_versions_in_household"] = method_versions
-    counts["activity_rows_household"] = sum(len(v) for v in act_by_acct.values())
-    del act_rows_all
+    # the activity rows of the household, every activity partition (a filter, never a sum)
+    act_table = sibling_tables[ACT_CONTRACT]
+    act_rows, act_dates = gold_rows(reader, naming, act_table, None, accounts, every=True)
+    act_by_acct = {}
+    for r in act_rows:
+        act_by_acct.setdefault(r["account_id"], {})[r["business_date"]] = r
+    counts["activity_partitions_listed"] = len(act_dates)
+    counts["activity_method_versions_in_household"] = sorted({int(r["method_version"]) for r in act_rows})
 
-    # windows: anchors and first expected trading day per account window (same for all accounts)
+    # windows: anchors from the calendar; trading days from the first return partition to R
+    TD = trading_days_list(tc, dt.date.fromisoformat(min(ret_parts)), R)
     wdefs = {}
     for name in ("qtd", "ytd", "last_12_months"):
         s = window_start(name, R)
         anchor = tc.prev_trading_day(s)
-        first_exp = next_trading_day(tc, anchor)
-        wdefs[name] = {"start": s.isoformat(), "anchor": anchor.isoformat(),
-                       "first_trading_day": first_exp.isoformat(), "as_of": R.isoformat()}
-    wdefs["since_inception"] = {"start": "account first_data_date (client summary, not granted)",
-                                "anchor": None, "first_trading_day": None, "as_of": R.isoformat()}
+        wdefs[name] = {"start": s.isoformat(), "anchor": anchor.isoformat(), "as_of": R.isoformat()}
+    wdefs["since_inception"] = {"start": "per account: its first valued day", "anchor": None, "as_of": R.isoformat()}
 
-    # per-account window terms
-    T = {}
+    # return-table terms per account (the 36 window members), and the household sums
+    TR = {}
     for a in accounts:
-        T[a] = {}
+        rows = RET.get(a, {})
+        TR[a] = {}
         for name in ("qtd", "ytd", "last_12_months"):
-            w = wdefs[name]
-            T[a][name] = window_terms(act_by_acct.get(a, {}), dt.date.fromisoformat(w["anchor"]),
-                                      dt.date.fromisoformat(w["first_trading_day"]), R)
-        T[a]["since_inception"] = None
-
-    # household window terms: sums with the absent rule
+            anchor = dt.date.fromisoformat(wdefs[name]["anchor"])
+            TR[a][name] = ret_window_terms(rows, anchor, [d for d in TD if anchor < d <= R], R)
+        if rows:
+            first = dt.date.fromisoformat(min(rows))
+            TR[a]["since_inception"] = ret_window_terms(rows, first, [d for d in TD if first < d <= R], R)
+        else:
+            TR[a]["since_inception"] = ret_window_terms({}, R, [], R)
     H = {}
-    for name in ("qtd", "ytd", "last_12_months"):
-        terms = [T[a][name] for a in accounts]
-        H[name] = {}
-        for key in ("beginning_value", "net_additions", "net_gain", "ending_value", "contributions",
-                    "withdrawals", "income"):
-            H[name][key] = hh_sum(terms, key)
-        H[name]["days"] = [t["days"] for t in terms]
-    H["since_inception"] = None
+    for name in ("qtd", "ytd", "last_12_months", "since_inception"):
+        terms = [TR[a][name] for a in accounts]
+        H[name] = {key: hh_sum(terms, key) for key in ("beginning_value", "net_additions", "net_gain", "ending_value")}
 
-    # identity checks and the proof read (counts only in the record; the detail goes to PROOF_READ.txt)
+    # activity-sourced window terms: a window the activity table cannot open is absent in words
+    act_n = len(act_dates)
+    TA = {}
+    for a in accounts:
+        TA[a] = {}
+        rows = act_by_acct.get(a, {})
+        for name in ("qtd", "ytd", "last_12_months"):
+            anchor_s = wdefs[name]["anchor"]
+            if anchor_s in act_dates:
+                anchor = dt.date.fromisoformat(anchor_s)
+                TA[a][name] = window_terms(rows, anchor, next_trading_day(tc, anchor), R)
+            else:
+                TA[a][name] = absent_terms(hist_reason("account_activity_daily", act_n))
+        TA[a]["since_inception"] = absent_terms(hist_reason("account_activity_daily", act_n))
+
+    # identity checks (amendment 3(c)): counted, tolerance 1 dollar; the residual identity is recorded apart
     proof_lines = []
-    checks = 0
-    passed = 0
-    per_scope_checks = {}
+    tally = {"i": [0, 0, 0], "ii": [0, 0, 0], "iii": [0, 0, 0]}   # [checks, passed, not gradeable]
+    pairs_none = [0]
 
-    def check(scope, name, tset):
-        nonlocal checks, passed
-        keys = ("beginning_value", "net_additions", "net_gain", "ending_value")
-        vals = [tset[k] for k in keys]
-        if any(isinstance(v, Absent) for v in vals):
-            proof_lines.append("%s %s: NOT GRADED (%s)" % (scope, name, "; ".join(
-                sorted({v.reason[:60] for v in vals if isinstance(v, Absent)}))))
+    def record(rule, lhs, rhs):
+        slot = tally[rule]
+        if lhs is None or rhs is None:
+            slot[2] += 1
             return
+        slot[0] += 1
+        gap = lhs - rhs
+        if abs(gap) <= TOL:
+            slot[1] += 1
+        else:
+            proof_lines.append("FAIL rule %s gap %.2f" % (rule, gap))
+
+    def ret_mv(a, iso):
+        r = RET.get(a, {}).get(iso)
+        return None if r is None else r[0]
+
+    for a in accounts:
+        rows = act_by_acct.get(a, {})
+        for d in sorted(rows):
+            row = rows[d]
+            prev = tc.prev_trading_day(dt.date.fromisoformat(d)).isoformat()
+            ev = clean(row["ending_value"])
+            record("ii", ev, ret_mv(a, d))
+            if prev not in rows:
+                pairs_none[0] += 1
+                continue
+            parts = [clean(row[k]) for k in ("beginning_value", "contributions", "withdrawals", "realized",
+                                             "unrealized_change", "income")]
+            if any(p is None for p in parts) or ev is None:
+                record("i", None, None)
+            else:
+                record("i", parts[0] + parts[1] - parts[2] + parts[3] + parts[4] + parts[5], ev)
+            record("iii", clean(row["beginning_value"]), ret_mv(a, prev))
+
+    resid = [0, 0]   # [checks, passed]; NOT counted in identity.checks
+
+    def residual(scope, name, t):
+        vals = [t[k] for k in ("beginning_value", "net_additions", "net_gain", "ending_value")]
+        if any(isinstance(v, Absent) for v in vals):
+            return
+        resid[0] += 1
         gap = vals[0] + vals[1] + vals[2] - vals[3]
-        checks += 1
-        ok = abs(gap) <= TOL
-        passed += 1 if ok else 0
-        per_scope_checks[scope] = per_scope_checks.get(scope, 0) + 1
-        proof_lines.append("%s %s: gap=%.2f %s" % (scope, name, gap, "PASS" if ok else "FAIL"))
+        if abs(gap) <= TOL:
+            resid[1] += 1
+        proof_lines.append("%s %s residual gap %.2f" % (scope, name, gap))
 
-    for name in CHECK_WINDOWS:
-        check("household", name, H[name])
+    for name in ("qtd", "ytd", "last_12_months", "since_inception"):
+        residual("household", name, H[name])
         for a in accounts:
-            check("account", name, T[a][name])
+            residual("account", name, TR[a][name])
 
-    # the sample
-    values = {}
-    contract_absent = 0
-    for m in members:
-        src = m["source"]
-        if src == "ABSENT":
-            contract_absent += 1
-    result = build_values(members, accounts, T, H, wdefs, R, reader, naming, tc, act_by_acct, sibling_tables,
-                          hh_hash, counts)
-    values.update(result)
+    checks = sum(v[0] for v in tally.values())
+    passed = sum(v[1] for v in tally.values())
+    not_gradeable = sum(v[2] for v in tally.values())
+
+    values = build_values(members, accounts, TR, TA, H, wdefs, R, reader, naming, tc, act_by_acct, act_dates,
+                          sibling_tables, hh_hash, counts)
     missing = [i for i in member_ids if i not in values]
     if missing:
         raise SystemExit("ERROR: %d member ids were not assigned a value (first: %s)" % (len(missing), missing[0]))
-
     form = to_form(values)
-    filled = 0
-    absent = 0
-    for mid in member_ids:
-        if is_absent_form(form[mid]):
-            absent += 1
-        else:
-            filled += 1
+    filled = sum(1 for mid in member_ids if not is_absent_form(form[mid]))
     total = len(member_ids)
+    absent = total - filled
+    contract_absent = sum(1 for m in members if m["source"] == "ABSENT")
     problems = shape_problems(members, form)
-    counts_members = {"total": total, "filled": filled, "absent": absent, "contract_absent": contract_absent,
-                      "absent_forms_inside_filled_members": count_inner_absent(form, member_ids)}
     shape_ok = (not problems) and filled + absent == total and absent >= contract_absent
 
     # the sample: private only
@@ -498,34 +630,39 @@ def main(repo, out):
         },
         "windows": wdefs,
         "values": form,
-        "rows": build_rows(accounts, T, H, wdefs, R, reader, naming, tc, act_by_acct),
+        "rows": build_rows(accounts),
     }
     os.makedirs(out, exist_ok=True)
     with open(os.path.join(out, "HOUSEHOLD_SAMPLE.json"), "w", encoding="utf-8") as fh:
         json.dump(layout, fh, indent=1, sort_keys=True)
     with open(os.path.join(out, "PROOF_READ.txt"), "w", encoding="utf-8") as fh:
         fh.write("PROOF READ (private; for the issuer; never in the repo)\n")
-        fh.write("reference R=%s window anchors: %s\n" % (R.isoformat(), json.dumps(wdefs, sort_keys=True)))
+        fh.write("reference R=%s windows: %s\n" % (R.isoformat(), json.dumps(wdefs, sort_keys=True)))
+        fh.write("identity tally (rule: checks, passed, not gradeable): %s\n" % json.dumps(tally, sort_keys=True))
         for line in proof_lines:
             fh.write(line + "\n")
-        fh.write("household value summary: %s\n" % json.dumps(to_form({k: H[k] for k in CHECK_WINDOWS}), default=str,
-                                                              sort_keys=True))
+        fh.write("household value summary: %s\n" % json.dumps(to_form(H), default=str, sort_keys=True))
 
     counts.update({
         "members_total": total,
         "members_filled": filled,
         "members_absent": absent,
         "members_contract_absent": contract_absent,
-        "absent_forms_inside_filled_members": counts_members["absent_forms_inside_filled_members"],
+        "absent_forms_inside_filled_members": count_inner_absent(form, member_ids),
         "fields_checked_against_sibling_contracts": fields_checked,
         "shape_problems": problems,
         "shape_valid_against_contract": shape_ok,
         "absent_members_never_zero": all(is_absent_form(form[m["id"]]) for m in members if m["source"] == "ABSENT"),
         "identity_checks": checks,
         "identity_passed": passed,
-        "identity_checks_per_scope": per_scope_checks,
+        "identity_not_gradeable": not_gradeable,
+        "identity_by_rule": tally,
+        "identity_pairs_without_prior_activity_row": pairs_none[0],
         "identity_tolerance_dollars": TOL,
-        "gold_tables_read": sorted(set(sibling_tables.values()) | {"account_activity_daily", "account_return_daily"}),
+        "identity_basis": "daily_ledger_and_cross_table",
+        "window_residual_checks": resid,
+        "gold_tables_read": sorted({ret_table, act_table, "household_crosswalk", sibling_tables[LOT_R_CONTRACT],
+                                    sibling_tables[LOT_U_CONTRACT], sibling_tables[CLS_CONTRACT]}),
         "outcome": "BUILT",
     })
     return finish_counts(out, counts, reader)
@@ -577,47 +714,53 @@ def shape_problems(members, values):
     return problems
 
 
-def build_values(members, accounts, T, H, wdefs, R, reader, naming, tc, act_by_acct, sibling_tables, hh_hash, counts):
+def build_values(members, accounts, TR, TA, H, wdefs, R, reader, naming, tc, act_by_acct, act_dates, sibling_tables,
+                 hh_hash, counts):
     """Every member id is assigned here exactly once. Unknown sourced ids raise (no silent absent)."""
     out = {}
     cs_reason = ("carried by the client summary, which this build does not read (the issuer's ruling keeps the client "
                  "summary and the investor-reporting directory out of scope)")
-    si_reason = ("the since-inception window opens on the account's first_data_date, which the client summary carries; "
-                 "the client summary is not read in this build, so the window is not built")
+    rd = R.isoformat()
 
-    # gold tables needed for lots, class and fee basis
-    lot_r = gold_rows(reader, naming, sibling_tables[LOT_R_CONTRACT], ["account_id", "business_date", "cost_basis",
-                                                                     "proceeds", "realized_gain", "holding_term"],
-                      accounts)
-    lot_u = gold_rows(reader, naming, sibling_tables[LOT_U_CONTRACT], ["account_id", "business_date", "cost_basis",
-                                                                      "unrealized_gain"], accounts)
-    cls = gold_rows(reader, naming, sibling_tables[CLS_CONTRACT], ["account_id", "business_date", "asset_class",
-                                                                   "market_value_eod"], accounts)
+    lot_r, _d1 = gold_rows(reader, naming, sibling_tables[LOT_R_CONTRACT], ["account_id", "business_date", "cost_basis",
+                                                                           "proceeds", "realized_gain", "holding_term"],
+                           accounts)
+    lot_u, _d2 = gold_rows(reader, naming, sibling_tables[LOT_U_CONTRACT], ["account_id", "business_date", "cost_basis",
+                                                                           "unrealized_gain"], accounts)
+    cls, cls_dates = gold_rows(reader, naming, sibling_tables[CLS_CONTRACT],
+                               ["account_id", "business_date", "asset_class", "market_value_eod"], accounts, every=True)
     counts["lot_realized_rows_read"] = len(lot_r)
     counts["lot_unrealized_rows_read"] = len(lot_u)
     counts["class_rows_read"] = len(cls)
+    counts["class_partitions_listed"] = len(cls_dates)
 
     lot_r_by = {}
     for r in lot_r:
-        if r["account_id"] in accounts:
-            lot_r_by.setdefault(r["account_id"], []).append(r)
+        lot_r_by.setdefault(r["account_id"], []).append(r)
     lot_u_by = {}
     for r in lot_u:
-        if r["account_id"] in accounts and r["business_date"] == R.isoformat():
+        if r["business_date"] == rd:
             lot_u_by.setdefault(r["account_id"], []).append(r)
     cls_by = {}
     for r in cls:
-        if r["account_id"] in accounts:
-            cls_by.setdefault((r["account_id"], r["business_date"]), {}).setdefault(r["asset_class"], 0.0)
-            cls_by[(r["account_id"], r["business_date"])][r["asset_class"]] += float(r["market_value_eod"])
+        key = (r["account_id"], r["business_date"])
+        cls_by.setdefault(key, {}).setdefault(r["asset_class"], 0.0)
+        cls_by[key][r["asset_class"]] += float(r["market_value_eod"])
     del lot_r, lot_u, cls
 
-    l12_anchor = dt.date.fromisoformat(wdefs["last_12_months"]["anchor"])
-    l12_days = sorted({d for a in accounts for d in act_by_acct.get(a, {}) if l12_anchor.isoformat() < d <= R.isoformat()})
-    fee_label = fee_basis_label(reader, naming, counts)
+    l12_anchor = wdefs["last_12_months"]["anchor"]
+    act_open = l12_anchor in act_dates
+    act_days_l12 = sorted({d for a in accounts for d in act_by_acct.get(a, {}) if l12_anchor < d <= rd})
+    cls_open = l12_anchor in cls_dates
+    cls_days_l12 = sorted({d for d in cls_dates if l12_anchor < d <= rd})
+    act_hist = hist_reason("account_activity_daily", len(act_dates))
+    cls_hist = hist_reason(sibling_tables[CLS_CONTRACT], len(cls_dates))
 
     def per_account(fn):
         return {a: fn(a) for a in accounts}
+
+    def hh_term(w, term):
+        return hh_sum([TA[a][w] for a in accounts], term)
 
     for m in members:
         mid = m["id"]
@@ -629,41 +772,32 @@ def build_values(members, accounts, T, H, wdefs, R, reader, naming, tc, act_by_a
         if isinstance(src, dict) and CS_MARK in src.get("contract", ""):
             out[mid] = Absent(cs_reason)
             continue
-        if parts[0] in ("pvs", "avs") and parts[1] == "since_inception":
-            out[mid] = Absent(si_reason)
-            continue
         if parts[0] == "pvs":
-            term = parts[2]
-            out[mid] = H[parts[1]][term] if term in H[parts[1]] else Absent("not built")
+            out[mid] = H[parts[1]][parts[2]]
             continue
         if parts[0] == "avs":
-            term = parts[2]
-            out[mid] = per_account(lambda a, w=parts[1], t=term: T[a][w][t])
+            out[mid] = per_account(lambda a, w=parts[1], t=parts[2]: TR[a][w][t])
+            continue
+        if parts[0] == "act":
+            term, grain = parts[1], parts[2]
+            if term == "ending_value":
+                if grain == "household":
+                    out[mid] = H_end(accounts, act_by_acct, R)
+                else:
+                    out[mid] = per_account(lambda a: act_account_end(act_by_acct, a, R))
+            elif grain == "household":
+                out[mid] = hh_term("last_12_months", term)
+            else:
+                out[mid] = per_account(lambda a, t=term: TA[a]["last_12_months"][t])
             continue
         if mid == "hold.ending_value":
             out[mid] = H_end(accounts, act_by_acct, R)
             continue
-        if mid == "hold.net_gain_last_12_months":
-            out[mid] = H["last_12_months"]["net_gain"]
-            continue
-        if mid == "hold.net_gain_ytd":
-            out[mid] = H["ytd"]["net_gain"]
-            continue
-        if mid == "hold.net_gain_qtd":
-            out[mid] = H["qtd"]["net_gain"]
-            continue
-        if mid == "hold.net_gain_since_inception":
-            out[mid] = Absent(si_reason)
+        if mid.startswith("hold.net_gain_"):
+            out[mid] = hh_term(mid[len("hold.net_gain_"):], "net_gain")
             continue
         if mid == "hold.allocation":
             out[mid] = allocation_at(accounts, cls_by, act_by_acct, R)
-            continue
-        if parts[0] == "act":
-            term, grain = parts[1], parts[2]
-            if grain == "household":
-                out[mid] = act_value(term, accounts, T, H, act_by_acct, R)
-            else:
-                out[mid] = per_account(lambda a, t=term: act_account_value(t, a, T, act_by_acct, R))
             continue
         if parts[0] == "trgl":
             out[mid] = per_account(lambda a, k=parts[1]: trgl_value(k, lot_r_by.get(a, []), R))
@@ -672,74 +806,58 @@ def build_values(members, accounts, T, H, wdefs, R, reader, naming, tc, act_by_a
             out[mid] = per_account(lambda a, k=parts[1]: glr_value(k, a, lot_r_by, lot_u_by, act_by_acct, R))
             continue
         if mid == "overview.chart.allocation_by_asset_class":
-            out[mid] = class_series(l12_days, accounts, cls_by)
+            out[mid] = class_series(cls_days_l12, accounts, cls_by) if cls_open else Absent(cls_hist)
             continue
         if mid == "accounts.chart.allocation_by_account":
-            out[mid] = account_series(l12_days, accounts, act_by_acct)
+            out[mid] = account_series(act_days_l12, accounts, act_by_acct) if act_open else Absent(act_hist)
             continue
         if mid == "accounts.chart.ending_value_and_net_additions_last_12_months":
-            out[mid] = ending_netadd_series(l12_days, accounts, act_by_acct)
+            out[mid] = ending_netadd_series(act_days_l12, accounts, act_by_acct) if act_open else Absent(act_hist)
             continue
         if mid == "holdings.rows.class_hierarchy":
             out[mid] = ("class level only: Opal's seven asset-class values (" + ", ".join(CLASS_ENUM) +
                         "); the baseline's sub-class rows are not carried by any sibling, so each sub-class cell is absent")
             continue
         if mid == "convention.fee_basis_label":
-            out[mid] = fee_label
+            out[mid] = Absent(FEE_REASON)
             continue
-        if mid == "cover.as_of_date":
-            out[mid] = Absent(cs_reason)
-            continue
-        if mid in ("convention.inception_per_household_and_account", "convention.not_held_for_entire_period"):
+        if mid in ("convention.inception_per_household_and_account", "convention.not_held_for_entire_period",
+                   "cover.as_of_date"):
             out[mid] = Absent(cs_reason)
             continue
         if mid == "overview.chart.portfolio_performance_last_12_months":
-            out[mid] = Absent("the household performance line needs a household daily return series, which no sibling carries")
+            out[mid] = Absent("the household performance line needs a household daily return series, which no sibling "
+                              "carries")
             continue
         raise SystemExit("ERROR: sourced member %s has no builder rule" % mid)
     # account-grain members whose value is a dict keyed by account are checked by shape_problems
     return out
 
 
-def gold_rows(reader, naming, table, columns, accounts):
-    """Rows of the newest partition of one gold table, filtered to the household's accounts (a filter, never a sum)."""
+def gold_rows(reader, naming, table, columns, accounts, every=False):
+    """Rows of one gold table filtered to the household's accounts (a filter, never a sum). every=False reads the newest
+    date= partition; every=True reads all of them. Returns (rows, sorted partition dates); LIST and GET only."""
     import pyarrow as pa
     import pyarrow.compute as pc
     import pyarrow.parquet as pq
     probe = naming.address("irpt", FIRM, "gold", table, "date=2000-01-01")
     bucket = split_s3(probe)[0]
-    newest, n = newest_partition(reader, bucket, "irpt/%s/gold/%s/" % (FIRM, table), DATE_PART, table)
-    addr = naming.address("irpt", FIRM, "gold", table, "date=%s" % newest, "data.parquet")
-    b, k = split_s3(addr)
-    tbl = pq.read_table(io.BytesIO(reader.get(b, k)), columns=columns)
-    mask = pc.is_in(tbl["account_id"], value_set=pa.array(sorted(accounts)))
-    return tbl.filter(mask).to_pylist()
+    parts = date_partitions(reader, bucket, "irpt/%s/gold/%s/" % (FIRM, table), DATE_PART)
+    if not parts:
+        raise SystemExit("ERROR: no date= partition for gold table %s" % table)
+    use = sorted(parts) if every else [max(parts)]
+    rows = []
+    for d in use:
+        addr = naming.address("irpt", FIRM, "gold", table, "date=%s" % d, "data.parquet")
+        b, k = split_s3(addr)
+        tbl = pq.read_table(io.BytesIO(reader.get(b, k)), columns=columns)
+        mask = pc.is_in(tbl["account_id"], value_set=pa.array(sorted(accounts)))
+        rows.extend(tbl.filter(mask).to_pylist())
+    return rows, sorted(parts)
 
 
-def fee_basis_label(reader, naming, counts):
-    mv = counts.get("activity_method_versions_in_household") or []
-    if len(mv) != 1:
-        return Absent("the activity rows of the household carry more than one method_version; the fee basis is not one value")
-    v = mv[0]
-    probe = naming.address("irpt", FIRM, "gold", "dim_return_method", "method_version=%d" % v)
-    bucket = split_s3(probe)[0]
-    listed = reader.list_prefixes(bucket, "irpt/%s/gold/dim_return_method/" % FIRM)
-    have = set()
-    for p in listed:
-        m = METHOD_PART.search(p)
-        if m:
-            have.add(int(m.group(1)))
-    counts["dim_return_method_versions_landed"] = sorted(have)
-    if v not in have:
-        return Absent("the method_version the activity rows carry (%d) has no dim_return_method row in gold; "
-                      "the landed rows are %s" % (v, sorted(have)))
-    import pyarrow.parquet as pq
-    addr = naming.address("irpt", FIRM, "gold", "dim_return_method", "method_version=%d" % v, "data.parquet")
-    b, k = split_s3(addr)
-    rows = pq.read_table(io.BytesIO(reader.get(b, k)), columns=["fee_basis"]).to_pylist()
-    if not rows or rows[0]["fee_basis"] is None:
-        return Absent("the dim_return_method row for this method_version holds no fee_basis")
-    return "fee basis: %s (returns and gains are before advisory fees)" % rows[0]["fee_basis"]
+FEE_REASON = ("the fee-basis row for method_version 3 is outside this cell's grant: gold dim_return_method is not read "
+              "(issuer's amendment 2), so the fee-basis label is absent in words")
 
 
 def H_end(accounts, act_by_acct, R):
@@ -751,10 +869,19 @@ def H_end(accounts, act_by_acct, R):
     return hh_sum([{"v": v} for v in vals], "v")
 
 
+def act_account_end(act_by_acct, a, R):
+    r = act_by_acct.get(a, {}).get(R.isoformat())
+    return Absent("no activity row on as_of") if r is None else float(r["ending_value"])
+
+
 def allocation_at(accounts, cls_by, act_by_acct, R):
     rd = R.isoformat()
-    end_total = H_end(accounts, act_by_acct, R)
     out = {}
+    if not any((a, rd) in cls_by for a in accounts):
+        for c in CLASS_ENUM:
+            out[c] = Absent("gold account_class_daily holds no row for this household on as_of, so no class share is read")
+        return out
+    end_total = H_end(accounts, act_by_acct, R)
     if isinstance(end_total, Absent):
         for c in CLASS_ENUM:
             out[c] = Absent("the household ending value is absent on as_of, so no share is taken")
@@ -774,27 +901,6 @@ def allocation_at(accounts, cls_by, act_by_acct, R):
         else:
             out[c] = round(mv / end_total * 100.0, 1)
     return out
-
-
-ACT_TERMS = ("beginning_value", "contributions", "withdrawals", "net_gain", "income", "ending_value")
-
-
-def act_value(term, accounts, T, H, act_by_acct, R):
-    """The household act.* member: the last-12-months window terms, summed with the absent rule."""
-    if term not in ACT_TERMS:
-        raise SystemExit("ERROR: act term %s has no rule" % term)
-    if term == "ending_value":
-        return H_end(accounts, act_by_acct, R)
-    return H["last_12_months"][term]
-
-
-def act_account_value(term, a, T, act_by_acct, R):
-    if term not in ACT_TERMS:
-        raise SystemExit("ERROR: act term %s has no rule" % term)
-    if term == "ending_value":
-        r = act_by_acct.get(a, {}).get(R.isoformat())
-        return Absent("no activity row on as_of") if r is None else float(r["ending_value"])
-    return T[a]["last_12_months"][term]
 
 
 def trgl_value(key, lots, R):
@@ -889,7 +995,7 @@ def ending_netadd_series(days, accounts, act_by_acct):
     return out
 
 
-def build_rows(accounts, T, H, wdefs, R, reader, naming, tc, act_by_acct):
+def build_rows(accounts):
     rows = {
         "account": [{"account_key": a, "label": {"absent": "registration name not held by any sibling contract; "
                                                            "the label carries the last four digits until a name source exists"},
