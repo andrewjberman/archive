@@ -1,0 +1,35 @@
+{"order": "BP-a-3", "read_at": "2026-10-13T14:11:53Z", "claim": "measured",
+ "calls": [
+  "aws s3api list-objects-v2 --bucket opal-data-bd --prefix silver/prices/ --query 'Contents[].[Key,Size,LastModified]' (window end: newest silver/prices/<date>.parquet = 2026-10-13)",
+  "aws s3api list-object-versions --bucket opal-data-bd --prefix silver/prices/ (also run for silver/transactions/ and for silver/prices/canonical_prices.parquet; listings in gap_fetch.sh)",
+  "aws s3api get-object --bucket opal-data-bd --key <key> --version-id <vid> <local>  (114 manifest objects via gap_fetch.sh: 16 daily price versions, 74 transaction versions of the window dates, 20 current transaction versions of the prior 20 weekdays, the current canonical object, 3 canonical probe versions; plus 2 canonical probe versions fetched by hand)",
+  "aws s3api select-object-content (one attempt, rejected by the CLI with 'Unknown options: --version-id'; no data read)",
+  "python -I gap_measure.py (local files only; no AWS call)"
+ ],
+ "window": "2026-09-16..2026-10-13 (20 weekday dates)",
+ "served_rows": 1657,
+ "classes": {"EQUAL": 1148, "EXPLAINED_BY_VERSION_AT_WRITE": 0, "EXPLAINED_BY_MULTIDAY_WINDOW": 197,
+             "EXPLAINED_OTHER": 232, "UNEXPLAINED": 64, "NOT_RECOMPUTABLE": 16},
+ "denominator_note": "served_rows is 1657, not 1610. The canonical object was rewritten on 2026-10-13 (04:03, 09:49, 12:47, 12:48 UTC); the transaction_observed count in the window is 1657 on every canonical version checked: 2026-10-12 23:03:03, 2026-10-13 00:15:27, 04:03:42, 09:49:48, 12:47:50 and 12:48:05 (the current one). No checked version yields 1,610. Not forced. Served 1,610 = 1,148 EQUAL + 462 not-equal would need the 47 NOT_RECOMPUTABLE rows of the current file set removed; the measurer's 1,007 / 603 split is not reproduced (this read gives 1,148 raw-EQUAL, 1,266 EQUAL under the de-duplicated rule).",
+ "version_test": "the T1 rule (raw) over every version of each window-date transaction partition: 74 versions read; no version reproduces any of the 509 non-equal rows, so EXPLAINED_BY_VERSION_AT_WRITE is 0 by a superset test (the write-time version is one of those versions). Write-time (daily-file first carry) was not needed: the silver/prices/<date>.parquet file is absent for 6 of the 20 window dates (2026-09-21, 09-22, 09-28, 09-29, 10-05, 10-06).",
+ "other_causes": [
+  {"cause": "c2: JOB 2 observed-price rule on the day's own partition (bd_price_update.py extract_observed_prices, lines 677-706: price column first where price > 0, else market_value / units; CASH excluded; median per asset and trade_date)",
+   "rows": 169,
+   "evidence": "reproduced at tolerance by the own-day median on the current partition; the rule over the trailing concatenations (every start date from 2026-08-19) adds no row beyond these; for the 126 rows left after this cause, no version of the day's partition reproduces them under this rule (0 of 126)."},
+  {"cause": "c3: median of the price column over the day's rows excluding cash dividends (transaction_type == 'Dividend'); NOT a rule in the code read; a post-hoc candidate found by testing named variants on the 126 residual rows",
+   "rows": 62,
+   "evidence": "on the own-day partition, the price-column median excluding Dividend rows matches 62 of the 126 residual rows at tolerance; the Dividend Reinvestment-only price-column median matches 60 of the same rows; four variants were tested on the residue, so chance agreement is not excluded and this class should be re-read before it is relied on."},
+  {"cause": "c4: T1 rule on a neighbouring trade-date partition of the window",
+   "rows": 1,
+   "evidence": "FS CR REAL ESTATE INCOM TR INC COM CL I on 2026-09-30 (served 23.75729997): the T1 rule on the 2026-10-06 partition (raw) reproduces it; the own-day partition holds no valid T1 row for the asset."}
+ ],
+ "overlap_note": "Of the 197 EXPLAINED_BY_MULTIDAY_WINDOW rows, 123 are also reproduced by the own-day de-duplicated (keep first) T1 rule and 63 by the own-day JOB 2 rule; the class follows the spec's order (window before other causes). Window witnesses: 160 of 197 minimal windows are 2-partition windows; 153 end on the day itself, 36 start on it.",
+ "bound_statement": "64 rows stay UNEXPLAINED. The largest absolute difference is 1,072.162298 (BLACKROCK INC COM, 2026-09-22: served 1,073.162298, own-day T1 recompute 1.000000), and the largest relative difference is also 1,072.16 on that row (relative = |served - recomputed| / max(1, |recomputed|)); 19 of the 64 recompute to exactly 1.000000 because the own-day T1 median is dominated by cash-dividend rows whose units equal the cash amount. Those 19 are therefore not a reliable reference for their own rows. No version of the day's partition reproduces any of the 64.",
+ "largest_unexplained": [
+  {"date": "2026-09-22", "asset_name": "BLACKROCK INC COM", "served": 1073.162298, "recomputed": 1.0},
+  {"date": "2026-09-28", "asset_name": "VANGUARD MORN MID CAP INDEX ADMIRAL", "served": 391.225203, "recomputed": 1.0},
+  {"date": "2026-10-06", "asset_name": "PUBLIC STORAGE COM", "served": 285.267857, "recomputed": 1.0},
+  {"date": "2026-09-28", "asset_name": "VANGUARD MORN GROWTH INDEX ADMIRAL", "served": 277.92925, "recomputed": 1.0},
+  {"date": "2026-09-30", "asset_name": "VANGUARD MORNINGSTAR MID-CAP VALUE ETF", "served": 197.129114, "recomputed": 1.0}
+ ],
+ "rows_file": "GAP_ROWS.csv"}
