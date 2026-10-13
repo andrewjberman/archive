@@ -149,7 +149,7 @@ def firstchain(a):
     p = _need(d, ["pair.coo_half", "pair.cto_half", "dry_run_sample.advisors", "dry_run_sample.objects_written",
                   "dry_run_sample.read_before_deploy", "deploy.ledger_closed", "chain.label", "chain.emitted_line",
                   "chain.cloudtrail_putevents", "chain.generator_invocations", "keys.regenerated", "keys.ceiling",
-                  "keys.prior_version_ids_recorded", "claim"])
+                  "keys.prior_version_ids_recorded", "keys.advisors_with_bullets_before", "keys.bullet_regressions", "claim"])
     if not p:
         if d["claim"] not in CLAIMS:
             p.append("claim not one of %s" % "/".join(CLAIMS))
@@ -161,6 +161,8 @@ def firstchain(a):
             p.append("the first chain must show the emitted line, a CloudTrail PutEvents and a generator invocation")
         if not (0 <= d["keys"]["regenerated"] <= d["keys"]["ceiling"] <= 158) or d["keys"]["prior_version_ids_recorded"] is not True:
             p.append("regenerated keys must be within the named ceiling (at most 158) with prior VersionIds recorded")
+        if not isinstance(d["keys"]["advisors_with_bullets_before"], int) or d["keys"]["bullet_regressions"] != 0:
+            p.append("a summary that carried bullets before was replaced by one with none (bullet_regressions must be 0, read per advisor)")
         if d["deploy"]["ledger_closed"] is not True:
             p.append("the ledger entry is not closed")
     if p:
@@ -200,6 +202,39 @@ def dryrun(a):
     return 0
 
 
+def prescreen(a):
+    try:
+        d = json.load(open(a.file, encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        print("FAIL ABSENT or unreadable: %s" % type(e).__name__)
+        return 1
+    p = _need(d, ["advisors", "per_slot_fired", "advisors_firing_any", "targeted_ids", "second_dry_run.done",
+                  "second_dry_run.bullets_returned", "no_model_call_in_prescreen", "zero_reason", "claim"])
+    if not p:
+        if d["claim"] not in CLAIMS:
+            p.append("claim not one of %s" % "/".join(CLAIMS))
+        if d["no_model_call_in_prescreen"] is not True:
+            p.append("the pre-screen must make no model call")
+        if not (0 <= d["advisors_firing_any"] <= d["advisors"]) or d["advisors"] < 1:
+            p.append("advisors_firing_any must lie between 0 and a positive advisors count")
+        if not isinstance(d["per_slot_fired"], dict) or len(d["per_slot_fired"]) != 6:
+            p.append("per_slot_fired must name the six slots")
+        if len(d["targeted_ids"]) > 10:
+            p.append("targeted_ids is at most 10")
+        if d["advisors_firing_any"] == 0 and not str(d["zero_reason"]).strip():
+            p.append("zero advisors fire: zero_reason must say why, per slot")
+        if d["second_dry_run"]["done"] is True and d["second_dry_run"]["bullets_returned"] < 1 and d["advisors_firing_any"] > 0:
+            p.append("a targeted dry run on firing advisors returned no bullets: the positive control failed")
+    if p:
+        for x in p:
+            print("FAIL %s" % x)
+        print("PRESCREEN: %d problem(s)" % len(p))
+        return 1
+    print("PRESCREEN record ok advisors=%d firing_any=%d second_dry_run=%s" % (
+        d["advisors"], d["advisors_firing_any"], d["second_dry_run"]["done"]))
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -217,8 +252,10 @@ def main():
     f.add_argument("--file", required=True)
     h = sub.add_parser("dryrun")
     h.add_argument("--file", required=True)
+    s = sub.add_parser("prescreen")
+    s.add_argument("--file", required=True)
     a = ap.parse_args()
-    return {"awsdiff": awsdiff, "agree2": agree2, "emiterr": emiterr, "firstchain": firstchain, "dryrun": dryrun}[a.cmd](a)
+    return {"awsdiff": awsdiff, "agree2": agree2, "emiterr": emiterr, "firstchain": firstchain, "dryrun": dryrun, "prescreen": prescreen}[a.cmd](a)
 
 
 if __name__ == "__main__":
