@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cd-3",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cd-3.ticker-key-read-and-header.md",
+    "group": "OTHER",
+    "vintage_commit": "04b9a0bbed"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~163",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round82.md",
+    "vintage_commit": "04b9a0bbed",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cd-3.ticker-key-read-and-header.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~163/TICKER_KEY_READ.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read record: 12 readers, 4 ticker-keyed, graph calls, searches with denominators, positive control, keyed-fix footprint (described, not made); no code, config, test, manifest, registry or graph changed"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "edda775bcd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "docstring lines 9-10 only (2 insertions, 2 deletions per git diff --numstat); py_compile OK; no code line changed"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two new rows ADVI_COTBKF-D2-W163-S1 and -S2 appended with open(...,'a', newline='\\n'); git diff --numstat shows 57 added, 0 deleted"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB82cd3-AC1",
+      "criterion_verbatim": "every reader found is listed with its key kind; the count, the verdict and the positive control are in the record; every search carries its denominator.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~163/TICKER_KEY_READ.json',encoding='utf-8'));r=d['readers'];print('TICKER-KEY-READ readers=%d ticker_only=%d verdict=%s searches=%d graph_calls=%d control_found=%s'%(len(r),d['ticker_only_readers'],d['verdict_fact'],len(d['searches']),len(d['graph']['calls']),d['positive_control']['found']))\"",
+      "output_evidence": "TICKER-KEY-READ readers=12 ticker_only=4 verdict=ticker_only_readers_found searches=9 graph_calls=9 control_found=True (rc=0)",
+      "denominator": "readers 12 (1 writer, 4 keyed_ticker_only, 7 keyed_other); searches 9, each with files_scanned or a stated null; graph calls 9; positive control found 1 ticker-keyed join",
+      "status": "PASS",
+      "expect": "TICKER-KEY-READ readers="
+    },
+    {
+      "criterion_id": "CB82cd3-AC2",
+      "criterion_verbatim": "the module docstring no longer carries the false sentence, now names --apply, is ASCII, and the file compiles.",
+      "method": "command",
+      "invocation": "python -c \"import py_compile,ast;p='data/assets/scripts/silver/commonwealth_account_return_daily.py';py_compile.compile(p,doraise=True);t=open(p,encoding='utf-8').read();doc=ast.get_docstring(ast.parse(t)) or '';print('HEADER-FIX py_compile=OK old_sentence_gone=%s mentions_apply=%s ascii_only=%s'%('NO S3 WRITE anywhere in this file' not in doc,'--apply' in doc,all(ord(c)<128 for c in doc)))\"",
+      "output_evidence": "HEADER-FIX py_compile=OK old_sentence_gone=True mentions_apply=True ascii_only=True (rc=0); git diff --numstat 04b9a0bbed HEAD for the file: 2 2",
+      "denominator": "docstring sentences changed 1 of 1; file lines changed 2 (lines 9-10 of 1611); other no-S3-write lines reported 2 (702, 1553), edited 0",
+      "status": "PASS",
+      "expect": "HEADER-FIX py_compile=OK old_sentence_gone=True mentions_apply=True ascii_only=True"
+    },
+    {
+      "criterion_id": "CB82cd3-AC3",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the graph was queried first and its age printed; zero_ticker_only_readers is claimed only with a positive control and every search's denominator; a reader that selects by ticker is not called keyed_pair; the header diff touches the docstring lines only and the new sentence is true of the file as it stands (the guard lines it cites are the real ones); the two other 'no S3 write' lines are reported and left alone.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~163/TICKER_KEY_READ.json and the diff of commit edda775bcd; the guard lines cited (:459-463, :854-861, :879) are at the lines named",
+      "output_evidence": "JUDGMENT: output recorded, no verdict. Graph manifest mtime 2026-10-13T15:47:58 printed in graph.age; verdict_fact ticker_only_readers_found (no zero claimed); positive control line :825; no ticker-keyed reader is labelled keyed_pair; header diff lines 9-10 only.",
+      "denominator": "searches 9; readers 12; ticker-keyed readers 4 of 12",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment criterion graded at L9 by 3.0.0_SA_CVO; the worker records its output and does not self-grade."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: no repeated run was made; each graph call and search was read once",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the short .md companion named in the record step of the order",
+      "reason": "not written: the operator's rule against report .md files in a worker's output; the same content is carried by TICKER_KEY_READ.json (readers, searches, positive_control, headline, not_established)"
+    },
+    {
+      "item": "the optional read-only get-object of the store key at version 76.rgWIXYdLNsXSwrXvyuEmaEtfr9y98",
+      "reason": "not made: the counts the cell needed were answered from code and the round-82 records; no remote read was made in this cell"
+    },
+    {
+      "item": "the account-id scan (pytest test_cotbkf_no_account_ids.py) DENOMINATOR line",
+      "reason": "recorded in the report after the commit, not in this instance"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W163-S1: the round-82 ruling's named readers (the builder and the two minted-table readers) do not read the cot store key; four production scripts read it keyed by ticker alone, so the zero-reader disarm of D2-W158-S2 is not met; the keyed fix is the path",
+    "ADVI_COTBKF-D2-W163-S2: the graph (comp-pipescript io/consumers, comp-platinum reverse) cannot enumerate the readers of a store key; io shows the store as external with no writer edge; the .py and bare script names are refused"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~163/TICKER_KEY_READ.json",
+  "compiler_tools": [
+    {
+      "tool": "comp-pipescript io / consumers (--pipeline cot)",
+      "invocation": ".tools/comp-pipescript io B_00|B_01|A_03 --pipeline cot ; .tools/comp-pipescript consumers B_00|B_01|B_02|A_03 --pipeline cot",
+      "result": "io lists the store as external/silver with no writer edge; consumers answers at canonical-holdings level (5 and 1 downstream scripts), 0 for B_01 and A_03"
+    },
+    {
+      "tool": "comp-platinum reverse --firm cot",
+      "invocation": ".tools/comp-platinum reverse s3://opal-data-cot/silver/prices/canonical_prices.parquet --firm cot",
+      "result": "PRODUCER empty; CONSUMED BY none (portal platinum reads only)"
+    },
+    {
+      "tool": "comp-find (corpus=all)",
+      "invocation": "comp-find 'silver/prices/canonical_prices' --all ; comp-find 'canonical_prices' --files --all ; comp-find 'cottonwood-silver-canonical-prices' --all ; comp-find \"'ticker', 'date'\" data/cot/scripts/gold --files --all",
+      "result": "1204 hits / 77422 files; 9557 hits / 77422 files; 268 hits / 77422 files; positive control 2 hits / 112 files"
+    }
+  ]
+}
