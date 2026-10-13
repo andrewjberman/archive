@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_DEVPLN.TO-DP-x-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-x-1.live-chosen-set-promote.md",
+    "group": "OTHER",
+    "vintage_commit": "3ab6cc6281"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round2.md",
+    "vintage_commit": "3ab6cc6281",
+    "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-x-1.live-chosen-set-promote.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; none was run",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: a one-time push to a shared branch; the two reads are git reads of fixed shas",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the 8 DEV-only commits (7 unapproved IRPT_ANLREQ commits plus the integrator's merge of the feature)",
+      "reason": "the order says leave them behind; measured: DEV ahead 8, PROD ahead 1"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/CONTRIBUTING-BOXES.md (on PROD 10e7664d6c4824cb88f04acf47f06264345b5b8b)",
+      "kind": "doc",
+      "commit_or_etag": "10e7664d6c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "CI run 38466864693 Deploy to Production success; tag portal-v2.1.214 peels to 10e7664d (ls-remote and gh reads)",
+      "artifact_covered_by": [
+        "DPx1-AC1",
+        "DPx1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DPx1-AC1",
+      "criterion_verbatim": "git -C portal show origin/PROD:CONTRIBUTING-BOXES.md -- expect: # Contributing a portal feature from a box",
+      "method": "command",
+      "invocation": "git -C portal show origin/PROD:CONTRIBUTING-BOXES.md",
+      "output_evidence": "# Contributing a portal feature from a box\n\nOne page for every box. Read it before you change anything under `portal/`.\nrc=0",
+      "denominator": "line 1 of CONTRIBUTING-BOXES.md on origin/PROD @10e7664d (fetched), 57 lines in the file; read under timeout 120",
+      "status": "PASS",
+      "expect": "# Contributing a portal feature from a box"
+    },
+    {
+      "criterion_id": "DPx1-AC2",
+      "criterion_verbatim": "git -C portal log -1 --first-parent --format=%B origin/PROD -- expect: Approved-By: 1.0.0_SA_CTO @laptop-20261013T200117Z-9e8a",
+      "method": "command",
+      "invocation": "git -C portal log -1 --first-parent --format=%B origin/PROD",
+      "output_evidence": "merge feature cand/laptop/contributing-boxes into release/20261013T205139Z\n\nFeature: cand/laptop/contributing-boxes\nApproved-By: 1.0.0_SA_CTO @laptop-20261013T200117Z-9e8a\nrc=0",
+      "denominator": "PROD tip 10e7664d first-parent message, 1 commit read, under timeout 120",
+      "status": "PASS",
+      "expect": "Approved-By: 1.0.0_SA_CTO @laptop-20261013T200117Z-9e8a"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.4.0_DT_ClientPlatform/NFRA_DEVPLN.TO-DP-x-1.receipt.md",
+  "compiler_tools": [
+    {
+      "tool": "bash",
+      "invocation": "bash .tools/portal-release-build.sh --features cand/laptop/contributing-boxes",
+      "result": "RELEASE result=READY; unapproved=0; PROMOTE-CLIENT-FACING count=0"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/deploy_ledger.py close --slug devpln-r2-chosen-set-promote-20261013",
+      "result": "CLOSED, all 3 legs proven"
+    }
+  ]
+}
