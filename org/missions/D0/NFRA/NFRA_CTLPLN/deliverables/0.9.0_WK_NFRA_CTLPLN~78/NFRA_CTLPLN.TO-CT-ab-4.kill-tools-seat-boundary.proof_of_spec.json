@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ab-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-4.kill-tools-seat-boundary.md",
+    "group": "OTHER",
+    "vintage_commit": "5bd9bd2ed2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round12.md",
+    "vintage_commit": "5bd9bd2ed2",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-4.kill-tools-seat-boundary.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~78",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/seat-boundary.ps1",
+      "kind": "script",
+      "commit_or_etag": "a915a7cd84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "shared helper committed on wk-NFRA_CTLPLN-78; exercised only with fake process lists (no live process read or killed)",
+      "artifact_covered_by": ["CTab4-AC1", "CTab4-AC2"]
+    },
+    {
+      "path_or_key": ".tools/kill-agent.ps1",
+      "kind": "script",
+      "commit_or_etag": "a915a7cd84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_CTLPLN-78; parsed and wired by the test; never run against a real process",
+      "artifact_covered_by": ["CTab4-AC1", "CTab4-AC2"]
+    },
+    {
+      "path_or_key": ".tools/kill-maint.ps1",
+      "kind": "script",
+      "commit_or_etag": "a915a7cd84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_CTLPLN-78; parsed and wired by the test; never run against a real process",
+      "artifact_covered_by": ["CTab4-AC1", "CTab4-AC2"]
+    },
+    {
+      "path_or_key": ".tools/spawn-agent.ps1",
+      "kind": "script",
+      "commit_or_etag": "a915a7cd84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_CTLPLN-78; detached launch string dry-checked (base64 round-trip and marker presence), NOT started, so the live detach is unexercised",
+      "artifact_covered_by": ["CTab4-AC1", "CTab4-AC2"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_seat_boundary.ps1",
+      "kind": "test",
+      "commit_or_etag": "a915a7cd84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_CTLPLN-78; the battery runs under powershell 5.1 with fake processes only",
+      "artifact_covered_by": ["CTab4-AC1", "CTab4-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTab4-AC1",
+      "criterion_verbatim": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_seat_boundary.ps1 expect: ok=True -- every case passes (report the whole last line, with its denominator).",
+      "method": "test_suite",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_seat_boundary.ps1",
+      "output_evidence": "rc=0; 27 lines begin PASS, 0 begin FAIL; last line: SEAT-BOUNDARY-TEST cases=27/27 wired=both ok=True",
+      "denominator": "27 of 27 cases pass",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTab4-AC2",
+      "criterion_verbatim": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_seat_boundary.ps1 expect: wired=both -- both tools still parse and both call the shared check.",
+      "method": "test_suite",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_seat_boundary.ps1",
+      "output_evidence": "rc=0; parse checks PASS for seat-boundary.ps1, kill-agent.ps1, kill-maint.ps1, spawn-agent.ps1 (errors=0 each); AST checks PASS: kill-agent.ps1 calls Test-SeatBoundary, kill-maint.ps1 calls Test-SeatBoundary; last line: SEAT-BOUNDARY-TEST cases=27/27 wired=both ok=True",
+      "denominator": "2 of 2 kill tools call Test-SeatBoundary; 4 of 4 files parse with 0 errors",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control; the battery's negative cases (two-serial tree, hint, -Family bleed) are acceptance cases, not a named mutant",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: the pre-commit run and the run at HEAD 250ce6c42c, same invocation",
+      "observed": "both runs 27/27 ok=True; the last line is identical in both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any live run of kill-agent.ps1 or kill-maint.ps1 against a real process",
+      "reason": "order RULE: never run the kill tools against a real process and never stop a process; the battery uses fake process lists only"
+    },
+    {
+      "item": "a live launch of spawn-agent.ps1 non-wt branch (the detached cmd start)",
+      "reason": "launching a real seat is outside this cell; the launch string was dry-checked (base64 round-trip, marker and serial present) and NOT started, so the live detach is unexercised"
+    },
+    {
+      "item": "flip of the task order <status> from pending to complete",
+      "reason": "the task-order file is not in this order's <paths> grant; the flip is left for the issuer 2.0.0_SA_COO~C (see the worker report)"
+    },
+    {
+      "item": "codex.exe seats inside the boundary",
+      "reason": "BUILD 1 names claude.exe only; surprise row NFRA_CTLPLN-W78-S3 filed"
+    },
+    {
+      "item": "project codes carrying an underscore (serials such as 0.9.0_WK_NFRA_CTLPLN~78)",
+      "reason": "the ordered launch-serial pattern rejects them; the pattern is not widened under this grant; surprise row NFRA_CTLPLN-W78-S1 filed"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W78-S1: the ordered launch-serial pattern does not match a serial whose project code carries an underscore, so such a seat is not counted by the boundary",
+    "NFRA_CTLPLN-W78-S2: S9117 fix shape stops at the foreign seat; BUILD 2 refuses the whole tree, so the target survives while a foreign seat is beneath it",
+    "NFRA_CTLPLN-W78-S3: the boundary tests claude.exe only; a codex.exe seat under a killed tree is not judged",
+    "NFRA_CTLPLN-W78-S4: the TO asks for its own status flip, but the TO file is outside the order's paths grant; the flip is left pending for the issuer"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~78/NFRA_CTLPLN.TO-CT-ab-4.kill-tools-seat-boundary.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "powershell 5.1 PowerShell Parser (Parser::ParseFile)",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File .tools/tests/test_seat_boundary.ps1",
+      "result": "errors=0 for seat-boundary.ps1, kill-agent.ps1, kill-maint.ps1, spawn-agent.ps1"
+    }
+  ]
+}
