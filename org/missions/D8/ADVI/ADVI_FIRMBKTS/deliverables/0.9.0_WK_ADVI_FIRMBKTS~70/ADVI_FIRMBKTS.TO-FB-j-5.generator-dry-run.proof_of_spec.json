@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-j-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-5.generator-dry-run.md",
+    "group": "OTHER",
+    "vintage_commit": "6d35421d8d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R7.md",
+    "vintage_commit": "6d35421d8d",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-5.generator-dry-run.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~70",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/exec-summary-generator/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "220ea75078",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 220ea75078 on wk-ADVI_FIRMBKTS-70 (LOCAL); not deployed; no Terraform, no AWS call, no model call",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/exec-summary-generator/tests/test_dry_run.py",
+      "kind": "test",
+      "commit_or_etag": "220ea75078",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 220ea75078 on wk-ADVI_FIRMBKTS-70 (LOCAL); stubs only, no network, no AWS, no model call",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "a dry run still emits CloudWatch metrics through _call_llm (tokens in, tokens out, LLM calls) and _build_slot (slot dropped); see surprise ADVI_FIRMBKTS-D1-W70-S1",
+      "reason": "the cell's write surface is the handler and its test only; suppressing those emissions needs a change in _call_llm and _build_slot, outside the cell, so it is reported and not fixed"
+    },
+    {
+      "item": "no deploy, no Terraform, no AWS call, no model call, no sample run",
+      "reason": "order section 2 bounds: one commit, the handler and the test file, no deploy"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd /c/dev/wk-firmbkts-70/infra/aws/lambda/exec-summary-generator && timeout 110 python -m pytest tests/test_dry_run.py -q 2>&1 | sed \"s/\\x1b\\[[0-9;]*m//g\" | tail -1",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-70/infra/aws/lambda/exec-summary-generator && timeout 110 python -m pytest tests/test_dry_run.py -q 2>&1 | sed \"s/\\x1b\\[[0-9;]*m//g\" | tail -1",
+      "expect": "^3 passed",
+      "output_evidence": "3 passed in 0.23s",
+      "denominator": "3 of 3 named arms passed (test_dry_run_writes_nothing, test_dry_run_refuses_more_than_ten_and_empty, test_non_dry_unchanged); pytest rc=0",
+      "status": "PASS",
+      "status_reason": "issuer re-grade 2026-10-13 under AMENDMENT 1 (the invocation strips ANSI colour, the host sets FORCE_COLOR; the worker's row W70-S2); the literal amended invocation, run at the merged HEAD 39ba2f99f5, prints this line"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the two-file bound: git diff --stat over the generator directory from the merge-base with box/dell1 to HEAD, expect ^ 2 files changed",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-70 && git diff --stat $(git merge-base HEAD box/dell1) HEAD -- infra/aws/lambda/exec-summary-generator | tail -1",
+      "expect": "^ 2 files changed",
+      "output_evidence": " 2 files changed, 189 insertions(+)\n",
+      "denominator": "2 of 2 files changed in the generator directory (lambda_function.py modified; tests/test_dry_run.py created) against merge-base 6d35421d8d",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound: r4_scope.py with the four allows, expect ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-70 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-70 --allow infra/aws/lambda/exec-summary-generator/lambda_function.py --allow infra/aws/lambda/exec-summary-generator/tests/test_dry_run.py --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~70/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "output_evidence": "ROUND 4 SCOPE: OK 5 changed, 0 outside, 0 required missing\n",
+      "denominator": "5 changed, 0 outside; the 5 changed paths are lambda_function.py, tests/test_dry_run.py, the proof instance, the session log, INVESTIGATION_v1.md",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a temporary put_object(Bucket='MUTANT') line inserted after the process_advisor(upload=False) call in the dry branch (_dry_run); the file restored byte-identical from a copy before the commit",
+      "expected": "test_dry_run_writes_nothing FAILS with 0 objects written; the other two arms pass; after restore 3 passed and 0 MUTANT strings",
+      "observed": "FAILED tests\\test_dry_run.py::test_dry_run_writes_nothing - AssertionError: 0 objects written; 1 failed, 2 passed; after restore cmp byte-identical, 3 passed, MUTANT count 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 invocation run twice on the unchanged handler and test file; md5 of the tail line compared",
+      "observed": "a13fcb2e9e72fb81a074ab4d89aa599b on both runs",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W70-S1: a dry run still emits CloudWatch metrics through _call_llm and _build_slot, so the cell's no-metric clause is not met on the real path (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~B1)",
+    "ADVI_FIRMBKTS-D1-W70-S2: the AC1 literal ^3 passed does not match the host run because FORCE_COLOR=3 injects ANSI codes (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~70/ADVI_FIRMBKTS.TO-FB-j-5.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest tests/test_dry_run.py -q (mutant run, cwd infra/aws/lambda/exec-summary-generator)",
+      "result": "FAILED test_dry_run_writes_nothing - AssertionError: 0 objects written; 1 failed, 2 passed"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -m pytest tests/test_dry_run.py -q (after restore)",
+      "result": "3 passed"
+    },
+    {
+      "tool": "python",
+      "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-70 (four allows)",
+      "result": "ROUND 4 SCOPE: OK 5 changed, 0 outside, 0 required missing; rc=0"
+    }
+  ]
+}

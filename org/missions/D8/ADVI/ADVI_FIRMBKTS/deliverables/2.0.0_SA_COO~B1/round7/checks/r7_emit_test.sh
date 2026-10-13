@@ -1,12 +1,12 @@
 #!/bin/bash
 # ADVI_FIRMBKTS round 7, FB-j-2: the dispatcher's emit_chain_complete prints the CLI's error text (first 300 chars) in its WARN.
 # usage: bash r7_emit_test.sh <path to gold_dispatch.sh>
-# Extracts the function from the file, runs it against a stubbed `aws`, and prints a last line `EMIT TEST: <n> of 3 arms`.
+# Extracts the function from the file, runs it against a stubbed `aws`, and prints a last line `EMIT TEST: <n> of 4 arms`.
 # The stub is a shell function (it shadows any aws binary); no network, no AWS call, no write. Issuer-owned; never edit.
 SCRIPT="$1"
-if [ -z "$SCRIPT" ] || [ ! -f "$SCRIPT" ]; then echo "EMIT TEST: 0 of 3 arms (script not found)"; exit 1; fi
+if [ -z "$SCRIPT" ] || [ ! -f "$SCRIPT" ]; then echo "EMIT TEST: 0 of 4 arms (script not found)"; exit 1; fi
 FN=$(sed -n '/^emit_chain_complete() {/,/^}/p' "$SCRIPT")
-if [ -z "$FN" ]; then echo "EMIT TEST: 0 of 3 arms (function not found)"; exit 1; fi
+if [ -z "$FN" ]; then echo "EMIT TEST: 0 of 4 arms (function not found)"; exit 1; fi
 
 run_arm() {  # $1 = stub mode ; prints the function's stdout, then a line RC=<n>
   (
@@ -55,5 +55,25 @@ if [ "$(printf '%s\n' "$OUT" | grep -c 'WARN:')" = "1" ] \
 else
   echo "FAIL E3 a multi-line error text is one WARN line and the function still returns 0"
 fi
-echo "EMIT TEST: $PASS of 3 arms"
-[ "$PASS" = "3" ]
+# E4: the dispatcher runs under `set -e` (gold_dispatch.sh line 57): a FAILED put-events must not terminate the shell. The arm runs the
+# function in a subshell with `set -e` and a failing stub, then a marker after the call: the marker and rc 0 must both appear.
+OUT=$(
+  (
+    set -e
+    CHAIN_LABEL="probe-label"; SCRIPT_IDS="A_01"; MODE="chain"
+    log_ts() { echo "2026-01-01T00:00:00Z"; }
+    aws() { printf 'boom
+'; return 255; }
+    eval "$FN"
+    emit_chain_complete 0
+    echo "AFTER-CALL"
+  ) 2>&1
+  echo "RC=$?"
+)
+if printf '%s' "$OUT" | grep -q "AFTER-CALL" && printf '%s' "$OUT" | grep -q "WARN:.*boom" && printf '%s' "$OUT" | grep -q "^RC=0$"; then
+  echo "PASS E4 under set -e a failed put-events prints the WARN and the shell carries on (rc 0)"; PASS=$((PASS+1))
+else
+  echo "FAIL E4 under set -e a failed put-events prints the WARN and the shell carries on (rc 0)"
+fi
+echo "EMIT TEST: $PASS of 4 arms"
+[ "$PASS" = "4" ]
