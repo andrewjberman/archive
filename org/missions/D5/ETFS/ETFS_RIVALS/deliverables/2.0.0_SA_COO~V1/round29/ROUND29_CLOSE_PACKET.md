@@ -35,8 +35,10 @@ D1-W35-S2 (client already retries a captcha) answered by xb-1 AMENDMENT 1; D1-W3
 | TO-RIV-xa-1 J1 | on the next published audit page the sentence reads beside the calendar for BIDD, CGIC and SCHY |
 | TO-RIV-xc-1 J1 | on the next sweep page no two openings share a frame by the CVO's own measure, or a correction is on the record for each that did |
 
-**Deploy:** the code is LOCAL until the pair applies it. COO half `round29/NEVER_WIDEN_HALF_COO_R29_DEPLOY.md` @ff7e96adf6 (pin de3c6bf211,
-plan 0/5/0, parity 0 of 31); the CTO's half is asked. The recommended first sweep on the pin is 2026-10-14 13:00Z.
+**Deploy: LIVE 2026-10-13 13:59Z** under both signed halves (COO @ff7e96adf6, CTO `ledger/NEVER_WIDEN_ROUND29_DEPLOY_CTO_HALF.md`), pin de3c6bf211,
+plan 0/5/0, applier `0.7.0_AE_CloudOps~RV1` (report in `task-orders/ETFS_RIVALS.TO-APPLY-R29.rivalfunds-packages-deploy-dell1.md` @5d8aadb1b5; the
+issuer re-ran AC1 on the live plane at 14:03Z: PASS 0 failures). Ledger `etfs-rivalfunds-r29-dell1-20261013`, L2 open. **The first sweep on the pin is
+2026-10-14 13:00Z**; the two J1 reads take that page.
 
 ## Carried, not in this round's verdict
 
