@@ -274,6 +274,117 @@ def slotcause(a):
     return 0
 
 
+def tfslots(a):
+    """FB-j-11 part C: the Terraform carrier of the slot switch, three text arms over the worker's tree (and the base for arm 3)."""
+    root = a.root
+    res = []
+    try:
+        with open(root + "/infra/aws/terraform/exec-summary/variables.tf", encoding="utf-8") as fh:
+            var = fh.read()
+        with open(root + "/infra/aws/terraform/exec-summary/main.tf", encoding="utf-8") as fh:
+            main = fh.read()
+    except OSError as e:
+        print("FAIL cannot read the Terraform root: %s" % type(e).__name__)
+        print("TFSLOTS: 0 of 3 arms")
+        return 1
+    m = re.search(r'variable\s+"disabled_slots"\s*\{(.*?)\n\}', var, re.S)
+    ok1 = bool(m) and 'default' in m.group(1) and re.search(r'default\s*=\s*""', m.group(1)) is not None \
+        and "validation" in m.group(1)
+    res.append(("T1 variable disabled_slots exists with default empty and a validation", ok1))
+    ok2 = re.search(r'var\.disabled_slots\s*==\s*""\s*\?\s*\{\}\s*:\s*\{\s*EXEC_SUMMARY_DISABLED_SLOTS\s*=\s*var\.disabled_slots\s*\}', main) is not None
+    res.append(("T2 the environment adds EXEC_SUMMARY_DISABLED_SLOTS only when the variable is non-empty", ok2))
+    rc, base = _git(root, "merge-base", "HEAD", "box/dell1")
+    base = base.strip()
+    rc1, old = _git(root, "show", "%s:infra/aws/terraform/exec-summary/main.tf" % base)
+    keep = ["platinum_mode == \"\" ? {} : { BD_PLATINUM_MODE = var.platinum_mode }", "ANTHROPIC_SECRET_NAME", "MAX_ADVISORS_HARD_CAP", "DATA_BUCKET"]
+    ok3 = rc == 0 and rc1 == 0 and all((k in old) == (k in main) and k in main for k in keep)
+    res.append(("T3 the six existing environment keys and the platinum_mode term are untouched", ok3))
+    for name, ok in res:
+        print("%s %s" % ("PASS" if ok else "FAIL", name))
+    n = sum(1 for _, ok in res if ok)
+    print("TFSLOTS: %d of 3 arms" % n)
+    return 0 if n == 3 else 1
+
+
+def iqlt(a):
+    try:
+        d = json.load(open(a.file, encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        print("FAIL ABSENT or unreadable: %s" % type(e).__name__)
+        return 1
+    p = _need(d, ["ticker", "advisor_id", "accounts", "market_value", "cost_basis", "unrealized_loss", "loss_pct", "price_used",
+                  "price_sources", "classification", "reason", "calls", "claim"])
+    if not p:
+        if d["claim"] not in CLAIMS:
+            p.append("claim not one of %s" % "/".join(CLAIMS))
+        if d["classification"] not in ("DATA_DEFECT", "REAL_LOSS", "NOT_DETERMINED"):
+            p.append("classification not in the closed set")
+        if not isinstance(d["price_sources"], list) or len(d["price_sources"]) < 2:
+            p.append("price_sources must name at least two independent sources (or say which could not be read)")
+        bad = [c for c in d["calls"] if not re.match(r"^(aws|\.tools/aws)\s+[a-z0-9-]+\s+(get|describe|list|lookup|head|filter)", str(c))]
+        if bad:
+            p.append("a call is not a read verb: %s" % str(bad[0])[:80])
+    if p:
+        for x in p:
+            print("FAIL %s" % x)
+        print("IQLT: %d problem(s)" % len(p))
+        return 1
+    print("IQLT record ok classification=%s loss_pct=%s" % (d["classification"], d["loss_pct"]))
+    return 0
+
+
+def switchsample(a):
+    try:
+        d = json.load(open(a.file, encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        print("FAIL ABSENT or unreadable: %s" % type(e).__name__)
+        return 1
+    p = _need(d, ["plan.add", "plan.change", "plan.destroy", "plan.env_keys_added", "advisors", "listing_before", "listing_after",
+                  "nna_bullets", "bullets_returned", "drops", "ledger_closed", "pair.coo_half_addendum2", "pair.cto_half_addendum2",
+                  "deployed_version", "claim"])
+    if not p:
+        if d["claim"] not in CLAIMS:
+            p.append("claim not one of %s" % "/".join(CLAIMS))
+        if (d["plan"]["add"], d["plan"]["change"], d["plan"]["destroy"]) != (0, 1, 0):
+            p.append("the plan must read 0 to add, 1 to change, 0 to destroy")
+        if d["plan"]["env_keys_added"] != ["EXEC_SUMMARY_DISABLED_SLOTS"]:
+            p.append("the plan may add exactly ONE environment key, EXEC_SUMMARY_DISABLED_SLOTS")
+        if d["advisors"] != 10 or d["listing_before"] != d["listing_after"]:
+            p.append("ten advisors and an identical served listing are required")
+        if d["nna_bullets"] != 0:
+            p.append("the disabled slot returned bullets")
+        if not isinstance(d["bullets_returned"], int) or d["bullets_returned"] < 1:
+            p.append("the four other slots must still return bullets")
+        if d["ledger_closed"] is not True:
+            p.append("the ledger entry is not closed")
+    if p:
+        for x in p:
+            print("FAIL %s" % x)
+        print("SWITCHSAMPLE: %d problem(s)" % len(p))
+        return 1
+    print("SWITCHSAMPLE record ok bullets=%d nna=%d drops=%d" % (d["bullets_returned"], d["nna_bullets"], d["drops"]))
+    return 0
+
+
+def scrub(a):
+    """FB-j-14: no raw relationship id (z followed by six or more digits) in the named files; hashed forms h_<12 hex> are fine."""
+    pat = re.compile(r"(?<![0-9A-Za-z])z[0-9]{6,}(?![0-9A-Za-z])")
+    n_files = n_ids = 0
+    for f in a.files:
+        try:
+            txt = open(f, encoding="utf-8").read()
+        except OSError:
+            print("FAIL cannot read %s" % f)
+            return 1
+        n_files += 1
+        n_ids += len(pat.findall(txt))
+    if n_ids:
+        print("SCRUB: FAIL files=%d ids=%d" % (n_files, n_ids))
+        return 1
+    print("SCRUB: OK files=%d ids=0" % n_files)
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -295,8 +406,16 @@ def main():
     s.add_argument("--file", required=True)
     c = sub.add_parser("slotcause")
     c.add_argument("--file", required=True)
+    for nm in ("iqlt", "switchsample"):
+        q = sub.add_parser(nm)
+        q.add_argument("--file", required=True)
+    tf = sub.add_parser("tfslots")
+    tf.add_argument("--root", required=True)
+    sc = sub.add_parser("scrub")
+    sc.add_argument("--files", nargs="+", required=True)
     a = ap.parse_args()
-    return {"awsdiff": awsdiff, "agree2": agree2, "emiterr": emiterr, "firstchain": firstchain, "dryrun": dryrun, "prescreen": prescreen, "slotcause": slotcause}[a.cmd](a)
+    return {"awsdiff": awsdiff, "agree2": agree2, "emiterr": emiterr, "firstchain": firstchain, "dryrun": dryrun, "prescreen": prescreen, "slotcause": slotcause,
+            "tfslots": tfslots, "iqlt": iqlt, "switchsample": switchsample, "scrub": scrub}[a.cmd](a)
 
 
 if __name__ == "__main__":
