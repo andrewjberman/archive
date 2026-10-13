@@ -11,42 +11,64 @@ READS (S3 GET and LIST only; no put, copy, delete, vendor call or secret read):
   - the ADVI household crosswalk: LIST of advi/49financial/gold/household_crosswalk/ (the one granted prefix, issuer's
     ruling, amendment 1), newest date= partition, GET of its household_crosswalk.parquet;
   - the irpt gold tables of firm 49financial named by each sibling contract's "table" field, addressed by
-    lib/opal_naming.address(), newest date= partition, GET of data.parquet;
-  - dim_return_method: LIST of its method_version partitions, GET of the one the activity rows carry.
-  The client summary and the investor-reporting directory are NOT read (not granted); every member the contract sources
-  to them is written ABSENT with its reason.
+    lib/opal_naming.address(): account_return_daily is LISTed (every date= partition) and each data.parquet is GET
+    (the history test and the windows, amendment 3); account_activity_daily, the lot tables and account_class_daily
+    are read at their newest date= partition, GET of data.parquet.
+  The client summary, the investor-reporting directory and dim_return_method are NOT read (outside this cell's grant,
+  amendments 1 and 2); every member the contract sources to them is written ABSENT with its reason in words.
 
-HOUSEHOLD RULE. Written BEFORE any figure of any account was read. The only reads before this text were partition
-names and the crosswalk's column names.
+HOUSEHOLD RULE (amendment 3, issuer 2.0.0_SA_COO~D2, 2026-10-13). It supersedes the amendment-2 rule and the rules
+R1-R5 of the first seats, which stay in git history. Written BEFORE any figure of this run was read; the only reads before
+this text were partition names and column names.
   R1. Grouping: the accounts that share an opal_relationship_id in the newest crosswalk partition. A crosswalk row with a
       null opal_relationship_id or a null schwab_account_number belongs to no household.
-  R2. An ACCOUNT of a household is such a crosswalk row whose schwab_account_number has rows in the newest
-      account_activity_daily partition.
-  R3. Reference date R = the newest business_date in the newest account_activity_daily partition. R is the as_of of every
+  R2. An ACCOUNT of a household is such a crosswalk row whose schwab_account_number is present in the newest
+      account_return_daily partition.
+  R3. Reference date R = the newest business_date in the newest account_return_daily partition. R is the as_of of every
       window and every figure.
-  R4. ELIGIBLE: at least 3 accounts (R2), and EVERY one of them has at least 12 months of history in the return table:
-      its earliest business_date in the newest account_return_daily partition is on or before the calendar day one year
-      before R.
-  R5. CHOSEN: the eligible household whose sha256 of its opal_relationship_id (utf-8, hex digest) sorts lowest.
-  The rule reads counts and dates only. If no household is eligible, or the chosen household cannot make four identity
-  checks, the build stops with that outcome recorded. No other household is tried.
+  R4. HISTORY: an account passes when it has at least 252 trading days of return history, counted as the number of
+      account_return_daily date= partitions in which the account has a row (every partition is listed and read).
+  R5. ELIGIBLE: a household of at least 3 accounts (R2), EVERY one of which passes R4.
+  R6. CHOSEN: the eligible household whose sha256 of its opal_relationship_id (utf-8, hex digest) sorts lowest.
+  If no household is eligible, the build records the counts (households with 3 or more accounts under R2; households
+  eligible under R5; accounts passing R4) and stops. No other household is tried. A partition date is used only for
+  R3 and the history count; no date and no id is printed to the record.
 
-WINDOWS (the contract's four standard windows). For a window with start day S, the ANCHOR is the last trading day before
-S (lib/trading_calendar.py). The window's days are the activity rows with ANCHOR < business_date <= R. Beginning value is
-the beginning_value of the window's first trading day (which equals the anchor's close); ending value is the
-ending_value on R; net additions are contributions minus withdrawals over the window's days; net gain is realized plus
-unrealized_change plus income over the window's days. Since inception opens on the account's first_data_date, which
-the client summary carries and this build does not read; those members are ABSENT with that reason.
-A window term with a null gold value, a missing row, or a day that is not the first trading day after the anchor, is
-ABSENT in words, never zero. A household figure is absent when any account term is absent.
+WINDOWS (amendment 3(a); supersedes the amendment-2 window rule). The contract's 36 window members (beginning value,
+ending value, net additions and net gain for QTD, YTD, last 12 months and since inception in both value summaries, and
+the four account returns) are filled FROM account_return_daily by the contract's own folds, as its fold text (version
+0.2.0) states them. For a window with start day S, the ANCHOR is the last trading day before S (lib/trading_calendar.py);
+the window's days are the trading days after the anchor up to and including R.
+  - beginning value = market_value_eod on the anchor; ending value = market_value_eod on R;
+  - net additions = the sum of external_flow over the window's days (capital-in positive);
+  - net gain = ending - beginning - net additions, a RESIDUAL, never plugged;
+  - since inception opens on the account's first valued day (its first row in any date= partition);
+  - return = the product of (1 + total_return_daily) over the window's days, minus 1.
+ABSENT in words, never zero, by the folds: no row on the anchor day (NOT_SPANNED); SOURCE_LAG on the anchor or on R;
+a missing row or a SOURCE_LAG flow on a window day; a null total_return_daily; a GRADED_DISAGREED guard_state. A
+household sum is absent when any account term is absent.
+ACTIVITY-ONLY members (the activity-table act.* and hold.net_gain_* members, and the household series that need
+history): read account_activity_daily. For any window the activity table cannot open (its rows do not reach the window's
+opening anchor), the member is {"absent": "history not yet built: gold account_activity_daily holds <N> trading days"},
+N the count of its date= partitions (the dates go to the private sample only).
+Members sourced outside this cell's grant (the client summary, dim_return_method) are ABSENT with that reason.
 
 UNITS. Dollars are stored as floats rounded to 2 dp. Percent values are stored as percent numbers rounded to 1 dp
 (the decimal fraction times 100). Series are lists of dated objects. Account-grain members hold an object keyed by the
 custodian account id; a member whose whole source is ABSENT holds the single absent form.
 
-IDENTITY CHECKS. For the household and for each account, for each of the QTD, YTD and last-12-months windows whose four
-members (beginning value, net additions, net gain, ending value) are all measured: |beginning + net additions +
-net gain - ending| <= 1.00 dollar. Counts only are recorded.
+IDENTITY CHECKS (amendment 3(c)). Tolerance 1.00 dollar; identity.basis "daily_ledger_and_cross_table". The COUNTED
+checks are independent of the window folds:
+  (i)   the one-day ledger identity the activity contract's identity_gap column defines: beginning_value + contributions
+        - withdrawals + realized + unrealized_change + income - ending_value = 0, for each account and each activity row
+        whose previous trading day (lib/trading_calendar.prev_trading_day) also has an activity row for that account;
+  (ii)  for each account and each activity day, activity ending_value = account_return_daily market_value_eod that day;
+  (iii) for each account and each activity day whose previous trading day has an activity row, activity beginning_value
+        = account_return_daily market_value_eod on that previous trading day.
+A null on either side of a check is NOT GRADEABLE and is counted as such, never as a pass. A failing check is a finding:
+the build records the counts and stops; nothing is adjusted.
+window_residual_checks: beginning + net additions + net gain = ending, per window and account and household. It holds by
+construction (net gain is the residual), so it is RECORDED SEPARATELY and is NOT counted in identity.checks.
 """
 from __future__ import annotations
 
