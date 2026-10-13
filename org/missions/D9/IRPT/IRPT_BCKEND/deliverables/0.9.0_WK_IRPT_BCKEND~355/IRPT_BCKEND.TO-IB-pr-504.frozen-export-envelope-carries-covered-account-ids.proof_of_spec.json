@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-504",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-504.frozen-export-envelope-carries-covered-account-ids.md",
+    "group": "OTHER",
+    "vintage_commit": "54e10ac801"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "54e10ac801",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-504.frozen-export-envelope-carries-covered-account-ids.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~355",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-18/gen-fixtures.ts",
+      "kind": "test",
+      "commit_or_etag": "cdffa5dd41b54bb4799b76aa0c94c62929321d58",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal LOCAL commit cdffa5dd41 on wk-IRPT_BCKEND-355-portal, not pushed; exportEnvelope() keeps facts.covered_account_ids (the generator no longer deletes it)",
+      "artifact_covered_by": [
+        "IB173-2-AC1",
+        "IB173-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/fixtures/smoke/fe-s-18-frozen.json",
+      "kind": "test",
+      "commit_or_etag": "cdffa5dd41b54bb4799b76aa0c94c62929321d58",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal LOCAL commit cdffa5dd41; the export envelope data.facts gains covered_account_ids [ACCT-1] (one five-line hunk, git diff --ignore-cr-at-eol); validates against the v1 ExportReceipt schema with 0 errors",
+      "artifact_covered_by": [
+        "IB173-2-AC2",
+        "IB173-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~355/IB504_SESSION_LOG.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "worker session log; no deploy",
+      "artifact_covered_by": [
+        "IB173-2-AC1",
+        "IB173-2-AC2",
+        "IB173-2-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB173-2-AC1",
+      "criterion_verbatim": "running the fe-s-18 generator leaves the smoke, fe-s-16 and fe-s-32 fixture folders byte-equal to the committed files (end-of-line differences ignored)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r173/p173_cells.py\" . IB173-2-AC1",
+      "output_evidence": "FAIL: the fe-s-18 generator drifts from the committed bytes: .../__tests__/fe-s-32/holdings-no-answer.json | 5 ++++- .../fixtures/smoke/fe-s-18-holdings-missing-attribution.json | 5 ++++- .../fixtures/smoke/fe-s-18-holdings-observed.json | 5 ++++- .../fixtures/smoke/fe-s-18-holdings-target.json | 5 ++++- (the check's output, truncated at 200 characters by the check); IB173-2-AC1 FAIL; rc=1",
+      "denominator": "1 generator run by the check; 6 generator outputs, 4 of them drift (three holdings maps in smoke and the fe-s-32 no-answer map), each by one five-line hunk; the frozen map and the fe-s-16 print-prehistory map do not drift",
+      "expect": "^IB173-2-AC1 PASS$",
+      "status": "FAIL",
+      "status_reason": "BLOCKING under the grant: the generator also rewrites four committed fixtures outside the TO's <paths> (three holdings maps in smoke and the fe-s-32 no-answer map); they were not committed, so the folder check reads drift. Filed as IRPT_BCKEND-D2-W355-S1 (BLOCKING, ARMED)."
+    },
+    {
+      "criterion_id": "IB173-2-AC2",
+      "criterion_verbatim": "the six portal tests that consume the fe-s-18 maps pass (28 or more pass, none fail)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r173/p173_cells.py\" . IB173-2-AC2",
+      "output_evidence": "OK: the six consuming portal tests pass\nIB173-2-AC2 PASS\nrc=0",
+      "denominator": "6 test files: the check prints no count; a separate bun test of the six files at portal cdffa5dd41 (after the four generator-written fixtures were restored to committed bytes) read 28 pass, 8 skip, 0 fail, 36 tests across 6 files, rc 0; the check itself ran while the four generator-written fixtures were still present",
+      "expect": "^IB173-2-AC2 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB173-2-AC3",
+      "criterion_verbatim": "the frozen export envelope's data validates against the v1 ExportReceipt schema and its covered_account_ids equal the wire fixture's list",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r173/p173_cells.py\" . IB173-2-AC3",
+      "output_evidence": "OK: the frozen export envelope validates and carries the wire's synthetic covered_account_ids\nIB173-2-AC3 PASS\nrc=0",
+      "denominator": "1 frozen export envelope (data object): 0 schema errors under Draft 2020-12 (ExportReceipt.schema.json); covered_account_ids 1 of 1 list equal to the wire fixture's [ACCT-1]",
+      "expect": "^IB173-2-AC3 PASS$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control; none was run.",
+      "expected": "N/A",
+      "observed": "not run: the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the generator run twice at portal cdffa5dd41: once by hand from portal/ and once inside the check IB173-2-AC1; the git diff --ignore-cr-at-eol --stat over the smoke, fe-s-16 and fe-s-32 folders compared between the two runs",
+      "observed": "both runs changed the same four files, each by the same one five-line covered_account_ids hunk; the frozen map changed by that hunk only",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal fixtures/smoke/fe-s-18-holdings-observed.json, fixtures/smoke/fe-s-18-holdings-target.json, fixtures/smoke/fe-s-18-holdings-missing-attribution.json and __tests__/fe-s-32/holdings-no-answer.json",
+      "reason": "the generator rewrites them with the same added list; they are outside the grant (paths name only gen-fixtures.ts and fe-s-18-frozen.json); not committed; restored to their committed bytes after each run; filed as IRPT_BCKEND-D2-W355-S1; this is why AC1 FAILs"
+    },
+    {
+      "item": "portal package.json, lockfile, other generators, other tests and other fixtures",
+      "reason": "outside the grant; not touched; bun install not run"
+    },
+    {
+      "item": "workspace portal gitlink",
+      "reason": "never staged; the portal commit was made in the portal repo only"
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W355-S1: the generator writes the same covered_account_ids hunk into four committed fixtures outside the TO grant (three holdings maps and the fe-s-32 no-answer map); AC1 cannot PASS under the grant; not committed",
+    "IRPT_BCKEND-D2-W355-S2: the full InvestorReporting bun run reads 1212 pass, 27 skip, 5 fail against the order's base of 1213/27/4; the five named failures also fail with the base frozen bytes; the base count was not reproduced"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~355/IB504_SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r173/p173_cells.py\" . IB173-2-AC1 / IB173-2-AC2 / IB173-2-AC3 (each under timeout 120 from the workspace root)",
+      "result": "AC1 rc=1 FAIL; AC2 rc=0 PASS; AC3 rc=0 PASS"
+    },
+    {
+      "tool": "python -I jsonschema (Draft202012Validator)",
+      "invocation": "python -I .scratch/validate_ib504.py <workspace root> (schema docs/contracts/investor-reporting/v1/ExportReceipt.schema.json; frozen map; wire map)",
+      "result": "frozen export data schema errors: 0; wire covered_account_ids ['ACCT-1'] equal frozen ['ACCT-1']; synthetic ACCT-n only: True"
+    },
+    {
+      "tool": "bun",
+      "invocation": "timeout 500 bun test src/pages/InvestorReporting (portal worktree, portal HEAD cdffa5dd41, one run); six files separately under timeout 120",
+      "result": "folder: 1212 pass, 27 skip, 5 fail, 1244 tests across 393 files (base 1213/27/4 per the order, not reproduced); six files: 28 pass, 8 skip, 0 fail"
+    }
+  ]
+}
