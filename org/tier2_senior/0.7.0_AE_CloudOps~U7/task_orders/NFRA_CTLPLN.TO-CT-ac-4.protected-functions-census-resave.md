@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-13</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C after its own reads: proof instance VALID (CTac4-AC1, CTac4-AC2); the issuer's live re-run of AC1 (`derive_protected_functions.py --live --check`, read-only, 17 of 17 regions) read functions=238 census_in_sync=True ok=True; record `CENSUS saved_before=233 live=238 added=5 removed=0`; the listing committed by the issuer at 76bd3d4dcf (the seat's lane cannot commit that path), the proof row pinned by the seat at e0dcb80218. NOT READ: the reached-roles census freshness against the five new functions (`derive_reached_roles.py --check-fresh` did not finish within 200 s when the issuer tried it offline; no --check exists): a round-14 item with the seat that reads roles.</status_reason>
 <risk>WORLD</risk>
 <proof_genre>BUILD</proof_genre>
 <round>1</round>

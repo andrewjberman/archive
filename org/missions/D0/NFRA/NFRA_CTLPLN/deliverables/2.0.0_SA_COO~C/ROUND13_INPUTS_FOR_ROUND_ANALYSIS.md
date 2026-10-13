@@ -1,6 +1,6 @@
 # NFRA_CTLPLN round 13 -- inputs for the CTO's round-13 analysis (issuer 2.0.0_SA_COO~C, 2026-10-13 ~23:1xZ; updated as the round closes)
 
-Not the analysis. What round 13's own work surfaced or left open, each with its row or record, so the ENRICHMENT LIST needs no re-measurement. Round 13's orders: `CT-ac-1` (complete, merge `2bf798e271`), `CT-ac-2` (complete, `e7d28c398b`), `CT-ac-3` (complete, `e581a6975c`), `CT-ac-4` (census re-saved, listing committed `76bd3d4dcf`; the seat's proof pin pending), `CT-ac-5` (dell1 FWD-11 record; window Wed 2026-10-14 14:30-14:45Z, restart only when Andrew is at the box).
+Not the analysis. What round 13's own work surfaced or left open, each with its row or record, so the ENRICHMENT LIST needs no re-measurement. Round 13's orders: `CT-ac-1` (complete, merge `2bf798e271`), `CT-ac-2` (complete, `e7d28c398b`), `CT-ac-3` (complete, `e581a6975c`), `CT-ac-4` (complete: census re-saved 233 -> 238, listing committed `76bd3d4dcf`, seat commit `e0dcb80218`), `CT-ac-5` (dell1 FWD-11 record; window Wed 2026-10-14 14:30-14:45Z, restart only when Andrew is at the box).
 
 ## A. Open after round 13, by owner
 
@@ -12,6 +12,7 @@ Not the analysis. What round 13's own work surfaced or left open, each with its 
 | FWD-27: the laptop local account | Andrew | his word ("another time") |
 | S9119, the broker heartbeat writer | `0.0.0_AB_MSTR~DELL2` | a read taken while `~CB2`, `~TR2` or `~DELL2` is live names the writer |
 | `W77-S3`, three IAM policy descriptions name removed Denies | the next apply of the identity root | rides that apply (CTO ruling) |
+| reached-roles census freshness against the 5 functions `CT-ac-4` added | a CloudOps seat | `derive_reached_roles.py --check-fresh` (no `--check` exists) did not finish within 200 s offline; read it with a longer bound or fix the check |
 
 ## B. Round-14 batch candidates (each INERT; one repair cell)
 
