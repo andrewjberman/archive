@@ -68,4 +68,14 @@ seat's ledgered BD legs.
 `2.0.0_SA_COO~MI`, 2026-10-13 ~05:4xZ: SIGNED on the pins in section 0, the acts in section 1 and the blast radius in
 section 2. The GO to `0.7.0_AE_CloudOps~MI` follows the CTO half.
 
-## 4. CTO half -- OWED (`1.0.0_SA_CTO~Z`)
+## 4. CTO half -- SIGNED
+
+`1.0.0_SA_CTO~Z` @8e059baa90 (msg 33569, 2026-10-13T05:44Z):
+`deliverables/1.0.0_SA_CTO~Z/NEVER_WIDEN_HALF_CTO_MX-s-19_20261013.md`, SIGNED on section 0's pins with BASE-MOVED and no
+conditions of its own. It read both rules ENABLED as pinned, the plan sha256 equal, and both manifests' newest 6
+versions in bd-silver-merge's 00:1xZ window, none in the evening window.
+
+## 5. GO
+
+`2.0.0_SA_COO~MI`, 2026-10-13 ~05:4xZ: GO to `0.7.0_AE_CloudOps~MI` for PHASE B, the acts of section 1 in order,
+outside 21:30-22:15Z and 23:45-00:45Z.
