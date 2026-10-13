@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-13</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C after its own reads: proof instance VALID (CTab2-AC1, CTab2-AC2); record final lines APPLY pin=738bbc654f added=2 changed=3 destroyed=2, POST-1 both users in AdministratorAccessOpalCapital and cloudops-dell-agents-group, POST-2 allowed=5/5 per user, POST-3 explicit_deny=4/4 per user (control principal allowed 4/4); the re-plan reads No changes; ledger nfra-ctlpln-ab2-dell-admin-group-apply-20261013 closed. The Dell managers' own read-backs run after this.</status_reason>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <round>3</round>
