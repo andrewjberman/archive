@@ -50,7 +50,7 @@ Figure rows read against the served local copies. "Existing values changed" comp
 |---|---|---|---|---|---|---|
 | account_day_value (holding-days) | 21,102,041 | 3,709,042 | 17,392,999 | 3,648,401 | 17,453,640 | 0 (keys equal) |
 | daily_returns (account-days) | 1,691,729 | 669,262 | 1,022,467 | 658,642 | 1,033,087 | 0 (keys equal) |
-| month_grades (account-months) | 82,593 | 33,217 | 49,376 | 32,232 | 50,361 | NOT RE-DERIVED (see section 6) |
+| month_grades (account-months) | 82,593 | 33,217 | 49,376 | 32,232 | 50,361 | 0 on the 9 Month-derived columns, both rules; 10 Year/InceptionToDate-derived columns NOT MEASURED (see section 6) |
 
 WIDE = `yahoo_finance` and `linear_interpolation` (ruled 10-13). NARROW = `yahoo_finance` alone. A daily or monthly row reads the WORST
 Yahoo label among its holdings (FAIL over UNTESTABLE over UNVERIFIED over PASS). A row with no Yahoo-priced holding reads NOT_YAHOO.
@@ -73,9 +73,12 @@ NO consumer page reads these tables (round 82's read found two code readers and 
 
 ## 6. NOT ESTABLISHED
 
-- **month_grades existing values were not re-derived.** Its performance input is `commonwealth_monthly_grade.performance_prefix()`, an s3
-  prefix outside this worker's grant. The change to grade_table is additive (one appended column; a test proves the existing columns are equal
-  with and without the map), but the dry run did not measure the month rows against the served object.
+- **month_grades: measured on the Month partition only.** Under the AMENDMENT 1 grant the Month partition (`reporting_period=Month`, 80,709
+  rows) was read and the grades re-derived with the changed code: 0 of 82,593 rows changed on each of the nine Month-derived existing columns
+  (computed_pct, reported_month_pct, diff_pct, verdict, reason, benchmark_month_pct, list_version, cash_leg, run_commit), under both rules; a
+  control mutant reads 1. The ten columns built from the `reporting_period=Year` and `=InceptionToDate` partitions (reported_year_*, reported_itd_*,
+  benchmark_year_pct, benchmark_itd_pct, and the parts of benchmark_description and reported_note that depend on them) were NOT measured: those
+  partitions are outside the grant (surprise ADVI_COTBKF-D2-W165-S4). The grade_table diff changes only its signature and appends porting_verdict.
 - **The per-day price values differ from the r34 file** on 37,077 security-days (34 CUSIPs). Their ratio is a split factor per CUSIP (30 CUSIPs
   have one constant ratio; 4 vary by day). The r28 split repair (`apply_splits`) takes its split history from an S3 store the dry run may not read,
   so the dry run used the r34 price values and the new source labels. Store, presence and source are exact.
