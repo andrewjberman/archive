@@ -1,0 +1,158 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_CTLPLN.TO-CT-ab-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-1.dell-users-admin-group.md",
+  "group": "OTHER",
+  "vintage_commit": "0b8380acf8"
+ },
+ "assignee": "0.9.0_WK_NFRA_CTLPLN~77",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round12.md",
+  "vintage_commit": "0b8380acf8",
+  "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-1.dell-users-admin-group.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/iam.tf",
+   "kind": "terraform",
+   "commit_or_etag": "0a6e65f519",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "aws_iam_user_group_membership dell1_admin and dell2_admin (each lists the existing AdministratorAccessOpalCapital and the Dell group); aws_iam_group_membership.dell_agents unchanged; aws_iam_policy.dell_agent_routes_fn and its attachment no longer declared here (they are in routes.tf); comments updated; nothing applied"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/routes.tf",
+   "kind": "terraform",
+   "commit_or_etag": "0a6e65f519",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "aws_iam_policy.dell_agent_routes_fn and aws_iam_group_policy_attachment.dell_agent_routes_fn removed (the functions Deny, DenyRoutesToPrivilegedRolesFunctions, rendered by the module); the module output is still rendered; nothing applied; a plan of the root would show two destroys"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/main.tf",
+   "kind": "terraform",
+   "commit_or_etag": "0a6e65f519",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "header comment only: the Deny list and the admin-group membership named"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/dell_deploy_policy.json",
+   "kind": "config_data",
+   "commit_or_etag": "0a6e65f519",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "DenyApiKeyReads, DenyCutoverParameterWrites and DenyProtectedFunctions removed; DenyCloudTrailWrites, DenyS3DeletesOnProductionData, DenyTableAndDatabaseDeletes kept byte-identical; Allow statements byte-identical; 7 statements, 2,811 characters; CRLF line endings preserved; nothing applied"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/dell_iam_roles_policy.json",
+   "kind": "config_data",
+   "commit_or_etag": "0a6e65f519",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "DenyIamUsersGroupsKeysAndAccount removed; the two Allow statements byte-identical; 2 statements, 900 characters; nothing applied"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/dell2_ssm_policy.json",
+   "kind": "config_data",
+   "commit_or_etag": "0a6e65f519",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "DenyShellDocuments and DenyStartSessionOnShellScriptDocument removed; the three Allow statements byte-identical; attached to both users; nothing applied"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
+   "kind": "test",
+   "commit_or_etag": "0a6e65f519",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "routes-fn EXPECTED entry and counted-map key removed; ROUTES-HOST line asserts the functions Deny is not declared; IAM-PARTITION asserts no Deny in the IAM document and Allow names only iam: writes (the narrow Deny is gone); read-only (terraform init -backend=false and validate, no AWS)"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/check_admin_parity.py",
+   "kind": "test",
+   "commit_or_etag": "0a6e65f519",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "new: stdlib only, reads the root's json and tf files; prints the ADMIN-PARITY line; read-only, no AWS"
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "0a6e65f519",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "rows NFRA_CTLPLN-W77-S1 to S4 appended (routes-fn Deny found in HCL; renderers still encode the removed Denies; stale policy descriptions; membership resource lists both groups)"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CTab1-AC1",
+   "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_admin_parity.py expect: denies=DenyAuditTrailBucketWrites,DenyCloudTrailWrites,DenyS3DeletesOnProductionData,DenyTableAndDatabaseDeletes ok=True -- both memberships present and only the four kept denies remain",
+   "method": "command",
+   "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_admin_parity.py",
+   "output_evidence": "ADMIN-PARITY membership=both denies=DenyAuditTrailBucketWrites,DenyCloudTrailWrites,DenyS3DeletesOnProductionData,DenyTableAndDatabaseDeletes ok=True (rc=0; run under timeout 120)",
+   "denominator": "4 of 4 kept deny Sids found, 0 extra; 2 of 2 Dell users given AdministratorAccessOpalCapital",
+   "status": "PASS",
+   "expect": "denies=DenyAuditTrailBucketWrites,DenyCloudTrailWrites,DenyS3DeletesOnProductionData,DenyTableAndDatabaseDeletes ok=True",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CTab1-AC2",
+   "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_admin_parity.py expect: membership=both -- both users, not one",
+   "method": "command",
+   "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_admin_parity.py",
+   "output_evidence": "ADMIN-PARITY membership=both denies=DenyAuditTrailBucketWrites,DenyCloudTrailWrites,DenyS3DeletesOnProductionData,DenyTableAndDatabaseDeletes ok=True (rc=0; run under timeout 120)",
+   "denominator": "2 of 2 Dell users (dell1, dell2) named by an aws_iam_user_group_membership with AdministratorAccessOpalCapital",
+   "status": "PASS",
+   "expect": "membership=both",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CTab1-AC3",
+   "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py expect: ok=True -- the existing static identity check still passes (a control that PASSES at the base)",
+   "method": "command",
+   "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
+   "output_evidence": "init rc=0; validate rc=0: Success! The configuration is valid. | IDENTITY-STATIC validate=ok no_access_key=True allow_default_true=True shell_window_retired=True ssm_on_both_users=True group_policies=8/10 names_from_builder=14/14 policy_size_ok=True ok=True (rc=0; run under timeout 120); base run (before edits) also ok=True",
+   "denominator": "14 of 14 builder-named resources MATCH; 8 of 10 group managed-policy attachments; 97 botocore IAM write operations (28 Allow, 69 admin-granted)",
+   "status": "PASS",
+   "expect": "ok=True",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "scratch copy of the root (.scratch/mutant, outside the tree) with DenyCloudTrailWrites removed from dell_deploy_policy.json; the check run on the copy",
+   "expected": "ok=False: the deny set is no longer the four kept Sids",
+   "observed": "ADMIN-PARITY membership=both denies=DenyAuditTrailBucketWrites,DenyS3DeletesOnProductionData,DenyTableAndDatabaseDeletes ok=False (rc=1)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs of check_admin_parity.py compared byte for byte (cmp)",
+   "observed": "identical output on both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "terraform plan, apply and any AWS call; a credentialed init",
+   "reason": "not run: nothing is applied by this cell; the only terraform call is the one CTab1-AC3 names (init -backend=false and validate, no credentials)"
+  },
+  {
+   "item": "the task order status flip (<status> pending to complete)",
+   "reason": "the task order file is outside this order's <paths> grant (write surface = the identity root and the investigation file); left pending for the COO to flip"
+  }
+ ],
+ "surprises": [
+  "NFRA_CTLPLN-W77-S1",
+  "NFRA_CTLPLN-W77-S2",
+  "NFRA_CTLPLN-W77-S3",
+  "NFRA_CTLPLN-W77-S4"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~77/NFRA_CTLPLN.TO-CT-ab-1.dell-users-admin-group.proof_of_spec.json (the worker session of 0.9.0_WK_NFRA_CTLPLN~77, 2026-10-13; commit 0a6e65f519 on wk-NFRA_CTLPLN-77)",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_admin_parity.py",
+   "result": "ADMIN-PARITY membership=both denies=DenyAuditTrailBucketWrites,DenyCloudTrailWrites,DenyS3DeletesOnProductionData,DenyTableAndDatabaseDeletes ok=True"
+  },
+  {
+   "tool": "python",
+   "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
+   "result": "IDENTITY-STATIC validate=ok no_access_key=True allow_default_true=True shell_window_retired=True ssm_on_both_users=True group_policies=8/10 names_from_builder=14/14 policy_size_ok=True ok=True"
+  }
+ ]
+}
