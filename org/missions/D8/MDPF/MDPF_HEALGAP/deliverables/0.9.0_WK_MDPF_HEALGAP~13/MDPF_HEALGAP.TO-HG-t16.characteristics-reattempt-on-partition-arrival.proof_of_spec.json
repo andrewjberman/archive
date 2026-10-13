@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-t16",
+  "firm": "MDPF",
+  "genre": "BUILD",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t16.characteristics-reattempt-on-partition-arrival.md",
+    "group": "OTHER",
+    "vintage_commit": "011fd686a8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "011fd686a8",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t16.characteristics-reattempt-on-partition-arrival.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_HEALGAP~13",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/cot-pipeline/satellites-characteristics-producer.tf",
+      "kind": "terraform",
+      "commit_or_etag": "UNCOMMITTED (worktree C:/dev/wk_healgap_r4_13, base 011fd686a8 + t16_characteristics_tf.patch; commit refused by the naming limb, row MDPF_HEALGAP-D1-W13-S1)",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "TO BOUNDS: no terraform init, plan, validate, apply or safe-apply by this worker; no AWS write. Nothing is deployed. The file is not committed: safe-commit's naming limb refused the new rule's name as a hole (ratchet 0 -> 1 in infra/aws/terraform/cot-pipeline). The apply is the issuer's at the drain, if the name gate is resolved by its owner.",
+      "artifact_covered_by": [
+        "HG4-t16-AC1",
+        "HG4-t16-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/cot-pipeline/cot-satellites-characteristics-producer/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "UNCOMMITTED (worktree C:/dev/wk_healgap_r4_13, base 011fd686a8 + t16_handler.patch; same commit refusal as the terraform file)",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "TO BOUNDS: no package build, upload, Lambda invoke or AWS write by this worker. Nothing is deployed. The handler is graded by the stub arms of hg_t16_gate.py (GATE-OK) on the worktree file.",
+      "artifact_covered_by": [
+        "HG4-t16-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG4-t16-AC1",
+      "criterion_verbatim": "the existing rule stays at cron(25 13 * * ? *); exactly one other rule targets the producer, at cron(25 14-23 * * ? *), named by the opal_name module, input { require_partition = true }, with a permission.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R4_CHECKS/hg_r4_rules.py --t16",
+      "output_evidence": "T16-OK new_rule=cot_satellites_characteristics_producer_reattempt schedule=cron(25 14-23 * * ? *) existing=cot_satellites_characteristics_producer_daily cron(25 13 * * ? *) name=etfs-cot-satellites-characteristics-producer-reattempt-hourly (rc=0, identical on two runs). Base copy (011fd686a8): T16-BAD rules (other than cot_satellites_characteristics_producer_daily) targeting the producer: [] (want exactly 1) (rc=1).",
+      "denominator": "2 rules targeting the producer read (the existing daily rule and the one new reattempt rule); 1 of 1 other rule matches the schedule, name, input and permission checks",
+      "status": "PASS",
+      "status_reason": "PASS by the named output on the uncommitted worktree diff. The name is the opal_name module's output (module call etfs/cottonwood/satellites-characteristics-producer/reattempt/hourly, read from infra/aws/terraform/modules/opal_name/main.tf and generated_locals.tf scope_short cottonwood=cot). The commit is refused by the naming limb, so the order is not flipped (row MDPF_HEALGAP-D1-W13-S1).",
+      "expect": "T16-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "HG4-t16-AC2",
+      "criterion_verbatim": "the role gains exactly one ListBucket statement (Resource the cot bucket ARN, StringEquals s3:prefix = platinum/satellites/characteristics.json), the existing bbg/* list is unchanged, and there is NO GetObject on the output and no new Put or Delete.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R4_CHECKS/hg_r4_rules.py --t16-iam",
+      "output_evidence": "T16IAM-OK one new StringEquals-prefix ListBucket on the cot bucket for the exact output key, nothing wider (rc=0, identical on two runs). Base copy (011fd686a8): T16IAM-BAD 1 s3:ListBucket statements, want exactly 2 (the bbg history list and the one new) (rc=1).",
+      "denominator": "2 s3:ListBucket statements on the role (the existing bbg history list and the one new key statement) of 2 wanted",
+      "status": "PASS",
+      "status_reason": "PASS by the named output on the uncommitted worktree diff. The new statement is ListSatellitesCharacteristicsKey (diff read at lines 165-181 of the tf in the worktree). Commit refused, see row MDPF_HEALGAP-D1-W13-S1.",
+      "expect": "T16IAM-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "HG4-t16-AC3",
+      "criterion_verbatim": "nine stub arms on the handler: scheduled event makes no S3 call and the producer runs; a landed partition and an unwritten day runs the producer by listings only; a half-landed or absent partition logs one PARTITION-ABSENT and runs nothing; a day written today logs one SKIP-COMPLETE; 403 on either listing raises; a sibling key is never the key.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R4_CHECKS/hg_t16_gate.py",
+      "output_evidence": "GATE-OK arms A(scheduled, no S3) B(runs, listings only) C(half partition) D(no partition) E(complete day) F(403 output loud) G(403 partition loud) H(sibling output) I(sibling partition) (rc=0, identical on two runs). Base copy via HG_T16_HANDLER (011fd686a8): GATE-BAD B: list calls [] != [...]; C, D, E, F, G, I fail (rc=1).",
+      "denominator": "9 stub arms graded (A through I), 9 of 9 pass on the worktree handler",
+      "status": "PASS",
+      "status_reason": "PASS by the named output on the uncommitted worktree handler diff. Commit refused, see row MDPF_HEALGAP-D1-W13-S1.",
+      "expect": "GATE-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The three checks run from a .scratch copy of the base 011fd686a8 tf and handler (git show of the base pin), with HG_T16_HANDLER pointing at the base handler copy; the base is the mutant of the edited tree.",
+      "expected": "T16-BAD, T16IAM-BAD and GATE-BAD (each rc=1)",
+      "observed": "T16-BAD rules (other than cot_satellites_characteristics_producer_daily) targeting the producer: [] (want exactly 1) rc=1; T16IAM-BAD 1 s3:ListBucket statements, want exactly 2 rc=1; GATE-BAD B: list calls [] != [...]; C: manifest absent ... (want 0 and 1); D; E; F; G; I rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of hg_r4_rules.py --t16, hg_r4_rules.py --t16-iam and hg_t16_gate.py from the worktree root, on the same uncommitted worktree bytes",
+      "observed": "T16-OK ... rc=0 on both runs; T16IAM-OK ... rc=0 on both runs; GATE-OK ... rc=0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the code commit of satellites-characteristics-producer.tf and lambda_function.py",
+      "reason": "BLOCKED: safe-commit's naming limb refused the new rule's name as a HOLE (EVENT_RULE etfs-cot-satellites-characteristics-producer-reattempt-hourly, cadence unreadable from cron(25 14-23 * * ? *)). Filed as MDPF_HEALGAP-D1-W13-S1 BLOCKING. No --force, no GIT_COMMIT_AUTHOR_OVERRIDE, no edit to the schedule or the name, no edit to any check."
+    },
+    {
+      "item": "order status flip to complete",
+      "reason": "NOT FLIPPED: the order's refusal clause makes a refused name a stop; the criteria pass on the worktree but the change does not land from this branch, so the order stays pending for the COO."
+    },
+    {
+      "item": "terraform fmt, init, plan, validate, apply, safe-apply; any AWS write; any Lambda invoke or package build; any vendor call",
+      "reason": "TO BOUNDS: the apply, build and upload are the issuer's at the drain under its never-widen pair."
+    },
+    {
+      "item": "data/assets/scripts/gold/build_satellites_characteristics.py and lib/trading_calendar.py",
+      "reason": "TO BOUNDS: DS's producer and the calendar are read, not edited."
+    },
+    {
+      "item": "alarm, SNS topic, SES send, freshness checker or monitor",
+      "reason": "TO BOUNDS: standing moratorium. None added."
+    },
+    {
+      "item": "the portal submodule shows a modified state in the worktree (git diff --stat lists portal)",
+      "reason": "Not in this order's paths and not touched by this worker; left as found and not committed."
+    }
+  ],
+  "surprises": [
+    "MDPF_HEALGAP-D1-W13-S1: the naming limb refuses the reattempt rule's builder name etfs-cot-satellites-characteristics-producer-reattempt-hourly as a HOLE (cadence unreadable from cron(25 14-23 * * ? *)); the hole-count ratchet for infra/aws/terraform/cot-pipeline grows 0 -> 1, so the code commit is refused"
+  ],
+  "session_log": "0.9.0_WK_MDPF_HEALGAP~13 on HG-t-16 (HG4-t16-AC1, AC2, AC3), worktree C:/dev/wk_healgap_r4_13, branch wk-MDPF_HEALGAP-13, base HEAD 011fd686a8. Both R4 reference patches applied cleanly and unchanged. The three criteria PASS on the uncommitted worktree and FAIL on the base copies. The code commit was refused at the naming limb (see MDPF_HEALGAP-D1-W13-S1, committed as 2ac3329471 on the branch). This instance is committed after the row; the order is not flipped.",
+  "compiler_tools": [
+    {
+      "tool": "hg_r4_rules.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R4_CHECKS/hg_r4_rules.py --t16 and --t16-iam",
+      "result": "T16-OK rc=0; T16IAM-OK rc=0 (both on the worktree); T16-BAD rc=1 and T16IAM-BAD rc=1 on the base copies"
+    },
+    {
+      "tool": "hg_t16_gate.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R4_CHECKS/hg_t16_gate.py",
+      "result": "GATE-OK rc=0 on the worktree; GATE-BAD rc=1 on the base copy via HG_T16_HANDLER"
+    },
+    {
+      "tool": "safe-commit.sh (naming limb)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_HEALGAP~13 <0.9.0_WK_MDPF_HEALGAP~13@opal.agent>\" -F .scratch/msg_t16_code.txt -- infra/aws/terraform/cot-pipeline/satellites-characteristics-producer.tf infra/aws/lambda/cot-pipeline/cot-satellites-characteristics-producer/lambda_function.py",
+      "result": "ERROR: BLOCKED -- the naming limb refused (LGIC_ENFORCE DEC-6, ENFORCE mode); NAMING REFUSE infra/aws/terraform/cot-pipeline:0 <hole-count-ratchet> -> -; rc=1; files unstaged; HEAD unchanged"
+    }
+  ]
+}
