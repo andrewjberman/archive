@@ -30,7 +30,7 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y242-portal": "Y242-PORTAL", "y243-portal": "Y243-PORTAL", "y244-read": "Y244-READ", "y245-server": "Y245-SERVER",
           "y246-qa": "Y246-QA", "y247-swap": "Y247-SWAP", "y248-portal": "Y248-PORTAL",
           "y249-swap": "Y249-SWAP", "y250-qa": "Y250-QA", "y251-swap": "Y251-SWAP", "y252-portal": "Y252-PORTAL",
-          "y261-read": "Y261-READ", "y262-portal": "Y262-PORTAL", "y263-portal": "Y263-PORTAL", "y264-portal": "Y264-PORTAL"}
+          "y261-read": "Y261-READ", "y262-portal": "Y262-PORTAL", "y263-portal": "Y263-PORTAL", "y264-portal": "Y264-PORTAL", "y265-portal": "Y265-PORTAL"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -465,6 +465,14 @@ def main(argv):
         rec = portal_candidate(root, D22 % "89" + "PORTAL_FORM_COMMENTARY_CANDIDATE.json", problems)
         if rec and not (rec.get("trace") or {}).get("where_it_breaks"):
             problems.append("trace.where_it_breaks must name the first hop where a checked box stops reaching commentary_requested")
+    elif check == "y265-portal":
+        rec = portal_candidate(root, D22 % "90" + "PORTAL_SUBMIT_SILENCE_CANDIDATE.json", problems)
+        if rec:
+            trace = rec.get("trace") or {}
+            if not trace.get("silent_exits") or not trace.get("where_it_stops"):
+                problems.append("trace must list every silent exit (file:line) and where the submit stops")
+            if not rec.get("reproduction"):
+                problems.append("reproduction must say which hops end with no message on screen (RUN, with test names)")
     return finish(check, problems)
 
 
