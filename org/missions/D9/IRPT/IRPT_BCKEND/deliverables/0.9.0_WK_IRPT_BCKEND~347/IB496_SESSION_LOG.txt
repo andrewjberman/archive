@@ -1,0 +1,19 @@
+IRPT_BCKEND.TO-IB-pr-496 session log -- 0.9.0_WK_IRPT_BCKEND~347 -- branch wk-IRPT_BCKEND-347
+
+Preflight: git rev-parse --abbrev-ref HEAD -> wk-IRPT_BCKEND-347; test -d org && test -d .tools -> TREE-OK.
+
+Edits (commit 135fc3509e, LOCAL):
+- holdings_49f.py: import os; build_49f_meshed removes the retained_capture file in a finally when vintage has no env key.
+- holdings_snapshot.py: retained_capture removes its temp file if the write fails, then re-raises.
+- raw_keys.json: 49financial.account.holdings_source names dim_balance.account_id, minted by holdings_49f.py:363. holdings_citation and node_account_id_member unchanged.
+- tests/test_retained_capture_cleanup.py: new, 4 synthetic arms (raise, return, operator env file kept, control). tempfile.tempdir is pointed at pytest tmp_path.
+
+Runs (worktree root, each under timeout 120):
+- python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_retained_capture_cleanup.py -q -> 4 passed, rc=0
+- IB171-1-AC1 / AC2 / AC3 via p171_cells.py -> PASS, rc=0 each
+- python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_49f.py -q -> 22 passed, rc=0
+- python -m py_compile on the three edited .py files -> rc=0
+- python -m json.tool raw_keys.json -> rc=0
+
+Not run: the rest of tests/ (live read-only AWS in one test); no deploy; no AWS call; the live builder was not run.
+Surprise rows filed: IRPT_BCKEND-D2-W347-S1 (holdings_inf.py leaks the same way, outside paths), -S2 (holdings_citation stale), -S3 (order cites :339, mint is :363).

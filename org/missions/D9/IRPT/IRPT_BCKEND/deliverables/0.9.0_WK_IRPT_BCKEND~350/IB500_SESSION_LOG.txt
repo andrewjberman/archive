@@ -1,0 +1,15 @@
+IB-pr-500 worker session log -- 0.9.0_WK_IRPT_BCKEND~350 (ASCII)
+Workspace HEAD at start: f91aedd1ef (branch wk-IRPT_BCKEND-350). Portal HEAD at start: cf52fdbf (branch wk-IRPT_BCKEND-350-portal).
+Portal commit made: 69f69895 (LOCAL on wk-IRPT_BCKEND-350-portal; not pushed). Contents: fe-s-15/gen-fixtures.ts; fixtures/wire/ExportBundle.valid.json; fixtures/wire/requests/submit-export.request.json.
+
+1. Premises read live. Worktree check: branch wk-IRPT_BCKEND-350, TREE-OK.
+2. fe-s-15 generator: committed job.*.json carry unprojected_grant {count 0, denominator 1, kinds {}} between data and status, and no status.internal_correlation_id. The source of the grant is the analysis entry of fixtures/smoke/fe-s-13-wire.json. Fix committed in 69f69895. After the fix, the generator output is byte-equal to the HEAD blobs (cmp on job.queued.json and smoke/fe-s-15-clean.json; git hash-object equal).
+3. fe-s-18 generator: the HOLDINGS_KEY prefix fix ran, and the run produced a large rewrite of committed maps. Committed frozen map (F-49F, bare keys, status-summary, no covered_account_ids) and committed holdings maps (fir_..., built by copying frozen keys) are mutually inconsistent; the wire copy differs from both. REFUSED per the order's refusal clause. Row IRPT_BCKEND-D2-W350-S1. The fe-s-18 generator and its outputs were restored to HEAD (git restore --source=HEAD --worktree).
+4. selected_sections: AnalysisReport.valid.json carries S-RET-1, so only S-ALLOC-2 is dropped. Row S2. CRLF line endings kept (ExportBundle 42 CR / 42 LF).
+5. Criteria, under timeout 120 from the workspace root:
+   IB171-5-AC1: FAIL (rc=1), "fe-s-18 did not run" (the HEAD generator throws in holdingsMap after writing frozen). Restored after the run.
+   IB171-5-AC2: PASS (rc=0), "OK: 2 selected section id(s) all resolve".
+   IB171-5-AC3: FAIL (rc=1), "FAIL: 15 fixture(s) carry the old AnalysisReport section again". The five-test gate passed (the scan was reached). The pattern matches the current AnalysisReport copy. Row S3.
+6. bun test src/pages/InvestorReporting: 1213 pass, 27 skip, 4 fail at 69f69895; the same at cf52fdbf (three changed files restored). The order's base (1216/1) is stale. Row S5. The four failures are pre-existing: IVE26-AC3, IVE98, producer fixtures, F14-AC3.
+7. Producer fixture ExportBundle.valid.json still names S-RET-1 and S-ALLOC-2 (left unchanged). Row S4.
+8. Order status left pending: AC1 and AC3 FAIL.
