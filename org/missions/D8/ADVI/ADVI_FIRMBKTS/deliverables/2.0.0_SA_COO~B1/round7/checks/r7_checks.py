@@ -149,7 +149,7 @@ def firstchain(a):
     p = _need(d, ["pair.coo_half", "pair.cto_half", "dry_run_sample.advisors", "dry_run_sample.objects_written",
                   "dry_run_sample.read_before_deploy", "deploy.ledger_closed", "chain.label", "chain.emitted_line",
                   "chain.cloudtrail_putevents", "chain.generator_invocations", "keys.regenerated", "keys.ceiling",
-                  "keys.prior_version_ids_recorded", "keys.advisors_with_bullets_before", "keys.bullet_regressions", "claim"])
+                  "keys.prior_version_ids_recorded", "keys.advisors_with_bullets_before", "keys.bullet_regressions", "keys.nonempty_bullets", "slots_disabled", "claim"])
     if not p:
         if d["claim"] not in CLAIMS:
             p.append("claim not one of %s" % "/".join(CLAIMS))
@@ -161,6 +161,8 @@ def firstchain(a):
             p.append("the first chain must show the emitted line, a CloudTrail PutEvents and a generator invocation")
         if not (0 <= d["keys"]["regenerated"] <= d["keys"]["ceiling"] <= 158) or d["keys"]["prior_version_ids_recorded"] is not True:
             p.append("regenerated keys must be within the named ceiling (at most 158) with prior VersionIds recorded")
+        if d["keys"]["nonempty_bullets"] != 0 or len(d["slots_disabled"]) != 6:
+            p.append("the first regeneration is empty-for-empty: all six slots disabled and no regenerated artifact may carry a bullet")
         if not isinstance(d["keys"]["advisors_with_bullets_before"], int) or d["keys"]["bullet_regressions"] != 0:
             p.append("a summary that carried bullets before was replaced by one with none (bullet_regressions must be 0, read per advisor)")
         if d["deploy"]["ledger_closed"] is not True:
