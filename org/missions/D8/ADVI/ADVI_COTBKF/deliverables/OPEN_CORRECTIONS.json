@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-12T02:35:47Z",
+  "as_of": "2026-10-13T13:28:45Z",
   "compiled_by": "0.9.0_WK_ADVI_COTBKF~111; revised round 71 by 0.9.0_WK_ADVI_COTBKF~117; revised round 72 by 0.9.0_WK_ADVI_COTBKF~122; revised round 73 by 0.9.0_WK_ADVI_COTBKF~125; revised round 74 by 0.9.0_WK_ADVI_COTBKF~131; revised round 75 by 0.9.0_WK_ADVI_COTBKF~137; revised round 76 by 0.9.0_WK_ADVI_COTBKF~142; revised round 77 by 0.9.0_WK_ADVI_COTBKF~146; revised round 78 by 0.9.0_WK_ADVI_COTBKF~150; revised round 79 by 0.9.0_WK_ADVI_COTBKF~154",
   "served_method": "method_r28",
   "tree_default": "method_r29",
@@ -1591,6 +1591,392 @@
             "Reachability of path (vi) (CUSIP-keyed split store against ticker-keyed substitution for a fund whose CUSIP changed).",
             "The security-type table is from the code, which does not read the type; how many held securities of each custodian type are substituted or scaled was not counted."
           ]
+        },
+        "lander": {
+          "label": "ROUND 80, worker 0.9.0_WK_ADVI_COTBKF~157 (CB-cb-3)",
+          "dell1_ruling": {
+            "read_by": "git show origin/box/dell1:<path> (the ref resolves in this tree)",
+            "ref": "origin/box/dell1",
+            "ref_tip_at_read": "79b9ed7387",
+            "path": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_DELL2_AS_TRADED_CLOSES_VIA_DEMQUE_20261012.md",
+            "last_commit_touching_the_file_on_the_ref": "479d6deba0",
+            "text_verbatim": "# Cross-fabric call from `1.0.0_SA_CTO~DELL2` (dell2 msg 6336): who lands the as-traded closes ADVI_COTBKF and IRPT_BCKEND need (`1.0.0_SA_CTO~DELL1`, 2026-10-12 ~02:2xZ)\n\n**Question, verbatim in part:** \"will MDPF_SECHIST land a ticker list another fabric supplies, on a schedule, and by when; or does it rule that dell2 lands its own\nunder MDPF's writer and contract.\" The needs are:\n- ADVI_COTBKF: 15 funds, held days from 2020-07-06;\n- IRPT_BCKEND (PRD v0.46 answer 1): 878 tickers, the last 125 trading days, then daily.\n\n## Ruling: YES -- dell1 lands them, through ONE lander: MDPF_DEMQUE's queue. dell2 builds no lander.\n\n- **The lander is MDPF_DEMQUE's demand queue,** not a new MDPF_SECHIST path and not a dell2 path.\n  - It already prices a request before it runs (FWD-4) and pulls a security once for every page (C-ONCE / FWD-8).\n  - It paces Yahoo through the one shared pacer (C-YAHOO).\n  - It lands the seven-column store with `as_traded_close` (vendor Close with later splits undone) beside total return and cash\n    (`opal-data-assets/yahoo/global/silver/price_history/`).\n  - It now runs a STANDING daily tier-1 extension to the T-1 frontier (MDPF_DEMQUE round-9 t-31, scheduled 22:30 local on dell1).\n  - A second lander anywhere would be the shadow pipeline CLAUDE.md forbids.\n- **MDPF_SECHIST does not build a second store.** Its C-SERIES (one series per security) READS this store for the Yahoo-sourced share (its ADDENDUM v0.2 already\n  admits Yahoo from dell1 for ADVI_COTBKF's securities). That alignment is MDPF_SECHIST's next-round cell.\n- **How dell2 supplies the list:** as a REQUEST to the queue, in its own format (`request_id`, `tier`, `reason`, `page`, `securities [{cusip, symbol}]`, `fields [\"close\"]`,\n  `start`, `end`). One request per consumer:\n  - ADVI_COTBKF: tier 2 (backfill), 15 funds, start 2020-07-06;\n  - IRPT_BCKEND: tier 2 for the 125-trading-day history of 878 tickers, plus enrolment of the 878 in the standing tier-1 daily extension, which is \"then daily\".\n  dell2 hands the request files to `2.0.0_SA_COO~Q1` (the queue's issuer). Q1 files them, and the queue returns each one's QUOTE (cells and finish date) before anything\n  runs.\n- **\"By when\"** is the quote's answer, not a promise typed here.\n  - The queue draws backfills on non-trading days at the measured ceiling (round-7 R2), and Yahoo is paced to its own limits.\n  - Q1 sends dell2 the two quotes the turn they are computed, and `quote_vs_actual` grades the finish.\n- **Identity first (C-IDENTITY):** each security is locked against the client's trades where trades exist, or carries the claim `held`. A fund the resolvers cannot match\n  goes on the unresolved list with its reason; it is never priced by a guess.\n\n-- 1.0.0_SA_CTO~DELL1\n"
+          },
+          "request_file": {
+            "path": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/ADVI_COTBKF-TIER2-15-FUNDS-AS-TRADED-20261012.request.json",
+            "commit": "38c191a262",
+            "content_except_securities": {
+              "request_id": "ADVI_COTBKF-TIER2-15-FUNDS-AS-TRADED-20261012",
+              "tier": 2,
+              "reason": "ADVI_COTBKF PRD v0.9 contract C-BASIS: a fund security is priced at its as-traded close, read from the one lander (ruling CTO_RULING_DELL2_AS_TRADED_CLOSES_VIA_DEMQUE_20261012.md @479d6deba0 on origin/box/dell1; 1.0.0_SA_CTO~DELL2 msg 6361). 15 funds whose store close fails against the price paid; held days of the back-fill.",
+              "page": "ADVI_COTBKF returns back-fill (minted table account_return_daily; no portal page reads it)",
+              "fields": [
+                "close"
+              ],
+              "start": "2020-07-06",
+              "end": "2026-06-22",
+              "securities_count": 15
+            },
+            "note": "the securities list (15 entries of cusip and symbol) is not copied here; the request file carries it"
+          }
+        },
+        "three_equities": {
+          "label": "ROUND 80, worker 0.9.0_WK_ADVI_COTBKF~155 (CB-cb-1)",
+          "record": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~155/THREE_EQUITIES.json",
+          "record_last_commit": "695b8f107a",
+          "not_at_one": "5 of 1263 (build/store off 1.0 by more than 0.1 percent on the last common day; 1258 within; the five are APH, CTVA, HON, KLAC, SCCO)",
+          "securities_off_1_0": [
+            {
+              "ticker": "APH",
+              "ratio_build_over_store": 0.5,
+              "held_minted_days": 48,
+              "held_minted_account_days": 48,
+              "held_minted_accounts": 1,
+              "held_minted_first": "2025-02-11T00:00:00",
+              "held_minted_last": "2025-04-21T00:00:00",
+              "served_close_account_days": 48,
+              "held_served_partition_days": 0,
+              "last_common_day": "2026-06-05",
+              "day": "2025-04-21",
+              "ratios": {
+                "price_paid": 1.0,
+                "build": 0.487,
+                "store": 0.9672,
+                "vendor_close": 0.487
+              },
+              "cause": "not_established",
+              "served_split_sized_error": true,
+              "served_price_is": "build: the minted copy close equals the build on all 48 held account-days (1 account); served close / store is 0.5035 to 0.5048 on those days; the 47 partitions hold no APH name",
+              "notes": "Served close is 0.5 of the store on all 48 served days (2:1 split size). The build/store ratio is flat near 0.5 from the first common day (2021-01-08) to the last (2026-06-05); no step at the 2024-06 window (2024-06-18 factor 0.99841)."
+            },
+            {
+              "ticker": "CTVA",
+              "ratio_build_over_store": 0.150038,
+              "held_minted_days": 400,
+              "held_minted_account_days": 863,
+              "held_minted_accounts": 9,
+              "held_minted_first": "2019-06-03T00:00:00",
+              "held_minted_last": "2026-02-17T00:00:00",
+              "served_close_account_days": 115,
+              "held_served_partition_days": 0,
+              "last_common_day": "2026-06-05",
+              "day": "2026-02-17",
+              "ratios": {
+                "price_paid": 1.0,
+                "build": 0.1488,
+                "store": 0.9898,
+                "vendor_close": 0.1488
+              },
+              "cause": "not_established",
+              "served_split_sized_error": false,
+              "served_price_is": "build: the minted copy close equals the build on all 115 served account-days (115 days); the other 285 held days carry no close; served close / store is 0.1504 to 0.1603; the 47 partitions hold no CTVA name",
+              "notes": "Served 0.15 level is not an integer split ratio (nearest 1/7 = 0.1429, 1/6 = 0.1667). It drifts 0.1603 to 0.1500 through 15 small dividend-like steps; reported as not split-sized, for issuer judgment."
+            },
+            {
+              "ticker": "HON",
+              "ratio_build_over_store": 1.048768,
+              "held_minted_days": 3315,
+              "held_minted_account_days": 13097,
+              "held_minted_accounts": 44,
+              "held_minted_first": "2013-04-08T00:00:00",
+              "held_minted_last": "2026-06-10T00:00:00",
+              "served_close_account_days": 6057,
+              "held_served_partition_days": 9,
+              "last_common_day": "2026-06-05",
+              "day": "2026-02-04",
+              "ratios": {
+                "price_paid": 1.0,
+                "build": 1.0525,
+                "store": 0.9986,
+                "vendor_close": 1.0525
+              },
+              "cause": "not_established",
+              "served_split_sized_error": false,
+              "served_price_is": "two served copies disagree. Minted copy: build (close equals build on 1444 days, 6057 account-days; silver-labelled days close / store 1.0488 to 1.1726). 47 partitions (9 days 2026-05-27 to 2026-06-04, 17 rows, 2 accounts): store (partition / store = 1.0000 on all 9 days; partition / build = 0.9535)",
+              "notes": "Build/store steps are about 0.5 percent a quarter (22 steps, factors 0.9941 to 0.9961), dividend-like, none near a split ratio; the ratio falls from 1.1726 (2020-09-10) to 1.0488 (2026-06-05). Minted copy and partitions disagree on held days in the window (32 vs 9) and on price; not reconciled."
+            },
+            {
+              "ticker": "KLAC",
+              "ratio_build_over_store": 0.1,
+              "held_minted_days": 191,
+              "held_minted_account_days": 191,
+              "held_minted_accounts": 2,
+              "held_minted_first": "2018-11-05T00:00:00",
+              "held_minted_last": "2020-05-28T00:00:00",
+              "served_close_account_days": 0,
+              "held_served_partition_days": 0,
+              "last_common_day": "2026-06-05",
+              "day": "2020-05-28",
+              "ratios": {
+                "price_paid": 1.0,
+                "build": null,
+                "store": null,
+                "vendor_close": null
+              },
+              "cause": "not_established",
+              "served_split_sized_error": "not_established",
+              "served_price_is": "absent: the minted copy carries no close and no value on the 191 held account-days (2 accounts), 2018-11-05 to 2020-05-28; build and store start 2020-10-20; the 47 partitions hold no KLAC name",
+              "notes": "Last-common-day build/store is exactly 0.1000 (split size), but the security is held on no day the build or store covers, and its held days carry no served price."
+            },
+            {
+              "ticker": "SCCO",
+              "ratio_build_over_store": 0.988142,
+              "held_minted_days": 263,
+              "held_minted_account_days": 2162,
+              "held_minted_accounts": 46,
+              "held_minted_first": "2013-04-08T00:00:00",
+              "held_minted_last": "2014-04-22T00:00:00",
+              "served_close_account_days": 0,
+              "held_served_partition_days": 0,
+              "last_common_day": "2026-06-05",
+              "day": "2014-04-22",
+              "ratios": {
+                "price_paid": 1.0,
+                "build": null,
+                "store": null,
+                "vendor_close": null
+              },
+              "cause": "not_established",
+              "served_split_sized_error": "not_established",
+              "served_price_is": "absent: the minted copy carries no close and no value on the 2162 held account-rows (46 accounts), 2013-04-08 to 2014-04-22; build and store start 2023-02-03; the 47 partitions hold no SCCO name",
+              "notes": "Last-common-day build/store 0.9881. The security is held on no day after 2014-04-22, so the 2023-2026 ratio is never on a held day in either served copy."
+            }
+          ],
+          "served_day_with_split_sized_error": true,
+          "served_error_account_days": 48,
+          "cause_overall": "not_established",
+          "widens_c_basis": false,
+          "headline": "SAME-HOUR: APH is held on 48 SERVED minted days (1 account, 48 account-days, 2025-02-11 to 2025-04-21). Its served close is 0.50 of the store (0.5035 to 0.5048) and 0.487 of the price paid: a split-sized error in the served price. It is not in the 47 partitions. Cause not established: no build/store step equals a split ratio. CTVA: served 115 account-days at 0.15 of the store, not an integer split size; the store matches the price paid, the build does not. HON: build and store differ by 5 to 17 percent with no split step; the price paid favours the build on 2023-2025 trades and the store on 2026-02-04. KLAC and SCCO: no held day on which the build, store or served copy carries a price. C-BASIS does not widen: no cause is double_scaling.",
+          "not_established": [
+            "vendor split dates for all five: the cache files carry no split events, the build split plan is not on disk in r34/after/, and the split store was not read (grant); vendor_splits is empty for that reason, not because none exist",
+            "whether any build/store step equals a split ratio on a split date: none does in any overlap, so no double_scaling is named; the APH and CTVA level factors are flat from the first common day, so any split behind them lies before the store window or after 2026-06-05",
+            "KLAC and SCCO: no held day with a build or store row, so the price paid cannot test the build or the store there",
+            "HON held days in the window: minted copy 32 days (3 accounts), 47 partitions 9 days (2 accounts); not reconciled",
+            "the 47 partitions were matched by asset_name (pre-snapshot ticker column is empty; cache/holdings.parquet covers only from 2026-06-08); the four names absent from the partitions are absent under that match",
+            "post-store one-day steps in the build after 2026-06-05 (APH 2026-09-04 factor 0.517; CTVA 2026-10-02 factor 0.1535) are measured and not explained; the store does not reach them",
+            "the price paid is the custodian trade amount over units; intraday and limit effects of a few percent sit inside every comparison"
+          ],
+          "note": "the record's per-share step factors (steps) are not copied; the record is the source"
+        },
+        "fund_closes_read_back": {
+          "label": "ROUND 80, worker 0.9.0_WK_ADVI_COTBKF~156 (CB-cb-2)",
+          "record": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~156/FUND_CLOSES_READ_BACK.json",
+          "record_last_commit": "f4b94352c5",
+          "where": "The store root is s3_root() of data/mdpf/scripts/demque/price_store.py, which returns 's3://opal-data-assets/yahoo/global/silver/price_history' (address('yahoo','global','silver','price_history','x') with the last part dropped; the order's 's3://' prefix is already in the return value, so it was not added twice). One object set per CUSIP under cusip=<CUSIP>/: prices.parquet (date, close_served, as_traded_close, cash, total_return, tr_source, flags), splits.parquet, dividends.parquet, lock.json; index/index.parquet is the store index. Remote reads made, all read-only through .tools/aws: (1) one get of index/index.parquet; (2) fifteen s3api list-objects-v2 calls, each with prefix cusip=<CUSIP>/ for one of the 15 CUSIPs (no listing beyond them); (3) for the seven CUSIPs that list objects, get of prices.parquet, splits.parquet and lock.json (21 gets). No put, delete, serve or vendor call. Local reads: the custodian transaction cache and the round-76 served table, both under C:/dev/ajb_workspace/.scratch/advi_cotbkf (read, not modified).",
+          "funds": 15,
+          "funds_in_store": 7,
+          "held_trading_days": 20718,
+          "present": 5730,
+          "absent": 14988,
+          "present_share_as_record_headline": "27.7 percent",
+          "funds_with_trades": 15,
+          "classes_dell1_column_read_by_round_76_rule": {
+            "passes": 4,
+            "fails": 0,
+            "too_few": 1,
+            "no_trade_row": 2,
+            "not_landed": 8
+          },
+          "classes_round76_served_close": {
+            "fails": 15
+          },
+          "by_fund": [
+            {
+              "ticker": "VEIRX",
+              "in_store": false,
+              "held_trading_days": 1177,
+              "present": 0,
+              "absent": 1177,
+              "class_from_dell1": "not_landed",
+              "class_reason_from_dell1": "no object in the store (no cusip= prefix, no prices.parquet)",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 1596,
+              "dell1_median_ratio": null
+            },
+            {
+              "ticker": "PCBIX",
+              "in_store": true,
+              "held_trading_days": 1283,
+              "present": 1283,
+              "absent": 0,
+              "class_from_dell1": "passes",
+              "class_reason_from_dell1": "",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 1453,
+              "dell1_median_ratio": 1.0000007729252602
+            },
+            {
+              "ticker": "ABNFX",
+              "in_store": false,
+              "held_trading_days": 1520,
+              "present": 0,
+              "absent": 1520,
+              "class_from_dell1": "not_landed",
+              "class_reason_from_dell1": "no object in the store (no cusip= prefix, no prices.parquet)",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 195,
+              "dell1_median_ratio": null
+            },
+            {
+              "ticker": "SGIIX",
+              "in_store": true,
+              "held_trading_days": 1535,
+              "present": 1535,
+              "absent": 0,
+              "class_from_dell1": "passes",
+              "class_reason_from_dell1": "",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 46,
+              "dell1_median_ratio": 1.0000000977719112
+            },
+            {
+              "ticker": "GFFFX",
+              "in_store": true,
+              "held_trading_days": 1571,
+              "present": 122,
+              "absent": 1449,
+              "class_from_dell1": "no_trade_row",
+              "class_reason_from_dell1": "object holds no close on any trade's effective day: every trade pre-dates the object's first row 2026-04-14",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 35,
+              "dell1_median_ratio": null
+            },
+            {
+              "ticker": "FOCPX",
+              "in_store": true,
+              "held_trading_days": 1499,
+              "present": 56,
+              "absent": 1443,
+              "class_from_dell1": "no_trade_row",
+              "class_reason_from_dell1": "object holds no close on any trade's effective day: every trade pre-dates the object's first row 2026-04-14",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 25,
+              "dell1_median_ratio": null
+            },
+            {
+              "ticker": "FCNTX",
+              "in_store": true,
+              "held_trading_days": 1528,
+              "present": 85,
+              "absent": 1443,
+              "class_from_dell1": "too_few",
+              "class_reason_from_dell1": "fewer than 5 decisive units or fewer than 3 days",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 21,
+              "dell1_median_ratio": 0.9999995572603667
+            },
+            {
+              "ticker": "PRILX",
+              "in_store": false,
+              "held_trading_days": 1121,
+              "present": 0,
+              "absent": 1121,
+              "class_from_dell1": "not_landed",
+              "class_reason_from_dell1": "no object in the store (no cusip= prefix, no prices.parquet)",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 13,
+              "dell1_median_ratio": null
+            },
+            {
+              "ticker": "BALCX",
+              "in_store": false,
+              "held_trading_days": 1036,
+              "present": 0,
+              "absent": 1036,
+              "class_from_dell1": "not_landed",
+              "class_reason_from_dell1": "no object in the store (no cusip= prefix, no prices.parquet)",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 12,
+              "dell1_median_ratio": null
+            },
+            {
+              "ticker": "AGTHX",
+              "in_store": false,
+              "held_trading_days": 1563,
+              "present": 0,
+              "absent": 1563,
+              "class_from_dell1": "not_landed",
+              "class_reason_from_dell1": "no object in the store (no cusip= prefix, no prices.parquet)",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 10,
+              "dell1_median_ratio": null
+            },
+            {
+              "ticker": "DISVX",
+              "in_store": true,
+              "held_trading_days": 1242,
+              "present": 1242,
+              "absent": 0,
+              "class_from_dell1": "passes",
+              "class_reason_from_dell1": "",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 6,
+              "dell1_median_ratio": 1.0000003111717204
+            },
+            {
+              "ticker": "DFLVX",
+              "in_store": true,
+              "held_trading_days": 1407,
+              "present": 1407,
+              "absent": 0,
+              "class_from_dell1": "passes",
+              "class_reason_from_dell1": "",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 7,
+              "dell1_median_ratio": 1.000000333283959
+            },
+            {
+              "ticker": "NFFFX",
+              "in_store": false,
+              "held_trading_days": 1227,
+              "present": 0,
+              "absent": 1227,
+              "class_from_dell1": "not_landed",
+              "class_reason_from_dell1": "no object in the store (no cusip= prefix, no prices.parquet)",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 6,
+              "dell1_median_ratio": null
+            },
+            {
+              "ticker": "MEIIX",
+              "in_store": false,
+              "held_trading_days": 1568,
+              "present": 0,
+              "absent": 1568,
+              "class_from_dell1": "not_landed",
+              "class_reason_from_dell1": "no object in the store (no cusip= prefix, no prices.parquet)",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 6,
+              "dell1_median_ratio": null
+            },
+            {
+              "ticker": "VGHAX",
+              "in_store": false,
+              "held_trading_days": 1441,
+              "present": 0,
+              "absent": 1441,
+              "class_from_dell1": "not_landed",
+              "class_reason_from_dell1": "no object in the store (no cusip= prefix, no prices.parquet)",
+              "class_from_store_r76": "fails",
+              "round76_trade_units_read": 5,
+              "dell1_median_ratio": null
+            }
+          ],
+          "rule_record_key": "test (the rule, written_at 2026-10-11T23:07:58Z, in the record's key test)",
+          "funds_that_split": 0,
+          "split_arm_in_the_records_own_words": "Funds with a split inside the back-fill: 0 of 15. The split-undone property rests on dell1's word alone for these funds: on every row where both fields are present, dell1's close_served equals its as_traded_close (0 rows differ), and the two vendor split events in the landed objects (FOCPX 2018-05-11 and FCNTX 2018-08-10, ratio 10.0) fall before every held day of those funds and before their objects' first rows. The split arm was not tested and is not claimed as passed.",
+          "headline": "dell1's lander drew 7 of the 15 funds (PCBIX, SGIIX, GFFFX, FOCPX, FCNTX, DISVX, DFLVX; the bucket index and the cusip= listings agree, MEASURED); the 8 rejected funds (VEIRX, ABNFX, PRILX, BALCX, AGTHX, NFFFX, MEIIX, VGHAX) have no object and are not_landed. Of the 20,718 held trading days, 5730 carry a non-null as-traded close (27.7 percent) and 14988 are absent: 10653 days belong to the 8 funds with no object, 4335 to GFFFX, FOCPX and FCNTX whose objects hold only 2026-04-14 to 2026-10-09 (122, 56 and 85 present), and PCBIX, SGIIX, DISVX and DFLVX are present on every held day. Trades: all 15 funds have trade units on the round-76 basis (5 to 1,596 each), so the premise of 14 funds with trades is not what the round-76 record shows; of those 15, 7 have a dell1 column to test at all. On dell1's column, the round-76 test classes 4 funds passes (PCBIX, SGIIX, DISVX, DFLVX; 3975 of 4324 read units within 1 percent), FCNTX too_few (1 unit), GFFFX and FOCPX no_trade_row (every trade pre-dates 2026-04-14), and 8 not_landed; 0 fail. Round 76 classed all 15 fails on the served close. No fund has a split inside the back-fill: the split-undone property rests on dell1's word alone for these funds.",
+          "not_established": [
+            "The premise of 14 funds with trades: the round-76 record (FUNDS_BY_TRADES.json, named) gives trade units for all 15 funds (5 to 1,596 each, every one classed fails on the served close). Round 80's bz-2 record calls VGHAX the fifteenth, too_few with 5 units on the cache close; on the round-76 basis VGHAX has 5 decisive units on 5 days and classes fails. Not reconciled here; filed as a surprise row.",
+            "The eight rejected funds (VEIRX, ABNFX, PRILX, BALCX, AGTHX, NFFFX, MEIIX, VGHAX) have no object under their cusip= prefix: not_landed. Their dell1 closes do not exist in the store; no other location was read or searched.",
+            "Held trading days are the served-table dates per fund (r34 security_day_price) that fall on a NYSE session by lib/trading_calendar (WARN printed: pandas_market_calendars absent, the hardcoded NYSE fallback answered, covering 2010-2027). The per-fund counts reproduce round 80's held_covered_by_cache exactly (sum 20,718), but the calendar is the fallback.",
+            "Presence counts a held trading day present when dell1's object carries a non-null as_traded_close on that date. Dell1's values were not compared with any vendor source; this is a read of the object, not a check of its prices.",
+            "The three partial objects (GFFFX, FOCPX, FCNTX; lock valid_from 2026-04-14) hold no row before 2026-04-14. Why the lock starts there is not read; whether dell1 will extend it is dell1's to say.",
+            "dell1's close_served differs from the round-76 served close on most common dates for PCBIX, SGIIX, DISVX and DFLVX (within 0.1 percent on 202, 171, 48 and 48 dates of 1283, 1535, 1242 and 1407 common dates). Not explained here; the four passes rest on dell1's as_traded_close, which is the column the test reads.",
+            "Trade units come from the custodian transaction cache (by and sl rows of the 15 CUSIPs, 6,379 rows, 6,377 units; the same population that round 76 read, reproduced per fund on all 15 funds with 0 mismatches). No account identifier, amount, quantity or balance is printed or written; no advisor or firm filter was applied or inspected.",
+            "The charge-sized reading (|gap| <= 34.15 dollars in the charge direction) and the guard window (180 days before the latest served date, 2026-10-06) are as the round-76 rule states; the round-76 positive control reproduces every per-fund count, so the reading is the one round 76 used.",
+            "Nothing was re-priced, re-minted, fetched from a vendor, served or written to S3. Remote reads are listed in where_as_named."
+          ]
         }
       },
       "evidence": [
@@ -1801,6 +2187,30 @@
         {
           "file": "org/tier1_exec/3.0.0_SA_CVO/deliverables/ADVI_COTBKF_PRD_v0.9_RATIFIED_TEXT_REVIEW_20261012.md",
           "what_it_says": "ratified-text half of v0.9 SIGNED by 3.0.0_SA_CVO (@9ec84220b8); the v0.8 half was REFUSED (ADVI_COTBKF_PRD_v0.8_RATIFIED_TEXT_REVIEW_20261012.md @118f800793)."
+        },
+        {
+          "file": "org/missions/D8/ADVI/ADVI_COTBKF/prd/ADVI_COTBKF_PRD.md",
+          "what_it_says": "ADDENDUM v0.10 (line 389), PRD v0.10 @4d488ab2f0: the basis value against the split scaling; v0.9's split sentence withdrawn and replaced; quoted whole under c_basis."
+        },
+        {
+          "file": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~155/THREE_EQUITIES.json",
+          "what_it_says": "THREE_EQUITIES (CB-cb-1, round 80): five securities off 1.0 on the last common day; held and served account-days; the four ratios; causes not_established; served_day_with_split_sized_error true; widens_c_basis false. Quoted under extent.three_equities."
+        },
+        {
+          "file": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~156/FUND_CLOSES_READ_BACK.json",
+          "what_it_says": "FUND_CLOSES_READ_BACK (CB-cb-2, round 80): where read; 20,718 held trading days, 5,730 present; the dell1 column classes beside the round-76 classes; split arm 0 of 15. Quoted under extent.fund_closes_read_back."
+        },
+        {
+          "file": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_DELL2_AS_TRADED_CLOSES_VIA_DEMQUE_20261012.md",
+          "what_it_says": "dell1 ruling (origin/box/dell1 @479d6deba0, read by git show): dell1 lands the as-traded closes through one lander, MDPF_DEMQUE's queue. Quoted under extent.lander."
+        },
+        {
+          "file": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/ADVI_COTBKF-TIER2-15-FUNDS-AS-TRADED-20261012.request.json",
+          "what_it_says": "the tier-2 request to the demand queue for the 15 funds, 2020-07-06 to 2026-06-22 (commit 38c191a262); its non-security fields quoted under extent.lander."
+        },
+        {
+          "file": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_ROUND_ANALYSIS_ADVI_COTBKF_ROUND_80_20261012.md",
+          "what_it_says": "round-80 analysis: section 1 (the three equities, line 14), section 3 (the widening condition, lines 33-36), section 4 (the list predates v0.10 and is re-cut after item 2)."
         }
       ],
       "unreconciled": [
@@ -1835,9 +2245,18 @@
         "The live store is not the output of the writer at HEAD (row ADVI_COTBKF-D2-W149-S1: no source_firm column; a scoped_override source on 12,042 rows).",
         "The post hoc 12-dollar figure is untested: a gap within 0.15 of 12 dollars on 101 of 186 units that fit none in P1, 171 of 194 in P2, 10 of 11 in P3 (PRICE_PAID_CAUSES.json post_hoc); read off the same units, a description, not a test.",
         "The classing rule of round 76 (15 funds fail by trades) excused units by a 34.15-dollar charge allowance whose seven figures have now failed their own held-out bar as a complete set (PRICE_PAID_CAUSES.json reading fails): the 15 were classed with that allowance; PRICE_PAID_CAUSES.json does not re-class them. ROUND 79: answered by C-BASIS item 5 (PRD ADDENDUM v0.8 lines 319-320): \"The 15 funds' classing is re-derived after the re-pricing, from the price paid, and not from the flat-charge allowance. The allowance fails its own bar; it could only excuse units, so it did not make a fund fail, but no class rests on it.\" The item stays until the re-derivation is done; it is not done.",
-        "SECHIST_AS_IT_STANDS.json not_established: whether SECHIST's as_traded_close, when it lands, is already split-scaled upstream (\"yes in DEMQUE yahoo_pull.py:130-136\") so that the ADVI build applying its own split scaling on top (ADDENDUM v0.9 item 2) would scale twice, \"a design question for the issuer, not measured\". PRD v0.9 lines 367-370 say the vendor's Close alone is split-ADJUSTED and the value means the traded price only AFTER the build's split scaling. Both stand; the records do not settle which source the scaling applies to.",
-        "BASIS_VALUE_AGAINST_SPLIT_SCALING.json against the signed sentence (PRD v0.9 lines 369-370, \"a point that has not passed it is not written with this value\"): the record reads order value_before_scaling, scaling not recorded per point, and \"the signed sentence holds for no security type\". The PRD sentence and the record are both stated here; neither is reconciled to the other. Whether any held security takes a data-dependent unscaled path is not established (the split entries and the repair plan of the served build were not read).",
-        "STORE_WRITER.json against row ADVI_COTBKF-D2-W149-S1 (item \"The live store is not the output of the writer at HEAD\"): the record finds the live object is the June version with 1,623 rows removed and shows the missing source_firm column is the June shape; no cot-tree file assigns scoped_override; code that matches the live shape not_established; owner of record not_established. The row's question (whose writer) is not answered by any record."
+        "SECHIST_AS_IT_STANDS.json not_established: whether SECHIST's as_traded_close, when it lands, is already split-scaled upstream (\"yes in DEMQUE yahoo_pull.py:130-136\") so that the ADVI build applying its own split scaling on top (ADDENDUM v0.9 item 2) would scale twice, \"a design question for the issuer, not measured\". PRD v0.9 lines 367-370 say the vendor's Close alone is split-ADJUSTED and the value means the traded price only AFTER the build's split scaling. Both stand; the records do not settle which source the scaling applies to. ROUND 80 (PRD v0.10 lines 406-408, 1.0.0_SA_CTO~DELL2): answered in part. The text reads: \"So a point read from it IS the traded price, and this build's own split scaling is NOT applied to it: applying it would scale the same split twice (row ADVI_COTBKF-D2-W151-S1).\" That names dell1's column only and names no SECHIST column. The round-80 analysis (section 1, lines 9-10) says the dell1 read is \"code, not yet a landed value.\" The question for SECHIST's column stays open.",
+        "BASIS_VALUE_AGAINST_SPLIT_SCALING.json against the signed sentence (PRD v0.9 lines 369-370, \"a point that has not passed it is not written with this value\"): the record reads order value_before_scaling, scaling not recorded per point, and \"the signed sentence holds for no security type\". The PRD sentence and the record are both stated here; neither is reconciled to the other. Whether any held security takes a data-dependent unscaled path is not established (the split entries and the repair plan of the served build were not read). ROUND 80 (PRD v0.10 lines 395-397, 404-414, 1.0.0_SA_CTO~DELL2): the signed sentence is WITHDRAWN: \"v0.9's sentence is WITHDRAWN\" and it \"described a build that does not exist.\" For fund points the value is replaced (lines 404-411): it says where the point came from, and is the traded price only when the point is free of any later split's adjustment. For the other security types v0.10 lines 412-414 leave the record's limit in place: \"it does not record whether the split scaling reached the point. That is row material for those types and is not settled here.\" Answered for fund points; open for the other types.",
+        "STORE_WRITER.json against row ADVI_COTBKF-D2-W149-S1 (item \"The live store is not the output of the writer at HEAD\"): the record finds the live object is the June version with 1,623 rows removed and shows the missing source_firm column is the June shape; no cot-tree file assigns scoped_override; code that matches the live shape not_established; owner of record not_established. The row's question (whose writer) is not answered by any record.",
+        "ROUND 80, order against record (round-80 cell CB-cb-3 item 2 says \"the 14 funds classed\"): FUND_CLOSES_READ_BACK.json has all 15 funds with trade units (5 to 1,596 each on the round-76 basis; funds_with_trades 15) and only 7 with a dell1 column (8 not_landed). The record's count is carried in extent.fund_closes_read_back. For 1.0.0_SA_CTO~DELL2.",
+        "ROUND 80, record against record (FUND_CLOSES_READ_BACK.json not_established item 1): round 80's bz-2 record calls VGHAX the fifteenth, too_few with 5 units on the cache close; on the round-76 basis VGHAX has 5 decisive units on 5 days and classes fails. dell1 has no object for VGHAX (not_landed). The record does not reconcile this.",
+        "ROUND 80, two columns, two classes for the same funds: round 76 classes all 15 funds fails on the served close (class_from_store_r76); dell1's column, read by the same rule, classes 4 passes (PCBIX, SGIIX, DISVX, DFLVX; 3,975 of 4,324 read units within 1 percent), 1 too_few (FCNTX), 2 no_trade_row (GFFFX, FOCPX), 8 not_landed and 0 fails (FUND_CLOSES_READ_BACK.json headline). dell1's close_served differs from the round-76 served close on most common dates for PCBIX, SGIIX, DISVX and DFLVX (within 0.1 percent on 202, 171, 48 and 48 of 1,283, 1,535, 1,242 and 1,407 common dates); the record does not explain it. Both are carried.",
+        "ROUND 80, PRD v0.10 split arm against the record (FUND_CLOSES_READ_BACK.json split_arm_in_the_records_own_words): the record gives 0 of 15 funds split inside the back-fill and says the split arm was not tested and is not claimed as passed. PRD v0.10 lines 416-419 ask for (a) a split fund priced before and after its split reproducing the price paid on both sides, with the split step shown not to have touched those points, or (b) the count searched when no held fund split. The record gives the count and no arm (a) result. Both carried.",
+        "ROUND 80, count against the round-80 analysis: THREE_EQUITIES.json not_at_one reads \"5 of 1263\" (APH, CTVA, HON, KLAC, SCCO off 1.0 by more than 0.1 percent on the last common day), where the round-80 analysis (section 1 line 14, section 3 item 1) says \"three EQUITIES\". The record's count is carried; the analysis's words are kept as written.",
+        "ROUND 80, served split-sized day (THREE_EQUITIES.json served_day_with_split_sized_error true): APH, 48 served account-days under 1 account, 2025-02-11 to 2025-04-21; served close 0.50 of the store and 0.487 of the price paid on the 2025-04-21 read; cause not_established. Carried to the CTO the same hour as row ADVI_COTBKF-D2-W155-S1 (cited by id, not restated).",
+        "ROUND 80, widening (THREE_EQUITIES.json widens_c_basis false; headline \"C-BASIS does not widen: no cause is double_scaling.\"): the round-80 analysis (section 3, lines 33-36) makes a widening depend on whether the equities are this build's split step meeting a scaled store row, and says item 1 decides it. The record's basis is its not_established item that no build or store step equals a split ratio on a split date; its APH note reads \"Served close is 0.5 of the store on all 48 served days (2:1 split size)\". Both are carried; not reconciled by the record.",
+        "ROUND 80, HON (THREE_EQUITIES.json not_established): the minted copy holds 32 held days in the window 2026-04-22 to 2026-06-07 (3 accounts) and the 47 partitions hold 9 days (2 accounts), with prices that disagree; the record says not reconciled.",
+        "ROUND 80, closes_when (this entry, closes_when.now) still quotes ADDENDUM v0.9's split arm (PRD lines 384-385); PRD v0.10 lines 416-419 replace that arm (c_basis.v0_9_split_arm_replaced_by_v0_10). closes_when is not rewritten in this round because the round's order names no key for it; for the issuer to decide."
       ],
       "closes_when": {
         "now": "C-BASIS built and its proof graded. PRD ADDENDUM v0.8 line 322-323: \"Row ADVI_COTBKF-D2-S131 stays BLOCKING and its ruling stays in force: no rebuild of a holdings partition dated before 2026-06-08 for this firm, no consumer attached to the minted table, until C-BASIS is built and its proof graded.\" The proof, v0.8 lines 326-328, is quoted verbatim under c_basis.the_proof_as_v0_8_states_it (its sentence on the reader refusing a point names a v0.8 token that v0.9 lines 349-350 withdraw): the 15 funds re-priced from the history, the trades that reproduce the price paid counted before and after per fund, graded by the reviewer. ADDENDUM v0.9 lines 384-385 adds one arm: \"a fund that has split inside the back-fill, priced before and after its split, reproduces the price paid on both sides. If no held fund split, the run says so with the count searched.\" Status per the records of this round: not built (cells CB-ca-1 to CB-ca-3 are reads; nothing is built). The round-78 text (the addendum NOT YET WRITTEN) is moved to earlier_closing_conditions.",
@@ -1881,8 +2300,8 @@
       "c_basis": {
         "prd": {
           "file": "org/missions/D8/ADVI/ADVI_COTBKF/prd/ADVI_COTBKF_PRD.md",
-          "prd_version": "v0.9",
-          "commit": "95da777fbf (the newest commit that touched the PRD; prd-signoff status prints @95da777fbf)",
+          "prd_version": "v0.10",
+          "commit": "4d488ab2f0 (the newest commit that touched the PRD; prd-signoff status prints @4d488ab2f0)",
           "headings_read": [
             {
               "line": 224,
@@ -1903,9 +2322,13 @@
             {
               "line": 343,
               "heading": "## ADDENDUM v0.9 -- C-BASIS item 2 replaced: the basis field is the one the build already has (L10; CONTRACTS changed)"
+            },
+            {
+              "line": 389,
+              "heading": "## ADDENDUM v0.10 -- C-BASIS: what `as_traded_close` means against the split scaling, corrected on the read (L10; CONTRACTS changed)"
             }
           ],
-          "heading_past_v0_9": "none (the last heading is ADDENDUM v0.9, line 343)"
+          "heading_past_v0_9": "ADDENDUM v0.10 at line 389, the last heading (the file ends at line 422)"
         },
         "what_it_is": "CONTRACT C-BASIS: ADDENDUM v0.8 (lines 303-320) items 1, 3, 4, 5; ADDENDUM v0.9 (lines 365-382) item 2 and the new item 3. Quoted line by line, not interpreted.",
         "item_1_from_v0_8": [
@@ -2082,16 +2505,243 @@
         ],
         "ratified_text_half": {
           "v0_8": "REFUSED by 3.0.0_SA_CVO (msg 6278), review org/tier1_exec/3.0.0_SA_CVO/deliverables/ADVI_COTBKF_PRD_v0.8_RATIFIED_TEXT_REVIEW_20261012.md @118f800793 (the commit subject: REFUSED on the basis field's value set)",
-          "v0_9": "SIGNED by 3.0.0_SA_CVO, review org/tier1_exec/3.0.0_SA_CVO/deliverables/ADVI_COTBKF_PRD_v0.9_RATIFIED_TEXT_REVIEW_20261012.md @9ec84220b8; sign-off file org/missions/D8/ADVI/ADVI_COTBKF/prd/signoff/3.0.0_SA_CVO.json (verdict SIGNED, prd_pin 95da777fbf36b23bd4fd70edc9457813bb9b588c, signed_at 2026-10-12T01:50:12Z)"
+          "v0_9": "SIGNED by 3.0.0_SA_CVO, review org/tier1_exec/3.0.0_SA_CVO/deliverables/ADVI_COTBKF_PRD_v0.9_RATIFIED_TEXT_REVIEW_20261012.md @9ec84220b8; sign-off file org/missions/D8/ADVI/ADVI_COTBKF/prd/signoff/3.0.0_SA_CVO.json (verdict SIGNED, prd_pin 95da777fbf36b23bd4fd70edc9457813bb9b588c, signed_at 2026-10-12T01:50:12Z)",
+          "v0_10": "SIGNED per the printed line ratified-text SIGNED 3.0.0_SA_CVO current (above). The round-80 analysis header reads \"Prior: PRD v0.10 @4d488ab2f0, signed @c346902670.\" (CTO_ROUND_ANALYSIS_ADVI_COTBKF_ROUND_80_20261012.md line 5). The v0.10 review file was not read by this worker."
         },
-        "signoff_state_as_the_tool_printed_it": {
+        "withdrawn": "the two tokens of v0.8 item 2 are withdrawn (v0.9 lines 349-350 above) and are not used as values in this record",
+        "what_it_is_v0_10": "ADDENDUM v0.10 (PRD lines 389-420, v0.10 @4d488ab2f0), quoted line by line from the file, not interpreted. The withdrawal of v0.9 lines 395-397 and its replacement (lines 402-414) and the replaced split arm (lines 416-419) are the keys below.",
+        "addendum_v0_10_lines": [
+          {
+            "line": 389,
+            "text": "## ADDENDUM v0.10 -- C-BASIS: what `as_traded_close` means against the split scaling, corrected on the read (L10; CONTRACTS changed)"
+          },
+          {
+            "line": 390,
+            "text": ""
+          },
+          {
+            "line": 391,
+            "text": "- **Author:** `1.0.0_SA_CTO~DELL2`, 2026-10-12 ~02:4xZ. **Sources:** `2.0.0_SA_COO~C2` msg 6372 and its record"
+          },
+          {
+            "line": 392,
+            "text": "  `deliverables/0.9.0_WK_ADVI_COTBKF~152/BASIS_VALUE_AGAINST_SPLIT_SCALING.json` (merged 12a3c98e51), the lines read by the issuer;"
+          },
+          {
+            "line": 393,
+            "text": "  `1.0.0_SA_CTO~DELL1`'s ruling relayed in msg 6357 (its file @479d6deba0 on origin/box/dell1, read by the two issuers, not by this"
+          },
+          {
+            "line": 394,
+            "text": "  seat); the reviewer's note on v0.9 (msg 6284). This seat read no code for this addendum."
+          },
+          {
+            "line": 395,
+            "text": "- **v0.9's sentence is WITHDRAWN:** \"the value means the traded price only AFTER the split scaling, and a point that has not"
+          },
+          {
+            "line": 396,
+            "text": "  passed it is not written with this value.\" It described a build that does not exist. Measured: the value is written inside the"
+          },
+          {
+            "line": 397,
+            "text": "  substitution (`commonwealth_daily_valuation.py:271`, `:283`), the price input carrying it is written (`:976-978`) BEFORE the split"
+          },
+          {
+            "line": 398,
+            "text": "  plan runs (`:983-984`), the split step works on a frame with no basis column and records nothing per point, and a point can leave"
+          },
+          {
+            "line": 399,
+            "text": "  marked `as_traded_close` and unscaled on 9 of 11 paths. This seat asked for that read because it doubted its own sentence; the"
+          },
+          {
+            "line": 400,
+            "text": "  doubt was right."
+          },
+          {
+            "line": 401,
+            "text": ""
+          },
+          {
+            "line": 402,
+            "text": "**C-BASIS item 2, the meaning of the value, as it now reads.**"
+          },
+          {
+            "line": 403,
+            "text": ""
+          },
+          {
+            "line": 404,
+            "text": "- `as_traded_close` on a point says WHERE THE POINT CAME FROM: an as-traded source. It does not by itself say the point is the"
+          },
+          {
+            "line": 405,
+            "text": "  price the security traded at. That holds only when the point is free of any later split's adjustment."
+          },
+          {
+            "line": 406,
+            "text": "- **Under C-BASIS the one as-traded source for a fund is dell1's `as_traded_close` column** (v0.8 item 3; dell1's ruling: one lander,"
+          },
+          {
+            "line": 407,
+            "text": "  its demand queue). That column already has later splits undone. **So a point read from it IS the traded price, and this build's"
+          },
+          {
+            "line": 408,
+            "text": "  own split scaling is NOT applied to it:** applying it would scale the same split twice (row ADVI_COTBKF-D2-W151-S1)."
+          },
+          {
+            "line": 409,
+            "text": "- **The cached vendor Close is no longer a source for a fund point** (v0.8 already bars the cache as a source). On that path the"
+          },
+          {
+            "line": 410,
+            "text": "  value meant \"the vendor's Close, split-adjusted, scaling applied afterwards and unrecorded\"; no fund point is written from it"
+          },
+          {
+            "line": 411,
+            "text": "  under C-BASIS, so the value has one meaning in what C-BASIS mints."
+          },
+          {
+            "line": 412,
+            "text": "- For security types this contract does not re-price, the value keeps the meaning the build gives it today, with the limit just"
+          },
+          {
+            "line": 413,
+            "text": "  measured: it does not record whether the split scaling reached the point. That is row material for those types and is not"
+          },
+          {
+            "line": 414,
+            "text": "  settled here."
+          },
+          {
+            "line": 415,
+            "text": ""
+          },
+          {
+            "line": 416,
+            "text": "- **The proof, replacing v0.9's split arm.** (a) A fund that split inside the back-fill, priced from dell1's column on a day"
+          },
+          {
+            "line": 417,
+            "text": "  before and a day after its split, reproduces the price paid on both, with this build's split step shown NOT to have touched"
+          },
+          {
+            "line": 418,
+            "text": "  those points (the count of fund points the split step changed is zero). (b) If no held fund split, the run says so with the"
+          },
+          {
+            "line": 419,
+            "text": "  count searched. Graded by the reviewer."
+          },
+          {
+            "line": 420,
+            "text": "- **Round 79's list is unchanged.** The request file to dell1's queue is cut (msg 6361); nothing on dell2 fetches a price."
+          }
+        ],
+        "v0_9_split_sentence_withdrawn_by_v0_10": [
+          {
+            "line": 395,
+            "text": "- **v0.9's sentence is WITHDRAWN:** \"the value means the traded price only AFTER the split scaling, and a point that has not"
+          },
+          {
+            "line": 396,
+            "text": "  passed it is not written with this value.\" It described a build that does not exist. Measured: the value is written inside the"
+          },
+          {
+            "line": 397,
+            "text": "  substitution (`commonwealth_daily_valuation.py:271`, `:283`), the price input carrying it is written (`:976-978`) BEFORE the split"
+          }
+        ],
+        "what_replaces_it_v0_10": [
+          {
+            "line": 402,
+            "text": "**C-BASIS item 2, the meaning of the value, as it now reads.**"
+          },
+          {
+            "line": 403,
+            "text": ""
+          },
+          {
+            "line": 404,
+            "text": "- `as_traded_close` on a point says WHERE THE POINT CAME FROM: an as-traded source. It does not by itself say the point is the"
+          },
+          {
+            "line": 405,
+            "text": "  price the security traded at. That holds only when the point is free of any later split's adjustment."
+          },
+          {
+            "line": 406,
+            "text": "- **Under C-BASIS the one as-traded source for a fund is dell1's `as_traded_close` column** (v0.8 item 3; dell1's ruling: one lander,"
+          },
+          {
+            "line": 407,
+            "text": "  its demand queue). That column already has later splits undone. **So a point read from it IS the traded price, and this build's"
+          },
+          {
+            "line": 408,
+            "text": "  own split scaling is NOT applied to it:** applying it would scale the same split twice (row ADVI_COTBKF-D2-W151-S1)."
+          },
+          {
+            "line": 409,
+            "text": "- **The cached vendor Close is no longer a source for a fund point** (v0.8 already bars the cache as a source). On that path the"
+          },
+          {
+            "line": 410,
+            "text": "  value meant \"the vendor's Close, split-adjusted, scaling applied afterwards and unrecorded\"; no fund point is written from it"
+          },
+          {
+            "line": 411,
+            "text": "  under C-BASIS, so the value has one meaning in what C-BASIS mints."
+          },
+          {
+            "line": 412,
+            "text": "- For security types this contract does not re-price, the value keeps the meaning the build gives it today, with the limit just"
+          },
+          {
+            "line": 413,
+            "text": "  measured: it does not record whether the split scaling reached the point. That is row material for those types and is not"
+          },
+          {
+            "line": 414,
+            "text": "  settled here."
+          }
+        ],
+        "v0_9_split_arm_replaced_by_v0_10": [
+          {
+            "line": 416,
+            "text": "- **The proof, replacing v0.9's split arm.** (a) A fund that split inside the back-fill, priced from dell1's column on a day"
+          },
+          {
+            "line": 417,
+            "text": "  before and a day after its split, reproduces the price paid on both, with this build's split step shown NOT to have touched"
+          },
+          {
+            "line": 418,
+            "text": "  those points (the count of fund points the split step changed is zero). (b) If no held fund split, the run says so with the"
+          },
+          {
+            "line": 419,
+            "text": "  count searched. Graded by the reviewer."
+          }
+        ],
+        "signoff_state_v0_9_as_the_tool_printed_it_round_79": {
           "command": "python .tools/prd-signoff.py status ADVI_COTBKF",
           "run_at": "2026-10-12T02:35:47Z",
           "header_line": "ADVI_COTBKF  v0.9 @95da777fbf  dep_stage=EXECUTING  ->  ADMITTED",
           "ratified_text_line": "    ratified-text  SIGNED        3.0.0_SA_CVO           current",
           "brief_line": "    brief          SIGNED        (auto) brief written by 4.0.0_SA_CRO admitted without a signature: the CRO wrote the brief (spine v3.19 L4-R)"
         },
-        "withdrawn": "the two tokens of v0.8 item 2 are withdrawn (v0.9 lines 349-350 above) and are not used as values in this record"
+        "signoff_state_as_the_tool_printed_it": {
+          "command": "python .tools/prd-signoff.py status ADVI_COTBKF",
+          "run_at": "2026-10-13T13:28:45Z",
+          "printed_lines": [
+            "ADVI_COTBKF  v0.10 @4d488ab2f0  dep_stage=EXECUTING  ->  ADMITTED",
+            "    ratified-text  SIGNED        3.0.0_SA_CVO           current",
+            "    brief          SIGNED        (auto) brief written by 4.0.0_SA_CRO admitted without a signature: the CRO wrote the brief (spine v3.19 L4-R)"
+          ]
+        }
       }
     },
     {
@@ -2287,6 +2937,19 @@
         "adjusted-close-used-as-price: evidence 46 -> 52 rows (the four records, the PRD addenda, the v0.9 review)",
         "adjusted-close-used-as-price: unreconciled item 26 (corrected basis has no store) reworded with C-BASIS item 3 and the SECHIST record, item 30 (flat-charge allowance) gains C-BASIS item 5, 3 items appended (total in the entry now 34)",
         "spinoff-factor-2022-event unchanged: no PRD addendum on the factor exists (headings v0.5, v0.6, v0.7, v0.8 the fund basis, v0.9 the basis field; the last is line 343)",
+        "other entries unchanged"
+      ]
+    },
+    {
+      "round": 80,
+      "by": "0.9.0_WK_ADVI_COTBKF~157",
+      "changed": [
+        "adjusted-close-used-as-price: c_basis.prd moved to v0.10 @4d488ab2f0 (headings_read gains line 389); addendum_v0_10_lines quotes PRD lines 389-420; the v0.9 split sentence (lines 395-397) and its replacement (lines 402-414) and the replaced split arm (lines 416-419) are quoted; signoff_state_as_the_tool_printed_it is the v0.10 print; the round-79 print is kept as signoff_state_v0_9_as_the_tool_printed_it_round_79",
+        "adjusted-close-used-as-price: extent.lander added (dell1 ruling @479d6deba0 on origin/box/dell1, text quoted; request file @38c191a262, non-security fields quoted, securities not copied); extent.sechist.owning_fabric_answer left as \"relay file not in this tree\" (the relay file and its relays folder are absent from this worktree)",
+        "adjusted-close-used-as-price: extent.three_equities added from THREE_EQUITIES.json (five securities off 1.0; served_day_with_split_sized_error true; widens_c_basis false); extent.fund_closes_read_back added from FUND_CLOSES_READ_BACK.json (20,718 held trading days, 5,730 present; dell1 classes beside round-76 classes; split arm quoted)",
+        "adjusted-close-used-as-price: the two revision-9 unreconciled items (double scaling; signed sentence against the basis record) have ROUND 80 answers appended, quoted from v0.10; both stay open where v0.10 is silent; 9 items appended to unreconciled (the order-against-record and record-against-record differences, the split arm, the widening statement, HON, and closes_when)",
+        "adjusted-close-used-as-price: evidence gains six rows (PRD v0.10, the two records, the dell1 ruling, the request file, the round-80 analysis)",
+        "adjusted-close-used-as-price: state, in_force, floor_series, ceiling_series, closes_when, owner unchanged",
         "other entries unchanged"
       ]
     }
