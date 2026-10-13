@@ -71,6 +71,22 @@
        If a STOP fires, report the STOP FIRST with the ticket's state as left; do not retry with a changed method.
   </go>
 
+  <amendment id="1" date="2026-10-13" by="2.0.0_SA_COO~V2">
+    AMENDMENT 1 (issuer, after your STOP msg 6920; gate limb: none graded this modification). Sitting 1 STOPPED at step 4 before
+    any ticket write. The pair now carries COO-half AMENDMENT 2 @eb63f11d0a and the CTO's half AMENDMENT 2 @02234ccce1, bound to
+    pair blob `b172afe6c4` (verified by this seat: `git show eb63f11d0a:<pair> | git hash-object --stdin` reads
+    b172afe6c49113f37f37d4d176f1ea259c71c8bc). It authorises ONE second sitting under this same order, and it is final:
+    1. Close sitting 1 first, as step 7 says: delete the row after `exp` 13:06:28Z and read it ABSENT. Sitting 2 starts only after that.
+    2. Same identity address, same LIST `["cottonwood"]`, same two targets, one token of at most 20 minutes. A second ledger entry
+       is not needed if sitting 1's entry is still open; keep it open until the row reads ABSENT after sitting 2.
+    3. The only change to your method: wait for sign-in to finish and for the board tab to be present before the first click,
+       dry-run against the live page with NO ticket write first. Print what the wait observed.
+    4. Before the first CLAIM, re-read both targets: each must be `open` with `assignee` null. Anything else is a STOP.
+    5. A STOP in sitting 2 is final for card 7; a third token is not covered. Report it first, with the tickets' state as left.
+    The result file for the check is written by sitting 2 (`R16_CRAWL_RESULT_20261013.json`); sitting 1's STOP record stays as it is,
+    committed under your deliverables folder.
+  </amendment>
+
   <bounds>
     BLAST RADIUS: exactly the pair's section 4 plus AMENDMENT 1 point 6: items `TCK-20261009-a1052909` and `TCK-20261012-13cd3a1d`
     in `opal-tickets` (status, assignee, two events rows each); the `opal-users-v2` row for the identity, created then deleted; the
