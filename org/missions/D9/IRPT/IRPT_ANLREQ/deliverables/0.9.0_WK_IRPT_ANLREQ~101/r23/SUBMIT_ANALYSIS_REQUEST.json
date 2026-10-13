@@ -1,0 +1,71 @@
+{
+  "cell": "AR-y-280",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~101",
+  "premise_head": "6c728045fb",
+  "read": {
+    "submit_today": "POST /api/scoped/tickets/submit (submit_form) admits CLIENT and INTERNAL (MATRIX SUBMIT-FORM, lambda_function.py:167 at HEAD 6c728045fb). Body allowlist SUBMIT_ALLOWED_FIELDS = ticket_type, title, description (lambda_function.py:182 at HEAD); any other member is 400 ('unexpected field(s) on the submit path'). The row is written under svc-ticket-form with requester.firm = the authorizer firmId, source dashboard_form:<firm>, and the 201 echoes the whole item plus cutoff_et. answers and attachment were refused for every type on this path.",
+    "create_validation": "create_ticket (HEAD :1145-1201, shifted by the change): for a type with questions or an attachment it calls _validate_service_fields (:633), then _validate_answers(defn, answers, pc) (:689-735) and _validate_attachment(kind, attachment) (:738-758) and sets requester firm = answers.firm (:1182-1184). _validate_answers: unknown keys refused, required answers refused, text/firm/enum/number/date/boolean shapes checked. _validate_attachment: attachment must be an object with exactly upload_id (non-empty, <= 200 characters) and input_id (matching ^portfolio_[0-9a-f]{64}$); no owner, existence or firm check exists anywhere in the module.",
+    "tenant_axis": "requester.firm is server-derived on every path: submit = the authorizer firmId; CREATE for analysis_request = answers.firm, with a body requester_firm required to equal it (:1182) and _create_firm_allowed (:1188, :352-357) checking the principal allowedFirmIds and the internal caller's profile scope; svc-commentary is checked against COMMENTARY_ALLOWED_FIRMS (:355-356). The submit path now refuses answers.firm that is not the caller's own firm (submit_form, answers.get(\"firm\") != firm).",
+    "report_ref_shapes": "Four writers and readers, and they do not meet. (1) PACKAGE (package_ticket, :1538) writes package.report_ref, the packager's opaque string (PACKAGE_REF_FIELDS :137), and never the top-level member. (2) REPORT (report_ticket, assignee branch or creator branch, SET report_ref) writes the top-level report_ref = {request_id, revision, recorded_by, recorded_at}; the creator branch records once (attribute_not_exists). (3) CREATE with report_request_id by svc-commentary writes the top-level report_ref = {request_id} (_validate_service_fields :649). (4) commentary_draft_ticket reads the TOP-LEVEL report_ref.request_id (:1595) and matches it to the body request_id. The split of row IRPT_ANLREQ-D2-W92-S4 holds at HEAD: the packager writes package.report_ref, the drafter reads report_ref.request_id, and nothing writes the top-level member from the packager's path (row IRPT_ANLREQ-D2-W101-S1).",
+    "packager_payload": "opal_packager.py _attach payload = {report_ref (the READY receipt's report_id, opal_packager.py:168), pdf_ref, original_ref, commentary_ref, firm} at :208-209. No request id is sent."
+  },
+  "built": {
+    "files": [
+      "infra/aws/lambda/ticket_center/lambda_function.py (submit_form: SUBMIT_TYPED_FIELDS, analysis_request answers and attachment through _validate_answers and _validate_attachment, the answers.firm = caller firm check, the five-member 201 view for analysis_request; the constants SUBMIT_TYPED_FIELDS and SUBMIT_ANALYSIS_VIEW)",
+      "infra/aws/lambda/ticket_center/tests/test_submit_analysis_request.py (new, 15 tests)"
+    ],
+    "commit": "336168cde3",
+    "not_built": "step 3 (package_ticket writes the top-level report_ref once): STOPPED per the order; the PACKAGE body carries no request id. BLOCKING row IRPT_ANLREQ-D2-W101-S1 in the channel commit 245924c8ee.",
+    "not_changed_existing_files": "tests/test_analysis_request.py is NOT edited: the refusal it pins at :131-133 is for ticket_type other and still holds (folder count unchanged by it)."
+  },
+  "authorization_change": "A client-human (a verified human at a firm other than the internal firm) may now submit ONE analysis_request on POST /api/scoped/tickets/submit: answers and an attachment (upload_id and input_id), checked by CREATE's own validation, for the caller's OWN firm only. The firm is the authorizer firmId and never the body's: a body answers.firm naming another firm is refused 400, and any firm, requester, source or created_by member at the top level is refused 400 as before. The ticket is written under svc-ticket-form with requester.firm = the caller's firm, and the 201 names the ticket with ticket_id, status, ticket_type, title and created_at only (no answers, no attachment; cutoff_et as before). An internal human gets the same analysis_request submit on the internal firm (opal-capital) only. The packager (svc-irpt-packager) gains NO new write in this change: PACKAGE is unchanged and report_ref is not written (step 3 STOPPED). NOT CHANGED: CREATE (a client is still 403; the service subjects are unchanged), LIST, GET, METRICS, REPORT, CLAIM, COMPLETE, COMMENTARY_DRAFT, COMMENTARY_SENT, and the PACKAGE matrix row (still empty, the named principal still the only caller). Other ticket types on the submit path keep the refusal of answers and attachment. Keys touched in the ticket table: the new analysis_request item only (answers map, attachment map, the same keys CREATE writes); no existing item is written. The service CANNOT tell whether an input_id belongs to the caller's firm: the check is shape only and no owner check was invented (channel row IRPT_ANLREQ-D2-W101-S3, ARMED, disarm_owner 1.0.0_SA_CTO). Rollback: redeploy the previous Lambda package version (the HEAD build of lambda_function.py); no data migration; the analysis_request rows already written remain ordinary rows that the previous code reads. Release files: the Lambda package of infra/aws/lambda/ticket_center only is expected; infra/aws/terraform/ticket-center/main.tf and the portal authorizer were NOT read and NOT edited, so whether a release also needs them is unverified. Nothing was released, deployed, pushed or applied.",
+  "tests": {
+    "new_file": "infra/aws/lambda/ticket_center/tests/test_submit_analysis_request.py",
+    "count": 15,
+    "pass_with_change": "15 passed in 0.72s, 15 passed in 0.63s (two same-input runs, determinism); 15 passed in 1.00s",
+    "folder_with_change": "221 passed, 43 subtests passed (206 at HEAD plus 15 new)",
+    "cases": {
+      "a": "test_a_client_files_an_analysis_request_for_its_own_firm",
+      "b": "test_b_firm_and_identity_are_never_taken_from_the_body (firm, requester_firm, source, created_by, requester_email, requester_name, requester, and answers.firm for a client and for an internal caller)",
+      "c": "test_c_other_ticket_types_keep_the_refusal_of_answers_and_attachment",
+      "d": "test_d_the_201_names_the_ticket_and_echoes_no_answers_and_no_attachment",
+      "e": "test_e_invalid_answers_are_refused_with_the_same_words_as_create (seven cases; the error text compared with CREATE's)",
+      "f": "test_f_an_unresolvable_or_non_client_principal_is_refused_and_writes_nothing",
+      "g": "test_g_a_client_of_one_firm_cannot_read_or_write_another_firms_ticket",
+      "h": "NOT BUILT (step 3). No test in the file; BLOCKING row IRPT_ANLREQ-D2-W101-S1.",
+      "i": "test_i_only_the_named_packager_may_attach_a_package",
+      "j": "test_j_a_firm_outside_package_allowed_firms_is_refused",
+      "k": "test_k_create_stays_refused_for_a_client_and_open_for_internal",
+      "l": "test_l_the_attachment_is_refused_with_the_same_words_as_create",
+      "m": "test_m_an_analysis_request_submit_without_an_attachment_is_refused",
+      "n": "test_n_comparison_requires_a_model_on_submit",
+      "o": "test_o_submit_refuses_a_service_subject_even_with_the_analysis_fields",
+      "p": "test_p_an_unknown_ticket_type_on_submit_is_still_refused"
+    }
+  },
+  "before_arm": {
+    "run": "the same test file against the HEAD build of lambda_function.py, in a scratch copy outside the product tree (.scratch/before_arm/ticket_center under the worktree, gitignored)",
+    "failed": 11,
+    "passed": 4,
+    "failing_at_head": ["a", "b", "d", "e", "f", "g", "i", "j", "l", "m", "n"],
+    "passing_at_head": ["c", "k", "o", "p"],
+    "note": "Cases f, i and j fail at HEAD through their POSITIVE CONTROLS (a valid analysis_request submit, which HEAD refuses), not through the refusal they name. Case (a) fails at HEAD as the order requires. Case (h) cannot fail at HEAD because it is not built."
+  },
+  "mutant": {
+    "description": "answers.firm check disabled (the line becomes 'if False'), in a scratch copy: a client may name another firm in answers",
+    "observed": "2 failed, 13 passed: test_b_firm_and_identity_are_never_taken_from_the_body and test_g_a_client_of_one_firm_cannot_read_or_write_another_firms_ticket",
+    "fired": true
+  },
+  "acceptance_status": {
+    "AR280-y-AC1": "NOT MET as written: the order requires cases (a) AND (h) to fail at HEAD; (h) is not built (step 3 stopped, BLOCKING). The mechanical parts hold: 15 new tests pass, case (a) fails at HEAD, the folder reads 221, the record states the submit and the authorization change.",
+    "AR280-y-AC2J": "judgment criterion, graded at L9 by 3.0.0_SA_CVO, never by the worker."
+  },
+  "claim": "With the change, a client-human can file one analysis_request with answers and an attachment for its own firm, the firm is never taken from the body, the 201 echoes neither answers nor attachment, every other type keeps the refusal, and CREATE, LIST, GET, REPORT, CLAIM, COMPLETE and PACKAGE are unchanged. The packager's top-level report_ref write (step 3) is NOT built: it is blocked on the packager sending a request id, which is outside this grant. Nothing was released, deployed, pushed or applied.",
+  "not_read": [
+    "infra/aws/terraform/ticket-center/main.tf (routes, env PACKAGE_ALLOWED_FIRMS, authorizer wiring)",
+    "the portal authorizer and the portal's submit client",
+    "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py beyond the attach payload (:144-212 and the live ports) and any packager test that pins its payload",
+    "the downstream reader of the upload input_id (whether it enforces the input's owner)",
+    "the decomposition IRPT_ANLREQ_DECOMP_R23B_Y.md and the task order's own wording beyond its acceptance block"
+  ]
+}
