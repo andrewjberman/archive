@@ -1,0 +1,126 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-b-5",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-b-5.registration-facts-and-lease.md",
+  "group": "OTHER",
+  "vintage_commit": "46842c7d3b"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~1",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round1.md",
+  "vintage_commit": "46842c7d3b",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-b-5.registration-facts-and-lease.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/open-calls.py",
+   "kind": "script",
+   "commit_or_etag": "7bff1eab9b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local tool a seat runs; nothing is deployed and no cluster copy is written by any criterion here."
+  },
+  {
+   "path_or_key": ".tools/tests/test_open_calls_register.py",
+   "kind": "test",
+   "commit_or_etag": "7bff1eab9b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local test on temporary git portals and a temporary OPAL_STATE_ROOT with OPAL_OPENCALLS_CLOUD=0; nothing is deployed."
+  },
+  {
+   "path_or_key": ".tools/tests/test_open_calls_approval.py",
+   "kind": "test",
+   "commit_or_etag": "84821898b9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Item 4 (amended) and the issuer's ruling (row NFRA_DEVPLN-W1-S10): every approval add passes --portal to a temporary fixture git repository; case 1 asserts head_sha = fixture branch tip and commits = fixture branch own count; runs on a temporary OPAL_STATE_ROOT."
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_DEVPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "config_data",
+   "commit_or_etag": "46842c7d3b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "No row was appended by this run; rows S5 to S10 of this order already stand in the file. A document, nothing is deployed."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPb5-AC1",
+   "criterion_verbatim": "python .tools/tests/test_open_calls_register.py expect: ok=True (the last line reads OPEN-CALLS-REGISTER-TEST cases=<k>/<n> ok=True)",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_open_calls_register.py",
+   "output_evidence": "Run under timeout 120 from the worktree root on HEAD 84821898b9 (open-calls.py at 7bff1eab9b): rc=0. Per-case lines: PASS a branch cut from PROD with 2 own commits registers with commits=2 and the computed head; PASS a branch cut from DEV is refused dev-overlap (rc 3) and writes nothing; PASS a missing branch is refused branch-not-found (rc 3) and writes nothing; PASS an empty branch (no commits over PROD) is refused reason=empty (rc 3) and writes nothing; PASS no --portal is refused reason=portal-required (rc 3) and writes nothing; PASS a live lease for this seat writes an APPROVED row (approval-status APPROVED valid=yes); PASS an expired lease, a lease for another seat and a lease with mode HOLD are each refused and write nothing; PASS a lease file that does not exist is refused lease-not-live (rc 3) and writes nothing; PASS a live lease on a DEV-cut branch is refused dev-overlap (rc 3) and writes nothing; PASS --check-only prints the same register line for a branch of any name, refuses the DEV cut, and writes nothing. LAST line: OPEN-CALLS-REGISTER-TEST cases=10/10 ok=True.",
+   "denominator": "10 of 10 cases pass",
+   "status": "PASS",
+   "expect": "ok=True"
+  },
+  {
+   "criterion_id": "DPb5-AC2",
+   "criterion_verbatim": "python .tools/open-calls.py add --kind approval --check-only --project NFRA_DEVPLN --box dell1 --branch origin/cand/laptop/contributing-boxes --purpose x --pages x --class opal-internal --how x --portal portal expect: APPROVAL-REGISTER result=OK row=- head_sha=",
+   "method": "command",
+   "invocation": "python .tools/open-calls.py add --kind approval --check-only --project NFRA_DEVPLN --box dell1 --branch origin/cand/laptop/contributing-boxes --purpose x --pages x --class opal-internal --how x --portal portal",
+   "output_evidence": "Run under timeout 120 from the worktree root against the REAL portal repo (read-only git reads; nothing written, --check-only): rc=0. OUTPUT: APPROVAL-REGISTER result=OK row=- head_sha=07f065e69f54b6821d1197cd7b947ec1131c8026 commits=1 check-only=yes",
+   "denominator": "1 of 1 invocation run; 1 of 1 expected output lines present (prefix APPROVAL-REGISTER result=OK row=- head_sha=)",
+   "status": "PASS",
+   "expect": "APPROVAL-REGISTER result=OK row=- head_sha="
+  },
+  {
+   "criterion_id": "DPb5-AC3",
+   "criterion_verbatim": "python .tools/tests/test_open_calls_approval.py expect: ok=True (DP-b-1's own test stays green after --portal became required for the approval kind)",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_open_calls_approval.py",
+   "output_evidence": "Run under timeout 120 from the worktree root on HEAD 84821898b9: rc=0. Every approval add passes --portal to a temporary fixture repository. Per-case lines: PASS add makes an OPEN approval row (head_sha = fixture tip, commits = fixture own count, pages split); PASS close approved by andrew on a client-facing row reads APPROVED valid=yes; PASS close approved by a CTO serial on a client-facing row reads valid=no; PASS the same CTO close on an opal-internal row reads APPROVED valid=yes; PASS close declined reads DECLINED valid=no; PASS a test-only approval by a CTO serial reads APPROVED valid=yes; PASS a branch with no row reads ABSENT (rc 0); PASS unreadable JSON and a missing store exit rc 2 as UNREADABLE, never ABSENT; PASS a bad class, a bad branch and a branch of another box are refused (rc 2, field named, nothing written); PASS an approval close needs --decision and a CTO close needs OPAL_AGENT_SERIAL; --decision on a fork is refused; PASS a fork add and a fork close behave as before (kind fork, no decision key on the closure); PASS a row without a kind key lists as a fork (as before); PASS a fork add without --context is refused rc 2 naming --context. LAST line: OPEN-CALLS-APPROVAL-TEST cases=13/13 ok=True.",
+   "denominator": "13 of 13 cases pass",
+   "status": "PASS",
+   "expect": "ok=True"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Difference control on the overlap rule: the same registration tool on a PROD cut (o1, o2 over PROD) and a DEV cut (d1, d2, x1 over PROD); the rule must register the first and refuse the second.",
+   "expected": "the PROD cut registers commits=2 with overlap 0; the DEV cut is refused reason=dev-overlap overlap=2 commits=3 and writes nothing",
+   "observed": "AC1 cases 'a branch cut from PROD with 2 own commits registers with commits=2 and the computed head' and 'a branch cut from DEV is refused dev-overlap (rc 3) and writes nothing' both PASS in the AC1 run",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1, AC2 and AC3 were each run once under timeout 120 on this HEAD; no rerun was needed (no timeout, no rc other than the recorded one).",
+   "observed": "AC1 last line OPEN-CALLS-REGISTER-TEST cases=10/10 ok=True (rc 0). AC2 line APPROVAL-REGISTER result=OK row=- head_sha=07f065e69f54b6821d1197cd7b947ec1131c8026 commits=1 check-only=yes (rc 0). AC3 last line OPEN-CALLS-APPROVAL-TEST cases=13/13 ok=True (rc 0).",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the S3 cluster copy of an approval row written by approval-lease",
+   "reason": "The tests run with OPAL_STATE_ROOT set and OPAL_OPENCALLS_CLOUD=0, so no put is exercised; the cluster copy is not tested by this order. The AC2 run was --check-only, so no list was written."
+  },
+  {
+   "item": "a real DEV-cut branch in the portal",
+   "reason": "The DEV refusal is exercised on temporary portals (DPb5-AC1). The live portal has no DEV-cut branch to refuse (origin/DEV is an ancestor of origin/PROD; NFRA_DEVPLN-W1-S9), so AC2 is the positive real-seam arm only."
+  },
+  {
+   "item": "the older suite (.tools/tests/test_open_calls.py)",
+   "reason": "Not a criterion of this order and outside its paths; it was red at HEAD before this change (NFRA_DEVPLN-W1-S8)."
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W1-S5: the earlier AC2 branch wk-dsgn-irptv1-r25-61-prodcut is a stale PROD cut with overlap 0 (superseded as AC2 by the amendment; row stays open)",
+  "NFRA_DEVPLN-W1-S6: --portal required on add --kind approval made test_open_calls_approval.py red at its first add (ARMED, disarm owner 2.0.0_SA_COO~DV); item 4 supplies the fixture; AC3 is green in this run",
+  "NFRA_DEVPLN-W1-S7: approval-lease takes a --project the order's flag list does not name; built with a default of NFRA_DEVPLN",
+  "NFRA_DEVPLN-W1-S8: test_open_calls.py is red at HEAD (its fork add omits --context, required since the 2026-10-09 context rule); outside this order's paths",
+  "NFRA_DEVPLN-W1-S9: AC2 as first written named origin/DEV (empty over PROD on the live portal); the issuer amended AC2 to origin/cand/laptop/contributing-boxes, which PASSES in this run (row stays open for the issuer)",
+  "NFRA_DEVPLN-W1-S10: the DP-b-1 test's case 1 null assertion contradicted DP-b-5's computed head_sha and commits; the issuer ruled the expectation and case 1 now asserts the fixture tip and own count; AC3 PASSES in this run (row stays open for the issuer)"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~1/NFRA_DEVPLN.TO-DP-b-5.registration-facts-and-lease.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check .tools/tests/test_open_calls_approval.py .tools/tests/test_open_calls_register.py .tools/open-calls.py",
+   "result": "All checks passed! (rc 0)"
+  },
+  {
+   "tool": "py_compile",
+   "invocation": "python -m py_compile .tools/tests/test_open_calls_approval.py",
+   "result": "rc 0, no output"
+  }
+ ]
+}
