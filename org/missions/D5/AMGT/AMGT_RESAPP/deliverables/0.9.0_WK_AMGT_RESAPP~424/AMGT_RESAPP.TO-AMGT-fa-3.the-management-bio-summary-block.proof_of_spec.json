@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-fa-3.the-management-bio-summary-block",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-fa-3.the-management-bio-summary-block.md",
+    "group": "OTHER",
+    "vintage_commit": "0a4abb922c8ec6b3a05909be3822eda54df3d447"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "0d02a44ab91291aa1fecea459d0cdee68615878a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-fa-3.the-management-bio-summary-block.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~424",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/block_mgmt_bio.py",
+      "kind": "script",
+      "commit_or_etag": "b2a160c355",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib library module: build_block(ctx) for mgmt_bio, no I/O of its own. Nothing deploys: no schedule, no AWS call, no grant; the orchestrator and run cells of the workstream are other cells.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_block_mgmt_bio.py",
+      "kind": "test",
+      "commit_or_etag": "b2a160c355",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pytest module, 23 collected items over 17 test functions, stub model only, reads the recorded ASML fixture; run from the repository root with PYTHONPATH set. Not a deployed artifact.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "b2a160c355",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended: AMGT_RESAPP-D1-W424-S1 (BLOCKING, INERT, disarm_owner 2.0.0_SA_COO~R2). Append-only; no existing row edited."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `AIFILL FA-3 ARMS: YES (N of N)` with N equal to the count printed and N at least 14, no `FAIL` arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-424 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa3_mgmt_bio.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM a model failure propagates (the orchestrator converts it) PASS RuntimeError\nARM the module does no I/O of its own                    PASS []\nARM the source file is ASCII                             PASS non-ASCII byte in source\nAIFILL FA-3 ARMS: NO (13 of 14)\nexit=1\n(full run on the same bytes, the line above the tail window: ARM OPAL citations are plain-words source labels (team pack, officer list) FAIL ['Research team pack, management passage'])",
+      "denominator": "13 of 14 arms PASS (14 ARM lines in the full run, 1 FAIL: the officer-citation arm)",
+      "status": "FAIL",
+      "status_reason": "The arm 'OPAL citations are plain-words source labels (team pack, officer list)' requires an officer-list citation. The served ASML fixture's CEO officer row carries role_start and tenure_years both null, so the spec's officer fact (taken only when one is not null) is absent and the arm cannot pass. The module follows the spec literally; no spec or check edit was made. Filed as AMGT_RESAPP-D1-W424-S1 (BLOCKING); the issuer decides. The non-zero exit also fails the criterion's exit=0.",
+      "expect": "AIFILL FA-3 ARMS: YES \\((\\d+) of \\d+\\)\\s*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the last non-empty line before `exit=` reads `N passed` (N at least the count your test module's functions define) with no `failed` and no `error` in the last 3 lines; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-424 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_block_mgmt_bio.py | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": ".......................                                                  [100%]\n23 passed in 0.08s\nexit=0",
+      "denominator": "23 of 23 collected test items passed (0 failed, 0 errors); 17 test functions, N=23 at least 17",
+      "status": "PASS",
+      "expect": "[0-9]+ passed in [0-9.]+s\\s*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutation run: the face names no mutant for this cell. The negative arms stand as the controls: the AC1 refusal and fallback arms (numeric guard, NO_INFORMATION, web no-citation, unknown CEO, missing bodies, propagated model failure) and the pytest branch cases.",
+      "expected": "N/A - the spec names no mutant",
+      "observed": "The fallback and refusal arms of check_fa3_mgmt_bio.py and the branch tests of the pytest module are the negative controls; 13 of 14 arms are PASS, the one FAIL is the officer-citation arm reported above.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: AC1 invoked twice and the pytest module invoked twice on the same committed bytes (commit b2a160c355)",
+      "observed": "AC1 run 1 and run 2: AIFILL FA-3 ARMS: NO (13 of 14), exit=1 both times; pytest run 1 and run 2: 23 passed both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the task-order <status> flip to complete",
+      "reason": "The face states the status flip is the issuer's, and AC1 is FAIL, so the order stays open. The task order file is outside this worker's write grant (<paths>)."
+    },
+    {
+      "item": "lib/research/aifill/model.py, inputs.py, block_*.py other than block_mgmt_bio.py, store.py and run.py",
+      "reason": "Other cells of the workstream. The face bounds this cell to block_mgmt_bio.py and its test module."
+    },
+    {
+      "item": "any live model call, network or AWS access",
+      "reason": "Declared EGRESS NONE. The tests use a stub model; the anthropic package is never imported; the module imports only re and lib.research.aifill.contract."
+    },
+    {
+      "item": "an edit of the officer-citation arm or of the spec's officer rule",
+      "reason": "Outside this worker's authority; recorded as the BLOCKING row AMGT_RESAPP-D1-W424-S1 for the issuer."
+    },
+    {
+      "item": "the drain-end merge of branch wk-AMGT_RESAPP-424",
+      "reason": "Worker rule: commit on the worktree branch only; the drain merges it."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W424-S1: the acceptance arm 'OPAL citations are plain-words source labels (team pack, officer list)' requires an officer-list citation, which the served ASML fixture cannot produce (the CEO officer row has role_start and tenure_years both null); the module follows the spec literally, the arm FAILs (13 of 14), and the row is BLOCKING for the issuer's disposition."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~424/AMGT_RESAPP.TO-AMGT-fa-3.the-management-bio-summary-block.proof_of_spec.json (this instance carries the session narrative inline; no separate SESSION_LOG.md was produced)",
+  "compiler_tools": [
+    {
+      "tool": "python (check_fa3_mgmt_bio.py)",
+      "invocation": "PYTHONPATH=<worktree> python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa3_mgmt_bio.py",
+      "result": "AIFILL FA-3 ARMS: NO (13 of 14), exit 1"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "PYTHONPATH=<worktree> python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_block_mgmt_bio.py",
+      "result": "23 passed, exit 0"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/block_mgmt_bio.py lib/research/aifill/tests/test_block_mgmt_bio.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+    }
+  ]
+}
