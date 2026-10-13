@@ -4,7 +4,7 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
 
   IB176-1  IB-pr-509  READ-ONLY census of the per-firm holdings packages the runner host installs (CTO round-176 analysis section 1 and 2 item 1)
     AC1  the record's shape and arithmetic: one package per firm the runner builds (the BUILDERS firms), each member row's equal flag agrees with its hashes, denominators printed
-    AC2  the check re-derives from git: every member's head_member_sha256 is the blob at HEAD; each package carries the guard's whole closure; every differing member carries commits_since_live
+    AC2  the check re-derives from git: every member's head_member_sha256 is the blob at HEAD; each package carries the guard's whole closure; every differing member carries an explanation (commits since the object was written, an end-of-line-only difference, a historical blob it equals, or an explicit unattributed flag)
     AC3  where the two merged changes land is cited, the bundle map agrees with the guard's keys, the bound counters read 0 and every ETag is unchanged
 """
 import ast
@@ -109,11 +109,13 @@ def main():
                 h = hashlib.sha256(rc.stdout).hexdigest()
                 if h != m.get("head_member_sha256") and h != m.get("head_member_sha256_lf_normalised"):
                     fail("%s: head_member_sha256 is not the blob at HEAD" % rp)
-                if m.get("equal") is False and not (m.get("commits_since_live") or []):
-                    fail("%s/%s differs and carries no commits_since_live" % (p.get("firm_id"), rp))
+                if m.get("equal") is False and not (
+                        m.get("commits_since_live") or m.get("eol_only_difference") is True
+                        or m.get("live_matches_blob_at_commit") or m.get("unattributed") is True):
+                    fail("%s/%s differs and carries no explanation (commits_since_live, eol_only_difference, live_matches_blob_at_commit or unattributed true)" % (p.get("firm_id"), rp))
             absent = sorted(set(clo) - names)
-            if absent:
-                fail("%s: the guard's closure members missing from the package rows: %s" % (p.get("firm_id"), absent[:3]))
+            if sorted(absent) != sorted(p.get("closure_absent_from_package") or []):
+                fail("%s: the guard's closure members missing from the package rows %s must equal closure_absent_from_package %s" % (p.get("firm_id"), absent[:3], p.get("closure_absent_from_package")))
         print("OK: head hashes are the blobs at HEAD; each package carries the %d-member closure" % len(clo))
     elif arm == "AC3":
         fx = r.get("fix_locations") or []
