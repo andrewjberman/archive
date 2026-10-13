@@ -36,7 +36,7 @@
       "ycharts/research/tests/test_opal_packager.py::test_d_one_message_one_render_to_package_pdf_then_one_attach (assertion at :155 pins the five-member payload)",
       "ycharts/research/tests/test_packager_own_store.py::test_a_a_retained_package_makes_no_commentary_read_no_render_no_produce_and_posts_the_retained_ref (assertion at :70 pins the five-member payload; the extra members are request_id and request_revision)"
     ],
-    "existing_edits_made": "NONE. Both pinned assertions are in files outside the <paths> grant; the order says to STOP and file a BLOCKING row, and the issuer amends the grant. The edit each needs is the same: add request_id and request_revision to the expected dict.",
+    "existing_edits_made": "BEFORE AMENDMENT 2: NONE (both pinned assertions were outside the grant; BLOCKING row IRPT_ANLREQ-D2-W109-S1). AFTER AMENDMENT 2: the two edits in amendment_2.test_edits, the expected dict of each pinned assertion only.",
     "generate_folder": "ycharts/generate/tests: 544 passed, 30 skipped, 1 xfailed, 4 failed at HEAD and 544 passed, 30 skipped, 1 xfailed, 4 failed with the change. The 4 failures are the known custody baseline (test_custody_entry.py x2, test_custody_retained.py x2); no change",
     "commit_gate": "bash .tools/commit-gate.sh on opal_packager.py: rc=0; on the new test file: rc=0 after one unused-import fix (keys)"
   },
@@ -55,7 +55,33 @@
     "queue_or_env": "none",
     "tests_to_amend_before_release": "ycharts/research/tests/test_opal_packager.py:155 and ycharts/research/tests/test_packager_own_store.py:70 (five-member pins; outside this grant; BLOCKING row IRPT_ANLREQ-D2-W109-S1)"
   },
-  "claim": "The packager sends the request id and the record's integer revision on the PACKAGE body, once per attach; the idempotence still reads the four pointers only; a conflicting request id is the named refusal ATTACH_CONFLICT:REPORT_REF_ALREADY_RECORDED_OTHER. Nothing released; the two pinned existing tests are red until the issuer amends the grant.",
+  "amendment_2": {
+    "trigger": "BLOCKING row IRPT_ANLREQ-D2-W109-S1; AMENDMENT 2 of IRPT_ANLREQ.TO-AR-y-285 (commit 461a5fa3df) added both pinned files to <paths>",
+    "merge": "461a5fa3df merged into wk-IRPT_ANLREQ-109 as 50cb639d86; the one conflict was the investigations file, resolved by keeping both sides' rows (trunk rows then W109-S1..S4)",
+    "test_edits": [
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_packager.py",
+        "test": "test_d_one_message_one_render_to_package_pdf_then_one_attach",
+        "line": 155,
+        "before": "                       \"original_ref\": UPLOAD_ID, \"commentary_ref\": wire(COMMENTARY_REF), \"firm\": FIRM}",
+        "after": "                       \"original_ref\": UPLOAD_ID, \"commentary_ref\": wire(COMMENTARY_REF), \"firm\": FIRM,\n                       \"request_id\": REQUEST_ID, \"request_revision\": 1}"
+      },
+      {
+        "file": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_packager_own_store.py",
+        "test": "test_a_a_retained_package_makes_no_commentary_read_no_render_no_produce_and_posts_the_retained_ref",
+        "line": 70,
+        "before": "                       \"commentary_ref\": base.wire(base.COMMENTARY_REF), \"firm\": base.FIRM}",
+        "after": "                       \"commentary_ref\": base.wire(base.COMMENTARY_REF), \"firm\": base.FIRM,\n                       \"request_id\": base.REQUEST_ID, \"request_revision\": 1}"
+      }
+    ],
+    "edit_scope": "the expected dict of the one assertion in each test; no other assertion, comment or word changed; no test deleted or loosened",
+    "results_after_edit": {
+      "research_folder": "319 passed, 0 failed (rc=0) -- was 317 passed, 2 failed before the two edits",
+      "new_file": "test_opal_packager_request_id.py: 13 passed (rc=0)",
+      "generate_folder": "ycharts/generate/tests: two bounded runs (timeout 120, rc=124 both); partial output shows 4 F markers through about 68 percent of the run; the 4 known custody failures, full denominator NOT reached inside the bound"
+    }
+  },
+  "claim": "The packager sends the request id and the record's integer revision on the PACKAGE body, once per attach; the idempotence still reads the four pointers only; a conflicting request id is the named refusal ATTACH_CONFLICT:REPORT_REF_ALREADY_RECORDED_OTHER. Nothing released; the two pinned existing tests were amended in the grant (test_edits) and are green.",
   "not_read": [
     "the server half (AR-y-284): ticket_center is not edited and the server's request id validation was read only at the refusal of unknown members (:1497-1501)",
     "the keys registry row for the request id key component (only keys.py:62 OPAQUE_ID_RE was read)",
