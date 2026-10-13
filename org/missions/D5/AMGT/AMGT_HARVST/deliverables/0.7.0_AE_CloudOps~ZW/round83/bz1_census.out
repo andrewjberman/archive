@@ -1,0 +1,29 @@
+# HVST-bz-1 -- step 4 and C-c: the stop, and the census reading NONE
+# 0.7.0_AE_CloudOps~ZW, site Z box. 2026-10-13T05:51:08Z.
+
+## C-g FIRST -- the stop file deleted AFTER the cycle record and BEFORE Start-ScheduledTask
+path   : C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-b5a7a3a4b6\.runtime\harvest-cycle\STOP
+BEFORE : Test-Path = True
+deleted: 2026-10-13T05:51:08Z
+AFTER  : Test-Path = False     <- C-g satisfied
+
+## step 4 -- Stop-ScheduledTask
+The runner had ALREADY ended itself on its own stop file at 05:46:00Z (see bz1_console_release.out),
+so the task read Ready with LastTaskResult 0 before this step. Stop-ScheduledTask was run anyway, as
+the order writes it; it is idempotent on a Ready task.
+  State after Stop-ScheduledTask: Ready
+
+## C-c -- the census MUST read NONE
+$ Get-CimInstance Win32_Process -Filter "Name='python.exe'" | where CommandLine match 'cycle_runner|backfill_driver'
+  matching rows: 0        <- NONE, as C-c requires
+
+## POSITIVE CONTROL for that census (a zero must be shown to be a real zero)
+The SAME command and the SAME Name filter, with a pattern that DOES match live processes:
+  pattern 'agent-poller|server\.py'  -> 44 rows
+  total python.exe on the box        -> 47
+So the census command, its Name filter and its CommandLine match all work; the 0 above is a real
+zero and not instrument silence.
+
+## PID 21512 and its console host
+  21512: GONE   17968 (conhost): GONE
+Both exited with the runner's own clean exit. Neither was ended by name or by PID by this seat.

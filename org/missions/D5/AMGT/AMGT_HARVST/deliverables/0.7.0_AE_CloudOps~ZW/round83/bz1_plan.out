@@ -1,0 +1,30 @@
+# HVST-bz-1 -- step 5a and C-b: the installer -Plan, READ before anything was registered
+# 0.7.0_AE_CloudOps~ZW, site Z box. 2026-10-13T05:5xZ. exit code 0. REGISTERED NOTHING.
+
+$ powershell -NoProfile -ExecutionPolicy Bypass -File "<new>\lib\opal_data_harvest\install-cycle-schedule.ps1" \
+    -RepoRoot "<new>" -Publishers bbg,wsj,barrons \
+    -StateDir "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state" \
+    -RuntimeRoot "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/runtime" -Plan
+
+TASK Opal Data Harvest - Continuous Cycle
+TRIGGER AtLogOn Opal_Bloomberg\Opal Bloomberg
+ACTION C:\Program Files\Python314\python.exe -m lib.opal_data_harvest.cycle_runner --state-dir "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state" --runtime-root "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/runtime" --stop-file "C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-1c69fa35a3\.runtime\harvest-cycle\STOP" --publishers bbg wsj barrons
+WORKDIR C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-1c69fa35a3
+TIMELIMIT PT0S
+MULTIPLE IgnoreNew
+RESTART 3 PT5M
+REGISTERED NOTHING (plan)
+
+## C-b GRADED on that text, each clause read
+  ACTION ends '--publishers bbg wsj barrons'                         YES
+  --state-dir is <state>, the c1be67f53c pin, UNCHANGED              YES
+  --runtime-root is <runtime>, the c1be67f53c pin, UNCHANGED         YES
+  WORKDIR is <new>, wk-harvest-runner-pin-1c69fa35a3                 YES
+  nothing registered by the plan run                                 YES
+=> C-b satisfied. The state dir and runtime root are carried exactly as the order and both halves require.
+
+## NOTE ON THE NEW --stop-file PATH (read, not assumed)
+The installer derives --stop-file from -RepoRoot, so the new task's stop file is under the NEW pin
+(...wk-harvest-runner-pin-1c69fa35a3\.runtime\harvest-cycle\STOP), NOT the old one. The old stop file
+could therefore not have ended the new runner at once, which is the hazard C-g names. C-g's delete was
+performed regardless, because the order requires it and it leaves no stale marker behind.

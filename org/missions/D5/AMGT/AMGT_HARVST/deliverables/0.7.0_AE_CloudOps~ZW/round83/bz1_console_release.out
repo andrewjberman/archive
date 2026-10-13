@@ -1,0 +1,72 @@
+# HVST-bz-1 AMENDMENT 3 section 1d -- GATE Y. No key is sent by this file; the gate is read first.
+# 0.7.0_AE_CloudOps~ZW, site Z box.
+gate_started_utc: 2026-10-13T05:40:59Z
+
+## Y5 FIRST -- the checkpoint snapshot, before any other act
+  source   : 3991 bytes  SHA-256 101489A14247FF8B015043B13F1055A587551FE8610EF605FA57692BB888ABE4
+  snapshot : 3991 bytes  SHA-256 101489A14247FF8B015043B13F1055A587551FE8610EF605FA57692BB888ABE4
+  Y5 = True  (byte for byte)
+
+## Y1 / Y2 -- two samples 120 s apart
+  sample 1 at 2026-10-13T05:40:59Z : title='Select C:\Program Files\Python314\python.exe'  CPU=26.984375  MainWindowHandle=1310950
+  sample 2 at 2026-10-13T05:42:59Z : title='Select C:\Program Files\Python314\python.exe'  CPU=26.984375  MainWindowHandle=1310950
+  Y1 = True  (both titles begin 'Select ')
+  CPU unchanged: True;  log last write 2026-10-12T20:19:44Z, age 9.39 h
+  Y2 = True
+
+## Y3 -- the ONLY child is a conhost.exe created within 5 s of the runner, owning no other child
+  runner CreationDate: 2026-10-10T22:15:26.513Z
+  child: ProcessId=17968 conhost.exe created 2026-10-10T22:15:26.520Z  delta=0.007689s  own children=0
+  Y3 = True
+
+## Y4 -- no ESTABLISHED connection
+  ESTABLISHED count: 0
+  positive control PID 5320: ESTABLISHED 1 (non-zero: the instrument works)
+  Y4 = True
+
+## Y6 -- the target handle, printed
+  PID 21512 MainWindowHandle = 1310950 (sample 1), 1310950 (sample 2); stable and non-zero: True
+  Y6 = True
+
+## GATE Y VERDICT  (read at 2026-10-13T05:43:01Z)
+  Y1=True  Y2=True  Y3=True  Y4=True  Y5=True  Y6=True
+  ALL SIX TRUE: True
+  => the single Escape to handle 1310950 is AUTHORISED. It is sent by the NEXT call, not this one.
+
+## THE KEY -- ONE Escape, sent 2026-10-13T05:46:00Z to handle 1310950 only
+
+Gate Y read ALL SIX TRUE at 05:43:01Z, so the key was authorised, and it was sent in a SEPARATE
+call after that verdict was read.
+
+Mechanism: PostMessage(hwnd=1310950, WM_KEYDOWN, VK_ESCAPE) then WM_KEYUP -- that pair IS one
+Escape keystroke, one key, pressed once. PostMessage targets the HWND explicitly, so unlike
+SendKeys/AppActivate it has NO focus dependency and CANNOT land on another window. The handle was
+re-read immediately before the send and matched 1310950; a mismatch would have aborted without a key.
+Nothing else was sent: no Enter, no click, no second key, no other window. The task was not stopped
+and the stop file was not touched.
+
+  PRE-KEY : handle 1310950  title='Select C:\Program Files\Python314\python.exe'  CPU=26.984375
+  KEY SENT: WM_KEYDOWN rc=True, WM_KEYUP rc=True
+  POST-KEY: PID 21512 GONE; cycle_runner.log mtime 2026-10-13T05:46:00Z -- the exact second of the key
+
+## THE OUTCOME: C-f SATISFIED AS ORIGINALLY SIGNED, ZERO PAIRS LOST, NO KILL
+
+The release did not merely unblock the process -- the runner immediately drained its pending console
+write, read the stop file that had been waiting 108 minutes, and ended itself. Its own log:
+
+  05:46:00Z STOP-FILE ...\STOP present: ending after the current job (24 pairs done)
+  05:46:00Z CYCLE bbg 20261012T191641Z floor 2026-10-12 asked 242 new 1 held 0 failed 0 stopped stopped_by_operator completed false
+  05:46:00Z STOP-FILE ...\STOP present: no further cycle
+
+STOP-FILE lines in the log: 0 before the key, 2 after.
+Cycle record 20261012T191641Z.cycle.json now EXISTS (388 bytes) reading
+  "stopped": "stopped_by_operator", "ended_at": "2026-10-13T05:46:00Z",
+  "asked": 242, "new": 1, "already_held": 0, "failed": 0, "failures": [],
+  "requeued": ["security-2edef08324932f27", "security-88716edce6fc0e54"]
+Task State: Ready, LastTaskResult 0 -- a clean exit, not a termination.
+PID 21512 GONE, conhost 17968 GONE, both by the runner's own exit.
+
+So the FALLBACK (the signed kill under W1-W5) was NEVER REACHED and no 5/10/15-minute read was
+needed: the terminal condition arrived inside 3 seconds. The 24 pairs of the cycle are recorded and
+the 2 requeued pairs carry into the next cycle from the same state dir. Nothing was killed by name
+or PID. This is the ORIGINAL C-f path, satisfied exactly as the round-81 pair signed it.
