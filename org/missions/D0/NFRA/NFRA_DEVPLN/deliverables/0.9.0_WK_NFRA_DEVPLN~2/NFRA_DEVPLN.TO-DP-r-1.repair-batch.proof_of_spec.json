@@ -1,0 +1,131 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-r-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-r-1.repair-batch.md",
+  "group": "OTHER",
+  "vintage_commit": "5b69a3c295"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~2",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round2.md",
+  "vintage_commit": "5b69a3c295",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-r-1.repair-batch.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/tests/test_open_calls.py",
+   "kind": "test",
+   "commit_or_etag": "24763e605f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local test on temporary mktemp state and crossbox directories; nothing is deployed and no real org/devices/state file is written."
+  },
+  {
+   "path_or_key": ".tools/portal-merge-forward.sh",
+   "kind": "script",
+   "commit_or_etag": "24763e605f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local script; the self-test runs against a mktemp origin and a mktemp clone. Nothing was pushed and the real portal DEV, PROD and main were not changed."
+  },
+  {
+   "path_or_key": ".tools/open-calls.py",
+   "kind": "script",
+   "commit_or_etag": "24763e605f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local tool a seat runs; one argument changed (approval-lease --project is required). Nothing is deployed."
+  },
+  {
+   "path_or_key": ".tools/tests/test_open_calls_register.py",
+   "kind": "test",
+   "commit_or_etag": "6b9bc6662b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local test on mktemp repositories; the one-line change adds --project NFRA_DEVPLN to the register_lease helper. Nothing is deployed."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPr1-AC1",
+   "criterion_verbatim": "python .tools/tests/test_open_calls.py expect: ok=True (the test is green and prints OPEN-CALLS-TEST cases=2/2 ok=True in the order's wording)",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_open_calls.py",
+   "output_evidence": "timeout 120, rc=0. Last line: OPEN-CALLS-TEST cases=19/19 ok=True. The order's cases=2/2 is stale: the test has 19 cases; the base run aborted after 2 entries (see NFRA_DEVPLN-W2-S5).",
+   "denominator": "19 of 19 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPr1-AC2",
+   "criterion_verbatim": "bash .tools/portal-merge-forward.sh cand/laptop/none-9 --repo portal --no-fetch expect: MERGE-FORWARD branch=cand/laptop/none-9 result=REFUSED reason=branch-not-found",
+   "method": "command",
+   "invocation": "bash .tools/portal-merge-forward.sh cand/laptop/none-9 --repo portal --no-fetch",
+   "output_evidence": "timeout 120, rc=1 (a refusal exits 1 by design). Output: MERGE-FORWARD branch=cand/laptop/none-9 result=REFUSED reason=branch-not-found dev_before=- dev_after=- pushed=no merge=-. No fetch ran and no worktree was made.",
+   "denominator": "1 of 1 refusal line matches the expected reason",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPr1-AC3",
+   "criterion_verbatim": "python .tools/open-calls.py approval-lease --branch cand/laptop/none-9 --box laptop --purpose x --pages x --class opal-internal --how x --portal portal --lease-file none.json expect: required: --project",
+   "method": "command",
+   "invocation": "python .tools/open-calls.py approval-lease --branch cand/laptop/none-9 --box laptop --purpose x --pages x --class opal-internal --how x --portal portal --lease-file none.json",
+   "output_evidence": "timeout 120, rc=2 (argparse). Last line: open-calls.py approval-lease: error: the following arguments are required: --project",
+   "denominator": "1 of 1 argparse refusal names --project",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPr1-AC4",
+   "criterion_verbatim": "bash .tools/portal-merge-forward.sh --selftest expect: ok=True (this order edits an existing script whose 18 self-test cases must stay green with the new merge= field and the fetch case added)",
+   "method": "test_suite",
+   "invocation": "bash .tools/portal-merge-forward.sh --selftest",
+   "output_evidence": "timeout 120, rc=0. Last line: MERGE-FORWARD-SELFTEST cases=22/22 ok=True. The 18 original cases stay green; new cases 1d (merge= names the merge commit), 12a (precondition: the clone does not know the pushed branch), 12b (the default fetch picks it up and merges) and 12c (its merge has origin DEV and the pushed tip as parents) are added.",
+   "denominator": "22 of 22 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPr1-AC5",
+   "criterion_verbatim": "python .tools/tests/test_open_calls_register.py expect: ok=True",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_open_calls_register.py",
+   "output_evidence": "timeout 120, rc=0. Last line: OPEN-CALLS-REGISTER-TEST cases=10/10 ok=True. The register_lease helper now passes --project NFRA_DEVPLN (commit 6b9bc6662b, one line); the four lease cases that were 6/10 red under the required --project are green again.",
+   "denominator": "10 of 10 cases pass",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Difference control on the fetch step: the same local-only branch in a temporary repository with no origin ref, run once with the default fetch and once with --no-fetch.",
+   "expected": "the default run refuses fetch-failed; the --no-fetch run passes step 1 and reaches the approval reader",
+   "observed": "default run: MERGE-FORWARD branch=localonly result=REFUSED reason=fetch-failed (git: couldn't find remote ref refs/heads/localonly). --no-fetch run: REFUSED reason=status-unreadable, which is the reader stand-in printing nothing, so step 1 passed.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "This session ran each of the five invocations once; the open-calls test and the self-test were also run in the prior session with the same last lines.",
+   "observed": "OPEN-CALLS-TEST cases=19/19 ok=True; MERGE-FORWARD-SELFTEST cases=22/22 ok=True; OPEN-CALLS-REGISTER-TEST cases=10/10 ok=True (this session). Prior session: the first two read the same.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a default (fetching) run against the REAL portal repository",
+   "reason": "the order says not to fetch the real portal; the default fetch was verified only in a temporary repository (controls.mutant) and in the self-test's temporary origin (case 12)."
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W2-S5 -- the open-calls test was red because its fixture add lacked --context and --rec, which the tool requires for a fork; the test was repaired, the tool was not (class OBSERVATION, INERT)",
+  "NFRA_DEVPLN-W2-S6 -- approval-lease --project broke four lease cases of test_open_calls_register.py, a file outside this order's paths; the issuer widened the grant, and BUILD item 4 (commit 6b9bc6662b) repairs the helper (class BLOCKING, resolved by this order)",
+  "NFRA_DEVPLN-W2-S7 -- the default fetch refuses a branch that exists only locally with fetch-failed; the local fallback runs only under --no-fetch (class OBSERVATION, INERT)",
+  "NFRA_DEVPLN-W2-S8 -- the proof checker's POST-COMMIT pin-drift line names 066fd5d7e2 as the commit that changed the register test file, and git shows that commit touches only the instance JSON (class OBSERVATION, INERT)"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~2/NFRA_DEVPLN.TO-DP-r-1.repair-batch.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 .tools/tests/test_open_calls_register.py .tools/tests/test_open_calls.py .tools/open-calls.py",
+   "result": "All checks passed!"
+  },
+  {
+   "tool": "bash -n",
+   "invocation": "commit-gate.sh on the code commit 24763e605f (bash -n .tools/portal-merge-forward.sh)",
+   "result": "OK: bash -n syntax-checked .tools/portal-merge-forward.sh"
+  }
+ ]
+}
