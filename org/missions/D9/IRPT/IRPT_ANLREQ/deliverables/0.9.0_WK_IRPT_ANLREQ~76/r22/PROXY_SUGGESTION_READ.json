@@ -1,0 +1,103 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-244",
+  "cell": "AR-y-244",
+  "read_only": true,
+  "built_or_changed": "nothing: no code, no page, no deploy, no live call",
+  "where_suggestion_comes_from": {
+    "reader_portal": "src/pages/InvestorReporting/tabs/analysis/prospect.ts:54-67 (proxyableFindings) and ProspectComposer.tsx:472-503 at portal DEV cf52fdbf; the input placeholder is ProspectComposer.tsx:480 (placeholder=\"Ticker\"); the suggestion block is :484-493 (Did you mean / Use <symbol>)",
+    "portal_read_method": "git object read of portal DEV cf52fdbf in the base portal repository (C:/dev/ajb_workspace/portal). The worktree submodule portal is an empty gitlink at 53506d49 (git ls-tree HEAD), so no portal file is on disk in this worktree.",
+    "writer": "infra/aws/lambda/investor-reporting/intake/upload_suggestions.py, function suggest_for, lines 26-88",
+    "file_lines": [
+      "upload_suggestions.py:58 advisory(\"check\", symbol, context_symbols=context, deadline=deadline) -- the only ask",
+      "upload_suggestions.py:62-64 the proposal is kept only when it is a string different from the symbol",
+      "upload_suggestions.py:68-79 verify(sorted proposals) and the acceptance test: state FOUND, reason EXACT_PROVIDER_MATCH, candidate id equal to the proposal, no features_needed, provider_receipt a dict",
+      "upload_suggestions.py:82-86 the finding gets item[\"suggestion\"] = {symbol, source KIMI_CHECK_PROVIDER_VERIFIED, provider_receipt_sha256} and actions lead with ACCEPT_SUGGESTION",
+      "ycharts/generate/resident_worker.py:623 suggest=_check_gate(self.session, resolver) (inside resolve_upload, :589)",
+      "ycharts/generate/resident_worker.py:753-772 _check_gate: builds suggest_for with advisory.call and verify=the same resolver (one securities_info batch)",
+      "ycharts/session/resident_session.py:133-137 kimi_advisory(): KimiAdvisory(send=..., telemetry=...) with NO search_capability",
+      "intake/resolution_kimi.py:48-51 the check prompt; :102-110 the reply must be exactly suggestion/confidence/reason and a valid symbol or KimiFailure",
+      "intake/security_resolution.py:178 SecurityResolver.check (cache, then provider_check); intake/resolution_broker.py:15 ROUTE /securities/securities_info; :78-91 BrokerSecurityCheck.__call__"
+    ],
+    "rule_in_words": "For each NEEDS_CORRECTION finding with code TICKER_NOT_FOUND whose row is in the template, the server asks Kimi (model kimi-k3) whether the symbol is a typo and may return one ticker; the same provider read then verifies that ticker, and only an exact FOUND match is attached to the finding as a suggestion that the page offers as Did you mean X?",
+    "what_it_calls": "Kimi kimi-k3 through KimiAdvisory.call('check') (a typo question, not a similarity question); then the provider read /securities/securities_info through the broker port. The browser calls neither: the Kimi key is read by the resident session on the server.",
+    "when_none_is_sent": [
+      "the finding is not TICKER_NOT_FOUND, its row is not in the template, or it is past the first 6 target rows (upload_suggestions.py:44-45)",
+      "the symbol repeats an earlier target (asked once, :49-51)",
+      "the 240 s total is spent before its turn (:52-54, counted as unasked)",
+      "the advisory raises or returns a failure or a reply off the schema (:58-60; resolution_kimi.py:102-110)",
+      "Kimi returns null -- the check prompt asks for a typo fix only (resolution_kimi.py:49-51)",
+      "Kimi returns the same ticker in another case (:63)",
+      "the provider read raises, returns no FOUND EXACT_PROVIDER_MATCH for the proposal, returns features_needed, or returns no receipt (:68-81)",
+      "the portal drops a suggestion whose actions do not lead with ACCEPT_SUGGESTION, whose symbol fails the ticker pattern, or which equals the file value (prospect.ts:62-64)"
+    ]
+  },
+  "why_timxx_got_none": {
+    "verdict_class": "READ, with two RUN checks on the existing harness and one constructed case",
+    "read": "The only producer of a suggestion is the typo check. TIMXX is not a one-character or transposition slip of any ticker, so the check's answer is null, and with a null answer the verify step never runs (upload_suggestions.py:63-66). Kimi's real reply for TIMXX is not in this worktree and was not asked for (no live call), so the null is an inference from the prompt, not a measured reply.",
+    "even_if_kimi_proposed": "Had Kimi proposed a ticker, the provider read would still decide. A money-market ticker the provider does not answer FOUND exact for is refused there (upload_suggestions.py:76-79). For a fund row the provider answers only if its own display id is the bare ticker (security_resolution.py:52-58, :108-115); otherwise that ticker is refused by name.",
+    "run_existing_harness": "RUN: timeout 120 python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_y4_check_gate.py -k anything_but -p no:cacheprovider -q -> '6 passed, 10 deselected' rc=0. The six cases are the null answer, the same ticker, an advisory failure, a provider that does not know the proposal, a gated feature, and a failing verify read. The fixtures use APPL, not TIMXX.",
+    "constructed_timxx_case": "RUN: timeout 120 python .scratch/timxx_case.py (worktree scratch, gitignored) rc=0 with output: 'A kimi null, provider knows nothing | suggestion=None | asked=1 suggested=0 verified=0'; 'B kimi proposes SGOV, provider does not verify SGOV | suggestion=None | asked=1 suggested=1 verified=0'; 'C kimi proposes SGOV, provider verifies SGOV exact | suggestion={symbol SGOV, source KIMI_CHECK_PROVIDER_VERIFIED} | asked=1 suggested=1 verified=1'. Case C shows the rule keys on the proposal and the provider's verdict, not on the symbol's shape.",
+    "not_determined": "Whether TIMXX was unasked (the 6-row cap or the 240 s budget) on the live upload is not read: the IRPT_RESIDENT_SUGGEST journal line would show it, and that journal is not in this worktree."
+  },
+  "options": [
+    {
+      "source": "A. Kimi typo check, provider-verified (the one live source today)",
+      "already_in_the_estate": "yes -- intake/upload_suggestions.py; intake/resolution_kimi.py:48-51; ycharts/generate/resident_worker.py:623",
+      "how_it_would_be_asked": "Already asked: one check per TICKER_NOT_FOUND symbol, then one securities_info batch on the proposal",
+      "what_it_returns": "one ticker that the provider answers FOUND exact; typo-shaped only",
+      "cost": {
+        "work": "none; live today",
+        "risk": "Returns nothing for a non-typo such as TIMXX; a model proposal, held back by the provider verify"
+      },
+      "server_only": true,
+      "callable_from_browser": false
+    },
+    {
+      "source": "B. Kimi swap advisory: up to three ETF alternatives with similar exposure, web search, each then provider-verified",
+      "already_in_the_estate": "yes, built but unreachable: intake/resolution_kimi.py:53-56 (the prompt), :159-165 (the gate: KIMI_WEB_SEARCH_UNVERIFIED unless search_capability carries verified true and a qa_receipt_sha256); intake/security_resolution.py:242-249 verified_suggestions (no caller outside tests); resident_session.py:133-137 passes no search_capability",
+      "how_it_would_be_asked": "KimiAdvisory.call('swap', symbol, excluded=...) then verified_suggestions(candidates, resolver), which keeps only exact provider FOUND rows",
+      "what_it_returns": "up to three candidate tickers with reasons and sources, each shown only if the provider answers FOUND",
+      "cost": {
+        "work": "provider QA that establishes web-search support and pins request_fields and a qa_receipt_sha256; then wire search_capability into resident_session.py:137 and a caller on the upload path; no new service",
+        "risk": "Model-sourced suggestions from a web search; each needs user approval (the prompt says so) and the provider verify; web-search spend per ask (budget 240 s, max_tokens 32000)"
+      },
+      "server_only": true,
+      "callable_from_browser": false
+    },
+    {
+      "source": "C. YCharts search through the gateway tool ycharts_search",
+      "already_in_the_estate": "UNPROVEN HERE -- the cell names it; it was not located in this worktree: comp-find over org/mcp returned 0 hits in 156 files scanned; Grep over org/modules and infra/aws/lambda/investor-reporting returned 0 files; the only hits are the task order text and an IRPT_BCKEND investigation row",
+      "how_it_would_be_asked": "A seat-side MCP call; no server code path to it was found in this worktree",
+      "what_it_returns": "not read",
+      "cost": {
+        "work": "unknown until the tool is located; a server path would need a new caller",
+        "risk": "a seat-side tool is not a server contract; the page cannot call it"
+      },
+      "server_only": true,
+      "callable_from_browser": false
+    },
+    {
+      "source": "D. Security master, asset dimension, or the SecurityResolver cache",
+      "already_in_the_estate": "no for similarity -- Grep over infra/aws/lambda/investor-reporting for security master, asset dimension returned 0 files; the SecurityResolver cache (security_resolution.py:178-237) holds only provider FOUND or NOT_FOUND results for exact symbols already asked, keyed by account and source revision",
+      "how_it_would_be_asked": "a cache get on the exact symbol",
+      "what_it_returns": "only symbols already verified before",
+      "cost": {
+        "work": "none",
+        "risk": "does not answer a similarity question; a cache hit is no evidence about a new ticker"
+      },
+      "server_only": true,
+      "callable_from_browser": false
+    }
+  ],
+  "earlier_sgov_resolution": "IRPT_YCDGEN.TO-YCD-h-5 line 50 says a row's ticker is its resolved symbol 'which carries the user's correction, e.g. SGOV for TIMXX'. So SGOV reached the row by the user typing a correction in the proxy row (the Y-5 path), not by a server suggestion.",
+  "recommendation": "Option B. The estate already has the similar-exposure advisory and the verify step (resolution_kimi.py:53-56, :159-165; security_resolution.py:242-249). What is missing is a provider QA receipt for web search, a search_capability wired at resident_session.py:137, and a caller. Nothing new is built and no index or search service is needed. Option A stays as the live source for typos. Option C is not chosen until the ycharts_search tool is located and its contract read. The CTO rules; nothing is built here.",
+  "proxy_wording": "This ticker is not in the data provider. Type the ticker of a security the provider prices, such as a listed ETF with the same kind of exposure, then review again.",
+  "claim": "READ of the code at the worktree HEAD (infra/aws/lambda/investor-reporting) and of portal DEV cf52fdbf (git object read); RUN offline only: the existing test_y4_check_gate.py -k anything_but (6 passed) and the constructed case in .scratch/timxx_case.py (worktree scratch). No live call, no build, no deploy, no change to the page or the code. The provider's and Kimi's live answer for TIMXX is not measured.",
+  "not_read": [
+    "Kimi's real reply for TIMXX and the live IRPT_RESIDENT_SUGGEST journal line for the upload (not in the worktree; no live call)",
+    "the freeze that writes TICKER_NOT_FOUND findings and the live row order that the 6-row cap applies to",
+    "the ycharts_search gateway definition (not located in this worktree)",
+    "the portal worktree files (submodule not checked out; read by object store at cf52fdbf)",
+    "the swap advisory's real QA receipt (no non-test code passes a search_capability; the repo's tests were not read for one)"
+  ]
+}
