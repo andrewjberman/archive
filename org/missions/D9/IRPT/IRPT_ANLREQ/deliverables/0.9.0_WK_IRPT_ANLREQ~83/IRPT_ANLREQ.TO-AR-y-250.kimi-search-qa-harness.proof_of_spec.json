@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-250",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-250.kimi-search-qa-harness.md",
+    "group": "OTHER",
+    "vintage_commit": "c53686ba6d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R22C_Y.md",
+    "vintage_commit": "c53686ba6d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-250.kimi-search-qa-harness.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~83",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/kimi_search_qa.py",
+      "kind": "script",
+      "commit_or_etag": "sha256:d4ecb2e02353f95925410845651cf6a2ccf435f8dd92fe3751a0c78c71d57e7d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the QA harness committed on the worker branch only; it makes no provider call and is not deployed, released or invoked",
+      "artifact_covered_by": ["AR250-y-AC1", "AR250-y-AC2J"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_kimi_search_qa.py",
+      "kind": "test",
+      "commit_or_etag": "sha256:495e7a3334bc9e50c311e99730a85ef2916d5a6f1c7db68b6773a9d777c46e57",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "14 offline tests with fake send, search and verify ports; no network; run on the worker branch",
+      "artifact_covered_by": ["AR250-y-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~83/r22/KIMI_SEARCH_QA_HARNESS.json",
+      "kind": "doc",
+      "commit_or_etag": "worker-branch",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record: the fixed case list, the harness sha256, the test results, the live QA design (NOT RUN) and the not_read list; committed on the worker branch only",
+      "artifact_covered_by": ["AR250-y-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "worker-branch",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four rows appended on the worker branch only (W83-S1 to W83-S4); no existing row edited",
+      "artifact_covered_by": ["AR250-y-AC2J"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR250-y-AC1",
+      "criterion_verbatim": "the record names the fixed case list (TIMXX, at least 4 known funds, a nonsense symbol, two injection strings), the harness file with its sha256, at least 7 passing offline tests including every no-receipt case, and a live QA design.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-83/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y250-qa --root C:/dev/wk-irpt-anlreq-83",
+      "output_evidence": "qa tests: 14 passed, 0 failed (rc=0) / Y250-QA-OK (rc=0). Run twice, identical output both times (.scratch/ar250_run1.txt and run2.txt).",
+      "denominator": "1 check run; 3 of 3 conditions met (the record's sha256 and case count of at least 8 with TIMXX; the harness file present; the test file passes with 14 of 14 tests against a floor of 7); 14 of 14 offline tests passed, 0 failed",
+      "expect": "Y250-QA-OK",
+      "status": "PASS",
+      "status_reason": "the checker printed Y250-QA-OK at rc=0; the decisive line is the verdict itself"
+    },
+    {
+      "criterion_id": "AR250-y-AC2J",
+      "criterion_verbatim": "judgment (graded at L9, never by the worker): the case list is fixed in the file before any run, verified is True only inside the QA run and said so, no receipt is minted for an unverified, unsupported, malformed or injected answer, the harness has no network client of its own, and no live call was made.",
+      "method": "manual_read_with_citation",
+      "invocation": "READ: infra/aws/lambda/investor-reporting/ycharts/generate/kimi_search_qa.py (CASES; validate_cases; grade_case; run_qa with the verified flag at the capability dict, the placeholder receipt and the return of the minted receipt; no import of urllib.request, socket, http.client, boto3 or kimi_port, asserted by test_the_harness_holds_no_network_client); infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_kimi_search_qa.py. RUN: python ar21_checks.py y250-qa --root <worktree> (twice); cd infra/aws/lambda/investor-reporting && timeout 120 python -m pytest ycharts/generate/tests/test_kimi_search_qa.py -q -p no:cacheprovider. NO LIVE CALL, NO UPLOAD, NO PUSH, NO DEPLOY.",
+      "output_evidence": "the case list is the module-level tuple CASES committed with the file before the first run; verified True appears in run_qa only; the capability carries the 64-zero placeholder and the minted receipt is returned, not written; grade_case returns closed codes (FAILURE, NO_RESULT, SHAPE_*, SOURCE_NOT_HTTPS, SOURCE_NOT_RESULT_URL, CANDIDATE_COUNT, EXPECTED_EMPTY, EXPECTED_CANDIDATES, INJECTION_OBEYED, UNSUPPORTED, UNVERIFIED) and a receipt needs all_ok; the test file reads 14 tests, 14 passed; no live call was made",
+      "denominator": "8 fixed cases of which 1 TIMXX, 4 known, 1 nonsense, 2 injection; 14 offline tests; 0 receipts minted from a provider answer; 0 live calls; 1 mutant of the 1 support rule fired on 1 test",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: the verdict is graded at L9 by 3.0.0_SA_CVO, never by the worker. The worker supplies the reads above and no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In a scratch copy outside the product tree (.scratch/ar250_mutant, gitignored), the support rule is disabled: 'if not _supported(clean, cand_sources, results):' is replaced by 'if False:'. The support rule is the one that stops a candidate no search result named from earning a receipt.",
+      "expected": "the test that asserts no receipt for an unsupported candidate FAILS; the other tests pass",
+      "observed": "1 failed (test_a_candidate_not_supported_by_a_result_yields_no_receipt), 13 passed, rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the real-root y250-qa, the second redirected to .scratch/ar250_run2.txt, compared with diff",
+      "observed": "run 1 and run 2 print the identical lines 'qa tests: 14 passed, 0 failed (rc=0)' and 'Y250-QA-OK', rc=0 both times; diff reports no difference",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W83-S1: the real KimiAdvisory at c53686ba6d has no search port, so the default factory would raise TypeError; run_qa records that as HARNESS_EXCEPTION and mints no receipt; the offline tests use a stub with the interface kwargs; the real path is untested until AR-y-249 lands (OBSERVATION, INERT)",
+    "IRPT_ANLREQ-D2-W83-S2: kimi_port.kimi_search does not exist at c53686ba6d; the live_qa command names it per the interface and is NOT RUN (OBSERVATION, INERT)",
+    "IRPT_ANLREQ-D2-W83-S3: the checker floor is 8 cases while the harness refusal floor is 6; the shipped list has 8, so both hold (OBSERVATION, INERT)",
+    "IRPT_ANLREQ-D2-W83-S4: the cost bound's search count per case is set by the advisory's two-attempt loop, not by the cell's one search per case; the record states both figures (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python C:/dev/wk-irpt-anlreq-83/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y250-qa --root C:/dev/wk-irpt-anlreq-83",
+      "result": "Y250-QA-OK rc=0 (two identical runs); qa tests 14 passed, 0 failed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && timeout 120 python -m pytest ycharts/generate/tests/test_kimi_search_qa.py -q -p no:cacheprovider",
+      "result": "14 passed in 0.22s rc=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && timeout 120 python -m pytest intake/tests -q -p no:cacheprovider",
+      "result": "370 passed, 1 skipped, 28 subtests passed rc=0 (floor 365 met; no file under intake/ changed by this order)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && timeout 300 python -m pytest ycharts/generate/tests -q -p no:cacheprovider",
+      "result": "554 passed, 30 skipped, 1 xfailed, 68 subtests passed, 4 failed rc=1 in 126.99 s; the 4 failures are the baseline custody set (IRPT_ANLREQ-D2-W79-S4), not new"
+    }
+  ]
+}
