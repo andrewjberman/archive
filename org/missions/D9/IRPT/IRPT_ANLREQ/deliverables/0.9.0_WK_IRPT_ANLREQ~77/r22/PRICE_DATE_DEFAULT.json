@@ -1,0 +1,99 @@
+{
+  "record_id": "AR-y-245 r22 PRICE_DATE_DEFAULT",
+  "cell": "AR-y-245",
+  "issued_to": "0.9.0_WK_IRPT_ANLREQ~77",
+  "order": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-245.server-defaults-the-price-date.md",
+  "worktree": "C:/dev/wk-irpt-anlreq-77 (branch wk-IRPT_ANLREQ-77, cut at bddbded002)",
+  "code_commit": "d9d34f0b77",
+  "premise_read_from": "C:/dev/ajb_workspace (box/dell2, read only): deliverables/0.9.0_WK_IRPT_ANLREQ~75/r22/PORTAL_PRICE_DATE_CANDIDATE.json and channel rows IRPT_ANLREQ-D2-W75-S1..S4. Not in this worktree; see IRPT_ANLREQ-D2-W77-S1.",
+  "trading_day_source": {
+    "module": "lib/trading_calendar.py (the estate's one trading-day frontier; header: 'the ONE definition of trading day')",
+    "function": "prev_trading_day(date) -> date, lib/trading_calendar.py:191-197: the NYSE trading day strictly before the date; it calls _require_covered (:164-174) and is_trading_day (:177-188)",
+    "file_lines": "304 lines in total; the hardcoded NYSE closure set NYSE_HOLIDAYS_FALLBACK covers 2010-2027 (FALLBACK_LAST_YEAR = 2027); pandas_market_calendars is an optional import at the top of the module, the fallback answers without it",
+    "used_by": [
+      "infra/aws/lambda/investor-reporting/performance/holdings_gold.py:381, :409, :443-444 (import trading_calendar as tc; is_trading_day, prev_trading_day)",
+      "infra/aws/lambda/investor-reporting/holdings-performance/handler.py:110-111 (tc.expected_last_trading_day, tc.prev_trading_day)",
+      "infra/aws/lambda/investor-reporting/reporting-gold/handler.py:151-153 (tc.is_trading_day, tc.prev_trading_day for T-1)"
+    ],
+    "packaging_precedent": "infra/aws/lambda/ci/lambda-source-map.json: irpt-directory-search and irpt-directory-refresh stage it flat (packaged_as trading_calendar.py); irpt-holdings-performance-lambda, irpt-inf-holdings-performance-lambda and irpt-49f-reporting-gold-lambda stage it under lib/ (packaged_as lib/trading_calendar.py)",
+    "today_source": "intake/portfolio.py:54-55 _new_york_today(): datetime.now(ZoneInfo('America/New_York')).date()"
+  },
+  "packaging": {
+    "ycharts_generate": {
+      "function": "irpt-ycharts-generate (infra/aws/lambda/ci/lambda-source-map.json, key at line 3991)",
+      "already_a_member": "no",
+      "already_a_member_evidence": "the entry's staged_from carries intake/portfolio.py, intake/uploads.py and lib/opal_naming.py (lib/opal_naming.py is packaged as lib/opal_naming.py); no row names lib/trading_calendar.py and files[] has no calendar name",
+      "members_to_add": [
+        "ONE member: lib/trading_calendar.py, packaged_as trading_calendar.py at the package root (the flat form the directory lambdas use; intake modules import flat, as intake/uploads.py:17-18 does). One staged_from row with its pin. The builder that stages it was not read and is not in this grant."
+      ],
+      "imports_not_packaged": "none: lib/trading_calendar.py imports __future__ and datetime only; pandas_market_calendars is a try/except ImportError import and the fallback answers without it. The entry carries no pandas_market_calendars member and no layer (runtime python3.12).",
+      "path_manifest": "infra/aws/lambda/investor-reporting/PATH_MANIFEST.json:478-483 registers lib/trading_calendar.py as a READ reuse for cells B1 and B4 (the directory functions), not for this function; no change needed there for this cell"
+    },
+    "resident": {
+      "package": "reports/build_resident_package.py (in-tree, 8 arguments) and the release-19 recipe (org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~55/r19/RESIDENT_RECIPE_AND_DELTA.json)",
+      "already_a_member": "no for the calendar. intake/ ships: reports/build_resident_package.py:37-38 DIRS includes intake (tests and fixtures excluded at :59-61), so intake/portfolio.py and intake/uploads.py are members.",
+      "members_to_add": [
+        "ONE member: lib/trading_calendar.py packaged at lib/trading_calendar.py, as lib/opal_naming.py is (reports/build_resident_package.py:75 is the one add() line for opal_naming). In the release-19 recipe's builder, org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_P/build_resident_package.py, it is one entry in EXTRA_FILES (:62). That builder is outside this grant and was read only; see IRPT_ANLREQ-D2-W77-S2."
+      ],
+      "imports_not_packaged": "none (as for ycharts_generate). The resident import route: reporting/entry.py:85 does 'from lib import opal_naming', so the package root is on sys.path there; _trading_calendar() reaches the calendar by 'from lib import trading_calendar' as its second route. The resident host itself was not read."
+    }
+  },
+  "behaviour": {
+    "no_date_sent_shares": "A SHARES unit with no price date (None) is priced at prev_trading_day(New York today): the close of the trading day before today. CSV lane: intake/uploads.py:421-424 (has_shares) defaults options.price_date before resolve_prices, and the defaulted value is what freeze_parsed_portfolio receives. Template lane: intake/uploads.py:589-592 (shares) defaults price_date before resolve_prices and freeze_template_portfolio. Code: intake/portfolio.py:58-68 default_price_date, :36-51 _trading_calendar, :54-55 _new_york_today.",
+    "date_sent": "A date that is sent is used exactly as today. intake/uploads.py:234-236 still checks only type and length. resolve_prices receives it. The CSV freeze validates it with date.fromisoformat (intake/portfolio.py:248-252) and requires each priced row's quote as_of to equal it. Each priced row records it as price.as_of.",
+    "bad_date_sent": "A malformed date that is sent passes uploads.py:234-236, is passed to resolve_prices, and is refused by intake/portfolio.py:248-252 with PRICE_DATE_REQUIRED (CSV lane: state NEEDS_CORRECTION, reason PRICE_DATE_REQUIRED; asserted by the new test). Template lane: portfolio.py:443 valid_date is False and every SHARES row answers SHARES_PRICE_UNAVAILABLE, unchanged.",
+    "no_date_no_shares": "A dollars or weights file with no date: no default, resolve_prices not called, no price recorded (asserted by the new test).",
+    "freeze_level_guard": "intake/portfolio.py:248-252 still refuses a SHARES freeze with no date (direct callers of freeze_parsed_portfolio). The serving path never reaches it with None now, because the default is applied before pricing. test_portfolio.py:144 asserts this freeze-level refusal and is therefore NOT moved.",
+    "calendar_gap": "A prior day in a year the calendar does not cover raises CalendarCoverageError out of default_price_date. It is not caught and not turned into a refusal. Under the fallback that starts on 2028-01-02; see IRPT_ANLREQ-D2-W77-S3.",
+    "retry_same_token": "The normalization revision is keyed on the options as received, before the default is applied (intake/uploads.py normalization block, before the branch). A same-token retry on a later day therefore returns the answer first priced; the default is fixed at first normalization. Not changed by this cell."
+  },
+  "tests": {
+    "added": 5,
+    "file": "infra/aws/lambda/investor-reporting/intake/tests/test_price_date_default.py",
+    "passed": 5,
+    "failed": 0,
+    "command": "cd intake && python -m pytest tests/test_price_date_default.py -v -p no:cacheprovider --color=no",
+    "intake_folder": {
+      "command": "cd intake && python -m pytest tests -q -p no:cacheprovider --color=no",
+      "passed": 370,
+      "skipped": 1,
+      "failed": 0,
+      "subtests_passed": 28,
+      "baseline_before_change": "365 passed, 1 skipped, 25 subtests (run at bddbded002 before any edit); floor 365"
+    }
+  },
+  "before_arm": {
+    "method": "git archive HEAD (bddbded002) of infra/aws/lambda/investor-reporting, docs/contracts/investor-reporting and lib/opal_naming.py, org/standards/NAMING_SCHEMA.json, infra/logic/registry and data/firm_registry.json extracted into .scratch/before_arm (no change of the worktree); the new test file copied in; run from its intake folder",
+    "failed": 2,
+    "failing": [
+      "test_a_shares_file_with_no_date_is_priced_at_the_prior_trading_day: 3 of 3 subtests (today 2026-10-12, 2026-01-20, 2026-10-14): 'NEEDS_CORRECTION' != 'NORMALIZED'",
+      "test_the_default_is_the_estates_one_calendar_and_its_prior_day: AttributeError: module 'portfolio' has no attribute 'default_price_date'"
+    ],
+    "passed_at_head": [
+      "test_a_date_that_is_sent_is_used_exactly_as_sent",
+      "test_a_malformed_date_that_is_sent_still_refuses_as_it_always_did",
+      "test_a_dollars_file_with_no_date_is_untouched"
+    ],
+    "output_tail": "4 failed, 4 passed in 1.79s (subtests counted separately: 3 subtests of the Shares test and the calendar test failed; the three behaviour controls passed at HEAD)"
+  },
+  "files_changed": [
+    "infra/aws/lambda/investor-reporting/intake/portfolio.py",
+    "infra/aws/lambda/investor-reporting/intake/uploads.py",
+    "infra/aws/lambda/investor-reporting/intake/tests/test_price_date_default.py (new)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~77/r22/PRICE_DATE_DEFAULT.json (this record)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md (rows W77-S1..S3 appended)"
+  ],
+  "claim": "MEASURED in the worktree at d9d34f0b77. With no price date a SHARES unit (CSV or template lane) is priced at the close of the NYSE trading day before the New York date now, taken from lib/trading_calendar.py via intake/portfolio.py default_price_date; no weekday or holiday rule is written in intake/. A sent date is used exactly as before and a malformed sent date still refuses PRICE_DATE_REQUIRED. The new test fails at HEAD for the default (2 of 5 tests) and passes with the change. The intake folder passes 370 (floor 365). Packaging answer: one member per leg (ycharts_generate: lib/trading_calendar.py as trading_calendar.py; resident: lib/trading_calendar.py via reports/build_resident_package.py and the recipe's EXTRA_FILES). Nothing was released, uploaded, deployed, applied, invoked or pushed. The template lane change is covered only by the existing template tests, which pass; the new file does not exercise a template upload.",
+  "not_read": [
+    "the resident host (reporting/entry.py beyond :85) and the installed resident service's sys.path set-up",
+    "the deployed irpt-ycharts-generate bytes (the map is read as a pointer, not as a vintage oracle)",
+    "the builders' bodies beyond the lines quoted (reports/build_resident_package.py, the recipe builder under org/tier1_exec); no builder was run",
+    "the portal (no portal change in this cell; the portal field stays with AR-y-243's blocked candidate)",
+    "the template reader path beyond uploads.py:586-594 and portfolio.py:443-520"
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W77-S1",
+    "IRPT_ANLREQ-D2-W77-S2",
+    "IRPT_ANLREQ-D2-W77-S3"
+  ]
+}
