@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~CT1</issued_to>
 <date>2026-10-13</date>
-<status>pending</status>
+<status>superseded</status>
+<status_reason>Re-routed to worker 0.9.0_WK_NFRA_CTLPLN~83 on dell1's CTO ruling (msg 4974): 0.7.0_AE_CloudOps~CT1 is stopped. See org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~C/CT-ab-3_REROUTE_RULING.md.</status_reason>
 <risk>LOCAL</risk>
 <proof_genre>BUILD</proof_genre>
 <round>12</round>
