@@ -1,0 +1,65 @@
+{
+  "definition": {
+    "primary": "holds a non-cash position with non-zero units in the latest Black Diamond holdings snapshot (silver/holdings, dated 2026-10-12)",
+    "snapshot_date": "2026-10-12",
+    "snapshot_accounts": 999,
+    "alt_90d_snapshots": 875,
+    "alt_90d_transactions": 0,
+    "differs_from_alt_1": 106,
+    "differs_from_alt_2": 769
+  },
+  "files": [
+    {
+      "path": "C:/dev/_cotbkf_active_set_20261013/ACTIVE_COTTONWOOD_SET.csv",
+      "rows": 42319,
+      "sha256": "eb9dd0c3f6def67eab31c1b931e7fe66ad07ef37e2600908733da0a154afebfc",
+      "bytes": 3868045
+    },
+    {
+      "path": "C:/dev/_cotbkf_active_set_20261013/REVERSE_MATCH.csv",
+      "rows": 769,
+      "sha256": "20fb38333542b23beab5a61316cf9acdc0119dbf0be85b55fe150ec191c09a64",
+      "bytes": 77473
+    }
+  ],
+  "active_accounts": 769,
+  "securities_active": 3357,
+  "window_rows": 42319,
+  "earliest_window_start": "2013-04-08",
+  "windows_clipped_by_floor": 0,
+  "windows_joined_across_predecessor": 6736,
+  "reverse_match": {
+    "current_accounts": 769,
+    "crosswalk_matched": 457,
+    "account_links": 0,
+    "near_match_waiting_on_a_person": 12,
+    "none": 300,
+    "rows_in_file": 769
+  },
+  "former_client_accounts": 986,
+  "securities_only_former_clients": 1699,
+  "sources": [
+    "s3://opal-data-cot/silver/holdings/ : one list-objects-v2 (auto-paginated), 88 dated parquet keys 2026-06-08..2026-10-12; all 88 read for the 90-day alternative and the latest for the primary; columns account_id, units, cusip, ticker, cash_equivalent",
+    "s3://opal-data-cot/gold/canonical/holdings/ : 135 dated parquet keys 2026-04-22..2026-10-12 read for the per-security held windows; columns account_id, asset_name, units, cusip, ticker, cash_equivalent only",
+    "s3://opal-data-assets/commonwealth/cottonwood/silver/transactions/date=2026-06-23/ : 14 parquet parts, 1,416,497 rows, 1,533 accounts, Trade_Date 2013-04-03..2026-06-22; columns Account_Number, Cusip, Symbol, Quantity, Trade_Date, Transaction_Type",
+    "s3://opal-data-assets/commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/crosswalk.csv : 1,533 rows (471 MATCHED, 1,062 NOT_MATCHED; 22 AWAITING_PERSON, 38 AMBIGUOUS)",
+    "s3://opal-data-assets/commonwealth/cottonwood/silver/account_links/date=2026-06-23/account_links.csv : 1,450 rows (212 LINKED)",
+    "data/assets/scripts/silver/commonwealth_signs.py@04b9a0bbed : the one signed-quantity rule (SIGN) for transaction types",
+    "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~49/ENDPOINT_READ_20261009.md : the FWD-8 crosswalk counts, cross-checked against the applied crosswalk read",
+    "not read: silver positions (2026-06-23), the restricted CRM prefix, any vendor or Black Diamond API, the account_number, bd_units and schwab_units columns, any S3 write or delete"
+  ],
+  "headline": "769 current accounts hold a position in the 2026-10-12 snapshot; 42319 per-security windows cover 3357 securities. Reverse match: 457 crosswalk-matched, 12 near match awaiting a person, 300 none, 0 by account_links. 986 Commonwealth accounts are former clients; their 1699 securities that no active account holds are the quota stop list. The 90-day transaction alternative is 0 because the Commonwealth transactions end 2026-06-22 (surprise ADVI_COTBKF-D2-W161-S4).",
+  "not_established": [
+    "near_matches.csv is absent from both trees; the near class is taken from the crosswalk's 22 AWAITING_PERSON rows, and the FWD-8 figure of 21 is not reproduced (ADVI_COTBKF-D2-W161-S1).",
+    "Commonwealth-side account keys are salted SHA-256 tokens; the salt is held only in the worktree .scratch folder and is in no committed file (ADVI_COTBKF-D2-W161-S2).",
+    "The account_links class is empty by construction: links join Commonwealth accounts only. The 85 current accounts with an inbound link are classed crosswalk_matched, and their linked older accounts are carried in the windows (ADVI_COTBKF-D2-W161-S3).",
+    "The Commonwealth transactions end 2026-06-22; the 90-day transaction alternative holds 0 accounts (ADVI_COTBKF-D2-W161-S4).",
+    "The gold canonical units column is read as the Black Diamond side; the source, bd_units and schwab_units columns were not read, so BD-only per row is not established (ADVI_COTBKF-D2-W161-S5).",
+    "Black Diamond history begins 2026-04-22 (the earliest gold canonical key); no earlier Black Diamond record was read, so Black Diamond-only windows start there.",
+    "After the one-CUSIP-per-name map, 42,941 gold rows keep no CUSIP; 472 active window rows are not_established and keyed by ticker or name, not CUSIP.",
+    "78 active window rows carry a security identifier that is not the 9-character CUSIP form (51 distinct); they are kept as the source carries them.",
+    "A Commonwealth window still open at the 2026-06-22 table end is marked open; 3 such windows are Commonwealth-only.",
+    "Former-client accounts and securities are counts only; no list is written.",
+    "Alternative 2 is defined over the Black Diamond accounts whose Commonwealth chain has a transaction in the last 90 days; with the table end on 2026-06-22 it is 0."
+  ]
+}
