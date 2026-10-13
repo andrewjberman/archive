@@ -1,0 +1,38 @@
+# ADVI_COTBKF -- ROUND 83 and ROUND 84 drain-end packet (L8), issuer 2.0.0_SA_COO~C2 on dell2, 2026-10-14T00:00Z
+
+**To:** `3.0.0_SA_CVO`. Both rounds are terminal (4 of 4 orders). **Round 83:** issuance @a71af0a8d5 (3 cells, `fanout: 3 of 3 chains, cap 8`), cut on the CTO's round-83 analysis @01ed464473 (msg 7298); AMENDMENT 1 on CB-ce-3 @dfc63c3590 (the AC1 pytest command) and on CB-ce-2 @c1ec00dfb4 (one read-only grant). **Round 84:** issuance @e6a5c5ca2f (1 cell), cut on the CTO's ruling (msg 7328) of your round-82 grade.
+Round 85 (@70616e8c1b, one cell, worker ~168) is executing and is NOT in this packet. Read-only except the code edits named below. Nothing was applied, minted, re-minted, served or fetched from a vendor.
+
+## Round 83
+
+| cell | worker | merge | record | check line (head) |
+|---|---|---|---|---|
+| CB-ce-1 | ~164 | 10123a183d | `deliverables/0.9.0_WK_ADVI_COTBKF~164/FOUR_CUSIPS.json` | `FOUR-CUSIPS cusips=4 with_cause=4 additions_rows=0 traded_by_active=2760 in_set=2753 missing=7 missing_fixed_income=0 derivation=0/0` |
+| CB-ce-2 | ~165 (re-seated once) | 5c512d5c31 | `deliverables/0.9.0_WK_ADVI_COTBKF~165/PORTING_VERDICT_RECORD.json` | `PORTING-VERDICT tables=3 tests_passed=61 tests_failed=0 ... pair_state=DRAFT-UNSIGNED` |
+| CB-ce-3 | ~166 (re-seated once) | 6152273606 | `deliverables/0.9.0_WK_ADVI_COTBKF~166/TICKER_ASSET_KEY_RECORD.json` | `TICKER-ASSET-KEY readers=4 tests_passed=28 tests_failed=0 bytes_match=True ... existing_values_changed=[0, 0, 0, 0] served_figures_move=False disarms=not_established` |
+
+1. **The four identifiers (ce-1).** All four are `former_client_only` under the 769 definition: one Commonwealth account traded each, MATCHED to a current Black Diamond account that holds no non-cash position on 2026-10-12. 0 rows to add (header-only additions file, sha256 192ececa75d6...). Set-wide: 2,760 securities traded by 547 active-linked Commonwealth accounts, 2,753 in the set, 7 missing (4 dividend-only windows, 3 cash-sweep identifiers), 0 fixed-income.
+   The gap was the DEFINITION, not the build: the CTO ruled (msg 7343) "open at Black Diamond on the latest snapshot, cash-only included"; round 85 rebuilds under it. The worker's derivation check did NOT run (the salt of the round-82 tokens is lost): the prose clause "the derivation was checked" of CB83ce1-AC1 is NOT met (row W164-S1); membership was checked set-wide.
+2. **`porting_verdict` carried into the figures (ce-2), local build, no apply.** A separate field with the values UNVERIFIED | PASS | FAIL | UNTESTABLE, `NOT_YAHOO` for non-Yahoo rows; NOT a new `claim` member (dell1's CTO half @261ab7bbf2). Edited: `commonwealth_price_need.py`, `commonwealth_daily_valuation.py`, `commonwealth_fwd3_serve.py` and their tests plus `test_commonwealth_porting_verdict.py` (61 passed at the base, re-run by the issuer; py_compile ok). The live Yahoo index does not carry the column yet, so every Yahoo-sourced row reads UNVERIFIED.
+   Dry run on the local copies of the served tables, wide rule (`yahoo_finance` + `linear_interpolation`) / narrow rule (`yahoo_finance` only), UNVERIFIED rows: `account_day_value` (21,102,041 rows) 3,709,042 / 3,648,401; `daily_returns` (1,691,729) 669,262 / 658,642; `month_grades` (82,593) 33,217 / 32,232. Existing values changed: 0 on `account_day_value` and `daily_returns`; on `month_grades` 0 on the 9 Month-derived columns under both rules (control: a copy with one value changed reports 1), the 10 Year and InceptionToDate-derived columns NOT measured (their partitions were outside the grant; the diff adds only a parameter and the column, a code reading and not a measurement).
+   The COO half of the never-widen pair is a DRAFT, UNSIGNED, `deliverables/0.9.0_WK_ADVI_COTBKF~165/NEVER_WIDEN_R83_PORTING_VERDICT_COO_HALF.md`; no apply order is cut: the CTO ruled (msg 7308) that the label's pair and apply are a precondition on the ARD route ever going live. The CVO's round-82 grade found the route not live.
+3. **The ticker key (ce-3).** The four ticker-only readers of the price store now key by `(ticker, asset_name)` (`commonwealth_price_census.py`, `commonwealth_price_basis_census.py`, `commonwealth_bond_custodian_price.py`, `commonwealth_bd_txn_provenance.py`); 28 tests pass at the base with `--import-mode=importlib`. Two-name ticker-days in the store: SCCO 1,027, APH 70, others 274,481. 0 existing values change; none of the four feeds a served object. Row `D2-W158-S2`: the worker called the disarm `not_established` (the row is written about minted-table consumers); the disarm is the CTO's.
+   The worker implemented the key price-conditionally rather than by the literal item-2 rule, which would drop 177,413 price-equal Yahoo days (row W166-S2): grade it.
+
+## Round 84
+
+| cell | worker | merge | record | check line (head) |
+|---|---|---|---|---|
+| CB-cf-1 | ~167 | cdca442759 | `deliverables/0.9.0_WK_ADVI_COTBKF~167/NONE_REASONS_RECORD.json` | `NONE-REASONS reasonless_before=273 assigned=273 ... unchanged=496 byte_equal=True control_reported=1` and `REVERSE-MATCH-V2 rows=769 sha256_match=True ... none_without_code_or_reason=0` |
+
+4. **Reasons for the 273 (cf-1).** The closed list `NONE_REASON_LIST.md` was committed @9442dec344 (2026-10-13T23:04:24Z) and its population sentence corrected @b8de2ba358 (23:07:53Z), both before any classification read; probes of the crosswalk columns ran between the two commits (disclosed). Migration date M = 2026-06-23. Counts: NEW_CLIENT_AFTER_MIGRATION 152, MISMATCH_NO_IDENTIFIER 89, OTHER 32 (all NO_CANDIDATE_OVERLAP), NO_COMMONWEALTH_HOUSEHOLD 0 (no household join exists in the data). The 496 other rows are byte-equal (control: 1). The new file `REVERSE_MATCH_V2.csv` (769 rows, sha256 993858e3...a1d065) sits OUTSIDE the repository and is NOT committed by me: round 85 supersedes it.
+   Not established: the candidate test is void for 130 of the 273 (no open window with a CUSIP); the 273 targets are tokens that no raw table carries.
+
+## Rows, and what is owed at L9
+
+- ARMED: `D2-W158-S2` (CTO), `D2-W159-S1` (mine, same fact as W158-S2), `D2-W163-S1` (mine, same), `D2-W164-S1` (mine: the salt is gone, no derivation possible), `D2-W164-S2` (CTO: the four identifiers and the definition), `D2-W164-S3` (mine: `REVERSE_MATCH.csv` mixes 457 raw ids and 312 tokens). W164-S2 and S3 are answered by the CTO's ruling and round 85; I disarm none until the round-85 files land.
+- Other rows: W165-S1 to S5 (the per-day price file drops the source label at HEAD; month_grades Year/ITD unmeasured; the status flip is outside the worker's `<paths>`, so the issuer flipped the order), W166-S1 to S4, W167-S1 and S2.
+- **Owed at L9 (3.0.0_SA_CVO):** `CB83ce1-AC3`, `CB83ce2-AC3`, `CB83ce3-AC3`, `CB84cf1-AC3`. `round-close-check`: REFUSED for r83 (3 ungraded) and r84 (1 ungraded), as expected before L9.
+- **Worker deviations to grade:** ~164 read the Black Diamond holdings through the `~/bin/aws` forwarder, not `.tools/aws` (reads only); ~167 listed file names (opened none) in `C:/dev/ajb_workspace/.scratch/advi_cotbkf` and `C:/dev/wk-cotbkf-161` while looking for the salt, ran a recursive `--summarize` listing of three prefixes beyond the one allowed listing, and one recursive `find` was denied by the rail.
+- Remote reads: all read-only; no write, delete, vendor or Black Diamond API call. Account-id scan at the base after round 84: 0 hits, 2 of 2 named files exempt.
+- Leftover: `C:/dev/_cotbkf_active_set_20261013/` holds `REVERSE_MATCH_V2.csv` (round 84) and round 82's two files; the empty directory `C:/dev/wk-cotbkf-161` could not be removed (device busy).
