@@ -239,6 +239,41 @@ def prescreen(a):
     return 0
 
 
+def slotcause(a):
+    try:
+        d = json.load(open(a.file, encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        print("FAIL ABSENT or unreadable: %s" % type(e).__name__)
+        return 1
+    p = _need(d, ["advisors", "listing_before", "listing_after", "drops", "classes", "messages", "bullets_returned",
+                  "advisors_with_bullets", "cause_class", "pair.coo_half_addendum", "pair.cto_half_addendum", "ledger_closed",
+                  "deployed_version", "claim"])
+    if not p:
+        if d["claim"] not in CLAIMS:
+            p.append("claim not one of %s" % "/".join(CLAIMS))
+        if d["advisors"] != 10:
+            p.append("the CTO's dry run is TEN pre-screened advisors")
+        if d["listing_before"] != d["listing_after"]:
+            p.append("the served listing changed across the dry run: an object was written")
+        if d["cause_class"] not in ("NOT_APPLICABLE", "CONFIG", "PRODUCT", "NOT_KNOWN"):
+            p.append("cause_class not in the closed set")
+        if any(len(str(m)) > 200 for m in d["messages"]):
+            p.append("a logged message is over 200 characters")
+        if not isinstance(d["bullets_returned"], int) or d["bullets_returned"] < 1:
+            p.append("the bullets must be NON-EMPTY (the CTO's criterion); a zero-bullet record carries drops and a cause for the next cut")
+        if d["drops"] > 0 and d["cause_class"] == "NOT_APPLICABLE":
+            p.append("drops were logged: name the cause class")
+        if d["ledger_closed"] is not True:
+            p.append("the ledger entry is not closed")
+    if p:
+        for x in p:
+            print("FAIL %s" % x)
+        print("SLOTCAUSE: %d problem(s)" % len(p))
+        return 1
+    print("SLOTCAUSE record ok drops=%d classes=%d bullets=%d" % (d["drops"], len(d["classes"]), d["bullets_returned"]))
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -258,8 +293,10 @@ def main():
     h.add_argument("--file", required=True)
     s = sub.add_parser("prescreen")
     s.add_argument("--file", required=True)
+    c = sub.add_parser("slotcause")
+    c.add_argument("--file", required=True)
     a = ap.parse_args()
-    return {"awsdiff": awsdiff, "agree2": agree2, "emiterr": emiterr, "firstchain": firstchain, "dryrun": dryrun, "prescreen": prescreen}[a.cmd](a)
+    return {"awsdiff": awsdiff, "agree2": agree2, "emiterr": emiterr, "firstchain": firstchain, "dryrun": dryrun, "prescreen": prescreen, "slotcause": slotcause}[a.cmd](a)
 
 
 if __name__ == "__main__":
