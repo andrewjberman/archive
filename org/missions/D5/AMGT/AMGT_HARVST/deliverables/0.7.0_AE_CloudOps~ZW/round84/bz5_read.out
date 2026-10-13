@@ -91,3 +91,68 @@ STATUS OF THE TWO Z-S117 ASKS, measured in the channel rather than recalled:
 NEXT: read again at the next ended record, at most once an hour. The honest test is still the first
 cycle to end on its own under the windowless pin, i.e. the live 20261013T080909Z cycle (about 19:00Z
 on an ~11h measure).
+
+## ================= THIRD READ, 2026-10-13T18:19:48Z -- AC1 PASSES. THIS IS THE CLOSE. =================
+## Appended, never overwritten. The two sections above stand as written.
+
+The hourly re-read found the windowless cycle ENDED, and it carries a NAMED failure:
+
+  CYCLE=20261013T080909Z STOPPED=bot_check FAILED=1 NAMED=1   (rc=0)
+
+AC1 expects FAILED >= 1 with NAMED equal to it. FAILED=1, NAMED=1: AC1 MATCHES, and this is
+the close of row AMGT_HARVST-D1-W135-S2.
+
+THE RECORD (read from the byte-identical copy):
+  cycle_id   20261013T080909Z
+  started_at 2026-10-13T08:09:09Z
+  ended_at   2026-10-13T17:37:08Z
+  completed  False
+  stopped    bot_check
+
+FAILURES ROWS (key, status, detail) -- 1 row, the whole point of the cell:
+  key    = security-0f3eb2ded85ad44b
+  status = bot_check
+  detail = ChallengeFailed: bot_check challenge_failed (bloomberg_press_and_hold)
+
+THAT DETAIL IS EXACTLY THE SHAPE HVST-bx-3 PUT IN THE PIN. The form is
+"<ExceptionClassName>: <message>" -- class ChallengeFailed, then the message -- at 70
+characters, inside the 303-character cap, and it is NOT the bare word "error" that every
+record before this pin carried. Measured, not eyeballed: the detail contains ':', it DIFFERS
+from 'status', and it is non-empty, which are the three things the script counts as NAMED.
+So NAMED=1 of FAILED=1: every failure in this record names its reason.
+
+A TRUNCATED RECORD IS ALLOWED TO SERVE THIS READ, by the order's own words: "a truncated
+record that DOES hold a failure still serves the read". STOPPED=bot_check is not an operator
+stop and not a completion; what matters for AC1 is that the record ENDED and holds a failure
+whose detail names a reason. Nothing here claims this cycle was failure-free or completed --
+completed is False and it is recorded as False.
+
+NOTHING WAS DRIVEN TO MAKE THIS PASS. No pair was planted or re-queued, nothing was signed
+in, the task was not stopped, started or re-registered, and the state dir was never written.
+The failure is the runner's own, from its own cycle, and it was read after the fact.
+
+CONTROLS ON AC1'S REGEX, so the PASS is the record's and not the pattern's:
+  CYCLE=20261013T080909Z STOPPED=bot_check FAILED=1 NAMED=1              -> MATCH (the live line)
+  CYCLE=20261013T055243Z STOPPED=stopped_by_operator FAILED=0 NAMED=0    -> no match (FAILED=0)
+  CYCLE=X STOPPED=none FAILED=1 NAMED=0                                  -> no match (names nothing)
+  CYCLE=X STOPPED=none FAILED=8 NAMED=8                                  -> MATCH (consistent pair)
+The second case is the previous reading of this very cell, so the regex demonstrably separates
+the old FAIL from the new PASS rather than matching any line of this shape.
+
+THE RECORD COPY, SUPERSEDED IN PLACE (state artifact, so in place is correct):
+  PRIOR (preserved, the 055243Z truncated record): len=320 sha256=52e0451bad833db2dc687fb961d0f30492e3a377e002bdd9982ec9d73fc6e6bf
+  SOURCE C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state/cycles/bbg/20261013T080909Z.cycle.json
+    len=514 sha256=5e652eaf659452452bb49db3008f1695efe63e4eb2e76bb211681f6c1bf2af31
+  COPY   org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~ZW/round84/bz5_cycle_record.json
+    len=514 sha256=5e652eaf659452452bb49db3008f1695efe63e4eb2e76bb211681f6c1bf2af31
+  IDENTICAL
+  The order names ONE file, bz5_cycle_record.json, and it must hold the record the close rests
+  on, so it now holds 20261013T080909Z (514 bytes). THE EARLIER TRUNCATED RECORD IS NOT LOST:
+  it is preserved beside it as bz5_cycle_record_prior_20261013T055243Z.json, byte-identical to
+  what the 09:0xZ read copied (320 bytes, sha256 52e0451b...), and it is also in git at
+  c4ec6c221e. The hash line in the 09:0xZ section above refers to that prior file.
+
+bz-7 at the same read: PUBLISHER=wsj NONE, PUBLISHER=barrons NONE -- still no ended wsj or
+barrons cycle, so bz-7 stays OPEN. The runner is live and progressing (events.jsonl written
+within the last minute of this read), and the bbg cycle it just finished is the one whose end
+lets wsj begin.
