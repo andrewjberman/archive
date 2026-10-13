@@ -1,0 +1,31 @@
+# HVST-bz-1 -- step 5b/5c: registered once at the new pin, started once
+# 0.7.0_AE_CloudOps~ZW, site Z box.
+
+## step 5b -- the SAME command without -Plan, run ONCE
+run_at_utc: 2026-10-13T05:52:40Z   exit code 0
+  TaskName                             State
+  Opal Data Harvest - Continuous Cycle Ready
+
+## step 5c -- Start-ScheduledTask, ONCE
+started_at_utc: 2026-10-13T05:52:43Z
+
+## AC1 -- literal invocation
+$ powershell -NoProfile -Command "(Get-ScheduledTask -TaskName 'Opal Data Harvest - Continuous Cycle').Actions.WorkingDirectory"
+C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-1c69fa35a3
+  expect wk-harvest-runner-pin-1c69fa35a3  ->  AC1: PASS
+  negative control: the AC1 regex against the OLD pin string b5a7a3a4b6 -> no match, so it discriminates
+
+## AC2 -- literal invocation
+$ powershell -NoProfile -Command "(Get-ScheduledTask -TaskName 'Opal Data Harvest - Continuous Cycle').Actions.Arguments"
+-m lib.opal_data_harvest.cycle_runner --state-dir "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state" --runtime-root "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/runtime" --stop-file "C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-1c69fa35a3\.runtime\harvest-cycle\STOP" --publishers bbg wsj barrons
+  expect --state-dir "[^"]*wk-harvest-runner-pin-c1be67f53c  ->  AC2: PASS
+
+## THE LIVE RUNNER -- exactly one, from the new pin, and ACCRUING CPU
+  Task State: Running
+  runner-pattern processes over ALL processes of ANY exe: 1
+    PID 27560  python.exe  created 2026-10-13T05:52:43Z
+  runs from the new pin (command line carries no b5a7a3a4b6): True
+  CPU shortly after start: 0.375 and rising -- unlike the wedged predecessor, which held 26.984375
+  exactly across every sample.
+No second runner. Step 7: <old> is left in place and locked, and is the rollback (installer with
+-RepoRoot <old> and the same state flags, start once).

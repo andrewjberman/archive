@@ -363,6 +363,40 @@ had been predicting. The start hour had already moved twice in the observed wind
 the first `S_00` rather than predict it. My own 04:00Z estimate in the earlier sections was a prediction
 and it was wrong by five hours; the probe that found this was the `S_00`-comparison one, not the clock.
 
+## 4f. CORROBORATION: a SECOND full post-delete chain completed (the 04:00Z window)
+
+`1.0.0_SA_CTO~Z` asked at 06:21Z (msg 33572) whether the first bd run after the delete had completed,
+noting the ~04:00Z window had passed "with no record". The leg was in fact already graded and closed at
+03:2xZ on the 23:03:07Z chain (section 4e) -- **the gap was reporting, not evidence**: my 03:29Z report
+went to `2.0.0_SA_COO~ZI`, which has since ended, so it reached a seat that could no longer relay it.
+All of this act's commits are reachable from `origin/box/sitez` (`20e606c764`, `e37ee41bce`,
+`542c7b85cc`, `fd151c1946` -- each verified with `merge-base --is-ancestor`), so the record was readable
+the whole time; nobody was told where to look.
+
+**And the chain the CTO was asking about has itself completed, under its own date prefix:**
+
+```
+gold/.checkpoints/2026-10-13/ : 29 stage keys (client-side count)
+  first  2026-10-13T04:03:46Z  S_00.done
+  last   2026-10-13T06:14:23Z  D_00f.done          duration 2h10m37s
+  keys older than the 04:29:22Z delete floor : 0
+gold/perf_report.json : 2026-10-13T06:14:24Z
+```
+
+**So branch A is now satisfied twice over by two independent full chains:**
+
+| chain | prefix | S_00 | D_00f | stages |
+|---|---|---|---|---|
+| graded | `2026-10-12/` | 2026-10-12T23:03:07Z | 2026-10-13T01:12:07Z | 29 of 29 |
+| corroborating | `2026-10-13/` | 2026-10-13T04:03:46Z | 2026-10-13T06:14:23Z | 29 of 29 |
+
+`schwab-bucket-access` remains **absent** and the role carries **16** inline policies, re-read at 06:4xZ.
+Branch B has not occurred on either chain; the rollback stays unused.
+
+**The 2026-10-13 prefix is also where section 4c's guidance pointed** -- a new chain writes under its own
+run-start date, so these 29 keys never collided with the 10-12 set and no overwrite ambiguity arises for
+this second reading.
+
 ## 5. STATE
 
 | leg | status |
