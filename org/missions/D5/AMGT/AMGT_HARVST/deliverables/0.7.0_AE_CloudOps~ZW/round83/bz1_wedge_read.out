@@ -1,0 +1,124 @@
+# HVST-bz-1 AMENDMENT 1 -- the WEDGE READ. Read only; nothing stopped, killed or started by this file.
+# 0.7.0_AE_CloudOps~ZW, site Z box.
+read_started_utc: 2026-10-13T04:58:50Z
+
+## 1. Get-CimInstance Win32_Process -Filter ProcessId=21512
+ProcessId       : 21512
+ParentProcessId : 2668
+CreationDate    : 2026-10-10T22:15:26.513Z
+CommandLine     : "C:\Program Files\Python314\python.exe" -m lib.opal_data_harvest.cycle_runner --state-dir "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/state" --runtime-root "C:/Users/Opal Bloomberg/Desktop/wk-harvest-runner-pin-c1be67f53c/.runtime/harvest-cycle/runtime" --stop-file "C:\Users\Opal Bloomberg\Desktop\wk-harvest-runner-pin-b5a7a3a4b6\.runtime\harvest-cycle\STOP" --publishers bbg wsj barrons
+
+## 2. Get-CimInstance Win32_Process -Filter ParentProcessId=21512 (children)
+  child ProcessId=17968 Name=conhost.exe Created=2026-10-10T22:15:26Z
+child count: 1
+
+## 3. Get-Process -Id 21512 : CPU, Threads, Responding, MainWindowTitle -- SAMPLE 1 of 2
+at_utc          : 2026-10-13T04:58:50Z
+CPU             : 26.984375
+Threads         : 1
+Responding      : True
+MainWindowTitle : 'Select C:\Program Files\Python314\python.exe'
+
+   ... Start-Sleep 120 (the signed condition requires the samples 120 seconds apart) ...
+
+## 4. SAME READ -- SAMPLE 2 of 2, 120 seconds after sample 1
+at_utc          : 2026-10-13T05:00:50Z
+CPU             : 26.984375
+Threads         : 1
+Responding      : True
+MainWindowTitle : 'Select C:\Program Files\Python314\python.exe'
+CPU DELTA across the 120 s: 0  (zero means nothing accrued)
+
+## 5. Get-NetTCPConnection -OwningProcess 21512
+NO CONNECTION
+ESTABLISHED count: 0
+
+## 6. Get-ScheduledTaskInfo 'Opal Data Harvest - Continuous Cycle'
+State          : Running
+LastRunTime    : 10/10/2026 18:15:26
+LastTaskResult : 267009  (267009 = 0x00041301, 'the task is currently running')
+NextRunTime    : 
+
+## 7. POSITIVE CONTROL for the child and connection reads -- the same two commands against a process known to have BOTH
+control process: ProcessId=5320 Name=SentinelAgent.exe
+  Get-CimInstance -Filter ParentProcessId=5320 -> child count: 5  (NON-ZERO: the child read works)
+  Get-NetTCPConnection -OwningProcess 5320 -> ESTABLISHED count: 1  (NON-ZERO: the connection read works)
+  => both instruments return non-zero on a process that has them, so 21512's readings are real values, not instrument silence.
+
+## 8. last 5 lines of cycle_runner.log
+log mtime_utc: 2026-10-12T20:19:44Z
+  2026-10-12T20:09:38Z JOB bbg security-b5d9e0c90a2fe76d status=no_new_articles run_id=20261012T200706Z-run-be7ed7e3 stored=0
+  2026-10-12T20:12:09Z JOB bbg security-21f220c4d7bee429 status=no_new_articles run_id=20261012T200938Z-run-b07a21f3 stored=0
+  2026-10-12T20:14:39Z JOB bbg security-04b81ac7cfd1ecab status=no_new_articles run_id=20261012T201210Z-run-4cb1352a stored=0
+  2026-10-12T20:17:12Z JOB bbg security-21f955799be2fd3e status=no_new_articles run_id=20261012T201440Z-run-73551b4d stored=0
+  2026-10-12T20:19:44Z JOB bbg security-85663a3912a0c415 status=no_new_articles run_id=20261012T201712Z-run-b816c546 stored=0
+STOP-FILE lines in the whole log: 0
+
+## 9. the checkpoint: 'done' length and TOP-LEVEL KEY NAMES ONLY
+top-level key names: done, stopped, stored, retry, gave_up, started_at, updated_at, stopped_by_operator
+done length: 23
+stored length: 1
+retry length: 1
+gave_up length: 1
+stopped_by_operator: False
+started_at: 2026-10-12T19:16:42.047817+00:00
+updated_at: 2026-10-12T20:19:44.187709+00:00
+
+## 10. the stop file
+present, created_utc 2026-10-13T03:57:25Z, age_minutes 68.4
+read_ended_utc: 2026-10-13T05:05:49Z
+
+## 11. W1-W5 GRADED (AMENDMENT 2 section 1c; CTO half @e683fd2032 says W1-W5 GOVERN)
+
+W1  TRUE   CreationDate 2026-10-10T22:15:26.513Z equals the 03:46Z read (10/10/2026 6:15:26 PM local).
+           The same process; no PID reuse.
+W2  TRUE   CPU 26.984375 s at 04:58:50Z and 26.984375 s at 05:00:50Z -- 120 s apart, DELTA 0,
+           and equal to the 26.984375 s read at 03:46Z. Nothing accrued in 1 h 15 m.
+W3  FALSE  <<< THE CONDITION THAT FAILS >>>
+           "NO CHILD process and NO ESTABLISHED connection owned by 21512."
+           ESTABLISHED connections: 0  -- that half holds.
+           CHILD PROCESSES: 1 -- ProcessId 17968, conhost.exe, created 2026-10-10T22:15:26Z.
+           Positive control (same two commands, PID 5320 SentinelAgent.exe): 5 children,
+           1 ESTABLISHED. Both instruments return non-zero where the thing exists, so the
+           connection zero is a real zero and the child ONE is a real one.
+W4  TRUE   cycle_runner.log last write 2026-10-12T20:19:44Z = 8 h 46 m old (> 2 h).
+           Stop file present since 2026-10-13T03:57:25Z, age 68.4 min (>= 60), 0 STOP-FILE lines.
+W5  TRUE   Snapshot taken FIRST at 04:53:08Z, before any other act:
+           source   3991 bytes  SHA-256 101489A14247FF8B015043B13F1055A587551FE8610EF605FA57692BB888ABE4
+           snapshot 3991 bytes  SHA-256 101489A14247FF8B015043B13F1055A587551FE8610EF605FA57692BB888ABE4
+           byte-for-byte identical.
+
+## VERDICT: BRANCH X. NO ACT TAKEN.
+
+Four of five read TRUE; W3 reads FALSE on its child half. Both halves name this exact reading as a
+branch-X trigger in their own words -- COO half: "Branch X (anything else): any of W1-W5 reads FALSE
+(A CHILD, a live connection, CPU accrued, a recent write, a changed creation time): NO act, the stop
+file stays, the seat files one row naming the reading and waits."
+
+So: no Stop-ScheduledTask, no census, no C-g delete, no Start-ScheduledTask. The stop file STAYS.
+The scheduled task is UNTOUCHED and still armed at the old pin. Nothing served moved.
+
+This seat did NOT read W3's intent as "no WORKER child" and let conhost.exe through. A console host is
+plausibly not the kind of child the condition is hunting, and saying so is this seat's business; acting
+on it is not. Reading a signed condition narrower than its words is the widening the pair exists to
+prevent, and the halves named "a child" without qualification. The issuer decides whether W3 means to
+exclude a console host.
+
+## OBSERVATION THE ISSUER SHOULD HAVE (not a diagnosis acted on, and not a cause claimed proven)
+
+MainWindowTitle reads, in BOTH samples:  'Select C:\Program Files\Python314\python.exe'
+
+On Windows a console window whose title carries the 'Select' prefix is in MARK / QUICKEDIT SELECTION
+mode, and a process that writes to that console BLOCKS until the selection is released. That shape
+fits every reading here and explains the ones a plain hang does not:
+  - zero CPU accrued and a single thread parked in a kernel Executive wait;
+  - it stopped AT a job boundary -- the last event is run_record_persisted, a COMPLETED job, and the
+    next thing the runner does is write a log line;
+  - the conhost.exe child that makes W3 false is the console host that owns that selection;
+  - Responding reads True throughout, which a deadlocked or crashed process would not sustain.
+If that is what this is, the runner is NOT broken and needs NO kill: releasing the selection (a key
+press in the window, or clearing QuickEdit) returns it to its loop, and it would then read the stop
+file that has been waiting 68 minutes and stop cleanly, which is the ORIGINAL signed C-f path.
+It is offered as the cheapest thing to try before any termination is authorised, and it is a
+hypothesis consistent with the readings, not a proven cause. It belongs to row AMGT_HARVST-Z-S114,
+which the issuer assigned the wedge's diagnosis.
