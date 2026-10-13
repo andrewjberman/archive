@@ -1,0 +1,33 @@
+{
+  "cell": "AR-y-243",
+  "status": "BLOCKED",
+  "blocking_row": "IRPT_ANLREQ-D2-W75-S1",
+  "dev_tip": "f6ef1d2548cf6f619f80662d3082d66ea0a3fcf4",
+  "dev_tip_source": "git -C C:/dev/ajb_workspace/portal fetch origin DEV (rc=0), then rev-parse origin/DEV",
+  "portal_worktree": "C:/dev/wk-portal-75 (branch wk-IRPT_ANLREQ-75-portal, created at origin/DEV, no commit)",
+  "workspace_head_read": "2d244d2ff0 (worktree C:/dev/wk-irpt-anlreq-75)",
+  "server_reads": {
+    "what_the_server_does_with_a_date": "A date that is sent is validated for ISO form at infra/aws/lambda/investor-reporting/intake/uploads.py:234-236 (type and length only) and at intake/portfolio.py:208-212 for a SHARES unit (date.fromisoformat). The CSV lane then requires each SHARES quote's as_of to equal price_date exactly (portfolio.py:250, quote as_of and currency and security key checked) and records price_date in the document options (portfolio.py:501). The template lane applies the same exact-date test at portfolio.py:403 and :479. The server prices share quantities only at the date it is given; it does not derive a date.",
+    "what_the_server_does_without_a_price_date": "REFUSES. intake/portfolio.py:208-212: when a SHARES unit is present and price_date is None (the portal omits the member when the field is empty, see the portal prospect.ts:136), date.fromisoformat(None) raises TypeError and the code raises PortfolioRefused('PRICE_DATE_REQUIRED'). The CSV lane reaches it after resolve_prices is called with None (uploads.py:419-421); the call happens before freeze_parsed_portfolio (uploads.py:425). The template lane (uploads.py:586-587) gives valid_date False (portfolio.py:401-405), so every SHARES row answers SHARES_PRICE_UNAVAILABLE (portfolio.py:477-486). Test evidence that the refusal is intended: intake/tests/test_portfolio.py:144 self.assert_refused('PRICE_DATE_REQUIRED', parsed) for a SHARES parse with no price_date.",
+    "trading_day_rule_where": "NONE in the intake lambda. A grep of the named intake folder for trading-day or prior-close terms finds only intake/settings.json:48 level_as_of_type PRIOR_CLOSE, a recorded constant for another analysis (IB-s-7), not a date rule. lib/trading_calendar.py is not referenced from intake. The server does not compute the prior trading day close for share quantities.",
+    "files_read": [
+      "infra/aws/lambda/investor-reporting/intake/portfolio.py:140-151, 190-212, 214-261, 348-410, 466-490, 501 (at 2d244d2ff0)",
+      "infra/aws/lambda/investor-reporting/intake/uploads.py:185-237, 400-432, 575-600 (at 2d244d2ff0)",
+      "infra/aws/lambda/investor-reporting/intake/upload_resolution.py:95-135 (not-composed resolvers for the deferred and resident services)",
+      "infra/aws/lambda/investor-reporting/intake/settings.json:38-51",
+      "infra/aws/lambda/investor-reporting/intake/tests/test_portfolio.py:138-151 (at 2d244d2ff0)",
+      "portal src/pages/InvestorReporting/tabs/analysis/prospect.ts:120-141 (at f6ef1d25)",
+      "portal src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx:146, 210, 276-283, 436-445 (at f6ef1d25)"
+    ]
+  },
+  "candidate": "ABSENT. Step 2 found the server refuses a SHARES upload without a price date, so no portal change was made under step 3.",
+  "what_a_person_sees": "A holdings file with a Shares column and an empty 'Price date for share quantities' field is answered with a correction request (PRICE_DATE_REQUIRED on the CSV lane; SHARES_PRICE_UNAVAILABLE per row on the template lane). Read from code, not run.",
+  "design_clauses": "not applicable: no visual change made",
+  "claim": "The server requires a price date for share quantities. The portal field cannot be removed without a server change, so the issuer must cut a server cell. No trading day is computed in the portal.",
+  "not_read": [
+    "the composed production price resolver (which module wires resolve_prices for the live template path) was not read; the refusal at portfolio.py:208-212 precedes any price lookup in the CSV lane, and the template lane refuses per row at portfolio.py:477-486 with no date",
+    "the generation-side (irpt-generation) consumer of the deferred template path was not read",
+    "no test was run; no portal test or typecheck was run because no change was made",
+    "no live call, upload, deploy or push was made"
+  ]
+}

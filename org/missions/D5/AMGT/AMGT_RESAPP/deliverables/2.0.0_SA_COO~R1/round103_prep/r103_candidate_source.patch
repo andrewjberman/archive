@@ -1,0 +1,36 @@
+diff --git a/lib/research/api/scoped_amgt.py b/lib/research/api/scoped_amgt.py
+index 02627c18a0..84002d3fd5 100644
+--- a/lib/research/api/scoped_amgt.py
++++ b/lib/research/api/scoped_amgt.py
+@@ -3559,7 +3559,8 @@ def _overlay_top_band(
+             "day": day.isoformat(), "items": [],
+             "items_reason": "no news was looked up because this name is not matched to a company we cover"})
+     try:
+-        rows = [row for row in _timeline_snapshot_rows("article_security_mention")
++        rows = [row for row in _timeline_snapshot_rows(
++                    "article_security_mention", columns=_OVERLAY_NEWS_COLUMNS, security_key=security_key)
+                 if row.get("security_key") == security_key]
+         news = top_band.news_items_newest(rows, day)
+     except Exception as err:  # noqa: BLE001 -- reported, never read as "no news"
+@@ -5654,7 +5655,8 @@ def read_feed(
+     from lib.research.harvest import publication_gold
+ 
+     try:
+-        held = [row for row in _timeline_snapshot_rows("article_security_mention")
++        held = [row for row in _timeline_snapshot_rows(
++                    "article_security_mention", columns=_OVERLAY_NEWS_COLUMNS, security_key=resolved_key)
+                 if row.get("security_key") == resolved_key and row.get("published_utc") is not None]
+         dated = [(publication_gold._day_of(row["published_utc"]).isoformat(), row) for row in held]
+     except Exception as err:  # noqa: BLE001 -- reported as INCOMPLETE, never as empty
+@@ -6779,6 +6781,11 @@ _TIMELINE_ARTICLE_COLUMNS = (
+     "security_key", "article_key", "publisher", "signal_tier", "mention_count", "mention_in_title",
+     "mention_in_lead", "published_utc", "title", "published_precision",
+ )
++# AMGT-bj-1: the columns the OVERLAY's two readers of `article_security_mention` use (the header feed and the top band's news card): ONE tuple, so the
++# snapshot is fetched and decoded once per container for both, and only these columns and only the subject's rows are decoded to row dicts.
++_OVERLAY_NEWS_COLUMNS = (
++    "security_key", "article_key", "publisher", "mention_count", "published_utc", "title", "url", "published_precision",
++)
+ 
+ 
+ def _timeline_snapshot_rows(

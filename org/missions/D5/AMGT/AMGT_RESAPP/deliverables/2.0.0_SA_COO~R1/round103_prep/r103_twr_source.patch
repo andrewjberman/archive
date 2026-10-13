@@ -1,0 +1,137 @@
+diff --git a/integrations/bloomberg/research/price_axis_pull.py b/integrations/bloomberg/research/price_axis_pull.py
+index cb73d6c64a..cb19127235 100644
+--- a/integrations/bloomberg/research/price_axis_pull.py
++++ b/integrations/bloomberg/research/price_axis_pull.py
+@@ -280,6 +280,64 @@ def build_movement_rows(series_by_ticker: dict, as_of_key: str, computed_at: str
+     return products
+ 
+ 
++# AMGT-bj-5 (Andrew-direct 2026-10-13, TWR pricing on every surface; census row A4 of DEMQUE_QUEUE_FORM_ANDREW_20261013.md): the research price axis also pulls
++# DAY_TO_DAY_TOT_RETURN_GROSS_DVDS over the LAST FIVE TRADING DAYS (lib.trading_calendar), about 500 history cells a day, and keeps it beside the PX_LAST history.
++# The rankings stay on PRICE: nothing below changes a ranking, the PX_LAST request, its writes or this script's exit code.
++TR_FIELD = "DAY_TO_DAY_TOT_RETURN_GROSS_DVDS"
++TR_WINDOW_TRADING_DAYS = 5
++
++
++def tr_window_start(as_of, days: int = TR_WINDOW_TRADING_DAYS):
++    """The first of the `days` trading days ending at `as_of` (inclusive), walking back with lib.trading_calendar, never BDay."""
++    start = as_of
++    for _ in range(days - 1):
++        start = trading_calendar.prev_trading_day(start)
++    return start
++
++
++def pull_total_return(blp, securities: list, sec_to_ticker: dict, start, as_of) -> dict:
++    """{ticker: [(date, value), ...]} of the total-return field for the window `start`..`as_of`, in requests of 20 securities; a row without the field is dropped."""
++    series: dict = {}
++    start_ymd, end_ymd = start.strftime("%Y%m%d"), as_of.strftime("%Y%m%d")
++    for grp in _chunks(securities, 20):
++        resp = blp.historical_data(grp, [TR_FIELD], start_ymd, end_ymd, "DAILY", timeout_s=180.0)
++        for sec, rows in resp.items():
++            ticker = sec_to_ticker.get(sec, sec)
++            kept = [r for r in (rows or []) if r.get(TR_FIELD) is not None]
++            if not kept:
++                continue
++            kept.sort(key=lambda r: r["date"])
++            series[ticker] = [(r["date"], float(r[TR_FIELD])) for r in kept]
++    return series
++
++
++def run_total_return_leg(blp, securities: list, sec_to_ticker: dict, as_of, as_of_key: str, dry_run: bool, say) -> dict:
++    """The total-return leg: pull, then persist write-once (nothing is persisted on a dry run). NEVER raises: a failure is logged and returned, and the caller ignores the
++    result for the exit code, exactly as the 90/365 window step is."""
++    result = {"pulled": 0, "persisted": None, "error": None}
++    try:
++        start = tr_window_start(as_of)
++        series = pull_total_return(blp, securities, sec_to_ticker, start, as_of)
++        result["pulled"] = len(series)
++        say("total-return leg: %d of %d ticker(s) carry %s over %s .. %s (%d trading days)" % (
++            len(series), len(securities), TR_FIELD, start.isoformat(), as_of.isoformat(), TR_WINDOW_TRADING_DAYS))
++        if dry_run:
++            say("total-return leg: DRY-RUN, nothing persisted")
++        elif series:
++            here = os.path.dirname(os.path.abspath(__file__))
++            if here not in sys.path:
++                sys.path.insert(0, here)
++            import price_series_persist
++
++            receipt = price_series_persist.persist_tr_series(as_of_key, start.isoformat(), as_of.isoformat(), series)
++            result["persisted"] = receipt
++            say("total-return leg: persisted %s (put_performed=%s existed=%s)" % (receipt.get("uri"), receipt.get("put_performed"), receipt.get("existed")))
++    except Exception as e:  # noqa: BLE001 -- the PX_LAST legs and the exit code stand whatever happens here
++        result["error"] = "%s: %s" % (type(e).__name__, e)
++        say("WARN: total-return leg could not run: %s" % result["error"])
++    return result
++
++
+ def main(argv=None) -> int:
+     ap = argparse.ArgumentParser(description=__doc__)
+     ap.add_argument("--dry-run", action="store_true",
+@@ -445,6 +503,9 @@ def main(argv=None) -> int:
+     except Exception as e:  # noqa: BLE001 -- the 30-day leg's result stands whatever happens here
+         log(f"WARN: 90/365 window step could not run: {type(e).__name__}: {e}")
+ 
++    # AMGT-bj-5: the total-return leg, AFTER every PX_LAST leg and write; its result is not read by the exit-code logic below.
++    run_total_return_leg(blp, securities, sec_to_ticker, as_of, as_of_key, args.dry_run, log)
++
+     failed = [p["axis"] for p in summary["products"] if p["state"] == STATE_FAILED]
+     if args.dry_run:
+         log("DRY-RUN: not writing to DynamoDB.")
+diff --git a/integrations/bloomberg/research/price_series_persist.py b/integrations/bloomberg/research/price_series_persist.py
+index ae244e48eb..782979c3e2 100644
+--- a/integrations/bloomberg/research/price_series_persist.py
++++ b/integrations/bloomberg/research/price_series_persist.py
+@@ -50,6 +50,15 @@ OBJECT_NAMES = {KIND_YEAR: "year_pull.json", KIND_DAILY: "daily_30d.json"}
+ FORM_NORMALISED = "normalised_record"
+ 
+ 
++# AMGT-bj-5 (Andrew-direct 2026-10-13, TWR pricing on every surface): the daily job ALSO keeps the total-return series of the last five trading days, as a SECOND
++# write-once object under its own table, beside (never inside) the PX_LAST history: the PX_LAST objects, their schema and `load_history` are untouched.
++TABLE_TR = "price_history_tot_return"
++SCHEMA_TR = "price_tot_return_series_v1"
++FIELD_TR = "DAY_TO_DAY_TOT_RETURN_GROSS_DVDS"
++KIND_TR = "daily_5d"
++OBJECT_TR = "daily_5d.json"
++
++
+ class NoYearHistory(LookupError):
+     """No year-pull object exists in the history -- the 90/365 build has nothing to build from."""
+ 
+@@ -114,6 +123,37 @@ def persist_series(kind, as_of_date, window_start, window_end, series_by_ticker,
+     )
+ 
+ 
++def tr_series_doc(as_of_date, window_start, window_end, series_by_ticker) -> dict:
++    """The body of the total-return object: {"schema", "kind", "field", "as_of_date", "window_start", "window_end", "series": {ticker: [[date, value], ...]}}; no clock inside."""
++    return {
++        "schema": SCHEMA_TR,
++        "kind": KIND_TR,
++        "field": FIELD_TR,
++        "as_of_date": as_of_date,
++        "window_start": window_start,
++        "window_end": window_end,
++        "series": {
++            ticker: [[str(d)[:10], float(v)] for d, v in series]
++            for ticker, series in sorted(series_by_ticker.items())
++        },
++    }
++
++
++def persist_tr_series(as_of_date, window_start, window_end, series_by_ticker, client=None) -> dict:
++    """Land the total-return series, write-once per as_of: the same series again is a no-op, a different one for the same as_of is REFUSED (`BronzeImmutableError`),
++    exactly as `persist_series` does for PX_LAST. Returns bronze_put's receipt."""
++    from lib.research.harvest import store
++
++    doc = tr_series_doc(as_of_date, window_start, window_end, series_by_ticker)
++    body = json.dumps(doc, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
++    return store.bronze_put(
++        SOURCE, TABLE_TR, partition_for(as_of_date), OBJECT_TR, body,
++        content_type="application/json",
++        metadata={"received-form": FORM_NORMALISED},
++        client=client or _default_client(),
++    )
++
++
+ def _list_keys(client) -> list:
+     prefix = history_prefix()
+     bucket = _bucket()

@@ -12,6 +12,8 @@ share of the handler time, then the arms:
   T3  the eleven inner phases sum to `read_security_overlay` within max(5 percent, 5 ms)
   T4  identity + read_security_overlay + serialize sum to the handler time within max(5 percent, 5 ms)
   T5  the handler time is stated (a number, not absent)
+Optional (round 103, `AMGT-bj-2`): `--feed-max-ms <n>` and `--handler-max-ms <n>` print, after the verdict, `TARGET feed <= n ms: MET|NOT MET (x ms)` and
+`TARGET handler <= n ms: MET|NOT MET (x ms)` and a line `R103 COLD TARGET: MET|NOT MET` (both given and both met = MET); they never change the table verdict.
 Verdict `R102 PHASE TABLE: YES` (T1 to T5), `R102 PHASE TABLE: WARM` (T1, T3, T4, T5 hold and the container was warm: the split is real but it is not a COLD request), else
 `R102 PHASE TABLE: NO`. Exit 0 on YES. Writes nothing. A query that does not reach `Complete` is `NO`, never an empty table.
 """
@@ -26,6 +28,7 @@ PHASES = ["identity", "model_block", "axis_reads", "check_face", "feed", "descri
           "input_provenance", "read_security_overlay", "serialize"]
 INNER = PHASES[1:12]
 PHASE_LINE = re.compile(r"AMGT_PHASE route=overlay phase=(\S+) ms=(\d+)")
+TARGETS = {}  # filled by main() from --feed-max-ms and --handler-max-ms
 
 
 def within(a, b):
@@ -38,6 +41,9 @@ def main(argv):
 
     rid = opt("--request-id")
     lines_file = opt("--lines-file")
+    for flag, name in (("--feed-max-ms", "feed"), ("--handler-max-ms", "handler")):
+        if opt(flag):
+            TARGETS[name] = float(opt(flag))
     if lines_file:
         messages = [x.rstrip("\n") for x in open(lines_file, encoding="utf-8")]
         return report(messages, "lines-file")
@@ -128,6 +134,17 @@ def report(messages, rid):
     else:
         verdict = "NO"
     print("R102 PHASE TABLE: %s" % verdict)
+    if TARGETS:
+        got = {"feed": seen.get("feed"), "handler": handler_ms}
+        met_all = True
+        for name in ("feed", "handler"):
+            if name not in TARGETS:
+                continue
+            value = got[name]
+            ok = value is not None and value <= TARGETS[name]
+            met_all = met_all and ok
+            print("TARGET %s <= %.0f ms: %s (%s ms)" % (name, TARGETS[name], "MET" if ok else "NOT MET", "%.0f" % value if value is not None else "ABSENT"))
+        print("R103 COLD TARGET: %s" % ("MET" if met_all else "NOT MET"))
     return 0 if verdict == "YES" else 1
 
 
