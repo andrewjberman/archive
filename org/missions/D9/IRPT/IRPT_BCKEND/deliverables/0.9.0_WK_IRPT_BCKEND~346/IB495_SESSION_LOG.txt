@@ -1,0 +1,32 @@
+IB-pr-495 worker session log -- 0.9.0_WK_IRPT_BCKEND~346 (ASCII)
+Workspace HEAD at start: fba6052830 (branch wk-IRPT_BCKEND-346). Portal HEAD at start: cf52fdbf (branch wk-IRPT_BCKEND-346-portal).
+Portal commit made: a5cadfd7 (LOCAL on wk-IRPT_BCKEND-346-portal; not pushed).
+
+BASE, before any edit (workspace root as cwd, timeout 120):
+  IB170-4-AC1: FAIL: 29 file(s) still carry annualized_return or DECIMAL_FRACTION: ['job.generating.json', 'job.preparing.json', 'job.queued.json', 'job.ready.json'] / IB170-4-AC1 FAIL / rc=1
+  IB170-4-AC2: OK: the five portal tests pass (21) / IB170-4-AC2 PASS / rc=0
+  IB170-4-AC3: FAIL: the portal wire copy's sections differ from the producer fixture's (1 vs 1 sections) / IB170-4-AC3 FAIL / rc=1
+BASE whole suite (portal, bun test src/pages/InvestorReporting): 1216 pass, 27 skip, 1 fail; 1244 tests across 393 files. The one fail is F14-AC3 (firmAccess numstat), pre-existing.
+
+EDITS
+- wire copy, step 1: fixtures/wire/AnalysisReport.valid.json section set to the producer section (4 keys).
+- generator runs (portal root, bun run per header):
+  fe-s-13/gen-corpus.ts: section-only changes in smoke/default.json and smoke/fe-s-13-wire.json, plus EOL-only changes (22 requests, fe-s-14-print-v1). EOL restored to CRLF.
+  fe-s-14/gen-maps.ts: EOL-only (4 fe-s-14 maps). Restored.
+  fe-s-15/gen-fixtures.ts: smoke/fe-s-15-clean.json and -needs-correction.json section-only (kept). fixtures/fe-s-15/job.*.json changed beyond the section (unprojected_grant dropped, internal_correlation_id added): restored to HEAD bytes, NOT changed (STOP clause; row S2).
+  fe-s-18/gen-fixtures.ts: FAILED at gen-fixtures.ts:424 (JSON Parse error: Unexpected identifier "undefined"); its partial run had rewritten smoke/fe-s-18-frozen.json beyond the section: restored to HEAD bytes, NOT changed (row S3).
+- hand section-only edits (numstat 4/4 each): fixtures/smoke/fe-s-21-queued.json (no generator writes it); fixtures/smoke/fe-s-18-holdings-observed.json, -target.json, -missing-attribution.json (generator broken, row S3); __tests__/fe-s-32/holdings-no-answer.json (step 4); __tests__/fe-s-74/fixtures/one-bad-key.json (step 4).
+- no test file edited (row S6).
+
+WHOLE SUITE after the section edits, first run: 1215 pass, 27 skip, 2 fail. The new fail: fe-s-32/holdings-in-a-browser.test.ts "the NO-ANSWER map is the observed map with ONE member changed" (analysis member differed) because the observed sibling still carried the old section. Fixed by the sibling section-only edits above.
+WHOLE SUITE final state: 1216 pass, 27 skip, 1 fail (the same one as base; F14-AC3 firmAccess numstat). This is the second whole-suite run; the first was the diagnostic run described above.
+
+FINAL CRITERIA (workspace root, timeout 120):
+  IB170-4-AC1: FAIL: 29 file(s) still carry annualized_return or DECIMAL_FRACTION (same list as base) / rc=1
+  IB170-4-AC2: OK: the five portal tests pass (21) / rc=0
+  IB170-4-AC3: OK: the wire copy's sections equal the producer fixture's / rc=0
+
+RENDER PROBE (scratch file .scratch/ib495_probe.tsx, not committed; RetainedSections on the wire section):
+  old form (0.0712, DECIMAL_FRACTION): "... As of 0.0712 percent not stated 2026-08-31 Vendor attribution: 2"
+  new form (7.12, pct): "... As of 7.12 percent not stated 2026-08-31 Vendor attribution: 2"
+  heading in both: "2. Unnamed section of the source report". Printed words change: the value only.
