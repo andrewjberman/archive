@@ -24,6 +24,8 @@ Usage:  python ar19_checks.py <check> --root <worker worktree root>
                                                                                                                               -> Y201-LIVE-OK
   y202-portal    AR-y-202 (workstream YR): the portal's readers of the upload door's answer at the PROD and DEV commits, each with its key policy, and
                  the door answers of the pinned and the moved pair passed through them, the four new finding codes among the cases    -> Y202-PORTAL-OK
+  y203-defer     AR-y-203 (workstream YR): the portal's readers given the DEPLOYED first answer of the template lane (the _defer body, reason
+                 TEMPLATE_FINDINGS) built from the moved uploads.py, at PROD and DEV, for the three ERROR finding codes     -> Y203-DEFER-OK
   y199-recipe    AR-y-199: st32's full assembly recipe recovered, rebuilt at st32's pin (326 members by name and content) before the
                  release pin is built with it, and the delta redone                                                           -> Y199-RECIPE-OK
 
@@ -41,7 +43,7 @@ INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r19/"
 ROUND18_VERSION = "irpt-template-reader.r18.1"
 TOKENS = {"y191-scratch": "Y191-SCRATCH", "y192-census": "Y192-CENSUS", "y193-build": "Y193-BUILD", "y194-rule": "Y194-RULE",
-          "y194-backstop": "Y194-BACKSTOP", "y194-keep": "Y194-KEEP", "y195-delta": "Y195-DELTA", "y196-install": "Y196-INSTALL", "y197-four": "Y197-FOUR", "y198-equal": "Y198-EQUAL", "y199-recipe": "Y199-RECIPE", "y200-two": "Y200-TWO", "y201-live": "Y201-LIVE", "y202-portal": "Y202-PORTAL"}
+          "y194-backstop": "Y194-BACKSTOP", "y194-keep": "Y194-KEEP", "y195-delta": "Y195-DELTA", "y196-install": "Y196-INSTALL", "y197-four": "Y197-FOUR", "y198-equal": "Y198-EQUAL", "y199-recipe": "Y199-RECIPE", "y200-two": "Y200-TWO", "y201-live": "Y201-LIVE", "y202-portal": "Y202-PORTAL", "y203-defer": "Y203-DEFER"}
 SHEETS = ("two_value_account_sheet", "total_row_sheet", "one_account_sheet", "two_sheet_workbook")
 NATIVE_UNPINNED = ("acceptance.py", "submission.py", "submission_service.py", "durable_job.py")
 S31_FORMS = ("Account Numbers", "Subaccounts", "Accnt", "Account Nos", "Account Seqno", "Account Serial", "Roth IRA Account", "Trust Account")
@@ -352,6 +354,35 @@ def main(argv):
                 if code not in seen:
                     problems.append("no AFTER case carries the new finding code %s" % code)
             print("readers %d, cases %d, new codes covered %d of 4" % (len(readers), len(cases), len(seen & {"ACCOUNT_COLUMN_SEVERAL_VALUES", "HEADER_ROW_REPEATED", "SHEETS_NOT_READ", "TOTAL_ROW_PRESENT"})))
+    elif check == "y203-defer":
+        rec = load(root, D % "58" + "PORTAL_DEFER_SHAPE_READERS.json", problems)
+        if rec:
+            for member in ("prod_commit", "dev_commit", "cases", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            cases = rec.get("cases") or []
+            seen, commits = set(), set()
+            for c in cases:
+                if not str(c.get("body_source", "")).startswith("_defer"):
+                    problems.append("case %r: body_source must start with _defer (the deployed first answer)" % c.get("case"))
+                keys = set(c.get("body_keys") or [])
+                if not {"reason", "findings", "findings_total", "template", "state", "upload_id", "input_id"} <= keys:
+                    problems.append("case %r: the body lacks a _defer member (has %s)" % (c.get("case"), sorted(keys)))
+                if c.get("reason") != "TEMPLATE_FINDINGS":
+                    problems.append("case %r: reason must be TEMPLATE_FINDINGS" % c.get("case"))
+                if c.get("outcome") not in ("RETURNED", "THREW"):
+                    problems.append("case %r: outcome must be RETURNED or THREW" % c.get("case"))
+                if c.get("arm") not in ("BEFORE", "AFTER") or c.get("commit") not in ("PROD", "DEV"):
+                    problems.append("case %r: arm or commit missing" % c.get("case"))
+                if c.get("arm") == "AFTER":
+                    seen.update(c.get("codes") or [])
+                    commits.add(c.get("commit"))
+            for code in ("ACCOUNT_COLUMN_SEVERAL_VALUES", "HEADER_ROW_REPEATED", "TOTAL_ROW_PRESENT"):
+                if code not in seen:
+                    problems.append("no AFTER _defer case carries %s" % code)
+            if commits != {"PROD", "DEV"}:
+                problems.append("AFTER cases must cover both PROD and DEV (got %s)" % sorted(commits))
+            print("cases %d, AFTER codes %s" % (len(cases), sorted(seen)))
     return finish(check, problems)
 
 
