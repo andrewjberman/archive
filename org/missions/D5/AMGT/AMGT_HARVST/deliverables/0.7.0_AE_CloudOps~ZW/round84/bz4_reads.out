@@ -1,0 +1,63 @@
+# HVST-bz-4 step 6 -- THE FOUR READS, at +3 and +15 from the start. All four TRUE.
+# 0.7.0_AE_CloudOps~ZW, site Z box. Runner PID 50360, pythonw.exe, started 2026-10-13T08:09:08Z.
+
+## A CLOCK NOTE, BECAUSE IT NEARLY CAUSED A WRONG ROLLBACK
+
+The first attempt at the "+15" read computed elapsed time with a PowerShell datetime subtraction
+against a 'Z'-suffixed literal. It printed "+252.2 min" and "due yet: True" when only 12 minutes had
+passed: the literal was taken as LOCAL and compared against a UTC value, a flat 240-minute error.
+R4 had grown by 2 at that moment and needed 3. Had that reading been accepted, the order's step 8
+would have rolled back a runner that was working perfectly.
+**Every elapsed figure below is EPOCH arithmetic.** The real +15 read was taken at +17.9 min.
+
+## R1 -- cycle_runner.log is still written under the windowless launch
+
+  at +7.3 min : last write 2026-10-13T08:15:14Z, age 1.24 min   -> under 5 min: TRUE
+  at +17.9 min: last write 2026-10-13T08:26:54Z                 -> a NEW line since the +3 read: TRUE
+  the lines themselves, on the ~2.9 min cadence:
+    08:09:09Z PLAN bbg security-bf8d3142a86af658
+    08:12:20Z JOB bbg security-b0fe721e1f2a0d8b status=no_new_articles run_id=20261013T080911Z-run-f4c8f41c
+    08:15:14Z JOB bbg security-43ac880cbeff2e39 status=no_new_articles run_id=20261013T081221Z-run-b034fad7
+    08:18:13Z JOB bbg security-3f84640fbc272aee status=no_new_articles run_id=20261013T081515Z-run-367cf131
+    08:21:07Z JOB bbg security-45c4e1ba04304d2c status=no_new_articles run_id=20261013T081813Z-run-97e6f412
+    08:24:05Z JOB bbg security-88716edce6fc0e54 status=no_new_articles run_id=20261013T082107Z-run-aba027bd
+    08:26:54Z JOB bbg security-9c8928a07b1e047e status=no_new_articles run_id=20261013T082405Z-run-d457ebc2
+  R1: TRUE at both reads.
+
+## R2 -- the task action is pythonw.exe in schtasks /query /xml
+
+  $ schtasks /query /xml /tn "Opal Data Harvest - Continuous Cycle"      (saved: bz4_task.xml)
+      <Command>C:\Program Files\Python314\pythonw.exe</Command>
+  R2: TRUE. Matched on 'pythonw\.exe</Command>', which cannot be satisfied by 'python.exe</Command>'.
+
+## R3 -- no console window        (the AC3 file is bz4_console.out)
+
+  MainWindowHandle = 0, MainWindowTitle = '' (empty), conhost.exe children = 0.
+  CONTROL, and it CORRECTS one of R3's two signals: a console python.exe (PID 7068) reads
+  conhost children = 1 but ALSO MainWindowHandle = 0. So the conhost-child count discriminates and
+  the handle does NOT. The handle=0 is true and is printed because the order requires it, but it is
+  the conhost count that carries the evidence. Detail in bz4_console.out.
+  R3: TRUE, on the signal that discriminates.
+
+## R4 -- the REAL collector spawn works with no console
+
+  This is the read bz-3's own test could not make: bz-3 exercised a FAKE driver, so `pythonw` had
+  never actually spawned the real collector. A runner that wrote its log but spawned nothing would
+  have passed R1, R2 and R3.
+  checkpoint state/cycles/bbg/20261013T080909Z.checkpoint.json, cycle started 08:09:09.755752Z
+    done length at  +7.3 min : 2      (the baseline)
+    done length at +17.9 min : 6      (grew by 4; the order requires at least 3)
+  AttributeError / OSError / WinError lines in the log since the start: 0   (0 required)
+  DIRECT CORROBORATION: the spawn itself was read as a live process -- PID 4164, pythonw.exe, child of
+  50360, command line "... -m lib.opal_data_harvest --runtime-root ... run --harvest...", itself with
+  MainWindowHandle 0 and no children. The collector runs, windowless.
+  R4: TRUE.
+
+## VERDICT
+
+  R1 TRUE  R2 TRUE  R3 TRUE  R4 TRUE        AC1 PASS  AC2 PASS  AC3 PASS
+  => BRANCH G: it stays. Step 8's rollback is NOT taken and was never reached.
+  => The order's condition for disarming row Z-S115 ("R1 to R4 read TRUE and AC1 to AC3 PASS") is MET.
+     Who flips the clock is not clean, and row Z-S116 says so rather than this seat assuming it.
+  Runner at the +15 read: 1 cycle_runner over all exes, PID 50360 pythonw.exe, handle 0, title empty,
+  CPU accruing, task State Running. No second runner. The old pin 1c69fa35a3 stays locked as the rollback.
