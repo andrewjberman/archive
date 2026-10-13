@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ab-8",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-8.box-lists-from-register.md",
+    "group": "OTHER",
+    "vintage_commit": "2ab34bf8ff"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~81",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round12.md",
+    "vintage_commit": "2ab34bf8ff",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-8.box-lists-from-register.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/box-status-report-check.py",
+      "kind": "script",
+      "commit_or_etag": "61ccbe5feb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed",
+      "artifact_covered_by": [
+        "CTab8-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_box_lists_from_register.py",
+      "kind": "test",
+      "commit_or_etag": "61ccbe5feb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed"
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "60c03218c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local surprise row; nothing deployed"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTab8-AC1",
+      "criterion_verbatim": "python .tools/tests/test_box_lists_from_register.py expect: gate=derived status_report=derived ok=True",
+      "method": "command",
+      "invocation": "python .tools/tests/test_box_lists_from_register.py",
+      "output_evidence": "FAIL  gate FABRIC_ENUM is derived, not a literal (AST literal) | literal\nPASS  gate FABRIC_ENUM equals lib/devices placement_values() | ('laptop', 'site-z', 'dell1', 'dell2') vs ('laptop', 'site-z', 'dell1', 'dell2')\nFAIL  gate holds no literal box list (787 containers scanned) | literal box lists at lines [93]\nPASS  status report BOXES is derived, not a literal (AST derived) | derived\nPASS  status report BOXES equals set(lib/devices names()) | ['dell1', 'dell2', 'laptop', 'sitez'] vs ['dell1', 'dell2', 'laptop', 'sitez']\nPASS  status report holds no literal box list (45 containers scanned) | literal box lists at lines []\nBOX-LISTS-FROM-REGISTER gate=literal status_report=derived ok=False\n(rc 1)",
+      "denominator": "4 of 6 cases PASS; gate half 1 of 3 PASS (the gate's FABRIC_ENUM is a literal at .tools/to-pipeline-gate.py:93, the held AST carrier); status-report half 3 of 3 PASS",
+      "status": "FAIL",
+      "status_reason": "BLOCKING: the gate half cannot derive inside the order's <paths>; .tools/missions-tree-index.py reads FABRIC_ENUM by ast.literal_eval (outside the grant). Filed as NFRA_CTLPLN-W81-S1.",
+      "expect": "gate=derived status_report=derived ok=True"
+    },
+    {
+      "criterion_id": "CTab8-AC2",
+      "criterion_verbatim": "python .tools/tests/test_fabric_enum_dell.py expect: ok=True (the gate still admits and refuses as before)",
+      "method": "command",
+      "invocation": "python .tools/tests/test_fabric_enum_dell.py",
+      "output_evidence": "gate FABRIC_ENUM = ('laptop', 'site-z', 'dell1', 'dell2')\nfabric='dell1' -> ADMITTED\nfabric='dell2' -> ADMITTED\nfabric='laptop' -> ADMITTED\nfabric='site-z' -> ADMITTED\nfabric='DELL1 ' -> ADMITTED\nfabric='dell3' -> REFUSED: org/missions/D0/NFRA/FABTMP/task-orders/FABTMP.TO-1.md: project org/missions/D0/NFRA/FABTMP/project.json has fabric='del\nmissions-tree-index --self-test -> ok | missions-tree-index --self-test: 52/52 PASS\nto-pipeline-gate --self-test -> ok | [to-pipeline-gate --self-test] RESULT: 0 arm(s) failed of 132\nFABRIC-ENUM admitted=5/5 refused=1/1 tree_selftest=ok gate_selftest=ok ok=True\n(rc 0)",
+      "denominator": "admitted 5 of 5, refused 1 of 1; missions-tree-index self-test 52 of 52 PASS; to-pipeline-gate self-test 0 of 132 arms failed",
+      "status": "PASS",
+      "expect": "ok=True"
+    },
+    {
+      "criterion_id": "CTab8-AC3",
+      "criterion_verbatim": "python .tools/tests/test_no_hand_listed_boxes.py expect: ok=True (the hand-listed census test still passes; report its real-tree hand_listed= count, base 9, expected 7)",
+      "method": "command",
+      "invocation": "python .tools/tests/test_no_hand_listed_boxes.py",
+      "output_evidence": "PASS  gate AST carrier FABRIC_ENUM equals the register-derived values (no drift) | ('laptop', 'site-z', 'dell1', 'dell2') vs ('laptop', 'site-z', 'dell1', 'dell2')\nPASS  real-tree census lists none of the edited files except the held AST carrier | edited files still listed=['.tools/to-pipeline-gate.py'] held={'.tools/to-pipeline-gate.py': 'NFRA_CTLPLN-W53-S1'}\nBOX-LIST-CENSUS scanned=1510 hand_listed=8 files=.tools/agentbus-sqs.sh,.tools/box-sync-schedule.ps1,.tools/directives-check.py,.tools/git-hooks/one-writer-check.py,.tools/integrate-directives.py,.tools/to-pipeline-gate.py,.tools/unblock.py,.tools/xadj.py\nNO-HAND-LISTED-BOXES-TEST cases=23/23 ok=True\n(rc 0)",
+      "denominator": "23 of 23 cases PASS; real-tree census hand_listed=8 of 1510 files scanned (base 9; the order expected 7 -- the held gate carrier .tools/to-pipeline-gate.py stays listed)",
+      "status": "PASS",
+      "expect": "ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the unbuilt gate half: the literal FABRIC_ENUM at .tools/to-pipeline-gate.py:93 is the state AC1's gate arm must flag; the arm fired (gate=literal, FAIL)",
+      "expected": "gate=derived",
+      "observed": "gate=literal",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC3 re-run at the same code (the build commit 61ccbe5feb); AC1 gate=literal and AC3 hand_listed=8 on both runs",
+      "observed": "AC1 gate=literal on both runs; AC3 hand_listed=8 on both runs (the first AC3 run printed hand_listed=8 in its real-tree arm)",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "BUILD 1: FABRIC_ENUM = tuple(lib.devices placement_values()) in .tools/to-pipeline-gate.py, and the AST readers updated to call the derived value",
+      "reason": "not built: .tools/missions-tree-index.py _resolve_enum reads FABRIC_ENUM by ast.literal_eval, and a derived assignment raises ValueError there; that reader, org/standards/PROJECT_TREE.contract.json value_enums.fabric, .tools/tests/test_fabric_readers_dell.py and the investigation schema are outside <paths>. Rowed NFRA_CTLPLN-W81-S1 (BLOCKING, INERT)."
+    },
+    {
+      "item": "the order's expected real-tree hand_listed=7",
+      "reason": "measured 8: box-status-report-check.py left the census (base 9); the gate literal stays listed as the held AST carrier, so 7 is not reachable without the BUILD 1 decision in W81-S1."
+    },
+    {
+      "item": "test_fabric_readers_dell.py as a base control",
+      "reason": "not a criterion of this order; at the base it printed no result within the 120-second bound and returned rc=0 with ok=True inside a 600-second run; not re-run at the build commit."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W81-S1: TO-CT-ab-8 BUILD 1 cannot derive FABRIC_ENUM; .tools/missions-tree-index.py reads the literal by ast.literal_eval outside the grant (BLOCKING, INERT)"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~81/NFRA_CTLPLN.TO-CT-ab-8.box-lists-from-register.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_box_lists_from_register.py",
+      "result": "BOX-LISTS-FROM-REGISTER gate=literal status_report=derived ok=False (rc 1)"
+    }
+  ]
+}
