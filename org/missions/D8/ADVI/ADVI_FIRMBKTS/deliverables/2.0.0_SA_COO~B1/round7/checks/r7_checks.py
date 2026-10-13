@@ -387,6 +387,41 @@ def scrub(a):
     return 0
 
 
+def trailsel(a):
+    """FB-j-15: the organization trail holds the two ruled selectors unchanged plus a third, WriteOnly, on exactly bd, inf and cot.
+
+    Reads the JSON of `aws cloudtrail get-event-selectors` on stdin.
+    """
+    try:
+        d = json.load(sys.stdin)
+        sel = d["EventSelectors"]
+    except (ValueError, KeyError, TypeError):
+        print("TRAILSEL: FAIL input is not get-event-selectors JSON")
+        return 1
+    want_read = sorted("arn:aws:s3:::%s/" % b for b in ("opal-data-49financial", "opal-data-bd", "opal-data-cot", "opal-data-inf"))
+    want_write = sorted("arn:aws:s3:::%s/" % b for b in ("opal-data-bd", "opal-data-cot", "opal-data-inf"))
+
+    def shape(s):
+        vals = sorted(v for r in s.get("DataResources", []) if r.get("Type") == "AWS::S3::Object" for v in r.get("Values", []))
+        return (s.get("ReadWriteType"), bool(s.get("IncludeManagementEvents")), vals)
+
+    got = [shape(s) for s in sel]
+    problems = []
+    if len(got) != 3:
+        problems.append("selectors=%d, want 3" % len(got))
+    if ("All", True, []) not in got:
+        problems.append("management selector missing or changed")
+    if ("ReadOnly", False, want_read) not in got:
+        problems.append("read selector missing or changed")
+    if ("WriteOnly", False, want_write) not in got:
+        problems.append("write selector missing or not exactly bd, inf and cot")
+    if problems:
+        print("TRAILSEL: FAIL " + "; ".join(problems))
+        return 1
+    print("TRAILSEL: OK selectors=3 write_buckets=3")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -413,11 +448,12 @@ def main():
         q.add_argument("--file", required=True)
     tf = sub.add_parser("tfslots")
     tf.add_argument("--root", required=True)
+    sub.add_parser("trailsel")
     sc = sub.add_parser("scrub")
     sc.add_argument("--files", nargs="+", required=True)
     a = ap.parse_args()
     return {"awsdiff": awsdiff, "agree2": agree2, "emiterr": emiterr, "firstchain": firstchain, "dryrun": dryrun, "prescreen": prescreen, "slotcause": slotcause,
-            "tfslots": tfslots, "iqlt": iqlt, "switchsample": switchsample, "scrub": scrub}[a.cmd](a)
+            "tfslots": tfslots, "iqlt": iqlt, "switchsample": switchsample, "scrub": scrub, "trailsel": trailsel}[a.cmd](a)
 
 
 if __name__ == "__main__":

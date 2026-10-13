@@ -4,7 +4,8 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~U7</issued_to>
 <date>2026-10-13</date>
-<status>pending</status>
+<status>complete</status>
+<status_reason>Closed by the issuer 2.0.0_SA_COO~C after its own reads: proof instance VALID (CTab10-AC1, CTab10-AC2); record final lines PURGE streams_listed=8550 streams_deleted=8513 spanning_kept=0, POST-PURGE pre_cut_refresh=0 pre_cut_device_trust=0 pre_cut_jwt=0 pre_cut_bearer=0, refresh_latest_expiry=2026-10-18T03:08:59Z, device_trust_latest_expiry=2026-11-10T03:08:59Z, rotation_path=the OP-s-10 runbook (nothing rotated); ledger s9112-data-proxy-log-purge-ab10-20261013 closed. The rotation decision rides the drain-end message (row NFRA_CTLPLN-S9122).</status_reason>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <round>2</round>
