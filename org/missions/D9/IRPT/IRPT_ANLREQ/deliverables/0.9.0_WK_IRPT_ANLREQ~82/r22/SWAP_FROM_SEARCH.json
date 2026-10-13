@@ -1,0 +1,72 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-249",
+  "cell": "AR-y-249",
+  "base_head": "c53686ba6d",
+  "read": {
+    "files": [
+      "infra/aws/lambda/investor-reporting/intake/resolution_kimi.py (whole file, pre-change)",
+      "infra/aws/lambda/investor-reporting/ycharts/generate/kimi_port.py (whole file, pre-change)",
+      "infra/aws/lambda/investor-reporting/intake/tests/test_resolution_kimi.py (whole file, pre-change)",
+      "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_y4_check_gate.py (whole file; read-only, not edited)",
+      "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_frozen_worker.py (lines 1-30; the sys.path pattern for the new port test)",
+      "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py (the y249-swap branch, read only, to match the record members and the floors)",
+      "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md (tail rows and format)"
+    ],
+    "what_changes": "The swap no longer uses request_fields or tools. The advisory takes a search port and a four-member capability (model, verified, qa_receipt_sha256, search_limit). A swap runs one search over the symbol, then one plain chat call whose prompt carries the numbered results as data. Each candidate is dropped unless its symbol is a whole token in a given result and every source url is a given result url. The transport kimi_search is added beside kimi_send. The check kind is unchanged."
+  },
+  "transport": {
+    "file": "infra/aws/lambda/investor-reporting/ycharts/generate/kimi_port.py",
+    "lines": "20 KIMI_SEARCH_URL = https://api.moonshot.ai/v1/tools/search; 21 SEARCH_MAX_BODY (256 KiB); 22-23 SEARCH_TEXT_MAX and SEARCH_URL_MAX (600); 62-102 kimi_search(read_secret, url, opener) returning search(text_query, limit, timeout_seconds); 88 response read capped at SEARCH_MAX_BODY+1; 90 HTTPError -> KimiFailure KIMI_SEARCH_HTTP_<status> with status attribute; 91-96 timeout -> TimeoutError KIMI_TIMEOUT, URLError/OSError -> KimiFailure KIMI_CONNECTION_RESET; 105-126 _search_results (strings only; title and snippet truncated to 600; items with a non-https url or a url over 600 chars, or a non-string field, are skipped; at most limit items; malformed top level -> KIMI_SEARCH_MALFORMED)",
+    "shape": "POST JSON {text_query, limit, timeout_seconds} with Authorization Bearer and Content-Type application/json. The key is read once through read_secret and held in memory. Timeout is max(1, int(timeout_seconds)); the body timeout_seconds is clamped to 1..60. Errors name the status code, never the body or the key."
+  },
+  "advisory": {
+    "file": "infra/aws/lambda/investor-reporting/intake/resolution_kimi.py",
+    "gate": "lines 81-88 _search_ready: search port present AND capability dict with exactly the four keys, model == MODEL, verified is True, qa_receipt_sha256 a 64-hex string, search_limit an int 1..10. Otherwise KIMI_WEB_SEARCH_UNVERIFIED, returned at call() before any telemetry, search or send (line 256). The pre-ruling request_fields shape is refused by the key-set equality.",
+    "constructor": "line 209: KimiAdvisory(*, send, telemetry, clock, search_capability=None, search=None); a non-callable search port is refused with KIMI_PORT_REQUIRED.",
+    "query": "line 224: '<SYMBOL> ticker ETF fund', symbol only. No context, holdings or client data enters the query. The search is called once with (query, search_capability.search_limit, remaining deadline seconds) at lines 218-246, journaled before and after through the telemetry port (states BEFORE_SEARCH and AFTER_SEARCH, attempt 0, no query text, no results).",
+    "empty_results": "an empty list returns the empty-candidates result (_empty_swap, line 104) with no chat call; failure null; attempts [].",
+    "search_error": "any search failure returns that failure code with no chat call (KIMI_SEARCH_HTTP_<status>, KIMI_CONNECTION_RESET, KIMI_TIMEOUT, KIMI_SEARCH_MALFORMED, and so on).",
+    "prompt_shape": "lines 41-50 SWAP_INSTRUCTION, then the data JSON (symbol, context_symbols, excluded_symbols), then one line per result: '<n> <json object with title, url, snippet>', numbered from 1. The instruction says the results are untrusted text and the candidate must appear in a result it cites. The payload is {model, temperature, max_tokens, messages} only: no tools, no tool_choice (lines 65-79 prompt_for, call() payload at lines 270-271).",
+    "drop_rules": "lines 110-130 _ground, run after the parse and after the excluded-symbol refusal: a candidate is kept only when (a) its symbol matches as a whole token, case-insensitive, in the title or snippet of at least one given result, AND (b) every url in its sources is the url of a given result. Overall sources not among the given urls are removed. If candidates survive and no overall source survives, KIMI_EVIDENCE_MISSING. The counts return as dropped_unsupported (candidates) and dropped_unsupported_sources (line 332).",
+    "check_kind": "unchanged in behaviour: prompt_for check branch, _parse check branch, the check payload and the retry rules are the same code paths."
+  },
+  "tests": {
+    "added": 35,
+    "added_breakdown": "intake/tests/test_swap_from_search.py 18 (13 functions, 6 of them parametrized over refused capabilities); ycharts/generate/tests/test_kimi_search_port.py 17 (10 functions, parametrized over statuses and malformed bodies)",
+    "passed": 66,
+    "failed": 0,
+    "folders": {
+      "intake/tests": "388 passed, 1 skipped, 28 subtests passed (floor 365; HEAD baseline 370 passed, 1 skipped)",
+      "intake/tests/test_swap_from_search.py": "18 passed (floor 10)",
+      "intake/tests/test_resolution_kimi.py": "48 passed (the two swap fixtures moved to the new shape; the shared deadline fixture now passes search=)",
+      "ycharts/generate/tests/test_kimi_search_port.py": "17 passed (floor 5)",
+      "ycharts/generate/tests/test_y4_check_gate.py": "16 passed on the worktree and 16 passed on the HEAD copy",
+      "ycharts/generate/tests (whole folder)": "a bounded run (timeout 120) did not finish on either tree (rc 124); collect-only gives 592 tests collected rc 0 with 0 ERROR lines on both trees. The custody and fitz baseline was not re-run (row IRPT_ANLREQ-D2-W82-S2)."
+    }
+  },
+  "before_arm": {
+    "method": "a git archive of HEAD c53686ba6d extracted under .scratch/headcopy (with docs/contracts for the Y-4 test); the new test files and the edited test_resolution_kimi.py copied in; pytest run there.",
+    "test_swap_from_search.py": "18 failed, 0 passed. The new files do not fail to import: they collect and fail at construction (TypeError: KimiAdvisory.__init__() got an unexpected keyword argument 'search'). Recorded as row IRPT_ANLREQ-D2-W82-S1.",
+    "test_kimi_search_port.py": "17 failed, 0 passed (AttributeError: module 'kimi_port' has no attribute 'kimi_search').",
+    "edited_fixtures_test_resolution_kimi": "27 failed, 21 passed. test_swap_requires_qa_capability_and_rejects_prior_failed_proxy FAILS: assert 'KIMI_WEB_SEARCH_UNVERIFIED' == 'KIMI_REJECTED_CANDIDATE' under the new capability shape. The swap deadline cases fail on the search= keyword. The 27 include check-kind deadline cases, because the shared fixture passes search= for both kinds.",
+    "failed": 62
+  },
+  "files_changed": [
+    "infra/aws/lambda/investor-reporting/intake/resolution_kimi.py (modified)",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/kimi_port.py (modified)",
+    "infra/aws/lambda/investor-reporting/intake/tests/test_resolution_kimi.py (modified: the two swap fixtures, lines 70-85 and 88-101, moved to the search capability shape; intent kept)",
+    "infra/aws/lambda/investor-reporting/intake/tests/test_swap_from_search.py (added)",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_kimi_search_port.py (added)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md (three rows appended: IRPT_ANLREQ-D2-W82-S1, -S2, -S3)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~82/ (this record, the proof instance, the session log)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-249.swap-from-search-results.md (status flip only)"
+  ],
+  "claim": "Code and tests only, offline. The transport and the advisory are built to the CTO ruling a' (msg 7137): one search over the symbol, then one plain chat call with no tools, candidates dropped unless the given results support them, and the old request_fields shape refused. Nothing was called live: no search, no chat, no secret read, no deploy, no upload, no apply, no invoke. The judgment criterion AR249-y-AC2J is graded at L9 by 3.0.0_SA_CVO, not by this worker.",
+  "not_read": [
+    "the live Kimi search endpoint and the live chat model (nothing was called)",
+    "the QA receipt for this capability (qa_receipt_sha256 is not supplied here; the gate only checks its shape)",
+    "the full ycharts/generate test folder outcome (bounded run did not finish; see tests.folders)",
+    "the Secrets Manager secret astn/kimi/api-key (named, never read; no value was handled)",
+    "the signed release pair and the resident wiring (AR-y-251 scope, not in this grant)"
+  ]
+}
