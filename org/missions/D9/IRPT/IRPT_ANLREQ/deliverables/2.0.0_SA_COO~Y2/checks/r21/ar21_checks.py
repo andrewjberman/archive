@@ -300,7 +300,11 @@ def main(argv):
         if got.returncode != 0 or "ALL PASS" not in out:
             problems.append("the verify tests must exit 0 and print ALL PASS")
     elif check == "y242-portal":
-        portal_candidate(root, D22 % "74" + "PORTAL_FILE_NAME_CANDIDATE.json", problems)
+        # AMENDMENT 1 (the state line): the continuation worker could not commit under ~74's folder (lane gate, row W78-S3), so the
+        # issuer attached the amended record under its own deliverables; when it is present it is the record the check reads.
+        amend = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/r22/PORTAL_FILE_NAME_CANDIDATE_AMEND1.json"
+        rec242 = amend if (root / amend).is_file() else D22 % "74" + "PORTAL_FILE_NAME_CANDIDATE.json"
+        portal_candidate(root, rec242, problems)
     elif check == "y243-portal":
         rec = portal_candidate(root, D22 % "75" + "PORTAL_PRICE_DATE_CANDIDATE.json", problems)
         if rec and not (rec.get("server_reads") or {}).get("what_the_server_does_without_a_price_date"):
