@@ -1,0 +1,149 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-12",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3566a85699"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "e473fef6eb",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-12.dlq-visibility-grant-apply.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opal-assets/silver.tf",
+   "kind": "terraform",
+   "commit_or_etag": "9568e6cd77",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Added sqs:ChangeMessageVisibility to statement SilverDlqSendAndDrain of aws_iam_policy.silver_dlq_access, and moved local.silver_build_commit.schwab back to a11240c01c. Applied IN-PLACE: get-policy reads DefaultVersionId v2 (was v1) with AttachmentCount UNCHANGED at 7, which is the positive evidence that no replacement occurred and no role's DLQ access was cycled.",
+   "artifact_covered_by": ["AC1"]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-silver-schwab/schwab_runtime.py",
+   "kind": "script",
+   "commit_or_etag": "9568e6cd77",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Restored to the drain blob 94165f4ce5 (verified identical by blob hash) and re-deployed. Live CodeSha256 reads YeLmNn/Tkz+HYVVrCS/PeE+mISSAnH/8ilUUxPEnCmk=, equal to the OG-ap-11 build, with OPAL_BUILD_COMMIT a11240c01c, State Active, LastUpdateStatus Successful and a 0-diff re-plan.",
+   "artifact_covered_by": ["AC1", "AC2"]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/ap12_build.json",
+   "kind": "doc",
+   "commit_or_etag": "734032be62",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Records {code_sha256, path: 'redeployed'}. The branch was chosen by MEASUREMENT: live CodeSha256 read the prior hash, equal to ap11_build.json's prior_code_sha256, so step 3's rollback-was-applied arm applied.",
+   "artifact_covered_by": ["AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~Z/AP12_GRADE.json",
+   "kind": "doc",
+   "commit_or_etag": "f042a78023",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The live grade on the real scheduled sweep, plus the determination of how the foreign synthetic left the queue. It still records the two report fields as UNREADABLE, which the issuer's A2 ruling did not ask to change.",
+   "artifact_covered_by": ["AC2"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the grant is live and schwab runs the per-family build.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r35/checks/ap12.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "nfra-oplgtw-ap12-dlq-visibility: entries at HEAD 1; status CLOSED=yes; sentinel at HEAD=no\nsimulate schwab-role sqs:ChangeMessageVisibility on arn:aws:sqs:us-east-1:313476888478:opal-assets-silver-dlq: allowed\nlive CodeSha256 equals the OG-ap-11 build: yes\nRESULT: PASS\nexit=0",
+   "denominator": "Five figures read live: the ledger's entry count, Status line and sentinel presence; the simulate decision for the schwab role on the one action against the one queue ARN; and the live CodeSha256 against the recorded OG-ap-11 build.",
+   "status": "PASS",
+   "status_reason": "Both halves of the fix are live and were read on the live plane rather than inferred from the applies. The grant went in as an in-place policy VERSION bump, v1 to v2, with AttachmentCount unchanged at 7 -- the count holding is what shows no role's access was cycled. The simulate ran with ONE --resource-arns in its own invocation, because two or more in a single call flip held actions to implicitDeny and would have disarmed this very control.",
+   "expect": "(?s)entries at HEAD [1-9]\\d*; status CLOSED=yes; sentinel at HEAD=no.*sqs:ChangeMessageVisibility on arn:aws:sqs:us-east-1:313476888478:opal-assets-silver-dlq: allowed.*live CodeSha256 equals the OG-ap-11 build: yes.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: on the real scheduled sweep, schwab keeps only its own.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r35/checks/ap12.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "sweep run 37fe3466-a8d4-4909-8fcc-4cd56c547779; sweep_was_scheduled=True; foreign_survived_schwab_sweep=True; depth 2 -> 1; schwab_drained_by_queue=True\nRESULT: PASS\nexit=0",
+   "denominator": "Four figures from the live grade: the sweep's RequestId, whether it was the scheduled run, the foreign record's presence after it, and the queue depth before and after.",
+   "status": "PASS",
+   "status_reason": "The per-family drain did exactly what it should on the REAL scheduled 12:15Z sweep: one invocation, no error and NO RETRIES, against OG-ap-11's three invocations on one RequestId all ending AccessDenied. The foreign record SURVIVED, proven positively because a receive RETURNED it. The own record was DRAINED, proven from the count plus the identity of the remainder -- depth 2 at plant, 1 after, and the single remaining message proven to be the foreign one -- deliberately not from a message failing to appear in a sample. THIS CRITERION WAS AMENDED: as first written it also required the records' presence in and absence from 'the schwab sweep's report', which does not exist for a scheduled sweep because the report is the function's discarded return value. I graded it FAIL as written, filed row Z-S100, and the issuer ruled (a) in A2 @d86203d41d that the report clause was its own criterion defect and that AC2 reads the queue.",
+   "expect": "(?s)sweep_was_scheduled=True; foreign_survived_schwab_sweep=True; depth 2 -> 1; schwab_drained_by_queue=True.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Four controls, and the first is the strongest because it is a real prior failure of the same act. (1) OG-ap-11 IS THE NEGATIVE ARM: the identical build on the identical sweep, without this grant, failed three times on one RequestId with AccessDenied at schwab_runtime.py:319. So a clean run here cannot be a sweep that would pass regardless. (2) THE FOREIGN ARM: a record of another family was planted alongside, and must SURVIVE -- if the drain were still whole-queue it would be gone. (3) PRE-EXERCISE: both synthetic bodies were parsed by the DEPLOYED parser before being sent, so a malformed payload could not masquerade as a drain failure. (4) THE ISOLATED SIMULATE with one --resource-arns, since two in a call flip held actions to implicitDeny.",
+   "expected": "The sweep completes with no error and no retries; the foreign record is still present afterwards; the own record is gone; and the simulate reads allowed where it read implicitDeny before the grant.",
+   "observed": "One invocation 12:15:49Z to 12:18:19Z, RequestId 37fe3466, no traceback and no retry. Foreign eclipse f9a08314 returned by a post-sweep receive. Own schwab 44ee0375 gone, depth 2 to 1 with the remainder proven foreign. Simulate allowed, where the issuer's pre-cut read and the CTO half both recorded implicitDeny. Pre-exercise routed eclipse to 'eclipse' and schwab to 'schwab'.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 was run three times across the order -- after the ledger close, again at the issuer's 21:41Z query, and again after the A2 amendment. AC2 was run twice: once as written, once after the amendment. The live policy and Lambda state were read independently each time rather than carried forward.",
+   "observed": "AC1 returned PASS at exit=0 on every run, with the same v2 / AttachmentCount 7 / allowed / CodeSha256 readings. AC2 returned FAIL as written and PASS after the amendment, from the SAME unedited grade file -- the verdict moved because the criterion changed, not because the evidence did, which is the distinction worth preserving.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "That the sweep's own DLQ report was read.",
+   "reason": "It does not exist for a scheduled sweep. Measured four ways: drain_dlq's report is the dict it RETURNS and EventBridge discards the return; schwab_runtime.py has 0 print( calls, so CloudWatch holds 4 lines and no application output; the module makes exactly ONE S3 write whose section carries lane conversion fields and no dlq; and a search for a run-log writer read 0 hits over 425 files. Row Z-S100; persisting it is option (b), deferred by the issuer to a build cell for every family."
+  },
+  {
+   "item": "That any family other than schwab is now per-family.",
+   "reason": "The PARTIAL ROLL-OUT stands and was directly OBSERVED this round: the foreign synthetic left the queue when the BLACKDIAMOND sweep ran at 12:45:52Z, still on the old whole-queue drain. etf, blackdiamond, orion and eclipse keep draining everything until their own pairs land. Row Z-S91 stays open until every sweeping family is per-family."
+  },
+  {
+   "item": "That the ~16:00Z queue-emptying consumer is identified.",
+   "reason": "OG-dq-1 reads actor.verdict unnamed and this order did not investigate it. What this round adds is that a whole-queue family sweep can empty the queue at other times too, which WIDENS the candidate set for that pattern rather than narrowing it."
+  },
+  {
+   "item": "Any widening of the policy beyond the one action.",
+   "reason": "One action on one queue, with Resource unchanged. The plan carried 0 add / 1 change / 0 destroy with the single added action as the only changed element, and the ForceNew description was deliberately left untouched (row Z-S98) because editing it plans as a destroy-and-recreate of a policy attached to 7 live roles."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S98",
+  "NFRA_OPLGTW-Z-S100"
+ ],
+ "session_log": "This seat is a SESSION seat, not an L7 worker subagent. The order ran across two days: grant applied 14:16:11Z, schwab re-deployed 23:40:59Z after the order's own [21:15,23:35)Z window closed, ledger CLOSED 23:44:23Z, and the live grade taken on the 2026-10-13 12:15Z scheduled sweep. Session logs: org/tier2_senior/0.7.0_AE_CloudOps~Z/logs/2026-10-13/",
+ "compiler_tools": [
+  {
+   "tool": "safe-apply.sh",
+   "invocation": "-target=aws_iam_policy.silver_dlq_access, then -target the schwab function",
+   "result": "PASS",
+   "notes": "Both rc=0 and 0 add / 1 change / 0 destroy. The policy leg went in-place only because the ForceNew description was left alone; with it edited the plan read 1 add / 0 change / 1 destroy."
+  },
+  {
+   "tool": "iam get-policy / simulate-principal-policy",
+   "invocation": "live reads, one --resource-arns per isolated invocation",
+   "result": "PASS",
+   "notes": "v1 to v2 with AttachmentCount unchanged at 7; simulate allowed where it was implicitDeny before."
+  },
+  {
+   "tool": "build-and-upload.sh",
+   "invocation": "BUILD_ONLY first, then upload",
+   "result": "PASS",
+   "notes": "BUILD_ONLY confirmed the artifact sha equalled the OG-ap-11 build BEFORE the apply, so nothing irreversible ran against an unverified artifact."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open ; close-leg x5 ; close",
+   "result": "PASS",
+   "notes": "5 legs proven, CLOSED 23:44:23Z. The ledger sat open 8h because I had not closed its legs, not because anything was stranded -- the issuer queried it and that gap was mine."
+  },
+  {
+   "tool": "sqs send-message / receive-message / get-queue-attributes",
+   "invocation": "plant 2 synthetics, then read the queue non-destructively",
+   "result": "PASS",
+   "notes": "A receive is a SAMPLE, not a census: it returned only one of two planted records while the depth read 2. Presence is proven by a return; absence needs the count plus the remainder's identity."
+  },
+  {
+   "tool": "logs filter-log-events",
+   "invocation": "schwab, eclipse, etf, smartx, orion, blackdiamond, bd49finsurance",
+   "result": "PASS",
+   "notes": "Established the clean sweep and bracketed the foreign record's removal to the blackdiamond run at 12:45:52Z. One window was checked for width before a zero was trusted."
+  }
+ ]
+}
