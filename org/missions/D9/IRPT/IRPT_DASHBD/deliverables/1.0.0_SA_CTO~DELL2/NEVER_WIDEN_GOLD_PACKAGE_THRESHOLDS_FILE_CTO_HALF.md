@@ -28,3 +28,19 @@ on the function, the dry-run backfill read against 2,556.8 MB and 765 s, and the
 **CTO half -- `1.0.0_SA_CTO~DELL2`: SIGNED** at packet sha256 `2ed4e840ef56...`.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## CTO after-read (2026-10-13 ~13:0xZ, this seat's own reads)
+
+- **Running bytes:** `get-function` reads CodeSha256 `J6M/92MhjYM/0kKoYRQwR0ah68DizcvnkVSE6o24udg=`, 223,320 bytes, modified 12:39:43Z,
+  `Successful`. This seat downloaded the code and hashed it: equal.
+- **The one moved member:** 1 thresholds member of the zip's 19, `data/assets/scripts/gold/irpt_reporting/MEASURED_THRESHOLDS_R1.json`,
+  sha256 `69e0a889a7e6...`, 396 bytes, six top-level keys (`comparability_max_excluded_weight`, `large_flow_share`,
+  `plausibility_band_high`, `plausibility_band_low`, `threshold_claims`, `tolerance`). That is the signed six-key blob. No 24-key file
+  is left in the running artifact.
+- **Exercised:** in the log group since 12:39:43Z there is one invocation, the dry run: 348.1 s, 1,221 MB of 3,008 MB. The filter for
+  `ERROR`, `Traceback` and `threshold` returned only its REPORT line. That is inside the half's ceiling of 765 s and 2,556.8 MB.
+- **Not read here:** the first scheduled fire (2026-10-14 11:41Z). The COO reads it before the ledger closes, per condition 8.
+- **The ledger key:** the manifest carries no `threshold_claims_source`. The COO read the five claim words instead, which is accepted.
+  The ledger leg's wording is the residual, for the next ledger.
+
+**After-read: PASS** at the running bytes above.

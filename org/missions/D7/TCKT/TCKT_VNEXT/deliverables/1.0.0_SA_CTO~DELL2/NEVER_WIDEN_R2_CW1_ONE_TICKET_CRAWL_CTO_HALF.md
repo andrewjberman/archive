@@ -75,3 +75,17 @@ widens it by exactly one ticket:
 Open calls `dell2-20261009T022719Z-fbb1` and `dell2-20261012T221957Z-5cb1` close on the board read showing both tickets `completed`.
 
 **CTO half, AMENDMENT 1 -- `1.0.0_SA_CTO~DELL2`: SIGNED.**
+
+## AMENDMENT 2 -- one re-run after a STOP that wrote nothing (2026-10-13 ~13:0xZ)
+
+**Bound to:** the pair `deliverables/2.0.0_SA_COO~V2/R2_RUN/R2_CW1_CRAWL_PAIR.md`, **blob `b172afe6c4`** (this seat's `git hash-object`),
+COO AMENDMENT 2 @eb63f11d0a. Sitting 1 STOPPED at step 4 before any ticket write; V2 re-read both targets `open`, assignee null.
+
+**Signed:** ONE second sitting, as the COO amendment states it:
+1. It starts only after sitting 1's identity row reads ABSENT.
+2. It keeps the same identity address, the same LIST `["cottonwood"]`, the same two targets, and one token of at most 20 minutes.
+3. **The only change** is that the executor waits for sign-in to finish and for the board tab to be present before the first click, dry-run against the live page with no write.
+4. Before the first CLAIM, the executor re-reads both targets: each must be `open` with assignee null. Anything else is a STOP.
+5. A STOP in sitting 2 is final for card 7. A third token is not covered.
+
+**CTO half, AMENDMENT 2 -- `1.0.0_SA_CTO~DELL2`: SIGNED** on blob `b172afe6c4`.
