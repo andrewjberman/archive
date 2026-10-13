@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-cb-1",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cb-1.three-equities.md",
+    "group": "OTHER",
+    "vintage_commit": "b38e73ab2d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round80.md",
+    "vintage_commit": "b38e73ab2d",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cb-1.three-equities.md"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~155",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~155/THREE_EQUITIES.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only record; remote reads were one head-object and one get-object on the price store key at its version, and get-object on the holdings partitions 2026-04-22 to 2026-06-07; no S3 write, no deploy, no serve",
+      "artifact_covered_by": ["CB80cb1-AC1", "CB80cb1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~155/THREE_EQUITIES.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only note; no S3 write, no deploy",
+      "artifact_covered_by": ["CB80cb1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB80cb1-AC1",
+      "criterion_verbatim": "every security off 1.0 is listed with its four ratios, its held and served days and a cause. The issuer reads whether a served day carries a split-sized error and whether the contract widens.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~155/THREE_EQUITIES.json',encoding='utf-8'));e=d['equities'];print('THREE-EQUITIES listed=%d not_at_one=%s with_four_ratios=%d held_minted=%d held_served_partitions=%d served_day_with_split_sized_error=%s served_error_account_days=%d causes=%s widens_c_basis=%s'%(len(e),d['not_at_one'],sum(1 for x in e if all(k in x['ratios'] for k in ('price_paid','build','store','vendor_close'))),sum(1 for x in e if x['held_minted_days']),sum(1 for x in e if x['held_served_partition_days']),d['served_day_with_split_sized_error'],d['served_error_account_days'],json.dumps(sorted(str(x['cause']) for x in e)),d['widens_c_basis']))\"",
+      "expect": "THREE-EQUITIES listed=",
+      "output_evidence": "THREE-EQUITIES listed=5 not_at_one=5 of 1263 (build/store off 1.0 by more than 0.1 percent on the last common day; 1258 within; the five are APH, CTVA, HON, KLAC, SCCO) with_four_ratios=5 held_minted=5 held_served_partitions=1 served_day_with_split_sized_error=True served_error_account_days=48 causes=[\"not_established\", \"not_established\", \"not_established\", \"not_established\", \"not_established\"] widens_c_basis=False (rc 0)",
+      "denominator": "5 of 1263 silver-labelled CUSIPs off 1.0 on the last common day (1258 within); 5 of 5 listed with four ratio keys; 5 held in the minted copy; 1 with held partition days (HON, 9 days)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB80cb1-AC2",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the price paid decides which of the build and the store is right, with the numbers shown; \"served\" is read from what is served (the minted copy and the 47 partitions), not from what is built; a cause is named only where the step equals a split ratio on the split's date, and not_established otherwise; no account id or amount appears.",
+      "method": "manual_read_with_citation",
+      "invocation": "read THREE_EQUITIES.json (equities[].price_paid_check, served_price_is, steps, cause) and THREE_EQUITIES.md",
+      "expect": "judgment by 3.0.0_SA_CVO at L9",
+      "output_evidence": "THREE_EQUITIES.json and THREE_EQUITIES.md recorded without verdict. Price paid: CTVA store 0.948 to 0.990 of price paid, build 0.147 to 0.152; APH store 0.967, build 0.487; HON 2023-2025 build 0.984 to 0.993 and store 0.885 to 0.914, 2026-02-04 store 0.9986 and build 1.0525; KLAC and SCCO no held day with a build or store row. Served: minted copy close equals build (APH 48 days, CTVA 115 account-days, HON 1444 days); partitions carry store prices for HON (9 days). Cause not_established for all five (no build/store step equals a split ratio on any overlap).",
+      "denominator": "5 equities; 4 with a price-paid comparison (CTVA 4 trades, APH 1, HON 5); 0 causes named",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9, never self-graded; output recorded, no verdict"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "none named",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON",
+      "status_reason": "the order names no determinism control"
+    },
+    "mutant": {
+      "description": "the task order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "ADVI_COTBKF-D2-W155-S1",
+    "ADVI_COTBKF-D2-W155-S2",
+    "ADVI_COTBKF-D2-W155-S3",
+    "ADVI_COTBKF-D2-W155-S4"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~155/THREE_EQUITIES.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -c (CB80cb1-AC1)",
+      "result": "THREE-EQUITIES listed=5 not_at_one=5 of 1263 with_four_ratios=5 held_minted=5 held_served_partitions=1 served_day_with_split_sized_error=True served_error_account_days=48 widens_c_basis=False (rc 0)"
+    }
+  ]
+}
