@@ -11,6 +11,8 @@ Usage:  python ar19_checks.py <check> --root <worker worktree root>
                  excluded only when its values are counts, every negative control unmatched)                                -> Y194-RULE-OK
   y194-backstop  AR-y-194: the named backstop tests exist and pass                                                            -> Y194-BACKSTOP-OK
   y194-keep      AR-y-194: the whole intake folder passes (floor 331) and READER_VERSION differs from r18.1                    -> Y194-KEEP-OK
+  y195-delta     AR-y-195 (workstream YR): the resident package delta between the live resident's pin and the release pin names every differing
+                 member with both hashes, the two reader members, and the other members grouped by owner                      -> Y195-DELTA-OK
 
 --root is REQUIRED. Each check prints its token last, or the token with -FAIL after one FAIL line per problem. Writes nothing.
 """
@@ -26,7 +28,7 @@ INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r19/"
 ROUND18_VERSION = "irpt-template-reader.r18.1"
 TOKENS = {"y191-scratch": "Y191-SCRATCH", "y192-census": "Y192-CENSUS", "y193-build": "Y193-BUILD", "y194-rule": "Y194-RULE",
-          "y194-backstop": "Y194-BACKSTOP", "y194-keep": "Y194-KEEP"}
+          "y194-backstop": "Y194-BACKSTOP", "y194-keep": "Y194-KEEP", "y195-delta": "Y195-DELTA"}
 SHEETS = ("two_value_account_sheet", "total_row_sheet", "one_account_sheet", "two_sheet_workbook")
 NATIVE_UNPINNED = ("acceptance.py", "submission.py", "submission_service.py", "durable_job.py")
 S31_FORMS = ("Account Numbers", "Subaccounts", "Accnt", "Account Nos", "Account Seqno", "Account Serial", "Roth IRA Account", "Trust Account")
@@ -173,6 +175,22 @@ def main(argv):
         print("READER_VERSION = %s" % version)
         if not version or version == ROUND18_VERSION:
             problems.append("READER_VERSION must change in the same commit as what the reader returns (still %r)" % version)
+    elif check == "y195-delta":
+        rec = load(root, D % "55" + "RESIDENT_PACKAGE_DELTA.json", problems)
+        if rec:
+            for member in ("old_pin", "new_pin", "builder_args_source", "only_in_old", "only_in_new", "differing", "moved_by_this_release",
+                           "other_differing_by_owner", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            moved = {m.get("member") if isinstance(m, dict) else m for m in rec.get("moved_by_this_release", [])}
+            for name in ("uploads.py", "template_reader.py"):
+                if not any(str(x).endswith(name) for x in moved):
+                    problems.append("moved_by_this_release lacks %s" % name)
+            for row in rec.get("differing", []):
+                if not (row.get("member") and row.get("old_sha256") and row.get("new_sha256")):
+                    problems.append("a differing row lacks its member or a hash: %r" % row.get("member"))
+                    break
+            print("differing %d, only in old %d, only in new %d" % (len(rec.get("differing", [])), len(rec.get("only_in_old", [])), len(rec.get("only_in_new", []))))
     return finish(check, problems)
 
 

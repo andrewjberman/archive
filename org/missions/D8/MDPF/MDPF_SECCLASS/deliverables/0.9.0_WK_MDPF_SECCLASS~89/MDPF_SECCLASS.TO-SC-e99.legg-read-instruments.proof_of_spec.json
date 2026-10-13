@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e99",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e99.legg-read-instruments.md",
+    "group": "OTHER",
+    "vintage_commit": "c68cb7c25a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R24.md",
+    "vintage_commit": "93e1116459",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e99.legg-read-instruments.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~89",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R24_CHECKS/r24_legg_read.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only instrument. AWS calls: s3api head-object, list-object-versions, get-object (by VersionId, to a system temp file that is removed before the verdict), list-objects-v2, s3 cp to stdout, all through .tools/aws.cmd. No write to any bucket or table, no deploy, no invoke. The script writes nothing to the repository. The served keys are located through lib/platinum_dest.py source(key, mode); the mode defaults to canonical.",
+      "artifact_covered_by": [
+        "SC24-e99-AC1",
+        "SC24-e99-AC2",
+        "SC24-e99-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Seven surprise rows appended (MDPF_SECCLASS-D1-W89-S1 to S7) by byte append. The prefix was verified byte-identical at each append (668094 bytes before S1-S6, 679200 before S7); no existing row edited.",
+      "artifact_covered_by": [
+        "SC24-e99-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC24-e99-AC1",
+      "criterion_verbatim": "every positive fixture grades ok and every negative fixture fails on exactly its own criterion (AMENDMENT 2 item 6: AC1 gains three negatives; the face's bound + $1 negative is replaced by bound + $251, see row W89-S1).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R24_CHECKS/r24_legg_read.py selftest",
+      "expect": "R24-SELFTEST ok=True",
+      "output_evidence": "R24-SELFTEST-FIXTURES built from LEGG_E91_PREFIRE_BASELINE_20261012.json and R23_RADIUS\nR24-FIX e91 positive (fall = half the bound on 10-08 and 10-09) ok=True failing=[]\nR24-FIX e91 positive (baseline day values reproduce the committed D_04 remainder to the cent) ok=True failing=[]\nR24-FIX e91 fire positive (default mode reads the canonical destination; state CHANGED) ok=True failing=[]\nR24-FIX e91 --since counting fixture (2 modified of 3 C_06 keys; subdir and _composition excluded) ok=True failing=[]\nR24-FIX e91 neg in_range (10-09 fall = bound + $251) failing=['in_range'] strict=True delta_vs_positive=True\nR24-FIX e91 neg census (new class key) failing=['census'] strict=True delta_vs_positive=True\nR24-FIX e91 neg canonical BEFORE equal to AFTER (state NO-CHANGE-SINCE-FIRE) failing=['state'] strict=True delta_vs_positive=True\nR24-FIX e91 neg legacy-mode read of a canonical-only move (state NO-CHANGE-SINCE-FIRE, a read the default must not make) failing=['state'] strict=True delta_vs_positive=True\nR24-FIX e97 positive (post-act set from R23_RADIUS) ok=True failing=[]\nR24-FIX e97 neg totals_equal_aua (total off AUA by $5 on 10-02) failing=['totals_aua'] strict=True delta_vs_positive=True\nR24-FIX e97 neg w86_s5 (key gap = tolerance $250 + $1 on 10-04) failing=['w86_s5'] strict=True delta_vs_positive=True\nR24-FIX e97 neg bars (2026-Q3 structured $1,000 off) failing=['bars'] strict=True delta_vs_positive=True\nR24-FIX e97 neg advisors (one advisor key missing) failing=['advisors'] strict=True delta_vs_positive=True\nR24-FIX e97 neg added_dropped (dropped relationship still carries its date) failing=['added_dropped'] strict=True delta_vs_positive=True\nR24-FIX e97 neg restated absent (shipped=False) failing=['shipped'] strict=True delta_vs_positive=True\nR24-SELFTEST-DELTA negatives_relative_to_their_positive=10 of 10\nR24-SELFTEST ok=True positives=5 of 5 negatives=10 of 10",
+      "denominator": "1 criterion; 1 of 1 PASS. Positives 5 of 5 graded ok (e91 positive, e91 baseline-day reproduction, e91 fire positive on the default mode, e91 --since counting fixture, e97 positive). Negatives 10 of 10 fail on exactly their own criterion (strict reading): e91 in_range (bound + $251), census, canonical BEFORE equal to AFTER, legacy-mode read of a canonical-only move, and six e97 negatives. Exit code 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC24-e99-AC2",
+      "criterion_verbatim": "LIVE CONTROL (AMENDMENT 2 item 6, replacing the face's bare-e91 no-change row): python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R24_CHECKS/r24_legg_read.py e91 --fire-start 2026-10-12T23:00:00Z --since 2026-10-12T23:00:00Z must print E91-LEGG state=CHANGED ok=True d10_09_fall=653857.47 d10_08_fall=629530.84 and keys_modified_since=3184.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R24_CHECKS/r24_legg_read.py e91 --fire-start 2026-10-12T23:00:00Z --since 2026-10-12T23:00:00Z",
+      "expect": "E91-LEGG state=CHANGED ok=True d10_09_fall=653857.47 d10_08_fall=629530.84",
+      "output_evidence": "E91-READ gold/views/mix_daily_summary.json bucket=opal-data-49financial key=advi/49financial/platinum/views/mix_daily_summary.json VersionId=ZuygB9ZtOGqSqiaE.3gV_ae70lhbSZeF baseline=VrrTn2RrESHBImlLOMHQbNP6Fvzi9NZD LastModified=2026-10-13T00:23:32+00:00\nE91-READ platinum/firm/mix_summary.json bucket=opal-data-49financial key=advi/49financial/platinum/firm/mix_summary.json VersionId=l_Ch9mqN5wIdAEAOC0xmIdH3ht2.jOhd baseline=_MTtBmpPHKvL3Hvt58tzeIsshH4c_lxb LastModified=2026-10-13T00:45:57+00:00\nE91-READ gold/meta/client_timeseries_watermark.json bucket=opal-data-bd key=gold/meta/client_timeseries_watermark.json VersionId=_UBm5wvtCvVNbbE6m5ry4JOns5MuqL9a baseline=_UBm5wvtCvVNbbE6m5ry4JOns5MuqL9a LastModified=2026-10-11T05:23:28+00:00\nE91-VERSIONS gold/views/mix_daily_summary.json bucket=opal-data-49financial key=advi/49financial/platinum/views/mix_daily_summary.json after_VersionId=ZuygB9ZtOGqSqiaE.3gV_ae70lhbSZeF after_LastModified=2026-10-13T00:23:32+00:00 head_agrees=True before_VersionId=VyuLE19UQIHCSF6bkM9Brja6Lz___8RF before_LastModified=2026-10-12T07:29:12+00:00\nE91-VERSIONS platinum/firm/mix_summary.json bucket=opal-data-49financial key=advi/49financial/platinum/firm/mix_summary.json after_VersionId=l_Ch9mqN5wIdAEAOC0xmIdH3ht2.jOhd after_LastModified=2026-10-13T00:45:57+00:00 head_agrees=True before_VersionId=MkgiFxUGLLC0pTSdmgV1bTD2lyQNBdlH before_LastModified=2026-10-12T07:31:34+00:00\nE91-BEFORE-AFTER mds BEFORE=VyuLE19UQIHCSF6bkM9Brja6Lz___8RF AFTER=ZuygB9ZtOGqSqiaE.3gV_ae70lhbSZeF firm_dates BEFORE=2293 AFTER=2293\nE91-MOVED date=2026-09-30 fall=34785227.39 named=False total_held=True keys=9 (printed, graded only as the named pair)\nE91-MOVED date=2026-10-01 fall=33836779.53 named=False total_held=True keys=9 (printed, graded only as the named pair)\nE91-MOVED date=2026-10-02 fall=96672741.33 named=False total_held=True keys=9 (printed, graded only as the named pair)\nE91-MOVED date=2026-10-03 fall=92473711.36 named=False total_held=True keys=9 (printed, graded only as the named pair)\nE91-MOVED date=2026-10-04 fall=92932908.17 named=False total_held=True keys=9 (printed, graded only as the named pair)\nE91-MOVED date=2026-10-05 fall=88791866.90 named=False total_held=True keys=9 (printed, graded only as the named pair)\nE91-MOVED date=2026-10-06 fall=89259247.00 named=False total_held=True keys=9 (printed, graded only as the named pair)\nE91-MOVED date=2026-10-07 fall=617114.52 named=False total_held=True keys=9 (printed, graded only as the named pair)\nE91-MOVED date=2026-10-08 fall=629530.84 named=True total_held=True keys=9 (printed, graded only as the named pair)\nE91-MOVED date=2026-10-09 fall=653857.47 named=True total_held=True keys=9 (printed, graded only as the named pair)\nE91-MOVED-COUNT firm_days_changed=10 of 2293 firm dates in BEFORE or AFTER; named=2 unnamed=8\nE91-BASE-VS-BEFORE date=2026-10-06 baseline_d04=140161790.57 before_d04=140161790.57 diff=-0.00 baseline_total=2019548567.60 before_total=2019548567.60 moved_by_fire=True\nE91-BASE-VS-BEFORE date=2026-10-07 baseline_d04=998762.85 before_d04=998762.85 diff=-0.00 baseline_total=2013270405.35 before_total=2013270405.35 moved_by_fire=True\nE91-BASE-VS-BEFORE date=2026-10-08 baseline_d04=972621.40 before_d04=972621.40 diff=-0.00 baseline_total=2014814865.45 before_total=2014814865.45 moved_by_fire=True\nE91-BASE-VS-BEFORE date=2026-10-09 baseline_d04=1846332.73 before_d04=1846332.73 diff=-0.00 baseline_total=2015391646.72 before_total=2015391646.72 moved_by_fire=True\nE91-LEGG state=CHANGED ok=True d10_09_fall=653857.47 d10_08_fall=629530.84 in_range=True census_new=0 total_held=True advisors_same=True\nE91-DETAIL census_new_keys=[] reach_10_09=653857.12 reach_10_08=629530.89 advisors_now=56 advisor_count=56 in_range_tolerance=bound+250.00\nE91-PRINTED d04_page_unclassified_now=1192475.25 baseline_line=1846332.73 (printed, not graded)\nE91-LEGG-B destination bucket=opal-data-49financial prefix=advi/49financial/platinum/entities/clients/ legacy_prefix=gold/entities/clients/ c06_keys_modified_since=1592 of 7586 listed_total=18230 pages=19\nE91-LEGG-B destination bucket=opal-data-bd prefix=gold/client_timeseries/ legacy_prefix=gold/client_timeseries/ c06_keys_modified_since=1592 of 7945 listed_total=11314 pages=12\nE91-LEGG-B keys_modified_since=3184 of 15531 (C_06 keys, both destinations) mds_unchanged_since=False\nE91-TIME total_run_s=51.50",
+      "denominator": "1 criterion; 1 of 1 PASS. Three served keys read through source() (mix daily summary and mix summary on the canonical destination, watermark on the legacy one). Firm dates 2293 in BEFORE and AFTER; firm days changed 10 (named 2, unnamed 8, printed with named=False). keys_modified_since=3184 of 15531: canonical 1592 of 7586, legacy 1592 of 7945; the count equals the issuer's 3184 exactly, so no later fire rewrote a key. mds_unchanged_since=False is correct for this T (the fire wrote the mix daily summary at 00:23:32Z). Exit code 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC24-e99-AC3",
+      "criterion_verbatim": "run against the live served objects as they are today (the ship has not happened: the canonical mix daily summary carries no restated_through), the e97 instrument prints shipped=False and ok=False, exit 3, writing nothing.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R24_CHECKS/r24_legg_read.py e97",
+      "expect": "E97-ACCEPT shipped=False ok=False",
+      "output_evidence": "E97-READ mix_daily_summary bucket=opal-data-49financial key=advi/49financial/platinum/views/mix_daily_summary.json VersionId=ZuygB9ZtOGqSqiaE.3gV_ae70lhbSZeF LastModified=2026-10-13T00:23:32+00:00\nE97-ACCEPT shipped=False ok=False",
+      "denominator": "1 criterion; 1 of 1 PASS. The canonical mix daily summary read (VersionId ZuygB9ZtOGqSqiaE.3gV_ae70lhbSZeF); no restated_through key present; exit code 3.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative fixtures built from the committed radius, the e91 baseline and the fire-store fixtures: e91 in_range (10-09 fall = bound + $251, the amended tolerance), e91 census (new class key), e91 canonical BEFORE equal to AFTER (state NO-CHANGE-SINCE-FIRE), e91 legacy-mode read of a canonical-only move (NO-CHANGE-SINCE-FIRE), e97 totals_equal_aua ($5 off AUA on 10-02), w86_s5 (key gap = the amended $250 tolerance + $1 on 10-04), bars ($1,000 off Q3 structured), advisors (one key removed), added_dropped (a dropped relationship still carries its date), restated_through removed. Each must fail on exactly its own criterion.",
+      "expected": "each negative fails on exactly its own criterion (strict)",
+      "observed": "strict 10 of 10 in the selftest run: in_range, census, state (canonical BEFORE equal to AFTER), state (legacy-mode read), totals_aua, w86_s5, bars, advisors, added_dropped and shipped each fail exactly their own criterion against a passing positive. The default mode is asserted canonical (resolve_mode(None)).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: selftest run twice on the final code and diffed (identical); e91 --fire-start --since run twice against the same live objects and diffed (identical except the E91-TIME line and the shell rc marker); e97 run once (exits at the restated_through gate).",
+      "observed": "selftest: R24-SELFTEST ok=True positives=5 of 5 negatives=10 of 10, outputs identical. e91: E91-LEGG state=CHANGED ok=True d10_09_fall=653857.47 d10_08_fall=629530.84 and keys_modified_since=3184 of 15531 on both runs, rc 0. e97: E97-ACCEPT shipped=False ok=False, rc 3.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "e97 criteria 1-7 graded against the live post-ship served objects",
+      "reason": "Not reached: the live canonical mix daily summary carries no restated_through, so e97 exits at shipped=False (AC3). Only the grader is exercised, on the post-act fixture built from the committed radius."
+    },
+    {
+      "item": "e97 added_dropped read elapsed time on the live post-ship objects",
+      "reason": "Not run live (the post-ship path is not reached). The live e97 run exits before any relationship JSON is read."
+    },
+    {
+      "item": "e91 --since second-fire expectation (0 C_06 keys modified, mds_unchanged_since True)",
+      "reason": "Not tested: no second fire has run (the 04:00Z launch is pending). The live reads take the first fire's start (23:00Z) as T and measure 3184 of 15531 keys, the first fire's writes, with mds_unchanged_since=False."
+    },
+    {
+      "item": "the face's bare-e91 AC2 (NO-CHANGE-SINCE-BASELINE, exit 3)",
+      "reason": "Replaced by AMENDMENT 2 item 6. On the canonical default a bare e91 prints FIRE-START-REQUIRED and exits 2 (row MDPF_SECCLASS-D1-W89-S3); the baseline comparison runs only under --mode legacy."
+    },
+    {
+      "item": "the e97 per-object relationship read lines",
+      "reason": "The ~300 relationship JSON reads print as one family line with the key template and bucket counts from source(), not one line per object (row MDPF_SECCLASS-D1-W89-S5)."
+    },
+    {
+      "item": "the 'other' class in the bars",
+      "reason": "Neither bars.json nor the request's Period bars table carries an after figure for it; not graded (S4, accepted by AMENDMENT 1 item 4)."
+    },
+    {
+      "item": "the D_04 CANONICAL_MIX_CLASSES import",
+      "reason": "Read by AST from D_04.client_portal_summary.py; the module was not imported."
+    },
+    {
+      "item": "the stored Unclassified key in the post-act fixture (AMENDMENT 1 item 2 asks which)",
+      "reason": "Set equal to the would-be D_04 remainder, per the order's recipe, which names no stored key. The would-be stored key differs from the remainder by 162.29, 3.94 and 166.72 on 2026-10-03..05 (W88-S3); all three are inside the amended $250 tolerance."
+    },
+    {
+      "item": "the w86_s5 negative magnitude",
+      "reason": "The order's $50 gap is inside the amended $250 tolerance and cannot fail; the negative is set at the tolerance plus $1 (row W88-S7)."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W88-S1: criterion 1's typed bound 53010.45 is the maximum over the seven criterion dates; the 15-record maximum is 883483.05 (2026-10-09). The seven-date maximum is graded. Accepted as read by AMENDMENT 1 item 4.",
+    "MDPF_SECCLASS-D1-W88-S2: criterion 1's lower bound 0 is contradicted by the order's own post-act fixture (2026-10-06 remainder -42.15). Dispositioned by AMENDMENT 1 item 1: the lower bound is -250, and the e97 positive now grades ok=True.",
+    "MDPF_SECCLASS-D1-W88-S3: criterion 2 (stored key within $1.00) disagrees with the would-be snapshot's own figures (gaps 162.29, 3.94, 166.72). Dispositioned by AMENDMENT 1 item 2: the tolerance is 250; the fixture key equals the remainder.",
+    "MDPF_SECCLASS-D1-W88-S4: bars.json carries the Unclassified class only; the other five classes' after figures are read from the request's Period bars table. Accepted by AMENDMENT 1 item 4; the section is named in the script (PERIOD_BARS_SECTION).",
+    "MDPF_SECCLASS-D1-W88-S5: the e91 --since prefixes held 18230 keys including D_02 subdirectory objects. Dispositioned by AMENDMENT 1 item 3: the count is C_06 keys only, per prefix.",
+    "MDPF_SECCLASS-D1-W88-S6: the 2026-10-09 reach bound (653857.12) is below the re-derive's move on that date (962919.40). Accepted by AMENDMENT 1 item 4 as two different acts.",
+    "MDPF_SECCLASS-D1-W88-S7: the $50 w86 negative control cannot fail the amended $250 tolerance; the negative is set at tolerance plus $1.",
+    "MDPF_SECCLASS-D1-W89-S1: the face's e91 in_range negative (bound + $1) sits inside the amended bound + $250 tolerance; replaced by the fall of bound + $251 (AMENDMENT 2 item 3 and item 6).",
+    "MDPF_SECCLASS-D1-W89-S2: AMENDMENT 2 item 2 'if AFTER is BEFORE' does not name the object; the state is graded on the mix daily summary, the platinum mix summary's move is printed beside it and not graded.",
+    "MDPF_SECCLASS-D1-W89-S3: a bare e91 on the canonical default cannot print the face's NO-CHANGE-SINCE-BASELINE (the baseline VersionIds are legacy); the script prints FIRE-START-REQUIRED and exits 2.",
+    "MDPF_SECCLASS-D1-W89-S4: s3api get-object with '-' wrote the body to a file named '-' and metadata to stdout; the probe file was deleted; version bodies are read through a system temp file removed before the verdict.",
+    "MDPF_SECCLASS-D1-W89-S5: the e97 relationship JSON reads print as one family line with bucket counts, not one E97-READ line per object (AMENDMENT 2 item 1 asks per object).",
+    "MDPF_SECCLASS-D1-W89-S6: the live C_06-shaped denominators are 7586 canonical and 7945 legacy against 3793 relationships read; the 359-key difference is printed and not explained.",
+    "MDPF_SECCLASS-D1-W89-S7: the order's proof_of_spec path named the ~88 deliverables folder; the owned-paths gate admits this session (~89) only under its own folder. The instance is written under ~89; the ~88 instance is left at its trunk bytes."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e99.legg-read-instruments.md",
+  "compiler_tools": [
+    {
+      "tool": "r24_legg_read.py (this worker's instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R24_CHECKS/r24_legg_read.py selftest | e91 --fire-start 2026-10-12T23:00:00Z --since 2026-10-12T23:00:00Z | e97 | e91 --mode legacy --fire-start 2026-10-12T23:00:00Z",
+      "result": "selftest ok=True positives=5 of 5 negatives=10 of 10 (rc 0); e91 fire-start CHANGED ok=True d10_09_fall=653857.47 d10_08_fall=629530.84 keys_modified_since=3184 of 15531 (rc 0); e97 shipped=False ok=False (rc 3); e91 --mode legacy --fire-start NO-CHANGE-SINCE-FIRE (rc 3), the destination trap the default avoids"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~88/MDPF_SECCLASS.TO-SC-e99.legg-read-instruments.proof_of_spec.json SC24-e99-AC1,SC24-e99-AC2,SC24-e99-AC3",
+      "result": "recorded by the worker report at the commit that carries this instance (rc printed there)"
+    }
+  ]
+}
