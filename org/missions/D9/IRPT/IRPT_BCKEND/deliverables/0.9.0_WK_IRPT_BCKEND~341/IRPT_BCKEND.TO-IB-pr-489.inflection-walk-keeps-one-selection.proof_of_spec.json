@@ -20,7 +20,7 @@
    "kind": "doc",
    "commit_or_etag": "PENDING-THIS-COMMIT",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "the walk record of the second walk: firm_label Inflection Wealth Management, performance_tab_reached false, performance_request_paths 0, walker_disarmed true, walk_stamp 20261012T234939Z, reference_file_written false; no client name, no reference",
+   "deploy_evidence": "the walk record of the third walk (stamp 20261013T000334Z): firm_label Inflection Wealth Management, performance_tab_reached false, performance_request_paths 4, walker_disarmed true, reference_file_written false; no client name, no reference, no figure",
    "artifact_covered_by": [
     "IB169-2-AC2",
     "IB169-2-AC3"
@@ -31,8 +31,9 @@
    "kind": "doc",
    "commit_or_etag": "PENDING-THIS-COMMIT",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "row IRPT_BCKEND-D2-W341-S5 appended (BLOCKING, INERT): the Firm option was selected and the empty client search listed no client, so no client was walked; row S4 kept as it was",
+   "deploy_evidence": "rows IRPT_BCKEND-D2-W341-S6 (BLOCKING, INERT: performance state ceiling while 4 performance answers returned 200) and IRPT_BCKEND-D2-W341-S7 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~P2: the walker's shot and step names leak a fragment of the client name to the terminal); rows S4 and S5 kept as they were",
    "artifact_covered_by": [
+    "IB169-2-AC1",
     "IB169-2-AC3"
    ]
   }
@@ -45,9 +46,9 @@
    "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r169/p169_cells.py\" . IB169-2-AC1",
    "expect": "IB169-2-AC1 PASS",
    "output_evidence": "FAIL: no reference file at the named scratch path | IB169-2-AC1 FAIL | rc=1",
-   "denominator": "0 reference lines of 1 required (the scratch file was not written: the walk reached no client and no Performance tab)",
+   "denominator": "0 reference lines of 1 required (the walk stopped at the refusal clause: the Performance tab was not reached by the walker's own measure, so step 4 wrote no reference)",
    "status": "FAIL",
-   "status_reason": "the second walk selected the Firm option (label Inflection Wealth Management) but the empty client search listed no client, so no client was walked, no Performance tab was reached, no performance request path was logged and no sel_ reference was produced; the order stays open (refusal clause)"
+   "status_reason": "the walk loaded the Inflection client through the letter fallback (letter a listed the first client) and logged 4 performance request paths with status 200, but the walker's performance-state read was ceiling (no answer body, no refusal, 45009 ms) and the 4 paths carry 2 distinct sel_ values; under the refusal clause no reference is written and the order stays open; row IRPT_BCKEND-D2-W341-S6"
   },
   {
    "criterion_id": "IB169-2-AC2",
@@ -68,13 +69,15 @@
    "output_evidence": "FAIL: firm_label beginning Inflection, performance_tab_reached, walker_disarmed and reference_file_written must all be true | IB169-2-AC3 FAIL | rc=1",
    "denominator": "record keys 6 of 6 exact; firm_label and walker_disarmed met; performance_tab_reached and reference_file_written false (the checker stops at the first unmet value)",
    "status": "FAIL",
-   "status_reason": "the record is the honest record of the second walk: no client walked, performance_tab_reached false, reference_file_written false, performance_request_paths 0; the order stays open"
+   "status_reason": "the record is the honest record of the third walk: performance_tab_reached false by the walker's measure (ceiling), performance_request_paths 4, reference_file_written false; the order stays open pending the row S6 ruling"
   }
  ],
  "declared_exclusions": [],
  "surprises": [
   "IRPT_BCKEND-D2-W341-S4: the first walk's Firm label Inflection is not an option; the control shows Inflection Wealth Management; FIRM_OPTION_ABSENT stopped the walk before any client (kept as it was)",
-  "IRPT_BCKEND-D2-W341-S5: the second walk with the amended label selected the Firm option, but the empty client search listed no client, so no client was walked, the Performance tab was not reached and no reference was written; walker disarmed"
+  "IRPT_BCKEND-D2-W341-S5: the second walk with the amended label selected the Firm option, but the empty client search listed no client (before amendment 2); kept as it was",
+  "IRPT_BCKEND-D2-W341-S6: the third walk (amendment 2 build) found the client through letter a; the walker recorded performance state ceiling while 4 performance answers returned 200 with 2 distinct sel_ values; refusal clause, no reference written",
+  "IRPT_BCKEND-D2-W341-S7: the walker's shot and step names carry a fragment of the walked client name to the terminal; the redaction matches the full name only; ARMED, disarm_owner 2.0.0_SA_COO~P2"
  ],
  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
  "compiler_tools": [
@@ -86,13 +89,13 @@
  ],
  "controls": {
   "mutant": {
-   "description": "Negative arm: IB169-2-AC1 is run while the scratch reference file is absent (the second walk wrote none); it must fail, not pass.",
+   "description": "Negative arm: IB169-2-AC1 is run while the scratch reference file is absent (this walk wrote none); it must fail, not pass.",
    "expected": "FAIL on the missing reference file",
    "observed": "FAIL: no reference file at the named scratch path | IB169-2-AC1 FAIL | rc=1",
    "status": "FIRED-AS-EXPECTED"
   },
   "determinism": {
-   "method": "N/A: a stopped walk; no second live walk was run, since a repeat would re-arm the walker and the stop condition is the same empty client list",
+   "method": "N/A: a stopped walk; no second live walk was run, since a repeat would re-arm the walker against a performance tab whose state the walker reads as ceiling, and the refusal clause stops the order",
    "observed": "n/a",
    "status": "N/A-WITH-REASON"
   }
