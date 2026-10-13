@@ -1,0 +1,121 @@
+diff --git a/lib/research/api/scoped_amgt.py b/lib/research/api/scoped_amgt.py
+index 9f72b58aa8..02627c18a0 100644
+--- a/lib/research/api/scoped_amgt.py
++++ b/lib/research/api/scoped_amgt.py
+@@ -3629,7 +3629,9 @@ def read_security_overlay(
+     identity = identity or resolve_identity(security_key)
+     resolved_key = identity.get("security_key")
+     as_of_date = as_of_date or _today()
++    phase_started = time.monotonic()  # AMGT-bi-1: per-phase log lines, logs only
+     model_block = read_model_block(resolved_key) if resolved_key else None
++    phase_started = _phase_log("overlay", "model_block", phase_started)
+     # The point read's own key space is the PRODUCER's `ticker` column, and the
+     # identity's `bloomberg` form is what that column holds -- MEASURED on the
+     # live table 2026-09-15: the TRENDING_CHATTER#2026-09-15 partition's ten
+@@ -3685,6 +3687,7 @@ def read_security_overlay(
+                     row["places_moved_window_days"] = row.get("window_days")
+             axis_reads.append(entry)
+ 
++    phase_started = _phase_log("overlay", "axis_reads", phase_started)
+     header_figures = _header_figures(model_block)
+     # AMGT-rk-124: mirror read_thesis_bundle's check face (:2012-2016) for the
+     # overlay's OWN header figures, and nothing else -- the overlay never draws
+@@ -3698,6 +3701,7 @@ def read_security_overlay(
+ 
+         check_face = check_block(header_figures)
+ 
++    phase_started = _phase_log("overlay", "check_face", phase_started)
+     # AMENDMENT 1 (DSGN FWD-24): a name with no BREAKOUT/PRICE rankings row has no row to carry places_moved, so
+     # the overlay says why in the entry's own plain words (a ranked name carries it on the row instead).
+     breakout_miss = None
+@@ -3714,8 +3718,11 @@ def read_security_overlay(
+                         if e["resolution"]["requested_axis"] == requested_axis and e.get("absent_reason")), None)
+         return carried or "no ranking row is stored for this name on the {0} ranking".format(label)
+ 
++    phase_started = time.monotonic()
+     bundle_feed = read_feed(resolved_key, identity=identity, as_of_date=as_of_date)
++    phase_started = _phase_log("overlay", "feed", phase_started)
+     bundle_description = read_description(resolved_key, identity=identity, model_block=model_block)
++    _phase_log("overlay", "description", phase_started)
+     bundle = {
+         "security_key": resolved_key,
+         "identity": identity,
+@@ -3725,13 +3732,13 @@ def read_security_overlay(
+         "header_figures": country_name.with_plain_country(header_figures),
+         "check_face": check_face,
+         # AMGT-bb-17 (bb-10): one marker saying whether we cover this company.
+-        "research_coverage": _research_coverage(resolved_key),
++        "research_coverage": _phase_call("overlay", "research_coverage", lambda: _research_coverage(resolved_key)),
+         # THE HEADER (C-PAGE-LAYOUT, AMGT-rj-9): the one-line description, the
+         # company-level feed and the Posture line travel on this payload, the one
+         # the header already reads -- no route was added for them.
+         "description": bundle_description,
+         "feed": bundle_feed,
+-        "posture": read_posture(resolved_key, identity=identity),
++        "posture": _phase_call("overlay", "posture", lambda: read_posture(resolved_key, identity=identity)),
+         "axis_reads": axis_reads,
+         "chatter": by_axis.get(movement_gate.crossed_axis("TRENDING", "CHATTER")),
+         "chatter_absent_reason": _axis_absent_reason(movement_gate.crossed_axis("TRENDING", "CHATTER"), "chatter"),
+@@ -3741,13 +3748,13 @@ def read_security_overlay(
+         "breakout_price": by_axis.get(movement_gate.crossed_axis("BREAKOUT", "PRICE")),
+         "breakout_price_absent_reason": _axis_absent_reason(
+             movement_gate.crossed_axis("BREAKOUT", "PRICE"), "price breakout"),
+-        "peers": read_peer_set(resolved_key) if resolved_key else None,
++        "peers": _phase_call("overlay", "peers", lambda: read_peer_set(resolved_key) if resolved_key else None),
+         "bloomberg_session_state": "UNKNOWN",
+         # AMGT-an-4 (FWD-38 d): when each input class last landed for this name, or why it cannot be read.
+-        "provenance": _overlay_provenance(resolved_key, model_block, bundle_feed),
++        "provenance": _phase_call("overlay", "provenance", lambda: _overlay_provenance(resolved_key, model_block, bundle_feed)),
+         # AMGT-az-2 (FWD-16 news half, FWD-12 provenance half): the top-of-page band and each input's last run.
+-        "top_band": _overlay_top_band(resolved_key, bundle_description, as_of_date),
+-        "input_provenance": _overlay_input_provenance(resolved_key),
++        "top_band": _phase_call("overlay", "top_band", lambda: _overlay_top_band(resolved_key, bundle_description, as_of_date)),
++        "input_provenance": _phase_call("overlay", "input_provenance", lambda: _overlay_input_provenance(resolved_key)),
+     }
+     if breakout_miss:
+         bundle["places_moved"] = None
+@@ -6749,6 +6756,16 @@ def _phase_log(route: str, phase: str, started: float) -> float:
+     return time.monotonic()
+ 
+ 
++# AMGT-bi-1: `_phase_log` around one call, for an expression that sits inside a literal: the call runs exactly as before, its value is returned
++# unchanged, and one `AMGT_PHASE route=<r> phase=<name> ms=<n>` line is printed (also when the call raises). Logs only.
++def _phase_call(route: str, phase: str, call: Any) -> Any:
++    started = time.monotonic()
++    try:
++        return call()
++    finally:
++        _phase_log(route, phase, started)
++
++
+ # The columns each timeline route SERVES off gold (timeline_api's `_serve_*` readers plus the two keys the
+ # loaders match on). A column an older snapshot lacks is simply absent, read as None exactly as before.
+ _TIMELINE_DAY_DAILY_COLUMNS = ("security_key", "day", "data_status", "publishers_covered", "publishers_covered_codes")
+@@ -7246,8 +7263,11 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
+             # forwarded.
+             requested = _route_security_key(rest[1:-1])
+             attribution["security_key"] = requested
++            identity_started = time.monotonic()  # AMGT-bi-1: per-phase log lines for the overlay, logs only
+             identity = resolve_identity(requested)
+             leaf = rest[-1]
++            if leaf == "overlay":
++                _phase_log("overlay", "identity", identity_started)
+             # AMGT-am-5 (Z-S332): the ONE resolution point of the per-security arm. A key the crosswalk
+             # and the landed artifact plane do not know AND the covered universe does not hold is not a
+             # security this page serves: 404 with a plain message, for every leaf below (overlay,
+@@ -7318,9 +7338,12 @@ def handler(event: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
+                         "block and not a covered name".format(requested),
+                     )
+             if leaf == "overlay":
+-                return _response(
+-                    200, read_security_overlay(requested, query.get("as_of"), identity=identity)
+-                )
++                overlay_started = time.monotonic()
++                overlay_body = read_security_overlay(requested, query.get("as_of"), identity=identity)
++                serialize_started = _phase_log("overlay", "read_security_overlay", overlay_started)
++                answer = _response(200, overlay_body)
++                _phase_log("overlay", "serialize", serialize_started)
++                return answer
+             if leaf == "thesis":
+                 return _response(200, read_thesis_bundle(requested, identity=identity))
+             if leaf == "peers":
