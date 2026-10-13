@@ -1,0 +1,208 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t48",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t48.incremental-last-five-days-with-targeted-refill.md",
+    "group": "OTHER",
+    "vintage_commit": "83c3920c82"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "83c3920c82",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t48.incremental-last-five-days-with-targeted-refill.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~40",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/incremental_append.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "apply_incremental returns append (new rows, dividends, lock valid_to extended), refill_split (gained split or restated overlap close), refill_gap (stored max more than 5 trading days back) or no_append; request_window is the last five trading days after the stored max; restatements R1 and R2 named in the docstring. AC1 tests and the AC3 proof call it.",
+      "artifact_covered_by": [
+        "DQ9-t48-AC1",
+        "DQ9-t48-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/incremental_plan.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--plan prints one JSON line over the real index (S3 read, no vendor call, nothing written): frontier 2026-10-13, names 326, incremental 309, refill_gap 17, refill_split 0, requests 326, cells_full_repull 427433, cells_incremental 2959. Two runs byte-identical.",
+      "artifact_covered_by": [
+        "DQ9-t48-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/incremental_equal.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--n 50 --out wrote INCREMENTAL_EQUALITY_REPORT.json (no_split 50 of 50 equal, split arm CTVA refilled and equal, cells prices 575002, dividends 5470, splits 45, http 53, symbol requests 52). --spot N prints the equal/of line; live spot 5 of 5. Scratch pacer min_gap 1.0 max_gap 2.0; the shared pacer untouched.",
+      "artifact_covered_by": [
+        "DQ9-t48-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_incremental.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the four named tests PASSED (stub frames and stub fetch, no network): 4 passed on the order's run.",
+      "artifact_covered_by": [
+        "DQ9-t48-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~40/INCREMENTAL_EQUALITY_REPORT.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the equality report of the 50-name no-split arm and the split arm, with the lock record, the restatements named and the request count. Read by AC3.",
+      "artifact_covered_by": [
+        "DQ9-t48-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "83c3920c82",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows MDPF_DEMQUE-D1-W40-S1, S2 and S3 appended (OBSERVATION, INERT). Existing rows not edited.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t48-AC1",
+      "criterion_verbatim": "DQ9-t48-AC1 -- the four named tests. python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t48_tests.py -> INC-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t48_tests.py",
+      "output_evidence": "test_demque_incremental.py: test_the_window_is_the_last_five_trading_days_after_the_stored_max_and_never_wider_than_the_gap PASSED; test_a_gap_wider_than_five_days_or_a_new_split_in_the_window_is_a_targeted_refill_never_a_wider_standing_window PASSED; test_appending_the_incremental_rows_equals_the_full_repull_on_a_no_split_day PASSED; test_a_gained_split_triggers_the_full_repull_and_the_result_equals_the_full_path PASSED; 4 passed in 1.09s. Verbatim last line: INC-OK ; rc=0.",
+      "denominator": "4 of 4 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "INC-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t48-AC2",
+      "criterion_verbatim": "DQ9-t48-AC2 -- on the REAL index: window 5, the classes sum to the names, one request per name, writes at least five times smaller. python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t48_plan.py -> INCPLAN-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t48_plan.py",
+      "output_evidence": "{\"cells_full_repull\": 427433, \"cells_incremental\": 2959, \"frontier\": \"2026-10-13\", \"incremental\": 309, \"names\": 326, \"refill_gap\": 17, \"refill_split\": 0, \"requests\": 326, \"window_trading_days\": 5} then INCPLAN-OK 326 names, 326 requests (unchanged), writes 2959 cells instead of 427433 ; rc=0.",
+      "denominator": "6 of 6 arms pass (ints, window 5, partition 309+17+0=326, requests=names, names>=140, 2959*5<=427433); 326 names",
+      "status": "PASS",
+      "expect": "INCPLAN-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t48-AC3",
+      "criterion_verbatim": "DQ9-t48-AC3 -- the equality report (50+ no-split names all equal, the split arm refilled and equal, dividends and splits compared) and a live 5-symbol spot equal 5 of 5. python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t48_equal.py -> INCEQ-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t48_equal.py",
+      "output_evidence": "no_split n=50 equal=50 mismatches=0 | split n=1 refilled=True equal=True | cells={'dividends': 5470, 'prices': 575002, 'splits': 45} http=53 ; spot: {\"equal\": 5, \"of\": 5} ; INCEQ-OK 50 symbols equal on a no-split day, 1 split arm refilled and equal, http 53 ; rc=0. The report was written by python data/mdpf/scripts/demque/incremental_equal.py --n 50 --out <deliverables>/INCREMENTAL_EQUALITY_REPORT.json (frontier 2026-10-12, stored_max 2026-10-05, window 2026-10-06..2026-10-12, 52 symbol requests, rc=0).",
+      "denominator": "no-split 50 of 50 equal (4 asset classes: ETF 11, Equity 16, Mutual Fund 19, Mutual Fund (Closed End) 4); split 1 of 1 refilled and equal; spot 5 of 5",
+      "status": "PASS",
+      "expect": "INCEQ-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "two in-process mutants of apply_incremental run by .scratch/mutant_t48.py (no file edit): gap = the five-trading-day gap check disabled (WINDOW_TRADING_DAYS raised to 10**6); split = the window's splits stripped before apply",
+      "expected": "gap: the gap-or-split named test fails; split: the gap-or-split test and the gained-split test both fail",
+      "observed": "gap: 1 failed, 3 passed (test_a_gap_wider_than_five_days... FAILED with action append), MUTANT gap pytest_rc=1; split: 2 failed, 2 passed (test_a_gap_wider_than_five_days... and test_a_gained_split_triggers... FAILED with action append), MUTANT split pytest_rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of incremental_plan.py --plan (timeout 120 each), outputs compared with cmp",
+      "observed": "both rc=0; byte-identical: {\"cells_full_repull\": 427433, \"cells_incremental\": 2959, \"frontier\": \"2026-10-13\", \"incremental\": 309, \"names\": 326, \"refill_gap\": 17, \"refill_split\": 0, \"requests\": 326, \"window_trading_days\": 5}",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "wiring the incremental path into daily_draw.py, extend_frontier.py or run_daily_draw.sh; the nightly draw is unchanged",
+      "reason": "the cell changes no served byte; wiring is a later SERVED order under its own never-widen pair (CTO msg 4936)"
+    },
+    {
+      "item": "any write to the served store, the queue, the ledger, the real pacer state ~/.opal/demque/pacer.json, any Bloomberg call, any AWS write; daily_draw.py, extend_frontier.py --apply and run_daily_draw.sh never run",
+      "reason": "order BOUNDS"
+    },
+    {
+      "item": "the merge of box/dell1 into the worker branch",
+      "reason": "the worker standing rule forbids a merge; surprise MDPF_DEMQUE-D1-W40-S3"
+    },
+    {
+      "item": "the TR columns on the append path",
+      "reason": "not named by the cell; surprise MDPF_DEMQUE-D1-W40-S2"
+    },
+    {
+      "item": "a lock re-proof on append",
+      "reason": "the append keeps the stored lock; the two measured lock differences are named in surprise MDPF_DEMQUE-D1-W40-S1"
+    },
+    {
+      "item": "the split arm's real frontier",
+      "reason": "no name had a split inside the real last five trading days (report split_arm.split_inside_real_last_five_days false); the arm simulates the frontier at ex-date plus two trading days (CTVA ex 2026-10-01, simulated frontier 2026-10-05)"
+    },
+    {
+      "item": "the old-row cells of the no-split arm",
+      "reason": "the stored state is the FULL pull cut at stored_max, so old rows agree by construction; the served store's own overlap is not compared (named limitation)"
+    },
+    {
+      "item": "account ids",
+      "reason": "none enter a committed file"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W40-S1: a full re-lock differs from the append path's kept lock on 2 of 50 names (LCEYX, FTHSX): the served hold is carried and not re-proved (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W40-S2: append rows carry no TR columns that price_store.write stores; a wiring order must add the TR step (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W40-S3: the order's merge of box/dell1 was not run because the worker standing rule forbids a merge; the rows sit on the worker branch for the drain (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~40/MDPF_DEMQUE.TO-DQ-t48.incremental-last-five-days-with-targeted-refill.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "the whole folder, from the worktree root, with this order's files",
+      "result": "168 passed, rc=0 (0 failed); 4 of them the DQ-t-48 named tests"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque/test_demque_incremental.py -q",
+      "invocation": "the named file",
+      "result": "4 passed"
+    },
+    {
+      "tool": "python data/mdpf/scripts/demque/incremental_plan.py --plan",
+      "invocation": "read only over the real index, timeout 120",
+      "result": "rc=0; {\"cells_full_repull\": 427433, \"cells_incremental\": 2959, \"frontier\": \"2026-10-13\", \"incremental\": 309, \"names\": 326, \"refill_gap\": 17, \"refill_split\": 0, \"requests\": 326, \"window_trading_days\": 5}"
+    },
+    {
+      "tool": "python data/mdpf/scripts/demque/incremental_equal.py --n 50 --out <deliverables>/INCREMENTAL_EQUALITY_REPORT.json",
+      "invocation": "background run, scratch pacer min_gap 1.0 max_gap 2.0",
+      "result": "rc=0; {\"no_split_equal\": 50, \"of\": 50, \"split_refilled\": true, \"split_equal\": true, \"http_requests\": 53, \"symbol_requests\": 52, \"frontier\": \"2026-10-12\"}"
+    },
+    {
+      "tool": "python data/mdpf/scripts/demque/incremental_equal.py --spot 2",
+      "invocation": "smoke run before the report",
+      "result": "rc=0; {\"equal\": 2, \"of\": 2} (CAM and AES, both append)"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t48_tests.py",
+      "invocation": "DQ9-t48-AC1",
+      "result": "INC-OK, rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t48_plan.py",
+      "invocation": "DQ9-t48-AC2",
+      "result": "INCPLAN-OK, rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t48_equal.py",
+      "invocation": "DQ9-t48-AC3",
+      "result": "INCEQ-OK, rc=0; spot {\"equal\": 5, \"of\": 5}"
+    }
+  ]
+}
