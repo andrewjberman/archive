@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-197",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-197.resident-four-members-read.md",
+    "group": "OTHER",
+    "vintage_commit": "ba043ac4f8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R19R2_Y.md",
+    "vintage_commit": "ba043ac4f8",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-197.resident-four-members-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~54",
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~54/r19/RESIDENT_FOUR_MEMBERS_READ.json",
+      "kind": "doc",
+      "commit_or_etag": "bdbfadcda9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only record of four members of the resident package delta, committed LOCAL on wk-IRPT_ANLREQ-54. No product file changed, no push, no deploy, no upload, no apply, no AWS call.",
+      "artifact_covered_by": [
+        "AR197-y-AC1",
+        "AR197-y-AC2J"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "bdbfadcda9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three rows appended (IRPT_ANLREQ-D2-W54-S13, S14, S15), append-only; the surprise-row gate passed at commit (3 new rows of 153 checked)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR197-y-AC1",
+      "criterion_verbatim": "AR197-y-AC1: the record has the four members, each with its old and new blob, its commits, the resident's use of it and the change in behaviour.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-54/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r19/ar19_checks.py y197-four --root C:/dev/wk-irpt-anlreq-54",
+      "output_evidence": "members read: 4\nY197-FOUR-OK\n(rc=0; two runs, byte-identical; the record's members are _authz/served.py, infra/logic/registry/name_rulings.json, ops/status.py and ycharts/generate/resident_worker.py, each with old_blob, new_blob, commits, resident_use and behaviour_change; the record carries claim and not_read)",
+      "denominator": "4 of 4 members carry the five checked keys; 8 of 8 blob sha256 values (old and new, four members) equal RESIDENT_PACKAGE_DELTA.json, measured by sha256sum of git cat-file output",
+      "status": "PASS",
+      "expect": "Y197-FOUR-OK"
+    },
+    {
+      "criterion_id": "AR197-y-AC2J",
+      "criterion_verbatim": "AR197-y-AC2J (judgment, graded at L9, never by you): each resident-use claim is traced from the resident's entry point with file:line, and a member the resident does not reach is shown not reached rather than assumed.",
+      "method": "manual_read_with_citation",
+      "invocation": "Static import closure of resident_main.py and reports/resident_installed.py at 069b8f797e (script .scratch/ar197_trace.py, output .scratch/ar197_trace_release.txt, 66 modules), with git grep of call sites at the pin for each lazy edge. Nothing graded here.",
+      "output_evidence": "Per member, as recorded in r19/RESIDENT_FOUR_MEMBERS_READ.json. (1) ycharts/generate/resident_worker.py: REACHED DIRECTLY: resident_main.py:25 import, resident_main.py:65 poll_once, resident_worker.py:880 assembly.execute, resident_worker.py:687 send_ready_if_ticketed (already-READY branch), resident_worker.py:705 worker.run, resident_worker.py:341-342 mark_ready -> signal_ready, resident_worker.py:189-200 the gate. (2) _authz/served.py: NOT REACHED for the changed code: lazy chain resident_installed.py:376 -> canonical_profile_reads.py:15 -> maintained_sources.py:332 (in def 313) -> custody.py:25 (in def 24) -> served.py:323 verified_internal_subject (unchanged); the call sites are unreached (resolve_custody_profile_fields maintained_sources.py:380 has no closure caller; CustodyAccess custody.py:45 is never instantiated). Entry.handle (served.py:1195) has no closure call site; its callers are lambda_handler (served.py:1459) and __call__ (served.py:1354), inside lambda_entry (1423), called only from installed_entry (1491), which has no closure caller. Entry._internal_allowed_firms (served.py:1154) is called only from handle (served.py:1253). The status rule (served.py:1177-1178) and the log line (served.py:99-102, 1255, 1258) do not reach the resident. (3) ops/status.py: NOT REACHED: no closure module imports status; the delta changes only the CORRECTION_WORDS literal (24 keys). (4) infra/logic/registry/name_rulings.json: NOT READ on the resident path: its only code reader is lib/opal_naming_rootcheck.py:109 via lib/opal_naming.py:3482-3490, called only from census_judge (3495) and census (3599), reached only from the CLI main (3729); the resident loads lib/opal_naming.py (resident_installed.py:379) but reporting_policy (2616), reporting_destination (2652), lookup (364) and grade (2428) contain no reference to the file.",
+      "denominator": "4 of 4 members traced; 1 reached directly (resident_worker.py); 3 shown not reached on the static path (served.py changed code, ops/status.py, name_rulings.json as data); 1 latent lazy edge recorded (IRPT_ANLREQ-D2-W54-S15)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion graded at L9 by 3.0.0_SA_CVO, never by the worker. Output recorded; no PASS or FAIL. Substitute oracle: the mechanical check y197-four in AR197-y-AC1 and the static closure recorded in the record's trace_method (the dynamic path and the host copy were not read; see the record's not_read).",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A copy of the record in .scratch/mutant_root (outside the record file) with the old_blob key deleted from the _authz/served.py member; the y197-four check run against that scratch root with --root.",
+      "expected": "Y197-FOUR-FAIL rc=1 with the line 'served.py lacks old_blob'",
+      "observed": "members read: 4 / FAIL: served.py lacks 'old_blob' / Y197-FOUR-FAIL, rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "y197-four run twice on the worktree at bdbfadcda9; the two printed outputs compared byte for byte (cmp)",
+      "observed": "both runs: 'members read: 4' and 'Y197-FOUR-OK', rc=0; identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No live AWS call, network call, push, deploy, upload, apply or invoke",
+      "reason": "Forbidden by the worker face of the order; the check and the trace are offline reads of git objects."
+    },
+    {
+      "item": "The resident host, its installed copy and its dynamic runtime path were not read",
+      "reason": "Named in the order's not_read; the trace is static, from the source at the two pins."
+    },
+    {
+      "item": "The ' M portal' working-tree change",
+      "reason": "Not committed, per the worker face; not touched."
+    },
+    {
+      "item": "Scratch files .scratch/ar197_trace.py, .scratch/ar197_trace_release.txt, .scratch/mutant_root/ and .scratch/msg_A.txt, in the gitignored scratch folder of this worktree",
+      "reason": "Left in place; no recursive delete was run. None is committed."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W54-S13: the cell's blob path (infra/aws/lambda/investor-reporting/<member>) misses name_rulings.json, which lives at infra/logic/registry/name_rulings.json at both pins; read at the registry path.",
+    "IRPT_ANLREQ-D2-W54-S14: resident_installed.py is at reports/resident_installed.py (the factory, line 344), not beside resident_main.py under ycharts/generate/; the trace followed the import by module name.",
+    "IRPT_ANLREQ-D2-W54-S15: the resident's static closure reaches _authz/served.py only through a lazy chain with no call site today; a future caller would bring the status rule and the log line into the resident's reach, and nothing names that edge."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "ar19_checks.py",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r19/ar19_checks.py y197-four --root C:/dev/wk-irpt-anlreq-54",
+      "result": "Y197-FOUR-OK (members read: 4, rc=0); against the mutant scratch root: Y197-FOUR-FAIL (rc=1)"
+    }
+  ]
+}
