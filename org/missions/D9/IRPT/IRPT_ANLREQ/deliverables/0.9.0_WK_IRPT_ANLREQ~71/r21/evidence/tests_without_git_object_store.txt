@@ -1,0 +1,332 @@
+F.FFF................................................................... [ 52%]
+...............F.................................................        [100%]
+================================== FAILURES ===================================
+_ test_an_input_stored_by_the_base_reader_is_read_unchanged_by_the_new_reader _
+
+case = <test_uploads.UploadIntegrationTests testMethod=runTest>
+tmp_path = WindowsPath('C:/Users/Test/AppData/Local/Temp/pytest-of-Test/pytest-1367/test_an_input_stored_by_the_ba0')
+
+    def test_an_input_stored_by_the_base_reader_is_read_unchanged_by_the_new_reader(case, tmp_path):
+>       base = base_reader(tmp_path)
+               ^^^^^^^^^^^^^^^^^^^^^
+
+intake\tests\test_stored_input_contract.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+intake\tests\test_stored_input_contract.py:39: in base_reader
+    source = subprocess.run(["git", "-C", str(REPO), "show", f"{BASE_COMMIT}:{READER_IN_REPO}"],
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['git', '-C', 'C:\\dev\\ar227-71\\pkgtest', 'show', '35c3c4bd45:infra/aws/lambda/investor-reporting/intake/template_reader.py'],)
+kwargs = {'stderr': -1, 'stdout': -1}
+process = <Popen: returncode: 128 args: ['git', '-C', 'C:\\dev\\ar227-71\\pkgtest', 's...>
+stdout = b''
+stderr = b'fatal: not a git repository (or any of the parent directories): .git\n'
+retcode = 128
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them,
+        or pass capture_output=True to capture both.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout (seconds) is given and the process takes too long,
+         a TimeoutExpired exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['git', '-C', 'C:\\dev\\ar227-71\\pkgtest', 'show', '35c3c4bd45:infra/aws/lambda/investor-reporting/intake/template_reader.py']' returned non-zero exit status 128.
+
+C:\Users\Test\AppData\Local\Programs\Python\Python314\Lib\subprocess.py:578: CalledProcessError
+_____ test_an_original_with_altered_bytes_is_refused_under_both_versions ______
+
+case = <test_uploads.UploadIntegrationTests testMethod=runTest>
+tmp_path = WindowsPath('C:/Users/Test/AppData/Local/Temp/pytest-of-Test/pytest-1367/test_an_original_with_altered_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001EF3AAEF950>
+
+    def test_an_original_with_altered_bytes_is_refused_under_both_versions(case, tmp_path, monkeypatch):
+        # The artifact store checks its own digest first, so the altered bytes are served to read_input with the stored
+        # ref intact: the check under test is read_input's own digest of the original (CONTRACT point 3, the original's bytes).
+>       base = base_reader(tmp_path)
+               ^^^^^^^^^^^^^^^^^^^^^
+
+intake\tests\test_stored_input_contract.py:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+intake\tests\test_stored_input_contract.py:39: in base_reader
+    source = subprocess.run(["git", "-C", str(REPO), "show", f"{BASE_COMMIT}:{READER_IN_REPO}"],
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['git', '-C', 'C:\\dev\\ar227-71\\pkgtest', 'show', '35c3c4bd45:infra/aws/lambda/investor-reporting/intake/template_reader.py'],)
+kwargs = {'stderr': -1, 'stdout': -1}
+process = <Popen: returncode: 128 args: ['git', '-C', 'C:\\dev\\ar227-71\\pkgtest', 's...>
+stdout = b''
+stderr = b'fatal: not a git repository (or any of the parent directories): .git\n'
+retcode = 128
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them,
+        or pass capture_output=True to capture both.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout (seconds) is given and the process takes too long,
+         a TimeoutExpired exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['git', '-C', 'C:\\dev\\ar227-71\\pkgtest', 'show', '35c3c4bd45:infra/aws/lambda/investor-reporting/intake/template_reader.py']' returned non-zero exit status 128.
+
+C:\Users\Test\AppData\Local\Programs\Python\Python314\Lib\subprocess.py:578: CalledProcessError
+___ test_a_stored_input_with_no_version_member_reads_as_the_version_before ____
+
+case = <test_uploads.UploadIntegrationTests testMethod=runTest>
+tmp_path = WindowsPath('C:/Users/Test/AppData/Local/Temp/pytest-of-Test/pytest-1367/test_a_stored_input_with_no_ve0')
+
+    def test_a_stored_input_with_no_version_member_reads_as_the_version_before(case, tmp_path):
+>       base = base_reader(tmp_path)
+               ^^^^^^^^^^^^^^^^^^^^^
+
+intake\tests\test_stored_input_contract.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+intake\tests\test_stored_input_contract.py:39: in base_reader
+    source = subprocess.run(["git", "-C", str(REPO), "show", f"{BASE_COMMIT}:{READER_IN_REPO}"],
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['git', '-C', 'C:\\dev\\ar227-71\\pkgtest', 'show', '35c3c4bd45:infra/aws/lambda/investor-reporting/intake/template_reader.py'],)
+kwargs = {'stderr': -1, 'stdout': -1}
+process = <Popen: returncode: 128 args: ['git', '-C', 'C:\\dev\\ar227-71\\pkgtest', 's...>
+stdout = b''
+stderr = b'fatal: not a git repository (or any of the parent directories): .git\n'
+retcode = 128
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them,
+        or pass capture_output=True to capture both.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout (seconds) is given and the process takes too long,
+         a TimeoutExpired exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['git', '-C', 'C:\\dev\\ar227-71\\pkgtest', 'show', '35c3c4bd45:infra/aws/lambda/investor-reporting/intake/template_reader.py']' returned non-zero exit status 128.
+
+C:\Users\Test\AppData\Local\Programs\Python\Python314\Lib\subprocess.py:578: CalledProcessError
+______ test_the_readers_output_on_the_fixtures_is_pinned_to_its_version _______
+
+    def test_the_readers_output_on_the_fixtures_is_pinned_to_its_version():
+        """The reader's output on the fixed fixture set is digested and compared with READER_PINS[READER_VERSION].
+    
+        A change to what the reader returns with no version bump FAILS here. To move the pin legitimately, bump
+        READER_VERSION and set READER_PINS[<new version>] to the digest this test prints, in ONE commit with the change.
+        """
+        digest = reader_digest()
+        pinned = reader.READER_PINS.get(reader.READER_VERSION)
+        assert pinned is not None, "READER_PINS has no digest for READER_VERSION %s" % reader.READER_VERSION
+>       assert digest == pinned, "the reader's output changed without a version bump; the digest is %s" % digest
+E       AssertionError: the reader's output changed without a version bump; the digest is 12856189f4a33af9f0613d45d8608eeb20e78bef345f472bb318d912d04304e3
+E       assert '12856189f4a3...8d912d04304e3' == '858b1282115b...06a512c168f3a'
+E         
+E         - 858b1282115b7a3c9ad77fab50bf69e45042a21bc1231b0632506a512c168f3a
+E         + 12856189f4a33af9f0613d45d8608eeb20e78bef345f472bb318d912d04304e3
+
+intake\tests\test_stored_input_contract.py:189: AssertionError
+________________ test_correction_words_are_the_envelopes_words ________________
+
+    def test_correction_words_are_the_envelopes_words():
+        sys.path.insert(0, str(IR / "ops"))
+        try:
+            import status
+        finally:
+            sys.path.remove(str(IR / "ops"))
+>       assert uploads.CORRECTION_WORDS == status.CORRECTION_WORDS
+E       AssertionError: assert {'AMOUNT_MISS... meant.', ...} == {'RESOLVE_PRO...that it did.'}
+E         
+E         Omitting 4 identical items, use -vv to show
+E         Left contains 24 more items:
+E         {'AMOUNT_MISSING': 'A holding has no amount in column B. Fill in the amount '
+E                            'for that row, or delete the row, and upload the file '
+E                            'again.',
+E          'AMOUNT_NOT_A_NUMBER': 'An amount in column B is not a plain number (a word, '...
+E         
+E         ...Full output truncated (72 lines hidden), use '-vv' to show
+
+intake\tests\test_correction_words.py:44: AssertionError
+=========================== short test summary info ===========================
+FAILED intake/tests/test_stored_input_contract.py::test_an_input_stored_by_the_base_reader_is_read_unchanged_by_the_new_reader
+FAILED intake/tests/test_stored_input_contract.py::test_an_original_with_altered_bytes_is_refused_under_both_versions
+FAILED intake/tests/test_stored_input_contract.py::test_a_stored_input_with_no_version_member_reads_as_the_version_before
+FAILED intake/tests/test_stored_input_contract.py::test_the_readers_output_on_the_fixtures_is_pinned_to_its_version
+FAILED intake/tests/test_correction_words.py::test_correction_words_are_the_envelopes_words
+5 failed, 132 passed in 2.95s

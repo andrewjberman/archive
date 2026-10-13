@@ -1,0 +1,47 @@
+....F................................................................... [ 52%]
+...............F.................................................        [100%]
+================================== FAILURES ===================================
+______ test_the_readers_output_on_the_fixtures_is_pinned_to_its_version _______
+
+    def test_the_readers_output_on_the_fixtures_is_pinned_to_its_version():
+        """The reader's output on the fixed fixture set is digested and compared with READER_PINS[READER_VERSION].
+    
+        A change to what the reader returns with no version bump FAILS here. To move the pin legitimately, bump
+        READER_VERSION and set READER_PINS[<new version>] to the digest this test prints, in ONE commit with the change.
+        """
+        digest = reader_digest()
+        pinned = reader.READER_PINS.get(reader.READER_VERSION)
+        assert pinned is not None, "READER_PINS has no digest for READER_VERSION %s" % reader.READER_VERSION
+>       assert digest == pinned, "the reader's output changed without a version bump; the digest is %s" % digest
+E       AssertionError: the reader's output changed without a version bump; the digest is 12856189f4a33af9f0613d45d8608eeb20e78bef345f472bb318d912d04304e3
+E       assert '12856189f4a3...8d912d04304e3' == '858b1282115b...06a512c168f3a'
+E         
+E         - 858b1282115b7a3c9ad77fab50bf69e45042a21bc1231b0632506a512c168f3a
+E         + 12856189f4a33af9f0613d45d8608eeb20e78bef345f472bb318d912d04304e3
+
+intake\tests\test_stored_input_contract.py:189: AssertionError
+________________ test_correction_words_are_the_envelopes_words ________________
+
+    def test_correction_words_are_the_envelopes_words():
+        sys.path.insert(0, str(IR / "ops"))
+        try:
+            import status
+        finally:
+            sys.path.remove(str(IR / "ops"))
+>       assert uploads.CORRECTION_WORDS == status.CORRECTION_WORDS
+E       AssertionError: assert {'AMOUNT_MISS... meant.', ...} == {'RESOLVE_PRO...that it did.'}
+E         
+E         Omitting 4 identical items, use -vv to show
+E         Left contains 24 more items:
+E         {'AMOUNT_MISSING': 'A holding has no amount in column B. Fill in the amount '
+E                            'for that row, or delete the row, and upload the file '
+E                            'again.',
+E          'AMOUNT_NOT_A_NUMBER': 'An amount in column B is not a plain number (a word, '...
+E         
+E         ...Full output truncated (72 lines hidden), use '-vv' to show
+
+intake\tests\test_correction_words.py:44: AssertionError
+=========================== short test summary info ===========================
+FAILED intake/tests/test_stored_input_contract.py::test_the_readers_output_on_the_fixtures_is_pinned_to_its_version
+FAILED intake/tests/test_correction_words.py::test_correction_words_are_the_envelopes_words
+2 failed, 135 passed in 3.73s
