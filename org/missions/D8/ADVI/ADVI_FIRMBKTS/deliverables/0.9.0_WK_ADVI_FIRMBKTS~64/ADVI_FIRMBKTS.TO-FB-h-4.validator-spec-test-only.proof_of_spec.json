@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-h-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-h-4.validator-spec-test-only.md",
+    "group": "OTHER",
+    "vintage_commit": "b39d4a70f6"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~64",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R5.md",
+    "vintage_commit": "b39d4a70f6",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-h-4.validator-spec-test-only.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "The order's mutant control, r5_checks.py mutant: copies the key helper, the spec and firm-config.mjs to a temporary directory, empties the generated list there, and runs the suite. Base-tree arm: the suite at base reads 5 pass 1 fail (the stale test (i)), measured before the edit.",
+      "expected": "MUTANT: the spec FAILS as expected with the list emptied (one or more fail)",
+      "observed": "MUTANT: the spec FAILS as expected with the list emptied (2 fail)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- each invocation was run once per byte state; the base run and the post-edit run are different bytes, not a same-input pair",
+      "observed": "N/A -- no same-input pair was run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any deploy, any push, any AWS call, any Terraform change, and the edge packaging of the validator",
+      "reason": "Bounds section 2 item 1 of the order: one commit of the spec file; the validator is unaffected and nothing is deployed."
+    },
+    {
+      "item": "The generated firm-config.mjs and every product file",
+      "reason": "Order section 1b.1: the spec file is the only edit; the generated block is read, not regenerated."
+    },
+    {
+      "item": "Order status flip",
+      "reason": "Order section 5: the status is not flipped by the worker; the CVO flips on the adjudication."
+    },
+    {
+      "item": "bun install --frozen-lockfile",
+      "reason": "Order section 1b.3 applies only if a module will not resolve; the suite ran at HEAD without install, so no node_modules was written."
+    },
+    {
+      "item": "The worktree's portal submodule pointer (git status shows the gitlink dirty)",
+      "reason": "A gitlink already dirty in this worktree before this work; not this worker's edit; not staged or committed."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/tests/ownership_key.spec.mjs",
+      "kind": "test",
+      "commit_or_etag": "7c6522bfe4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local commit 7c6522bfe4 on wk-ADVI_FIRMBKTS-64; test-only file, no deploy; the validator product is unchanged.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 is the suite's own count (pass count not fixed: one test is added). Invocation: bun test tests/ under timeout 110, grep of the pass and fail lines.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-64/infra/aws/lambda-edge/auth-validator-edge && PATH=\"$PATH:$HOME/.bun/bin\" timeout 110 bun test tests/ 2>&1 | sed \"s/\\x1b\\[[0-9;]*m//g\" | grep -E \"^ *[0-9]+ (pass|fail)$\" | tr \"\\n\" \" \"",
+      "output_evidence": " 7 pass  0 fail ",
+      "denominator": "7 pass of 7 tests, 0 fail (base at HEAD before the edit: 5 pass 1 fail, rc=1)",
+      "status": "PASS",
+      "expect": "^ *[0-9]+ pass +0 fail *$"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the mutant control: the spec must FAIL when the generated list is emptied. Invocation: r5_checks.py mutant at its own path against the worktree, tail of the output.",
+      "method": "command",
+      "invocation": "PATH=\"$PATH:$HOME/.bun/bin\" timeout 110 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round5/checks/r5_checks.py mutant --root /c/dev/wk-firmbkts-64 2>&1 | tail -1",
+      "output_evidence": "MUTANT: the spec FAILS as expected with the list emptied (2 fail)",
+      "denominator": "1 mutant arm; 2 test failures in the emptied-list copy (the temporary copy is deleted; the worktree is not touched)",
+      "status": "PASS",
+      "expect": "^MUTANT: the spec FAILS as expected with the list emptied \\([1-9][0-9]* fail\\)$"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound: one changed file, inside the grant, nothing outside it. Invocation: r4_scope.py with the three --allow paths of the order.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-64 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-64 --allow infra/aws/lambda-edge/auth-validator-edge/tests/ownership_key.spec.mjs --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~64/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "output_evidence": "ROUND 4 SCOPE: OK 1 changed, 0 outside, 0 required missing",
+      "denominator": "1 changed file, 0 outside the three granted paths, 0 required missing (0 required paths named)",
+      "status": "PASS",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W64-S1: the order's test (i) wording 'every other firm's bucket is false' cannot hold for mockadv, which shares the 49financial bucket; implemented as 'every bucket that differs from the 49financial bucket is absent' (OBSERVATION, INERT)",
+    "ADVI_FIRMBKTS-D1-W64-S2: safe-commit's client-data check did not run on this device (the hashed account-id list is absent), so the spec commit was not checked for client account ids (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~64/ADVI_FIRMBKTS.TO-FB-h-4.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "bun test (validator suite)",
+      "invocation": "cd /c/dev/wk-firmbkts-64/infra/aws/lambda-edge/auth-validator-edge && PATH=\"$PATH:$HOME/.bun/bin\" timeout 110 bun test tests/",
+      "result": "base: 5 pass 1 fail rc=1; post-edit: 7 pass 0 fail rc=0; no bun install was needed"
+    },
+    {
+      "tool": "r5_checks.py mutant",
+      "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round5/checks/r5_checks.py mutant --root /c/dev/wk-firmbkts-64",
+      "result": "MUTANT: the spec FAILS as expected with the list emptied (2 fail) rc=0"
+    },
+    {
+      "tool": "r4_scope.py",
+      "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-64 --allow ...",
+      "result": "ROUND 4 SCOPE: OK 1 changed, 0 outside, 0 required missing rc=0"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~64 <0.9.0_WK_ADVI_FIRMBKTS~64@opal.agent>\" -F .scratch/fb_h_4_commit_msg.txt -- infra/aws/lambda-edge/auth-validator-edge/tests/ownership_key.spec.mjs",
+      "result": "[wk-ADVI_FIRMBKTS-64 7c6522bfe4] 1 file changed, 11 insertions(+), 2 deletions(-); msg-verify MATCH; commit-gate checked 0 of 1 file(s) (suffix .mjs not graded, stated by the gate); client-data-check WARN (account-id list absent)"
+    }
+  ]
+}
