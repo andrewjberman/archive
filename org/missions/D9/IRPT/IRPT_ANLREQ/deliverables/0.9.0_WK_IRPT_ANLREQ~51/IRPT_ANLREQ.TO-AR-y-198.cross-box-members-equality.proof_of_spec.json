@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-198",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-198.cross-box-members-equality.md",
+    "group": "OTHER",
+    "vintage_commit": "2107dfe618"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R19R2_Y.md",
+    "vintage_commit": "2107dfe618",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-198.cross-box-members-equality.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~51",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~51/r19/CROSS_BOX_MEMBERS_EQUALITY.json",
+      "kind": "doc",
+      "commit_or_etag": "d5f4b58271",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five members (loaders.py, exemptions.json, scopes.json, lib/opal_naming.py, firm_pages.json) at release pin 069b8f797e, each with the release-pin blob and sha256, the owner's released version and where it is recorded, a verdict (EQUAL 1, NOT_EQUAL 2, CANNOT_TELL 2) and evidence. Read from git blobs and recorded owner proofs; no S3 read, no live call, no upload, no deploy.",
+      "artifact_covered_by": ["AR198-y-AC1", "AR198-y-AC2J"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d5f4b58271",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three surprise rows appended (IRPT_ANLREQ-D2-W51-S21 to S23) in the fenced json form; the surprise-row gate read 3 new rows of 156 total, OK.",
+      "artifact_covered_by": ["AR198-y-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR198-y-AC1",
+      "criterion_verbatim": "AR198-y-AC1: the record has the five members, each with the release-pin blob, the owner's released version, a verdict (EQUAL, NOT_EQUAL or CANNOT_TELL) and its evidence.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-51/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r19/ar19_checks.py y198-equal --root C:/dev/wk-irpt-anlreq-51",
+      "output_evidence": "members compared: 5\nY198-EQUAL-OK\nrc=0 (run 1); the same output and rc=0 on run 2",
+      "denominator": "5 of 5 members with a release-pin blob, an owner_released_version and a verdict; verdicts 1 EQUAL (loaders.py), 2 CANNOT_TELL (scopes.json, exemptions.json), 2 NOT_EQUAL (lib/opal_naming.py, firm_pages.json)",
+      "status": "PASS",
+      "expect": "Y198-EQUAL-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AR198-y-AC2J",
+      "criterion_verbatim": "AR198-y-AC2J (judgment, graded at L9, never by you): each owner-released version is read from a record that names it, EQUAL means byte-identical blobs rather than similar, and a CANNOT_TELL says what is missing.",
+      "method": "manual_read_with_citation",
+      "invocation": "none: judgment criterion, graded at L9 by 3.0.0_SA_CVO. Output cited from the record (commit d5f4b58271): members[].owner_released_version.recorded_in, members[].evidence, members[].missing and two_hashes.",
+      "output_evidence": "loaders.py EQUAL: blob a89958a0 at 069b8f797e and at the owner's flip 69679b90e3, sha256 a2283dc8 both, recorded in act4_irpt/member.out (8 of 8). CANNOT_TELL: scopes.json (release blob b53fb599 equals the flip commit's blob; the eight shipped artifacts' member bytes are not recorded) and exemptions.json (release blob ccaf6c9f equals the trunk commit 61cc536c29; no shipped-artifact record). NOT_EQUAL: lib/opal_naming.py and firm_pages.json (the owner proofs at CT-w-1, CT-w-4 and CT-w-8 record COMMITTED-NOT-DEPLOY-SCOPE).",
+      "denominator": "5 of 5 members; 1 EQUAL read from a record naming the release; 2 CANNOT_TELL with the missing item named; 2 NOT_EQUAL",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: no mechanical oracle. Graded at L9 by 3.0.0_SA_CVO, whose adjudication row is the verdict; this worker records the output and no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the owner_released_version key dropped from the _authz/loaders.py member of a copy of the record, written to a scratch root inside the worktree's .scratch folder",
+      "expected": "the y198-equal check refuses the record (a member without its owner's released version fails)",
+      "observed": "FAIL: loaders.py lacks the owner's released version or the release-pin blob; Y198-EQUAL-FAIL; rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 invocation run twice on the committed record",
+      "observed": "run 1 and run 2 both print 'members compared: 5' then Y198-EQUAL-OK, rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "live AWS calls, S3 object reads, the live Lambda configuration, SSM, the resident host, network",
+      "reason": "the order's bounds: no live call, no network, no push, no deploy, no upload. Every shipped hash is a recorded value from the source map, the act-4 member record or the ledger; the eight act-4 artifacts' scopes.json and exemptions.json bytes are not recorded anywhere read and are named as missing."
+    },
+    {
+      "item": "the ADVI_FIRMBKTS ledger for COO~B1 row+half 61cc536c29 beyond the commit itself",
+      "reason": "not read: the commit is the owner's version named in the record; whether 61cc536c29 shipped is named as the missing item for exemptions.json"
+    },
+    {
+      "item": "the worktree's stale source map and the shared drains after 95406de7f3",
+      "reason": "the head row moved between 731a72ecb2 and 95406de7f3; the verdicts read blobs at the release pin, and the row direction is recorded as surprise IRPT_ANLREQ-D2-W51-S21"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W51-S21: the head source-map row for irpt-ycharts-generate loaders.py reads 69679b90e3 at the shared head 95406de7f3 (the cell says it moved to 0642c9d004); the release pin carries the 69679b90e3 blob (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W51-S22: no NFRA_CTLPLN release record ships lib/opal_naming.py or firm_pages.json; the owner proofs mark every artifact COMMITTED-NOT-DEPLOY-SCOPE, so two members are NOT_EQUAL (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W51-S23: the eight act-4 artifacts' scopes.json and exemptions.json bytes are not recorded; act 4 checked loaders.py only, and the stale source-map rows carry values that match neither pin, so two members are CANNOT_TELL (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ar19_checks.py y198-equal",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r19/ar19_checks.py y198-equal --root <worktree>",
+      "result": "Y198-EQUAL-OK rc=0 on two runs; mutant with the loaders.py owner_released_version key dropped: Y198-EQUAL-FAIL rc=1"
+    },
+    {
+      "tool": "git rev-parse, git cat-file blob and sha256 at the pins (069b8f797e, 0485393f3a, 69679b90e3, 61cc536c29, 6ae365f583, e76206bdcb, 3a6d8aa89d)",
+      "invocation": "read-only git plumbing and a python hashlib pass over the blob bytes, from the worktree and the shared tree",
+      "result": "loaders.py release blob a89958a0 equals 69679b90e3; scopes.json release blob b53fb599 equals 69679b90e3; exemptions.json release blob ccaf6c9f equals 61cc536c29; lib/opal_naming.py release blob 7730d500 equals 6ae365f583; firm_pages.json release blob 4ea32f2e equals e76206bdcb"
+    },
+    {
+      "tool": "safe-commit (surprise-row gate, to-pipeline gate, msg-verify)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_ANLREQ~51 <0.9.0_WK_IRPT_ANLREQ~51@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit d5f4b58271 (LOCAL on wk-IRPT_ANLREQ-51); surprise-row gate OK, 3 new rows of 156; msg-verify MATCH"
+    }
+  ]
+}
