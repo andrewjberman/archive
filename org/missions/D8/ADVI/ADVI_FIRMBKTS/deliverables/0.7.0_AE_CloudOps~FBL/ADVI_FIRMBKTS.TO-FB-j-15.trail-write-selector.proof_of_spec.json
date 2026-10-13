@@ -1,0 +1,97 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-j-15",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-15.trail-write-selector.md",
+  "group": "OTHER",
+  "vintage_commit": "86dd84d6e4"
+ },
+ "assignee": "0.7.0_AE_CloudOps~FBL",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R7.md",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-15.trail-write-selector.md",
+  "vintage_commit": "86dd84d6e4"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "cloudtrail:event-selectors opal-organization-trail (us-east-1)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-apply of the saved plan 2026-10-13T20:30:02Z to 20:30:31Z: Apply complete! Resources: 0 added, 1 changed, 0 destroyed; get-event-selectors returns three selectors, the third WriteOnly on opal-data-bd, opal-data-cot, opal-data-inf; IsLogging True; a full terraform plan afterwards reads No changes",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "trail ARN arn:aws:cloudtrail:us-east-1:313476888478:trail/opal-organization-trail"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/shared-infra/cloudtrail-organization-trail.tf",
+   "kind": "terraform",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "new local org_trail_write_logged_buckets (comment names DEC-12) and a third basic event_selector; the two existing selectors byte-unchanged; terraform fmt -check rc=0",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261013T2028Z_advi-firmbkts-fb-j-15-trail-write-selector-20261013_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "entry opened (with its .open_deploys sentinel, committed) before the apply; four legs closed with proof",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "invocation": "cd C:/dev/ajb_workspace && timeout 100 .tools/aws cloudtrail get-event-selectors --trail-name opal-organization-trail --region us-east-1 --output json | timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py trailsel",
+   "expect": "^TRAILSEL: OK selectors=3 write_buckets=3$",
+   "output_evidence": "run on the laptop at 2026-10-13T20:3xZ after the apply, with the ordered invocation's only change the workspace root (C:/dev/ajb_workspace is the Dell path and does not exist on this box; C:/Users/AndrewBerman/Desktop/ajb_workspace used), printed:\nTRAILSEL: OK selectors=3 write_buckets=3",
+   "denominator": "1 of 1 live trail read; 3 of 3 selectors in the document; 3 of 3 write buckets",
+   "status": "PASS",
+   "criterion_verbatim": "cd C:/dev/ajb_workspace && timeout 100 .tools/aws cloudtrail get-event-selectors --trail-name opal-organization-trail --region us-east-1 --output json | timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py trailsel",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative control: the same checker fed the saved BEFORE document (two selectors).",
+   "expected": "FAIL (write selector missing)",
+   "observed": "TRAILSEL: FAIL selectors=2, want 3; write selector missing or not exactly bd, inf and cot",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 ran once against the live trail",
+   "observed": "single read; the saved TRAIL_SELECTORS_AFTER.json carries the same three selectors",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "events actually arriving in the trail log bucket for a write on bd, inf or cot",
+   "reason": "the order's blindness line: AC1 reads the selectors, not that events arrive; the order asks for no write to opal-data-inf and none was made"
+  },
+  {
+   "item": "AC1 path root",
+   "reason": "C:/dev/ajb_workspace does not exist on the laptop; the same command ran under this box's workspace root"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261013T2028Z_advi-firmbkts-fb-j-15-trail-write-selector-20261013_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "terraform / safe-apply",
+   "invocation": "plan -target=aws_cloudtrail.organization -out, then safe-apply apply of the saved plan",
+   "result": "Plan: 0 to add, 1 to change, 0 to destroy; Apply complete: 0 added 1 changed 0 destroyed; full plan afterwards No changes"
+  },
+  {
+   "tool": "aws iam simulate-principal-policy",
+   "invocation": "cloudtrail:PutEventSelectors and GetEventSelectors on the trail ARN, one resource per call; DescribeTrails on * as a separate control",
+   "result": "allowed, allowed, allowed (step0_simulate.txt)"
+  }
+ ]
+}

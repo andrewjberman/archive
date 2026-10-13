@@ -1,0 +1,85 @@
+{
+  "cell": "AR-y-282",
+  "task_order": "IRPT_ANLREQ.TO-AR-y-282",
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~103",
+  "status_of_candidate": "LOCAL CANDIDATE. Not landed, not pushed, not deployed, not registered with open-calls. The branch has no upstream.",
+  "read": {
+    "guard_today": "portal@a577cba5: src/App.tsx:501-503 wraps /ticket-center in ProtectedRoute requireInternal; src/components/ProtectedRoute.tsx:119 tests claims.firmId !== 'opal-capital'; src/lib/firmAccess.ts:136-144 (isPathAllowedForFirm) denies a partner path that is not in FIRM_ALLOWED_PATHS; the generated matrix omits /ticket-center for every partner (firmAccess.ts:105-114 says so in a comment).",
+    "requiresDev_pattern": "portal@a577cba5: the requiresDev / requireDev pattern is App.tsx:74 and :82 (NavItem and NavSection fields), App.tsx:339-374 (sidebar filter), ProtectedRoute.tsx:11 and :120 (requireDev tests claims.userType !== 'Dev'). It is decided by the per-USER claim: AuthContext.tsx:121-122 sets userType to 'Dev' iff the auth claim says 'Dev'. It is NOT a DEV-versus-PROD environment discriminator, and it cannot keep PROD refusing a partner user who carries the claim. No src/ file reads a DEV or PROD environment flag or a hostname rule; .env.production carries none. The candidate therefore uses the build flag import.meta.env.DEV (firmAccess.ts isPartnerDevReach). That flag is the portal's existing dev-only switch: AdvisorIntelligence/_partners/inflection/index.tsx:174 (if not import.meta.env.DEV, return) and the devBypass comment at AuthContext.tsx (DEV ONLY). It is false in a vite build. Surprise IRPT_ANLREQ-D2-W103-S1.",
+    "nav_entry": "portal@a577cba5: src/App.tsx:141 { path: '/ticket-center', label: 'Ticket Center', icon: Ticket } in the tools section, with no requiresDev and no requiresTier. Visibility is the sidebar filter at App.tsx:344-347, which calls isPathAllowedForFirm(claims.firmId, item.path).",
+    "existing_tests": "portal@a577cba5: src/components/__tests__/route-no-permission.test.tsx (bun:test, renderToStaticMarkup, five arms, DSGN_REBRND E3); src/lib/__tests__/create5pm-et.test.ts (unrelated). No firmAccess unit test existed at the tip. The new file is src/lib/__tests__/firmAccess-partner-dev-reach.test.tsx.",
+    "page_predicate_inside_the_board": "portal@a577cba5: src/pages/TicketCenter/TicketCenter.tsx:188 'const internal = auth.isInternal() || auth.isDev()'. Not changed here (AR-y-283's surface). Surprise IRPT_ANLREQ-D2-W103-S4.",
+    "contributing_boxes_rule": "CONTRIBUTING-BOXES.md at portal@07f065e6 (absent from origin/DEV; on origin/cand/laptop/contributing-boxes). Step 1 says cut from the last PROD release, never from DEV. The face says cut from origin/DEV; this candidate follows the face and the PROD re-cut is owed by the owner before registration. Surprise IRPT_ANLREQ-D2-W103-S2.",
+    "portal_law_read": "portal CLAUDE.md (colour law, typecheck law, verification law) and DESIGN.md (clauses C3, C8 read). The candidate has no visual change, so no visual clause is cited for a choice; C3 and C8 are the clauses a later visual cell would cite."
+  },
+  "dev_tip": "a577cba5644192bf1f62b10dc03dd3657e12b59f",
+  "branch": "wk-IRPT_ANLREQ-103-portal",
+  "worktree": "C:/dev/wk-portal-103 (linked worktree of C:/dev/ajb_workspace/portal; node_modules is a junction to the portal checkout's node_modules)",
+  "commit": "46a49e57e34a6ce5a023d4b263074bf3a6576359",
+  "commit_state": "LOCAL @46a49e57 on wk-IRPT_ANLREQ-103-portal. Not pushed; no upstream (the inherited origin/DEV upstream was unset).",
+  "files_changed": [
+    "src/App.tsx",
+    "src/lib/firmAccess.ts",
+    "src/lib/__tests__/firmAccess-partner-dev-reach.test.tsx"
+  ],
+  "diff_summary": {
+    "src/App.tsx": "import isPartnerDevReach; the /ticket-center route becomes ProtectedRoute requireInternal={!isPartnerDevReach('/ticket-center')}; comment added at the route.",
+    "src/lib/firmAccess.ts": "outside the generated FIRM_ALLOWED_PATHS block: PARTNER_DEV_REACH_PATHS (= {'/ticket-center'}); isPartnerDevReach(path, devBuild = Boolean(import.meta.env.DEV)); isPathAllowedForFirm gains devBuild (same default) and admits a known partner firm (own-property key of FIRM_ALLOWED_PATHS) for a dev-reach path on a dev build. Unknown, null and internal firms are unchanged.",
+    "src/lib/__tests__/firmAccess-partner-dev-reach.test.tsx": "new, five tests (a) to (e)."
+  },
+  "tests": {
+    "added": 5,
+    "file": "src/lib/__tests__/firmAccess-partner-dev-reach.test.tsx",
+    "passed": 5,
+    "failed": 0,
+    "runs": "two same-input runs, both 5 pass 0 fail, rc 0",
+    "folder_runs_with_change": {
+      "command": "bun test src/lib src/components src/pages/TicketCenter",
+      "result": "100 pass, 0 fail, 25 files, rc 0"
+    },
+    "dsgn_irptv1_with_change": {
+      "command": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1",
+      "result": "371 pass, 10 fail, 2 errors, 381 tests across 240 files",
+      "tip_baseline": "371 pass, 10 fail, 2 errors on a577cba5",
+      "same_failure_names": true
+    },
+    "typecheck": {
+      "command": "bun run typecheck (tsc -b --noEmit)",
+      "rc": 0,
+      "control": "a deliberate type error in a probe file makes the same command exit rc 2 (confirms the instrument can fail); the probe was removed"
+    }
+  },
+  "before_arm": {
+    "dev_tip": "a577cba5644192bf1f62b10dc03dd3657e12b59f",
+    "method": "the new test file, with a namespace-import probe copy so each arm reports separately, run on the DEV tip before any source change; the probe was removed afterwards",
+    "failed": 2,
+    "passed": 3,
+    "failing_arms": ["(a)", "(e)"],
+    "controls_passing_on_tip": ["(b)", "(c)", "(d)"],
+    "output_file": "C:/dev/wk-irpt-anlreq-103/.scratch/before_arm_probe.txt (scratch, not committed)"
+  },
+  "mutant": {
+    "description": "src/lib/firmAccess.ts isPartnerDevReach with devBuild ignored (return PARTNER_DEV_REACH_PATHS.has(path)), which opens /ticket-center to partners on a production build",
+    "observed": "2 failed, 3 passed, rc 1: (b) and (e) fail. The source was restored byte-identical (cmp) afterwards.",
+    "output_file": "C:/dev/wk-irpt-anlreq-103/.scratch/mutant_prod_reach.txt (scratch, not committed)"
+  },
+  "what_a_person_sees": {
+    "partner_on_DEV": "A signed-in partner-firm user on a dev build sees the Ticket Center entry in the Tools section and reaches /ticket-center. The page is the existing unscoped board until AR-y-281 and AR-y-283 land: every firm's tickets. Do not land before them (surprise IRPT_ANLREQ-D2-W103-S3, ARMED).",
+    "partner_on_PROD": "Unchanged. isPathAllowedForFirm returns false for a partner on /ticket-center, so the sidebar entry is hidden and a direct URL redirects to /market (FIRM_DEFAULT_LANDING), as on the tip. The route guard is requireInternal=true, as on the tip.",
+    "internal_on_DEV_and_PROD": "Unchanged. opal-capital short-circuits in isPathAllowedForFirm; requireInternal passes on firmId 'opal-capital'; the page renders as on the tip.",
+    "anonymous_or_unresolvable": "Unchanged on both builds: the login redirect (anonymous) or the landing redirect (unknown or null firm).",
+    "partner_with_Dev_claim_and_allowedFirmIds_ALL": "Route-level: not internal. requireInternal refuses it on /investor-reporting on both builds. On a dev build its /ticket-center reach is the partner reach, not an internal one. The page predicate (TicketCenter.tsx:188, isDev) still treats a Dev claim as internal inside the page: surprise IRPT_ANLREQ-D2-W103-S4, ARMED for AR-y-283."
+  },
+  "design_clauses": [
+    "No visual choice in this candidate. The sidebar entry is the existing one, rendered by the existing filter. Read: DESIGN.md C3 (surface role) and C8 (accent), portal CLAUDE.md colour law. Nothing added or restyled."
+  ],
+  "claim": "On a dev build, a known partner firm reaches /ticket-center and its sidebar entry through the existing isPathAllowedForFirm and ProtectedRoute code paths, with the route's requireInternal flag set from isPartnerDevReach. On a production build the decision is identical to the tip for every caller tested (partner, internal, anonymous, unknown firm, Dev-claim spoof). The DEV gate is the build flag, not the requiresDev pattern. Whether the deployed DEV site is a dev build is NOT measured, so the candidate may grant nothing on deployed DEV. Nothing was landed, pushed, deployed or registered.",
+  "not_read": [
+    "The deployed DEV site build mode (the CI or deploy configuration that produces DEV is outside src/ and was not read).",
+    "origin/DEV in a live sense: origin/DEV was read through the fetched ref a577cba5 only; no ls-remote was run.",
+    "The server side (infra/aws/lambda/ticket_center): AR-y-280 and AR-y-281 are other cells.",
+    "The Ticket Center page contents and its partner view: AR-y-283.",
+    "The open-calls tracker and the portal merge-forward tooling (.tools/portal-merge-forward.sh): not run; nothing registered.",
+    "The full portal test suite: only src/lib, src/components, src/pages/TicketCenter and the dsgn-irptv1 folder were run."
+  ]
+}

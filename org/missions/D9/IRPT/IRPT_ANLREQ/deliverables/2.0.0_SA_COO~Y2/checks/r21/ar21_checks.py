@@ -26,6 +26,7 @@ D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r21/"
 D22 = D.replace("/r21/", "/r22/")
 D23 = D.replace("/r21/", "/r23/")
 D24 = D23
+D26 = D23
 ROUND192_VERSION = "irpt-template-reader.r19.2"
 TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-verify": "Y222-VERIFY", "y223-design": "Y223-DESIGN",
           "y226-effect": "Y226-EFFECT", "y227-resident": "Y227-RESIDENT", "y228-lambda": "Y228-LAMBDA", "y229-stderr": "Y229-STDERR",
@@ -36,7 +37,8 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y271-j2": "Y271-J2", "y272-j5": "Y272-J5", "y273-portal": "Y273-PORTAL", "y274-portal": "Y274-PORTAL", "y275-portal": "Y275-PORTAL",
           "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ",
           "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL",
-          "y291-known": "Y291-KNOWN", "y292-checker": "Y292-CHECKER", "y293-kept": "Y293-KEPT"}
+          "y291-known": "Y291-KNOWN", "y292-checker": "Y292-CHECKER", "y293-kept": "Y293-KEPT",
+          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -568,6 +570,8 @@ def main(argv):
     elif check in ("y280-submit", "y281-list"):
         worker, rel, testfile, floor = (("101", "SUBMIT_ANALYSIS_REQUEST.json", "tests/test_submit_analysis_request.py", 12) if check == "y280-submit"
                                         else ("102", "LIST_SCOPED.json", "tests/test_list_scoped_firm.py", 10))
+        if check == "y281-list" and (root / (D24 % "108" + rel)).is_file():
+            worker = "108"  # the continuation worker's record (AMENDMENT 1); the first worker (102) stopped at the build gate
         rec = load(root, D24 % worker + rel, problems)
         if rec:
             for member in ("read", "authorization_change", "tests", "before_arm", "claim", "not_read"):
@@ -604,6 +608,8 @@ def main(argv):
                                  (("intake", "tests/test_yfinance_check.py", 12),)),
                 "y293-kept": ("107", "KEPT_STATE.json", ("read", "state", "freeze_branch", "words", "tests", "before_arm", "shares_status", "claim", "not_read"),
                               (("intake", "tests/test_kept_holding.py", 14),))}[check]
+        if check == "y293-kept" and (root / (D24 % "110" + spec[1])).is_file():
+            spec = ("110",) + spec[1:]  # the continuation worker's record (AMENDMENT 1)
         rec = load(root, D24 % spec[0] + spec[1], problems)
         if rec:
             for member in spec[2]:
@@ -626,6 +632,44 @@ def main(argv):
         print("intake tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
         if rc != 0 or failed or passed < 370:
             problems.append("the intake folder must pass with at least 370")
+    elif check == "y284-pkg-server":
+        rec = load(root, D26 % "108" + "PACKAGE_REQUEST_ID_SERVER.json", problems)
+        if rec:
+            for member in ("read", "built", "authorization_change", "tests", "before_arm", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if not (rec.get("authorization_change") or "").strip():
+                problems.append("authorization_change must state what the package principal may now write")
+            if (rec.get("before_arm") or {}).get("failed") in (None, 0, "0"):
+                problems.append("before_arm: case (a) must FAIL at HEAD without the change")
+        tc = "infra/aws/lambda/ticket_center"
+        if not (root / tc / "tests/test_package_request_id.py").is_file():
+            problems.append("no ticket_center/tests/test_package_request_id.py")
+        else:
+            rc, passed, failed = pytest(root, "tests/test_package_request_id.py", tc)
+            print("package request id tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+            if rc != 0 or failed or passed < 10:
+                problems.append("tests/test_package_request_id.py must pass with at least 10 tests")
+        rc, passed, failed = pytest(root, "tests", tc)
+        print("ticket service folder: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+        if rc != 0 or failed or passed < 221:
+            problems.append("the ticket service folder must pass with at least 221 tests")
+    elif check == "y285-pkg-sender":
+        rec = load(root, D26 % "109" + "PACKAGER_REQUEST_ID.json", problems)
+        if rec:
+            for member in ("read", "built", "tests", "before_arm", "release_needs", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if (rec.get("before_arm") or {}).get("failed") in (None, 0, "0"):
+                problems.append("before_arm: case (a) must FAIL at HEAD without the change")
+        t = root / IR / "ycharts/research/tests/test_opal_packager_request_id.py"
+        if not t.is_file():
+            problems.append("no ycharts/research/tests/test_opal_packager_request_id.py")
+        else:
+            rc, passed, failed = pytest(root, "tests/test_opal_packager_request_id.py", IR + "/ycharts/research")
+            print("packager request id tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+            if rc != 0 or failed or passed < 6:
+                problems.append("tests/test_opal_packager_request_id.py must pass with at least 6 tests")
     return finish(check, problems)
 
 

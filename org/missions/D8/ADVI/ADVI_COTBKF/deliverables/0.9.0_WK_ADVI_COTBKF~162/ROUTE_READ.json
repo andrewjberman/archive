@@ -1,0 +1,105 @@
+{
+  "objects": [
+    {
+      "key": "s3://opal-data-assets/commonwealth/cottonwood/silver/daily_returns/date=2026-06-23/part-00000.parquet",
+      "bytes": 1651055,
+      "rows": 1691729,
+      "first_date": "2013-04-03",
+      "last_date": "2026-06-22",
+      "columns": ["account", "date", "value", "flow", "return", "blank_reason", "cash_leg", "run_commit"]
+    },
+    {
+      "key": "s3://opal-data-assets/commonwealth/cottonwood/silver/account_day_value/date=2026-06-23/part-00000.parquet",
+      "bytes": 54246028,
+      "rows": 21102041,
+      "first_date": "2013-04-03",
+      "last_date": "2026-06-22",
+      "columns": ["account", "date", "cusip", "quantity", "close", "value", "price_source", "blank_reason", "cash_leg", "run_commit"]
+    },
+    {
+      "key": "s3://opal-data-assets/commonwealth/cottonwood/silver/month_grades/date=2026-06-23/part-00000.parquet",
+      "bytes": 421751,
+      "rows": 82593,
+      "first_date": "2013-04",
+      "last_date": "2026-06",
+      "columns": ["account", "month", "computed_pct", "reported_month_pct", "diff_pct", "verdict", "reason", "reported_year_pct", "reported_year_start", "reported_year_end", "reported_itd_pct", "reported_itd_start", "reported_itd_end", "benchmark_month_pct", "benchmark_year_pct", "benchmark_itd_pct", "benchmark_description", "reported_note", "list_version", "cash_leg", "run_commit"]
+    }
+  ],
+  "agrees_with_scratch": true,
+  "rows_read": [
+    {
+      "ticker": "APH",
+      "day": "2025-04-21",
+      "served_close": 31.795000076293945,
+      "ratio_to_vendor": 1.0,
+      "ratio_to_price_paid": 0.487
+    },
+    {
+      "ticker": "CTVA",
+      "day": "2026-02-17",
+      "served_close": 11.335333824157717,
+      "ratio_to_vendor": 1.0,
+      "ratio_to_price_paid": 0.148841
+    },
+    {
+      "ticker": "HON",
+      "day": "2026-02-04",
+      "served_close": 246.82748413085935,
+      "ratio_to_vendor": 1.0,
+      "ratio_to_price_paid": 1.052498
+    }
+  ],
+  "hops": [
+    {
+      "hop": "1. minted tables -> ARD adapter -> gold account_return_daily (Cottonwood, firm scope cottonwood)",
+      "reads_file_line": "data/assets/scripts/silver/commonwealth_account_return_daily.py:221-226 (read_source of the three minted tables), called at :479 :482 :486; SCOPE = lookup('cottonwood')['key'] at :134",
+      "writes_file_line": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py:100 (TABLE_RETURNS), :1876-1878 (emit_day address); called from data/assets/scripts/silver/commonwealth_account_return_daily.py:603 (upload=False) and :910 (upload=True, guarded --apply); the data.parquet suffix is read back at :1022",
+      "name_matches_previous": "n/a (first hop; its inputs are the three minted tables)",
+      "deployed": true,
+      "evidence": "lib/opal_naming.address('irpt','cottonwood','gold','account_return_daily','date=2026-06-22') = s3://opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily/date=2026-06-22 (computed locally); aws s3api head-object of .../date=2026-06-22/data.parquet rc=0, ContentLength 5837, LastModified 2026-10-11T07:17:06Z. One partition read; its writer was not identified."
+    },
+    {
+      "hop": "2. gold account_return_daily -> reporting-publish Lambda -> platinum reporting (the Cottonwood publish)",
+      "reads_file_line": "infra/aws/lambda/investor-reporting/reporting-publish/handler.py:66 (TABLE_GOLD), :82-84 (_declared_sources), :87-103 (resolve_firm: only the declared custody source schwab_08335338 resolves, to firm 49financial), :111-126 (_gold_objects; probe address :113, prefix :115)",
+      "writes_file_line": "handler.py:67 (TIER_PLATINUM, TABLE_PLATINUM), :194 (series and manifest put_object), :372 (summary put_object)",
+      "name_matches_previous": false,
+      "deployed": false,
+      "evidence": "BREAK. The producer writes firm scope cottonwood (opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily/). The deployed publish reads firm 49financial (opal-data-49financial/irpt/49financial/gold/account_return_daily/, lib/opal_naming with lookup('08335338')['firm']). The Cottonwood master z09 (infra/logic/registry/scopes.json, firm cottonwood) is not a declared source: the sources.json key _commonwealth_delivery is underscore-prefixed and method-fields-only (data/assets/scripts/gold/irpt_reporting/sources.json:123-130). Terraform infra/aws/terraform/investor-reporting/reporting-publish/locals.tf:38-61 derives firm 49financial and a read grant only on irpt/49financial/gold/{account_return_daily,dim_return_method}/. Deployed: irpt-49f-reporting-publish-lambda found (State Active; LastModified 2026-10-03T17:22:27Z; CodeSha256 AH5r60vpxR/Gt4RlpsSkhAw5HDths5P2Ht+Ix1CHlQ8= equals artifact_sha256 at lambda-source-map.json:6025). No Cottonwood-scoped publish function: get-function-configuration irpt-cot-reporting-publish-lambda (name from lib/opal_naming.name('irpt','cottonwood','reporting-publish','lambda')) returned ResourceNotFoundException, rc=254. No cottonwood reporting-publish Terraform root exists in infra/aws/terraform/investor-reporting/ and none is in lambda-source-map.json."
+    },
+    {
+      "hop": "3. platinum reporting -> reporting-read Lambda -> API route (the page read route)",
+      "reads_file_line": "infra/aws/lambda/investor-reporting/reporting/entry.py:87 (TIER_PLATINUM, TABLE_PLATINUM), :156, :223 (platinum address with the firm argument); firm locked in infra/aws/terraform/investor-reporting/reporting-read/locals.tf:37-38 (irpt_rr_firm, irpt_rr_bucket = one() of the declared source: 49financial), :46-48 (platinum read prefix irpt/49financial/platinum/reporting/), :59 (directory bucket map: one firm)",
+      "writes_file_line": "none (read route)",
+      "name_matches_previous": false,
+      "deployed": true,
+      "evidence": "irpt-49f-reporting-read-lambda found (State Active; LastModified 2026-10-13T13:07:19Z; CodeSha256 WjnDxvu2biEPXcwuF8oXJWRUqFaeUY550xnRxa2daa0= equals deployed_code_sha256 at lambda-source-map.json:6492; env var NAMES IRPT_DIRECTORY_BUCKET_MAP, IRPT_EVIDENCE_BUCKET, IRPT_FIRM_REGISTRY, values not read). Route GET /api/scoped/investor-reporting/reporting/{account_id}/{which} on API 7k3ed8px20, route id 3smc8xr, authorization CUSTOM, target integrations/904xvoc; get-integration 904xvoc is AWS_PROXY, payload 2.0, IntegrationUri ends irpt-49f-reporting-read-lambda/invocations. This Lambda is firm 49financial, so it has no Cottonwood platinum series to read. Deployed IAM policy not read (outside the bounded reads)."
+    },
+    {
+      "hop": "4. the dashboard page reads the route (portal origin/DEV and origin/PROD source)",
+      "reads_file_line": "src/pages/InvestorReporting/dashboard/reportingRead.ts:18 (REPORTING_READ_BASE), :22-24 (reportingReadPath), :124 (readDashboard: manifest and series paths); src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx:139 (import readDashboard), :911 (renders DashboardPerformance); src/pages/InvestorReporting/dashboard/seriesContract.ts:4 (the page's read of series.json.gz and manifest.json); src/App.tsx:462 (PROD route /investor-reporting gated requireAdmin requireInternal requireDev)",
+      "writes_file_line": "none (read)",
+      "name_matches_previous": true,
+      "deployed": "not_established",
+      "evidence": "reportingRead.ts is byte-identical on origin/DEV and origin/PROD (git show of each ref; the local DEV ref is not used). The series path /api/scoped/investor-reporting/reporting/{account}/series matches the route of hop 3. Page source present on both; the page was not run, per the order."
+    }
+  ],
+  "planned_not_applied_reading": "lambda-source-map.json:6485 is the _build_note of the reporting-read entry (key irpt-49f-reporting-read-lambda at :6263). The sentence 'Planned, not applied: the apply is the issuer's act under both never-widen halves' refers to the apply of the reporting-read Lambda, which is the page's read route, in its own Terraform root infra/aws/terraform/investor-reporting/reporting-read/. Read with its neighbours: :6481 tf_file, :6482 tf_resource, :6488 last_deployed_commit 8d08ee54e488e74ef5bc9f4ba715e0a3cad776f5, :6489 last_deployed_at 2026-10-13T13:07:19Z, :6490 recorded_by record-terraform-deploy.sh, :6491 deploy_ledger irpt-status-rule-all-eight-20261013, :6492 deployed_code_sha256. The live function matches those fields, and its route is registered. The note is STALE against the live deployment. The identical sentence at lambda-source-map.json:6023 (reporting-publish entry, key at :5912) is also stale against its own record (last_deployed_at 2026-10-05T00:15:43Z; live LastModified 2026-10-03T17:22:27Z; CodeSha256 equal to artifact_sha256).",
+  "positive_control": {
+    "hop": "the Cottonwood-scoped publish read (get-function-configuration irpt-cot-reporting-publish-lambda, ResourceNotFound) is controlled by the same call on irpt-49f-reporting-publish-lambda (found, Active, CodeSha256 equal to the map artifact hash); the same API's route listing (get-routes, 121 routes, no NextToken) also finds 18 investor-reporting routes and the hop 3 route key (one match, route id 3smc8xr)",
+    "found": true
+  },
+  "route_verdict": "route_not_live",
+  "a_person_can_see_these_prices": "no",
+  "page_or_break": "BREAK at hop 2. No Cottonwood-scoped reporting-publish function is deployed. The deployed publish (irpt-49f-reporting-publish-lambda) declares only the 49financial custody source and reads opal-data-49financial gold, never opal-data-cottonwood gold. Hop 3 (reporting-read, route registered, page calls it on DEV and PROD) is deployed but firm-locked to 49financial, so no Cottonwood platinum series exists for the page to read. The page route is gated to Opal internal admin logins (App.tsx:462), not partner-firm or client logins. The minted tables have no page reader (portal, opal_ai and mcportal searches recorded in CONSUMER_READ.json returned 0 hits).",
+  "headline": "route_not_live; no person can see these prices today. Hop 1 is deployed: the Cottonwood gold account_return_daily partition 2026-06-22 exists (LastModified 2026-10-11T07:17Z). Hop 2 is absent for Cottonwood: no Cottonwood publish function (ResourceNotFound, positive control found), and the deployed publish reads 49financial gold only. Hop 3 is deployed and registered but firm-locked to 49financial. The 'Planned, not applied' sentence (lambda-source-map.json:6485 and :6023) is stale against live deployment. The served minted objects agree with the scratch copy on the three chosen rows (APH 1, CTVA 1, HON 3 account-days; served close equals vendor Close; ratio to price paid 0.487, 0.148841, 1.052498) and on close, quantity and value for all 21,102,041 rows. They differ in run_commit on every row and in blank-day labels on 988 account-days (detail in ROUTE_READ_EVIDENCE.json). Nothing was built, served, written or corrected.",
+  "not_established": [
+    "The deployed IAM role policies of irpt-49f-reporting-publish-role and irpt-49f-reporting-read-role were not read (outside the bounded reads); the firm scope of both is taken from the Terraform locals and the code.",
+    "The packaged sources.json inside each deployed zip was not read (artifacts not downloaded). Deployed code is tied to the source map by CodeSha256 equal to artifact_sha256 only.",
+    "Whether any Cottonwood platinum object exists under irpt/cottonwood/platinum/reporting/ was not listed (not a named read in the order). The absence rests on the absent Cottonwood publish function and the firm-locked read.",
+    "The CloudFront behaviour /api/scoped/investor-reporting/* was not read. The route was read on the API (get-routes filtered by route key, 121 routes listed) and its integration (get-integration).",
+    "Only the 2026-06-22 gold partition was read. The gold table prefix was not listed, so the full set of Cottonwood gold partitions is not established. The writer of the 2026-10-11 gold object is not identified.",
+    "The build-to-minted link on the chosen rows was not re-measured against the build file in this cell; the served-to-scratch comparison is the measured part.",
+    "The page was not run. Its login gate was read from PROD App.tsx only.",
+    "The map's last_deployed_at for reporting-publish (2026-10-05T00:15:43Z) differs from the live LastModified (2026-10-03T17:22:27Z) while CodeSha256 matches; not reconciled."
+  ]
+}

@@ -69,6 +69,15 @@ at the cap against about 9.2 for the close alone. That figure PREDATES the remov
 `history_owed.summary(owed(s, day))` first and states the runs. The queue request `ETFS_RIVALS-HISTORY-OWED-DAILY` (Q1's file in
 `org/missions/D8/MDPF/MDPF_DEMQUE/requests/`) carries the field list, so Q1 re-files it; that is one ask to `2.0.0_SA_COO~Q1` at the cut.
 
+**C1 RULED (CTO msg 5166, 2026-10-13 ~20:3xZ, on `RIVALFUNDS_PAGE_HISTORY_NEEDS_MEASURED_20261013.md` @a100e2490e): xe-2's owed request is FIELD-MATCHED and STAGED.**
+- Total return only on the rankings' held days (123,933 units); the close only on the curves' days (89,216 units); the 36,705 units outside the page are not
+  drawn. Total 213,149 cells, counted in CELLS against the 20,000 cap (about 11 runs).
+- Staged newest period first: 30d (2026-09-12), then 90d (2026-07-14), then 365d (2025-10-12).
+- Andrew confirmed ~21:0xZ 2026-10-13 (CTO msg 5197), VERBATIM as relayed: "C1 yes, approved in that order". The CTO's ruling now stands on his word, recorded in
+  the DEMQUE form. Queue order is held by `2.0.0_SA_COO~Q1`: surface B before C1 stage 1 (30d).
+- Lands from the CTO's round-29 analysis, unless the cut is a queue request only, in which case `2.0.0_SA_COO~Q1` files it. The cell's checks assert the
+  field asked per unit, the cells counted, and the stage order. The figures are the 2026-10-13 read: the issuance re-reads `owed_size.py` first.
+
 **xf-1, Z4.** `universe.py:25` marks ACWI and IWM `"leg": "pending"` behind `RIVALFUNDS_LEG_D13`, `collector_bloomberg.py:350` sizes them
 (`CONTROL_ROW_CAP`). Removal is the entries, their cap and the three tests. Check arm: after the change no `ACWI` or `IWM` in `universe.funds()`
 with the flag on or off, and the holdings plan's fund list equals the prior list minus those two (printed before and after).
