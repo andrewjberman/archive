@@ -38,7 +38,7 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ",
           "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL",
           "y291-known": "Y291-KNOWN", "y292-checker": "Y292-CHECKER", "y293-kept": "Y293-KEPT",
-          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS"}
+          "y284-pkg-server": "Y284-PKG-SERVER", "y285-pkg-sender": "Y285-PKG-SENDER", "y294-stack": "Y294-STACK", "y295-census": "Y295-CENSUS", "y296-armed": "Y296-ARMED"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -748,6 +748,35 @@ def main(argv):
             ws = rec.get("member_writers") or {}
             if not ws or any(not isinstance(v, (list, dict)) for v in ws.values()):
                 problems.append("member_writers must map each member to its writers")
+    elif check == "y296-armed":
+        rec = load(root, D.replace("/r21/", "/r29/") % "114" + "ARMED_ROWS_CENSUS.json", problems)
+        chan = root / "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md"
+        text = chan.read_text(encoding="utf-8", errors="replace")
+        rows = []
+        for block in re.findall(r"```json\n(\{.*?\n\})\n```", text, flags=re.S):
+            try:
+                rows.append(json.loads(block))
+            except ValueError:
+                pass
+        owned = [(i, r) for i, r in enumerate(rows) if r.get("hazard_standing") == "ARMED" and "Y2" in str(r.get("disarm_owner", ""))]
+        left = []
+        for i, r in owned:
+            if not any("DISARMS" in str(x.get("one_line", "")) and str(r.get("id")) in str(x.get("one_line", "")) for x in rows[i + 1:]):
+                left.append(str(r["id"]))
+        print("rows parsed %d, ARMED-OWNED %d, left %d" % (len(rows), len(owned), len(left)))
+        if rec:
+            for member in ("denominator", "rows", "groups", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            got = {str(r.get("id")): r for r in (rec.get("rows") or [])}
+            missing = [i for i in left if i not in got]
+            if missing:
+                problems.append("no verdict for %d row(s), first: %s" % (len(missing), missing[:5]))
+            for i, r in got.items():
+                if r.get("verdict") not in ("RESOLVED", "STILL_ARMED", "UNCLEAR"):
+                    problems.append("%s: verdict must be RESOLVED, STILL_ARMED or UNCLEAR" % i)
+                elif r.get("verdict") == "RESOLVED" and not (r.get("evidence") or []):
+                    problems.append("%s: a RESOLVED verdict needs evidence" % i)
     return finish(check, problems)
 
 

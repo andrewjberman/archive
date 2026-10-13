@@ -1,0 +1,21 @@
+AC1 -- cd C:/dev/wk-resapp-422 && PYTHONPATH="$(pwd)" timeout 300 python "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa7_serve.py" | tail -4; echo "exit=${PIPESTATUS[0]}"
+run 1 (before the commit, on the same bytes):
+ARM scoped_amgt.py imports neither lib.opal_naming nor harvest.store (Lambda-safe) PASS []
+ARM ENV_AIFILL_ROOT == 'AMGT_AIFILL_ROOT'                PASS AMGT_AIFILL_ROOT
+ARM serving does not alter the stored document           PASS
+AIFILL FA-7 ARMS: YES (18 of 18)
+exit=0
+run 2 (determinism, same input):
+ARM scoped_amgt.py imports neither lib.opal_naming nor harvest.store (Lambda-safe) PASS []
+ARM ENV_AIFILL_ROOT == 'AMGT_AIFILL_ROOT'                PASS AMGT_AIFILL_ROOT
+ARM serving does not alter the stored document           PASS
+AIFILL FA-7 ARMS: YES (18 of 18)
+exit=0
+
+AC2 -- cd C:/dev/wk-resapp-422 && PYTHONPATH="$(pwd)" timeout 500 python "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_api_suite_no_new_failures.py" | tail -3; echo "exit=${PIPESTATUS[0]}"
+AIFILL API SUITE: YES (base 4 failing, now 4 failing, new 0, passed 1008)
+exit=0
+
+Mutant control (pytest, the new module):
+python -m pytest -q lib/research/api/tests/test_ai_fill_serve.py
+39 passed in 0.81s
