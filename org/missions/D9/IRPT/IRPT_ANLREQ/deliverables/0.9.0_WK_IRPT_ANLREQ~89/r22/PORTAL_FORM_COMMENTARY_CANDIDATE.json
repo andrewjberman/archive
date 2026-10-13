@@ -1,0 +1,92 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-264",
+  "cell": "AR-y-264",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~89",
+  "dev_tip": "f6ef1d2548cf6f619f80662d3082d66ea0a3fcf4",
+  "dev_tip_source": "git -C C:/dev/ajb_workspace/portal fetch origin DEV (permitted), then rev-parse origin/DEV",
+  "branch": "wk-IRPT_ANLREQ-89-portal",
+  "worktree": "C:/dev/wk-portal-89 (outside the product tree; created from origin/DEV)",
+  "commit": "972c7dabc320ac4ee2e5a4e18459ff61a3bdba51",
+  "push_state": "LOCAL on wk-IRPT_ANLREQ-89-portal; not pushed, not landed on DEV, not deployed",
+  "files_changed": [
+    "src/pages/TicketCenter/analysisRequest.ts",
+    "src/pages/InvestorReporting/contracts/submission-request.ts",
+    "src/pages/TicketCenter/__tests__/analysis-commentary-requested.test.ts"
+  ],
+  "server_code_edited": false,
+  "trace": {
+    "method": "read hop by hop at portal DEV f6ef1d25 (portal worktree) and workspace base 56c8113a00 (this worktree); no code run for the trace itself",
+    "hops": [
+      {"n": 1, "file_line": "src/pages/TicketCenter/AnalysisRequestParts.tsx:134-135", "lane": "portal", "member_in": "checkbox checked", "member_out": "form.add_commentary (set('add_commentary', e.target.checked))", "fine": true},
+      {"n": 2, "file_line": "src/pages/TicketCenter/AnalysisRequestParts.tsx:33,45-56", "lane": "portal", "member_in": "form.add_commentary", "member_out": "answers.add_commentary (answersFromForm :56)", "fine": true},
+      {"n": 3, "file_line": "src/pages/TicketCenter/TicketCenter.tsx:307-309 -> src/pages/TicketCenter/analysisRequest.ts:304-312 (fileAndRequestAnalysis) -> :151,186 (fileAnalysisRequest)", "lane": "portal", "member_in": "answers.add_commentary", "member_out": "answers.add_commentary (passed unchanged)", "fine": true},
+      {"n": 4, "file_line": "src/api/endpoints/tickets.ts:45 (AnalysisRequestAnswers.add_commentary), :142-143 (createTicket POST, JSON body)", "lane": "portal", "member_in": "answers.add_commentary", "member_out": "answers.add_commentary in the ticket POST body", "fine": true},
+      {"n": 5, "file_line": "infra/aws/lambda/ticket_center/lambda_function.py:112 (declared kind boolean), :689-696 (_validate_answers: unknown names refused), :735-737 (boolean kind)", "lane": "ticket service", "member_in": "add_commentary", "member_out": "add_commentary (validated)", "fine": true, "note": "the ticket service reads add_commentary; it does not read commentary_requested"},
+      {"n": 6, "file_line": "infra/aws/lambda/ticket_center/lambda_function.py:624-625, :1196-1197", "lane": "ticket service", "member_in": "add_commentary", "member_out": "item.answers.add_commentary (stored as given)", "fine": true},
+      {"n": 7, "file_line": "src/pages/TicketCenter/analysisRequest.ts:257-272 (analysisBody, the first submission) and :197-211 (submissionBody, the retry at :426)", "lane": "portal", "member_in": "answers.add_commentary (available in both builders)", "member_out": "NOTHING: neither builder writes a commentary member into the submission body", "fine": false, "BREAK": true},
+      {"n": 8, "file_line": "src/pages/InvestorReporting/contracts/submission-request.ts:14,22-25 (allowed set; refuse any other key) called by src/api/endpoints/investor-reporting.ts:1472-1473 before transport", "lane": "portal", "member_in": "commentary_requested (if the builder sent it)", "member_out": "TypeError before any POST (measured on f6ef1d25: 4 of the 5 new tests fail here)", "fine": false, "BREAK": true, "note": "second portal hop; the builder fix alone would not reach the packager"},
+      {"n": 9, "file_line": "infra/aws/lambda/investor-reporting/ycharts/generate/prospect_submission.py:46 (validate_public_request(body)), submission.py:16 (PUBLIC_FIELDS admits commentary_requested), :82 (must be a JSON boolean), :116 (SubmissionService.submit(browser))", "lane": "packager", "member_in": "commentary_requested", "member_out": "browser.commentary_requested", "fine": true},
+      {"n": 10, "file_line": "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py:112 (validate), :138-139 (record[commentary_requested] copied from browser)", "lane": "packager", "member_in": "browser.commentary_requested", "member_out": "accepted record.commentary_requested", "fine": true},
+      {"n": 11, "file_line": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py:191-200 (send_ready_if_ticketed)", "lane": "packager (drafter trigger)", "member_in": "accepted record.commentary_requested and ticket_id", "member_out": "analysis_ready sent only when ticket_id is a non-empty string AND commentary_requested is exactly True (:197); otherwise skipped COMMENTARY_NOT_REQUESTED", "fine": true}
+    ],
+    "where_it_breaks": {
+      "file_line": "src/pages/TicketCenter/analysisRequest.ts:257-272 (analysisBody; the same gap at :197-211 submissionBody)",
+      "lane": "portal",
+      "first_hop_where_the_checked_box_stops": "the submission builder reads the ticket answers and writes no commentary member, so the packager never receives commentary_requested",
+      "server_lane_involved": false,
+      "ticket_service_is_the_break": false,
+      "packager_is_the_break": false,
+      "second_portal_hop_in_the_way": "src/pages/InvestorReporting/contracts/submission-request.ts:14,22-25 refuses the member before transport (fixed in the candidate)"
+    },
+    "already_working": [1, 2, 3, 4, 5, 6, 9, 10, 11],
+    "face_premise_note": "The face expected the ticket service to read commentary_requested. It reads add_commentary and refuses unknown answer names, so the cell's step-3 rename of the ANSWER would make every analysis ticket POST fail with 400. The candidate therefore keeps add_commentary in the answers and adds commentary_requested to the submission body, the place the packager reads it. Filed as surprise rows IRPT_ANLREQ-D2-W89-S1 and -S2."
+  },
+  "what_a_person_sees": {
+    "now": "The Add commentary box can be checked and the ticket is filed with add_commentary true. The analysis submission the packager receives carries no commentary_requested, so the packager records no commentary request and never sends the analysis_ready signal (resident_worker.py:197 skips with COMMENTARY_NOT_REQUESTED). The person sees no effect, as Andrew reported.",
+    "after_candidate": "The same checked box sends commentary_requested true in the analysis submission (and false when unchecked). The packager records it, and for a ticketed request the analysis_ready signal goes out. The drafter is started by that signal; this seat did not read the drafter's body beyond the gate (see not_read).",
+    "on_screen": "The checkbox, its label and placement are unchanged by this candidate. No confirmation text is added here; that defect is row D2-S83, another cell."
+  },
+  "design_clauses": [
+    {"visual_choice": "none", "clause": "no visual change: the checkbox, label, placement and classes are untouched"},
+    {"read": "portal CLAUDE.md (color, typecheck and verification laws) and DESIGN.md (C3 surfaces, C9 contrast, C12 states)", "applied": false}
+  ],
+  "tests": {
+    "added": 5,
+    "added_file": "src/pages/TicketCenter/__tests__/analysis-commentary-requested.test.ts",
+    "names": [
+      "(a) checked: both submission builders carry commentary_requested true",
+      "(b) unchecked: both submission builders carry commentary_requested false",
+      "(c) the analysis-submission POST carries commentary_requested true when checked and false when not",
+      "(d) the closed submission reader admits the member as a boolean and refuses any other value",
+      "(e) the ticket answer keeps its name add_commentary: the ticket service refuses an unknown answer"
+    ],
+    "passed": 5,
+    "failed": 0,
+    "run": "timeout 240 bun test src/pages/TicketCenter/__tests__/analysis-commentary-requested.test.ts -> 5 pass, 0 fail (rc=0)",
+    "folder_TicketCenter": "timeout 240 bun test src/pages/TicketCenter/__tests__ -> 77 pass, 0 fail, 77 tests across 16 files (rc=0); on DEV tip without the change 73 pass, 4 fail (the new tests a to d)",
+    "neighbours": "src/pages/InvestorReporting/__tests__/submission-request.test.ts + src/pages/InvestorReporting/tabs/analysis/tests -> 27 pass, 0 fail (rc=0)",
+    "dsgn_irptv1": "src/pages/InvestorReporting/__tests__/dsgn-irptv1 -> 370 pass, 11 fail of 381 tests across 240 files, on the DEV tip AND on the candidate; the failure names are identical in both runs (diff after timing strip); pre-existing, not this change",
+    "typecheck": "bun run typecheck (= tsc -b --noEmit) -> rc=0 on the candidate; it returned rc=2 once on a real error in the new test file (a TS2352 cast), which fixed before the commit, so the form was shown able to fail"
+  },
+  "before_arm": {
+    "ref": "origin/DEV f6ef1d25 without the change to src/ (the new test file present)",
+    "failed": 4,
+    "passed": 1,
+    "failing": ["(a)", "(b)", "(c)", "(d)"],
+    "passing": ["(e)"],
+    "evidence": "C:/dev/wk-irpt-anlreq-89/.scratch/tc_before.txt (TicketCenter folder on DEV tip: 73 pass, 4 fail)"
+  },
+  "mutant": {
+    "change": "analysisBody commentary_requested replaced by false",
+    "result": "tests (a) and (c) fail (2 fail, 3 pass); the file was restored byte-identical afterwards",
+    "evidence": "C:/dev/wk-irpt-anlreq-89/.scratch/mutant_analysis.txt"
+  },
+  "claim": "On branch wk-IRPT_ANLREQ-89-portal at 972c7dab, the Add commentary box's member reaches the analysis submission body as commentary_requested (true when checked, false when not), and the closed reader admits it. Shown by offline tests (fake transport) and typecheck only. Not landed, not pushed, not deployed, not exercised against a live packager or on DEV.",
+  "not_read": [
+    "the drafter's body beyond the analysis_ready gate (resident_worker.py send_ready)",
+    "the packager's test_commentary_requested_member.py was not run (server code not edited; the gate was read, not re-run)",
+    "the Ticket Center screen: no render, no screenshot (no visual change made)",
+    "the investor-reporting route wiring beyond prospect_submission.py:46,116",
+    "live DEV, live tickets, live packager: none called"
+  ]
+}

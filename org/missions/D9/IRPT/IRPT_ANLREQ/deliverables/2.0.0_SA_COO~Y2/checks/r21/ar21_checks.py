@@ -24,13 +24,16 @@ IR = "infra/aws/lambda/investor-reporting"
 INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r21/"
 D22 = D.replace("/r21/", "/r22/")
+D23 = D.replace("/r21/", "/r23/")
 ROUND192_VERSION = "irpt-template-reader.r19.2"
 TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-verify": "Y222-VERIFY", "y223-design": "Y223-DESIGN",
           "y226-effect": "Y226-EFFECT", "y227-resident": "Y227-RESIDENT", "y228-lambda": "Y228-LAMBDA", "y229-stderr": "Y229-STDERR",
           "y242-portal": "Y242-PORTAL", "y243-portal": "Y243-PORTAL", "y244-read": "Y244-READ", "y245-server": "Y245-SERVER",
           "y246-qa": "Y246-QA", "y247-swap": "Y247-SWAP", "y248-portal": "Y248-PORTAL",
           "y249-swap": "Y249-SWAP", "y250-qa": "Y250-QA", "y251-swap": "Y251-SWAP", "y252-portal": "Y252-PORTAL",
-          "y261-read": "Y261-READ", "y262-portal": "Y262-PORTAL", "y263-portal": "Y263-PORTAL", "y264-portal": "Y264-PORTAL", "y265-portal": "Y265-PORTAL", "y266-live": "Y266-LIVE"}
+          "y261-read": "Y261-READ", "y262-portal": "Y262-PORTAL", "y263-portal": "Y263-PORTAL", "y264-portal": "Y264-PORTAL", "y265-portal": "Y265-PORTAL", "y266-live": "Y266-LIVE",
+          "y271-j2": "Y271-J2", "y272-j5": "Y272-J5", "y273-portal": "Y273-PORTAL", "y274-portal": "Y274-PORTAL", "y275-portal": "Y275-PORTAL",
+          "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -489,6 +492,74 @@ def main(argv):
             print("live runner tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
             if rc != 0 or failed or passed < 6:
                 problems.append("tests/test_kimi_search_qa_live.py must pass with at least 6 tests")
+    elif check in ("y271-j2", "y272-j5"):
+        name, members, worker, rel = (("J2", ("trace", "options", "chosen", "authorization_change", "tests", "claim", "not_read"), "92", "J2_REQUEST_ID.json")
+                                      if check == "y271-j2" else
+                                      ("J5", ("trace", "chosen_principal", "order_rule", "authorization_change", "tests", "claim", "not_read"), "93", "J5_PACKAGER.json"))
+        rec = load(root, D23 % worker + rel, problems)
+        if rec:
+            for member in members:
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if not (rec.get("authorization_change") or "").strip():
+                problems.append("authorization_change must state in a paragraph who may now write what (or that nothing widens)")
+            built = rec.get("built")
+            if built and (rec.get("before_arm") or {}).get("failed") in (None, 0, "0"):
+                problems.append("before_arm: the new tests must FAIL at HEAD without the change")
+            print("%s: built=%s" % (name, bool(built)))
+    elif check == "y273-portal":
+        rec = portal_candidate(root, D23 % "94" + "J6_FORM_ATTACHMENT.json", problems)
+        if rec and not rec.get("chosen"):
+            problems.append("chosen must name the design of the fourth item")
+    elif check == "y274-portal":
+        rec = portal_candidate(root, D23 % "95" + "PORTAL_C_FIRM_CANDIDATE.json", problems)
+        if rec and not (rec.get("read") or {}).get("firm_source"):
+            problems.append("read.firm_source must name where the firm comes from (file:line)")
+    elif check == "y275-portal":
+        rec = portal_candidate(root, D23 % "96" + "PORTAL_VARIANT_CANDIDATE.json", problems)
+        if rec and not (rec.get("read") or {}).get("receiver_member"):
+            problems.append("read.receiver_member must name the member the receiver reads for the variant")
+    elif check == "y276-design":
+        rec = load(root, D23 % "97" + "SYNTHETIC_ADVISOR_DESIGN.json", problems)
+        if rec:
+            for member in ("read", "identity", "drive", "offline_run", "removal", "bounds", "blast_radius", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            drive = rec.get("drive")
+            if not isinstance(drive, list) or len(drive) < 5:
+                problems.append("drive must list the ordered calls from Submit to the package (at least 5)")
+            print("drive calls: %s" % (len(drive) if isinstance(drive, list) else drive))
+    elif check == "y277-revert":
+        rec = load(root, D23 % "98" + "KIMI_SWAP_REVERT.json", problems)
+        base = "6bca581cd1"
+        restored = ("intake/resolution_kimi.py", "intake/tests/test_resolution_kimi.py", "ycharts/generate/kimi_port.py", "intake/upload_suggestions.py", "ycharts/generate/resident_worker.py")
+        removed = ("intake/tests/test_swap_from_search.py", "ycharts/generate/tests/test_kimi_search_port.py", "ycharts/generate/kimi_search_qa.py",
+                   "ycharts/generate/tests/test_kimi_search_qa.py", "ycharts/generate/tests/test_swap_suggestions.py")
+        for f in restored:
+            got = subprocess.run(["git", "-C", str(root), "diff", "--quiet", base, "--", IR + "/" + f], capture_output=True)
+            if got.returncode != 0:
+                problems.append("%s is not equal to its content at %s" % (f, base))
+        for f in removed:
+            if (root / IR / f).exists():
+                problems.append("%s still exists" % f)
+        if rec:
+            for member in ("restored", "removed", "guard", "tests", "commit", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+        rc, passed, failed = pytest(root, "tests", INTAKE)
+        print("intake tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+        if rc != 0 or failed or passed != 370:
+            problems.append("the intake suite must read 370 passed (got %d)" % passed)
+    elif check == "y278-read":
+        rec = load(root, D23 % "99" + "C_SWAP_STEPS_1_2_READ.json", problems)
+        if rec:
+            for member in ("door", "estate", "design", "cells", "measurement", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if not (rec.get("door") or {}).get("where_ticker_not_found_is_made"):
+                problems.append("door.where_ticker_not_found_is_made must name file:line")
+            if not rec.get("cells"):
+                problems.append("cells must list the cells the design splits into")
     return finish(check, problems)
 
 

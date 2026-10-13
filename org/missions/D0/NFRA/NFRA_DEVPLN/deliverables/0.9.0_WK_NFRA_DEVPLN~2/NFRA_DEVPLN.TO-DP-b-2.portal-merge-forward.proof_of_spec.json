@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_DEVPLN.TO-DP-b-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-b-2.portal-merge-forward.md",
+    "group": "OTHER",
+    "vintage_commit": "38ac43222d"
+  },
+  "assignee": "0.9.0_WK_NFRA_DEVPLN~2",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round1.md",
+    "vintage_commit": "38ac43222d",
+    "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-b-2.portal-merge-forward.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; none was run. The self-test's 18 checks exercise every refusal branch and both merge paths against fixture repositories.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: every self-test check builds its own mktemp repositories, a fixture reader and a temporary runtmp directory, and removes them on exit",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the real approval reader, python .tools/open-calls.py approval-status, which is absent at 38ac43222d",
+      "reason": "the TO says another cell builds the reader at the same time; every check feeds the reader through OPAL_APPROVAL_STATUS_CMD; surprise NFRA_DEVPLN-W2-S1"
+    },
+    {
+      "item": "any push to the real portal origin and any change to the real portal DEV",
+      "reason": "the TO forbids it; the --push path is exercised only against a temporary bare origin, and AC2 refuses before any worktree is made"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/portal-merge-forward.sh",
+      "kind": "script",
+      "commit_or_etag": "9e0bdb058d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "worker-branch commit wk-NFRA_DEVPLN-2 only; nothing pushed, nothing run against the real portal origin",
+      "artifact_covered_by": [
+        "DPb2-AC1",
+        "DPb2-AC2",
+        "DPb2-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DPb2-AC1",
+      "criterion_verbatim": "bash .tools/portal-merge-forward.sh --selftest -- expect: ok=True (every case passing)",
+      "method": "command",
+      "invocation": "bash .tools/portal-merge-forward.sh --selftest",
+      "output_evidence": "SELFTEST PASS 1a APPROVED valid=yes merges (MERGED line, DEV unchanged)\nSELFTEST PASS 1b merge commit has two parents, first is dev_before, second is the branch tip\nSELFTEST PASS 1c merge commit carries both trailers\nSELFTEST PASS 2 OPEN refuses not-approved, DEV unchanged\nSELFTEST PASS 3 DECLINED refuses declined, DEV unchanged\nSELFTEST PASS 4 valid=no refuses approver-not-valid, DEV unchanged\nSELFTEST PASS 5 stale head refuses stale-head, DEV unchanged\nSELFTEST PASS 6a non-zero status exit refuses status-unreadable, DEV unchanged\nSELFTEST PASS 6b state=UNREADABLE refuses status-unreadable, DEV unchanged\nSELFTEST PASS 7 ABSENT with a product file refuses no-approval-row, DEV unchanged\nSELFTEST PASS 8a ABSENT with only test files merges (MERGED line, DEV unchanged)\nSELFTEST PASS 8b merge carries Approved-By: test-only @- and parents are dev_before and the tip\nSELFTEST PASS 9a conflicting branch refuses conflict, DEV unchanged\nSELFTEST PASS 9b no worktree and no runtmp entry left behind\nSELFTEST PASS 10a --push result MERGED pushed=yes with dev_before the old DEV\nSELFTEST PASS 10b origin DEV is now a merge of old DEV and the tip\nSELFTEST PASS 11a non-fast-forward push reports REFUSED push-rejected pushed=no\nSELFTEST PASS 11b origin DEV untouched by the rejected push\nMERGE-FORWARD-SELFTEST cases=18/18 ok=True\nrc=0",
+      "denominator": "18 of 18 self-test checks pass (rc 0), run under timeout 120 (completed inside the bound); the checks run against temporary bare origin and clone repositories and a fixture approval reader, and the temporary directory was removed",
+      "status": "PASS",
+      "expect": "ok=True"
+    },
+    {
+      "criterion_id": "DPb2-AC2",
+      "criterion_verbatim": "bash .tools/portal-merge-forward.sh cand/laptop/none-9 --repo portal -- expect: MERGE-FORWARD branch=cand/laptop/none-9 result=REFUSED reason=branch-not-found",
+      "method": "command",
+      "invocation": "bash .tools/portal-merge-forward.sh cand/laptop/none-9 --repo portal",
+      "output_evidence": "MERGE-FORWARD branch=cand/laptop/none-9 result=REFUSED reason=branch-not-found dev_before=- dev_after=- pushed=no\nrc=1",
+      "denominator": "1 of 1 invocation refused with branch-not-found, run under timeout 120 (completed inside the bound); the refusal came before any status call, DEV read or worktree creation; .runtmp/ absent afterwards and the real repo lists 9 worktrees after the run",
+      "status": "PASS",
+      "expect": "MERGE-FORWARD branch=cand/laptop/none-9 result=REFUSED reason=branch-not-found"
+    },
+    {
+      "criterion_id": "DPb2-AC3",
+      "criterion_verbatim": "grep -c -E \"git[^#|]*(rebase|--force|--force-with-lease| -f )\" .tools/portal-merge-forward.sh -- expect: ^0$",
+      "method": "command",
+      "invocation": "grep -c -E \"git[^#|]*(rebase|--force|--force-with-lease| -f )\" .tools/portal-merge-forward.sh",
+      "output_evidence": "grep -c -E pattern over .tools/portal-merge-forward.sh (433 lines) printed:\n0\nrc=1 (grep no-match exit, not an error; a line-level grep -n of the same pattern printed no line)",
+      "denominator": "0 matching lines of 433 lines in .tools/portal-merge-forward.sh, run under timeout 120 (completed inside the bound). The grep has no comment exclusion, so the header comment was worded to carry none of the pattern words (surprise NFRA_DEVPLN-W2-S3)",
+      "status": "PASS",
+      "expect": "^0$"
+    }
+  ],
+  "surprises": [
+    "NFRA_DEVPLN-W2-S1: the approval reader the script consumes (python .tools/open-calls.py approval-status) is absent at 38ac43222d, so a default-path run refuses status-unreadable until the sibling cell lands",
+    "NFRA_DEVPLN-W2-S2: the script runs no git fetch; branch and DEV refs are read as they stand, and a stale origin/DEV is caught only at the push as push-rejected",
+    "NFRA_DEVPLN-W2-S3: the AC3 grep has no comment exclusion, so its 'comments excepted' clause cannot hold for a comment that names git with rebase or a force option",
+    "NFRA_DEVPLN-W2-S4: the TO's status flip edits the task order file, which is not in this order's write grant; the status is left pending for the issuer or the gate"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~2/NFRA_DEVPLN.TO-DP-b-2.portal-merge-forward.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash",
+      "invocation": "bash .tools/portal-merge-forward.sh --selftest",
+      "result": "MERGE-FORWARD-SELFTEST cases=18/18 ok=True"
+    },
+    {
+      "tool": "bash",
+      "invocation": "bash .tools/portal-merge-forward.sh cand/laptop/none-9 --repo portal",
+      "result": "MERGE-FORWARD branch=cand/laptop/none-9 result=REFUSED reason=branch-not-found dev_before=- dev_after=- pushed=no"
+    }
+  ]
+}
