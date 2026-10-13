@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_DEVPLN.TO-DP-b-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-b-3.chosen-set-release.md",
+    "group": "OTHER",
+    "vintage_commit": "01c718ffe3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round1.md",
+    "vintage_commit": "01c718ffe3",
+    "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-b-3.chosen-set-release.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_DEVPLN~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/portal-release-build.sh",
+      "kind": "script",
+      "commit_or_etag": "5893d0e056",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_DEVPLN-3 (LOCAL); the selftest runs only in mktemp repositories; the real-portal run exercised the branch-not-found refusal only, so no worktree, branch or push was made",
+      "artifact_covered_by": ["DPb3-AC1", "DPb3-AC2"]
+    },
+    {
+      "path_or_key": ".claude/skills/prod-deploy/SKILL.md",
+      "kind": "doc",
+      "commit_or_etag": "5893d0e056",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_DEVPLN-3 (LOCAL); the skill text was not run as a promote in this order",
+      "artifact_covered_by": ["DPb3-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DPb3-AC1",
+      "criterion_verbatim": "bash .tools/portal-release-build.sh --selftest -- expect: ok=True -- the full self-test above, every case passing.",
+      "method": "test_suite",
+      "invocation": "bash .tools/portal-release-build.sh --selftest",
+      "output_evidence": "CASE 1 two-approved-release-unapproved-0 ok=True; CASE 2 one-open-refuses-whole-release-no-branch ok=True; CASE 3 stale-head-refuses ok=True; CASE 4 valid-no-row-refuses ok=True; CASE 5 commits-differ-row-refuses ok=True; CASE 6 feature-cut-from-DEV-refuses-commits-differ ok=True; CASE 7 declined-refuses ok=True; CASE 8 unreadable-reader-refuses ok=True; CASE 9 check-plain-untrailered-commit-refuses ok=True; CASE 10 unapproved-DEV-change-not-on-release ok=True; last line: RELEASE-SELFTEST cases=10/10 ok=True; rc=0",
+      "denominator": "10 of 10 cases pass",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DPb3-AC2",
+      "criterion_verbatim": "bash .tools/portal-release-build.sh --features cand/laptop/none-9 --repo portal -- expect: RELEASE result=REFUSED reason=branch-not-found -- against the REAL portal repo: a branch that does not exist refuses the release before any worktree exists.",
+      "method": "command",
+      "invocation": "bash .tools/portal-release-build.sh --features cand/laptop/none-9 --repo portal",
+      "output_evidence": "REFUSE branch=cand/laptop/none-9 reason=branch-not-found; RELEASE result=REFUSED reason=branch-not-found branch=- base=- head=-; rc=1; before and after the run the real portal repo held 10 worktrees, 0 release/ branches and no .runtmp directory",
+      "denominator": "1 of 1 nonexistent branch refused before any worktree or release branch exists",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DPb3-AC3",
+      "criterion_verbatim": "grep -h -c -F \"merge --no-ff origin/DEV\" .claude/skills/prod-*/SKILL.md -- expect: ^0$ -- the skill no longer merges live DEV whole.",
+      "method": "command",
+      "invocation": "grep -h -c -F \"merge --no-ff origin/DEV\" .claude/skills/prod-*/SKILL.md",
+      "output_evidence": "run from the worktree root: the grep printed 0 and exited rc=1 (grep exits 1 on a zero count, so rc=1 is the zero reading, not a failure). The one matched file is .claude/skills/prod-deploy/SKILL.md; its Step 4 now reads git merge --ff-only \"$RELEASE_BRANCH\" and git diff \"$RELEASE_BRANCH\" HEAD, and the live-DEV merge line is gone",
+      "denominator": "1 of 1 matched prod-*/SKILL.md file carries the live-DEV merge; count 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: the order names no mutant control; the selftest's negative cases (OPEN, stale head, valid=no, commits-differ, DEV-cut, plain untrailered commit) are acceptance cases, not a named mutant",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the AC1 selftest run twice at the same commit 5893d0e056 with the same invocation, and the last lines compared",
+      "observed": "both runs: RELEASE-SELFTEST cases=10/10 ok=True, rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "flip of the task order <status> from pending to complete",
+      "reason": "the TO file is not in this order's <paths> grant; the flip is left for the issuer 2.0.0_SA_COO~DV (surprise row NFRA_DEVPLN-W3-S5)"
+    },
+    {
+      "item": "the real approval-status reader (open-calls.py approval-status)",
+      "reason": "built by another cell of this round; at this commit open-calls.py has no approval-status subcommand, so the selftest uses OPAL_APPROVAL_STATUS_CMD with a fixture that prints the pinned line; the real seam is probed at the drain (decomposition act A4)"
+    },
+    {
+      "item": "a live release of real approved feature branches through /prod-deploy, and any push",
+      "reason": "the order forbids pushes and any change to the real portal DEV, PROD or main tree; AC2 is the only real-portal run and it refuses before creating anything"
+    },
+    {
+      "item": "the Windows long-path fallback for removing the ephemeral worktree",
+      "reason": "the trap removes the worktree with git worktree remove and falls back to removing the path; the fallback was not exercised on this host, where every selftest worktree was removed by git"
+    }
+  ],
+  "surprises": [
+    "NFRA_DEVPLN-W3-S1: the cell names two Step 0 freeze bullets that merge live origin/DEV at GO time; only one bullet carries that text, and only that one was changed",
+    "NFRA_DEVPLN-W3-S2: the builder refuses on setup and argument errors (bad-args, no-workspace, no-repo, prod-ref-missing, worktree-failed, no-runtmp) that the pinned reason-token list does not name",
+    "NFRA_DEVPLN-W3-S3: the cell keeps Steps 5-8 unchanged but asks for a receipt edit, and the receipt is the Step 8 table; one row was added there and nothing else in Step 8 changed",
+    "NFRA_DEVPLN-W3-S4: .claude/skills/prod-deploy/SKILL.md carried 189 non-ASCII bytes at HEAD against the cell's no-non-ASCII rule; the edit added none and did not remove the existing bytes",
+    "NFRA_DEVPLN-W3-S5: the order asks for its own <status> flip, but the TO file is not in the <paths> grant, so the flip is left for the issuer"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~3/NFRA_DEVPLN.TO-DP-b-3.chosen-set-release.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash -n syntax check (commit-gate)",
+      "invocation": "bash -n .tools/portal-release-build.sh",
+      "result": "OK: bash -n syntax-checked .tools/portal-release-build.sh (safe-commit 5893d0e056)"
+    }
+  ]
+}
