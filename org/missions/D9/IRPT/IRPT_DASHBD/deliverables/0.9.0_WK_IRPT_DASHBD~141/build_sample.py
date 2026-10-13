@@ -722,9 +722,13 @@ def build_values(members, accounts, TR, TA, H, wdefs, R, reader, naming, tc, act
                  "summary and the investor-reporting directory out of scope)")
     rd = R.isoformat()
 
-    lot_r, _d1 = gold_rows(reader, naming, sibling_tables[LOT_R_CONTRACT], ["account_id", "business_date", "cost_basis",
-                                                                           "proceeds", "realized_gain", "holding_term"],
-                           accounts)
+    # the realized lots are partitioned by closing date, so the year-to-date and last-12-months folds read EVERY partition
+    lot_r, lot_r_dates = gold_rows(reader, naming, sibling_tables[LOT_R_CONTRACT],
+                                   ["account_id", "business_date", "cost_basis", "proceeds", "realized_gain",
+                                    "holding_term"], accounts, every=True)
+    ytd_lots_open = bool(lot_r_dates) and lot_r_dates[0] <= wdefs["ytd"]["anchor"]
+    l12_lots_open = bool(lot_r_dates) and lot_r_dates[0] <= wdefs["last_12_months"]["anchor"]
+    lot_hist = hist_reason(sibling_tables[LOT_R_CONTRACT], len(lot_r_dates))
     lot_u, _d2 = gold_rows(reader, naming, sibling_tables[LOT_U_CONTRACT], ["account_id", "business_date", "cost_basis",
                                                                            "unrealized_gain"], accounts)
     cls, cls_dates = gold_rows(reader, naming, sibling_tables[CLS_CONTRACT],
@@ -800,10 +804,16 @@ def build_values(members, accounts, TR, TA, H, wdefs, R, reader, naming, tc, act
             out[mid] = allocation_at(accounts, cls_by, act_by_acct, R)
             continue
         if parts[0] == "trgl":
-            out[mid] = per_account(lambda a, k=parts[1]: trgl_value(k, lot_r_by.get(a, []), R))
+            if not ytd_lots_open:
+                out[mid] = per_account(lambda a: Absent(lot_hist))
+            else:
+                out[mid] = per_account(lambda a, k=parts[1]: trgl_value(k, lot_r_by.get(a, []), R))
             continue
         if parts[0] == "glr":
-            out[mid] = per_account(lambda a, k=parts[1]: glr_value(k, a, lot_r_by, lot_u_by, act_by_acct, R))
+            if parts[1] == "total_realized_gl" and not l12_lots_open:
+                out[mid] = per_account(lambda a: Absent(lot_hist))
+            else:
+                out[mid] = per_account(lambda a, k=parts[1]: glr_value(k, a, lot_r_by, lot_u_by, act_by_acct, R))
             continue
         if mid == "overview.chart.allocation_by_asset_class":
             out[mid] = class_series(cls_days_l12, accounts, cls_by) if cls_open else Absent(cls_hist)
