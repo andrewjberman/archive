@@ -1,0 +1,71 @@
+{
+  "cell": "AR-y-263",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-263",
+  "server_reads": {
+    "optional": "true at infra/aws/lambda/ticket_center/lambda_function.py:110 ({\"name\": \"advisory_fee\", \"kind\": \"number\", \"required\": False, \"default\": None}); _answer_required (:678-686) returns False for it; _validate_answers (:689-735) skips an absent or blank value at :701-704 and admits it.",
+    "default_when_absent": "No value. The key is omitted from the stored answers: _validate_answers builds `out` only from the answers present (:697-735), the \"default\": None at :110 is declared metadata that no code reads (the only \"default\" readers are the test assertions at test_analysis_request.py:144), and create_ticket (:1145-1190) fills no default. No fee is computed, stored or invented.",
+    "anything_requires_it": "No. _answer_required (:678-686) never requires advisory_fee. A ticket created without it is admitted: infra/aws/lambda/ticket_center/tests/test_analysis_request.py:161 creates one with advisory_fee=None and :152 asserts the stored answer when present. A present fee is validated (non-negative finite number, not a bool, :716-719; refusals at test_analysis_request.py:199-200). infra/aws/lambda/investor-reporting/ycharts/generate/submission.py has no advisory_fee reference (grep at workspace commit 56c8113a00), and no file under infra/aws/lambda reads a ticket's advisory_fee outside ticket_center (grep, 8 files, all inf-pipeline Orion converters or ticket_center)."
+  },
+  "dev_tip": "4d6010234ed2eb1d0a1c1782b4bf782b7e019993",
+  "dev_tip_note": "origin/DEV read by git fetch and git rev-parse at each step: f6ef1d2548 at the first fetch and at worktree creation; c1d367231c then 4d6010234e while the candidate was cut. The branch was fast-forwarded (merge --ff-only) onto 4d6010234e before the commit; the candidate's files had no overlap with the two landings. Surprise row IRPT_ANLREQ-D2-W88-S2.",
+  "branch": "wk-IRPT_ANLREQ-88-portal (portal repository, local worktree C:/dev/wk-portal-88; not pushed, not landed)",
+  "commit": "9ef6a359b80750cff51e18369d68035f73a046af",
+  "files_changed": [
+    "src/pages/TicketCenter/AnalysisRequestParts.tsx",
+    "src/pages/TicketCenter/analysisRequest.ts",
+    "src/pages/TicketCenter/__tests__/analysis-form-no-fee.test.tsx",
+    "src/pages/TicketCenter/__tests__/analysis-request.test.tsx",
+    "src/pages/TicketCenter/__tests__/analysis-request-repost.test.tsx",
+    "src/pages/TicketCenter/__tests__/analysis-form-i1.test.tsx",
+    "src/pages/TicketCenter/__tests__/analysis-form-i1-record.test.tsx"
+  ],
+  "edits": {
+    "removed_from_form": "AnalysisRequestParts.tsx: the advisory_fee member of AnalysisFormState (:31), its EMPTY_ANALYSIS_FORM initial value (:38), the fee trim and the advisory_fee answer in answersFromForm (:47, :54), and the Advisory fee input with its placeholder (:127-130). The Needed by input and the Add commentary checkbox are unchanged.",
+    "removed_from_validation": "analysisRequest.ts answersRefusal: the advisory_fee branch (:73). Nothing else in src/ reads it.",
+    "kept": "src/api/endpoints/tickets.ts:43 advisory_fee?: number on AnalysisRequestAnswers. Kept because the ticket service still defines the field as optional (server_reads) and an earlier ticket may carry a stored fee, so the type describes the wire shape the portal receives. No src/ file displays it (see not_read and the claim).",
+    "test_fixtures_dropped_field_only": [
+      "analysis-request.test.tsx:63 answers fixture: advisory_fee: 0.85 removed",
+      "analysis-request-repost.test.tsx:28 answers fixture: advisory_fee: 0.85 removed",
+      "analysis-form-i1-record.test.tsx:24 answers fixture: advisory_fee: 0.85 removed",
+      "analysis-form-i1.test.tsx:72 baseAnswers fixture: advisory_fee: 0.85 removed",
+      "analysis-form-i1.test.tsx:136 answersFromForm input: advisory_fee: '0.85' removed (the form state no longer has the member)"
+    ],
+    "no_assertion_changed": "No assertion in any neighbour test was edited; grep of the four neighbour files shows no assertion on advisory_fee."
+  },
+  "tests": {
+    "folder": "src/pages/TicketCenter/__tests__ (16 files)",
+    "added": 2,
+    "added_file": "src/pages/TicketCenter/__tests__/analysis-form-no-fee.test.tsx: (a) the form renders no Advisory fee label, input or placeholder; (b) the answers built by the form carry no advisory_fee member whatever was typed before",
+    "passed": 74,
+    "failed": 0,
+    "expect_calls": 615,
+    "command": "bun test src/pages/TicketCenter (cwd C:/dev/wk-portal-88)",
+    "second_run": "identical: 74 pass, 0 fail (determinism)",
+    "typecheck": "bun run typecheck (tsc -b --noEmit) rc=0; a deliberate-error probe file in src/ gave rc=2 and was removed",
+    "dsgn_irptv1_folder": "src/pages/InvestorReporting/__tests__/dsgn-irptv1: 371 pass, 10 fail, 2 errors WITH this change; 371 pass, 10 fail, 2 errors on origin/DEV 4d6010234e WITHOUT it (known, pre-existing, unchanged by this candidate)"
+  },
+  "before_arm": {
+    "base": "origin/DEV 4d6010234ed2 in detached worktree C:/dev/wk-portal-88-base with the new test file copied in and no src/ change",
+    "command": "bun test src/pages/TicketCenter/__tests__/analysis-form-no-fee.test.tsx",
+    "result": "0 pass, 2 fail: (a) the markup contains the Advisory fee input and placeholder; (b) 'advisory_fee' is a member of the answers",
+    "failed": 2,
+    "passed": 0
+  },
+  "what_a_person_sees": {
+    "rendered": "The Analysis Request form on the TicketCenter page (inside the page's chart band). The first row is Advisor, Firm and Household. Then the comparables block: the Opal model checkboxes and Other ETFs. The next row holds the Needed by date input and the Add commentary checkbox; the Advisory fee input and its placeholder 'Advisory fee (blank = the standard default)' are no longer rendered anywhere on the form. A submit creates the ticket with the answers the person typed and no advisory_fee.",
+    "not_rendered": "A screenshot was NOT taken (no /frontend-dev headless render in this order); the words above are read from the rendered static markup in the test (AnalysisRequestFields via renderToStaticMarkup, the markup printed in the failing before-arm run)."
+  },
+  "design_clauses": {
+    "C3": "The form stays on the chart band (AnalysisRequestParts.tsx header comment: Panel variant chart); the candidate adds no colour, no light-on-light idiom and no new surface. The remaining controls keep their existing classes.",
+    "C5.8": "No opacity is introduced; the removed input carried the same FIELD class as the others.",
+    "C10": "The row that held the fee keeps its sm:grid-cols-3 template and its gap; the two remaining items sit in the first two columns, the third column is empty. No spacing value is changed."
+  },
+  "claim": "Candidate 9ef6a359b8 on the local branch wk-IRPT_ANLREQ-88-portal (not pushed, not landed) removes the Advisory fee from the Analysis Request form and from the answers the form sends. The ticket service keeps advisory_fee optional, computes no default and requires nothing; a ticket created without a fee is admitted. Tests (a) and (b) fail on origin/DEV 4d6010234ed2 and pass with the change; the TicketCenter folder is 74 of 74; typecheck rc=0; dsgn-irptv1 is unchanged at 371 pass, 10 fail, 2 errors both ways. Test (c) (an existing ticket's stored fee rendered on the board) is NOT written because no board renders a ticket's answers on this tip: surprise IRPT_ANLREQ-D2-W88-S1.",
+  "not_read": [
+    "The live DEV and PROD bundles and any rendered screenshot of the form.",
+    "The full portal test suite: only the TicketCenter folder and the dsgn-irptv1 folder were run.",
+    "The ticket service's read and list routes beyond the create path (lambda_function.py:1145-1190); the GET path was not read for fee handling.",
+    "Every portal component outside src/pages/TicketCenter (grep of portal src/ for advisory_fee only: tickets.ts:43, analysisRequest.ts:73, the tests, and unrelated advisory-fee copy in InvestorReporting and AdvisorIntelligence, none of which reads a ticket's answers).",
+    "Git state changed only in the two worktrees this seat created: C:/dev/wk-portal-88 (branch wk-IRPT_ANLREQ-88-portal, fast-forwarded and committed) and C:/dev/wk-portal-88-base (detached, the before-arm run; not committed). The shared portal checkout was not checked out, reset or committed. A git stash attempt was refused by a shared-worktree hook and did not run. The portal typecheck law was followed (bun run typecheck, not bare tsc)."
+  ]
+}
