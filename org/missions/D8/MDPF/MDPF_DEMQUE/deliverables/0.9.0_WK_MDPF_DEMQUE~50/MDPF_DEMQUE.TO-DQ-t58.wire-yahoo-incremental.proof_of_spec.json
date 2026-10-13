@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t58",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "genre": "BUILD",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t58.wire-yahoo-incremental.md",
+    "group": "OTHER",
+    "vintage_commit": "502c991c40"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "502c991c40",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t58.wire-yahoo-incremental.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~50",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/daily_draw.py",
+      "kind": "script",
+      "commit_or_etag": "0b279b80bc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "run(): a name the store holds (_stored_state, _incremental_plan) is fetched over one window request (ia.request_window, or from the first missing trading day for a gap pull) through fetch_for and _yf_window; on_incremental applies incremental_append.apply_incremental, then append_tr (TR_COLS), then the relock check on the appended window (lock.check when a trade falls in the window; appended_without_relock otherwise), then price_store.write_incremental; a refill_split, a failed relock, an unbuildable TR or a refused write HOLDS the name (hold: receipt held_restatement, the name's files untouched). The receipt is out['incremental'] = {appended, appended_without_relock, held_restatement, keys_written}. A name the store does not hold takes the unchanged full path. The frontier is the last closed session (_closed_frontier, before 21:00 UTC the prior day) when today is not passed. No S3 write, no queue, ledger or pacer write by this module's new code.",
+      "artifact_covered_by": [
+        "DQ9-t58-AC1",
+        "DQ9-t58-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/price_store.py",
+      "kind": "script",
+      "commit_or_etag": "0b279b80bc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "write_incremental(root, cusip, appended, lock_row): appends the new prices and dividends and extends lock.json; never writes splits.parquet; refuses (written False, reason) on a stored schema mismatch, a row not dated after the stored max, a gained split, a lock differing in any field but valid_to, a backwards valid_to, or a stored row that would change on re-read. index() reads the names in a 16-thread pool with the same rows and order (_index_row); measured 50.5 s sequential to 4.0 s.",
+      "artifact_covered_by": [
+        "DQ9-t58-AC1",
+        "DQ9-t58-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/incremental_append.py",
+      "kind": "script",
+      "commit_or_etag": "0b279b80bc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "append_tr(stored, window, act, symbol, bbg): tr_column.build over the stored max row plus the new rows (the stored max's close as the prior close), cut to the new dates; the stored splits and the stored plus window dividends are its inputs. TR_COLS constant. apply_incremental itself is unchanged.",
+      "artifact_covered_by": [
+        "DQ9-t58-AC1",
+        "DQ9-t58-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/incremental_equal.py",
+      "kind": "script",
+      "commit_or_etag": "0b279b80bc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--tr compares the TR columns (cash, total_return, tr_source, flags) of the appended rows with tr_column.build over the FULL history (_compare_tr, _tr_rows); --spot N --tr prints {equal, of, tr_cells}; --piece I/K runs one chunk of the stratified sample (_piece_of); the split arm (_split_arm) drives daily_draw.run over a local scratch store with a stub window fetch and requires the held decision, refilled false and the four files byte-identical. The shared pacer is never touched; the scratch pacer is .scratch/incremental_equal_pacer.json.",
+      "artifact_covered_by": [
+        "DQ9-t58-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_incremental_wiring.py",
+      "kind": "test",
+      "commit_or_etag": "0b279b80bc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the four named tests PASS: '4 passed in 2.11s' (dq_t58_tests.py WIRE-OK). Local store directory, stub window fetch, stub Bloomberg frame, no network, no S3, no real store.",
+      "artifact_covered_by": [
+        "DQ9-t58-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "0b279b80bc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four rows appended at the end of the array: MDPF_DEMQUE-D1-W50-S1 to S4. Existing rows unchanged.",
+      "artifact_covered_by": [
+        "DQ9-t58-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t58-AC1",
+      "criterion_verbatim": "DQ9-t58-AC1: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_tests.py -> WIRE-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_tests.py",
+      "output_evidence": "test_a_stored_name_takes_the_five_day_window_and_appends_only_new_rows_with_tr_columns_and_an_extended_lock PASSED; test_a_gained_split_or_a_restated_overlap_bar_is_held_restatement_and_the_name_keeps_its_files PASSED; test_a_gap_beyond_five_days_pulls_from_the_stored_max_and_appends_only PASSED; test_the_receipt_lists_names_appended_without_a_relock_and_a_failed_lock_check_makes_the_name_held PASSED; '4 passed in 2.11s'; verbatim last line: WIRE-OK; rc=0",
+      "denominator": "4 of 4 named tests PASSED by name; 4 of 4 tests in test_demque_incremental_wiring.py PASSED",
+      "status": "PASS",
+      "expect": "WIRE-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t58-AC2",
+      "criterion_verbatim": "DQ9-t58-AC2: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_equal.py -> WIREEQ-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_equal.py",
+      "output_evidence": "no_split n=50 equal=50 mismatches=0 | split n=1 held=True unchanged=True | cells={'dividends': 5441, 'prices': 571352, 'splits': 50, 'tr': 924} http=56 | spot: {\"equal\": 5, \"of\": 5, \"tr_cells\": 88} | verbatim last line: WIREEQ-OK 50 symbols equal on a no-split day including 924 TR cells; 1 gained-split name(s) HELD, files unchanged; http 56; rc=0",
+      "denominator": "50 of 50 no-split names equal, INCLUDING 924 TR cells (cash, total_return, tr_source, flags); split arm 1 of 1 held with files unchanged and refilled false; live spot 5 of 5 equal with 88 TR cells; http_requests 56 <= 120",
+      "status": "PASS",
+      "expect": "WIREEQ-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "two mutants, each patched in-process by a scratch pytest plugin (.scratch/mutants.py, selected by env MUTANT; no file edit) and run against test_demque_incremental_wiring.py. (1) no_tr: ia.append_tr returns total_return null on every appended row. (2) no_relock: lock.check returns LOCKED on every name.",
+      "expected": "each mutant fails at least one named test",
+      "observed": "(1) no_tr: 3 failed, 1 passed (test_a_stored_name_takes_the_five_day_window_and_appends_only_new_rows_with_tr_columns_and_an_extended_lock, test_a_gap_beyond_five_days_pulls_from_the_stored_max_and_appends_only, test_the_receipt_lists_names_appended_without_a_relock_and_a_failed_lock_check_makes_the_name_held). (2) no_relock: 1 failed, 3 passed (test_the_receipt_lists_names_appended_without_a_relock_and_a_failed_lock_check_makes_the_name_held).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of .scratch/stub_night.py (stub night, no network), outputs byte-compared with cmp",
+      "status": "STABLE",
+      "expected": "two identical runs",
+      "observed": "identical (cmp rc=0; 2 lines each: the window requests and the incremental receipt)"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any S3 write, the real store, the queue, the ledger, the actuals, the shared pacer (~/.opal/demque/pacer.json), any AWS write, any deploy, any timer; daily_draw.py against the real store or --s3; extend_frontier.py --apply; standing_drawer.py --apply",
+      "reason": "order BOUNDS. Every proof run wrote only .scratch/ (the scratch pacer, the local split-arm store and queue) and the deliverables report. The served index and the stored Bloomberg TR were READ ONLY (incremental_equal.py: ps.index, ps._Store.get, tr_compare.load_bloomberg)."
+    },
+    {
+      "item": "Yahoo symbol requests: 96 spent in total, all attempts (the spot check of the live run included)",
+      "reason": "order BOUNDS: at most 120 in the whole order. Breakdown: 75 before the final piece 1/5 (12 + 11 + 11 superseded piece-1 attempts while the split arm was corrected, 40 for pieces 2/5 to 5/5, 1 one-name window check), 11 for the final piece 1/5, 5 for the live spot check in the AC2 run, and 5 for the re-run of AC2 on the final code. The merged report counts 51 symbol requests and 56 HTTP requests."
+    },
+    {
+      "item": "the 50-name proof run as --n 50 --tr --piece I/K for I = 1..5, not as --n 10 pieces",
+      "reason": "the stratified sampler is cut for n=50 (batch_equality._select, QUOTA = 50); --n 10 cannot run. The 50 names are one selection, sliced into five chunks; the merge asserts 50 distinct cusips and equality with the current selection. Recorded as surprise MDPF_DEMQUE-D1-W50-S1."
+    },
+    {
+      "item": "the split arm",
+      "reason": "re-stated for the wired behaviour, as the AC2 check requires: the name is driven through daily_draw.run over a local pre-split store and must HOLD (refilled false, four files byte-identical). The earlier split arm refilled the name with a second full pull; that is not the wired behaviour and is not counted."
+    },
+    {
+      "item": "the merge of box/dell1; the surprise-channel rows of other workers; portal (modified in the worktree before this order began, not staged)",
+      "reason": "order: do NOT merge box/dell1 (blocked by a foreign row). The portal gitlink was already modified in the worktree before this order; it is not part of this order."
+    },
+    {
+      "item": "Bloomberg: no Bloomberg pull; the stored Bloomberg TR is read from S3 by tr_compare.load_bloomberg (read only), as the nightly draw reads it",
+      "reason": "order BOUNDS: no queue or vendor Bloomberg call. The proof's --tr reads the same stored history that daily_draw reads each night."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W50-S1: the order's proof call 'incremental_equal.py --n 10 --tr' cannot select 10 names (the stratified sampler is cut for n=50); the 50-name proof ran as five --piece chunks of one selection (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W50-S2: two names whose served lock reads LOCKED (claim held) get REJECTED:LOW_TRADE_AGREEMENT from a fresh lock.check on today's trades (LCEYX, FTHSX); the append carries the served lock and extends valid_to; neither has a trade in its appended window (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~Q1)",
+    "MDPF_DEMQUE-D1-W50-S3: at 22:21Z on 2026-10-13 Yahoo held no 2026-10-13 bar for the sampled mutual funds (ACTSX last bar 2026-10-12); 19 of 50 names appended 4 rows where the window has 5 trading days; both paths agree (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W50-S4: price_store.index read 326 names sequentially (50.5 s), too slow for the 100-second subprocess limit on the live spot run; index() now reads them in a thread pool, same rows and order (4.0 s) (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~50/INCREMENTAL_WIRED_EQUALITY_REPORT.json",
+  "compiler_tools": [
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_tests.py",
+      "invocation": "from the worktree root",
+      "result": "WIRE-OK; 4 passed; rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t58_equal.py",
+      "invocation": "from the worktree root",
+      "result": "WIREEQ-OK; no_split 50 of 50 equal, mismatches 0, tr cells 924; split arm held, files unchanged; spot 5 of 5 with 88 TR cells; http 56; rc=0"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "from the worktree root",
+      "result": "202 passed (198 existing, unchanged, plus the 4 new); rc=0 (0 failed)"
+    },
+    {
+      "tool": "python data/mdpf/scripts/demque/incremental_equal.py --n 50 --tr --piece I/5 --out .scratch/parts/partI.json (I = 1..5), merged by .scratch/merge_report.py",
+      "invocation": "from the worktree root, one piece per command",
+      "result": "five parts, each 10 of 10 equal with TR cells (160, 164, 200, 200, 200); merged to the report at session_log: 50 of 50 equal; selection verified equal to the current stratified selection (.scratch/verify_selection.py)"
+    },
+    {
+      "tool": "bash .tools/commit-gate.sh (five changed .py files)",
+      "invocation": "from the worktree root",
+      "result": "pre-commit gate clean for 5 of 5 file(s); rc=0"
+    },
+    {
+      "tool": "python .scratch/stub_night.py (stub night: one window append, one gained-split hold; no network)",
+      "invocation": "from the worktree root",
+      "result": "window requests [[\"AAA\", \"2026-10-07\", \"2026-10-13\"], [\"BBB\", \"2026-10-07\", \"2026-10-13\"]]; incremental: {\"appended\": [\"100000011\"], \"appended_without_relock\": [\"100000011\"], \"held_restatement\": [{\"cusip\": \"100000022\", \"reason\": \"refill_split: gained_split (split 2026-10-09 ratio 2.0)\"}], \"keys_written\": [\"cusip=100000011/prices.parquet\", \"cusip=100000011/dividends.parquet\", \"cusip=100000011/lock.json\"]}"
+    }
+  ]
+}
