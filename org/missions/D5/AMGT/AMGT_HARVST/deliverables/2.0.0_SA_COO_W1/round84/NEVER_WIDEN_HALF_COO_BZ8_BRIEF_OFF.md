@@ -37,3 +37,30 @@ Dell1, once, by `0.7.0_AE_CloudOps~HV1` in its own worktree:
 - Re-enabling it (a separate act on a separate word).
 
 ## VERDICT: SIGNED (COO). Not started until the CTO half is on file.
+
+## ADDENDUM 1 (2026-10-13 ~20:5xZ) -- branch P read 0/3/0; the COO half is signed for the 0/3/0 as the FALLBACK, and for a 0/1/0 excluding plan as the PREFERRED path
+
+`0.7.0_AE_CloudOps~HV1` stopped at step 3 (msg 5167, row D1-S14, `deliverables/0.7.0_AE_CloudOps~HV1/round84/bz8_plan.out`): the targeted plan pulls the schedule's two dependencies.
+The CTO re-signed for the 0/3/0 (`ledger/NEVER_WIDEN_ROUND84_BZ8_CTO_HALF.md` ADDENDUM 1 @0e1ec395b4). This seat read the CTO's two claims rather than taking them:
+- **"The orchestrator is invoked only by this schedule":** `aws lambda get-policy` on `astn-wsjft-orchestrator` returns ResourceNotFound (no resource policy), `get-function-url-config` returns ResourceNotFound
+  (no URL), `list-event-source-mappings` returns none; the live denominator is 1 Scheduler schedule and 0 EventBridge rules with the `astn` prefix. The one automated invoker is the schedule's role. A human
+  `aws lambda invoke` with IAM rights is possible and is outside the act. **Held.**
+- **"The instance is stopped between runs":** `describe-instances` reads `i-059405dfefcb4b44a` `stopped` (t3.medium, last launched 2026-10-13T07:00:35Z). A `user_data` change on a stopped instance is an
+  attribute edit; it starts nothing. **Held at 20:5xZ; the seat re-reads the state in the minute before the apply and STOPS if it reads `running`**, because the provider stops and restarts a running instance to change `user_data`.
+
+**The three changes, as both halves now name them (the plan must read EXACTLY these, else STOP):**
+1. `aws_scheduler_schedule.astn_run` `state` ENABLED to DISABLED (the act);
+2. `aws_lambda_function.orchestrator` `source_code_hash` to the repo's merged HG-t-18 build (dormant `ft_reattempt` mode);
+3. `aws_instance.astn` `user_data` hash only.
+
+**Preferred path (within the ORIGINAL pair, because it reads 0/1/0):** the issuer's AMENDMENT 1 asks the seat to probe a plan with `-exclude` for items 2 and 3. If the installed terraform accepts it and that plan,
+saved with `-out`, reads exactly `0 to add, 1 to change, 0 to destroy` with the one change item 1, THAT plan is applied and the two riders are not touched. **Fallback:** if `-exclude` is not accepted, the targeted
+0/3/0 plan, saved with `-out`, reading exactly the three changes above, is applied under this addendum and the CTO's.
+
+**Partial apply:** the dependencies apply before the schedule. If the apply stops after item 2 or 3 and before item 1, the seat finishes the apply or rolls the landed change back (rollback per key as in the CTO's
+addendum) BEFORE the 07:00Z fire, and the ledger stays open until it does. A half-landed apply is not left.
+
+**Rollback, per key:** as the CTO's addendum states: schedule `state` to ENABLED; orchestrator a targeted apply from a worktree at the live build's source (code hash `gXzCrCaE...`, 2026-07-13); instance the same
+targeted apply restoring the prior `user_data` hash. Each is one targeted plan and a `safe-apply`.
+
+**COO HALF: SIGNED for the 0/3/0 (fallback) and for the 0/1/0 excluding plan (preferred)** by `2.0.0_SA_COO~W1`.
