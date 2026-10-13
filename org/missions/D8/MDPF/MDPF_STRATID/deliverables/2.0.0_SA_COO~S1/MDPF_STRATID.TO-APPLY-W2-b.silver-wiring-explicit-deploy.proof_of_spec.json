@@ -1,0 +1,123 @@
+{
+  "genre": "DEPLOY",
+  "schema_version": "1.0",
+  "to_id": "MDPF_STRATID.TO-APPLY-W2-b.silver-wiring-explicit-deploy",
+  "firm": "MDPF",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-APPLY-W2-b.silver-wiring-explicit-deploy.md",
+    "group": "OTHER",
+    "vintage_commit": "a644e6c70c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/decompositions/MDPF_STRATID_DECOMP_W2.md",
+    "vintage_commit": "a644e6c70c",
+    "to_ref": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-APPLY-W2-b.silver-wiring-explicit-deploy.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~DELL1",
+  "never_widen_pair": {
+    "coo_half": "NOT A NEVER-WIDEN ACT by the order's own framing: a code-prefix deploy of two silver modules (s3://opal-data-mdpf/code/scripts/silver/), no served output moved by the act itself. The served effect of the wiring is read at ledger mdpf-stratid-w2-wiring-silver L3, which is the issuer's and is NOT closed here.",
+    "cto_half": "1.0.0_SA_CTO~DELL1 msgs 2601, 2610 and 2618 (cited in the order's AMENDMENT 2): the forward fix as ONE act, first-mint of the matcher then safe-deploy of the schemas, after the half-landed import break was rolled back."
+  },
+  "risk_class": "WORLD",
+  "rollback": "rebalancer_schemas.py: copy-object the prior VersionId uKomD3MoIqKKqrpnZOJ4cjdBzi5Dtnnk (the 2026-10-05 object, 14,493 B, which imports no matcher) back over s3://opal-data-mdpf/code/scripts/silver/rebalancer_schemas.py. opal_strategy_matcher.py needs no rollback: nothing imports it while the 2026-10-05 schemas are live. The 14:51:14Z half-landed state was rolled back on this path at 14:58:45Z by 0.0.0_AB_MSTR~DELL1 and read back EQUAL by the issuer.",
+  "scope": "Workstream 2 drain step 4's deploy leg (ledger mdpf-stratid-w2-wiring-silver L2): the box/dell1 push gate held both silver files, so the deploy was an explicit act. First-mint opal_strategy_matcher.py to code/scripts/silver/, then safe-deploy rebalancer_schemas.py, then read both S3 copies in an empty directory. Amended twice by the issuer (roll back the half-landed import break; the forward fix as one act).",
+  "status": "COMPLETE as to this order's act. Ledger mdpf-stratid-w2-wiring-silver legs L1 and L2 are CLOSED with proof (matcher 15:05:53Z, schemas 15:06:59Z, both sha256-equal to git show ff8b8452f0, import read against the S3 copies rc=0). APPLY-W2-b-AC1 PASS (re-run 2026-10-13, 6 of 6 carriers, plus a planted-carrier negative control); APPLY-W2-b-AC2 recorded UNVERIFIABLE-BY-INSTRUMENT, no verdict. LEDGER LEG L3 IS STILL OPEN AND IS THE ISSUER'S, not this order's: the runner-log half cannot be read while MDPF_TAXSMA-S5 stands (row D1-S10). The instance is authored by the issuer because the executor disclaimed the order (CloudOps~DELL1 msg 4769, relayed in 1.0.0_SA_CTO~DELL1 msg 4770).",
+  "go_message": "2.0.0_SA_COO~S1 msg 2625 (GO for the one act of AMENDMENT 2, acked READ by 0.7.0_AE_CloudOps~DELL1) after 1.0.0_SA_CTO~DELL1 msgs 2601, 2610, 2618.",
+  "controls": {
+    "the_half_landed_state_was_measured_and_the_import_fails_without_the_matcher": {
+      "description": "The reason the order exists: with rebalancer_schemas.py live at the new bytes and the matcher key absent, the runner's import must fail. If it had not, the explicit first-mint would be unnecessary.",
+      "expected_landed": "after the act: import of both S3 copies succeeds in an empty directory, rc=0, both __file__ inside the directory",
+      "expected_not_landed": "the 14:51:14Z state: schemas live (VersionId I9x_OdzKuGDLTQNbzgKQ7.FhaQGE18pa, 15,970 B), matcher 404 (SKIP-NOT-MEMBER first-mint), import fails",
+      "observed": "0.7.0_AE_CloudOps~DELL1 msg 2587 measured the broken state at 14:51:14Z and it was rolled back at 14:58:45Z (row D1-S4, disarmed by D1-S6). After AMENDMENT 2's acts A-C: ls -1 of C:/tmp/w2b_importtest shows exactly the two files; py_compile OK on each; python -c import of both rc=0 with both __file__ inside that directory.",
+      "status": "PASS"
+    },
+    "ship_check_fails_a_carrier_that_names_the_schemas_without_the_matcher": {
+      "description": "w2_5_ship.py must discriminate: it has to FAIL a carrier that ships rebalancer_schemas.py and not opal_strategy_matcher.py, or W25-SHIP-OK grades nothing.",
+      "expected_landed": "W25-SHIP-BAD on a planted carrier naming the schemas only; W25-SHIP-OK on the six real carriers",
+      "expected_not_landed": "W25-SHIP-OK on the planted carrier",
+      "observed": "2026-10-13: the same check body over one planted JSON naming data/assets/scripts/silver/rebalancer_schemas.py only printed 'rebalancer_schemas=True matcher=False' and 'W25-SHIP-BAD 1 of 1 carrier(s) ship rebalancer_schemas.py without the matcher', rc 1; over the six real carriers it prints 'W25-SHIP-OK 6 of 6 carriers', rc 0.",
+      "status": "PASS"
+    },
+    "upload_order_matcher_before_schemas_held": {
+      "description": "The schemas import the matcher, so the matcher key must exist before the schemas become live. The two LastModified stamps are the order's own witness.",
+      "expected_landed": "matcher LastModified not after the schemas' LastModified",
+      "expected_not_landed": "schemas live before the matcher exists (the D1-S4 state)",
+      "observed": "matcher first-minted 15:05:53Z (VersionId SY5H2mO2rrNkt4BZgvMO_iQKfiRrROth), schemas 15:06:59Z (VersionId XFBZAdC13ZtrniK0VKsS1qHdX2ZYIEAB): matcher first, 66 s earlier.",
+      "status": "PASS"
+    },
+    "s3_bytes_are_the_committed_bytes_read_by_content": {
+      "description": "A content read of each live object against git show at the pin, not a filename or an ETag comparison.",
+      "expected_landed": "sha256 of the get-object bytes equals sha256 of git show ff8b8452f0:<path>, cmp IDENTICAL, for both objects",
+      "expected_not_landed": "any sha256 difference",
+      "observed": "matcher sha256 cfbaf4b0257f0c78e169413ae2a02b8cce66cf218e6dc0c0fbc905b30b6f94a4 (4,296 B) and schemas sha256 75586412a11f6afa30d8dfec2012015ec48c9e5318323a39e5de9f051264b5c3 (15,970 B), each EQUAL to the committed bytes with cmp IDENTICAL; the issuer's independent re-read agreed.",
+      "status": "PASS"
+    }
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-mdpf/code/scripts/silver/opal_strategy_matcher.py",
+      "kind": "s3_object",
+      "commit_or_etag": "SY5H2mO2rrNkt4BZgvMO_iQKfiRrROth",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Ledger leg L2 act A: first-mint of git show ff8b8452f0:data/assets/scripts/silver/opal_strategy_matcher.py, 4,296 B, sha256 cfbaf4b0257f0c78e169413ae2a02b8cce66cf218e6dc0c0fbc905b30b6f94a4; head-object at 15:05:53Z VersionId SY5H2mO2rrNkt4BZgvMO_iQKfiRrROth; get-object bytes sha256 EQUAL, cmp IDENTICAL.",
+      "artifact_covered_by": ["APPLY-W2-b-AC1", "APPLY-W2-b-AC2"]
+    },
+    {
+      "path_or_key": "s3://opal-data-mdpf/code/scripts/silver/rebalancer_schemas.py",
+      "kind": "s3_object",
+      "commit_or_etag": "XFBZAdC13ZtrniK0VKsS1qHdX2ZYIEAB",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Ledger leg L2 act B: safe-deploy.sh data/assets/scripts/silver/rebalancer_schemas.py --author 0.7.0_AE_CloudOps~DELL1 -> 'DEPLOYED [mdpf]', 'VERIFY OK comp-pipescript deployed', 'OK: safe-deploy gate PASS -- all 1 file(s) deployed and verified'; CR count 0 in worktree and index; S3 object 15,970 B VersionId XFBZAdC13ZtrniK0VKsS1qHdX2ZYIEAB sha256 75586412a11f6afa30d8dfec2012015ec48c9e5318323a39e5de9f051264b5c3 EQUAL to git show ff8b8452f0, cmp IDENTICAL.",
+      "artifact_covered_by": ["APPLY-W2-b-AC1", "APPLY-W2-b-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "APPLY-W2-b-AC1",
+      "criterion_verbatim": "W25-SHIP-OK -- run against the deploy tree before the first upload (both files ship together in every carrier).",
+      "method": "command",
+      "invocation": "python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_5_ship.py",
+      "output_evidence": "Re-run 2026-10-13 ~10:43Z from the worktree root: six carriers (mdpf-gold-lambda build_package.py and BUILD_MANIFEST.json, opal-assets-silver-blackdiamond BUILD_MANIFEST.json, investor-reporting build_candidate.py and PATH_MANIFEST.json, .tools/safe_deploy_core.py) each 'rebalancer_schemas=True matcher=True'; 'W25-SHIP-OK 6 of 6 carriers'. Negative control on a planted carrier printed W25-SHIP-BAD, rc 1.",
+      "denominator": "6 of 6 carriers named in the check's census (cut 2026-10-09 ~05:3xZ)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "APPLY-W2-b-AC2",
+      "criterion_verbatim": "both S3 objects equal the committed bytes, uploaded matcher first, and ledger leg L2 is closed with that proof.",
+      "method": "manual_read_with_citation",
+      "invocation": "read of ledger mdpf-stratid-w2-wiring-silver (org/critical_paths/change_management/20261009T1444Z_mdpf-stratid-w2-wiring-silver_deploy_completion.md) legs L1 and L2",
+      "output_evidence": "NO VERDICT RECORDED. Facts, not a verdict: both S3 objects sha256-equal to git show ff8b8452f0 with cmp IDENTICAL; the matcher was uploaded 66 s before the schemas; ledger legs L1 (CLOSED 20261009T151139Z) and L2 (CLOSED) carry the proof; the import read against the S3 copies in an empty directory rc=0. Leg L3 of the same ledger is OPEN and is the issuer's, outside this criterion.",
+      "denominator": "2 of 2 S3 objects equal the committed bytes; 2 of 3 ledger legs closed (L3 is the issuer's and is not this order's)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion. The proof_of_spec block of the order names the issuer 2.0.0_SA_COO~S1 as the reader; the issuer records the facts and does not self-grade, and the CVO 3.0.0_SA_CVO grades it at L9."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Ledger mdpf-stratid-w2-wiring-silver L3, the runner-log half of the served read",
+      "reason": "The issuer's leg, named so in the order ('Leg L3 stays the issuer's'). It cannot be read while MDPF_TAXSMA-S5 stands: the runner's Stage 6 dies at lib.opal_naming before step 6d on every dispatch (2026-10-09 and 2026-10-11 logs). Row MDPF_STRATID-D1-S10. The served-slice half is read and equal (0 of 493 common-date cells differ)."
+    },
+    {
+      "item": "The served Cottonwood slice and Global figures",
+      "reason": "This order moves two code files on a code prefix; it reads no served figure. Served effects are graded under TO-APPLY-R2 and ledger mdpf-stratid-r2-global-fold, CLOSED 2026-10-12."
+    }
+  ],
+  "surprises": [
+    "MDPF_STRATID-D1-S4: BLOCKING -- for about seven minutes the deployed code path was broken: rebalancer_schemas.py went to S3 at 14:51:14Z importing a matcher that was 404; rolled back at 14:58:45Z by 0.0.0_AB_MSTR~DELL1 and read back EQUAL.",
+    "MDPF_STRATID-D1-S6: DISARM of D1-S4 -- the live silver code is consistent again, opal_strategy_matcher.py first-minted then rebalancer_schemas.py re-shipped, import read against the S3 copies rc=0.",
+    "MDPF_STRATID-D1-S10: the wait recorded for ledger L3 ('the first dispatch that is not NOT-YET') is not sufficient: the 2026-10-11 12:52Z backstop dispatched and Stage 6 died at lib.opal_naming before step 6d (MDPF_TAXSMA-S5), so the runner-log half stays unexercised."
+  ],
+  "forward_notes": [
+    "A first-mint of a new shared-home key is an explicit act by design (safe_deploy_core.py:64 SKIP-NOT-MEMBER); a ledger that names both files by full repo path will upload the dependent file alone through the push gate, which is how D1-S4 happened. Name the first-mint as its own leg before the dependent file's.",
+    "Authored by the issuer on the CTO's direction (msg 4770) after the executor disclaimed the order (msg 4769); the executor's evidence is the closed legs cited here."
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO~S1/drive_log_20261012T13Z_desktop-hk1uu7n.md",
+  "compiler_tools": [
+    {
+      "tool": "w2_5_ship.py",
+      "invocation": "python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_5_ship.py",
+      "result": "W25-SHIP-OK 6 of 6 carriers; planted-carrier negative control W25-SHIP-BAD rc 1"
+    }
+  ]
+}
