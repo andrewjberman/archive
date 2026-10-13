@@ -1,0 +1,108 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_COTBKF.TO-CB-cb-2",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cb-2.fund-closes-read-back.md",
+  "group": "OTHER",
+  "vintage_commit": "156563e290"
+ },
+ "assignee": "0.9.0_WK_ADVI_COTBKF~156",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round80.md",
+  "vintage_commit": "156563e290",
+  "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-cb-2.fund-closes-read-back.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~156/FUND_CLOSES_READ_BACK.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only record; nothing re-priced, re-minted, served or written to S3; remote reads were one index get, fifteen prefix listings and 21 object gets, all read-only through .tools/aws",
+   "artifact_covered_by": [
+    "CB80cb2-AC1",
+    "CB80cb2-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~156/FUND_CLOSES_READ_BACK.csv",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only per-fund table: 15 rows, CUSIPs only in the column named cusip; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB80cb2-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~156/FUND_CLOSES_READ_BACK.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only note; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "CB80cb2-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CB80cb2-AC1",
+   "criterion_verbatim": "every held trading day of the 15 funds is present or absent in dell1's column (sum equals held_trading_days); the funds with trades are classed by the round-76 test. The issuer reads the counts the CTO asked for.",
+   "method": "command",
+   "invocation": "python -c \"import json;d=json.load(open('org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~156/FUND_CLOSES_READ_BACK.json',encoding='utf-8'));print('FUND-CLOSES-READ-BACK funds=%d listed=%d funds_in_store=%d held_trading_days=%d present=%d absent=%d sum=%d funds_with_trades=%d pass=%d fail=%d too_few=%d funds_that_split=%d split_arm=%s'%(d['funds'],len(d['by_fund']),d['funds_in_store'],d['held_trading_days'],d['present'],d['absent'],d['present']+d['absent'],d['funds_with_trades'],d['pass'],d['fail'],d['too_few'],d['funds_that_split'],str(d['split_arm'])[:70]))\"",
+   "expect": "FUND-CLOSES-READ-BACK funds=15 listed=15",
+   "output_evidence": "FUND-CLOSES-READ-BACK funds=15 listed=15 funds_in_store=7 held_trading_days=20718 present=5730 absent=14988 sum=20718 funds_with_trades=15 pass=4 fail=0 too_few=1 funds_that_split=0 split_arm=Funds with a split inside the back-fill: 0 of 15. The split-undone pro (rc 0)",
+   "denominator": "15 funds; 20718 held trading days (sum 20718 = present 5730 + absent 14988); 15 by_fund rows; 7 funds in store, 8 not landed; 15 funds with trades on the round-76 basis; dell1 classes: 4 passes, 0 fails, 1 too_few, 2 no_trade_row, 8 not_landed (15)",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "CB80cb2-AC2",
+   "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the test is round 76's, unchanged; presence is counted against the held trading days with the denominator; the split arm is worded as ruled (dell1's word alone where no fund split, never 'passed'); nothing was re-priced or re-minted.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "read FUND_CLOSES_READ_BACK.json (test, by_fund, split_arm, not_established) and FUND_CLOSES_READ_BACK.md; the round-76 rule is quoted in the record as test, with its source FUNDS_BY_TRADES.json rule.text",
+   "output_evidence": "test quoted from FUNDS_BY_TRADES.json rule.text (written 2026-10-11T23:07:58Z); the positive control reproduces round 76 on all 15 funds (0 mismatches); presence counted over 20718 held trading days with missing ranges per fund; split arm worded as 'rests on dell1's word alone', not passed; nothing re-priced, re-minted, served or written",
+   "denominator": "15 funds; 20718 held trading days; 10065 held trading days in the 7 landed objects; 4324 read units on dell1's column",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "PENDING-ADJUDICATION: judgment criterion, graded by 3.0.0_SA_CVO at L9 and never self-graded; recorded, not passed"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "none named",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON",
+   "status_reason": "the order names no determinism control"
+  },
+  "mutant": {
+   "description": "the task order names no mutant control",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "ADVI_COTBKF-D2-W156-S1",
+  "ADVI_COTBKF-D2-W156-S2",
+  "ADVI_COTBKF-D2-W156-S3",
+  "ADVI_COTBKF-D2-W156-S4",
+  "ADVI_COTBKF-D2-W156-S5"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~156/ADVI_COTBKF.TO-CB-cb-2.fund-closes-read-back.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -c (CB80cb2-AC1)",
+   "result": "FUND-CLOSES-READ-BACK funds=15 listed=15 funds_in_store=7 held_trading_days=20718 present=5730 absent=14988 sum=20718 funds_with_trades=15 pass=4 fail=0 too_few=1 funds_that_split=0"
+  },
+  {
+   "tool": "python -I (scratch positive control, round-76 instrument on round-76 population, not committed)",
+   "invocation": "python -I .scratch/cb2_test.py r76",
+   "result": "POSITIVE CONTROL mismatches: 0 of 15 (per-fund read units, decisive, failing, unresolved, distinct days and class match FUNDS_BY_TRADES.json named)"
+  }
+ ]
+}
