@@ -1,0 +1,115 @@
+{
+  "order": "IRPT_ANLREQ.TO-AR-y-246",
+  "cell": "AR-y-246",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~79",
+  "base_commit": "85f43d3456",
+  "status": "PARTIAL -- the gate is read and the record is written; the harness file and its tests were NOT written (outside the grant, IRPT_ANLREQ-D2-W79-S1); no live call was made",
+  "gate": {
+    "source": "infra/aws/lambda/investor-reporting/intake/resolution_kimi.py at base 85f43d3456 (read in the worktree)",
+    "model": "kimi-k3 (MODEL, resolution_kimi.py:20)",
+    "capability_shape": {
+      "rule": "KimiAdvisory.call('swap') returns failure KIMI_WEB_SEARCH_UNVERIFIED with no telemetry and no send unless search_capability is a dict with model == 'kimi-k3', verified is True, a truthy qa_receipt_sha256, and a non-empty request_fields dict whose keys are a subset of {tools, tool_choice} (resolution_kimi.py:159-166)",
+      "tests": "intake/tests/test_resolution_kimi.py:70-85 (no capability refused, then a capability admitted) and :96-97 (a capability fixture)",
+      "copied_into_request": "payload.update(copy of request_fields) only after the gate passes (resolution_kimi.py:166)"
+    },
+    "what_swap_parses": {
+      "keys_exact": ["identified_asset", "security_type", "asset_class", "sub_asset_class", "region", "capitalization", "credit", "duration", "sources", "candidates", "reason"],
+      "strings": "the eight attribute fields are a string or null, at most 300 characters each; identified_asset is one of them (resolution_kimi.py:113-116)",
+      "sources": "array of 0 to 10 HTTPS URLs (no credentials, a hostname, at most 2048 characters) (:117-118, _url :32-36)",
+      "candidates": "array of at most 3 objects with exactly {symbol, reason, sources}; reason 1 to 2000 characters; sources 1 to 10 HTTPS URLs; symbol passes validate_symbols and is unique (:119, :124-136)",
+      "reason": "string of 1 to 2000 characters (:99-101)",
+      "cross_field": "a non-empty candidates list needs an identified_asset and a non-empty sources list, else KIMI_EVIDENCE_MISSING (:121-122); a candidate symbol in excluded_symbols gives KIMI_REJECTED_CANDIDATE (:198-199)",
+      "finish": "finish_reason must be 'stop'; 'length' gives KIMI_LENGTH_STARVED; any other value gives KIMI_FINISH_UNSUPPORTED (:71-74)",
+      "response_limit": "the text is at most 256 KiB (MAX_RESPONSE, :23, :79-80)"
+    },
+    "budgets": {
+      "check": {"max_tokens": 16000, "timeout_seconds": 120},
+      "swap": {"max_tokens": 32000, "timeout_seconds": 240},
+      "source": "resolution_kimi.py:21-22"
+    },
+    "transport": {
+      "file": "infra/aws/lambda/investor-reporting/ycharts/generate/kimi_port.py",
+      "function": "kimi_send(read_secret, url=KIMI_URL, opener=urllib.request.urlopen) returns send(payload, timeout_seconds): one HTTPS JSON POST per call to the Moonshot chat-completions URL, Bearer key held in memory after one read, returns the decoded JSON; it does not loop on tool_calls and does not add request fields itself",
+      "failure_mapping": "HTTP error -> KIMI_HTTP with status; timeout -> TimeoutError; connection error -> KIMI_CONNECTION_RESET; body over 1 MiB -> KIMI_RESPONSE_LIMIT; undecodable -> KIMI_MALFORMED (kimi_port.py:39-53)",
+      "telemetry": "journal_telemetry prints closed fields only (kind, attempt, state, outcome, elapsed_seconds, prompt_chars, max_tokens, timeout_seconds) and the total token count; never the prompt, the answer or a key (kimi_port.py:57-62)"
+    },
+    "secret_id_name_only": {
+      "name": "astn/kimi/api-key (KIMI_SECRET_ID, kimi_port.py:19)",
+      "read_by": "secret_reader(client) calls client.get_secret_value(SecretId=<name>) (kimi_port.py:65-69); resident_session.py:137 passes self.secrets_client",
+      "value_recorded": false
+    },
+    "call_site": {
+      "resident_session": "ycharts/session/resident_session.py:133-137 kimi_advisory() builds KimiAdvisory(send=kimi_send(secret_reader(self.secrets_client)), telemetry=journal_telemetry); it passes NO search_capability, so swap is refused in production",
+      "resident_worker": "ycharts/generate/resident_worker.py:753-772 _check_gate: makes the advisory, passes advisory.call and advisory.clock to suggest_for for the check kind; no swap call"
+    }
+  },
+  "harness": {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/generate/kimi_search_qa.py",
+    "sha256": null,
+    "cases": [],
+    "status": "NOT WRITTEN -- the path is outside the order's grant (<paths> names only the investigations file); BLOCKING IRPT_ANLREQ-D2-W79-S1",
+    "planned_cases_not_built": [
+      "symbol a web search should identify (an ETF or fund with a public ticker)",
+      "TIMXX (the gated fund named in the order)",
+      "a nonsense symbol that must return an empty candidates array",
+      "an ETF that exists",
+      "two symbol-shaped prompt-injection strings (free text with spaces never reaches send; see IRPT_ANLREQ-D2-W79-S3)"
+    ],
+    "planned_design_gap": "KimiAdvisory.call has no tool-result loop, and _parse requires finish_reason stop, so a single request_fields candidate cannot pass the live QA on the measured models (IRPT_ANLREQ-D2-W79-S2)",
+    "verified_flag_rule": "when the harness exists, verified True must be set only inside the QA run and said so in a comment and in the QA record"
+  },
+  "tests": {
+    "added": false,
+    "passed": 0,
+    "failed": 0,
+    "before_arm": "ycharts/generate/tests/test_kimi_search_qa.py does not exist and is outside the grant, so no test of the harness ran",
+    "folders": {
+      "intake/tests": {
+        "command": "cd infra/aws/lambda/investor-reporting && python -m pytest intake/tests -q -p no:cacheprovider",
+        "result": "365 passed, 1 skipped, 25 subtests passed, rc=0",
+        "floor": "365 -- met (baseline, no change by this worker)"
+      },
+      "ycharts/generate/tests": {
+        "command": "cd infra/aws/lambda/investor-reporting && python -m pytest ycharts/generate/tests -q -p no:cacheprovider",
+        "result": "540 passed, 30 skipped, 1 xfailed, 68 subtests passed, 4 failed, rc=1, 118.68 s",
+        "failed_tests": "test_custody_entry.py (2) and test_custody_retained.py (2 parametrized cases); baseline at base 85f43d3456, no change by this worker; recorded as IRPT_ANLREQ-D2-W79-S4",
+        "collection": "the folder collected in full here; the fitz collection limit from the release-20 records did not apply in this worktree"
+      }
+    }
+  },
+  "live_qa": {
+    "status": "DESIGNED, NOT RUN -- no live call was made in this order",
+    "command": "NOT DEFINED -- the harness does not exist (IRPT_ANLREQ-D2-W79-S1). The intended shape once it exists: a Dell CloudOps lane runs the harness entry point with send = kimi_port.kimi_send(kimi_port.secret_reader(<Secrets Manager client>)) and the candidate request_fields, reading the secret by the id astn/kimi/api-key; the key is never printed.",
+    "provider_request_fields": {
+      "tools_entry_in_estate": [{"type": "builtin_function", "function": {"name": "$web_search"}}],
+      "tools_entry_source": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/Y5P2/KIMI_WEB_SEARCH_QA_FINDINGS_20261003.md:5-6 (the QA instrument's request; the estate's only copy)",
+      "tool_choice": "NOT READ -- the estate holds no documented tool_choice value for this search; the live order must look it up in the Moonshot documentation. The tool name is taken from the estate's QA record only; no name is guessed.",
+      "measured_failure_modes": "kimi-k3: tool_calls on send 1, then 400 'tokenization failed' on the tool echo in 3 shapes; kimi-k2.6: tool_calls, then schema-invalid answers or a 500 in JSON mode (findings :20-30, :37-43)"
+    },
+    "cost_bound": {
+      "formula": "cases x attempts x swap max_tokens (BUDGETS['swap'])",
+      "cases": 6,
+      "attempts_per_case": 2,
+      "swap_max_tokens": 32000,
+      "ceiling_completion_tokens_single_send": 384000,
+      "swap_timeout_seconds": 240,
+      "ceiling_wall_seconds_single_send": 2880,
+      "note": "a bounded tool loop multiplies the sends per attempt; its bound is not yet fixed, and the QA instrument of Y5P2 used at most 4 sends per run"
+    },
+    "what_is_sent": "only the symbol (validated by the SYMBOL pattern, security_resolution.py:17), the fixed swap instruction, and the candidate request_fields; no context_symbols, no excluded_symbols, no holdings, no names and no client data (prompt_for, resolution_kimi.py:39-61)",
+    "record_and_receipt_storage": {
+      "qa_record_path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~79/r22/KIMI_QA_LIVE_RECORD.json (proposed; not written)",
+      "receipt": "the qa_receipt_sha256 value, to be carried in the search capability the resident reads; the capability has no production home yet (resident_session.py:137 passes none)",
+      "step_2_reads": "the QA record path above and the receipt value"
+    }
+  },
+  "claim": "The gate's shape, its parse, its transport and its call site are read at base 85f43d3456. No harness, no test and no receipt exist, and no live call was made. The cell's single-request design is refuted on the estate's measured record (IRPT_ANLREQ-D2-W79-S2), and the harness and test paths are outside the grant (IRPT_ANLREQ-D2-W79-S1). AC1 is FAIL on the checker. AC2J is recorded for L9 with no verdict. The order stays pending.",
+  "not_read": [
+    "Moonshot's published tool_choice values (no estate copy holds them; no network read in this order)",
+    "the nine QA receipts KIMI_WEB_SEARCH_QA_RECEIPT_TIMXX_*.json cited by the Y5P2 findings (cited, not opened)",
+    "RULINGS.md batch 218 (cited by the brief at docs/briefs/irpt-check-swap-ai-autosuggest-ux-brief-20261007.md:105, not opened)",
+    "estate_report_runner.call_kimi_sub, named as the source pattern in resolution_kimi.py's docstring (not opened)",
+    "docs/research/investor_reporting_ycharts_auth_20260910 probe files (a captcha probe with no tool shape)",
+    "the cause of the four ycharts/generate custody test failures (out of this order's scope; see IRPT_ANLREQ-D2-W79-S4)"
+  ]
+}
