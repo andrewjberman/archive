@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bj-5.the-research-price-axis-pulls-and-keeps-the-total-return-field-over-five-trading-days",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "57e446ce0b775fb00132ec627932767a0f83afc3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "57e446ce0b775fb00132ec627932767a0f83afc3",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bj-5.the-research-price-axis-pulls-and-keeps-the-total-return-field-over-five-trading-days.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~407",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/price_axis_pull.py",
+      "kind": "script",
+      "commit_or_etag": "6e8f4d013da11c0e873bea980c1f64f0abc16c4b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, ADD-ONLY (61 insertions, 0 deletions): TR_FIELD, TR_WINDOW_TRADING_DAYS, tr_window_start, pull_total_return, run_total_return_leg, and one call to run_total_return_leg in main after the 90/365 step and before the failed-products exit computation. The PX_LAST request, the ranking writes and the exit-code logic are untouched. Runs at site Z under the queue; this worker made no Bloomberg call."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/price_series_persist.py",
+      "kind": "script",
+      "commit_or_etag": "6e8f4d013da11c0e873bea980c1f64f0abc16c4b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, ADD-ONLY (40 insertions, 0 deletions): TABLE_TR, SCHEMA_TR, FIELD_TR, KIND_TR, OBJECT_TR constants, tr_series_doc and persist_tr_series (bronze_put to bloomberg/harvest/bronze/price_history_tot_return/date=<as_of>/daily_5d.json, write-once). The PX_LAST objects, persist_series, load_history and their schema are byte-identical in this diff."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_price_axis_total_return.py",
+      "kind": "test",
+      "commit_or_etag": "6e8f4d013da11c0e873bea980c1f64f0abc16c4b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW, 99 lines, five offline tests (fake client, captured put, no AWS or Bloomberg call). Collected 5 of 5; all five pass with the applied source."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "`9 passed, 1 deselected` (the five new tests and the four existing ones that run off site Z); and exit=0",
+      "method": "test_suite",
+      "invocation": "cd C:/dev/wk-resapp-407 && python -m pytest integrations/bloomberg/research/tests/test_price_axis_total_return.py integrations/bloomberg/research/tests/test_price_axis_pull.py -k \"not loopback_dapi\" -q 2>&1 | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "9 passed, 1 deselected in 2.71s\nexit=0 (run 1, pre-commit tree; run 2 at HEAD 6e8f4d013d identical: 9 passed, 1 deselected in 2.71s; exit=0)",
+      "denominator": "9 passed of 9 selected; 1 deselected of 10 collected (loopback_dapi, needs blpapi, passes only at site Z)",
+      "status": "PASS",
+      "expect": "9 passed, 1 deselected in [0-9.]+s\\s+exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "exactly three lines: `integrations/bloomberg/research/price_axis_pull.py`, `integrations/bloomberg/research/price_series_persist.py`, `integrations/bloomberg/research/tests/test_price_axis_total_return.py`, and no other line",
+      "method": "diff",
+      "invocation": "cd C:/dev/wk-resapp-407 && git diff --name-only \"$(git merge-base HEAD box/dell1)\" HEAD -- . \":(exclude)org\" | sort",
+      "output_evidence": "integrations/bloomberg/research/price_axis_pull.py\nintegrations/bloomberg/research/price_series_persist.py\nintegrations/bloomberg/research/tests/test_price_axis_total_return.py\n(rc=0; merge-base = 57e446ce0b, an ancestor of box/dell1)",
+      "denominator": "3 of 3 expected lines present; 0 extra lines",
+      "status": "PASS",
+      "expect": "integrations/bloomberg/research/price_axis_pull\\.py\\s+integrations/bloomberg/research/price_series_persist\\.py\\s+integrations/bloomberg/research/tests/test_price_axis_total_return\\.py",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No planted discriminator is named in the task order for this cell; the new tests assert the window, the field, the write-once table and the untouched PX_LAST leg directly.",
+      "expected": "N/A: the order names no mutant for AMGT-bj-5.",
+      "observed": "Not run by the worker; no mutant was planted.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs of AC1 (pytest over the two files, -k not loopback_dapi) compared at HEAD 6e8f4d013d",
+      "observed": "both runs: 9 passed, 1 deselected, exit 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "loopback_dapi test in test_price_axis_pull.py",
+      "reason": "Needs blpapi and the loopback DAPI; passes only at site Z. Deselected by the order's own AC1 invocation."
+    },
+    {
+      "item": "The live total-return leg (a Bloomberg pull of about 500 history cells a day, and the persisted object)",
+      "reason": "Out of BOUNDS: no Bloomberg, AWS, network, deploy, store write or schedule by the worker. It runs at site Z under the queue."
+    },
+    {
+      "item": "comp-adversary run of the new test against unpatched modules (the order's preflight: '5 failed' with AttributeError)",
+      "reason": "Not re-run by the worker: the order's bar is the criteria only, with no adversary lens. The five tests were collected (--co) and pass against the applied source."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~407/AMGT_RESAPP.TO-AMGT-bj-5.the-research-price-axis-pulls-and-keeps-the-total-return-field-over-five-trading-days.SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile integrations/bloomberg/research/price_axis_pull.py ; python -m py_compile integrations/bloomberg/research/price_series_persist.py",
+      "result": "COMPILE-OK (rc=0 for both)"
+    },
+    {
+      "tool": "python -m pytest --co",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_price_axis_total_return.py -q -k \"not loopback_dapi\" --co",
+      "result": "5 tests collected in 0.84s"
+    }
+  ]
+}
