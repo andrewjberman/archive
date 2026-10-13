@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-j-9",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-9.slot-drop-log.md",
+    "group": "OTHER",
+    "vintage_commit": "78a9c61182"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~73",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R7.md",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-j-9.slot-drop-log.md",
+    "vintage_commit": "78a9c61182"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/exec-summary-generator/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "2deaa9165ec896a47f42bddd1ff334ab4a9a8de1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "not deployed: the cell changes code only; deploy and the measuring dry run are FB-j-10",
+      "artifact_covered_by": ["AC1", "AC2"],
+      "introduces": ["_log_slot_drop"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/exec-summary-generator/tests/test_slot_drop_log.py",
+      "kind": "script",
+      "commit_or_etag": "2deaa9165ec896a47f42bddd1ff334ab4a9a8de1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test file, stubs only; not part of any deployed artifact",
+      "artifact_covered_by": ["AC1"],
+      "introduces": ["test_model_call_uses_only_sdk_parameters"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (cell FB-j-9): cd /c/dev/wk-firmbkts-73/infra/aws/lambda/exec-summary-generator && timeout 110 python -m pytest tests/test_slot_drop_log.py -q 2>&1 | sed \"s/\\x1b\\[[0-9;]*m//g\" | tail -1 ; expect ^4 passed. AC1 is the four named arms.",
+      "method": "test_suite",
+      "invocation": "cd /c/dev/wk-firmbkts-73/infra/aws/lambda/exec-summary-generator && timeout 110 python -m pytest tests/test_slot_drop_log.py -q 2>&1 | sed \"s/\\x1b\\[[0-9;]*m//g\" | tail -1",
+      "output_evidence": "run 1: '4 passed in 0.49s' rc=0. run 2 (determinism): '4 passed in 0.49s' rc=0. Full log in FB-j-9_session_log.txt.",
+      "denominator": "4 of 4 named arms passed (test_drop_logs_class_and_clipped_message, test_pii_schema_url_classes_are_redacted, test_success_path_unchanged, test_model_call_uses_only_sdk_parameters)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 (cell FB-j-9): cd /c/dev/wk-firmbkts-73 && git diff --stat $(git merge-base HEAD box/dell1) HEAD -- infra/aws/lambda/exec-summary-generator | tail -1 ; expect ^ 2 files changed. AC2 is the two-file bound.",
+      "method": "diff",
+      "invocation": "cd /c/dev/wk-firmbkts-73 && git diff --stat $(git merge-base HEAD box/dell1) HEAD -- infra/aws/lambda/exec-summary-generator | tail -1",
+      "output_evidence": " 2 files changed, 158 insertions(+), 3 deletions(-)  (per file: lambda_function.py 29 +-, tests/test_slot_drop_log.py 132 +)",
+      "denominator": "2 of 2 files changed in infra/aws/lambda/exec-summary-generator between merge-base 78a9c61182 and HEAD 2deaa9165e",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 (cell FB-j-9): cd /c/dev/wk-firmbkts-73 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-73 --allow <lambda_function.py> --allow <test_slot_drop_log.py> --allow <deliverables/0.9.0_WK_ADVI_FIRMBKTS~73/> --allow <INVESTIGATION_v1.md> ; expect ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$ . AC3 is the write-surface bound.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-73 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-73 --allow infra/aws/lambda/exec-summary-generator/lambda_function.py --allow infra/aws/lambda/exec-summary-generator/tests/test_slot_drop_log.py --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~73/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "output_evidence": "  CHANGED infra/aws/lambda/exec-summary-generator/lambda_function.py ; CHANGED infra/aws/lambda/exec-summary-generator/tests/test_slot_drop_log.py ; ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing (rc=0; run before this instance and the session log were written, both inside an --allow surface)",
+      "denominator": "3 changed paths of 3, 0 outside the four --allow surfaces, 0 required missing",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two temporary mutants on lambda_function.py, each reverted and byte-compared (cmp) with the committed copy before the next: (I) the helper call removed from the generic except clause; (II) the betas kwarg restored to the messages.create call.",
+      "expected": "mutant I: test_drop_logs_class_and_clipped_message FAILS; mutant II: test_model_call_uses_only_sdk_parameters FAILS",
+      "observed": "mutant I: '2 failed, 2 passed in 0.68s' (FAILED test_drop_logs_class_and_clipped_message: assert 0 == 1; FAILED test_pii_schema_url_classes_are_redacted). mutant II: '1 failed, 3 passed in 0.70s' (FAILED test_model_call_uses_only_sdk_parameters: assert ['betas'] == []). Both reverted; committed file restored.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 command run twice on the committed tree with no edits between runs",
+      "observed": "run 1 '4 passed in 0.49s' rc=0; run 2 '4 passed in 0.49s' rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy, Terraform, AWS calls and the model call",
+      "reason": "the order's bounds (section 2.1) forbid them: one code commit and one test file; the live dry run is FB-j-10. The tests stub the model call, the metrics and the prompt loaders."
+    },
+    {
+      "item": "non-ASCII handling of the drop message",
+      "reason": "the cell text names non-printable characters only; the helper also replaces non-ASCII with a space under the workspace ASCII law. Filed as ADVI_FIRMBKTS-D1-W73-S1 (OBSERVATION, INERT) for adjudication."
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W73-S1: the drop line replaces non-ASCII message characters with a space as well as non-printable ones; the cell text names non-printable only, so the choice is recorded as an OBSERVATION row."
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~73/FB-j-9_session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest 9.1.1 on Python 3.14.7",
+      "invocation": "python -m pytest tests/test_slot_drop_log.py -q",
+      "result": "4 passed in 0.49s"
+    },
+    {
+      "tool": "anthropic SDK 0.45.0 (installed) signature read",
+      "invocation": "inspect.signature(anthropic.resources.messages.Messages.create)",
+      "result": "17 parameters incl. self; 'betas' not among them; no **kwargs"
+    },
+    {
+      "tool": "r4_scope.py (ROUND 4 write-surface checker)",
+      "invocation": "as AC3",
+      "result": "ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, naming-gate, to-pipeline-gate, surprise-row-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_FIRMBKTS~73 <0.9.0_WK_ADVI_FIRMBKTS~73@opal.agent>\" -F .scratch/msg_fbj9.txt -- <handler> <test>",
+      "result": "commit-gate OK 2 of 2 file(s); to-pipeline OK; surprise-row OK (no rows in that commit)"
+    }
+  ]
+}
