@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -49,3 +49,4 @@ Instance at `org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r21
   </proof_of_spec>
 </task_order>
 # pipeline-override: an APPLY order to a tier-2 applier for the live arm of a drained fix (not a worker cell); the cell AR-y-225 is the issuer's, as for TO-APPLY-R20.
+<!-- ISSUER NOTE 2026-10-13 (2.0.0_SA_COO~Y2): status flipped to complete because the applier ran every step and its proof instance is VALID. R21S-AC1 is recorded FAIL and stays FAIL: the fixed script exited 1 (UPLOAD NOT VERIFIED) on the applier's real run; cause, a shim WARN line on stderr merged into the compared value by 2>&1; the fix is NOT proven. Follow-up cell AR-y-229 (IRPT_ANLREQ_DECOMP_R21F_Y.md); a second live arm follows its drain. -->

@@ -25,7 +25,7 @@ INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r21/"
 ROUND192_VERSION = "irpt-template-reader.r19.2"
 TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-verify": "Y222-VERIFY", "y223-design": "Y223-DESIGN",
-          "y226-effect": "Y226-EFFECT", "y227-resident": "Y227-RESIDENT", "y228-lambda": "Y228-LAMBDA"}
+          "y226-effect": "Y226-EFFECT", "y227-resident": "Y227-RESIDENT", "y228-lambda": "Y228-LAMBDA", "y229-stderr": "Y229-STDERR"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -253,6 +253,22 @@ def main(argv):
             if not (rec.get("release_build") or {}).get("code_sha256_base64"):
                 problems.append("release_build.code_sha256_base64 must carry the expected CodeSha256")
             print("live members %d, release members %d" % (len(lman), len(rman)))
+    elif check == "y229-stderr":
+        script = root / "infra/aws/lambda/ci/build-and-upload.sh"
+        text = script.read_text(encoding="utf-8") if script.is_file() else ""
+        merged = [ln.strip() for ln in text.splitlines() if "head-object" in ln and "2>&1" in ln]
+        merged += [ln.strip() for ln in text.splitlines() if re.search(r"--query\s+'(ContentLength|Metadata\.\"content-sha256\")'.*2>&1", ln)]
+        if merged:
+            problems.append("a head-object value still merges stderr into stdout: %r" % merged[:3])
+        got = subprocess.run(["bash", "infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh"], cwd=str(root),
+                             capture_output=True, text=True, encoding="utf-8", errors="replace")
+        out = (got.stdout or "") + (got.stderr or "")
+        print("verify tests rc=%d" % got.returncode)
+        for arm in ("landed_upload_verifies", "head_object_fails", "stderr_warning_ignored", "mutant"):
+            if not re.search(r"^PASS %s" % arm, out, re.M):
+                problems.append("the test arm %s did not print PASS" % arm)
+        if got.returncode != 0 or "ALL PASS" not in out:
+            problems.append("the verify tests must exit 0 and print ALL PASS")
     return finish(check, problems)
 
 
