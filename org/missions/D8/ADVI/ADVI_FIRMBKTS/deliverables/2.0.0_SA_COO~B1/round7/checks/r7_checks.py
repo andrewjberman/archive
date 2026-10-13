@@ -1,0 +1,225 @@
+"""ADVI_FIRMBKTS round 7 graders, issuer 2.0.0_SA_COO~B1.
+
+  awsdiff --root R --file F [--allow-pattern P]   FB-j-2, FB-j-4: every `aws ` line of F is byte-unchanged between the merge-base of R's
+                    HEAD with the primary checkout and HEAD, EXCEPT lines containing the pattern (default `events put-events`), which may
+                    change; and no changed hunk lies outside the file's `emit_chain_complete` function or the one EVENTS_REGION line.
+  agree2 --a A --b B [--root R]                    FB-j-1: reader 2's answers against reader 1's and the key (per field and all four).
+  emiterr --file F                                 FB-j-3: the measured CLI error record.
+  firstchain --file F                              FB-j-7: the first chain after the fix deploy.
+  dryrun --file F                                  FB-j-6: the deployed dry-run handler's sample record.
+Plain ASCII; exit 0 on a pass. Proves SHAPE and discipline, never that a finding is true.
+"""
+import argparse
+import json
+import re
+import subprocess
+import sys
+
+R6 = "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round6"
+CLAIMS = ("measured", "inferred", "held", "absent")
+FIELDS = ("system", "firm", "tier", "table")
+
+
+def _git(root, *a):
+    r = subprocess.run(["git", "-C", root] + list(a), capture_output=True, text=True, encoding="utf-8", errors="replace")
+    return r.returncode, r.stdout
+
+
+def awsdiff(a):
+    rc, wl = _git(a.root, "worktree", "list", "--porcelain")
+    primary = next((ln.split()[1] for ln in wl.split("\n") if ln.startswith("worktree ")), "")
+    rc, base = _git(a.root, "merge-base", "HEAD", primary and "box/dell1")
+    base = base.strip()
+    if rc or not base:
+        print("AWSDIFF: FAIL no merge-base")
+        return 1
+    rc, old = _git(a.root, "show", "%s:%s" % (base, a.file))
+    rc2, new = _git(a.root, "show", "HEAD:%s" % a.file)
+    if rc or rc2:
+        print("AWSDIFF: FAIL cannot read the file at the base or at HEAD")
+        return 1
+    pat = a.allow_pattern
+
+    def aws_lines(t):
+        return [x.strip() for x in t.split("\n") if re.search(r"^[^#]*\baws ", x) and pat not in x]
+    same = aws_lines(old) == aws_lines(new)
+    # hunks
+    rc, df = _git(a.root, "diff", "-U0", base, "HEAD", "--", a.file)
+    hunks = [(int(m.group(1)), int(m.group(2) or 1)) for m in re.finditer(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@", df, re.M)]
+    lines = new.split("\n")
+    start = next((i + 1 for i, ln in enumerate(lines) if ln.startswith("emit_chain_complete() {")), None)
+    end = next((i + 1 for i in range((start or 1), len(lines)) if lines[i] == "}"), None)
+    ev = [i + 1 for i, ln in enumerate(lines) if re.match(r"^\s*EVENTS_REGION=", ln)]
+    outside = []
+    for s, n in hunks:
+        for ln in range(s, s + max(n, 1)):
+            if n == 0:
+                continue
+            if start and end and start <= ln <= end:
+                continue
+            if ln in ev:
+                continue
+            outside.append(ln)
+    print("  aws lines other than the pattern unchanged: %s; changed hunks %d; changed lines outside the function and the variable: %s"
+          % (same, len(hunks), outside[:8]))
+    ok = same and not outside and bool(hunks)
+    print("AWSDIFF: %s" % ("OK" if ok else "FAIL"))
+    return 0 if ok else 1
+
+
+def _norm(v):
+    return re.sub(r"[^a-z0-9]", "", str(v).lower())
+
+
+def agree2(a):
+    root = a.root or subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
+    key = json.load(open("%s/%s/READING_KEY.json" % (root, R6), encoding="utf-8"))
+    ra = {x["id"]: x for x in json.load(open(a.a, encoding="utf-8"))["answers"]}
+    rb = {x["id"]: x for x in json.load(open(a.b, encoding="utf-8"))["answers"]}
+    ids = sorted(key)
+    print("reader1=%d reader2=%d key=%d" % (len(ra), len(rb), len(key)))
+    line = ["n=%d" % len(ids)]
+    for f in FIELDS:
+        ag = sum(1 for i in ids if _norm(ra[i][f]) == _norm(rb[i][f]) != "unknown")
+        line.append("%s agree %d of %d" % (f, ag, len(ids)))
+    allf = sum(1 for i in ids if all(_norm(ra[i][f]) == _norm(rb[i][f]) != "unknown" for f in FIELDS))
+    eq2 = sum(1 for i in ids if all(_norm(rb[i][f]) == _norm(key[i]["truth"][f]) for f in FIELDS))
+    line.append("all four agree %d of %d" % (allf, len(ids)))
+    line.append("reader 2 equals the key on all four %d of %d" % (eq2, len(ids)))
+    print(" | ".join(line))
+    for i in ids:
+        if not all(_norm(ra[i][f]) == _norm(rb[i][f]) != "unknown" for f in FIELDS):
+            print("  DISAGREE %s class=%s r1=%s r2=%s key=%s" % (
+                i, key[i]["class"], "/".join(ra[i][f] for f in FIELDS), "/".join(rb[i][f] for f in FIELDS),
+                "/".join(key[i]["truth"][f] for f in FIELDS)))
+    return 0
+
+
+def _need(d, keys):
+    out = []
+    for k in keys:
+        cur = d
+        for p in k.split("."):
+            if not isinstance(cur, dict) or p not in cur:
+                out.append("missing %s" % k)
+                break
+            cur = cur[p]
+    return out
+
+
+def emiterr(a):
+    try:
+        d = json.load(open(a.file, encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        print("FAIL ABSENT or unreadable: %s" % type(e).__name__)
+        return 1
+    p = _need(d, ["deployed.key", "deployed.sha256", "deployed.equals_repo", "ledger.entry", "ledger.closed",
+                  "next_chain.label", "next_chain.started_at", "warn_text", "cause_class", "claim", "calls"])
+    if not p:
+        if d["cause_class"] not in ("NO_REGION", "CREDENTIALS", "OTHER_NAMED", "NOT_OBSERVED"):
+            p.append("cause_class not in the closed set")
+        if d["claim"] not in CLAIMS:
+            p.append("claim not one of %s" % "/".join(CLAIMS))
+        if d["deployed"]["equals_repo"] is not True or not re.fullmatch(r"[0-9a-f]{64}", str(d["deployed"]["sha256"])):
+            p.append("the deployed object must equal the repository file (sha256)")
+        if d["ledger"]["closed"] is not True:
+            p.append("the ledger entry is not closed")
+        if d["cause_class"] != "NOT_OBSERVED" and not str(d["warn_text"] or "").strip():
+            p.append("a named cause carries no verbatim warn_text")
+        if len(str(d["warn_text"] or "")) > 300:
+            p.append("warn_text longer than 300 characters")
+        bad = [c for c in d["calls"] if not re.match(r"^(aws|\.tools/aws)\s+[a-z0-9-]+\s+(get|describe|list|lookup|head|filter|cp|s3api put-object)", str(c))]
+        if bad and any(re.search(r"\b(delete|rm|terminate|stop|start|update|invoke|put-events)\b", str(c)) for c in bad):
+            p.append("a call is a write other than the one object copy")
+    if p:
+        for x in p:
+            print("FAIL %s" % x)
+        print("EMITERR: %d problem(s)" % len(p))
+        return 1
+    print("EMITERR record ok cause_class=%s" % d["cause_class"])
+    return 0
+
+
+def firstchain(a):
+    try:
+        d = json.load(open(a.file, encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        print("FAIL ABSENT or unreadable: %s" % type(e).__name__)
+        return 1
+    p = _need(d, ["pair.coo_half", "pair.cto_half", "dry_run_sample.advisors", "dry_run_sample.objects_written",
+                  "dry_run_sample.read_before_deploy", "deploy.ledger_closed", "chain.label", "chain.emitted_line",
+                  "chain.cloudtrail_putevents", "chain.generator_invocations", "keys.regenerated", "keys.ceiling",
+                  "keys.prior_version_ids_recorded", "claim"])
+    if not p:
+        if d["claim"] not in CLAIMS:
+            p.append("claim not one of %s" % "/".join(CLAIMS))
+        if d["dry_run_sample"]["objects_written"] != 0 or d["dry_run_sample"]["read_before_deploy"] is not True:
+            p.append("the dry-run sample must write 0 objects and be read before the deploy")
+        if not (1 <= d["dry_run_sample"]["advisors"] <= 10):
+            p.append("the dry-run sample is 1 to 10 advisors")
+        if d["chain"]["emitted_line"] is not True or d["chain"]["cloudtrail_putevents"] < 1 or d["chain"]["generator_invocations"] < 1:
+            p.append("the first chain must show the emitted line, a CloudTrail PutEvents and a generator invocation")
+        if not (0 <= d["keys"]["regenerated"] <= d["keys"]["ceiling"] <= 158) or d["keys"]["prior_version_ids_recorded"] is not True:
+            p.append("regenerated keys must be within the named ceiling (at most 158) with prior VersionIds recorded")
+        if d["deploy"]["ledger_closed"] is not True:
+            p.append("the ledger entry is not closed")
+    if p:
+        for x in p:
+            print("FAIL %s" % x)
+        print("FIRSTCHAIN: %d problem(s)" % len(p))
+        return 1
+    print("FIRSTCHAIN record ok regenerated=%d invocations=%d" % (d["keys"]["regenerated"], d["chain"]["generator_invocations"]))
+    return 0
+
+
+def dryrun(a):
+    try:
+        d = json.load(open(a.file, encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        print("FAIL ABSENT or unreadable: %s" % type(e).__name__)
+        return 1
+    p = _need(d, ["advisors", "listing_before", "listing_after", "artifacts_returned", "deployed_version", "pair.coo_half",
+                  "pair.cto_half", "ledger_closed", "claim"])
+    if not p:
+        if d["claim"] not in CLAIMS:
+            p.append("claim not one of %s" % "/".join(CLAIMS))
+        if not (1 <= d["advisors"] <= 10):
+            p.append("the sample is 1 to 10 advisors")
+        if d["listing_before"] != d["listing_after"]:
+            p.append("the bucket listing changed across the dry run: it wrote an object")
+        if d["artifacts_returned"] != d["advisors"]:
+            p.append("artifacts returned must equal the advisors asked")
+        if d["ledger_closed"] is not True:
+            p.append("the ledger entry is not closed")
+    if p:
+        for x in p:
+            print("FAIL %s" % x)
+        print("DRYRUN: %d problem(s)" % len(p))
+        return 1
+    print("DRYRUN record ok advisors=%d listing=%s" % (d["advisors"], d["listing_after"]))
+    return 0
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    x = sub.add_parser("awsdiff")
+    x.add_argument("--root", required=True)
+    x.add_argument("--file", required=True)
+    x.add_argument("--allow-pattern", default="events put-events")
+    g = sub.add_parser("agree2")
+    g.add_argument("--a", required=True)
+    g.add_argument("--b", required=True)
+    g.add_argument("--root")
+    e = sub.add_parser("emiterr")
+    e.add_argument("--file", required=True)
+    f = sub.add_parser("firstchain")
+    f.add_argument("--file", required=True)
+    h = sub.add_parser("dryrun")
+    h.add_argument("--file", required=True)
+    a = ap.parse_args()
+    return {"awsdiff": awsdiff, "agree2": agree2, "emiterr": emiterr, "firstchain": firstchain, "dryrun": dryrun}[a.cmd](a)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
