@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t53",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t53.secclass-sync-key-proof.md",
+    "group": "OTHER",
+    "vintage_commit": "41d134244e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "41d134244e",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t53.secclass-sync-key-proof.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~45",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/secclass_sync.py",
+      "kind": "script",
+      "commit_or_etag": "52f6fc19d1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--prove: one JSON line, read only (price_store.index over the live store, request and queue files, the unresolved list, one get_item per candidate up to 60 and one re-read for the negative arm); the printed security is AES (CUSIP 00130H105), equal true. --coverage: one JSON line {checked 131, classified 108, missing_examples 5 CUSIPs}; batch_get_item only, 100 keys a call. Identity key = the SYMBOL string; the CUSIP is DEMQUE's own identity and the symbol is the join. The DynamoDB calls are get_item and batch_get_item on etf-classifications only.",
+      "artifact_covered_by": [
+        "DQ9-t53-AC1",
+        "DQ9-t53-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_secclass_sync.py",
+      "kind": "test",
+      "commit_or_etag": "52f6fc19d1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the three named tests PASSED (stub DynamoDB client, stub frames, no network): 3 passed on the check's run; the stub fails any put, update, delete or scan call by name.",
+      "artifact_covered_by": [
+        "DQ9-t53-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "52f6fc19d1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row MDPF_DEMQUE-D1-W45-S1 appended (OBSERVATION, INERT): the order's fund-type filter reads Asset_Type 'from lock.json's class where present', and no landed lock.json carries a class (0 of 326 read), so the filter takes Asset_Type from the transactions. Existing rows not edited. The box/dell1 merge was not made: the worker bar forbids merges, and this file is byte-identical on this branch and on box/dell1 at this point, so the append is conflict-free.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t53-AC1",
+      "criterion_verbatim": "DQ9-t53-AC1 -- the three named tests. python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t53_tests.py -> SYNC-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t53_tests.py",
+      "output_evidence": "test_demque_secclass_sync.py::test_the_same_security_key_prints_equal_on_the_request_row_the_unresolved_entry_and_the_classification_row PASSED; test_a_security_already_classified_that_enters_through_a_second_request_gets_no_second_row PASSED; test_a_key_that_differs_between_the_three_places_is_reported_unequal_never_equal PASSED; 3 passed in 0.99s. Verbatim last line: SYNC-OK ; rc=0.",
+      "denominator": "3 of 3 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "SYNC-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t53-AC2",
+      "criterion_verbatim": "DQ9-t53-AC2 -- on the REAL index, request files, unresolved list and the live table: one security's key printed equal across the three places, the classification row present in etf-classifications, one row for the key. python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t53_real.py -> SYNC-REAL-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t53_real.py",
+      "output_evidence": "{\"classification_row\": {\"key\": \"AES\", \"present\": true, \"table\": \"etf-classifications\"}, \"equal\": true, \"negative_arm\": {\"classification_rows_for_key\": 1, \"last_updated_unchanged\": true, \"second_request_rows\": 1}, \"request_row\": {\"file\": \"IRPT_BCKEND-AS-TRADED-CLOSES-878.json\", \"key\": \"AES\"}, \"security\": {\"cusip\": \"00130H105\", \"symbol\": \"AES\"}, \"unresolved\": {\"key\": null, \"state\": \"resolved\"}} then SYNC-REAL-OK key AES equal on the request row, the unresolved list (resolved) and the classification row; one row for the key ; rc=0; 48.3 s wall (timeout 115 in the check).",
+      "denominator": "1 security (AES, the first of 326 landed names in CUSIP order whose symbol has a classification row: 2 of 60 lookups allowed); 2 of 3 places print a key (request row, classification row; the unresolved list is 'resolved', so it prints none); 2 of 2 printed keys equal as stored; 1 of 1 classification row present in etf-classifications; negative arm: 1 of 1 row for the key",
+      "status": "PASS",
+      "expect": "SYNC-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the --prove line run twice on the live store and table, stdout compared with cmp",
+      "observed": "IDENTICAL (one JSON line each run, rc 0 both runs; about 50 s a run)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "scratch mutant .scratch/t53_mutant.py (in process, no file edit): secclass_sync.unresolved_entry monkeypatched to report the list as listed under 'ABC' whatever the list holds, run against the three named tests",
+      "expected": "the mismatch test (list carries another symbol) must FAIL, since equal would turn true on a mismatch; the baseline passes all three",
+      "observed": "baseline 3 passed; mutant 2 failed, 1 passed, rc=1: test_a_key_that_differs_between_the_three_places_is_reported_unequal_never_equal FAILED (assert True is False) and test_a_security_already_classified_that_enters_through_a_second_request_gets_no_second_row FAILED (state listed, not resolved)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any put_item, update_item, delete_item or scan on etf-classifications; any write to S3, the ledger, the queue or pacer state",
+      "reason": "order BOUNDS: READ-ONLY. The negative arm's second request row is built in memory and never written; the stub in the tests fails any such call by name."
+    },
+    {
+      "item": "any Yahoo or Bloomberg call",
+      "reason": "order BOUNDS: no vendor call."
+    },
+    {
+      "item": "the box/dell1 merge into this branch",
+      "reason": "the worker bar forbids merges, and the order's merge direction conflicts with it. The investigation file is byte-identical on this branch and on box/dell1 at the time of the append, so no conflict arises; the merge is the drain's (safe-merge)."
+    },
+    {
+      "item": "the unresolved 'listed' arm on the REAL security",
+      "reason": "AES is 'resolved' on the real list, so the listed arm is exercised only by the synthetic tests (DQ9-t53-AC1), not by DQ9-t53-AC2."
+    },
+    {
+      "item": "the classification gap in --coverage (5 missing examples among 131 fund-type names)",
+      "reason": "the gap the classification path owns (SECCLASS), not DEMQUE: DEMQUE never classifies."
+    },
+    {
+      "item": "any account number or account key in a committed file",
+      "reason": "order BOUNDS; the proof prints CUSIPs, symbols and file basenames only."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W45-S1: the order's fund-type filter reads Asset_Type 'from lock.json's class where present', but no landed lock.json carries a class (0 of 326 read); the filter takes Asset_Type from the Cottonwood transactions instead (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~45/MDPF_DEMQUE.TO-DQ-t53.secclass-sync-key-proof.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python data/mdpf/scripts/demque/secclass_sync.py --prove",
+      "invocation": "from the worktree root, read only, timeout 115 (the check's bound)",
+      "result": "rc=0; INFO: price index landed names 326; the one JSON line: security AES (CUSIP 00130H105), request_row IRPT_BCKEND-AS-TRADED-CLOSES-878.json key AES, unresolved resolved, classification_row AES present, equal true, negative_arm second_request_rows 1 classification_rows_for_key 1 last_updated_unchanged true"
+    },
+    {
+      "tool": "python data/mdpf/scripts/demque/secclass_sync.py --coverage",
+      "invocation": "from the worktree root, read only, timeout 120",
+      "result": "rc=0; INFO: landed names 326; lock.json carries a class for 0; transactions Asset_Type for 4634; one JSON line {\"checked\": 131, \"classified\": 108, \"missing_examples\": [\"001419688\", \"00141B204\", \"00888W700\", \"01883A107\", \"09251M504\"]}"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque/test_demque_secclass_sync.py -v",
+      "invocation": "the new file, from the worktree root",
+      "result": "3 passed, rc=0"
+    },
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "the whole folder, from the worktree root, once, timeout 600",
+      "result": "183 passed in 14.92s, rc=0 (0 failed)"
+    }
+  ]
+}
