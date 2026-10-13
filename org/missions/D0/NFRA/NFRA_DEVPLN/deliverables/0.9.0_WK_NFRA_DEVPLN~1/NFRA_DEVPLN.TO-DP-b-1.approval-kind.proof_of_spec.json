@@ -1,0 +1,118 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-b-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-b-1.approval-kind.md",
+  "group": "OTHER",
+  "vintage_commit": "80247a96ad"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~1",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round1.md",
+  "vintage_commit": "80247a96ad",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-b-1.approval-kind.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/open-calls.py",
+   "kind": "script",
+   "commit_or_etag": "967b8ec7b2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local tool a seat runs; nothing is deployed and no cluster copy is written by any criterion here."
+  },
+  {
+   "path_or_key": ".tools/tests/test_open_calls_approval.py",
+   "kind": "test",
+   "commit_or_etag": "967b8ec7b2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local test on a temporary OPAL_STATE_ROOT with OPAL_OPENCALLS_CLOUD=0; nothing is deployed."
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_DEVPLN/ledger/APPROVAL_KIND_RULE24_RECORD_20261013.md",
+   "kind": "config_data",
+   "commit_or_etag": "967b8ec7b2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The Rule 24 record for the enum widening; a document, nothing is deployed."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPb1-AC1",
+   "criterion_verbatim": "python .tools/tests/test_open_calls_approval.py expect: OPEN-CALLS-APPROVAL-TEST cases=<k>/<n> ok=True (every case passing: the last line must read ok=True)",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_open_calls_approval.py",
+   "output_evidence": "timeout 120 rc=0, 14 s wall, run twice against the same tree with identical last lines. LAST line: OPEN-CALLS-APPROVAL-TEST cases=13/13 ok=True. Cases: add makes an OPEN approval row with head_sha and commits null; close approved by andrew on a client-facing row reads APPROVED valid=yes; close approved by a CTO serial on a client-facing row reads valid=no; the same CTO close on an opal-internal row reads APPROVED valid=yes; close declined reads DECLINED valid=no; a test-only approval reads APPROVED valid=yes; a branch with no row reads ABSENT; unreadable JSON and a missing store exit rc 2 as UNREADABLE, never ABSENT; a bad class, a bad branch and a branch of another box are refused rc 2 with the field named and nothing written; an approval close needs --decision and a CTO close needs OPAL_AGENT_SERIAL, and --decision on a fork is refused; a fork add and a fork close behave as before; a row without a kind key lists as a fork; a fork add without --context is refused rc 2.",
+   "denominator": "13 of 13 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPb1-AC2",
+   "criterion_verbatim": "python .tools/open-calls.py approval-status --branch cand/laptop/none-9 expect: APPROVAL branch=cand/laptop/none-9 state=ABSENT valid=-  (the seam against the REAL laptop list; a read, nothing written)",
+   "method": "live_read",
+   "invocation": "python .tools/open-calls.py approval-status --branch cand/laptop/none-9",
+   "output_evidence": "timeout 120 rc=0. OUTPUT: APPROVAL branch=cand/laptop/none-9 state=ABSENT valid=- row=- by=- head_sha=- commits=- class=- box=laptop pages=-. The store read is the working-tree org/devices/state/laptop/open_calls.json (valid open-calls/1, device laptop); the real list was not written (git status clean under org/devices/state/).",
+   "denominator": "1 of 1 read; the real laptop list holds 10 rows, 0 of kind approval",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPb1-AC3",
+   "criterion_verbatim": "grep -c -E \"^## (MECE|SAME GRAIN|INTENT COHERENCE|STATE COHERENCE)$\" org/missions/D0/NFRA/NFRA_DEVPLN/ledger/APPROVAL_KIND_RULE24_RECORD_20261013.md expect: ^4$ (the record carries all four postulates)",
+   "method": "command",
+   "invocation": "grep -c -E \"^## (MECE|SAME GRAIN|INTENT COHERENCE|STATE COHERENCE)$\" org/missions/D0/NFRA/NFRA_DEVPLN/ledger/APPROVAL_KIND_RULE24_RECORD_20261013.md",
+   "output_evidence": "timeout 120 rc=0. OUTPUT: 4",
+   "denominator": "4 of 4 postulate headings present",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Difference control on the class rule: the same CTO serial closes one client-facing approval and one opal-internal approval; the rule must split them.",
+   "expected": "the client-facing row reads APPROVED valid=no and the opal-internal row reads APPROVED valid=yes",
+   "observed": "test cases 'close approved by a CTO serial on a client-facing row reads valid=no' and 'the same CTO close on an opal-internal row reads APPROVED valid=yes' both PASS in the AC1 run",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The AC1 test was run twice against the same tree in one session.",
+   "observed": "identical last lines: OPEN-CALLS-APPROVAL-TEST cases=13/13 ok=True both times",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the S3 cluster copy of an approval row",
+   "reason": "the test runs with OPAL_STATE_ROOT set and OPAL_OPENCALLS_CLOUD=0, so no put is exercised; the cluster copy of approval rows is not tested by this order"
+  },
+  {
+   "item": "--portal on add and the approval-lease subcommand",
+   "reason": "the decomposition pins both for cell DP-b-5 and this order's invocation omits them; the mismatch is recorded as NFRA_DEVPLN-W1-S3"
+  },
+  {
+   "item": "head_sha and commits on an approval row",
+   "reason": "written null by this order by design; DP-b-5 computes them at registration"
+  },
+  {
+   "item": "the real org/devices/state lists",
+   "reason": "never written: AC2 reads the real laptop list, and the test writes only a temporary state root"
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W1-S1 -- the approval close skips the CROSS-BOX file gate, because NFRA_DEVPLN's own scope reads CROSS-BOX for every approval (ARMED, disarm owner 1.0.0_SA_CTO)",
+  "NFRA_DEVPLN-W1-S2 -- the order states two values of valid for a declined approval (valid=- in BUILD item 4, valid=no in DPb1-AC1); the tool follows the graded criterion",
+  "NFRA_DEVPLN-W1-S3 -- the order's close and add flags differ from the tool (--ruling-file, no --id or --by) and the decomposition pins --portal and approval-lease the order omits; aliases built, --portal and approval-lease not built",
+  "NFRA_DEVPLN-W1-S4 -- an older checkout refuses a whole list that holds an approval row, because every reader refuses a key or value it does not know (ARMED, disarm owner 2.0.0_SA_COO~DV)"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~1/NFRA_DEVPLN.TO-DP-b-1.approval-kind.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 .tools/open-calls.py .tools/tests/test_open_calls_approval.py",
+   "result": "All checks passed!"
+  },
+  {
+   "tool": "py_compile",
+   "invocation": "python -m py_compile .tools/open-calls.py",
+   "result": "COMPILE-OK (no output, rc 0)"
+  }
+ ]
+}
