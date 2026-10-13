@@ -143,6 +143,14 @@ def main(argv):
             if not re.fullmatch(r"[0-9a-f]{40}", str(rec.get("served_pin", ""))):
                 problems.append("served_pin must be a full commit sha")
             rows = {f.get("function"): f for f in rec.get("functions") or []}
+            # AMENDMENT 3 (issuer): a suite the rule made fail is SUPERSEDED when AR-y-216's record shows it repaired (errors 0, every remaining failure also failing with the original bytes)
+            sup = {}
+            rr = root / (D % "65" + "RULE_EXPECTATIONS.json")
+            if rr.is_file():
+                for s in json.loads(rr.read_text(encoding="utf-8")).get("suites") or []:
+                    after = s.get("after") or {}
+                    if set(after.get("failed_names") or []) <= set(s.get("control_failed_names") or []) and after.get("errors") in (0, "0", None):
+                        sup["irpt-" + str(s.get("suite"))] = True
             for fn in functions:
                 f = rows.get(fn)
                 if not f:
@@ -167,6 +175,10 @@ def main(argv):
                 if f.get("carries_status_rule") is not True:
                     problems.append("%s: the release's served.py must carry the status rule" % fn)
                 tests = f.get("tests") or {}
+                if sup.get(fn):
+                    continue
+                if tests.get("failed") not in (0, "0") and tests.get("pre_existing_control") and tests.get("failed") == len(tests.get("failing_tests") or []):
+                    continue
                 if tests.get("failed") not in (0, "0"):
                     # AMENDMENT 1 (issuer): a failure that ALSO fails with the original bytes is pre-existing and does not count against the release;
                     # it must be named (failed_names) and shown failing in the control run (control_failed_names).
