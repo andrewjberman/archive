@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-492",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_IRPT_BCKEND~343",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-492.directory-search-returns-the-account-entry.md",
+    "group": "OTHER",
+    "vintage_commit": "4117f637e098f8742f57b91b02968da5698a6253"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "4117f637e098f8742f57b91b02968da5698a6253",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-492.directory-search-returns-the-account-entry.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/handler.py",
+      "kind": "script",
+      "commit_or_etag": "e8177e8a4b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD ONLY per the order: no deploy and no AWS call. The served irpt-directory-search function is unchanged. The change adds tail_account_entries(), a tail branch in _candidates/_match used by search(), and an entry_id lookup extension in resolve(). Result shapes are unchanged."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/tests/test_tail_account_entry.py",
+      "kind": "test",
+      "commit_or_etag": "e8177e8a4b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file, 9 arms on synthetic opaque ids. Not a deployed artifact."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB170-1-AC1",
+      "criterion_verbatim": "IB170-1-AC1: your new test file passes (6 or more, none failed); expect last line `IB170-1-AC1 PASS`",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r170/p170_cells.py\" . IB170-1-AC1",
+      "output_evidence": "OK: 9 tests pass\nIB170-1-AC1 PASS  (rc=0)",
+      "denominator": "9 of 9 collected tests pass; 0 failed; 0 errors; 6 required",
+      "status": "PASS",
+      "expect": "IB170-1-AC1 PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "IB170-1-AC2",
+      "criterion_verbatim": "IB170-1-AC2: the issuer's seam probe on a synthetic directory (a tail of a non-head account shared by two entries gives two ACCOUNT results and no relationship result and each resolves to its own account; the head tail gives its ACCOUNT result; a name query gives the relationship entry only; an entry with no masks is found as before; the relationship's own resolve still reaches all its accounts); expect `IB170-1-AC2 PASS`",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r170/p170_cells.py\" . IB170-1-AC2",
+      "output_evidence": "OK: the seam probe holds (tail of a non-head account, shared tail, head tail, name query, old entry, resolve, the relationship's own resolve)\nIB170-1-AC2 PASS  (rc=0)",
+      "denominator": "6 of 6 probe arms (a) to (f) hold",
+      "status": "PASS",
+      "expect": "IB170-1-AC2 PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "IB170-1-AC3",
+      "criterion_verbatim": "IB170-1-AC3: no existing directory test file changed, and the existing suite is no worse than base (173 passed, 10 failed, 28 errors there); expect `IB170-1-AC3 PASS`",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r170/p170_cells.py\" . IB170-1-AC3",
+      "output_evidence": "OK: no existing test file changed; existing suite 173 passed, 10 failed, 28 errors (base 173 / 10 / 28)\nIB170-1-AC3 PASS  (rc=0)",
+      "denominator": "211 of 211 existing-suite tests accounted (173 passed, 10 failed, 28 errors, equal to base); 0 existing test files changed; the 9 new tests excluded from the count",
+      "status": "PASS",
+      "expect": "IB170-1-AC3 PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Tail matching disabled (the TAIL branch of _match forced to return False) in a scratch copy of the directory folder; the 9-arm test file is run against it.",
+      "expected": "At least one arm fails, since the tail behaviour is the thing under test.",
+      "observed": "5 failed, 4 passed (scratch copy, pytest rc=1); failing arms include the head tail and the synthesized resolve.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of test_tail_account_entry.py compared (pytest summary line)",
+      "observed": "run 1: 9 passed in 0.10s; run 2: 9 passed in 0.10s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy of handler.py to the served irpt-directory-search function.",
+      "reason": "BUILD ONLY per the order. The apply is a later order under its own never-widen pair, because it is a served behaviour change."
+    },
+    {
+      "item": "Any AWS call, including a live read showing the served directory object carries account_masks.",
+      "reason": "BUILD ONLY per the order. The producer at HEAD (data/assets/scripts/gold/investor_reporting/directory_runner.py) writes account_masks in the schema shape; no live object was read."
+    },
+    {
+      "item": "A run of the FNTEND consumer or the portal browse page against the new search results.",
+      "reason": "Not in this order's paths. The result shape is unchanged by construction, so no consumer contract moves."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest, new test file (9 arms)",
+      "invocation": "timeout 120 python -m pytest infra/aws/lambda/investor-reporting/directory/tests/test_tail_account_entry.py -q --no-header -p no:cacheprovider",
+      "result": "9 passed in 0.15s, rc=0"
+    },
+    {
+      "tool": "mutant control (scratch copy, tail matching disabled)",
+      "invocation": "python edit of .scratch/mut/directory/handler.py, then timeout 120 python -m pytest .scratch/mut/directory/tests/test_tail_account_entry.py -q",
+      "result": "5 failed, 4 passed, rc=1"
+    },
+    {
+      "tool": "safe-commit.sh (pre-commit gate: py_compile, ds-precommit, ruff; naming, to-pipeline and surprise-row gates)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~343 <0.9.0_WK_IRPT_BCKEND~343@opal.agent>\" -F .scratch/msg_ib_pr_492_code.txt -- handler.py test_tail_account_entry.py",
+      "result": "rc=0; commit e8177e8a4b; commit-gate All checks passed; the risk-reflex HOLD on handler.py cited an unrelated deck_generation note matched by basename and did not block"
+    }
+  ]
+}
