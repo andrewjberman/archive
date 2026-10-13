@@ -1,0 +1,127 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_BDPRCE.TO-BP-b-4.trace-follows-served",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-b-4.trace-follows-served.md",
+  "group": "OTHER",
+  "vintage_commit": "73a2b77c3c"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_BDPRCE/decompositions/ADVI_BDPRCE_DECOMP_R2.md",
+  "vintage_commit": "e48e036784",
+  "to_ref": "org/missions/D8/ADVI/ADVI_BDPRCE/task-orders/ADVI_BDPRCE.TO-BP-b-4.trace-follows-served.md"
+ },
+ "assignee": "0.9.0_WK_ADVI_BDPRCE~8",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~8/trace_price_v2.py",
+   "kind": "script",
+   "commit_or_etag": "80be485749",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a read-only instrument in the worker deliverables folder, committed LOCAL on wk-ADVI_BDPRCE-8; nothing deployed, scheduled or wired into the pipeline. It imports round 1's trace_price.py for the rule and adds the follow step.",
+   "artifact_covered_by": ["AC1", "AC2"]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~8/TRACE2_PROBE.json",
+   "kind": "doc",
+   "commit_or_etag": "80be485749",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the seam-probe record from the served lot (--lot-object, explicit VersionId ZCjWpzPR1n2uZl849onevhS.pIvSQhVA); a read-only sample, not a served object",
+   "artifact_covered_by": ["AC2"]
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~8/TRACE2_README.md",
+   "kind": "doc",
+   "commit_or_etag": "80be485749",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "how to run the instrument and what it does not do; committed LOCAL on wk-ADVI_BDPRCE-8"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 is the built behaviour (five planted arms, the negative arm among them); expect ^TRACE2 SELFTEST: OK [0-9]+ arms$",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-bdprce-r2-8 && timeout 100 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~8/trace_price_v2.py --self-test",
+   "expect": "^TRACE2 SELFTEST: OK [0-9]+ arms$",
+   "output_evidence": "TRACE2 SELFTEST: OK 7 arms",
+   "denominator": "7 of 7 planted arms ok (arms 1-5 are the five the task order names: equal rows, NEGATIVE daily 162.155 vs canonical 168.94, daily followed at served 162.155, neither matches, repeated transaction_id; arms 6-7 are the daily-only and tolerance arms); rc=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 is the seam probe against the real served lot (followed canonical, daily row 162.155 reported, trade_ids of length at least 1, match true, follows_served true): ^TRACE2 record ok followed=canonical trades=[1-9][0-9]* match=true follows_served=true$",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-bdprce-r2-8 && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round2/checks/r2_checks.py trace2 --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~8/TRACE2_PROBE.json",
+   "expect": "^TRACE2 record ok followed=canonical trades=[1-9][0-9]* match=true follows_served=true$",
+   "output_evidence": "TRACE2 record ok followed=canonical trades=4 match=true follows_served=true",
+   "denominator": "1 record; served_price 168.94 read from the served lot object (2 lots for the asset, one distinct current_price); followed_source canonical, followed_price 168.94; daily_row {price 162.155, source carry_forward} reported and not followed; canonical_row {price 168.94, source transaction_observed}; 4 trade ids (1 distinct, repeats kept, rows_used 4); recomputed_price 168.94; 2 same-date rows (daily 1, canonical 1); rc=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 is the write-surface bound (its printed label says ROUND 4 because the checker is reused unchanged): ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+   "method": "command",
+   "invocation": "cd /c/dev/wk-bdprce-r2-8 && timeout 60 python org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-bdprce-r2-8 --allow org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~8/ --allow org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+   "output_evidence": "ROUND 4 SCOPE: OK 5 changed, 0 outside, 0 required missing",
+   "denominator": "5 changed paths (TRACE2_PROBE.json, TRACE2_README.md, trace_price_v2.py, INVESTIGATION_v1.md, and this instance), all inside the two granted surfaces; 0 outside; 0 required missing; rc=0",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the recompute switched from the median to the mean in a scratch copy of round 1's trace_price.py (.scratch/mut/, not committed), with a scratch copy of trace_price_v2.py pointed at it; then the v2 self-test run against it",
+   "expected": "TRACE2 SELFTEST: FAIL on arm 1 (the equal-rows arm, whose match needs the median)",
+   "observed": "arm 1 FAIL: daily and canonical equal -> follows canonical -- followed=canonical follows=True both=True match=False; TRACE2 SELFTEST: FAIL arm 1: equal rows (rc=1)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs compared: the self-test run twice (both OK 7 arms) and the live --lot-object probe run twice, comparing 17 measured keys (asset_name, date, served_price, followed_source, followed_price, follows_served, rule, trade_ids, recomputed_price, match, daily_row, canonical_row, claim, served_from, served_rows, rows_used, distinct_trade_ids)",
+   "observed": "17 of 17 keys equal between TRACE2_PROBE.json and the re-run record",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "r1_price is not added to the record",
+   "reason": "the task order adds it only when data/black_diamond/scripts/silver/bd_price_rule.py exists in the tree; that file is absent in this worktree, so the record carries r1_price_module with the absent note"
+  },
+  {
+   "item": "the non-lot live mode (--asset --date --served-price against the bucket) was not run live",
+   "reason": "the probe runs the lot mode, which reaches the same trace_followed core and the same read_obj / read_txn calls for the daily file, canonical_prices.parquet and the day's transaction partition; the non-lot path is exercised offline by the self-test only"
+  },
+  {
+   "item": "the client-data check on the commit against a hashed account-id list was not run",
+   "reason": "the probe record and the instrument output carry asset names, prices, VersionIds, trade ids and a SHA-256 prefix of the client key; no client name, account or advisor field is written; checked by reading the output keys (the client name and the raw client key are absent from TRACE2_PROBE.json)"
+  }
+ ],
+ "surprises": [
+  "ADVI_BDPRCE-D1-W8-S1: the output contract enumerates followed_source as canonical or daily, and when neither same-date candidate equals the served price the instrument emits followed_source null with follows_served false",
+  "ADVI_BDPRCE-D1-W8-S2: the --lot-object form names no date, so the date and the served price are read from the served object (data_as_of, its current_price) and the client key is recorded only as a SHA-256 prefix"
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_BDPRCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "trace_price_v2.py",
+   "invocation": "cd /c/dev/wk-bdprce-r2-8 && timeout 240 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~8/trace_price_v2.py --asset \"EXXONMOBIL HOLDINGS CORP COM SHS\" --lot-object \"<bucket>/<served client detail key per TO section 1c>@ZCjWpzPR1n2uZl849onevhS.pIvSQhVA\" --out org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~8/TRACE2_PROBE.json",
+   "result": "TRACE2 WROTE ... asset=\"EXXONMOBIL HOLDINGS CORP COM SHS\" date=2026-10-09 followed=canonical follows_served=true trades=4 match=true (rc=0, live read of opal-data-49financial and opal-data-bd)"
+  },
+  {
+   "tool": "r2_checks.py",
+   "invocation": "cd /c/dev/wk-bdprce-r2-8 && timeout 60 python org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/2.0.0_SA_COO~K1/round2/checks/r2_checks.py trace2 --file org/missions/D8/ADVI/ADVI_BDPRCE/deliverables/0.9.0_WK_ADVI_BDPRCE~8/TRACE2_PROBE.json",
+   "result": "TRACE2 record ok followed=canonical trades=4 match=true follows_served=true (rc=0)"
+  },
+  {
+   "tool": "aws s3api head-object / get-object (READ verbs)",
+   "invocation": "cd /c/dev/wk-bdprce-r2-8 && .tools/aws s3api get-object --bucket opal-data-49financial --key <detail.json key> --version-id ZCjWpzPR1n2uZl849onevhS.pIvSQhVA /c/dev/wk-bdprce-r2-8-data/lot_detail_r1.json",
+   "result": "rc=0; VersionId ZCjWpzPR1n2uZl849onevhS.pIvSQhVA, ContentLength 51343, data_as_of 2026-10-09; the asset carries one distinct current_price, 168.94. The downloaded object is outside the checkout."
+  },
+  {
+   "tool": "safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ADVI_BDPRCE~8 <0.9.0_WK_ADVI_BDPRCE~8@opal.agent>\" -F .scratch/msg_bp_b_4_instrument.txt -- <three deliverable paths>",
+   "result": "committed 80be485749 on wk-ADVI_BDPRCE-8 after the commit gate passed (ruff on the instrument: three lambda and unused-name findings fixed before the commit landed)"
+  }
+ ]
+}
