@@ -35,7 +35,8 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y261-read": "Y261-READ", "y262-portal": "Y262-PORTAL", "y263-portal": "Y263-PORTAL", "y264-portal": "Y264-PORTAL", "y265-portal": "Y265-PORTAL", "y266-live": "Y266-LIVE",
           "y271-j2": "Y271-J2", "y272-j5": "Y272-J5", "y273-portal": "Y273-PORTAL", "y274-portal": "Y274-PORTAL", "y275-portal": "Y275-PORTAL",
           "y276-design": "Y276-DESIGN", "y277-revert": "Y277-REVERT", "y278-read": "Y278-READ",
-          "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL"}
+          "y279-portal": "Y279-PORTAL", "y280-submit": "Y280-SUBMIT", "y281-list": "Y281-LIST", "y282-portal": "Y282-PORTAL", "y283-portal": "Y283-PORTAL",
+          "y291-known": "Y291-KNOWN", "y292-checker": "Y292-CHECKER", "y293-kept": "Y293-KEPT"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -596,6 +597,35 @@ def main(argv):
         rec = portal_candidate(root, D24 % "104" + "PORTAL_PARTNER_VIEW_CANDIDATE.json", problems)
         if rec and not (rec.get("read") or {}).get("how_filing_is_sent"):
             problems.append("read.how_filing_is_sent must name file:line")
+    elif check in ("y291-known", "y292-checker", "y293-kept"):
+        spec = {"y291-known": ("105", "KNOWN_REGISTRY_PORT.json", ("read", "port", "tests", "before_arm", "release_needs", "claim", "not_read"),
+                               (("ycharts/generate", "tests/test_registry_identity_port.py", 8),)),
+                "y292-checker": ("106", "YFINANCE_CHECKER.json", ("read", "module", "tests", "measurement", "release_needs", "claim", "not_read"),
+                                 (("intake", "tests/test_yfinance_check.py", 12),)),
+                "y293-kept": ("107", "KEPT_STATE.json", ("read", "state", "freeze_branch", "words", "tests", "before_arm", "shares_status", "claim", "not_read"),
+                              (("intake", "tests/test_kept_holding.py", 14),))}[check]
+        rec = load(root, D24 % spec[0] + spec[1], problems)
+        if rec:
+            for member in spec[2]:
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if check != "y292-checker" and (rec.get("before_arm") or {}).get("failed") in (None, 0, "0"):
+                problems.append("before_arm: the new test must FAIL at HEAD without the change")
+            if check == "y292-checker" and not re.fullmatch(r"[0-9a-f]{64}", str((rec.get("module") or {}).get("sha256", ""))):
+                problems.append("module.sha256 must be a 64-hex digest")
+        for sub, rel, floor in spec[3]:
+            cwd = IR + "/" + sub
+            if not (root / cwd / rel).is_file():
+                problems.append("no %s/%s" % (cwd, rel))
+                continue
+            rc, passed, failed = pytest(root, rel, cwd)
+            print("%s: %d passed, %d failed (rc=%d)" % (rel, passed, failed, rc))
+            if rc != 0 or failed or passed < floor:
+                problems.append("%s must pass with at least %d tests" % (rel, floor))
+        rc, passed, failed = pytest(root, "tests", INTAKE)
+        print("intake tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+        if rc != 0 or failed or passed < 370:
+            problems.append("the intake folder must pass with at least 370")
     return finish(check, problems)
 
 
