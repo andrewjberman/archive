@@ -16,13 +16,13 @@
     "tr": 924
   },
   "frontier": "2026-10-13",
-  "http_requests": 56,
+  "http_requests": 60,
   "limitations_named": [
     "TR columns (DQ-t-21: cash, total_return, tr_source, flags) are compared only under --tr (DQ-t-58): the appended rows' TR (incremental_append.append_tr, the stored max's close as the prior close) against tr_column.build over the FULL history; without --tr the comparison covers the price, dividend and split cells",
     "the stored state is the FULL pull cut at stored_max, so the old rows agree by construction; the proof's content is the appended rows, the two restatement checks, the lock record and the refill path. The served store's own overlap is not compared",
     "the lock record: the derived lock is the stored lock with valid_to extended (claim, trades_through, state, observations carried); a full re-lock is lock.check over the same trades on the FULL history; differences are listed, not assumed away"
   ],
-  "merge_note": "five --piece parts of one stratified 50-name sample (incremental_equal.py --n 50 --tr --piece I/5); the split arm rides piece 1/5. Yahoo symbol requests spent on this proof, all attempts: 12 + 11 + 11 (three superseded piece 1/5 runs while the split arm was being corrected), 40 (pieces 2/5 to 5/5), 11 (the final piece 1/5, the only piece 1/5 in this merge), 1 (a one-name window check of ACTSX) = 75 before the spot check; the live spot check in dq_t58_equal.py adds 5. The merged symbol_requests counts the final pieces only (51).",
+  "merge_note": "five --piece parts of one stratified 50-name sample (incremental_equal.py --n 50 --tr --piece I/5); the split arm rides piece 1/5. Yahoo symbol requests spent on this proof, all attempts: 12 + 11 + 11 (three superseded piece 1/5 runs while the split arm was being corrected), 40 (pieces 2/5 to 5/5), 11 (the final piece 1/5, the only piece 1/5 in this merge), 1 (a one-name window check of ACTSX) = 75 before the spot check; the live spot check in dq_t58_equal.py adds 5. The merged symbol_requests counts the final pieces only (51). RELOCK RE-RUN (DQ-t-58 amendment, S2 ruling 2026-10-13): the 50 no-split names keep their records (the append arithmetic is unchanged); the combined-history relock is measured for LCEYX and FTHSX by the production code (relock_held); the split arm (APH) is re-run (1 pull). http_requests = prior 56 + 4 (this re-run: 3 symbols, 4 HTTP). symbol_requests stays 51 (the proof pieces); symbol_requests_relock_rerun 3. The stub night (3 symbols) and the live spot check (5) are counted in the order total, not here.",
   "merged_from": [
     {
       "equal": 10,
@@ -841,6 +841,82 @@
     "shared_pacer_touched": false,
     "state": "C:\\dev\\wk-demque-50\\.scratch\\incremental_equal_pacer.json"
   },
+  "relock_held": [
+    "FTHSX",
+    "LCEYX"
+  ],
+  "relock_scope": {
+    "measured_by_production_code": {
+      "run": "incremental_equal.py --n 50 --tr --only LCEYX,FTHSX (2026-10-13, scratch pacer); daily_draw.combined_relock",
+      "states": {
+        "FTHSX": "REJECTED:LOW_TRADE_AGREEMENT",
+        "LCEYX": "REJECTED:LOW_TRADE_AGREEMENT"
+      },
+      "symbols": [
+        "FTHSX",
+        "LCEYX"
+      ]
+    },
+    "read_against_served_state": {
+      "count": 48,
+      "method": "the 2026-10-13 run's lock_record: the full-history relock state equals the served state (LOCKED, read from the served lock.json of each name) on every name except LCEYX and FTHSX; not re-pulled",
+      "symbols": [
+        "A",
+        "ABBV",
+        "ACTHX",
+        "ACTSX",
+        "ACWV",
+        "ADLYX",
+        "AES",
+        "AGNC",
+        "AIG",
+        "ALB",
+        "ALL",
+        "ALLY",
+        "ALNY",
+        "AMLP",
+        "AMP",
+        "APD",
+        "ARKF",
+        "AVAV",
+        "BABA",
+        "BCTK",
+        "BISOX",
+        "BLW",
+        "BSNIX",
+        "BTT",
+        "CDSIX",
+        "CEMIX",
+        "CNSDX",
+        "COR",
+        "CVMIX",
+        "CWVIX",
+        "DFIEX",
+        "DFLVX",
+        "DISVX",
+        "EEM",
+        "FAX",
+        "FBTC",
+        "FDIQ",
+        "FFBOX",
+        "FFMMX",
+        "IEF",
+        "IVE",
+        "IVW",
+        "LQD",
+        "MADVX",
+        "MO",
+        "NFJ",
+        "T",
+        "VADDX"
+      ]
+    },
+    "relock_held": [
+      "FTHSX",
+      "LCEYX"
+    ],
+    "rule": "lock.check over the COMBINED history (stored as_traded_close plus appended rows), same trades, range [stored valid_from, frontier] and trades_through as the full path; a state other than LOCKED holds the name"
+  },
   "restatements_named": [
     "R1 gained split: a window split absent from stored splits (date, ratio within 1e-9) -> refill_split, reason gained_split; price_store._gained_splits refuses the same write (the name keeps its prior files)",
     "R2 restated overlap close: the window row on the stored max date carries a close_served that differs from the stored one (relative 1e-9) -> refill_split, reason restated_close"
@@ -873,6 +949,7 @@
     "held_restatement": true,
     "mismatches": [],
     "n": 1,
+    "note": "re-run 2026-10-13 under the combined-relock code (the gained split holds before the relock; the result is unchanged)",
     "reason": "refill_split: gained_split (split 2026-09-03 ratio 2.0)",
     "refilled": false,
     "simulated_frontier": "2026-09-08",
@@ -886,6 +963,7 @@
   },
   "stored_max": "2026-10-06",
   "symbol_requests": 51,
+  "symbol_requests_relock_rerun": 3,
   "tr_compared": true,
   "window": [
     "2026-10-07",
