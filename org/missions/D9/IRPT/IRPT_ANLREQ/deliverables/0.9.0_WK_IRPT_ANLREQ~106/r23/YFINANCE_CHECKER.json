@@ -1,0 +1,76 @@
+{
+  "record_id": "IRPT_ANLREQ.TO-AR-y-292.yfinance-checker-port",
+  "cell": "AR-y-292",
+  "issued_to": "0.9.0_WK_IRPT_ANLREQ~106",
+  "scope": "C-SWAP steps (1) KNOWN and (2) the yfinance checker, the module only. Code and tests only; every test on fakes; one read-only measurement; nothing released, uploaded, installed, applied, invoked or deployed.",
+  "worktree": "C:/dev/wk-irpt-anlreq-106 (branch wk-IRPT_ANLREQ-106)",
+  "cut_head": "d2c68580a1",
+  "read": {
+    "premise_record": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~99/r23/C_SWAP_STEPS_1_2_READ.json (design.step_2_yfinance_check, measurement); CTO rulings msg 7210 as cited in the order",
+    "pacer_conventions": "data/mdpf/scripts/demque/yahoo_pull.py:33 _PUSHBACK_CODES = (401, 403, 429) (followed); :66-93 _http_status_of (status attribute, then message regex for 4xx/5xx, then 'too many requests' / 'rate limit' / 'unauthorized' / 'forbidden' text; followed, not imported); :61-63 _default_fetch builds yfinance.Ticker(symbol).history(...) with yfinance imported INSIDE the function (lazy); :141 class Pacer takes an injected sleep (default time.sleep) and a gap; :188-196 wait(); :207 a pushback result stops the queue. The estate's gap is 8-12 s random (Pacer defaults at :141); the cell's ruling is a fixed 1.0 s pace, so the gap is not copied.",
+    "yfinance_in_resident": "NOT READ. The resident host's Python package set is the host-origin pydeps directory (/opt/investor-reporting-ycharts/pydeps, copied by the host script at line 44 of resident_host_install_0485393f3a-st32.sh, outside the repo); RESIDENT_RECIPE_AND_DELTA.json host_origin_names records its names as NOT RECORDED. No requirements file for the resident exists in the repo (Glob of requirements*.txt under infra/aws/lambda/investor-reporting: 0 files).",
+    "yfinance_in_lambda": "no, in the repo's records. The irpt-ycharts-generate Lambda attaches layers = [irpt-common, AWSSDKPandas-Python312:16] (infra/aws/terraform/investor-reporting/ycharts/generate.tf:396-399). infra/aws/lambda/layers/irpt-common/requirements.txt pins jsonschema 4.26.0, attrs, jsonschema-specifications, referencing, rpds-py and typing_extensions, with no yfinance. The contents of the AWS-managed AWSSDKPandas-Python312:16 layer are NOT READ (not in the repo). Lambda source map (infra/aws/lambda/ci/lambda-source-map.json, /functions/irpt-ycharts-generate) carries no dependency list.",
+    "pandas_needed": "the module does not import pandas. The default port reads the frame by its index and its 'Close' column (duck typing). yfinance itself depends on pandas, so pandas is present wherever yfinance is; the Lambda's AWSSDKPandas layer supplies it, the resident's pydeps are NOT READ.",
+    "yfinance_source_read": "installed yfinance 1.2.0 (site-packages, dell2): config.py:34 hide_exceptions defaults True; scrapers/history.py:80-81 raise_errors is deprecated in favour of yf.config.debug.hide_exceptions = False; scrapers/history.py:97-98, :123-124, :220-221, :272-273, :473-474 raise only when raise_errors or not hide_exceptions; shared.py:24 _ERRORS dict, written at scrapers/history.py:97, :123, :272, :480 on the hidden path.",
+    "dependency_decision": "no dependency was added. yfinance is not a member of any repo-recorded package; the module imports it lazily, and the default port raises CHECKER_UNAVAILABLE when it cannot be imported. The tests inject the port or a fake yfinance module."
+  },
+  "module": {
+    "path": "infra/aws/lambda/investor-reporting/intake/yfinance_check.py",
+    "sha256": "343ab79c58de6c2da072f650f3b340e06842edf3eeb8ad6a062ca7a677985808",
+    "bytes": 7649,
+    "ascii_only": true,
+    "before_arm_absent_at_head": "git ls-tree -r --name-only d2c68580a1 -- <path> printed nothing (positive control: security_resolution.py listed)",
+    "interface": "YfinanceChecker(*, history=None, sleep=time.sleep, clock=time.monotonic, cap=10, pace_seconds=1.0).check(symbols) -> {SYMBOL: {state, rows, last_close, reason}}; default_history(symbol) -> [(date_iso, close)] or raises; CheckerUnavailable, ErrorFrame",
+    "behaviour": "symbols upper-cased and de-duplicated in order; a symbol failing the estate's SYMBOL pattern (security_resolution.py:17) or not a str is NOT_CHECKED with SYMBOL_REFUSED before any call and does not use the cap; the first cap=10 accepted distinct symbols are called in order with one history call each, sleep(pace_seconds) before every call except the first; the rest are NOT_CHECKED BEYOND_CAP; a PUSHBACK (401/403/429-shaped) stops the step and every later symbol is NOT_CHECKED STEP_STOPPED; KEPT needs rows > 0 and a finite positive last close; a clean empty list is NOT_KEPT NO_ROWS; a non-finite or non-positive last close is NOT_KEPT; an exception is CHECK_FAILED with reason EXCEPTION, TIMEOUT (TimeoutError or a timeout-shaped name or text), PUSHBACK, or ERROR_FRAME (ErrorFrame, raised by the default port when an empty frame carries a yfinance error entry, or when no error signal can be observed). CheckerUnavailable propagates out of check() as a configuration fault."
+  },
+  "tests": {
+    "file": "infra/aws/lambda/investor-reporting/intake/tests/test_yfinance_check.py",
+    "added": 29,
+    "passed": 29,
+    "failed": 0,
+    "run": "timeout 120 python -m pytest <test file> -q -p no:cacheprovider (cwd intake) -> 29 passed in 0.20s, rc 0",
+    "covers": "KEPT with rows; clean empty NOT_KEPT; exception CHECK_FAILED and never NOT_KEPT; timeout-shaped TIMEOUT; 401/403/429 PUSHBACK stop with STEP_STOPPED for the rest; the 11th distinct symbol NOT_CHECKED with the port never called (spy); duplicates call once; pace 9 sleeps of 1.0 for 10 symbols, none before the first; non-positive and NaN/inf last close NOT_KEPT; bad symbols refused before any call; symbol pattern equals security_resolution.py; default port without yfinance raises CHECKER_UNAVAILABLE; default port with a fake yfinance whose history hides the error (the ALPPL shape) is ERROR_FRAME, not absent; the default port sets hide_exceptions False for the call and restores it; a raised error is EXCEPTION; a stale error entry is cleared before the call; a hidden 429 text stops the step; a NaN close from a real-shaped frame is NOT_KEPT.",
+    "folders": {
+      "intake/tests": {
+        "before_this_order": 370,
+        "after_this_order": 399,
+        "passed": 399,
+        "failed": 0,
+        "skipped": 1,
+        "subtests_passed": 28,
+        "run": "timeout 300 python -m pytest tests -q -p no:cacheprovider (cwd intake) -> 399 passed, 1 skipped, 28 subtests passed, rc 0"
+      }
+    },
+    "commit_gate": "bash .tools/commit-gate.sh on both files: rc 0 (py_compile, ds-precommit, ruff py39)"
+  },
+  "measurement": {
+    "what": "one read-only history call per symbol through the REAL default port (default_history, errors RAISED), yfinance 1.2.0, the checker's own pacing (1.0 s between calls); nothing written, nothing landed; no other live call. Script: .scratch/measure_yfinance_checker.py in this worktree (not committed).",
+    "when_utc": "2026-10-13, after the module and tests were written and the row timestamp 21:04:04Z was taken; the exact start time was not recorded; wall time below",
+    "box": "dell2 (Python 3.14.7, yfinance 1.2.0). Not the resident; not dell1 (1.7.0 per the MDPF_SECHIST addendum, as cited in the read record).",
+    "results": [
+      {"symbol": "TIMXX", "state": "KEPT", "rows": 20, "last_close": 1.0, "reason": "HISTORY_ROWS", "client": "returned 20 pairs, last 2026-10-09 close 1.0", "elapsed_s": 0.517},
+      {"symbol": "ALPPL", "state": "CHECK_FAILED", "rows": 0, "last_close": null, "reason": "EXCEPTION", "client": "RAISED HTTPError, message 'HTTP Error 404: ' (not an empty return)", "elapsed_s": 0.615},
+      {"symbol": "ZZQXJVK", "state": "CHECK_FAILED", "rows": 0, "last_close": null, "reason": "EXCEPTION", "client": "RAISED HTTPError, message 'HTTP Error 404: ' (not an empty return)", "elapsed_s": 0.510}
+    ],
+    "wall_s": 3.644,
+    "hide_exceptions_after_run": true,
+    "denominator": "3 symbols; 1 KEPT (TIMXX, 20 of 20 rows), 2 CHECK_FAILED by a raised 404 (ALPPL, ZZQXJVK), 0 NOT_KEPT",
+    "reading": "With the config honoured, a 404 for a nonexistent quote raises and is classified CHECK_FAILED EXCEPTION, not NOT_KEPT. The read record's zero-rows-and-no-exception reading for ALPPL, BREIT and CCCQ was the hidden-config behaviour. The error-shaped empty frame path (ERROR_FRAME) was not exercised by the real port here; it is covered by the fake.",
+    "surprise_rows": ["IRPT_ANLREQ-D2-W106-S2"]
+  },
+  "release_needs": [
+    "yfinance in the resident host's Python: a host read of the pydeps listing (YC2 host read; the names are host-origin and unrecorded in RESIDENT_RECIPE_AND_DELTA.json) before any live upload relies on the default port. Until then the resident's default port may raise CHECKER_UNAVAILABLE, which check() propagates.",
+    "yfinance in the irpt-ycharts-generate Lambda package or its layers: none is in the repo records (irpt-common requirements.txt has none; AWSSDKPandas-Python312:16 contents not read). Adding it is a dependency change and needs Andrew's word; none was added here.",
+    "the pinned yfinance version on each host: this module was measured on 1.2.0 (dell2); dell1 reports 1.7.0. The private _ERRORS signal (surprise IRPT_ANLREQ-D2-W106-S3) must be confirmed on the released version.",
+    "egress from the resident to Yahoo: standing law, CLAUDE.md Agent Autonomy ('Egress is open on every channel, except Bloomberg'; 'other vendor APIs need no per-use word'), Andrew-direct 2026-10-09 ANDREW_DIRECT_20261009_024xZ_LAW_EDIT_*, which postdates the MDPF_SECHIST addendum v0.2 limit (lines 168-171) cited in the read record. No Andrew word is needed for the Yahoo egress.",
+    "the registry row and the price landing for a KEPT symbol belong to MDPF_SECCLASS and MDPF_SECHIST (dell1), not this order; the resolver (intake/security_resolution.py) is the consumer of this module, and its change (KEPT with reason YFINANCE_HISTORY and price_source 'yfinance', no provider receipt) is not made in this order."
+  ],
+  "claim": "MEASURED: (1) the module and its 29 offline tests are committed as described; the intake folder runs 399 passed, 1 skipped, rc 0, with 370 before this order (floor 370 met). (2) yfinance is not in any repo-recorded resident or Lambda dependency set; the resident's host pydeps are NOT READ. (3) One read-only call per symbol through the real default port: TIMXX KEPT 20 rows last close 1.0; ALPPL and ZZQXJVK each raised HTTPError 404 and are CHECK_FAILED EXCEPTION. (4) No dependency was added; nothing was built for release, uploaded, installed, applied, invoked or deployed; the only external calls are the three history calls in the measurement.",
+  "not_read": [
+    "the resident host's pydeps directory and its package names (host-origin; the host was not read, no SSM, no sign-in)",
+    "the contents of the AWS-managed AWSSDKPandas-Python312:16 layer (not in the repo; no AWS call made)",
+    "yfinance 1.7.0 on dell1 (not on this box; the private _ERRORS name is unverified there)",
+    "the resolver (security_resolution.py classify_batch and the consumer of the checker): read only for the SYMBOL pattern; the resolver change is cell AR-y-294 and is not made here",
+    "the ERROR_FRAME path on the real yfinance port (no real symbol produced an error-shaped empty frame in the measurement)"
+  ]
+}
