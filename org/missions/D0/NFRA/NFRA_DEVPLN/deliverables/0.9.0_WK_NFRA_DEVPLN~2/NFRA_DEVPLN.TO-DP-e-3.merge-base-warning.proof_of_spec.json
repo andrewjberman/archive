@@ -1,0 +1,84 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-e-3",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-e-3.merge-base-warning.md",
+  "group": "OTHER",
+  "vintage_commit": "dc9b9ed25a"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~2",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round4.md",
+  "vintage_commit": "dc9b9ed25a",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-e-3.merge-base-warning.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/portal-merge-forward.sh",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local script. The self-test runs in mktemp repositories. Nothing was pushed; the real portal DEV was read at 24877b67b7a1 before and after the seam call, and the portal repo was not fetched (the seam ran with --no-fetch)."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPe3-AC1",
+   "criterion_verbatim": "bash .tools/portal-merge-forward.sh --selftest -- ok=True (every case, old and the new criss-cross case, passing)",
+   "method": "test_suite",
+   "invocation": "bash .tools/portal-merge-forward.sh --selftest",
+   "output_evidence": "Run under timeout 120; rc=0, twice, same last line: MERGE-FORWARD-SELFTEST cases=29/29 ok=True. Cases 1-15 are unchanged and all PASS. New case 16: 16a precondition (DEV and the branch have exactly two merge bases), 16b (no multiple-merge-bases text on stderr), 16c (ABSENT with a product file after the bases is refused no-approval-row, DEV unchanged). The case count is computed by the script, so no literal count was edited.",
+   "denominator": "29 of 29 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DPe3-AC2",
+   "criterion_verbatim": "bash -c 'bash .tools/portal-merge-forward.sh cand/laptop/local-only-probe --repo portal --no-fetch 2>&1 | grep -c \"multiple merge bases\"' -- the warning count is 0 (it is 1 at the base)",
+   "method": "command",
+   "invocation": "bash -c 'bash .tools/portal-merge-forward.sh cand/laptop/local-only-probe --repo portal --no-fetch 2>&1 | grep -c \"multiple merge bases\"'",
+   "output_evidence": "Run under timeout 120. Output: 0 (grep prints 0 and exits 1 on zero matches, which is the count the criterion expects). Baseline in this session on the unmodified script at dc9b9ed25a: count 1, line 'warning: refs/remotes/origin/DEV...refs/heads/cand/laptop/local-only-probe: multiple merge bases, using 63c4f9e35f...'. After the change the full result line is: MERGE-FORWARD branch=cand/laptop/local-only-probe result=REFUSED reason=no-approval-row dev_before=24877b67b7a175bcfe73c779f69c0bf7c3c639c8 dev_after=24877b67b7a175bcfe73c779f69c0bf7c3c639c8 pushed=no merge=-. Nothing merged or pushed.",
+   "denominator": "0 of 1 warning lines (the seam ran once after the change, and once more for the criterion)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Difference control on the changed-file read: the same seam call on the same real portal repo and branch, run on the unmodified script (dc9b9ed25a) and on the changed script.",
+   "expected": "before the change the three-dot read prints the multiple-merge-bases warning; after the change it prints none and the verdict stays REFUSED no-approval-row",
+   "observed": "before: warning count 1 (git: using 63c4f9e35f...), result REFUSED reason=no-approval-row. after: warning count 0, result REFUSED reason=no-approval-row, dev unchanged.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 ran twice at the committed bytes, and AC2 ran at the committed bytes.",
+   "observed": "MERGE-FORWARD-SELFTEST cases=29/29 ok=True on both selftest runs; seam warning count 0 and result REFUSED reason=no-approval-row with dev_before equal to dev_after.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the zero-base case (two histories with no common ancestor)",
+   "reason": "the new read refuses no-approval-row when merge-base --all prints nothing or fails, as the old three-dot did. This branch is not exercised by the self-test and was not measured in the portal repo."
+  },
+  {
+   "item": "the single-base equality with the old three-dot result, as a measured diff",
+   "reason": "the equality is argued from the definition (one base: diff base..branch is the three-dot diff); the self-test's older cases and the seam (two bases) do not measure it directly."
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W2-S11: the merge-forward self-test fixture writes have no exit check, so a failed write silently produces a degenerate graph; case 16's precondition caught it (class OBSERVATION, INERT)"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~2/NFRA_DEVPLN.TO-DP-e-3.merge-base-warning.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "bash -n",
+   "invocation": "bash -n .tools/portal-merge-forward.sh",
+   "result": "SYNTAX-OK"
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> DPe3-AC1,DPe3-AC2",
+   "result": "recorded in the commit report; the criteria are graded by their own output above"
+  }
+ ]
+}

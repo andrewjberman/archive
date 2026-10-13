@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-i-7",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-7.mail-draft-redraft-and-approve-by-text.md",
+    "group": "OTHER",
+    "vintage_commit": "90adf8a007"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round17.md",
+    "vintage_commit": "90adf8a007",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-i-7.mail-draft-redraft-and-approve-by-text.md"
+  },
+  "assignee": "0.9.0_WK_COMM_ASSIST~13",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/mail_requests.py",
+      "kind": "script",
+      "commit_or_etag": "a02eb94765",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "draft_mail_reply takes optional previous and notes; on_mail_reply answers edit (redraft, unseen, redraft-refused), send (mail-approved, unseen, no-draft) and no command (asked); NOT_BUILT and SEND_NOT_BUILT removed; no gateway, Teams or mail call added; committed on wk-COMM_ASSIST-13 and not deployed (a later cell rebuilds and deploys the assistant)",
+      "artifact_covered_by": ["CAi7-AC1", "CAi7-AC2"]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_inbound_mail_reply.py",
+      "kind": "test",
+      "commit_or_etag": "a02eb94765",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "15 cases: the not-built case is now the no-command case; redraft, approve, stale, refused-or-empty redraft, no-draft approve and first-prompt cases added; the difference control and the other 8 cases are unchanged; last line INBOUND-MAIL-REPLY-TEST ok=True cases=15/15",
+      "artifact_covered_by": ["CAi7-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/COMM/COMM_ASSIST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "a02eb94765",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one row appended: COMM_ASSIST-W13-S1 (the mail footer names #dev and 0 only); existing rows untouched, LF line endings kept",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAi7-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i7_mail.py\" expect: I7-MAIL ok=True arms=6 of 6",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i7_mail.py\"",
+      "output_evidence": "(timeout 120, rc 0) I7-MAIL ok=True arms=6 of 6 failed=none reason=none",
+      "denominator": "6 of 6 arms through the real on_sms_reply with a stand-in drafting model: notes-redraft, one-approves-and-hands-back, stale-one-refused, stale-notes-refused, zero-and-dev-unchanged, nothing-sent; no chat message and no post sent across the run",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CAi7-AC2",
+      "criterion_verbatim": "python \"data/transcripts/scripts/tests/test_inbound_mail_reply.py\" expect: INBOUND-MAIL-REPLY-TEST ok=True",
+      "method": "command",
+      "invocation": "python \"data/transcripts/scripts/tests/test_inbound_mail_reply.py\"",
+      "output_evidence": "(timeout 120, rc 0) INBOUND-MAIL-REPLY-TEST ok=True cases=15/15",
+      "denominator": "15 of 15 cases pass; the difference control (a completed MAIL job makes zero gateway chat sends where a CHAT job makes one) is among them and passes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CAi7-AC3",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\" expect: I2-REGRESSION ok=True",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r17/checks/check_i2_regression.py\"",
+      "output_evidence": "(timeout 120, rc 0) I2-REGRESSION ok=True passed=32 failed=0 reason=none",
+      "denominator": "32 passed of 32 in data/transcripts/scripts/tests/test_teams_chat_tenant.py (the chat and muse flow tests, unchanged by this cell); 0 failed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CAi7-AC1 run with teams_chat/mail_requests.py swapped to its base content (git show 90adf8a007:<path>) in the worktree, then restored byte-identical (cmp-verified) before the green run",
+      "expected": "I7-MAIL ok=False arms=2 of 6 (the two controls pass; the four build arms fail)",
+      "observed": "I7-MAIL ok=False arms=2 of 6 failed=notes-redraft;one-approves-and-hands-back;stale-one-refused;stale-notes-refused reason=none",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "CAi7-AC1 run twice after the final code edit (once before the mutant swap, once after the byte-identical restore); CAi7-AC2 run twice after the final code edit",
+      "observed": "I7-MAIL ok=True arms=6 of 6 on both post-edit runs; INBOUND-MAIL-REPLY-TEST ok=True cases=15/15 on both post-edit runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "saving the final draft as an Outlook draft through a gateway route",
+      "reason": "the order says this is a separate decision and a separate component; nothing built or called for it"
+    },
+    {
+      "item": "deploy of the assistant",
+      "reason": "the order says this cell is not deployed here; a later cell rebuilds and deploys under change management"
+    },
+    {
+      "item": "the mail text footer wording (names #dev and 0 only)",
+      "reason": "not changed: the order names no footer change; recorded as COMM_ASSIST-W13-S1 for the issuer"
+    },
+    {
+      "item": "the time window of tenant.unseen (UNSEEN_S 5 s) applied to a mail 1 and to a mail edit that carries a version",
+      "reason": "used as the chat path uses it (tenant.on_sms_reply line 503 rule), so a 1 is always checked and an edit is checked when it carries a version; the order's wording is the version check, which unseen() includes. Stated as a judgment for the issuer, not a surprise"
+    },
+    {
+      "item": "AWS calls, network calls, Terraform changes",
+      "reason": "none made; the order forbids them and the cell has no AWS path"
+    }
+  ],
+  "surprises": [
+    "COMM_ASSIST-W13-S1: the mail text footer (_mail_text) names #dev and 0 only; a mail reader is not told that 1 approves or that notes redraft. Not changed here; OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~13/COMM_ASSIST.TO-CA-i-7.mail-draft-redraft-and-approve-by-text.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python test run",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_mail_reply.py",
+      "result": "INBOUND-MAIL-REPLY-TEST ok=True cases=15/15"
+    },
+    {
+      "tool": "commit gate",
+      "invocation": "bash .tools/commit-gate.sh data/transcripts/scripts/teams_chat/mail_requests.py data/transcripts/scripts/tests/test_inbound_mail_reply.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s); rc 0"
+    }
+  ]
+}

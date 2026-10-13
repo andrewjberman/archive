@@ -1,0 +1,16 @@
+NFRA_CTLPLN TO-CT-ac-4 -- protected-functions census re-save record
+by 0.7.0_AE_CloudOps~U7, 2026-10-13 ~22:45Z to 23:05Z, laptop. Read-only AWS (lambda list/get through the script, the laptop identity) and one file write; function names only, no environment value, no code.
+
+START CONDITION: TO-CT-ac-1 merged on box/laptop (merge 2bf798e271, an ancestor of HEAD; derive_protected_functions.py last changed by 2a477c9b49) and flipped complete per the issuer's message 108972.
+REGIONS WALKED (the denominator): 17 of 17, refused_regions 0: ap-northeast-1, ap-northeast-2, ap-northeast-3, ap-south-1, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-north-1, eu-west-1, eu-west-2, eu-west-3, sa-east-1, us-east-1, us-east-2, us-west-1, us-west-2. BLIND: functions created or deleted while the listing ran, and any region the script does not walk. comp-iam: its operation-list lens does not apply to a script run (no Lambda is deployed or changed and no IAM moves); the seat's list/get grant is proven by the live listing succeeding in 17 of 17 regions.
+
+BEFORE: saved census tests/protected_functions_listing.json held 233 functions (us-east-1 232). Live --check before the write: functions=238, protected=10, census_in_sync=True. NOTE for the issuer: the order expected census_in_sync=False at the base; it read True because the check compares the PROTECTED set (10, unchanged), not the whole listing, so the 233-vs-238 gap is a stale listing that the check does not flag.
+
+RE-SAVE: python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_protected_functions.py --live --write, rc 0. It wrote the census only; dell_deploy_policy.json was not edited (sha256 9bdfcfa26299.. before and after).
+DIFF against the committed files (names only): ADDED 5: advi-49f-billing-read-lambda, irpt-commentary-composition-read-lambda, irpt-commentary-draft-store-lambda, outlook-global-commentary-draft-lambda, teams-global-transcripts-pull-lambda (all us-east-1). REMOVED 0. Files changed in the tree: exactly one, tests/protected_functions_listing.json (+26 -1: five entries and the us-east-1 count 232 to 237). protected_functions.json is unchanged because the protected set (10) did not move. No diff outside the two census files.
+AFTER: a second live --check after the write read functions=238 again (the live count did not move between the check and the write).
+
+STEP 3: derive_protected_functions.py --from-file tests/protected_functions_listing.json --check (run from the root directory; the relative path resolves there): ok=True, last line below. derive_reached_roles.py has NO --check; its freshness test is --check-fresh, an 8-minute live re-read of IAM roles, which is outside this order's read-only bound (Lambda list/get and sts only), so it was NOT run and the reached-roles census was NOT regenerated. Whether five new functions change a reached role is therefore unread: a question for the issuer, no row filed because nothing measured it stale.
+
+CENSUS saved_before=233 live=238 added=5 removed=0
+PROTECTED-CHECK PROTECTED-CENSUS functions=238 regions=17 refused_regions=0 protected=10 by_authorizer=1 by_edge=5 ruled_in=4 unruled=0 census_in_sync=True deploy_has_statement=False ok=True
