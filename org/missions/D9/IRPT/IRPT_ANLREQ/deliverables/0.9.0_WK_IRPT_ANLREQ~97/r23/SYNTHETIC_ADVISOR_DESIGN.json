@@ -1,0 +1,336 @@
+{
+  "cell": "AR-y-276",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-276",
+  "issued_to": "0.9.0_WK_IRPT_ANLREQ~97",
+  "status": "DESIGN-ONLY. Nothing is minted, called, signed in, written or deleted. The live drive is not authorised by this record; it needs the never-widen pair (COO half and CTO half) and the executor lane's grants.",
+  "claim_words": "RECORD = a path@4b1e07dabc:line read by this seat. OFFLINE = run on the shipped bytes with recording fakes or pure decision functions, no token, no key, no AWS call. NOT-READ = named in not_read.",
+  "read": [
+    {
+      "what": "Ticket service principal classes, the per-action matrix, SUBMIT and CREATE",
+      "where": "infra/aws/lambda/ticket_center/lambda_function.py@4b1e07dabc:8-25 (route table), :165-180 (MATRIX), :182 (SUBMIT_ALLOWED_FIELDS), :300-330 (_actor, principal_class), :333-336 (authorize), :1102-1142 (submit_form), :1145-1170 (create_ticket)",
+      "finding": "principal_class reads the authorizer context only (email, userType, firmId); userType service plus sub names a service subject; firmId opal-capital is internal; any other firmId is client-human. CREATE admits svc-ticket-form, svc-analyst-intake, svc-commentary and internal, not client-human. SUBMIT-FORM admits client-human and internal and accepts only ticket_type, title, description."
+    },
+    {
+      "what": "Ticket service package and commentary routes and the TYPE_DEFINITIONS entry for analysis_request",
+      "where": "infra/aws/lambda/ticket_center/lambda_function.py@4b1e07dabc:21-24 (commentary routes), :98-127 (analysis_request, package_principal svc-irpt-packager at :120, service_fields), :135-138 (_INPUT_ID_RE, REPORT_ALLOWED_FIELDS, PACKAGE_REF_FIELDS, PACKAGE_ALLOWED_FIELDS)",
+      "finding": "PACKAGE_REF_FIELDS is report_ref, pdf_ref, original_ref, commentary_ref. The form as the fourth attachment has no member in it today; AR-y-273 decides that member."
+    },
+    {
+      "what": "The portal authorizer (API Gateway, the ticket routes)",
+      "where": "infra/aws/users/lambda/portal-authorizer/index.mjs@4b1e07dabc:16 (USERS_TABLE opal-users-v2), :293-322 (computeAllowedFirms), :334-351 (origin gate: CloudFront only), :368-370 (render branch), :380-384 (verify: RS256, issuer opal-portal-auth, audience opal-portal-api), :397-414 (context)",
+      "finding": "allowedFirmIds is COMPUTED: userType Dev or tier internal gives ALL; otherwise the own firmId, plus descendants only for role admin. It is not a token claim. A direct execute-api call without the CloudFront origin is refused before the token is read."
+    },
+    {
+      "what": "The CloudFront Lambda@Edge auth validator (investor-reporting routes)",
+      "where": "infra/aws/lambda-edge/auth-validator-edge/index.mjs@4b1e07dabc:9-12 (claims and injected headers), :338-341 (/auth/* passes through), :376-381 (getJwtKeySlots and verifyWithSlots with algorithms RS256 only), :403-407 (admin bypass), :409-426 (advisor tier gate, ADVI paths only), :546-553 (X-User-Email from sub, X-User-Tier, X-User-Role, X-Firm-Id, X-User-Type, X-Advisor-Id from advisorId, X-Advisor-Role)",
+      "finding": "The edge's verify call names only the algorithm. The iss and aud checks are in the portal authorizer, not read here for the edge (NOT-READ)."
+    },
+    {
+      "what": "The investor-reporting principal classifier and the advisor owner",
+      "where": "infra/aws/lambda/investor-reporting/_scope/resolve.py@4b1e07dabc:104-114 (TRUSTED_HEADERS), :223-296 (classify_principal: origin cloudfront; subject; userType client gives CLIENT at :284-285; admin role with a firm gives FIRM_OPERATIONS at :286-292; advisorId gives FIRM_ADVISOR at :293-294); infra/aws/lambda/investor-reporting/_scope/prospect.py@4b1e07dabc:25-48 (resolve_prospect_owner accepts FIRM_ADVISOR and FIRM_OPERATIONS only, firm in firm_ids(), advisor_id from the header)",
+      "finding": "A partner-firm advisor is FIRM_ADVISOR when its userType is not client, its role is not admin and its advisorId claim is non-empty."
+    },
+    {
+      "what": "The eligible-advisor rule E5, read from code (the PRD names E5 and does not define it)",
+      "where": "infra/aws/lambda/investor-reporting/_authz/served.py@4b1e07dabc:627 (ON_BEHALF_ADVISOR_PARAM advisor_email), :1063-1083 (_create_owner), :1085-1114 (_advisor_owner: partner row at opal-partner-<firm> with raw.email equal and firmId equal or absent; users PROFILE with email equal, firmId equal and status exactly active; advisorKey becomes the advisorId claim); infra/aws/lambda/investor-reporting/_scope/canonical_profile_reads.py@4b1e07dabc:26-30 (projections), :70-103 (get_user: email-index GSI, then ConsistentRead PROFILE), :105-120 (get_partner_profile: opal-partner-<firm> keyed by email, ConsistentRead); org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~G2/advisor_census.py@4b1e07dabc:3-6",
+      "finding": "E5 as code: an advisor is eligible when a partner row exists at the firm with a non-empty advisorKey, and the users PROFILE row is active in that firm. The on-behalf path (advisor_email) is for internal filers only (served.py:1019-1027); a partner-firm filer's upload resolves its owner from the headers (served.py:1031)."
+    },
+    {
+      "what": "The upload door owner rule",
+      "where": "infra/aws/lambda/investor-reporting/intake/uploads.py@4b1e07dabc:312-344 (_internal_for_allowed_firm; create refuses UPLOAD_CREATOR_MUST_BE_CURRENT_ACTOR unless on behalf)"
+    },
+    {
+      "what": "The form's own filing sequence (the portal, read at its base checkout, read-only)",
+      "where": "C:/dev/ajb_workspace/portal at cf52fdbf00f2798e5dd295170fcb00c2bee1b27b (DEV): src/pages/TicketCenter/analysisRequest.ts:133-139 (FileDeps), :149-191 (fileAnalysisRequest: upload door, RESOLVING re-post up to UPLOAD_MAX_TRIES, NORMALIZED with input_id, createTicket with source ticketcenter:i1), :251-271 (reportTypeForKeys, analysisBody with ticket_id), :304-318 (fileAndRequestAnalysis: file, request, record), :321-335 (sendAnalysisStep: submitAnalysisRequest with selectedTenant), :340-352 (recordStep: recordTicketReport); src/pages/TicketCenter/TicketCenter.tsx:289-333 (handleCreateAnalysis calls fileAndRequestAnalysis with ir and tickets {createTicket, recordTicketReport}); src/api/endpoints/tickets.ts:142-143 (POST /api/scoped/tickets), :165-170 (POST /api/scoped/tickets/{id}/report); src/api/endpoints/investor-reporting.ts:233 (analysis/inputs POST), :238 (analysis POST), :1210-1214 (upload query carries selected_tenant only), :1472 (submitAnalysisRequest); src/api/api-client.ts:46 (accessToken from localStorage), :76-87 (401 refresh path clears the token), :133-163 (Bearer header)",
+      "finding": "The form's request builder is a pure function over two injected clients. The drive can run the form itself (headless browser), or run the same builder over the real clients; the browser arm is the one that exercises the FORM."
+    },
+    {
+      "what": "Precedents and the direction",
+      "where": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R2_RUN/R2_CW1_CRAWL_PAIR.md (sections 2-4: row, token, one-firm proof, removal); org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release21/NEVER_WIDEN_PAIR_ANLREQ_STATUS_RULE_DRIVEN_EXERCISE.md (sections 3-6: identities, removal, the GSI bounded window); org/tier1_exec/1.0.0_SA_CTO/deliverables/PIVOT_DIRECTION_20261013/DIRECTION_DELL2_20261013.md (section 2 O1, lines 108-175: the form, the chain, J1-J6); org/missions/D9/IRPT/IRPT_ANLREQ/prd/IRPT_ANLREQ_PRD.md (lines 97-106: C-ONE-JOURNEY, C-PACKAGER, C-FIRM, C-ABSORB)",
+      "finding": "The R2 identity was an internal test-filer with cottonwood list; the R21 identities were internal with email; both removed by row delete after exp with ConsistentRead and GSI ABSENT reads. FWD-1's filer is a partner-firm advisor, so the internal-tier precedent does not carry over claim for claim. Its refusals travel as HTTP 200 envelopes (R21 section 7)."
+    }
+  ],
+  "identity": {
+    "name": "one synthetic partner-firm advisor for the FWD-1 sitting; minted for the sitting, deleted after its exp; the address carries the sitting's date",
+    "address": "irpt-anlreq-ar276-<YYYYMMDD>@opal.invalid (lowercase; the sitting's date stamp is filled at the act)",
+    "one_line": "a synthetic FIRM_ADVISOR of 49financial: a users PROFILE row active in 49financial, a partner row at opal-partner-49financial carrying an advisorKey, and one RS256 token with userType test-filer, tier advisor, role user and advisorId equal to that advisorKey",
+    "users_row": {
+      "table": "opal-users-v2",
+      "key": "PK USER#<address>, SK PROFILE",
+      "fields": {
+        "email": "<address>, lowercase, equal to the email-index value (the GSI read and the PROFILE read both key on it: canonical_profile_reads.py:70-103)",
+        "firmId": "49financial",
+        "status": "active (exact string; served.py:1102-1104 and :1178 test it exactly)",
+        "userType": "test-filer (not client, not service, not Dev: resolve.py:284, lambda_function.py:317, portal-authorizer:295)",
+        "role": "user (not admin: resolve.py:286, portal-authorizer:313)",
+        "name": "IRPT_ANLREQ AR-y-276 synthetic advisor",
+        "allowedFirmIds": "[\"49financial\"] as a LIST naming that firm only (a list, not the string ALL; served.py:1139-1192). The portal authorizer does not read it (see S1); the internal-narrowing reader and the status test do.",
+        "createdAt": "the write time, ISO-8601"
+      },
+      "write": "PutItem with ConditionExpression attribute_not_exists(PK); then a ConsistentRead GetItem of PK USER#<address>, SK PROFILE must read PRESENT before any token is minted. A present row before the write is a STOP."
+    },
+    "partner_row": {
+      "table": "opal-partner-49financial",
+      "key": "email = <address> (partition key, canonical_profile_reads.py:113)",
+      "fields": {
+        "email": "<address>",
+        "firmId": "49financial",
+        "advisorKey": "a synthetic advisor key string, minted at the act; it is the advisorId claim below",
+        "advisorName": "IRPT_ANLREQ AR-y-276 synthetic advisor",
+        "firmRole": "user"
+      },
+      "why": "E5 as code (served.py:1085-1114): an advisor is eligible when the partner row exists with advisorKey and the users row is active in the firm. A partner-firm filer is FIRM_ADVISOR only with a non-empty advisorId claim (resolve.py:293-294)."
+    },
+    "token_claims": {
+      "alg": "RS256",
+      "kid": "the current signing slot (the same slot the portal authorizer's verifyWithSlots accepts; the key read is reported after the fact, as in R2)",
+      "sub": "<address>",
+      "iss": "opal-portal-auth (portal-authorizer:382)",
+      "aud": "opal-portal-api (portal-authorizer:383)",
+      "name": "IRPT_ANLREQ AR-y-276 synthetic advisor",
+      "firmId": "49financial",
+      "tier": "advisor (not internal: portal-authorizer:301 does not grant ALL)",
+      "role": "user",
+      "userType": "test-filer",
+      "advisorId": "<the partner row's advisorKey>",
+      "iat": "the mint time",
+      "exp": "iat + (run length + 5 minutes), and never more than iat + 1200 seconds",
+      "absent_on_purpose": [
+        "allowedFirmIds: NOT a claim; the portal authorizer computes it (S1)",
+        "firmRole and advisorRole: absent, so no admin and no advisor-role tier (edge :403-407, :412)",
+        "allowedPages and allowedTabs: absent",
+        "officeId, regionId: absent (the edge injects 'null' or empty)"
+      ],
+      "one_token": "exactly one token for the whole sitting; a 401 or an expired token is a STOP; no refresh call (api-client.ts:76-87 must not run a refresh with this token)"
+    },
+    "resulting_principal": {
+      "ticket_service": "client-human (OFFLINE: pure decision on the context {email, firmId 49financial, userType test-filer, allowedFirmIds 49financial}: principal_class=client-human; SUBMIT-FORM ALLOW; CREATE, LIST, GET, REPORT, CLAIM, COMPLETE, PACKAGE, COMMENTARY_DRAFT DENY 403; firm 49financial allowed; cottonwood refused)",
+      "investor_reporting_edge": "FIRM_ADVISOR (resolve.py:293-294): X-User-Email <address>, X-Firm-Id 49financial, X-User-Type test-filer, X-Advisor-Id <advisorKey>, X-User-Role user, X-User-Tier advisor, X-Origin-Verify cloudfront",
+      "allowedFirmIds_computed_by_portal_authorizer": ["49financial"]
+    },
+    "sign_in": {
+      "method": "no login route is called (auth-validator-edge index.mjs:338-341 passes /auth/* through, and this design does not use it). The token is minted by the executor, held in the executor's process memory only, never written to a file, a log or a trace. Its signing key is read by the executor and reported after the fact through 0.0.0_AB_MSTR~DELL2.",
+      "page_driven_by_token_alone": "NO for the Ticket Center page as the SPA is built. The SPA reads accessToken from localStorage (api-client.ts:46) and sends Bearer (:133-163). A token alone drives the API routes over HTTP through the CloudFront host. The page itself needs a browser context with that localStorage entry seeded before load.",
+      "form_submit_driven_by": "ARM A (the one this design chooses): a headless browser on the portal DEV origin through CloudFront, localStorage accessToken seeded, the page's own TicketCenter form clicked, so the page calls fileAndRequestAnalysis itself. ARM B (named fallback, not the FORM): the same builder run over the real ir and tickets clients from a node or bun script with the same token in memory. ARM B proves the requests; only ARM A proves the form.",
+      "refresh_hazard": "a 401 makes api-client clear accessToken (:76-87); the run then cannot continue on the same token. That is a STOP, not a retry."
+    }
+  },
+  "drive": [
+    {
+      "step": 0,
+      "what": "open the Ticket Center with the seeded token (no API call of the drive)",
+      "route": "the portal page on the DEV origin through CloudFront (the route name is NOT-READ)",
+      "principal": "the synthetic advisor (browser session with localStorage accessToken)",
+      "expected": "the Analysis Request form renders; its firm is locked to 49financial (C-FIRM); no staff picker is offered",
+      "proof": "the CVO's read of the screenshot and of the firm control; the firm list route is NOT-READ",
+      "stop_if": "a 401 (refresh hazard), a picker listing any firm other than 49financial, or a second token is needed"
+    },
+    {
+      "step": 1,
+      "what": "upload the holdings file through the upload door",
+      "route": "POST /api/scoped/investor-reporting/analysis/inputs?selected_tenant=49financial (investor-reporting.ts:233, :1210-1214)",
+      "principal": "FIRM_ADVISOR via the edge headers (resolve.py:293-294)",
+      "body_members": "upload_token, filename, file_type or csv_base64 (AnalysisUploadRequestWire)",
+      "expected": "state NORMALIZED with upload_id and input_id; RESOLVING is re-posted by the form up to 5 times (analysisRequest.ts:159-163); NEEDS_CORRECTION or REFUSED files nothing and is a STOP for the drive",
+      "proof": "the response state and the input_id shape (portfolio_ and 64 lowercase hex, lambda_function.py:135); the S3 object and its retention read by the CVO",
+      "file": "the synthetic holdings file (shape in offline_run)"
+    },
+    {
+      "step": 2,
+      "what": "create the ticket with the answers and the attachment",
+      "route": "POST /api/scoped/tickets (the form's createTicket, tickets.ts:142-143)",
+      "principal": "client-human (the synthetic advisor)",
+      "body_members": "ticket_type, title, answers {advisor, firm, household, report_type, comparison_model, advisory_fee?, needed_by?, add_commentary?}, attachment {upload_id, input_id}, source ticketcenter:i1",
+      "expected_under_current_bytes": "403 forbidden, CREATE not permitted to client-human (lambda_function.py:168 and :1148-1150; offline decision DENY). The drive is a STOP here until AR-y-271 names the route a partner-firm filer uses (surprise IRPT_ANLREQ-D2-W97-S2).",
+      "expected_after_AR-y-271": "not decided by this record. The required outcome: one ticket whose requester.firm is 49financial, with its attachment upload_id and input_id held and its answers as filed",
+      "proof": "the response status and body, then a ConsistentRead of the item by an internal human's session (GET, lambda_function.py:14)"
+    },
+    {
+      "step": 3,
+      "what": "request the analysis with the new ticket's id",
+      "route": "POST /api/scoped/investor-reporting/analysis (investor-reporting.ts:238, :1472), query selected_tenant=49financial",
+      "principal": "FIRM_ADVISOR via the edge headers",
+      "body_members": "account_ids, client_id, comparison_keys, input_id, prepared_for, report_title, request_id (tckt-<ticket id>), snapshot_id, ticket_id, variant",
+      "expected": "HTTP 200 envelope carrying requestId and requestRevision. A refusal also travels as HTTP 200, so the envelope's body is read, not the status code (R21 section 7).",
+      "variant_expected": "the select's variant. UNDER CURRENT CODE the body variant is set from the key count (analysisRequest.ts:264; surprise IRPT_ANLREQ-D2-W97-S5); AR-y-275 must make it the select's.",
+      "proof": "the envelope's request id; the request read through the internal session (analysis-request-read, investor-reporting.ts:229)"
+    },
+    {
+      "step": 4,
+      "what": "write the request id back to the ticket",
+      "route": "POST /api/scoped/tickets/{ticketId}/report (tickets.ts:165-170)",
+      "principal": "client-human (the synthetic advisor)",
+      "body_members": "request_id, revision",
+      "expected_under_current_bytes": "403, REPORT is internal only (lambda_function.py:174; offline decision DENY). The form's step 4 fails for every partner-firm filer today. AR-y-271 decides the route.",
+      "expected_after_AR-y-271": "not decided here. The required outcome: report_ref set with request_id equal to step 3's id",
+      "proof": "ConsistentRead of the ticket, report_ref.request_id equal to step 3's requestId"
+    },
+    {
+      "step": 5,
+      "what": "READY trigger and the Opal producer's run (no caller)",
+      "route": "the READY event (H1, C-ABSORB d, the queue owned by IRPT_BCKEND ~P2); the analysis_ready event needs a ticket id and commentary_requested exactly true (DIRECTION O1, J1)",
+      "principal": "the system (event); no caller of this drive signs it",
+      "expected": "the Opal producer writes the report for the request; the producer principal is the one named in OPAL_PRODUCER_PRINCIPALS (DIRECTION O1, J3); no YCharts call",
+      "proof": "the producer's log read (log group NOT-READ) shows the producer principal and no YCharts line; the report read by analysis-request-read"
+    },
+    {
+      "step": 6,
+      "what": "the commentary drafter sets the DRAFT once",
+      "route": "POST /api/scoped/tickets/{ticketId}/commentary-draft (lambda_function.py:21, MATRIX COMMENTARY_DRAFT at :175)",
+      "principal": "svc-commentary (the drafter's own service token, NOT the synthetic)",
+      "expected": "draft_commentary with status DRAFT, written once (lambda_function.py:123-125). The firm must be in COMMENTARY_ALLOWED_FIRMS (env NOT-READ).",
+      "proof": "ticket read: draft_commentary.status equal to DRAFT; commentary_sent null"
+    },
+    {
+      "step": 7,
+      "what": "the packager attaches the pointers after the commentary",
+      "route": "POST /api/scoped/tickets/{ticketId}/package (lambda_function.py:18-20)",
+      "principal": "svc-irpt-packager (package_principal, lambda_function.py:120; no users row is read; body firm bound to PACKAGE_ALLOWED_FIRMS, env NOT-READ)",
+      "body_members": "from PACKAGE_ALLOWED_FIELDS (lambda_function.py:138): report_ref, pdf_ref, original_ref, commentary_ref, firm, prior_attached_at",
+      "expected": "the four items recorded: (1) the advisor's original upload as original_ref, (2) the form as filled, (3) the Opal-generated report as report_ref, (4) the commentary draft as commentary_ref. The form's member is NOT in PACKAGE_REF_FIELDS today (lambda_function.py:137); AR-y-273 decides it. The branded PDF is out of FWD-1 (PRD C-PACKAGER).",
+      "proof": "ticket read by the internal session: the four pointers"
+    }
+  ],
+  "end_state_reads": {
+    "principal": "an existing internal human session named by the COO at the act (not minted, not the synthetic)",
+    "ticket_read": "GET /api/scoped/tickets/{ticketId} (lambda_function.py:14): report_ref set; the four package pointers set; draft_commentary.status DRAFT; commentary_sent null; status open until the package lands (PRD FWD-1 row 5)",
+    "four_attachments_opened_from_the_ticket_page": [
+      "(1) original upload: GET analysis/requests/{requestId}/original (investor-reporting.ts:232)",
+      "(2) the form as filled: the ticket page's form view (its route is named by AR-y-273; NOT-READ)",
+      "(3) the Opal report: GET analysis/requests/{requestId} (investor-reporting.ts:229); the PDF read (:231) is not the report",
+      "(4) the commentary draft: the ticket's draft_commentary text, shown as DRAFT"
+    ],
+    "each_open_records": "status and a sha256 of the body; no body kept; no client figure in any file"
+  },
+  "log_reads": {
+    "producer": "the producer's trace for the request id shows the Opal producer served it (its principal in OPAL_PRODUCER_PRINCIPALS), and no YCharts call. Log group name NOT-READ.",
+    "ticket_service": "the ticket service's log group for the drive's calls shows one CREATE denial (if step 2 is run under current bytes) and the authorize decisions; log group name NOT-READ"
+  },
+  "offline_run": {
+    "script": ".scratch/r23/offline_run.ts in the worktree (not committed); runs the portal's real fileAndRequestAnalysis, analysisBody, comparisonKeysFor and reportTypeForKeys from the base checkout at cf52fdbf, with recording fakes for the upload door, createTicket, submitAnalysisRequest and recordTicketReport",
+    "principal_script": ".scratch/r23/principal_decision.py (python -I): the ticket service's own _actor, principal_class, authorize and _firm_allowed on the synthetic context",
+    "input_shape": "a constructed three-row holdings CSV: header Ticker, Quantity, Market Value; tickers SYNTHA, SYNTHB, SYNTHC; quantities and values are round synthetic numbers. Stored OUTSIDE the repository tree (the session scratchpad, folder ar276_r23). It holds no client data.",
+    "selected": "report_type Comparison; two synthetic catalogue keys SYNTHKEY_MODEL_A and SYNTHKEY_MODEL_B (checked models); no typed other ETFs",
+    "rc": "offline_run.ts rc=0, run twice, the two outputs compared byte for byte (cmp: identical). principal_decision.py rc=0.",
+    "request_sequence": [
+      "1 POST /api/scoped/investor-reporting/analysis/inputs?selected_tenant=<firm> body members: csv_base64, declared_currency, filename, price_date, reference_notional, upload_token",
+      "2 POST /api/scoped/tickets body members: answers, attachment, source, ticket_type, title; answers members: advisor, comparison_model, firm, household, report_type; attachment members: input_id, upload_id",
+      "3 POST /api/scoped/investor-reporting/analysis body members: account_ids, client_id, comparison_keys, input_id, prepared_for, report_title, request_id, snapshot_id, ticket_id, variant; scope member: selectedTenant",
+      "4 POST /api/scoped/tickets/{ticketId}/report body members: request_id, revision"
+    ],
+    "variant_observed": "multicomp for a Comparison select with two keys (analysisRequest.ts:264 via reportTypeForKeys :251-253). A defect the drive must not hide: it is AR-y-275's, surprise IRPT_ANLREQ-D2-W97-S5.",
+    "outcome_line": "filed=true analysis.ok=true record.state=recorded (the fakes always answer success; this is the builder's own control flow, not a server result)",
+    "principal_decision": "principal_class=client-human; SUBMIT-FORM ALLOW; CREATE DENY 403; LIST DENY 403; GET DENY 403; REPORT DENY 403; CLAIM DENY 403; COMPLETE DENY 403; PACKAGE DENY 403; COMMENTARY_DRAFT DENY 403; firm 49financial allowed True; firm cottonwood allowed False",
+    "cannot_predict": [
+      "the server's answer to each request; the fakes always succeed, so a 403 at step 2 or step 4 is invisible to this run (it is shown by the principal decision instead)",
+      "the edge's token verification and the portal authorizer's iss and aud checks: no token is minted, and the verify calls are not run",
+      "whether the CloudFront origin gate admits the request (portal-authorizer:340-351)",
+      "the upload door's owner rules and its NEEDS_CORRECTION and RESOLVING answers beyond the fake (uploads.py:312-344 runs server-side)",
+      "the HTTP status and envelope (refusals travel as HTTP 200), the submission reader's validation of the body, and the variant the producer writes",
+      "the READY event, the drafter, the packager and the producer (not in the form's sequence)",
+      "the firm list a partner filer is offered (resolveDirectoryContext route NOT-READ)",
+      "the live tables, the email-index GSI's eventual consistency, and the env lists (COMMENTARY_ALLOWED_FIRMS, PACKAGE_ALLOWED_FIRMS)"
+    ]
+  },
+  "removal": {
+    "sequence": "same sitting, after the LATER exp has passed (the token's exp, iat + run + 5 minutes, never past iat + 1200 seconds)",
+    "users_row": "DeleteItem PK USER#<address>, SK PROFILE, ConditionExpression attribute_exists(PK). Then ConsistentRead GetItem reads ABSENT, and the email-index query for the address reads no item. The GSI is eventually consistent: repeat the GSI read within a printed bounded window (5 minutes, the R21 method) until ABSENT; print each read with its time.",
+    "partner_row": "DeleteItem opal-partner-49financial key email=<address>, ConditionExpression attribute_exists(email). Then ConsistentRead GetItem ABSENT.",
+    "ticket": "the ticket the drive creates is a REAL ticket and is NOT deleted: the ticket service has no delete route (route table lambda_function.py:8-25). It is CLOSED by the existing internal routes: CLAIM then COMPLETE (lambda_function.py:15-16), by an internal human named by the COO at the act, after the end-state reads. Its title carries the test tag '[TEST IRPT_ANLREQ AR-y-276 r23]'. It stays in opal-tickets with its events list as the evidence trail.",
+    "what_stays_as_evidence": "the ticket item and its events; the four pointers; report_ref; the draft_commentary and its status; the absent reads of both rows (with times); the upload's input in the intake store (synthetic data); the report, pdf and commentary artifacts (synthetic data); the proof instance and the sitting's ledger entry",
+    "ledger": "an entry in org/critical_paths/change_management/ is NOT required by this record (no deploy, no code change); if the executor opens one for the sitting it closes only after the removal reads"
+  },
+  "bounds": {
+    "may": [
+      "one filing: one upload, one ticket, one analysis request, one report record, on one ticket",
+      "the four routes of steps 1 to 4 and step 0's page read, each once per step, with the one token",
+      "the internal reads of step 7's end state and the four opens, by an internal human's session that already exists",
+      "the removal deletes of its own two rows, each conditioned on attribute_exists"
+    ],
+    "may_not": [
+      "any firm other than 49financial: the firm is the signed-in user's (C-FIRM); cottonwood and every other firm is refused by _firm_allowed (offline decision) and by the picker's absence",
+      "any route not in steps 0 to 4, including LIST, GET, CLAIM, COMPLETE, COMMENTARY_DRAFT, COMMENTARY_SENT and PACKAGE, which are the system principals' routes",
+      "a second token, a refresh, a login route, or a token past exp (no retry with a second token; a token refused at the edge is a STOP and a row)",
+      "any write to a client's data, any holdings or ownership read through the identity, and any client figure in a tracked file or a log",
+      "a second ticket, a second upload, or a SUBMIT of a second form",
+      "any IAM, code, route, Terraform or environment change",
+      "any notification send: the executor reads the ticket service's notification paths before the act and STOPS if the drive's create would send mail to a person (see not_read)"
+    ]
+  },
+  "blast_radius": [
+    {
+      "key": "opal-users-v2 PK USER#<address>, SK PROFILE",
+      "may_change": "created by PutItem (attribute_not_exists), deleted after exp",
+      "rollback": "DeleteItem with attribute_exists; ConsistentRead ABSENT; GSI ABSENT within the window"
+    },
+    {
+      "key": "opal-partner-49financial, key email=<address>",
+      "may_change": "created, then deleted after exp",
+      "rollback": "DeleteItem with attribute_exists; ConsistentRead ABSENT"
+    },
+    {
+      "key": "opal-tickets item TCK-<the drive's id>",
+      "may_change": "created by step 2 (only after AR-y-271); report_ref, package pointers, draft_commentary written by the system principals; events appended; status open then completed by CLAIM and COMPLETE",
+      "rollback": "none by deletion (no delete route). Closed by CLAIM and COMPLETE; the residue is a test ticket on the 49financial board, accepted by the CVO when the sitting is graded"
+    },
+    {
+      "key": "intake store (the upload door's S3 object for the synthetic file)",
+      "may_change": "one object created by step 1 (synthetic data)",
+      "rollback": "none by the executor; a retained synthetic object; NAMED so the CVO can grade the residue"
+    },
+    {
+      "key": "the report, pdf and commentary artifacts and the producer's request record",
+      "may_change": "written by the Opal producer, the drafter and the packager under the drive's request id",
+      "rollback": "none by the executor; synthetic data only; NAMED"
+    },
+    {
+      "key": "the edge's token verification and the portal authorizer's verification",
+      "may_change": "nothing: read-only use of the signing slot",
+      "rollback": "not applicable"
+    },
+    {
+      "key": "log groups (producer, ticket service, edge)",
+      "may_change": "nothing: read-only filters, counted client side with the streams searched printed",
+      "rollback": "not applicable"
+    }
+  ],
+  "claim": {
+    "what_this_record_establishes": [
+      "RECORD: the identity's fields and token claims are read from the authorizer contract and from the classifiers (read list above), not recalled",
+      "RECORD: the drive's calls are the form's own calls, in the form's order (analysisRequest.ts:304-318), with the principal per call",
+      "OFFLINE: the form's builder over fakes lists four requests with body member names; the ticket service's decision on the synthetic context is DENY for CREATE and REPORT (two of the four)",
+      "RECORD: the removal covers the two rows and the ticket, the ticket closed by existing routes, not deleted",
+      "RECORD: nothing was minted, called, signed in, written, or deleted by this seat; the token was not requested, and no AWS, portal DEV or CloudFront call was made"
+    ],
+    "what_this_record_does_not_establish": [
+      "that the drive can file for a partner-firm advisor today: it cannot (S2), and the drive is a STOP at step 2 until AR-y-271 names the route",
+      "that the variant the advisor selects is the variant produced: it is not today (S5)",
+      "that E5's text in the PRD matches the code: the PRD does not define E5 in its text (S3)"
+    ]
+  },
+  "not_read": [
+    "the live edge: the CloudFront distribution, its origin gate secret and the viewer-request association (read: only the code)",
+    "the live tables: opal-users-v2 rows, its email-index GSI, opal-partner-49financial rows, opal-tickets items",
+    "the live authorizer configuration: the API Gateway authorizer's settings, the JWT key secret and its slots, the origin verification secret",
+    "the signing key and its slot; the verifyWithSlots and getJwtKeySlots module (lambda/lib/authkeys/jwtPublicKeys.mjs) and the edge's iss and aud behaviour",
+    "the portal DEV host and the Ticket Center page's route name and firm list route (resolveDirectoryContext)",
+    "the ticket service's notification paths on create (notify_dl_isolated and the create route's sends), and the environment values COMMENTARY_ALLOWED_FIRMS, PACKAGE_ALLOWED_FIRMS, OPAL_PRODUCER_PRINCIPALS and CUTOFF_ET",
+    "the producer, drafter and packager code paths for steps 5 to 7 (named by the DIRECTION and PRD, not read here)",
+    "the log group names of the producer, the ticket service and the edge",
+    "the IRPT_ANLREQ PRD's text for E5 (S3): the rule was read from code"
+  ],
+  "executor": "0.7.0_AE_CloudOps~AQ2 (the lane that ran the R21 status-rule exercise). This seat holds no key and makes no call.",
+  "grants_needed": [
+    "DynamoDB on opal-users-v2: GetItem, Query on the email-index GSI, PutItem with attribute_not_exists, DeleteItem with attribute_exists, for PK USER#<address>, SK PROFILE only",
+    "DynamoDB on opal-partner-49financial: GetItem, PutItem with attribute_not_exists, DeleteItem with attribute_exists, for key email=<address> only",
+    "read of the current JWT signing key (the lane's Secrets Manager grant; the secret's name is NOT-READ and the grant is named by the CVO)",
+    "logs:FilterLogEvents on the producer, ticket-service and edge log groups, read only, with auto-pagination and client-side counting",
+    "a headless browser against the portal DEV origin through CloudFront, with no portal write"
+  ],
+  "owed_before_any_live_act": [
+    "the COO half and the CTO half of the never-widen pair, on this file's blob",
+    "AR-y-271 (the route a partner-firm filer uses for steps 2 and 4) landed and read as met on DEV",
+    "AR-y-273 (the form's pointer member) and AR-y-275 (the variant from the select) landed",
+    "the executor lane's step 0: the NEVER-2 ledger read of every live worktree's .open_deploys, with the per-tree denominator printed"
+  ]
+}
