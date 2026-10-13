@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-223",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-223.driven-exercise-design.md",
+    "group": "OTHER",
+    "vintage_commit": "b4943b79ce"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R21_Y.md",
+    "vintage_commit": "b4943b79ce",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-223.driven-exercise-design.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~69",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~69/r21/EXERCISE_DESIGN.json",
+      "kind": "doc",
+      "commit_or_etag": "0c71be7d0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "design record for the driven status-rule exercise: route, three identities, offline_run results, log group, removal, bounds; nothing minted, called or read live",
+      "artifact_covered_by": [
+        "AR223-y-AC1",
+        "AR223-y-AC2J"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~69/r21/offline_run_ar223.py",
+      "kind": "script",
+      "commit_or_etag": "0c71be7d0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline only: imports the tree's directory/entry.py and _authz/served.py, drives the rule's real reader over a fake users table, stubs deps; no AWS call, no key, no token",
+      "artifact_covered_by": [
+        "AR223-y-AC1",
+        "AR223-y-AC2J"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR223-y-AC1",
+      "criterion_verbatim": "the design names three identities (`disabled`, `norow`, `active`), each selecting a firm other than its own, with expected outcomes `refused`/`row_non_active`, `refused`/`row_absent` and `admitted`/`row_present`; the offline run of each equals its expected outcome and class; the log group and the removal method are named.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-69/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y223-design --root C:/dev/wk-irpt-anlreq-69",
+      "output_evidence": "identities 3, offline results 3\nY223-DESIGN-OK",
+      "denominator": "3 of 3 identities named with a selected firm other than home (cottonwood, home opal-capital); 3 of 3 offline results equal their expected outcome and class; log group and removal method present",
+      "status": "PASS",
+      "expect": "Y223-DESIGN-OK"
+    },
+    {
+      "criterion_id": "AR223-y-AC2J",
+      "criterion_verbatim": "the route and the selected firm are read from the code, the selected firm opens no client data, the offline run used the shipped bytes and the rule's own harness, and nothing was minted or called.",
+      "method": "manual_read_with_citation",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~69/r21/offline_run_ar223.py --root C:/dev/wk-irpt-anlreq-69 (output recorded in EXERCISE_DESIGN.json offline_run); timeout 120 python -m pytest infra/aws/lambda/investor-reporting/_authz/tests/test_internal_status_active.py infra/aws/lambda/investor-reporting/_authz/tests/test_caller_class_log.py",
+      "output_evidence": "disabled: refused, row_non_active, deps_reached false; norow: refused, row_absent, deps_reached false; active: admitted, row_present, deps_reached TRUE for cottonwood; served.py sha256 30c0eb88ec38a7ddfc410e4ae1c06ee7a9e77661812ba666a45ffcf5552c2475 equals the source-map pin; rule harness 28 passed; minted false; live calls false",
+      "denominator": "3 identities; 3 of 3 offline outcomes equal the expectation; 2 of 3 arms read no artifact (refused before deps); 1 of 3 (active) reaches deps for the selected client firm",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion, graded at L9 by 3.0.0_SA_CVO and never by this worker. The clause 'the selected firm opens no client data' does NOT hold for the admitted arm: the live map admits only client firms and the active arm reads that firm's directory and ownership artifacts (surprise IRPT_ANLREQ-D2-W69-S1). Output recorded, no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "mutant: the active identity's expected class in EXERCISE_DESIGN.json set to row_absent, in a scratch copy under .scratch/mutant_root; check AR223-y-AC1 must go FAIL",
+      "expected": "Y223-DESIGN-FAIL with rc=1",
+      "observed": "FAIL: identity active: expected must be outcome admitted and class row_present (...'class': 'row_absent'...); Y223-DESIGN-FAIL; rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of offline_run_ar223.py compared byte for byte on stdout (cmp)",
+      "observed": "identical output across two runs; both rc=0",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W69-S1: premise fails -- every firm the live map can select is a client firm, and the admitted arm reads that firm's directory and ownership artifacts; the refused arms read none (BLOCKING, INERT; the judgment clause is recorded, not graded)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "the live path of the admitted (positive control) arm",
+      "reason": "not run by design: no live call, no mint; the offline stub stops at deps, so the live reads are the premise finding, not measured here"
+    },
+    {
+      "item": "the edge token verification (aggregate_gate.mjs) and any token",
+      "reason": "not exercised: the offline run sets the headers the verified edge would set and mints or verifies no token"
+    },
+    {
+      "item": "the live users table, its GSI and its rows",
+      "reason": "not read: a fake DynamoDB client answers the two calls the rule's reader makes"
+    },
+    {
+      "item": "the deployed irpt-directory-search zip bytes",
+      "reason": "the tree bytes the source map pins were run (served.py sha256 equal); the live CodeSha256 was not read"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python ar21_checks.py y223-design --root C:/dev/wk-irpt-anlreq-69; python offline_run_ar223.py --root C:/dev/wk-irpt-anlreq-69; python -m pytest on the two _authz harness files",
+      "result": "Y223-DESIGN-OK rc=0; offline 3 of 3 match, rc=0; 28 passed, rc=0"
+    }
+  ]
+}

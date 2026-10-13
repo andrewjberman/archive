@@ -3,7 +3,7 @@
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
 
   IB178-2  IB-pr-513  ONE more read-only count of leftover snapshot temp files on the runner host AFTER the 14:15Z holdings builds (the first read, IB178-1, preceded any build)
-    AC1  the record: counts are integers taken after a real build, on a host that is Online; the build is named (start time, package VersionId equal to the apply's, package digest, its own log line showing the snapshot path)
+    AC1  the record: counts are integers taken after a real build, on a host that is Online; the build is named (start time, package VersionId equal to the apply's, package digest, its own vintage receipt: kind s3, capture_date, version_id)
     AC2  the command is a read-only count and the record carries no path, name or long digit run
     AC3  the counts read 0 for both firms, and the bound counters: no write, no host start, no deletion
   IB178-1  IB-pr-512  the APPLY of the signed host-bundle pair (IB-pr-510): the two minimal holdings packages put at the runner host's next SCHEDULED Online, digest-gated, with the first read
@@ -70,12 +70,13 @@ def main():
                 fail("build.package_version_id must equal the VersionId the apply put for build.firm_id (%s)" % newv)
             if not re.fullmatch(r"[0-9a-f]{64}", str(bd.get("package_sha256", ""))):
                 fail("build.package_sha256 must be the 64-hex digest of the package the build ran")
-            if not str(bd.get("snapshot_path_log_line", "")).strip() or not str(bd.get("log_source", "")).strip():
-                fail("build.snapshot_path_log_line and build.log_source are required (the positive control: the build's own log line showing it took the snapshot path)")
+            vt = bd.get("vintage") or {}
+            if vt.get("kind") != "s3" or not str(vt.get("capture_date", "")).strip() or not str(vt.get("version_id", "")).strip():
+                fail("build.vintage must read kind s3 with a capture_date and a version_id (the positive control, CTO RE 7001): an env vintage makes the count vacuous: %s" % vt)
             print("OK: post-build counts %s; the build is named" % c2)
         elif arm == "AC2":
             cmd = str(r2.get("command_run", ""))
-            if not re.search(r"find", cmd) or "wc -l" not in cmd or re.search(r"(rm|mv|cp|tee|shred|dd|truncate|xargs)|-delete|-exec", cmd):
+            if not re.search(r"\bfind\b", cmd) or "wc -l" not in cmd or re.search(r"\b(rm|mv|cp|tee|shred|dd|truncate|xargs)\b|-delete|-exec", cmd):
                 fail("command_run must be a read-only find piped to wc -l")
             if re.search(r"(?<![0-9a-fA-F-])\d{9,}(?![0-9a-fA-F])", json.dumps(r2.get("temp_file_counts"))) or re.search(r"/tmp/\S", json.dumps(r2.get("temp_file_counts"))):
                 fail("the counts carry a path or a long digit run")
