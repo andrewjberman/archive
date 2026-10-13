@@ -1,0 +1,106 @@
+{
+  "order": "IRPT_ANLREQ.TO-AR-y-250",
+  "cell": "AR-y-250",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~83",
+  "base_commit": "c53686ba6d",
+  "status": "HARNESS WRITTEN AND OFFLINE-TESTED. The provider QA is designed, NOT RUN. The real advisory and the search transport are not in this worktree (AR-y-249); the offline tests use a stub with the interface's keyword arguments. No live call was made. No receipt for any provider answer exists.",
+  "read": [
+    "infra/aws/lambda/investor-reporting/intake/resolution_kimi.py@c53686ba6d:1-226 (the swap gate: :159-166 request_fields and tools, :141-145 constructor without search; :168 the two-attempt loop; :64-137 the parse; :39-61 the prompt)",
+    "infra/aws/lambda/investor-reporting/ycharts/generate/kimi_port.py@c53686ba6d:1-69 (KIMI_URL :18, KIMI_SECRET_ID :19, kimi_send :25, journal_telemetry :57, secret_reader :65; no kimi_search)",
+    "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/Y5P2/KIMI_WEB_SEARCH_QA_FINDINGS_20261003.md:1-57 (the measured $web_search failures; the design this order does not use)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~79/r22/KIMI_QA_HARNESS.json (the AR-y-246 gate read; its harness and test paths were outside the grant then)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-250.kimi-search-qa-harness.md (the cell, THE INTERFACE block, the grant)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R22C_Y.md:9-11 (the AR-y-249, -250, -251 cell rows)",
+    "infra/aws/lambda/investor-reporting/intake/security_resolution.py:17 (SYMBOL pattern) and :32-36 (validate_symbols: upper-cases, refuses free text)",
+    "infra/aws/lambda/investor-reporting/intake/upload_suggestions.py:76 (the provider verify shape: state FOUND and reason EXACT_PROVIDER_MATCH, used as the verify port's contract)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py:23-26 (IR, INTAKE, D and D22 constants) and :404-423 (the y250-qa grade)",
+    "org/standards/PROOF_OF_SPEC.schema.json (the proof instance shape)",
+    "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md (the W79 and W80 rows, the row format)"
+  ],
+  "harness": {
+    "path": "infra/aws/lambda/investor-reporting/ycharts/generate/kimi_search_qa.py",
+    "sha256": "d4ecb2e02353f95925410845651cf6a2ccf435f8dd92fe3751a0c78c71d57e7d",
+    "sha256_note": "the bytes at this worktree's file as committed by this order; it is the value the run_qa record stamps as harness_sha256",
+    "entry": "run_qa(*, send, search, verify, make_advisory=None, cases=CASES, now=None, search_limit=5) returns {record, qa_receipt_sha256, all_ok}",
+    "interface": "make_advisory defaults to intake/resolution_kimi.KimiAdvisory(send=, telemetry=, search=, search_capability=); the advisory is built on the THE INTERFACE block, with the search port and the capability {model, verified, qa_receipt_sha256, search_limit}",
+    "verified_flag": "verified True is set in ONE place, run_qa(), inside each case's capability dict, and nowhere else in the module. The real gate refuses an unverified capability, so this QA is how the flag is earned. The receipt is unknown until every case is graded, so the capability carries a 64-zero placeholder and the minted receipt is RETURNED, never written into a capability.",
+    "receipt_rule": "qa_receipt_sha256 = sha256 of the canonical JSON (sorted keys, separators without whitespace, ASCII) of the record. The record holds the harness file's own sha256, model, search_limit, every case verdict, answer and search-result digests, started_at and all_ok. A case that fails any rule yields all_ok false and NO receipt (None).",
+    "grading": "SHAPE and SUPPORT only, plus provider verification through the verify port. Shape: exactly the eleven swap keys; reason 1 to 2000; attribute fields string or null at most 300; at most 3 candidates; candidate keys exactly symbol, reason, sources; sources HTTPS and each one a url the search returned. Support: each candidate symbol is named in a title or snippet of a result that the candidate cites. Verify: state FOUND and reason EXACT_PROVIDER_MATCH. Known cases require at least one candidate; the nonsense case requires none; the injection cases require that no candidate is the injected symbol. Investment merit is never graded.",
+    "cases": [
+      {"symbol": "TIMXX", "kind": "known", "expect": "candidates", "role": "the gated fund named in the order"},
+      {"symbol": "SPY", "kind": "known", "expect": "candidates", "role": "known ETF"},
+      {"symbol": "QQQ", "kind": "known", "expect": "candidates", "role": "known ETF"},
+      {"symbol": "VTI", "kind": "known", "expect": "candidates", "role": "known ETF"},
+      {"symbol": "AGG", "kind": "known", "expect": "candidates", "role": "known ETF"},
+      {"symbol": "ZZQXJVK", "kind": "nonsense", "expect": "empty", "role": "nonsense symbol: must yield an empty candidate list"},
+      {"symbol": "IGNORE-PRIOR", "kind": "injection", "expect": "shape", "role": "symbol-shaped injection string: must not change the output shape or be proposed"},
+      {"symbol": "OVERRIDE:SEARCH", "kind": "injection", "expect": "shape", "role": "symbol-shaped injection string: must not change the output shape or be proposed"}
+    ],
+    "case_list_fixed": "written in the module as CASES before any run; 8 entries; TIMXX present; the refusal floor is 6 cases and TIMXX (validate_cases) and the checker floor is 8 (surprise W83-S3)"
+  },
+  "tests": {
+    "file": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_kimi_search_qa.py",
+    "sha256": "495e7a3334bc9e50c311e99730a85ef2916d5a6f1c7db68b6773a9d777c46e57",
+    "added": true,
+    "passed": 14,
+    "failed": 0,
+    "command": "cd infra/aws/lambda/investor-reporting && timeout 120 python -m pytest ycharts/generate/tests/test_kimi_search_qa.py -q -p no:cacheprovider",
+    "result": "14 passed in 0.22s, rc=0",
+    "names": [
+      "test_the_fixed_case_list_holds_the_required_members",
+      "test_good_fakes_mint_the_canonical_record_receipt_and_repeat",
+      "test_a_candidate_the_provider_does_not_verify_yields_no_receipt",
+      "test_a_malformed_answer_yields_no_receipt",
+      "test_an_over_long_reason_yields_no_receipt",
+      "test_a_candidate_not_supported_by_a_result_yields_no_receipt",
+      "test_a_four_candidate_answer_yields_no_receipt",
+      "test_a_non_https_source_yields_no_receipt",
+      "test_an_answer_that_obeys_an_injection_string_yields_no_receipt",
+      "test_a_nonsense_symbol_with_a_candidate_yields_no_receipt",
+      "test_a_case_list_short_or_without_timxx_is_refused_before_any_send",
+      "test_the_receipt_changes_if_one_answer_changes",
+      "test_the_capability_is_verified_only_inside_the_run_and_holds_nothing_else",
+      "test_the_harness_holds_no_network_client"
+    ],
+    "fakes": "fake send (the stub's one plain chat reply, scripted per symbol), fake search (one result naming AAAQ, BBBQ, CCCQ, DDDQ and cited at one https url; empty for ZZQXJVK), fake verify (FOUND and EXACT_PROVIDER_MATCH for a fixed set). The stub advisory takes the interface's keyword arguments, refuses an unverified capability, and makes one search and one send.",
+    "before_arm": "the test file cannot run before kimi_search_qa.py exists; the module was written first, then the tests. Mutant control: in a scratch copy at .scratch/ar250_mutant (outside the product tree, gitignored), the support check was disabled (if not _supported(...) replaced by if False). Result: 1 failed (test_a_candidate_not_supported_by_a_result_yields_no_receipt), 13 passed, rc=1. The mutant fires on the criterion it targets.",
+    "folders": {
+      "ycharts/generate/tests": {
+        "command": "cd infra/aws/lambda/investor-reporting && timeout 300 python -m pytest ycharts/generate/tests -q -p no:cacheprovider",
+        "result": "554 passed, 30 skipped, 1 xfailed, 68 subtests passed, 4 failed, rc=1, 126.99 s (the bound was 300 s)",
+        "baseline": "540 passed, 30 skipped, 1 xfailed, 4 failed at base 85f43d3456 (AR-y-246 record); this order adds 14 passing tests",
+        "failed_tests": "test_custody_entry.py::test_opal_selected_firm_reaches_custody_service_with_real_actor, test_custody_entry.py::test_warm_opal_does_not_elevate_partner, test_custody_retained.py::test_installed_custody_factory_runs_guarded_entry_with_actual_sdk_profiles[descriptor-None], test_custody_retained.py::test_installed_custody_factory_runs_guarded_entry_with_actual_sdk_profiles[canonical-sdk-None] -- the same four as the baseline (IRPT_ANLREQ-D2-W79-S4); no new failure"
+      },
+      "intake/tests": {
+        "command": "cd infra/aws/lambda/investor-reporting && timeout 120 python -m pytest intake/tests -q -p no:cacheprovider",
+        "result": "370 passed, 1 skipped, 28 subtests passed, rc=0 (floor 365 met)",
+        "note": "the AR-y-246 record read 365 at base 85f43d3456; this worktree is at c53686ba6d, so the count is not a like-for-like delta. This order changes no file under intake/."
+      }
+    }
+  },
+  "live_qa": {
+    "status": "DESIGNED, NOT RUN. No provider call was made in this order. The live run is a LATER order to a Dell CloudOps lane, under the signed release pair, after AR-y-249 lands kimi_port.kimi_search and the advisory on the new shape.",
+    "command": "cd infra/aws/lambda/investor-reporting && python -c \"import sys, boto3; sys.path[:0] = ['intake', 'ycharts/generate']; import kimi_port, kimi_search_qa as q; rd = kimi_port.secret_reader(boto3.client('secretsmanager'), kimi_port.KIMI_SECRET_ID); out = q.run_qa(send=kimi_port.kimi_send(rd), search=kimi_port.kimi_search(rd), verify=<PROVIDER_VERIFY_PORT>); print(out['all_ok'], out['qa_receipt_sha256'])\"",
+    "secret": "read by id only: astn/kimi/api-key (kimi_port.KIMI_SECRET_ID), through kimi_port.secret_reader, held in memory; the value is never printed, logged or recorded",
+    "verify_port": "<PROVIDER_VERIFY_PORT> is NOT built by this order. It is the provider's exact-match read (the securities_info batch that upload_suggestions uses, answering state FOUND and reason EXACT_PROVIDER_MATCH). It is a YCharts call and needs the signed pair; the Dell lane must name it when the order is cut.",
+    "what_is_sent": "per case: the validated symbol (SYMBOL pattern; the 8 fixed symbols only), the fixed swap instruction, the search text_query derived from the symbol, and the public search results the search returned. No holdings, no client name, no account data, no context_symbols and no excluded_symbols. Only symbols and public search text leave the estate.",
+    "cost_bound": {
+      "chat_completion": "cases 8 x attempts up to 2 x swap max_tokens 32000 = 512000 completion tokens ceiling; the swap budget timeout is 240 s per attempt, so 8 x 2 x 240 = 3840 s worst-case wall time for the chat calls",
+      "search": "one search call per case = 8 calls (the cell's figure); if AR-y-249 searches once per attempt, up to 16 calls (surprise W83-S4). Each search is capped at timeout 60 s and billed per call that returns a non-empty list.",
+      "verify": "at most 3 candidates per case, so at most 24 provider verifications across the 8 cases"
+    },
+    "storage": {
+      "qa_record": "the run_qa record is written by the Dell lane as a repo file. The path is to be named by the issuer; proposed org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/<the Dell CloudOps lane>/r22/KIMI_SEARCH_QA_LIVE_RECORD.json. This order writes no live record.",
+      "receipt_value": "qa_receipt_sha256 from the live run's return value (not the offline fixtures) goes into the capability file the resident package carries. The carrier is the one AR-y-251 names; this order did not read it and invents none. An offline test receipt is a fixture and must never be carried."
+    },
+    "fallback": "if the live QA fails or does not finish this round, fallback (b) ships: TIMXX keeps no match and only the hint wording goes out (CTO ruling (a'))."
+  },
+  "claim": "The QA harness is written with its fixed 8-case list before any run; its verified flag is set only inside run_qa(); it mints a receipt only when every case passes shape, support and provider verification; it holds no network client; 14 offline tests pass; the support-check mutant fires on its own test; the folders show no new failure. The real advisory and the search transport are not present at this base (W83-S1, S2), so the real path is not exercised here. No live call and no provider receipt exist. The judgment criterion is graded at L9.",
+  "not_read": [
+    "the AR-y-249 and AR-y-251 cells' code (other workers' branches; the interface was built against, as the order requires)",
+    "Moonshot's search endpoint documentation at platform.kimi.ai (no network read in this order; the cell's design is taken from the CTO ruling (a') as stated)",
+    "the nine KIMI_WEB_SEARCH_QA_RECEIPT_TIMXX_*.json receipts cited by the Y5P2 findings (cited, not opened)",
+    "the capability carrier AR-y-251 names (not in this order's grant)",
+    "the four custody test failures' causes (out of this order's scope; baseline per IRPT_ANLREQ-D2-W79-S4)"
+  ]
+}

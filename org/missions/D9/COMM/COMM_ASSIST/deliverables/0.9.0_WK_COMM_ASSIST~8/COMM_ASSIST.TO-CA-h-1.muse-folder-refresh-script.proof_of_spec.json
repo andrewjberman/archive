@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-h-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-h-1.muse-folder-refresh-script.md",
+    "group": "OTHER",
+    "vintage_commit": "3477d67af5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round16.md",
+    "vintage_commit": "3477d67af5",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-h-1.muse-folder-refresh-script.md"
+  },
+  "assignee": "0.9.0_WK_COMM_ASSIST~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/muse_reader/refresh.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit on the worker branch; nothing deployed, scheduled or installed on dell2 (cell CA-h-2)",
+      "artifact_covered_by": ["CAh1-AC1", "CAh1-AC2", "CAh1-AC3"]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/muse_reader/__init__.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "package marker only; nothing deployed",
+      "artifact_covered_by": ["CAh1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAh1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r16/checks/check_h1_failure_shape.py\" expect: H1-FAILURE-SHAPE ok=True",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r16/checks/check_h1_failure_shape.py\"",
+      "output_evidence": "(timeout 120, rc 0) H1-FAILURE-SHAPE ok=True reason=failed source unreadable+null+last_good_at; control true-empty ok",
+      "denominator": "1 of 1 check run; inside it 3 assertions on the failing arm (status, items null, last_good_at carried, error text) and 1 control arm (true empty) and 1 unrelated source",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CAh1-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r16/checks/check_h1_live.py\" expect: H1-LIVE ok=True unreadable=0 of 4",
+      "method": "live_read",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r16/checks/check_h1_live.py\"",
+      "output_evidence": "(timeout 120, rc 0) H1-LIVE ok=True unreadable=0 of 4 rc=0 statuses={\"drafts\": \"ok\", \"eod_today\": \"absent\", \"open_calls\": \"ok\", \"sprint_today\": \"absent\"}",
+      "denominator": "unreadable 0 of 4 sources; ok 2 (open_calls 15 open rows across 4 box copies; drafts 4 pending rows from 556-558 scanned table rows); absent 2 (eod:2026-10-13 row not present; no objects under daily-reports/2026-10-13/)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CAh1-AC3",
+      "criterion_verbatim": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r16/checks/check_h1_census.py\" expect: hits=0 ok=True",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r16/checks/check_h1_census.py\"",
+      "output_evidence": "(timeout 120, rc 0) H1-CENSUS files=6 hits=0 ok=True patterns=6",
+      "denominator": "6 files written by the live run (drafts.json, eod_today.json, open_calls.json, sprint_today.json, INDEX.json, README.txt) x 6 patterns (AWS key, PEM, bearer, JWT, email, secret assignment); hits 0 of 36 file-pattern tests",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CAh1-AC1 base arm: the check run with its module hook pointed at a module that does not exist, which is the base state the TO names",
+      "expected": "H1-FAILURE-SHAPE ok=False",
+      "observed": "H1-FAILURE-SHAPE ok=False reason=import ModuleNotFoundError: No module named 'data.transcripts.scripts.muse_reader_absent' (rc 0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "CAh1-AC1 run twice, before and after the eod_today edit: identical lines. AC2 and AC3 read live AWS state (the table row count moved 558 then 556 between runs), so no same-input determinism is claimed for them.",
+      "observed": "CAh1-AC1 identical on both runs (ok=True); AC2 and AC3 live, N/A for same-input determinism",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "scheduling, installing or running the refresh on dell2",
+      "reason": "outside this cell; CA-h-2 runs on dell2 and measures dell2's launch form and identity"
+    },
+    {
+      "item": "AWS write calls (put, update, delete, deploy, apply)",
+      "reason": "the TO rule is read calls only; none were made. The scan, get-item, list and get-object calls are reads"
+    },
+    {
+      "item": "CAh1-AC2 base arm (script absent)",
+      "reason": "the base state was not reproduced by deleting the script; the TO records it as FAIL and the base arm was measured for AC1 only"
+    }
+  ],
+  "surprises": [
+    "COMM_ASSIST-W8-S1",
+    "COMM_ASSIST-W8-S2",
+    "COMM_ASSIST-W8-S3",
+    "COMM_ASSIST-W8-S4",
+    "COMM_ASSIST-W8-S5"
+  ],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~8/COMM_ASSIST.TO-CA-h-1.muse-folder-refresh-script.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m py_compile data/transcripts/scripts/muse_reader/refresh.py",
+      "result": "rc 0 (compiles)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python data/transcripts/scripts/muse_reader/refresh.py --root .scratch/muse_live2",
+      "result": "READ open_calls boxes=4 copies_read=4 copies_absent=0 open_rows=15; READ drafts table=teams-global-chat-assist-table rows_scanned=556 pages=2 pending_rows=4; OK open_calls items=15; OK drafts items=4; ABSENT eod_today; ABSENT sprint_today; MUSE-REFRESH ok=2 absent=2 unreadable=0; rc 0"
+    },
+    {
+      "tool": "aws",
+      "invocation": "shutil.which('aws') -> C:\\Users\\AndrewBerman\\bin\\aws.CMD ; positive controls: dynamodb get-item on an existing state row (Item present), s3api list-objects-v2 --prefix daily-reports/ --max-items 5",
+      "result": "get-item existing row rc 0 Item present; list-objects-v2 rc 0 keys from 2026-08-27 onward, truncated"
+    }
+  ]
+}
