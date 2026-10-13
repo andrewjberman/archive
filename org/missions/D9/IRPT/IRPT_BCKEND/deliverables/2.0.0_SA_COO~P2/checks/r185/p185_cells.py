@@ -158,8 +158,12 @@ def main():
         cur = (load(SRCMAP).get("functions") or {}).get(FN, {}).get("artifact_sha256")
         if cur != b64_of_hex(f["live_sha256"]):
             fail("live_sha256 must equal the source map's last deployed CodeSha256 for %s (%s): the census is of a STALE live otherwise" % (FN, cur))
-        if f.get("built_twice_identical") is not True or f.get("built_signature_mismatched") != 0 or f.get("live_signature_mismatched", 0) != 0:
-            fail("built twice identical true and 0 signature mismatches on the built and live zips are required")
+        if f.get("built_twice_identical") is not True:
+            fail("built twice identical true is required")
+        sm_b, sm_l = f.get("built_signature_mismatched"), f.get("live_signature_mismatched")
+        sl_b, sl_l = f.get("signature_mismatch_lines_built"), f.get("signature_mismatch_lines_live")
+        if not is_int(sm_b) or not is_int(sm_l) or sm_b > sm_l or not isinstance(sl_b, list) or not isinstance(sl_l, list) or len(sl_b) != sm_b or len(sl_l) != sm_l or not set(sl_b) <= set(sl_l):
+            fail("signature mismatches (AMENDMENT 1): built must not exceed live and every built line must be a live line (a pre-existing mismatch the live zip carries is named, not hidden)")
         bm, lm = f.get("built_attribute_mismatched"), f.get("live_attribute_mismatched")
         bl, ll = f.get("attribute_mismatch_lines_built"), f.get("attribute_mismatch_lines_live")
         if not is_int(bm) or not is_int(lm) or bm > lm or not isinstance(bl, list) or not isinstance(ll, list) or len(bl) != bm or len(ll) != lm or not set(bl) <= set(ll):

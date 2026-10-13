@@ -1,0 +1,96 @@
+{
+  "readers": [
+    {
+      "path": "data/assets/scripts/analysis/commonwealth_price_census.py",
+      "line_before": 57,
+      "line_after": 59,
+      "asset_name_source": "the store's own asset_name column (STORES[0] name_col); the universe read carries no security name here (Security_Description is not read), so presence is the union over a ticker's names",
+      "change": "STORES[0] gains name_col; read_store keeps the name; _clean keeps (kind, key, day, source, name); presence views unchanged (union per ticker); new counts ticker_name_ambiguity (line 432) and name_free_rows (line 427); meta fields ticker_days_two_names and tickers_two_names added; rows_kept computed name-free; universe-hash version v4-census to v5-census (store cache refresh)",
+      "feeds_served": false
+    },
+    {
+      "path": "data/assets/scripts/silver/commonwealth_price_basis_census.py",
+      "line_before": 384,
+      "line_after": 402,
+      "asset_name_source": "the store's own asset_name column (read_store reads it at line 164); the Yahoo series is ticker-keyed, so the name is used only to detect a ticker-day with two names",
+      "change": "ticker_day_series (line 168): a ticker-day whose yahoo rows carry two asset_names is left out of the series only where the rows disagree on price; where they agree the value is the median, as before; new column ambiguous_name_days appended to the CSV; one added MD count line in section 3",
+      "feeds_served": false
+    },
+    {
+      "path": "data/assets/scripts/silver/commonwealth_bond_custodian_price.py",
+      "line_before": 125,
+      "line_after": 259,
+      "asset_name_source": "the bond's Security_Description in the transactions table (ttx, already read by main) matched against the store asset_name",
+      "change": "norm_name, bond_name_index and name_matches_bond (lines 115-139); read_cot_stores carries the store asset_name on each silver CUSIP row (line 155, gold rows name None); main counts a silver row for a bond only under that bond's own transaction name (line 259) and reports the refused rows in the MD",
+      "feeds_served": false
+    },
+    {
+      "path": "data/assets/scripts/silver/commonwealth_bd_txn_provenance.py",
+      "line_before": 117,
+      "line_after": 49,
+      "asset_name_source": "the store asset_name only (this reader reads no transactions); the CUSIP-valued ticker matches are counted by (ticker, asset_name)",
+      "change": "the HEAD selection moved verbatim into store_hit_mask (line 49, called at line 143); ticker_key_summary (line 64) counts (ticker, asset_name) pairs for the store key and is written as one added line in section 2; COLS gains asset_name; no row is merged or dropped",
+      "feeds_served": false
+    }
+  ],
+  "tests": {
+    "passed": 28,
+    "failed": 0,
+    "files": [
+      "data/assets/scripts/silver/tests/test_commonwealth_ticker_asset_key.py",
+      "data/assets/scripts/silver/tests/test_commonwealth_price_basis.py",
+      "data/assets/scripts/analysis/tests/test_commonwealth_price_census.py"
+    ]
+  },
+  "store": {
+    "key": "s3://opal-data-cot/silver/prices/canonical_prices.parquet",
+    "version": "76.rgWIXYdLNsXSwrXvyuEmaEtfr9y98",
+    "bytes": 97443387,
+    "bytes_match": true
+  },
+  "two_name_ticker_days": {
+    "SCCO": 1027,
+    "APH": 70,
+    "others": 274481
+  },
+  "before_after": [
+    {
+      "reader": "commonwealth_price_census.py",
+      "rows_changed": 0,
+      "existing_values_changed": 0,
+      "state": "measured"
+    },
+    {
+      "reader": "commonwealth_price_basis_census.py",
+      "rows_changed": 0,
+      "existing_values_changed": 0,
+      "state": "measured"
+    },
+    {
+      "reader": "commonwealth_bond_custodian_price.py",
+      "rows_changed": 0,
+      "existing_values_changed": 0,
+      "state": "measured"
+    },
+    {
+      "reader": "commonwealth_bd_txn_provenance.py",
+      "rows_changed": 0,
+      "existing_values_changed": 0,
+      "state": "measured"
+    }
+  ],
+  "served_figures_move": false,
+  "row_w158_s2_disarms": "not_established",
+  "headline": "All four readers now key the store by (ticker, asset_name) in code and fixtures. On the pinned store none of them changes a row or an existing value: census presence changes for 0 of 4000 tickers and the name-free row count is equal (5,186,000); basis census removes or changes 0 of 3,163,974 yahoo ticker-day series values; the custodian reader has 0 CUSIP-valued store rows; the provenance selection is 0 rows either way. Two-name ticker-days: SCCO 1027, APH 70, others 274,481 (all sources, non-null ticker). No served figure moves: none of the four writes an S3 object. The as-written AC1 invocation errors at collection (rc=2, duplicate package name tests, present at HEAD before any edit); the 28 tests pass per file (6, 3, 19) and under --import-mode=importlib, twice. row_w158_s2_disarms is not_established: the channel row ADVI_COTBKF-D2-W158-S2 is written about the minted-table consumers, not the ticker-only readers (surprise ADVI_COTBKF-D2-W166-S4).",
+  "not_established": [
+    "AC1 as written: pytest rc=2 at collection (ModuleNotFoundError tests.test_commonwealth_price_census) because data/assets/scripts/silver/tests and data/assets/scripts/analysis/tests are both packages named tests; present at HEAD before any edit; the packaging fix is outside this order's paths (surprise ADVI_COTBKF-D2-W166-S1). The 28 figure is from per-file runs and from --import-mode=importlib runs.",
+    "The four main() read-only runs were not made: census main lists every bucket and writes deliverables; basis census main calls Yahoo (barred); custodian main needs the transactions table (not on this box) and writes a deliverable; provenance main lists every object version of opal-data-cot. Before and after were measured through each reader's own functions on the local copy of the pinned object, with HEAD copies (git show HEAD:<file>) for the old side (surprise ADVI_COTBKF-D2-W166-S3).",
+    "Basis census classes (as_traded, mixed and the rest) were not re-run because Yahoo calls are barred; the yahoo series is identical before and after on the pinned store (0 values changed, 0 days removed or added), so the class inputs are identical.",
+    "Custodian name test: its effect needs the bond's transaction Security_Description, which is not on this box; the reader has 0 CUSIP-valued rows on the pinned store, so the name test cannot change a row here.",
+    "The census universe does not read security names. On the pinned store, for all 4000 tickers (price greater than 0 rows), the union of dates equals the largest single asset_name's date count, so presence by ticker equals presence by name here. This is a measurement on the store, not a proof for a future store.",
+    "Served-figure answer: none of the four writes an S3 object (no put, upload or write call in any of the four files; their writes are local deliverable files). The consumer record CONSUMER_READ.json reads the minted tables, not this store, and the store's gold consumers (B_00, B_01, B_02, A_03, E_00, E_01) are not touched by this change.",
+    "row_w158_s2_disarms is not_established, not true: the four readers are keyed in code and tests, but the channel row ADVI_COTBKF-D2-W158-S2 is written about the minted-table consumers, and the census presence view remains ticker-level by design (presence is name-neutral on the store). The disarm act belongs to disarm_owner 1.0.0_SA_CTO~DELL2; this worker did not edit the row.",
+    "Item 2 literal rule: implemented as the price-conditional rule (a two-name ticker-day is left out only where its yahoo rows disagree on price). The literal branch would have removed 177,413 price-equal yahoo ticker-days (surprise ADVI_COTBKF-D2-W166-S2).",
+    "The account-id scan and the commit gate are reported at commit time, not in this record."
+  ]
+}
