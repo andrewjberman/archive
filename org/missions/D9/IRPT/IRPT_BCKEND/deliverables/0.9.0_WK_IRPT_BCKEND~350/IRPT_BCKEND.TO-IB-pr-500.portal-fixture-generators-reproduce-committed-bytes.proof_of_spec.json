@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-500",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-500.portal-fixture-generators-reproduce-committed-bytes.md",
+    "group": "OTHER",
+    "vintage_commit": "f91aedd1ef"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "f91aedd1ef",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-500.portal-fixture-generators-reproduce-committed-bytes.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~350",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-15/gen-fixtures.ts",
+      "kind": "test",
+      "commit_or_etag": "69f69895",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal LOCAL commit 69f69895 on wk-IRPT_BCKEND-350-portal, not pushed; fe-s-15 generator now emits unprojected_grant and omits status.internal_correlation_id from job envelopes; its output is byte-equal to HEAD",
+      "artifact_covered_by": ["IB171-5-AC1"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/fixtures/wire/ExportBundle.valid.json and portal/src/pages/InvestorReporting/fixtures/wire/requests/submit-export.request.json",
+      "kind": "test",
+      "commit_or_etag": "69f69895",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal LOCAL commit 69f69895, not pushed; selected_sections drops S-ALLOC-2 and keeps S-RET-1; CRLF kept",
+      "artifact_covered_by": ["IB171-5-AC2", "IB171-5-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~350/IB500_SESSION_LOG.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "worker session log; no deploy",
+      "artifact_covered_by": ["IB171-5-AC1", "IB171-5-AC2", "IB171-5-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB171-5-AC1",
+      "criterion_verbatim": "running each generator leaves its outputs byte-equal to the committed files (end-of-line differences ignored)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r171/p171_cells.py\" . IB171-5-AC1",
+      "output_evidence": "FAIL: fe-s-18 did not run: ...fe-s-18\\gen-fixtures.ts:435:18 ... Bun v1.4.2 (Windows x64)\nIB171-5-AC1 FAIL\nrc=1",
+      "denominator": "1 of 2 generators ran to completion in the check: fe-s-15 ran (its output byte-equal to HEAD by cmp on job.queued.json and smoke/fe-s-15-clean.json); fe-s-18 did not run (HEAD generator throws in holdingsMap after writing fe-s-18-frozen.json)",
+      "expect": "^IB171-5-AC1 PASS$",
+      "status": "FAIL",
+      "status_reason": "AC1 FAIL: the check's fe-s-18 run did not run (HEAD generator throws after writing a committed map); the fe-s-18 half is refused, row IRPT_BCKEND-D2-W350-S1"
+    },
+    {
+      "criterion_id": "IB171-5-AC2",
+      "criterion_verbatim": "every selected_sections id in the portal ExportBundle wire fixture and the submit-export request fixture is a section_id of the portal AnalysisReport wire copy",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r171/p171_cells.py\" . IB171-5-AC2",
+      "output_evidence": "OK: 2 selected section id(s) all resolve\nIB171-5-AC2 PASS\nrc=0",
+      "denominator": "2 of 2 selected section ids resolve (ExportBundle.valid.json 1 id, submit-export.request.json 1 id) against the AnalysisReport wire copy section_id list [S-RET-1] (1 of 1)",
+      "expect": "^IB171-5-AC2 PASS$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB171-5-AC3",
+      "criterion_verbatim": "the five token-citing portal tests still pass (21) and no fixture carries the old AnalysisReport section",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r171/p171_cells.py\" . IB171-5-AC3",
+      "output_evidence": "FAIL: 15 fixture(s) carry the old AnalysisReport section again\nIB171-5-AC3 FAIL\nrc=1",
+      "denominator": "15 fixtures flagged by the check's section_type annualized_return pattern (the corpus size is not printed by the check); the five-test gate passed before the scan; the pattern includes wire/AnalysisReport.valid.json, which carries the current section S-RET-1",
+      "expect": "^IB171-5-AC3 PASS$",
+      "status": "FAIL",
+      "status_reason": "AC3 FAIL: the check's old-section pattern matches the current AnalysisReport copy (15 fixtures flagged); the five-test gate passed; row IRPT_BCKEND-D2-W350-S3"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control; none was run.",
+      "expected": "N/A",
+      "observed": "not run: the order names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "fe-s-15 generator output compared to the HEAD blobs after the standalone run and after the check's run; the fe-s-18 run is not repeatable because it throws",
+      "observed": "fe-s-15 job and smoke outputs equal the HEAD blobs by cmp and git hash-object; the fe-s-18 generator's partial write is recorded in row IRPT_BCKEND-D2-W350-S1",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal fe-s-18/gen-fixtures.ts and its committed outputs (fixtures/smoke/fe-s-18-*.json, fixtures/smoke/fe-s-16-print-prehistory.json, __tests__/fe-s-32/holdings-no-answer.json)",
+      "reason": "REFUSED per the order's refusal clause: the committed maps are mutually inconsistent and no single run reproduces them without changing figures the order does not name; row IRPT_BCKEND-D2-W350-S1; restored to HEAD"
+    },
+    {
+      "item": "producer fixture infra/aws/lambda/investor-reporting/_contracts/fixtures/ExportBundle.valid.json",
+      "reason": "outside the grant; the order says leave it and file one observation row; row IRPT_BCKEND-D2-W350-S4"
+    },
+    {
+      "item": "p171_cells.py and the order file",
+      "reason": "the issuer's check is not edited; the order's status stays pending because AC1 and AC3 FAIL"
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W350-S1: fe-s-18 generator refused: the committed fe-s-18 maps are mutually inconsistent (directory/resolve F-49F in frozen, fir_ in the holdings maps) and the HEAD generator writes a committed map before it throws",
+    "IRPT_BCKEND-D2-W350-S2: the order says AnalysisReport.valid.json no longer carries S-RET-1; it does, and only S-ALLOC-2 is dropped",
+    "IRPT_BCKEND-D2-W350-S3: IB171-5-AC3 cannot pass as written; its section_type annualized_return pattern matches the current AnalysisReport copy (15 fixtures)",
+    "IRPT_BCKEND-D2-W350-S4: the producer ExportBundle.valid.json still names S-RET-1 and S-ALLOC-2; the portal mirror now names S-RET-1 only, so the producer-fixtures test lists a new disagreement",
+    "IRPT_BCKEND-D2-W350-S5: the order's base count (1216 pass, 27 skip, 1 fail) does not match the measured base (1213 pass, 27 skip, 4 fail); the commit is count-neutral"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~350/IB500_SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python p171_cells.py . IB171-5-AC1 / IB171-5-AC2 / IB171-5-AC3 (each under timeout 120 from the workspace root)",
+      "result": "AC1 rc=1 FAIL; AC2 rc=0 PASS; AC3 rc=1 FAIL"
+    },
+    {
+      "tool": "bun",
+      "invocation": "bun test src/pages/InvestorReporting (portal worktree, one run at 69f69895 and one at cf52fdbf for the base comparison)",
+      "result": "1213 pass, 27 skip, 4 fail, 1244 tests across 393 files at both states"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~350/IRPT_BCKEND.TO-IB-pr-500.portal-fixture-generators-reproduce-committed-bytes.proof_of_spec.json IB171-5-AC1,IB171-5-AC2,IB171-5-AC3",
+      "result": "run after this write; the rc is in the worker report"
+    }
+  ]
+}
