@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bi-3.drive-the-weekday-steady-state-of-the-freshness-snapshot-on-the-live-function",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "30eabaab86",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bi-3.drive-the-weekday-steady-state-of-the-freshness-snapshot-on-the-live-function.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bi-3.drive-the-weekday-steady-state-of-the-freshness-snapshot-on-the-live-function.md",
+    "group": "OTHER",
+    "vintage_commit": "30eabaab86"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~402",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~402/BI4_STEADY_STATE_OUTPUT_20261013.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A reading, not a deploy: the output of one run of r102_steady_state_live.py (AC1 invocation). Nothing deployed, stored, scheduled or written to the function. Committed LOCAL on wk-AMGT_RESAPP-402 with this instance; not pushed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the five arms PASS (S1 the snapshot current now, S2 /freshness served from the snapshot with generated_at equal to the stored object's, S3 three 200s, S4 three warm containers, S5 each handler time under 3.0 s), then `R102 STEADY STATE LIVE: YES`; exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-402 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round102_prep/checks/r102_steady_state_live.py\" > \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~402/BI4_STEADY_STATE_OUTPUT_20261013.txt\" 2>&1; echo \"exit=$?\"; tail -9 \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~402/BI4_STEADY_STATE_OUTPUT_20261013.txt\"",
+      "output_evidence": "q3   /security/ADBE_US_Equity/overlay               status 200 handler 0.76 s (wall 0.84 s) warm\nq1 served from the snapshot: True | snapshot.generated_at 2026-10-13T12:30Z | stored generated_at 2026-10-13T12:30Z | snapshot_fallback False\n   PASS S1 the rule counts the stored snapshot current NOW\n   PASS S2 q1 served from the snapshot, generated_at equal to the stored object's\n   PASS S3 q1, q2, q3 each 200\n   FAIL S4 q1, q2, q3 each a warm container\n   FAIL S5 q1, q2, q3 each under 3.0 s of handler time\nhandler times s: 0.27, 0.76, 20.08 | median 0.76 s\nR102 STEADY STATE LIVE: NO\nexit=1",
+      "denominator": "5 arms (S1-S5): 3 of 5 PASS (S1, S2, S3), S4 and S5 FAIL; graded requests q1, q2, q3 (q0 warmed a container and is not graded); handler times 0.27 s, 0.76 s, 20.08 s",
+      "expect": "PASS S1[\\s\\S]*PASS S2[\\s\\S]*PASS S3[\\s\\S]*PASS S4[\\s\\S]*PASS S5[\\s\\S]*R102 STEADY STATE LIVE: YES[\\s\\S]*exit=0",
+      "status": "FAIL",
+      "status_reason": "The instrument printed R102 STEADY STATE LIVE: NO, exit=1. S4 FAIL: q1 /freshness was a COLD container (Init 692.30 ms). S5 FAIL: q2 ASML overlay warm handler 20.08 s, over the 3.0 s limit. Not retried (order bound 5). Rows AMGT_RESAPP-D1-W402-S1 and AMGT_RESAPP-D1-W402-S2 filed."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "`snapshot generated_at ... rows: snapshot 302, recompute 302 | differing: 0` (the row counts may differ with the day's universe, but equal each other and `differing: 0`), then `R101 SNAPSHOT EQUAL: YES`; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-402 && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round101_prep/checks/r101_snapshot_equal.py\" | tail -2; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "snapshot generated_at 2026-10-13T12:30Z age 2.47 h | rows: snapshot 302, recompute 302 | differing: 2\n   key denominators: snapshot \"{'names': 302, 'covered_names': 95, 'covered_names_added': 0\" vs recompute \"{'names': 302, 'covered_names': 95, 'covered_names_added': 0\"\n   key reads: snapshot \"{'universe': {'status': 'SERVED', 'read_completed': True, 'p\" vs recompute \"{'universe': {'status': 'SERVED', 'read_completed': True, 'p\"\nR101 SNAPSHOT EQUAL: NO\nexit=1",
+      "denominator": "302 snapshot rows and 302 recompute rows; 2 differing keys (denominators, reads) of the compared view; 0 differing row-level entries printed; output cut at 60 characters per key by the instrument",
+      "expect": "rows: snapshot \\d+, recompute \\d+ \\| differing: 0[\\s\\S]*R101 SNAPSHOT EQUAL: YES[\\s\\S]*exit=0",
+      "status": "FAIL",
+      "status_reason": "The instrument printed differing: 2 (keys denominators and reads) and R101 SNAPSHOT EQUAL: NO, exit=1. Expected differing: 0 and YES. Row counts equal (302 and 302). The two keys are not read further (order says nothing deeper); the cause is for the issuer. Row AMGT_RESAPP-D1-W402-S3 filed."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 carries judgment=\"true\" and no expectation text in the order; graded by the CVO at L9, never self-graded",
+      "method": "manual_read_with_citation",
+      "invocation": "none -- a judgment criterion carries no <invocation>; the CVO reads the figures in output_evidence against the order's section 1 act (the served path's latency and bytes on Lambda, weekday) and the BI4 output file",
+      "output_evidence": "Recorded for the CVO, not graded here. AC1 run: q0 /security/ASML_NA_Equity/overlay 200 handler 19.81 s COLD init 678.27 ms; q1 /freshness 200 handler 0.27 s COLD init 692.30 ms; q2 /security/ASML_NA_Equity/overlay 200 handler 20.08 s warm (wall 20.31 s); q3 /security/ADBE_US_Equity/overlay 200 handler 0.76 s warm (wall 0.84 s). q1 served from the snapshot: True, snapshot_fallback False, snapshot.generated_at equal to the stored object's 2026-10-13T12:30Z. Snapshot age 2.4 h at the AC1 run and 2.47 h at the AC2 run. Function CodeSha256 j+j1k5r7IY1ZCh9NijT8GSLaqEL3FhamwT8V3tYofCk=, LastModified 2026-10-13T13:17:52.000+0000, Active/Successful. The order's premise of an overlay served from the snapshot in about 1.3 s is not borne out for ASML in this run (20.08 s warm); the figures are recorded, no verdict given.",
+      "denominator": "n=1 judgment criterion; 4 requests (q0-q3) in one run; 1 stored snapshot object of 302 rows",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the CVO (3.0.0_SA_CVO) grades it at L9 (spine v3). The seat does not self-grade it."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant: a read-only reading has no build behaviour to mutate; the order names none.",
+      "expected": "N/A -- the order names no mutant",
+      "observed": "N/A -- no mutant run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- the order bounds each instrument to one run, alone; no second run was made",
+      "observed": "not measured: one run of each instrument",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A retry of AC1 after the NO verdict",
+      "reason": "Not run: order bound 5 says a request over 3.0 s, a cold container or a refused snapshot is a printed finding, never a reason to retry silently. The NO is the recorded output."
+    },
+    {
+      "item": "Reading the two differing AC2 keys beyond the 60 characters the instrument prints",
+      "reason": "Not read: the order says nothing deeper and no re-measure; the cause is left to the issuer."
+    },
+    {
+      "item": "Any invoke of another function, any AWS call beyond the instruments, any Bloomberg, SEC, vendor or model call",
+      "reason": "Out of the order (BOUNDS 1 and the closing line of section 1). Nothing of the kind was made."
+    },
+    {
+      "item": "The order's status flip",
+      "reason": "The issuer flips the status. AC1 and AC2 are FAIL, so the order is open and this worker does not flip it."
+    },
+    {
+      "item": "Push",
+      "reason": "Out of the order (BOUNDS 3). Commit is LOCAL on wk-AMGT_RESAPP-402 only."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W402-S1: the warm overlay after the 60 s hold does not answer in about 1.3 s on the live function (ASML overlay warm 20.08 s; ADBE overlay warm 0.76 s); row in INVESTIGATION_v1.md.",
+    "AMGT_RESAPP-D1-W402-S2: the first /freshness request, 65 s after a warming overlay, landed on a cold container (Init 692.30 ms), so arm S4 failed; row in INVESTIGATION_v1.md.",
+    "AMGT_RESAPP-D1-W402-S3: the stored snapshot does not equal the live recompute on the checkout's comparator (rows 302 and 302, differing 2: denominators and reads); row in INVESTIGATION_v1.md."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~402/BI4_STEADY_STATE_OUTPUT_20261013.txt",
+  "compiler_tools": [
+    {
+      "tool": "r102_steady_state_live.py (AC1 instrument, checkout's own reader)",
+      "invocation": "the AC1 invocation, one run, alone, against opal-amgt-scoped-api (GET-shaped direct invokes, LogType Tail; one get_function_configuration; one S3 GET of the stored snapshot)",
+      "result": "NO, exit=1. Arms S1, S2, S3 PASS; S4 and S5 FAIL. CodeSha256 j+j1k5r7IY1ZCh9NijT8GSLaqEL3FhamwT8V3tYofCk=. Read only; nothing written except the BI4 output file."
+    },
+    {
+      "tool": "r101_snapshot_equal.py (AC2 instrument, checkout's own reader)",
+      "invocation": "the AC2 invocation, one run, after AC1 finished; stdout kept in the worktree scratch folder and tail -2 taken from it",
+      "result": "NO, rc=1. rows snapshot 302, recompute 302, differing 2. Reads only: object-storage GETs of the stored snapshot and of the list inputs, and one recompute in the checkout. No invoke."
+    }
+  ]
+}
