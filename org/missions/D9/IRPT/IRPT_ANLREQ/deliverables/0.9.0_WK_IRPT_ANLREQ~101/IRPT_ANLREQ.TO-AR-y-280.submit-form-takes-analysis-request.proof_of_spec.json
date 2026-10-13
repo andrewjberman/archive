@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-280",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-280.submit-form-takes-analysis-request.md",
+    "group": "OTHER",
+    "vintage_commit": "6c728045fb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R23B_Y.md",
+    "vintage_commit": "6c728045fb",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-280.submit-form-takes-analysis-request.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~101",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "336168cde3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed LOCAL on wk-IRPT_ANLREQ-101; nothing released, deployed, pushed or applied (the order forbids all four)"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/tests/test_submit_analysis_request.py",
+      "kind": "test",
+      "commit_or_etag": "336168cde3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a test file; run locally against the handler with an in-memory table; no AWS call"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~101/r23/SUBMIT_ANALYSIS_REQUEST.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record of the cell (read, built, authorization_change, tests, before_arm, claim, not_read); a document, nothing deployed"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "245924c8ee",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "four rows appended: IRPT_ANLREQ-D2-W101-S1 (BLOCKING) to S4; the channel file is append-only"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR280-y-AC1",
+      "criterion_verbatim": "`AR280-y-AC1`: the record states the accepted submit and the report_ref shape, the authorization change in one paragraph, a new test file with at least 12 passing tests whose cases (a) and (h) fail at HEAD, and the existing ticket service tests pass with at most the one named edit.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-101/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y280-submit --root C:/dev/wk-irpt-anlreq-101",
+      "output_evidence": "tests/test_submit_analysis_request.py: 15 passed, 0 failed (rc=0) / ticket service folder: 221 passed, 0 failed (rc=0) / Y280-SUBMIT-OK (rc=0). Before-arm (the same file against the HEAD lambda, scratch copy): 11 failed, 4 passed; case (a) is among the 11. Case (h) is not in the file.",
+      "denominator": "15 of 15 new tests pass with the change; 221 of 221 folder tests pass (206 at HEAD plus 15); 11 of 15 new tests fail at HEAD, case (a) among them; case (h) 0 of 1 built (the order requires it to fail at HEAD)",
+      "status": "FAIL",
+      "status_reason": "The criterion requires cases (a) AND (h) to fail at HEAD. Case (h) (the packager records report_ref once, a second write refused) is NOT BUILT: order step 3 was STOPPED because the PACKAGE body carries no request id. BLOCKING row IRPT_ANLREQ-D2-W101-S1. The checker prints Y280-SUBMIT-OK because it does not test case (h); that token does not meet this criterion. Order left open.",
+      "expect": "Y280-SUBMIT-OK"
+    },
+    {
+      "criterion_id": "AR280-y-AC2J",
+      "criterion_verbatim": "`AR280-y-AC2J` (judgment, graded at L9, never by you): the firm is never taken from the body, no other ticket type gained the submit fields, the 201 body echoes no answers or attachment, the report_ref is written once and only by the named principal, the old test is edited only where it pinned this refusal, the authorization change is stated, and nothing was released.",
+      "method": "manual_read_with_citation",
+      "invocation": "read: infra/aws/lambda/ticket_center/lambda_function.py submit_form (SUBMIT_TYPED_FIELDS gate, answers.get(\"firm\") != firm, the five-member 201 view), MATRIX SUBMIT-FORM and REPORT rows, package_ticket (unchanged); git -C C:/dev/wk-irpt-anlreq-101 show --stat 336168cde3; git -C C:/dev/wk-irpt-anlreq-101 diff --stat 6c728045fb 336168cde3",
+      "output_evidence": "336168cde3: 2 files changed (lambda_function.py, tests/test_submit_analysis_request.py); the submit firm check at lambda_function.py submit_form answers.get(\"firm\") != firm refuses another firm; the 201 returns {ticket_id, status, ticket_type, title, created_at} for analysis_request; SUBMIT_TYPED_FIELDS admits answers and attachment for analysis_request only; the report_ref write in package_ticket is NOT added (step 3 stopped); test_analysis_request.py unedited; no Terraform, no authorizer, no portal file in the commit",
+      "denominator": "2 of 2 files of the code commit are the granted paths; 0 of 1 judgment criteria graded here; 7 named points of the criterion, read not graded",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion (judgment=true): graded at L9 by 3.0.0_SA_CVO, never by the worker; the output is recorded with no verdict",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "answers.firm check disabled (the line 'if answers.get(\"firm\") != firm:' becomes 'if False:') in a scratch copy outside the product tree; the new file must fail",
+      "expected": "the new file fails: the firm-from-body tests (b) and the cross-firm test (g) fail",
+      "observed": "2 failed, 13 passed: test_b_firm_and_identity_are_never_taken_from_the_body and test_g_a_client_of_one_firm_cannot_read_or_write_another_firms_ticket",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the new test file, outputs compared (python -m pytest tests/test_submit_analysis_request.py -q in infra/aws/lambda/ticket_center)",
+      "observed": "run 1: 15 passed in 0.72s; run 2: 15 passed in 0.63s; both identical in count and names",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "step 3: the packager's top-level report_ref.request_id written once by svc-irpt-packager, and its test (h)",
+      "reason": "STOPPED per the order: the PACKAGE body carries no request id; the packager would have to send one (outside this grant: opal_packager.py _attach). BLOCKING row IRPT_ANLREQ-D2-W101-S1"
+    },
+    {
+      "item": "an owner check on the attachment's input_id (the upload belongs to the caller's firm)",
+      "reason": "the ticket service cannot tell (the check is shape only, lambda_function.py _validate_attachment); no check was invented. Row IRPT_ANLREQ-D2-W101-S3, ARMED, disarm owner 1.0.0_SA_CTO"
+    },
+    {
+      "item": "infra/aws/terraform/ticket-center/main.tf and the portal authorizer",
+      "reason": "not read and not edited; whether a release also needs them is unverified (recorded in the authorization_change of the record)"
+    },
+    {
+      "item": "release, deploy, push, apply, invoke, upload, and any live AWS call",
+      "reason": "the order forbids them; the change is LOCAL on wk-IRPT_ANLREQ-101 and nothing was released"
+    },
+    {
+      "item": "the portal (AR-y-282 and AR-y-283) and the packager's own payload change",
+      "reason": "outside this cell and this grant"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W101-S1: BLOCKING -- step 3 STOPPED: the PACKAGE body carries no request id, so the top-level report_ref.request_id the commentary drafter reads cannot be written by the packager's path",
+    "IRPT_ANLREQ-D2-W101-S2: the pinned refusal the order names at test_analysis_request.py :131-133 is for ticket_type other, so no edit to the old test was needed",
+    "IRPT_ANLREQ-D2-W101-S3: ARMED (disarm owner 1.0.0_SA_CTO) -- the attachment check is shape only; the service cannot tell whether an input_id belongs to the caller's firm",
+    "IRPT_ANLREQ-D2-W101-S4: a submit-path ticket has created_by svc-ticket-form, so REPORT's creator branch admits no human for it"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~101/r23/AR280_session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "ar21_checks.py y280-submit",
+      "invocation": "python C:/dev/wk-irpt-anlreq-101/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y280-submit --root C:/dev/wk-irpt-anlreq-101",
+      "result": "Y280-SUBMIT-OK, rc=0 (the checker does not test case (h); see AC1 status_reason)"
+    },
+    {
+      "tool": "pytest (ticket service folder)",
+      "invocation": "python -m pytest tests -q -p no:cacheprovider in infra/aws/lambda/ticket_center",
+      "result": "221 passed, 43 subtests passed, rc=0 (206 at HEAD plus 15 new)"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh on lambda_function.py and tests/test_submit_analysis_request.py",
+      "result": "All checks passed; pre-commit gate clean, rc=0 on both files"
+    }
+  ]
+}
