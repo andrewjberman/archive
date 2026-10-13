@@ -223,8 +223,12 @@ def prescreen(a):
             p.append("targeted_ids is at most 10")
         if d["advisors_firing_any"] == 0 and not str(d["zero_reason"]).strip():
             p.append("zero advisors fire: zero_reason must say why, per slot")
-        if d["second_dry_run"]["done"] is True and d["second_dry_run"]["bullets_returned"] < 1 and d["advisors_firing_any"] > 0:
-            p.append("a targeted dry run on firing advisors returned no bullets: the positive control failed")
+        sd = d["second_dry_run"]
+        if sd["done"] is True and sd["bullets_returned"] < 1 and d["advisors_firing_any"] > 0:
+            # the control failing is a FINDING when the record names the drops and the cause (or says it is unknown)
+            dropped = sd.get("slots_dropped")
+            if not isinstance(dropped, int) or dropped < 1 or not str(sd.get("control_failed_cause", "")).strip():
+                p.append("a targeted dry run on firing advisors returned no bullets: record slots_dropped (>= 1) and control_failed_cause (the exception class, or the words cause not known)")
     if p:
         for x in p:
             print("FAIL %s" % x)
