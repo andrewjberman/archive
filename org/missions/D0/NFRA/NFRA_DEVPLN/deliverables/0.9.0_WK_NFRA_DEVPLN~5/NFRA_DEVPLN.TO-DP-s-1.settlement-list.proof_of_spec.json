@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_DEVPLN.TO-DP-s-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round1.md",
+    "vintage_commit": "5570ac9eeeeb109694bf282991fb18551c6ae166",
+    "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-s-1.settlement-list.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/prd/NFRA_DEVPLN_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "d2b7385bee30382d1ffbaa699e3757b5b43914a8"
+  },
+  "assignee": "0.9.0_WK_NFRA_DEVPLN~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/portal-settlement-list.py",
+      "kind": "script",
+      "commit_or_etag": "3104fa102d52310107156fd21444f976bd243673",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed LOCAL on branch wk-NFRA_DEVPLN-5 (3104fa102d); a read-only stdlib tool, no deploy, no push"
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_DEVPLN/ledger/SETTLEMENT_LIST.md",
+      "kind": "doc",
+      "commit_or_etag": "3104fa102d52310107156fd21444f976bd243673",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the list written by the live run at origin/DEV f6ef1d25 and origin/PROD 15c97549 (ls-remote-free read of the local refs, no fetch); its header timestamp is refreshed by the final commit, the counts are unchanged"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DPs1-AC1",
+      "criterion_verbatim": "python .tools/portal-settlement-list.py --selftest -- expect ok=True: the self-test builds a temporary repo with a DEV, a PROD and a branch with known counts, and every case passes",
+      "method": "command",
+      "invocation": "python .tools/portal-settlement-list.py --selftest",
+      "output_evidence": "run under timeout 120 from the worktree root: SETTLEMENT-LIST-SELFTEST cases=33/33 ok=True (exit 0)",
+      "denominator": "33 of 33 self-test cases passed",
+      "status": "PASS",
+      "expect": "ok=True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DPs1-AC2",
+      "criterion_verbatim": "python .tools/portal-settlement-list.py --portal portal --out org/missions/D0/NFRA/NFRA_DEVPLN/ledger/SETTLEMENT_LIST.md -- the live run against the real portal refs; expect the SETTLEMENT-LIST dev_ahead= machine line",
+      "method": "command",
+      "invocation": "python .tools/portal-settlement-list.py --portal portal --out org/missions/D0/NFRA/NFRA_DEVPLN/ledger/SETTLEMENT_LIST.md",
+      "output_evidence": "run under timeout 120 from the worktree root: WROTE .../ledger/SETTLEMENT_LIST.md then SETTLEMENT-LIST dev_ahead=201 prod_ahead=33 groups=6 files_total=229 files_other=8 branches=9 (exit 0); the same line is the last line of the written file",
+      "denominator": "201 DEV-not-PROD commits, 33 PROD-only commits, 229 changed files (8 in other), 6 named groups, 9 remote branches with work not on DEV",
+      "status": "PASS",
+      "expect": "SETTLEMENT-LIST dev_ahead=",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DPs1-AC3",
+      "criterion_verbatim": "bash org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/2.0.0_SA_COO~DV/checks/check_devpln_settlement.sh org/missions/D0/NFRA/NFRA_DEVPLN/ledger/SETTLEMENT_LIST.md portal -- the issuer's independent denominator: the list's two headline counts equal rev-list --count read directly",
+      "method": "command",
+      "invocation": "bash org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/2.0.0_SA_COO~DV/checks/check_devpln_settlement.sh org/missions/D0/NFRA/NFRA_DEVPLN/ledger/SETTLEMENT_LIST.md portal",
+      "output_evidence": "run under timeout 120 from the worktree root: SETTLEMENT-COUNTS-MATCH dev_ahead=201 prod_ahead=33 (exit 0); direct rev-list --count origin/PROD..origin/DEV = 201 and origin/DEV..origin/PROD = 33",
+      "denominator": "2 headline counts matched (dev_ahead, prod_ahead) of 2",
+      "status": "PASS",
+      "expect": "SETTLEMENT-COUNTS-MATCH",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "no mutant named by the spec; the cell names the self-test as its control",
+      "expected": "N/A-SPEC-NAMES-NONE",
+      "observed": "the TO names no mutant to plant; the fixture self-test (33 cases, including the prefix-boundary and cherry-sign cases) is the control that exercises the grouping and cherry logic",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input live runs of the writer against the same refs compared on the machine line; the header timestamp is the only varying line",
+      "observed": "live runs at 18:54:11Z and at the final re-run both gave SETTLEMENT-LIST dev_ahead=201 prod_ahead=33 groups=6 files_total=229 files_other=8 branches=9; the list diff against the committed copy is one header line (timestamp)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "merge commits in the cherry split",
+      "reason": "git cherry omits merges by construction; 7 PROD-only merges and 9 branch-ahead merges carry no +/- sign and are shown as n/a or in a merge column. Recorded as surprise NFRA_DEVPLN-W5-S1 (OBSERVATION, INERT)."
+    }
+  ],
+  "surprises": [
+    "NFRA_DEVPLN-W5-S1"
+  ],
+  "session_log": "Worker 0.9.0_WK_NFRA_DEVPLN~5 on NFRA_DEVPLN.TO-DP-s-1, worktree /c/Users/AndrewBerman/Desktop/ajb_wk/devpln-5, branch wk-NFRA_DEVPLN-5. Premises re-grounded: TREE-OK; portal/ present; origin/DEV f6ef1d25 (201 ahead), origin/PROD 15c97549 (33 ahead). Path prefixes measured: all six named prefixes exist in the repo as the issuer wrote them, no correction. Tool built stdlib-only, read-only git calls, ASCII-forced output; self-test first failed on a cherry-pick usage flag inside the fixture, fixed, then 33/33. Ruff check clean. Live run wrote the list. The first commit 3104fa102d carries the tool, the list and surprise row NFRA_DEVPLN-W5-S1; this instance and the TO flip follow in a second commit. No fetch, no push, no write to the portal repo.",
+  "compiler_tools": [
+    {
+      "tool": "python .tools/portal-settlement-list.py",
+      "invocation": "--selftest; then --portal portal --out org/missions/D0/NFRA/NFRA_DEVPLN/ledger/SETTLEMENT_LIST.md",
+      "result": "SETTLEMENT-LIST-SELFTEST cases=33/33 ok=True; SETTLEMENT-LIST dev_ahead=201 prod_ahead=33 groups=6 files_total=229 files_other=8 branches=9"
+    },
+    {
+      "tool": "ruff check",
+      "invocation": "ruff check .tools/portal-settlement-list.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "check_devpln_settlement.sh (issuer, run not edited)",
+      "invocation": "bash org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/2.0.0_SA_COO~DV/checks/check_devpln_settlement.sh org/missions/D0/NFRA/NFRA_DEVPLN/ledger/SETTLEMENT_LIST.md portal",
+      "result": "SETTLEMENT-COUNTS-MATCH dev_ahead=201 prod_ahead=33"
+    }
+  ]
+}
