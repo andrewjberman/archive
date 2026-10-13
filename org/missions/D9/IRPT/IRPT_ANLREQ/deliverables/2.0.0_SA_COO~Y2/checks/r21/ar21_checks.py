@@ -30,7 +30,7 @@ TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-ve
           "y242-portal": "Y242-PORTAL", "y243-portal": "Y243-PORTAL", "y244-read": "Y244-READ", "y245-server": "Y245-SERVER",
           "y246-qa": "Y246-QA", "y247-swap": "Y247-SWAP", "y248-portal": "Y248-PORTAL",
           "y249-swap": "Y249-SWAP", "y250-qa": "Y250-QA", "y251-swap": "Y251-SWAP", "y252-portal": "Y252-PORTAL",
-          "y261-read": "Y261-READ", "y262-portal": "Y262-PORTAL", "y263-portal": "Y263-PORTAL", "y264-portal": "Y264-PORTAL", "y265-portal": "Y265-PORTAL"}
+          "y261-read": "Y261-READ", "y262-portal": "Y262-PORTAL", "y263-portal": "Y263-PORTAL", "y264-portal": "Y264-PORTAL", "y265-portal": "Y265-PORTAL", "y266-live": "Y266-LIVE"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -473,6 +473,22 @@ def main(argv):
                 problems.append("trace must list every silent exit (file:line) and where the submit stops")
             if not rec.get("reproduction"):
                 problems.append("reproduction must say which hops end with no message on screen (RUN, with test names)")
+    elif check == "y266-live":
+        rec = load(root, D22 % "91" + "KIMI_SEARCH_QA_LIVE_RUNNER.json", problems)
+        if rec:
+            for member in ("read", "runner", "tests", "before_arm", "runbook", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if not re.fullmatch(r"[0-9a-f]{64}", str((rec.get("runner") or {}).get("sha256", ""))):
+                problems.append("runner.sha256 must be a 64-hex digest")
+        path = root / IR / "ycharts/generate/kimi_search_qa_live.py"
+        if not path.is_file():
+            problems.append("no ycharts/generate/kimi_search_qa_live.py")
+        else:
+            rc, passed, failed = pytest(root, "tests/test_kimi_search_qa_live.py", IR + "/ycharts/generate")
+            print("live runner tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+            if rc != 0 or failed or passed < 6:
+                problems.append("tests/test_kimi_search_qa_live.py must pass with at least 6 tests")
     return finish(check, problems)
 
 

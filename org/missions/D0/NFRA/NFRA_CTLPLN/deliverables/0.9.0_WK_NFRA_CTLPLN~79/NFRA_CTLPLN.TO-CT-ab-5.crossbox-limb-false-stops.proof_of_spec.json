@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-ab-5",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-5.crossbox-limb-false-stops.md",
+    "group": "OTHER",
+    "vintage_commit": "3477d67af5"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~79",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round12.md",
+    "vintage_commit": "3477d67af5",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-ab-5.crossbox-limb-false-stops.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/crossbox-deploy-check.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local read-only tool edit committed on wk-NFRA_CTLPLN-79; nothing deployed; the ENFORCE switch org/mcp/seat-gates.crossbox.safe-apply.enforce was NOT created; covered by CTab5-AC1, whose fixtures run this tool at its own path in every case",
+      "artifact_covered_by": [
+        "CTab5-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_apply_who_and_crossbox.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test file edit committed on wk-NFRA_CTLPLN-79; fixtures are temporary git repositories only; no terraform, no aws, no push"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTab5-AC1",
+      "criterion_verbatim": "python .tools/tests/test_apply_who_and_crossbox.py; expect ok=True -- every case passes, the old 96 and the new ones (report the whole last line with its denominator)",
+      "method": "command",
+      "invocation": "python .tools/tests/test_apply_who_and_crossbox.py",
+      "output_evidence": "PASS case 83: OPEN-DEPLOY race: a worktree removed between the list and the ls-tree reads VANISHED, is not a hit, and is counted | nator: 1 worktree(s), 0 sentinel read(s), 0 distinct (path, blob), 0 distinct slug(s), vanished=1, stale=0 / OPEN-DEPLOY worktrees_scanned=1 open=0 stale_merged=0\nPASS case 84: OPEN-DEPLOY race: a worktree listed but unreadable (still listed, or its path still exists) is still a hit | 1 1\nPASS case 85: OPEN-DEPLOY race: a failed re-read of the worktree list is a hit | nator: 1 worktree(s), 0 sentinel read(s), 0 distinct (path, blob), 0 distinct slug(s), vanished=0, stale=0 / OPEN-DEPLOY worktrees_scanned=1 open=0 stale_merged=0\nPASS case 97: OPEN-DEPLOY: a merged checkout (HEAD contained in trunk) carrying an OPEN sentinel is STALE-MERGED and not counted | OPEN-DEPLOY worktrees_scanned=2 open=1 stale_merged=1\nPASS case 98: OPEN-DEPLOY: an unmerged checkout (HEAD not contained in trunk) carrying a sentinel is OPEN: open=1 stale_merged=0 | OPEN-DEPLOY worktrees_scanned=2 open=1 stale_merged=0\nPASS case 99: OPEN-CALL: a call whose text names a Terraform root's BARE name but not its path does not match; calls_scanned is printed | OPEN-CALL calls_scanned=1 matched=0\nPASS case 100: OPEN-CALL: a call naming the root's PATH matches; a call whose own roots field names the root (bare name) matches | path: OPEN-CALL calls_scanned=1 matched=1 | roots field: OPEN-CALL calls_scanned=1 matched=1\nAPPLY-GATES-TEST cases=100/100 ok=True\nrc=0 (tests run twice; second run kept as the evidence)",
+      "denominator": "100 of 100 cases: the old 96 and four new ones (cases 97-100); APPLY-GATES-TEST cases=100/100",
+      "status": "PASS",
+      "expect": "ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "two mutants, one at a time, against the same test file: (a) contained_in_trunk returns open for every HEAD (the ancestry rule off) must FAIL case 97; (b) mention_patterns also matches the bare root name (the bare-name rule back on) must FAIL case 99",
+      "expected": "case 97 FAILS under (a) and case 99 FAILS under (b); each run ends cases=99/100 ok=False; no other case changes",
+      "observed": "(a) ancestry off: 'CONTROL ancestry-off rc=1', 'FAIL case 97: OPEN-DEPLOY: a merged checkout (HEAD contained in trunk) carrying an OPEN sentinel is STALE-MERGED and not counted', 'APPLY-GATES-TEST cases=99/100 ok=False'; (b) bare name on: 'CONTROL bare-name-on rc=1', 'FAIL case 99: OPEN-CALL: a call whose text names a Terraform root's BARE name but not its path does not match', 'APPLY-GATES-TEST cases=99/100 ok=False'; the only FAIL line in each run is the named case; the tool file was restored byte-identical to the tested copy (cmp)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of the same test file on the same tree, compared on the decisive lines",
+      "observed": "both runs print APPLY-GATES-TEST cases=100/100 ok=True and rc=0, with 100 PASS lines and 0 FAIL lines each",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the flip of the task order's <status> to complete",
+      "reason": "the task-order file is not in this order's <paths> grant (the grant is the tool, the test file and the investigation channel); the status stays pending for the COO to flip"
+    },
+    {
+      "item": "a Python 3.11 run",
+      "reason": "the local interpreter is Python 3.12.10; the tool and test were run under it, not under 3.11"
+    },
+    {
+      "item": "the sibling test .tools/tests/test_crossbox_call.py",
+      "reason": "outside the grant and unchanged; it reads 45/50 at the base and after; filed as NFRA_CTLPLN-W79-S2"
+    },
+    {
+      "item": "the project-code arm of OPEN-CALL",
+      "reason": "kept, because the old case 943 requires it; the ruling's wording disagrees; filed as NFRA_CTLPLN-W79-S1"
+    },
+    {
+      "item": "the ENFORCE switch file",
+      "reason": "not created, as the cell forbids; the limb stays at WARN"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W79-S1: the OPEN-CALL project-code arm still matches a bare project code in free text, as the kept case 943 requires, although the CTO ruling words it as never a bare token; decided by the COO and CTO, not here",
+    "NFRA_CTLPLN-W79-S2: .tools/tests/test_crossbox_call.py reads 45/50 at the base (five origin-refusal checks); outside this grant, not changed"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~79/NFRA_CTLPLN.TO-CT-ab-5.crossbox-limb-false-stops.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_apply_who_and_crossbox.py",
+      "result": "APPLY-GATES-TEST cases=100/100 ok=True (rc=0), run twice"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -m py_compile .tools/crossbox-deploy-check.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py311 .tools/crossbox-deploy-check.py .tools/tests/test_apply_who_and_crossbox.py",
+      "result": "All checks passed!"
+    }
+  ]
+}
