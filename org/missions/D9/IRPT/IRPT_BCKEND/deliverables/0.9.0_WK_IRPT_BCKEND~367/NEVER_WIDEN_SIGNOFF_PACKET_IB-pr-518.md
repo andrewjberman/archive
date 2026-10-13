@@ -16,6 +16,8 @@ no YCharts id), in the canonical order: Opal Ultra Short-Term, Opal Short-Term, 
 Opal Ultra Long-Term. The Analysis Request form lists the model entries of the served catalogue, so the fifth model appears
 there without any portal change.
 
+The four existing entries keep their key and label, but their served ORDER changes: Opal Long-Term moves from first place to fourth place (the canonical order), and the Analysis Request form renders served order, so the form's model checkboxes reorder for every firm.
+
 Permission is UNCHANGED: the same three permitted firms and the same three principal classes. No figure moves. No route,
 IAM grant, schedule or cache surface is touched.
 
