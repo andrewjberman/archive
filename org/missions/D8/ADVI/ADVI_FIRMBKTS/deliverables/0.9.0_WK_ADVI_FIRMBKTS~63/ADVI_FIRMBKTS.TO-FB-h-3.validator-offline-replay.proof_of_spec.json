@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-h-3.validator-offline-replay",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-h-3.validator-offline-replay.md",
+    "group": "OTHER",
+    "vintage_commit": "b39d4a70f6"
+  },
+  "assignee": "0.9.0_WK_ADVI_FIRMBKTS~63",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_R5.md",
+    "vintage_commit": "b39d4a70f6",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-h-3.validator-offline-replay.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~63/replay_harness.mjs",
+      "kind": "test",
+      "commit_or_etag": "4b8bd3b056",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 4b8bd3b056 on wk-ADVI_FIRMBKTS-63 (LOCAL); offline replay drives the handler with stubs, nothing deployed",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~63/REPLAY_RESULT.json",
+      "kind": "doc",
+      "commit_or_etag": "4b8bd3b056",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed in 4b8bd3b056 on wk-ADVI_FIRMBKTS-63 (LOCAL); the replay record, no client identifier in it",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 re-runs the harness against the two map files you fetched (it ends inside its bound).",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-63 && PATH=\"$PATH:$HOME/.bun/bin\" timeout 110 bun run org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~63/replay_harness.mjs --legacy C:/dev/wk-firmbkts-63-maps/legacy.json --canonical C:/dev/wk-firmbkts-63-maps/canonical.json 2>&1 | tail -1",
+      "expect": "^REPLAY pairs=[0-9]{3,} mismatches=0 control_mismatches=[1-9][0-9]* accounts=[1-9][0-9]* relationships=[1-9][0-9]*$",
+      "output_evidence": "REPLAY pairs=2127 mismatches=0 control_mismatches=1 accounts=1501 relationships=626",
+      "denominator": "mismatches 0 of 2127 request pairs; control 1 of 2127 differs from the legacy run; 1501 account and 626 relationship paths replayed; rc=0 (a second run printed the same line and wrote a byte-identical REPLAY_RESULT.json, see controls.determinism)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 reads the record's shape.",
+      "method": "command",
+      "invocation": "timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round5/checks/r5_checks.py replay --file C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~63/REPLAY_RESULT.json",
+      "expect": "^REPLAY record ok pairs=[0-9]{3,} mismatches=0 control_mismatches=[1-9][0-9]* bytes_equal=(True|False)$",
+      "output_evidence": "FAIL ABSENT or unreadable: FileNotFoundError: [Errno 2] No such file or directory: 'C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~63/REPLAY_RESULT.json' / REPLAY: 1 problem(s) / RC=1",
+      "denominator": "1 of 1 problem reported (the named path is absent); the record's keys were not graded by this invocation",
+      "status": "FAIL",
+      "status_reason": "The invocation names a path in the base checkout C:/dev/ajb_workspace, which has no folder for this worker; the record is committed at 4b8bd3b056 in the worktree and was not copied to the base (outside the write grant). Diagnostic only, not the verdict: the same checker on the worktree copy printed 'REPLAY record ok pairs=2127 mismatches=0 control_mismatches=1 bytes_equal=False' with rc=0. Row ADVI_FIRMBKTS-D1-W63-S4 (BLOCKING)."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the write-surface bound.",
+      "method": "command",
+      "invocation": "cd /c/dev/wk-firmbkts-63 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root /c/dev/wk-firmbkts-63 --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~63/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+      "output_evidence": "ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing",
+      "denominator": "3 changed paths (replay_harness.mjs, REPLAY_RESULT.json, INVESTIGATION_v1.md, all inside the allow list), 0 outside, 0 required missing; rc=0; run before this instance was committed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Perturbed-map control: the canonical map is served with the first account of its first advisor removed in memory; the decision for the pair built on that account must differ from the legacy run.",
+      "expected": "control_mismatches >= 1 (the comparison discriminates)",
+      "observed": "control_mismatches=1 of 2127 requests (the control pair is forced into the sampled set so the control is always exercised)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of replay_harness.mjs, REPLAY_RESULT.json sha256 taken before and after the second run and compared",
+      "observed": "both runs printed REPLAY pairs=2127 mismatches=0 control_mismatches=1 accounts=1501 relationships=626; the record's sha256 was unchanged; git status shows no change under the deliverables folder",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Map files are not in the tree and not committed",
+      "reason": "they hold client account and relationship identifiers; they are held only at C:/dev/wk-firmbkts-63-maps/ (order section 1a)"
+    },
+    {
+      "item": "A live session, a token minted by the production key, or an advisor the legacy map lacks",
+      "reason": "the replay signs with a harness-generated key and builds its requests from the legacy map; the order's preflight names this blindness"
+    },
+    {
+      "item": "Verbatim pass of AC2",
+      "reason": "the path the invocation names is in the base checkout, where the record does not exist; see ADVI_FIRMBKTS-D1-W63-S4"
+    },
+    {
+      "item": "Edits to product code and to the validator",
+      "reason": "order section 1c and 2.2: product files are read-only; none were edited"
+    },
+    {
+      "item": "Flip of this order's status",
+      "reason": "the order says not to flip it; the AC2 FAIL row leaves it open"
+    }
+  ],
+  "surprises": [
+    "ADVI_FIRMBKTS-D1-W63-S1: two probe runs before the harness reached the render-key Secrets Manager secret outside the order's read bound; the mock did not bind (inferred from the non-throw outcome, not measured in CloudTrail).",
+    "ADVI_FIRMBKTS-D1-W63-S2: the order's mock list omits the render branch's Secrets Manager call; the replay seeds the render key cache before each request instead.",
+    "ADVI_FIRMBKTS-D1-W63-S3: the handler's module-level 60 s ownership-map cache would serve the first run's map to back-to-back runs; the harness steps the clock between runs and asserts one GetObject per run.",
+    "ADVI_FIRMBKTS-D1-W63-S4: AC2 names the base checkout's deliverables path, but the record is committed in the worktree; AC2 fails verbatim as ABSENT (BLOCKING)."
+  ],
+  "session_log": "no session log is committed; the record is commits 4b8bd3b056 (harness and REPLAY_RESULT.json), 9766f3bcd5 (rows W63-S1 to S3) and the commit that carries this instance and row S4 (LOCAL on wk-ADVI_FIRMBKTS-63)",
+  "compiler_tools": [
+    {
+      "tool": "bun",
+      "invocation": "bun install --frozen-lockfile in infra/aws/lambda-edge/auth-validator-edge (node_modules is gitignored)",
+      "result": "115 packages installed, rc=0"
+    },
+    {
+      "tool": "aws",
+      "invocation": ".tools/aws s3api get-object for the legacy and the canonical ownership map, two reads, no write",
+      "result": "rc=0 both; legacy sha256 6367f1ed6a6633dd74c12c92915531d5103b30fef6063968693acd4a8b20fad2; canonical sha256 cb00986e1c0358e16f3be84aed9c33c3f15e5c7a799c051e405753fd86a5a441; both 474841 bytes"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -I structural comparison of the two maps (counts and dict equality only)",
+      "result": "advisors 193 and accounts 24161 and relationships 10813 in each map; advisors dict equal; generated_at differs; bytes_equal=False"
+    },
+    {
+      "tool": "bun",
+      "invocation": "bun run replay_harness.mjs --legacy <file> --canonical <file> (AC1 verbatim, twice)",
+      "result": "REPLAY pairs=2127 mismatches=0 control_mismatches=1 accounts=1501 relationships=626 on both runs; record bytes identical"
+    },
+    {
+      "tool": "python",
+      "invocation": "r5_checks.py replay (AC2 verbatim, then the same checker on the worktree copy as a diagnostic)",
+      "result": "verbatim FAIL ABSENT (rc=1); diagnostic REPLAY record ok pairs=2127 mismatches=0 control_mismatches=1 bytes_equal=False (rc=0)"
+    },
+    {
+      "tool": "python",
+      "invocation": "r4_scope.py (AC3 verbatim)",
+      "result": "ROUND 4 SCOPE: OK 3 changed, 0 outside, 0 required missing (rc=0)"
+    }
+  ]
+}
