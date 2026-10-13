@@ -1,0 +1,108 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEVPLN.TO-DP-b-5",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-b-5.registration-facts-and-lease.md",
+  "group": "OTHER",
+  "vintage_commit": "e2c9f07062"
+ },
+ "assignee": "0.9.0_WK_NFRA_DEVPLN~1",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_DEVPLN/decompositions/NFRA_DEVPLN_DECOMP.round1.md",
+  "vintage_commit": "e2c9f07062",
+  "to_ref": "org/missions/D0/NFRA/NFRA_DEVPLN/task-orders/NFRA_DEVPLN.TO-DP-b-5.registration-facts-and-lease.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/open-calls.py",
+   "kind": "script",
+   "commit_or_etag": "7bff1eab9b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local tool a seat runs; nothing is deployed and no cluster copy is written by any criterion here."
+  },
+  {
+   "path_or_key": ".tools/tests/test_open_calls_register.py",
+   "kind": "test",
+   "commit_or_etag": "7bff1eab9b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local test on temporary git portals and a temporary OPAL_STATE_ROOT with OPAL_OPENCALLS_CLOUD=0; nothing is deployed."
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_DEVPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "config_data",
+   "commit_or_etag": "7bff1eab9b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Four surprise rows appended (NFRA_DEVPLN-W1-S5 to W1-S8); a document, nothing is deployed."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DPb5-AC1",
+   "criterion_verbatim": "python .tools/tests/test_open_calls_register.py expect: ok=True (the last line reads OPEN-CALLS-REGISTER-TEST cases=<k>/<n> ok=True)",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_open_calls_register.py",
+   "output_evidence": "timeout 120 rc=0, run twice on the committed tree 7bff1eab9b with identical last lines (about 6 s wall). LAST line: OPEN-CALLS-REGISTER-TEST cases=10/10 ok=True. Cases: a branch cut from PROD with 2 own commits registers with commits=2 and head_sha equal to the branch tip of the temporary portal; a branch cut from DEV is refused dev-overlap overlap=2 commits=3 and writes nothing; a missing branch is refused branch-not-found; an empty branch is refused reason=empty; no --portal is refused reason=portal-required; a live lease for this seat writes an APPROVED row that approval-status reads APPROVED valid=yes; an expired lease, a lease for another seat and a lease with mode HOLD are each refused lease-not-live and write nothing; a lease file that does not exist is refused lease-not-live; a live lease on a DEV-cut branch is refused dev-overlap; --check-only prints the register line for a cand branch and for a non-cand branch name and writes nothing.",
+   "denominator": "10 of 10 cases pass",
+   "status": "PASS",
+   "expect": "ok=True"
+  },
+  {
+   "criterion_id": "DPb5-AC2",
+   "criterion_verbatim": "python .tools/open-calls.py add --kind approval --check-only --project NFRA_DEVPLN --box dell1 --branch origin/wk-dsgn-irptv1-r25-61-prodcut --purpose x --pages x --class client-facing --how x --portal portal expect: APPROVAL-REGISTER result=REFUSED reason=dev-overlap",
+   "method": "command",
+   "invocation": "python .tools/open-calls.py add --kind approval --check-only --project NFRA_DEVPLN --box dell1 --branch origin/wk-dsgn-irptv1-r25-61-prodcut --purpose x --pages x --class client-facing --how x --portal portal",
+   "output_evidence": "timeout 120 rc=0 (run twice, same line). OUTPUT: APPROVAL-REGISTER result=OK row=- head_sha=fc876722f5af6e92f8f045982e1b1d7ad73755f7 commits=2 check-only=yes. The expected line (result=REFUSED reason=dev-overlap) is NOT printed. Measured on the real portal (read-only git): origin/PROD..branch = 2 commits (fc876722, 418600b2), neither in origin/PROD..origin/DEV, so overlap = 0; origin/DEV..branch = 34 is PROD history that DEV does not contain (origin/PROD is not an ancestor of origin/DEV), not DEV commits beneath the feature; merge-base with origin/PROD is 37aa1247, an older PROD commit. Nothing written: the live laptop list md5 e0a52f51e53f8557401f631dd8d13369 is unchanged before and after.",
+   "denominator": "1 of 1 invocation run; 0 of 1 expected output lines present",
+   "status": "FAIL",
+   "status_reason": "The registration rule BUILD item 1 specifies (overlap = commits of origin/PROD..branch also in origin/PROD..origin/DEV) registers this branch with commits=2; the criterion's premise that the branch is cut from DEV (+34 over DEV) does not hold. Open as NFRA_DEVPLN-W1-S5 for the CTO or issuer to rule the criterion's branch or the overlap definition. Not adjudicated by this worker.",
+   "expect": "APPROVAL-REGISTER result=REFUSED reason=dev-overlap"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Difference control on the overlap rule: the same registration tool on a PROD cut (o1, o2 over PROD) and a DEV cut (d1, d2, x1 over PROD); the rule must register the first and refuse the second.",
+   "expected": "the PROD cut registers commits=2 with overlap 0; the DEV cut is refused reason=dev-overlap overlap=2 commits=3 and writes nothing",
+   "observed": "test cases 'a branch cut from PROD with 2 own commits registers with commits=2 and the computed head' and 'a branch cut from DEV is refused dev-overlap (rc 3) and writes nothing' both PASS in the AC1 run",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The AC1 test was run twice against the same committed tree in one session, and AC2 was run twice against the real portal.",
+   "observed": "AC1 last lines identical both times: OPEN-CALLS-REGISTER-TEST cases=10/10 ok=True. AC2 output identical both times (head_sha fc876722f5af6e92f8f045982e1b1d7ad73755f7 commits=2).",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the S3 cluster copy of an approval row written by approval-lease",
+   "reason": "The tests run with OPAL_STATE_ROOT set and OPAL_OPENCALLS_CLOUD=0, so no put is exercised; the cluster copy is not tested by this order."
+  },
+  {
+   "item": "a real DEV-cut branch in the portal",
+   "reason": "The DEV refusal is exercised on temporary portals (DPb5-AC1). The one real branch the order names is not DEV-cut (NFRA_DEVPLN-W1-S5), so the real-portal refusal could not be measured."
+  },
+  {
+   "item": "the DP-b-1 approval test (.tools/tests/test_open_calls_approval.py) and the older suite (.tools/tests/test_open_calls.py)",
+   "reason": "Not criteria of this order and outside its paths. The DP-b-1 test is red after this change (NFRA_DEVPLN-W1-S6, ARMED, disarm owner 2.0.0_SA_COO~DV); the older suite was red at HEAD before this change (NFRA_DEVPLN-W1-S8)."
+  }
+ ],
+ "surprises": [
+  "NFRA_DEVPLN-W1-S5: the DPb5-AC2 branch is a stale PROD cut with overlap 0, so the BUILD item 1 rule registers it (AC2 FAIL, row left open)",
+  "NFRA_DEVPLN-W1-S6: --portal required on add --kind approval makes test_open_calls_approval.py red at its first add (ARMED, disarm owner 2.0.0_SA_COO~DV)",
+  "NFRA_DEVPLN-W1-S7: approval-lease takes a --project the order's flag list does not name; built with a default of NFRA_DEVPLN",
+  "NFRA_DEVPLN-W1-S8: test_open_calls.py is red at HEAD e2c9f07062 (its fork add omits --context, required since the 2026-10-09 context rule)"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_DEVPLN/deliverables/0.9.0_WK_NFRA_DEVPLN~1/NFRA_DEVPLN.TO-DP-b-5.registration-facts-and-lease.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 .tools/open-calls.py .tools/tests/test_open_calls_register.py",
+   "result": "All checks passed!"
+  },
+  {
+   "tool": "py_compile",
+   "invocation": "python -m py_compile .tools/open-calls.py .tools/tests/test_open_calls_register.py",
+   "result": "COMPILE-OK (no output, rc 0)"
+  }
+ ]
+}
