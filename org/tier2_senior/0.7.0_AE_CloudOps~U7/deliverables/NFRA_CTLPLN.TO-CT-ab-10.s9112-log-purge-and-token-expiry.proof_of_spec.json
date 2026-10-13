@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-CT-ab-10.s9112-log-purge-and-token-expiry",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "risk_class": "WORLD",
+  "assignee": "0.7.0_AE_CloudOps~U7",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~U7/task_orders/NFRA_CTLPLN.TO-CT-ab-10.s9112-log-purge-and-token-expiry.md",
+    "group": "OTHER",
+    "vintage_commit": "f94216ea59"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round12.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~U7/task_orders/NFRA_CTLPLN.TO-CT-ab-10.s9112-log-purge-and-token-expiry.md",
+    "vintage_commit": "39a80ae385"
+  },
+  "scope": "ONE group, /aws/lambda/opal-portal-data-proxy: delete log streams whose lastEventTimestamp is before 2026-10-12T11:58:21Z (8513 of 8550), print token expiries, read the rotation path. Executed 2026-10-13T19:50Z to 20:12Z; ledger s9112-data-proxy-log-purge-ab10-20261013, CLOSED.",
+  "session_log": "org/critical_paths/change_management/20261013T1950Z_s9112-data-proxy-log-purge-ab10-20261013_deploy_completion.md",
+  "never_widen_pair": {
+    "coo_half": "not a never-widen act: the only write is a delete the order confirms with Andrew's sentence (record org/tier1_exec/2.0.0_SA_COO~C/deliverables/ANDREW_DIRECT_20261013_143xZ_NFRA_CTLPLN_ROUND12_CALLS_ANSWERED.md); no served output moved",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_DELL_ADMIN_GROUP_SUPERSEDES_GRANTS_AND_S9112_PURGE_ROTATE_IF_EXISTS_NO_ACCOUNT_DISABLE_20261013.md section 2 (purge proceeds, no account disabled, rotation only where a path exists, and as its own order)"
+  },
+  "rollback": "none: a deleted log stream is not recoverable (stated in the ledger entry and confirmed by Andrew); the group, its retention and the 37 post-cut streams are untouched",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-ab-10.s9112-purge-record.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the pre-purge census, the purge counts, the post-purge census with its positive control, the two expiries, the rotation path and the four exact final lines",
+      "artifact_covered_by": ["CTab10-AC1", "CTab10-AC2"]
+    },
+    {
+      "path_or_key": "cloudwatch-logs:/aws/lambda/opal-portal-data-proxy",
+      "kind": "aws_resource",
+      "commit_or_etag": "streams_deleted=8513 failed=0",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "post-purge describe-log-streams, auto-paginated and counted client-side: 37 streams, 0 before the cut, 0 spanning; retention still 14 days; filter-log-events before the cut returns 0 events",
+      "artifact_covered_by": ["CTab10-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTab10-AC1",
+      "criterion_verbatim": "cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-ab-10.s9112-purge-record.txt expects pre_cut_refresh=0 pre_cut_device_trust=0 pre_cut_jwt=0 pre_cut_bearer=0",
+      "method": "command",
+      "invocation": "cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-ab-10.s9112-purge-record.txt",
+      "expect": "pre_cut_refresh=0 pre_cut_device_trust=0 pre_cut_jwt=0 pre_cut_bearer=0",
+      "output_evidence": "POST-PURGE pre_cut_refresh=0 pre_cut_device_trust=0 pre_cut_jwt=0 pre_cut_bearer=0",
+      "denominator": "8550 streams listed before the purge (8513 before the cut, 0 spanning, 37 after), 37 after; the post-purge census read every event before the cut through filter-log-events (0 events). Control: the same detector over the 947 pre-cut events before the purge read refresh_token 20, device_trust 14, JWT-shaped 31, Bearer 31, and the same read without the end-time returned the 132 post-cut events after it, so the zero is not a blind detector or a failed read",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTab10-AC2",
+      "criterion_verbatim": "cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-ab-10.s9112-purge-record.txt expects rotation_path=",
+      "method": "command",
+      "invocation": "cat org/tier2_senior/0.7.0_AE_CloudOps~U7/deliverables/NFRA_CTLPLN.TO-CT-ab-10.s9112-purge-record.txt",
+      "expect": "rotation_path=",
+      "output_evidence": "rotation_path=org/missions/D12/NFRA/NFRA_OPSEC202609/deliverables/0.7.0_AE_CloudOps~V/JWT_SIGNING_KEY_ROTATION_RUNBOOK.md",
+      "denominator": "one secret described by metadata only (opal/auth/jwt-private-key: RotationEnabled null, no rotation Lambda, AWSCURRENT and AWSPREVIOUS present) and the OP-s-10 runbook read at HEAD (941aea16c8); the runbook is a no-sign-out two-slot rotation and its section 7 makes retiring the previous slot a separate cut, so a single rotation does not invalidate the leaked tokens. Nothing was rotated",
+      "status": "PASS"
+    }
+  ],
+  "compiler_tools": [
+    {"tool": "comp-iam", "invocation": "none run: the laptop identity (Andrew_Berman) deleted the streams directly; the delete grant on the one group was proven by the 8513 successful deletes", "result": "DECLARED-NOT-APPLICABLE as a lens; the readers of the group (NFRA_IAMROLES202609) are not seen by it"},
+    {"tool": "deploy_ledger.py", "invocation": "open/close-leg L1-L4/close --slug s9112-data-proxy-log-purge-ab10-20261013", "result": "4 legs, all closed with proof, sentinel removed"}
+  ],
+  "controls": {
+    "detector_sees_credentials": {
+      "description": "the post-purge zero is only meaningful if the same detector reads non-zero where credentials exist",
+      "expected_landed": "the pre-purge pre-cut read is non-zero",
+      "expected_not_landed": "a zero before and after would mean a blind detector",
+      "observed": "before: 947 events, refresh_token 20, device_trust 14, JWT-shaped 31, Bearer 31; after: 0 events before the cut",
+      "status": "PASS"
+    },
+    "read_is_not_vacuous": {
+      "description": "the filter-log-events read returns events when events exist",
+      "expected_landed": "the same read without the end-time returns the post-cut events",
+      "expected_not_landed": "an empty unbounded read would mean the zero was a failed read",
+      "observed": "per-page lengths sum to 132, equal to the 132 post-cut events counted before the purge",
+      "status": "PASS"
+    },
+    "nothing_else_deleted": {
+      "description": "the delete touched only streams before the cut",
+      "expected_landed": "37 streams remain, all with lastEventTimestamp at or after the cut, retention 14",
+      "expected_not_landed": "fewer than 37 would mean a post-cut stream was deleted",
+      "observed": "37 listed after (8550 - 8513 = 37); 0 before the cut; retention 14",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the leaked refresh_token (latest possible expiry 2026-10-18T03:08:59Z) and device_trust (2026-11-10T03:08:59Z) tokens are NOT invalidated",
+      "reason": "the order forbids rotating and forbids disabling an account; a rotation path exists but is its own order under its own pair, cut by the issuer (row NFRA_CTLPLN-S9122)"
+    },
+    {
+      "item": "copies of the log lines outside the group were not searched beyond subscription filters (none) and export tasks (none)",
+      "reason": "named in the order's comp-adversary as blind"
+    },
+    {
+      "item": "the 38 and 29 line counts of the row were not reproduced (20 and 14 measured)",
+      "reason": "the 14 day retention aged part of the earlier read out between the two reads; the 16 in-window refresh_token lines agree"
+    }
+  ],
+  "surprises": ["NFRA_CTLPLN-S9112", "NFRA_CTLPLN-S9122"]
+}
