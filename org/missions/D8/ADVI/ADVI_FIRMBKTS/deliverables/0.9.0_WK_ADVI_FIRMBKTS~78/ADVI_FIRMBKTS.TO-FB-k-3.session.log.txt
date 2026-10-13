@@ -1,0 +1,46 @@
+SESSION LOG -- 0.9.0_WK_ADVI_FIRMBKTS~78 on ADVI_FIRMBKTS.TO-FB-k-3 (read-only inventory), 2026-10-13 21:32Z to 22:30Z
+
+Step 0 -- tree check
+  git rev-parse --abbrev-ref HEAD -> wk-ADVI_FIRMBKTS-78 ; test -d org && test -d .tools -> TREE-OK
+
+Step 1 -- AWS, through the served graph first
+  comp-find --corpus aws 'opal-data-cot' -> DENOMINATOR 9 hit(s) across 2926 aws node(s), rc 0
+  comp-find --corpus aws -i 'cottonwood|cot-|cot_|_cot|/cot' -> DENOMINATOR 104 hit(s) across 2926 aws node(s), rc 0 (page 1 of 5 read)
+  comp-find --corpus aws 'crosswalk' piped to head -> no output within bound, rc 143 (not retried; the repository search used the Grep tool)
+
+Step 2 -- rules and targets
+  aws events list-rules --region us-east-1 -> 156 rules, rc 0
+  aws events list-targets-by-rule --rule <name> --region us-east-1 -> 156 calls, 0 failed, 168 targets
+  aws events describe-rule --name cot-satellites-registry-producer-daily -> rc 254, ResourceNotFoundException
+  aws events list-rules --name-prefix cot-satellites -> 1 rule (cot-satellites-characteristics-producer-daily)
+  helpers/summ_rules.py -> RULES scanned=156 targets_total=168 names_matched=23
+
+Step 3 -- notifications, schedules, ECS, Step Functions, Lambda
+  aws s3api get-bucket-notification-configuration --bucket opal-data-cot -> EventBridge configuration only, rc 0
+  aws s3api get-bucket-notification-configuration --bucket opal-data-bd -> 2 Lambda configurations, rc 0
+  aws scheduler list-schedules --region us-east-1 -> 34 schedules, rc 0
+  aws scheduler get-schedule (opal-assets-ingest-mirror-cot-daily-et; cot-bd-session-daily-et) -> rc 0 both
+  aws ecs list-clusters -> 1 ; aws ecs list-services --cluster opal-globgrph -> 3 ; aws ecs list-task-definitions --status ACTIVE -> 9 (none name-matched), rc 0
+  aws stepfunctions list-state-machines -> 1 (YangDataPipeline), rc 0
+  aws lambda list-functions --region us-east-1 -> 237 functions, rc 0
+  helpers/lambda_env.py <27 names> -> environment names and bucket-like values only (secret-like keys shown as redacted)
+
+Step 4 -- S3 listings (list-objects-v2, delimiter /)
+  opal-data-cot top level -> 9 common prefixes; second level for 8 prefixes plus investor-reporting, investor-reporting/directory, platinum/satellites, platinum/firm -> 13 list calls, rc 0
+  opal-data-bd top level -> 31 common prefixes; blackdiamond/cottonwood/, advi/cottonwood/, cottonwood/, blackdiamond/cot/ -> empty; second level for 8 prefixes -> 13 list calls, rc 0
+
+Step 5 -- repository (Grep tool, worktree-pathed)
+  opal-data-cot named in 1741 files worktree-wide; 117 under infra/; 61 under data/
+  content greps with -n on: cot-bd-session-trigger, cot-etf-ownership-daily, cot-rebalancer-runner, cot-satellites-characteristics-producer, cot-satellites-registry-producer, bd-cot-keepalive, bd-silver-merge, bd-gold-trigger, opal-assets-ingest-mirror, served_guard.py, value_parity_reader.py, mdpf-pipeline main.tf and iam.tf, cot-pipeline ssm.tf and user-data.sh, the cot data scripts, land_cot.py, directory_runner.py, build_cottonwood_mdpf_pair.py
+  comp-read on cot-bd-session-trigger and cot-etf-ownership-daily lambda_function.py -> rc 0 (sections and salient lines only)
+
+Step 6 -- record and checks
+  Write: PLANINV_COTTONWOOD_PIPELINE.json (42 rows), PLANINV_COTTONWOOD_PIPELINE.md
+  r7_checks.py planinv --file <record> --firm cottonwood -> PLANINV: FAIL row 41 is legacy_touch with no read or write (first run); after the fix of row 41 -> PLANINV: OK firm=cottonwood rows=42 legacy=23, rc 0
+  r4_scope.py --root <worktree> --allow <deliverables/> --allow <INVESTIGATION_v1.md> -> ROUND 4 SCOPE: OK 4 changed, 0 outside, 0 required missing, rc 0
+  safe-commit (first try) -> BLOCKED by commit-gate ruff (multiple imports on one line; ambiguous name); fixed in the two helper scripts; second try committed ad4cca5692 (4 files)
+
+Step 7 -- surprise rows
+  INVESTIGATION_v1.md: appended ADVI_FIRMBKTS-D1-W78-S1 to S4 (surprised_at 2026-10-13T22:22:11Z)
+
+No AWS write, no producer run, no deploy, no terraform command, no product file edited, no secret or credential read or printed. The task-order status was not flipped.
