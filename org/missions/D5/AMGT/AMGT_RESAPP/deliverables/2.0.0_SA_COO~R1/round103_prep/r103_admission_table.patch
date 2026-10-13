@@ -1,0 +1,54 @@
+diff --git a/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round94_prep/checks/r94_admission_table.py b/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round94_prep/checks/r94_admission_table.py
+index 9268c8fee8..69deeb6269 100644
+--- a/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round94_prep/checks/r94_admission_table.py
++++ b/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round94_prep/checks/r94_admission_table.py
+@@ -2,21 +2,35 @@
+ 
+   python r94_admission_table.py [<ref>] [--pin 6a6c5c49d0]
+ 
+-The live package was built at `--pin` (round 92 qq-5, CodeSha256 SOzAz9/gfKE..). For every non-test file under `lib/` and every registry file (`infra/logic/registry/*.json`) the function
+-packages, print its blob at the pin, its blob at `<ref>` (default HEAD) and the added and removed line counts. A member absent at the pin prints ABSENT. This is
++The live package was built at `--pin` (round 92 qq-5, CodeSha256 SOzAz9/gfKE..). For every non-test file under `lib/` and every registry file the build script packages
++(`NAMING_REGISTRY_FILES`, read from the script), print its blob at the pin, its blob at `<ref>` (default HEAD) and the added and removed line counts. A member absent at the pin prints ABSENT. This is
+ the table the pair's blast-radius section is written from: any member the pair does not admit, or a blob that differs from the table's column, is a STOP at the GO.
+ Read-only (git plumbing only).
+ """
++import re
+ import subprocess
+ import sys
+ 
+-REGISTRY = ("infra/logic/registry/scopes.json", "infra/logic/registry/systems.json")
++# AMGT-bj-4 (CTO round-102 analysis item 3): the registry files a build PACKAGES are the build script's own `NAMING_REGISTRY_FILES` (and NAMING_SCHEMA.json), read from the script AT the
++# pin and at the ref, never typed here and never "every file in the folder".
++BUILD_SCRIPT = "infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh"
++REGISTRY_DIR = "infra/logic/registry/"
+ 
+ 
+ def git(*args):
+     return subprocess.run(["git", *args], capture_output=True, text=True, check=False).stdout
+ 
+ 
++def packaged_registry(ref):
++    """The registry members the build script at `ref` packages: `NAMING_REGISTRY_FILES` under infra/logic/registry/, plus org/standards/NAMING_SCHEMA.json when the script names it."""
++    text = git("show", "%s:%s" % (ref, BUILD_SCRIPT))
++    match = re.search(r"NAMING_REGISTRY_FILES\s*=\s*\((.*?)\)", text, re.S)
++    names = [REGISTRY_DIR + n for n in re.findall(r'"([^"]+\.json)"', match.group(1))] if match else []
++    if "org/standards/NAMING_SCHEMA.json" in text:
++        names.append("org/standards/NAMING_SCHEMA.json")
++    return names
++
++
+ def blob(ref, path):
+     out = git("rev-parse", "--short=12", "%s:%s" % (ref, path)).strip()
+     return out if out and " " not in out else "ABSENT"
+@@ -32,8 +46,8 @@ def main():
+     ref = args[0] if args else "HEAD"
+     names = git("diff", "--name-only", pin, ref, "--", "lib/").split()
+     names = [n for n in names if "/tests/" not in n and not n.endswith("_test.py")]
+-    # round 102 (row AMGT_RESAPP-D1-S27, RA1): EVERY registry file the builder loads is a package member, not only scopes.json and systems.json (exemptions.json was the twelfth member)
+-    reg = [p for p in git("ls-files", "infra/logic/registry/").split("\n") if p.endswith(".json")]
++    # round 103 (AMGT-bj-4): the build script's own packaging rule, read at the pin and the ref (exemptions.json was the twelfth member in round 102)
++    reg = sorted(set(packaged_registry(pin)) | set(packaged_registry(ref)))
+     for p in reg:
+         if blob(pin, p) != blob(ref, p):
+             names.append(p)
