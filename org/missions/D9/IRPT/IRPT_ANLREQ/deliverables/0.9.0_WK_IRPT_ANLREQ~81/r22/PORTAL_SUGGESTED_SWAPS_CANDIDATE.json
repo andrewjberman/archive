@@ -1,0 +1,65 @@
+{
+  "dev_tip": "f6ef1d2548cf6f619f80662d3082d66ea0a3fcf4",
+  "branch": "wk-IRPT_ANLREQ-81-portal",
+  "commit": "1742505086408bc7120e3f36b9e3ced6dfc2fd02",
+  "files_changed": [
+    "src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx",
+    "src/pages/InvestorReporting/tabs/analysis/prospect.ts",
+    "src/pages/InvestorReporting/tabs/analysis/tests/prospect-suggested-swaps.test.tsx"
+  ],
+  "tests": {
+    "added": 8,
+    "passed": 30,
+    "failed": 0,
+    "folders": [
+      "src/pages/InvestorReporting/tabs/analysis/tests: 30 pass, 0 fail, 5 files (22 pass before the change; 8 added, all 8 pass)",
+      "src/pages/InvestorReporting/__tests__/dsgn-irptv1: 371 pass, 10 fail, 2 errors, 381 tests across 240 files WITHOUT the change (origin/DEV) and WITH it; the same failing test names both ways (ENOENT on workspace-relative paths)",
+      "bun run typecheck (tsc -b --noEmit): rc=0 with the change; a deliberate type error in a probe file returned rc=2 and the probe was removed"
+    ]
+  },
+  "before_arm": {
+    "failed": 6,
+    "passed": 2,
+    "failing_on_origin_DEV": [
+      "(a) each suggestion shows \"Suggested: <symbol>, verified by the data provider.\" and its reason; at most three [34.20ms]",
+      "(b) pressing Use <symbol> sets that row proxy input and nothing else [6.83ms]",
+      "(d) a malformed item beside a valid one is skipped and the valid one still shows [2.64ms]",
+      "(e) a reason holding markup characters is rendered as text, never as HTML [2.14ms]",
+      "(f) the hint line under \"Name a proxy\" and the input placeholder carry the read record words [3.90ms]",
+      "no suggestion shows no extra text: no \"suggested\" line, no verification words, no \"no match\" text [3.20ms]"
+    ],
+    "passing_on_origin_DEV": [
+      "(c) without a press the input is empty on first render and after re-render, and the upload body carries no proxy",
+      "(d) malformed suggestions absent/null/empty/non-list/no-symbol render nothing and do not throw"
+    ],
+    "output_tail": "Expected to contain: \"<img src=x onerror=\\\"throw 1\\\"> <b>bold</b> & more\"\nReceived: \"Prospect portfolioUpload holdingsDrop the holdings template here, or choose a file: a Ticker column and one of Dollars, Shares, Target Weight or Current Weight. The template is holdings-template.csv.Holdings fileNeeds correction.I confirm amounts without a currency label are US dollarsPrice date for share quantitiesReference notional for weights (USD)Weight-based analysis uses a reference amount, not client assets.Retry same uploadReview required: Check the file. Correct the file or valuation options and review again, or name a proxy below for a security the data provider cannot price.Row 2: Ticker QKZAQ was not found.Name a proxyQKZAQ (row 2) is analysed asReview with these proxies\"\n      at <anonymous> (C:\\dev\\wk-portal-81-before\\src\\pages\\InvestorReporting\\tabs\\analysis\\tests\\prospect-suggested-swaps.test.tsx:159:41)\n\u2717 AR-y-248 -- a verified swap is shown as suggested, with its words and reason > (e) a reason holding markup characters is rendered as text, never as HTML [2.14ms]\n160 |   })\n161 |\n162 |   test('(f) the hint line under \"Name a proxy\" and the input placeholder carry the read record words', async () => {\n163 |     const { container } = await mount([TWO])\n164 |     const hint = container.querySelector('[data-slot=\"upload-proxy-hint\"]')\n165 |     expect(hint).not.toBeNull()\n                           ^\nerror: expect(received).not.toBeNull()\nReceived: null\n      at <anonymous> (C:\\dev\\wk-portal-81-before\\src\\pages\\InvestorReporting\\tabs\\analysis\\tests\\prospect-suggested-swaps.test.tsx:165:22)\n\u2717 AR-y-248 -- a verified swap is shown as suggested, with its words and reason > (f) the hint line under \"Name a proxy\" and the input placeholder carry the read record words [3.90ms]\n172 |     const text = container.textContent ?? ''\n173 |     expect(container.querySelectorAll('[data-slot=\"upload-swap\"]').length).toBe(0)\n174 |     expect(text).not.toContain('Suggested')\n175 |     expect(text).not.toContain(VERIFIED)\n176 |     expect(text.toLowerCase()).not.toContain('no match')\n177 |     expect(container.querySelector('[data-slot=\"upload-proxy-hint\"]')).not.toBeNull()\n                                                                                 ^\nerror: expect(received).not.toBeNull()\nReceived: null\n      at <anonymous> (C:\\dev\\wk-portal-81-before\\src\\pages\\InvestorReporting\\tabs\\analysis\\tests\\prospect-suggested-swaps.test.tsx:177:76)\n\u2717 AR-y-248 -- a verified swap is shown as suggested, with its words and reason > no suggestion shows no extra text: no \"suggested\" line, no verification words, no \"no match\" text [3.20ms]\n 2 pass\n 6 fail\n 53 expect() calls\nRan 8 tests across 1 file. [367.00ms]"
+  },
+  "what_a_person_sees": {
+    "two_suggestions": "Under 'Name a proxy': the hint line 'This ticker is not in the data provider. Type the ticker of a security the provider prices, such as a listed ETF with the same kind of exposure, then review again.' Then the row 'QKZAQ (row 2) is analysed as' with an input whose placeholder is the same hint sentence. Then, per suggestion: 'Suggested: ABCD, verified by the data provider.' followed by the server's reason as plain text ('A listed ETF with similar holdings') and a navy-bordered 'Use ABCD' button; the same for 'Suggested: EFGH, verified by the data provider.' Nothing is typed into the input. The 'Review with these proxies' button stays disabled until a press of 'Use'; a press sets only that row's input, after which it reads 'Review with this proxy' and is enabled.",
+    "no_suggestion": "Under 'Name a proxy': the same hint line, the row 'QKZAQ (row 2) is analysed as' with an empty input and the hint as its placeholder, and the disabled 'Review with these proxies' button. No suggested line, no verification words, no 'no match' text, and no extra element."
+  },
+  "design_clauses": [
+    "C3 (surface role, DESIGN.md): every new text is navy ink (palette.navy) on the white panel; no dark fill, no band, no light-on-light; the Use button is a white button with a navy border (components.button-secondary), not the indigo primary.",
+    "C8 (accent): no #5F3BE3 element is added; the single primary action of the view is unchanged.",
+    "C9 (contrast): navy on #FFFFFF is 12.00:1 per the C3 table; the secondary grey #6B7280 is not used for any new text.",
+    "C10 (spacing): the swap list sits inside the proxy block with space-y-1 between lines; no new gap above spacing.sm.",
+    "C11 (shape and focus): the Use button radius is rounded-[3px] (rounded.sm); no shadow; no outline removed; the focus ring is the page's existing :focus-visible, not replaced.",
+    "C13 (overflow): the reason uses whitespace-normal break-words and no truncate, nowrap, overflow-hidden or line-clamp; the hint line is not clipped. The placeholder of the w-28 input clips the hint sentence visually; its full words sit on the input's title attribute and on the hint line (the recovery path), which is stated here as a clip with an affordance.",
+    "C12 and C14: not applicable; no panel is empty and no fact is disclosed behind a toggle."
+  ],
+  "claim": "On origin/DEV f6ef1d25 the proxy row shows no verified swap, and its placeholder and hint are absent. With this candidate (commit 1742505086408bc7120e3f36b9e3ced6dfc2fd02, src/ only, not landed, not pushed): each valid suggestion (at most three, source KIMI_SWAP_PROVIDER_VERIFIED, ticker-shaped symbol, not the file's own ticker) is shown as 'Suggested: <symbol>, verified by the data provider.' with its reason as text and a 'Use <symbol>' button; only that press sets the row's proxy input; nothing fills the input or the request on render or re-render; an absent, null, empty, non-list or malformed member shows nothing and does not throw; the hint line and the placeholder carry the read record's words as written. Measured: the 8 new tests fail 6 of 8 on origin/DEV and pass 8 of 8 with the change; a mutant that prefills the input from the first suggestion fails the no-auto-fill test.",
+  "not_read": [
+    "The rendered screenshot required by the portal CLAUDE.md verification law (scripts/ui-smoke.mjs and the /frontend-dev skill) was NOT run; no visual render was read. The visual judgment is open for L9.",
+    "design/systems/portal/DESIGN_SYSTEM.md and design/process/UI_VERIFICATION.md were not read; DESIGN.md and the portal CLAUDE.md were read in full.",
+    "The AR-y-247 server emitter was not read; the wire shape is taken from the cell text, and the source constant from the same text.",
+    "The causes of the dsgn-irptv1 failures were not read; only their names and counts were compared, both ways.",
+    "The portal history after f6ef1d25 and the commit f6446051 beyond its message were not read."
+  ],
+  "notes": [
+    "The reader also requires source == KIMI_SWAP_PROVIDER_VERIFIED on each item; the cell's listed malformed cases do not name it. Recorded as surprise row IRPT_ANLREQ-D2-W81-S4.",
+    "The portal worktree has no node_modules of its own; it carries a directory junction to the main portal checkout's install (no network install). Recorded as surprise row IRPT_ANLREQ-D2-W81-S1.",
+    "The portal repository has no committer identity for this worker; the commit set GIT_COMMITTER_NAME and GIT_COMMITTER_EMAIL to the serial on the command line only. Recorded as surprise row IRPT_ANLREQ-D2-W81-S2.",
+    "The hint sentence as a placeholder is wider than the w-28 proxy input; its full words are also on the title attribute and the hint line. Recorded as surprise row IRPT_ANLREQ-D2-W81-S3.",
+    "The rendered screenshot required by the portal verification law was not produced in this candidate. Recorded as surprise row IRPT_ANLREQ-D2-W81-S5."
+  ]
+}

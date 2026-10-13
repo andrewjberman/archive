@@ -28,7 +28,8 @@ ROUND192_VERSION = "irpt-template-reader.r19.2"
 TOKENS = {"y221-allowlist": "Y221-ALLOWLIST", "y221-keep": "Y221-KEEP", "y222-verify": "Y222-VERIFY", "y223-design": "Y223-DESIGN",
           "y226-effect": "Y226-EFFECT", "y227-resident": "Y227-RESIDENT", "y228-lambda": "Y228-LAMBDA", "y229-stderr": "Y229-STDERR",
           "y242-portal": "Y242-PORTAL", "y243-portal": "Y243-PORTAL", "y244-read": "Y244-READ", "y245-server": "Y245-SERVER",
-          "y246-qa": "Y246-QA", "y247-swap": "Y247-SWAP", "y248-portal": "Y248-PORTAL"}
+          "y246-qa": "Y246-QA", "y247-swap": "Y247-SWAP", "y248-portal": "Y248-PORTAL",
+          "y249-swap": "Y249-SWAP", "y250-qa": "Y250-QA", "y251-swap": "Y251-SWAP", "y252-portal": "Y252-PORTAL"}
 READER_R181_SHA = "83ab9b45d59065f53c640803df9fd07a0ddfcc97d89c13540c20622a6bf7bd58"
 UPLOADS_SHA = "176682cb1545435eec084376b3c37a578ca70d05f9ad5a376c0f2275f62b05ea"
 NEGATIVES = (
@@ -379,6 +380,65 @@ def main(argv):
             problems.append("the intake folder must pass with at least 365")
     elif check == "y248-portal":
         portal_candidate(root, D22 % "81" + "PORTAL_SUGGESTED_SWAPS_CANDIDATE.json", problems)
+    elif check == "y249-swap":
+        rec = load(root, D22 % "82" + "SWAP_FROM_SEARCH.json", problems)
+        if rec:
+            for member in ("read", "transport", "advisory", "tests", "before_arm", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+        for rel, cwd, floor in (("tests/test_swap_from_search.py", INTAKE, 10), ("tests/test_kimi_search_port.py", IR + "/ycharts/generate", 5)):
+            if not (root / cwd / rel).is_file():
+                problems.append("no %s/%s" % (cwd, rel))
+                continue
+            rc, passed, failed = pytest(root, rel, cwd)
+            print("%s: %d passed, %d failed (rc=%d)" % (rel, passed, failed, rc))
+            if rc != 0 or failed or passed < floor:
+                problems.append("%s must pass with at least %d tests" % (rel, floor))
+        rc, passed, failed = pytest(root, "tests", INTAKE)
+        print("intake tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+        if rc != 0 or failed or passed < 365:
+            problems.append("the intake folder must pass with at least 365")
+        text = (root / IR / "intake/resolution_kimi.py").read_text(encoding="utf-8") if (root / IR / "intake/resolution_kimi.py").is_file() else ""
+        if "request_fields" in text and "REFUSED" not in text.upper() and "refuse" not in text.lower():
+            problems.append("resolution_kimi.py still reads request_fields without refusing the old capability shape")
+    elif check == "y250-qa":
+        rec = load(root, D22 % "83" + "KIMI_SEARCH_QA_HARNESS.json", problems)
+        if rec:
+            for member in ("read", "harness", "tests", "live_qa", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            harness = rec.get("harness") or {}
+            cases = harness.get("cases") or []
+            if not re.fullmatch(r"[0-9a-f]{64}", str(harness.get("sha256", ""))) or len(cases) < 8:
+                problems.append("harness needs a 64-hex sha256 and at least 8 cases (TIMXX, 4 funds, a nonsense symbol, 2 injection strings)")
+            if not any("TIMXX" in json.dumps(c) for c in cases):
+                problems.append("the fixed case list must hold TIMXX")
+        path = root / IR / "ycharts/generate/kimi_search_qa.py"
+        if not path.is_file():
+            problems.append("no ycharts/generate/kimi_search_qa.py")
+        else:
+            rc, passed, failed = pytest(root, "tests/test_kimi_search_qa.py", IR + "/ycharts/generate")
+            print("qa tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+            if rc != 0 or failed or passed < 7:
+                problems.append("tests/test_kimi_search_qa.py must pass with at least 7 tests")
+    elif check == "y251-swap":
+        rec = load(root, D22 % "84" + "SWAP_SUGGESTIONS_R2.json", problems)
+        if rec:
+            for member in ("where_wired", "capability_carrier", "behaviour", "wire_shape", "tests", "before_arm", "release_size", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            if (rec.get("before_arm") or {}).get("failed") in (None, 0, "0"):
+                problems.append("before_arm: case (b) must FAIL at HEAD without the change")
+        rc, passed, failed = pytest(root, "tests/test_swap_suggestions.py", IR + "/ycharts/generate")
+        print("swap tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+        if rc != 0 or failed or passed < 7:
+            problems.append("tests/test_swap_suggestions.py must pass with at least 7 tests")
+        rc, passed, failed = pytest(root, "tests", INTAKE)
+        print("intake tests: %d passed, %d failed (rc=%d)" % (passed, failed, rc))
+        if rc != 0 or failed or passed < 365:
+            problems.append("the intake folder must pass with at least 365")
+    elif check == "y252-portal":
+        portal_candidate(root, D22 % "85" + "PORTAL_PROXY_PLACEHOLDER_CANDIDATE.json", problems)
     return finish(check, problems)
 
 
