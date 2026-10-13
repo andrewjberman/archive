@@ -1,0 +1,284 @@
+"""IRPT_ANLREQ TO-EXERCISE-R21 executor (0.7.0_AE_CloudOps~AQ2): the status rule driven through the live edge in one sitting.
+
+Pair: COO half blob d1d4296341, CTO half @decdd94c48 (choice A). Tokens are held in this process only and never written.
+No response body is kept: status, the refusal code of a REFUSED arm, and the sha256 of the body are recorded.
+Rows written for the sitting are removed after the later exp, even when a step stops.
+"""
+import datetime as dt
+import hashlib
+import json
+import re
+import sys
+import time
+import urllib.error
+import urllib.request
+
+import boto3
+import jwt as pyjwt
+
+REGION = "us-east-1"
+HOST = "d2n2nzpeqf34ge.cloudfront.net"
+URL = "https://" + HOST + "/api/scoped/investor-reporting/directory/search?selected_tenant=cottonwood"
+USERS = "opal-users-v2"
+FN = "irpt-directory-search"
+EXPECT_SHA = "tvrsQ+w820jp1pxiUoYrhiKCZGVnViUTbBsDUbJEG3w="
+KEY_SECRET = "opal/auth/jwt-private-key"
+ADDR = {n: "irpt-r21-status-%s@opal.invalid" % n for n in ("norow", "disabled", "active")}
+LIFE = 720          # seconds, at most 1200 after iat; the sitting is about 3 min plus the +5 min window
+SPACING = 65        # seconds between requests, at least 60
+PATTERN = '"INTERNAL-CALLER-CLASS class="'
+OUT = sys.argv[1]   # deliverables dir, forward slashes
+
+ddb = boto3.client("dynamodb", region_name=REGION)
+logs = boto3.client("logs", region_name=REGION)
+events = []
+
+
+def iso(t=None):
+    return dt.datetime.fromtimestamp(time.time() if t is None else t, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def say(m):
+    line = "%s %s" % (iso(), m)
+    print(line, flush=True)
+    events.append(line)
+
+
+class Stop(Exception):
+    pass
+
+
+def key(n):
+    return {"PK": {"S": "USER#" + ADDR[n]}, "SK": {"S": "PROFILE"}}
+
+
+def cread(n):
+    return ddb.get_item(TableName=USERS, Key=key(n), ConsistentRead=True).get("Item")
+
+
+def gsi_count(n):
+    return ddb.query(TableName=USERS, IndexName="email-index", KeyConditionExpression="email = :e",
+                     ExpressionAttributeValues={":e": {"S": ADDR[n]}}, Select="COUNT")["Count"]
+
+
+def request(token):
+    req = urllib.request.Request(URL, method="GET")
+    req.add_header("Authorization", "Bearer " + token)
+    req.add_header("x-contract-version", "v1")
+    start = time.time()
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            st, body = r.status, r.read()
+    except urllib.error.HTTPError as e:
+        st, body = e.code, e.read()
+    return start, st, body
+
+
+def classify(st, body):
+    """REFUSED FIRM_BINDING only on a 4xx whose envelope names it; the body is not kept."""
+    sha = hashlib.sha256(body).hexdigest()
+    code = None
+    if 400 <= st < 500:
+        m = re.search(rb'"public_reason_code"\s*:\s*"([A-Z_]+)"', body)
+        code = m.group(1).decode() if m else None
+    if code == "FIRM_BINDING":
+        return "REFUSED", code, sha
+    if st == 200:
+        return "ADMITTED", None, sha
+    return "OTHER", code, sha
+
+
+def mint(pem, sub):
+    iat = int(time.time())
+    claims = {"sub": sub, "iss": "opal-portal-auth", "aud": "opal-portal-api", "firmId": "opal-capital", "tier": "internal",
+              "role": "user", "userType": "test-filer", "name": "IRPT_ANLREQ R21 synthetic status exercise", "iat": iat, "exp": iat + LIFE}
+    return pyjwt.encode(claims, pem, algorithm="RS256"), iat, iat + LIFE
+
+
+def class_lines(lo_s, hi_s):
+    """Auto-paginated, counted client side. Returns (total, distinct streams, {(class, outcome): n})."""
+    total, streams, by = 0, set(), {}
+    pg = logs.get_paginator("filter_log_events")
+    for page in pg.paginate(logGroupName="/aws/lambda/" + FN, startTime=int(lo_s * 1000), endTime=int(hi_s * 1000) - 1,
+                            filterPattern=PATTERN):
+        for e in page.get("events", []):
+            total += 1
+            streams.add(e["logStreamName"])
+            m = re.search(r"INTERNAL-CALLER-CLASS class=(\w+) outcome=(\w+)", e["message"])
+            k = (m.group(1), m.group(2)) if m else ("UNPARSED", "-")
+            by[k] = by.get(k, 0) + 1
+    return total, len(streams), by
+
+
+def streams_searched(lo_s, hi_s):
+    n = 0
+    pg = logs.get_paginator("describe_log_streams")
+    for page in pg.paginate(logGroupName="/aws/lambda/" + FN, orderBy="LastEventTime", descending=True):
+        for s in page.get("logStreams", []):
+            last = s.get("lastEventTimestamp", 0) / 1000.0
+            first = s.get("firstEventTimestamp", 0) / 1000.0
+            if last < lo_s:
+                return n
+            if first <= hi_s:
+                n += 1
+    return n
+
+
+def main():
+    written, tokens_exp, results, counts, stop = [], [], {}, {}, None
+    sitting_lo = sitting_hi = None
+    pem = None
+    try:
+        cfg = boto3.client("lambda", region_name=REGION).get_function_configuration(FunctionName=FN)
+        say("deployed %s CodeSha256=%s" % (FN, cfg["CodeSha256"]))
+        if cfg["CodeSha256"] != EXPECT_SHA:
+            raise Stop("deployed CodeSha256 differs from the release-20 value")
+        for n in ADDR:
+            if cread(n) is not None or gsi_count(n) != 0:
+                raise Stop("address %s is not ABSENT before the sitting" % n)
+        say("pair step 1: three USER# keys ConsistentRead ABSENT and the email index returns 0 for each")
+
+        for n in ("disabled", "active"):
+            item = {"PK": {"S": "USER#" + ADDR[n]}, "SK": {"S": "PROFILE"}, "email": {"S": ADDR[n]}, "firmId": {"S": "opal-capital"},
+                    "status": {"S": n}, "userType": {"S": "test-filer"}, "allowedFirmIds": {"L": [{"S": "cottonwood"}]}}
+            ddb.put_item(TableName=USERS, Item=item, ConditionExpression="attribute_not_exists(PK)")
+            written.append(n)
+            back = cread(n)
+            ok = (back is not None and back["status"]["S"] == n and back["email"]["S"] == ADDR[n]
+                  and [x["S"] for x in back["allowedFirmIds"]["L"]] == ["cottonwood"])
+            say("row %s written (attribute_not_exists(PK)); ConsistentRead PRESENT as designed: %s" % (n, ok))
+            if not ok:
+                raise Stop("row %s not PRESENT as designed after the put" % n)
+        # positive control for the GSI path: the written row must show on the email index (eventually consistent, bounded)
+        t_end = time.time() + 90
+        seen = False
+        while time.time() < t_end:
+            if gsi_count("disabled") == 1:
+                seen = True
+                break
+            time.sleep(3)
+        say("GSI positive control: the written disabled row appears on the email index: %s" % seen)
+
+        sec = boto3.client("secretsmanager", region_name=REGION).get_secret_value(SecretId=KEY_SECRET)["SecretString"]
+        if "BEGIN" not in sec[:40]:
+            raise Stop("signing secret is not a PEM string in the expected shape")
+        pem = sec
+        del sec
+        say("signing key read (value never printed or written)")
+
+        sitting_lo = time.time()
+        order = ["norow", "disabled", "active"]
+        starts = {}
+        for n in order:
+            if n == "disabled" and results.get("norow", ("",))[0] != "REFUSED":
+                break
+            if n == "active" and not (results.get("norow", ("",))[0] == "REFUSED" and results.get("disabled", ("",))[0] == "REFUSED"):
+                break
+            if starts:
+                time.sleep(SPACING)
+            token, iat, exp = mint(pem, ADDR[n])
+            tokens_exp.append(exp)
+            say("token for %s minted (held in memory only) iat=%s exp=%s life=%ds" % (n, iso(iat), iso(exp), LIFE))
+            start, st, body = request(token)
+            del token
+            outcome, code, sha = classify(st, body)
+            del body
+            starts[n] = start
+            results[n] = (outcome, st, code, sha)
+            say("%s request started %s: %s status=%s refusal_code=%s body_sha256=%s" % (n, iso(start), outcome, st, code, sha))
+            if n in ("norow", "disabled") and outcome != "REFUSED":
+                stop = "%s arm did not REFUSE FIRM_BINDING (outcome %s status %s code %s)" % (n, outcome, st, code)
+                break
+        del pem
+        pem = None
+        sitting_hi = max(starts.values()) + 300 if starts else time.time()
+
+        # pair step 5: per sub-window class lines, after the last window and ingestion lag have passed
+        if starts:
+            wait = sitting_hi + 75 - time.time()
+            if wait > 0:
+                say("waiting %ds for the last sub-window (+5 min) and log ingestion" % int(wait))
+                time.sleep(wait)
+            names = [n for n in order if n in starts]
+            for i, n in enumerate(names):
+                lo = starts[n]
+                hi = starts[names[i + 1]] if i + 1 < len(names) else lo + 300
+                tot, ns, by = class_lines(lo, hi)
+                counts[n] = (lo, hi, tot, ns, by)
+                say("sub-window %s [%s, %s): class lines total=%d distinct logStreamName=%d by=%s" % (n, iso(lo), iso(hi), tot, ns, by))
+            searched = streams_searched(sitting_lo, sitting_hi)
+            say("streams searched in the sitting window [%s, %s]: %d" % (iso(sitting_lo), iso(sitting_hi), searched))
+            if searched == 0:
+                stop = stop or "zero streams searched: the count is VOID"
+    except Exception as e:  # noqa: BLE001 -- anything is a STOP; the rows are still removed after exp
+        stop = stop or "STOP (%s): %s" % (type(e).__name__, str(e)[:300])
+        say(stop)
+    finally:
+        pem = None
+        removal = {}
+        if written or tokens_exp:
+            later = max(tokens_exp) if tokens_exp else time.time()
+            wait = later + 5 - time.time()
+            if wait > 0:
+                say("waiting %ds for the later exp %s to pass before removal" % (int(wait), iso(later)))
+                time.sleep(wait)
+        for n in written:
+            try:
+                ddb.delete_item(TableName=USERS, Key=key(n), ConditionExpression="attribute_exists(PK)")
+                say("row %s deleted (attribute_exists(PK))" % n)
+            except Exception as e:  # noqa: BLE001
+                say("DELETE of %s failed: %s" % (n, str(e)[:200]))
+        t_end = time.time() + 240
+        for n in ADDR:
+            gsi_abs = cons_abs = False
+            first = time.time()
+            while time.time() < t_end:
+                cons_abs = cread(n) is None
+                gsi_abs = gsi_count(n) == 0
+                if cons_abs and gsi_abs:
+                    break
+                time.sleep(5)
+            removal[n] = (gsi_abs, cons_abs, round(time.time() - first))
+            say("removal read %s: GSI ABSENT=%s ConsistentRead ABSENT=%s (waited %ds, bounded 240s)" % (n, gsi_abs, cons_abs, removal[n][2]))
+        with open(OUT + "/EXERCISE_REMOVAL.txt", "w", encoding="utf-8") as f:
+            f.write("removal reads, %s; rows written for the sitting: %s; norow never written\n" % (iso(), written))
+            for n in ADDR:
+                g, c, w = removal[n]
+                if g:
+                    f.write("ABSENT GSI %s\n" % ADDR[n])
+                if c:
+                    f.write("ABSENT CONSISTENT %s\n" % ADDR[n])
+            f.write("GSI reads repeated within a bounded 240 s window; seconds waited per address: %s\n" % {k: v[2] for k, v in removal.items()})
+        with open(OUT + "/EXERCISE_RESULT.txt", "w", encoding="utf-8") as f:
+            for n in ("norow", "disabled", "active"):
+                if n not in results:
+                    f.write("%s NOT RUN\n" % n)
+                    continue
+                outcome, st, code, sha = results[n]
+                lo, hi, tot, ns, by = counts.get(n, (None, None, None, None, {}))
+                want = {"norow": "row_absent", "disabled": "row_non_active", "active": "row_present"}[n]
+                cls = "+".join("%s/%s" % k for k in by) if by else "none"
+                match = (tot == 1 and list(by.keys()) == [(want, "refused" if n != "active" else "admitted")])
+                if n == "active" and outcome == "ADMITTED":
+                    head = "active ADMITTED status=%s" % st
+                elif outcome == "REFUSED":
+                    head = "%s REFUSED %s" % (n, code)
+                else:
+                    head = "%s %s status=%s" % (n, outcome, st)
+                cname = want if match else cls
+                f.write("%s class=%s lines=%s\n" % (head, cname, tot))
+            f.write("\nper-request record (UTC start, status, refusal code, body sha256; no body kept)\n")
+            for n in results:
+                outcome, st, code, sha = results[n]
+                lo, hi, tot, ns, by = counts.get(n, (None, None, None, None, {}))
+                f.write("%s start=%s status=%s refusal_code=%s body_sha256=%s | sub-window [%s, %s) lines=%s streams=%s by=%s\n" % (
+                    n, iso(lo) if lo else "-", st, code, sha, iso(lo) if lo else "-", iso(hi) if hi else "-", tot, ns, by))
+            if stop:
+                f.write("STOP/FAIL: %s\n" % stop)
+        with open(OUT + "/EXERCISE_TRACE.txt", "w", encoding="utf-8") as f:
+            f.write("\n".join(events) + "\n")
+    return 0 if not stop else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
