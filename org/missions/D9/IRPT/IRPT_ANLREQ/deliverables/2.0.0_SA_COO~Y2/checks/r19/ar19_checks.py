@@ -123,7 +123,7 @@ def main(argv):
     elif check == "y193-build":
         rec = load(root, D % "51" + "RELEASE_BUILD_RECORD.json", problems)
         if rec:
-            for member in ("package_sha256", "member_manifest", "planned_members_that_move", "actual_members_that_differ_from_baseline", "baseline", "claim", "not_read"):
+            for member in ("package_sha256", "member_manifest", "planned_members_that_move", "actual_members_that_differ_from_baseline", "baseline", "live_equivalent_baseline", "differs_from_unpatched_baseline", "base_commit", "claim", "not_read"):
                 if member not in rec:
                     problems.append("the record lacks %r" % member)
             if rec.get("planned_members_that_move") is not None and rec.get("actual_members_that_differ_from_baseline") is not None:
