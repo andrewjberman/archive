@@ -1,0 +1,52 @@
+{
+  "record": "ROUTE_READ.json (the exact-key record) carries the verdict; this file carries the measured detail behind it",
+  "serial": "0.9.0_WK_ADVI_COTBKF~162",
+  "to_id": "ADVI_COTBKF.TO-CB-cd-2",
+  "as_of": "2026-10-13T20:20Z",
+  "served_objects_read": {
+    "list_objects_v2": "aws s3api list-objects-v2 --bucket opal-data-assets --prefix commonwealth/cottonwood/silver/<table>/date=2026-06-23/ --max-items 5 : rc=0 for each of the three tables, one object each, no NextToken",
+    "get_object": "aws s3api get-object (one per object) rc=0 into worktree .scratch/route_read/<table>.parquet (not committed)",
+    "version_ids": {"daily_returns": "w9j5YeV1LnNIakNlRTBX6jW1.SDHqmJR", "account_day_value": "qIWjLLwCIh_Gx6IblSgyaint2tfJ37pr", "month_grades": "QI5Ks8vQwGTwnc9ekyh.DOsyN8PKN3PB"},
+    "last_modified": "2026-10-09T12:41:01Z / 12:41:02Z / 12:41:03Z"
+  },
+  "chosen_rows_method": "account_day_value filtered on (cusip, date); accounts counted, no account value printed. CUSIPs: APH 032095101 (channel row ADVI_COTBKF-D2-W155-S1), CTVA 22052L104 and HON 438516106 (identifier table, cusip column, deliverables/0.9.0_WK_ADVI_COTBKF~95/PRICE_REQUEST_YAHOO.csv). Vendor close and price paid from deliverables/0.9.0_WK_ADVI_COTBKF~159/STAGE_READ.json.",
+  "chosen_rows": [
+    {"ticker": "APH", "day": "2025-04-21", "account_rows_served": 1, "account_rows_scratch": 1, "served_distinct_close": 1, "served_close": 31.795000076293945, "vendor_close": 31.795, "price_paid": 65.2875, "price_source": "cottonwood-silver-canonical-prices"},
+    {"ticker": "CTVA", "day": "2026-02-17", "account_rows_served": 1, "account_rows_scratch": 1, "served_distinct_close": 1, "served_close": 11.335333824157717, "vendor_close": 11.335334, "price_paid": 76.157514, "price_source": "cottonwood-silver-canonical-prices"},
+    {"ticker": "HON", "day": "2026-02-04", "account_rows_served": 3, "account_rows_scratch": 3, "served_distinct_close": 1, "served_close": 246.82748413085935, "vendor_close": 246.827484, "price_paid": 234.515833, "price_source": "cottonwood-silver-canonical-prices"}
+  ],
+  "served_vs_scratch": {
+    "scratch_dir": "C:/dev/ajb_workspace/.scratch/advi_cotbkf/fwd3_serve_r34/ (read only, not modified)",
+    "row_counts": {"daily_returns": [1691729, 1691729], "account_day_value": [21102041, 21102041], "month_grades": [82593, 82593]},
+    "same_column_names": true,
+    "account_day_value_close_quantity_value": "exact row-for-row equality on all 21,102,041 rows (same row order); a group-by sum comparison differed only at float-summation noise (max relative 4.9e-16 on close)",
+    "run_commit": "differs on every row of all three objects: served 6f70d5cc01bb2e196266799a657be6d0b2dc8a16, scratch 728d223ddca5472884c464b0482f814bfc706f41",
+    "account_day_value_blank_reason": "988 rows differ: served HELD_SOURCE_UNDER_REVIEW (988); scratch has no label on those rows; null counts served 21,081,444 vs scratch 21,082,432; scratch REGRESSED_UNDER_AS_TRADED on 789 rows",
+    "daily_returns": "value and return equal row-for-row; flow null on 988 rows served vs scratch (no non-null value differs); blank_reason differs on 988 rows (served UNPRICED 1,558,187 vs scratch 1,559,175)",
+    "month_grades": "reason text differs on 47 rows (counts only)",
+    "file_bytes": {"daily_returns": [1651055, 1651026], "account_day_value": [54246028, 54245762], "month_grades": [421751, 421592]}
+  },
+  "naming_check": {
+    "tool": "lib/opal_naming.py, run read-only with python -I; no AWS call",
+    "lookup_cottonwood_key": "cottonwood (firm None on the scope row; class FIRM, bucket opal-data-cottonwood)",
+    "lookup_z09_firm": "cottonwood",
+    "lookup_08335338_firm": "49financial (class MASTER, vendor schwab)",
+    "ard_gold_address": "s3://opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily/date=<D>",
+    "publish_gold_address_probe": "s3://opal-data-49financial/irpt/49financial/gold/account_return_daily/date=<D>",
+    "publish_lambda_name": "irpt-49f-reporting-publish-lambda",
+    "read_lambda_name": "irpt-49f-reporting-read-lambda",
+    "cottonwood_scoped_publish_name": "irpt-cot-reporting-publish-lambda"
+  },
+  "aws_reads": [
+    "s3api head-object opal-data-cottonwood irpt/cottonwood/gold/account_return_daily/date=2026-06-22/data.parquet : rc=0 (ContentLength 5837, LastModified 2026-10-11T07:17:06Z)",
+    "s3api head-object opal-data-assets commonwealth/cottonwood/silver/daily_returns/date=2026-06-23/part-00000.parquet : rc=0 (positive control on a known object; ContentLength 1651055)",
+    "lambda get-function-configuration irpt-49f-reporting-publish-lambda : rc=0 (State Active, LastUpdateStatus Successful, LastModified 2026-10-03T17:22:27.000+0000, Runtime python3.12, Role irpt-49f-reporting-publish-role, env var names none)",
+    "lambda get-function-configuration irpt-49f-reporting-read-lambda : rc=0 (State Active, LastUpdateStatus Successful, LastModified 2026-10-13T13:07:19.000+0000, Runtime python3.12, Role irpt-49f-reporting-read-role, env var names IRPT_DIRECTORY_BUCKET_MAP, IRPT_EVIDENCE_BUCKET, IRPT_FIRM_REGISTRY)",
+    "lambda get-function-configuration irpt-49f-reporting-gold-lambda : rc=0 (positive control on a known deployed function; LastModified 2026-10-13T12:39:43.000+0000)",
+    "lambda get-function-configuration irpt-cot-reporting-publish-lambda : rc=254, ResourceNotFoundException (the Cottonwood-scoped publish name, absent)",
+    "apigatewayv2 get-api 7k3ed8px20 : rc=0 (opal-portal-data-proxy-api, HTTP)",
+    "apigatewayv2 get-routes 7k3ed8px20 : rc=0, 121 routes, no NextToken; route key GET /api/scoped/investor-reporting/reporting/{account_id}/{which} matched once (route id 3smc8xr, CUSTOM, target integrations/904xvoc); 18 investor-reporting routes found (positive control)",
+    "apigatewayv2 get-integration 7k3ed8px20 904xvoc : rc=0 (AWS_PROXY, IntegrationUri ends irpt-49f-reporting-read-lambda/invocations)"
+  ],
+  "not_run": "no apply, remint, overwrite, serve, put, delete, vendor call, fetch or refresh; no IAM read; no CloudFront read; no listing of the Cottonwood platinum prefix; no artifact download"
+}
