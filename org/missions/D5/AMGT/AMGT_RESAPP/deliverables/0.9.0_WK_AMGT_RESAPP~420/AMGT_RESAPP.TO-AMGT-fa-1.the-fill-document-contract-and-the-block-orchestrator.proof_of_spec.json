@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-fa-1.the-fill-document-contract-and-the-block-orchestrator",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-fa-1.the-fill-document-contract-and-the-block-orchestrator.md",
+    "group": "OTHER",
+    "vintage_commit": "0d02a44ab91291aa1fecea459d0cdee68615878a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "0d02a44ab91291aa1fecea459d0cdee68615878a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-fa-1.the-fill-document-contract-and-the-block-orchestrator.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~420",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/__init__.py",
+      "kind": "script",
+      "commit_or_etag": "1363a7defe0baac1ae2a947bc280f87721337540",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Zero-byte package marker for a stdlib library module. Nothing deploys: no schedule, no AWS call, no grant. The sibling cells import the package in later rounds.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/aifill/contract.py",
+      "kind": "script",
+      "commit_or_etag": "1363a7defe0baac1ae2a947bc280f87721337540",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib library module (constants, fold_text, none_block, make_block, validate_block, validate_document, ContractError). Nothing deploys; it has no runtime target of its own in this round."
+    },
+    {
+      "path_or_key": "lib/research/aifill/orchestrate.py",
+      "kind": "script",
+      "commit_or_etag": "1363a7defe0baac1ae2a947bc280f87721337540",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib library module (BlockContext, build_document, default discovery of lib.research.aifill.block_<id>). Nothing deploys; the block builders are other cells."
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_contract_orchestrate.py",
+      "kind": "test",
+      "commit_or_etag": "1363a7defe0baac1ae2a947bc280f87721337540",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pytest module of 114 collected items, stub-only, no fixture file. Run from the repository root with PYTHONPATH set; not a deployed artifact."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1363a7defe0baac1ae2a947bc280f87721337540",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three OBSERVATION rows AMGT_RESAPP-D1-W420-S1..S3 appended; the 4923 appended bytes follow the prior bytes unchanged (prefix intact)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `AIFILL FA-1 ARMS: YES (N of N)` with N equal to the count printed and N at least 31, no `FAIL` arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-420 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa1_contract.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM default discovery calls lib.research.aifill.block_<id>.build_block PASS \nARM validate_document refuses each broken document       PASS accepted: []\nARM importing the cell did not import the anthropic SDK  PASS \nAIFILL FA-1 ARMS: YES (31 of 31)\nexit=0\n(full run on the same committed bytes: 31 ARM lines, 0 with FAIL)",
+      "denominator": "31 of 31 arms (31 ARM lines in the full run, 0 FAIL)",
+      "status": "PASS",
+      "expect": "AIFILL FA-1 ARMS: YES \\(31 of 31\\)\\s*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the last non-empty line before `exit=` reads `N passed` (N at least the count your test module's functions define) with no `failed` and no `error` in the last 3 lines; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-420 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_contract_orchestrate.py | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "........................................................................ [ 63%]\n..........................................                               [100%]\n114 passed in 0.21s\nexit=0",
+      "denominator": "114 of 114 collected test items passed (0 failed, 0 errors)",
+      "status": "PASS",
+      "expect": "114 passed in [0-9.]+s\\s*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutation run: the face names no mutant for this cell. The negative arms stand as the controls: the AC1 refusal arms and the pytest refusal and broken-document cases.",
+      "expected": "N/A - the spec names no mutant",
+      "observed": "The refusal arms of check_fa1_contract.py (make_block refusals, validate_document broken-document refusals) and the parametrized refusal tests of the pytest module are the negative controls.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: AC1 and the pytest module each run twice on the same committed bytes",
+      "observed": "AC1 31 of 31 on both runs; pytest 114 passed on both runs. The default-now arm reads the clock but checks only a 300 second window.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the task-order <status> flip to complete",
+      "reason": "The face states the status flip is the issuer's, and the task order file is outside this worker's write grant (<paths>)."
+    },
+    {
+      "item": "lib/research/aifill/model.py, inputs.py, block_*.py, store.py and run.py",
+      "reason": "Other cells of the workstream. The face bounds this cell to the package init, contract.py, orchestrate.py and its test module."
+    },
+    {
+      "item": "any live model call, network or AWS access",
+      "reason": "Declared EGRESS NONE. The tests use stubs only; the anthropic package is never imported."
+    },
+    {
+      "item": "a mutation run against the contract's refusals",
+      "reason": "Not named by the spec. The negative arms of AC1 and the pytest module are the controls."
+    },
+    {
+      "item": "the drain-end merge of branch wk-AMGT_RESAPP-420",
+      "reason": "Worker rule: commit on the worktree branch only; the drain merges it."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W420-S1: the cell's source files, as first written, held raw UTF-8 characters where the face requires \\uXXXX escapes; rewritten to escapes before the code commit (ASCII, values unchanged).",
+    "AMGT_RESAPP-D1-W420-S2: fold_text strips before it drops non-ASCII, so a dropped character at the end of a text leaves a trailing space; the listed order was kept.",
+    "AMGT_RESAPP-D1-W420-S3: build_document catches Exception from a builder, not BaseException, so a KeyboardInterrupt or SystemExit from a builder propagates; the literal 'no exception escapes' line was not met for those two classes."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~420/AMGT_RESAPP.TO-AMGT-fa-1.the-fill-document-contract-and-the-block-orchestrator.proof_of_spec.json (this instance carries the session narrative inline; no separate SESSION_LOG.md was produced)",
+  "compiler_tools": [
+    {
+      "tool": "python (check_fa1_contract.py)",
+      "invocation": "PYTHONPATH=<worktree> python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa1_contract.py",
+      "result": "AIFILL FA-1 ARMS: YES (31 of 31), exit 0"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "PYTHONPATH=<worktree> python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_contract_orchestrate.py",
+      "result": "114 passed, exit 0"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/__init__.py lib/research/aifill/contract.py lib/research/aifill/orchestrate.py lib/research/aifill/tests/test_contract_orchestrate.py",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s)"
+    },
+    {
+      "tool": "python ast.parse (feature_version 3.9) and ASCII decode",
+      "invocation": "python -c, reading each of the four cell .py files as bytes, decoding ascii, and parsing with feature_version=(3,9)",
+      "result": "all four files decode as ASCII and parse under the 3.9 grammar; 0 bytes above 127 in the test module and orchestrate.py"
+    }
+  ]
+}

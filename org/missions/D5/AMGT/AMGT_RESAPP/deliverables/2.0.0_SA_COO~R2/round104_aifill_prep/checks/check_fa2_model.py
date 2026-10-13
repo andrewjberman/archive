@@ -15,6 +15,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import aifill_check_lib as L  # noqa: E402
 
 
+FN = "opal-amgt-scoped-api"  # supplied by the caller: lib/ code types no resource name (rule 30)
+
+
 def main():
     from lib.research.aifill import inputs, model
 
@@ -153,7 +156,7 @@ def main():
 
     def served_ok():
         lam = FakeLambda({"overlay": (200, {"name": "A"}), "thesis": (200, {"management": {}})})
-        out = inputs.served_inputs("ASML_NA_Equity", lam=lam)
+        out = inputs.served_inputs("ASML_NA_Equity", lam=lam, function_name=FN)
         names = [e[0] for e in lam.events]
         paths = [e[1]["rawPath"] for e in lam.events]
         ev = lam.events[0][1]
@@ -164,15 +167,51 @@ def main():
 
     def served_failures():
         lam = FakeLambda({"overlay": (500, {"message": "x"}), "thesis": RuntimeError("lambda down")})
-        out = inputs.served_inputs("K", lam=lam)
+        out = inputs.served_inputs("K", lam=lam, function_name=FN)
         return out["overlay"] is None and out["thesis"] is None and "500" in out["errors"]["overlay"] and "RuntimeError" in out["errors"]["thesis"], out["errors"]
     arms.run("served_inputs: a 500 or a raise is an error entry, body None", served_failures)
 
     def served_one_failure():
         lam = FakeLambda({"overlay": (200, {"name": "A"}), "thesis": (404, {})})
-        out = inputs.served_inputs("K", lam=lam)
+        out = inputs.served_inputs("K", lam=lam, function_name=FN)
         return out["overlay"] == {"name": "A"} and out["thesis"] is None and list(out["errors"]) == ["thesis"]
     arms.run("served_inputs: one route failing leaves the other served", served_one_failure)
+
+
+    def no_function_name():
+        saved = os.environ.pop("AIFILL_SERVED_FUNCTION", None)
+        try:
+            try:
+                inputs.served_inputs("K", lam=FakeLambda({"overlay": (200, {}), "thesis": (200, {})}))
+            except ValueError as err:
+                return "AIFILL_SERVED_FUNCTION" in str(err), str(err)[:100]
+            return False, "no ValueError"
+        finally:
+            if saved is not None:
+                os.environ["AIFILL_SERVED_FUNCTION"] = saved
+    arms.run("served_inputs: no function name and no env var -> ValueError naming AIFILL_SERVED_FUNCTION", no_function_name)
+
+    def env_function_name():
+        saved = os.environ.get("AIFILL_SERVED_FUNCTION")
+        os.environ["AIFILL_SERVED_FUNCTION"] = "fn-from-env"
+        try:
+            lam = FakeLambda({"overlay": (200, {}), "thesis": (200, {})})
+            inputs.served_inputs("K", lam=lam)
+            from_env = {e[0] for e in lam.events}
+            lam2 = FakeLambda({"overlay": (200, {}), "thesis": (200, {})})
+            inputs.served_inputs("K", lam=lam2, function_name="fn-from-arg")
+            from_arg = {e[0] for e in lam2.events}
+        finally:
+            if saved is None:
+                os.environ.pop("AIFILL_SERVED_FUNCTION", None)
+            else:
+                os.environ["AIFILL_SERVED_FUNCTION"] = saved
+        return from_env == {"fn-from-env"} and from_arg == {"fn-from-arg"}, (from_env, from_arg)
+    arms.run("served_inputs: the env var names the function, an argument wins over it", env_function_name)
+
+    def no_function_literal():
+        return "opal-amgt-scoped-api" not in open(inputs.__file__, "r", encoding="utf-8").read(), "inputs.py types the function name"
+    arms.run("inputs.py types no Lambda name literal (the LGIC naming gate, rule 30)", no_function_literal)
 
     def no_sdk():
         return "anthropic" not in sys.modules, "anthropic imported"
