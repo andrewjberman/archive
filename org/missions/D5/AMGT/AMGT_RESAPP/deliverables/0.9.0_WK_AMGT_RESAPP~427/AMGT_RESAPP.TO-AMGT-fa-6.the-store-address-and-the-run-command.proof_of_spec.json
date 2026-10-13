@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-fa-6.the-store-address-and-the-run-command",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "0d02a44ab9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_AIFILL_DECOMP.md",
+    "vintage_commit": "0d02a44ab9",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-fa-6.the-store-address-and-the-run-command.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~427",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/aifill/store.py",
+      "kind": "script",
+      "commit_or_etag": "aaeb9a04e4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "library module, no deploy: address_for() calls the harvest builder and write_document/read_document take an injected S3 client; the module makes no AWS call on import and types no address literal (rule 30). The one real write is the issuer's under a never-widen sign-off.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/aifill/run.py",
+      "kind": "script",
+      "commit_or_etag": "aaeb9a04e4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "command module, no deploy: python -m lib.research.aifill.run runs when the issuer runs it; every check and test drives it with --inputs-file and --no-model, a fake S3 client and no network.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/aifill/tests/test_store_run.py",
+      "kind": "test",
+      "commit_or_etag": "aaeb9a04e4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest module: 21 test functions; the S3 client is a fake, the model is the --no-model path, the inputs are the recorded fixture; no network, no AWS, no real model call.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the line `AIFILL FA-6 ARMS: YES (N of N)` with N equal to the count printed and N at least 16, no `FAIL` arm line above it; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-427 && PYTHONPATH=\"$(pwd)\" timeout 300 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R2/round104_aifill_prep/checks/check_fa6_store_run.py\" | tail -4; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "ARM an invalid document is never written to S3 (exit non-zero) PASS (1, 'ERROR: document INVALID: forced problem\\n')\nAIFILL FA-6 ARMS: YES (16 of 16)\nexit=0",
+      "denominator": "16 of 16 arms PASS on the committed bytes of HEAD aaeb9a04e4 (the exact invocation, run at HEAD); the full check output of the same run at HEAD carries 16 ARM lines, grep -c ' FAIL' = 0, and rc = 0.",
+      "status": "PASS",
+      "expect": "AIFILL FA-6 ARMS: YES \\(16 of 16\\)[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the last non-empty line before `exit=` reads `N passed` (N at least the count your test module's functions define) with no `failed` and no `error` in the last 3 lines; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-427 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest -q --color=no -p no:cacheprovider lib/research/aifill/tests/test_store_run.py | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": ".....................                                                    [100%]\n21 passed in 0.27s\nexit=0",
+      "denominator": "21 passed of 21 test functions defined in lib/research/aifill/tests/test_store_run.py on the committed bytes of HEAD aaeb9a04e4 (the exact invocation, run at HEAD); 0 failed, 0 error in the last 3 lines.",
+      "status": "PASS",
+      "expect": "[0-9]+ passed in [0-9.]+s[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the face names no mutant for this cell; the prepared check is not mutated at this cut",
+      "expected": "N/A",
+      "observed": "N/A: the face names no mutant (proof of the cell is the two criteria only)",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "repeated same-input runs on HEAD aaeb9a04e4: the check run four times (each 16 of 16, rc 0, grep -c ' FAIL' = 0) and the pytest module run four times (each 21 passed, 0 failed)",
+      "observed": "check: AIFILL FA-6 ARMS: YES (16 of 16) in every run; pytest: 21 passed in every run (0.27s to 0.61s); no FAIL arm line and no failed test in any run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the one real S3 write (--to-s3 --confirm-write against the real client)",
+      "reason": "out of bounds per the face (section 2): the issuer runs that write under a never-widen sign-off; the check and the tests use a fake S3 client, so the dry run and the fake write are the only write paths exercised."
+    },
+    {
+      "item": "the live served-inputs read (the Lambda invoke) and the one real model call",
+      "reason": "out of bounds per the face (section 2): the check and the tests use --inputs-file and --no-model; no network, no AWS and no model call is made."
+    },
+    {
+      "item": "the order's status flip to complete",
+      "reason": "the flip is the issuer's (face section 5); this instance carries the worker's measured criteria only."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~427/AMGT_RESAPP.TO-AMGT-fa-6.the-store-address-and-the-run-command.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/aifill/store.py lib/research/aifill/run.py lib/research/aifill/tests/test_store_run.py",
+      "result": "All checks passed! and OK: pre-commit gate clean for 3 of 3 file(s) (run before the commit and again after the one test-module edit)"
+    },
+    {
+      "tool": "safe-commit.sh (naming-gate, to-pipeline-gate, surprise-row-gate, msg-verify inside it)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~427 <0.9.0_WK_AMGT_RESAPP~427@opal.agent>\" -F .scratch/fa6_commit_msg.txt -- lib/research/aifill/store.py lib/research/aifill/run.py lib/research/aifill/tests/test_store_run.py",
+      "result": "committed aaeb9a04e4 (3 files, 547 insertions); msg-verify MATCH len=1187; naming-gate PASS 0 graded; to-pipeline-gate OK; surprise-row-gate OK (no channel rows in the commit)"
+    }
+  ]
+}
