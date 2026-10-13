@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-bz-3.the-runner-runs-windowless",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "041da7626d",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bz-3.the-runner-runs-windowless.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bz-3.the-runner-runs-windowless.md",
+    "group": "OTHER",
+    "vintage_commit": "041da7626d"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~138",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/cycle_runner.py",
+      "kind": "script",
+      "commit_or_etag": "31f2854a37",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build on branch wk-AMGT_HARVST-138 at 31f2854a37; not deployed: no site Z box, no scheduled task registered or changed (order section 1 and step 5).",
+      "introduces": ["self.real is not None"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/install-cycle-schedule.ps1",
+      "kind": "script",
+      "commit_or_etag": "31f2854a37",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build at 31f2854a37; -Plan only was run (REGISTERED NOTHING); no task registered.",
+      "introduces": ["[switch]$Windowless"],
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_bz3_windowless_runner.py",
+      "kind": "test",
+      "commit_or_etag": "31f2854a37",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test module at 31f2854a37; run as AC1 (7 passed)."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "31f2854a37",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two appended rows, AMGT_HARVST-D1-W138-S1 and -S2, at 31f2854a37: 28 insertions, 0 deletions; the JSON array parses (397 elements)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (cell HVST-bz-3): python -m pytest lib/opal_data_harvest/test_bz3_windowless_runner.py -q -p no:cacheprovider --color=no ; expect (?m)^\\d+ passed in",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_bz3_windowless_runner.py -q -p no:cacheprovider --color=no",
+      "output_evidence": ".......                                                                  [100%]\n7 passed in 2.43s\n(exit code 0)",
+      "denominator": "7 of 7 tests in lib/opal_data_harvest/test_bz3_windowless_runner.py (0 failed, 0 skipped)",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 (cell HVST-bz-3): python -m pytest lib/opal_data_harvest/test_br2_cycle_runner.py lib/opal_data_harvest/test_bv1_cycle_continues_past_pair_errors.py lib/opal_data_harvest/test_bx3_failure_reason_kept.py lib/opal_data_harvest/test_ae4_backfill_driver.py -q -p no:cacheprovider --color=no ; expect (?m)^\\d+ passed in",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_br2_cycle_runner.py lib/opal_data_harvest/test_bv1_cycle_continues_past_pair_errors.py lib/opal_data_harvest/test_bx3_failure_reason_kept.py lib/opal_data_harvest/test_ae4_backfill_driver.py -q -p no:cacheprovider --color=no",
+      "output_evidence": ".............................................................            [100%]\n61 passed in 11.09s\n(exit code 0)",
+      "denominator": "61 of 61 tests in the four named modules (0 failed, 0 skipped)",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base's unguarded Tee.write and Tee.flush put back in a real pythonw.exe run (test_c): the cycle record must end stopped AttributeError, completed false.",
+      "expected": "record stopped == AttributeError and completed false under the real pythonw.exe run with the unguarded Tee",
+      "observed": "test_c_mutant_unguarded_tee_ends_the_cycle_as_attribute_error PASSED in the final 7-passed run (HEAD 31f2854a37). Before the DETACHED_PROCESS launch change the same mutant read stopped None, because the captured-pipe child had real stdio; see AMGT_HARVST-D1-W138-S2.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of AC1 on identical bytes (the test module and the code unchanged between them): 7 passed in 3.24s, then 7 passed in 2.43s at HEAD 31f2854a37",
+      "observed": "both runs 7 passed, 0 failed, 0 skipped",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A real pythonw.exe cycle on the site Z box, and any scheduled-task registration or change",
+      "reason": "Out of scope by the order (section 1 step 5, preflight): no site Z box, no scheduled task registered or changed; the -Plan path registers nothing."
+    },
+    {
+      "item": "The four pre-existing failures of the full lib/opal_data_harvest suite (test_ah1_fixture_solve[bbg] and three in test_aw1_origin_load_wait.py)",
+      "reason": "Present before the change (4 failed, 792 passed, 3 skipped) and after it (4 failed, 799 passed, 3 skipped): the same four, none added. Cause on this device: Playwright cannot find the Chrome distribution. Not touched (outside paths)."
+    },
+    {
+      "item": "backfill_driver.py (order step 2 audit of sys.stdout at about lines 365 and 574)",
+      "reason": "Not changed: both uses run inside the runner's redirect_stdout(Tee), so they reach the guarded Tee; the real pythonw.exe run (test_b) showed no failure on the runner path, and the order changes a use only when that run shows it failing."
+    },
+    {
+      "item": "Status flip of the task order",
+      "reason": "The order's last line says the issuer flips its status and the TO file is not in paths; left for 2.0.0_SA_COO~W1."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W138-S1: the package conftest HVST-r-4 poisons subprocess.run unless a test carries allow_real_session; the order's pythonw.exe and powershell tests were marked with it (tests b, c, d1, d2, d3), reason in each docstring.",
+    "AMGT_HARVST-D1-W138-S2: a pythonw.exe child started with captured pipes has real stdio, not the no-console condition; the test launches it DETACHED_PROCESS with nothing redirected and asserts stdout and stderr are None before any cycle assertion."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~138/AMGT_HARVST.TO-HVST-bz-3.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_bz3_windowless_runner.py -q -p no:cacheprovider --color=no",
+      "result": "7 passed in 2.43s, rc 0 (AC1)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/opal_data_harvest -q -p no:cacheprovider --color=no (before and after)",
+      "result": "before: 4 failed, 792 passed, 3 skipped; after: 4 failed, 799 passed, 3 skipped; the same four failures"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh lib/opal_data_harvest/cycle_runner.py lib/opal_data_harvest/test_bz3_windowless_runner.py",
+      "result": "pre-commit gate clean for 2 of 2 file(s), rc 0"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~138 <0.9.0_WK_AMGT_HARVST~138@opal.agent>\" -F .scratch/msg_build.txt -- <4 paths>",
+      "result": "committed 31f2854a37, 4 files changed, 248 insertions(+), 3 deletions(-); surprise-row-gate OK for 2 new rows"
+    }
+  ]
+}

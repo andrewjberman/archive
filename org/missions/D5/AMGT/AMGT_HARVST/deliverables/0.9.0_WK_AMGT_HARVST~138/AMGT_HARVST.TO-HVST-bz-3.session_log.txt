@@ -1,0 +1,48 @@
+SESSION LOG -- 0.9.0_WK_AMGT_HARVST~138 on AMGT_HARVST.TO-HVST-bz-3.the-runner-runs-windowless
+Worktree C:/Dev/wk-harvst-138, branch wk-AMGT_HARVST-138, base 7b8f8e6241, build commit 31f2854a37 (LOCAL).
+
+1. First act
+   git rev-parse --abbrev-ref HEAD -> wk-AMGT_HARVST-138 ; test -d org && test -d .tools -> TREE-OK
+
+2. Baseline, before the change (full package, bounded 580 s)
+   python -m pytest lib/opal_data_harvest -q -p no:cacheprovider --color=no
+   4 failed, 792 passed, 3 skipped, 6 subtests passed in 32.38s   rc=1
+   FAILED test_ah1_fixture_solve.py::test_fixture_solve[bbg]
+   FAILED test_aw1_origin_load_wait.py::test_load_never_fires_still_opens
+   FAILED test_aw1_origin_load_wait.py::test_document_never_arrives
+   FAILED test_aw1_origin_load_wait.py::test_mutant_waiting_for_load_raises
+   (cause on this device: playwright "Chromium distribution 'chrome' is not found")
+
+3. New module, first run (captured-pipe launch and no opt-out marker)
+   5 failed, 2 passed in 0.21s
+   test_d1, test_d2, test_d3: HarvestPoisonError (conftest HVST-r-4 subprocess poison) -> markers added
+   test_b, test_c: child reported stdout_is_none False; mutant stopped None -> launch changed to DETACHED_PROCESS
+   (after markers and launch fix: see step 4)
+
+4. AC1, final, HEAD 31f2854a37 (bounded 120 s)
+   python -m pytest lib/opal_data_harvest/test_bz3_windowless_runner.py -q -p no:cacheprovider --color=no
+   .......                                                                  [100%]
+   7 passed in 2.43s
+   rc=0
+   (earlier identical-bytes run: 7 passed in 3.24s)
+
+5. AC2, final, HEAD 31f2854a37 (bounded 120 s)
+   python -m pytest lib/opal_data_harvest/test_br2_cycle_runner.py lib/opal_data_harvest/test_bv1_cycle_continues_past_pair_errors.py lib/opal_data_harvest/test_bx3_failure_reason_kept.py lib/opal_data_harvest/test_ae4_backfill_driver.py -q -p no:cacheprovider --color=no
+   61 passed in 11.09s
+   rc=0
+
+6. Full package, after the change (bounded 580 s)
+   4 failed, 799 passed, 3 skipped, 6 subtests passed in 30.75s   rc=1
+   the same four failures as step 2; 7 added passes = the new module; none added as failures
+
+7. Installer, default output versus the base file (powershell -NoProfile -File ... -Plan -Publishers bbg -RepoRoot C:/dev/wk-harvst-138)
+   diff of base (git show 7b8f8e6241-equivalent HEAD:... before the change) and new default output: SAME
+   with -Windowless: ACTION C:\...\Python314\pythonw.exe -m lib.opal_data_harvest.cycle_runner ... ; REGISTERED NOTHING (plan); rc=0
+
+8. Commit gate and commit
+   bash .tools/commit-gate.sh <2 py files> -> pre-commit gate clean for 2 of 2 file(s); rc=0
+   bash .tools/safe-commit.sh ... -> [wk-AMGT_HARVST-138 31f2854a37] ; 4 files changed, 248 insertions(+), 3 deletions(-)
+   the 3 deletions: cycle_runner.py two Tee lines replaced, install-cycle-schedule.ps1 one param line replaced
+   INVESTIGATION_v1.md: 28 insertions, 0 deletions (two rows), JSON array parses: 397 elements
+
+9. Not done, by order: no publisher, no S3, no site Z box, no scheduled task registered or changed; TO status left to the issuer.
