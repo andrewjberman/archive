@@ -366,6 +366,25 @@ def switchsample(a):
     return 0
 
 
+def scrub(a):
+    """FB-j-14: no raw relationship id (z followed by six or more digits) in the named files; hashed forms h_<12 hex> are fine."""
+    pat = re.compile(r"(?<![0-9A-Za-z])z[0-9]{6,}(?![0-9A-Za-z])")
+    n_files = n_ids = 0
+    for f in a.files:
+        try:
+            txt = open(f, encoding="utf-8").read()
+        except OSError:
+            print("FAIL cannot read %s" % f)
+            return 1
+        n_files += 1
+        n_ids += len(pat.findall(txt))
+    if n_ids:
+        print("SCRUB: FAIL files=%d ids=%d" % (n_files, n_ids))
+        return 1
+    print("SCRUB: OK files=%d ids=0" % n_files)
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -392,9 +411,11 @@ def main():
         q.add_argument("--file", required=True)
     tf = sub.add_parser("tfslots")
     tf.add_argument("--root", required=True)
+    sc = sub.add_parser("scrub")
+    sc.add_argument("--files", nargs="+", required=True)
     a = ap.parse_args()
     return {"awsdiff": awsdiff, "agree2": agree2, "emiterr": emiterr, "firstchain": firstchain, "dryrun": dryrun, "prescreen": prescreen, "slotcause": slotcause,
-            "tfslots": tfslots, "iqlt": iqlt, "switchsample": switchsample}[a.cmd](a)
+            "tfslots": tfslots, "iqlt": iqlt, "switchsample": switchsample, "scrub": scrub}[a.cmd](a)
 
 
 if __name__ == "__main__":
