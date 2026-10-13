@@ -1,0 +1,143 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_FIRMBKTS.TO-FB-k-3.cottonwood-pipeline",
+ "firm": "COT",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-k-3.cottonwood-pipeline.md",
+  "group": "OTHER",
+  "vintage_commit": "1072dc94f3"
+ },
+ "assignee": "0.9.0_WK_ADVI_FIRMBKTS~78",
+ "decomp_ref": {
+  "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_PLANINV.md",
+  "vintage_commit": "1072dc94f3",
+  "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-k-3.cottonwood-pipeline.md"
+ },
+ "controls": {
+  "mutant": {
+   "description": "the order names no mutant; the two arms carry their own checks (the planinv shape check and the r4 scope check)",
+   "expected": "N/A -- the order names none",
+   "observed": "N/A -- the order names none",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "not re-run: each invocation ran once as the order states; the record is a saved read, not a live sweep, so a second sweep would read a later state",
+   "observed": "N/A -- no second run was made by this worker",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Any AWS write, producer run, deploy, or terraform command",
+   "reason": "Bound (order section 2, item 1): read verbs only. Every AWS call was a list, get, describe or head on one resource, bounded by the aws shim."
+  },
+  {
+   "item": "Secret contents and credential objects (blackdiamond/cot/credentials, blackdiamond/cot/session, the orion jwt object)",
+   "reason": "Bound (order section 2, item 3): never read or printed. Environment values that name secrets are recorded as redacted."
+  },
+  {
+   "item": "Live Lambda code bytes compared with repository source; object bodies under opal-data-cot and opal-data-bd; EC2 state and crontabs; the live SSM service",
+   "reason": "Declared in the record's not_read list (14 entries). Completeness is the issuer's read from the denominators and a sample re-read, as the order states."
+  },
+  {
+   "item": "helpers/summ_rules.py: local summary of the saved EventBridge listings (no criterion; reproduces the rule denominators in the record)",
+   "reason": "Not a graded artifact. It reads C:/dev/wk-firmbkts-78-data and makes no AWS call. Its output is the 156-rule and 23-match denominator in the record."
+  },
+  {
+   "item": "helpers/lambda_env.py: local summary of the saved Lambda listing (no criterion; prints environment names and bucket-like values only)",
+   "reason": "Not a graded artifact. It reads C:/dev/wk-firmbkts-78-data and makes no AWS call. It backs the environment names recorded on the Lambda rows."
+  },
+  {
+   "item": "The Cottonwood crosswalk input and its consumers",
+   "reason": "Owned by cell FB-k-4 (the same decomposition). Named in the record's consumer notes; not located here."
+  },
+  {
+   "item": "The order's <status> flip",
+   "reason": "Not flipped by the worker (order section 5). Both criteria PASS and the proof instance validates, but the order is closed by the issuer's read, not by this worker."
+  }
+ ],
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~78/PLANINV_COTTONWOOD_PIPELINE.json",
+   "kind": "doc",
+   "commit_or_etag": "ad4cca5692",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only inventory record; nothing is deployed or scheduled by it"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~78/PLANINV_COTTONWOOD_PIPELINE.md",
+   "kind": "doc",
+   "commit_or_etag": "ad4cca5692",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "one-page view of the record; nothing is deployed"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~78/helpers/summ_rules.py",
+   "kind": "script",
+   "commit_or_etag": "ad4cca5692",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "local summary of the saved EventBridge listings; reads C:/dev/wk-firmbkts-78-data; no AWS call"
+  },
+  {
+   "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~78/helpers/lambda_env.py",
+   "kind": "script",
+   "commit_or_etag": "ad4cca5692",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "local summary of the saved Lambda listing; prints environment names and bucket-like values only; no AWS call"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 grades the record's shape and read-only discipline: expect ^PLANINV: OK firm=cottonwood rows=[0-9]+ legacy=[0-9]+$",
+   "method": "command",
+   "invocation": "cd C:/dev/wk-firmbkts-78 && timeout 30 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py planinv --file C:/dev/wk-firmbkts-78/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~78/PLANINV_COTTONWOOD_PIPELINE.json --firm cottonwood",
+   "output_evidence": "PLANINV: OK firm=cottonwood rows=42 legacy=23",
+   "denominator": "42 rows checked (exit 0); 23 legacy_touch true; 13 rules, 2 schedules, 13 lambdas, 4 tasks, 9 scripts, 1 other",
+   "status": "PASS",
+   "expect": "^PLANINV: OK firm=cottonwood rows=[0-9]+ legacy=[0-9]+$",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 is the write-surface bound: expect ^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+   "method": "command",
+   "invocation": "cd C:/dev/wk-firmbkts-78 && timeout 60 python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root C:/dev/wk-firmbkts-78 --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~78/ --allow org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "output_evidence": "ROUND 4 SCOPE: OK 6 changed, 0 outside, 0 required missing",
+   "denominator": "6 changed paths (exit 0): the record, the markdown, the two helpers, the session log and the investigation file; 0 outside the write surface; 0 required missing",
+   "status": "PASS",
+   "expect": "^ROUND 4 SCOPE: OK [0-9]+ changed, 0 outside, 0 required missing$",
+   "judgment": false
+  }
+ ],
+ "surprises": [
+  "ADVI_FIRMBKTS-D1-W78-S1: the Cottonwood scope inside opal-data-bd is empty (no blackdiamond/cottonwood/ or blackdiamond/cot/ prefix); the Cottonwood legacy home is opal-data-cot. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+  "ADVI_FIRMBKTS-D1-W78-S2: the characteristics producer header says zero writers today, but platinum/satellites/characteristics.json was last modified 2026-10-13T15:56:02Z with its schedules ENABLED. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+  "ADVI_FIRMBKTS-D1-W78-S3: the served graph lists EventBridge rule cot-satellites-registry-producer-daily, which is absent from the live account (describe-rule ResourceNotFound). OBSERVATION, INERT, UNDER_INVESTIGATION.",
+  "ADVI_FIRMBKTS-D1-W78-S4: the live cot-etf-ownership-daily Lambda names the legacy bucket opal-data-cot in SRC_BUCKET, but its code does not read it. OBSERVATION, INERT, UNDER_INVESTIGATION."
+ ],
+ "session_log": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.9.0_WK_ADVI_FIRMBKTS~78/ADVI_FIRMBKTS.TO-FB-k-3.session.log.txt",
+ "compiler_tools": [
+  {
+   "tool": "comp-find --corpus aws",
+   "invocation": "comp-find --corpus aws 'opal-data-cot' ; comp-find --corpus aws -i 'cottonwood|cot-|cot_|_cot|/cot'",
+   "result": "9 hits across 2926 aws nodes; 104 hits across 2926 aws nodes (page 1 of 5 read); VINTAGE 2026-10-13 21:02:47 UTC"
+  },
+  {
+   "tool": "aws (.tools/aws) read verbs",
+   "invocation": "events list-rules; events list-targets-by-rule (156 calls); events describe-rule; s3api get-bucket-notification-configuration (2); s3api list-objects-v2 (26 calls); scheduler list-schedules and get-schedule (2); ecs list-clusters, list-services, list-task-definitions; stepfunctions list-state-machines; lambda list-functions",
+   "result": "156 rules, 168 targets, 34 schedules, 1 cluster, 3 services, 9 task definitions, 1 state machine, 237 functions; all rc 0 except the one describe-rule ResourceNotFound (rc 254, recorded)"
+  },
+  {
+   "tool": "r7_checks.py planinv",
+   "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round7/checks/r7_checks.py planinv --file <record> --firm cottonwood",
+   "result": "PLANINV: OK firm=cottonwood rows=42 legacy=23 (after one fix: a legacy_touch row with no read or write)"
+  },
+  {
+   "tool": "r4_scope.py",
+   "invocation": "python C:/dev/ajb_workspace/org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round4/checks/r4_scope.py --root <worktree> --allow <deliverables/> --allow <INVESTIGATION_v1.md>",
+   "result": "ROUND 4 SCOPE: OK 6 changed, 0 outside, 0 required missing"
+  }
+ ]
+}
