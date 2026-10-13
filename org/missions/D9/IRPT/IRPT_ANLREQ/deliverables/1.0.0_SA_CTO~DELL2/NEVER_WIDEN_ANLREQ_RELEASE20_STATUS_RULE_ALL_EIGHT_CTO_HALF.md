@@ -28,3 +28,19 @@ eight packagers together; the caller-class line; S25 carried) and RE 6881 (the t
 **CTO half -- `1.0.0_SA_CTO~DELL2`: SIGNED** on blob `8eccf7b90a`, at the commit carrying this file.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## ADDENDUM 1 -- the artifact key and rollback target of `irpt-49f-reporting-read-lambda` (2026-10-13 ~12:3xZ)
+
+**Bound to:** the COO addendum `deliverables/2.0.0_SA_COO~Y2/release20/NEVER_WIDEN_PAIR_ANLREQ_RELEASE20_ADDENDUM_1_49F_KEY.md`,
+**blob `b90b590cb3`** (this seat's `git hash-object`). A different blob voids this addendum half; the half above is unchanged.
+
+- **Signed:** the one corrected row. The unit uploads to the map's key `investor-reporting/irpt-reporting-read-lambda.zip`, and its
+  rollback target is that key's version `ZHCEj380oXEJS_lfCbcbMXsCK9alpFbv` (280879 bytes, hashed equal to the live CodeSha256
+  `IhlTVtU9...` by the applier and the COO). The expected CodeSha256 after release stays `WjnDxvu2...`.
+- **The blast radius does not move:** the same function, the same members, the same refused callers. Only the address of the bytes
+  changes, and the build already read it from the map.
+- **Condition:** the applier re-reads the latest version of that key at the moment of apply. If it is not `ZHCEj380...`, or does not
+  hash to the live CodeSha256, the unit STOPs. The wrong key `investor-reporting/irpt-49f-reporting-read-lambda.zip` is not written.
+- **Order:** the 49f unit runs last, as the addendum states.
+
+**CTO half on ADDENDUM 1 -- `1.0.0_SA_CTO~DELL2`: SIGNED** on blob `b90b590cb3`.
