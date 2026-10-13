@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-h-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.7.0_AE_CloudOps~CA2",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/prd/COMM_ASSIST_PRD.md",
+    "group": "C",
+    "vintage_commit": "e7bde907ba"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round16.md",
+    "vintage_commit": "3477d67af5",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-h-2.muse-reader-host-act-on-dell2.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "dell2:C:/Users/Test/muse-reader (folder)",
+      "kind": "aws_resource",
+      "commit_or_etag": "INDEX.json run_at 2026-10-13T21:26:23Z",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NOT AWS: kind aws_resource is the nearest schema value for a dell2-local artifact. Created by the order's step-4 manual run of data/transcripts/scripts/muse_reader/refresh.py (MUSE-REFRESH ok=4 absent=0 unreadable=0, 17:23 local) and then rewritten by the task. Holds INDEX.json, README.txt, drafts.json, eod_today.json, open_calls.json, sprint_today.json; no file copied in by hand."
+    },
+    {
+      "path_or_key": "dell2:scheduled-task/MuseReaderRefresh",
+      "kind": "aws_resource",
+      "commit_or_etag": "LastRunTime 2026-10-13T21:26:55Z, LastTaskResult 0",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NOT AWS: kind aws_resource is the nearest schema value for a dell2-local artifact. State Ready, Principal Test (S4U, RunLevel Limited), trigger Once at 2026-10-13T17:26:23-04:00 repeating PT15M with no duration (no end date). Get-ScheduledTaskInfo after Start-ScheduledTask: LastRunTime 2026-10-13T21:26:55Z, LastTaskResult 0, NextRunTime 17:41:23 local (the 15-minute repeat is live). Action: python.exe data\\transcripts\\scripts\\muse_reader\\refresh.py --root C:\\Users\\Test\\muse-reader, WorkingDirectory C:\\dev\\ajb_workspace."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAh2-AC1",
+      "criterion_verbatim": "the identity read-back: the running caller is a dell2 agent user and a member of AdministratorAccessOpalCapital. It prints ok=False at the base (a laptop caller).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r16/checks/check_h2_identity.py\"",
+      "output_evidence": "H2-IDENTITY ok=True user=cloudops-dell2-agent-user in_group=True reason=none (run BEFORE the folder, the task or any other act, per step 2).",
+      "denominator": "1 of 1 caller identities read (aws sts get-caller-identity as the dell2 account), 2 of 2 limbs true: dell2 agent user and group membership.",
+      "status": "PASS",
+      "expect": "H2-IDENTITY ok=True"
+    },
+    {
+      "criterion_id": "CAh2-AC2",
+      "criterion_verbatim": "the seam against the real neighbours: the scheduled task exists with last result 0, and the folder's INDEX.json was written by that task under 35 minutes ago with drafts and open_calls ok and nothing unreadable. It prints ok=False at the base.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r16/checks/check_h2_scheduled.py\"",
+      "output_evidence": "H2-SCHEDULED ok=True task=found last_result=0 age_min=1.7 ok=4 absent=0 unreadable=0 reason=none (rerun 2.4 minutes later: age_min=4.1, same counts).",
+      "denominator": "4 of 4 sources in INDEX.json read ok (drafts, eod_today, open_calls, sprint_today); 0 absent, 0 unreadable; 1 of 1 task found.",
+      "status": "PASS",
+      "expect": "H2-SCHEDULED ok=True"
+    },
+    {
+      "criterion_id": "CAh2-AC3",
+      "criterion_verbatim": "the box is dell2, something listens on port 22, and the key file's fingerprints are read and listed. It prints ok=False at the base.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~CA/r16/checks/check_h2_ssh.py\"",
+      "output_evidence": "H2-SSH ok=True listening=True keys=3 fingerprints=SHA256:Ysgq86UGf/r7GargduCa/3yzyl6wb0wgKbzUpsc9kMg,SHA256:oq0WqfmN1I15uxqNGuoN64t+SubEBfmPINUyLgqFBRQ,SHA256:oq0WqfmN1I15uxqNGuoN64t+SubEBfmPINUyLgqFBRQ reason=none",
+      "denominator": "3 key lines read from C:\\ProgramData\\ssh\\administrators_authorized_keys, which are 2 DISTINCT fingerprints (the second and third lines are the same key). Whether muse's key is among them is the issuer's read, not graded here.",
+      "status": "PASS",
+      "expect": "H2-SSH ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three environment-only mutations, one per check, each run beside the live PASS and touching no file, task or AWS state: AC2 with MUSE_READER_ROOT pointed at an empty directory; AC1 with AWS_PROFILE set to a profile that does not exist; AC3 with ProgramData pointed at an empty directory so the key file path resolves to nothing.",
+      "expected": "Each check flips to ok=False with a reason naming the missing input, while the unmutated rerun still reads ok=True.",
+      "observed": "AC2 mutant: H2-SCHEDULED ok=False ... reason=[Errno 2] No such file or directory ...\\emptyroot_ca2\\INDEX.json. AC1 mutant: H2-IDENTITY ok=False user=NA in_group=False reason=aws sts rc=255 (config profile could not be found). AC3 mutant: H2-SSH ok=False listening=True keys=0 fingerprints=none reason=administrators_authorized_keys not found. Unmutated reruns: AC2 and AC3 ok=True again.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran check_h2_scheduled.py twice, 2.4 minutes apart, against the live task and folder.",
+      "observed": "H2-SCHEDULED ok=True on both runs; only age_min moved (1.7 then 4.1).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Whether muse's SSH key is among the fingerprints AC3 printed, and the off-tailnet refusal.",
+      "reason": "Named BLIND in the order's preflight and row COMM_ASSIST-S3: the issuer's read. This seat added no key and changed no sshd or firewall setting."
+    },
+    {
+      "item": "The next scheduled fire after the one graded.",
+      "reason": "AC2 grades the run that existed at check time (LastTaskResult 0, INDEX within 35 minutes, written by the task). The 17:41 local fire is queued (NextRunTime) but had not run when this was written."
+    },
+    {
+      "item": "FWD-7 (answers folder, forwarder, SQS send).",
+      "reason": "Explicitly not this order: THE CELL. None was created."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.7.0_AE_CloudOps~CA2/REPORT_TO-CA-h-2.md",
+  "compiler_tools": [
+    {
+      "tool": "git merge-base",
+      "invocation": "git merge-base --is-ancestor bfaa09da63 HEAD",
+      "result": "ANCESTOR on box/dell2 at e061f31fa9, so step 1 passed with no sync needed."
+    }
+  ]
+}
