@@ -1,0 +1,79 @@
+{
+  "order": "IRPT_ANLREQ.TO-AR-y-229",
+  "cell": "AR-y-229",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~73",
+  "base_commit": "ecdf3a1665",
+  "fix_commit": "2cb3430069",
+  "repro": {
+    "record": "org/tier2_senior/0.7.0_AE_CloudOps~AQ2/deliverables/irpt_anlreq_r21/SCRATCH_RUN.txt",
+    "exit_code": 1,
+    "stdout_value": "SHA256: vlGh380QUKvBMOhJn0GJGgDi1/WLI9qTaSP2uETmdP4= (zip size 363594)",
+    "stderr_exact": [
+      "WARN: aws.cmd: the caller toplevel C:/dev/aq2-r21-scratch carries no .tools\\aws.cmd -- CALLING THE BAKED PATH C:\\dev\\ajb_workspace\\.tools\\aws.cmd instead (run: aws --which)",
+      "  ERROR: UPLOAD NOT VERIFIED -- s3://<account-bucket>/investor-reporting/_ar222_scratch/ar222-20261013T151208.zip",
+      "         head-object ContentLength (rc=0) returned: WARN: aws: no caller-toplevel .tools/aws (git rc=0) -- PREPENDING THE BAKED C:/dev/ajb_workspace/.tools instead (run: aws --which)",
+      "363594",
+      "         head-object content-sha256 (rc=0) returned: WARN: aws: no caller-toplevel .tools/aws (git rc=0) -- PREPENDING THE BAKED C:/dev/ajb_workspace/.tools instead (run: aws --which)",
+      "vlGh380QUKvBMOhJn0GJGgDi1/WLI9qTaSP2uETmdP4=",
+      "         expected: size=363594 content-sha256=vlGh380QUKvBMOhJn0GJGgDi1/WLI9qTaSP2uETmdP4=",
+      "         zip KEPT at /tmp/lambda-artifact-irpt-status.zip for retry; source map NOT updated."
+    ],
+    "cause_read": "Both scalar head-object reads returned the right value on stdout. The script merged stderr into each captured value (2>&1), so the shim WARN line became part of the compared text and the compare failed. The applier's own reading agrees.",
+    "redaction": "The account id in the bucket name is replaced by <account-bucket>. No credential, profile or secret was read or copied."
+  },
+  "fix": {
+    "lines_changed": 15,
+    "insertions": 13,
+    "deletions": 2,
+    "diff_stat": "infra/aws/lambda/ci/build-and-upload.sh | 15 +++++++++++++-- ; infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh | 21 +++++++++++++++++++++ ; 2 files changed, 34 insertions(+), 2 deletions(-)",
+    "words": "Two head-object reads now send stderr to a temp file (one per read, created with mktemp; a mktemp failure marks the function FAILED and continues the loop). Stdout alone is the captured value. The compare is unchanged and fail-closed. On failure the message prints each value, its rc and the contents of its stderr file, and the temp files are removed before the continue. On success the temp files are removed and their content is never compared. Nothing else in the script changed.",
+    "non_ascii_added": 0
+  },
+  "arms": [
+    {
+      "arm": "landed_upload_verifies",
+      "exit_code": 0,
+      "evidence": "PASS landed_upload_verifies (rc=0, s3-cp=1, head-object=2)"
+    },
+    {
+      "arm": "head_object_fails",
+      "exit_code": 1,
+      "evidence": "PASS head_object_fails (rc=1, map unchanged, cli error printed); the stub's 403 text is printed on the failure path"
+    },
+    {
+      "arm": "stderr_warning_ignored",
+      "exit_code": 0,
+      "evidence": "PASS stderr_warning_ignored (rc=0, shim-warn-stubbed=2, head-object=2, write VERIFIED)"
+    },
+    {
+      "arm": "mutant_size_off_by_one",
+      "exit_code": 1,
+      "evidence": "PASS mutant-size-off-by-one-FIRED (rc=1, refused, map unchanged)"
+    }
+  ],
+  "unfixed_script_result_on_new_arm": {
+    "script": "infra/aws/lambda/ci/build-and-upload.sh at HEAD ecdf3a1665 (2>&1 on both reads)",
+    "result": "FAIL stderr_warning_ignored rc=1 s3-cp=1 head-object=2 shim-warn=2",
+    "deciding_lines": "ERROR: UPLOAD NOT VERIFIED; head-object ContentLength (rc=0) returned: WARN: shim: no caller-toplevel .tools/aws -- PREPENDING THE BAKED PATH (stub) / 187",
+    "suite_result": "rc=1, FAILS=1, no ALL PASS; the other arms PASS",
+    "output_file": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~73/r21/ (run recorded in the worker's scratch: run_unfixed.txt)"
+  },
+  "tests": {
+    "passed": 10,
+    "failed": 0,
+    "file": "infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh",
+    "runner": "bash infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh",
+    "rc": 0,
+    "all_pass": true,
+    "second_run": "identical PASS-line set, 10 PASS 0 FAIL",
+    "sibling_results": {
+      "test_build_only.sh": "rc=0, 6 PASS, 0 FAIL",
+      "test_sha_handoff.sh": "rc=0, 4 PASS, 0 FAIL",
+      "test_build_artifact_key.sh": "rc=0, 2 PASS, 0 FAIL",
+      "note": "run on the fixed tree; not separately re-run at HEAD"
+    }
+  },
+  "shell_syntax_ok": true,
+  "claim": "In the verify step, each head-object value is stdout alone; stderr is kept apart and shown only on failure; the new arm fails on the unfixed script and passes on the fix. Offline proof only: stubs stand in for aws and powershell.exe.",
+  "not_read": "The live CLI and the .tools/aws shim were not run by the worker. No aws call, upload, deploy, apply or invoke was made. The applier's live arm is the first real test of this fix and runs after the drain."
+}

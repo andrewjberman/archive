@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-228",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-228.lambda-leg-live-r193.md",
+    "group": "OTHER",
+    "vintage_commit": "af70692803"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R21R_Y.md",
+    "vintage_commit": "af70692803",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-228.lambda-leg-live-r193.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~72",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~72/r21/LAMBDA_LEG_R193.json",
+      "kind": "doc",
+      "commit_or_etag": "5eec66cc56",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "record of the live read (CodeSha256 and member manifest, S3 version list), the no-move control and the release build; nothing uploaded, deployed, applied or invoked",
+      "artifact_covered_by": [
+        "AR228-y-AC1",
+        "AR228-y-AC2J"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~72/r21/RELEASE_MAP_PATCH_R3.diff",
+      "kind": "config_data",
+      "commit_or_etag": "5eec66cc56",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "diff of infra/aws/lambda/ci/lambda-source-map.json used only in the throwaway release worktree; the trunk map is not edited; git hash-object 5be34a0f17006dba3e7c3ac3cb171437a63cc6dd",
+      "artifact_covered_by": [
+        "AR228-y-AC1",
+        "AR228-y-AC2J"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR228-y-AC1",
+      "criterion_verbatim": "the record carries the live manifest read now, a no-move control that reproduces the live CodeSha256 and differs in no member, and a release build that differs from the live package in exactly template_reader.py, with the expected CodeSha256.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-72/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y228-lambda --root C:/dev/wk-irpt-anlreq-72",
+      "output_evidence": "live members 104, release members 104\nY228-LAMBDA-OK",
+      "denominator": "104 of 104 live file members mapped to sha256; 104 of 104 release members mapped; 1 differing member of 104 (template_reader.py, release sha256 a61cd0c622f8dd54864b8f2415cbe9968c0287d28087ce703073c7e392c1fc35 equals the head blob); control differs in 0 of 104 members; expected release CodeSha256 TU9m6Bivz32whSIQ7HvEbnPhw5W33+UVZTqtgXRaP3E=",
+      "status": "PASS",
+      "expect": "Y228-LAMBDA-OK"
+    },
+    {
+      "criterion_id": "AR228-y-AC2J",
+      "criterion_verbatim": "the live package was read from AWS in this run and not taken from a record, the guard count was printed before each build, both builds were BUILD_ONLY at the base, and nothing was uploaded or applied.",
+      "method": "manual_read_with_citation",
+      "invocation": "timeout 120 .tools/aws lambda get-function --function-name irpt-ycharts-generate --query Configuration.CodeSha256 --output text; timeout 120 .tools/aws lambda get-function --function-name irpt-ycharts-generate --query Code.Location --output text; timeout 120 python -I .scratch/r21/fetch_live.py .scratch/r21/live_zip/location.txt .scratch/r21/live_zip/live_package.zip; timeout 120 .tools/aws s3api list-object-versions --bucket opal-313476888478-lambda-artifacts --prefix investor-reporting/irpt-ycharts-generate.zip --output json; git show 4067c2dd5b8a9669bbe4ab94997728de8d6433a4:infra/aws/lambda/ci/build-and-upload.sh | grep -c BUILD_ONLY (printed 8); BUILD_ONLY=1 timeout 580 bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting irpt-ycharts-generate (run in C:/dev/wk72-release/base, then in C:/dev/wk72-release/rel)",
+      "output_evidence": "live CodeSha256 hpNfkhLtLRl0e9TFL+Vdr5kilZ1W8bN3GKMhlzmVXgg=; Code.Location zip 621567 bytes whose sha256 base64 equals it; S3 latest VersionId ennO07toFOYlPWM64JC4MS9g.bVRr7fW, 52 versions; guard count 8 at base 4067c2dd5b before both builds; control log 'BUILD_ONLY: ... sha256=hpNfkhLtLRl0e9TFL+Vdr5kilZ1W8bN3GKMhlzmVXgg=' and 'Complete (BUILD_ONLY) -- nothing uploaded'; release log 'BUILD_ONLY: ... sha256=TU9m6Bivz32whSIQ7HvEbnPhw5W33+UVZTqtgXRaP3E=' and 'Complete (BUILD_ONLY) -- nothing uploaded'; no 's3 cp' executed in either log",
+      "denominator": "1 live CodeSha256 read, matched by its zip (1 of 1); 2 of 2 builds BUILD_ONLY=1 at base 4067c2dd5b; 2 of 2 guard reads at least 1 (8); 0 uploads, 0 applies, 0 invokes, 0 deploys",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion, graded at L9 by 3.0.0_SA_CVO and never by this worker. The output is recorded here with no verdict: the live read, the guard counts, the BUILD_ONLY lines and the absence of an upload step are the evidence the CVO reads against the clause.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "mutant: a copy of LAMBDA_LEG_R193.json under .scratch/mutant_root with release_build.member_manifest served.py changed to a different digest (a second member moved); check AR228-y-AC1 must go FAIL",
+      "expected": "Y228-LAMBDA-FAIL with rc=1",
+      "observed": "FAIL: the release package must differ from the live package in exactly template_reader.py (differs in ['served.py', 'template_reader.py']); FAIL: differ_from_live does not equal the manifests' difference; Y228-LAMBDA-FAIL; rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of ar21_checks.py y228-lambda --root C:/dev/wk-irpt-anlreq-72 compared byte for byte (cmp)",
+      "observed": "identical output across two runs ('live members 104, release members 104' and Y228-LAMBDA-OK); both rc=0",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-W72-S1: premise fails -- step 3 asks to move ONLY the reader pin, but build-and-upload.sh refuses a staged row whose declared sha256 differs from the blob at its pin (lines 229-233 at 4067c2dd5b); the row's declared sha256 moved with the pin in the same row (OBSERVATION, INERT; not blocking).",
+    "IRPT_ANLREQ-D2-W72-S2: the r19 record's live read of irpt-ycharts-generate (04:21Z, template_reader.py 76795b75) is superseded: the live package read in this run carries template_reader.py 83ab9b45 (OBSERVATION, INERT; not blocking)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "Lambda configuration other than CodeSha256 and Code.Location (environment, role, layers, handler, memory)",
+      "reason": "not read: the cell's scope is the package bytes; the record's not_read names it"
+    },
+    {
+      "item": "the test suite of the release package",
+      "reason": "not run: the cell builds and compares bytes; the release-20 group B record names a pre-existing g_schema_valid failure for this function"
+    },
+    {
+      "item": "the S3 object body of any version",
+      "reason": "only the version list was read; the rollback decision is not made by this worker"
+    },
+    {
+      "item": "the upload step of build-and-upload.sh",
+      "reason": "not exercised by design: BUILD_ONLY=1 stops before the upload; the release is not uploaded"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "timeout 120 python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y228-lambda --root C:/dev/wk-irpt-anlreq-72; the same with --root C:/dev/wk-irpt-anlreq-72/.scratch/mutant_root (mutant)",
+      "result": "Y228-LAMBDA-OK rc=0; mutant Y228-LAMBDA-FAIL rc=1"
+    }
+  ]
+}

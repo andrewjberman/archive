@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-229",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-229.ci-script-stderr-not-the-value.md",
+    "group": "OTHER",
+    "vintage_commit": "ecdf3a1665"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R21F_Y.md",
+    "vintage_commit": "ecdf3a1665",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-229.ci-script-stderr-not-the-value.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~73",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/build-and-upload.sh",
+      "kind": "script",
+      "commit_or_etag": "2cb3430069",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the verify block reads each head-object value from stdout alone (stderr to a per-read temp file, shown on failure); offline, no upload, no deploy; the applier's live arm runs after the drain",
+      "artifact_covered_by": [
+        "AR229-y-AC1",
+        "AR229-y-AC2J"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh",
+      "kind": "test",
+      "commit_or_etag": "2cb3430069",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new arm stderr_warning_ignored: FAIL on the unfixed HEAD script, PASS on the fix; full suite 10 PASS 0 FAIL, ALL PASS, rc=0 on two runs",
+      "artifact_covered_by": [
+        "AR229-y-AC1",
+        "AR229-y-AC2J"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR229-y-AC1",
+      "criterion_verbatim": "no head-object value of the verify block merges stderr into stdout, the test prints PASS for landed_upload_verifies, head_object_fails, stderr_warning_ignored and the mutant arm, and exits 0 with ALL PASS.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-73/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y229-stderr --root C:/dev/wk-irpt-anlreq-73",
+      "output_evidence": "verify tests rc=0 / Y229-STDERR-OK (the check's own run of bash infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh, rc=0). Same suite run by the worker, rc=0: PASS landed_upload_verifies (rc=0, s3-cp=1, head-object=2); PASS head_object_fails (rc=1, map unchanged, cli error printed); PASS stderr_warning_ignored (rc=0, shim-warn-stubbed=2, head-object=2, write VERIFIED); PASS mutant-size-off-by-one-FIRED (rc=1, refused, map unchanged); ALL PASS",
+      "denominator": "4 of 4 named arms printed PASS; 10 PASS and 0 FAIL of 10 printed test lines; 0 of 2 head-object reads merge stderr into stdout (grep of build-and-upload.sh)",
+      "status": "PASS",
+      "expect": "Y229-STDERR-OK"
+    },
+    {
+      "criterion_id": "AR229-y-AC2J",
+      "criterion_verbatim": "only the two reads and the failure message changed, the new arm FAILS on the unfixed script and passes on the fix, the CLI's error text is still printed on the failure path, and nothing was run against the real aws.",
+      "method": "manual_read_with_citation",
+      "invocation": "git diff ecdf3a1665 2cb3430069 -- infra/aws/lambda/ci/build-and-upload.sh infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh ; bash infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh run against the HEAD script before the fix was written (mutant) and after (fix)",
+      "output_evidence": "diff: 2 files changed, 34 insertions(+), 2 deletions(-); build-and-upload.sh 15 lines (13 insertions, 2 deletions) = the two head-object reads (2>&1 to 2>temp file) plus the mktemp guard, rm -f cleanup and the stderr echo lines in the failure message. Unfixed HEAD script: FAIL stderr_warning_ignored rc=1 s3-cp=1 head-object=2 shim-warn=2; ERROR: UPLOAD NOT VERIFIED; head-object ContentLength (rc=0) returned: WARN: shim: no caller-toplevel .tools/aws -- PREPENDING THE BAKED PATH (stub) / 187; suite FAILS=1. Fixed script: PASS stderr_warning_ignored (rc=0, shim-warn-stubbed=2, head-object=2, write VERIFIED); ALL PASS. CLI error still printed: PASS head_object_fails (rc=1, map unchanged, cli error printed). Real aws: not run.",
+      "denominator": "2 of 2 head-object reads changed; 1 new arm FAIL on unfixed of 1; 1 of 1 failure-path arm prints the CLI error; 0 real aws calls of 0 offline stub runs",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded at L9 by 3.0.0_SA_CVO; the worker records the output and carries no verdict",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the new arm stderr_warning_ignored run against the unfixed HEAD script (2>&1 on both head-object reads): each shim WARN line is read into the compared value, so the arm must FAIL",
+      "expected": "FAIL stderr_warning_ignored (non-zero exit, no write VERIFIED, upload refused)",
+      "observed": "FAIL stderr_warning_ignored rc=1 s3-cp=1 head-object=2 shim-warn=2; ERROR: UPLOAD NOT VERIFIED; suite FAILS=1, no ALL PASS",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the verify suite on the fixed script, PASS-line sets compared",
+      "observed": "run 1 and run 2 both rc=0 with ALL PASS; identical PASS-line set, 10 PASS 0 FAIL",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live aws CLI and the .tools/aws shim were not run; no aws call, upload, deploy, apply or invoke was made",
+      "reason": "the order bounds the cell to offline arms with stub aws and stub powershell.exe; the applier's live arm re-runs after the drain"
+    },
+    {
+      "item": "AR229-y-AC2J judgment verdict",
+      "reason": "judgment criterion graded at L9 by 3.0.0_SA_CVO, never by the worker"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~73/r21/CI_STDERR_FIX.json",
+  "compiler_tools": [
+    {
+      "tool": "bash -n",
+      "invocation": "bash -n infra/aws/lambda/ci/build-and-upload.sh ; bash -n infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh",
+      "result": "rc=0 for both"
+    },
+    {
+      "tool": "offline verify suite",
+      "invocation": "bash infra/aws/lambda/ci/tests/test_build_and_upload_verify.sh",
+      "result": "10 PASS 0 FAIL, ALL PASS, rc=0 (two runs, identical)"
+    },
+    {
+      "tool": "ar21_checks.py",
+      "invocation": "python C:/dev/wk-irpt-anlreq-73/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y229-stderr --root C:/dev/wk-irpt-anlreq-73",
+      "result": "Y229-STDERR-OK rc=0"
+    },
+    {
+      "tool": "sibling suites",
+      "invocation": "bash infra/aws/lambda/ci/tests/test_build_only.sh ; bash infra/aws/lambda/ci/tests/test_sha_handoff.sh ; bash infra/aws/lambda/ci/tests/test_build_artifact_key.sh",
+      "result": "rc=0 each; 6 PASS, 4 PASS, 2 PASS; 0 FAIL"
+    }
+  ]
+}
