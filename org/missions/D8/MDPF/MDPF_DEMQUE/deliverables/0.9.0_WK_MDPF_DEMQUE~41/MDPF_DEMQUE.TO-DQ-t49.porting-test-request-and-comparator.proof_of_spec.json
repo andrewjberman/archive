@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t49",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t49.porting-test-request-and-comparator.md",
+    "group": "OTHER",
+    "vintage_commit": "932f896786"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "932f896786",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t49.porting-test-request-and-comparator.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~41",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/porting_test.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--build --out PATH reads the store index (S3 read only, no vendor call) and writes the porting-test request; draw_intervals (sha256 draw, 1 month, 1 quarter, 1 year, two drawn trading-day lengths 5 to 250), build_request (one single-day entry per endpoint, at most 10 a security, validated by bbg_quote._validate before any write), reformulated_adjusted_close (tr_compare.daily_tr and as_traded_dividends, AC_first 1.0) and compare (PASS | FAIL | NO_BLOOMBERG, pure). Real index: 326 securities, 1260 intervals, 2497 cells, max 10 a security, 182 short-window securities, two runs byte-identical.",
+      "artifact_covered_by": [
+        "DQ9-t49-AC1",
+        "DQ9-t49-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_porting_test.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the three named tests PASSED (synthetic frames, no network, no S3): 3 passed in 0.87s on the check's run.",
+      "artifact_covered_by": [
+        "DQ9-t49-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows MDPF_DEMQUE-D1-W41-S1 (merge precondition not run, the worker rule forbids a merge) and MDPF_DEMQUE-D1-W41-S2 (held-window draw clamped to the 2012-01-01 floor) appended, OBSERVATION, INERT. Existing rows not edited.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t49-AC1",
+      "criterion_verbatim": "DQ9-t49-AC1 -- the three named tests. python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t49_tests.py -> PORT-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t49_tests.py",
+      "output_evidence": "test_demque_porting_test.py: test_the_five_intervals_are_a_deterministic_sha256_draw_inside_the_held_window_with_one_month_quarter_and_year_lengths PASSED; test_a_security_passes_only_when_every_interval_return_is_within_ten_basis_points_and_one_miss_fails_it PASSED; test_the_request_carries_at_most_ten_single_day_cells_a_security_on_trading_days_inside_the_window PASSED; 3 passed in 0.87s. Verbatim last line: PORT-OK ; rc=0.",
+      "denominator": "3 of 3 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "PORT-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t49-AC2",
+      "criterion_verbatim": "DQ9-t49-AC2 -- on the REAL store: 300+ securities, at most 10 cells each, the declared client class, a deterministic file that validates under the queue's rule, every entry a single day, no account key. python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t49_real.py -> PORT-REAL-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t49_real.py",
+      "output_evidence": "{\"cells\": 2497, \"intervals_total\": 1260, \"max_cells_per_security\": 10, \"need_class\": \"client\", \"securities\": 326, \"short_window_securities\": 182, \"window_start\": \"2013-05-10\"} then PORT-REAL-OK 326 securities, 2497 cells (at most 10 each), deterministic, valid under the queue's rule ; rc=0; 22.4 s wall.",
+      "denominator": "326 of 326 index securities in the request (300 required); 2497 cells against a cap of 3260 (10 a security); max 10 a security",
+      "status": "PASS",
+      "expect": "PORT-REAL-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "two in-process mutants (monkeypatched in .scratch/t49_mutant.py, no file edit) run against the three named tests: TOL_BP raised to 1e9; the sha256 salt order changed to k|cusip",
+      "expected": "the mutant of the tolerance fails the within-10-bps test; the mutant of the salt order fails the sha256 draw test; the baseline passes all three",
+      "observed": "baseline PASS x3; tolerance mutant: within-10-bps test FAIL, the others PASS; salt mutant: sha256 draw test FAIL, the others PASS; restored PASS x3",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the --build line run twice to .scratch files on the real index; cmp of the two request files (two same-input runs compared)",
+      "observed": "IDENTICAL; sha256 ca922f3b7e4fd0cf5d2dfbf710e844b75d9ea41d50fe62209b58db89fc05e509 (the scratch file; the request is not committed)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any Yahoo call, any Bloomberg call, any draw from the queue, any write to S3, the ledger, the queue or pacer state",
+      "reason": "order BOUNDS: READ-ONLY; the request is built and not sent"
+    },
+    {
+      "item": "the merge of box/dell1 into the worker branch before appending rows",
+      "reason": "the worker standing rule forbids a merge; surprise MDPF_DEMQUE-D1-W41-S1 (same finding as MDPF_DEMQUE-D1-W40-S3)"
+    },
+    {
+      "item": "the Yahoo-served Adj Close as an input",
+      "reason": "the order's rule: the adjusted close is reformulated from the store (as-traded close, split ratios, stored dividends)"
+    },
+    {
+      "item": "any account number or account key in a committed file",
+      "reason": "order BOUNDS; the request carries CUSIP and date only"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W41-S1: the order's merge of box/dell1 was not run because the worker standing rule forbids a merge; the row sits on the worker branch for the drain (OBSERVATION, INERT)",
+    "MDPF_DEMQUE-D1-W41-S2: a held window starting before 2012-01-01 cannot be requested as written; the draw window start is clamped to the floor. The real index min valid_from is 2013-04-08, so no current draw changes (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~41/MDPF_DEMQUE.TO-DQ-t49.porting-test-request-and-comparator.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest data/mdpf/scripts/demque -q",
+      "invocation": "the whole folder, from the worktree root, once",
+      "result": "174 passed in 10.72s, rc=0 (0 failed)"
+    },
+    {
+      "tool": "python data/mdpf/scripts/demque/porting_test.py --build --out <scratch>/t49_a.json",
+      "invocation": "read only over the real index, timeout 120, run twice",
+      "result": "rc=0; {\"securities\": 326, \"intervals_total\": 1260, \"cells\": 2497, \"max_cells_per_security\": 10, \"short_window_securities\": 182, \"need_class\": \"client\", \"window_start\": \"2013-05-10\"}; 12.1 s wall; second run byte-identical"
+    },
+    {
+      "tool": "python data/mdpf/scripts/demque/porting_test.py comparator on one stored name (read-only sanity, .scratch/t49_sanity.py)",
+      "invocation": "one stored name's prices, splits and dividends read from the store; its own reformulated index fed back as the Bloomberg series at scale 100; compare() on its drawn intervals",
+      "result": "PASS, n 5, max abs diff 1.1e-12 bps (3383 price rows, 361 dividends, 0 splits), rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t49_tests.py",
+      "invocation": "DQ9-t49-AC1",
+      "result": "PORT-OK, rc=0"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t49_real.py",
+      "invocation": "DQ9-t49-AC2",
+      "result": "PORT-REAL-OK 326 securities, 2497 cells (at most 10 each), deterministic, valid under the queue's rule, rc=0; 22.4 s wall"
+    }
+  ]
+}
