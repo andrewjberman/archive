@@ -1,5 +1,5 @@
-"""HVST-bz-5 (read only): the FIRST ENDED cycle record of a publisher under the new pin, and how many of its failures name
-their reason. A failure NAMES its reason when `detail` is not the bare `status` and carries a `:` (the exception class or
+"""HVST-bz-5 (read only): the first ENDED cycle record of a publisher under the new pin that holds a failure (else the newest
+ended record), and how many of its failures name their reason. A failure NAMES its reason when `detail` is not the bare `status` and carries a `:` (the exception class or
 `HTTP <code>` then the message, as HVST-bx-3 writes it). Prints one line; exit 0 when a record was read, 1 when none ended
 since `--since`. Writes nothing."""
 import argparse
@@ -28,7 +28,9 @@ def main(argv=None):
         print("NO-ENDED-CYCLE-SINCE %s" % args.since)
         return 1
     rows.sort(key=lambda row: row[0])
-    record = rows[0][1]
+    # the first ended record that HOLDS a failure; when none does, the newest ended record (FAILED=0, the seat waits for the next)
+    with_failures = [row for row in rows if row[1].get("failures")]
+    record = (with_failures[0] if with_failures else rows[-1])[1]
     failures = record.get("failures") or []
     named = [f for f in failures
              if f.get("detail") and f.get("detail") != f.get("status") and ":" in str(f.get("detail"))]
