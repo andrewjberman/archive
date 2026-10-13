@@ -46,9 +46,10 @@ Route("/gateway/families", family_depth.families, methods=["GET"])   # behind ow
   read (`CD1_LIVE_READ.json`, 13 rows over 7 families and 8 channels): schwab schedule `cron(15 12 * * ? *)`, frontier 2026-10-12,
   earliest 2023-01-17, equal to the live values the AC2 check re-reads.
 * One source unreadable: that leaf is `absent` with the reason in `source`, never a default (`test_ogcd1_ac03`). Live: the
-  `bd49finsurance` family has no sweep rule and no status key, so its schedule, last sweep and frontier read `absent` with the
-  `ResourceNotFoundException` / `NoSuchKey` text; `smartx` has no status key at the scopes' top level, so the same. When some keys of a
-  family read and some do not, the claim drops to `inferred` and the unreadable keys are named.
+  `bd49finsurance` family has no sweep rule, so its schedule reads `absent` with the `ResourceNotFoundException` text; `smartx` has
+  no status key at the top level of its scopes, so its last sweep and frontier read `absent` with `NoSuchKey`. When some keys of a
+  family read and some do not, or two families share a source (`blackdiamond`, `bd49finsurance`), the claim drops to `inferred` and
+  the reason is named.
 * A channel no family serves reads `family: null`, every value `absent`, reason "no silver sweep family serves this channel's datasets".
 
 On the host `default_channels()` reads the live `registry._ACTIVE_BY_TOOL` (claim `measured`); off-host it registers the
