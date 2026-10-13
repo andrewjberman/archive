@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-508",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-508.tolerance-test-import-order-repair.md",
+    "group": "OTHER",
+    "vintage_commit": "7c04ead6e3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "7c04ead6e3",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-508.tolerance-test-import-order-repair.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~360",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_runner_jsonschema_tolerance.py",
+      "kind": "test",
+      "commit_or_etag": "24eddb9ae2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build-only test file edit (one line moved: the safe_deploy_core import placed before the .tools path removal); no AWS call, no deploy; the test reads the guard's bundle declaration only",
+      "artifact_covered_by": ["IB175-2-AC1", "IB175-2-AC2", "IB175-2-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~360/IB175-2_import_order.json",
+      "kind": "doc",
+      "commit_or_etag": "24eddb9ae2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the base_commit, edit, alone and together counts and the sys.path check, recorded at base 7c04ead6e3 and at 24eddb9ae2; no deploy",
+      "artifact_covered_by": ["IB175-2-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB175-2-AC1",
+      "criterion_verbatim": "AC1 the tolerance test collects and passes alone (1 or more passed, no error)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r175/p175_cells.py\" . IB175-2-AC1",
+      "output_evidence": "OK: the tolerance test passes alone (6)\nIB175-2-AC1 PASS\nrc=0",
+      "denominator": "6 of 6 tests in test_runner_jsonschema_tolerance.py pass alone, none failed, no collection error (1 or more required)",
+      "expect": "IB175-2-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB175-2-AC2",
+      "criterion_verbatim": "AC2 the three suites pass together (37 or more passed, rc 0)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r175/p175_cells.py\" . IB175-2-AC2",
+      "output_evidence": "OK: the three suites pass together (42)\nIB175-2-AC2 PASS\nrc=0",
+      "denominator": "42 of 42 tests pass together (test_holdings_49f.py 22 + test_holdings_inf.py 14 + tolerance test 6), none failed, no error (37 or more required)",
+      "expect": "IB175-2-AC2 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB175-2-AC3",
+      "criterion_verbatim": "AC3 git diff --numstat <base_commit> HEAD -- data/assets/scripts/gold/investor_reporting/ names exactly that one test file and at most 12 changed lines",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r175/p175_cells.py\" . IB175-2-AC3",
+      "output_evidence": "OK: one test file, 2 changed lines\nIB175-2-AC3 PASS\nrc=0",
+      "denominator": "1 of 1 changed file under investor_reporting/ is test_runner_jsonschema_tolerance.py; 2 changed lines (1 insertion, 1 deletion) of 12 allowed; base_commit 7c04ead6e3",
+      "expect": "IB175-2-AC3 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the base file (before the one-line move) run alone and with the two holdings suites, the same invocation the checks use",
+      "expected": "collection error, ModuleNotFoundError: No module named 'safe_deploy_core', no tests run, rc 2 together",
+      "observed": "at base 7c04ead6e3: 1 error during collection, ModuleNotFoundError: No module named 'safe_deploy_core', rc=2 (alone); the combined run stopped at collection with rc=2",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs: once by python -m pytest of the file alone and the three suites together, once inside the AC1 and AC2 checks",
+      "observed": "alone 6 passed on both runs; together 42 passed on both runs; rc 0 on both",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the whole tests/ folder was not run",
+      "reason": "the order forbids it: one test in the folder makes live read-only AWS calls"
+    },
+    {
+      "item": "no AWS call and no deploy",
+      "reason": "BUILD ONLY order; the test reads the deploy guard's bundle declaration (safe_deploy_core.find_bundle) only"
+    },
+    {
+      "item": "the other test files and the product code were not edited",
+      "reason": "the grant is the one test file; the repair moves one import line inside it and changes no assertion"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~360/IB175-2_import_order.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_runner_jsonschema_tolerance.py -q (from the worktree root, timeout 120)",
+      "result": "6 passed, rc=0 (at 24eddb9ae2); at base 7c04ead6e3 the same run read 1 error, ModuleNotFoundError safe_deploy_core, rc=2"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_49f.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_inf.py data/assets/scripts/gold/investor_reporting/tests/test_runner_jsonschema_tolerance.py -q (once, timeout 120)",
+      "result": "42 passed, rc=0 (22 + 14 + 6)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_49f.py -q; python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_inf.py -q (each alone, timeout 120)",
+      "result": "22 passed rc=0; 14 passed rc=0"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -c-style probe via importlib.util.spec_from_file_location of the test module, then tools_on_sys_path check against m._REPO / .tools",
+      "result": "tools_on_sys_path_after_import = False; sdc loaded: safe_deploy_core"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~360/IRPT_BCKEND.TO-IB-pr-508.tolerance-test-import-order-repair.proof_of_spec.json IB175-2-AC1,IB175-2-AC2,IB175-2-AC3",
+      "result": "run before the status flip; the rc is in the worker report"
+    }
+  ]
+}
