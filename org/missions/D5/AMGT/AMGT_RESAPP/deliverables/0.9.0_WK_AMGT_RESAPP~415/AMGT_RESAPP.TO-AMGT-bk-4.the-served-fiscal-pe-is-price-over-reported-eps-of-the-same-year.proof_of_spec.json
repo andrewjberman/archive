@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bk-4.the-served-fiscal-pe-is-price-over-reported-eps-of-the-same-year",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bk-4.the-served-fiscal-pe-is-price-over-reported-eps-of-the-same-year.md",
+    "group": "OTHER",
+    "vintage_commit": "a035ac2701"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "a035ac2701",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bk-4.the-served-fiscal-pe-is-price-over-reported-eps-of-the-same-year.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~415",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "57fb3c63f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-AMGT_RESAPP-415 (LOCAL). No deploy in this cell: the order's bounds grant no deploy, no store write and no Bloomberg call. Post-patch blob 351f9a1d7a8a read by git rev-parse HEAD:path and by git hash-object (both agree)."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_derive_fiscal_pe.py",
+      "kind": "test",
+      "commit_or_etag": "57fb3c63f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-AMGT_RESAPP-415 (LOCAL). A test module has no deploy scope. 11 of 11 cases pass under AC2."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the lines `names 95 (read failures 0)`, `WITHHELD BY REASON:` and the verdict `R104 PE CHECK: YES (6 of 6 arms; names 95, rows R served, W withheld)` with PASS on P1 to P6; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-415 && PYTHONPATH=\"$(pwd)\" timeout 590 python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round104_prep/checks/r104_pe_check.py\" | grep -E \"^names|WITHHELD|PASS|FAIL|R104\"; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "names 95 (read failures 0) | PE rows served 464, withheld with a reason 154 (95 names x years)\nWITHHELD BY REASON: {'different currencies': 126, 'EPS not positive': 28, 'price not positive': 0, 'input absent': 0, 'currency not stated': 0, 'other': 0}\n   PASS P1 each served P/E is price / reported EPS of its year\n   PASS P2 each live P/E year is served or withheld with a reason\n   PASS P3 no other figure, reason, case or forecast moved\n   PASS P4 the basis states the derivation\n   PASS P5 the arm sees a value moved by 0.01\n   PASS P6 different-currency years are withheld, both codes named\nR104 PE CHECK: YES (6 of 6 arms; names 95, rows 464 served, 154 withheld)\nexit=0",
+      "denominator": "6 of 6 arms (P1 to P6); 95 of 95 names read (read failures 0); 618 name-years = 464 served + 154 withheld; exit=0 is the rc of the single bare run of the same check (saved in full at session_log), not of the grep pipeline; the grep is applied to that saved output",
+      "status": "PASS",
+      "expect": "names 95 \\(read failures 0\\).*WITHHELD BY REASON:.*PASS P1.*PASS P2.*PASS P3.*PASS P4.*PASS P5.*PASS P6.*R104 PE CHECK: YES \\(6 of 6 arms; names 95, rows 464 served, 154 withheld\\).*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "`N passed` with N at least 7 and no `failed`; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-415 && PYTHONPATH=\"$(pwd)\" timeout 300 python -m pytest lib/research/api/tests/test_derive_fiscal_pe.py -q 2>&1 | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "11 passed in 0.62s\nexit=0",
+      "denominator": "11 of 11 tests passed (0 failed); N = 11 is at least 7; the tail -3 line is shown with its ANSI colour codes stripped; exit=0",
+      "status": "PASS",
+      "expect": "(?:[7-9]|[1-9][0-9]+) passed(?!.*failed).*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "exactly two lines, `lib/research/api/scoped_amgt.py` and `lib/research/api/tests/test_derive_fiscal_pe.py`",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-415 && git diff --name-only \"$(git merge-base HEAD box/dell1)\" HEAD -- . \":(exclude)org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~415\" \":(exclude)org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel\" | sort",
+      "output_evidence": "lib/research/api/scoped_amgt.py\nlib/research/api/tests/test_derive_fiscal_pe.py",
+      "denominator": "2 of 2 expected lines (committed changed paths against merge-base a035ac2701 with box/dell1; the deliverables folder and surprise-channel excluded by the invocation)",
+      "status": "PASS",
+      "expect": "lib/research/api/scoped_amgt\\.py\\s+lib/research/api/tests/test_derive_fiscal_pe\\.py"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Fault-injection control for the derivation: a derived value moved by 0.01 must read as a P1 failure. The order names no assertion this worker authored beyond its own unit tests; the check's arm P5 is that control.",
+      "expected": "P5 PASS: the arm sees a value moved by 0.01 (the moved value reads a P1 failure)",
+      "observed": "PASS P5 the arm sees a value moved by 0.01 (AC1 run, 6 of 6 arms).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the order prescribes one run of AC1 under its bound (timeout 590, exit 0); no second same-input run was made. The criterion's grep was applied to the saved output of that single run (a read of the same output, per the order's note), not to a second execution of the check.",
+      "observed": "single run, exit=0, R104 PE CHECK: YES (6 of 6 arms; names 95, rows 464 served, 154 withheld)",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live deploy of lib/research/api/scoped_amgt.py",
+      "reason": "Out of this cell by the order's bounds (read-only against the world); the bk-2 pair owns any apply and redeploy."
+    },
+    {
+      "item": "Push of wk-AMGT_RESAPP-415 to any remote",
+      "reason": "Out of bounds: local commits only on the worktree branch."
+    },
+    {
+      "item": "Surprise rows in INVESTIGATION_v1.md",
+      "reason": "None filed: no premise failed. The prepared patch applied by git apply rc=0, and the post-patch blob 351f9a1d7a8a matches the preflight's candidate blob."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~415/AC1_full_output.txt",
+  "compiler_tools": [
+    {
+      "tool": "git apply",
+      "invocation": "git apply --whitespace=nowarn org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round104_prep/r104_pe_source.patch",
+      "result": "rc=0 after a clean git apply --check dry run (rc=0); base blob 96642b55204d verified before apply; post-patch blob 351f9a1d7a8a"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~415 <0.9.0_WK_AMGT_RESAPP~415@opal.agent>\" -F .scratch/r104_bk4_commit_msg.txt -- lib/research/api/scoped_amgt.py lib/research/api/tests/test_derive_fiscal_pe.py",
+      "result": "commit 57fb3c63f3; commit-gate All checks passed; msg-verify MATCH len=1063"
+    }
+  ]
+}
