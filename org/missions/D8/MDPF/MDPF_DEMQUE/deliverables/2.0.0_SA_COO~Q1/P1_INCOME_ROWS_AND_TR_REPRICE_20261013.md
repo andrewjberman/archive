@@ -52,3 +52,6 @@ bill, strip, zero or discount), and **36 are UNREAD**.
 What this says: 30 of the 50 are held 183 days or less and 28 are cash equivalents, which is the pattern of no coupon in the window. The 11 held more than a year (Fixed Income, none in the
 snapshot that I could confirm) are the ones where a paying security with no income row would make the income basis wrong; they need a zero-coupon / discount check against a master I have not found, or
 the total-return field. Nothing here was drawn.
+
+**Cost of the total-return field on just the 11 long-held Fixed Income names** (computed from the per-CUSIP cuts, after a message that guessed it): option C `PX_LAST` 1,246 cells; with
+`TOT_RETURN_INDEX_GROSS_DVDS` as well 2,492 cells = 0.9 day at 2,673 a day; every trading day `PX_LAST` 25,258 cells.
