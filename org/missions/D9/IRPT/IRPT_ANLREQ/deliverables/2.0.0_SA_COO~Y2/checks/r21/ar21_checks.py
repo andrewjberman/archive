@@ -711,10 +711,14 @@ def main(argv):
             ae = rec.get("after_each") or []
             if len(ae) < len(want):
                 problems.append("after_each must carry at least one row per merge (got %d)" % len(ae))
+            # an intermediate merge may strand a test (that is why the order has a reconciliation step): every row must
+            # typecheck clean, and the LAST row (after the reconciliation commit) must have no failing test.
             for row in ae:
-                if str(row.get("failed", "x")) not in ("0",) or str(row.get("typecheck_rc", row.get("typecheck", "x"))) not in ("0",):
-                    problems.append("after_each row not clean (failed 0, typecheck_rc 0): %r" % row)
+                if str(row.get("typecheck_rc", row.get("typecheck", "x"))) not in ("0",):
+                    problems.append("after_each row does not typecheck (typecheck_rc 0): %r" % row)
                     break
+            if ae and str(ae[-1].get("failed", "x")) not in ("0",):
+                problems.append("the last after_each row (after the reconciliation) must have failed 0: %r" % ae[-1])
     return finish(check, problems)
 
 
