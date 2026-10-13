@@ -52,7 +52,10 @@ def instrument(zip_path):
     m2 = re.search(r"attr_mismatched=(\d+)", last)
     if not (m1 and m2):
         raise SystemExit("instrument line unreadable: " + last[:200])
-    return last, int(m1.group(1)), int(m2.group(1)), r.returncode
+    attr_lines = [ln.strip() for ln in lines if ln.startswith("ATTR_MISMATCH: ")]
+    if len(attr_lines) != int(m2.group(1)):
+        raise SystemExit("ATTR_MISMATCH line count %d differs from attr_mismatched %s" % (len(attr_lines), m2.group(1)))
+    return last, int(m1.group(1)), int(m2.group(1)), r.returncode, attr_lines
 
 
 built_bytes = open(BUILT, "rb").read()
@@ -130,12 +133,14 @@ rec = {
         "second_build_sha256": b2_sha,
         "built_signature_mismatched": sig_b[1],
         "built_attribute_mismatched": sig_b[2],
+        "attribute_mismatch_lines_built": sig_b[4],
         "built_instrument_last_line": sig_b[0],
         "built_instrument_rc": sig_b[3],
         "live_instrument_last_line": sig_l[0],
         "live_instrument_rc": sig_l[3],
         "live_signature_mismatched": sig_l[1],
         "live_attribute_mismatched": sig_l[2],
+        "attribute_mismatch_lines_live": sig_l[4],
         "instrument": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~278/signature_closure_attr.py",
         "members_built": len(built),
         "members_live": len(live),
