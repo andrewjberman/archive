@@ -17,6 +17,8 @@ Usage:  python ar19_checks.py <check> --root <worker worktree root>
   y197-four      AR-y-197: the four members the issuer reads (served.py, name_rulings.json, ops/status.py, resident_worker.py) each with old/new blob,
                  the resident's use of it, and the change in behaviour                                                       -> Y197-FOUR-OK
   y198-equal     AR-y-198: the five cross-box members each compared to the owner-released version                              -> Y198-EQUAL-OK
+  y199-recipe    AR-y-199: st32's full assembly recipe recovered, rebuilt at st32's pin (326 members by name and content) before the
+                 release pin is built with it, and the delta redone                                                           -> Y199-RECIPE-OK
 
 --root is REQUIRED. Each check prints its token last, or the token with -FAIL after one FAIL line per problem. Writes nothing.
 """
@@ -32,7 +34,7 @@ INTAKE = IR + "/intake"
 D = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~%s/r19/"
 ROUND18_VERSION = "irpt-template-reader.r18.1"
 TOKENS = {"y191-scratch": "Y191-SCRATCH", "y192-census": "Y192-CENSUS", "y193-build": "Y193-BUILD", "y194-rule": "Y194-RULE",
-          "y194-backstop": "Y194-BACKSTOP", "y194-keep": "Y194-KEEP", "y195-delta": "Y195-DELTA", "y196-install": "Y196-INSTALL", "y197-four": "Y197-FOUR", "y198-equal": "Y198-EQUAL"}
+          "y194-backstop": "Y194-BACKSTOP", "y194-keep": "Y194-KEEP", "y195-delta": "Y195-DELTA", "y196-install": "Y196-INSTALL", "y197-four": "Y197-FOUR", "y198-equal": "Y198-EQUAL", "y199-recipe": "Y199-RECIPE"}
 SHEETS = ("two_value_account_sheet", "total_row_sheet", "one_account_sheet", "two_sheet_workbook")
 NATIVE_UNPINNED = ("acceptance.py", "submission.py", "submission_service.py", "durable_job.py")
 S31_FORMS = ("Account Numbers", "Subaccounts", "Accnt", "Account Nos", "Account Seqno", "Account Serial", "Roth IRA Account", "Trust Account")
@@ -239,6 +241,23 @@ def main(argv):
                 if member not in rec:
                     problems.append("the record lacks %r" % member)
             print("members compared: %d" % len(members))
+    elif check == "y199-recipe":
+        rec = load(root, D % "55" + "RESIDENT_RECIPE_AND_DELTA.json", problems)
+        if rec:
+            for member in ("recipe_source", "recipe_steps", "st32_rebuild", "release_build", "delta", "claim", "not_read"):
+                if member not in rec:
+                    problems.append("the record lacks %r" % member)
+            rb = rec.get("st32_rebuild") or {}
+            for member in ("members_total", "matched_by_name", "matched_by_content", "unmatched_names", "host_origin_names", "pass"):
+                if member not in rb:
+                    problems.append("st32_rebuild lacks %r" % member)
+            if "pass" in rb and rb.get("pass") is not True:
+                problems.append("st32_rebuild.pass is not true: the recipe does not yet rebuild st32's members by name and content")
+            delta = rec.get("delta") or {}
+            for member in ("only_in_old", "only_in_new", "differing", "moved_by_this_release", "other_differing_by_owner"):
+                if member not in delta:
+                    problems.append("delta lacks %r" % member)
+            print("st32 rebuild: total %s, by name %s, by content %s, host-origin %s" % (rb.get("members_total"), rb.get("matched_by_name"), rb.get("matched_by_content"), len(rb.get("host_origin_names") or [])))
     return finish(check, problems)
 
 
