@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-221",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R21_Y.md",
+    "vintage_commit": "b4943b79ce",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-221.account-header-backstop-allowlist.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-221.account-header-backstop-allowlist.md",
+    "group": "OTHER",
+    "vintage_commit": "b4943b79ce"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~67",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/template_reader.py",
+      "kind": "script",
+      "commit_or_etag": "55d1755d39",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built, not released: no deploy, upload or invoke was run; READER_VERSION irpt-template-reader.r19.3 is not live. The allowlist rule, the version and the pin are in commit 55d1755d39."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~67/r21/ACCOUNT_HEADER_ALLOWLIST.json",
+      "kind": "doc",
+      "commit_or_etag": "3f9a884a98",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The allowlist record. Its first version, with the controls named before the rule changed, is commit 3f9a884a98; it was completed in the completion commit of this order. Not a deploy."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR221-y-AC1",
+      "criterion_verbatim": "none of the sixteen one-account negative controls (the ten of r19.2 and the CVO's six neighbours) is turned back, the five positive controls (the two-account controls, `Acct Alias`, `Primary Acct`) are, and the five named backstop tests pass.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-67/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y221-allowlist --root C:/dev/wk-irpt-anlreq-67",
+      "output_evidence": "negatives 16, positives 5; backstop tests: 22 passed, 3 failed (rc=1)\nFAIL: the named backstop tests must all pass\nY221-ALLOWLIST-FAIL",
+      "denominator": "Named backstop tests: 3 of 5 pass (22 passed, 3 failed in test_account_value_backstop.py). Negatives: 16 of 16 not turned back (no control FAIL line). Positives: 5 of 5 turned back (no control FAIL line). Log: SESSION_LOG.txt sections 2, 3 and 6.",
+      "status": "FAIL",
+      "status_reason": "Three intake tests read the header 'Acct Ref Ext'. 'ext' is neither an ACCOUNT_TAIL_WORDS word nor an ACCOUNT_MODIFIERS word, so the ruled allowlist does not admit that header. The named tests test_an_account_root_header_with_two_identifier_values_is_read_as_an_account_column and test_the_backstop_words_say_what_is_seen_and_ask fail, and so does the earlier test_a_digit_run_column_with_no_separator_under_a_root_is_read_as_an_account_column. Recorded as surprise IRPT_ANLREQ-D2-W67-S1 (BLOCKING). Adding 'ext' to the tails or changing the test header is a ruling for the CTO, not taken here.",
+      "expect": "Y221-ALLOWLIST-OK"
+    },
+    {
+      "criterion_id": "AR221-y-AC2",
+      "criterion_verbatim": "the difference control -- the whole intake test folder passes (364 at the base) and `READER_VERSION` differs from r19.2.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-67/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y221-keep --root C:/dev/wk-irpt-anlreq-67",
+      "output_evidence": "intake tests: 361 passed, 3 failed (rc=1)\nREADER_VERSION = irpt-template-reader.r19.3\nFAIL: the intake folder must pass with at least 364 (the r19.2 count)\nY221-KEEP-FAIL",
+      "denominator": "361 passed of the 364 floor; 3 failed; 1 skipped; 25 subtests passed; 365 tests counted (361 + 3 + 1). READER_VERSION differs from r19.2: yes (r19.3). Log: SESSION_LOG.txt sections 5 and 7.",
+      "status": "FAIL",
+      "status_reason": "The 364 floor is not met: the same three tests as AR221-y-AC1 fail on 'Acct Ref Ext'. The difference control holds (READER_VERSION is r19.3, not r19.2). Recorded as surprise IRPT_ANLREQ-D2-W67-S1.",
+      "expect": "Y221-KEEP-OK"
+    },
+    {
+      "criterion_id": "AR221-y-AC3J",
+      "criterion_verbatim": "the allowlist closes every attribute neighbour, known or not, keeps both identifier forms, and the controls were named before the rule changed.",
+      "method": "manual_read_with_citation",
+      "invocation": "Judgment read for the CVO at L9, no command run by the worker: infra/aws/lambda/investor-reporting/intake/template_reader.py function _root_header_admitted at commit 55d1755d39, against org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~67/r21/ACCOUNT_HEADER_ALLOWLIST.json whose first version is commit 3f9a884a98.",
+      "output_evidence": "Rule as built (55d1755d39): a header with an account root is admitted to the backstop only when every word before the root is in ACCOUNT_MODIFIERS and every word after it is in ACCOUNT_TAIL_WORDS or ACCOUNT_ROOTS. The attribute-word blocklist is removed. Controls were committed alone first (3f9a884a98): 16 negatives, 5 positives. Function-level read: 16 of 16 negatives not turned back, 5 of 5 positives turned back. Named tests: 3 of 5 pass. Surprise rows IRPT_ANLREQ-D2-W67-S1 (BLOCKING) and IRPT_ANLREQ-D2-W67-S2 (OBSERVATION).",
+      "denominator": "Attribute neighbours closed: 16 negative controls, of which 6 are the CVO's neighbours (Acct Cost Basis, Acct Gain, Acct Weight, Acct Description, Acct Currency, Acct Custodian). Identifier forms kept: 5 positive controls. Named tests: 3 of 5 pass. Controls named before the rule changed: yes (3f9a884a98 precedes 55d1755d39).",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion. Graded at L9 by 3.0.0_SA_CVO, never by the worker. The substitute oracle for that grade is the control commit 3f9a884a98 (the controls were named first), the rule at 55d1755d39, and the function-level control run in SESSION_LOG.txt sections 2 and 6."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Literal word-set reading: the after-root clause admits any word that is a tail, a modifier or a root (scratch copy under .scratch/mutant, one line changed).",
+      "expected": "The named one-account control 'Acct Custodian' is turned back, so the AC1 check prints a FAIL line for it.",
+      "observed": "FAIL: a one-account file is turned back: header 'Acct Custodian' values ('SCHWAB01', 'FIDELITY1') -> [('C', 'VALUES', 2)]",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_stored_input_contract.reader_digest() run twice in the worktree on the committed reader; the two digests compared.",
+      "observed": "858b1282115b7a3c9ad77fab50bf69e45042a21bc1231b0632506a512c168f3a (run 1) == 858b1282115b7a3c9ad77fab50bf69e45042a21bc1231b0632506a512c168f3a (run 2)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Release, deploy, upload, invoke of the reader (WORLD order; nothing is released by this order)",
+      "reason": "The cell's bounds: build only. build-and-upload.sh was not run."
+    },
+    {
+      "item": "Making AR221-y-AC1 and AR221-y-AC2 pass",
+      "reason": "Blocked by the premise: 'Acct Ref Ext' needs a ruling on 'ext' (surprise IRPT_ANLREQ-D2-W67-S1). Not widened here."
+    },
+    {
+      "item": "Other cells of round 21 workstream Y (AR-y-222, AR-y-223)",
+      "reason": "Not in this order's paths. Other workers or orders own them."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W67-S1: the ruled allowlist does not admit the header 'Acct Ref Ext' ('ext' is neither a tail word nor a modifier); three intake tests fail (361 passed, 3 failed of 364); AC1 and AC2 cannot pass as ruled without a ruling on 'ext'.",
+    "IRPT_ANLREQ-D2-W67-S2: the cell's word-set test, applied literally, admits 'Acct Custodian' (custodian is a modifier), a named control; built by word position (modifier before the root, tail after it)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~67/r21/SESSION_LOG.txt",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting/intake && python -m pytest tests -q -p no:cacheprovider",
+      "result": "361 passed, 1 skipped, 25 subtests passed, 3 failed (rc 1); base run 364 passed, 1 skipped, 25 subtests passed (rc 0)"
+    },
+    {
+      "tool": "ar21_checks.py",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/checks/r21/ar21_checks.py y221-allowlist|y221-keep --root <worktree>",
+      "result": "Y221-ALLOWLIST-FAIL (rc 1); Y221-KEEP-FAIL (rc 1); mutant run FAIL on 'Acct Custodian' (rc 1)"
+    }
+  ]
+}

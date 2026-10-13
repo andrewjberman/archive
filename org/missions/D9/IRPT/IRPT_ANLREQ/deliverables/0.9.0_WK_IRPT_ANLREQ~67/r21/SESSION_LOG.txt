@@ -1,0 +1,46 @@
+SESSION LOG -- 0.9.0_WK_IRPT_ANLREQ~67 on IRPT_ANLREQ.TO-AR-y-221 (verbatim outputs, ANSI stripped)
+worktree C:/dev/wk-irpt-anlreq-67, base b4943b79ce, controls 3f9a884a98, rule 55d1755d39, rows 373f79dd7d
+
+## 1. baseline before the rule change: cd intake && python -m pytest tests -q -p no:cacheprovider
+................................................................... [ 95%]
+.................                                           [100%]
+364 passed, 1 skipped, 25 subtests passed in 7.72s
+
+## 2. AC1 check on the rule change (first run): ar21_checks.py y221-allowlist --root <worktree>
+negatives 16, positives 5; backstop tests: 22 passed, 3 failed (rc=1)
+FAIL: the named backstop tests must all pass
+Y221-ALLOWLIST-FAIL
+
+## 3. backstop file by test name after the rule change: pytest tests/test_account_value_backstop.py -q
+FAILED test_an_account_root_header_with_two_identifier_values_is_read_as_an_account_column
+FAILED test_the_backstop_words_say_what_is_seen_and_ask
+FAILED test_a_digit_run_column_with_no_separator_under_a_root_is_read_as_an_account_column
+3 failed, 22 passed in 0.21s
+
+## 4. digest pin: test_stored_input_contract.reader_digest(), run twice
+858b1282115b7a3c9ad77fab50bf69e45042a21bc1231b0632506a512c168f3a
+858b1282115b7a3c9ad77fab50bf69e45042a21bc1231b0632506a512c168f3a
+
+## 5. full intake folder after the rule change: pytest tests -q -p no:cacheprovider
+FAILED tests\test_account_value_backstop.py::test_an_account_root_header_with_two_identifier_values_is_read_as_an_account_column
+FAILED tests\test_account_value_backstop.py::test_the_backstop_words_say_what_is_seen_and_ask
+FAILED tests\test_account_value_backstop.py::test_a_digit_run_column_with_no_separator_under_a_root_is_read_as_an_account_column
+3 failed, 361 passed, 1 skipped, 25 subtests passed in 6.43s
+
+## 6. AC1 check on the committed state: ar21_checks.py y221-allowlist
+negatives 16, positives 5; backstop tests: 22 passed, 3 failed (rc=1)
+FAIL: the named backstop tests must all pass
+Y221-ALLOWLIST-FAIL
+
+## 7. AC2 check on the committed state: ar21_checks.py y221-keep
+intake tests: 361 passed, 3 failed (rc=1)
+READER_VERSION = irpt-template-reader.r19.3
+FAIL: the intake folder must pass with at least 364 (the r19.2 count)
+Y221-KEEP-FAIL
+
+## 8. mutant (scratch copy .scratch/mutant, after-root test widened to tails or modifiers): ar21_checks.py y221-allowlist --root .scratch/mutant
+negatives 16, positives 5; backstop tests: 22 passed, 3 failed (rc=1)
+FAIL: a one-account file is turned back: header 'Acct Custodian' values ('SCHWAB01', 'FIDELITY1') -> [('C', 'VALUES', 2)]
+FAIL: the named backstop tests must all pass
+Y221-ALLOWLIST-FAIL
+
