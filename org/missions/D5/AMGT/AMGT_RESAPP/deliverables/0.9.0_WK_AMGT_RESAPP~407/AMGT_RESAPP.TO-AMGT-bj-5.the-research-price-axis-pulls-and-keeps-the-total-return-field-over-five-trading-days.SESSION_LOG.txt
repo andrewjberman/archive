@@ -1,0 +1,16 @@
+SESSION LOG -- 0.9.0_WK_AMGT_RESAPP~407 on AMGT_RESAPP.TO-AMGT-bj-5 (worktree C:/dev/wk-resapp-407, branch wk-AMGT_RESAPP-407)
+
+1. Tree check: git rev-parse --abbrev-ref HEAD -> wk-AMGT_RESAPP-407; test -d org && test -d .tools -> TREE-OK.
+2. Cut HEAD before edits: 57e446ce0b775fb00132ec627932767a0f83afc3.
+3. git apply --check --whitespace=nowarn <round103_prep>/r103_twr_source.patch -> rc=0; git apply (same args) -> rc=0.
+   cp <round103_prep>/r103_test_price_axis_total_return.py -> integrations/bloomberg/research/tests/test_price_axis_total_return.py -> rc=0.
+4. python -m py_compile integrations/bloomberg/research/price_axis_pull.py -> rc=0; price_series_persist.py -> rc=0.
+5. Name check at the new call site: blp is the import alias `import blp_client as blp` inside main; securities, sec_to_ticker,
+   as_of, as_of_key, args.dry_run and log are all bound before the call (price_axis_pull.py :353, :376, :382-383, :408).
+6. Commit 6e8f4d013da11c0e873bea980c1f64f0abc16c4b via safe-commit.sh (3 paths, msg-verify MATCH).
+7. AC1 (run 1, pre-commit tree and run 2 at HEAD 6e8f4d013d): timeout 600 python -m pytest ... -k "not loopback_dapi" -q
+   -> "9 passed, 1 deselected in 2.71s", exit=0 both runs.
+   --co on the new file: 5 tests collected (window, pull field/groups, leg never raises + dry run, write-once table, PX_LAST unchanged).
+8. AC2: git diff --name-only "$(git merge-base HEAD box/dell1)" HEAD -- . ":(exclude)org" | sort -> three lines, rc=0
+   (merge-base = 57e446ce0b, the cut HEAD, an ancestor of box/dell1).
+9. No Bloomberg, AWS, network, deploy, store write, schedule, or pip call made. No surprise row filed.
